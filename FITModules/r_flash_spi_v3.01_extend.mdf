@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate>r_pinset_type1</fileTemplate>
+    <fileTemplatePath>r_config/r_flash_spi_pin_config.h</fileTemplatePath>
+    <resourceInfo>
+      <peripheral name="Null">
+      </peripheral>
+    </resourceInfo>
+    <configuration>
+        <property id="FLASH_SPI_CFG_WEL_CHK" display="ENABLE CHECKING OF THE WEL BIT." default="1" type="combobox">
+            <option id="FLASH_SPI_CFG_WEL_CHK.0" display="Disabled" value="0"/>
+            <option id="FLASH_SPI_CFG_WEL_CHK.1" display="Enabled" value="1"/>
+            <description>Selects whether or not the WEL bit is checked after the WREN
+command is issued. (1: enabled, 0: disabled).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_LONGQ_ENABLE" display="ENABLE DEBUGGING INFORMATION" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_LONGQ_ENABLE.0" display="Disabled" value="0"/>
+            <option id="FLASH_SPI_CFG_LONGQ_ENABLE.1" display="Enabled" value="1"/>
+            <description>Selects whether or not error log acquisition processing is
+performed for debugging. (1: enabled, 0: disabled)</description>
+        </property>
+        <property id="FLASH_SPI_CFG_USE_GPIO_MPC_FIT" display="ENABLE GPIO MODULE AND MPC MODULE" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_USE_GPIO_MPC_FIT.0" display="Disabled" value="0"/>
+            <option id="FLASH_SPI_CFG_USE_GPIO_MPC_FIT.1" display="Enabled" value="1"/>
+            <description>Selects whether the GPIO FIT module or MPC FIT module is
+used to control the SS# pin. (1: enabled, 0: disabled)</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV0_INCLUDED" display="Device 0 Included" default="1" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV0_INCLUDED.0" display="Disabled" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV0_INCLUDED.1" display="Enabled" value="1"/>
+            <description>If these are defined, then the code for the specified device is valid.
+(1: enabled, 0: disabled)</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV1_INCLUDED" display="Device 1 Included" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV1_INCLUDED.0" display="Disabled" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV1_INCLUDED.1" display="Enabled" value="1"/>
+            <description>If these are defined, then the code for the specified device is valid.
+(1: enabled, 0: disabled)</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV0_MX25L" display="Device 0 Macronix MX25L" default="1" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV0_MX25L.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV0_MX25L.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV0_INCLUDED}" == "${FLASH_SPI_CFG_DEV0_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory device to be controlled for device 0.
+(1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV0_MX66L" display="Device 0 Macronix MX66L" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV0_MX66L.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV0_MX66L.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV0_INCLUDED}" == "${FLASH_SPI_CFG_DEV0_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory device to be controlled for device 0.
+(1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV0_MX25R" display="Device 0 Macronix MX25R" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV0_MX25R.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV0_MX25R.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV0_INCLUDED}" == "${FLASH_SPI_CFG_DEV0_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory device to be controlled for device 0.
+(1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV1_MX25L" display="Device 1 Macronix MX25L" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV1_MX25L.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV1_MX25L.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV1_INCLUDED}" == "${FLASH_SPI_CFG_DEV1_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory device to be controlled for device 1.
+(1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV1_MX66L" display="Device 1 Macronix MX66L" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV1_MX66L.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV1_MX66L.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV1_INCLUDED}" == "${FLASH_SPI_CFG_DEV1_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory device to be controlled for device 1.
+(1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV1_MX25R" display="Device 1 Macronix MX25R" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV1_MX25R.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV1_MX25R.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV1_INCLUDED}" == "${FLASH_SPI_CFG_DEV1_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory device to be controlled for device 1.
+(1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV0_SIZE_512K" display="Device 0 512K-bit    (64K Bytes)" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_512K.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_512K.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV0_INCLUDED}" == "${FLASH_SPI_CFG_DEV0_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV0_SIZE_1M" display="Device 0 1M-bit      (128K Bytes)" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_1M.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_1M.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV0_INCLUDED}" == "${FLASH_SPI_CFG_DEV0_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV0_SIZE_2M" display="Device 0 2M-bit      (256K Bytes)" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_2M.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_2M.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV0_INCLUDED}" == "${FLASH_SPI_CFG_DEV0_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV0_SIZE_4M" display="Device 0 4M-bit      (512K Bytes)" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_4M.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_4M.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV0_INCLUDED}" == "${FLASH_SPI_CFG_DEV0_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV0_SIZE_16M" display="Device 0 16M-bit     (2M Bytes)" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_16M.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_16M.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV0_INCLUDED}" == "${FLASH_SPI_CFG_DEV0_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV0_SIZE_32M" display="Device 0 32M-bit     (4M Bytes)" default="1" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_32M.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_32M.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV0_INCLUDED}" == "${FLASH_SPI_CFG_DEV0_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV0_SIZE_64M" display="Device 0 64M-bit     (8M Bytes" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_64M.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_64M.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV0_INCLUDED}" == "${FLASH_SPI_CFG_DEV0_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV0_SIZE_128M" display="Device 0 128M-bit    (16M Bytes)" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_128M.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_128M.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV0_INCLUDED}" == "${FLASH_SPI_CFG_DEV0_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV0_SIZE_256M" display="Device 0 256M-bit    (32M Bytes)" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_256M.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_256M.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV0_INCLUDED}" == "${FLASH_SPI_CFG_DEV0_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV0_SIZE_512M" display="Device 0 512M-bit    (64M Bytes)" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_512M.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_512M.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV0_INCLUDED}" == "${FLASH_SPI_CFG_DEV0_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV0_SIZE_1G" display="Device 0 1G-bit      (128M Bytes)" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_1G.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV0_SIZE_1G.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV0_INCLUDED}" == "${FLASH_SPI_CFG_DEV0_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV1_SIZE_512K" display="Device 1 512K-bit    (64K Bytes)" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_512K.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_512K.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV1_INCLUDED}" == "${FLASH_SPI_CFG_DEV1_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV1_SIZE_1M" display="Device 1 1M-bit      (128K Bytes)" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_1M.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_1M.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV1_INCLUDED}" == "${FLASH_SPI_CFG_DEV1_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV1_SIZE_2M" display="Device 1 2M-bit      (256K Bytes)" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_2M.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_2M.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV1_INCLUDED}" == "${FLASH_SPI_CFG_DEV1_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV1_SIZE_4M" display="Device 1 4M-bit      (512K Bytes)" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_4M.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_4M.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV1_INCLUDED}" == "${FLASH_SPI_CFG_DEV1_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV1_SIZE_16M" display="Device 1 16M-bit     (2M Bytes)" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_16M.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_16M.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV1_INCLUDED}" == "${FLASH_SPI_CFG_DEV1_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV1_SIZE_32M" display="Device 1 32M-bit     (4M Bytes)" default="1" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_32M.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_32M.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV1_INCLUDED}" == "${FLASH_SPI_CFG_DEV1_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV1_SIZE_64M" display="Device 1 64M-bit     (8M Bytes" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_64M.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_64M.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV1_INCLUDED}" == "${FLASH_SPI_CFG_DEV1_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV1_SIZE_128M" display="Device 1 128M-bit    (16M Bytes)" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_128M.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_128M.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV1_INCLUDED}" == "${FLASH_SPI_CFG_DEV1_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV1_SIZE_256M" display="Device 1 256M-bit    (32M Bytes)" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_256M.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_256M.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV1_INCLUDED}" == "${FLASH_SPI_CFG_DEV1_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV1_SIZE_512M" display="Device 1 512M-bit    (64M Bytes)" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_512M.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_512M.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV1_INCLUDED}" == "${FLASH_SPI_CFG_DEV1_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="FLASH_SPI_CFG_DEV1_SIZE_1G" display="Device 1 1G-bit      (128M Bytes)" default="0" type="combobox">
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_1G.0" display="Not control target" value="0"/>
+            <option id="FLASH_SPI_CFG_DEV1_SIZE_1G.1" display="Control target" value="1"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${FLASH_SPI_CFG_DEV1_INCLUDED}" == "${FLASH_SPI_CFG_DEV1_INCLUDED.1}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+    </configuration>
+</module>

@@ -1,0 +1,488 @@
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+* this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+
+/***********************************************************************************************************************
+* File Name    : r_ble_rx23w_config.h
+* Description  : Configures the BLE module.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+* History : DD.MM.YYYY Version Description           
+*         : 23.08.2019 1.00    First Release
+*         : 26.12.2019 1.10    Modify the default value of the following configuration options.
+*                                - BLE_CFG_EN_SEC_DATA
+*                                - BLE_CFG_CMD_LINE_EN
+*                                - BLE_CFG_BOARD_LED_SW_EN
+*                                - BLE_CFG_DEV_DATA_DF_BLOCK
+*                              
+*                              Add the following configuration options.
+*                                - BLE_CFG_ABS_API_EN
+*                                - BLE_CFG_SOFT_TIMER_EN
+*                                - BLE_CFG_MCU_LPC_EN
+*                                - BLE_CFG_HCI_MODE_EN
+***********************************************************************************************************************/
+
+/*******************************************************************************************************************//**
+ * @file
+ * @defgroup config R_BLE Configuration Option
+ * @{
+ * @ingroup config
+ * @brief R_BLE Configuration Option
+***********************************************************************************************************************/
+
+
+#ifndef R_BLE_RX23W_CONFIG_H
+#define R_BLE_RX23W_CONFIG_H
+
+/***********************************************************************************************************************
+Configuration Options
+***********************************************************************************************************************/
+
+/** 
+ * @def BLE_CFG_LIB_TYPE
+ * @brief Type of BLE protocol stack library.
+ * @details     0: All features \n
+ *              1: Balance \n
+ *              2: Compact \n
+ *              default : 0
+ */
+#define BLE_CFG_LIB_TYPE                (0)
+
+/** 
+ * @def BLE_CFG_RF_DBG_PUB_ADDR
+ * @brief Public Address of firmware initial value for debug.
+ * @details     Note: When the setting of Public Address of 3 places below is ALL 0xFF, 
+ *                    Public Address use default value by BLE library.
+ *                      1. Device specific data block on E2 Data Flash
+ *                      2. Device specific data block on Code Flash(ROM)
+ *                      3. Firmware initial value (this macro)
+ *
+ *                    In addition, this setting value is the initial value of firmware.
+ *                    Public Address can be changed by the BLE API.
+ * @note   The BD address setting format is little endian. \n
+ *         If the address is "AA:BB:CC:DD:EE:FF", set the byte array in the order {0xFF, 0xEE, 0xDD, 0xCC, 0xBB, 0xAA}.
+ */
+#define BLE_CFG_RF_DBG_PUB_ADDR         {0xFF,0xFF,0xFF,0x50,0x90,0x74}
+
+/** 
+ * @def BLE_CFG_RF_DBG_RAND_ADDR
+ * @brief Random Address of firmware initial value for debug.
+ * @details       Note: When the setting of Random Address of 3 places below is ALL 0xFF,
+ *                      Random Address unique to MCU is generated by BLE library.
+ *                        1. Device specific data block on E2 Data Flash
+ *                        2. Device specific data block on Code Flash(ROM)
+ *                        3. Firmware initial value (this macro)
+ * 
+ *                      In addition, this setting value is the initial value of firmware.
+ *                      Random Address can be changed by the BLE API.
+ * @note   The BD address setting format is little endian. \n
+ *         If the address is "AA:BB:CC:DD:EE:FF", set the byte array in the order {0xFF, 0xEE, 0xDD, 0xCC, 0xBB, 0xAA}.
+ */
+#define BLE_CFG_RF_DBG_RAND_ADDR        {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF}
+
+/** 
+ * @def BLE_CFG_RF_CONN_MAX
+ * @brief Maximum number of connections.
+ * @details     range: 1 to 7 \n
+ *              default : 7
+ */
+#define BLE_CFG_RF_CONN_MAX             (7)
+
+/** 
+ * @def BLE_CFG_RF_CONN_DATA_MAX
+ * @brief Maximum connection data length.
+ * @details     range: 27 to 251 \n
+ *              default : 251
+ */
+#define BLE_CFG_RF_CONN_DATA_MAX        (251)
+
+/** 
+ * @def BLE_CFG_RF_ADV_DATA_MAX
+ * @brief Maximum advertising data length.
+ * @details     range: 31 to 1650 \n
+ *              default : 1650
+ */
+#define BLE_CFG_RF_ADV_DATA_MAX         (1650)
+
+
+/** 
+ * @def BLE_CFG_RF_ADV_SET_MAX
+ * @brief Maximum advertising set number.
+ * @details     range: 1 to 4 \n
+ *              default : 4
+ */
+#define BLE_CFG_RF_ADV_SET_MAX          (4)
+
+/** 
+ * @def BLE_CFG_RF_SYNC_SET_MAX
+ * @brief Maximum periodic sync set number.
+ * @details     range: 1 to 2 \n
+ *              default : 2
+ */
+#define BLE_CFG_RF_SYNC_SET_MAX         (2)
+
+/** 
+ * @def BLE_CFG_EVENT_NOTIFY_CONN_START
+ * @brief Set Connection event start notify enable/disable.
+ * @details     0: Disable notify \n
+ *              1: Enable notify \n
+ *              default : 0 
+ */
+#define BLE_CFG_EVENT_NOTIFY_CONN_START (0)
+
+/** 
+ * @def BLE_CFG_EVENT_NOTIFY_CONN_CLOSE
+ * @brief Set Connection event close notify enable/disable.
+ * @details     0: Disable notify \n
+ *              1: Enable notify \n
+ *              default : 0
+ */
+#define BLE_CFG_EVENT_NOTIFY_CONN_CLOSE (0)
+
+/** 
+ * @def BLE_CFG_EVENT_NOTIFY_ADV_START
+ * @brief Set Advertising event start notify enable/disable.
+ * @details     0: Disable notify \n
+ *              1: Enable notify \n
+ *              default : 0
+ */
+#define BLE_CFG_EVENT_NOTIFY_ADV_START  (0)
+
+/** 
+ * @def BLE_CFG_EVENT_NOTIFY_ADV_CLOSE
+ * @brief Set Advertising event close notify enable/disable.
+ * @details     0: Disable notify \n
+ *              1: Enable notify \n
+ *              default : 0
+ */
+#define BLE_CFG_EVENT_NOTIFY_ADV_CLOSE  (0)
+
+/** 
+ * @def BLE_CFG_EVENT_NOTIFY_SCAN_START
+ * @brief Set Scanning event start notify enable/disable.
+ * @details     0: Disable notify \n
+ *              1: Enable notify \n
+ *              default : 0
+ */
+#define BLE_CFG_EVENT_NOTIFY_SCAN_START (0)
+
+/** 
+ * @def BLE_CFG_EVENT_NOTIFY_SCAN_CLOSE
+ * @brief Set Scanning event close notify enable/disable.
+ * @details     0: Disable notify \n
+ *              1: Enable notify \n
+ *              default : 0
+ */
+#define BLE_CFG_EVENT_NOTIFY_SCAN_CLOSE (0)
+
+/** 
+ * @def BLE_CFG_EVENT_NOTIFY_INIT_START
+ * @brief Set Initiating event start notify enable/disable.
+ * @details     0: Disable notify \n
+ *              1: Enable notify \n
+ *              default : 0
+ */
+#define BLE_CFG_EVENT_NOTIFY_INIT_START (0)
+
+/** 
+ * @def BLE_CFG_EVENT_NOTIFY_INIT_CLOSE
+ * @brief Set Initiating event close notify enable/disable.
+ * @details     0: Disable notify \n
+ *              1: Enable notify \n
+ *              default : 0
+ */
+#define BLE_CFG_EVENT_NOTIFY_INIT_CLOSE (0)
+
+/** 
+ * @def BLE_CFG_EVENT_NOTIFY_DS_START
+ * @brief Set RF_DEEP_SLEEP start notify enable/disable.
+ * @details     0: Disable notify \n
+ *              1: Enable notify \n
+ *              default : 0
+ */
+#define BLE_CFG_EVENT_NOTIFY_DS_START   (0)
+
+/** 
+ * @def BLE_CFG_EVENT_NOTIFY_DS_WAKEUP
+ * @brief Set RF_DEEP_SLEEP wakeup notify enable/disable.
+ * @details     0: Disable notify \n
+ *              1: Enable notify \n
+ *              default : 0
+ */
+#define BLE_CFG_EVENT_NOTIFY_DS_WAKEUP  (0)
+
+/** 
+ * @def BLE_CFG_RF_CLVAL
+ * @brief Capacity adjustment of 32MHz crystal resonator.
+ * @details     0 to 15: Adjust according to board environment. \n
+ *              default : 6
+ */
+#define BLE_CFG_RF_CLVAL                (6) 
+
+/** 
+ * @def BLE_CFG_RF_DDC_EN
+ * @brief Set DC-DC converter for RF part.
+ * @details     0: Disable DC-DC Converter \n
+ *              1: Enable  DC-DC Converter \n
+ *              default : 0
+ */
+#define BLE_CFG_RF_DDC_EN               (0) 
+
+/** 
+ * @def BLE_CFG_RF_EXT32K_EN
+ * @brief Set slow clock source for RF part. 
+ * @details     0: Use RF_LOCO \n
+ *              1: Use External32.768kHz \n
+ *              default : 0
+ */
+#define BLE_CFG_RF_EXT32K_EN            (0) 
+
+/** 
+ * @def BLE_CFG_RF_MCU_CLKOUT_PORT
+ * @brief When BLE_CFG_RF_EXT32K_EN = 1, Set port of MCU CLKOUT.
+ * @details     0: PE3 \n
+ *              1: PE4 \n
+ *              default : 0
+ */
+#define BLE_CFG_RF_MCU_CLKOUT_PORT      (0)
+
+/** 
+ * @def BLE_CFG_RF_MCU_CLKOUT_FREQ
+ * @brief When BLE_CFG_RF_EXT32K_EN = 1, set frequency output from CLKOUT of MCU part.
+ * @details     0: MCU CLKOUT frequency 32.768kHz \n
+ *              1: MCU CLKOUT frequency 16.384kHz \n
+ *              default : 0
+ */
+#define BLE_CFG_RF_MCU_CLKOUT_FREQ      (0)
+
+/** 
+ * @def BLE_CFG_RF_SCA
+ * @brief Set Sleep Clock Accuracy(SCA) for RF slow clock.
+ * @details     range: 0 to 500 [ppm] \n
+ *              default : 250 \n
+ *              Note: When BLE_CFG_RF_EXT32K_EN = 0(RF_LOCO) is selected, \n
+ *                    need to set SCA >= 250 [ppm].
+ */
+#define BLE_CFG_RF_SCA                  (250)
+
+/** 
+ * @def BLE_CFG_RF_MAX_TX_POW
+ * @brief Set transmission power maximum value.
+ * @details     0: max +0dBm \n
+ *              1: max +4dBm \n
+ *              default : 1
+ */
+#define BLE_CFG_RF_MAX_TX_POW           (1)
+
+/** 
+ * @def BLE_CFG_RF_DEF_TX_POW
+ * @brief Set default transmit power. 
+ * @details     Default transmit power is dependent on the configuration of 
+ *              Maximum transmission power(BLE_CFG_RF_MAX_TX_POW).
+ *
+ *              When BLE_CFG_RF_MAX_TX_POW = 0(0dBm), BLE_CFG_RF_DEF_TX_POW is as follows. \n
+ * 
+ *                0(High) :   0dBm \n
+ *                1(Mid)  :   0dBm \n
+ *                2(Low)  : -18dBm
+ * 
+ *              When BLE_CFG_RF_MAX_TX_POW = 1(+4dBm), BLE_CFG_RF_DEF_TX_POW is as follows. \n
+ *
+ *                0(High) :  +4dBm \n
+ *                1(Mid)  :   0dBm \n
+ *                2(Low)  : -20dBm
+ *
+ * 
+ *              default : 0
+ */
+#define BLE_CFG_RF_DEF_TX_POW           (0)
+
+/** 
+ * @def BLE_CFG_RF_CLKOUT_EN
+ * @brief Set CLKOUT_RF output setting.
+ * @details     0: No output \n
+ *              1: reserved \n
+ *              2: reserved \n
+ *              3: reserved \n
+ *              4: reserved \n
+ *              5: 4MHz output \n
+ *              6: 2MHz output \n
+ *              7: 1MHz output
+ *
+ *              default : 0
+ */
+#define BLE_CFG_RF_CLKOUT_EN            (0) 
+
+/** 
+ * @def BLE_CFG_RF_DEEP_SLEEP_EN
+ * @brief Set RF_DEEP_SLEEP transition.
+ * @details     0: Disable  \n
+ *              1: Enable \n
+ *              default : 1
+ */
+#define BLE_CFG_RF_DEEP_SLEEP_EN        (1)
+
+/** 
+ * @def BLE_CFG_MCU_MAIN_CLK_KHZ
+ * @brief Set MCU Main Clock Frequency (kHz).
+ * @details     Set clock source according to your board environment. \n
+ *              HOCO : don't care \n
+ *              Main Clock : 1000 to 20000 kHz \n
+ *              PLL Circuit: 4000 to 12500 kHz \n
+ *              default : 4000
+ */
+#define BLE_CFG_MCU_MAIN_CLK_KHZ        (4000)
+
+/** 
+ * @def BLE_CFG_DEV_DATA_CF_BLOCK
+ * @brief Device specific data block on Code Flash (ROM).
+ * @details     range: 0 to 255 or -1 (not use) \n
+ *              Note: 0 to 15 is Start-Up Program Protection block. \n
+ *              default : 16
+ */
+#define BLE_CFG_DEV_DATA_CF_BLOCK       (16)
+
+/** 
+ * @def BLE_CFG_DEV_DATA_DF_BLOCK
+ * @brief Device specific data block on E2 Data Flash.
+ * @details     range: 0 to 7 or -1 (not use) \n
+ *              default : -1
+ */
+#define BLE_CFG_DEV_DATA_DF_BLOCK       (-1)
+
+/** 
+ * @def BLE_CFG_GATT_MTU_SIZE
+ * @brief MTU Size configured by GATT MTU exchange procedure.
+ * @details     range: 23 to 247 \n
+ *              default : 247
+ */
+#define BLE_CFG_GATT_MTU_SIZE           (247)
+
+/** 
+ * @def BLE_CFG_NUM_BOND
+ * @brief Number of remote device bonding information
+ * @details     range: 1 to 7 \n
+ *              default : 7
+ */
+#define BLE_CFG_NUM_BOND                (7)
+
+/** 
+ * @def BLE_CFG_EN_SEC_DATA
+ * @brief Store Security Data in DataFlash 
+ * @details     0: Disable \n
+ *              1: Enable \n
+ *              default : 0
+ */
+#define BLE_CFG_EN_SEC_DATA             (0)
+
+/** 
+ * @def BLE_CFG_SECD_DATA_DF_BLOCK
+ * @brief Data Flash Block for Security Data Management
+ * @details     range: 0 to 7 \n
+ *              default : 0
+ */
+#define BLE_CFG_SECD_DATA_DF_BLOCK      (0)
+
+/** 
+ * @def BLE_CFG_CMD_LINE_EN
+ * @brief CommandLine support.
+ * @details     0: Disable \n
+ *              1: Enable \n
+ *              default : 0
+ */
+#define BLE_CFG_CMD_LINE_EN             (0)
+
+/** 
+ * @def BLE_CFG_CMD_LINE_CH
+ * @brief SCI Channel for CommandLine.
+ * @details     Select SCI Channel. \n
+ *              default : 1
+ */
+#define BLE_CFG_CMD_LINE_CH             (1)
+
+/** 
+ * @def BLE_CFG_BOARD_LED_SW_EN
+ * @brief Board LED & Switch suppport.
+ * @details     0: Disable \n
+ *              1: Enable \n
+ *              default : 0
+ */
+#define BLE_CFG_BOARD_LED_SW_EN         (0)
+
+/** 
+ * @def BLE_CFG_BOARD_TYPE
+ * @brief Board Type
+ * @details     0 : Customer board \n
+ *              1 : Target board \n
+ *              2 : RSSK board \n
+ *              3 : Evaluation board \n
+ *              default : 0
+ */
+#define BLE_CFG_BOARD_TYPE              (0)
+
+/** 
+ * @def BLE_CFG_LOG_LEVEL
+ * @brief Log level
+ * @details     0 : Disable \n
+ *              1 : Error \n
+ *              2 : Error & Warning \n
+ *              3 : Error & Warning & Debug \n
+ *              default : 3
+ */
+#define BLE_CFG_LOG_LEVEL               (3)
+
+/** 
+ * @def BLE_CFG_ABS_API_EN
+ * @brief Abstraction API support
+ * @details     0 : Disable \n
+ *              1 : Enable \n
+ *              default : 1
+ */
+#define BLE_CFG_ABS_API_EN              (1)
+
+/**
+ * @def BLE_CFG_SOFT_TIMER_EN
+ * @brief Software Timer support
+ * @details     0 : Disable \n
+ *              1 : Enable \n
+ *              default : 1
+ */
+#define BLE_CFG_SOFT_TIMER_EN           (1)
+
+/** 
+ * @def BLE_CFG_MCU_LPC_EN
+ * @brief MCU low power consumption support.
+ * @details     0: Disable \n
+ *              1: Enable \n
+ *              default : 1
+ */
+#define BLE_CFG_MCU_LPC_EN              (1)
+
+/** 
+ * @def BLE_CFG_HCI_MODE_EN
+ * @brief HCI Mode support
+ * @details     0 : Disable \n
+ *              1 : Enable \n
+ *              default : 0
+ */
+#define BLE_CFG_HCI_MODE_EN             (0)
+
+#endif /* R_BLE_RX23W_CONFIG_H */
+
+/** @} */
+

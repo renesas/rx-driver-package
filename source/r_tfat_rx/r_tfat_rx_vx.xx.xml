@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>2.05.00</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family omit_series="true">RX</family>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_tfat_rx</name>
+        <version>3.04</version>
+        <zipsource>r_tfat_rx_v3.04.zip</zipsource>
+        <dependency>
+            <module>r_tfat_driver_rx</module>
+            <version>1.04</version>
+        </dependency>
+        <dependency>
+            <module>r_cmt_rx</module>
+            <version>3.21</version>
+        </dependency>
+        <dependency>
+            <module>r_sys_time_rx</module>
+            <version>1.00</version>
+        </dependency>
+        <application>Storage &#38; Memory</application>
+        <desc>Open Source FAT File System.</desc>
+        <details>TFAT library is a FAT file system which just requres small memory.<br/>
+TFAT library is based on FatFs.<br/>
+<br/>
+Please refer to the<br/>
+ http://www.renesas.com/mw/tfat<br/>
+ http://japan.renesas.com/mw/tfat<br/>
+  </details>
+        <function>storage</function>
+        <incdir>r_config</incdir>
+        <incdir>r_tfat_rx</incdir>
+        <incdir>r_tfat_rx/lib</incdir>
+        <library>
+            <family>RX</family>
+            <series>RX700</series>
+            <series>RX600</series>
+            <libdir endian="big" path="rel">r_tfat_rx/lib/tfat_rx600_big.lib</libdir>
+            <libdir endian="little" path="rel">r_tfat_rx/lib/tfat_rx600_little.lib</libdir>
+        </library>
+        <library>
+            <family>RX</family>
+            <series>RX200</series>
+            <series>RX100</series>
+            <libdir endian="big" path="rel">r_tfat_rx/lib/tfat_rx200_big.lib</libdir>
+            <libdir endian="little" path="rel">r_tfat_rx/lib/tfat_rx200_little.lib</libdir>
+        </library>
+    </package>
+    <sampleapplicationnote>
+        <documentno>R20AN0038</documentno>
+        <documentno>R01AN2295</documentno>
+        <documentno>R01AN2237</documentno>
+    </sampleapplicationnote>
+</refinfo>

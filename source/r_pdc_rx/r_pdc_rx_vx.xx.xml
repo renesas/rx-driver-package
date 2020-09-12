@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>2.07.00</version>
+        <version>3.01.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>4.08.04.201803</version>
+        <version>4.08.04.201902</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.10.01</version>
+        <version>4.12.01</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX600</series>
+        <series>RX700</series>
+        <group omit_board="true">RX64M</group>
+        <group omit_board="true">RX65N</group>
+        <group omit_board="true">RX66N</group>
+        <group omit_board="true">RX71M</group>
+        <group omit_board="true">RX72M</group>
+        <group omit_board="true">RX72N</group>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_pdc_rx</name>
+        <version>2.05</version>
+        <zipsource>r_pdc_rx_v2.05.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>5.50</version>
+        </dependency>
+        <application>connectivity</application>
+        <desc>PDC driver</desc>
+        <details>This driver gives the user an easy API to control the MCU's PDC. PDC module has the function of communicating with the external I/O devices including image sensors, and specifically transferring parallel data such as an image output from the external I/O devices via the DTC or DMAC to the on-chip RAM and external address spaces(the CS and SDRAM areas).</details>
+        <function>PDC</function>
+        <incdir>r_config</incdir>
+        <incdir>r_pdc_rx</incdir>
+    </package>
+
+</refinfo>

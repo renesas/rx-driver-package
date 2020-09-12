@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>2.01.00</version>
+        <version>3.01.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>4.08.04.201801</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.10.01</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX600</series>
+        <series>RX700</series>
+        <group omit_board="true">RX64M</group>
+        <group omit_board="true">RX71M</group>
+    </target>
+
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+
+    <package>
+        <type>fitmodule</type>
+        <name>r_src_api_rx</name>
+        <version>1.13</version>
+        <zipsource>r_src_api_rx_v1.13.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>5.20</version>
+        </dependency>
+        <application>SRC</application>
+        <desc>Sampling rate converter driver.</desc>
+        <details>This module supports a sampling rate converter operation by the user.</details>
+        <function>SRC</function>
+        <incdir>r_config</incdir>
+        <incdir>r_src_api_rx</incdir>
+        <incdir>r_src_api_rx/src</incdir>
+    </package>
+
+</refinfo>

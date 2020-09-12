@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="CMT_RX_CFG_IPR" display="CMT interrupts priority level" default="5" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${CMT_RX_CFG_IPR}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 15">("${CMT_RX_CFG_IPR}" &gt;= 0) &amp;&amp; ("${CMT_RX_CFG_IPR}" &lt;= 15)</constraint>
+            <description>The interrupt priority level to be used for CMT interrupts. 
+</description>
+        </property>
+    </configuration>
+</module>

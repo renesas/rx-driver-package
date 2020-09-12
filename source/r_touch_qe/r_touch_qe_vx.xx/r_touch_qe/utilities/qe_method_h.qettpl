@@ -1,0 +1,172 @@
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+* this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+@qe:begin:SwapTargetMethod
+* File Name    : qe_@method@.h
+@qe:end:
+* Description  : This file includes definitions
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+* History : DD.MM.YYYY Version Description
+*                      1.00    First Release
+***********************************************************************************************************************/
+
+@qe:begin:SwapTargetMethod
+#ifndef QE_@METHOD@_HEADER_FILE
+#define QE_@METHOD@_HEADER_FILE
+@qe:end:
+
+/***********************************************************************************************************************
+Includes   <System Includes> , "Project Includes"
+***********************************************************************************************************************/
+#include "r_touch_qe_private.h"
+#include "qe_common.h"
+
+
+/***********************************************************************************************************************
+Macro definitions
+***********************************************************************************************************************/
+@qe:begin:MacroNumberButtons
+#define @METHOD@_NUM_BUTTONS        (@value@)
+@qe:end:
+@qe:begin:MacroEachButtonId
+#define @METHOD@_INDEX_@TIF@     (@value@)
+#define @METHOD@_ID_@TIF@        ((QE_METHOD_@METHOD@<<8) | @METHOD@_INDEX_@TIF@)
+#define @METHOD@_MASK_@TIF@      (1ULL << @value@)
+@qe:end:
+
+@qe:begin:MacroNumberSliders
+#define @METHOD@_NUM_SLIDERS        (@value@)
+@qe:end:
+@qe:begin:MacroEachSliderId
+#define @METHOD@_INDEX_@TIF@     (@value@)
+#define @METHOD@_ID_@TIF@        ((QE_METHOD_@METHOD@<<8) | @METHOD@_INDEX_@TIF@)
+@qe:end:
+
+@qe:begin:MacroNumberWheels
+#define @METHOD@_NUM_WHEELS         (@value@)
+@qe:end:
+@qe:begin:MacroEachWheelId
+#define @METHOD@_INDEX_@TIF@     (@value@)
+#define @METHOD@_ID_@TIF@        ((QE_METHOD_@METHOD@<<8) | @METHOD@_INDEX_@TIF@)
+@qe:end:
+
+
+@qe:begin:MacroNumberElements
+#define @METHOD@_NUM_ELEMENTS       (@value@)
+#define @METHOD@_BTN_MASKS_SIZE     (@value@)
+@qe:end:
+
+
+/* Button configurations */
+@qe:begin:MacroEachButtonThreshold
+#define @METHOD@_@TIF@_THR_OFFSET    (@value@)
+#define @METHOD@_@TIF@_HYS_OFFSET    (@value@)
+@qe:end:
+
+/* Slider configurations */
+@qe:begin:MacroEachSliderThreshold
+#define @METHOD@_@TIF@_THRESHOLD     (@value@)
+#define @METHOD@_@TIF@_THR_OFFSET    (@value@)
+#define @METHOD@_@TIF@_RESOLUTION    (@value@)
+@qe:end:
+
+/* Wheel configurations */
+@qe:begin:MacroEachWheelThreshold
+#define @METHOD@_@TIF@_THRESHOLD     (@value@)
+#define @METHOD@_@TIF@_THR_OFFSET    (@value@)
+#define @METHOD@_@TIF@_RESOLUTION    (@value@)
+@qe:end:
+
+/* Touch configurations */
+@qe:begin:MacroTouchConfigParameters
+#define @METHOD@_TOUCH_ON           (@value@)
+#define @METHOD@_TOUCH_OFF          (@value@)
+#define @METHOD@_MAX_ON_TIME        (@value@)
+#define @METHOD@_DRIFT_ENABLE       (@value@)
+#define @METHOD@_DRIFT_FREQ         (@value@)
+@qe:end:
+
+
+/***********************************************************************************************************************
+Typedef definitions
+***********************************************************************************************************************/
+
+
+/***********************************************************************************************************************
+Exported global variables
+***********************************************************************************************************************/
+
+@qe:begin:ExportedGlobalVariables
+#define QE_METHOD_@METHOD@_CAPACITANCE_TYPE @value@
+@qe:end:
+
+@qe:begin:SwapTargetMethod
+extern ctsu_cfg_t   g_ctsu_cfg_@method@;
+extern btn_ctrl_t   g_buttons_@method@[];
+extern sldr_ctrl_t  g_sliders_@method@[];
+extern wheel_ctrl_t g_wheels_@method@[];
+extern touch_cfg_t  g_touch_cfg_@method@;
+
+extern uint16_t     g_@method@_write[];
+#if (QE_METHOD_@METHOD@_CAPACITANCE_TYPE == TOUCH_SELF_MODE)
+extern self_ico_t   g_@method@_ico_data[];
+extern self_ico_t   g_@method@_raw_data[];
+extern uint16_t     g_@method@_add_sensor[];
+extern uint16_t     g_@method@_sensor_cnt[];
+#else
+extern mutual_ico_t g_@method@_ico_data[];
+extern mutual_ico_t g_@method@_raw_data[];
+extern uint16_t     g_@method@_add_pri_sensor[];
+extern uint16_t     g_@method@_add_snd_sensor[];
+extern uint16_t     g_@method@_sensor_diff[];
+#endif
+extern int8_t       g_@method@_current_sign[];
+#if (@METHOD@_NUM_BUTTONS != 0)
+extern uint16_t     g_@method@_ref[];
+extern uint16_t     g_@method@_thr[];
+extern uint16_t     g_@method@_user_thr[];
+extern uint16_t     g_@method@_hys[];
+extern uint16_t     g_@method@_delta[];
+extern uint16_t     g_@method@_touch_cnt[];
+extern uint16_t     g_@method@_non_touch_cnt[];
+extern uint16_t     g_@method@_in_touch[];
+extern uint16_t     g_@method@_out_touch[];
+extern uint16_t     g_@method@_touch_result[];
+extern uint16_t     g_@method@_drift_permission[];
+extern uint32_t     g_@method@_drift_ref[];
+extern uint16_t     g_@method@_drift_cnt[];
+extern uint16_t     g_@method@_key_uesd_info[];
+extern uint16_t     g_@method@_calib[@METHOD@_NUM_BUTTONS][QE_CALIB_TIME];
+#endif
+extern uint8_t      g_@method@_sensor_index[];
+extern int8_t       g_@method@_counter_magni[];
+extern uint16_t     g_@method@_tune_ctsuso[];
+extern volatile uint8_t    g_@method@_tune_result[];
+@qe:end:
+
+
+/***********************************************************************************************************************
+Exported global functions (to be accessed by other files)
+***********************************************************************************************************************/
+
+
+@qe:begin:SwapTargetMethod
+#endif /* QE_@METHOD@_HEADER_FILE */
+@qe:end:

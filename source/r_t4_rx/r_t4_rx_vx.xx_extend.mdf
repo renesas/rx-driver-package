@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="T4_CFG_SYSTEM_CHANNEL_NUMBER" display="Channel number your system has." default="1" type="combobox">
+            <option id="T4_CFG_SYSTEM_CHANNEL_NUMBER.1" display="1" value="1"/>
+            <option id="T4_CFG_SYSTEM_CHANNEL_NUMBER.2" display="2" value="2"/>
+            <description>Typical RX MCUs(RX65N) correspond to Ethernet has 1 channel. Please confirm your MCU spec for about Ethernet channel. If your system has additional Ethernet channel (e.g. wireless LAN), please modify config file in directly.</description>
+        </property>
+        <property id="T4_CFG_SYSTEM_DHCP" display="Enable/Disable DHCP function." default="1" type="combobox">
+            <option id="T4_CFG_SYSTEM_DHCP.0" display="0" value="0"/>
+            <option id="T4_CFG_SYSTEM_DHCP.1" display="1" value="1"/>
+            <description>0 = Disable
+1 = Enable</description>
+        </property>
+        <property id="T4_CFG_FIXED_IP_ADDRESS_CH0" display="IP address for ch0, when DHCP disable." default="192,168,0,3" type="textbox">
+            <constraint display="Disable DHCP" actionOnFail="disable">"${T4_CFG_SYSTEM_DHCP}" == "${T4_CFG_SYSTEM_DHCP.0}"</constraint>
+            <constraint display="Illegal input.">/^\b\d{1,3}\,\d{1,3}\,\d{1,3}\,\d{1,3}\b$/.test("${T4_CFG_FIXED_IP_ADDRESS_CH0}")</constraint>
+            <description>String must be a valid IP address delimited by ','.
+Value must be an decimal value. 
+Value must be in the range 0-255.</description>
+        </property>
+        <property id="T4_CFG_FIXED_SABNET_MASK_CH0" display="Subnet mask for ch0, when DHCP disable." default="255,255,255,0" type="textbox">
+            <constraint display="Disable DHCP" actionOnFail="disable">"${T4_CFG_SYSTEM_DHCP}" == "${T4_CFG_SYSTEM_DHCP.0}"</constraint>
+            <constraint display="Illegal input.">/^\b\d{1,3}\,\d{1,3}\,\d{1,3}\,\d{1,3}\b$/.test("${T4_CFG_FIXED_SABNET_MASK_CH0}")</constraint>
+            <description>String must be a valid subnet mask delimited by ','.
+Value must be an decimal value. 
+Value must be in the range 0-255.</description>
+        </property>
+        <property id="T4_CFG_FIXED_GATEWAY_ADDRESS_CH0" display="Gateway address for ch0, when DHCP disable." default="0,0,0,0" type="textbox">
+            <constraint display="Disable DHCP" actionOnFail="disable">"${T4_CFG_SYSTEM_DHCP}" == "${T4_CFG_SYSTEM_DHCP.0}"</constraint>
+            <constraint display="Illegal input.">/^\b\d{1,3}\,\d{1,3}\,\d{1,3}\,\d{1,3}\b$/.test("${T4_CFG_FIXED_GATEWAY_ADDRESS_CH0}")</constraint>
+            <description>All zero means, "this system is used only local area network".
+String must be a valid gateway address delimited by ','.
+Value must be an decimal value. 
+Value must be in the range 0-255.</description>
+        </property>
+        <property id="T4_CFG_FIXED_IP_ADDRESS_CH1" display="IP address for ch1, when DHCP disable." default="192,168,0,10" type="textbox">
+            <constraint display="Disable DHCP" actionOnFail="disable">"${T4_CFG_SYSTEM_DHCP}" == "${T4_CFG_SYSTEM_DHCP.0}"</constraint>
+            <constraint display="Channel number your system has 1." actionOnFail="disable">"${T4_CFG_SYSTEM_CHANNEL_NUMBER}" == "${T4_CFG_SYSTEM_CHANNEL_NUMBER.2}"</constraint>
+            <constraint display="Illegal input.">/^\b\d{1,3}\,\d{1,3}\,\d{1,3}\,\d{1,3}\b$/.test("${T4_CFG_FIXED_IP_ADDRESS_CH1}")</constraint>
+            <description>String must be a valid IP address delimited by ','.
+Value must be an decimal value. 
+Value must be in the range 0-255.</description>
+        </property>
+        <property id="T4_CFG_FIXED_SABNET_MASK_CH1" display="Subnet mask for ch1, when DHCP disable." default="255,255,255,0" type="textbox">
+            <constraint display="Disable DHCP" actionOnFail="disable">"${T4_CFG_SYSTEM_DHCP}" == "${T4_CFG_SYSTEM_DHCP.0}"</constraint>
+            <constraint display="Channel number your system has 1." actionOnFail="disable">"${T4_CFG_SYSTEM_CHANNEL_NUMBER}" == "${T4_CFG_SYSTEM_CHANNEL_NUMBER.2}"</constraint>
+            <constraint display="Illegal input.">/^\b\d{1,3}\,\d{1,3}\,\d{1,3}\,\d{1,3}\b$/.test("${T4_CFG_FIXED_SABNET_MASK_CH1}")</constraint>
+            <description>String must be a valid subnet mask delimited by ','.
+Value must be an decimal value. 
+Value must be in the range 0-255.</description>
+        </property>
+        <property id="T4_CFG_FIXED_GATEWAY_ADDRESS_CH1" display="Gateway address for ch1, when DHCP disable." default="0,0,0,0" type="textbox">
+            <constraint display="Disable DHCP" actionOnFail="disable">"${T4_CFG_SYSTEM_DHCP}" == "${T4_CFG_SYSTEM_DHCP.0}"</constraint>
+            <constraint display="Channel number your system has 1." actionOnFail="disable">"${T4_CFG_SYSTEM_CHANNEL_NUMBER}" == "${T4_CFG_SYSTEM_CHANNEL_NUMBER.2}"</constraint>
+            <constraint display="Illegal input.">/^\b\d{1,3}\,\d{1,3}\,\d{1,3}\,\d{1,3}\b$/.test("${T4_CFG_FIXED_GATEWAY_ADDRESS_CH1}")</constraint>
+            <description>All zero means, "this system is used only local area network".
+String must be a valid gateway address delimited by ','.
+Value must be an decimal value. 
+Value must be in the range 0-255.</description>
+        </property>
+        <property id="T4_CFG_ETHER_CH0_MAC_ADDRESS" display="Ether ch0 MAC address." default="0x74,0x90,0x50,0x00,0x79,0x03" type="textbox">
+            <constraint display="Illegal input.">/^\b[0][x][0-9a-fA-F]{2}\,[0][x][0-9a-fA-F]{2}\,[0][x][0-9a-fA-F]{2}\,[0][x][0-9a-fA-F]{2}\,[0][x][0-9a-fA-F]{2}\,[0][x][0-9a-fA-F]{2}\b$/.test("${T4_CFG_ETHER_CH0_MAC_ADDRESS}")</constraint>
+            <description>String must be a valid MAC address delimited by ','.
+Value must be an hexadecimal value.
+Value must be in the range 0x00-0xff.</description>
+        </property>
+        <property id="T4_CFG_ETHER_CH1_MAC_ADDRESS" display="Ether ch1 MAC address." default="0x74,0x90,0x50,0x00,0x79,0x10" type="textbox">
+            <constraint display="Channel number your system has 1." actionOnFail="disable">"${T4_CFG_SYSTEM_CHANNEL_NUMBER}" == "${T4_CFG_SYSTEM_CHANNEL_NUMBER.2}"</constraint>
+            <constraint display="Illegal input.">/^\b[0][x][0-9a-fA-F]{2}\,[0][x][0-9a-fA-F]{2}\,[0][x][0-9a-fA-F]{2}\,[0][x][0-9a-fA-F]{2}\,[0][x][0-9a-fA-F]{2}\,[0][x][0-9a-fA-F]{2}\b$/.test("${T4_CFG_ETHER_CH1_MAC_ADDRESS}")</constraint>
+            <description>String must be a valid MAC address delimited by ','.
+Value must be an hexadecimal value.
+Value must be in the range 0x00-0xff.</description>
+        </property>
+        <property id="T4_CFG_SYSTEM_CALLBACK_FUNCTION_USE" display="SYSTEM callback function use" default="1" type="combobox">
+            <option id="T4_CFG_SYSTEM_CALLBACK_FUNCTION_USE.0" display="0" value="0"/>
+            <option id="T4_CFG_SYSTEM_CALLBACK_FUNCTION_USE.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="T4_CFG_SYSTEM_CALLBACK_FUNCTION_NAME_TMP" display="SYSTEM callback function name." default="system_callback" type="textbox">
+            <constraint display="Used for callback function." actionOnFail="disable">"${T4_CFG_SYSTEM_CALLBACK_FUNCTION_USE}" == "${T4_CFG_SYSTEM_CALLBACK_FUNCTION_USE.1}"</constraint>
+            <constraint display="Illegal input.">/^[a-zA-Z_0-9]*$/.test("${T4_CFG_SYSTEM_CALLBACK_FUNCTION_NAME_TMP}")</constraint>
+            <description>Please input the SYSTEM callback function name.</description>
+        </property>
+        <property id="T4_CFG_TCP_REPID1_PORT_NUMBER" display="TCP REPID1 port number" default="1024" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_TCP_REPID1_PORT_NUMBER}")</constraint>
+            <constraint display="Value must be in the range 1~65535">("${T4_CFG_TCP_REPID1_PORT_NUMBER}" &gt;= 1) &amp;&amp; ("${T4_CFG_TCP_REPID1_PORT_NUMBER}" &lt;= 65535)</constraint>
+            <description>1-65535</description>
+        </property>
+        <property id="T4_CFG_TCP_REPID2_PORT_NUMBER" display="TCP REPID2 port number" default="1025" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_TCP_REPID2_PORT_NUMBER}")</constraint>
+            <constraint display="Value must be in the range 1~65535">("${T4_CFG_TCP_REPID2_PORT_NUMBER}" &gt;= 1) &amp;&amp; ("${T4_CFG_TCP_REPID2_PORT_NUMBER}" &lt;= 65535)</constraint>
+            <description>1-65535</description>
+        </property>
+        <property id="T4_CFG_TCP_REPID3_PORT_NUMBER" display="TCP REPID3 port number" default="1026" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_TCP_REPID3_PORT_NUMBER}")</constraint>
+            <constraint display="Value must be in the range 1~65535">("${T4_CFG_TCP_REPID3_PORT_NUMBER}" &gt;= 1) &amp;&amp; ("${T4_CFG_TCP_REPID3_PORT_NUMBER}" &lt;= 65535)</constraint>
+            <description>1-65535</description>
+        </property>
+        <property id="T4_CFG_TCP_REPID4_PORT_NUMBER" display="TCP REPID4 port number" default="1027" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_TCP_REPID4_PORT_NUMBER}")</constraint>
+            <constraint display="Value must be in the range 1~65535">("${T4_CFG_TCP_REPID4_PORT_NUMBER}" &gt;= 1) &amp;&amp; ("${T4_CFG_TCP_REPID4_PORT_NUMBER}" &lt;= 65535)</constraint>
+            <description>1-65535</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID1_CHANNEL" display="TCP CEPID1 channel number." default="0" type="combobox">
+            <option id="T4_CFG_TCP_CEPID1_CHANNEL.0" display="0" value="0"/>
+            <option id="T4_CFG_TCP_CEPID1_CHANNEL.1" display="1" value="1"/>
+            <description>0 = Use CH0
+1 = Use CH1</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID1_RECEIVE_WINDOW_SIZE" display="TCP CEPID1 receive window size." default="1460" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_TCP_CEPID1_RECEIVE_WINDOW_SIZE}")</constraint>
+            <constraint display="Value must be in the range 1~65535">("${T4_CFG_TCP_CEPID1_RECEIVE_WINDOW_SIZE}" &gt;= 1) &amp;&amp; ("${T4_CFG_TCP_CEPID1_RECEIVE_WINDOW_SIZE}" &lt;= 65535)</constraint>
+            <description>1-65535 (bytes)
+TCP receive window size is for TCP communication buffer for flow control. TCP always report the remaining TCP receive window size using TCP header to notify the buffer status for peer. Peer can send the data without confirming ACK therefore huge buffer help improving receiving throughput, especially, 1460xN buffer size is effective because of the data will send as 1460 payload packat.
+This value will set to each communication endpoint settings as common. If you set other value to each communication endpoint, please modify config file in directly.</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID1_CALLBACK_FUNCTION_USE" display="TCP CEPID1 callback function use." default="0" type="combobox">
+            <option id="T4_CFG_TCP_CEPID1_CALLBACK_FUNCTION_USE.0" display="0" value="0"/>
+            <option id="T4_CFG_TCP_CEPID1_CALLBACK_FUNCTION_USE.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID1_CALLBACK_FUNCTION_NAME_TMP" display="TCP CEPID1 callback function name." default="0" type="textbox">
+            <constraint display="Used for callback function." actionOnFail="disable">"${T4_CFG_TCP_CEPID1_CALLBACK_FUNCTION_USE}" == "${T4_CFG_TCP_CEPID1_CALLBACK_FUNCTION_USE.1}"</constraint>
+            <constraint display="Illegal input.">/^[a-zA-Z_0-9]*$/.test("${T4_CFG_TCP_CEPID1_CALLBACK_FUNCTION_NAME_TMP}")</constraint>
+            <description>Please input the TCP callback function name. If you set other function name to each communication endpoint, please modify config file in directly.</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID1_KEEPALIVE_ENABLE" display="TCP CEPID1 Keep-Alive function" default="0" type="combobox">
+            <option id="T4_CFG_TCP_CEPID1_KEEPALIVE_ENABLE.0" display="0" value="0"/>
+            <option id="T4_CFG_TCP_CEPID1_KEEPALIVE_ENABLE.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID2_CHANNEL" display="TCP CEPID2 channel number." default="0" type="combobox">
+            <option id="T4_CFG_TCP_CEPID2_CHANNEL.0" display="0" value="0"/>
+            <option id="T4_CFG_TCP_CEPID2_CHANNEL.1" display="1" value="1"/>
+            <description> 0 = Use CH0
+ 1 = Use CH1</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID2_RECEIVE_WINDOW_SIZE" display="TCP CEPID2 receive window size." default="1460" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_TCP_CEPID2_RECEIVE_WINDOW_SIZE}")</constraint>
+            <constraint display="Value must be in the range 1~65535">("${T4_CFG_TCP_CEPID2_RECEIVE_WINDOW_SIZE}" &gt;= 1) &amp;&amp; ("${T4_CFG_TCP_CEPID2_RECEIVE_WINDOW_SIZE}" &lt;= 65535)</constraint>
+            <description>1-65535 (bytes)
+TCP receive window size is for TCP communication buffer for flow control. TCP always report the remaining TCP receive window size using TCP header to notify the buffer status for peer. Peer can send the data without confirming ACK therefore huge buffer help improving receiving throughput, especially, 1460xN buffer size is effective because of the data will send as 1460 payload packat.
+This value will set to each communication endpoint settings as common. If you set other value to each communication endpoint, please modify config file in directly.</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID2_CALLBACK_FUNCTION_USE" display="TCP CEPID2 callback function use." default="0" type="combobox">
+            <option id="T4_CFG_TCP_CEPID2_CALLBACK_FUNCTION_USE.0" display="0" value="0"/>
+            <option id="T4_CFG_TCP_CEPID2_CALLBACK_FUNCTION_USE.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID2_CALLBACK_FUNCTION_NAME_TMP" display="TCP CEPID2 callback function name." default="0" type="textbox">
+            <constraint display="Used for callback function." actionOnFail="disable">"${T4_CFG_TCP_CEPID2_CALLBACK_FUNCTION_USE}" == "${T4_CFG_TCP_CEPID2_CALLBACK_FUNCTION_USE.1}"</constraint>
+            <constraint display="Illegal input.">/^[a-zA-Z_0-9]*$/.test("${T4_CFG_TCP_CEPID2_CALLBACK_FUNCTION_NAME_TMP}")</constraint>
+            <description>Please input the TCP callback function name. If you set other function name to each communication endpoint, please modify config file in directly.</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID2_KEEPALIVE_ENABLE" display="TCP CEPID2 Keep-Alive function" default="0" type="combobox">
+            <option id="T4_CFG_TCP_CEPID2_KEEPALIVE_ENABLE.0" display="0" value="0"/>
+            <option id="T4_CFG_TCP_CEPID2_KEEPALIVE_ENABLE.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID3_CHANNEL" display="TCP CEPID3 channel number." default="0" type="combobox">
+            <option id="T4_CFG_TCP_CEPID3_CHANNEL.0" display="0" value="0"/>
+            <option id="T4_CFG_TCP_CEPID3_CHANNEL.1" display="1" value="1"/>
+            <description> 0 = Use CH0
+ 1 = Use CH1</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID3_RECEIVE_WINDOW_SIZE" display="TCP CEPID3 receive window size." default="1460" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_TCP_CEPID3_RECEIVE_WINDOW_SIZE}")</constraint>
+            <constraint display="Value must be in the range 1~65535">("${T4_CFG_TCP_CEPID3_RECEIVE_WINDOW_SIZE}" &gt;= 1) &amp;&amp; ("${T4_CFG_TCP_CEPID3_RECEIVE_WINDOW_SIZE}" &lt;= 65535)</constraint>
+            <description>1-65535 (bytes)
+TCP receive window size is for TCP communication buffer for flow control. TCP always report the remaining TCP receive window size using TCP header to notify the buffer status for peer. Peer can send the data without confirming ACK therefore huge buffer help improving receiving throughput, especially, 1460xN buffer size is effective because of the data will send as 1460 payload packat.
+This value will set to each communication endpoint settings as common. If you set other value to each communication endpoint, please modify config file in directly.</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID3_CALLBACK_FUNCTION_USE" display="TCP CEPID3 callback function use." default="0" type="combobox">
+            <option id="T4_CFG_TCP_CEPID3_CALLBACK_FUNCTION_USE.0" display="0" value="0"/>
+            <option id="T4_CFG_TCP_CEPID3_CALLBACK_FUNCTION_USE.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID3_CALLBACK_FUNCTION_NAME_TMP" display="TCP CEPID3 callback function name." default="0" type="textbox">
+            <constraint display="Used for callback function." actionOnFail="disable">"${T4_CFG_TCP_CEPID3_CALLBACK_FUNCTION_USE}" == "${T4_CFG_TCP_CEPID3_CALLBACK_FUNCTION_USE.1}"</constraint>
+            <constraint display="Illegal input.">/^[a-zA-Z_0-9]*$/.test("${T4_CFG_TCP_CEPID3_CALLBACK_FUNCTION_NAME_TMP}")</constraint>
+            <description>Please input the TCP callback function name. If you set other function name to each communication endpoint, please modify config file in directly.</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID3_KEEPALIVE_ENABLE" display="TCP CEPID3 Keep-Alive function" default="0" type="combobox">
+            <option id="T4_CFG_TCP_CEPID3_KEEPALIVE_ENABLE.0" display="0" value="0"/>
+            <option id="T4_CFG_TCP_CEPID3_KEEPALIVE_ENABLE.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID4_CHANNEL" display="TCP CEPID4 channel number." default="0" type="combobox">
+            <option id="T4_CFG_TCP_CEPID4_CHANNEL.0" display="0" value="0"/>
+            <option id="T4_CFG_TCP_CEPID4_CHANNEL.1" display="1" value="1"/>
+            <description> 0 = Use CH0
+ 1 = Use CH1</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID4_RECEIVE_WINDOW_SIZE" display="TCP CEPID4 receive window size." default="1460" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_TCP_CEPID4_RECEIVE_WINDOW_SIZE}")</constraint>
+            <constraint display="Value must be in the range 1~65535">("${T4_CFG_TCP_CEPID4_RECEIVE_WINDOW_SIZE}" &gt;= 1) &amp;&amp; ("${T4_CFG_TCP_CEPID4_RECEIVE_WINDOW_SIZE}" &lt;= 65535)</constraint>
+            <description>1-65535 (bytes)
+TCP receive window size is for TCP communication buffer for flow control. TCP always report the remaining TCP receive window size using TCP header to notify the buffer status for peer. Peer can send the data without confirming ACK therefore huge buffer help improving receiving throughput, especially, 1460xN buffer size is effective because of the data will send as 1460 payload packat.
+This value will set to each communication endpoint settings as common. If you set other value to each communication endpoint, please modify config file in directly.</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID4_CALLBACK_FUNCTION_USE" display="TCP CEPID4 callback function use." default="0" type="combobox">
+            <option id="T4_CFG_TCP_CEPID4_CALLBACK_FUNCTION_USE.0" display="0" value="0"/>
+            <option id="T4_CFG_TCP_CEPID4_CALLBACK_FUNCTION_USE.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID4_CALLBACK_FUNCTION_NAME_TMP" display="TCP CEPID4 callback function name." default="0" type="textbox">
+            <constraint display="Used for callback function." actionOnFail="disable">"${T4_CFG_TCP_CEPID4_CALLBACK_FUNCTION_USE}" == "${T4_CFG_TCP_CEPID4_CALLBACK_FUNCTION_USE.1}"</constraint>
+            <constraint display="Illegal input.">/^[a-zA-Z_0-9]*$/.test("${T4_CFG_TCP_CEPID4_CALLBACK_FUNCTION_NAME_TMP}")</constraint>
+            <description>Please input the TCP callback function name. If you set other function name to each communication endpoint, please modify config file in directly.</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID4_KEEPALIVE_ENABLE" display="TCP CEPID4 Keep-Alive function" default="0" type="combobox">
+            <option id="T4_CFG_TCP_CEPID4_KEEPALIVE_ENABLE.0" display="0" value="0"/>
+            <option id="T4_CFG_TCP_CEPID4_KEEPALIVE_ENABLE.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID5_CHANNEL" display="TCP CEPID5 channel number." default="0" type="combobox">
+            <option id="T4_CFG_TCP_CEPID5_CHANNEL.0" display="0" value="0"/>
+            <option id="T4_CFG_TCP_CEPID5_CHANNEL.1" display="1" value="1"/>
+            <description> 0 = Use CH0
+ 1 = Use CH1</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID5_RECEIVE_WINDOW_SIZE" display="TCP CEPID5 receive window size." default="1460" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_TCP_CEPID4_RECEIVE_WINDOW_SIZE}")</constraint>
+            <constraint display="Value must be in the range 1~65535">("${T4_CFG_TCP_CEPID4_RECEIVE_WINDOW_SIZE}" &gt;= 1) &amp;&amp; ("${T4_CFG_TCP_CEPID4_RECEIVE_WINDOW_SIZE}" &lt;= 65535)</constraint>
+            <description>1-65535 (bytes)
+TCP receive window size is for TCP communication buffer for flow control. TCP always report the remaining TCP receive window size using TCP header to notify the buffer status for peer. Peer can send the data without confirming ACK therefore huge buffer help improving receiving throughput, especially, 1460xN buffer size is effective because of the data will send as 1460 payload packat.
+This value will set to each communication endpoint settings as common. If you set other value to each communication endpoint, please modify config file in directly.</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID5_CALLBACK_FUNCTION_USE" display="TCP CEPID5 callback function use." default="0" type="combobox">
+            <option id="T4_CFG_TCP_CEPID5_CALLBACK_FUNCTION_USE.0" display="0" value="0"/>
+            <option id="T4_CFG_TCP_CEPID5_CALLBACK_FUNCTION_USE.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID5_CALLBACK_FUNCTION_NAME_TMP" display="TCP CEPID5 callback function name." default="0" type="textbox">
+            <constraint display="Used for callback function." actionOnFail="disable">"${T4_CFG_TCP_CEPID5_CALLBACK_FUNCTION_USE}" == "${T4_CFG_TCP_CEPID5_CALLBACK_FUNCTION_USE.1}"</constraint>
+            <constraint display="Illegal input.">/^[a-zA-Z_0-9]*$/.test("${T4_CFG_TCP_CEPID5_CALLBACK_FUNCTION_NAME_TMP}")</constraint>
+            <description>Please input the TCP callback function name. If you set other function name to each communication endpoint, please modify config file in directly.</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID5_KEEPALIVE_ENABLE" display="TCP CEPID5 Keep-Alive function" default="0" type="combobox">
+            <option id="T4_CFG_TCP_CEPID5_KEEPALIVE_ENABLE.0" display="0" value="0"/>
+            <option id="T4_CFG_TCP_CEPID5_KEEPALIVE_ENABLE.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID6_CHANNEL" display="TCP CEPID6 channel number." default="0" type="combobox">
+            <option id="T4_CFG_TCP_CEPID6_CHANNEL.0" display="0" value="0"/>
+            <option id="T4_CFG_TCP_CEPID6_CHANNEL.1" display="1" value="1"/>
+            <description> 0 = Use CH0
+ 1 = Use CH1</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID6_RECEIVE_WINDOW_SIZE" display="TCP CEPID6 receive window size." default="1460" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_TCP_CEPID4_RECEIVE_WINDOW_SIZE}")</constraint>
+            <constraint display="Value must be in the range 1~65535">("${T4_CFG_TCP_CEPID4_RECEIVE_WINDOW_SIZE}" &gt;= 1) &amp;&amp; ("${T4_CFG_TCP_CEPID4_RECEIVE_WINDOW_SIZE}" &lt;= 65535)</constraint>
+            <description>1-65535 (bytes)
+TCP receive window size is for TCP communication buffer for flow control. TCP always report the remaining TCP receive window size using TCP header to notify the buffer status for peer. Peer can send the data without confirming ACK therefore huge buffer help improving receiving throughput, especially, 1460xN buffer size is effective because of the data will send as 1460 payload packat.
+This value will set to each communication endpoint settings as common. If you set other value to each communication endpoint, please modify config file in directly.</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID6_CALLBACK_FUNCTION_USE" display="TCP CEPID6 callback function use." default="0" type="combobox">
+            <option id="T4_CFG_TCP_CEPID6_CALLBACK_FUNCTION_USE.0" display="0" value="0"/>
+            <option id="T4_CFG_TCP_CEPID6_CALLBACK_FUNCTION_USE.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID6_CALLBACK_FUNCTION_NAME_TMP" display="TCP CEPID6 callback function name." default="0" type="textbox">
+            <constraint display="Used for callback function." actionOnFail="disable">"${T4_CFG_TCP_CEPID6_CALLBACK_FUNCTION_USE}" == "${T4_CFG_TCP_CEPID6_CALLBACK_FUNCTION_USE.1}"</constraint>
+            <constraint display="Illegal input.">/^[a-zA-Z_0-9]*$/.test("${T4_CFG_TCP_CEPID6_CALLBACK_FUNCTION_NAME_TMP}")</constraint>
+            <description>Please input the TCP callback function name. If you set other function name to each communication endpoint, please modify config file in directly.</description>
+        </property>
+        <property id="T4_CFG_TCP_CEPID6_KEEPALIVE_ENABLE" display="TCP CEPID6 Keep-Alive function" default="0" type="combobox">
+            <option id="T4_CFG_TCP_CEPID6_KEEPALIVE_ENABLE.0" display="0" value="0"/>
+            <option id="T4_CFG_TCP_CEPID6_KEEPALIVE_ENABLE.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="T4_CFG_TCP_MSS" display="TCP max segment size." default="1460" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_TCP_MSS}")</constraint>
+            <constraint display="Value must be in the range 1~1460">("${T4_CFG_TCP_MSS}" &gt;= 1) &amp;&amp; ("${T4_CFG_TCP_MSS}" &lt;= 1460)</constraint>
+            <description>1-1460 (bytes)
+TCP always negotiate with peer in connecting phase abuot max segment size.TCP payload max size is usually 1460, user can reduce this size due to system issue for example, the system has no enough RAM for communicaton.</description>
+        </property>
+        <property id="T4_CFG_TCP_2MSL_TIME" display="TCP max segment life time." default="60" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_TCP_2MSL_TIME}")</constraint>
+            <constraint display="Value must be in the range 1~600">("${T4_CFG_TCP_2MSL_TIME}" &gt;= 1) &amp;&amp; ("${T4_CFG_TCP_2MSL_TIME}" &lt;= 600)</constraint>
+            <description>1-600 (seconds)
+TCP should wait before connection CLOSED in TIME_WAIT state during 2MSL time, this time is defined 60 seconds as default in RFC. If this value is short, peer may be waited because of last ack lost. But embedded system often has no enough memory for maintaining the connection, therefore embedded system would reduce this value for release the memory, an reuse the communication endpoint.</description>
+        </property>
+        <property id="T4_CFG_TCP_MAX_TIMEOUT_PERIOD" display="TCP max timeout period time." default="600" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_TCP_MAX_TIMEOUT_PERIOD}")</constraint>
+            <constraint display="Value must be in the range 1~600">("${T4_CFG_TCP_MAX_TIMEOUT_PERIOD}" &gt;= 1) &amp;&amp; ("${T4_CFG_TCP_MAX_TIMEOUT_PERIOD}" &lt;= 600)</constraint>
+            <description>1-600 (seconds)
+TCP should wait before sending connection reset signal (RST) during re-transmission phase.
+This time is defined 600 seconds as default in RFC.</description>
+        </property>
+        <property id="T4_CFG_TCP_DIVIDE_SENDING_PACKET" display="TCP divide the sending packet." default="1" type="combobox">
+            <option id="T4_CFG_TCP_DIVIDE_SENDING_PACKET.0" display="0" value="0"/>
+            <option id="T4_CFG_TCP_DIVIDE_SENDING_PACKET.1" display="1" value="1"/>
+            <description>This TCP/IP protocol stack has the policy that "no need many memory". Therefore the many implementation for throughput are omitted for example, Nagle algorithm, delayed ack, etc. But an embedded system requires high throughput in recently. In other hands, normal TCP/IP (eg. Windows has/Linux has/etc) has delayed ACK implementation that reply the ACK when data would come 2 times or after 200ms. This configuration can divide the send data to the 2 packets in unconditional. </description>
+        </property>
+        <property id="T4_CFG_TCP_KEEPALIVE_START" display="TCP Keep-Alive start time." default="7200" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_TCP_KEEPALIVE_START}")</constraint>
+            <constraint display="Value must be in the range 1~86400">("${T4_CFG_TCP_KEEPALIVE_START}" &gt;= 1) &amp;&amp; ("${T4_CFG_TCP_KEEPALIVE_START}" &lt;= 86400)</constraint>
+            <description>1-86400</description>
+        </property>
+        <property id="T4_CFG_TCP_KEEPALIVE_INTERVAL" display="TCP Keep-Alive interval time." default="10" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_TCP_KEEPALIVE_INTERVAL}")</constraint>
+            <constraint display="Value must be in the range 1~86400">("${T4_CFG_TCP_KEEPALIVE_INTERVAL}" &gt;= 1)  &amp;&amp; ("${T4_CFG_TCP_KEEPALIVE_INTERVAL}" &lt;= 86400)</constraint>
+            <description>1-86400</description>
+        </property>
+        <property id="T4_CFG_TCP_KEEPALIVE_COUNT" display="TCP Keep-Alive send count." default="10" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_TCP_KEEPALIVE_COUNT}")</constraint>
+            <constraint display="Value must be in the range 1~4294967295">("${T4_CFG_TCP_KEEPALIVE_COUNT}" &gt;= 1) &amp;&amp; ("${T4_CFG_TCP_KEEPALIVE_COUNT}" &lt;= 4294967295)</constraint>
+            <description>1-4294967295.</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID1_CHANNEL" display="UDP CEPID1 channel number." default="0" type="combobox">
+            <option id="T4_CFG_UDP_CEPID1_CHANNEL.0" display="0" value="0"/>
+            <option id="T4_CFG_UDP_CEPID1_CHANNEL.1" display="1" value="1"/>
+            <description> 0 = Use CH0
+ 1 = Use CH1</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID1_PORT_NUMBER" display="UDP CEPID1 port number" default="1365" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_UDP_CEPID1_PORT_NUMBER}")</constraint>
+            <constraint display="Value must be in the range 1~65535">("${T4_CFG_UDP_CEPID1_PORT_NUMBER}" &gt;= 1) &amp;&amp; ("${T4_CFG_UDP_CEPID1_PORT_NUMBER}" &lt;= 65535)</constraint>
+            <description>1-65535</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID1_CALLBACK_FUNCTION_USE" display="UDP CEPID1 callback function use" default="0" type="combobox">
+            <option id="T4_CFG_UDP_CEPID1_CALLBACK_FUNCTION_USE.0" display="0" value="0"/>
+            <option id="T4_CFG_UDP_CEPID1_CALLBACK_FUNCTION_USE.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID1_CALLBACK_FUNCTION_NAME_TMP" display="UDP CEPID1 callback function name." default="0" type="textbox">
+            <constraint display="Used for callback function." actionOnFail="disable">"${T4_CFG_UDP_CEPID1_CALLBACK_FUNCTION_USE}" == "${T4_CFG_UDP_CEPID1_CALLBACK_FUNCTION_USE.1}"</constraint>
+            <constraint display="Illegal input.">/^[a-zA-Z_0-9]*$/.test("${T4_CFG_UDP_CEPID1_CALLBACK_FUNCTION_NAME_TMP}")</constraint>
+            <description>Please input the UDP callback function name. If you set other function name to each communication endpoint, please modify config file in directly.</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID2_CHANNEL" display="UDP CEPID2 channel number." default="0" type="combobox">
+            <option id="T4_CFG_UDP_CEPID2_CHANNEL.0" display="0" value="0"/>
+            <option id="T4_CFG_UDP_CEPID2_CHANNEL.1" display="1" value="1"/>
+            <description> 0 = Use CH0
+ 1 = Use CH1</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID2_PORT_NUMBER" display="UDP CEPID2 port number" default="1366" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_UDP_CEPID2_PORT_NUMBER}")</constraint>
+            <constraint display="Value must be in the range 1~65535">("${T4_CFG_UDP_CEPID2_PORT_NUMBER}" &gt;= 1) &amp;&amp; ("${T4_CFG_UDP_CEPID2_PORT_NUMBER}" &lt;= 65535)</constraint>
+            <description>1-65535</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID2_CALLBACK_FUNCTION_USE" display="UDP CEPID2 callback function use" default="0" type="combobox">
+            <option id="T4_CFG_UDP_CEPID2_CALLBACK_FUNCTION_USE.0" display="0" value="0"/>
+            <option id="T4_CFG_UDP_CEPID2_CALLBACK_FUNCTION_USE.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID2_CALLBACK_FUNCTION_NAME_TMP" display="UDP CEPID2 callback function name." default="0" type="textbox">
+            <constraint display="Used for callback function." actionOnFail="disable">"${T4_CFG_UDP_CEPID2_CALLBACK_FUNCTION_USE}" == "${T4_CFG_UDP_CEPID2_CALLBACK_FUNCTION_USE.1}"</constraint>
+            <constraint display="Illegal input.">/^[a-zA-Z_0-9]*$/.test("${T4_CFG_UDP_CEPID2_CALLBACK_FUNCTION_NAME_TMP}")</constraint>
+            <description>Please input the UDP callback function name. If you set other function name to each communication endpoint, please modify config file in directly.</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID3_CHANNEL" display="UDP CEPID3 channel number." default="0" type="combobox">
+            <option id="T4_CFG_UDP_CEPID3_CHANNEL.0" display="0" value="0"/>
+            <option id="T4_CFG_UDP_CEPID3_CHANNEL.1" display="1" value="1"/>
+            <description> 0 = Use CH0
+ 1 = Use CH1</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID3_PORT_NUMBER" display="UDP CEPID3 port number" default="1367" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_UDP_CEPID3_PORT_NUMBER}")</constraint>
+            <constraint display="Value must be in the range 1~65535">("${T4_CFG_UDP_CEPID3_PORT_NUMBER}" &gt;= 1) &amp;&amp; ("${T4_CFG_UDP_CEPID3_PORT_NUMBER}" &lt;= 65535)</constraint>
+            <description>1-65535</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID3_CALLBACK_FUNCTION_USE" display="UDP CEPID3 callback function use" default="0" type="combobox">
+            <option id="T4_CFG_UDP_CEPID3_CALLBACK_FUNCTION_USE.0" display="0" value="0"/>
+            <option id="T4_CFG_UDP_CEPID3_CALLBACK_FUNCTION_USE.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID3_CALLBACK_FUNCTION_NAME_TMP" display="UDP CEPID3 callback function name." default="0" type="textbox">
+            <constraint display="Used for callback function." actionOnFail="disable">"${T4_CFG_UDP_CEPID3_CALLBACK_FUNCTION_USE}" == "${T4_CFG_UDP_CEPID3_CALLBACK_FUNCTION_USE.1}"</constraint>
+            <constraint display="Illegal input.">/^[a-zA-Z_0-9]*$/.test("${T4_CFG_UDP_CEPID3_CALLBACK_FUNCTION_NAME_TMP}")</constraint>
+            <description>Please input the UDP callback function name. If you set other function name to each communication endpoint, please modify config file in directly.</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID4_CHANNEL" display="UDP CEPID4 channel number." default="0" type="combobox">
+            <option id="T4_CFG_UDP_CEPID4_CHANNEL.0" display="0" value="0"/>
+            <option id="T4_CFG_UDP_CEPID4_CHANNEL.1" display="1" value="1"/>
+            <description> 0 = Use CH0
+ 1 = Use CH1</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID4_PORT_NUMBER" display="UDP CEPID4 port number" default="1368" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_UDP_CEPID4_PORT_NUMBER}")</constraint>
+            <constraint display="Value must be in the range 1~65535">("${T4_CFG_UDP_CEPID4_PORT_NUMBER}" &gt;= 1) &amp;&amp; ("${T4_CFG_UDP_CEPID4_PORT_NUMBER}" &lt;= 65535)</constraint>
+            <description>1-65535</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID4_CALLBACK_FUNCTION_USE" display="UDP CEPID4 callback function use" default="0" type="combobox">
+            <option id="T4_CFG_UDP_CEPID4_CALLBACK_FUNCTION_USE.0" display="0" value="0"/>
+            <option id="T4_CFG_UDP_CEPID4_CALLBACK_FUNCTION_USE.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID4_CALLBACK_FUNCTION_NAME_TMP" display="UDP CEPID4 callback function name." default="0" type="textbox">
+            <constraint display="Used for callback function." actionOnFail="disable">"${T4_CFG_UDP_CEPID4_CALLBACK_FUNCTION_USE}" == "${T4_CFG_UDP_CEPID4_CALLBACK_FUNCTION_USE.1}"</constraint>
+            <constraint display="Illegal input.">/^[a-zA-Z_0-9]*$/.test("${T4_CFG_UDP_CEPID4_CALLBACK_FUNCTION_NAME_TMP}")</constraint>
+            <description>Please input the UDP callback function name. If you set other function name to each communication endpoint, please modify config file in directly.</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID5_CHANNEL" display="UDP CEPID5 channel number." default="0" type="combobox">
+            <option id="T4_CFG_UDP_CEPID5_CHANNEL.0" display="0" value="0"/>
+            <option id="T4_CFG_UDP_CEPID5_CHANNEL.1" display="1" value="1"/>
+            <description> 0 = Use CH0
+ 1 = Use CH1</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID5_PORT_NUMBER" display="UDP CEPID5 port number" default="1369" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_UDP_CEPID4_PORT_NUMBER}")</constraint>
+            <constraint display="Value must be in the range 1~65535">("${T4_CFG_UDP_CEPID4_PORT_NUMBER}" &gt;= 1) &amp;&amp; ("${T4_CFG_UDP_CEPID4_PORT_NUMBER}" &lt;= 65535)</constraint>
+            <description>1-65535</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID5_CALLBACK_FUNCTION_USE" display="UDP CEPID5 callback function use" default="0" type="combobox">
+            <option id="T4_CFG_UDP_CEPID5_CALLBACK_FUNCTION_USE.0" display="0" value="0"/>
+            <option id="T4_CFG_UDP_CEPID5_CALLBACK_FUNCTION_USE.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID5_CALLBACK_FUNCTION_NAME_TMP" display="UDP CEPID5 callback function name." default="0" type="textbox">
+            <constraint display="Used for callback function." actionOnFail="disable">"${T4_CFG_UDP_CEPID5_CALLBACK_FUNCTION_USE}" == "${T4_CFG_UDP_CEPID5_CALLBACK_FUNCTION_USE.1}"</constraint>
+            <constraint display="Illegal input.">/^[a-zA-Z_0-9]*$/.test("${T4_CFG_UDP_CEPID5_CALLBACK_FUNCTION_NAME_TMP}")</constraint>
+            <description>Please input the UDP callback function name. If you set other function name to each communication endpoint, please modify config file in directly.</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID6_CHANNEL" display="UDP CEPID6 channel number." default="0" type="combobox">
+            <option id="T4_CFG_UDP_CEPID6_CHANNEL.0" display="0" value="0"/>
+            <option id="T4_CFG_UDP_CEPID6_CHANNEL.1" display="1" value="1"/>
+            <description> 0 = Use CH0
+ 1 = Use CH1</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID6_PORT_NUMBER" display="UDP CEPID6 port number" default="1370" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_UDP_CEPID4_PORT_NUMBER}")</constraint>
+            <constraint display="Value must be in the range 1~65535">("${T4_CFG_UDP_CEPID4_PORT_NUMBER}" &gt;= 1) &amp;&amp; ("${T4_CFG_UDP_CEPID4_PORT_NUMBER}" &lt;= 65535)</constraint>
+            <description>1-65535</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID6_CALLBACK_FUNCTION_USE" display="UDP CEPID6 callback function use" default="0" type="combobox">
+            <option id="T4_CFG_UDP_CEPID6_CALLBACK_FUNCTION_USE.0" display="0" value="0"/>
+            <option id="T4_CFG_UDP_CEPID6_CALLBACK_FUNCTION_USE.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="T4_CFG_UDP_CEPID6_CALLBACK_FUNCTION_NAME_TMP" display="UDP CEPID6 callback function name." default="0" type="textbox">
+            <constraint display="Used for callback function." actionOnFail="disable">"${T4_CFG_UDP_CEPID6_CALLBACK_FUNCTION_USE}" == "${T4_CFG_UDP_CEPID6_CALLBACK_FUNCTION_USE.1}"</constraint>
+            <constraint display="Illegal input.">/^[a-zA-Z_0-9]*$/.test("${T4_CFG_UDP_CEPID6_CALLBACK_FUNCTION_NAME_TMP}")</constraint>
+            <description>Please input the UDP callback function name. If you set other function name to each communication endpoint, please modify config file in directly.</description>
+        </property>
+        <property id="T4_CFG_UDP_MULTICAST_TTL" display="UDP multicast TTL value." default="1" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_UDP_MULTICAST_TTL}")</constraint>
+            <constraint display="Value must be in the range 1~255">("${T4_CFG_UDP_MULTICAST_TTL}" &gt;= 1) &amp;&amp; ("${T4_CFG_UDP_MULTICAST_TTL}" &lt;= 255)</constraint>
+            <description>-</description>
+        </property>
+        <property id="T4_CFG_UDP_BEHAVIOR_OF_RECEIVED_ZERO_CHECKSUM" display="UDP behavior of received zero checksum." default="0" type="combobox">
+            <option id="T4_CFG_UDP_BEHAVIOR_OF_RECEIVED_ZERO_CHECKSUM.0" display="0" value="0"/>
+            <option id="T4_CFG_UDP_BEHAVIOR_OF_RECEIVED_ZERO_CHECKSUM.1" display="1" value="1"/>
+            <description>-</description>
+        </property>
+        <property id="T4_CFG_IP_ARP_CACHE_TABLE_COUNT" display="IP ARP cache table count." default="3" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${T4_CFG_IP_ARP_CACHE_TABLE_COUNT}")</constraint>
+            <constraint display="Value must be in the range 1~255">("${T4_CFG_IP_ARP_CACHE_TABLE_COUNT}" &gt;= 1) &amp;&amp; ("${T4_CFG_IP_ARP_CACHE_TABLE_COUNT}" &lt;= 255)</constraint>
+            <description>-</description>
+        </property>
+    </configuration>
+</module>

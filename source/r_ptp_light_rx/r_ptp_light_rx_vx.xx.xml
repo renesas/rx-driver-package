@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>3.01.0</version>
+    </toolchain>
+	<toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>4.08.04.201801</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.11.1</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX600</series>
+        <group>RX64M</group>
+        <group omit_board="true">RX64M</group>
+        <series>RX700</series>
+        <group>RX71M</group>
+        <group omit_board="true">RX71M</group>
+		<group>RX72M</group>
+        <group omit_board="true">RX72M</group>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_ptp_light_rx</name>
+        <version>1.13</version>
+        <zipsource>r_ptp_light_rx_v1.13.zip</zipsource>
+        <desc>PTP Light Driver</desc>
+        <details>The PTP light driver is reduced from the PTP (Precision Time Protocol) function defined by the IEEE1588-2008 specification, 
+			and focus on the enhanced standard Ethernet function such as the simple switch and multicast frame filter.</details>
+        <dependency>
+            <module>r_bsp</module>
+			<version>5.20</version>
+        </dependency>
+        <application>Communications</application>
+        <application>Connectivity</application>
+		<function>EPTPC</function>
+        <incdir>r_config</incdir>
+        <incdir>r_ptp_light_rx</incdir>
+		<incdir>r_ptp_light_rx/src</incdir>
+    </package>
+
+</refinfo>

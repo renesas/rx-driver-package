@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
+* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
+* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
+* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
+* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
+* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
+* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="VBATT_CFG_PARAM_CHECKING_ENABLE" display="Parameter checking" default="1" type="combobox">
+            <option id="VBATT_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="System default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <option id="VBATT_CFG_PARAM_CHECKING_ENABLE.0" display="Disabled" value="0"/>
+            <option id="VBATT_CFG_PARAM_CHECKING_ENABLE.1" display="Enabled" value="1"/>
+            <description>Selects whether to include parameter checking in the code.
+System default = BSP_CFG_PARAM_CHECKING_ENABLE
+Disabled = compiles out parameter checking
+Enabled = includes parameter checking</description>
+        </property>
+        <property id="VBATT_CFG_DETECT_FUNCTION" display="VBATT Detection, Interrupt" default="VBATT_DTCT_DISABLE" type="combobox">
+            <option id="VBATT_CFG_DETECT_FUNCTION.VBATT_DTCT_DISABLE" display="Disable detection,  Disable interrupt" value="VBATT_DTCT_DISABLE"/>
+            <option id="VBATT_CFG_DETECT_FUNCTION.VBATT_DTCT_ENABLE_INT_DISABLE" display="Enable detection,  Disable interrupt" value="VBATT_DTCT_ENABLE_INT_DISABLE"/>
+            <option id="VBATT_CFG_DETECT_FUNCTION.VBATT_DTCT_ENABLE_NMI_ENABLE" display="Enable detection,  Enable non-maskable interrupt" value="VBATT_DTCT_ENABLE_NMI_ENABLE"/>
+            <option id="VBATT_CFG_DETECT_FUNCTION.VBATT_DTCT_ENABLE_INT_ENABLE" display="Enable detection,  Enable maskable interrupt" value="VBATT_DTCT_ENABLE_INT_ENABLE"/>
+            <description>Setting to 
+    VBATT pin voltage drop detection (VBATTCR.VBTLVDEN).
+    VBATT pin voltage drop detection interrupt (VBTLVDICR.VBTLVDIE).
+    VBATT pin voltage drop detection interrupt type (VBTLVDICR.VBTLVDISEL).</description>
+        </property>
+        <property id="VBATT_CFG_DETECT_LEVEL" display="VBATT Voltage level" default="VBATT_DTCT_LEVEL_2_20_V" type="combobox">
+            <option id="VBATT_CFG_DETECT_LEVEL.VBATT_DTCT_LEVEL_2_20_V" display="2.20V" value="VBATT_DTCT_LEVEL_2_20_V"/>
+            <option id="VBATT_CFG_DETECT_LEVEL.VBATT_DTCT_LEVEL_2_00_V" display="2.00V" value="VBATT_DTCT_LEVEL_2_00_V"/>
+            <description>Setting to 
+    VBATT pin voltage drop detection level (VBATTCR.VBTLVDLVL).</description>
+        </property>
+        <property id="VBATT_CFG_INT_PRIORITY" display="VBATT Interrupt priority level" default="5" type="combobox">
+            <option id="VBATT_CFG_INT_PRIORITY.1" display="Level 1 (lowest)" value="1"/>
+            <option id="VBATT_CFG_INT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="VBATT_CFG_INT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="VBATT_CFG_INT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="VBATT_CFG_INT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="VBATT_CFG_INT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="VBATT_CFG_INT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="VBATT_CFG_INT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="VBATT_CFG_INT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="VBATT_CFG_INT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="VBATT_CFG_INT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="VBATT_CFG_INT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="VBATT_CFG_INT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="VBATT_CFG_INT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="VBATT_CFG_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="This setting becomes valid when VBATT maskable interrupt is enabled." actionOnFail="disable">"${VBATT_CFG_DETECT_FUNCTION}" == "VBATT_DTCT_ENABLE_INT_ENABLE"</constraint>
+            <description>Set value must be in the range 1 (lowest) to 15 (highest).
+This setting becomes valid when "VBATT Detection, Interrupt" is "Enable detection,  Enable maskable interrupt".</description>
+        </property>
+    </configuration>
+</module>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="FLASH_CFG_PARAM_CHECKING_ENABLE" display="Parameter check" default="1" type="combobox">
+            <option id="FLASH_CFG_PARAM_CHECKING_ENABLE.0" display="Disable parameter checks" value="0"/>
+            <option id="FLASH_CFG_PARAM_CHECKING_ENABLE.1" display="Enable parameter checks" value="1"/>
+            <option id="FLASH_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="Use system default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <description>Setting to BSP_CFG_PARAM_CHECKING_ENABLE utilizes the system default setting
+Setting to 1 includes parameter checking; 0 compiles out parameter checking</description>
+        </property>
+        <property id="FLASH_CFG_CODE_FLASH_ENABLE" display="Enable code flash programming" default="0" type="combobox">
+            <option id="FLASH_CFG_CODE_FLASH_ENABLE.0" display="Only data flash" value="0"/>
+            <option id="FLASH_CFG_CODE_FLASH_ENABLE.1" display="Includes code to program ROM area" value="1"/>
+            <description>If you are only using data flash, set this to 0.
+Setting to 1 includes code to program the ROM area.</description>
+        </property>
+        <property id="FLASH_CFG_DATA_FLASH_BGO" display="Enable BGO/Non-blocking data flash operations" default="0" type="combobox">
+            <option id="FLASH_CFG_DATA_FLASH_BGO.0" display="Forces data flash API function to block until completed." value="0"/>
+            <option id="FLASH_CFG_DATA_FLASH_BGO.1" display="Enable BGO (background operations/interrupt) mode." value="1"/>
+            <description>Setting this to 0 forces data flash API function to block until completed.
+Setting to 1 places the module in BGO (background operations/interrupt) mode.</description>
+        </property>
+        <property id="FLASH_CFG_CODE_FLASH_BGO" display="Enable BGO/Non-blocking code flash operations" default="0" type="combobox">
+            <option id="FLASH_CFG_CODE_FLASH_BGO.0" display="Forces ROM API function to block until completed." value="0"/>
+            <option id="FLASH_CFG_CODE_FLASH_BGO.1" display="Enable BGO (background operations/interrupt) mode." value="1"/>
+            <description>Setting this to 0 forces ROM API function to block until completed.
+Setting to 1 places the module in BGO (background operations/interrupt) mode.</description>
+        </property>
+        <property id="FLASH_CFG_CODE_FLASH_RUN_FROM_ROM" display="Enable code flash self-programming" default="0" type="combobox">
+            <option id="FLASH_CFG_CODE_FLASH_RUN_FROM_ROM.0" display="Programming code flash while executing in RAM." value="0"/>
+            <option id="FLASH_CFG_CODE_FLASH_RUN_FROM_ROM.1" display="Programming code flash while executing from another segment in ROM." value="1"/>
+            <description>Set this to 0 when programming code flash while executing in RAM.
+Set this to 1 when programming code flash while executing from another segment in ROM.</description>
+        </property>
+    </configuration>
+</module>

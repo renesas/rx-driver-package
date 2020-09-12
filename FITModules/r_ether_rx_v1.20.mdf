@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
+* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
+* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
+* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
+* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
+* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
+* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 0.2)
+           This is a description of a sample FIT module for demonstration purposes only.
+***********************************************************************************************************************/
+-->
+
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="1.0" xs:noNamespaceSchemaLocation="mdf_schema.xsd">
+  <fileVersion>1.00</fileVersion>
+  <formatVersion>1.00</formatVersion>
+  <fileTemplate>r_pinset_type2</fileTemplate>
+  <resourceInfo>
+    <peripheral name="ETHERC">
+      <channel number="ETHERC0_MII" group="RX64M,RX651,RX65N,RX71M,RX72M,RX72N,RX66N">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <pin name="CLKOUT25M">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_TX_CLK">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_RX_CLK">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_TX_EN">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_ETXD3">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_ETXD2">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_ETXD1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_ETXD0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_TX_ER">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_RX_DV">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_ERXD3">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_ERXD2">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_ERXD1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_ERXD0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_RX_ER">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_CRS">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_COL">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <!-- <pin name="REF50CK0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII0_TXD_EN">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII0_TXD1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII0_TXD0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII0_RXD1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII0_RXD0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII0_RX_ER">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII0_CRS_DV">
+          <pinConfiguration config="AUTO"/>
+        </pin> -->
+        <pin name="ET0_MDC">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_MDIO">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_LINKSTA">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_EXOUT">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_WOL">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+      </channel>
+      <channel number="ETHERC0_RMII" group="RX64M,RX651,RX65N,RX71M,RX72M,RX72N,RX66N">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <!-- <pin name="ET0_TX_CLK">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_RX_CLK">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_TX_EN">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_ETXD3">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_ETXD2">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_ETXD1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_ETXD0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_TX_ER">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_RX_DV">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_ERXD3">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_ERXD2">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_ERXD1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_ERXD0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_RX_ER">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_CRS">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_COL">
+          <pinConfiguration config="AUTO"/>
+        </pin> -->
+        <pin name="REF50CK0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII0_TXD_EN">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII0_TXD1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII0_TXD0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII0_RXD1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII0_RXD0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII0_RX_ER">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII0_CRS_DV">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_MDC">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_MDIO">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_LINKSTA">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_EXOUT">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET0_WOL">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+      </channel>
+      <channel number="ETHERC1_MII" group="RX64M,RX651,RX65N,RX71M,RX72M,RX72N,RX66N">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <pin name="CLKOUT25M">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_TX_CLK">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_RX_CLK">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_TX_EN">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_ETXD3">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_ETXD2">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_ETXD1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_ETXD0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_TX_ER">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_RX_DV">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_ERXD3">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_ERXD2">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_ERXD1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_ERXD0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_RX_ER">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_CRS">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_COL">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <!-- <pin name="REF50CK1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII1_TXD_EN">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII1_TXD1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII1_TXD0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII1_RXD1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII1_RXD0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII1_RX_ER">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII1_CRS_DV">
+          <pinConfiguration config="AUTO"/>
+        </pin> -->
+        <pin name="ET1_MDC">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_MDIO">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_LINKSTA">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_EXOUT">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_WOL">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+      </channel>
+      <channel number="ETHERC1_RMII" group="RX64M,RX651,RX65N,RX71M,RX72M,RX72N,RX66N">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <!-- <pin name="ET1_TX_CLK">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_RX_CLK">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_TX_EN">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_ETXD3">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_ETXD2">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_ETXD1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_ETXD0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_TX_ER">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_RX_DV">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_ERXD3">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_ERXD2">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_ERXD1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_ERXD0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_RX_ER">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_CRS">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_COL">
+          <pinConfiguration config="AUTO"/>
+        </pin> -->
+        <pin name="REF50CK1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII1_TXD_EN">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII1_TXD1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII1_TXD0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII1_RXD1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII1_RXD0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII1_RX_ER">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="RMII1_CRS_DV">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_MDC">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_MDIO">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_LINKSTA">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_EXOUT">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="ET1_WOL">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+      </channel>
+      <channel number="PMGI0" group="RX72M,RX72N,RX66N">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <pin name="PMGI0_MDC">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="PMGI0_MDIO">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+      </channel>
+      <channel number="PMGI1" group="RX72M,RX72N,RX66N">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <pin name="PMGI1_MDC">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="PMGI1_MDIO">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+      </channel>
+    </peripheral>
+  </resourceInfo>
+</module>

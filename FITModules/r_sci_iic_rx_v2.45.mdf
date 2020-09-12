@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
+* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
+* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
+* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
+* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
+* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
+* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2017 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 0.2)
+           This is a description of a sample FIT module for demonstration purposes only.
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="1.0" xs:noNamespaceSchemaLocation="mdf_schema.xsd">
+  <fileVersion>1.00</fileVersion>
+  <formatVersion>1.00</formatVersion>
+  <fileTemplate>r_pinset_type1</fileTemplate>
+  <fileTemplatePath>r_config/r_sci_iic_rx_pin_config.h</fileTemplatePath>
+  <resourceInfo>
+    <peripheral name="SCI">
+      <channel number="SCI0">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <pin name="SSCL0">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI0_SSCL0_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI0_SSCL0_BIT" value="bitnum"/>
+        </pin>
+        <pin name="SSDA0">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI0_SSDA0_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI0_SSDA0_BIT" value="bitnum"/>
+        </pin>
+      </channel>
+      <channel number="SCI1">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <pin name="SSCL1">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI1_SSCL1_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI1_SSCL1_BIT" value="bitnum"/>
+        </pin>
+        <pin name="SSDA1">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI1_SSDA1_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI1_SSDA1_BIT" value="bitnum"/>
+        </pin>
+      </channel>
+      <channel number="SCI2">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <pin name="SSCL2">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI2_SSCL2_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI2_SSCL2_BIT" value="bitnum"/>
+        </pin>
+        <pin name="SSDA2">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI2_SSDA2_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI2_SSDA2_BIT" value="bitnum"/>
+        </pin>
+      </channel>
+      <channel number="SCI3">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <pin name="SSCL3">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI3_SSCL3_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI3_SSCL3_BIT" value="bitnum"/>
+        </pin>
+        <pin name="SSDA3">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI3_SSDA3_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI3_SSDA3_BIT" value="bitnum"/>
+        </pin>
+      </channel>
+      <channel number="SCI4">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <pin name="SSCL4">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI4_SSCL4_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI4_SSCL4_BIT" value="bitnum"/>
+        </pin>
+        <pin name="SSDA4">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI4_SSDA4_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI4_SSDA4_BIT" value="bitnum"/>
+        </pin>
+      </channel>
+      <channel number="SCI5">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <pin name="SSCL5">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI5_SSCL5_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI5_SSCL5_BIT" value="bitnum"/>
+        </pin>
+        <pin name="SSDA5">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI5_SSDA5_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI5_SSDA5_BIT" value="bitnum"/>
+        </pin>
+      </channel>
+      <channel number="SCI6">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <pin name="SSCL6">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI6_SSCL6_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI6_SSCL6_BIT" value="bitnum"/>
+        </pin>
+        <pin name="SSDA6">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI6_SSDA6_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI6_SSDA6_BIT" value="bitnum"/>
+        </pin>
+      </channel>
+      <channel number="SCI7">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <pin name="SSCL7">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI7_SSCL7_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI7_SSCL7_BIT" value="bitnum"/>
+        </pin>
+        <pin name="SSDA7">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI7_SSDA7_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI7_SSDA7_BIT" value="bitnum"/>
+        </pin>
+      </channel>
+      <channel number="SCI8">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <pin name="SSCL8">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI8_SSCL8_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI8_SSCL8_BIT" value="bitnum"/>
+        </pin>
+        <pin name="SSDA8">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI8_SSDA8_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI8_SSDA8_BIT" value="bitnum"/>
+        </pin>
+      </channel>
+      <channel number="SCI9">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <pin name="SSCL9">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI9_SSCL9_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI9_SSCL9_BIT" value="bitnum"/>
+        </pin>
+        <pin name="SSDA9">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI9_SSDA9_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI9_SSDA9_BIT" value="bitnum"/>
+        </pin>
+      </channel>
+      <channel number="SCI10">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <pin name="SSCL10">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI10_SSCL10_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI10_SSCL10_BIT" value="bitnum"/>
+        </pin>
+        <pin name="SSDA10">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI10_SSDA10_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI10_SSDA10_BIT" value="bitnum"/>
+        </pin>
+      </channel>
+      <channel number="SCI11">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <pin name="SSCL11">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI11_SSCL11_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI11_SSCL11_BIT" value="bitnum"/>
+        </pin>
+        <pin name="SSDA11">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI11_SSDA11_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI11_SSDA11_BIT" value="bitnum"/>
+        </pin>
+      </channel>
+      <channel number="SCI12">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <pin name="SSCL12">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI12_SSCL12_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI12_SSCL12_BIT" value="bitnum"/>
+        </pin>
+        <pin name="SSDA12">
+          <pinConfiguration config="AUTO"/>
+          <macro name="R_SCI_IIC_CFG_SCI12_SSDA12_PORT" value="portnum"/>
+          <macro name="R_SCI_IIC_CFG_SCI12_SSDA12_BIT" value="bitnum"/>
+        </pin>
+      </channel>
+    </peripheral>
+  </resourceInfo>
+</module>

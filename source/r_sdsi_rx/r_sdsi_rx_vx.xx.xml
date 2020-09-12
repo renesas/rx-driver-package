@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>2.05.00</version>
+        <version>2.06.00</version>
+        <version>2.07.00</version>
+        <version>3.01.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>4.08.04.201803</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.10.01</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX600</series>
+        <group omit_board="true">RX65N</group>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_sdsi_rx</name>
+        <version>2.02</version>
+        <zipsource>r_sdsi_rx_v2.02.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>5.20</version>
+        </dependency>
+        <application>SDIO Slave</application>
+        <application>SDSI</application>
+        <desc>SD Mode SDSI Driver</desc>
+        <details>This driver is a device driver to control the SD mode SDIO using SD Slave Interface (SDSI).</details>
+        <function>SDSI</function>
+        <incdir>r_config</incdir>
+        <incdir>r_sdsi_rx</incdir>
+    </package>
+
+</refinfo>

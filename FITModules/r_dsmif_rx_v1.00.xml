@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
+* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
+* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
+* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
+* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
+* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
+* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+-->
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>3.01.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>4.08.04.201803</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX700</series>
+        <group omit_board="true">RX72M</group>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_dsmif_rx</name>
+        <version>1.00</version>
+        <zipsource>r_dsmif_rx_v1.00.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>5.50</version>
+</dependency>
+        <dependency>
+            <module>r_cmt_rx</module>
+            <version>4.20</version>
+</dependency>
+        <application>Communications</application>
+        <desc>Delta-Sigma Modulator Interface (DSMIF) Software using Firmware Integration Technology</desc>
+        <details>The sample program implements a device driver that receives data from the photocoupler at the Delta-Sigma Modulator Interface of the RX microcomputer.</details>
+        <function>drivers.communications</function>
+        <incdir>r_config</incdir>
+        <incdir>r_dsmif_rx</incdir>
+    </package>
+    <sampleapplicationnote>
+        <documentno>R01AN4707</documentno>
+    </sampleapplicationnote>
+
+</refinfo>
+

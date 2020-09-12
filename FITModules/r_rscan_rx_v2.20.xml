@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>2.08.0</version>   
+        <version>3.01.00</version>  
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>4.08.04.201803</version>
+        <version>4.08.04.201902</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.10.00</version>
+        <version>4.10.01</version>
+        <version>4.11.01</version>
+        <version>4.12.01</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX200</series>
+        <group omit_board="true">RX231</group>
+        <group omit_board="true">RX230</group>
+        <group omit_board="true">RX24T</group>
+        <group omit_board="true">RX24U</group>
+        <group omit_board="true">RX23W</group>
+        <group omit_board="true">RX23E-A</group>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, functions, and incdirs permitted -->
+
+    <package>
+        <type>fitmodule</type>
+        <name>r_rscan_rx</name>
+        <version>2.20</version>
+        <dependency>
+            <module>r_bsp</module>
+            <version>5.40</version>
+        </dependency>
+        <zipsource>r_rscan_rx_v2.20.zip</zipsource>
+        <application>Communications</application>
+        <application>Connectivity</application>
+        <function>CAN</function>
+        <function>RSCAN</function>
+        <desc>CAN API for the RX200 Series.</desc>
+        <details>This module allows the user to communicate via CAN using either mailboxes or FIFOs (or a combination thereof). The driver can be configured for interrupt or polling operation. All possible interrupt sources are enabled or disabled through settings in the config.h file.</details>
+        <incdir>r_rscan_rx</incdir>
+        <incdir>r_rscan_rx/src</incdir>
+    </package>
+    
+    <sampleapplicationnote>
+        <documentno>R01AN2805</documentno>
+    </sampleapplicationnote>
+
+</refinfo>

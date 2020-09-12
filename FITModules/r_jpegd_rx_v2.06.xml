@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>2.04.01</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family omit_series="true">RX</family>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_jpegd_rx</name>
+        <version>2.06</version>
+        <zipsource>r_jpegd_rx_v2.06.zip</zipsource>
+        <application>JPEG</application>
+        <desc>JPEG Decoder for Renesas MCUs.</desc>
+        <details>JPEG Decoder for Renesas MCUs.</details>
+        <function>JPEG</function>
+        <incdir>r_config</incdir>
+        <incdir>r_jpegd_rx/lib</incdir>
+    </package>
+
+</refinfo>

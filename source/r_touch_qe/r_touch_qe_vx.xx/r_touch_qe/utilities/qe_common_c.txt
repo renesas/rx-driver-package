@@ -1,0 +1,97 @@
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+* this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+* File Name    : qe_common.c
+* Description  : DUMMY FILE. WILL BE OVERWRITTEN WHEN TARGET IS TUNED.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+* History      : DD.MM.YYYY Version Description
+*              :            1.00    First Release
+***********************************************************************************************************************/
+
+/***********************************************************************************************************************
+Includes   <System Includes> , "Project Includes"
+***********************************************************************************************************************/
+#include "r_touch_qe_private.h"
+
+
+/***********************************************************************************************************************
+Macro definitions
+***********************************************************************************************************************/
+
+
+/***********************************************************************************************************************
+Typedef definitions
+***********************************************************************************************************************/
+
+
+/***********************************************************************************************************************
+Exported global variables
+***********************************************************************************************************************/
+ctsu_cfg_t  *gp_ctsu_cfgs[] = { NULL };
+touch_cfg_t *gp_touch_cfgs[] = { NULL };
+
+
+/***********************************************************************************************************************
+External global variables and functions
+***********************************************************************************************************************/
+
+
+/***********************************************************************************************************************
+Private global variables and functions
+***********************************************************************************************************************/
+
+
+/***********************************************************************************************************************
+* Function Name: ctsu_sensor_data_address_set
+* Description  : ctsu parameter address setting
+* Arguments    : none
+* Return Value : none
+***********************************************************************************************************************/
+void ctsu_sensor_data_address_set( void )
+{
+    nop();
+}
+
+
+/***********************************************************************************************************************
+* Function Name   : touch_parameter_address_set
+* Description     : Touch parameter top address setting
+* Arguments       : None
+* Return value    : None
+***********************************************************************************************************************/
+void touch_parameter_address_set( void )
+{
+    nop();
+}
+
+
+/***********************************************************************************************************************
+* Function Name: qetouch_timer_callback
+* Description  : Callback function for periodic timer which indicates to start next scan.
+* Arguments    : p_args
+*                    (unused)
+* Return Value : none
+***********************************************************************************************************************/
+void qetouch_timer_callback(void *p_args)
+{
+    nop();
+}
+
+

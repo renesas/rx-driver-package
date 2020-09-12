@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate>r_pinset_type2</fileTemplate>
+    <resourceInfo>
+      <peripheral name="LCDC">
+          <pin name="CAPH">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="CAPL">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="COM0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="COM1">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="COM2">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="COM3">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="COM4">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="COM5">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="COM6">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="COM7">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG00">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG01">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG02">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG03">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG04">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG05">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG06">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG07">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG08">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG09">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG10">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG11">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG12">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG13">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG14">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG15">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG16">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG17">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG18">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG19">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG20">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG21">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG22">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG23">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG24">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG25">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG26">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG27">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG28">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG29">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG30">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG31">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG32">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG33">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG34">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG35">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG36">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG37">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG38">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SEG39">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="VL1">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="VL2">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="VL3">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="VL4">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+      </peripheral>
+    </resourceInfo>
+    <configuration>
+        <property id="LCDC_CFG_PARAM_CHECKING_ENABLE" display="Parameter checking" default="1" type="combobox">
+            <option id="LCDC_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="System default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <option id="LCDC_CFG_PARAM_CHECKING_ENABLE.0" display="Disabled" value="0"/>
+            <option id="LCDC_CFG_PARAM_CHECKING_ENABLE.1" display="Enabled" value="1"/>
+            <description>Selects whether to include parameter checking in the code.
+System default = BSP_CFG_PARAM_CHECKING_ENABLE
+Disabled = compiles out parameter checking
+Enabled = includes parameter checking</description>
+        </property>
+        <property id="LCDC_CFG_DRV_GENERATOR" display="LCD drive voltage generator" default="1" type="combobox">
+            <option id="LCDC_CFG_DRV_GENERATOR.0" display="External resistance division method" value="0"/>
+            <option id="LCDC_CFG_DRV_GENERATOR.1" display="Internal voltage boosting method" value="1"/>
+            <option id="LCDC_CFG_DRV_GENERATOR.2" display="Capacitor split method" value="2"/>
+            <description>LCD drive voltage generator select (MDSET bit).
+The following methods are setting prohibited when IWDT-dedicated on-chip oscillator is chosen as LCD clock source.
+- Internal voltage boosting method
+- Capacitor split method</description>
+        </property>
+        <property id="LCDC_CFG_VOLTAGE_WAIT" display="Use the voltage boosting wait" default="1" type="checkbox">
+            <option id="LCDC_CFG_VOLTAGE_WAIT.0" display="Unused" value="0"/>
+            <option id="LCDC_CFG_VOLTAGE_WAIT.1" display="Used" value="1"/>
+            <description>Selects whether to voltage boosting wait time is performed within this module or user's program.
+Unused = Not to perform the wait processing in this module. Perform it in the user program.
+Used = To perform the wait processing in this module.</description>
+        </property>
+        <property id="LCDC_CFG_BIAS" display="LCD display bias method" default="3" type="combobox">
+            <option id="LCDC_CFG_BIAS.2" display="1/2 bias method" value="2"/>
+            <option id="LCDC_CFG_BIAS.3" display="1/3 bias method" value="3"/>
+            <option id="LCDC_CFG_BIAS.4" display="1/4 bias method" value="4"/>
+            <description>LCD display bias method select (LBAS bit).</description>
+        </property>
+        <property id="LCDC_CFG_TIME_SLICES" display="Time slice of LCD display" default="4" type="combobox">
+            <option id="LCDC_CFG_TIME_SLICES.1" display="Static" value="1"/>
+            <option id="LCDC_CFG_TIME_SLICES.2" display="2-time slice" value="2"/>
+            <option id="LCDC_CFG_TIME_SLICES.3" display="3-time slice" value="3"/>
+            <option id="LCDC_CFG_TIME_SLICES.4" display="4-time slice" value="4"/>
+            <option id="LCDC_CFG_TIME_SLICES.8" display="8-time slice" value="8"/>
+            <description>Time slice of LCD display select (LDTY bit).</description>
+        </property>
+        <property id="LCDC_CFG_DRV_WAVEFORM" display="LCD display waveform" default="0" type="combobox">
+            <option id="LCDC_CFG_DRV_WAVEFORM.0" display="Waveform A" value="0"/>
+            <option id="LCDC_CFG_DRV_WAVEFORM.1" display="Waveform B" value="1"/>
+            <description>LCD display waveform select (LWAVE bit).</description>
+        </property>
+        <property id="LCDC_CFG_CLOCK_DIV" display="LCD clock division" default="23" type="combobox">
+            <option id="LCDC_CFG_CLOCK_DIV.17" display="main clock/HOCO/LOCO : 1/256" value="17"/>
+            <option id="LCDC_CFG_CLOCK_DIV.18" display="main clock/HOCO/LOCO : 1/512" value="18"/>
+            <option id="LCDC_CFG_CLOCK_DIV.19" display="main clock/HOCO/LOCO : 1/1024" value="19"/>
+            <option id="LCDC_CFG_CLOCK_DIV.20" display="main clock/HOCO/LOCO : 1/2048" value="20"/>
+            <option id="LCDC_CFG_CLOCK_DIV.21" display="main clock/HOCO/LOCO : 1/4096" value="21"/>
+            <option id="LCDC_CFG_CLOCK_DIV.22" display="main clock/HOCO/LOCO : 1/8192" value="22"/>
+            <option id="LCDC_CFG_CLOCK_DIV.23" display="main clock/HOCO/LOCO : 1/16384" value="23"/>
+            <option id="LCDC_CFG_CLOCK_DIV.24" display="main clock/HOCO/LOCO : 1/32768" value="24"/>
+            <option id="LCDC_CFG_CLOCK_DIV.25" display="main clock/HOCO/LOCO : 1/65536" value="25"/>
+            <option id="LCDC_CFG_CLOCK_DIV.26" display="main clock/HOCO/LOCO : 1/131072" value="26"/>
+            <option id="LCDC_CFG_CLOCK_DIV.27" display="main clock/HOCO/LOCO : 1/262144" value="27"/>
+            <option id="LCDC_CFG_CLOCK_DIV.43" display="main clock/HOCO/LOCO : 1/524288" value="43"/>
+            <option id="LCDC_CFG_CLOCK_DIV.4" display="sub-clock : 1/32" value="4"/>
+            <option id="LCDC_CFG_CLOCK_DIV.5" display="sub-clock : 1/64" value="5"/>
+            <option id="LCDC_CFG_CLOCK_DIV.6" display="sub-clock : 1/128" value="6"/>
+            <option id="LCDC_CFG_CLOCK_DIV.7" display="sub-clock : 1/256" value="7"/>
+            <option id="LCDC_CFG_CLOCK_DIV.8" display="sub-clock : 1/512" value="8"/>
+            <option id="LCDC_CFG_CLOCK_DIV.9" display="sub-clock : 1/1024" value="9"/>
+            <option id="LCDC_CFG_CLOCK_DIV.3" display="IWDT-dedicated OCO : 1/16" value="3"/>
+            <option id="LCDC_CFG_CLOCK_DIV.4" display="IWDT-dedicated OCO : 1/32" value="4"/>
+            <option id="LCDC_CFG_CLOCK_DIV.5" display="IWDT-dedicated OCO : 1/64" value="5"/>
+            <option id="LCDC_CFG_CLOCK_DIV.6" display="IWDT-dedicated OCO : 1/128" value="6"/>
+            <option id="LCDC_CFG_CLOCK_DIV.7" display="IWDT-dedicated OCO : 1/256" value="7"/>
+            <description>LCD clock (LCDCL) setting (LCDC0 bit).
+Selects the division ratio of the LCD source clock (main clock, HOCO, LOCO, sub-clock or IWDT-dedicated on-chip oscillator). </description>
+        </property>
+        <property id="LCDC_CFG_REF_VCC" display="Reference voltage" default="12" type="combobox">
+            <option id="LCDC_CFG_REF_VCC.4" display="VL1=1.00 V" value="4"/>
+            <option id="LCDC_CFG_REF_VCC.5" display="VL1=1.05 V" value="5"/>
+            <option id="LCDC_CFG_REF_VCC.6" display="VL1=1.10 V" value="6"/>
+            <option id="LCDC_CFG_REF_VCC.7" display="VL1=1.15 V" value="7"/>
+            <option id="LCDC_CFG_REF_VCC.8" display="VL1=1.20 V" value="8"/>
+            <option id="LCDC_CFG_REF_VCC.9" display="VL1=1.25 V" value="9"/>
+            <option id="LCDC_CFG_REF_VCC.10" display="VL1=1.30 V" value="10"/>
+            <option id="LCDC_CFG_REF_VCC.11" display="VL1=1.35 V (1/3 bias method only)" value="11"/>
+            <option id="LCDC_CFG_REF_VCC.12" display="VL1=1.40 V (1/3 bias method only)" value="12"/>
+            <option id="LCDC_CFG_REF_VCC.13" display="VL1=1.45 V (1/3 bias method only)" value="13"/>
+            <option id="LCDC_CFG_REF_VCC.14" display="VL1=1.50 V (1/3 bias method only)" value="14"/>
+            <option id="LCDC_CFG_REF_VCC.15" display="VL1=1.55 V (1/3 bias method only)" value="15"/>
+            <option id="LCDC_CFG_REF_VCC.16" display="VL1=1.60 V (1/3 bias method only)" value="16"/>
+            <option id="LCDC_CFG_REF_VCC.17" display="VL1=1.65 V (1/3 bias method only)" value="17"/>
+            <option id="LCDC_CFG_REF_VCC.18" display="VL1=1.70 V (1/3 bias method only)" value="18"/>
+            <option id="LCDC_CFG_REF_VCC.19" display="VL1=1.75 V (1/3 bias method only)" value="19"/>
+            <constraint display="Only Internal voltage boosting method supported" actionOnFail="disable">("${LCDC_CFG_DRV_GENERATOR}" == 1)</constraint>
+            <constraint display="Only 1/3 and 1/4 bias method supported" actionOnFail="error">(("${LCDC_CFG_REF_VCC}" &lt;= 10) &amp;&amp; ("${LCDC_CFG_BIAS}" != 2)) || ("${LCDC_CFG_REF_VCC}" &gt;= 11)</constraint>
+            <constraint display="Only 1/3 bias method supported" actionOnFail="error">(("${LCDC_CFG_REF_VCC}" &gt;= 11) &amp;&amp; ("${LCDC_CFG_BIAS}" == 3)) || ("${LCDC_CFG_REF_VCC}" &lt;= 10)</constraint>
+            <description>Reference voltage (contrast adjustment) select (VLCD bit).
+VLCD        VL1                 VL4                 VL4
+            Reference           1/3 Bias            1/4 Bias
+            Voltage             Method              Method
+----------------------------------------------------------------------
+     4      1.00 V              3.00 V              4.00 V
+     5      1.05 V              3.15 V              4.20 V
+     6      1.10 V              3.30 V              4.40 V
+     7      1.15 V              3.45 V              4.60 V
+     8      1.20 V              3.60 V              4.80 V
+     9      1.25 V              3.75 V              5.00 V
+    10      1.30 V              3.90 V              5.20 V
+    11      1.35 V              4.05 V              Setting prohibited
+    12      1.40 V              4.20 V              Setting prohibited
+    13      1.45 V              4.35 V              Setting prohibited
+    14      1.50 V              4.50 V              Setting prohibited
+    15      1.55 V              4.65 V              Setting prohibited
+    16      1.60 V              4.80 V              Setting prohibited
+    17      1.65 V              4.95 V              Setting prohibited
+    18      1.70 V              5.10 V              Setting prohibited
+    19      1.75 V              5.25 V              Setting prohibited</description>
+        </property>
+    </configuration>
+</module>

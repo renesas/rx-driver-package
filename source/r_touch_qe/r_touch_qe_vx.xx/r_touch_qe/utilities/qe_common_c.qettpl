@@ -1,0 +1,170 @@
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+* this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+* File Name    : qe_common.c
+* Description  : This module implements
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+* History      : DD.MM.YYYY Version Description
+*              :            1.00    First Release
+***********************************************************************************************************************/
+
+/***********************************************************************************************************************
+Includes   <System Includes> , "Project Includes"
+***********************************************************************************************************************/
+#include "r_touch_qe_private.h"
+@qe:begin:SwapEachMethod
+#include "qe_@method@.h"
+@qe:end:
+
+/***********************************************************************************************************************
+Macro definitions
+***********************************************************************************************************************/
+
+
+/***********************************************************************************************************************
+Typedef definitions
+***********************************************************************************************************************/
+
+
+/***********************************************************************************************************************
+Exported global variables
+***********************************************************************************************************************/
+
+/* Configuration arrays must be in method scan order */
+
+ctsu_cfg_t  *gp_ctsu_cfgs[] =
+{
+@qe:begin:SwapEachMethod
+    &g_ctsu_cfg_@method@,
+@qe:end:
+};
+
+touch_cfg_t *gp_touch_cfgs[] =
+{
+@qe:begin:SwapEachMethod
+    &g_touch_cfg_@method@,
+@qe:end:
+};
+
+volatile bool g_qetouch_timer_flg = false;
+
+
+/***********************************************************************************************************************
+External global variables and functions
+***********************************************************************************************************************/
+
+
+/***********************************************************************************************************************
+Private global variables and functions
+***********************************************************************************************************************/
+
+
+/***********************************************************************************************************************
+* Function Name: ctsu_sensor_data_address_set
+* Description  : ctsu parameter address setting
+* Arguments    : none
+* Return Value : none
+***********************************************************************************************************************/
+void ctsu_sensor_data_address_set( void )
+{
+    uint8_t method;
+
+@qe:begin:SwapEachMethod
+    method = QE_METHOD_@METHOD@;
+#if (QE_METHOD_@METHOD@_CAPACITANCE_TYPE == TOUCH_SELF_MODE)
+    g_self_ico_data_pt[method]            = &g_@method@_ico_data[0];
+    g_self_raw_data_pt[method]            = &g_@method@_raw_data[0];
+    g_self_ico_sensor_pt[method]          = &g_@method@_ico_data[0].sen;
+    g_self_add_sensor_pt[method]          = &g_@method@_add_sensor[0];
+    g_self_sensor_cnt_pt[method]          = &g_@method@_sensor_cnt[0];
+#else
+    g_mutual_ico_data_pt[method]          = &g_@method@_ico_data[0];
+    g_mutual_raw_data_pt[method]          = &g_@method@_raw_data[0];
+    g_mutual_ico_pri_sensor_pt[method]    = &g_@method@_ico_data[0].pri_sen;
+    g_mutual_ico_snd_sensor_pt[method]    = &g_@method@_ico_data[0].snd_sen;
+    g_mutual_add_pri_sensor_pt[method]    = &g_@method@_add_pri_sensor[0];
+    g_mutual_add_snd_sensor_pt[method]    = &g_@method@_add_snd_sensor[0];
+    g_mutual_sensor_diff_pt[method]       = &g_@method@_sensor_diff[0];
+#endif
+    g_current_sign_pt[method]             = &g_@method@_current_sign[0];
+
+@qe:end:
+}
+
+
+/***********************************************************************************************************************
+* Function Name   : touch_parameter_address_set
+* Description     : Touch parameter top address setting
+* Arguments       : None
+* Return value    : None
+***********************************************************************************************************************/
+void touch_parameter_address_set( void )
+{
+    uint8_t method;
+
+@qe:begin:PrivateGlobalFunctionsTouchForEachMethod
+    method = QE_METHOD_@METHOD@;
+    g_key_info[method].mode               = @value@;
+    g_key_info[method].key_num            = @METHOD@_NUM_BUTTONS;
+    g_key_info[method].ena_num            = @METHOD@_NUM_ELEMENTS;
+    g_key_info[method].key_max_group      = @METHOD@_BTN_MASKS_SIZE;
+#if (@METHOD@_NUM_BUTTONS != 0)
+    g_key_info[method].ref                = &g_@method@_ref[0];
+    g_key_info[method].thr                = &g_@method@_thr[0];
+    g_key_info[method].user_thr           = &g_@method@_user_thr[0];
+    g_key_info[method].hys                = &g_@method@_hys[0];
+    g_key_info[method].delta              = &g_@method@_delta[0];
+    g_key_info[method].touch_cnt          = &g_@method@_touch_cnt[0];
+    g_key_info[method].non_touch_cnt      = &g_@method@_non_touch_cnt[0];
+    g_key_info[method].in_touch           = &g_@method@_in_touch[0];
+    g_key_info[method].out_touch          = &g_@method@_out_touch[0];
+    g_key_info[method].touch_result       = &g_@method@_touch_result[0];
+    g_key_info[method].drift_permission   = &g_@method@_drift_permission[0];
+    g_key_info[method].drift_add_ref      = &g_@method@_drift_ref[0];
+    g_key_info[method].drift_cnt          = &g_@method@_drift_cnt[0];
+    g_key_info[method].key_used_info      = &g_@method@_key_uesd_info[0];
+
+    g_touch_key_group[method].group       = &g_touch_cfg_@method@.button_masks[0];
+
+    g_calib_info[method].calib_data       = &g_@method@_calib[0][0];
+#endif
+    g_key_info[method].sensor_index       = &g_@method@_sensor_index[0];
+    g_key_info[method].counter_magni      = &g_@method@_counter_magni[0];
+
+    g_touch_tuning_info[method].ctsuso    = &g_@method@_tune_ctsuso[0];
+    g_touch_tuning_info[method].result    = &g_@method@_tune_result[0];
+
+
+@qe:end:
+}
+
+
+/***********************************************************************************************************************
+* Function Name: qetouch_timer_callback
+* Description  : Callback function for periodic timer which indicates to start next scan.
+* Arguments    : p_args
+*                    (unused)
+* Return Value : none
+***********************************************************************************************************************/
+void qetouch_timer_callback(void *p_args)
+{
+    g_qetouch_timer_flg = true;
+}
+

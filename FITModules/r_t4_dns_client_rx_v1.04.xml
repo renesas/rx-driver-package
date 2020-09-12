@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>2.05.00</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family omit_series="true">RX</family>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_t4_dns_client_rx</name>
+        <version>1.04</version>
+        <zipsource>r_t4_dns_client_rx_v1.04.zip</zipsource>
+        <dependency>
+            <module>r_t4_rx</module>
+            <version>2.06</version>
+        </dependency>
+        <application>Connectivity</application>
+        <desc>Simple DNS Client</desc>
+        <details>Simple DNS Client.Please refer to the<br/>
+<br/>
+https://www.renesas.com/mw/t4 <br/></details>
+        <function>connectivity</function>
+        <incdir>r_config</incdir>
+        <incdir>r_t4_dns_client_rx</incdir>
+        <incdir>r_t4_dns_client_rx/src</incdir>
+    </package>
+
+</refinfo>

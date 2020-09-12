@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
+* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
+* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
+* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
+* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
+* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
+* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate>r_pinset_multiapi</fileTemplate>
+    <resourceInfo>
+      <peripheral name="SDHI">
+          <pin name="SDHI_CLK">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SDHI_CMD">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SDHI_CD">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SDHI_WP">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SDHI_D0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SDHI_D1">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SDHI_D2">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SDHI_D3">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+      </peripheral>
+    </resourceInfo>
+    <configuration>
+        <property id="SDHI_CFG_CH0_INCLUDED" display="Use SDHI Channel 0" default="1" type="checkbox">
+            <option id="SDHI_CFG_CH0_INCLUDED.0" display="Unused" value="0"/>
+            <option id="SDHI_CFG_CH0_INCLUDED.1" display="Used" value="1"/>
+            <description>Selects whether to use SDHI channel 0.</description>
+        </property>
+        <property id="SDHI_CFG_CH1_INCLUDED" display="Use SDHI Channel 1" default="0" type="checkbox">
+            <option id="SDHI_CFG_CH1_INCLUDED.0" display="Unused" value="0"/>
+            <option id="SDHI_CFG_CH1_INCLUDED.1" display="Used" value="1"/>
+            <description>Selects whether to use SDHI channel 1.</description>
+        </property>
+        <property id="SDHI_CFG_CH0_CD_ACTIVE" display="Use CH0 SDHI_CD pin" default="1" type="checkbox">
+            <option id="SDHI_CFG_CH0_CD_ACTIVE.0" display="Unused" value="0"/>
+            <option id="SDHI_CFG_CH0_CD_ACTIVE.1" display="Used" value="1"/>
+            <constraint display="This setting is only valid for CH0" actionOnFail="disable">"${SDHI_CFG_CH0_INCLUDED}" == "1"</constraint>
+            <description>Selects whether to use SDHI_CD pin.</description>
+        </property>
+        <property id="SDHI_CFG_CH0_WP_ACTIVE" display="Use CH0 SDHI_WP pin" default="1" type="checkbox">
+            <option id="SDHI_CFG_CH0_WP_ACTIVE.0" display="Unused" value="0"/>
+            <option id="SDHI_CFG_CH0_WP_ACTIVE.1" display="Used" value="1"/>
+            <constraint display="This setting is only valid for CH0" actionOnFail="disable">"${SDHI_CFG_CH0_INCLUDED}" == "1"</constraint>
+            <description>Selects whether to use SDHI_WP pin.</description>
+        </property>
+        <property id="SDHI_CFG_CH0_INT_LEVEL" display="SDHI CH0 Interrupt priority level" default="10" type="combobox">
+            <option id="SDHI_CFG_CH0_INT_LEVEL.0" display="Level 0 (interrupt disabled)" value="0"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL.1" display="Level 1" value="1"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL.2" display="Level 2" value="2"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL.3" display="Level 3" value="3"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL.4" display="Level 4" value="4"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL.5" display="Level 5" value="5"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL.6" display="Level 6" value="6"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL.7" display="Level 7" value="7"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL.8" display="Level 8" value="8"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL.9" display="Level 9" value="9"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL.10" display="Level 10" value="10"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL.11" display="Level 11" value="11"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL.12" display="Level 12" value="12"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL.13" display="Level 13" value="13"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL.14" display="Level 14" value="14"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="This setting is only valid for CH0" actionOnFail="disable">"${SDHI_CFG_CH0_INCLUDED}" == "1"</constraint>
+            <description>Specify the level of the card detect interrupt (CDETI), card access interrupt (CACI), and SDIO access interrupt (SDACI).</description>
+        </property>
+        <property id="SDHI_CFG_CH0_INT_LEVEL_DMADTC" display="SDHI CH0 DMA/DTC Interrupt priority level" default="10" type="combobox">
+            <option id="SDHI_CFG_CH0_INT_LEVEL_DMADTC.0" display="Level 0 (interrupt disabled)" value="0"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL_DMADTC.1" display="Level 1" value="1"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL_DMADTC.2" display="Level 2" value="2"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL_DMADTC.3" display="Level 3" value="3"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL_DMADTC.4" display="Level 4" value="4"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL_DMADTC.5" display="Level 5" value="5"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL_DMADTC.6" display="Level 6" value="6"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL_DMADTC.7" display="Level 7" value="7"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL_DMADTC.8" display="Level 8" value="8"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL_DMADTC.9" display="Level 9" value="9"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL_DMADTC.10" display="Level 10" value="10"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL_DMADTC.11" display="Level 11" value="11"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL_DMADTC.12" display="Level 12" value="12"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL_DMADTC.13" display="Level 13" value="13"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL_DMADTC.14" display="Level 14" value="14"/>
+            <option id="SDHI_CFG_CH0_INT_LEVEL_DMADTC.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="This setting is only valid for CH0" actionOnFail="disable">"${SDHI_CFG_CH0_INCLUDED}" == "1"</constraint>
+            <description>Specify the level of the SD buffer access interrupt (SBFAI).
+This interrupt level is relevant when writing data to the SD buffer, or when reading data from the SDHI buffer, using the DMAC or DTC.</description>
+        </property>
+        <property id="SDHI_CFG_CH1_CD_ACTIVE" display="Use CH1 SDHI_CD pin" default="1" type="checkbox">
+            <option id="SDHI_CFG_CH1_CD_ACTIVE.0" display="Unused" value="0"/>
+            <option id="SDHI_CFG_CH1_CD_ACTIVE.1" display="Used" value="1"/>
+            <constraint display="This setting is only valid for CH1" actionOnFail="disable">"${SDHI_CFG_CH1_INCLUDED}" == "1"</constraint>
+            <description>Selects whether to use SDHI_CD pin.</description>
+        </property>
+        <property id="SDHI_CFG_CH1_WP_ACTIVE" display="Use CH1 SDHI_WP pin" default="1" type="checkbox">
+            <option id="SDHI_CFG_CH1_WP_ACTIVE.0" display="Unused" value="0"/>
+            <option id="SDHI_CFG_CH1_WP_ACTIVE.1" display="Used" value="1"/>
+            <constraint display="This setting is only valid for CH1" actionOnFail="disable">"${SDHI_CFG_CH1_INCLUDED}" == "1"</constraint>
+            <description>Selects whether to use SDHI_WP pin.</description>
+        </property>
+        <property id="SDHI_CFG_CH1_INT_LEVEL" display="SDHI CH1 Interrupt priority level" default="10" type="combobox">
+            <option id="SDHI_CFG_CH1_INT_LEVEL.0" display="Level 0 (interrupt disabled)" value="0"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL.1" display="Level 1" value="1"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL.2" display="Level 2" value="2"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL.3" display="Level 3" value="3"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL.4" display="Level 4" value="4"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL.5" display="Level 5" value="5"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL.6" display="Level 6" value="6"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL.7" display="Level 7" value="7"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL.8" display="Level 8" value="8"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL.9" display="Level 9" value="9"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL.10" display="Level 10" value="10"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL.11" display="Level 11" value="11"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL.12" display="Level 12" value="12"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL.13" display="Level 13" value="13"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL.14" display="Level 14" value="14"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="This setting is only valid for CH1" actionOnFail="disable">"${SDHI_CFG_CH1_INCLUDED}" == "1"</constraint>
+            <description>Specify the level of the card detect interrupt (CDETI), card access interrupt (CACI), and SDIO access interrupt (SDACI).</description>
+        </property>
+        <property id="SDHI_CFG_CH1_INT_LEVEL_DMADTC" display="SDHI CH1 DMA/DTC Interrupt priority level" default="10" type="combobox">
+            <option id="SDHI_CFG_CH1_INT_LEVEL_DMADTC.0" display="Level 0 (interrupt disabled)" value="0"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL_DMADTC.1" display="Level 1" value="1"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL_DMADTC.2" display="Level 2" value="2"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL_DMADTC.3" display="Level 3" value="3"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL_DMADTC.4" display="Level 4" value="4"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL_DMADTC.5" display="Level 5" value="5"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL_DMADTC.6" display="Level 6" value="6"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL_DMADTC.7" display="Level 7" value="7"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL_DMADTC.8" display="Level 8" value="8"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL_DMADTC.9" display="Level 9" value="9"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL_DMADTC.10" display="Level 10" value="10"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL_DMADTC.11" display="Level 11" value="11"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL_DMADTC.12" display="Level 12" value="12"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL_DMADTC.13" display="Level 13" value="13"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL_DMADTC.14" display="Level 14" value="14"/>
+            <option id="SDHI_CFG_CH1_INT_LEVEL_DMADTC.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="This setting is only valid for CH1" actionOnFail="disable">"${SDHI_CFG_CH1_INCLUDED}" == "1"</constraint>
+            <description>Specify the level of the SD buffer access interrupt (SBFAI).
+This interrupt level is relevant when writing data to the SD buffer, or when reading data from the SDHI buffer, using the DMAC or DTC.</description>
+        </property>
+        <property id="SDHI_CFG_DIV_HIGH_SPEED" display="SDHI clock : High speed" default="SDHI_DIV_2" type="combobox">
+            <option id="SDHI_CFG_DIV_HIGH_SPEED.SDHI_DIV_1" display="PCLKB/1" value="SDHI_DIV_1"/>
+            <option id="SDHI_CFG_DIV_HIGH_SPEED.SDHI_DIV_2" display="PCLKB/2" value="SDHI_DIV_2"/>
+            <option id="SDHI_CFG_DIV_HIGH_SPEED.SDHI_DIV_4" display="PCLKB/4" value="SDHI_DIV_4"/>
+            <option id="SDHI_CFG_DIV_HIGH_SPEED.SDHI_DIV_8" display="PCLKB/8" value="SDHI_DIV_8"/>
+            <option id="SDHI_CFG_DIV_HIGH_SPEED.SDHI_DIV_16" display="PCLKB/16" value="SDHI_DIV_16"/>
+            <option id="SDHI_CFG_DIV_HIGH_SPEED.SDHI_DIV_32" display="PCLKB/32" value="SDHI_DIV_32"/>
+            <option id="SDHI_CFG_DIV_HIGH_SPEED.SDHI_DIV_64" display="PCLKB/64" value="SDHI_DIV_64"/>
+            <option id="SDHI_CFG_DIV_HIGH_SPEED.SDHI_DIV_128" display="PCLKB/128" value="SDHI_DIV_128"/>
+            <option id="SDHI_CFG_DIV_HIGH_SPEED.SDHI_DIV_256" display="PCLKB/256" value="SDHI_DIV_256"/>
+            <option id="SDHI_CFG_DIV_HIGH_SPEED.SDHI_DIV_512" display="PCLKB/512" value="SDHI_DIV_512"/>
+            <description>The clock frequency definition for high-speed mode.
+Specify the PCLKB division ratio by setting the SDHI clock frequency select bits (SDCLKCR.CLKSEL[7:0]).
+Refer to the hardware manual of the microcontroller regarding setting values, and specify a value of PCLKB/1 to PCLKB/512.
+For example, for PCLKB = 60 MHz, high-speed mode clock frequency = 30 MHz, the setting value would be PCLKB/2.</description>
+        </property>
+        <property id="SDHI_CFG_DIV_DEFAULT_SPEED" display="SDHI clock : Default speed" default="SDHI_DIV_4" type="combobox">
+            <option id="SDHI_CFG_DIV_DEFAULT_SPEED.SDHI_DIV_1" display="PCLKB/1" value="SDHI_DIV_1"/>
+            <option id="SDHI_CFG_DIV_DEFAULT_SPEED.SDHI_DIV_2" display="PCLKB/2" value="SDHI_DIV_2"/>
+            <option id="SDHI_CFG_DIV_DEFAULT_SPEED.SDHI_DIV_4" display="PCLKB/4" value="SDHI_DIV_4"/>
+            <option id="SDHI_CFG_DIV_DEFAULT_SPEED.SDHI_DIV_8" display="PCLKB/8" value="SDHI_DIV_8"/>
+            <option id="SDHI_CFG_DIV_DEFAULT_SPEED.SDHI_DIV_16" display="PCLKB/16" value="SDHI_DIV_16"/>
+            <option id="SDHI_CFG_DIV_DEFAULT_SPEED.SDHI_DIV_32" display="PCLKB/32" value="SDHI_DIV_32"/>
+            <option id="SDHI_CFG_DIV_DEFAULT_SPEED.SDHI_DIV_64" display="PCLKB/64" value="SDHI_DIV_64"/>
+            <option id="SDHI_CFG_DIV_DEFAULT_SPEED.SDHI_DIV_128" display="PCLKB/128" value="SDHI_DIV_128"/>
+            <option id="SDHI_CFG_DIV_DEFAULT_SPEED.SDHI_DIV_256" display="PCLKB/256" value="SDHI_DIV_256"/>
+            <option id="SDHI_CFG_DIV_DEFAULT_SPEED.SDHI_DIV_512" display="PCLKB/512" value="SDHI_DIV_512"/>
+            <description>The clock frequency definition for default-speed mode.
+The setting method is the same as that for high-speed mode.
+For example, for PCLKB = 60 MHz, default-speed mode clock frequency = 15 MHz, the setting value would be PCLKB/4.</description>
+        </property>
+        <property id="SDHI_CFG_DIV_INIT_SPEED" display="SDHI clock : Init speed" default="SDHI_DIV_256" type="combobox">
+            <option id="SDHI_CFG_DIV_INIT_SPEED.SDHI_DIV_1" display="PCLKB/1" value="SDHI_DIV_1"/>
+            <option id="SDHI_CFG_DIV_INIT_SPEED.SDHI_DIV_2" display="PCLKB/2" value="SDHI_DIV_2"/>
+            <option id="SDHI_CFG_DIV_INIT_SPEED.SDHI_DIV_4" display="PCLKB/4" value="SDHI_DIV_4"/>
+            <option id="SDHI_CFG_DIV_INIT_SPEED.SDHI_DIV_8" display="PCLKB/8" value="SDHI_DIV_8"/>
+            <option id="SDHI_CFG_DIV_INIT_SPEED.SDHI_DIV_16" display="PCLKB/16" value="SDHI_DIV_16"/>
+            <option id="SDHI_CFG_DIV_INIT_SPEED.SDHI_DIV_32" display="PCLKB/32" value="SDHI_DIV_32"/>
+            <option id="SDHI_CFG_DIV_INIT_SPEED.SDHI_DIV_64" display="PCLKB/64" value="SDHI_DIV_64"/>
+            <option id="SDHI_CFG_DIV_INIT_SPEED.SDHI_DIV_128" display="PCLKB/128" value="SDHI_DIV_128"/>
+            <option id="SDHI_CFG_DIV_INIT_SPEED.SDHI_DIV_256" display="PCLKB/256" value="SDHI_DIV_256"/>
+            <option id="SDHI_CFG_DIV_INIT_SPEED.SDHI_DIV_512" display="PCLKB/512" value="SDHI_DIV_512"/>
+            <description>The clock frequency definition for card-recognition mode.
+The setting method is the same as that for high-speed mode.
+For example, for PCLKB = 60 MHz, card-recognition mode clock frequency = 234 kHz, the setting value would be PCLKB/256.</description>
+        </property>
+        <property id="SDHI_CFG_SDOPT_CTOP" display="SDHI time out count : CD" default="0x000eu" type="combobox">
+            <option id="SDHI_CFG_SDOPT_CTOP.0x0000u" display="PCLKB x 2^10" value="0x0000u"/>
+            <option id="SDHI_CFG_SDOPT_CTOP.0x0001u" display="PCLKB x 2^11" value="0x0001u"/>
+            <option id="SDHI_CFG_SDOPT_CTOP.0x0002u" display="PCLKB x 2^12" value="0x0002u"/>
+            <option id="SDHI_CFG_SDOPT_CTOP.0x0003u" display="PCLKB x 2^13" value="0x0003u"/>
+            <option id="SDHI_CFG_SDOPT_CTOP.0x0004u" display="PCLKB x 2^14" value="0x0004u"/>
+            <option id="SDHI_CFG_SDOPT_CTOP.0x0005u" display="PCLKB x 2^15" value="0x0005u"/>
+            <option id="SDHI_CFG_SDOPT_CTOP.0x0006u" display="PCLKB x 2^16" value="0x0006u"/>
+            <option id="SDHI_CFG_SDOPT_CTOP.0x0007u" display="PCLKB x 2^17" value="0x0007u"/>
+            <option id="SDHI_CFG_SDOPT_CTOP.0x0008u" display="PCLKB x 2^18" value="0x0008u"/>
+            <option id="SDHI_CFG_SDOPT_CTOP.0x0009u" display="PCLKB x 2^19" value="0x0009u"/>
+            <option id="SDHI_CFG_SDOPT_CTOP.0x000au" display="PCLKB x 2^20" value="0x000au"/>
+            <option id="SDHI_CFG_SDOPT_CTOP.0x000bu" display="PCLKB x 2^21" value="0x000bu"/>
+            <option id="SDHI_CFG_SDOPT_CTOP.0x000cu" display="PCLKB x 2^22" value="0x000cu"/>
+            <option id="SDHI_CFG_SDOPT_CTOP.0x000du" display="PCLKB x 2^23" value="0x000du"/>
+            <option id="SDHI_CFG_SDOPT_CTOP.0x000eu" display="PCLKB x 2^24" value="0x000eu"/>
+            <description>Selects SDHI card detection time. (SDOPT.CTOP[3:0])</description>
+        </property>
+        <property id="SDHI_CFG_SDOPT_TOP" display="SDHI time out count : Response" default="0x00e0u" type="combobox">
+            <option id="SDHI_CFG_SDOPT_TOP.0x0000u" display="SDHI clock x 2^13" value="0x0000u"/>
+            <option id="SDHI_CFG_SDOPT_TOP.0x0010u" display="SDHI clock x 2^14" value="0x0010u"/>
+            <option id="SDHI_CFG_SDOPT_TOP.0x0020u" display="SDHI clock x 2^15" value="0x0020u"/>
+            <option id="SDHI_CFG_SDOPT_TOP.0x0030u" display="SDHI clock x 2^16" value="0x0030u"/>
+            <option id="SDHI_CFG_SDOPT_TOP.0x0040u" display="SDHI clock x 2^17" value="0x0040u"/>
+            <option id="SDHI_CFG_SDOPT_TOP.0x0050u" display="SDHI clock x 2^18" value="0x0050u"/>
+            <option id="SDHI_CFG_SDOPT_TOP.0x0060u" display="SDHI clock x 2^19" value="0x0060u"/>
+            <option id="SDHI_CFG_SDOPT_TOP.0x0070u" display="SDHI clock x 2^20" value="0x0070u"/>
+            <option id="SDHI_CFG_SDOPT_TOP.0x0080u" display="SDHI clock x 2^21" value="0x0080u"/>
+            <option id="SDHI_CFG_SDOPT_TOP.0x0090u" display="SDHI clock x 2^22" value="0x0090u"/>
+            <option id="SDHI_CFG_SDOPT_TOP.0x00a0u" display="SDHI clock x 2^23" value="0x00a0u"/>
+            <option id="SDHI_CFG_SDOPT_TOP.0x00b0u" display="SDHI clock x 2^24" value="0x00b0u"/>
+            <option id="SDHI_CFG_SDOPT_TOP.0x00c0u" display="SDHI clock x 2^25" value="0x00c0u"/>
+            <option id="SDHI_CFG_SDOPT_TOP.0x00d0u" display="SDHI clock x 2^26" value="0x00d0u"/>
+            <option id="SDHI_CFG_SDOPT_TOP.0x00e0u" display="SDHI clock x 2^27" value="0x00e0u"/>
+            <description>Selects SDHI command response timeout. (SDOPT.TOP[3:0])</description>
+        </property>
+        <property id="SDHI_CFG_PARAM_CHECKING_ENABLE" display="Parameter checking" default="1" type="combobox">
+            <option id="SDHI_CFG_PARAM_CHECKING_ENABLE.0" display="Disabled" value="0"/>
+            <option id="SDHI_CFG_PARAM_CHECKING_ENABLE.1" display="Enabled" value="1"/>
+            <description>Selects whether to include parameter checking in the code.
+Disabled = compiles out parameter checking
+Enabled = includes parameter checking</description>
+        </property>
+        <property id="SDHI_CFG_LONGQ_ENABLE" display="Enable debugging information" default="/* #define" keyword="SDHI_CFG_LONGQ_ENABLE */" type="checkbox">
+            <option id="SDHI_CFG_LONGQ_ENABLE./* #define" display="Unused" value="/* #define"/>
+            <option id="SDHI_CFG_LONGQ_ENABLE.#define SDHI_CFG_LONGQ_ENABLE           /*" display="Used" value="#define SDHI_CFG_LONGQ_ENABLE           /*"/>
+            <description>Stores error log information using LONGQ driver.</description>
+        </property>
+    </configuration>
+</module>

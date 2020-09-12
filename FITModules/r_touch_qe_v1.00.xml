@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+	<!-- multiple versions permitted -->
+	<toolchain>
+		<brand>Renesas</brand>
+		<product>RXC</product>
+        <version>2.07.00</version>	
+		<version>2.08.00</version>
+	</toolchain>
+    
+
+	<!-- only one target entry allowed; multiple sub tags permitted -->
+	<target>
+		<family>RX</family>
+		<series>RX100</series>
+        <series>RX200</series>
+        <group>RX113</group>
+		<group>RX130</group>
+        <group>RX230</group>
+        <group>RX231</group>
+        <board>RSKRX231</board>
+  	</target>
+
+
+	<!-- only one package entry allowed -->
+	<!-- multiple dependencies, functions, and incdirs permitted -->
+
+	<package>
+		<type>fitmodule</type>
+		<name>r_touch_qe</name>
+		<version>1.00</version>
+        <dependency>
+		        <module>r_bsp</module>
+		        <version>3.71</version>
+        </dependency>
+        <dependency>
+		        <module>r_ctsu_qe</module>
+		        <version>1.00</version>
+        </dependency>
+		<zipsource>r_touch_qe_v1.00.zip</zipsource>
+		<application>Capacitive Touch</application>
+        <function>Capacitive Touch</function>
+		<desc>Touch QE API for select RX100 and RX200 MCUs.</desc>
+		<details>This module allows for touch detection of buttons, sliders, and wheels using CTSU sensor data.</details>
+		<incdir>r_config</incdir>
+		<incdir>r_touch_qe</incdir>
+        <incdir>r_touch_qe/src</incdir>
+	</package>
+</refinfo>

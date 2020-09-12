@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>3.01.00</version>
+    </toolchain>
+	<toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>4.08.04.201801</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.11.1</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX600</series>
+        <group>RX64M</group>
+		<group omit_board="true">RX64M</group>
+        <series>RX700</series>
+        <group>RX71M</group>
+		<group omit_board="true">RX71M</group>
+		<group>RX72M</group>
+        <group omit_board="true">RX72M</group>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_ptp_rx</name>
+        <version>1.16</version>
+        <zipsource>r_ptp_rx_v1.16.zip</zipsource>
+        <desc>PTP Driver</desc>
+        <details>The PTP driver makes the time synchronization based on the PTP using the EPTPC peripheral module (EPTPC).</details>
+		<dependency>
+            <module>r_bsp</module>
+			<version>5.20</version>
+        </dependency>
+        <application>Communications</application>
+        <application>Connectivity</application>
+        <function>EPTPC</function>
+        <function>PTPEDMAC</function>
+        <incdir>r_config</incdir>
+        <incdir>r_ptp_rx</incdir>
+		<incdir>r_ptp_rx/src</incdir>
+		<section>
+            <address>0x00018000</address>
+            <name>B_PTPIF_BUFFER_1</name>
+        </section>
+        <section>
+            <address>0x00018000</address>
+            <name>B_PTPIF_RX_DESC</name>
+        </section>
+        <section>
+            <address>0x00018000</address>
+            <name>B_PTPIF_TX_DESC</name>
+        </section>
+    </package>
+
+</refinfo>

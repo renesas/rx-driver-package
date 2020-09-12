@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="TOUCH_CFG_PARAM_CHECKING_ENABLE" display="Parameter check" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+            <option id="TOUCH_CFG_PARAM_CHECKING_ENABLE.0" display="Disable parameter checks" value="0"/>
+            <option id="TOUCH_CFG_PARAM_CHECKING_ENABLE.1" display="Enable parameter checks" value="1"/>
+            <option id="TOUCH_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="Use system default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <description>Setting to BSP_CFG_PARAM_CHECKING_ENABLE utilizes the system default setting
+Setting to 1 includes parameter checking; 0 compiles out parameter checking</description>
+        </property>
+        <property id="TOUCH_CFG_UPDATE_MONITOR" display="Provide sensor data for monitor tool" default="1" type="combobox">
+            <option id="TOUCH_CFG_UPDATE_MONITOR.0" display="Sensor monitor not used" value="0"/>
+            <option id="TOUCH_CFG_UPDATE_MONITOR.1" display="Include code to update sensor data for monitor" value="1"/>
+            <description>If real-time monitoring of sensor data with the QE Tool is not desired, set this to 0.
+Setting to 1 includes touch driver code to provide updated sensor data to QE Tool while running.</description>
+        </property>
+    </configuration>
+</module>

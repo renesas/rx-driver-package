@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
+* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
+* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
+* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
+* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
+* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
+* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate>r_pinset_type2</fileTemplate>
+    <resourceInfo>
+      <peripheral name="SDSI">
+          <pin name="SDSI_CLK">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SDSI_CMD">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SDSI_D0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SDSI_D1">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SDSI_D2">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SDSI_D3">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+      </peripheral>
+    </resourceInfo>
+    <configuration>
+        <property id="SDSI_CFG_USE_FIT" display="Use FIT" default="#define" keyword="SDSI_CFG_USE_FIT" type="checkbox">
+            <option id="SDSI_CFG_USE_FIT.//#define" display="Unused" value="//#define"/>
+            <option id="SDSI_CFG_USE_FIT.#define" display="Used" value="#define"/>
+            <description>Specify if FIT modules are used.</description>
+        </property>
+        <property id="SDSI_CFG_PARAM_CHECKING_ENABLE" display="Parameter checking" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+            <option id="SDSI_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="System default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <option id="SDSI_CFG_PARAM_CHECKING_ENABLE.0" display="Disabled" value="0"/>
+            <option id="SDSI_CFG_PARAM_CHECKING_ENABLE.1" display="Enabled" value="1"/>
+            <description>Selects whether to include parameter checking in the code.
+System default = BSP_CFG_PARAM_CHECKING_ENABLE
+Disabled = compiles out parameter checking
+Enabled = includes parameter checking</description>
+        </property>
+        <property id="SDSI_CFG_CH0_INCLUDED" display="Use SDSI Channel 0" default="#define" keyword="SDSI_CFG_CH0_INCLUDED" type="checkbox">
+            <option id="SDSI_CFG_CH0_INCLUDED.//#define" display="Unused" value="//#define"/>
+            <option id="SDSI_CFG_CH0_INCLUDED.#define" display="Used" value="#define"/>
+            <description>Selects whether to use SDSI Channel 0.</description>
+        </property>
+        <property id="SDSI_CFG_LONGQ_ENABLE" display="Enable debugging information" default="/* #define" keyword="SDSI_CFG_LONGQ_ENABLE */" type="checkbox">
+            <option id="SDSI_CFG_LONGQ_ENABLE./* #define" display="Unused" value="/* #define"/>
+            <option id="SDSI_CFG_LONGQ_ENABLE.#define SDSI_CFG_LONGQ_ENABLE               /*" display="Used" value="#define SDSI_CFG_LONGQ_ENABLE               /*"/>
+            <description>Stores error log information using LONGQ driver.</description>
+        </property>
+        <property id="SDSI_CFG_CH0_INT_LEVEL" display="SDSI Interrupt priority level" default="5" type="combobox">
+            <option id="SDSI_CFG_CH0_INT_LEVEL.0" display="Level 0 (interrupt disabled)" value="0"/>
+            <option id="SDSI_CFG_CH0_INT_LEVEL.1" display="Level 1" value="1"/>
+            <option id="SDSI_CFG_CH0_INT_LEVEL.2" display="Level 2" value="2"/>
+            <option id="SDSI_CFG_CH0_INT_LEVEL.3" display="Level 3" value="3"/>
+            <option id="SDSI_CFG_CH0_INT_LEVEL.4" display="Level 4" value="4"/>
+            <option id="SDSI_CFG_CH0_INT_LEVEL.5" display="Level 5" value="5"/>
+            <option id="SDSI_CFG_CH0_INT_LEVEL.6" display="Level 6" value="6"/>
+            <option id="SDSI_CFG_CH0_INT_LEVEL.7" display="Level 7" value="7"/>
+            <option id="SDSI_CFG_CH0_INT_LEVEL.8" display="Level 8" value="8"/>
+            <option id="SDSI_CFG_CH0_INT_LEVEL.9" display="Level 9" value="9"/>
+            <option id="SDSI_CFG_CH0_INT_LEVEL.10" display="Level 10" value="10"/>
+            <option id="SDSI_CFG_CH0_INT_LEVEL.11" display="Level 11" value="11"/>
+            <option id="SDSI_CFG_CH0_INT_LEVEL.12" display="Level 12" value="12"/>
+            <option id="SDSI_CFG_CH0_INT_LEVEL.13" display="Level 13" value="13"/>
+            <option id="SDSI_CFG_CH0_INT_LEVEL.14" display="Level 14" value="14"/>
+            <option id="SDSI_CFG_CH0_INT_LEVEL.15" display="Level 15 (highest)" value="15"/>
+            <description>Selects SDSI interrupt priority level.
+If the SDSI interrupt assigned to the group interrupt, set it in consideration of the priority of other interrupts assigned to the same group.</description>
+        </property>
+        <property id="SDSI_CFG_DISABLE_SYSTEM_INTERRUPT" display="Disable system interrupt requests" default="/* #define" keyword="SDSI_CFG_DISABLE_SYSTEM_INTERRUPT */" type="checkbox">
+            <option id="SDSI_CFG_DISABLE_SYSTEM_INTERRUPT./* #define" display="Unused" value="/* #define"/>
+            <option id="SDSI_CFG_DISABLE_SYSTEM_INTERRUPT.#define SDSI_CFG_DISABLE_SYSTEM_INTERRUPT   /*" display="Used" value="#define SDSI_CFG_DISABLE_SYSTEM_INTERRUPT   /*"/>
+            <description>Disable interrupt requests while R_SDSI_Open().
+Detect the published SDIO command that the driver is in an uninitialized state and reduce possibility to return the response.
+This is performed by setting the "I" bit in the CPU's Processor Status Word (PSW) register.
+The "I" bit of the PSW can only be modified when in Supervisor Mode. If the CPU is in User Mode and this function is called then a Privileged Instruction Exception will occur.</description>
+        </property>
+        <property id="SDSI_CFG_FBR_ADR_100H" display="FBR1.FBR1L[3:0] Bits" default="0x00" type="textbox">
+            <constraint display="Value must be a hex integer" actionOnFail="error">testHexInteger("${SDSI_CFG_FBR_ADR_100H}")</constraint>
+            <constraint display="Value must be in the range 0x00~0xFF" actionOnFail="error">("${SDSI_CFG_FBR_ADR_100H}".replace(/[LUlu]+$/, '') &gt;= 0) &amp;&amp; ("${SDSI_CFG_FBR_ADR_100H}".replace(/[LUlu]+$/, '') &lt;= 0xff)</constraint>
+            <description>Set Function Basic Register (FBR) value.
+When R_SDSI_Initialize() called, set FBR value.
+b7-b4 : Ignore setting value.
+b3-b0 : Function 1 Standard SDIO Function Interface Code</description>
+        </property>
+        <property id="SDSI_CFG_FBR_ADR_101H" display="FBR1.FBR1U[7:0] Bits" default="0x01" type="textbox">
+            <constraint display="Value must be a hex integer" actionOnFail="error">testHexInteger("${SDSI_CFG_FBR_ADR_101H}")</constraint>
+            <constraint display="Value must be in the range 0x00~0xFF" actionOnFail="error">("${SDSI_CFG_FBR_ADR_101H}".replace(/[LUlu]+$/, '') &gt;= 0) &amp;&amp; ("${SDSI_CFG_FBR_ADR_101H}".replace(/[LUlu]+$/, '') &lt;= 0xff)</constraint>
+            <description>Set Function Basic Register (FBR) value.
+When R_SDSI_Initialize() called, set FBR value.
+b7-b0 : Function 1 Extended standard SDIO Function interface code</description>
+        </property>
+        <property id="SDSI_CFG_FBR_ADR_103H" display="FBR2.FBR2[7:0] Bits" default="0x00" type="textbox">
+            <constraint display="Value must be a hex integer" actionOnFail="error">testHexInteger("${SDSI_CFG_FBR_ADR_103H}")</constraint>
+            <constraint display="Value must be in the range 0x00~0xFF" actionOnFail="error">("${SDSI_CFG_FBR_ADR_103H}".replace(/[LUlu]+$/, '') &gt;= 0) &amp;&amp; ("${SDSI_CFG_FBR_ADR_103H}".replace(/[LUlu]+$/, '') &lt;= 0xff)</constraint>
+            <description>Set Function Basic Register (FBR) value.
+When R_SDSI_Initialize() called, set FBR value.
+b7-b0 : Function 1 Standard iSDIO Function Interface Code</description>
+        </property>
+        <property id="SDSI_CFG_FBR_ADR_104H" display="FBR3.FBR3[7:0] Bits" default="0x00" type="textbox">
+            <constraint display="Value must be a hex integer" actionOnFail="error">testHexInteger("${SDSI_CFG_FBR_ADR_104H}")</constraint>
+            <constraint display="Value must be in the range 0x00~0xFF" actionOnFail="error">("${SDSI_CFG_FBR_ADR_104H}".replace(/[LUlu]+$/, '') &gt;= 0) &amp;&amp; ("${SDSI_CFG_FBR_ADR_104H}".replace(/[LUlu]+$/, '') &lt;= 0xff)</constraint>
+            <description>Set Function Basic Register (FBR) value.
+When R_SDSI_Initialize() called, set FBR value.
+b7-b0 : Function 1 MID_MANF SDIO Card Manufacturer Code</description>
+        </property>
+        <property id="SDSI_CFG_FBR_ADR_105H" display="FBR3.FBR3[15:8] Bits" default="0x00" type="textbox">
+            <constraint display="Value must be a hex integer" actionOnFail="error">testHexInteger("${SDSI_CFG_FBR_ADR_105H}")</constraint>
+            <constraint display="Value must be in the range 0x00~0xFF" actionOnFail="error">("${SDSI_CFG_FBR_ADR_105H}".replace(/[LUlu]+$/, '') &gt;= 0) &amp;&amp; ("${SDSI_CFG_FBR_ADR_105H}".replace(/[LUlu]+$/, '') &lt;= 0xff)</constraint>
+            <description>Set Function Basic Register (FBR) value.
+When R_SDSI_Initialize() called, set FBR value.
+b7-b0 : Function 1 MID_MANF SDIO Card Manufacturer Code</description>
+        </property>
+        <property id="SDSI_CFG_FBR_ADR_106H" display="FBR4.FBR4[7:0] Bits" default="0x00" type="textbox">
+            <constraint display="Value must be a hex integer" actionOnFail="error">testHexInteger("${SDSI_CFG_FBR_ADR_106H}")</constraint>
+            <constraint display="Value must be in the range 0x00~0xFF" actionOnFail="error">("${SDSI_CFG_FBR_ADR_106H}".replace(/[LUlu]+$/, '') &gt;= 0) &amp;&amp; ("${SDSI_CFG_FBR_ADR_106H}".replace(/[LUlu]+$/, '') &lt;= 0xff)</constraint>
+            <description>Set Function Basic Register (FBR) value.
+When R_SDSI_Initialize() called, set FBR value.
+b7-b0 : Function 1 MID_CARD Manufacturer Information</description>
+        </property>
+        <property id="SDSI_CFG_FBR_ADR_107H" display="FBR4.FBR4[15:8] Bits" default="0x00" type="textbox">
+            <constraint display="Value must be a hex integer" actionOnFail="error">testHexInteger("${SDSI_CFG_FBR_ADR_107H}")</constraint>
+            <constraint display="Value must be in the range 0x00~0xFF" actionOnFail="error">("${SDSI_CFG_FBR_ADR_107H}".replace(/[LUlu]+$/, '') &gt;= 0) &amp;&amp; ("${SDSI_CFG_FBR_ADR_107H}".replace(/[LUlu]+$/, '') &lt;= 0xff)</constraint>
+            <description>Set Function Basic Register (FBR) value.
+When R_SDSI_Initialize() called, set FBR value.
+b7-b0 : Function 1 MID_CARD Manufacturer Information</description>
+        </property>
+        <property id="SDSI_CFG_FBR_ADR_108H" display="FBR5.FBR5[7:0] Bits" default="0x00" type="textbox">
+            <constraint display="Value must be a hex integer" actionOnFail="error">testHexInteger("${SDSI_CFG_FBR_ADR_108H}")</constraint>
+            <constraint display="Value must be in the range 0x00~0xFF" actionOnFail="error">("${SDSI_CFG_FBR_ADR_108H}".replace(/[LUlu]+$/, '') &gt;= 0) &amp;&amp; ("${SDSI_CFG_FBR_ADR_108H}".replace(/[LUlu]+$/, '') &lt;= 0xff)</constraint>
+            <description>Set Function Basic Register (FBR) value.
+When R_SDSI_Initialize() called, set FBR value.
+b7-b0 : Function 1 iSDIO Type Support Code</description>
+        </property>
+        <property id="SDSI_CFG_FBR_SPS_BIT" display="SDSICR3.SPS Bit" default="0" type="combobox">
+            <option id="SDSI_CFG_FBR_SPS_BIT.0" display="0" value="0"/>
+            <option id="SDSI_CFG_FBR_SPS_BIT.1" display="1" value="1"/>
+            <description>Set SPS bit of Function Basic Register (FBR).
+When R_SDSI_Initialize() called, set SDSICR3.SPS bit (0 or 1).</description>
+        </property>
+        <property id="SDSI_CFG_CCCR_SMPC_BIT" display="SDSICR3.SMPC Bit" default="0" type="combobox">
+            <option id="SDSI_CFG_CCCR_SMPC_BIT.0" display="0" value="0"/>
+            <option id="SDSI_CFG_CCCR_SMPC_BIT.1" display="1" value="1"/>
+            <description>Set SMPC bit of CCCR register.
+When R_SDSI_Initialize() called, set SDSICR3.SMPC bit (0 or 1).</description>
+        </property>
+    </configuration>
+</module>

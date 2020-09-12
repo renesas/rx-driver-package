@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>2.02.00</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX100</series>
+        <group>RX113</group>
+        <board>RSKRX113</board>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_irda_sci_rx</name>
+        <version>1.01</version>
+        <zipsource>r_irda_sci_rx_v1.01.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>2.70</version>
+        </dependency>
+        <dependency>
+            <module>r_byteq</module>
+            <version>1.00</version>
+            <version>1.10</version>
+        </dependency>
+        <application>Communications</application>
+        <application>Connectivity</application>
+        <desc>IrDA Driver.</desc>
+        <details>The r_irda_sci_rx module sends and receives IrDA data communication waveforms in cooperation with the SCI5 based on the IrDA (Infrared Data Association) standard 1.0. The driver is interrupt driven and non-blocking. Transmit and receive buffer queues are used and their sizes may be configured independently for each channel. Resources for unused channels or modes may be removed via settings in the driver's config.h file.</details>
+        <function>IrDA</function>
+        <incdir>r_config</incdir>
+        <incdir>r_irda_sci_rx</incdir>
+        <incdir>r_irda_sci_rx/src</incdir>
+    </package>
+
+</refinfo>

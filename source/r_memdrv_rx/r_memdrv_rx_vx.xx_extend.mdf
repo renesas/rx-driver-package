@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="MEMDRV_CFG_DEV0_INCLUDED" display="Use device 0" default="1" type="combobox">
+            <option id="MEMDRV_CFG_DEV0_INCLUDED.0" display="disabled" value="0"/>
+            <option id="MEMDRV_CFG_DEV0_INCLUDED.1" display="enabled" value="1"/>
+            <description>This definition is related to device x. (1: enabled, 0: disabled)
+This option must be set to "enabled" for at least one device.</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV1_INCLUDED" display="Use device 1" default="0" type="combobox">
+            <option id="MEMDRV_CFG_DEV1_INCLUDED.0" display="disabled" value="0"/>
+            <option id="MEMDRV_CFG_DEV1_INCLUDED.1" display="enabled" value="1"/>
+            <description>This definition is related to device x. (1: enabled, 0: disabled)
+This option must be set to "enabled" for at least one device.</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV0_MODE_TRNS" display="Device 0 data transfer mode" default="MEMDRV_TRNS_CPU" type="combobox">
+            <option id="MEMDRV_CFG_DEV0_MODE_TRNS.MEMDRV_TRNS_CPU" display="CPU transfer (Software transfer)" value="MEMDRV_TRNS_CPU"/>
+            <option id="MEMDRV_CFG_DEV0_MODE_TRNS.MEMDRV_TRNS_DMAC" display="DMAC transfer" value="MEMDRV_TRNS_DMAC"/>
+            <option id="MEMDRV_CFG_DEV0_MODE_TRNS.MEMDRV_TRNS_DTC" display="DTC transfer" value="MEMDRV_TRNS_DTC"/>
+            <constraint display="Used for device 0 only" actionOnFail="disable">"${MEMDRV_CFG_DEV0_INCLUDED}" == "${MEMDRV_CFG_DEV0_INCLUDED.1}"</constraint>
+            <description>Defines the method used to transfer data to the MCU's on-chip RAM.
+Choose one of the following settings:
+MEMDRV_TRNS_CPU: CPU transfer (Software transfer)
+MEMDRV_TRNS_DMAC: DMAC transfer
+MEMDRV_TRNS_DTC: DTC transfer</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV1_MODE_TRNS" display="Device 1 data transfer mode" default="MEMDRV_TRNS_CPU" type="combobox">
+            <option id="MEMDRV_CFG_DEV1_MODE_TRNS.MEMDRV_TRNS_CPU" display="CPU transfer (Software transfer)" value="MEMDRV_TRNS_CPU"/>
+            <option id="MEMDRV_CFG_DEV1_MODE_TRNS.MEMDRV_TRNS_DMAC" display="DMAC transfer" value="MEMDRV_TRNS_DMAC"/>
+            <option id="MEMDRV_CFG_DEV1_MODE_TRNS.MEMDRV_TRNS_DTC" display="DTC transfer" value="MEMDRV_TRNS_DTC"/>
+            <constraint display="Used for device 1 only" actionOnFail="disable">"${MEMDRV_CFG_DEV1_INCLUDED}" == "${MEMDRV_CFG_DEV1_INCLUDED.1}"</constraint>
+            <description>Defines the method used to transfer data to the MCU's on-chip RAM.
+Choose one of the following settings:
+MEMDRV_TRNS_CPU: CPU transfer (Software transfer)
+MEMDRV_TRNS_DMAC: DMAC transfer
+MEMDRV_TRNS_DTC: DTC transfer</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV0_MODE_DRVR" display="Device 0  driver" default="MEMDRV_DRVR_RX_FIT_RSPI" type="combobox">
+            <option id="MEMDRV_CFG_DEV0_MODE_DRVR.MEMDRV_DRVR_RX_FIT_RSPI" display="RSPI clock synchronous control FIT module" value="MEMDRV_DRVR_RX_FIT_RSPI"/>
+            <option id="MEMDRV_CFG_DEV0_MODE_DRVR.MEMDRV_DRVR_RX_FIT_QSPI_SMSTR" display="QSPI clock synchronous single-master control FIT module" value="MEMDRV_DRVR_RX_FIT_QSPI_SMSTR"/>
+            <option id="MEMDRV_CFG_DEV0_MODE_DRVR.MEMDRV_DRVR_RX_FIT_SCI_SPI" display="SCI clock synchronous control FIT module(working in SPI mode)" value="MEMDRV_DRVR_RX_FIT_SCI_SPI"/>
+            <constraint display="Used for device 0 only" actionOnFail="disable">"${MEMDRV_CFG_DEV0_INCLUDED}" == "${MEMDRV_CFG_DEV0_INCLUDED.1}"</constraint>
+            <description>Defines the device driver used.
+Choose one of the following settings:
+MEMDRV_DRVR_RX_FIT_RSPI:
+RSPI clock synchronous control FIT module
+MEMDRV_DRVR_RX_FIT_QSPI_SMSTR:
+QSPI clock synchronous single-master control FIT module
+MEMDRV_DRVR_RX_FIT_SCI_SPI:
+SCI clock synchronous control FIT module(working in SPI mode)</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV1_MODE_DRVR" display="Device 1 driver" default="MEMDRV_DRVR_RX_FIT_RSPI" type="combobox">
+            <option id="MEMDRV_CFG_DEV1_MODE_DRVR.MEMDRV_DRVR_RX_FIT_RSPI" display="RSPI clock synchronous control FIT module" value="MEMDRV_DRVR_RX_FIT_RSPI"/>
+            <option id="MEMDRV_CFG_DEV1_MODE_DRVR.MEMDRV_DRVR_RX_FIT_QSPI_SMSTR" display="QSPI clock synchronous single-master control FIT module" value="MEMDRV_DRVR_RX_FIT_QSPI_SMSTR"/>
+            <option id="MEMDRV_CFG_DEV1_MODE_DRVR.MEMDRV_DRVR_RX_FIT_SCI_SPI" display="SCI clock synchronous control FIT module(working in SPI mode)" value="MEMDRV_DRVR_RX_FIT_SCI_SPI"/>
+            <constraint display="Used for device 1 only" actionOnFail="disable">"${MEMDRV_CFG_DEV1_INCLUDED}" == "${MEMDRV_CFG_DEV1_INCLUDED.1}"</constraint>
+            <description>Defines the device driver used.
+Choose one of the following settings:
+MEMDRV_DRVR_RX_FIT_RSPI:
+RSPI clock synchronous control FIT module
+MEMDRV_DRVR_RX_FIT_QSPI_SMSTR:
+QSPI clock synchronous single-master control FIT module
+MEMDRV_DRVR_RX_FIT_SCI_SPI:
+SCI clock synchronous control FIT module(working in SPI mode)</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV0_MODE_DRVR_CH" display="Device 0 driver channel number" default="MEMDRV_DRVR_CH0" type="combobox">
+            <option id="MEMDRV_CFG_DEV0_MODE_DRVR_CH.MEMDRV_DRVR_CH0" display="Channel 0" value="MEMDRV_DRVR_CH0"/>
+            <option id="MEMDRV_CFG_DEV0_MODE_DRVR_CH.MEMDRV_DRVR_CH1" display="Channel 1" value="MEMDRV_DRVR_CH1"/>
+            <option id="MEMDRV_CFG_DEV0_MODE_DRVR_CH.MEMDRV_DRVR_CH2" display="Channel 2" value="MEMDRV_DRVR_CH2"/>
+            <option id="MEMDRV_CFG_DEV0_MODE_DRVR_CH.MEMDRV_DRVR_CH3" display="Channel 3" value="MEMDRV_DRVR_CH3"/>
+            <option id="MEMDRV_CFG_DEV0_MODE_DRVR_CH.MEMDRV_DRVR_CH4" display="Channel 4" value="MEMDRV_DRVR_CH4"/>
+            <option id="MEMDRV_CFG_DEV0_MODE_DRVR_CH.MEMDRV_DRVR_CH5" display="Channel 5" value="MEMDRV_DRVR_CH5"/>
+            <option id="MEMDRV_CFG_DEV0_MODE_DRVR_CH.MEMDRV_DRVR_CH6" display="Channel 6" value="MEMDRV_DRVR_CH6"/>
+            <option id="MEMDRV_CFG_DEV0_MODE_DRVR_CH.MEMDRV_DRVR_CH7" display="Channel 7" value="MEMDRV_DRVR_CH7"/>
+            <option id="MEMDRV_CFG_DEV0_MODE_DRVR_CH.MEMDRV_DRVR_CH8" display="Channel 8" value="MEMDRV_DRVR_CH8"/>
+            <option id="MEMDRV_CFG_DEV0_MODE_DRVR_CH.MEMDRV_DRVR_CH9" display="Channel 9" value="MEMDRV_DRVR_CH9"/>
+            <option id="MEMDRV_CFG_DEV0_MODE_DRVR_CH.MEMDRV_DRVR_CH10" display="Channel 10" value="MEMDRV_DRVR_CH10"/>
+            <option id="MEMDRV_CFG_DEV0_MODE_DRVR_CH.MEMDRV_DRVR_CH11" display="Channel 11" value="MEMDRV_DRVR_CH11"/>
+            <option id="MEMDRV_CFG_DEV0_MODE_DRVR_CH.MEMDRV_DRVR_CH12" display="Channel 12" value="MEMDRV_DRVR_CH12"/>
+            <option id="MEMDRV_CFG_DEV0_MODE_DRVR_CH.MEMDRV_DRVR_CH13" display="Channel 13" value="MEMDRV_DRVR_CH13"/>
+            <option id="MEMDRV_CFG_DEV0_MODE_DRVR_CH.MEMDRV_DRVR_CH14" display="Channel 14" value="MEMDRV_DRVR_CH14"/>
+            <option id="MEMDRV_CFG_DEV0_MODE_DRVR_CH.MEMDRV_DRVR_CH15" display="Channel 15" value="MEMDRV_DRVR_CH15"/>
+            <constraint display="Used for device 0 only" actionOnFail="disable">"${MEMDRV_CFG_DEV0_INCLUDED}" == "${MEMDRV_CFG_DEV0_INCLUDED.1}"</constraint>
+            <description>Defines the channel number of the device driver used.
+Choose one of the following (CH0 to CH15):
+MEMDRV_DRVR_CH0
+MEMDRV_DRVR_CH1
+...
+MEMDRV_DRVR_CH15
+</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV1_MODE_DRVR_CH" display="Device 1 driver channel number" default="MEMDRV_DRVR_CH0" type="combobox">
+            <option id="MEMDRV_CFG_DEV1_MODE_DRVR_CH.MEMDRV_DRVR_CH0" display="Channel 0" value="MEMDRV_DRVR_CH0"/>
+            <option id="MEMDRV_CFG_DEV1_MODE_DRVR_CH.MEMDRV_DRVR_CH1" display="Channel 1" value="MEMDRV_DRVR_CH1"/>
+            <option id="MEMDRV_CFG_DEV1_MODE_DRVR_CH.MEMDRV_DRVR_CH2" display="Channel 2" value="MEMDRV_DRVR_CH2"/>
+            <option id="MEMDRV_CFG_DEV1_MODE_DRVR_CH.MEMDRV_DRVR_CH3" display="Channel 3" value="MEMDRV_DRVR_CH3"/>
+            <option id="MEMDRV_CFG_DEV1_MODE_DRVR_CH.MEMDRV_DRVR_CH4" display="Channel 4" value="MEMDRV_DRVR_CH4"/>
+            <option id="MEMDRV_CFG_DEV1_MODE_DRVR_CH.MEMDRV_DRVR_CH5" display="Channel 5" value="MEMDRV_DRVR_CH5"/>
+            <option id="MEMDRV_CFG_DEV1_MODE_DRVR_CH.MEMDRV_DRVR_CH6" display="Channel 6" value="MEMDRV_DRVR_CH6"/>
+            <option id="MEMDRV_CFG_DEV1_MODE_DRVR_CH.MEMDRV_DRVR_CH7" display="Channel 7" value="MEMDRV_DRVR_CH7"/>
+            <option id="MEMDRV_CFG_DEV1_MODE_DRVR_CH.MEMDRV_DRVR_CH8" display="Channel 8" value="MEMDRV_DRVR_CH8"/>
+            <option id="MEMDRV_CFG_DEV1_MODE_DRVR_CH.MEMDRV_DRVR_CH9" display="Channel 9" value="MEMDRV_DRVR_CH9"/>
+            <option id="MEMDRV_CFG_DEV1_MODE_DRVR_CH.MEMDRV_DRVR_CH10" display="Channel 10" value="MEMDRV_DRVR_CH10"/>
+            <option id="MEMDRV_CFG_DEV1_MODE_DRVR_CH.MEMDRV_DRVR_CH11" display="Channel 11" value="MEMDRV_DRVR_CH11"/>
+            <option id="MEMDRV_CFG_DEV1_MODE_DRVR_CH.MEMDRV_DRVR_CH12" display="Channel 12" value="MEMDRV_DRVR_CH12"/>
+            <option id="MEMDRV_CFG_DEV1_MODE_DRVR_CH.MEMDRV_DRVR_CH13" display="Channel 13" value="MEMDRV_DRVR_CH13"/>
+            <option id="MEMDRV_CFG_DEV1_MODE_DRVR_CH.MEMDRV_DRVR_CH14" display="Channel 14" value="MEMDRV_DRVR_CH14"/>
+            <option id="MEMDRV_CFG_DEV1_MODE_DRVR_CH.MEMDRV_DRVR_CH15" display="Channel 15" value="MEMDRV_DRVR_CH15"/>
+            <constraint display="Used for device 1 only" actionOnFail="disable">"${MEMDRV_CFG_DEV1_INCLUDED}" == "${MEMDRV_CFG_DEV1_INCLUDED.1}"</constraint>
+            <description>Defines the channel number of the device driver used.
+Choose one of the following (CH0 to CH15):
+MEMDRV_DRVR_CH0
+MEMDRV_DRVR_CH1
+...
+MEMDRV_DRVR_CH15
+</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV0_TYPE" display="Device 0 type" default="0" type="combobox">
+            <option id="MEMDRV_CFG_DEV0_TYPE.0" display="NOR FLASH or EEPROM" value="0"/>
+            <option id="MEMDRV_CFG_DEV0_TYPE.1" display="NAND FLASH" value="1"/>
+            <constraint display="Used for device 0 only" actionOnFail="disable">"${MEMDRV_CFG_DEV0_INCLUDED}" == "${MEMDRV_CFG_DEV0_INCLUDED.1}"</constraint>
+            <description></description>
+        </property>
+        <property id="MEMDRV_CFG_DEV1_TYPE" display="Device 1 type" default="0" type="combobox">
+            <option id="MEMDRV_CFG_DEV1_TYPE.0" display="NOR FLASH or EEPROM" value="0"/>
+            <option id="MEMDRV_CFG_DEV1_TYPE.1" display="NAND FLASH" value="1"/>
+            <constraint display="Used for device 1 only" actionOnFail="disable">"${MEMDRV_CFG_DEV1_INCLUDED}" == "${MEMDRV_CFG_DEV1_INCLUDED.1}"</constraint>
+            <description></description>
+        </property>
+        <property id="MEMDRV_CFG_DEV0_BR" display="Device 0 transfer rate for command transmission." default="1000000" type="textbox">
+            <constraint display="Used for device 0 only" actionOnFail="disable">"${MEMDRV_CFG_DEV0_INCLUDED}" == "${MEMDRV_CFG_DEV0_INCLUDED.1}"</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${MEMDRV_CFG_DEV0_BR}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 30000000" actionOnFail="error">("${MEMDRV_CFG_DEV0_BR}" &gt;= 0) &amp;&amp; ("${MEMDRV_CFG_DEV0_BR}" &lt;= 30000000)</constraint>
+            <description>Sets the bit rate used when issuing commands.</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV0_BR_WRITE_DATA" display="Device 0 Transfer rate for data transmission." default="1000000" type="textbox">
+            <constraint display="Used for device 0 only" actionOnFail="disable">"${MEMDRV_CFG_DEV0_INCLUDED}" == "${MEMDRV_CFG_DEV0_INCLUDED.1}"</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${MEMDRV_CFG_DEV0_BR_WRITE_DATA}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 30000000" actionOnFail="error">("${MEMDRV_CFG_DEV0_BR_WRITE_DATA}" &gt;= 0) &amp;&amp; ("${MEMDRV_CFG_DEV0_BR_WRITE_DATA}" &lt;= 30000000)</constraint>
+            <description>Sets the bit rate used when outputting data.</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV0_BR_READ_DATA" display="Device 0 Transfer rate for data reception." default="1000000" type="textbox">
+            <constraint display="Used for device 0 only" actionOnFail="disable">"${MEMDRV_CFG_DEV0_INCLUDED}" == "${MEMDRV_CFG_DEV0_INCLUDED.1}"</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${MEMDRV_CFG_DEV0_BR_READ_DATA}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 30000000" actionOnFail="error">("${MEMDRV_CFG_DEV0_BR_READ_DATA}" &gt;= 0) &amp;&amp; ("${MEMDRV_CFG_DEV0_BR_READ_DATA}" &lt;= 30000000)</constraint>
+            <description>Sets the bit rate used when inputting data.</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV1_BR" display="Device 1 transfer rate for command transmission." default="1000000" type="textbox">
+            <constraint display="Used for device 1 only" actionOnFail="disable">"${MEMDRV_CFG_DEV1_INCLUDED}" == "${MEMDRV_CFG_DEV1_INCLUDED.1}"</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${MEMDRV_CFG_DEV1_BR}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 30000000" actionOnFail="error">("${MEMDRV_CFG_DEV1_BR}" &gt;= 0) &amp;&amp; ("${MEMDRV_CFG_DEV1_BR}" &lt;= 30000000)</constraint>
+            <description>Sets the bit rate used when issuing commands.</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV1_BR_WRITE_DATA" display="Device 1 Transfer rate for data transmission." default="1000000" type="textbox">
+            <constraint display="Used for device 1 only" actionOnFail="disable">"${MEMDRV_CFG_DEV1_INCLUDED}" == "${MEMDRV_CFG_DEV1_INCLUDED.1}"</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${MEMDRV_CFG_DEV1_BR_WRITE_DATA}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 30000000" actionOnFail="error">("${MEMDRV_CFG_DEV1_BR_WRITE_DATA}" &gt;= 0) &amp;&amp; ("${MEMDRV_CFG_DEV1_BR_WRITE_DATA}" &lt;= 30000000)</constraint>
+            <description>Sets the bit rate used when outputting data.</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV1_BR_READ_DATA" display="Device 1 Transfer rate for data reception." default="1000000" type="textbox">
+            <constraint display="Used for device 1 only" actionOnFail="disable">"${MEMDRV_CFG_DEV1_INCLUDED}" == "${MEMDRV_CFG_DEV1_INCLUDED.1}"</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${MEMDRV_CFG_DEV1_BR_READ_DATA}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 30000000" actionOnFail="error">("${MEMDRV_CFG_DEV1_BR_READ_DATA}" &gt;= 0) &amp;&amp; ("${MEMDRV_CFG_DEV1_BR_READ_DATA}" &lt;= 30000000)</constraint>
+            <description>Sets the bit rate used when inputting data.</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV0_DMAC_CH_NO_Tx" display="Device 0 DMAC for transmission and reception" default="0" type="combobox">
+            <option id="MEMDRV_CFG_DEV0_DMAC_CH_NO_Tx.0" display="Channel 0" value="0"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_CH_NO_Tx.1" display="Channel 1" value="1"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_CH_NO_Tx.2" display="Channel 2" value="2"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_CH_NO_Tx.3" display="Channel 3" value="3"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_CH_NO_Tx.4" display="Channel 4" value="4"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_CH_NO_Tx.5" display="Channel 5" value="5"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_CH_NO_Tx.6" display="Channel 6" value="6"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_CH_NO_Tx.7" display="Channel 7" value="7"/>
+            <constraint display="Used for device 0 only" actionOnFail="disable">"${MEMDRV_CFG_DEV0_INCLUDED}" == "${MEMDRV_CFG_DEV0_INCLUDED.1}"</constraint>
+            <constraint display="Used for the DAMC FIT module only" actionOnFail="disable">"${MEMDRV_CFG_DEV0_MODE_TRNS}" == "${MEMDRV_CFG_DEV0_MODE_TRNS.MEMDRV_TRNS_DMAC}"</constraint>
+            <description>If the DAMC FIT module will be used, specify the DMAC channel number.
+This DMAC channel is used when transferring data from the MCU's on-chip RAM to the data buffer of the serial communication function.</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV0_DMAC_CH_NO_Rx" display="Device 0 DMAC for reception" default="1" type="combobox">
+            <option id="MEMDRV_CFG_DEV0_DMAC_CH_NO_Rx.0" display="Channel 0" value="0"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_CH_NO_Rx.1" display="Channel 1" value="1"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_CH_NO_Rx.2" display="Channel 2" value="2"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_CH_NO_Rx.3" display="Channel 3" value="3"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_CH_NO_Rx.4" display="Channel 4" value="4"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_CH_NO_Rx.5" display="Channel 5" value="5"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_CH_NO_Rx.6" display="Channel 6" value="6"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_CH_NO_Rx.7" display="Channel 7" value="7"/>
+            <constraint display="Used for device 0 only" actionOnFail="disable">"${MEMDRV_CFG_DEV0_INCLUDED}" == "${MEMDRV_CFG_DEV0_INCLUDED.1}"</constraint>
+            <constraint display="Used for the DAMC FIT module only" actionOnFail="disable">"${MEMDRV_CFG_DEV0_MODE_TRNS}" == "${MEMDRV_CFG_DEV0_MODE_TRNS.MEMDRV_TRNS_DMAC}"</constraint>
+            <description>If the DAMC FIT module will be used, specify the DMAC channel number.
+This DMAC channel is used when transferring data from the data buffer of the serial communication function to the MCU's on-chip RAM.</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV1_DMAC_CH_NO_Tx" display="Device 1 DMAC for transmission and reception" default="2" type="combobox">
+            <option id="MEMDRV_CFG_DEV1_DMAC_CH_NO_Tx.0" display="Channel 0" value="0"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_CH_NO_Tx.1" display="Channel 1" value="1"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_CH_NO_Tx.2" display="Channel 2" value="2"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_CH_NO_Tx.3" display="Channel 3" value="3"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_CH_NO_Tx.4" display="Channel 4" value="4"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_CH_NO_Tx.5" display="Channel 5" value="5"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_CH_NO_Tx.6" display="Channel 6" value="6"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_CH_NO_Tx.7" display="Channel 7" value="7"/>
+            <constraint display="Used for device 1 only" actionOnFail="disable">"${MEMDRV_CFG_DEV1_INCLUDED}" == "${MEMDRV_CFG_DEV1_INCLUDED.1}"</constraint>
+            <constraint display="Used for the DAMC FIT module only" actionOnFail="disable">"${MEMDRV_CFG_DEV1_MODE_TRNS}" == "${MEMDRV_CFG_DEV1_MODE_TRNS.MEMDRV_TRNS_DMAC}"</constraint>
+            <description>If the DAMC FIT module will be used, specify the DMAC channel number.
+This DMAC channel is used when transferring data from the MCU's on-chip RAM to the data buffer of the serial communication function.</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV1_DMAC_CH_NO_Rx" display="Device 1 DMAC for reception" default="3" type="combobox">
+            <option id="MEMDRV_CFG_DEV1_DMAC_CH_NO_Rx.0" display="Channel 0" value="0"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_CH_NO_Rx.1" display="Channel 1" value="1"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_CH_NO_Rx.2" display="Channel 2" value="2"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_CH_NO_Rx.3" display="Channel 3" value="3"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_CH_NO_Rx.4" display="Channel 4" value="4"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_CH_NO_Rx.5" display="Channel 5" value="5"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_CH_NO_Rx.6" display="Channel 6" value="6"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_CH_NO_Rx.7" display="Channel 7" value="7"/>
+            <constraint display="Used for device 1 only" actionOnFail="disable">"${MEMDRV_CFG_DEV1_INCLUDED}" == "${MEMDRV_CFG_DEV1_INCLUDED.1}"</constraint>
+            <constraint display="Used for the DAMC FIT module only" actionOnFail="disable">"${MEMDRV_CFG_DEV1_MODE_TRNS}" == "${MEMDRV_CFG_DEV1_MODE_TRNS.MEMDRV_TRNS_DMAC}"</constraint>
+            <description>If the DAMC FIT module will be used, specify the DMAC channel number.
+This DMAC channel is used when transferring data from the data buffer of the serial communication function to the MCU's on-chip RAM.</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Tx" display="Device 0 DMAC interrupt priority level for transmission" default="10" type="combobox">
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Tx.0" display="Level 0" value="0"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Tx.1" display="Level 1" value="1"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Tx.2" display="Level 2" value="2"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Tx.3" display="Level 3" value="3"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Tx.4" display="Level 4" value="4"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Tx.5" display="Level 5" value="5"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Tx.6" display="Level 6" value="6"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Tx.7" display="Level 7" value="7"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Tx.8" display="Level 8" value="8"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Tx.9" display="Level 9" value="9"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Tx.10" display="Level 10" value="10"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Tx.11" display="Level 11" value="11"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Tx.12" display="Level 12" value="12"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Tx.13" display="Level 13" value="13"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Tx.14" display="Level 14" value="14"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Tx.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="Used for device 0 only" actionOnFail="disable">"${MEMDRV_CFG_DEV0_INCLUDED}" == "${MEMDRV_CFG_DEV0_INCLUDED.1}"</constraint>
+            <constraint display="Used for the DAMC FIT module only" actionOnFail="disable">"${MEMDRV_CFG_DEV0_MODE_TRNS}" == "${MEMDRV_CFG_DEV0_MODE_TRNS.MEMDRV_TRNS_DMAC}"</constraint>
+            <description>If the DAMC FIT module will be used, specify the DMAC interrupt priority level.
+This DMAC channel is used when transferring data from the MCU's on-chip RAM to the data buffer of the serial communication function.</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Rx" display="Device 0 DMAC interrupt priority level for reception" default="10" type="combobox">
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Rx.0" display="Level 0" value="0"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Rx.1" display="Level 1" value="1"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Rx.2" display="Level 2" value="2"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Rx.3" display="Level 3" value="3"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Rx.4" display="Level 4" value="4"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Rx.5" display="Level 5" value="5"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Rx.6" display="Level 6" value="6"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Rx.7" display="Level 7" value="7"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Rx.8" display="Level 8" value="8"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Rx.9" display="Level 9" value="9"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Rx.10" display="Level 10" value="10"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Rx.11" display="Level 11" value="11"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Rx.12" display="Level 12" value="12"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Rx.13" display="Level 13" value="13"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Rx.14" display="Level 14" value="14"/>
+            <option id="MEMDRV_CFG_DEV0_DMAC_INT_PRL_Rx.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="Used for device 0 only" actionOnFail="disable">"${MEMDRV_CFG_DEV0_INCLUDED}" == "${MEMDRV_CFG_DEV0_INCLUDED.1}"</constraint>
+            <constraint display="Used for the DAMC FIT module only" actionOnFail="disable">"${MEMDRV_CFG_DEV0_MODE_TRNS}" == "${MEMDRV_CFG_DEV0_MODE_TRNS.MEMDRV_TRNS_DMAC}"</constraint>
+            <description>If the DAMC FIT module will be used, specify the DMAC interrupt priority level.
+This DMAC channel is used when transferring data from the data buffer of the serial communication function to the MCU's on-chip RAM.</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Tx" display="Device 1 DMAC interrupt priority level for transmission" default="10" type="combobox">
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Tx.0" display="Level 0" value="0"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Tx.1" display="Level 1" value="1"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Tx.2" display="Level 2" value="2"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Tx.3" display="Level 3" value="3"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Tx.4" display="Level 4" value="4"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Tx.5" display="Level 5" value="5"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Tx.6" display="Level 6" value="6"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Tx.7" display="Level 7" value="7"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Tx.8" display="Level 8" value="8"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Tx.9" display="Level 9" value="9"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Tx.10" display="Level 10" value="10"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Tx.11" display="Level 11" value="11"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Tx.12" display="Level 12" value="12"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Tx.13" display="Level 13" value="13"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Tx.14" display="Level 14" value="14"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Tx.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="Used for device 1 only" actionOnFail="disable">"${MEMDRV_CFG_DEV1_INCLUDED}" == "${MEMDRV_CFG_DEV1_INCLUDED.1}"</constraint>
+            <constraint display="Used for the DAMC FIT module only" actionOnFail="disable">"${MEMDRV_CFG_DEV1_MODE_TRNS}" == "${MEMDRV_CFG_DEV1_MODE_TRNS.MEMDRV_TRNS_DMAC}"</constraint>
+            <description>If the DAMC FIT module will be used, specify the DMAC interrupt priority level.
+This DMAC channel is used when transferring data from the MCU's on-chip RAM to the data buffer of the serial communication function.</description>
+        </property>
+        <property id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Rx" display="Device 1 DMAC interrupt priority level for reception" default="10" type="combobox">
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Rx.0" display="Level 0" value="0"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Rx.1" display="Level 1" value="1"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Rx.2" display="Level 2" value="2"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Rx.3" display="Level 3" value="3"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Rx.4" display="Level 4" value="4"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Rx.5" display="Level 5" value="5"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Rx.6" display="Level 6" value="6"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Rx.7" display="Level 7" value="7"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Rx.8" display="Level 8" value="8"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Rx.9" display="Level 9" value="9"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Rx.10" display="Level 10" value="10"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Rx.11" display="Level 11" value="11"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Rx.12" display="Level 12" value="12"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Rx.13" display="Level 13" value="13"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Rx.14" display="Level 14" value="14"/>
+            <option id="MEMDRV_CFG_DEV1_DMAC_INT_PRL_Rx.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="Used for device 1 only" actionOnFail="disable">"${MEMDRV_CFG_DEV1_INCLUDED}" == "${MEMDRV_CFG_DEV1_INCLUDED.1}"</constraint>
+            <constraint display="Used for the DAMC FIT module only" actionOnFail="disable">"${MEMDRV_CFG_DEV1_MODE_TRNS}" == "${MEMDRV_CFG_DEV1_MODE_TRNS.MEMDRV_TRNS_DMAC}"</constraint>
+            <description>If the DAMC FIT module will be used, specify the DMAC interrupt priority level.
+This DMAC channel is used when transferring data from the data buffer of the serial communication function to the MCU's on-chip RAM.</description>
+        </property>
+        <property id="MEMDRV_CFG_PARAM_CHECKING_ENABLE" display="Parameter check" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+            <option id="MEMDRV_CFG_PARAM_CHECKING_ENABLE.0" display="Disable parameter checks" value="0"/>
+            <option id="MEMDRV_CFG_PARAM_CHECKING_ENABLE.1" display="Enable parameter checks" value="1"/>
+            <option id="MEMDRV_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="Use system default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <description>Selects whether or not parameter check processing is included in the code.
+Parameter check processing is omitted from the code if "0" is selected, resulting in a smaller code size.
+A setting of "0" means that parameter check processing is omitted from the code.
+A setting of "1" means that parameter check processing is included in the code.</description>
+        </property>
+        <property id="MEMDRV_CFG_LONGQ_ENABLE" display="Enable debugging information" default="0" type="combobox">
+            <option id="MEMDRV_CFG_LONGQ_ENABLE.0" display="disabled" value="0"/>
+            <option id="MEMDRV_CFG_LONGQ_ENABLE.1" display="enabled" value="1"/>
+            <description>When using the FIT module's BSP environment, you can specify whether or not to use debug error log acquisition processing (1: enabled, 0: disabled).
+When disabled, the processing is omitted from the code.
+When enabled, the processing is included in the code.
+The separate LONGQ FIT module is required in order to use this option. Also, enable #define xxx_LONGQ_ENABLE in the device driver.</description>
+        </property>
+    </configuration>
+</module>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="DTC_CFG_PARAM_CHECKING_ENABLE" display="Parameter check" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+            <option id="DTC_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="System Default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <option id="DTC_CFG_PARAM_CHECKING_ENABLE.0" display="Not" value="0"/>
+            <option id="DTC_CFG_PARAM_CHECKING_ENABLE.1" display="Include" value="1"/>
+            <description>Selects whether to include parameter checking in the code.
+BSP_CFG_PARAM_CHECKING_ENABLE = System default.
+0 = compile out parameter checking.
+1 = includes parameter checking.</description>
+        </property>
+        <property id="DTC_CFG_DISABLE_ALL_ACT_SOURCE" display="DTCER control" default="DTC_ENABLE" type="combobox">
+            <option id="DTC_CFG_DISABLE_ALL_ACT_SOURCE.DTC_DISABLE" display="Do nothing" value="DTC_DISABLE"/>
+            <option id="DTC_CFG_DISABLE_ALL_ACT_SOURCE.DTC_ENABLE" display="Clear all DTCER registers in R_DTC_Open()" value="DTC_ENABLE"/>
+            <description>SPECIFY WHETHER THE DTCER REGISTERS WILL BE CLEARED IN R_DTC_OPEN()
+- DTC_DISABLE : Do nothing.
+- DTC_ENABLE  : Clear all DTCER registers in R_DTC_Open().</description>
+        </property>
+        <property id="DTC_CFG_SHORT_ADDRESS_MODE" display="Address mode" default="DTC_DISABLE" type="combobox">
+            <option id="DTC_CFG_SHORT_ADDRESS_MODE.DTC_DISABLE" display="Full address mode" value="DTC_DISABLE"/>
+            <option id="DTC_CFG_SHORT_ADDRESS_MODE.DTC_ENABLE" display="Short address mode" value="DTC_ENABLE"/>
+            <description>SPECIFY WHICH ADDRESS MODE IS SUPPORTED BY DTC
+- DTC_DISABLE : Select the Full address mode.
+- DTC_ENABLE  : Select the Short address mode.</description>
+        </property>
+        <property id="DTC_CFG_TRANSFER_DATA_READ_SKIP_EN" display="Transfer Data Read Skip" default="DTC_ENABLE" type="combobox">
+            <option id="DTC_CFG_TRANSFER_DATA_READ_SKIP_EN.DTC_DISABLE" display="Disable transfer data read Skip" value="DTC_DISABLE"/>
+            <option id="DTC_CFG_TRANSFER_DATA_READ_SKIP_EN.DTC_ENABLE" display="Enable transfer data read skip" value="DTC_ENABLE"/>
+            <description>SPECIFY WHETHER THE TRANSFER DATA READ SKIP IS ENABLED
+- DTC_DISABLE : Disable Transfer Data Read Skip.
+- DTC_ENABLE  : Enable Transfer Data Read Skip. </description>
+        </property>
+        <property id="DTC_CFG_USE_DMAC_FIT_MODULE" display="DMAC FIT check" default="DTC_ENABLE" type="combobox">
+            <option id="DTC_CFG_USE_DMAC_FIT_MODULE.DTC_DISABLE" display="DMAC FIT module is not used with DTC FIT module." value="DTC_DISABLE"/>
+            <option id="DTC_CFG_USE_DMAC_FIT_MODULE.DTC_ENABLE" display="DMAC FIT module is used with DTC FIT module." value="DTC_ENABLE"/>
+            <description>SPECIFY WHETHER THE DMAC FIT MODULE IS USED WITH DTC FIT MODULE
+- DTC_DISABLE : DMAC FIT module is not used with DTC FIT module.
+- DTC_ENABLE  : DMAC FIT module is used with DTC FIT module.
+</description>
+        </property>
+        <property id="DTC_CFG_USE_SEQUENCE_TRANSFER" display="Sequence transfer" default="DTC_DISABLE" type="combobox">
+            <option id="DTC_CFG_USE_SEQUENCE_TRANSFER.DTC_DISABLE" display="Sequence transfer not used" value="DTC_DISABLE"/>
+            <option id="DTC_CFG_USE_SEQUENCE_TRANSFER.DTC_ENABLE" display="Sequence transfer used" value="DTC_ENABLE"/>
+            <description>SPECIFY WHETHER THE SEQUENCE TRANSFER IS USED
+Also, set DTC_DISABLE to DTC_CFG_SHORT_ADDRESS_MODE.
+- DTC_DISABLE : Not use sequence transfer.
+- DTC_ENABLE  : Use sequence transfer.</description>
+        </property>
+    </configuration>
+</module>

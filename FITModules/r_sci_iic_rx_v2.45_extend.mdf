@@ -1,0 +1,1156 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate>r_pinset_type1</fileTemplate>
+    <fileTemplatePath>r_config/r_sci_iic_rx_pin_config.h</fileTemplatePath>
+    <resourceInfo>
+      <peripheral name="SCI">
+        <channel number="SCI0">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${SCI_IIC_CFG_CH0_INCLUDED} == ${SCI_IIC_CFG_CH0_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSCL0">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI0_SSCL0_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI0_SSCL0_BIT" value="bitnum"/>
+          </pin>
+          <pin name="SSDA0">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI0_SSDA0_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI0_SSDA0_BIT" value="bitnum"/>
+          </pin>
+        </channel>
+        <channel number="SCI1">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${SCI_IIC_CFG_CH1_INCLUDED} == ${SCI_IIC_CFG_CH1_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSCL1">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI1_SSCL1_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI1_SSCL1_BIT" value="bitnum"/>
+          </pin>
+          <pin name="SSDA1">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI1_SSDA1_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI1_SSDA1_BIT" value="bitnum"/>
+          </pin>
+        </channel>
+        <channel number="SCI2">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${SCI_IIC_CFG_CH2_INCLUDED} == ${SCI_IIC_CFG_CH2_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSCL2">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI2_SSCL2_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI2_SSCL2_BIT" value="bitnum"/>
+          </pin>
+          <pin name="SSDA2">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI2_SSDA2_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI2_SSDA2_BIT" value="bitnum"/>
+          </pin>
+        </channel>
+        <channel number="SCI3">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${SCI_IIC_CFG_CH3_INCLUDED} == ${SCI_IIC_CFG_CH3_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSCL3">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI3_SSCL3_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI3_SSCL3_BIT" value="bitnum"/>
+          </pin>
+          <pin name="SSDA3">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI3_SSDA3_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI3_SSDA3_BIT" value="bitnum"/>
+          </pin>
+        </channel>
+        <channel number="SCI4">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${SCI_IIC_CFG_CH4_INCLUDED} == ${SCI_IIC_CFG_CH4_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSCL4">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI4_SSCL4_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI4_SSCL4_BIT" value="bitnum"/>
+          </pin>
+          <pin name="SSDA4">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI4_SSDA4_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI4_SSDA4_BIT" value="bitnum"/>
+          </pin>
+        </channel>
+        <channel number="SCI5">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${SCI_IIC_CFG_CH5_INCLUDED} == ${SCI_IIC_CFG_CH5_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSCL5">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI5_SSCL5_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI5_SSCL5_BIT" value="bitnum"/>
+          </pin>
+          <pin name="SSDA5">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI5_SSDA5_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI5_SSDA5_BIT" value="bitnum"/>
+          </pin>
+        </channel>
+        <channel number="SCI6">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${SCI_IIC_CFG_CH6_INCLUDED} == ${SCI_IIC_CFG_CH6_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSCL6">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI6_SSCL6_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI6_SSCL6_BIT" value="bitnum"/>
+          </pin>
+          <pin name="SSDA6">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI6_SSDA6_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI6_SSDA6_BIT" value="bitnum"/>
+          </pin>
+        </channel>
+        <channel number="SCI7">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${SCI_IIC_CFG_CH7_INCLUDED} == ${SCI_IIC_CFG_CH7_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSCL7">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI7_SSCL7_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI7_SSCL7_BIT" value="bitnum"/>
+          </pin>
+          <pin name="SSDA7">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI7_SSDA7_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI7_SSDA7_BIT" value="bitnum"/>
+          </pin>
+        </channel>
+        <channel number="SCI8">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${SCI_IIC_CFG_CH8_INCLUDED} == ${SCI_IIC_CFG_CH8_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSCL8">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI8_SSCL8_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI8_SSCL8_BIT" value="bitnum"/>
+          </pin>
+          <pin name="SSDA8">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI8_SSDA8_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI8_SSDA8_BIT" value="bitnum"/>
+          </pin>
+        </channel>
+        <channel number="SCI9">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${SCI_IIC_CFG_CH9_INCLUDED} == ${SCI_IIC_CFG_CH9_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSCL9">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI9_SSCL9_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI9_SSCL9_BIT" value="bitnum"/>
+          </pin>
+          <pin name="SSDA9">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI9_SSDA9_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI9_SSDA9_BIT" value="bitnum"/>
+          </pin>
+        </channel>
+        <channel number="SCI10">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${SCI_IIC_CFG_CH10_INCLUDED} == ${SCI_IIC_CFG_CH10_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSCL10">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI10_SSCL10_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI10_SSCL10_BIT" value="bitnum"/>
+          </pin>
+          <pin name="SSDA10">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI10_SSDA10_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI10_SSDA10_BIT" value="bitnum"/>
+          </pin>
+        </channel>
+        <channel number="SCI11">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${SCI_IIC_CFG_CH11_INCLUDED} == ${SCI_IIC_CFG_CH11_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSCL11">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI11_SSCL11_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI11_SSCL11_BIT" value="bitnum"/>
+          </pin>
+          <pin name="SSDA11">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI11_SSDA11_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI11_SSDA11_BIT" value="bitnum"/>
+          </pin>
+        </channel>
+        <channel number="SCI12">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${SCI_IIC_CFG_CH12_INCLUDED} == ${SCI_IIC_CFG_CH12_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSCL12">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI12_SSCL12_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI12_SSCL12_BIT" value="bitnum"/>
+          </pin>
+          <pin name="SSDA12">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_SCI_IIC_CFG_SCI12_SSDA12_PORT" value="portnum"/>
+            <macro name="R_SCI_IIC_CFG_SCI12_SSDA12_BIT" value="bitnum"/>
+          </pin>
+        </channel>
+      </peripheral>
+    </resourceInfo>
+    <configuration>
+        <property id="SCI_IIC_CFG_PARAM_CHECKING_ENABLE" display="Set parameter checking enable" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="System Default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <option id="SCI_IIC_CFG_PARAM_CHECKING_ENABLE.0" display="Not" value="0"/>
+            <option id="SCI_IIC_CFG_PARAM_CHECKING_ENABLE.1" display="Include" value="1"/>
+            <description>Selectable whether to include parameter checking in the code.
+BSP_CFG_PARAM_CHECKING_ENABLE = System default.
+0 = Compile out parameter checking.
+1 = Includes parameter checking.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH0_INCLUDED" display="MCU supported channels for CH0" default="0" type="combobox">
+            <option id="SCI_IIC_CFG_CH0_INCLUDED.0" display="Not supported" value="0"/>
+            <option id="SCI_IIC_CFG_CH0_INCLUDED.1" display="Supported" value="1"/>
+            <description>Selectable whether to use available channels.
+0 = Not supported.
+1 = Supported.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH1_INCLUDED" display="MCU supported channels for CH1" default="0" type="combobox">
+            <option id="SCI_IIC_CFG_CH1_INCLUDED.0" display="Not supported" value="0"/>
+            <option id="SCI_IIC_CFG_CH1_INCLUDED.1" display="Supported" value="1"/>
+            <description>Selectable whether to use available channels.
+0 = Not supported.
+1 = Supported.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH2_INCLUDED" display="MCU supported channels for CH2" default="0" type="combobox">
+            <option id="SCI_IIC_CFG_CH2_INCLUDED.0" display="Not supported" value="0"/>
+            <option id="SCI_IIC_CFG_CH2_INCLUDED.1" display="Supported" value="1"/>
+            <description>Selectable whether to use available channels.
+0 = Not supported.
+1 = Supported.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH3_INCLUDED" display="MCU supported channels for CH3" default="0" type="combobox">
+            <option id="SCI_IIC_CFG_CH3_INCLUDED.0" display="Not supported" value="0"/>
+            <option id="SCI_IIC_CFG_CH3_INCLUDED.1" display="Supported" value="1"/>
+            <description>Selectable whether to use available channels.
+0 = Not supported.
+1 = Supported.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH4_INCLUDED" display="MCU supported channels for CH4" default="0" type="combobox">
+            <option id="SCI_IIC_CFG_CH4_INCLUDED.0" display="Not supported" value="0"/>
+            <option id="SCI_IIC_CFG_CH4_INCLUDED.1" display="Supported" value="1"/>
+            <description>Selectable whether to use available channels.
+0 = Not supported.
+1 = Supported.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH5_INCLUDED" display="MCU supported channels for CH5" default="0" type="combobox">
+            <option id="SCI_IIC_CFG_CH5_INCLUDED.0" display="Not supported" value="0"/>
+            <option id="SCI_IIC_CFG_CH5_INCLUDED.1" display="Supported" value="1"/>
+            <description>Selectable whether to use available channels.
+0 = Not supported.
+1 = Supported.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH6_INCLUDED" display="MCU supported channels for CH6" default="0" type="combobox">
+            <option id="SCI_IIC_CFG_CH6_INCLUDED.0" display="Not supported" value="0"/>
+            <option id="SCI_IIC_CFG_CH6_INCLUDED.1" display="Supported" value="1"/>
+            <description>Selectable whether to use available channels.
+0 = Not supported.
+1 = Supported.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH7_INCLUDED" display="MCU supported channels for CH7" default="0" type="combobox">
+            <option id="SCI_IIC_CFG_CH7_INCLUDED.0" display="Not supported" value="0"/>
+            <option id="SCI_IIC_CFG_CH7_INCLUDED.1" display="Supported" value="1"/>
+            <description>Selectable whether to use available channels.
+0 = Not supported.
+1 = Supported.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH8_INCLUDED" display="MCU supported channels for CH8" default="0" type="combobox">
+            <option id="SCI_IIC_CFG_CH8_INCLUDED.0" display="Not supported" value="0"/>
+            <option id="SCI_IIC_CFG_CH8_INCLUDED.1" display="Supported" value="1"/>
+            <description>Selectable whether to use available channels.
+0 = Not supported.
+1 = Supported.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH9_INCLUDED" display="MCU supported channels for CH9" default="0" type="combobox">
+            <option id="SCI_IIC_CFG_CH9_INCLUDED.0" display="Not supported" value="0"/>
+            <option id="SCI_IIC_CFG_CH9_INCLUDED.1" display="Supported" value="1"/>
+            <description>Selectable whether to use available channels.
+0 = Not supported.
+1 = Supported.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH10_INCLUDED" display="MCU supported channels for CH10" default="0" type="combobox">
+            <option id="SCI_IIC_CFG_CH10_INCLUDED.0" display="Not supported" value="0"/>
+            <option id="SCI_IIC_CFG_CH10_INCLUDED.1" display="Supported" value="1"/>
+            <description>Selectable whether to use available channels.
+0 = Not supported.
+1 = Supported.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH11_INCLUDED" display="MCU supported channels for CH11" default="0" type="combobox">
+            <option id="SCI_IIC_CFG_CH11_INCLUDED.0" display="Not supported" value="0"/>
+            <option id="SCI_IIC_CFG_CH11_INCLUDED.1" display="Supported" value="1"/>
+            <description>Selectable whether to use available channels.
+0 = Not supported.
+1 = Supported.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH12_INCLUDED" display="MCU supported channels for CH12" default="0" type="combobox">
+            <option id="SCI_IIC_CFG_CH12_INCLUDED.0" display="Not supported" value="0"/>
+            <option id="SCI_IIC_CFG_CH12_INCLUDED.1" display="Supported" value="1"/>
+            <description>Selectable whether to use available channels.
+0 = Not supported.
+1 = Supported.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH0_BITRATE_BPS" display="SCI IIC bitrate (bps) for CH0" default="384000" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH0_INCLUDED} == ${SCI_IIC_CFG_CH0_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH0_BITRATE_BPS}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 384000" actionOnFail="error">("${SCI_IIC_CFG_CH0_BITRATE_BPS}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH0_BITRATE_BPS}" &lt;= 384000)</constraint>
+            <description>Specifies the bit rate. Specify a value less than or equal to 384000 (384 kbit/sec.).
+The bit rate setting should be based on this definition value and the clock setting definition value specified by RX Family Board Support Package Module (BSP FIT module ). Depending on the target device to be used and the BSP FIT module clock setting, the actual bit rate may differ from the expected bit rate.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH1_BITRATE_BPS" display="SCI IIC bitrate (bps) for CH1" default="384000" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH1_INCLUDED} == ${SCI_IIC_CFG_CH1_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH1_BITRATE_BPS}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 384000" actionOnFail="error">("${SCI_IIC_CFG_CH1_BITRATE_BPS}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH1_BITRATE_BPS}" &lt;= 384000)</constraint>
+            <description>Specifies the bit rate. Specify a value less than or equal to 384000 (384 kbit/sec.).
+The bit rate setting should be based on this definition value and the clock setting definition value specified by RX Family Board Support Package Module (BSP FIT module ). Depending on the target device to be used and the BSP FIT module clock setting, the actual bit rate may differ from the expected bit rate.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH2_BITRATE_BPS" display="SCI IIC bitrate (bps) for CH2" default="384000" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH2_INCLUDED} == ${SCI_IIC_CFG_CH2_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH2_BITRATE_BPS}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 384000" actionOnFail="error">("${SCI_IIC_CFG_CH2_BITRATE_BPS}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH2_BITRATE_BPS}" &lt;= 384000)</constraint>
+            <description>Specifies the bit rate. Specify a value less than or equal to 384000 (384 kbit/sec.).
+The bit rate setting should be based on this definition value and the clock setting definition value specified by RX Family Board Support Package Module (BSP FIT module ). Depending on the target device to be used and the BSP FIT module clock setting, the actual bit rate may differ from the expected bit rate.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH3_BITRATE_BPS" display="SCI IIC bitrate (bps) for CH3" default="384000" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH3_INCLUDED} == ${SCI_IIC_CFG_CH3_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH3_BITRATE_BPS}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 384000" actionOnFail="error">("${SCI_IIC_CFG_CH3_BITRATE_BPS}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH3_BITRATE_BPS}" &lt;= 384000)</constraint>
+            <description>Specifies the bit rate. Specify a value less than or equal to 384000 (384 kbit/sec.).
+The bit rate setting should be based on this definition value and the clock setting definition value specified by RX Family Board Support Package Module (BSP FIT module ). Depending on the target device to be used and the BSP FIT module clock setting, the actual bit rate may differ from the expected bit rate.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH4_BITRATE_BPS" display="SCI IIC bitrate (bps) for CH4" default="384000" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH4_INCLUDED} == ${SCI_IIC_CFG_CH4_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH4_BITRATE_BPS}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 384000" actionOnFail="error">("${SCI_IIC_CFG_CH4_BITRATE_BPS}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH4_BITRATE_BPS}" &lt;= 384000)</constraint>
+            <description>Specifies the bit rate. Specify a value less than or equal to 384000 (384 kbit/sec.).
+The bit rate setting should be based on this definition value and the clock setting definition value specified by RX Family Board Support Package Module (BSP FIT module ). Depending on the target device to be used and the BSP FIT module clock setting, the actual bit rate may differ from the expected bit rate.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH5_BITRATE_BPS" display="SCI IIC bitrate (bps) for CH5" default="384000" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH5_INCLUDED} == ${SCI_IIC_CFG_CH5_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH5_BITRATE_BPS}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 384000" actionOnFail="error">("${SCI_IIC_CFG_CH5_BITRATE_BPS}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH5_BITRATE_BPS}" &lt;= 384000)</constraint>
+            <description>Specifies the bit rate. Specify a value less than or equal to 384000 (384 kbit/sec.).
+The bit rate setting should be based on this definition value and the clock setting definition value specified by RX Family Board Support Package Module (BSP FIT module ). Depending on the target device to be used and the BSP FIT module clock setting, the actual bit rate may differ from the expected bit rate.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH6_BITRATE_BPS" display="SCI IIC bitrate (bps) for CH6" default="384000" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH6_INCLUDED} == ${SCI_IIC_CFG_CH6_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH6_BITRATE_BPS}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 384000" actionOnFail="error">("${SCI_IIC_CFG_CH6_BITRATE_BPS}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH6_BITRATE_BPS}" &lt;= 384000)</constraint>
+            <description>Specifies the bit rate. Specify a value less than or equal to 384000 (384 kbit/sec.).
+The bit rate setting should be based on this definition value and the clock setting definition value specified by RX Family Board Support Package Module (BSP FIT module ). Depending on the target device to be used and the BSP FIT module clock setting, the actual bit rate may differ from the expected bit rate.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH7_BITRATE_BPS" display="SCI IIC bitrate (bps) for CH7" default="384000" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH7_INCLUDED} == ${SCI_IIC_CFG_CH7_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH7_BITRATE_BPS}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 384000" actionOnFail="error">("${SCI_IIC_CFG_CH7_BITRATE_BPS}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH7_BITRATE_BPS}" &lt;= 384000)</constraint>
+            <description>Specifies the bit rate. Specify a value less than or equal to 384000 (384 kbit/sec.).
+The bit rate setting should be based on this definition value and the clock setting definition value specified by RX Family Board Support Package Module (BSP FIT module ). Depending on the target device to be used and the BSP FIT module clock setting, the actual bit rate may differ from the expected bit rate.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH8_BITRATE_BPS" display="SCI IIC bitrate (bps) for CH8" default="384000" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH8_INCLUDED} == ${SCI_IIC_CFG_CH8_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH8_BITRATE_BPS}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 384000" actionOnFail="error">("${SCI_IIC_CFG_CH8_BITRATE_BPS}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH8_BITRATE_BPS}" &lt;= 384000)</constraint>
+            <description>Specifies the bit rate. Specify a value less than or equal to 384000 (384 kbit/sec.).
+The bit rate setting should be based on this definition value and the clock setting definition value specified by RX Family Board Support Package Module (BSP FIT module ). Depending on the target device to be used and the BSP FIT module clock setting, the actual bit rate may differ from the expected bit rate.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH9_BITRATE_BPS" display="SCI IIC bitrate (bps) for CH9" default="384000" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH9_INCLUDED} == ${SCI_IIC_CFG_CH9_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH9_BITRATE_BPS}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 384000" actionOnFail="error">("${SCI_IIC_CFG_CH9_BITRATE_BPS}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH9_BITRATE_BPS}" &lt;= 384000)</constraint>
+            <description>Specifies the bit rate. Specify a value less than or equal to 384000 (384 kbit/sec.).
+The bit rate setting should be based on this definition value and the clock setting definition value specified by RX Family Board Support Package Module (BSP FIT module ). Depending on the target device to be used and the BSP FIT module clock setting, the actual bit rate may differ from the expected bit rate.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH10_BITRATE_BPS" display="SCI IIC bitrate (bps) for CH10" default="384000" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH10_INCLUDED} == ${SCI_IIC_CFG_CH10_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH10_BITRATE_BPS}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 384000" actionOnFail="error">("${SCI_IIC_CFG_CH10_BITRATE_BPS}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH10_BITRATE_BPS}" &lt;= 384000)</constraint>
+            <description>Specifies the bit rate. Specify a value less than or equal to 384000 (384 kbit/sec.).
+The bit rate setting should be based on this definition value and the clock setting definition value specified by RX Family Board Support Package Module (BSP FIT module ). Depending on the target device to be used and the BSP FIT module clock setting, the actual bit rate may differ from the expected bit rate.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH11_BITRATE_BPS" display="SCI IIC bitrate (bps) for CH11" default="384000" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH11_INCLUDED} == ${SCI_IIC_CFG_CH11_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH11_BITRATE_BPS}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 384000" actionOnFail="error">("${SCI_IIC_CFG_CH11_BITRATE_BPS}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH11_BITRATE_BPS}" &lt;= 384000)</constraint>
+            <description>Specifies the bit rate. Specify a value less than or equal to 384000 (384 kbit/sec.).
+The bit rate setting should be based on this definition value and the clock setting definition value specified by RX Family Board Support Package Module (BSP FIT module ). Depending on the target device to be used and the BSP FIT module clock setting, the actual bit rate may differ from the expected bit rate.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH12_BITRATE_BPS" display="SCI IIC bitrate (bps) for CH12" default="384000" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH12_INCLUDED} == ${SCI_IIC_CFG_CH12_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH12_BITRATE_BPS}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 384000" actionOnFail="error">("${SCI_IIC_CFG_CH12_BITRATE_BPS}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH12_BITRATE_BPS}" &lt;= 384000)</constraint>
+            <description>Specifies the bit rate. Specify a value less than or equal to 384000 (384 kbit/sec.).
+The bit rate setting should be based on this definition value and the clock setting definition value specified by RX Family Board Support Package Module (BSP FIT module ). Depending on the target device to be used and the BSP FIT module clock setting, the actual bit rate may differ from the expected bit rate.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH0_INT_PRIORITY" display="Interrupt Priority for CH0" default="2" type="combobox">
+            <option id="SCI_IIC_CFG_CH0_INT_PRIORITY.1" display="Level 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH0_INT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH0_INT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="SCI_IIC_CFG_CH0_INT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="SCI_IIC_CFG_CH0_INT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="SCI_IIC_CFG_CH0_INT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="SCI_IIC_CFG_CH0_INT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="SCI_IIC_CFG_CH0_INT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="SCI_IIC_CFG_CH0_INT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="SCI_IIC_CFG_CH0_INT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="SCI_IIC_CFG_CH0_INT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="SCI_IIC_CFG_CH0_INT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="SCI_IIC_CFG_CH0_INT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="SCI_IIC_CFG_CH0_INT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="SCI_IIC_CFG_CH0_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH0_INCLUDED} == ${SCI_IIC_CFG_CH0_INCLUDED.1}</constraint>
+            <description>Specifies interrupt priority levels for condition generation, receivedata-full, transmit-data-empty, and transmit-end interrupts.
+Specify the level between 1 and 15.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH1_INT_PRIORITY" display="Interrupt Priority for CH1" default="2" type="combobox">
+            <option id="SCI_IIC_CFG_CH1_INT_PRIORITY.1" display="Level 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH1_INT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH1_INT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="SCI_IIC_CFG_CH1_INT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="SCI_IIC_CFG_CH1_INT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="SCI_IIC_CFG_CH1_INT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="SCI_IIC_CFG_CH1_INT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="SCI_IIC_CFG_CH1_INT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="SCI_IIC_CFG_CH1_INT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="SCI_IIC_CFG_CH1_INT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="SCI_IIC_CFG_CH1_INT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="SCI_IIC_CFG_CH1_INT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="SCI_IIC_CFG_CH1_INT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="SCI_IIC_CFG_CH1_INT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="SCI_IIC_CFG_CH1_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH1_INCLUDED} == ${SCI_IIC_CFG_CH1_INCLUDED.1}</constraint>
+            <description>Specifies interrupt priority levels for condition generation, receivedata-full, transmit-data-empty, and transmit-end interrupts.
+Specify the level between 1 and 15.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH2_INT_PRIORITY" display="Interrupt Priority for CH2" default="2" type="combobox">
+            <option id="SCI_IIC_CFG_CH2_INT_PRIORITY.1" display="Level 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH2_INT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH2_INT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="SCI_IIC_CFG_CH2_INT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="SCI_IIC_CFG_CH2_INT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="SCI_IIC_CFG_CH2_INT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="SCI_IIC_CFG_CH2_INT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="SCI_IIC_CFG_CH2_INT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="SCI_IIC_CFG_CH2_INT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="SCI_IIC_CFG_CH2_INT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="SCI_IIC_CFG_CH2_INT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="SCI_IIC_CFG_CH2_INT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="SCI_IIC_CFG_CH2_INT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="SCI_IIC_CFG_CH2_INT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="SCI_IIC_CFG_CH2_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH2_INCLUDED} == ${SCI_IIC_CFG_CH2_INCLUDED.1}</constraint>
+            <description>Specifies interrupt priority levels for condition generation, receivedata-full, transmit-data-empty, and transmit-end interrupts.
+Specify the level between 1 and 15.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH3_INT_PRIORITY" display="Interrupt Priority for CH3" default="2" type="combobox">
+            <option id="SCI_IIC_CFG_CH3_INT_PRIORITY.1" display="Level 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH3_INT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH3_INT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="SCI_IIC_CFG_CH3_INT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="SCI_IIC_CFG_CH3_INT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="SCI_IIC_CFG_CH3_INT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="SCI_IIC_CFG_CH3_INT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="SCI_IIC_CFG_CH3_INT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="SCI_IIC_CFG_CH3_INT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="SCI_IIC_CFG_CH3_INT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="SCI_IIC_CFG_CH3_INT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="SCI_IIC_CFG_CH3_INT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="SCI_IIC_CFG_CH3_INT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="SCI_IIC_CFG_CH3_INT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="SCI_IIC_CFG_CH3_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH3_INCLUDED} == ${SCI_IIC_CFG_CH3_INCLUDED.1}</constraint>
+            <description>Specifies interrupt priority levels for condition generation, receivedata-full, transmit-data-empty, and transmit-end interrupts.
+Specify the level between 1 and 15.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH4_INT_PRIORITY" display="Interrupt Priority for CH4" default="2" type="combobox">
+            <option id="SCI_IIC_CFG_CH4_INT_PRIORITY.1" display="Level 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH4_INT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH4_INT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="SCI_IIC_CFG_CH4_INT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="SCI_IIC_CFG_CH4_INT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="SCI_IIC_CFG_CH4_INT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="SCI_IIC_CFG_CH4_INT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="SCI_IIC_CFG_CH4_INT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="SCI_IIC_CFG_CH4_INT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="SCI_IIC_CFG_CH4_INT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="SCI_IIC_CFG_CH4_INT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="SCI_IIC_CFG_CH4_INT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="SCI_IIC_CFG_CH4_INT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="SCI_IIC_CFG_CH4_INT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="SCI_IIC_CFG_CH4_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH4_INCLUDED} == ${SCI_IIC_CFG_CH4_INCLUDED.1}</constraint>
+            <description>Specifies interrupt priority levels for condition generation, receivedata-full, transmit-data-empty, and transmit-end interrupts.
+Specify the level between 1 and 15.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH5_INT_PRIORITY" display="Interrupt Priority for CH5" default="2" type="combobox">
+            <option id="SCI_IIC_CFG_CH5_INT_PRIORITY.1" display="Level 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH5_INT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH5_INT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="SCI_IIC_CFG_CH5_INT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="SCI_IIC_CFG_CH5_INT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="SCI_IIC_CFG_CH5_INT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="SCI_IIC_CFG_CH5_INT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="SCI_IIC_CFG_CH5_INT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="SCI_IIC_CFG_CH5_INT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="SCI_IIC_CFG_CH5_INT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="SCI_IIC_CFG_CH5_INT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="SCI_IIC_CFG_CH5_INT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="SCI_IIC_CFG_CH5_INT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="SCI_IIC_CFG_CH5_INT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="SCI_IIC_CFG_CH5_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH5_INCLUDED} == ${SCI_IIC_CFG_CH5_INCLUDED.1}</constraint>
+            <description>Specifies interrupt priority levels for condition generation, receivedata-full, transmit-data-empty, and transmit-end interrupts.
+Specify the level between 1 and 15.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH6_INT_PRIORITY" display="Interrupt Priority for CH6" default="2" type="combobox">
+            <option id="SCI_IIC_CFG_CH6_INT_PRIORITY.1" display="Level 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH6_INT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH6_INT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="SCI_IIC_CFG_CH6_INT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="SCI_IIC_CFG_CH6_INT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="SCI_IIC_CFG_CH6_INT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="SCI_IIC_CFG_CH6_INT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="SCI_IIC_CFG_CH6_INT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="SCI_IIC_CFG_CH6_INT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="SCI_IIC_CFG_CH6_INT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="SCI_IIC_CFG_CH6_INT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="SCI_IIC_CFG_CH6_INT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="SCI_IIC_CFG_CH6_INT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="SCI_IIC_CFG_CH6_INT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="SCI_IIC_CFG_CH6_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH6_INCLUDED} == ${SCI_IIC_CFG_CH6_INCLUDED.1}</constraint>
+            <description>Specifies interrupt priority levels for condition generation, receivedata-full, transmit-data-empty, and transmit-end interrupts.
+Specify the level between 1 and 15.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH7_INT_PRIORITY" display="Interrupt Priority for CH7" default="2" type="combobox">
+            <option id="SCI_IIC_CFG_CH7_INT_PRIORITY.1" display="Level 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH7_INT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH7_INT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="SCI_IIC_CFG_CH7_INT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="SCI_IIC_CFG_CH7_INT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="SCI_IIC_CFG_CH7_INT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="SCI_IIC_CFG_CH7_INT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="SCI_IIC_CFG_CH7_INT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="SCI_IIC_CFG_CH7_INT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="SCI_IIC_CFG_CH7_INT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="SCI_IIC_CFG_CH7_INT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="SCI_IIC_CFG_CH7_INT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="SCI_IIC_CFG_CH7_INT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="SCI_IIC_CFG_CH7_INT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="SCI_IIC_CFG_CH7_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH7_INCLUDED} == ${SCI_IIC_CFG_CH7_INCLUDED.1}</constraint>
+            <description>Specifies interrupt priority levels for condition generation, receivedata-full, transmit-data-empty, and transmit-end interrupts.
+Specify the level between 1 and 15.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH8_INT_PRIORITY" display="Interrupt Priority for CH8" default="2" type="combobox">
+            <option id="SCI_IIC_CFG_CH8_INT_PRIORITY.1" display="Level 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH8_INT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH8_INT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="SCI_IIC_CFG_CH8_INT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="SCI_IIC_CFG_CH8_INT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="SCI_IIC_CFG_CH8_INT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="SCI_IIC_CFG_CH8_INT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="SCI_IIC_CFG_CH8_INT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="SCI_IIC_CFG_CH8_INT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="SCI_IIC_CFG_CH8_INT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="SCI_IIC_CFG_CH8_INT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="SCI_IIC_CFG_CH8_INT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="SCI_IIC_CFG_CH8_INT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="SCI_IIC_CFG_CH8_INT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="SCI_IIC_CFG_CH8_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH8_INCLUDED} == ${SCI_IIC_CFG_CH8_INCLUDED.1}</constraint>
+            <description>Specifies interrupt priority levels for condition generation, receivedata-full, transmit-data-empty, and transmit-end interrupts.
+Specify the level between 1 and 15.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH9_INT_PRIORITY" display="Interrupt Priority for CH9" default="2" type="combobox">
+            <option id="SCI_IIC_CFG_CH9_INT_PRIORITY.1" display="Level 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH9_INT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH9_INT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="SCI_IIC_CFG_CH9_INT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="SCI_IIC_CFG_CH9_INT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="SCI_IIC_CFG_CH9_INT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="SCI_IIC_CFG_CH9_INT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="SCI_IIC_CFG_CH9_INT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="SCI_IIC_CFG_CH9_INT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="SCI_IIC_CFG_CH9_INT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="SCI_IIC_CFG_CH9_INT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="SCI_IIC_CFG_CH9_INT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="SCI_IIC_CFG_CH9_INT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="SCI_IIC_CFG_CH9_INT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="SCI_IIC_CFG_CH9_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH9_INCLUDED} == ${SCI_IIC_CFG_CH9_INCLUDED.1}</constraint>
+            <description>Specifies interrupt priority levels for condition generation, receivedata-full, transmit-data-empty, and transmit-end interrupts.
+Specify the level between 1 and 15.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH10_INT_PRIORITY" display="Interrupt Priority for CH10" default="2" type="combobox">
+            <option id="SCI_IIC_CFG_CH10_INT_PRIORITY.1" display="Level 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH10_INT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH10_INT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="SCI_IIC_CFG_CH10_INT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="SCI_IIC_CFG_CH10_INT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="SCI_IIC_CFG_CH10_INT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="SCI_IIC_CFG_CH10_INT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="SCI_IIC_CFG_CH10_INT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="SCI_IIC_CFG_CH10_INT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="SCI_IIC_CFG_CH10_INT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="SCI_IIC_CFG_CH10_INT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="SCI_IIC_CFG_CH10_INT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="SCI_IIC_CFG_CH10_INT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="SCI_IIC_CFG_CH10_INT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="SCI_IIC_CFG_CH10_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH10_INCLUDED} == ${SCI_IIC_CFG_CH10_INCLUDED.1}</constraint>
+            <description>Specifies interrupt priority levels for condition generation, receivedata-full, transmit-data-empty, and transmit-end interrupts.
+Specify the level between 1 and 15.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH11_INT_PRIORITY" display="Interrupt Priority for CH11" default="2" type="combobox">
+            <option id="SCI_IIC_CFG_CH11_INT_PRIORITY.1" display="Level 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH11_INT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH11_INT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="SCI_IIC_CFG_CH11_INT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="SCI_IIC_CFG_CH11_INT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="SCI_IIC_CFG_CH11_INT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="SCI_IIC_CFG_CH11_INT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="SCI_IIC_CFG_CH11_INT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="SCI_IIC_CFG_CH11_INT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="SCI_IIC_CFG_CH11_INT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="SCI_IIC_CFG_CH11_INT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="SCI_IIC_CFG_CH11_INT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="SCI_IIC_CFG_CH11_INT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="SCI_IIC_CFG_CH11_INT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="SCI_IIC_CFG_CH11_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH11_INCLUDED} == ${SCI_IIC_CFG_CH11_INCLUDED.1}</constraint>
+            <description>Specifies interrupt priority levels for condition generation, receivedata-full, transmit-data-empty, and transmit-end interrupts.
+Specify the level between 1 and 15.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH12_INT_PRIORITY" display="Interrupt Priority for CH12" default="2" type="combobox">
+            <option id="SCI_IIC_CFG_CH12_INT_PRIORITY.1" display="Level 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH12_INT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH12_INT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="SCI_IIC_CFG_CH12_INT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="SCI_IIC_CFG_CH12_INT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="SCI_IIC_CFG_CH12_INT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="SCI_IIC_CFG_CH12_INT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="SCI_IIC_CFG_CH12_INT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="SCI_IIC_CFG_CH12_INT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="SCI_IIC_CFG_CH12_INT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="SCI_IIC_CFG_CH12_INT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="SCI_IIC_CFG_CH12_INT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="SCI_IIC_CFG_CH12_INT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="SCI_IIC_CFG_CH12_INT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="SCI_IIC_CFG_CH12_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH12_INCLUDED} == ${SCI_IIC_CFG_CH12_INCLUDED.1}</constraint>
+            <description>Specifies interrupt priority levels for condition generation, receivedata-full, transmit-data-empty, and transmit-end interrupts.
+Specify the level between 1 and 15.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH0_DIGITAL_FILTER" display="Digital noise filter (NFEN bit) for CH0" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH0_DIGITAL_FILTER.0" display="Disable" value="0"/>
+            <option id="SCI_IIC_CFG_CH0_DIGITAL_FILTER.1" display="Enable" value="1"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH0_INCLUDED} == ${SCI_IIC_CFG_CH0_INCLUDED.1}</constraint>
+            <description>Selectable whether to use the noise cancellation function for the SSCL and SSDA input signals.
+0 = Noise cancellation function is disabled.
+1 = Noise cancellation function is enabled.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH1_DIGITAL_FILTER" display="Digital noise filter (NFEN bit) for CH1" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH1_DIGITAL_FILTER.0" display="Disable" value="0"/>
+            <option id="SCI_IIC_CFG_CH1_DIGITAL_FILTER.1" display="Enable" value="1"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH1_INCLUDED} == ${SCI_IIC_CFG_CH1_INCLUDED.1}</constraint>
+            <description>Selectable whether to use the noise cancellation function for the SSCL and SSDA input signals.
+0 = Noise cancellation function is disabled.
+1 = Noise cancellation function is enabled.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH2_DIGITAL_FILTER" display="Digital noise filter (NFEN bit) for CH2" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH2_DIGITAL_FILTER.0" display="Disable" value="0"/>
+            <option id="SCI_IIC_CFG_CH2_DIGITAL_FILTER.1" display="Enable" value="1"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH2_INCLUDED} == ${SCI_IIC_CFG_CH2_INCLUDED.1}</constraint>
+            <description>Selectable whether to use the noise cancellation function for the SSCL and SSDA input signals.
+0 = Noise cancellation function is disabled.
+1 = Noise cancellation function is enabled.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH3_DIGITAL_FILTER" display="Digital noise filter (NFEN bit) for CH3" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH3_DIGITAL_FILTER.0" display="Disable" value="0"/>
+            <option id="SCI_IIC_CFG_CH3_DIGITAL_FILTER.1" display="Enable" value="1"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH3_INCLUDED} == ${SCI_IIC_CFG_CH3_INCLUDED.1}</constraint>
+            <description>Selectable whether to use the noise cancellation function for the SSCL and SSDA input signals.
+0 = Noise cancellation function is disabled.
+1 = Noise cancellation function is enabled.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH4_DIGITAL_FILTER" display="Digital noise filter (NFEN bit) for CH4" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH4_DIGITAL_FILTER.0" display="Disable" value="0"/>
+            <option id="SCI_IIC_CFG_CH4_DIGITAL_FILTER.1" display="Enable" value="1"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH4_INCLUDED} == ${SCI_IIC_CFG_CH4_INCLUDED.1}</constraint>
+            <description>Selectable whether to use the noise cancellation function for the SSCL and SSDA input signals.
+0 = Noise cancellation function is disabled.
+1 = Noise cancellation function is enabled.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH5_DIGITAL_FILTER" display="Digital noise filter (NFEN bit) for CH5" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH5_DIGITAL_FILTER.0" display="Disable" value="0"/>
+            <option id="SCI_IIC_CFG_CH5_DIGITAL_FILTER.1" display="Enable" value="1"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH5_INCLUDED} == ${SCI_IIC_CFG_CH5_INCLUDED.1}</constraint>
+            <description>Selectable whether to use the noise cancellation function for the SSCL and SSDA input signals.
+0 = Noise cancellation function is disabled.
+1 = Noise cancellation function is enabled.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH6_DIGITAL_FILTER" display="Digital noise filter (NFEN bit) for CH6" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH6_DIGITAL_FILTER.0" display="Disable" value="0"/>
+            <option id="SCI_IIC_CFG_CH6_DIGITAL_FILTER.1" display="Enable" value="1"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH6_INCLUDED} == ${SCI_IIC_CFG_CH6_INCLUDED.1}</constraint>
+            <description>Selectable whether to use the noise cancellation function for the SSCL and SSDA input signals.
+0 = Noise cancellation function is disabled.
+1 = Noise cancellation function is enabled.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH7_DIGITAL_FILTER" display="Digital noise filter (NFEN bit) for CH7" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH7_DIGITAL_FILTER.0" display="Disable" value="0"/>
+            <option id="SCI_IIC_CFG_CH7_DIGITAL_FILTER.1" display="Enable" value="1"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH7_INCLUDED} == ${SCI_IIC_CFG_CH7_INCLUDED.1}</constraint>
+            <description>Selectable whether to use the noise cancellation function for the SSCL and SSDA input signals.
+0 = Noise cancellation function is disabled.
+1 = Noise cancellation function is enabled.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH8_DIGITAL_FILTER" display="Digital noise filter (NFEN bit) for CH8" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH8_DIGITAL_FILTER.0" display="Disable" value="0"/>
+            <option id="SCI_IIC_CFG_CH8_DIGITAL_FILTER.1" display="Enable" value="1"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH8_INCLUDED} == ${SCI_IIC_CFG_CH8_INCLUDED.1}</constraint>
+            <description>Selectable whether to use the noise cancellation function for the SSCL and SSDA input signals.
+0 = Noise cancellation function is disabled.
+1 = Noise cancellation function is enabled.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH9_DIGITAL_FILTER" display="Digital noise filter (NFEN bit) for CH9" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH9_DIGITAL_FILTER.0" display="Disable" value="0"/>
+            <option id="SCI_IIC_CFG_CH9_DIGITAL_FILTER.1" display="Enable" value="1"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH9_INCLUDED} == ${SCI_IIC_CFG_CH9_INCLUDED.1}</constraint>
+            <description>Selectable whether to use the noise cancellation function for the SSCL and SSDA input signals.
+0 = Noise cancellation function is disabled.
+1 = Noise cancellation function is enabled.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH10_DIGITAL_FILTER" display="Digital noise filter (NFEN bit) for CH10" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH10_DIGITAL_FILTER.0" display="Disable" value="0"/>
+            <option id="SCI_IIC_CFG_CH10_DIGITAL_FILTER.1" display="Enable" value="1"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH10_INCLUDED} == ${SCI_IIC_CFG_CH10_INCLUDED.1}</constraint>
+            <description>Selectable whether to use the noise cancellation function for the SSCL and SSDA input signals.
+0 = Noise cancellation function is disabled.
+1 = Noise cancellation function is enabled.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH11_DIGITAL_FILTER" display="Digital noise filter (NFEN bit) for CH11" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH11_DIGITAL_FILTER.0" display="Disable" value="0"/>
+            <option id="SCI_IIC_CFG_CH11_DIGITAL_FILTER.1" display="Enable" value="1"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH11_INCLUDED} == ${SCI_IIC_CFG_CH11_INCLUDED.1}</constraint>
+            <description>Selectable whether to use the noise cancellation function for the SSCL and SSDA input signals.
+0 = Noise cancellation function is disabled.
+1 = Noise cancellation function is enabled.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH12_DIGITAL_FILTER" display="Digital noise filter (NFEN bit) for CH12" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH12_DIGITAL_FILTER.0" display="Disable" value="0"/>
+            <option id="SCI_IIC_CFG_CH12_DIGITAL_FILTER.1" display="Enable" value="1"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH12_INCLUDED} == ${SCI_IIC_CFG_CH12_INCLUDED.1}</constraint>
+            <description>Selectable whether to use the noise cancellation function for the SSCL and SSDA input signals.
+0 = Noise cancellation function is disabled.
+1 = Noise cancellation function is enabled.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH0_FILTER_CLOCK" display="Noise Filter Setting Register (NFCS bit) for CH0" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH0_FILTER_CLOCK.1" display="The clock divided by 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH0_FILTER_CLOCK.2" display="The clock divided by 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH0_FILTER_CLOCK.3" display="The clock divided by 4" value="3"/>
+            <option id="SCI_IIC_CFG_CH0_FILTER_CLOCK.4" display="The clock divided by 8" value="4"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH0_INCLUDED} == ${SCI_IIC_CFG_CH0_INCLUDED.1}</constraint>
+            <description>Select the sampling clock used for digital noise filter.
+1 = The clock divided by 1 is used.
+2 = The clock divided by 2 is used.
+3 = The clock divided by 4 is used.
+4 = The clock divided by 8 is used.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH1_FILTER_CLOCK" display="Noise Filter Setting Register (NFCS bit) for CH1" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH1_FILTER_CLOCK.1" display="The clock divided by 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH1_FILTER_CLOCK.2" display="The clock divided by 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH1_FILTER_CLOCK.3" display="The clock divided by 4" value="3"/>
+            <option id="SCI_IIC_CFG_CH1_FILTER_CLOCK.4" display="The clock divided by 8" value="4"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH1_INCLUDED} == ${SCI_IIC_CFG_CH1_INCLUDED.1}</constraint>
+            <description>Select the sampling clock used for digital noise filter.
+1 = The clock divided by 1 is used.
+2 = The clock divided by 2 is used.
+3 = The clock divided by 4 is used.
+4 = The clock divided by 8 is used.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH2_FILTER_CLOCK" display="Noise Filter Setting Register (NFCS bit) for CH2" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH2_FILTER_CLOCK.1" display="The clock divided by 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH2_FILTER_CLOCK.2" display="The clock divided by 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH2_FILTER_CLOCK.3" display="The clock divided by 4" value="3"/>
+            <option id="SCI_IIC_CFG_CH2_FILTER_CLOCK.4" display="The clock divided by 8" value="4"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH2_INCLUDED} == ${SCI_IIC_CFG_CH2_INCLUDED.1}</constraint>
+            <description>Select the sampling clock used for digital noise filter.
+1 = The clock divided by 1 is used.
+2 = The clock divided by 2 is used.
+3 = The clock divided by 4 is used.
+4 = The clock divided by 8 is used.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH3_FILTER_CLOCK" display="Noise Filter Setting Register (NFCS bit) for CH3" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH3_FILTER_CLOCK.1" display="The clock divided by 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH3_FILTER_CLOCK.2" display="The clock divided by 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH3_FILTER_CLOCK.3" display="The clock divided by 4" value="3"/>
+            <option id="SCI_IIC_CFG_CH3_FILTER_CLOCK.4" display="The clock divided by 8" value="4"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH3_INCLUDED} == ${SCI_IIC_CFG_CH3_INCLUDED.1}</constraint>
+            <description>Select the sampling clock used for digital noise filter.
+1 = The clock divided by 1 is used.
+2 = The clock divided by 2 is used.
+3 = The clock divided by 4 is used.
+4 = The clock divided by 8 is used.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH4_FILTER_CLOCK" display="Noise Filter Setting Register (NFCS bit) for CH4" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH4_FILTER_CLOCK.1" display="The clock divided by 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH4_FILTER_CLOCK.2" display="The clock divided by 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH4_FILTER_CLOCK.3" display="The clock divided by 4" value="3"/>
+            <option id="SCI_IIC_CFG_CH4_FILTER_CLOCK.4" display="The clock divided by 8" value="4"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH4_INCLUDED} == ${SCI_IIC_CFG_CH4_INCLUDED.1}</constraint>
+            <description>Select the sampling clock used for digital noise filter.
+1 = The clock divided by 1 is used.
+2 = The clock divided by 2 is used.
+3 = The clock divided by 4 is used.
+4 = The clock divided by 8 is used.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH5_FILTER_CLOCK" display="Noise Filter Setting Register (NFCS bit) for CH5" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH5_FILTER_CLOCK.1" display="The clock divided by 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH5_FILTER_CLOCK.2" display="The clock divided by 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH5_FILTER_CLOCK.3" display="The clock divided by 4" value="3"/>
+            <option id="SCI_IIC_CFG_CH5_FILTER_CLOCK.4" display="The clock divided by 8" value="4"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH5_INCLUDED} == ${SCI_IIC_CFG_CH5_INCLUDED.1}</constraint>
+            <description>Select the sampling clock used for digital noise filter.
+1 = The clock divided by 1 is used.
+2 = The clock divided by 2 is used.
+3 = The clock divided by 4 is used.
+4 = The clock divided by 8 is used.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH6_FILTER_CLOCK" display="Noise Filter Setting Register (NFCS bit) for CH6" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH6_FILTER_CLOCK.1" display="The clock divided by 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH6_FILTER_CLOCK.2" display="The clock divided by 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH6_FILTER_CLOCK.3" display="The clock divided by 4" value="3"/>
+            <option id="SCI_IIC_CFG_CH6_FILTER_CLOCK.4" display="The clock divided by 8" value="4"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH6_INCLUDED} == ${SCI_IIC_CFG_CH6_INCLUDED.1}</constraint>
+            <description>Select the sampling clock used for digital noise filter.
+1 = The clock divided by 1 is used.
+2 = The clock divided by 2 is used.
+3 = The clock divided by 4 is used.
+4 = The clock divided by 8 is used.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH7_FILTER_CLOCK" display="Noise Filter Setting Register (NFCS bit) for CH7" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH7_FILTER_CLOCK.1" display="The clock divided by 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH7_FILTER_CLOCK.2" display="The clock divided by 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH7_FILTER_CLOCK.3" display="The clock divided by 4" value="3"/>
+            <option id="SCI_IIC_CFG_CH7_FILTER_CLOCK.4" display="The clock divided by 8" value="4"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH7_INCLUDED} == ${SCI_IIC_CFG_CH7_INCLUDED.1}</constraint>
+            <description>Select the sampling clock used for digital noise filter.
+1 = The clock divided by 1 is used.
+2 = The clock divided by 2 is used.
+3 = The clock divided by 4 is used.
+4 = The clock divided by 8 is used.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH8_FILTER_CLOCK" display="Noise Filter Setting Register (NFCS bit) for CH8" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH8_FILTER_CLOCK.1" display="The clock divided by 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH8_FILTER_CLOCK.2" display="The clock divided by 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH8_FILTER_CLOCK.3" display="The clock divided by 4" value="3"/>
+            <option id="SCI_IIC_CFG_CH8_FILTER_CLOCK.4" display="The clock divided by 8" value="4"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH8_INCLUDED} == ${SCI_IIC_CFG_CH8_INCLUDED.1}</constraint>
+            <description>Select the sampling clock used for digital noise filter.
+1 = The clock divided by 1 is used.
+2 = The clock divided by 2 is used.
+3 = The clock divided by 4 is used.
+4 = The clock divided by 8 is used.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH9_FILTER_CLOCK" display="Noise Filter Setting Register (NFCS bit) for CH9" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH9_FILTER_CLOCK.1" display="The clock divided by 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH9_FILTER_CLOCK.2" display="The clock divided by 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH9_FILTER_CLOCK.3" display="The clock divided by 4" value="3"/>
+            <option id="SCI_IIC_CFG_CH9_FILTER_CLOCK.4" display="The clock divided by 8" value="4"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH9_INCLUDED} == ${SCI_IIC_CFG_CH9_INCLUDED.1}</constraint>
+            <description>Select the sampling clock used for digital noise filter.
+1 = The clock divided by 1 is used.
+2 = The clock divided by 2 is used.
+3 = The clock divided by 4 is used.
+4 = The clock divided by 8 is used.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH10_FILTER_CLOCK" display="Noise Filter Setting Register (NFCS bit) for CH10" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH10_FILTER_CLOCK.1" display="The clock divided by 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH10_FILTER_CLOCK.2" display="The clock divided by 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH10_FILTER_CLOCK.3" display="The clock divided by 4" value="3"/>
+            <option id="SCI_IIC_CFG_CH10_FILTER_CLOCK.4" display="The clock divided by 8" value="4"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH10_INCLUDED} == ${SCI_IIC_CFG_CH10_INCLUDED.1}</constraint>
+            <description>Select the sampling clock used for digital noise filter.
+1 = The clock divided by 1 is used.
+2 = The clock divided by 2 is used.
+3 = The clock divided by 4 is used.
+4 = The clock divided by 8 is used.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH11_FILTER_CLOCK" display="Noise Filter Setting Register (NFCS bit) for CH11" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH11_FILTER_CLOCK.1" display="The clock divided by 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH11_FILTER_CLOCK.2" display="The clock divided by 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH11_FILTER_CLOCK.3" display="The clock divided by 4" value="3"/>
+            <option id="SCI_IIC_CFG_CH11_FILTER_CLOCK.4" display="The clock divided by 8" value="4"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH11_INCLUDED} == ${SCI_IIC_CFG_CH11_INCLUDED.1}</constraint>
+            <description>Select the sampling clock used for digital noise filter.
+1 = The clock divided by 1 is used.
+2 = The clock divided by 2 is used.
+3 = The clock divided by 4 is used.
+4 = The clock divided by 8 is used.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH12_FILTER_CLOCK" display="Noise Filter Setting Register (NFCS bit) for CH12" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_CH12_FILTER_CLOCK.1" display="The clock divided by 1" value="1"/>
+            <option id="SCI_IIC_CFG_CH12_FILTER_CLOCK.2" display="The clock divided by 2" value="2"/>
+            <option id="SCI_IIC_CFG_CH12_FILTER_CLOCK.3" display="The clock divided by 4" value="3"/>
+            <option id="SCI_IIC_CFG_CH12_FILTER_CLOCK.4" display="The clock divided by 8" value="4"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH12_INCLUDED} == ${SCI_IIC_CFG_CH12_INCLUDED.1}</constraint>
+            <description>Select the sampling clock used for digital noise filter.
+1 = The clock divided by 1 is used.
+2 = The clock divided by 2 is used.
+3 = The clock divided by 4 is used.
+4 = The clock divided by 8 is used.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH0_SSDA_DELAY_SELECT" display="I2C Mode Register 1 (IICDL bit) for CH0" default="18" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH0_INCLUDED} == ${SCI_IIC_CFG_CH0_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH0_SSDA_DELAY_SELECT}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 31" actionOnFail="error">("${SCI_IIC_CFG_CH0_SSDA_DELAY_SELECT}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH0_SSDA_DELAY_SELECT}" &lt;= 31)</constraint>
+            <description>Select the delay time for output on the SSDA pin relative to the falling edge of the output on the SSCL pin.
+Specify the delay between 1 and 31.
+The default value is a value based on PCLK which operates in 60
+MHz and is the clock source of the on-chip baud rate generator.
+The SSDA delay time is increased or decreased according to the
+clock source of the on-chip baud rate generator.
+When the bit rate or the PCLK frequency is set to low speed,
+the SSDA falling timing may occur after the SSCL falling timing in
+the start condition.
+Confirm and set an appropriate value depending on the user system.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH1_SSDA_DELAY_SELECT" display="I2C Mode Register 1 (IICDL bit) for CH1" default="18" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH1_INCLUDED} == ${SCI_IIC_CFG_CH1_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH1_SSDA_DELAY_SELECT}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 31" actionOnFail="error">("${SCI_IIC_CFG_CH1_SSDA_DELAY_SELECT}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH1_SSDA_DELAY_SELECT}" &lt;= 31)</constraint>
+            <description>Select the delay time for output on the SSDA pin relative to the falling edge of the output on the SSCL pin.
+Specify the delay between 1 and 31.
+The default value is a value based on PCLK which operates in 60
+MHz and is the clock source of the on-chip baud rate generator.
+The SSDA delay time is increased or decreased according to the
+clock source of the on-chip baud rate generator.
+When the bit rate or the PCLK frequency is set to low speed,
+the SSDA falling timing may occur after the SSCL falling timing in
+the start condition.
+Confirm and set an appropriate value depending on the user system.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH2_SSDA_DELAY_SELECT" display="I2C Mode Register 1 (IICDL bit) for CH2" default="18" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH2_INCLUDED} == ${SCI_IIC_CFG_CH2_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH2_SSDA_DELAY_SELECT}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 31" actionOnFail="error">("${SCI_IIC_CFG_CH2_SSDA_DELAY_SELECT}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH2_SSDA_DELAY_SELECT}" &lt;= 31)</constraint>
+            <description>Select the delay time for output on the SSDA pin relative to the falling edge of the output on the SSCL pin.
+Specify the delay between 1 and 31.
+The default value is a value based on PCLK which operates in 60
+MHz and is the clock source of the on-chip baud rate generator.
+The SSDA delay time is increased or decreased according to the
+clock source of the on-chip baud rate generator.
+When the bit rate or the PCLK frequency is set to low speed,
+the SSDA falling timing may occur after the SSCL falling timing in
+the start condition.
+Confirm and set an appropriate value depending on the user system.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH3_SSDA_DELAY_SELECT" display="I2C Mode Register 1 (IICDL bit) for CH3" default="18" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH3_INCLUDED} == ${SCI_IIC_CFG_CH3_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH3_SSDA_DELAY_SELECT}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 31" actionOnFail="error">("${SCI_IIC_CFG_CH3_SSDA_DELAY_SELECT}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH3_SSDA_DELAY_SELECT}" &lt;= 31)</constraint>
+            <description>Select the delay time for output on the SSDA pin relative to the falling edge of the output on the SSCL pin.
+Specify the delay between 1 and 31.
+The default value is a value based on PCLK which operates in 60
+MHz and is the clock source of the on-chip baud rate generator.
+The SSDA delay time is increased or decreased according to the
+clock source of the on-chip baud rate generator.
+When the bit rate or the PCLK frequency is set to low speed,
+the SSDA falling timing may occur after the SSCL falling timing in
+the start condition.
+Confirm and set an appropriate value depending on the user system.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH4_SSDA_DELAY_SELECT" display="I2C Mode Register 1 (IICDL bit) for CH4" default="18" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH4_INCLUDED} == ${SCI_IIC_CFG_CH4_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH4_SSDA_DELAY_SELECT}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 31" actionOnFail="error">("${SCI_IIC_CFG_CH4_SSDA_DELAY_SELECT}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH4_SSDA_DELAY_SELECT}" &lt;= 31)</constraint>
+            <description>Select the delay time for output on the SSDA pin relative to the falling edge of the output on the SSCL pin.
+Specify the delay between 1 and 31.
+The default value is a value based on PCLK which operates in 60
+MHz and is the clock source of the on-chip baud rate generator.
+The SSDA delay time is increased or decreased according to the
+clock source of the on-chip baud rate generator.
+When the bit rate or the PCLK frequency is set to low speed,
+the SSDA falling timing may occur after the SSCL falling timing in
+the start condition.
+Confirm and set an appropriate value depending on the user system.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH5_SSDA_DELAY_SELECT" display="I2C Mode Register 1 (IICDL bit) for CH5" default="18" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH5_INCLUDED} == ${SCI_IIC_CFG_CH5_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH5_SSDA_DELAY_SELECT}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 31" actionOnFail="error">("${SCI_IIC_CFG_CH5_SSDA_DELAY_SELECT}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH5_SSDA_DELAY_SELECT}" &lt;= 31)</constraint>
+            <description>Select the delay time for output on the SSDA pin relative to the falling edge of the output on the SSCL pin.
+Specify the delay between 1 and 31.
+The default value is a value based on PCLK which operates in 60
+MHz and is the clock source of the on-chip baud rate generator.
+The SSDA delay time is increased or decreased according to the
+clock source of the on-chip baud rate generator.
+When the bit rate or the PCLK frequency is set to low speed,
+the SSDA falling timing may occur after the SSCL falling timing in
+the start condition.
+Confirm and set an appropriate value depending on the user system.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH6_SSDA_DELAY_SELECT" display="I2C Mode Register 1 (IICDL bit) for CH6" default="18" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH6_INCLUDED} == ${SCI_IIC_CFG_CH6_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH6_SSDA_DELAY_SELECT}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 31" actionOnFail="error">("${SCI_IIC_CFG_CH6_SSDA_DELAY_SELECT}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH6_SSDA_DELAY_SELECT}" &lt;= 31)</constraint>
+            <description>Select the delay time for output on the SSDA pin relative to the falling edge of the output on the SSCL pin.
+Specify the delay between 1 and 31.
+The default value is a value based on PCLK which operates in 60
+MHz and is the clock source of the on-chip baud rate generator.
+The SSDA delay time is increased or decreased according to the
+clock source of the on-chip baud rate generator.
+When the bit rate or the PCLK frequency is set to low speed,
+the SSDA falling timing may occur after the SSCL falling timing in
+the start condition.
+Confirm and set an appropriate value depending on the user system.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH7_SSDA_DELAY_SELECT" display="I2C Mode Register 1 (IICDL bit) for CH7" default="18" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH7_INCLUDED} == ${SCI_IIC_CFG_CH7_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH7_SSDA_DELAY_SELECT}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 31" actionOnFail="error">("${SCI_IIC_CFG_CH7_SSDA_DELAY_SELECT}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH7_SSDA_DELAY_SELECT}" &lt;= 31)</constraint>
+            <description>Select the delay time for output on the SSDA pin relative to the falling edge of the output on the SSCL pin.
+Specify the delay between 1 and 31.
+The default value is a value based on PCLK which operates in 60
+MHz and is the clock source of the on-chip baud rate generator.
+The SSDA delay time is increased or decreased according to the
+clock source of the on-chip baud rate generator.
+When the bit rate or the PCLK frequency is set to low speed,
+the SSDA falling timing may occur after the SSCL falling timing in
+the start condition.
+Confirm and set an appropriate value depending on the user system.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH8_SSDA_DELAY_SELECT" display="I2C Mode Register 1 (IICDL bit) for CH8" default="18" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH8_INCLUDED} == ${SCI_IIC_CFG_CH8_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH8_SSDA_DELAY_SELECT}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 31" actionOnFail="error">("${SCI_IIC_CFG_CH8_SSDA_DELAY_SELECT}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH8_SSDA_DELAY_SELECT}" &lt;= 31)</constraint>
+            <description>Select the delay time for output on the SSDA pin relative to the falling edge of the output on the SSCL pin.
+Specify the delay between 1 and 31.
+The default value is a value based on PCLK which operates in 60
+MHz and is the clock source of the on-chip baud rate generator.
+The SSDA delay time is increased or decreased according to the
+clock source of the on-chip baud rate generator.
+When the bit rate or the PCLK frequency is set to low speed,
+the SSDA falling timing may occur after the SSCL falling timing in
+the start condition.
+Confirm and set an appropriate value depending on the user system.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH9_SSDA_DELAY_SELECT" display="I2C Mode Register 1 (IICDL bit) for CH9" default="18" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH9_INCLUDED} == ${SCI_IIC_CFG_CH9_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH9_SSDA_DELAY_SELECT}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 31" actionOnFail="error">("${SCI_IIC_CFG_CH9_SSDA_DELAY_SELECT}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH9_SSDA_DELAY_SELECT}" &lt;= 31)</constraint>
+            <description>Select the delay time for output on the SSDA pin relative to the falling edge of the output on the SSCL pin.
+Specify the delay between 1 and 31.
+The default value is a value based on PCLK which operates in 60
+MHz and is the clock source of the on-chip baud rate generator.
+The SSDA delay time is increased or decreased according to the
+clock source of the on-chip baud rate generator.
+When the bit rate or the PCLK frequency is set to low speed,
+the SSDA falling timing may occur after the SSCL falling timing in
+the start condition.
+Confirm and set an appropriate value depending on the user system.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH10_SSDA_DELAY_SELECT" display="I2C Mode Register 1 (IICDL bit) for CH10" default="18" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH10_INCLUDED} == ${SCI_IIC_CFG_CH10_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH10_SSDA_DELAY_SELECT}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 31" actionOnFail="error">("${SCI_IIC_CFG_CH10_SSDA_DELAY_SELECT}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH10_SSDA_DELAY_SELECT}" &lt;= 31)</constraint>
+            <description>Select the delay time for output on the SSDA pin relative to the falling edge of the output on the SSCL pin.
+Specify the delay between 1 and 31.
+The default value is a value based on PCLK which operates in 60
+MHz and is the clock source of the on-chip baud rate generator.
+The SSDA delay time is increased or decreased according to the
+clock source of the on-chip baud rate generator.
+When the bit rate or the PCLK frequency is set to low speed,
+the SSDA falling timing may occur after the SSCL falling timing in
+the start condition.
+Confirm and set an appropriate value depending on the user system.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH11_SSDA_DELAY_SELECT" display="I2C Mode Register 1 (IICDL bit) for CH11" default="18" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH11_INCLUDED} == ${SCI_IIC_CFG_CH11_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH11_SSDA_DELAY_SELECT}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 31" actionOnFail="error">("${SCI_IIC_CFG_CH11_SSDA_DELAY_SELECT}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH11_SSDA_DELAY_SELECT}" &lt;= 31)</constraint>
+            <description>Select the delay time for output on the SSDA pin relative to the falling edge of the output on the SSCL pin.
+Specify the delay between 1 and 31.
+The default value is a value based on PCLK which operates in 60
+MHz and is the clock source of the on-chip baud rate generator.
+The SSDA delay time is increased or decreased according to the
+clock source of the on-chip baud rate generator.
+When the bit rate or the PCLK frequency is set to low speed,
+the SSDA falling timing may occur after the SSCL falling timing in
+the start condition.
+Confirm and set an appropriate value depending on the user system.</description>
+        </property>
+        <property id="SCI_IIC_CFG_CH12_SSDA_DELAY_SELECT" display="I2C Mode Register 1 (IICDL bit) for CH12" default="18" type="textbox">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SCI_IIC_CFG_CH12_INCLUDED} == ${SCI_IIC_CFG_CH12_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SCI_IIC_CFG_CH12_SSDA_DELAY_SELECT}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 31" actionOnFail="error">("${SCI_IIC_CFG_CH12_SSDA_DELAY_SELECT}" &gt;= 1) &amp;&amp; ("${SCI_IIC_CFG_CH12_SSDA_DELAY_SELECT}" &lt;= 31)</constraint>
+            <description>Select the delay time for output on the SSDA pin relative to the falling edge of the output on the SSCL pin.
+Specify the delay between 1 and 31.
+The default value is a value based on PCLK which operates in 60
+MHz and is the clock source of the on-chip baud rate generator.
+The SSDA delay time is increased or decreased according to the
+clock source of the on-chip baud rate generator.
+When the bit rate or the PCLK frequency is set to low speed,
+the SSDA falling timing may occur after the SSCL falling timing in
+the start condition.
+Confirm and set an appropriate value depending on the user system.</description>
+        </property>
+        <property id="SCI_IIC_CFG_BUS_CHECK_COUNTER" display="Software bus busy check counter" default="1000" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${SCI_IIC_CFG_BUS_CHECK_COUNTER}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 4294967295">("${SCI_IIC_CFG_BUS_CHECK_COUNTER}" &gt;= 0) &amp;&amp; ("${SCI_IIC_CFG_BUS_CHECK_COUNTER}" &lt;= 4294967295)</constraint>
+            <description>Specifies the timeout counter (number of times to perform bus checking) when the simple I2C API function performs bus checking. Specify a value less than or equal to 0xFFFFFFFF.
+The bus checking is performed after generating each condition using
+the simple I2C control function (R_SCI_IIC_Control function).
+With the bus checking, the timeout counter is decremented after
+generating each condition. When the counter reaches 0, the API
+determines that a timeout has occurred and returns an error (Busy) as
+the return value.
+* The timeout counter is used for the bus not to be locked by the bus
+lock or others. Therefore specify the value greater than or equal to
+the time for that the other device holds the SCL pin low.
+</description>
+        </property>
+        <property id="SCI_IIC_CFG_PORT_SETTING_PROCESSING" display="Setting port setting processing" default="1" type="combobox">
+            <option id="SCI_IIC_CFG_PORT_SETTING_PROCESSING.0" display="Not include port setting" value="0"/>
+            <option id="SCI_IIC_CFG_PORT_SETTING_PROCESSING.1" display="Include port setting" value="1"/>
+            <description>Specifies whether to include processing for port setting in the code.
+ 1 =  Includes sci (simple iic)port setting processing
+ 0 =  Compiles out sci (simple iic)port setting processing</description>
+        </property>
+    </configuration>
+</module>

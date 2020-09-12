@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>2.08.00</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX200</series>
+        <group>RX23W</group>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_ble_qe_utility</name>
+        <version>1.00</version>
+        <zipsource>r_ble_qe_utility_v1.00.zip</zipsource>
+        <application>Connectivity</application>
+        <application>Communications</application>
+        <desc>QE for BLE Utility Module</desc>
+        <details>This FIT module is necessary to use QE for Bluetooth Low Energy </details>
+        <incdir>r_ble_qe_utility</incdir>
+    </package>
+
+</refinfo>

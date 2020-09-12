@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="USB_CFG_HCDC_MULTI" display="Setting connection of multiple CDC devices" default="USB_CFG_ENABLE" type="combobox">
+            <option id="USB_CFG_HCDC_MULTI.USB_CFG_ENABLE" display="Supporting the multiple connection" value="USB_CFG_ENABLE"/>
+            <option id="USB_CFG_HCDC_MULTI.USB_CFG_DISABLE" display="Not supporting the multiple connection" value="USB_CFG_DISABLE"/>
+            <description>Supporting the multiple connection
+Not supporting the multiple connection</description>
+        </property>
+        <property id="USB_CFG_HCDC_IFCLS" display="Setting whether the connected device supports the CDC class" default="USB_CFG_CDC" type="combobox">
+            <option id="USB_CFG_HCDC_IFCLS.USB_CFG_CDC" display="Supporting the CDC class" value="USB_CFG_CDC"/>
+            <option id="USB_CFG_HCDC_IFCLS.USB_CFG_VEN" display="Supporting the vendor class" value="USB_CFG_VEN"/>
+            <description>Supporting the CDC class
+Supporting the vendor class</description>
+        </property>
+        <property id="USB_CFG_HCDC_BULK_IN" display="Setting the USB Bulk In pipe to be used for 1st CDC device" default="USB_PIPE1" type="combobox">
+            <option id="USB_CFG_HCDC_BULK_IN.USB_PIPE1" display="Using USB PIPE1" value="USB_PIPE1"/>
+            <option id="USB_CFG_HCDC_BULK_IN.USB_PIPE2" display="Using USB PIPE2" value="USB_PIPE2"/>
+            <option id="USB_CFG_HCDC_BULK_IN.USB_PIPE3" display="Using USB PIPE3" value="USB_PIPE3"/>
+            <option id="USB_CFG_HCDC_BULK_IN.USB_PIPE4" display="Using USB PIPE4" value="USB_PIPE4"/>
+            <option id="USB_CFG_HCDC_BULK_IN.USB_PIPE5" display="Using USB PIPE5" value="USB_PIPE5"/>
+            <constraint display="Selected pipe must not be used multiple times">("${USB_CFG_HCDC_BULK_IN}" != "${USB_CFG_HCDC_BULK_OUT}")</constraint>
+            <constraint display="Selected pipe must not be used multiple times">("${USB_CFG_HCDC_MULTI}" == "${USB_CFG_HCDC_MULTI.USB_CFG_DISABLE}" || "${USB_CFG_HCDC_BULK_IN}" != "${USB_CFG_HCDC_BULK_IN2}")</constraint>
+            <constraint display="Selected pipe must not be used multiple times">("${USB_CFG_HCDC_MULTI}" == "${USB_CFG_HCDC_MULTI.USB_CFG_DISABLE}" || "${USB_CFG_HCDC_BULK_IN}" != "${USB_CFG_HCDC_BULK_OUT2}")</constraint>
+            <description>Using USB PIPE1
+Using USB PIPE2
+Using USB PIPE3
+Using USB PIPE4
+Using USB PIPE5</description>
+        </property>
+        <property id="USB_CFG_HCDC_BULK_OUT" display="Setting the USB Bulk Out pipe to be used for 1st CDC device" default="USB_PIPE2" type="combobox">
+            <option id="USB_CFG_HCDC_BULK_OUT.USB_PIPE1" display="Using USB PIPE1" value="USB_PIPE1"/>
+            <option id="USB_CFG_HCDC_BULK_OUT.USB_PIPE2" display="Using USB PIPE2" value="USB_PIPE2"/>
+            <option id="USB_CFG_HCDC_BULK_OUT.USB_PIPE3" display="Using USB PIPE3" value="USB_PIPE3"/>
+            <option id="USB_CFG_HCDC_BULK_OUT.USB_PIPE4" display="Using USB PIPE4" value="USB_PIPE4"/>
+            <option id="USB_CFG_HCDC_BULK_OUT.USB_PIPE5" display="Using USB PIPE5" value="USB_PIPE5"/>
+            <constraint display="Selected pipe must not be used multiple times">("${USB_CFG_HCDC_BULK_OUT}" != "${USB_CFG_HCDC_BULK_IN}")</constraint>
+            <constraint display="Selected pipe must not be used multiple times">("${USB_CFG_HCDC_MULTI}" == "${USB_CFG_HCDC_MULTI.USB_CFG_DISABLE}" || "${USB_CFG_HCDC_BULK_OUT}" != "${USB_CFG_HCDC_BULK_IN2}")</constraint>
+            <constraint display="Selected pipe must not be used multiple times">("${USB_CFG_HCDC_MULTI}" == "${USB_CFG_HCDC_MULTI.USB_CFG_DISABLE}" || "${USB_CFG_HCDC_BULK_OUT}" != "${USB_CFG_HCDC_BULK_OUT2}")</constraint>
+            <description>Using USB PIPE1
+Using USB PIPE2
+Using USB PIPE3
+Using USB PIPE4
+Using USB PIPE5</description>
+        </property>
+        <property id="USB_CFG_HCDC_BULK_IN2" display="Setting the USB Bulk In pipe to be used for 2nd CDC device" default="USB_PIPE3" type="combobox">
+            <option id="USB_CFG_HCDC_BULK_IN2.USB_PIPE1" display="Using USB PIPE1" value="USB_PIPE1"/>
+            <option id="USB_CFG_HCDC_BULK_IN2.USB_PIPE2" display="Using USB PIPE2" value="USB_PIPE2"/>
+            <option id="USB_CFG_HCDC_BULK_IN2.USB_PIPE3" display="Using USB PIPE3" value="USB_PIPE3"/>
+            <option id="USB_CFG_HCDC_BULK_IN2.USB_PIPE4" display="Using USB PIPE4" value="USB_PIPE4"/>
+            <option id="USB_CFG_HCDC_BULK_IN2.USB_PIPE5" display="Using USB PIPE5" value="USB_PIPE5"/>
+            <constraint display="USB_CFG_HCDC_MULTI should be enabled" actionOnFail="disable">"${USB_CFG_HCDC_MULTI}" == "${USB_CFG_HCDC_MULTI.USB_CFG_ENABLE}"</constraint>
+            <constraint display="Selected pipe must not be used multiple times" actionOnFail="error">("${USB_CFG_HCDC_BULK_IN2}" != "${USB_CFG_HCDC_BULK_IN}")</constraint>
+            <constraint display="Selected pipe must not be used multiple times" actionOnFail="error">("${USB_CFG_HCDC_BULK_IN2}" != "${USB_CFG_HCDC_BULK_OUT}")</constraint>
+            <constraint display="Selected pipe must not be used multiple times" actionOnFail="error">("${USB_CFG_HCDC_BULK_IN2}" != "${USB_CFG_HCDC_BULK_OUT2}")</constraint>
+            <description>Using USB PIPE1
+Using USB PIPE2
+Using USB PIPE3
+Using USB PIPE4
+Using USB PIPE5</description>
+        </property>
+        <property id="USB_CFG_HCDC_BULK_OUT2" display="Setting the USB Bulk Out pipe to be used for 2nd CDC device" default="USB_PIPE4" type="combobox">
+            <option id="USB_CFG_HCDC_BULK_OUT2.USB_PIPE1" display="Using USB PIPE1" value="USB_PIPE1"/>
+            <option id="USB_CFG_HCDC_BULK_OUT2.USB_PIPE2" display="Using USB PIPE2" value="USB_PIPE2"/>
+            <option id="USB_CFG_HCDC_BULK_OUT2.USB_PIPE3" display="Using USB PIPE3" value="USB_PIPE3"/>
+            <option id="USB_CFG_HCDC_BULK_OUT2.USB_PIPE4" display="Using USB PIPE4" value="USB_PIPE4"/>
+            <option id="USB_CFG_HCDC_BULK_OUT2.USB_PIPE5" display="Using USB PIPE5" value="USB_PIPE5"/>
+            <constraint display="USB_CFG_HCDC_MULTI should be enabled" actionOnFail="disable">"${USB_CFG_HCDC_MULTI}" == "${USB_CFG_HCDC_MULTI.USB_CFG_ENABLE}"</constraint>
+            <constraint display="Selected pipe must not be used multiple times" actionOnFail="error">("${USB_CFG_HCDC_BULK_OUT2}" != "${USB_CFG_HCDC_BULK_IN}")</constraint>
+            <constraint display="Selected pipe must not be used multiple times" actionOnFail="error">("${USB_CFG_HCDC_BULK_OUT2}" != "${USB_CFG_HCDC_BULK_OUT}")</constraint>
+            <constraint display="Selected pipe must not be used multiple times" actionOnFail="error">("${USB_CFG_HCDC_BULK_OUT2}" != "${USB_CFG_HCDC_BULK_IN2}")</constraint>
+            <description>Using USB PIPE1
+Using USB PIPE2
+Using USB PIPE3
+Using USB PIPE4
+Using USB PIPE5</description>
+        </property>
+        <property id="USB_CFG_HCDC_INT_IN" display="Setting the USB Interrupt In pipe to be used for 1st CDC device" default="USB_PIPE6" type="combobox">
+            <option id="USB_CFG_HCDC_INT_IN.USB_PIPE6" display="Using USB PIPE6" value="USB_PIPE6"/>
+            <option id="USB_CFG_HCDC_INT_IN.USB_PIPE7" display="Using USB PIPE7" value="USB_PIPE7"/>
+            <option id="USB_CFG_HCDC_INT_IN.USB_PIPE8" display="Using USB PIPE8" value="USB_PIPE8"/>
+            <option id="USB_CFG_HCDC_INT_IN.USB_PIPE9" display="Using USB PIPE9" value="USB_PIPE9"/>
+            <constraint display="Selected pipe must not be used multiple times">("${USB_CFG_HCDC_MULTI}" == "${USB_CFG_HCDC_MULTI.USB_CFG_DISABLE}" || "${USB_CFG_HCDC_INT_IN}" != "${USB_CFG_HCDC_INT_IN2}")</constraint>
+            <description>Using USB PIPE6
+Using USB PIPE7
+Using USB PIPE8
+Using USB PIPE9</description>
+        </property>
+        <property id="USB_CFG_HCDC_INT_IN2" display="Setting the USB Interrupt In pipe to be used for 2nd CDC device" default="USB_PIPE7" type="combobox">
+            <option id="USB_CFG_HCDC_INT_IN2.USB_PIPE6" display="Using USB PIPE6" value="USB_PIPE6"/>
+            <option id="USB_CFG_HCDC_INT_IN2.USB_PIPE7" display="Using USB PIPE7" value="USB_PIPE7"/>
+            <option id="USB_CFG_HCDC_INT_IN2.USB_PIPE8" display="Using USB PIPE8" value="USB_PIPE8"/>
+            <option id="USB_CFG_HCDC_INT_IN2.USB_PIPE9" display="Using USB PIPE9" value="USB_PIPE9"/>
+            <constraint display="USB_CFG_HCDC_MULTI should be enabled" actionOnFail="disable">"${USB_CFG_HCDC_MULTI}" == "${USB_CFG_HCDC_MULTI.USB_CFG_ENABLE}"</constraint>
+            <constraint display="Selected pipe must not be used multiple times" actionOnFail="error">("${USB_CFG_HCDC_INT_IN2}" != "${USB_CFG_HCDC_INT_IN}")</constraint>
+            <description>Using USB PIPE6
+Using USB PIPE7
+Using USB PIPE8
+Using USB PIPE9</description>
+        </property>
+    </configuration>
+</module>

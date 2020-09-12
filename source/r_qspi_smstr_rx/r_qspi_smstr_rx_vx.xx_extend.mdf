@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
+* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
+* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
+* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
+* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
+* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
+* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate>r_pinset_type1</fileTemplate>
+    <fileTemplatePath>r_config/r_qspi_smstr_rx_pin_config.h</fileTemplatePath>
+    <resourceInfo>
+      <peripheral name="QSPI">
+        <channel number="QSPI0">
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="QSPCLK">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_QSPI_SMSTR_CFG_QSPI_QSPCLK_PORT" value="portnum"/>
+            <macro name="R_QSPI_SMSTR_CFG_QSPI_QSPCLK_BIT" value="bitnum"/>
+          </pin>
+          <pin name="QIO0">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_QSPI_SMSTR_CFG_QSPI_QIO0_PORT" value="portnum"/>
+            <macro name="R_QSPI_SMSTR_CFG_QSPI_QIO0_BIT" value="bitnum"/>
+          </pin>
+          <pin name="QIO1">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_QSPI_SMSTR_CFG_QSPI_QIO1_PORT" value="portnum"/>
+            <macro name="R_QSPI_SMSTR_CFG_QSPI_QIO1_BIT" value="bitnum"/>
+          </pin>
+          <pin name="QIO2">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_QSPI_SMSTR_CFG_QSPI_QIO2_PORT" value="portnum"/>
+            <macro name="R_QSPI_SMSTR_CFG_QSPI_QIO2_BIT" value="bitnum"/>
+          </pin>
+          <pin name="QIO3">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_QSPI_SMSTR_CFG_QSPI_QIO3_PORT" value="portnum"/>
+            <macro name="R_QSPI_SMSTR_CFG_QSPI_QIO3_BIT" value="bitnum"/>
+          </pin>
+        </channel>
+      </peripheral>
+    </resourceInfo>
+    <configuration>
+        <property id="QSPI_SMSTR_CFG_USE_FIT" display="Use FIT" default="#define" keyword="QSPI_SMSTR_CFG_USE_FIT" type="checkbox">
+            <option id="QSPI_SMSTR_CFG_USE_FIT.//#define" display="Unused" value="//#define"/>
+            <option id="QSPI_SMSTR_CFG_USE_FIT.#define" display="Used" value="#define"/>
+            <description>Specify if FIT modules are used.</description>
+        </property>
+        <property id="QSPI_SMSTR_CFG_CH0_INCLUDED" display="Use QSPI Channel 0" default="#define" keyword="QSPI_SMSTR_CFG_CH0_INCLUDED" type="checkbox">
+            <option id="QSPI_SMSTR_CFG_CH0_INCLUDED.//#define" display="Unused" value="//#define"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INCLUDED.#define" display="Used" value="#define"/>
+            <description>If enabled, then the code for this specific channel is valid.
+If the #define which channel is not supported on the MCU is uncommented, then compile error occurs.</description>
+        </property>
+        <property id="QSPI_SMSTR_CFG_LONGQ_ENABLE" display="Enable debugging information" default="/* #define" keyword="QSPI_SMSTR_CFG_LONGQ_ENABLE */" type="checkbox">
+            <option id="QSPI_SMSTR_CFG_LONGQ_ENABLE./* #define" display="Unused" value="/* #define"/>
+            <option id="QSPI_SMSTR_CFG_LONGQ_ENABLE.#define QSPI_SMSTR_CFG_LONGQ_ENABLE     /*" display="Used" value="#define QSPI_SMSTR_CFG_LONGQ_ENABLE     /*"/>
+            <description>Stores error log information using LONGQ driver.</description>
+        </property>
+        <property id="QSPI_SMSTR_CFG_CH0_INT_SPTI_LEVEL" display="SPTI0 Interrupt priority level" default="10" type="combobox">
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPTI_LEVEL.0" display="Level 0 (interrupt disabled)" value="0"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPTI_LEVEL.1" display="Level 1" value="1"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPTI_LEVEL.2" display="Level 2" value="2"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPTI_LEVEL.3" display="Level 3" value="3"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPTI_LEVEL.4" display="Level 4" value="4"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPTI_LEVEL.5" display="Level 5" value="5"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPTI_LEVEL.6" display="Level 6" value="6"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPTI_LEVEL.7" display="Level 7" value="7"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPTI_LEVEL.8" display="Level 8" value="8"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPTI_LEVEL.9" display="Level 9" value="9"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPTI_LEVEL.10" display="Level 10" value="10"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPTI_LEVEL.11" display="Level 11" value="11"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPTI_LEVEL.12" display="Level 12" value="12"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPTI_LEVEL.13" display="Level 13" value="13"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPTI_LEVEL.14" display="Level 14" value="14"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPTI_LEVEL.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="This setting is only valid for CH0" actionOnFail="disable">"${QSPI_SMSTR_CFG_CH0_INCLUDED}" == "#define"</constraint>
+            <description>In the case of DMAC/DTC, set the interrupt source priority level of spti and spri.</description>
+        </property>
+        <property id="QSPI_SMSTR_CFG_CH0_INT_SPRI_LEVEL" display="SPRI0 Interrupt priority level" default="10" type="combobox">
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPRI_LEVEL.0" display="Level 0 (interrupt disabled)" value="0"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPRI_LEVEL.1" display="Level 1" value="1"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPRI_LEVEL.2" display="Level 2" value="2"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPRI_LEVEL.3" display="Level 3" value="3"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPRI_LEVEL.4" display="Level 4" value="4"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPRI_LEVEL.5" display="Level 5" value="5"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPRI_LEVEL.6" display="Level 6" value="6"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPRI_LEVEL.7" display="Level 7" value="7"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPRI_LEVEL.8" display="Level 8" value="8"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPRI_LEVEL.9" display="Level 9" value="9"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPRI_LEVEL.10" display="Level 10" value="10"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPRI_LEVEL.11" display="Level 11" value="11"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPRI_LEVEL.12" display="Level 12" value="12"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPRI_LEVEL.13" display="Level 13" value="13"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPRI_LEVEL.14" display="Level 14" value="14"/>
+            <option id="QSPI_SMSTR_CFG_CH0_INT_SPRI_LEVEL.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="This setting is only valid for CH0" actionOnFail="disable">"${QSPI_SMSTR_CFG_CH0_INCLUDED}" == "#define"</constraint>
+            <description>In the case of DMAC/DTC, set the interrupt source priority level of spti and spri.</description>
+        </property>
+    </configuration>
+</module>

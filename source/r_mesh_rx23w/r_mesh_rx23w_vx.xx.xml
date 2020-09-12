@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>2.08.00</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX200</series>
+        <group>RX23W</group>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_mesh_rx23w</name>
+        <version>1.01</version>
+        <zipsource>r_mesh_rx23w_v1.01.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>5.40</version>
+        </dependency>
+        <dependency>
+            <module>r_ble_rx23w</module>
+            <version>1.01</version>
+        </dependency>
+        <dependency>
+            <module>r_flash_rx</module>
+            <version>4.10</version>
+            <version>4.20</version>
+        </dependency>
+        <application>Communications</application>
+        <desc>MESH stack</desc>
+        <details>RX23W Bluetooth Mesh Stack package that provides applications with many-to-many wireless communication features which is compliant with the Bluetooth Mesh Networking specifications</details>
+        <function>MESH</function>
+        <incdir>r_config</incdir>
+        <incdir>r_mesh_rx23w</incdir>
+        <incdir>r_mesh_rx23w/src</incdir>
+        <incdir>r_mesh_rx23w/src/bearer</incdir>
+        <incdir>r_mesh_rx23w/src/drivers</incdir>
+        <incdir>r_mesh_rx23w/src/include</incdir>
+        <incdir>r_mesh_rx23w/src/include/platform</incdir>
+        <incdir>general</incdir>
+        <library>
+            <family>RX</family>
+            <series>RX200</series>
+            <group>RX23W</group>
+            <libdir endian="big" path="rel">r_mesh_rx23w/lib/lib_ble_ms_ccrx.lib</libdir>
+            <libdir endian="little" path="rel">r_mesh_rx23w/lib/lib_ble_ms_ccrx.lib</libdir>
+        </library>
+    </package>
+
+    <sampleapplicationnote>
+        <documentno>R01AN4930</documentno>
+    </sampleapplicationnote>
+
+</refinfo>

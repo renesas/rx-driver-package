@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate>r_pinset_type1</fileTemplate>
+    <fileTemplatePath>r_config/r_eeprom_spi_pin_config.h</fileTemplatePath>
+    <resourceInfo>
+      <peripheral name="Null">
+      </peripheral>
+    </resourceInfo>
+    <configuration>
+        <property id="SC_EEPROM_SPI_CFG_WEL_CHK" display="ENABLE CHECKING OF THE WEL BIT" default="#define EEPROM_SPI_CFG_WEL_CHK" keyword="/* SC_EEPROM_SPI_CFG_WEL_CHK */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_WEL_CHK./* #define EEPROM_SPI_CFG_WEL_CHK */" display="Disabled" value="/* #define EEPROM_SPI_CFG_WEL_CHK */"/>
+            <option id="SC_EEPROM_SPI_CFG_WEL_CHK.#define EEPROM_SPI_CFG_WEL_CHK" display="Enabled" value="#define EEPROM_SPI_CFG_WEL_CHK"/>
+            <description>Selects whether or not the WEL bit is checked after the WREN command is issued. 
+(1: enabled, 0: disabled).</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_LONGQ_ENABLE" display="ENABLE DEBUGGING INFORMATION" default="/* #define EEPROM_SPI_CFG_LONGQ_ENABLE */" keyword="/* SC_EEPROM_SPI_CFG_LONGQ_ENABLE */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_LONGQ_ENABLE./* #define EEPROM_SPI_CFG_LONGQ_ENABLE */" display="Disabled" value="/* #define EEPROM_SPI_CFG_LONGQ_ENABLE */"/>
+            <option id="SC_EEPROM_SPI_CFG_LONGQ_ENABLE.#define EEPROM_SPI_CFG_LONGQ_ENABLE" display="Enabled" value="#define EEPROM_SPI_CFG_LONGQ_ENABLE"/>
+            <description>Selects whether or not error log acquisition processing is performed for debugging.
+(1: enabled, 0: disabled)</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_USE_GPIO_MPC_FIT" display="ENABLE GPIO MODULE AND MPC MODULE" default="/* #define EEPROM_SPI_CFG_USE_GPIO_MPC_FIT */" keyword="/* SC_EEPROM_SPI_CFG_USE_GPIO_MPC_FIT */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_USE_GPIO_MPC_FIT./* #define EEPROM_SPI_CFG_USE_GPIO_MPC_FIT */" display="Disabled" value="/* #define EEPROM_SPI_CFG_USE_GPIO_MPC_FIT */"/>
+            <option id="SC_EEPROM_SPI_CFG_USE_GPIO_MPC_FIT.#define EEPROM_SPI_CFG_USE_GPIO_MPC_FIT" display="Enabled" value="#define EEPROM_SPI_CFG_USE_GPIO_MPC_FIT"/>
+            <description>Selects whether the GPIO FIT module or MPC FIT module is used to control the SS# pin.
+ (1: enabled, 0: disabled)</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV0_INCLUDED" display="Device 0 Included" default="#define EEPROM_SPI_CFG_DEV0_INCLUDED" keyword="/* SC_EEPROM_SPI_CFG_DEV0_INCLUDED */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV0_INCLUDED./* #define EEPROM_SPI_CFG_DEV0_INCLUDED */" display="Disabled" value="/* #define EEPROM_SPI_CFG_DEV0_INCLUDED */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV0_INCLUDED.#define EEPROM_SPI_CFG_DEV0_INCLUDED" display="Enabled" value="#define EEPROM_SPI_CFG_DEV0_INCLUDED"/>
+            <description>If these are defined, then the code for the specified device 0 is valid.
+(1: enabled, 0: disabled)</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV1_INCLUDED" display="Device 1 Included" default="/* #define EEPROM_SPI_CFG_DEV1_INCLUDED */" keyword="/* SC_EEPROM_SPI_CFG_DEV1_INCLUDED */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV1_INCLUDED./* #define EEPROM_SPI_CFG_DEV1_INCLUDED */" display="Disabled" value="/* #define EEPROM_SPI_CFG_DEV1_INCLUDED */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV1_INCLUDED.#define EEPROM_SPI_CFG_DEV1_INCLUDED" display="Enabled" value="#define EEPROM_SPI_CFG_DEV1_INCLUDED"/>
+            <description>If these are defined, then the code for the specified device 1 is valid.
+(1: enabled, 0: disabled)</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV0_SIZE_002K" display="Device 0   2K-bit  (256 Bytes)" default="/* #define EEPROM_SPI_CFG_DEV0_SIZE_002K */" keyword="/* SC_EEPROM_SPI_CFG_DEV0_SIZE_002K */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV0_SIZE_002K./* #define EEPROM_SPI_CFG_DEV0_SIZE_002K */" display="Not control target" value="/* #define EEPROM_SPI_CFG_DEV0_SIZE_002K */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV0_SIZE_002K.#define EEPROM_SPI_CFG_DEV0_SIZE_002K" display="Control target" value="#define EEPROM_SPI_CFG_DEV0_SIZE_002K"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV0_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV0_INCLUDED.#define EEPROM_SPI_CFG_DEV0_INCLUDED}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV0_SIZE_004K" display="Device 0   4K-bit  (512 Bytes)" default="/* #define EEPROM_SPI_CFG_DEV0_SIZE_004K */" keyword="/* SC_EEPROM_SPI_CFG_DEV0_SIZE_004K */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV0_SIZE_004K./* #define EEPROM_SPI_CFG_DEV0_SIZE_004K */" display="Not control target" value="/* #define EEPROM_SPI_CFG_DEV0_SIZE_004K */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV0_SIZE_004K.#define EEPROM_SPI_CFG_DEV0_SIZE_004K" display="Control target" value="#define EEPROM_SPI_CFG_DEV0_SIZE_004K"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV0_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV0_INCLUDED.#define EEPROM_SPI_CFG_DEV0_INCLUDED}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV0_SIZE_008K" display="Device 0   8K-bit  ( 1K Bytes)" default="#define EEPROM_SPI_CFG_DEV0_SIZE_008K" keyword="/* SC_EEPROM_SPI_CFG_DEV0_SIZE_008K */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV0_SIZE_008K./* #define EEPROM_SPI_CFG_DEV0_SIZE_008K */" display="Not control target" value="/* #define EEPROM_SPI_CFG_DEV0_SIZE_008K */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV0_SIZE_008K.#define EEPROM_SPI_CFG_DEV0_SIZE_008K" display="Control target" value="#define EEPROM_SPI_CFG_DEV0_SIZE_008K"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV0_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV0_INCLUDED.#define EEPROM_SPI_CFG_DEV0_INCLUDED}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV0_SIZE_016K" display="Device 0  16K-bit  ( 2K Bytes)" default="/* #define EEPROM_SPI_CFG_DEV0_SIZE_016K */" keyword="/* SC_EEPROM_SPI_CFG_DEV0_SIZE_016K */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV0_SIZE_016K./* #define EEPROM_SPI_CFG_DEV0_SIZE_016K */" display="Not control target" value="/* #define EEPROM_SPI_CFG_DEV0_SIZE_016K */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV0_SIZE_016K.#define EEPROM_SPI_CFG_DEV0_SIZE_016K" display="Control target" value="#define EEPROM_SPI_CFG_DEV0_SIZE_016K"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV0_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV0_INCLUDED.#define EEPROM_SPI_CFG_DEV0_INCLUDED}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV0_SIZE_032K" display="Device 0  32K-bit  ( 4K Bytes)" default="/* #define EEPROM_SPI_CFG_DEV0_SIZE_032K */" keyword="/* SC_EEPROM_SPI_CFG_DEV0_SIZE_032K */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV0_SIZE_032K./* #define EEPROM_SPI_CFG_DEV0_SIZE_032K */" display="Not control target" value="/* #define EEPROM_SPI_CFG_DEV0_SIZE_032K */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV0_SIZE_032K.#define EEPROM_SPI_CFG_DEV0_SIZE_032K" display="Control target" value="#define EEPROM_SPI_CFG_DEV0_SIZE_032K"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV0_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV0_INCLUDED.#define EEPROM_SPI_CFG_DEV0_INCLUDED}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV0_SIZE_064K" display="Device 0  64K-bit  ( 8K Bytes" default="/* #define EEPROM_SPI_CFG_DEV0_SIZE_064K */" keyword="/* SC_EEPROM_SPI_CFG_DEV0_SIZE_064K */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV0_SIZE_064K./* #define EEPROM_SPI_CFG_DEV0_SIZE_064K */" display="Not control target" value="/* #define EEPROM_SPI_CFG_DEV0_SIZE_064K */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV0_SIZE_064K.#define EEPROM_SPI_CFG_DEV0_SIZE_064K" display="Control target" value="#define EEPROM_SPI_CFG_DEV0_SIZE_064K"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV0_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV0_INCLUDED.#define EEPROM_SPI_CFG_DEV0_INCLUDED}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV0_SIZE_128K" display="Device 0 128K-bit  (16K Bytes)" default="/* #define EEPROM_SPI_CFG_DEV0_SIZE_128K */" keyword="/* SC_EEPROM_SPI_CFG_DEV0_SIZE_128K */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV0_SIZE_128K./* #define EEPROM_SPI_CFG_DEV0_SIZE_128K */" display="Not control target" value="/* #define EEPROM_SPI_CFG_DEV0_SIZE_128K */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV0_SIZE_128K.#define EEPROM_SPI_CFG_DEV0_SIZE_128K" display="Control target" value="#define EEPROM_SPI_CFG_DEV0_SIZE_128K"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV0_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV0_INCLUDED.#define EEPROM_SPI_CFG_DEV0_INCLUDED}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV0_SIZE_256K" display="Device 0 256K-bit  (32K Bytes)" default="/* #define EEPROM_SPI_CFG_DEV0_SIZE_256K */" keyword="/* SC_EEPROM_SPI_CFG_DEV0_SIZE_256K */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV0_SIZE_256K./* #define EEPROM_SPI_CFG_DEV0_SIZE_256K */" display="Not control target" value="/* #define EEPROM_SPI_CFG_DEV0_SIZE_256K */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV0_SIZE_256K.#define EEPROM_SPI_CFG_DEV0_SIZE_256K" display="Control target" value="#define EEPROM_SPI_CFG_DEV0_SIZE_256K"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV0_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV0_INCLUDED.#define EEPROM_SPI_CFG_DEV0_INCLUDED}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV0_SIZE_512K" display="Device 0 512K-bit  (64K Bytes)" default="/* #define EEPROM_SPI_CFG_DEV0_SIZE_512K */" keyword="/* SC_EEPROM_SPI_CFG_DEV0_SIZE_512K */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV0_SIZE_512K./* #define EEPROM_SPI_CFG_DEV0_SIZE_512K */" display="Not control target" value="/* #define EEPROM_SPI_CFG_DEV0_SIZE_512K */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV0_SIZE_512K.#define EEPROM_SPI_CFG_DEV0_SIZE_512K" display="Control target" value="#define EEPROM_SPI_CFG_DEV0_SIZE_512K"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV0_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV0_INCLUDED.#define EEPROM_SPI_CFG_DEV0_INCLUDED}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 0.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV1_SIZE_002K" display="Device 1   2K-bit  (256 Bytes)" default="/* #define EEPROM_SPI_CFG_DEV1_SIZE_002K */" keyword="/* SC_EEPROM_SPI_CFG_DEV1_SIZE_002K */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV1_SIZE_002K./* #define EEPROM_SPI_CFG_DEV1_SIZE_002K */" display="Not control target" value="/* #define EEPROM_SPI_CFG_DEV1_SIZE_002K */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV1_SIZE_002K.#define EEPROM_SPI_CFG_DEV1_SIZE_002K" display="Control target" value="#define EEPROM_SPI_CFG_DEV1_SIZE_002K"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV1_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV1_INCLUDED.#define EEPROM_SPI_CFG_DEV1_INCLUDED}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV1_SIZE_004K" display="Device 1   4K-bit  (512 Bytes)" default="/* #define EEPROM_SPI_CFG_DEV1_SIZE_004K */" keyword="/* SC_EEPROM_SPI_CFG_DEV1_SIZE_004K */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV1_SIZE_004K./* #define EEPROM_SPI_CFG_DEV1_SIZE_004K */" display="Not control target" value="/* #define EEPROM_SPI_CFG_DEV1_SIZE_004K */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV1_SIZE_004K.#define EEPROM_SPI_CFG_DEV1_SIZE_004K" display="Control target" value="#define EEPROM_SPI_CFG_DEV1_SIZE_004K"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV1_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV1_INCLUDED.#define EEPROM_SPI_CFG_DEV1_INCLUDED}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV1_SIZE_008K" display="Device 1   8K-bit  ( 1K Bytes)" default="#define EEPROM_SPI_CFG_DEV1_SIZE_008K" keyword="/* SC_EEPROM_SPI_CFG_DEV1_SIZE_008K */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV1_SIZE_008K./* #define EEPROM_SPI_CFG_DEV1_SIZE_008K */" display="Not control target" value="/* #define EEPROM_SPI_CFG_DEV1_SIZE_008K */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV1_SIZE_008K.#define EEPROM_SPI_CFG_DEV1_SIZE_008K" display="Control target" value="#define EEPROM_SPI_CFG_DEV1_SIZE_008K"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV1_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV1_INCLUDED.#define EEPROM_SPI_CFG_DEV1_INCLUDED}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV1_SIZE_016K" display="Device 1  16K-bit  ( 2K Bytes)" default="/* #define EEPROM_SPI_CFG_DEV1_SIZE_016K */" keyword="/* SC_EEPROM_SPI_CFG_DEV1_SIZE_016K */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV1_SIZE_016K./* #define EEPROM_SPI_CFG_DEV1_SIZE_016K */" display="Not control target" value="/* #define EEPROM_SPI_CFG_DEV1_SIZE_016K */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV1_SIZE_016K.#define EEPROM_SPI_CFG_DEV1_SIZE_016K" display="Control target" value="#define EEPROM_SPI_CFG_DEV1_SIZE_016K"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV1_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV1_INCLUDED.#define EEPROM_SPI_CFG_DEV1_INCLUDED}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV1_SIZE_032K" display="Device 1  32K-bit  ( 4K Bytes)" default="/* #define EEPROM_SPI_CFG_DEV1_SIZE_032K */" keyword="/* SC_EEPROM_SPI_CFG_DEV1_SIZE_032K */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV1_SIZE_032K./* #define EEPROM_SPI_CFG_DEV1_SIZE_032K */" display="Not control target" value="/* #define EEPROM_SPI_CFG_DEV1_SIZE_032K */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV1_SIZE_032K.#define EEPROM_SPI_CFG_DEV1_SIZE_032K" display="Control target" value="#define EEPROM_SPI_CFG_DEV1_SIZE_032K"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV1_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV1_INCLUDED.#define EEPROM_SPI_CFG_DEV1_INCLUDED}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV1_SIZE_064K" display="Device 1  64K-bit  ( 8K Bytes" default="/* #define EEPROM_SPI_CFG_DEV1_SIZE_064K */" keyword="/* SC_EEPROM_SPI_CFG_DEV1_SIZE_064K */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV1_SIZE_064K./* #define EEPROM_SPI_CFG_DEV1_SIZE_064K */" display="Not control target" value="/* #define EEPROM_SPI_CFG_DEV1_SIZE_064K */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV1_SIZE_064K.#define EEPROM_SPI_CFG_DEV1_SIZE_064K" display="Control target" value="#define EEPROM_SPI_CFG_DEV1_SIZE_064K"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV1_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV1_INCLUDED.#define EEPROM_SPI_CFG_DEV1_INCLUDED}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV1_SIZE_128K" display="Device 1 128K-bit  (16K Bytes)" default="/* #define EEPROM_SPI_CFG_DEV1_SIZE_128K */" keyword="/* SC_EEPROM_SPI_CFG_DEV1_SIZE_128K */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV1_SIZE_128K./* #define EEPROM_SPI_CFG_DEV1_SIZE_128K */" display="Not control target" value="/* #define EEPROM_SPI_CFG_DEV1_SIZE_128K */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV1_SIZE_128K.#define EEPROM_SPI_CFG_DEV1_SIZE_128K" display="Control target" value="#define EEPROM_SPI_CFG_DEV1_SIZE_128K"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV1_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV1_INCLUDED.#define EEPROM_SPI_CFG_DEV1_INCLUDED}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV1_SIZE_256K" display="Device 1 256K-bit  (32K Bytes)" default="/* #define EEPROM_SPI_CFG_DEV1_SIZE_256K */" keyword="/* SC_EEPROM_SPI_CFG_DEV1_SIZE_256K */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV1_SIZE_256K./* #define EEPROM_SPI_CFG_DEV1_SIZE_256K */" display="Not control target" value="/* #define EEPROM_SPI_CFG_DEV1_SIZE_256K */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV1_SIZE_256K.#define EEPROM_SPI_CFG_DEV1_SIZE_256K" display="Control target" value="#define EEPROM_SPI_CFG_DEV1_SIZE_256K"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV1_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV1_INCLUDED.#define EEPROM_SPI_CFG_DEV1_INCLUDED}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+        <property id="SC_EEPROM_SPI_CFG_DEV1_SIZE_512K" display="Device 1 512K-bit  (64K Bytes)" default="/* #define EEPROM_SPI_CFG_DEV1_SIZE_512K */" keyword="/* SC_EEPROM_SPI_CFG_DEV1_SIZE_512K */" type="checkbox">
+            <option id="SC_EEPROM_SPI_CFG_DEV1_SIZE_512K./* #define EEPROM_SPI_CFG_DEV1_SIZE_512K */" display="Not control target" value="/* #define EEPROM_SPI_CFG_DEV1_SIZE_512K */"/>
+            <option id="SC_EEPROM_SPI_CFG_DEV1_SIZE_512K.#define EEPROM_SPI_CFG_DEV1_SIZE_512K" display="Control target" value="#define EEPROM_SPI_CFG_DEV1_SIZE_512K"/>
+            <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV1_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV1_INCLUDED.#define EEPROM_SPI_CFG_DEV1_INCLUDED}"</constraint>
+            <description>Select only one serial flash memory capacity to be controlled for device 1.
+ (1: control target, 0: not control target).</description>
+        </property>
+    </configuration>
+</module>

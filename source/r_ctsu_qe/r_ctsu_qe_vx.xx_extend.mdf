@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate>r_pinset_multiapi</fileTemplate>
+    <resourceInfo>
+      <peripheral name="CTSU">
+          <pin name="TSCAP">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS1">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS2">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS3">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS4">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS5">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS6">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS7">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS8">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS9">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS10">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS11">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS12">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS13">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS14">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS15">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS16">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS17">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS18">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS19">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS20">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS21">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS22">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS23">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS24">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS25">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS26">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS27">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS28">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS29">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS30">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS31">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS32">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS33">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS34">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TS35">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+      </peripheral>
+    </resourceInfo>
+    <configuration>
+        <property id="CTSU_CFG_PARAM_CHECKING_ENABLE" display="Parameter check" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+            <option id="CTSU_CFG_PARAM_CHECKING_ENABLE.0" display="Disable parameter checks" value="0"/>
+            <option id="CTSU_CFG_PARAM_CHECKING_ENABLE.1" display="Enable parameter checks" value="1"/>
+            <option id="CTSU_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="Use system default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <description>Setting to BSP_CFG_PARAM_CHECKING_ENABLE utilizes the system default setting
+Setting to 1 includes parameter checking; 0 compiles out parameter checking</description>
+        </property>
+        <property id="CTSU_CFG_USE_DTC" display="Use DTC to handle read/write register interrupts" default="0" type="combobox">
+            <option id="CTSU_CFG_USE_DTC.0" display="Use interrupts to read/write registers" value="0"/>
+            <option id="CTSU_CFG_USE_DTC.1" display="Use DTC to read/write registers" value="1"/>
+            <description>For standard interrupt handling, set this to 0.
+To use DTC for read/write register handling, set this to 1. This feature cannot be used when external triggering of scans is used, or possibly when DTC is used elsewhere in the system (may have conflicts). DTC will reduce CPU usage compared to normal interrupts when a large number of sensors are being used.</description>
+        </property>
+        <property id="CTSU_CFG_INT_PRIORITY_LEVEL" display="Set interrupt level for all CTSU interrupts" default="8" type="combobox">
+            <option id="CTSU_CFG_INT_PRIORITY_LEVEL.1" display="Level 1" value="1"/>
+            <option id="CTSU_CFG_INT_PRIORITY_LEVEL.2" display="Level 2" value="2"/>
+            <option id="CTSU_CFG_INT_PRIORITY_LEVEL.3" display="Level 3" value="3"/>
+            <option id="CTSU_CFG_INT_PRIORITY_LEVEL.4" display="Level 4" value="4"/>
+            <option id="CTSU_CFG_INT_PRIORITY_LEVEL.5" display="Level 5" value="5"/>
+            <option id="CTSU_CFG_INT_PRIORITY_LEVEL.6" display="Level 6" value="6"/>
+            <option id="CTSU_CFG_INT_PRIORITY_LEVEL.7" display="Level 7" value="7"/>
+            <option id="CTSU_CFG_INT_PRIORITY_LEVEL.8" display="Level 8" value="8"/>
+            <option id="CTSU_CFG_INT_PRIORITY_LEVEL.9" display="Level 9" value="9"/>
+            <option id="CTSU_CFG_INT_PRIORITY_LEVEL.10" display="Level 10" value="10"/>
+            <option id="CTSU_CFG_INT_PRIORITY_LEVEL.11" display="Level 11" value="11"/>
+            <option id="CTSU_CFG_INT_PRIORITY_LEVEL.12" display="Level 12" value="12"/>
+            <option id="CTSU_CFG_INT_PRIORITY_LEVEL.13" display="Level 13" value="13"/>
+            <option id="CTSU_CFG_INT_PRIORITY_LEVEL.14" display="Level 14" value="14"/>
+            <option id="CTSU_CFG_INT_PRIORITY_LEVEL.15" display="Level 15 (highest)" value="15"/>
+            <description>This defines the interrupt priority level for all CTSU interrupts</description>
+        </property>
+    </configuration>
+</module>

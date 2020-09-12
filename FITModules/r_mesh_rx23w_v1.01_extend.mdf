@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <configuration>
+        <property id="MESH_CFG_DEFAULT_COMPANY_ID" display="Company ID" default="0x0036" type="textbox">
+            <description>Company ID registered with Bluetooth SIG&#xD;&#xA;Refer to https://www.bluetooth.com/specifications/assigned-numbers/company-identifiers</description>
+        </property>
+        <property id="MESH_CFG_DEFAULT_PID" display="Product ID" default="0x0001" type="textbox">
+            <description>Vendor-assigned product identifier</description>
+        </property>
+        <property id="MESH_CFG_DEFAULT_VID" display="Version ID" default="0x0100" type="textbox">
+            <description>Vendor-assigned product version identifier</description>
+        </property>
+        <property id="MESH_CFG_ACCESS_ELEMENT_COUNT" display="Maximum Number of Element" default="4" type="textbox">
+            <constraint display="Value must be greater than or equal to 1">("${MESH_CFG_ACCESS_ELEMENT_COUNT}" &gt;=1)</constraint>
+            <description>Maximum number of elements, 1 and over</description>
+        </property>
+        <property id="MESH_CFG_ACCESS_MODEL_COUNT" display="Maximum Number of Model" default="20" type="textbox">
+            <constraint display="Value must be greater than or equal to 1">("${MESH_CFG_ACCESS_MODEL_COUNT}" &gt;=1)</constraint>
+            <description>Maximum number of models, 1 and over</description>
+        </property>
+        <property id="MESH_CFG_HEALTH_SERVER_MAX" display="Maximum Number of Health Server" default="2" type="textbox">
+            <constraint display="Value must be greater than or equal to 1">("${MESH_CFG_HEALTH_SERVER_MAX}" &gt;=1)</constraint>
+            <description>Maximum number of Health Servers to be supported, 1 and over</description>
+        </property>
+        <property id="MESH_CFG_MAX_SUBNETS" display="Maximum Number of Subnets" default="4" type="textbox">
+            <constraint display="Value must be greater than or equal to 1">("${MESH_CFG_MAX_SUBNETS}" &gt;=1)</constraint>
+            <description>Maximum number of subnets the device can store, 1 and over</description>
+        </property>
+        <property id="MESH_CFG_MAX_APPS" display="Maximum Number of AppKeys" default="8" type="textbox">
+            <constraint display="Value must be greater than or equal to 1">("${MESH_CFG_MAX_APPS}" &gt;=1)</constraint>
+            <description>Maximum number of Applications Keys the device can store, 1 and over</description>
+        </property>
+        <property id="MESH_CFG_MAX_DEV_KEYS" display="Maximum Number of DevKeys" default="4" type="textbox">
+            <constraint display="Value must be greater than or equal to 1">("${MESH_CFG_MAX_DEV_KEYS}" &gt;=1)</constraint>
+            <description>Maximum number of device keys the device can store, 1 and over</description>
+        </property>
+        <property id="MESH_CFG_MAX_VIRTUAL_ADDRS" display="Maximum Number of Virtual Addresses" default="8" type="textbox">
+            <constraint display="Value must be greater than or equal to 1">("${MESH_CFG_MAX_VIRTUAL_ADDRS}" &gt;=1)</constraint>
+            <description>Maximum number of Virtual Addresses the device can store, 1 and over</description>
+        </property>
+        <property id="MESH_CFG_MAX_NON_VIRTUAL_ADDRS" display="Maximum Number of Non-Virtual Addresses" default="8" type="textbox">
+            <constraint display="Value must be greater than or equal to 1">("${MESH_CFG_MAX_NON_VIRTUAL_ADDRS}" &gt;=1)</constraint>
+            <description>Maximum number of Non-Virtual Addresses (Unicast Addresses and Group Addresses) the device can store, 1 and over</description>
+        </property>
+        <property id="MESH_CFG_NET_SEQ_NUMBER_BLOCK_SIZE" display="Size of Sequence Block" default="2048" type="textbox">
+            <constraint display="Value must be greater than or equal to 1">("${MESH_CFG_NET_SEQ_NUMBER_BLOCK_SIZE}" &gt;=1)</constraint>
+            <description>The distance between the network sequence numbers for every persistent storage write, 1 and over</description>
+        </property>
+        <property id="MESH_CFG_MAX_LPNS" display="Maximum Number of LPN" default="1" type="textbox">
+            <constraint display="Value must be greater than or equal to 1">("${MESH_CFG_MAX_LPNS}" &gt;=1)</constraint>
+            <description>Maximum number of Low Power Nodes to which friendship can be established as a Friend, 1 and over</description>
+        </property>
+        <property id="MESH_CFG_FRIEND_SUBSCRIPTION_LIST_SIZE" display="Maximum Number of Subscription List" default="8" type="textbox">
+            <constraint display="Value must be greater than or equal to 1">("${MESH_CFG_FRIEND_SUBSCRIPTION_LIST_SIZE}" &gt;=1)</constraint>
+            <description>Maximum number of subscription addresses that the friend is capable to store for a single Low Power Node, 1 and over</description>
+        </property>
+        <property id="MESH_CFG_FRIEND_MESSAGEQUEUE_SIZE" display="Maximum Number of Friend Queue" default="15" type="textbox">
+            <constraint display="Value must be greater than or equal to 2">("${MESH_CFG_FRIEND_MESSAGEQUEUE_SIZE}" &gt;=2)</constraint>
+            <description>Maximum number of messages that the friend is capable to queue for a single Low Power Node, 2 and over</description>
+        </property>
+        <property id="MESH_CFG_PROXY_FILTER_LIST_SIZE" display="Maximum Number of Proxy Filter List" default="2" type="textbox">
+            <constraint display="Value must be greater than or equal to 1">("${MESH_CFG_PROXY_FILTER_LIST_SIZE}" &gt;=1)</constraint>
+            <description>Maximum number of addresses stored in each proxy filter list, 1 and over</description>
+        </property>
+        <property id="MESH_CFG_NET_CACHE_SIZE" display="Number of Network Messsage Cache" default="10" type="textbox">
+            <constraint display="Value must be greater than or equal to 2">("${MESH_CFG_NET_CACHE_SIZE}" &gt;=2)</constraint>
+            <description>Number of the network message caches, 2 and over</description>
+        </property>
+        <property id="MESH_CFG_REPLAY_CACHE_SIZE" display="Number of Replay Protect Cache" default="10" type="textbox">
+            <constraint display="Value must be greater than or equal to 2">("${MESH_CFG_REPLAY_CACHE_SIZE}" &gt;=2)</constraint>
+            <description>Number of the Replay Protection caches, 2 and over</description>
+        </property>
+        <property id="MESH_CFG_LTRN_SAR_CTX_MAX" display="Maximum Number of SAR Contexts" default="8" type="textbox">
+            <constraint display="Value must be greater than or equal to 2">("${MESH_CFG_LTRN_SAR_CTX_MAX}" &gt;=2)</constraint>
+            <description>Maximum Number of SAR (segmentation and reassembly) contexts, 2 and over</description>
+        </property>
+        <property id="MESH_CFG_REASSEMBLED_CACHE_SIZE" display="Number of SAR Cache" default="8" type="textbox">
+            <constraint display="Value must be greater than or equal to 2">("${MESH_CFG_REASSEMBLED_CACHE_SIZE}" &gt;=2)</constraint>
+            <description>Number of SAR (segmentation and reassembly) Reception caches, 2 and over</description>
+        </property>
+        <property id="MESH_CFG_NUM_NETWORK_INTERFACES" display="Number of Network Interfaces" default="2" type="textbox">
+            <constraint display="Value must be greater than or equal to 1">("${MESH_CFG_NUM_NETWORK_INTERFACES}" &gt;=1)</constraint>
+            <description>Number of bearer interfaces for mesh network, 1 and over</description>
+        </property>
+        <property id="MESH_CFG_NUM_PROVISIONING_INTERFACES" display="Number of Provisioning Interfaces" default="2" type="textbox">
+            <constraint display="Value must be greater than or equal to 1">("${MESH_CFG_NUM_PROVISIONING_INTERFACES}" &gt;=1)</constraint>
+            <description>Number of bearer interfaces for provisioning, 1 and over</description>
+        </property>
+    </configuration>
+</module>
+

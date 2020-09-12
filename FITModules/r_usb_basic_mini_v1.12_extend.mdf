@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate>r_pinset_type2</fileTemplate>
+    <resourceInfo>
+      <peripheral name="USB">
+        <channel number="USB0_HOST">
+          <constraint display="Channel only valid for Host mode" actionOnFail="disable">"${USB_CFG_MODE}" !== "${USB_CFG_MODE.USB_CFG_PERI}"</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="USB0_VBUSEN">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="USB0_OVRCURA">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="USB0_OVRCURB">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+        </channel>
+        <channel number="USB0_PERI">
+          <constraint display="Channel only valid for Peripheral mode" actionOnFail="disable">"${USB_CFG_MODE}" !== "${USB_CFG_MODE.USB_CFG_HOST}"&amp;&amp;"${USB_CFG_USE_USBIP}" !== "${USB_CFG_USE_USBIP.USB_CFG_IP1}"</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="USB0_VBUS">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+        </channel>
+      </peripheral>
+    </resourceInfo>
+    <configuration>
+        <property id="USB_CFG_MODE" display="USB operating mode setting" default="USB_CFG_PERI" type="combobox">
+            <option id="USB_CFG_MODE.USB_CFG_HOST" display="USB Host mode" value="USB_CFG_HOST"/>
+            <option id="USB_CFG_MODE.USB_CFG_PERI" display="USB Peripheral mode" value="USB_CFG_PERI"/>
+            <description>USB Host mode
+USB Peripheral mode</description>
+        </property>
+        <property id="USB_CFG_PARAM_CHECKING" display="Argument check setting" default="USB_CFG_ENABLE" type="combobox">
+            <option id="USB_CFG_PARAM_CHECKING.USB_CFG_ENABLE" display="Checking the argument" value="USB_CFG_ENABLE"/>
+            <option id="USB_CFG_PARAM_CHECKING.USB_CFG_DISABLE" display="No checking the argument" value="USB_CFG_DISABLE"/>
+            <description>Checking the argument
+No checking the argument</description>
+        </property>
+        <property id="USB_CFG_DEVICE_CLASS" display="Device class setting" default="#define USB_CFG_PCDC_USE" keyword="/* USB_CFG_DEVICE_CLASS */" type="combobox">
+            <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_HCDC_USE" display="Host Communication Device Class" value="#define USB_CFG_HCDC_USE"/>
+            <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_HHID_USE" display="Host Human Interface Device Class" value="#define USB_CFG_HHID_USE"/>
+            <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_HMSC_USE" display="Host Mass Storage Class" value="#define USB_CFG_HMSC_USE"/>
+            <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_HVND_USE" display="Host Vendor Class" value="#define USB_CFG_HVND_USE"/>
+            <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_PCDC_USE" display="Peripheral Communication Device Class" value="#define USB_CFG_PCDC_USE"/>
+            <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_PHID_USE" display="Peripheral Human Interface Device Class" value="#define USB_CFG_PHID_USE"/>
+            <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_PMSC_USE" display="Peripheral Mass Storage Classs" value="#define USB_CFG_PMSC_USE"/>
+            <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_PVND_USE" display="Peripheral Vendor Class" value="#define USB_CFG_PVND_USE"/>
+            <description>Host Communication Device Class
+Host Human Interface Device Class
+Host Mass Storage Class
+Host Vendor Class
+Peripheral Communication Device Class
+Peripheral Human Interface Device Class
+Peripheral Mass Storage Classs
+Peripheral Vendor Class</description>
+        </property>
+        <property id="USB_CFG_DTC" display="DTC use setting" default="USB_CFG_DISABLE" type="combobox">
+            <option id="USB_CFG_DTC.USB_CFG_ENABLE" display="Using DTC" value="USB_CFG_ENABLE"/>
+            <option id="USB_CFG_DTC.USB_CFG_DISABLE" display="Not using DTC" value="USB_CFG_DISABLE"/>
+            <constraint display="DTC and DMA should not be enabled at the same time" actionOnFail="error">!("${USB_CFG_DTC}" == "${USB_CFG_DTC.USB_CFG_ENABLE}" &amp;&amp; "${USB_CFG_DMA}" == "${USB_CFG_DMA.USB_CFG_ENABLE}")</constraint>
+            <description>Not using DTC
+Using DTC</description>
+        </property>
+        <property id="USB_CFG_DMA" display="DMA use setting" default="USB_CFG_DISABLE" type="combobox">
+            <option id="USB_CFG_DMA.USB_CFG_ENABLE" display="Using DMA" value="USB_CFG_ENABLE"/>
+            <option id="USB_CFG_DMA.USB_CFG_DISABLE" display="Not using DMA" value="USB_CFG_DISABLE"/>
+            <constraint display="DMA transfer is supported only for RX231 and RX23W" actionOnFail="disable">"${Device.group}" == "RX231"||"${Device.group}" == "RX23W"</constraint>
+            <constraint display="DTC and DMA should not be enabled at the same time" actionOnFail="error">!("${USB_CFG_DTC}" == "${USB_CFG_DTC.USB_CFG_ENABLE}" &amp;&amp; "${USB_CFG_DMA}" == "${USB_CFG_DMA.USB_CFG_ENABLE}")</constraint>
+            <description>Not using DMA
+Using DMA</description>
+        </property>
+        <property id="USB_CFG_USB0_DMA_TX" display="DMA channel setting for transmission using USB0 module" default="USB_CFG_CH0" type="combobox">
+            <option id="USB_CFG_USB0_DMA_TX.USB_CFG_NOUSE" display="No using DMA channel" value="USB_CFG_NOUSE"/>
+            <option id="USB_CFG_USB0_DMA_TX.USB_CFG_CH0" display="Using DMAC0" value="USB_CFG_CH0"/>
+            <option id="USB_CFG_USB0_DMA_TX.USB_CFG_CH1" display="Using DMAC1" value="USB_CFG_CH1"/>
+            <option id="USB_CFG_USB0_DMA_TX.USB_CFG_CH2" display="Using DMAC2" value="USB_CFG_CH2"/>
+            <option id="USB_CFG_USB0_DMA_TX.USB_CFG_CH3" display="Using DMAC3" value="USB_CFG_CH3"/>
+            <constraint display="USB_CFG_DMA should be enabled first" actionOnFail="disable">"${USB_CFG_DMA}" == "${USB_CFG_DMA.USB_CFG_ENABLE}"</constraint>
+            <constraint display="Selected channel must not be used multiple times">("${USB_CFG_USB0_DMA_TX}" == "USB_CFG_NOUSE" || "${USB_CFG_USB0_DMA_TX}" != "${USB_CFG_USB0_DMA_RX}")</constraint>
+            <description>No using DMA channel
+Using DMAC0
+Using DMAC1
+Using DMAC2
+Using DMAC3</description>
+        </property>
+        <property id="USB_CFG_USB0_DMA_RX" display="DMA channel setting for reception using USB0 module" default="USB_CFG_CH1" type="combobox">
+            <option id="USB_CFG_USB0_DMA_RX.USB_CFG_NOUSE" display="No using DMA channel" value="USB_CFG_NOUSE"/>
+            <option id="USB_CFG_USB0_DMA_RX.USB_CFG_CH0" display="Using DMAC0" value="USB_CFG_CH0"/>
+            <option id="USB_CFG_USB0_DMA_RX.USB_CFG_CH1" display="Using DMAC1" value="USB_CFG_CH1"/>
+            <option id="USB_CFG_USB0_DMA_RX.USB_CFG_CH2" display="Using DMAC2" value="USB_CFG_CH2"/>
+            <option id="USB_CFG_USB0_DMA_RX.USB_CFG_CH3" display="Using DMAC3" value="USB_CFG_CH3"/>
+            <constraint display="USB_CFG_DMA should be enabled first" actionOnFail="disable">"${USB_CFG_DMA}" == "${USB_CFG_DMA.USB_CFG_ENABLE}"</constraint>
+            <constraint display="Selected channel must not be used multiple times">("${USB_CFG_USB0_DMA_RX}" == "USB_CFG_NOUSE" || "${USB_CFG_USB0_DMA_RX}" != "${USB_CFG_USB0_DMA_TX}")</constraint>
+            <description>No using DMA channel
+Using DMAC0
+Using DMAC1
+Using DMAC2
+Using DMAC3</description>
+        </property>
+        <property id="USB_CFG_BC" display="Setting the battery charging function" default="USB_CFG_DISABLE" type="combobox">
+            <option id="USB_CFG_BC.USB_CFG_ENABLE" display="Using the battery charging function" value="USB_CFG_ENABLE"/>
+            <option id="USB_CFG_BC.USB_CFG_DISABLE" display="Not using the battery charging function" value="USB_CFG_DISABLE"/>
+            <description>Not using the battery charging function
+Using the battery charging function</description>
+        </property>
+        <property id="USB_CFG_INTERRUPT_PRIORITY" display="Setting USB Interrupt priority" default="3" type="combobox">
+            <option id="USB_CFG_INTERRUPT_PRIORITY.1" display="Level 1" value="1"/>
+            <option id="USB_CFG_INTERRUPT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="USB_CFG_INTERRUPT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="USB_CFG_INTERRUPT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="USB_CFG_INTERRUPT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="USB_CFG_INTERRUPT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="USB_CFG_INTERRUPT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="USB_CFG_INTERRUPT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="USB_CFG_INTERRUPT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="USB_CFG_INTERRUPT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="USB_CFG_INTERRUPT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="USB_CFG_INTERRUPT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="USB_CFG_INTERRUPT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="USB_CFG_INTERRUPT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="USB_CFG_INTERRUPT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <description>Setting USB interrupt priority
+1: lowest
+15: highest</description>
+        </property>
+        <property id="USB_CFG_REGULATOR" display="Setting USB regulator use or not" default="USB_CFG_DISABLE" type="combobox">
+            <option id="USB_CFG_REGULATOR.USB_CFG_DISABLE" display="USB Regulator disabled" value="USB_CFG_DISABLE"/>
+            <option id="USB_CFG_REGULATOR.USB_CFG_ENABLE" display="USB Regulator enabled" value="USB_CFG_ENABLE"/>
+            <constraint display="Only RX231 and RX23W supported" actionOnFail="disable">"${Device.group}" == "RX231"||"${Device.group}" == "RX23W"</constraint>
+            <description>USB Regulator disabled
+USB Regulator enabled</description>
+        </property>
+        <property id="USB_CFG_VBUS" display="Setting the power source IC" default="USB_CFG_HIGH" type="combobox">
+            <option id="USB_CFG_VBUS.USB_CFG_HIGH" display="High assert" value="USB_CFG_HIGH"/>
+            <option id="USB_CFG_VBUS.USB_CFG_LOW" display="Low assert" value="USB_CFG_LOW"/>
+            <constraint display="Used for USB Host mode only" actionOnFail="disable">"${USB_CFG_MODE}" == "${USB_CFG_MODE.USB_CFG_HOST}"</constraint>
+            <description>High assert
+Low assert</description>
+        </property>
+        <property id="USB_CFG_DCP" display="Setting USB port operation when using the battery charging function" default="USB_CFG_DISABLE" type="combobox">
+            <option id="USB_CFG_DCP.USB_CFG_ENABLE" display="DCP enabled" value="USB_CFG_ENABLE"/>
+            <option id="USB_CFG_DCP.USB_CFG_DISABLE" display="DCP disabled" value="USB_CFG_DISABLE"/>
+            <constraint display="Used for USB Host mode only" actionOnFail="disable">"${USB_CFG_MODE}" == "${USB_CFG_MODE.USB_CFG_HOST}"</constraint>
+            <constraint display="USB_CFG_BC should be enabled" actionOnFail="disable">"${USB_CFG_BC}" == "${USB_CFG_BC.USB_CFG_ENABLE}"</constraint>
+            <description>DCP disabled
+DCP enabled</description>
+        </property>
+        <property id="USB_CFG_COMPLIANCE" display="Setting USB compliance test mode" default="USB_CFG_DISABLE" type="combobox">
+            <option id="USB_CFG_COMPLIANCE.USB_CFG_ENABLE" display="Supporting USB compliance test" value="USB_CFG_ENABLE"/>
+            <option id="USB_CFG_COMPLIANCE.USB_CFG_DISABLE" display="Not supporting USB compliance test" value="USB_CFG_DISABLE"/>
+            <constraint display="Used for USB Host mode only" actionOnFail="disable">"${USB_CFG_MODE}" == "${USB_CFG_MODE.USB_CFG_HOST}"</constraint>
+            <description>Not supporting USB compliance test
+Supporting USB compliance test</description>
+        </property>
+        <property id="USB_CFG_TPLCNT" display="Setting the number of USB devices to be connected" default="1" type="textbox">
+            <constraint display="Used for USB Host mode only" actionOnFail="disable">"${USB_CFG_MODE}" == "${USB_CFG_MODE.USB_CFG_HOST}"</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${USB_CFG_TPLCNT}")</constraint>
+            <constraint display="Value must be >1" actionOnFail="error">("${USB_CFG_TPLCNT}" &gt;= 1)</constraint>
+            <description>[Setting a Targeted Peripheral List (TPL)]
+ - USB_CFG_TPLCNT       : Number of the USB devices to be connected.
+ - USB_CFG_TPL          : Set the VID and PID pairs for the USB device to be connected.</description>
+        </property>
+        <property id="USB_CFG_TPL" display="Setting the vendor ID and product ID pairs for USB devices to be connected" default="USB_NOVENDOR, USB_NOPRODUCT" type="textbox">
+            <constraint display="Used for USB Host mode only" actionOnFail="disable">"${USB_CFG_MODE}" == "${USB_CFG_MODE.USB_CFG_HOST}"</constraint>
+            <constraint display="Enter a string for vendor and product ID pairs separated by comma" actionOnFail="error">/^[a-zA-Z_0-9, ]*$/.test("${USB_CFG_TPL}")</constraint>
+            <description>[Setting a Targeted Peripheral List (TPL)]
+ - USB_CFG_TPLCNT       : Number of the USB devices to be connected.
+ - USB_CFG_TPL          : Set the VID and PID pairs for the USB device to be connected.</description>
+        </property>
+        <property id="USB_CFG_REQUEST" display="Setting whether to notify the specific request to the application program." default="USB_CFG_DISABLE" type="combobox">
+            <option id="USB_CFG_REQUEST.USB_CFG_DISABLE" display="Not notifying the specific request." value="USB_CFG_DISABLE"/>
+            <option id="USB_CFG_REQUEST.USB_CFG_ENABLE" display="Notifying the specific request." value="USB_CFG_ENABLE"/>
+            <description>Not notifying the specific request.
+Notifying the specific request.</description>
+        </property>
+        <property id="USB_CFG_DBLB" display="Set or clear DBLB bit in USB module" default="USB_CFG_DBLBON" type="combobox">
+            <option id="USB_CFG_DBLB.USB_CFG_DBLBON" display="Using the double buffer function in USB module." value="USB_CFG_DBLBON"/>
+            <option id="USB_CFG_DBLB.USB_CFG_DBLBOFF" display="Not using the double buffer function in USB module." value="USB_CFG_DBLBOFF"/>
+            <description>Using the double buffer function in USB module.
+Not using the double buffer function in USB module.</description>
+        </property>
+    </configuration>
+</module>

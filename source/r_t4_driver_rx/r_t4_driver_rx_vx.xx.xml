@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>3.01.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>4.08.04.201801</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.11.01</version>
+    </toolchain>
+
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family omit_series="true">RX</family>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_t4_driver_rx</name>
+        <version>1.08</version>
+        <zipsource>r_t4_driver_rx_v1.08.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>5.20</version>
+        </dependency>
+        <dependency>
+            <module>r_ether_rx</module>
+            <version>1.16</version>
+        </dependency>
+        <dependency>
+            <module>r_sys_time_rx</module>
+            <version>1.01</version>
+        </dependency>
+        <dependency>
+            <module>r_t4_rx</module>
+            <version>2.09</version>
+        </dependency>
+        <application>TCP/IP</application>
+        <desc>Convert the TCP/IP(T4) - RX Ethernet Driver Interface.</desc>
+        <details>Convert the TCP/IP(T4) - RX Ethernet Driver Interface.</details>
+        <function>connectivity</function>
+        <incdir>r_t4_driver_rx</incdir>
+        <incdir>r_t4_driver_rx/src</incdir>
+    </package>
+
+</refinfo>

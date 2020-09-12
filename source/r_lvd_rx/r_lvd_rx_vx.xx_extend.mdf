@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="LVD_CFG_PARAM_CHECKING_ENABLE" display="Parameter checking" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+            <option id="LVD_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="System Default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <option id="LVD_CFG_PARAM_CHECKING_ENABLE.0" display="Not" value="0"/>
+            <option id="LVD_CFG_PARAM_CHECKING_ENABLE.1" display="Include" value="1"/>
+            <description>Selects whether to include parameter checking in the code.
+BSP_CFG_PARAM_CHECKING_ENABLE = System default.
+0 = compile out parameter checking.
+1 = includes parameter checking.</description>
+        </property>
+        <property id="LVD_CFG_CHANNEL_1_USED" display="Use LVD channel 1" default="1" type="combobox">
+            <option id="LVD_CFG_CHANNEL_1_USED.0" display="Corresponding channel is Not used" value="0"/>
+            <option id="LVD_CFG_CHANNEL_1_USED.1" display="Corresponding channel is used" value="1"/>
+            <description>Specifies whether to use the corresponding channel.                              
+- 0: The corresponding channel is not used.                                        
+- 1: The corresponding channel is used. (default value)                           </description>
+        </property>
+        <property id="LVD_CFG_CHANNEL_2_USED" display="Use LVD channel 2" default="1" type="combobox">
+            <option id="LVD_CFG_CHANNEL_2_USED.0" display="Corresponding channel is Not used" value="0"/>
+            <option id="LVD_CFG_CHANNEL_2_USED.1" display="Corresponding channel is used" value="1"/>
+            <description>Specifies whether to use the corresponding channel.                              
+- 0: The corresponding channel is not used.                                        
+- 1: The corresponding channel is used. (default value)                           </description>
+        </property>
+        <property id="LVD_CFG_VDET_TARGET_CHANNEL_1" display="Target to be monitored for channel 1" default="0" type="combobox">
+            <option id="LVD_CFG_VDET_TARGET_CHANNEL_1.0" display="VCC" value="0"/>
+            <option id="LVD_CFG_VDET_TARGET_CHANNEL_1.1" display="CMPA2" value="1"/>
+            <description>Specifies the target to be monitored for each channel.                           
+- 0: VCC (default value)                                                           
+- 1: CMPA2 pin                                                                     </description>
+        </property>
+        <property id="LVD_CFG_VDET_TARGET_CHANNEL_2" display="Target to be monitored for channel 2" default="0" type="combobox">
+            <option id="LVD_CFG_VDET_TARGET_CHANNEL_2.0" display="VCC" value="0"/>
+            <option id="LVD_CFG_VDET_TARGET_CHANNEL_2.1" display="CMPA2" value="1"/>
+            <description>Specifies the target to be monitored for each channel.                           
+- 0: VCC (default value)                                                           
+- 1: CMPA2 pin                                                                     </description>
+        </property>
+        <property id="LVD_CFG_VOLTAGE_LEVEL_CHANNEL_1" display="Voltage detection level for channel 1" default="0xFFFF" type="textbox">
+            <constraint display="Value must be an integer ">testInteger("${LVD_CFG_VOLTAGE_LEVEL_CHANNEL_1}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 500 or 0xFFFF(default value)">(("${LVD_CFG_VOLTAGE_LEVEL_CHANNEL_1}" &gt;= 0) &amp;&amp; ("${LVD_CFG_VOLTAGE_LEVEL_CHANNEL_1}" &lt;= 500)) || ("${LVD_CFG_VOLTAGE_LEVEL_CHANNEL_1}" == 0xFFFF)</constraint>
+            <description>Specifies the voltage detection level for each channel. Set an integer value which expresses the number up to two decimal places. 
+The default value is with reference to the hardware initial value, thus it varies depending on the product used.                                           
+Example:                                                                         
+- To set the voltage detection level to 3.00 V, specify '300'.                     
+- To set the voltage detection level to 4.29 V, specify '429'.                     
+- To set the voltage detection level to default value, specify '0xFFFF' .          </description>
+        </property>
+        <property id="LVD_CFG_VOLTAGE_LEVEL_CHANNEL_2" display="Voltage detection level for channel 2" default="0xFFFF" type="textbox">
+            <constraint display="Value must be an integer ">testInteger("${LVD_CFG_VOLTAGE_LEVEL_CHANNEL_2}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 500 or 0xFFFF(default value)">(("${LVD_CFG_VOLTAGE_LEVEL_CHANNEL_2}" &gt;= 0) &amp;&amp; ("${LVD_CFG_VOLTAGE_LEVEL_CHANNEL_2}" &lt;= 500)) || ("${LVD_CFG_VOLTAGE_LEVEL_CHANNEL_2}" == 0xFFFF)</constraint>
+            <description>Specifies the voltage detection level for each channel. Set an integer value which expresses the number up to two decimal places. 
+The default value is with reference to the hardware initial value, thus it varies depending on the product used.                                           
+Example:                                                                         
+- To set the voltage detection level to 3.00 V, specify '300'.                     
+- To set the voltage detection level to 4.29 V, specify '429'.                     
+- To set the voltage detection level to default value, specify '0xFFFF' .          </description>
+        </property>
+        <property id="LVD_CFG_DIGITAL_FILTER_CHANNEL_1" display="Digital filter for channel 1" default="0" type="combobox">
+            <option id="LVD_CFG_DIGITAL_FILTER_CHANNEL_1.0" display="Disable" value="0"/>
+            <option id="LVD_CFG_DIGITAL_FILTER_CHANNEL_1.1" display="Enable" value="1"/>
+            <description>Specifies enable/disable of the digital filter for each channel.                 
+- 0: Digital filter is disabled. (default value)                                   
+- 1: Digital filter is enabled.                                                    </description>
+        </property>
+        <property id="LVD_CFG_DIGITAL_FILTER_CHANNEL_2" display="Digital filter for channel 2" default="0" type="combobox">
+            <option id="LVD_CFG_DIGITAL_FILTER_CHANNEL_2.0" display="Disable" value="0"/>
+            <option id="LVD_CFG_DIGITAL_FILTER_CHANNEL_2.1" display="Enable" value="1"/>
+            <description>Specifies enable/disable of the digital filter for each channel.                
+- 0: Digital filter is disabled. (default value)                                   
+- 1: Digital filter is enabled.                                                    </description>
+        </property>
+        <property id="LVD_CFG_SAMPLING_CLOCK_CHANNEL_1" display="Division ratio of LOCO as the sampling clock applied to channel 1" default="0xFFFF" type="combobox">
+            <option id="LVD_CFG_SAMPLING_CLOCK_CHANNEL_1.0xFFFF" display="System Default" value="0xFFFF"/>
+            <option id="LVD_CFG_SAMPLING_CLOCK_CHANNEL_1.1" display="Divided by 1" value="1"/>
+            <option id="LVD_CFG_SAMPLING_CLOCK_CHANNEL_1.4" display="Divided by 4" value="4"/>
+            <option id="LVD_CFG_SAMPLING_CLOCK_CHANNEL_1.8" display="Divided by 8" value="8"/>
+            <option id="LVD_CFG_SAMPLING_CLOCK_CHANNEL_1.16" display="Divided by 16" value="16"/>
+            <description>With the digital filter enabled, specifies the division ratio of LOCO as the sampling clock applied to each channel. Set an integer value which expresses the division ratio.                                                             
+The default value is with reference to the hardware initial value, thus it varies depending on the product used.                                            
+Example:                                                                   
+- To set the division ratio to divided-by-1, specify '1'.                          
+- To set the division ratio to divided-by-4, specify '4'.                          
+- To set the division ratio to default value, specify '0xFFFF' .                   </description>
+        </property>
+        <property id="LVD_CFG_SAMPLING_CLOCK_CHANNEL_2" display="Division ratio of LOCO as the sampling clock applied to channel 2" default="0xFFFF" type="combobox">
+            <option id="LVD_CFG_SAMPLING_CLOCK_CHANNEL_2.0xFFFF" display="System Default" value="0xFFFF"/>
+            <option id="LVD_CFG_SAMPLING_CLOCK_CHANNEL_2.1" display="Divided by 1" value="1"/>
+            <option id="LVD_CFG_SAMPLING_CLOCK_CHANNEL_2.4" display="Divided by 4" value="4"/>
+            <option id="LVD_CFG_SAMPLING_CLOCK_CHANNEL_2.8" display="Divided by 8" value="8"/>
+            <option id="LVD_CFG_SAMPLING_CLOCK_CHANNEL_2.16" display="Divided by 16" value="16"/>
+            <description>With the digital filter enabled, specifies the division ratio of LOCO as the sampling clock applied to each channel. Set an integer value which expresses the division ratio.                                                             
+The default value is with reference to the hardware initial value, thus it varies depending on the product used.                                            
+Example:                                                                   
+- To set the division ratio to divided-by-1, specify '1'.                          
+- To set the division ratio to divided-by-4, specify '4'.                          
+- To set the division ratio to default value, specify '0xFFFF' .                   </description>
+        </property>
+        <property id="LVD_CFG_ACTION_CHANNEL_1" display="Processing upon voltage detection for channel 1" default="1" type="combobox">
+            <option id="LVD_CFG_ACTION_CHANNEL_1.0" display="Reset" value="0"/>
+            <option id="LVD_CFG_ACTION_CHANNEL_1.1" display="Non-maskable interrupt (default value)" value="1"/>
+            <option id="LVD_CFG_ACTION_CHANNEL_1.2" display="Maskable interrupt" value="2"/>
+            <option id="LVD_CFG_ACTION_CHANNEL_1.3" display="No processing" value="3"/>
+            <description>Specifies processing upon voltage detection for each channel.                    
+- 0: Reset                                                                         
+- 1: Non-maskable interrupt (default value)                                        
+- 2: Maskable interrupt                                                            
+- 3: No processing                                                                 
+Note: Reset here indicates device reset. When reset is selected as processing, a reset occurs when a monitored voltage is below the voltage detection level. When reset is selected with this definition, the operation of the reset is not dependent on the voltage detection condition.                                    </description>
+        </property>
+        <property id="LVD_CFG_ACTION_CHANNEL_2" display="Processing upon voltage detection for channel 2" default="1" type="combobox">
+            <option id="LVD_CFG_ACTION_CHANNEL_2.0" display="Reset" value="0"/>
+            <option id="LVD_CFG_ACTION_CHANNEL_2.1" display="Non-maskable interrupt (default value)" value="1"/>
+            <option id="LVD_CFG_ACTION_CHANNEL_2.2" display="Maskable interrupt" value="2"/>
+            <option id="LVD_CFG_ACTION_CHANNEL_2.3" display="No processing" value="3"/>
+            <description>Specifies processing upon voltage detection for each channel.                    
+- 0: Reset                                                                         
+- 1: Non-maskable interrupt (default value)                                        
+- 2: Maskable interrupt                                                            
+- 3: No processing                                                                 
+Note: Reset here indicates device reset. When reset is selected as processing, a reset occurs when a monitored voltage is below the voltage detection level. When reset is selected with this definition, the operation of the reset is not dependent on the voltage detection condition.                                    </description>
+        </property>
+        <property id="LVD_CFG_INT_PRIORITY_CHANNEL_1" display="Interrupt priority level for channel 1" default="3" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${LVD_CFG_INT_PRIORITY_CHANNEL_1}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 15">("${LVD_CFG_INT_PRIORITY_CHANNEL_1}" &gt;= 0) &amp;&amp; ("${LVD_CFG_INT_PRIORITY_CHANNEL_1}" &lt;= 15)</constraint>
+            <description>Specifies the interrupt priority level for each channel, with maskable interrupt selected as processing.                                                          
+Set the level with an integer value; setting 1 means that the priority level is the lowest level and 15 means the highest level.                                 
+(default value = 3)                                                             
+Example:                                                                         
+- To set the priority level to 3, specify '3'.                                     
+- To set the priority level to 15, specify '15'.                                   </description>
+        </property>
+        <property id="LVD_CFG_INT_PRIORITY_CHANNEL_2" display="Interrupt priority level for channel 2" default="3" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${LVD_CFG_INT_PRIORITY_CHANNEL_2}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 15">("${LVD_CFG_INT_PRIORITY_CHANNEL_2}" &gt;= 0) &amp;&amp; ("${LVD_CFG_INT_PRIORITY_CHANNEL_2}" &lt;= 15)</constraint>
+            <description>Specifies the interrupt priority level for each channel, with maskable interrupt selected as processing.                                                          
+Set the level with an integer value; setting 1 means that the priority level is the lowest level and 15 means the highest level.                                 
+(default value = 3)                                                             
+Example:                                                                         
+- To set the priority level to 3, specify '3'.                                     
+- To set the priority level to 15, specify '15'.                                   </description>
+        </property>
+        <property id="LVD_CFG_STABILIZATION_CHANNEL_1" display="Reset negation timing for channel 1" default="0" type="combobox">
+            <option id="LVD_CFG_STABILIZATION_CHANNEL_1.0" display="After a LVD reset, negation occurs when a certain period elapses after the monitored voltage goes above the voltage detection level. " value="0"/>
+            <option id="LVD_CFG_STABILIZATION_CHANNEL_1.1" display="Negation occurs when a certain period elapses after the LVD reset assertion." value="1"/>
+            <description>Specifies the reset negation timing for each channel, with reset selected as processing.                                                                      
+- 0: After a LVD reset, negation occurs when a certain period elapses after the monitored voltage goes above the voltage detection level.                     
+- 1: Negation occurs when a certain period elapses after the LVD reset assertion.  
+Note: "a certain period" here means a wait time after a voltage monitoring reset. Refer to the User's Manual: Hardware for details.                        </description>
+        </property>
+        <property id="LVD_CFG_STABILIZATION_CHANNEL_2" display="Reset negation timing for channel 2" default="0" type="combobox">
+            <option id="LVD_CFG_STABILIZATION_CHANNEL_2.0" display="After a LVD reset, negation occurs when a certain period elapses after the monitored voltage goes above the voltage detection level. " value="0"/>
+            <option id="LVD_CFG_STABILIZATION_CHANNEL_2.1" display="Negation occurs when a certain period elapses after the LVD reset assertion." value="1"/>
+            <description>Specifies the reset negation timing for each channel, with reset selected as processing.                                                                      
+- 0: After a LVD reset, negation occurs when a certain period elapses after the monitored voltage goes above the voltage detection level.                     
+- 1: Negation occurs when a certain period elapses after the LVD reset assertion.  
+Note: "a certain period" here means a wait time after a voltage monitoring reset. Refer to the User's Manual: Hardware for details.                        </description>
+        </property>
+    </configuration>
+</module>

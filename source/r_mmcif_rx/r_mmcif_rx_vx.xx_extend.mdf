@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
+* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
+* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
+* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
+* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
+* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
+* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate>r_pinset_multiapi</fileTemplate>
+    <resourceInfo>
+      <peripheral name="MMCIF">
+          <pin name="MMC_CLK">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="MMC_CD">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="MMC_CMD">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="MMC_D0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="MMC_D1">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="MMC_D2">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="MMC_D3">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="MMC_D4">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="MMC_D5">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="MMC_D6">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="MMC_D7">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+      </peripheral>
+    </resourceInfo>
+    <configuration>
+        <property id="MMC_CFG_USE_FIT" display="Use FIT" default="#define" keyword="MMC_CFG_USE_FIT" type="checkbox">
+            <option id="MMC_CFG_USE_FIT.//#define" display="Unused" value="//#define"/>
+            <option id="MMC_CFG_USE_FIT.#define" display="Used" value="#define"/>
+            <description>Specify if FIT modules are used.</description>
+        </property>
+        <property id="MMC_CFG_CH0_INCLUDED" display="Use MMC Channel 0" default="" keyword="#define MMC_CFG_CH0_INCLUDED" type="checkbox">
+            <option id="MMC_CFG_CH0_INCLUDED.//" display="Unused" value="//"/>
+            <option id="MMC_CFG_CH0_INCLUDED." display="Used" value=""/>
+            <description>Selects whether to use MMC Channel 0.</description>
+        </property>
+        <property id="MMC_CFG_CH1_INCLUDED" display="Use MMC Channel 1" default="/* #define" keyword="MMC_CFG_CH1_INCLUDED */" type="checkbox">
+            <option id="MMC_CFG_CH1_INCLUDED./* #define" display="Unused" value="/* #define"/>
+            <option id="MMC_CFG_CH1_INCLUDED.#define MMC_CFG_CH1_INCLUDED            /*" display="Used" value="#define MMC_CFG_CH1_INCLUDED            /*"/>
+            <description>Selects whether to use MMC Channel 1.</description>
+        </property>
+        <property id="MMC_CFG_DRIVER_MODE" display="MMC mode" default="MMC_MODE_HWINT | MMC_MODE_eMMC | MMC_MODE_1BIT" type="combobox">
+            <option id="MMC_CFG_DRIVER_MODE.MMC_MODE_HWINT | MMC_MODE_eMMC | MMC_MODE_1BIT" display="Interrupt, eMMC, 1 bit" value="MMC_MODE_HWINT | MMC_MODE_eMMC | MMC_MODE_1BIT"/>
+            <option id="MMC_CFG_DRIVER_MODE.MMC_MODE_HWINT | MMC_MODE_eMMC | MMC_MODE_4BIT" display="Interrupt, eMMC, 4 bits" value="MMC_MODE_HWINT | MMC_MODE_eMMC | MMC_MODE_4BIT"/>
+            <option id="MMC_CFG_DRIVER_MODE.MMC_MODE_HWINT | MMC_MODE_eMMC | MMC_MODE_8BIT" display="Interrupt, eMMC, 8 bits" value="MMC_MODE_HWINT | MMC_MODE_eMMC | MMC_MODE_8BIT"/>
+            <option id="MMC_CFG_DRIVER_MODE.MMC_MODE_HWINT | MMC_MODE_MMC | MMC_MODE_1BIT" display="Interrupt,  MMC, 1 bit" value="MMC_MODE_HWINT | MMC_MODE_MMC | MMC_MODE_1BIT"/>
+            <option id="MMC_CFG_DRIVER_MODE.MMC_MODE_HWINT | MMC_MODE_MMC | MMC_MODE_4BIT" display="Interrupt,  MMC, 4 bits" value="MMC_MODE_HWINT | MMC_MODE_MMC | MMC_MODE_4BIT"/>
+            <option id="MMC_CFG_DRIVER_MODE.MMC_MODE_HWINT | MMC_MODE_MMC | MMC_MODE_8BIT" display="Interrupt,  MMC, 8 bits" value="MMC_MODE_HWINT | MMC_MODE_MMC | MMC_MODE_8BIT"/>
+            <option id="MMC_CFG_DRIVER_MODE.MMC_MODE_POLL | MMC_MODE_eMMC | MMC_MODE_1BIT" display="Polling, eMMC, 1 bit" value="MMC_MODE_POLL | MMC_MODE_eMMC | MMC_MODE_1BIT"/>
+            <option id="MMC_CFG_DRIVER_MODE.MMC_MODE_POLL | MMC_MODE_eMMC | MMC_MODE_4BIT" display="Polling, eMMC, 4 bits" value="MMC_MODE_POLL | MMC_MODE_eMMC | MMC_MODE_4BIT"/>
+            <option id="MMC_CFG_DRIVER_MODE.MMC_MODE_POLL | MMC_MODE_eMMC | MMC_MODE_8BIT" display="Polling, eMMC, 8 bits" value="MMC_MODE_POLL | MMC_MODE_eMMC | MMC_MODE_8BIT"/>
+            <option id="MMC_CFG_DRIVER_MODE.MMC_MODE_POLL | MMC_MODE_MMC | MMC_MODE_1BIT" display="Polling,  MMC, 1 bit" value="MMC_MODE_POLL | MMC_MODE_MMC | MMC_MODE_1BIT"/>
+            <option id="MMC_CFG_DRIVER_MODE.MMC_MODE_POLL | MMC_MODE_MMC | MMC_MODE_4BIT" display="Polling,  MMC, 4 bits" value="MMC_MODE_POLL | MMC_MODE_MMC | MMC_MODE_4BIT"/>
+            <option id="MMC_CFG_DRIVER_MODE.MMC_MODE_POLL | MMC_MODE_MMC | MMC_MODE_8BIT" display="Polling,  MMC, 8 bits" value="MMC_MODE_POLL | MMC_MODE_MMC | MMC_MODE_8BIT"/>
+            <description>Change following definition according to your target.
+(1) status check mode
+    MMC_MODE_HWINT  : status check mode is hardware interrupt
+    MMC_MODE_POLL   : status check mode is software polling
+(2) support eMMC
+    MMC_MODE_eMMC   : support eMMC
+    MMC_MODE_MMC    : not support eMMC
+(3) bus width
+    MMC_MODE_1BIT   : MMC Mode 1bit
+    MMC_MODE_4BIT   : MMC Mode 4bit
+    MMC_MODE_8BIT   : MMC Mode 8bit</description>
+        </property>
+        <property id="MMC_CFG_CH0_CD_ACTIVE" display="MMC CH0 CD pin" default="0" type="checkbox">
+            <option id="MMC_CFG_CH0_CD_ACTIVE.0" display="Unused" value="0"/>
+            <option id="MMC_CFG_CH0_CD_ACTIVE.1" display="Used" value="1"/>
+            <constraint display="This setting is only valid for CH0" actionOnFail="disable">"${MMC_CFG_CH0_INCLUDED}" == ""</constraint>
+            <description>Selects whether to use MMC_CD pin.
+Unused = Not used CD pin (For example : eMMC)
+Used = Used CD pin (For example : MMC card)</description>
+        </property>
+        <property id="MMC_CFG_CH1_CD_ACTIVE" display="MMC CH1 CD pin" default="0" type="checkbox">
+            <option id="MMC_CFG_CH1_CD_ACTIVE.0" display="Unused" value="0"/>
+            <option id="MMC_CFG_CH1_CD_ACTIVE.1" display="Used" value="1"/>
+            <constraint display="This setting is only valid for CH1" actionOnFail="disable">"${MMC_CFG_CH1_INCLUDED}" == "#define MMC_CFG_CH1_INCLUDED            /*"</constraint>
+            <description>Selects whether to use MMC_CD pin.
+Unused = Not used CD pin (For example : eMMC)
+Used = Used CD pin (For example : MMC card)</description>
+        </property>
+        <property id="MMC_CFG_DIV_HIGH_SPEED" display="MMC clock : High-speed" default="MMC_DIV_2" type="combobox">
+            <option id="MMC_CFG_DIV_HIGH_SPEED.MMC_DIV_2" display="PCLKB/2" value="MMC_DIV_2"/>
+            <option id="MMC_CFG_DIV_HIGH_SPEED.MMC_DIV_4" display="PCLKB/4" value="MMC_DIV_4"/>
+            <option id="MMC_CFG_DIV_HIGH_SPEED.MMC_DIV_8" display="PCLKB/8" value="MMC_DIV_8"/>
+            <option id="MMC_CFG_DIV_HIGH_SPEED.MMC_DIV_16" display="PCLKB/16" value="MMC_DIV_16"/>
+            <option id="MMC_CFG_DIV_HIGH_SPEED.MMC_DIV_32" display="PCLKB/32" value="MMC_DIV_32"/>
+            <option id="MMC_CFG_DIV_HIGH_SPEED.MMC_DIV_64" display="PCLKB/64" value="MMC_DIV_64"/>
+            <option id="MMC_CFG_DIV_HIGH_SPEED.MMC_DIV_128" display="PCLKB/128" value="MMC_DIV_128"/>
+            <option id="MMC_CFG_DIV_HIGH_SPEED.MMC_DIV_256" display="PCLKB/256" value="MMC_DIV_256"/>
+            <option id="MMC_CFG_DIV_HIGH_SPEED.MMC_DIV_512" display="PCLKB/512" value="MMC_DIV_512"/>
+            <option id="MMC_CFG_DIV_HIGH_SPEED.MMC_DIV_1024" display="PCLKB/1024" value="MMC_DIV_1024"/>
+            <description>Defines the clock frequency for High-speed mode. (CECLKCTRL.CLKDIV[3:0])
+52MHz or less clock (Depend on the electrical characteristic of MCU)
+</description>
+        </property>
+        <property id="MMC_CFG_DIV_BACKWARD_COM_SPEED" display="MMC clock : Backward-compatible" default="MMC_DIV_4" type="combobox">
+            <option id="MMC_CFG_DIV_BACKWARD_COM_SPEED.MMC_DIV_2" display="PCLKB/2" value="MMC_DIV_2"/>
+            <option id="MMC_CFG_DIV_BACKWARD_COM_SPEED.MMC_DIV_4" display="PCLKB/4" value="MMC_DIV_4"/>
+            <option id="MMC_CFG_DIV_BACKWARD_COM_SPEED.MMC_DIV_8" display="PCLKB/8" value="MMC_DIV_8"/>
+            <option id="MMC_CFG_DIV_BACKWARD_COM_SPEED.MMC_DIV_16" display="PCLKB/16" value="MMC_DIV_16"/>
+            <option id="MMC_CFG_DIV_BACKWARD_COM_SPEED.MMC_DIV_32" display="PCLKB/32" value="MMC_DIV_32"/>
+            <option id="MMC_CFG_DIV_BACKWARD_COM_SPEED.MMC_DIV_64" display="PCLKB/64" value="MMC_DIV_64"/>
+            <option id="MMC_CFG_DIV_BACKWARD_COM_SPEED.MMC_DIV_128" display="PCLKB/128" value="MMC_DIV_128"/>
+            <option id="MMC_CFG_DIV_BACKWARD_COM_SPEED.MMC_DIV_256" display="PCLKB/256" value="MMC_DIV_256"/>
+            <option id="MMC_CFG_DIV_BACKWARD_COM_SPEED.MMC_DIV_512" display="PCLKB/512" value="MMC_DIV_512"/>
+            <option id="MMC_CFG_DIV_BACKWARD_COM_SPEED.MMC_DIV_1024" display="PCLKB/1024" value="MMC_DIV_1024"/>
+            <description>Defines the clock frequency for Backward-compatible mode. (CECLKCTRL.CLKDIV[3:0])
+26MHz or less clock (Depend on the electrical characteristic of MCU)</description>
+        </property>
+        <property id="MMC_CFG_DIV_INIT_SPEED" display="MMC clock : Init speed" default="MMC_DIV_1024" type="combobox">
+            <option id="MMC_CFG_DIV_INIT_SPEED.MMC_DIV_2" display="PCLKB/2" value="MMC_DIV_2"/>
+            <option id="MMC_CFG_DIV_INIT_SPEED.MMC_DIV_4" display="PCLKB/4" value="MMC_DIV_4"/>
+            <option id="MMC_CFG_DIV_INIT_SPEED.MMC_DIV_8" display="PCLKB/8" value="MMC_DIV_8"/>
+            <option id="MMC_CFG_DIV_INIT_SPEED.MMC_DIV_16" display="PCLKB/16" value="MMC_DIV_16"/>
+            <option id="MMC_CFG_DIV_INIT_SPEED.MMC_DIV_32" display="PCLKB/32" value="MMC_DIV_32"/>
+            <option id="MMC_CFG_DIV_INIT_SPEED.MMC_DIV_64" display="PCLKB/64" value="MMC_DIV_64"/>
+            <option id="MMC_CFG_DIV_INIT_SPEED.MMC_DIV_128" display="PCLKB/128" value="MMC_DIV_128"/>
+            <option id="MMC_CFG_DIV_INIT_SPEED.MMC_DIV_256" display="PCLKB/256" value="MMC_DIV_256"/>
+            <option id="MMC_CFG_DIV_INIT_SPEED.MMC_DIV_512" display="PCLKB/512" value="MMC_DIV_512"/>
+            <option id="MMC_CFG_DIV_INIT_SPEED.MMC_DIV_1024" display="PCLKB/1024" value="MMC_DIV_1024"/>
+            <description>Defines the clock frequency for card identification mode. (CECLKCTRL.CLKDIV[3:0])
+400KHz or less clock (Depend on the electrical characteristic of MCU)
+ In the SD Slot of RX64M_RSK, the MMC_CMD line gets the pulling up resistance of the 100k ohm. Therefore, cannot transfer identification mode in 400KHz. The default setting of MMC_CFG_DIV_INIT_SPEED is the clock frequency that is slower than 400KHz.</description>
+        </property>
+        <property id="MMC_CFG_TIMEOUT_TRANS" display="MMC timeout : Write/Read data" default="0x000000a0ul" type="combobox">
+            <option id="MMC_CFG_TIMEOUT_TRANS.0x00000000ul" display="MMC clock x 2^14" value="0x00000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_TRANS.0x00000010ul" display="MMC clock x 2^15" value="0x00000010ul"/>
+            <option id="MMC_CFG_TIMEOUT_TRANS.0x00000020ul" display="MMC clock x 2^16" value="0x00000020ul"/>
+            <option id="MMC_CFG_TIMEOUT_TRANS.0x00000030ul" display="MMC clock x 2^17" value="0x00000030ul"/>
+            <option id="MMC_CFG_TIMEOUT_TRANS.0x00000040ul" display="MMC clock x 2^18" value="0x00000040ul"/>
+            <option id="MMC_CFG_TIMEOUT_TRANS.0x00000050ul" display="MMC clock x 2^19" value="0x00000050ul"/>
+            <option id="MMC_CFG_TIMEOUT_TRANS.0x00000060ul" display="MMC clock x 2^20" value="0x00000060ul"/>
+            <option id="MMC_CFG_TIMEOUT_TRANS.0x00000070ul" display="MMC clock x 2^21" value="0x00000070ul"/>
+            <option id="MMC_CFG_TIMEOUT_TRANS.0x00000080ul" display="MMC clock x 2^22" value="0x00000080ul"/>
+            <option id="MMC_CFG_TIMEOUT_TRANS.0x00000090ul" display="MMC clock x 2^23" value="0x00000090ul"/>
+            <option id="MMC_CFG_TIMEOUT_TRANS.0x000000a0ul" display="MMC clock x 2^24" value="0x000000a0ul"/>
+            <option id="MMC_CFG_TIMEOUT_TRANS.0x000000b0ul" display="MMC clock x 2^25" value="0x000000b0ul"/>
+            <option id="MMC_CFG_TIMEOUT_TRANS.0x000000c0ul" display="MMC clock x 2^26" value="0x000000c0ul"/>
+            <option id="MMC_CFG_TIMEOUT_TRANS.0x000000d0ul" display="MMC clock x 2^27" value="0x000000d0ul"/>
+            <option id="MMC_CFG_TIMEOUT_TRANS.0x000000e0ul" display="MMC clock x 2^28" value="0x000000e0ul"/>
+            <option id="MMC_CFG_TIMEOUT_TRANS.0x000000f0ul" display="MMC clock x 2^29" value="0x000000f0ul"/>
+            <description>Write data/read data timeout (CECLKCTRL.SRWDTO[3:0])</description>
+        </property>
+        <property id="MMC_CFG_TIMEOUT_RESBUSY" display="MMC timeout : Response busy" default="0x00000f00ul" type="combobox">
+            <option id="MMC_CFG_TIMEOUT_RESBUSY.0x00000000ul" display="MMC clock x 2^14" value="0x00000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_RESBUSY.0x00000100ul" display="MMC clock x 2^15" value="0x00000100ul"/>
+            <option id="MMC_CFG_TIMEOUT_RESBUSY.0x00000200ul" display="MMC clock x 2^16" value="0x00000200ul"/>
+            <option id="MMC_CFG_TIMEOUT_RESBUSY.0x00000300ul" display="MMC clock x 2^17" value="0x00000300ul"/>
+            <option id="MMC_CFG_TIMEOUT_RESBUSY.0x00000400ul" display="MMC clock x 2^18" value="0x00000400ul"/>
+            <option id="MMC_CFG_TIMEOUT_RESBUSY.0x00000500ul" display="MMC clock x 2^19" value="0x00000500ul"/>
+            <option id="MMC_CFG_TIMEOUT_RESBUSY.0x00000600ul" display="MMC clock x 2^20" value="0x00000600ul"/>
+            <option id="MMC_CFG_TIMEOUT_RESBUSY.0x00000700ul" display="MMC clock x 2^21" value="0x00000700ul"/>
+            <option id="MMC_CFG_TIMEOUT_RESBUSY.0x00000800ul" display="MMC clock x 2^22" value="0x00000800ul"/>
+            <option id="MMC_CFG_TIMEOUT_RESBUSY.0x00000900ul" display="MMC clock x 2^23" value="0x00000900ul"/>
+            <option id="MMC_CFG_TIMEOUT_RESBUSY.0x00000a00ul" display="MMC clock x 2^24" value="0x00000a00ul"/>
+            <option id="MMC_CFG_TIMEOUT_RESBUSY.0x00000b00ul" display="MMC clock x 2^25" value="0x00000b00ul"/>
+            <option id="MMC_CFG_TIMEOUT_RESBUSY.0x00000c00ul" display="MMC clock x 2^26" value="0x00000c00ul"/>
+            <option id="MMC_CFG_TIMEOUT_RESBUSY.0x00000d00ul" display="MMC clock x 2^27" value="0x00000d00ul"/>
+            <option id="MMC_CFG_TIMEOUT_RESBUSY.0x00000e00ul" display="MMC clock x 2^28" value="0x00000e00ul"/>
+            <option id="MMC_CFG_TIMEOUT_RESBUSY.0x00000f00ul" display="MMC clock x 2^29" value="0x00000f00ul"/>
+            <description>Response busy timeout (CECLKCTRL.SRBSYTO[3:0])</description>
+        </property>
+        <property id="MMC_CFG_TIMEOUT_RES" display="MMC timeout : Response" default="0x00002000ul" type="combobox">
+            <option id="MMC_CFG_TIMEOUT_RES.0x00000000ul" display="MMC clock x 64" value="0x00000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_RES.0x00001000ul" display="MMC clock x 128" value="0x00001000ul"/>
+            <option id="MMC_CFG_TIMEOUT_RES.0x00002000ul" display="MMC clock x 256" value="0x00002000ul"/>
+            <description>Response timeout (CECLKCTRL.SRSPTO[1:0])</description>
+        </property>
+        <property id="MMC_CFG_TIMEOUT_BOOT_DATA" display="MMC timeout : Boot data" default="0x000f0000ul" type="combobox">
+            <option id="MMC_CFG_TIMEOUT_BOOT_DATA.0x00000000ul" display="MMC clock x 2^14" value="0x00000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_DATA.0x00010000ul" display="MMC clock x 2^15" value="0x00010000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_DATA.0x00020000ul" display="MMC clock x 2^16" value="0x00020000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_DATA.0x00030000ul" display="MMC clock x 2^17" value="0x00030000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_DATA.0x00040000ul" display="MMC clock x 2^18" value="0x00040000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_DATA.0x00050000ul" display="MMC clock x 2^19" value="0x00050000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_DATA.0x00060000ul" display="MMC clock x 2^20" value="0x00060000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_DATA.0x00070000ul" display="MMC clock x 2^21" value="0x00070000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_DATA.0x00080000ul" display="MMC clock x 2^22" value="0x00080000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_DATA.0x00090000ul" display="MMC clock x 2^23" value="0x00090000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_DATA.0x000a0000ul" display="MMC clock x 2^24" value="0x000a0000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_DATA.0x000b0000ul" display="MMC clock x 2^25" value="0x000b0000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_DATA.0x000c0000ul" display="MMC clock x 2^26" value="0x000c0000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_DATA.0x000d0000ul" display="MMC clock x 2^27" value="0x000d0000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_DATA.0x000e0000ul" display="MMC clock x 2^28" value="0x000e0000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_DATA.0x000f0000ul" display="MMC clock x 2^29" value="0x000f0000ul"/>
+            <description>Boot data timeout (CEBOOT.SBTDATTO[3:0])</description>
+        </property>
+        <property id="MMC_CFG_TIMEOUT_BOOT_FIRSTDATA" display="MMC timeout : First boot data" default="0x00f00000ul" type="combobox">
+            <option id="MMC_CFG_TIMEOUT_BOOT_FIRSTDATA.0x00000000ul" display="MMC clock x 2^14" value="0x00000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_FIRSTDATA.0x00100000ul" display="MMC clock x 2^15" value="0x00100000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_FIRSTDATA.0x00200000ul" display="MMC clock x 2^16" value="0x00200000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_FIRSTDATA.0x00300000ul" display="MMC clock x 2^17" value="0x00300000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_FIRSTDATA.0x00400000ul" display="MMC clock x 2^18" value="0x00400000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_FIRSTDATA.0x00500000ul" display="MMC clock x 2^19" value="0x00500000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_FIRSTDATA.0x00600000ul" display="MMC clock x 2^20" value="0x00600000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_FIRSTDATA.0x00700000ul" display="MMC clock x 2^21" value="0x00700000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_FIRSTDATA.0x00800000ul" display="MMC clock x 2^22" value="0x00800000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_FIRSTDATA.0x00900000ul" display="MMC clock x 2^23" value="0x00900000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_FIRSTDATA.0x00a00000ul" display="MMC clock x 2^24" value="0x00a00000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_FIRSTDATA.0x00b00000ul" display="MMC clock x 2^25" value="0x00b00000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_FIRSTDATA.0x00c00000ul" display="MMC clock x 2^26" value="0x00c00000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_FIRSTDATA.0x00d00000ul" display="MMC clock x 2^27" value="0x00d00000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_FIRSTDATA.0x00e00000ul" display="MMC clock x 2^28" value="0x00e00000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_FIRSTDATA.0x00f00000ul" display="MMC clock x 2^29" value="0x00f00000ul"/>
+            <description>First boot data timeout (CEBOOT.SFSTBTDATTO[3:0])</description>
+        </property>
+        <property id="MMC_CFG_TIMEOUT_BOOT_ACKNOW" display="MMC timeout : Boot acknowledge" default="0x0f000000ul" type="combobox">
+            <option id="MMC_CFG_TIMEOUT_BOOT_ACKNOW.0x00000000ul" display="MMC clock x 2^14" value="0x00000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_ACKNOW.0x01000000ul" display="MMC clock x 2^15" value="0x01000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_ACKNOW.0x02000000ul" display="MMC clock x 2^16" value="0x02000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_ACKNOW.0x03000000ul" display="MMC clock x 2^17" value="0x03000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_ACKNOW.0x04000000ul" display="MMC clock x 2^18" value="0x04000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_ACKNOW.0x05000000ul" display="MMC clock x 2^19" value="0x05000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_ACKNOW.0x06000000ul" display="MMC clock x 2^20" value="0x06000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_ACKNOW.0x07000000ul" display="MMC clock x 2^21" value="0x07000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_ACKNOW.0x08000000ul" display="MMC clock x 2^22" value="0x08000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_ACKNOW.0x09000000ul" display="MMC clock x 2^23" value="0x09000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_ACKNOW.0x0a000000ul" display="MMC clock x 2^24" value="0x0a000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_ACKNOW.0x0b000000ul" display="MMC clock x 2^25" value="0x0b000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_ACKNOW.0x0c000000ul" display="MMC clock x 2^26" value="0x0c000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_ACKNOW.0x0d000000ul" display="MMC clock x 2^27" value="0x0d000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_ACKNOW.0x0e000000ul" display="MMC clock x 2^28" value="0x0e000000ul"/>
+            <option id="MMC_CFG_TIMEOUT_BOOT_ACKNOW.0x0f000000ul" display="MMC clock x 2^29" value="0x0f000000ul"/>
+            <description>Boot acknowledge timeout (CEBOOT.SBTACKTO[3:0])</description>
+        </property>
+        <property id="MMC_CFG_CH0_INT_LEVEL" display="MMC CH0 Interrupt priority level" default="10" type="combobox">
+            <option id="MMC_CFG_CH0_INT_LEVEL.0" display="Level 0 (interrupt disabled)" value="0"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL.1" display="Level 1" value="1"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL.2" display="Level 2" value="2"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL.3" display="Level 3" value="3"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL.4" display="Level 4" value="4"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL.5" display="Level 5" value="5"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL.6" display="Level 6" value="6"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL.7" display="Level 7" value="7"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL.8" display="Level 8" value="8"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL.9" display="Level 9" value="9"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL.10" display="Level 10" value="10"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL.11" display="Level 11" value="11"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL.12" display="Level 12" value="12"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL.13" display="Level 13" value="13"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL.14" display="Level 14" value="14"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="This setting is only valid for CH0" actionOnFail="disable">"${MMC_CFG_CH0_INCLUDED}" == ""</constraint>
+            <description>This sets the normal operation interrupt (ACCIO), the error/timeout interrupt (ERRIO), and the MMC detection interrupt (CDETIO) levels.</description>
+        </property>
+        <property id="MMC_CFG_CH0_INT_LEVEL_DMADTC" display="MMC CH0 DMA/DTC Interrupt priority level" default="10" type="combobox">
+            <option id="MMC_CFG_CH0_INT_LEVEL_DMADTC.0" display="Level 0 (interrupt disabled)" value="0"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL_DMADTC.1" display="Level 1" value="1"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL_DMADTC.2" display="Level 2" value="2"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL_DMADTC.3" display="Level 3" value="3"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL_DMADTC.4" display="Level 4" value="4"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL_DMADTC.5" display="Level 5" value="5"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL_DMADTC.6" display="Level 6" value="6"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL_DMADTC.7" display="Level 7" value="7"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL_DMADTC.8" display="Level 8" value="8"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL_DMADTC.9" display="Level 9" value="9"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL_DMADTC.10" display="Level 10" value="10"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL_DMADTC.11" display="Level 11" value="11"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL_DMADTC.12" display="Level 12" value="12"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL_DMADTC.13" display="Level 13" value="13"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL_DMADTC.14" display="Level 14" value="14"/>
+            <option id="MMC_CFG_CH0_INT_LEVEL_DMADTC.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="This setting is only valid for CH0" actionOnFail="disable">"${MMC_CFG_CH0_INCLUDED}" == ""</constraint>
+            <description>Set this define macro to the MMCIF buffer access interrupt (MBFAI) level. This is the interrupt level when DMAC/DTC is used and data is written to the MMCIF buffer and when data is read from the MMCIF buffer.</description>
+        </property>
+        <property id="MMC_CFG_CH1_INT_LEVEL" display="MMC CH1 Interrupt priority level" default="10" type="combobox">
+            <option id="MMC_CFG_CH1_INT_LEVEL.0" display="Level 0 (interrupt disabled)" value="0"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL.1" display="Level 1" value="1"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL.2" display="Level 2" value="2"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL.3" display="Level 3" value="3"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL.4" display="Level 4" value="4"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL.5" display="Level 5" value="5"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL.6" display="Level 6" value="6"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL.7" display="Level 7" value="7"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL.8" display="Level 8" value="8"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL.9" display="Level 9" value="9"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL.10" display="Level 10" value="10"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL.11" display="Level 11" value="11"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL.12" display="Level 12" value="12"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL.13" display="Level 13" value="13"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL.14" display="Level 14" value="14"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="This setting is only valid for CH1" actionOnFail="disable">"${MMC_CFG_CH1_INCLUDED}" == "#define MMC_CFG_CH1_INCLUDED            /*"</constraint>
+            <description>This sets the normal operation interrupt (ACCIO), the error/timeout interrupt (ERRIO), and the MMC detection interrupt (CDETIO) levels.</description>
+        </property>
+        <property id="MMC_CFG_CH1_INT_LEVEL_DMADTC" display="MMC CH1 DMA/DTC Interrupt priority level" default="10" type="combobox">
+            <option id="MMC_CFG_CH1_INT_LEVEL_DMADTC.0" display="Level 0 (interrupt disabled)" value="0"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL_DMADTC.1" display="Level 1" value="1"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL_DMADTC.2" display="Level 2" value="2"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL_DMADTC.3" display="Level 3" value="3"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL_DMADTC.4" display="Level 4" value="4"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL_DMADTC.5" display="Level 5" value="5"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL_DMADTC.6" display="Level 6" value="6"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL_DMADTC.7" display="Level 7" value="7"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL_DMADTC.8" display="Level 8" value="8"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL_DMADTC.9" display="Level 9" value="9"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL_DMADTC.10" display="Level 10" value="10"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL_DMADTC.11" display="Level 11" value="11"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL_DMADTC.12" display="Level 12" value="12"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL_DMADTC.13" display="Level 13" value="13"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL_DMADTC.14" display="Level 14" value="14"/>
+            <option id="MMC_CFG_CH1_INT_LEVEL_DMADTC.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="This setting is only valid for CH1" actionOnFail="disable">"${MMC_CFG_CH1_INCLUDED}" == "#define MMC_CFG_CH1_INCLUDED            /*"</constraint>
+            <description>Set this define macro to the MMCIF buffer access interrupt (MBFAI) level. This is the interrupt level when DMAC/DTC is used and data is written to the MMCIF buffer and when data is read from the MMCIF buffer.</description>
+        </property>
+        <property id="MMC_CFG_LONGQ_ENABLE" display="Enable debugging information" default="/* #define" keyword="MMC_CFG_LONGQ_ENABLE */" type="checkbox">
+            <option id="MMC_CFG_LONGQ_ENABLE./* #define" display="Unused" value="/* #define"/>
+            <option id="MMC_CFG_LONGQ_ENABLE.#define MMC_CFG_LONGQ_ENABLE            /*" display="Used" value="#define MMC_CFG_LONGQ_ENABLE            /*"/>
+            <description>Stores error log information using LONGQ driver.</description>
+        </property>
+    </configuration>
+</module>

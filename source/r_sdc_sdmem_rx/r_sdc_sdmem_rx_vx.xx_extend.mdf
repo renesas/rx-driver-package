@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="SDC_SD_CFG_STATUS_CHECK_MODE" display="Status check mode" default="SDC_SD_MODE_HWINT" type="combobox">
+            <option id="SDC_SD_CFG_STATUS_CHECK_MODE.SDC_SD_MODE_HWINT" display="Hardware Interrupt" value="SDC_SD_MODE_HWINT"/>
+            <option id="SDC_SD_CFG_STATUS_CHECK_MODE.SDC_SD_MODE_POLL" display="Software polling" value="SDC_SD_MODE_POLL"/>
+            <description>Set SD memory Status check mode.Possible values are:
+SDC_SD_MODE_HWINT = Hardware Interrupt
+SDC_SD_MODE_POLL    = Software polling</description>
+        </property>
+        <property id="SDC_SD_CFG_TRANSFER" display="Data transfer type" default="SDC_SD_MODE_SW" type="combobox">
+            <option id="SDC_SD_CFG_TRANSFER.SDC_SD_MODE_SW" display="Software transfers" value="SDC_SD_MODE_SW"/>
+            <option id="SDC_SD_CFG_TRANSFER.SDC_SD_MODE_DMA" display="DMAC transfers" value="SDC_SD_MODE_DMA"/>
+            <option id="SDC_SD_CFG_TRANSFER.SDC_SD_MODE_DTC" display="DTC transfers" value="SDC_SD_MODE_DTC"/>
+            <description>Set SD memory Data transfer type.Possible values are:
+SDC_SD_MODE_SW    = Software transfers
+SDC_SD_MODE_DMA = DMAC transfers
+SDC_SD_MODE_DTC  = DTC transfers
+When DMAC transfers or DTC transfers are set as the data transfer for the operating mode , either a DMAC control program or a DTC control program is required.</description>
+        </property>
+        <property id="SDC_SD_CFG_ERROR_LOG_ACQUISITION" display="Enable an  error log acquisition function" default="0" type="combobox">
+            <option id="SDC_SD_CFG_ERROR_LOG_ACQUISITION.0" display="Disable" value="0"/>
+            <option id="SDC_SD_CFG_ERROR_LOG_ACQUISITION.1" display="Enable" value="1"/>
+            <constraint display="-"></constraint>
+            <description>0=Disable
+1=Enable
+This must be set when an error log acquisition function using the LONGQ FIT module is used.
+When this function is used, the LONGQ FIT module must be included.</description>
+        </property>
+    </configuration>
+</module>

@@ -1,0 +1,1097 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
+* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
+* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
+* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
+* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
+* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
+* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="SSI_STANDARD_CONFIG" display="Use Standard configuration" default="" keyword="#define SSI_STANDARD_CONFIG" type="checkbox">
+            <option id="SSI_STANDARD_CONFIG.#define SSI_USER_UNIQUE_CONFIG      //" display="User unique" value="#define SSI_USER_UNIQUE_CONFIG      //"/>
+            <option id="SSI_STANDARD_CONFIG." display="Standard" value=""/>
+            <description>This SSI module support Standatrd configuration to be easy for users to configure SSI peripheral. However some users woulkd like to configure on their own way. Set SSI_STANDARD_CONFIG or SSI_USER_UNIQUE_CONFIG to definition below according to the requirement.
+Standard = SSI_STANDARD_CONFIG
+User unique = SSI_USER_UNIQUE_CONFIG</description>
+        </property>
+        <property id="SSIE" display="SSI or SSIE" default="0" keyword="" type="checkbox">
+            <option id="SSIE.0" display="SSI" value="0"/>
+            <option id="SSIE.1" display="SSIE" value="1"/>
+            <description>SSI or SSIE</description>
+        </property>
+        <property id="SSI_CH0_IO_MODE" display="Ch0 Transmit / Receive mode" default="2u" type="combobox">
+            <option id="SSI_CH0_IO_MODE.0u" display="SSI not to use" value="0u"/>
+            <option id="SSI_CH0_IO_MODE.1u" display="SSI to Receive data" value="1u"/>
+            <option id="SSI_CH0_IO_MODE.2u" display="SSI to Transmit data" value="2u"/>
+            <option id="SSI_CH0_IO_MODE.3u" display="SSI to Receive and Transmit" value="3u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+            <description>Selects transmit / receive mode (I/O mode).
+NOTE: This is a configuration which must be set wether in case of "SSI_STANDARD_CONFIG" or "SSI_USER_UNIQUE_CONFIG". </description>
+        </property>
+        <property id="SSI_CH1_IO_MODE" display="Ch1 Transmit / Receive mode" default="0u" type="combobox">
+            <option id="SSI_CH1_IO_MODE.0u" display="SSI not to use" value="0u"/>
+            <option id="SSI_CH1_IO_MODE.1u" display="SSI to Receive data" value="1u"/>
+            <option id="SSI_CH1_IO_MODE.2u" display="SSI to Transmit data" value="2u"/>
+            <option id="SSI_CH1_IO_MODE.3u" display="SSI to Receive and Transmit" value="3u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+            <description>Selects transmit / receive mode (I/O mode).
+NOTE: This is a configuration which must be set wether in case of "SSI_STANDARD_CONFIG" or "SSI_USER_UNIQUE_CONFIG". </description>
+        </property>
+        <property id="SSI_CH0_SERIAL_IF_FMT" display="Ch0 Audio serial interface format" default="0u" type="combobox">
+            <option id="SSI_CH0_SERIAL_IF_FMT.0u" display="I2S" value="0u"/>
+            <option id="SSI_CH0_SERIAL_IF_FMT.1u" display="Left-justified" value="1u"/>
+            <option id="SSI_CH0_SERIAL_IF_FMT.2u" display="Right-justified" value="2u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+            <constraint display="This setting is only valid for SSI Standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <description>Selects audio serial interface format.
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSI_CH1_SERIAL_IF_FMT" display="Ch1 Audio serial interface format" default="0u" type="combobox">
+            <option id="SSI_CH1_SERIAL_IF_FMT.0u" display="I2S" value="0u"/>
+            <option id="SSI_CH1_SERIAL_IF_FMT.1u" display="Left-justified" value="1u"/>
+            <option id="SSI_CH1_SERIAL_IF_FMT.2u" display="Right-justified" value="2u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+            <constraint display="This setting is only valid for SSI Standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <description>Selects audio serial interface format.
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSI_CH0_DATA_WIDTH" display="Ch0 PCM data width" default="16u" type="combobox">
+            <option id="SSI_CH0_DATA_WIDTH.8u" display="8 bits" value="8u"/>
+            <option id="SSI_CH0_DATA_WIDTH.16u" display="16 bits" value="16u"/>
+            <option id="SSI_CH0_DATA_WIDTH.18u" display="18 bits" value="18u"/>
+            <option id="SSI_CH0_DATA_WIDTH.20u" display="20 bits" value="20u"/>
+            <option id="SSI_CH0_DATA_WIDTH.22u" display="22 bits" value="22u"/>
+            <option id="SSI_CH0_DATA_WIDTH.24u" display="24 bits" value="24u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+            <constraint display="This setting is only valid for SSI Standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <description>Selects PCM data width.
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSI_CH1_DATA_WIDTH" display="Ch1 PCM data width" default="16u" type="combobox">
+            <option id="SSI_CH1_DATA_WIDTH.8u" display="8 bits" value="8u"/>
+            <option id="SSI_CH1_DATA_WIDTH.16u" display="16 bits" value="16u"/>
+            <option id="SSI_CH1_DATA_WIDTH.18u" display="18 bits" value="18u"/>
+            <option id="SSI_CH1_DATA_WIDTH.20u" display="20 bits" value="20u"/>
+            <option id="SSI_CH1_DATA_WIDTH.22u" display="22 bits" value="22u"/>
+            <option id="SSI_CH1_DATA_WIDTH.24u" display="24 bits" value="24u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+            <constraint display="This setting is only valid for SSI Standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <description>Selects PCM data width.
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSI_CH0_BCLK" display="Ch0 Bit Clock" default="64u" type="combobox">
+            <option id="SSI_CH0_BCLK.16u" display="16 fs" value="16u"/>
+            <option id="SSI_CH0_BCLK.32u" display="32 fs" value="32u"/>
+            <option id="SSI_CH0_BCLK.48u" display="48 fs" value="48u"/>
+            <option id="SSI_CH0_BCLK.64u" display="64 fs" value="64u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+            <constraint display="This setting is only valid for SSI Standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <constraint display="Master Clock must be the integral multiple of the Bit Clock." actionOnFail="error">"${SSI_MCLK}".replace(/[LUlu]+$/, '') % "${SSI_CH0_BCLK}".replace(/[LUlu]+$/, '') == 0</constraint>
+            <description>Selects bit clock.
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSI_CH1_BCLK" display="Ch1 Bit Clock" default="64u" type="combobox">
+            <option id="SSI_CH1_BCLK.16u" display="16 fs" value="16u"/>
+            <option id="SSI_CH1_BCLK.32u" display="32 fs" value="32u"/>
+            <option id="SSI_CH1_BCLK.48u" display="48 fs" value="48u"/>
+            <option id="SSI_CH1_BCLK.64u" display="64 fs" value="64u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+            <constraint display="This setting is only valid for SSI Standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <constraint display="Master Clock must be the integral multiple of the Bit Clock." actionOnFail="error">"${SSI_MCLK}".replace(/[LUlu]+$/, '') % "${SSI_CH1_BCLK}".replace(/[LUlu]+$/, '') == 0</constraint>
+            <description>Selects bit clock.
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSI_MCLK" display="Master Clock" default="256u" type="textbox">
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+          <constraint display="This setting is only valid for SSI Standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SSI_MCLK}")</constraint>
+            <constraint display="Value must be in the range 16 ~ 8192" actionOnFail="error">("${SSI_MCLK}".replace(/[LUlu]+$/, '') &gt;= 16) &amp;&amp; ("${SSI_MCLK}".replace(/[LUlu]+$/, '') &lt;= 8192)</constraint>
+            <constraint display="Master Clock must be the integral multiple of the Bit Clock" actionOnFail="error">("${SSI_MCLK}".replace(/[LUlu]+$/, '') % "${SSI_CH0_BCLK}".replace(/[LUlu]+$/, '') == 0) &amp;&amp; ("${SSI_MCLK}".replace(/[LUlu]+$/, '') % "${SSI_CH1_BCLK}".replace(/[LUlu]+$/, '') == 0)</constraint>
+            <description>Master clock frequency 
+  This setting is only valid for "SSI_STANDARD_CONFIG".
+  Set a value from following alternatives to SSIn_MCLK.
+----------------------------------
+ Clock               value
+----------------------------------
+  16Fs                (16u)
+  32Fs                (32u)
+   :                    :
+  8192Fs              (8192u)
+NOTE: Set the Master Clock to the integral multiple of the Bit Clock.
+</description>
+        </property>
+        <property id="SSI_CH0_CLK_MODE" display="Ch0 Clock Supply Mode" default="0u" type="combobox">
+            <option id="SSI_CH0_CLK_MODE.0u" display="Master mode" value="0u"/>
+            <option id="SSI_CH0_CLK_MODE.1u" display="Slave mode" value="1u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+          <constraint display="This setting is only valid for standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <description>Selects clock supply mode.
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSI_CH1_CLK_MODE" display="Ch1 Clock Supply Mode" default="0u" type="combobox">
+            <option id="SSI_CH1_CLK_MODE.0u" display="Master mode" value="0u"/>
+            <option id="SSI_CH1_CLK_MODE.1u" display="Slave mode" value="1u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+         <constraint display="This setting is only valid for standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <description>Selects clock supply mode.
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSI_CH0_TTRG_NUMBER" display="Ch0 Tx Empty trigger" default="4u" type="combobox">
+            <option id="SSI_CH0_TTRG_NUMBER.1u" display="1 (PCM data width = 18/20/22/24 bits)" value="1u"/>
+            <option id="SSI_CH0_TTRG_NUMBER.2u" display="2 (PCM data width = 16/18/20/22/24 bits)" value="2u"/>
+            <option id="SSI_CH0_TTRG_NUMBER.3u" display="3 (PCM data width = 18/20/22/24 bits)" value="3u"/>
+            <option id="SSI_CH0_TTRG_NUMBER.4u" display="4 (PCM data width = 8/16 bits)" value="4u"/>
+            <option id="SSI_CH0_TTRG_NUMBER.6u" display="6 (PCM data width = 16 bits only)" value="6u"/>
+            <option id="SSI_CH0_TTRG_NUMBER.8u" display="8 (PCM data width = 8 bits only)" value="8u"/>
+            <option id="SSI_CH0_TTRG_NUMBER.12u" display="12 (PCM data width = 8 bits only)" value="12u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+       <constraint display="This setting is only valid for standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH0_TTRG_NUMBER}" != "1u" || "${SSI_CH0_DATA_WIDTH}" == "18u" || "${SSI_CH0_DATA_WIDTH}" == "20u" || "${SSI_CH0_DATA_WIDTH}" == "22u" || "${SSI_CH0_DATA_WIDTH}" == "24u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH0_TTRG_NUMBER}" != "2u" || "${SSI_CH0_DATA_WIDTH}" == "16u" || "${SSI_CH0_DATA_WIDTH}" == "18u" || "${SSI_CH0_DATA_WIDTH}" == "20u" || "${SSI_CH0_DATA_WIDTH}" == "22u" || "${SSI_CH0_DATA_WIDTH}" == "24u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH0_TTRG_NUMBER}" != "3u" || "${SSI_CH0_DATA_WIDTH}" == "18u" || "${SSI_CH0_DATA_WIDTH}" == "20u" || "${SSI_CH0_DATA_WIDTH}" == "22u" || "${SSI_CH0_DATA_WIDTH}" == "24u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH0_TTRG_NUMBER}" != "4u" || "${SSI_CH0_DATA_WIDTH}" == "8u" || "${SSI_CH0_DATA_WIDTH}" == "16u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH0_TTRG_NUMBER}" != "6u" || "${SSI_CH0_DATA_WIDTH}" == "16u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH0_TTRG_NUMBER}" != "8u" || "${SSI_CH0_DATA_WIDTH}" == "8u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH0_TTRG_NUMBER}" != "12u" || "${SSI_CH0_DATA_WIDTH}" == "8u"</constraint>
+            <description>Transmit Data Trigger number selection
+  Set a value from following alternatives to SSIn_TTRG_NUMBER.
+----------------------------------
+ Data length           value
+----------------------------------
+   8bit                 (12u) or (8u) or (4u)
+  16bit                 (6u)  or (4u) or (2u)
+  18,20,22,24bit        (3u)  or (2u) or (1u)
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSI_CH1_TTRG_NUMBER" display="Ch1 Tx Empty trigger" default="4u" type="combobox">
+            <option id="SSI_CH1_TTRG_NUMBER.1u" display="1 (PCM data width = 18/20/22/24 bits)" value="1u"/>
+            <option id="SSI_CH1_TTRG_NUMBER.2u" display="2 (PCM data width = 16/18/20/22/24 bits)" value="2u"/>
+            <option id="SSI_CH1_TTRG_NUMBER.3u" display="3 (PCM data width = 18/20/22/24 bits)" value="3u"/>
+            <option id="SSI_CH1_TTRG_NUMBER.4u" display="4 (PCM data width = 8/16 bits)" value="4u"/>
+            <option id="SSI_CH1_TTRG_NUMBER.6u" display="6 (PCM data width = 16 bits only)" value="6u"/>
+            <option id="SSI_CH1_TTRG_NUMBER.8u" display="8 (PCM data width = 8 bits only)" value="8u"/>
+            <option id="SSI_CH1_TTRG_NUMBER.12u" display="12 (PCM data width = 8 bits only)" value="12u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+  <constraint display="This setting is only valid for standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH1_TTRG_NUMBER}" != "1u" || "${SSI_CH1_DATA_WIDTH}" == "18u" || "${SSI_CH1_DATA_WIDTH}" == "20u" || "${SSI_CH1_DATA_WIDTH}" == "22u" || "${SSI_CH1_DATA_WIDTH}" == "24u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH1_TTRG_NUMBER}" != "2u" || "${SSI_CH1_DATA_WIDTH}" == "16u" || "${SSI_CH1_DATA_WIDTH}" == "18u" || "${SSI_CH1_DATA_WIDTH}" == "20u" || "${SSI_CH1_DATA_WIDTH}" == "22u" || "${SSI_CH1_DATA_WIDTH}" == "24u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH1_TTRG_NUMBER}" != "3u" || "${SSI_CH1_DATA_WIDTH}" == "18u" || "${SSI_CH1_DATA_WIDTH}" == "20u" || "${SSI_CH1_DATA_WIDTH}" == "22u" || "${SSI_CH1_DATA_WIDTH}" == "24u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH1_TTRG_NUMBER}" != "4u" || "${SSI_CH1_DATA_WIDTH}" == "8u" || "${SSI_CH1_DATA_WIDTH}" == "16u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH1_TTRG_NUMBER}" != "6u" || "${SSI_CH1_DATA_WIDTH}" == "16u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH1_TTRG_NUMBER}" != "8u" || "${SSI_CH1_DATA_WIDTH}" == "8u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH1_TTRG_NUMBER}" != "12u" || "${SSI_CH1_DATA_WIDTH}" == "8u"</constraint>
+            <description>Transmit Data Trigger number selection
+  Set a value from following alternatives to SSIn_TTRG_NUMBER.
+----------------------------------
+ Data length           value
+----------------------------------
+   8bit                 (12u) or (8u) or (4u)
+  16bit                 (6u)  or (4u) or (2u)
+  18,20,22,24bit        (3u)  or (2u) or (1u)
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSI_CH0_RTRG_NUMBER" display="Ch0 Rx Full trigger" default="4u" type="combobox">
+            <option id="SSI_CH0_RTRG_NUMBER.1u" display="1 (PCM data width = 18/20/22/24 bits)" value="1u"/>
+            <option id="SSI_CH0_RTRG_NUMBER.2u" display="2 (PCM data width = 16/18/20/22/24 bits)" value="2u"/>
+            <option id="SSI_CH0_RTRG_NUMBER.3u" display="3 (PCM data width = 18/20/22/24 bits)" value="3u"/>
+            <option id="SSI_CH0_RTRG_NUMBER.4u" display="4 (PCM data width = 8/16 bits)" value="4u"/>
+            <option id="SSI_CH0_RTRG_NUMBER.6u" display="6 (PCM data width = 16 bits only)" value="6u"/>
+            <option id="SSI_CH0_RTRG_NUMBER.8u" display="8 (PCM data width = 8 bits only)" value="8u"/>
+            <option id="SSI_CH0_RTRG_NUMBER.12u" display="12 (PCM data width = 8 bits only)" value="12u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+    <constraint display="This setting is only valid for standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH0_RTRG_NUMBER}" != "1u" || "${SSI_CH0_DATA_WIDTH}" == "18u" || "${SSI_CH0_DATA_WIDTH}" == "20u" || "${SSI_CH0_DATA_WIDTH}" == "22u" || "${SSI_CH0_DATA_WIDTH}" == "24u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH0_RTRG_NUMBER}" != "2u" || "${SSI_CH0_DATA_WIDTH}" == "16u" || "${SSI_CH0_DATA_WIDTH}" == "18u" || "${SSI_CH0_DATA_WIDTH}" == "20u" || "${SSI_CH0_DATA_WIDTH}" == "22u" || "${SSI_CH0_DATA_WIDTH}" == "24u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH0_RTRG_NUMBER}" != "3u" || "${SSI_CH0_DATA_WIDTH}" == "18u" || "${SSI_CH0_DATA_WIDTH}" == "20u" || "${SSI_CH0_DATA_WIDTH}" == "22u" || "${SSI_CH0_DATA_WIDTH}" == "24u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH0_RTRG_NUMBER}" != "4u" || "${SSI_CH0_DATA_WIDTH}" == "8u" || "${SSI_CH0_DATA_WIDTH}" == "16u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH0_RTRG_NUMBER}" != "6u" || "${SSI_CH0_DATA_WIDTH}" == "16u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH0_RTRG_NUMBER}" != "8u" || "${SSI_CH0_DATA_WIDTH}" == "8u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH0_RTRG_NUMBER}" != "12u" || "${SSI_CH0_DATA_WIDTH}" == "8u"</constraint>
+            <description>Receive Data Trigger number selection
+  Set a value from following alternatives to SSIn_RTRG_NUMBER.
+----------------------------------
+ Data length           value
+----------------------------------
+   8bit                 (4u)  or (8u) or (12u)
+  16bit                 (2u)  or (4u) or (6u)
+  18,20,22,24bit        (1u)  or (2u) or (3u)
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSI_CH1_RTRG_NUMBER" display="Ch1 Rx Full trigger" default="4u" type="combobox">
+            <option id="SSI_CH1_RTRG_NUMBER.1u" display="1 (PCM data width = 18/20/22/24 bits)" value="1u"/>
+            <option id="SSI_CH1_RTRG_NUMBER.2u" display="2 (PCM data width = 16/18/20/22/24 bits)" value="2u"/>
+            <option id="SSI_CH1_RTRG_NUMBER.3u" display="3 (PCM data width = 18/20/22/24 bits)" value="3u"/>
+            <option id="SSI_CH1_RTRG_NUMBER.4u" display="4 (PCM data width = 8/16 bits)" value="4u"/>
+            <option id="SSI_CH1_RTRG_NUMBER.6u" display="6 (PCM data width = 16 bits only)" value="6u"/>
+            <option id="SSI_CH1_RTRG_NUMBER.8u" display="8 (PCM data width = 8 bits only)" value="8u"/>
+            <option id="SSI_CH1_RTRG_NUMBER.12u" display="12 (PCM data width = 8 bits only)" value="12u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+ <constraint display="This setting is only valid for standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH1_RTRG_NUMBER}" != "1u" || "${SSI_CH1_DATA_WIDTH}" == "18u" || "${SSI_CH1_DATA_WIDTH}" == "20u" || "${SSI_CH1_DATA_WIDTH}" == "22u" || "${SSI_CH1_DATA_WIDTH}" == "24u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH1_RTRG_NUMBER}" != "2u" || "${SSI_CH1_DATA_WIDTH}" == "16u" || "${SSI_CH1_DATA_WIDTH}" == "18u" || "${SSI_CH1_DATA_WIDTH}" == "20u" || "${SSI_CH1_DATA_WIDTH}" == "22u" || "${SSI_CH1_DATA_WIDTH}" == "24u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH1_RTRG_NUMBER}" != "3u" || "${SSI_CH1_DATA_WIDTH}" == "18u" || "${SSI_CH1_DATA_WIDTH}" == "20u" || "${SSI_CH1_DATA_WIDTH}" == "22u" || "${SSI_CH1_DATA_WIDTH}" == "24u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH1_RTRG_NUMBER}" != "4u" || "${SSI_CH1_DATA_WIDTH}" == "8u" || "${SSI_CH1_DATA_WIDTH}" == "16u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH1_RTRG_NUMBER}" != "6u" || "${SSI_CH1_DATA_WIDTH}" == "16u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH1_RTRG_NUMBER}" != "8u" || "${SSI_CH1_DATA_WIDTH}" == "8u"</constraint>
+            <constraint display="Illegal value is selected" actionOnFail="error">"${SSI_CH1_RTRG_NUMBER}" != "12u" || "${SSI_CH1_DATA_WIDTH}" == "8u"</constraint>
+            <description>Receive Data Trigger number selection
+  Set a value from following alternatives to SSIn_RTRG_NUMBER.
+----------------------------------
+ Data length           value
+----------------------------------
+   8bit                 (4u)  or (8u) or (12u)
+  16bit                 (2u)  or (4u) or (6u)
+  18,20,22,24bit        (1u)  or (2u) or (3u)
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSI_CH0_TTRG" display="SSI0.SSIFCR.TTRG[1:0] Bits" default="3u" type="combobox">
+            <option id="SSI_CH0_TTRG.0u" display="7 (1)" value="0u"/>
+            <option id="SSI_CH0_TTRG.1u" display="6 (2)" value="1u"/>
+            <option id="SSI_CH0_TTRG.2u" display="4 (4)" value="2u"/>
+            <option id="SSI_CH0_TTRG.3u" display="2 (6)" value="3u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Transmit FIFO Threshold Setting
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH0_RTRG" display="SSI0.SSIFCR.RTRG[1:0] Bits" default="3u" type="combobox">
+            <option id="SSI_CH0_RTRG.0u" display="1" value="0u"/>
+            <option id="SSI_CH0_RTRG.1u" display="2" value="1u"/>
+            <option id="SSI_CH0_RTRG.2u" display="4" value="2u"/>
+            <option id="SSI_CH0_RTRG.3u" display="6" value="3u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+ <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Receive FIFO Threshold Setting
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH0_DEL" display="SSI0.SSICR.DEL Bit" default="0u" type="combobox">
+            <option id="SSI_CH0_DEL.0u" display="One clock cycle delay" value="0u"/>
+            <option id="SSI_CH0_DEL.1u" display="No delay" value="1u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+  <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Serial Data Delay
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH0_PDTA" display="SSI0.SSICR.PDTA Bit" default="0u" type="combobox">
+            <option id="SSI_CH0_PDTA.0u" display="Lower bits / Left-justified" value="0u"/>
+            <option id="SSI_CH0_PDTA.1u" display="Upper bits / Right-justified" value="1u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+  <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Parallel Data Allocation
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH0_SDTA" display="SSI0.SSICR.SDTA Bit" default="0u" type="combobox">
+            <option id="SSI_CH0_SDTA.0u" display="Serial data -> Padding bits" value="0u"/>
+            <option id="SSI_CH0_SDTA.1u" display="Padding bits -> Serial data" value="1u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Serial Data Alignment
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH0_SPDP" display="SSI0.SSICR.SPDP Bit" default="0u" type="combobox">
+            <option id="SSI_CH0_SPDP.0u" display="Padding data is 0" value="0u"/>
+            <option id="SSI_CH0_SPDP.1u" display="Padding data is 1" value="1u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+  <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Serial Padding Polarity
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH0_SWSP" display="SSI0.SSICR.SWSP Bit" default="0u" type="combobox">
+            <option id="SSI_CH0_SWSP.0u" display="Low for the 1st, High for the 2nd" value="0u"/>
+            <option id="SSI_CH0_SWSP.1u" display="High for the 1st, Low for the 2nd" value="1u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+  <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Word Select Polarity
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH0_SCKP" display="SSI0.SSICR.SCKP Bit" default="0u" type="combobox">
+            <option id="SSI_CH0_SCKP.0u" display="Change at the falling edge" value="0u"/>
+            <option id="SSI_CH0_SCKP.1u" display="Change at the rising edge" value="1u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+  <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Serial Bit Clock Polarity
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH0_SWL" display="SSI0.SSICR.SWL[2:0] Bits" default="0u" type="combobox">
+            <option id="SSI_CH0_SWL.0u" display="8 bits (bit clock = 16 fs)" value="0u"/>
+            <option id="SSI_CH0_SWL.1u" display="6 bits (bit clock = 32 fs)" value="1u"/>
+            <option id="SSI_CH0_SWL.2u" display="24 bits (bit clock = 48 fs)" value="2u"/>
+            <option id="SSI_CH0_SWL.3u" display="32 bits (bit clock = 64 fs)" value="3u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>System Word Length
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH0_DWL" display="SSI0.SSICR.DWL[2:0] Bits" default="0u" type="combobox">
+            <option id="SSI_CH0_DWL.0u" display="8 bits" value="0u"/>
+            <option id="SSI_CH0_DWL.1u" display="16 bits" value="1u"/>
+            <option id="SSI_CH0_DWL.2u" display="18 bits" value="2u"/>
+            <option id="SSI_CH0_DWL.3u" display="20 bits" value="3u"/>
+            <option id="SSI_CH0_DWL.4u" display="22 bits" value="4u"/>
+            <option id="SSI_CH0_DWL.5u" display="24 bits" value="5u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+    <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Data Word Length
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH0_SWSD" display="SSI0.SSICR.SWSD Bit" default="0u" type="combobox">
+            <option id="SSI_CH0_SWSD.0u" display="SSIWS0 pin is input (slave mode)" value="0u"/>
+            <option id="SSI_CH0_SWSD.1u" display="SSIWS0 pin is output (master mode)" value="1u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Word Select Direction
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH0_SCKD" display="SSI0.SSICR.SCKD Bit" default="0u" type="combobox">
+            <option id="SSI_CH0_SCKD.0u" display="SSISCK0 pin is input (slave mode)" value="0u"/>
+            <option id="SSI_CH0_SCKD.1u" display="SSISCK0 pin is output (master mode)" value="1u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+    <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Serial Bit Clock Direction
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH0_AUCKE" display="SSI0.SSIFCR.AUCKE Bit" default="0u" type="combobox">
+            <option id="SSI_CH0_AUCKE.0u" display="The master clock is disabled" value="0u"/>
+            <option id="SSI_CH0_AUCKE.1u" display="The master clock is enabled" value="1u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+    <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Master Clock Enable
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH0_CKDV" display="SSI0.SSICR.CKDV[3:0] Bits" default="0u" type="combobox">
+            <option id="SSI_CH0_CKDV.0u" display="MCLK" value="0u"/>
+            <option id="SSI_CH0_CKDV.1u" display="MCLK/2" value="1u"/>
+            <option id="SSI_CH0_CKDV.2u" display="MCLK/4" value="2u"/>
+            <option id="SSI_CH0_CKDV.3u" display="MCLK/8" value="3u"/>
+            <option id="SSI_CH0_CKDV.4u" display="MCLK/16" value="4u"/>
+            <option id="SSI_CH0_CKDV.5u" display="MCLK/32" value="5u"/>
+            <option id="SSI_CH0_CKDV.6u" display="MCLK/64" value="6u"/>
+            <option id="SSI_CH0_CKDV.7u" display="MCLK/128" value="7u"/>
+            <option id="SSI_CH0_CKDV.8u" display="MCLK/6" value="8u"/>
+            <option id="SSI_CH0_CKDV.9u" display="MCLK/12" value="9u"/>
+            <option id="SSI_CH0_CKDV.10u" display="MCLK/24" value="10u"/>
+            <option id="SSI_CH0_CKDV.11u" display="MCLK/48" value="11u"/>
+            <option id="SSI_CH0_CKDV.12u" display="MCLK/96" value="12u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Serial Bit Clock Frequency Setting
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH1_TTRG" display="SSI1.SSIFCR.TTRG[1:0] Bits" default="3u" type="combobox">
+            <option id="SSI_CH1_TTRG.0u" display="7 (1)" value="0u"/>
+            <option id="SSI_CH1_TTRG.1u" display="6 (2)" value="1u"/>
+            <option id="SSI_CH1_TTRG.2u" display="4 (4)" value="2u"/>
+            <option id="SSI_CH1_TTRG.3u" display="2 (6)" value="3u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+    <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Transmit FIFO Threshold Setting
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH1_RTRG" display="SSI1.SSIFCR.RTRG[1:0] Bits" default="3u" type="combobox">
+            <option id="SSI_CH1_RTRG.0u" display="1" value="0u"/>
+            <option id="SSI_CH1_RTRG.1u" display="2" value="1u"/>
+            <option id="SSI_CH1_RTRG.2u" display="4" value="2u"/>
+            <option id="SSI_CH1_RTRG.3u" display="6" value="3u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+ <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Receive FIFO Threshold Setting
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH1_DEL" display="SSI1.SSICR.DEL Bit" default="0u" type="combobox">
+            <option id="SSI_CH1_DEL.0u" display="One clock cycle delay" value="0u"/>
+            <option id="SSI_CH1_DEL.1u" display="No delay" value="1u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+  <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Serial Data Delay
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH1_PDTA" display="SSI1.SSICR.PDTA Bit" default="0u" type="combobox">
+            <option id="SSI_CH1_PDTA.0u" display="Lower bits / Left-justified" value="0u"/>
+            <option id="SSI_CH1_PDTA.1u" display="Upper bits / Right-justified" value="1u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+     <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Parallel Data Allocation
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH1_SDTA" display="SSI1.SSICR.SDTA Bit" default="0u" type="combobox">
+            <option id="SSI_CH1_SDTA.0u" display="Serial data -> Padding bits" value="0u"/>
+            <option id="SSI_CH1_SDTA.1u" display="Padding bits -> Serial data" value="1u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+    <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Serial Data Alignment
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH1_SPDP" display="SSI1.SSICR.SPDP Bit" default="0u" type="combobox">
+            <option id="SSI_CH1_SPDP.0u" display="Padding data is 0" value="0u"/>
+            <option id="SSI_CH1_SPDP.1u" display="Padding data is 1" value="1u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+     <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Serial Padding Polarity
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH1_SWSP" display="SSI1.SSICR.SWSP Bit" default="0u" type="combobox">
+            <option id="SSI_CH1_SWSP.0u" display="Low for the 1st, High for the 2nd" value="0u"/>
+            <option id="SSI_CH1_SWSP.1u" display="High for the 1st, Low for the 2nd" value="1u"/>
+                     <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Word Select Polarity
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH1_SCKP" display="SSI1.SSICR.SCKP Bit" default="0u" type="combobox">
+            <option id="SSI_CH1_SCKP.0u" display="Change at the falling edge" value="0u"/>
+            <option id="SSI_CH1_SCKP.1u" display="Change at the rising edge" value="1u"/>
+                     <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Serial Bit Clock Polarity
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH1_SWL" display="SSI1.SSICR.SWL[2:0] Bits" default="0u" type="combobox">
+            <option id="SSI_CH1_SWL.0u" display="8 bits (bit clock = 16 fs)" value="0u"/>
+            <option id="SSI_CH1_SWL.1u" display="6 bits (bit clock = 32 fs)" value="1u"/>
+            <option id="SSI_CH1_SWL.2u" display="24 bits (bit clock = 48 fs)" value="2u"/>
+            <option id="SSI_CH1_SWL.3u" display="32 bits (bit clock = 64 fs)" value="3u"/>
+                  <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+      <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>System Word Length
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH1_DWL" display="SSI1.SSICR.DWL[2:0] Bits" default="0u" type="combobox">
+            <option id="SSI_CH1_DWL.0u" display="8 bits" value="0u"/>
+            <option id="SSI_CH1_DWL.1u" display="16 bits" value="1u"/>
+            <option id="SSI_CH1_DWL.2u" display="18 bits" value="2u"/>
+            <option id="SSI_CH1_DWL.3u" display="20 bits" value="3u"/>
+            <option id="SSI_CH1_DWL.4u" display="22 bits" value="4u"/>
+            <option id="SSI_CH1_DWL.5u" display="24 bits" value="5u"/>
+                      <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+  <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Data Word Length
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH1_SWSD" display="SSI1.SSICR.SWSD Bit" default="0u" type="combobox">
+            <option id="SSI_CH1_SWSD.0u" display="SSIWS1 pin is input (slave mode)" value="0u"/>
+            <option id="SSI_CH1_SWSD.1u" display="SSIWS1 pin is output (master mode)" value="1u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+    <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Word Select Direction
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH1_SCKD" display="SSI1.SSICR.SCKD Bit" default="0u" type="combobox">
+            <option id="SSI_CH1_SCKD.0u" display="SSISCK1 pin is input (slave mode)" value="0u"/>
+            <option id="SSI_CH1_SCKD.1u" display="SSISCK1 pin is output (master mode)" value="1u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+    <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Serial Bit Clock Direction
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH1_AUCKE" display="SSI1.SSIFCR.AUCKE Bit" default="0u" type="combobox">
+            <option id="SSI_CH1_AUCKE.0u" display="The master clock is disabled" value="0u"/>
+            <option id="SSI_CH1_AUCKE.1u" display="The master clock is enabled" value="1u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+     <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Master Clock Enable
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSI_CH1_CKDV" display="SSI1.SSICR.CKDV[3:0] Bits" default="0u" type="combobox">
+            <option id="SSI_CH1_CKDV.0u" display="MCLK" value="0u"/>
+            <option id="SSI_CH1_CKDV.1u" display="MCLK/2" value="1u"/>
+            <option id="SSI_CH1_CKDV.2u" display="MCLK/4" value="2u"/>
+            <option id="SSI_CH1_CKDV.3u" display="MCLK/8" value="3u"/>
+            <option id="SSI_CH1_CKDV.4u" display="MCLK/16" value="4u"/>
+            <option id="SSI_CH1_CKDV.5u" display="MCLK/32" value="5u"/>
+            <option id="SSI_CH1_CKDV.6u" display="MCLK/64" value="6u"/>
+            <option id="SSI_CH1_CKDV.7u" display="MCLK/128" value="7u"/>
+            <option id="SSI_CH1_CKDV.8u" display="MCLK/6" value="8u"/>
+            <option id="SSI_CH1_CKDV.9u" display="MCLK/12" value="9u"/>
+            <option id="SSI_CH1_CKDV.10u" display="MCLK/24" value="10u"/>
+            <option id="SSI_CH1_CKDV.11u" display="MCLK/48" value="11u"/>
+            <option id="SSI_CH1_CKDV.12u" display="MCLK/96" value="12u"/>
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+    <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Serial Bit Clock Frequency Setting
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+<!--
+/***********************************************************************************************************************
+************************************************************************************************************************
+*                                  SSIE
+************************************************************************************************************************
+***********************************************************************************************************************/
+-->
+        <property id="SSIE_CH0_IO_MODE" display="Ch0 Transmit / Receive mode" default="2u" type="combobox">
+            <option id="SSIE_CH0_IO_MODE.0u" display="SSIE not to use" value="0u"/>
+            <option id="SSIE_CH0_IO_MODE.1u" display="SSIE to Receive data" value="1u"/>
+            <option id="SSIE_CH0_IO_MODE.2u" display="SSIE to Transmit data" value="2u"/>
+            <option id="SSIE_CH0_IO_MODE.3u" display="SSIE to Receive and Transmit" value="3u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+            <description>Selects transmit / receive mode (I/O mode).
+NOTE: This is a configuration which must be set wether in case of "SSI_STANDARD_CONFIG" or "SSI_USER_UNIQUE_CONFIG". </description>
+        </property>
+        <property id="SSIE_CH1_IO_MODE" display="Ch1 Transmit / Receive mode" default="0u" type="combobox">
+            <option id="SSIE_CH1_IO_MODE.0u" display="SSIE not to use" value="0u"/>
+            <option id="SSIE_CH1_IO_MODE.1u" display="SSIE to Receive data" value="1u"/>
+            <option id="SSIE_CH1_IO_MODE.2u" display="SSIE to Transmit data" value="2u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+            <description>Selects transmit / receive mode (I/O mode).
+NOTE: This is a configuration which must be set wether in case of "SSI_STANDARD_CONFIG" or "SSI_USER_UNIQUE_CONFIG". </description>
+        </property>
+        <property id="SSIE_CH0_SERIAL_IF_FMT" display="Ch0 Audio serial interface format" default="0u" type="combobox">
+            <option id="SSIE_CH0_SERIAL_IF_FMT.0u" display="I2S" value="0u"/>
+            <option id="SSIE_CH0_SERIAL_IF_FMT.1u" display="Left-justified" value="1u"/>
+            <option id="SSIE_CH0_SERIAL_IF_FMT.2u" display="Right-justified" value="2u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+            <constraint display="This setting is only valid for SSI Standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <description>Selects audio serial interface format.
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSIE_CH1_SERIAL_IF_FMT" display="Ch1 Audio serial interface format" default="0u" type="combobox">
+            <option id="SSIE_CH1_SERIAL_IF_FMT.0u" display="I2S" value="0u"/>
+            <option id="SSIE_CH1_SERIAL_IF_FMT.1u" display="Left-justified" value="1u"/>
+            <option id="SSIE_CH1_SERIAL_IF_FMT.2u" display="Right-justified" value="2u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+            <constraint display="This setting is only valid for SSI Standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <description>Selects audio serial interface format.
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSIE_CH0_DATA_WIDTH" display="Ch0 PCM data width" default="16u" type="combobox">
+            <option id="SSIE_CH0_DATA_WIDTH.8u" display="8 bits" value="8u"/>
+            <option id="SSIE_CH0_DATA_WIDTH.16u" display="16 bits" value="16u"/>
+            <option id="SSIE_CH0_DATA_WIDTH.18u" display="18 bits" value="18u"/>
+            <option id="SSIE_CH0_DATA_WIDTH.20u" display="20 bits" value="20u"/>
+            <option id="SSIE_CH0_DATA_WIDTH.22u" display="22 bits" value="22u"/>
+            <option id="SSIE_CH0_DATA_WIDTH.24u" display="24 bits" value="24u"/>
+            <option id="SSIE_CH0_DATA_WIDTH.32u" display="32 bits" value="32u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+            <constraint display="This setting is only valid for SSI Standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <description>Selects PCM data width.
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSIE_CH1_DATA_WIDTH" display="Ch1 PCM data width" default="16u" type="combobox">
+            <option id="SSIE_CH1_DATA_WIDTH.8u" display="8 bits" value="8u"/>
+            <option id="SSIE_CH1_DATA_WIDTH.16u" display="16 bits" value="16u"/>
+            <option id="SSIE_CH1_DATA_WIDTH.18u" display="18 bits" value="18u"/>
+            <option id="SSIE_CH1_DATA_WIDTH.20u" display="20 bits" value="20u"/>
+            <option id="SSIE_CH1_DATA_WIDTH.22u" display="22 bits" value="22u"/>
+            <option id="SSIE_CH1_DATA_WIDTH.24u" display="24 bits" value="24u"/>
+            <option id="SSIE_CH1_DATA_WIDTH.32u" display="32 bits" value="32u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+            <constraint display="This setting is only valid for SSI Standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <description>Selects PCM data width.
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSIE_CH0_BCLK" display="Ch0 Bit Clock" default="64u" type="combobox">
+            <option id="SSIE_CH0_BCLK.16u" display="16 fs" value="16u"/>
+            <option id="SSIE_CH0_BCLK.32u" display="32 fs" value="32u"/>
+            <option id="SSIE_CH0_BCLK.48u" display="48 fs" value="48u"/>
+            <option id="SSIE_CH0_BCLK.64u" display="64 fs" value="64u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+            <constraint display="This setting is only valid for SSI Standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <constraint display="Master Clock must be the integral multiple of the Bit Clock." actionOnFail="error">"${SSIE_MCLK}".replace(/[LUlu]+$/, '') % "${SSIE_CH0_BCLK}".replace(/[LUlu]+$/, '') == 0</constraint>
+            <description>Selects bit clock.
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSIE_CH1_BCLK" display="Ch1 Bit Clock" default="64u" type="combobox">
+            <option id="SSIE_CH1_BCLK.16u" display="16 fs" value="16u"/>
+            <option id="SSIE_CH1_BCLK.32u" display="32 fs" value="32u"/>
+            <option id="SSIE_CH1_BCLK.48u" display="48 fs" value="48u"/>
+            <option id="SSIE_CH1_BCLK.64u" display="64 fs" value="64u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+            <constraint display="This setting is only valid for SSI Standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <constraint display="Master Clock must be the integral multiple of the Bit Clock." actionOnFail="error">"${SSIE_MCLK}".replace(/[LUlu]+$/, '') % "${SSIE_CH1_BCLK}".replace(/[LUlu]+$/, '') == 0</constraint>
+            <description>Selects bit clock.
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSIE_MCLK" display="Master Clock" default="256u" type="textbox">
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+          <constraint display="This setting is only valid for SSI Standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${SSIE_MCLK}")</constraint>
+            <constraint display="Value must be in the range 16 ~ 8192" actionOnFail="error">("${SSIE_MCLK}".replace(/[LUlu]+$/, '') &gt;= 16) &amp;&amp; ("${SSIE_MCLK}".replace(/[LUlu]+$/, '') &lt;= 8192)</constraint>
+            <constraint display="Master Clock must be the integral multiple of the Bit Clock" actionOnFail="error">("${SSIE_MCLK}".replace(/[LUlu]+$/, '') % "${SSIE_CH0_BCLK}".replace(/[LUlu]+$/, '') == 0) &amp;&amp; ("${SSIE_MCLK}".replace(/[LUlu]+$/, '') % "${SSIE_CH1_BCLK}".replace(/[LUlu]+$/, '') == 0)</constraint>
+            <description>Master clock frequency 
+  This setting is only valid for "SSI_STANDARD_CONFIG".
+  Set a value from following alternatives to SSIEn_MCLK.
+----------------------------------
+ Clock               value
+----------------------------------
+  16Fs                (16u)
+  32Fs                (32u)
+   :                    :
+  8192Fs              (8192u)
+NOTE: Set the Master Clock to the integral multiple of the Bit Clock.
+</description>
+        </property>
+        <property id="SSIE_CH0_CLK_MODE" display="Ch0 Clock Supply Mode" default="0u" type="combobox">
+            <option id="SSIE_CH0_CLK_MODE.0u" display="Master mode" value="0u"/>
+            <option id="SSIE_CH0_CLK_MODE.1u" display="Slave mode" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+          <constraint display="This setting is only valid for standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <description>Selects clock supply mode.
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSIE_CH1_CLK_MODE" display="Ch1 Clock Supply Mode" default="0u" type="combobox">
+            <option id="SSIE_CH1_CLK_MODE.0u" display="Master mode" value="0u"/>
+            <option id="SSIE_CH1_CLK_MODE.1u" display="Slave mode" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+         <constraint display="This setting is only valid for standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <description>Selects clock supply mode.
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSIE_CH0_TDES_NUMBER" display="Ch0 Tx Empty trigger" default="8u" type="combobox">
+            <option id="SSIE_CH0_TDES_NUMBER.0u" display="0" value="0u"/>
+            <option id="SSIE_CH0_TDES_NUMBER.1u" display="1" value="1u"/>
+            <option id="SSIE_CH0_TDES_NUMBER.2u" display="2" value="2u"/>
+            <option id="SSIE_CH0_TDES_NUMBER.3u" display="3" value="3u"/>
+            <option id="SSIE_CH0_TDES_NUMBER.4u" display="4" value="4u"/>
+            <option id="SSIE_CH0_TDES_NUMBER.5u" display="5" value="5u"/>
+            <option id="SSIE_CH0_TDES_NUMBER.6u" display="6" value="6u"/>
+            <option id="SSIE_CH0_TDES_NUMBER.7u" display="7" value="7u"/>
+            <option id="SSIE_CH0_TDES_NUMBER.8u" display="8" value="8u"/>
+            <option id="SSIE_CH0_TDES_NUMBER.9u" display="9" value="9u"/>
+            <option id="SSIE_CH0_TDES_NUMBER.10u" display="10" value="10u"/>
+            <option id="SSIE_CH0_TDES_NUMBER.11u" display="11" value="11u"/>
+            <option id="SSIE_CH0_TDES_NUMBER.12u" display="12" value="12u"/>
+            <option id="SSIE_CH0_TDES_NUMBER.13u" display="13" value="13u"/>
+            <option id="SSIE_CH0_TDES_NUMBER.14u" display="14" value="14u"/>
+            <option id="SSIE_CH0_TDES_NUMBER.15u" display="15" value="15u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+       <constraint display="This setting is only valid for standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <description>Transmit Data Trigger number selection
+  Set a value from following alternatives to SSIEn_TDES_NUMBER.
+---------------------------------------------------------------------------
+ IF format             value
+---------------------------------------------------------------------------
+ I2S                         0 to 15
+ Left-justified        0 to 15
+ Right-justified      0 to 15
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSIE_CH1_TDES_NUMBER" display="Ch1 Tx Empty trigger" default="8u" type="combobox">
+            <option id="SSIE_CH1_TDES_NUMBER.0u" display="0" value="0u"/>
+            <option id="SSIE_CH1_TDES_NUMBER.1u" display="1" value="1u"/>
+            <option id="SSIE_CH1_TDES_NUMBER.2u" display="2" value="2u"/>
+            <option id="SSIE_CH1_TDES_NUMBER.3u" display="3" value="3u"/>
+            <option id="SSIE_CH1_TDES_NUMBER.4u" display="4" value="4u"/>
+            <option id="SSIE_CH1_TDES_NUMBER.5u" display="5" value="5u"/>
+            <option id="SSIE_CH1_TDES_NUMBER.6u" display="6" value="6u"/>
+            <option id="SSIE_CH1_TDES_NUMBER.7u" display="7" value="7u"/>
+            <option id="SSIE_CH1_TDES_NUMBER.8u" display="8" value="8u"/>
+            <option id="SSIE_CH1_TDES_NUMBER.9u" display="9" value="9u"/>
+            <option id="SSIE_CH1_TDES_NUMBER.10u" display="10" value="10u"/>
+            <option id="SSIE_CH1_TDES_NUMBER.11u" display="11" value="11u"/>
+            <option id="SSIE_CH1_TDES_NUMBER.12u" display="12" value="12u"/>
+            <option id="SSIE_CH1_TDES_NUMBER.13u" display="13" value="13u"/>
+            <option id="SSIE_CH1_TDES_NUMBER.14u" display="14" value="14u"/>
+            <option id="SSIE_CH1_TDES_NUMBER.15u" display="15" value="15u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+  <constraint display="This setting is only valid for standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <description>Transmit Data Trigger number selection
+  Set a value from following alternatives to SSIEn_TDES_NUMBER.
+---------------------------------------------------------------------------
+ IF format             value
+---------------------------------------------------------------------------
+ I2S                         0 to 15
+ Left-justified        0 to 15
+ Right-justified      0 to 15
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSIE_CH0_RDFS_NUMBER" display="Ch0 Rx Full trigger" default="8u" type="combobox">
+            <option id="SSIE_CH0_RDFS_NUMBER.1u" display="1" value="1u"/>
+            <option id="SSIE_CH0_RDFS_NUMBER.2u" display="2" value="2u"/>
+            <option id="SSIE_CH0_RDFS_NUMBER.3u" display="3" value="3u"/>
+            <option id="SSIE_CH0_RDFS_NUMBER.4u" display="4" value="4u"/>
+            <option id="SSIE_CH0_RDFS_NUMBER.5u" display="5" value="5u"/>
+            <option id="SSIE_CH0_RDFS_NUMBER.6u" display="6" value="6u"/>
+            <option id="SSIE_CH0_RDFS_NUMBER.7u" display="7" value="7u"/>
+            <option id="SSIE_CH0_RDFS_NUMBER.8u" display="8" value="8u"/>
+            <option id="SSIE_CH0_RDFS_NUMBER.9u" display="9" value="9u"/>
+            <option id="SSIE_CH0_RDFS_NUMBER.10u" display="10" value="10u"/>
+            <option id="SSIE_CH0_RDFS_NUMBER.11u" display="11" value="11u"/>
+            <option id="SSIE_CH0_RDFS_NUMBER.12u" display="12" value="12u"/>
+            <option id="SSIE_CH0_RDFS_NUMBER.13u" display="13" value="13u"/>
+            <option id="SSIE_CH0_RDFS_NUMBER.14u" display="14" value="14u"/>
+            <option id="SSIE_CH0_RDFS_NUMBER.15u" display="15" value="15u"/>
+            <option id="SSIE_CH0_RDFS_NUMBER.16u" display="16" value="16u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+    <constraint display="This setting is only valid for standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <description>Receive Data Trigger number selection
+  Set a value from following alternatives to SSIEn_RDFS_NUMBER.
+----------------------------------------------------------------------------
+ IF format             value
+---------------------------------------------------------------------------
+ I2S                         1 to 16
+ Left-justified        1 to 16
+ Right-justified      1 to 16
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSIE_CH1_RDFS_NUMBER" display="Ch1 Rx Full trigger" default="8u" type="combobox">
+            <option id="SSIE_CH1_RDFS_NUMBER.1u" display="1" value="1u"/>
+            <option id="SSIE_CH1_RDFS_NUMBER.2u" display="2" value="2u"/>
+            <option id="SSIE_CH1_RDFS_NUMBER.3u" display="3" value="3u"/>
+            <option id="SSIE_CH1_RDFS_NUMBER.4u" display="4" value="4u"/>
+            <option id="SSIE_CH1_RDFS_NUMBER.5u" display="5" value="5u"/>
+            <option id="SSIE_CH1_RDFS_NUMBER.6u" display="6" value="6u"/>
+            <option id="SSIE_CH1_RDFS_NUMBER.7u" display="7" value="7u"/>
+            <option id="SSIE_CH1_RDFS_NUMBER.8u" display="8" value="8u"/>
+            <option id="SSIE_CH1_RDFS_NUMBER.9u" display="9" value="9u"/>
+            <option id="SSIE_CH1_RDFS_NUMBER.10u" display="10" value="10u"/>
+            <option id="SSIE_CH1_RDFS_NUMBER.11u" display="11" value="11u"/>
+            <option id="SSIE_CH1_RDFS_NUMBER.12u" display="12" value="12u"/>
+            <option id="SSIE_CH1_RDFS_NUMBER.13u" display="13" value="13u"/>
+            <option id="SSIE_CH1_RDFS_NUMBER.14u" display="14" value="14u"/>
+            <option id="SSIE_CH1_RDFS_NUMBER.15u" display="15" value="15u"/>
+            <option id="SSIE_CH1_RDFS_NUMBER.16u" display="16" value="16u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+ <constraint display="This setting is only valid for standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <description>Receive Data Trigger number selection
+  Set a value from following alternatives to SSIEn_RDFS_NUMBER.
+----------------------------------------------------------------------------
+ IF format             value
+---------------------------------------------------------------------------
+ I2S                         1 to 16
+ Left-justified        1 to 16
+ Right-justified      1 to 16
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSIE_CH0_BYTE_SWAP" display="Ch0 Byte Swap" default="0u" type="combobox">
+            <option id="SSIE_CH0_BYTE_SWAP.0u" display="Byte swapping is disabled" value="0u"/>
+            <option id="SSIE_CH0_BYTE_SWAP.1u" display="Byte swapping is enabled" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+          <constraint display="This setting is only valid for standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <description>This enables or disables byte swapping when the SSIFTDR is written and the SSIFRDR register is read.
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+        <property id="SSIE_CH1_BYTE_SWAP" display="Ch1 Byte Swap" default="0u" type="combobox">
+            <option id="SSIE_CH1_BYTE_SWAP.0u" display="Byte swapping is disabled" value="0u"/>
+            <option id="SSIE_CH1_BYTE_SWAP.1u" display="Byte swapping is enabled" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+         <constraint display="This setting is only valid for standard configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" == ""</constraint>
+            <description>This enables or disables byte swapping when the SSIFTDR is written and the SSIFRDR register is read.
+This setting is only valid for "SSI_STANDARD_CONFIG".</description>
+        </property>
+
+        <property id="SSIE_CH0_TDES" display="SSIE0.SSISCR.TDES[4:0] Bits" default="15u" type="textbox">
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <constraint display="Value must be in the range 0 ~ 31" actionOnFail="error">("${SSIE_CH0_TDES}".replace(/[LUlu]+$/, '') &gt;= 0) &amp;&amp; ("${SSIE_CH0_TDES}".replace(/[LUlu]+$/, '') &lt;= 31)</constraint>
+            <description>Value for "SSIE0.SSISCR.TDES"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH1_TDES" display="SSIE1.SSISCR.TDES[4:0] Bits" default="15u" type="textbox">
+            <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <constraint display="Value must be in the range 0 ~ 31" actionOnFail="error">("${SSIE_CH1_TDES}".replace(/[LUlu]+$/, '') &gt;= 0) &amp;&amp; ("${SSIE_CH1_TDES}".replace(/[LUlu]+$/, '') &lt;= 31)</constraint>
+            <description>Value for "SSIE1.SSISCR.TDES"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH0_RDFS" display="SSIE0.SSISCR.RDFS[4:0] Bits" default="15u" type="textbox">
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <constraint display="Value must be in the range 0 ~ 31" actionOnFail="error">("${SSIE_CH0_RDFS}".replace(/[LUlu]+$/, '') &gt;= 0) &amp;&amp; ("${SSIE_CH0_RDFS}".replace(/[LUlu]+$/, '') &lt;= 31)</constraint>
+            <description>Value for "SSIE0.SSISCR.RDFS"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH1_RDFS" display="SSIE1.SSISCR.RDFS[4:0] Bits" default="15u" type="textbox">
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <constraint display="Value must be in the range 0 ~ 31" actionOnFail="error">("${SSIE_CH1_RDFS}".replace(/[LUlu]+$/, '') &gt;= 0) &amp;&amp; ("${SSIE_CH1_RDFS}".replace(/[LUlu]+$/, '') &lt;= 31)</constraint>
+            <description>Value for "SSIE1.SSISCR.RDFS"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH0_DEL" display="SSIE0.SSICR.DEL Bit" default="0u" type="combobox">
+            <option id="SSIE_CH0_DEL.0u" display="0" value="0u"/>
+            <option id="SSIE_CH0_DEL.1u" display="1" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE0.SSICR.DEL"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH1_DEL" display="SSIE1.SSICR.DEL Bit" default="0u" type="combobox">
+            <option id="SSIE_CH1_DEL.0u" display="0" value="0u"/>
+            <option id="SSIE_CH1_DEL.1u" display="1" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE1.SSICR.DEL"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH0_PDTA" display="SSIE0.SSICR.PDTA Bit" default="0u" type="combobox">
+            <option id="SSIE_CH0_PDTA.0u" display="0" value="0u"/>
+            <option id="SSIE_CH0_PDTA.1u" display="1" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE0.SSICR.PDTA"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH1_PDTA" display="SSIE1.SSICR.PDTA Bit" default="0u" type="combobox">
+            <option id="SSIE_CH1_PDTA.0u" display="0" value="0u"/>
+            <option id="SSIE_CH1_PDTA.1u" display="1" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE1.SSICR.PDTA"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH0_SDTA" display="SSIE0.SSICR.SDTA Bit" default="0u" type="combobox">
+            <option id="SSIE_CH0_SDTA.0u" display="0" value="0u"/>
+            <option id="SSIE_CH0_SDTA.1u" display="1" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE0.SSICR.SDTA"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH1_SDTA" display="SSIE1.SSICR.SDTA Bit" default="0u" type="combobox">
+            <option id="SSIE_CH1_SDTA.0u" display="0" value="0u"/>
+            <option id="SSIE_CH1_SDTA.1u" display="1" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE1.SSICR.SDTA"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH0_SPDP" display="SSIE0.SSICR.SPDP Bit" default="0u" type="combobox">
+            <option id="SSIE_CH0_SPDP.0u" display="0" value="0u"/>
+            <option id="SSIE_CH0_SPDP.1u" display="1" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE0.SSICR.SPDP"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH1_SPDP" display="SSIE1.SSICR.SPDP Bit" default="0u" type="combobox">
+            <option id="SSIE_CH1_SPDP.0u" display="0" value="0u"/>
+            <option id="SSIE_CH1_SPDP.1u" display="1" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE1.SSICR.SPDP"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH0_LRCKP" display="SSIE0.SSICR.LRCKP Bit" default="0u" type="combobox">
+            <option id="SSIE_CH0_LRCKP.0u" display="0" value="0u"/>
+            <option id="SSIE_CH0_LRCKP.1u" display="1" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE0.SSICR.LRCKP"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH1_LRCKP" display="SSIE1.SSICR.LRCKP Bit" default="0u" type="combobox">
+            <option id="SSIE_CH1_LRCKP.0u" display="0" value="0u"/>
+            <option id="SSIE_CH1_LRCKP.1u" display="1" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE1.SSICR.LRCKP"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH0_BCKP" display="SSIE0.SSICR.BCKP Bit" default="0u" type="combobox">
+            <option id="SSIE_CH0_BCKP.0u" display="0" value="0u"/>
+            <option id="SSIE_CH0_BCKP.1u" display="1" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE0.SSICR.BCKP"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH1_BCKP" display="SSIE1.SSICR.BCKP Bit" default="0u" type="combobox">
+            <option id="SSIE_CH1_BCKP.0u" display="0" value="0u"/>
+            <option id="SSIE_CH1_BCKP.1u" display="1" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE1.SSICR.BCKP"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH0_SWL" display="SSIE0.SSICR.SWL[2:0] Bits" default="3u" type="combobox">
+            <option id="SSIE_CH0_SWL.0u" display="0" value="0u"/>
+            <option id="SSIE_CH0_SWL.1u" display="1" value="1u"/>
+            <option id="SSIE_CH0_SWL.2u" display="2" value="2u"/>
+            <option id="SSIE_CH0_SWL.3u" display="3" value="3u"/>
+            <option id="SSIE_CH0_SWL.4u" display="4" value="4u"/>
+            <option id="SSIE_CH0_SWL.5u" display="5" value="5u"/>
+            <option id="SSIE_CH0_SWL.6u" display="6" value="6u"/>
+            <option id="SSIE_CH0_SWL.7u" display="7" value="7u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE0.SSICR.SWL"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH1_SWL" display="SSIE1.SSICR.SWL[2:0] Bits" default="3u" type="combobox">
+            <option id="SSIE_CH1_SWL.0u" display="0" value="0u"/>
+            <option id="SSIE_CH1_SWL.1u" display="1" value="1u"/>
+            <option id="SSIE_CH1_SWL.2u" display="2" value="2u"/>
+            <option id="SSIE_CH1_SWL.3u" display="3" value="3u"/>
+            <option id="SSIE_CH1_SWL.4u" display="4" value="4u"/>
+            <option id="SSIE_CH1_SWL.5u" display="5" value="5u"/>
+            <option id="SSIE_CH1_SWL.6u" display="6" value="6u"/>
+            <option id="SSIE_CH1_SWL.7u" display="7" value="7u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE1.SSICR.SWL"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH0_DWL" display="SSIE0.SSICR.DWL[2:0] Bits" default="1u" type="combobox">
+            <option id="SSIE_CH0_DWL.0u" display="0" value="0u"/>
+            <option id="SSIE_CH0_DWL.1u" display="1" value="1u"/>
+            <option id="SSIE_CH0_DWL.2u" display="2" value="2u"/>
+            <option id="SSIE_CH0_DWL.3u" display="3" value="3u"/>
+            <option id="SSIE_CH0_DWL.4u" display="4" value="4u"/>
+            <option id="SSIE_CH0_DWL.5u" display="5" value="5u"/>
+            <option id="SSIE_CH0_DWL.6u" display="6" value="6u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE0.SSICR.DWL"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH1_DWL" display="SSIE1.SSICR.DWL[2:0] Bits" default="1u" type="combobox">
+            <option id="SSIE_CH1_DWL.0u" display="0" value="0u"/>
+            <option id="SSIE_CH1_DWL.1u" display="1" value="1u"/>
+            <option id="SSIE_CH1_DWL.2u" display="2" value="2u"/>
+            <option id="SSIE_CH1_DWL.3u" display="3" value="3u"/>
+            <option id="SSIE_CH1_DWL.4u" display="4" value="4u"/>
+            <option id="SSIE_CH1_DWL.5u" display="5" value="5u"/>
+            <option id="SSIE_CH1_DWL.6u" display="6" value="6u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE1.SSICR.DWL"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH0_CKDV" display="SSIE0.SSICR.CKDV[3:0] Bits" default="2u" type="combobox">
+            <option id="SSIE_CH0_CKDV.0u" display="0" value="0u"/>
+            <option id="SSIE_CH0_CKDV.1u" display="1" value="1u"/>
+            <option id="SSIE_CH0_CKDV.2u" display="2" value="2u"/>
+            <option id="SSIE_CH0_CKDV.3u" display="3" value="3u"/>
+            <option id="SSIE_CH0_CKDV.4u" display="4" value="4u"/>
+            <option id="SSIE_CH0_CKDV.5u" display="5" value="5u"/>
+            <option id="SSIE_CH0_CKDV.6u" display="6" value="6u"/>
+            <option id="SSIE_CH0_CKDV.7u" display="7" value="7u"/>
+            <option id="SSIE_CH0_CKDV.8u" display="8" value="8u"/>
+            <option id="SSIE_CH0_CKDV.9u" display="9" value="9u"/>
+            <option id="SSIE_CH0_CKDV.10u" display="10" value="10u"/>
+            <option id="SSIE_CH0_CKDV.11u" display="11" value="11u"/>
+            <option id="SSIE_CH0_CKDV.12u" display="12" value="12u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE0.SSICR.CKDV"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH1_CKDV" display="SSIE1.SSICR.CKDV[3:0] Bits" default="2u" type="combobox">
+            <option id="SSIE_CH1_CKDV.0u" display="0" value="0u"/>
+            <option id="SSIE_CH1_CKDV.1u" display="1" value="1u"/>
+            <option id="SSIE_CH1_CKDV.2u" display="2" value="2u"/>
+            <option id="SSIE_CH1_CKDV.3u" display="3" value="3u"/>
+            <option id="SSIE_CH1_CKDV.4u" display="4" value="4u"/>
+            <option id="SSIE_CH1_CKDV.5u" display="5" value="5u"/>
+            <option id="SSIE_CH1_CKDV.6u" display="6" value="6u"/>
+            <option id="SSIE_CH1_CKDV.7u" display="7" value="7u"/>
+            <option id="SSIE_CH1_CKDV.8u" display="8" value="8u"/>
+            <option id="SSIE_CH1_CKDV.9u" display="9" value="9u"/>
+            <option id="SSIE_CH1_CKDV.10u" display="10" value="10u"/>
+            <option id="SSIE_CH1_CKDV.11u" display="11" value="11u"/>
+            <option id="SSIE_CH1_CKDV.12u" display="12" value="12u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE1.SSICR.CKDV"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH0_MST" display="SSIE0.SSICR.MST Bit" default="1u" type="combobox">
+            <option id="SSIE_CH0_MST.0u" display="0" value="0u"/>
+            <option id="SSIE_CH0_MST.1u" display="1" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE0.SSICR.MST"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH1_MST" display="SSIE1.SSICR.MST Bit" default="1u" type="combobox">
+            <option id="SSIE_CH1_MST.0u" display="0" value="0u"/>
+            <option id="SSIE_CH1_MST.1u" display="1" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE1.SSICR.MST"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH0_FRM" display="SSIE0.SSICR.FRM[1:0] Bits" default="0u" type="combobox">
+            <option id="SSIE_CH0_FRM.0u" display="0" value="0u"/>
+            <option id="SSIE_CH0_FRM.1u" display="1" value="1u"/>
+            <option id="SSIE_CH0_FRM.2u" display="2" value="2u"/>
+            <option id="SSIE_CH0_FRM.3u" display="3" value="3u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE0.SSICR.FRM"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH1_FRM" display="SSIE1.SSICR.FRM[1:0] Bits" default="0u" type="combobox">
+            <option id="SSIE_CH1_FRM.0u" display="0" value="0u"/>
+            <option id="SSIE_CH1_FRM.1u" display="1" value="1u"/>
+            <option id="SSIE_CH1_FRM.2u" display="2" value="2u"/>
+            <option id="SSIE_CH1_FRM.3u" display="3" value="3u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE1.SSICR.FRM"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH0_BSW" display="SSIE0.SSIFCR.BSW Bit" default="0u" type="combobox">
+            <option id="SSIE_CH0_BSW.0u" display="0" value="0u"/>
+            <option id="SSIE_CH0_BSW.1u" display="1" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE0.SSIFCR.BSW"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH1_BSW" display="SSIE1.SSIFCR.BSW Bit" default="0u" type="combobox">
+            <option id="SSIE_CH1_BSW.0u" display="0" value="0u"/>
+            <option id="SSIE_CH1_BSW.1u" display="1" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE1.SSIFCR.BSW"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH0_AUCKE" display="SSIE0.SSIFCR.AUCKE Bit" default="1u" type="combobox">
+            <option id="SSIE_CH0_AUCKE.0u" display="0" value="0u"/>
+            <option id="SSIE_CH0_AUCKE.1u" display="1" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE0.SSIFCR.AUCKE"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH1_AUCKE" display="SSIE1.SSIFCR.AUCKE Bit" default="1u" type="combobox">
+            <option id="SSIE_CH1_AUCKE.0u" display="0" value="0u"/>
+            <option id="SSIE_CH1_AUCKE.1u" display="1" value="1u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE1.SSIFCR.AUCKE"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH0_OMOD" display="SSIE0.SSIOFR.OMOD[1:0] Bits" default="0u" type="combobox">
+            <option id="SSIE_CH0_OMOD.0u" display="0" value="0u"/>
+            <option id="SSIE_CH0_OMOD.1u" display="1" value="1u"/>
+            <option id="SSIE_CH0_OMOD.2u" display="2" value="2u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE0.SSIOFR.OMOD"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+        <property id="SSIE_CH1_OMOD" display="SSIE1.SSIOFR.OMOD[1:0] Bits" default="0u" type="combobox">
+            <option id="SSIE_CH1_OMOD.0u" display="0" value="0u"/>
+            <option id="SSIE_CH1_OMOD.1u" display="1" value="1u"/>
+            <option id="SSIE_CH1_OMOD.2u" display="2" value="2u"/>
+            <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+   <constraint display="This setting is only valid for user unique configuration." actionOnFail="disable">"${SSI_STANDARD_CONFIG}" != ""</constraint>
+            <description>Value for "SSIE1.SSIOFR.OMOD"
+In case "SSI_USER_UNIQUE_CONFIG", change this macro definitions to fit for user unique requirement. Refer to Hardware user's manual.</description>
+        </property>
+
+    </configuration>
+</module>

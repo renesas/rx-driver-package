@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>3.01.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>4.08.04.201801</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.11.01</version>
+    </toolchain>
+
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family omit_series="true">RX</family>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_sys_time_rx</name>
+        <version>1.01</version>
+        <zipsource>r_sys_time_rx_v1.01.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>5.20</version>
+        </dependency>
+        <dependency>
+            <module>r_cmt_rx</module>
+            <version>4.00</version>
+        </dependency>
+        <application>Connectivity</application>
+        <desc>Generic system timer for RX MCUs using CMT module.</desc>
+        <details>Generic system timer for RX MCUs using CMT module.</details>
+        <function>connectivity</function>
+        <incdir>r_config</incdir>
+        <incdir>r_sys_time_rx</incdir>
+        <incdir>r_sys_time_rx/src</incdir>
+    </package>
+
+</refinfo>

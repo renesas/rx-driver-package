@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>2.08.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.12.01</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX200</series>
+        <group>RX23W</group>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_ble_rx23w</name>
+        <version>1.10</version>
+        <zipsource>r_ble_rx23w_v1.10.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>5.40</version>
+        </dependency>
+        <dependency>
+            <module>r_lpc_rx</module>
+            <version>1.42</version>
+            <version>2.00</version>
+        </dependency>
+        <dependency>
+            <module>r_cmt_rx</module>
+            <version>4.10</version>
+            <version>4.20</version>
+        </dependency>
+        <application>Communications</application>
+        <desc>BLE stack</desc>
+        <details>BLE stack package program</details>
+        <function>BLE</function>
+        <incdir>r_config</incdir>
+        <incdir>r_ble_rx23w</incdir>
+        <incdir>r_ble_rx23w/src</incdir>
+        <incdir>r_ble_rx23w/src/app_lib</incdir>
+        <incdir>r_ble_rx23w/src/platform</incdir>
+        <incdir>r_ble_rx23w/lib</incdir>
+        <incdir>general</incdir>
+        <library>
+            <family>RX</family>
+            <series>RX200</series>
+            <group>RX23W</group>
+            <libdir endian="big" path="rel">r_ble_rx23w/lib/lib_ble_ps_ccrx.lib</libdir>
+            <libdir endian="little" path="rel">r_ble_rx23w/lib/lib_ble_ps_ccrx.lib</libdir>
+        </library>
+    </package>
+
+    <sampleapplicationnote>
+        <documentno>R01AN4860</documentno>
+    </sampleapplicationnote>
+
+</refinfo>

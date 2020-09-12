@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
+* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
+* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
+* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
+* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
+* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
+* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate>r_pinset_type2</fileTemplate>
+    <resourceInfo>
+      <peripheral name="PDC">
+          <pin name="PIXCLK">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="VSYNC">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="HSYNC">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="PIXD7">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="PIXD6">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="PIXD5">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="PIXD4">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="PIXD3">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="PIXD2">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="PIXD1">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="PIXD0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="PCKO">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+      </peripheral>
+    </resourceInfo>
+    <configuration>
+        <property id="PDC_CFG_PCKO_DIV" display="PCKO Frequency division ratio" default="2" type="combobox">
+            <option id="PDC_CFG_PCKO_DIV.2" display="/2" value="2"/>
+            <option id="PDC_CFG_PCKO_DIV.4" display="/4" value="4"/>
+            <option id="PDC_CFG_PCKO_DIV.6" display="/6" value="6"/>
+            <option id="PDC_CFG_PCKO_DIV.8" display="/8" value="8"/>
+            <option id="PDC_CFG_PCKO_DIV.10" display="/10" value="10"/>
+            <option id="PDC_CFG_PCKO_DIV.12" display="/12" value="12"/>
+            <option id="PDC_CFG_PCKO_DIV.14" display="/14" value="14"/>
+            <option id="PDC_CFG_PCKO_DIV.16" display="/16" value="16"/>
+            <description>Selects PCKO frequency division ratio. (PCKDIV)</description>
+        </property>
+    </configuration>
+</module>

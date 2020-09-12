@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<qeForUsbSetting id="4">
+	<versionId>MINI_RX200_FIT_110</versionId>
+	<version>1.00</version>
+	<needSymbols>
+		<symbol>usb_pstd_detach_process</symbol>
+		<symbol>usb_pstd_attach_process</symbol>
+		<symbol>usb_pstd_bus_reset</symbol>
+		<symbol>usb_pstd_suspend_process</symbol>
+		<symbol>usb_pstd_resume_process</symbol>
+		<symbol>usb_pstd_stand_req1</symbol>
+		<symbol>usb_pstd_stand_req2</symbol>
+		<symbol>usb_pstd_stand_req3</symbol>
+		<symbol>g_usb_pstd_req_type</symbol>
+		<symbol>g_usb_pstd_req_value</symbol>
+		<symbol>g_usb_pstd_req_index</symbol>
+		<symbol>g_usb_pstd_req_length</symbol>
+		<symbol>g_usb_pstd_driver.p_devicetbl</symbol>
+		<symbol>g_usb_pstd_driver.p_configtbl</symbol>
+		<symbol>g_usb_pstd_driver.pp_stringtbl</symbol>
+	</needSymbols>
+	<stateChartSetting>
+		<checkPoints>
+			<checkPoint>
+				<function>usb_pstd_detach_process</function>
+				<kind>Detach</kind>
+				<stateExpression>0</stateExpression>
+				<stateValues></stateValues>
+				<detailFormat>state={StateLabel}</detailFormat>
+				<detailExpressions></detailExpressions>
+				<detailValues></detailValues>
+			</checkPoint>
+			<checkPoint>
+				<function>usb_pstd_attach_process</function>
+				<kind>Attach</kind>
+				<stateExpression>1</stateExpression>
+				<stateValues></stateValues>
+				<detailFormat>state={StateLabel}</detailFormat>
+				<detailExpressions></detailExpressions>
+				<detailValues></detailValues>
+			</checkPoint>
+			<checkPoint>
+				<function>usb_pstd_bus_reset</function>
+				<kind>BusReset</kind>
+				<stateExpression>3</stateExpression>
+				<stateValues></stateValues>
+				<detailFormat>state={StateLabel}</detailFormat>
+				<detailExpressions></detailExpressions>
+				<detailValues></detailValues>
+			</checkPoint>
+			<checkPoint>
+				<function>usb_pstd_suspend_process</function>
+				<kind>Suspend</kind>
+				<stateExpression>6</stateExpression>
+				<stateValues></stateValues>
+				<detailFormat>state={StateLabel}</detailFormat>
+				<detailExpressions></detailExpressions>
+				<detailValues></detailValues>
+			</checkPoint>
+			<checkPoint>
+				<function>usb_pstd_resume_process</function>
+				<kind>Resume</kind>
+				<stateExpression>(g_usb_pstd_usb_int.buf[g_usb_pstd_usb_int.rp].status &amp; 0x0070) &gt;&gt; 4</stateExpression>
+				<stateValues>dvsq</stateValues>
+				<detailFormat>state={StateLabel}</detailFormat>
+				<detailExpressions></detailExpressions>
+				<detailValues></detailValues>
+			</checkPoint>
+			<checkPoint>
+				<function>usb_pstd_stand_req1</function>
+				<kind>StandReq</kind>
+				<stateExpression>(g_usb_pstd_usb_int.buf[g_usb_pstd_usb_int.rp].status &amp; 0x0070) &gt;&gt; 4</stateExpression>
+				<stateValues>dvsq</stateValues>
+				<detailFormat>state={StateLabel} : Setup Data(type={direction},{requestType},{recipient} : request={request} : value={value} : index={index} : length={length})</detailFormat>
+				<detailExpressions>setupData</detailExpressions>
+				<detailValues>setupData</detailValues>
+			</checkPoint>
+			<checkPoint>
+				<function>usb_pstd_stand_req2</function>
+				<kind>StandReq</kind>
+				<stateExpression>(g_usb_pstd_usb_int.buf[g_usb_pstd_usb_int.rp].status &amp; 0x0070) &gt;&gt; 4</stateExpression>
+				<stateValues>dvsq</stateValues>
+				<detailFormat>state={StateLabel} : Setup Data(type={direction},{requestType},{recipient} : request={request} : value={value} : index={index} : length={length})</detailFormat>
+				<detailExpressions>setupData</detailExpressions>
+				<detailValues>setupData</detailValues>
+			</checkPoint>
+			<checkPoint>
+				<function>usb_pstd_stand_req3</function>
+				<kind>StandReq</kind>
+				<stateExpression>(g_usb_pstd_usb_int.buf[g_usb_pstd_usb_int.rp].status &amp; 0x0070) &gt;&gt; 4</stateExpression>
+				<stateValues>dvsq</stateValues>
+				<detailFormat>state={StateLabel} : Setup Data(type={direction},{requestType},{recipient} : request={request} : value={value} : index={index} : length={length})</detailFormat>
+				<detailExpressions>setupData</detailExpressions>
+				<detailValues>setupData</detailValues>
+			</checkPoint>
+		</checkPoints>
+		<stateValuesDefinition>
+			<stateValues key="dvsq">
+				<state value="0">2</state>
+				<state value="1">3</state>
+				<state value="2">4</state>
+				<state value="3">5</state>
+				<state value="4">6</state>
+				<state value="5">6</state>
+				<state value="6">6</state>
+				<state value="7">6</state>
+			</stateValues>
+		</stateValuesDefinition>
+		<detailExpressionsDefinition>
+			<detailExpressions key="setupData">
+				<detailExpression key="type">g_usb_pstd_req_type &amp; 0xff</detailExpression>
+				<detailExpression key="request">(g_usb_pstd_req_type &gt;&gt; 8) &amp; 0xff</detailExpression>
+				<detailExpression key="value">g_usb_pstd_req_value</detailExpression>
+				<detailExpression key="index">g_usb_pstd_req_index</detailExpression>
+				<detailExpression key="length">g_usb_pstd_req_length</detailExpression>
+				<detailExpression key="direction">g_usb_pstd_req_type &amp; 0x80</detailExpression>
+				<detailExpression key="requestType">g_usb_pstd_req_type &amp; 0x60</detailExpression>
+				<detailExpression key="recipient">g_usb_pstd_req_type &amp; 0x1f</detailExpression>
+			</detailExpressions>
+		</detailExpressionsDefinition>
+		<detailValuesDefinition>
+			<detailValues key="setupData">
+				<detailValuesForExpression expressionKey="direction">
+					<detailValue value="0">HostToDevice</detailValue>
+					<detailValue value="0x80">DeviceToHost</detailValue>
+					<default>Unknown</default>
+				</detailValuesForExpression>
+				<detailValuesForExpression expressionKey="requestType">
+					<detailValue value="0x00">Standard</detailValue>
+					<detailValue value="0x20">Class</detailValue>
+					<detailValue value="0x40">Vendor</detailValue>
+					<default>Reserved</default>
+				</detailValuesForExpression>
+				<detailValuesForExpression expressionKey="recipient">
+					<detailValue value="0x0">Device</detailValue>
+					<detailValue value="0x1">Interface</detailValue>
+					<detailValue value="0x2">Endpoint</detailValue>
+					<detailValue value="0x3">Other</detailValue>
+					<default>Reserved</default>
+				</detailValuesForExpression>
+				<detailValuesForExpression expressionKey="request">
+					<detailValue value="0x0">GET_STATUS</detailValue>
+					<detailValue value="0x1">CLEAR_FEATURE</detailValue>
+					<detailValue value="0x2">Reserved</detailValue>
+					<detailValue value="0x3">SET_FEATURE</detailValue>
+					<detailValue value="0x4">Reserved</detailValue>
+					<detailValue value="0x5">SET_ADDRESS</detailValue>
+					<detailValue value="0x6">GET_DESCRIPTOR</detailValue>
+					<detailValue value="0x7">SET_DESCRIPTOR</detailValue>
+					<detailValue value="0x8">GET_CONFIGURATION</detailValue>
+					<detailValue value="0x9">SET_CONFIGURATION</detailValue>
+					<detailValue value="0xa">GET_INTERFACE</detailValue>
+					<detailValue value="0xb">SET_INTERFACE</detailValue>
+					<detailValue value="0xc">SYNCH_FRAME</detailValue>
+					<default>UNKNOWN</default>
+				</detailValuesForExpression>
+			</detailValues>
+		</detailValuesDefinition>
+	</stateChartSetting>
+	<usbDescriptorSetting>
+		<deviceDescriptorAddressExpression>g_usb_pstd_driver.p_devicetbl</deviceDescriptorAddressExpression>
+		<configurationDescriptorAddressExpression total="true">g_usb_pstd_driver.p_configtbl</configurationDescriptorAddressExpression>
+		<stringDescriptorAddressExpression>g_usb_pstd_driver.pp_stringtbl[{index}]</stringDescriptorAddressExpression>
+	</usbDescriptorSetting>
+	<usbDescriptorSourceJumpSetting>
+		<setting key="PCDC_MINI_RX200_FIT_110">
+			<sourceFileName>r_usb_pcdc_descriptor.c</sourceFileName>
+			<deviceDescriptorName>g_apl_device</deviceDescriptorName>
+			<configurationDescriptorName multi="false">g_apl_configuration</configurationDescriptorName>
+			<stringDescriptorTableName>gp_apl_string_table</stringDescriptorTableName>
+		</setting>
+		<setting key="PHID_MINI_RX200_FIT_110">
+			<sourceFileName>r_usb_phid_descriptor.c</sourceFileName>
+			<deviceDescriptorName>g_apl_device</deviceDescriptorName>
+			<configurationDescriptorName multi="false">g_apl_configuration</configurationDescriptorName>
+			<stringDescriptorTableName>gp_apl_string_table</stringDescriptorTableName>
+		</setting>
+		<setting key="PMSC_MINI_RX200_FIT_110">
+			<sourceFileName>r_usb_pmsc_descriptor.c</sourceFileName>
+			<deviceDescriptorName>g_apl_device</deviceDescriptorName>
+			<configurationDescriptorName multi="false">g_apl_configuration</configurationDescriptorName>
+			<stringDescriptorTableName>gp_apl_string_table</stringDescriptorTableName>
+		</setting>
+	</usbDescriptorSourceJumpSetting>
+</qeForUsbSetting>

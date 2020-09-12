@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate>r_pinset_type2</fileTemplate>
+    <resourceInfo>
+      <peripheral name="CMTW">
+        <channel number="CMTW0">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${CMTW_CFG_USE_CH0} == ${CMTW_CFG_USE_CH0.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="TIC0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TIC1">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TOC0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TOC1">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+        </channel>
+        <channel number="CMTW1">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${CMTW_CFG_USE_CH1} == ${CMTW_CFG_USE_CH1.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="TIC2">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TIC3">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TOC2">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TOC3">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+        </channel>
+      </peripheral>
+    </resourceInfo>
+    <configuration>
+        <property id="CMTW_CFG_PARAM_CHECKING_ENABLE" display="Parameter checking" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+            <option id="CMTW_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="System Default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <option id="CMTW_CFG_PARAM_CHECKING_ENABLE.0" display="Not" value="0"/>
+            <option id="CMTW_CFG_PARAM_CHECKING_ENABLE.1" display="Include" value="1"/>
+            <description>Selects whether to include parameter checking in the code.
+BSP_CFG_PARAM_CHECKING_ENABLE = System default.
+0 = compile out parameter checking.
+1 = includes parameter checking.</description>
+        </property>
+        <property id="CMTW_CGF_REQUIRE_LOCK" display="Locking function for CMTW APIs" default="1" type="combobox">
+            <option id="CMTW_CGF_REQUIRE_LOCK.0" display="Disable" value="0"/>
+            <option id="CMTW_CGF_REQUIRE_LOCK.1" display="Enable" value="1"/>
+            <description>Acquire lock configuration</description>
+        </property>
+        <property id="CMTW_CFG_USE_CH0" display="Use channel 0" default="1" type="combobox">
+            <option id="CMTW_CFG_USE_CH0.0" display="Not" value="0"/>
+            <option id="CMTW_CFG_USE_CH0.1" display="Use" value="1"/>
+            <description>Enable the CMTW channels used</description>
+        </property>
+        <property id="CMTW_CFG_USE_CH1" display="Use channel 1" default="1" type="combobox">
+            <option id="CMTW_CFG_USE_CH1.0" display="Not" value="0"/>
+            <option id="CMTW_CFG_USE_CH1.1" display="Use" value="1"/>
+            <description>Enable the CMTW channels used</description>
+        </property>
+        <property id="CMTW_CFG_IPR_CM_CH0" display="Interrupt priority level for Compare Match of CMTW0" default="3" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${CMTW_CFG_IPR_CM_CH0}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 15">("${CMTW_CFG_IPR_CM_CH0}" &gt;= 0) &amp;&amp; ("${CMTW_CFG_IPR_CM_CH0}" &lt;= 15)</constraint>
+            <description>The interrupt priority level to be used for CMT interrupts.
+CM_CH0: Compare Match of CMTW0.CMWCOR register.</description>
+        </property>
+        <property id="CMTW_CFG_IPR_OC0_CH0" display="Interrupt priority level for Output Compare 0 of CMTW0" default="3" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${CMTW_CFG_IPR_OC0_CH0}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 15">("${CMTW_CFG_IPR_OC0_CH0}" &gt;= 0) &amp;&amp; ("${CMTW_CFG_IPR_OC0_CH0}" &lt;= 15)</constraint>
+            <description>The interrupt priority level to be used for CMT interrupts.
+OC0_CH0: Output Compare of CMTW0.CMWOCR0 register.</description>
+        </property>
+        <property id="CMTW_CFG_IPR_OC1_CH0" display="Interrupt priority level for Output Compare 1 of CMTW0" default="3" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${CMTW_CFG_IPR_OC1_CH0}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 15">("${CMTW_CFG_IPR_OC1_CH0}" &gt;= 0) &amp;&amp; ("${CMTW_CFG_IPR_OC1_CH0}" &lt;= 15)</constraint>
+            <description>The interrupt priority level to be used for CMT interrupts.
+OC1_CH0: Output Compare of CMTW0.CMWOCR1 register.</description>
+        </property>
+        <property id="CMTW_CFG_IPR_IC0_CH0" display="Interrupt priority level for Input Capture 0 of CMTW0" default="3" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${CMTW_CFG_IPR_IC0_CH0}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 15">("${CMTW_CFG_IPR_IC0_CH0}" &gt;= 0) &amp;&amp; ("${CMTW_CFG_IPR_IC0_CH0}" &lt;= 15)</constraint>
+            <description>The interrupt priority level to be used for CMT interrupts.
+IC0_CH0: Input Capture of CMTW0.CMWICR0 register.</description>
+        </property>
+        <property id="CMTW_CFG_IPR_IC1_CH0" display="Interrupt priority level for Input Capture 1 of CMTW0" default="3" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${CMTW_CFG_IPR_IC1_CH0}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 15">("${CMTW_CFG_IPR_IC1_CH0}" &gt;= 0) &amp;&amp; ("${CMTW_CFG_IPR_IC1_CH0}" &lt;= 15)</constraint>
+            <description>The interrupt priority level to be used for CMT interrupts.
+IC1_CH0: Input Capture of CMTW0.CMWICR1 register.</description>
+        </property>
+        <property id="CMTW_CFG_IPR_CM_CH1" display="Interrupt priority level for Compare Match of CMTW1" default="3" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${CMTW_CFG_IPR_CM_CH1}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 15">("${CMTW_CFG_IPR_CM_CH1}" &gt;= 0) &amp;&amp; ("${CMTW_CFG_IPR_CM_CH1}" &lt;= 15)</constraint>
+            <description>The interrupt priority level to be used for CMT interrupts.
+CM_CH1: Compare Match of CMTW1.CMWCOR register.</description>
+        </property>
+        <property id="CMTW_CFG_IPR_OC0_CH1" display="Interrupt priority level for Output Compare 0 of CMTW1" default="3" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${CMTW_CFG_IPR_OC0_CH1}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 15">("${CMTW_CFG_IPR_OC0_CH1}" &gt;= 0) &amp;&amp; ("${CMTW_CFG_IPR_OC0_CH1}" &lt;= 15)</constraint>
+            <description>The interrupt priority level to be used for CMT interrupts.
+OC0_CH1: Output Compare of CMTW1.CMWOCR0 register.</description>
+        </property>
+        <property id="CMTW_CFG_IPR_OC1_CH1" display="Interrupt priority level for Output Compare 1 of CMTW1" default="3" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${CMTW_CFG_IPR_OC1_CH1}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 15">("${CMTW_CFG_IPR_OC1_CH1}" &gt;= 0) &amp;&amp; ("${CMTW_CFG_IPR_OC1_CH1}" &lt;= 15)</constraint>
+            <description>The interrupt priority level to be used for CMT interrupts.
+OC1_CH1: Output Compare of CMTW1.CMWOCR1 register.</description>
+        </property>
+        <property id="CMTW_CFG_IPR_IC0_CH1" display="Interrupt priority level for Input Capture 0 of CMTW1" default="3" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${CMTW_CFG_IPR_IC0_CH1}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 15">("${CMTW_CFG_IPR_IC0_CH1}" &gt;= 0) &amp;&amp; ("${CMTW_CFG_IPR_IC0_CH1}" &lt;= 15)</constraint>
+            <description>The interrupt priority level to be used for CMT interrupts.
+IC0_CH1: Input Capture of CMTW1.CMWICR0 register.</description>
+        </property>
+        <property id="CMTW_CFG_IPR_IC1_CH1" display="Interrupt priority level for Input Capture 1 of CMTW1" default="3" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${CMTW_CFG_IPR_IC1_CH1}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 15">("${CMTW_CFG_IPR_IC1_CH1}" &gt;= 0) &amp;&amp; ("${CMTW_CFG_IPR_IC1_CH1}" &lt;= 15)</constraint>
+            <description>The interrupt priority level to be used for CMT interrupts.
+IC1_CH1: Input Capture of CMTW1.CMWICR1 register.</description>
+        </property>
+    </configuration>
+</module>

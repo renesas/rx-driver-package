@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>2.04.01</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family omit_series="true">RX</family>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_t4_file_driver_rx</name>
+        <version>1.02</version>
+        <zipsource>r_t4_file_driver_rx_v1.02.zip</zipsource>
+        <application>Connectivity</application>
+        <desc>File driver for HTTP Server and FTP Server</desc>
+        <details>File driver for HTTP Server  and FTP Server<br/>
+Please refer to the<br/>
+<br/>
+http://japan.renesas.com/mw/t4 (Japanese)<br/>
+<br/>
+http://www.renesas.com/mw/t4 (English)<br/></details>
+        <function>connectivity</function>
+        <incdir>r_t4_file_driver_rx</incdir>
+        <incdir>r_t4_file_driver_rx/src</incdir>
+        <incdir>r_t4_file_driver_rx/src/use_external_mem</incdir>
+        <incdir>r_t4_file_driver_rx/src/use_internal_mem</incdir>
+    </package>
+
+</refinfo>

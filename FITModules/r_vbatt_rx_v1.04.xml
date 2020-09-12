@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>2.03.00</version>
+        <version>3.01.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>4.08.04.201801</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.10.01</version>
+    </toolchain>
+    
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX200</series>
+        <group omit_board="true">RX230</group>
+        <group omit_board="true">RX231</group>
+        <group omit_board="true">RX23W</group>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_vbatt_rx</name>
+        <version>1.04</version>
+        <zipsource>r_vbatt_rx_v1.04.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>5.20</version>
+        </dependency>
+        <application>Low Voltage Detection</application>
+        <application>Power Supply</application>
+        <desc>Battery Backup Function Driver.</desc>
+        <details>This module detects drop for the battery backup power and voltage of VBATT pin.
+So, the user can detect whether RTC count value is valid or not by this module.
+</details>
+        <function>VBATT</function>
+        <incdir>r_config</incdir>
+        <incdir>r_vbatt_rx</incdir>
+        <incdir>r_vbatt_rx/src</incdir>
+    </package>
+
+</refinfo>

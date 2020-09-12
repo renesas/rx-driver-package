@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>3.01.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>4.08.04.201902</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.12.01</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX100</series>
+        <series>RX200</series>
+        <group omit_board="true">RX111</group>
+        <group omit_board="true">RX113</group>
+        <group omit_board="true">RX231</group>
+        <group omit_board="true">RX23W</group>
+        <board>GENERIC_RX111</board>
+        <board>GENERIC_RX113</board>
+        <board>GENERIC_RX231</board>
+        <board>GENERIC_RX23W</board>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_usb_pmsc_mini</name>
+        <version>1.12</version>
+        <zipsource>r_usb_pmsc_mini_v1.12.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>5.20</version>
+        </dependency>
+        <dependency>
+            <module>r_usb_basic_mini</module>
+            <version>1.12</version>
+        </dependency>
+        <application>Connectivity</application>
+        <desc>USB Peripheral Mass Storage Class</desc>
+        <details>The r_usb_pmsc_mini package provides USB peripheral mass storage class driver</details>
+        <function>USB_PMSC_MINI</function>
+        <incdir>r_usb_pmsc_mini</incdir>
+        <incdir>r_usb_pmsc_mini\src\inc</incdir>
+    </package>
+
+    <sampleapplicationnote >
+        <documentno>R01AN2298</documentno>
+    </sampleapplicationnote >
+
+</refinfo>

@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate>r_pinset_type2</fileTemplate>
+    <resourceInfo>
+      <peripheral name="SCIF">
+        <channel number="SCIF8">
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SCK8">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TXD8">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="RXD8">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="CTS8#">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="RTS8#">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+        </channel>
+        <channel number="SCIF9">
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SCK9">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TXD9">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="RXD9">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="CTS9#">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="RTS9#">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+        </channel>
+        <channel number="SCIF10">
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SCK10">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TXD10">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="RXD10">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="CTS10#">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="RTS10#">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+        </channel>
+        <channel number="SCIF11">
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SCK11">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TXD11">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="RXD11">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="CTS11#">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="RTS11#">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+        </channel>
+      </peripheral>
+    </resourceInfo>
+    <configuration>
+        <property id="SCIF_CFG_PARAM_CHECKING_ENABLE" display="Parameter checking" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+            <option id="SCIF_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="System default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <option id="SCIF_CFG_PARAM_CHECKING_ENABLE.0" display="Disabled" value="0"/>
+            <option id="SCIF_CFG_PARAM_CHECKING_ENABLE.1" display="Enabled" value="1"/>
+            <description>Selects whether to include parameter checking in the code.
+System default = BSP_CFG_PARAM_CHECKING_ENABLE
+Disabled = compiles out parameter checking
+Enabled = includes parameter checking</description>
+        </property>
+        <property id="SCIF_CFG_ASYNC_INCLUDED" display="Use asynchronous mode" default="1" type="checkbox">
+            <option id="SCIF_CFG_ASYNC_INCLUDED.0" display="Unused" value="0"/>
+            <option id="SCIF_CFG_ASYNC_INCLUDED.1" display="Used" value="1"/>
+            <description>Specify whether to include code for asynchronous mode.
+Used = includes code specific to that mode
+Unused = not include</description>
+        </property>
+        <property id="SCIF_CFG_SYNC_INCLUDED" display="Use clock synchronous mode" default="0" type="checkbox">
+            <option id="SCIF_CFG_SYNC_INCLUDED.0" display="Unused" value="0"/>
+            <option id="SCIF_CFG_SYNC_INCLUDED.1" display="Used" value="1"/>
+            <description>Specify whether to include code for clock synchronous mode.
+Used = includes code specific to that mode
+Unused = not include</description>
+        </property>
+        <property id="SCIF_CFG_DUMMY_TX_BYTE" display="Dummy data value" default="0xFF" type="textbox">
+            <constraint display="Value must be a hex integer" actionOnFail="error">testHexInteger("${SCIF_CFG_DUMMY_TX_BYTE}")</constraint>
+            <constraint display="Value must be in the range 0x00~0xFF" actionOnFail="error">("${SCIF_CFG_DUMMY_TX_BYTE}".replace(/[LUlu]+$/, '') &gt;= 0) &amp;&amp; ("${SCIF_CFG_DUMMY_TX_BYTE}".replace(/[LUlu]+$/, '') &lt;= 0xff)</constraint>
+            <description>Specify byte value to transmit while clocking in data in clock synchronous mode.</description>
+        </property>
+        <property id="SCIF_CFG_CH8_INCLUDED" display="Use channel 8" default="0" type="checkbox">
+            <option id="SCIF_CFG_CH8_INCLUDED.0" display="Unused" value="0"/>
+            <option id="SCIF_CFG_CH8_INCLUDED.1" display="Used" value="1"/>
+            <description>Specify whether to include software support for channel 8.
+Used = includes the channel 8
+Unused = not include</description>
+        </property>
+        <property id="SCIF_CFG_CH9_INCLUDED" display="Use channel 9" default="1" type="checkbox">
+            <option id="SCIF_CFG_CH9_INCLUDED.0" display="Unused" value="0"/>
+            <option id="SCIF_CFG_CH9_INCLUDED.1" display="Used" value="1"/>
+            <description>Specify whether to include software support for channel 9.
+Used = includes the channel 9
+Unused = not include</description>
+        </property>
+        <property id="SCIF_CFG_CH10_INCLUDED" display="Use channel 10" default="0" type="checkbox">
+            <option id="SCIF_CFG_CH10_INCLUDED.0" display="Unused" value="0"/>
+            <option id="SCIF_CFG_CH10_INCLUDED.1" display="Used" value="1"/>
+            <description>Specify whether to include software support for channel 10.
+Used = includes the channel 10
+Unused = not include</description>
+        </property>
+        <property id="SCIF_CFG_CH11_INCLUDED" display="Use channel 11" default="0" type="checkbox">
+            <option id="SCIF_CFG_CH11_INCLUDED.0" display="Unused" value="0"/>
+            <option id="SCIF_CFG_CH11_INCLUDED.1" display="Used" value="1"/>
+            <description>Specify whether to include software support for channel 10.
+Used = includes the channel 11
+Unused = not include</description>
+        </property>
+        <property id="SCIF_CFG_CH8_TX_FIFO_THRESHOLD" display="SCIFA8.FTCR.TFTC[4:0] Bits" default="8" type="combobox">
+            <option id="SCIF_CFG_CH8_TX_FIFO_THRESHOLD.0" display="0" value="0"/>
+            <option id="SCIF_CFG_CH8_TX_FIFO_THRESHOLD.1" display="1" value="1"/>
+            <option id="SCIF_CFG_CH8_TX_FIFO_THRESHOLD.2" display="2" value="2"/>
+            <option id="SCIF_CFG_CH8_TX_FIFO_THRESHOLD.3" display="3" value="3"/>
+            <option id="SCIF_CFG_CH8_TX_FIFO_THRESHOLD.4" display="4" value="4"/>
+            <option id="SCIF_CFG_CH8_TX_FIFO_THRESHOLD.5" display="5" value="5"/>
+            <option id="SCIF_CFG_CH8_TX_FIFO_THRESHOLD.6" display="6" value="6"/>
+            <option id="SCIF_CFG_CH8_TX_FIFO_THRESHOLD.7" display="7" value="7"/>
+            <option id="SCIF_CFG_CH8_TX_FIFO_THRESHOLD.8" display="8" value="8"/>
+            <option id="SCIF_CFG_CH8_TX_FIFO_THRESHOLD.9" display="9" value="9"/>
+            <option id="SCIF_CFG_CH8_TX_FIFO_THRESHOLD.10" display="10" value="10"/>
+            <option id="SCIF_CFG_CH8_TX_FIFO_THRESHOLD.11" display="11" value="11"/>
+            <option id="SCIF_CFG_CH8_TX_FIFO_THRESHOLD.12" display="12" value="12"/>
+            <option id="SCIF_CFG_CH8_TX_FIFO_THRESHOLD.13" display="13" value="13"/>
+            <option id="SCIF_CFG_CH8_TX_FIFO_THRESHOLD.14" display="14" value="14"/>
+            <option id="SCIF_CFG_CH8_TX_FIFO_THRESHOLD.15" display="15" value="15"/>
+            <description>Specify TX FIFO Threshold.
+The TX FIFO threshold indicates the number of bytes remaining in the FIFO before more data should be loaded. The lower the  threshold the fewer TXIF interrupts are required to send multiple FIFOs of data.</description>
+        </property>
+        <property id="SCIF_CFG_CH9_TX_FIFO_THRESHOLD" display="SCIFA9.FTCR.TFTC[4:0] Bits" default="8" type="combobox">
+            <option id="SCIF_CFG_CH9_TX_FIFO_THRESHOLD.0" display="0" value="0"/>
+            <option id="SCIF_CFG_CH9_TX_FIFO_THRESHOLD.1" display="1" value="1"/>
+            <option id="SCIF_CFG_CH9_TX_FIFO_THRESHOLD.2" display="2" value="2"/>
+            <option id="SCIF_CFG_CH9_TX_FIFO_THRESHOLD.3" display="3" value="3"/>
+            <option id="SCIF_CFG_CH9_TX_FIFO_THRESHOLD.4" display="4" value="4"/>
+            <option id="SCIF_CFG_CH9_TX_FIFO_THRESHOLD.5" display="5" value="5"/>
+            <option id="SCIF_CFG_CH9_TX_FIFO_THRESHOLD.6" display="6" value="6"/>
+            <option id="SCIF_CFG_CH9_TX_FIFO_THRESHOLD.7" display="7" value="7"/>
+            <option id="SCIF_CFG_CH9_TX_FIFO_THRESHOLD.8" display="8" value="8"/>
+            <option id="SCIF_CFG_CH9_TX_FIFO_THRESHOLD.9" display="9" value="9"/>
+            <option id="SCIF_CFG_CH9_TX_FIFO_THRESHOLD.10" display="10" value="10"/>
+            <option id="SCIF_CFG_CH9_TX_FIFO_THRESHOLD.11" display="11" value="11"/>
+            <option id="SCIF_CFG_CH9_TX_FIFO_THRESHOLD.12" display="12" value="12"/>
+            <option id="SCIF_CFG_CH9_TX_FIFO_THRESHOLD.13" display="13" value="13"/>
+            <option id="SCIF_CFG_CH9_TX_FIFO_THRESHOLD.14" display="14" value="14"/>
+            <option id="SCIF_CFG_CH9_TX_FIFO_THRESHOLD.15" display="15" value="15"/>
+            <description>Specify TX FIFO Threshold.
+The TX FIFO threshold indicates the number of bytes remaining in the FIFO before more data should be loaded. The lower the  threshold the fewer TXIF interrupts are required to send multiple FIFOs of data.</description>
+        </property>
+        <property id="SCIF_CFG_CH10_TX_FIFO_THRESHOLD" display="SCIFA10.FTCR.TFTC[4:0] Bits" default="8" type="combobox">
+            <option id="SCIF_CFG_CH10_TX_FIFO_THRESHOLD.0" display="0" value="0"/>
+            <option id="SCIF_CFG_CH10_TX_FIFO_THRESHOLD.1" display="1" value="1"/>
+            <option id="SCIF_CFG_CH10_TX_FIFO_THRESHOLD.2" display="2" value="2"/>
+            <option id="SCIF_CFG_CH10_TX_FIFO_THRESHOLD.3" display="3" value="3"/>
+            <option id="SCIF_CFG_CH10_TX_FIFO_THRESHOLD.4" display="4" value="4"/>
+            <option id="SCIF_CFG_CH10_TX_FIFO_THRESHOLD.5" display="5" value="5"/>
+            <option id="SCIF_CFG_CH10_TX_FIFO_THRESHOLD.6" display="6" value="6"/>
+            <option id="SCIF_CFG_CH10_TX_FIFO_THRESHOLD.7" display="7" value="7"/>
+            <option id="SCIF_CFG_CH10_TX_FIFO_THRESHOLD.8" display="8" value="8"/>
+            <option id="SCIF_CFG_CH10_TX_FIFO_THRESHOLD.9" display="9" value="9"/>
+            <option id="SCIF_CFG_CH10_TX_FIFO_THRESHOLD.10" display="10" value="10"/>
+            <option id="SCIF_CFG_CH10_TX_FIFO_THRESHOLD.11" display="11" value="11"/>
+            <option id="SCIF_CFG_CH10_TX_FIFO_THRESHOLD.12" display="12" value="12"/>
+            <option id="SCIF_CFG_CH10_TX_FIFO_THRESHOLD.13" display="13" value="13"/>
+            <option id="SCIF_CFG_CH10_TX_FIFO_THRESHOLD.14" display="14" value="14"/>
+            <option id="SCIF_CFG_CH10_TX_FIFO_THRESHOLD.15" display="15" value="15"/>
+            <description>Specify TX FIFO Threshold.
+The TX FIFO threshold indicates the number of bytes remaining in the FIFO before more data should be loaded. The lower the  threshold the fewer TXIF interrupts are required to send multiple FIFOs of data.</description>
+        </property>
+        <property id="SCIF_CFG_CH11_TX_FIFO_THRESHOLD" display="SCIFA11.FTCR.TFTC[4:0] Bits" default="8" type="combobox">
+            <option id="SCIF_CFG_CH11_TX_FIFO_THRESHOLD.0" display="0" value="0"/>
+            <option id="SCIF_CFG_CH11_TX_FIFO_THRESHOLD.1" display="1" value="1"/>
+            <option id="SCIF_CFG_CH11_TX_FIFO_THRESHOLD.2" display="2" value="2"/>
+            <option id="SCIF_CFG_CH11_TX_FIFO_THRESHOLD.3" display="3" value="3"/>
+            <option id="SCIF_CFG_CH11_TX_FIFO_THRESHOLD.4" display="4" value="4"/>
+            <option id="SCIF_CFG_CH11_TX_FIFO_THRESHOLD.5" display="5" value="5"/>
+            <option id="SCIF_CFG_CH11_TX_FIFO_THRESHOLD.6" display="6" value="6"/>
+            <option id="SCIF_CFG_CH11_TX_FIFO_THRESHOLD.7" display="7" value="7"/>
+            <option id="SCIF_CFG_CH11_TX_FIFO_THRESHOLD.8" display="8" value="8"/>
+            <option id="SCIF_CFG_CH11_TX_FIFO_THRESHOLD.9" display="9" value="9"/>
+            <option id="SCIF_CFG_CH11_TX_FIFO_THRESHOLD.10" display="10" value="10"/>
+            <option id="SCIF_CFG_CH11_TX_FIFO_THRESHOLD.11" display="11" value="11"/>
+            <option id="SCIF_CFG_CH11_TX_FIFO_THRESHOLD.12" display="12" value="12"/>
+            <option id="SCIF_CFG_CH11_TX_FIFO_THRESHOLD.13" display="13" value="13"/>
+            <option id="SCIF_CFG_CH11_TX_FIFO_THRESHOLD.14" display="14" value="14"/>
+            <option id="SCIF_CFG_CH11_TX_FIFO_THRESHOLD.15" display="15" value="15"/>
+            <description>Specify TX FIFO Threshold.
+The TX FIFO threshold indicates the number of bytes remaining in the FIFO before more data should be loaded. The lower the  threshold the fewer TXIF interrupts are required to send multiple FIFOs of data.</description>
+        </property>
+        <property id="SCIF_CFG_CH8_RX_FIFO_THRESHOLD" display="SCIFA8.FTCR.RFTC[4:0] Bits" default="8" type="combobox">
+            <option id="SCIF_CFG_CH8_RX_FIFO_THRESHOLD.1" display="1" value="1"/>
+            <option id="SCIF_CFG_CH8_RX_FIFO_THRESHOLD.2" display="2" value="2"/>
+            <option id="SCIF_CFG_CH8_RX_FIFO_THRESHOLD.3" display="3" value="3"/>
+            <option id="SCIF_CFG_CH8_RX_FIFO_THRESHOLD.4" display="4" value="4"/>
+            <option id="SCIF_CFG_CH8_RX_FIFO_THRESHOLD.5" display="5" value="5"/>
+            <option id="SCIF_CFG_CH8_RX_FIFO_THRESHOLD.6" display="6" value="6"/>
+            <option id="SCIF_CFG_CH8_RX_FIFO_THRESHOLD.7" display="7" value="7"/>
+            <option id="SCIF_CFG_CH8_RX_FIFO_THRESHOLD.8" display="8" value="8"/>
+            <option id="SCIF_CFG_CH8_RX_FIFO_THRESHOLD.9" display="9" value="9"/>
+            <option id="SCIF_CFG_CH8_RX_FIFO_THRESHOLD.10" display="10" value="10"/>
+            <option id="SCIF_CFG_CH8_RX_FIFO_THRESHOLD.11" display="11" value="11"/>
+            <option id="SCIF_CFG_CH8_RX_FIFO_THRESHOLD.12" display="12" value="12"/>
+            <option id="SCIF_CFG_CH8_RX_FIFO_THRESHOLD.13" display="13" value="13"/>
+            <option id="SCIF_CFG_CH8_RX_FIFO_THRESHOLD.14" display="14" value="14"/>
+            <option id="SCIF_CFG_CH8_RX_FIFO_THRESHOLD.15" display="15" value="15"/>
+            <description>Specify RX FIFO Threshold (should match TX FIFO for Sync).
+The RX FIFO threshold indicates the number of bytes available in the FIFO before more data should be read. The higher the threshold the fewer RXIF interrupts are required to receive multiple FIFOs of data.</description>
+        </property>
+        <property id="SCIF_CFG_CH9_RX_FIFO_THRESHOLD" display="SCIFA9.FTCR.RFTC[4:0] Bits" default="8" type="combobox">
+            <option id="SCIF_CFG_CH9_RX_FIFO_THRESHOLD.1" display="1" value="1"/>
+            <option id="SCIF_CFG_CH9_RX_FIFO_THRESHOLD.2" display="2" value="2"/>
+            <option id="SCIF_CFG_CH9_RX_FIFO_THRESHOLD.3" display="3" value="3"/>
+            <option id="SCIF_CFG_CH9_RX_FIFO_THRESHOLD.4" display="4" value="4"/>
+            <option id="SCIF_CFG_CH9_RX_FIFO_THRESHOLD.5" display="5" value="5"/>
+            <option id="SCIF_CFG_CH9_RX_FIFO_THRESHOLD.6" display="6" value="6"/>
+            <option id="SCIF_CFG_CH9_RX_FIFO_THRESHOLD.7" display="7" value="7"/>
+            <option id="SCIF_CFG_CH9_RX_FIFO_THRESHOLD.8" display="8" value="8"/>
+            <option id="SCIF_CFG_CH9_RX_FIFO_THRESHOLD.9" display="9" value="9"/>
+            <option id="SCIF_CFG_CH9_RX_FIFO_THRESHOLD.10" display="10" value="10"/>
+            <option id="SCIF_CFG_CH9_RX_FIFO_THRESHOLD.11" display="11" value="11"/>
+            <option id="SCIF_CFG_CH9_RX_FIFO_THRESHOLD.12" display="12" value="12"/>
+            <option id="SCIF_CFG_CH9_RX_FIFO_THRESHOLD.13" display="13" value="13"/>
+            <option id="SCIF_CFG_CH9_RX_FIFO_THRESHOLD.14" display="14" value="14"/>
+            <option id="SCIF_CFG_CH9_RX_FIFO_THRESHOLD.15" display="15" value="15"/>
+            <description>Specify RX FIFO Threshold (should match TX FIFO for Sync).
+The RX FIFO threshold indicates the number of bytes available in the FIFO before more data should be read. The higher the threshold the fewer RXIF interrupts are required to receive multiple FIFOs of data.</description>
+        </property>
+        <property id="SCIF_CFG_CH10_RX_FIFO_THRESHOLD" display="SCIFA10.FTCR.RFTC[4:0] Bits" default="8" type="combobox">
+            <option id="SCIF_CFG_CH10_RX_FIFO_THRESHOLD.1" display="1" value="1"/>
+            <option id="SCIF_CFG_CH10_RX_FIFO_THRESHOLD.2" display="2" value="2"/>
+            <option id="SCIF_CFG_CH10_RX_FIFO_THRESHOLD.3" display="3" value="3"/>
+            <option id="SCIF_CFG_CH10_RX_FIFO_THRESHOLD.4" display="4" value="4"/>
+            <option id="SCIF_CFG_CH10_RX_FIFO_THRESHOLD.5" display="5" value="5"/>
+            <option id="SCIF_CFG_CH10_RX_FIFO_THRESHOLD.6" display="6" value="6"/>
+            <option id="SCIF_CFG_CH10_RX_FIFO_THRESHOLD.7" display="7" value="7"/>
+            <option id="SCIF_CFG_CH10_RX_FIFO_THRESHOLD.8" display="8" value="8"/>
+            <option id="SCIF_CFG_CH10_RX_FIFO_THRESHOLD.9" display="9" value="9"/>
+            <option id="SCIF_CFG_CH10_RX_FIFO_THRESHOLD.10" display="10" value="10"/>
+            <option id="SCIF_CFG_CH10_RX_FIFO_THRESHOLD.11" display="11" value="11"/>
+            <option id="SCIF_CFG_CH10_RX_FIFO_THRESHOLD.12" display="12" value="12"/>
+            <option id="SCIF_CFG_CH10_RX_FIFO_THRESHOLD.13" display="13" value="13"/>
+            <option id="SCIF_CFG_CH10_RX_FIFO_THRESHOLD.14" display="14" value="14"/>
+            <option id="SCIF_CFG_CH10_RX_FIFO_THRESHOLD.15" display="15" value="15"/>
+            <description>Specify RX FIFO Threshold (should match TX FIFO for Sync).
+The RX FIFO threshold indicates the number of bytes available in the FIFO before more data should be read. The higher the threshold the fewer RXIF interrupts are required to receive multiple FIFOs of data.</description>
+        </property>
+        <property id="SCIF_CFG_CH11_RX_FIFO_THRESHOLD" display="SCIFA11.FTCR.RFTC[4:0] Bits" default="8" type="combobox">
+            <option id="SCIF_CFG_CH11_RX_FIFO_THRESHOLD.1" display="1" value="1"/>
+            <option id="SCIF_CFG_CH11_RX_FIFO_THRESHOLD.2" display="2" value="2"/>
+            <option id="SCIF_CFG_CH11_RX_FIFO_THRESHOLD.3" display="3" value="3"/>
+            <option id="SCIF_CFG_CH11_RX_FIFO_THRESHOLD.4" display="4" value="4"/>
+            <option id="SCIF_CFG_CH11_RX_FIFO_THRESHOLD.5" display="5" value="5"/>
+            <option id="SCIF_CFG_CH11_RX_FIFO_THRESHOLD.6" display="6" value="6"/>
+            <option id="SCIF_CFG_CH11_RX_FIFO_THRESHOLD.7" display="7" value="7"/>
+            <option id="SCIF_CFG_CH11_RX_FIFO_THRESHOLD.8" display="8" value="8"/>
+            <option id="SCIF_CFG_CH11_RX_FIFO_THRESHOLD.9" display="9" value="9"/>
+            <option id="SCIF_CFG_CH11_RX_FIFO_THRESHOLD.10" display="10" value="10"/>
+            <option id="SCIF_CFG_CH11_RX_FIFO_THRESHOLD.11" display="11" value="11"/>
+            <option id="SCIF_CFG_CH11_RX_FIFO_THRESHOLD.12" display="12" value="12"/>
+            <option id="SCIF_CFG_CH11_RX_FIFO_THRESHOLD.13" display="13" value="13"/>
+            <option id="SCIF_CFG_CH11_RX_FIFO_THRESHOLD.14" display="14" value="14"/>
+            <option id="SCIF_CFG_CH11_RX_FIFO_THRESHOLD.15" display="15" value="15"/>
+            <description>Specify RX FIFO Threshold (should match TX FIFO for Sync).
+The RX FIFO threshold indicates the number of bytes available in the FIFO before more data should be read. The higher the threshold the fewer RXIF interrupts are required to receive multiple FIFOs of data.</description>
+        </property>
+    </configuration>
+</module>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>2.07.00</version>
+        <version>3.00.00</version>
+        <version>3.01.00</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX100</series>
+        <series>RX200</series>
+        <group omit_board="true">RX113</group>
+        <group omit_board="true">RX130</group>
+        <group omit_board="true">RX230</group>
+        <group omit_board="true">RX231</group>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_lpt_rx</name>
+        <version>1.23</version>
+        <zipsource>r_lpt_rx_v1.23.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>3.60</version>
+            <version>3.91</version>
+            <version>4.00</version>
+        </dependency>
+        <application>Low Power Consumption</application>
+        <application>Low Power</application>
+        <application>Timer</application>
+        <desc>Low-Power Timer Driver.</desc>
+        <details>The LPT FIT module provides a method to generate an exit signal from software standby mode using the low power timer (LPT).</details>
+        <function>LPT</function>
+        <incdir>r_config</incdir>
+        <incdir>r_lpt_rx</incdir>
+        <incdir>r_lpt_rx/src</incdir>
+    </package>
+    
+    <sampleapplicationnote>
+        <documentno>R01AN2571</documentno>
+    </sampleapplicationnote>
+
+</refinfo>

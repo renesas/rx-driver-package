@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
+* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
+* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
+* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
+* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
+* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
+* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="SRC_IEN" display="SRCIDCTRL.IEN Bit" default="0" type="combobox">
+            <option id="SRC_IEN.0" display="0" value="0"/>
+            <option id="SRC_IEN.1" display="1" value="1"/>
+            <description>Input data empty interrupt configuration (for SRCIDCTRL.IEN)
+0 = Disable interrupt
+1 = Enable interrupt</description>
+        </property>
+        <property id="SRC_OEN" display="SRCODCTRL.OEN Bit" default="0" type="combobox">
+            <option id="SRC_OEN.0" display="0" value="0"/>
+            <option id="SRC_OEN.1" display="1" value="1"/>
+            <description>Output data empty interrupt configuration (for SRCODCTRL.OEN)
+0 = Disable interrupt
+1 = Enable interrupt</description>
+        </property>
+        <property id="SRC_OCH" display="SRCODCTRL.OCH Bit" default="0" type="combobox">
+            <option id="SRC_OCH.0" display="0" value="0"/>
+            <option id="SRC_OCH.1" display="1" value="1"/>
+            <description>Channel swap of output data (for SRCODCTRL.OCH)
+0 = same order of input data
+1 = reverse order of input data</description>
+        </property>
+        <property id="SRC_IFTG" display="SRCIDCTRL.IFTRG[1:0] Bits" default="3" type="combobox">
+            <option id="SRC_IFTG.0" display="0" value="0"/>
+            <option id="SRC_IFTG.1" display="1" value="1"/>
+            <option id="SRC_IFTG.2" display="2" value="2"/>
+            <option id="SRC_IFTG.3" display="3" value="3"/>
+            <description>Configure condition when IINT flag to be set (for SRCIDCTRL.IFTRG)
+0 = Set flag when number of data in FIFO is 0 or less
+1 = Set flag when number of data in FIFO is 2 or less
+2 = Set flag when number of data in FIFO is 4 or less
+3 = Set flag when number of data in FIFO is 6 or less</description>
+        </property>
+        <property id="SRC_OFTG" display="SRCODCTRL.OFTRG[1:0] Bits" default="3" type="combobox">
+            <option id="SRC_OFTG.0" display="0" value="0"/>
+            <option id="SRC_OFTG.1" display="1" value="1"/>
+            <option id="SRC_OFTG.2" display="2" value="2"/>
+            <option id="SRC_OFTG.3" display="3" value="3"/>
+            <description>Configure condition when OINT frag to be set (for SRCODCTRL.OFTRG)
+0 = Set flag when number of data in FIFO is 1 or larger
+1 = Set flag when number of data in FIFO is 4 or larger
+2 = Set flag when number of data in FIFO is 8 or larger
+3 = Set flag when number of data in FIFO is 12 or larger</description>
+        </property>
+    </configuration>
+</module>

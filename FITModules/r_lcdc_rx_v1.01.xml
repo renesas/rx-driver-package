@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>1.00.00</version>
+        <version>1.00.20</version>
+        <version>1.01.00</version>
+        <version>1.02.00</version>
+        <version>2.00.00</version>
+        <version>2.01.00</version>
+        <version>3.01.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>4.08.04.201801</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.10.01</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX100</series>
+        <group omit_board="true">RX113</group>
+    </target>
+
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, functions, and incdirs permitted -->
+
+    <package>
+        <type>fitmodule</type>
+        <name>r_lcdc_rx</name>
+        <version>1.01</version>
+        <zipsource>r_lcdc_rx_v1.01.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>5.20</version>
+        </dependency>
+        <application>Graphics</application>
+        <desc>LCD Control Driver.</desc>
+        <details> This module uses the LCD
+controller/driver (LCDC) to display data on an LCD. </details>
+        <function>LCDC</function>
+        <incdir>r_config</incdir>
+        <incdir>r_lcdc_rx</incdir>
+        <incdir>r_lcdc_rx/src</incdir>
+    </package>
+
+</refinfo>
