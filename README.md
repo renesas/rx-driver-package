@@ -1,14 +1,14 @@
 # rx-driver-package
 This is RX Driver Package GitHub repository.
 This repository includes some of early prototype version of FIT Modules, or un-tested FIT Modules.
-So please download tested FIT Modules from [Renesas official website](https://www.renesas.com/jp/ja/products/software-tools/software-os-middleware-driver/software-package/rx-driver-package.html).
+So please download tested FIT Modules from [Renesas official website](https://www.renesas.com/products/software-tools/software-os-middleware-driver/software-package/rx-driver-package.html).
 
 # These software
 - can be used for any users.
 - can be re-distributed by any users. (excluding r_emwin_rx)
 - can be integrated with specified open source code. 
     - Amazon FreeRTOS has been now allowed, Renesas would accept other open source.
-- use condition is basically MIT License, and details are shown in [PDF file in FIT Modules directory](https://github.com/renesas-rx/rx-driver-package/tree/master/FITModules).
+- use condition is basically MIT License, and details are shown in [PDF file in FIT Modules directory](https://github.com/renesas/rx-driver-package/tree/master/FITModules).
 
 # early prototype of FIT Modules
 - r_drw2d_rx
