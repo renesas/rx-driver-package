@@ -13,7 +13,7 @@ So please download tested FIT Modules from [Renesas official website](https://ww
 # How to Install
 - Official package can be installed by SmartConfigurator in automatically.
 - This repository "FITModules" folder can be installed(overwrited) into following folder in manually. SmartConfigurator can detect these FITModules folder.
-    - C:\Users\<user_name>\.eclipse\com.renesas.platform_download\FITModules
+    - C:\Users\\<user_name>\\.eclipse\com.renesas.platform_download\FITModules
     
 # early prototype of FIT Modules
 - r_drw2d_rx
