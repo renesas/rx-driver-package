@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014(2015) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014(2015-2019) Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_tfat_drv_if_usb.c
@@ -32,6 +32,7 @@
 *              : 01.04.2016 1.03     Updated the xml file.
 *              : 30.09.2016 x.xx      Added support MCU RX65N.
 *              : 14.12.2018 1.05     Supporting USB dirver for RTOS
+*              : 08.08.2019 2.00     Supporting offer of C source for TFAT.
 *******************************************************************************/
 
 /******************************************************************************
@@ -43,7 +44,8 @@ Includes   <System Includes> , "Project Includes"
 #if (TFAT_USB_DRIVE_NUM > 0)
 
 #include "r_usb_basic_if.h"
-#include "r_tfat_lib.h"             /* TFAT define */
+#include "ff.h"                  /* TFAT define */
+#include "diskio.h"              /* TFAT define */
 #include "r_usb_hmsc_if.h"          /* version info. */
 
 /* version info. */
@@ -60,7 +62,8 @@ Includes   <System Includes> , "Project Includes"
 #else
 #if (RX_USB_HMSC_API_VERSION_MAJOR == 1) && (RX_USB_HMSC_API_VERSION_MINOR == 00)
 #define TFAT_DRV_USB_API_TYPE1
-#elif (USB_VERSION_MAJOR == 1) && (USB_VERSION_MINOR <= 19) && (RX_USB_HMSC_API_VERSION_MAJOR == 1) && (RX_USB_HMSC_API_VERSION_MINOR <= 10)
+#elif (USB_VERSION_MAJOR == 1) && (USB_VERSION_MINOR <= 19) && (RX_USB_HMSC_API_VERSION_MAJOR == 1) && \
+      (RX_USB_HMSC_API_VERSION_MINOR <= 10)
 #define TFAT_DRV_USB_API_TYPE2
 #else
 #define TFAT_DRV_USB_API_TYPE3
@@ -147,32 +150,32 @@ usb_utr_t tfat_ptr;
 #endif
 
 /******************************************************************************
-* Function Name : R_tfat_usb_disk_initialize
+* Function Name : usb_disk_initialize
 * Description   : This function initializes the memory medium
 *               :    for file operations
-* Arguments     : uint8_t  drive        : Physical drive number
+* Arguments     : uint8_t pdrv        : Physical drive number
 * Return value  : Status of the memory medium
 ******************************************************************************/
-DSTATUS R_tfat_usb_disk_initialize (uint8_t pdrv)
+DSTATUS usb_disk_initialize (uint8_t pdrv)
 {
-    return TFAT_RES_OK;
+    return RES_OK;
 }
 
 /******************************************************************************
-* Function Name : R_tfat_usb_disk_read
+* Function Name : usb_disk_read
 * Description   : This function reads data from the specified location
 *               :    of the memory medium
-* Arguments     : uint8_t  drive        : Physical drive number
-*               : uint8_t* buff         : Pointer to the read data buffer
-*               : uint32_t sector_number : uint32_t SectorNumber
-*               : uint8_t count         : Number of sectors to read
+* Arguments     : uint8_t pdrv    : Physical drive number
+*               : uint8_t* buff   : Pointer to the read data buffer
+*               : uint32_t sector : uint32_t SectorNumber
+*               : uint32_t count  : Number of sectors to read
 * Return value  : Result of function execution
 ******************************************************************************/
-DRESULT R_tfat_usb_disk_read (
-    uint8_t drive,              /* Physical drive number            */
+DRESULT usb_disk_read (
+    uint8_t pdrv,               /* Physical drive number            */
     uint8_t* buff,              /* Pointer to the read data buffer  */
-    uint32_t sector_number,     /* Start sector number              */
-    uint8_t count               /* Number of sectors to read        */
+    uint32_t sector,            /* Start sector number              */
+    uint32_t count              /* Number of sectors to read        */
 )
 {
 #if (BSP_CFG_RTOS_USED == 0)
@@ -189,26 +192,26 @@ DRESULT R_tfat_usb_disk_read (
     tran_byte = (uint32_t) count * g_usb_hmsc_tfatSecSize;
 
 #ifdef TFAT_DRV_USB_API_TYPE1
-    usb_hmsc_smp_drive2_addr(drive);             /* Drive no. -> USB IP no. and IO Reg Base address */
+    usb_hmsc_smp_drive2_addr(pdrv);             /* Drive no. -> USB IP no. and IO Reg Base address */
 #else
-    usb_hmsc_smp_drive2_addr(drive, &tfat_ptr); /* Drive no. -> USB IP no. and IO Reg Base address */
+    usb_hmsc_smp_drive2_addr(pdrv, &tfat_ptr); /* Drive no. -> USB IP no. and IO Reg Base address */
 #endif
     /* Check Detach */
 #if defined(TFAT_DRV_USB_API_TYPE1) || defined(TFAT_DRV_USB_API_TYPE2)
     R_usb_hstd_DeviceInformation(&tfat_ptr, tfat_ptr.keyword, (uint16_t *)res);         /* Get device connect state */
     if ( USB_FALSE == res[1] )
 #else
-    if (USB_FALSE == R_USB_HmscGetDevSts(drive))
+    if (USB_FALSE == R_USB_HmscGetDevSts(pdrv))
 #endif
     {
-        return TFAT_RES_ERROR;
+        return RES_ERROR;
     }
 
     /* read function */
-    err = R_USB_HmscStrgReadSector(&tfat_ptr, (uint16_t) drive, buff, sector_number, (uint16_t) count, tran_byte);
+    err = R_USB_HmscStrgReadSector(&tfat_ptr, (uint16_t) pdrv, buff, sector, (uint16_t) count, tran_byte);
     if ( USB_OK != err)
     {
-        return TFAT_RES_ERROR;
+        return RES_ERROR;
     }
 
 #if (BSP_CFG_RTOS_USED == 0)
@@ -219,7 +222,7 @@ DRESULT R_tfat_usb_disk_read (
 #if defined(TFAT_DRV_USB_API_TYPE1) || defined(TFAT_DRV_USB_API_TYPE2)
         R_usb_hstd_DeviceInformation(&tfat_ptr, tfat_ptr.keyword, (uint16_t *)res); /* Get device connect state */
 #else
-        res[1] = R_USB_HmscGetDevSts(drive);
+        res[1] = R_USB_HmscGetDevSts(pdrv);
 #endif
         R_usb_hmsc_WaitLoop(); /* Task Schedule */
         err = USB_TRCV_MSG(USB_HSTRG_MBX, (usb_msg_t** ) & mess, (uint16_t )0); /* Receive read complete msg */
@@ -244,28 +247,28 @@ DRESULT R_tfat_usb_disk_read (
 
     if (err != USB_OK)
     {
-        return TFAT_RES_ERROR;
+        return RES_ERROR;
     }
 #endif /* (BSP_CFG_RTOS_USED == 0) */
 
-    return TFAT_RES_OK;
+    return RES_OK;
 }
 
 /******************************************************************************
-* Function Name : R_tfat_usb_disk_write
+* Function Name : usb_disk_write
 * Description   : This function writes data to a specified location
 *               :    of the memory medium
-* Arguments     : uint8_t Drive : Physical drive number
-*               : const uint8_t* buffer       : Pointer to the write data
-*               : uint32_t       sector_number : Sector number to write
-*               : uint8_t        sector_count  : Number of sectors to write
+* Arguments     : uint8_t pdrv        : Physical drive number
+*               : const uint8_t* buff : Pointer to the write data
+*               : uint32_t sector     : Sector number to write
+*               : uint32_t count      : Number of sectors to write
 * Return value  : Result of function execution
 ******************************************************************************/
-DRESULT R_tfat_usb_disk_write (
-    uint8_t drive,          /* Physical drive number           */
+DRESULT usb_disk_write (
+    uint8_t pdrv,           /* Physical drive number           */
     const uint8_t* buff,    /* Pointer to the write data       */
     uint32_t sector,        /* Sector number to write          */
-    uint8_t count           /* Number of sectors to write      */
+    uint32_t count          /* Number of sectors to write      */
 )
 {
 #if (BSP_CFG_RTOS_USED == 0)
@@ -281,9 +284,9 @@ DRESULT R_tfat_usb_disk_write (
     /* set transfer length */
     tran_byte = (uint32_t) count * g_usb_hmsc_tfatSecSize;
 #ifdef TFAT_DRV_USB_API_TYPE1
-    usb_hmsc_smp_drive2_addr(drive);             /* Drive no. -> USB IP no. and IO Reg Base address */
+    usb_hmsc_smp_drive2_addr(pdrv);             /* Drive no. -> USB IP no. and IO Reg Base address */
 #else
-    usb_hmsc_smp_drive2_addr(drive, &tfat_ptr); /* Drive no. -> USB IP no. and IO Reg Base address */
+    usb_hmsc_smp_drive2_addr(pdrv, &tfat_ptr); /* Drive no. -> USB IP no. and IO Reg Base address */
 #endif
 
     /* Check Detach */
@@ -291,18 +294,18 @@ DRESULT R_tfat_usb_disk_write (
     R_usb_hstd_DeviceInformation(&tfat_ptr, tfat_ptr.keyword, (uint16_t *)res);         /* Get device connect state */
     if ( USB_FALSE == res[1] )
 #else
-    if (USB_FALSE == R_USB_HmscGetDevSts(drive))
+    if (USB_FALSE == R_USB_HmscGetDevSts(pdrv))
 #endif
     {
-        return TFAT_RES_ERROR;
+        return RES_ERROR;
     }
 
     /* write function */
-    err = R_USB_HmscStrgWriteSector(&tfat_ptr, (uint16_t) drive, (uint8_t *) buff, sector, (uint16_t) count,
+    err = R_USB_HmscStrgWriteSector(&tfat_ptr, (uint16_t) pdrv, (uint8_t *) buff, sector, (uint16_t) count,
                                     tran_byte);
     if ( USB_OK != err)
     {
-        return TFAT_RES_ERROR;
+        return RES_ERROR;
     }
 
 #if (BSP_CFG_RTOS_USED == 0)
@@ -313,7 +316,7 @@ DRESULT R_tfat_usb_disk_write (
 #if defined(TFAT_DRV_USB_API_TYPE1) || defined(TFAT_DRV_USB_API_TYPE2)
         R_usb_hstd_DeviceInformation(&tfat_ptr, tfat_ptr.keyword, (uint16_t *)res); /* Get device connect state */
 #else
-        res[1] = R_USB_HmscGetDevSts(drive);
+        res[1] = R_USB_HmscGetDevSts(pdrv);
 #endif
         R_usb_hmsc_WaitLoop(); /* Task Schedule */
         err = USB_TRCV_MSG(USB_HSTRG_MBX, (usb_msg_t** ) & mess, (uint16_t )0); /* Receive write complete msg */
@@ -338,49 +341,49 @@ DRESULT R_tfat_usb_disk_write (
 
     if (err != USB_OK)
     {
-        return TFAT_RES_ERROR;
+        return RES_ERROR;
     }
 #endif /* (BSP_CFG_RTOS_USED == 0) */
 
-    return TFAT_RES_OK;
+    return RES_OK;
 }
 
 /******************************************************************************
-* Function Name : R_tfat_usb_disk_ioctl
+* Function Name : usb_disk_ioctl
 * Description   : This function is used to execute memory operations
 *               :    other than read\write
-* Arguments     : uint8_t drive   : Drive number
-*               : uint8_t command : Control command code
-*               : void*   buffer  : Data transfer buffer
+* Arguments     : uint8_t pdrv : Drive number
+*               : uint8_t cmd  : Control command code
+*               : void* buff   : Data transfer buffer
 * Return value  : Result of function execution
 ******************************************************************************/
-DRESULT R_tfat_usb_disk_ioctl (
-    uint8_t drive,          /* Drive number             */
-    uint8_t command,        /* Control command code     */
-    void* buffer            /* Data transfer buffer     */
+DRESULT usb_disk_ioctl (
+    uint8_t pdrv,          /* Drive number             */
+    uint8_t cmd,        /* Control command code     */
+    void* buff            /* Data transfer buffer     */
 )
 {
 
-    /*  Please put the code for R_tfat_disk_ioctl driver interface
+    /*  Please put the code for disk_ioctl driver interface
      function over here.  */
     /*  Please refer the application note for details.  */
-    return TFAT_RES_OK;
+    return RES_OK;
 }
 
 /******************************************************************************
-* Function Name : R_tfat_usb_disk_status
+* Function Name : usb_disk_status
 * Description   : This function is used to retrieve the current status
 *               :    of the disk
-* Arguments     : uint8_t drive : Physical drive number
+* Arguments     : uint8_t pdrv : Physical drive number
 * Return value  : Status of the disk
 ******************************************************************************/
-DSTATUS R_tfat_usb_disk_status (uint8_t drive /* Physical drive number    */
+DSTATUS usb_disk_status (uint8_t pdrv /* Physical drive number    */
                                )
 {
-    /*  Please put the code for R_tfat_disk_status driver interface
+    /*  Please put the code for disk_status driver interface
      function over here.  */
     /*  Please refer the application note for details.  */
-    return TFAT_RES_OK;
+    return RES_OK;
 }
 
 #if (BSP_CFG_RTOS_USED == 0)

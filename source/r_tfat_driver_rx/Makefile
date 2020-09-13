@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_tfat_driver_rx
-VERSION = 		v1.05
+VERSION = 		v2.00
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

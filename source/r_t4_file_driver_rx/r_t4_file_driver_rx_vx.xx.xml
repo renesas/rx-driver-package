@@ -34,6 +34,10 @@ http://www.renesas.com/mw/t4 (English)<br/></details>
         <incdir>r_t4_file_driver_rx/src</incdir>
         <incdir>r_t4_file_driver_rx/src/use_external_mem</incdir>
         <incdir>r_t4_file_driver_rx/src/use_internal_mem</incdir>
+        <dependency>
+            <module>r_tfat_rx</module>
+            <version>4.00</version>
+        </dependency>
     </package>
 
 </refinfo>

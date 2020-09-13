@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014(2015-2018) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014(2015-2019) Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_tfat_drv_if.c
@@ -31,8 +31,11 @@
 *              : 21.01.2015 1.01     Added Support USB Mini Firmware.
 *              : 22.06.2015 1.02     Added support MCU RX231.
 *              : 01.04.2016 1.03     Updated the xml file.
-*              : 29.06.2018 1.04     Modified R_tfat_get_fattime() and SD memory device.
-*              : 14.12.2018 1.05     Supporting USB dirver for RTOS
+*              : 29.06.2018 1.04     Modified get_fattime() and SD memory device.
+*              : 14.12.2018 1.05     Supporting USB dirver for RTOS.
+*              : 08.08.2019 2.00     Added support for FreeRTOS and 
+*                                    Renesas uITRON (RI600V4).
+*                                    Added support for GNUC and ICCRX.
 *******************************************************************************/
 
 /******************************************************************************
@@ -43,9 +46,7 @@ Includes   <System Includes> , "Project Includes"
 #include "r_tfat_driver_rx_config.h"
 #include "r_tfat_drv_if_dev.h"
 
-#if (BSP_CFG_RTOS_USED == 0)
 #include "r_sys_time_rx_if.h"
-#endif /* BSP_CFG_RTOS_USED == 0 */
 
 /*******************************************************************************
 Macro definitions
@@ -90,32 +91,38 @@ Macro definitions
 #endif // (TFAT_DRIVE_ALLOC_NUM_5 == TFAT_CTRL_USB)
 #if (TFAT_DRIVE_ALLOC_NUM_6 == TFAT_CTRL_USB)
 #define USB_NUM_6    (1<<6)
-#define DRV6_DEV_CH  (0 + USB_NUM_0 + (USB_NUM_1>>1) + (USB_NUM_2>>2) + (USB_NUM_3>>3) + (USB_NUM_4>>4) + (USB_NUM_5>>5))
+#define DRV6_DEV_CH  (0 + USB_NUM_0 + (USB_NUM_1>>1) + (USB_NUM_2>>2) + (USB_NUM_3>>3) + (USB_NUM_4>>4) \
+                        + (USB_NUM_5>>5))
 #else
 #define USB_NUM_6    (0)
 #endif // (TFAT_DRIVE_ALLOC_NUM_6 == TFAT_CTRL_USB)
 #if (TFAT_DRIVE_ALLOC_NUM_7 == TFAT_CTRL_USB)
 #define USB_NUM_7    (1<<7)
-#define DRV7_DEV_CH  (0 + USB_NUM_0 + (USB_NUM_1>>1) + (USB_NUM_2>>2) + (USB_NUM_3>>3) + (USB_NUM_4>>4) + (USB_NUM_5>>5) + (USB_NUM_6>>6))
+#define DRV7_DEV_CH  (0 + USB_NUM_0 + (USB_NUM_1>>1) + (USB_NUM_2>>2) + (USB_NUM_3>>3) + (USB_NUM_4>>4) \
+                        + (USB_NUM_5>>5) + (USB_NUM_6>>6))
 #else
 #define USB_NUM_7    (0)
 #endif // (TFAT_DRIVE_ALLOC_NUM_7 == TFAT_CTRL_USB)
 #if (TFAT_DRIVE_ALLOC_NUM_8 == TFAT_CTRL_USB)
 #define USB_NUM_8    (1<<8)
-#define DRV8_DEV_CH  (0 + USB_NUM_0 + (USB_NUM_1>>1) + (USB_NUM_2>>2) + (USB_NUM_3>>3) + (USB_NUM_4>>4) + (USB_NUM_5>>5) + (USB_NUM_6>>6) + (USB_NUM_7>>7))
+#define DRV8_DEV_CH  (0 + USB_NUM_0 + (USB_NUM_1>>1) + (USB_NUM_2>>2) + (USB_NUM_3>>3) + (USB_NUM_4>>4) \
+                       + (USB_NUM_5>>5) + (USB_NUM_6>>6) + (USB_NUM_7>>7))
 #else
 #define USB_NUM_8    (0)
 #endif // (TFAT_DRIVE_ALLOC_NUM_8 == TFAT_CTRL_USB)
 #if (TFAT_DRIVE_ALLOC_NUM_9 == TFAT_CTRL_USB)
 #define USB_NUM_9    (1<<9)
-#define DRV9_DEV_CH  (0 + USB_NUM_0 + (USB_NUM_1>>1) + (USB_NUM_2>>2) + (USB_NUM_3>>3) + (USB_NUM_4>>4) + (USB_NUM_5>>5) + (USB_NUM_6>>6) + (USB_NUM_7>>7) + (USB_NUM_8>>8))
+#define DRV9_DEV_CH  (0 + USB_NUM_0 + (USB_NUM_1>>1) + (USB_NUM_2>>2) + (USB_NUM_3>>3) + (USB_NUM_4>>4) \
+                        + (USB_NUM_5>>5) + (USB_NUM_6>>6) + (USB_NUM_7>>7) + (USB_NUM_8>>8))
 #else
 #define USB_NUM_9    (0)
 #endif // (TFAT_DRIVE_ALLOC_NUM_9 == TFAT_CTRL_USB)
 
-static uint32_t TFAT_DRIVE_USB_ALLOC = (USB_NUM_9 | USB_NUM_8 | USB_NUM_7 | USB_NUM_6 | USB_NUM_5 | USB_NUM_4 | USB_NUM_3 | USB_NUM_2 | USB_NUM_1 | USB_NUM_0);
+static uint32_t TFAT_DRIVE_USB_ALLOC = (USB_NUM_9 | USB_NUM_8 | USB_NUM_7 | USB_NUM_6 | USB_NUM_5 | USB_NUM_4 | \
+                                        USB_NUM_3 | USB_NUM_2 | USB_NUM_1 | USB_NUM_0);
 
-#if TFAT_USB_DRIVE_NUM != ( (USB_NUM_9>>9)+(USB_NUM_8>>8)+(USB_NUM_7>>7)+(USB_NUM_6>>6)+(USB_NUM_5>>5)+(USB_NUM_4>>4)+(USB_NUM_3>>3)+(USB_NUM_2>>2)+(USB_NUM_1>>1)+USB_NUM_0 )
+#if TFAT_USB_DRIVE_NUM != ( (USB_NUM_9>>9)+(USB_NUM_8>>8)+(USB_NUM_7>>7)+(USB_NUM_6>>6)+(USB_NUM_5>>5)+ \
+                            (USB_NUM_4>>4)+(USB_NUM_3>>3)+(USB_NUM_2>>2)+(USB_NUM_1>>1)+USB_NUM_0 )
 #error "Error! Invalid setting for TFAT_USB_DRIVE_NUM or TFAT_DRIVE_ALLOC_NUM_x in r_tfat_driver_rx_config.h"
 #endif
 
@@ -162,32 +169,38 @@ static uint32_t TFAT_DRIVE_USB_ALLOC = (USB_NUM_9 | USB_NUM_8 | USB_NUM_7 | USB_
 #endif // (TFAT_DRIVE_ALLOC_NUM_5 == TFAT_CTRL_SDMEM)
 #if (TFAT_DRIVE_ALLOC_NUM_6 == TFAT_CTRL_SDMEM)
 #define SDMEM_NUM_6   (1<<6)
-#define DRV6_DEV_CH   (0 + SDMEM_NUM_0 + (SDMEM_NUM_1>>1) + (SDMEM_NUM_2>>2) + (SDMEM_NUM_3>>3) + (SDMEM_NUM_4>>4) + (SDMEM_NUM_5>>5))
+#define DRV6_DEV_CH   (0 + SDMEM_NUM_0 + (SDMEM_NUM_1>>1) + (SDMEM_NUM_2>>2) + (SDMEM_NUM_3>>3) + (SDMEM_NUM_4>>4) \
+                         + (SDMEM_NUM_5>>5))
 #else
 #define SDMEM_NUM_6    (0)
 #endif // (TFAT_DRIVE_ALLOC_NUM_6 == TFAT_CTRL_SDMEM)
 #if (TFAT_DRIVE_ALLOC_NUM_7 == TFAT_CTRL_SDMEM)
 #define SDMEM_NUM_7   (1<<7)
-#define DRV7_DEV_CH   (0 + SDMEM_NUM_0 + (SDMEM_NUM_1>>1) + (SDMEM_NUM_2>>2) + (SDMEM_NUM_3>>3) + (SDMEM_NUM_4>>4) + (SDMEM_NUM_5>>5) + (SDMEM_NUM_6>>6))
+#define DRV7_DEV_CH   (0 + SDMEM_NUM_0 + (SDMEM_NUM_1>>1) + (SDMEM_NUM_2>>2) + (SDMEM_NUM_3>>3) + (SDMEM_NUM_4>>4) \
+                         + (SDMEM_NUM_5>>5) + (SDMEM_NUM_6>>6))
 #else
 #define SDMEM_NUM_7    (0)
 #endif // (TFAT_DRIVE_ALLOC_NUM_7 == TFAT_CTRL_SDMEM)
 #if (TFAT_DRIVE_ALLOC_NUM_8 == TFAT_CTRL_SDMEM)
 #define SDMEM_NUM_8   (1<<8)
-#define DRV8_DEV_CH   (0 + SDMEM_NUM_0 + (SDMEM_NUM_1>>1) + (SDMEM_NUM_2>>2) + (SDMEM_NUM_3>>3) + (SDMEM_NUM_4>>4) + (SDMEM_NUM_5>>5) + (SDMEM_NUM_6>>6) + (SDMEM_NUM_7>>7))
+#define DRV8_DEV_CH   (0 + SDMEM_NUM_0 + (SDMEM_NUM_1>>1) + (SDMEM_NUM_2>>2) + (SDMEM_NUM_3>>3) + (SDMEM_NUM_4>>4) \
+                         + (SDMEM_NUM_5>>5) + (SDMEM_NUM_6>>6) + (SDMEM_NUM_7>>7))
 #else
 #define SDMEM_NUM_8    (0)
 #endif // (TFAT_DRIVE_ALLOC_NUM_8 == TFAT_CTRL_SDMEM)
 #if (TFAT_DRIVE_ALLOC_NUM_9 == TFAT_CTRL_SDMEM)
 #define SDMEM_NUM_9   (1<<9)
-#define DRV9_DEV_CH   (0 + SDMEM_NUM_0 + (SDMEM_NUM_1>>1) + (SDMEM_NUM_2>>2) + (SDMEM_NUM_3>>3) + (SDMEM_NUM_4>>4) + (SDMEM_NUM_5>>5) + (SDMEM_NUM_6>>6) + (SDMEM_NUM_7>>7) + (SDMEM_NUM_8>>8))
+#define DRV9_DEV_CH   (0 + SDMEM_NUM_0 + (SDMEM_NUM_1>>1) + (SDMEM_NUM_2>>2) + (SDMEM_NUM_3>>3) + (SDMEM_NUM_4>>4) \
+                     + (SDMEM_NUM_5>>5) + (SDMEM_NUM_6>>6) + (SDMEM_NUM_7>>7) + (SDMEM_NUM_8>>8))
 #else
 #define SDMEM_NUM_9   (0)
 #endif // (TFAT_DRIVE_ALLOC_NUM_9 == TFAT_CTRL_SDMEM)
 
-static uint32_t TFAT_DRIVE_SDMEM_ALLOC = (SDMEM_NUM_9 | SDMEM_NUM_8 | SDMEM_NUM_7 | SDMEM_NUM_6 | SDMEM_NUM_5 | SDMEM_NUM_4 | SDMEM_NUM_3 | SDMEM_NUM_2 | SDMEM_NUM_1 | SDMEM_NUM_0);
+static uint32_t TFAT_DRIVE_SDMEM_ALLOC = (SDMEM_NUM_9 | SDMEM_NUM_8 | SDMEM_NUM_7 | SDMEM_NUM_6 | SDMEM_NUM_5 | \
+                                          SDMEM_NUM_4 | SDMEM_NUM_3 | SDMEM_NUM_2 | SDMEM_NUM_1 | SDMEM_NUM_0);
 
-#if TFAT_SDMEM_DRIVE_NUM != ( (SDMEM_NUM_9>>9)+(SDMEM_NUM_8>>8)+(SDMEM_NUM_7>>7)+(SDMEM_NUM_6>>6)+(SDMEM_NUM_5>>5)+(SDMEM_NUM_4>>4)+(SDMEM_NUM_3>>3)+(SDMEM_NUM_2>>2)+(SDMEM_NUM_1>>1)+SDMEM_NUM_0 )
+#if TFAT_SDMEM_DRIVE_NUM != ( (SDMEM_NUM_9>>9)+(SDMEM_NUM_8>>8)+(SDMEM_NUM_7>>7)+(SDMEM_NUM_6>>6)+(SDMEM_NUM_5>>5)+ \
+                              (SDMEM_NUM_4>>4)+(SDMEM_NUM_3>>3)+(SDMEM_NUM_2>>2)+(SDMEM_NUM_1>>1)+SDMEM_NUM_0 )
 #error "Error! Invalid setting for TFAT_SDMEM_DRIVE_NUM or TFAT_DRIVE_ALLOC_NUM_x in r_tfat_driver_rx_config.h"
 #endif
 
@@ -234,32 +247,38 @@ static uint32_t TFAT_DRIVE_SDMEM_ALLOC = (SDMEM_NUM_9 | SDMEM_NUM_8 | SDMEM_NUM_
 #endif // (TFAT_DRIVE_ALLOC_NUM_5 == TFAT_CTRL_MMC)
 #if (TFAT_DRIVE_ALLOC_NUM_6 == TFAT_CTRL_MMC)
 #define MMC_NUM_6    (1<<6)
-#define DRV6_DEV_CH  (0 + MMC_NUM_0 + (MMC_NUM_1>>1) + (MMC_NUM_2>>2) + (MMC_NUM_3>>3) + (MMC_NUM_4>>4) + (MMC_NUM_5>>5))
+#define DRV6_DEV_CH  (0 + MMC_NUM_0 + (MMC_NUM_1>>1) + (MMC_NUM_2>>2) + (MMC_NUM_3>>3) + (MMC_NUM_4>>4) \
+                        + (MMC_NUM_5>>5))
 #else
 #define MMC_NUM_6    (0)
 #endif // (TFAT_DRIVE_ALLOC_NUM_6 == TFAT_CTRL_MMC)
 #if (TFAT_DRIVE_ALLOC_NUM_7 == TFAT_CTRL_MMC)
 #define MMC_NUM_7    (1<<7)
-#define DRV7_DEV_CH  (0 + MMC_NUM_0 + (MMC_NUM_1>>1) + (MMC_NUM_2>>2) + (MMC_NUM_3>>3) + (MMC_NUM_4>>4) + (MMC_NUM_5>>5) + (MMC_NUM_6>>6))
+#define DRV7_DEV_CH  (0 + MMC_NUM_0 + (MMC_NUM_1>>1) + (MMC_NUM_2>>2) + (MMC_NUM_3>>3) + (MMC_NUM_4>>4) \
+                        + (MMC_NUM_5>>5) + (MMC_NUM_6>>6))
 #else
 #define MMC_NUM_7    (0)
 #endif // (TFAT_DRIVE_ALLOC_NUM_7 == TFAT_CTRL_MMC)
 #if (TFAT_DRIVE_ALLOC_NUM_8 == TFAT_CTRL_MMC)
 #define MMC_NUM_8    (1<<8)
-#define DRV8_DEV_CH  (0 + MMC_NUM_0 + (MMC_NUM_1>>1) + (MMC_NUM_2>>2) + (MMC_NUM_3>>3) + (MMC_NUM_4>>4) + (MMC_NUM_5>>5) + (MMC_NUM_6>>6) + (MMC_NUM_7>>7))
+#define DRV8_DEV_CH  (0 + MMC_NUM_0 + (MMC_NUM_1>>1) + (MMC_NUM_2>>2) + (MMC_NUM_3>>3) + (MMC_NUM_4>>4) \
+                        + (MMC_NUM_5>>5) + (MMC_NUM_6>>6) + (MMC_NUM_7>>7))
 #else
 #define MMC_NUM_8    (0)
 #endif // (TFAT_DRIVE_ALLOC_NUM_8 == TFAT_CTRL_MMC)
 #if (TFAT_DRIVE_ALLOC_NUM_9 == TFAT_CTRL_MMC)
 #define MMC_NUM_9    (1<<9)
-#define DRV9_DEV_CH  (0 + MMC_NUM_0 + (MMC_NUM_1>>1) + (MMC_NUM_2>>2) + (MMC_NUM_3>>3) + (MMC_NUM_4>>4) + (MMC_NUM_5>>5) + (MMC_NUM_6>>6) + (MMC_NUM_7>>7) + (MMC_NUM_8>>8))
+#define DRV9_DEV_CH  (0 + MMC_NUM_0 + (MMC_NUM_1>>1) + (MMC_NUM_2>>2) + (MMC_NUM_3>>3) + (MMC_NUM_4>>4) \
+                        + (MMC_NUM_5>>5) + (MMC_NUM_6>>6) + (MMC_NUM_7>>7) + (MMC_NUM_8>>8))
 #else
 #define MMC_NUM_9    (0)
 #endif // (TFAT_DRIVE_ALLOC_NUM_9 == TFAT_CTRL_MMC)
 
-static uint32_t TFAT_DRIVE_MMC_ALLOC = (MMC_NUM_9 | MMC_NUM_8 | MMC_NUM_7 | MMC_NUM_6 | MMC_NUM_5 | MMC_NUM_4 | MMC_NUM_3 | MMC_NUM_2 | MMC_NUM_1 | MMC_NUM_0);
+static uint32_t TFAT_DRIVE_MMC_ALLOC = (MMC_NUM_9 | MMC_NUM_8 | MMC_NUM_7 | MMC_NUM_6 | MMC_NUM_5 | MMC_NUM_4 | \
+                                        MMC_NUM_3 | MMC_NUM_2 | MMC_NUM_1 | MMC_NUM_0);
 
-#if TFAT_MMC_DRIVE_NUM != ( (MMC_NUM_9>>9)+(MMC_NUM_8>>8)+(MMC_NUM_7>>7)+(MMC_NUM_6>>6)+(MMC_NUM_5>>5)+(MMC_NUM_4>>4)+(MMC_NUM_3>>3)+(MMC_NUM_2>>2)+(MMC_NUM_1>>1)+MMC_NUM_0 )
+#if TFAT_MMC_DRIVE_NUM != ( (MMC_NUM_9>>9)+(MMC_NUM_8>>8)+(MMC_NUM_7>>7)+(MMC_NUM_6>>6)+(MMC_NUM_5>>5)+ \
+                            (MMC_NUM_4>>4)+(MMC_NUM_3>>3)+(MMC_NUM_2>>2)+(MMC_NUM_1>>1)+MMC_NUM_0 )
 #error "Error! Invalid setting for TFAT_MMC_DRIVE_NUM or TFAT_DRIVE_ALLOC_NUM_x in r_tfat_driver_rx_config.h"
 #endif
 
@@ -299,38 +318,48 @@ static uint32_t TFAT_DRIVE_MMC_ALLOC = (MMC_NUM_9 | MMC_NUM_8 | MMC_NUM_7 | MMC_
 #endif // (TFAT_DRIVE_ALLOC_NUM_4 == TFAT_CTRL_USB_MINI)
 #if (TFAT_DRIVE_ALLOC_NUM_5 == TFAT_CTRL_USB_MINI)
 #define USB_MINI_NUM_5    (1<<5)
-#define DRV5_DEV_CH  (0 + USB_MINI_NUM_0 + (USB_MINI_NUM_1>>1) + (USB_MINI_NUM_2>>2) + (USB_MINI_NUM_3>>3) + (USB_MINI_NUM_4>>4))
+#define DRV5_DEV_CH  (0 + USB_MINI_NUM_0 + (USB_MINI_NUM_1>>1) + (USB_MINI_NUM_2>>2) + (USB_MINI_NUM_3>>3) \
+                        + (USB_MINI_NUM_4>>4))
 #else
 #define USB_MINI_NUM_5    (0)
 #endif // (TFAT_DRIVE_ALLOC_NUM_5 == TFAT_CTRL_USB_MINI)
 #if (TFAT_DRIVE_ALLOC_NUM_6 == TFAT_CTRL_USB_MINI)
 #define USB_MINI_NUM_6    (1<<6)
-#define DRV6_DEV_CH  (0 + USB_MINI_NUM_0 + (USB_MINI_NUM_1>>1) + (USB_MINI_NUM_2>>2) + (USB_MINI_NUM_3>>3) + (USB_MINI_NUM_4>>4) + (USB_MINI_NUM_5>>5))
+#define DRV6_DEV_CH  (0 + USB_MINI_NUM_0 + (USB_MINI_NUM_1>>1) + (USB_MINI_NUM_2>>2) + (USB_MINI_NUM_3>>3) \
+                        + (USB_MINI_NUM_4>>4) + (USB_MINI_NUM_5>>5))
 #else
 #define USB_MINI_NUM_6    (0)
 #endif // (TFAT_DRIVE_ALLOC_NUM_6 == TFAT_CTRL_USB_MINI)
 #if (TFAT_DRIVE_ALLOC_NUM_7 == TFAT_CTRL_USB_MINI)
 #define USB_MINI_NUM_7    (1<<7)
-#define DRV7_DEV_CH  (0 + USB_MINI_NUM_0 + (USB_MINI_NUM_1>>1) + (USB_MINI_NUM_2>>2) + (USB_MINI_NUM_3>>3) + (USB_MINI_NUM_4>>4) + (USB_MINI_NUM_5>>5) + (USB_MINI_NUM_6>>6))
+#define DRV7_DEV_CH  (0 + USB_MINI_NUM_0 + (USB_MINI_NUM_1>>1) + (USB_MINI_NUM_2>>2) + (USB_MINI_NUM_3>>3) \
+                        + (USB_MINI_NUM_4>>4) + (USB_MINI_NUM_5>>5) + (USB_MINI_NUM_6>>6))
 #else
 #define USB_MINI_NUM_7    (0)
 #endif // (TFAT_DRIVE_ALLOC_NUM_7 == TFAT_CTRL_USB_MINI)
 #if (TFAT_DRIVE_ALLOC_NUM_8 == TFAT_CTRL_USB_MINI)
 #define USB_MINI_NUM_8    (1<<8)
-#define DRV8_DEV_CH  (0 + USB_MINI_NUM_0 + (USB_MINI_NUM_1>>1) + (USB_MINI_NUM_2>>2) + (USB_MINI_NUM_3>>3) + (USB_MINI_NUM_4>>4) + (USB_MINI_NUM_5>>5) + (USB_MINI_NUM_6>>6) + (USB_MINI_NUM_7>>7))
+#define DRV8_DEV_CH  (0 + USB_MINI_NUM_0 + (USB_MINI_NUM_1>>1) + (USB_MINI_NUM_2>>2) + (USB_MINI_NUM_3>>3) \
+                        + (USB_MINI_NUM_4>>4) + (USB_MINI_NUM_5>>5) + (USB_MINI_NUM_6>>6) + (USB_MINI_NUM_7>>7))
 #else
 #define USB_MINI_NUM_8    (0)
 #endif // (TFAT_DRIVE_ALLOC_NUM_8 == TFAT_CTRL_USB_MINI)
 #if (TFAT_DRIVE_ALLOC_NUM_9 == TFAT_CTRL_USB_MINI)
 #define USB_MINI_NUM_9    (1<<9)
-#define DRV9_DEV_CH  (0 + USB_MINI_NUM_0 + (USB_MINI_NUM_1>>1) + (USB_MINI_NUM_2>>2) + (USB_MINI_NUM_3>>3) + (USB_MINI_NUM_4>>4) + (USB_MINI_NUM_5>>5) + (USB_MINI_NUM_6>>6) + (USB_MINI_NUM_7>>7) + (USB_MINI_NUM_8>>8))
+#define DRV9_DEV_CH  (0 + USB_MINI_NUM_0 + (USB_MINI_NUM_1>>1) + (USB_MINI_NUM_2>>2) + (USB_MINI_NUM_3>>3) \
+                        + (USB_MINI_NUM_4>>4) + (USB_MINI_NUM_5>>5) + (USB_MINI_NUM_6>>6) + (USB_MINI_NUM_7>>7) \
+                        + (USB_MINI_NUM_8>>8))
 #else
 #define USB_MINI_NUM_9    (0)
 #endif // (TFAT_DRIVE_ALLOC_NUM_9 == TFAT_CTRL_USB_MINI)
 
-static uint32_t TFAT_DRIVE_USB_MINI_ALLOC = (USB_MINI_NUM_9 | USB_MINI_NUM_8 | USB_MINI_NUM_7 | USB_MINI_NUM_6 | USB_MINI_NUM_5 | USB_MINI_NUM_4 | USB_MINI_NUM_3 | USB_MINI_NUM_2 | USB_MINI_NUM_1 | USB_MINI_NUM_0);
+static uint32_t TFAT_DRIVE_USB_MINI_ALLOC = (USB_MINI_NUM_9 | USB_MINI_NUM_8 | USB_MINI_NUM_7 | USB_MINI_NUM_6 | \
+                                             USB_MINI_NUM_5 | USB_MINI_NUM_4 | USB_MINI_NUM_3 | USB_MINI_NUM_2 | \
+                                             USB_MINI_NUM_1 | USB_MINI_NUM_0);
 
-#if TFAT_USB_MINI_DRIVE_NUM != ( (USB_MINI_NUM_9>>9)+(USB_MINI_NUM_8>>8)+(USB_MINI_NUM_7>>7)+(USB_MINI_NUM_6>>6)+(USB_MINI_NUM_5>>5)+(USB_MINI_NUM_4>>4)+(USB_MINI_NUM_3>>3)+(USB_MINI_NUM_2>>2)+(USB_MINI_NUM_1>>1)+USB_MINI_NUM_0 )
+#if TFAT_USB_MINI_DRIVE_NUM != ( (USB_MINI_NUM_9>>9)+(USB_MINI_NUM_8>>8)+(USB_MINI_NUM_7>>7)+(USB_MINI_NUM_6>>6)+ \
+                                 (USB_MINI_NUM_5>>5)+(USB_MINI_NUM_4>>4)+(USB_MINI_NUM_3>>3)+(USB_MINI_NUM_2>>2)+ \
+                                 (USB_MINI_NUM_1>>1)+USB_MINI_NUM_0 )
 #error "Error! Invalid setting for TFAT_USB_MINI_DRIVE_NUM or TFAT_DRIVE_ALLOC_NUM_x in r_tfat_driver_rx_config.h"
 #endif
 
@@ -391,17 +420,6 @@ static uint8_t drive_alloc_tbl[TFAT_DRIVE_ALLOC_NUM_MAX][2] =
     { TFAT_DRIVE_ALLOC_NUM_9, DRV9_DEV_CH },
 };
 
-
-
-#if (BSP_CFG_RTOS_USED == 1)
-static uint8_t usb_ghmsc_rtcYear = 109;
-static uint8_t usb_ghmsc_rtcMon  = 2;
-static uint8_t usb_ghmsc_rtcMday = 23;
-static uint8_t usb_ghmsc_rtcHour = 15;
-static uint8_t usb_ghmsc_rtcMin  = 2;
-static uint8_t usb_ghmsc_rtcSec  = 20;
-#endif /* BSP_CFG_RTOS_USED == 0 */
-
 /******************************************************************************
 * Function Name : chk_use_usb
 * Description   : allocation check
@@ -455,34 +473,34 @@ static uint8_t chk_use_usb_mini(uint8_t drive)
 #endif // USE_USB
 
 /******************************************************************************
-* Function Name : R_tfat_disk_initialize
+* Function Name : disk_initialize
 * Description   : This function initializes the memory medium
 *               :    for file operations
-* Arguments     : uint8_t  drive        : Physical drive number for FIT module
+* Arguments     : BYTE pdrv        : Physical drive number for FIT module
 * Return value  : Status of the memory medium
 ******************************************************************************/
-DSTATUS R_tfat_disk_initialize(uint8_t drive)
+DSTATUS disk_initialize(BYTE pdrv)
 {
-    DSTATUS ret = TFAT_RES_PARERR;
+    DSTATUS ret = RES_PARERR;
 
 #if (TFAT_USB_DRIVE_NUM > 0)
-    if ( chk_use_usb(drive) )
+    if ( chk_use_usb(pdrv) )
     {
-        ret = R_tfat_usb_disk_initialize( drive_alloc_tbl[drive][1] ); /* function for USB */
+        ret = usb_disk_initialize( drive_alloc_tbl[pdrv][1] ); /* function for USB */
     }
 #endif
 
 #if (TFAT_SDMEM_DRIVE_NUM > 0)
-    if ( chk_use_sdmem(drive) )
+    if ( chk_use_sdmem(pdrv) )
     {
-        ret = R_tfat_sdmem_disk_initialize( drive_alloc_tbl[drive][1] ); /* function for SDMEM */
+        ret = sdmem_disk_initialize( drive_alloc_tbl[pdrv][1] ); /* function for SDMEM */
     }
 #endif
 
 #if (TFAT_USB_MINI_DRIVE_NUM > 0)
-    if ( chk_use_usb_mini(drive) )
+    if ( chk_use_usb_mini(pdrv) )
     {
-        ret = R_tfat_usb_mini_disk_initialize( drive_alloc_tbl[drive][1] ); /* function for USB Mini */
+        ret = usb_mini_disk_initialize( drive_alloc_tbl[pdrv][1] ); /* function for USB Mini */
     }
 #endif
 
@@ -490,42 +508,42 @@ DSTATUS R_tfat_disk_initialize(uint8_t drive)
 }
 
 /******************************************************************************
-* Function Name : R_tfat_disk_read
+* Function Name : disk_read
 * Description   : This function reads data from the specified location
 *               :    of the memory medium
-* Arguments     : uint8_t  drive        : Physical drive number
-*               : uint8_t* buffer       : Pointer to the read data buffer
-*               : uint32_t sector_number : uint32_t SectorNumber
-*               : uint8_t sector_count   : Number of sectors to read
+* Arguments     : BYTE pdrv    : Physical drive number
+*               : BYTE* buff   : Pointer to the read data buffer
+*               : DWORD sector : uint32_t SectorNumber
+*               : UINT count   : Number of sectors to read
 * Return value  : Result of function execution
 ******************************************************************************/
-DRESULT R_tfat_disk_read (
-    uint8_t drive,          /* Physical drive number             */
-    uint8_t* buffer,        /* Pointer to the read data buffer   */
-    uint32_t sector_number, /* Start sector number               */
-    uint8_t sector_count    /* Number of sectors to read         */
+DRESULT disk_read (
+    BYTE pdrv,          /* Physical drive number             */
+    BYTE* buff,         /* Pointer to the read data buffer   */
+    DWORD sector,       /* Start sector number               */
+    UINT count          /* Number of sectors to read         */
 )
 {
-    DRESULT ret = TFAT_RES_PARERR;
+    DRESULT ret = RES_PARERR;
 
 #if (TFAT_USB_DRIVE_NUM > 0)
-    if ( chk_use_usb(drive) )
+    if ( chk_use_usb(pdrv) )
     {
-        ret = R_tfat_usb_disk_read( drive_alloc_tbl[drive][1], buffer, sector_number, sector_count ); /* function for USB */
+        ret = usb_disk_read( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for USB */
     }
 #endif
 
 #if (TFAT_SDMEM_DRIVE_NUM > 0)
-    if ( chk_use_sdmem(drive) )
+    if ( chk_use_sdmem(pdrv) )
     {
-        ret = R_tfat_sdmem_disk_read( drive_alloc_tbl[drive][1], buffer, sector_number, sector_count ); /* function for SDMEM */
+        ret = sdmem_disk_read( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for SDMEM */
     }
 #endif
 
 #if (TFAT_USB_MINI_DRIVE_NUM > 0)
-    if ( chk_use_usb_mini(drive) )
+    if ( chk_use_usb_mini(pdrv) )
     {
-        ret = R_tfat_usb_mini_disk_read( drive_alloc_tbl[drive][1], buffer, sector_number, sector_count ); /* function for USB Mini */
+        ret = usb_mini_disk_read( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for USB Mini */
     }
 #endif
 
@@ -533,42 +551,42 @@ DRESULT R_tfat_disk_read (
 }
 
 /******************************************************************************
-* Function Name : R_tfat_disk_write
+* Function Name : disk_write
 * Description   : This function writes data to a specified location
 *               :    of the memory medium
-* Arguments     : uint8_t Drive : Physical drive number
-*               : const uint8_t* buffer       : Pointer to the write data
-*               : uint32_t       sector_number : Sector number to write
-*               : uint8_t        sector_count  : Number of sectors to write
+* Arguments     : BYTE pdrv        : Physical drive number
+*               : const BYTE* buff : Pointer to the write data
+*               : DWORD sector     : Sector number to write
+*               : UINT count       : Number of sectors to write
 * Return value  : Result of function execution
 ******************************************************************************/
-DRESULT R_tfat_disk_write (
-    uint8_t drive,           /* Physical drive number           */
-    const uint8_t* buffer,   /* Pointer to the write data       */
-    uint32_t sector_number,  /* Sector number to write          */
-    uint8_t sector_count     /* Number of sectors to write      */
+DRESULT disk_write (
+    BYTE pdrv,              /* Physical drive number           */
+    const BYTE* buff,       /* Pointer to the write data       */
+    DWORD sector,           /* Sector number to write          */
+    UINT count              /* Number of sectors to write      */
 )
 {
-    DRESULT ret = TFAT_RES_PARERR;
+    DRESULT ret = RES_PARERR;
 
 #if (TFAT_USB_DRIVE_NUM > 0)
-    if ( chk_use_usb(drive) )
+    if ( chk_use_usb(pdrv) )
     {
-        ret = R_tfat_usb_disk_write( drive_alloc_tbl[drive][1], buffer, sector_number, sector_count ); /* function for USB */
+        ret = usb_disk_write( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for USB */
     }
 #endif
 
 #if (TFAT_SDMEM_DRIVE_NUM > 0)
-    if ( chk_use_sdmem(drive) )
+    if ( chk_use_sdmem(pdrv) )
     {
-        ret = R_tfat_sdmem_disk_write( drive_alloc_tbl[drive][1], buffer, sector_number, sector_count ); /* function for SDMEM */
+        ret = sdmem_disk_write( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for SDMEM */
     }
 #endif
 
 #if (TFAT_USB_MINI_DRIVE_NUM > 0)
-    if ( chk_use_usb_mini(drive) )
+    if ( chk_use_usb_mini(pdrv) )
     {
-        ret = R_tfat_usb_mini_disk_write( drive_alloc_tbl[drive][1], buffer, sector_number, sector_count ); /* function for USB Mini */
+        ret = usb_mini_disk_write( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for USB Mini */
     }
 #endif
 
@@ -576,40 +594,40 @@ DRESULT R_tfat_disk_write (
 }
 
 /******************************************************************************
-* Function Name : R_tfat_disk_ioctl
+* Function Name : disk_ioctl
 * Description   : This function is used to execute memory operations
 *               :    other than read\write
-* Arguments     : uint8_t drive   : Drive number
-*               : uint8_t command : Control command code
-*               : void*   buffer  : Data transfer buffer
+* Arguments     : BYTE pdrv  : Drive number
+*               : BYTE cmd   : Control command code
+*               : void* buff : Data transfer buffer
 * Return value  : Result of function execution
 ******************************************************************************/
-DRESULT R_tfat_disk_ioctl (
-    uint8_t drive,           /* Drive number             */
-    uint8_t command,         /* Control command code     */
-    void* buffer             /* Data transfer buffer     */
+DRESULT disk_ioctl (
+    BYTE pdrv,          /* Drive number             */
+    BYTE cmd,           /* Control command code     */
+    void* buff          /* Data transfer buffer     */
 )
 {
-    DRESULT ret = TFAT_RES_PARERR;
+    DRESULT ret = RES_PARERR;
 
 #if (TFAT_USB_DRIVE_NUM > 0)
-    if ( chk_use_usb(drive) )
+    if ( chk_use_usb(pdrv) )
     {
-        ret = R_tfat_usb_disk_ioctl( drive_alloc_tbl[drive][1], command, buffer ); /* function for USB */
+        ret = usb_disk_ioctl( drive_alloc_tbl[pdrv][1], cmd, buff ); /* function for USB */
     }
 #endif
 
 #if (TFAT_SDMEM_DRIVE_NUM > 0)
-    if ( chk_use_sdmem(drive) )
+    if ( chk_use_sdmem(pdrv) )
     {
-        ret = R_tfat_sdmem_disk_ioctl ( drive_alloc_tbl[drive][1], command, buffer ); /* function for SDMEM */
+        ret = sdmem_disk_ioctl ( drive_alloc_tbl[pdrv][1], cmd, buff ); /* function for SDMEM */
     }
 #endif
 
 #if (TFAT_USB_MINI_DRIVE_NUM > 0)
-    if ( chk_use_usb_mini(drive) )
+    if ( chk_use_usb_mini(pdrv) )
     {
-        ret = R_tfat_usb_mini_disk_ioctl( drive_alloc_tbl[drive][1], command, buffer ); /* function for USB Mini */
+        ret = usb_mini_disk_ioctl( drive_alloc_tbl[pdrv][1], cmd, buff ); /* function for USB Mini */
     }
 #endif
 
@@ -617,64 +635,56 @@ DRESULT R_tfat_disk_ioctl (
 }
 
 /******************************************************************************
-* Function Name : R_tfat_disk_status
+* Function Name : disk_status
 * Description   : This function is used to retrieve the current status
 *               :    of the disk
-* Arguments     : uint8_t drive : Physical drive number
+* Arguments     : BYTE pdrv : Physical drive number
 * Return value  : Status of the disk
 ******************************************************************************/
-DSTATUS R_tfat_disk_status (
-    uint8_t drive             /* Physical drive number    */
+DSTATUS disk_status (
+    BYTE pdrv             /* Physical drive number    */
 )
 {
-    DSTATUS ret = TFAT_RES_PARERR;
+    DSTATUS ret = RES_PARERR;
 
 #if (TFAT_USB_DRIVE_NUM > 0)
-    if ( chk_use_usb(drive) )
+    if ( chk_use_usb(pdrv) )
     {
-        ret = R_tfat_usb_disk_status ( drive_alloc_tbl[drive][1] ); /* function for USB */
+        ret = usb_disk_status ( drive_alloc_tbl[pdrv][1] ); /* function for USB */
     }
 #endif
 
 #if (TFAT_SDMEM_DRIVE_NUM > 0)
-    if ( chk_use_sdmem(drive) )
+    if ( chk_use_sdmem(pdrv) )
     {
-        ret = R_tfat_sdmem_disk_status ( drive_alloc_tbl[drive][1] ); /* function for SDMEM */
+        ret = sdmem_disk_status ( drive_alloc_tbl[pdrv][1] ); /* function for SDMEM */
     }
 #endif
 
 #if (TFAT_USB_MINI_DRIVE_NUM > 0)
-    if ( chk_use_usb_mini(drive) )
+    if ( chk_use_usb_mini(pdrv) )
     {
-        ret = R_tfat_usb_mini_disk_status ( drive_alloc_tbl[drive][1] ); /* function for USB Mini */
+        ret = usb_mini_disk_status ( drive_alloc_tbl[pdrv][1] ); /* function for USB Mini */
     }
 #endif
 
     return ret;
 }
 
+#if !FF_FS_READONLY && !FF_FS_NORTC
 /******************************************************************************
-* Function Name : R_tfat_get_fattime
+* Function Name : get_fattime
 * Description   : This function returns the current date and time
 * Arguments     : none
-* Return value  : uint32_t
-* NOTE          : Please DO NOT modify this function. This function
-*               :    is used by the FAT library to get the current date
-                :    and time during file manipulations.
+* Return value  : DWORD
+* NOTE          : This function is used by the TFAT to get the current date
+*               :    and time during file manipulations. The current date/time
+*               :    is got by the system timer FIT. If getting the current
+*               :     date/time by other ways, modify process of this function.
 ******************************************************************************/
-uint32_t R_tfat_get_fattime (void)
+DWORD get_fattime (void)
 {
     uint32_t tmr;
-
-#if (BSP_CFG_RTOS_USED == 1)
-    tmr =   (((uint32_t)usb_ghmsc_rtcYear - 80) << 25);
-    tmr |=  ((uint32_t)usb_ghmsc_rtcMon << 21);
-    tmr |=  ((uint32_t)usb_ghmsc_rtcMday << 16);
-    tmr |=  ((uint32_t)usb_ghmsc_rtcHour << 11);
-    tmr |=  ((uint32_t)usb_ghmsc_rtcMin << 5);
-    tmr |=  ((uint32_t)usb_ghmsc_rtcSec >> 1);
-
-#else  /* BSP_CFG_RTOS_USED == 1 */
     SYS_TIME time;
 
     /* Disable interrupts   */
@@ -689,16 +699,16 @@ uint32_t R_tfat_get_fattime (void)
     tmr |=  ((uint32_t)time.hour << 11);
     tmr |=  ((uint32_t)time.min << 5);
     tmr |=  ((uint32_t)time.sec >> 1);
+
     /* Enable interrupts    */
     R_BSP_InterruptsEnable();
 
-#endif /* BSP_CFG_RTOS_USED == 1 */
-
-    return tmr;
+    return (DWORD)tmr;
 }
+#endif
 
 /******************************************************************************
-* Function Name : R_tfat_drv_change_alloc
+* Function Name : drv_change_alloc
 * Description   : This function is used to change drive allocation.
 *               :    of the disk
 * Arguments     : TFAT_DRV_NUM      tfat_drv : Physical drive number( in TFAT)
@@ -706,11 +716,11 @@ uint32_t R_tfat_get_fattime (void)
 *               : uint8_t dev_drv_num        : drive number/device channnel( in device driver)
 * Return value  : Result of function execution
 ******************************************************************************/
-DRESULT R_tfat_drv_change_alloc(TFAT_DRV_NUM tfat_drv, uint8_t dev_type, uint8_t dev_drv_num )
+DRESULT drv_change_alloc(TFAT_DRV_NUM tfat_drv, uint8_t dev_type, uint8_t dev_drv_num )
 {
     if ( TFAT_DRIVE_ALLOC_NUM_MAX <= tfat_drv )
     {
-        return TFAT_RES_ERROR;
+        return RES_ERROR;
     }
 
 #if (TFAT_USB_DRIVE_NUM > 0)
@@ -757,7 +767,7 @@ DRESULT R_tfat_drv_change_alloc(TFAT_DRV_NUM tfat_drv, uint8_t dev_type, uint8_t
     drive_alloc_tbl[tfat_drv][0] = dev_type;
     drive_alloc_tbl[tfat_drv][1] = dev_drv_num;
 
-    return TFAT_RES_OK;
+    return RES_OK;
 }
 
 /*******************************************************************************

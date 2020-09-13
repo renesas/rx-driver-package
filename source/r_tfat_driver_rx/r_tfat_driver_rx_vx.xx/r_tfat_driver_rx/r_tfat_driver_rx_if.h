@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014(2015-2018) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014(2015-2019) Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_tfat_driver_rx_if.h
@@ -32,6 +32,9 @@
 *              : 22.06.2015 1.02     Added support MCU RX231.
 *              : 01.04.2016 1.03     Added support RX family.
 *              : 29.06.2018 1.04     Modified SDHI to SDMEM.
+*              : 08.08.2019 2.00     Added support for FreeRTOS and 
+*                                    Renesas uITRON (RI600V4).
+*                                    Added support for GNUC and ICCRX.
 *******************************************************************************/
 #ifndef _R_TFAT_DRIVER_RX_IF_H_
 #define _R_TFAT_DRIVER_RX_IF_H_
@@ -40,14 +43,17 @@
 Includes   <System Includes> , "Project Includes"
 *******************************************************************************/
 #include <stdint.h>
-#include "r_tfat_lib.h"
+#include "platform.h"
+#include "ff.h"                  /* TFAT define */
+#include "diskio.h"              /* TFAT define */
 
 /*******************************************************************************
 Macro definitions
 *******************************************************************************/
 /* used memory define */
+#define TFAT_CTRL_NONE    0
 #define TFAT_CTRL_USB     1
-#define TFAT_CTRL_SDMEM    2
+#define TFAT_CTRL_SDMEM   2
 //#define TFAT_CTRL_MMC     3
 #define TFAT_CTRL_USB_MINI     4
 
@@ -73,22 +79,7 @@ typedef enum
 /*******************************************************************************
 Exported global functions (to be accessed by other files)
 *******************************************************************************/
-
-/* refer to r_tfat_lib.h(r_tfat_rx:TFAT module) */
-#if 0
-DSTATUS R_tfat_disk_initialize(uint8_t drive);
-DRESULT R_tfat_disk_read(uint8_t drive, uint8_t* buffer, uint32_t sector_number, uint8_t sector_count);
-DRESULT R_tfat_disk_write(uint8_t crive, const uint8_t* buffer, uint32_t sector_number, uint8_t sector_count);
-DRESULT R_tfat_disk_ioctl(uint8_t crive, uint8_t command, void* buffer);
-DSTATUS R_tfat_disk_status(uint8_t drive);
-
-/* User defined function to give a current time to fatfs module */
-/* 31-25: Year(0-127 +1980), 24-21: Month(1-12), 20-16: Day(1-31)
-   15-11: Hour(0-23), 10-5: Minute(0-59), 4-0: Second(0-29 *2) */
-extern uint32_t R_tfat_get_fattime(void);
-#endif
-
-extern DRESULT R_tfat_drv_change_alloc(TFAT_DRV_NUM tfat_drv, uint8_t dev_type, uint8_t dev_drv_num );
+extern DRESULT drv_change_alloc(TFAT_DRV_NUM tfat_drv, uint8_t dev_type, uint8_t dev_drv_num );
 
 #endif    /* _R_TFAT_DRIVER_RX_IF_H_ */
 

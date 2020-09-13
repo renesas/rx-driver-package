@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2015 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2015(2016-2019) Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_tfat_drv_if_usb_mini.c
@@ -30,6 +30,7 @@
 *              : 21.01.2015 1.00     First Release
 *              : 22.06.2015 1.02     Added support MCU RX231.
 *              : 01.04.2016 1.03     Updated the xml file.
+*              : 08.08.2019 2.00     Supporting offer of C source for TFAT.
 *******************************************************************************/
 
 /******************************************************************************
@@ -40,7 +41,8 @@ Includes   <System Includes> , "Project Includes"
 
 #if (TFAT_USB_MINI_DRIVE_NUM > 0)
 
-#include "r_tfat_lib.h"             /* TFAT define */
+#include "ff.h"                  /* TFAT define */
+#include "diskio.h"              /* TFAT define */
 
 #include "r_usb_basic_mini_if.h"
 #include "r_usb_hmsc_mini_config.h"
@@ -63,32 +65,32 @@ static uint16_t usb_ghmsc_tfatSecSize = 512;
 
 
 /******************************************************************************
-* Function Name : R_tfat_usb_mini_disk_initialize
+* Function Name : usb_mini_disk_initialize
 * Description   : This function initializes the memory medium
 *               :    for file operations
 * Arguments     : uint8_t  drive        : Physical drive number
 * Return value  : Status of the memory medium
 ******************************************************************************/
-DSTATUS R_tfat_usb_mini_disk_initialize(uint8_t pdrv)
+DSTATUS usb_mini_disk_initialize(uint8_t pdrv)
 {
-    return  TFAT_RES_OK;
+    return  RES_OK;
 }
 
 /******************************************************************************
-* Function Name : R_tfat_usb_mini_disk_read
+* Function Name : usb_mini_disk_read
 * Description   : This function reads data from the specified location
 *               :    of the memory medium
-* Arguments     : uint8_t  drive        : Physical drive number
-*               : uint8_t* buffer       : Pointer to the read data buffer
+* Arguments     : uint8_t drive          : Physical drive number
+*               : uint8_t* buffer        : Pointer to the read data buffer
 *               : uint32_t sector_number : uint32_t SectorNumber
-*               : uint8_t sector_count   : Number of sectors to read
+*               : uint32_t sector_count  : Number of sectors to read
 * Return value  : Result of function execution
 ******************************************************************************/
-DRESULT R_tfat_usb_mini_disk_read (
+DRESULT usb_mini_disk_read (
     uint8_t drive,              /* Physical drive number            */
     uint8_t* buffer,            /* Pointer to the read data buffer  */
     uint32_t sector_number,     /* Start sector number              */
-    uint8_t sector_count        /* Number of sectors to read        */
+    uint32_t sector_count       /* Number of sectors to read        */
 )
 {
     uint16_t        res[10];
@@ -103,7 +105,7 @@ DRESULT R_tfat_usb_mini_disk_read (
     R_usb_hstd_DeviceInformation(usb_ghmsc_RootDevaddr, (uint16_t *)res);         /* Get device connect state */
     if ( USB_STS_DETACH == res[1] )    /* Check detach */
     {
-        return TFAT_RES_ERROR;
+        return RES_ERROR;
     }
 
     /* read function */
@@ -138,26 +140,26 @@ DRESULT R_tfat_usb_mini_disk_read (
 
     if ( err != USB_E_OK )
     {
-        return TFAT_RES_ERROR;
+        return RES_ERROR;
     }
-    return TFAT_RES_OK;
+    return RES_OK;
 }
 
 /******************************************************************************
-* Function Name : R_tfat_usb_mini_disk_write
+* Function Name : usb_mini_disk_write
 * Description   : This function writes data to a specified location
 *               :    of the memory medium
-* Arguments     : uint8_t Drive : Physical drive number
-*               : const uint8_t* buffer       : Pointer to the write data
-*               : uint32_t       sector_number : Sector number to write
-*               : uint8_t        sector_count  : Number of sectors to write
+* Arguments     : uint8_t drive          : Physical drive number
+*               : const uint8_t* buffer  : Pointer to the write data
+*               : uint32_t sector_number : Sector number to write
+*               : uint32_t sector_count  : Number of sectors to write
 * Return value  : Result of function execution
 ******************************************************************************/
-DRESULT R_tfat_usb_mini_disk_write (
+DRESULT usb_mini_disk_write (
     uint8_t drive,               /* Physical drive number           */
     const uint8_t* buffer,       /* Pointer to the write data       */
     uint32_t sector_number,      /* Sector number to write          */
-    uint8_t sector_count         /* Number of sectors to write      */
+    uint32_t sector_count        /* Number of sectors to write      */
 )
 {
     uint16_t        res[10];
@@ -172,7 +174,7 @@ DRESULT R_tfat_usb_mini_disk_write (
     R_usb_hstd_DeviceInformation(usb_ghmsc_RootDevaddr, (uint16_t *)res); /* Get device connect state */
     if ( USB_STS_DETACH == res[1] )    /* Check detach */
     {
-        return TFAT_RES_ERROR;
+        return RES_ERROR;
     }
 
     /* write function */
@@ -208,13 +210,13 @@ DRESULT R_tfat_usb_mini_disk_write (
 
     if ( err != USB_E_OK )
     {
-        return TFAT_RES_ERROR;
+        return RES_ERROR;
     }
-    return TFAT_RES_OK;
+    return RES_OK;
 }
 
 /******************************************************************************
-* Function Name : R_tfat_usb_mini_disk_ioctl
+* Function Name : usb_mini_disk_ioctl
 * Description   : This function is used to execute memory operations
 *               :    other than read\write
 * Arguments     : uint8_t drive   : Drive number
@@ -222,35 +224,35 @@ DRESULT R_tfat_usb_mini_disk_write (
 *               : void*   buffer  : Data transfer buffer
 * Return value  : Result of function execution
 ******************************************************************************/
-DRESULT R_tfat_usb_mini_disk_ioctl (
+DRESULT usb_mini_disk_ioctl (
     uint8_t drive,               /* Drive number             */
     uint8_t command,             /* Control command code     */
     void* buffer                 /* Data transfer buffer     */
 )
 {
 
-    /*  Please put the code for R_tfat_disk_ioctl driver interface
+    /*  Please put the code for disk_ioctl driver interface
          function over here.  */
     /*  Please refer the application note for details.  */
-    return TFAT_RES_OK;
+    return RES_OK;
 }
 
 /******************************************************************************
-* Function Name : R_tfat_usb_mini_disk_status
+* Function Name : usb_mini_disk_status
 * Description   : This function is used to retrieve the current status
 *               :    of the disk
 * Arguments     : uint8_t drive : Physical drive number
 * Return value  : Status of the disk
 ******************************************************************************/
-DSTATUS R_tfat_usb_mini_disk_status (
+DSTATUS usb_mini_disk_status (
     uint8_t drive                 /* Physical drive number    */
 )
 {
 
-    /*  Please put the code for R_tfat_disk_status driver interface
+    /*  Please put the code for disk_status driver interface
          function over here.  */
     /*  Please refer the application note for details.  */
-    return TFAT_RES_OK;
+    return RES_OK;
 }
 
 /******************************************************************************

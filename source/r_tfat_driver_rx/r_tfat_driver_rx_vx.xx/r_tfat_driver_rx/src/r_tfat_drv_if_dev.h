@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014(2015-2018) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014(2015-2019) Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
 * History      : DD.MM.YYYY Version  Description
@@ -28,6 +28,9 @@
 *              : 22.06.2015 1.02     Added support MCU RX231.
 *              : 01.04.2016 1.03     Updated the xml file.
 *              : 29.06.2018 1.04     Modified SDHI to SDMEM.
+*              : 08.08.2019 2.00     Added support for FreeRTOS and 
+*                                    Renesas uITRON (RI600V4).
+*                                    Added support for GNUC and ICCRX.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_tfat_driver_rx_if_dev.h
@@ -40,7 +43,8 @@
 Includes   <System Includes> , "Project Includes"
 *******************************************************************************/
 #include "r_tfat_driver_rx_config.h"
-#include "r_tfat_lib.h"
+#include "diskio.h"
+#include "ff.h"
 
 /*******************************************************************************
 Macro definitions
@@ -55,27 +59,27 @@ Typedef definitions
 Exported global functions (to be accessed by other files)
 *******************************************************************************/
 #if (TFAT_USB_DRIVE_NUM > 0)
-DSTATUS R_tfat_usb_disk_initialize(uint8_t drive);
-DRESULT R_tfat_usb_disk_read(uint8_t drive, uint8_t* buffer, uint32_t sector_number, uint8_t sector_count);
-DRESULT R_tfat_usb_disk_write(uint8_t crive, const uint8_t* buffer, uint32_t sector_number, uint8_t sector_count);
-DRESULT R_tfat_usb_disk_ioctl(uint8_t crive, uint8_t command, void* buffer);
-DSTATUS R_tfat_usb_disk_status(uint8_t drive);
+DSTATUS usb_disk_initialize(uint8_t pdrv);
+DRESULT usb_disk_read(uint8_t pdrv, uint8_t* buff, uint32_t sector, uint32_t count);
+DRESULT usb_disk_write(uint8_t pdrv, const uint8_t* buff, uint32_t sector, uint32_t count);
+DRESULT usb_disk_ioctl(uint8_t pdrv, uint8_t cmd, void* buff);
+DSTATUS usb_disk_status(uint8_t pdrv);
 #endif // (TFAT_USB_DRIVE_NUM > 0)
 
 #if (TFAT_USB_MINI_DRIVE_NUM > 0)
-DSTATUS R_tfat_usb_mini_disk_initialize(uint8_t drive);
-DRESULT R_tfat_usb_mini_disk_read(uint8_t drive, uint8_t* buffer, uint32_t sector_number, uint8_t sector_count);
-DRESULT R_tfat_usb_mini_disk_write(uint8_t crive, const uint8_t* buffer, uint32_t sector_number, uint8_t sector_count);
-DRESULT R_tfat_usb_mini_disk_ioctl(uint8_t crive, uint8_t command, void* buffer);
-DSTATUS R_tfat_usb_mini_disk_status(uint8_t drive);
+DSTATUS usb_mini_disk_initialize(uint8_t drive);
+DRESULT usb_mini_disk_read(uint8_t drive, uint8_t* buffer, uint32_t sector_number, uint32_t sector_count);
+DRESULT usb_mini_disk_write(uint8_t drive, const uint8_t* buffer, uint32_t sector_number, uint32_t sector_count);
+DRESULT usb_mini_disk_ioctl(uint8_t drive, uint8_t command, void* buffer);
+DSTATUS usb_mini_disk_status(uint8_t drive);
 #endif // (TFAT_USB_MINI_DRIVE_NUM > 0)
 
 #if (TFAT_SDMEM_DRIVE_NUM > 0)
-DSTATUS R_tfat_sdmem_disk_initialize(uint8_t drive);
-DRESULT R_tfat_sdmem_disk_read(uint8_t drive, uint8_t* buffer, uint32_t sector_number, uint8_t sector_count);
-DRESULT R_tfat_sdmem_disk_write(uint8_t crive, const uint8_t* buffer, uint32_t sector_number, uint8_t sector_count);
-DRESULT R_tfat_sdmem_disk_ioctl(uint8_t crive, uint8_t command, void* buffer);
-DSTATUS R_tfat_sdmem_disk_status(uint8_t drive);
+DSTATUS sdmem_disk_initialize(uint8_t drive);
+DRESULT sdmem_disk_read(uint8_t drive, uint8_t* buffer, uint32_t sector_number, uint32_t sector_count);
+DRESULT sdmem_disk_write(uint8_t drive, const uint8_t* buffer, uint32_t sector_number, uint32_t sector_count);
+DRESULT sdmem_disk_ioctl(uint8_t drive, uint8_t command, void* buffer);
+DSTATUS sdmem_disk_status(uint8_t drive);
 #endif // (TFAT_SDMEM_DRIVE_NUM > 0)
 
 #endif    /* _R_TFAT_DRIVER_RX_IF_DEV_H_ */
