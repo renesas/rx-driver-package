@@ -20,6 +20,7 @@ So please download tested FIT Modules from [Renesas official website](https://ww
 - r_t4_ftp_server_rx
 - r_t4_http_server_rx
 - r_t4_sntp_client_rx
+
 - r_wifi_esp32
 - r_wifi_esp8266
 - r_wifi_sx_ulpgn
