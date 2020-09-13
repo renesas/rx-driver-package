@@ -8,7 +8,7 @@ MODULE_NAME_LIST = 	r_ble_qe_utility r_ble_rx23w r_bsp r_byteq r_can_rx r_cmt_rx
 					r_s12ad_rx r_sci_iic_rx r_sci_rx r_scif_rx r_sdc_sdmem_rx r_sdhi_rx r_sdc_sdio_rx\
 					r_sdsi_rx r_simple_glcdc_config_rx r_simple_graphic_rx r_src_api_rx\
 					r_ssi_api_rx r_sys_time_rx r_t4_dns_client_rx r_t4_driver_rx r_t4_file_driver_rx\
-					r_t4_ftp_server_rx r_t4_http_server_rx r_t4_rx r_t4_sntp_client_rx\
+					r_t4_ftp_server_rx r_t4_http_server_rx r_t4_rx r_t4_sntp_client_rx r_socket_rx\
 					r_tfat_driver_rx r_tfat_rx r_touch_qe r_uid_rx\
 					r_usb_basic r_usb_basic_mini r_usb_hcdc r_usb_hcdc_mini\
 					r_usb_hhid r_usb_hhid_mini r_usb_hmsc r_usb_hmsc_mini\

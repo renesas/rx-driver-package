@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>2.04.01</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family omit_series="true">RX</family>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_socket_rx</name>
+        <version>1.31</version>
+        <zipsource>r_socket_rx_v1.31.zip</zipsource>
+        <dependency>
+            <module>r_t4_rx</module>
+            <version>2.05</version>
+        </dependency>
+        <application>TCP/IP</application>
+        <desc>Add Socket API to TCP/IP(T4) Module.</desc>
+        <details>Add Socket API to TCP/IP(T4) Module.</details>
+        <function>connectivity</function>
+        <incdir>r_config</incdir>
+        <incdir>r_socket_rx</incdir>
+        <incdir>r_socket_rx/src</incdir>
+    </package>
+
+</refinfo>
