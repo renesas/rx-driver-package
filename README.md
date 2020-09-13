@@ -10,6 +10,11 @@ So please download tested FIT Modules from [Renesas official website](https://ww
     - Amazon FreeRTOS has been now allowed, Renesas would accept other open source.
 - use condition is basically MIT License, and details are shown in [PDF file in FIT Modules directory](https://github.com/renesas/rx-driver-package/tree/master/FITModules).
 
+# How to Install
+- Official package can be installed by SmartConfigurator in automatically.
+- This repository "FITModules" folder can be installed(overwrited) into following folder in manually. SmartConfigurator can detect these FITModules.
+    - C:\Users\<user_name>\.eclipse\com.renesas.platform_download\FITModules
+    
 # early prototype of FIT Modules
 - r_drw2d_rx
 - r_emwin_rx
