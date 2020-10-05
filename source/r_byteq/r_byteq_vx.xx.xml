@@ -45,8 +45,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_byteq</name>
-        <version>1.80</version>
-        <zipsource>r_byteq_v1.80.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_byteq_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>3.10</version>

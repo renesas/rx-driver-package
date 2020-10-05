@@ -29,8 +29,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_t4_rx</name>
-        <version>2.09</version>
-        <zipsource>r_t4_rx_v2.09.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_t4_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_t4_driver_rx</module>
             <version>1.08</version>

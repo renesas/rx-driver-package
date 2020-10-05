@@ -24,8 +24,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_drw2d_rx</name>
-        <version>1.10</version>
-        <zipsource>r_drw2d_rx_v1.10.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_drw2d_rx_vx.xx.zip</zipsource>
         <application>other</application>
         <desc>Drawing 2D engine driver for RX MCUs</desc>
         <details>Drawing 2D engine(DRW2D) driver for RX MCUs</details>

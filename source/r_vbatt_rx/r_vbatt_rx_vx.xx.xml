@@ -34,8 +34,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_vbatt_rx</name>
-        <version>1.04</version>
-        <zipsource>r_vbatt_rx_v1.04.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_vbatt_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>5.20</version>

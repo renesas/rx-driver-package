@@ -44,12 +44,12 @@
   <package>
     <type>fitmodule</type>
     <name>r_can_rx</name>
-    <version>3.20</version>
+    <version>x.xx</version>
     <dependency>
       <module>r_bsp</module>
       <version>5.50</version>
     </dependency>
-    <zipsource>r_can_rx_v3.20.zip</zipsource>
+    <zipsource>r_can_rx_vx.xx.zip</zipsource>
     <application>Communications</application>
     <application>Connectivity</application>
     <function>CAN</function>

@@ -45,8 +45,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_ssi_api_rx</name>
-        <version>2.01</version>
-        <zipsource>r_ssi_api_rx_v2.01.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_ssi_api_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>5.50</version>

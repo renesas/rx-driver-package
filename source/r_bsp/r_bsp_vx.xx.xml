@@ -115,8 +115,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_bsp</name>
-        <version>5.52</version>
-        <zipsource>r_bsp_v5.52.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_bsp_vx.xx.zip</zipsource>
         <application>Generic</application>
         <desc>Board Support Packages.</desc>
         <details>The r_bsp package provides a foundation for code to be built on top of. It provides startup code, iodefines, and MCU information for different boards. There are 2 folders that make up the r_bsp package. The 'mcu' folder contains files that are common to a MCU group. These files provide functionality such as easy register access, CPU functions, and a file named 'mcu_info.h' for each MCU group. The 'mcu_info.h' file has information about the MCU on the board and is configured based on the information given in r_bsp_config.h. The information in 'mcu_info.h' is used to help configure Renesas middleware that uses the r_bsp package. The 'board' folder has a folder with startup code for each supported board.  Which MCU and board is chosen is decided by the settings in 'platform.h'. The user can choose which board they are using by uncommenting the include path that applies to their board. For example, if you are using the RSK+RX64M then you would uncomment the #include "./board/generic_rx64m/r_bsp.h" include path. Users are encouraged to add their own boards to the 'board' directory. BSPs are configured by using the r_bsp_config.h file. Each board will have a reference configuration file named r_bsp_config_reference.h. The user should copy this file to their project, rename it to r_bsp_config.h, and use the options inside the file to configure the BSP for their project.</details>

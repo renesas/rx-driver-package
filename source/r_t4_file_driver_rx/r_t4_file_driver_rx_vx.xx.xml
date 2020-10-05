@@ -19,8 +19,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_t4_file_driver_rx</name>
-        <version>1.02</version>
-        <zipsource>r_t4_file_driver_rx_v1.02.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_t4_file_driver_rx_vx.xx.zip</zipsource>
         <application>Connectivity</application>
         <desc>File driver for HTTP Server and FTP Server</desc>
         <details>File driver for HTTP Server  and FTP Server<br/>

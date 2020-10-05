@@ -26,8 +26,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_ble_rx23w</name>
-        <version>1.10</version>
-        <zipsource>r_ble_rx23w_v1.10.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_ble_rx23w_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>5.40</version>

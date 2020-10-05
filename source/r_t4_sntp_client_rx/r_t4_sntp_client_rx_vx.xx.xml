@@ -19,8 +19,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_t4_sntp_client_rx</name>
-        <version>1.00</version>
-        <zipsource>r_t4_sntp_client_rx_v1.00.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_t4_sntp_client_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_sys_time_rx</module>
             <version>1.00</version>

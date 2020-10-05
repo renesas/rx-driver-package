@@ -19,8 +19,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_st7735_lcd_driver_rx</name>
-        <version>1.00</version>
-        <zipsource>r_st7735_lcd_driver_rx_v1.00.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_st7735_lcd_driver_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_cmt_rx</module>
             <version>3.10</version>

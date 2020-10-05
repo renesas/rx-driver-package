@@ -19,8 +19,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_t4_http_server_rx</name>
-        <version>1.06</version>
-        <zipsource>r_t4_http_server_rx_v1.06.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_t4_http_server_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_t4_file_driver_rx</module>
             <version>1.02</version>

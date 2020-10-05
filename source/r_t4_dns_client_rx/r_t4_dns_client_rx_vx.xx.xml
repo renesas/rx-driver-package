@@ -19,8 +19,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_t4_dns_client_rx</name>
-        <version>1.04</version>
-        <zipsource>r_t4_dns_client_rx_v1.04.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_t4_dns_client_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_t4_rx</module>
             <version>2.06</version>

@@ -30,10 +30,10 @@
 	<package>
 		<type>fitmodule</type>
 		<name>r_touch_qe</name>
-		<version>1.00</version>
+		<version>x.xx</version>
         <dependency>
 		        <module>r_bsp</module>
-		        <version>3.71</version>
+		        <version>x.xx</version>
         </dependency>
         <dependency>
 		        <module>r_ctsu_qe</module>

@@ -19,8 +19,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_socket_rx</name>
-        <version>1.31</version>
-        <zipsource>r_socket_rx_v1.31.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_socket_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_t4_rx</module>
             <version>2.05</version>

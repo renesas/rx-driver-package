@@ -19,8 +19,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_simple_graphic_rx</name>
-        <version>0.80</version>
-        <zipsource>r_simple_graphic_rx_v0.80.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_simple_graphic_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_cmt_rx</module>
             <version>3.21</version>

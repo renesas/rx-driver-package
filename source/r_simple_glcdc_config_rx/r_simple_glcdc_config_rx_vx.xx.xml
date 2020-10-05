@@ -19,8 +19,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_simple_glcdc_config_rx</name>
-        <version>0.81</version>
-        <zipsource>r_simple_glcdc_config_rx_v0.81.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_simple_glcdc_config_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_glcdc_rx</module>
             <version>1.00</version>

@@ -81,8 +81,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_dac_rx</name>
-        <version>4.40</version>
-        <zipsource>r_dac_rx_v4.40.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_dac_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>5.50</version>

@@ -30,12 +30,12 @@
 	<package>
 		<type>fitmodule</type>
 		<name>r_ctsu_qe</name>
-		<version>1.00</version>
+		<version>x.xx</version>
         <dependency>
 		        <module>r_bsp</module>
 		        <version>3.71</version>
         </dependency>
-		<zipsource>r_ctsu_qe_v1.00.zip</zipsource>
+		<zipsource>r_ctsu_qe_vx.xx.zip</zipsource>
 		<application>Capacitive Touch</application>
         <function>Capacitive Touch</function>
 		<desc>CTSU QE API for select RX100 and RX200 MCUs.</desc>

@@ -33,7 +33,7 @@
 		<version>1.00</version>
         <dependency>
 		        <module>r_bsp</module>
-		        <version>3.71</version>
+		        <version>1.00</version>
         </dependency>
         <dependency>
 		        <module>r_ctsu_qe</module>

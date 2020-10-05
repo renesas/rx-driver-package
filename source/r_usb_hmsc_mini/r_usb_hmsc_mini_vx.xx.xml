@@ -39,8 +39,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_usb_hmsc_mini</name>
-        <version>1.12</version>
-        <zipsource>r_usb_hmsc_mini_v1.12.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_usb_hmsc_mini_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>5.20</version>
