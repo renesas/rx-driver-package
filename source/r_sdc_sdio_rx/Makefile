@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_sdc_sdio_rx
-VERSION = 		2.00-pre
+VERSION = 		2.00
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

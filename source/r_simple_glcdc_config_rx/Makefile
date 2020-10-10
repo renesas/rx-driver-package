@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_simple_glcdc_config_rx
-VERSION = 		0.81-pre
+VERSION = 		0.81
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

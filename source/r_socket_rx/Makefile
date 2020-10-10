@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_socket_rx
-VERSION = 		1.31-pre
+VERSION = 		1.31
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

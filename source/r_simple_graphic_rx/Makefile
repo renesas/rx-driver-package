@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_simple_graphic_rx
-VERSION = 		0.80-pre
+VERSION = 		0.80
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

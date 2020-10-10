@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_t4_file_driver_rx
-VERSION = 		1.02-pre
+VERSION = 		1.02
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

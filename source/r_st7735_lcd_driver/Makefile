@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_st7735_lcd_driver_rx
-VERSION = 		1.00-pre
+VERSION = 		1.00
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

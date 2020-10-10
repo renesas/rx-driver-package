@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>3.01.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>4.08.04.201902</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family omit_series="true">RX</family>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_wifi_esp8266</name>
+        <version>1.00</version>
+        <zipsource>r_wifi_esp8266_v1.00.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>5.20</version>
+        </dependency>
+        <dependency>
+            <module>r_byteq</module>
+            <version>1.80</version>
+        </dependency>
+        <dependency>
+            <module>r_sci_rx</module>
+            <version>3.20</version>
+        </dependency>
+        <application>WiFI</application>
+        <desc>WI-FI Module control functions for Renesas MCUs.</desc>
+        <details>Use UART to control ESP8266 and connect to the Internet.</details>
+        <function>connectivity</function>
+        <incdir>r_wifi_esp8266</incdir>
+        <incdir>r_wifi_esp8266/src</incdir>
+    </package>
+
+</refinfo>
