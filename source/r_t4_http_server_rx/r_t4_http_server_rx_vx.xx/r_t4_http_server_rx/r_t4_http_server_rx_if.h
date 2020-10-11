@@ -14,19 +14,21 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014-2016 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_t4_http_server_rx_if.h
-* Version      : 1.04
+* Version      : 1.06
 * Description  : This is HTTP server function header file.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
-*         : 01.04.2011 1.00    First Release
-*         : 09.05.2014 1.03    Corresponded to FIT Modules
-*         : 09.05.2014 1.04    Clean up source code
-*         : 01.04.2016 1.05    XML file update
+*         : 01.04.2011 1.00      First Release
+*         : 09.05.2014 1.03      Corresponded to FIT Modules
+*         : 09.05.2014 1.04      Clean up source code
+*         : 15.08.2016 1.05      Added POST method for file upload.
+*         : 30.11.2016 1.06-pre  Included r_sys_time_rx_if.h.
+*         : 11.10.2020 1.06-pre2 Corresponded to FireFox POST command behavior.
 ***********************************************************************************************************************/
 #ifndef _R_T4_HTTP_SERVER_RX_IF_H_
 #define _R_T4_HTTP_SERVER_RX_IF_H_

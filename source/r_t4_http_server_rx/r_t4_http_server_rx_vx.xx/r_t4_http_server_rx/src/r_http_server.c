@@ -19,24 +19,25 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011-2016 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2011-2020 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_http_server.c
-* Version      : 1.06
+* Version      : 1.06-pre2
 * Device(s)    : Renesas MCUs
-* Tool-Chain   : CC-RX v.2.05.00
+* Tool-Chain   : CC-RX v.3.02.00
 * OS           : none
 * H/W Platform : -
 * Description  : HTTP server code.
 ******************************************************************************/
 /******************************************************************************
 * History : DD.MM.YYYY Version Description
-*         : 01.04.2011 1.00    First Release
-*         : 09.05.2014 1.03    Corresponded to FIT Modules
-*         : 09.05.2014 1.04    Clean up source code
-*         : 15.08.2016 1.05    Added POST method for file upload.
-*         : 30.11.2016 1.06    Included r_sys_time_rx_if.h.
+*         : 01.04.2011 1.00      First Release
+*         : 09.05.2014 1.03      Corresponded to FIT Modules
+*         : 09.05.2014 1.04      Clean up source code
+*         : 15.08.2016 1.05      Added POST method for file upload.
+*         : 30.11.2016 1.06-pre  Included r_sys_time_rx_if.h.
+*         : 11.10.2020 1.06-pre2 Corresponded to FireFox POST command behavior.
 ******************************************************************************/
 
 /******************************************************************************
@@ -268,7 +269,6 @@ void R_TCPIP_HttpServerProcess(void)
 {
     ER   ercd;
     volatile uint32_t  i;
-    static int32_t init_flag = 0;
     static SYS_TIME previous_sys_time;
     SYS_TIME sys_time;
     uint32_t dummy_i;
@@ -394,7 +394,7 @@ static ER httpd_parse_post_header(ID cepid, uint8_t *buf, ER rcv_dat_size)
 
         if (http_cep[cepid - 1].http_post.file_name[0] == 0)
         {
-            return httpd_parse_request_internal_server_error(cepid);;
+            return httpd_parse_request_internal_server_error(cepid);
         }
 
         str_p = strtok((char *)http_cep[cepid - 1].http_post.file_name, "\\");
@@ -449,13 +449,12 @@ static ER httpd_rcv_request(ID cepid, uint8_t *buf, int16_t buf_len, HTTPD_RESOU
     {
         return ercd;
     }
-    if (http_cep[cepid - 1].total_rcv_len > (buf_len - 1))
+    if (http_cep[cepid - 1].total_rcv_len > (buf_len))
     {
         /* stop receiving when buffer is full */
         http_cep[cepid - 1].total_rcv_len = 0;
         return httpd_parse_request_internal_server_error(cepid);
     }
-    buf[http_cep[cepid - 1].total_rcv_len] = '\0';
 
     ptr = (uint8_t *)strstr((char*)buf, "\r\n\r\n");
     if (ptr == 0)
@@ -465,7 +464,17 @@ static ER httpd_rcv_request(ID cepid, uint8_t *buf, int16_t buf_len, HTTPD_RESOU
     }
 
     ercd = httpd_parse_request(cepid, buf, res_info);
-    http_cep[cepid - 1].total_rcv_len = 0;
+    if(ercd != HTTPD_PEND_SENDING)
+    {
+    	http_cep[cepid - 1].total_rcv_len = 0;
+    }
+    else
+    {
+    	 if (http_cep[cepid - 1].status == HTTPD_RECEIVE_POST_BODY)
+    	 {
+    		 ercd = HTTPD_CONTINUE_RECEIVING_FOR_POST;
+    	 }
+    }
     return ercd;
 }
 
@@ -529,15 +538,21 @@ static ER httpd_parse_request(ID cepid, uint8_t *buf, HTTPD_RESOURCE_INFO *res_i
                 return httpd_parse_request_internal_server_error(cepid);
             }
             str_p += strlen("\r\n\r\n");
+            http_cep[cepid - 1].status = HTTPD_RECEIVE_POST_PARAMETER;
             if(*str_p != 0)
             {
-                ercd = httpd_parse_post_header(cepid, (uint8_t *)str_p, http_cep[cepid - 1].total_rcv_len - ((uint8_t *)str_p - buf));
+            	http_cep[cepid - 1].total_rcv_len -= ((uint8_t *)str_p - buf) + (sizeof("POST ") - 1);
+                ercd = httpd_parse_post_header(cepid, (uint8_t *)str_p, http_cep[cepid - 1].total_rcv_len);
                 if(ercd != HTTPD_CONTINUE_RECEIVING_FOR_POST)
                 {
                     return httpd_parse_request_internal_server_error(cepid);
                 }
+                http_cep[cepid - 1].status = HTTPD_RECEIVE_POST_BODY;
             }
-            http_cep[cepid - 1].status = HTTPD_RECEIVE_POST_PARAMETER;
+            else
+            {
+            	http_cep[cepid - 1].total_rcv_len = 0;
+            }
         }
     }
     else
@@ -1355,13 +1370,13 @@ ER R_TCPIP_HttpServerCallback(ID cepid, FN fncd , VP p_parblk)
                             if(http_cep[cepid_oft - 1].http_post.initialize_flag == 0)
                             {
                                 http_cep[cepid_oft - 1].http_post.initialize_flag = 1;
-                                p_http_post_callback(cepid, HTTP_POST_CALLBACK_EVENT_INITIALIZE, http_cep[cepid_oft - 1].http_post.file_name, dummy_p, dummy_i, dummy_i);
+                                p_http_post_callback(cepid, HTTP_POST_CALLBACK_EVENT_INITIALIZE, http_cep[cepid_oft - 1].http_post.file_name, dummy_p, dummy_i, http_cep[cepid_oft - 1].http_post.uploaded_file_size);
                             }
                             http_cep[cepid_oft - 1].http_post.current_part_data_size -= (strlen((char *)http_cep[cepid_oft - 1].http_post.mime_boundary) + 8); /* +8 means crlf (2bytes) and "--" (2bytes) at each side of boundary */
                             p_http_post_callback(cepid, HTTP_POST_CALLBACK_EVENT_PROCEEDING, http_cep[cepid_oft - 1].http_post.file_name, http_cep[cepid_oft - 1].rcv_buff, http_cep[cepid_oft - 1].http_post.current_part_data_size + http_cep[cepid_oft - 1].http_post.buffered_data_size, http_cep[cepid_oft - 1].http_post.uploaded_file_size);
                         }
                     }
-                    p_http_post_callback(cepid, HTTP_POST_CALLBACK_EVENT_FINALIZE, dummy_p, dummy_p, dummy_i, dummy_i);
+                    p_http_post_callback(cepid, HTTP_POST_CALLBACK_EVENT_FINALIZE, http_cep[cepid_oft - 1].http_post.file_name, dummy_p, dummy_i, http_cep[cepid_oft - 1].http_post.uploaded_file_size);
                     /* start transmitting response header */
                     http_cep[cepid_oft - 1].now_data = 0;
                     http_cep[cepid_oft - 1].remain_data = http_cep[cepid_oft - 1].res_info.res.hdr_size;
@@ -1372,25 +1387,35 @@ ER R_TCPIP_HttpServerCallback(ID cepid, FN fncd , VP p_parblk)
                     /* case: mime_boundary is separated into last 2 packets */
                     if ((http_cep[cepid_oft - 1].http_post.content_length - http_cep[cepid_oft - 1].total_rcv_len) <= strlen((char *)http_cep[cepid_oft - 1].http_post.mime_boundary) + 8) /* +8 means crlf (2bytes) and "--" (2bytes) at each side of boundary */
                     {
-                        http_cep[cepid_oft - 1].http_post.current_part_data_size -= ((strlen((char *)http_cep[cepid_oft - 1].http_post.mime_boundary) + 8) - (http_cep[cepid_oft - 1].http_post.content_length - http_cep[cepid_oft - 1].total_rcv_len)); /* +8 means crlf (2bytes) and "--" (2bytes) at each side of boundary */
-                        p_http_post_callback(cepid, HTTP_POST_CALLBACK_EVENT_PROCEEDING, http_cep[cepid_oft - 1].http_post.file_name, http_cep[cepid_oft - 1].rcv_buff, http_cep[cepid_oft - 1].http_post.current_part_data_size + http_cep[cepid_oft - 1].http_post.buffered_data_size, http_cep[cepid_oft - 1].http_post.uploaded_file_size);
-                    }
-                    /* callback and write to file when buffer is full (filesystem writes the data to storage in part of 512 bytes, so buffer size is multiple by 512 bytes has good effect for performance. */
-                    if((http_cep[cepid_oft - 1].http_post.buffered_data_size + http_cep[cepid_oft - 1].http_post.current_part_data_size) == sizeof(http_cep[cepid_oft - 1].rcv_buff))
-                    {
+                        /* for tiny file is uploaded like smaller than 1 receive buffer */
                         if(http_cep[cepid_oft - 1].http_post.initialize_flag == 0)
                         {
                             http_cep[cepid_oft - 1].http_post.initialize_flag = 1;
-                            p_http_post_callback(cepid, HTTP_POST_CALLBACK_EVENT_INITIALIZE, http_cep[cepid_oft - 1].http_post.file_name, dummy_p, dummy_i, dummy_i);
+                            p_http_post_callback(cepid, HTTP_POST_CALLBACK_EVENT_INITIALIZE, http_cep[cepid_oft - 1].http_post.file_name, dummy_p, dummy_i, http_cep[cepid_oft - 1].http_post.uploaded_file_size);
                         }
-                        p_http_post_callback(cepid, HTTP_POST_CALLBACK_EVENT_PROCEEDING, http_cep[cepid_oft - 1].http_post.file_name, http_cep[cepid_oft - 1].rcv_buff, sizeof(http_cep[cepid_oft - 1].rcv_buff), http_cep[cepid_oft - 1].http_post.uploaded_file_size);
-                        http_cep[cepid_oft - 1].http_post.buffered_data_size = 0;
+                        http_cep[cepid_oft - 1].http_post.current_part_data_size -= ((strlen((char *)http_cep[cepid_oft - 1].http_post.mime_boundary) + 8) - (http_cep[cepid_oft - 1].http_post.content_length - http_cep[cepid_oft - 1].total_rcv_len)); /* +8 means crlf (2bytes) and "--" (2bytes) at each side of boundary */
+                        p_http_post_callback(cepid, HTTP_POST_CALLBACK_EVENT_PROCEEDING, http_cep[cepid_oft - 1].http_post.file_name, http_cep[cepid_oft - 1].rcv_buff, http_cep[cepid_oft - 1].http_post.current_part_data_size + http_cep[cepid_oft - 1].http_post.buffered_data_size, http_cep[cepid_oft - 1].http_post.uploaded_file_size);
+						tcp_rcv_dat(cepid, http_cep[cepid_oft - 1].rcv_buff, sizeof(http_cep[cepid_oft - 1].rcv_buff), TMO_NBLK);
                     }
                     else
                     {
-                        http_cep[cepid_oft - 1].http_post.buffered_data_size += http_cep[cepid_oft - 1].http_post.current_part_data_size;
+						/* callback and write to file when buffer is full (filesystem writes the data to storage in part of 512 bytes, so buffer size is multiple by 512 bytes has good effect for performance. */
+						if((http_cep[cepid_oft - 1].http_post.buffered_data_size + http_cep[cepid_oft - 1].http_post.current_part_data_size) == sizeof(http_cep[cepid_oft - 1].rcv_buff))
+						{
+							if(http_cep[cepid_oft - 1].http_post.initialize_flag == 0)
+							{
+								http_cep[cepid_oft - 1].http_post.initialize_flag = 1;
+								p_http_post_callback(cepid, HTTP_POST_CALLBACK_EVENT_INITIALIZE, http_cep[cepid_oft - 1].http_post.file_name, dummy_p, dummy_i, http_cep[cepid_oft - 1].http_post.uploaded_file_size);
+							}
+							p_http_post_callback(cepid, HTTP_POST_CALLBACK_EVENT_PROCEEDING, http_cep[cepid_oft - 1].http_post.file_name, http_cep[cepid_oft - 1].rcv_buff, sizeof(http_cep[cepid_oft - 1].rcv_buff), http_cep[cepid_oft - 1].http_post.uploaded_file_size);
+							http_cep[cepid_oft - 1].http_post.buffered_data_size = 0;
+						}
+						else
+						{
+							http_cep[cepid_oft - 1].http_post.buffered_data_size += http_cep[cepid_oft - 1].http_post.current_part_data_size;
+						}
+						tcp_rcv_dat(cepid, http_cep[cepid_oft - 1].rcv_buff + http_cep[cepid_oft - 1].http_post.buffered_data_size, sizeof(http_cep[cepid_oft - 1].rcv_buff) - http_cep[cepid_oft - 1].http_post.buffered_data_size, TMO_NBLK);
                     }
-                    tcp_rcv_dat(cepid, http_cep[cepid_oft - 1].rcv_buff + http_cep[cepid_oft - 1].http_post.buffered_data_size, sizeof(http_cep[cepid_oft - 1].rcv_buff) - http_cep[cepid_oft - 1].http_post.buffered_data_size, TMO_NBLK);
                 }
                 break;
             }
@@ -1409,11 +1434,13 @@ ER R_TCPIP_HttpServerCallback(ID cepid, FN fncd , VP p_parblk)
             file_close(http_cep[cepid_oft - 1].fileid);
             http_cep[cepid_oft - 1].fileid = -1;
             memset(&http_cep[cepid_oft - 1].http_post, 0, sizeof(HTTP_POST));
+            memset(&http_cep[cepid_oft - 1].hdr_buff, 0, sizeof(http_cep[cepid_oft - 1].hdr_buff));
+            memset(&http_cep[cepid_oft - 1].rcv_buff, 0, sizeof(http_cep[cepid_oft - 1].rcv_buff));
+            memset(&http_cep[cepid_oft - 1].body_buff, 0, sizeof(http_cep[cepid_oft - 1].body_buff));
             break;
         case TFN_TCP_CAN_CEP:
             tcp_cls_cep(cepid, TMO_NBLK);
             http_cep[cepid_oft - 1].status = HTTPD_CLOSING;
-            memset(&http_cep[cepid_oft - 1].http_post, 0, sizeof(HTTP_POST));
             break;
         default:
             break;
@@ -1459,7 +1486,6 @@ void R_TCPIP_HttpServerReset(uint8_t channel)
 }
 
 /* Copyright 2005-2016 RENESAS ELECTRONICS CORPORATION */
-
 
 
 

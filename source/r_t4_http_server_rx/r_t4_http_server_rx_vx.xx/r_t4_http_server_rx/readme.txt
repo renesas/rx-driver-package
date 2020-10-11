@@ -10,7 +10,7 @@ R20AN0075EJ0106-RX-T4
 
 Version
 -------
-v1.06
+v1.06-pre2
 
 Overview
 --------
