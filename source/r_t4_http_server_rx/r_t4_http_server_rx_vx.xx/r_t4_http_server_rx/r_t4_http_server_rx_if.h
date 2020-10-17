@@ -29,6 +29,7 @@
 *         : 15.08.2016 1.05      Added POST method for file upload.
 *         : 30.11.2016 1.06-pre  Included r_sys_time_rx_if.h.
 *         : 11.10.2020 1.06-pre2 Corresponded to FireFox POST command behavior.
+*         : 17.10.2020 1.06-pre3 Fixed bug: incorrect pointer would be given in FireFox POST case.
 ***********************************************************************************************************************/
 #ifndef _R_T4_HTTP_SERVER_RX_IF_H_
 #define _R_T4_HTTP_SERVER_RX_IF_H_
