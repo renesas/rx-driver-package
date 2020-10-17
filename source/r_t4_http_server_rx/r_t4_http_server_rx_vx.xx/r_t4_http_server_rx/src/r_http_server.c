@@ -23,7 +23,7 @@
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_http_server.c
-* Version      : 1.06-pre2
+* Version      : 1.06-pre3
 * Device(s)    : Renesas MCUs
 * Tool-Chain   : CC-RX v.3.02.00
 * OS           : none
@@ -38,6 +38,7 @@
 *         : 15.08.2016 1.05      Added POST method for file upload.
 *         : 30.11.2016 1.06-pre  Included r_sys_time_rx_if.h.
 *         : 11.10.2020 1.06-pre2 Corresponded to FireFox POST command behavior.
+*         : 17.10.2020 1.06-pre3 Fixed bug: incorrect pointer would be given in FireFox POST case.
 ******************************************************************************/
 
 /******************************************************************************
@@ -472,6 +473,8 @@ static ER httpd_rcv_request(ID cepid, uint8_t *buf, int16_t buf_len, HTTPD_RESOU
     {
     	 if (http_cep[cepid - 1].status == HTTPD_RECEIVE_POST_BODY)
     	 {
+    		 ptr += strlen("\r\n\r\n");
+    		 memmove(http_cep[cepid - 1].rcv_buff, http_cep[cepid - 1].rcv_buff + (((uint8_t *)ptr - buf)), http_cep[cepid - 1].total_rcv_len);
     		 ercd = HTTPD_CONTINUE_RECEIVING_FOR_POST;
     	 }
     }
