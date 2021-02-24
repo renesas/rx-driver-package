@@ -952,12 +952,7 @@ static sci_err_t sci_send_async_data(sci_hdl_t const hdl,
     sci_err_t   err = SCI_SUCCESS;
     uint16_t    cnt;
     byteq_err_t byteq_err = BYTEQ_ERR_QUEUE_FULL;
-
-    if (true != hdl->tx_idle  )
-    {
-        return SCI_ERR_XCVR_BUSY;
-    }
-
+    
 #if SCI_CFG_FIFO_INCLUDED
     if (true == hdl->fifo_ctrl)
     {
