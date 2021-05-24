@@ -1,5 +1,6 @@
 MODULE_NAME = 	r_can_rx
 VERSION = 		3.20
+MDF =			V1
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

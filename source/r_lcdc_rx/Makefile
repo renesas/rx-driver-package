@@ -1,5 +1,6 @@
 MODULE_NAME = 	r_lcdc_rx
 VERSION = 		1.01
+MDF =			V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

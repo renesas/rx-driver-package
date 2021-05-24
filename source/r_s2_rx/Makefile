@@ -1,5 +1,6 @@
 MODULE_NAME = 	r_s2_rx
 VERSION = 		3.04
+MDF =			NOT_SUPPORTED
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

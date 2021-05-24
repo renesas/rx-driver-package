@@ -1,5 +1,6 @@
 MODULE_NAME = 	r_usb_hhid_mini
 VERSION = 		1.12
+MDF =			V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

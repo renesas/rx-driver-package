@@ -1,5 +1,6 @@
 MODULE_NAME = 	r_longq
 VERSION = 		1.80
+MDF =			V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

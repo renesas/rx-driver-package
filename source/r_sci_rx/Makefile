@@ -1,5 +1,6 @@
 MODULE_NAME = 	r_sci_rx
 VERSION = 		3.40
+MDF =			V1,V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

@@ -1,5 +1,6 @@
 MODULE_NAME = 	r_t4_ftp_server_rx
 VERSION = 		1.04
+MDF =			NOT_SUPPORTED
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

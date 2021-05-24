@@ -1,3 +1,5 @@
+RELEASE_TAG_COMMIT_NUMBER = 8dadb91c0486eaa03af224c935eedb9bb2df69a3
+VERSIONS_FILE_NAME = versions.xml
 MODULE_NAME_LIST = 	r_ble_qe_utility r_ble_rx23w r_bsp r_byteq r_can_rx r_cmt_rx r_cmtw_rx\
 					r_ctsu_qe r_dac_rx r_datfrx_rx r_dmaca_rx r_drw2d_rx r_dsmif_rx r_dtc_rx\
 					r_eeprom_spi r_elc_rx r_emwin_rx r_ether_rx r_flash_rx r_flash_spi\
@@ -15,13 +17,18 @@ MODULE_NAME_LIST = 	r_ble_qe_utility r_ble_rx23w r_bsp r_byteq r_can_rx r_cmt_rx
 					r_usb_pcdc r_usb_pcdc_mini r_usb_phid r_usb_phid_mini\
 					r_usb_pmsc r_usb_pmsc_mini r_vbatt_rx r_wdt_rx r_wifi_esp32 r_wifi_esp8266 r_wifi_sx_ulpgn\
 					r_st7735_lcd_driver\
-
+					
 all:
+	rm -f ./$(VERSIONS_FILE_NAME);
+	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > ./$(VERSIONS_FILE_NAME)
+	echo "<modules>" >> ./$(VERSIONS_FILE_NAME)
 	for i in $(MODULE_NAME_LIST); do \
 		cd ./source/$$i/; \
+		sh ../../tools/version_xml_generator.sh ./Makefile release_tag_commit_number=$(RELEASE_TAG_COMMIT_NUMBER) >> ../../$(VERSIONS_FILE_NAME);\
 		make; \
 		cd ../../; \
 	done
+	echo "</modules>" >> ./$(VERSIONS_FILE_NAME)
 		
 clean:
 	for i in $(MODULE_NAME_LIST); do \

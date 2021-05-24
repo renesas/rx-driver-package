@@ -1,5 +1,6 @@
 MODULE_NAME = 	r_rscan_rx
 VERSION = 		2.20
+MDF =			V1,V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

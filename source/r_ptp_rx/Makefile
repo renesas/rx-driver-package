@@ -1,5 +1,6 @@
 MODULE_NAME = 	r_ptp_rx
 VERSION = 		1.16
+MDF =			NOT_SUPPORTED
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

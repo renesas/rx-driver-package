@@ -1,6 +1,7 @@
 MODULE_NAME = 	r_sdc_sdmem_rx
 CONFIG_NAME = 	r_sdc_sd_rx
 VERSION = 		3.00
+MDF =			V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

@@ -1,5 +1,6 @@
 MODULE_NAME = 	r_uid_rx
 VERSION = 		1.13
+MDF =			NOT_SUPPORTED
 
 TARGET_FOLDER = ../../FITModules
 

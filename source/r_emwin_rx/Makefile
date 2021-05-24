@@ -1,5 +1,6 @@
 MODULE_NAME = 	r_emwin_rx
 VERSION = 		5.50
+MDF =			NOT_SUPPORTED
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

@@ -1,5 +1,6 @@
 MODULE_NAME = 	r_dsmif_rx
 VERSION = 		1.00
+MDF =			V1
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

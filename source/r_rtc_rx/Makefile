@@ -1,5 +1,6 @@
 MODULE_NAME = 	r_rtc_rx
 VERSION = 		2.78
+MDF =			V1,V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

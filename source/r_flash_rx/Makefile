@@ -1,5 +1,6 @@
 MODULE_NAME = 	r_flash_rx
 VERSION = 		4.50
+MDF =			V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

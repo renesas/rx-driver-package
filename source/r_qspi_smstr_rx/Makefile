@@ -1,5 +1,6 @@
 MODULE_NAME = 	r_qspi_smstr_rx
 VERSION = 		1.14
+MDF =			V1,V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

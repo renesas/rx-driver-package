@@ -1,5 +1,6 @@
 MODULE_NAME = 	r_sdsi_rx
 VERSION = 		2.02
+MDF =			V1,V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

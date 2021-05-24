@@ -1,5 +1,6 @@
 MODULE_NAME = 	r_t4_sntp_client_rx
 VERSION = 		1.00
+MDF =			NOT_SUPPORTED
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

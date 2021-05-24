@@ -1,5 +1,6 @@
 MODULE_NAME = 	r_irda_sci_rx
 VERSION = 		1.01
+MDF =			NOT_SUPPORTED
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules
