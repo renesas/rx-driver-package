@@ -19,11 +19,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014(2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_eeprom_spi_dev_port.h
-* Version      : 3.00
+* Version      : 3.02
 * Description  : EEPROM driver dev port header file
 *************************************************************************************************/
 /************************************************************************************************
@@ -33,6 +33,7 @@
 *              : 29.05.2015 2.32     Added RX231 and RX230.
 *              : 04.04.2019 3.01     Added support for GNUC and ICCRX.
 *                                    Fixed coding style.
+*              : 10.12.2020 3.02     Remodeling the target device to the entire RX family.
 *************************************************************************************************/
 #ifndef __EEPROM_SPI_DEV_PORT_H__
 #define __EEPROM_SPI_DEV_PORT_H__
@@ -122,8 +123,44 @@ Macro definitions
         #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     F
     #elif (('G' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('g' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
         #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     G
+    #elif (('H' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('h' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     H
+    #elif (('I' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('i' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     I
     #elif (('J' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('j' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
         #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     J
+    #elif (('K' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('k' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     K
+    #elif (('L' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('l' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     L
+    #elif (('M' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('m' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     M
+    #elif (('N' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('n' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     N
+    #elif (('O' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('o' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     O
+    #elif (('P' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('p' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     P
+    #elif (('Q' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('q' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     Q
+    #elif (('R' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('r' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     R
+    #elif (('S' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('s' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     S
+    #elif (('T' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('t' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     T
+    #elif (('U' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('u' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     U
+    #elif (('V' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('v' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     V
+    #elif (('W' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('w' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     W
+    #elif (('X' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('x' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     X
+    #elif (('Y' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('y' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     Y
+    #elif (('Z' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('z' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     Z
     #endif
 
     #if   ('0' == EEPROM_SPI_CS_DEV0_CFG_BITNO)
@@ -206,8 +243,44 @@ Macro definitions
         #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     F
     #elif (('G' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('g' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
         #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     G
+    #elif (('H' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('h' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     H
+    #elif (('I' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('i' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     I
     #elif (('J' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('j' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
         #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     J
+    #elif (('K' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('k' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     K
+    #elif (('L' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('l' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     L
+    #elif (('M' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('m' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     M
+    #elif (('N' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('n' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     N
+    #elif (('O' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('o' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     O
+    #elif (('P' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('p' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     P
+    #elif (('Q' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('q' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     Q
+    #elif (('R' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('r' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     R
+    #elif (('S' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('s' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     S
+    #elif (('T' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('t' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     T
+    #elif (('U' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('u' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     U
+    #elif (('V' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('v' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     V
+    #elif (('W' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('w' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     W
+    #elif (('X' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('x' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     X
+    #elif (('Y' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('y' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     Y
+    #elif (('Z' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('z' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
+        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     Z
     #endif
 
     #if   ('0' == EEPROM_SPI_CS_DEV1_CFG_BITNO)

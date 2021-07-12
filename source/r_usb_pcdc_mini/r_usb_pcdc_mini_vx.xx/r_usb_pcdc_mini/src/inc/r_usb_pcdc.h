@@ -18,7 +18,7 @@
  * you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2014(2018) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
  ******************************************************************************/
 /******************************************************************************
  * File Name    : r_usb_pcdc.h
@@ -26,8 +26,9 @@
  ******************************************************************************/
 /*******************************************************************************
  * History : DD.MM.YYYY Version  Description
- *         : 01.09.2014 1.00    First Release
- *         : 30.11.2018 1.10    Supporting Smart Configurator
+ *         : 01.09.2014 1.00     First Release
+ *         : 30.11.2018 1.10     Supporting Smart Configurator
+ *         : 30.06.2020 1.20     Added support for RTOS.
  ******************************************************************************/
 
 /******************************************************************************
@@ -49,7 +50,6 @@
  Exported global variables
  ******************************************************************************/
 
-extern uint32_t g_usb_read_request_size[USB_MAXPIPE_NUM + 1];
 
 /******************************************************************************
  Exported global functions (to be accessed by other files)

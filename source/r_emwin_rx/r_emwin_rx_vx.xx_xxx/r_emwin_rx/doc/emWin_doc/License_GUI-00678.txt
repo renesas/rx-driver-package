@@ -1,0 +1,6 @@
+Licensor:                 SEGGER Software GmbH
+Licensed to:              Renesas Electronics Europe GmbH, Arcadiastrasse 10, 40472 Duesseldorf, Germany
+Licensed SEGGER software: emWin
+License number:           GUI-00678
+License model:            License and Service Agreement, signed December 16th, 2016 and Amendment No. 1, signed May 16th, 2019
+License valid for:        RX65N, RX651, RX72M, RX72N, RX661, RX66N

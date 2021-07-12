@@ -25,9 +25,16 @@
 /***********************************************************************************************************************
 * History      : DD.MM.YYYY Version Description
 *              : 04.10.2018 1.00    First Release
+*              : 09.07.2019 1.10    Moved TUNING_UPPER/LOWER_LIMIT #defines here from touch_qe.c.
+*              :                    Added OT_WINDOW_TUNE_COUNT, OT_MAX_SCAN_ATTEMPTS, CTSUSO_INCREMENTING, and
+*              :                      CTSUSO_DECREMENTING.
+*              :                    Removed unused variables from former offset tuning and ref count initialization.
+*              :                    Added touch_pcmd_t.
+*              :                    Removed extern g_calib_info[][] declaration.
+*              : 31.10.2019 1.11    Renamed TOUCH_PCMD_CONTINUE_OFFSET_TUNING to TOUCH_PCMD_CLEAR_TUNING_FLAGS.
 ***********************************************************************************************************************/
-#ifndef QETOUCH_RX_PRIVATE_H__FILE
-#define QETOUCH_RX_PRIVATE_H__FILE
+#ifndef QETOUCH_RX_PRIVATE_H
+#define QETOUCH_RX_PRIVATE_H
 
 /***********************************************************************************************************************
 * Includes
@@ -35,12 +42,19 @@
 #include "r_typedefs_qe.h"
 #include "qe_common.h"
 #include "r_touch_qe_config.h"
-#include "r_touch_qe_if.h"        // method_list_t
+#include "r_touch_qe_if.h"        /* method_list_t */
 
 
 /***********************************************************************************************************************
 * Macro definitions
 ***********************************************************************************************************************/
+#define OT_WINDOW_TUNE_COUNT    (10)    /* number of scans with counts within window for sensor to be considered tuned */
+#define OT_MAX_SCAN_ATTEMPTS    (255)   /* offset tuning max scan attempts before considered failure */
+
+#define TUNING_UPPER_LIMIT      (200)
+#define TUNING_LOWER_LIMIT      (150)
+
+
 #define DRIFT_OK        (0)
 #define DRIFT_ERROR     (1)
 #define DRIFT_OFF       (2)
@@ -51,31 +65,25 @@
 #define ZERO_ENA        (0)
 #define ZERO_DIS        (1)
 
-#define _0_RUN          (0)
-#define _1_FINISH       (1)
-
-#define _0_STOP         (0)
-#define _1_START        (1)
-
 #define TOUCH_SELF_MODE     (0)
 #define TOUCH_MUTUAL_MODE   (1)
+
+/* For touch_tuning_t ctsuso (see below) Offset tuning information for element */
+#define CTSUSO_INCREMENTING     (1)
+#define CTSUSO_DECREMENTING     (2)
 
 
 /***********************************************************************************************************************
 * Typedef definitions
 ***********************************************************************************************************************/
 
-/* Touch system control flag */
-typedef union
+/* r_touch_control_private() commands */
+typedef enum e_touch_pcmd
 {
-    struct
-    {
-        volatile uint8_t    initial     :1;     /* Calibration completion flag */
-        volatile uint8_t    timing      :1;     /* timing flag */
-        volatile uint8_t    reserved    :6;     /* reserved */
-    } flag;
-    uint8_t    value;
-} touch_system_t;
+    TOUCH_PCMD_PERFORM_OFFSET_TUNING,
+    TOUCH_PCMD_CLEAR_TUNING_FLAGS,      // if want to do offset tuning again, call this first
+    TOUCH_PCMD_END_ENUM
+} touch_pcmd_t;
 
 
 /* Touch function control flag */
@@ -83,9 +91,9 @@ typedef union
 {
     struct
     {
-        volatile uint8_t    tuning      :1;     /* Initial tuning completion flag */
-        volatile uint8_t    average     :1;     /* Moving average flag */
-        volatile uint8_t    calib       :1;     /* Calibration completion flag */
+        volatile uint8_t    tuning      :1;     /* 1 = offset tuning complete for method */
+        volatile uint8_t    average     :1;     /* 0 = no data value available to average with */
+        volatile uint8_t    calib       :1;     /* unused */
         volatile uint8_t    drift       :1;     /* Drift correction */
         volatile uint8_t    msa         :1;     /* Maximum successive on counter */
         volatile uint8_t    acd0        :1;     /* Accumulated counter */
@@ -99,56 +107,44 @@ typedef union
 /* Touch function parameter */
 typedef struct
 {
-    uint8_t     calib_key_num;      /*  */
-    uint8_t     calib_freq;         /* Calibration frequency */
-    uint8_t     touch_freq;         /* Continuous agreement touch comparison frequency */
-    uint8_t     not_touch_freq;     /* Continuous agreement non-touch comparison frequency */
-    uint16_t    drift_freq;         /* Drift correction frequency */
-    uint16_t    msa_freq;           /* Compulsion touch cancellation frequency */
+    uint8_t     touch_freq;         /* configured touch-on debounce count number */
+    uint8_t     not_touch_freq;     /* configured touch-off debounce count number */
+    uint16_t    drift_freq;         /* configured drift correction frequency (in number of scans) */
+    uint16_t    msa_freq;           /* configured touch-stuck-on cancellation freq (in number of scans) */
 } touch_func_param_t;
 
 
 /* Touch key parameter information */
 typedef struct
 {
-    uint8_t     mode;               /* Measurement mode flag  0=Self, 1=Mutual */
-    uint8_t     key_num;            /* Key function number */
-    uint8_t     ena_num;            /* Touch sensor number */
+    uint8_t     mode;               /* Measurement mode 0=Self, 1=Mutual */
+    uint8_t     key_num;            /* number of buttons configured */
+    uint8_t     ena_num;            /* number of elements configured/scanned */
     uint8_t     key_max_group;      /* Key group max number */
     uint16_t    *ref;               /* Reference value */
-    uint16_t    *thr;               /* Threshold value */
+    uint16_t    *thr;               /* ref + user_thr threshold value */
     uint16_t    *user_thr;          /* User setting touch threshold value */
     uint16_t    *hys;               /* User setting hysteresis value */
-    uint16_t    *delta;             /* Touch judgment delta  value */
-    uint16_t    *touch_cnt;         /* Continuous agreement touch counter */
-    uint16_t    *non_touch_cnt;     /* Continuous agreement non-touch counter */
-    uint16_t    *in_touch;          /* Inside touch flag */
-    uint16_t    *out_touch;         /* Outside touch flag */
+    uint16_t    *delta;             /* sensor value - ref absolute value */
+    uint16_t    *touch_cnt;         /* touched debounce counter */
+    uint16_t    *non_touch_cnt;     /* touch-stopped debounce counter */
+    uint16_t    *in_touch;          /* possibly-touched flag */
+    uint16_t    *out_touch;         /* definitely-touched flag */
     uint16_t    *touch_result;      /* Touch result flag */
     uint16_t    *drift_permission;  /* Drift permission flag */
     uint32_t    *drift_add_ref;     /* Drift reference value */
     uint16_t    *drift_cnt;         /* Drift correction counter */
-    uint16_t    *key_used_info;     /* Keu function used flag */
-    uint8_t     *sensor_index;      /* Touch sensor index */
-    int8_t      *counter_magni;     /* Touch sensor index */
+    uint16_t    *key_used_info;     /* key group masks; buttons configured */
+    uint8_t     *sensor_index;      /* Touch sensor index (for TS# to element# conversion) */
+    int8_t      *counter_magni;     /* scaling factor (magnification) for PCLK */
 } key_info_t;
 
 
-/* Offset tuning information */
 typedef struct
 {
-    uint16_t            *ctsuso;    /* Tuning ctsuso value */
+    uint16_t            *ctsuso;    /* direction of SO0 adjustment for offset tuning; use CTSUSO_INC/DEC from above */
     volatile uint8_t    *result;    /* Tuning completion flag */
 } touch_tuning_t;
-
-
-/* Calibration information */
-typedef struct
-{
-    uint8_t     calib_key;          /* Calibration key number */
-    uint8_t     calib_cnt;          /* Calibration counter */
-    uint16_t    *calib_data;        /* Calibration value */
-} calib_info_t;
 
 
 typedef struct
@@ -196,14 +192,10 @@ extern int8_t       *g_current_sign_pt[];
 
 extern key_info_t           g_key_info[];
 extern touch_group_param_t  g_touch_key_group[];
-extern calib_info_t         g_calib_info[];
 extern touch_tuning_t       g_touch_tuning_info[];
 
-extern touch_system_t       g_touch_system;
 extern touch_func_flag_t    g_touch_function[];
 extern touch_result_t       g_touch_all_result[];
-extern uint16_t             g_offset_time[];
-extern uint8_t              g_current_offset_count[];
 extern touch_func_param_t   g_touch_paramter[];
 extern volatile uint8_t     g_data_tim;
 
@@ -223,16 +215,14 @@ extern wheel_ctrl_t     *gp_wheelInfo;
 ***********************************************************************************************************************/
 extern void     touch_parameter_address_set(void);
 extern uint8_t  offset_tuning_stop_judgement(uint8_t method);
-extern uint8_t  touch_calibration_check(uint8_t method, uint8_t offset_sta);
 extern void     touch_key_decode(uint8_t method, uint16_t value, uint8_t number);
 extern uint16_t slider_decode(uint8_t slider_id);
 extern uint16_t wheel_decode(uint8_t wheel_id);
 extern void     touch_parameter_set(ctsu_cfg_t *p_ctsu_cfgs[], touch_cfg_t *p_touch_cfgs[]);
 extern uint8_t  touch_key_function_check(uint8_t method, uint8_t loop);
+
 /* following can be made static but need #ifs if widget not used */
 extern uint8_t  slider_decode_abnormal_judgement(uint8_t id, uint16_t delta1, uint16_t delta2, uint8_t maxch);
 extern uint8_t  wheel_decode_abnormal_judgement(uint8_t id, uint16_t delta1, uint16_t delta2, uint8_t maxch);
-extern uint8_t  touch_calibration(uint8_t method);
-extern void     touch_initial_reference_set(uint8_t method, uint8_t number);
 
-#endif  // QETOUCH_RX_PRIVATE_H__FILE
+#endif  /* QETOUCH_RX_PRIVATE_H */

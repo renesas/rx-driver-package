@@ -18,7 +18,7 @@
  * you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2013(2019) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2013(2020) Renesas Electronics Corporation. All rights reserved.
  *****************************************************************************/
 /******************************************************************************
 * File Name    : r_usb_hscheduler.c
@@ -30,13 +30,16 @@
 *           : 01.06.2015 1.01    Added RX231.
 *           : 30.11.2018 1.10    Supporting Smart Configurator
 *           : 31.05.2019 1.11    Added support for GNUC and ICCRX.
+*           : 30.06.2020 1.20    Added support for RTOS.
 *******************************************************************************/
 
 /*******************************************************************************
  Includes   <System Includes> , "Project Includes"
  ******************************************************************************/
-
 #include "r_usb_basic_mini_if.h"
+
+#if (BSP_CFG_RTOS_USED == 0)    /* Non-OS */
+
 #include "r_usb_bitdefine.h"
 #include "r_usb_typedef.h"
 #include "r_usb_extern.h"
@@ -389,6 +392,7 @@ usb_er_t usb_hstd_rel_blk( uint8_t blk_num )
 }   /* End of function usb_hstd_rel_blk() */
 
 #endif /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
+#endif /* BSP_CFG_RTOS_USED == 0 */
 /******************************************************************************
 End of file
 ******************************************************************************/

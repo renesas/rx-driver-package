@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_elc_rx
-VERSION = 		1.21
-MDF =			V2
+VERSION = 		2.00
+MDF = V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

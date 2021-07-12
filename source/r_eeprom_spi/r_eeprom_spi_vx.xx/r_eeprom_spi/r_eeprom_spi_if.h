@@ -19,11 +19,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2004(2005-2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2004(2005-2020) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_eeprom_spi_if.h
-* Version      : 3.01
+* Version      : 3.02
 * Description  : EEPROM driver interface header file
 *************************************************************************************************/
 /************************************************************************************************
@@ -56,6 +56,7 @@
 *              : 21.12.2018 3.00     Change eeprom drive interface to Memory Access Driver Interface
 *              : 04.04.2019 3.01     Added support for GNUC and ICCRX.
 *                                    Fixed coding style.
+*              : 10.12.2020 3.02     Change version to 3.02
 *************************************************************************************************/
 #ifndef __EEPROM_SPI_IF_H__
 #define __EEPROM_SPI_IF_H__
@@ -70,12 +71,16 @@ Includes <System Includes> , "Project Includes"
 /************************************************************************************************
 Macro definitions
 *************************************************************************************************/
+#if R_BSP_VERSION_MAJOR < 5
+    #error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
+#endif
+
 /* Define using Firmware Integration Technology (FIT) for RX family MCU. */
 #define EEPROM_SPI_CFG_USE_FIT
 
 /* Driver version */
 #define EEPROM_SPI_VERSION_MAJOR       (3)
-#define EEPROM_SPI_VERSION_MINOR       (01)
+#define EEPROM_SPI_VERSION_MINOR       (02)
 
 
 /*--------------- Define no. of slots ----------------*/

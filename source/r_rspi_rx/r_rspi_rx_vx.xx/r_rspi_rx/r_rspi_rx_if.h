@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013 (2014-2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013 (2014-2020) Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rspi_rx_if.h
@@ -39,6 +39,8 @@
 *         : 20.06.2019 2.02     Supported RX23W.
 *         : 30.07.2019 2.03     Supported RX72M.
 *         : 22.11.2019 2.04     Supported RX72N and RX66N.
+*         : 10.03.2020 2.05     Supported RX23E-A.
+*         : 10.09.2020 3.00     Added new API function R_RSPI_DisableRSPI() and R_RSPI_DisableSpti().
 ***********************************************************************************************************************/
 
 #ifndef RSPI_API_HEADER_FILE
@@ -64,8 +66,8 @@ Macro definitions
 #endif
 
 /* Version Number of API. */
-#define RSPI_RX_VERSION_MAJOR           (2)
-#define RSPI_RX_VERSION_MINOR           (04)
+#define RSPI_RX_VERSION_MAJOR           (3)
+#define RSPI_RX_VERSION_MINOR           (00)
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -325,7 +327,11 @@ rspi_err_t R_RSPI_GetBuffRegAddress(rspi_handle_t handle,
 rspi_err_t R_RSPI_IntSptiIerClear(rspi_handle_t handle);
 
 rspi_err_t R_RSPI_IntSpriIerClear(rspi_handle_t handle);
-                                        
+
+rspi_err_t R_RSPI_DisableSpti(rspi_handle_t handle);
+
+rspi_err_t R_RSPI_DisableRSPI(rspi_handle_t handle);
+
 rspi_err_t R_RSPI_SetLogHdlAddress(uint32_t user_long_que);
 
 #endif /* RSPI_API_HEADER_FILE */

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>2.07.00</version>
+        <version>3.01.00</version>
+        <version>3.02.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>4.08.04.201801</version>
+        <version>4.08.04.201802</version>
+        <version>8.03.00 201904</version>
+        <version>8.03.00 202004</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.10.01</version>
+        <version>4.12.01</version>
+        <version>4.14.01</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX600</series>
+        <series>RX700</series>
+        <group omit_board="true">RX65N</group>
+        <group omit_board="true">RX66N</group>
+        <group omit_board="true">RX72M</group>
+        <group omit_board="true">RX72N</group>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_glcdc_rx</name>
+        <version>1.50</version>
+        <zipsource>r_glcdc_rx_v1.50.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>5.20</version>
+            <version>5.50</version>
+            <version>5.52</version>
+            <version>5.61</version>
+        </dependency>
+        <application>other</application>
+        <desc>Graphics LCD Controller Module.</desc>
+        <details>The GLCDC FIT module provides the method to output image data read from memory to the LCD panel. </details>
+        <function>GLCDC</function>
+        <incdir>r_config</incdir>
+        <incdir>r_glcdc_rx</incdir>
+    </package>
+
+</refinfo>

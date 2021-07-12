@@ -26,23 +26,19 @@
 /* --------------------------------------------- Global Definitions */
 
 /**
- * \defgroup access_module ACCESS (Mesh Access Layer)
+ * \defgroup access_module Access Layer (ACCESS)
+ * \ingroup mesh_core_block
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Access (ACCESS) module to the Application and other upper
  *  layers of the stack.
- */
-
-/**
- * \defgroup access_defines Defines
- * \{
- * Describes defines for the module.
  */
 
 /**
  * \defgroup access_constants Constants
  * \{
  * Describes Constants defined by the module.
+ * \brief This section describes the EtherMind Mesh Access Layer Constants.
  */
 
 /**
@@ -52,13 +48,16 @@
 #define MS_ACCESS_MAX_PKT_SIZE                                                  384
 
 
-/** Array sizes for use in the Access layer */
+/** \name Array sizes for use in the Access layer
+ *  \{
+ */
 /** Size of Virtual Address (Label UUID) */
 #define MS_ACCESS_VADDR_LABEL_UUID_SIZE                                         16
 /** Size of NetKey */
 #define MS_ACCESS_NETKEY_SIZE                                                   16
 /** Size of AppKey */
 #define MS_ACCESS_APPKEY_SIZE                                                   16
+/** \} */
 
 /** Default Node Identifier */
 #define MS_ACCESS_DEFAULT_NODE_ID                                               0x00
@@ -78,15 +77,20 @@
 /** Maximum TTL value - used as initializer */
 #define ACCESS_MAX_TTL                                                          0x7F
 
-/** Model Specific Request Message Type: Get, Set or Others */
+/** \name Model Specific Request Message Type
+ *  \{
+ */
 /** Model Specific Request Message Type: Get */
 #define MS_ACCESS_MODEL_REQ_MSG_T_GET                                           0
 /** Model Specific Request Message Type: Set */
 #define MS_ACCESS_MODEL_REQ_MSG_T_SET                                           1
 /** Model Specific Request Message Type: Others */
 #define MS_ACCESS_MODEL_REQ_MSG_T_OTHERS                                        2
+/** \} */
 
-/** Key Refersh Phase states */
+/** \name Key Refersh Phase states
+ *  \{
+ */
 /** Key Refersh Phase - Normal */
 #define MS_ACCESS_KEY_REFRESH_PHASE_NORMAL                                      0x00
 /** Key Refersh Phase - 1 */
@@ -95,27 +99,17 @@
 #define MS_ACCESS_KEY_REFRESH_PHASE_2                                           0x02
 /** Key Refersh Phase - 3 */
 #define MS_ACCESS_KEY_REFRESH_PHASE_3                                           0x03
+/** \} */
 
 /** Invalid Access Address */
 #define MS_ACCESS_ADDRESS_INVALID_HANDLE                                        0xFFFFFFFF
 
 /** \} */
 
-/** \} */
-
-/**
- *  \defgroup access_events Events
- *  \{
- *  This section lists the Asynchronous Events notified to Application by the
- *  Module.
- */
-
-/** \} */
-
 /**
  *  \defgroup access_marcos Utility Macros
  *  \{
- *  This section defines the utility macros for use by the application.
+ *  \brief This section defines the utility macros for use by the application.
  *
  */
 /** Populates the given element with the Model information */
@@ -146,14 +140,20 @@
 
 /* --------------------------------------------- Data Types/ Structures */
 
+/**
+ * \ingroup access_types_structures
+ * \{
+ */
+
 /** Access Model Handle */
 typedef UINT16          MS_ACCESS_MODEL_HANDLE;
 
+/** \} */
 
 /**
  *  \defgroup access_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
+ *  \brief This section Describes the module Notification Callback interface offered
  *  to the application
  */
 /**
@@ -200,8 +200,9 @@ typedef API_RESULT (* MS_ACCESS_MODEL_PUBLISH_TIMEOUT_CB)
 /** \} */
 
 /**
- *  \defgroup access_structures Structures
+ *  \defgroup access_types_structures Types/Structures
  *  \{
+ *  \brief This section describes the EtherMind Mesh Access Layer Types/Structures.
  */
 
 /** SIG Model ID */
@@ -422,7 +423,7 @@ typedef struct _MS_PROV_DEV_ENTRY
 /**
  * \defgroup access_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Access Layer APIs.
+ * \brief This section describes the EtherMind Mesh Access Layer APIs.
  */
 
 #ifdef __cplusplus
@@ -710,6 +711,9 @@ API_RESULT MS_access_send_pdu
 API_RESULT MS_access_get_composition_data(/* OUT */ MS_BUFFER * buffer);
 
 /* Configuration Manager related interfaces */
+/** \name Functions for Configuration Manager
+ *  \{
+ */
 
 /**
  *  \brief To reset a node
@@ -897,7 +901,11 @@ API_RESULT MS_access_cm_get_features
            (
                /* OUT */ UINT8   * features
            );
+/** \} */
 
+/** \name Macros for Optional Features
+ *  \{
+ */
 /** Enable Relay Feature */
 #define MS_ENABLE_RELAY_FEATURE() \
         MS_access_cm_set_features_field(MS_ENABLE, MS_FEATURE_RELAY)
@@ -929,7 +937,11 @@ API_RESULT MS_access_cm_get_features
 /** Disable Low Power Feature */
 #define MS_DISABLE_LPN_FEATURE() \
         MS_access_cm_set_features_field(MS_DISABLE, MS_FEATURE_LPN)
+/** \} */
 
+/** \name Functions for Configuration Manager
+ *  \{
+ */
 /**
  *  \brief To get friendship role of the node
  *
@@ -1648,6 +1660,7 @@ API_RESULT MS_access_cm_get_appkey_index_list
                /* INOUT */ UINT16             * appkey_count,
                /* OUT */   UINT16             * appkey_index_list
            );
+/** \} */
 
 /**
  *  \brief To bind a model with an AppKey
@@ -1683,6 +1696,9 @@ API_RESULT MS_access_unbind_model_app
                /* IN */ UINT16                    appkey_index
            );
 
+/** \name Functions for Configuration Manager
+ *  \{
+ */
 /**
  *  \brief To get list of all AppKeys associated with a model
  *
@@ -1859,6 +1875,7 @@ API_RESULT MS_access_cm_get_all_model_subscription_list
                /* INOUT */ UINT16                  * sub_addr_count,
                /* OUT */   UINT16                  * sub_addr_list
            );
+/** \} */
 
 /**
  *  \brief To check if valid element address to receive a packet
@@ -1924,6 +1941,21 @@ API_RESULT MS_access_ps_get_handle_and_offset
                /* OUT */ UINT32       * offset
            );
 #endif /* MS_STORAGE */
+
+#ifdef MS_ACCESS_IV_UPDT_TEST_MODE_SUPPORT
+/**
+ *  \brief To set the IV Update Test Mode feature
+ *
+ *  \par Description
+ *  This routine is used to set the IV Update Test Mode flag.
+ *
+ *  \param [in] test_mode This flag is used to either enable or disable the
+ *                        IV Update Test Mode feature.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_access_set_iv_update_test_mode(UCHAR test_mode);
+#endif /* MS_ACCESS_IV_UPDT_TEST_MODE_SUPPORT */
 
 #ifdef __cplusplus
 };

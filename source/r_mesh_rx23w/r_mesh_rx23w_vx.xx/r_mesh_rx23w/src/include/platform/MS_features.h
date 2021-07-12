@@ -206,4 +206,13 @@
  */
 #define MS_ACCESS_PUBLISH_TIMER_SUPPORT
 
+/*
+ *  MS_ACCESS_IV_UPDT_TEST_MODE_SUPPORT
+ *
+ *  This flag enables the IVI Test Mode support.
+ *
+ *  Dependency: None.
+ */
+#define MS_ACCESS_IV_UPDT_TEST_MODE_SUPPORT
+
 #endif /* _H_MS_FEATURES_ */

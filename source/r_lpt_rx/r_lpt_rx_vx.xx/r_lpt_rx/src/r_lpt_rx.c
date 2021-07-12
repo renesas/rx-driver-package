@@ -14,44 +14,65 @@
  * following link:
  * http://www.renesas.com/disclaimer 
  *
- * Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.    
+ * Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_lpt_rx.c
- * Version      : 1.00
+ * Version      : 2.00
  * Description  : Functions for using Low Power Timer
- ************************************************************************************************************************
+ ***********************************************************************************************************************
  * History : DD.MM.YYYY Version Description  
  *         : 01.03.2016 1.00    First Release
  *         : 01.07.2016 1.10    Added support for RX130,RX230,RX231
  *         :                    Lock release then lpt_open() error occurred
  *         : 04.08.2016 1.11    Added command LPT_CMD_COUNT_RESET to R_LPT_Control()
  *         : 04.22.2019 1.23    Delete inline definition of GetVersion function
+ *         : 10.06.2020 2.00    Added support for RX23W
+ *                              Modified comment of API function to Doxygen style.
  ***********************************************************************************************************************/
-/*******************************************************************************
+/***********************************************************************************************************************
   Includes <System Includes> , "Project Includes"
-*******************************************************************************/
+************************************************************************************************************************/
 /* Access to peripherals and board defines. */
 #include "platform.h"
 
 /* Defines for LPT support */
 #include "r_lpt_rx_if.h"
 
-/* Include specifics for chosen MCU.  */
+/* Include specifics for chosen MCU. */
 #include "r_lpt_rx_private.h"
 
-/*****************************************************************************
-* Function Name: R_LPT_Open
-* Description  : Initializes the I/O register for LPT control.
-* Arguments    : period -
-*                    LPT period (microsecond)
-* Return Value : LPT_SUCCESS -
-*                    Successful operation
-*                LPT_ERR_LOCK_FUNC -
-*                    Operating. The LPT has been used.
-*                LPT_ERR_INVALID_ARG -
-*                    An invalid argument included.
-******************************************************************************/
+/***********************************************************************************************************************
+ * Function Name: R_LPT_Open
+ ******************************************************************************************************************/ /**
+ * @brief The function initializes the LPT FIT module. This function must be called before calling any other API        
+ *        functions.
+ * @param[in] period 
+ *            LPT cycle (unit: microsecond)
+ * @retval    LPT_SUCCESS: Processing completed successfully.
+ * @retval    LPT_ERR_LOCK_FUNC: Operating. LPT has been used.
+ * @retval    LPT_ERR_INVALID_ARG: Argument has an invalid value.
+ * @details   The initialization is performed to start LPT operation and then the LPT cycle specified with the argument 
+ *            is set.\n
+ *            Operations included in the initialization are as follows:
+ *            \li Enables exiting software standby mode using the LPT.
+ *            \li Sets the LPT clock source and the division ratio.
+ *            \li Enables compare match 0.
+ *            \li Sets the LPT cycle.
+ *            \li Sets the value of LPT compare match 0.
+ *            \li Provides the LPT clock.
+ *            \li Resets the LPT.
+ * @note      Call this function while the LPT clock source oscillation is stabilized.\n
+ *            When the sub-clock oscillator is selected as the LPT clock source, the LPT cycle must be specified from 
+ *            153 to 64000488.\n
+ *            When the IWDT-dedicated on-chip oscillator is selected as the LPT clock source, the LPT cycle must be
+ *            specified from 334 to 139811199.\n
+ *            When the IWDT-dedicated on-chip oscillator is selected as the LPT clock source, set the OFS0.IWDTSLCSTP 
+ *            bit to 0 (counting stop is disabled) in IWDT auto-start mode, and set the IWDTCSTPR.SLCSTP bit to 0 
+ *            (counting stop is disabled) in other modes.\n
+ *            MCU executes the program after MCU waits for the stability time for Main Clock Oscillator Wait Control
+ *            Register (SMOSCWTCR) when MCU is resumed from software standby mode.
+ */
 lpt_err_t R_LPT_Open(uint32_t const period)
 {
     lpt_err_t   err = LPT_SUCCESS;
@@ -76,17 +97,26 @@ lpt_err_t R_LPT_Open(uint32_t const period)
     }
     return (err);
 }
-/******************************************************************************
+/***********************************************************************************************************************
  * End of function R_LPT_Open()
- ******************************************************************************/
+ ***********************************************************************************************************************/
 
-/*****************************************************************************
-* Function Name: R_LPT_Close
-* Description  : Resets the LPT driver.
-* Arguments    : none
-* Return Value : LPT_SUCCESS -
-*                    Successful operation
-******************************************************************************/
+/***********************************************************************************************************************
+ * Function Name: R_LPT_Close
+ ******************************************************************************************************************/ /**
+ * @brief This function performs processing to stop the LPT.
+ * @retval    LPT_SUCCESS: Processing completed successfully.
+ * @details   The following operations are performed to stop the LPT.
+ *            \li Stops the LPT.
+ *            \li Resets the LPT if the LPT clock is provided.
+ *            \li Stops the LPT clock.
+ *            \li Resets the value of LPT compare match 0.
+ *            \li Resets the LPT cycle.
+ *            \li Resets low-power timer control register 1.
+ *            \li Disables exiting software standby mode using the LPT.
+ * @note      Configure the LPT settings in the R_LPT_Open function first, wait one or more cycles of the LPT clock
+ *            source, and then call this function.
+ */
 lpt_err_t R_LPT_Close(void)
 {
     /* Calls the API function. */
@@ -97,20 +127,24 @@ lpt_err_t R_LPT_Close(void)
 
     return (LPT_SUCCESS);
 }
-/******************************************************************************
+/***********************************************************************************************************************
  * End of function R_LPT_Close()
- ******************************************************************************/
+ ***********************************************************************************************************************/
 
-/*****************************************************************************
-* Function Name: R_LPT_Control
-* Description  : This function controls start/stop of the low power timer counter.
-* Arguments    : cmd -
-*                    command to run
-* Return Value : LPT_SUCCESS -
-*                    Command completed successfully.
-*                LPT_ERR_INVALID_ARG -
-*                    The cmd value contains an invalid value.
-******************************************************************************/
+/***********************************************************************************************************************
+ * Function Name: R_LPT_Control
+ ******************************************************************************************************************/ /**
+ * @brief This function performs processing to start, stop, or reset LPT count.
+ * @param[in] cmd
+ *            Command to be executed (see 2.9, Parameters in the application note).
+ * @retval    LPT_SUCCESS: Processing completed successfully.
+ * @retval    LPT_ERR_INVALID_ARG: Argument has an invalid value.
+ * @retval    LPT_ERR_CONDITION_NOT_MET: Condition not met.
+ * @details   This API function controls start/stop of LPT count.\n
+ *            The counter reset command (LPT_CMD_COUNT_RESET) must be executed while LPT count stops. If
+ *            LPT_CMD_COUNT_RESET is executed during counting, LPT_ERR_CONDITION_NOT_MET is returned.
+ * @note      Call this function after the LPT have been configured in the R_LPT_Open function.
+ */
 lpt_err_t R_LPT_Control(lpt_cmd_t const cmd)
 {
     lpt_err_t   err = LPT_SUCCESS;
@@ -142,27 +176,28 @@ lpt_err_t R_LPT_Control(lpt_cmd_t const cmd)
 
     return err;
 }
-/******************************************************************************
+/***********************************************************************************************************************
  * End of function R_LPT_Control()
- ******************************************************************************/
+ ***********************************************************************************************************************/
 
-/*****************************************************************************
-* Function Name: R_LPT_GetVersion
-* Description  : Returns the version of this module. The version number is 
-*                encoded such that the top two bytes are the major version
-*                number and the bottom two bytes are the minor version number.
-* Arguments    : none
-* Return Value : version number
-******************************************************************************/
+/***********************************************************************************************************************
+ * Function Name: R_LPT_GetVersion
+ ******************************************************************************************************************/ /**
+ * @brief This function returns the module version.
+ * @return    Version number
+ * @details   Returns the module version number. The version number is encoded where the top 2 bytes are the major
+ *            version number and the bottom 2 bytes are the minor version number.
+ * @note      None
+ */
 uint32_t  R_LPT_GetVersion(void)
 {
     uint32_t const version = (LPT_VERSION_MAJOR << 16) | LPT_VERSION_MINOR;
 
     return version;
 }
-/******************************************************************************
+/***********************************************************************************************************************
  * End of function R_LPT_GetVersion()
- ******************************************************************************/
+ ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
  * End of File

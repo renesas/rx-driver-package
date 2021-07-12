@@ -30,6 +30,7 @@
 *           25.11.2019 3.30    Added support RX13T.
 *                              Removed support for Generation 1 devices.
 *           30.12.2019 3.40    Added support RX66N, RX72N.
+*           31.03.2020 3.50    Added support RX23E-A.
 ************************************************************************************************************************/
 
 #ifndef SCI_RX_PLATFORM_H
@@ -54,6 +55,8 @@ Includes   <System Includes> , "Project Includes"
 #include "./targets/rx230/r_sci_rx230_private.h"  /* RX230 */
 #elif defined(BSP_MCU_RX231)
 #include "./targets/rx231/r_sci_rx231_private.h"  /* RX231 */
+#elif defined(BSP_MCU_RX23E_A)
+#include "./targets/rx23e-a/r_sci_rx23e-a_private.h"  /* RX23E-A */
 #elif defined(BSP_MCU_RX23T)
 #include "./targets/rx23t/r_sci_rx23t_private.h"  /* RX23T */
 #elif defined(BSP_MCU_RX23W)

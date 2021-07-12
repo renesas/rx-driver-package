@@ -28,6 +28,7 @@
  *         : 01.04.2019 1.41    Changed Minor version to 1.41.
  *         : 01.07.2019 1.42    Changed Minor version to 1.42.
  *         : 14.11.2019 2.00    Changed version to 2.00.
+ *         : 10.06.2020 2.01    Changed version to 2.01.
  ***********************************************************************************************************************/
 
 #ifndef R_LPC_RX_IF_H
@@ -52,7 +53,7 @@
 
 /* Version Number of API. */
     #define LPC_RX_VERSION_MAJOR           (2)
-    #define LPC_RX_VERSION_MINOR           (0)
+    #define LPC_RX_VERSION_MINOR           (1)
 
 /***********************************************************************************************************************
  Typedef definitions

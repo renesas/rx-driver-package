@@ -31,7 +31,6 @@
 *         : 31.10.2019 1.01    Add doxygen comments.
 ***********************************************************************************************************************/
 
-#include "r_ble_rx23w_if.h"
 #include "r_ble_serv_common.h"
 
 #ifndef R_BLE_SERVC_IF_H
@@ -49,7 +48,7 @@
  * @def BLE_SERVC_MAX_NUM_OF_SAVED
  * @brief Max number of connection to be saved.
  */
-#define BLE_SERVC_MAX_NUM_OF_SAVED      (BLE_CFG_RF_CONN_MAX)
+#define BLE_SERVC_MAX_NUM_OF_SAVED      (BLE_PRF_CONN_MAX)
 
 /** 
  * @def BLE_SERVC_MAX_NUM_OF_CLIENTS
@@ -65,7 +64,7 @@
  * @param[in] inst_idx Service index. 4bit is used.
  * @param[in] evt_idx Event index. 5bit is used.
  */
-#define BLE_SERVC_MULTI_ATTR_EVENT(attr_idx, inst_idx, evt_idx) ((attr_idx << 10) | (inst_idx << 6) | (evt_idx << 0))
+#define BLE_SERVC_MULTI_ATTR_EVENT(attr_idx, inst_idx, evt_idx) ((uint16_t)((attr_idx << 10) | (inst_idx << 6) | (evt_idx << 0)))
 
 /** 
  * @def BLE_SERVC_ATTR_EVENT

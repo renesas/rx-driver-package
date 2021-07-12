@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_wifi_esp8266
 VERSION = 		1.00
-MDF =			V2
+MDF = V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

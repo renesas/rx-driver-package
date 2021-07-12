@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 /*******************************************************************************************************************//**
@@ -58,7 +58,8 @@ extern const st_ble_cli_cmd_t g_abs_cmd;
 /*******************************************************************************************************************//**
  * @fn void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t *data)
  * @brief GAP event handler.
- * @details This function shall be called from GAP callback registered by @ref R_BLE_VS_RegisterCb function.
+ * @details This function shall be called from GAP callback registered by 
+ *          @ref R_BLE_GAP_Init or @ref R_BLE_ABS_Init function.
 ***********************************************************************************************************************/
 void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t *data);
 /*@}*/

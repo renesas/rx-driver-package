@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 #include <string.h>
 #include "r_ble_rx23w_if.h"
@@ -24,15 +24,17 @@
 
 char *BLE_BD_ADDR_STR(uint8_t *p_addr, uint8_t addr_type)
 {
-    static char addr_str[24];
+    static char addr_str[28];
 
-    memset(addr_str, '\0', 24);
+    memset(addr_str, '\0', 28);
 
     if (NULL != p_addr)
     {
         sprintf(addr_str, "%02X:%02X:%02X:%02X:%02X:%02X %s",
                 p_addr[5], p_addr[4], p_addr[3], p_addr[2], p_addr[1], p_addr[0],
-                (addr_type == BLE_GAP_ADDR_PUBLIC) ? "pub" : "rnd");
+                (BLE_GAP_ADDR_PUBLIC == addr_type) ? "pub" : 
+                    ((BLE_GAP_ADDR_RAND == addr_type) ? "rnd" : 
+                        ((BLE_GAP_ADDR_RPA_ID_PUBLIC == addr_type) ? "rpa_pub" : "rpa_rnd")));
     }
 
     return addr_str;
@@ -46,12 +48,12 @@ char *BLE_UUID_STR(uint8_t *p_uuid, uint8_t uuid_type)
 
     if (NULL != p_uuid)
     {
-        if (uuid_type == 0)
+        if (uuid_type == BLE_GATT_16_BIT_UUID_FORMAT)
         {
             /* For 16bit, ex: 0xE29B */
             sprintf(uuid_str, "0x%02X%02X", p_uuid[1], p_uuid[0]);
         }
-        else if (uuid_type == 1)
+        else if (uuid_type == BLE_GATT_128_BIT_UUID_FORMAT)
         {
             /* For 128bit, ex: 550E8400-E29B-41D4-A716-446655440000 */
             sprintf(uuid_str, "%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
@@ -70,20 +72,19 @@ char *BLE_UUID_STR(uint8_t *p_uuid, uint8_t uuid_type)
 }
 
 #else /* (BLE_DEFAULT_LOG_LEVEL != 0) && (BLE_CFG_HCI_MODE_EN == 0) */
+static char gs_dummy_str[] = "-";
 char *BLE_BD_ADDR_STR(uint8_t *p_addr, uint8_t addr_type)
 {
-    static char addr = '\n';
     (void)p_addr;
     (void)addr_type;
-    return &addr;
+    return &gs_dummy_str[0];
 }
 
 char *BLE_UUID_STR(uint8_t *p_uuid, uint8_t uuid_type)
 {
-    static char uuid = '\n';
     (void)p_uuid;
     (void)uuid_type;
-    return &uuid;
+    return &gs_dummy_str[0];
 }
 
 #endif /* (BLE_DEFAULT_LOG_LEVEL != 0) && (BLE_CFG_HCI_MODE_EN == 0) */

@@ -31,6 +31,8 @@
 *         : 01.06.2018 1.70    Updated version to 1.70
 *         : 03.12.2018 1.71    Updated version to 1.71 for update of xml file.
 *         : 07.02.2019 1.80    Updated version to 1.80.
+*         : 10.06.2020 1.81    Updated version to 1.81.
+*         : 30.11.2020 1.82    Updated version to 1.82 for e2studio 2020-10 support.
 ***********************************************************************************************************************/
 
 #ifndef LONGQ_IF_H
@@ -46,7 +48,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
 #define LONGQ_VERSION_MAJOR (1)
-#define LONGQ_VERSION_MINOR (80)
+#define LONGQ_VERSION_MINOR (82)
 
 
 /*****************************************************************************

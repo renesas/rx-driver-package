@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011-2019 Renesas Electronics Corporation, All Rights Reserved.
+* Copyright (C) 2011-2021 Renesas Electronics Corporation, All Rights Reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_stdint.h

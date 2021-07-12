@@ -52,6 +52,8 @@
           : 12.11.2019 3.21    Removed definitions for MTU5 in DTC activation interrupt source for RX23W.
 *         : 25.11.2019 3.30    Added support for RX13T.
 *         : 30.12.2019 3.40    Added support for RX66N, RX72N.
+*         : 31.03.2020 3.50    Added support for RX23E-A.
+*         : 30.06.2020 3.60    Changed revision to reflect demo upgrade.
 *******************************************************************************/
 #ifndef DTC_RX_IF_H
 #define DTC_RX_IF_H
@@ -74,7 +76,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define DTC_VERSION_MAJOR  (3)
-#define DTC_VERSION_MINOR  (40)
+#define DTC_VERSION_MINOR  (60)
 
 /*******************************************************************************
 Typedef definitions
@@ -243,6 +245,8 @@ typedef struct st_transfer_data { /* 4 long-words */
     #include ".\src\targets\rx72t\r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX231)
     #include ".\src\targets\rx231\r_dtc_rx_target_if.h"
+#elif defined(BSP_MCU_RX23E_A)
+    #include ".\src\targets\rx23e-a\r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX230)
     #include ".\src\targets\rx230\r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX65N)

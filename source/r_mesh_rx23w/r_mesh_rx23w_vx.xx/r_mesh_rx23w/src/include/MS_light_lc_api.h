@@ -20,9 +20,10 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup light_lc_module LIGHT_LC (Mesh Light Lc Model)
+ * \defgroup light_lc_module Light Lc Model (LIGHT_LC)
+ * \ingroup mesh_models_block
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Light Lc Model (LIGHT_LC) module to the Application.
  */
 
@@ -32,7 +33,7 @@
 /**
  *  \defgroup light_lc_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
+ *  \brief This section Describes the module Notification Callback interface offered
  *  to the application
  */
 
@@ -64,14 +65,14 @@ typedef API_RESULT (* MS_LIGHT_LC_SERVER_CB)
  * Light Lc Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_LIGHT_LC_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -81,6 +82,7 @@ typedef API_RESULT (* MS_LIGHT_LC_CLIENT_CB)
 /**
  *  \defgroup light_lc_structures Structures
  *  \{
+ *  \brief This section describes the EtherMind Mesh Light HSL Model Structures.
  */
 
 /**
@@ -211,12 +213,12 @@ typedef struct MS_light_lc_property_status_struct
 /**
  * \defgroup light_lc_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Light Lc Model APIs.
+ * \brief This section describes the EtherMind Mesh Light Lc Model APIs.
  */
 /**
- * \defgroup light_lc_ser_api_defs Light Lc Server API Definitions
+ * \defgroup light_lc_ser_api_defs Light Lc Server API
  * \{
- * This section describes the Light Lc Server APIs.
+ * \brief This section describes the Light Lc Server APIs.
  */
 
 /**
@@ -275,9 +277,9 @@ API_RESULT MS_light_lc_server_state_update
 /** \} */
 
 /**
- * \defgroup light_lc_cli_api_defs Light Lc Client API Definitions
+ * \defgroup light_lc_cli_api_defs Light Lc Client API
  * \{
- * This section describes the Light Lc Client APIs.
+ * \brief This section describes the Light Lc Client APIs.
  */
 
 /**
@@ -339,6 +341,9 @@ API_RESULT MS_light_lc_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
+/** \name Messsage Send
+ *  \{
+ */
 /**
  *  \brief API to get the Light LC Mode state of an element.
  *
@@ -563,6 +568,7 @@ API_RESULT MS_light_lc_client_send_reliable_pdu
             param,\
             0xFFFFFFFF\
         )
+/** \} */
 /** \} */
 /** \} */
 /** \} */

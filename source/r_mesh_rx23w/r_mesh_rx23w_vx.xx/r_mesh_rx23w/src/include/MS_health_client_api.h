@@ -20,9 +20,10 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup health_module HEALTH (Mesh Health Model)
+ * \defgroup health_module Health Model (HEALTH)
+ * \ingroup mesh_models_block
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Health Model (HEALTH) module to the Application.
  */
 
@@ -32,7 +33,7 @@
 /**
  *  \defgroup health_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
+ *  \brief This section Describes the module Notification Callback interface offered
  *  to the application
  */
 
@@ -42,14 +43,14 @@
  * Health Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_HEALTH_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -59,6 +60,7 @@ typedef API_RESULT (* MS_HEALTH_CLIENT_CB)
 /**
  *  \defgroup health_structures Structures
  *  \{
+ *  \brief This section describes the EtherMind Mesh Health Model Structures.
  */
 
 /**
@@ -135,12 +137,12 @@ typedef struct MS_health_attention_struct
 /**
  * \defgroup health_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Health Model APIs.
+ * \brief This section describes the EtherMind Mesh Health Model APIs.
  */
 /**
- * \defgroup health_cli_api_defs Health Client API Definitions
+ * \defgroup health_cli_api_defs Health Client API
  * \{
- * This section describes the Health Client APIs.
+ * \brief This section describes the Health Client APIs.
  */
 
 /**
@@ -202,6 +204,9 @@ API_RESULT MS_health_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
+/** \name Messsage Send
+ *  \{
+ */
 /**
  *  \brief API to report the registered fault state
  *
@@ -414,6 +419,7 @@ API_RESULT MS_health_client_send_reliable_pdu
             param,\
             0xFFFFFFFF\
         )
+/** \} */
 /** \} */
 /** \} */
 /** \} */

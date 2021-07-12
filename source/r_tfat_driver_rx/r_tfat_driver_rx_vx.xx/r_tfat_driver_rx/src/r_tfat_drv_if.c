@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014(2015-2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014(2015-2020) Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_tfat_drv_if.c
@@ -36,6 +36,8 @@
 *              : 08.08.2019 2.00     Added support for FreeRTOS and 
 *                                    Renesas uITRON (RI600V4).
 *                                    Added support for GNUC and ICCRX.
+*              : 10.06.2020 2.10     Added Support MMC Firmware and 
+*                                    FLASH Firmware.
 *******************************************************************************/
 
 /******************************************************************************
@@ -365,6 +367,82 @@ static uint32_t TFAT_DRIVE_USB_MINI_ALLOC = (USB_MINI_NUM_9 | USB_MINI_NUM_8 | U
 
 #endif // (TFAT_USB_MINI_DRIVE_NUM > 0)
 
+/* for FLASH */
+#if (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
+#if (TFAT_DRIVE_ALLOC_NUM_0 == TFAT_CTRL_SERIAL_FLASH)
+#define SERIAL_FLASH_NUM_0    (1)
+#define DRV0_DEV_CH  (0)
+#else
+#define SERIAL_FLASH_NUM_0    (0)
+#endif // (TFAT_DRIVE_ALLOC_NUM_0 == TFAT_CTRL_SERIAL_FLASH)
+#if (TFAT_DRIVE_ALLOC_NUM_1 == TFAT_CTRL_SERIAL_FLASH)
+#define SERIAL_FLASH_NUM_1    (1<<1)
+#define DRV1_DEV_CH  (0 + SERIAL_FLASH_NUM_0)
+#else
+#define SERIAL_FLASH_NUM_1    (0)
+#endif // (TFAT_DRIVE_ALLOC_NUM_1 == TFAT_CTRL_SERIAL_FLASH)
+#if (TFAT_DRIVE_ALLOC_NUM_2 == TFAT_CTRL_SERIAL_FLASH)
+#define SERIAL_FLASH_NUM_2    (1<<2)
+#define DRV2_DEV_CH  (0 + SERIAL_FLASH_NUM_0 + (SERIAL_FLASH_NUM_1>>1))
+#else
+#define SERIAL_FLASH_NUM_2    (0)
+#endif // (TFAT_DRIVE_ALLOC_NUM_2 == TFAT_CTRL_SERIAL_FLASH)
+#if (TFAT_DRIVE_ALLOC_NUM_3 == TFAT_CTRL_SERIAL_FLASH)
+#define SERIAL_FLASH_NUM_3    (1<<3)
+#define DRV3_DEV_CH  (0 + SERIAL_FLASH_NUM_0 + (SERIAL_FLASH_NUM_1>>1) + (SERIAL_FLASH_NUM_2>>2))
+#else
+#define SERIAL_FLASH_NUM_3    (0)
+#endif // (TFAT_DRIVE_ALLOC_NUM_3 == TFAT_CTRL_SERIAL_FLASH)
+#if (TFAT_DRIVE_ALLOC_NUM_4 == TFAT_CTRL_SERIAL_FLASH)
+#define SERIAL_FLASH_NUM_4    (1<<4)
+#define DRV4_DEV_CH  (0 + SERIAL_FLASH_NUM_0 + (SERIAL_FLASH_NUM_1>>1) + (SERIAL_FLASH_NUM_2>>2) + (SERIAL_FLASH_NUM_3>>3))
+#else
+#define SERIAL_FLASH_NUM_4    (0)
+#endif // (TFAT_DRIVE_ALLOC_NUM_4 == TFAT_CTRL_SERIAL_FLASH)
+#if (TFAT_DRIVE_ALLOC_NUM_5 == TFAT_CTRL_SERIAL_FLASH)
+#define SERIAL_FLASH_NUM_5    (1<<5)
+#define DRV5_DEV_CH  (0 + SERIAL_FLASH_NUM_0 + (SERIAL_FLASH_NUM_1>>1) + (SERIAL_FLASH_NUM_2>>2) + (SERIAL_FLASH_NUM_3>>3) + (SERIAL_FLASH_NUM_4>>4))
+#else
+#define SERIAL_FLASH_NUM_5    (0)
+#endif // (TFAT_DRIVE_ALLOC_NUM_5 == TFAT_CTRL_SERIAL_FLASH)
+#if (TFAT_DRIVE_ALLOC_NUM_6 == TFAT_CTRL_SERIAL_FLASH)
+#define SERIAL_FLASH_NUM_6    (1<<6)
+#define DRV6_DEV_CH  (0 + SERIAL_FLASH_NUM_0 + (SERIAL_FLASH_NUM_1>>1) + (SERIAL_FLASH_NUM_2>>2) + (SERIAL_FLASH_NUM_3>>3) + (SERIAL_FLASH_NUM_4>>4) \
+                        + (SERIAL_FLASH_NUM_5>>5))
+#else
+#define SERIAL_FLASH_NUM_6    (0)
+#endif // (TFAT_DRIVE_ALLOC_NUM_6 == TFAT_CTRL_SERIAL_FLASH)
+#if (TFAT_DRIVE_ALLOC_NUM_7 == TFAT_CTRL_SERIAL_FLASH)
+#define SERIAL_FLASH_NUM_7    (1<<7)
+#define DRV7_DEV_CH  (0 + SERIAL_FLASH_NUM_0 + (SERIAL_FLASH_NUM_1>>1) + (SERIAL_FLASH_NUM_2>>2) + (SERIAL_FLASH_NUM_3>>3) + (SERIAL_FLASH_NUM_4>>4) \
+                        + (SERIAL_FLASH_NUM_5>>5) + (SERIAL_FLASH_NUM_6>>6))
+#else
+#define SERIAL_FLASH_NUM_7    (0)
+#endif // (TFAT_DRIVE_ALLOC_NUM_7 == TFAT_CTRL_SERIAL_FLASH)
+#if (TFAT_DRIVE_ALLOC_NUM_8 == TFAT_CTRL_SERIAL_FLASH)
+#define SERIAL_FLASH_NUM_8    (1<<8)
+#define DRV8_DEV_CH  (0 + SERIAL_FLASH_NUM_0 + (SERIAL_FLASH_NUM_1>>1) + (SERIAL_FLASH_NUM_2>>2) + (SERIAL_FLASH_NUM_3>>3) + (SERIAL_FLASH_NUM_4>>4) \
+                       + (SERIAL_FLASH_NUM_5>>5) + (SERIAL_FLASH_NUM_6>>6) + (SERIAL_FLASH_NUM_7>>7))
+#else
+#define SERIAL_FLASH_NUM_8    (0)
+#endif // (TFAT_DRIVE_ALLOC_NUM_8 == TFAT_CTRL_SERIAL_FLASH)
+#if (TFAT_DRIVE_ALLOC_NUM_9 == TFAT_CTRL_SERIAL_FLASH)
+#define SERIAL_FLASH_NUM_9    (1<<9)
+#define DRV9_DEV_CH  (0 + SERIAL_FLASH_NUM_0 + (SERIAL_FLASH_NUM_1>>1) + (SERIAL_FLASH_NUM_2>>2) + (SERIAL_FLASH_NUM_3>>3) + (SERIAL_FLASH_NUM_4>>4) \
+                        + (SERIAL_FLASH_NUM_5>>5) + (SERIAL_FLASH_NUM_6>>6) + (SERIAL_FLASH_NUM_7>>7) + (SERIAL_FLASH_NUM_8>>8))
+#else
+#define SERIAL_FLASH_NUM_9    (0)
+#endif // (TFAT_DRIVE_ALLOC_NUM_9 == TFAT_CTRL_SERIAL_FLASH)
+
+static uint32_t TFAT_DRIVE_FLASH_ALLOC = (SERIAL_FLASH_NUM_9 | SERIAL_FLASH_NUM_8 | SERIAL_FLASH_NUM_7 | SERIAL_FLASH_NUM_6 | SERIAL_FLASH_NUM_5 | SERIAL_FLASH_NUM_4 | \
+                                        SERIAL_FLASH_NUM_3 | SERIAL_FLASH_NUM_2 | SERIAL_FLASH_NUM_1 | SERIAL_FLASH_NUM_0);
+
+#if TFAT_SERIAL_FLASH_DRIVE_NUM != ( (SERIAL_FLASH_NUM_9>>9)+(SERIAL_FLASH_NUM_8>>8)+(SERIAL_FLASH_NUM_7>>7)+(SERIAL_FLASH_NUM_6>>6)+(SERIAL_FLASH_NUM_5>>5)+ \
+                            (SERIAL_FLASH_NUM_4>>4)+(SERIAL_FLASH_NUM_3>>3)+(SERIAL_FLASH_NUM_2>>2)+(SERIAL_FLASH_NUM_1>>1)+SERIAL_FLASH_NUM_0 )
+#error "Error! Invalid setting for TFAT_SERIAL_FLASH_DRIVE_NUM or TFAT_DRIVE_ALLOC_NUM_x in r_tfat_driver_rx_config.h"
+#endif
+
+#endif // (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
 
 #ifndef DRV0_DEV_CH
 #define DRV0_DEV_CH  (0)
@@ -473,6 +551,19 @@ static uint8_t chk_use_usb_mini(uint8_t drive)
 #endif // USE_USB
 
 /******************************************************************************
+* Function Name : chk_use_flash
+* Description   : allocation check
+* Arguments     : uint8_t drive : Physical drive number for TFAT module
+* Return value  : true : 0x01
+******************************************************************************/
+#if TFAT_SERIAL_FLASH_DRIVE_NUM > 0
+static uint8_t chk_use_flash(uint8_t drive)
+{
+    return ( ( (TFAT_DRIVE_FLASH_ALLOC & (0x01 << drive) ) != 0) ?  0x01 : 0x00);
+}
+#endif // USE_FLASH
+
+/******************************************************************************
 * Function Name : disk_initialize
 * Description   : This function initializes the memory medium
 *               :    for file operations
@@ -497,10 +588,24 @@ DSTATUS disk_initialize(BYTE pdrv)
     }
 #endif
 
+#if (TFAT_MMC_DRIVE_NUM > 0)
+    if ( chk_use_mmc(pdrv) )
+    {
+        ret = mmcif_disk_initialize( drive_alloc_tbl[pdrv][1] ); /* function for mmc */
+    }
+#endif
+
 #if (TFAT_USB_MINI_DRIVE_NUM > 0)
     if ( chk_use_usb_mini(pdrv) )
     {
         ret = usb_mini_disk_initialize( drive_alloc_tbl[pdrv][1] ); /* function for USB Mini */
+    }
+#endif
+
+#if (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
+    if ( chk_use_flash(pdrv) )
+    {
+        ret = flash_spi_disk_initialize( drive_alloc_tbl[pdrv][1] ); /* function for FLASH */
     }
 #endif
 
@@ -540,10 +645,24 @@ DRESULT disk_read (
     }
 #endif
 
+#if (TFAT_MMC_DRIVE_NUM > 0)
+    if ( chk_use_mmc(pdrv) )
+    {
+        ret = mmcif_disk_read( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for MMC */
+    }
+#endif
+
 #if (TFAT_USB_MINI_DRIVE_NUM > 0)
     if ( chk_use_usb_mini(pdrv) )
     {
         ret = usb_mini_disk_read( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for USB Mini */
+    }
+#endif
+
+#if (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
+    if ( chk_use_flash(pdrv) )
+    {
+        ret = flash_spi_disk_read( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for FLASH */
     }
 #endif
 
@@ -583,10 +702,24 @@ DRESULT disk_write (
     }
 #endif
 
+#if (TFAT_MMC_DRIVE_NUM > 0)
+    if ( chk_use_mmc(pdrv) )
+    {
+        ret = mmcif_disk_write( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for MMC */
+    }
+#endif
+
 #if (TFAT_USB_MINI_DRIVE_NUM > 0)
     if ( chk_use_usb_mini(pdrv) )
     {
         ret = usb_mini_disk_write( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for USB Mini */
+    }
+#endif
+
+#if (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
+    if ( chk_use_flash(pdrv) )
+    {
+        ret = flash_spi_disk_write( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for FLASH */
     }
 #endif
 
@@ -624,10 +757,24 @@ DRESULT disk_ioctl (
     }
 #endif
 
+#if (TFAT_MMC_DRIVE_NUM > 0)
+    if ( chk_use_mmc(pdrv) )
+    {
+        ret = mmcif_disk_ioctl ( drive_alloc_tbl[pdrv][1], cmd, buff ); /* function for MMC */
+    }
+#endif
+
 #if (TFAT_USB_MINI_DRIVE_NUM > 0)
     if ( chk_use_usb_mini(pdrv) )
     {
         ret = usb_mini_disk_ioctl( drive_alloc_tbl[pdrv][1], cmd, buff ); /* function for USB Mini */
+    }
+#endif
+
+#if (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
+    if ( chk_use_flash(pdrv) )
+    {
+        ret = flash_spi_disk_ioctl ( drive_alloc_tbl[pdrv][1], cmd, buff ); /* function for FLASH */
     }
 #endif
 
@@ -661,6 +808,13 @@ DSTATUS disk_status (
     }
 #endif
 
+#if (TFAT_MMC_DRIVE_NUM > 0)
+    if ( chk_use_mmc(pdrv) )
+    {
+        ret = mmcif_disk_status ( drive_alloc_tbl[pdrv][1] ); /* function for MMC */
+    }
+#endif
+
 #if (TFAT_USB_MINI_DRIVE_NUM > 0)
     if ( chk_use_usb_mini(pdrv) )
     {
@@ -668,7 +822,29 @@ DSTATUS disk_status (
     }
 #endif
 
+#if (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
+    if ( chk_use_flash(pdrv) )
+    {
+        ret = flash_spi_disk_status ( drive_alloc_tbl[pdrv][1] ); /* function for FLASH */
+    }
+#endif
+
     return ret;
+}
+
+/******************************************************************************
+* Function Name : disk_1ms_interval
+* Description   : This function is used to intialize the 1ms timer
+* Arguments     : None
+* Return value  : None
+******************************************************************************/
+void disk_1ms_interval (
+    void
+)
+{
+#if (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
+    flash_spi_1ms_interval (); /* function for FLASH */
+#endif
 }
 
 #if !FF_FS_READONLY && !FF_FS_NORTC
@@ -761,6 +937,16 @@ DRESULT drv_change_alloc(TFAT_DRV_NUM tfat_drv, uint8_t dev_type, uint8_t dev_dr
     else
     {
         TFAT_DRIVE_USB_MINI_ALLOC &= ~(0x01 << tfat_drv);
+    }
+#endif
+#if (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
+    if ( TFAT_CTRL_SERIAL_FLASH == dev_type )
+    {
+        TFAT_DRIVE_FLASH_ALLOC |= (0x01 << tfat_drv);
+    }
+    else
+    {
+        TFAT_DRIVE_FLASH_ALLOC &= ~(0x01 << tfat_drv);
     }
 #endif
 

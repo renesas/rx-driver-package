@@ -19,8 +19,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_jpegd_rx</name>
-        <version>2.06</version>
-        <zipsource>r_jpegd_rx_v2.06.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_jpegd_rx_vx.xx.zip</zipsource>
         <application>JPEG</application>
         <desc>JPEG Decoder for Renesas MCUs.</desc>
         <details>JPEG Decoder for Renesas MCUs.</details>

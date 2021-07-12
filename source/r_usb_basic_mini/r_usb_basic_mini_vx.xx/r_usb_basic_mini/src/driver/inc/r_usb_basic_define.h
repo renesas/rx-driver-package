@@ -1,37 +1,34 @@
-/*******************************************************************************
+/***********************************************************************************************************************
  * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only
- * intended for use with Renesas products. No other uses are authorized. This
- * software is owned by Renesas Electronics Corporation and is protected under
- * all applicable laws, including copyright laws.
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
  * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
- * LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
- * TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
- * ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
- * FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
- * ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
- * BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software
- * and to discontinue the availability of this software. By using this software,
- * you agree to the additional terms and conditions found by accessing the
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+ * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2014(2019) Renesas Electronics Corporation. All rights reserved.
- ******************************************************************************/
-/*******************************************************************************
+ *
+ * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+ ***********************************************************************************************************************/
+/***********************************************************************************************************************
  * File Name    : r_usb_basic_define.h
  * Description  : USB common macro define header
- ******************************************************************************/
-/*******************************************************************************
+ ***********************************************************************************************************************/
+/**********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 01.09.2014 1.00 First Release
-*         : 01.06.2015 1.01    Added RX231.
-*         : 30.11.2018 1.10    Supporting Smart Configurator
-*         : 31.05.2019 1.11    Added support for GNUC and ICCRX.
-*         : 30.06.2019 1.12    RX23W is added.
-*******************************************************************************/
+*         : 01.06.2015 1.01 Added RX231.
+*         : 30.11.2018 1.10 Supporting Smart Configurator
+*         : 31.05.2019 1.11 Added support for GNUC and ICCRX.
+*         : 30.06.2019 1.12 RX23W is added.
+*         : 30.06.2020 1.20 Added support for RTOS.
+ ***********************************************************************************************************************/
 
 
 
@@ -61,25 +58,25 @@
 #if defined(__CCRX__)
 
   #ifdef __BIG
-    #define    USB_CFG_ENDIAN           (USB_CFG_BIG)
+    #define    USB_CFG_ENDIAN   (USB_CFG_BIG)
   #else   /* __BIG */
-    #define    USB_CFG_ENDIAN           (USB_CFG_LITTLE)
+    #define    USB_CFG_ENDIAN   (USB_CFG_LITTLE)
   #endif  /* __BIG */
 
 #elif defined(__GNUC__)
 
   #ifdef __RX_BIG_ENDIAN__
-    #define    USB_CFG_ENDIAN           (USB_CFG_BIG)
+    #define    USB_CFG_ENDIAN   (USB_CFG_BIG)
   #else   /* __RX_BIG_ENDIAN__ */
-    #define    USB_CFG_ENDIAN           (USB_CFG_LITTLE)
+    #define    USB_CFG_ENDIAN   (USB_CFG_LITTLE)
   #endif  /* __RX_BIG_ENDIAN__ */
 
 #elif defined(__ICCRX__)
 
   #if __BIG_ENDIAN__
-    #define    USB_CFG_ENDIAN           (USB_CFG_BIG)
+    #define    USB_CFG_ENDIAN   (USB_CFG_BIG)
   #else   /* __BIG_ENDIAN__ */
-    #define    USB_CFG_ENDIAN           (USB_CFG_LITTLE)
+    #define    USB_CFG_ENDIAN   (USB_CFG_LITTLE)
   #endif  /* __BIG_ENDIAN__ */
 
 #endif /* defined(__CCRX__), defined(__GNUC__), defined(__ICCRX__) */
@@ -95,58 +92,61 @@
 #endif /* BSP_MCU_RX113 */
 
 #ifdef BSP_MCU_RX231
-    #define USB_TATTDB          (BSP_ICLK_HZ / 7000)     /* RX231 (Chapter 7.1.7.3 TATTDB) minimum duration of 100 ms */
+    #define USB_TATTDB          (BSP_ICLK_HZ / 7000)     /* RX231(Chapter 7.1.7.3 TATTDB) minimum duration of 100 ms */
 #endif /* BSP_MCU_RX231 */
 
 #ifdef BSP_MCU_RX23W
-    #define USB_TATTDB          (BSP_ICLK_HZ / 7000)     /* RX23W (Chapter 7.1.7.3 TATTDB) minimum duration of 100 ms */
+    #define USB_TATTDB          (BSP_ICLK_HZ / 7000)     /* RX23W(Chapter 7.1.7.3 TATTDB) minimum duration of 100 ms */
 #endif /* BSP_MCU_RX231 */
 
 
 
-/*****************************************************************************
- Macro definitions (USER DEFINE)
-******************************************************************************/
+/**********************************************************************************************************************
+ * Macro definitions (USER DEFINE)
+ **********************************************************************************************************************/
 /* Version Number of API. */
 #define USB_VERSION_MAJOR       (1)
-#define USB_VERSION_MINOR       (12)
+#define USB_VERSION_MINOR       (20)
 
-#define USB_INT_BUFSIZE         (15u)               /* Size of Interrupt info buffer */
+#define CLSDATASIZE             (255u)                  /* Transfer data size for Standard Request */
+#if (BSP_CFG_RTOS_USED != 0)                            /* Use RTOS */
+    /* The buffer size of interrupt info is increased to avoid overlapping interrupt events. */
+    #define USB_INT_BUFSIZE     (64u)                   /* Size of Interrupt info buffer */
+#else /* (BSP_CFG_RTOS_USED != 0) */
+    #define USB_INT_BUFSIZE     (15u)                   /* Size of Interrupt info buffer */
+#endif /* (BSP_CFG_RTOS_USED != 0) */
 #define USB_EVENT_MAX           (15u)
 
-/******************************************************************************
- Scheduler use define
-******************************************************************************/
-#define USB_FLGCLR              (0u)            /* Flag clear */
-#define USB_FLGSET              (1u)            /* Flag set */
-#define USB_IDCLR               (0xFFu)         /* Priority clear */
+/* Scheduler use define */
+#define USB_FLGCLR              (0u)                    /* Flag clear */
+#define USB_FLGSET              (1u)                    /* Flag set */
+#define USB_IDCLR               (0xFFu)                 /* Priority clear */
 
 /*******************************************************************************
  Task infomation
 *******************************************************************************/
 /* Please set with user system */
-#define USB_IDMAX           ((uint8_t)5)            /* Maximum Task ID +1 */
-#define USB_TABLEMAX        ((uint8_t)10)           /* Maximum priority table */
-#define USB_BLKMAX          ((uint8_t)5)            /* Maximum block */
+#define USB_IDMAX               ((uint8_t)5)            /* Maximum Task ID +1 */
+#define USB_TABLEMAX            ((uint8_t)10)           /* Maximum priority table */
+#define USB_BLKMAX              ((uint8_t)5)            /* Maximum block */
     
 /* Task ID define */
-#define USB_TID_0           (0u)                /* Task ID 0 */
-#define USB_TID_1           (1u)                /* Task ID 1 */
-#define USB_TID_2           (2u)                /* Task ID 2 */
-#define USB_TID_3           (3u)                /* Task ID 3 */
+#define USB_TID_0               (0u)                    /* Task ID 0 */
+#define USB_TID_1               (1u)                    /* Task ID 1 */
+#define USB_TID_2               (2u)                    /* Task ID 2 */
+#define USB_TID_3               (3u)                    /* Task ID 3 */
 
 /* Host Control Driver Task */
-#define USB_HCD_TSK             (USB_TID_0)               /* Task ID */
-#define USB_HCD_MBX             (USB_HCD_TSK)             /* Mailbox ID */
+#define USB_HCD_TSK             (USB_TID_0)             /* Task ID */
+#define USB_HCD_MBX             (USB_HCD_TSK)           /* Mailbox ID */
 
 /* Host Manager Task */
-#define USB_MGR_TSK             (USB_TID_1)               /* Task ID */
-#define USB_MGR_MBX             (USB_MGR_TSK)             /* Mailbox ID */
-
+#define USB_MGR_TSK             (USB_TID_1)             /* Task ID */
+#define USB_MGR_MBX             (USB_MGR_TSK)           /* Mailbox ID */
 
 /* Host Class Driver Task */
-#define USB_HCLASS_TSK          (USB_TID_2)               /* Task ID */
-#define USB_HCLASS_MBX          (USB_HCLASS_TSK)          /* Mailbox ID */
+#define USB_HCLASS_TSK          (USB_TID_2)             /* Task ID */
+#define USB_HCLASS_MBX          (USB_HCLASS_TSK)        /* Mailbox ID */
 
 /******************************************************************************
  Macro definitions (Debug hook)
@@ -172,9 +172,12 @@
 #define USB_DEBUG_HOOK_CODE10   (0x000Au)
 #define USB_DEBUG_HOOK_CODE11   (0x000Bu)
 #define USB_DEBUG_HOOK_CODE12   (0x000Cu)
+#define USB_DEBUG_HOOK_CODE13   (0x000Du)
+#define USB_DEBUG_HOOK_CODE14   (0x000Eu)
+#define USB_DEBUG_HOOK_CODE15   (0x000Fu)
 
 #ifdef USB_DEBUG_HOOK_USE
-    #define USB_DEBUG_HOOK(x)     (usb_cstd_debug_hook(x))
+    #define USB_DEBUG_HOOK(x)   (usb_cstd_debug_hook(x))
 #else
     #define USB_DEBUG_HOOK(x)
 #endif
@@ -185,9 +188,8 @@
 
 #define USB_BITSET(x)           ((uint16_t)((uint16_t)1 << (x)))
 
-
 /* Interrupt message num */
-#define USB_INTMSGMAX           ((uint16_t)10)
+#define USB_INTMSGMAX           ((uint16_t)10u)
 
 #define USB_STATIC  static      /* Not use #define USB_STATIC  */
 
@@ -197,10 +199,6 @@
 #define USB_PAR                 (0xef)          /* parameter error */
 
 #define USB_E_OK                (USB_OK)        /* Normal end */
-#define USB_E_ERROR             (USB_ERROR)     /* Error end */
-#define USB_E_QOVR              (USB_QOVR)      /* Queuing over flow */
-#define USB_E_PAR               (USB_PAR)       /* Parameter Error */
-
 
 #define USB_TRUE                (1u)
 #define USB_FALSE               (0u)
@@ -208,10 +206,12 @@
 #define USB_YES                 (1u)
 #define USB_NO                  (0u)
 
-/* FIFO port register default access size */
-#define USB0_CFIFO_MBW          (USB_MBW_16)
-#define USB0_D0FIFO_MBW         (USB_MBW_16)
-#define USB0_D1FIFO_MBW         (USB_MBW_16)
+#define USB_MAXPIPE_NUM         (9u)
+
+/* Max device */
+#define USB_MAXPIPE_BULK        (5u)
+#define USB_MAXPIPE_ISO         (2u)
+#define USB_MAXPIPE_NUM         (9u)
 
 #define USB_BULK_PIPE_START     (1u)
 #define USB_BULK_PIPE_END       (5u)
@@ -222,11 +222,21 @@
 
 /* Reset Handshake result */
 #define USB_NOCONNECT           (0xFFu)         /* Speed undecidedness */
-#define USB_HSCONNECT           (0x02u)         /* Hi-Speed connect */
 #define USB_FSCONNECT           (0x01u)         /* Full-Speed connect */
 #define USB_LSCONNECT           (0x03u)         /* Low-Speed connect */
 #define USB_CONNECT             (0xF0u)
 
+#define USB_SEQ_0               (0x00u)
+#define USB_SEQ_1               (0x01u)
+#define USB_SEQ_2               (0x02u)
+#define USB_SEQ_3               (0x03u)
+#define USB_SEQ_4               (0x04u)
+#define USB_SEQ_5               (0x05u)
+#define USB_SEQ_6               (0x06u)
+#define USB_SEQ_7               (0x07u)
+#define USB_SEQ_8               (0x08u)
+#define USB_SEQ_9               (0x09u)
+#define USB_SEQ_10              (0x0au)
 
 #define USB_1                   (1u)
 #define USB_2                   (2u)
@@ -387,8 +397,15 @@
 
 /* Device connect information */
 #define USB_ATTACH                          (0x0040u)
+#define USB_ATTACHL                         (0x0041u)
+#define USB_ATTACHF                         (0x0042u)
 #define USB_DETACH                          (0x0043u)
 
+/* Reset Handshake result */
+#define USB_DEVADD_NOCONNECT                (0x0000u)   /* Speed undecidedness */
+#define USB_DEVADD_HSCONNECT                (0x00C0u)   /* Hi-Speed connect */
+#define USB_DEVADD_FSCONNECT                (0x0080u)   /* Full-Speed connect */
+#define USB_DEVADD_LSCONNECT                (0x0040u)   /* Low-Speed connect */
 
 /* Pipe configuration table define */
 #define USB_TYPFIELD                        (0xC000u)   /* Transfer type */
@@ -401,8 +418,6 @@
 #define USB_BFREON                          (0x0400u)
 #define USB_BFREOFF                         (0x0000u)
 #define USB_DBLBFIELD                       (0x0200u)   /* Double buffer mode select */
-#define USB_DBLBON                          (0x0200u)
-#define USB_DBLBOFF                         (0x0000u)
 #define USB_SHTNAKFIELD                     (0x0080u)   /* Transfer end NAK */
 #define USB_SHTNAKON                        (0x0080u)
 #define USB_SHTNAKOFF                       (0x0000u)
@@ -415,7 +430,6 @@
 #define USB_FIFO2BUF                        (0x0000u)   /* FIFO --> buffer */
 #define USB_EPNUMFIELD                      (0x000Fu)   /* Endpoint number select */
 #define USB_MAX_EP_NO                       (15u)       /* EP0 EP1 ... EP15 */
-
 
 /* FIFO port & access define */
 #define USB_CUSE                            (0u)  /* CFIFO  trans */
@@ -450,6 +464,8 @@
 #define USB_DATA_STOP                       (8u)    /* Exceptions of the forced end */
 #define USB_DATA_DTCH                       (9u)    /* Exceptions of the detach */
 #define USB_DATA_TMO                        (10u)   /* Exceptions of the timeout */
+#define USB_CTRL_READING                    (17u)
+#define USB_CTRL_WRITING                    (18u)
 #define USB_DATA_READING                    (19u)
 #define USB_DATA_WRITING                    (20u)
 
@@ -461,6 +477,7 @@
 #define USB_INT_BRDY                        (0x01u)
 #define USB_INT_BEMP                        (0x02u)
 #define USB_INT_NRDY                        (0x03u)
+#define USB_INT_DXFIFO                      (0x04u)   /* BSP_CFG_RTOS_USED == 1 (FreeRTOS) */
 
 /* USB interrupt type (PERI)*/
 #define USB_INT_VBINT                       (0x0011u)
@@ -496,8 +513,6 @@
 /* Root port */
 #define USB_NOPORT                          (0xFFu) /* Not connect */
 
-#define USB_MAXPIPE_NUM                     (9u)
-
 /* Max device */
 #define USB_MAXDEVADDR                      (1u)
 
@@ -518,6 +533,7 @@
 
 /* Device state define */
 #define USB_NONDEVICE                       (0u)
+#define USB_NOTTPL                          (1u)
 #define USB_DEVICEENUMERATION               (3u)
 #define USB_COMPLETEPIPESET                 (10u)
 
@@ -530,58 +546,88 @@
 #define USB_DATARD                          (5u)  /* Data Stage Control Read */
 #define USB_STATUSRD                        (6u)  /* Status stage */
 #define USB_STATUSWR                        (7u)  /* Status stage */
+#define USB_SETUPWRCNT                      (17u) /* Setup Stage Control Write */
+#define USB_SETUPRDCNT                      (18u) /* Setup Stage Control Read */
+#define USB_DATAWRCNT                       (19u) /* Data Stage Control Write */
+#define USB_DATARDCNT                       (20u) /* Data Stage Control Read */
 
-#define USB_REQUEST_TYPE(x,y,z)         ((uint8_t)((uint8_t)(((uint8_t)(x)<<7)|((uint8_t)(y)<<5))|(z)))
+/*  USB Manager mode    */
+#define USB_DETACHED                        (10u)     /* Disconnect(VBUSon) */
+#define USB_POWERED                         (30u)     /* Start reset handshake */
+#define USB_DEFAULT                         (40u)     /* Set device address */
+#define USB_ADDRESS                         (50u)     /* Enumeration start */
+#define USB_CONFIGURED                      (70u)     /* Detach detected */
+#define USB_SUSPENDED                       (80u)     /* Device suspended */
+#define USB_RESUME_PROCESS                  (103u)    /* Wait device resume */
 
-/* Sequence control command define (HCD2MGR/UPL2MGR) */
-#define USB_MGR_CONTINUE                (0x30u)     /* Continues sequnce */
-#define USB_RTP_DETACH                  (0x31u)     /* USB_INT_DTCH */
-#define USB_RTP_ATTACH                  (0x32u)     /* USB_INT_ATTCH */
-#define USB_RTP_OVERCURRENT             (0x33u)     /* USB_INT_OVRCR */
-#define USB_RTP_REMOTEWAKEUP            (0x34u)     /* USB_INT_BCHG */
-#define USB_DO_SELECTIVE_SUSPEND        (0x35u)     /* SUSPEND control (device select)*/
-#define USB_DO_SELECTIVE_RESUME         (0x36u)     /* RESUME control (device select) */
-#define USB_DO_PORT_ENABLE              (0x37u)     /* VBOUT control */
-#define USB_DO_PORT_DISABLE             (0x38u)     /* VBOUT control */
-#define USB_DO_CLEAR_STALL              (0x39u)     /* Clear_Feature request */
-#define USB_DO_GLOBAL_SUSPEND           (0x3Au)     /* SUSPEND control (port select)*/
-#define USB_DO_GLOBAL_RESUME            (0x3Bu)     /* RESUME control (port select) */
-#define USB_MGR_NOSEQUENCE              (0x3Cu)
+/* HCD common task message command */
+#define USB_MSG_HCD_ATTACH                  (0x0101u)
+#define USB_MSG_HCD_DETACH                  (0x0102u)
+#define USB_MSG_HCD_USBRESET                (0x0103u)
+#define USB_MSG_HCD_SUSPEND                 (0x0104u)
+#define USB_MSG_HCD_RESUME                  (0x0105u)
+#define USB_MSG_HCD_REMOTE                  (0x0106u)
+#define USB_MSG_HCD_VBON                    (0x0107u)
+#define USB_MSG_HCD_VBOFF                   (0x0108u)
+#define USB_MSG_HCD_CLR_STALL               (0x0109u)
+#define USB_MSG_HCD_DETACH_MGR              (0x010Au)
+#define USB_MSG_HCD_ATTACH_MGR              (0x010Bu)
+
+#define USB_MSG_HCD_CLR_STALLBIT            (0x010Du)
+#define USB_MSG_HCD_SQTGLBIT                (0x010Fu)
+
+/* HCD task message command */
+#define USB_MSG_HCD_SUBMITUTR               (0x0112u)
+#define USB_MSG_HCD_TRANSEND1               (0x0113u)
+#define USB_MSG_HCD_TRANSEND2               (0x0114u)
+#define USB_MSG_HCD_CLRSEQBIT               (0x0115u)
+#define USB_MSG_HCD_SETSEQBIT               (0x0116u)
+#define USB_MSG_HCD_INT                     (0x0117u)
 
 /* Davice state control command define (MGR2HCD) */
-#define USB_HCD_USBRESET                (0x41u)
-#define USB_HCD_SUSPEND                 (0x42u)
-#define USB_HCD_RESUME                  (0x43u)
-#define USB_HCD_VBON                    (0x44u)
-#define USB_HCD_VBOFF                   (0x45u)
-#define USB_HCD_CLEAR_STALL             (0x46u)
+#define USB_HCD_USBRESET                    (0x41u)
+#define USB_HCD_SUSPEND                     (0x42u)
+#define USB_HCD_RESUME                      (0x43u)
+#define USB_HCD_VBON                        (0x44u)
+#define USB_HCD_VBOFF                       (0x45u)
+#define USB_HCD_CLEAR_STALL                 (0x46u)
 
 /* API function command define */
-#define USB_INTERRUPT                   (0x01u)
+#define USB_INTERRUPT                       (0x01u)
 
-/* Davice state control command for API function(R_USB_PstdChangeDeviceState) */
-#define USB_DO_REMOTEWAKEUP             (0x21u)
+
+/* USB Manager task message command */
+#define USB_MSG_MGR_AORDETACH               (0x0121u)
+#define USB_MSG_MGR_OVERCURRENT             (0x0122u)
+#define USB_MSG_MGR_STATUSRESULT            (0x0123u)
+#define USB_MSG_MGR_SUBMITRESULT            (0x0124u)
 
 /* Davice state control command for API function(HOST/PERI common define) */
-#define USB_DO_TRANSFERSTART            (0x11u)
-#define USB_DO_TRANSFEREND              (0x12u)
-#define USB_DO_TRANSFER_STP             (0x13u)     /* Transfer stop */
-#define USB_DO_INITHWFUNCTION           (0x17u)     /* USB-IP initialize */
-#define USB_DO_SETHWFUNCTION            (0x18u)     /* USB-IP function set */
+#define USB_DO_TRANSFERSTART                (0x11u)
+#define USB_DO_TRANSFEREND                  (0x12u)
+#define USB_DO_TRANSFER_STP                 (0x13u)     /* Transfer stop */
 
 /* Alternate number */
 #define USB_ALT_NO                          (255u)
 
 /* USB Peripheral task message command */
-#define USB_MSG_PCD_SETSTALL                (0x0164u)
-
-/* USB Peripheral task message command */
+#define USB_MSG_PCD_INT                     (0x0151u)
+#define USB_MSG_PCD_SUBMITUTR               (0x0152u)
+#define USB_MSG_PCD_TRANSEND1               (0x0153u)
+#define USB_MSG_PCD_TRANSEND2               (0x0154u)
+#define USB_MSG_PCD_REMOTEWAKEUP            (0x0155u)
+#define USB_MSG_PCD_PCUTINT                 (0x0156u)
 #define USB_MSG_PCD_DP_ENABLE               (0x0157u)
 #define USB_MSG_PCD_DP_DISABLE              (0x0158u)
 #define USB_MSG_PCD_DM_ENABLE               (0x0159u)
 #define USB_MSG_PCD_DM_DISABLE              (0x015Au)
+#define USB_MSG_PCD_DETACH                  (0x0161u)
+#define USB_MSG_PCD_ATTACH                  (0x0162u)
+#define USB_MSG_PCD_CLRSEQBIT               (0x0163u)
+#define USB_MSG_PCD_SETSTALL                (0x0164u)
 
-
+/* Davice state control command for API function(R_USB_PstdChangeDeviceState) */
+#define USB_DO_REMOTEWAKEUP                 (0x21u)
 #define USB_DP_ENABLE                       (USB_MSG_PCD_DP_ENABLE)
 #define USB_DP_DISABLE                      (USB_MSG_PCD_DP_DISABLE)
 #define USB_DM_ENABLE                       (USB_MSG_PCD_DM_ENABLE)
@@ -589,6 +635,33 @@
 
 #define USB_DO_STALL                        (USB_MSG_PCD_SETSTALL)
 
+#if (BSP_CFG_RTOS_USED != 0)                            /* Use RTOS */
+#define USB_DO_RESET_AND_ENUMERATION        (0x0202u) /* USB_MSG_HCD_ATTACH */
+#define USB_PORT_ENABLE                     (0x0203u) /* USB_MSG_HCD_VBON */
+#define USB_PORT_DISABLE                    (0x0204u) /* USB_MSG_HCD_VBOFF */
+#define USB_DO_GLOBAL_SUSPEND               (0x0205u) /* USB_MSG_HCD_SUSPEND */
+#define USB_DO_SELECTIVE_SUSPEND            (0x0206u) /* USB_MSG_HCD_SUSPEND */
+#define USB_DO_GLOBAL_RESUME                (0x0207u) /* USB_MSG_HCD_RESUME */
+#define USB_DO_SELECTIVE_RESUME             (0x0208u) /* USB_MSG_HCD_RESUME */
+#define USB_DO_CLR_STALL                    (0x0209u) /* USB_MSG_HCD_CLR_STALL */
+#define USB_DO_SET_SQTGL                    (0x020Au) /* USB_MSG_HCD_SQTGLBIT */
+#define USB_DO_CLR_SQTGL                    (0x020Bu) /* USB_MSG_HCD_CLRSEQBIT */
+#else /* (BSP_CFG_RTOS_USED != 0) */
+/* Sequence control command define (HCD2MGR/UPL2MGR) */
+#define USB_MGR_CONTINUE                    (0x30u)     /* Continues sequnce */
+#define USB_RTP_DETACH                      (0x31u)     /* USB_INT_DTCH */
+#define USB_RTP_ATTACH                      (0x32u)     /* USB_INT_ATTCH */
+#define USB_RTP_OVERCURRENT                 (0x33u)     /* USB_INT_OVRCR */
+#define USB_RTP_REMOTEWAKEUP                (0x34u)     /* USB_INT_BCHG */
+#define USB_DO_SELECTIVE_SUSPEND            (0x35u)     /* SUSPEND control (device select)*/
+#define USB_DO_SELECTIVE_RESUME             (0x36u)     /* RESUME control (device select) */
+#define USB_DO_PORT_ENABLE                  (0x37u)     /* VBOUT control */
+#define USB_DO_PORT_DISABLE                 (0x38u)     /* VBOUT control */
+#define USB_DO_CLEAR_STALL                  (0x39u)     /* Clear_Feature request */
+#define USB_DO_GLOBAL_SUSPEND               (0x3Au)     /* SUSPEND control (port select)*/
+#define USB_DO_GLOBAL_RESUME                (0x3Bu)     /* RESUME control (port select) */
+#define USB_MGR_NOSEQUENCE                  (0x3Cu)
+#endif /* (BSP_CFG_RTOS_USED != 0) */
 
 /******************************************************************************
  Sequence control
@@ -646,7 +719,7 @@
                                                                (usb_cbinfo_t) (CLB), (usb_strct_t)(KEY) ))
 #define R_USB_REL_BLK(BLK)              (usb_hstd_rel_blk((uint8_t)(BLK)))
 
-#define usb_hstd_scheduler          R_usb_cstd_Scheduler
+#define usb_hstd_scheduler              R_usb_cstd_Scheduler
 
 /* Descriptor size */
 #define USB_DEVICESIZE                  (20u)   /* Device Descriptor size */
@@ -654,43 +727,6 @@
 
 /* Number of software retries when a no-response condition occurs during a transfer */
 #define USB_PIPEERROR                   (1u)
-
-/** [Output debugging message in a console of IDE.]
- *   not defined(USB_DEBUG_ON) : No output the debugging message
- *   defined(USB_DEBUG_ON)     : Output the debugging message
- */
-#if defined(USB_DEBUG_ON)
-    #define USB_PRINTF0(FORM)                           (printf(FORM))
-    #define USB_PRINTF1(FORM,x1)                        (printf((FORM), (x1)))
-    #define USB_PRINTF2(FORM,x1,x2)                     (printf((FORM), (x1), (x2)))
-    #define USB_PRINTF3(FORM,x1,x2,x3)                  (printf((FORM), (x1), (x2), (x3)))
-    #define USB_PRINTF4(FORM,x1,x2,x3,x4)               (printf((FORM), (x1), (x2), (x3), (x4)))
-    #define USB_PRINTF5(FORM,x1,x2,x3,x4,x5)            (printf((FORM), (x1), (x2), (x3), (x4), (x5)))
-    #define USB_PRINTF6(FORM,x1,x2,x3,x4,x5,x6)         (printf((FORM), (x1), (x2), (x3), (x4), (x5), (x6)))
-    #define USB_PRINTF7(FORM,x1,x2,x3,x4,x5,x6,x7)      (printf((FORM), (x1), (x2), (x3), (x4), (x5), (x6), (x7)))
-    #define USB_PRINTF8(FORM,x1,x2,x3,x4,x5,x6,x7,x8)   (printf((FORM), (x1), (x2), (x3), (x4), (x5), (x6), (x7), (x8)))
-#else   /* defined(USB_DEBUG_ON) */
-    #define USB_PRINTF0(FORM)
-    #define USB_PRINTF1(FORM,x1)
-    #define USB_PRINTF2(FORM,x1,x2)
-    #define USB_PRINTF3(FORM,x1,x2,x3)
-    #define USB_PRINTF4(FORM,x1,x2,x3,x4)
-    #define USB_PRINTF5(FORM,x1,x2,x3,x4,x5)
-    #define USB_PRINTF6(FORM,x1,x2,x3,x4,x5,x6)
-    #define USB_PRINTF7(FORM,x1,x2,x3,x4,x5,x6,x7)
-    #define USB_PRINTF8(FORM,x1,x2,x3,x4,x5,x6,x7,x8)
-#endif  /* defined(USB_DEBUG_ON) */
-/*******************************************************************************
- Typedef definitions
- ******************************************************************************/
-
-/*******************************************************************************
- Exported global variables
- ******************************************************************************/
-
-/*******************************************************************************
- Exported global functions (to be accessed by other files)
- ******************************************************************************/
 
 #endif  /* R_USB_BASIC_DEFINE_H */
 /******************************************************************************

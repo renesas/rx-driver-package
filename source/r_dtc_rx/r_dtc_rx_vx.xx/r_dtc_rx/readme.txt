@@ -5,12 +5,12 @@ r_dtc_rx
 
 Document Number 
 ---------------
-R01AN1819EJ0330
-R01AN1819JJ0330
+R01AN1819EJ0360
+R01AN1819JJ0360
 
 Version
 -------
-v3.30
+v3.50
 
 Overview
 --------
@@ -33,6 +33,7 @@ Supported MCUs
 * RX130 MCU
 * RX230 MCU
 * RX231 MCU
+* RX23E-A MCU
 * RX64M MCU
 * RX71M MCU
 * RX23T MCU
@@ -57,6 +58,7 @@ Boards Tested On
 * RSKRX130_512KB
 * RSKRX230
 * RSKRX231
+* RSKRX23E-A
 * RSKRX64M
 * RSKRX71M
 * RSKRX23T
@@ -111,8 +113,8 @@ Refer to "Adding Firmware Integration Technology Modules to CS+ Projects (R01AN1
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.01.00
-* GCC for Renesas RX 4.8.4.201902
+* Renesas RX v3.02.00
+* GCC for Renesas RX 8.03.00.201904
 * IAR C/C++ Compiler for Renesas RX 4.12.1
 
 File Structure
@@ -228,6 +230,11 @@ r_dtc_rx
         |       r_dtc_rx_target_if.h
         |
         +---rx231
+                r_dtc_rx_target.c
+                r_dtc_rx_target.h
+                r_dtc_rx_target_if.h
+        |
+        +---rx23E-A
                 r_dtc_rx_target.c
                 r_dtc_rx_target.h
                 r_dtc_rx_target_if.h

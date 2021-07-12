@@ -5,12 +5,12 @@ r_ptp_rx
 
 Document Number 
 ---------------
-R01AN1943EJ0116 (English version)
-R01AN1943JJ0116 (Japanese version)
+R01AN1943EJ0117 (English version)
+R01AN1943JJ0117 (Japanese version)
 
 Version
 -------
-v1.16
+v1.17
 
 Overview
 --------
@@ -30,12 +30,14 @@ Supported MCUs
 * RX64M Group
 * RX71M Group
 * RX72M Group
+* RX72N Group
 
 Boards Tested On
 ----------------
 * RSKRX64M
 * RSKRX71M
 * RSKRX72M
+* RSKRX72N
  
 Limitations
 -----------
@@ -59,7 +61,9 @@ Please refer to the following documents;
 
 Toolchain(s) Used
 -----------------
-* Renesas RX Toolchain v3.01.00
+* Renesas RX v3.01.00
+* GCC for Renesas RX 4.8.4
+* IAR EWRX 4.12.1
 
 File Structure
 --------------
@@ -71,10 +75,10 @@ r_ptp_rx
 +---doc
 |   |
 |   +---en
-|       r01an1943ej0116-rx-eptpc.pdf
+|       r01an1943ej0117-rx-eptpc.pdf
 |   |
 |   +---ja
-|       r01an1943jj0116-rx-eptpc.pdf
+|       r01an1943jj0117-rx-eptpc.pdf
 |
 +---ref
 |       r_ptp_rx_config_reference.h
@@ -84,6 +88,7 @@ r_ptp_rx
 |       r_ptp_rx_private.h
 |       r_ptpif.c
 |       r_ptpif_rx_private.h
+|
 | \---targets
 | |
 | +---rx

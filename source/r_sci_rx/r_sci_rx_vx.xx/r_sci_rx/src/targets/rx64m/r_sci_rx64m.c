@@ -27,6 +27,7 @@
 *           07.03.2017 1.20    Fixed a bug that the interrupt priority level can be changed only in async mode.
 *           20.05.2019 3.00    Added support for GNUC and ICCRX.
 *           15.08.2019 3.20    Fixed warnings in IAR.
+*           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -435,7 +436,12 @@ void sci_disable_ints(sci_hdl_t const hdl)
 
     return;
 } /* End of function sci_disable_ints() */
-#if (SCI_CFG_ASYNC_INCLUDED)
+
+/*****************************************************************************
+ISRs
+******************************************************************************/
+
+#if ((SCI_CFG_ASYNC_INCLUDED) || (TX_DTC_DMACA_ENABLE | RX_DTC_DMACA_ENABLE))
 /*****************************************************************************
 * sciN_txiN_isr 
 *  
@@ -514,7 +520,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_txi12_isr(void)
 
 #endif
 
-#endif
+#endif /* End of ((SCI_CFG_ASYNC_INCLUDED) || (TX_DTC_DMACA_ENABLE | RX_DTC_DMACA_ENABLE)) */
 
 #if SCI_CFG_TEI_INCLUDED
 /*****************************************************************************
@@ -823,7 +829,33 @@ sci_err_t sci_async_cmds(sci_hdl_t const hdl,
     case (SCI_CMD_EN_TEI):  /* SCI_CMD_EN_TEI is obsolete command, but it exists only for compatibility with older version. */
     break;
 #endif
+#if TX_DTC_DMACA_ENABLE
+        case (SCI_CMD_CHECK_TX_DONE):
+        {
+            if((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_tx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_tx_enable))
+            {
+                if (false == hdl->tx_idle)
+                {
+                    err = SCI_ERR_XCVR_BUSY;
+                }
+            }
+            break;
+        }
+#endif
 
+#if RX_DTC_DMACA_ENABLE
+        case (SCI_CMD_CHECK_RX_DONE):
+        {
+            if((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
+            {
+                if (0 != hdl->queue[0].rx_cnt)
+                {
+                    err = SCI_ERR_XCVR_BUSY;
+                }
+            }
+            break;
+        }
+#endif
     case (SCI_CMD_TX_Q_FLUSH):
         DISABLE_TXI_INT;
         R_BYTEQ_Flush(hdl->u_tx_data.que);
@@ -849,6 +881,39 @@ sci_err_t sci_async_cmds(sci_hdl_t const hdl,
         /* flush transmit queue */
         DISABLE_TXI_INT;
         R_BYTEQ_Flush(hdl->u_tx_data.que);
+#if(TX_DTC_DMACA_ENABLE)
+        if((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_tx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_tx_enable))
+        {
+            sci_fifo_ctrl_t        *p_tctrl = &hdl->queue[hdl->qindex_app_rx];
+            p_tctrl->tx_cnt = 0;
+            p_tctrl->tx_fraction = 0;
+#if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+            if(SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_tx_enable)
+            {
+                dtc_cmd_arg_t           args_dtc;
+                args_dtc.act_src = hdl->rom->dtc_tx_act_src;
+                R_DTC_Control(DTC_CMD_ACT_SRC_DISABLE, NULL, &args_dtc);
+
+            }
+#endif
+#if ((TX_DTC_DMACA_ENABLE & 0x02) || (RX_DTC_DMACA_ENABLE & 0x02))
+            if(SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_tx_enable)
+            {
+                dmaca_stat_t   stat_dmaca;
+                R_DMACA_Control(hdl->rom->dmaca_tx_channel, DMACA_CMD_DISABLE, &stat_dmaca);
+
+            }
+#endif
+#if SCI_CFG_FIFO_INCLUDED
+            if (true == hdl->fifo_ctrl)
+            {
+
+                /* reset TX FIFO */
+                hdl->rom->regs->FCR.BIT.TFRST = 0x01;
+            }
+#endif
+        }
+#endif
         ENABLE_TXI_INT;
 
         /* NOTE: the following steps will abort anything being sent */
@@ -957,7 +1022,35 @@ sci_err_t sci_sync_cmds(sci_hdl_t const hdl,
         /* disable receive interrupts in ICU and peripheral */
         DISABLE_RXI_INT;
         DISABLE_ERI_INT;
+#if(TX_DTC_DMACA_ENABLE)
+        if((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_tx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_tx_enable))
+        {
+            sci_fifo_ctrl_t        *p_tctrl = &hdl->queue[hdl->qindex_app_rx];
+            p_tctrl->tx_cnt = 0;
+            p_tctrl->tx_fraction = 0;
+#if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+            if((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_tx_enable) && (SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
+            {
+                // Set condition for reset TDFR to generate interrupt in next time
+                hdl->qindex_int_tx = 1;
+                dtc_cmd_arg_t           args_dtc;
+                args_dtc.act_src               = hdl->rom->dtc_tx_act_src;
+                R_DTC_Control(DTC_CMD_ACT_SRC_DISABLE, NULL, &args_dtc);
 
+                args_dtc.act_src               = hdl->rom->dtc_rx_act_src;
+                R_DTC_Control(DTC_CMD_ACT_SRC_DISABLE, NULL, &args_dtc);
+            }
+#endif
+#if ((TX_DTC_DMACA_ENABLE & 0x02) || (RX_DTC_DMACA_ENABLE & 0x02))
+            if((SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_tx_enable) && (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
+            {
+                R_DMACA_Close(hdl->rom->dmaca_tx_channel);
+                R_DMACA_Close(hdl->rom->dmaca_rx_channel);
+            }
+#endif
+
+        }
+#endif
         hdl->rom->regs->SCR.BYTE &= ~(SCI_SCR_REI_MASK | SCI_SCR_RE_MASK | SCI_SCR_TE_MASK);
 
         hdl->tx_cnt = 0;
@@ -973,6 +1066,21 @@ sci_err_t sci_sync_cmds(sci_hdl_t const hdl,
         }
 
         *hdl->rom->ir_rxi = 0;                  /* clear rxi interrupt flag */
+#if SCI_CFG_FIFO_INCLUDED
+#if(TX_DTC_DMACA_ENABLE)
+            if((SCI_DTC_DMACA_DISABLE != hdl->rom->dtc_dmaca_tx_enable) && (true != hdl->fifo_ctrl))
+            {
+                *hdl->rom->ir_txi = 0;
+            }
+#endif
+#else
+#if(TX_DTC_DMACA_ENABLE)
+            if((SCI_DTC_DMACA_DISABLE != hdl->rom->dtc_dmaca_tx_enable))
+            {
+                *hdl->rom->ir_txi = 0;
+            }
+#endif
+#endif
         *hdl->rom->icu_grp &= ~hdl->rom->eri_ch_mask;  /* clear eri interrupt flag */
 
         ENABLE_ERI_INT;                         /* enable rx err interrupts in ICU */
@@ -983,6 +1091,19 @@ sci_err_t sci_sync_cmds(sci_hdl_t const hdl,
         hdl->rom->regs->SCR.BYTE |= SCI_SCR_REI_MASK;
     break;
 
+#if RX_DTC_DMACA_ENABLE
+        case (SCI_CMD_CHECK_RX_SYNC_DONE):
+        {
+            if((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
+            {
+                if (0 != hdl->queue[0].rx_cnt)
+                {
+                    err = SCI_ERR_XCVR_BUSY;
+                }
+            }
+            break;
+        }
+#endif
     case (SCI_CMD_CHANGE_SPI_MODE):
 #if SCI_CFG_PARAM_CHECKING_ENABLE
 

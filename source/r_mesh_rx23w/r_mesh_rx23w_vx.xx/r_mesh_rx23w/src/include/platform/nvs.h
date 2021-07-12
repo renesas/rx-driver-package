@@ -15,7 +15,7 @@
 
 /* --------------------------------------------- Header File Inclusion */
 #include "MS_common.h"
-#include "storage_pl.h"
+#include "MS_storage_pl.h"
 
 /* --------------------------------------------- Global Definitions */
 /* NVS Signature Length */

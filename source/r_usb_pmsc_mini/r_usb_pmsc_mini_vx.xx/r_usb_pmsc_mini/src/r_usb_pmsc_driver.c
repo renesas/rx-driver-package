@@ -18,7 +18,7 @@
  * you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2014(2019) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
  ******************************************************************************/
 /******************************************************************************
  * File Name    : r_usb_pmsc_driver.c
@@ -30,6 +30,7 @@
  *         : 01.06.2015 1.01     Added RX231.
  *         : 30.11.2018 1.10     Supporting Smart Configurator
  *         : 31.05.2019 1.11     Added support for GNUC and ICCRX.
+ *         : 30.06.2020 1.20     Added support for RTOS.
  ******************************************************************************/
 
 /******************************************************************************
@@ -46,6 +47,11 @@
 #include "r_usb_patapi.h"
 #include "r_usb_pmsc.h"
 #include "r_usb_pmsc_mini_if.h"
+
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+#include "r_rtos_abstract.h"
+#include "r_usb_cstd_rtos.h"
+#endif /* (BSP_CFG_RTOS_USED != 0) */
 
 /******************************************************************************
  Macro definitions
@@ -92,11 +98,14 @@ static usb_putr_t        gs_usb_pmsc_utr;
 /* Mass Storage Device Class sequence */
 static uint8_t          gs_usb_pmsc_seq;
 
-/* Transfer Complete Flag */
-static uint8_t          gs_usb_pmsc_trans_complete_flag;
 
 /* Transfer Status */
 static uint16_t         gs_usb_pmscstatus;
+
+#if (BSP_CFG_RTOS_USED == 0)        /* Non-OS */
+/* Transfer Complete Flag */
+static uint8_t          gs_usb_pmsc_trans_complete_flag;
+#endif  /* (BSP_CFG_RTOS_USED == 0) */
 
 
 /******************************************************************************
@@ -105,9 +114,15 @@ static uint16_t         gs_usb_pmscstatus;
   * Arguments    : none
   * Return Value : none
  ******************************************************************************/
+#if (BSP_CFG_RTOS_USED == 4)        /* Renesas RI600V4 & RI600PX */
+void usb_pmsc_task (VP_INT b)
+#else  /* (BSP_CFG_RTOS_USED == 4) */
 void usb_pmsc_task (void)
+#endif /* (BSP_CFG_RTOS_USED == 4) */
 {
+#if (BSP_CFG_RTOS_USED == 0)        /* Non-OS */
     static uint8_t  is_init = USB_NO;
+    static usb_putr_t    atapi_mess;
 
     if (USB_NO == is_init)
     {
@@ -138,21 +153,12 @@ void usb_pmsc_task (void)
                 /* Abnormal Status Conditions */
                 case USB_DATA_SHT:
                 case USB_DATA_OVR:
-
-                    USB_PRINTF0("### CBW Size Error \n");
-
                 break;
 
                 case USB_DATA_STOP:
-
-                    USB_PRINTF0("### USB_PMSC_CBWRCV detach error\n");
-
                 break;
 
                 default:
-
-                    USB_PRINTF0("### USB_PMSC_CBWRCV error\n");
-
                 break;
             }
 
@@ -167,21 +173,16 @@ void usb_pmsc_task (void)
                 case USB_DATA_SHT:
                 case USB_DATA_OVR:
 
-                    pmsc_atapi_command_processing(gs_usb_pmsc_cbw.cbwcb, gs_usb_pmscstatus, &usb_pmsc_data_transfer);
+                    pmsc_atapi_command_processing(gs_usb_pmsc_cbw.cbwcb, gs_usb_pmscstatus, &atapi_mess);
+                    usb_pmsc_data_transfer(&atapi_mess, USB_NULL, USB_NULL);
 
                 break;
 
                 /* Abnormal Stauts Conditions */
                 case USB_DATA_STOP:
-
-                    USB_PRINTF0("### USB_PMSC_DATARCV detach error\n");
-
                 break;
 
                 default:
-
-                    USB_PRINTF0("### USB_PMSC_DATARCV error\n");
-
                 break;
             }
 
@@ -194,21 +195,16 @@ void usb_pmsc_task (void)
                 /* Normal Status Condotion */
                 case USB_DATA_NONE:
 
-                    pmsc_atapi_command_processing(gs_usb_pmsc_cbw.cbwcb, gs_usb_pmscstatus, &usb_pmsc_data_transfer);
+                    pmsc_atapi_command_processing(gs_usb_pmsc_cbw.cbwcb, gs_usb_pmscstatus, &atapi_mess);
+                    usb_pmsc_data_transfer(&atapi_mess, USB_NULL, USB_NULL);
 
                 break;
 
                 /* Abnormal Status Conditions */
                 case USB_DATA_STOP:
-
-                    USB_PRINTF0("### USB_PMSC_DATASND detach error\n");
-
                 break;
 
                 default :
-
-                    USB_PRINTF0("### USB_PMSC_DATASND error\n");
-
                 break;
             }
 
@@ -227,15 +223,9 @@ void usb_pmsc_task (void)
 
                 /* Abnormal Status Conditions */
                 case USB_DATA_STOP:
-
-                    USB_PRINTF0("### USB_PMSC_CSWSND detach error\n");
-
                 break;
 
                 default:
-
-                    USB_PRINTF0("### USB_PMSC_CSWSND error\n");
-
                 break;
             }
 
@@ -243,13 +233,108 @@ void usb_pmsc_task (void)
 
         /* Abnormal pmsc_seq Conditions */
         default:
-
-            USB_PRINTF1("### pmsc Sequence error:%x\n", gs_usb_pmsc_seq);
-
         break;
     }
 
     gs_usb_pmsc_trans_complete_flag = USB_FALSE;
+#else /*(BSP_CFG_RTOS_USED == 0)*/
+
+    static uint8_t  is_init = USB_NO;
+    rtos_err_t  err;
+    usb_int_t   *p_mess;
+    static usb_putr_t    atapi_mess;
+
+    if (USB_NO == is_init)
+    {
+        usb_pmsc_init ();
+        pmsc_atapi_init ();
+
+        is_init = USB_YES;
+    }
+
+    /* WAIT_LOOP */
+    while(1)
+    {
+        err = rtos_receive_mailbox (&g_rtos_usb_pmsc_mbx_id, (void **)&p_mess, (rtos_time_t)1000);
+        if (RTOS_SUCCESS == err)
+        {
+            switch (gs_usb_pmsc_seq)
+            {
+                /* Normal  pmsc_seq Conditions */
+                case USB_PMSC_CBWRCV:
+                    switch (gs_usb_pmscstatus)
+                    {
+                        /* Normal Status Condotion */
+                        case USB_DATA_OK:
+                            usb_pmsc_check_cbw();
+                        break;
+                        /* Abnormal Status Conditions */
+                        case USB_DATA_SHT:
+                        case USB_DATA_OVR:
+                        break;
+                        case USB_DATA_STOP:
+                        break;
+                        default:
+                        break;
+                    }
+                break;
+
+                case USB_PMSC_DATARCV:
+                    switch (gs_usb_pmscstatus)
+                    {
+                        /* Normal Status Condotion */
+                        case USB_DATA_OK:
+                        case USB_DATA_SHT:
+                        case USB_DATA_OVR:
+                            pmsc_atapi_command_processing(gs_usb_pmsc_cbw.cbwcb, gs_usb_pmscstatus, &atapi_mess);
+                            usb_pmsc_data_transfer(&atapi_mess, USB_NULL, USB_NULL);
+                        break;
+                        /* Abnormal Stauts Conditions */
+                        case USB_DATA_STOP:
+                        break;
+                        default:
+                        break;
+                    }
+                break;
+
+                case USB_PMSC_DATASND:
+                    switch (gs_usb_pmscstatus)
+                    {
+                        /* Normal Status Condotion */
+                        case USB_DATA_NONE:
+                            pmsc_atapi_command_processing(gs_usb_pmsc_cbw.cbwcb, gs_usb_pmscstatus, &atapi_mess);
+                            usb_pmsc_data_transfer(&atapi_mess, USB_NULL, USB_NULL);
+                        break;
+                        /* Abnormal Status Conditions */
+                        case USB_DATA_STOP:
+                        break;
+                        default :
+                        break;
+                    }
+                break;
+
+                case USB_PMSC_CSWSND :
+                    switch (gs_usb_pmscstatus)
+                    {
+                        /* Normal  Status Condotion */
+                        case USB_DATA_NONE:
+                            usb_pmsc_receive_cbw();
+                        break;
+                        /* Abnormal Status Conditions */
+                        case USB_DATA_STOP:
+                        break;
+                        default:
+                        break;
+                    }
+                break;
+
+                /* Abnormal pmsc_seq Conditions */
+                default:
+                break;
+            }
+        }
+    }
+#endif /*(BSP_CFG_RTOS_USED == 0)*/
 } /* End of function usb_pmsc_task() */
 
 /******************************************************************************
@@ -263,6 +348,7 @@ static void usb_pmsc_check_cbw (void)
     uint8_t     result;
     uint8_t     uc_case = USB_MSC_CASE_ERR;
     uint8_t     uc_pmsc_case = USB_MSC_CASE_ERR;
+    static usb_putr_t    atapi_mess;
 
     result = USB_PMSC_CHECK;
 
@@ -358,8 +444,6 @@ static void usb_pmsc_check_cbw (void)
             break;
 
             default:
-
-                USB_PRINTF0("### Unexpcted Command Check Error\n");
                 result = USB_PMSC_IN_DATA_STALL_CSW_NG;
 
             break;
@@ -381,13 +465,12 @@ static void usb_pmsc_check_cbw (void)
         case USB_PMSC_CSWSND:
 
             gs_usb_pmsc_seq = result;
-            pmsc_atapi_command_processing(gs_usb_pmsc_cbw.cbwcb, gs_usb_pmscstatus, &usb_pmsc_data_transfer);
+            pmsc_atapi_command_processing(gs_usb_pmsc_cbw.cbwcb, gs_usb_pmscstatus, &atapi_mess);
+            usb_pmsc_data_transfer(&atapi_mess, USB_NULL, USB_NULL);
 
         break;
 
         case USB_PMSC_SIG_ERR:
-
-            USB_PRINTF0("### ERROR0 \n");
             /* b31-b24 set */
             g_usb_pmsc_dtl = (uint32_t) gs_usb_pmsc_cbw.dcbw_dtl_hi << 24;
             /* b23-b16 set */
@@ -418,45 +501,32 @@ static void usb_pmsc_check_cbw (void)
         break;
 
         case USB_PMSC_IN_DATA_STALL_CSW_NG:
-
-            USB_PRINTF0("### ERROR1 \n");
-
             /* IN Stall & CSW(NG) transfer*/
             usb_pstd_change_device_state(USB_DO_STALL, USB_CFG_PMSC_BULK_IN, &usb_pmsc_err_csw_ng);
 
         break;
 
         case USB_PMSC_OUT_DATA_STALL_CSW_NG:
-
-            USB_PRINTF0("### ERROR2 \n");
-
             /* OUT Stall & CSW(NG) transfer */
             usb_pstd_change_device_state(USB_DO_STALL, USB_CFG_PMSC_BULK_OUT, &usb_pmsc_err_csw_ng);
 
         break;
 
         case USB_PMSC_IN_DATA_STALL_CSW_ERR:
-
-            USB_PRINTF0("### ERROR3 \n");
             g_usb_pmsc_dtl = 0x00ul;
             /* Cast Call-back function */
-            usb_pstd_change_device_state(USB_DO_STALL, USB_CFG_PMSC_BULK_IN, (usb_pcb_t)&usb_pmsc_err_phase_err);
+            usb_pstd_change_device_state(USB_DO_STALL, USB_CFG_PMSC_BULK_IN, (usb_cb_t)&usb_pmsc_err_phase_err);
 
         break;
 
         case USB_PMSC_OUT_DATA_STALL_CSW_ERR:
-
-            USB_PRINTF0("### ERROR4 \n");
             g_usb_pmsc_dtl = 0x00UL;
             /* Cast Call-back function */
-            usb_pstd_change_device_state(USB_DO_STALL, USB_CFG_PMSC_BULK_OUT, (usb_pcb_t)&usb_pmsc_err_phase_err);
+            usb_pstd_change_device_state(USB_DO_STALL, USB_CFG_PMSC_BULK_OUT, (usb_cb_t)&usb_pmsc_err_phase_err);
 
         break;
 
         case USB_PMSC_NO_DATA_CSW_NG:
-
-            USB_PRINTF0("### ERROR5 \n");
-
             /* CSW(NG) transfer */
             usb_pmsc_csw_transfer(USB_MSC_CSW_NG);
 
@@ -576,8 +646,6 @@ static uint8_t usb_pmsc_check_case13 (uint32_t ul_size, uint8_t *p_uc_case)
         break;
 
         default :
-
-            USB_PRINTF0("### (Error) Not Found 13 Case \n");
             result = USB_MSC_CASE_ERR;
 
         break;
@@ -650,8 +718,6 @@ static uint8_t usb_pmsc_transfer_matrix (uint8_t uc_case)
 
             g_usb_pmsc_dtl = 0x00UL;
             result = USB_PMSC_OUT_DATA_STALL_CSW_ERR;   /* Internal Device Error */
-            USB_PRINTF0("### (Error) Not CASE1-13 \n");
-
         break;
     }
     return result;
@@ -751,30 +817,15 @@ static void usb_pmsc_data_transfer (usb_putr_t *p_mess, uint16_t data1, uint16_t
                 break;
 
                 default:
-
-                    USB_PRINTF0("### usb_pmsc_data_transfer PMSC error:\n");
-
                 break;
             }
 
         break;
 
         case USB_PMSC_CMD_ERROR:
-
-            USB_PRINTF2("### usb_pmsc_data_transfer CMD error1:%d, %x\n", gs_usb_pmsc_seq,p_mess->status);
-            USB_PRINTF1("### g_usb_pmsc_message:%08x\n", p_mess);
-            USB_PRINTF2("### *tranadr:%08x, tranlen:%d\n", &p_mess->p_tranadr, p_mess->tranlen);
-            USB_PRINTF0("### error\n");
-
         break;
 
         default:
-
-            USB_PRINTF2("### usb_pmsc_data_transfer CMD error2:%d, %x\n", gs_usb_pmsc_seq,p_mess->status);
-            USB_PRINTF1("### g_usb_pmsc_message:%08x\n",p_mess);
-            USB_PRINTF2("### *tranadr:%08x, tranlen:%d\n", &p_mess->p_tranadr, p_mess->tranlen);
-            USB_PRINTF0("### error\n");
-
         break;
     }
 } /* End of function usb_pmsc_data_transfer() */
@@ -850,9 +901,11 @@ static void usb_pmsc_transfer_start (uint16_t pipe, uint32_t size, uint8_t *p_ta
     gs_usb_pmsc_utr.p_tranadr    = p_table;
     gs_usb_pmsc_utr.tranlen      = size;
     /* Call-back function set */
-    gs_usb_pmsc_utr.complete     = (usb_pcb_t)usb_pmsc_trans_result;
+    gs_usb_pmsc_utr.complete     = (usb_cb_t)usb_pmsc_trans_result;
 
+#if (BSP_CFG_RTOS_USED == 0)        /* Non-OS */
     gs_usb_pmsc_trans_complete_flag = USB_FALSE;
+#endif /*(BSP_CFG_RTOS_USED == 0)*/
 
     usb_pstd_transfer_start(&gs_usb_pmsc_utr);
 } /* End of function usb_pmsc_transfer_start() */
@@ -867,7 +920,12 @@ static void usb_pmsc_transfer_start (uint16_t pipe, uint32_t size, uint8_t *p_ta
  ******************************************************************************/
 static void usb_pmsc_trans_result (usb_putr_t *p_mess, uint16_t data1, uint16_t data2)
 {
+#if (BSP_CFG_RTOS_USED == 0)        /* Non-OS */
     gs_usb_pmsc_trans_complete_flag = USB_TRUE;
+#else  /*(BSP_CFG_RTOS_USED == 0)*/
+    rtos_send_mailbox (&g_rtos_usb_pmsc_mbx_id, (void *)p_mess);
+
+#endif /*(BSP_CFG_RTOS_USED == 0)*/
     gs_usb_pmscstatus = p_mess->status;
 } /* End of function usb_pmsc_trans_result() */
 
@@ -883,7 +941,6 @@ void usb_pmsc_mass_strage_reset(uint16_t value, uint16_t index, uint16_t length)
 {
     if ((0 == value) && (0 == length))
     {
-        USB_PRINTF0("### Mass Storage Reset Request \n");
         usb_cstd_set_buf(USB_PIPE0);
 
         /* Please add the processing with the system. */
@@ -913,7 +970,6 @@ void usb_pmsc_get_max_lun(uint16_t value, uint16_t index, uint16_t length)
     {
         if (USB_MSC_LUN_LENGTH == length)
         {
-            USB_PRINTF0("*** GetMaxLun Request \n");
             usb_pstd_ctrl_read(USB_MSC_LUN_LENGTH, &uc_lun);
             usb_pstd_ctrl_end(USB_CTRL_END);
         }
@@ -939,7 +995,9 @@ void usb_pmsc_get_max_lun(uint16_t value, uint16_t index, uint16_t length)
 void usb_pmsc_init (void)
 {
     gs_usb_pmsc_seq = 0;
+#if (BSP_CFG_RTOS_USED == 0)        /* Non-OS */
     gs_usb_pmsc_trans_complete_flag = USB_FALSE;
+#endif /*(BSP_CFG_RTOS_USED == 0)*/
     gs_usb_pmscstatus = 0;
     /* Cast for argument type */
     memset((void *)&gs_usb_pmsc_cbw, 0, sizeof(usb_msc_cbw_t));

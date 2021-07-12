@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_t4_file_driver_rx
 VERSION = 		1.02
-MDF =			NOT_SUPPORTED
+MDF = NOT_SUPPORTED
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

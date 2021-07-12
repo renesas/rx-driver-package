@@ -1,34 +1,32 @@
-/*******************************************************************************
+/***********************************************************************************************************************
  * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only
- * intended for use with Renesas products. No other uses are authorized. This
- * software is owned by Renesas Electronics Corporation and is protected under
- * all applicable laws, including copyright laws.
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
  * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
- * LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
- * TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
- * ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
- * FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
- * ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
- * BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software
- * and to discontinue the availability of this software. By using this software,
- * you agree to the additional terms and conditions found by accessing the
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+ * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2018(2019) Renesas Electronics Corporation. All rights reserved.
-  ******************************************************************************/
-/*******************************************************************************
+ *
+ * Copyright (C) 2018(2020) Renesas Electronics Corporation. All rights reserved.
+ ***********************************************************************************************************************/
+/***********************************************************************************************************************
  * File Name    : r_usb_creg_abs.c
  * Description  : Call USB register access function
- *****************************************************************************/
-/******************************************************************************
+ ***********************************************************************************************************************/
+/**********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *         : 30.11.2018 1.00 First Release
- *         : 31.05.2019 1.11    Added support for GNUC and ICCRX.
- ******************************************************************************/
+ *         : 31.05.2019 1.11 Added support for GNUC and ICCRX.
+ *         : 30.06.2020 1.20 Added support for RTOS.
+ ***********************************************************************************************************************/
+
 /******************************************************************************
  Includes   <System Includes> , "Project Includes"
  ******************************************************************************/
@@ -40,15 +38,11 @@
 #include "r_usb_reg_access.h"
 #include "r_usb_dmac.h"
 
-/*******************************************************************************
- Macro definitions
- ******************************************************************************/
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+#include "r_usb_cstd_rtos.h"
+#endif /* (BSP_CFG_RTOS_USED != 0) */
 
-/*******************************************************************************
- Typedef definitions
- ******************************************************************************/
-
-/*******************************************************************************
+/******************************************************************************
  Exported global variables (to be accessed by other files)
  ******************************************************************************/
 
@@ -75,19 +69,26 @@ uint16_t usb_cstd_get_maxpacket_size (uint16_t pipe)
     if (USB_PIPE0 == pipe)
     {
         buffer = hw_usb_read_dcpmaxp();
+
+    /* Max Packet Size */
+        size = (uint16_t) (buffer & USB_DCP_MXPS);
     }
     else
     {
         /* Pipe select */
         hw_usb_write_pipesel(pipe);
+
         buffer = hw_usb_read_pipemaxp();
+
+        /* Max Packet Size */
+        size = (uint16_t) (buffer & USB_PIPE_MXPS);
     }
 
-    /* Max Packet Size */
-    size = (uint16_t) (buffer & USB_MAXP);
-
     return size;
-} /* End of function usb_cstd_get_maxpacket_size */
+}
+/******************************************************************************
+ End of function usb_cstd_get_maxpacket_size
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : usb_cstd_set_pipe_config
@@ -102,12 +103,31 @@ void usb_cstd_set_pipe_config (uint16_t pipe)
 #endif /* ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE)) */
 
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
+
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+        if (USB_NULL != gp_usb_pstd_pipe[pipe])
+        {
+            rtos_release_fixed_memory(&g_rtos_usb_mpf_id, (void *)gp_usb_pstd_pipe[pipe]);
+        }
+
+#endif  /* (BSP_CFG_RTOS_USED != 0) */
+
     gp_usb_pstd_pipe[pipe] = (usb_putr_t *)USB_NULL;
 #endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI */
 
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
+
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+    if (USB_NULL != gp_usb_hstd_pipe[pipe])
+    {
+        rtos_release_fixed_memory(&g_rtos_usb_mpf_id, (void *)gp_usb_hstd_pipe[pipe]);
+    }
+
+    gp_usb_hstd_pipe[pipe] = (usb_utr_t*) USB_NULL;
+#else   /* (BSP_CFG_RTOS_USED != 0) */
     g_usb_hstd_current_pipe   = pipe;
     gp_usb_hstd_pipe[pipe] = (usb_hutr_t*)USB_NULL;
+#endif  /* (BSP_CFG_RTOS_USED != 0) */
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 
     /* Interrupt Disable */
@@ -161,7 +181,10 @@ void usb_cstd_set_pipe_config (uint16_t pipe)
 
     /* Empty/SizeErr Int Clear */
     hw_usb_clear_status_bemp(pipe);
-}/* End of function usb_cstd_set_pipe_config */
+}
+/******************************************************************************
+ End of function usb_cstd_set_pipe_config
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : usb_cstd_clr_pipe_config
@@ -176,19 +199,37 @@ void usb_cstd_clr_pipe_config (uint16_t pipe_no)
 #endif /* ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE)) */
 
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
+
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+        if (USB_NULL != gp_usb_pstd_pipe[pipe_no])
+        {
+            rtos_release_fixed_memory(&g_rtos_usb_mpf_id, (void *)gp_usb_pstd_pipe[pipe_no]);
+        }
+
+#endif  /* (BSP_CFG_RTOS_USED != 0) */
+
     gp_usb_pstd_pipe[pipe_no] = (usb_putr_t *)USB_NULL;
 
 #endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI */
 
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
+
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+    if (USB_NULL != gp_usb_hstd_pipe[pipe_no])
+    {
+        rtos_release_fixed_memory(&g_rtos_usb_mpf_id, (void *)gp_usb_hstd_pipe[pipe_no]);
+    }
+
+    gp_usb_hstd_pipe[pipe_no] = (usb_utr_t*) USB_NULL;
+#else   /* (BSP_CFG_RTOS_USED != 0) */
     gp_usb_hstd_pipe[pipe_no] = (usb_hutr_t*)USB_NULL;
+#endif  /* (BSP_CFG_RTOS_USED != 0) */
 
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 
     /* PID=NAK & clear STALL */
     usb_cstd_clr_stall(pipe_no);
 
-    /* Pipe Configuration Disable */
     /* Interrupt Disable */
     /* Ready         Int Disable */
     hw_usb_clear_brdyenb(pipe_no);
@@ -230,14 +271,7 @@ void usb_cstd_clr_pipe_config (uint16_t pipe_no)
     hw_usb_write_pipecfg(0);
 
     hw_usb_write_pipemaxp(0);
-
-#if (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST
-    if (USB_HOST == g_usb_cstd_usb_mode)
-    {
-        hw_usb_write_pipeperi(0);
-    }
-#endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
-
+    hw_usb_write_pipeperi(0);
     hw_usb_write_pipesel(USB_PIPE0);
 
     /* FIFO buffer DATA-PID initialized */
@@ -258,7 +292,10 @@ void usb_cstd_clr_pipe_config (uint16_t pipe_no)
 
     /* Empty/SizeErr Int Clear */
     hw_usb_clear_status_bemp(pipe_no);
-} /* End of function usb_cstd_clr_pipe_config */
+}
+/******************************************************************************
+ End of function usb_cstd_clr_pipe_config
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : usb_cstd_set_nak
@@ -282,12 +319,15 @@ void usb_cstd_set_nak (uint16_t pipe)
     {
         /* PIPE control reg read */
         buf = hw_usb_read_pipectr(pipe);
-        if ((uint16_t) (buf & USB_PBUSY) == 0)
+        if (0 == (uint16_t) (buf & USB_PBUSY))
         {
             n = 0xFFFEu;
         }
     }
-} /* End of function usb_cstd_set_nak */
+}
+/******************************************************************************
+ End of function usb_cstd_set_nak
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : usb_cstd_is_set_frdy
@@ -306,14 +346,14 @@ uint16_t usb_cstd_is_set_frdy (uint16_t pipe, uint16_t fifosel, uint16_t isel)
     usb_cstd_chg_curpipe(pipe, fifosel, isel);
 
     /* WAIT_LOOP */
-    for (i = 0; i < 4; i++)
+    for (i = 0; i < 4000; i++)
     {
         read_reg = hw_usb_read_fifoctr(fifosel);
 
-        if ((uint16_t) (read_reg & USB_FRDY) == USB_FRDY)
+        if (USB_FRDY == (uint16_t) (read_reg & USB_FRDY))
         {
             return (read_reg);
-        } USB_PRINTF1("*** FRDY wait pipe = %d\n", pipe);
+        }
 
         /* Caution!!!
          * Depending on the external bus speed of CPU, you may need to wait
@@ -326,7 +366,10 @@ uint16_t usb_cstd_is_set_frdy (uint16_t pipe, uint16_t fifosel, uint16_t isel)
         /*************************************/
     }
     return (USB_FIFOERROR);
-} /* End of function usb_cstd_is_set_frdy */
+}
+/******************************************************************************
+ End of function usb_cstd_is_set_frdy
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : usb_cstd_chg_curpipe
@@ -346,11 +389,11 @@ void usb_cstd_chg_curpipe (uint16_t pipe, uint16_t fifosel, uint16_t isel)
         /* CFIFO use */
         case USB_CUSE :
             /* CURPIPE=pipeX */
-            hw_usb_rmw_fifosel(fifosel, ((USB_RCNT | isel) | pipe), ((USB_RCNT | USB_ISEL) | USB_CURPIPE));
+            hw_usb_rmw_fifosel(USB_CUSE, ((USB_RCNT | isel) | pipe), ((USB_RCNT | USB_ISEL) | USB_CURPIPE));
             /* WAIT_LOOP */
             do
             {
-                reg_fifosel = hw_usb_read_fifosel(fifosel);
+                reg_fifosel = hw_usb_read_fifosel(USB_CUSE);
             }
             while ((reg_fifosel & (uint16_t) (USB_ISEL | USB_CURPIPE)) != (uint16_t) (isel | pipe));
         break;
@@ -370,6 +413,7 @@ void usb_cstd_chg_curpipe (uint16_t pipe, uint16_t fifosel, uint16_t isel)
             while ((reg_fifosel & (uint16_t)(USB_CURPIPE)) != USB_PIPE0 );
 
             hw_usb_set_curpipe (fifosel, pipe);
+
             /* WAIT_LOOP */
             do
             {
@@ -383,7 +427,10 @@ void usb_cstd_chg_curpipe (uint16_t pipe, uint16_t fifosel, uint16_t isel)
         default :
         break;
     }
-} /* End of function usb_cstd_chg_curpipe */
+}
+/******************************************************************************
+ End of function usb_cstd_chg_curpipe
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : usb_cstd_set_transaction
@@ -397,7 +444,10 @@ void usb_cstd_set_transaction (uint16_t pipe, uint16_t trncnt)
     hw_usb_set_trclr(pipe);
     hw_usb_write_pipetrn(pipe, trncnt);
     hw_usb_set_trenb(pipe);
-} /* End of function usb_cstd_set_transaction */
+}
+/******************************************************************************
+ End of function usb_cstd_set_transaction
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : usb_cstd_clr_transaction
@@ -409,7 +459,10 @@ void usb_cstd_clr_transaction (uint16_t pipe)
 {
     hw_usb_clear_trenb(pipe);
     hw_usb_set_trclr(pipe);
-} /* End of function usb_cstd_clr_transaction */
+}
+/******************************************************************************
+ End of function usb_cstd_clr_transaction
+ ******************************************************************************/
 
 /******************************************************************************
  End of file

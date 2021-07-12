@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014(2015-2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014(2015-2020) Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
 * File Name     : r_tfat_driver_rx_config.h
@@ -35,6 +35,8 @@
 *              : 20.12.2019 2.00     Added support for FreeRTOS and 
 *                                    Renesas uITRON (RI600V4).
 *                                    Added support for GNUC and ICCRX.
+*              : 10.06.2020 2.10     Added support MMC Firmware and 
+*                                    FLASH Firmware.
 *******************************************************************************/
 #ifndef _R_TFAT_DRIVER_RX_CONFIG_H_
 #define _R_TFAT_DRIVER_RX_CONFIG_H_
@@ -49,16 +51,20 @@ Configuration Options
               other : number of logical drives
    (USB and SD memory card can be used together.)
 */
-#define TFAT_USB_DRIVE_NUM         (0)
-#define TFAT_SDMEM_DRIVE_NUM       (0)
-#define TFAT_USB_MINI_DRIVE_NUM    (0)
+#define TFAT_USB_DRIVE_NUM          (0)
+#define TFAT_SDMEM_DRIVE_NUM        (0)
+#define TFAT_USB_MINI_DRIVE_NUM     (0)
+#define TFAT_MMC_DRIVE_NUM          (0)
+#define TFAT_SERIAL_FLASH_DRIVE_NUM (0)
 
-/* alocate a drive number(initial setting)
+/* allocate a drive number(initial setting)
   <valid define>
-  TFAT_CTRL_USB      : for USB
-  TFAT_CTRL_SDMEM    : for SD memory card
-  TFAT_CTRL_USB_MINI : for USB Mini
-  NULL               : unallocated drive
+  TFAT_CTRL_USB             : for USB
+  TFAT_CTRL_SDMEM           : for SD memory card
+  TFAT_CTRL_USB_MINI        : for USB Mini
+  TFAT_CTRL_MMC             : for MMC memory card or eMMC
+  TFAT_CTRL_SERIAL_FLASH    : for Serial FLASH memory
+  TFAT_CTRL_NONE            : unallocated drive
 
   MAX 10 drives(TFAT module spec)
 

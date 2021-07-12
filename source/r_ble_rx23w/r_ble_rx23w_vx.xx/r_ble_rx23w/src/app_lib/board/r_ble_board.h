@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 /*******************************************************************************************************************//**
@@ -81,6 +81,11 @@ typedef enum
  * @brief The callback invoked when the switch is ON.
 ***********************************************************************************************************************/
 typedef void (*ble_sw_cb_t)(void);
+
+/*******************************************************************************************************************//**
+ * @brief The callback invoked when the IRQ interrupt event.
+***********************************************************************************************************************/
+typedef void (*ble_sw_event_cb_t)(void);
 /*@}*/
 
 /** @defgroup board_func Functions
@@ -116,6 +121,13 @@ void R_BLE_BOARD_ToggleLEDState(e_ble_led_t led);
  * @param[in] cb The callback invoked when the switch is ON.
 ***********************************************************************************************************************/
 void R_BLE_BOARD_RegisterSwitchCb(e_ble_sw_t sw, ble_sw_cb_t cb);
+
+/*******************************************************************************************************************//**
+ * @brief Register switch interrupt event callback for RTOS task wakeup.
+ * @param[in] cb The callback invoked when the switch interrupt (IRQ) event.
+***********************************************************************************************************************/
+void R_BLE_BOARD_RegisterSwitchEventCb(ble_sw_event_cb_t cb);
+
 /*@}*/
 
 #endif /* R_BLE_BOARD_H */

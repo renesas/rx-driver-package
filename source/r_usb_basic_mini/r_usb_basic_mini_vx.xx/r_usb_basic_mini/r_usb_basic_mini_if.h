@@ -1,46 +1,46 @@
-/******************************************************************************
+/***********************************************************************************************************************
  * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only
- * intended for use with Renesas products. No other uses are authorized. This
- * software is owned by Renesas Electronics Corporation and is protected under
- * all applicable laws, including copyright laws.
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
  * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
- * LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
- * TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
- * ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
- * FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
- * ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
- * BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software
- * and to discontinue the availability of this software. By using this software,
- * you agree to the additional terms and conditions found by accessing the
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+ * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2014(2018) Renesas Electronics Corporation. All rights reserved.
-******************************************************************************/
-/******************************************************************************
+ *
+ * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+ ***********************************************************************************************************************/
+/***********************************************************************************************************************
  * File Name    : r_usb_basic_mini_if.h
  * Description  : User macro define file
  *                This file is the macrodefinition header file which a user can operate.
-******************************************************************************/
-/******************************************************************************
+ ***********************************************************************************************************************/
+/**********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *         : 08.01.2014 1.00 First Release
  *         : 30.11.2018 1.10 Supporting Smart Configurator
-******************************************************************************/
+ *         : 30.06.2020 1.20 Added support for RTOS.
+ ***********************************************************************************************************************/
+#ifndef R_USB_BASIC_MINI_IF_H
+#define R_USB_BASIC_MINI_IF_H
 
 /******************************************************************************
 Includes   <System Includes> , "Project Includes"
 ******************************************************************************/
-
 #include "platform.h"
 #include "r_usb_basic_define.h"
 #include "r_usb_basic_mini_config.h"
+#include "r_rtos_abstract.h"
 
-#ifndef R_USB_BASIC_MINI_IF_H
-#define R_USB_BASIC_MINI_IF_H
+#if (BSP_CFG_RTOS_USED == 4)                    /* Renesas RI600V4 & RI600PX */
+#include "itron.h"
+#endif /* (BSP_CFG_RTOS_USED == 4) */
 
 /******************************************************************************
  Macro definitions
@@ -69,8 +69,8 @@ Includes   <System Includes> , "Project Includes"
 #define     USB_SYNCH_FRAME                     (0x0C00u)
 
 /* USB_BMREQUESTTYPEDIR 0x0080u(b7) */
-#define USB_HOST_TO_DEV                         (0u)
-#define USB_DEV_TO_HOST                         (1u)
+#define USB_HOST_TO_DEV                         (0x0000u)
+#define USB_DEV_TO_HOST                         (0x0080u)
 
 /* USB_BMREQUESTTYPETYPE    0x0060u(b6-5) */
 #define USB_REQUEST_TYPE_STANDARD               (0x0000u)
@@ -172,19 +172,6 @@ Includes   <System Includes> , "Project Includes"
 /* Host CLASS Task Command */
 #define USB_MSG_HCLASS_OPEN                     (10u)   /* Host enumeration sequence message */
 
-#define USB_SEQ_0                               (0x00u)
-#define USB_SEQ_1                               (0x01u)
-#define USB_SEQ_2                               (0x02u)
-#define USB_SEQ_3                               (0x03u)
-#define USB_SEQ_4                               (0x04u)
-#define USB_SEQ_5                               (0x05u)
-#define USB_SEQ_6                               (0x06u)
-#define USB_SEQ_7                               (0x07u)
-#define USB_SEQ_8                               (0x08u)
-#define USB_SEQ_9                               (0x09u)
-#define USB_SEQ_10                              (0x0au)
-
-
 /*****************************************************************************
  Typedef definitions
  ******************************************************************************/
@@ -197,7 +184,7 @@ typedef enum usb_err
     USB_ERR_NOT_SUSPEND,        /* Device is not the suspend state */
     USB_ERR_OVER,               /* Received data size over */
     USB_ERR_SHORT,              /* Received data size short */
-    USB_ERR_NG,                 /* Operation failed */
+    USB_ERR_NG                  /* Operation failed */
 } usb_err_t;
 
 typedef struct usb_descriptor
@@ -211,6 +198,7 @@ typedef struct usb_descriptor
 typedef struct usb_cfg
 {
     uint8_t             usb_mode;   /* USB_HOST/USB_PERI */
+    uint8_t             usb_speed;  /* USB speed (USB_HS/USB_FS/USB_LS) */
     usb_descriptor_t    *p_usb_reg; /* Pointer to the usb_decriptor_t structure area */
 } usb_cfg_t;
 
@@ -224,11 +212,20 @@ typedef struct usb_setup
 
 typedef struct usb_ctrl
 {
+#if (BSP_CFG_RTOS_USED == 4)    /* Renesas RI600V4 & RI600PX */
+    T_MSG           msghead;    /* Message Header */
+#endif /* (BSP_CFG_RTOS_USED == 4) */
     uint8_t         pipe;       /* USB pipe number */
     uint8_t         type;       /* USB device class etc */
     uint8_t         status;     /* USB device state etc */
+#if (BSP_CFG_RTOS_USED != 0)    /* Use RTOS */
+    uint8_t         event;      /* USB event */
+#endif /*(BSP_CFG_RTOS_USED != 0)*/
     uint32_t        size;       /* Read data size */
     usb_setup_t     setup;      /* usb_setup_t structure area */
+#if (BSP_CFG_RTOS_USED != 0)    /* Use RTOS */
+    void            *p_data;    /* Other information */
+#endif /*(BSP_CFG_RTOS_USED != 0)*/
 } usb_ctrl_t;
 
 typedef struct usb_pipe
@@ -269,7 +266,7 @@ typedef struct usb_compliance
 /* USB speed type */
 typedef enum usb_speed
 {
-    USB_NOT_CONNECT = 0, USB_LS, USB_FS, USB_HS,
+    USB_NOT_CONNECT = 0, USB_LS, USB_FS
 } usb_speed_t;
 
 /* USB request result */
@@ -282,6 +279,7 @@ typedef enum usb_setup_status
 typedef enum usb_status
 {
     USB_STS_ATTACH = 0,
+    USB_STS_POWERED,
     USB_STS_DEFAULT,
     USB_STS_ADDRESS,
     USB_STS_CONFIGURED,
@@ -302,7 +300,7 @@ typedef enum usb_status
 /* USB class type */
 typedef enum usb_class
 {
-    USB_PCDC = 0, USB_PCDCC, USB_PHID, USB_PVND,
+    USB_PCDC = 0, USB_PCDCC, USB_PCDC2, USB_PCDCC2, USB_PHID, USB_PVND,
 
     USB_HCDC, USB_HCDCC, USB_HHID, USB_HVND,
 
@@ -332,6 +330,13 @@ typedef enum usb_transfer
 {
     USB_BULK = 0, USB_INT, USB_ISO,
 } usb_transfer_t;
+#if (BSP_CFG_RTOS_USED == 1)        /* FreeRTOS */
+typedef void (usb_callback_t)(usb_ctrl_t *, rtos_task_id_t, uint8_t);
+#elif (BSP_CFG_RTOS_USED == 2)      /* SEGGER embOS */
+#elif (BSP_CFG_RTOS_USED == 3)      /* Micrium MicroC/OS */
+#elif (BSP_CFG_RTOS_USED == 4)      /* Renesas RI600V4 & RI600PX */
+typedef void (usb_callback_t)(usb_ctrl_t *, rtos_task_id_t, uint8_t);
+#endif /* (BSP_CFG_RTOS_USED == 1) */
 
 /******************************************************************************
  Export global functions
@@ -351,7 +356,15 @@ extern usb_err_t       R_USB_PipeWrite (usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint
 extern usb_err_t       R_USB_PipeStop (usb_ctrl_t *p_ctrl);
 extern usb_err_t       R_USB_GetUsePipe (uint16_t *p_pipe);
 extern usb_err_t       R_USB_GetPipeInfo (usb_ctrl_t *p_ctrl, usb_pipe_t *p_info);
-extern usb_status_t    R_USB_GetEvent (usb_ctrl_t *p_ctrl);
 extern uint32_t        R_USB_GetVersion (void);
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+void            R_USB_Callback (usb_callback_t *);
+#else   /*(BSP_CFG_RTOS_USED != 0)*/
+extern usb_status_t    R_USB_GetEvent (usb_ctrl_t *p_ctrl);
+#endif  /*(BSP_CFG_RTOS_USED != 0)*/
 
 #endif /* R_USB_BASIC_MINI_IF_H */
+
+/***********************************************************************************************************************
+End  Of File
+***********************************************************************************************************************/

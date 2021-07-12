@@ -108,8 +108,14 @@ void usb_pstd_attach_process (void)
     usb_pstd_bc_detect_process();
 
 #endif  /* USB_CFG_BC == USB_CFG_ENABLE */
-    hw_usb_pset_dprpu();
-
+    if (USB_LS  == g_usb_pstd_speed)
+    {
+        hw_usb_pset_dmrpu();
+    }
+    else
+    {
+        hw_usb_pset_dprpu();
+    }
 } /* End of function usb_pstd_attach_process */
 
 
@@ -125,7 +131,14 @@ void usb_pstd_detach_process (void)
     uint16_t i;
 
     /* Pull-up disable */
-    hw_usb_pclear_dprpu();
+    if (USB_LS  == g_usb_pstd_speed)
+    {
+        hw_usb_pclear_dmrpu();
+    }
+    else
+    {
+        hw_usb_pclear_dprpu();
+    }
 
     /* Configuration number */
     g_usb_pstd_config_no = 0;
@@ -163,13 +176,23 @@ void usb_pstd_suspend_process (void)
 {
     uint16_t intsts0;
     uint16_t buf;
+    uint16_t jsts;
 
     /* Resume interrupt enable */
     hw_usb_pset_enb_rsme();
 
     intsts0 = hw_usb_read_intsts();
     buf = hw_usb_read_syssts();
-    if (((uint16_t)0 !=(intsts0 & USB_DS_SUSP)) && (USB_FS_JSTS == (buf & USB_LNST)))
+    if (USB_LS  == g_usb_pstd_speed)
+	{
+		jsts = USB_LS_JSTS;
+	}
+	else
+	{
+		jsts = USB_FS_JSTS;
+	}
+    if ((intsts0 & USB_DS_SUSP) && ((buf & USB_LNST) == jsts))
+
     {
         /* Suspend */
         usb_pstd_suspend_function();

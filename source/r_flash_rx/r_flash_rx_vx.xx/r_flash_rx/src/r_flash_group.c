@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_group.c
@@ -45,6 +45,12 @@
 *              : 18.11,2019 4.50    Modified to use BSP API functions to enable/disable interrupt requests.
 *                                   Modified where the error return code was not being checked when calling
 *                                     FLASH_CMD_ROM_CACHE_ENABLE in set_non_cached_regs(). 
+*              : 26.06.2020 4.60    Modified to not use BSP API functions to enable/disable interrupt requests.
+*                                   Added error check for successful completion of r_flash_open(),
+*                                     in r_flash_erase(), r_flash_blankcheck(), r_flash_write(), and r_flash_control().
+*                                   Changed to call internal function.
+*                                   Modified compile condition of the 256k boundary for erase and blank check.
+*                                   Modified minor problem.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -199,6 +205,10 @@ flash_err_t r_flash_open(void)
     flash_err_t err;
 #endif
 
+    if (true == g_driver_opened)
+    {
+        return FLASH_ERR_ALREADY_OPEN;
+    }
 
 #if (FLASH_CFG_PARAM_CHECKING_ENABLE == 1)
     if ((MCU_CFG_FCLK_HZ > FLASH_FREQ_HI) || (MCU_CFG_FCLK_HZ < FLASH_FREQ_LO))
@@ -210,12 +220,6 @@ flash_err_t r_flash_open(void)
     if (FLASH_SUCCESS != flash_lock_state(FLASH_INITIALIZATION))
     {
         return FLASH_ERR_BUSY;      // should never happen
-    }
-
-    if (g_driver_opened == true)
-    {
-        flash_release_state();
-        return FLASH_ERR_ALREADY_OPEN;
     }
 
     /* Initialize the FCU */
@@ -287,12 +291,12 @@ flash_err_t flash_interrupt_config(bool state, void *pcfg)
         /* Enable interrupts in ICU */
         IR(FCU,FRDYI)  = 0;                             // Clear Flash Ready Interrupt Request
         IPR(FCU,FRDYI) = int_cfg->int_priority;         // Set Flash Ready Interrupt Priority
-        R_BSP_InterruptRequestEnable(VECT(FCU,FRDYI));  // Enable Flash Ready Interrupt
+        flash_InterruptRequestEnable(VECT(FCU,FRDYI));  // Enable Flash Ready Interrupt
 
 #ifdef FLASH_HAS_ERR_ISR
         IR(FCU,FIFERR)  = 0;                            // Clear Flash Error Interrupt Request
         IPR(FCU,FIFERR) = int_cfg->int_priority;        // Set Flash Error Interrupt Priority
-        R_BSP_InterruptRequestEnable(VECT(FCU,FIFERR)); // Enable Flash Error Interrupt
+        flash_InterruptRequestEnable(VECT(FCU,FIFERR)); // Enable Flash Error Interrupt
 #endif
     }
 
@@ -397,7 +401,7 @@ static flash_err_t set_non_cached_regs(flash_non_cached_t *p_cfg, flash_non_cach
     /* re-enable caching if that was its previous state */
     if (caching_was_enabled)
     {
-        err = R_FLASH_Control(FLASH_CMD_ROM_CACHE_ENABLE, NULL);
+        err = r_flash_control(FLASH_CMD_ROM_CACHE_ENABLE, NULL);
     }
 
     return err;
@@ -439,6 +443,10 @@ flash_err_t r_flash_erase(flash_block_address_t block_start_address, uint32_t nu
     flash_err_t     err;
     flash_type_t    flash_type;
 
+    if (true != g_driver_opened)
+    {
+        return FLASH_ERR_BUSY;
+    }
 
     /* Lock flash driver and set state to ERASING */
     if (FLASH_SUCCESS != flash_lock_state(FLASH_ERASING))
@@ -448,7 +456,7 @@ flash_err_t r_flash_erase(flash_block_address_t block_start_address, uint32_t nu
 
     /* Get flash type (DF or CF) based upon start address */
     err = get_erase_flash_type(block_start_address, num_blocks, &flash_type);
-    if (err != FLASH_SUCCESS)
+    if (FLASH_SUCCESS != err)
     {
         flash_release_state();      // unlock driver
         return err;
@@ -456,7 +464,7 @@ flash_err_t r_flash_erase(flash_block_address_t block_start_address, uint32_t nu
 
     /* Setup erase parameters */
     err = set_erase_params(block_start_address, num_blocks, flash_type);
-    if (err != FLASH_SUCCESS)
+    if (FLASH_SUCCESS != err)
     {
         flash_release_state();      // unlock driver
         return err;
@@ -486,8 +494,8 @@ flash_err_t r_flash_erase(flash_block_address_t block_start_address, uint32_t nu
     }
 
     /* If in blocking mode, operation complete. Exit PE mode and return. */
-    if ((g_current_parameters.current_operation == FLASH_CUR_CF_ERASE)
-     || (g_current_parameters.current_operation == FLASH_CUR_DF_ERASE))
+    if ((FLASH_CUR_CF_ERASE == g_current_parameters.current_operation)
+     || (FLASH_CUR_DF_ERASE == g_current_parameters.current_operation))
     {
         err = flash_pe_mode_exit();
         if (FLASH_SUCCESS != err)
@@ -570,7 +578,7 @@ flash_err_t get_erase_flash_type(flash_block_address_t block_start_address, uint
             return FLASH_ERR_BLOCKS;
         }
 
-#if (defined(MCU_RX113) && (MCU_ROM_SIZE_BYTES > 0x40000L))
+#if ((defined(MCU_RX111) || defined(MCU_RX113) || defined(MCU_RX130)) && (MCU_ROM_SIZE_BYTES > 0x40000L))
         /* For parts with CF > 256K, erase and blankcheck cannot cross 256k boundary */
         if ((block_start_address < (uint32_t)FLASH_CF_256KBOUNDARY)
          && ((block_start_address + (num_blocks * FLASH_CF_BLOCK_SIZE) - 1) > (uint32_t)FLASH_CF_256KBOUNDARY))
@@ -913,6 +921,10 @@ flash_err_t r_flash_blankcheck(uint32_t address, uint32_t num_bytes, flash_res_t
     flash_err_t     err;
     flash_type_t    flash_type;
 
+    if (true != g_driver_opened)
+    {
+        return FLASH_ERR_BUSY;
+    }
 
     /* Lock flash driver and set state to BLANKCHECK */
     if (FLASH_SUCCESS != flash_lock_state(FLASH_BLANKCHECK))
@@ -922,7 +934,7 @@ flash_err_t r_flash_blankcheck(uint32_t address, uint32_t num_bytes, flash_res_t
 
     /* Get flash type (DF or CF) based upon start address */
     err = get_bc_pgm_flash_type(address, num_bytes, &flash_type);
-    if (err != FLASH_SUCCESS)
+    if (FLASH_SUCCESS != err)
     {
         flash_release_state();      // unlock driver
         return err;
@@ -930,7 +942,7 @@ flash_err_t r_flash_blankcheck(uint32_t address, uint32_t num_bytes, flash_res_t
 
     /* Setup blankcheck parameters */
     err = set_blankcheck_params(address, num_bytes, flash_type);
-    if (err != FLASH_SUCCESS)
+    if (FLASH_SUCCESS != err)
     {
         flash_release_state();      // unlock driver
         return err;
@@ -940,7 +952,7 @@ flash_err_t r_flash_blankcheck(uint32_t address, uint32_t num_bytes, flash_res_t
 #if (FLASH_CFG_PARAM_CHECKING_ENABLE == 1)
     if (FLASH_TYPE_DATA_FLASH == flash_type)    // DATA FLASH
     {
-        if (g_current_parameters.bgo_enabled_df == false)
+        if (false == g_current_parameters.bgo_enabled_df)
         {
             if ((NULL == result) || (FIT_NO_PTR == result))
             {
@@ -951,7 +963,7 @@ flash_err_t r_flash_blankcheck(uint32_t address, uint32_t num_bytes, flash_res_t
     }
     else                                        // CODE FLASH
     {
-        if (g_current_parameters.bgo_enabled_cf == false)
+        if (false == g_current_parameters.bgo_enabled_cf)
         {
             if ((NULL == result) || (FIT_NO_PTR == result))
             {
@@ -987,8 +999,8 @@ flash_err_t r_flash_blankcheck(uint32_t address, uint32_t num_bytes, flash_res_t
     }
 
     /* If in non-BGO (blocking) mode, then blankcheck is complete. Exit PE mode before returning */
-    if ((g_current_parameters.current_operation == FLASH_CUR_CF_BLANKCHECK)
-     || (g_current_parameters.current_operation == FLASH_CUR_DF_BLANKCHECK))
+    if ((FLASH_CUR_CF_BLANKCHECK == g_current_parameters.current_operation)
+     || (FLASH_CUR_DF_BLANKCHECK == g_current_parameters.current_operation))
     {
         err = flash_pe_mode_exit();
         if (FLASH_SUCCESS != err)
@@ -1114,6 +1126,10 @@ flash_err_t r_flash_write(uint32_t src_address, uint32_t dest_address, uint32_t 
     flash_err_t     err;
     flash_type_t    flash_type;
 
+    if (true != g_driver_opened)
+    {
+        return FLASH_ERR_BUSY;
+    }
 
     /* Lock flash driver and set state to WRITING */
     if (FLASH_SUCCESS != flash_lock_state(FLASH_WRITING))
@@ -1123,7 +1139,7 @@ flash_err_t r_flash_write(uint32_t src_address, uint32_t dest_address, uint32_t 
 
     /* Get flash type (DF or CF) based upon start address */
     err = get_bc_pgm_flash_type(dest_address, num_bytes, &flash_type);
-    if (err != FLASH_SUCCESS)
+    if (FLASH_SUCCESS != err)
     {
         flash_release_state();      // unlock driver
         return err;
@@ -1131,7 +1147,7 @@ flash_err_t r_flash_write(uint32_t src_address, uint32_t dest_address, uint32_t 
 
     /* Setup write parameters */
     err = set_write_params(dest_address, num_bytes, flash_type);
-    if (err != FLASH_SUCCESS)
+    if (FLASH_SUCCESS != err)
     {
         flash_release_state();      // unlock driver
         return err;
@@ -1162,8 +1178,8 @@ flash_err_t r_flash_write(uint32_t src_address, uint32_t dest_address, uint32_t 
     }
 
     /* If in non-BGO (blocking) mode, then write is complete. Exit PE mode before returning */
-    if ((g_current_parameters.current_operation == FLASH_CUR_CF_WRITE)
-     || (g_current_parameters.current_operation == FLASH_CUR_DF_WRITE))
+    if ((FLASH_CUR_CF_WRITE == g_current_parameters.current_operation)
+     || (FLASH_CUR_DF_WRITE == g_current_parameters.current_operation))
     {
         err = flash_pe_mode_exit();
         if (FLASH_SUCCESS != err)
@@ -1231,7 +1247,7 @@ flash_err_t get_bc_pgm_flash_type(uint32_t address, uint32_t num_bytes, flash_ty
         *flash_type = FLASH_TYPE_CODE_FLASH;
 
 #if FLASH_CFG_PARAM_CHECKING_ENABLE
-#if (defined(MCU_RX113) && (MCU_ROM_SIZE_BYTES > 0x40000L))
+#if ((defined(MCU_RX111) || defined(MCU_RX113) || defined(MCU_RX130)) && (MCU_ROM_SIZE_BYTES > 0x40000L))
         if (g_flash_state == FLASH_BLANKCHECK)
         {
             /* For parts with CF > 256K, erase and blankcheck cannot cross 256k boundary */
@@ -1417,6 +1433,10 @@ flash_err_t r_flash_control(flash_cmd_t cmd, void *pcfg)
 #endif
     flash_err_t err = FLASH_SUCCESS;
 
+    if ((true != g_driver_opened) && (FLASH_INITIALIZATION != g_flash_state))
+    {
+        return FLASH_ERR_BUSY;
+    }
 
     if (FLASH_CMD_RESET == cmd)
     {
@@ -1581,7 +1601,7 @@ flash_err_t r_flash_control(flash_cmd_t cmd, void *pcfg)
          */
         if ((pAccessInfo->start_addr > pAccessInfo->end_addr)
          || ((uint32_t)FLASH_CF_LOWEST_VALID_BLOCK > pAccessInfo->start_addr)
-         || (0 != (ACCESS_BAD_ADDR_MASK & pAccessInfo->start_addr))
+         || ((0 != (ACCESS_BAD_ADDR_MASK & pAccessInfo->start_addr)) && ((uint32_t)FLASH_CF_BLOCK_END != pAccessInfo->start_addr))
          || ((0 != (ACCESS_BAD_ADDR_MASK & pAccessInfo->end_addr)) && ((uint32_t)FLASH_CF_BLOCK_END != pAccessInfo->end_addr)))
         {
             return(FLASH_ERR_ACCESSW);
@@ -1656,7 +1676,7 @@ flash_err_t r_flash_control(flash_cmd_t cmd, void *pcfg)
     {
         FLASH_RETURN_IF_PCFG_NULL;
         banksel_val = *((uint32_t *)BANKSEL_ADDR);
-        *pBank = (0 == (banksel_val & BANKSWP_MASK)) ? FLASH_BANK0_FFE00000 : FLASH_BANK0_FFF00000;
+        *pBank = (0 == (banksel_val & BANKSWP_MASK)) ? FLASH_BANK1 : FLASH_BANK0;
     }
 #endif // (FLASH_IN_DUAL_BANK_MODE == 1)
 

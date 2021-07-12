@@ -14,11 +14,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_t4_rx_config_reference.h
-* Version      : 2.09
+* Version      : 2.10
 * Description  : Configuration options for the r_t4_rx module.
 * Website      : https://www.renesas.com/mw/t4
 ***********************************************************************************************************************/
@@ -29,6 +29,7 @@
 *         : 12.12.2017 2.07    Corresponding to Smart Configurator.
 *         : 10.12.2018 2.08    Corresponding to Smart Configurator.
 *         : 20.06.2019 2.09    Added TCP Keep-Alive Function.
+*         : 29.01.2021 2.10    Changed defalt MAC Address (T4_CFG_ETHER_CH0_MAC_ADDRESS, T4_CFG_ETHER_CH1_MAC_ADDRESS).
 ***********************************************************************************************************************/
 #ifndef T4_RX_CONFIG_HEADER_FILE
 #define T4_RX_CONFIG_HEADER_FILE
@@ -44,8 +45,8 @@ Configuration Options
 #define T4_CFG_FIXED_IP_ADDRESS_CH1                       192,168,0,10
 #define T4_CFG_FIXED_SABNET_MASK_CH1                      255,255,255,0
 #define T4_CFG_FIXED_GATEWAY_ADDRESS_CH1                  0,0,0,0
-#define T4_CFG_ETHER_CH0_MAC_ADDRESS                      0x74,0x90,0x50,0x00,0x79,0x03
-#define T4_CFG_ETHER_CH1_MAC_ADDRESS                      0x74,0x90,0x50,0x00,0x79,0x10
+#define T4_CFG_ETHER_CH0_MAC_ADDRESS                      0x74,0x90,0x50,0x10,0xFE,0x77
+#define T4_CFG_ETHER_CH1_MAC_ADDRESS                      0x74,0x90,0x50,0x00,0x79,0x79
 #define T4_CFG_SYSTEM_CALLBACK_FUNCTION_USE               (1)
 #define T4_CFG_SYSTEM_CALLBACK_FUNCTION_NAME_TMP          (system_callback)
 #define T4_CFG_TCP_REPID1_PORT_NUMBER                     (1024)

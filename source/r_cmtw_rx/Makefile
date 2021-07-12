@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_cmtw_rx
-VERSION = 		2.20
-MDF =			V1,V2
+VERSION = 		2.30
+MDF = V1,V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

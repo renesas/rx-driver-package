@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_jpegd_rx
 VERSION = 		2.06
-MDF =			NOT_SUPPORETD
+MDF = NOT_SUPPORTED
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

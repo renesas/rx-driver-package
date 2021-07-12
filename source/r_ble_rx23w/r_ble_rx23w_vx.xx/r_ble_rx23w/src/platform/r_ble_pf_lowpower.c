@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -34,7 +34,11 @@
 #include "board/r_ble_board.h"
 #include "timer/r_ble_timer.h"
 
-bool g_inhibit_software_standby = true;
+#if (BSP_CFG_RTOS_USED == 1)
+#include "rtos/r_ble_rtos.h"
+#endif /* (BSP_CFG_RTOS_USED == 1) */
+
+bool g_inhibit_software_standby;
 
 
 /* Check whether MCU can enter software standby mode. */
@@ -52,9 +56,11 @@ static bool check_software_standby(void)
     }
 #endif /* BLE_CFG_CMD_LINE_EN */
 
-    if( false != R_BLE_TIMER_IsActive() )
+    /* If CMT is in active, disallow enter to software standby. */
+    if ((0x0000 != (CMT.CMSTR0.WORD & 0x0003)) ||
+        (0x0000 != (CMT.CMSTR1.WORD & 0x0003)) )
     {
-    	return false;
+        return false;
     }
 
     /* If DTC/DMAC/DataFlash is in active, MCU can not enter software standby.
@@ -165,6 +171,12 @@ void R_BLE_LPC_Init(void)
     /* Disable writing to MSTP registers. */
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR);
 
+#if (BLE_CFG_CMD_LINE_EN == 1)
+    g_inhibit_software_standby = true;
+#else /*  (BLE_CFG_CMD_LINE_EN == 1) */
+    g_inhibit_software_standby = false;
+#endif /*  (BLE_CFG_CMD_LINE_EN == 1) */
+
 }
 
 void R_BLE_LPC_EnterLowPowerMode(void)
@@ -188,6 +200,10 @@ void R_BLE_LPC_EnterLowPowerMode(void)
     if(0 == R_BLE_IsTaskFree()) 
     {
         R_BSP_InterruptsEnable();
+
+#if (BSP_CFG_RTOS_USED == 1)
+        R_BLE_RTOS_WakeTask();
+#endif /* (BSP_CFG_RTOS_USED == 1) */
         return;
     }
 

@@ -7,18 +7,22 @@
         <brand>Renesas</brand>
         <product>RXC</product>
         <version>3.01.00</version>
+        <version>3.02.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
         <version>4.08.04.201801</version>
+        <version>4.08.04.201803</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
         <product>ICCRX</product>
         <version>4.11.01</version>
+        <version>4.12.01</version>
+        <version>4.13.01</version>
+        <version>4.14.01</version>
     </toolchain>
-
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
     <target>
@@ -34,11 +38,11 @@
         <zipsource>r_t4_driver_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.20</version>
+            <version>5.61</version>
         </dependency>
         <dependency>
             <module>r_ether_rx</module>
-            <version>1.16</version>
+            <version>1.21</version>
         </dependency>
         <dependency>
             <module>r_sys_time_rx</module>
@@ -46,10 +50,10 @@
         </dependency>
         <dependency>
             <module>r_t4_rx</module>
-            <version>2.09</version>
+            <version>2.10</version>
         </dependency>
         <application>TCP/IP</application>
-        <desc>Convert the TCP/IP(T4) - RX Ethernet Driver Interface.</desc>
+        <desc>TCP/IP protocol stack [M3S-T4-Tiny] - RX Ethernet Driver Interface</desc>
         <details>Convert the TCP/IP(T4) - RX Ethernet Driver Interface.</details>
         <function>connectivity</function>
         <incdir>r_t4_driver_rx</incdir>

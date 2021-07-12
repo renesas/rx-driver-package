@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_socket_rx
 VERSION = 		1.31
-MDF =			NOT_SUPPORTED
+MDF = NOT_SUPPORTED
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

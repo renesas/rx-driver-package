@@ -19,12 +19,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018(2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018(2020) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * System Name  : MEMDRV  software
 * File Name    : r_memdrv_rspi.c
-* Version      : 1.02
+* Version      : 1.03
 * Device       : -
 * Abstract     : IO I/F module
 * Tool-Chain   : -
@@ -44,6 +44,12 @@
 *                                    The issue occurs when the number of transmit is set to a value of 1024 byte.
 *                                    Corrected parameter type of the r_memdrv_rspi_write_data function.
 *                                    Corrected parameter type of the r_memdrv_rspi_read_data function.
+*              : 10.09.2020 1.03     Modified the RSPI callback function.
+*                                    The module is updated to fix the software issue.
+*                                    In IAR and Big Endian, set the device driver to be used to RSPI and set it to
+*                                    transfer data by Software transfer. If you transfer 4 bytes or more of data
+*                                    with R_MEMDRV_TxData() and R_MEMDRV_RxData(), more data than the specified
+*                                    transfer size will be transferred.
 *************************************************************************************************/
 
 /************************************************************************************************
@@ -2578,45 +2584,6 @@ static void r_memdrv_rspi_callback(void *p_data)
 {
     callback_event = (*(rspi_callback_data_t *)p_data).event_code;
     g_transfer_busy = false;
-
-#if (MEMDRV_CFG_DEV0_MODE_TRNS & MEMDRV_TRNS_DTC)  | (MEMDRV_CFG_DEV1_MODE_TRNS & MEMDRV_TRNS_DTC)
-    R_RSPI_IntSpriIerClear(g_rspi_handle);
-    R_RSPI_IntSptiIerClear(g_rspi_handle);
-    if (0 == g_rspi_handle->channel)
-    {
-#if ((MEMDRV_CFG_DEV0_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH0) | \
-    ((MEMDRV_CFG_DEV1_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH0)
-        RSPI0.SPCR.BIT.SPE   = 0;  // Disable RSPI.
-#if RSPI_CFG_REQUIRE_LOCK == 1
-        R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_RSPI0));
-#endif
-#endif
-    }
-    else if (1 == g_rspi_handle->channel)
-    {
-#if ((MEMDRV_CFG_DEV0_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH1) | \
-    ((MEMDRV_CFG_DEV1_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH1)
-    {
-        RSPI1.SPCR.BIT.SPE   = 0;  // Disable RSPI.
-#if RSPI_CFG_REQUIRE_LOCK == 1
-        R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_RSPI1));
-#endif
-#endif
-    }
-    else if (2 == g_rspi_handle->channel)
-    {
-#if ((MEMDRV_CFG_DEV0_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH2) | \
-    ((MEMDRV_CFG_DEV1_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH2)
-        RSPI2.SPCR.BIT.SPE   = 0;  // Disable RSPI.
-#if RSPI_CFG_REQUIRE_LOCK == 1
-        R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_RSPI2));
-#endif
-#endif
-    }
-    else
-    {
-    }
-#endif
 } /* End of function r_memdrv_rspi_callback() */
 
 /*****************************************************************************
@@ -2670,10 +2637,20 @@ static memdrv_err_t r_memdrv_rspi_write_data(uint8_t channel,
         count = count >> 2;
     }
 #else
+    #if defined (__ICCRX__)
+    uint16_t cmd_big_endian = 0;
+    cmd_big_endian = (MEMDRV_TRNS_DATA_CMD >> 8);
+    cmd_big_endian |= (MEMDRV_TRNS_DATA_CMD << 8);
+    if (cmd_big_endian == cmd.word[0])
+    {
+        count = count >> 2;
+    }
+    #else
     if (MEMDRV_TRNS_DATA_CMD == cmd.word[1])
     {
         count = count >> 2;
     }
+    #endif
 #endif
     ret_drv = R_RSPI_Write(g_rspi_handle,
                            cmd,
@@ -2730,10 +2707,20 @@ static memdrv_err_t r_memdrv_rspi_read_data(uint8_t channel,
         count = count >> 2;
     }
 #else
+    #if defined (__ICCRX__)
+    uint16_t cmd_big_endian = 0;
+    cmd_big_endian = (MEMDRV_TRNS_DATA_CMD >> 8);
+    cmd_big_endian |= (MEMDRV_TRNS_DATA_CMD << 8);
+    if (cmd_big_endian == cmd.word[0])
+    {
+        count = count >> 2;
+    }
+    #else
     if (MEMDRV_TRNS_DATA_CMD == cmd.word[1])
     {
         count = count >> 2;
     }
+    #endif
 #endif
     ret_drv = R_RSPI_Read(g_rspi_handle,
                            cmd,

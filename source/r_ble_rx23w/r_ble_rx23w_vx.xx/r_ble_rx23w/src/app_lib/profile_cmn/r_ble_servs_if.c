@@ -259,7 +259,7 @@ void R_BLE_SERVS_GattsCb(uint16_t type, ble_status_t result, st_ble_gatts_evt_da
 
         case BLE_GATTS_EVENT_EX_MTU_REQ:
         {
-            R_BLE_GATTS_RspExMtu(p_data->conn_hdl, BLE_CFG_GATT_MTU_SIZE);
+            R_BLE_GATTS_RspExMtu(p_data->conn_hdl, BLE_PRF_MTU_SIZE);
         } 
         break;
 
@@ -288,7 +288,7 @@ void R_BLE_SERVS_GattsCb(uint16_t type, ble_status_t result, st_ble_gatts_evt_da
                             .param_len = 0,
                             .p_param   = NULL,
                         };
-                        p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->char_idx, p_char->inst_idx, BLE_SERVS_HDL_VAL_CNF), BLE_SUCCESS, &evt_data);
+                        p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->char_idx, p_char->inst_idx, BLE_SERVS_HDL_VAL_CNF), result, &evt_data);
                     }
                 }
             }
@@ -492,6 +492,9 @@ void R_BLE_SERVS_GattsCb(uint16_t type, ble_status_t result, st_ble_gatts_evt_da
 
 void R_BLE_SERVS_VsCb(uint16_t type, ble_status_t result, st_ble_vs_evt_data_t * p_data)
 {
+    /* unused arg */
+    (void)result;
+
     switch (type)
     {
         case BLE_VS_EVENT_TX_FLOW_STATE_CHG:
@@ -527,6 +530,7 @@ void R_BLE_SERVS_VsCb(uint16_t type, ble_status_t result, st_ble_vs_evt_data_t *
 ble_status_t R_BLE_SERVS_Init(void)
 {
     R_BLE_VS_StartTxFlowEvtNtf();
+    gs_num_of_servs = 0;
 
     return BLE_SUCCESS;
 }
@@ -569,10 +573,6 @@ ble_status_t R_BLE_SERVS_SendHdlVal(const st_ble_servs_char_info_t *p_attr, uint
     /* Check CCCD */
     uint16_t cccd = 0;
     R_BLE_SERVS_GetDesc(p_attr->pp_descs[0], conn_hdl, &cccd);
-    if(0 == cccd)
-    {
-        return BLE_ERR_INVALID_OPERATION;
-    }
 
     void *p_gatt_value = malloc(p_attr->db_size);
 
@@ -582,7 +582,7 @@ ble_status_t R_BLE_SERVS_SendHdlVal(const st_ble_servs_char_info_t *p_attr, uint
     }
 
     st_ble_gatt_hdl_value_pair_t hdl_val_data = {
-        .attr_hdl        = p_attr->start_hdl + 1,
+        .attr_hdl        = (uint16_t)(p_attr->start_hdl + 1),
         .value.value_len = p_attr->db_size,
         .value.p_value   = (uint8_t *)p_gatt_value,
     };
@@ -591,13 +591,17 @@ ble_status_t R_BLE_SERVS_SendHdlVal(const st_ble_servs_char_info_t *p_attr, uint
 
     if (BLE_SUCCESS == ret)
     {
-        if (is_notify)
+        if ((is_notify == true) && (cccd & BLE_GATTS_CLI_CNFG_NOTIFICATION))
         {
             ret = R_BLE_GATTS_Notification(conn_hdl, &hdl_val_data);
         }
-        else
+        else if ((is_notify == false) && (cccd & BLE_GATTS_CLI_CNFG_INDICATION))
         {
             ret = R_BLE_GATTS_Indication(conn_hdl, &hdl_val_data);
+        }
+        else 
+        {
+            ret = BLE_ERR_INVALID_OPERATION;
         }
     }
 
@@ -622,7 +626,7 @@ ble_status_t R_BLE_SERVS_GetChar(const st_ble_servs_char_info_t *p_attr, uint16_
 
     st_ble_gatt_value_t gatt_value;
 
-    ret = R_BLE_GATTS_GetAttr(conn_hdl, p_attr->start_hdl + 1, &gatt_value);
+    ret = R_BLE_GATTS_GetAttr(conn_hdl, (uint16_t)(p_attr->start_hdl + 1), &gatt_value);
 
     if (BLE_SUCCESS == ret)
     {
@@ -662,7 +666,7 @@ ble_status_t R_BLE_SERVS_SetChar(const st_ble_servs_char_info_t *p_attr, uint16_
 
     if (BLE_SUCCESS == ret)
     {
-        ret = R_BLE_GATTS_SetAttr(conn_hdl, p_attr->start_hdl + 1, &gatt_value);
+        ret = R_BLE_GATTS_SetAttr(conn_hdl, (uint16_t)(p_attr->start_hdl + 1), &gatt_value);
     }
 
     free(p_gatt_value);

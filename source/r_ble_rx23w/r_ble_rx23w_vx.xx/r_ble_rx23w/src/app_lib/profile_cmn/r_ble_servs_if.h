@@ -30,10 +30,6 @@
 *         : 23.08.2019 1.00    First Release
 *         : 31.10.2019 1.01    Add doxygen comments.
 ***********************************************************************************************************************/
-
-#include "r_ble_rx23w_if.h"
-
-#include "r_ble_profile_cmn.h"
 #include "r_ble_serv_common.h"
 
 #ifndef R_BLE_SERVS_IF_H
@@ -55,7 +51,7 @@
  * @param[in] inst_idx Service index. 4bit is used.
  * @param[in] evt_idx Event index. 5bit is used.
  */
-#define BLE_SERVS_MULTI_ATTR_EVENT(attr_idx, inst_idx, evt_idx) ((attr_idx << 10) | (inst_idx << 6) | (evt_idx << 0))
+#define BLE_SERVS_MULTI_ATTR_EVENT(attr_idx, inst_idx, evt_idx) ((uint16_t)((attr_idx << 10) | (inst_idx << 6) | (evt_idx << 0)))
 
 /** 
  * @def BLE_SERVS_ATTR_EVENT

@@ -1,30 +1,26 @@
-/*******************************************************************************
+/***********************************************************************************************************************
  * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only
- * intended for use with Renesas products. No other uses are authorized. This
- * software is owned by Renesas Electronics Corporation and is protected under
- * all applicable laws, including copyright laws.
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
  * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
- * LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
- * TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
- * ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
- * FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
- * ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
- * BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software
- * and to discontinue the availability of this software. By using this software,
- * you agree to the additional terms and conditions found by accessing the
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+ * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2015(2019) Renesas Electronics Corporation. All rights reserved.
- *****************************************************************************/
-/******************************************************************************
+ *
+ * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
+ ***********************************************************************************************************************/
+/***********************************************************************************************************************
 * File Name    : r_usb_hstdfunction.c
 * Description  : This is the USB basic firmware library function code.
-*******************************************************************************/
-/*******************************************************************************
+ ***********************************************************************************************************************/
+/**********************************************************************************************************************
 * History   : DD.MM.YYYY Version Description
 *           : 01.09.2014 1.00    First Release
 *           : 01.06.2015 1.01    Added RX231.
@@ -32,20 +28,23 @@
 *           : 30.11.2018 1.10    Supporting Smart Configurator
 *           : 31.05.2019 1.11    Added support for GNUC and ICCRX.
 *           : 30.06.2019 1.12    RX23W is added.
-*******************************************************************************/
+*           : 30.06.2020 1.20    Added support for RTOS.
+ ***********************************************************************************************************************/
 
-
-/*******************************************************************************
+/******************************************************************************
  Includes   <System Includes> , "Project Includes"
  ******************************************************************************/
 #include "r_usb_basic_mini_if.h"
+
+#if (BSP_CFG_RTOS_USED == 0)    /* Non-OS */
+
 #include "r_usb_bitdefine.h"
 #include "r_usb_typedef.h"
 #include "r_usb_reg_access.h"            /* Definition of the USB register access macro */
 #include "r_usb_extern.h"
 
 #if defined(USB_CFG_HCDC_USE)
-#include "r_usb_hcdc.h"
+#include "r_usb_hcdc_mini_if.h"
 #endif /* defined(USB_CFG_HCDC_USE) */
 
 #if defined(USB_CFG_HHID_USE)
@@ -60,12 +59,10 @@
 #include "r_usb_dmac.h"
 
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
-
 /*******************************************************************************
  Macro definitions
  ******************************************************************************/
 
-#define CLSDATASIZE     (512)
 #define USB_PET_VID     (0x1a0a)    /* USB-PET Vendor ID  */
 #define USB_PET_PID     (0x0200)    /* USB-PET Product ID (Use Embedded Host Test) */
 
@@ -80,12 +77,14 @@
 
 /* variables */
 USB_STATIC  usb_hcdrequest_t    gs_usb_hstd_mgr_request;
-USB_STATIC  uint8_t             gs_usb_hstd_mgr_dummy_data[CLSDATASIZE];
-USB_STATIC  uint8_t             gs_usb_hstd_device_descriptor[USB_DEVICESIZE];
+USB_STATIC  uint8_t             gs_usb_hstd_mgr_dummy_data;
 USB_STATIC  uint8_t             gs_usb_hstd_string_descriptor[USB_STRING_SIZE];
 USB_STATIC  uint8_t             *gsp_usb_hstd_device_desc_tbl;
 USB_STATIC  uint8_t             *gsp_usb_hstd_config_desc_tbl;
 USB_STATIC  usb_hutr_t          gs_usb_hstd_string_control;        /* Request for HID to USB Request */
+USB_STATIC  uint16_t            gs_usb_enum_seq;                   /* Enumeration Sequence */
+USB_STATIC  usb_hcdrequest_t    gs_usb_hstd_request;               /* Control Transfer Request field */
+USB_STATIC  usb_leng_t          gs_usb_hstd_data_cnt_pipe0;
 
 USB_STATIC  const uint16_t gs_usb_device_tpl[] =
 {
@@ -100,10 +99,6 @@ USB_STATIC  const uint16_t gs_usb_device_tpl[] =
 
 /* functions */
 /* HCD task / MGR task */
-USB_STATIC  usb_er_t            usb_hstd_set_asddress(void);
-USB_STATIC  void                usb_hstd_dummy_request(void);
-/* USB Host control driver libraries */
-USB_STATIC  uint16_t            usb_hstd_get_devaddx_register(void);
 /* standard request functions */
 USB_STATIC  usb_er_t            usb_hstd_do_command(uint8_t* tranadr);
 /* HCD to MGR, APL(class driver) to MGR, MGR to HCD, HCD to MGR command control function */
@@ -131,7 +126,6 @@ uint8_t         g_usb_hstd_int_msg_cnt;                         /* Interrupt mes
 usb_hutr_t      *gp_usb_hstd_pipe[USB_MAX_PIPE_NO + 1u];      /* Message pipe */
 uint8_t         *gp_usb_hstd_data_ptr[USB_MAX_PIPE_NO + 1u];    /* PIPEn Buffer pointer(8bit) */
 usb_leng_t      g_usb_hstd_data_cnt[USB_MAX_PIPE_NO + 1u];     /* PIPEn Buffer counter */
-usb_leng_t      g_usb_hstd_data_cnt_pipe0;
 usb_pipe_no_t   g_usb_hstd_current_pipe;                          /* Pipe number */
 /* Scheduler global variables */
 usb_tskinfo_t   g_usb_hstd_block[USB_BLKMAX];
@@ -146,6 +140,7 @@ usb_msg_t       *gp_usb_hstd_next_addr_sch;
 uint8_t         g_usb_hstd_next_id_sch;        /* Priority Counter */
 uint8_t         g_usb_next_read_ptr_sch;       /* Priority Table Reading pointer */
 uint8_t         *gp_usb_hstd_interface_tbl;
+uint8_t         g_usb_hstd_device_descriptor[USB_DEVICESIZE];
 
 /******************************************************************************
 Function Name   : usb_cstd_init_library
@@ -199,10 +194,11 @@ void usb_cstd_init_library(void)
 
 
 /******************************************************************************
-Function Name   : usb_hstd_buf_to_fifo
-Description     : Buffer to FIFO data write
-Arguments       : uint16_t useport       : FIFO Access mode
-Return value    : none
+ Function Name   : usb_hstd_buf_to_fifo
+ Description     : Set USB registers as required to write from data buffer to USB 
+                 : FIFO, to have USB FIFO to write data to bus.
+ Arguments       : uint16_t useport       : FIFO Access mode
+ Return value    : none
 ******************************************************************************/
 void usb_hstd_buf_to_fifo(uint16_t useport)
 {
@@ -235,14 +231,18 @@ void usb_hstd_buf_to_fifo(uint16_t useport)
         break;
     }
 
-}   /* End of function usb_hstd_buf_to_fifo() */
+}
+/******************************************************************************
+ End of function usb_hstd_buf_to_fifo
+ ******************************************************************************/
 
 
 /******************************************************************************
-Function Name   : usb_cstd_buf_to_cfifo
-Description     : Buffer to CFIFO data write
-Arguments       : uint16_t useport       : FIFO Access mode
-Return value    : uint16_t end_flag
+ Function Name   : usb_cstd_buf_to_cfifo
+ Description     : Switch PIPE, request the USB FIFO to write data, and manage 
+                 : the size of written data.
+ Arguments       : uint16_t useport       : FIFO Access mode
+ Return value    : uint16_t end_flag
 ******************************************************************************/
 USB_STATIC uint8_t usb_cstd_buf_to_cfifo(uint16_t useport)
 {
@@ -283,6 +283,7 @@ USB_STATIC uint8_t usb_cstd_buf_to_cfifo(uint16_t useport)
             /* Check error */
             if (USB_FIFOERROR == buffer)
             {
+        /* FIFO access error */
                 return (USB_FIFOERROR);
             }
             p_fifo_port_16bit = (uint16_t*)&USB0.CFIFO.WORD;
@@ -290,6 +291,7 @@ USB_STATIC uint8_t usb_cstd_buf_to_cfifo(uint16_t useport)
         break;
     }
 
+    /* Max Packet Size */
     mxps = usb_cstd_get_maxpacket_size(pipe);
 
     /* Write continues */
@@ -340,14 +342,17 @@ USB_STATIC uint8_t usb_cstd_buf_to_cfifo(uint16_t useport)
     }
     return end_flag;
 
-}   /* End of function usb_cstd_buf_to_cfifo() */
+}
+/******************************************************************************
+ End of function usb_cstd_buf_to_cfifo
+ ******************************************************************************/
 
 /******************************************************************************
-Function Name   : usb_hstd_fifo_to_buf
-Description     : FIFO to Buffer data read
-                : CFIFO     : Operation on the conditions of CNTMD=0 is possible
-Arguments       : none
-Return value    : none
+ Function Name   : usb_hstd_fifo_to_buf
+ Description     : Request readout from USB FIFO to buffer and process depending
+                 : on status; read complete or reading.
+ Arguments       : none
+ Return value    : none
 ******************************************************************************/
 void usb_hstd_fifo_to_buf(void)
 {
@@ -375,15 +380,18 @@ void usb_hstd_fifo_to_buf(void)
             usb_hstd_forced_termination(USB_DATA_ERR);
         break;
     }
-}   /* End of function usb_hstd_fifo_to_buf() */
+}
+/******************************************************************************
+ End of function usb_hstd_fifo_to_buf
+ ******************************************************************************/
 
 
 /******************************************************************************
-Function Name   : usb_hstd_cfifo_to_buf
-Description     : CFIFO to Buffer data read
-                : Operation on the conditions of DBLB=0/CNTMD=0 is possible.
-Arguments       : none
-Return value    : uint16_t end_flag
+ Function Name   : usb_hstd_cfifo_to_buf
+ Description     : Request to read data from USB FIFO, and manage the size of 
+                 : the data read.
+ Arguments       : none
+ Return value    : uint16_t end_flag
 ******************************************************************************/
 USB_STATIC uint8_t usb_hstd_cfifo_to_buf(void)
 {
@@ -415,13 +423,15 @@ USB_STATIC uint8_t usb_hstd_cfifo_to_buf(void)
         count = (uint16_t)g_usb_hstd_data_cnt[pipe];
         g_usb_hstd_data_cnt[pipe] = dtln;
     }
-    else if (g_usb_hstd_data_cnt[pipe] == dtln )           /* Just Receive Size */
+    else if (g_usb_hstd_data_cnt[pipe] == dtln)           /* Just Receive Size */
     {
+        /* Just Receive Size */
         count = dtln;
         end_flag = USB_READEND;
     }
     else                                                /* Continues Receive data */
     {
+        /* Continus Receive data */
         count = dtln;
         end_flag = USB_READING;
         if ( (0 == count) || (count != mxps) )
@@ -439,6 +449,7 @@ USB_STATIC uint8_t usb_hstd_cfifo_to_buf(void)
     if (0 == dtln)
     {
         /* 0 length packet */
+        /* Clear BVAL */
         hw_usb_set_bclr(USB_CUSE);
     }
     else
@@ -525,131 +536,6 @@ USB_STATIC uint8_t usb_hstd_get_ifclass( uint8_t class )
 #endif /* end USB_CFG_COMPLIANCE == USB_CFG_ENABLE */
 
 
-/******************************************************************************
-Function Name   : usb_hstd_enumeration
-Description     : USB Enumeration
-Argument        : none
-Return          : uint16_t                  : enumeration status
-******************************************************************************/
-uint8_t usb_hstd_enumeration(void)
-{
-    usb_hcdreg_t    *p_driver;
-    uint8_t         *p_table[3];
-#if USB_CFG_COMPLIANCE == USB_CFG_ENABLE
-    uint16_t vendor_id;
-    uint16_t product_id;
-    usb_compliance_t disp_param;
-    uint8_t         ifclass;
-#endif /* end USB_CFG_COMPLIANCE == USB_CFG_ENABLE */
-
-    switch (g_usb_mgr_seq)
-    {
-        case USB_2:                 /* Receive Device Descriptor */
-            /* Set device speed */
-            g_usb_hstd_hcd_port    = g_usb_mgr_port;
-            g_usb_hcd_devaddr      = g_usb_mgr_devaddr;
-            usb_hstd_set_devaddx_register(g_usb_hstd_devspd);
-            g_usb_hstd_hcd_dcp_mxps[g_usb_mgr_devaddr]
-                = (uint16_t)((uint16_t)(gs_usb_hstd_device_descriptor[USB_DEV_B_MAX_PACKET_SIZE_0] & USB_MAXPFIELD) |
-                             (USB_ADDR2DEVSEL(g_usb_mgr_devaddr)));
-            usb_hstd_set_asddress();
-            g_usb_hcd_dev_info.state    = USB_STS_ADDRESS;
-        break;
-        case USB_3:             /* Set Address */
-        /* continue */
-        case USB_4:             /* Receive Device Descriptor(18) */
-        /* continue */
-        case USB_5:             /* Receive Configuration Descriptor(9) */
-            if (usb_hstd_get_descriptor(g_usb_mgr_seq) != USB_OK)
-            {
-                return (USB_NONDEVICE);
-            }
-        break;
-        case USB_6:             /* Receive Configuration Descriptor(xx) */
-            /* Device enumeration function */
-            p_driver = &g_usb_hcd_driver;
-
-#if USB_CFG_COMPLIANCE == USB_CFG_ENABLE
-            vendor_id = (uint16_t)(gs_usb_hstd_device_descriptor[USB_DEV_ID_VENDOR_L]
-                    + ((uint16_t)gs_usb_hstd_device_descriptor[USB_DEV_ID_VENDOR_H] << 8));
-            product_id = (uint16_t)(gs_usb_hstd_device_descriptor[USB_DEV_ID_PRODUCT_L]
-                    + ((uint16_t)gs_usb_hstd_device_descriptor[USB_DEV_ID_PRODUCT_H] << 8));
-
-            /* Check PET connect */
-            if ((USB_PET_VID == vendor_id) && (USB_PET_PID == product_id))
-            {
-                usb_hstd_set_configuration();
-                g_usb_mgr_seq = USB_7;
-                return (USB_DEVICEENUMERATION);
-            }
-            else
-            {
-                ifclass = usb_hstd_get_ifclass( p_driver->ifclass );
-            }
-
-            if ((USB_STS_DETACH == p_driver->devstate) && ( USB_YES == ifclass ) )
-            {
-#else /* USB_CFG_COMPLIANCE == USB_CFG_ENABLE */
-            if (USB_STS_DETACH == p_driver->devstate)
-            {
-#endif /* USB_CFG_COMPLIANCE == USB_CFG_ENABLE */
-                /* To judge the detach while the class driver is operating, the pre-register is executed. */
-                p_driver->rootport    = g_usb_mgr_port;
-                p_driver->devaddr     = g_usb_mgr_devaddr;
-                p_table[0]    = gs_usb_hstd_device_descriptor;
-                p_table[1]    = g_usb_hstd_cfg_descriptor;
-                p_table[2]    = (uint8_t*)&g_usb_mgr_devaddr;
-
-                g_usb_hcd_dev_info.port     = g_usb_mgr_port;
-                g_usb_hcd_dev_info.speed    = g_usb_hstd_devspd;
-
-                (*p_driver->classcheck)(p_table);
-                return (USB_DEVICEENUMERATION);
-                /* In this function, check device class of enumeration flow move to class */
-                /* "usb_hstd_return_enu_mgr()" is used to return */
-            }
-#if USB_CFG_COMPLIANCE == USB_CFG_ENABLE
-            ifclass = usb_hstd_get_ifclass( USB_IFCLS_HUB );
-            if (USB_YES == ifclass )
-            {
-                disp_param.status = USB_CT_HUB;
-                disp_param.pid    = product_id;
-                disp_param.vid    = vendor_id;
-            }
-            else
-            {
-                disp_param.status = USB_CT_NOTTPL;
-                disp_param.pid    = product_id;
-                disp_param.vid    = vendor_id;
-            }
-            usb_compliance_disp ((void *)&disp_param);
-
-#endif /* USB_CFG_COMPLIANCE == USB_CFG_ENABLE */
-            usb_hstd_return_enu_mgr(USB_ERROR);
-            usb_hstd_connect_err_event_set();           /* Set event USB_STS_NOT_SUPPORT */
-        break;
-        case USB_8:             /* Set Configuration */
-            /* Device enumeration function */
-            p_driver = &g_usb_hcd_driver;
-            if (g_usb_mgr_devaddr == p_driver->devaddr )
-            {
-                g_usb_hcd_dev_info.port     = g_usb_mgr_port;
-                g_usb_hcd_dev_info.state    = USB_STS_CONFIGURED;
-                g_usb_hcd_dev_info.config   = g_usb_hstd_cfg_descriptor[USB_DEV_B_CONFIGURATION_VALUE];
-                g_usb_hcd_dev_info.speed    = g_usb_hstd_devspd;
-                /* Device state */
-                p_driver->devstate                        = USB_STS_CONFIGURED;
-                (*p_driver->statediagram)(p_driver->devaddr, USB_STS_CONFIGURED);
-                return (USB_COMPLETEPIPESET);
-            }
-            return (USB_COMPLETEPIPESET);
-        break;
-        default:
-            usb_hstd_dummy_request();
-        break;
-    }
-    return (USB_DEVICEENUMERATION);
-}   /* End of function usb_hstd_enumeration() */
 
 
 /******************************************************************************
@@ -662,7 +548,7 @@ usb_er_t usb_hstd_get_descriptor(uint16_t cnt_value)
 {
     uint8_t     *p_data_table;
 
-    gs_usb_hstd_mgr_request.word.byte.bm_request_type  = USB_REQUEST_TYPE(USB_DEV_TO_HOST,USB_STANDARD,USB_DEVICE);
+    gs_usb_hstd_mgr_request.word.w_request = (USB_DEV_TO_HOST | USB_REQUEST_TYPE_STANDARD | USB_DEVICE);
     gs_usb_hstd_mgr_request.word.byte.b_request        = USB_REQUEST_GET_DESCRIPTOR;
     gs_usb_hstd_mgr_request.address                    = (uint16_t)g_usb_mgr_devaddr;
     switch (cnt_value)
@@ -680,7 +566,7 @@ usb_er_t usb_hstd_get_descriptor(uint16_t cnt_value)
             gs_usb_hstd_mgr_request.w_value     = USB_DEV_DESCRIPTOR;
             gs_usb_hstd_mgr_request.w_index     = 0x0000;
             gs_usb_hstd_mgr_request.w_length    = USB_DEVICESIZE;
-            p_data_table                  = (uint8_t*)&gs_usb_hstd_device_descriptor;
+            p_data_table                  = (uint8_t*)&g_usb_hstd_device_descriptor;
         break;
         case 4:
             gs_usb_hstd_mgr_request.w_value     = USB_CONF_DESCRIPTOR;
@@ -714,14 +600,14 @@ Description     : Set SetAddress
 Argument        : none
 Return          : usb_er_t
 ******************************************************************************/
-USB_STATIC usb_er_t usb_hstd_set_asddress(void)
+usb_er_t usb_hstd_set_asddress(void)
 {
-    gs_usb_hstd_mgr_request.word.byte.bm_request_type  = USB_REQUEST_TYPE(USB_HOST_TO_DEV,USB_STANDARD,USB_DEVICE);
-    gs_usb_hstd_mgr_request.word.byte.b_request        = USB_REQUEST_SET_ADDRESS;
-    gs_usb_hstd_mgr_request.w_value                    = (uint16_t)g_usb_mgr_devaddr;
-    gs_usb_hstd_mgr_request.w_index                    = 0x0000;
-    gs_usb_hstd_mgr_request.w_length                   = 0x0000;
-    gs_usb_hstd_mgr_request.address                    = 0;
+    gs_usb_hstd_mgr_request.word.w_request = (USB_HOST_TO_DEV | USB_REQUEST_TYPE_STANDARD | USB_DEVICE);
+    gs_usb_hstd_mgr_request.word.byte.b_request       = USB_REQUEST_SET_ADDRESS;
+    gs_usb_hstd_mgr_request.w_value     = (uint16_t)g_usb_mgr_devaddr;
+    gs_usb_hstd_mgr_request.w_index     = 0x0000;
+    gs_usb_hstd_mgr_request.w_length    = 0x0000;
+    gs_usb_hstd_mgr_request.address     = 0;
     return usb_hstd_do_command((uint8_t*)&gs_usb_hstd_mgr_dummy_data);
 }   /* End of function usb_hstd_set_asddress() */
 
@@ -733,25 +619,14 @@ Return          : usb_er_t
 ******************************************************************************/
 usb_er_t usb_hstd_set_configuration(void)
 {
-    gs_usb_hstd_mgr_request.word.byte.bm_request_type  = USB_REQUEST_TYPE(USB_HOST_TO_DEV,USB_STANDARD,USB_DEVICE);
-    gs_usb_hstd_mgr_request.word.byte.b_request        = USB_REQUEST_SET_CONFIGURATION;
-    gs_usb_hstd_mgr_request.w_value         = (uint16_t)(g_usb_hstd_cfg_descriptor[USB_DEV_B_CONFIGURATION_VALUE]);
-    gs_usb_hstd_mgr_request.w_index                    = 0x0000;
-    gs_usb_hstd_mgr_request.w_length                   = 0x0000;
-    gs_usb_hstd_mgr_request.address                    = (uint16_t)g_usb_mgr_devaddr;
+    gs_usb_hstd_mgr_request.word.w_request = (USB_HOST_TO_DEV | USB_REQUEST_TYPE_STANDARD | USB_DEVICE);
+    gs_usb_hstd_mgr_request.word.byte.b_request = USB_REQUEST_SET_CONFIGURATION;
+    gs_usb_hstd_mgr_request.w_value     = (uint16_t)(g_usb_hstd_cfg_descriptor[USB_DEV_B_CONFIGURATION_VALUE]);
+    gs_usb_hstd_mgr_request.w_index     = 0x0000;
+    gs_usb_hstd_mgr_request.w_length    = 0x0000;
+    gs_usb_hstd_mgr_request.address     = (uint16_t)g_usb_mgr_devaddr;
     return usb_hstd_do_command((uint8_t*)&gs_usb_hstd_mgr_dummy_data);
 }   /* End of function usb_hstd_set_configuration() */
-
-/******************************************************************************
-Function Name   : usb_hstd_dummy_request
-Description     : Set Dummy Request
-Argument        : none
-Return          : none
-******************************************************************************/
-USB_STATIC void usb_hstd_dummy_request(void)
-{
-}   /* End of function usb_hstd_dummy_request() */
-
 
 /******************************************************************************
 Function Name   : usb_hstd_clr_device_info
@@ -813,11 +688,11 @@ uint16_t usb_hstd_control_write_start(void)
 
     /* PID=NAK & clear STALL */
     g_usb_hstd_current_pipe = USB_PIPE0;
-    usb_cstd_clr_stall(g_usb_hstd_current_pipe);
+    usb_cstd_clr_stall(USB_PIPE0);
 
     /* DCP Configuration Register  (0x5C) */
     hw_usb_write_dcpcfg(USB_DIRFIELD);
-    hw_usb_set_sqset(USB_PIPE0);
+    hw_usb_set_sqset(USB_PIPE0); /* SQSET=1, PID=NAK */
 
     hw_usb_clear_status_bemp(USB_PIPE0);
 
@@ -829,17 +704,23 @@ uint16_t usb_hstd_control_write_start(void)
         case USB_WRITEEND:              /* End of data write (not null) */
         case USB_WRITESHRT:             /* End of data write */
             /* Next stage is Control write status stage */
-            g_usb_hcd_ctsq = USB_STATUSWR;
-            hw_usb_set_bempenb(g_usb_hstd_current_pipe);
-            usb_cstd_nrdy_enable(g_usb_hstd_current_pipe);
-            usb_cstd_set_buf(g_usb_hstd_current_pipe);
+            g_usb_hstd_ctsq = USB_STATUSWR;
+            /* Enable Empty Interrupt */
+            hw_usb_set_bempenb(USB_PIPE0);
+            /* Enable Not Ready Interrupt */
+            usb_cstd_nrdy_enable(USB_PIPE0);
+            /* Set BUF */
+            usb_cstd_set_buf(USB_PIPE0);
         break;
-        case USB_WRITING:               /* Continuance of data write */
+        case USB_WRITING:               /* Continue of data write */
             /* Next stage is Control write data stage */
-            g_usb_hcd_ctsq = USB_DATAWR;
-            hw_usb_set_bempenb(g_usb_hstd_current_pipe);
-            usb_cstd_nrdy_enable(g_usb_hstd_current_pipe);
-            usb_cstd_set_buf(g_usb_hstd_current_pipe);
+            g_usb_hstd_ctsq = USB_DATAWR;
+            /* Enable Empty Interrupt */
+            hw_usb_set_bempenb(USB_PIPE0);
+            /* Enable Not Ready Interrupt */
+            usb_cstd_nrdy_enable(USB_PIPE0);
+            /* Set BUF */
+            usb_cstd_set_buf(USB_PIPE0);
         break;
         /* FIFO access error */
         case USB_FIFOERROR:
@@ -848,8 +729,13 @@ uint16_t usb_hstd_control_write_start(void)
             /* no processing */
         break;
     }
+
+    /* End or Err or Continue */
     return (end_flag);
-}   /* End of function usb_hstd_control_write_start() */
+}
+/******************************************************************************
+ End of function usb_hstd_control_write_start
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hstd_control_read_start
@@ -861,24 +747,27 @@ void usb_hstd_control_read_start(void)
 {
 #if USB_CFG_COMPLIANCE == USB_CFG_ENABLE
     g_usb_hstd_response_counter = 0;
+
     hw_usb_clear_sts_sofr();
     hw_usb_set_intenb(USB_SOFE);
 #endif /* USB_CFG_COMPLIANCE == USB_CFG_ENABLE */
-
     /* PID=NAK & clear STALL */
     g_usb_hstd_current_pipe = USB_PIPE0;
-    usb_cstd_clr_stall(g_usb_hstd_current_pipe);
+    usb_cstd_clr_stall(USB_PIPE0);
     hw_usb_write_dcpcfg(USB_SHTNAKFIELD);
     hw_usb_hwrite_dcpctr(USB_SQSET); /* SQSET=1, PID=NAK */
 
     /* Next stage is Control read data stage */
-    g_usb_hcd_ctsq = USB_DATARD;
+    g_usb_hstd_ctsq = USB_DATARD;
 
     /* Interrupt enable */
-    hw_usb_set_brdyenb(g_usb_hstd_current_pipe);
-    usb_cstd_nrdy_enable(g_usb_hstd_current_pipe);
-    usb_cstd_set_buf(g_usb_hstd_current_pipe);
-}   /* End of function usb_hstd_control_read_start() */
+    hw_usb_set_brdyenb(USB_PIPE0); /* Enable Ready Interrupt */
+    usb_cstd_nrdy_enable(USB_PIPE0);/* Enable Not Ready Interrupt */
+    usb_cstd_set_buf(USB_PIPE0); /* Set BUF */
+}
+/******************************************************************************
+ End of function usb_hstd_control_read_start
+ ******************************************************************************/
 
 
 /******************************************************************************
@@ -893,46 +782,52 @@ void usb_hstd_status_start(void)
 
     /* Interrupt Disable */
     g_usb_hstd_current_pipe = USB_PIPE0;
-    hw_usb_clear_bempenb(g_usb_hstd_current_pipe);
-    hw_usb_clear_brdyenb(g_usb_hstd_current_pipe);
+    /* BEMP0 Disable */
+    hw_usb_clear_bempenb(USB_PIPE0);
+    /* BRDY0 Disable */
+    hw_usb_clear_brdyenb(USB_PIPE0);
+    /* Transfer size set */
     gp_usb_hstd_pipe[USB_PIPE0]->tranlen = g_usb_hstd_data_cnt[USB_PIPE0];
-    g_usb_hstd_data_cnt_pipe0 = g_usb_hstd_data_cnt[USB_PIPE0];
+    /* Save Data stage transfer size */
+    gs_usb_hstd_data_cnt_pipe0 = g_usb_hstd_data_cnt[USB_PIPE0];
     g_usb_hstd_data_cnt[USB_PIPE0] = 0;
     gp_usb_hstd_data_ptr[USB_PIPE0] = (uint8_t*)&gs_usb_hstd_mgr_dummy_data;
 
     /* Branch by the Control transfer stage management */
-    switch (g_usb_hcd_ctsq)
+    switch (g_usb_hstd_ctsq)
     {
         case USB_DATARD:                    /* Control Read Data */
             /* Control read status, Control write start */
-            g_usb_hcd_ctsq = USB_DATARD;
+            g_usb_hstd_ctsq = USB_DATARD;
+            /* Control write start */
             end_flag = usb_hstd_control_write_start();
-
             if (USB_FIFOERROR == end_flag)
             {
                 /* Control Read/Write End */
-                usb_hstd_control_end(USB_DATA_ERR);
+                usb_hstd_control_end(USB_DATA_ERR); /* Control Read/Write End */
             }
             else
             {
                 /* Next stage is Control read status stage */
-                g_usb_hcd_ctsq = USB_STATUSRD;
+                g_usb_hstd_ctsq = USB_STATUSRD;
             }
         break;
+            /* Control Write Data */
         case USB_STATUSWR:                  /* Control Write Data */
             /* continue */
         case USB_SETUPNDC:                  /* NoData Control */
             /* Next stage is Control write status stage */
             usb_hstd_control_read_start();
-            g_usb_hcd_ctsq = USB_STATUSWR;
+            g_usb_hstd_ctsq = USB_STATUSWR;
         break;
         default:
             return;
         break;
     }
-
-}   /* End of function usb_hstd_status_start() */
-
+}
+/******************************************************************************
+ End of function usb_hstd_status_start
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hstd_control_end
@@ -950,24 +845,23 @@ void usb_hstd_control_end(usb_strct_t status)
 
     /* Interrupt Disable */
     g_usb_hstd_current_pipe = USB_PIPE0;
-    hw_usb_clear_bempenb(g_usb_hstd_current_pipe);
-    hw_usb_clear_brdyenb(g_usb_hstd_current_pipe);
-    hw_usb_clear_nrdyenb(g_usb_hstd_current_pipe);
+    hw_usb_clear_bempenb(USB_PIPE0); /* BEMP0 Disable */
+    hw_usb_clear_brdyenb(USB_PIPE0); /* BRDY0 Disable */
+    hw_usb_clear_nrdyenb(USB_PIPE0); /* NRDY0 Disable */
 
-    /* PID=NAK & clear STALL */
-    usb_cstd_clr_stall(g_usb_hstd_current_pipe);
+    usb_cstd_clr_stall(USB_PIPE0);    /* PID=NAK & clear STALL */
+
+    /* SUREQ=1, SQCLR=1, PID=NAK */
     hw_usb_hwrite_dcpctr((uint16_t) (USB_SUREQCLR | USB_SQCLR));
 
     /* CFIFO buffer clear */
     usb_cstd_chg_curpipe(USB_PIPE0, USB_CUSE, USB_NULL);
-
     hw_usb_set_bclr(USB_CUSE); /* Clear BVAL */
     usb_cstd_chg_curpipe(USB_PIPE0, USB_CUSE, USB_ISEL);
-
     hw_usb_set_bclr(USB_CUSE); /* Clear BVAL */
 
     /* Next stage is idle */
-    g_usb_hcd_ctsq = USB_IDLEST;
+    g_usb_hstd_ctsq = USB_IDLEST;
 
     /* Call Back */
     if ((USB_NULL != p_utr) && (USB_DATA_TMO != status))
@@ -976,6 +870,7 @@ void usb_hstd_control_end(usb_strct_t status)
         p_utr->status     = (usb_strct_t)status;
         if (USB_NULL != p_utr->complete)
         {
+            /* Process Done Callback */
             (*p_utr->complete)(p_utr);
         }
     }
@@ -984,13 +879,16 @@ void usb_hstd_control_end(usb_strct_t status)
     hw_usb_clear_enb_sofe();
 #endif /* USB_CFG_COMPLIANCE == USB_CFG_ENABLE */
 
-}   /* End of function usb_hstd_control_end() */
-
+}
+/******************************************************************************
+ End of function usb_hstd_control_end
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hstd_setup_start
-Description     : Setup start
-Argument        : none
+ Description     : Start control transfer setup stage. (Set global function re-
+                 : quired to start control transfer, and USB register).
+ Arguments       : none
 Return          : none
 ******************************************************************************/
 void usb_hstd_setup_start(void)
@@ -1005,17 +903,15 @@ void usb_hstd_setup_start(void)
     g_usb_hstd_current_pipe = USB_PIPE0;
     p_setup     = gp_usb_hstd_pipe[USB_PIPE0]->setup;
 
-    /* Set Setup Request data */
-    setup_req   = *p_setup++;
-    setup_val   = *p_setup++;
-    setup_indx  = *p_setup++;
-    setup_leng  = *p_setup++;
+    setup_req   = *p_setup++; /* Set Request data */
+    setup_val   = *p_setup++; /* Set wValue data */
+    setup_indx  = *p_setup++; /* Set wIndex data */
+    setup_leng  = *p_setup++; /* Set wLength data */
 
     /* Max Packet Size + Device Number select */
     hw_usb_write_dcpmxps(g_usb_hstd_hcd_dcp_mxps[*p_setup]);
 
     /* Transfer Length check */
-
     if (gp_usb_hstd_pipe[USB_PIPE0]->tranlen < setup_leng )
     {
         setup_leng = (uint16_t)gp_usb_hstd_pipe[USB_PIPE0]->tranlen;
@@ -1032,6 +928,7 @@ void usb_hstd_setup_start(void)
 
     /* Control sequence setting */
     dir = (uint16_t)(setup_req & USB_BMREQUESTTYPEDIR);
+
     /* Check wLength field */
     if (0 == setup_leng)
     {
@@ -1039,31 +936,31 @@ void usb_hstd_setup_start(void)
         if (0 == dir)
         {
             /* Next stage is NoData control status stage */
-            g_usb_hcd_ctsq = USB_SETUPNDC;
+            g_usb_hstd_ctsq = USB_SETUPNDC;
         }
         else
         {
             /* Error */
-            g_usb_hcd_ctsq = USB_IDLEST;
+            g_usb_hstd_ctsq = USB_IDLEST;
         }
     }
     else
     {
-        /* Check direction field */
+        /* Check Dir field */
         if (0 == dir)
         {
                 /* Next stage is Control Write data stage */
-                g_usb_hcd_ctsq = USB_SETUPWR;
+                g_usb_hstd_ctsq = USB_SETUPWR;
         }
         else
         {
                 /* Next stage is Control read data stage */
-                g_usb_hcd_ctsq = USB_SETUPRD;
+                g_usb_hstd_ctsq = USB_SETUPRD;
         }
     }
 
     /* Control transfer idle stage ? */
-    if (USB_IDLEST == g_usb_hcd_ctsq)
+    if (USB_IDLEST == g_usb_hstd_ctsq)
     {
         /* Control Read/Write End */
         usb_hstd_control_end(USB_DATA_ERR);
@@ -1078,13 +975,15 @@ void usb_hstd_setup_start(void)
         /* Interrupt enable */
         usb_hstd_setup_enable();
     }
-
-}   /* End of function usb_hstd_setup_start() */
+}
+/******************************************************************************
+ End of function usb_hstd_setup_start
+ ******************************************************************************/
 
 
 /******************************************************************************
 Function Name   : usb_hstd_brdy_pipe
-Description     : INTR interrupt
+Description     : BRDY Interrupt
 Arguments       : none
 Return value    : none
 ******************************************************************************/
@@ -1096,10 +995,10 @@ void usb_hstd_brdy_pipe(void)
 
     /* When operating by the host function, usb_hstd_brdy_pipe_process() is executed without fail because */
     /* only one BRDY message is issued even when the demand of PIPE0 and PIPEx has been generated at the same time. */
-    if ((bitsts & USB_BRDY0) == USB_BRDY0 )
+    if (USB_BRDY0 == (bitsts & USB_BRDY0))
     {
         /* Branch  by the Control transfer stage management */
-        switch (g_usb_hcd_ctsq)
+        switch (g_usb_hstd_ctsq)
         {
             case USB_DATARD:                    /* Data stage of Control read transfer */
                 g_usb_hstd_current_pipe = USB_PIPE0;
@@ -1108,17 +1007,15 @@ void usb_hstd_brdy_pipe(void)
                     case USB_READEND:           /* End of data read */
                     /* continue */
                     case USB_READSHRT:          /* End of data read */
-                        usb_hstd_status_start();
+                        usb_hstd_status_start(); /* Control Read/Write Status */
                     break;
-                    case USB_READING:           /* Continuance of data read */
+                    case USB_READING:           /* Continue of data read */
                     break;
                     case USB_READOVER:          /* bufer over */
-                        /* Control Read/Write End */
-                        usb_hstd_control_end(USB_DATA_OVR);
+                        usb_hstd_control_end(USB_DATA_OVR); /* Control Read/Write End */
                     break;
                     case USB_FIFOERROR:         /* FIFO access error */
-                        /* Control Read/Write End */
-                        usb_hstd_control_end(USB_DATA_ERR);
+                        usb_hstd_control_end(USB_DATA_ERR); /* Control Read/Write End */
                     break;
                     default:
                         /* no processing */
@@ -1134,14 +1031,18 @@ void usb_hstd_brdy_pipe(void)
             break;
         }
     }
-    usb_hstd_brdy_pipe_process(bitsts);
 
-}   /* End of function usb_hstd_brdy_pipe() */
+    /* BRDY interrupt */
+    usb_hstd_brdy_pipe_process(bitsts);
+}
+/******************************************************************************
+ End of function usb_hstd_brdy_pipe
+ ******************************************************************************/
 
 
 /******************************************************************************
 Function Name   : usb_hstd_nrdy_pipe
-Description     : INTN interrupt
+Description     : NRDY Interrupt
 Arguments       : none
 Return value    : none
 ******************************************************************************/
@@ -1154,13 +1055,13 @@ void usb_hstd_nrdy_pipe(void)
 
     /* When operating by the host function, usb_hstd_nrdy_pipe_process() is executed without fail because */
     /* only one NRDY message is issued even when the demand of PIPE0 and PIPEx has been generated at the same time. */
-    if ((bitsts & USB_NRDY0) == USB_NRDY0 )
+    if (USB_NRDY0 == (bitsts & USB_NRDY0))
     {
         /* Get Pipe PID from pipe number */
         g_usb_hstd_current_pipe = USB_PIPE0;
-        buffer = usb_cstd_get_pid(g_usb_hstd_current_pipe);
+        buffer = usb_cstd_get_pid(USB_PIPE0);
         /* STALL ? */
-        if ((buffer & USB_PID_STALL) == USB_PID_STALL )
+        if (USB_PID_STALL == (buffer & USB_PID_STALL))
         {
             /* PIPE0 STALL callback */
             usb_hstd_control_end(USB_DATA_STALL);
@@ -1171,9 +1072,13 @@ void usb_hstd_nrdy_pipe(void)
             usb_hstd_control_end(USB_DATA_DTCH);
         }
     }
-    usb_hstd_nrdy_pipe_process(bitsts);
 
-}   /* End of function usb_hstd_nrdy_pipe() */
+    /* Nrdy Pipe interrupt */
+    usb_hstd_nrdy_pipe_process(bitsts);
+}
+/******************************************************************************
+ End of function usb_hstd_nrdy_pipe
+ ******************************************************************************/
 
 
 /******************************************************************************
@@ -1191,22 +1096,22 @@ void usb_hstd_bemp_pipe(void)
 
     /* When operating by the host function, usb_hstd_bemp_pipe_process() is executed without fail because */
     /* only one BEMP message is issued even when the demand of PIPE0 and PIPEx has been generated at the same time. */
-    if ((bitsts & USB_BEMP0) == USB_BEMP0 )
+    if (USB_BEMP0 == (bitsts & USB_BEMP0))
     {
         /* Get Pipe PID from pipe number */
         g_usb_hstd_current_pipe = USB_PIPE0;
-        buffer = usb_cstd_get_pid(g_usb_hstd_current_pipe);
+        buffer = usb_cstd_get_pid(USB_PIPE0);
         /* MAX packet size error ? */
-        if ((buffer & USB_PID_STALL) == USB_PID_STALL )
+        if (USB_PID_STALL == (buffer & USB_PID_STALL))
         {
-            usb_hstd_control_end(USB_DATA_STALL);
+            usb_hstd_control_end(USB_DATA_STALL); /* PIPE0 STALL call back */
         } 
         else
         {
             /* Branch by the Control transfer stage management */
-            switch (g_usb_hcd_ctsq)
+            switch (g_usb_hstd_ctsq)
             {
-                case USB_DATAWR:                    /* Continuance of data stage (Control write) */
+                case USB_DATAWR:                    /* Continue of data stage (Control write) */
                     /* Buffer to CFIFO data write */
                     buffer = usb_cstd_buf_to_cfifo(USB_CUSE);
                     switch (buffer)
@@ -1214,17 +1119,16 @@ void usb_hstd_bemp_pipe(void)
                         case USB_WRITEEND:          /* End of data write (not null) */
                         case USB_WRITESHRT:         /* End of data write */
                             /* Next stage is Control write status stage */
-                            g_usb_hcd_ctsq = USB_STATUSWR;
-                            hw_usb_set_bempenb(g_usb_hstd_current_pipe);
-                            usb_cstd_nrdy_enable(g_usb_hstd_current_pipe);
+                            g_usb_hstd_ctsq = USB_STATUSWR;
+                            hw_usb_set_bempenb(USB_PIPE0);
+                            usb_cstd_nrdy_enable(USB_PIPE0);
                         break;
                         case USB_WRITING:           /* Continue of data write */
-                            hw_usb_set_bempenb(g_usb_hstd_current_pipe);
-                            usb_cstd_nrdy_enable(g_usb_hstd_current_pipe);
+                            hw_usb_set_bempenb(USB_PIPE0); /* Enable Empty Interrupt */
+                            usb_cstd_nrdy_enable(USB_PIPE0); /* Enable Not Ready Interrupt */
                         break;
                         case USB_FIFOERROR:         /* FIFO access error */
-                            /* Control Read/Write End */
-                            usb_hstd_control_end(USB_DATA_ERR);
+                            usb_hstd_control_end(USB_DATA_ERR); /* Control Read/Write End */
                         break;
                         default:
                             /* no processing */
@@ -1244,9 +1148,11 @@ void usb_hstd_bemp_pipe(void)
             }
         }
     }
-    usb_hstd_bemp_pipe_process(bitsts);
-
-}   /* End of function usb_hstd_bemp_pipe() */
+    usb_hstd_bemp_pipe_process(bitsts); /* BEMP interrupt */
+}
+/******************************************************************************
+ End of function usb_hstd_bemp_pipe
+ ******************************************************************************/
 
 
 
@@ -1284,97 +1190,6 @@ uint8_t usb_hstd_devaddr_to_speed(void)
 
 
 /******************************************************************************
-Function Name   : usb_hstd_check_device_address
-Description     : Check device connected from device address & root port
-Arguments       : none
-Return value    : uint8_t                  : YES/NO
-******************************************************************************/
-uint8_t usb_hstd_check_device_address(void)
-{
-    uint16_t    buffer;
-
-    /* Get device address configuration register from device address */
-    buffer = usb_hstd_get_devaddx_register();
-    if (USB_ERROR != buffer)
-    {
-        buffer = (uint16_t)(buffer & USB_USBSPD);
-        if (USB_FULLSPEED == buffer)
-        {
-            return  (USB_FSCONNECT);
-        }
-        else if (USB_LOWSPEED == buffer)
-        {
-            return  (USB_LSCONNECT);
-        }
-        else
-        {
-
-        }
-    }
-    return USB_NOCONNECT;
-}   /* End of function usb_hstd_check_device_address() */
-
-
-/******************************************************************************
-Function Name   : usb_hstd_get_devaddx_register
-Description     : Get device address configuration register from device address
-Arguments       : none
-Return value    : uint16_t                  : configuration register
-******************************************************************************/
-USB_STATIC uint16_t usb_hstd_get_devaddx_register(void)
-{
-    R_BSP_VOLATILE_EVENACCESS uint16_t *p_reg;
-    uint16_t return_value;
-
-    if (g_usb_hcd_devaddr > USB_MAXDEVADDR)
-    {
-        return_value = USB_ERROR;
-    }
-    else
-    {
-        p_reg = (uint16_t *) &(USB0.DEVADD0) + g_usb_hcd_devaddr;
-        return_value = *p_reg;
-    }
-
-    return return_value;
-}   /* End of function usb_hstd_get_devaddx_register() */
-
-
-/******************************************************************************
-Function Name   : usb_hstd_set_devaddx_register
-Description     : Set device speed
-Arguments       : uint8_t    usbspd     : device speed
-                : usb_port_t port       : message keyword
-Return value    : none
-******************************************************************************/
-void usb_hstd_set_devaddx_register(uint8_t usbspd)
-{
-    R_BSP_VOLATILE_EVENACCESS uint16_t *p_reg;
-    uint16_t    data;
-
-    if (USB_FSCONNECT == usbspd)
-    {
-        data    = (uint16_t)(USB_FULLSPEED);
-    }
-    else if (USB_LSCONNECT == usbspd)
-    {
-        data    = (uint16_t)(USB_LOWSPEED);
-    }
-    else                                      /* else if (usbspd == USB_NOCONNECT) */
-    {
-        data    = (uint16_t)(USB_NOTUSED);    /* RTPT is set to port0 when unused. */
-    }
-
-    p_reg = (uint16_t *) &(USB0.DEVADD0) + g_usb_hcd_devaddr;
-
-    (*p_reg) &= (~USB_USBSPD);
-    (*p_reg) |= data;
-
-
-}   /* End of function usb_hstd_set_devaddx_register() */
-
-
-/******************************************************************************
 Function Name   : usb_hstd_check_attach
 Description     : Check Atacch
 Arguments       : none
@@ -1389,15 +1204,15 @@ uint8_t usb_hstd_check_attach(void)
 
     if (USB_UNDECID == (uint16_t)(buf[1] & USB_RHST))      /* RHST is at non-connection */
     {
-        if ((buf[0] & USB_LNST) == USB_FS_JSTS )            /* High/Full speed device */
+        if (USB_FS_JSTS == (buf[0] & USB_LNST))            /* High/Full speed device */
         {
             return USB_LNST_ATTACH;
         }
-        else if ((buf[0] & USB_LNST) == USB_LS_JSTS )       /* Low speed device */
+        else if (USB_LS_JSTS == (buf[0] & USB_LNST))       /* Low speed device */
         {
             return USB_LNST_ATTACH;
         }
-        else if ((buf[0] & USB_LNST) == USB_SE0 )
+        else if (USB_SE0 == (buf[0] & USB_LNST))
         {
         }
         else 
@@ -1421,23 +1236,25 @@ usb_er_t usb_hstd_set_feature(uint16_t epnum)
     if (0xFF == epnum)
     {
         /* SetFeature(Device) */
-        gs_usb_hstd_mgr_request.word.byte.bm_request_type = USB_REQUEST_TYPE(USB_HOST_TO_DEV,USB_STANDARD,USB_DEVICE);
-        gs_usb_hstd_mgr_request.w_value                   = USB_DEV_REMOTE_WAKEUP;
-        gs_usb_hstd_mgr_request.w_index                   = (uint16_t)0x0000;
+        gs_usb_hstd_mgr_request.word.w_request = (USB_HOST_TO_DEV | USB_REQUEST_TYPE_STANDARD | USB_DEVICE);
+        gs_usb_hstd_mgr_request.w_value     = USB_DEV_REMOTE_WAKEUP;
+        gs_usb_hstd_mgr_request.w_index     = (uint16_t)0x0000;
     }
     else
     {
         /* SetFeature(endpoint) */
-        gs_usb_hstd_mgr_request.word.byte.bm_request_type 
-                                                       = USB_REQUEST_TYPE(USB_HOST_TO_DEV,USB_STANDARD,USB_ENDPOINT);
-        gs_usb_hstd_mgr_request.w_value                   = USB_ENDPOINT_HALT;
-        gs_usb_hstd_mgr_request.w_index                   = epnum;
+        gs_usb_hstd_mgr_request.word.w_request  = (USB_HOST_TO_DEV | USB_REQUEST_TYPE_STANDARD | USB_ENDPOINT);
+        gs_usb_hstd_mgr_request.w_value         = USB_ENDPOINT_HALT;
+        gs_usb_hstd_mgr_request.w_index         = epnum;
     }
-    gs_usb_hstd_mgr_request.word.byte.b_request           = USB_REQUEST_SET_FEATURE;
-    gs_usb_hstd_mgr_request.w_length                      = (uint16_t)0x0000;
-    gs_usb_hstd_mgr_request.address                       = (uint16_t)g_usb_mgr_devaddr;
+    gs_usb_hstd_mgr_request.word.byte.b_request = USB_REQUEST_SET_FEATURE;
+    gs_usb_hstd_mgr_request.w_length            = (uint16_t)0x0000;
+    gs_usb_hstd_mgr_request.address             = (uint16_t)g_usb_mgr_devaddr;
     return usb_hstd_do_command((uint8_t*)&gs_usb_hstd_mgr_dummy_data);
-}   /* End of function usb_hstd_set_feature() */
+}
+/******************************************************************************
+ End of function usb_hstd_set_feature
+ ******************************************************************************/
 
 
 /******************************************************************************
@@ -1451,23 +1268,25 @@ usb_er_t usb_hstd_clear_feature(uint16_t epnum)
     if (0xFF == epnum)
     {
         /* ClearFeature(Device) */
-        gs_usb_hstd_mgr_request.word.byte.bm_request_type = USB_REQUEST_TYPE(USB_HOST_TO_DEV,USB_STANDARD,USB_DEVICE);
-        gs_usb_hstd_mgr_request.w_value                   = USB_DEV_REMOTE_WAKEUP;
-        gs_usb_hstd_mgr_request.w_index                   = (uint16_t)0x0000;
+        gs_usb_hstd_mgr_request.word.w_request  = (USB_HOST_TO_DEV | USB_REQUEST_TYPE_STANDARD | USB_DEVICE);
+        gs_usb_hstd_mgr_request.w_value         = USB_DEV_REMOTE_WAKEUP;
+        gs_usb_hstd_mgr_request.w_index         = (uint16_t)0x0000;
     }
     else
     {
         /* ClearFeature(endpoint) */
-        gs_usb_hstd_mgr_request.word.byte.bm_request_type 
-                                                       = USB_REQUEST_TYPE(USB_HOST_TO_DEV,USB_STANDARD,USB_ENDPOINT);
-        gs_usb_hstd_mgr_request.w_value                   = USB_ENDPOINT_HALT;
-        gs_usb_hstd_mgr_request.w_index                   = epnum;
+        gs_usb_hstd_mgr_request.word.w_request  = (USB_HOST_TO_DEV | USB_REQUEST_TYPE_STANDARD | USB_ENDPOINT);
+        gs_usb_hstd_mgr_request.w_value         = USB_ENDPOINT_HALT;
+        gs_usb_hstd_mgr_request.w_index         = epnum;
     }
-    gs_usb_hstd_mgr_request.word.byte.b_request           = USB_REQUEST_CLEAR_FEATURE;
-    gs_usb_hstd_mgr_request.w_length                      = (uint16_t)0x0000;
-    gs_usb_hstd_mgr_request.address                       = (uint16_t)g_usb_mgr_devaddr;
+    gs_usb_hstd_mgr_request.word.byte.b_request = USB_REQUEST_CLEAR_FEATURE;
+    gs_usb_hstd_mgr_request.w_length            = (uint16_t)0x0000;
+    gs_usb_hstd_mgr_request.address             = (uint16_t)g_usb_mgr_devaddr;
     return usb_hstd_do_command((uint8_t*)&gs_usb_hstd_mgr_dummy_data);
-}   /* End of function usb_hstd_clear_feature() */
+}
+/******************************************************************************
+ End of function usb_hstd_clear_feature
+ ******************************************************************************/
 
 
 /******************************************************************************
@@ -1486,36 +1305,34 @@ USB_STATIC usb_er_t usb_hstd_do_command(uint8_t *data_table)
     return usb_hstd_transfer_start(&g_usb_mgr_ctrl_msg);
 }   /* End of function usb_hstd_do_command() */
 
-
-/******************************************************************************
-Function Name   : usb_hstd_pipe_to_epadr
-Description     : pipe number to endpoint address
-Arguments       : none
-Return value    : uint8_t               : Endpoint Number + Direction
-******************************************************************************/
-uint8_t usb_hstd_pipe_to_epadr(void)
+ /******************************************************************************
+ Function Name   : usb_hstd_pipe_to_epadr
+ Description     : Get the associated endpoint value of the specified pipe.
+ Arguments       : uint16_t pipe  : Pipe number.
+ Return value    : uint8_t        : OK    : Endpoint nr + direction.
+                 :                : ERROR : Error.
+ ******************************************************************************/
+uint8_t usb_hstd_pipe_to_epadr (uint16_t pipe)
 {
+    uint16_t buffer;
+    uint16_t direp;
 
-    uint16_t    buffer;
-    uint8_t     direp = 0;
-
-    if (USB_PIPE0 == g_usb_hstd_current_pipe)
+    if (USB_MAX_PIPE_NO < pipe)
     {
-        buffer = hw_usb_read_dcpcfg();
-    }
-    else
-    {
-        /* Pipe select */
-        buffer = hw_usb_read_pipecfg();
-        direp = (uint8_t)(buffer & USB_EPNUM);
+        return USB_NULL; /* Error */
     }
 
-    direp   |= (uint8_t)( ((buffer & USB_DIR)^USB_DIR) << 3);
+    /* Pipe select */
+    hw_usb_write_pipesel(pipe);
 
-    return direp;
-
-}   /* End of function usb_hstd_pipe_to_epadr() */
-
+    /* Read Pipe direction */
+    buffer = hw_usb_read_pipecfg();
+    direp = (uint16_t) ((((buffer & USB_DIRFIELD) ^ USB_DIRFIELD) << 3) + (buffer & USB_EPNUMFIELD));
+    return (uint8_t) (direp);
+}
+/******************************************************************************
+ End of function usb_hstd_pipe_to_epadr
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hstd_pipe_to_hcddevaddr
@@ -1719,7 +1536,7 @@ void usb_hstd_port_enable(void)
     usb_cpu_delay_xms((uint16_t)100);
 #endif  /* USB_CFG_BC == USB_CFG_ENABLE */
 
-    if (usb_hstd_check_attach() == USB_LNST_ATTACH )
+    if (USB_LNST_ATTACH == usb_hstd_check_attach())
     {
         usb_hstd_attach_control();
     }
@@ -1732,9 +1549,7 @@ void usb_hstd_port_enable(void)
 /******************************************************************************
  Function Name   : usb_hclass_request_complete
  Description     : Class request transfer complete
- Arguments       : usb_hutr_t *mess  : Pointer to usb_hutr_t structure.
-                 : uint16_t  data1  : Not used.
-                 : uint16_t  data2  : Not used.
+ Arguments       : usb_hutr_t *p_mess  : Pointer to usb_hutr_t structure.
  Return          : none
  ******************************************************************************/
 void usb_hclass_request_complete (usb_hutr_t *p_mess)
@@ -1759,9 +1574,12 @@ void usb_hclass_request_complete (usb_hutr_t *p_mess)
     ctrl.setup.value = p_mess->setup[1];
     ctrl.setup.index = p_mess->setup[2];
     ctrl.setup.length = p_mess->setup[3];
-    ctrl.size = ctrl.setup.length - g_usb_hstd_data_cnt_pipe0;
+    ctrl.size = ctrl.setup.length - gs_usb_hstd_data_cnt_pipe0;
     usb_cstd_set_event(USB_STS_REQUEST_COMPLETE, &ctrl); /* Set Event()  */
-} /* End of function usb_hclass_request_complete */
+}
+/******************************************************************************
+ End of function usb_hclass_request_complete
+ ******************************************************************************/
 
 
 /******************************************************************************
@@ -1777,7 +1595,10 @@ void usb_hstd_suspend_complete (uint16_t data1, uint16_t data2)
 
     g_usb_hstd_is_susp_resm &= (~(1 << USB_STS_SUSPEND));
     usb_cstd_set_event(USB_STS_SUSPEND, &ctrl);
-} /* End of function usb_hstd_suspend_complete */
+}
+/******************************************************************************
+ End of function usb_hstd_suspend_complete
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : usb_hstd_resume_complete
@@ -1806,7 +1627,7 @@ void usb_hstd_read_complete (usb_hutr_t *p_mess)
     usb_ctrl_t ctrl;
 
     /* Set Receive data length */
-    ctrl.size   = g_usb_read_request_size[p_mess->pipenum] - p_mess->tranlen;
+    ctrl.size   = p_mess->read_req_len - p_mess->tranlen;
     ctrl.pipe   = p_mess->pipenum;                    /* Pipe number setting */
 
 #if defined(USB_CFG_HCDC_USE)
@@ -1839,10 +1660,12 @@ void usb_hstd_read_complete (usb_hutr_t *p_mess)
         break;
         case USB_DATA_OVR :
             ctrl.status = USB_ERR_OVER;
+            ctrl.size   = 0;
         break;
         case USB_DATA_ERR :
         default :
             ctrl.status = USB_ERR_NG;
+            ctrl.size   = 0;
         break;
     }
     usb_cstd_set_event(USB_STS_READ_COMPLETE, &ctrl);
@@ -1860,6 +1683,7 @@ void usb_hstd_write_complete (usb_hutr_t *p_mess)
     usb_ctrl_t ctrl;
 
     ctrl.pipe   = p_mess->pipenum;                      /* Pipe number setting */
+    ctrl.size   = 0;
 
 #if defined(USB_CFG_HCDC_USE)
     ctrl.type = USB_HCDC;       /* CDC Data class  */
@@ -1894,17 +1718,17 @@ void usb_hstd_host_registration (void)
 {
 
 #if defined(USB_CFG_HCDC_USE)
-    cdc_registration();                         /* Sample driver registration */
+    usb_hcdc_registration();                     /* Sample driver registration */
 
 #endif /* defined(USB_CFG_HCDC_USE) */
 
 #if defined(USB_CFG_HHID_USE)
-    hid_registration();                         /* Sample driver registration */
+    usb_hhid_registration();                    /* Sample driver registration */
 
 #endif /* defined(USB_CFG_HHID_USE) */
 
 #if defined(USB_CFG_HMSC_USE)
-    msc_registration();                         /* Sample driver registration. */
+    usb_hmsc_registration();                     /* Sample driver registration. */
 
 #endif /* defined(USB_CFG_HMSC_USE) */
 
@@ -1926,7 +1750,7 @@ void usb_hstd_class_check(uint8_t **pp_table)
     gsp_usb_hstd_config_desc_tbl  = (uint8_t*)((uint16_t*)pp_table[1]);      /* Configuration Descriptor Table */
 
     /* Enumeration Sequence String Descriptor #0 receive request */
-    g_usb_enum_seq  = USB_SEQ_0;                            /* Initialize sequence number for enumeration */
+    gs_usb_enum_seq  = USB_SEQ_0;                            /* Initialize sequence number for enumeration */
     USB_GET_SND(USB_HCLASS_MBX, USB_MSG_HCLASS_OPEN, &usb_hstd_dummy_function, USB_NULL);
 } /* End of function usb_hstd_class_check() */
 
@@ -1944,34 +1768,37 @@ USB_STATIC void usb_hstd_get_string_desc(usb_addr_t addr, uint8_t string, usb_hc
 
     if (0 == string)
     {
-        g_usb_hstd_request.w_index   = 0;
-        g_usb_hstd_request.w_length  = 4;
+        gs_usb_hstd_request.w_index   = 0;
+        gs_usb_hstd_request.w_length  = 4;
     }
     else
     {
-        g_usb_hstd_request.w_index   = (uint16_t)(gs_usb_hstd_string_descriptor[2]);
-        g_usb_hstd_request.w_index   |= (uint16_t)((uint16_t)(gs_usb_hstd_string_descriptor[3]) << 8);
-        g_usb_hstd_request.w_length  = (uint16_t)USB_STRING_SIZE;
+        gs_usb_hstd_request.w_index   = (uint16_t)(gs_usb_hstd_string_descriptor[2]);
+        gs_usb_hstd_request.w_index   |= (uint16_t)((uint16_t)(gs_usb_hstd_string_descriptor[3]) << 8);
+        gs_usb_hstd_request.w_length  = (uint16_t)USB_STRING_SIZE;
     }
-    g_usb_hstd_request.word.byte.bm_request_type  = USB_REQUEST_TYPE(USB_DEV_TO_HOST,USB_STANDARD,USB_DEVICE);
-    g_usb_hstd_request.word.byte.b_request        = USB_REQUEST_GET_DESCRIPTOR;
-    g_usb_hstd_request.w_value                    = (uint16_t)(USB_STRING_DESCRIPTOR + string);
-    g_usb_hstd_request.address                    = (uint16_t)addr;
+    gs_usb_hstd_request.word.w_request = (USB_DEV_TO_HOST | USB_REQUEST_TYPE_STANDARD | USB_DEVICE);
+    gs_usb_hstd_request.word.byte.b_request        = USB_REQUEST_GET_DESCRIPTOR;
+    gs_usb_hstd_request.w_value                    = (uint16_t)(USB_STRING_DESCRIPTOR + string);
+    gs_usb_hstd_request.address                    = (uint16_t)addr;
 
     /* WAIT_LOOP */
-    for (i = 0; i < g_usb_hstd_request.w_length; i++)
+    for (i = 0; i < gs_usb_hstd_request.w_length; i++)
     {
         gs_usb_hstd_string_descriptor[i] = (uint8_t)0xFF;
     }
 
     gs_usb_hstd_string_control.p_tranadr   = (void*)gs_usb_hstd_string_descriptor;
     gs_usb_hstd_string_control.complete    = complete;
-    gs_usb_hstd_string_control.tranlen     = (usb_leng_t)g_usb_hstd_request.w_length;
+    gs_usb_hstd_string_control.tranlen     = (usb_leng_t)gs_usb_hstd_request.w_length;
     gs_usb_hstd_string_control.pipenum     = USB_PIPE0;
-    gs_usb_hstd_string_control.setup       = (uint16_t*)&g_usb_hstd_request;
+    gs_usb_hstd_string_control.setup       = (uint16_t*)&gs_usb_hstd_request;
 
     usb_hstd_transfer_start(&gs_usb_hstd_string_control);
-} /* End of function usb_hstd_get_string_desc() */
+}
+/******************************************************************************
+ End of function usb_hstd_get_string_desc
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hstd_check_open_class
@@ -2079,7 +1906,7 @@ void usb_hstd_class_enumeration(usb_tskinfo_t *p_mess)
 #endif /* end USB_CFG_COMPLIANCE == USB_CFG_ENABLE */
 
     /* Branch for Enumeration Sequence */
-    switch (g_usb_enum_seq)
+    switch (gs_usb_enum_seq)
     {
     /* Enumeration Sequence String Descriptor #0 receive request */
         case USB_SEQ_0:
@@ -2174,7 +2001,7 @@ void usb_hstd_class_enumeration(usb_tskinfo_t *p_mess)
                         /* Get String descriptor */
                         usb_hstd_get_string_desc (USB_DEVICEADDR, 0, (usb_hcb_t)usb_hstd_get_str_desc_cb);
                         /* String Descriptor #0 Receive wait */
-                        g_usb_enum_seq++;
+                        gs_usb_enum_seq++;
                         break;
                     }
                 }
@@ -2182,7 +2009,7 @@ void usb_hstd_class_enumeration(usb_tskinfo_t *p_mess)
             }
             if (USB_ERROR == retval)
             {
-                g_usb_enum_seq = USB_SEQ_0;
+                gs_usb_enum_seq = USB_SEQ_0;
                 usb_hstd_return_enu_mgr(USB_NO);
             }
 #if USB_CFG_COMPLIANCE == USB_CFG_ENABLE
@@ -2213,11 +2040,11 @@ void usb_hstd_class_enumeration(usb_tskinfo_t *p_mess)
                     usb_hstd_specified_path();                /* Skip Get String Descriptor(iProduct) */
                 }
                 /* StringDescriptor iProduct Receive */
-                g_usb_enum_seq++;
+                gs_usb_enum_seq++;
             }
             else
             {
-                g_usb_enum_seq = USB_SEQ_0;
+                gs_usb_enum_seq = USB_SEQ_0;
                 /* Return to MGR */
                 usb_hstd_return_enu_mgr (USB_NO);
             }
@@ -2301,13 +2128,13 @@ void usb_hstd_class_enumeration(usb_tskinfo_t *p_mess)
                 retval  = USB_YES;
             }
             /* Enumeration Sequence Complete */
-            g_usb_enum_seq  = USB_SEQ_0;
+            gs_usb_enum_seq  = USB_SEQ_0;
             /* return to MGR */
             usb_hstd_return_enu_mgr(retval);
         break;
 
         default:
-            g_usb_enum_seq = USB_SEQ_0;
+            gs_usb_enum_seq = USB_SEQ_0;
             /* Return to MGR */
             usb_hstd_return_enu_mgr (USB_NO);
         break;
@@ -2368,19 +2195,6 @@ void usb_hstd_dummy_function(usb_hutr_t *p_utr, uint16_t data1, uint16_t data2)
 }   /* End of function usb_hstd_dummy_function() */
 
 /******************************************************************************
-Function Name   : usb_hstd_sw_reset
-Description     : Software reset
-Arguments       : none
-Return value    : none
-******************************************************************************/
-void usb_hstd_sw_reset(void)
-{
-    hw_usb_clear_usbe ();
-    hw_usb_set_usbe ();
-}   /* End of function usb_hstd_sw_reset() */
-
-
-/******************************************************************************
 Function Name   : usb_hstd_hw_start
 Description     : Start Oscillation: H/W reset
                 : Reset start
@@ -2405,6 +2219,43 @@ void usb_hstd_hw_start(void)
 
 
 /******************************************************************************
+Function Name   : usb_hstd_driver_init
+Description     : Usb Driver Open
+Argument        : none
+Return          : none
+******************************************************************************/
+void usb_hstd_driver_init(void)
+{
+    /* Initialized Manager Mode */
+    g_usb_mgr_seq   = 0;
+    g_usb_mgr_seq_mode    = USB_MGR_NOSEQUENCE;
+
+    /* Initialized driver registration area */
+    usb_hstd_driver_reg_init();
+
+    /* Initial device address & driver number */
+    g_usb_hcd_devaddr    = (usb_addr_t)0;
+
+    /* Initialized device information area */
+    usb_hstd_clr_device_info();
+
+    /* Control transfer stage management */
+    g_usb_hstd_ctsq               = USB_IDLEST;
+    g_usb_hcd_remote_wakeup  = USB_NO;
+
+    usb_cstd_init_library();                    /* Initialized global variables */
+
+#if USB_CFG_BC == USB_CFG_ENABLE
+    g_usb_hstd_bc.state = USB_BC_STATE_INIT;
+#endif
+
+    usb_hstd_class_driver_start ();
+    usb_hstd_host_registration ();
+
+}   /* End of function usb_hstd_driver_init() */
+
+
+/******************************************************************************
  Function Name   : usb_hstd_class_driver_start
  Description     : Init host class driver task.
  Arguments       : none
@@ -2412,12 +2263,12 @@ void usb_hstd_hw_start(void)
  ******************************************************************************/
 void usb_hstd_class_driver_start (void)
 {
-    g_usb_enum_seq      = (uint16_t)USB_SEQ_0;
+    gs_usb_enum_seq      = (uint16_t)USB_SEQ_0;
 
 } /* End of function usb_hstd_class_driver_start() */
 
 #endif /* ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST) */
-
+#endif /*(BSP_CFG_RTOS_USED == 0)*/
 /******************************************************************************
-End of file
+ End  Of File
 ******************************************************************************/

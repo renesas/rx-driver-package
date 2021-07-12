@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_simple_glcdc_config_rx
 VERSION = 		0.81
-MDF =			NOT_SUPPORTED
+MDF = NOT_SUPPORTED
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

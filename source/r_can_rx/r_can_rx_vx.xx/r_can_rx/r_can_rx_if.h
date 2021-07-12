@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2015 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_can_rx_if.h
@@ -37,6 +37,13 @@
 *         : 16.09.2019 3.11    - Added message to warn issue of CAN0, CAN1 and CAN2 interrupt sources are not assigned any
 *                                interrupt vector number
 *         : 30.12.2019 3.20    - Added support RX66N, RX72N.
+*         : 13.06.2020 4.00    - Added support CAN FIFO.
+*         :                    - Added support Pin-setting.
+*         :                    - Removed definitions port pin.
+*         :                    - Removed define registers and information to fill the CAN pin map.
+*         : 04.01.2021 4.10    - Changed can_tx_callback to can_txf_callback in case txf_cb_func is NULL in R_CAN_Create().
+*                              - Added support demo for CAN v4.10.
+*         : 01.04.2021 5.00    - Added support for setting different bitrate for different channels.
 ***********************************************************************************************************************/
 #ifndef CAN_INTERFACE_HEADER_FILE
 #define CAN_INTERFACE_HEADER_FILE 
@@ -56,8 +63,8 @@ Macro definitions
 #endif
 
 /* Version Number of API. */
-#define RCAN_RX_VERSION_MAJOR           (3)
-#define RCAN_RX_VERSION_MINOR           (20)
+#define RCAN_RX_VERSION_MAJOR           (5)
+#define RCAN_RX_VERSION_MINOR           (00)
 /* The process of getting the version number is done through the macro below. The version number is encoded where the
    top 2 bytes are the major version number and the bottom 2 bytes are the minor version number. For example,
    Version 4.25 would be returned as 0x00040019. */
@@ -92,230 +99,6 @@ Macro definitions
         #error "Interrupt vector number of CAN2 should be defined in file r_bsp_interrupt_config.h."
     #endif
 #endif
-
-/******************************************************************************
-Definitions to make the port pin selection logic below work (needs be numericals).
-******************************************************************************/
-#define    P14        (1)
-#define    P15        (2)
-#define    P22        (3)
-#define    P23        (4)
-#define    P32        (5)
-#define    P33        (6)
-#define    P54        (7)
-#define    P55        (8)
-#define    P66        (9)
-#define    P67        (10)
-#define    PA0        (11)
-#define    PA1        (12)
-#define    PB5        (13)
-#define    PB6        (14)
-#define    PC5        (15)
-#define    PC6        (16)
-#define    PD1        (17)
-#define    PD2        (18)
-#define    PD7        (19)
-#define    PE0        (20)
-#define    PF2        (21)
-#define    PF3        (22)
-
-/* Define registers and information to fill the CAN pin map based on user selection
- * of port/pin numbers in r_can_rx_config.h */
-
-/* CAN0 RX port configuration */
-#if ((BSP_MCU_RX64M == 1) || (BSP_MCU_RX65N == 1) || (BSP_MCU_RX71M == 1) || (BSP_MCU_RX72M == 1)|| (BSP_MCU_RX72N == 1) || (BSP_MCU_RX66N == 1))
-    #if (CAN0_RX_PORT == P33)
-        #define p_CAN0_RX_PIN_MPC       (&MPC.P33PFS.BYTE)
-        #define p_CAN0_RX_PIN_PMR       (&PORT3.PMR.BYTE)
-        #define p_CAN0_RX_PIN_PDR       (&PORT3.PDR.BYTE)
-        #define p_CAN0_RX_PIN_PIDR      (&PORT3.PIDR.BYTE)
-        #define   CAN0_RX_PIN_MASK      (0x08) /* bit 3 */
-    #elif (CAN0_RX_PORT == PD2)
-        #define p_CAN0_RX_PIN_MPC       (&MPC.PD2PFS.BYTE)
-        #define p_CAN0_RX_PIN_PMR       (&PORTD.PMR.BYTE)
-        #define p_CAN0_RX_PIN_PDR       (&PORTD.PDR.BYTE)
-        #define p_CAN0_RX_PIN_PIDR      (&PORTD.PIDR.BYTE)
-        #define   CAN0_RX_PIN_MASK      (0x04) /* bit 2 */
-    #else
-        #error " - Assigned CAN0 RX port not supported by device! -"
-    #endif
-#elif ((BSP_MCU_RX66T == 1) || (BSP_MCU_RX72T == 1))
-    #if (CAN0_RX_PORT == P22)
-        #define p_CAN0_RX_PIN_MPC       (&MPC.P22PFS.BYTE)
-        #define p_CAN0_RX_PIN_PMR       (&PORT2.PMR.BYTE)
-        #define p_CAN0_RX_PIN_PDR       (&PORT2.PDR.BYTE)
-        #define p_CAN0_RX_PIN_PIDR      (&PORT2.PIDR.BYTE)
-        #define   CAN0_RX_PIN_MASK      (0x04) /* bit 2 */
-    #elif(CAN0_RX_PORT == PA1)
-        #define p_CAN0_RX_PIN_MPC       (&MPC.PA1PFS.BYTE)
-        #define p_CAN0_RX_PIN_PMR       (&PORTA.PMR.BYTE)
-        #define p_CAN0_RX_PIN_PDR       (&PORTA.PDR.BYTE)
-        #define p_CAN0_RX_PIN_PIDR      (&PORTA.PIDR.BYTE)
-        #define   CAN0_RX_PIN_MASK      (0x02) /* bit 1 */
-    #elif (CAN0_RX_PORT == PA7)
-        #define p_CAN0_RX_PIN_MPC       (&MPC.PA7PFS.BYTE)
-        #define p_CAN0_RX_PIN_PMR       (&PORTA.PMR.BYTE)
-        #define p_CAN0_RX_PIN_PDR       (&PORTA.PDR.BYTE)
-        #define p_CAN0_RX_PIN_PIDR      (&PORTA.PIDR.BYTE)
-        #define   CAN0_RX_PIN_MASK      (0x80) /* bit 7 */
-    #elif (CAN0_RX_PORT == PB6)
-        #define p_CAN0_RX_PIN_MPC       (&MPC.PB6PFS.BYTE)
-        #define p_CAN0_RX_PIN_PMR       (&PORTB.PMR.BYTE)
-        #define p_CAN0_RX_PIN_PDR       (&PORTB.PDR.BYTE)
-        #define p_CAN0_RX_PIN_PIDR      (&PORTB.PIDR.BYTE)
-        #define   CAN0_RX_PIN_MASK      (0x40) /* bit 6 */
-    #elif (CAN0_RX_PORT == PC6)
-        #define p_CAN0_RX_PIN_MPC       (&MPC.PC6PFS.BYTE)
-        #define p_CAN0_RX_PIN_PMR       (&PORTC.PMR.BYTE)
-        #define p_CAN0_RX_PIN_PDR       (&PORTC.PDR.BYTE)
-        #define p_CAN0_RX_PIN_PIDR      (&PORTC.PIDR.BYTE)
-        #define   CAN0_RX_PIN_MASK      (0x40) /* bit 6 */
-    #elif (CAN0_RX_PORT == PE0)
-        #define p_CAN0_RX_PIN_MPC       (&MPC.PE0PFS.BYTE)
-        #define p_CAN0_RX_PIN_PMR       (&PORTE.PMR.BYTE)
-        #define p_CAN0_RX_PIN_PDR       (&PORTE.PDR.BYTE)
-        #define p_CAN0_RX_PIN_PIDR      (&PORTE.PIDR.BYTE)
-        #define   CAN0_RX_PIN_MASK      (0x01) /* bit 0 */
-    #elif (CAN0_RX_PORT == PF3)
-        #define p_CAN0_RX_PIN_MPC       (&MPC.PF3PFS.BYTE)
-        #define p_CAN0_RX_PIN_PMR       (&PORTF.PMR.BYTE)
-        #define p_CAN0_RX_PIN_PDR       (&PORTF.PDR.BYTE)
-        #define p_CAN0_RX_PIN_PIDR      (&PORTF.PIDR.BYTE)
-        #define   CAN0_RX_PIN_MASK      (0x08) /* bit 3 */
-    #else
-        #error " - Assigned CAN0 RX port not supported by device! -"
-    #endif
-#endif
-
-/* CAN0 TX port configuration */
-#if ((BSP_MCU_RX64M == 1) || (BSP_MCU_RX65N == 1) || (BSP_MCU_RX71M == 1) || (BSP_MCU_RX72M == 1) || (BSP_MCU_RX72N == 1)|| (BSP_MCU_RX66N == 1))
-    #if (CAN0_TX_PORT == P32)
-        #define p_CAN0_TX_PIN_MPC       (&MPC.P32PFS.BYTE)
-        #define p_CAN0_TX_PIN_PMR       (&PORT3.PMR.BYTE)
-        #define p_CAN0_TX_PIN_PDR       (&PORT3.PDR.BYTE)
-        #define p_CAN0_TX_PIN_PODR      (&PORT3.PODR.BYTE)
-        #define   CAN0_TX_PIN_MASK      (0x04) /* bit 2 */
-    #elif (CAN0_TX_PORT == PD1)
-        #define p_CAN0_TX_PIN_MPC       (&MPC.PD1PFS.BYTE)
-        #define p_CAN0_TX_PIN_PMR       (&PORTD.PMR.BYTE)
-        #define p_CAN0_TX_PIN_PDR       (&PORTD.PDR.BYTE)
-        #define p_CAN0_TX_PIN_PODR      (&PORTD.PODR.BYTE)
-        #define   CAN0_TX_PIN_MASK      (0x02) /* bit 1 */
-    #else
-        #error " - Assigned CAN0 TX port not supported by device! -"
-    #endif
-#elif ((BSP_MCU_RX66T == 1) || (BSP_MCU_RX72T == 1))
-    #if (CAN0_TX_PORT == P23)
-        #define p_CAN0_TX_PIN_MPC       (&MPC.P23PFS.BYTE)
-        #define p_CAN0_TX_PIN_PMR       (&PORT2.PMR.BYTE)
-        #define p_CAN0_TX_PIN_PDR       (&PORT2.PDR.BYTE)
-        #define p_CAN0_TX_PIN_PODR      (&PORT2.PODR.BYTE)
-        #define   CAN0_TX_PIN_MASK      (0x08) /* bit 3 */
-    #elif (CAN0_TX_PORT == PA0)
-        #define p_CAN0_TX_PIN_MPC       (&MPC.PA0PFS.BYTE)
-        #define p_CAN0_TX_PIN_PMR       (&PORTA.PMR.BYTE)
-        #define p_CAN0_TX_PIN_PDR       (&PORTA.PDR.BYTE)
-        #define p_CAN0_TX_PIN_PODR      (&PORTA.PODR.BYTE)
-        #define   CAN0_TX_PIN_MASK      (0x01) /* bit 0 */
-    #elif (CAN0_TX_PORT == PA6)
-        #define p_CAN0_TX_PIN_MPC       (&MPC.PA6PFS.BYTE)
-        #define p_CAN0_TX_PIN_PMR       (&PORTA.PMR.BYTE)
-        #define p_CAN0_TX_PIN_PDR       (&PORTA.PDR.BYTE)
-        #define p_CAN0_TX_PIN_PODR      (&PORTA.PODR.BYTE)
-        #define   CAN0_TX_PIN_MASK      (0x40) /* bit 6 */
-    #elif (CAN0_TX_PORT == PB5)
-        #define p_CAN0_TX_PIN_MPC       (&MPC.PB5PFS.BYTE)
-        #define p_CAN0_TX_PIN_PMR       (&PORTB.PMR.BYTE)
-        #define p_CAN0_TX_PIN_PDR       (&PORTB.PDR.BYTE)
-        #define p_CAN0_TX_PIN_PODR      (&PORTB.PODR.BYTE)
-        #define   CAN0_TX_PIN_MASK      (0x20) /* bit 5 */
-    #elif (CAN0_TX_PORT == PC5)
-        #define p_CAN0_TX_PIN_MPC       (&MPC.PC5PFS.BYTE)
-        #define p_CAN0_TX_PIN_PMR       (&PORTC.PMR.BYTE)
-        #define p_CAN0_TX_PIN_PDR       (&PORTC.PDR.BYTE)
-        #define p_CAN0_TX_PIN_PODR      (&PORTC.PODR.BYTE)
-        #define   CAN0_TX_PIN_MASK      (0x20) /* bit 5 */
-    #elif (CAN0_TX_PORT == PD7)
-        #define p_CAN0_TX_PIN_MPC       (&MPC.PD7PFS.BYTE)
-        #define p_CAN0_TX_PIN_PMR       (&PORTD.PMR.BYTE)
-        #define p_CAN0_TX_PIN_PDR       (&PORTD.PDR.BYTE)
-        #define p_CAN0_TX_PIN_PODR      (&PORTD.PODR.BYTE)
-        #define   CAN0_TX_PIN_MASK      (0x80) /* bit 7 */
-    #elif (CAN0_TX_PORT == PF2)
-        #define p_CAN0_TX_PIN_MPC       (&MPC.PF2PFS.BYTE)
-        #define p_CAN0_TX_PIN_PMR       (&PORTF.PMR.BYTE)
-        #define p_CAN0_TX_PIN_PDR       (&PORTF.PDR.BYTE)
-        #define p_CAN0_TX_PIN_PODR      (&PORTF.PODR.BYTE)
-        #define   CAN0_TX_PIN_MASK      (0x04) /* bit 2 */
-    #else
-        #error " - Assigned CAN0 TX port not supported by device! -"
-    #endif
-#endif
-
-
-/* CAN1 RX port configuration */
-#if ((BSP_MCU_RX64M == 1) || (BSP_MCU_RX65N == 1) || (BSP_MCU_RX71M == 1) || (BSP_MCU_RX72M == 1) || (BSP_MCU_RX72N == 1)|| (BSP_MCU_RX66N == 1))
-    #if (CAN1_RX_PORT == P15)
-        #define p_CAN1_RX_PIN_MPC       (&MPC.P15PFS.BYTE)
-        #define p_CAN1_RX_PIN_PMR       (&PORT1.PMR.BYTE)
-        #define p_CAN1_RX_PIN_PDR       (&PORT1.PDR.BYTE)
-        #define p_CAN1_RX_PIN_PIDR      (&PORT1.PIDR.BYTE)
-        #define CAN1_RX_PIN_MASK        (0x20) /* bit 5 */
-    #elif (CAN1_RX_PORT == P55)
-        #define p_CAN1_RX_PIN_MPC       (&MPC.P55PFS.BYTE)
-        #define p_CAN1_RX_PIN_PMR       (&PORT5.PMR.BYTE)
-        #define p_CAN1_RX_PIN_PDR       (&PORT5.PDR.BYTE)
-        #define p_CAN1_RX_PIN_PIDR      (&PORT5.PIDR.BYTE)
-        #define CAN1_RX_PIN_MASK        (0x20) /* bit 5 */
-    #else
-        #error " - Assigned CAN1 RX port not supported by device! -"
-    #endif
-#endif
-
-/* CAN1 TX port configuration */
-#if ((BSP_MCU_RX64M == 1) || (BSP_MCU_RX65N == 1) || (BSP_MCU_RX71M == 1) || (BSP_MCU_RX72M == 1) || (BSP_MCU_RX72N == 1)|| (BSP_MCU_RX66N == 1))
-    #if (CAN1_TX_PORT == P14)
-        #define p_CAN1_TX_PIN_MPC       (&MPC.P14PFS.BYTE)
-        #define p_CAN1_TX_PIN_PMR       (&PORT1.PMR.BYTE)
-        #define p_CAN1_TX_PIN_PDR       (&PORT1.PDR.BYTE)
-        #define p_CAN1_TX_PIN_PODR      (&PORT1.PODR.BYTE)
-        #define   CAN1_TX_PIN_MASK      (0x10) /* bit 4 */
-    #elif (CAN1_TX_PORT == P54)
-        #define p_CAN1_TX_PIN_MPC       (&MPC.P54PFS.BYTE)
-        #define p_CAN1_TX_PIN_PMR       (&PORT5.PMR.BYTE)
-        #define p_CAN1_TX_PIN_PDR       (&PORT5.PDR.BYTE)
-        #define p_CAN1_TX_PIN_PODR      (&PORT5.PODR.BYTE)
-        #define   CAN1_TX_PIN_MASK      (0x10) /* bit 4 */
-    #else
-        #error " - Assigned CAN1 TX port not supported by device! -"
-    #endif
-#endif
-
-
-/* CAN2 RX port configuration */
-#if (CAN2_RX_PORT == P67)
-    #define p_CAN2_RX_PIN_MPC       (&MPC.P67PFS.BYTE)
-    #define p_CAN2_RX_PIN_PMR       (&PORT6.PMR.BYTE)
-    #define p_CAN2_RX_PIN_PDR       (&PORT6.PDR.BYTE)
-    #define p_CAN2_RX_PIN_PIDR      (&PORT6.PIDR.BYTE)
-    #define   CAN2_RX_PIN_MASK      (0x80) /* bit 7 */
-#else
-    #error " - Assigned CAN2 RX port not supported by device! -"
-#endif
-/* CAN2 TX port configuration */        
-#if (CAN2_TX_PORT == P66)
-    #define p_CAN2_TX_PIN_MPC       (&MPC.P66PFS.BYTE)
-    #define p_CAN2_TX_PIN_PMR       (&PORT6.PMR.BYTE)
-    #define p_CAN2_TX_PIN_PDR       (&PORT6.PDR.BYTE)
-    #define p_CAN2_TX_PIN_PODR      (&PORT6.PODR.BYTE)
-    #define   CAN2_TX_PIN_MASK      (0x40) /* bit 6 */
-#else
-    #error " - Assigned CAN2 TX port not supported by device! -"
-#endif
-
-
-
-#define PINFUNC_CAN                 (0x10)    /* Value to set MPC PFS registers for CAN operation. */
 
 /******************************************************************************
 Macro definitions
@@ -357,6 +140,11 @@ Macro definitions
 #define     R_CAN_BAD_CH_NR         ((uint32_t)0x00000020)    /* 32 */
 #define     R_CAN_SW_BAD_MBX        ((uint32_t)0x00000040)    /* 64 */
 #define     R_CAN_BAD_ACTION_TYPE   ((uint32_t)0x00000080)    /* 128 */
+#define     CAN_ERR_NOT_FIFO_MODE   ((uint32_t)0x00010000)
+#define     CAN_ERR_BOX_FULL        ((uint32_t)0x00020000)
+#define     CAN_ERR_BOX_EMPTY       ((uint32_t)0x00040000)
+#define     R_CAN_SW_BAD_MODE       ((uint32_t)0x00080000)
+
 
 /* CAN peripheral timeout reasons. */
 #define     R_CAN_SW_WAKEUP_ERR     ((uint32_t)0x00000100)    /* 256 */
@@ -395,6 +183,10 @@ Macro definitions
 /* Frame types */
 #define DATA_FRAME          (0)
 #define REMOTE_FRAME        (1)
+
+/* Mailbox mode */
+#define NORMAL_MAILBOX_MODE      (0)
+#define FIFO_MAILBOX_MODE        (1)
 
 /* Bit set defines */
 #define        MBX_0        (0x00000001)
@@ -441,23 +233,17 @@ typedef struct
     uint8_t data[8];
 } can_frame_t;
 
+/* BITRATE configuration object */
+typedef struct
+{
+    uint8_t BRP;
+    uint8_t TSEG1;
+    uint8_t TSEG2;
+    uint8_t SJW;
+} can_bitrate_config_t;
+
 /* A pointer to the CAN peripheral registers memory map structure. */
 typedef volatile struct st_can R_BSP_EVENACCESS_SFR * can_st_ptr;
-
-/* A set of pointers to the registers of the I/O ports assigned to CAN pins. */
-typedef const struct
-{
-    volatile R_BSP_EVENACCESS_SFR unsigned char * p_CAN_Rx_Pin_MPC;
-    volatile R_BSP_EVENACCESS_SFR unsigned char * p_CAN_Rx_Pin_PMR;
-    volatile R_BSP_EVENACCESS_SFR unsigned char * p_CAN_Rx_Pin_PDR;
-    volatile R_BSP_EVENACCESS_SFR unsigned char * p_CAN_Rx_Pin_PIDR;
-    uint8_t Rx_Pin_mask;
-    volatile R_BSP_EVENACCESS_SFR unsigned char * p_CAN_Tx_Pin_MPC;
-    volatile R_BSP_EVENACCESS_SFR unsigned char * p_CAN_Tx_Pin_PMR;
-    volatile R_BSP_EVENACCESS_SFR unsigned char * p_CAN_Tx_Pin_PDR;
-    volatile R_BSP_EVENACCESS_SFR unsigned char * p_CAN_Tx_Pin_PODR;
-    uint8_t Tx_Pin_mask;
-} CAN_port_map_t;
 
 /**************************************************************************************************
 Exported global variables
@@ -469,25 +255,26 @@ Exported global functions (to be accessed by other files)
                 R X   C A N   A P I 
 ******************************************************************/
 /* INITIALIZATION */
-uint32_t    R_CAN_Create(const uint32_t  ch_nr, void (*tx_cb_func)(void), void (*cb_rx_func)(void), void (*cb_err_func)(void));
+uint32_t    R_CAN_Create(const uint32_t  ch_nr, const uint32_t mb_mode, const can_bitrate_config_t p_cfg, void (*tx_cb_func)(void), void (*txf_cb_func)(void), void (*rx_cb_func)(void), void (*rxf_cb_func)(void), void (*err_cb_func)(void));
 uint32_t    R_CAN_PortSet(const uint32_t ch_nr, const uint32_t action_type);
 uint32_t    R_CAN_Control(const uint32_t ch_nr, const uint32_t action_type);
-void        R_CAN_SetBitrate(const uint32_t ch_nr);
+void        R_CAN_SetBitrate(const uint32_t ch_nr, const can_bitrate_config_t p_cfg);
 
 /* TRANSMIT */
-uint32_t    R_CAN_TxSet(const uint32_t ch_nr, const uint32_t mbox_nr, const can_frame_t* frame_p, const uint32_t frame_type);
-uint32_t    R_CAN_TxSetXid(const uint32_t ch_nr, const uint32_t mbox_nr, can_frame_t* frame_p, const uint32_t frame_type);
-uint32_t    R_CAN_Tx(const uint32_t ch_nr, const uint32_t mbox_nr);
+uint32_t    R_CAN_TxSet(const uint32_t ch_nr, const uint32_t mb_mode, const uint32_t mbox_nr, const can_frame_t* frame_p, const uint32_t frame_type);
+uint32_t    R_CAN_TxSetXid(const uint32_t ch_nr, const uint32_t mb_mode, const uint32_t mbox_nr, can_frame_t* frame_p, const uint32_t frame_type);
+uint32_t    R_CAN_Tx(const uint32_t ch_nr, const uint32_t mb_mode, const uint32_t mbox_nr);
 uint32_t    R_CAN_TxCheck(const uint32_t ch_nr, const uint32_t mbox_nr);
-uint32_t    R_CAN_TxStopMsg(const uint32_t ch_nr, const uint32_t mbox_nr);
+uint32_t    R_CAN_TxStopMsg(const uint32_t ch_nr, const uint32_t  mb_mode, const uint32_t mbox_nr);
 
 /* RECEIVE */
 uint32_t    R_CAN_RxSet(const uint32_t ch_nr, const uint32_t mbox_nr, const uint32_t sid, const uint32_t frame_type);
 uint32_t    R_CAN_RxSetXid(const uint32_t ch_nr, const uint32_t mbox_nr, uint32_t xid, const uint32_t frame_type);
 uint32_t    R_CAN_RxPoll(const uint32_t ch_nr, const uint32_t mbox_nr);
-uint32_t    R_CAN_RxRead(const uint32_t ch_nr, const uint32_t mbox_nr, can_frame_t * const frame_p);
+uint32_t    R_CAN_RxRead(const uint32_t ch_nr, const uint32_t mb_mode, const uint32_t mbox_nr, can_frame_t * const frame_p);
 void        R_CAN_RxSetMask(const uint32_t ch_nr, const uint32_t mbox_nr, const uint32_t mask_value);
-
+uint32_t    R_CAN_RxSetFIFO(const uint32_t  ch_nr, const uint32_t mb_mode, const uint32_t  mbox_nr, const uint32_t  fidcr0_value, const uint32_t  fidcr1_value, const uint32_t  frame_type, const uint32_t  mkr6_value, const uint32_t  mkr7_value);
+uint32_t    R_CAN_RxSetFIFOXid(const uint32_t  ch_nr, const uint32_t mb_mode, const uint32_t  mbox_nr, const uint32_t  xfidcr0_value, const uint32_t  xfidcr1_value, const uint32_t  frame_type, const uint32_t  mkr6_value, const uint32_t  mkr7_value);
 /* ERRORS */
 uint32_t    R_CAN_CheckErr(const uint32_t ch_nr);
 

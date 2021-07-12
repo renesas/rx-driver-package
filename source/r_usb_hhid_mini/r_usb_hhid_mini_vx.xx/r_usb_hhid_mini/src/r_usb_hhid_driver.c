@@ -1,64 +1,60 @@
-/*******************************************************************************
+/***********************************************************************************************************************
 * DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
 * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+ * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
 * following link:
-* http://www.renesas.com/disclaimer *
-* Copyright (C) 2014(2019) Renesas Electronics Corporation. All rights reserved.
-*******************************************************************************/
-/*******************************************************************************
+ * http://www.renesas.com/disclaimer
+ *
+ * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+ ***********************************************************************************************************************/
+/***********************************************************************************************************************
 * File Name     : r_usb_hhid_driver.c
 * Description   : This is the USB host HID class driver function code.
-*******************************************************************************/
-/*******************************************************************************
+ ***********************************************************************************************************************/
+/**********************************************************************************************************************
  * History   : DD.MM.YYYY Version Description
  *           : 01.09.2014 1.00    First Release
  *           : 01.06.2015 1.01    Added RX231.
  *           : 29.12.2015 1.02    Minor Update.
  *           : 30.11.2018 1.10    Supporting Smart Configurator
  *           : 31.05.2019 1.11    Added support for GNUC and ICCRX.
- *******************************************************************************/
+ *           : 30.06.2020 1.20    Added support for RTOS.
+ ***********************************************************************************************************************/
 
-/*******************************************************************************
+/******************************************************************************
  Includes   <System Includes> , "Project Includes"
  ******************************************************************************/
 
 #include "r_usb_hhid.h"
 
+#if (BSP_CFG_RTOS_USED == 0)    /* Non-OS */
 /*******************************************************************************
  Macro definitions
  ******************************************************************************/
+#define USB_B_INTERFACE_PROTOCOL            (7)                 /* Interface Descriptor bInterfaceProtocol */
 
-/*******************************************************************************
- Typedef definitions
- ******************************************************************************/
-
-/*******************************************************************************
+/******************************************************************************
  Exported global variables (to be accessed by other files)
  ******************************************************************************/
 
 /*******************************************************************************
  Private global variables and functions
  ******************************************************************************/
+/* functions */
+static void        usb_hhid_device_state (uint16_t data, uint16_t state);
 
 /******************************************************************************
 Renesas Host HID Driver functions
 ******************************************************************************/
-
 
 /******************************************************************************
 Function Name   : usb_hhid_pipe_info
@@ -71,7 +67,6 @@ uint16_t usb_hhid_pipe_info (uint8_t *p_table, uint16_t length)
 {
     /* Offset for Descriptor Top Address */
     uint16_t ofdsc;
-    uint16_t retval = USB_ERROR;
     uint8_t  pipe_no;
     uint8_t  protocol;
     uint8_t  num_endpoint;
@@ -96,10 +91,16 @@ uint16_t usb_hhid_pipe_info (uint8_t *p_table, uint16_t length)
     /* WAIT_LOOP */
     while (ofdsc < length)
     {
-        /* Branch descriptor type */
-        if (USB_DT_ENDPOINT == p_table[ofdsc + 1])
+        /* Endpoint Descriptor */
+        if (USB_DT_ENDPOINT == p_table[ofdsc + USB_EP_B_DESCRIPTORTYPE])
         {
+            /* Check pipe information */
             pipe_no = usb_cstd_pipe_table_set (USB_HHID, &p_table[ofdsc]);
+            if (USB_NULL == pipe_no)
+            {
+                return USB_ERROR;
+            }
+
             if (USB_CFG_HHID_INT_IN == pipe_no)
             {
                 detect_in_pipe = USB_ON;
@@ -110,28 +111,29 @@ uint16_t usb_hhid_pipe_info (uint8_t *p_table, uint16_t length)
             }
             else
             {
-                /* Do Nothing */
+                /* error */
+            }
+
+            if ((USB_ON == detect_in_pipe) && (USB_ON == detect_out_pipe))
+            {
+                    return USB_OK;
             }
         }
-        ofdsc   +=  p_table[ofdsc];
+        ofdsc += p_table[ofdsc];/* Next descriptor point set */
     }
-
-    if ((USB_ON == detect_in_pipe) && (USB_ON == detect_out_pipe))
-    {
-        retval = USB_OK;
-    }
-
-    return retval;
-}   /* eof usb_hhid_pipe_info() */
-
+    return USB_ERROR;
+}
+/******************************************************************************
+ End of function usb_hhid_pipe_info
+ ******************************************************************************/
 
 /******************************************************************************
-Function Name   : hid_registration
-Description     : Host Sample Driver Registration
-Arguments       : none
-Return value    : none
+ Function Name   : usb_hhid_registration
+ Description     : registration of Host HID driver.
+ Arguments       : none
+ Return value    : none
 ******************************************************************************/
-void hid_registration(void)
+void usb_hhid_registration(void)
 {
     usb_hcdreg_t    driver;
 
@@ -140,7 +142,10 @@ void hid_registration(void)
     driver.classcheck       = &usb_hstd_class_check;
     driver.statediagram     = &usb_hhid_device_state;
     usb_hstd_driver_registration (&driver);
-}   /* eof hid_registration() */
+}
+/******************************************************************************
+ End of function usb_hhid_registration
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hhid_device_state
@@ -231,9 +236,12 @@ uint8_t usb_hhid_get_hid_protocol(void)
 {
     /* table[USB_B_INTERFACE_PROTOCOL]:Interface Descriptor-bInterfaceProtocol */
     return gp_usb_hstd_interface_tbl[USB_B_INTERFACE_PROTOCOL];
-}   /* eof usb_hhid_get_hid_protocol() */
+}
+/******************************************************************************
+ End of function usb_hhid_get_hid_protocol
+ ******************************************************************************/
 
-
+#endif /*(BSP_CFG_RTOS_USED == 0)*/
 /******************************************************************************
 End Of File
 ******************************************************************************/

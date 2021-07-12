@@ -18,12 +18,13 @@
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_lpt_rx_platform.h
- * Version      : 1.10
+ * Version      : 2.00
  * Description  : Functions for using Low Power Timer
  ************************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *         : 01.03.2016 1.00    First Release
  *         : 01.07.2016 1.10    Added support for RX130,RX230,RX231
+ *         : 10.06.2020 2.00    Added support for RX23W
  ***********************************************************************************************************************/
 #ifndef LPT_PLATFORM_H
 #define LPT_PLATFORM_H
@@ -40,6 +41,8 @@ Includes <System Includes> , "Project Includes"
     #include "./targets/rx230/r_lpt_rx230_private.h"
 #elif defined(BSP_MCU_RX231)
     #include "./targets/rx231/r_lpt_rx231_private.h"
+#elif defined(BSP_MCU_RX23W)
+    #include "./targets/rx23w/r_lpt_rx23w_private.h"
 #else
     #error "This MCU is not supported by the current r_lpt_rx module."
 #endif

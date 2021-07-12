@@ -23,9 +23,10 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *           04.10.2018 1.00    First Release
+*           06.05.2019 1.10    Added TOUCH_CFG_SAFETY_LINKAGE ENABLE
 ***********************************************************************************************************************/
-#ifndef TOUCH_CONFIG_HEADER_FILE
-#define TOUCH_CONFIG_HEADER_FILE
+#ifndef TOUCH_QE_CONFIG_H
+#define TOUCH_QE_CONFIG_H
 
 
 /***********************************************************************************************************************
@@ -35,7 +36,7 @@
  * Setting to BSP_CFG_PARAM_CHECKING_ENABLE utilizes the system default setting
  * Setting to 1 includes parameter checking; 0 compiles out parameter checking
  */
-#define TOUCH_CFG_PARAM_CHECKING_ENABLE      (1)
+#define TOUCH_CFG_PARAM_CHECKING_ENABLE     (BSP_CFG_PARAM_CHECKING_ENABLE)
 
 
 /* Setting to 1 provides data for monitoring tool to display.
@@ -43,4 +44,10 @@
  */
 #define TOUCH_CFG_UPDATE_MONITOR    (1)
 
-#endif /* TOUCH_CONFIG_HEADER_FILE */
+
+/* Setting to 1 provides section information used by safety code for checksum and CRC calculations.
+ * Setting to 0 requires no changes to linker section table. Driver size is same with 0 or 1 setting.
+ */
+#define TOUCH_CFG_SAFETY_LINKAGE_ENABLE     (0)
+
+#endif /* TOUCH_QE_CONFIG_H */

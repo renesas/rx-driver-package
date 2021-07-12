@@ -33,6 +33,7 @@ Features
 * (RX72M) Simultaneous operation of up to 13 channels
 * (RX72N) Simultaneous operation of up to 13 channels
 * (RX66N) Simultaneous operation of up to 13 channels
+* (RX23E-A) Simultaneous operation of up to 4 channels
 * Simultaneous operation of Async, Sync, or SSPI modes on different channels.
 * Queueing of incoming and outgoing data for Asynchronous channels.
 * Interrupt driven.

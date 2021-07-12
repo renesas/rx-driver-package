@@ -33,12 +33,14 @@
         <version>2.07.00</version>
         <version>3.00.00</version>
         <version>3.01.00</version>
+        <version>3.02.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
         <version>4.08.04.201803</version>
         <version>4.08.04.201902</version>
+        <version>8.03.00.201904</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -63,6 +65,7 @@
         <group omit_board="true">RX13T</group>
         <group omit_board="true">RX230</group>
         <group omit_board="true">RX231</group>
+        <group omit_board="true">RX23E-A</group>
         <group omit_board="true">RX23W</group>
         <group omit_board="true">RX23T</group>
         <group omit_board="true">RX24T</group>
@@ -82,11 +85,11 @@
     <package>
         <type>fitmodule</type>
         <name>r_dtc_rx</name>
-        <version>3.40</version>
-        <zipsource>r_dtc_rx_v3.40.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_dtc_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.50</version>
+            <version>5.52</version>
         </dependency>
         <application>DTC</application>
         <desc>DTC driver</desc>

@@ -23,9 +23,9 @@
            This is a description of a sample FIT module configuration file
 ***********************************************************************************************************************/
 -->
-<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.11.xsd">
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.15.xsd">
     <fileVersion>1.00</fileVersion>
-    <formatVersion>2.11</formatVersion>
+    <formatVersion>2.15</formatVersion>
     <fileTemplate></fileTemplate>
     <configuration>
         <property id="BSP_CFG_STARTUP_DISABLE" display="Startup select" default="0" type="combobox">
@@ -44,20 +44,22 @@ NOTE: This setting is available only when using CCRX and GNUC.</description>
         </property>
         <property id="BSP_CFG_USTACK_BYTES" display="User stack size" default="0x1000" type="textbox">
             <constraint display="when User stack setting is 2 stacks only" actionOnFail="disable">${BSP_CFG_USER_STACK_ENABLE} == ${BSP_CFG_USER_STACK_ENABLE.1}</constraint>
-            <constraint display="Value must be an hexadecimal value" actionOnFail="error">testHexInteger("${BSP_CFG_USTACK_BYTES}")</constraint>
+            <constraint display="Value must be hexadecimal" actionOnFail="error">testHexInteger("${BSP_CFG_USTACK_BYTES}")</constraint>
             <constraint display="Value must be in the range (0x1~RAM capacity)" actionOnFail="error">("${BSP_CFG_USTACK_BYTES}" &gt;= 1) &amp;&amp; ("${BSP_CFG_USTACK_BYTES}" &lt;= (${Device.ramSize} * 1024))</constraint>
             <description>User stack size
 NOTE: This setting is available only when using CCRX and GNUC.</description>
         </property>
         <property id="BSP_CFG_ISTACK_BYTES" display="Interrupt stack size" default="0x400" type="textbox">
-            <constraint display="Value must be an hexadecimal value">testHexInteger("${BSP_CFG_ISTACK_BYTES}")</constraint>
+            <constraint display="Value must be hexadecimal">testHexInteger("${BSP_CFG_ISTACK_BYTES}")</constraint>
             <constraint display="Value must be in the range (0x1~RAM capacity)">("${BSP_CFG_ISTACK_BYTES}" &gt;= 1) &amp;&amp; ("${BSP_CFG_ISTACK_BYTES}" &lt;= (${Device.ramSize} * 1024))</constraint>
             <description>Interrupt stack  size
 NOTE: This setting is available only when using CCRX and GNUC.</description>
         </property>
         <property id="BSP_CFG_HEAP_BYTES" display="Heap size" default="0x400" type="textbox">
-            <constraint display="Value must be an hexadecimal value">testHexInteger("${BSP_CFG_HEAP_BYTES}")</constraint>
-            <constraint display="Value must be in the range (0x0~RAM capacity)">("${BSP_CFG_HEAP_BYTES}" &gt;= 0) &amp;&amp; ("${BSP_CFG_HEAP_BYTES}" &lt;= (${Device.ramSize} * 1024))</constraint>
+            <constraint display="Value must be hexadecimal">testHexInteger("${BSP_CFG_HEAP_BYTES}")</constraint>
+            <constraint display="Value must be less than max RAM capacity">${BSP_CFG_HEAP_BYTES} &lt;= ${Device.ramSize} * 1024</constraint>
+            <constraint display="Value must not be negative">${BSP_CFG_HEAP_BYTES} &gt;= 0</constraint>
+            <constraint display="Value must be more than ${Memory.heapMin}">if (testExists("${Memory.heapMin}")) {${BSP_CFG_HEAP_BYTES} &gt;= "${Memory.heapMin}"} else {true}</constraint>
             <description>Heap size
 NOTE: This setting is available only when using CCRX and GNUC.</description>
         </property>
@@ -105,28 +107,34 @@ NOTE: This setting is available only when using CCRX.</description>
 1 = User Boot Mode</description>
         </property>
         <property id="BSP_CFG_ID_CODE_LONG_1" display="ID code 1" default="0xFFFFFFFF" type="textbox">
-            <constraint display="Value must be an hexadecimal value">testHexInteger("${BSP_CFG_ID_CODE_LONG_1}")</constraint>
+            <constraint display="Value must be hexadecimal">testHexInteger("${BSP_CFG_ID_CODE_LONG_1}")</constraint>
             <constraint display="Value must be in the range (0x00000000~0xFFFFFFFF)">("${BSP_CFG_ID_CODE_LONG_1}" &gt;= 0) &amp;&amp; ("${BSP_CFG_ID_CODE_LONG_1}" &lt;= 0xFFFFFFFF)</constraint>
             <description>Set your desired ID code. NOTE, leave at the default (all 0xFF's) if you do not wish to use an ID code. If you set this value and program it into the MCU then you will need to remember the ID code because the debugger will ask for it when trying to connect. Note that the E1/E20 will ignore the ID code when programming the MCU during debugging.
 If you set this value and then forget it then you can clear the ID code by connecting up in serial boot mode using FDT. The ID Code is 16 bytes long. The macro below define the ID Code in 4-byte sections.</description>
         </property>
         <property id="BSP_CFG_ID_CODE_LONG_2" display="ID code 2" default="0xFFFFFFFF" type="textbox">
-            <constraint display="Value must be an hexadecimal value">testHexInteger("${BSP_CFG_ID_CODE_LONG_2}")</constraint>
+            <constraint display="Value must be hexadecimal">testHexInteger("${BSP_CFG_ID_CODE_LONG_2}")</constraint>
             <constraint display="Value must be in the range (0x00000000~0xFFFFFFFF)">("${BSP_CFG_ID_CODE_LONG_2}" &gt;= 0) &amp;&amp; ("${BSP_CFG_ID_CODE_LONG_2}" &lt;= 0xFFFFFFFF)</constraint>
             <description>Set your desired ID code. NOTE, leave at the default (all 0xFF's) if you do not wish to use an ID code. If you set this value and program it into the MCU then you will need to remember the ID code because the debugger will ask for it when trying to connect. Note that the E1/E20 will ignore the ID code when programming the MCU during debugging.
 If you set this value and then forget it then you can clear the ID code by connecting up in serial boot mode using FDT. The ID Code is 16 bytes long. The macro below define the ID Code in 4-byte sections.</description>
         </property>
         <property id="BSP_CFG_ID_CODE_LONG_3" display="ID code 3" default="0xFFFFFFFF" type="textbox">
-            <constraint display="Value must be an hexadecimal value">testHexInteger("${BSP_CFG_ID_CODE_LONG_3}")</constraint>
+            <constraint display="Value must be hexadecimal">testHexInteger("${BSP_CFG_ID_CODE_LONG_3}")</constraint>
             <constraint display="Value must be in the range (0x00000000~0xFFFFFFFF)">("${BSP_CFG_ID_CODE_LONG_3}" &gt;= 0) &amp;&amp; ("${BSP_CFG_ID_CODE_LONG_3}" &lt;= 0xFFFFFFFF)</constraint>
             <description>Set your desired ID code. NOTE, leave at the default (all 0xFF's) if you do not wish to use an ID code. If you set this value and program it into the MCU then you will need to remember the ID code because the debugger will ask for it when trying to connect. Note that the E1/E20 will ignore the ID code when programming the MCU during debugging.
 If you set this value and then forget it then you can clear the ID code by connecting up in serial boot mode using FDT. The ID Code is 16 bytes long. The macro below define the ID Code in 4-byte sections.</description>
         </property>
         <property id="BSP_CFG_ID_CODE_LONG_4" display="ID code 4" default="0xFFFFFFFF" type="textbox">
-            <constraint display="Value must be an hexadecimal value">testHexInteger("${BSP_CFG_ID_CODE_LONG_4}")</constraint>
+            <constraint display="Value must be hexadecimal">testHexInteger("${BSP_CFG_ID_CODE_LONG_4}")</constraint>
             <constraint display="Value must be in the range (0x00000000~0xFFFFFFFF)">("${BSP_CFG_ID_CODE_LONG_4}" &gt;= 0) &amp;&amp; ("${BSP_CFG_ID_CODE_LONG_4}" &lt;= 0xFFFFFFFF)</constraint>
             <description>Set your desired ID code. NOTE, leave at the default (all 0xFF's) if you do not wish to use an ID code. If you set this value and program it into the MCU then you will need to remember the ID code because the debugger will ask for it when trying to connect. Note that the E1/E20 will ignore the ID code when programming the MCU during debugging.
 If you set this value and then forget it then you can clear the ID code by connecting up in serial boot mode using FDT. The ID Code is 16 bytes long. The macro below define the ID Code in 4-byte sections.</description>
+        </property>
+        <property id="BSP_CFG_ID_CODE_ENABLE" display="ID code select" default="0" type="combobox">
+            <option id="BSP_CFG_ID_CODE_ENABLE.0" display="Disabled" value="0"/>
+            <option id="BSP_CFG_ID_CODE_ENABLE.1" display="Enabled" value="1"/>
+            <description>0 = ID code is disabled.
+1 = ID code is enabled.</description>
         </property>
         <property id="BSP_CFG_ROM_CACHE_ENABLE" display="ROM Cache Enable Register" default="1" type="combobox">
             <option id="BSP_CFG_ROM_CACHE_ENABLE.0" display="Disabled" value="0"/>
@@ -135,12 +143,12 @@ If you set this value and then forget it then you can clear the ID code by conne
 1 = ROM cache operation enabled.</description>
         </property>
         <property id="BSP_CFG_TRUSTED_MODE_FUNCTION" display="TMEF - TM Enable Flag Register" default="0xFFFFFFFF" type="textbox">
-            <constraint display="Value must be an hexadecimal value">testHexInteger("${BSP_CFG_TRUSTED_MODE_FUNCTION}")</constraint>
+            <constraint display="Value must be hexadecimal">testHexInteger("${BSP_CFG_TRUSTED_MODE_FUNCTION}")</constraint>
             <constraint display="Value must be in the range 0x00000000~0xFFFFFFFF">("${BSP_CFG_TRUSTED_MODE_FUNCTION}" &gt;= 0) &amp;&amp; ("${BSP_CFG_TRUSTED_MODE_FUNCTION}" &lt;= 0xFFFFFFFF)</constraint>
             <description>TMEF register value.</description>
         </property>
         <property id="BSP_CFG_ROMCODE_REG_VALUE" display="ROMCODE - ROM Code Protection Register" default="0xFFFFFFFF" type="textbox">
-            <constraint display="Value must be an hexadecimal value">testHexInteger("${BSP_CFG_ROMCODE_REG_VALUE}")</constraint>
+            <constraint display="Value must be hexadecimal">testHexInteger("${BSP_CFG_ROMCODE_REG_VALUE}")</constraint>
             <constraint display="Value must be in the range 0x00000000~0xFFFFFFFF">("${BSP_CFG_ROMCODE_REG_VALUE}" &gt;= 0) &amp;&amp; ("${BSP_CFG_ROMCODE_REG_VALUE}" &lt;= 0xFFFFFFFF)</constraint>
             <description>ROMCODE register value.</description>
         </property>
@@ -211,7 +219,7 @@ If you set this value and then forget it then you can clear the ID code by conne
         </property>
         <property id="BSP_CFG_NONCACHEABLE_AREA0_ADDR" display="Non-cacheable area 0 start address" default="0xFFF80000" conditionalDefault= "if (${Device.romSize} === 512) {'0xFFF80000';} else {'0xFFF00000';}" type="textbox">
             <constraint display="when Non-cacheable area 0 select is Enabled only" actionOnFail="disable">${BSP_CFG_NONCACHEABLE_AREA0_ENABLE} == ${BSP_CFG_NONCACHEABLE_AREA0_ENABLE.1}</constraint>
-            <constraint display="Value must be an hexadecimal value" actionOnFail="error">testHexInteger("${BSP_CFG_NONCACHEABLE_AREA0_ADDR}")</constraint>
+            <constraint display="Value must be hexadecimal" actionOnFail="error">testHexInteger("${BSP_CFG_NONCACHEABLE_AREA0_ADDR}")</constraint>
             <constraint display="Value must be in the upper 10 bits are fixed at 1 and the lower 4 bits of value must be 0 and not select an area other than the code flash memory area." actionOnFail="error">(("${BSP_CFG_NONCACHEABLE_AREA0_ADDR}" &gt;= 0xFFC00000) &amp;&amp; ("${BSP_CFG_NONCACHEABLE_AREA0_ADDR}" &lt;= 0xFFFFFFF0)) &amp;&amp; ("${BSP_CFG_NONCACHEABLE_AREA0_ADDR}" % 16 == 0)</constraint>
             <description>Selects the start address of non-cacheable area 0.
 The upper 10 bits are fixed at 1. The lower 4 bits are fixed at 0.</description>
@@ -276,7 +284,7 @@ The upper 10 bits are fixed at 1. The lower 4 bits are fixed at 0.</description>
         </property>
         <property id="BSP_CFG_NONCACHEABLE_AREA1_ADDR" display="Non-cacheable area 1 start address" default="0xFFF80000" conditionalDefault= "if (${Device.romSize} === 512) {'0xFFF80000';} else {'0xFFF00000';}" type="textbox">
             <constraint display="when Non-cacheable area 1 select is Enabled only" actionOnFail="disable">${BSP_CFG_NONCACHEABLE_AREA1_ENABLE} == ${BSP_CFG_NONCACHEABLE_AREA1_ENABLE.1}</constraint>
-            <constraint display="Value must be an hexadecimal value" actionOnFail="error">testHexInteger("${BSP_CFG_NONCACHEABLE_AREA1_ADDR}")</constraint>
+            <constraint display="Value must be hexadecimal" actionOnFail="error">testHexInteger("${BSP_CFG_NONCACHEABLE_AREA1_ADDR}")</constraint>
             <constraint display="Value must be in the upper 10 bits are fixed at 1 and the lower 4 bits of value must be 0 and not select an area other than the code flash memory area." actionOnFail="error">(("${BSP_CFG_NONCACHEABLE_AREA1_ADDR}" &gt;= 0xFFC00000) &amp;&amp; ("${BSP_CFG_NONCACHEABLE_AREA1_ADDR}" &lt;= 0xFFFFFFF0)) &amp;&amp; ("${BSP_CFG_NONCACHEABLE_AREA1_ADDR}" % 16 == 0)</constraint>
             <description>Selects the start address of non-cacheable area 1.
 The upper 10 bits are fixed at 1. The lower 4 bits are fixed at 0.</description>
@@ -395,6 +403,48 @@ NOTE: This setting is common to all units. It can not be set individually. The m
             <constraint display="when Software Interrupts is Used only" actionOnFail="disable">((${BSP_CFG_SWINT_UNIT1_ENABLE} == ${BSP_CFG_SWINT_UNIT1_ENABLE.1}) || (${BSP_CFG_SWINT_UNIT2_ENABLE} == ${BSP_CFG_SWINT_UNIT2_ENABLE.1}))</constraint>
             <description>For software interrupt, this value is interrupt priority. Range is 0x0 - 0xF.
 NOTE: This setting is common to all units. It can not be set individually. Please be careful that this setting is the initial value of the interrupt priority register(IPR).It is possible to dynamically change the IPR.</description>
+        </property>
+        <property id="BSP_CFG_SCI_UART_TERMINAL_ENABLE" display="Serial terminal select" default="0" type="combobox">
+            <option id="BSP_CFG_SCI_UART_TERMINAL_ENABLE.0" display="Disabled" value="0"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_ENABLE.1" display="Enabled" value="1"/>
+            <description>0 = SCI UART Terminal is disabled.
+1 = SCI UART Terminal is enabled.</description>
+        </property>
+        <property id="BSP_CFG_SCI_UART_TERMINAL_CHANNEL" display="Channel for serial terminal" default="11" type="combobox">
+            <option id="BSP_CFG_SCI_UART_TERMINAL_CHANNEL.1" display="Channel 1" value="1"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_CHANNEL.5" display="Channel 5" value="5"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_CHANNEL.6" display="Channel 6" value="6"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_CHANNEL.8" display="Channel 8" value="8"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_CHANNEL.9" display="Channel 9" value="9"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_CHANNEL.11" display="Channel 11" value="11"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_CHANNEL.12" display="Channel 12" value="12"/>
+            <constraint display="when SCI UART Terminal is enabled only" actionOnFail="disable">${BSP_CFG_SCI_UART_TERMINAL_ENABLE} == ${BSP_CFG_SCI_UART_TERMINAL_ENABLE.1}</constraint>
+            <description>Selects the channel number for serial terminal.</description>
+        </property>
+        <property id="BSP_CFG_SCI_UART_TERMINAL_BITRATE" display="Bitrate for serial terminal" default="115200" type="textbox">
+            <constraint display="when SCI UART Terminal is enabled only" actionOnFail="disable">${BSP_CFG_SCI_UART_TERMINAL_ENABLE} == ${BSP_CFG_SCI_UART_TERMINAL_ENABLE.1}</constraint>
+            <constraint display="Value must be greater than 0." actionOnFail="error">("${BSP_CFG_SCI_UART_TERMINAL_BITRATE}" &gt;= 1)</constraint>
+            <description>Selects the bitrate for serial terminal (unit is bps).</description>
+        </property>
+        <property id="BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY" display="Interrupt priority  for serial terminal" default="15" type="combobox">
+            <option id="BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY.0" display="Priority level 0 (lowest)" value="0"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY.1" display="Priority level 1" value="1"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY.2" display="Priority level 2" value="2"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY.3" display="Priority level 3" value="3"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY.4" display="Priority level 4" value="4"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY.5" display="Priority level 5" value="5"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY.6" display="Priority level 6" value="6"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY.7" display="Priority level 7" value="7"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY.8" display="Priority level 8" value="8"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY.9" display="Priority level 9" value="9"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY.10" display="Priority level 10" value="10"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY.11" display="Priority level 11" value="11"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY.12" display="Priority level 12" value="12"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY.13" display="Priority level 13" value="13"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY.14" display="Priority level 14" value="14"/>
+            <option id="BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY.15" display="Priority level 15 (highest)" value="15"/>
+            <constraint display="when SCI UART Terminal is enabled only" actionOnFail="disable">${BSP_CFG_SCI_UART_TERMINAL_ENABLE} == ${BSP_CFG_SCI_UART_TERMINAL_ENABLE.1}</constraint>
+            <description>For serial terminal, this value is interrupt priority. Range is 0 - 15.</description>
         </property>
     </configuration>
 </module>

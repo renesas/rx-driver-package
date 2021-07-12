@@ -9,6 +9,17 @@
         <version>2.07.00</version>
         <version>3.00.00</version>
         <version>3.01.00</version>
+        <version>3.02.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>8.03.00.201904</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.14.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -20,6 +31,7 @@
         <group omit_board="true">RX130</group>
         <group omit_board="true">RX230</group>
         <group omit_board="true">RX231</group>
+        <group omit_board="true">RX23W</group>
     </target>
 
     <!-- only one package entry allowed -->
@@ -27,13 +39,11 @@
     <package>
         <type>fitmodule</type>
         <name>r_lpt_rx</name>
-        <version>1.23</version>
-        <zipsource>r_lpt_rx_v1.23.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_lpt_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>3.60</version>
-            <version>3.91</version>
-            <version>4.00</version>
+            <version>5.61</version>
         </dependency>
         <application>Low Power Consumption</application>
         <application>Low Power</application>

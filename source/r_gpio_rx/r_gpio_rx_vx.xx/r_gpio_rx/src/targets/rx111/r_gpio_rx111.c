@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013, 2014 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_gpio_rx111.c
@@ -23,7 +23,8 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 17.07.2013 1.00    First Release
-*           18.02.2014 1.10    Updated bitmasks
+*         : 18.02.2014 1.10    Updated bitmasks
+*         : 15.01.2021 3.70    Removed PH7 for RX111.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -77,7 +78,7 @@ const uint8_t g_gpio_open_drain_n_support[GPIO_INFO_NUM_PORTS] =
     0xFF,     //PORTE   PE0 to PE7
     0x00,     //PORTF
     0x00,     //PORTG
-    0x00,     //PORTH   None
+    0x00,     //PORTH
     0x00,     //PORTJ   None
 };
 
@@ -100,7 +101,7 @@ const uint8_t g_gpio_open_drain_p_support[GPIO_INFO_NUM_PORTS] =
     0x02,     //PORTE   PE1
     0x00,     //PORTF
     0x00,     //PORTG
-    0x00,     //PORTH   None
+    0x00,     //PORTH
     0x00,     //PORTJ   None
 };
 
@@ -123,7 +124,7 @@ const uint8_t g_gpio_pull_up_support[GPIO_INFO_NUM_PORTS] =
     0xFF,     //PORTE   PE0 to PE7
     0x00,     //PORTF
     0x00,     //PORTG
-    0x00,     //PORTH   None
+    0x00,     //PORTH
     0x00,     //PORTJ   None
 };
 #endif

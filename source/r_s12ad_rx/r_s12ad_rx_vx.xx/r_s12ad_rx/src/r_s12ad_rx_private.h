@@ -40,6 +40,9 @@
 *           30.08.2019 4.30    Added RX13T support.
 *           22.11.2019 4.40    Added RX66N and RX72N support.
 *           28.02.2020 4.50    Added RX23E-A support.
+*           10.06.2020 4.60    Added RX23T and RX24T and RX24U support.
+*           01.03.2021 4.70    Added RX72M 144pins and 100pins support.
+*                              Added RX23W 83pins support.
 *******************************************************************************/
 
 #ifndef S12AD_PRV_PRIVATE_H
@@ -59,8 +62,8 @@ Macro definitions
     #error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
 #endif
 
-/* Macro for accessing RX64M/RX65x/RX66T/RX71M/RX72T data register pointers for a given unit (0, 1 or 2) */
-#if (defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T))
+/* Macro for accessing RX64M/RX65x/RX66T/RX71M/RX72T/RX24T/RX24U data register pointers for a given unit (0, 1 or 2) */
+#if (defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX24U))
 #define ADC_PRV_GET_DATA_ARR(x)     (((x)==0) ? gp_dreg0_ptrs : \
                                     ((x)==1) ? gp_dreg1_ptrs : \
                                                 gp_dreg2_ptrs)
@@ -213,6 +216,30 @@ Macro definitions
 #endif
 
 
+#ifdef BSP_MCU_RX23T
+
+/* Internal v ref are in bit location 8 in each mask for rx23t */
+#if BSP_PACKAGE_PINS == 64
+
+/* valid: 0000 0000 0000 0011 0000 0001 1111 1111; invalid 1111 1111 1111 1100 1111 1110 0000 0000 */
+#define ADC_PRV_INVALID_CH_MASK     (0xFFFCFE00)
+
+#elif BSP_PACKAGE_PINS == 52
+
+/* valid: 0000 0000 0000 0011 0000 0001 1111 1111; invalid 1111 1111 1111 1100 1111 1110 0000 0000 */
+#define ADC_PRV_INVALID_CH_MASK     (0xFFFCFE00)
+
+#elif BSP_PACKAGE_PINS == 48
+
+/* valid: 0000 0000 0000 0011 0000 0001 1111 1111; invalid 1111 1111 1111 1100 1111 1110 0000 0000 */
+#define ADC_PRV_INVALID_CH_MASK     (0xFFFCFE00)
+#else
+    #error "ERROR - BSP_CFG_MCU_PART_PACKAGE - Unknown package chosen in r_bsp_config.h"
+#endif /* BSP_PACKAGE_PINS == 64 */
+
+#endif
+
+
 #ifdef BSP_MCU_RX23E_A
 
 #if BSP_PACKAGE_PINS == 48
@@ -237,6 +264,10 @@ Macro definitions
 /* valid: 0000 1000 0001 1111 0000 0011 1111 1111; invalid 1111 0111 1110 0000 1111 1100 0000 0000 */
 #define ADC_PRV_INVALID_CH_MASK     (0xF7E0FC00)
 
+#elif BSP_PACKAGE_PINS == 83
+/* valid: 0000 1000 0001 1111 0000 0011 1111 1111; invalid 1111 0111 1110 0000 1111 1100 0000 0000 */
+#define ADC_PRV_INVALID_CH_MASK     (0xF7E0FC00)
+
 #elif BSP_PACKAGE_PINS == 56
 
 /* valid: 0000 1000 0001 1100 0000 0011 1110 0010; invalid 1111 0111 1110 0011 1111 1100 0001 1101 */
@@ -245,6 +276,54 @@ Macro definitions
 #else
     #error "ERROR - BSP_CFG_MCU_PART_PACKAGE - Unknown package chosen in r_bsp_config.h"
 #endif  /* BSP_PACKAGE_PINS == 85 */
+
+#endif
+
+#ifdef BSP_MCU_RX24T
+
+/* Internal v ref are in bit location 12 in mask2 for rx24t */
+#if BSP_PACKAGE_PINS == 100
+
+#define ADC_PRV_INVALID_CH_MASK0    (0xFFFEFFF0)    /* all channels valid (0-3,16) */
+#define ADC_PRV_INVALID_CH_MASK1    (0xFFFEFFF0)    /* all channels valid (0-3,16) */
+#define ADC_PRV_INVALID_CH_MASK2    (0xFFFFE000)    /* all channels valid (0-11, sensors) */
+
+#elif BSP_PACKAGE_PINS == 80
+
+#define ADC_PRV_INVALID_CH_MASK0    (0xFFFEFFF0)    /* all channels valid (0-3,16) */
+#define ADC_PRV_INVALID_CH_MASK1    (0xFFFEFFF0)    /* all channels valid (0-3,16) */
+#define ADC_PRV_INVALID_CH_MASK2    (0xFFFFE0C4)    /* all channels valid (2,6-11, sensors) */
+
+#elif BSP_PACKAGE_PINS == 64
+
+#define ADC_PRV_INVALID_CH_MASK0    (0xFFFFFFF8)    /* all channels valid (0-2) */
+#define ADC_PRV_INVALID_CH_MASK1    (0xFFFEFFF8)    /* all channels valid (0-2,16) */
+#define ADC_PRV_INVALID_CH_MASK2    (0xFFFFE83F)    /* all channels valid (6-10, sensors) */
+
+#else
+    #error "ERROR - BSP_CFG_MCU_PART_PACKAGE - Unknown package chosen in r_bsp_config.h"
+#endif  /* BSP_PACKAGE_PINS == 100 */
+
+#endif
+
+#ifdef BSP_MCU_RX24U
+
+/* Internal v ref are in bit location 12 in mask2 for rx24u */
+#if BSP_PACKAGE_PINS == 144
+
+#define ADC_PRV_INVALID_CH_MASK0    (0xFFFEFFF0)    /* all channels valid (0-3,16) */
+#define ADC_PRV_INVALID_CH_MASK1    (0xFFFEFFF0)    /* all channels valid (0-3,16) */
+#define ADC_PRV_INVALID_CH_MASK2    (0xFFFFE000)    /* all channels valid (0-11, sensors) */
+
+#elif BSP_PACKAGE_PINS == 100
+
+#define ADC_PRV_INVALID_CH_MASK0    (0xFFFEFFF0)    /* all channels valid (0-3,16) */
+#define ADC_PRV_INVALID_CH_MASK1    (0xFFFEFFF0)    /* all channels valid (0-3,16) */
+#define ADC_PRV_INVALID_CH_MASK2    (0xFFFFE0C0)    /* all channels valid (0-5,8-11, sensors) */
+
+#else
+    #error "ERROR - BSP_CFG_MCU_PART_PACKAGE - Unknown package chosen in r_bsp_config.h"
+#endif  /* BSP_PACKAGE_PINS == 144 */
 
 #endif
 
@@ -398,9 +477,17 @@ Macro definitions
 #define ADC_PRV_INVALID_CH_MASK0    (0xFFFFFF00)    /* all channels valid (0-7) */
 #define ADC_PRV_INVALID_CH_MASK1    (0xFF800000)    /* all channels valid (0-20, sensors) */
 
+#elif BSP_PACKAGE_PINS == 144
+#define ADC_PRV_INVALID_CH_MASK0    (0xFFFFFFE0)    /* channels 0-4 valid */
+#define ADC_PRV_INVALID_CH_MASK1    (0xFF800000)    /* all channels valid (0-20, sensors) */
+
+#elif BSP_PACKAGE_PINS == 100
+#define ADC_PRV_INVALID_CH_MASK0    (0xFFFFFFF8)    /* channels 0-2  */
+#define ADC_PRV_INVALID_CH_MASK1    (0xFF983931)    /* channels 1-3, 6, 7, 9, 10, 14-18, sensors valid */
+
 #else
     #error "ERROR - BSP_CFG_MCU_PART_PACKAGE - Unknown package chosen in r_bsp_config.h"
-#endif /* BSP_PACKAGE_PINS == 177 */
+#endif /* BSP_PACKAGE_PINS == 224 */
 #endif
 
 #if (defined(BSP_MCU_RX66N))
@@ -508,7 +595,8 @@ extern adc_err_t adc_control(uint8_t const       unit,
 
 #if (!defined(BSP_MCU_RX64M) && !defined(BSP_MCU_RX65_ALL) && !defined(BSP_MCU_RX66T) \
     && !defined(BSP_MCU_RX71M) && !defined(BSP_MCU_RX72T) && !defined(BSP_MCU_RX72M) \
-    && !defined(BSP_MCU_RX13T) && !defined(BSP_MCU_RX66N) && !defined(BSP_MCU_RX72N))
+    && !defined(BSP_MCU_RX13T) && !defined(BSP_MCU_RX66N) && !defined(BSP_MCU_RX72N) \
+    && !defined(BSP_MCU_RX23T) && !defined(BSP_MCU_RX24T) && !defined(BSP_MCU_RX24U))
 /******************************************************************************
 * Function Name: adc_enable_s12adi0
 * Description  : This function clears the S12ADI0 interrupt flag and enables
@@ -521,7 +609,8 @@ extern adc_err_t adc_control(uint8_t const       unit,
 void adc_enable_s12adi0(void);
 #endif /* #if (!defined(BSP_MCU_RX64M) && !defined(BSP_MCU_RX65_ALL) && !defined(BSP_MCU_RX66T) \
     && !defined(BSP_MCU_RX71M) && !defined(BSP_MCU_RX72T) && !defined(BSP_MCU_RX72M) \
-    && !defined(BSP_MCU_RX13T) && !defined(BSP_MCU_RX66N) && !defined(BSP_MCU_RX72N)) */
+    && !defined(BSP_MCU_RX13T) && !defined(BSP_MCU_RX66N) && !defined(BSP_MCU_RX72N) \
+    && !defined(BSP_MCU_RX23T) && !defined(BSP_MCU_RX24T) && !defined(BSP_MCU_RX24U)) */
 
 
 #endif /* S12AD_PRV_PRIVATE_H */

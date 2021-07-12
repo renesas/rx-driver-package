@@ -25,6 +25,9 @@
  *           12.09.2016 1.10    Added support for RX65N
  *           16.06.2017 1.20    Added support for RX65N(2MB), RX130(512KB)
  *           01.04.2019 1.21    Changed Minor version to 1.21.
+ *           10.06.2020 2.00    Updated version to 2.00 for RX23W release
+ *                              Added support for GNUC and ICCRX.
+ *                              Fixed coding style.
 ***********************************************************************************************************************/
 #ifndef R_ELC_RX_IF_H
     #define R_ELC_RX_IF_H
@@ -38,9 +41,13 @@
 /******************************************************************************
  Macro definitions
  ******************************************************************************/
+#if R_BSP_VERSION_MAJOR < 5
+    #error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
+#endif
+
 /* Version Number of API. */
-    #define ELC_RX_VERSION_MAJOR            (1)
-    #define ELC_RX_VERSION_MINOR            (21)
+    #define ELC_RX_VERSION_MAJOR            (2)
+    #define ELC_RX_VERSION_MINOR            (00)
 
 /***********************************************************************************************************************
  Typedef definitions

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 @qe:begin:SwapTargetMethod
@@ -23,13 +23,15 @@
 * Description  : This file includes definitions
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
-* History : DD.MM.YYYY Version Description
-*                      1.00    First Release
+* History      : DD.MM.YYYY Version Description
+*              : 27.09.2018 1.00    First Release
+*              : 02.04.2019 1.01    Add Some Comments
+*              : 18.04.2019 1.02    Change the Minor Format
 ***********************************************************************************************************************/
 
 @qe:begin:SwapTargetMethod
-#ifndef QE_@METHOD@_HEADER_FILE
-#define QE_@METHOD@_HEADER_FILE
+#ifndef QE_@METHOD@_H
+#define QE_@METHOD@_H
 @qe:end:
 
 /***********************************************************************************************************************
@@ -46,31 +48,31 @@ Macro definitions
 #define @METHOD@_NUM_BUTTONS        (@value@)
 @qe:end:
 @qe:begin:MacroEachButtonId
-#define @METHOD@_INDEX_@TIF@     (@value@)
-#define @METHOD@_ID_@TIF@        ((QE_METHOD_@METHOD@<<8) | @METHOD@_INDEX_@TIF@)
-#define @METHOD@_MASK_@TIF@      (1ULL << @value@)
+#define @METHOD@_INDEX_@TIF@     (@value@)   /* btn_ctrl_t array index */
+#define @METHOD@_ID_@TIF@        ((QE_METHOD_@METHOD@<<8) | @METHOD@_INDEX_@TIF@)   /* button ID */
+#define @METHOD@_MASK_@TIF@      (1ULL << @value@)   /* button state mask */
 @qe:end:
 
 @qe:begin:MacroNumberSliders
 #define @METHOD@_NUM_SLIDERS        (@value@)
 @qe:end:
 @qe:begin:MacroEachSliderId
-#define @METHOD@_INDEX_@TIF@     (@value@)
-#define @METHOD@_ID_@TIF@        ((QE_METHOD_@METHOD@<<8) | @METHOD@_INDEX_@TIF@)
+#define @METHOD@_INDEX_@TIF@     (@value@)   /* sldr_ctrl_t array index */
+#define @METHOD@_ID_@TIF@        ((QE_METHOD_@METHOD@<<8) | @METHOD@_INDEX_@TIF@)   /* slider ID */
 @qe:end:
 
 @qe:begin:MacroNumberWheels
 #define @METHOD@_NUM_WHEELS         (@value@)
 @qe:end:
 @qe:begin:MacroEachWheelId
-#define @METHOD@_INDEX_@TIF@     (@value@)
-#define @METHOD@_ID_@TIF@        ((QE_METHOD_@METHOD@<<8) | @METHOD@_INDEX_@TIF@)
+#define @METHOD@_INDEX_@TIF@     (@value@)   /* wheel_ctrl_t array index */
+#define @METHOD@_ID_@TIF@        ((QE_METHOD_@METHOD@<<8) | @METHOD@_INDEX_@TIF@)   /* wheel ID */
 @qe:end:
 
 
 @qe:begin:MacroNumberElements
-#define @METHOD@_NUM_ELEMENTS       (@value@)
-#define @METHOD@_BTN_MASKS_SIZE     (@value@)
+#define @METHOD@_NUM_ELEMENTS       (@value@)   /* num TS for SELF; RX x TX for MUTUAL */
+#define @METHOD@_BTN_MASKS_SIZE     (@value@)   /* necessary array size for widgets.button_masks[] */
 @qe:end:
 
 
@@ -114,7 +116,7 @@ Exported global variables
 ***********************************************************************************************************************/
 
 @qe:begin:ExportedGlobalVariables
-#define QE_METHOD_@METHOD@_CAPACITANCE_TYPE @value@
+#define QE_METHOD_@METHOD@_CAPACITANCE_TYPE (@value@)
 @qe:end:
 
 @qe:begin:SwapTargetMethod
@@ -153,7 +155,6 @@ extern uint16_t     g_@method@_drift_permission[];
 extern uint32_t     g_@method@_drift_ref[];
 extern uint16_t     g_@method@_drift_cnt[];
 extern uint16_t     g_@method@_key_uesd_info[];
-extern uint16_t     g_@method@_calib[@METHOD@_NUM_BUTTONS][QE_CALIB_TIME];
 #endif
 extern uint8_t      g_@method@_sensor_index[];
 extern int8_t       g_@method@_counter_magni[];
@@ -168,5 +169,5 @@ Exported global functions (to be accessed by other files)
 
 
 @qe:begin:SwapTargetMethod
-#endif /* QE_@METHOD@_HEADER_FILE */
+#endif /* QE_@METHOD@_H */
 @qe:end:

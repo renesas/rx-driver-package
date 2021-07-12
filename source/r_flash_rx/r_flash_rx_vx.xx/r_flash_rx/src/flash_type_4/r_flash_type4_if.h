@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2020 Renesas Electronics Corporation. All rights reserved.
 **********************************************************************************************************************/
 /**********************************************************************************************************************
 * File Name    : r_flash_type4_if.h
@@ -27,6 +27,7 @@
 *         : 17.11.2016 2.10    Added FLASH_FREQ_xx and FLASH_FCU_INT_xxx #defines
 *         : 05.10.2016 3.00    Merged functions common to other flash types into r_flash_fcu.c and r_flash_group.c.
 *         : 03.02.2017 3.10    Added BANKSEL_ADDR and BANKSWP_MASK for RX65N-2M support.
+*         : 26.06.2020 4.60    Added FLASH_ACCESS_WINDOW_END_NEXT_REG_VALUE #define.
 **********************************************************************************************************************/
 
 #ifndef FLASH_TYPE4_HEADER_FILE
@@ -53,6 +54,8 @@ Macro definitions
                                 FLASH.FRDYIE.BYTE = 0x01;
 #define FLASH_FCU_INT_DISABLE   FLASH.FAEINT.BYTE = 0x00;   \
                                 FLASH.FRDYIE.BYTE = 0x00;
+
+#define FLASH_ACCESS_WINDOW_END_NEXT_REG_VALUE  (0x800)
 
 /***********************************************************************************************************************
 Typedef definitions

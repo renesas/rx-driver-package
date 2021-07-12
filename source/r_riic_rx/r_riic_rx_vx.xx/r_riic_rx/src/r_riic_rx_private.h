@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer 
  *
- * Copyright (C) 2013(2019) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2013(2020) Renesas Electronics Corporation. All rights reserved.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_riic_private.h
@@ -67,6 +67,7 @@
  *         : 30.07.2019 2.43     Added RX72M support.
  *         : 10.10.2019 2.44     Added RX13T support.
  *         : 22.11.2019 2.45     Added RX66N, RX72N support.
+ *         : 10.03.2020 2.46     Added RX23E-A support.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIIC_PRIVATE_H
@@ -118,6 +119,8 @@
         #include "./targets/rx66n/r_riic_rx66n_private.h"
     #elif defined(BSP_MCU_RX72N)
         #include "./targets/rx72n/r_riic_rx72n_private.h"
+    #elif defined(BSP_MCU_RX23E_A)
+        #include "./targets/rx23e-a/r_riic_rx23e_a_private.h"
     #else
         #error "This MCU is not supported by the current r_riic_rx module."
     #endif

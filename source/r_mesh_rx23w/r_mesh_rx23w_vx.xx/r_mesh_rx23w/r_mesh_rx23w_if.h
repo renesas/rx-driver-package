@@ -24,6 +24,9 @@
 * History : DD.MM.YYYY Version  Description
 *           30.09.2019 1.00     First Release.
 *           29.11.2019 1.01     Add random-delay to advertising transmission.
+*           30.09.2020 1.10     Refer to "Program Updates (MESH FIT Module)" in
+                                the application note of RX23W Group Bluetooth
+                                Mesh FIT Module (R01AN4930).
 *******************************************************************************/
 
 #ifndef R_MESH_RX23W_IF_H
@@ -67,12 +70,7 @@
 #include "EM_os.h"
 #include "EM_platform.h"
 #include "EM_timer.h"
-#include "mempool_pl.h"
 #include "MS_features.h"
-#include "nvs.h"
-#include "nvsto.h"
-#include "storage_pl.h"
-#include "prov_pl.h"
 
 /* Mesh Stack configurations */
 #include "r_mesh_rx23w_config.h"

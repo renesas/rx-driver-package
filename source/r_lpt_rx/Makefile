@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_lpt_rx
-VERSION = 		1.23
-MDF =			V2
+VERSION = 		2.01
+MDF = V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

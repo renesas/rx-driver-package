@@ -1,35 +1,33 @@
-/*******************************************************************************
+/***********************************************************************************************************************
  * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only
- * intended for use with Renesas products. No other uses are authorized. This
- * software is owned by Renesas Electronics Corporation and is protected under
- * all applicable laws, including copyright laws.
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
  * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
- * LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
- * TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
- * ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
- * FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
- * ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
- * BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software
- * and to discontinue the availability of this software. By using this software,
- * you agree to the additional terms and conditions found by accessing the
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+ * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2015(2019) Renesas Electronics Corporation. All rights reserved.
-  ******************************************************************************/
-/*******************************************************************************
+ *
+ * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
+ ***********************************************************************************************************************/
+/***********************************************************************************************************************
  * File Name    : r_usb_hreg_access.c
  * Description  : USB IP Host control register access code
- *****************************************************************************/
-/******************************************************************************
+ ***********************************************************************************************************************/
+/**********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *         : 08.01.2014 1.00 First Release
  *         : 31.11.2018 1.10 Supporting Smart Configurator
- *         : 31.05.2019 1.11    Added support for GNUC and ICCRX.
- ******************************************************************************/
+ *         : 31.05.2019 1.11 Added support for GNUC and ICCRX.
+ *         : 30.06.2020 1.20 Added support for RTOS.
+ ***********************************************************************************************************************/
+
 /******************************************************************************
  Includes   <System Includes> , "Project Includes"
  ******************************************************************************/
@@ -68,60 +66,10 @@
 void hw_usb_hset_rwupe (void)
 {
     USB0.DVSTCTR0.WORD |= USB_RWUPE;
-} /* End of function hw_usb_hset_rwupe */
-
+}
 /******************************************************************************
- Function Name   : hw_usb_hclear_rwupe
- Description     : Clear the RWUPE-bit specified port's DVSTCTR0 reg-
-                 : ister. When host. To prohibit detection of remote wake-up from 
-                 : a USB Function.
- Arguments       : none
- Return value    : none
+ End of function hw_usb_hset_rwupe
  ******************************************************************************/
-void hw_usb_hclear_rwupe (void)
-{
-    USB0.DVSTCTR0.WORD &= (~USB_RWUPE);
-} /* End of function hw_usb_hclear_rwupe */
-
-
-/******************************************************************************
- Function Name   : hw_usb_hset_resume
- Description     : Set the RESUME-bit specified port's DVSTCTR0 register 
-                 : When host. To allow output of resume signal to a USB Function.
- Arguments       : none
- Return value    : none
- ******************************************************************************/
-void hw_usb_hset_resume (void)
-{
-    USB0.DVSTCTR0.WORD |= USB_RESUME;
-} /* End of function hw_usb_hset_resume */
-
-
-/******************************************************************************
- Function Name   : hw_usb_hclear_resume
- Description     : Clear the RESUME-bit specified port's DVSTCTR0 register 
-                 : When host. To prohibit output of resume signal to a USB Func-
-                 : tion.
- Arguments       : none
- Return value    : none
- ******************************************************************************/
-void hw_usb_hclear_resume (void)
-{
-    USB0.DVSTCTR0.WORD &= (~USB_RESUME);
-} /* End of function hw_usb_hclear_resume */
-
- 
-/******************************************************************************
- Function Name   : hw_usb_hset_uact
- Description     : Set UACT-bit (USB Bus Enable) specified port's DVSTCTR0 
-                 : register. When Host, to output SOF.
- Arguments       : none
- Return value    : none
- ******************************************************************************/
-void hw_usb_hset_uact (void)
-{
-    USB0.DVSTCTR0.WORD |= USB_UACT;
-} /* End of function hw_usb_hset_uact */
 
 /******************************************************************************
  Function Name   : hw_usb_hclear_uact
@@ -133,31 +81,10 @@ void hw_usb_hset_uact (void)
 void hw_usb_hclear_uact (void)
 {
     USB0.DVSTCTR0.WORD &= (~USB_UACT);
-} /* End of function hw_usb_hclear_uact */
-
+}
 /******************************************************************************
- Function Name   : hw_usb_hwrite_intenb
- Description     : Write the specified data to the specified port's INTENB register.
- Arguments       : uint16_t  data   : Setting value    
- Return value    : none
+ End of function hw_usb_hclear_uact
  ******************************************************************************/
-void hw_usb_hwrite_intenb (uint16_t data)
-{
-    USB0.INTENB1.WORD = data;
-} /* End of function hw_usb_hwrite_intenb */
-
-
-/******************************************************************************
- Function Name   : hw_usb_hset_enb_ovrcre
- Description     : Set specified port's OVRCRE-bit (Overcurrent Input Change Int-
-                 : errupt Status Enable) in the INTENB1 register.
- Arguments       : none
- Return value    : none
- ******************************************************************************/
-void hw_usb_hset_enb_ovrcre (void)
-{
-    USB0.INTENB1.WORD |= USB_OVRCRE;
-} /* End of function hw_usb_hset_enb_ovrcre */
 
 /******************************************************************************
  Function Name   : hw_usb_hclear_enb_ovrcre
@@ -169,8 +96,10 @@ void hw_usb_hset_enb_ovrcre (void)
 void hw_usb_hclear_enb_ovrcre (void)
 {
     USB0.INTENB1.WORD &= (~USB_OVRCRE);
-} /* End of function hw_usb_hclear_enb_ovrcre */
-
+}
+/******************************************************************************
+ End of function hw_usb_hclear_enb_ovrcre
+ ******************************************************************************/
  
 /******************************************************************************
  Function Name   : hw_usb_hset_enb_bchge
@@ -183,7 +112,10 @@ void hw_usb_hclear_enb_ovrcre (void)
 void hw_usb_hset_enb_bchge (void)
 {
     USB0.INTENB1.WORD |= USB_BCHGE;
-} /* End of function hw_usb_hset_enb_bchge */
+}
+/******************************************************************************
+ End of function hw_usb_hset_enb_bchge
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_hclear_enb_bchge
@@ -195,7 +127,10 @@ void hw_usb_hset_enb_bchge (void)
 void hw_usb_hclear_enb_bchge (void)
 {
     USB0.INTENB1.WORD &= (~USB_BCHGE);
-} /* End of function hw_usb_hclear_enb_bchge */
+}
+/******************************************************************************
+ End of function hw_usb_hclear_enb_bchge
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_hset_enb_dtche
@@ -207,8 +142,10 @@ void hw_usb_hclear_enb_bchge (void)
 void hw_usb_hset_enb_dtche (void)
 {
     USB0.INTENB1.WORD |= USB_DTCHE;
-} /* End of function hw_usb_hset_enb_dtche */
-
+}
+/******************************************************************************
+ End of function hw_usb_hset_enb_dtche
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_hclear_enb_dtche
@@ -220,19 +157,10 @@ void hw_usb_hset_enb_dtche (void)
 void hw_usb_hclear_enb_dtche (void)
 {
     USB0.INTENB1.WORD &= (~USB_DTCHE);
-} /* End of function hw_usb_hclear_enb_dtche */
-
+}
 /******************************************************************************
- Function Name   : hw_usb_hset_enb_attche
- Description     : Enable the specified port's ATTCHE-interrupt "Connection 
-                 : Detection" by setting the ATTCHE-bit.
- Arguments       : none
- Return value    : none
+ End of function hw_usb_hclear_enb_dtche
  ******************************************************************************/
-void hw_usb_hset_enb_attche (void)
-{
-    USB0.INTENB1.WORD |= USB_ATTCHE;
-} /* End of function hw_usb_hset_enb_attche */
 
 /******************************************************************************
  Function Name   : hw_usb_hclear_enb_attche
@@ -244,8 +172,10 @@ void hw_usb_hset_enb_attche (void)
 void hw_usb_hclear_enb_attche (void)
 {
     USB0.INTENB1.WORD &= (~USB_ATTCHE);
-} /* End of function hw_usb_hclear_enb_attche */
-
+}
+/******************************************************************************
+ End of function hw_usb_hclear_enb_attche
+ ******************************************************************************/
  
 /******************************************************************************
  Function Name   : hw_usb_hset_enb_signe
@@ -257,8 +187,10 @@ void hw_usb_hclear_enb_attche (void)
 void hw_usb_hset_enb_signe (void)
 {
     USB0.INTENB1.WORD |= USB_SIGNE;
-} /* End of function hw_usb_hset_enb_signe */
-
+}
+/******************************************************************************
+ End of function hw_usb_hset_enb_signe
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_hset_enb_sacke
@@ -270,8 +202,10 @@ void hw_usb_hset_enb_signe (void)
 void hw_usb_hset_enb_sacke (void)
 {
     USB0.INTENB1.WORD |= USB_SACKE;
-} /* End of function hw_usb_hset_enb_sacke */
-
+}
+/******************************************************************************
+ End of function hw_usb_hset_enb_sacke
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_hset_enb_pddetinte
@@ -284,19 +218,10 @@ void hw_usb_hset_enb_sacke (void)
 void hw_usb_hset_enb_pddetinte (void)
 {
     USB0.INTENB1.WORD |= USB_PDDETINTE;
-} /* End of function hw_usb_hset_enb_pddetinte */
-
+}
 /******************************************************************************
- Function Name   : hw_usb_hwrite_intsts
- Description     : Write the specified data to the specified port's INTSTS1 reg-
-                 : ister.
- Arguments       : uint16_t  data   : Setting value
- Return value    : none
+ End of function hw_usb_hset_enb_pddetinte
  ******************************************************************************/
-void hw_usb_hwrite_intsts (uint16_t data)
-{
-    USB0.INTSTS1.WORD = data;
-} /* End of function hw_usb_hwrite_intsts */
 
 /******************************************************************************
  Function Name   : hw_usb_hclear_sts_ovrcr
@@ -308,7 +233,10 @@ void hw_usb_hwrite_intsts (uint16_t data)
 void hw_usb_hclear_sts_ovrcr (void)
 {
     USB0.INTSTS1.WORD = (uint16_t) ((~USB_OVRCR) & USB_INTSTS1_MASK);
-} /* End of function hw_usb_hclear_sts_ovrcr */
+}
+/******************************************************************************
+ End of function hw_usb_hclear_sts_ovrcr
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_hclear_sts_bchg
@@ -320,7 +248,10 @@ void hw_usb_hclear_sts_ovrcr (void)
 void hw_usb_hclear_sts_bchg (void)
 {
     USB0.INTSTS1.WORD = (uint16_t) ((~USB_BCHG) & USB_INTSTS1_MASK);
-} /* End of function hw_usb_hclear_sts_bchg() */
+}
+/******************************************************************************
+ End of function hw_usb_hclear_sts_bchg
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_hclear_sts_dtch
@@ -332,8 +263,10 @@ void hw_usb_hclear_sts_bchg (void)
 void hw_usb_hclear_sts_dtch (void)
 {
     USB0.INTSTS1.WORD = (uint16_t) ((~USB_DTCH) & USB_INTSTS1_MASK);
-} /* End of function hw_usb_hclear_sts_dtch */
-
+}
+/******************************************************************************
+ End of function hw_usb_hclear_sts_dtch
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_hclear_sts_attch
@@ -344,8 +277,10 @@ void hw_usb_hclear_sts_dtch (void)
 void hw_usb_hclear_sts_attch (void)
 {
     USB0.INTSTS1.WORD = (uint16_t) ((~USB_ATTCH) & USB_INTSTS1_MASK);
-} /* End of function hw_usb_hclear_sts_attch */
-
+}
+/******************************************************************************
+ End of function hw_usb_hclear_sts_attch
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_hclear_sts_sign
@@ -357,8 +292,10 @@ void hw_usb_hclear_sts_attch (void)
 void hw_usb_hclear_sts_sign (void)
 {
     USB0.INTSTS1.WORD = (uint16_t) ((~USB_SIGN) & USB_INTSTS1_MASK);
-} /* End of function hw_usb_hclear_sts_sign */
-
+}
+/******************************************************************************
+ End of function hw_usb_hclear_sts_sign
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_hclear_sts_sack
@@ -371,8 +308,10 @@ void hw_usb_hclear_sts_sign (void)
 void hw_usb_hclear_sts_sack (void)
 {
     USB0.INTSTS1.WORD = (uint16_t) ((~USB_SACK) & USB_INTSTS1_MASK);
-} /* End of function hw_usb_hclear_sts_sack */
-
+}
+/******************************************************************************
+ End of function hw_usb_hclear_sts_sack
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_hclear_sts_pddetint
@@ -385,7 +324,10 @@ void hw_usb_hclear_sts_sack (void)
 void hw_usb_hclear_sts_pddetint (void)
 {
     USB0.INTSTS1.WORD = (uint16_t) ((~USB_PDDETINT) & USB_INTSTS1_MASK);
-} /* End of function hw_usb_hclear_sts_pddetint */
+}
+/******************************************************************************
+ End of function hw_usb_hclear_sts_pddetint
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_hwrite_usbreq
@@ -399,7 +341,10 @@ void hw_usb_hclear_sts_pddetint (void)
 void hw_usb_hwrite_usbreq (uint16_t data)
 {
     USB0.USBREQ.WORD = data;
-} /* End of function hw_usb_hwrite_usbreq */
+}
+/******************************************************************************
+ End of function hw_usb_hwrite_usbreq
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_hset_usbval
@@ -413,7 +358,10 @@ void hw_usb_hwrite_usbreq (uint16_t data)
 void hw_usb_hset_usbval (uint16_t data)
 {
     USB0.USBVAL = data;
-} /* End of function hw_usb_hset_usbval */
+}
+/******************************************************************************
+ End of function hw_usb_hset_usbval
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_hset_usbindx
@@ -426,7 +374,10 @@ void hw_usb_hset_usbval (uint16_t data)
 void hw_usb_hset_usbindx (uint16_t data)
 {
     USB0.USBINDX = data;
-} /* End of function hw_usb_hset_usbindx */
+}
+/******************************************************************************
+ End of function hw_usb_hset_usbindx
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_hset_usbleng
@@ -438,7 +389,10 @@ void hw_usb_hset_usbindx (uint16_t data)
 void hw_usb_hset_usbleng (uint16_t data)
 {
     USB0.USBLENG = data;
-} /* End of function hw_usb_hset_usbleng */
+}
+/******************************************************************************
+ End of function hw_usb_hset_usbleng
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_hwrite_dcpctr
@@ -449,7 +403,10 @@ void hw_usb_hset_usbleng (uint16_t data)
 void hw_usb_hwrite_dcpctr (uint16_t data)
 {
     USB0.DCPCTR.WORD = data;
-} /* End of function hw_usb_hwrite_dcpctr */
+}
+/******************************************************************************
+ End of function hw_usb_hwrite_dcpctr
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_hset_sureq
@@ -461,8 +418,65 @@ void hw_usb_hwrite_dcpctr (uint16_t data)
 void hw_usb_hset_sureq (void)
 {
     USB0.DCPCTR.WORD |= USB_SUREQ;
-} /* End of function hw_usb_hset_sureq */
+}
+/******************************************************************************
+ End of function hw_usb_hset_sureq
+ ******************************************************************************/
 
+/******************************************************************************
+ Function Name   : hw_usb_hread_devadd
+ Description     : Return the DEVADD register value for the specified USB device 
+                 ; address.
+ Arguments       : uint16_t  devsel : USB device address value 
+ Return value    : DEVADDx content
+ ******************************************************************************/
+uint16_t hw_usb_hread_devadd (uint16_t devsel)
+{
+    R_BSP_VOLATILE_EVENACCESS uint16_t *preg;
+    uint16_t return_value;
+    uint16_t devadr;
+
+    devadr = devsel >> USB_DEVADDRBIT;
+    if (devadr > USB_MAXDEVADDR)
+    {
+        return_value = USB_ERROR;
+    }
+    else
+    {
+        preg = (uint16_t *) &(USB0.DEVADD0) + devadr;
+        return_value = ((*preg) & USB_USBSPD);
+    }
+    return return_value;
+}
+/******************************************************************************
+ End of function hw_usb_hread_devadd
+ ******************************************************************************/
+
+/******************************************************************************
+ Function Name   : hw_usb_hset_usbspd
+ Description     : Set the DEVADD register's USBSPD for the specified device add-
+                 : ress.
+ Arguments       : uint16_t  devsel : USB device address value 
+                 : uint16_t  data   : The value to write.
+ Return value    : none
+ ******************************************************************************/
+void hw_usb_hset_usbspd (uint16_t devsel, uint8_t data)
+{
+    R_BSP_VOLATILE_EVENACCESS uint16_t *preg;
+    uint16_t devadr;
+
+    devadr = devsel >> USB_DEVADDRBIT;
+
+    preg = (uint16_t *) &(USB0.DEVADD0) + devadr;
+
+    (*preg) &= (~USB_USBSPD);
+    (*preg) |= data;
+}
+/******************************************************************************
+ End of function hw_usb_hset_usbspd
+ ******************************************************************************/
+
+#if USB_CFG_BC == USB_CFG_ENABLE
 /******************************************************************************
  Function Name   : hw_usb_hset_dcpmode
  Description     : Set DCPMODE bit.
@@ -472,8 +486,11 @@ void hw_usb_hset_sureq (void)
 void hw_usb_hset_dcpmode (void)
 {
     USB0.USBBCCTRL0.WORD |= USB_DCPMODE;
-} /* End of function hw_usb_hset_dcpmode */
-
+}
+/******************************************************************************
+ End of function hw_usb_hset_dcpmode
+ ******************************************************************************/
+#endif /* USB_CFG_BC == USB_CFG_ENABLE */
 
 /******************************************************************************
  Function Name   : hw_usb_hmodule_init
@@ -496,7 +513,7 @@ void hw_usb_hmodule_init (void)
 
     USB0.SYSCFG.WORD |= USB_DRPD;
 
-    sts = usb_chattering((uint16_t *) &USB0.SYSSTS0.WORD);
+    sts = usb_chattaring((uint16_t *) &USB0.SYSSTS0.WORD);
 
     USB0.SYSCFG.WORD |= USB_USBE;
 
@@ -542,8 +559,10 @@ void hw_usb_hmodule_init (void)
     USB0.INTSTS1.WORD &= ((~USB_OVRCRE) & USB_INTSTS1_MASK);
     USB0.INTENB0.WORD = ((USB_BEMPE | USB_NRDYE) | USB_BRDYE);
     USB0.INTENB1.WORD = (USB_OVRCRE | USB_ATTCH);
-} /* End of function hw_usb_hmodule_init */
-
+}
+/******************************************************************************
+ End of function hw_usb_hmodule_init
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_hset_trnensel
@@ -556,7 +575,10 @@ void hw_usb_hmodule_init (void)
 void hw_usb_hset_trnensel (void)
 {
     USB0.SOFCFG.WORD |= USB_TRNENSEL;
-} /* End of function hw_usb_hset_trnensel */
+}
+/******************************************************************************
+ End of function hw_usb_hset_trnensel
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_hclear_trnensel

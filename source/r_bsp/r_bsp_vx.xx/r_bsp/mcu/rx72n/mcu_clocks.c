@@ -26,6 +26,9 @@
 *         : 10.12.2019 1.01     Removed unnecessary processing from the clock_source_select fucntion.
 *         : 17.12.2019 1.02     Fixed warning of clock_source_select function with IAR compiler.
 *         : 14.02.2020 1.03     Fixed warning of clock_source_select function with CCRX and IAR compiler.
+*         : 31.07.2020 1.04     Added the setting of PSTOP0 bit.
+*         : 29.01.2021 1.05     Fixed the initialization settings of sub-clock for Technical Update Information
+*                               (TN-RX*-A0236B).
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -354,6 +357,11 @@ static void operating_frequency_set (void)
     }
 #else
     #error "Error! Invalid setting for BSP_CFG_BCLK_OUTPUT in r_bsp_config.h"
+#endif
+
+    /* Configure PSTOP0 bit for SDCLK output. */
+#if BSP_CFG_SDCLK_OUTPUT == 0
+    tmp_clock |= 0x00400000;
 #endif
 
     /* Figure out setting for PCKA bits. */
@@ -854,6 +862,13 @@ static void clock_source_select (void)
         {
             /* Confirm that the written value can be read correctly. */
              R_BSP_NOP();
+        }
+
+        /* WAIT_LOOP */
+        while (0 != RTC.RCR2.BIT.CNTMD)
+        {
+            /* Confirm that the written value can be read correctly. */
+            R_BSP_NOP();
         }
 
         /* RTC Software Reset */

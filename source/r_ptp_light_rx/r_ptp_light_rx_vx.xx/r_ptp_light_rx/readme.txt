@@ -5,12 +5,12 @@ r_ptp_light_rx
 
 Document Number 
 ---------------
-R01AN3035EJ0113 (English version)
-R01AN3035JJ0113 (Japanese version)
+R01AN3035EJ0114 (English version)
+R01AN3035JJ0114 (Japanese version)
 
 Version
 -------
-v1.13
+v1.14
 
 Overview
 --------
@@ -28,13 +28,15 @@ Supported MCUs
 * RX64M Group
 * RX71M Group
 * RX72M Group
+* RX72N Group
 
 Boards Tested On
 ----------------
 * RSKRX64M
 * RSKRX71M
 * RSKRX72M
- 
+* RSKRX72N
+
 Limitations
 -----------
 * Not support PTP time synchronization.
@@ -58,7 +60,9 @@ Please refer to the following documents;
 
 Toolchain(s) Used
 -----------------
-* Renesas RX Toolchain v3.01.00
+* Renesas RX v3.01.00
+* GCC for Renesas RX 4.8.4
+* IAR EWRX 4.12.1
 
 File Structure
 --------------

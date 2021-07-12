@@ -1,42 +1,41 @@
-/*******************************************************************************
+/***********************************************************************************************************************
 * DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
 * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+ * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
 * following link:
-* http://www.renesas.com/disclaimer *
-* Copyright (C) 2013(2019) Renesas Electronics Corporation. All rights reserved.
-*******************************************************************************/
-/*******************************************************************************
+ * http://www.renesas.com/disclaimer
+ *
+ * Copyright (C) 2013(2020) Renesas Electronics Corporation. All rights reserved.
+ ***********************************************************************************************************************/
+/***********************************************************************************************************************
 * File Name    : r_usb_hlibusbip.c
-* Version      : 1.01
-* Description  : This is the USB host control driver code.
-*******************************************************************************/
-/*******************************************************************************
+ * Description  : USB IP Host library.
+ ***********************************************************************************************************************/
+/**********************************************************************************************************************
 * History   : DD.MM.YYYY Version Description
 *           : 01.09.2014 1.00    First Release
 *           : 01.06.2015 1.01    Added RX231.
 *           : 30.11.2018 1.10    Supporting Smart Configurator
 *           : 31.05.2019 1.11    Added support for GNUC and ICCRX.
-*******************************************************************************/
+*           : 30.06.2020 1.20    Added support for RTOS.
+***********************************************************************************************************************/
 
-/*******************************************************************************
+/******************************************************************************
  Includes   <System Includes> , "Project Includes"
  ******************************************************************************/
 #include "r_usb_basic_mini_if.h"
+
+#if (BSP_CFG_RTOS_USED == 0)    /* Non-OS */
+
 #include "r_usb_bitdefine.h"
 #include "r_usb_typedef.h"
 #include "r_usb_reg_access.h"    /* Definition of the USB register access macro */
@@ -58,6 +57,7 @@
 
 #endif /* defined(USB_CFG_HMSC_USE) */
 
+#if (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST
 /*******************************************************************************
  Macro definitions
  ******************************************************************************/
@@ -76,24 +76,25 @@
 
 
 
-#if (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST
 
 /******************************************************************************
 Function Name   : usb_hstd_bchg_enable
-Description     : Enable port BCHG interrupt
+ Description     : Enable BCHG interrupt for the specified USB port.
 Arguments       : none
 Return value    : none
 ******************************************************************************/
 void usb_hstd_bchg_enable(void)
 {
-    hw_usb_hclear_enb_bchge();
+    hw_usb_hclear_sts_bchg();
     hw_usb_hset_enb_bchge();
-}   /* end of function usb_hstd_bchg_enable() */
-
+}
+/******************************************************************************
+ End of function usb_hstd_bchg_enable
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hstd_bchg_disable
-Description     : Disable port BCHG interrupt
+ Description     : Disable BCHG interrupt for specified USB port.
 Arguments       : none
 Return value    : none
 ******************************************************************************/
@@ -101,114 +102,103 @@ void usb_hstd_bchg_disable(void)
 {
     hw_usb_hclear_sts_bchg();
     hw_usb_hclear_enb_bchge();
-}   /* end of function usb_hstd_bchg_disable() */
-
+}
+/******************************************************************************
+ End of function usb_hstd_bchg_disable
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hstd_set_uact
-Description     : SOF start
+ Description     : Start sending SOF to the connected USB device.
 Arguments       : none
 Return value    : none
 ******************************************************************************/
 void usb_hstd_set_uact(void)
 {
     hw_usb_rmw_dvstctr(USB_UACT, ((USB_USBRST | USB_RESUME) | USB_UACT));
-}   /* end of function usb_hstd_set_uact() */
-
-
+}
 /******************************************************************************
-Function Name   : usb_hstd_ovrcr_enable
-Description     : Enable OVRCR interrupt
-Arguments       : none
-Return value    : none
-******************************************************************************/
-void usb_hstd_ovrcr_enable(void)
-{
-    hw_usb_hclear_sts_ovrcr();
-    hw_usb_hset_enb_ovrcre();
-}   /* end of function usb_hstd_ovrcr_enable() */
-
+ End of function usb_hstd_set_uact
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hstd_ovrcr_disable
-Description     : Disable OVRCR interrupt
+ Description     : Disable OVRCR interrupt of the specified USB port.
 Arguments       : none
 Return value    : none
 ******************************************************************************/
 void usb_hstd_ovrcr_disable(void)
 {
+    /* OVRCR Clear(INT_N edge sense) */
     hw_usb_hclear_sts_ovrcr();
+
+    /* Over-current disable */
     hw_usb_hclear_enb_ovrcre();
-}   /* end of function usb_hstd_ovrcr_disable() */
-
-
+}
 /******************************************************************************
-Function Name   : usb_hstd_attch_clear_status
-Description     : Clear port ATTCH interrupt status
-Arguments       : none
-Return value    : none
-******************************************************************************/
-void usb_hstd_attch_clear_status(void)
-{
-    hw_usb_hclear_sts_attch();
-}   /* end of function usb_hstd_attch_clear_status() */
+ End of function usb_hstd_ovrcr_disable
+ ******************************************************************************/
 
 
 /******************************************************************************
 Function Name   : usb_hstd_attch_disable
-Description     : Disable ATTCH interrupt
+ Description     : Disable ATTCH (attach) interrupt of the specified USB port.
 Arguments       : none
 Return value    : none
 ******************************************************************************/
 void usb_hstd_attch_disable(void)
 {
-    usb_hstd_attch_clear_status();
+    /* ATTCH Clear(INT_N edge sense) */
+    hw_usb_hclear_sts_attch();
+
+    /* Attach disable */
     hw_usb_hclear_enb_attche();
-}   /* end of function usb_hstd_attch_disable() */
-
-
+}
 /******************************************************************************
-Function Name   : usb_hstd_detch_clear_status
-Description     : Clear port DTCH interrupt status
-Arguments       : none
-Return value    : none
-******************************************************************************/
-void usb_hstd_detch_clear_status(void)
-{
-    hw_usb_hclear_sts_dtch();
-}   /* end of function usb_hstd_detch_clear_status() */
-
+ End of function usb_hstd_attch_disable
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hstd_detach_enable
-Description     : Enable DTCH interrupt
+ Description     : Enable DTCH (detach) interrupt of the specified USB port. 
 Arguments       : none
 Return value    : none
 ******************************************************************************/
 void usb_hstd_detach_enable(void)
 {
-    usb_hstd_detch_clear_status();
-    hw_usb_hset_enb_dtche();
-}   /* end of function usb_hstd_detach_enable() */
+    /* DTCH Clear */
+    hw_usb_hclear_sts_dtch();
 
+    /* Detach enable */
+    hw_usb_hset_enb_dtche();
+}
+/******************************************************************************
+ End of function usb_hstd_detach_enable
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hstd_detach_disable
-Description     : Disable DTCH interrupt
+ Description     : Disable DTCH (detach) interrupt of the specified USB port.  
 Arguments       : none
 Return value    : none
 ******************************************************************************/
 void usb_hstd_detach_disable(void)
 {
-    usb_hstd_detch_clear_status();
+    /* DTCH Clear(INT_N edge sense) */
+    hw_usb_hclear_sts_dtch();
+
+    /* Detach disable */
     hw_usb_hclear_enb_dtche();
-}   /* end of function usb_hstd_detach_disable() */
+}
+/******************************************************************************
+ End of function usb_hstd_detach_disable
+ ******************************************************************************/
 
 /******************************************************************************
-Function Name   : usb_hstd_bus_int_disable
-Description     : Disable USB Bus-interrupt
-Argument        : none
-Return          : none
+ Function Name   : usb_hstd_bus_int_disable
+ Description     : Disable USB Bus Interrupts OVRCR, ATTCH, DTCH, and BCHG.
+ Arguments       : none
+ Return          : none
 ******************************************************************************/
 void usb_hstd_bus_int_disable(void)
 {
@@ -216,11 +206,15 @@ void usb_hstd_bus_int_disable(void)
     usb_hstd_attch_disable();
     usb_hstd_detach_disable();
     usb_hstd_bchg_disable();
-}   /* end of function usb_hstd_bus_int_disable() */
+}
+/******************************************************************************
+ End of function usb_hstd_bus_int_disable
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hstd_send_start
-Description     : Send Data start
+ Description     : Start data transmission using CPU/DMA transfer to USB host/
+                 : /device.
 Arguments       : none
 Return value    : none
 ******************************************************************************/
@@ -228,7 +222,7 @@ void usb_hstd_send_start(void)
 {
     usb_hutr_t       *p_utr;
 #if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))
-    uint16_t        use_port;
+    uint16_t        useport;
 #endif /* ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE)) */
     usb_pipe_no_t   pipe;
 
@@ -246,11 +240,11 @@ void usb_hstd_send_start(void)
     hw_usb_clear_sts_brdy(pipe);
 
 #if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))
-    use_port = usb_cstd_pipe_to_fport(pipe);
+    useport = usb_cstd_pipe_to_fport(pipe);
 
-    if ((USB_D0USE == use_port) || (USB_D1USE == use_port))
+    if ((USB_D0USE == useport) || (USB_D1USE == useport))
     {
-        usb_cstd_dma_set_ch_no (use_port, USB_CFG_USB0_DMA_TX);
+        usb_cstd_dma_set_ch_no (useport, USB_CFG_USB0_DMA_TX);
 
         /* Setting for use PIPE number */
         g_usb_cstd_dma_pipe[USB_CFG_USB0_DMA_TX] = pipe;
@@ -258,22 +252,20 @@ void usb_hstd_send_start(void)
         /* Buffer size */
         g_usb_cstd_dma_fifo[USB_CFG_USB0_DMA_TX] = usb_cstd_get_maxpacket_size(pipe);
         /* Check data count */
-        if (g_usb_hstd_data_cnt[g_usb_cstd_dma_pipe[USB_CFG_USB0_DMA_TX]] <= g_usb_cstd_dma_fifo[USB_CFG_USB0_DMA_TX])
+        if (g_usb_hstd_data_cnt[pipe] <= g_usb_cstd_dma_fifo[USB_CFG_USB0_DMA_TX])
         {
             /* Transfer data size */
             g_usb_cstd_dma_size[USB_CFG_USB0_DMA_TX] 
-                                     = (uint16_t)g_usb_hstd_data_cnt[g_usb_cstd_dma_pipe[USB_CFG_USB0_DMA_TX]];
+                                     = (uint16_t)g_usb_hstd_data_cnt[pipe];
         }
         else
         {
             /* Transfer data size */
-            g_usb_cstd_dma_size[USB_CFG_USB0_DMA_TX] 
-                                                = g_usb_hstd_data_cnt[g_usb_cstd_dma_pipe[USB_CFG_USB0_DMA_TX]]
-                                                  - (g_usb_hstd_data_cnt[g_usb_cstd_dma_pipe[USB_CFG_USB0_DMA_TX]] 
-                                                     % g_usb_cstd_dma_fifo[USB_CFG_USB0_DMA_TX]);
+            g_usb_cstd_dma_size[USB_CFG_USB0_DMA_TX]  = g_usb_hstd_data_cnt[pipe]
+                - (g_usb_hstd_data_cnt[pipe] % g_usb_cstd_dma_fifo[USB_CFG_USB0_DMA_TX]);
         }
 
-        usb_cstd_dma_send_start(pipe, use_port);
+        usb_cstd_dma_send_start(pipe, useport);
 
         /* Set BUF */
         usb_cstd_set_buf(pipe);
@@ -288,12 +280,15 @@ void usb_hstd_send_start(void)
     }
 #endif /* ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE)) */
 
-}   /* end of function usb_hstd_send_start() */
-
+}
+/******************************************************************************
+ End of function usb_hstd_send_start
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hstd_receive_start
-Description     : Receive Data start
+ Description     : Start data reception using CPU/DMA transfer to USB Host/USB
+                 : device.
 Arguments       : none
 Return value    : none
 ******************************************************************************/
@@ -303,7 +298,7 @@ void usb_hstd_receive_start(void)
     uint16_t        trncnt;
     uint16_t        mxps;
 #if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))
-    uint16_t        use_port;
+    uint16_t        useport;
 #endif /* ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE)) */
     usb_pipe_no_t   pipe;
 
@@ -318,20 +313,19 @@ void usb_hstd_receive_start(void)
     gp_usb_hstd_data_ptr[pipe] = (uint8_t*)p_utr->p_tranadr;
 
 #if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))
-    use_port = usb_cstd_pipe_to_fport(pipe);
+    useport = usb_cstd_pipe_to_fport(pipe);
 
-    if ((USB_D0USE == use_port) || (USB_D1USE == use_port))
+    if ((USB_D0USE == useport) || (USB_D1USE == useport))
     {
-        usb_cstd_dma_set_ch_no (use_port, USB_CFG_USB0_DMA_RX);
+        usb_cstd_dma_set_ch_no (useport, USB_CFG_USB0_DMA_RX);
 
         g_usb_cstd_dma_pipe[USB_CFG_USB0_DMA_RX] = pipe;              /* Setting for use PIPE number */
         g_usb_cstd_dma_fifo[USB_CFG_USB0_DMA_RX] = usb_cstd_get_maxpacket_size(pipe); /* Buffer size */
 
         /* Transfer data size */
-        g_usb_cstd_dma_size[USB_CFG_USB0_DMA_RX] 
-                              = (uint16_t)g_usb_hstd_data_cnt[g_usb_cstd_dma_pipe[USB_CFG_USB0_DMA_RX]];
+        g_usb_cstd_dma_size[USB_CFG_USB0_DMA_RX]  = (uint16_t)g_usb_hstd_data_cnt[pipe];
 
-        usb_cstd_dma_rcv_start(pipe, use_port);
+        usb_cstd_dma_rcv_start(pipe, useport);
     }
     else
     {
@@ -361,18 +355,24 @@ void usb_hstd_receive_start(void)
 #if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))
     }
 #endif /* ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE)) */
-}   /* end of function usb_hstd_receive_start() */
-
+}
+/******************************************************************************
+ End of function usb_hstd_receive_start
+ ******************************************************************************/
 
 /******************************************************************************
-Function Name   : usb_hstd_data_end
-Description     : End of data transfer (IN/OUT)
-                : In the case of timeout status, it does not call back.
-Arguments       : uint16_t status       ; Transfer status type
-Return value    : none
+ Function Name   : usb_hstd_data_end
+ Description     : Set USB registers as appropriate after data transmission/re-
+                 : ception, and call the callback function as transmission/recep-
+                 : tion is complete.
+ Arguments       : uint16_t status       ; Transfer status type
+ Return value    : none
 ******************************************************************************/
 void usb_hstd_data_end(uint16_t status)
 {
+#if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))
+    uint16_t         useport;
+#endif /* ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE)) */
     usb_hutr_t       *p_utr;
     usb_pipe_no_t    pipe;
 
@@ -382,25 +382,37 @@ void usb_hstd_data_end(uint16_t status)
     p_utr     = gp_usb_hstd_pipe[pipe];
     gp_usb_hstd_pipe[pipe]    = (usb_hutr_t*)USB_NULL;
 
+    /* PID = NAK */
     /* Set NAK */
     usb_cstd_set_nak(pipe);
 
+#if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))
+    /* Pipe number to FIFO port select */
+    useport = usb_cstd_pipe_to_fport(pipe);
+#endif /* ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE)) */
+
     /* Disable Interrupt */
+    /* Disable Ready Interrupt */
     hw_usb_clear_brdyenb(pipe);
+
+    /* Disable Not Ready Interrupt */
     hw_usb_clear_nrdyenb(pipe);
+
+    /* Disable Empty Interrupt */
     hw_usb_clear_bempenb(pipe);
 
     /* Disable Transaction count */
     usb_cstd_clr_transaction(pipe);
 
 #if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))
-    if (USB_D0USE == usb_cstd_pipe_to_fport(pipe) )
+    /* Check use FIFO */
+    if (USB_D0USE == useport)
     {
         /* DMA buffer clear mode clear */
         hw_usb_clear_dclrm(USB_D0USE);
         hw_usb_set_mbw(USB_D0USE, USB_MBW_16 );
     }
-    if (USB_D1USE == usb_cstd_pipe_to_fport(pipe) )
+    if (USB_D1USE == useport)
     {
         /* DMA buffer clear mode clear */
         hw_usb_clear_dclrm(USB_D1USE);
@@ -419,38 +431,45 @@ void usb_hstd_data_end(uint16_t status)
             (*p_utr->complete)(p_utr);
         }
     }
-}   /* end of function usb_hstd_data_end() */
-
+}
+/******************************************************************************
+ End of function usb_hstd_data_end
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hstd_brdy_pipe_process
-Description     : BRDY interrupt
-Arguments       : uint16_t bitsts       ; BRDYSTS Register & BRDYENB Register
+ Description     : Search for the PIPE No. that BRDY interrupt occurred, and 
+                 : request data transmission/reception from the PIPE
+ Arguments       : uint16_t     bitsts  : BRDYSTS Register & BRDYENB Register
 Return value    : none
 ******************************************************************************/
 void usb_hstd_brdy_pipe_process(uint16_t bitsts)
 {
     uint16_t    useport;
+    usb_pipe_no_t   pipe;
+
 #if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))
     uint16_t buffer;
     uint16_t maxps;
-    uint16_t set_dtc_block_cnt;
-    uint16_t trans_dtc_block_cnt;
+    uint16_t set_dma_block_cnt;
+    uint16_t trans_dma_block_cnt;
     uint16_t dma_ch;
+    uint16_t status;
 
 #endif /* ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE)) */
-    usb_pipe_no_t   pipe;
 
     /* WAIT_LOOP */
     for (pipe = USB_MIN_PIPE_NO; pipe <= USB_MAX_PIPE_NO; pipe++ )
     {
-        if ((bitsts & USB_BITSET(pipe)) != 0 )
+        if (0 != (bitsts & USB_BITSET(pipe)))
         {
             g_usb_hstd_current_pipe = pipe;
             /* Interrupt check */
             hw_usb_clear_status_bemp(pipe);
+
             if (USB_NULL != gp_usb_hstd_pipe[pipe])
             {
+                /* Pipe number to FIFO port select */
                 useport = usb_cstd_pipe_to_fport(pipe);
                 if ((USB_D0USE == useport) || (USB_D1USE == useport))
                 {
@@ -469,49 +488,47 @@ void usb_hstd_brdy_pipe_process(uint16_t bitsts)
 
                     buffer = hw_usb_read_fifoctr(useport);
 
-                    set_dtc_block_cnt = (uint16_t)((g_usb_hstd_data_cnt[g_usb_cstd_dma_pipe[dma_ch]] -1)
+                    set_dma_block_cnt = (uint16_t)((g_usb_hstd_data_cnt[g_usb_cstd_dma_pipe[dma_ch]] -1)
                                                                              / g_usb_cstd_dma_fifo[dma_ch]) +1;
 
-                    trans_dtc_block_cnt = usb_cstd_dma_get_crtb(dma_ch);
+                    trans_dma_block_cnt = usb_cstd_dma_get_crtb(dma_ch);
                     /* Get D0fifo Receive Data Length */
                     g_usb_cstd_dma_size[dma_ch] = buffer & USB_DTLN;
-                    if (set_dtc_block_cnt > trans_dtc_block_cnt)
+                    if (set_dma_block_cnt > trans_dma_block_cnt)
                     {
-                        g_usb_cstd_dma_size[dma_ch] += ((set_dtc_block_cnt - (trans_dtc_block_cnt + 1)) * maxps);
+                        g_usb_cstd_dma_size[dma_ch] += ((set_dma_block_cnt - (trans_dma_block_cnt + 1)) * maxps);
                     }
 
                     /* Check data count */
-                    if (g_usb_cstd_dma_size[dma_ch] == g_usb_hstd_data_cnt[pipe] )
+                    if (g_usb_cstd_dma_size[dma_ch] == g_usb_hstd_data_cnt[pipe])
                     {
                         g_usb_hstd_data_cnt[pipe] = 0;
-                        /* End of data transfer */
-                        usb_hstd_data_end( USB_DATA_OK);
+                        status = USB_DATA_OK;
                     }
-                    else if (g_usb_cstd_dma_size[dma_ch] > g_usb_hstd_data_cnt[pipe] )
+                    else if (g_usb_cstd_dma_size[dma_ch] > g_usb_hstd_data_cnt[pipe])
                     {
                         /* D0FIFO access DMA stop */
                         usb_cstd_dfifo_end(useport);
-                        /* End of data transfer */
-                        usb_hstd_data_end( USB_DATA_OVR);
+                        status = USB_DATA_OVR;
                     }
                     else
                     {
                         /* D0FIFO access DMA stop */
                         usb_cstd_dfifo_end(useport);
-                        /* End of data transfer */
-                        usb_hstd_data_end( USB_DATA_SHT);
+                        status = USB_DATA_SHT;
                     }
+                    /* End of data transfer */
+                    usb_hstd_data_end(status);
 
                     /* Set BCLR */
-                    hw_usb_set_bclr(useport );
+                    hw_usb_set_bclr(useport);
 
 #endif /* ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE)) */
-
                 }
                 else
                 {
                     /* Pipe number to FIFO port select */
-                    if (usb_cstd_get_pipe_dir(g_usb_hstd_current_pipe) == USB_BUF2FIFO )
+                    if (USB_BUF2FIFO == usb_cstd_get_pipe_dir(pipe))
                     {
                         /* Buffer to FIFO data write */
                         usb_hstd_buf_to_fifo(useport);
@@ -525,14 +542,13 @@ void usb_hstd_brdy_pipe_process(uint16_t bitsts)
             }
         }
     }
-
-}   /* end of function usb_hstd_brdy_pipe_process() */
-
+}/* End of function usb_hstd_brdy_pipe_process() */
 
 /******************************************************************************
 Function Name   : usb_hstd_nrdy_pipe_process
-Description     : Nrdy Pipe interrupt (host only)
-Arguments       : uint16_t bitsts       ; NRDYSTS Register & NRDYENB Register
+ Description     : Search for PIPE No. that occurred NRDY interrupt, and execute 
+                 : the process for PIPE when NRDY interrupt occurred
+ Arguments       : uint16_t     bitsts  : NRDYSTS Register & NRDYENB Register
 Return value    : none
 ******************************************************************************/
 void usb_hstd_nrdy_pipe_process(uint16_t bitsts)
@@ -592,14 +608,15 @@ void usb_hstd_nrdy_pipe_process(uint16_t bitsts)
             }
         }
     }
-
-}   /* end of function usb_hstd_nrdy_pipe_process() */
-
+}
+/******************************************************************************
+ End of function usb_hstd_nrdy_pipe_process
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hstd_bemp_pipe_process
-Description     : BEMP interrupt
-Arguments       : uint16_t bitsts       ; BEMPSTS Register & BEMPENB Register
+ Description     : Search for PIPE No. that BEMP interrupt occurred, and complete data transmission for the PIPE
+ Arguments       : uint16_t     bitsts  : BEMPSTS Register & BEMPENB Register
 Return value    : none
 ******************************************************************************/
 void usb_hstd_bemp_pipe_process(uint16_t bitsts)
@@ -612,16 +629,18 @@ void usb_hstd_bemp_pipe_process(uint16_t bitsts)
     usb_pipe_no_t   pipe;
 
     /* WAIT_LOOP */
-    for (pipe = USB_MIN_PIPE_NO; pipe <= USB_MAX_PIPE_NO; pipe++ )
+    for (pipe = USB_MIN_PIPE_NO; pipe <= USB_MAX_PIPE_NO; pipe++)
     {
         if (0 != (bitsts & USB_BITSET(pipe)))
         {
+            /* Interrupt check */
             if ((USB_NULL != gp_usb_hstd_pipe[pipe]) && (USB_ON != g_usb_cstd_bemp_skip[pipe]))
             {
                 g_usb_hstd_current_pipe = pipe;
                 buffer = usb_cstd_get_pid(pipe);
+
                 /* MAX packet size error ? */
-                if ((buffer & USB_PID_STALL) == USB_PID_STALL )
+                if (USB_PID_STALL == (buffer & USB_PID_STALL))
                 {
                     usb_hstd_forced_termination(USB_DATA_STALL);
                 }
@@ -630,8 +649,8 @@ void usb_hstd_bemp_pipe_process(uint16_t bitsts)
                     /* Because interrupt pipe can read "0" at this bit, the distinction of BULK/INT is unnecessary. */
                     if (USB_INBUFM != (hw_usb_read_pipectr(pipe) & USB_INBUFM))
                     {
-
 #if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))
+                        /* Pipe number to FIFO port select */
                         useport = usb_cstd_pipe_to_fport(pipe);
                         hw_usb_clear_dreqe(useport);
                         /* DMA stop */
@@ -649,12 +668,15 @@ void usb_hstd_bemp_pipe_process(uint16_t bitsts)
         }
     }
 
-}   /* end of function usb_hstd_bemp_pipe_process() */
+}
+/******************************************************************************
+ End of function usb_hstd_bemp_pipe_process
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_cstd_pipe_table_set
 Description     : Set pipe table
-Arguments       : uint16_t class     : USB Device class(USB_HVND/USB_HCDC/USB_HHID/USB_HMSC/USB_HUB)
+Arguments       : uint16_t class     : USB Device class(USB_HVND/USB_HCDC/USB_HHID/USB_HMSC)
                 : uint8_t *descriptor: Address for Endpoint descriptor
 Return value    : Pipe no (USB_PIPE1->USB_PIPE9:OK, 0:Error)
 ******************************************************************************/
@@ -663,12 +685,12 @@ uint8_t         usb_cstd_pipe_table_set (uint16_t usb_class, uint8_t *p_descript
     uint8_t     pipe_no;
     uint16_t    pipe_cfg;
     uint16_t    pipe_maxp;
-    uint16_t    pipe_peri = 0;
+    uint16_t    pipe_peri = USB_NULL;
 
     /* Check Endpoint descriptor */
     if (USB_DT_ENDPOINT != p_descriptor[USB_DEV_B_DESCRIPTOR_TYPE])
     {
-        return 0;   /* Error */
+        return USB_NULL;   /* Error */
     }
 
     /* set pipe configuration value */
@@ -707,13 +729,12 @@ uint8_t         usb_cstd_pipe_table_set (uint16_t usb_class, uint8_t *p_descript
                 pipe_no     = usb_hstd_get_pipe_no (usb_class, USB_EP_INT, USB_PIPE_DIR_OUT);
             }
 
-            /* set interval counter */
             /* Get value for Interval Error Detection Interval  */
             pipe_peri = usb_hstd_get_pipe_peri_value (p_descriptor[USB_EP_B_INTERVAL]);
         break;
 
         default:
-            return 0;   /* Error */
+            return USB_NULL;   /* Error */
         break;
     }
 
@@ -745,7 +766,7 @@ uint8_t         usb_cstd_pipe_table_set (uint16_t usb_class, uint8_t *p_descript
 /******************************************************************************
 Function Name   : usb_hstd_get_pipe_no
 Description     : Get PIPE No.
-Arguments       : uint16_t class     : USB Device class(USB_HVND/USB_HCDC/USB_HHID/USB_HMSC/USB_HUB)
+Arguments       : uint16_t class     : USB Device class(USB_HVND/USB_HCDC/USB_HHID/USB_HMSC)
                 : uint8_t  type      : Transfer Type.(USB_EP_BULK/USB_EP_INT)
                 : uint8_t  dir       : (USB_PIPE_DIR_IN/USB_PIPE_DIR_OUT)
 Return value    : Pipe no (USB_PIPE1->USB_PIPE9:OK, USB_NULL:Error)
@@ -887,8 +908,8 @@ uint16_t usb_hstd_get_pipe_peri_value (uint8_t binterval)
     return pipe_peri;
 } /* end of function usb_hstd_get_pipe_peri_value() */
 
-
 #endif /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
+#endif /*(BSP_CFG_RTOS_USED == 0)*/
 /******************************************************************************
-End of file
+ End  Of File
 ******************************************************************************/

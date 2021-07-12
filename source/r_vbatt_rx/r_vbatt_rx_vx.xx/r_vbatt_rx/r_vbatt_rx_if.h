@@ -33,6 +33,7 @@
 *                                    Updated version to 1.03
 *              : 30.06.2019 1.04     Added support for RX23W
 *                                    Updated version to 1.04
+*              : 10.06.2020 1.05     Updated version to 1.05
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_vbatt_rx_if.h
@@ -54,7 +55,7 @@ Macro definitions
 *******************************************************************************/
 /* Version Number of API. */
 #define VBATT_VERSION_MAJOR           (1)
-#define VBATT_VERSION_MINOR           (04)
+#define VBATT_VERSION_MINOR           (05)
 
 /* VBATT Pin Voltage Drop Detection Level */
 #define VBATT_DTCT_LEVEL_2_20_V       (0U)  /* VBATT pin voltage drop detection level is 2.20V      */

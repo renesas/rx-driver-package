@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 /*******************************************************************************************************************//**
@@ -60,7 +60,8 @@ extern const st_ble_cli_cmd_t g_vs_cmd;
  */
 /*******************************************************************************************************************//**
  * @brief VS event handler.
- * @details This function shall be called from VS callback registered by @ref R_BLE_VS_RegisterCb function.
+ * @details This function shall be called from VS callback registered by 
+ *          @ref R_BLE_VS_Init or @ref R_BLE_ABS_Init function.
 ***********************************************************************************************************************/
 void R_BLE_CMD_VsCb(uint16_t type, ble_status_t result, st_ble_vs_evt_data_t *data);
 /*@}*/

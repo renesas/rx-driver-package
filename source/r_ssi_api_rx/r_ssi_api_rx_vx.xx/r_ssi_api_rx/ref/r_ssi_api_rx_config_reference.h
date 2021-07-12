@@ -76,7 +76,6 @@ Macro definitions
 *******************************************************************************/
 #define SSI_STANDARD_CONFIG
 
-#if (defined(SSI0) || defined(SSI1))
 /******************************************************************************
     Transmit / Receive mode selection (I/O mode)
       Set a value from following alternatives to SSIn_IO_MODE.
@@ -251,7 +250,6 @@ Macro definitions
 /* USER_UNIQUE_CONFIG */
 #endif
 
-#else /* (defined(SSI0) || defined(SSI1)) */
 /******************************************************************************
     Transmit / Receive mode selection (I/O mode)
       Set a value from following alternatives to SSIEn_IO_MODE.
@@ -439,6 +437,5 @@ Macro definitions
 /* USER_UNIQUE_CONFIG */
 #endif
 
-#endif /* (defined(SSI0) || defined(SSI1)) */
 
 #endif /* SSI_API_CONFIG_REFERENCE_H_ */

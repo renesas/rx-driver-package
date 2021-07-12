@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_lvd_rx
-VERSION = 		3.40
-MDF =			V2
+VERSION = 		3.60
+MDF = V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_byteq
-VERSION = 		1.80
-MDF =			V2
+VERSION = 		1.82
+MDF = V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

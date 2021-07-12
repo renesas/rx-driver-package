@@ -88,7 +88,7 @@ static void mesh_prov_gatt_db_cb
         /* Handle Write Command to Prov Data IN */
         case BLE_GATTS_OP_CHAR_PEER_WRITE_CMD:
         {
-            if (MESH_PROV_DATA_IN_VAL_HDL == params->attr_hdl)
+            if (BLE_MESH_PROVS_DATA_IN_VAL_HDL == params->attr_hdl)
             {
                 if (NULL != prov_cb)
                 {
@@ -124,7 +124,7 @@ static void mesh_proxy_gatt_db_cb
         /* Handle Write Command to Proxy Data IN */
         case BLE_GATTS_OP_CHAR_PEER_WRITE_CMD:
         {
-            if (MESH_PROXY_DATA_IN_VAL_HDL == params->attr_hdl)
+            if (BLE_MESH_PROXYS_DATA_IN_VAL_HDL == params->attr_hdl)
             {
                 if (NULL != proxy_cb)
                 {
@@ -176,7 +176,6 @@ static void mesh_serv_gatts_cb
             {
                 /* Do nothing */
             }
-
         }
         break;
 
@@ -199,7 +198,7 @@ static void mesh_serv_gatts_cb
             p_cli_mtu);
 
             /* Set the MTU to be Responded */
-            g_mesh_curr_mtu = (p_cli_mtu >= g_mesh_curr_mtu) ?\
+            g_mesh_curr_mtu = (p_cli_mtu >= g_mesh_curr_mtu) ?
                               g_mesh_curr_mtu : p_cli_mtu;
 
             /* Responding with Default MTU here */
@@ -259,17 +258,17 @@ static void mesh_serv_gatts_cb
             if (MESH_PROV_SERVICE_DONE == g_mesh_serv_state)
             {
                 /* Check if the Write RSP if for Prov CCCD */
-                if (MESH_PROV_DATA_OUT_CCD_HDL == db_wt_rsp_evt_param->attr_hdl)
+                if (BLE_MESH_PROVS_DATA_OUT_CLI_CNFG_DESC_HDL == db_wt_rsp_evt_param->attr_hdl)
                 {
-                    /* Get the PROXY DATA OUT CCD Value */
+                    /* Get the PROXY DATA OUT CCCD Value */
                     mesh_serv_get_cccd
                     (
                         data->conn_hdl,
-                        MESH_PROV_DATA_OUT_CCD_HDL,
+                        BLE_MESH_PROVS_DATA_OUT_CLI_CNFG_DESC_HDL,
                         &cli_cnfg
                     );
 
-                    t_cccd_val = (cli_cnfg == BLE_GATTS_CLI_CNFG_NOTIFICATION) ?\
+                    t_cccd_val = (cli_cnfg == BLE_GATTS_CLI_CNFG_NOTIFICATION) ?
                                                  MS_TRUE : MS_FALSE;
 
                     /* Invoke CCCD Update Callback */
@@ -286,17 +285,17 @@ static void mesh_serv_gatts_cb
             else if (MESH_PROXY_SERVICE_DONE == g_mesh_serv_state)
             {
                 /* Check if the Write RSP if for Proxy CCCD */
-                if (MESH_PROXY_DATA_OUT_CCD_HDL == db_wt_rsp_evt_param->attr_hdl)
+                if (BLE_MESH_PROXYS_DATA_OUT_CLI_CNFG_DESC_HDL == db_wt_rsp_evt_param->attr_hdl)
                 {
-                    /* Get the PROXY DATA OUT CCD Value */
+                    /* Get the PROXY DATA OUT CCCD Value */
                     mesh_serv_get_cccd
                     (
                         data->conn_hdl,
-                        MESH_PROXY_DATA_OUT_CCD_HDL,
+                        BLE_MESH_PROXYS_DATA_OUT_CLI_CNFG_DESC_HDL,
                         &cli_cnfg
                     );
 
-                    t_cccd_val = (cli_cnfg == BLE_GATTS_CLI_CNFG_NOTIFICATION) ?\
+                    t_cccd_val = (cli_cnfg == BLE_GATTS_CLI_CNFG_NOTIFICATION) ?
                                                  MS_TRUE : MS_FALSE;
 
                     /* Invoke CCCD Update Callback */
@@ -343,19 +342,21 @@ uint16_t mesh_serv_get_mtu(void)
     return g_mesh_curr_mtu;
 }
 
+#if 0 /* unused */
 /***************************************************************************//**
 * @brief Sets new MTU size
 *******************************************************************************/
 ble_status_t mesh_serv_set_mtu(uint16_t mtu)
 {
-    g_mesh_curr_mtu = (BLE_GATT_DEFAULT_MTU > mtu)? \
+    g_mesh_curr_mtu = (BLE_GATT_DEFAULT_MTU > mtu) ?
                        BLE_GATT_DEFAULT_MTU : mtu;
 
     return BLE_SUCCESS;
 }
+#endif /* unused */
 
 /***************************************************************************//**
-* @brief Sets Mesh Provisioning Service instance to BLE Stack
+* @brief Sets Mesh Provisioning Service instance to BLE Protocol Stack
 *******************************************************************************/
 ble_status_t mesh_serv_prov_init(mesh_prov_cb *cb)
 {
@@ -387,7 +388,7 @@ ble_status_t mesh_serv_prov_init(mesh_prov_cb *cb)
 }
 
 /***************************************************************************//**
-* @brief Sets Mesh Proxy Service instance to BLE Stack
+* @brief Sets Mesh Proxy Service instance to BLE Protocol Stack
 *******************************************************************************/
 ble_status_t mesh_serv_proxy_init(mesh_proxy_cb *cb)
 {
@@ -460,7 +461,7 @@ ble_status_t mesh_serv_proxy_deinit(void)
 ble_status_t mesh_prov_notify_data_out
              (
                  uint16_t  conn_hndl,
-                 uint8_t   attidx,
+                 uint16_t  attr_hdl,
                  uint8_t   * val,
                  uint8_t   val_len
               )
@@ -468,16 +469,13 @@ ble_status_t mesh_prov_notify_data_out
     uint16_t cli_cnfg;
     ble_status_t ret;
 
-    /* Get the PROV DATA OUT CCD Value */
-    mesh_serv_get_cccd(conn_hndl, MESH_PROV_DATA_OUT_CCD_HDL, &cli_cnfg);
-
-    /* NOTE: Currently the attidx is ignored */
-    (void)attidx;
+    /* Get the PROV DATA OUT CCCD Value */
+    mesh_serv_get_cccd(conn_hndl, BLE_MESH_PROVS_DATA_OUT_CLI_CNFG_DESC_HDL, &cli_cnfg);
 
     if (cli_cnfg == BLE_GATTS_CLI_CNFG_NOTIFICATION)
     {
         st_ble_gatt_hdl_value_pair_t ntf_data = {
-            .attr_hdl        = MESH_PROV_DATA_OUT_VAL_HDL,
+            .attr_hdl        = attr_hdl,
             .value.p_value   = val,
             .value.value_len = val_len,
         };
@@ -497,7 +495,7 @@ ble_status_t mesh_prov_notify_data_out
 ble_status_t mesh_proxy_notify_data_out
           (
               uint16_t  conn_hndl,
-              uint8_t   attidx,
+              uint16_t  attr_hdl,
               uint8_t   * val,
               uint8_t   val_len
           )
@@ -505,16 +503,13 @@ ble_status_t mesh_proxy_notify_data_out
     uint16_t cli_cnfg;
     ble_status_t ret;
 
-    /* Get the PROXY DATA OUT CCD Value */
-    mesh_serv_get_cccd(conn_hndl, MESH_PROXY_DATA_OUT_CCD_HDL, &cli_cnfg);
-
-    /* NOTE: Currently the attidx is ignored */
-    (void)attidx;
+    /* Get the PROXY DATA OUT CCCD Value */
+    mesh_serv_get_cccd(conn_hndl, BLE_MESH_PROXYS_DATA_OUT_CLI_CNFG_DESC_HDL, &cli_cnfg);
 
     if (cli_cnfg == BLE_GATTS_CLI_CNFG_NOTIFICATION)
     {
         st_ble_gatt_hdl_value_pair_t ntf_data = {
-            .attr_hdl        = MESH_PROXY_DATA_OUT_VAL_HDL,
+            .attr_hdl        = attr_hdl,
             .value.p_value   = val,
             .value.value_len = val_len,
         };
@@ -530,13 +525,13 @@ ble_status_t mesh_proxy_notify_data_out
 
 static void mesh_prov_handle_conn( uint16_t connHandle, uint8_t changeType )
 {
-    /* Reset the PROV DATA OUT CCD Value */
+    /* Reset the PROV DATA OUT CCCD Value */
     if (MS_TRUE == changeType)
     {
         mesh_serv_set_cccd
         (
             connHandle,
-            MESH_PROV_DATA_OUT_CCD_HDL,
+            BLE_MESH_PROVS_DATA_OUT_CLI_CNFG_DESC_HDL,
             BLE_GATTS_CLI_CNFG_DEFAULT
         );
     }
@@ -544,13 +539,13 @@ static void mesh_prov_handle_conn( uint16_t connHandle, uint8_t changeType )
 
 static void mesh_proxy_handle_conn( uint16_t connHandle, uint8_t changeType )
 {
-    /* Reset the PROXY DATA OUT CCD Value */
+    /* Reset the PROXY DATA OUT CCCD Value */
     if (MS_TRUE == changeType)
     {
         mesh_serv_set_cccd
         (
             connHandle,
-            MESH_PROXY_DATA_OUT_CCD_HDL,
+            BLE_MESH_PROXYS_DATA_OUT_CLI_CNFG_DESC_HDL,
             BLE_GATTS_CLI_CNFG_DEFAULT
         );
     }

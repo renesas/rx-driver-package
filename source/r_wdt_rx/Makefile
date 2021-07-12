@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_wdt_rx
-VERSION = 		2.30
-MDF =			V2
+VERSION = 		2.40
+MDF = V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_usb_pcdc_mini
-VERSION = 		1.12
-MDF =			V2
+VERSION = 		1.20
+MDF = V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

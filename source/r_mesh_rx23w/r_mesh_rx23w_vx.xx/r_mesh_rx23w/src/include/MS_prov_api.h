@@ -22,34 +22,34 @@
 /* --------------------------------------------- Global Definitions */
 
 /**
- * \defgroup prov_module PROVISIONING (Mesh Provisioning Layer)
+ * \defgroup prov_module Provisioning Layer (PROV)
+ * \ingroup mesh_core_block
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
- *  Mesh Provisioning module to the Application and other upper
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
+ *  Mesh Provisioning (PROV) module to the Application and other upper
  *  layers of the stack.
- */
-
-/**
- * \defgroup prov_defines Defines
- * \{
- * Describes defines for the module.
  */
 
 /**
  * \defgroup prov_constants Constants
  * \{
- * Describes Constants defined by the module.
+ * \brief This section describes the EtherMind Mesh Provisiong Layer Constants.
  */
 
-/** Provisiong Roles */
+/** \name Provisiong Roles */
+/** \{ */
 #define PROV_ROLE_DEVICE                    0x01
 #define PROV_ROLE_PROVISIONER               0x02
+/** \} */
 
-/** Provisioning Bearer Types */
+/** \name Provisioning Bearer Types */
+/** \{ */
 #define PROV_BRR_ADV                        0x01
 #define PROV_BRR_GATT                       0x02
+/** \} */
 
-/** Provisioning PDU Types */
+/** \name Provisioning PDU Types */
+/** \{ */
 #define PROV_PDU_TYPE_INVITE                0x00
 #define PROV_PDU_TYPE_CAPAB                 0x01
 #define PROV_PDU_TYPE_START                 0x02
@@ -60,32 +60,41 @@
 #define PROV_PDU_TYPE_DATA                  0x07
 #define PROV_PDU_TYPE_COMPLETE              0x08
 #define PROV_PDU_TYPE_FAILED                0x09
+/** \} */
 
 /** Provisioning algorithm values */
 #define PROV_ALGO_EC_FIPS_P256              0x00
 
-/** Provisioning public key values */
+/** \name Provisioning public key values */
+/** \{ */
 #define PROV_PUBKEY_NO_OOB                  0x00
 #define PROV_PUBKEY_OOB                     0x01
+/** \} */
 
-/** Provisioning authentication method values */
+/** \name Provisioning authentication method values */
+/** \{ */
 #define PROV_AUTH_OOB_NONE                  0x00
 #define PROV_AUTH_OOB_STATIC                0x01
 #define PROV_AUTH_OOB_OUTPUT                0x02
 #define PROV_AUTH_OOB_INPUT                 0x03
+/** \} */
 
-/** Provisioning Output OOB action values */
+/** \name Provisioning Output OOB action values */
+/** \{ */
 #define PROV_OOOB_ACTION_BLINK              0x00
 #define PROV_OOOB_ACTION_BEEP               0x01
 #define PROV_OOOB_ACTION_VIBRATE            0x02
 #define PROV_OOOB_ACTION_NUMERIC            0x03
 #define PROV_OOOB_ACTION_ALPHANUMERIC       0x04
+/** \} */
 
-/** Provisioning Input OOB action values */
+/** \name Provisioning Input OOB action values */
+/** \{ */
 #define PROV_IOOB_ACTION_PUSH               0x00
 #define PROV_IOOB_ACTION_TWIST              0x01
 #define PROV_IOOB_ACTION_NUMERIC            0x02
 #define PROV_IOOB_ACTION_ALPHANUMERIC       0x03
+/** \} */
 
 /** Provisioning algorithm support masks */
 #define PROV_MASK_ALGO_EC_FIPS_P256         (1 << 0)
@@ -96,18 +105,22 @@
 /** Provisioning static oob supported type masks */
 #define PROV_MASK_STATIC_OOBINFO            (1 << 0)
 
-/** Output OOB actions supported masks */
+/** \name Output OOB actions supported masks */
+/** \{ */
 #define PROV_MASK_OOOB_ACTION_BLINK         (1 << 0)
 #define PROV_MASK_OOOB_ACTION_BEEP          (1 << 1)
 #define PROV_MASK_OOOB_ACTION_VIBRATE       (1 << 2)
 #define PROV_MASK_OOOB_ACTION_NUMERIC       (1 << 3)
 #define PROV_MASK_OOOB_ACTION_ALPHANUMERIC  (1 << 4)
+/** \} */
 
-/** Input OOB actions supported masks */
+/** \name Input OOB actions supported masks */
+/** \{ */
 #define PROV_MASK_IOOB_ACTION_PUSH          (1 << 0)
 #define PROV_MASK_IOOB_ACTION_TWIST         (1 << 1)
 #define PROV_MASK_IOOB_ACTION_NUMERIC       (1 << 2)
 #define PROV_MASK_IOOB_ACTION_ALPHANUMERIC  (1 << 3)
+/** \} */
 
 /**
  * \defgroup prov_control Control Constants
@@ -166,7 +179,8 @@
  * Describes Error Codes defined by the specification.
  */
 
-/** Provisioning Failure Error Codes */
+/** \name Provisioning Failure Error Codes */
+/** \{ */
 #define PROV_ERR_PROHIBITED                 0x00
 #define PROV_ERR_INVALID_PDU                0x01
 #define PROV_ERR_INVALID_FORMAT             0x02
@@ -176,19 +190,26 @@
 #define PROV_ERR_DECRYPTION_FAILED          0x06
 #define PROV_ERR_UNEXPECTED_ERROR           0x07
 #define PROV_ERR_CANNOT_ASSIGN_ADDRESS      0x08
+/** \} */
 
-/** Provisioning LinkClose Error codes */
+/** \name Provisioning LinkClose Error codes */
+/** \{ */
 #define PROV_CLOSE_REASON_SUCCESS           0x00
 #define PROV_CLOSE_REASON_TIMEOUT           0x01
 #define PROV_CLOSE_REASON_FAIL              0x02
 /** \} */
 
-/** Provisioning array size requirements */
+/** \} */
+
+/** \name Provisioning array size requirements */
+/** \{ */
 #define PROV_KEY_NETKEY_SIZE                16
 #define PROV_OOB_VALUE_SIZE                 16
 #define PROV_URI_HASH_SIZE                  4
+/** \} */
 
-/** Provisioning OOB type masks for ADV data */
+/** \name Provisioning OOB type masks for ADV data */
+/** \{ */
 #define PROV_OOB_TYPE_OTHER                 (1 << 0)
 #define PROV_OOB_TYPE_URI                   (1 << 1)
 #define PROV_OOB_TYPE_2DMRC                 (1 << 2)
@@ -201,6 +222,7 @@
 #define PROV_OOB_TYPE_ONPIECEOFPAPER        (1 << 13)
 #define PROV_OOB_TYPE_INSIDEMANUAL          (1 << 14)
 #define PROV_OOB_TYPE_ONDEVICE              (1 << 15)
+/** \} */
 
 /** Invalid Provisioning Handle */
 #define PROV_HANDLE_INVALID                 0xFF
@@ -210,7 +232,7 @@
 /**
  *  \defgroup prov_events Events
  *  \{
- *  This section lists the Asynchronous Events notified to Application by the
+ *  \brief This section lists the Asynchronous Events notified to Application by the
  *  Module.
  */
 
@@ -355,18 +377,12 @@
 
 /** \} */
 
-/** \} */
-
 /* --------------------------------------------- Structures/Data Types */
 
 /**
- *  \addtogroup prov_defines Defines
+ *  \defgroup prov_types_structures Types/Structures
  *  \{
- */
-
-/**
- *  \defgroup prov_structures Structures
- *  \{
+ *  \brief This section describes the EtherMind Mesh Provisioning Layer Types/Structures.
  */
 
 /** Role of the device */
@@ -477,12 +493,11 @@ typedef struct _PROV_DATA_S
 } PROV_DATA_S;
 
 /** \} */
-/** \} */
 
 /**
  *  \defgroup prov_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
+ *  \brief This section Describes the module Notification Callback interface offered
  *  to the application
  */
 
@@ -513,7 +528,7 @@ typedef API_RESULT (* PROV_UI_NOTIFY_CB)
 /**
  *  \defgroup prov_marcos Utility Macros
  *  \{
- *  Initialization and other Utility Macros offered by the module.
+ *  \brief Initialization and other Utility Macros offered by the module.
  */
 
 /**
@@ -637,7 +652,7 @@ typedef API_RESULT (* PROV_UI_NOTIFY_CB)
 /**
  * \defgroup prvsng_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Provisioning Layer APIs.
+ * \brief This section describes the EtherMind Mesh Provisioning Layer APIs.
  */
 
 #ifdef __cplusplus

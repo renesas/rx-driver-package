@@ -15,7 +15,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2015 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_can_rx_config_reference.h
@@ -29,10 +29,14 @@
 *         : 8.14.2017  2.12    Release version for 65N 2MB. Bug fix in r_can_rx.c.
 *         : 27.04.2018 2.13WS  - Added RX66T
 *         : 26.09.2018 2.13    Revised r_can_rx_config_reference.h for use with Smart Configurator
-*         : 08.01.2019 2.15   - Added RX72T
-*         : 30.04.2019 3.10   - Added RX72M
-*         : 30.12.2019 3.20   - Added support RX66N, RX72N
-*         :                   - Fixed to comply with GSCE Coding Standards Rev.6.00.
+*         : 08.01.2019 2.15    - Added RX72T
+*         : 30.04.2019 3.10    - Added RX72M
+*         : 30.12.2019 3.20    - Added support RX66N, RX72N.
+*         :                    - Fixed to comply with GSCE Coding Standards Rev.6.00.
+*         : 13.06.2020 4.00    - Added support CAN FIFO.
+*         :                    - Removed macros related to Pin-setting.
+*         :                    - Removed wrong parentheses at value of macros for STB/EN Port/pin.
+*         : 01.04.2021 5.00    - Added support for setting different bitrate for different channels.
 ***********************************************************************************************************************/
 #ifndef CAN_CONFIG_HEADER_FILE
 #define CAN_CONFIG_HEADER_FILE
@@ -46,6 +50,16 @@ Configuration Options
 /* Set to 0 to use the CAN interrupts. Set to 1 if you want to poll CAN 
 mailboxes for messages sent and received. */
 #define USE_CAN_POLL        (0)   /* 1 polled mode, 0 use interrupts (=default). */
+
+/* Transmit FIFO Interrupt Generation Timing Control:
+   0 when every time transmission is completed (=default), 
+   1 when the transmit FIFO becomes empty due to completion of transmission. */
+#define CAN_CFG_TXFIFO_INT_GEN_TIMING        (0) 
+
+/* Receive FIFO Interrupt Generation Timing Control:
+   0 when every time reception is completed (=default), 
+   1 when the receive FIFO becomes buffer warning by completion of reception. */
+#define CAN_CFG_RXFIFO_INT_GEN_TIMING        (0)
 
 /* Level */
 #define CAN0_INT_LVL        (2)
@@ -75,16 +89,10 @@ mailboxes for messages sent and received. */
  * Pins defined here for unused CAN channels are ignored and remain available for other uses.
  ***********************************************************************************************************************/
 #define CAN_USE_CAN0    (1)
-#define CAN0_RX_PORT    (P33) /* Options for RX64M, RX65N, RX71M, RX72M, RX72N, RX66N: P33, PD2. RX72T, RX66T: P22, PA1, PA7, PB6, PC6, PE0, PF3 */
-#define CAN0_TX_PORT    (P32) /* Options for RX64M, RX65N, RX71M, RX72M, RX72N, RX66N: P32, PD1. RX72T, RX66T: P23, PA0, PA6, PB5, PC5, PD7, PF2 */
 
 #define CAN_USE_CAN1    (0)
-#define CAN1_RX_PORT    (P15) /* Options for RX64M, RX65N, RX71M, RX72M, RX72N, RX66N: P15, P55. */
-#define CAN1_TX_PORT    (P14) /* Options for RX64M, RX65N, RX71M, RX72M, RX72N, RX66N: P14, P54. */
 
 #define CAN_USE_CAN2    (0)
-#define CAN2_RX_PORT    (P67) /* RX64M, RX71M, RX72M, RX72N, RX66N only */
-#define CAN2_TX_PORT    (P66) /* RX64M, RX71M, RX72M, RX72N, RX66N only */
 
 
 /**********************************************************************************************************************
@@ -94,85 +102,43 @@ mailboxes for messages sent and received. */
 #define CAN_USE_CAN0_STANDBY_ENABLE_PINS (0)
 #if (CAN_USE_CAN0_STANDBY_ENABLE_PINS == 1)
 /* Configure CAN0 STBn GPIO output pin. */
-    #define CAN0_TRX_STB_PORT       (0)
-    #define CAN0_TRX_STB_PIN        (0)
-    #define CAN0_TRX_STB_LVL        (0)  /* Choose High or Low active state for CAN Transceiver standby pin. */
+    #define CAN0_TRX_STB_PORT       0
+    #define CAN0_TRX_STB_PIN        0
+    #define CAN0_TRX_STB_LVL        0   /* Choose High or Low active state for CAN Transceiver standby pin. */
 
     /* Configure CAN0 EN GPIO output pin. */
-    #define CAN0_TRX_ENABLE_PORT    (0)
-    #define CAN0_TRX_ENABLE_PIN     (0)
-    #define CAN0_TRX_ENABLE_LVL     (0)   /* Choose High or Low active state for CAN Transceiver standby pin. */
+    #define CAN0_TRX_ENABLE_PORT    0
+    #define CAN0_TRX_ENABLE_PIN     0
+    #define CAN0_TRX_ENABLE_LVL     0   /* Choose High or Low active state for CAN Transceiver standby pin. */
 #endif
 
 #define CAN_USE_CAN1_STANDBY_ENABLE_PINS (0)
 #if (CAN_USE_CAN1_STANDBY_ENABLE_PINS == 1)
     /* Configure CAN1 STBn GPIO output pin.
     Output. High = not standby. */
-    #define CAN1_TRX_STB_PORT       (0)
-    #define CAN1_TRX_STB_PIN        (0)
-    #define CAN1_TRX_STB_LVL        (0)   /* Choose High or Low active state for CAN Transceiver standby pin. */
+    #define CAN1_TRX_STB_PORT       0
+    #define CAN1_TRX_STB_PIN        0
+    #define CAN1_TRX_STB_LVL        0   /* Choose High or Low active state for CAN Transceiver standby pin. */
 
     /* Configure CAN1 EN GPIO output pin. */
-    #define CAN1_TRX_ENABLE_PORT    (0)
-    #define CAN1_TRX_ENABLE_PIN     (0)
-    #define CAN1_TRX_ENABLE_LVL     (0)  /* Choose High or Low active state for CAN Transceiver standby pin. */
+    #define CAN1_TRX_ENABLE_PORT    0
+    #define CAN1_TRX_ENABLE_PIN     0
+    #define CAN1_TRX_ENABLE_LVL     0   /* Choose High or Low active state for CAN Transceiver standby pin. */
 #endif
 
 #define CAN_USE_CAN2_STANDBY_ENABLE_PINS (0)
 #if (CAN_USE_CAN2_STANDBY_ENABLE_PINS == 1)
     /* Configure CAN2 STB GPIO output pin.
     Output. High = not standby. */
-    #define CAN2_TRX_STB_PORT       (0)
-    #define CAN2_TRX_STB_PIN        (0)
-    #define CAN2_TRX_STB_LVL        (0)   /* Choose High or Low active state for CAN Transceiver standby pin. */
+    #define CAN2_TRX_STB_PORT       0
+    #define CAN2_TRX_STB_PIN        0
+    #define CAN2_TRX_STB_LVL        0   /* Choose High or Low active state for CAN Transceiver standby pin. */
 
     /* Configure CAN2 EN GPIO output pin. */
-    #define CAN2_TRX_ENABLE_PORT    (0)
-    #define CAN2_TRX_ENABLE_PIN     (0)
-    #define CAN2_TRX_ENABLE_LVL     (0)   /* Choose High or Low active state for CAN Transceiver standby pin. */
+    #define CAN2_TRX_ENABLE_PORT    0
+    #define CAN2_TRX_ENABLE_PIN     0
+    #define CAN2_TRX_ENABLE_LVL     0   /* Choose High or Low active state for CAN Transceiver standby pin. */
 #endif
-
-
-/**********************************************************************************************************************
- * CAN BITRATE Settings **
- * See 'CAN Communication Speed Setting', and 'Bit Rate' sections in HW-manual.
- *
- * CCLKS is 0 => running on PCLK which is PCLKB, that is,
- * FCAN = PCLK = PCLKB.
- * CAN_BRP = Baudrate prescaling.
- * FCANCLK = FCAN / CAN_BRP
- * P = value selected in BRP[9:0] bits in BCR (P = 0 to 1023). P + 1 = CAN_BRP.
- * TQTOT = Nr CAN clocks in one CAN bit = FCANCLK/BITRATE.
- *
- * With CCLKS = 0, and using r_bsp macros we get:
- * FCAN = (BSP_CFG_XTAL_HZ * BSP_CFG_PLL_MUL / BSP_CFG_PCKB_DIV)   (Eq. 1)
- * TQTOT = (FCAN/(CAN_BRP * BITRATE))                              (Eq. 2)
- *
- * Eq. (1) in (2):
- * TQTOT = (BSP_CFG_XTAL_HZ * BSP_CFG_PLL_MUL / BSP_CFG_PCKB_DIV)/(CAN_BRP * BITRATE)), or
- * TQTOT = (BSP_CFG_XTAL_HZ * BSP_CFG_PLL_MUL)/(CAN_BRP * BITRATE * BSP_CFG_PCKB_DIV) (Eq. 3)
- ***********************************************************************************************************************/
-    /* Example A). Desired baudrate 500 kbps.
-     * Try CAN_BRP = 4. Equation 3:
-     * TQTOT = (24000000 * 10)/(4 * 500000 * 4) = 30. This is too large. TQTOT can be max 25.
-     * Try CAN_BRP = 5.
-     * TQTOT = (BSP_CFG_XTAL_HZ * BSP_CFG_PLL_MUL)/(CAN_BRP * BITRATE * BSP_CFG_PCKB_DIV) =
-     * = (24000000 * 10)/(5 * 500000 * 4) = ***24***
-     * TQTOT = 24 = TSEG1 + TSEG2 + SS:
-     *  Try:
-     *      SS = 1 Tq always.
-     *      TSEG1 = 15 Tq
-     *      TSEG2 = 8 Tq
-     *      ============
-     *      SUM = 24
-     */
-#define BITRATE    (500000)
-#define CAN_BRP     (5)
-#define CAN_TSEG1   (15)
-#define CAN_TSEG2   (8)
-#define CAN_SJW     (2) /* Re-synchronization Control (SJW) should be 1-4 Tq (must be <=TSEG2). */
-
-/** End bitrate setting. **************************************************************************/
 
 
 /* Max loops to poll a CAN register bit for expected value. If you are using 

@@ -19,12 +19,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2011-2021 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 
 /*******************************************************************************
 * File Name     : t4_driver.c
-* Version       : 1.08
+* Version       : 1.09
 * Tool-Chain    : C/C++ Compiler Package for RX Family
 * Description   : T4 ethernet driver interface program.
 ******************************************************************************/
@@ -43,6 +43,8 @@
 *               : 10.12.2018 ----   Fixed Random number conflict.
 *               :                   Fixed IP address conflict.
 *               : 20.06.2019 ----   Added support GCC RX compiler and IAR RX compiler .
+*               : 29.01.2021 ----   Updated operation of random number generator.
+*                                   Added hash value generation function.
 ******************************************************************************/
 
 /******************************************************************************
@@ -55,6 +57,23 @@ Includes <System Includes> , "Project Includes"
 #include "r_t4_itcpip.h"
 #include "r_ether_rx_if.h"
 #include "timer.h"
+
+#if R_BSP_VERSION_MAJOR < 5
+#error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
+#endif
+#if (defined BSP_MCU_RX231 || defined BSP_MCU_RX23W) && (BSP_CFG_MCU_PART_VERSION == 0xB)  /* B */
+#include "r_tsip_rx_if.h"
+#elif (defined BSP_MCU_RX66T || defined BSP_MCU_RX72T) && ((BSP_CFG_MCU_PART_FUNCTION == 0xE /* E */) || \
+    (BSP_CFG_MCU_PART_FUNCTION == 0xF /* F */) || (BSP_CFG_MCU_PART_FUNCTION == 0x10 /* G */))
+#include "r_tsip_rx_if.h"
+#elif (defined BSP_MCU_RX65N || defined BSP_MCU_RX651) && (BSP_CFG_MCU_PART_ENCRYPTION_INCLUDED == true)
+#include "r_tsip_rx_if.h"
+#elif (defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N) && \
+    (BSP_CFG_MCU_PART_FUNCTION == 0x11 /* H */)
+#include "r_tsip_rx_if.h"
+#else
+#warning "Your MCU does not support TSIP functions. It is better to use RX Family that support TSIP functions for more security. Vulnerability reference: https://www.ipa.go.jp/security/rfc/RFC1948EN.html"
+#endif  /* defined BSP_MCU_RX231 || defined BSP_MCU_RX23W && BSP_CFG_MCU_PART_VERSION == 0xB */
 
 #if   BSP_CFG_RTOS_USED == 0    // Non-OS
 #elif BSP_CFG_RTOS_USED == 1    // FreeRTOS
@@ -82,6 +101,11 @@ Macro definitions
 #define IP_TYPE_TCP  0
 #define IP_TYPE_UDP  1
 
+#ifdef R_TSIP_RX_HEADER_FILE
+#define R_T4_DRIVER_RX_HASH_LENGTH R_TSIP_SHA256_HASH_LENGTH_BYTE_SIZE
+#else
+#define R_T4_DRIVER_RX_HASH_LENGTH 32
+#endif
 
 /******************************************************************************
 Exported global variables and functions (to be accessed by other files)
@@ -539,10 +563,51 @@ UH get_timer(void)
 }
 
 /******************************************************************************
-Functions : random number generator(XorShift method)
+Functions : random number generator
+            (Used TSIP when the MCU has TSIP, otherwise XorShift method)
 ******************************************************************************/
 void get_random_number(UB *data, UW len)
 {
+#ifdef R_TSIP_RX_HEADER_FILE
+    e_tsip_err_t  tsip_ret;
+    uint32_t org_random[4];
+    UW loop_cnt = 0;
+    UW out_len = 0;
+
+    loop_cnt = len;
+    memset( &org_random, 0, sizeof(org_random) );
+
+    /* WAIT_LOOP */
+    while ( loop_cnt > 0U )
+    {
+        if ( loop_cnt > 16 )
+        {
+            out_len = 16;
+            loop_cnt -= 16;
+        }
+        else
+        {
+            out_len = len;
+            loop_cnt = 0;
+        }
+
+        tsip_ret = R_TSIP_GenerateRandomNumber(&org_random[0]);
+
+        memcpy(data, &org_random[0], out_len);
+
+        data += out_len;
+
+        if(TSIP_SUCCESS != tsip_ret)
+        {
+            /* WAIT_LOOP */
+            while(1)
+            {
+                /* Processing at the time of the error */
+                R_BSP_NOP();
+            }
+        }
+    }
+#else
     static uint32_t y = 2463534242;
     static uint32_t *z = (uint32_t *)&_myethaddr[0][2];
     uint32_t res;
@@ -611,6 +676,92 @@ void get_random_number(UB *data, UW len)
             /* no op */
             break;
     }
+#endif
+}
+
+/******************************************************************************
+Functions : hash value generator
+            (Used SHA256 by TSIP when the MCU has TSIP, or XOR calculation for random number)
+******************************************************************************/
+void get_hash_value(UB lan_port_no, UB *message, UW message_len, UB **hash, UW *hash_len)
+{
+    static UB hash_result[ETHER_CHANNEL_MAX][R_T4_DRIVER_RX_HASH_LENGTH];
+    UW hash_result_len = R_T4_DRIVER_RX_HASH_LENGTH;
+
+#ifdef R_TSIP_RX_HEADER_FILE
+    e_tsip_err_t tsip_ret;
+    tsip_sha_md5_handle_t sha256_handle; /* TSIP SHA256 handle */
+#else
+    UW hash_result_index = 0;
+    UW loop_cnt = 0;
+    UW hash_block_cnt = message_len / R_T4_DRIVER_RX_HASH_LENGTH;
+    UW hash_block_odd = message_len % R_T4_DRIVER_RX_HASH_LENGTH;
+    UB random_value[R_T4_DRIVER_RX_HASH_LENGTH];
+#endif
+
+    if(ETHER_CHANNEL_MAX < lan_port_no)
+    {
+        /* WAIT_LOOP */
+        while(1)
+        {
+        R_BSP_NOP();    /* Channel error */
+        }
+    }
+
+#ifdef R_TSIP_RX_HEADER_FILE
+    /* SHA256 */
+    tsip_ret = R_TSIP_Sha256Init(&sha256_handle);
+    if (TSIP_SUCCESS == tsip_ret)
+    {
+        tsip_ret = R_TSIP_Sha256Update(&sha256_handle, message, message_len);
+    }
+    if (TSIP_SUCCESS == tsip_ret)
+    {
+        tsip_ret = R_TSIP_Sha256Final(&sha256_handle, &hash_result[lan_port_no][0], &hash_result_len);
+    }
+    if (TSIP_SUCCESS != tsip_ret)
+    {
+        while (1)
+        {
+            R_BSP_NOP();    /* Processing at the time of the error */
+        }
+    }
+#else
+    memset(hash_result, 0x0, sizeof(hash_result));
+    
+    if (message_len >= R_T4_DRIVER_RX_HASH_LENGTH)
+    {
+        /* XOR calculation to self by R_T4_DRIVER_RX_HASH_LENGTH */
+        /* WAIT_LOOP */
+        for (loop_cnt = 0; loop_cnt < hash_block_cnt; loop_cnt++)
+        {
+            for (hash_result_index = 0; hash_result_index < R_T4_DRIVER_RX_HASH_LENGTH; hash_result_index++)
+            {
+                hash_result[lan_port_no][hash_result_index] ^= message[(R_T4_DRIVER_RX_HASH_LENGTH * loop_cnt) + hash_result_index];
+            }
+        }
+    }
+
+    /* XOR calculation to self for fraction */
+    /* WAIT_LOOP */
+    for (hash_result_index = 0; hash_result_index < hash_block_odd; hash_result_index++)
+    {
+        hash_result[lan_port_no][hash_result_index] ^= message[(R_T4_DRIVER_RX_HASH_LENGTH * hash_block_cnt) + hash_result_index];
+    }
+
+    /* Get random value */
+    get_random_number(&random_value[0], R_T4_DRIVER_RX_HASH_LENGTH - hash_block_odd);
+    
+    /* XOR calculation by random value */
+    /* WAIT_LOOP */
+    for (hash_result_index = hash_block_odd; hash_result_index < R_T4_DRIVER_RX_HASH_LENGTH; hash_result_index++)
+    {
+        hash_result[lan_port_no][hash_result_index] ^= random_value[hash_result_index - hash_block_odd];
+    }
+#endif
+
+    *hash = &hash_result[lan_port_no][0];
+    *hash_len = hash_result_len;
 }
 
 /***********************************************************************************************************************

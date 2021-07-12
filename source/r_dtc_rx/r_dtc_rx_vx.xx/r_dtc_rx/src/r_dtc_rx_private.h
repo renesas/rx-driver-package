@@ -50,6 +50,7 @@
 *         : 15.08.2019 3.20    Added support for RX72M.
 *         : 25.11.2019 3.30    Added support for RX13T.
 *         : 30.12.2019 3.40    Added support for RX66N, RX72N.
+*         : 31.03.2020 3.50    Added support for RX23E-A.
 *******************************************************************************/
 #ifndef DTC_RX_PRIVATE_H
 #define DTC_RX_PRIVATE_H
@@ -146,6 +147,11 @@ Includes   <System Includes> , "Project Includes"
     #endif
 #elif defined(BSP_MCU_RX231)
     #include ".\src\targets\rx231\r_dtc_rx_target.h"
+    #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
+        #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
+#elif defined(BSP_MCU_RX23E_A)
+    #include ".\src\targets\rx23e-a\r_dtc_rx_target.h"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif

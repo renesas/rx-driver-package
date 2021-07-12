@@ -23,6 +23,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 18.02.2014 1.00    First Release
+*         : 15.01.2021 3.70    Removed PH7 for RX113.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -76,7 +77,7 @@ const uint8_t g_gpio_open_drain_n_support[GPIO_INFO_NUM_PORTS] =
     0xFF,     //PORTE   PE0 to PE7
     0x00,     //PORTF   None
     0x00,     //PORTG
-    0x00,     //PORTH   None
+    0x00,     //PORTH
     0x08,     //PORTJ   PJ3
 };
 
@@ -122,7 +123,7 @@ const uint8_t g_gpio_pull_up_support[GPIO_INFO_NUM_PORTS] =
     0xFF,     //PORTE   PE0 to PE7
     0xC0,     //PORTF   PF6, PF7
     0x00,     //PORTG
-    0x00,     //PORTH   None
+    0x00,     //PORTH
     0x0F,     //PORTJ   PJ0 to PJ3
 };
 #endif

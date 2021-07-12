@@ -24,6 +24,7 @@
 * History : DD.MM.YYYY Version  Description
 *         : 29.03.2019 1.00     First Release
 *         : 31.07.2019 1.01     Fixed the initial value of port setting of Port 1, 2, and 3.
+*         : 31.07.2020 1.02    Added support for RX23W with 83 pin package.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -40,7 +41,7 @@ Macro definitions
  * is non-existent then its value is set to a 1. These values are then ORed into the
  * direction registers to set non-existent pins as outputs which can help save power.
  */
-#if   (BSP_PACKAGE_PINS == 85)
+#if   (BSP_PACKAGE_PINS == 85) || (BSP_PACKAGE_PINS == 83)
     /* HW Manual Table 21.3 */
     #define BSP_PRV_PORT0_NE_PIN_MASK     (0x57)
     #define BSP_PRV_PORT1_NE_PIN_MASK     (0x03)

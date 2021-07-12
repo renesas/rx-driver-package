@@ -20,9 +20,10 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup generic_battery_module GENERIC_BATTERY (Mesh Generic Battery Model)
+ * \defgroup generic_battery_module Generic Battery Model (GENERIC_BATTERY)
+ * \ingroup mesh_models_block
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Generic Battery Model (GENERIC_BATTERY) module to the Application.
  */
 
@@ -32,7 +33,7 @@
 /**
  *  \defgroup generic_battery_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
+ *  \brief This section Describes the module Notification Callback interface offered
  *  to the application
  */
 
@@ -64,14 +65,14 @@ typedef API_RESULT (* MS_GENERIC_BATTERY_SERVER_CB)
  * Generic Battery Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_GENERIC_BATTERY_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -81,6 +82,7 @@ typedef API_RESULT (* MS_GENERIC_BATTERY_CLIENT_CB)
 /**
  *  \defgroup generic_battery_structures Structures
  *  \{
+ *  \brief This section describes the EtherMind Mesh Generic Battery Model Structures.
  */
 
 /**
@@ -146,12 +148,12 @@ typedef struct MS_generic_battery_status_struct
 /**
  * \defgroup generic_battery_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Generic Battery Model APIs.
+ * \brief This section describes the EtherMind Mesh Generic Battery Model APIs.
  */
 /**
- * \defgroup generic_battery_ser_api_defs Generic Battery Server API Definitions
+ * \defgroup generic_battery_ser_api_defs Generic Battery Server API
  * \{
- * This section describes the Generic Battery Server APIs.
+ * \brief This section describes the Generic Battery Server APIs.
  */
 
 /**
@@ -204,9 +206,9 @@ API_RESULT MS_generic_battery_server_state_update
 /** \} */
 
 /**
- * \defgroup generic_battery_cli_api_defs Generic Battery Client API Definitions
+ * \defgroup generic_battery_cli_api_defs Generic Battery Client API
  * \{
- * This section describes the Generic Battery Client APIs.
+ * \brief This section describes the Generic Battery Client APIs.
  */
 
 /**
@@ -268,6 +270,9 @@ API_RESULT MS_generic_battery_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
+/** \name Macros for Message
+ *  \{
+ */
 /**
  *  \brief API to get the Generic Battery state of an element.
  *
@@ -285,6 +290,7 @@ API_RESULT MS_generic_battery_client_send_reliable_pdu
             NULL,\
             MS_ACCESS_GENERIC_BATTERY_STATUS_OPCODE\
         )
+/** \} */
 /** \} */
 /** \} */
 /** \} */

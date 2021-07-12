@@ -33,6 +33,7 @@
 *           28.06.2019 2.10    Added support for RX23W
 *           15.08.2019 2.20    Added support for RX72M
 *           30.12.2019 2.30    Added support RX66N, RX72N.
+*           30.06.2020 3.60    Changed revision to reflect demo upgrade.
 ***********************************************************************************************************************/
 
 #ifndef WDT_RX_IF_H
@@ -56,7 +57,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define WDT_RX_VERSION_MAJOR   (2)
-#define WDT_RX_VERSION_MINOR   (30)
+#define WDT_RX_VERSION_MINOR   (40)
 
 #define OFS0_WDT_DISABLED              (0x00020000)
 

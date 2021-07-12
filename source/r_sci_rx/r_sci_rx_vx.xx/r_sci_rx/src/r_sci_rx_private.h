@@ -29,6 +29,8 @@
 *           28.06.2019 3.10    Added support for RX23W
 *           15.08.2019 3.20    Added support received data match function for RX72M (SCI0 to SCI11).
 *                              Added support FIFO mode for RX72M (SCI7 to SCI11).
+*           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
+*                              Merged IrDA functionality to SCI FIT.
 ***********************************************************************************************************************/
 
 #ifndef SCI_RX_H
@@ -38,6 +40,14 @@
 Includes   <System Includes> , "Project Includes"
 ***********************************************************************************************************************/
 #include "../r_sci_rx_if.h"
+#if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+#include "r_dtc_rx_if.h"
+#include "r_sci_rx_dtc.h"
+#endif
+#if ((TX_DTC_DMACA_ENABLE & 0x02) || (RX_DTC_DMACA_ENABLE & 0x02))
+#include "r_dmaca_rx_if.h"
+#include "r_sci_rx_dmaca.h"
+#endif
 
 /***********************************************************************************************************************
 Macro definitions
@@ -109,6 +119,9 @@ Macro definitions
 #define SCI_SSRFIFO_FER  (hdl->rom->regs->SSRFIFO.BIT.FER)
 #define SCI_SSRFIFO_RDF  (hdl->rom->regs->SSRFIFO.BIT.RDF)
 #define SCI_SSRFIFO      (hdl->rom->regs->SSRFIFO.BYTE)
+#define SCI_PRV_RX_FIFO_THRESHOLD   (hdl->rom->regs->FCR.BIT.RTRG)
+#define SCI_PRV_RX_FIFO_USED_CNT    (hdl->rom->regs->FDR.BIT.R)
+#define SCI_PRV_TX_FIFO_USED_CNT    (hdl->rom->regs->FDR.BIT.T)
 #endif
 #define SCI_SSR_ORER     (hdl->rom->regs->SSR.BIT.ORER)
 #define SCI_SSR_PER      (hdl->rom->regs->SSR.BIT.PER)
@@ -168,7 +181,7 @@ Typedef definitions
 /*****************************************************************************
 Private global variables and functions
 ******************************************************************************/
-#if (SCI_CFG_ASYNC_INCLUDED)
+#if ((SCI_CFG_ASYNC_INCLUDED) || (TX_DTC_DMACA_ENABLE | RX_DTC_DMACA_ENABLE) || (SCI_CFG_IRDA_INCLUDED))
 extern void txi_handler(sci_hdl_t const hdl);
 #endif
 
@@ -182,3 +195,44 @@ extern void eri_handler(sci_hdl_t const hdl);
 
 #endif /* SCI_RX_H */
 
+#if   defined(BSP_MCU_RX23T)
+    #if ((SCI_DMACA_ENABLE == (TX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)) || (SCI_DMACA_ENABLE == (RX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)))
+        #error "This MCU does not have DMAC module."
+        #error "Change to SCI_CFG_CHxx_TX_DTC_DMACA_ENABLE and SCI_CFG_CHxx_RX_DTC_DMACA_ENABLE (1) or (0) in r_sci_rx_config.h."
+    #endif
+#elif defined(BSP_MCU_RX24T)
+    #if ((SCI_DMACA_ENABLE == (TX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)) || (SCI_DMACA_ENABLE == (RX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)))
+        #error "This MCU does not have DMAC module."
+        #error "Change to SCI_CFG_CHxx_TX_DTC_DMACA_ENABLE and SCI_CFG_CHxx_RX_DTC_DMACA_ENABLE (1) or (0) in r_sci_rx_config.h."
+    #endif
+#elif defined(BSP_MCU_RX24U)
+    #if ((SCI_DMACA_ENABLE == (TX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)) || (SCI_DMACA_ENABLE == (RX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)))
+        #error "This MCU does not have DMAC module."
+        #error "Change to SCI_CFG_CHxx_TX_DTC_DMACA_ENABLE and SCI_CFG_CHxx_RX_DTC_DMACA_ENABLE (1) or (0) in r_sci_rx_config.h."
+    #endif
+#elif defined(BSP_MCU_RX130)
+    #if ((SCI_DMACA_ENABLE == (TX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)) || (SCI_DMACA_ENABLE == (RX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)))
+        #error "This MCU does not have DMAC module."
+        #error "Change to SCI_CFG_CHxx_TX_DTC_DMACA_ENABLE and SCI_CFG_CHxx_RX_DTC_DMACA_ENABLE (1) or (0) in r_sci_rx_config.h."
+    #endif
+#elif defined(BSP_MCU_RX13T)
+    #if ((SCI_DMACA_ENABLE == (TX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)) || (SCI_DMACA_ENABLE == (RX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)))
+        #error "This MCU does not have DMAC module."
+        #error "Change to SCI_CFG_CHxx_TX_DTC_DMACA_ENABLE and SCI_CFG_CHxx_RX_DTC_DMACA_ENABLE (1) or (0) in r_sci_rx_config.h."
+    #endif
+#elif defined(BSP_MCU_RX113)
+    #if ((SCI_DMACA_ENABLE == (TX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)) || (SCI_DMACA_ENABLE == (RX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)))
+        #error "This MCU does not have DMAC module."
+        #error "Change to SCI_CFG_CHxx_TX_DTC_DMACA_ENABLE and SCI_CFG_CHxx_RX_DTC_DMACA_ENABLE (1) or (0) in r_sci_rx_config.h."
+    #endif
+#elif defined(BSP_MCU_RX111)
+    #if ((SCI_DMACA_ENABLE == (TX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)) || (SCI_DMACA_ENABLE == (RX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)))
+        #error "This MCU does not have DMAC module."
+        #error "Change to SCI_CFG_CHxx_TX_DTC_DMACA_ENABLE and SCI_CFG_CHxx_RX_DTC_DMACA_ENABLE (1) or (0) in r_sci_rx_config.h."
+    #endif
+#elif defined(BSP_MCU_RX110)
+    #if ((SCI_DMACA_ENABLE == (TX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)) || (SCI_DMACA_ENABLE == (RX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)))
+        #error "This MCU does not have DMAC module."
+        #error "Change to SCI_CFG_CHxx_TX_DTC_DMACA_ENABLE and SCI_CFG_CHxx_RX_DTC_DMACA_ENABLE (1) or (0) in r_sci_rx_config.h."
+    #endif
+#endif

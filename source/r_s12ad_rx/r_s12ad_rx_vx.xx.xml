@@ -52,6 +52,7 @@
         <version>4.11.01</version>
         <version>4.12.01</version>
         <version>4.13.01</version>
+        <version>4.14.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -69,7 +70,10 @@
         <group omit_board="true">RX230</group>
         <group omit_board="true">RX231</group>
         <group omit_board="true">RX23E-A</group>
+        <group omit_board="true">RX23T</group>
         <group omit_board="true">RX23W</group>
+        <group omit_board="true">RX24T</group>
+        <group omit_board="true">RX24U</group>
         <group omit_board="true">RX631</group>
         <group omit_board="true">RX64M</group>
         <group omit_board="true">RX65N</group>
@@ -86,11 +90,11 @@
     <package>
         <type>fitmodule</type>
         <name>r_s12ad_rx</name>
-        <version>4.50</version>
-        <zipsource>r_s12ad_rx_v4.50.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_s12ad_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.51</version>
+            <version>5.62</version>
         </dependency>
         <application>Analog</application>
         <application>Motor Control</application>

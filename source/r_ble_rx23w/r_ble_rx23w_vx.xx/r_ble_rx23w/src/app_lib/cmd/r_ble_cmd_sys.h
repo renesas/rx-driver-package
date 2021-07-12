@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020  Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 /*******************************************************************************************************************//**
@@ -54,7 +54,12 @@ extern ble_event_cb_t g_ble_host_reset_cb;
 
 /** @brief ble command definition. */
 extern const st_ble_cli_cmd_t g_ble_cmd;
+/*@}*/
 
+/** @defgroup cmd_sys_func Functions
+ *  @{
+ *  @brief Function definition
+ */
 /*******************************************************************************************************************//**
  * @brief Register a callback for "ble reset" command.
  * @details
@@ -63,8 +68,7 @@ extern const st_ble_cli_cmd_t g_ble_cmd;
  * @retval  none
 ***********************************************************************************************************************/
 void R_BLE_CMD_SetResetCb(ble_event_cb_t reset_cb);
-
 /*@}*/
 
 #endif /* R_BLE_CMD_SYS_H */
-/*@}*/
+/** @} */

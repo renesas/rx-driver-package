@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>3.01.00</version>
+        <version>3.02.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>4.08.04.201801</version>
+        <version>4.08.04.201803</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.11.01</version>
+        <version>4.12.01</version>
+        <version>4.13.01</version>
+        <version>4.14.01</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family omit_series="true">RX</family>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_t4_rx</name>
+        <version>2.10</version>
+        <zipsource>r_t4_rx_v2.10.zip</zipsource>
+        <dependency>
+            <module>r_t4_driver_rx</module>
+            <version>1.09</version>
+        </dependency>
+        <application>TCP/IP</application>
+        <desc>TCP/IP protocol stack [M3S-T4-Tiny] for Renesas MCUs</desc>
+        <details>T4 is TCP/IP protocol stack that has small footprint for Renesas MCUs.</details>
+        <function>connectivity</function>
+        <incdir>r_t4_rx</incdir>
+        <incdir>r_t4_rx/lib</incdir>
+        <library>
+            <family omit_series="true">RX</family>
+            <libdir endian="big" path="rel">r_t4_rx/lib/ccrx/T4_Library_ether_ccrx_rxv1_big.lib</libdir>
+            <libdir endian="little" path="rel">r_t4_rx/lib/ccrx/T4_Library_ether_ccrx_rxv1_little.lib</libdir>
+        </library>
+    </package>
+    <sampleapplicationnote>
+        <documentno>R20AN0051</documentno>
+    </sampleapplicationnote>
+</refinfo>

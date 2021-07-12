@@ -23,11 +23,11 @@
 *******************************************************************************/
 /******************************************************************************
 * File Name    : r_src_api_rx_if.h
-* Version      : 1.13
+* Version      : 1.14
 * Device       : RX64M, RX71M
-* Tool-Chain   : RX Family C Compiler v3.01.00
-*                GCC for Renesas RX 4.8.4.201801
-*                IAR C/C++ Compiler for Renesas RX version 4.10.1
+* Tool-Chain   : RX Family C Compiler v3.02.00
+*                GCC for Renesas RX 8.3.0.201904
+*                IAR C/C++ Compiler for Renesas RX version 4.13.1
 * Description  : Interface file for SRC API for RX
 *******************************************************************************
 * History : DD.MM.YYYY Version Description
@@ -38,6 +38,7 @@
 *                              'change SRC_API_VERSION_MINOR (10) to (11).
 *         : 01.02.2019 1.12    Changed Minor version to 1.12.
 *         : 20.05.2019 1.13    Updated version to 1.13
+*         : 10.06.2020 1.14    Updated version to 1.14
 ******************************************************************************/
 
 #ifndef SRC_API_RX_H_
@@ -54,7 +55,7 @@ Macro definitions
 ******************************************************************************/
 /* Version Number of API. */
 #define SRC_API_VERSION_MAJOR           (1)
-#define SRC_API_VERSION_MINOR           (13)
+#define SRC_API_VERSION_MINOR           (14)
 
 /* Return Value of SRC API */
 typedef enum

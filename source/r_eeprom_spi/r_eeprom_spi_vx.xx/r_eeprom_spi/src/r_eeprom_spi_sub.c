@@ -19,12 +19,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2004(2005-2015) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2004(2005-2020) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * System Name  : EEPROM driver software
 * File Name    : r_eeprom_spi_sub.c
-* Version      : 2.31
+* Version      : 3.02
 * Device       : -
 * Abstract     : Sub module
 * Tool-Chain   : -
@@ -75,6 +75,7 @@
 *              : DD.MM.YYYY Version  Description
 *              : 28.11.2014 2.30     Revised functions of same as Ver.2.30 of other middleware.
 *              : 30.01.2015 2.31     Added RX71M.
+*              : 10.12.2020 3.02     Modified comment of API function to Doxygen style.
 *************************************************************************************************/
 
 
@@ -83,7 +84,7 @@ Includes <System Includes> , "Project Includes"
 *************************************************************************************************/
 #include "r_eeprom_spi_if.h"                      /* EEPROM driver I/F definitions                 */
 #include "r_eeprom_spi_config.h"                  /* EEPROM driver Configuration definitions       */
-#include "./src/r_eeprom_spi_private.h"           /* EEPROM driver Private module definitions      */
+#include "r_eeprom_spi_private.h"                 /* EEPROM driver Private module definitions      */
 
 
 /************************************************************************************************
@@ -1007,14 +1008,16 @@ uint32_t r_eeprom_spi_page_calc(uint8_t devno, eeprom_info_t  * p_eeprom_info)
 }
 
 
-/************************************************************************************************
-* Function Name: R_EEPROM_SPI_1ms_Interval
-* Description  : 1ms Interval Timer call function.
-* Arguments    : None
-* Return Value : None
-*------------------------------------------------------------------------------------------------
-* Notes        : Please call the function when using DMAC or DTC.
-*************************************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: R_EEPROM_SPI_1ms_Interval
+ *****************************************************************************************************************/ /**
+ * @brief This function calls the interval timer counter function of the clock synchronous single master control
+ *        software. When using the DMAC or DTC, use a timer to call this function at 1 ms intervals.
+ * @details   Increments the internal timer counter of the clock synchronous single master control software while
+ *            waiting for the DMAC transfer or DTC transfer to finish.
+ * @note      User a timer or the like to call this function at 1 ms intervals. \n
+ *            In the example above, this function is called by a callback function that runs at 1 ms intervals.
+ */
 void R_EEPROM_SPI_1ms_Interval(void)
 {
     r_eeprom_spi_drvif_1ms_interval();
@@ -1022,14 +1025,25 @@ void R_EEPROM_SPI_1ms_Interval(void)
 
 
 #ifdef EEPROM_SPI_CFG_LONGQ_ENABLE
-/************************************************************************************************
-* Function Name: R_EEPROM_SPI_Set_LogHdlAddress
-* Description  : Sets handler address.
-* Arguments    : uint32_t           user_long_que       ;   Handler address
-* Return Value : EEPROM_SPI_SUCCESS                     ;   Successful operation
-*------------------------------------------------------------------------------------------------
-* Notes        : None
-*************************************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: R_EEPROM_SPI_Set_LogHdlAddress
+ *****************************************************************************************************************/ /**
+ * @brief This function specifies the handler address for the LONGQ FIT module. Call this function when using error
+ *        log acquisition processing.
+ * @param[in] user_long_que
+ *             Specify the handler address of the LONGQ FIT module.
+ * @retval    EEPROM_SPI_SUCCESS    Successful operation
+ * @details   Sets the handler address of the LONGQ FIT module in the serial EEPROM control software and the clock
+ *            synchronous single master control software used by the specified device.\n
+ *            This is preparatory processing to enable fetching of error logs using the LONGQ FIT module. Run this
+ *            function before calling R_EEPROM_SPI_Open().
+ * @note      Add the LONGQ FIT module, which is available separately, to your project.\n
+ *            Enable the option #define EEPROM_SPI_CFG_LONGQ_ENABLE in r_eeprom_spi_config.h. Also, enable
+ *            #define xxx_LONGQ_ENABLE in the clock synchronous single master control software used by the
+ *            specified device.\n
+ *            In the LONGQ FIT module, set the ignore_overflow argument of R_LONGQ_Open() to 1.
+ *            This allows the error log buffer to be used as a ring buffer.
+ */
 eeprom_status_t R_EEPROM_SPI_Set_LogHdlAddress(uint32_t user_long_que)
 {
     p_eeprom_long_que = (longq_hdl_t)user_long_que;
@@ -1075,14 +1089,25 @@ uint32_t r_eeprom_spi_log(uint32_t flg, uint32_t fid, uint32_t line)
     return 0;
 }
 #else
-/************************************************************************************************
-* Function Name: R_EEPROM_SPI_Set_LogHdlAddress
-* Description  : Sets handler address.
-* Arguments    : uint32_t           user_long_que       ;   Handler address
-* Return Value : EEPROM_SPI_SUCCESS                     ;   Successful operation
-*------------------------------------------------------------------------------------------------
-* Notes        : None
-*************************************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: R_EEPROM_SPI_Set_LogHdlAddress
+ *****************************************************************************************************************/ /**
+ * @brief This function specifies the handler address for the LONGQ FIT module. Call this function when using error
+ *        log acquisition processing.
+ * @param[in] user_long_que
+ *             Specify the handler address of the LONGQ FIT module.
+ * @retval    EEPROM_SPI_SUCCESS    Successful operation
+ * @details   Sets the handler address of the LONGQ FIT module in the serial EEPROM control software and the clock
+ *            synchronous single master control software used by the specified device.\n
+ *            This is preparatory processing to enable fetching of error logs using the LONGQ FIT module. Run this
+ *            function before calling R_EEPROM_SPI_Open().
+ * @note      Add the LONGQ FIT module, which is available separately, to your project.\n
+ *            Enable the option #define EEPROM_SPI_CFG_LONGQ_ENABLE in r_eeprom_spi_config.h. Also, enable
+ *            #define xxx_LONGQ_ENABLE in the clock synchronous single master control software used by the
+ *            specified device.\n
+ *            In the LONGQ FIT module, set the ignore_overflow argument of R_LONGQ_Open() to 1.
+ *            This allows the error log buffer to be used as a ring buffer.
+ */
 eeprom_status_t R_EEPROM_SPI_Set_LogHdlAddress(uint32_t user_long_que)
 {
     return EEPROM_SPI_SUCCESS;
@@ -1090,17 +1115,26 @@ eeprom_status_t R_EEPROM_SPI_Set_LogHdlAddress(uint32_t user_long_que)
 #endif  /* EEPROM_SPI_CFG_LONGQ_ENABLE */
 
 
-/************************************************************************************************
-* Function Name: r_eeprom_spi_log
-* Description  : Stores error information to LONGQ buffer.
-* Arguments    : uint32_t           flg                 ;   Breakpoint processing
-*              : uint32_t           fid                 ;   EEPROM middleware file No.
-*              : uint32_t           line                ;   EEPROM middleware line No.
-* Return Value : 0                                      ;   Successful operation
-*              : 1                                      ;   Error
-*------------------------------------------------------------------------------------------------
-* Notes        : None
-*************************************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: R_EEPROM_SPI_Log
+ *****************************************************************************************************************/ /**
+ * @brief This function fetches the error log. When an error occurs, call this function immediately before user
+ *        processing ends.
+ * @param[in] flg
+ *             Set this to 0x00000001 (fixed value).
+ * @param[in] fid
+ *             Set this to 0x0000003f (fixed value).
+ * @param[in] line
+ *             Set this to 0x0001ffff (fixed value).
+ * @retval    0    Successful operation
+ * @retval    1    Error
+ * @details   This function fetches the error log. When an error occurs, call this function immediately before user
+ *            processing ends.
+ * @note      Incorporate the LONGQ FIT module separately.\n
+ *            Enable the option #define EEPROM_SPI_CFG_LONGQ_ENABLE in r_eeprom_spi_config.h. Also, enable
+ *            #define xxx_LONGQ_ENABLE in the clock synchronous single master control software used by the
+ *            specified device.
+ */
 uint32_t R_EEPROM_SPI_Log(uint32_t flg, uint32_t fid, uint32_t line)
 {
     R_EEPROM_SPI_Log_Func(flg, fid, line);

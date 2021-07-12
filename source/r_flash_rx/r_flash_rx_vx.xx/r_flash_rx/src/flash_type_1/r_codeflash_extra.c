@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2020 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_codeflash_extra.c
@@ -44,6 +44,7 @@
 *                02.08.2017 2.10     Removed #include "r_mcu_config.h". Now in
 *                                    targets.h (r_flash_rx_if.h includes)
 *                19.04.2019 4.00     Added support for GNUC and ICCRX.
+*                26.06.2020 4.60     Modified to include block 0 in the setting range of the access window.
 *******************************************************************************/
 
 /******************************************************************************
@@ -96,8 +97,23 @@ flash_err_t R_CF_SetAccessWindow (flash_access_window_config_t  *pAccessInfo)
 
     g_current_parameters.current_operation = FLASH_CUR_CF_ACCESSWINDOW;
     
-    start_addr_idx = (pAccessInfo->start_addr) - CODEFLASH_ADDR_OFFSET;    /* Conversion to the P/E address from the read address */
-    end_addr_idx   = (pAccessInfo->end_addr) - CODEFLASH_ADDR_OFFSET;      /* Conversion to the P/E address from the read address */
+    /* Conversion to the P/E address from the read address */
+    if ((uint32_t)FLASH_CF_BLOCK_END == pAccessInfo->start_addr)
+    {
+        start_addr_idx = FLASH_ACCESS_WINDOW_END_NEXT_REG_VALUE << 10;
+    }
+    else
+    {
+        start_addr_idx = (pAccessInfo->start_addr) - CODEFLASH_ADDR_OFFSET;
+    }
+    if ((uint32_t)FLASH_CF_BLOCK_END == pAccessInfo->end_addr)
+    {
+        end_addr_idx = FLASH_ACCESS_WINDOW_END_NEXT_REG_VALUE << 10;
+    }
+    else
+    {
+        end_addr_idx = (pAccessInfo->end_addr) - CODEFLASH_ADDR_OFFSET;
+    }
 
     /* == Select Extra Area == */
     FLASH.FASR.BIT.EXS = 1;
@@ -129,8 +145,22 @@ flash_err_t R_CF_SetAccessWindow (flash_access_window_config_t  *pAccessInfo)
 FLASH_PE_MODE_SECTION
 flash_err_t R_CF_GetAccessWindow (flash_access_window_config_t  *pAccessInfo)
 {
-    pAccessInfo->start_addr = (((FLASH.FAWSMR << 10) + CODEFLASH_ADDR_OFFSET) | 0xFC000000);
-    pAccessInfo->end_addr = (((FLASH.FAWEMR << 10) + CODEFLASH_ADDR_OFFSET) | 0xFC000000);
+    if (FLASH_ACCESS_WINDOW_END_NEXT_REG_VALUE == FLASH.FAWSMR)
+    {
+        pAccessInfo->start_addr = (uint32_t)FLASH_CF_BLOCK_END;
+    }
+    else
+    {
+        pAccessInfo->start_addr = ((FLASH.FAWSMR << 10) | CODEFLASH_ADDR_OFFSET | 0xFC000000);
+    }
+    if (FLASH_ACCESS_WINDOW_END_NEXT_REG_VALUE == FLASH.FAWEMR)
+    {
+        pAccessInfo->end_addr = (uint32_t)FLASH_CF_BLOCK_END;
+    }
+    else
+    {
+        pAccessInfo->end_addr = ((FLASH.FAWEMR << 10) | CODEFLASH_ADDR_OFFSET | 0xFC000000);
+    }
 
     return FLASH_SUCCESS;
 }

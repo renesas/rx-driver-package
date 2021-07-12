@@ -33,6 +33,7 @@
 *                              Changed MINT interrupt handler operation.
 *		  : 31.08.2019 1.13    Supported RX72M device.
 *                              Added Bypass setting.
+*		  : 30.11.2019 1.14    Supported RX72N device.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -263,7 +264,7 @@ ptpl_return_t R_PTPL_Init(PTPLConfig *tbl)
 {
 	uint8_t ch;
 
-#if (1 == BSP_MCU_RX72M)
+#if ((1 == BSP_MCU_RX72M) || (1 == BSP_MCU_RX72N))
 	EPTPC.SYBYPSR.LONG = 0x00000000; /* bypass off */
 #endif
 

@@ -18,7 +18,7 @@
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_ether_rx_if.h
- * Version      : 1.20
+ * Version      : 1.21
  * Description  : Ethernet module device driver
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
@@ -42,6 +42,7 @@
  *         :                     Added changes for RX66N.
  *         :                     Deleted supoort for RX63N.
  *         :                     Added support for NON_BLOCKING.
+ *         : 10.09.2020 1.21     Changed minor version to '21'.
  ***********************************************************************************************************************/
 
 /* Guards against multiple inclusion */
@@ -67,7 +68,7 @@
 
  /* Version Number of API. */
     #define ETHER_RX_VERSION_MAJOR  (1)
-    #define ETHER_RX_VERSION_MINOR  (20)
+    #define ETHER_RX_VERSION_MINOR  (21)
 
 /* When using the Read functions, ETHER_NO_DATA is the return value that indicates that no received data. */
     #define ETHER_NO_DATA           (0)

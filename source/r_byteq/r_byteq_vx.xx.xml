@@ -41,7 +41,7 @@
     </target>
 
     <!-- only one package entry allowed -->
-    <!-- multiple dependencies, functions, and incdirs permitted -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
     <package>
         <type>fitmodule</type>
         <name>r_byteq</name>
@@ -49,7 +49,7 @@
         <zipsource>r_byteq_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>3.10</version>
+            <version>5.61</version>
         </dependency>
         <application>Communications</application>
         <application>Storage and Memory</application>

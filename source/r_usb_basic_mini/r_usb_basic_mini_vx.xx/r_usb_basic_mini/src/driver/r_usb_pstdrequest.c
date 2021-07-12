@@ -18,7 +18,7 @@
  * you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2015(2019) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
  *****************************************************************************/
 /******************************************************************************
  * File Name    : r_usb_pstdrequest.c
@@ -27,9 +27,10 @@
 /*******************************************************************************
  * History : DD.MM.YYYY Version Description
  *         : 08.01.2014 1.00 First Release
- *         : 30.11.2018 1.10    Supporting Smart Configurator
- *         : 31.05.2019 1.11    Added support for GNUC and ICCRX.
- *         : 30.06.2019 1.12    RX23W is added.
+ *         : 30.11.2018 1.10 Supporting Smart Configurator
+ *         : 31.05.2019 1.11 Added support for GNUC and ICCRX.
+ *         : 30.06.2019 1.12 RX23W is added.
+ *         : 30.06.2020 1.20 Added support for RTOS.
 *******************************************************************************/
 
 /******************************************************************************
@@ -1263,6 +1264,9 @@ void usb_pstd_class_request_rwds (usb_setup_t * p_req)
             ctrl.size   = 0;
             ctrl.status = USB_ACK;
             ctrl.type   = USB_REQUEST;
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+            ctrl.p_data =  (void *)g_usb_default_apl_task_id;
+#endif /* (BSP_CFG_RTOS_USED != 0) */
             usb_cstd_set_event(USB_STS_REQUEST, &ctrl);
         }
     }
@@ -1281,6 +1285,9 @@ void usb_pstd_class_request_rwds (usb_setup_t * p_req)
     ctrl.size   = 0;
     ctrl.status = USB_ACK;
     ctrl.type   = USB_REQUEST;
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+    ctrl.p_data =  (void *)g_usb_default_apl_task_id;
+#endif /* (BSP_CFG_RTOS_USED != 0) */
     usb_cstd_set_event(USB_STS_REQUEST, &ctrl);
 #endif  /* defined(USB_CFG_PMSC_USE) */
 } /* End of function usb_pstd_class_request_rwds */
@@ -1313,6 +1320,9 @@ void usb_pstd_other_request (usb_setup_t *p_req)
 
     ctrl.size   = 0;
     ctrl.status = USB_ACK;
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+    ctrl.p_data =  (void *)g_usb_default_apl_task_id;
+#endif /* (BSP_CFG_RTOS_USED != 0) */
     usb_cstd_set_event(USB_STS_REQUEST, &ctrl);
 } /* End of function usb_pstd_other_request */
 
@@ -1357,6 +1367,9 @@ void usb_pstd_class_request_wnss (usb_setup_t *p_req)
     ctrl.size   = 0;
     ctrl.status = USB_ACK;
     ctrl.type   = USB_REQUEST;
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+    ctrl.p_data =  (void *)g_usb_default_apl_task_id;
+#endif /* (BSP_CFG_RTOS_USED != 0) */
     usb_cstd_set_event(USB_STS_REQUEST, &ctrl);
 
     usb_pstd_ctrl_end((uint16_t) USB_CTRL_END); /* End control transfer. */
@@ -1451,6 +1464,9 @@ void usb_pstd_request_event_set (void)
     ctrl.size         = 0;
     ctrl.status       = USB_ACK;
     ctrl.type         = USB_REQUEST;
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+    ctrl.p_data =  (void *)g_usb_default_apl_task_id;
+#endif /* (BSP_CFG_RTOS_USED != 0) */
     usb_cstd_set_event(USB_STS_REQUEST, &ctrl);
 } /* End of function usb_pstd_request_event_set */
 #endif /* USB_CFG_REQUEST == USB_CFG_ENABLE */

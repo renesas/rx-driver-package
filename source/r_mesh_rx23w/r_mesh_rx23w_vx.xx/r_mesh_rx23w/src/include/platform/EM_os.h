@@ -18,10 +18,6 @@
 #define _H_EM_OS_
 
 /* -------------------------------------------- Header File Inclusion */
-/* EtherMind Features */
-/* #include "EM_features.h" */
-
-#include "EM_platform.h"
 
 /* -------------------------------------------- Global Definitions */
 
@@ -123,7 +119,7 @@ typedef EM_THREAD_RETURN_TYPE (*EM_THREAD_START_ROUTINE)(EM_THREAD_ARGS);
 
 /* Abstractions for memory functions */
 #define EM_alloc_mem(s)               malloc((size_t)(s))
-#define EM_alloc_mem_ext(s)           mempool_alloc_pl((size_t)(s))
+#define EM_alloc_mem_ext(s)           em_mempool_alloc_pl((size_t)(s))
 #define EM_free_mem(p)                free(p)
 #define EM_mem_move(d, s, n)          memmove((d), (s), (n))
 #define EM_mem_cmp(p1, p2, n)         memcmp((p1), (p2), (n))
@@ -154,7 +150,7 @@ extern "C" {
 /* Task/Thread Delay Primitives */
 #define EM_sleep(...)
 #define EM_usleep(...)
-#define EM_get_current_time(ct)     (*ct) = 0
+#define EM_get_current_time(ct)     (*(ct)) = em_systemtime_read_pl()
 
 #define EM_process_term_notify(...)
 

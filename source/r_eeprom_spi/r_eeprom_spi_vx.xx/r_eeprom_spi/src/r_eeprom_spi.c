@@ -19,12 +19,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2004(2005-2015) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2004(2005-2020) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * System Name  : EEPROM driver software
 * File Name    : r_eeprom_spi.c
-* Version      : 2.31
+* Version      : 3.02
 * Device       : -
 * Abstract     : User I/F file
 * Tool-Chain   : -
@@ -72,6 +72,7 @@
 *              : DD.MM.YYYY Version  Description
 *              : 28.11.2014 2.30     Revised functions of same as Ver.2.30 of other middleware.
 *              : 30.01.2015 2.31     Added RX71M.
+*              : 10.12.2020 3.02     Modified comment of API function to Doxygen style.
 *************************************************************************************************/
 
 
@@ -80,7 +81,7 @@ Includes <System Includes> , "Project Includes"
 *************************************************************************************************/
 #include "r_eeprom_spi_if.h"                      /* EEPROM driver I/F definitions                 */
 #include "r_eeprom_spi_config.h"                  /* EEPROM driver Configuration definitions       */
-#include "./src/r_eeprom_spi_private.h"           /* EEPROM driver Private module definitions      */
+#include "r_eeprom_spi_private.h"                 /* EEPROM driver Private module definitions      */
 
 /************************************************************************************************
 Macro definitions
@@ -97,17 +98,25 @@ Exported global variables (to be accessed by other files)
 *************************************************************************************************/
 
 
-/************************************************************************************************
-* Function Name: R_EEPROM_SPI_Open
-* Description  : Initializes the EEPROM driver.
-*              : Sets EEPROM control ports.
-*              : Call this function once at system activation.
-* Arguments    : uint8_t         devno                     ;   Device No. (EEPROM_SPI_DEVn)
-* Return Value : EEPROM_SPI_SUCCESS                        ;   Successful operation
-*              : EEPROM_SPI_ERR_PARAM                      ;   Parameter error
-*------------------------------------------------------------------------------------------------
-* Notes        : None
-*************************************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: R_EEPROM_SPI_Open
+ *****************************************************************************************************************/ /**
+ * @brief This function is run first when using the APIs of the serial EEPROM control software.
+ * @param[in] devno
+ *             Device number (0, 1)
+ * @retval    EEPROM_SPI_SUCCESS            Successful operation
+ * @retval    EEPROM_SPI_ERR_PARAM          Parameter error
+ * @details   Initializes the slave device select pin of the device number specified by the argument devno.
+ *            After initialization the pin is in the general output port high-output state.\n
+ *            Do not call this function when communication is in progress.
+ *            Communication cannot be guaranteed if the function is called when communication is in progress.
+ * @note      After calling this user API function, it is recommended that R_EEPROM_SPI_Polling() be used to
+ *            confirm that the EEPROM write cycle has completed. The next read or write processing will not
+ *            be accepted while the EEPROM write cycle is in progress.\n
+ *            However, it is possible to access the EEPROM during the write cycle by, for example, issuing a
+ *            system reset while the EEPROM write cycle is in progress and restarting EEPROM control from the
+ *            beginning.
+ */
 eeprom_status_t R_EEPROM_SPI_Open(uint8_t devno)
 {
     /* Check parameters. */
@@ -124,16 +133,25 @@ eeprom_status_t R_EEPROM_SPI_Open(uint8_t devno)
 }
 
 
-/************************************************************************************************
-* Function Name: R_EEPROM_SPI_Close
-* Description  : Stops EEPROM control.
-*                Resets setting of ports.
-* Arguments    : uint8_t         devno                     ;   Device No. (EEPROM_SPI_DEVn)
-* Return Value : EEPROM_SPI_SUCCESS                        ;   Successful operation
-*              : EEPROM_SPI_ERR_PARAM                      ;   Parameter error
-*------------------------------------------------------------------------------------------------
-* Notes        : None
-*************************************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: R_EEPROM_SPI_Close
+ *****************************************************************************************************************/ /**
+ * @brief This function is used to close the serial EEPROM control software when it is in use.
+ * @param[in] devno
+ *             Device number (0, 1)
+ * @retval    EEPROM_SPI_SUCCESS    Successful operation
+ * @retval    EEPROM_SPI_ERR_PARAM  Parameter error
+ * @retval    EEPROM_SPI_ERR_OTHER  Other error
+ * @details   Sets the slave device select pin of the device number specified by the argument devno to function as
+ *            a general I/O port. After the function runs, the pin is in the general output port high-output state.\n
+ *            Do not call this function when communication is in progress.
+ *            Communication cannot be guaranteed if the function is called when communication is in progress.
+ * @note      The state of the slave device select pin after this function is called is different from its state after
+ *            a reset (general input port state). Review the pin settings if necessary.\n
+ *            Before calling this user API function, it is recommended that R_EEPROM_SPI_Polling() be used to confirm
+ *            that the EEPROM write cycle has completed. This makes it possible to restart EEPROM control because the
+ *            EEPROM has not transitioned to the write cycle.
+ */
 eeprom_status_t R_EEPROM_SPI_Close(uint8_t devno)
 {
     /* Check parameters. */
@@ -149,47 +167,24 @@ eeprom_status_t R_EEPROM_SPI_Close(uint8_t devno)
 }
 
 
-/************************************************************************************************
-* Function Name: R_EEPROM_SPI_Read_Status
-* Description  : Reads status from the status register and stores to the read status storage buffer (p_status).
-*              :
-*              : Memory size <= 4K-bit
-*              :   Bits 7 to 4 :   Reserved (All "1")
-*              :   Bits 3, 2   :   BP1, BP0
-*              :                   00: No protection
-*              :                   01: Upper-quarter protection
-*              :                   10: Upper-half protection
-*              :                   11: Whole memory protection
-*              :   Bit 1   : WEL
-*              :                   0: Write disabled
-*              :                    1: Write enabled
-*              :   Bit 0   : WIP
-*              :                   1: During write operation
-*              : Memory size > 4K-bit
-*              :   Bit 7   : SRWD
-*              :                   0: Status register can be changed
-*              :                   1: Status register cannot be changed
-*              :   Bits 6 to 4 :   Reserved (All "0")
-*              :   Bits 3, 2   :   BP1, BP0
-*              :                   00: No protection
-*              :                   01: Upper-quarter protection
-*              :                   10: Upper-half protection
-*              :                   11: Whole memory protection
-*              :   Bit 1   : WEL
-*              :                   0: Write disabled
-*              :                   1: Write enabled
-*              :   Bit 0   : WIP
-*              :                   1: During write operation
-*              :
-* Arguments    : uint8_t         devno                     ;   Device No. (EEPROM_SPI_DEVn)
-*              : uint8_t       * p_status                  ;   Read status storage buffer (1 byte)
-* Return Value : EEPROM_SPI_SUCCESS                        ;   Successful operation
-*              : EEPROM_SPI_ERR_PARAM                      ;   Parameter error
-*              : EEPROM_SPI_ERR_HARD                       ;   Hardware error
-*              : EEPROM_SPI_ERR_OTHER                      ;   Other error
-*------------------------------------------------------------------------------------------------
-* Notes        : None
-*************************************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: R_EEPROM_SPI_Read_Status
+ *****************************************************************************************************************/ /**
+ * @brief This function is used to read the status register.
+ * @param[in] devno
+ *             Device number (0, 1)
+ * @param[in,out] *p_status
+ *             Status register storage buffer (size: 1 byte)
+ * @retval    EEPROM_SPI_SUCCESS    Successful operation
+ * @retval    EEPROM_SPI_ERR_PARAM  Parameter error
+ * @retval    EEPROM_SPI_ERR_HARD   Hardware error
+ * @retval    EEPROM_SPI_ERR_OTHER  Other task has acquired clock synchronous single master control software resources,
+ *                                  or other error
+ * @details   Reads the status register and stores the contents in p_status. See section 3.3 in the application note
+ *            for details.
+ * @note      The clock synchronous single master control software resources are acquired at the start of the
+ *            processing, and the resources are released and the end of the processing.
+ */
 eeprom_status_t R_EEPROM_SPI_Read_Status(uint8_t devno, uint8_t * p_status)
 {
     eeprom_status_t          ret = EEPROM_SPI_SUCCESS;
@@ -256,25 +251,30 @@ eeprom_status_t R_EEPROM_SPI_Read_Status(uint8_t devno, uint8_t * p_status)
 }
 
 
-/************************************************************************************************
-* Function Name: R_EEPROM_SPI_Set_Write_Protect
-* Description  : Sets the write-protection setting to write-protection setting data (wpsts).
-*              :
-*              : EEPROM_SPI_WP_NONE           : No protection
-*              : EEPROM_SPI_WP_UPPER_QUART    : Upper-quarter protection setting
-*              : EEPROM_SPI_WP_UPPER_HALF     : Upper-half protection setting
-*              : EEPROM_SPI_WP_WHOLE_MEM      : Whole memory protection setting
-*              :
-* Arguments    : uint8_t            devno                  ;   Device No. (EEPROM_SPI_DEVn)
-*              : uint8_t            wpsts                  ;   Write-protection setting data
-* Return Value : EEPROM_SPI_SUCCESS                        ;   Successful operation
-*              : EEPROM_SPI_ERR_PARAM                      ;   Parameter error
-*              : EEPROM_SPI_ERR_HARD                       ;   Hardware error
-*              : EEPROM_SPI_ERR_OTHER                      ;   Other error
-*------------------------------------------------------------------------------------------------
-* Notes        : A SRWD bit is fixed to 0.
-*              : Please confirm the status register.
-*************************************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: R_EEPROM_SPI_Set_Write_Protect
+ *****************************************************************************************************************/ /**
+ * @brief This function is used to make write protect settings.
+ * @param[in] devno
+ *             Device number (0, 1)
+ * @param[in] wpsts
+ *             Write protect setting data
+ * @retval    EEPROM_SPI_SUCCESS    Successful operation
+ * @retval    EEPROM_SPI_ERR_PARAM  Parameter error
+ * @retval    EEPROM_SPI_ERR_HARD   Hardware error
+ * @retval    EEPROM_SPI_ERR_OTHER  Other task has acquired clock synchronous single master control software resources,
+ *                                  or other error
+ * @details   Make write protect settings. SRWD is cleared to 0. \n
+ *            After this user API function finishes successfully, the EEPROM transitions to the write cycle. Do not
+ *            fail to confirm that the write has finished with R_EEPROM_SPI_Polling(). If an attempt is made to perform
+ *            the next read or write processing while a write cycle is in progress, the EEPROM will not accept that
+ *            processing.\n
+ *            R_EEPROM_SPI_Polling() can be called at any time specified by the user. This makes it possible for the
+ *            user application to perform other processing while a write cycle is in progress.See section 3.4 in the
+ *            application note for details.
+ * @note      The clock synchronous single master control software resources are acquired at the start of the
+ *            processing, and the resources are released and the end of the processing.
+ */
 eeprom_status_t R_EEPROM_SPI_Set_Write_Protect(uint8_t devno, uint8_t wpsts)
 {
     eeprom_status_t     ret = EEPROM_SPI_SUCCESS;
@@ -348,17 +348,21 @@ eeprom_status_t R_EEPROM_SPI_Set_Write_Protect(uint8_t devno, uint8_t wpsts)
 }
 
 
-/************************************************************************************************
-* Function Name: R_EEPROM_SPI_Write_Di
-* Description  : Clears the WEL bit.
-* Arguments    : uint8_t         devno                     ;   Device No. (EEPROM_SPI_DEVn)
-* Return Value : EEPROM_SPI_SUCCESS                        ;   Successful operation
-*              : EEPROM_SPI_ERR_PARAM                      ;   Parameter error
-*              : EEPROM_SPI_ERR_HARD                       ;   Hardware error
-*              : EEPROM_SPI_ERR_OTHER                      ;   Other error
-*------------------------------------------------------------------------------------------------
-* Notes        : None
-*************************************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: R_EEPROM_SPI_Write_Di
+ *****************************************************************************************************************/ /**
+ * @brief This function is used to disable write operation.
+ * @param[in] devno
+ *             Device number (0, 1)
+ * @retval    EEPROM_SPI_SUCCESS    Successful operation
+ * @retval    EEPROM_SPI_ERR_PARAM  Parameter error
+ * @retval    EEPROM_SPI_ERR_HARD   Hardware error
+ * @retval    EEPROM_SPI_ERR_OTHER  Other task has acquired clock synchronous single master control software resources,
+ *                                  or other error
+ * @details   Transmits the WRDI command and clears the WEL bit in the status register.
+ * @note      The clock synchronous single master control software resources are acquired at the start of the
+ *            processing, and the resources are released and the end of the processing.
+ */
 eeprom_status_t R_EEPROM_SPI_Write_Di(uint8_t devno)
 {
     eeprom_status_t        ret = EEPROM_SPI_SUCCESS;
@@ -425,23 +429,32 @@ eeprom_status_t R_EEPROM_SPI_Write_Di(uint8_t devno)
 }
 
 
-/************************************************************************************************
-* Function Name: R_EEPROM_SPI_Read_Data
-* Description  : Reads data from the specified address (addr) for the specified number (cnt) of bytes
-*              : and stores to the specified buffer (p_data).
-* Arguments    : uint8_t            devno                  ;   Device No. (EEPROM_SPI_DEVn)
-*              : eeprom_info_t    * p_eeprom_info          ;   EEPROM Information
-*              :    uint32_t        addr                   ;   Read start address
-*              :    uint32_t        cnt                    ;   Number of bytes to be read
-*              :    uint32_t        data_cnt               ;   Not used
-*              :    uint8_t       * p_data                 ;   Read data storage buffer pointer
-* Return Value : EEPROM_SPI_SUCCESS                        ;   Successful operation
-*              : EEPROM_SPI_ERR_PARAM                      ;   Parameter error
-*              : EEPROM_SPI_ERR_HARD                       ;   Hardware error
-*              : EEPROM_SPI_ERR_OTHER                      ;   Other error
-*------------------------------------------------------------------------------------------------
-* Notes        : The maximum read address is EEPROM size - 1.
-*************************************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: R_EEPROM_SPI_Read_Data
+ *****************************************************************************************************************/ /**
+ * @brief This function is used to read data from the EEPROM.
+ * @param[in] devno
+ *             Device number (0, 1)
+ * @param[in,out] *p_eeprom_info
+ *             EEPROM information structure. Use the structure address aligned with a 4-byte boundary.
+ *             See section 3.6 in the application note for details.
+ * @retval    EEPROM_SPI_SUCCESS    Successful operation
+ * @retval    EEPROM_SPI_ERR_PARAM  Parameter error
+ * @retval    EEPROM_SPI_ERR_HARD   Hardware error
+ * @retval    EEPROM_SPI_ERR_OTHER  Other task has acquired clock synchronous single master control software resources,
+ *                                  or other error
+ * @details   Reads the specified number of bytes of data from the specified address in the EEPROM and stores the data
+ *            in p_data.\n
+ *            The maximum read address is the EEPROM capacity – 1.\n
+ *            EEPROM_SPI_ERR_PARAM is returned if the total value of the read byte count, cnt, and specified address,
+ *            addr, exceeds the maximum read address.\n
+ *            DMAC transfer or DTC transfer occurs when the transfer size conditions of the clock synchronous single
+ *            master control software are matched. Otherwise, operation switches to software transfer.
+ * @note      To speed up data transfers, align the start address with a 4-byte boundary when specifying data storage
+ *            buffer pointers.\n
+ *            The clock synchronous single master control software resources are acquired at the start of the
+ *            processing, and the resources are released and the end of the processing.
+ */
 eeprom_status_t R_EEPROM_SPI_Read_Data(uint8_t devno, eeprom_info_t * p_eeprom_info)
 {
     eeprom_status_t        ret = EEPROM_SPI_SUCCESS;
@@ -523,25 +536,48 @@ eeprom_status_t R_EEPROM_SPI_Read_Data(uint8_t devno, eeprom_info_t * p_eeprom_i
 }
 
 
-/************************************************************************************************
-* Function Name: R_EEPROM_SPI_Write_Data_Page
-* Description  : Writes data from the specified buffer (p_data)
-*              : to the specified address (addr) for the specified number (cnt) of bytes.
-* Arguments    : uint8_t            devno                  ;   Device No. (EEPROM_SPI_DEVn)
-*              : eeprom_info_t    * p_eeprom_info          ;   EEPROM Information
-*              :    uint32_t        addr                   ;   Write start address
-*              :    uint32_t        cnt                    ;   Number of bytes to be written
-*              :    uint32_t        data_cnt               ;   Number of bytes to be written in a page
-*              :    uint8_t       * p_data                 ;   Write data storage buffer pointer
-* Return Value : EEPROM_SPI_SUCCESS                        ;   Successful operation
-*              : EEPROM_SPI_ERR_PARAM                      ;   Parameter error
-*              : EEPROM_SPI_ERR_HARD                       ;   Hardware error
-*              : EEPROM_SPI_ERR_WP                         ;   Write-protection error
-*              : EEPROM_SPI_ERR_OTHER                      ;   Other error
-*------------------------------------------------------------------------------------------------
-* Notes        : EEPROM can be written to only when write-protection has been canceled.
-*              : The maximum write address is EEPROM size - 1.
-*************************************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: R_EEPROM_SPI_Write_Data_Page
+ *****************************************************************************************************************/ /**
+ * @brief This function is used to write data to the EEPROM in single-page units.
+ * @param[in] devno
+ *             Device number (0, 1)
+ * @param[in, out] *p_eeprom_info
+ *             EEPROM information structure. Use the structure address aligned with a 4-byte boundary.
+ *             See section 3.7 in the application note for details.
+ * @retval    EEPROM_SPI_SUCCESS    Successful operation
+ * @retval    EEPROM_SPI_ERR_PARAM  Parameter error
+ * @retval    EEPROM_SPI_ERR_HARD   Hardware error
+ * @retval    EEPROM_SPI_ERR_WP     Write protect error
+ * @retval    EEPROM_SPI_ERR_OTHER  Other task has acquired clock synchronous single master control software resources,
+ *                                  or other error
+ * @details   Writes the specified number of bytes of data (up to a maximum size of 1 page) in p_data to the EEPROM,
+ *            starting from the specified address.\n
+ *            When writing a large volume of data, communication is divided into page units. This prevents a situation
+ *            in which other processing is not possible while communication is in progress.\n
+ *            Writing to the EEPROM is only possible when write protect has been canceled.\n
+ *            It is not possible to write to a protected page. Attempting to do so returns the error EEPROM_SPI_ERR_WP.\n
+ *            The maximum write address is the EEPROM capacity – 1.\n
+ *            EEPROM_SPI_ERR_PARAM is returned if the total value of the write byte count, cnt, and specified address,
+ *            addr, exceeds the maximum write address.\n
+ *            DMAC transfer or DTC transfer occurs when the transfer size conditions of the clock synchronous single
+ *            master control software are matched. Otherwise, operation switches to software transfer.\n
+ *            When a byte count exceeding 1 page is specified, the remaining byte count and next address information
+ *            remain in the EEPROM information stricture (p_eeprom_info) after processing of a single page write
+ *            finishes. It is possible to write the remaining bytes by specifying p_eeprom_info unmodified in this
+ *            API function again.\n
+ *            After this user API function finishes successfully, the EEPROM transitions to the write cycle. Do not
+ *            fail to confirm that the write has finished with R_EEPROM_SPI_Polling(). If an attempt is made to perform
+ *            the next read or write processing while a write cycle is in progress, the EEPROM will not accept that
+ *            processing. \n
+ *            R_EEPROM_SPI_Polling() can be called at any time specified by the user. This makes it possible for the
+ *            user application to perform other processing while a write cycle is in progress.\n
+ *            See section 3.7 in the application note for details.
+ * @note      To speed up data transfers, align the start address with a 4-byte boundary when specifying data storage
+ *            buffer pointers.\n
+ *            The clock synchronous single master control software resources are acquired at the start of the
+ *            processing, and the resources are released and the end of the processing.
+ */
 eeprom_status_t R_EEPROM_SPI_Write_Data_Page(uint8_t devno, eeprom_info_t * p_eeprom_info)
 {
     eeprom_status_t     ret = EEPROM_SPI_SUCCESS;
@@ -662,18 +698,24 @@ eeprom_status_t R_EEPROM_SPI_Write_Data_Page(uint8_t devno, eeprom_info_t * p_ee
 }
 
 
-/************************************************************************************************
-* Function Name: R_EEPROM_SPI_Polling
-* Description  : Checks busy for the WRITE command operation.
-* Arguments    : uint8_t            devno                  ;   Device No. (EEPROM_SPI_DEVn)
-* Return Value : EEPROM_SPI_SUCCESS                        ;   Successful operation (EERPOM is ready)
-*              : EEPROM_SPI_SUCCESS_BUSY                   ;   Successful operation (EERPOM is busy)
-*              : EEPROM_SPI_ERR_PARAM                      ;   Parameter error
-*              : EEPROM_SPI_ERR_HARD                       ;   Hardware error
-*              : EEPROM_SPI_ERR_OTHER                      ;   Other error
-*------------------------------------------------------------------------------------------------
-* Notes        : None
-*************************************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: R_EEPROM_SPI_Polling
+ *****************************************************************************************************************/ /**
+ * @brief This function is used to perform polling to determine if the write operation has finished.
+ * @param[in] devno
+ *             Device number (0, 1)
+ * @retval    EEPROM_SPI_SUCCESS         Normal end, and write finished
+ * @retval    EEPROM_SPI_SUCCESS_BUSY    Normal end, and write in progress
+ * @retval    EEPROM_SPI_ERR_PARAM       Parameter error
+ * @retval    EEPROM_SPI_ERR_HARD        Hardware error
+ * @retval    EEPROM_SPI_ERR_OTHER       Other task has acquired clock synchronous single master control software
+ *                                       resources, or other error
+ * @details   Determines whether or not the write cycle has finished.
+ * @note      R_EEPROM_SPI_Polling() can be called at any time specified by the user. This makes it possible for the
+ *            user application to perform other processing while a write cycle is in progress.\n
+ *            The clock synchronous single master control software resources are acquired at the start of the
+ *            processing, and the resources are released and the end of the processing.
+ */
 eeprom_status_t R_EEPROM_SPI_Polling(uint8_t devno)
 {
     eeprom_status_t        ret = EEPROM_SPI_SUCCESS;
@@ -741,16 +783,19 @@ eeprom_status_t R_EEPROM_SPI_Polling(uint8_t devno)
 }
 
 
-/************************************************************************************************
-* Function Name: R_EEPROM_SPI_GetMemoryInfo
-* Description  : Gets the memory size and page size.
-* Arguments    : uint8_t               devno                   ;   Device No. (EEPROM_SPI_DEVn)
-*              : eeprom_mem_info_t   * p_eeprom_mem_info       ;   EEPROM information
-* Return Value : EEPROM_SPI_SUCCESS                            ;   Successful operation
-*              : EEPROM_SPI_ERR_PARAM                          ;   Parameter error
-*------------------------------------------------------------------------------------------------
-* Notes        : None
-*************************************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: R_EEPROM_SPI_GetMemoryInfo
+ *****************************************************************************************************************/ /**
+ * @brief This function is used to fetch the serial EEPROM size information.
+ * @param[in] devno
+ *             Device number (0, 1)
+ * @param[in,out] p_eeprom_mem_info
+ *             EEPROM size information structure. Use the structure address aligned with a 4-byte boundary.
+ * @retval    EEPROM_SPI_SUCCESS    Successful operation
+ * @retval    EEPROM_SPI_ERR_PARAM  Parameter error
+ * @details   Fetches EEPROM size information for the device number specified by the argument devno.
+ * @note      None.
+ */
 eeprom_status_t R_EEPROM_SPI_GetMemoryInfo(uint8_t devno, eeprom_mem_info_t * p_eeprom_mem_info)
 {
     /* Check parameters. */
@@ -790,17 +835,14 @@ eeprom_status_t R_EEPROM_SPI_GetMemoryInfo(uint8_t devno, eeprom_mem_info_t * p_
 }
 
 
-/************************************************************************************************
-* Function Name: R_EEPROM_SPI_GetVersion
-* Description  : Returns the version of EEPROM SPI driver.
-*                The version number is encoded such that the top two bytes are
-*                the major version number and the bottom two bytes are the minor
-*                version number.
-* Arguments    : none
-* Return Value : version number
-*------------------------------------------------------------------------------------------------
-* Notes        : None
-*************************************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: R_EEPROM_SPI_GetVersion
+ *****************************************************************************************************************/ /**
+ * @brief This function is used to fetch the serial EEPROM version information.
+ * @return    Version number.   Upper 2 bytes: major version, lower 2 bytes: minor version.
+ * @details   Returns the version information.
+ * @note      None
+ */
 uint32_t R_EEPROM_SPI_GetVersion(void)
 {
     uint32_t const version = (EEPROM_SPI_VERSION_MAJOR << 16) | EEPROM_SPI_VERSION_MINOR;

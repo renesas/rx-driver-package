@@ -126,7 +126,7 @@
  * USB_CFG_ENABLE       : Using Type-C
  * USB_CFG_DISABLE      : Not using Type-C
  */
-#define USB_CFG_TYPEC               (UCB_CFG_DISABLE)
+#define USB_CFG_TYPEC               (USB_CFG_DISABLE)
 
 /** [Setting Compliance Test mode]
  * USB_CFG_ENABLE       : Compliance Test supported.
@@ -151,7 +151,7 @@
  * USB_CFG_ENABLE       : Notification
  * USB_CFG_DISABLE      : Not Notification
  */
-#define USB_CFG_REQUEST             (USB_CFG_DISABLE)
+#define USB_CFG_REQUEST             (USB_CFG_ENABLE)
 
 /******************************************************************************/
 /** OTHER DEFINITIONS SETTING                                                 */

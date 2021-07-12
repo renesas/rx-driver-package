@@ -45,6 +45,7 @@
 *                              Removed support for Generation 1 devices
 *           30.12.2019 4.40    Added support for RX72N, RX66N.
 *                              Added support for RX65N, RX72M Amplifier Stabilization Wait Control.
+*         : 30.06.2020 4.50    Changed revision to reflect demo upgrade.
 ***********************************************************************************************************************/
 #ifndef DAC_RX_IF_H
 #define DAC_RX_IF_H
@@ -65,7 +66,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define DAC_VERSION_MAJOR  (4)
-#define DAC_VERSION_MINOR  (40)
+#define DAC_VERSION_MINOR  (50)
 
 
 #if defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX13T)

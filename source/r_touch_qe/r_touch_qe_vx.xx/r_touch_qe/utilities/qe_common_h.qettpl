@@ -14,19 +14,21 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : qe_common.h
 * Description  : This file includes definitions
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
-* History : DD.MM.YYYY Version Description
-*                      1.00    First Release
+* History      : DD.MM.YYYY Version Description
+*              : 29.08.2018 1.00    First Release
+*              : 02.04.2019 1.01    Add Some Comments
+*              : 18.04.2019 1.02    Change the Minor Format
 ***********************************************************************************************************************/
 
-#ifndef QE_COMMON_HEADER_FILE
-#define QE_COMMON_HEADER_FILE
+#ifndef QE_COMMON_H
+#define QE_COMMON_H
 
 #include "r_typedefs_qe.h"
 
@@ -35,30 +37,30 @@
 Macro definitions
 ***********************************************************************************************************************/
 @qe:begin:MacroMcuMaxSensors
-#define MCU_MAX_SENSORS         (@value@)
+#define MCU_MAX_SENSORS         (@value@)    /* highest TS number + 1; legacy MAX_TS from compile line */
 @qe:end:
 
 @qe:begin:MacroNumberMethods
 #define QE_NUM_METHODS          (@value@)
 @qe:end:
 @qe:begin:MacroEachMethodId
-#define QE_METHOD_@METHOD@      (@value@)
+#define QE_METHOD_@METHOD@      (@value@)     /* method ID; array index */
 @qe:end:
 
 @qe:begin:MacroMaxButtons
-#define QE_MAX_BUTTONS          (@value@)
+#define QE_MAX_BUTTONS          (@value@)     /* most buttons present in all methods */
 @qe:end:
 @qe:begin:MacroMaxSliders
-#define QE_MAX_SLIDERS          (@value@)
+#define QE_MAX_SLIDERS          (@value@)     /* most sliders present in all methods */
 @qe:end:
 @qe:begin:MacroMaxWheels
-#define QE_MAX_WHEELS           (@value@)
+#define QE_MAX_WHEELS           (@value@)     /* most wheels present in all methods */
 @qe:end:
 @qe:begin:MacroMaxSliderElements
-#define QE_MAX_SLDR_ELEM_USED   (@value@)
+#define QE_MAX_SLDR_ELEM_USED   (@value@)     /* most elements used in a slider in all methods */
 @qe:end:
 @qe:begin:MacroMaxWheelElements
-#define QE_MAX_WHEEL_ELEM_USED  (@value@)
+#define QE_MAX_WHEEL_ELEM_USED  (@value@)     /* most elements used in a wheel in all methods */
 @qe:end:
 
 
@@ -83,4 +85,4 @@ extern void touch_parameter_address_set(void);
 extern void qetouch_timer_callback(void *p_args);
 
 
-#endif /* QE_COMMON_HEADER_FILE */
+#endif /* QE_COMMON_H */

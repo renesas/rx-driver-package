@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_ble_sec_data.c
@@ -45,6 +45,7 @@
 #define BLE_SECD_UPD_BN_ADD_OVERWR                                      (0x01)
 #define BLE_SECD_UPD_BN_DEL                                             (0x02)
 #define BLE_SECD_UPD_BN_ALL_DEL                                         (0x03)
+#define BLE_SECD_UPD_BN_UPD                                             (0x04)
 
 /***********************************************************************************************************************
  Local Typedef definitions
@@ -62,7 +63,7 @@ static const st_ble_dev_addr_t invalid_rem_addr = {
     };
 
 static ble_status_t find_entry(st_ble_dev_addr_t * p_dev_addr, int32_t * p_entry, uint8_t * p_sec_data);
-static void find_oldest_entry(int32_t * p_entry);
+static void find_oldest_entry(int32_t * p_entry, uint8_t * p_sec_data);
 static ble_status_t update_bond_num(int32_t entry, int32_t op_code, uint8_t * p_alloc_bond_num, uint8_t * p_sec_data);
 static void update_bond_order(int32_t entry, uint8_t * p_sec_data, uint8_t bond_order);
 static ble_status_t is_valid_entry(int32_t entry);
@@ -182,14 +183,35 @@ ble_status_t R_BLE_SECD_ReadLocInfo(st_ble_dev_addr_t * p_lc_id_addr, uint8_t * 
 
     if((NULL != p_lc_irk) && (NULL != p_lc_id_addr))
     {
-        memcpy(p_lc_irk, &p_loc_area[BLE_SECD_MGN_DATA_SIZE], BLE_GAP_IRK_SIZE);
-        memcpy(p_lc_id_addr, &p_loc_area[BLE_SECD_MGN_DATA_SIZE + BLE_GAP_IRK_SIZE + BLE_GAP_CSRK_SIZE], 
-               BLE_SECD_BD_ADDR_SIZE);
+        if(0xFF == p_loc_area[BLE_SECD_MGN_DATA_SIZE + BLE_GAP_IRK_SIZE + BLE_GAP_CSRK_SIZE + BLE_BD_ADDR_LEN])
+        {
+            /* invalid IRK and identity address */
+            memset(p_lc_irk, 0x00, BLE_GAP_IRK_SIZE);
+            memset(p_lc_id_addr, 0x00, BLE_SECD_BD_ADDR_SIZE);
+        }
+        else
+        {
+            /* valid IRK and identity address */
+            memcpy(p_lc_irk, &p_loc_area[BLE_SECD_MGN_DATA_SIZE], BLE_GAP_IRK_SIZE);
+            memcpy(p_lc_id_addr, &p_loc_area[BLE_SECD_MGN_DATA_SIZE + BLE_GAP_IRK_SIZE + BLE_GAP_CSRK_SIZE], 
+                BLE_SECD_BD_ADDR_SIZE);
+        }
     }
 
     if(NULL != p_lc_csrk)
     {
-        memcpy(p_lc_csrk, &p_loc_area[BLE_SECD_MGN_DATA_SIZE + BLE_GAP_IRK_SIZE], BLE_GAP_CSRK_SIZE);
+        uint8_t df_init[BLE_GAP_CSRK_SIZE];
+        memset(df_init, 0xFF, BLE_GAP_CSRK_SIZE);
+        if(0 == memcmp(df_init, &p_loc_area[BLE_SECD_MGN_DATA_SIZE + BLE_GAP_IRK_SIZE], BLE_GAP_CSRK_SIZE))
+        {
+            /* invalid CSRK */
+            memset(p_lc_csrk, 0x00, BLE_GAP_CSRK_SIZE);
+        }
+        else
+        {
+            /* valid CSRK */
+            memcpy(p_lc_csrk, &p_loc_area[BLE_SECD_MGN_DATA_SIZE + BLE_GAP_IRK_SIZE], BLE_GAP_CSRK_SIZE);
+        }
     }
 
     free(p_loc_area);
@@ -287,11 +309,16 @@ ble_status_t R_BLE_SECD_WriteRemKeys(st_ble_dev_addr_t * p_addr, st_ble_gap_auth
         if(BLE_SUCCESS != retval)
         {
             /* find oldest entry */
-            find_oldest_entry(&entry);
+            find_oldest_entry(&entry, p_sec_data);
 
             /** found the entry for overwrite */
             op_code = BLE_SECD_UPD_BN_ADD_OVERWR;
         }
+    }
+    else
+    {
+        /** found the entry for update */
+        op_code = BLE_SECD_UPD_BN_UPD;
     }
 
     start_addr = BLE_SECD_ADDR_REM_START + entry * BLE_SECD_REM_BOND_SIZE;
@@ -364,6 +391,67 @@ ble_status_t R_BLE_SECD_Init(void)
     return retval;
 } /* End of function R_BLE_SECD_Init() */
 
+/***********************************************************************************************************************
+ * Function Name: R_BLE_SECD_GetIdInfo
+ * Description  : Get Identify address, IRK from Data Flash.
+ * Arguments    : st_ble_dev_addr_t * p_idaddr                ; An array of the addresses to set the identity addresses 
+ *                                                            ; stored in Data Flash.
+ *              : st_ble_gap_rslv_list_key_set_t * p_key_set  ; An array of the keys to set the IRKs stored 
+ *                                                            ; in Data Flash.
+ *              : uint8_t * p_num                             ; The number of identity addresses stored in Data Flash.
+ **********************************************************************************************************************/
+ble_status_t R_BLE_SECD_GetIdInfo(st_ble_dev_addr_t * p_idaddr, 
+                                  st_ble_gap_rslv_list_key_set_t * p_key_set, 
+                                  uint8_t * p_num)
+{
+    uint8_t in_bond_num;
+    ble_status_t retval = BLE_SUCCESS;
+    uint8_t * p_sec_data;
+    st_ble_gap_bond_info_t bond_info[BLE_CFG_NUM_BOND];
+    st_ble_gap_key_dist_t * key_info;
+    uint32_t i;
+
+    if((NULL == p_idaddr) || (NULL == p_key_set) || (NULL == p_num))
+    {
+        return BLE_ERR_INVALID_PTR;
+    }
+
+    /** Read bonding information from DataFlash. */
+    retval = read_bond_info(&in_bond_num, &p_sec_data, bond_info);
+    if((BLE_SUCCESS != retval) && (BLE_ERR_NOT_FOUND != retval))
+    {
+        return retval;
+    }
+
+    *p_num = 0;
+
+    /** No bonding information is written in DataFlash. */
+    if(0 == in_bond_num)
+    {
+        return BLE_SUCCESS;
+    }
+
+    for(i=0; i<in_bond_num; i++)
+    {
+        key_info = bond_info[i].p_keys->p_keys_info;
+        if(0 != (BLE_GAP_KEY_DIST_IDKEY & bond_info[i].p_keys->keys))
+        {
+            /* set identity address */
+            memcpy(p_idaddr[*p_num].addr, &key_info->id_addr_info[1], BLE_BD_ADDR_LEN);
+            p_idaddr[*p_num].type = key_info->id_addr_info[0];
+
+            /* set IRK */
+            memcpy(p_key_set[*p_num].remote_irk, key_info->id_info, BLE_GAP_IRK_SIZE);
+            p_key_set[*p_num].local_irk_type = BLE_GAP_RL_LOC_KEY_REGISTERED;
+            (*p_num)++;
+        }
+    }
+
+    /** bonding info buffer release */
+    release_bond_info_buf(p_sec_data);
+
+    return retval;
+}
 
 /***********************************************************************************************************************
  * Function Name: R_BLE_SECD_DelRemKeys
@@ -453,8 +541,12 @@ static ble_status_t find_entry(st_ble_dev_addr_t * p_dev_addr, int32_t * p_entry
 
     for(i=0; i<BLE_CFG_NUM_BOND; i++)
     {
-        if(0 == memcmp(&p_sec_data[BLE_SECD_SEC_REM_OFFSET + i * BLE_SECD_REM_BOND_SIZE], 
-                       p_addr, BLE_SECD_BD_ADDR_SIZE))
+        if((0 == memcmp(&p_sec_data[BLE_SECD_SEC_REM_OFFSET + i * BLE_SECD_REM_BOND_SIZE], 
+                        p_addr, BLE_SECD_BD_ADDR_SIZE)) ||
+           ((0 == memcmp(&p_sec_data[BLE_SECD_SEC_REM_OFFSET + i * BLE_SECD_REM_BOND_SIZE + 
+                          1 + BLE_SECD_SEC_IDADDR_OFFSET], p_addr->addr, BLE_BD_ADDR_LEN)) && 
+            (p_addr->type == p_sec_data[BLE_SECD_SEC_REM_OFFSET + i * BLE_SECD_REM_BOND_SIZE + 
+                                        BLE_SECD_SEC_IDADDR_OFFSET])))
         {
             *p_entry = i;
             return BLE_SUCCESS;
@@ -470,13 +562,31 @@ static ble_status_t find_entry(st_ble_dev_addr_t * p_dev_addr, int32_t * p_entry
  * Arguments    : int32_t * p_entry                           ; Entry
  * Return Value : none
   *********************************************************************************************************************/
-static void find_oldest_entry(int32_t * p_entry)
+static void find_oldest_entry(int32_t * p_entry, uint8_t * p_sec_data)
 {
-    uint8_t bond_order;
     int32_t out_bond;
+    int32_t i;
+    uint8_t tmp_order;
 
-    r_dflash_read(BLE_SECD_ADDR_MGN_DATA + BLE_SECD_OUT_BOND_OFFSET, &bond_order, 1);
-    out_bond = (int32_t)bond_order;
+    out_bond = 0xFF;
+    tmp_order = BLE_CFG_NUM_BOND + 1;
+
+    for(i=0; i<BLE_CFG_NUM_BOND; i++)
+    {
+        uint8_t order;
+        order = p_sec_data[BLE_SECD_SEC_REM_OFFSET + i * BLE_SECD_REM_BOND_SIZE + BLE_SECD_BD_ADDR_SIZE];
+        if(BLE_CFG_NUM_BOND < order)
+        {
+            continue;
+        }
+
+        if(order < tmp_order)
+        {
+            tmp_order = order;
+            out_bond = i;
+        }
+    }
+
     * p_entry = out_bond;
 
     return;
@@ -504,6 +614,7 @@ static ble_status_t update_bond_num(int32_t entry, int32_t op_code, uint8_t * p_
     {
         case BLE_SECD_UPD_BN_ADD :
         case BLE_SECD_UPD_BN_ADD_OVERWR :
+        case BLE_SECD_UPD_BN_UPD :
             /* update bond_num */
             if(0xFF == bond_num)
             {
@@ -518,15 +629,24 @@ static ble_status_t update_bond_num(int32_t entry, int32_t op_code, uint8_t * p_
             }
             else
             {
-                bond_num++;
+                if(BLE_SECD_UPD_BN_UPD != op_code)
+                {
+                    bond_num++;
+                }
             }
 
             p_sec_data[BLE_SECD_MGC_NUM_SIZE] = bond_num;
 
             /* update bond order */
-            if(BLE_SECD_UPD_BN_ADD_OVERWR == op_code)
+            bond_order = 1;
+            if(BLE_SECD_UPD_BN_UPD == op_code)
             {
-                update_bond_order(entry, p_sec_data, 1);
+                bond_order = p_sec_data[BLE_SECD_SEC_REM_OFFSET + entry * BLE_SECD_REM_BOND_SIZE + BLE_SECD_BD_ADDR_SIZE];
+            }
+
+            if(BLE_SECD_UPD_BN_ADD != op_code)
+            {
+                update_bond_order(entry, p_sec_data, bond_order);
             }
 
             * p_alloc_bond_num = bond_num;
@@ -678,14 +798,20 @@ static ble_status_t read_bond_info(uint8_t * p_out_bond_num, uint8_t ** pp_sec_d
         return BLE_ERR_LIMIT_EXCEEDED;
     }
 
+    uint8_t bond_index;
     for(i=0; i<p_bonds[BLE_SECD_BOND_NUM_OFFSET]; i++)
     {
+        /* i : DataFlash index */
         start_addr = BLE_SECD_SEC_REM_OFFSET + i * BLE_SECD_REM_BOND_SIZE;
-        p_bond_info[i].p_addr = (st_ble_dev_addr_t *)(p_bonds + start_addr);
-        p_bond_info[i].p_auth_info = (st_ble_gap_auth_info_t *)(p_bonds + start_addr + BLE_SECD_SEC_INFO_OFFSET);
-        p_bond_info[i].p_keys = (st_ble_gap_key_ex_param_t *)(p_bonds + start_addr + BLE_SECD_SEC_KEYS_INFO_OFFSET);
-        p_bond_info[i].p_keys->p_keys_info = (st_ble_gap_key_dist_t *)(p_bonds + start_addr + BLE_SECD_SEC_KEYS_OFFSET);
-        (*p_out_bond_num)++;
+        bond_index = *(uint8_t *)(p_bonds + start_addr + 7) - 1;
+        if(bond_index < BLE_CFG_NUM_BOND)
+        {
+            p_bond_info[bond_index].p_addr = (st_ble_dev_addr_t *)(p_bonds + start_addr);
+            p_bond_info[bond_index].p_auth_info = (st_ble_gap_auth_info_t *)(p_bonds + start_addr + BLE_SECD_SEC_INFO_OFFSET);
+            p_bond_info[bond_index].p_keys = (st_ble_gap_key_ex_param_t *)(p_bonds + start_addr + BLE_SECD_SEC_KEYS_INFO_OFFSET);
+            p_bond_info[bond_index].p_keys->p_keys_info = (st_ble_gap_key_dist_t *)(p_bonds + start_addr + BLE_SECD_SEC_KEYS_OFFSET);
+            (*p_out_bond_num)++;
+        }
     }
 
     return BLE_SUCCESS;
@@ -744,6 +870,16 @@ ble_status_t R_BLE_SECD_WriteRemKeys(st_ble_dev_addr_t * p_addr,
 
 ble_status_t R_BLE_SECD_Init(void)
 {
+    return BLE_ERR_UNSUPPORTED;
+}
+
+ble_status_t R_BLE_SECD_GetIdInfo(st_ble_dev_addr_t * p_idaddr, 
+                                  st_ble_gap_rslv_list_key_set_t * p_key_set, 
+                                  uint8_t * p_cnt)
+{
+    (void)p_idaddr;
+    (void)p_key_set;
+    (void)p_cnt;
     return BLE_ERR_UNSUPPORTED;
 }
 

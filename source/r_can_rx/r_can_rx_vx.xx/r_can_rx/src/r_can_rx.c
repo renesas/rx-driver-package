@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2015 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_can_rx.c
@@ -52,6 +52,12 @@
 *                              - Added support for atomic control.
 *                              - Removed support for Generation 1 devices.
 *                              - Fixed to comply with GSCE Coding Standards Rev.6.00.
+*         : 13.06.2020 4.00    - Added support CAN FIFO.
+*                              - Removed source code related to Pin-setting.
+*                              - Fixed R_CAN_Control() in case EXITSLEEP_CANMODE.
+*                              - Fixed processing in R_CAN_RxSetMask() function.
+*         : 04.01.2021 4.10    - Changed can_tx_callback to can_txf_callback in case txf_cb_func is NULL in R_CAN_Create().
+*         : 01.04.2021 5.00    - Added support for setting different bitrate for different channels.
 ***********************************************************************************************************************/
 /******************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -74,7 +80,9 @@ can peripheral and driver from blocking the CPU indefinatly. */
 #define MAX_CAN_SW_DELAY        (0x2000)
 
 #define CHECK_MBX_NR            {if (mbox_nr > 31) return R_CAN_SW_BAD_MBX;}
-
+#define CHECK_TXFIFO_MBX_NR     {if (mbox_nr > 27) return R_CAN_SW_BAD_MBX;}
+#define CHECK_RXFIFO_MBX_NR     {if (((mbox_nr > 23) && (mbox_nr < 28)) || mbox_nr > 31 ) return R_CAN_SW_BAD_MBX;}
+#define CHECK_MBX_MODE          {if (mb_mode > 1) return R_CAN_SW_BAD_MODE;}
 
 /* Define a mask for MSB of a long to serve as an extended ID mode bit flag. */
 /* Extended ID occupies lower 29 bits, so use this to mask off upper 3 bits. */ 
@@ -118,52 +126,6 @@ static const can_st_ptr CAN_CHANNELS[] =
 /* make sure that MAX_CHANNELS = the number of CAN channels */
 #define MAX_CHANNELS (sizeof(CAN_CHANNELS)/sizeof(can_st_ptr))
 
-/* initialize CAN port map */
-static CAN_port_map_t CAN_CHNL_PORTS[] = {
-    #ifdef CAN0
-        {
-        p_CAN0_RX_PIN_MPC,
-        p_CAN0_RX_PIN_PMR,
-        p_CAN0_RX_PIN_PDR,
-        p_CAN0_RX_PIN_PIDR,
-          CAN0_RX_PIN_MASK,
-        p_CAN0_TX_PIN_MPC, 
-        p_CAN0_TX_PIN_PMR,
-        p_CAN0_TX_PIN_PDR,
-        p_CAN0_TX_PIN_PODR,
-          CAN0_TX_PIN_MASK,
-        },
-    #endif
-    #ifdef CAN1
-        {
-        p_CAN1_RX_PIN_MPC,
-        p_CAN1_RX_PIN_PMR,
-        p_CAN1_RX_PIN_PDR,
-        p_CAN1_RX_PIN_PIDR,
-          CAN1_RX_PIN_MASK,
-        p_CAN1_TX_PIN_MPC, 
-        p_CAN1_TX_PIN_PMR,
-        p_CAN1_TX_PIN_PDR,
-        p_CAN1_TX_PIN_PODR,
-          CAN1_TX_PIN_MASK,
-        },
-    #endif
-    #ifdef CAN2
-        {
-        p_CAN2_RX_PIN_MPC,
-        p_CAN2_RX_PIN_PMR,
-        p_CAN2_RX_PIN_PDR,
-        p_CAN2_RX_PIN_PIDR,
-          CAN2_RX_PIN_MASK,
-        p_CAN2_TX_PIN_MPC, 
-        p_CAN2_TX_PIN_PMR,
-        p_CAN2_TX_PIN_PDR,
-        p_CAN2_TX_PIN_PODR,
-          CAN2_TX_PIN_MASK,
-        }
-    #endif
-    };
-
 /******************************************************************************
 Global variables and functions private to the file
 ******************************************************************************/
@@ -177,16 +139,22 @@ static void     can_module_stop_state_cancel(const uint32_t ch_nr);
 /* User-function vectors for the CAN interrupts. These will be populated by R_CAN_Create(). */
 #ifdef CAN2     /* Three CAN channels exist on device. */
     void (*can_tx_callback[MAX_CHANNELS])(void) = {NULL, NULL, NULL};
+    void (*can_txf_callback[MAX_CHANNELS])(void) = {NULL, NULL, NULL};
     void (*can_rx_callback[MAX_CHANNELS])(void) = {NULL, NULL, NULL};
+    void (*can_rxf_callback[MAX_CHANNELS])(void) = {NULL, NULL, NULL};
     void (*can_err_callback[MAX_CHANNELS])(void) = {NULL, NULL, NULL};
 #else
 #ifdef CAN1     /* Two CAN channels exist. */
     void (*can_tx_callback[MAX_CHANNELS])(void) = {NULL, NULL};
+    void (*can_txf_callback[MAX_CHANNELS])(void) = {NULL, NULL};
     void (*can_rx_callback[MAX_CHANNELS])(void) = {NULL, NULL};
+    void (*can_rxf_callback[MAX_CHANNELS])(void) = {NULL, NULL};
     void (*can_err_callback[MAX_CHANNELS])(void) = {NULL, NULL};
 #else           /* Only one CAN channel on device. */
     void (*can_tx_callback[MAX_CHANNELS])(void) = {NULL};
+    void (*can_txf_callback[MAX_CHANNELS])(void) = {NULL};
     void (*can_rx_callback[MAX_CHANNELS])(void) = {NULL};
+    void (*can_rxf_callback[MAX_CHANNELS])(void) = {NULL};
     void (*can_err_callback[MAX_CHANNELS])(void) = {NULL};
 #endif
 #endif
@@ -206,6 +174,9 @@ static void     can_module_stop_state_cancel(const uint32_t ch_nr);
 * This function sets the CAN interrupt levels and user callbacks. This function will also call R_CAN_SetBitrate()
 * and sets the mask to default: not mask any frames.
 * @param[in] ch_nr - CAN channel to use (0-2 MCU dependent).
+* @param[in] mb_mode - Normal mailbox (0), FIFO mailbox (1).
+* @param[in] p_cfg - It is an address to the data structure containing the BRP, TSEG1, TSEG2, and SJW that constitute
+* the bitrate for channel ch_nr.
 * @param[in] tx_cb_func - The name of a function in your application which will be called by the CAN driver when
 * a mailbox has finished transmitting. If you are using polled mode, or do not want a callback for interrupt mode
 * for some reason, specify NULL.
@@ -231,7 +202,7 @@ static void     can_module_stop_state_cancel(const uint32_t ch_nr);
 * in r_can_rx_config.h.\n
 * Before returning, it clears all mailboxes, sets the peripheral into Operation mode, and clears any errors.
 */
-uint32_t R_CAN_Create(const uint32_t ch_nr, void (*tx_cb_func)(void), void (*rx_cb_func)(void), void (*err_cb_func)(void))
+uint32_t R_CAN_Create(const uint32_t ch_nr, const uint32_t mb_mode, const can_bitrate_config_t p_cfg, void (*tx_cb_func)(void), void (*txf_cb_func)(void), void (*rx_cb_func)(void), void (*rxf_cb_func)(void), void (*err_cb_func)(void))
 {
     volatile struct st_can R_BSP_EVENACCESS_SFR * can_block_p;
     uint32_t api_status = R_CAN_OK;
@@ -241,6 +212,9 @@ uint32_t R_CAN_Create(const uint32_t ch_nr, void (*tx_cb_func)(void), void (*rx_
     the program at a while-loop. To prevent this, a sw timer in the while-loops
     will time out enabling the CPU to continue. */
     uint32_t can_tmo_cnt = MAX_CAN_SW_DELAY;
+
+    /* check mailbox mode */
+    CHECK_MBX_MODE
 
     if (ch_nr < MAX_CHANNELS)
     {
@@ -262,6 +236,17 @@ uint32_t R_CAN_Create(const uint32_t ch_nr, void (*tx_cb_func)(void), void (*rx_
         can_tx_callback[ch_nr] = tx_cb_func;
     }
 
+    if (NULL == txf_cb_func)
+    {
+        /* Set the interrupt to a default function as a safety precaution. Even if in polled mode. */
+        can_txf_callback[ch_nr] = universal_can_callback;
+    }
+    else
+    {
+        /* Set what user function to execute when a CAN transmit interrupt occurs. */
+        can_txf_callback[ch_nr] = txf_cb_func;
+    }
+
     if (NULL == rx_cb_func)
     {
         /* Set the interrupt to a default function as a safety precaution. Even if in polled mode. */
@@ -271,6 +256,17 @@ uint32_t R_CAN_Create(const uint32_t ch_nr, void (*tx_cb_func)(void), void (*rx_
     {
         /* Set what user function to execute when a CAN receive interrupt occurs. */
         can_rx_callback[ch_nr] = rx_cb_func;
+    }
+
+    if (NULL == rxf_cb_func)
+    {
+        /* Set the interrupt to a default function as a safety precaution. Even if in polled mode. */
+        can_rxf_callback[ch_nr] = universal_can_callback;
+    }
+    else
+    {
+        /* Set what user function to execute when a CAN receive interrupt occurs. */
+        can_rxf_callback[ch_nr] = rxf_cb_func;
     }
 
     if (NULL == err_cb_func)
@@ -295,16 +291,21 @@ uint32_t R_CAN_Create(const uint32_t ch_nr, void (*tx_cb_func)(void), void (*rx_
     /* Exit Sleep mode. This will also take us from HALT mode to OPERATE_CANMODE. */
     api_status |= R_CAN_Control(ch_nr, EXITSLEEP_CANMODE);
 
-    /* Go to RESET mode. **********************************************************/
-    api_status |= R_CAN_Control(ch_nr, RESET_CANMODE);
-
     /*** Set CAN Control register.***/
 
     /* BOM:    Bus Off recovery mode acc. to IEC11898-1 */
     can_block_p->CTLR.BIT.BOM = 0;
 
-    /* MBM: Select normal mailbox mode. */
-    can_block_p->CTLR.BIT.MBM = 0;
+    if(FIFO_MAILBOX_MODE == mb_mode )    /* check normal or fifo mode */
+    {
+        /* MBM: Select FIFO mailbox mode. */
+        can_block_p->CTLR.BIT.MBM = 1;
+    }
+    else
+    {
+        /* MBM: Select normal mailbox mode. */
+        can_block_p->CTLR.BIT.MBM = 0;
+    }
 
     /* IDFM: Select Frame ID mode. */
     can_block_p->CTLR.BIT.IDFM = FRAME_ID_MODE;
@@ -323,7 +324,7 @@ uint32_t R_CAN_Create(const uint32_t ch_nr, void (*tx_cb_func)(void), void (*rx_
     can_block_p->CTLR.BIT.TSPS = 3;
 
     /* Set BAUDRATE */
-    R_CAN_SetBitrate(ch_nr);
+    R_CAN_SetBitrate(ch_nr, p_cfg);
 
     /* Mask invalid for all mailboxes by default. */
     can_block_p->MKIVLR.LONG = 0xFFFFFFFF;
@@ -419,12 +420,10 @@ uint32_t R_CAN_PortSet(const uint32_t ch_nr, const uint32_t action_type)
 {
     volatile struct st_can R_BSP_EVENACCESS_SFR * can_block_p;
     uint32_t api_status = R_CAN_OK;
-    CAN_port_map_t * pst_can_pin;
 
     if (ch_nr < MAX_CHANNELS) 
     { 
         can_block_p = CAN_CHANNELS[ch_nr];
-        pst_can_pin = (CAN_port_map_t *)&CAN_CHNL_PORTS[ch_nr];
     }
     else 
     {
@@ -434,34 +433,9 @@ uint32_t R_CAN_PortSet(const uint32_t ch_nr, const uint32_t action_type)
     switch (action_type)
     {
         case ENABLE:
-            if (!pst_can_pin->p_CAN_Rx_Pin_MPC) /* Check for null pointer. */
-            {
-                return (R_CAN_BAD_CH_NR);    /* Channel port not defined */
-            }
-
-            /* Initialize the CTXn and CRXn pins. */
-
             /* Port pin function select register setting */
             MPC.PWPR.BYTE = 0x00;    /* PWPR.PFSWE write protect off */
             MPC.PWPR.BYTE = 0x40;    /* PFS register write protect off */
-
-            /* When setting up pins, follow this sequence to avoid glitches */
-            (*(pst_can_pin->p_CAN_Rx_Pin_PMR)) &= (~pst_can_pin->Rx_Pin_mask); /* Clear RX bit to general I/O */
-            (*(pst_can_pin->p_CAN_Rx_Pin_PDR)) &= (~pst_can_pin->Rx_Pin_mask); /* Set RX pin as input:  0  */
-            (*(pst_can_pin->p_CAN_Tx_Pin_PMR)) &= (~pst_can_pin->Tx_Pin_mask); /* Clear TX bit to general I/O */
-            (*(pst_can_pin->p_CAN_Tx_Pin_PDR)) &= (~pst_can_pin->Tx_Pin_mask); /* Set TX pin as input (for now):  0  */
-
-            /* Select CAN signal I/O pins in MPC register*/
-            (*(pst_can_pin->p_CAN_Tx_Pin_MPC)) = PINFUNC_CAN;
-            (*(pst_can_pin->p_CAN_Rx_Pin_MPC)) = PINFUNC_CAN;
-
-            /* Set RX and TX port pins as peripheral I/O (set bit to 1) */
-            (*(pst_can_pin->p_CAN_Rx_Pin_PMR)) |= pst_can_pin->Rx_Pin_mask;
-            (*(pst_can_pin->p_CAN_Tx_Pin_PMR)) |= pst_can_pin->Tx_Pin_mask;
-
-            /* set port directions */
-            (*(pst_can_pin->p_CAN_Rx_Pin_PDR)) &= (~pst_can_pin->Rx_Pin_mask); /* CRX0 is input: clear the bit */
-            (*(pst_can_pin->p_CAN_Tx_Pin_PDR)) |= (pst_can_pin->Tx_Pin_mask);  /* CTX0 is output: set the bit */
 
             #if defined(CAN0) && defined(CAN0_TRX_STB_PORT) && defined(CAN0_TRX_STB_PIN)
             if (ch_nr == 0)
@@ -505,15 +479,9 @@ uint32_t R_CAN_PortSet(const uint32_t ch_nr, const uint32_t action_type)
 
         case DISABLE:
 
-            /* Configure CAN1 TX and RX pins. */
             /* Port pin function select register setting */
             MPC.PWPR.BYTE = 0x00;    /* PWPR.PFSWE write protect off */
             MPC.PWPR.BYTE = 0x40;    /* PFS register write protect off */
-
-            (*(pst_can_pin->p_CAN_Rx_Pin_PMR)) &= (~pst_can_pin->Rx_Pin_mask); /* Clear RX bit to general I/O */
-            (*(pst_can_pin->p_CAN_Rx_Pin_PDR)) &= (~pst_can_pin->Rx_Pin_mask); /* Set RX pin as input:  0  */
-            (*(pst_can_pin->p_CAN_Tx_Pin_PMR)) &= (~pst_can_pin->Tx_Pin_mask); /* Clear TX bit to general I/O */
-            (*(pst_can_pin->p_CAN_Tx_Pin_PDR)) &= (~pst_can_pin->Tx_Pin_mask); /* Set TX pin as input: 0  */
 
             #if defined(CAN0) && defined(CAN0_TRX_STB_PORT) && defined(CAN0_TRX_STB_PIN)
             if (ch_nr == 0)
@@ -626,7 +594,7 @@ uint32_t R_CAN_PortSet(const uint32_t ch_nr, const uint32_t action_type)
 * See also R_CAN_PortSet() return values.
 * @details Other than calling this API to enter Halt mode, CAN mode transitions are called via the other API
 * functions automatically. For example, the default mode when starting up is CAN Sleep mode. Use the API to switch
-* to other operating modes, for example first 'Exit Sleep' followed by 'Reset' to initialize the CAN registers for
+* to other operating modes, for example first ‘Exit Sleep' followed by ‘Reset' to initialize the CAN registers for
 * bitrate and interrupts, then enter ‘Halt' mode to configure mailboxes.
 */
 uint32_t R_CAN_Control(const uint32_t  ch_nr, const uint32_t  action_type)
@@ -661,7 +629,7 @@ uint32_t R_CAN_Control(const uint32_t  ch_nr, const uint32_t  action_type)
             { 
                 api_status = R_CAN_SW_WAKEUP_ERR;
             }
-            R_CAN_Control(ch_nr, OPERATE_CANMODE);
+            R_CAN_Control(ch_nr, RESET_CANMODE);
             break;
         case ENTERSLEEP_CANMODE:
 
@@ -762,6 +730,7 @@ uint32_t R_CAN_Control(const uint32_t  ch_nr, const uint32_t  action_type)
 * Finally R_CAN_Tx is called to deliver the message.
 */
 uint32_t R_CAN_TxSet(const uint32_t         ch_nr,
+                     const uint32_t         mb_mode,
                      const uint32_t         mbox_nr,
                      const can_frame_t*     frame_p,
                      const uint32_t         frame_type)
@@ -770,7 +739,22 @@ uint32_t R_CAN_TxSet(const uint32_t         ch_nr,
     uint32_t    api_status = R_CAN_OK;
     uint32_t    i;
 
-    CHECK_MBX_NR
+    /* check mailbox mode */
+    CHECK_MBX_MODE
+
+    /* check mailbox for fifo mode: normal mailbox: 0 --> 23,
+     * Transmit fifo mailbox: 24 --> 27;
+     * return if number of mailbox is receive fifo mailbox(28 -->31) or higher */
+    if(FIFO_MAILBOX_MODE == mb_mode )    /* check normal or fifo mailbox mode */
+    {
+        /* return if MBX is receive FIFO mailbox */
+        CHECK_TXFIFO_MBX_NR
+    }
+    else
+    {
+        CHECK_MBX_NR
+    }
+
     if (ch_nr < MAX_CHANNELS)
     {
         can_block_p = CAN_CHANNELS[ch_nr];
@@ -780,62 +764,149 @@ uint32_t R_CAN_TxSet(const uint32_t         ch_nr,
         return (R_CAN_BAD_CH_NR);
     }
 
-    /* Wait for any previous transmission to complete. */
-    api_status = can_wait_tx_rx(ch_nr, mbox_nr);
-
-    /* Interrupt disable the mailbox.in case it was a receive mailbox */
-    can_block_p->MIER.LONG &= ((~(bit_set[mbox_nr])));
-
-    /* Clear message mailbox control register. TRMREQ/RECREQ already 0 after can_wait_tx_rx(). (No need to write twice). */
-    can_block_p->MCTL[mbox_nr].BYTE = 0;
-        
-    /*** Set Mailbox ID based on ID mode ***/
-    if (frame_p->id & XID_MASK)    /* Check for XID flag bit set in ID field */
+    if((FIFO_MAILBOX_MODE == mb_mode) && (bit_set[mbox_nr] & 0x0f000000))    /* check fifo mailbox mode and using FIFO mailbox */
     {
-        /* Set message mailbox buffer Extended ID, masking off temporary XID flag bit. */
-        can_block_p->MB[mbox_nr].ID.LONG = (frame_p->id & (~XID_MASK));
-        if (MIXED_ID_MODE == can_block_p->CTLR.BIT.IDFM)
+        /* In FIFO mailbox mode, change the bits in MIER for the related FIFO only when
+         * the TFE bit in TFCR is 0 and the TFEST flag is 1 */
+        if((can_block_p->TFCR.BIT.TFE == 0) && (can_block_p->TFCR.BIT.TFEST == 1))
         {
-            can_block_p->MB[mbox_nr].ID.BIT.IDE = 1;   /* Mixed mode; select to send extended frame. */
+            /* Interrupt disable the mailbox.in case it was a receive mailbox */
+            can_block_p->MIER.LONG &= ((~(bit_set[24])));
         }
+
+        /* return if transmit fifo mailbox is full */
+        if(can_block_p->TFCR.BIT.TFFST == 1)
+        {
+            return (CAN_ERR_BOX_FULL);
+        }
+
+        /* Copy frame data into mailbox */
+        for (i = 0; ((i < frame_p->dlc) && (i<8)); i++)
+        {
+            can_block_p->MB[24].DATA[i] = frame_p->data[i];
+        }
+
+        /* Frame select: Data frame = 0, Remote = 1 */
+        if (REMOTE_FRAME == frame_type)
+        {
+            can_block_p->MB[24].ID.BIT.RTR = 1;
+        }
+        else
+        {
+            can_block_p->MB[24].ID.BIT.RTR = 0;
+        }
+
+        /*** Set Mailbox ID based on ID mode ***/
+        if (frame_p->id & XID_MASK)    /* Check for XID flag bit set in ID field */
+        {
+            /* Set message mailbox buffer Extended ID, masking off temporary XID flag bit. */
+            can_block_p->MB[24].ID.LONG = (frame_p->id & (~XID_MASK));
+
+            if (MIXED_ID_MODE == can_block_p->CTLR.BIT.IDFM)
+            {
+                can_block_p->MB[24].ID.BIT.IDE = 1;   /* Mixed mode; select to send extended frame. */
+            }
+        }
+        else
+        {
+            /* Set message mailbox buffer Standard ID.
+             * Put only the lower 11 bit in the SID. */
+            can_block_p->MB[24].ID.BIT.SID = (frame_p->id & SID_MASK);
+
+            /* Always set IDE to 0 (unless mixed mode and extended frame as above). */
+            can_block_p->MB[24].ID.BIT.IDE = 0;
+        }
+
+        /* Set the Data Length Code */
+        can_block_p->MB[24].DLC = (unsigned short)frame_p->dlc;
+
+        #if (USE_CAN_POLL == 0)
+        /* In FIFO mailbox mode, change the bits in MIER for the related FIFO only when
+         * the TFE bit in TFCR is 0 and the TFEST flag is 1 */
+            if((can_block_p->TFCR.BIT.TFE == 0) && (can_block_p->TFCR.BIT.TFEST == 1))
+            {
+                /* Interrupt enable the mailbox */
+                can_block_p->MIER.LONG |= (bit_set[24]);
+
+                /* Generate interrupt when FIFO last message transmission completed */
+                if(CAN_CFG_TXFIFO_INT_GEN_TIMING == 1)
+                {
+                    can_block_p->MIER.LONG |= (bit_set[25]);
+                }
+            }
+        #endif
+
+        if(can_block_p->TFCR.BIT.TFEST == 1) /* confirm that the transmit FIFO empty status bit is set to 1. */
+        {
+            can_block_p->TFCR.BIT.TFE = 1; /* Transmit FIFO enabled. */
+        }
+
+        api_status |= R_CAN_Tx(ch_nr, mb_mode, mbox_nr);
     }
+
+    /* Content of below else will occur in 2 case:
+     * 1: Transmit message by MBX normal in FIFO mailbox mode when FIFO_MAILBOX_MODE == mb_mode
+     * 2: Transmit message by MBX normal in normal mailbox mode when FIFO_MAILBOX_MODE != mb_mode */
     else
     {
-        /* Set message mailbox buffer Standard ID. Put only the lower 11 bit in the SID. */
-        can_block_p->MB[mbox_nr].ID.BIT.SID = (frame_p->id & SID_MASK);
+        /* Wait for any previous transmission to complete. */
+        api_status = can_wait_tx_rx(ch_nr, mbox_nr);
+        /* Interrupt disable the mailbox.in case it was a receive mailbox */
+        can_block_p->MIER.LONG &= ((~(bit_set[mbox_nr])));
 
-        /* Always set IDE to 0 (unless mixed mode and extended frame as above). */
-        can_block_p->MB[mbox_nr].ID.BIT.IDE = 0;
+        /* Clear message mailbox control register. TRMREQ/RECREQ already 0 after can_wait_tx_rx(). (No need to write twice). */
+        can_block_p->MCTL[mbox_nr].BYTE = 0;
+
+
+        /*** Set Mailbox ID based on ID mode ***/
+        if (frame_p->id & XID_MASK)    /* Check for XID flag bit set in ID field */
+        {
+            /* Set message mailbox buffer Extended ID, masking off temporary XID flag bit. */
+            can_block_p->MB[mbox_nr].ID.LONG = (frame_p->id & (~XID_MASK));
+
+            if (MIXED_ID_MODE == can_block_p->CTLR.BIT.IDFM)
+            {
+                can_block_p->MB[mbox_nr].ID.BIT.IDE = 1;   /* Mixed mode; select to send extended frame. */
+            }
+        }
+        else
+        {
+            /* Set message mailbox buffer Standard ID. Put only the lower 11 bit in the SID. */
+            can_block_p->MB[mbox_nr].ID.BIT.SID = (frame_p->id & SID_MASK);
+
+            /* Always set IDE to 0 (unless mixed mode and extended frame as above). */
+            can_block_p->MB[mbox_nr].ID.BIT.IDE = 0;
+        }
+
+        /* Set the Data Length Code */
+        can_block_p->MB[mbox_nr].DLC = (unsigned short)frame_p->dlc;
+
+        /* Frame select: Data frame = 0, Remote = 1 */
+        if (REMOTE_FRAME == frame_type)
+        {
+            can_block_p->MB[mbox_nr].ID.BIT.RTR = 1;
+        }
+        else
+        {
+            can_block_p->MB[mbox_nr].ID.BIT.RTR = 0;
+        }
+
+        /* Copy frame data into mailbox */
+        for (i = 0; ((i < frame_p->dlc) && (i<8)); i++)
+        {
+            can_block_p->MB[mbox_nr].DATA[i] = frame_p->data[i];
+        }
+
+        #if (USE_CAN_POLL == 0)
+            /* Interrupt enable the mailbox */
+            can_block_p->MIER.LONG |= (bit_set[mbox_nr]);
+        #endif
+
+        api_status |= R_CAN_Tx(ch_nr, mb_mode, mbox_nr);
     }
-
-    /* Set the Data Length Code */
-    can_block_p->MB[mbox_nr].DLC = (unsigned short)frame_p->dlc;
-
-    /* Frame select: Data frame = 0, Remote = 1 */
-    if (REMOTE_FRAME == frame_type)
-    {
-        can_block_p->MB[mbox_nr].ID.BIT.RTR = 1;
-    }
-    else
-    {
-        can_block_p->MB[mbox_nr].ID.BIT.RTR = 0;
-    }
-
-    /* Copy frame data into mailbox */
-    for (i = 0; ((i < frame_p->dlc) && (i<8)); i++)
-    {
-        can_block_p->MB[mbox_nr].DATA[i] = frame_p->data[i];
-    }
-
-    #if (USE_CAN_POLL == 0)
-        /* Interrupt enable the mailbox */
-        can_block_p->MIER.LONG |= (bit_set[mbox_nr]);
-    #endif
-
-    api_status |= R_CAN_Tx(ch_nr, mbox_nr);
-
     return (api_status);
 }
+
 /******************************************************************************
  End of function R_CAN_TxSet
  *****************************************************************************/ /* end R_CAN_TxSet() */
@@ -863,7 +934,8 @@ uint32_t R_CAN_TxSet(const uint32_t         ch_nr,
 * payload bytes (0-7) into the mailbox. The mailbox is interrupt enabled again unless USE_CAN_POLL was defined.
 * Finally R_CAN_Tx is called to deliver the message.
 */
-uint32_t R_CAN_TxSetXid(const uint32_t     ch_nr, 
+uint32_t R_CAN_TxSetXid(const uint32_t     ch_nr,
+                        const uint32_t     mb_mode,
                         const uint32_t     mbox_nr,
                         can_frame_t*       frame_p,
                         const uint32_t     frame_type)
@@ -877,7 +949,7 @@ uint32_t R_CAN_TxSetXid(const uint32_t     ch_nr,
     memcpy(&temp_frame, frame_p, sizeof(can_frame_t));
 
     temp_frame.id |= XID_MASK;    /* Set XID flag bit set in ID field */
-    api_status = R_CAN_TxSet(ch_nr, mbox_nr, (can_frame_t*)&temp_frame, frame_type);
+    api_status = R_CAN_TxSet(ch_nr, mb_mode, mbox_nr, (can_frame_t*)&temp_frame, frame_type);
            
     return (api_status);
 }
@@ -900,12 +972,27 @@ uint32_t R_CAN_TxSetXid(const uint32_t     ch_nr,
 * @details R_CAN_TxSet must have been called at least once for this mailbox after system start to set up the mailbox
 * content, as this function only tells the mailbox to send its content.
 */
-uint32_t R_CAN_Tx(const uint32_t  ch_nr, const uint32_t  mbox_nr)
+uint32_t R_CAN_Tx(const uint32_t  ch_nr, const uint32_t  mb_mode, const uint32_t  mbox_nr)
 {
     volatile struct st_can R_BSP_EVENACCESS_SFR * can_block_p;
     uint32_t api_status = R_CAN_OK;
 
-    CHECK_MBX_NR
+     /* check mailbox mode */
+     CHECK_MBX_MODE
+
+    /* check mailbox for fifo mode: normal mailbox: 0 --> 23,
+     * Transmit fifo mailbox: 24 --> 27;
+     * return if number of mailbox is receive fifo mailbox(28 -->31) or higher */
+    if(FIFO_MAILBOX_MODE == mb_mode )    /* check normal or fifo mailbox mode */
+    {
+        /* return if MBX is receive FIFO mailbox */
+        CHECK_TXFIFO_MBX_NR
+    }
+    else
+    {
+        CHECK_MBX_NR
+    }
+
     if (ch_nr < MAX_CHANNELS)
     {
         can_block_p = CAN_CHANNELS[ch_nr];
@@ -914,7 +1001,13 @@ uint32_t R_CAN_Tx(const uint32_t  ch_nr, const uint32_t  mbox_nr)
     {
         return (R_CAN_BAD_CH_NR);
     }
-
+    if((FIFO_MAILBOX_MODE == mb_mode) && (bit_set[mbox_nr] & 0x0f000000))    /* check normal or fifo mode */
+    {
+        /* Write FFh to transmit FIFO pointer control register */
+        can_block_p->TFPCR = 0xFF;
+    }
+    else   /* Don't using FIFO mode */
+    {
     /* Wait for any previous transmission to complete. */
     api_status = can_wait_tx_rx(ch_nr, mbox_nr);
 
@@ -925,7 +1018,7 @@ uint32_t R_CAN_Tx(const uint32_t  ch_nr, const uint32_t  mbox_nr)
 
     /* Set TrmReq bit to "1" */
     can_block_p->MCTL[mbox_nr].BIT.TX.TRMREQ = 1;
-
+    }
     return (api_status);
 }
 /******************************************************************************
@@ -1001,12 +1094,15 @@ uint32_t R_CAN_TxCheck(const uint32_t ch_nr, const uint32_t mbox_nr)
 * If the message was not stopped, R_CAN_SW_ABORT_ERR is returned. Note that the cause of this could be that the
 * message was already sent.
 */
-uint32_t R_CAN_TxStopMsg(const uint32_t ch_nr, const uint32_t mbox_nr)
+uint32_t R_CAN_TxStopMsg(const uint32_t ch_nr, const uint32_t  mb_mode, const uint32_t mbox_nr)
 {
     volatile struct st_can R_BSP_EVENACCESS_SFR * can_block_p;
     uint32_t api_status = R_CAN_OK;
     uint32_t can_tmo_cnt = MAX_CAN_SW_DELAY;
     
+    /* check mailbox mode */
+    CHECK_MBX_MODE
+
     CHECK_MBX_NR
     if (ch_nr < MAX_CHANNELS)
     {
@@ -1017,21 +1113,37 @@ uint32_t R_CAN_TxStopMsg(const uint32_t ch_nr, const uint32_t mbox_nr)
         return (R_CAN_BAD_CH_NR);
     }
 
-    /* Clear message mailbox control register. Setting TRMREQ to 0 should abort. Do a byte-write to avoid read-modify-write with HW writing another bit inbetween. See RX64M/71M UM 43.2.8.
-     * Do it twice since "Bits SENTDATA and TRMREQ cannot be set to 0 simultaneously." */
-    can_block_p->MCTL[mbox_nr].BYTE = 0;
-    can_block_p->MCTL[mbox_nr].BYTE = 0;
-
-    /* Wait for abort. */
-    while ((can_block_p->MCTL[mbox_nr].BIT.TX.TRMABT) && DEC_CHK_CAN_SW_TMR)
-    {;}
-    if (0 == can_tmo_cnt)
+    if((FIFO_MAILBOX_MODE == mb_mode) && (bit_set[mbox_nr] & 0x0f000000))    /* check fifo mailbox mode and using FIFO mailbox */
     {
-        api_status = R_CAN_SW_ABORT_ERR;
-    }
+        /* To abort FIFO transmission, it is necessary to clear the transmit FIFO enable bit (TFE) to 0 */
+        can_block_p->TFCR.BIT.TFE = 0; /* Transmit FIFO enabled. */
 
-    /* Clear abort flag. Do a byte-write to avoid read-modify-write with HW writing another bit inbetween. */
-    can_block_p->MCTL[mbox_nr].BYTE = 0;
+        /* Wait for abort. */
+        while ((!can_block_p->TFCR.BIT.TFEST) && DEC_CHK_CAN_SW_TMR)
+        {;}
+        if (0 == can_tmo_cnt)
+        {
+            api_status = R_CAN_SW_ABORT_ERR;
+        }
+    }
+    else
+    {
+        /* Clear message mailbox control register. Setting TRMREQ to 0 should abort. Do a byte-write to avoid read-modify-write with HW writing another bit inbetween. See RX64M/71M UM 43.2.8.
+         * Do it twice since "Bits SENTDATA and TRMREQ cannot be set to 0 simultaneously." */
+        can_block_p->MCTL[mbox_nr].BYTE = 0;
+        can_block_p->MCTL[mbox_nr].BYTE = 0;
+
+        /* Wait for abort. */
+        while ((can_block_p->MCTL[mbox_nr].BIT.TX.TRMABT) && DEC_CHK_CAN_SW_TMR)
+        {;}
+        if (0 == can_tmo_cnt)
+        {
+            api_status = R_CAN_SW_ABORT_ERR;
+        }
+
+        /* Clear abort flag. Do a byte-write to avoid read-modify-write with HW writing another bit inbetween. */
+        can_block_p->MCTL[mbox_nr].BYTE = 0;
+    }
 
     return (api_status);
 }
@@ -1146,6 +1258,199 @@ uint32_t R_CAN_RxSet(const uint32_t  ch_nr,
  *****************************************************************************/ /* end R_CAN_RxSet() */
 
 /***********************************************************************************************************************
+* Function Name: R_CAN_RxSetFIFO
+********************************************************************************************************************//**
+* @brief Set up a mailbox to FIFO receive.\n
+* The API sets up a given mailbox to receive data frames with the given CAN 11-bit ID. Incoming data frames with the
+* same ID will be stored in the mailbox.
+* @param[in] ch_nr \n
+*               CAN channel to use (0-2 MCU dependent).
+* @param[in] mbox_nr \n
+*               Which CAN mailbox to use. (0-32)
+* @param[in] FIDCRO_value \n
+*               The register FIDCR0 which the mailbox id will be received .
+* @param[in] FIDCR1_value \n
+*               The register FIDCR1 which the mailbox id will be received.
+* @param[in] MKR6_value \n
+*               The mask register 6.
+* @param[in] MKR7_value \n
+*               The mask register 7.
+* @param[in] frame_type \n
+*  DATA_FRAME      receive a normal data frame. \n
+*  REMOTE_FRAME    receive a remote data frame request.
+* @details The function will set up value id which will be receive and the value of mask register in mode FIFO.
+*/
+uint32_t R_CAN_RxSetFIFO(const uint32_t  ch_nr,
+                         const uint32_t  mb_mode,
+                         const uint32_t  mbox_nr,
+                         const uint32_t  fidcr0_value,
+                         const uint32_t  fidcr1_value,
+                         const uint32_t  frame_type,
+                         const uint32_t  mkr6_value,
+                         const uint32_t  mkr7_value)
+{
+    volatile struct st_can R_BSP_EVENACCESS_SFR * can_block_p;
+    uint32_t api_status = R_CAN_OK;
+
+    /* check mailbox mode */
+    CHECK_MBX_MODE
+
+    /* return if not FIFO_MAILBOX_MODE */
+    if(FIFO_MAILBOX_MODE != mb_mode )    /* check normal or fifo mode */
+    {
+        return (CAN_ERR_NOT_FIFO_MODE);
+    }
+
+     /* return if mailbox is not receive fifo mailbox(28 -->31) */
+    if ((mbox_nr < 28) || (mbox_nr > 31))
+    {
+        return (R_CAN_SW_BAD_MBX);
+    }
+
+    if (ch_nr < MAX_CHANNELS)
+    {
+        can_block_p = CAN_CHANNELS[ch_nr];
+    }
+    else
+    {
+        return (R_CAN_BAD_CH_NR);
+    }
+
+    /* Shift to CAN Halt mode only when the CAN operation mode is not Halt or Reset */
+    if((CAN_RESET != can_block_p->CTLR.BIT.CANM) && (CAN_HALT != can_block_p->CTLR.BIT.CANM))
+    {
+        /* Write to fidcr0, fidcr1 and mkr6, mkr7 in CAN reset mode or CAN halt mode. */
+        R_CAN_Control(ch_nr, HALT_CANMODE);
+    }
+
+    /* In FIFO mailbox mode, change the bits in MIER for the related FIFO only
+     * when the RFE bit in RFCR is 0 and the RFEST flag in RFCR is 1 */
+    if((can_block_p->RFCR.BIT.RFE == 0) && (can_block_p->RFCR.BIT.RFEST == 1))
+    {
+        /* Interrupt disable the mailbox. */
+        can_block_p->MIER.LONG &= (~(bit_set[28]));
+    }
+
+    /* Data frame = 0, Remote frame = 1    */
+    if (REMOTE_FRAME == frame_type)
+    {
+        can_block_p->FIDCR0.BIT.RTR = 1;
+        can_block_p->FIDCR1.BIT.RTR = 1;
+    }
+    else
+    {
+        can_block_p->FIDCR0.BIT.RTR = 0;
+        can_block_p->FIDCR1.BIT.RTR = 0;
+    }
+
+    /*** Set Mailbox ID based on ID mode ***/
+    /* Check for XID flag bit set in fidcr0_value argument */
+    if (fidcr0_value & XID_MASK)
+    {
+         /* Set message mailbox buffer Extended ID, masking off temporary XID flag bit. */
+        can_block_p->FIDCR0.LONG = (fidcr0_value & (~XID_MASK));
+    }
+    else
+    {
+        /* Set message mailbox buffer Standard ID */
+        can_block_p->FIDCR0.BIT.SID = (fidcr0_value & SID_MASK);
+    }
+
+    /* Set IDE bit depending on if want to receive SID or XID frame. Only for mixed mode. */
+    if (MIXED_ID_MODE == can_block_p->CTLR.BIT.IDFM)
+    {
+        if (fidcr0_value & XID_MASK)
+        {
+        /* Mixed mode; select to send extended frame. */
+        can_block_p->FIDCR0.BIT.IDE = 1;
+        }
+        else
+        {
+        /* Always set IDE to 0 (unless mixed mode and extended frame as above). */
+        can_block_p->FIDCR0.BIT.IDE = 0;
+        }
+    }
+    else
+    {
+        /* When not MIXED mode, IDE should be written with 0. */
+        can_block_p->FIDCR0.BIT.IDE = 0;
+    }
+
+    /* Check for XID flag bit set in fidcr1_value argument */
+    if (fidcr1_value & XID_MASK)
+    {
+         /* Set message mailbox buffer Extended ID, masking off temporary XID flag bit. */
+        can_block_p->FIDCR1.LONG = (fidcr1_value & (~XID_MASK));
+    }
+    else
+    {
+        /* Set message mailbox buffer Standard ID */
+        can_block_p->FIDCR1.BIT.SID = (fidcr1_value & SID_MASK);
+    }
+
+    /* Set IDE bit depending on if want to receive SID or XID frame. Only for mixed mode. */
+    if (MIXED_ID_MODE == can_block_p->CTLR.BIT.IDFM)
+    {
+        if (fidcr1_value & XID_MASK)
+        {
+        /* Mixed mode; select to send extended frame. */
+        can_block_p->FIDCR1.BIT.IDE = 1;
+        }
+        else
+        {
+        /* Always set IDE to 0 (unless mixed mode and extended frame as above). */
+        can_block_p->FIDCR1.BIT.IDE = 0;
+        }
+    }
+    else
+    {
+        /* When not MIXED mode, IDE should be written with 0. */
+        can_block_p->FIDCR1.BIT.IDE = 0;
+    }
+
+    if ((EXT_ID_MODE == can_block_p->CTLR.BIT.IDFM) || (MIXED_ID_MODE == can_block_p->CTLR.BIT.IDFM))
+    {
+        /* Set XID 29-bit mask value in mask register. */
+        can_block_p->MKR[6].LONG = (mkr6_value & (~XID_MASK)); /* Set XID 29-bit mask value in mask register 6. */
+        can_block_p->MKR[7].LONG = (mkr7_value & (~XID_MASK)); /* Set XID 29-bit mask value in mask register 7. */
+    }
+    else
+    {
+        /* Set SID 11-bit mask value in mask register. */
+        can_block_p->MKR[6].BIT.SID = mkr6_value; /* Set SID 11-bit mask value in mask register 6. */
+        can_block_p->MKR[7].BIT.SID = mkr7_value; /* Set SID 11-bit mask value in mask register 7. */
+    }
+
+    /* Set mailbox mask to be used. (0 = mask VALID.).
+     *  Set bits 31 to 24 to 0 in FIFO mailbox mode */
+    can_block_p->MKIVLR.LONG &= (~(0xFF000000));
+
+    #if (USE_CAN_POLL == 0)
+    /* In FIFO mailbox mode, change the bits in MIER for the related FIFO only
+     * when the RFE bit in RFCR is 0 and the RFEST flag in RFCR is 1 */
+        if((can_block_p->RFCR.BIT.RFE == 0) && (can_block_p->RFCR.BIT.RFEST == 1))
+        {
+            /* Interrupt enable the mailbox */
+            can_block_p->MIER.LONG |= (bit_set[28]);
+
+            /* Generate interrupt when Receive FIFO warning */
+            if(CAN_CFG_RXFIFO_INT_GEN_TIMING == 1)
+            {
+                can_block_p->MIER.LONG |= (bit_set[29]);
+            }
+        }
+    #endif
+
+    /* Receive FIFO enable */
+    can_block_p->RFCR.BIT.RFE = 1;
+
+    return (api_status);
+}
+/******************************************************************************
+ End of function R_CAN_RxSetFIFO
+ *****************************************************************************/ /* end R_CAN_RxSetFIFO() */
+
+/***********************************************************************************************************************
 * Function Name: R_CAN_RxSetXid
 ********************************************************************************************************************//**
 * @brief Set up a mailbox to receive.\n
@@ -1170,7 +1475,7 @@ uint32_t R_CAN_RxSet(const uint32_t  ch_nr,
 * CAN dataframes or remote frame requests.
 */
 uint32_t R_CAN_RxSetXid(const uint32_t     ch_nr, 
-                        const uint32_t     mbox_nr, 
+                        const uint32_t     mbox_nr,
                         uint32_t           xid,
                         const uint32_t     frame_type)
 {
@@ -1179,6 +1484,46 @@ uint32_t R_CAN_RxSetXid(const uint32_t     ch_nr,
 }
 /******************************************************************************
  End of function R_CAN_RxSetXid
+ *****************************************************************************/ /* end R_CAN_RxSetXid() */
+
+/***********************************************************************************************************************
+* Function Name: R_CAN_RxSetFIFOXid
+********************************************************************************************************************//**
+* @brief Set up a mailbox to receive.\n
+* The API sets up a given mailbox to receive data frames with the given CAN 11-bit ID. Incoming data frames with the
+* same ID will be stored in the mailbox, except the ID will be a 29-bit ID.
+* @param[in] ch_nr \n
+*               CAN channel to use (0-2 MCU dependent).
+* @param[in] mbox_nr \n
+*               Which CAN mailbox to use. (0-32)
+* @param[in] xid \n
+*               The CAN ID which the mailbox should receive.
+* @param[in] frame_type \n
+*  DATA_FRAME      Send a normal data frame. \n
+*  REMOTE_FRAME    Send a remote data frame request.
+* @retval R_CAN_OK                Action completed successfully.
+* @retval R_CAN_SW_BAD_MBX        Bad mailbox number.
+* @retval R_CAN_BAD_CH_NR         The channel number does not exist.
+* @retval R_CAN_SW_SET_TX_TMO     Waiting for previous transmission to finish timed out.
+* @retval R_CAN_SW_SET_RX_TMO     Waiting for previous reception to complete timed out.
+* @details The function will first wait for any previous transmission/reception to complete, then temporarily
+* interrupt disable the mailbox. It sets the mailbox to the given standard ID value, and whether to receive normal
+* CAN dataframes or remote frame requests.
+*/
+uint32_t R_CAN_RxSetFIFOXid(const uint32_t     ch_nr,
+                            const uint32_t     mb_mode,
+                            const uint32_t     mbox_nr,
+                            uint32_t           xfidcr0_value,
+                            uint32_t           xfidcr1_value,
+                            const uint32_t     frame_type,
+                            const uint32_t     mkr6_value,
+                            const uint32_t     mkr7_value)
+{
+    /* Add the Xid bit so that 29-bit ID will be used by R_CAN_RxSetFIFO(). */
+    return (R_CAN_RxSetFIFO(ch_nr, mb_mode, mbox_nr, (xfidcr0_value | XID_MASK), (xfidcr1_value | XID_MASK), frame_type, mkr6_value, mkr7_value));
+}
+/******************************************************************************
+ End of function R_CAN_RxSetFIFOXid
  *****************************************************************************/ /* end R_CAN_RxSetXid() */
 
 /***********************************************************************************************************************
@@ -1263,6 +1608,7 @@ uint32_t R_CAN_RxPoll(const uint32_t  ch_nr, const uint32_t  mbox_nr)
 
 */
 uint32_t R_CAN_RxRead(const uint32_t       ch_nr,
+                      const uint32_t       mb_mode,
                       const uint32_t       mbox_nr,
                       can_frame_t* const   frame_p)
 {
@@ -1270,7 +1616,23 @@ uint32_t R_CAN_RxRead(const uint32_t       ch_nr,
     uint32_t i;
     uint32_t api_status = R_CAN_OK;
 
+    /* check mailbox mode*/
+    CHECK_MBX_MODE
+
+    /* check mailbox for fifo mailbox mode:
+     * Normal mailbox: 0 --> 23,
+     * Receive fifo mailbox: 28 --> 31;
+     * return if number of mailbox is transmit fifo mailbox(24 -->27) or other mailbox */
+    if(FIFO_MAILBOX_MODE == mb_mode )    /* check normal or fifo mailbox mode */
+    {
+        /* return if MBX is receive FIFO mailbox */
+        CHECK_RXFIFO_MBX_NR
+    }
+    else
+    {
     CHECK_MBX_NR
+    }
+
     if (ch_nr < MAX_CHANNELS)
     {
         can_block_p = CAN_CHANNELS[ch_nr];
@@ -1280,51 +1642,111 @@ uint32_t R_CAN_RxRead(const uint32_t       ch_nr,
         return (R_CAN_BAD_CH_NR);
     }
 
-    /* EXT_ID_MODE */
-    /* Copy received data from message mailbox to memory. The IDE bit is only valid in mixed mode. */
-    if (EXT_ID_MODE == can_block_p->CTLR.BIT.IDFM)
+    if((FIFO_MAILBOX_MODE == mb_mode) && (bit_set[mbox_nr] & 0xf0000000))    /* check normal or fifo mode */
     {
-        /* Get mailbox Extended ID, keeping only lower 29 bits. */
-        frame_p->id = (can_block_p->MB[mbox_nr].ID.LONG & (~XID_MASK)); 
+        /* return if FIFO is empty */
+        if(can_block_p->RFCR.BIT.RFEST)
+        {
+            return (CAN_ERR_BOX_EMPTY);
+        }
+
+        /* EXT_ID_MODE */
+        /* Copy received data from message mailbox to memory. The IDE bit is only valid in mixed mode. */
+        if (EXT_ID_MODE == can_block_p->CTLR.BIT.IDFM)
+        {
+            /* Get mailbox Extended ID, keeping only lower 29 bits. */
+            frame_p->id = (can_block_p->MB[28].ID.LONG & (~XID_MASK));
+        }
+        /* MIXED_ID_MODE */
+        else if (MIXED_ID_MODE == can_block_p->CTLR.BIT.IDFM)
+        {
+            if (1 == can_block_p->MB[28].ID.BIT.IDE) /* Check for XID control bit set. */
+            {
+                /* Get mailbox Extended ID, keeping only lower 29 bits. */
+                frame_p->id = (can_block_p->MB[28].ID.LONG & (~XID_MASK));
+            }
+            else
+            {
+                /* Get only the lower 11 bits from the SID. */
+                frame_p->id = can_block_p->MB[28].ID.BIT.SID;
+            }
+        }
+        /* STD_ID_MODE */
+        else
+        {
+            /* Get lower 11 bits from SID. */
+            frame_p->id = can_block_p->MB[28].ID.BIT.SID;
+        }
+
+        frame_p->dlc = (uint8_t)can_block_p->MB[28].DLC;
+
+        for (i = 0; i < can_block_p->MB[mbox_nr].DLC; i++)
+        {
+            frame_p->data[i] = can_block_p->MB[28].DATA[i];
+        }
+         /* check receive FIFO message lost */
+        if(can_block_p->RFCR.BIT.RFMLF)
+        {
+            /* Clear receive FIFO message lost flag to 0 */
+            can_block_p->RFCR.BYTE = 0x01;
+            api_status = R_CAN_MSGLOST;
+        }
+
+        /* Write FFh to receive FIFO pointer control register */
+        can_block_p->RFPCR = 0xFF;
     }
-    /* MIXED_ID_MODE */
-    else if (MIXED_ID_MODE == can_block_p->CTLR.BIT.IDFM)
+
+    /* Content of below else will occur in 2 case:
+     * 1: Read message by MBX normal in FIFO mailbox mode when FIFO_MAILBOX_MODE == mb_mode
+       2: Read message by MBX normal in normal mailbox mode when FIFO_MAILBOX_MODE != mb_mode */
+    else
     {
-        if (1 == can_block_p->MB[mbox_nr].ID.BIT.IDE) /* Check for XID control bit set. */
+        /* EXT_ID_MODE */
+        /* Copy received data from message mailbox to memory. The IDE bit is only valid in mixed mode. */
+        if (EXT_ID_MODE == can_block_p->CTLR.BIT.IDFM)
         {
             /* Get mailbox Extended ID, keeping only lower 29 bits. */
             frame_p->id = (can_block_p->MB[mbox_nr].ID.LONG & (~XID_MASK));
         }
+        /* MIXED_ID_MODE */
+        else if (MIXED_ID_MODE == can_block_p->CTLR.BIT.IDFM)
+        {
+            if (1 == can_block_p->MB[mbox_nr].ID.BIT.IDE) /* Check for XID control bit set. */
+            {
+                /* Get mailbox Extended ID, keeping only lower 29 bits. */
+                frame_p->id = (can_block_p->MB[mbox_nr].ID.LONG & (~XID_MASK));
+            }
+            else
+            {
+                /* Get only the lower 11 bits from the SID. */
+                frame_p->id = can_block_p->MB[mbox_nr].ID.BIT.SID;
+            }
+        }
+        /* STD_ID_MODE */
         else
         {
-            /* Get only the lower 11 bits from the SID. */
+            /* Get lower 11 bits from SID. */
             frame_p->id = can_block_p->MB[mbox_nr].ID.BIT.SID;
         }
-    }
-    /* STD_ID_MODE */
-    else
-    {
-        /* Get lower 11 bits from SID. */
-        frame_p->id = can_block_p->MB[mbox_nr].ID.BIT.SID;
-    }
 
-    frame_p->dlc = (uint8_t)can_block_p->MB[mbox_nr].DLC;
+        frame_p->dlc = (uint8_t)can_block_p->MB[mbox_nr].DLC;
 
-    for (i = 0; i < can_block_p->MB[mbox_nr].DLC; i++)
-    {
-        frame_p->data[i] = can_block_p->MB[mbox_nr].DATA[i];
+        for (i = 0; i < can_block_p->MB[mbox_nr].DLC; i++)
+        {
+            frame_p->data[i] = can_block_p->MB[mbox_nr].DATA[i];
+        }
+
+        /* Check if message was lost/overwritten. */
+        if (can_block_p->MCTL[mbox_nr].BIT.RX.MSGLOST)
+        {
+            api_status = R_CAN_MSGLOST;
+        }
+
+        /* Clear MSGLOST.
+         * Also set NEWDATA to 0 since the mailbox was just emptied and start over with new RxPolls.
+         * Do a byte-write to avoid read-modify-write with HW writing another bit inbetween. See RX64M/71M UM 43.2.8.*/
+        can_block_p->MCTL[mbox_nr].BYTE = 0x40;
     }
-
-    /* Check if message was lost/overwritten. */
-    if (can_block_p->MCTL[mbox_nr].BIT.RX.MSGLOST)
-    {
-        api_status = R_CAN_MSGLOST;
-    }
-
-    /* Clear MSGLOST.
-     * Also set NEWDATA to 0 since the mailbox was just emptied and start over with new RxPolls.
-     * Do a byte-write to avoid read-modify-write with HW writing another bit inbetween. See RX64M/71M UM 43.2.8.*/
-    can_block_p->MCTL[mbox_nr].BYTE = 0x40;
 
     return (api_status);
 }
@@ -1346,8 +1768,8 @@ uint32_t R_CAN_RxRead(const uint32_t       ch_nr,
 * @details Receive mailboxes can use a mask to filter out one message, or expand receiving to a range of messages
 * (CAN IDs). The mask enables this using the mailbox group’s ID field. There is one mask for mailbox 0-3, one
 * for 4-7, etc. Changing a mask will therefore affect the behavior of adjacent mailboxes. \n
-* Each '0' in the mask means "mask this bit", or "don't look at that bit"; accept anything.\n
-* Each '1' means check if the CAN-ID bit in this position matches the CAN-ID of the mailbox.
+*  Each '0' in the mask means "mask this bit", or "don't look at that bit"; accept anything.\n
+*  Each '1' means check if the CAN-ID bit in this position matches the CAN-ID of the mailbox.
 */
 void R_CAN_RxSetMask( const uint32_t  ch_nr,
                       const uint32_t  mbox_nr,
@@ -1363,9 +1785,12 @@ void R_CAN_RxSetMask( const uint32_t  ch_nr,
     {
         return;
     }
-
-    /* Write to MKR0 to MKR7 in CAN reset mode or CAN halt mode. */
-    R_CAN_Control(ch_nr, HALT_CANMODE);
+    /* Shift to CAN Halt mode only when the CAN operation mode is not Halt or Reset */
+    if((CAN_RESET != can_block_p->CTLR.BIT.CANM) && (CAN_HALT != can_block_p->CTLR.BIT.CANM))
+    {
+        /* Write to MKR0 to MKR7 in CAN reset mode or CAN halt mode.*/
+        R_CAN_Control(ch_nr, HALT_CANMODE);
+    }
 
     /* Set mask for the group of mailboxes. */
     if ((EXT_ID_MODE == can_block_p->CTLR.BIT.IDFM) || (MIXED_ID_MODE == can_block_p->CTLR.BIT.IDFM))
@@ -1381,8 +1806,6 @@ void R_CAN_RxSetMask( const uint32_t  ch_nr,
 
     /* Set mailbox mask to be used. (0 = mask VALID.) */
     can_block_p->MKIVLR.LONG &= (~(bit_set[mbox_nr]));
-
-    R_CAN_Control(ch_nr, OPERATE_CANMODE);
 
 }
 /******************************************************************************
@@ -1508,18 +1931,19 @@ uint32_t R_CAN_CheckErr(const uint32_t ch_nr)
 * @brief Set the CAN bitrate (communication speed). The baud rate and bit timing must always be set during the
 * configuration process. It can be changed later if reset mode is entered.
 * @param[in] ch_nr - CAN channel to use (0-2 MCU dependent).
+* @param[in] p_cfg - It is an address to the data structure containing the BRP, TSEG1, TSEG2, and SJW that constitute
+* the bitrate for channel ch_nr.
 * @details Setting the baud rate or data speed on the CAN bus requires some understanding of CAN bit timing and MCU
-* frequency, as well as reading hardware manual figures and tables. The default bitrate setting of the API is 500kB,
-* and unless the MCU clock or peripheral frequencies are changed, it is sufficient to just call the function.\n
-* The bitrate is set via macros inside r_can_rx_config.h. Some calculations need to be done to set these macros.
+* frequency, as well as reading hardware manual figures and tables. Some calculations need to be done to set up the
+* baud rate: Selects the baud rate prescaler division value, time segment 2 control, time segment 1 control, and
+* resynchronization jump width control indicated by p_cfg.
 * First some explanations. The CAN system clock, fcanclk, is the internal clock period of the CAN peripheral.
 * This CAN system clock is determined by the CAN Baud Rate Prescaler value and the peripheral bus clock. One Time
 * Quantum is equal to the period of the CAN clock.\n
 * One CAN bus bit-time is an integer sum of a number of Time Quanta, Tq. Each bitrate register is then given a
 * certain number of Tq of the total number of Time Quanta that make up one CAN bit period, or Tqtot.\n
-* See r_can_rx_config.h for details.
 */
-void R_CAN_SetBitrate(const uint32_t ch_nr)
+void R_CAN_SetBitrate(const uint32_t ch_nr, const can_bitrate_config_t p_cfg)
 {
     volatile struct st_can R_BSP_EVENACCESS_SFR * can_block_p;
 
@@ -1532,14 +1956,21 @@ void R_CAN_SetBitrate(const uint32_t ch_nr)
         return;
     }
 
+    /* Shift to CAN Reset mode only when the CAN operation mode is not Reset */
+    if(CAN_RESET != can_block_p->CTLR.BIT.CANM)
+    {
+        /* Change to Reset mode */
+        R_CAN_Control(ch_nr, RESET_CANMODE);
+    }
+
     /* Set CAN clock select to be either PLL (default) or crystal direct. */
     can_block_p->BCR.BIT.CCLKS = 0; /* 0 = PLL. */
 
     /* Set TSEG1, TSEG2 and SJW. */
-    can_block_p->BCR.BIT.BRP = CAN_BRP - 1;
-    can_block_p->BCR.BIT.TSEG1 = CAN_TSEG1 - 1;
-    can_block_p->BCR.BIT.TSEG2 = CAN_TSEG2 - 1;
-    can_block_p->BCR.BIT.SJW = CAN_SJW - 1;
+    can_block_p->BCR.BIT.BRP = p_cfg.BRP - 1;
+    can_block_p->BCR.BIT.TSEG1 = p_cfg.TSEG1 - 1;
+    can_block_p->BCR.BIT.TSEG2 = p_cfg.TSEG2 - 1;
+    can_block_p->BCR.BIT.SJW = p_cfg.SJW - 1;
 }
 /******************************************************************************
  End of function R_CAN_SetBitrate
@@ -1614,9 +2045,17 @@ bsp_int_ctrl_t int_ctrl;
         R_BSP_InterruptRequestEnable(VECT(CAN0, TXM0));  /* 1 = interrupt enabled. */
         IPR(CAN0, TXM0) = CAN0_INT_LVL; /* priority */
 
+        /* Configure CAN FIFO Tx interrupt. */
+        R_BSP_InterruptRequestEnable(VECT(CAN0, TXF0));  /* 1 = interrupt enabled. */
+        IPR(CAN0, TXF0) = CAN0_INT_LVL; /* priority */
+
         /* Configure CAN Rx interrupt. */
         R_BSP_InterruptRequestEnable(VECT(CAN0, RXM0));
         IPR(CAN0, RXM0) = CAN0_INT_LVL;
+
+        /* Configure CAN FIFO Rx interrupt. */
+        R_BSP_InterruptRequestEnable(VECT(CAN0, RXF0));
+        IPR(CAN0, RXF0) = CAN0_INT_LVL;
 
         /* Configure CAN Error interrupt. Must enable group that it belongs to */
         /* in addition to individual source. */
@@ -1643,12 +2082,21 @@ bsp_int_ctrl_t int_ctrl;
 #if (CAN_USE_CAN1 == 1)
     else if (1 == ch_nr)
     {
+        /* Configure CAN Tx interrupt. */
         R_BSP_InterruptRequestEnable(VECT(CAN1, TXM1)); /* 1 = interrupt enabled. */
         IPR(CAN1, TXM1) = CAN1_INT_LVL; /* priority */
+
+        /* Configure CAN FIFO Tx interrupt. */
+        R_BSP_InterruptRequestEnable(VECT(CAN1, TXF1)); /* 1 = interrupt enabled. */
+        IPR(CAN1, TXF1) = CAN1_INT_LVL; /* priority */
 
         /* Configure CAN Rx interrupt. */
         R_BSP_InterruptRequestEnable(VECT(CAN1, RXM1));
         IPR(CAN1, RXM1) = CAN1_INT_LVL;
+
+        /* Configure CAN FIFO Rx interrupt. */
+        R_BSP_InterruptRequestEnable(VECT(CAN1, RXF1));
+        IPR(CAN1, RXF1) = CAN1_INT_LVL;
 
         /* Configure CAN Error interrupt. Must enable group that it belongs to */
         /* in addition to individual source. */
@@ -1680,9 +2128,17 @@ bsp_int_ctrl_t int_ctrl;
         R_BSP_InterruptRequestEnable(VECT(CAN2, TXM2)); /* 1 = interrupt enabled. */
         IPR(CAN2, TXM2) = CAN2_INT_LVL; /* priority */
 
+        /* Configure CAN FIFO Tx interrupt. */
+        R_BSP_InterruptRequestEnable(VECT(CAN2, TXF2)); /* 1 = interrupt enabled. */
+        IPR(CAN2, TXF2) = CAN2_INT_LVL; /* priority */
+
         /* Configure CAN Rx interrupt. */
         R_BSP_InterruptRequestEnable(VECT(CAN2, RXM2));
         IPR(CAN2, RXM2) = CAN2_INT_LVL;
+
+        /* Configure CAN FIFO Rx interrupt. */
+        R_BSP_InterruptRequestEnable(VECT(CAN2, RXF2));
+        IPR(CAN2, RXF2) = CAN2_INT_LVL;
 
         /* Configure CAN Error interrupt. Must enable group that it belongs to */
         /* in addition to individual source. */
@@ -1737,6 +2193,21 @@ R_BSP_ATTRIB_INTERRUPT void CAN0_TXM0_ISR(void)
  *****************************************************************************//* end CAN0_TXM0_ISR() */
 
 /*****************************************************************************
+Function name:  CAN0_TXF0_ISR
+Parameters:     -
+Returns:        -
+Description:    CAN0 fifo Transmit interrupt (channel 0).
+*****************************************************************************/
+R_BSP_PRAGMA_INTERRUPT(CAN0_TXF0_ISR, VECT_CAN0_TXF0)    /* See mcu_mapped_interrupts.h. */
+R_BSP_ATTRIB_INTERRUPT void CAN0_TXF0_ISR(void)
+{
+    can_txf_callback[0]();
+}
+/******************************************************************************
+ End of function CAN0_TXF0_ISR
+ *****************************************************************************//* end CAN0_TXF0_ISR() */
+
+/*****************************************************************************
 Function name:  CAN0_RXM0_ISR()
 Parameters:     -
 Returns:        -
@@ -1750,6 +2221,21 @@ R_BSP_ATTRIB_INTERRUPT void CAN0_RXM0_ISR(void)
 /******************************************************************************
  End of function CAN0_RXM0_ISR
  *****************************************************************************//* end CAN0_RXM0_ISR() */
+
+/*****************************************************************************
+Function name:  CAN0_RXF0_ISR()
+Parameters:     -
+Returns:        -
+Description:    CAN0 fifo Receive interrupt (channel 1).
+*****************************************************************************/
+R_BSP_PRAGMA_INTERRUPT(CAN0_RXF0_ISR, VECT_CAN0_RXF0)
+R_BSP_ATTRIB_INTERRUPT void CAN0_RXF0_ISR(void)
+{
+    can_rxf_callback[0]();
+}
+/******************************************************************************
+ End of function CAN0_RXM0_ISR
+ *****************************************************************************//* end CAN0_RXF0_ISR() */
 #endif /* CAN_USE_CAN0 */
 #ifdef CAN1
 #if (CAN_USE_CAN1 == 1)
@@ -1769,6 +2255,21 @@ R_BSP_ATTRIB_INTERRUPT void CAN1_TXM1_ISR(void)
  *****************************************************************************/ /* end CAN1_TXM1_ISR() */
 
 /*****************************************************************************
+Function name:  CAN0_TXF1_ISR
+Parameters:     -
+Returns:        -
+Description:    CAN0 fifo Transmit interrupt (channel 1).
+*****************************************************************************/
+R_BSP_PRAGMA_INTERRUPT(CAN1_TXF1_ISR, VECT_CAN1_TXF1)    /* See mcu_mapped_interrupts.h. */
+R_BSP_ATTRIB_INTERRUPT void CAN1_TXF1_ISR(void)
+{
+    can_txf_callback[1]();
+}
+/******************************************************************************
+ End of function CAN1_TXF1_ISR
+ *****************************************************************************//* end CAN1_TXF1_ISR() */
+
+/*****************************************************************************
 Function name:  CAN1_RXM1_ISR()
 Parameters:     -
 Returns:        -
@@ -1782,6 +2283,21 @@ R_BSP_ATTRIB_INTERRUPT void CAN1_RXM1_ISR(void)
 /******************************************************************************
  End of function CAN1_RXM1_ISR
  *****************************************************************************/ /* end CAN1_RXM1_ISR() */
+
+/*****************************************************************************
+Function name:  CAN1_RXF1_ISR()
+Parameters:     -
+Returns:        -
+Description:    CAN1 fifo Receive interrupt (channel 1).
+*****************************************************************************/
+R_BSP_PRAGMA_INTERRUPT(CAN1_RXF1_ISR, VECT_CAN1_RXF1)
+R_BSP_ATTRIB_INTERRUPT void CAN1_RXF1_ISR(void)
+{
+    can_rxf_callback[1]();
+}
+/******************************************************************************
+ End of function CAN1_RXF1_ISR
+ *****************************************************************************/ /* end CAN1_RXF1_ISR() */
 #endif /* CAN_USE_CAN1 */
 #endif /* CAN1 */
 
@@ -1801,6 +2317,20 @@ R_BSP_ATTRIB_INTERRUPT void CAN2_TXM2_ISR(void)
  End of function CAN2_TXM2_ISR
  *****************************************************************************/ /* end CAN2_TXM2_ISR() */
 
+/*Function name:  CAN2_TXF2_ISR
+Parameters:     -
+Returns:        -
+Description:    CAN2 fifo Transmit interrupt (channel 2).
+*****************************************************************************/
+R_BSP_PRAGMA_INTERRUPT(CAN2_TXF2_ISR, VECT_CAN2_TXF2)    /* See mcu_mapped_interrupts.h. */
+R_BSP_ATTRIB_INTERRUPT void CAN2_TXF2_ISR(void)
+{
+    can_txf_callback[2]();
+}
+/******************************************************************************
+ End of function CAN2_TXF2_ISR
+ *****************************************************************************/ /* end CAN2_TXF2_ISR() */
+
 /*****************************************************************************
 Name:           CAN2_RXM2_ISR()
 Parameters:     -
@@ -1815,6 +2345,21 @@ R_BSP_ATTRIB_INTERRUPT void CAN2_RXM2_ISR(void)
 /******************************************************************************
  End of function CAN2_RXM2_ISR
  *****************************************************************************//* end CAN2_RXM2_ISR() */
+
+/*****************************************************************************
+Name:           CAN2_RXF2_ISR()
+Parameters:     -
+Returns:        -
+Description:    CAN2 fifo Receive interrupt (channel 2).
+*****************************************************************************/
+R_BSP_PRAGMA_INTERRUPT(CAN2_RXF2_ISR, VECT_CAN2_RXF2)    /* See mcu_mapped_interrupts.h. */
+R_BSP_ATTRIB_INTERRUPT void CAN2_RXF2_ISR(void)
+{
+    can_rxf_callback[2]();
+}
+/******************************************************************************
+ End of function CAN2_RXR2_ISR
+ *****************************************************************************//* end CAN2_RXR2_ISR() */
 #endif /* CAN_USE_CAN2 */
 #endif /* CAN2 */
 

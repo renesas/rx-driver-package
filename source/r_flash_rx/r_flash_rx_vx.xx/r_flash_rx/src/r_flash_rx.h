@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_rx.h
@@ -45,6 +45,7 @@
 *           27.09.2019 4.40    Added RX23E-A.
 *                              Added include path for rx230.
 *           18.11.2019 4.50    Added RX66N, and RX72N.
+*           26.06.2020 4.60    Added prototypes for flash_InterruptRequestEnable() and flash_InterruptRequestDisable().
 ***********************************************************************************************************************/
 
 #ifndef FLASH_RX_HEADER_FILE
@@ -192,6 +193,8 @@ extern flash_err_t flash_lock_state(flash_states_t new_state);
 extern void flash_release_state(void);
 extern bool flash_softwareLock (int32_t * const plock);
 extern bool flash_softwareUnlock (int32_t * const plock);
+extern void flash_InterruptRequestEnable (uint32_t vector);
+extern void flash_InterruptRequestDisable (uint32_t vector);
 
 
 #endif /* FLASH_RX_HEADER_FILE */

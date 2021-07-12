@@ -10,7 +10,7 @@ R01AN2167JJ
 
 Version
 -------
-v1.12
+v1.20
 
 Overview
 --------
@@ -53,9 +53,9 @@ How to add to your project
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v.3.01.00
-* GCC for Renesas RX 4.08.04.201902
-* IAR C/C++ Compiler for Renesas version 4.12.01
+* Renesas RX v.3.02.00
+* GCC for Renesas RX 8.3.0.201904
+* IAR C/C++ Compiler for Renesas version 4.14.1
 
 File Structure
 --------------
@@ -65,9 +65,9 @@ r_usb_hcdc_mini
 |
 +---doc
 |     \en
-|     |   r01an2167ej0112_usb.pdf
+|     |   r01an2167ej0120_usb.pdf
 |     \jp
-|         r01an2167jj0112_usb.pdf
+|         r01an2167jj0120_usb.pdf
 |
 +---ref
 |       r_usb_hcdc_mini_config_reference.h

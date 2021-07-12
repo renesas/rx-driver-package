@@ -21,12 +21,13 @@
 * Description  : DUMMY FILE. WILL BE OVERWRITTEN WHEN TARGET IS TUNED.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
-* History : DD.MM.YYYY Version Description
-*                      1.00    First Release
+* History      : DD.MM.YYYY Version Description
+*              : 21.09.2018 1.00    First Release
+*              : 18.04.2019 1.01    Change the Minor Format
 ***********************************************************************************************************************/
 
-#ifndef QE_COMMON_HEADER_FILE
-#define QE_COMMON_HEADER_FILE
+#ifndef QE_COMMON_H
+#define QE_COMMON_H
 
 #include "r_typedefs_qe.h"
 
@@ -62,4 +63,4 @@ extern void touch_parameter_address_set(void);
 extern void qetouch_timer_callback(void *p_args);
 
 
-#endif /* QE_COMMON_HEADER_FILE */
+#endif /* QE_COMMON_H */

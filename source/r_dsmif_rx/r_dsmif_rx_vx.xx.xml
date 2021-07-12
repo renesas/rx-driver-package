@@ -45,8 +45,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_dsmif_rx</name>
-        <version>1.00</version>
-        <zipsource>r_dsmif_rx_v1.00.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_dsmif_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>5.50</version>

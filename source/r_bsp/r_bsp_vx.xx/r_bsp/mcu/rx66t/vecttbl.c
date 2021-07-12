@@ -29,7 +29,10 @@
 *                                Added support for GNUC and ICCRX.
 *                                Fixed coding style.
 *         : 31.07.2019 3.00      Fixed initialization for option-setting memory.
-*         : 08.10.2019 2.01      Changed for added support of Renesas RTOS (RI600V4 or RI600PX).
+*         : 08.10.2019 3.01      Changed for added support of Renesas RTOS (RI600V4 or RI600PX).
+*         : 20.11.2020 3.02      Added the setting of ID code protection for BSP_CFG_ID_CODE_ENABLE.
+*         : 29.01.2021 3.03      Added the macro definition of BSP_PRV_SPCC_VALUE and modified the setting of 
+*                                ID code protection for BSP_CFG_ID_CODE_ENABLE.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -97,6 +100,12 @@ R_BSP_ATTRIB_SECTION_CHANGE_END
     #define BSP_PRV_MDE_VALUE (0xffffffff)    /* little */
 #endif
 
+#if BSP_CFG_ID_CODE_ENABLE == 1
+    #define BSP_PRV_SPCC_VALUE (0x1effffff)    /* ID code protection is enabled after a reset. */
+#else
+    #define BSP_PRV_SPCC_VALUE (0xffffffff)    /* ID code protection is disabled after a reset. */
+#endif
+
 #if defined(__CCRX__)
 
 #pragma address __SPCCreg    = 0x00120040
@@ -111,7 +120,7 @@ R_BSP_ATTRIB_SECTION_CHANGE_END
 #pragma address __OFS1reg    = 0x0012006c
 #pragma address __ROMCODEreg = 0x0012007c
 
-const uint32_t __SPCCreg    = 0xffffffff;
+const uint32_t __SPCCreg    = BSP_PRV_SPCC_VALUE;
 const uint32_t __TMEFreg    = BSP_CFG_TRUSTED_MODE_FUNCTION;
 const uint32_t __OSIS1reg   = BSP_CFG_ID_CODE_LONG_1;
 const uint32_t __OSIS2reg   = BSP_CFG_ID_CODE_LONG_2;
@@ -125,7 +134,7 @@ const uint32_t __ROMCODEreg = BSP_CFG_ROMCODE_REG_VALUE;
 
 #elif defined(__GNUC__)
 
-const uint32_t __SPCCreg    __attribute__ ((section(".ofs1"))) = 0xffffffff;
+const uint32_t __SPCCreg    __attribute__ ((section(".ofs1"))) = BSP_PRV_SPCC_VALUE;
 const uint32_t __TMEFreg    __attribute__ ((section(".ofs2"))) = BSP_CFG_TRUSTED_MODE_FUNCTION;
 const st_ofsm_sec_ofs3_t __ofsm_sec_ofs3   __attribute__ ((section(".ofs3"))) = {
     BSP_CFG_ID_CODE_LONG_1, /* __OSIS1reg */
@@ -143,7 +152,7 @@ const uint32_t __ROMCODEreg __attribute__ ((section(".ofs5"))) = BSP_CFG_ROMCODE
 
 #elif defined(__ICCRX__)
 
-#pragma public_equ = "__SPCC", 0xffffffff
+#pragma public_equ = "__SPCC", BSP_PRV_SPCC_VALUE
 #pragma public_equ = "__TMINF", 0xffffffff
 #pragma public_equ = "__OSIS_1", BSP_CFG_ID_CODE_LONG_1
 #pragma public_equ = "__OSIS_2", BSP_CFG_ID_CODE_LONG_2

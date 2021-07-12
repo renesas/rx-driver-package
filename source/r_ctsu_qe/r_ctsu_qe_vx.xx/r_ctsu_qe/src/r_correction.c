@@ -24,6 +24,18 @@
 * History      : DD.MM.YYYY Version Description
 *              :            0.82    Shinji Takeda: Line 667- Change 1000000 to 1024*1024.
 *              : 04.10.2018 1.00    First Release
+*              : 29.04.2019 1.10    Added error return codes to correction_CTSU_sensor_ico()
+*                                     and correction_CTSU_measurement_start().
+*                                   Added error checking in correction_CTSU_register_txd_set() switch default.
+*                                   Added #pragma sections and ported to GCC/IAR.
+*                                   Modified CTSUInterrupt() to
+*                                     -load g_pvt_scan_info[] with status
+*                                     -also not call callback when touch is performing offset tuning
+*                                     -call custom callback if configured
+*                                     -reset data_update flag on err in case using ext trig and Touch did not process
+*                                       last scan yet
+*              : 09.01.2020 1.11    Replaced correction_CTSU_register_txd_set() switch statement with if-else statement
+*                                     to fix RX231 13.5 PLL multiplier compile-time error.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -38,20 +50,20 @@ Includes   <System Includes> , "Project Includes"
 /***********************************************************************************************************************
 Macro definitions
 ***********************************************************************************************************************/
-#define _0_NORMAL               (0)
-#define _1_CORRECTION           (1)
+#define CTSU_PRV_0_NORMAL               (0)
+#define CTSU_PRV_1_CORRECTION           (1)
 
-#define _0_1ST                  (0)
-#define _1_2ND                  (1)
+#define CTSU_PRV_0_1ST                  (0)
+#define CTSU_PRV_1_2ND                  (1)
 
-#define CORRECTION_AVERAGE      (32)        /* Correction measurement average times    */
+#define CTSU_PRV_CORRECTION_AVERAGE     (32)        /* Correction measurement average times    */
 
-#define SENS_OK                 (0x00)
-#define SENS_OVER               (0x01)
-#define REF_OVER                (0x02)
-#define SENS_REF_OVER           (0x03)
+#define CTSU_PRV_SENS_OK                (0x00)
+#define CTSU_PRV_SENS_OVER              (0x01)
+#define CTSU_PRV_REF_OVER               (0x02)
+#define CTSU_PRV_SENS_REF_OVER          (0x03)
 
-#define WAFER_PARAMETER         (0.96523525)
+#define CTSU_PRV_WAFER_PARAMETER        (0.96523525)
 
 
 /***********************************************************************************************************************
@@ -65,15 +77,26 @@ Typedef definitions
 /* for ctsu driver use */
 uint16_t    g_correction_dtc_txd[3];           /* CTSU measurement parameter         */
 uint8_t     g_correction_mode;                 /* Sensor correction mode flag        */
-/* for public (touch) use */
+
+/* for Touch layer use */
+
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (CTSU_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_SAFETY_RAM
+#elif (CTSU_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(B, _QE_TOUCH_SAFETY_RAM, 2)
+#endif
 uint16_t    g_linear_interpolation_table[61];
 uint16_t    g_linear_interpolation_coefficient[61];
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (CTSU_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section
+#elif (CTSU_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE_END
+#endif
 
 
 /***********************************************************************************************************************
 External global variables and functions
 ***********************************************************************************************************************/
-extern ctsu_ctrl_t  g_ctsu_ctrl;    // from new driver
 
 
 /***********************************************************************************************************************
@@ -90,22 +113,35 @@ static uint32_t                g_correction_1st_val;              /* 1st standar
 static uint16_t                g_correction_2nd_std_val;
 static uint8_t                 g_correct_value_measure;
 static uint16_t                g_correction_2nd_coefficient;      /* 2nd correction coefficient         */
-
 static volatile ctsu_status_t  g_correction_status;               /* CTSU correction status flag        */
+
+
+
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (CTSU_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_SAFETY_CONSTANT
+#elif (CTSU_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(C, _QE_TOUCH_SAFETY_CONSTANT, 2)
+#endif
 static const uint16_t g_ctsu_correction_std[] =
 {
-    _19_2UA, _18_0UA, _16_8UA, _15_6UA, _14_4UA, _13_2UA, _12_0UA, _10_8UA,
-    _09_6UA, _08_4UA, _07_2UA, _06_0UA, _04_8UA, _03_6UA, _02_4UA, _01_2UA
+    QE_19_2UA, QE_18_0UA, QE_16_8UA, QE_15_6UA, QE_14_4UA, QE_13_2UA, QE_12_0UA, QE_10_8UA,
+    QE_09_6UA, QE_08_4UA, QE_07_2UA, QE_06_0UA, QE_04_8UA, QE_03_6UA, QE_02_4UA, QE_01_2UA
 };
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (CTSU_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section
+#elif (CTSU_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE_END
+#endif
+
 
 #if (CTSU_HAS_TRIMMER_REG)
 static uint8_t g_ctsutrimr_def;
 #endif
 
 static void    configure_correction_method(void);
-static void    correction_CTSU_register_txd_set(void);
+static qe_err_t correction_CTSU_register_txd_set(void);
 static void    R_Set_CTSU_Correction_Mode(uint8_t mode);
-static void    correction_CTSU_measurement_start(void);
+static qe_err_t correction_CTSU_measurement_start(void);
 static void    correction_CTSU_1st_coefficient_create(void);
 static void    correction_CTSU_2nd_standard_val_create(void);
 static void    correction_CTSU_2nd_coefficient_create(void);
@@ -116,16 +152,32 @@ static void    R_Set_CTSU_Power_Supply_Only(uint8_t mode);
 static uint8_t R_Get_CTSU_Counter_Overflow_flag(void);
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (CTSU_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (CTSU_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: correction_CTSU_sensor_ico
 * Description  : Sensor ICO gain correction initial setting.
 * Arguments    : None
-* Return Value : None
+* Return Value : QE_SUCCESS -
+*                   Correction completed successfully
+*                QE_ERR_ABNORMAL_TSCAP -
+*                   TSCAP error detected during correction
+*                QE_ERR_SENSOR_OVERFLOW -
+*                   Sensor overflow error detected during correction
+*                QE_ERR_SENSOR_SATURATION -
+*                   Initial sensor value beyond linear portion of correction curve
+*                QE_ERR_UNSUPPORTED_CLK_CFG -
+*                   No correction parameters available for selected clock frequency
 ***********************************************************************************************************************/
-void correction_CTSU_sensor_ico( void )
+qe_err_t correction_CTSU_sensor_ico( void )
 {
-    g_correction_mode  = _1_CORRECTION;                            /* Sensor ICO correction measurement mode setting  */
-    g_correction_time  = _0_1ST;                                   /* 1st measurement flag setting                    */
+    qe_err_t    err=QE_SUCCESS;
+
+    g_correction_mode  = CTSU_PRV_1_CORRECTION;                            /* Sensor ICO correction measurement mode setting  */
+    g_correction_time  = CTSU_PRV_0_1ST;                                   /* 1st measurement flag setting                    */
 
 #if (CTSU_HAS_TRIMMER_REG)
     g_ctsutrimr_def    = CTSU.CTSUTRMR;                            /* Current trimming value storage                  */
@@ -134,22 +186,32 @@ void correction_CTSU_sensor_ico( void )
 
     while (0 != CTSU.CTSUCR0.BIT.CTSUSTRT)
     {
-        /* Measurement finish wait */
+        ;  /* Measurement finish wait */
     }
 
     configure_correction_method();
 
-    while (_1_CORRECTION == g_correction_mode)
+    while (CTSU_PRV_1_CORRECTION == g_correction_mode)
     {
-        correction_CTSU_register_txd_set();                    /* CTSU correction parameter setting by DTC.       */
-        R_Set_CTSU_Correction_Mode(_1_CORRECTION);             /* Sensor ICO correction measurement setting       */
+        err = correction_CTSU_register_txd_set();              /* CTSU correction parameter setting by DTC.       */
+        if (QE_SUCCESS != err)
+        {
+            break;
+        }
+
+        R_Set_CTSU_Correction_Mode(CTSU_PRV_1_CORRECTION);     /* Sensor ICO correction measurement setting       */
         g_ctsu_ctrl.state = CTSU_STATE_READY;                  /* CTSU measurement ready mode setting             */
-        correction_CTSU_measurement_start();                   /* Sensor ICO gain correction measurement start    */
-        if (_0_1ST == g_correction_time)
+        err = correction_CTSU_measurement_start();             /* Sensor ICO gain correction measurement start    */
+        if (QE_SUCCESS != err)
+        {
+            break;
+        }
+
+        if (CTSU_PRV_0_1ST == g_correction_time)
         {
             correction_CTSU_1st_coefficient_create();          /* 1st coefficient create                          */
             correction_CTSU_2nd_standard_val_create();         /* 2nd standard value create                       */
-            g_correction_time = _1_2ND;                        /* 2nd measurement flag setting                    */
+            g_correction_time = CTSU_PRV_1_2ND;                /* 2nd measurement flag setting                    */
 #if (CTSU_HAS_TRIMMER_REG)
             CTSU.CTSUTRMR = 0xFF;                              /* 0xFF set in the current trimming register       */
 #endif
@@ -161,55 +223,62 @@ void correction_CTSU_sensor_ico( void )
 #if (CTSU_HAS_TRIMMER_REG)
             CTSU.CTSUTRMR = g_ctsutrimr_def;                   /* Return the current trimming register to the initial value */
 #endif
-            R_Set_CTSU_Correction_Mode(_0_NORMAL);             /* Sensor ICO normal measurement setting            */
-            g_correction_mode = _0_NORMAL;                     /* Sensor ICO normal measurement mode setting      */
+            R_Set_CTSU_Correction_Mode(CTSU_PRV_0_NORMAL);     /* Sensor ICO normal measurement setting            */
+            g_correction_mode = CTSU_PRV_0_NORMAL;             /* Sensor ICO normal measurement mode setting      */
         }
     }
 
-    return;
+    return err;
 }    /* End of function correction_CTSU_sensor_ico() */
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (CTSU_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (CTSU_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: configure_correction_method
 * Description  :
 * Arguments    : none
 * Return Value : none
 ***********************************************************************************************************************/
-void configure_correction_method(void)
+static void configure_correction_method(void)
 {
 
     g_ctsu_ctrl.mode = CTSU_MODE_SELF_MULTI_SCAN;
 
     CTSU.CTSUCR1.BYTE = 0x43;
-    while (CTSU.CTSUCR1.BIT.CTSUPON != 1)                   // Wait for charging to stabilize
+    while (1 != CTSU.CTSUCR1.BIT.CTSUPON)                       /* Wait for charging to stabilize */
+    {
         ;
+    }
 
     CTSU.CTSUSDPRS.BYTE = 0x23;
     CTSU.CTSUSST.BYTE = 0x10;   // always
     CTSU.CTSUDCLKC.BYTE = 0x30; // always
 
     /* Enable lowest configured channel */
-    if (gp_cur_cfg->ctsuchac0 != 0)
+    if (0 != gp_cur_cfg->ctsuchac0)
     {
-        CTSU.CTSUCHAC0.BYTE = gp_cur_cfg->ctsuchac0 & -gp_cur_cfg->ctsuchac0;
+        CTSU.CTSUCHAC0.BYTE = gp_cur_cfg->ctsuchac0 & (-gp_cur_cfg->ctsuchac0);
     }
-    else if (gp_cur_cfg->ctsuchac1 != 0)
+    else if (0 != gp_cur_cfg->ctsuchac1)
     {
-        CTSU.CTSUCHAC1.BYTE = gp_cur_cfg->ctsuchac1 & -gp_cur_cfg->ctsuchac1;
+        CTSU.CTSUCHAC1.BYTE = gp_cur_cfg->ctsuchac1 & (-gp_cur_cfg->ctsuchac1);
     }
 #if (CTSU_HAS_LARGE_REG_SET)
-    else if (gp_cur_cfg->ctsuchac2 != 0)
+    else if (0 != gp_cur_cfg->ctsuchac2)
     {
-        CTSU.CTSUCHAC2.BYTE = gp_cur_cfg->ctsuchac2 & -gp_cur_cfg->ctsuchac2;
+        CTSU.CTSUCHAC2.BYTE = gp_cur_cfg->ctsuchac2 & (-gp_cur_cfg->ctsuchac2);
     }
-    else if (gp_cur_cfg->ctsuchac3 != 0)
+    else if (0 != gp_cur_cfg->ctsuchac3)
     {
-        CTSU.CTSUCHAC3.BYTE = gp_cur_cfg->ctsuchac3 & -gp_cur_cfg->ctsuchac3;
+        CTSU.CTSUCHAC3.BYTE = gp_cur_cfg->ctsuchac3 & (-gp_cur_cfg->ctsuchac3);
     }
     else
     {
-        CTSU.CTSUCHAC4.BYTE = gp_cur_cfg->ctsuchac4 & -gp_cur_cfg->ctsuchac4;
+        CTSU.CTSUCHAC4.BYTE = gp_cur_cfg->ctsuchac4 & (-gp_cur_cfg->ctsuchac4);
     }
 #endif
 
@@ -221,16 +290,21 @@ void configure_correction_method(void)
     CTSU.CTSUCR0.BIT.CTSUINIT = 1;
 
     return;
-}
+} /* End of function configure_correction_method() */
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (CTSU_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (CTSU_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: R_Set_CTSU_Correction_Mode
 * Description  :
 * Arguments    : uint8_t mode    : 0 Normal mode    1 Test mode
 * Return Value : none
 ***********************************************************************************************************************/
-void R_Set_CTSU_Correction_Mode( uint8_t mode )
+static void R_Set_CTSU_Correction_Mode( uint8_t mode )
 {
     if (0 == SYSTEM.MSTPCRD.BIT.MSTPD10)
     {
@@ -258,98 +332,143 @@ void R_Set_CTSU_Correction_Mode( uint8_t mode )
 }    /* End of function R_Set_CTSU_Correction_Mode() */
 
 
-
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (CTSU_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (CTSU_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: correction_CTSU_register_txd_set
 * Description  : CTSU correction parameters transmit setting by DTC.
 * Arguments    : None
-* Return Value : None
+* Return Value : QE_SUCCESS-
+*                   Correction parameter set.
+*                QE_ERR_UNSUPPORTED_CLK_CFG-
+*                   No correction parameter available for clock speed.
 ***********************************************************************************************************************/
-void correction_CTSU_register_txd_set( void )
+static qe_err_t correction_CTSU_register_txd_set( void )
 {
+    qe_err_t    err = QE_SUCCESS;
+
+
     if (0 == g_correct_value_measure)
     {
         g_correction_dtc_txd[0] = 0x0700;
         g_correction_dtc_txd[1] = 0x0000;
-        switch ((uint32_t)CTSU_INPUT_FREQUENCY_DIV)
+
+        if (CTSU_INPUT_FREQUENCY_DIV == 32)
         {
-            case 32:
-                g_correction_dtc_txd[2] = 0x3F0F;                                    /* 32 / 64 = 0.5MHz              */
-                break;
-            case 27:
-                g_correction_dtc_txd[2] = 0x3A0F;                                    /* 27 / 54 = 0.5MHz              */
-                break;
-            case 24:
-                g_correction_dtc_txd[2] = 0x370F;                                    /* 24 / 48 = 0.5MHz              */
-                break;
-            case 16:
-                g_correction_dtc_txd[2] = 0x2F0F;                                    /* 16 / 32 = 0.5MHz              */
-                break;
-            case 8:
-                g_correction_dtc_txd[2] = 0x270F;                                    /*  8 / 16 = 0.5MHz              */
-                break;
-            default:
-                break;
+            g_correction_dtc_txd[2] = 0x3F0F;       /* 32 / 64 = 0.5MHz              */
+        }
+        else if (CTSU_INPUT_FREQUENCY_DIV == 27)
+        {
+            g_correction_dtc_txd[2] = 0x3A0F;       /* 27 / 54 = 0.5MHz              */
+        }
+        else if (CTSU_INPUT_FREQUENCY_DIV == 24)
+        {
+            g_correction_dtc_txd[2] = 0x370F;       /* 24 / 48 = 0.5MHz              */
+        }
+        else if (CTSU_INPUT_FREQUENCY_DIV == 16)
+        {
+            g_correction_dtc_txd[2] = 0x2F0F;       /* 16 / 32 = 0.5MHz              */
+        }
+        else if (CTSU_INPUT_FREQUENCY_DIV == 8)
+        {
+            g_correction_dtc_txd[2] = 0x270F;       /*  8 / 16 = 0.5MHz              */
+        }
+        else
+        {
+            err = QE_ERR_UNSUPPORTED_CLK_CFG;
         }
 
 #ifdef BSP_MCU_RX23_ALL
-        if(_1_2ND == g_correction_time)
+        if(CTSU_PRV_1_2ND == g_correction_time)
         {
             g_correction_dtc_txd[2] = g_correction_dtc_txd[2] | 0x6000;              /* ICO gain  66% -> 40%          */
         }
 #endif
     }
+
+    return err;
 }    /* End of function correction_CTSU_register_txd_set() */
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (CTSU_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (CTSU_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: correction_CTSU_measurement_start
 * Description  : Sensor ICO gain correction measurement start.
 * Arguments    : None
 * Return Value : None
 ***********************************************************************************************************************/
-void correction_CTSU_measurement_start( void )
+static qe_err_t correction_CTSU_measurement_start( void )
 {
     uint8_t     measure_count;
     uint32_t    sensor_ico_add;
+    qe_err_t    err = QE_SUCCESS;
 
     measure_count  = 0;
     sensor_ico_add = 0;
 
-    while (CORRECTION_AVERAGE != measure_count)                       /* Average number of times loop                 */
+    while (CTSU_PRV_CORRECTION_AVERAGE != measure_count)                /* Average number of times loop */
     {
         while (CTSU_STATE_READY == g_ctsu_ctrl.state)
         {
-            g_ctsu_ctrl.state = CTSU_STATE_RUN;                       /* CTSU measurement run mode setting            */
+            g_ctsu_ctrl.state = CTSU_STATE_RUN;                         /* CTSU measurement run mode setting */
+
             /* WARNING! Do NOT call R_CTSU_StartScan(). That is for application layer.
              * It may be using external triggers or the DTC for non-correction registers values.
              */
             CTSU.CTSUCR0.BIT.CTSUSTRT = 1;      // Start scan
         }
 
-        if ((CTSU_STATE_FINISH == g_ctsu_ctrl.state) && (1 == g_correction_status.flag.data_update))
+        if (CTSU_STATE_FINISH == g_ctsu_ctrl.state)
         {
-            sensor_ico_add = sensor_ico_add + gp_cur_cfg->p_scan_buf[0];
-            measure_count  = measure_count + 1;                                    /* Measurement count up            */
+            if (1 == g_correction_status.flag.data_update)
+            {
+                sensor_ico_add = sensor_ico_add + gp_cur_cfg->p_scan_buf[0];
+                measure_count  = measure_count + 1;                     /* Measurement count up */
 
-            g_correction_status.flag.data_update = 0;                              /* Update flag clear               */
-            g_ctsu_ctrl.state = CTSU_STATE_READY;                     /* CTSU measurement run mode setting            */
+                g_correction_status.flag.data_update = 0;               /* Update flag clear */
+                g_ctsu_ctrl.state = CTSU_STATE_READY;                   /* CTSU measurement run mode setting */
+            }
+            else if (1 == g_correction_status.flag.icomp_error)
+            {
+                return QE_ERR_ABNORMAL_TSCAP;
+            }
+            else if (1 == g_correction_status.flag.sens_over)
+            {
+                return QE_ERR_SENSOR_OVERFLOW;
+            }
         }
     }
 
-    if (_0_1ST == g_correction_time)                                  /* 1st measurement judgment                     */
+    if (CTSU_PRV_0_1ST == g_correction_time)                            /* 1st measurement judgment */
     {
-        g_correction_1st_val = sensor_ico_add >> 5;                   /* 1/32 = 5 bit right shift                     */
-        sensor_ico_add       = 0;                                     /* Sensor ico addition data clear               */
+        g_correction_1st_val = sensor_ico_add / CTSU_PRV_CORRECTION_AVERAGE;   /* get average */
+        sensor_ico_add       = 0;                                       /* Sensor ico addition data clear */
+        if (g_correction_1st_val >= CTSU_SENSOR_SATURATION)
+        {
+            err = QE_ERR_SENSOR_SATURATION;
+        }
     }
     else
     {
-        g_correction_2nd_val = sensor_ico_add >> 5;                   /* 1/32 = 5 bit right shift                     */
+        g_correction_2nd_val = sensor_ico_add / CTSU_PRV_CORRECTION_AVERAGE;   /* get average */
     }
 
+    return err;
 }    /* End of function correction_CTSU_measurement_start() */
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (CTSU_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (CTSU_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: CTSUInterrupt
 * Description  : CTSU measurement end interrupt function
@@ -360,60 +479,69 @@ void CTSUInterrupt( void )
 {
     uint8_t         err_status;
     ctsu_status_t   status;
+    ctsu_isr_evt_t  event;
 
 
     status = gp_cur_cfg->ctsu_status;
-
+    g_pvt_scan_info[g_ctsu_ctrl.cur_method].ctsuerrs = CTSU.CTSUERRS.WORD;
+    g_pvt_scan_info[g_ctsu_ctrl.cur_method].ctsust = CTSU.CTSUST.BYTE;
 
     if (0 != CTSUGetTscapVoltageError())
     {
-        if (_1_CORRECTION == g_correction_mode)
+        if (CTSU_PRV_1_CORRECTION == g_correction_mode)
         {
-            g_correction_status.flag.icomp_error = 1;                         /* TSCAP voltage error                  */
+            g_correction_status.flag.icomp_error = 1;   /* TSCAP voltage error */
         }
         else
         {
-            status.flag.icomp_error = 1;                /* TSCAP voltage error                  */
+            status.flag.icomp_error = 1;                /* TSCAP voltage error */
         }
-        R_Set_CTSU_Power_Supply_Only(0x00);                                       /* TSCUPON off -> TSCUICOMP clear   */
+        R_Set_CTSU_Power_Supply_Only(0x00);             /* TSCUPON off -> TSCUICOMP clear */
+#if (!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5))
         nop();
         nop();
-        R_Set_CTSU_Power_Supply_Only(0x01);                                       /* TSCUPON on                       */
+#else
+        R_BSP_NOP();
+        R_BSP_NOP();
+#endif
+        R_Set_CTSU_Power_Supply_Only(0x01);             /* TSCUPON on */
     }
     else
     {
-        if (_1_CORRECTION == g_correction_mode)
+        if (CTSU_PRV_1_CORRECTION == g_correction_mode)
         {
-            g_correction_status.flag.icomp_error = 0;                         /* TSCAP voltage error clear            */
+            g_correction_status.flag.icomp_error = 0;   /* TSCAP voltage error clear */
         }
         else
         {
-            status.flag.icomp_error = 0;                /* TSCAP voltage error clear            */
+            status.flag.icomp_error = 0;                /* TSCAP voltage error clear */
         }
     }
 
     err_status = R_Get_CTSU_Counter_Overflow_flag();
     CTSU.CTSUST.BYTE &= 0x9F;                           /* clear possible overflow flags */
 
-    if (_1_CORRECTION == g_correction_mode)
+    if (CTSU_PRV_1_CORRECTION == g_correction_mode)
     {
         switch (err_status)
         {
-            case SENS_OK:
+            case CTSU_PRV_SENS_OK:
                 g_correction_status.flag.sens_over = 0;
                 g_correction_status.flag.ref_over = 0;
-                if (g_correction_status.flag.icomp_error != 1)         /* TSCAP voltage error                    */
+                if (1 != g_correction_status.flag.icomp_error)  /* TSCAP voltage error */
                 {
-                    g_correction_status.flag.data_update = 1;          /* Measurement data update status set     */
+                    g_correction_status.flag.data_update = 1;   /* Measurement data update status set */
                 }
                 g_ctsu_ctrl.state = CTSU_STATE_FINISH;
                 g_correction_status.flag.ctsu_measure = 1;
                 break;
-            case SENS_OVER:
+
+            case CTSU_PRV_SENS_OVER:
                 g_correction_status.flag.ref_over = 0;
-                g_correction_status.flag.sens_over = 1;                /* Sensor Counter overflow status set     */
+                g_correction_status.flag.sens_over = 1;         /* Sensor Counter overflow status set */
                 g_ctsu_ctrl.state = CTSU_STATE_FINISH;
                 break;
+
             default:
                 g_ctsu_ctrl.state = CTSU_STATE_STOP;
                 break;
@@ -423,31 +551,46 @@ void CTSUInterrupt( void )
     {
         switch (err_status)
         {
-            case SENS_OK:
+            case CTSU_PRV_SENS_OK:
                 status.flag.sens_over = 0;
                 status.flag.ref_over = 0;
-                if (status.flag.icomp_error != 1)         /* TSCAP voltage error                    */
+                if (1 != status.flag.icomp_error)         /* TSCAP voltage error */
                 {
-                    status.flag.data_update = 1;          /* Measurement data update status set     */
+                    status.flag.data_update = 1;          /* Measurement data update status set */
+                    event = CTSU_EVT_SCAN_COMPLETE;
+                }
+                else
+                {
+                    event = CTSU_EVT_VOLT_ERR;
                 }
                 g_ctsu_ctrl.state = CTSU_STATE_READY;
                 status.flag.ctsu_measure = 1;
                 break;
-            case SENS_OVER:
+
+            case CTSU_PRV_SENS_OVER:
                 status.flag.ref_over = 0;
                 status.flag.sens_over = 1;                /* Sensor Counter overflow status set     */
+                status.flag.data_update = 0;    // clear in case using ext trig and Touch did not process last scan
+                event = CTSU_EVT_SENSOR_OVERFLOW;
                 g_ctsu_ctrl.state = CTSU_STATE_READY;
                 break;
-            case REF_OVER:
+
+            case CTSU_PRV_REF_OVER:
                 status.flag.sens_over = 0;
                 status.flag.ref_over = 1;                 /* Reference Counter overflow status set  */
+                status.flag.data_update = 0;    // clear in case using ext trig and Touch did not process last scan
+                event = CTSU_EVT_SENSOR_OVERFLOW;
                 g_ctsu_ctrl.state = CTSU_STATE_READY;
                 break;
-            case SENS_REF_OVER:
+
+            case CTSU_PRV_SENS_REF_OVER:
                 status.flag.sens_over = 1;                /* Sensor Counter overflow status set     */
                 status.flag.ref_over = 1;                 /* Reference Counter overflow status set  */
+                status.flag.data_update = 0;    // clear in case using ext trig and Touch did not process last scan
+                event = CTSU_EVT_OVERFLOW;
                 g_ctsu_ctrl.state = CTSU_STATE_READY;
                 break;
+
             default:
                 g_ctsu_ctrl.state = CTSU_STATE_STOP;
                 break;
@@ -456,36 +599,60 @@ void CTSUInterrupt( void )
 
     gp_cur_cfg->ctsu_status = status;
 
-    if ((g_ctsu_ctrl.trigger == QE_TRIG_EXTERNAL) && (g_correction_mode != _1_CORRECTION))
+    /* if not doing correction or offset tuning, do callback as appropriate */
+    if ((CTSU_PRV_1_CORRECTION != g_correction_mode) && (1 != gp_cur_cfg->ctsu_status.flag.offset_tuning))
     {
-        qetouch_timer_callback(NULL);
+        /* if power user created special callback, call that
+         * if using external triggers, call default callback to notify user that scan is done
+         * no callback is made by default for sw triggers because that is done by the timer interrupt
+         */
+        if (NULL != g_ctsu_ctrl.p_callback)
+        {
+            g_ctsu_ctrl.p_callback(event, &g_ctsu_ctrl.cur_method);
+        }
+        else if (QE_TRIG_EXTERNAL == g_ctsu_ctrl.trigger)
+        {
+            qetouch_timer_callback(NULL);
+        }
     }
+
 
 }    /* End of function CTSUInterrupt() */
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (CTSU_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (CTSU_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: CTSUGetTscapVoltageError
 * Description  : This API reads the value in [CTSU Error Status Register (CTSUERRS)].
 * Arguments    : None
 * Return Value : data
 ***********************************************************************************************************************/
-uint8_t CTSUGetTscapVoltageError( void )
+static uint8_t CTSUGetTscapVoltageError( void )
 {
     /* CTSU Error Status Register (CTSUERRS)
     b15        CTSU TSCAP voltage error
     b14-0    Reserved    */
     return(CTSU.CTSUERRS.BIT.CTSUICOMP);                    //    CTSU Error Status Register (CTSUICOMP)
-}
+
+} /* End of function CTSUGetTscapVoltageError() */
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (CTSU_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (CTSU_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
-* Function Name: CTSUSetPowerSupplyOnly
+* Function Name: R_Set_CTSU_Power_Supply_Only
 * Description  : This API switches  power of AFE (Analog Front End).
 * Arguments    : mode
 * Return Value : None
 ***********************************************************************************************************************/
-void R_Set_CTSU_Power_Supply_Only( uint8_t mode )
+static void R_Set_CTSU_Power_Supply_Only( uint8_t mode )
 {
     volatile uint8_t data;
 
@@ -515,9 +682,14 @@ void R_Set_CTSU_Power_Supply_Only( uint8_t mode )
             }
         }
     }
-}
+} /* End of function R_Set_CTSU_Power_Supply_Only() */
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (CTSU_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (CTSU_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: R_Get_CTSU_Counter_Overflow_flag
 * Description  :
@@ -527,7 +699,7 @@ void R_Set_CTSU_Power_Supply_Only( uint8_t mode )
 *              :                 bit0 CTSU Sensor Counter Overflow Flag       0 : No overflow
 *              :                                                              1 : An overflow
 ***********************************************************************************************************************/
-uint8_t R_Get_CTSU_Counter_Overflow_flag( void )
+static uint8_t R_Get_CTSU_Counter_Overflow_flag( void )
 {
     uint8_t flag;
 
@@ -545,13 +717,18 @@ uint8_t R_Get_CTSU_Counter_Overflow_flag( void )
 }    /* End of function R_Get_CTSU_Counter_Overflow_flag() */
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (CTSU_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (CTSU_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: correction_CTSU_1st_coefficient_create
 * Description  :
 * Arguments    : None
 * Return Value : None
 ***********************************************************************************************************************/
-void correction_CTSU_1st_coefficient_create( void)
+static void correction_CTSU_1st_coefficient_create( void)
 {
     /*                                      (g_correction_1st_val * 1024)       g_correction_1st_val +20              */
     /*    g_correction_1st_coefficient  =  -------------------------------  =  --------------------------             */
@@ -561,16 +738,23 @@ void correction_CTSU_1st_coefficient_create( void)
 }    /* End of function correction_CTSU_1st_coefficient_create() */
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (CTSU_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (CTSU_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: correction_CTSU_2nd_standard_val_create
 * Description  :
 * Arguments    : None
 * Return Value : None
 ***********************************************************************************************************************/
-void correction_CTSU_2nd_standard_val_create( void )
+static void correction_CTSU_2nd_standard_val_create( void )
 {
 #ifdef BSP_MCU_RX23_ALL
-    g_correction_2nd_std_val = (uint16_t)(24824 * WAFER_PARAMETER);        /* ICOG = 66% : 40960, ICOG = 40% : 24824  */
+
+    /* convert float to word */
+    g_correction_2nd_std_val = (uint16_t)(24824 * CTSU_PRV_WAFER_PARAMETER);        /* ICOG = 66% : 40960, ICOG = 40% : 24824  */
 #else
     uint32_t _1st_parm;
 
@@ -584,13 +768,20 @@ void correction_CTSU_2nd_standard_val_create( void )
 }    /* End of function correction_CTSU_2nd_standard_val_create() */
 
 
+#if (CTSU_CFG_SAFETY_LINKAGE_ENABLE)
+#if (!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5))
+#pragma section _QE_TOUCH_DRIVER
+#else
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
+#endif
 /***********************************************************************************************************************
 * Function Name: correction_CTSU_2nd_coefficient_create
 * Description  :
 * Arguments    : None
 * Return Value : None
 ***********************************************************************************************************************/
-void correction_CTSU_2nd_coefficient_create( void)
+static void correction_CTSU_2nd_coefficient_create( void)
 {
     /*                                        g_correction_2nd_val                                                    */
     /*    g_correction_2nd_coefficient  =  -------------------------- * 1024                                          */
@@ -600,13 +791,18 @@ void correction_CTSU_2nd_coefficient_create( void)
 }    /* End of function correction_CTSU_2nd_coefficient_create() */
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (CTSU_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (CTSU_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: correction_CTSU_16point_coefficient_create
 * Description  :
 * Arguments    : None
 * Return Value : None
 ***********************************************************************************************************************/
-void correction_CTSU_16point_coefficient_create(void)
+static void correction_CTSU_16point_coefficient_create(void)
 {
     uint16_t diff_coefficient;
     uint8_t  up_down;
@@ -663,6 +859,8 @@ void correction_CTSU_16point_coefficient_create(void)
         {
             work_table = 0x0000FFFF;
         }
+
+        /* convert uint32_t to uint16_t */
         g_correction_16table[loop]       = (uint16_t)work_table;
         g_correction_16coefficient[loop] = (1024 * 1024) / g_correction_16point[loop_p];
         loop_p = loop_p - 1;
@@ -673,13 +871,18 @@ void correction_CTSU_16point_coefficient_create(void)
 }    /* End of function correction_CTSU_16point_coefficient_create() */
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (CTSU_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (CTSU_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: sensor_linear_interpolation
 * Description  :
 * Arguments    : none
 * Return Value : none
 ***********************************************************************************************************************/
-void sensor_linear_interpolation(void)
+static void sensor_linear_interpolation(void)
 {
     uint8_t     loop;
     uint8_t     bnum;
@@ -692,17 +895,17 @@ void sensor_linear_interpolation(void)
     {
         for (loop = 0; loop < 15; loop++)
         {
-            table_diff       = (g_correction_16table[loop] - g_correction_16table[loop+1] + 2) / 4;
+            table_diff       = ((g_correction_16table[loop] - g_correction_16table[loop+1]) + 2) / 4;
             g_linear_interpolation_table[bnum]         = g_correction_16table[loop];
             g_linear_interpolation_table[bnum+1]       = g_correction_16table[loop] - table_diff;
-            g_linear_interpolation_table[bnum+2]       = g_correction_16table[loop] - table_diff * 2;
-            g_linear_interpolation_table[bnum+3]       = g_correction_16table[loop] - table_diff * 3;
+            g_linear_interpolation_table[bnum+2]       = g_correction_16table[loop] - (table_diff * 2);
+            g_linear_interpolation_table[bnum+3]       = g_correction_16table[loop] - (table_diff * 3);
 
-            coefficient_diff = (g_correction_16coefficient[loop+1] - g_correction_16coefficient[loop] +2) / 4;
+            coefficient_diff = ((g_correction_16coefficient[loop+1] - g_correction_16coefficient[loop]) +2) / 4;
             g_linear_interpolation_coefficient[bnum]   = g_correction_16coefficient[loop];
             g_linear_interpolation_coefficient[bnum+1] = g_correction_16coefficient[loop] + coefficient_diff;
-            g_linear_interpolation_coefficient[bnum+2] = g_correction_16coefficient[loop] + coefficient_diff * 2;
-            g_linear_interpolation_coefficient[bnum+3] = g_correction_16coefficient[loop] + coefficient_diff * 3;
+            g_linear_interpolation_coefficient[bnum+2] = g_correction_16coefficient[loop] + (coefficient_diff * 2);
+            g_linear_interpolation_coefficient[bnum+3] = g_correction_16coefficient[loop] + (coefficient_diff * 3);
             bnum = bnum +4;
         }
     }
@@ -710,20 +913,29 @@ void sensor_linear_interpolation(void)
     {
         for (loop = 0; loop < 15; loop++)
         {
-            table_diff       = (g_correction_16table[loop] - g_correction_16table[loop+1] + 2) / 4;
+            table_diff       = ((g_correction_16table[loop] - g_correction_16table[loop+1]) + 2) / 4;
             g_linear_interpolation_table[bnum]         = g_correction_16table[loop];
             g_linear_interpolation_table[bnum+1]       = g_correction_16table[loop] - table_diff;
-            g_linear_interpolation_table[bnum+2]       = g_correction_16table[loop] - table_diff * 2;
-            g_linear_interpolation_table[bnum+3]       = g_correction_16table[loop] - table_diff * 3;
+            g_linear_interpolation_table[bnum+2]       = g_correction_16table[loop] - (table_diff * 2);
+            g_linear_interpolation_table[bnum+3]       = g_correction_16table[loop] - (table_diff * 3);
 
-            coefficient_diff = (g_correction_16coefficient[loop] - g_correction_16coefficient[loop+1] +2) / 4;
+            coefficient_diff = ((g_correction_16coefficient[loop] - g_correction_16coefficient[loop+1]) +2) / 4;
             g_linear_interpolation_coefficient[bnum]   = g_correction_16coefficient[loop];
             g_linear_interpolation_coefficient[bnum+1] = g_correction_16coefficient[loop] - coefficient_diff;
-            g_linear_interpolation_coefficient[bnum+2] = g_correction_16coefficient[loop] - coefficient_diff * 2;
-            g_linear_interpolation_coefficient[bnum+3] = g_correction_16coefficient[loop] - coefficient_diff * 3;
+            g_linear_interpolation_coefficient[bnum+2] = g_correction_16coefficient[loop] - (coefficient_diff * 2);
+            g_linear_interpolation_coefficient[bnum+3] = g_correction_16coefficient[loop] - (coefficient_diff * 3);
             bnum = bnum +4;
         }
     }
+
     g_linear_interpolation_table[bnum]       = g_correction_16table[loop];
     g_linear_interpolation_coefficient[bnum] = g_correction_16coefficient[loop];
-}
+
+} /* End of function sensor_linear_interpolation() */
+
+
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (CTSU_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section
+#elif (CTSU_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE_END
+#endif

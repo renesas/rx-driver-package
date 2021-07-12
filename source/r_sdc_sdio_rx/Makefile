@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_sdc_sdio_rx
 VERSION = 		2.00
-MDF =			NOT_SUPPORTED
+MDF = NOT_SUPPORTED
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

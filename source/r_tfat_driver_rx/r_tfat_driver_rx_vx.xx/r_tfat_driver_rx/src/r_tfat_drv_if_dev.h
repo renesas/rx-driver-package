@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014(2015-2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014(2015-2020) Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
 * History      : DD.MM.YYYY Version  Description
@@ -31,6 +31,9 @@
 *              : 08.08.2019 2.00     Added support for FreeRTOS and 
 *                                    Renesas uITRON (RI600V4).
 *                                    Added support for GNUC and ICCRX.
+*              : 10.06.2020 2.10     Added API function "flash_1ms_interval".
+*                                    Added support FLASH SPI Firmware
+*                                    Added support MMCIF Firmware
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_tfat_driver_rx_if_dev.h
@@ -81,6 +84,23 @@ DRESULT sdmem_disk_write(uint8_t drive, const uint8_t* buffer, uint32_t sector_n
 DRESULT sdmem_disk_ioctl(uint8_t drive, uint8_t command, void* buffer);
 DSTATUS sdmem_disk_status(uint8_t drive);
 #endif // (TFAT_SDMEM_DRIVE_NUM > 0)
+
+#if (TFAT_MMC_DRIVE_NUM > 0)
+DSTATUS mmcif_disk_initialize(uint8_t drive);
+DRESULT mmcif_disk_read(uint8_t drive, uint8_t* buffer, uint32_t sector_number, uint32_t sector_count);
+DRESULT mmcif_disk_write(uint8_t drive, const uint8_t* buffer, uint32_t sector_number, uint32_t sector_count);
+DRESULT mmcif_disk_ioctl(uint8_t drive, uint8_t command, void* buffer);
+DSTATUS mmcif_disk_status(uint8_t drive);
+#endif // (TFAT_MMC_DRIVE_NUM > 0)
+
+#if (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
+DSTATUS flash_spi_disk_initialize(uint8_t drive);
+DRESULT flash_spi_disk_read(uint8_t drive, uint8_t* buffer, uint32_t sector_number, uint32_t sector_count);
+DRESULT flash_spi_disk_write(uint8_t drive, const uint8_t* buffer, uint32_t sector_number, uint32_t sector_count);
+DRESULT flash_spi_disk_ioctl(uint8_t drive, uint8_t command, void* buffer);
+DSTATUS flash_spi_disk_status(uint8_t drive);
+void flash_spi_1ms_interval(void);
+#endif // (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
 
 #endif    /* _R_TFAT_DRIVER_RX_IF_DEV_H_ */
 

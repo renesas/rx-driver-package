@@ -34,6 +34,14 @@
 *                               Modified comment for added support of Renesas RTOS (RI600V4 or RI600PX).
 *                               Added the following macro definition.
 *                                - BSP_CFG_RENESAS_RTOS_USED
+*         : 31.07.2020 1.03     Modified comment.
+*         : 20.11.2020 1.04     Added support for RX72M with 100 pin and 144 pin packages.
+*         : 29.01.2021 1.05     Added the following macro definition.
+*                                - BSP_CFG_SCI_UART_TERMINAL_ENABLE
+*                                - BSP_CFG_SCI_UART_TERMINAL_CHANNEL
+*                                - BSP_CFG_SCI_UART_TERMINAL_BITRATE
+*                                - BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY
+*         : 26.02.2021 1.06     Added a comment for Azure RTOS to BSP_CFG_RTOS_USED.
 ***********************************************************************************************************************/
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
 #define R_BSP_CONFIG_REF_HEADER_FILE
@@ -60,7 +68,7 @@ Configuration Options
    | | | |  |  | | | |  Macro Name                             Description
    | | | |  |  | | | |__BSP_CFG_MCU_PART_PACKAGE             = Package type, number of pins, and pin pitch
    | | | |  |  | | |____not used                             = Products with wide temperature range
-   | | | |  |  | |______BSP_CFG_MCU_PART_ENCRYPTION_INCLUDED = Encryption module included/not included
+   | | | |  |  | |______BSP_CFG_MCU_PART_FUNCTION            = Encryption module included/not included
    | | | |  |  |________BSP_CFG_MCU_PART_MEMORY_SIZE         = ROM, RAM, and Data Flash Capacity
    | | | |  |___________BSP_CFG_MCU_PART_GROUP               = Group name
    | | | |______________BSP_CFG_MCU_PART_SERIES              = Series name
@@ -74,6 +82,8 @@ Configuration Options
    FC           = 0x0             = LFQFP/176/0.50
    BG           = 0x1             = LFBGA/176/0.80
    BD           = 0x2             = LFBGA/224/0.80
+   FB           = 0x3             = LFQFP/144/0.50
+   FP           = 0x5             = LFQFP/100/0.50
 */
 #define BSP_CFG_MCU_PART_PACKAGE        (0x2)
 
@@ -367,7 +377,6 @@ NOTE: The RAM areas are not contiguous.It is separated by 512 KB each.
 
 /* Configure SDCLK output pin (only effective when external bus enabled)
    Values 0=no output, 1 = BCK frequency
-   NOTE: The definition is invalid.
 */
 #define BSP_CFG_SDCLK_OUTPUT            (0)
 
@@ -557,7 +566,7 @@ NOTE: The RAM areas are not contiguous.It is separated by 512 KB each.
                                             - 111: The TM function in the address range from FFDE 0000h to 
                                                    FFDE FFFFh is disabled in dual mode.
        b27     Reserved (set to 1)
-       b26:b24 TMEFF  - TM Enable - 000: TM function is enabled.
+       b26:b24 TMEF   - TM Enable - 000: TM function is enabled.
                                   - 111: TM function is disabled.
        b23:b0  Reserved (set to 1)
        NOTE: If the dual bank function has not been incorporated in a device,
@@ -620,6 +629,7 @@ NOTE: The RAM areas are not contiguous.It is separated by 512 KB each.
    2 = embOS is used.(This is not available.)
    3 = MicroC_OS is used.(This is not available.)
    4 = Renesas ITRON OS (RI600V4 or RI600PX) is used.
+   5 = Azure RTOS is used.(This is not available.)
 */
 #define BSP_CFG_RTOS_USED               (0)
 
@@ -774,6 +784,25 @@ NOTE: The RAM areas are not contiguous.It is separated by 512 KB each.
          It is possible to dynamically change the IPR.
 */
 #define BSP_CFG_SWINT_IPR_INITIAL_VALUE     (0x1)
+
+/* This macro is used for serial terminal on the board selected by smart configurator.
+   0 = SCI UART Terminal is disabled.
+   1 = SCI UART Terminal is enabled.
+*/
+#define BSP_CFG_SCI_UART_TERMINAL_ENABLE         (0)
+
+/* This macro is channel number for serial terminal.
+*/
+#define BSP_CFG_SCI_UART_TERMINAL_CHANNEL        (6)
+
+/* This macro is bit-rate for serial terminal.
+*/
+#define BSP_CFG_SCI_UART_TERMINAL_BITRATE        (115200)
+
+/* This macro is interrupt priority for serial terminal.
+   0(low) - 15(high)
+*/
+#define BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY   (15)
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

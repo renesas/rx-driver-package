@@ -1,66 +1,48 @@
-/*******************************************************************************
+/***********************************************************************************************************************
  * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only
- * intended for use with Renesas products. No other uses are authorized. This
- * software is owned by Renesas Electronics Corporation and is protected under
- * all applicable laws, including copyright laws.
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
  * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
- * LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
- * TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
- * ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
- * FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
- * ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
- * BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software
- * and to discontinue the availability of this software. By using this software,
- * you agree to the additional terms and conditions found by accessing the
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+ * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2015(2019) Renesas Electronics Corporation. All rights reserved.
-  ******************************************************************************/
-/*******************************************************************************
+ *
+ * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
+ ***********************************************************************************************************************/
+/***********************************************************************************************************************
  * File Name    : r_usb_hreg_abs.c
  * Description  : Call USB Host register access function 
- *****************************************************************************/
-/******************************************************************************
+ ***********************************************************************************************************************/
+/**********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *         : 08.01.2014 1.00 First Release
  *         : 31.11.2018 1.10 Supporting Smart Configurator
  *         : 31.05.2019 1.11 Added support for GNUC and ICCRX.
  *         : 30.06.2019 1.12 RX23W is added.
- ******************************************************************************/
+ *         : 30.06.2020 1.20 Added support for RTOS.
+ ***********************************************************************************************************************/
+
 /******************************************************************************
  Includes   <System Includes> , "Project Includes"
  ******************************************************************************/
-
 #include "r_usb_basic_mini_if.h"
+
+#if (BSP_CFG_RTOS_USED == 0)    /* Non-OS */
+
 #include "r_usb_typedef.h"
+#include "r_usb_extern.h"
 #include "r_usb_bitdefine.h"
 #include "r_usb_reg_access.h"
 #include "r_usb_dmac.h"
-#include "r_usb_extern.h"
 
 #if ( (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST )
-
-/*******************************************************************************
- Macro definitions
- ******************************************************************************/
-
-/*******************************************************************************
- Typedef definitions
- ******************************************************************************/
-
-
-/*******************************************************************************
- Exported global variables (to be accessed by other files)
- ******************************************************************************/
-
-/*******************************************************************************
- Private global variables and functions
- ******************************************************************************/
-
 /******************************************************************************
 Function Name   : usb_hstd_check_interrupt_source
 Description     : USB interrupt Handler
@@ -70,21 +52,21 @@ Return          : none
 ******************************************************************************/
 void usb_hstd_check_interrupt_source(usb_strct_t *p_inttype, uint16_t *p_bitsts)
 {
-    status_t    intsts0;
-    status_t    intsts1;
-    status_t    brdysts;
-    status_t    nrdysts;
-    status_t    bempsts;
-    status_t    intenb0;
-    status_t    intenb1;
-    status_t    brdyenb;
-    status_t    nrdyenb;
-    status_t    bempenb;
-    intbit_t    ists_u;
-    intbit2_t   ists1_w;
-    status_t    bsts_d;
-    status_t    nsts_d;
-    status_t    ests_d;
+    reg_access_t    intsts0;
+    reg_access_t    intsts1;
+    reg_access_t    brdysts;
+    reg_access_t    nrdysts;
+    reg_access_t    bempsts;
+    reg_access_t    intenb0;
+    reg_access_t    intenb1;
+    reg_access_t    brdyenb;
+    reg_access_t    nrdyenb;
+    reg_access_t    bempenb;
+    intstsbit_t     ists_u;
+    intsts1bit_t    ists1_w;
+    reg_access_t    bsts_d;
+    reg_access_t    nsts_d;
+    reg_access_t    ests_d;
     uint16_t    stat;
     usb_strct_t key;
 
@@ -156,11 +138,13 @@ void usb_hstd_check_interrupt_source(usb_strct_t *p_inttype, uint16_t *p_bitsts)
     }
     else if (0 != ists1_w.word.bit.eoferr)          /***** EOFERR INT *****/
     {
+        /* EOFERR Clear */
         USB0.INTSTS1.WORD = (uint16_t) ((~USB_EOFERR) & USB_INTSTS1_MASK);
         key     = USB_INT_EOFERR0;
     }
     else if (0 != ists1_w.word.bit.bchg)            /***** BCHG INT *****/
     {
+        /* BCHG  interrupt disable */
         usb_hstd_bchg_disable();
         key     = USB_INT_BCHG0;
     }
@@ -186,6 +170,7 @@ void usb_hstd_check_interrupt_source(usb_strct_t *p_inttype, uint16_t *p_bitsts)
     }
     else if (0 != ists_u.byte.bit.sofr)             /***** SOFR change *****/
     {
+        /* SOFR Clear */
         USB0.INTSTS0.WORD = (uint16_t) ~USB_SOFR;
         key = USB_INT_SOFR;
     }
@@ -195,12 +180,15 @@ void usb_hstd_check_interrupt_source(usb_strct_t *p_inttype, uint16_t *p_bitsts)
     }
     *p_bitsts     = stat;
     *p_inttype    = key;
-}   /* End of function usb_hstd_check_interrupt_source() */
-
+}
+/******************************************************************************
+ End of function usb_hstd_check_interrupt_source
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hstd_interrupt_handler
-Description     : USB interrupt handler
+ Description     : USB interrupt routine. Analyze which USB interrupt occurred 
+                 : and send message to HCD task.
 Arguments       : none
 Return value    : none
 ******************************************************************************/
@@ -221,12 +209,17 @@ void usb_hstd_interrupt_handler(void)
     {
         g_usb_hstd_int_msg_cnt  = 0;
     }
-}   /* End of function usb_hstd_interrupt_handler() */
+}
+/******************************************************************************
+ End of function usb_hstd_interrupt_handler
+ ******************************************************************************/
 
 
 /******************************************************************************
 Function Name   : usb_hstd_detach_process
-Description     : USB detach process
+ Description     : Handles the require processing when USB device is detached
+                 : (Data transfer forcibly termination processing to the connected USB Device,
+                 : the clock supply stop setting and the USB interrupt dissable setteing etc)
 Arguments       : none
 Return value    : none
 ******************************************************************************/
@@ -235,14 +228,14 @@ void usb_hstd_detach_process(void)
     usb_addr_t addr;
 
     /* OVRCR, ATTCH, DTCH, BCHG interrupt disable */
-    usb_hstd_int_disable();
+    usb_hstd_bus_int_disable();
 
     /* WAIT_LOOP */
     for (g_usb_hcd_devaddr = USB_DEVICE_0; g_usb_hcd_devaddr <= USB_MAXDEVADDR; g_usb_hcd_devaddr++ )
     {
-        if (USB_NOCONNECT != usb_hstd_check_device_address())
+        if (USB_NOCONNECT != usb_hstd_devaddr_to_speed())
         {
-            if (USB_IDLEST != g_usb_hcd_ctsq)
+            if (USB_IDLEST != g_usb_hstd_ctsq)
             {
                 /* Control Read/Write End */
                 usb_hstd_setup_disable();
@@ -279,13 +272,17 @@ void usb_hstd_detach_process(void)
     {
         usb_hstd_detach_control();
     }
-}   /* End of function usb_hstd_detach_process() */
-
+}
+/******************************************************************************
+ End of function usb_hstd_detach_process
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hstd_read_lnst
-Description     : Check Atacch
-Arguments       : uint16_t *buf             : RHST bit(return value)
+ Description     : Reads LNST register two times, checks whether these values
+                 : are equal and returns the value of DVSTCTR register that correspond to
+                 : the port specified by 2nd argument.
+ Arguments       : uint16_t *buf     : Pointer to the buffer to store DVSTCTR register
 Return value    : none
 Note            : Please change for your SYSTEM
 ******************************************************************************/
@@ -295,22 +292,30 @@ void usb_hstd_read_lnst(uint16_t *p_buf)
     do
     {
         p_buf[0] = hw_usb_read_syssts();
+
+        /* 30ms wait */
         usb_cpu_delay_xms((uint16_t)30);
         p_buf[1] = hw_usb_read_syssts();
         if ((p_buf[0] & USB_LNST) == (p_buf[1] & USB_LNST) )
         {
+            /* 20ms wait */
             usb_cpu_delay_xms((uint16_t)20);
             p_buf[1] = hw_usb_read_syssts();
         }
     }
     while ((p_buf[0] & USB_LNST) != (p_buf[1] & USB_LNST) );
     p_buf[1] = hw_usb_read_dvstctr();
-}   /* End of function usb_hstd_read_lnst() */
+}
+/******************************************************************************
+ End of function usb_hstd_read_lnst
+ ******************************************************************************/
 
 
 /******************************************************************************
 Function Name   : usb_hstd_attach_process
-Description     : USB attach / detach
+ Description     : Interrupt disable setting when USB Device is attached and
+                 : handles the required interrupt disable setting etc when USB device
+                 : is attached.
 Arguments       : none
 Return value    : none
 Note            : Please change for your SYSTEM
@@ -319,7 +324,7 @@ void usb_hstd_attach_process(void)
 {
 
     /* OVRCR, ATTCH, DTCH, BCHG interrupt disable */
-    usb_hstd_int_disable();
+    usb_hstd_bus_int_disable();
 
     /* Decide USB Line state (ATTACH) */
     if (USB_LNST_DETACH == usb_hstd_check_attach())
@@ -330,12 +335,15 @@ void usb_hstd_attach_process(void)
     {
         usb_hstd_attach_control();
     }
-}   /* End of function usb_hstd_attach_process() */
+}
+/******************************************************************************
+ End of function usb_hstd_attach_process
+ ******************************************************************************/
 
 
 /******************************************************************************
 Function Name   : usb_hstd_bus_reset
-Description     : USB bus reset
+ Description     : Setting USB register when BUS Reset
 Arguments       : none
 Return value    : none
 ******************************************************************************/
@@ -356,12 +364,15 @@ void usb_hstd_bus_reset(void)
     /* Wait 10ms or more (USB reset recovery) */
     hw_usb_write_dcpmxps((uint16_t) (USB_DEFPACKET + USB_DEVICE_0));
     usb_cpu_delay_xms((uint16_t)20);
-}   /* End of function usb_hstd_bus_reset() */
+}
+/******************************************************************************
+ End of function usb_hstd_bus_reset
+ ******************************************************************************/
 
 
 /******************************************************************************
 Function Name   : usb_hstd_resume_process
-Description     : USB resume
+ Description     : Setting USB register when RESUME signal is detected
 Arguments       : none
 Return value    : none
 ******************************************************************************/
@@ -369,11 +380,20 @@ void usb_hstd_resume_process(void)
 {
     /* RESUME signal output, wait 20ms, SOF output, wait 5ms */
     usb_hstd_bchg_disable();
+    /* RESUME=1, RWUPE=0 */
     hw_usb_rmw_dvstctr(USB_RESUME, (USB_RESUME | USB_RWUPE));
+    /* Wait */
     usb_cpu_delay_xms((uint16_t)20);
+
+    /* USBRST=0, RESUME=0, UACT=1 */
     usb_hstd_set_uact();
+
+    /* Wait */
     usb_cpu_delay_xms((uint16_t)5);
-}   /* End of function usb_hstd_resume_process() */
+}
+/******************************************************************************
+ End of function usb_hstd_resume_process
+ ******************************************************************************/
 
 
 /******************************************************************************
@@ -385,21 +405,29 @@ Note            : In the case of timeout status, it does not call back.
 ******************************************************************************/
 void usb_hstd_forced_termination(uint16_t status)
 {
+    uint16_t    pipe = g_usb_hstd_current_pipe;
     uint16_t    buffer;
 
     /* PID = NAK */
-    usb_cstd_set_nak(g_usb_hstd_current_pipe);
+    /* Set NAK */
+    usb_cstd_set_nak(pipe);
 
     /* Disable Interrupt */
-    hw_usb_clear_brdyenb(g_usb_hstd_current_pipe);
-    hw_usb_clear_nrdyenb(g_usb_hstd_current_pipe);
-    hw_usb_clear_bempenb(g_usb_hstd_current_pipe);
+    /* Disable Ready Interrupt */
+    hw_usb_clear_brdyenb(pipe);
 
-    usb_cstd_clr_transaction(g_usb_hstd_current_pipe);
+    /* Disable Not Ready Interrupt */
+    hw_usb_clear_nrdyenb(pipe);
+
+    /* Disable Empty Interrupt */
+    hw_usb_clear_bempenb(pipe);
+
+    usb_cstd_clr_transaction(pipe);
 
 #if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))
+    /* Clear D0FIFO-port */
     buffer = hw_usb_read_fifosel(USB_D0USE);
-    if ((buffer & USB_CURPIPE) == g_usb_hstd_current_pipe )
+    if ((buffer & USB_CURPIPE) == pipe )
     {
         /* Stop DMA,FIFO access */
         usb_cstd_dma_stop(USB_D0USE);
@@ -408,8 +436,9 @@ void usb_hstd_forced_termination(uint16_t status)
         usb_cstd_chg_curpipe(USB_PIPE0, USB_D0USE, USB_NULL);
     }
 
+    /* Clear D1FIFO-port */
     buffer = hw_usb_read_fifosel(USB_D1USE);
-    if ((buffer & USB_CURPIPE) == g_usb_hstd_current_pipe )
+    if ((buffer & USB_CURPIPE) == pipe )
     {
         /* Stop DMA,FIFO access */
         usb_cstd_dma_stop(USB_D1USE);
@@ -419,34 +448,97 @@ void usb_hstd_forced_termination(uint16_t status)
     }
 #endif /* ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE)) */
 
+    /* Clear CFIFO-port */
     buffer = hw_usb_read_fifosel(USB_CUSE);
-    if ((buffer & USB_CURPIPE) == g_usb_hstd_current_pipe )
+    if ((buffer & USB_CURPIPE) == pipe )
     {
         /* FIFO buffer SPLIT transaction initialized */
         usb_cstd_chg_curpipe(USB_PIPE0, USB_CUSE, USB_NULL);
     }
 
-    usb_cstd_do_aclrm(g_usb_hstd_current_pipe);
+    /* Do Aclr */
+    usb_cstd_do_aclrm(pipe);
 
     /* Call Back */
-    if (USB_NULL != gp_usb_hstd_pipe[g_usb_hstd_current_pipe])
+    if (USB_NULL != gp_usb_hstd_pipe[pipe])
     {
         /* Transfer information set */
-        gp_usb_hstd_pipe[g_usb_hstd_current_pipe]->tranlen    = g_usb_hstd_data_cnt[g_usb_hstd_current_pipe];
-        gp_usb_hstd_pipe[g_usb_hstd_current_pipe]->status     = (usb_strct_t)status;
-        if (USB_NULL != gp_usb_hstd_pipe[g_usb_hstd_current_pipe]->complete)
+        gp_usb_hstd_pipe[pipe]->tranlen    = g_usb_hstd_data_cnt[pipe];
+        gp_usb_hstd_pipe[pipe]->status     = (usb_strct_t)status;
+        if (USB_NULL != gp_usb_hstd_pipe[pipe]->complete)
         {
-            (gp_usb_hstd_pipe[g_usb_hstd_current_pipe]->complete)(gp_usb_hstd_pipe[g_usb_hstd_current_pipe]);
+            (gp_usb_hstd_pipe[pipe]->complete)(gp_usb_hstd_pipe[pipe]);
         }
 
         /* Evacuation pointer */
-        gp_usb_hstd_pipe[g_usb_hstd_current_pipe]    = (usb_hutr_t*)USB_NULL;
+        gp_usb_hstd_pipe[pipe]    = (usb_hutr_t*)USB_NULL;
     }
-}   /* End of function usb_hstd_forced_termination() */
+}
+/******************************************************************************
+ End of function usb_hstd_forced_termination
+ ******************************************************************************/
 
+
+/******************************************************************************
+Function Name   : usb_hstd_get_devaddx_register
+Description     : Get device address configuration register from device address
+Arguments       : none
+Return value    : uint16_t                  : configuration register
+******************************************************************************/
+uint16_t usb_hstd_get_devaddx_register(void)
+{
+    R_BSP_VOLATILE_EVENACCESS uint16_t *p_reg;
+    uint16_t return_value;
+
+    if (g_usb_hcd_devaddr > USB_MAXDEVADDR)
+    {
+        return_value = USB_ERROR;
+    }
+    else
+    {
+        p_reg = (uint16_t *) &(USB0.DEVADD0) + g_usb_hcd_devaddr;
+        return_value = *p_reg;
+    }
+
+    return return_value;
+}   /* End of function usb_hstd_get_devaddx_register() */
+
+
+/******************************************************************************
+Function Name   : usb_hstd_set_devaddx_register
+Description     : Set device speed
+Arguments       : uint8_t    usbspd     : device speed
+Return value    : none
+******************************************************************************/
+void usb_hstd_set_devaddx_register(uint8_t usbspd)
+{
+    R_BSP_VOLATILE_EVENACCESS uint16_t *p_reg;
+    uint16_t    data;
+
+    if (USB_FSCONNECT == usbspd)
+    {
+        data    = (uint16_t)(USB_FULLSPEED);
+    }
+    else if (USB_LSCONNECT == usbspd)
+    {
+        data    = (uint16_t)(USB_LOWSPEED);
+    }
+    else                                      /* else if (usbspd == USB_NOCONNECT) */
+    {
+        data    = (uint16_t)(USB_NOTUSED);    /* RTPT is set to port0 when unused. */
+    }
+
+    p_reg = (uint16_t *) &(USB0.DEVADD0) + g_usb_hcd_devaddr;
+
+    (*p_reg) &= (~USB_USBSPD);
+    (*p_reg) |= data;
+}
+/******************************************************************************
+ End of function usb_hstd_set_devaddx_register
+ ******************************************************************************/
 
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
-
+#endif /*(BSP_CFG_RTOS_USED == 0)*/
 /******************************************************************************
  End of file
  ******************************************************************************/

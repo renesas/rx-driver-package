@@ -34,12 +34,14 @@
         <version>2.07.00</version>
         <version>3.00.00</version>
         <version>3.01.00</version>
+        <version>3.02.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
         <version>4.08.04.201803</version>
         <version>4.08.04.201902</version>
+        <version>8.03.00.201904</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -66,6 +68,7 @@
         <group omit_board="true">RX231</group>
         <group omit_board="true">RX23T</group>
         <group omit_board="true">RX23W</group>
+        <group omit_board="true">RX23E-A</group>
         <group omit_board="true">RX24T</group>
         <group omit_board="true">RX24U</group>
         <group omit_board="true">RX64M</group>
@@ -101,7 +104,7 @@
         <zipsource>r_cmt_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.50</version>
+            <version>5.52</version>
         </dependency>
         <application>Timer</application>
         <desc>Simple CMT driver for creating timer tick.</desc>

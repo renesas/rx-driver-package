@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_ble_rx23w
-VERSION = 		1.10
-MDF =			V2
+VERSION = 		2.11
+MDF = V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

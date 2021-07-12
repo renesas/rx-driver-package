@@ -6,16 +6,21 @@
     <toolchain>
         <brand>Renesas</brand>
         <product>RXC</product>
-        <version>3.01.00</version>
+        <version>3.02.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
+        <version>4.08.04.201803</version>
         <version>4.08.04.201902</version>
+        <version>8.03.00.201904</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
         <product>ICCRX</product>
+        <version>4.10.00</version>
+        <version>4.10.01</version>
+        <version>4.11.01</version>
         <version>4.12.01</version>
     </toolchain>
 
@@ -47,7 +52,7 @@
         </dependency>
         <dependency>
             <module>r_usb_basic_mini</module>
-            <version>1.12</version>
+            <version>1.20</version>
         </dependency>
         <application>Connectivity</application>
         <desc>USB Host Human Interface Device Class</desc>

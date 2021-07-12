@@ -48,6 +48,7 @@
 *                              Added reset release waiting operation in the R_PTP_Reset function.
 *		  : 31.08.2019 1.16    Supported RX72M device.
 *                              Added Bypass setting.
+*		  : 30.11.2019 1.17    Supported RX72N device.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -335,7 +336,7 @@ ptp_return_t R_PTP_Init(PTPConfig *tbl)
 {
     uint8_t ch;
 
-#if (1 == BSP_MCU_RX72M)
+#if ((1 == BSP_MCU_RX72M) || (1 == BSP_MCU_RX72N))
 	EPTPC.SYBYPSR.LONG = 0x00000000; /* bypass off */
 #endif
 
@@ -2230,7 +2231,7 @@ static int32_t _R_PTP_Wait(volatile uint32_t * reg, uint32_t event)
 {	
 #if (1 == BSP_MCU_RX64M)
 	volatile int32_t retry_cnt = 12000000; /* 12M count (= more than 100msec) */
-#else /* ((1 == BSP_MCU_RX71M) || (1 == BSP_MCU_RX72M)) */
+#else /* ((1 == BSP_MCU_RX71M) || (1 == BSP_MCU_RX72M) || (1 == BSP_MCU_RX72N)) */
     volatile int32_t retry_cnt = 24000000; /* 24M count (= more than 100msec) */
 #endif
     volatile uint32_t tmp;
@@ -2264,7 +2265,7 @@ static int32_t _R_PTP_Wait_Ext(volatile uint32_t * reg, uint32_t event)
     int32_t sec_cnt = 4000; /* 400sec (=4000*100msec) */
 #if (1 == BSP_MCU_RX64M)
 	int32_t unit_cnt = 12000000; /* 12M count (= more than 100msec) */
-#else /* ((1 == BSP_MCU_RX71M) || (1 == BSP_MCU_RX72M)) */
+#else /* ((1 == BSP_MCU_RX71M) || (1 == BSP_MCU_RX72M) || (1 == BSP_MCU_RX72N)) */
     int32_t unit_cnt = 24000000; /* 24M count (= more than 100msec) */
 #endif
     volatile uint32_t tmp;
@@ -2297,7 +2298,7 @@ static int32_t _R_PTP_InfoChk(void)
 {
 #if (1 == BSP_MCU_RX64M)
 	volatile int32_t retry_cnt = 12000000; /* 12M count (= more than 100msec) */
-#else /* ((1 == BSP_MCU_RX71M) || (1 == BSP_MCU_RX72M)) */
+#else /* ((1 == BSP_MCU_RX71M) || (1 == BSP_MCU_RX72M) || (1 == BSP_MCU_RX72N)) */
     volatile int32_t retry_cnt = 24000000; /* 24M count (= more than 100msec) */
 #endif
 
@@ -2447,7 +2448,7 @@ static void _R_PTP_Init_SYNFP(uint8_t ch, PTPPort* port)
 	LDATA.B.b0 = port->macAddr[5];
     synfp[ch]->SYMACRL.LONG = LDATA.All;
 
-#if ((1 == BSP_MCU_RX71M) || (1 == BSP_MCU_RX72M))
+#if ((1 == BSP_MCU_RX71M) || (1 == BSP_MCU_RX72M) || (1 == BSP_MCU_RX72N))
 	/* Set LLC-CTL filed (SYLLCCTLR) */
 	synfp[ch]->SYLLCCTLR = (uint32_t)PTP_CFG_LLC_CTL;
 #endif

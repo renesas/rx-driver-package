@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_vbatt_rx
-VERSION = 		1.04
-MDF =			V2
+VERSION = 		1.05
+MDF = V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

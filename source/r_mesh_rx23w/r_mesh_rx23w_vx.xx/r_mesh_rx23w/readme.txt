@@ -5,12 +5,12 @@ r_mesh_rx23w
 
 Document Number
 ---------------
-R01AN4930EJ0101
-R01AN4930JJ0101
+R01AN4930EJ0110
+R01AN4930JJ0110
 
 Version
 -------
-v1.01
+v1.10
 
 Overview
 --------
@@ -55,6 +55,7 @@ Peripherals Used Directly
 -------------------------
 * BLE (Bluetooth Low Energy)
 * E2 Data Flash memory
+* 8-Bit Timer
 
 Required Packages
 -----------------
@@ -97,9 +98,9 @@ File Structure
 |   |   |   blemesh_api.chm
 |   |   |   
 |   |   +---en
-|   |   |       r01an4930ej0101-rx23w-blemesh.pdf
+|   |   |       r01an4930ej0110-rx23w-blemesh.pdf
 |   |   +---ja
-|   |           r01an4930jj0101-rx23w-blemesh.pdf
+|   |           r01an4930jj0110-rx23w-blemesh.pdf
 |   |           
 |   +---lib
 |   |       lib_ble_ms_ccrx.lib
@@ -128,6 +129,8 @@ File Structure
 |       |       mesh_dataflash.h
 |       |       mesh_resources.c
 |       |       mesh_resources.h
+|       |       mesh_systemtime.c
+|       |       mesh_systemtime.h
 |       |       
 |       +---include
 |           |   MS_access_api.h
@@ -166,12 +169,14 @@ File Structure
 |                   EM_os.h
 |                   EM_platform.h
 |                   EM_timer.h
-|                   mempool_pl.h
 |                   MS_features.h
+|                   MS_mempool_pl.h
+|                   MS_monitor_pl.h
+|                   MS_storage_pl.h
+|                   MS_systemtime_pl.h
 |                   nvs.h
 |                   nvsto.h
 |                   prov_pl.h
-|                   storage_pl.h
 |                   
 +---r_config
         r_mesh_rx23w_config.h

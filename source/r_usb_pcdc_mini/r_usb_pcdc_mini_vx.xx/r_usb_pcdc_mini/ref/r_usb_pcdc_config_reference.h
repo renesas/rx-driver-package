@@ -18,7 +18,7 @@
  * you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2014(2018) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
  ******************************************************************************/
 /******************************************************************************
  * File Name    : r_usb_pcdc_mini_config.h
@@ -28,6 +28,7 @@
  * History : DD.MM.YYYY Version Description
  *         : 01.09.2014 1.00    First Release
  *         : 30.11.2018 1.10    Supporting Smart Configurator
+ *         : 30.06.2020 1.20    Added support for RTOS.
  ******************************************************************************/
 
 #ifndef R_USB_PCDC_MINI_CONFIG_H
@@ -38,13 +39,19 @@
  ******************************************************************************/
 
 /** [Setting pipe to be used]
- * USB_CFG_PCDC_BULK_IN   : Pipe number (USB_PIPE1 to USB_PIPE5)  CDC Data class Bulk In Pipe
- * USB_CFG_PCDC_BULK_OUT  : Pipe number (USB_PIPE1 to USB_PIPE5)  CDC Data class Bulk Out Pipe
- * USB_CFG_PCDC_INT_IN    : Pipe number (USB_PIPE6 to USB_PIPE9)  CDC Data class Interrupt In Pipe
+ * USB_CFG_PCDC_BULK_IN   : Pipe number (USB_PIPE1 to USB_PIPE5)  1st VCOM CDC Data class Bulk In Pipe
+ * USB_CFG_PCDC_BULK_OUT  : Pipe number (USB_PIPE1 to USB_PIPE5)  1st VCOM CDC Data class Bulk Out Pipe
+ * USB_CFG_PCDC_INT_IN    : Pipe number (USB_PIPE6 to USB_PIPE9)  1st VCOM CDC Data class Interrupt In Pipe
+ * USB_CFG_PCDC_BULK_IN2  : Pipe number (USB_PIPE1 to USB_PIPE5)  2nd VCOM CDC Data class Bulk In Pipe
+ * USB_CFG_PCDC_BULK_OUT2 : Pipe number (USB_PIPE1 to USB_PIPE5)  2nd VCOM CDC Data class Bulk Out Pipe
+ * USB_CFG_PCDC_INT_IN2   : Pipe number (USB_PIPE6 to USB_PIPE9)  2nd VCOM CDC Data class Interrupt In Pipe
  */
 #define USB_CFG_PCDC_BULK_IN        (USB_PIPE1)
 #define USB_CFG_PCDC_BULK_OUT       (USB_PIPE2)
 #define USB_CFG_PCDC_INT_IN         (USB_PIPE6)
+#define USB_CFG_PCDC_BULK_IN2       (USB_PIPE3)
+#define USB_CFG_PCDC_BULK_OUT2      (USB_PIPE4)
+#define USB_CFG_PCDC_INT_IN2        (USB_PIPE7)
 
 
 #endif  /* R_USB_PCDC_MINI_CONFIG_H */

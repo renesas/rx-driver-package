@@ -19,12 +19,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018(2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018(2020) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * System Name  : memdrv software
 * File Name    : r_memdrv_rx.c
-* Version      : 1.02
+* Version      : 1.03
 * Device       : -
 * Abstract     : IO I/F module
 * Tool-Chain   : -
@@ -39,6 +39,7 @@
 *              : 04.04.2019 1.01     Added support for GNUC and ICCRX.
 *                                    Fixed coding style.
 *              : 22.11.2019 1.02     Modified comment of API function to Doxygen style.
+*              : 10.09.2020 1.03     Modified the callback function processing during DMAC/DTC transfer.
 *************************************************************************************************/
 
 /************************************************************************************************
@@ -140,6 +141,7 @@ void R_MEMDRV_ClearDMACFlagTx(uint8_t channel)
     ((MEMDRV_CFG_DEV1_INCLUDED == 1) && (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_RSPI))
     g_rspi_handle->channel = channel;
 
+    R_RSPI_DisableSpti(g_rspi_handle);
     R_RSPI_IntSptiIerClear(g_rspi_handle);
 #endif
 #if ((MEMDRV_CFG_DEV0_INCLUDED == 1) && (MEMDRV_CFG_DEV0_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPI_SMSTR)) || \
@@ -163,41 +165,8 @@ void R_MEMDRV_ClearDMACFlagRx(uint8_t channel)
     ((MEMDRV_CFG_DEV1_INCLUDED == 1) && (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_RSPI))
     g_rspi_handle->channel = channel;
     
-    R_RSPI_IntSptiIerClear(g_rspi_handle);
     R_RSPI_IntSpriIerClear(g_rspi_handle);
-    if (0 == channel)
-    {
-#if ((MEMDRV_CFG_DEV0_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH0) | \
-    ((MEMDRV_CFG_DEV1_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH0)
-        RSPI0.SPCR.BIT.SPE   = 0;  // Disable RSPI.
-#if RSPI_CFG_REQUIRE_LOCK == 1
-        R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_RSPI0 + channel));
-#endif
-#endif
-    }
-    else if (1 == channel)
-    {
-#if ((MEMDRV_CFG_DEV0_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH1) | \
-    ((MEMDRV_CFG_DEV1_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH1)
-        RSPI1.SPCR.BIT.SPE   = 0;  // Disable RSPI.
-#if RSPI_CFG_REQUIRE_LOCK == 1
-        R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_RSPI0 + channel));
-#endif
-#endif
-    }
-    else if (2 == channel)
-    {
-#if ((MEMDRV_CFG_DEV0_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH2) | \
-    ((MEMDRV_CFG_DEV1_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH2)
-        RSPI2.SPCR.BIT.SPE   = 0;  // Disable RSPI.
-#if RSPI_CFG_REQUIRE_LOCK == 1
-        R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_RSPI0 + channel));
-#endif
-#endif
-    }
-    else
-    {
-    }
+    R_RSPI_DisableRSPI(g_rspi_handle);  // Disable RSPI.
     g_transfer_busy = false;
 #endif
 #if (MEMDRV_CFG_DEV0_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPI_SMSTR) | \

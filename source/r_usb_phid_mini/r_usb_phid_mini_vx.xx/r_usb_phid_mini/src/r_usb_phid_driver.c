@@ -18,7 +18,7 @@
  * you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2014(2018) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
  ******************************************************************************/
 /******************************************************************************
  * File Name    : r_usb_phid_driver.c
@@ -26,9 +26,10 @@
  ******************************************************************************/
 /*******************************************************************************
  * History : DD.MM.YYYY Version  Description
- *         : 01.09.2014 1.00    First Release
- *         : 01.06.2015 1.01    Added RX231.
- *         : 30.11.2018 1.10    Supporting Smart Configurator
+ *         : 01.09.2014 1.00     First Release
+ *         : 01.06.2015 1.01     Added RX231.
+ *         : 30.11.2018 1.10     Supporting Smart Configurator
+ *         : 30.06.2020 1.20     Added support for RTOS.
  ******************************************************************************/
 
 /******************************************************************************
@@ -73,7 +74,7 @@ void usb_phid_write_complete (usb_putr_t *p_mess, uint16_t data1, uint16_t data2
 
     ctrl.pipe   = p_mess->keyword;                    /* Pipe number setting */
     ctrl.type   = USB_PHID;                           /* PHID class  */
-    ctrl.type   = USB_PHID;                           /* HID Data class  */
+    ctrl.size   = 0;
     if (USB_DATA_NONE == p_mess->status)
     {
         ctrl.status = USB_SUCCESS;
@@ -82,6 +83,9 @@ void usb_phid_write_complete (usb_putr_t *p_mess, uint16_t data1, uint16_t data2
     {
         ctrl.status = USB_ERR_NG;
     }
+#if (BSP_CFG_RTOS_USED != 0)                          /* RTOS */
+    ctrl.p_data = (void *)p_mess->task_id;
+#endif /* (BSP_CFG_RTOS_USED != 0) */
     usb_cstd_set_event(USB_STS_WRITE_COMPLETE, &ctrl);
 }
 /******************************************************************************
@@ -101,7 +105,7 @@ void usb_phid_read_complete (usb_putr_t *p_mess, uint16_t data1, uint16_t data2)
     usb_ctrl_t ctrl;
 
     /* Set Receive data length */
-    ctrl.size   = g_usb_read_request_size[p_mess->keyword] - p_mess->tranlen;
+    ctrl.size   = p_mess->read_req_len - p_mess->tranlen;
     ctrl.pipe   = p_mess->keyword;                  /* Pipe number setting */
 
     ctrl.type   = USB_PHID;                         /* Device class setting  */
@@ -115,12 +119,17 @@ void usb_phid_read_complete (usb_putr_t *p_mess, uint16_t data1, uint16_t data2)
         break;
         case USB_DATA_OVR :
             ctrl.status = USB_ERR_OVER;
+            ctrl.size   = 0;
         break;
         case USB_DATA_ERR :
         default :
             ctrl.status = USB_ERR_NG;
+            ctrl.size   = 0;
         break;
     }
+#if (BSP_CFG_RTOS_USED != 0)                         /* RTOS */
+    ctrl.p_data = (void *)p_mess->task_id;
+#endif /* (BSP_CFG_RTOS_USED != 0) */
     usb_cstd_set_event(USB_STS_READ_COMPLETE, &ctrl);
 }
 /******************************************************************************

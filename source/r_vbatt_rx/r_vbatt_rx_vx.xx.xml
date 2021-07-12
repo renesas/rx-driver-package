@@ -8,16 +8,19 @@
         <product>RXC</product>
         <version>2.03.00</version>
         <version>3.01.00</version>
+        <version>3.02.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
         <version>4.08.04.201801</version>
+        <version>8.03.00.201904</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
         <product>ICCRX</product>
         <version>4.10.01</version>
+        <version>4.13.01</version>
     </toolchain>
     
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -38,7 +41,7 @@
         <zipsource>r_vbatt_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.20</version>
+            <version>5.50</version>
         </dependency>
         <application>Low Voltage Detection</application>
         <application>Power Supply</application>

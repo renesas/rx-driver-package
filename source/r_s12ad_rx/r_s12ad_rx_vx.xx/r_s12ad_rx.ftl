@@ -103,6 +103,14 @@ void ${Function_Name}()
         <#if pin.portNum != "4">
     PORT${pin.portNum}.PMR.BIT.B${pin.pinBitNum} = 0U;
                 </#if>
+    <#elseif headerInfo.device?contains("R5F523T")>
+        <#if pin.portNum != "4">
+    PORT${pin.portNum}.PMR.BIT.B${pin.pinBitNum} = 0U;
+                </#if>
+    <#elseif headerInfo.device?contains("R5F524T") || headerInfo.device?contains("R5F524U")>
+        <#if pin.portNum != "4" && pin.portNum != "5" && pin.portNum != "6">
+    PORT${pin.portNum}.PMR.BIT.B${pin.pinBitNum} = 0U;
+                </#if>
     <#else>    
     PORT${pin.portNum}.PMR.BIT.B${pin.pinBitNum} = 0U;
     </#if>

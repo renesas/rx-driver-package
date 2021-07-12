@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_touch_qe
-VERSION = 		1.00
-MDF =			V2
+VERSION = 		1.11
+MDF = V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

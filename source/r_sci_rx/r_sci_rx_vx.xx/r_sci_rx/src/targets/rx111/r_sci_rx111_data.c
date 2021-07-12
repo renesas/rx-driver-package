@@ -23,6 +23,7 @@
 * History : DD.MM.YYYY Version Description
 *           03.06.2016 1.00    Initial Release.
 *           20.05.2019 3.00    Added support for GNUC and ICCRX.
+*           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -100,6 +101,14 @@ const sci_ch_rom_t  ch1_rom = {(volatile struct st_sci12 R_BSP_EVENACCESS_SFR *)
                                 &ICU.IER[IER_SCI1_TEI1].BYTE,
                                 &ICU.IER[IER_SCI1_ERI1].BYTE,
                                 BIT2_MASK, BIT3_MASK, BIT4_MASK, BIT5_MASK
+                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                                , SCI_CFG_CH1_TX_DTC_DMACA_ENABLE
+                                , SCI_CFG_CH1_RX_DTC_DMACA_ENABLE
+                                #endif
+                                #if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+                                , DTCE_SCI1_TXI1
+                                , DTCE_SCI1_RXI1
+                                #endif
                                 };
 /* channel control block */
 sci_ch_ctrl_t   ch1_ctrl = {&ch1_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
@@ -107,6 +116,9 @@ sci_ch_ctrl_t   ch1_ctrl = {&ch1_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , true, 0, 0, false
                             #endif
                             , BSP_PCLKB_HZ
+                            #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                            , 0, 0, 0, 0, 0
+                            #endif
                            };
 #endif
 
@@ -126,6 +138,14 @@ const sci_ch_rom_t  ch5_rom = {(volatile struct st_sci12 R_BSP_EVENACCESS_SFR *)
                                 &ICU.IER[IER_SCI5_TEI5].BYTE,
                                 &ICU.IER[IER_SCI5_ERI5].BYTE,
                                 BIT6_MASK, BIT7_MASK, BIT0_MASK, BIT1_MASK
+                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                                , SCI_CFG_CH5_TX_DTC_DMACA_ENABLE
+                                , SCI_CFG_CH5_RX_DTC_DMACA_ENABLE
+                                #endif
+                                #if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+                                , DTCE_SCI5_TXI5
+                                , DTCE_SCI5_RXI5
+                                #endif
                                 };
 /* channel control block */
 sci_ch_ctrl_t   ch5_ctrl = {&ch5_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
@@ -133,6 +153,9 @@ sci_ch_ctrl_t   ch5_ctrl = {&ch5_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , true, 0, 0, false
                             #endif
                             , BSP_PCLKB_HZ
+                            #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                            , 0, 0, 0, 0, 0
+                            #endif
                            };
 #endif
 
@@ -152,6 +175,14 @@ const sci_ch_rom_t  ch12_rom = {(volatile struct st_sci12 R_BSP_EVENACCESS_SFR *
                                 &ICU.IER[IER_SCI12_TEI12].BYTE,
                                 &ICU.IER[IER_SCI12_ERI12].BYTE,
                                 BIT6_MASK, BIT7_MASK, BIT0_MASK, BIT1_MASK
+                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                                , SCI_CFG_CH12_TX_DTC_DMACA_ENABLE
+                                , SCI_CFG_CH12_RX_DTC_DMACA_ENABLE
+                                #endif
+                                #if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+                                , DTCE_SCI12_TXI12
+                                , DTCE_SCI12_RXI12
+                                #endif
                                 };
 /* channel control block */
 sci_ch_ctrl_t   ch12_ctrl = {&ch12_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
@@ -159,6 +190,9 @@ sci_ch_ctrl_t   ch12_ctrl = {&ch12_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                              , true, 0, 0, false
                              #endif
                              , BSP_PCLKB_HZ
+                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                             , 0, 0, 0, 0, 0
+                             #endif
                             };
 #endif
 

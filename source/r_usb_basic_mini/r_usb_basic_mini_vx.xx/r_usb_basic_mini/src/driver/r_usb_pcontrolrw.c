@@ -175,7 +175,7 @@ void usb_pstd_ctrl_end (uint16_t status)
     /* NRDY0 disable */
     hw_usb_clear_nrdyenb((uint16_t) USB_PIPE0);
 
-    hw_usb_set_mbw(USB_CUSE, USB0_CFIFO_MBW);
+    hw_usb_set_mbw(USB_CUSE, USB_MBW_16);
 
 
     if ((USB_DATA_ERR == status) || (USB_DATA_OVR == status))

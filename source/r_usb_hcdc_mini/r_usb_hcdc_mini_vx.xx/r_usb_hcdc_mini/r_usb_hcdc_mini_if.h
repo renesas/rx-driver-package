@@ -1,53 +1,47 @@
-/*******************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer *
-* Copyright (C) 2017(2019) Renesas Electronics Corporation. All rights reserved.
-*******************************************************************************/
-/*******************************************************************************
+/***********************************************************************************************************************
+ * DISCLAIMER
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
+ * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+ * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
+ * following link:
+ * http://www.renesas.com/disclaimer
+ *
+ * Copyright (C) 2017(2020) Renesas Electronics Corporation. All rights reserved.
+ ***********************************************************************************************************************/
+/***********************************************************************************************************************
  * File Name    : r_usb_hcdc_mini_if.h
- * Version      : 1.10
  * Description  : Interface file for USB host CDC
- *******************************************************************************/
-/*******************************************************************************
- * History   : DD.MM.YYYY Version Description
- *           : 01.09.2014 1.00    First Release
- *           : 01.06.2015 1.01    Added RX231.
- *           : 30.11.2018 1.10    Supporting Smart Configurator
- *           : 31.05.2019 1.11    Added support for GNUC and ICCRX.
- *******************************************************************************/
-
-/*******************************************************************************
- Includes   <System Includes> , "Project Includes"
- ******************************************************************************/
-
-#include "r_usb_hcdc_mini_config.h"          /* CDC class define */
+ ***********************************************************************************************************************/
+/**********************************************************************************************************************
+ * History : DD.MM.YYYY Version Description
+ *         : 01.09.2014 1.00    First Release
+ *         : 01.06.2015 1.01    Added RX231.
+ *         : 30.11.2018 1.10    Supporting Smart Configurator
+ *         : 31.05.2019 1.11    Added support for GNUC and ICCRX.
+ *         : 30.06.2020 1.20    Added support for RTOS.
+ ***********************************************************************************************************************/
 
 #ifndef USB_HCDC_IF_H
 #define USB_HCDC_IF_H
 
-/*******************************************************************************
+/******************************************************************************
+ Includes   <System Includes> , "Project Includes"
+ ******************************************************************************/
+#include "r_usb_hcdc_mini_config.h"          /* CDC class define */
+
+/******************************************************************************
  Macro definitions
  ******************************************************************************/
-
 /* Serial State message Length */
-#define  USB_HCDC_SERIAL_STATE_MSG_LEN          (10)
+#define     USB_HCDC_SERIAL_STATE_MSG_LEN   (10)
 
 /* CDC Class Requests IDs*/
 #define     USB_CDC_SEND_ENCAPSULATED_COMMAND   (0x0000)
@@ -61,10 +55,9 @@
 #define     USB_CDC_SEND_BREAK                  (0x2300)
 #define     USB_CDC_REQUEST_NONE                (0xffff)
 
-/*******************************************************************************
+/*****************************************************************************
  Typedef definitions
  ******************************************************************************/
-
 typedef enum
 {
     USB_HCDC_DATA_BIT_7 = (7u),     /* Line Coding 7Data bits */
@@ -116,6 +109,41 @@ typedef enum
     USB_HCDC_COUNTRY_SETTING = (0x02u),
 } usb_hcdc_feature_selctor_t;
 
+/*****************************************************************************
+ Struct definition
+ ******************************************************************************/
+
+typedef struct
+{
+    uint8_t  *p_data; /* Protocol dependent data */
+    uint16_t wlength; /* Amount of data, in bytes, associated with this recipient. */
+} usb_hcdc_encapsulated_t;
+
+R_BSP_PRAGMA_UNPACK
+typedef struct
+{
+    union {
+        uint16_t    WORD;
+        /* CPU bit order rigth */
+        R_BSP_ATTRIB_STRUCT_BIT_ORDER_RIGHT_3(
+            uint16_t bis  :1,       /* Idle Setting */
+            uint16_t bdms :1,       /* Data Multiplexed State */
+            uint16_t rsv  :14       /* Reserve */
+        )BIT;
+    };
+} usb_hcdc_abstractstate_t;
+R_BSP_PRAGMA_PACKOPTION
+
+typedef struct
+{
+    uint16_t country_code;
+} usb_hcdc_countrysetting_t;
+
+typedef union
+{
+    usb_hcdc_abstractstate_t  abstract_state;
+    usb_hcdc_countrysetting_t country_setting;
+} usb_hcdc_commfeature_t;
 
 typedef struct
 {
@@ -126,6 +154,20 @@ typedef struct
     uint8_t  rsv;           /* Reserve */
 } usb_hcdc_linecoding_t;
 
+R_BSP_PRAGMA_UNPACK
+typedef struct
+{
+    union {
+        uint16_t    WORD;
+        /* CPU bit order rigth */
+        R_BSP_ATTRIB_STRUCT_BIT_ORDER_RIGHT_3(
+            uint16_t bdtr :1,       /* DTR */
+            uint16_t brts :1,       /* RTS */
+            uint16_t rsv  :14       /* Reserve */
+        )BIT;
+    };
+} usb_hcdc_controllinestate_t;
+R_BSP_PRAGMA_PACKOPTION
 
 R_BSP_PRAGMA_UNPACK
 typedef struct
@@ -134,28 +176,26 @@ typedef struct
         uint16_t    WORD;
         /* CPU bit order rigth */
         R_BSP_ATTRIB_STRUCT_BIT_ORDER_RIGHT_8(
-            uint16_t brx_carrier  :1, /* DCD signal */
-            uint16_t btx_carrier  :1, /* DSR signal */
-            uint16_t bbreak       :1, /* State of break detection mechanism of the device */
-            uint16_t bring_signal :1, /* State of ring signal detection of the device */
-            uint16_t bframing     :1, /* Framing error */
-            uint16_t bparity      :1, /* Parity error */
-            uint16_t bover_run    :1, /* Over Run error */
-            uint16_t rsv          :9  /* Reserve */
+            uint16_t brx_carrier  :1,   /* DCD signal */
+            uint16_t btx_carrier  :1,   /* DSR signal */
+            uint16_t bbreak       :1,   /* State of break detection mechanism of the device */
+            uint16_t bring_signal :1,   /* State of ring signal detection of the device */
+            uint16_t bframing     :1,   /* Framing error */
+            uint16_t bparity      :1,   /* Parity error */
+            uint16_t bover_run    :1,   /* Over Run error */
+            uint16_t rsv          :9    /* Reserve */
         )BIT;
     };
 } usb_hcdc_serialstate_t;
 R_BSP_PRAGMA_PACKOPTION
 
-/*******************************************************************************
- Exported global variables
- ******************************************************************************/
-
-/*******************************************************************************
- Exported global functions (to be accessed by other files)
- ******************************************************************************/
+typedef struct
+{
+    uint16_t wtime_ms; /* Duration of Break */
+} usb_hcdc_breakduration_t;
 
 #endif /* USB_HCDC_IF_H */
-/******************************************************************************
-End of file
- ******************************************************************************/
+
+/***********************************************************************************************************************
+End  Of File
+***********************************************************************************************************************/

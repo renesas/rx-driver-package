@@ -45,11 +45,11 @@
     <package>
         <type>fitmodule</type>
         <name>r_longq</name>
-        <version>1.80</version>
-        <zipsource>r_longq_v1.80.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_longq_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>3.10</version>
+            <version>5.61</version>
         </dependency>
         <application>Communications</application>
         <application>Storage and Memory</application>

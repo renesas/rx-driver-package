@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 #include "r_ble_rx23w_if.h"
 
@@ -54,7 +54,7 @@ static void exec_sys_stby(int argc, char *argv[])
     }
     else
     {
-        pf("sys %s: unrecognized operands\n", argv[0]);
+        R_BLE_CLI_PrintUnrecognized();
     }
 }
 

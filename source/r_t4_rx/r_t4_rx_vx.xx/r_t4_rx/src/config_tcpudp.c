@@ -19,12 +19,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2011-2021 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 
 /*******************************************************************************
 * File Name     : config_tcpudp.c
-* Version       : 2.09
+* Version       : 2.10
 * Device(s)     : Renesas microcomputer
 * Tool-Chain    : Renesas compilers
 * OS            :

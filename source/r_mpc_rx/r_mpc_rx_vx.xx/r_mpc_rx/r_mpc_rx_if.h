@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_mpc_rx_if.h
@@ -45,6 +45,10 @@
 *         : 15.08.2019 3.20    Added support RX72M
 *         : 25.11.2019 3.30    Added support RX13T
 *         : 30.12.2019 3.40    Added support RX72N, RX66N
+*         : 31.03.2020 3.50    Added support RX23E-A
+*         : 30.06.2020 3.60    Changed revision to reflect demo upgrade.
+*         : 01.04.2021 3.70    Added support RX23W-83pins
+*         : 01.04.2021 3.80    Added support RX72M 144pins, 100pins.
 ***********************************************************************************************************************/
 
 #ifndef MPC_RX_INTERFACE_HEADER_FILE
@@ -68,7 +72,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define MPC_RX_VERSION_MAJOR           (3)
-#define MPC_RX_VERSION_MINOR           (40)
+#define MPC_RX_VERSION_MINOR           (80)
 
 /***********************************************************************************************************************
 Typedef definitions

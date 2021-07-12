@@ -33,6 +33,7 @@
 *                              Changed MINT interrupt handler operation.
 *		  : 31.08.2019 1.13    Supported RX72M device.
 *                              Added Bypass setting.
+*		  : 30.11.2019 1.14    Supported RX72N device.
 **********************************************************************************************************************/
 
 #ifndef _PTP_LIGHT_RX_H
@@ -50,10 +51,10 @@ Macro definitions
 **********************************************************************************************************************/
 /* Version Number of API. */
 #define RX_PTP_LIGHT_VERSION_MAJOR           (1)
-#define RX_PTP_LIGHT_VERSION_MINOR           (13)
+#define RX_PTP_LIGHT_VERSION_MINOR           (14)
 
 /* Number of ports */
-#define NUM_PORT (2) /* Set 2 in the RX64M/71M/72M */
+#define NUM_PORT (2) /* Set 2 in the RX64M/71M/72M/72N */
 
 /* PTP light driver return value */
 typedef enum

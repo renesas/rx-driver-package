@@ -20,9 +20,16 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
+ * \defgroup health_constants Constants
+ * \ingroup health_module
+ * \{
+ * Describes Constants defined by the module.
+ */
+
+/**
  *  \defgroup health_fault_values Fault Values
  *  \{
- *  This section lists the Fault Values defined for Health Model.
+ *  \brief This section lists the Fault Values defined for Health Model.
  */
 
 /** Health Model - Fault Values */
@@ -135,10 +142,11 @@
 /** \} */
 
 /**
-*  \defgroup health_server_events Health Server Events
-*  \{
-*  This section lists the Application Events defined for Health Server Model.
-*/
+ *  \defgroup health_server_events Health Server Events
+ *  \ingroup health_module
+ *  \{
+ *  \brief This section lists the Application Events defined for Health Server Model.
+ */
 
 /** Attention Start */
 #define MS_HEALTH_SERVER_ATTENTION_START                       0x01
@@ -151,8 +159,14 @@
 
 /** \} */
 
+/** \} */
 
 /* --------------------------------------------- Data Types/ Structures */
+/**
+ *  \ingroup health_cb
+ *  \{
+ */
+
 /**
  * \brief Health Server application Asynchronous Notification Callback.
  *
@@ -173,12 +187,18 @@ typedef API_RESULT (* MS_HEALTH_SERVER_CB)
             UINT16                   param_len
         ) DECL_REENTRANT;
 
-
 /**
  * Health Server Self Test Function.
  */
 /* TODO: Add context of the Health Server, so that associated current/registered fault can be updated */
 typedef void (* MS_HEALTH_SERVER_SELF_TEST_FN)(UINT8 test_id, UINT16 company_id);
+
+/** \} */
+
+/**
+ *  \ingroup health_structures
+ *  \{
+ */
 
 /**
  * Health Server Self Test Funtion Structure.
@@ -193,8 +213,16 @@ typedef struct _MS_HEALTH_SERVER_SELF_TEST
 
 }MS_HEALTH_SERVER_SELF_TEST;
 
+/** \} */
 
 /* --------------------------------------------- Function */
+/**
+ * \defgroup health_svr_api_defs Health Server API
+ * \ingroup health_api_defs
+ * \{
+ * \brief This section describes the Health Server APIs.
+ */
+
 /**
  *  \brief API to initialize Health Server model
  *
@@ -272,5 +300,7 @@ API_RESULT MS_health_server_publish_current_status
 /**
  * \endcond
  */
+
+/** \} */
 
 #endif /*_H_MS_HEALTH_SERVER_API_ */

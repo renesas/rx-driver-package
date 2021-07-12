@@ -1,3 +1,4 @@
+/* Generated configuration header file - do not edit */
 /***********************************************************************************************************************
  * DISCLAIMER
  * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
@@ -23,9 +24,10 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *           04.10.2018 1.00    First Release
+*           06.05.2019 1.10    Added CTSU_CFG_SAFETY_LINKAGE ENABLE
 ***********************************************************************************************************************/
-#ifndef CTSU_CONFIG_HEADER_FILE
-#define CTSU_CONFIG_HEADER_FILE
+#ifndef CTSU_QE_CONFIG_H
+#define CTSU_QE_CONFIG_H
 
 
 /***********************************************************************************************************************
@@ -35,7 +37,7 @@
  * Setting to BSP_CFG_PARAM_CHECKING_ENABLE utilizes the system default setting
  * Setting to 1 includes parameter checking; 0 compiles out parameter checking
  */
-#define CTSU_CFG_PARAM_CHECKING_ENABLE      (1)
+#define CTSU_CFG_PARAM_CHECKING_ENABLE      (BSP_CFG_PARAM_CHECKING_ENABLE)
 
 /* Set value to 1 to use DTC instead of main processor for handling CTSU write
  * and read interrupts.
@@ -50,4 +52,9 @@
 #define CTSU_CFG_INT_PRIORITY_LEVEL         (8)
 
 
-#endif /* CTSU_CONFIG_HEADER_FILE */
+/* Setting to 1 provides section information used by safety code for checksum and CRC calculations.
+ * Setting to 0 requires no changes to linker section table. Driver size is same with 0 or 1 setting.
+ */
+#define CTSU_CFG_SAFETY_LINKAGE_ENABLE      (0)
+
+#endif /* CTSU_QE_CONFIG_H */

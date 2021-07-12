@@ -14,13 +14,13 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
+ * Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
+ **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_glcdc_private.c
- * Version      : 1.30
+ * Version      : 1.40
  * Description  : Internal function program using in GLCDC API functions.
- ************************************************************************************************************************/
+ **********************************************************************************************************************/
 /***********************************************************************************************************************
  * History : DD.MM.YYYY Version   Description
  *         : 01.10.2017 1.00      First Release
@@ -33,20 +33,25 @@
  *                                Added the interrupt control processing to before and after
  *                                Module Stop Control(MSTP()) executing in r_glcdc_power_on, r_glcdc_power_off
  *                                and r_glcdc_interrupt_setting.
+ *         : 30.06.2020 1.40      Added a table constant that reflects the gamma value adjusted
+ *                                by configuration options and QE for Display[RX}.
+ *                                Added r_glcdc_qe_parameters_setting function to set the result adjusted
+ *                                by configuration options and QE for Display[RX].
+ *                                Fixed preprocessor condition of BSP version.
  *********************************************************************************************************************/
 /***********************************************************************************************************************
  Includes <System Includes> , "Project Includes"
- ************************************************************************************************************************/
+ **********************************************************************************************************************/
 #include "r_glcdc_private.h"
 
 /***********************************************************************************************************************
  Imported global variables and functions (from other files)
- ***********************************************************************************************************************/
+ **********************************************************************************************************************/
 extern glcdc_ctrl_t g_ctrl_blk;
 
 /***********************************************************************************************************************
  Private global variables and functions
- ***********************************************************************************************************************/
+ **********************************************************************************************************************/
 /* Structure pointer for accessing iodefine witch related to graphic 1 and graphic 2 */
 R_BSP_VOLATILE_EVENACCESS st_glcdc_gr_t *gp_gr[GLCDC_FRAME_LAYER_NUM] =
 {
@@ -66,6 +71,76 @@ R_BSP_VOLATILE_EVENACCESS st_glcdc_gr_clut_t *gp_gr_clut[GLCDC_FRAME_LAYER_NUM][
         (st_glcdc_gr_clut_t R_BSP_EVENACCESS *) &GLCDC.GR2CLUT1[0]
     }
 };
+
+
+
+/* Enabled when GLCDC_CFG_CONFIGURATION_MODE is set to "1" or using QE for Display[RX] */
+/* QE for Display[RX] adds the macro definition "QE_DISPLAY_CONFIGURATION" to the compile options. */
+#if ((GLCDC_CFG_CONFIGURATION_MODE) || defined(QE_DISPLAY_CONFIGURATION))
+
+/* ---- Setting gamma parameters to be adjusted with configuration options ---- */
+/* Gamma red data table */
+const gamma_correction_t g_glcdc_gamma_table_r =
+{
+    /* Gain (Adjusted value by configuration options) */
+    {
+        IMGC_GAMMA_R_GAIN_00, IMGC_GAMMA_R_GAIN_01, IMGC_GAMMA_R_GAIN_02, IMGC_GAMMA_R_GAIN_03,
+        IMGC_GAMMA_R_GAIN_04, IMGC_GAMMA_R_GAIN_05, IMGC_GAMMA_R_GAIN_06, IMGC_GAMMA_R_GAIN_07,
+        IMGC_GAMMA_R_GAIN_08, IMGC_GAMMA_R_GAIN_09, IMGC_GAMMA_R_GAIN_10, IMGC_GAMMA_R_GAIN_11,
+        IMGC_GAMMA_R_GAIN_12, IMGC_GAMMA_R_GAIN_13, IMGC_GAMMA_R_GAIN_14, IMGC_GAMMA_R_GAIN_15
+    },
+
+    /* Threshold (Adjusted value by configuration options) */
+    {
+        IMGC_GAMMA_R_TH_01, IMGC_GAMMA_R_TH_02, IMGC_GAMMA_R_TH_03, IMGC_GAMMA_R_TH_04,
+        IMGC_GAMMA_R_TH_05, IMGC_GAMMA_R_TH_06, IMGC_GAMMA_R_TH_07, IMGC_GAMMA_R_TH_08,
+        IMGC_GAMMA_R_TH_09, IMGC_GAMMA_R_TH_10, IMGC_GAMMA_R_TH_11, IMGC_GAMMA_R_TH_12,
+        IMGC_GAMMA_R_TH_13, IMGC_GAMMA_R_TH_14, IMGC_GAMMA_R_TH_15
+    }
+};
+
+/* Gamma green data table */
+const gamma_correction_t g_glcdc_gamma_table_g =
+{
+    /* Gain (Adjusted value by configuration options) */
+    {
+        IMGC_GAMMA_G_GAIN_00, IMGC_GAMMA_G_GAIN_01, IMGC_GAMMA_G_GAIN_02, IMGC_GAMMA_G_GAIN_03,
+        IMGC_GAMMA_G_GAIN_04, IMGC_GAMMA_G_GAIN_05, IMGC_GAMMA_G_GAIN_06, IMGC_GAMMA_G_GAIN_07,
+        IMGC_GAMMA_G_GAIN_08, IMGC_GAMMA_G_GAIN_09, IMGC_GAMMA_G_GAIN_10, IMGC_GAMMA_G_GAIN_11,
+        IMGC_GAMMA_G_GAIN_12, IMGC_GAMMA_G_GAIN_13, IMGC_GAMMA_G_GAIN_14, IMGC_GAMMA_G_GAIN_15
+    },
+
+    /* Threshold (Adjusted value by configuration options) */
+    {
+        IMGC_GAMMA_G_TH_01, IMGC_GAMMA_G_TH_02, IMGC_GAMMA_G_TH_03, IMGC_GAMMA_G_TH_04,
+        IMGC_GAMMA_G_TH_05, IMGC_GAMMA_G_TH_06, IMGC_GAMMA_G_TH_07, IMGC_GAMMA_G_TH_08,
+        IMGC_GAMMA_G_TH_09, IMGC_GAMMA_G_TH_10, IMGC_GAMMA_G_TH_11, IMGC_GAMMA_G_TH_12,
+        IMGC_GAMMA_G_TH_13, IMGC_GAMMA_G_TH_14, IMGC_GAMMA_G_TH_15
+    }
+};
+
+/* Gamma blue data table */
+const gamma_correction_t g_glcdc_gamma_table_b =
+{
+    /* Gain (Adjusted value by configuration options) */
+    {
+        IMGC_GAMMA_B_GAIN_00, IMGC_GAMMA_B_GAIN_01, IMGC_GAMMA_B_GAIN_02, IMGC_GAMMA_B_GAIN_03,
+        IMGC_GAMMA_B_GAIN_04, IMGC_GAMMA_B_GAIN_05, IMGC_GAMMA_B_GAIN_06, IMGC_GAMMA_B_GAIN_07,
+        IMGC_GAMMA_B_GAIN_08, IMGC_GAMMA_B_GAIN_09, IMGC_GAMMA_B_GAIN_10, IMGC_GAMMA_B_GAIN_11,
+        IMGC_GAMMA_B_GAIN_12, IMGC_GAMMA_B_GAIN_13, IMGC_GAMMA_B_GAIN_14, IMGC_GAMMA_B_GAIN_15
+    },
+
+    /* Threshold (Adjusted value by configuration options) */
+    {
+        IMGC_GAMMA_B_TH_01, IMGC_GAMMA_B_TH_02, IMGC_GAMMA_B_TH_03, IMGC_GAMMA_B_TH_04,
+        IMGC_GAMMA_B_TH_05, IMGC_GAMMA_B_TH_06, IMGC_GAMMA_B_TH_07, IMGC_GAMMA_B_TH_08,
+        IMGC_GAMMA_B_TH_09, IMGC_GAMMA_B_TH_10, IMGC_GAMMA_B_TH_11, IMGC_GAMMA_B_TH_12,
+        IMGC_GAMMA_B_TH_13, IMGC_GAMMA_B_TH_14, IMGC_GAMMA_B_TH_15
+    }
+};
+
+#endif /* (GLCDC_CFG_CONFIGURATION_MODE) || defined(QE_DISPLAY_CONFIGURATION) */
+
 
 /* ---- private prototype functions ---- */
 static uint16_t r_glcdc_get_bit_size(glcdc_in_format_t format);
@@ -804,6 +879,197 @@ glcdc_err_t r_glcdc_open_param_check(glcdc_cfg_t const * const p_cfg)
     return GLCDC_SUCCESS;
 } /* End of function r_glcdc_open_param_check() */
 #endif /* if (GLCDC_CFG_PARAM_CHECKING_ENABLE) */
+
+
+/* Enabled when GLCDC_CFG_CONFIGURATION_MODE is set to "1" or using QE for Display[RX] */
+/* QE for Display[RX] adds the macro definition "QE_DISPLAY_CONFIGURATION" to the compile options. */
+#if ((GLCDC_CFG_CONFIGURATION_MODE) || defined(QE_DISPLAY_CONFIGURATION))
+/*******************************************************************************
+ * Outline      : Setting parameters using configuration options and QE for Display [RX]
+ * Function Name: r_glcdc_qe_parameters_setting
+ * Description  : The setting value of the configuration options is reflected internally.
+ *                The macro definition of the adjustment result is referenced
+ *                from r_glcdc_rx_config.h.
+ * Arguments    : p_glcdc_qe_cfg -
+ *                  Pointer to the GLCDC setting data structure.
+ * Return Value : none
+ * Note         : Even if you set it in the argument in advance, it will be overwritten.
+ *******************************************************************************/
+void r_glcdc_qe_parameters_setting(glcdc_cfg_t * const p_glcdc_qe_cfg)
+{
+    /* Output timing */
+    p_glcdc_qe_cfg->output.htiming.front_porch = LCD_CH0_W_HFP;
+    p_glcdc_qe_cfg->output.htiming.back_porch  = LCD_CH0_W_HBP;
+    p_glcdc_qe_cfg->output.htiming.display_cyc = LCD_CH0_DISP_HW;
+    p_glcdc_qe_cfg->output.htiming.sync_width  = LCD_CH0_W_HSYNC;
+
+    p_glcdc_qe_cfg->output.vtiming.front_porch = LCD_CH0_W_VFP;
+    p_glcdc_qe_cfg->output.vtiming.back_porch  = LCD_CH0_W_VBP;
+    p_glcdc_qe_cfg->output.vtiming.display_cyc = LCD_CH0_DISP_VW;
+    p_glcdc_qe_cfg->output.vtiming.sync_width  = LCD_CH0_W_VSYNC;
+
+    /* Output format */
+    p_glcdc_qe_cfg->output.format = LCD_CH0_OUT_FORMAT;
+
+    /* Tcon polarity*/
+    p_glcdc_qe_cfg->output.data_enable_polarity = LCD_CH0_TCON_POL_DE;
+    p_glcdc_qe_cfg->output.hsync_polarity       = LCD_CH0_TCON_POL_HSYNC;
+    p_glcdc_qe_cfg->output.vsync_polarity       = LCD_CH0_TCON_POL_VSYNC;
+
+    /* Sync signal edge */
+    p_glcdc_qe_cfg->output.sync_edge = LCD_CH0_OUT_EDGE;
+
+    /* Output tcon pin */
+    p_glcdc_qe_cfg->output.tcon_hsync = LCD_CH0_TCON_PIN_HSYNC;
+    p_glcdc_qe_cfg->output.tcon_vsync = LCD_CH0_TCON_PIN_VSYNC;
+    p_glcdc_qe_cfg->output.tcon_de    = LCD_CH0_TCON_PIN_DE;
+
+    /* Endian */
+    p_glcdc_qe_cfg->output.endian = LCD_CH0_OUT_ENDIAN;
+
+    /* Color order */
+    p_glcdc_qe_cfg->output.color_order = LCD_CH0_OUT_COLOR_ORDER;
+
+    /* Output clock */
+    p_glcdc_qe_cfg->output.clksrc          = GLCDC_CLK_SRC_INTERNAL;
+    p_glcdc_qe_cfg->output.clock_div_ratio = LCD_CH0_OUT_CLK_DIV_RATIO;
+
+    /* Back ground color */
+    p_glcdc_qe_cfg->output.bg_color.argb = LCD_CH0_OUT_BG_COLOR;
+
+
+
+    /* Correction circuit sequence */
+    p_glcdc_qe_cfg->output.correction_proc_order = IMGC_OUTCTL_CALIB_ROUTE;
+
+    /* Brightness */
+    p_glcdc_qe_cfg->output.brightness.enable = IMGC_BRIGHT_OUTCTL_ACTIVE;
+    p_glcdc_qe_cfg->output.brightness.r      = IMGC_BRIGHT_OUTCTL_OFFSET_R;
+    p_glcdc_qe_cfg->output.brightness.g      = IMGC_BRIGHT_OUTCTL_OFFSET_G;
+    p_glcdc_qe_cfg->output.brightness.b      = IMGC_BRIGHT_OUTCTL_OFFSET_B;
+
+    /* Contrast */
+    p_glcdc_qe_cfg->output.contrast.enable = IMGC_CONTRAST_OUTCTL_ACTIVE;
+    p_glcdc_qe_cfg->output.contrast.r      = IMGC_CONTRAST_OUTCTL_GAIN_R;
+    p_glcdc_qe_cfg->output.contrast.g      = IMGC_CONTRAST_OUTCTL_GAIN_G;
+    p_glcdc_qe_cfg->output.contrast.b      = IMGC_CONTRAST_OUTCTL_GAIN_B;
+
+    /* Gamma */
+    p_glcdc_qe_cfg->output.gamma.enable = IMGC_GAMMA_ACTIVE;
+    p_glcdc_qe_cfg->output.gamma.p_r    = (gamma_correction_t *) &g_glcdc_gamma_table_r;
+    p_glcdc_qe_cfg->output.gamma.p_g    = (gamma_correction_t *) &g_glcdc_gamma_table_g;
+    p_glcdc_qe_cfg->output.gamma.p_b    = (gamma_correction_t *) &g_glcdc_gamma_table_b;
+
+    /* Dethering */
+    p_glcdc_qe_cfg->output.dithering.dithering_on        = IMGC_DITHER_ACTIVE;
+    p_glcdc_qe_cfg->output.dithering.dithering_mode      = IMGC_DITHER_MODE;
+    p_glcdc_qe_cfg->output.dithering.dithering_pattern_a = IMGC_DITHER_2X2_PA;
+    p_glcdc_qe_cfg->output.dithering.dithering_pattern_b = IMGC_DITHER_2X2_PB;
+    p_glcdc_qe_cfg->output.dithering.dithering_pattern_c = IMGC_DITHER_2X2_PC;
+    p_glcdc_qe_cfg->output.dithering.dithering_pattern_d = IMGC_DITHER_2X2_PD;
+
+
+    /* ---- Graphic layer 2 setting ---- */
+    /* Image format */
+    p_glcdc_qe_cfg->input[GLCDC_FRAME_LAYER_2].p_base        = (uint32_t *) LCD_CH0_IN_GR2_PBASE;
+    p_glcdc_qe_cfg->input[GLCDC_FRAME_LAYER_2].hsize         = LCD_CH0_IN_GR2_HSIZE;
+    p_glcdc_qe_cfg->input[GLCDC_FRAME_LAYER_2].vsize         = LCD_CH0_IN_GR2_VSIZE;
+    p_glcdc_qe_cfg->input[GLCDC_FRAME_LAYER_2].offset        = LCD_CH0_IN_GR2_LINEOFFSET;
+    p_glcdc_qe_cfg->input[GLCDC_FRAME_LAYER_2].format        = LCD_CH0_IN_GR2_FORMAT;
+    p_glcdc_qe_cfg->input[GLCDC_FRAME_LAYER_2].frame_edge    = LCD_CH0_IN_GR2_FRAME_EDGE;
+    p_glcdc_qe_cfg->input[GLCDC_FRAME_LAYER_2].coordinate.x  = LCD_CH0_IN_GR2_COORD_X;
+    p_glcdc_qe_cfg->input[GLCDC_FRAME_LAYER_2].coordinate.y  = LCD_CH0_IN_GR2_COORD_Y;
+    p_glcdc_qe_cfg->input[GLCDC_FRAME_LAYER_2].bg_color.argb = LCD_CH0_IN_GR2_BG_COLOR;
+
+    /* Blending */
+    p_glcdc_qe_cfg->blend[GLCDC_FRAME_LAYER_2].visible            = LCD_CH0_BLEND_GR2_VISIBLE;
+    p_glcdc_qe_cfg->blend[GLCDC_FRAME_LAYER_2].blend_control      = LCD_CH0_BLEND_GR2_BLEND_CONTROL;
+
+    /* When blend_control is GLCDC_BLEND_CONTROL_NONE,
+     * setting values of following blend structure members are ignored. */
+    p_glcdc_qe_cfg->blend[GLCDC_FRAME_LAYER_2].frame_edge         = LCD_CH0_BLEND_GR2_FRAME_EDGE;
+    p_glcdc_qe_cfg->blend[GLCDC_FRAME_LAYER_2].fixed_blend_value  = LCD_CH0_BLEND_GR2_FIXED_BLEND_VALUE;
+    p_glcdc_qe_cfg->blend[GLCDC_FRAME_LAYER_2].fade_speed         = LCD_CH0_BLEND_GR2_FADE_SPEED;
+    p_glcdc_qe_cfg->blend[GLCDC_FRAME_LAYER_2].start_coordinate.x = LCD_CH0_BLEND_GR2_START_COORD_X;
+    p_glcdc_qe_cfg->blend[GLCDC_FRAME_LAYER_2].start_coordinate.y = LCD_CH0_BLEND_GR2_START_COORD_Y;
+    p_glcdc_qe_cfg->blend[GLCDC_FRAME_LAYER_2].end_coordinate.x   = LCD_CH0_BLEND_GR2_END_COORD_X;
+    p_glcdc_qe_cfg->blend[GLCDC_FRAME_LAYER_2].end_coordinate.y   = LCD_CH0_BLEND_GR2_END_COORD_Y;
+
+    /* Chromakey */
+    p_glcdc_qe_cfg->chromakey[GLCDC_FRAME_LAYER_2].enable      = LCD_CH0_CHROMAKEY_GR2_ENABLE;
+
+    /* When enable is false, setting values of structure members under chromakey are ignored. */
+    p_glcdc_qe_cfg->chromakey[GLCDC_FRAME_LAYER_2].before.argb = LCD_CH0_CHROMAKEY_GR2_BEFORE_ARGB;
+    p_glcdc_qe_cfg->chromakey[GLCDC_FRAME_LAYER_2].after.argb  = LCD_CH0_CHROMAKEY_GR2_AFTER_ARGB;
+
+    /* Color look-up table */
+    p_glcdc_qe_cfg->clut[GLCDC_FRAME_LAYER_2].enable = LCD_CH0_CLUT_GR2_ENABLE;
+
+    /* When enable is false, setting values of structure members under clut are ignored. */
+    p_glcdc_qe_cfg->clut[GLCDC_FRAME_LAYER_2].p_base = (uint32_t *) LCD_CH0_CLUT_GR2_PBASE;
+    p_glcdc_qe_cfg->clut[GLCDC_FRAME_LAYER_2].start  = LCD_CH0_CLUT_GR2_START;
+    p_glcdc_qe_cfg->clut[GLCDC_FRAME_LAYER_2].size   = LCD_CH0_CLUT_GR2_SIZE;
+
+
+    /* ---- Graphic layer 1 setting ---- */
+    /* Image format */
+    p_glcdc_qe_cfg->input[GLCDC_FRAME_LAYER_1].p_base        = (uint32_t *) LCD_CH0_IN_GR1_PBASE;
+    p_glcdc_qe_cfg->input[GLCDC_FRAME_LAYER_1].hsize         = LCD_CH0_IN_GR1_HSIZE;
+    p_glcdc_qe_cfg->input[GLCDC_FRAME_LAYER_1].vsize         = LCD_CH0_IN_GR1_VSIZE;
+    p_glcdc_qe_cfg->input[GLCDC_FRAME_LAYER_1].offset        = LCD_CH0_IN_GR1_LINEOFFSET;
+    p_glcdc_qe_cfg->input[GLCDC_FRAME_LAYER_1].format        = LCD_CH0_IN_GR1_FORMAT;
+    p_glcdc_qe_cfg->input[GLCDC_FRAME_LAYER_1].frame_edge    = LCD_CH0_IN_GR1_FRAME_EDGE;
+    p_glcdc_qe_cfg->input[GLCDC_FRAME_LAYER_1].coordinate.x  = LCD_CH0_IN_GR1_COORD_X;
+    p_glcdc_qe_cfg->input[GLCDC_FRAME_LAYER_1].coordinate.y  = LCD_CH0_IN_GR1_COORD_Y;
+    p_glcdc_qe_cfg->input[GLCDC_FRAME_LAYER_1].bg_color.argb = LCD_CH0_IN_GR1_BG_COLOR;
+
+    /* Blending */
+    p_glcdc_qe_cfg->blend[GLCDC_FRAME_LAYER_1].visible            = LCD_CH0_BLEND_GR1_VISIBLE;
+    p_glcdc_qe_cfg->blend[GLCDC_FRAME_LAYER_1].blend_control      = LCD_CH0_BLEND_GR1_BLEND_CONTROL;
+
+    /* When blend_control is GLCDC_BLEND_CONTROL_NONE,
+     * setting values of following blend structure members are ignored. */
+    p_glcdc_qe_cfg->blend[GLCDC_FRAME_LAYER_1].frame_edge         = LCD_CH0_BLEND_GR1_FRAME_EDGE;
+    p_glcdc_qe_cfg->blend[GLCDC_FRAME_LAYER_1].fixed_blend_value  = LCD_CH0_BLEND_GR1_FIXED_BLEND_VALUE;
+    p_glcdc_qe_cfg->blend[GLCDC_FRAME_LAYER_1].fade_speed         = LCD_CH0_BLEND_GR1_FADE_SPEED;
+    p_glcdc_qe_cfg->blend[GLCDC_FRAME_LAYER_1].start_coordinate.x = LCD_CH0_BLEND_GR1_START_COORD_X;
+    p_glcdc_qe_cfg->blend[GLCDC_FRAME_LAYER_1].start_coordinate.y = LCD_CH0_BLEND_GR1_START_COORD_Y;
+    p_glcdc_qe_cfg->blend[GLCDC_FRAME_LAYER_1].end_coordinate.x   = LCD_CH0_BLEND_GR1_END_COORD_X;
+    p_glcdc_qe_cfg->blend[GLCDC_FRAME_LAYER_1].end_coordinate.y   = LCD_CH0_BLEND_GR1_END_COORD_Y;
+
+    /* Chromakey */
+    p_glcdc_qe_cfg->chromakey[GLCDC_FRAME_LAYER_1].enable      = LCD_CH0_CHROMAKEY_GR1_ENABLE;
+
+    /* When enable is false, setting values of structure members under chromakey are ignored. */
+    p_glcdc_qe_cfg->chromakey[GLCDC_FRAME_LAYER_1].before.argb = LCD_CH0_CHROMAKEY_GR1_BEFORE_ARGB;
+    p_glcdc_qe_cfg->chromakey[GLCDC_FRAME_LAYER_1].after.argb  = LCD_CH0_CHROMAKEY_GR1_AFTER_ARGB;
+
+    /* Color look-up table */
+    p_glcdc_qe_cfg->clut[GLCDC_FRAME_LAYER_1].enable = LCD_CH0_CLUT_GR1_ENABLE;
+
+    /* When enable is false, setting values of structure members under clut are ignored. */
+    p_glcdc_qe_cfg->clut[GLCDC_FRAME_LAYER_1].p_base = (uint32_t *) LCD_CH0_CLUT_GR1_PBASE;
+    p_glcdc_qe_cfg->clut[GLCDC_FRAME_LAYER_1].start  = LCD_CH0_CLUT_GR1_START;
+    p_glcdc_qe_cfg->clut[GLCDC_FRAME_LAYER_1].size   = LCD_CH0_CLUT_GR1_SIZE;
+
+
+
+    /* Detection */
+    p_glcdc_qe_cfg->detection.vpos_detect  = LCD_CH0_DETECT_VPOS;
+    p_glcdc_qe_cfg->detection.gr1uf_detect = LCD_CH0_DETECT_GR1UF;
+    p_glcdc_qe_cfg->detection.gr2uf_detect = LCD_CH0_DETECT_GR2UF;
+
+    /* Interrupt */
+    p_glcdc_qe_cfg->interrupt.vpos_enable  = LCD_CH0_INTERRUPT_VPOS_ENABLE;
+    p_glcdc_qe_cfg->interrupt.gr1uf_enable = LCD_CH0_INTERRUPT_GR1UF_ENABLE;
+    p_glcdc_qe_cfg->interrupt.gr2uf_enable = LCD_CH0_INTERRUPT_GR2UF_ENABLE;
+
+    /* Call back function */
+    p_glcdc_qe_cfg->p_callback = GLCDC_PRV_PCALLBACK;
+
+} /* End of function r_glcdc_qe_parameters_setting() */
+#endif /* (GLCDC_CFG_CONFIGURATION_MODE) || defined(QE_DISPLAY_CONFIGURATION) */
+
 
 /*******************************************************************************
  * Outline      : Panel clock setting
@@ -1988,21 +2254,21 @@ void r_glcdc_graphics_read_enable(void)
 void r_glcdc_power_on(void)
 {
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
     bsp_int_ctrl_t int_ctrl;
 #endif
 
     /* ---- Enable protection using PRCR register. ---- */
     R_BSP_RegisterProtectDisable (BSP_REG_PROTECT_LPC_CGC_SWR);
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
     R_BSP_InterruptControl (BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 #endif
 
     /* Release Module Stop of GLCDC */
     MSTP(GLCDC) = 0;
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
     R_BSP_InterruptControl (BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 #endif
 
@@ -2021,21 +2287,21 @@ void r_glcdc_power_on(void)
 void r_glcdc_power_off(void)
 {
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
     bsp_int_ctrl_t int_ctrl;
 #endif
 
     /* ---- Enable protection using PRCR register. ---- */
     R_BSP_RegisterProtectDisable (BSP_REG_PROTECT_LPC_CGC_SWR);
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
     R_BSP_InterruptControl (BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 #endif
 
     /* Set Module Stop of GLCDC */
     MSTP(GLCDC) = 1;
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
     R_BSP_InterruptControl (BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 #endif
 

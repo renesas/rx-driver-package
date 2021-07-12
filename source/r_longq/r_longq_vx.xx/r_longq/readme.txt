@@ -32,10 +32,10 @@ r_longq
 |
 +---doc
 |    +---en
-|    |      r01an1889ej{VERSION_NUMBER}-rx.pdf
+|    |      r01an1889ej{VERSION_NUMBER}-rx-apl.pdf
 |    |
 |    +---ja
-|           r01an1889jj{VERSION_NUMBER}-rx.pdf
+|           r01an1889jj{VERSION_NUMBER}-rx-apl.pdf
 |
 +---ref
 |       r_longq_config_reference.h

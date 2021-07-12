@@ -7,12 +7,14 @@
         <brand>Renesas</brand>
         <product>RXC</product>
         <version>3.01.00</version>
+        <version>3.02.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
         <version>4.08.04.201803</version>
         <version>4.08.04.201902</version>
+        <version>8.03.00.202002</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -20,6 +22,7 @@
         <version>4.10.01</version>
         <version>4.11.01</version>
         <version>4.12.01</version>
+        <version>4.14.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -40,11 +43,11 @@
     <package>
         <type>fitmodule</type>
         <name>r_ether_rx</name>
-        <version>1.20</version>
-        <zipsource>r_ether_rx_v1.20.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_ether_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.50</version>
+            <version>5.52</version>
         </dependency>
         <application>connectivity</application>
         <desc>Ethernet Driver.</desc>
@@ -65,8 +68,5 @@
             <name>B_TX_DESC_1</name>
         </section>
     </package>
-    <sampleapplicationnote>
-        <documentno>R01AN2009</documentno>
-    </sampleapplicationnote>
 
 </refinfo>

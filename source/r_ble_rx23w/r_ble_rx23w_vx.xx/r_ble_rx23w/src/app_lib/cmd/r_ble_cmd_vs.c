@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 #include <string.h>
 #include <stdlib.h>
@@ -33,6 +33,9 @@
 extern void r_ble_rf_control_error(uint32_t err_no);
 
 static uint8_t g_vs_mcu_reset = 0;
+#if (BLE_CFG_LIB_TYPE == 0)
+extern void start_adv_cmd(st_ble_dev_addr_t * o_rnd_addr);
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
 
 /*----------------------------------------------------------------------------------------------------------------------
     vs txp command
@@ -42,7 +45,7 @@ static void exec_vs_set_tx_power(int argc, char *argv[])
 {
     if (argc != 3)
     {
-        pf("vs txp %s: unrecognized operands\n", argv[0]);
+        R_BLE_CLI_PrintUnrecognized();
         return;
     }
     uint16_t conn_hdl = (uint16_t)strtol(argv[1], NULL, 0);
@@ -63,7 +66,7 @@ static void exec_vs_get_tx_power(int argc, char *argv[])
 {
     if (argc != 2)
     {
-        pf("vs txp %s: unrecognized operands\n", argv[0]);
+        R_BLE_CLI_PrintUnrecognized();
         return;
     }
 
@@ -98,12 +101,16 @@ static const st_ble_cli_cmd_t vs_txp_cmd =
 /*----------------------------------------------------------------------------------------------------------------------
     vs test command
 ----------------------------------------------------------------------------------------------------------------------*/
+static void abort_vs_test(void)
+{
+    R_BLE_VS_EndTest();
+}
 
 static void exec_vs_tx_test_start(int argc, char *argv[])
 {
     if (argc != 8)
     {
-        pf("vs test %s: unrecognized operands\n", argv[0]);
+        R_BLE_CLI_PrintUnrecognized();
         return;
     }
     st_ble_vs_tx_test_param_t param;
@@ -122,6 +129,7 @@ static const st_ble_cli_cmd_t vs_test_tx_cmd =
 {
     .p_name = "tx",
     .exec   = exec_vs_tx_test_start,
+    .abort  = abort_vs_test,
     .p_help = "Usage: vs test tx <ch(0-39)> <data_len(0-255)> <payload(0-7)> "
               "<phy(1-4)> <tx_power(0-2)> <option(0-3)> <num_of_packet(0-65535)>\n"
               "Tramsmiter test start",
@@ -131,7 +139,7 @@ static void exec_vs_rx_test_start(int argc, char *argv[])
 {
     if (argc != 3)
     {
-        pf("vs test %s: unrecognized operands\n", argv[0]);
+        R_BLE_CLI_PrintUnrecognized();
         return;
     }
     st_ble_vs_rx_test_param_t param;
@@ -145,6 +153,7 @@ static const st_ble_cli_cmd_t vs_test_rx_cmd =
 {
     .p_name = "rx",
     .exec   = exec_vs_rx_test_start,
+    .abort  = abort_vs_test,
     .p_help = "Usage: vs test rx <ch(0-39)> <phy(1-3)>\n"
               "Reciever test start",
 };
@@ -189,7 +198,7 @@ static void exec_vs_set_addr(int argc, char *argv[])
 {
     if ((argc != 4) && (argc != 5))
     {
-        pf("vs addr %s: unrecognized operands\n", argv[0]);
+        R_BLE_CLI_PrintUnrecognized();
         return;
     }
 
@@ -199,26 +208,44 @@ static void exec_vs_set_addr(int argc, char *argv[])
     {
         area = BLE_VS_ADDR_AREA_DATA_FLASH;
     }
-    else
+    else if (strcmp(argv[1], "curr") == 0)
     {
         area = BLE_VS_ADDR_AREA_REG;
     }
+    else
+    {
+        R_BLE_CLI_PrintUnrecognized();
+        return;
+    }
+
     if (strcmp(argv[2], "rnd") == 0)
     {
         dev_addr.type = BLE_GAP_ADDR_RAND;
     }
-    else
+    else if (strcmp(argv[2], "pub") == 0)
     {
         dev_addr.type = BLE_GAP_ADDR_PUBLIC;
     }
-    R_BLE_CMD_ParseAddr(argv[3],&dev_addr.addr[0]);
-    if ((argc == 5) && (strcmp(argv[4], "mcu_rst") == 0))
-    {
-        g_vs_mcu_reset = 1;
-    }
     else
     {
-        g_vs_mcu_reset = 0;
+        R_BLE_CLI_PrintUnrecognized();
+        return;
+    }
+
+    R_BLE_CMD_ParseAddr(argv[3],&dev_addr.addr[0]);
+    g_vs_mcu_reset = 0;
+
+    if (argc == 5)
+    {
+        if(strcmp(argv[4], "mcu_rst") == 0)
+        {
+            g_vs_mcu_reset = 1;
+        }
+        else
+        {
+            R_BLE_CLI_PrintUnrecognized();
+            return;
+        }
     }
 
     R_BLE_VS_SetBdAddr(area, &dev_addr);
@@ -236,7 +263,7 @@ static void exec_vs_get_addr(int argc, char *argv[])
 {
     if (argc != 3)
     {
-        pf("vs addr %s: unrecognized operands\n", argv[0]);
+        R_BLE_CLI_PrintUnrecognized();
         return;
     }
     uint8_t area;
@@ -245,17 +272,28 @@ static void exec_vs_get_addr(int argc, char *argv[])
     {
         area = BLE_VS_ADDR_AREA_DATA_FLASH;
     }
-    else
+    else if (strcmp(argv[1], "curr") == 0)
     {
         area = BLE_VS_ADDR_AREA_REG;
     }
+    else
+    {
+        R_BLE_CLI_PrintUnrecognized();
+        return;
+    }
+
     if (strcmp(argv[2], "rnd") == 0)
     {
         type = BLE_GAP_ADDR_RAND;
     }
-    else
+    else if (strcmp(argv[2], "pub") == 0)
     {
         type = BLE_GAP_ADDR_PUBLIC;
+    }
+    else
+    {
+        R_BLE_CLI_PrintUnrecognized();
+        return;
     }
 
     R_BLE_VS_GetBdAddr(area, type);
@@ -292,7 +330,7 @@ static void exec_vs_set_coding_scheme(int argc, char *argv[])
 {
     if (argc != 2)
     {
-        pf("vs %s: unrecognized operands\n", argv[0]);
+        R_BLE_CLI_PrintUnrecognized();
         return;
     }
 
@@ -316,7 +354,7 @@ static void exec_vs_rf_control(int argc, char *argv[])
 {
     if ((argc != 2) && (argc != 7))
     {
-        pf("vs %s: unrecognized operands\n", argv[0]);
+        R_BLE_CLI_PrintUnrecognized();
         return;
     }
     st_ble_vs_set_rf_ctrl_param_t param;
@@ -359,7 +397,7 @@ static void exec_vs_get_rand(int argc, char *argv[])
 {
     if (argc != 2)
     {
-        pf("vs %s: unrecognized operands\n", argv[0]);
+        R_BLE_CLI_PrintUnrecognized();
         return;
     }
     uint8_t rand_size = (uint8_t)strtol(argv[1],NULL,0);
@@ -376,6 +414,68 @@ static const st_ble_cli_cmd_t vs_rand_cmd =
 };
 
 /*----------------------------------------------------------------------------------------------------------------------
+    vs scan_ch_map command
+----------------------------------------------------------------------------------------------------------------------*/
+static void exec_vs_scan_ch_map_set(int argc, char *argv[])
+{
+    if (argc < 2)
+    {
+        R_BLE_CLI_PrintUnrecognized();
+        return;
+    }
+    uint16_t ch_map = (uint16_t)strtol(argv[1],NULL,0);
+
+    R_BLE_VS_SetScanChMap(ch_map);
+    return;
+}
+
+static void exec_vs_scan_ch_map_get(int argc, char *argv[])
+{
+    if (argc < 1)
+    {
+        R_BLE_CLI_PrintUnrecognized();
+        return;
+    }
+    
+    R_BLE_VS_GetScanChMap();
+    return;
+}
+
+
+static const st_ble_cli_cmd_t vs_scan_ch_map_set_cmd =
+{
+    .p_name = "set",
+    .exec   = exec_vs_scan_ch_map_set,
+    .p_help = "Usage: vs scan_ch_map set <ch_map(1-7)>\n"
+              "Set scan channel map for use",
+};
+
+static const st_ble_cli_cmd_t vs_scan_ch_map_get_cmd =
+{
+    .p_name = "get",
+    .exec   = exec_vs_scan_ch_map_get,
+    .p_help = "Usage: vs scan_ch_map get\n"
+              "Get scan channel map",
+};
+
+static const st_ble_cli_cmd_t * const vs_scan_ch_map_sub_cmds[] =
+{
+    &vs_scan_ch_map_set_cmd,
+    &vs_scan_ch_map_get_cmd,
+};
+
+
+static const st_ble_cli_cmd_t vs_scan_ch_map_cmd =
+{
+    .p_name      = "scan_ch_map",
+    .p_cmds      = vs_scan_ch_map_sub_cmds,
+    .num_of_cmds = ARRAY_SIZE(vs_scan_ch_map_sub_cmds),
+    .p_help      = "Sub Command: set, get\n"
+                   "Try 'vs scan_ch_map sucmd help' for more information",
+};
+
+
+/*----------------------------------------------------------------------------------------------------------------------
     vs command
 ----------------------------------------------------------------------------------------------------------------------*/
 
@@ -387,6 +487,7 @@ static const st_ble_cli_cmd_t * const vs_sub_cmds[] =
     &vs_scheme_cmd,
     &vs_rfctrl_cmd,
     &vs_rand_cmd,
+    &vs_scan_ch_map_cmd,
 };
 
 const st_ble_cli_cmd_t g_vs_cmd =
@@ -412,6 +513,8 @@ const char * const vs_evt_name[] =
     [BLE_VS_EVENT_GET_ADDR_COMP & 0x00FFU]          = "BLE_VS_EVENT_GET_ADDR_COMP",
     [BLE_VS_EVENT_GET_RAND & 0x00FFU]               = "BLE_VS_EVENT_GET_RAND",
     [BLE_VS_EVENT_TX_FLOW_STATE_CHG & 0x00FFU]      = "BLE_VS_EVENT_TX_FLOW_STATE_CHG",
+    [BLE_VS_EVENT_SET_SCAN_CH_MAP & 0x00FFU]        = "BLE_VS_EVENT_SET_SCAN_CH_MAP",
+    [BLE_VS_EVENT_GET_SCAN_CH_MAP & 0x00FFU]        = "BLE_VS_EVENT_GET_SCAN_CH_MAP",
 };
 
 void R_BLE_CMD_VsCb(uint16_t type, ble_status_t result, st_ble_vs_evt_data_t *data)
@@ -419,6 +522,7 @@ void R_BLE_CMD_VsCb(uint16_t type, ble_status_t result, st_ble_vs_evt_data_t *da
     pf("%s result:0x%04X, param_len:%d\n", vs_evt_name[type&0xFFU], result, data->param_len);
     if(BLE_SUCCESS != result)
     {
+        R_BLE_CLI_SetCmdComp();
         return;
     }
     switch( type )
@@ -448,6 +552,7 @@ void R_BLE_CMD_VsCb(uint16_t type, ble_status_t result, st_ble_vs_evt_data_t *da
         case BLE_VS_EVENT_TX_TEST_TERM:
         {
             pf("BLE_VS_EVENT_TX_TEST_TERM\n");
+            R_BLE_CLI_SetCmdComp();
             /* do nothing */
         } break;
         case BLE_VS_EVENT_RX_TEST_START:
@@ -502,7 +607,12 @@ void R_BLE_CMD_VsCb(uint16_t type, ble_status_t result, st_ble_vs_evt_data_t *da
         {
             st_ble_vs_get_bd_addr_comp_evt_t *param =
                     (st_ble_vs_get_bd_addr_comp_evt_t*)data->p_param;
-
+#if (BLE_CFG_LIB_TYPE == 0)
+            if((BLE_VS_ADDR_AREA_REG == param->area) && (BLE_GAP_ADDR_RAND == param->addr.type))
+            {
+                start_adv_cmd(&param->addr);
+            }
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
             pf(" addr:%s on %s\n",
                 BLE_BD_ADDR_STR(param->addr.addr,param->addr.type),
                 (BLE_VS_ADDR_AREA_REG == param->area)?"current register":"data flash");
@@ -525,7 +635,15 @@ void R_BLE_CMD_VsCb(uint16_t type, ble_status_t result, st_ble_vs_evt_data_t *da
             pf(" state:%d (tx flow %s)\n",param->state,(BLE_VS_TX_FLOW_CTL_ON==param->state)?"on":"off");
             pf(" buffer_num:%u\n",param->buffer_num);
         } break;
-        
+        case BLE_VS_EVENT_SET_SCAN_CH_MAP:
+        {
+        } break;
+        case BLE_VS_EVENT_GET_SCAN_CH_MAP:
+        {
+            st_ble_vs_get_scan_ch_map_comp_evt_t *param =
+                    (st_ble_vs_get_scan_ch_map_comp_evt_t*)data->p_param;
+            pf(" ch_map:0x%02x\n", param->ch_map);
+        } break;
         default:
             break;
     }
@@ -537,7 +655,8 @@ void R_BLE_CMD_VsCb(uint16_t type, ble_status_t result, st_ble_vs_evt_data_t *da
 {
     (void)type;
     (void)result;
-    (void)data;
+    (void)&data;
+    return;
 }
 
 const st_ble_cli_cmd_t g_vs_cmd;

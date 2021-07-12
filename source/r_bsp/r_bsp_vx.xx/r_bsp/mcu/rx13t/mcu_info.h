@@ -24,6 +24,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 26.07.2019 1.00     First release
+*         : 31.07.2020 1.01     Added support for RX13T with 32 pin and 48 pin packages.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -69,6 +70,12 @@ Macro definitions
 #elif BSP_CFG_MCU_PART_PACKAGE == 0x3
     #define BSP_PACKAGE_LFQFP48     (1)
     #define BSP_PACKAGE_PINS        (48)
+#elif BSP_CFG_MCU_PART_PACKAGE == 0x10
+    #define BSP_PACKAGE_QFN48       (1)
+    #define BSP_PACKAGE_PINS        (48)
+#elif BSP_CFG_MCU_PART_PACKAGE == 0x11
+    #define BSP_PACKAGE_QFN32       (1)
+    #define BSP_PACKAGE_PINS        (32)
 #else
     #error "ERROR - BSP_CFG_MCU_PART_PACKAGE - Unknown package chosen in r_bsp_config.h"
 #endif

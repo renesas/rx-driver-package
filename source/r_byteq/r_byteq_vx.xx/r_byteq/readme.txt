@@ -31,10 +31,10 @@ r_byteq
 |
 +---doc
 |    +---en
-|    |      r01an1683ej{VERSION_NUMBER}-rx.pdf
+|    |      r01an1683ej{VERSION_NUMBER}-rx-apl.pdf
 |    |
 |    +---ja
-|           r01an1683jj{VERSION_NUMBER}-rx.pdf
+|           r01an1683jj{VERSION_NUMBER}-rx-apl.pdf
 |
 +---ref
 |       r_byteq_config_reference.h

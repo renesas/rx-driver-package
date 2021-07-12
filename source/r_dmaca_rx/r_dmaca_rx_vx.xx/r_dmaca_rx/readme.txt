@@ -5,12 +5,12 @@ r_dmaca_rx
 
 Document Number 
 ---------------
-R01AN2063EJ0230
-R01AN2063JJ0230
+R01AN2063EJ0250
+R01AN2063JJ0250
 
 Version
 -------
-v2.30
+v2.50
 
 Overview
 --------
@@ -29,6 +29,7 @@ Supported MCUs
 --------------
 * RX230 Group
 * RX231 Group
+* RX23E-A Group
 * RX23W Group
 * RX64M Group
 * RX65N Group
@@ -44,6 +45,7 @@ Boards Tested On
 ----------------
 * RSKRX230
 * RSKRX231
+* RSKRX23E-A
 * RSKRX23W
 * RSKRX64M
 * RSKRX65N
@@ -65,7 +67,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp v5.50
+* r_bsp 
 
 How to add to your project
 --------------------------
@@ -95,9 +97,9 @@ Refer to "Adding Firmware Integration Technology Modules to CS+ Projects (R01AN1
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.01 release 00
+* Renesas RX v3.02 release 00
 * GCC for Renesas
-RX 4.08.04.201902
+RX 8.03.00.201904
 * IAR C/C++ Compiler
 for Renesas RX 4.12.1
 
@@ -110,9 +112,9 @@ r_dmaca_rx
 +---doc
 |   |
 |   +---en
-|   |       r01an2063ej0230-rx-dmac.pdf
+|   |       r01an2063ej0240-rx-dmac.pdf
 |   +---ja
-|           r01an2063jj0230-rx-dmac.pdf
+|           r01an2063jj0240-rx-dmac.pdf
 |
 +---ref
 |       r_dmaca_rx_config_reference.h
@@ -160,6 +162,10 @@ r_dmaca_rx
         |       r_dmaca_rx_target.h
         |
         +---rx231
+        |       r_dmaca_rx_target.c
+        |       r_dmaca_rx_target.h
+        |
+        +---rx23e-a
         |       r_dmaca_rx_target.c
         |       r_dmaca_rx_target.h
         |

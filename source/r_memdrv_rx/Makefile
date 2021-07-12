@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_memdrv_rx
-VERSION = 		1.02
-MDF =			V2
+VERSION = 		1.03
+MDF = V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

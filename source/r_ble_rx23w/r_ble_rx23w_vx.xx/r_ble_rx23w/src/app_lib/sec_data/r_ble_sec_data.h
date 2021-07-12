@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 #ifndef R_BLE_SECD_DATA_H
 #define R_BLE_SECD_DATA_H
@@ -69,6 +69,7 @@ Includes   <System Includes> , "Project Includes"
 #define BLE_SECD_SEC_KEYS_INFO_OFFSET         (12)
 #define BLE_SECD_SEC_KEYS_OFFSET              (20)
 #define BLE_SECD_SEC_REM_OFFSET               (48)
+#define BLE_SECD_SEC_IDADDR_OFFSET            (62)
 
 #define BLE_SECD_REM_BOND_SIZE                (88)
 #define BLE_SECD_LOC_AREA_SIZE                (40)
@@ -114,6 +115,7 @@ extern "C" {
  * @param[in] p_lc_csrk Local CSRK
  * @retval  BLE_SUCCESS(0x0000) Success 
  * @retval  BLE_ERR_INVALID_PTR(0x0001) IRK(p_lc_id_addr or p_lc_irk) or CSRK(p_lc_csrk) is specified and as NULL. 
+ * @retval  BLE_ERR_UNSUPPORTED(0x0007) Not supported.
  * @retval  BLE_ERR_INVALID_OPERATION(0x0009) Write to Data Flash is failed.
  **********************************************************************************************************************/
 ble_status_t R_BLE_SECD_WriteLocInfo(st_ble_dev_addr_t * p_lc_id_addr, uint8_t * p_lc_irk, uint8_t * p_lc_csrk);
@@ -122,12 +124,16 @@ ble_status_t R_BLE_SECD_WriteLocInfo(st_ble_dev_addr_t * p_lc_id_addr, uint8_t *
  * @fn ble_status_t R_BLE_SECD_ReadLocInfo(st_ble_dev_addr_t * p_lc_id_addr, uint8_t * p_lc_irk, uint8_t * p_lc_csrk)
  * @brief   Read Local device Identity Address and IRK and/or CSRK in DataFlash.
  * @details Read Local device Identity Address and IRK and/or CSRK in DataFlash.
- * @param[in] p_lc_id_addr Local device Identity Address
- * @param[in] p_lc_irk Local IRK
- * @param[in] p_lc_csrk Local CSRK
+ * @param[out] p_lc_id_addr Local device Identity Address. 
+ *                          If the value is all 0x00, Local Identity address is not found in Data Flash.
+ * @param[out] p_lc_irk Local IRK. If the value is all 0x00, Local IRK is not found in Data Flash.
+ * @param[out] p_lc_csrk Local CSRK. If value is all 0x00, CSRK is not found in Data Flash.
  * @retval  BLE_SUCCESS(0x0000) Success 
  * @retval  BLE_ERR_INVALID_PTR(0x0001) IRK(p_lc_id_addr or p_lc_irk) or CSRK(p_lc_csrk) is specified and as NULL. 
+ * @retval  BLE_ERR_UNSUPPORTED(0x0007) Not supported.
  * @retval  BLE_ERR_INVALID_OPERATION(0x0009) Read to Data Flash is failed.
+ * @retval  BLE_ERR_MEM_ALLOC_FAILED(0x000C) Memory allocation error. 
+ * @retval  BLE_ERR_NOT_FOUND(0x000D) No security data is written to Data Flash.
  **********************************************************************************************************************/
 ble_status_t R_BLE_SECD_ReadLocInfo(st_ble_dev_addr_t * p_lc_id_addr, uint8_t * p_lc_irk, uint8_t * p_lc_csrk);
 
@@ -159,7 +165,9 @@ void R_BLE_SECD_RecvRemKeys(st_ble_dev_addr_t * p_addr, st_ble_gap_key_ex_param_
  * @param[in] p_keyinfo Key info from remote device
  * @retval  BLE_SUCCESS(0x0000) Success 
  * @retval  BLE_ERR_INVALID_PTR(0x0001) p_addr or p_keyinfo is specified as NULL. 
+ * @retval  BLE_ERR_UNSUPPORTED(0x0007) Not supported.
  * @retval  BLE_ERR_INVALID_OPERATION(0x0009) Write to Data Flash is failed.
+ * @retval  BLE_ERR_MEM_ALLOC_FAILED(0x000C) Memory allocation error.
  **********************************************************************************************************************/
 ble_status_t R_BLE_SECD_WriteRemKeys(st_ble_dev_addr_t * p_addr, st_ble_gap_auth_info_t * p_keyinfo);
 
@@ -171,9 +179,31 @@ ble_status_t R_BLE_SECD_WriteRemKeys(st_ble_dev_addr_t * p_addr, st_ble_gap_auth
  * @retval  BLE_SUCCESS(0x0000) Success 
  * @retval  BLE_ERR_INVALID_PTR(0x0001) p_addr or p_keys is specified as NULL. 
  * @retval  BLE_ERR_INVALID_ARG(0x0003) Number of bonding information is out of range.
+ * @retval  BLE_ERR_UNSUPPORTED(0x0007) Not supported.
  * @retval  BLE_ERR_INVALID_OPERATION(0x0009) Flash Open failure.
  **********************************************************************************************************************/
 ble_status_t R_BLE_SECD_Init(void);
+
+/******************************************************************************************************************//**
+ * @fn ble_status_t R_BLE_SECD_GetIdInfo(st_ble_dev_addr_t * p_idaddr, 
+                                         st_ble_gap_rslv_list_key_set_t * p_key_set, 
+                                         uint8_t * p_num)
+ * @brief   Get Identity Address and IRK from Data Flash.
+ * @details The identity addresses and IRKs are used to set the resolving list.
+ * @param[out] p_idaddr An array of the addresses to set the identity addresses stored in Data Flash.
+ * @param[out] p_key_set An array of the keys to set the IRKs stored in Data Flash.
+ * @param[out] p_num The number of identity addresses stored in Data Flash.
+ * @retval  BLE_SUCCESS(0x0000) Success 
+ * @retval  BLE_ERR_INVALID_PTR(0x0001) p_addr or p_keys is specified as NULL. 
+ * @retval  BLE_ERR_UNSUPPORTED(0x0007) Not supported.
+ * @retval  BLE_ERR_INVALID_OPERATION(0x0009) Flash Open failure.
+ * @retval  BLE_ERR_MEM_ALLOC_FAILED(0x000C) Memory allocation error.
+ * @retval  BLE_ERR_NOT_FOUND(0x000D) No security data is written to Data Flash.
+ * @retval  BLE_ERR_LIMIT_EXCEEDED(0x0010) The bonding information number in Data Flash is larger than BLE_CFG_NUM_BOND.
+ **********************************************************************************************************************/
+ble_status_t R_BLE_SECD_GetIdInfo(st_ble_dev_addr_t * p_idaddr, 
+                                  st_ble_gap_rslv_list_key_set_t * p_key_set, 
+                                  uint8_t * p_num);
 
 /******************************************************************************************************************//**
  * @fn ble_status_t R_BLE_SECD_DelRemKeys(st_ble_dev_addr_t * p_dev_addr)

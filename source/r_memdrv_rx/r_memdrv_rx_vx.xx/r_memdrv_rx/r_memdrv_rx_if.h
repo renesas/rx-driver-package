@@ -32,6 +32,7 @@
 *              : 04.04.2019 1.01     Added support for GNUC and ICCRX.
 *                                    Fixed coding style.
 *              : 22.11.2019 1.02     Modify the parameter type of structure Memory Driver I/F information.
+*              : 10.09.2020 1.03     Changed version to 1.03.
 *************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -51,7 +52,7 @@ Macro definitions
 #define MEMDRV_IF_H
 /* Version Number of API. */
 #define MEMDRV_VERSION_MAJOR                 (1)
-#define MEMDRV_VERSION_MINOR                 (02)
+#define MEMDRV_VERSION_MINOR                 (03)
 
 /* Define device no. */
 #define MEMDRV_DEV0                          (0)

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_fcu.c
@@ -32,6 +32,8 @@
 *              : 19.04.2019 4.00    Added support for GNUC and ICCRX.
 *              : 19.07.2019 4.20    Modified flash_erase() & Excep_FCU_FRDYI().
 *                                   Removed include of r_flash_type3_if.h.
+*              : 26.06.2020 4.60    Changed to call internal function.
+*                                   Modified minor problem.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -81,7 +83,7 @@ flash_err_t flash_init_fcu(void)
     FLASH.FWEPROR.BYTE = 0x01;
 
     /* Let the sequencer know what FCLK is running at */
-    err = R_FLASH_Control(FLASH_CMD_CONFIG_CLOCK, &fclk);
+    err = r_flash_control(FLASH_CMD_CONFIG_CLOCK, &fclk);
 
     /* Copy the FCU firmware to FCU RAM */
 #ifdef FLASH_HAS_FCU_RAM_ENABLE
@@ -151,11 +153,8 @@ flash_err_t flash_fcuram_codecopy(void)
     err = flash_pe_mode_enter(FLASH_TYPE_CODE_FLASH);
     if (err == FLASH_SUCCESS)
     {
-        err = flash_stop();
-        if (err == FLASH_SUCCESS)
-        {
-            err = flash_pe_mode_exit();
-        }
+        flash_stop();
+        err = flash_pe_mode_exit();
     }
 
     return err;

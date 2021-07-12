@@ -25,6 +25,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 08.10.2019 1.00     First Release
+*         : 20.11.2020 1.01     Modified the proccess of bsp_adc_initial_configure function.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -373,6 +374,11 @@ static void bsp_adc_initial_configure(void)
 
     /* Release from the module-stop state */
     MSTP(S12AD1) = 0;
+
+    if(0 != MSTP(S12AD1))
+    {
+        R_BSP_NOP();
+    }
 
     /* Writing to the A/D conversion time setting register is enabled. */
     S12AD1.ADSAMPR.BYTE = 0x03;

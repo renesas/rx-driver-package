@@ -27,9 +27,10 @@
 /***********************************************************************************************************************
 * History      : DD.MM.YYYY Version Description
 *              : 04.10.2018 1.00    First Release
+*              : 29.04.2019 1.10    Modified for GCC/IAR compatibility.
 ***********************************************************************************************************************/
-#ifndef QEMONITOR_H_FILE
-#define QEMONITOR_H_FILE
+#ifndef R_MONITOR_H
+#define R_MONITOR_H
 
 #include "r_touch_qe_config.h"
 #include "qe_common.h"
@@ -52,18 +53,18 @@
  *   match the 1st part ID, and if the toggle field differs from the last time a 2-part request was made.
  */
 /* REQUEST FLAGS */
-#define MON_FLG_READ_REQ         (0x01)  // 1=read request; 0=write request
+#define MON_FLG_READ_REQ         (0x01)  /* 1=read request; 0=write request */
 /* flags valid only with read requests */
-#define MON_FLG_AUTO_UPDATE      (0x02)  // 1=update data after each scan; 0=update once
-#define MON_FLG_INCL_SLDR_COUNTS (0x04)  // 1=include slider/wheel sensor counts; 0=position only
-#define MON_FLG_2_PART_REQ       (0x08)  // 1=request is 1st of two in buf; 0=single req; valid only with Auto Update
+#define MON_FLG_AUTO_UPDATE      (0x02)  /* 1=update data after each scan; 0=update once */
+#define MON_FLG_INCL_SLDR_COUNTS (0x04)  /* 1=include slider/wheel sensor counts; 0=position only */
+#define MON_FLG_2_PART_REQ       (0x08)  /* 1=request is 1st of two in buf; 0=single req; valid only with Auto Update */
 
 /* request data_type */
-#define MON_DATA_STOP           (0)     // no data requested; stop updating monitor data buffer
-#define MON_DATA_BUTTONS        (1)     // read only
-#define MON_DATA_SLIDERS        (2)     // read only sliders and wheels
-#define MON_DATA_BTNS_AND_SLDRS (3)     // read only
-#define MON_DATA_ACTIVE_METHODS (4)     // read only; method and mask fields unused in this request
+#define MON_DATA_STOP           (0)     /* no data requested; stop updating monitor data buffer */
+#define MON_DATA_BUTTONS        (1)     /* read only */
+#define MON_DATA_SLIDERS        (2)     /* read only sliders and wheels */
+#define MON_DATA_BTNS_AND_SLDRS (3)     /* read only */
+#define MON_DATA_ACTIVE_METHODS (4)     /* read only; method and mask fields unused in this request */
 
 /* request buffer constants */
 #define MON_MAX_REQUESTS        (2)
@@ -82,7 +83,12 @@
 /***********************************************************************************************************************
 * Typedef definitions
 ***********************************************************************************************************************/
+#if (!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5))
 #pragma pack
+#else
+R_BSP_PRAGMA_PACK
+#endif
+
 typedef struct
 {
     uint8_t     s_id;           // start id; must match e_id (changes with each request)
@@ -93,16 +99,30 @@ typedef struct
     uint8_t     slider_mask;    // mask bit numbers correspond to g_sliders_<config>[] indexes
     uint8_t     wheel_mask;     // mask bit numbers correspond to g_wheels_<config>[] indexes
 } mon_req_hdr_t;
-#pragma unpack
 
+#if (!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5))
+#pragma unpack
+#else
+R_BSP_PRAGMA_UNPACK
+#endif
+
+#if (!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5))
 #pragma pack
+#else
+R_BSP_PRAGMA_PACK
+#endif
+
 typedef struct
 {
-    uint8_t     part2_toggle;   // 0 or 1; must alternate in 2nd request/reply each time a 2-part request is made
-                                // field ignored in 1st part request/reply
+    uint8_t     part2_toggle;   // 0 or 1; must alternate in 2nd part each time a 2-part request is made (field ignored in 1st part)
     uint8_t     e_id;           // end id; must match s_id (changes with each request)
 } mon_trailer_t;
+
+#if (!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5))
 #pragma unpack
+#else
+R_BSP_PRAGMA_UNPACK
+#endif
 
 
 /* MONITOR DATA (DRIVER "TRANSMIT") BUFFER
@@ -169,4 +189,4 @@ extern uint8_t  g_mon_reply_buf[];
 extern void monitor_init(void);
 extern void monitor_update_data(void);
 
-#endif // QEMONITOR_H_FILE
+#endif /* R_MONITOR_H */

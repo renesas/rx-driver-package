@@ -20,9 +20,10 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup time_module TIME (Mesh Time Model)
+ * \defgroup time_module Time Model (TIME)
+ * \ingroup mesh_models_block
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Time Model (TIME) module to the Application.
  */
 
@@ -32,7 +33,7 @@
 /**
  *  \defgroup time_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
+ *  \brief This section Describes the module Notification Callback interface offered
  *  to the application
  */
 
@@ -64,14 +65,14 @@ typedef API_RESULT (* MS_TIME_SERVER_CB)
  * Time Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_TIME_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -81,6 +82,7 @@ typedef API_RESULT (* MS_TIME_CLIENT_CB)
 /**
  *  \defgroup time_structures Structures
  *  \{
+ *  \brief This section describes the EtherMind Mesh Time Model Structures.
  */
 
 /**
@@ -193,12 +195,12 @@ typedef struct MS_time_role_struct
 /**
  * \defgroup time_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Time Model APIs.
+ * \brief This section describes the EtherMind Mesh Time Model APIs.
  */
 /**
  * \defgroup time_ser_api_defs Time Server API Definitions
  * \{
- * This section describes the Time Server APIs.
+ * \brief This section describes the Time Server APIs.
  */
 
 /**
@@ -259,7 +261,7 @@ API_RESULT MS_time_server_state_update
 /**
  * \defgroup time_cli_api_defs Time Client API Definitions
  * \{
- * This section describes the Time Client APIs.
+ * \brief This section describes the Time Client APIs.
  */
 
 /**
@@ -321,6 +323,9 @@ API_RESULT MS_time_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
+/** \name Messsage Send
+ *  \{
+ */
 /**
  *  \brief API to get the Time state of neighbor nodes.
  *
@@ -468,6 +473,7 @@ API_RESULT MS_time_client_send_reliable_pdu
             param,\
             MS_ACCESS_TIME_ROLE_STATUS_OPCODE\
         )
+/** \} */
 /** \} */
 /** \} */
 /** \} */

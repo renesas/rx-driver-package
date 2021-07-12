@@ -24,6 +24,8 @@
 * History : DD.MM.YYYY Version  Description
 *         : 26.07.2019 1.00     First Release
 *         : 17.12.2019 1.01     Deleted the unused variables of clock_source_select function.
+*         : 31.07.2020 1.02     Modified the process of the main clock oscillator forced oscillation control register
+*                               (MOFCR.BIT.MODRV21).
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -321,9 +323,9 @@ static void clock_source_select (void)
     /* Set the oscillation source of the main clock oscillator. */
     SYSTEM.MOFCR.BIT.MOSEL = BSP_CFG_MAIN_CLOCK_SOURCE;
 
-    /* If the main oscillator is > 10MHz, and VCC is >= 2.4V then the main clock oscillator
+    /* If the main oscillator is > 10MHz then the main clock oscillator
        forced oscillation control register (MOFCR) must be changed. */
-    if ((BSP_CFG_MCU_VCC_MV >= 2400) && (BSP_CFG_XTAL_HZ >= 10000000))
+    if (BSP_CFG_XTAL_HZ >= 10000000)
     {
         /* 10 - 20MHz. */
         SYSTEM.MOFCR.BIT.MODRV21 = 1;

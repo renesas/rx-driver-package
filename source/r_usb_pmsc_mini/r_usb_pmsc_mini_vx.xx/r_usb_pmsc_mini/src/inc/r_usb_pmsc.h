@@ -219,7 +219,6 @@ typedef struct
  ******************************************************************************/
 extern uint32_t         g_usb_pmsc_dtl;
 extern usb_pmsc_cbm_t   g_usb_pmsc_message;
-extern void     usb_cstd_set_event (usb_status_t event, usb_ctrl_t *ctrl);
 
 
 /******************************************************************************

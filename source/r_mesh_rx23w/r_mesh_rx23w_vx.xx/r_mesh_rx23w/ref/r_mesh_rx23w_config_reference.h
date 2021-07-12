@@ -25,6 +25,9 @@
 * History : DD.MM.YYYY Version  Description
 *           30.09.2019 1.00     First Release.
 *           29.11.2019 1.01     Add random-delay to advertising transmission.
+*           30.09.2020 1.10     Refer to "Program Updates (MESH FIT Module)" in
+                                the application note of RX23W Group Bluetooth
+                                Mesh FIT Module (R01AN4930).
 *******************************************************************************/
 
 #ifndef R_MESH_RX23W_CONFIG_H
@@ -54,6 +57,16 @@ Configuration Options
  *  Maximum Value: can be anything.
  */
 #define MESH_CFG_NET_CACHE_SIZE                         10
+
+/*
+ *  In a 'flooding' mesh implementation, one of the methods used to restrict
+ *  unlimited flooding, is using message cache.
+ *  This parameter specifies the size sequence number cache per node.
+ *
+ *  Minimum Value: 32
+ *  Maximum Value: can be anything.
+ */
+#define MESH_CFG_NET_SEQNUM_CACHE_SIZE                  32
 
 /*
  *  Maximum number of subnets the device can store information about.
@@ -248,6 +261,7 @@ Configuration Options
     (config).config_MS_NUM_NETWORK_INTERFACES        = MESH_CFG_NUM_NETWORK_INTERFACES; \
     (config).config_MS_NUM_PROVISIONING_INTERFACES   = MESH_CFG_NUM_PROVISIONING_INTERFACES; \
     (config).config_MS_NET_CACHE_SIZE                = MESH_CFG_NET_CACHE_SIZE; \
+    (config).config_MS_NET_SEQNUM_CACHE_SIZE         = MESH_CFG_NET_SEQNUM_CACHE_SIZE; \
     (config).config_MS_MAX_SUBNETS                   = MESH_CFG_MAX_SUBNETS; \
     (config).config_MS_MAX_DEV_KEYS                  = MESH_CFG_MAX_DEV_KEYS; \
     (config).config_MS_PROXY_FILTER_LIST_SIZE        = MESH_CFG_PROXY_FILTER_LIST_SIZE; \

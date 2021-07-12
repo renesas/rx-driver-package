@@ -103,6 +103,9 @@ void usb_pstd_bc_detect_process(void)
         {
             g_usb_pstd_bc_detect = USB_CDP;
         }
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+        ctrl.p_data =  (void *)g_usb_default_apl_task_id;
+#endif /* (BSP_CFG_RTOS_USED != 0) */
 
         usb_cstd_set_event(USB_STS_BC, &ctrl);
 

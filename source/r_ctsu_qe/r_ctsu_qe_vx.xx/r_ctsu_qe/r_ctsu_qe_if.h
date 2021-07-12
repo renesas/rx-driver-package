@@ -23,15 +23,29 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description           
 *           04.10.2018 1.00    First Release
+*           09.07.2019 1.10    Created private internal control commands ctsu_pcmd_t.
+*                              Added QE_ERR_ABNORMAL_TSCAP and QE_ERR_SENSOR_OVERFLOW return codes to Open()
+*                                (error detected during correction)
+*                              Modified to allow R_CTSU_StartScan() to be called in external trigger mode IF
+*                                Touch is performing offset tuning.
+*                              Set ctsu state to RUN (ctsu now busy) in ctsu_ctsuwr_isr() so Touch can detect
+*                                if it missed processing a scan when using external triggers.
+*                              Added special callback support for scan done interrupt.
+*                              Added Control() commands CTSU_CMD_GET_METHOD_MODE and TOUCH_CMD_GET_SCAN_INFO.
+*                              Added error checking in correction_CTSU_register_txd_set() switch default.
+*                              Added #pragma sections for diagnostic/safety code.
+*                              Modified for GCC/IAR compatibility.
+*           09.01.2020 1.11    Fixed bug where custom callback function was called twice.
+*                              Added Control() commands CTSU_CMD_SNOOZE_ENABLE and CTSU_CMD_SNOOZE_DISABLE.
+*                              Fixed compile-time bug when PLL multiplier of 13.5 is selected for RX231.
 ***********************************************************************************************************************/
 
-#ifndef QECTSU_RX_IF_H_FILE
-#define QECTSU_RX_IF_H_FILE
+#ifndef R_CTSU_QE_IF_H
+#define R_CTSU_QE_IF_H
 
 #include "platform.h"
 #include "r_typedefs_qe.h"
 #include "r_ctsu_qe_config.h"
-
 
 
 /***********************************************************************************************************************
@@ -39,7 +53,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Driver Version Number. */
 #define QECTSU_RX_VERSION_MAJOR         (1)
-#define QECTSU_RX_VERSION_MINOR         (00)
+#define QECTSU_RX_VERSION_MINOR         (11)
 
 #define CTSU_INPUT_FREQUENCY_DIV        (BSP_PCLKB_HZ / 1000000)
 
@@ -52,8 +66,10 @@ Typedef definitions
 typedef enum e_ctsu_isr_event
 {
     CTSU_EVT_SCAN_COMPLETE,
-    CTSU_EVT_OVERFLOW,              // sensor overflow (CTSUST.CTSUSOVF set)
-    CTSU_EVT_VOLT_ERR               // abnormal TSCAP voltage (CTSUERRS.CTSUICOMP set)
+    CTSU_EVT_VOLT_ERR,              // abnormal TSCAP voltage (CTSUERRS.CTSUICOMP set)
+    CTSU_EVT_SENSOR_OVERFLOW,       // sensor overflow (CTSUST.CTSUSOVF set)
+    CTSU_EVT_REF_OVERFLOW,          // reference overflow (CTSUST.CTSUROVF set)
+    CTSU_EVT_OVERFLOW,              // (CTSUST.CTSUSOVF and CTSUROVF set)
 } ctsu_isr_evt_t;
 
 
@@ -89,11 +105,14 @@ typedef enum e_ctsu_reg
 /* CTSU Control() Commands */
 typedef enum e_ctsu_cmd
 {
-    CTSU_CMD_SET_CALLBACK,                  // register callback for scan complete interrupts
+    CTSU_CMD_SET_CALLBACK,                  // set callback for scan complete interrupts
     CTSU_CMD_GET_STATE,
     CTSU_CMD_GET_STATUS,
-    CTSU_CMD_CLR_UPDATE_FLG,                // clear ctsu status update flag
-    CTSU_CMD_SET_METHOD,                        // change scan configuration
+    CTSU_CMD_SET_METHOD,                    // change scan configuration
+    CTSU_CMD_GET_METHOD_MODE,
+    CTSU_CMD_GET_SCAN_INFO,
+    CTSU_CMD_SNOOZE_ENABLE,
+    CTSU_CMD_SNOOZE_DISABLE,
     CTSU_CMD_END_ENUM
 } ctsu_cmd_t;
 
@@ -101,18 +120,28 @@ typedef enum e_ctsu_cmd
 /* CTSU_CMD_GET_STATE values */
 typedef enum e_ctsu_state
 {
-    CTSU_STATE_STOP       = 0,              // error occurred
+    CTSU_STATE_STOP       = 0,              // fatal error occurred
     CTSU_STATE_READY      = 1,              // post-scan processing (if any) complete; idle
     CTSU_STATE_RUN        = 2,              // scan in progress
     CTSU_STATE_FINISH     = 3,              // scan complete
-    // legacy
-    CTSU_STOP_MODE        = 0,
-    CTSU_READY_MODE       = 1,
-    CTSU_RUN_MODE         = 2,
-    CTSU_FINISH_MODE      = 3
 } ctsu_state_t;
 
-typedef enum e_ctsu_state   ctsu_measure_mode;  // legacy
+
+/* CTSU_CMD_GET_METHOD_MODE values */
+typedef enum e_ctsu_mode
+{
+    CTSU_MODE_SELF_SINGLE_SCAN = 0,
+    CTSU_MODE_SELF_MULTI_SCAN  = 1,
+    CTSU_MODE_MUTUAL_FULL_SCAN = 3,
+} ctsu_mode_t;
+
+
+/* CTSU_CMD_GET_SCAN_INFO */
+typedef struct st_scan_info
+{
+    uint16_t        ctsuerrs;               // register value at end of method scan
+    uint8_t         ctsust;                 // register value at end of method scan
+} scan_info_t;
 
 
 /***********************************************************************************************************************
@@ -137,4 +166,4 @@ qe_err_t R_CTSU_Control(ctsu_cmd_t cmd, uint8_t method, void *p_arg);
 qe_err_t R_CTSU_Close(void);
 uint32_t R_CTSU_GetVersion(void);
 
-#endif /* QECTSU_RX_IF_H_FILE */
+#endif /* R_CTSU_QE_IF_H */

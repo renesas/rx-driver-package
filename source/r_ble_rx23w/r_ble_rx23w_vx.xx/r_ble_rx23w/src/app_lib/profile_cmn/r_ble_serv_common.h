@@ -36,7 +36,15 @@
 /***********************************************************************************************************************
 Includes   <System Includes> , "Project Includes"
 ***********************************************************************************************************************/
+#if defined(__CCRX__) || defined(__ICCRX__)
+/*RX23W*/
 #include "r_ble_rx23w_if.h"
+#else
+/*RA4W*/
+#include "r_ble_api.h"
+#include "rm_ble_abs.h"
+#endif
+
 #include "r_ble_profile_cmn.h"
 
 /** @defgroup profile_cmn_macro Macros 
@@ -75,6 +83,16 @@ Includes   <System Includes> , "Project Includes"
  * @brief UUID of Server Characteristic Configuration descriptor.
  */
 #define BLE_SERV_SER_CNFG_UUID (0x2903)
+
+#if defined(__CCRX__) || defined(__ICCRX__)
+/*RX23W*/
+#define BLE_PRF_MTU_SIZE (BLE_CFG_GATT_MTU_SIZE)
+#define BLE_PRF_CONN_MAX (BLE_CFG_RF_CONN_MAX)
+#else
+/*RA4W*/
+#define BLE_PRF_MTU_SIZE (BLE_ABS_CFG_GATT_MTU_SIZE)
+#define BLE_PRF_CONN_MAX (BLE_ABS_CFG_RF_CONNECTION_MAXIMUM)
+#endif
 /*@}*/
 
 /** @defgroup profile_cmn_struct Structures

@@ -47,7 +47,7 @@ Includes <System Includes> , "Project Includes"
 #include "r_eeprom_spi_if.h"                      /* EEPROM driver I/F definitions                 */
 #include "r_eeprom_spi_config.h"                  /* EEPROM driver Configuration definitions       */
 #include "r_memdrv_rx_if.h"                       /* MEMORY driver I/F definitions                 */
-#include "./src/r_eeprom_spi_private.h"           /* EEPROM driver Private module definitions      */
+#include "../r_eeprom_spi_private.h"              /* EEPROM driver Private module definitions      */
 
 
 /************************************************************************************************

@@ -18,13 +18,14 @@
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_elc_rx_platform.h
- * Version      : 1.0
+ * Version      : 2.00
  * Description  : Functions for using Event Link Controller module
  ************************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *           01.07.2016 1.0     Initial Release
  *           12.09.2016 1.10    Added support for RX65N
  *           16.06.2017 1.20    Added support for RX65N(2MB), RX130(512KB)
+ *           10.06.2020 2.00    Added support for RX23W
  ***********************************************************************************************************************/
 #ifndef ELC_RX_PLATFORM_H
     #define ELC_RX_PLATFORM_H
@@ -44,6 +45,9 @@
     #endif
     #if defined(BSP_MCU_RX231)
         #include "./targets/rx231/r_elc_rx231_private.h"  /* RX231 */
+    #endif
+    #if defined(BSP_MCU_RX23W)
+        #include "./targets/rx23w/r_elc_rx23w_private.h"  /* RX23W */
     #endif
     #if defined(BSP_MCU_RX65N)
         #include "./targets/rx65n/r_elc_rx65n_private.h"  /* RX65N */

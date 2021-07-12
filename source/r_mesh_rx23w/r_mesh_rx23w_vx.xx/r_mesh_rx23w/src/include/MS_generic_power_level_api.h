@@ -20,9 +20,10 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup generic_power_level_module GENERIC_POWER_LEVEL (Mesh Generic Power Level Model)
+ * \defgroup generic_power_level_module Generic Power Level Model (GENERIC_POWER_LEVEL)
+ * \ingroup mesh_models_block
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Generic Power Level Model (GENERIC_POWER_LEVEL) module to the Application.
  */
 
@@ -32,7 +33,7 @@
 /**
  *  \defgroup generic_power_level_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
+ *  \brief This section Describes the module Notification Callback interface offered
  *  to the application
  */
 
@@ -64,14 +65,14 @@ typedef API_RESULT (* MS_GENERIC_POWER_LEVEL_SERVER_CB)
  * Generic Power Level Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_GENERIC_POWER_LEVEL_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -103,6 +104,7 @@ typedef API_RESULT (* MS_GENERIC_POWER_LEVEL_SETUP_SERVER_CB)
 /**
  *  \defgroup generic_power_level_structures Structures
  *  \{
+ *  \brief This section describes the EtherMind Mesh Generic Power Level Model Structures.
  */
 
 /**
@@ -232,12 +234,12 @@ typedef struct MS_generic_power_range_set_struct
 /**
  * \defgroup generic_power_level_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Generic Power Level Model APIs.
+ * \brief This section describes the EtherMind Mesh Generic Power Level Model APIs.
  */
 /**
- * \defgroup generic_power_level_ser_api_defs Generic Power Level Server API Definitions
+ * \defgroup generic_power_level_ser_api_defs Generic Power Level Server API
  * \{
- * This section describes the Generic Power Level Server APIs.
+ * \brief This section describes the Generic Power Level Server APIs.
  */
 
 /**
@@ -338,9 +340,9 @@ API_RESULT MS_generic_power_level_setup_server_state_update
 /** \} */
 
 /**
- * \defgroup generic_power_level_cli_api_defs Generic Power Level Client API Definitions
+ * \defgroup generic_power_level_cli_api_defs Generic Power Level Client API
  * \{
- * This section describes the Generic Power Level Client APIs.
+ * \brief This section describes the Generic Power Level Client APIs.
  */
 
 /**
@@ -402,6 +404,9 @@ API_RESULT MS_generic_power_level_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
+/** \name Messsage Send
+ *  \{
+ */
 /**
  *  \brief API to get the Generic Power Actual state of an element.
  *
@@ -587,6 +592,7 @@ API_RESULT MS_generic_power_level_client_send_reliable_pdu
             param,\
             0xFFFFFFFF\
         )
+/** \} */
 /** \} */
 /** \} */
 /** \} */

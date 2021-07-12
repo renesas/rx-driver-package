@@ -34,8 +34,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_sdsi_rx</name>
-        <version>2.02</version>
-        <zipsource>r_sdsi_rx_v2.02.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_sdsi_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>5.20</version>

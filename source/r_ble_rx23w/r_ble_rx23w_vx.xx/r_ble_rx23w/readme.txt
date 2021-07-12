@@ -10,7 +10,7 @@ R01AN4860JJ
 
 Version
 -------
-v1.10
+v2.11
 
 Overview
 --------
@@ -46,6 +46,7 @@ Supported MCUs
 Boards Tested On
 ----------------
 * Target Board for RX23W
+* Target Board for RX23W module
 * RSSKRX23W
 
 Limitations
@@ -101,7 +102,7 @@ Refer to "Adding Firmware Integration Technology Modules to CS+ Projects (R01AN1
 Toolchain(s) Used
 -----------------
 * Renesas RX v2.08
-* IAR C/C++ Compiler for Renesas RX version 4.12.1
+* IAR C/C++ Compiler for Renesas RX version 4.14.1
 
 File Structure
 --------------
@@ -114,9 +115,9 @@ File Structure
  |  |    |  r_ble_api_spec.chm
  |  |    |
  |  |    +---en
- |  |    |      r01an4860ej0110-rx23w-ble.pdf
+ |  |    |      r01an4860ej0211-rx23w-ble.pdf
  |  |    +---ja
- |  |           r01an4860jj0110-rx23w-ble.pdf
+ |  |           r01an4860jj0211-rx23w-ble.pdf
  |  |
  |  +---lib
  |  |      ble_fit_lib_selector.bat
@@ -178,6 +179,10 @@ File Structure
  |       |    |      r_ble_servs_if.h
  |       |    |      r_ble_serv_common.c
  |       |    |      r_ble_serv_common.h
+ |       |    |
+ |       |    +---rtos
+ |       |    |      r_ble_rtos.c
+ |       |    |      r_ble_rtos.h
  |       |    |
  |       |    +---sec_data
  |       |    |      r_ble_sec_data.c

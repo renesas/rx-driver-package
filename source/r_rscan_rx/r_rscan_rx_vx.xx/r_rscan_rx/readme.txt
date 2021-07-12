@@ -5,13 +5,13 @@ r_rscan_rx
 
 Document Number 
 ---------------
-R01AN2805EU0200
-R01AN2805JU0200
+R01AN2805EU0231
+R01AN2805JU0231
 
 
 Version
 -------
-v2.00
+v2.31
 
 
 Overview
@@ -54,6 +54,7 @@ Supported MCUs
 * RX230, RX231 Group
 * RX24T-512 Group
 * RX24U Group
+* RX23E-A Group
 
 
 Boards Tested On
@@ -61,6 +62,7 @@ Boards Tested On
 * RSKRX231
 * RSKRX24T
 * RSKRX24U
+* RSSKRX23E-A
 
 
 Limitations
@@ -75,7 +77,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp    
+* r_bsp
 
 
 How to add to your project
@@ -92,9 +94,9 @@ How to add to your project
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.01
-* GCC for Renesas RX 4.8.4
-* IAR C/C++ Compiler for Renesas RX 4.11.1
+* Renesas RX v3.02
+* GCC for Renesas RX 8.03.00.201904
+* IAR C/C++ Compiler for Renesas RX 4.12.1
 
 
 File Structure
@@ -105,9 +107,9 @@ r_rscan_rx
   |
   +---doc
   |   +-- en 
-  |   |   r01an2805eu0200-rx-rscan.pdf
+  |   |   r01an2805eu0231-rx-rscan.pdf
   |   +-- ja
-  |       r01an2805ju0200-rx-rscan.pdf
+  |       r01an2805ju0231-rx-rscan.pdf
   |
   +---ref
   |     r_rscan_rx_config_reference.h

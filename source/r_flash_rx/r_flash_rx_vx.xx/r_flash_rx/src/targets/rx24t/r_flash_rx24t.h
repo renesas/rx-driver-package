@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2020 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /******************************************************************************
 * File Name    : r_flash_rx24t.h
@@ -33,6 +33,7 @@
 *                              FLASH_CF_LOWEST_VALID_BLOCK and FLASH_CF_BLOCK_INVALID.
 *         : 18.11.2016 2.10    Added #define FLASH_CF_256KBOUNDARY for new large MCUs.
 *         : 06.03.2018 2.11    Added FLASH_CF_BLOCK_INVALID for 'B' and 'C' parts.
+*         : 24.06.2020 4.60    Deleted #define FLASH_CF_256KBOUNDARY.
 ******************************************************************************/
 
 #ifndef _FLASH_API_RX24T_H
@@ -62,8 +63,6 @@ Macro definitions
 #define FLASH_CF_FULL_SIZE            (FLASH_NUM_BLOCKS_CF*FLASH_CF_BLOCK_SIZE)
 #define FLASH_CF_LOWEST_VALID_BLOCK   (FLASH_CF_BLOCK_INVALID + 1)
 #define FLASH_CF_LAST_VALID_ADDR      (FLASH_CF_LOWEST_VALID_BLOCK)
-
-#define FLASH_CF_256KBOUNDARY         (0xFFFC0000)
 
 /* Delay function Setting */
 #define WAIT_DIV_LOOP_CYCLE           (4000) /* 4 cycle of 1 loop * 1000(us) */

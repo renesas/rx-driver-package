@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 #include "r_ble_cmd.h"
 #include "cli/r_ble_cli.h"
@@ -31,7 +31,14 @@ void R_BLE_CMD_ParseValues(char *p_str, uint8_t *p_buffer, uint16_t *p_length)
     {
         if (p_tp != NULL)
         {
-            p_buffer[*p_length] = (uint8_t)strtol(p_tp, NULL, 0);
+            char *p_endp;
+            p_endp = NULL;
+            p_buffer[*p_length] = (uint8_t)strtol(p_tp, &p_endp, 0);
+            if((p_buffer[*p_length] == 0) && (p_endp != NULL) && (*p_endp != '\0'))
+            {
+                *p_length = 0;
+                return;
+            }
             *p_length += 1;
         }
 

@@ -570,11 +570,10 @@ void R_BLE_SERVC_GattcCb(uint16_t type, ble_status_t result, st_ble_gattc_evt_da
                         {
                             st_ble_servc_evt_data_t evt_data = {
                                 .conn_hdl  = p_data->conn_hdl,
-
-                                .param_len = 0,
-                                .p_param   = NULL,
+                                .param_len = 2,
+                                .p_param   = &p_err_rsp_evt_param->attr_hdl,
                             };
-                            p_client->cb(BLE_SERVC_MULTI_ATTR_EVENT(p_attr->char_idx, p_attr->inst_idx, BLE_SERVC_READ_RSP), BLE_SUCCESS, &evt_data);
+                            p_client->cb(BLE_SERVC_MULTI_ATTR_EVENT(p_attr->char_idx, p_attr->inst_idx, BLE_SERVC_READ_RSP), p_err_rsp_evt_param->rsp_code, &evt_data);
                         }
                     } break;
 
@@ -588,10 +587,10 @@ void R_BLE_SERVC_GattcCb(uint16_t type, ble_status_t result, st_ble_gattc_evt_da
                         {
                             st_ble_servc_evt_data_t evt_data = {
                                 .conn_hdl  = p_data->conn_hdl,
-                                .param_len = 0,
-                                .p_param   = NULL,
+                                .param_len = 2,
+                                .p_param   = &p_err_rsp_evt_param->attr_hdl,
                             };
-                            p_client->cb(BLE_SERVC_MULTI_ATTR_EVENT(p_attr->char_idx, p_attr->inst_idx, BLE_SERVC_WRITE_RSP), BLE_SUCCESS, &evt_data);
+                            p_client->cb(BLE_SERVC_MULTI_ATTR_EVENT(p_attr->char_idx, p_attr->inst_idx, BLE_SERVC_WRITE_RSP), p_err_rsp_evt_param->rsp_code, &evt_data);
                         }
                     } break;
                 }
@@ -643,6 +642,8 @@ ble_status_t R_BLE_SERVC_RegisterClient(const st_ble_servc_info_t *p_info)
 ble_status_t R_BLE_SERVC_ReadChar(
     const st_ble_servc_char_info_t *p_attr, uint16_t conn_hdl)
 {
+    ble_status_t ret;
+
     if (NULL == p_attr)
     {
         return BLE_ERR_INVALID_ARG;
@@ -657,7 +658,16 @@ ble_status_t R_BLE_SERVC_ReadChar(
     uint16_t mtu = BLE_GATT_DEFAULT_MTU;
     R_BLE_GATT_GetMtu(conn_hdl, &mtu);
 
-    return R_BLE_GATTC_ReadChar(conn_hdl, p_attr->p_attr_hdls[conn_idx].start_hdl+1);
+    if (p_attr->db_size <= (mtu - 3))
+    {
+        ret = R_BLE_GATTC_ReadChar(conn_hdl, (uint16_t)(p_attr->p_attr_hdls[conn_idx].start_hdl+1));
+    }
+    else
+    {
+        ret = R_BLE_GATTC_ReadLongChar(conn_hdl, (uint16_t)(p_attr->p_attr_hdls[conn_idx].start_hdl+1), 0);
+    }
+
+    return ret;
 }
 
 ble_status_t R_BLE_SERVC_WriteChar(
@@ -688,7 +698,7 @@ ble_status_t R_BLE_SERVC_WriteChar(
     ret = p_attr->encode(p_app_value, &gatt_value);
 
     st_ble_gatt_hdl_value_pair_t write_data = {
-        .attr_hdl        = p_attr->p_attr_hdls[conn_idx].start_hdl + 1,
+        .attr_hdl        = (uint16_t)(p_attr->p_attr_hdls[conn_idx].start_hdl + 1),
         .value.p_value   = gatt_value.p_value,
         .value.value_len = gatt_value.value_len,
     };
@@ -743,7 +753,7 @@ ble_status_t R_BLE_SERVC_WriteCmdChar(
     ret = p_attr->encode(p_app_value, &gatt_value);
 
     st_ble_gatt_hdl_value_pair_t write_data = {
-        .attr_hdl        = p_attr->p_attr_hdls[conn_idx].start_hdl + 1,
+        .attr_hdl        = (uint16_t)(p_attr->p_attr_hdls[conn_idx].start_hdl + 1),
         .value.p_value   = gatt_value.p_value,
         .value.value_len = gatt_value.value_len,
     };
@@ -991,6 +1001,8 @@ ble_status_t R_BLE_SERVC_WriteDesc_with_Size(
 void R_BLE_SERVC_ServDiscCb(const st_ble_servc_info_t *p_info, uint16_t conn_hdl, uint8_t serv_idx, uint16_t type, void *p_param)
 {
     uint8_t conn_idx = find_conn_idx_from_conn_hdl(conn_hdl);
+    /* unused arg */
+    (void)serv_idx;
 
     if (0xFF == conn_idx)
     {
@@ -1038,10 +1050,17 @@ void R_BLE_SERVC_ServDiscCb(const st_ble_servc_info_t *p_info, uint16_t conn_hdl
                                 p_info->pp_chars[c]->pp_descs[dd]->p_attr_hdls[conn_idx] = p_char_param->descs[d].value.desc_16.desc_hdl;
                                 break;
                             }
+                            else if ((0 == memcmp(p_info->pp_chars[c]->pp_descs[dd]->uuid_128, p_char_param->descs[d].value.desc_128.uuid_128, 0x10)) &&
+                                (BLE_GATT_INVALID_ATTR_HDL_VAL == p_info->pp_chars[c]->pp_descs[dd]->p_attr_hdls[conn_idx]))    
+                                {
+                                    p_info->pp_chars[c]->pp_descs[dd]->p_attr_hdls[conn_idx] = p_char_param->descs[d].value.desc_128.desc_hdl;
+                                    break;
+                                }
                         }
                     }
                     break;
                 }
+
                 else if ((BLE_GATT_128_BIT_UUID_FORMAT == p_char_param->uuid_type) &&
                     (p_info->pp_chars[c]->uuid_type == p_char_param->uuid_type) &&
                     (0 == memcmp(p_info->pp_chars[c]->uuid_128, p_char_param->value.char_128.uuid_128, 0x10)) &&
@@ -1067,6 +1086,12 @@ void R_BLE_SERVC_ServDiscCb(const st_ble_servc_info_t *p_info, uint16_t conn_hdl
                                 (BLE_GATT_INVALID_ATTR_HDL_VAL == p_info->pp_chars[c]->pp_descs[dd]->p_attr_hdls[conn_idx]))
                             {
                                 p_info->pp_chars[c]->pp_descs[dd]->p_attr_hdls[conn_idx] = p_char_param->descs[d].value.desc_16.desc_hdl;
+                                break;
+                            }
+                            else if ((0 == memcmp(p_info->pp_chars[c]->pp_descs[dd]->uuid_128, p_char_param->descs[d].value.desc_128.uuid_128, 0x10)) &&
+                                (BLE_GATT_INVALID_ATTR_HDL_VAL == p_info->pp_chars[c]->pp_descs[dd]->p_attr_hdls[conn_idx]))
+                            {
+                                p_info->pp_chars[c]->pp_descs[dd]->p_attr_hdls[conn_idx] = p_char_param->descs[d].value.desc_128.desc_hdl;
                                 break;
                             }
                         }

@@ -14,13 +14,13 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
+ * Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
+ **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_glcdc_rx_if.h
- * Version      : 1.30
+ * Version      : 1.50
  * Description  : GLCDC interface header file
- ***********************************************************************************************************************/
+ **********************************************************************************************************************/
 /***********************************************************************************************************************
  * History : DD.MM.YYYY Version  Description
  *         : 01.10.2017 1.00     First Release
@@ -28,22 +28,32 @@
  *         : 04.04.2019 1.10     Added support for GNUC and ICCRX. 
  *         : 04.04.2019 1.20     Added support for RX72M.
  *         : 20.09.2019 1.30     Added GLCDC_TCON_PIN_NON in enum e_glcdc_tcon_pin.
- ***********************************************************************************************************************/
+ *         : 30.06.2020 1.40     Changed the following
+ *                               1.Removed "const" from the argument type of R_GLCDC_Open function.
+ *                               2.Enabled to refer to the gamma tables defined in the module
+ *                                 when GLCDC_CFG_CONFIGURATION_MODE is set to "1" or
+ *                                 QE_DISPLAY_CONFIGURATION is declared.
+ *                               3.Include the header file "r_glcdc_rx_config.h"
+ *                               4.Changed Minor version to 1.40.
+ *         : 06.11.2020 1.50     Added the prototype definition of R_GLCDC_ClutUpdate_NoReflect function.
+ *                               Changed Minor version to 1.50.
+ **********************************************************************************************************************/
 
 #ifndef R_GLCDC_RX_IF_H
 #define R_GLCDC_RX_IF_H
 
 /***********************************************************************************************************************
  Includes <System Includes> , "Project Includes"
- ************************************************************************************************************************/
+ **********************************************************************************************************************/
 #include <stdbool.h>
+#include "r_glcdc_rx_config.h"
 
 /**********************************************************************************************************************
  Macro definitions
  **********************************************************************************************************************/
 /* Version Number of API. */
 #define GLCDC_RX_VERSION_MAJOR         (1)
-#define GLCDC_RX_VERSION_MINOR         (30)
+#define GLCDC_RX_VERSION_MINOR         (50)
 
 /* Number of Gamma correction setting items  */
 #define GLCDC_GAMMA_CURVE_GAIN_ELEMENT_NUM      (16)
@@ -211,7 +221,7 @@ typedef enum e_glcdc_panel_clk_div
     GLCDC_PANEL_CLK_DIVISOR_12 = 12,       // Division Ratio 1/12.
     GLCDC_PANEL_CLK_DIVISOR_16 = 16,       // Division Ratio 1/16.
     GLCDC_PANEL_CLK_DIVISOR_24 = 24,       // Division Ratio 1/24.
-    GLCDC_PANEL_CLK_DIVISOR_32 = 32       // Division Ratio 1/32.
+    GLCDC_PANEL_CLK_DIVISOR_32 = 32        // Division Ratio 1/32.
 } glcdc_panel_clk_div_t;
 
 /** LCD TCON output pin select */
@@ -261,14 +271,14 @@ typedef enum e_glcdc_serial_output_delay
     GLCDC_SERIAL_DELAY_0_CYCLE = 0,        // 0 cycles delay.
     GLCDC_SERIAL_DELAY_1_CYCLE = 1,        // 1 cycle delay.
     GLCDC_SERIAL_DELAY_2_CYCLE = 2,        // 2 cycles delay.
-    GLCDC_SERIAL_DELAY_3_CYCLE = 3        // 3 cycles delay.
+    GLCDC_SERIAL_DELAY_3_CYCLE = 3         // 3 cycles delay.
 } glcdc_serial_output_delay_t;
 
 /** Serial RGB scan direction select (this function is not supported) */
 typedef enum e_glcdc_serial_scan_direction
 {
     GLCDC_SERIAL_FORWARD_SCAN = 0,         // Forward scan.
-    GLCDC_SERIAL_REVERSE_SCAN = 1         // Reverse scan.
+    GLCDC_SERIAL_REVERSE_SCAN = 1          // Reverse scan.
 } glcdc_serial_scan_direction_t;
 
 /** Display output signal timing setting */
@@ -496,16 +506,34 @@ typedef struct st_glcdc_status
 } glcdc_status_t;
 
 
+/***********************************************************************************************************************
+ Exported global variables (to be accessed by other files)
+ **********************************************************************************************************************/
+
+/* Enabled when GLCDC_CFG_CONFIGURATION_MODE is set to "1" or using QE for Display[RX] */
+/* QE for Display[RX] adds the macro definition "QE_DISPLAY_CONFIGURATION" to the compile options. */
+#if ((GLCDC_CFG_CONFIGURATION_MODE) || defined(QE_DISPLAY_CONFIGURATION))
+
+/* This is a gamma table that reflects the results adjusted by configuration options.
+ * This gamma table is defined in the GLCDC FIT module. (r_glcdc_private.c)
+ * Users can now refer to the gamma table.
+ */
+extern const gamma_correction_t g_glcdc_gamma_table_r;  // table of red color
+extern const gamma_correction_t g_glcdc_gamma_table_g;  // table of green color
+extern const gamma_correction_t g_glcdc_gamma_table_b;  // table of blue color
+
+#endif
 
 /***********************************************************************************************************************
  Exported global functions (to be accessed by other files)
  **********************************************************************************************************************/
-glcdc_err_t R_GLCDC_Open(glcdc_cfg_t const * const p_cfg);
+glcdc_err_t R_GLCDC_Open(glcdc_cfg_t * const p_cfg);
 glcdc_err_t R_GLCDC_Close(void);
 glcdc_err_t R_GLCDC_Control(glcdc_control_cmd_t cmd, void const * const p_args);
 glcdc_err_t R_GLCDC_LayerChange(glcdc_frame_layer_t frame, glcdc_runtime_cfg_t const * const p_args);
 glcdc_err_t R_GLCDC_ColorCorrection(glcdc_correction_cmd_t cmd, void const * const p_args);
 glcdc_err_t R_GLCDC_ClutUpdate(glcdc_frame_layer_t frame, glcdc_clut_cfg_t const * const p_clut_cfg);
+glcdc_err_t R_GLCDC_ClutUpdate_NoReflect(glcdc_frame_layer_t frame, glcdc_clut_cfg_t const * const p_clut_cfg);
 glcdc_err_t R_GLCDC_GetStatus(glcdc_status_t * const p_status);
 uint32_t R_GLCDC_GetVersion(void);
 

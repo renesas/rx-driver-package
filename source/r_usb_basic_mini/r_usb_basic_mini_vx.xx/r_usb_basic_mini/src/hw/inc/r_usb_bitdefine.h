@@ -1,48 +1,39 @@
-/*******************************************************************************
+/***********************************************************************************************************************
  * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only
- * intended for use with Renesas products. No other uses are authorized. This
- * software is owned by Renesas Electronics Corporation and is protected under
- * all applicable laws, including copyright laws.
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
  * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
- * LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
- * TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
- * ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
- * FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
- * ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
- * BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software
- * and to discontinue the availability of this software. By using this software,
- * you agree to the additional terms and conditions found by accessing the
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+ * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2015(2018) Renesas Electronics Corporation. All rights reserved.
- ******************************************************************************/
-/*******************************************************************************
+ *
+ * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
+ ***********************************************************************************************************************/
+/***********************************************************************************************************************
 * File Name    : r_usb_bitdefine.h
 * Description  : USB-IP define
- ******************************************************************************/
-/*******************************************************************************
+ ***********************************************************************************************************************/
+/**********************************************************************************************************************
 * History   : DD.MM.YYYY Version Description
 *           : 01.09.2014 1.00    First Release
 *           : 01.06.2015 1.01    Added RX231.
 *           : 30.11.2018 1.10    Supporting Smart Configurator
-******************************************************************************/
+*           : 30.06.2020 1.20    Added support for RTOS.
+ ***********************************************************************************************************************/
+#ifndef R_USB_BITDEFINE_H
+#define R_USB_BITDEFINE_H
 
-
-/*******************************************************************************
- Includes   <System Includes> , "Project Includes"
- ******************************************************************************/
-
-/*******************************************************************************
+/*****************************************************************************
  Macro definitions
  ******************************************************************************/
 
-#ifndef R_USB_BITDEFINE_H
-#define R_USB_BITDEFINE_H
- 
 /* USB0 Register definition */
 /* System Configuration Control Register */
 #define USB_SCKE                (0x0400u)   /* b10: USB clock enable */
@@ -232,15 +223,6 @@
 
 /* USB Request Index Register */
 #define USB_WINDEX              (0xFFFFu)   /* b15-0: wIndex */
-#define USB_TEST_SELECT         (0xFF00u)   /* b15-b8: Test Mode Selectors */
-#define USB_TEST_J              (0x0100u)   /* Test_J */
-#define USB_TEST_K              (0x0200u)   /* Test_K */
-#define USB_TEST_SE0_NAK        (0x0300u)   /* Test_SE0_NAK */
-#define USB_TEST_PACKET         (0x0400u)   /* Test_Packet */
-#define USB_TEST_FORCE_ENABLE   (0x0500u)   /* Test_Force_Enable */
-#define USB_TEST_STSelectors    (0x0600u)   /* Standard test selectors */
-#define USB_TEST_RESERVED       (0x4000u)   /* Reserved */
-#define USB_TEST_VSTMODES       (0xC000u)   /* VendorSpecific test modes */
 #define USB_EP_DIR              (0x0080u)   /* b7: Endpoint Direction */
 #define USB_EP_DIR_IN           (0x0080u)
 #define USB_EP_DIR_OUT          (0x0000u)
@@ -255,15 +237,12 @@
 /* Pipe Configuration Register */
 #define USB_TYPE                (0xC000u)   /* b15-14: Transfer type */
 #define USB_BFRE                (0x0400u)   /* b10: Buffer ready interrupt mode select */
-#define USB_DBLB                (0x0200u)   /* b9: Double buffer mode select */
-#define USB_SHTNAK              (0x0080u)   /* b7: Transfer end NAK */
-#define USB_DIR                 (0x0010u)   /* b4: Transfer direction select */
-#define USB_EPNUM               (0x000Fu)   /* b3-0: Endpoint number select */
 
 /* Default Control Pipe Maxpacket Size Register */
 /* Pipe Maxpacket Size Register */
 #define USB_DEVSEL              (0xF000u)   /* b15-12: Device address select */
-#define USB_MAXP                (0x007Fu)   /* b6-0: Maxpacket size of default control pipe */
+#define USB_DCP_MXPS            (0x007Fu)   /* b6-0: Maxpacket size of default control pipe */
+#define USB_PIPE_MXPS           (0x01FFu)   /* b8-0: Maxpacket size */
 
 /* Pipe Cycle Configuration Register */
 #define USB_IITV            (0x0007u)   /* b2-0: Isochronous interval */
@@ -294,6 +273,12 @@
 /* PIPExTRN */
 #define USB_TRNCNT              (0xFFFFu)   /* b15-0: Transaction counter */
 
+/* DEVADDx */
+#define USB_USBSPD              (0x00C0u)   /* b7-6: Device speed */
+#define USB_NOTUSED             (0x0000u)
+#define USB_FULLSPEED           (0x0080u)   /* Full-Speed connect */
+#define USB_LOWSPEED            (0x0040u)   /* Low-Speed connect */
+
 /* Battery Charging Control Register */
 /* BCCTRL */
 #define USB_PDDETSTS            (0x0200u)
@@ -307,33 +292,13 @@
 #define USB_IDPSRCE             (0x0002u)
 #define USB_RPDME               (0x0001u)
 
-/* DEVADDx */
-#define USB_USBSPD              (0x00C0u)   /* b7-6: Device speed */
-#define   USB_NOTUSED           (0x0000u)
-#define   USB_FULLSPEED         (0x0080u)       /* Full-Speed connect */
-#define   USB_HIGHSPEED         (0x00C0u)       /* Hi-Speed connect */
-#define   USB_LOWSPEED          (0x0040u)       /* Low-Speed connect */
-
 /* USB Module Control Register */
 /*  USB_USBMC     (*((REGP*)(USB_BASE+0xCC))) */
 #define USB_VDDUSBE             (0x0001)
 #define USB_VDCEN               (0x0080)
 
-
-
-/*******************************************************************************
- Typedef definitions
- ******************************************************************************/
-
-/*******************************************************************************
- Exported global variables
- ******************************************************************************/
-
-/*******************************************************************************
- Exported global functions (to be accessed by other files)
- ******************************************************************************/
-
 #endif /* R_USB_BITDEFINE_H */
-/******************************************************************************
-End of file
-******************************************************************************/
+
+/***********************************************************************************************************************
+End  Of File
+***********************************************************************************************************************/

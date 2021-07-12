@@ -21,9 +21,9 @@ r_tfat_rx
 |
 +---doc
 |   +---en
-|       r20an0038ej0400-rx-tfat.pdf
+|       r20an0038ej0402-rx-tfat.pdf
 |   +---ja
-|       r20an0038jj0400-rx-tfat.pdf
+|       r20an0038jj0402-rx-tfat.pdf
 |
 +---src
 |         diskio.h
@@ -32,12 +32,6 @@ r_tfat_rx
 |         ffconf.h
 |         ffsystem.c
 |         ffunicode.c
-|
-+---FITDemos
-|   |
-|   +---rx65n_1mb_rsk_sdcard_fat_sample
-|   +---rx65n_1mb_rsk_usb_fat_sample
-|   +---rx231_rsk_usb_fat_sample
 |
 +---ref
           r_tfat_rx_config_reference.h

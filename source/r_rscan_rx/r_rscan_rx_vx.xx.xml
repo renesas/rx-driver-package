@@ -8,12 +8,13 @@
         <product>RXC</product>
         <version>2.08.0</version>   
         <version>3.01.00</version>  
+        <version>3.02.00</version>  
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
         <version>4.08.04.201803</version>
-        <version>4.08.04.201902</version>
+        <version>8.03.00.201904</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -42,12 +43,12 @@
     <package>
         <type>fitmodule</type>
         <name>r_rscan_rx</name>
-        <version>2.20</version>
+        <version>x.xx</version>
         <dependency>
             <module>r_bsp</module>
-            <version>5.40</version>
+            <version>5.52</version>
         </dependency>
-        <zipsource>r_rscan_rx_v2.20.zip</zipsource>
+        <zipsource>r_rscan_rx_vx.xx.zip</zipsource>
         <application>Communications</application>
         <application>Connectivity</application>
         <function>CAN</function>

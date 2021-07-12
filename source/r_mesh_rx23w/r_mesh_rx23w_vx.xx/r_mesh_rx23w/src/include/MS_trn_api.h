@@ -22,29 +22,24 @@
 /* --------------------------------------------- Global Definitions */
 
 /**
- * \defgroup trn_module TRANSPORT (Mesh Transport Layer)
+ * \defgroup trn_module Transport Layer (TRN)
+ * \ingroup mesh_core_block
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
- *  Mesh Transport (TRANSPORT) module to the Application and other upper
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
+ *  Mesh Transport (TRN) module to the Application and other upper
  *  layers of the stack.
- */
-
-/**
- * \defgroup trn_defines Defines
- * \{
- * Describes defines for the module.
  */
 
 /**
  * \defgroup trn_constants Constants
  * \{
- * Describes Constants defined by the module.
+ * \brief This section describes the EtherMind Mesh Transport Layer Constants.
  */
 
 /**
- * Tranport Layer Control Packet Opcodes
- *
- * RFU: 0x02 - 0x0F
+ * \name Tranport Layer Control Packet Opcodes
+ *       RFU: 0x02 - 0x0F
+ * \{
  */
 
 /**
@@ -95,19 +90,20 @@
 /** Sent by a node to let other nodes determine topology of a Subnet */
 #define MS_TRN_CTRL_OPCODE_HEARTBEAT                    0x0A
 
+/** \} */
+
 /**
- * Parameter defines for Friendship Opcodes
- */
-/**
+ * \name Parameter defines for Friendship Opcodes
  * Friend Update Flags
  *
- * Bit 0: Key Refresh Flag
- *        0: Not-In-Phase2
+ * Bit 0: Key Refresh Flag \n
+ *        0: Not-In-Phase2 \n
  *        1: In-Phase2
  *
- * Bit 1: IV Update Flag
- *        0: Normal operation
+ * Bit 1: IV Update Flag \n
+ *        0: Normal operation \n
  *        1: IV Update active
+ * \{
  */
 #define MS_FRNDUPD_FLAG_KEYREF_BIT                      0
 #define MS_FRNDUPD_FLAG_KEYREF_NOTINPHASE_2             0x00
@@ -116,15 +112,19 @@
 #define MS_FRNDUPD_FLAG_IVUPDATE_BIT                    1
 #define MS_FRNDUPD_FLAG_IVUPDATE_NORMAL                 0x00
 #define MS_FRNDUPD_FLAG_IVUPDATE_ACTIVE                 0x01
+/** \} */
 
 /**
- * Friend Update More Data
+ * \name Friend Update More Data
+ * \{
  */
 #define MS_FRNDUPD_MD_QUEUE_EMPTY                       0x00
 #define MS_FRNDUPD_MD_QUEUE_NOTEMPTY                    0x01
+/** \} */
 
 /**
- * Friend Request Criteria
+ * \name Friend Request Criteria
+ * \{
  */
 #define MS_FRNDREQ_RSSIFACTOR_OFFSET                    5
 #define MS_FRNDREQ_RSSIFACTOR_MASK                      0x60
@@ -150,25 +150,32 @@
 #define MS_FRNDREQ_MINQSIZE_32                          0x05
 #define MS_FRNDREQ_MINQSIZE_64                          0x06
 #define MS_FRNDREQ_MINQSIZE_128                         0x07
+/** \} */
 
 /**
- * Heartbeat features
+ * \name Heartbeat features
+ * \{
  */
 #define MS_HEARTBEAT_FEATURE_RELAY                      (1 << 0)
 #define MS_HEARTBEAT_FEATURE_PROXY                      (1 << 1)
 #define MS_HEARTBEAT_FEATURE_FRIEND                     (1 << 2)
 #define MS_HEARTBEAT_FEATURE_LOWPOWER                   (1 << 3)
+/** \} */
 
-/** Friendship constants as defined in the specification */
+/**
+ * \name Friendship constants as defined in the specification
+ * \{
+ */
 #define MS_MIN_FRNDOFFER_DELAY                          100 /* ms */
 #define MS_TRN_INITIAL_FRNDPOLL_TIMEOUT                 1000 /* ms */
+/** \} */
 
 /** \} */
 
 /**
  *  \defgroup trn_events Events
  *  \{
- *  This section lists the Asynchronous Events notified to Application by the
+ *  \brief This section lists the Asynchronous Events notified to Application by the
  *  Module.
  */
 #define MS_TRN_FRIEND_SETUP_CNF                         0x00
@@ -177,36 +184,13 @@
 #define MS_TRN_FRIEND_TERMINATE_IND                     0x03
 
 /** \} */
-/** \} */
-
-/**
- *  \defgroup trn_marcos Utility Macros
- *  \{
- *  Initialization and other Utility Macros offered by the module.
- */
-
-/** \} */
 
 /* --------------------------------------------- Data Types/ Structures */
 
 /**
- *  \addtogroup trn_defines Defines
- *  \{
- */
-
-/**
- *  \addtogroup trn_structures Structures
- *  \{
- */
-
-/** \} */
-
-/** \} */
-
-/**
  *  \defgroup trn_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
+ *  \brief This section Describes the module Notification Callback interface offered
  *  to the application
  */
 /**
@@ -251,13 +235,9 @@ typedef void (*TRN_FRND_CB)
 /** \} */
 
 /**
- *  \addtogroup trn_defines Defines
- *  \{
- */
-
-/**
  *  \addtogroup trn_structures Structures
  *  \{
+ *  \brief This section describes the EtherMind Mesh Transport Layer Structures.
  */
 /** Transport Control Packet Opcode Type */
 typedef UCHAR   MS_TRN_CTRL_PKT_OPCODE;
@@ -450,6 +430,9 @@ typedef struct _MS_TRN_FRNDSHIP_INFO
 
 } MS_TRN_FRNDSHIP_INFO;
 
+/* Invalid LPN Handle */
+#define LPN_HANDLE_INVALID              MS_CONFIG_LIMITS(MS_MAX_LPNS)
+
 /** Hearbeat Publication state */
 typedef struct _MS_TRN_HEARTBEAT_PUBLICATION_INFO
 {
@@ -529,8 +512,6 @@ typedef struct _MS_TRN_HEARTBEAT_SUBSCRIPTION_INFO
 
 /** \} */
 
-/** \} */
-
 /** TCF (Transport Control Field) - Transport Field Value */
 
 
@@ -539,12 +520,13 @@ typedef struct _MS_TRN_HEARTBEAT_SUBSCRIPTION_INFO
 /**
  * \defgroup trn_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Transport Layer APIs.
+ * \brief This section describes the EtherMind Mesh Transport Layer APIs.
  */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/** \cond DOC_EXCLUDE */
 /**
  *  \brief Register Inerface with Transport Layer
  *
@@ -565,6 +547,7 @@ API_RESULT MS_trn_register
                /* IN */ TRN_NTF_CB        trn_cb,
                /* IN */ MS_TRN_MSG_TYPE   msg_type
            );
+/** \endcond */
 
 
 /**
@@ -649,6 +632,10 @@ API_RESULT MS_trn_send_control_pdu
 
 
 /**
+ * \name Low Power Feature Functions
+ * \{
+ */
+/**
  *  \brief API to setup Friendship.
  *
  *  \par Description
@@ -667,7 +654,7 @@ API_RESULT MS_trn_send_control_pdu
  *         listening to response for any request.
  *
  *  \param [in] poll_timeout
- *         Timeout in milliseconds after which the LPN will send Poll PDU
+ *         Timeout in units of 100 milliseconds after which the LPN will send Poll PDU
  *         to check for data from the friend.
  *
  *  \param [in] setup_timeout
@@ -728,7 +715,6 @@ API_RESULT MS_trn_lpn_manage_subscription
                UINT16        count
            );
 
-
 /**
  *  \brief API to add to friend subscription list.
  *
@@ -775,7 +761,12 @@ API_RESULT MS_trn_lpn_manage_subscription
             (addr_list),\
             (count)\
         );
+/** \} */
 
+/**
+ * \name Friend Feature Functions
+ * \{
+ */
 /**
  *  \brief To check if address matches with any of the LPN
  *
@@ -885,6 +876,12 @@ API_RESULT MS_trn_clear_all_lpn
            (
                void
            );
+/** \} */
+
+/**
+ * \name Heartbeat Functions
+ * \{
+ */
 
 /**
  *  \brief To set the Heartbeat publication data
@@ -963,6 +960,8 @@ API_RESULT MS_trn_get_heartbeat_subscription
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
 API_RESULT MS_trn_trigger_heartbeat (/* IN */ UINT8 change_in_feature_bit);
+
+/** \} */
 
 #ifdef __cplusplus
 };

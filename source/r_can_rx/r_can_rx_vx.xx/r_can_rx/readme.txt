@@ -1,16 +1,7 @@
-PLEASE REFER TO THE APPLICATION NOTE r01an2472eu0215_can FOR THIS DRIVER FOR MORE INFORMATION
+PLEASE REFER TO THE APPLICATION NOTE FOR THIS DRIVER FOR MORE INFORMATION
 
 r_can_rx
 =========
-
-Document Number 
----------------
-R01AN2472EU0320
-R01AN2472JU0320
-
-Version
--------
-v3.20.
 
 Overview
 --------
@@ -51,10 +42,6 @@ Boards Tested On
 * RSKRX72T
 
 
-Limitations
------------
-* CAN FIFO not implemented.
-
 Peripherals Used Directly
 -------------------------
 * CAN
@@ -75,9 +62,9 @@ How to add the driver to your project
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.01
-* GNURX 4.08.04
-* ICCRX 4.12.01
+* Renesas RX v3.03
+* GNURX 8.3.0.202004
+* ICCRX 4.20.1
 
 File Structure
 --------------
@@ -87,9 +74,9 @@ r_can_rx
 |
 +---doc
 |   +-- en
-|       r01an2472eu0320-rx-can.pdf
+|       r01an2472eu{VERSION_NUMBER}-rx-can.pdf
 |   +-- ja
-|       r01an2472ju0320-rx-can.pdf
+|       r01an2472ju{VERSION_NUMBER}-rx-can.pdf
 |
 +---ref
 |       r_can_rx_config_reference.h (copy to ../r_config)

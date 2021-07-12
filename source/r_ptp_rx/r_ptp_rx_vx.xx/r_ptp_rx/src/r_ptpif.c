@@ -48,6 +48,11 @@
 *                              Corrected RACT bit setting sequence in the R_PTPIF_Read_ZC2_BufRelease function.
 *		  : 31.08.2019 1.16    Supported RX72M device.
 *                              Added Bypass setting.
+*		  : 30.11.2019 1.17    Supported RX72N device.
+*                              When number of RX descriptors is one, judge whether received data exist or not referring 
+*                              EDRRR.RR substituted for RACT.
+*                              When number of TX descriptors is one, judge whether transmitting data exist or not referring 
+*                              EDTRR.TR substituted for TACT.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -383,7 +388,11 @@ int32_t R_PTPIF_Read_ZC2(uint32_t *ch, void **buf)
         ret = PTPIF_ERR_NOT_TRAN;
     }
     
+#if (1 == PTPIF_CFG_NUM_RX_DESCRIPTORS)
+	if (0x00000000L == PTPEDMAC.EDRRR.LONG)
+#else
     if (RACT != (app_ptp_rx_desc->status & RACT))
+#endif
     { /* Received data exists */
 		/* Get received port channel */
 		*ch = ((app_ptp_rx_desc->status & PORT) >> 7u);
@@ -418,7 +427,11 @@ ptpif_return_t R_PTPIF_Read_ZC2_BufRelease(void)
         return PTPIF_ERR_NOT_TRAN;
     }
 	
+#if (1 == PTPIF_CFG_NUM_RX_DESCRIPTORS)
+	if (0x00000000L == PTPEDMAC.EDRRR.LONG)
+#else
     if (RACT != (app_ptp_rx_desc->status & RACT))
+#endif
     { /* Received data exists */
         /* Move current descriptor to next one */
         app_ptp_rx_desc->status &= ~(RFP1 | RFP0 | RFE | RFOF | PORT | PVER | TYPE3 | TYPE2 | TYPE1 | TYPE0);
@@ -454,7 +467,11 @@ ptpif_return_t R_PTPIF_Write_ZC2_GetBuf(void **buf, uint16_t *size)
         ret = PTPIF_ERR_NOT_TRAN;
     }
 	
+#if (1 == PTPIF_CFG_NUM_TX_DESCRIPTORS)
+	if (0x00000000L != PTPEDMAC.EDTRR.LONG)
+#else
     if (TACT == (app_ptp_tx_desc->status & TACT))
+#endif
     { /* No remaining transmit descriptor */
         ret = PTPIF_ERR_TACT;
     }
@@ -658,12 +675,18 @@ static void _R_PTPIF_ConfigEthernet(void)
 #endif
 
     /* Initialize receive descriptor list address */
-    /* Casting the pointer to a uint32_t type is valid because the Renesas Compiler uses 4 bytes per pointer. */
+#if ((1 == BSP_MCU_RX72M) || (1 == BSP_MCU_RX72N))
     PTPEDMAC.RDLAR = (void*)app_ptp_rx_desc;
+#else /* ((1 == BSP_MCU_RX64M) || (1 == BSP_MCU_RX71M)) */
+	PTPEDMAC.RDLAR = (uint32_t)app_ptp_rx_desc;
+#endif
     
     /* Initialize transmit descriptor list address */
-    /* Casting the pointer to a uint32_t type is valid because the Renesas Compiler uses 4 bytes per pointer. */
+#if ((1 == BSP_MCU_RX72M) || (1 == BSP_MCU_RX72N))
     PTPEDMAC.TDLAR = (void*)app_ptp_tx_desc;
+#else /* ((1 == BSP_MCU_RX64M) || (1 == BSP_MCU_RX71M)) */
+	PTPEDMAC.TDLAR = (uint32_t)app_ptp_tx_desc;
+#endif
     
     /* Threshold of transmit FIFO */
     /* To prevent a transmit underflow, setting the initial value (store and forward modes) is recommended. */

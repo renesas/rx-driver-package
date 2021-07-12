@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_irq_rx_private.h
@@ -46,6 +46,8 @@
 *         : 15.08.2019  3.20    Added support for RX72M.
 *         : 25.11.2019  3.30    Added support RX13T.
 *         : 30.12.2019  3.40    Added support RX66N, RX72N.
+*         : 31.03.2020  3.50    Added support RX23E-A.
+*         : 30.06.2020  3.60    Changed revision to reflect demo upgrade.
 ***********************************************************************************************************************/
 #ifndef R_IRQ_PRIVATE_H_
 #define R_IRQ_PRIVATE_H_
@@ -58,7 +60,7 @@ Macro definitions
 ******************************************************************************/
 /* Version Number of API. */
 #define IRQ_RX_VERSION_MAJOR           (3)
-#define IRQ_RX_VERSION_MINOR           (40)
+#define IRQ_RX_VERSION_MINOR           (60)
 
 /* Bit position of interrupt enable bits in interrupt enable register. */
 #define IRQ_IEN_MASK_IRQ0   (0x01)

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name: r_ble_cli.h
@@ -135,21 +135,54 @@ ble_status_t R_BLE_CLI_Terminate(void);
 ble_status_t R_BLE_CLI_RegisterCmds(const st_ble_cli_cmd_t * const p_cmds[], uint16_t num_of_cmds);
 
 /*******************************************************************************************************************//**
+ * @brief Register CLI event callback for RTOS task wakeup.
+ * @param[in] cb        callback pointer
+ * @return BLE_SUCCESS, otherwise an error code
+ **********************************************************************************************************************/
+ble_status_t R_BLE_CLI_RegisterEventCb(ble_cli_event_cb_t cb);
+
+/*******************************************************************************************************************//**
  * @brief Process input characters from the user.
  * @details This function process the input characters.
  **********************************************************************************************************************/
 void R_BLE_CLI_Process(void);
 
 /*******************************************************************************************************************//**
+ * @brief Process input characters from the user with return value.
+ * @details This function process the input characters.
+ **********************************************************************************************************************/
+bool R_BLE_CLI_Process_With_Retval(void);
+
+/*******************************************************************************************************************//**
  * @brief Print with format like printf.
  * @details This function print with format.
  **********************************************************************************************************************/
+#if (BLE_CFG_CMD_LINE_EN == 1)
 #define R_BLE_CLI_Printf console_putsf
+#else /* (BLE_CFG_CMD_LINE_EN == 1) */
+#define R_BLE_CLI_Printf   /* null macro */
+#endif /* (BLE_CFG_CMD_LINE_EN == 1) */
 
 /*******************************************************************************************************************//**
  * @brief Inform the completion of abortable command.
  **********************************************************************************************************************/
 void R_BLE_CLI_SetCmdComp(void);
+
+
+/*******************************************************************************************************************//**
+ * @brief Print unrecognized operands message.
+ * @details This function print unrecognized operands message.\n
+ *          message format:  "<latest command line>: unrecognized operands\n"
+ **********************************************************************************************************************/
+void R_BLE_CLI_PrintUnrecognized(void);
+
+/*******************************************************************************************************************//**
+ * @brief Print command error message.
+ * @details This function print command error message.\n
+ *          message format: "command error. result : <ret>\n"
+ * @param[in] ret  Result code to print in the error message.
+ **********************************************************************************************************************/
+void R_BLE_CLI_PrintError(ble_status_t ret);
 /*@}*/
 
 #endif /* R_BLE_CLI_H */

@@ -122,7 +122,8 @@ Configuration Options
 
 /** 
  * @def BLE_CFG_RF_ADV_SET_MAX
- * @brief Maximum advertising set number.
+ * @brief Maximum advertising set number. \n
+ *        Balance and Compact libraries ignore BLE_CFG_RF_ADV_SET_MAX, because the libraries do not use advertising set.
  * @details     range: 1 to 4 \n
  *              default : 4
  */

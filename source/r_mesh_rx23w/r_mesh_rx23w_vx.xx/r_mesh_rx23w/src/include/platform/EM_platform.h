@@ -20,8 +20,11 @@
 #include <string.h>
 #include <math.h>
 #include "EM_os.h"
-#include "r_ble_rx23w_if.h"
-#include "mempool_pl.h"
+#include "MS_mempool_pl.h"
+#include "MS_storage_pl.h"
+#include "MS_systemtime_pl.h"
+#include "MS_monitor_pl.h"
+#include "prov_pl.h"
 
 /* --------------------------------------------- Global Definitions */
 //#define BLE_LOG_TAG "mesh"
@@ -51,7 +54,11 @@ extern void console_putsf(const char *p_format, ...);
 
 /* --------------------------------------------- Internal Functions */
 
+/* --------------------------------------------- External Functions */
+extern void r_ble_rf_control_error(uint32_t err_no);
+
 /* --------------------------------------------- API Declarations */
+#define EM_PLATFORM_REBOOT()    r_ble_rf_control_error(0x00000000)
 
 #endif /* _H_EM_PLATFORM_ */
 

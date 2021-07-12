@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name: r_ble_cli.c
@@ -630,7 +630,18 @@ ble_status_t R_BLE_CLI_RegisterCmds(const st_ble_cli_cmd_t * const p_cmds[], uin
     return BLE_SUCCESS;
 }
 
+ble_status_t R_BLE_CLI_RegisterEventCb(ble_cli_event_cb_t cb)
+{
+    console_register_event_cb(cb);
+    return BLE_SUCCESS;
+}
+
 void R_BLE_CLI_Process(void) // @suppress("API function naming")
+{
+    (void)R_BLE_CLI_Process_With_Retval();
+}
+
+bool R_BLE_CLI_Process_With_Retval(void) // @suppress("API function naming")
 {
     uint8_t data;
     bool escape;
@@ -640,13 +651,13 @@ void R_BLE_CLI_Process(void) // @suppress("API function naming")
 
     if (false == ret)
     {
-        return;
+        return false;
     }
 
     /* During abort callback is exist, only Ctrl-C and Ctrl-D is accepted. */
     if ((NULL != gs_cmd_abort) && (KEY_CTRLC != data) && (KEY_CTRLD != data))
     {
-        return;
+        return false;
     }
 
     if (escape)
@@ -679,12 +690,14 @@ void R_BLE_CLI_Process(void) // @suppress("API function naming")
             case KEY_CTRLD:
             {
                 key_abort();
+                return true;
             } break;
 
             case KEY_LF:
             case KEY_CR:
             {
                 key_execute();
+                return true;
             } break;
 
             case KEY_BS:
@@ -708,6 +721,8 @@ void R_BLE_CLI_Process(void) // @suppress("API function naming")
             }
         }
     }
+
+    return false;
 }
 
 void R_BLE_CLI_SetCmdComp(void) // @suppress("API function naming")
@@ -718,6 +733,18 @@ void R_BLE_CLI_SetCmdComp(void) // @suppress("API function naming")
         R_BLE_CLI_Printf("\n");
         R_BLE_CLI_Printf("%s ", BLE_PRV_CLI_PROMPT);
     }
+}
+
+void R_BLE_CLI_PrintUnrecognized(void)
+{
+    R_BLE_CLI_Printf("%s: unrecognized operands\n", gs_lines[gs_line_idx]);
+    R_BLE_CLI_SetCmdComp();
+}
+
+void R_BLE_CLI_PrintError(ble_status_t ret)
+{
+    R_BLE_CLI_Printf("command error. result : 0x%04x\n", ret);
+    R_BLE_CLI_SetCmdComp();
 }
 
 #else /* (BLE_CFG_CMD_LINE_EN == 1) && (BLE_CFG_HCI_MODE_EN == 0) */
@@ -740,12 +767,27 @@ ble_status_t R_BLE_CLI_RegisterCmds(const st_ble_cli_cmd_t * const p_cmds[], uin
     return BLE_ERR_UNSUPPORTED;
 }
 
+ble_status_t R_BLE_CLI_RegisterEventCb(ble_cli_event_cb_t cb)
+{
+    (void)cb;
+    return BLE_ERR_UNSUPPORTED;
+}
+
 void R_BLE_CLI_Process(void)
 {
 }
 
 void R_BLE_CLI_SetCmdComp(void)
 {
+}
+
+void R_BLE_CLI_PrintUnrecognized(void)
+{
+}
+
+void R_BLE_CLI_PrintError(ble_status_t ret)
+{
+    (void)ret;
 }
 
 #endif /* (BLE_CFG_CMD_LINE_EN == 1) && (BLE_CFG_HCI_MODE_EN == 0) */

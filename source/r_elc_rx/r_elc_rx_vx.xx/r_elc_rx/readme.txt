@@ -29,10 +29,10 @@ r_elc_rx
 +---doc
 |   |
 |   +-- ja
-|   |   +-- r01an3066jj0121-rx.pdf
+|   |   +-- r01an3066jj0200-rx-elc.pdf
 |   |
 |   +-- en
-|       +-- r01an3066ej0121-rx.pdf
+|       +-- r01an3066ej0200-rx-elc.pdf
 |
 +---ref
 |       r_elc_rx_config_reference.h
@@ -59,6 +59,10 @@ r_elc_rx
         +-- rx231
         |   +-- r_elc_rx231.c
         |   +-- r_elc_rx231_private.h
+        |
+        +-- rx23w
+        |   +-- r_elc_rx23w.c
+        |   +-- r_elc_rx23w_private.h
         |
         +-- rx65n
             +-- r_elc_rx65n.c

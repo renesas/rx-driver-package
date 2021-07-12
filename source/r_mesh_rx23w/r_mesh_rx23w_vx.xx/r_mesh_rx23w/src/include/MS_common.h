@@ -14,8 +14,21 @@
 #ifndef _H_MS_COMMON_
 #define _H_MS_COMMON_
 
+
 /**
- * \defgroup ms_common_module MESH Common
+ * \defgroup mesh_core_block Mesh Core
+ * \brief Mesh Core block is composed of modules corresponding with each layer defined by Mesh Core Specification and provides application with the features to perform Provisioning process and mesh networking operations. Regarding the specification, visit a Mesh Networking Specifications website of Bluetooth SIG and refer to Mesh Profile Specification.
+ */
+
+/**
+ * \defgroup mesh_models_block Mesh Models
+ * \brief Mesh Models block is composed of modules corresponding with each model defined by Mesh Model Specification and provides application with the features to support Mesh models that defines basic functionality on a mesh network. Regarding the specification, visit a Mesh Networking Specifications website of Bluetooth SIG and refer to Mesh Profile Specification.
+ */
+
+
+/**
+ * \defgroup ms_common_module Mesh Common
+ * \ingroup mesh_core_block
  * \{
  */
 
@@ -40,11 +53,6 @@
 
 /* -------------------------------------------- Global Definitions */
 /**
- * \defgroup ms_common_defines Defines
- * \{
- */
-
-/**
  * \defgroup ms_common_constants Constants
  * \{
  */
@@ -63,8 +71,6 @@
 
 /** \} */
 
-/** \} */
-
 /* -------------------------------------------- Macros */
 
 /**
@@ -72,7 +78,7 @@
  * \{
  */
 
-/**
+/*
  *  Packing Macros.
  *
  *  Syntax: MS_PACK_<Endian-ness LE/BE>_<no_of_bytes>_BYTE
@@ -209,7 +215,7 @@
         EM_mem_copy ((dst), (val), (n))
 
 
-/**
+/*
  *  Unpacking Macros.
  *
  *  Syntax: MS_UNPACK_<Endian-ness LE/BE>_<no_of_bytes>_BYTE
@@ -636,8 +642,9 @@ static API_RESULT (x) \
  * \{
  */
 
-/*
- * Module Identifier definitions.
+/**
+ * \name Module Identifier definitions.
+ * \{
  * Currently used for runtime debug enable/disable scenario.
  * In future, this can be used for other purposes as well,
  * hence these defines are placed under common header file.
@@ -645,7 +652,9 @@ static API_RESULT (x) \
 /* Page 4 - Bluetooth Protocol Modules */
 #define MS_MODULE_PAGE_4                      0x40000000
 
-/* Module - Bit Mask */
+/** \name Module - Bit Mask
+ *  \{
+ */
 #define MS_MODULE_BIT_MASK_COMMON             0x00000001
 #define MS_MODULE_BIT_MASK_BRR                0x00000002
 #define MS_MODULE_BIT_MASK_NET                0x00000004
@@ -658,8 +667,11 @@ static API_RESULT (x) \
 #define MS_MODULE_BIT_MASK_FSM                0x00000200
 #define MS_MODULE_BIT_MASK_PROV               0x00000400
 #define MS_MODULE_BIT_MASK_MESH_MODEL         0x00000800
+/** \} */
 
-/* Module ID */
+/** \name Module - ID
+ *  \{
+ */
 #define MS_MODULE_ID_COMMON                   (MS_MODULE_PAGE_4 | MS_MODULE_BIT_MASK_COMMON)
 #define MS_MODULE_ID_BRR                      (MS_MODULE_PAGE_4 | MS_MODULE_BIT_MASK_BRR)
 #define MS_MODULE_ID_NET                      (MS_MODULE_PAGE_4 | MS_MODULE_BIT_MASK_NET)
@@ -672,6 +684,7 @@ static API_RESULT (x) \
 #define MS_MODULE_ID_FSM                      (MS_MODULE_PAGE_4 | MS_MODULE_BIT_MASK_FSM)
 #define MS_MODULE_ID_PROV                     (MS_MODULE_PAGE_4 | MS_MODULE_BIT_MASK_PROV)
 #define MS_MODULE_ID_MESH_MODEL               (MS_MODULE_PAGE_4 | MS_MODULE_BIT_MASK_MESH_MODEL)
+/** \} */
 
 /** Device UUID Size */
 #define MS_DEVICE_UUID_SIZE    16
@@ -685,23 +698,34 @@ static API_RESULT (x) \
 /** Beacon URI Hash Size */
 #define MS_BCON_URI_HASH_SIZE   4
 
-/** Beacon Types */
+/** \name Beacon Types
+ *  \{
+ */
 /** Unprovisioned Device Beacon Type */
 #define MS_BCON_TYPE_UNPRVSNG_DEV    0x00
 
-/* Secure Network Beacon Type */
+/** Secure Network Beacon Type */
 #define MS_BCON_TYPE_SECURE          0x01
 
-/** Friend Role */
-/* Invalid */
+/** \} */
+
+/** \name Friend Role
+ *  \{
+ */
+/** Invalid */
 #define MS_FRND_ROLE_INVALID   0x00
 
-/* Friend */
+/** Friend */
 #define MS_FRND_ROLE_FRIEND    0x01
 
-/* LPN */
+/** LPN */
 #define MS_FRND_ROLE_LPN       0x02
 
+/** \} */
+
+/** \name Feature
+ *  \{
+ */
 /** Relay Feature */
 #define MS_FEATURE_RELAY    0x00
 /** Proxy Feature */
@@ -714,6 +738,11 @@ static API_RESULT (x) \
 /** Secure Nework Beacon */
 #define MS_FEATURE_SEC_NET_BEACON 0x04
 
+/** \} */
+
+/** \name Operation State
+ *  \{
+ */
 /** Operation: Enable */
 #define MS_ENABLE           0x01
 /** Operation: Disable */
@@ -724,6 +753,7 @@ static API_RESULT (x) \
  * when the feature is not supported.
  */
 #define MS_NOT_SUPPORTED    0x02
+/** \} */
 
 /** Network Tx State */
 #define MS_NETWORK_TX_STATE            0x00
@@ -738,12 +768,8 @@ static API_RESULT (x) \
 /* -------------------------------------------- Structures/Data Types */
 
 /**
- * \addtogroup ms_common_defines Defines
- * \{
- */
-
-/**
  * \defgroup ms_common_structures Structures
+ * \ingroup ms_common_module
  * \{
  */
 /** Payload type */
@@ -772,6 +798,11 @@ typedef struct _MS_CONFIG
 
     /** Network Cache Size */
     UINT16 config_MS_NET_CACHE_SIZE;
+
+#ifndef MS_NET_BASIC_SEQNUM_CACHE
+    /** Network Sequence Number Cache Size */
+    UINT16 config_MS_NET_SEQNUM_CACHE_SIZE;
+#endif /* MS_NET_BASIC_SEQNUM_CACHE */
 
     /** Maximum number of subnets the device can store information about. */
     UINT16 config_MS_MAX_SUBNETS;
@@ -856,8 +887,6 @@ typedef struct _MS_CONFIG
 
 /** \} */
 
-/** \} */
-
 /* -------------------------------------------- Function/API Declarations */
 #ifdef __cplusplus
 extern "C"{
@@ -870,6 +899,7 @@ extern MS_CONFIG ms_global_config;
 
 /**
  * \defgroup ms_common_api API Definitions
+ * \ingroup ms_common_module
  * \{
  */
 
@@ -877,8 +907,6 @@ extern MS_CONFIG ms_global_config;
  * API to initialize Mesh Stack. This is the first API that the
  * application should call before any other API. This function
  * initializes all the internal stack modules and creates necessary tasks.
- *
- * \note
  */
 
 /**
@@ -914,6 +942,10 @@ API_RESULT MS_shutdown
            (
                void
            );
+
+/** \name Transition Timer
+ *  \{
+ */
 
 /**
  *  \brief To start transition timer.
@@ -1031,6 +1063,8 @@ API_RESULT ms_common_init_transition_timer(void);
 /**
  * \endcond
  */
+
+/** \} */
 
 #ifdef __cplusplus
 };

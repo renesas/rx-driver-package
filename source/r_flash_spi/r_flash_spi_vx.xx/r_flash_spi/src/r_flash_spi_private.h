@@ -19,11 +19,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011(2012-2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2011(2012-2020) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_flash_spi_private.h
-* Version      : 3.00
+* Version      : 3.02
 * Description  : FLASH SPI driver private header file
 *************************************************************************************************/
 /************************************************************************************************
@@ -31,6 +31,8 @@
 *              : 23.07.2014 2.21     Created
 *              : 29.05.2015 2.32     Revised functions of same as Ver.2.32 of EEPROM SPI FIT module.
 *              : 11.02.2019 3.00     Added parameter check of  Configuration Options.
+*              : 10.12.2020 3.02     Fixed a bug that build does not pass due to #error 
+*                                    when Flash of 1Gbit or more is selected.
 *************************************************************************************************/
 #ifndef __FLASH_SPI_PRIVATE_H__
 #define __FLASH_SPI_PRIVATE_H__
@@ -153,7 +155,7 @@ Includes <System Includes> , "Project Includes"
      ((FLASH_SPI_CFG_DEV0_SIZE_512K != 1 ) &&  (FLASH_SPI_CFG_DEV0_SIZE_1M != 1) && (FLASH_SPI_CFG_DEV0_SIZE_2M != 1) && \
      (FLASH_SPI_CFG_DEV0_SIZE_4M != 1) && (FLASH_SPI_CFG_DEV0_SIZE_16M != 1) && (FLASH_SPI_CFG_DEV0_SIZE_32M != 1) && \
      (FLASH_SPI_CFG_DEV0_SIZE_64M != 1) && (FLASH_SPI_CFG_DEV0_SIZE_128M != 1) && (FLASH_SPI_CFG_DEV0_SIZE_256M != 1) && \
-     (FLASH_SPI_CFG_DEV0_SIZE_512M == 1) && (FLASH_SPI_CFG_DEV0_SIZE_1G != 1)))
+     (FLASH_SPI_CFG_DEV0_SIZE_512M != 1) && (FLASH_SPI_CFG_DEV0_SIZE_1G == 1)))
 #else 
     #error "ERROR - Only One FLASH_SPI_CFG_DEV0_SIZE_xxx can be set. -  Parameter error in configures file."
 #endif
@@ -204,7 +206,7 @@ Includes <System Includes> , "Project Includes"
      ((FLASH_SPI_CFG_DEV1_SIZE_512K != 1 ) &&  (FLASH_SPI_CFG_DEV1_SIZE_1M != 1) && (FLASH_SPI_CFG_DEV1_SIZE_2M != 1) && \
      (FLASH_SPI_CFG_DEV1_SIZE_4M != 1) && (FLASH_SPI_CFG_DEV1_SIZE_16M != 1) && (FLASH_SPI_CFG_DEV1_SIZE_32M != 1) && \
      (FLASH_SPI_CFG_DEV1_SIZE_64M != 1) && (FLASH_SPI_CFG_DEV1_SIZE_128M != 1) && (FLASH_SPI_CFG_DEV1_SIZE_256M != 1) && \
-     (FLASH_SPI_CFG_DEV1_SIZE_512M == 1) && (FLASH_SPI_CFG_DEV1_SIZE_1G != 1)))
+     (FLASH_SPI_CFG_DEV1_SIZE_512M != 1) && (FLASH_SPI_CFG_DEV1_SIZE_1G == 1)))
 #else 
     #error "ERROR - Only One FLASH_SPI_CFG_DEV1_SIZE_xxx can be set. -  Parameter error in configures file."
 #endif
@@ -333,7 +335,7 @@ void               r_flash_spi_drvif_1ms_interval(void);
 flash_spi_status_t r_flash_spi_drvif_set_loghdladdress(uint32_t user_long_que);
 
 
-/* r_flash_spi_dev_port.c */
+/* r_flash_spi_dev_port_iodefine.c or r_flash_spi_dev_port_gpio.c */
 void               r_flash_spi_cs_init(uint8_t devno);
 void               r_flash_spi_cs_reset(uint8_t devno);
 void               r_flash_spi_set_cs(uint8_t devno, uint8_t lv);

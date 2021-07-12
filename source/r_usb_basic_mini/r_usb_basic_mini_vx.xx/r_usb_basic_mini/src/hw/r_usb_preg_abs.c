@@ -18,7 +18,7 @@
  * you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2015(2019) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
   ******************************************************************************/
 /*******************************************************************************
  * File Name    : r_usb_preg_abs.c
@@ -30,6 +30,7 @@
  *         : 30.11.2018 1.10    Supporting Smart Configurator
  *         : 31.05.2019 1.11    Added support for GNUC and ICCRX.
  *         : 30.06.2019 1.12    RX23W is added.
+ *         : 30.06.2020 1.20    Added support for RTOS.
  ******************************************************************************/
 /******************************************************************************
  Includes   <System Includes> , "Project Includes"
@@ -39,7 +40,11 @@
 #include "r_usb_typedef.h"
 #include "r_usb_extern.h"
 #include "r_usb_reg_access.h"
+#include "r_usb_dmac.h"
 #include "r_usb_bitdefine.h"
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+#include "r_usb_cstd_rtos.h"
+#endif /* (BSP_CFG_RTOS_USED != 0) */
 
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
 /*******************************************************************************
@@ -475,14 +480,20 @@ void usb_pstd_forced_termination(uint16_t pipe, uint16_t status)
         /* Transfer information set */
         gp_usb_pstd_pipe[pipe]->tranlen = g_usb_pstd_data_cnt[pipe];
         gp_usb_pstd_pipe[pipe]->status = status;
-        gp_usb_pstd_pipe[pipe]->pipectr = hw_usb_read_pipectr(pipe);
 
         if (USB_NULL != (gp_usb_pstd_pipe[pipe]->complete))
         {
             (gp_usb_pstd_pipe[pipe]->complete)(gp_usb_pstd_pipe[pipe], USB_NULL, USB_NULL);
         }
 
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+        rtos_release_fixed_memory(&g_rtos_usb_mpf_id, (void *)gp_usb_pstd_pipe[pipe]);
         gp_usb_pstd_pipe[pipe] = (usb_putr_t *)USB_NULL;
+        usb_rtos_resend_msg_to_submbx (pipe, USB_PERI);
+#else   /* (BSP_CFG_RTOS_USED != 0) */
+        gp_usb_pstd_pipe[pipe] = (usb_putr_t *)USB_NULL;
+
+#endif  /* (BSP_CFG_RTOS_USED != 0) */
     }
 } /* End of function usb_pstd_forced_termination */
 

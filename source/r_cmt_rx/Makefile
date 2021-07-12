@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_cmt_rx
-VERSION = 		4.31
-MDF =			V2
+VERSION = 		4.70
+MDF = V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

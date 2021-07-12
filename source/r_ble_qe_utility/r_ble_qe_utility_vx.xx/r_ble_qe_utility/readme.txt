@@ -10,7 +10,7 @@ R01AN4907JJ
 
 Version
 -------
-v1.00
+v1.10
 
 Overview
 --------
@@ -86,9 +86,9 @@ r_ble_qe_utility
 +---doc
 |   |
 |   +---en
-|   |       r01an4907ej0100-ble-qe-util.pdf
+|   |       r01an4907ej0110-ble-qe-util.pdf
 |   +---ja
-|           r01an4907jj0100-ble-qe-util.pdf
+|           r01an4907jj0110-ble-qe-util.pdf
 +---utilities
         qe-rble-cli.zip
         qe-sig-adopted-json.zip

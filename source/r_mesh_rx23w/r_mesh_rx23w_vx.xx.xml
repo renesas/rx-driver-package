@@ -21,15 +21,15 @@
     <package>
         <type>fitmodule</type>
         <name>r_mesh_rx23w</name>
-        <version>1.01</version>
-        <zipsource>r_mesh_rx23w_v1.01.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_mesh_rx23w_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>5.40</version>
         </dependency>
         <dependency>
             <module>r_ble_rx23w</module>
-            <version>1.01</version>
+            <version>1.10</version>
         </dependency>
         <dependency>
             <module>r_flash_rx</module>

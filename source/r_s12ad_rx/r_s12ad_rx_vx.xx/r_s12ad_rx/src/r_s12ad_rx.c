@@ -49,6 +49,7 @@
 *                              - Added the process of read the A/D Data Duplication Register (ADDBLDR) to the 
 *                                R_ADC_ReadAll function.
 *                              - Added the interrupt function of A/D scan end interrupt for Group B.
+*           10.06.2020 4.60    Added RX23T and RX24T and RX24U support.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -74,18 +75,19 @@ Typedef definitions
 /***********************************************************************************************************************
 Private global variables and functions
 ***********************************************************************************************************************/
-#if (defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) \
+#if (defined(BSP_MCU_RX64M)   || defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) \
     || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T)    || defined(BSP_MCU_RX72M) \
-    || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N))
+    || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N)    || defined(BSP_MCU_RX24T) \
+    || defined(BSP_MCU_RX24U))
 
 /* In ROM */
 extern R_BSP_VOLATILE_EVENACCESS uint16_t * const  gp_dreg0_ptrs[];
 extern R_BSP_VOLATILE_EVENACCESS uint16_t * const  gp_dreg1_ptrs[];
-#if (defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T))
+#if (defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX24U))
 extern R_BSP_VOLATILE_EVENACCESS uint16_t * const  gp_dreg2_ptrs[];
 #endif
 
-#else  /* rx110/rx111/rx113/rx130/rx13t/rx230/rx231/rx23w/rx23e-a */
+#else  /* rx110/rx111/rx113/rx130/rx13t/rx230/rx231/rx23w/rx23e-a/rx23t */
 
 extern R_BSP_VOLATILE_EVENACCESS uint16_t * const  gp_dreg_ptrs[]; // In ROM
 adc_ctrl_t g_dcb = { ADC_MODE_MAX, false, NULL};  // In RAM
@@ -96,7 +98,8 @@ adc_ctrl_t g_dcb = { ADC_MODE_MAX, false, NULL};  // In RAM
 
 #if (!defined(BSP_MCU_RX64M) && !defined(BSP_MCU_RX65_ALL) && !defined(BSP_MCU_RX66T) \
     && !defined(BSP_MCU_RX71M) && !defined(BSP_MCU_RX72T) && !defined(BSP_MCU_RX72M) \
-    && !defined(BSP_MCU_RX13T) && !defined(BSP_MCU_RX66N) && !defined(BSP_MCU_RX72N))
+    && !defined(BSP_MCU_RX13T) && !defined(BSP_MCU_RX66N) && !defined(BSP_MCU_RX72N) \
+    && !defined(BSP_MCU_RX23T) && !defined(BSP_MCU_RX24T) && !defined(BSP_MCU_RX24U))
 R_BSP_PRAGMA_STATIC_INTERRUPT(adc_s12adi0_isr, VECT(S12AD,S12ADI0))
 R_BSP_PRAGMA_STATIC_INTERRUPT(adc_gbadi_isr, VECT(S12AD,GBADI))
 
@@ -237,7 +240,8 @@ adc_err_t R_ADC_Read(uint8_t            unit,
 
 #if (defined(BSP_MCU_RX64M)   || defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) \
     || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T)    || defined(BSP_MCU_RX72M) \
-    || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N))
+    || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N)    || defined(BSP_MCU_RX24T) \
+    || defined(BSP_MCU_RX24U))
     p_dregs = ADC_PRV_GET_DATA_ARR(unit);
 #else
     p_dregs = gp_dreg_ptrs;
@@ -252,7 +256,7 @@ adc_err_t R_ADC_Read(uint8_t            unit,
     {
         return ADC_ERR_INVALID_ARG;
     }
-    #elif (defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T))
+    #elif (defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX24U))
     if (unit > 2)
     {
         return ADC_ERR_INVALID_ARG;
@@ -302,7 +306,8 @@ adc_err_t R_ADC_ReadAll(adc_data_t * const  p_all_data)
     || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72M)    || defined(BSP_MCU_RX72T) \
     || defined(BSP_MCU_RX231) || defined(BSP_MCU_RX230)    || defined(BSP_MCU_RX23W) \
     || defined(BSP_MCU_RX130) || defined(BSP_MCU_RX13T)    || defined(BSP_MCU_RX66N) \
-    || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX23E_A))
+    || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX23E_A)  || defined(BSP_MCU_RX23T) \
+    || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX24U))
 
     return adc_read_all(p_all_data);
 
@@ -336,11 +341,12 @@ adc_err_t R_ADC_ReadAll(adc_data_t * const  p_all_data)
 
     return ADC_SUCCESS;
 
-#endif /* #if definedBSP_MCU_RX64M || definedBSP_MCU_RX65_ALL || definedBSP_MCU_RX66T \
+#endif /* #if (definedBSP_MCU_RX64M || definedBSP_MCU_RX65_ALL || definedBSP_MCU_RX66T \
     || definedBSP_MCU_RX71M || definedBSP_MCU_RX72M    || definedBSP_MCU_RX72T \
     || definedBSP_MCU_RX231 || definedBSP_MCU_RX230    || definedBSP_MCU_RX23W \
     || definedBSP_MCU_RX130 || definedBSP_MCU_RX13T    || definedBSP_MCU_RX66N \
-    || definedBSP_MCU_RX72N)|| defined(BSP_MCU_RX23E_A) */
+    || definedBSP_MCU_RX72N || definedBSP_MCU_RX23E_A  || definedBSP_MCU_RX23T \
+    || definedBSP_MCU_RX24T || definedBSP_MCU_RX24U) */
 
 } /* End of function R_ADC_ReadAll() */
 
@@ -362,7 +368,8 @@ adc_err_t   R_ADC_Close(uint8_t const unit)
     || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72M)    || defined(BSP_MCU_RX72T) \
     || defined(BSP_MCU_RX231) || defined(BSP_MCU_RX230)    || defined(BSP_MCU_RX23W) \
     || defined(BSP_MCU_RX130) || defined(BSP_MCU_RX13T)    || defined(BSP_MCU_RX66N) \
-    || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX23E_A))
+    || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX23E_A)  || defined(BSP_MCU_RX23T) \
+    || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX24U))
 
     return adc_close(unit);
 
@@ -429,7 +436,8 @@ adc_err_t   R_ADC_Close(uint8_t const unit)
     || definedBSP_MCU_RX71M || definedBSP_MCU_RX72M    || definedBSP_MCU_RX72T \
     || definedBSP_MCU_RX231 || definedBSP_MCU_RX230    || definedBSP_MCU_RX23W \
     || definedBSP_MCU_RX130 || definedBSP_MCU_RX13T    || definedBSP_MCU_RX66N \
-    || definedBSP_MCU_RX72N) || defined(BSP_MCU_RX23E_A) */
+    || definedBSP_MCU_RX72N || definedBSP_MCU_RX23E_A  || definedBSP_MCU_RX23T \
+    || definedBSP_MCU_RX24T || definedBSP_MCU_RX24U */
 } /* End of function R_ADC_Close() */
 
 
@@ -452,7 +460,8 @@ uint32_t  R_ADC_GetVersion(void)
 
 #if (!defined(BSP_MCU_RX64M) && !defined(BSP_MCU_RX65_ALL) && !defined(BSP_MCU_RX66T) \
     && !defined(BSP_MCU_RX71M) && !defined(BSP_MCU_RX72T) && !defined(BSP_MCU_RX72M) \
-    && !defined(BSP_MCU_RX13T) && !defined(BSP_MCU_RX66N) && !defined(BSP_MCU_RX72N))
+    && !defined(BSP_MCU_RX13T) && !defined(BSP_MCU_RX66N) && !defined(BSP_MCU_RX72N) \
+    && !defined(BSP_MCU_RX23T) && !defined(BSP_MCU_RX24T) && !defined(BSP_MCU_RX24U))
 
 /******************************************************************************
 * Function Name: adc_enable_s12adi0
@@ -512,4 +521,5 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void adc_gbadi_isr(void)
 
 #endif /* #if (!definedBSP_MCU_RX64M && !definedBSP_MCU_RX65_ALL && !definedBSP_MCU_RX66T \
     && !definedBSP_MCU_RX71M && !definedBSP_MCU_RX72T && !definedBSP_MCU_RX72M \
-    && !definedBSP_MCU_RX13T && !definedBSP_MCU_RX66N && !definedBSP_MCU_RX72N) */
+    && !definedBSP_MCU_RX13T && !definedBSP_MCU_RX66N && !definedBSP_MCU_RX72N \
+    && !definedBSP_MCU_RX23T && !definedBSP_MCU_RX24T && !definedBSP_MCU_RX24U) */

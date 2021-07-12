@@ -24,6 +24,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 29.03.2019 1.00     First Release
+*         : 31.07.2020 1.01     Added support for RX23W with 83 pin package.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -69,6 +70,9 @@ Macro definitions
 #elif BSP_CFG_MCU_PART_PACKAGE == 0xE
     #define BSP_PACKAGE_QFN56       (1)
     #define BSP_PACKAGE_PINS        (56)
+#elif BSP_CFG_MCU_PART_PACKAGE == 0xF
+    #define BSP_PACKAGE_LGA83       (1)
+    #define BSP_PACKAGE_PINS        (83)
 #else
     #error "ERROR - BSP_CFG_MCU_PART_PACKAGE - Unknown package chosen in r_bsp_config.h"
 #endif

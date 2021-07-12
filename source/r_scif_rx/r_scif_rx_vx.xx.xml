@@ -27,6 +27,7 @@
         <product>RXC</product>
         <version>2.06.00</version>
         <version>3.01.00</version>
+        <version>3.02.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -53,11 +54,11 @@
     <package>
         <type>fitmodule</type>
         <name>r_scif_rx</name>
-        <version>2.00</version>
-        <zipsource>r_scif_rx_v2.00.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_scif_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.50</version>
+            <version>5.61</version>
         </dependency>
         <application>Communications</application>
         <application>Connectivity</application>

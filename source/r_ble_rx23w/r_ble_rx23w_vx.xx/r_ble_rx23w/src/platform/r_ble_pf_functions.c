@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -34,6 +34,10 @@
 #include "r_ble_rx23w_if.h"
 #include "r_ble_rx23w_config.h"
 #include "r_ble_pf_config_private.h"
+
+#if (BSP_CFG_RTOS_USED == 1)
+#include "rtos/r_ble_rtos.h"
+#endif /* (BSP_CFG_RTOS_USED == 1) */
 
 #ifndef DISBALE_BLE_SECTION
 #if defined(__CCRX__)
@@ -109,6 +113,136 @@ BLE_SECTION_P void r_ble_rf_notify_deep_sleep(uint32_t param)
 }
 #endif /* ((BLE_EVENT_NOTIFY_ENABLE_VAL & BLE_EVENT_NOTIFY_DS_MASK) != 0) */
 
+#if ((BSP_CFG_RTOS_USED == 1) && (configUSE_MUTEXES != 1))
+#error "ERROR - Invalid settings for BLE FreeRTOS. "
+#else /* ((BSP_CFG_RTOS_USED == 1) && (configUSE_MUTEXES != 1)) */
+/***********************************************************************************************************************
+* Function Name: r_ble_mutex_init
+* Description  : Don't change this function.
+* Arguments    : None
+* Return Value : Mutex handle
+***********************************************************************************************************************/
+void * r_ble_mutex_init(void)
+{
+#if ((BSP_CFG_RTOS_USED == 1) && (configUSE_MUTEXES == 1))
+    return xSemaphoreCreateRecursiveMutex();
+#else /* ((BSP_CFG_RTOS_USED == 1) && (configUSE_MUTEXES == 1)) */
+    return (uint8_t *)!NULL;
+#endif /* ((BSP_CFG_RTOS_USED == 1) && (configUSE_MUTEXES == 1)) */
+}
+
+/***********************************************************************************************************************
+* Function Name: r_ble_mutex_term
+* Description  : Don't change this function.
+* Arguments    : Mutex handle
+* Return Value : None
+***********************************************************************************************************************/
+void r_ble_mutex_term(void * handle)
+{
+#if ((BSP_CFG_RTOS_USED == 1) && (configUSE_MUTEXES == 1))
+    if(NULL != handle)
+    {
+        vSemaphoreDelete(handle);
+    }
+#endif /* ((BSP_CFG_RTOS_USED == 1) && (configUSE_MUTEXES == 1)) */
+    return;
+}
+
+/***********************************************************************************************************************
+* Function Name: r_ble_mutex_lock
+* Description  : Don't change this function.
+* Arguments    : Mutex handle
+* Return Value : pdTRUE(success) or pdFALSE(failure)
+***********************************************************************************************************************/
+int32_t r_ble_mutex_lock(void * handle)
+{
+#if ((BSP_CFG_RTOS_USED == 1) && (configUSE_MUTEXES == 1))
+    if(pdFALSE == xSemaphoreTakeRecursive(handle, portMAX_DELAY))
+    {
+        return -1;
+    }
+    return 0;
+#else /* ((BSP_CFG_RTOS_USED == 1) && (configUSE_MUTEXES == 1)) */
+    return 0;
+#endif /* ((BSP_CFG_RTOS_USED == 1) && (configUSE_MUTEXES == 1)) */
+}
+
+/***********************************************************************************************************************
+* Function Name: r_ble_mutex_unlock
+* Description  : Don't change this function.
+* Arguments    : Mutex handle
+* Return Value : pdTRUE(success) or pdFALSE(failure)
+***********************************************************************************************************************/
+int32_t r_ble_mutex_unlock(void * handle)
+{
+#if ((BSP_CFG_RTOS_USED == 1) && (configUSE_MUTEXES == 1))
+    if(pdFALSE == xSemaphoreGiveRecursive(handle))
+    {
+        return -1;
+    }
+    return 0;
+#else /* ((BSP_CFG_RTOS_USED == 1) && (configUSE_MUTEXES == 1)) */
+    return 0;
+#endif /* ((BSP_CFG_RTOS_USED == 1) && (configUSE_MUTEXES == 1)) */
+}
+#endif /* ((BSP_CFG_RTOS_USED == 1) && (configUSE_MUTEXES != 1)) */
+
+/***********************************************************************************************************************
+* Function Name: r_ble_mcu_sleep
+* Description  : Don't change this function.
+* Arguments    : none
+* Return Value : none
+***********************************************************************************************************************/
+void r_ble_mcu_sleep(void)
+{
+#if (BSP_CFG_RTOS_USED != 1)
+    /* DTC/DMA module active */
+    if( 0 == MSTP(DMAC) )
+    {
+        /* MCU Sleep */
+        extern void r_rf_mcu_lpc_sleep(void);
+        r_rf_mcu_lpc_sleep();
+    }
+    else
+    {
+        /* MCU DeepSleep */
+        extern void r_rf_mcu_lpc_deep_sleep(void);
+        r_rf_mcu_lpc_deep_sleep();
+    }
+#endif /* (BSP_CFG_RTOS_USED != 1) */
+}
+
+/***********************************************************************************************************************
+* Function Name: r_ble_enter_critical
+* Description  : Don't change this function.
+* Arguments    : none
+* Return Value : none
+***********************************************************************************************************************/
+void r_ble_enter_critical(void)
+{
+#if (BSP_CFG_RTOS_USED != 1)
+    extern void r_ble_enter_critical_no_rtos(void);
+    r_ble_enter_critical_no_rtos();
+#else /* (BSP_CFG_RTOS_USED != 1) */
+    vTaskEnterCritical();
+#endif /* (BSP_CFG_RTOS_USED != 1) */
+}
+
+/***********************************************************************************************************************
+* Function Name: r_ble_exit_critical
+* Description  : Don't change this function.
+* Arguments    : none
+* Return Value : none
+***********************************************************************************************************************/
+void r_ble_exit_critical(void)
+{
+#if (BSP_CFG_RTOS_USED != 1)
+    extern void r_ble_exit_critical_no_rtos(void);
+    r_ble_exit_critical_no_rtos();
+#else /* (BSP_CFG_RTOS_USED != 1) */
+    vTaskExitCritical();
+#endif /* (BSP_CFG_RTOS_USED != 1) */
+}
 
 /***********************************************************************************************************************
 * Function Name: r_ble_cmt_cmi2_interrupt_func
@@ -152,6 +286,10 @@ BLE_ATTRIB_INTERRUPT void r_ble_bleirq_interrupt_func(void)
 {
     extern void r_ble_bleirq_interrupt(void);
     r_ble_bleirq_interrupt();
+
+#if (BSP_CFG_RTOS_USED == 1)
+    R_BLE_RTOS_WakeTaskFromIsr();
+#endif /* (BSP_CFG_RTOS_USED == 1) */
 }
 
 

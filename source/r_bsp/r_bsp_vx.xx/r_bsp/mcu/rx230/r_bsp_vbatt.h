@@ -23,6 +23,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 28.02.2019 1.00     First Release
+*         : 20.11.2020 1.01     Fixed the vbatt_voltage_stability_wait function for updated TN-RX*-A0214A.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -46,9 +47,7 @@ Exported global functions (to be accessed by other files)
 #if (BSP_CFG_STARTUP_DISABLE != 0) && (BSP_CFG_VBATT_ENABLE == 0)
 void R_BSP_VbattInitialSetting(void);
 #endif
-#if (BSP_CFG_VBATT_ENABLE == 0)
 void vbatt_voltage_stability_wait(void); //r_bsp internal function. DO NOT CALL.
-#endif
 
 /* End of multiple inclusion prevention macro */
 #endif

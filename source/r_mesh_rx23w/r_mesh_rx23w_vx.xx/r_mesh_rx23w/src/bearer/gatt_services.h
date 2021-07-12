@@ -37,7 +37,7 @@
 /*******************************************************************************
 * Type definitions
 *******************************************************************************/
-/* Define the available custom service states */
+/* Define the available mesh service states */
 enum mesh_serv_state
 {
     MESH_NO_SERVICES,
@@ -112,7 +112,7 @@ extern "C"
  * Register Mesh Service [one time Call]
  *
  * \param [in] priority     priority associated with internal callbacks
- *                          to the BLE Stack.
+ *                          to the BLE Protocol Stack.
  */
 ble_status_t mesh_serv_init(uint8_t priority);
 
@@ -149,14 +149,14 @@ ble_status_t mesh_serv_prov_deinit(void);
  * Notification will only be sent if given client enabled notifications before.
  *
  * \param [in] conn_hndl  Connection Identifier
- * \param [in] attidx  Attribute Index
+ * \param [in] attr_hdl  Attribute Handle
  * \param [in] val     Pointer to Data to be sent
  * \param [in] val_len Length of Data to be sent
  */
 ble_status_t mesh_prov_notify_data_out
           (
               uint16_t  conn_hndl,
-              uint8_t   attidx,
+              uint16_t  attr_hdl,
               uint8_t   * val,
               uint8_t   val_len
           );
@@ -180,14 +180,14 @@ ble_status_t mesh_serv_proxy_deinit(void);
  * Notification will only be sent if given client enabled notifications before.
  *
  * \param [in] conn_hndl  Connection Identifier
- * \param [in] attidx  Attribute Index
+ * \param [in] attr_hdl  Attribute Handle
  * \param [in] val     Pointer to Data to be sent
  * \param [in] val_len Length of Data to be sent
  */
 ble_status_t mesh_proxy_notify_data_out
           (
               uint16_t  conn_hndl,
-              uint8_t   attidx,
+              uint16_t  attr_hdl,
               uint8_t   * val,
               uint8_t   val_len
           );

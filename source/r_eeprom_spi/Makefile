@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_eeprom_spi
-VERSION = 		3.01
-MDF =			V2
+VERSION = 		3.02
+MDF = V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

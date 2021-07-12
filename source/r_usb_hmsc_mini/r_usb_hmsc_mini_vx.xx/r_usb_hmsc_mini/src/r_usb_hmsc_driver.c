@@ -1,41 +1,41 @@
-/*******************************************************************************
+/***********************************************************************************************************************
  * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only
- * intended for use with Renesas products. No other uses are authorized. This
- * software is owned by Renesas Electronics Corporation and is protected under
- * all applicable laws, including copyright laws.
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
  * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
- * LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
- * TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
- * ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
- * FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
- * ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
- * BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software
- * and to discontinue the availability of this software. By using this software,
- * you agree to the additional terms and conditions found by accessing the
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+ * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2014(2019) Renesas Electronics Corporation. All rights reserved.
- ******************************************************************************/
-/*******************************************************************************
+ *
+ * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+ ***********************************************************************************************************************/
+/***********************************************************************************************************************
 * File Name    : r_usb_hmsc_driver.c
 * Description  : USB Host MSC BOT driver
-*******************************************************************************/
-/*******************************************************************************
+ ***********************************************************************************************************************/
+/**********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *         : 01.09.2014 1.00    First Release
  *         : 01.06.2015 1.01    Added RX231.
  *         : 31.05.2019 1.11    Added support for GNUC and ICCRX.
- ******************************************************************************/
+ *         : 30.06.2020 1.20    Added support for RTOS.
+ ***********************************************************************************************************************/
 
-/*******************************************************************************
+/******************************************************************************
  Includes   <System Includes> , "Project Includes"
  ******************************************************************************/
-
 #include "r_usb_hmsc_mini_if.h"
+
+#if (BSP_CFG_RTOS_USED == 0)    /* Non-OS */
+#include "r_usb_reg_access.h"
+#include "r_usb_cstd_rtos.h"
 
 /*******************************************************************************
  Macro definitions
@@ -44,14 +44,6 @@
 /*******************************************************************************
  Typedef definitions
  ******************************************************************************/
-
-/*******************************************************************************
- Exported global variables (to be accessed by other files)
- ******************************************************************************/
-uint8_t     g_usb_hmsc_sub_class;
-uint8_t     g_usb_hmsc_data[512];
-
-extern uint16_t     g_usb_hmsc_strg_process;
 
 /*******************************************************************************
  Private global variables and functions
@@ -108,189 +100,60 @@ static uint16_t    usb_hmsc_set_device_status (uint16_t data);
 static usb_er_t    usb_hmsc_mass_storage_reset (usb_hcb_t complete);
 
 
-/******************************************************************************
-Function Name   : usb_hmsc_process
-Description     : USB HMSC Task
-Arguments       : usb_tskinfo_t *p_mess : 
-Return value    : none
-******************************************************************************/
-void usb_hmsc_process (usb_tskinfo_t *p_mess)
-{
-    switch (p_mess->msginfo)
-    {
-        case USB_MSG_HMSC_NO_DATA:
-        case USB_MSG_HMSC_DATA_IN:
-        case USB_MSG_HMSC_DATA_OUT:
-            usb_hmsc_data_act (p_mess);
-        break;
+/*******************************************************************************
+ Exported global variables (to be accessed by other files)
+ ******************************************************************************/
+uint8_t     g_usb_hmsc_sub_class;
+uint8_t     g_usb_hmsc_data[512];
 
-        case USB_MSG_HMSC_CBW_ERR:
-        case USB_MSG_HMSC_CSW_PHASE_ERR:
-            usb_hmsc_phase_err ();
-        break;
-
-        default:
-            /* Do Nothing */
-        break;
-    }
-}   /* eof usb_hmsc_process() */
-
+extern uint16_t     g_usb_hmsc_strg_process;
 
 /******************************************************************************
-Function Name   : usb_hmsc_pipe_info
-Description     : Pipe Information
-Arguments       : uint8_t *p_table : 
-                : uint16_t msgnum : 
-                : uint16_t length : 
-Return value    : uint16_t : USB_OK / USB_ERROR
-******************************************************************************/
-uint16_t usb_hmsc_pipe_info(uint8_t *p_table, uint16_t length)
-{
-    uint16_t    ofdsc;
-    uint16_t    retval;
-    int16_t     in_pipe;
-    int16_t     out_pipe;
-    uint8_t     pipe_no;
-
-    /* Check Endpoint Descriptor */
-    ofdsc = p_table[0];
-    /* Pipe initial */
-    in_pipe     = USB_NOPORT;
-    out_pipe    = USB_NOPORT;
-
-    /* WAIT_LOOP */
-    while (ofdsc < length)
-    {
-        if (USB_DT_ENDPOINT == p_table[ofdsc + 1])
-        {
-            /* Endpoint Descriptor */
-            pipe_no = usb_cstd_pipe_table_set (USB_HMSC, &p_table[ofdsc]);
-            if (USB_CFG_HMSC_BULK_OUT == pipe_no)
-            {
-                out_pipe = USB_YES;
-            }
-            else if (USB_CFG_HMSC_BULK_IN == pipe_no)
-            {
-                in_pipe = USB_YES;
-            }
-            else
-            {
-                /* Do Nothing */
-            }
-        }
-        ofdsc +=  p_table[ofdsc];
-    }
-
-    if ((in_pipe != USB_NOPORT) && (out_pipe != USB_NOPORT))
-    {
-        retval = USB_OK; /* USB_OK; */
-    }
-    else
-    {
-        retval = USB_ERROR;
-    }
-
-    return retval;
-}   /* eof usb_hmsc_pipe_info() */
-
-/******************************************************************************
-Function Name   : msc_registration
-Description     : Registration of peripheral Communications Devices Driver
+Function Name   : usb_hmsc_driver_start
+Description     : initialized USB_HMSC_TSK
 Arguments       : none
 Return value    : none
 ******************************************************************************/
-void msc_registration (void)
+static void usb_hmsc_driver_start (void)
 {
-    usb_hcdreg_t    driver;
+    gs_usb_hmsc_connect_state = USB_HMSC_DEV_DET;
 
-    /* Driver registration */
-    driver.ifclass      = USB_IFCLS_MAS;            /* Mass Storage class */
-    driver.classcheck   = &usb_hstd_class_check;
-    driver.statediagram = &usb_hmsc_device_state;
-    usb_hstd_driver_registration (&driver);
+    gs_usb_hmsc_tag_no = 1;
+    /* CBW Signature (Endian little:0x55534243/ big:0x43425355) */
+    gs_usb_hmsc_cbw.dcbw_signature = USB_MSC_CBW_SIGNATURE;
+    gs_usb_hmsc_cbw.dcbw_tag = gs_usb_hmsc_tag_no;
+    gs_usb_hmsc_cbw.dcbw_dtl_lo = 0;
+    gs_usb_hmsc_cbw.dcbw_dtl_ml = 0;
+    gs_usb_hmsc_cbw.dcbw_dtl_mh = 0;
+    gs_usb_hmsc_cbw.dcbw_dtl_hi = 0;
+    gs_usb_hmsc_cbw.bm_cbw_flags.BIT.cbw_dir = 0;
+    gs_usb_hmsc_cbw.bm_cbw_flags.BIT.reserved7 = 0;
+    gs_usb_hmsc_cbw.bcbw_lun.BIT.bcbw_lun = 0;
+    gs_usb_hmsc_cbw.bcbw_lun.BIT.reserved4 = 0;
+    gs_usb_hmsc_cbw.bcbwcb_length.BIT.bcbwcb_length = 0;
+    gs_usb_hmsc_cbw.bcbwcb_length.BIT.reserved3 = 0;
 
-} /* eof msc_registration() */
-
+    gs_usb_hmsc_cbw.cbwcb[0]  = 0;
+    gs_usb_hmsc_cbw.cbwcb[1]  = 0;
+    gs_usb_hmsc_cbw.cbwcb[2]  = 0;
+    gs_usb_hmsc_cbw.cbwcb[3]  = 0;
+    gs_usb_hmsc_cbw.cbwcb[4]  = 0;
+    gs_usb_hmsc_cbw.cbwcb[5]  = 0;
+    gs_usb_hmsc_cbw.cbwcb[6]  = 0;
+    gs_usb_hmsc_cbw.cbwcb[7]  = 0;
+    gs_usb_hmsc_cbw.cbwcb[8]  = 0;
+    gs_usb_hmsc_cbw.cbwcb[9]  = 0;
+    gs_usb_hmsc_cbw.cbwcb[10] = 0;
+    gs_usb_hmsc_cbw.cbwcb[11] = 0;
+    gs_usb_hmsc_cbw.cbwcb[12] = 0;
+    gs_usb_hmsc_cbw.cbwcb[13] = 0;
+    gs_usb_hmsc_cbw.cbwcb[14] = 0;
+    gs_usb_hmsc_cbw.cbwcb[15] = 0;
+}
 /******************************************************************************
-Function Name   : usb_hmsc_device_state
-Description     : Open / Close
-Arguments       : uint16_t data             : Device address/BC type
-                : uint16_t state            : Device state
-Return value    : none
-******************************************************************************/
-static void usb_hmsc_device_state(uint16_t data, uint16_t state)
-{
-    usb_ctrl_t  ctrl;
-#if USB_CFG_COMPLIANCE == USB_CFG_ENABLE
-    usb_compliance_t disp_param;
-#endif /* USB_CFG_COMPLIANCE == USB_CFG_ENABLE */
+ End of function usb_hmsc_driver_start
+ ******************************************************************************/
 
-    switch (state)
-    {
-        case USB_STS_DETACH:
-#if USB_CFG_COMPLIANCE == USB_CFG_ENABLE
-            disp_param.status = USB_CT_DETACH;
-            disp_param.pid    = USB_NULL;
-            disp_param.vid    = USB_NULL;
-            usb_compliance_disp ((void *)&disp_param);
-
-#endif /* USB_CFG_COMPLIANCE == USB_CFG_ENABLE */
-            usb_hmsc_strg_drive_close();
-            usb_cstd_pipe_reg_clear();
-            usb_cstd_pipe_table_clear();
-
-
-            usb_cstd_set_event(USB_STS_DETACH, &ctrl);
-        break;
-
-        case USB_STS_ATTACH:
-#if USB_CFG_BC == USB_CFG_ENABLE
-            if (USB_BC_STATE_CDP == data)
-            {
-                usb_cstd_set_event(USB_STS_BC, &ctrl);
-            }
-
-#endif /* USB_CFG_BC == USB_CFG_ENABLE */
-
-
-#if USB_CFG_COMPLIANCE == USB_CFG_ENABLE
-            disp_param.status = USB_CT_ATTACH;
-            disp_param.pid    = USB_NULL;
-            disp_param.vid    = USB_NULL;
-                usb_compliance_disp ((void *)&disp_param);
-
-#endif /* USB_CFG_COMPLIANCE == USB_CFG_ENABLE */
-        break;
-
-        case USB_STS_DEFAULT:
-            usb_hmsc_driver_start();
-        break;
-
-        case USB_STS_CONFIGURED:
-            usb_hmsc_set_device_status(USB_HMSC_DEV_ATT);
-            usb_cstd_pipe_reg_set();
-
-            /* Storage drive search. */
-            usb_hmsc_strg_drive_search (usb_hmsc_drive_complete);
-        break;
-
-        case USB_STS_SUSPEND:
-        break;
-
-        case USB_STS_RESUME:
-            usb_cstd_set_event(USB_STS_RESUME, &ctrl);
-        break;
-
-        case USB_STS_OVERCURRENT:
-            usb_cstd_set_event (USB_STS_OVERCURRENT, &ctrl);
-        break;
-
-        default:
-            /* Do Nothing */
-        break;
-    }
-
-}   /* eof usb_hmsc_device_state() */
 
 /******************************************************************************
 Function Name   : usb_hmsc_set_rw_cbw
@@ -315,7 +178,7 @@ static void usb_hmsc_set_rw_cbw(uint16_t command, uint32_t secno, uint16_t seccn
     gs_usb_hmsc_cbw.dcbw_dtl_hi = (uint8_t)(trans_byte >> 24);
     gs_usb_hmsc_cbw.bm_cbw_flags.BIT.cbw_dir = 0;
     gs_usb_hmsc_cbw.bm_cbw_flags.BIT.reserved7 = 0;
-    gs_usb_hmsc_cbw.bcbw_lun.BIT.bcbw_lun = 0;
+    gs_usb_hmsc_cbw.bcbw_lun.BIT.bcbw_lun = 0; /*** Support LUN0 ONLY ***/
     gs_usb_hmsc_cbw.bcbw_lun.BIT.reserved4 = 0;
     gs_usb_hmsc_cbw.bcbwcb_length.BIT.bcbwcb_length = 0;
     gs_usb_hmsc_cbw.bcbwcb_length.BIT.reserved3 = 0;
@@ -383,16 +246,19 @@ static void usb_hmsc_set_rw_cbw(uint16_t command, uint32_t secno, uint16_t seccn
         /* 12bytes */
         gs_usb_hmsc_cbw.bcbwcb_length.BIT.bcbwcb_length = USB_MSC_CBWCB_LENGTH;
     }
-}   /* eof usb_hmsc_set_rw_cbw() */
+}
+/******************************************************************************
+ End of function usb_hmsc_set_rw_cbw
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_set_els_cbw
 Description     : CBW parameter initialization for other commands
-Arguments       : uint8_t *p_data     : Set CBW data address.
+Arguments       : uint8_t *p_cbwcb    : Set CBW data address.
                 : uint32_t trans_byte : ATAPI command data transfer size
 Return value    : none
 ******************************************************************************/
-static void usb_hmsc_set_els_cbw(uint8_t *p_data, uint32_t trans_byte)
+static void usb_hmsc_set_els_cbw(uint8_t *p_cbwcb, uint32_t trans_byte)
 {
     uint8_t     i;
 
@@ -416,11 +282,11 @@ static void usb_hmsc_set_els_cbw(uint8_t *p_data, uint32_t trans_byte)
     /* WAIT_LOOP */
     for (i = 0; i < 12; i++)
     {
-        gs_usb_hmsc_cbw.cbwcb[i] = p_data[i];
+        gs_usb_hmsc_cbw.cbwcb[i] = p_cbwcb[i];
     }
 
     /* ATAPI command check */
-    switch (p_data[0])
+    switch (p_cbwcb[0])
     {
         /* No data */
         case USB_ATAPI_TEST_UNIT_READY:
@@ -488,7 +354,10 @@ static void usb_hmsc_set_els_cbw(uint8_t *p_data, uint32_t trans_byte)
         /* 12bytes */
         gs_usb_hmsc_cbw.bcbwcb_length.BIT.bcbwcb_length = USB_MSC_CBWCB_LENGTH;
     }
-}   /* eof usb_hmsc_set_els_cbw() */
+}
+/******************************************************************************
+ End of function usb_hmsc_set_els_cbw
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_clr_data
@@ -506,8 +375,10 @@ static void usb_hmsc_clr_data(uint16_t len, uint8_t *p_buf)
     {
         *p_buf++ = 0x00;
     }
-}   /* eof usb_hmsc_clr_data() */
-
+}
+/******************************************************************************
+ End of function usb_hmsc_clr_data
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_no_data
@@ -525,7 +396,10 @@ static uint16_t usb_hmsc_no_data (void)
     gs_usb_hmsc_data_seq = USB_SEQ_0;
 
     return USB_OK; /* USB_OK; */
-}   /* eof usb_hmsc_no_data() */
+}
+/******************************************************************************
+ End of function usb_hmsc_no_data
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_data_in
@@ -541,13 +415,15 @@ static uint16_t usb_hmsc_data_in(uint8_t *p_buff, uint32_t size)
     mess.keyword = 0;
     gsp_usb_hmsc_buff = p_buff;
     gs_usb_hmsc_data_size = size;
-
     gs_usb_hmsc_process = USB_MSG_HMSC_DATA_IN;
     usb_hmsc_specified_path (&mess);
     gs_usb_hmsc_data_seq = USB_SEQ_0;
 
     return USB_OK; /* USB_OK; */
-}   /* eof usb_hmsc_data_in() */
+}
+/******************************************************************************
+ End of function usb_hmsc_data_in
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_data_out
@@ -568,7 +444,10 @@ static uint16_t usb_hmsc_data_out(uint8_t *p_buff, uint32_t size)
     gs_usb_hmsc_data_seq = USB_SEQ_0;
 
     return USB_OK; /* USB_OK; */
-}   /* eof usb_hmsc_data_out() */
+}
+/******************************************************************************
+ End of function usb_hmsc_data_out
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_data_act
@@ -728,93 +607,10 @@ static void usb_hmsc_data_act(usb_tskinfo_t *p_mess)
             gs_usb_hmsc_data_seq = USB_SEQ_0;
         break;
     }
-}   /* eof usb_hmsc_data_act() */
-
+}
 /******************************************************************************
-Function Name   : usb_hmsc_phase_err
-Description     : HMSC Stall Error
-Arguments       : none
-Return value    : none
-******************************************************************************/
-static void usb_hmsc_phase_err (void)
-{
-    switch (gs_usb_hmsc_phase_err_seq)
-    {
-        case USB_SEQ_0:
-            /* MassStorage Reset Class Request*/
-            usb_hmsc_mass_storage_reset((usb_hcb_t)usb_hmsc_check_result);
-            gs_usb_hmsc_phase_err_seq++;
-        break;
-
-        case USB_SEQ_1:
-            usb_hmsc_clear_stall (USB_CFG_HMSC_BULK_OUT, usb_hmsc_check_result_stall_pipe_cb);
-            gs_usb_hmsc_phase_err_seq++;
-        break;
-        case USB_SEQ_2:
-            usb_hmsc_clear_stall (USB_CFG_HMSC_BULK_IN, usb_hmsc_check_result_stall_pipe_cb);
-            gs_usb_hmsc_phase_err_seq++;
-        break;
-        case USB_SEQ_3:
-            usb_hmsc_command_result (USB_HMSC_CSW_PHASE_ERR);
-            gs_usb_hmsc_phase_err_seq = USB_SEQ_0;
-        break;
-
-        default:
-            /* Do Nothing */
-        break;
-    }
-}   /* eof usb_hmsc_phase_err() */
-
-/******************************************************************************
-Function Name   : usb_hmsc_specified_path
-Description     : Next Process Selector
-Arguments       : usb_tskinfo_t *p_mess : Pointer to usb_tskinfo_t structure
-Return value    : none
-******************************************************************************/
-static void usb_hmsc_specified_path (usb_tskinfo_t *p_mess)
-{
-    /* Send Message for USB Host Device Class. Next phase process. */
-    USB_GET_SND(USB_HCLASS_MBX, gs_usb_hmsc_process, &usb_hstd_dummy_function, (usb_strct_t)p_mess->keyword);
-}   /* eof usb_hmsc_specified_path() */
-
-/******************************************************************************
-Function Name   : usb_hmsc_check_result
-Description     : Hub class check result
-Arguments       : usb_hutr_t *p_mess : Pointer to usb_tskinfo_t structure
-Return value    : none
-******************************************************************************/
-static void usb_hmsc_check_result (usb_hutr_t *p_mess)
-{
-    /* Send Message for USB Host Device Class. Complete usb data transfer. */
-    USB_GET_SND(USB_HCLASS_MBX, gs_usb_hmsc_process, &usb_hstd_dummy_function, (usb_strct_t)p_mess->status);
-}   /* eof usb_hmsc_check_result() */
-
-/******************************************************************************
-Function Name   : usb_hmsc_check_result_stall_pipe_cb
-Description     : Hub class check result
-Arguments       : uint16_t pipe  : 
-                : uint16_t state : 
-Return value    : none
-******************************************************************************/
-static void usb_hmsc_check_result_stall_pipe_cb (uint16_t pipe, uint16_t state)
-{
-    g_usb_hstd_current_pipe = pipe;
-
-    /* Send Message for USB Host Device Class. Clear stall complete. */
-    USB_GET_SND(USB_HCLASS_MBX, gs_usb_hmsc_process, &usb_hstd_dummy_function, state);
-}   /* eof usb_hmsc_check_result_stall_pipe_cb() */
-
-/******************************************************************************
-Function Name   : usb_hmsc_command_result
-Description     : Hub class check result
-Arguments       : uint16_t result     : Result
-Return value    : none
-******************************************************************************/
-static void usb_hmsc_command_result (uint16_t result)
-{
-    /* Send Message for StrageDriveTask. Notification ATAPI command processing complete. */
-    USB_GET_SND(USB_HSTRG_MBX, g_usb_hmsc_strg_process, &usb_hstd_dummy_function, (usb_strct_t)result);
-}   /* eof usb_hmsc_command_result() */
+ End of function usb_hmsc_data_act
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_send_cbw
@@ -837,7 +633,10 @@ static uint16_t usb_hmsc_send_cbw (void)
     err = usb_hmsc_send_data((uint8_t *)&gs_usb_hmsc_cbw, USB_MSC_CBWLENGTH);
 
     return err;
-}   /* eof usb_hmsc_send_cbw() */
+}
+/******************************************************************************
+ End of function usb_hmsc_send_cbw
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_rcv_data
@@ -849,7 +648,7 @@ Return value    : uint16_t                  : Error Code
 static uint16_t usb_hmsc_rcv_data (uint8_t *p_buff, uint32_t size)
 {
     usb_er_t    err;
-
+    /* pipe number */
     gs_usb_hmsc_receive_data.pipenum   = USB_CFG_HMSC_BULK_IN;
     /* Transfer data address */
     gs_usb_hmsc_receive_data.p_tranadr = (void*)p_buff;
@@ -861,17 +660,20 @@ static uint16_t usb_hmsc_rcv_data (uint8_t *p_buff, uint32_t size)
     gs_usb_hmsc_receive_data.complete  = (usb_hcb_t)&usb_hmsc_check_result;
 
     err = usb_hstd_transfer_start(&gs_usb_hmsc_receive_data);
-    if (err != USB_OK) 
+    if (USB_OK != err)
     {
         return USB_HMSC_SUBMIT_ERR;
     }
     return err;
-}   /* eof usb_hmsc_rcv_data() */
+}
+/******************************************************************************
+ End of function usb_hmsc_rcv_data
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_send_data
 Description     : Send Pipe Data
-Arguments       : uint8_t  *p_buff           : Data Info Address
+Arguments       : uint8_t  *p_buff          : Data Info Address
                 : uint32_t size             : Data Size
 Return value    : uint16_t                  : Error Code(USB_OK)
 ******************************************************************************/
@@ -980,7 +782,10 @@ static uint16_t usb_hmsc_rcv_csw_check(uint16_t result)
         break;
     }
     return USB_HMSC_CSW_ERR;
-}   /* eof usb_hmsc_rcv_csw_check() */
+}
+/******************************************************************************
+ End of function usb_hmsc_rcv_csw_check
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_clear_stall
@@ -996,45 +801,11 @@ static usb_er_t usb_hmsc_clear_stall (uint16_t pipe, usb_cbinfo_t complete)
     err = usb_hstd_change_device_state (complete, USB_DO_CLEAR_STALL, pipe);
 
     return err;
-}   /* eof usb_hmsc_clear_stall () */
-
+}
 /******************************************************************************
-Function Name   : usb_hmsc_drive_complete
-Description     : Next Process Selector
-Argument        : usb_tskinfo_t *p_mess : Pointer to usb_tskinfo_t structure
-Return          : none
-******************************************************************************/
-static void usb_hmsc_drive_complete(usb_tskinfo_t *p_mess)
-{
-    usb_ctrl_t  ctrl;
+ End of function usb_hmsc_clear_stall
+ ******************************************************************************/
 
-    ctrl.type = USB_HMSC;
-    usb_cstd_set_event(USB_STS_CONFIGURED, &ctrl);
-
-}   /* eof usb_hmsc_drive_complete() */
-
-/******************************************************************************
-Function Name   : usb_hmsc_set_device_status
-Description     : Sets HMSCD operation state
-Arguments       : uint16_t data : 
-Return value    : uint16_t : USB_OK
-******************************************************************************/
-static uint16_t usb_hmsc_set_device_status (uint16_t data)
-{
-    gs_usb_hmsc_connect_state = data;
-    return USB_OK; /* USB_OK; */
-}   /* eof usb_hmsc_set_device_status() */
-
-/******************************************************************************
-Function Name   : usb_hmsc_get_device_status
-Description     : Responds to HMSCD operation state
-Arguments       : none
-Return value    : uint16_t : USB_HMSC_DEV_DET/USB_HMSC_DEV_ATT
-******************************************************************************/
-uint16_t usb_hmsc_get_device_status (void)
-{
-    return (gs_usb_hmsc_connect_state);
-}   /* eof usb_hmsc_get_device_status() */
 
 /******************************************************************************
 Function Name   : usb_hmsc_read10
@@ -1055,7 +826,10 @@ uint16_t usb_hmsc_read10 (uint8_t *p_buff, uint32_t secno, uint16_t seccnt, uint
     /* Data IN */
     hmsc_retval = usb_hmsc_data_in(p_buff, trans_byte);
     return (hmsc_retval);
-}   /* eof usb_hmsc_read10() */
+}
+/******************************************************************************
+ End of function usb_hmsc_read10
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_write10
@@ -1076,7 +850,10 @@ uint16_t usb_hmsc_write10 (uint8_t *p_buff, uint32_t secno, uint16_t seccnt, uin
     /* Data OUT */
     hmsc_retval = usb_hmsc_data_out(p_buff, trans_byte);
     return (hmsc_retval);
-}   /* eof usb_hmsc_write10() */
+}
+/******************************************************************************
+ End of function usb_hmsc_write10
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_test_unit
@@ -1102,7 +879,10 @@ uint16_t usb_hmsc_test_unit (void)
     /* No Data */
     hmsc_retval = usb_hmsc_no_data ();
     return (hmsc_retval);
-}   /* eof usb_hmsc_test_unit() */
+}
+/******************************************************************************
+ End of function usb_hmsc_test_unit
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_request_sense
@@ -1131,7 +911,10 @@ uint16_t usb_hmsc_request_sense (uint8_t *p_buff)
     /* Data IN */
     hmsc_retval = usb_hmsc_data_in (p_buff, (uint32_t)length);
     return (hmsc_retval);
-}   /* eof usb_hmsc_request_sense() */
+}
+/******************************************************************************
+ End of function usb_hmsc_request_sense
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_inquiry
@@ -1160,7 +943,10 @@ uint16_t usb_hmsc_inquiry (uint8_t *p_buff)
     /* Data IN */
     hmsc_retval = usb_hmsc_data_in (p_buff, (uint32_t)length);
     return (hmsc_retval);
-}   /* eof usb_hmsc_inquiry() */
+}
+/******************************************************************************
+ End of function usb_hmsc_inquiry
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_read_capacity
@@ -1187,7 +973,10 @@ uint16_t usb_hmsc_read_capacity (uint8_t *p_buff)
     /* Data IN */
     hmsc_retval = usb_hmsc_data_in (p_buff, (uint32_t)length);
     return (hmsc_retval);
-}   /* eof usb_hmsc_read_capacity() */
+}
+/******************************************************************************
+ End of function usb_hmsc_read_capacity
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_read_format_capacity
@@ -1216,7 +1005,10 @@ uint16_t usb_hmsc_read_format_capacity (uint8_t *p_buff)
     /* Data IN */
     hmsc_retval = usb_hmsc_data_in (p_buff, (uint32_t)length);
     return (hmsc_retval);
-}   /* eof usb_hmsc_read_format_capacity() */
+}
+/******************************************************************************
+ End of function usb_hmsc_read_format_capacity
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_get_max_unit
@@ -1247,7 +1039,10 @@ usb_er_t usb_hmsc_get_max_unit (usb_hcb_t complete)
 
     err = usb_hstd_transfer_start(&gs_usb_hmsc_class_request);
     return err;
-}   /* eof usb_hmsc_get_max_unit() */
+}
+/******************************************************************************
+ End of function usb_hmsc_get_max_unit
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_mass_storage_reset
@@ -1278,7 +1073,10 @@ static usb_er_t usb_hmsc_mass_storage_reset (usb_hcb_t complete)
 
     err = usb_hstd_transfer_start(&gs_usb_hmsc_class_request);
     return err;
-}   /* eof usb_hmsc_mass_storage_reset() */
+}
+/******************************************************************************
+ End of function usb_hmsc_mass_storage_reset
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_prevent_allow
@@ -1306,7 +1104,10 @@ uint16_t usb_hmsc_prevent_allow (uint8_t *p_buff)
     /* No Data */
     hmsc_retval = usb_hmsc_no_data();
     return (hmsc_retval);
-}   /* eof usb_hmsc_prevent_allow() */
+}
+/******************************************************************************
+ End of function usb_hmsc_prevent_allow
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hmsc_mode_sense10
@@ -1362,7 +1163,11 @@ uint16_t usb_hmsc_mode_sense10 (uint8_t *p_buff)
     /* Data IN */
     hmsc_retval = usb_hmsc_data_in(p_buff, (uint32_t)length);
     return (hmsc_retval);
-}   /* eof usb_hmsc_mode_sense10() */
+}
+/******************************************************************************
+ End of function usb_hmsc_mode_sense10
+ ******************************************************************************/
+
 
 /******************************************************************************
 Function Name   : usb_hmsc_mode_select10
@@ -1416,52 +1221,207 @@ uint16_t usb_hmsc_mode_select10 (uint8_t *p_buff)
     /* Data OUT */
     hmsc_retval = usb_hmsc_data_out(p_buff, (uint32_t)length);
     return (hmsc_retval);
-}   /* eof usb_hmsc_mode_select10() */
+}
+/******************************************************************************
+ End of function usb_hmsc_mode_select10
+ ******************************************************************************/
 
 /******************************************************************************
-Function Name   : usb_hmsc_driver_start
-Description     : initialized USB_HMSC_TSK
+Function Name   : usb_hmsc_pipe_info
+Description     : Pipe Information
+Arguments       : uint8_t *p_table : 
+                : uint16_t msgnum : 
+                : uint16_t length : 
+Return value    : uint16_t : USB_OK / USB_ERROR
+******************************************************************************/
+uint16_t usb_hmsc_pipe_info(uint8_t *p_table, uint16_t length)
+{
+    uint16_t    ofdsc;
+    uint16_t    retval;
+    int16_t     in_pipe;
+    int16_t     out_pipe;
+    uint8_t     pipe_no;
+
+    /* Check Endpoint Descriptor */
+    ofdsc = p_table[0];
+    /* Pipe initial */
+    in_pipe     = USB_NOPORT;
+    out_pipe    = USB_NOPORT;
+
+    /* WAIT_LOOP */
+    while (ofdsc < length)
+    {
+        if (USB_DT_ENDPOINT == p_table[ofdsc + 1])
+        {
+            /* Endpoint Descriptor */
+            pipe_no = usb_cstd_pipe_table_set (USB_HMSC, &p_table[ofdsc]);
+            if (USB_CFG_HMSC_BULK_OUT == pipe_no)
+            {
+                out_pipe = USB_YES;
+            }
+            else if (USB_CFG_HMSC_BULK_IN == pipe_no)
+            {
+                in_pipe = USB_YES;
+            }
+            else
+            {
+                /* Do Nothing */
+            }
+        }
+        ofdsc +=  p_table[ofdsc];
+    }
+
+    if ((in_pipe != USB_NOPORT) && (out_pipe != USB_NOPORT))
+    {
+        retval = USB_OK; /* USB_OK; */
+    }
+    else
+    {
+        retval = USB_ERROR;
+    }
+
+    return retval;
+}   /* eof usb_hmsc_pipe_info() */
+
+/******************************************************************************
+Function Name   : usb_hmsc_registration
+Description     : Registration of peripheral Communications Devices Driver
 Arguments       : none
 Return value    : none
 ******************************************************************************/
-static void usb_hmsc_driver_start (void)
+void usb_hmsc_registration (void)
 {
-    /* 0x00 */
-    gs_usb_hmsc_connect_state = USB_HMSC_DEV_DET;
+    usb_hcdreg_t    driver;
 
-    gs_usb_hmsc_tag_no = 1;
-    /* CBW Signature (Endian little:0x55534243/ big:0x43425355) */
-    gs_usb_hmsc_cbw.dcbw_signature = USB_MSC_CBW_SIGNATURE;
-    gs_usb_hmsc_cbw.dcbw_tag = gs_usb_hmsc_tag_no;
-    gs_usb_hmsc_cbw.dcbw_dtl_lo = 0;
-    gs_usb_hmsc_cbw.dcbw_dtl_ml = 0;
-    gs_usb_hmsc_cbw.dcbw_dtl_mh = 0;
-    gs_usb_hmsc_cbw.dcbw_dtl_hi = 0;
-    gs_usb_hmsc_cbw.bm_cbw_flags.BIT.cbw_dir = 0;
-    gs_usb_hmsc_cbw.bm_cbw_flags.BIT.reserved7 = 0;
-    gs_usb_hmsc_cbw.bcbw_lun.BIT.bcbw_lun = 0;
-    gs_usb_hmsc_cbw.bcbw_lun.BIT.reserved4 = 0;
-    gs_usb_hmsc_cbw.bcbwcb_length.BIT.bcbwcb_length = 0;
-    gs_usb_hmsc_cbw.bcbwcb_length.BIT.reserved3 = 0;
+    /* Driver registration */
+    driver.ifclass      = USB_IFCLS_MAS;            /* Mass Storage class */
+    driver.classcheck   = &usb_hstd_class_check;
+    driver.statediagram = &usb_hmsc_device_state;
+    usb_hstd_driver_registration (&driver);
 
-    gs_usb_hmsc_cbw.cbwcb[0]  = 0;
-    gs_usb_hmsc_cbw.cbwcb[1]  = 0;
-    gs_usb_hmsc_cbw.cbwcb[2]  = 0;
-    gs_usb_hmsc_cbw.cbwcb[3]  = 0;
-    gs_usb_hmsc_cbw.cbwcb[4]  = 0;
-    gs_usb_hmsc_cbw.cbwcb[5]  = 0;
-    gs_usb_hmsc_cbw.cbwcb[6]  = 0;
-    gs_usb_hmsc_cbw.cbwcb[7]  = 0;
-    gs_usb_hmsc_cbw.cbwcb[8]  = 0;
-    gs_usb_hmsc_cbw.cbwcb[9]  = 0;
-    gs_usb_hmsc_cbw.cbwcb[10] = 0;
-    gs_usb_hmsc_cbw.cbwcb[11] = 0;
-    gs_usb_hmsc_cbw.cbwcb[12] = 0;
-    gs_usb_hmsc_cbw.cbwcb[13] = 0;
-    gs_usb_hmsc_cbw.cbwcb[14] = 0;
-    gs_usb_hmsc_cbw.cbwcb[15] = 0;
-}   /* eof usb_hmsc_driver_start() */
+}
+/******************************************************************************
+ End of function usb_hmsc_registration
+ ******************************************************************************/
 
+/******************************************************************************
+Function Name   : usb_hmsc_device_state
+Description     : Open / Close
+Arguments       : uint16_t data             : Device address/BC type
+                : uint16_t state            : Device state
+Return value    : none
+******************************************************************************/
+static void usb_hmsc_device_state(uint16_t data, uint16_t state)
+{
+    usb_ctrl_t  ctrl;
+#if USB_CFG_COMPLIANCE == USB_CFG_ENABLE
+    usb_compliance_t disp_param;
+#endif /* USB_CFG_COMPLIANCE == USB_CFG_ENABLE */
+
+    switch (state)
+    {
+        case USB_STS_DETACH:
+#if USB_CFG_COMPLIANCE == USB_CFG_ENABLE
+            disp_param.status = USB_CT_DETACH;
+            disp_param.pid    = USB_NULL;
+            disp_param.vid    = USB_NULL;
+            usb_compliance_disp ((void *)&disp_param);
+
+#endif /* USB_CFG_COMPLIANCE == USB_CFG_ENABLE */
+            usb_hmsc_strg_drive_close();
+            usb_cstd_pipe_reg_clear();
+            usb_cstd_pipe_table_clear();
+
+
+            usb_cstd_set_event(USB_STS_DETACH, &ctrl);
+        break;
+
+        case USB_STS_ATTACH:
+#if USB_CFG_BC == USB_CFG_ENABLE
+            if (USB_BC_STATE_CDP == data)
+            {
+                usb_cstd_set_event(USB_STS_BC, &ctrl);
+            }
+
+#endif /* USB_CFG_BC == USB_CFG_ENABLE */
+
+
+#if USB_CFG_COMPLIANCE == USB_CFG_ENABLE
+            disp_param.status = USB_CT_ATTACH;
+            disp_param.pid    = USB_NULL;
+            disp_param.vid    = USB_NULL;
+                usb_compliance_disp ((void *)&disp_param);
+
+#endif /* USB_CFG_COMPLIANCE == USB_CFG_ENABLE */
+        break;
+
+        case USB_STS_DEFAULT:
+            usb_hmsc_driver_start();
+        break;
+
+        case USB_STS_CONFIGURED:
+            usb_hmsc_set_device_status(USB_HMSC_DEV_ATT);
+            usb_cstd_pipe_reg_set();
+
+            /* Storage drive search. */
+            usb_hmsc_strg_drive_search (usb_hmsc_drive_complete);
+        break;
+
+        case USB_STS_SUSPEND:
+        break;
+
+        case USB_STS_RESUME:
+            usb_cstd_set_event(USB_STS_RESUME, &ctrl);
+        break;
+
+        case USB_STS_OVERCURRENT:
+            usb_cstd_set_event (USB_STS_OVERCURRENT, &ctrl);
+        break;
+
+        default:
+            /* Do Nothing */
+        break;
+    }
+
+}   /* eof usb_hmsc_device_state() */
+
+/******************************************************************************
+Function Name   : usb_hmsc_drive_complete
+Description     : Next Process Selector
+Argument        : usb_tskinfo_t *p_mess : Pointer to usb_tskinfo_t structure
+Return          : none
+******************************************************************************/
+static void usb_hmsc_drive_complete(usb_tskinfo_t *p_mess)
+{
+    usb_ctrl_t  ctrl;
+
+    ctrl.type = USB_HMSC;
+    usb_cstd_set_event(USB_STS_CONFIGURED, &ctrl);
+
+}   /* eof usb_hmsc_drive_complete() */
+
+/******************************************************************************
+Function Name   : usb_hmsc_set_device_status
+Description     : Sets HMSCD operation state
+Arguments       : uint16_t data : 
+Return value    : uint16_t : USB_OK
+******************************************************************************/
+static uint16_t usb_hmsc_set_device_status (uint16_t data)
+{
+    gs_usb_hmsc_connect_state = data;
+    return USB_OK; /* USB_OK; */
+}   /* eof usb_hmsc_set_device_status() */
+
+/******************************************************************************
+Function Name   : usb_hmsc_get_device_status
+Description     : Responds to HMSCD operation state
+Arguments       : none
+Return value    : uint16_t : USB_HMSC_DEV_DET/USB_HMSC_DEV_ATT
+******************************************************************************/
+uint16_t usb_hmsc_get_device_status (void)
+{
+    return (gs_usb_hmsc_connect_state);
+}   /* eof usb_hmsc_get_device_status() */
 
 /******************************************************************************
  Function Name   : usb_hmsc_strg_cmd_complete
@@ -1497,6 +1457,120 @@ void usb_hmsc_strg_cmd_complete (usb_tskinfo_t *p_mess)
     usb_cstd_set_event(USB_STS_MSC_CMD_COMPLETE, &ctrl); /* Set Event(USB receive complete)  */
 } /* End of function usb_hmsc_strg_cmd_complete() */
 
+/******************************************************************************
+Function Name   : usb_hmsc_phase_err
+Description     : HMSC Stall Error
+Arguments       : none
+Return value    : none
+******************************************************************************/
+static void usb_hmsc_phase_err (void)
+{
+    switch (gs_usb_hmsc_phase_err_seq)
+    {
+        case USB_SEQ_0:
+            /* MassStorage Reset Class Request*/
+            usb_hmsc_mass_storage_reset((usb_hcb_t)usb_hmsc_check_result);
+            gs_usb_hmsc_phase_err_seq++;
+        break;
+
+        case USB_SEQ_1:
+            usb_hmsc_clear_stall (USB_CFG_HMSC_BULK_OUT, usb_hmsc_check_result_stall_pipe_cb);
+            gs_usb_hmsc_phase_err_seq++;
+        break;
+        case USB_SEQ_2:
+            usb_hmsc_clear_stall (USB_CFG_HMSC_BULK_IN, usb_hmsc_check_result_stall_pipe_cb);
+            gs_usb_hmsc_phase_err_seq++;
+        break;
+        case USB_SEQ_3:
+            usb_hmsc_command_result (USB_HMSC_CSW_PHASE_ERR);
+            gs_usb_hmsc_phase_err_seq = USB_SEQ_0;
+        break;
+
+        default:
+            /* Do Nothing */
+        break;
+    }
+}   /* eof usb_hmsc_phase_err() */
+
+/******************************************************************************
+Function Name   : usb_hmsc_process
+Description     : USB HMSC Task
+Arguments       : usb_tskinfo_t *p_mess : 
+Return value    : none
+******************************************************************************/
+void usb_hmsc_process (usb_tskinfo_t *p_mess)
+{
+    switch (p_mess->msginfo)
+    {
+        case USB_MSG_HMSC_NO_DATA:
+        case USB_MSG_HMSC_DATA_IN:
+        case USB_MSG_HMSC_DATA_OUT:
+            usb_hmsc_data_act (p_mess);
+        break;
+
+        case USB_MSG_HMSC_CSW_PHASE_ERR:
+            usb_hmsc_phase_err ();
+        break;
+
+        default:
+            /* Do Nothing */
+        break;
+    }
+}   /* eof usb_hmsc_process() */
+
+
+/******************************************************************************
+Function Name   : usb_hmsc_specified_path
+Description     : Next Process Selector
+Arguments       : usb_tskinfo_t *p_mess : Pointer to usb_tskinfo_t structure
+Return value    : none
+******************************************************************************/
+static void usb_hmsc_specified_path (usb_tskinfo_t *p_mess)
+{
+    /* Send Message for USB Host Device Class. Next phase process. */
+    USB_GET_SND(USB_HCLASS_MBX, gs_usb_hmsc_process, &usb_hstd_dummy_function, (usb_strct_t)p_mess->keyword);
+}   /* eof usb_hmsc_specified_path() */
+
+/******************************************************************************
+Function Name   : usb_hmsc_check_result
+Description     : Hub class check result
+Arguments       : usb_hutr_t *p_mess : Pointer to usb_tskinfo_t structure
+Return value    : none
+******************************************************************************/
+static void usb_hmsc_check_result (usb_hutr_t *p_mess)
+{
+    /* Send Message for USB Host Device Class. Complete usb data transfer. */
+    USB_GET_SND(USB_HCLASS_MBX, gs_usb_hmsc_process, &usb_hstd_dummy_function, (usb_strct_t)p_mess->status);
+}   /* eof usb_hmsc_check_result() */
+
+/******************************************************************************
+Function Name   : usb_hmsc_check_result_stall_pipe_cb
+Description     : Hub class check result
+Arguments       : uint16_t pipe  : 
+                : uint16_t state : 
+Return value    : none
+******************************************************************************/
+static void usb_hmsc_check_result_stall_pipe_cb (uint16_t pipe, uint16_t state)
+{
+    g_usb_hstd_current_pipe = pipe;
+
+    /* Send Message for USB Host Device Class. Clear stall complete. */
+    USB_GET_SND(USB_HCLASS_MBX, gs_usb_hmsc_process, &usb_hstd_dummy_function, state);
+}   /* eof usb_hmsc_check_result_stall_pipe_cb() */
+
+/******************************************************************************
+Function Name   : usb_hmsc_command_result
+Description     : Hub class check result
+Arguments       : uint16_t result     : Result
+Return value    : none
+******************************************************************************/
+static void usb_hmsc_command_result (uint16_t result)
+{
+    /* Send Message for StrageDriveTask. Notification ATAPI command processing complete. */
+    USB_GET_SND(USB_HSTRG_MBX, g_usb_hmsc_strg_process, &usb_hstd_dummy_function, (usb_strct_t)result);
+}   /* eof usb_hmsc_command_result() */
+
+#endif /*(BSP_CFG_RTOS_USED == 0)*/
 /******************************************************************************
 End  Of File
 ******************************************************************************/

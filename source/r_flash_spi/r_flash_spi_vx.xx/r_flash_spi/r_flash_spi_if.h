@@ -19,11 +19,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011(2012-2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2011(2012-2020) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_flash_spi_if.h
-* Version      : 3.01
+* Version      : 3.02
 * Description  : FLASH SPI driver interface header file
 *************************************************************************************************/
 /************************************************************************************************
@@ -33,8 +33,9 @@
 *              : 24.12.2015 2.33     Added RX130, RX23T and RX24T.
 *              : 31.07.2017 2.34     Modified Application note.
 *              : 21.12.2018 3.00     Change flash drive interface to Memory Access Driver Interface
-*              : 04.04.2019 3.01     Added support for GNUC and ICCRX.
+*              : 20.05.2019 3.01     Added support for GNUC and ICCRX.
 *                                    Fixed coding style.
+*              : 10.12.2020 3.02     Changed version to 3.02.
 *************************************************************************************************/
 #ifndef __FLASH_SPI_IF_H__
 #define __FLASH_SPI_IF_H__
@@ -49,12 +50,16 @@ Includes <System Includes> , "Project Includes"
 /************************************************************************************************
 Macro definitions
 *************************************************************************************************/
+#if R_BSP_VERSION_MAJOR < 5
+    #error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
+#endif
+
 /* Define using Firmware Integration Technology (FIT) for RX family MCU. */
 #define FLASH_SPI_CFG_USE_FIT
 
 /* Driver version */
 #define FLASH_SPI_VERSION_MAJOR       (3)
-#define FLASH_SPI_VERSION_MINOR       (01)
+#define FLASH_SPI_VERSION_MINOR       (02)
 
 
 /*--------------- Define no. of slots ----------------*/

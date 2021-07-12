@@ -1,39 +1,30 @@
-/*******************************************************************************
+/***********************************************************************************************************************
  * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only
- * intended for use with Renesas products. No other uses are authorized. This
- * software is owned by Renesas Electronics Corporation and is protected under
- * all applicable laws, including copyright laws.
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
  * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
- * LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
- * TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
- * ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
- * FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
- * ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
- * BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software
- * and to discontinue the availability of this software. By using this software,
- * you agree to the additional terms and conditions found by accessing the
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+ * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2015(2019) Renesas Electronics Corporation. All rights reserved.
-  ******************************************************************************/
-/*******************************************************************************
+ *
+ * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
+ ***********************************************************************************************************************/
+/***********************************************************************************************************************
  * File Name    : r_usb_rx_mcu.c
  * Description  : RX MCU processing
- *****************************************************************************/
-/******************************************************************************
+ ***********************************************************************************************************************/
+/**********************************************************************************************************************
 * History   : DD.MM.YYYY Version Description
-*           : 01.09.2014 1.00    First Release
-*           : 01.06.2015 1.01    Added RX231.
-*           : 29.12.2015 1.02    Minor Update.
-*           : 31.03.2018 1.23 Supporting Smart Configurator
-*           : 31.05.2019 1.11    Added support for GNUC and ICCRX.
-*******************************************************************************/
-/* Start user code for pragma. Do not edit comment generated here. */
-/* End user code. Do not edit comment generated here. */
+*           : 08.01.2014 1.00 First Release
+*           : 30.06.2020 1.20 Added support for RTOS.
+ ***********************************************************************************************************************/
 
 /******************************************************************************
  Includes   <System Includes> , "Project Includes"
@@ -54,11 +45,11 @@
 
 #if defined(USB_CFG_HHID_USE) || defined(USB_CFG_PHID_USE)
   #if USB_CFG_DTC == USB_CFG_ENABLE
-    #error  In HID class, can not set USB_CFG_ENABLE to USB_CFG_DTC in r_usb_basic_config.h.
+    #error  In HID class, can not set USB_CFG_ENABLE to USB_CFG_DTC in r_usb_basic_mini_config.h.
   #endif /* USB_CFG_DTC == USB_CFG_ENABLE */
 
   #if USB_CFG_DMA == USB_CFG_ENABLE
-    #error  In HID class, can not set USB_CFG_ENABLE to USB_CFG_DMA in r_usb_basic_config.h.
+    #error  In HID class, can not set USB_CFG_ENABLE to USB_CFG_DMA in r_usb_basic_mini_config.h.
   #endif /* USB_CFG_DMA == USB_CFG_ENABLE */
 
 #endif /* defined(USB_CFG_HHID_USE) || defined(USB_CFG_PHID_USE) */
@@ -67,7 +58,7 @@
 #if USB_CFG_BC == USB_CFG_DISABLE
   #if USB_CFG_DCP == USB_CFG_ENABLE
     #error  Can not set USB_CFG_DISABLE to USB_CFG_BC when setting USB_CFG_ENABLE to USB_CFG_DCP \
-         in r_usb_basic_config.h.
+         in r_usb_basic_mini_config.h.
 
   #endif /* USB_CFG_DCP == USB_CFG_ENABLE */
 #endif /* USB_CFG_BC == USB_CFG_DISABLE */
@@ -76,7 +67,7 @@
 #if USB_CFG_DMA == USB_CFG_ENABLE
   #if USB_CFG_DTC == USB_CFG_ENABLE
     #error  Can not set USB_CFG_ENABLE to the definitions (USB_CFG_DMA and USB_CFG_DTC) at the same time \
-         in r_usb_basic_config.h.
+         in r_usb_basic_mini_config.h.
 
   #endif /* USB_CFG_DTC == USB_CFG_ENABLE */
 #endif /* USB_CFG_DMA == USB_CFG_ENABLE */
@@ -85,18 +76,18 @@
 #if USB_CFG_MODE == USB_CFG_HOST
   #if defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_PMSC_USE) || defined(USB_CFG_PVNDR_USE)
     #error  Can not enable these definitions(USB_CFG_PCDC_USE/USB_CFG_PHID_USE/USB_CFG_PMSC_USE/USB_CFG_PVNDR_USE) \
-        when setting USB_HOST to USB_CFG_MODE in r_usb_basic_config.h.
+        when setting USB_HOST to USB_CFG_MODE in r_usb_basic_mini_config.h.
 
   #endif /* defined(USB_CFG_PCDC_USE || USB_CFG_PHID_USE || USB_CFG_PMSC_USE || USB_CFG_PVNDR_USE) */
 #endif /* USB_CFG_MODE == USB_HOST */
 
 
 #if USB_CFG_MODE == USB_CFG_PERI
-  #if defined(USB_CFG_HCDC_USE) || defined(USB_CFG_HHID_USE) || defined(USB_CFG_HMSC_USE) || defined(USB_CFG_HVNDR_USE)
-    #error  Can not enable these definitions(USB_CFG_HCDC_USE/USB_CFG_HHID_USE/USB_CFG_HMSC_USE/USB_CFG_HVNDR_USE) \
-        when setting USB_PERI to USB_CFG_MODE in r_usb_basic_config.h.
+  #if defined(USB_CFG_HCDC_USE) || defined(USB_CFG_HHID_USE) || defined(USB_CFG_HMSC_USE) || defined(USB_CFG_HVND_USE)
+    #error  Can not enable these definitions(USB_CFG_HCDC_USE/USB_CFG_HHID_USE/USB_CFG_HMSC_USE/USB_CFG_HVND_USE) \
+        when setting USB_PERI to USB_CFG_MODE in r_usb_basic_mini_config.h.
 
-  #endif /* defined(USB_CFG_HCDC_USE || USB_CFG_HHID_USE || USB_CFG_HMSC_USE || USB_CFG_HVNDR_USE) */
+  #endif /* defined(USB_CFG_HCDC_USE || USB_CFG_HHID_USE || USB_CFG_HMSC_USE || USB_CFG_HVND_USE) */
 #endif /* USB_CFG_MODE == USB_PERI */
 
 /*******************************************************************************
@@ -107,17 +98,20 @@
  Exported global variables (to be accessed by other files)
  ******************************************************************************/
 
+
 /******************************************************************************
  Private global variables and functions
  ******************************************************************************/
- 
 R_BSP_PRAGMA_STATIC_INTERRUPT(usb_cpu_usb_interrupt, VECT(USB0, USBI0))
+
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
 R_BSP_PRAGMA_STATIC_INTERRUPT(usb_cpu_usb_resume_interrupt, VECT(USB0, USBR0))
-#endif
+#endif /* ( (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI ) */
+
 #if USB_CFG_DTC == USB_CFG_ENABLE
 R_BSP_PRAGMA_STATIC_INTERRUPT(usb_cpu_d0fifo_isr, VECT(USB0, D0FIFO0))
 R_BSP_PRAGMA_STATIC_INTERRUPT(usb_cpu_d1fifo_isr, VECT(USB0, D1FIFO0))
+
 #endif  /* USB_CFG_DTC == USB_CFG_ENABLE */
 
 /******************************************************************************
@@ -128,6 +122,10 @@ R_BSP_PRAGMA_STATIC_INTERRUPT(usb_cpu_d1fifo_isr, VECT(USB0, D1FIFO0))
  ******************************************************************************/
 usb_err_t usb_module_start (void)
 {
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) 
+    bsp_int_ctrl_t int_ctrl;
+#endif  /* ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)  */
+
     if (0 == MSTP(USB0))
     {
         return USB_ERR_BUSY;
@@ -136,13 +134,21 @@ usb_err_t usb_module_start (void)
     /* Enable writing to MSTP registers */
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);
 
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) 
+    R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
+#endif  /* ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) */
+
     /* Enable power for USB0 */
     MSTP(USB0) = 0;
+
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) 
+    R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
+#endif  /* ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) */
 
     /* Disable writing to MSTP registers */
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR);
 
-#if ((defined(BSP_MCU_RX23W) || defined(BSP_MCU_RX231)) && (USB_CFG_REGULATOR == USB_CFG_ENABLE))
+#if (defined(BSP_MCU_RX231) && (USB_CFG_REGULATOR == USB_CFG_ENABLE))
     hw_usb_set_vdcen();
 #endif /* USB_CFG_REGULATOR == USB_CFG_ON */
 
@@ -151,7 +157,10 @@ usb_err_t usb_module_start (void)
 #endif  /* USB_CFG_BC == USB_CFG_ENABLE */
 
     return USB_SUCCESS;
-} /*End of function usb_module_start */
+}
+/******************************************************************************
+End of function usb_module_start
+******************************************************************************/
 
 /******************************************************************************
  Function Name   : usb_module_stop
@@ -161,6 +170,10 @@ usb_err_t usb_module_start (void)
  ******************************************************************************/
 usb_err_t usb_module_stop (void)
 {
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) 
+    bsp_int_ctrl_t int_ctrl;
+#endif  /* ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)  */
+
     if (0 != MSTP(USB0))
     {
         return USB_ERR_NOT_OPEN;
@@ -183,6 +196,7 @@ usb_err_t usb_module_stop (void)
     USB0.INTENB0.WORD = 0;
     USB0.INTENB1.WORD = 0;
     USB0.SYSCFG.WORD &= (~USB_DPRPU);
+    USB0.SYSCFG.WORD &= (~USB_DMRPU);
     USB0.SYSCFG.WORD &= (~USB_DRPD);
     USB0.SYSCFG.WORD &= (~USB_USBE);
     USB0.SYSCFG.WORD &= (~USB_DCFM);
@@ -193,14 +207,25 @@ usb_err_t usb_module_stop (void)
     /* Enable writing to MSTP registers */
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);
 
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) 
+    R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
+#endif  /* ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) */
+
     /* Disable power for USB0 */
     MSTP(USB0) = 1;
+
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) 
+    R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
+#endif  /* ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) */
 
     /* Disable writing to MSTP registers */
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR);
 
     return USB_SUCCESS;
-} /*End of function usb_module_stop */
+}
+/******************************************************************************
+End of function usb_module_stop
+******************************************************************************/
 
 /******************************************************************************
  Function Name   : usb_cpu_usbint_init
@@ -232,9 +257,14 @@ void usb_cpu_usbint_init (void)
      */
     IPR (USB0, USBI0)= USB_CFG_INTERRUPT_PRIORITY; /* USBI0 in vector 128 */
     R_BSP_InterruptRequestEnable(VECT(USB0, USBI0)); /* USBI0 enable in vector 128 */
+}
+/******************************************************************************
+ End of function usb_cpu_usbint_init
+ ******************************************************************************/
 
-} /*End of function usb_cpu_usbint_init */
-
+/******************************************************************************
+ TIMER function
+ ******************************************************************************/
 /******************************************************************************
  Function Name   : usb_cpu_delay_1us
  Description     : 1us Delay timer
@@ -244,20 +274,34 @@ void usb_cpu_usbint_init (void)
 void usb_cpu_delay_1us (uint16_t time)
 {
     R_BSP_SoftwareDelay((uint32_t)time, BSP_DELAY_MICROSECS);
-} /*End of function usb_cpu_delay_1us */
+}
+/******************************************************************************
+ End of function usb_cpu_delay_1us
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : usb_cpu_delay_xms
  Description     : xms Delay timer
  Arguments       : uint16_t  time        ; Delay time(*1ms)
- Return value    : none
+ Return value    : void
+ Note            : Please change for your MCU
  ******************************************************************************/
 void usb_cpu_delay_xms (uint16_t time)
 {
+#if (BSP_CFG_RTOS_USED == 0)        /* Non-OS */
     R_BSP_SoftwareDelay((uint32_t)time, BSP_DELAY_MILLISECS);
-} /*End of function usb_cpu_delay_xms */
+#elif (BSP_CFG_RTOS_USED == 1)        /* FreeRTOS */
+    vTaskDelay((TickType_t)(time/portTICK_PERIOD_MS));
+#elif (BSP_CFG_RTOS_USED == 4)      /* Renesas RI600V4 & RI600PX */
+    dly_tsk((RELTIM)time);
+#endif /* (BSP_CFG_RTOS_USED == 1) */
+}
+/******************************************************************************
+ End of function usb_cpu_delay_xms
+ ******************************************************************************/
 
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
+#if (BSP_CFG_RTOS_USED == 0)        /* Non-OS */
 /******************************************************************************
  Function Name   : usb_cpu_int_enable
  Description     : USB Interrupt Enable
@@ -277,7 +321,10 @@ void usb_cpu_int_enable (void)
      b7 IEN7 Interrupt enable bit
      */
     R_BSP_InterruptRequestEnable(VECT(USB0, USBI0)); /* Enable USB0 interrupt */
-} /*End of function usb_cpu_int_enable */
+}
+/******************************************************************************
+ End of function usb_cpu_int_enable
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : usb_cpu_int_disable
@@ -298,19 +345,19 @@ void usb_cpu_int_disable (void)
      b7 IEN7 Interrupt enable bit
      */
     R_BSP_InterruptRequestDisable(VECT(USB0, USBI0)); /* Disable USB0 interrupt */
-} /*End of function usb_cpu_int_disable */
-
-#endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
-
-
+}
+/******************************************************************************
+ End of function usb_cpu_int_disable
+ ******************************************************************************/
+#endif /* (BSP_CFG_RTOS_USED == 0) */
 
 /******************************************************************************
- Function Name   : usb_chattering
- Description     : Remove chattering processing
+ Function Name   : usb_chattaring
+ Description     : Remove chattaring processing
  Arguments       : uint16_t *p_syssts : SYSSTS register value
  Return value    : LNST bit value
  ******************************************************************************/
-uint16_t usb_chattering (uint16_t *p_syssts)
+uint16_t usb_chattaring (uint16_t *p_syssts)
 {
     uint16_t lnst[4];
 
@@ -328,22 +375,27 @@ uint16_t usb_chattering (uint16_t *p_syssts)
         }
     }
     return lnst[0];
-} /*End of function usb_chattering */
-
-
+}
 /******************************************************************************
- Function Name   : usb_cpu_usb_interrupt
- Description     : USB interrupt Handler
- Arguments       : none
- Return value    : none
- ******************************************************************************/
-R_BSP_ATTRIB_STATIC_INTERRUPT void usb_cpu_usb_interrupt (void)
+End of function usb_chattaring
+******************************************************************************/
+
+#endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
+
+
+/*******************************************************************************
+ * Function Name: usb_cpu_usb_interrupt
+ * Description  : USB interrupt Handler
+ * Arguments    : none
+ * Return Value : none
+ *******************************************************************************/
+R_BSP_ATTRIB_INTERRUPT void usb_cpu_usb_interrupt (void)
 {
     /* Call USB interrupt routine */
     if (USB_HOST == g_usb_cstd_usb_mode)
     {
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
-    usb_hstd_interrupt_handler();
+        usb_hstd_interrupt_handler(); /* Call interrupt routine */
 
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
     }
@@ -354,7 +406,10 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void usb_cpu_usb_interrupt (void)
 
 #endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_REPI */
     }
-} /*End of function usb_cpu_usb_interrupt */
+}
+/******************************************************************************
+ End of function usb_cpu_usb_interrupt
+ ******************************************************************************/
 
 
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
@@ -370,7 +425,8 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void usb_cpu_usb_resume_interrupt (void)
     IPR(USB0,USBR0) = 0x00; /* Priority Resume1=0 */
     IR(USB0, USBR0) = 0; /* Interrupt Request USB_resume USBR1 Clear */
 } /* End of function usb_cpu_usb_resume_interrupt */
-#endif
+#endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_REPI */
+
 
 #if USB_CFG_DTC == USB_CFG_ENABLE
 /******************************************************************************
@@ -383,8 +439,10 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void usb_cpu_d0fifo_isr(void)
 {
     IPR(USB0,D0FIFO0) = 0;
     usb_cstd_dma_send_complete(USB_D0USE);
-} /*End of function usb_cpu_d0fifo_isr */
-
+}
+/******************************************************************************
+End of function usb_cpu_d0fifo_isr
+******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_cpu_d1fifo_isr
@@ -396,13 +454,14 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void usb_cpu_d1fifo_isr(void)
 {
     IPR(USB0,D1FIFO0) = 0;
     usb_cstd_dma_send_complete(USB_D1USE);
-}/*End of function usb_cpu_d1fifo_isr */
+}
+/******************************************************************************
+End of function usb_cpu_d1fifo_isr
+******************************************************************************/
 
 #endif /* USB_CFG_DTC == USB_CFG_ENABLE */
-
 
 
 /******************************************************************************
 End Of File
 ******************************************************************************/
-

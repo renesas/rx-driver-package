@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 @qe:begin:SwapTargetMethod
@@ -24,7 +24,13 @@
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * History      : DD.MM.YYYY Version Description
-*              :            1.00    First Release
+*              : 27.09.2018 1.00    First Release
+*              : 02.04.2019 1.01    Add Some Comments
+*              : 02.04.2019 1.02    Add Section information for VDE Safety Protocols
+*              : 18.04.2019 1.03    Change the Minor Format
+*              : 18.04.2019 1.04    Correspond to GCC Compiler
+*              : 25.04.2019 1.05    Fix the Macros for Section information
+*              : 07.05.2019 1.06    Add the Macro for Section information
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -51,6 +57,13 @@ Typedef definitions
 Exported global variables
 ***********************************************************************************************************************/
 
+#if (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+#if (!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5))
+#pragma section _QE_TOUCH_SAFETY_CONSTANT
+#else
+R_BSP_ATTRIB_SECTION_CHANGE(C, _QE_TOUCH_SAFETY_CONSTANT, 1)
+#endif
+#endif
 /* Element arrays must be in hardware scan order */
 @qe:begin:SwapTargetMethod
 const elem_ch_t g_@method@_elem_ch[] =
@@ -61,6 +74,29 @@ const elem_ch_t g_@method@_elem_ch[] =
 @qe:end:
 };
 
+#if (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+#if (!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5))
+#pragma section _QE_TOUCH_SAFETY_CONSTANT
+#else
+R_BSP_ATTRIB_SECTION_CHANGE(C, _QE_TOUCH_SAFETY_CONSTANT, 4)
+#endif
+#endif
+@qe:begin:SwapTargetMethod
+const port_cfg_t g_@method@_port_cfg[] =
+@qe:end:
+{
+@qe:begin:ExportedGlobalVariablesPortConfig
+    { .p_pmr=&@value@.BYTE, .ts_board_mask=@value@, .ts_method_mask=@value@ },
+@qe:end:
+};
+
+#if (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+#if (!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5))
+#pragma section _QE_TOUCH_SAFETY_RAMINIT
+#else
+R_BSP_ATTRIB_SECTION_CHANGE(D, _QE_TOUCH_SAFETY_RAMINIT, 2)
+#endif
+#endif
 @qe:begin:SwapTargetMethod
 elem_regs_t g_@method@_elem_regs[] =
 @qe:end:
@@ -70,33 +106,31 @@ elem_regs_t g_@method@_elem_regs[] =
 @qe:end:
 };
 
-@qe:begin:SwapTargetMethod
-port_cfg_t g_@method@_port_cfg[] =
-@qe:end:
-{
-@qe:begin:ExportedGlobalVariablesPortConfig
-    { .p_pmr=&@value@.BYTE, .ts_board_mask=@value@, .ts_method_mask=@value@ },
-@qe:end:
-};
-
+#if (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+#if (!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5))
+#pragma section _QE_TOUCH_SAFETY_RAMINIT
+#else
+R_BSP_ATTRIB_SECTION_CHANGE(D, _QE_TOUCH_SAFETY_RAMINIT, 4)
+#endif
+#endif
 @qe:begin:SwapTargetMethod
 ctsu_cfg_t g_ctsu_cfg_@method@ =
 @qe:end:
 {
 @qe:begin:ExportedGlobalVariablesCtsuConfigChannelMask
-    .ctsuchac0 = @value@,
-    .ctsuchac1 = @value@,
-    .ctsuchac2 = @value@,
-    .ctsuchac3 = @value@,
-    .ctsuchac4 = @value@,
+    .ctsuchac0 = @value@,   /* ch0-ch7 enable mask */
+    .ctsuchac1 = @value@,   /* ch8-ch15 enable mask */
+    .ctsuchac2 = @value@,   /* ch16-ch23 enable mask */
+    .ctsuchac3 = @value@,   /* ch24-ch31 enable mask */
+    .ctsuchac4 = @value@,   /* ch32-ch39 enable mask */
 @qe:end:
 
 @qe:begin:ExportedGlobalVariablesCtsuConfigTxChannelMask
-    .ctsuchtrc0 = @value@,
-    .ctsuchtrc1 = @value@,
-    .ctsuchtrc2 = @value@,
-    .ctsuchtrc3 = @value@,
-    .ctsuchtrc4 = @value@,
+    .ctsuchtrc0 = @value@,   /* ch0-ch7 mutual tx mask */
+    .ctsuchtrc1 = @value@,   /* ch8-ch15 mutual tx mask */
+    .ctsuchtrc2 = @value@,   /* ch16-ch23 mutual tx mask */
+    .ctsuchtrc3 = @value@,   /* ch24-ch31 mutual tx mask */
+    .ctsuchtrc4 = @value@,   /* ch32-ch39 mutual tx mask */
 @qe:end:
 
 @qe:begin:ExportedGlobalVariablesCtsuConfigCtsucr1
@@ -122,6 +156,14 @@ ctsu_cfg_t g_ctsu_cfg_@method@ =
 @qe:end:
     .ctsu_status = 0
 };
+
+#if (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+#if (!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5))
+#pragma section
+#else
+R_BSP_ATTRIB_SECTION_CHANGE_END
+#endif
+#endif
 
 
 @qe:begin:SwapTargetMethod
@@ -158,9 +200,9 @@ sldr_ctrl_t g_sliders_@method@[] =
         .elem_index[8] = @value@,
         .elem_index[9] = @value@,
         .num_elements = @value@,
-        .threshold = @METHOD@_@TIF@_THRESHOLD,
-        .thr_offset = @METHOD@_@TIF@_THR_OFFSET,
-        .resolution = @METHOD@_@TIF@_RESOLUTION,
+        .threshold = @METHOD@_@TIF@_THRESHOLD,   /* Position calculation start threshold value */
+        .thr_offset = @METHOD@_@TIF@_THR_OFFSET,   /* Threshold offset value */
+        .resolution = @METHOD@_@TIF@_RESOLUTION,   /* Position resolution */
         .value = 0xFFFF,
     },
 @qe:end:
@@ -184,9 +226,9 @@ wheel_ctrl_t g_wheels_@method@[] =
         .elem_index[6] = @value@,
         .elem_index[7] = @value@,
         .num_elements = @value@,
-        .threshold = @METHOD@_@TIF@_THRESHOLD,
-        .thr_offset = @METHOD@_@TIF@_THR_OFFSET,
-        .resolution = @METHOD@_@TIF@_RESOLUTION,
+        .threshold = @METHOD@_@TIF@_THRESHOLD,   /* Position calculation start threshold value */
+        .thr_offset = @METHOD@_@TIF@_THR_OFFSET,   /* Threshold offset value */
+        .resolution = @METHOD@_@TIF@_RESOLUTION,   /* Position resolution */
         .value = 0xffff
     },
 @qe:end:
@@ -215,11 +257,11 @@ touch_cfg_t g_touch_cfg_@method@ =
     .num_buttons = @METHOD@_NUM_BUTTONS,
     .num_sliders = @METHOD@_NUM_SLIDERS,
     .num_wheels = @METHOD@_NUM_WHEELS,
-    .touch_on = @METHOD@_TOUCH_ON,
-    .touch_off = @METHOD@_TOUCH_OFF,
-    .max_on_time = @METHOD@_MAX_ON_TIME,
-    .drift_enable = @METHOD@_DRIFT_ENABLE,
-    .drift_freq = @METHOD@_DRIFT_FREQ,
+    .touch_on = @METHOD@_TOUCH_ON,   /* 0-255 The cumulative number of determinations of [ON]; SELF_TOUCH_ON */
+    .touch_off = @METHOD@_TOUCH_OFF,   /* 0-255 The cumulative number of determinations of [OFF]; SELF_TOUCH_OFF */
+    .max_on_time = @METHOD@_MAX_ON_TIME,   /* 0-65535 Maximum continuous [ON], 0:no use; SELF_MSA */
+    .drift_enable = @METHOD@_DRIFT_ENABLE,   /* Drift function enable; SELF_DRIFT_ENABLE */
+    .drift_freq = @METHOD@_DRIFT_FREQ,   /* 0-65535; SELF_DRIFT_FREQUENCY */
 @qe:end:
 };
 
@@ -234,44 +276,42 @@ Private global variables and functions
 ***********************************************************************************************************************/
 
 @qe:begin:SwapTargetMethod
-uint16_t    g_@method@_write[sizeof(elem_regs_t)*@METHOD@_NUM_ELEMENTS];
+uint16_t    g_@method@_write[sizeof(elem_regs_t)*@METHOD@_NUM_ELEMENTS];   /* DTC transmit write data */
 #if (QE_METHOD_@METHOD@_CAPACITANCE_TYPE == TOUCH_SELF_MODE)
-self_ico_t  g_@method@_ico_data[@METHOD@_NUM_ELEMENTS];
-self_ico_t  g_@method@_raw_data[@METHOD@_NUM_ELEMENTS];
-uint16_t    g_@method@_add_sensor[@METHOD@_NUM_ELEMENTS];
-uint16_t    g_@method@_sensor_cnt[@METHOD@_NUM_ELEMENTS];
+self_ico_t  g_@method@_ico_data[@METHOD@_NUM_ELEMENTS];   /* ICO counter data */
+self_ico_t  g_@method@_raw_data[@METHOD@_NUM_ELEMENTS];   /* ICO counter data copy for API Get() */
+uint16_t    g_@method@_add_sensor[@METHOD@_NUM_ELEMENTS];   /* Sensor counter data adding buffer */
+uint16_t    g_@method@_sensor_cnt[@METHOD@_NUM_ELEMENTS];   /* Secondary - Primary (Sensor) */
 #else
-mutual_ico_t g_@method@_ico_data[@METHOD@_NUM_ELEMENTS];
-mutual_ico_t g_@method@_raw_data[@METHOD@_NUM_ELEMENTS];
-uint16_t    g_@method@_add_pri_sensor[@METHOD@_NUM_ELEMENTS];
-uint16_t    g_@method@_add_snd_sensor[@METHOD@_NUM_ELEMENTS];
-uint16_t    g_@method@_sensor_diff[@METHOD@_NUM_ELEMENTS];
+mutual_ico_t g_@method@_ico_data[@METHOD@_NUM_ELEMENTS];   /* ICO counter data */
+mutual_ico_t g_@method@_raw_data[@METHOD@_NUM_ELEMENTS];   /* ICO counter data copy for API Get() */
+uint16_t    g_@method@_add_pri_sensor[@METHOD@_NUM_ELEMENTS];   /* Primary Sensor counter data adding buffer */
+uint16_t    g_@method@_add_snd_sensor[@METHOD@_NUM_ELEMENTS];   /* Secondary Sensor counter data adding buffer */
+uint16_t    g_@method@_sensor_diff[@METHOD@_NUM_ELEMENTS];   /* Secondary - Primary (Sensor) */
 #endif
-int8_t      g_@method@_current_sign[@METHOD@_NUM_ELEMENTS];
+int8_t      g_@method@_current_sign[@METHOD@_NUM_ELEMENTS];   /* Current offset plus minus sign */
 #if (@METHOD@_NUM_BUTTONS != 0)
-uint16_t    g_@method@_ref[@METHOD@_NUM_BUTTONS];
-uint16_t    g_@method@_thr[@METHOD@_NUM_BUTTONS];
-uint16_t    g_@method@_user_thr[@METHOD@_NUM_BUTTONS];
-uint16_t    g_@method@_hys[@METHOD@_NUM_BUTTONS];
-uint16_t    g_@method@_delta[@METHOD@_NUM_BUTTONS];
-uint16_t    g_@method@_touch_cnt[@METHOD@_NUM_BUTTONS];
-uint16_t    g_@method@_non_touch_cnt[@METHOD@_NUM_BUTTONS];
-uint16_t    g_@method@_in_touch[@METHOD@_BTN_MASKS_SIZE];
-uint16_t    g_@method@_out_touch[@METHOD@_BTN_MASKS_SIZE];
-uint16_t    g_@method@_touch_result[@METHOD@_BTN_MASKS_SIZE];
-uint16_t    g_@method@_drift_permission[@METHOD@_BTN_MASKS_SIZE];
-uint32_t    g_@method@_drift_ref[@METHOD@_NUM_BUTTONS];
-uint16_t    g_@method@_drift_cnt[@METHOD@_NUM_BUTTONS];
+uint16_t    g_@method@_ref[@METHOD@_NUM_BUTTONS];   /* Reference */
+uint16_t    g_@method@_thr[@METHOD@_NUM_BUTTONS];   /* Threshold = Reference + User threshold */
+uint16_t    g_@method@_user_thr[@METHOD@_NUM_BUTTONS];   /* User threshold */
+uint16_t    g_@method@_hys[@METHOD@_NUM_BUTTONS];   /* Hysteresis */
+uint16_t    g_@method@_delta[@METHOD@_NUM_BUTTONS];   /* Delta = Reference - Sensor counter */
+uint16_t    g_@method@_touch_cnt[@METHOD@_NUM_BUTTONS];   /* Touch count */
+uint16_t    g_@method@_non_touch_cnt[@METHOD@_NUM_BUTTONS];   /* Non-touch count */
+uint16_t    g_@method@_in_touch[@METHOD@_BTN_MASKS_SIZE];   /* Inside touch/non-touch data */
+uint16_t    g_@method@_out_touch[@METHOD@_BTN_MASKS_SIZE];   /* Outside touch/non-touch data */
+uint16_t    g_@method@_touch_result[@METHOD@_BTN_MASKS_SIZE];   /* Touch/non-touch result data */
+uint16_t    g_@method@_drift_permission[@METHOD@_BTN_MASKS_SIZE];   /* Drift permission */
+uint32_t    g_@method@_drift_ref[@METHOD@_NUM_BUTTONS];   /* Drift addition reference */
+uint16_t    g_@method@_drift_cnt[@METHOD@_NUM_BUTTONS];   /* Drift counter */
 
 @qe:begin:PrivateGlobalVariables
 uint16_t    g_@method@_key_uesd_info[@value@];
-
-uint16_t    g_@method@_calib[@METHOD@_NUM_BUTTONS][QE_CALIB_TIME];
 #endif
-uint8_t     g_@method@_sensor_index[@value@];
+uint8_t     g_@method@_sensor_index[@value@];   /* Key sensor index */
 @qe:end:
 @qe:begin:SwapTargetMethod
-int8_t      g_@method@_counter_magni[@METHOD@_NUM_ELEMENTS];
-uint16_t    g_@method@_tune_ctsuso[@METHOD@_NUM_ELEMENTS];
-volatile uint8_t    g_@method@_tune_result[@METHOD@_NUM_ELEMENTS];
+int8_t      g_@method@_counter_magni[@METHOD@_NUM_ELEMENTS];   /* Measurement time */
+uint16_t    g_@method@_tune_ctsuso[@METHOD@_NUM_ELEMENTS];   /* Offset tuning ctsuso data */
+volatile uint8_t    g_@method@_tune_result[@METHOD@_NUM_ELEMENTS];   /* Offset tuning result data */
 @qe:end:

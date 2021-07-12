@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_mesh_rx23w
-VERSION = 		1.01
-MDF =			V2
+VERSION = 		1.10
+MDF = V2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules
@@ -14,7 +14,9 @@ $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).zip: $(TARGET_FOLDER)/$(MODULE_NAME)
 	cd ../;	\
 
 $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).xml:
-	cp ./$(MODULE_NAME)_vx.xx.xml $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).xml
+	cp ./$(MODULE_NAME)_vx.xx.xml tmp.xml
+	sed s/x.xx/$(VERSION)/ tmp.xml > $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).xml
+	rm -f tmp.xml
 
 $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION)_extend.mdf:
 	cp ./$(MODULE_NAME)_vx.xx_extend.mdf $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION)_extend.mdf

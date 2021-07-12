@@ -25,11 +25,11 @@ r_lpt_rx
 +---doc
 |    +---en
 |    |    |
-|    |    +---r01an2571ej{VERSION_NUMBER}-rx.pdf
+|    |    +---r01an2571ej{VERSION_NUMBER}-rx-timer.pdf
 |    |
 |    +---ja
 |         |
-|         +---r01an2571jj{VERSION_NUMBER}-rx.pdf
+|         +---r01an2571jj{VERSION_NUMBER}-rx-timer.pdf
 |
 +---ref
 |       r_lpt_rx_config_reference.h
@@ -54,8 +54,12 @@ r_lpt_rx
         |      r_lpt_rx230_private.h
         |
         +---rx231
-               r_lpt_rx231.c
-               r_lpt_rx231_private.h
+        |      r_lpt_rx231.c
+        |      r_lpt_rx231_private.h
+        |
+        +---rx23w
+               r_lpt_rx23w.c
+               r_lpt_rx23w_private.h
 
 r_config
     r_lpt_rx_config.h

@@ -25,8 +25,11 @@
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
-* History      : DD.MM.YYYY Version  Description
+* History      : DD.MM.YYYY Version Description
 *              : 04.10.2018 1.00    First Release
+*              : 16.10.2018 1.10    Fixed bug in monitor_update_data() where replies to the second command were not
+*                                   always written.
+*              : 29.04.2019 1.20    Modified for GCC/IAR compatibility.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * Includes
@@ -50,6 +53,7 @@ Typedef definitions
 /* Note: When doing a structure of structures, the sub-structures (e.g. hdr/trailer) must be packed
  * even if they contain all uint8_t, or the sub-structures will be located on a 4-byte boundary.
  */
+#if (!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5))
 #pragma pack
 typedef struct
 {
@@ -57,6 +61,15 @@ typedef struct
     mon_trailer_t   trailer;
 } rd_req_t;
 #pragma unpack
+#else
+R_BSP_PRAGMA_PACK
+typedef struct
+{
+    mon_req_hdr_t   hdr;
+    mon_trailer_t   trailer;
+} rd_req_t;
+R_BSP_PRAGMA_UNPACK
+#endif
 
 
 /***********************************************************************************************************************
@@ -69,12 +82,12 @@ External functions
 uint8_t  g_mon_req_buf[MON_REQ_BUF_SIZE];
 uint8_t  g_mon_reply_buf[MON_REPLY_BUF_SIZE];
 
-uint8_t * process_read_request(rd_req_t *p_rd_req, uint8_t *p_data_buf, uint8_t toggle_value, uint8_t data_id);
+static uint8_t * process_read_request(rd_req_t *p_rd_req, uint8_t *p_data_buf, uint8_t toggle_value, uint8_t data_id);
 
 
 /***********************************************************************************************************************
 * Function Name: monitor_init
-* Description  : This function
+* Description  : This function initializes the memory buffers prior to performing monitoring operations.
 * Arguments    : None
 * Return Value : None
 ***********************************************************************************************************************/
@@ -89,93 +102,116 @@ void monitor_init(void)
     /* initialize data buffer to invalid data (request's first and last bytes don't match) */
     memset(g_mon_reply_buf, 0, MON_REPLY_MAX_SIZE);
     g_mon_reply_buf[0] = 1;
-}
+
+} /* End of function monitor_init() */
 
 
 /***********************************************************************************************************************
 * Function Name: monitor_update_data
-* Description  : This function
+* Description  : This function handles the high level logic of determining whether a new request is received or not,
+*                whether to auto-update the reply for the last request, and whether there are two commands to be
+*                processed or just one. Note that commands are received asynchronously and can be any where in the
+*                process of being written when inspected. Matching starting and end IDs indicate that the message is
+*                completely written.
 * Arguments    : None
 * Return Value : None
 ***********************************************************************************************************************/
 void monitor_update_data(void)
 {
+    uint8_t         mon_req_copy_buf[MON_REQ_BUF_SIZE];
     mon_req_hdr_t   *p_hdr;
     rd_req_t        *p_rd_req;
-    uint8_t         *p_data_buf;
+    static uint8_t  *p_data_buf;
     static uint8_t  data_id=1;
     static uint8_t  expected_toggle=1;      // 1st request from Tool must have toggle set to 0
     static uint16_t last_req_id=65535;
+    static bool     part2_pending=false;
 
 
-    p_hdr = (mon_req_hdr_t *)g_mon_req_buf;
+    /* Inspect copy of request buffer so contents do not change while processing */
+    memcpy(mon_req_copy_buf, g_mon_req_buf, MON_REQ_BUF_SIZE);
+
+    /* cast start of buffer to header type */
+    p_hdr = (mon_req_hdr_t *)mon_req_copy_buf;
 
     /* if data is requested */
-    if (p_hdr->data_type != MON_DATA_STOP)
+    if (MON_DATA_STOP != p_hdr->data_type)
     {
         /* if it's a read request */
         if (p_hdr->flags & MON_FLG_READ_REQ)
         {
-            p_rd_req = (rd_req_t *)g_mon_req_buf;
+            /* cast buffer to read request format */
+            p_rd_req = (rd_req_t *)mon_req_copy_buf;
 
             /* if the request is ready (not in process of being written) */
             if (p_rd_req->hdr.s_id == p_rd_req->trailer.e_id)
             {
-                /* if data needs to be updated */
-                if ((last_req_id != (uint16_t)p_rd_req->hdr.s_id)   // new request
-                 || (p_rd_req->hdr.flags & MON_FLG_AUTO_UPDATE))    // or repeat last request
+                /* check if dual command, and set flag for later processing if so */
+                if ((last_req_id != (uint16_t)p_rd_req->hdr.s_id)
+                 && (0 != (p_hdr->flags & MON_FLG_2_PART_REQ)))
+                {
+                    part2_pending = true;
+                    expected_toggle ^= 1;
+                }
+
+                /* if new request or repeat last command */
+                if ((last_req_id != (uint16_t)p_rd_req->hdr.s_id)
+                 || ((p_rd_req->hdr.flags & MON_FLG_AUTO_UPDATE) != 0))
                 {
                     /* process main request */
+                    data_id++;
                     p_data_buf = process_read_request(p_rd_req, g_mon_reply_buf, expected_toggle, data_id);
 
-                    /* process optional secondary read request */
-                    p_rd_req++;                                             // point to optional 2nd request
-                    if ((p_hdr->flags & MON_FLG_2_PART_REQ)                 // if 1st request states 2-parts
-                     && (p_rd_req->hdr.s_id == p_rd_req->trailer.e_id)      // and 2nd request shows ready (but could be 256 requests old)
-                     && (p_rd_req->hdr.s_id == p_hdr->s_id))                // and matches 1st request ID
-                    {
-                        if (last_req_id != (uint16_t)p_hdr->s_id)           // if this is a new 2-part request
-                        {
-                            expected_toggle ^= 1;                           // change expected toggle value
-                        }
-
-                        /* if this is a current request (not from 256 requests ago) */
-                        if (p_rd_req->trailer.part2_toggle == expected_toggle)
-                        {
-                            process_read_request(p_rd_req, p_data_buf, expected_toggle, data_id);
-                        }
-                    }
-
+                    /* save id */
                     last_req_id = (uint16_t)p_hdr->s_id;
-                    data_id++;
+                }
+
+                /* process optional secondary read request */
+                p_rd_req++;
+                if ((true == part2_pending)                             // if there is a 2nd request
+                 && (p_rd_req->hdr.s_id == p_rd_req->trailer.e_id)      // and 2nd request shows ready (but could be n*256 requests old)
+                 && (p_rd_req->hdr.s_id == p_hdr->s_id)                 // and matches 1st request ID
+                 && (p_rd_req->trailer.part2_toggle == expected_toggle))// and not n*256 requests old
+                {
+                    process_read_request(p_rd_req, p_data_buf, expected_toggle, data_id);
                 }
             }
         }
 
         else /* write request */
         {
-
+            ;   // future placeholder
         }
     }
 
-}
+} /* End of function monitor_update_data() */
 
 
 /***********************************************************************************************************************
 * Function Name: process_read_request
-* Description  : This function
-* Arguments    :
-* Return Value :
+* Description  : This function does the processing for a single monitoring request.
+* Arguments    : p_rd_req -
+*                    Pointer to request to process
+*                p_data_buf -
+*                    Pointer to buffer to write reply to
+*                toggle_value -
+*                    Value to use in the toggle-byte in the reply
+*                data_id -
+*                    Value to use for start and end IDs
+* Return Value : Pointer to byte after last byte of reply.
 ***********************************************************************************************************************/
-uint8_t * process_read_request(rd_req_t *p_rd_req, uint8_t *p_data_buf, uint8_t toggle_value, uint8_t data_id)
+static uint8_t * process_read_request(rd_req_t *p_rd_req, uint8_t *p_data_buf, uint8_t toggle_value, uint8_t data_id)
 {
-    uint8_t     i,j;
+    uint8_t     i;
+    uint8_t     j;
     uint8_t     method=p_rd_req->hdr.method;
     mon_btn_t   *p_btn_data;
     uint16_t    *p_sldr_whl_data;
     btn_ctrl_t  *p_btn_ctrl;
     sldr_ctrl_t *p_sldr_ctrl;
     wheel_ctrl_t    *p_wheel_ctrl;
+
+    /* cast start of buffer to reply header format */
     mon_reply_hdr_t *p_hdr=(mon_reply_hdr_t *)p_data_buf;
     mon_trailer_t   *p_trailer;
 
@@ -187,8 +223,9 @@ uint8_t * process_read_request(rd_req_t *p_rd_req, uint8_t *p_data_buf, uint8_t 
 
 
     /* write button data (if any) */
-    if ((p_rd_req->hdr.data_type == MON_DATA_BUTTONS) || (p_rd_req->hdr.data_type == MON_DATA_BTNS_AND_SLDRS))
+    if ((MON_DATA_BUTTONS == p_rd_req->hdr.data_type) || (MON_DATA_BTNS_AND_SLDRS == p_rd_req->hdr.data_type))
     {
+        /* cast current location in buffer to button data */
         p_btn_data = (mon_btn_t *)p_data_buf;
 
         /* for each button possible */
@@ -202,7 +239,7 @@ uint8_t * process_read_request(rd_req_t *p_rd_req, uint8_t *p_data_buf, uint8_t 
                 p_btn_data->touch_delta = g_key_info[method].user_thr[i];
 
                 p_btn_ctrl = &gp_touch_cfgs[method]->p_buttons[i];
-                if (g_key_info[method].mode == TOUCH_SELF_MODE)
+                if (TOUCH_SELF_MODE == g_key_info[method].mode)
                 {
                     p_btn_data->primary = g_self_sensor_cnt_pt[method][p_btn_ctrl->elem_index];
                     p_btn_data->secondary = 0;
@@ -225,8 +262,9 @@ uint8_t * process_read_request(rd_req_t *p_rd_req, uint8_t *p_data_buf, uint8_t 
 
 
     /* write slider/wheel data (if any) */
-    if ((p_rd_req->hdr.data_type == MON_DATA_SLIDERS) || (p_rd_req->hdr.data_type == MON_DATA_BTNS_AND_SLDRS))
+    if ((MON_DATA_SLIDERS == p_rd_req->hdr.data_type) || (MON_DATA_BTNS_AND_SLDRS == p_rd_req->hdr.data_type))
     {
+        /* cast for data portion of reply */
         p_sldr_whl_data = (uint16_t *)p_data_buf;
 
         /* for each slider possible */
@@ -279,7 +317,7 @@ uint8_t * process_read_request(rd_req_t *p_rd_req, uint8_t *p_data_buf, uint8_t 
 
 
     /* write active method numbers (IDs/indexes) */
-    else if (p_rd_req->hdr.data_type == MON_DATA_ACTIVE_METHODS)
+    else if (MON_DATA_ACTIVE_METHODS == p_rd_req->hdr.data_type)
     {
         *p_data_buf++ = g_mlist.num_methods;
         for (i=0; i < g_mlist.num_methods; i++)
@@ -287,7 +325,10 @@ uint8_t * process_read_request(rd_req_t *p_rd_req, uint8_t *p_data_buf, uint8_t 
             *p_data_buf++ = g_mlist.methods[i];
         }
     }
-
+    else
+    {
+        ;   // coding standard requirement
+    }
 
     /* write trailer */
     p_trailer = (mon_trailer_t *)p_data_buf;
@@ -296,6 +337,6 @@ uint8_t * process_read_request(rd_req_t *p_rd_req, uint8_t *p_data_buf, uint8_t 
     p_data_buf += sizeof(mon_trailer_t);
 
     return p_data_buf;
-}
+} /* End of function process_read_request() */
 
-#endif // (TOUCH_CFG_UPDATE_MONITOR == 1)
+#endif /* (TOUCH_CFG_UPDATE_MONITOR == 1) */

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2016-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2020 Renesas Electronics Corporation. All rights reserved.
 ********************************************************************************************************************/
 /*******************************************************************************************************************
 * File Name : r_flash_type4.c
@@ -36,6 +36,8 @@
 *         : 19.07.2019 4.20    Fixed the placement of the PFRAM and PFRAM2 section of the dual mode and linear mode.
 *                              Fixed cast of g_pfcu_cmd_area.
 *                              Fixed timeout processing of flash_toggle_banksel_reg() and flash_write_faw_reg().
+*         : 26.06.2020 4.60    Modified R_CF_SetAccessWindow() and R_CF_GetAccessWindow() of access window functions.
+*                              Modified the check order in get_cmdlk_err() and get_cmdlk_err_event().
 ********************************************************************************************************************/
 
 /********************************************************************************************************************
@@ -263,13 +265,13 @@ flash_err_t get_cmdlk_err(void)
     flash_err_t err;
 
 
-    if ((FLASH.FASTAT.BIT.CFAE) || (FLASH.FSTATR.BIT.ILGLERR))
-    {
-        err = FLASH_ERR_ADDRESS;            // tried to access invalid address
-    }
-    else if (FLASH.FSTATR.BIT.SECERR)       // error due to access window locking
+    if (FLASH.FSTATR.BIT.SECERR)       // error due to access window locking
     {
         err = FLASH_ERR_SECURITY;
+    }
+    else if ((FLASH.FASTAT.BIT.CFAE) || (FLASH.FSTATR.BIT.ILGLERR))
+    {
+        err = FLASH_ERR_ADDRESS;            // tried to access invalid address
     }
     else if ((FLASH.FSTATR.BIT.PRGERR) || (FLASH.FSTATR.BIT.ERSERR))
     {
@@ -314,13 +316,13 @@ flash_interrupt_event_t get_cmdlk_err_event(void)
         event = FLASH_INT_EVENT_ERR_DF_ACCESS;  // tried to access invalid address
     }
 #endif
-    if ((FLASH.FASTAT.BIT.CFAE) || (FLASH.FSTATR.BIT.ILGLERR))
-    {
-        event = FLASH_INT_EVENT_ERR_CF_ACCESS;  // tried to access invalid address
-    }
-    else if (FLASH.FSTATR.BIT.SECERR)           // access window protected
+    if (FLASH.FSTATR.BIT.SECERR)           // access window protected
     {
         event = FLASH_INT_EVENT_ERR_SECURITY;
+    }
+    else if ((FLASH.FASTAT.BIT.CFAE) || (FLASH.FSTATR.BIT.ILGLERR))
+    {
+        event = FLASH_INT_EVENT_ERR_CF_ACCESS;  // tried to access invalid address
     }
     else if ((FLASH.FSTATR.BIT.PRGERR) || (FLASH.FSTATR.BIT.ERSERR))
     {
@@ -488,10 +490,17 @@ flash_err_t R_CF_SetAccessWindow (flash_access_window_config_t  *pAccessInfo)
 
     faw.LONG = FLASH.FAWMON.LONG;
 
-    faw.BIT.FAWS = (pAccessInfo->start_addr & 0x00FFE000) >> 13;
-    if (pAccessInfo->end_addr == (uint32_t)FLASH_CF_BLOCK_END)
+    if ((uint32_t)FLASH_CF_BLOCK_END == pAccessInfo->start_addr)
     {
-        faw.BIT.FAWE = 0x800;
+        faw.BIT.FAWS = FLASH_ACCESS_WINDOW_END_NEXT_REG_VALUE;
+    }
+    else
+    {
+        faw.BIT.FAWS = (pAccessInfo->start_addr & 0x00FFE000) >> 13;
+    }
+    if ((uint32_t)FLASH_CF_BLOCK_END == pAccessInfo->end_addr)
+    {
+        faw.BIT.FAWE = FLASH_ACCESS_WINDOW_END_NEXT_REG_VALUE;
     }
     else
     {
@@ -514,8 +523,22 @@ flash_err_t R_CF_SetAccessWindow (flash_access_window_config_t  *pAccessInfo)
 flash_err_t R_CF_GetAccessWindow (flash_access_window_config_t  *pAccessInfo)
 {
 
-    pAccessInfo->start_addr = ((FLASH.FAWMON.BIT.FAWS << 13) | 0xFF000000);
-    pAccessInfo->end_addr = ((FLASH.FAWMON.BIT.FAWE << 13) | 0xFF000000);
+    if (FLASH_ACCESS_WINDOW_END_NEXT_REG_VALUE == FLASH.FAWMON.BIT.FAWS)
+    {
+        pAccessInfo->start_addr = (uint32_t)FLASH_CF_BLOCK_END;
+    }
+    else
+    {
+        pAccessInfo->start_addr = ((FLASH.FAWMON.BIT.FAWS << 13) | 0xFF000000);
+    }
+    if (FLASH_ACCESS_WINDOW_END_NEXT_REG_VALUE == FLASH.FAWMON.BIT.FAWE)
+    {
+        pAccessInfo->end_addr = (uint32_t)FLASH_CF_BLOCK_END;
+    }
+    else
+    {
+        pAccessInfo->end_addr = ((FLASH.FAWMON.BIT.FAWE << 13) | 0xFF000000);
+    }
 
     return FLASH_SUCCESS;
 }

@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_ptp_light_rx
-VERSION = 		1.13
-MDF =			NOT_SUPPORTED
+VERSION = 		1.14
+MDF = NOT_SUPPORTED
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

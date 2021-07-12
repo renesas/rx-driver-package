@@ -5,12 +5,12 @@ r_t4_driver_rx
 
 Document Number
 ---------------
-R20AN0311JJ0108-RX-T4
-R20AN0311EJ0108-RX-T4
+R20AN0311JJ0109-RX-T4
+R20AN0311EJ0109-RX-T4
 
 Version
 -------
-v1.08
+v1.09
 
 Overview
 --------
@@ -69,9 +69,9 @@ Refer to "Adding Firmware Integration Technology Modules to CS+ Projects (R01AN1
 
 Toolchain(s) Used
 -----------------
-* Renesas RX Compiler V.3.01.00
-* GCC for Renesas RX 4.8.4.201801
-* IAR C/C++ Compiler for Renesas RX version 4.11.1
+* Renesas RX Compiler V.3.02.00
+* GCC for Renesas RX 4.8.4.201803
+* IAR C/C++ Compiler for Renesas RX version 4.14.1
 
 File Structure
 --------------
@@ -81,9 +81,9 @@ r_t4_driver_rx
 +---doc
 |   |
 |   +---ja
-|   |     r20an0311jj0108-rx-t4.pdf
+|   |     r20an0311jj0109-rx-t4.pdf
 |   +---en
-|         r20an0311ej0108-rx-t4.pdf
+|         r20an0311ej0109-rx-t4.pdf
 |
 +---ref
 |       r_t4_driver_rx_config_reference.h

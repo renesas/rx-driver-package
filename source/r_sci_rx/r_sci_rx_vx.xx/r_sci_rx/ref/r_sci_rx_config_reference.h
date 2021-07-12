@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name     : r_sci_rx_config.h
@@ -38,6 +38,9 @@
 *           25.11.2019 3.30    Added support RX13T.
 *                              Removed support for Generation 1 devices.
 *           30.12.2019 3.40    Added support RX66N, RX72N.
+*           31.03.2020 3.50    Added support RX23E-A.
+*           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
+*                              Merged IrDA functionality to SCI FIT.
 ***********************************************************************************************************************/
 #ifndef SCI_CONFIG_H
 #define SCI_CONFIG_H
@@ -58,6 +61,7 @@ Configuration Options
 #define SCI_CFG_ASYNC_INCLUDED  (1)
 #define SCI_CFG_SYNC_INCLUDED   (0)
 #define SCI_CFG_SSPI_INCLUDED   (0)
+#define SCI_CFG_IRDA_INCLUDED   (0)
 
 /* SPECIFY BYTE VALUE TO TRANSMIT WHILE CLOCKING IN DATA IN SSPI MODES */
 #define SCI_CFG_DUMMY_TX_BYTE   (0xFF)
@@ -71,23 +75,24 @@ Configuration Options
  * a = this channel is used only for RX130-512KB
  * n = this channel is not available for RX65N-64pin.
  * s = this channel is not available in simple SPI mode.
+ * i = this channel is available in IrDA interface.
  * RX MCU supported channels
  *
- * CH#  110 111 113 130 230 231 23T 24T 24U 64M 71M 65N 66T 72T 23W 72M 13T 72N 66N
- * ---  --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
- * CH0           X   Xa  X   X               X   X   Xn              X       X   X
- * CH1   X   X*  X*  Xu  X   X   Xu  Xu  Xu  X   X   Xs  X   X   X   X   X   X   X
- * CH2           X                           X   X   Xu              X       X   X
- * CH3                                       X   X   Xs              X       X   X
- * CH4                                       X   X   Xn              X       X   X
- * CH5   X   X   X   X   X   Xu  X   X   X   X   X   X   X   X   X   X   X   X   X
- * CH6           X   X   X   X       X   X   X   X   Xn  X   X       Xu      X   X
- * CH7                                       Xu  Xu  Xn              X       X   X
- * CH8           X   Xa  X   X           X           X   X   X   Xu  X       X   X
- * CH9           X   Xa  X   X           X           Xs  X   X       X       X   X
- * CH10                                              X               X       X   X
- * CH11                                  X           Xs  X   X       X       X   X
- * CH12  X   X   X   X   X   X               X   X   Xs  X   X   X   X   X   X   X
+ * CH#  110 111 113 130 230  231  23T 24T 24U 64M 71M 65N 66T 72T 23W 72M 13T 72N 66N RX23E-A
+ * ---  --- --- --- --- --- ----- --- --- --- --- --- --- --- --- --- --- --- --- --- -------
+ * CH0           X   Xa  X    X                X   X   Xn              X       X   X      
+ * CH1   X   X*  X*  Xu  X    X    Xu  Xu  Xu  X   X   Xs  X   X   X   X   X   X   X     Xu
+ * CH2           X                             X   X   Xu              X       X   X      
+ * CH3                                         X   X   Xs              X       X   X      
+ * CH4                                         X   X   Xn              X       X   X      
+ * CH5   X   X   Xi  X   Xi   Xu,i X   X   X   X   X   X   X   X   Xi  X   X   X   X     X
+ * CH6           X   X   X    X        X   X   X   X   Xn  X   X       Xu      X   X     X
+ * CH7                                         Xu  Xu  Xn              X       X   X      
+ * CH8           X   Xa  X    X            X           X   X   X   Xu  X       X   X      
+ * CH9           X   Xa  X    X            X           Xs  X   X       X       X   X      
+ * CH10                                                X               X       X   X      
+ * CH11                                    X           Xs  X   X       X       X   X      
+ * CH12  X   X   X   X   X    X                X   X   Xs  X   X   X   X   X   X   X     X
 */
                                    
 #define SCI_CFG_CH0_INCLUDED    (0)
@@ -193,5 +198,74 @@ Configuration Options
 #define SCI_CFG_CH9_DATA_MATCH_INCLUDED  (0)
 #define SCI_CFG_CH10_DATA_MATCH_INCLUDED (0)
 #define SCI_CFG_CH11_DATA_MATCH_INCLUDED (0)
+
+/* 0=Disable, 1=DTC, 2=DMAC */
+#define SCI_CFG_CH0_TX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH1_TX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH2_TX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH3_TX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH4_TX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH5_TX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH6_TX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH7_TX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH8_TX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH9_TX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH10_TX_DTC_DMACA_ENABLE (0)
+#define SCI_CFG_CH11_TX_DTC_DMACA_ENABLE (0)
+#define SCI_CFG_CH12_TX_DTC_DMACA_ENABLE (0)
+
+#define SCI_CFG_CH0_RX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH1_RX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH2_RX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH3_RX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH4_RX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH5_RX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH6_RX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH7_RX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH8_RX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH9_RX_DTC_DMACA_ENABLE  (0)
+#define SCI_CFG_CH10_RX_DTC_DMACA_ENABLE (0)
+#define SCI_CFG_CH11_RX_DTC_DMACA_ENABLE (0)
+#define SCI_CFG_CH12_RX_DTC_DMACA_ENABLE (0)
+
+/* 0~7 8 channels dmac, but maximum of SCI channel is 13 channel => cost 13*2 = 26 dmac channels in case all of sci channels run simultaneously */
+#define SCI_CFG_CH0_TX_DMACA_CH_NUM      (0)
+#define SCI_CFG_CH1_TX_DMACA_CH_NUM      (0)
+#define SCI_CFG_CH2_TX_DMACA_CH_NUM      (0)
+#define SCI_CFG_CH3_TX_DMACA_CH_NUM      (0)
+#define SCI_CFG_CH4_TX_DMACA_CH_NUM      (0)
+#define SCI_CFG_CH5_TX_DMACA_CH_NUM      (0)
+#define SCI_CFG_CH6_TX_DMACA_CH_NUM      (0)
+#define SCI_CFG_CH7_TX_DMACA_CH_NUM      (0)
+#define SCI_CFG_CH8_TX_DMACA_CH_NUM      (0)
+#define SCI_CFG_CH9_TX_DMACA_CH_NUM      (0)
+#define SCI_CFG_CH10_TX_DMACA_CH_NUM     (0)
+#define SCI_CFG_CH11_TX_DMACA_CH_NUM     (0)
+#define SCI_CFG_CH12_TX_DMACA_CH_NUM     (0)
+
+#define SCI_CFG_CH0_RX_DMACA_CH_NUM      (1)
+#define SCI_CFG_CH1_RX_DMACA_CH_NUM      (1)
+#define SCI_CFG_CH2_RX_DMACA_CH_NUM      (1)
+#define SCI_CFG_CH3_RX_DMACA_CH_NUM      (1)
+#define SCI_CFG_CH4_RX_DMACA_CH_NUM      (1)
+#define SCI_CFG_CH5_RX_DMACA_CH_NUM      (1)
+#define SCI_CFG_CH6_RX_DMACA_CH_NUM      (1)
+#define SCI_CFG_CH7_RX_DMACA_CH_NUM      (1)
+#define SCI_CFG_CH8_RX_DMACA_CH_NUM      (1)
+#define SCI_CFG_CH9_RX_DMACA_CH_NUM      (1)
+#define SCI_CFG_CH10_RX_DMACA_CH_NUM     (1)
+#define SCI_CFG_CH11_RX_DMACA_CH_NUM     (1)
+#define SCI_CFG_CH12_RX_DMACA_CH_NUM     (1)
+
+/* SPECIFY IRDA CHANNELS TO INCLUDE SOFTWARE (SUPPORTED MCU RX113/RX23W/RX231/RX230 ONLY) 1=included, 0=not */
+#define SCI_CFG_CH5_IRDA_INCLUDED    (0)
+
+/* Set the non-active level of the TXD pin */
+/* 1=High , 0=Low */
+#define SCI_CFG_CH5_IRDA_IRTXD_INACTIVE_LEVEL (0)
+
+/* Set the non-active level of the RXD pin */
+/* 1=High , 0=Low */
+#define SCI_CFG_CH5_IRDA_IRRXD_INACTIVE_LEVEL (0)
 
 #endif /* SCI_CONFIG_H */

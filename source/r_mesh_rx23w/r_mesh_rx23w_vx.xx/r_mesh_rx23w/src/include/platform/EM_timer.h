@@ -64,13 +64,16 @@ typedef UINT32 EM_time_type;
 
 /* Timer Related */
 #define EM_start_timer         BT_start_timer
-#define EM_restart_timer       BT_restart_timer
 #define EM_stop_timer          BT_stop_timer
-#define EM_is_active_timer     BT_is_active_timer
 
 /* Empty Functions */
 #define EM_timer_init(...)
 #define timer_em_init(...)
+
+#define EM_timer_get_remaining_time BT_timer_get_remaining_time
+
+/** Platform Interface to return ticks in milliseconds */
+#define EM_get_time_ms              em_systemtime_read_pl
 
 /* -------------------------------------------- Global Definitions */
 

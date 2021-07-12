@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2015(2016-2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2015(2016-2020) Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_tfat_drv_if_usb_mini.c
@@ -30,7 +30,10 @@
 *              : 21.01.2015 1.00     First Release
 *              : 22.06.2015 1.02     Added support MCU RX231.
 *              : 01.04.2016 1.03     Updated the xml file.
-*              : 08.08.2019 2.00     Supporting offer of C source for TFAT.
+*              : 08.08.2019 2.00     Added support for GNUC and ICCRX.
+*              : 16.04.2020 2.10     Added support for FreeRTOS and 
+*                                    Renesas uITRON (RI600V4).
+*              : 10.09.2020 2.20     Added support for the format function.
 *******************************************************************************/
 
 /******************************************************************************
@@ -45,7 +48,6 @@ Includes   <System Includes> , "Project Includes"
 #include "diskio.h"              /* TFAT define */
 
 #include "r_usb_basic_mini_if.h"
-#include "r_usb_hmsc_mini_config.h"
 #include "r_usb_hmsc_mini_if.h"
 
 /*******************************************************************************
@@ -55,12 +57,15 @@ Macro definitions
 /******************************************************************************
 Exported global variables and functions (to be accessed by other files)
 ******************************************************************************/
-extern uint16_t usb_ghmsc_RootDevaddr;
 
 /******************************************************************************
 Private global variables and functions
 *******************************************************************************/
+
+#if (BSP_CFG_RTOS_USED == 0)
 static void R_usb_mini_hmsc_WaitLoop(void);
+#endif /* BSP_CFG_RTOS_USED == 0 */
+
 static uint16_t usb_ghmsc_tfatSecSize = 512;
 
 
@@ -93,17 +98,21 @@ DRESULT usb_mini_disk_read (
     uint32_t sector_count       /* Number of sectors to read        */
 )
 {
-    uint16_t        res[10];
+#if (BSP_CFG_RTOS_USED == 0)
     usb_tskinfo_t   *mess;
     usb_tskinfo_t   *mes;
+#endif /* BSP_CFG_RTOS_USED == 0 */
     uint16_t        err;
     uint32_t        tran_byte;
+    usb_info_t      info;
+    usb_err_t       ret;
 
     /* set transfer length */
     tran_byte = (uint32_t)sector_count * usb_ghmsc_tfatSecSize;
 
-    R_usb_hstd_DeviceInformation(usb_ghmsc_RootDevaddr, (uint16_t *)res);         /* Get device connect state */
-    if ( USB_STS_DETACH == res[1] )    /* Check detach */
+#if (BSP_CFG_RTOS_USED == 0)
+    ret = R_USB_GetInformation (&info);
+    if ((USB_STS_CONFIGURED != info.status) || (USB_SUCCESS != ret))
     {
         return RES_ERROR;
     }
@@ -114,11 +123,11 @@ DRESULT usb_mini_disk_read (
     {
         do  /* Wait for complete R_usb_hmsc_StrgReadSector() */
         {
-            R_usb_hstd_DeviceInformation(usb_ghmsc_RootDevaddr, (uint16_t *)res);         /* Get device connect state */
-            R_usb_mini_hmsc_WaitLoop();                                                      /* Task Schedule */
+            ret = R_USB_GetInformation (&info);                         /* Get device connect state */
+            R_usb_mini_hmsc_WaitLoop();                                 /* Task Schedule */
             err = R_USB_RCV_MSG(USB_HSTRG_MBX, (usb_msg_t**)&mess);     /* Receive read complete msg */
         }
-        while ( (err != USB_E_OK) && (res[1] != USB_STS_DETACH) );
+        while ((USB_E_OK != err) && ((USB_STS_CONFIGURED == info.status) && (USB_SUCCESS == ret))); /* WAIT_LOOP */
 
         if ( err == USB_E_OK )
         {   /* Complete R_usb_hmsc_StrgReadSector() */
@@ -128,7 +137,7 @@ DRESULT usb_mini_disk_read (
         }
         else
         {   /* Device detach */
-            R_usb_mini_hmsc_WaitLoop();                                                      /* Task Schedule */
+            R_usb_mini_hmsc_WaitLoop();                                 /* Task Schedule */
             err = R_USB_RCV_MSG(USB_HSTRG_MBX, (usb_msg_t**)&mess);     /* Receive read complete msg */
             if ( USB_E_OK == err )
             {
@@ -142,6 +151,21 @@ DRESULT usb_mini_disk_read (
     {
         return RES_ERROR;
     }
+#else  /* BSP_CFG_RTOS_USED == 0 */
+    ret = R_USB_GetInformation (&info);
+    if ((USB_STS_CONFIGURED != info.status) || (USB_SUCCESS != ret))
+    {
+        return RES_ERROR;
+    }
+
+    /* read function */
+    err = R_usb_hmsc_StrgReadSector((uint16_t)drive, buffer, sector_number, (uint16_t) sector_count, tran_byte);
+    if ( USB_OK != err)
+    {
+        return RES_ERROR;
+    }
+#endif /* BSP_CFG_RTOS_USED == 0 */
+
     return RES_OK;
 }
 
@@ -162,33 +186,37 @@ DRESULT usb_mini_disk_write (
     uint32_t sector_count        /* Number of sectors to write      */
 )
 {
-    uint16_t        res[10];
+#if (BSP_CFG_RTOS_USED == 0)
     usb_tskinfo_t   *mess;
     usb_tskinfo_t   *mes;
+#endif /* BSP_CFG_RTOS_USED == 0 */
     uint16_t        err;
     uint32_t        tran_byte;
+    usb_info_t      info;
+    usb_err_t       ret;
 
     /* set transfer length */
     tran_byte = (uint32_t)sector_count * usb_ghmsc_tfatSecSize;
 
-    R_usb_hstd_DeviceInformation(usb_ghmsc_RootDevaddr, (uint16_t *)res); /* Get device connect state */
-    if ( USB_STS_DETACH == res[1] )    /* Check detach */
+#if (BSP_CFG_RTOS_USED == 0)
+    ret = R_USB_GetInformation (&info);
+    if ((USB_STS_CONFIGURED != info.status) || (USB_SUCCESS != ret))
     {
         return RES_ERROR;
     }
 
     /* write function */
-    err = R_usb_hmsc_StrgWriteSector((uint16_t)drive, (uint8_t *)buffer
+    err = R_USB_HmscStrgWriteSector((uint16_t)drive, (uint8_t *)buffer
                                      , sector_number, (uint16_t)sector_count, tran_byte);
     if ( USB_HMSC_OK == err )
     {
-        do  /* Wait for complete R_usb_hmsc_StrgWriteSector() */
+        do  /* Wait for complete R_USB_HmscStrgWriteSector() */
         {
-            R_usb_hstd_DeviceInformation(usb_ghmsc_RootDevaddr, (uint16_t *)res); /* Get device connect state */
-            R_usb_mini_hmsc_WaitLoop();                                                      /* Task Schedule */
-            err = R_USB_RCV_MSG(USB_HSTRG_MBX, (usb_msg_t**)&mess);    /* Receive write complete msg */
+            ret = R_USB_GetInformation (&info);                         /* Get device connect state */
+            R_usb_mini_hmsc_WaitLoop();                                 /* Task Schedule */
+            err = R_USB_RCV_MSG(USB_HSTRG_MBX, (usb_msg_t**)&mess);     /* Receive write complete msg */
         }
-        while ( ( err != USB_E_OK ) && ( res[1] != USB_STS_DETACH ) );
+        while ((USB_E_OK != err) && ((USB_STS_CONFIGURED == info.status) && (USB_SUCCESS == ret))); /* WAIT_LOOP */
 
         if ( err == USB_E_OK )
         {   /* Complete R_usb_hmsc_StrgReadSector() */
@@ -198,7 +226,7 @@ DRESULT usb_mini_disk_write (
         }
         else
         {   /* Device detach */
-            R_usb_mini_hmsc_WaitLoop();                                                      /* Task Schedule */
+            R_usb_mini_hmsc_WaitLoop();                                 /* Task Schedule */
             err = R_USB_RCV_MSG(USB_HSTRG_MBX, (usb_msg_t**)&mess);     /* Receive read complete msg */
             if ( USB_E_OK == err )
             {
@@ -212,6 +240,22 @@ DRESULT usb_mini_disk_write (
     {
         return RES_ERROR;
     }
+#else  /* BSP_CFG_RTOS_USED == 0 */
+    ret = R_USB_GetInformation (&info);
+    if ((USB_STS_CONFIGURED != info.status) || (USB_SUCCESS != ret))
+    {
+        return RES_ERROR;
+    }
+
+    /* write function */
+    err = R_USB_HmscStrgWriteSector((uint16_t)drive, (uint8_t *)buffer, sector_number, (uint16_t) sector_count,
+                                    tran_byte);
+    if ( USB_OK != err)
+    {
+        return RES_ERROR;
+    }
+
+#endif /* BSP_CFG_RTOS_USED == 0 */
     return RES_OK;
 }
 
@@ -230,10 +274,131 @@ DRESULT usb_mini_disk_ioctl (
     void* buffer                 /* Data transfer buffer     */
 )
 {
+#if FF_USE_MKFS == 1
+#if (BSP_CFG_RTOS_USED == 0)
+    usb_tskinfo_t   *p_mess;
+    usb_tskinfo_t   *p_mes;
+#endif /* BSP_CFG_RTOS_USED == 0 */
+    usb_info_t      info;
+    usb_err_t       ret;
+    uint32_t        num_blocks;
+    uint32_t        block_length;
+    uint16_t        err;
+    uint8_t         buff[8];
+#endif
 
-    /*  Please put the code for disk_ioctl driver interface
-         function over here.  */
-    /*  Please refer the application note for details.  */
+    if ((NULL == buffer) && (CTRL_SYNC != command))
+    {
+        return RES_PARERR;
+    }
+
+    switch (command)
+    {
+        case CTRL_SYNC:
+
+        break;
+
+        case GET_SECTOR_COUNT:
+        case GET_BLOCK_SIZE:
+#if FF_USE_MKFS
+            ret = R_USB_GetInformation (&info);
+            if ((USB_STS_CONFIGURED != info.status) || (USB_SUCCESS != ret))
+            {
+                return RES_ERROR;
+            }
+
+#if (BSP_CFG_RTOS_USED == 0)
+            /* Get format capacities */
+            err = usb_hmsc_strg_user_command(USB_ATAPI_READ_CAPACITY, buff, (usb_hmsc_cb_t)usb_hstd_dummy_function);
+            if (USB_OK != err)
+            {
+                return RES_ERROR;
+            }
+
+            do  /* Wait for complete usb_hmsc_strg_user_command() */
+            {
+                ret = R_USB_GetInformation (&info);                         /* Get device connect state */
+                /*
+                 * The completion judgment of usb_hmsc_strg_user_command() is the message sent by getting
+                 * the memory block of the previous stage. R_usb_mini_hmsc_WaitLoop() and R_USB_RCV_MSG()
+                 * were required to receive the message.
+                 */
+                R_usb_mini_hmsc_WaitLoop();                                 /* Task Schedule */
+                err = R_USB_RCV_MSG(USB_HSTRG_MBX, (usb_msg_t**)&p_mess);   /* Receive capacities complete msg */
+            }
+            while ((USB_E_OK != err) && ((USB_STS_CONFIGURED == info.status) && (USB_SUCCESS == ret))); /* WAIT_LOOP */
+
+            if (USB_E_OK == err)
+            {   /* Complete usb_hmsc_strg_user_command() */
+                p_mes = (usb_tskinfo_t *)p_mess;
+                err = p_mes->keyword;
+                R_USB_REL_BLK(p_mess->flag);
+            }
+            else
+            {   /* Device detach */
+                R_usb_mini_hmsc_WaitLoop();                                 /* Task Schedule */
+                err = R_USB_RCV_MSG(USB_HSTRG_MBX, (usb_msg_t**)&p_mess);   /* Receive capacities complete msg */
+                if (USB_E_OK == err)
+                {
+                    R_USB_REL_BLK(p_mess->flag);
+                }
+                err = USB_ERROR;
+            }
+#else /* (BSP_CFG_RTOS_USED == 0) */
+            err = usb_hmsc_strg_user_command(USB_ATAPI_READ_CAPACITY, buff);
+            if (USB_OK != err)
+            {
+                return RES_ERROR;
+            }
+#endif /* BSP_CFG_RTOS_USED == 0 */
+
+            /* eight bytes of READ CAPACITY data */
+            block_length = (uint32_t) buff[7];
+            block_length |= ((uint32_t) buff[6] << 8);
+            block_length |= ((uint32_t) buff[5] << 16);
+            block_length |= ((uint32_t) buff[4] << 24);
+            block_length = block_length / USB_HMSC_STRG_SECTSIZE;
+
+            if (GET_SECTOR_COUNT == command)
+            {
+                num_blocks = (uint32_t) buff[3];
+                num_blocks |= ((uint32_t) buff[2] << 8);
+                num_blocks |= ((uint32_t) buff[1] << 16);
+                num_blocks |= ((uint32_t) buff[0] << 24);
+                num_blocks = (num_blocks + 1) * block_length;
+                /* Get USB mini number of blocks */
+                ((uint32_t *)buffer)[0] = num_blocks;
+            }
+            else if (GET_BLOCK_SIZE == command)
+            {
+                /* Get USB mini block length */
+                ((uint32_t *)buffer)[0] = block_length;
+            }
+            else
+            {
+                return RES_ERROR;
+            }
+#else
+        return RES_PARERR;
+#endif
+        break;
+
+        case GET_SECTOR_SIZE:
+#if FF_MAX_SS == FF_MIN_SS
+            return RES_PARERR;
+#else
+            ((uint32_t *)buffer)[0] = (uint32_t)USB_HMSC_STRG_SECTSIZE;
+#endif
+        break;
+
+        case CTRL_TRIM:
+
+        break;
+
+        default:
+            return RES_PARERR;
+        break;
+    }
     return RES_OK;
 }
 
@@ -255,6 +420,7 @@ DSTATUS usb_mini_disk_status (
     return RES_OK;
 }
 
+#if (BSP_CFG_RTOS_USED == 0)
 /******************************************************************************
 Function Name   : R_usb_mini_hmsc_WaitLoop
 Description     : Hmsc wait loop function
@@ -263,13 +429,14 @@ Return value    : none
 ******************************************************************************/
 void R_usb_mini_hmsc_WaitLoop(void)
 {
-    if( R_usb_cstd_Scheduler() == USB_FLGSET )
+    if ( R_usb_cstd_Scheduler() == USB_FLGSET )
     {
         R_usb_hstd_HcdTask();
         R_usb_hstd_MgrTask();
         R_usb_hmsc_Task();
     }
 }
+#endif /* BSP_CFG_RTOS_USED == 0 */
 
 #endif // (TFAT_USB_MINI_DRIVE_NUM > 0)
 /******************************************************************************

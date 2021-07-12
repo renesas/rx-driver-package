@@ -43,6 +43,7 @@
  *         : 30.07.2019 2.43     RX72M support added.
  *         : 30.10.2019 2.44     RX13T support added.
  *         : 22.11.2019 2.45     RX66N, RX72N support added.
+ *         : 10.03.2020 2.46     RX23E-A support added.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef SCI_IIC_CONFIG_H
@@ -65,6 +66,7 @@
 /*  RX13T    :    , ch1,    ,    ,    , ch5,    ,    ,    ,    ,    ,    ,ch12 */
 /*  RX230    : ch0, ch1,    ,    ,    , ch5, ch6,    , ch8, ch9,    ,    ,ch12 */
 /*  RX231    : ch0, ch1,    ,    ,    , ch5, ch6,    , ch8, ch9,    ,    ,ch12 */
+/*  RX23E-A  :    , ch1,    ,    ,    , ch5, ch6,    ,    ,    ,    ,    ,ch12 */
 /*  RX23T    :    , ch1,    ,    ,    , ch5,    ,    ,    ,    ,    ,    ,     */
 /*  RX23W    :    , ch1,    ,    ,    , ch5,    ,    , ch8,    ,    ,    ,ch12 */
 /*  RX24T    :    , ch1,    ,    ,    , ch5, ch6,    ,    ,    ,    ,    ,     */

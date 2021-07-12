@@ -45,7 +45,7 @@ Includes <System Includes> , "Project Includes"
 *************************************************************************************************/
 #include "r_flash_spi_if.h"                     /* FLASH driver I/F definitions                 */
 #include "r_flash_spi_config.h"                 /* FLASH driver Configuration definitions       */
-#include "./src/r_flash_spi_private.h"          /* FLASH driver Private module definitions      */
+#include "../../r_flash_spi_private.h"          /* FLASH driver Private module definitions      */
 
 
 /* Check flash memory types. */

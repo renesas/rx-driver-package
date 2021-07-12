@@ -25,6 +25,7 @@
  *         : 01.10.2016 1.00    First Release
  *         : 01.04.2019 1.41    Added "WAIT_LOOP" keyword.
  *         : 14.11.2019 2.00    Added support for GNUC and ICCRX.
+ *         : 10.06.2020 2.01    Added support for atomic control.
  **********************************************************************************************************************/
 
 /*********************************************************************************************************************
@@ -135,18 +136,31 @@ lpc_err_t lpc_operating_mode_set (lpc_operating_mode_t e_mode)
  ********************************************************************************************************************/
 lpc_err_t lpc_low_power_mode_configure (lpc_low_power_mode_t e_mode)
 {
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) 
+    bsp_int_ctrl_t int_ctrl;
+#endif
+
     switch (e_mode)
     {
         case LPC_LP_SLEEP:
             R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);// unlock clock control registers
             SYSTEM.SBYCR.BIT.SSBY   = 0;        // Move to Sleep on R_BSP_WAIT()
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) 
+            R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
+#endif
             SYSTEM.MSTPCRA.BIT.ACSE = 0;
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) 
+            R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
+#endif
             R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR); // lock clock control registers
         break;
         
         case LPC_LP_ALL_MODULE_STOP:
             R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);// unlock clock control registers
             SYSTEM.SBYCR.BIT.SSBY      = 0;     // Move to All Module Stop on R_BSP_WAIT(). ACSE also needs to be set
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) 
+            R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
+#endif
             SYSTEM.MSTPCRA.BIT.ACSE    = 1;
             SYSTEM.MSTPCRA.BIT.MSTPA24 = 1;
             SYSTEM.MSTPCRA.BIT.MSTPA27 = 1;
@@ -158,6 +172,9 @@ lpc_err_t lpc_low_power_mode_configure (lpc_low_power_mode_t e_mode)
             SYSTEM.MSTPCRD.BIT.MSTPD5 = 1;
             SYSTEM.MSTPCRD.BIT.MSTPD6 = 1;
             SYSTEM.MSTPCRD.BIT.MSTPD7 = 1;
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) 
+            R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
+#endif
             R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR); // lock clock control registers
     
        break;

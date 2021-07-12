@@ -24,6 +24,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 08.04.2019 1.00     First Release
+*         : 20.11.2020 1.01     Added support for RX72M with 100 pin and 144 pin packages.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -72,6 +73,12 @@ Macro definitions
 #elif BSP_CFG_MCU_PART_PACKAGE == 0x2
     #define BSP_PACKAGE_LFBGA224    (1)
     #define BSP_PACKAGE_PINS        (224)
+#elif BSP_CFG_MCU_PART_PACKAGE == 0x3
+    #define BSP_PACKAGE_LFQFP144    (1)
+    #define BSP_PACKAGE_PINS        (144)
+#elif BSP_CFG_MCU_PART_PACKAGE == 0x5
+    #define BSP_PACKAGE_LFQFP100    (1)
+    #define BSP_PACKAGE_PINS        (100)
 #else
     #error "ERROR - BSP_CFG_MCU_PART_PACKAGE - Unknown package chosen in r_bsp_config.h"
 #endif

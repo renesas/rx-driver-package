@@ -22,8 +22,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_irda_sci_rx</name>
-        <version>1.01</version>
-        <zipsource>r_irda_sci_rx_v1.01.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_irda_sci_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>2.70</version>

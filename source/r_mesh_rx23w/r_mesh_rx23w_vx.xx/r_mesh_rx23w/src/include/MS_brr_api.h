@@ -21,83 +21,79 @@
 /* --------------------------------------------- Global Definitions */
 
 /**
- * \defgroup brr_module BEARER (Mesh Bearer Layer)
+ * \defgroup brr_module Bearer Layer (BRR)
+ * \ingroup mesh_core_block
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
- *  Mesh Bearer (BEARER) module to the Application and other upper
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
+ *  Mesh Bearer (BRR) module to the Application and other upper
  *  layers of the stack.
- */
-
-/**
- * \defgroup brr_defines Defines
- * \{
- * Describes defines for the module.
  */
 
 /**
  * \defgroup brr_constants Constants
  * \{
- * Describes Constants defined by the module.
+ * \brief This section describes the EtherMind Mesh Bearer Layer Constants.
  */
 
 /** Invalid Bearer handle identifier */
 #define BRR_HANDLE_INVALID                          0xFF
 
-/** Bearer Interface events to the above layer */
+/** \name Bearer Interface events to the above layer
+ *  \{
+ */
 #define BRR_IFACE_DOWN                              0x00
 #define BRR_IFACE_UP                                0x01
 #define BRR_IFACE_DATA                              0x02
 #define BRR_IFACE_PROXY_DATA                        0x03
+/** \} */
 
-/** Bearer beacon types - Connectable (Active) and Non-Connectable (Passive) */
+/** \name Bearer beacon types - Connectable (Active) and Non-Connectable (Passive)
+ *  \{
+ */
 #define BRR_BCON_PASSIVE                            0x00
 #define BRR_BCON_ACTIVE                             0x01
+/** \} */
 
-/** Bearer Beacon Operations - Broadcast/Observe */
+/** \name Bearer Beacon Operations - Broadcast/Observe
+ *  \{
+ */
 #define BRR_BROADCAST                               0x00
 #define BRR_OBSERVE                                 0x01
+/** \} */
 
-/** Bearer Beacon Actions - Enable/Disable */
+/** \name Bearer Beacon Actions - Enable/Disable
+ *  \{
+ */
 #define BRR_DISABLE                                 0x00
 #define BRR_ENABLE                                  0x01
+/** \} */
 
 /** Maximum PDU size for data received over bearer */
 #define BRR_MAX_PDU_SIZE                            65
 
-/** Bearer Server Client Roles */
+/** \name Bearer Server Client Roles
+ *  \{
+ */
 #define BRR_CLIENT_ROLE                             0x00
 #define BRR_SERVER_ROLE                             0x01
 #define BRR_INVALID_ROLE                            0xFF
+/** \} */
 
-/** Bearer Transmit and Receive operation modes */
+/** \name Bearer Transmit and Receive operation modes
+ *  \{
+ */
 #define BRR_TX                                      0x01
 #define BRR_RX                                      0x02
-
 /** \} */
 
-/** \} */
-
-/**
- *  \defgroup brr_events Events
- *  \{
- *  This section lists the Asynchronous Events notified to Application by the
- *  Module.
- */
-
-/**
- *  \defgroup brr_marcos Utility Macros
- *  \{
- *  Initialization and other Utility Macros offered by the module.
- */
-
-/** \} */
 /** \} */
 
 /* --------------------------------------------- Data Types/ Structures */
 
 /**
- *  \addtogroup brr_defines Defines
+ *  \defgroup brr_types_structures Types/Structures
  *  \{
+ *  \brief This section describes the EtherMind Mesh Bearer Layer Types/Structures.
  */
 /** Bearer handle identifier */
 typedef UCHAR           BRR_HANDLE;
@@ -125,41 +121,39 @@ typedef enum _BRR_TYPE
 
 } BRR_TYPE;
 
-/* GATT Bearer Message Type Masks */
+/** \name GATT Bearer Message Type Masks
+ *  \{
+ */
 #define BRR_SUBTYPE_GATT_T_MASK_BIT_OFFSET      6
 #define BRR_SUBTYPE_GATT_T_MASK                 (0xC0)
 #define BRR_SUBTYPE_GATT_NETWORK_T_MASK         ((MESH_GATT_TYPE_NETWORK << BRR_SUBTYPE_GATT_T_MASK_BIT_OFFSET) & (BRR_SUBTYPE_GATT_T_MASK))
 #define BRR_SUBTYPE_GATT_BEACON_T_MASK          ((MESH_GATT_TYPE_BEACON << BRR_SUBTYPE_GATT_T_MASK_BIT_OFFSET) & (BRR_SUBTYPE_GATT_T_MASK))
 #define BRR_SUBTYPE_GATT_PROXY_T_MASK           ((MESH_GATT_TYPE_PROXY << BRR_SUBTYPE_GATT_T_MASK_BIT_OFFSET) & (BRR_SUBTYPE_GATT_T_MASK))
 #define BRR_SUBTYPE_GATT_PROV_T_MASK            ((MESH_GATT_TYPE_PROV << BRR_SUBTYPE_GATT_T_MASK_BIT_OFFSET) & (BRR_SUBTYPE_GATT_T_MASK))
+/** \} */
 
 /** Bearer Beacon type definitions */
 typedef enum _BRR_BCON_TYPE
 {
-    /* Unprovisioned Device Beacon */
+    /** Unprovisioned Device Beacon */
     BRR_BCON_TYPE_UNPROV_DEVICE,
 
-    /* Secure Network Beacon */
+    /** Secure Network Beacon */
     BRR_BCON_TYPE_SECURE_NET,
 
-    /* Unprovisioned Device Beacon over GATT bearer */
+    /** Unprovisioned Device Beacon over GATT bearer */
     BRR_BCON_TYPE_GATT_UNPROV_DEVICE,
 
-    /* Proxy beacon with Network ID */
+    /** Proxy beacon with Network ID */
     BRR_BCON_TYPE_PROXY_NETID,
 
-    /* Proxy beacon with Node Identity */
+    /** Proxy beacon with Node Identity */
     BRR_BCON_TYPE_PROXY_NODEID,
 
     /** Number of Beacon types */
     BRR_BCON_COUNT
 
-} BRR_BCON_TTYPE;
-
-/**
- *  \addtogroup brr_structures Structures
- *  \{
- */
+} BRR_BCON_TYPE;
 
 /** Bearer information to register */
 typedef struct _BRR_BEARER_INFO
@@ -231,12 +225,11 @@ typedef struct _BRR_BEARER_CH_INFO
 }BRR_BEARER_CH_INFO;
 
 /** \} */
-/** \} */
 
 /**
  *  \defgroup brr_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
+ *  \brief This section Describes the module Notification Callback interface offered
  *  to the application
  */
 /**
@@ -273,32 +266,18 @@ typedef void (*BRR_BCON_CB)
         ) DECL_REENTRANT;
 /** \} */
 
-/**
- *  \addtogroup brr_defines Defines
- *  \{
- */
-
-/**
- *  \addtogroup brr_structures Structures
- *  \{
- */
-
-
-/** \} */
-
-/** \} */
-
 /* --------------------------------------------- Function */
 
 /**
  * \defgroup brr_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Bearer Layer APIs.
+ * \brief This section describes the EtherMind Mesh Bearer Layer APIs.
  */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/** \cond DOC_EXCLUDE */
 /**
  *  \brief Register Interface with Bearer Layer
  *
@@ -320,7 +299,9 @@ API_RESULT MS_brr_register
                /* IN */ BRR_TYPE        brr_type,
                /* IN */ BRR_NTF_CB      brr_cb
            );
+/** \endcond */
 
+/** \cond DOC_EXCLUDE */
 /**
  *  \brief Register Beacon Interface with Bearer Layer
  *
@@ -342,6 +323,7 @@ API_RESULT MS_brr_register_beacon_handler
                /* IN */ UCHAR   bcon_type,
                /* IN */ void    (*bcon_handler) (UCHAR * data, UINT16 datalen)
            );
+/** \endcond */
 
 /**
  *  \brief Add a bearer to Bearer Layer

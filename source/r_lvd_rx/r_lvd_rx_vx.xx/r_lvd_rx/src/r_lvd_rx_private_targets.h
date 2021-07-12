@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_lvd_rx_private_targets.h
@@ -37,7 +37,9 @@
 *              : 15.08.2019 3.20     Added support for RX72M.
 *              : 25.11.2019 3.30     Added support RX13T
 *                                    Removed support for Generation 1 devices.
-*              : 30.12.2019 3.40     Added support RX66N, RX72N.
+*              : 30.12.2019 3.40     Added support for RX66N, RX72N.
+*              : 31.03.2020 3.50     Added support for RX23E-A.
+*              : 30.06.2020 3.60    Changed revision to reflect demo upgrade.
 ***********************************************************************************************************************/
 #ifndef LVD_PRIVATE_TARGETS_HEADER_FILE
 #define LVD_PRIVATE_TARGETS_HEADER_FILE
@@ -64,6 +66,8 @@ Includes <System Includes> , "Project Includes"
     #include "./targets/rx230/r_lvd_rx230.h"
 #elif defined(BSP_MCU_RX231)
     #include "./targets/rx231/r_lvd_rx231.h"
+#elif defined(BSP_MCU_RX23E_A)
+    #include "./targets/rx23e-a/r_lvd_rx23e-a.h"
 #elif defined(BSP_MCU_RX23W)
     #include "./targets/rx23w/r_lvd_rx23w.h"
 #elif defined(BSP_MCU_RX24T)
@@ -95,7 +99,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
 #define LVD_RX_VERSION_MAJOR                    (3)
-#define LVD_RX_VERSION_MINOR                    (40)
+#define LVD_RX_VERSION_MINOR                    (60)
 
 /***********************************************************************************************************************
 Typedef definitions

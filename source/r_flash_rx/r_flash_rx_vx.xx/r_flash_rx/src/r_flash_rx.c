@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_rx.c
@@ -34,6 +34,8 @@
 *                                   Removed support for flash type 2.
 *              : 09.09.2019 4.30    Added copy in the case of ICCRX big endian to the function R_FlashCodeCopy().
 *              : 18.11.2019 4.50    Modified comment of API function to Doxygen style.
+*              : 26.06.2020 4.60    Changed R_FlashCodeCopy() to static function.
+*                                   Modified to not use BSP API functions to enable/disable interrupt requests.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -63,6 +65,10 @@ int32_t g_flash_lock;                                       // for locking the d
 flash_states_t g_flash_state = FLASH_UNINITIALIZED;         // for state in when driver locked
 FCU_BYTE_PTR g_pfcu_cmd_area = (uint8_t*) FCU_COMMAND_AREA; // sequencer command pointer
 
+#if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
+static void R_FlashCodeCopy(void);
+#endif
+
 
 /***********************************************************************************************************************
  * Function Name: R_FLASH_Open
@@ -86,8 +92,9 @@ flash_err_t R_FLASH_Open(void)
      * write to ROM simultaneously under certain circumstances (run from
      * one region and write to another).
      */
+#if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
     R_FlashCodeCopy();
-
+#endif
 
     /* Perform flash and driver initialization */
     err = r_flash_open();
@@ -100,6 +107,7 @@ flash_err_t R_FLASH_Open(void)
 }
 
 
+#if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
 /******************************************************************************
 * Function Name: R_FlashCodeCopy
 * Description  : Copies Flash driver code necessary for code flash program/erase
@@ -107,10 +115,8 @@ flash_err_t R_FLASH_Open(void)
 * Arguments    : none
 * Return Value : none
 ******************************************************************************/
-void R_FlashCodeCopy(void)
+static void R_FlashCodeCopy(void)
 {
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
-
 #if ((FLASH_CFG_CODE_FLASH_RUN_FROM_ROM == 0) || (FLASH_IN_DUAL_BANK_MODE == 1))
     uint8_t * p_rom_section;    // ROM source location
     uint8_t * p_ram_section;    // RAM copy destination
@@ -210,9 +216,8 @@ void R_FlashCodeCopy(void)
 #endif /* FLASH_IN_DUAL_BANK_MODE */
 
 #endif /* defined(__CCRX__) || defined(__GNUC__) */
-
-#endif /* (FLASH_CFG_CODE_FLASH_ENABLE == 1) */
 }
+#endif /* (FLASH_CFG_CODE_FLASH_ENABLE == 1) */
 
 
 /***********************************************************************************************************************
@@ -516,6 +521,72 @@ bool flash_softwareUnlock(int32_t * const plock)
 
     return true;
 } /* End of function flash_softwareUnlock() */
+
+/***********************************************************************************************************************
+* Function Name: flash_InterruptRequestEnable
+* Description  : Enable the specified interrupt request.
+*                Calculate the corresponding IER [m].IEN [j] from the vector number of the argument,
+*                and set "1" to that bit. 
+*                The macro defined in iodefine.h can be used to the setting of the argument "vector". 
+*                NOTE: When setting an immediate value for an argument "vector", the argument must be 0 to 255.
+*                      Don't set the  vector number of the reserved interrupt source to the argument.
+*                      This function is diverted from R_BSP_InterruptRequestEnable().
+* Arguments    : vector -
+*                    Interrupt vector number.
+* Return Value : none
+***********************************************************************************************************************/
+FLASH_PE_MODE_SECTION
+void flash_InterruptRequestEnable (uint32_t vector)
+{
+    uint32_t ier_reg_num;
+    uint32_t ien_bit_num;
+    uint8_t  *p_ier_addr;
+
+    /* Calculate the register number. (IER[m].IENj)(m = vector_number / 8) */
+    ier_reg_num = vector >> 3;
+
+    /* Calculate the bit number. (IERm.IEN[j])(j = vector_number % 8) */
+    ien_bit_num = vector & 0x00000007;
+
+    /* Casting is valid because it matches the type to the right side or argument. */
+    p_ier_addr = (uint8_t *)&ICU.IER[ier_reg_num].BYTE;
+
+    /* Casting is valid because it matches the type to the right side or argument. */
+    R_BSP_BIT_SET(p_ier_addr, ien_bit_num);
+} /* End of function flash_InterruptRequestEnable() */
+
+/***********************************************************************************************************************
+* Function Name: flash_InterruptRequestDisable
+* Description  : Disable the specified interrupt request.
+*                Calculate the corresponding IER [m].IEN [j] from the vector number of the argument,
+*                and clear "0" to that bit.
+*                The macro defined in iodefine.h can be used to the setting of the argument "vector".
+*                NOTE: When setting an immediate value for an argument "vector", the argument must be 0 to 255.
+*                      Don't set the vector number of the reserved interrupt source to the argument.
+*                      This function is diverted from R_BSP_InterruptRequestDisable().
+* Arguments    : vector -
+*                    Interrupt vector number.
+* Return Value : none
+***********************************************************************************************************************/
+FLASH_PE_MODE_SECTION
+void flash_InterruptRequestDisable (uint32_t vector)
+{
+    uint32_t ier_reg_num;
+    uint32_t ien_bit_num;
+    uint8_t  *p_ier_addr;
+
+    /* Calculate the register number. (IER[m].IENj)(m = vector_number / 8) */
+    ier_reg_num = vector >> 3;
+
+    /* Calculate the bit number. (IERm.IEN[j])(j = vector_number % 8) */
+    ien_bit_num = vector & 0x00000007;
+
+    /* Casting is valid because it matches the type to the right side or argument. */
+    p_ier_addr = (uint8_t *)&ICU.IER[ier_reg_num].BYTE;
+
+    /* Casting is valid because it matches the type to the right side or argument. */
+    R_BSP_BIT_CLEAR(p_ier_addr, ien_bit_num);
+} /* End of function flash_InterruptRequestDisable() */
 
 
 FLASH_SECTION_CHANGE_END /* end FLASH SECTION FRAM */

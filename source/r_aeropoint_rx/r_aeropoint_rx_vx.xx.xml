@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>3.02.00</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX600</series>
+        <series>RX700</series>
+        <group omit_board="true">RX651</group>
+        <group omit_board="true">RX65N</group>
+        <group omit_board="true">RX66N</group>
+        <group omit_board="true">RX72M</group>
+        <group omit_board="true">RX72N</group>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_aeropoint_rx</name>
+        <version>x.xx</version>
+        <zipsource>r_aeropoint_rx_vx.xx.zip</zipsource>
+        <dependency>
+            <module>r_cmt_rx</module>
+            <version>4.70</version>
+        </dependency>
+        <dependency>
+            <module>r_glcdc_rx</module>
+            <version>1.50</version>
+        </dependency>
+        <dependency>
+            <module>r_gpio_rx</module>
+            <version>3.60</version>
+        </dependency>
+        <dependency>
+            <module>r_sci_iic_rx</module>
+            <version>2.46</version>
+        </dependency>
+        <dependency>
+            <module>r_sys_time_rx</module>
+            <version>1.01</version>
+        </dependency>
+        <dependency>
+            <module>r_mpc_rx</module>
+            <version>3.60</version>
+        </dependency>
+        <application>Graphic</application>
+        <desc>Graphic Library with One-Stop Developent Solution</desc>
+        <details>Aeropoint GUI is designed to provide the one-stop solution to plan, design, embed and validate in a GUI development for embedded system with MCU. Aeropoint GUI realizes the division of labor between designing GUI and developing MCU system. Engineers and designers can design and implement GUI with modifying PowerPoint® file. It makes easy to make variations such as multiple variations and inexpensive edition.</details>
+        <function>-</function>
+        <incdir>r_config</incdir>
+        <incdir>r_aeropoint_rx/include</incdir>
+        <incdir>r_aeropoint_rx/src</incdir>
+        <buildOption optionId="ccrx.compiler.option.nostuffC" value="true"/>
+        <library>
+            <family omit_series="true">RX</family>
+            <ccrx_ver>RXV2</ccrx_ver>
+            <libdir toolchain="RXC" endian="big" path="rel">r_aeropoint_rx/lib/libcri_AeropointLite_RXv2_CCRX.lib</libdir>
+            <libdir toolchain="RXC" endian="big" path="rel">r_aeropoint_rx/lib/libcri_Atom_Multiplayer_RXv2_CCRX.lib</libdir>
+            <libdir toolchain="RXC" endian="little" path="rel">r_aeropoint_rx/lib/libcri_AeropointLite_RXv2_CCRX.lib</libdir>
+            <libdir toolchain="RXC" endian="little" path="rel">r_aeropoint_rx/lib/libcri_Atom_Multiplayer_RXv2_CCRX.lib</libdir>
+        </library>
+        <library>
+            <family omit_series="true">RX</family>
+            <ccrx_ver>RXV3</ccrx_ver>
+            <libdir toolchain="RXC" endian="big" path="rel">r_aeropoint_rx/lib/libcri_AeropointLite_RXv3_CCRX.lib</libdir>
+            <libdir toolchain="RXC" endian="big" path="rel">r_aeropoint_rx/lib/libcri_Atom_Multiplayer_RXv3_CCRX.lib</libdir>
+            <libdir toolchain="RXC" endian="little" path="rel">r_aeropoint_rx/lib/libcri_AeropointLite_RXv3_CCRX.lib</libdir>
+            <libdir toolchain="RXC" endian="little" path="rel">r_aeropoint_rx/lib/libcri_Atom_Multiplayer_RXv3_CCRX.lib</libdir>
+        </library>
+        <stdlibs>math.h</stdlibs>
+        <stdlibs>mathf.h</stdlibs>
+    </package>
+</refinfo>

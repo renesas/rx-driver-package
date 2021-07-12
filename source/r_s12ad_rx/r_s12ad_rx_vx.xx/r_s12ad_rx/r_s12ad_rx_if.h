@@ -44,6 +44,10 @@
 *           22.11.2019 4.40    Added RX66N and RX72N support.
 *           31.01.2020 4.41    Added support for RX13T with IAR Compiler.
 *           28.02.2020 4.50    Added RX23E-A support.
+*           10.06.2020 4.60    Added RX23T and RX24T and RX24U support.
+*           30.11.2020 4.61    Changed minor version for e2studio 2020-10 support.
+*           01.03.2021 4.70    Added RX72M 144pins and 100pins support.
+*                              Added RX23W 83pins support.
 ***********************************************************************************************************************/
 
 #ifndef S12AD_PRV_IF_H
@@ -90,6 +94,12 @@ Includes   <System Includes> , "Project Includes"
 #include "./src/targets/rx72m/r_s12ad_rx72m_if.h"
 #elif defined(BSP_MCU_RX72N)
 #include "./src/targets/rx72n/r_s12ad_rx72n_if.h"
+#elif defined(BSP_MCU_RX23T)
+#include "./src/targets/rx23t/r_s12ad_rx23t_if.h"
+#elif defined(BSP_MCU_RX24T)
+#include "./src/targets/rx24t/r_s12ad_rx24t_if.h"
+#elif defined(BSP_MCU_RX24U)
+#include "./src/targets/rx24u/r_s12ad_rx24u_if.h"
 #endif
 
 /******************************************************************************
@@ -97,7 +107,7 @@ Macro definitions
 *******************************************************************************/
 /* Version Number of API. */
 #define ADC_VERSION_MAJOR       (4)
-#define ADC_VERSION_MINOR       (50)
+#define ADC_VERSION_MINOR       (70)
 
 /*****************************************************************************
 Typedef definitions
@@ -126,8 +136,8 @@ typedef enum e_adc_cb_evt           // callback function events
     ADC_EVT_SCAN_COMPLETE,          // normal/Group A scan complete
     ADC_EVT_SCAN_COMPLETE_GROUPB,   // Group B scan complete
 #if (defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) \
-    || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX66N) \
-    || defined(BSP_MCU_RX72N))
+    || defined(BSP_MCU_RX72M)  || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX66N) \
+    || defined(BSP_MCU_RX72N)  || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX24U))
     ADC_EVT_SCAN_COMPLETE_GROUPC,   // Group C scan complete
 #endif    
 #if (defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) \
@@ -148,10 +158,15 @@ typedef struct st_adc_cb_args       // callback arguments
     || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) \
     || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N))
     uint32_t       compare_flags;   // valid only for compare event in Window A
+#endif
 #if (defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) \
     || defined(BSP_MCU_RX72M)  || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N))
     uint32_t       compare_flagsb;  // valid only for compare event in Window B
 #endif
+#if (defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) \
+    || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) \
+    || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX24T) \
+    || defined(BSP_MCU_RX24U))
     uint8_t        unit;
 #endif
 } adc_cb_args_t;

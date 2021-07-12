@@ -26,6 +26,9 @@
 * History      : DD.MM.YYYY Version Description
 *              :            0.85    Shinji Takeda: Add "return status" to else condition, line 447 in touch_calibration()
 *              : 04.10.2018 1.00    First Release
+*              : 29.04.2019 1.10    Removed former offset tuning functions and related variable initializations.
+*              :                    Fixed slider_decode_abnormal_judgement() bug hardcoded for 4 sensors (Takeda-san).
+*              :                    Added #pragma sections and modified for GCC/IAR compatibility.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -39,13 +42,13 @@
 /***********************************************************************************************************************
 * Macro definitions
 ***********************************************************************************************************************/
-#define OFF    0
-#define ON     1
+#define WIDGETS_PRV_OFF     (0)
+#define WIDGETS_PRV_ON      (1)
 
-#define KEY_GROUP0      (16)
-#define KEY_GROUP1      (32)
-#define KEY_GROUP2      (48)
-#define KEY_GROUP3      (64)
+#define WIDGETS_PRV_KEY_GROUP0      (16)
+#define WIDGETS_PRV_KEY_GROUP1      (32)
+#define WIDGETS_PRV_KEY_GROUP2      (48)
+#define WIDGETS_PRV_KEY_GROUP3      (64)
 
 
 /***********************************************************************************************************************
@@ -62,6 +65,11 @@ static void     touch_judgement_parameter_create(uint8_t method, uint16_t value)
 static void     touch_judgement(uint8_t method, uint16_t key_val_sub, uint8_t group, uint8_t offset);
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (TOUCH_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: touch_parameter_set
 * Description  : Touch parameter setting
@@ -72,22 +80,17 @@ void touch_parameter_set(ctsu_cfg_t *p_ctsu_cfgs[], touch_cfg_t *p_touch_cfgs[])
 {
     uint8_t     method;
     uint8_t     pt;
-    uint8_t     loop;
 #if ((QE_MAX_SLIDERS != 0) || (QE_MAX_WHEELS != 0))
     uint8_t     id;
 #endif
 
 
-    /* Touch system flag initial */
-    g_touch_system.value = 0x00;
 
     for (method = 0; method < g_open_num_methods; method++)
     {
         /**************************************************************************************************************/
         /*****     Touch function parameter setting     ***************************************************************/
         /**************************************************************************************************************/
-        g_touch_paramter[method].calib_key_num     = 0;
-
         /* Compulsion touch cancellation frequency setting    */
         g_touch_paramter[method].msa_freq          = p_touch_cfgs[method]->max_on_time;
 
@@ -103,53 +106,32 @@ void touch_parameter_set(ctsu_cfg_t *p_ctsu_cfgs[], touch_cfg_t *p_touch_cfgs[])
         /**************************************************************************************************************/
         /*****     Touch function flag setting          ***************************************************************/
         /**************************************************************************************************************/
-        g_touch_function[method].value             = 0x00;         /* Touch function flag initial                     */
+        g_touch_function[method].value             = 0x00;  /* Touch function flag initial                     */
 
         if (g_touch_paramter[method].msa_freq)
         {
-            g_touch_function[method].flag.msa      = ON;           /* Compulsion touch cancellation function enable   */
+            g_touch_function[method].flag.msa      = WIDGETS_PRV_ON;    /* Compulsion touch cancellation function enable   */
         }
 
         if (g_touch_paramter[method].touch_freq)
         {
-            g_touch_function[method].flag.acd0     = ON;           /* Continuous touch comparison function enable     */
+            g_touch_function[method].flag.acd0     = WIDGETS_PRV_ON;    /* Continuous touch comparison function enable     */
         }
 
         if (g_touch_paramter[method].not_touch_freq)
         {
-            g_touch_function[method].flag.acd1     = ON;           /* Continuous non-touch comparison function enable */
+            g_touch_function[method].flag.acd1     = WIDGETS_PRV_ON;    /* Continuous non-touch comparison function enable */
         }
 
         if (1 == p_touch_cfgs[method]->drift_enable)
         {
-            g_touch_function[method].flag.drift    = ON;           /* Drift correction function enable                */
+            g_touch_function[method].flag.drift    = WIDGETS_PRV_ON;    /* Drift correction function enable                */
         }
         else
         {
-            g_touch_function[method].flag.drift    = OFF;
+            g_touch_function[method].flag.drift    = WIDGETS_PRV_OFF;
         }
 
-#if (QE_MAX_BUTTONS != 0)
-        if (TOUCH_SELF_MODE == g_key_info[method].mode)
-        {
-            if (0 == g_key_info[method].key_num)
-            {
-                g_touch_function[method].flag.calib    = OFF;      /* Calibration function disable                    */
-            }
-            else
-            {
-                g_touch_function[method].flag.calib    = ON;       /* Calibration function enable                     */
-            }
-        }
-        else
-        {
-            g_touch_function[method].flag.calib        = ON;       /* Calibration function enable                     */
-        }
-        g_calib_info[method].calib_key                 = 0;
-        g_calib_info[method].calib_cnt                 = 0;
-#else
-        g_touch_function[method].flag.calib            = OFF;      /* Calibration function disable                    */
-#endif    // (QE_MAX_BUTTONS != 0)
 
         /**************************************************************************************************************/
         /*****     Threshold and Hysteresis setting     ***************************************************************/
@@ -171,20 +153,25 @@ void touch_parameter_set(ctsu_cfg_t *p_ctsu_cfgs[], touch_cfg_t *p_touch_cfgs[])
              *(g_key_info[method].touch_result     + pt) = 0x0000;
              *(g_key_info[method].drift_permission + pt) = 0xFFFF;
              *(g_key_info[method].key_used_info    + pt) = p_touch_cfgs[method]->button_masks[pt];
-             *(g_touch_tuning_info[method].result  + pt) = 0;
         }
 
 
-#endif    // (QE_MAX_BUTTONS != 0)
+#endif /* (QE_MAX_BUTTONS != 0) */
 
+        /* for every element */
         for (pt = 0; pt < g_key_info[method].ena_num; pt++)
         {
              *(g_touch_tuning_info[method].result  + pt) = 0;
+             g_touch_tuning_info[method].ctsuso[pt] = 0;        // no offset tuning direction set
+             g_current_sign_pt[method][pt] = -1;                // tuning direction change count
         }
 
+        /* Self mode button masks (1 << sensor number) */
         g_touch_all_result[method].button[0] = 0x0000;
         g_touch_all_result[method].button[1] = 0x0000;
         g_touch_all_result[method].button[2] = 0x0000;
+
+        /* Mutual mode button masks (1 << element index) */
         g_touch_all_result[method].matrix[0] = 0x0000;
         g_touch_all_result[method].matrix[1] = 0x0000;
         g_touch_all_result[method].matrix[2] = 0x0000;
@@ -211,22 +198,21 @@ void touch_parameter_set(ctsu_cfg_t *p_ctsu_cfgs[], touch_cfg_t *p_touch_cfgs[])
 
    }
 
-
-    for (loop = 0; loop < g_open_num_methods; loop++)
-    {
-        g_offset_time[loop]          = 10;
-        g_current_offset_count[loop] = 0;
-    }
 }    /* End of function touch_parameter_set() */
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (TOUCH_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: touch_sensor_index_set
 * Description  : 
 * Arguments    : none
 * Return Value : none
 ***********************************************************************************************************************/
-void touch_sensor_index_set(uint8_t method, ctsu_cfg_t *p_ctsu_cfgs[])
+static void touch_sensor_index_set(uint8_t method, ctsu_cfg_t *p_ctsu_cfgs[])
 {
     uint16_t    chac_stor;
     uint8_t     loop;
@@ -235,7 +221,7 @@ void touch_sensor_index_set(uint8_t method, ctsu_cfg_t *p_ctsu_cfgs[])
     uint8_t     key_num;
     uint8_t     used_key;
 
-    //chac_stor  = g_ctsu_parameter[method].ctsu_chac01;
+
     chac_stor = p_ctsu_cfgs[method]->ctsuchac0 | (p_ctsu_cfgs[method]->ctsuchac1 << 8);
 
     if (TOUCH_SELF_MODE == g_key_info[method].mode )
@@ -282,13 +268,15 @@ void touch_sensor_index_set(uint8_t method, ctsu_cfg_t *p_ctsu_cfgs[])
             }
             if(0 == loop)
             {
-                //chac_stor  = g_ctsu_parameter[method].ctsu_chac23;
                 chac_stor  = p_ctsu_cfgs[method]->ctsuchac2 | (p_ctsu_cfgs[method]->ctsuchac3 << 8);
             }
             else if (1 == loop)
             {
-                //chac_stor  = g_ctsu_parameter[method].ctsu_chac4;
                 chac_stor  = p_ctsu_cfgs[method]->ctsuchac4;
+            }
+            else
+            {
+                ;   // coding standard requirement
             }
         }
     }
@@ -298,7 +286,7 @@ void touch_sensor_index_set(uint8_t method, ctsu_cfg_t *p_ctsu_cfgs[])
         {
             if (16 > key_num)
             {
-                if (0 != (*g_key_info[method].key_used_info & (0x0001 << key_num)))
+                if (0 != ((*g_key_info[method].key_used_info) & (0x0001 << key_num)))
                 {
                      *(g_key_info[method].sensor_index + key_num) = used_key++;
                 }
@@ -309,7 +297,7 @@ void touch_sensor_index_set(uint8_t method, ctsu_cfg_t *p_ctsu_cfgs[])
             }
             else if (32 > key_num)
             {
-                if (0 != (*(g_key_info[method].key_used_info + 1) & (0x0001 << (key_num - 16))))
+                if (0 != ((*(g_key_info[method].key_used_info + 1)) & (0x0001 << (key_num - 16))))
                 {
                      *(g_key_info[method].sensor_index + key_num) = used_key++;
                 }
@@ -320,7 +308,7 @@ void touch_sensor_index_set(uint8_t method, ctsu_cfg_t *p_ctsu_cfgs[])
             }
             else if (48 > key_num)
             {
-                if (0 != (*(g_key_info[method].key_used_info + 2) & (0x0001 << (key_num - 32))))
+                if (0 != ((*(g_key_info[method].key_used_info + 2)) & (0x0001 << (key_num - 32))))
                 {
                      *(g_key_info[method].sensor_index + key_num) = used_key++;
                 }
@@ -331,7 +319,7 @@ void touch_sensor_index_set(uint8_t method, ctsu_cfg_t *p_ctsu_cfgs[])
             }
             else
             {
-                if (0 != (*(g_key_info[method].key_used_info + 3) & (0x0001 << (key_num - 48))))
+                if (0 != ((*(g_key_info[method].key_used_info + 3)) & (0x0001 << (key_num - 48))))
                 {
                      *(g_key_info[method].sensor_index + key_num) = used_key++;
                 }
@@ -345,190 +333,11 @@ void touch_sensor_index_set(uint8_t method, ctsu_cfg_t *p_ctsu_cfgs[])
 }    /* End of function touch_sensor_index_set() */
 
 
-/***********************************************************************************************************************
-* Function Name: touch_calibration_check
-* Description  : Key data calibration
-* Arguments    : uint8_t method    : Measurement method(0-8)
-* Return Value : 
-***********************************************************************************************************************/
-uint8_t touch_calibration_check( uint8_t method, uint8_t offset_sta )
-{
-#if (QE_MAX_BUTTONS != 0)
-    uint8_t    loop;
-    uint8_t    finish;
-    uint8_t    calib_status;
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (TOUCH_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
 #endif
-    uint8_t    ret_val;
-
-    ret_val = _0_RUN;
-
-#if (QE_MAX_BUTTONS != 0)
-    if (_1_FINISH == offset_sta)
-    {
-        if (1 == g_touch_function[method].flag.average)
-        {
-            calib_status = touch_calibration( method );
-
-            if (_1_FINISH == calib_status)
-            {
-                for (loop = 0, finish = 0; loop < g_open_num_methods; loop++)
-                {
-                    if (0 == g_touch_function[loop].flag.calib)
-                    {
-                        finish = finish + 1;
-                    }
-                }
-                if (g_open_num_methods == finish)
-                {
-                    g_touch_system.flag.initial = 1;
-                    ret_val = _1_FINISH;
-                }
-            }
-        }
-    }
-#else
-        if (_1_FINISH == offset_sta)
-        {
-            g_touch_system.flag.initial = 1;
-            ret_val = _1_FINISH;
-        }
-#endif    // (QE_MAX_BUTTONS != 0)
-
-    return ret_val;
-}
-
-
-#if (QE_MAX_BUTTONS != 0)
-/***********************************************************************************************************************
-* Function Name: touch_calibration
-* Description  : Key data calibration
-* Arguments    : uint8_t method    : Measurement method(0-8)
-* Return Value : uint8_t status    : CALIB_RUN    : 0
-*              :                   : CALIB_FINISH : 1
-***********************************************************************************************************************/
-uint8_t touch_calibration( uint8_t method )
-{
-    uint8_t loop;
-    uint8_t status;
-
-    status = _0_RUN;
-
-    while (1 == g_touch_function[method].flag.calib)
-    {
-        if (TOUCH_SELF_MODE == g_key_info[method].mode)
-        {
-            for (loop = 0; loop < MCU_MAX_SENSORS; loop++)
-            {
-                if (KEY_ENABLE == touch_key_function_check( method, loop ))
-                {
-                    touch_initial_reference_set( method, loop );
-                }
-            }
-        }
-        else
-        {
-            for (loop = 0; loop < g_key_info[method].ena_num; loop++)
-            {
-                if (KEY_ENABLE == touch_key_function_check( method, loop ))
-                {
-                    touch_initial_reference_set( method, loop );
-                }
-            }
-        }
-
-        if (0 == g_touch_function[method].flag.calib)
-        {
-            g_calib_info[method].calib_cnt = 0;
-            status       = _1_FINISH;
-        }
-        else
-        {
-            g_calib_info[method].calib_key = 0;
-            g_calib_info[method].calib_cnt = (uint8_t)(g_calib_info[method].calib_cnt + 1);
-            return status;
-        }
-    }
-
-    return status;
-}    /* End of function touch_calibration() */
-
-
-/***********************************************************************************************************************
-* Function Name: touch_initial_reference_set
-* Description  : Reference value setting
-* Arguments    : uint8_t method    : Measurement method(0-8)
-*              : uint8_t number    : Key number
-* Return Value : none
-***********************************************************************************************************************/
-void touch_initial_reference_set( uint8_t method, uint8_t number )
-{
-    uint8_t     loop;
-    uint8_t     loop_max;
-    uint8_t     key_pt;
-    uint8_t     cnt_pt;
-    uint8_t     offset;
-    uint8_t     max_num;
-    uint32_t    work_buff[6];
-
-    offset = 0;
-
-    if (0 == g_calib_info[method].calib_key )
-    {
-        key_pt = 0;
-    }
-    else
-    {
-        key_pt = 4 * g_calib_info[method].calib_key;
-    }
-
-    if (0 == g_calib_info[method].calib_cnt )
-    {
-        cnt_pt = 0;
-    }
-    else
-    {
-        cnt_pt = g_calib_info[method].calib_cnt;
-    }
-
-    if (QE_CALIB_TIME != g_calib_info[method].calib_cnt)
-    {
-        if (TOUCH_SELF_MODE == g_key_info[method].mode)
-        {
-             *(g_calib_info[method].calib_data + key_pt + cnt_pt) = *(g_self_sensor_cnt_pt[method] + (*(g_key_info[method].sensor_index + number)));
-        }
-        else
-        {
-             *(g_calib_info[method].calib_data + key_pt + cnt_pt) = *(g_mutual_sensor_diff_pt[method] + number);
-        }
-        g_calib_info[method].calib_key = (uint8_t)(g_calib_info[method].calib_key + 1);
-        return;
-    }
-
-    for (loop = 0; loop < g_key_info[method].key_num; loop++)
-    {
-        work_buff[0] = (uint32_t)(*(g_calib_info[method].calib_data + offset    ) + *(g_calib_info[method].calib_data + offset + 1));    /* buff0 + buff1 */
-        work_buff[1] = (uint32_t)(*(g_calib_info[method].calib_data + offset    ) + *(g_calib_info[method].calib_data + offset + 2));    /* buff0 + buff2 */
-        work_buff[2] = (uint32_t)(*(g_calib_info[method].calib_data + offset    ) + *(g_calib_info[method].calib_data + offset + 3));    /* buff0 + buff3 */
-        work_buff[3] = (uint32_t)(*(g_calib_info[method].calib_data + offset + 1) + *(g_calib_info[method].calib_data + offset + 2));    /* buff1 + buff2 */
-        work_buff[4] = (uint32_t)(*(g_calib_info[method].calib_data + offset + 1) + *(g_calib_info[method].calib_data + offset + 3));    /* buff1 + buff3 */
-        work_buff[5] = (uint32_t)(*(g_calib_info[method].calib_data + offset + 2) + *(g_calib_info[method].calib_data + offset + 3));    /* buff2 + buff3 */
-
-        for (loop_max = 0, max_num = 0; loop_max < 5; loop_max++)
-        {
-            if (work_buff[max_num] < work_buff[loop_max + 1])
-            {
-                max_num = (uint8_t)(loop_max + 1);
-            }
-        }
-         *(g_key_info[method].ref + loop) = (uint16_t)(work_buff[max_num] / 2);
-        offset = offset + 4;
-    }
-    g_touch_function[method].flag.calib = 0;
-}    /* End of function touch_initial_reference_set() */
-
-#endif    // (QE_MAX_BUTTONS != 0)
-
-
 /***********************************************************************************************************************
 * Function Name: touch_key_decode
 * Description  : Touch Key decoding
@@ -541,37 +350,37 @@ void touch_key_decode( uint8_t method, uint16_t value, uint8_t number )
 {
     uint8_t    key_id;
     uint8_t    offset;
-    uint16_t   sBit;
+    uint16_t   sbit;
 
     touch_judgement_parameter_create( method, value );          /* Make ON/OFFdecision-value */
 
-    if (KEY_GROUP0 > number)
+    if (WIDGETS_PRV_KEY_GROUP0 > number)
     {
         key_id = 0;
         offset = number;
     }
-    else if (KEY_GROUP1 > number)
+    else if (WIDGETS_PRV_KEY_GROUP1 > number)
     {
         key_id = 1;
-        offset = (uint8_t)(number - KEY_GROUP0);
+        offset = (number - WIDGETS_PRV_KEY_GROUP0);
     }
-    else if (KEY_GROUP2 > number)
+    else if (WIDGETS_PRV_KEY_GROUP2 > number)
     {
         key_id = 2;
-        offset = (uint8_t)(number - KEY_GROUP1);
+        offset = (number - WIDGETS_PRV_KEY_GROUP1);
     }
-    else if (KEY_GROUP3 > number)
+    else if (WIDGETS_PRV_KEY_GROUP3 > number)
     {
         key_id = 3;
-        offset = (uint8_t)(number - KEY_GROUP2);
+        offset = (number - WIDGETS_PRV_KEY_GROUP2);
     }
     else
     {
         return;
     }
 
-    sBit = (uint16_t)(0x0001 << offset);
-    if (0x0000 == (*(g_key_info[method].key_used_info + key_id) & sBit))
+    sbit = (0x0001 << offset);
+    if (0x0000 == ((*(g_key_info[method].key_used_info + key_id)) & sbit))
     {
         return;
     }
@@ -585,27 +394,32 @@ void touch_key_decode( uint8_t method, uint16_t value, uint8_t number )
     }
     else
     {
-        g_data_tim = (uint8_t)(g_data_tim + 1);
+        g_data_tim = (g_data_tim + 1);
     }
 }    /* End of function touch_key_decode() */
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (TOUCH_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: touch_judgement_parameter_create
 * Description  : Touch/non-touch judgement parameter creatting function. Create parameters are g_dcount and g_cthr.
 * Arguments    : value    Measurement value
 * Return Value : None
 ***********************************************************************************************************************/
-void touch_judgement_parameter_create( uint8_t method, uint16_t value )
+static void touch_judgement_parameter_create( uint8_t method, uint16_t value )
 {
     uint16_t over_cnt;
 
     if (TOUCH_SELF_MODE == g_key_info[method].mode)
     {
-        if ( *(g_key_info[method].ref  + g_data_tim) < value )
+        if ( (*(g_key_info[method].ref  + g_data_tim)) < value )
         {
             /* Dcount = g_nref - g_ncount */
-             *(g_key_info[method].delta  + g_data_tim) = (uint16_t)(value  - *(g_key_info[method].ref  + g_data_tim));
+             *(g_key_info[method].delta  + g_data_tim) = (uint16_t)(value  - (*(g_key_info[method].ref  + g_data_tim)));
         }
         else
         {
@@ -614,9 +428,9 @@ void touch_judgement_parameter_create( uint8_t method, uint16_t value )
 
         over_cnt = (65535 - (*(g_key_info[method].user_thr + g_data_tim)));
 
-        if (over_cnt > *(g_key_info[method].ref  + g_data_tim))
+        if (over_cnt > (*(g_key_info[method].ref  + g_data_tim)))
         {
-             *(g_key_info[method].thr  + g_data_tim) = (uint16_t)(*(g_key_info[method].ref  + g_data_tim) + *(g_key_info[method].user_thr + g_data_tim));
+             *(g_key_info[method].thr  + g_data_tim) = ((*(g_key_info[method].ref + g_data_tim)) + (*(g_key_info[method].user_thr + g_data_tim)));
         }
         else
         {
@@ -625,18 +439,18 @@ void touch_judgement_parameter_create( uint8_t method, uint16_t value )
     }
     else
     {
-        if (*(g_key_info[method].ref  + g_data_tim) > value)
+        if ((*(g_key_info[method].ref  + g_data_tim)) > value)
         {
-            *(g_key_info[method].delta  + g_data_tim) = (uint16_t)(*(g_key_info[method].ref  + g_data_tim) - value);
+            *(g_key_info[method].delta  + g_data_tim) = ((*(g_key_info[method].ref  + g_data_tim)) - value);
         }
         else
         {
              *(g_key_info[method].delta  + g_data_tim) = 0;
         }
 
-        if (*(g_key_info[method].ref  + g_data_tim) > *(g_key_info[method].thr  + g_data_tim))
+        if ((*(g_key_info[method].ref  + g_data_tim)) > (*(g_key_info[method].thr  + g_data_tim)))
         {
-             *(g_key_info[method].thr  + g_data_tim) = (uint16_t)(*(g_key_info[method].ref  + g_data_tim) - *(g_key_info[method].user_thr + g_data_tim));
+             *(g_key_info[method].thr  + g_data_tim) = ((*(g_key_info[method].ref  + g_data_tim)) - (*(g_key_info[method].user_thr + g_data_tim)));
         }
         else
         {
@@ -646,6 +460,11 @@ void touch_judgement_parameter_create( uint8_t method, uint16_t value )
 }    /* End of function touch_judgement_parameter_create() */
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (TOUCH_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: touch_judgement
 * Description  : 
@@ -654,16 +473,17 @@ void touch_judgement_parameter_create( uint8_t method, uint16_t value )
 *              : offset   Key number offset value
 * Return Value : None
 ***********************************************************************************************************************/
-void touch_judgement( uint8_t method, uint16_t value, uint8_t group, uint8_t offset )
+static void touch_judgement( uint8_t method, uint16_t value, uint8_t group, uint8_t offset )
 {
-    uint16_t    sBit;
+    uint16_t    sbit;
     uint32_t    ntouch_val;
-    uint8_t     freq;
+    uint16_t    freq;
 
     if (TOUCH_SELF_MODE == g_key_info[method].mode)
     {
-        if (*(g_key_info[method].thr + g_data_tim) > *(g_key_info[method].hys + g_data_tim))
+        if ((*(g_key_info[method].thr + g_data_tim)) > (*(g_key_info[method].hys + g_data_tim)))
         {
+            /* should always be positive number, but cast to uint16_t for safety */
             ntouch_val = (uint16_t)((*(g_key_info[method].thr + g_data_tim)) - (*(g_key_info[method].hys + g_data_tim)));
         }
         else
@@ -671,44 +491,45 @@ void touch_judgement( uint8_t method, uint16_t value, uint8_t group, uint8_t off
             ntouch_val = *(g_key_info[method].thr + g_data_tim);
         }
     
-        sBit = (uint16_t)( 0x0001 << offset );
-        if (value > *(g_key_info[method].thr  + g_data_tim))               /* Measurement value > Threshold = Touch   */
+        sbit = ( 0x0001 << offset );
+        if (value > (*(g_key_info[method].thr  + g_data_tim)))              /* Measurement value > Threshold = Touch */
         {
-             *(g_key_info[method].in_touch + group) |= sBit;               /* Inside touch                            */
+             (*(g_key_info[method].in_touch + group)) |= sbit;              /* Inside touch */
         }
-        else if (value < ntouch_val )                                    /* Measurement value < Threshold = Non-Touch */
+        else if (value < ntouch_val )                                       /* Measurement value < Threshold = Non-Touch */
         {
-             *(g_key_info[method].in_touch + group) &= (~sBit);            /* Inside non-touch                        */
+             (*(g_key_info[method].in_touch + group)) &= (~sbit);           /* Inside non-touch */
         }
         else
         {
-            /* Do Nothing */
+            ;   /* Do Nothing */
         }
     }
-    else                                                                   /* Mutual-capacitance measurement          */
+    else                                                                    /* Mutual-capacitance measurement */
     {
+        /* cast to 32-bit for calculations */
         ntouch_val = (uint32_t)(*(g_key_info[method].thr + g_data_tim)) + (uint32_t)(*(g_key_info[method].hys + g_data_tim));
 
-        sBit = (uint16_t)( 0x0001 << offset );
-        if (value < *(g_key_info[method].thr + g_data_tim))                /* Measurement value < Threshold = Touch   */
+        sbit = ( 0x0001 << offset );
+        if (value < (*(g_key_info[method].thr + g_data_tim)))               /* Measurement value < Threshold = Touch */
         {
-             *(g_key_info[method].in_touch + group) |= sBit;               /* Inside touch                            */
+             (*(g_key_info[method].in_touch + group)) |= sbit;              /* Inside touch */
         }
-        else if ((uint32_t)(value) > ntouch_val)                         /* Measurement value > Threshold = Non-Touch */
+        else if (value > ntouch_val)                                        /* Measurement value > Threshold = Non-Touch */
         {
-             *(g_key_info[method].in_touch + group) &= (~sBit);            /* Inside non-touch                        */
+             (*(g_key_info[method].in_touch + group)) &= (~sbit);           /* Inside non-touch */
         }
         else
         {
-            /* Do Nothing */
+            ;   /* Do Nothing */
         }
     }
 
-    if (0 != (*(g_key_info[method].in_touch + group) & sBit))              /* Inside touch flag check                 */
+    if (0 != ((*(g_key_info[method].in_touch + group)) & sbit))             /* Inside touch flag check */
     {
-         *(g_key_info[method].non_touch_cnt  + g_data_tim) = 0;            /* Inside non-touch counter clear          */
+         *(g_key_info[method].non_touch_cnt  + g_data_tim) = 0;             /* Inside non-touch counter clear */
 
-        if ( OFF == g_touch_function[method].flag.acd0 )                   /* Total touch function enable flag check  */
+        if (WIDGETS_PRV_OFF == g_touch_function[method].flag.acd0 )         /* Total touch function enable flag check */
         {
             freq = 1;
         }
@@ -717,24 +538,24 @@ void touch_judgement( uint8_t method, uint16_t value, uint8_t group, uint8_t off
             freq = g_touch_paramter[method].touch_freq;
         }
 
-        if ((*(g_key_info[method].touch_cnt  + g_data_tim)) == (uint16_t)freq)        /* Outside touch                */
+        if (freq == (*(g_key_info[method].touch_cnt  + g_data_tim)))        /* Outside touch */
         {
-             *(g_key_info[method].out_touch  + group) = (uint16_t)(*(g_key_info[method].out_touch + group) | sBit);    /* Outside touch */
+            *(g_key_info[method].out_touch  + group) = ((*(g_key_info[method].out_touch + group)) | sbit);    /* Outside touch */
             if (0 != g_touch_paramter[method].msa_freq)
             {
-                *(g_key_info[method].touch_cnt  + g_data_tim) = *(g_key_info[method].touch_cnt  + g_data_tim) + 1;     /* Total touch count up */
+                *(g_key_info[method].touch_cnt  + g_data_tim) = (*(g_key_info[method].touch_cnt  + g_data_tim)) + 1;    /* Total touch count up */
             }
         }
         else
         {
-             *(g_key_info[method].touch_cnt  + g_data_tim) = *(g_key_info[method].touch_cnt  + g_data_tim) + 1;        /* Total touch count up */
+             *(g_key_info[method].touch_cnt  + g_data_tim) = (*(g_key_info[method].touch_cnt  + g_data_tim)) + 1;        /* Total touch count up */
         }
     }
-    else                                                               /* Outside non-touch                           */
+    else                                                               /* Outside non-touch */
     {
-         *(g_key_info[method].touch_cnt  + g_data_tim) = 0;            /* Inside touch counter clear                  */
+         *(g_key_info[method].touch_cnt  + g_data_tim) = 0;            /* Inside touch counter clear */
 
-        if ( OFF == g_touch_function[method].flag.acd1 )               /* Total non-touch function enable flag check  */
+        if (WIDGETS_PRV_OFF == g_touch_function[method].flag.acd1 )    /* Total non-touch function enable flag check */
         {
             freq = 1;
         }
@@ -743,13 +564,13 @@ void touch_judgement( uint8_t method, uint16_t value, uint8_t group, uint8_t off
             freq = g_touch_paramter[method].not_touch_freq;
         }
 
-        if ((*(g_key_info[method].non_touch_cnt  + g_data_tim)) == (uint16_t)freq)    /* Outside non-touch            */
+        if (freq == (*(g_key_info[method].non_touch_cnt  + g_data_tim)))        /* Outside non-touch            */
         {
-             *(g_key_info[method].out_touch  + group) = (uint16_t)(*(g_key_info[method].out_touch  + group) & (~sBit));    /* Outside non-touch */
+             *(g_key_info[method].out_touch + group) = ((*(g_key_info[method].out_touch + group)) & (~sbit));    /* Outside non-touch */
         }
         else
         {
-             *(g_key_info[method].non_touch_cnt  + g_data_tim) = *(g_key_info[method].non_touch_cnt  + g_data_tim) + 1;    /* Total non-touch count up */
+             *(g_key_info[method].non_touch_cnt  + g_data_tim) = (*(g_key_info[method].non_touch_cnt  + g_data_tim)) + 1;    /* Total non-touch count up */
         }
     }
 
@@ -760,33 +581,38 @@ void touch_judgement( uint8_t method, uint16_t value, uint8_t group, uint8_t off
         {
             /* If reaching (c_msa(DF_MSA_DATA) + AcdON threshold),
                 it makes OnOff judgment result off and it revises a drift. */
-            if ((*(g_key_info[method].touch_cnt  + g_data_tim)) == g_touch_paramter[method].msa_freq + (uint16_t)freq)
+            if ((g_touch_paramter[method].msa_freq + freq) == (*(g_key_info[method].touch_cnt  + g_data_tim)))
             {
                 /* Real touch and Virtual touch OFF */
-                 *(g_key_info[method].out_touch  + group)       &= (~sBit);
-                 *(g_key_info[method].in_touch   + group)       &= (~sBit);
-                 *(g_key_info[method].touch_cnt  + g_data_tim)   = 0;
+                (*(g_key_info[method].out_touch  + group))       &= (~sbit);
+                (*(g_key_info[method].in_touch   + group))       &= (~sbit);
+                (*(g_key_info[method].touch_cnt  + g_data_tim))   = 0;
 
                 /* parameter reset */
-                 *(g_key_info[method].drift_cnt     + g_data_tim)   = 0;
-                 *(g_key_info[method].drift_add_ref + g_data_tim)   = 0x00000000ul;
-                 *(g_key_info[method].ref           + g_data_tim)   = value;
+                *(g_key_info[method].drift_cnt     + g_data_tim)   = 0;
+                *(g_key_info[method].drift_add_ref + g_data_tim)   = 0x00000000ul;
+                *(g_key_info[method].ref           + g_data_tim)   = value;
             }
         }
     }
 
     /* ===== ONOFF final result ===== */
-    if (0 != (*(g_key_info[method].out_touch  + group) & sBit))
+    if (0 != ((*(g_key_info[method].out_touch  + group)) & sbit))
     {
-         *(g_key_info[method].touch_result + group) |= sBit;
+         (*(g_key_info[method].touch_result + group)) |= sbit;
     }
     else
     {
-         *(g_key_info[method].touch_result + group) &= (~sBit);
+         (*(g_key_info[method].touch_result + group)) &= (~sbit);
     }
 }    /* End of function touch_judgement() */
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (TOUCH_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: touch_drift_correction
 * Description  : Drift correction function ( Reference value update )
@@ -796,41 +622,44 @@ void touch_judgement( uint8_t method, uint16_t value, uint8_t group, uint8_t off
 * Return Value : DRIFT_OK(0)
 *              : DRIFT_OFF(2)
 ***********************************************************************************************************************/
-uint8_t touch_drift_correction( uint8_t method, uint16_t value, uint8_t group, uint8_t offset )
+static uint8_t touch_drift_correction( uint8_t method, uint16_t value, uint8_t group, uint8_t offset )
 {
-    uint16_t    sBit;
+    uint16_t    sbit;
 
     /* If the drift processing is a prohibition */
-    if (OFF == g_touch_function[method].flag.drift)
+    if (WIDGETS_PRV_OFF == g_touch_function[method].flag.drift)
     {
         /* There is no processing */
         return DRIFT_OFF;
     }
 
-    sBit = (uint16_t)( 0x0001 << offset );
+    sbit = ( 0x0001 << offset );
+
     /* In case of doing drift correction being and moreover On/Off judgment result 1=OFF */
-    if ((0x0000ul == (*(g_key_info[method].in_touch   + group) & sBit)) && (0x0000ul != (*(g_key_info[method].drift_permission + group) & sBit)))
+    if ((0x0000ul == ((*(g_key_info[method].in_touch + group)) & sbit)) && (0x0000ul != ((*(g_key_info[method].drift_permission + group)) & sbit)))
     {
         /* It is an addition for the drift correction average calculation */
-         *(g_key_info[method].drift_add_ref  + g_data_tim) = *(g_key_info[method].drift_add_ref + g_data_tim) + value;
-        /* Drift correction counter's being incremented */
-         *(g_key_info[method].drift_cnt  + g_data_tim) = (uint16_t)(*(g_key_info[method].drift_cnt  + g_data_tim) + 1);
+        *(g_key_info[method].drift_add_ref  + g_data_tim) = (*(g_key_info[method].drift_add_ref + g_data_tim)) + value;
 
-        if (*(g_key_info[method].drift_cnt  + g_data_tim) <= g_touch_paramter[method].drift_freq)
+        /* Drift correction counter's being incremented */
+        *(g_key_info[method].drift_cnt + g_data_tim) = ((*(g_key_info[method].drift_cnt + g_data_tim)) + 1);
+
+        if ((*(g_key_info[method].drift_cnt + g_data_tim)) <= g_touch_paramter[method].drift_freq)
         {
             /* If reaching the correction number of times */
-            if (*(g_key_info[method].drift_cnt  + g_data_tim) == g_touch_paramter[method].drift_freq)
+            if ((*(g_key_info[method].drift_cnt  + g_data_tim)) == g_touch_paramter[method].drift_freq)
             {
-                if (g_touch_paramter[method].drift_freq == 0)
+                if (0 == g_touch_paramter[method].drift_freq)
                 {
                     g_touch_paramter[method].drift_freq = 1;
                 }
-                 *(g_key_info[method].ref  + g_data_tim)  = (uint16_t)(*(g_key_info[method].drift_add_ref  + g_data_tim) / g_touch_paramter[method].drift_freq);
+                *(g_key_info[method].ref  + g_data_tim)  = ((*(g_key_info[method].drift_add_ref + g_data_tim)) / g_touch_paramter[method].drift_freq);
 
                 /* To REF of the average */
-                 *(g_key_info[method].drift_add_ref  + g_data_tim) = 0x0000000ul;
+                *(g_key_info[method].drift_add_ref  + g_data_tim) = 0x0000000ul;
+
                 /* Work clear */
-                 *(g_key_info[method].drift_cnt      + g_data_tim) = 0;
+                *(g_key_info[method].drift_cnt      + g_data_tim) = 0;
             }
         }
         else
@@ -845,9 +674,14 @@ uint8_t touch_drift_correction( uint8_t method, uint16_t value, uint8_t group, u
          *(g_key_info[method].drift_cnt      + g_data_tim) = 0;
     }
     return DRIFT_OK;
-}
+} /* End of function touch_drift_correction() */
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (TOUCH_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: touch_key_function_check
 * Description  : 
@@ -858,107 +692,50 @@ uint8_t touch_key_function_check( uint8_t method, uint8_t loop )
 {
     uint8_t     key_id;
     uint8_t     offset;
-    uint16_t    sBit;
+    uint16_t    sbit;
 
-    if (KEY_GROUP0 > loop)
+    if (WIDGETS_PRV_KEY_GROUP0 > loop)
     {
         key_id = 0;
         offset = loop;
     }
-    else if (KEY_GROUP1 > loop)
+    else if (WIDGETS_PRV_KEY_GROUP1 > loop)
     {
         key_id = 1;
-        offset = (uint8_t)(loop - KEY_GROUP0);
+        offset = (loop - WIDGETS_PRV_KEY_GROUP0);
     }
-    else if (KEY_GROUP2 > loop)
+    else if (WIDGETS_PRV_KEY_GROUP2 > loop)
     {
         key_id = 2;
-        offset = (uint8_t)(loop - KEY_GROUP1);
+        offset = (loop - WIDGETS_PRV_KEY_GROUP1);
     }
-    else if (KEY_GROUP3 > loop)
+    else if (WIDGETS_PRV_KEY_GROUP3 > loop)
     {
         key_id = 3;
-        offset = (uint8_t)(loop - KEY_GROUP2);
+        offset = (loop - WIDGETS_PRV_KEY_GROUP2);
     }
     else
     {
         return KEY_DISENABLE;
     }
 
-    sBit = (uint16_t)(0x0001 << offset);
-    if (0x0000 == (*(g_key_info[method].key_used_info + key_id) & sBit))
+    sbit = (0x0001 << offset);
+    if (0x0000 == ((*(g_key_info[method].key_used_info + key_id)) & sbit))
     {
         return KEY_DISENABLE;
     }
 
     return KEY_ENABLE;
-}
-
-
-/***********************************************************************************************************************
-* Function Name: offset_tuning_stop_judgement
-* Description  : 
-* Arguments    : 
-* Return Value : 
-***********************************************************************************************************************/
-uint8_t offset_tuning_stop_judgement( uint8_t method )
-{
-    uint8_t status;
-    uint8_t group;
-
-    status = _1_START;
-
-#if (QE_MAX_BUTTONS != 0)
-    if (TOUCH_SELF_MODE == g_key_info[method].mode)
-    {
-        if (0 != g_key_info[method].key_num)
-        {
-            for (group = 0; group < g_key_info[method].key_max_group; group++)
-            {
-                if (0x0000 !=  *(g_key_info[method].touch_result + group))
-                {
-                    status = _0_STOP;
-                }
-            }
-        }
-    }
-    else
-    {
-        for (group = 0; group < g_key_info[method].key_max_group; group++)
-        {
-            if (0x0000 !=  *(g_key_info[method].touch_result + group))
-            {
-                status = _0_STOP;
-            }
-        }
-    }
-#endif    // (QE_MAX_BUTTONS != 0)
-
-#if (QE_MAX_SLIDERS != 0)
-    for (group = 0; group < gp_touch_configs[method]->num_sliders; group++)              /* Slider group loop                                 */
-    {
-        if (0xFFFF != gp_sliderInfo[group].value)                       /* Slider touch check                                */
-        {
-            status = _0_STOP;                                    /* Internal offset tuning flag stop setting          */
-        }
-    }
-#endif
-
-#if (QE_MAX_WHEELS != 0)
-    for (group = 0; group < gp_touch_configs[method]->num_wheels; group++)               /* Wheel group loop                                  */
-    {
-        if (0xFFFF != gp_wheelInfo[group].value)
-        {
-            status = _0_STOP;                                    /* Internal offset tuning flag stop setting          */
-        }
-    }
-#endif
-
-    return status;
-}
+} /* End of function touch_key_function_check() */
 
 
 #if (QE_MAX_SLIDERS != 0)
+
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (TOUCH_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: slider_decode
 * Description  : Slider decode function
@@ -970,13 +747,15 @@ uint16_t slider_decode( uint8_t s_id )
     uint8_t     loop;
     uint8_t     max_num;
     uint8_t     maxch1[3];
-    uint16_t    d1,d2,d3;
+    uint16_t    d1;
+    uint16_t    d2;
+    uint16_t    d3;
     uint16_t    slider_vpos;        /* Slider virtual position        */
     uint16_t    slider_rpos;
     uint8_t     resol_num;
     uint16_t    resol_plus;
     uint16_t    resol_minus;
-    uint16_t    dsum;           // GI: replaces g_slider_dsum[s_id]
+    uint16_t    dsum;               // replaces g_slider_dsum[s_id]
 
     /* Unstable Correction */
     for (loop = 0, max_num = 0; loop < (gp_sliderInfo[s_id].num_elements-1); loop++)
@@ -998,18 +777,18 @@ uint16_t slider_decode( uint8_t s_id )
     {
         if (0u == maxch1[0])
         {
-            maxch1[1] = (uint8_t)(maxch1[0] + 2);
-            maxch1[2] = (uint8_t)(maxch1[0] + 1);
+            maxch1[1] = (maxch1[0] + 2);
+            maxch1[2] = (maxch1[0] + 1);
         }
-        else if (maxch1[0] == (gp_sliderInfo[s_id].num_elements - 1))
+        else if ((gp_sliderInfo[s_id].num_elements - 1) == maxch1[0])
         {
-            maxch1[1] = (uint8_t)(maxch1[0] - 1);
-            maxch1[2] = (uint8_t)(maxch1[0] - 2);
+            maxch1[1] = (maxch1[0] - 1);
+            maxch1[2] = (maxch1[0] - 2);
         }
         else
         {
-            maxch1[1] = (uint8_t)(maxch1[0] - 1);
-            maxch1[2] = (uint8_t)(maxch1[0] + 1);
+            maxch1[1] = (maxch1[0] - 1);
+            maxch1[2] = (maxch1[0] + 1);
         }
 
         /* Constant decision for operation of angle of slider */
@@ -1017,7 +796,7 @@ uint16_t slider_decode( uint8_t s_id )
         /*    Operation of angle of slider                    */
         d1 = g_slider_data[maxch1[0]] - g_slider_data[maxch1[1]];
         d2 = g_slider_data[maxch1[0]] - g_slider_data[maxch1[2]];
-        dsum = (uint16_t)(d1 + d2);
+        dsum = (d1 + d2);
 
         if(dsum > gp_sliderInfo[s_id].thr_offset)
         {
@@ -1035,9 +814,9 @@ uint16_t slider_decode( uint8_t s_id )
                  d3          = 100 + ((d2 * 100) / d1);
                  slider_vpos = ((10000 / d3) + (100 * maxch1[0]));
 
-                 resol_num   = (uint8_t)(gp_sliderInfo[s_id].num_elements - 1);
-                 resol_plus  = (uint16_t)(100 * resol_num);
-                 resol_minus = (uint16_t)(50 / gp_sliderInfo[s_id].resolution);
+                 resol_num   = (gp_sliderInfo[s_id].num_elements - 1);
+                 resol_plus  = (100 * resol_num);
+                 resol_minus = (50 / gp_sliderInfo[s_id].resolution);
 
                  /* swa = 0 -> Max ------ swa output 1 to Max */
                  slider_rpos = (uint16_t)(slider_vpos / gp_sliderInfo[s_id].resolution);
@@ -1063,7 +842,7 @@ uint16_t slider_decode( uint8_t s_id )
                      else
                      {
                          slider_rpos = slider_rpos - resol_minus;
-                         if( slider_rpos == 0 )
+                         if(0 == slider_rpos)
                          {
                              slider_rpos = 1;
                          }
@@ -1075,10 +854,10 @@ uint16_t slider_decode( uint8_t s_id )
                  }
                  else
                  {
-                     /* Do Nothing */
+                     ;      /* Do Nothing */
                  }
-                 /* GI: Scale results to be 0-100 */
-                 slider_rpos /= gp_sliderInfo[s_id].num_elements;
+
+                 slider_rpos /= gp_sliderInfo[s_id].num_elements;   // Scale results to be 0-100
                  gp_sliderInfo[s_id].value = slider_rpos;
              }
           }
@@ -1098,6 +877,11 @@ uint16_t slider_decode( uint8_t s_id )
 }    /* End of function slider_decode() */
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (TOUCH_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: slider_decode_abnormal_judgement
 * Description  : 0 operation removal
@@ -1114,33 +898,40 @@ uint8_t slider_decode_abnormal_judgement(uint8_t id, uint16_t delta1, uint16_t d
 
     status = ZERO_DIS;
 
-    if( 4 == gp_sliderInfo[id].num_elements )
+    if (0x0000 == delta1)
     {
-        if (0x0000 == delta1)
+        if (0 == maxch)
         {
-            if (0 == maxch)
-            {
-                gp_sliderInfo[id].value = 1;
-            }
-            else
-            {
-                gp_sliderInfo[id].value = (100 / gp_sliderInfo[id].resolution) * maxch;
-            }
-            status = ZERO_ENA;
+            gp_sliderInfo[id].value = 1;
         }
-        else if (0x0000 == delta2)
+        else
         {
-            gp_sliderInfo[id].value = (100 / gp_sliderInfo[id].resolution) * (maxch + 1);
-            status = ZERO_ENA;
+            gp_sliderInfo[id].value = ((100 / gp_sliderInfo[id].resolution) * maxch) / gp_sliderInfo[id].num_elements;
         }
+        status = ZERO_ENA;
     }
+    else if (0x0000 == delta2)
+    {
+        gp_sliderInfo[id].value = ((100 / gp_sliderInfo[id].resolution) * (maxch + 1)) / gp_sliderInfo[id].num_elements;
+        status = ZERO_ENA;
+    }
+    else
+    {
+        ;       // coding standard requirement
+    }
+
     return status;
 }    /* End of function slider_decode_abnormal_judgement() */
-
-#endif    // SLIDER_USE
+#endif /* (QE_MAX_SLIDERS != 0) */
 
 
 #if (QE_MAX_WHEELS != 0)
+
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (TOUCH_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: wheel_decode
 * Description  : Wheel Decode function
@@ -1152,7 +943,9 @@ uint16_t wheel_decode( uint8_t w_id )
     uint8_t     loop;
     uint8_t     max_num;
     uint8_t     maxch[3];
-    uint16_t    d1,d2,d3;
+    uint16_t    d1;
+    uint16_t    d2;
+    uint16_t    d3;
     uint16_t    wheel_vpos;        /* Wheel virtual position    */
     uint16_t    wheel_rpos;
     uint16_t    dsum;           // GI: replaces g_wheel_dsum[w_id]
@@ -1177,18 +970,18 @@ uint16_t wheel_decode( uint8_t w_id )
     {
         if (0u == maxch[0])
         {
-            maxch[1] = (uint8_t)(gp_wheelInfo[w_id].num_elements - 1);
-            maxch[2] = (uint8_t)(maxch[0] + 1);
+            maxch[1] = (gp_wheelInfo[w_id].num_elements - 1);
+            maxch[2] = (maxch[0] + 1);
         }
-        else if ( maxch[0] == ( gp_wheelInfo[w_id].num_elements - 1 ))
+        else if (( gp_wheelInfo[w_id].num_elements - 1 ) == maxch[0])
         {
-            maxch[1] = (uint8_t)(maxch[0] - 1);
+            maxch[1] = (maxch[0] - 1);
             maxch[2] = 0;
         }
         else
         {
-            maxch[1] = (uint8_t)(maxch[0] - 1u);
-            maxch[2] = (uint8_t)(maxch[0] + 1u);
+            maxch[1] = (maxch[0] - 1u);
+            maxch[2] = (maxch[0] + 1u);
         }
 
         /* Constant decision for operation of angle of wheel    */
@@ -1196,7 +989,7 @@ uint16_t wheel_decode( uint8_t w_id )
         /*    Operation of angle of wheel                       */
         d1 = g_wheel_data[maxch[0]] - g_wheel_data[maxch[1]];
         d2 = g_wheel_data[maxch[0]] - g_wheel_data[maxch[2]];
-        dsum = (uint16_t)(d1 + d2);
+        dsum = (d1 + d2);
 
         if(dsum > gp_wheelInfo[w_id].thr_offset)
         {
@@ -1238,7 +1031,7 @@ uint16_t wheel_decode( uint8_t w_id )
                 }
                 else
                 {
-                    /* Do Nothing */
+                    ;   /* Do Nothing */
                 }
 
                 /* swa = 0 -> Max ------ swa output 1 to Max */
@@ -1266,6 +1059,11 @@ uint16_t wheel_decode( uint8_t w_id )
 }    /* End of function wheel_decode() */
 
 
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (TOUCH_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section _QE_TOUCH_DRIVER
+#elif (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
 /***********************************************************************************************************************
 * Function Name: wheel_decode_abnormal_judgement
 * Description  : 0 operation removal
@@ -1301,6 +1099,10 @@ uint8_t wheel_decode_abnormal_judgement(uint8_t id, uint16_t delta1, uint16_t de
             gp_wheelInfo[id].value = (90 / gp_wheelInfo[id].resolution) * (maxch + 1);
             status = ZERO_ENA;
         }
+        else
+        {
+            ;       // for coding standard
+        }
     }
     else
     {
@@ -1321,9 +1123,20 @@ uint8_t wheel_decode_abnormal_judgement(uint8_t id, uint16_t delta1, uint16_t de
             gp_wheelInfo[id].value = (45 / gp_wheelInfo[id].resolution) * (maxch + 1);
             status = ZERO_ENA;
         }
+        else
+        {
+            ;       // for coding standard
+        }
     }
 
     return status;
 }    /* End of function wheel_decode_abnormal_judgement() */
 
-#endif    // (QE_MAX_WHEELS != 0)
+#endif /* (QE_MAX_WHEELS != 0) */
+
+
+#if ((!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5)) && (TOUCH_CFG_SAFETY_LINKAGE_ENABLE))
+#pragma section
+#elif (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+R_BSP_ATTRIB_SECTION_CHANGE_END
+#endif

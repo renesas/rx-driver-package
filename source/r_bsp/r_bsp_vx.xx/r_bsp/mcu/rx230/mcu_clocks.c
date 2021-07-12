@@ -41,6 +41,10 @@
 *                               Fixed warning of clock_source_select function with IAR compiler.
 *         : 14.02.2020 2.02     Deleted the unused variables of clock_source_select function.
 *                               Fixed warning of clock_source_select function with CCRX and IAR compiler.
+*         : 20.11.2020 2.03     Changed the sub clock initialization process when the battery backup function is 
+*                               enabled.
+*         : 29.01.2021 2.04     Fixed the initialization settings of sub-clock for Technical Update Information
+*                               (TN-RX*-A0237B).
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -475,151 +479,184 @@ static void clock_source_select (void)
 
     /* Sub-clock setting. */
 
-    /* Cold start setting */
-    if (0 == SYSTEM.RSTSR1.BIT.CWSF)
+#if BSP_CFG_VBATT_ENABLE == 1 /* Battery backup function is enabled. */
+    if (1 == SYSTEM.VBATTSR.BIT.VBATRLVDETF)
     {
+        /* If the Battery backup power voltage drop (< 1.8 V) detected, Initialize of Sub-Clock. */
+#endif
 
-        /* SOSCCR - Sub-Clock Oscillator Control Register
-        b7:b1    Reserved - The write value should be 0.
-        b0       SOSTP    - Sub-clock oscillator Stop - Sub-clock oscillator is stopped. */
-        SYSTEM.SOSCCR.BYTE = 0x01;
-
-        /* WAIT_LOOP */
-        while (0x01 != SYSTEM.SOSCCR.BYTE)
+        /* Cold start setting */
+        if (0 == SYSTEM.RSTSR1.BIT.CWSF)
         {
-            /* wait for bit to change */
-            R_BSP_NOP();
-        }
 
-        /* RCR3 - RTC Control Register 3
-        b7:b4    Reserved - The write value should be 0.
-        b3:b1    RTCDV    - Sub-clock oscillator Drive Ability Control.
-        b0       RTCEN    - Sub-clock oscillator is stopped. */
-        RTC.RCR3.BIT.RTCEN = 0;
+            /* SOSCCR - Sub-Clock Oscillator Control Register
+            b7:b1    Reserved - The write value should be 0.
+            b0       SOSTP    - Sub-clock oscillator Stop - Sub-clock oscillator is stopped. */
+            SYSTEM.SOSCCR.BYTE = 0x01;
 
-        /* WAIT_LOOP */
-        while (0 != RTC.RCR3.BIT.RTCEN)
-        {
-            /* wait for bit to change */
-            R_BSP_NOP();
-        }
+            /* WAIT_LOOP */
+            while (0x01 != SYSTEM.SOSCCR.BYTE)
+            {
+                /* wait for bit to change */
+                R_BSP_NOP();
+            }
+
+            /* RCR3 - RTC Control Register 3
+            b7:b4    Reserved - The write value should be 0.
+            b3:b1    RTCDV    - Sub-clock oscillator Drive Ability Control.
+            b0       RTCEN    - Sub-clock oscillator is stopped. */
+            RTC.RCR3.BIT.RTCEN = 0;
+
+            /* WAIT_LOOP */
+            while (0 != RTC.RCR3.BIT.RTCEN)
+            {
+                /* wait for bit to change */
+                R_BSP_NOP();
+            }
 
 #if (BSP_PRV_SUB_CLK_SOSCCR == 1) || (BSP_CFG_RTC_ENABLE == 1)
-        /* Wait for 5 sub-clock cycles (153us): measurement result is approx. 176us */
-        R_BSP_SoftwareDelay(176, BSP_DELAY_MICROSECS);    /* 153us * 4.56 / 4.00 (LOCO max) */
+            /* Wait for 5 sub-clock cycles (153us): measurement result is approx. 176us */
+            R_BSP_SoftwareDelay(176, BSP_DELAY_MICROSECS);    /* 153us * 4.56 / 4.00 (LOCO max) */
 
-        /* Set the drive capacity of the sub-clock oscillator */
-        #if   (BSP_CFG_SOSC_DRV_CAP == 0) /* Standard CL */
+            /* Set the drive capacity of the sub-clock oscillator */
+    #if   (BSP_CFG_SOSC_DRV_CAP == 0) /* Standard CL */
             tmp = 0x06;
-        #elif (BSP_CFG_SOSC_DRV_CAP == 1) /* Low CL */
+    #elif (BSP_CFG_SOSC_DRV_CAP == 1) /* Low CL */
             tmp = 0x01;
-        #else
-            #error "Error! Invalid setting for BSP_CFG_SOSC_DRV_CAP in r_bsp_config.h"
-        #endif
+    #else
+        #error "Error! Invalid setting for BSP_CFG_SOSC_DRV_CAP in r_bsp_config.h"
+    #endif
 
-        /* Set the Sub-Clock Oscillator Drive Capacity Control. */
-        RTC.RCR3.BIT.RTCDV = tmp;
+            /* Set the Sub-Clock Oscillator Drive Capacity Control. */
+            RTC.RCR3.BIT.RTCDV = tmp;
 
-        /* WAIT_LOOP */
-        while (tmp != RTC.RCR3.BIT.RTCDV)
-        {
-            /* wait for bits to change */
-            R_BSP_NOP();
-        }
+            /* WAIT_LOOP */
+            while (tmp != RTC.RCR3.BIT.RTCDV)
+            {
+                /* wait for bits to change */
+                R_BSP_NOP();
+            }
 #endif
 
 #if BSP_PRV_SUB_CLK_SOSCCR == 1
-        /* Operate the Sub-clock oscillator */
-        SYSTEM.SOSCCR.BYTE = 0x00;
+            /* Operate the Sub-clock oscillator */
+            SYSTEM.SOSCCR.BYTE = 0x00;
 
-        /* WAIT_LOOP */
-        while (0x00 != SYSTEM.SOSCCR.BYTE)
-        {
-            /* wait for bit to change */
-            R_BSP_NOP();
-        }
+            /* WAIT_LOOP */
+            while (0x00 != SYSTEM.SOSCCR.BYTE)
+            {
+                /* wait for bit to change */
+                R_BSP_NOP();
+            }
 
-        /* Wait for the oscillation stabilization time of the sub-clock. */
-        R_BSP_SoftwareDelay(BSP_CFG_SOSC_WAIT_TIME, BSP_DELAY_MILLISECS);
+            /* Wait for the oscillation stabilization time of the sub-clock. */
+            R_BSP_SoftwareDelay(BSP_CFG_SOSC_WAIT_TIME, BSP_DELAY_MILLISECS);
 #endif
 
 #if BSP_CFG_RTC_ENABLE == 1
-        /* ---- Operate the sub-clock oscillator ---- */
-        RTC.RCR3.BIT.RTCEN = 0x01;
+            /* ---- Operate the sub-clock oscillator ---- */
+            RTC.RCR3.BIT.RTCEN = 0x01;
 
-        /* WAIT_LOOP */
-        while (0x01 != RTC.RCR3.BIT.RTCEN)
-        {
-            /* wait for bit to change */
-            R_BSP_NOP();
-        }
+            /* WAIT_LOOP */
+            while (0x01 != RTC.RCR3.BIT.RTCEN)
+            {
+                /* wait for bit to change */
+                R_BSP_NOP();
+            }
 #endif
 
 #if (BSP_PRV_SUB_CLK_SOSCCR == 0) && (BSP_CFG_RTC_ENABLE == 1)
-        /* Wait for the oscillation stabilization time of the sub-clock. */
-        R_BSP_SoftwareDelay(BSP_CFG_SOSC_WAIT_TIME, BSP_DELAY_MILLISECS);
+            /* Wait for the oscillation stabilization time of the sub-clock. */
+            R_BSP_SoftwareDelay(BSP_CFG_SOSC_WAIT_TIME, BSP_DELAY_MILLISECS);
 #endif
 
 #if (BSP_PRV_SUB_CLK_SOSCCR == 1) || (BSP_CFG_RTC_ENABLE == 1)
-        /* Wait for six the sub-clock cycles */
-        /* 6 count of sub-clock : (1000000/32768)*6=183.10546875us
-           In the case of LOCO frequency is 264kHz : 183.10546875/(1000000/264000)=48.33984375cycle
-           (48.33984375+2)*(1000000/240000)=209.7493489583333us ("+2" is overhead cycle) */
-        R_BSP_SoftwareDelay((uint32_t)210, BSP_DELAY_MICROSECS);
+            /* Wait for six the sub-clock cycles */
+            /* 6 count of sub-clock : (1000000/32768)*6=183.10546875us
+               In the case of LOCO frequency is 264kHz : 183.10546875/(1000000/264000)=48.33984375cycle
+               (48.33984375+2)*(1000000/240000)=209.7493489583333us ("+2" is overhead cycle) */
+            R_BSP_SoftwareDelay((uint32_t)210, BSP_DELAY_MICROSECS);
 #endif
 
 #if (BSP_PRV_SUB_CLK_SOSCCR == 1) && (BSP_CFG_RTC_ENABLE == 0)
-        /* Stop prescaler and counter */
-        /* RCR2 - RTC Control Register 2
-        b7  CNTMD - Count Mode Select - The calendar count mode.
-        b6  HR24  - Hours Mode - The RTC operates in 24-hour mode.
-        b5  AADJP - Automatic Adjustment Period Select - The RADJ.ADJ[5:0] setting value is adjusted from 
-                                                           the count value of the prescaler every 10 seconds.
-        b4  AADJE - Automatic Adjustment Enable - Automatic adjustment is enabled.
-        b3  RTCOE - RTCOUT Output Enable - RTCOUT output enabled.
-        b2  ADJ30 - 30-Second Adjustment - 30-second adjustment is executed.
-        b1  RESET - RTC Software Reset - The prescaler and the target registers for RTC software reset are initialized.
-        b0  START - start - Prescaler is stopped. */
-        RTC.RCR2.BYTE &= 0x7E;
+            /* Stop prescaler and counter */
+            /* RCR2 - RTC Control Register 2
+            b7  CNTMD - Count Mode Select - The calendar count mode.
+            b6  HR24  - Hours Mode - The RTC operates in 24-hour mode.
+            b5  AADJP - Automatic Adjustment Period Select - The RADJ.ADJ[5:0] setting value is adjusted from 
+                                                               the count value of the prescaler every 10 seconds.
+            b4  AADJE - Automatic Adjustment Enable - Automatic adjustment is enabled.
+            b3  RTCOE - RTCOUT Output Enable - RTCOUT output enabled.
+            b2  ADJ30 - 30-Second Adjustment - 30-second adjustment is executed.
+            b1  RESET - RTC Software Reset - The prescaler and the target registers for RTC software reset are initialized.
+            b0  START - start - Prescaler is stopped. */
+            RTC.RCR2.BYTE &= 0x7E;
 
-        /* WAIT_LOOP */
-        while (0 != RTC.RCR2.BIT.START)
-        {
-            /* Confirm that the written value can be read correctly. */
-            R_BSP_NOP();
-        }
+            /* WAIT_LOOP */
+            while (0 != RTC.RCR2.BIT.START)
+            {
+                /* Confirm that the written value can be read correctly. */
+                R_BSP_NOP();
+            }
 
-        /* RTC Software Reset */
-        RTC.RCR2.BIT.RESET = 1;
+            /* WAIT_LOOP */
+            while (0 != RTC.RCR2.BIT.CNTMD)
+            {
+                /* Confirm that the written value can be read correctly. */
+                R_BSP_NOP();
+            }
 
-        /* WAIT_LOOP */
-        while (0 != RTC.RCR2.BIT.RESET)
-        {
-            /* Confirm that the written value can be read correctly. */
-            R_BSP_NOP();
-        }
+            /* RTC Software Reset */
+            RTC.RCR2.BIT.RESET = 1;
 
-        /* An alarm interrupt request is disabled */
-        /* RCR1 - RTC Control Register 1
-        b7:b4  PES   - Periodic Interrupt Select - These bits specify the period for the periodic interrupt.
-        b3     RTCOS - RTCOUT Output Select - RTCOUT outputs 1 Hz.
-        b2     PIE   - Periodic Interrupt Enable - A periodic interrupt request is disabled.
-        b1     CIE   - Carry Interrupt Enable - A carry interrupt request is disabled.
-        b0     AIE   - Alarm Interrupt Enable - An alarm interrupt request is disabled. */
-        RTC.RCR1.BYTE &= 0xF8;
+            /* WAIT_LOOP */
+            while (0 != RTC.RCR2.BIT.RESET)
+            {
+                /* Confirm that the written value can be read correctly. */
+                R_BSP_NOP();
+            }
 
-        /* WAIT_LOOP */
-        while (0 != (0x07 & RTC.RCR1.BYTE))
-        {
-            /* Confirm that the written value can be read correctly. */
-            R_BSP_NOP();
-        }
+            /* An alarm interrupt request is disabled */
+            /* RCR1 - RTC Control Register 1
+            b7:b4  PES   - Periodic Interrupt Select - These bits specify the period for the periodic interrupt.
+            b3     RTCOS - RTCOUT Output Select - RTCOUT outputs 1 Hz.
+            b2     PIE   - Periodic Interrupt Enable - A periodic interrupt request is disabled.
+            b1     CIE   - Carry Interrupt Enable - A carry interrupt request is disabled.
+            b0     AIE   - Alarm Interrupt Enable - An alarm interrupt request is disabled. */
+            RTC.RCR1.BYTE &= 0xF8;
+
+            /* WAIT_LOOP */
+            while (0 != (0x07 & RTC.RCR1.BYTE))
+            {
+                /* Confirm that the written value can be read correctly. */
+                R_BSP_NOP();
+            }
 #endif /* (BSP_PRV_SUB_CLK_SOSCCR == 1) && (BSP_CFG_RTC_ENABLE == 0) */
+        }
+        /* Warm start setting */
+        else
+        {
+#if BSP_PRV_SUB_CLK_SOSCCR == 0
+            /* SOSCCR - Sub-Clock Oscillator Control Register
+            b7:b1    Reserved - The write value should be 0.
+            b0       SOSTP    - Sub-clock oscillator Stop - Sub-clock oscillator is stopped. */
+            SYSTEM.SOSCCR.BYTE = 0x01;
+
+            /* WAIT_LOOP */
+            while (0x01 != SYSTEM.SOSCCR.BYTE)
+            {
+                /* wait for bit to change */
+                R_BSP_NOP();
+            }
+#endif
+        }
+
+#if BSP_CFG_VBATT_ENABLE == 1 /* Battery backup function is enabled. */
     }
-    /* Warm start setting */
     else
     {
-#if BSP_PRV_SUB_CLK_SOSCCR == 0
+        /* If the Battery backup power voltage drop (< 1.8 V) not detected, does not initialize Sub-Clock. */
+    #if BSP_PRV_SUB_CLK_SOSCCR == 0
         /* SOSCCR - Sub-Clock Oscillator Control Register
         b7:b1    Reserved - The write value should be 0.
         b0       SOSTP    - Sub-clock oscillator Stop - Sub-clock oscillator is stopped. */
@@ -631,8 +668,9 @@ static void clock_source_select (void)
             /* wait for bit to change */
             R_BSP_NOP();
         }
-#endif
+    #endif
     }
+#endif
 
 #if BSP_CFG_CLOCK_SOURCE == 4
 

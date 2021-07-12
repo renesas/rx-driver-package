@@ -20,9 +20,10 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup generic_location_module GENERIC_LOCATION (Mesh Generic Location Model)
+ * \defgroup generic_location_module Generic Location Model (GENERIC_LOCATION)
+ * \ingroup mesh_models_block
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Generic Location Model (GENERIC_LOCATION) module to the Application.
  */
 
@@ -32,7 +33,7 @@
 /**
  *  \defgroup generic_location_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
+ *  \brief This section Describes the module Notification Callback interface offered
  *  to the application
  */
 
@@ -64,14 +65,14 @@ typedef API_RESULT (* MS_GENERIC_LOCATION_SERVER_CB)
  * Generic Location Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_GENERIC_LOCATION_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -104,6 +105,7 @@ typedef API_RESULT (* MS_GENERIC_LOCATION_SETUP_SERVER_CB)
 /**
  *  \defgroup generic_location_structures Structures
  *  \{
+ *  \brief This section describes the EtherMind Mesh Generic Location Model Structures.
  */
 
 /**
@@ -228,12 +230,12 @@ typedef struct MS_generic_location_local_struct
 /**
  * \defgroup generic_location_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Generic Location Model APIs.
+ * \brief This section describes the EtherMind Mesh Generic Location Model APIs.
  */
 /**
- * \defgroup generic_location_ser_api_defs Generic Location Server API Definitions
+ * \defgroup generic_location_ser_api_defs Generic Location Server API
  * \{
- * This section describes the Generic Location Server APIs.
+ * \brief This section describes the Generic Location Server APIs.
  */
 
 /**
@@ -334,9 +336,9 @@ API_RESULT MS_generic_location_setup_server_state_update
 /** \} */
 
 /**
- * \defgroup generic_location_cli_api_defs Generic Location Client API Definitions
+ * \defgroup generic_location_cli_api_defs Generic Location Client API
  * \{
- * This section describes the Generic Location Client APIs.
+ * \brief This section describes the Generic Location Client APIs.
  */
 
 /**
@@ -398,6 +400,9 @@ API_RESULT MS_generic_location_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
+/** \name Messsage Send
+ *  \{
+ */
 /**
  *  \brief API to get the selected fields of the Generic Location state of an element.
  *
@@ -510,6 +515,7 @@ API_RESULT MS_generic_location_client_send_reliable_pdu
             param,\
             0xFFFFFFFF\
         )
+/** \} */
 /** \} */
 /** \} */
 /** \} */

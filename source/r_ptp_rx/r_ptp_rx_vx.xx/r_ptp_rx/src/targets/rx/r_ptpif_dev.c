@@ -18,7 +18,7 @@
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_ptpif.c
-* Description  : PTPEDMAC module device driver RX64M/71M/72M device setting
+* Description  : PTPEDMAC module device driver RX64M/71M/72M/72N device setting
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
@@ -47,6 +47,7 @@
 *                              Added "WAIT_LOOP" comments for every loop operation.
 *		  : 31.08.2019 1.16    Supported RX72M device.
 *                              Added Bypass setting.
+*		  : 30.11.2019 1.17    Supported RX72N device.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -80,7 +81,7 @@ Private global variables and functions
  
 /***********************************************************************************************************************
 * Function Name: ptpif_dev_enab
-* Description  : Enable the PTPEDMAC of RX64M/71M/72M
+* Description  : Enable the PTPEDMAC of RX64M/71M/72M/72N
 * Return Value : None
 ***********************************************************************************************************************/
 void ptpif_dev_enab(void)
@@ -99,7 +100,7 @@ void ptpif_dev_enab(void)
 		R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR); /* WP ON */
 	}
 
-#if (1 == BSP_MCU_RX72M)
+#if ((1 == BSP_MCU_RX72M) || (1 == BSP_MCU_RX72N))
 	R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR); /* WP OFF */
 	MSTP_PTPEDMAC = 0; /* Enable PTPEDMAC */
 	R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR); /* WP ON */
@@ -109,7 +110,7 @@ void ptpif_dev_enab(void)
 
 /***********************************************************************************************************************
 * Function Name: ptpif_dev_start
-* Description  : Start setting for RX64M/71M/72M PTPEDMAC
+* Description  : Start setting for RX64M/71M/72M/72N PTPEDMAC
 *                - Set PTPEDMAC interrupt level
 *                - Enable PTPEDMAC interrupt
 *                - Register PTPEDMAC interrupt handler
@@ -151,7 +152,7 @@ ptpif_return_t ptpif_dev_start(void)
 
 /***********************************************************************************************************************
 * Function Name: ptpif_dev_stop
-* Description  : Stop setting for RX64M/71M/72M PTPEDMAC
+* Description  : Stop setting for RX64M/71M/72M/72N PTPEDMAC
 *                - Disable PTPEDMAC interrupt
 *                - Release PTPEDMAC Interrupt handler
 * Arguments    : None

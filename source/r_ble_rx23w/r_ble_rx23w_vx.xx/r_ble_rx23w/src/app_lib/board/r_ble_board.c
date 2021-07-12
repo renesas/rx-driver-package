@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 #include "r_ble_board.h"
@@ -43,6 +43,7 @@
 
 static irq_handle_t gs_irq_hdl[BLE_BOARD_SW_MAX];
 static ble_sw_cb_t gs_sw_cb[BLE_BOARD_SW_MAX];
+static ble_sw_event_cb_t gs_sw_event_cb;
 
 static void ble_sw_cb(void)
 {
@@ -59,6 +60,11 @@ static void irq_cb(void *pargs)
         {
             R_BLE_SetEvent(gs_sw_cb[i]);
         }
+    }
+
+    if( NULL != gs_sw_event_cb )
+    {
+        gs_sw_event_cb();
     }
 }
 
@@ -116,6 +122,8 @@ void R_BLE_BOARD_Init(void)
 
     /* Set wake up trigger */
     R_BLE_BOARD_RegisterSwitchCb(BLE_BOARD_SW1, ble_sw_cb);
+
+    gs_sw_event_cb = NULL;
 }
 
 void R_BLE_BOARD_SetLEDState(e_ble_led_t led, bool onoff)
@@ -184,6 +192,11 @@ void R_BLE_BOARD_RegisterSwitchCb(e_ble_sw_t sw, ble_sw_cb_t cb)
     }
 }
 
+void R_BLE_BOARD_RegisterSwitchEventCb(ble_sw_event_cb_t cb)
+{
+    gs_sw_event_cb = cb;
+}
+
 #else /* (BLE_CFG_BOARD_LED_SW_EN == 1) && (BLE_CFG_HCI_MODE_EN == 0) */
 
 void R_BLE_BOARD_Init(void)
@@ -204,6 +217,11 @@ void R_BLE_BOARD_ToggleLEDState(e_ble_led_t led)
 void R_BLE_BOARD_RegisterSwitchCb(e_ble_sw_t sw, ble_sw_cb_t cb)
 {
     (void)sw;
+    (void)cb;
+}
+
+void R_BLE_BOARD_RegisterSwitchEventCb(ble_sw_event_cb_t cb)
+{
     (void)cb;
 }
 

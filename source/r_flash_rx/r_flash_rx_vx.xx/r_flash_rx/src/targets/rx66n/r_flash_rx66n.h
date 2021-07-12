@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_rx66n.h
@@ -24,6 +24,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 18.11.2019 4.50    First Release
+*         : 26.06.2020 4.60    Removed unnecessary compile condition.
 ***********************************************************************************************************************/
 
 #ifndef R_FLASH_RX66N_H
@@ -367,7 +368,6 @@ typedef enum _flash_block_address
 #endif // 32 blocks for 4M only
 #endif // DUAL MODE
 
-#if (MCU_DATA_FLASH_SIZE_BYTES != 0)
     FLASH_DF_BLOCK_0       = 0x00100000,    /*   64B: 0x00100000 - 0x0010003F */
     FLASH_DF_BLOCK_1       = 0x00100040,    /*   64B: 0x00100040 - 0x0010007F */
     FLASH_DF_BLOCK_2       = 0x00100080,    /*   64B: 0x00100080 - 0x001000BF */
@@ -881,7 +881,6 @@ typedef enum _flash_block_address
     FLASH_DF_BLOCK_510     = 0x00107F80,    /*   64B: 0x00107F80 - 0x00107FBF */
     FLASH_DF_BLOCK_511     = 0x00107FC0,    /*   64B: 0x00107FC0 - 0x00107FFF */
     FLASH_DF_BLOCK_INVALID = 0x00108000     /*   Block 511 + 64 bytes */
-#endif // MCU_DATA_FLASH_SIZE_BYTES != 0
 } flash_block_address_t;
 
 

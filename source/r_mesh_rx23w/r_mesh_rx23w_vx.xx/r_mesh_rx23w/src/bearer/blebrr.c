@@ -16,14 +16,16 @@
 *******************************************************************************/
 #include "r_mesh_rx23w_if.h"
 #include "blebrr.h"
+#include "timer/r_ble_timer.h"
 
 /*******************************************************************************
 * Macro definitions
 *******************************************************************************/
-#define BLEBRR_QUEUE_SIZE                   32
-#define BLEBRR_ADV_TIMEOUT                  (EM_TIMEOUT_MILLISEC | 4)
+#define BLEBRR_QUEUE_SIZE                   64
+#define BLEBRR_ADV_TIMEOUT                  4
 #define BLEBRR_NCON_ADVTYPE_OFFSET          2
-#define BLEBRR_ADVREPEAT_COUNT              5
+#define BLEBRR_ADVREPEAT_COUNT              3
+#define BLEBRR_ADVREPEAT_RAND_DELAY         10
 
 /** Bearer state defines */
 #define BLEBRR_STATE_IDLE                   0x00
@@ -33,6 +35,9 @@
 #define BLEBRR_STATE_IN_ADV_ENABLE          0x10
 #define BLEBRR_STATE_IN_ADV_DISABLE         0x20
 #define BLEBRR_STATE_ADV_ENABLED            0x40
+
+#define BLEBRR_STATE_MASK_SCAN              0x0F
+#define BLEBRR_STATE_MASK_ADV               0xF0
 
 #define BLEBRR_MASK_STATE_ADV_ACTIVE \
                 (BLEBRR_STATE_IN_ADV_ENABLE  | \
@@ -48,8 +53,8 @@
 #define BLEBRR_NUM_BCONS                    0x05
 
 /** GATT Mode GAP Connectable Advertising Service data offset */
-#define BLEBRR_GATT_ADV_SERV_DATA_OFFSET    11
 #define BLEBRR_GATT_ADV_SERV_DATALEN_OFFSET 7
+#define BLEBRR_GATT_ADV_SERV_DATA_OFFSET    (BLEBRR_GATT_ADV_SERV_DATALEN_OFFSET + 4)
 
 /** Advertising data maximum length */
 #define BLEBRR_GAP_ADVDATA_LEN              31
@@ -64,8 +69,10 @@
 #define BLEBRR_UNLOCK()                     MS_MUTEX_UNLOCK(blebrr_mutex, BRR);
 #define BLEBRR_UNLOCK_VOID()                MS_MUTEX_UNLOCK_VOID(blebrr_mutex, BRR);
 
-#define BLEBRR_SET_STATE(x)                 blebrr_state = (x)
-#define BLEBRR_GET_STATE()                  blebrr_state
+#define BLEBRR_SET_STATE_SCAN(x)            blebrr_state = (x) | (blebrr_state & (~BLEBRR_STATE_MASK_SCAN))
+#define BLEBRR_SET_STATE_ADV(x)             blebrr_state = (x) | (blebrr_state & (~BLEBRR_STATE_MASK_ADV))
+#define BLEBRR_GET_STATE_SCAN()             (blebrr_state & BLEBRR_STATE_MASK_SCAN)
+#define BLEBRR_GET_STATE_ADV()              (blebrr_state & BLEBRR_STATE_MASK_ADV)
 
 /*******************************************************************************
 * Type definitions
@@ -126,9 +133,11 @@ static BLEBRR_Q blebrr_queue;
 /* static UCHAR blebrr_adv_bcon_type; */
 
 MS_DEFINE_MUTEX_TYPE(static, blebrr_mutex)
-static EM_timer_handle blebrr_timer_handle;
+static UINT32 blebrr_timer_handle;
+static UCHAR blebrr_timer_active;
 static UCHAR blebrr_state;
-static UCHAR blebrr_datacount;
+static UCHAR blebrr_datacount = 0;
+static UCHAR blebrr_memcount = 0;
 
 /* static UCHAR blebrr_scan_type; */
 static UCHAR blebrr_advrepeat_count;
@@ -143,10 +152,8 @@ BLEBRR_GAP_ADV_DATA blebrr_gap_adv_data[BLEBRR_GAP_MAX_ADVDATA_SETS] =
              *      0x01: LE Limited Discoverable Mode
              *      0x02: LE General Discoverable Mode
              *      0x04: BR/EDR Not Supported
-             *      0x08: Simultaneous LE and BR/EDR to Same Device
-             *            Capable (Controller)
-             *      0x10: Simultaneous LE and BR/EDR to Same Device
-             *            Capable (Host)
+             *      0x08: Simultaneous LE and BR/EDR to Same Device Capable (Controller)
+             *      0x10: Simultaneous LE and BR/EDR to Same Device Capable (Host)
              */
             0x02, 0x01, 0x06,
 
@@ -161,10 +168,11 @@ BLEBRR_GAP_ADV_DATA blebrr_gap_adv_data[BLEBRR_GAP_MAX_ADVDATA_SETS] =
              *      Mesh Provisioning Service (0x1827)
              *      Mesh UUID (16 Bytes)
              *      Mesh OOB Info (2 Bytes)
+             *  NOTE: UUID and OOB Info are set by the blebrr_bcon_send().
              */
              0x15, 0x16,
              0x27, 0x18,
-             0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF,
+             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
              0x00, 0x00
         },
 
@@ -179,10 +187,8 @@ BLEBRR_GAP_ADV_DATA blebrr_gap_adv_data[BLEBRR_GAP_MAX_ADVDATA_SETS] =
              *      0x01: LE Limited Discoverable Mode
              *      0x02: LE General Discoverable Mode
              *      0x04: BR/EDR Not Supported
-             *      0x08: Simultaneous LE and BR/EDR to Same Device
-             *            Capable (Controller)
-             *      0x10: Simultaneous LE and BR/EDR to Same Device
-             *            Capable (Host)
+             *      0x08: Simultaneous LE and BR/EDR to Same Device Capable (Controller)
+             *      0x10: Simultaneous LE and BR/EDR to Same Device Capable (Host)
              */
             0x02, 0x01, 0x06,
 
@@ -194,14 +200,21 @@ BLEBRR_GAP_ADV_DATA blebrr_gap_adv_data[BLEBRR_GAP_MAX_ADVDATA_SETS] =
 
             /**
              *  Service Data List:
-             *      Mesh Provisioning Service (0x1828)
-             *      Type (1 Byte) "0x00 - Network ID; 0x01 - Node Identity"
-             *      NetWork ID (8 Bytes)
+             *      Mesh Proxy Service (0x1828)
+             *      Type (1 Byte) 
+             *          0x00: Network ID
+             *          0x01: Node Identity
+             *      Network ID (8 Bytes), if Type is 0x00
+             *      Hash (8 Bytes) and Random (8 Bytes), if Type is 0x01
+             *  NOTE: AD Length is calculated and set by the blebrr_bcon_send().
+             *  NOTE: Type, Network ID, Hash and Random are set by the blebrr_bcon_send().
+             *  NOTE: The BLEBRR_GATT_ADV_SERV_DATALEN_OFFSET macro specifies offset to this Service Data List AD Structure.
+             *  NOTE: The BLEBRR_GATT_ADV_SERV_DATA_OFFSET macro specifies offset to the Service Data.
              */
-             0x0C, 0x16,
+             0x00, 0x16,
              0x28, 0x18,
              0x00,
-             0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88
+             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
         },
 
         /** Advertising Data length */
@@ -221,26 +234,26 @@ void blebrr_scan_enable(void)
 {
     BLEBRR_LOCK_VOID();
 
-    if ((BLEBRR_STATE_IDLE == BLEBRR_GET_STATE()) &&
+    if ((BLEBRR_STATE_IDLE == BLEBRR_GET_STATE_SCAN()) &&
         (MS_TRUE != blebrr_sleep))
     {
         blebrr_scan_pl(MS_TRUE);
 
         /* Update state */
-        BLEBRR_SET_STATE(BLEBRR_STATE_IN_SCAN_ENABLE);
+        BLEBRR_SET_STATE_SCAN(BLEBRR_STATE_IN_SCAN_ENABLE);
     }
 
     BLEBRR_UNLOCK_VOID();
 }
 
-static UCHAR blebrr_get_beacon_type (UCHAR type, UCHAR bcon)
+static UCHAR blebrr_get_beacon_type(UCHAR type, UCHAR bcon)
 {
     return (BRR_BCON_PASSIVE == type)?
            ((BRR_BCON_TYPE_UNPROV_DEVICE == bcon)? BLEBRR_UPROV_ADV_BCON: BLEBRR_SECNET_BCON):
            ((BRR_BCON_TYPE_UNPROV_DEVICE == bcon)? BLEBRR_UPROV_GATT_BCON: BLEBRR_NUM_BCONS);
 }
 
-static BLEBRR_Q_ELEMENT * blebrr_enqueue_alloc (void)
+static BLEBRR_Q_ELEMENT * blebrr_enqueue_alloc(void)
 {
     BLEBRR_Q_ELEMENT * elt;
     UINT16 ei;
@@ -272,7 +285,7 @@ static BLEBRR_Q_ELEMENT * blebrr_enqueue_alloc (void)
     return elt;
 }
 
-static BLEBRR_Q_ELEMENT * blebrr_dequeue (void)
+static BLEBRR_Q_ELEMENT * blebrr_dequeue(void)
 {
     BLEBRR_Q_ELEMENT * elt;
     UINT16 si;
@@ -308,7 +321,7 @@ static BLEBRR_Q_ELEMENT * blebrr_dequeue (void)
     return elt;
 }
 
-static void blebrr_clear_bcon (UCHAR bcon)
+static void blebrr_clear_bcon(UCHAR bcon)
 {
     BLEBRR_Q_ELEMENT * elt;
 
@@ -319,6 +332,7 @@ static void blebrr_clear_bcon (UCHAR bcon)
     if (NULL != elt->pdata)
     {
         EM_free_mem (elt->pdata);
+        blebrr_memcount--;
         elt->pdata = NULL;
         elt->pdatalen = 0;
 
@@ -329,6 +343,7 @@ static void blebrr_clear_bcon (UCHAR bcon)
             (0 != (elt + 1)->pdatalen))
         {
             EM_free_mem((elt + 1)->pdata);
+            blebrr_memcount--;
             (elt + 1)->pdata = NULL;
             (elt + 1)->pdatalen = 0;
 
@@ -406,34 +421,36 @@ static API_RESULT blebrr_update_advdata(void)
     /* Set the advertising data */
     blebrr_advrepeat_count = 1;
     blebrr_advertise_data_pl(type, elt->pdata, elt->pdatalen);
-    /* BLEBRR_LOG("\n ### [ADV-Tx]: blebrr adv send of type 0x%02X:\n", type);
-    appl_dump_bytes(elt->pdata, elt->pdatalen); */
 
     /* Is Adv data type in element? */
     if (BRR_BCON_COUNT == elt->type)
     {
         /* Yes, Free the element */
         EM_free_mem(elt->pdata);
+        blebrr_memcount--;
+        elt->pdata = NULL;
         elt->pdatalen = 0;
     }
 
     return API_SUCCESS;
 }
 
-static void blebrr_send
-                 (
-                     UCHAR type,
-                     void * pdata,
-                     UINT16 datalen,
-                     BLEBRR_Q_ELEMENT * elt
-                 )
+static API_RESULT blebrr_send
+                       (
+                           UCHAR type,
+                           void * pdata,
+                           UINT16 datalen,
+                           BLEBRR_Q_ELEMENT ** pelt
+                       )
 {
     API_RESULT retval;
-    UCHAR * data;
+    UCHAR * data, * ptr;
     UINT16 packet_len;
     UCHAR offset;
+    BLEBRR_Q_ELEMENT * elt;
 
     data = (UCHAR *)pdata;
+    elt = *pelt;
 
     /* Get the offset based on the type */
     offset = (0 != type)? BLEBRR_NCON_ADVTYPE_OFFSET: 0;
@@ -442,12 +459,40 @@ static void blebrr_send
     packet_len = datalen + offset;
 
     /* Allocate and save the data */
-    elt->pdata = EM_alloc_mem(packet_len);
-    if (NULL == elt->pdata)
+    ptr = EM_alloc_mem(packet_len);
+    if (NULL == ptr)
     {
         BLEBRR_LOG("Failed to allocate memory!\n");
-        return;
+        return API_FAILURE;
     }
+    blebrr_memcount++;
+
+    if (NULL == elt)
+    {
+        /* Allocate the next free element in the data queue */
+        elt = blebrr_enqueue_alloc();
+
+        /* Is any element free? */
+        if (NULL == elt)
+        {
+            /* Unlock */
+            BLEBRR_UNLOCK();
+
+            /* Free the memory allocated */
+            EM_free_mem (ptr);
+            blebrr_memcount--;
+            elt->pdata = NULL;
+
+            BLEBRR_LOG("Queue Full!\n");
+            return API_FAILURE;
+        }
+
+        /* Update element type */
+        elt->type = BRR_BCON_COUNT;
+    }
+
+    /* Assign the allocated memory */
+    elt->pdata = ptr;
 
     if (offset >= 1)
     {
@@ -461,22 +506,17 @@ static void blebrr_send
     }
 
     /* Update the data and datalen */
-    EM_mem_copy((elt->pdata + offset), data, datalen);
+    memcpy((elt->pdata + offset), data, datalen);
     elt->pdatalen = packet_len;
 
     /* Is the Adv/Scan timer running? */
-    if (EM_TIMER_HANDLE_INIT_VAL != blebrr_timer_handle)
+    if (MS_TRUE == blebrr_timer_active)
     {
         /* Yes. Do nothing */
     }
     else
     {
-        #if 1
-        if ((BLEBRR_MASK_STATE_ADV_ACTIVE & BLEBRR_GET_STATE()) == 0)
-        #else
-        if ((BLEBRR_STATE_IDLE == BLEBRR_GET_STATE()) ||
-            (BLEBRR_STATE_SCAN_ENABLED == BLEBRR_GET_STATE()))
-        #endif
+        if (BLEBRR_STATE_IDLE == BLEBRR_GET_STATE_ADV())
         {
             /* No, Enable Advertising with Data */
             retval = blebrr_update_advdata();
@@ -484,12 +524,12 @@ static void blebrr_send
             if (API_SUCCESS == retval)
             {
                 /* Update state */
-                BLEBRR_SET_STATE(BLEBRR_STATE_IN_ADV_ENABLE);
+                BLEBRR_SET_STATE_ADV(BLEBRR_STATE_IN_ADV_ENABLE);
             }
         }
     }
 
-    return;
+    return API_SUCCESS;
 }
 
 static API_RESULT blebrr_bcon_send(BRR_HANDLE * handle, void * pdata, UINT16 datalen)
@@ -497,6 +537,7 @@ static API_RESULT blebrr_bcon_send(BRR_HANDLE * handle, void * pdata, UINT16 dat
     BRR_BEACON_INFO * info;
     BLEBRR_Q_ELEMENT * elt;
     UCHAR op, action, type, bcon, bcontype;
+    API_RESULT retval;
 
     /* Get the beacon information */
     info = (BRR_BEACON_INFO *)pdata;
@@ -508,6 +549,8 @@ static API_RESULT blebrr_bcon_send(BRR_HANDLE * handle, void * pdata, UINT16 dat
     /* Get the Broadcast/Observe type and Beacon type */
     type = (info->type & 0x0F);
     bcon = ((info->type & 0xF0) >> 4);
+
+    retval = API_SUCCESS;
 
     /* Lock */
     BLEBRR_LOCK();
@@ -531,14 +574,14 @@ static API_RESULT blebrr_bcon_send(BRR_HANDLE * handle, void * pdata, UINT16 dat
                     /* Active Beacon (advdata) Source Index */
                     UCHAR abs_index;
 
-                    abs_index = blebrr_gatt_mode_get();
+                    abs_index = R_MS_BRR_Get_GattMode();
 
                     if (BLEBRR_GATT_PROV_MODE == abs_index)
                     {
                         /* Copy the incoming UUID and OOB info to global connectable ADV data for PB GATT */
                         /* TODO have a state to decide about provisioned and unprovisioned state */
 
-                        EM_mem_copy
+                        memcpy
                         (
                             blebrr_gap_adv_data[abs_index].data + BLEBRR_GATT_ADV_SERV_DATA_OFFSET,
                             info->bcon_data + 1,
@@ -547,9 +590,9 @@ static API_RESULT blebrr_bcon_send(BRR_HANDLE * handle, void * pdata, UINT16 dat
 
                         /**
                          * NOTE: It is not need to calculate assign the Service Data Length as
-                         *       Service Data length is Fixed for Connectable Provisioning ADV.
+                         * Service Data length is Fixed for Connectable Provisioning ADV.
                          * This data length is : 1 + 2 + 16 + 2 = 0x15 Bytes, already updated
-                         * in the global data strucutre blebrr_gap_adv_data[0].
+                         * in the global data structure blebrr_gap_adv_data[0].
                          */
 
                         /* Update the beacon type */
@@ -558,13 +601,13 @@ static API_RESULT blebrr_bcon_send(BRR_HANDLE * handle, void * pdata, UINT16 dat
                     /* Assuming that this Active Beacon is for GATT Proxy*/
                     else
                     {
-                        /* Copy the incoming UUID and OOB info to global connectable ADV data for PB GATT */
+                        /* Copy the incoming Type and either Network ID or Hash and Random to global connectable ADV data for PB GATT */
                         /* TODO have a state to decide about provisioned and unprovisioned state */
 
                         abs_index = BLEBRR_GATT_PROXY_MODE;
 
                         /* Copy the incoming Proxy ADV data */
-                        EM_mem_copy
+                        memcpy
                         (
                             blebrr_gap_adv_data[abs_index].data + BLEBRR_GATT_ADV_SERV_DATA_OFFSET,
                             info->bcon_data,
@@ -608,35 +651,46 @@ static API_RESULT blebrr_bcon_send(BRR_HANDLE * handle, void * pdata, UINT16 dat
                 elt->type = type;
 
                 /* Schedule to send */
-                blebrr_send
-                (
-                    ((BRR_BCON_TYPE_UNPROV_DEVICE == bcon) &&
-                     (BRR_BCON_ACTIVE != type))? MESH_AD_TYPE_BCON : 0,
-                    info->bcon_data,
-                    info->bcon_datalen,
-                    elt
-                );
+                retval = blebrr_send
+                         (
+                             ((BRR_BCON_TYPE_UNPROV_DEVICE == bcon) &&
+                              (BRR_BCON_ACTIVE != type))? MESH_AD_TYPE_BCON : 0,
+                             info->bcon_data,
+                             info->bcon_datalen,
+                             &elt
+                         );
 
-                /* Check if URI data is present for Unprovisioned device */
-                if ((BRR_BCON_TYPE_UNPROV_DEVICE == bcon) &&
-                    (NULL != info->uri) &&
-                    (NULL != info->uri->payload) &&
-                    (0 != info->uri->length))
+                if (API_SUCCESS == retval)
                 {
-                    elt = &blebrr_bcon[bcon + 1];
+                    /* Check if URI data is present for Unprovisioned device */
+                    if ((BRR_BCON_TYPE_UNPROV_DEVICE == bcon) &&
+                        (NULL != info->uri) &&
+                        (NULL != info->uri->payload) &&
+                        (0 != info->uri->length))
+                    {
+                        elt = &blebrr_bcon[bcon + 1];
 
-                    /* Update element type */
-                    elt->type = bcontype + 1;
+                        /* Update element type */
+                        elt->type = bcontype + 1;
 
-                    /* Schedule to send */
-                    blebrr_send
-                    (
-                        0,
-                        info->uri->payload,
-                        info->uri->length,
-                        elt
-                    );
+                        /* Schedule to send */
+                        retval = blebrr_send
+                                 (
+                                     0,
+                                     info->uri->payload,
+                                     info->uri->length,
+                                     &elt
+                                 );
+                    }
                 }
+                else
+                {
+                    /* Remove the beacon with type from the queue */
+                    blebrr_clear_bcon (bcon);
+
+                    /* Update the active beacon mask */
+                    blebrr_beacons &= (UCHAR)(~(1 << bcon));
+               }
             }
             else
             {
@@ -662,13 +716,14 @@ static API_RESULT blebrr_bcon_send(BRR_HANDLE * handle, void * pdata, UINT16 dat
     /* Unlock */
     BLEBRR_UNLOCK();
 
-    return API_SUCCESS;
+    return retval;
 }
 
 
 static API_RESULT blebrr_adv_send(BRR_HANDLE * handle, UCHAR type, void * pdata, UINT16 datalen)
 {
     BLEBRR_Q_ELEMENT * elt;
+	API_RESULT       retval;
 
     /* Validate handle */
     if (*handle != blebrr_advhandle)
@@ -705,35 +760,21 @@ static API_RESULT blebrr_adv_send(BRR_HANDLE * handle, UCHAR type, void * pdata,
     /* Lock */
     BLEBRR_LOCK();
 
-    /* Allocate the next free element in the data queue */
-    elt = blebrr_enqueue_alloc();
-
-    /* Is any element free? */
-    if (NULL == elt)
-    {
-        /* Unlock */
-        BLEBRR_UNLOCK();
-
-        BLEBRR_LOG("Queue Full!\n");
-        return API_FAILURE;
-    }
-
-    /* Update element type */
-    elt->type = BRR_BCON_COUNT;
+    elt = NULL;
 
     /* Schedule to send */
-    blebrr_send
-    (
-        type,
-        pdata,
-        datalen,
-        elt
-    );
+    retval = blebrr_send
+             (
+                 type,
+                 pdata,
+                 datalen,
+                 &elt
+             );
 
     /* Unlock */
     BLEBRR_UNLOCK();
 
-    return API_SUCCESS;
+    return retval;
 }
 
 static void blebrr_adv_sleep(BRR_HANDLE * handle)
@@ -743,13 +784,13 @@ static void blebrr_adv_sleep(BRR_HANDLE * handle)
     /* Set bearer sleep state */
     blebrr_sleep = MS_TRUE;
 
-    if (BLEBRR_STATE_SCAN_ENABLED == BLEBRR_GET_STATE())
+    if (BLEBRR_STATE_SCAN_ENABLED == BLEBRR_GET_STATE_SCAN())
     {
         /* Disable Scan */
         blebrr_scan_pl(MS_FALSE);
 
         /* Update state */
-        BLEBRR_SET_STATE(BLEBRR_STATE_IN_SCAN_DISABLE);
+        BLEBRR_SET_STATE_SCAN(BLEBRR_STATE_IN_SCAN_DISABLE);
     }
 
     /* Enter platform sleep */
@@ -770,38 +811,36 @@ static void blebrr_adv_wakeup(BRR_HANDLE * handle, UINT8 mode)
         /* Reset bearer sleep state */
         blebrr_sleep = MS_FALSE;
 
-        if (BLEBRR_STATE_IDLE == BLEBRR_GET_STATE())
+        if (BLEBRR_STATE_IDLE == BLEBRR_GET_STATE_SCAN())
         {
             /* Enable Scan */
             blebrr_scan_pl(MS_TRUE);
 
             /* Update state */
-            BLEBRR_SET_STATE(BLEBRR_STATE_IN_SCAN_ENABLE);
+            BLEBRR_SET_STATE_SCAN(BLEBRR_STATE_IN_SCAN_ENABLE);
         }
     }
 
     BLEBRR_UNLOCK_VOID();
 }
 
-static void blebrr_advscan_timeout_handler (void * args, UINT16 size)
+static void blebrr_advscan_timeout_handler(UINT32 timer_hdl)
 {
-    MS_IGNORE_UNUSED_PARAM(args);
-    MS_IGNORE_UNUSED_PARAM(size);
+    MS_IGNORE_UNUSED_PARAM(timer_hdl);
 
     BLEBRR_LOCK_VOID();
 
-    /* Reset Timer Handler */
-    blebrr_timer_handle = EM_TIMER_HANDLE_INIT_VAL;
+    blebrr_timer_active = MS_FALSE;
 
     /* Check the state of AdvScan procedure */
-    switch (BLEBRR_GET_STATE())
+    switch (BLEBRR_GET_STATE_ADV())
     {
         case BLEBRR_STATE_ADV_ENABLED:
             /* Disable Adv */
             blebrr_advertise_pl (MS_FALSE);
 
             /* Update state */
-            BLEBRR_SET_STATE(BLEBRR_STATE_IN_ADV_DISABLE);
+            BLEBRR_SET_STATE_ADV(BLEBRR_STATE_IN_ADV_DISABLE);
             break;
 
         default:
@@ -813,29 +852,21 @@ static void blebrr_advscan_timeout_handler (void * args, UINT16 size)
 }
 
 
-static void blebrr_timer_start (UINT32 timeout)
+static void blebrr_timer_start(UINT32 timeout)
 {
-    EM_RESULT retval;
+    ble_status_t retval;
 
-    retval = EM_start_timer
-             (
-                 &blebrr_timer_handle,
-                 timeout,
-                 blebrr_advscan_timeout_handler,
-                 NULL,
-                 0
-             );
-
-    if (EM_SUCCESS != retval)
+    retval = R_BLE_TIMER_UpdateTimeout(blebrr_timer_handle, timeout);
+    if (BLE_SUCCESS == retval)
     {
-        /* TODO: Log */
+        blebrr_timer_active = MS_TRUE;
     }
 }
 
 /***************************************************************************//**
 * @brief Handles Scan operation
 *******************************************************************************/
-void blebrr_pl_scan_setup (UCHAR enable)
+void blebrr_pl_scan_setup(UCHAR enable)
 {
     BLEBRR_LOCK_VOID();
 
@@ -843,12 +874,12 @@ void blebrr_pl_scan_setup (UCHAR enable)
     if (MS_TRUE == enable)
     {
         /* Yes, Update state */
-        BLEBRR_SET_STATE(BLEBRR_STATE_SCAN_ENABLED);
+        BLEBRR_SET_STATE_SCAN(BLEBRR_STATE_SCAN_ENABLED);
     }
     else
     {
         /* Update state */
-        BLEBRR_SET_STATE(BLEBRR_STATE_IDLE);
+        BLEBRR_SET_STATE_SCAN(BLEBRR_STATE_IDLE);
     }
 
     BLEBRR_UNLOCK_VOID();
@@ -857,7 +888,7 @@ void blebrr_pl_scan_setup (UCHAR enable)
 /***************************************************************************//**
 * @brief Handles Advertisement operation
 *******************************************************************************/
-void blebrr_pl_advertise_setup (UCHAR enable)
+void blebrr_pl_advertise_setup(UCHAR enable)
 {
     API_RESULT retval;
     UINT32 delay_ms = 0;
@@ -868,11 +899,11 @@ void blebrr_pl_advertise_setup (UCHAR enable)
     if (MS_TRUE == enable)
     {
         /* Yes, Update state */
-        BLEBRR_SET_STATE(BLEBRR_STATE_ADV_ENABLED);
+        BLEBRR_SET_STATE_ADV(BLEBRR_STATE_ADV_ENABLED);
 
-        /* Add Random Transmision Delay: 0 to 7 ms */
+        /* Add Random Transmission Delay */
         cry_rand_generate((UCHAR*)&delay_ms, sizeof(UINT32));
-        delay_ms &= 0x7;
+        delay_ms %= BLEBRR_ADVREPEAT_RAND_DELAY;
 
         /* Start bearer timer for Adv Timeout */
         blebrr_timer_start (BLEBRR_ADV_TIMEOUT + delay_ms);
@@ -885,7 +916,7 @@ void blebrr_pl_advertise_setup (UCHAR enable)
             blebrr_advertise_pl(MS_TRUE);
 
             /* Update state */
-            BLEBRR_SET_STATE(BLEBRR_STATE_IN_ADV_ENABLE);
+            BLEBRR_SET_STATE_ADV(BLEBRR_STATE_IN_ADV_ENABLE);
         }
         else
         {
@@ -894,12 +925,12 @@ void blebrr_pl_advertise_setup (UCHAR enable)
             if (API_SUCCESS == retval)
             {
                 /* Update state */
-                BLEBRR_SET_STATE(BLEBRR_STATE_IN_ADV_ENABLE);
+                BLEBRR_SET_STATE_ADV(BLEBRR_STATE_IN_ADV_ENABLE);
             }
             else
             {
                 /* Update state */
-                BLEBRR_SET_STATE(((MS_TRUE == blebrr_sleep)?BLEBRR_STATE_IDLE: BLEBRR_STATE_SCAN_ENABLED));
+                BLEBRR_SET_STATE_ADV(BLEBRR_STATE_IDLE);
             }
         }
     }
@@ -910,11 +941,11 @@ void blebrr_pl_advertise_setup (UCHAR enable)
 /***************************************************************************//**
 * @brief Advertisement End function
 *******************************************************************************/
-void blebrr_pl_advertise_end (void)
+void blebrr_pl_advertise_end(void)
 {
     BLEBRR_LOCK_VOID();
 
-    BLEBRR_SET_STATE(BLEBRR_STATE_IDLE);
+    BLEBRR_SET_STATE_ADV(BLEBRR_STATE_IDLE);
     /* blebrr_adv_bcon_type = 0; */
 
     BLEBRR_UNLOCK_VOID();
@@ -923,7 +954,7 @@ void blebrr_pl_advertise_end (void)
 /***************************************************************************//**
 * @brief Handles Advertising Reports
 *******************************************************************************/
-void blebrr_pl_recv_advpacket (UCHAR type, UCHAR * pdata, UINT16 pdatalen, UCHAR rssi)
+void blebrr_pl_recv_advpacket(UCHAR type, UCHAR * pdata, UINT16 pdatalen, UCHAR rssi)
 {
     MS_BUFFER info;
 
@@ -949,15 +980,16 @@ void blebrr_pl_recv_advpacket (UCHAR type, UCHAR * pdata, UINT16 pdatalen, UCHAR
 }
 
 /***************************************************************************//**
-* @brief Registers ADV Bearer with Mesh Stack
+* @brief Registers ADV Bearer with Mesh Stack and Start Scan
 *******************************************************************************/
-void blebrr_register(void)
+void R_MS_BRR_Setup(void)
 {
     /* Initialize locals */
     BLEBRR_MUTEX_INIT_VOID();
 
-    /* Initialize Timer Handler */
-    blebrr_timer_handle = EM_TIMER_HANDLE_INIT_VAL;
+    /* Initialize Timer */
+    blebrr_timer_active = MS_FALSE;
+    R_BLE_TIMER_Create(&blebrr_timer_handle, BLEBRR_ADV_TIMEOUT, BLE_TIMER_ONE_SHOT, blebrr_advscan_timeout_handler);
 
     /* Reset the bearer sleep */
     blebrr_sleep = MS_FALSE;
@@ -973,6 +1005,5 @@ void blebrr_register(void)
     blebrr_scan_pl (MS_TRUE);
 
     /* Update state */
-    BLEBRR_SET_STATE(BLEBRR_STATE_IN_SCAN_ENABLE);
+    BLEBRR_SET_STATE_SCAN(BLEBRR_STATE_IN_SCAN_ENABLE);
 }
-

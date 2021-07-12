@@ -18,7 +18,7 @@
  * you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2018(2019) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2018(2020) Renesas Electronics Corporation. All rights reserved.
  ******************************************************************************/
 /******************************************************************************
  * File Name    : r_usb_patapi.h
@@ -28,6 +28,7 @@
  * History : DD.MM.YYYY Version  Description
  *         : 30.11.2018 1.00     First Release
  *         : 31.05.2019 1.11     Added support for GNUC and ICCRX.
+ *         : 30.06.2020 1.20     Added support for RTOS.
  ******************************************************************************/
 
 /******************************************************************************
@@ -264,7 +265,7 @@ typedef union
  ******************************************************************************/
 
 void        pmsc_atapi_analyze_cbwcb(uint8_t *p_cbwcb);
-void        pmsc_atapi_command_processing(uint8_t *p_cbw, uint16_t status, usb_pcb_t complete);
+void        pmsc_atapi_command_processing(uint8_t *p_cbw, uint16_t usb_result, usb_putr_t *p_atapi_utr);
 void        pmsc_atapi_init (void);
 
 #endif  /* R_USB_PATAPI_H */

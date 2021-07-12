@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2015 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_gpio_rx113.h
@@ -24,6 +24,7 @@
 * History : DD.MM.YYYY Version Description
 *         : 18.02.2014 1.00    First Release
 *         : 24.04.2015 1.01    Added the compiler directive: "#if defined(BSP_MCU_RX113)"
+*         : 15.01.2021 3.70    Removed PH7 for RX113.
 ***********************************************************************************************************************/
 
 
@@ -47,9 +48,9 @@ Macro definitions
 #define GPIO_INFO_NUM_PORTS                 (19)
 
 #if   (BSP_PACKAGE_PINS == 100)
-    #define GPIO_INFO_NUM_PINS              (84)
+    #define GPIO_INFO_NUM_PINS              (83)
 #elif (BSP_PACKAGE_PINS == 64)
-    #define GPIO_INFO_NUM_PINS              (50)
+    #define GPIO_INFO_NUM_PINS              (47)
 #else
     #error "r_gpio_rx does not have information about this RX113 package. Please update r_gpio_rx113.h"
 #endif
@@ -90,7 +91,6 @@ typedef enum
     GPIO_PORT_D = 0x0D00,
     GPIO_PORT_E = 0x0E00,
     GPIO_PORT_F = 0x0F00,
-    GPIO_PORT_H = 0x1100,
     GPIO_PORT_J = 0x1200,
 } gpio_port_t;
 
@@ -110,7 +110,6 @@ typedef enum
     GPIO_PORTD_PIN_MASK = 0x1F,    /* Available pins: PD0 to PD4              */
     GPIO_PORTE_PIN_MASK = 0xFF,    /* Available pins: PE0 to PE7              */
     GPIO_PORTF_PIN_MASK = 0xC0,    /* Available pins: PF6, PF7                */
-    GPIO_PORTH_PIN_MASK = 0x80,    /* Available pins: PH7                     */
     GPIO_PORTJ_PIN_MASK = 0xCD,    /* Available pins: PJ0, PJ2, PJ3, PJ6, PJ7 */
 } gpio_pin_bit_mask_t;
 
@@ -195,7 +194,6 @@ typedef enum
     GPIO_PORT_E_PIN_7 = 0x0E07,
     GPIO_PORT_F_PIN_6 = 0x0F06,
     GPIO_PORT_F_PIN_7 = 0x0F07,
-    GPIO_PORT_H_PIN_7 = 0x1107,
     GPIO_PORT_J_PIN_0 = 0x1200,
     GPIO_PORT_J_PIN_2 = 0x1202,
     GPIO_PORT_J_PIN_3 = 0x1203,
@@ -217,7 +215,6 @@ typedef enum
     GPIO_PORT_C = 0x0C00,
     GPIO_PORT_D = 0x0D00,
     GPIO_PORT_E = 0x0E00,
-    GPIO_PORT_H = 0x1100,
     GPIO_PORT_J = 0x1200,
 } gpio_port_t;
 
@@ -237,7 +234,6 @@ typedef enum
     GPIO_PORTD_PIN_MASK = 0x07,    /* Available pins: PD0 to PD2                */
     GPIO_PORTE_PIN_MASK = 0xFF,    /* Available pins: PE0 to PE7                */
     GPIO_PORTF_PIN_MASK = 0x00,    /* Available pins: None                      */
-    GPIO_PORTH_PIN_MASK = 0x80,    /* Available pins: PH7                       */
     GPIO_PORTJ_PIN_MASK = 0xC5,    /* Available pins: PJ0, PJ2, PJ6, PJ7        */
 } gpio_pin_bit_mask_t;
 
@@ -289,7 +285,6 @@ typedef enum
     GPIO_PORT_E_PIN_5 = 0x0E05,
     GPIO_PORT_E_PIN_6 = 0x0E06,
     GPIO_PORT_E_PIN_7 = 0x0E07,
-    GPIO_PORT_H_PIN_7 = 0x1107,
     GPIO_PORT_J_PIN_0 = 0x1200,
     GPIO_PORT_J_PIN_2 = 0x1202,
     GPIO_PORT_J_PIN_6 = 0x1206,

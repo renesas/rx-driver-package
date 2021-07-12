@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014(2015-2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014(2015-2020) Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_tfat_drv_if_sdmem.c
@@ -31,7 +31,10 @@
 *              : 22.06.2015 1.02     Added support MCU RX231.
 *              : 01.04.2016 1.03     Updated the xml file.
 *              : 29.06.2018 1.04     Modified SD card API.
-*              : 08.08.2019 2.00     Supporting offer of C source for TFAT.
+*              : 08.08.2019 2.00     Added support for FreeRTOS and 
+*                                    Renesas uITRON (RI600V4).
+*                                    Added support for GNUC and ICCRX.
+*              : 10.09.2020 2.20     Added support for the format function.
 *******************************************************************************/
 
 /******************************************************************************
@@ -43,13 +46,16 @@ Includes   <System Includes> , "Project Includes"
 
 #if (TFAT_SDMEM_DRIVE_NUM > 0)
 #include "ff.h"              /* TFAT define */
-#include "diskio.h"              /* TFAT define */
+#include "diskio.h"          /* TFAT define */
 
 #include "r_sdc_sd_rx_if.h"
+#include "src/r_sdc_sd_rx_private.h"
 
 /*******************************************************************************
 Macro definitions
 *******************************************************************************/
+#define SDMEM_PRV_CSD_SHIT_7                  (7)
+#define SDMEM_PRV_CSD_ERASE_BLOCK_MASK        (0x0000007f)
 
 /******************************************************************************
 Exported global variables and functions (to be accessed by other files)
@@ -92,9 +98,7 @@ DRESULT sdmem_disk_read (
     sdc_sd_status_t   res = SDC_SD_SUCCESS;
 
     /* parameter check */
-    if ( ( NULL == buffer       )
-            || ( 0       == sector_count )
-       )
+    if ((NULL == buffer) || (0 == sector_count))
     {
         return RES_ERROR;
     }
@@ -135,9 +139,7 @@ DRESULT sdmem_disk_write (
     sdc_sd_status_t   res;
 
     /* parameter check */
-    if ( ( NULL == buffer       )
-            || ( 0       == sector_count )
-       )
+    if ((NULL == buffer) || (0 == sector_count))
     {
         return RES_ERROR;
     }
@@ -172,10 +174,71 @@ DRESULT sdmem_disk_ioctl (
     void* buffer                  /* Data transfer buffer     */
 )
 {
+    uint8_t                cmd = command;
+#if FF_USE_MKFS == 1
+    sdc_sd_card_status_t   sdmem_cardstatus;
+    sdc_sd_card_reg_t      sdmem_cardinfo;
+    sdc_sd_status_t        ret;
+#endif
 
-    /*  Please put the code for disk_ioctl driver interface
-         function over here.  */
-    /*  Please refer the application note for details.  */
+    if ((NULL == buffer) && (CTRL_SYNC != cmd))
+    {
+        return RES_PARERR;
+    }
+
+    switch (cmd)
+    {
+        case CTRL_SYNC:
+
+        break;
+
+        case GET_SECTOR_COUNT:
+#if FF_USE_MKFS
+            /* Get SD card sector count */
+            ret = R_SDC_SD_GetCardStatus(drive, &sdmem_cardstatus);
+            if (SDC_SD_SUCCESS != ret)
+            {
+                return RES_ERROR;
+            }
+
+            ((uint32_t *)buffer)[0] = sdmem_cardstatus.card_sector_size;
+#else
+            return RES_PARERR;
+#endif
+        break;
+
+        case GET_SECTOR_SIZE:
+#if FF_MAX_SS == FF_MIN_SS
+            return RES_PARERR;
+#else
+            ((uint32_t *)buffer)[0] = (uint32_t)SDC_SD_TRANS_BLOCK_SIZE;
+#endif
+        break;
+
+        case GET_BLOCK_SIZE:
+#if FF_USE_MKFS
+            /* Get SD card block size */
+            ret = R_SDC_SD_GetCardInfo(drive, &sdmem_cardinfo);
+            if (SDC_SD_SUCCESS != ret)
+            {
+                return RES_ERROR;
+            }
+
+            /* Erase sector size are [45:39] bits of CSD register */
+            ((uint32_t *)buffer)[0]  = ((sdmem_cardinfo.csd[1]>>SDMEM_PRV_CSD_SHIT_7) & SDMEM_PRV_CSD_ERASE_BLOCK_MASK) + 1;
+#else
+            return RES_PARERR;
+#endif
+        break;
+
+        case CTRL_TRIM:
+
+        break;
+
+        default:
+            return RES_PARERR;
+        break;
+    }
     return RES_OK;
 }
 

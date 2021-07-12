@@ -59,15 +59,16 @@
     <package>
         <type>fitmodule</type>
         <name>r_flash_rx</name>
-        <version>4.50</version>
+        <version>x.xx</version>
         <dependency>
                 <module>r_bsp</module>
                 <version>5.20</version>
                 <version>5.30</version>
                 <version>5.40</version>
                 <version>5.50</version>
+                <version>5.52</version>
         </dependency>
-        <zipsource>r_flash_rx_v4.50.zip</zipsource>
+        <zipsource>r_flash_rx_vx.xx.zip</zipsource>
         <application>Non-Volatile Storage</application>
         <function>Flash</function>
         <function>Data Flash</function>

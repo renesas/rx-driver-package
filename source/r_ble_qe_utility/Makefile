@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_ble_qe_utility
-VERSION = 		1.00
+VERSION = 		1.10
 MDF = NOT_SUPPORTED
 
 TARGET_FOLDER = ../../FITModules

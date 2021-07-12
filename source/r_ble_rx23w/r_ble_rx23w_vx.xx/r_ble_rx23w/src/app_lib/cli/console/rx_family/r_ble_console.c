@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
 **********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name: r_ble_console.c
@@ -59,6 +59,8 @@ volatile bool g_cli_tx_flg;
 volatile bool g_cli_rx_flg;
 static uint8_t state;
 static sci_hdl_t serial_hdl;
+static uint8_t gs_cli_buff[BLE_TX_BUFSIZ];
+static ble_cli_event_cb_t gs_cli_event_cb;
 
 /*********************************************************************************************************************
  * Function Name: sci_callback
@@ -99,6 +101,12 @@ static void sci_callback(void *p_args)
         default:
         {
         } break;
+    }
+
+    if( NULL != gs_cli_event_cb )
+    {
+        /* callback SCI event */
+        gs_cli_event_cb();
     }
 }
 
@@ -266,6 +274,19 @@ void console_init(void)
 
     g_cli_tx_flg = false;
     g_cli_rx_flg = false;
+
+    gs_cli_event_cb = NULL;
+}
+
+/*********************************************************************************************************************
+ * Function Name: console_register_cb
+ * Description  : Register console callback function
+ * Arguments    : cb       - callback function pointer
+ * Return Value : none
+ ********************************************************************************************************************/
+void console_register_event_cb(ble_cli_event_cb_t cb)
+{
+    gs_cli_event_cb = cb;
 }
 
 /*********************************************************************************************************************
@@ -336,18 +357,26 @@ bool console_getc(uint8_t *p_c, bool *p_escape)
  ********************************************************************************************************************/
 void console_putsf(const char *p_format, ...)
 {
-    uint8_t b[BLE_TX_BUFSIZ] = {0};
     va_list va;
     sci_err_t ret;
 
+    while(1)
+    {
+        if(false == g_cli_tx_flg)
+        {
+            break;
+        }
+    }
+
+    gs_cli_buff[0] = '\0';
+
     va_start(va, p_format);
-    vsnprintf((char *)b, BLE_TX_BUFSIZ, p_format, va);
+    vsnprintf((char *)gs_cli_buff, BLE_TX_BUFSIZ, p_format, va);
     va_end(va);
 
-    /* TODO: Remove this after support UART DMA transmission. */    
     do
     {
-        ret = R_SCI_Send(serial_hdl, b, (uint16_t)strlen((const char *)b));
+        ret = R_SCI_Send(serial_hdl, gs_cli_buff, (uint16_t)strlen((const char *)gs_cli_buff));
     } while ((ret == SCI_ERR_XCVR_BUSY) || (ret == SCI_ERR_INSUFFICIENT_SPACE));
 
     if( ret == SCI_SUCCESS )

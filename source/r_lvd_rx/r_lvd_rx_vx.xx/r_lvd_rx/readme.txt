@@ -57,6 +57,9 @@ r_lvd_rx
         +---rx231
         |       r_lvd_rx231.h
         |
+        +---rx23e-a
+        |       r_lvd_rx23e-a.h
+        |
         +---rx23t
         |       r_lvd_rx23t.h
         |

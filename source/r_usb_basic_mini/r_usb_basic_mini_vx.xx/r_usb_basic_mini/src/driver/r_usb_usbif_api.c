@@ -1,41 +1,37 @@
-/*******************************************************************************
+/***********************************************************************************************************************
  * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only
- * intended for use with Renesas products. No other uses are authorized. This
- * software is owned by Renesas Electronics Corporation and is protected under
- * all applicable laws, including copyright laws.
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
  * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
- * LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
- * TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
- * ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
- * FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
- * ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
- * BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software
- * and to discontinue the availability of this software. By using this software,
- * you agree to the additional terms and conditions found by accessing the
+* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+* this software. By using this software, you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2016(2019) Renesas Electronics Corporation. All rights reserved.
- *****************************************************************************/
-/******************************************************************************
+*
+* Copyright (C) 2016(2020) Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
 * File Name    : r_usb_usbif_api.c
-* Description  : USB Host and Peripheral Driver API code. 
-*                HCD(Host Control Driver) PCD (Peripheral Control Driver)
- ******************************************************************************/
-/*******************************************************************************
+* Description  : USB Host and Peripheral Driver API code. HCD(Host Control Driver) PCD (Peripheral Control Driver)
+***********************************************************************************************************************/
+/**********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 30.09.2015 1.00 First Release
 *         : 30.09.2017 1.22 Update Argument Checking
-*         : 30.11.2018 1.10    Supporting Smart Configurator
-*         : 31.05.2019 1.11    Added support for GNUC and ICCRX.
-*******************************************************************************/
+*         : 30.11.2018 1.10 Supporting Smart Configurator
+*         : 31.05.2019 1.11 Added support for GNUC and ICCRX.
+*         : 30.06.2020 1.20 Added support for RTOS.
+***********************************************************************************************************************/
 
-/******************************************************************************
+/***********************************************************************************************************************
 Includes   <System Includes> , "Project Includes"
-******************************************************************************/
+***********************************************************************************************************************/
 #include <string.h>
 
 #include "r_usb_basic_mini_if.h"
@@ -43,6 +39,18 @@ Includes   <System Includes> , "Project Includes"
 #include "r_usb_reg_access.h"
 #include "r_usb_typedef.h"
 #include "r_usb_extern.h"
+
+#if USB_CFG_DTC == USB_CFG_ENABLE
+#include "r_dtc_rx_if.h"
+#endif /* USB_CFG_DTC == USB_CFG_ENABLE */
+
+#if USB_CFG_DMA == USB_CFG_ENABLE
+#include "r_dmaca_rx_if.h"
+#endif /* USB_CFG_DMA == USB_CFG_ENABLE */
+
+#if (BSP_CFG_RTOS_USED == 4)        /* Renesas RI600V4 & RI600PX */
+#include "r_usb_cstd_rtos.h"
+#endif /* (BSP_CFG_RTOS_USED == 4) */
 
 #if defined(USB_CFG_HCDC_USE)
 #include "r_usb_hcdc_mini_if.h"
@@ -56,7 +64,6 @@ Includes   <System Includes> , "Project Includes"
 #include "r_usb_hmsc_mini_if.h"
 #endif /* defined(USB_CFG_HMSC_USE) */
 
-
 #if defined(USB_CFG_PHID_USE)
 #include "r_usb_phid_mini_if.h"
 #endif /* defined(USB_CFG_PHID_USE) */
@@ -64,44 +71,52 @@ Includes   <System Includes> , "Project Includes"
 #if defined(USB_CFG_PCDC_USE)
 #include "r_usb_pcdc_mini_if.h"
 #endif /* defined(USB_CFG_PCDC_USE) */
-/*******************************************************************************
- Macro definitions
- ******************************************************************************/
-
-/*******************************************************************************
- Typedef definitions
- ******************************************************************************/
  
-/*******************************************************************************
- Private global variables and functions
- ******************************************************************************/
- 
-/*******************************************************************************
+/***********************************************************************************************************************
  Exported global variables (to be accessed by other files)
- ******************************************************************************/
-uint32_t        g_usb_read_request_size[USB_MAXPIPE_NUM + 1];
-usb_event_t     g_usb_cstd_event;
+***********************************************************************************************************************/
+#if (BSP_CFG_RTOS_USED != 0)    /* Non-OS */
+    usb_ctrl_t      g_usb_cstd_event[USB_EVENT_MAX];
+    usb_callback_t  *g_usb_apl_callback;
+    rtos_task_id_t  g_usb_default_apl_task_id;
+#else /*(BSP_CFG_RTOS_USED != 0)*/
+    usb_event_t     g_usb_cstd_event;
+    uint16_t        g_usb_hstd_is_susp_resm;
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
-usb_hutr_t       g_usb_hstd_data[USB_MAXPIPE_NUM + 1];
+usb_hutr_t          g_usb_hstd_data[USB_MAXPIPE_NUM + 1];
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
+#endif /*(BSP_CFG_RTOS_USED != 0)*/
 
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
 usb_putr_t       g_usb_pstd_data[USB_MAXPIPE_NUM + 1];
+uint16_t         g_usb_pstd_speed;
 
 #endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI */
 
 uint16_t        g_usb_cstd_usb_mode;
 uint16_t        g_usb_cstd_open_class;
-uint16_t        g_usb_hstd_is_susp_resm;
 
-/*****************************************************************************
+/***********************************************************************************************************************
+ Private global variables and functions
+***********************************************************************************************************************/
+static uint8_t  is_init = USB_NO;
+
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+
+#if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
+static uint8_t  gs_usb_suspend_ing = USB_NO;
+#endif /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
+
+static uint8_t  gs_usb_resume_ing = USB_NO;
+#endif /*(BSP_CFG_RTOS_USED != 0)*/
+
+/***********************************************************************************************************************
 * Function Name: R_USB_GetVersion
-* Description  : Returns the version of this module. The version number is
-*                encoded such that the top two bytes are the major version
-*                number and the bottom two bytes are the minor version number.
-* Arguments    : none
-* Return Value : version number
-******************************************************************************/
+ *******************************************************************************************************************//**
+ * @brief Return API version number
+ * @retval Version number
+ * @details The version number of the USB driver is returned.
+ */
 uint32_t R_USB_GetVersion (void)
 {
     uint32_t version = 0;
@@ -109,15 +124,39 @@ uint32_t R_USB_GetVersion (void)
     version = (USB_VERSION_MAJOR << 16) | USB_VERSION_MINOR;
 
     return version;
-} /* End of function R_USB_GetVersion */
+}
+/***********************************************************************************************************************
+ End of function R_USB_GetVersion
+***********************************************************************************************************************/
 
+#if (BSP_CFG_RTOS_USED != 0)    /* Use RTOS */
+/***********************************************************************************************************************
+ * Function Name   : R_USB_Callback
+ *******************************************************************************************************************//**
+ * @brief Register a callback function to be called upon completion of a USB-related event. (RTOS only)
+ * @param[in]  p_callback  Pointer to the callback function
+ * @details This function registers a callback function to be called when a USB-related event has completed.
+ * When a USB-related event has completed, the USB driver will call the callback function that has been registered 
+ * using this API.
+ * @note This API is not supported when using RX100/RX200 series MCU.
+ */
+void    R_USB_Callback(usb_callback_t *p_callback)
+{
+    g_usb_apl_callback = p_callback;
+} /* End of function R_USB_Callback() */
 
-/******************************************************************************
-Function Name   : R_USB_GetEvent
-Description     : Get event.
-Arguments       : usb_ctrl_t *p_ctrl: control structure for USB API.
-Return value    : event code.
-******************************************************************************/
+#else   /* (BSP_CFG_RTOS_USED != 0)*/
+/***********************************************************************************************************************
+ * Function Name   : R_USB_GetEvent
+ *******************************************************************************************************************//**
+ * @brief Get completed USB-related events (Non-OS only)
+ * @param[in]    p_ctrl  Pointer to usb_ctrl_t structure area
+ * @retval       Value of completed USB-related events
+ * @details This function obtains completed USB-related events.
+ * In USB host mode, the device address value of the USB device that completed 
+ * an event is specified in the usb_ctrl_t structure member (address) specified 
+ * by the event's argument. In USB peripheral mode, USB_NULL is specified in member (address). 
+ */
 usb_status_t R_USB_GetEvent (usb_ctrl_t *p_ctrl)
 {
     usb_status_t    event = USB_STS_NONE;
@@ -135,19 +174,36 @@ usb_status_t R_USB_GetEvent (usb_ctrl_t *p_ctrl)
     }
     return event;
 }  /* End of function R_USB_GetEvent() */
+#endif  /* (BSP_CFG_RTOS_USED != 0)*/
 
-
-/******************************************************************************
-Function Name   : R_USB_Open
-Description     : Start of USB Driver.
-Arguments       : usb_ctrl_t    *p_ctrl : Pointer to usb_ctrl_t structure
-                : usb_cfg_t     *p_cfg    : Pointer to usb_cfg_t structure
-Return value    : usb_err_t error code  : USB_SUCCESS,USB_ERR_NG etc.
-******************************************************************************/
+/***********************************************************************************************************************
+ * Function Name   : R_USB_Open
+ *******************************************************************************************************************//**
+ * @brief Power on the USB module and initialize the USB driver. 
+ * (This is a function to be used first when using the USB module.)
+ * @param[in]  ctrl              Pointer to usb_ctrl_t structure area
+ * @param[in]  cfg               Pointer to usb_cfg_t structure area
+ * @retval     USB_SUCCESS       Success
+ * @retval     USB_ERR_PARA      Parameter error
+ * @retval     USB_ERR_BUSY      Specified USB module now in use
+ * @details This function applies power to the USB module specified in the argument (p_ctrl).
+ */
 usb_err_t R_USB_Open (usb_ctrl_t *p_ctrl, usb_cfg_t *p_cfg)
 {
     usb_err_t       err;
-    static uint8_t  is_init = USB_NO;
+#if USB_CFG_DTC == USB_CFG_ENABLE
+    dtc_err_t   ret;
+
+#endif  /* USB_CFG_DTC == USB_CFG_ENABLE */
+
+#if USB_CFG_DMA == USB_CFG_ENABLE
+    dmaca_return_t ret;
+
+#endif  /* USB_CFG_DMA == USB_CFG_ENABLE */
+
+#if (BSP_CFG_RTOS_USED > 1)
+    usb_rtos_configuration();
+#endif /* (BSP_CFG_RTOS_USED > 1) */
 
 #if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
     /* Argument Checking */
@@ -157,21 +213,38 @@ usb_err_t R_USB_Open (usb_ctrl_t *p_ctrl, usb_cfg_t *p_cfg)
         return USB_ERR_PARA;
     }
 
-#endif /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
-
     switch (p_ctrl->type)
     {
         case USB_PCDC:
-        case USB_PHID:
-        case USB_PVND:
         case USB_PMSC:
-#if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
             if (USB_PERI != p_cfg->usb_mode)
             {
                 return USB_ERR_PARA;
             }
-#endif/* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
-            g_usb_cstd_usb_mode = USB_PERI;
+            if (USB_NULL == p_cfg->p_usb_reg)
+            {
+                return USB_ERR_PARA;
+            }
+            if (USB_FS != p_cfg->usb_speed)
+            {
+                return USB_ERR_PARA;
+            }
+        break;
+
+        case USB_PHID:
+        case USB_PVND:
+            if (USB_PERI != p_cfg->usb_mode)
+            {
+                return USB_ERR_PARA;
+            }
+            if (USB_NULL == p_cfg->p_usb_reg)
+            {
+                return USB_ERR_PARA;
+            }
+            if ((USB_FS != p_cfg->usb_speed) && (USB_LS != p_cfg->usb_speed))
+            {
+                return USB_ERR_PARA;
+            }
         break;
 
         /* Host */
@@ -179,34 +252,37 @@ usb_err_t R_USB_Open (usb_ctrl_t *p_ctrl, usb_cfg_t *p_cfg)
         case USB_HHID:
         case USB_HVND:
         case USB_HMSC:
-#if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
             if (USB_HOST != p_cfg->usb_mode)
             {
                 return USB_ERR_PARA;
             }
-#endif/* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
-            g_usb_cstd_usb_mode = USB_HOST;
+            if (USB_FS != p_cfg->usb_speed)
+            {
+                return USB_ERR_PARA;
+            }
         break;
 
         default:
-#if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
             return USB_ERR_PARA;
-#endif/* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
         break;
     }
+#endif /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
 
-    if (USB_NO == is_init)
+    if (USB_YES == is_init)
     {
-        g_usb_cstd_open_class = 0;
-        memset((void *)&g_usb_cstd_event, 0, sizeof(usb_event_t));
-        is_init = USB_YES;
+        return USB_ERR_BUSY;
     }
-    g_usb_hstd_is_susp_resm = 0;
-    memset((void *)&g_usb_read_request_size, 0, ((USB_MAXPIPE_NUM + 1) * 4));
 
+    g_usb_cstd_open_class = 0;
+    memset((void *)&g_usb_cstd_event, 0, sizeof(usb_event_t));
+    is_init = USB_YES;
+
+#if (BSP_CFG_RTOS_USED == 0)
+    g_usb_hstd_is_susp_resm = 0;
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
     memset((void *)&g_usb_hstd_data, 0, ((USB_MAXPIPE_NUM + 1) * sizeof(usb_hutr_t)));
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
+#endif /* BSP_CFG_RTOS_USED == 0 */
 
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
     memset((void *)&g_usb_pstd_data, 0, ((USB_MAXPIPE_NUM + 1) * sizeof(usb_putr_t)));
@@ -218,20 +294,57 @@ usb_err_t R_USB_Open (usb_ctrl_t *p_ctrl, usb_cfg_t *p_cfg)
         return USB_ERR_BUSY;
     }
 
+#if USB_CFG_DTC == USB_CFG_ENABLE
+    ret = R_DTC_Open();
+    if (DTC_SUCCESS != ret)
+    {
+#if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
+        return USB_ERR_PARA;
+#else /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
+        return USB_ERR_NG;
+#endif/* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
+    }
+
+#endif  /* USB_CFG_DTC == USB_CFG_ENABLE */
+
+#if USB_CFG_DMA == USB_CFG_ENABLE
+    R_DMACA_Init();
+
+#if USB_CFG_NOUSE != USB_CFG_USB0_DMA_TX
+    ret = R_DMACA_Open(USB_CFG_USB0_DMA_TX);
+    if (DMACA_SUCCESS != ret)
+    {
+#if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
+        return USB_ERR_PARA;
+#else /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
+        return USB_ERR_NG;
+#endif/* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
+    }
+#endif  /* USB_CFG_NOUSE != USB_CFG_USB0_DMA_TX */
+
+#if USB_CFG_NOUSE != USB_CFG_USB0_DMA_RX
+    ret = R_DMACA_Open(USB_CFG_USB0_DMA_RX);
+    if (DMACA_SUCCESS != ret)
+    {
+#if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
+        return USB_ERR_PARA;
+#else /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
+        return USB_ERR_NG;
+#endif/* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
+    }
+#endif  /* USB_CFG_NOUSE != USB_CFG_USB0_DMA_RX */
+
+#endif  /* USB_CFG_DMA == USB_CFG_ENABLE */
+
     usb_cpu_usbint_init();                              /* Initialized USB interrupt */
 
-    if (USB_HOST == g_usb_cstd_usb_mode)
+    if (USB_HOST == p_cfg->usb_mode)
     {
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
+        g_usb_cstd_usb_mode = USB_HOST;
         /* HCD driver open & registration */
-        usb_hstd_driver_init();                             /* HCD task, MGR task open */
+        usb_hstd_driver_init();                         /* USB driver initialization */
         hw_usb_hmodule_init ();                         /* Setting USB relation register  */
-#if defined(USB_CFG_HHID_USE)
-        if (USB_HHID == p_ctrl->type)
-        {
-            hw_usb_hset_trnensel();
-        }
-#endif  /* defined(USB_CFG_HHID_USE) */
 
 #if USB_CFG_TYPEC == USB_CFG_DISABLE
         usb_hstd_vbus_control_on();
@@ -249,55 +362,75 @@ usb_err_t R_USB_Open (usb_ctrl_t *p_ctrl, usb_cfg_t *p_cfg)
     else
     {
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
+        g_usb_cstd_usb_mode = USB_PERI;
+        g_usb_pstd_speed = p_cfg->usb_speed;
 
-#if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
-        if (USB_NULL == p_cfg->p_usb_reg)
-        {
-            return USB_ERR_PARA;
-        }
-
-#endif  /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
         usb_pstd_driver_init(p_cfg);            /* USB driver initialization */
         hw_usb_pmodule_init();                      /* Setting USB relation register  */
         if (USB_ATTACH == usb_pstd_chk_vbsts())
         {
             usb_cpu_delay_xms((uint16_t)10);
-            hw_usb_pset_dprpu();
+            if (USB_LS  == g_usb_pstd_speed)
+            {
+                hw_usb_pset_dmrpu();
+            }
+            else
+            {
+                hw_usb_pset_dprpu();
+            }
         }
-
 #endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_REPI */
     }
 
-    g_usb_cstd_open_class |= (1 << p_ctrl->type);      /* Set USB Open device class */
-    if (USB_PCDC == p_ctrl->type)
+    if (USB_SUCCESS == err)
     {
-        g_usb_cstd_open_class |= (1 << USB_PCDCC);   /* Set USB Open device class */
-    }
-    if (USB_HCDC == p_ctrl->type)
-    {
-        g_usb_cstd_open_class |= (1 << USB_HCDCC);   /* Set USB Open device class */
+#if (BSP_CFG_RTOS_USED != 0)
+        rtos_get_task_id(&g_usb_default_apl_task_id);
+#endif /* BSP_CFG_RTOS_USED != 0 */
+        g_usb_cstd_open_class |= (1 << p_ctrl->type);      /* Set USB Open device class */
+        if (USB_PCDC == p_ctrl->type)
+        {
+            g_usb_cstd_open_class |= (1 << USB_PCDCC);   /* Set USB Open device class */
+        }
+        if (USB_HCDC == p_ctrl->type)
+        {
+            g_usb_cstd_open_class |= (1 << USB_HCDCC);   /* Set USB Open device class */
+        }
     }
 
     return err;
-} /* End of function R_USB_Open */
+}
+/***********************************************************************************************************************
+ End of function R_USB_Open
+***********************************************************************************************************************/
 
-/******************************************************************************
-Function Name   : R_USB_Close
-Description     : End of USB Driver.
-Arguments       : none
-Return value    : usb_err_t error code  : USB_SUCCESS,USB_ERR_NG etc.
-******************************************************************************/
+/***********************************************************************************************************************
+ * Function Name   : R_USB_Close
+ *******************************************************************************************************************//**
+ * @brief Power off USB module.
+ * @param[in]  p_ctrl              Pointer to usb_ctrl_t structure area
+ * @retval     USB_SUCCESS         Success
+ * @retval     USB_ERR_PARA        Parameter error
+ * @retval     USB_ERR_NOT_OPEN    USB module is not open.
+ * @details This function applies power to the USB module specified in the argument (p_ctrl).
+ * @note The argument (p_ctrl) is not supported when using RX100/RX200 series MCU.
+ */
 usb_err_t R_USB_Close (void)
 {
     usb_err_t   ret_code;
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
     uint8_t     devclass = USB_IFCLS_NOT;
-#endif
+#endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
+
+#if (BSP_CFG_RTOS_USED > 1)
+    usb_rtos_unconfiguration();
+#endif /* #if (BSP_CFG_RTOS_USED > 1) */
 
     ret_code = usb_module_stop();
-
     if (USB_SUCCESS == ret_code)
     {
+        is_init = USB_NO;
+
         if (USB_HOST == g_usb_cstd_usb_mode)
         {
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
@@ -347,21 +480,29 @@ usb_err_t R_USB_Close (void)
     g_usb_cstd_open_class  = 0;
 
     return ret_code;
-} /* End of function R_USB_Close */
+}
+/***********************************************************************************************************************
+ End of function R_USB_Close
+***********************************************************************************************************************/
 
-
-/******************************************************************************
-Function Name   : R_USB_Read
-Description     : USB Data Receive process.
-Arguments       : usb_ctrl_t    *p_ctrl     : Pointer to usb_ctrl_t structure
-                : uint8_t       *p_buf        : Pointer to the data buffer areatransfer data address
-                : uint32_t      size        : Read size
-Return value    : usb_err_t error code      : USB_SUCCESS,USB_ERR_NG etc.
-******************************************************************************/
+/***********************************************************************************************************************
+ * Function Name   : R_USB_Read
+ *******************************************************************************************************************//**
+ * @brief  USB data read request.
+ * @param[in]  p_ctrl            Pointer to usb_ctrl_t structure area
+ * @param[out] p_buf             Pointer to area that stores read data
+ * @param[in]  size              Read request size
+ * @retval     USB_SUCCESS       Successfully completed (Data read request completed)
+ * @retval     USB_ERR_PARA      Parameter error
+ * @retval     USB_ERR_BUSY      Data receive request already in process for USB device with same device address
+ * @retval     USB_ERR_NG        Other error
+ * @details Requests USB data read.The read data is stored in the area specified by argument (p_buf)
+ */
 usb_err_t R_USB_Read (usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint32_t size)
 {
     usb_info_t  info;
     usb_er_t    err;
+    usb_err_t   result = USB_ERR_NG;
 
 #if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
     if (((USB_NULL == p_ctrl) || (USB_NULL == p_buf)) || (USB_NULL == size))
@@ -387,11 +528,8 @@ usb_err_t R_USB_Read (usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint32_t size)
 #endif  /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
 
     R_USB_GetInformation(&info);
-    if (USB_STS_CONFIGURED != info.status)
+    if (USB_STS_CONFIGURED == info.status)
     {
-        return USB_ERR_NG;
-    }
-
     if (USB_REQUEST == p_ctrl->type)
     {
         err = usb_cstd_ctrl_receive(p_ctrl, p_buf, size);
@@ -403,33 +541,42 @@ usb_err_t R_USB_Read (usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint32_t size)
 
     if (USB_OK == err)
     {
-        return USB_SUCCESS;
+            result = USB_SUCCESS;
     }
     else if (USB_QOVR == err)
     {
-        return USB_ERR_BUSY;
+            result = USB_ERR_BUSY;
     }
     else
     {
         /* Do Nothing */
     }
+    }
+    return result;
+}
+/***********************************************************************************************************************
+ End of function R_USB_Read
+***********************************************************************************************************************/
 
-    return USB_ERR_NG;
-} /* End of function R_USB_Read */
 
-
-/******************************************************************************
-Function Name   : R_USB_Write
-Description     : USB Data send process.
-Arguments       : usb_ctrl_t    *p_ctrl     : Pointer to usb_ctrl_t structure
-                : uint8_t       *p_buf        : Pointer to the data buffer areatransfer data address
-                : uint32_t      size        : Write size
-Return value    : usb_err_t error code      : USB_SUCCESS,USB_ERR_NG etc.
-******************************************************************************/
+/***********************************************************************************************************************
+ * Function Name   : R_USB_Write
+ *******************************************************************************************************************//**
+ * @brief  USB data write request.
+ * @param[in]  p_ctrl          Pointer to usb_ctrl_t structure area
+ * @param[in]  p_buf           Pointer to area that stores read data
+ * @param[in]  size            Write request size
+ * @retval     USB_SUCCESS     Successfully completed (Data write request completed)
+ * @retval     USB_ERR_PARA    Parameter error
+ * @retval     USB_ERR_BUSY    Data write request already in process for USB device with same device address
+ * @retval     USB_ERR_NG      Other error
+ * @details    Requests USB data write.Stores write data in area specified by argument (p_buf).
+ */
 usb_err_t R_USB_Write (usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint32_t size)
 {
     usb_info_t  info;
     usb_er_t    err;
+    usb_err_t   result = USB_ERR_NG;
 
 #if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
     if ((USB_NULL == p_ctrl) || ((USB_NULL == p_buf) && (0 != size)))
@@ -455,11 +602,8 @@ usb_err_t R_USB_Write (usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint32_t size)
 #endif  /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
 
     R_USB_GetInformation(&info);
-    if (USB_STS_CONFIGURED != info.status)
+    if (USB_STS_CONFIGURED == info.status)
     {
-        return USB_ERR_NG;
-    }
-
     if (USB_REQUEST == p_ctrl->type)
     {
         err = usb_cstd_ctrl_send(p_ctrl, p_buf, size);
@@ -471,29 +615,38 @@ usb_err_t R_USB_Write (usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint32_t size)
 
     if (USB_OK == err)
     {
-        return USB_SUCCESS;
+            result = USB_SUCCESS;
     }
     else if (USB_QOVR == err)
     {
-        return USB_ERR_BUSY;
+            result = USB_ERR_BUSY;
     }
     else
     {
         /* error */
         /* Do Nothing */
     }
+    }
+    return result;
+}
+/***********************************************************************************************************************
+ End of function R_USB_Write
+***********************************************************************************************************************/
 
-    return USB_ERR_NG;
-} /* End of function R_USB_Write */
 
-
-/******************************************************************************
-Function Name   : R_USB_Stop
-Description     : USB Transfer stop
-Arguments       : usb_ctrl_t    *p_ctrl : Pointer to usb_ctrl_t structure
-                : uint16_t      type    : Read(0)/Write(1)
-Return value    : usb_err_t error code  : USB_SUCCESS,USB_ERR_NG etc.
-******************************************************************************/
+/***********************************************************************************************************************
+ * Function Name   : R_USB_Stop
+ *******************************************************************************************************************//**
+ * @brief USB data read/write stop request
+ * @param[in]  p_ctrl          Pointer to usb_ctrl_t structure area
+ * @param[in]  type            Receive (USB_READ) or send (USB_WRITE)
+ * @retval     USB_SUCCESS     Successfully completed (stop completed)
+ * @retval     USB_ERR_PARA    Parameter error
+ * @retval     USB_ERR_NG      Other error
+ * @details This function is used to request a data read/write transfer be terminated when a data read/write transfer 
+ * is performing. To stop a data read, set USB_READ as the argument (type); to stop a data write, 
+ * specify USB_WRITE as the argument (type).
+ */
 usb_err_t    R_USB_Stop (usb_ctrl_t *p_ctrl, uint16_t type)
 {
     usb_info_t  info;
@@ -544,6 +697,10 @@ usb_err_t    R_USB_Stop (usb_ctrl_t *p_ctrl, uint16_t type)
     {
         return USB_SUCCESS;
     }
+    else if (USB_QOVR == err)
+    {
+        return USB_ERR_BUSY;
+    }
     else
     {
         /* error */
@@ -551,15 +708,25 @@ usb_err_t    R_USB_Stop (usb_ctrl_t *p_ctrl, uint16_t type)
     }
 
     return USB_ERR_NG;
-} /* End of function R_USB_Stop */
+}
+/***********************************************************************************************************************
+ End of function R_USB_Stop
+***********************************************************************************************************************/
 
-
-/******************************************************************************
-Function Name   : R_USB_Suspend
-Description     : USB Suspend process for USB Host.
-Arguments       : none
-Return value    : usb_err_t error code  : USB_SUCCESS,USB_ERR_NG etc.
-******************************************************************************/
+/***********************************************************************************************************************
+ * Function Name   : R_USB_Suspend
+ *******************************************************************************************************************//**
+ * @brief Suspend signal transmission
+ * @param[in]  p_ctrl   Pointer to usb_ctrl_t structure area
+ * @retval     USB_SUCCESS     Successfully completed
+ * @retval     USB_ERR_PARA    Parameter error
+ * @retval     USB_ERR_BUSY    During a suspend request to the specified USB module, or when the USB module is already 
+ * in the suspended state 
+ * @retval     USB_ERR_NG      Other error
+ * @details This function sends a SUSPEND signal from the USB module assigned to the member (module) 
+ * of the usb_crtl_t structure.
+ * @note The argument (p_ctrl) is not supported when using RX100/RX200 series MCU.
+ */
 usb_err_t    R_USB_Suspend (void)
 {
 #if USB_CFG_MODE == USB_CFG_PERI
@@ -584,6 +751,26 @@ usb_err_t    R_USB_Suspend (void)
     R_USB_GetInformation(&info);
     if (USB_STS_CONFIGURED == info.status)
     {
+#if (BSP_CFG_RTOS_USED != 0)    /* RTOS */
+        if (USB_YES == gs_usb_suspend_ing)
+        {
+            return USB_ERR_BUSY;
+        }
+        else
+        {
+            gs_usb_suspend_ing = USB_YES;
+        }
+
+        err = usb_hstd_change_device_state((usb_cb_t)&usb_hstd_suspend_complete,
+                                           USB_DO_GLOBAL_SUSPEND, USB_DEVICEADDR);
+
+        if (USB_OK != err)
+        {
+            ret_code = USB_ERR_NG;
+        }
+
+        gs_usb_suspend_ing = USB_NO;
+#else   /* (BSP_CFG_RTOS_USED != 0) */
         if (USB_NULL != (g_usb_hstd_is_susp_resm & (1 << USB_STS_SUSPEND)))
         {
             return USB_ERR_BUSY;
@@ -598,6 +785,7 @@ usb_err_t    R_USB_Suspend (void)
         {
             ret_code = USB_ERR_NG;
         }
+#endif  /* (BSP_CFG_RTOS_USED != 0) */
     }
     else if (USB_STS_SUSPEND == info.status)
     {
@@ -611,17 +799,26 @@ usb_err_t    R_USB_Suspend (void)
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 
     return ret_code;
-
 #endif /* USB_CFG_MODE == USB_CFG_PERI */
-} /* End of function R_USB_Suspend */
+}
+/***********************************************************************************************************************
+ End of function R_USB_Suspend
+***********************************************************************************************************************/
 
-
-/******************************************************************************
-Function Name   : R_USB_Resume
-Description     : USB Resume process(Host) and Remote wakeup process(Peri).
-Arguments       : none
-Return value    : usb_err_t error code  : USB_SUCCESS,USB_ERR_NG etc.
-******************************************************************************/
+/***********************************************************************************************************************
+ * Function Name   : R_USB_Resume
+ *******************************************************************************************************************//**
+ * @brief Resume signal transmission
+ * @param[in]  p_ctrl              Pointer to usb_ctrl_t structure area
+ * @retval     USB_SUCCESS         Successfully completed
+ * @retval     USB_ERR_PARA        Parameter error
+ * @retval     USB_ERR_BUSY        During a resume request processing
+ * @retval     USB_ERR_NOT_SUSPEND USB device is not in the SUSPEND state
+ * @retval     USB_ERR_NG          USB device is not in a state that can request the remote wakeup (USB peripheral mode only)
+ * @details This function sends a RESUME signal from the USB module assigned to the member (module) of 
+ * the usb_ctrl_t structure.
+ * @note The argument (p_ctrl) is not supported when using RX100/RX200 series MCU.
+ */
 usb_err_t    R_USB_Resume (void)
 {
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
@@ -630,6 +827,15 @@ usb_err_t    R_USB_Resume (void)
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
     usb_err_t   ret_code = USB_SUCCESS;
     usb_info_t  info;
+
+#if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
+  #if !defined(USB_CFG_PHID_USE)
+    if (USB_PERI == g_usb_cstd_usb_mode)
+    {
+        return USB_ERR_PARA;
+    }
+  #endif /* !defined(USB_CFG_PHID_USE) */
+#endif  /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
 
     R_USB_GetInformation(&info);
     if (USB_STS_SUSPEND != info.status)
@@ -641,6 +847,26 @@ usb_err_t    R_USB_Resume (void)
     {
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
 
+
+#if (BSP_CFG_RTOS_USED != 0)    /* RTOS */
+        if (USB_YES == gs_usb_resume_ing)
+        {
+            return USB_ERR_BUSY;
+        }
+        else
+        {
+            gs_usb_resume_ing = USB_YES;
+        }
+
+        err = usb_hstd_change_device_state((usb_cb_t)&usb_hstd_resume_complete,
+                                         USB_DO_GLOBAL_RESUME, USB_DEVICEADDR);
+        if (USB_OK != err)
+        {
+            ret_code = USB_ERR_NG;
+        }
+
+        gs_usb_resume_ing = USB_NO;
+#else   /* (BSP_CFG_RTOS_USED != 0) */
 
         if (USB_NULL != (g_usb_hstd_is_susp_resm & (1 << USB_STS_RESUME)))
         {
@@ -656,6 +882,9 @@ usb_err_t    R_USB_Resume (void)
         {
             ret_code = USB_ERR_NG;
         }
+
+#endif  /* (BSP_CFG_RTOS_USED != 0) */
+
 #else   /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
         ret_code = USB_ERR_NG;
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
@@ -663,10 +892,20 @@ usb_err_t    R_USB_Resume (void)
     else
     {
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
+
+#if (BSP_CFG_RTOS_USED != 0)    /* RTOS */
+        if (USB_YES == gs_usb_resume_ing)
+        {
+            return USB_ERR_BUSY;
+        }
+        else
+        {
+            gs_usb_resume_ing = USB_YES;
+        }
         /* Support remote wakeup ? */
         if (USB_TRUE == g_usb_pstd_remote_wakeup)
         {
-            usb_pstd_change_device_state(USB_DO_REMOTEWAKEUP, USB_NULL, (usb_pcb_t)usb_pstd_dummy_function);
+            usb_pstd_change_device_state(USB_DO_REMOTEWAKEUP, USB_NULL, (usb_cb_t)usb_pstd_dummy_function);
             switch (g_usb_pstd_remote_wakeup_state)
             {
                 case USB_OK:
@@ -687,22 +926,59 @@ usb_err_t    R_USB_Resume (void)
         {
             ret_code = USB_ERR_NG;
         }
-#else   /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_PERI */
-        ret_code = USB_ERR_NG;
-#endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_PERI */
+        gs_usb_resume_ing = USB_NO;
 
+#else   /* (BSP_CFG_RTOS_USED != 0) */
+        /* Support remote wakeup ? */
+        if (USB_TRUE == g_usb_pstd_remote_wakeup)
+        {
+            usb_pstd_change_device_state(USB_DO_REMOTEWAKEUP, USB_NULL, (usb_cb_t)usb_pstd_dummy_function);
+            switch (g_usb_pstd_remote_wakeup_state)
+            {
+                case USB_OK:
+                    ret_code = USB_SUCCESS;
+                break;
+
+                case USB_QOVR:
+                    ret_code = USB_ERR_NOT_SUSPEND;
+                break;
+
+                case USB_ERROR:
+                default:
+                    ret_code = USB_ERR_NG;
+                break;
+            }
+        }
+        else
+        {
+            ret_code = USB_ERR_NG;
+        }
+
+#endif  /* (BSP_CFG_RTOS_USED != 0) */
+
+#else   /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI */
+        ret_code = USB_ERR_NG;
+#endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI */
     }
 
     return ret_code;
-} /* End of function R_USB_Resume */
+}
+/***********************************************************************************************************************
+ End of function R_USB_Resume
+***********************************************************************************************************************/
 
-
-/******************************************************************************
-Function Name   : R_USB_VbusSetting
-Description     : Contol of USB VBUS.(USB Host only)
-Arguments       : uint16_t      state   : HI/LOW assertion
-Return value    : usb_err_t error code  : USB_SUCCESS,USB_ERR_NG etc.
-******************************************************************************/
+/***********************************************************************************************************************
+ * Function Name   : R_USB_VbusSetting
+ *******************************************************************************************************************//**
+ * @brief VBUS Supply Start/Stop Specification
+ * @param[in]  p_ctrl          Pointer to usb_ctrl_t structure area
+ * @param[in]  state           VBUS supply start/stop specification
+ * @retval     USB_SUCCESS     Successful completion (VBUS supply start/stop completed)
+ * @retval     USB_ERR_PARA    Parameter error
+ * @retval     USB_ERR_NG      Other Error
+ * @details Specifies starting or stopping the VBUS supply.
+ * @note The argument (p_ctrl) is not supported when using RX100/RX200 series MCU.
+ */
 usb_err_t   R_USB_VbusSetting (uint16_t state)
 {
 
@@ -715,12 +991,14 @@ usb_err_t   R_USB_VbusSetting (uint16_t state)
         return USB_ERR_NG;              /* Support Host only. */
     }
 
-    /* Argument Checking */
+#if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
 
     if ((USB_ON != state) && (USB_OFF != state))
     {
        return USB_ERR_PARA;
     }
+
+#endif  /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
 
     if (USB_ON == state)
     {
@@ -733,56 +1011,22 @@ usb_err_t   R_USB_VbusSetting (uint16_t state)
 
     return USB_SUCCESS;
 #endif /* USB_CFG_MODE == USB_CFG_PERI */
-} /* End of function R_USB_VbusSetting */
+}
+/***********************************************************************************************************************
+ End of function R_USB_VbusSetting
+***********************************************************************************************************************/
 
-
-/******************************************************************************
-Function Name   : R_USB_PullUp
-Description     : Contol of USB D+/D- line pull-up.(USB Peripheral only)
-Arguments       : uint16_t      state   : USB_ON(Enable)/USB_OFF(Disable)
-Return value    : usb_err_t error code  : USB_SUCCESS,USB_ERR_NG etc.
-******************************************************************************/
-usb_err_t   R_USB_PullUp(uint8_t state)
-{
-
-#if (USB_CFG_MODE == USB_CFG_HOST)
-    return USB_ERR_NG;
-#else /* USB_CFG_MODE == USB_CFG_HOST */
-
-    if (USB_HOST == g_usb_cstd_usb_mode) 
-    {
-        return USB_ERR_NG;              /* Support Host only. */
-    }
-
-    /* Argument Checking */
-
-    if ((USB_ON != state) && (USB_OFF != state))
-    {
-       return USB_ERR_PARA;
-    }
-
-    if (USB_ON == state)
-    {
-        hw_usb_pset_dprpu();
-    }
-    else
-    {
-        hw_usb_pclear_dprpu();
-    }
-
-    return USB_SUCCESS;
-#endif /* USB_CFG_MODE == USB_CFG_HOST */
-} /* End of function R_USB_GetPipeInfo */
-/******************************************************************************
- End of function R_USB_PullUp
- ******************************************************************************/
-
-/******************************************************************************
-Function Name   : R_USB_GetInformation
-Description     : Get USB Informatio.(Device class,Connect speed,Device status)
-Arguments       : usb_info_t    *p_info : Pointer to usb_info_t structure
-Return value    : usb_err_t error code  : USB_SUCCESS,USB_ERR_NG etc.
-******************************************************************************/
+/***********************************************************************************************************************
+ * Function Name   : R_USB_GetInformation
+ *******************************************************************************************************************//**
+ * @brief Get USB device information
+ * @param[in]  p_info          Pointer to usb_info_t structure area
+ * @retval     USB_SUCCESS     Successful completion
+ * @retval     USB_ERR_PARA    Parameter error
+ * @retval     USB_ERR_NG      Other Error
+ * @details This function gets the USB device information.
+ * @note The argument (p_ctrl) is not supported when using RX100/RX200 series MCU.
+ */
 usb_err_t   R_USB_GetInformation (usb_info_t *p_info)
 {
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
@@ -802,7 +1046,6 @@ usb_err_t   R_USB_GetInformation (usb_info_t *p_info)
     {
         return USB_ERR_PARA;
     }
-
 
 #endif  /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
 
@@ -836,9 +1079,6 @@ usb_err_t   R_USB_GetInformation (usb_info_t *p_info)
             case USB_NOCONNECT:
                 p_info->speed  = USB_NULL;
             break;
-            case USB_HSCONNECT:
-                p_info->speed  = USB_HS;
-            break;
             case USB_FSCONNECT:
                 p_info->speed  = USB_FS;
             break;
@@ -853,6 +1093,29 @@ usb_err_t   R_USB_GetInformation (usb_info_t *p_info)
         /* Set USB device state */
         switch (g_usb_hcd_dev_info.state)
         {
+#if (BSP_CFG_RTOS_USED != 0)                            /* Use RTOS */
+            case USB_POWERED:                           /* Power state  */
+                p_info->status = USB_STS_POWERED;
+                break;
+            case USB_DEFAULT:                           /* Default state  */
+                p_info->status = USB_STS_DEFAULT;
+                break;
+            case USB_ADDRESS:                           /* Address state  */
+                p_info->status = USB_STS_ADDRESS;
+                break;
+            case USB_CONFIGURED:                        /* Configured state  */
+                p_info->status = USB_STS_CONFIGURED;
+                break;
+            case USB_SUSPENDED:                         /* Suspend state */
+                p_info->status = USB_STS_SUSPEND;
+                break;
+            case USB_DETACHED:                          /* Disconnect(VBUSon) state */
+                p_info->status = USB_STS_DETACH;
+                break;
+            default:                                    /* Error */
+                p_info->status = USB_NULL;
+                break;
+#else /* (BSP_CFG_RTOS_USED != 0) */
             case USB_DO_GLOBAL_SUSPEND:
             case USB_DO_SELECTIVE_SUSPEND:
                 p_info->status = USB_STS_SUSPEND;
@@ -865,6 +1128,7 @@ usb_err_t   R_USB_GetInformation (usb_info_t *p_info)
             default:
                 p_info->status = g_usb_hcd_dev_info.state;
             break;
+#endif /* (BSP_CFG_RTOS_USED != 0) */
         }
 
         /* Set USB Peri BC port state */
@@ -875,7 +1139,7 @@ usb_err_t   R_USB_GetInformation (usb_info_t *p_info)
         }
         else
         {
-            p_info->port   = USB_SDP;               /* USB_SDP/USB_CDP/USB_DCP */
+            p_info->port   = USB_SDP;                   /* USB_SDP/USB_CDP/USB_DCP */
         }
 
 #else   /* #if USB_CFG_BC == USB_CFG_ENABLE */
@@ -893,9 +1157,6 @@ usb_err_t   R_USB_GetInformation (usb_info_t *p_info)
         {
             case USB_NOCONNECT:
                 p_info->speed  = USB_NULL;
-            break;
-            case USB_HSCONNECT:
-                p_info->speed  = USB_HS;
             break;
             case USB_FSCONNECT:
                 p_info->speed  = USB_FS;
@@ -929,28 +1190,36 @@ usb_err_t   R_USB_GetInformation (usb_info_t *p_info)
                 p_info->status = USB_STS_SUSPEND;
             break;
             default:                                    /* Error */
-            break;                                  /* p_info->status = USB_STS_ERROR; */
+            break;                                      /* p_info->status = USB_STS_ERROR; */
         }
 #if USB_CFG_BC == USB_CFG_ENABLE
-        p_info->port   = g_usb_pstd_bc_detect;           /* USB_SDP/USB_CDP/USB_DCP */
+        p_info->port   = g_usb_pstd_bc_detect;          /* USB_SDP/USB_CDP/USB_DCP */
 #else   /* USB_CFG_BC == USB_CFG_ENABLE */
-        p_info->port   = USB_SDP;                   /* USB_SDP */
+        p_info->port   = USB_SDP;                       /* USB_SDP */
 #endif  /* USB_CFG_BC == USB_CFG_ENABLE */
 
 #endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI */
     }
     return USB_SUCCESS;
-} /* End of function R_USB_GetInformation */
+}
+/***********************************************************************************************************************
+ End of function R_USB_GetInformation
+***********************************************************************************************************************/
 
-
-/******************************************************************************
-Function Name   : R_USB_PipeRead
-Description     : USB Data receive process for Vendor class.
-Arguments       : usb_ctrl_t    *p_ctrl : Pointer to usb_ctrl_t structure
-                : uint8_t       *p_buf  : Pointer to the data buffer area
-                : uint32_t      size    : Read size
-Return value    : usb_err_t error code  : USB_SUCCESS,USB_ERR_NG etc.
-******************************************************************************/
+/***********************************************************************************************************************
+ * Function Name   : R_USB_PipeRead
+ *******************************************************************************************************************//**
+ * @brief Request data read via specified pipe
+ * @param[in]  p_ctrl          Pointer to usb_ctrl_t structure area
+ * @param[out] p_buf           Pointer to area that stores data
+ * @param[in]  size            Read request size
+ * @retval     USB_SUCCESS     Successful completion
+ * @retval     USB_ERR_PARA    Parameter error
+ * @retval     USB_ERR_BUSY    Specifed pipe now handling data receive/send request
+ * @retval     USB_ERR_NG      Other Error
+ * @details This function requests a data read via the pipe specified in the argument. 
+ * The read data is stored in the area specified in the argument (p_buf).
+ */
 usb_err_t  R_USB_PipeRead (usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint32_t size)
 {
 #if !defined(USB_CFG_HVND_USE) && !defined(USB_CFG_PVND_USE)
@@ -958,6 +1227,17 @@ usb_err_t  R_USB_PipeRead (usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint32_t size)
 
 #else   /* !defined(USB_CFG_HVND_USE) && !defined(USB_CFG_PVND_USE) */
     usb_err_t   ret_code = USB_ERR_NG;
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+    usb_utr_t   tran_data;
+    usb_utr_t   *p_tran_data;
+#else  /* BSP_CFG_RTOS_USED != 0 */
+#if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
+    usb_utr_t   *p_tran_data;
+#else  /* ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI) */
+    usb_sutr_t   *p_tran_data;
+#endif /* ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI) */
+#endif /* BSP_CFG_RTOS_USED != 0 */
+
     usb_er_t    err;
     usb_info_t  info;
 
@@ -973,90 +1253,110 @@ usb_err_t  R_USB_PipeRead (usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint32_t size)
         return USB_ERR_PARA;
     }
 
-    if (USB_NULL == (g_usb_cstd_open_class & (1 << p_ctrl->type)))           /* Check USB Open device class */
-    {
-        return USB_ERR_PARA;
-    }
-
 #endif  /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
 
     R_USB_GetInformation(&info);
-    if (USB_STS_CONFIGURED != info.status)
+    if (USB_STS_CONFIGURED == info.status)
     {
-        return USB_ERR_NG;
-    }
+        /* PIPE Transfer set */
+        if (USB_HOST == g_usb_cstd_usb_mode)
+        {
+    #if !defined(USB_CFG_HVND_USE)
+            return USB_ERR_NG;
+    #else /* !defined(USB_CFG_HVND_USE) */
 
-    /* PIPE Transfer set */
-    if (USB_HOST == g_usb_cstd_usb_mode)
-    {
-#if !defined(USB_CFG_HVND_USE)
-        return USB_ERR_NG;
-#else /* !defined(USB_CFG_HVND_USE) */
-        g_usb_hstd_data[p_ctrl->pipe].pipenum     = p_ctrl->pipe;           /* Pipe No */
-        g_usb_hstd_data[p_ctrl->pipe].p_tranadr   = p_buf;                  /* Data address */
-        g_usb_hstd_data[p_ctrl->pipe].tranlen     = size;                   /* Data Size */
-        g_usb_hstd_data[p_ctrl->pipe].setup       = USB_NULL;
-        g_usb_hstd_data[p_ctrl->pipe].complete    = usb_hstd_read_complete;      /* Callback function */
-        g_usb_read_request_size[p_ctrl->pipe] = size;
-        err = usb_hstd_transfer_start(&g_usb_hstd_data[p_ctrl->pipe]);      /* USB Transfer Start */
+    #if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+            p_tran_data = (usb_utr_t *)&tran_data;
+                p_tran_data->keyword     = p_ctrl->pipe;            /* Pipe No */
+            p_tran_data->p_setup     = USB_NULL;
+            p_tran_data->complete    = usb_hvnd_read_complete;      /* Callback function */
+    #else  /* BSP_CFG_RTOS_USED != 0 */
+            p_tran_data = (usb_sutr_t *)&g_usb_hstd_data[p_ctrl->pipe];
+            p_tran_data->pipenum     = p_ctrl->pipe;                /* Pipe No */
+            p_tran_data->setup       = USB_NULL;
+            p_tran_data->complete    = usb_hstd_read_complete;      /* Callback function */
+    #endif /* BSP_CFG_RTOS_USED != 0 */
+            p_tran_data->p_tranadr   = p_buf;                       /* Data address */
+            p_tran_data->tranlen     = size;                        /* Data Size */
+            p_tran_data->read_req_len = size;                       /* Data Size */
+            err = usb_hstd_transfer_start(p_tran_data);             /* USB Transfer Start */
+    #endif /* defined(USB_CFG_HVND_USE) */
+        }
+        else
+        {
+    #if !defined(USB_CFG_PVND_USE)
+            return USB_ERR_NG;
+    #else /* !defined(USB_CFG_PVND_USE) */
+    #if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+            p_tran_data = (usb_utr_t *)&tran_data;
+    #else  /* BSP_CFG_RTOS_USED != 0 */
+            p_tran_data = (usb_utr_t *)&g_usb_pstd_data[p_ctrl->pipe];
+    #endif /* BSP_CFG_RTOS_USED != 0 */
+            p_tran_data->keyword    = p_ctrl->pipe;             /* Pipe No */
+            p_tran_data->p_tranadr  = p_buf;                    /* Data address */
+            p_tran_data->tranlen    = size;                     /* Data Size */
+            p_tran_data->complete   = (usb_cb_t)&usb_pstd_read_complete;  /* Callback function */
+            p_tran_data->read_req_len = size;                   /* Data Size */
+            err = usb_pstd_transfer_start(p_tran_data);         /* USB Transfer Start */
+    #endif /* defined(USB_CFG_PVND_USE) */
+        }
 
-#endif /* defined(USB_CFG_HVND_USE) */
-    }
-    else
-    {
-#if !defined(USB_CFG_PVND_USE)
-        return USB_ERR_NG;
-#else /* !defined(USB_CFG_PVND_USE) */
-        g_usb_pstd_data[p_ctrl->pipe].keyword    = p_ctrl->pipe;            /* Pipe No */
-        g_usb_pstd_data[p_ctrl->pipe].p_tranadr  = p_buf;                   /* Data address */
-        g_usb_pstd_data[p_ctrl->pipe].tranlen    = size;                    /* Data Size */
-        g_usb_pstd_data[p_ctrl->pipe].complete   = (usb_pcb_t)&usb_pstd_read_complete;  /* Callback function */
-
-        g_usb_read_request_size[p_ctrl->pipe] = size;
-        err = usb_pstd_transfer_start(&g_usb_pstd_data[p_ctrl->pipe]);      /* USB Transfer Start */
-
-
-#endif /* defined(USB_CFG_PVND_USE) */
-    }
-
-    if (USB_OK == err)
-    {
-        ret_code = USB_SUCCESS;
-    }
-    else if (USB_QOVR == err)
-    {
-        ret_code = USB_ERR_BUSY;
-    }
-    else
-    {
-        ret_code = USB_ERR_NG;
+        if (USB_OK == err)
+        {
+            ret_code = USB_SUCCESS;
+        }
+        else if (USB_QOVR == err)
+        {
+            ret_code = USB_ERR_BUSY;
+        }
+        else
+        {
+        }
     }
 
     return ret_code;
 #endif   /* !defined(USB_CFG_HVND_USE) && !defined(USB_CFG_PVND_USE) */
-} /* End of function R_USB_PipeRead */
+}
+/***********************************************************************************************************************
+ End of function R_USB_PipeRead
+***********************************************************************************************************************/
 
-
-/******************************************************************************
-Function Name   : R_USB_PipeWrite
-Description     : USB Data send process for Vendor class.
-Arguments       : usb_ctrl_t    *p_ctrl : Pointer to usb_ctrl_t structure
-                : uint8_t       *p_buf  : Pointer to the data buffer area
-                : uint32_t      size    : Write size
-Return value    : usb_err_t error code  : USB_SUCCESS,USB_ERR_NG etc.
-******************************************************************************/
+/***********************************************************************************************************************
+ * Function Name   : R_USB_PipeWrite
+ *******************************************************************************************************************//**
+ * @brief Request data write to specified pipe
+ * @param[in]  p_ctrl          Pointer to usb_ctrl_t structure area
+ * @param[in]  p_buf           Pointer to area that write stores data
+ * @param[in]  size            Write request size
+ * @retval     USB_SUCCESS     Successful completion
+ * @retval     USB_ERR_PARA    Parameter error
+ * @retval     USB_ERR_BUSY    Specifed pipe now handling data receive/send request
+ * @retval     USB_ERR_NG      Other Error
+ * @details This function requests a data write. The write data is stored in the area specified in the argument (p_buf).
+ */
 usb_err_t  R_USB_PipeWrite (usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint32_t size)
 {
 #if !defined(USB_CFG_HVND_USE) && !defined(USB_CFG_PVND_USE)
     return USB_ERR_NG;
 
-#else
-    usb_err_t   ret_code = USB_SUCCESS;
+#else   /* !defined(USB_CFG_HVND_USE) && !defined(USB_CFG_PVND_USE) */
+
+    usb_err_t   ret_code = USB_ERR_NG;
     usb_er_t    err;
     usb_info_t  info;
-    
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+    usb_utr_t   tran_data;
+    usb_utr_t   *p_tran_data;
+#else  /* BSP_CFG_RTOS_USED != 0 */
+#if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
+    usb_utr_t   *p_tran_data;
+#else  /* ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI) */
+    usb_sutr_t   *p_tran_data;
+#endif /* ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI) */
+#endif /* BSP_CFG_RTOS_USED != 0 */
+
 #if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
-        /* Argument Checking */
+    /* Argument Checking */
     if (((USB_NULL == p_ctrl) || (USB_PIPE0 == p_ctrl->pipe)) || (USB_MAXPIPE_NUM < p_ctrl->pipe))
     {
         return USB_ERR_PARA;
@@ -1067,85 +1367,93 @@ usb_err_t  R_USB_PipeWrite (usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint32_t size)
         return USB_ERR_PARA;
     }
 
-    if (USB_NULL == (g_usb_cstd_open_class & (1 << p_ctrl->type)))           /* Check USB Open device class */
-    {
-        return USB_ERR_PARA;
-    }
-
 #endif  /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
 
     R_USB_GetInformation(&info);
-    if (USB_STS_CONFIGURED != info.status)
+    if (USB_STS_CONFIGURED == info.status)
     {
-        return USB_ERR_NG;
-    }
+        /* PIPE Transfer set */
+        if (USB_HOST == g_usb_cstd_usb_mode)
+        {
+    #if !defined(USB_CFG_HVND_USE)
+            return USB_ERR_NG;
 
-    /* PIPE Transfer set */
-    if (USB_HOST == g_usb_cstd_usb_mode)
-    {
-#if !defined(USB_CFG_HVND_USE)
-        return USB_ERR_NG;
+    #else /* !defined(USB_CFG_HVND_USE) */
+    #if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+            p_tran_data = (usb_utr_t *)&tran_data;
+            p_tran_data->keyword     = p_ctrl->pipe;                /* Pipe No */
+            p_tran_data->p_setup     = USB_NULL;
+            p_tran_data->complete    = usb_hvnd_write_complete;     /* Callback function */
+    #else  /* BSP_CFG_RTOS_USED != 0 */
+            p_tran_data = (usb_sutr_t *)&g_usb_hstd_data[p_ctrl->pipe];
+            p_tran_data->pipenum     = p_ctrl->pipe;                /* Pipe No */
+            p_tran_data->setup       = USB_NULL;
+            p_tran_data->complete    = usb_hstd_write_complete;     /* Callback function */
+    #endif /* BSP_CFG_RTOS_USED != 0 */
+            p_tran_data->p_tranadr   = p_buf;                       /* Data address */
+            p_tran_data->tranlen     = size;                        /* Data Size */
+            err = usb_hstd_transfer_start(p_tran_data);             /* USB Transfer Start */
+    #endif  /* !defined(USB_CFG_HVND_USE) */
+        }
+        else
+        {
+    #if !defined(USB_CFG_PVND_USE)
+            return USB_ERR_NG;
 
-#else /* !defined(USB_CFG_HVND_USE) */
-        g_usb_hstd_data[p_ctrl->pipe].pipenum     = p_ctrl->pipe;           /* Pipe No */
-        g_usb_hstd_data[p_ctrl->pipe].p_tranadr   = p_buf;                  /* Data address */
-        g_usb_hstd_data[p_ctrl->pipe].tranlen     = size;                   /* Data Size */
-        g_usb_hstd_data[p_ctrl->pipe].setup       = USB_NULL;
-        g_usb_hstd_data[p_ctrl->pipe].complete    = usb_hstd_write_complete;     /* Callback function */
+    #else /* !defined(USB_CFG_PVND_USE) */
+    #if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+            p_tran_data = (usb_utr_t *)&tran_data;
+    #else  /* BSP_CFG_RTOS_USED != 0 */
+            p_tran_data = (usb_utr_t *)&g_usb_pstd_data[p_ctrl->pipe];
+    #endif /* BSP_CFG_RTOS_USED != 0 */
+            p_tran_data->keyword    = p_ctrl->pipe;             /* Pipe No */
+            p_tran_data->p_tranadr  = p_buf;                    /* Data address */
+            p_tran_data->tranlen    = size;                     /* Data Size */
+            p_tran_data->complete   = (usb_cb_t)&usb_pstd_write_complete; /* Callback function */
 
-        err = usb_hstd_transfer_start(&g_usb_hstd_data[p_ctrl->pipe]);      /* USB Transfer Start */
-
-#endif  /* !defined(USB_CFG_HVND_USE) */
-    }
-    else
-    {
-#if !defined(USB_CFG_PVND_USE)
-        return USB_ERR_NG;
-
-#else /* !defined(USB_CFG_PVND_USE) */
-        g_usb_pstd_data[p_ctrl->pipe].keyword    = p_ctrl->pipe;            /* Pipe No */
-        g_usb_pstd_data[p_ctrl->pipe].p_tranadr  = p_buf;                   /* Data address */
-        g_usb_pstd_data[p_ctrl->pipe].tranlen    = size;                    /* Data Size */
-        g_usb_pstd_data[p_ctrl->pipe].complete   = (usb_pcb_t)&usb_pstd_write_complete; /* Callback function */
-
-        err = usb_pstd_transfer_start(&g_usb_pstd_data[p_ctrl->pipe]);      /* USB Transfer Start */
-#endif  /* defined(USB_CFG_PVND_USE) */
-    }
-
-    if (USB_OK == err)
-    {
-        ret_code = USB_SUCCESS;
-    }
-    else if (USB_QOVR == err)
-    {
-        ret_code = USB_ERR_BUSY;
-    }
-    else
-    {
-        ret_code = USB_ERR_NG;
+            err = usb_pstd_transfer_start(p_tran_data);         /* USB Transfer Start */
+    #endif  /* defined(USB_CFG_PVND_USE) */
+        }
+        if (USB_OK == err)
+        {
+            ret_code = USB_SUCCESS;
+        }
+        else if (USB_QOVR == err)
+        {
+            ret_code = USB_ERR_BUSY;
+        }
+        else
+        {
+        }
     }
 
     return ret_code;
 #endif /* #if !defined(USB_CFG_HVND_USE) && !defined(USB_CFG_PVND_USE) */
 
-} /* End of function R_USB_PipeWrite */
+}
+/***********************************************************************************************************************
+ End of function R_USB_PipeWrite
+***********************************************************************************************************************/
 
-
-/******************************************************************************
-Function Name   : R_USB_PipeStop
-Description     : USB transfer stop process for Vendor class.
-Arguments       : usb_ctrl_t    *p_ctrl : Pointer to usb_ctrl_t structure
-Return value    : usb_err_t error code  : USB_SUCCESS,USB_ERR_NG etc.
-******************************************************************************/
+/***********************************************************************************************************************
+ * Function Name   : R_USB_PipeStop
+ *******************************************************************************************************************//**
+ * @brief Stop data read/write via specified pipe
+ * @param[in]  p_ctrl          Pointer to usb_ctrl_t structure area
+ * @retval     USB_SUCCESS     Successful completed (stop request completed)
+ * @retval     USB_ERR_PARA    Parameter error
+ * @retval     USB_ERR_NG      Other Error
+ * @details This function is used to terminate a data read/write operation.
+ */
 usb_err_t    R_USB_PipeStop (usb_ctrl_t *p_ctrl)
 {
 #if !defined(USB_CFG_HVND_USE) && !defined(USB_CFG_PVND_USE)
     return USB_ERR_NG;
 #else
 
-#if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
-    usb_er_t    err;
-#endif /* ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI) */
+#if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI) || (BSP_CFG_RTOS_USED != 0)
+    usb_er_t    err = USB_ERR_NG;
+#endif /* ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI) || (BSP_CFG_RTOS_USED != 0) */
     usb_err_t   ret_code = USB_ERR_NG;
     usb_info_t  info;
 
@@ -1172,9 +1480,17 @@ usb_err_t    R_USB_PipeStop (usb_ctrl_t *p_ctrl)
     if (USB_HOST == g_usb_cstd_usb_mode)
     {
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
+#if (BSP_CFG_RTOS_USED != 0)                            /* Use RTOS */
+        err = usb_hstd_transfer_end(p_ctrl->pipe, (uint16_t)USB_DATA_STOP);
+        if (USB_OK == err)
+        {
+            ret_code = USB_SUCCESS;
+        }
+#else /* (BSP_CFG_RTOS_USED != 0) */
         g_usb_hstd_current_pipe = p_ctrl->pipe;
         usb_hstd_forced_termination(USB_DATA_STOP);
         ret_code = USB_SUCCESS;
+#endif /* (BSP_CFG_RTOS_USED != 0) */
 
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
     }
@@ -1186,21 +1502,31 @@ usb_err_t    R_USB_PipeStop (usb_ctrl_t *p_ctrl)
         {
             ret_code = USB_SUCCESS;
         }
-
 #endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI */
     }
 
     return ret_code;
 #endif /* !defined(USB_CFG_HVND_USE) && !defined(USB_CFG_PVND_USE) */
-} /* End of function R_USB_PipeStop */
+}
+/***********************************************************************************************************************
+ End of function R_USB_PipeStop
+***********************************************************************************************************************/
 
-
-/******************************************************************************
-Function Name   : R_USB_GetUsePipe
-Description     : Get Information for Use pipe.
-Arguments       : uint16_t      *p_pipe : Pointer to the area to store the used pipe bitmap
-Return value    : usb_err_t error code  : USB_SUCCESS,USB_ERR_NG etc.
-******************************************************************************/
+/***********************************************************************************************************************
+ * Function Name   : R_USB_GetUsePipe
+ *******************************************************************************************************************//**
+ * @brief Get used pipe number from bit map
+ * @param[in]  p_ctrl          Pointer to usb_ctrl_t structure area
+ * @param[out] p_pipe          Pointer to area that stores the selected pipe number (bit map information)
+ * @retval     USB_SUCCESS     Successful completed (stop request completed)
+ * @retval     USB_ERR_PARA    Parameter error
+ * @retval     USB_ERR_NG      Other Error
+ * @details Get the selected pipe number (number of the pipe that has completed initalization) via bit map information. 
+ * The bit map information is stored in the area specified in argument (p_pipe). 
+ * Based on the information (module member and address member) assigned to the usb_ctrl_t structure, 
+ * obtains the PIPE information of that USB device.
+ * @note The argument (p_ctrl) is not supported when using RX100/RX200 series MCU.
+ */
 usb_err_t    R_USB_GetUsePipe (uint16_t *p_pipe)
 {
     usb_info_t  info;
@@ -1232,16 +1558,24 @@ usb_err_t    R_USB_GetUsePipe (uint16_t *p_pipe)
     }
 
     return USB_SUCCESS;
-} /* End of function R_USB_GetUsePipe */
+}
+/***********************************************************************************************************************
+ End of function R_USB_GetUsePipe
+***********************************************************************************************************************/
 
-
-/******************************************************************************
-Function Name   : R_USB_GetPipeInfo
-Description     : Get Infomation for pipe setting.(DIR,Transfer Type,MAXPS)
-Arguments       : usb_ctrl_t    *p_ctrl : Pointer to usb_ctrl_t structure
-                : usb_pipe_t    *p_info : Pointer to the area to store the pipe information
-Return value    : usb_err_t error code  : USB_SUCCESS,USB_ERR_NG etc.
-******************************************************************************/
+/***********************************************************************************************************************
+ * Function Name   : R_USB_GetPipeInfo
+ *******************************************************************************************************************//**
+ * @brief Get pipe information for specified pipe
+ * @param[in]  p_ctrl          Pointer to usb_ctrl_t structure area
+ * @param[out] p_info          Pointer to usb_pipe_t structure area
+ * @retval     USB_SUCCESS     Successful completed (stop request completed)
+ * @retval     USB_ERR_PARA    Parameter error
+ * @retval     USB_ERR_NG      Other Error
+ * @details This function gets the following pipe information regarding the pipe specified 
+ * in the argument (p_ctrl) member (pipe): endpoint number, transfer type, transfer direction and maximum packet size. 
+ * The obtained pipe information is stored in the area specified in the argument (p_info).
+ */
 usb_err_t    R_USB_GetPipeInfo (usb_ctrl_t *p_ctrl, usb_pipe_t *p_info)
 {
     usb_info_t  info;
@@ -1256,7 +1590,6 @@ usb_err_t    R_USB_GetPipeInfo (usb_ctrl_t *p_ctrl, usb_pipe_t *p_info)
 
 #endif  /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
 
-
     R_USB_GetInformation(&info);
     if (USB_STS_CONFIGURED != info.status)
     {
@@ -1266,10 +1599,7 @@ usb_err_t    R_USB_GetPipeInfo (usb_ctrl_t *p_ctrl, usb_pipe_t *p_info)
     if (USB_HOST == g_usb_cstd_usb_mode)
     {
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
-
-        g_usb_hstd_current_pipe = p_ctrl->pipe;
-
-        p_info->ep = usb_hstd_pipe_to_epadr();
+        p_info->ep = usb_hstd_pipe_to_epadr(p_ctrl->pipe);
         pipe_type = usb_cstd_get_pipe_type(p_ctrl->pipe);
 
         switch (pipe_type)
@@ -1287,7 +1617,7 @@ usb_err_t    R_USB_GetPipeInfo (usb_ctrl_t *p_ctrl, usb_pipe_t *p_info)
                 return USB_ERR_NG;
             break;
         }
-        p_info->mxps = usb_cstd_get_maxpacket_size(p_ctrl->pipe);
+        p_info->mxps = usb_cstd_get_maxpacket_size(p_ctrl->pipe);     /* Set Max packet size */
         return USB_SUCCESS;
 
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
@@ -1326,8 +1656,71 @@ usb_err_t    R_USB_GetPipeInfo (usb_ctrl_t *p_ctrl, usb_pipe_t *p_info)
 #endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI */
     }
     return USB_ERR_NG;
-} /* End of function R_USB_GetPipeInfo */
+}
+/***********************************************************************************************************************
+ End of function R_USB_GetPipeInfo
+***********************************************************************************************************************/
 
-/******************************************************************************
+/***********************************************************************************************************************
+ * Function Name   : R_USB_PullUp
+ *******************************************************************************************************************//**
+ * @brief Pull-up enable/disable setting of D+/D- line
+ * @param[in]  state   Pull-up enable/disable setting
+ * @retval     USB_SUCCESS     Successful completion (Pull-up enable/disable setting completed)
+ * @retval     USB_ERR_PARA    Parameter error
+ * @retval     USB_ERR_NG      Other Error
+ * @details This API enables or disables pull-up of D+/D- line. 
+ */
+usb_err_t   R_USB_PullUp(uint8_t state)
+{
+
+#if (USB_CFG_MODE == USB_CFG_HOST)
+    return USB_ERR_NG;
+#else /* USB_CFG_MODE == USB_CFG_HOST */
+
+    if (USB_HOST == g_usb_cstd_usb_mode) 
+    {
+        return USB_ERR_NG;              /* Support Host only. */
+    }
+
+    /* Argument Checking */
+
+    if ((USB_ON != state) && (USB_OFF != state))
+    {
+       return USB_ERR_PARA;
+    }
+
+    if (USB_LS  == g_usb_pstd_speed)
+    {
+        if (USB_ON == state)
+        {
+            hw_usb_pset_dmrpu();
+        }
+        else
+        {
+            hw_usb_pclear_dmrpu();
+        }
+    }
+    else
+    {
+        if (USB_ON == state)
+        {
+            hw_usb_pset_dprpu();
+        }
+        else
+        {
+            hw_usb_pclear_dprpu();
+        }
+    }
+
+
+    return USB_SUCCESS;
+#endif /* USB_CFG_MODE == USB_CFG_HOST */
+}
+/***********************************************************************************************************************
+ End of function R_USB_PullUp
+***********************************************************************************************************************/
+
+/***********************************************************************************************************************
 End  Of File
-******************************************************************************/
+***********************************************************************************************************************/

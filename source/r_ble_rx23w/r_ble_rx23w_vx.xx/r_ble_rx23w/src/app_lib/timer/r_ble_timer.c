@@ -14,12 +14,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 #include "r_ble_timer.h"
 
-#if (BLE_CFG_SOFT_TIMER_EN == 1) && (BLE_CFG_HCI_MODE_EN == 0)
+#if (BLE_CFG_SOFT_TIMER_EN == 1) && (BLE_CFG_HCI_MODE_EN == 0) && ((BSP_CFG_RTOS_USED == 0) || (BSP_CFG_RTOS_USED ==1))
 
 typedef enum {
     BLE_TIMER_STATUS_FREE,
@@ -37,25 +37,49 @@ typedef struct {
     ble_timer_cb_t cb;
 } st_ble_timer_t;
 
+#if (BSP_CFG_RTOS_USED == 0)
 static st_ble_timer_t gs_timer[BLE_TIMER_NUM_OF_SLOT];
 
+/***********************************************************************************************************************
+* app_lib software timer Functions for bare metal.
+***********************************************************************************************************************/
 extern void pl_init_timer(void);
 extern void pl_terminate_timer(void);
 extern void pl_start_timer(uint32_t timeout_ms);
 extern void pl_stop_timer(void);
 extern uint16_t pl_get_elapsed_time_ms(bool expired);
+static void event_cb(void);
 
 static void update_remaining_time_ms(bool expired)
 {
+    R_BSP_InterruptsDisable();
+
+    uint8_t set_event = false;
     uint32_t elapsed_time_ms = pl_get_elapsed_time_ms(expired);
 
     for (uint32_t i = 0; i < BLE_TIMER_NUM_OF_SLOT; i++)
     {
         if (BLE_TIMER_STATUS_STARTED == gs_timer[i].status)
         {
-            gs_timer[i].remaining_time_ms -= elapsed_time_ms;
+            if (gs_timer[i].remaining_time_ms > elapsed_time_ms)
+            {
+                gs_timer[i].remaining_time_ms -= elapsed_time_ms;
+            }
+            else
+            {
+                gs_timer[i].remaining_time_ms = 0;
+                gs_timer[i].status = BLE_TIMER_STATUS_EXPIRED;
+                set_event = true;
+            }
         }
     }
+
+    if (false != set_event)
+    {
+        R_BLE_SetEvent(event_cb);
+    }
+
+    R_BSP_InterruptsEnable();
 }
 
 static uint32_t alloc_timer(void)
@@ -143,16 +167,6 @@ static void event_cb(void)
 void process_timer_expire(void)
 {
     update_remaining_time_ms(true);
-
-    for (uint32_t i = 0; i < BLE_TIMER_NUM_OF_SLOT; i++)
-    {
-        if ((BLE_TIMER_STATUS_STARTED == gs_timer[i].status) &&
-            (0 == gs_timer[i].remaining_time_ms))
-        {
-            gs_timer[i].status = BLE_TIMER_STATUS_EXPIRED;
-            R_BLE_SetEvent(event_cb);
-        }
-    }
 
     start_timer();
 }
@@ -297,20 +311,256 @@ ble_status_t R_BLE_TIMER_UpdateTimeout(uint32_t timer_hdl, uint32_t timeout_ms)
     return BLE_SUCCESS;
 }
 
-bool R_BLE_TIMER_IsActive(void)
+#else /* (BSP_CFG_RTOS_USED == 0) */
+/***********************************************************************************************************************
+* app_lib software timer Functions for FreeRTOS.
+***********************************************************************************************************************/
+#include "FreeRTOS.h"
+#include "task.h"
+#include "rtos/r_ble_rtos.h"
+
+static st_ble_timer_t gs_timer[BLE_TIMER_NUM_OF_SLOT];
+
+static uint32_t get_timer_index(TimerHandle_t xTimer)
 {
     for (uint32_t i = 0; i < BLE_TIMER_NUM_OF_SLOT; i++)
     {
-        if (BLE_TIMER_STATUS_STARTED == gs_timer[i].status)
+        if (gs_timer[i].timer_hdl == (uint32_t)xTimer)
         {
-            return true;
+            return i;
         }
     }
 
-    return false;
+    return BLE_TIMER_INVALID_INDEX;
 }
 
-#else /* (BLE_CFG_SOFT_TIMER_EN == 1) && (BLE_CFG_HCI_MODE_EN == 0) */
+static void sf_timer_cb(void)
+{
+    for (uint32_t i = 0; i < BLE_TIMER_NUM_OF_SLOT; i++)
+    {
+        if (BLE_TIMER_STATUS_EXPIRED == gs_timer[i].status)
+        {
+            gs_timer[i].status = BLE_TIMER_STATUS_IDLE;
+            gs_timer[i].cb(gs_timer[i].timer_hdl);
+        }
+    }
+}
+
+static void event_cb(TimerHandle_t xTimer)
+{
+    uint32_t timer_idx;
+
+    timer_idx = get_timer_index(xTimer);
+
+    if(BLE_TIMER_INVALID_INDEX != timer_idx)
+    {
+        /* set event for software timer callback */
+        gs_timer[timer_idx].status = BLE_TIMER_STATUS_EXPIRED;
+        R_BLE_SetEvent(sf_timer_cb);
+
+        /* wake BLE task */
+        R_BLE_RTOS_WakeTaskFromIsr();
+    }
+}
+
+static uint32_t alloc_timer(void)
+{
+    for (uint32_t i = 0; i < BLE_TIMER_NUM_OF_SLOT; i++)
+    {
+        if (gs_timer[i].status == BLE_TIMER_STATUS_FREE)
+        {
+            gs_timer[i].status = BLE_TIMER_STATUS_IDLE;
+            return i;
+        }
+    }
+
+    return BLE_TIMER_INVALID_INDEX;
+}
+
+static void free_timer(uint32_t timer_idx)
+{
+    gs_timer[timer_idx].status     = BLE_TIMER_STATUS_FREE;
+    gs_timer[timer_idx].timer_hdl  = BLE_TIMER_INVALID_HDL;
+    gs_timer[timer_idx].timeout_ms = 0;
+    gs_timer[timer_idx].type       = BLE_TIMER_ONE_SHOT;
+    gs_timer[timer_idx].cb         = NULL;
+}
+
+
+void R_BLE_TIMER_Init(void)
+{
+    for (uint32_t i = 0; i < BLE_TIMER_NUM_OF_SLOT; i++)
+    {
+        free_timer(i);
+    }
+}
+
+void R_BLE_TIMER_Terminate(void)
+{
+    for (uint32_t i = 0; i < BLE_TIMER_NUM_OF_SLOT; i++)
+    {
+        if (gs_timer[i].status == BLE_TIMER_STATUS_IDLE)
+        {
+            R_BLE_TIMER_Delete(&gs_timer[i].timer_hdl);
+        }
+    }
+}
+
+ble_status_t R_BLE_TIMER_Create(uint32_t *p_timer_hdl,
+                                uint32_t timeout_ms,
+                                uint8_t type,
+                                ble_timer_cb_t cb)
+{
+    TimerHandle_t xRtosTimerHdl;
+    uint32_t timer_period;
+    uint32_t timer_idx;
+
+    if ((NULL == p_timer_hdl) || (timeout_ms == 0) || (NULL == cb) ||
+        ((type != BLE_TIMER_ONE_SHOT) && (type != BLE_TIMER_PERIODIC)))
+    {
+        return BLE_ERR_INVALID_ARG;
+    }
+
+    timer_period = timeout_ms / portTICK_PERIOD_MS;
+    if(0 == timer_period)
+    {
+        timer_period = 1;
+    }
+
+    timer_idx = alloc_timer();
+    if(BLE_TIMER_INVALID_INDEX == timer_idx)
+    {
+        return BLE_ERR_LIMIT_EXCEEDED;
+    }
+
+    xRtosTimerHdl = xTimerCreate("app_lib",
+                             timer_period,
+                             ((BLE_TIMER_PERIODIC == type) ? pdTRUE : pdFALSE),
+                             ( void * ) 0,
+                             (TimerCallbackFunction_t)event_cb);
+
+    if (NULL == xRtosTimerHdl)
+    {
+        free_timer(timer_idx);
+        return BLE_ERR_LIMIT_EXCEEDED;
+    }
+
+    *p_timer_hdl = (uint32_t)xRtosTimerHdl;
+    gs_timer[timer_idx].timer_hdl = (uint32_t)xRtosTimerHdl;
+    gs_timer[timer_idx].cb = cb;
+
+    return BLE_SUCCESS;
+}
+
+ble_status_t R_BLE_TIMER_Delete(uint32_t *p_timer_hdl)
+{
+    BaseType_t ret;
+
+    if (NULL == p_timer_hdl)
+    {
+        return BLE_ERR_INVALID_ARG;
+    }
+
+    if (BLE_TIMER_INVALID_HDL == *p_timer_hdl)
+    {
+        return BLE_ERR_INVALID_HDL;
+    }
+
+    TimerHandle_t timer_hdl = (TimerHandle_t)*p_timer_hdl;
+
+    *p_timer_hdl = BLE_TIMER_INVALID_HDL;
+
+    if (pdFALSE != xTimerIsTimerActive(timer_hdl))
+    {
+        xTimerStop((TimerHandle_t)timer_hdl, 0);
+    }
+
+    ret = xTimerDelete(timer_hdl, 0);
+
+    uint32_t timer_idx;
+    timer_idx = get_timer_index(timer_hdl);
+    if(BLE_TIMER_INVALID_INDEX != timer_idx)
+    {
+        free_timer(timer_idx);
+    }
+
+    if(pdFAIL == ret)
+    {
+        return BLE_ERR_INVALID_OPERATION;
+    }
+
+    return BLE_SUCCESS;
+}
+
+ble_status_t R_BLE_TIMER_Start(uint32_t timer_hdl)
+{
+    BaseType_t ret;
+
+    if (BLE_TIMER_INVALID_HDL == timer_hdl)
+    {
+        return BLE_ERR_INVALID_HDL;
+    }
+
+    ret = xTimerStart((TimerHandle_t)timer_hdl, 0);
+    if(pdFAIL == ret)
+    {
+        return BLE_ERR_INVALID_OPERATION;
+    }
+
+    return BLE_SUCCESS;
+}
+
+ble_status_t R_BLE_TIMER_Stop(uint32_t timer_hdl)
+{
+    BaseType_t ret;
+
+    if (BLE_TIMER_INVALID_HDL == timer_hdl)
+    {
+        return BLE_ERR_INVALID_HDL;
+    }
+
+    ret = xTimerStop((TimerHandle_t)timer_hdl, 0);
+    if(pdFAIL == ret)
+    {
+        return BLE_ERR_INVALID_OPERATION;
+    }
+
+    return BLE_SUCCESS;
+}
+
+ble_status_t R_BLE_TIMER_UpdateTimeout(uint32_t timer_hdl, uint32_t timeout_ms)
+{
+    BaseType_t ret;
+    uint32_t timer_period;
+
+    if (timeout_ms == 0)
+    {
+        return BLE_ERR_INVALID_ARG;
+    }
+
+    if (BLE_TIMER_INVALID_HDL == timer_hdl)
+    {
+        return BLE_ERR_INVALID_HDL;
+    }
+
+    timer_period = timeout_ms / portTICK_PERIOD_MS;
+    if(0 == timer_period)
+    {
+        timer_period = 1;
+    }
+
+    ret = xTimerChangePeriod((TimerHandle_t)timer_hdl, timer_period, 0);
+    if(pdFAIL == ret)
+    {
+        return BLE_ERR_INVALID_OPERATION;
+    }
+
+    return BLE_SUCCESS;
+}
+
+#endif /* (BSP_CFG_RTOS_USED == 0) */
+
+#else /* (BLE_CFG_SOFT_TIMER_EN == 1) && (BLE_CFG_HCI_MODE_EN == 0) && ((BSP_CFG_RTOS_USED == 0) || (BSP_CFG_RTOS_USED ==1)) */
 void R_BLE_TIMER_Init(void)
 {
 }
@@ -353,9 +603,4 @@ ble_status_t R_BLE_TIMER_UpdateTimeout(uint32_t timer_hdl, uint32_t timeout_ms)
     return BLE_ERR_UNSUPPORTED;
 }
 
-bool R_BLE_TIMER_IsActive(void)
-{
-    return false;
-}
-
-#endif /* (BLE_CFG_SOFT_TIMER_EN == 1) && (BLE_CFG_HCI_MODE_EN == 0) */
+#endif /* (BLE_CFG_SOFT_TIMER_EN == 1) && (BLE_CFG_HCI_MODE_EN == 0) && ((BSP_CFG_RTOS_USED == 0) || (BSP_CFG_RTOS_USED ==1)) */

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_cmt_rx_if.h
@@ -45,6 +45,11 @@
 *         : 15.08.2019 4.20    Added support for RX72M.
 *         : 25.11.2019 4.30    Added support RX13T, RX66N, RX72N.
 *         : 29.11.2019 4.31    Fixed issues in power_on() and power_off().
+*         : 31.03.2020 4.40    Added support for RX23E-A.
+*         : 29.05.2020 4.50    Added support BLE for RX23W; CMT2, CMT3 are protected for RX23W.
+*         : 30.06.2020 4.60    Changed revision to reflect demo upgrade.
+*         : 31.08.2020 4.70    Added condition for _RI_TRACE_TIMER macro
+*                              Fixed warning when using RI600V4 with device has 2 CMT channels
 ***********************************************************************************************************************/
 #ifndef CMT_HEADER_FILE
 #define CMT_HEADER_FILE
@@ -63,7 +68,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define CMT_RX_VERSION_MAJOR            (4)
-#define CMT_RX_VERSION_MINOR            (31)
+#define CMT_RX_VERSION_MINOR            (70)
 
 /* This define is used with the R_CMT_Control() function if not channel needs to input. */
 #define CMT_RX_NO_CHANNEL               (0xFFFFFFFF)

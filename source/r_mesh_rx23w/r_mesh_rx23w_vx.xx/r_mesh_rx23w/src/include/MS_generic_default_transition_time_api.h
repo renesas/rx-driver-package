@@ -21,9 +21,10 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup generic_default_transition_time_module GENERIC_DEFAULT_TRANSITION_TIME (Mesh Generic Default Transition Time Model)
+ * \defgroup generic_default_transition_time_module Generic Default Transition Time Model (GENERIC_DEFAULT_TRANSITION_TIME)
+ * \ingroup mesh_models_block
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Generic Default Transition Time Model (GENERIC_DEFAULT_TRANSITION_TIME) module to the Application.
  */
 
@@ -33,7 +34,7 @@
 /**
  *  \defgroup generic_default_transition_time_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
+ *  \brief This section Describes the module Notification Callback interface offered
  *  to the application
  */
 
@@ -65,14 +66,14 @@ typedef API_RESULT (* MS_GENERIC_DEFAULT_TRANSITION_TIME_SERVER_CB)
  * Generic Default Transition Time Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_GENERIC_DEFAULT_TRANSITION_TIME_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -82,6 +83,7 @@ typedef API_RESULT (* MS_GENERIC_DEFAULT_TRANSITION_TIME_CLIENT_CB)
 /**
  *  \defgroup generic_default_transition_time_structures Structures
  *  \{
+ *  \brief This section describes the EtherMind Mesh Generic Default Transition Time Model Structures.
  */
 
 /**
@@ -139,12 +141,12 @@ typedef struct MS_generic_default_transition_time_struct
 /**
  * \defgroup generic_default_transition_time_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Generic Default Transition Time Model APIs.
+ * \brief This section describes the EtherMind Mesh Generic Default Transition Time Model APIs.
  */
 /**
- * \defgroup generic_default_transition_time_ser_api_defs Generic Default Transition Time Server API Definitions
+ * \defgroup generic_default_transition_time_ser_api_defs Generic Default Transition Time Server API
  * \{
- * This section describes the Generic Default Transition Time Server APIs.
+ * \brief This section describes the Generic Default Transition Time Server APIs.
  */
 
 /**
@@ -189,9 +191,9 @@ API_RESULT MS_generic_default_transition_time_server_get_time
 /** \} */
 
 /**
- * \defgroup generic_default_transition_time_cli_api_defs Generic Default Transition Time Client API Definitions
+ * \defgroup generic_default_transition_time_cli_api_defs Generic Default Transition Time Client API
  * \{
- * This section describes the Generic Default Transition Time Client APIs.
+ * \brief This section describes the Generic Default Transition Time Client APIs.
  */
 
 /**
@@ -253,6 +255,9 @@ API_RESULT MS_generic_default_transition_time_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
+/** \name Messsage Send
+ *  \{
+ */
 /**
  *  \brief API to get the Generic Default Transition Time state of an element.
  *
@@ -312,6 +317,7 @@ API_RESULT MS_generic_default_transition_time_client_send_reliable_pdu
             param,\
             0xFFFFFFFF\
         )
+/** \} */
 /** \} */
 /** \} */
 /** \} */

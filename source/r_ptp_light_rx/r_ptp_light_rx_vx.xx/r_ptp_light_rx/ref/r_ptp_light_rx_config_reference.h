@@ -33,6 +33,7 @@
 *                              Changed MINT interrupt handler operation.
 *		  : 31.08.2019 1.13    Supported RX72M device.
 *                              Added Bypass setting.
+*		  : 30.11.2019 1.14    Supported RX72N device.
 **********************************************************************************************************************/
 
 #ifndef _PTP_LIGHT_CONFIG_H

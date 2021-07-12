@@ -62,6 +62,15 @@
 *                              Modified comment for added support of Renesas RTOS (RI600V4 or RI600PX).
 *                              Added the following macro definition.
 *                                - BSP_CFG_RENESAS_RTOS_USED
+*         : 31.07.2020 3.03    Modified comment.
+*         : 20.11.2020 3.04    Added the following macro definition.
+*                                - BSP_CFG_ID_CODE_ENABLE
+*         : 29.01.2021 3.05    Added the following macro definition.
+*                                - BSP_CFG_SCI_UART_TERMINAL_ENABLE
+*                                - BSP_CFG_SCI_UART_TERMINAL_CHANNEL
+*                                - BSP_CFG_SCI_UART_TERMINAL_BITRATE
+*                                - BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY
+*         : 26.02.2021 3.06    Added a comment for Azure RTOS to BSP_CFG_RTOS_USED.
 ***********************************************************************************************************************/
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
 #define R_BSP_CONFIG_REF_HEADER_FILE
@@ -84,7 +93,7 @@ Configuration Options
 /* Enter the product part number for your MCU. This information will be used to obtain information about your MCU such 
    as package and memory size.
    To help parse this information, the part number will be defined using multiple macros.
-   R 5 F 56 4M L B D FP
+   R 5 F 57 1M L B D FP
    | | | |  |  | | | |  Macro Name                             Description
    | | | |  |  | | | |__BSP_CFG_MCU_PART_PACKAGE             = Package type, number of pins, and pin pitch
    | | | |  |  | | |____not used                             = Products with wide temperature range
@@ -232,6 +241,12 @@ Configuration Options
 /* 4th ID Code section, address 0x0012005C. From MSB to LSB: OCD/serial ID16, OCD/serial ID15, OCD/serial ID14,
                                                              OCD/serial ID13. */
 #define BSP_CFG_ID_CODE_LONG_4          (0xFFFFFFFF)
+
+/* ID code select.
+   0 = ID code is disabled.
+   1 = ID code is enabled.
+*/
+#define BSP_CFG_ID_CODE_ENABLE          (0)
 
 /* Clock source select (CKSEL).
    0 = Low Speed On-Chip Oscillator  (LOCO)
@@ -444,6 +459,7 @@ Configuration Options
    2 = embOS is used.(This is not available.)
    3 = MicroC_OS is used.(This is not available.)
    4 = Renesas ITRON OS (RI600V4 or RI600PX) is used.
+   5 = Azure RTOS is used.(This is not available.)
 */
 #define BSP_CFG_RTOS_USED               (0)
 
@@ -575,6 +591,25 @@ Configuration Options
          It is possible to dynamically change the IPR.
 */
 #define BSP_CFG_SWINT_IPR_INITIAL_VALUE     (0x1)
+
+/* This macro is used for serial terminal on the board selected by smart configurator.
+   0 = SCI UART Terminal is disabled.
+   1 = SCI UART Terminal is enabled.
+*/
+#define BSP_CFG_SCI_UART_TERMINAL_ENABLE         (0)
+
+/* This macro is channel number for serial terminal.
+*/
+#define BSP_CFG_SCI_UART_TERMINAL_CHANNEL        (7)
+
+/* This macro is bit-rate for serial terminal.
+*/
+#define BSP_CFG_SCI_UART_TERMINAL_BITRATE        (115200)
+
+/* This macro is interrupt priority for serial terminal.
+   0(low) - 15(high)
+*/
+#define BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY   (15)
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

@@ -20,10 +20,17 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup scene_module SCENE (Mesh Scene Model)
+ * \defgroup scene_module Scene Model (SCENE)
+ * \ingroup mesh_models_block
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Scene Model (SCENE) module to the Application.
+ */
+
+/**
+ * \defgroup scene_constants Constants
+ * \{
+ * Describes Constants defined by the module.
  */
 
 /** Scene Event Types */
@@ -42,11 +49,13 @@
 /** Scene Event - Recall Immediate */
 #define MS_SCENE_EVENT_RECALL_IMMEDIATE    0x05
 
+/** \} */
+
 /* --------------------------------------------- Data Types/ Structures */
 /**
  *  \defgroup scene_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
+ *  \brief This section Describes the module Notification Callback interface offered
  *  to the application
  */
 
@@ -79,14 +88,14 @@ typedef void * (* MS_SCENE_SERVER_CB)
  * Scene Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_SCENE_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -96,6 +105,7 @@ typedef API_RESULT (* MS_SCENE_CLIENT_CB)
 /**
  *  \defgroup scene_structures Structures
  *  \{
+ *  \brief This section describes the EtherMind Mesh Scene Model Structures.
  */
 
 /**
@@ -199,12 +209,12 @@ typedef struct MS_scene_struct
 /**
  * \defgroup scene_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Scene Model APIs.
+ * \brief This section describes the EtherMind Mesh Scene Model APIs.
  */
 /**
- * \defgroup scene_ser_api_defs Scene Server API Definitions
+ * \defgroup scene_ser_api_defs Scene Server API
  * \{
- * This section describes the Scene Server APIs.
+ * \brief This section describes the Scene Server APIs.
  */
 
 /**
@@ -263,9 +273,9 @@ API_RESULT MS_scene_server_state_update
 /** \} */
 
 /**
- * \defgroup scene_cli_api_defs Scene Client API Definitions
+ * \defgroup scene_cli_api_defs Scene Client API
  * \{
- * This section describes the Scene Client APIs.
+ * \brief This section describes the Scene Client APIs.
  */
 
 /**
@@ -327,6 +337,9 @@ API_RESULT MS_scene_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
+/** \name Messsage Send
+ *  \{
+ */
 /**
  *  \brief API to get the current status of a currently active scene of an element.
  *
@@ -473,6 +486,7 @@ API_RESULT MS_scene_client_send_reliable_pdu
             param,\
             0xFFFFFFFF\
         )
+/** \} */
 /** \} */
 /** \} */
 /** \} */

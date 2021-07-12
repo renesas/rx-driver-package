@@ -20,9 +20,10 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup scheduler_module SCHEDULER (Mesh Scheduler Model)
+ * \defgroup scheduler_module Scheduler Model (SCHEDULER)
+ * \ingroup mesh_models_block
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Scheduler Model (SCHEDULER) module to the Application.
  */
 
@@ -32,7 +33,7 @@
 /**
  *  \defgroup scheduler_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
+ *  \brief This section Describes the module Notification Callback interface offered
  *  to the application
  */
 
@@ -64,14 +65,14 @@ typedef API_RESULT (* MS_SCHEDULER_SERVER_CB)
  * Scheduler Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_SCHEDULER_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -81,6 +82,7 @@ typedef API_RESULT (* MS_SCHEDULER_CLIENT_CB)
 /**
  *  \defgroup scheduler_structures Structures
  *  \{
+ *  \brief This section describes the EtherMind Mesh Scheduler Model Structures.
  */
 
 /**
@@ -192,12 +194,12 @@ typedef struct MS_scheduler_action_set_struct
 /**
  * \defgroup scheduler_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Scheduler Model APIs.
+ * \brief This section describes the EtherMind Mesh Scheduler Model APIs.
  */
 /**
- * \defgroup scheduler_ser_api_defs Scheduler Server API Definitions
+ * \defgroup scheduler_ser_api_defs Scheduler Server API
  * \{
- * This section describes the Scheduler Server APIs.
+ * \brief This section describes the Scheduler Server APIs.
  */
 
 /**
@@ -256,9 +258,9 @@ API_RESULT MS_scheduler_server_state_update
 /** \} */
 
 /**
- * \defgroup scheduler_cli_api_defs Scheduler Client API Definitions
+ * \defgroup scheduler_cli_api_defs Scheduler Client API
  * \{
- * This section describes the Scheduler Client APIs.
+ * \brief This section describes the Scheduler Client APIs.
  */
 
 /**
@@ -320,6 +322,9 @@ API_RESULT MS_scheduler_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
+/** \name Messsage Send
+ *  \{
+ */
 /**
  *  \brief API to get the current Schedule Register state of an element.
  *
@@ -397,6 +402,7 @@ API_RESULT MS_scheduler_client_send_reliable_pdu
             param,\
             0xFFFFFFFF\
         )
+/** \} */
 /** \} */
 /** \} */
 /** \} */

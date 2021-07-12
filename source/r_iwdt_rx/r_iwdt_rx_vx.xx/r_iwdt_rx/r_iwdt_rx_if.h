@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.    
+* Copyright (C) 2013-2020 Renesas Electronics Corporation. All rights reserved.    
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_iwdt_rx_if.h
@@ -44,6 +44,8 @@
 *                              Removed support for Generation 1 devices.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.00.
 *           30.12.2019 3.40    Added support for RX66N, RX72N.
+*           31.03.2020 3.50    Added support for RX23E-A.
+*         : 30.06.2020 3.60    Changed revision to reflect demo upgrade.
 ***********************************************************************************************************************/
 
 #ifndef IWDT_RX_IF_H
@@ -64,7 +66,7 @@ Macro definitions
 #endif
 /* Version Number of API. */
 #define IWDT_RX_VERSION_MAJOR   (3)
-#define IWDT_RX_VERSION_MINOR   (40)
+#define IWDT_RX_VERSION_MINOR   (60)
 
 #define OFS0_IWDT_DISABLED      (0x00000002)
 

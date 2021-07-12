@@ -6,17 +6,19 @@
     <toolchain>
         <brand>Renesas</brand>
         <product>RXC</product>
-        <version>3.01.0</version>
+        <version>3.01.00</version>
     </toolchain>
 	<toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
-        <version>4.08.04.201801</version>
+		<version>4.08.04.201801</version>
+        <version>4.08.04.201902</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
         <product>ICCRX</product>
-        <version>4.11.1</version>
+		<version>4.11.01</version>
+        <version>4.12.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -30,6 +32,8 @@
         <group omit_board="true">RX71M</group>
 		<group>RX72M</group>
         <group omit_board="true">RX72M</group>
+		<group>RX72N</group>
+        <group omit_board="true">RX72N</group>
     </target>
 
     <!-- only one package entry allowed -->
@@ -37,14 +41,14 @@
     <package>
         <type>fitmodule</type>
         <name>r_ptp_light_rx</name>
-        <version>1.13</version>
-        <zipsource>r_ptp_light_rx_v1.13.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_ptp_light_rx_vx.xx.zip</zipsource>
         <desc>PTP Light Driver</desc>
         <details>The PTP light driver is reduced from the PTP (Precision Time Protocol) function defined by the IEEE1588-2008 specification, 
 			and focus on the enhanced standard Ethernet function such as the simple switch and multicast frame filter.</details>
         <dependency>
             <module>r_bsp</module>
-			<version>5.20</version>
+			<version>5.50</version>
         </dependency>
         <application>Communications</application>
         <application>Connectivity</application>

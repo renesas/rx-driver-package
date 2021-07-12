@@ -40,6 +40,7 @@
 *         : 20.06.2019   1.24      RX23W support added.
 *         : 25.06.2019   2.00      SSIE support added.
 *         : 31.10.2019   2.01      Version number updated.
+*         : 30.06.2020   2.02      Version number updated.
 *
 ******************************************************************************/
 #ifndef SSI_API_RX_H_
@@ -56,7 +57,7 @@ Macro definitions
 ******************************************************************************/
 /* Version Number of API. */
 #define SSI_API_VERSION_MAJOR           (2)
-#define SSI_API_VERSION_MINOR           (01)
+#define SSI_API_VERSION_MINOR           (02)
 
 /******************************************************************************
 Typedef definitions

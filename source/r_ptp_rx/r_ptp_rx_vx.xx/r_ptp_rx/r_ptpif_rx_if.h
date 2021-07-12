@@ -47,6 +47,7 @@
 *                              Added "WAIT_LOOP" comments for every loop operation.
 *		  : 31.08.2019 1.16    Supported RX72M device.
 *                              Added Bypass setting.
+*		  : 30.11.2019 1.17    Supported RX72N device.
 **********************************************************************************************************************/
 
 #ifndef _PTPIF_RX_H
@@ -64,7 +65,7 @@ Macro definitions
 **********************************************************************************************************************/
 /* Version Number of API. */
 #define RX_PTPIF_VERSION_MAJOR           (1)
-#define RX_PTPIF_VERSION_MINOR           (16)
+#define RX_PTPIF_VERSION_MINOR           (17)
 
 /* PTP driver (PTP Host interface part) return value */
 typedef enum

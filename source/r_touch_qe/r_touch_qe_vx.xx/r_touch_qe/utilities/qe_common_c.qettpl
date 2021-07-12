@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : qe_common.c
@@ -22,7 +22,11 @@
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * History      : DD.MM.YYYY Version Description
-*              :            1.00    First Release
+*              : 29.08.2018 1.00    First Release
+*              : 02.04.2019 1.01    Add Section information for VDE Safety Protocols
+*              : 18.04.2019 1.02    Correspond to GCC Compiler
+*              : 25.04.2019 1.03    Fix the Macros for Section information
+*              : 07.05.2019 1.04    Add the Macro for Section information
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -76,6 +80,13 @@ Private global variables and functions
 ***********************************************************************************************************************/
 
 
+#if (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+#if (!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5))
+#pragma section _QE_TOUCH_DRIVER
+#else
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
+#endif
 /***********************************************************************************************************************
 * Function Name: ctsu_sensor_data_address_set
 * Description  : ctsu parameter address setting
@@ -106,9 +117,16 @@ void ctsu_sensor_data_address_set( void )
     g_current_sign_pt[method]             = &g_@method@_current_sign[0];
 
 @qe:end:
-}
+} /* End of function ctsu_sensor_data_address_set() */
 
 
+#if (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+#if (!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5))
+#pragma section _QE_TOUCH_DRIVER
+#else
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
+#endif
 /***********************************************************************************************************************
 * Function Name   : touch_parameter_address_set
 * Description     : Touch parameter top address setting
@@ -142,8 +160,6 @@ void touch_parameter_address_set( void )
     g_key_info[method].key_used_info      = &g_@method@_key_uesd_info[0];
 
     g_touch_key_group[method].group       = &g_touch_cfg_@method@.button_masks[0];
-
-    g_calib_info[method].calib_data       = &g_@method@_calib[0][0];
 #endif
     g_key_info[method].sensor_index       = &g_@method@_sensor_index[0];
     g_key_info[method].counter_magni      = &g_@method@_counter_magni[0];
@@ -151,11 +167,17 @@ void touch_parameter_address_set( void )
     g_touch_tuning_info[method].ctsuso    = &g_@method@_tune_ctsuso[0];
     g_touch_tuning_info[method].result    = &g_@method@_tune_result[0];
 
-
 @qe:end:
-}
+} /* End of function touch_parameter_address_set() */
 
 
+#if (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+#if (!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5))
+#pragma section _QE_TOUCH_DRIVER
+#else
+R_BSP_ATTRIB_SECTION_CHANGE(P, _QE_TOUCH_DRIVER)
+#endif
+#endif
 /***********************************************************************************************************************
 * Function Name: qetouch_timer_callback
 * Description  : Callback function for periodic timer which indicates to start next scan.
@@ -166,5 +188,12 @@ void touch_parameter_address_set( void )
 void qetouch_timer_callback(void *p_args)
 {
     g_qetouch_timer_flg = true;
-}
+} /* End of function qetouch_timer_callback() */
 
+#if (TOUCH_CFG_SAFETY_LINKAGE_ENABLE)
+#if (!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5))
+#pragma section
+#else
+R_BSP_ATTRIB_SECTION_CHANGE_END
+#endif
+#endif

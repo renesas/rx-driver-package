@@ -1,34 +1,32 @@
-/*******************************************************************************
+/***********************************************************************************************************************
  * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only
- * intended for use with Renesas products. No other uses are authorized. This
- * software is owned by Renesas Electronics Corporation and is protected under
- * all applicable laws, including copyright laws.
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
  * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
- * LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
- * TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
- * ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
- * FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
- * ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
- * BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software
- * and to discontinue the availability of this software. By using this software,
- * you agree to the additional terms and conditions found by accessing the
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+ * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2018(2019) Renesas Electronics Corporation. All rights reserved.
-  ******************************************************************************/
-/*******************************************************************************
+ *
+ * Copyright (C) 2018(2020) Renesas Electronics Corporation. All rights reserved.
+ ***********************************************************************************************************************/
+/***********************************************************************************************************************
  * File Name    : r_usb_reg_access.c
  * Description  : USB IP register access code
- *****************************************************************************/
-/******************************************************************************
+ ***********************************************************************************************************************/
+/**********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *         : 30.11.2018 1.00 First Release
- *         : 31.05.2019 1.11    Added support for GNUC and ICCRX.
- ******************************************************************************/
+ *         : 31.05.2019 1.11 Added support for GNUC and ICCRX.
+ *         : 30.06.2020 1.20 Added support for RTOS.
+ ***********************************************************************************************************************/
+
  /******************************************************************************
  Includes   <System Includes> , "Project Includes"
  ******************************************************************************/
@@ -36,33 +34,17 @@
 #include "r_usb_basic_mini_if.h"
 #include "r_usb_bitdefine.h"
 #include "r_usb_typedef.h"
+#include "r_usb_extern.h"
 #include "r_usb_reg_access.h"
 #if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))
 #include "r_usb_dmac.h"
 #endif /* ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE)) */
 
-
-/*******************************************************************************
- Macro definitions
- ******************************************************************************/
-
-/*******************************************************************************
- Typedef definitions
- ******************************************************************************/
-
-
-/*******************************************************************************
- Exported global variables (to be accessed by other files)
- ******************************************************************************/
-
-extern uint16_t     g_usb_cstd_bemp_skip[USB_MAX_PIPE_NO + 1u];
-/*******************************************************************************
+/******************************************************************************
  Private global variables and functions
  ******************************************************************************/
 static void *hw_usb_get_fifosel_adr (uint16_t pipemode);
 static void *hw_usb_get_fifoctr_adr (uint16_t pipemode);
-
-
 
 /******************************************************************************
  Function Name   : hw_usb_read_syscfg
@@ -73,22 +55,12 @@ static void *hw_usb_get_fifoctr_adr (uint16_t pipemode);
 uint16_t hw_usb_read_syscfg (void)
 {
     return USB0.SYSCFG.WORD;
-} /*  End of function hw_usb_read_syscfg */
-
-#if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
+}
 /******************************************************************************
- Function Name   : hw_usb_write_syscfg
- Description     : Write specified value to the SYSCFG register of the given port.
- Arguments       : uint16_t     data   : Value to write.
- Return value    : none
+ End of function hw_usb_read_syscfg
  ******************************************************************************/
-void hw_usb_write_syscfg (uint16_t data)
-{
-    USB0.SYSCFG.WORD = data;
-} /*  End of function hw_usb_write_syscfg */
 
-#endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
-
+#if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
 /******************************************************************************
  Function Name   : hw_usb_set_cnen
  Description     : Enable single end receiver.
@@ -97,9 +69,11 @@ void hw_usb_write_syscfg (uint16_t data)
  ******************************************************************************/
 void hw_usb_set_cnen(void)
 {
-    /* Only USBA module */
     USB0.SYSCFG.WORD |= USB_CNEN;
-} /* End of function hw_usb_set_cnen */
+}
+/******************************************************************************
+ End of function hw_usb_set_cnen
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_clear_cnen
@@ -110,10 +84,11 @@ void hw_usb_set_cnen(void)
 void hw_usb_clear_cnen(void)
 {
     USB0.SYSCFG.WORD &= (~USB_CNEN);
-} /* End of function hw_usb_clear_cnen */
+}
+/******************************************************************************
+ End of function hw_usb_clear_cnen
+ ******************************************************************************/
 
-
-#if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
 /******************************************************************************
  Function Name   : hw_usb_set_dcfm
  Description     : DCFM-bit set of register SYSCFG
@@ -124,20 +99,11 @@ void hw_usb_clear_cnen(void)
 void hw_usb_set_dcfm (void)
 {
     USB0.SYSCFG.WORD |= USB_DCFM;
-} /* End of function hw_usb_set_dcfm */
-#endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_REPI */
-
+}
 /******************************************************************************
- Function Name   : hw_usb_clear_dcfm
- Description     : DCFM-bit clear of register SYSCFG.
-                 : (USB Peripheral mode is selected.)
- Arguments       : none
- Return value    : none
+ End of function hw_usb_set_dcfm
  ******************************************************************************/
-void hw_usb_clear_dcfm (void)
-{
-    USB0.SYSCFG.WORD &= (~USB_DCFM);
-} /* End of function hw_usb_clear_dcfm */
+#endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_REPI */
 
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
 /******************************************************************************
@@ -150,52 +116,11 @@ void hw_usb_clear_dcfm (void)
 void hw_usb_clear_drpd (void)
 {
     USB0.SYSCFG.WORD &= (~USB_DRPD);
-} /* End of function hw_usb_clear_drpd */
+}
+/******************************************************************************
+ End of function hw_usb_clear_drpd
+ ******************************************************************************/
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
-
-/******************************************************************************
- Function Name   : hw_usb_set_usbe
- Description     : Enable USB operation.
- Arguments       : none
- Return value    : none
- ******************************************************************************/
-void hw_usb_set_usbe (void)
-{
-    USB0.SYSCFG.WORD |= USB_USBE;
-} /* End of function hw_usb_set_usbe */
-
-/******************************************************************************
- Function Name   : hw_usb_clear_usbe
- Description     : Enable USB operation.
- Arguments       : none
- Return value    : none
- ******************************************************************************/
-void hw_usb_clear_usbe (void)
-{
-    USB0.SYSCFG.WORD &= (~USB_USBE);
-} /* End of function hw_usb_clear_usbe */
-
-/******************************************************************************
-Function Name   : hw_usb_set_bcctrl
-Description     : Set BCCTRL's bits.
-Arguments       : uint16_t      data   : Setting value
-Return value    : none
-******************************************************************************/
-void    hw_usb_set_bcctrl (uint16_t data)
-{
-    USB0.USBBCCTRL0.WORD |= data;
-} /* End of function hw_usb_set_bcctrl */
-
-/******************************************************************************
-Function Name   : hw_usb_clear_bcctrl
-Description     : Clear BCCTRL's bits.
-Arguments       : uint16_t  data    : Setting value
-Return value    : none
-******************************************************************************/
-void    hw_usb_clear_bcctrl (uint16_t data)
-{
-    USB0.USBBCCTRL0.WORD &= (~data);
-} /* End of function hw_usb_clear_bcctrl */
 
 /******************************************************************************
  Function Name   : hw_usb_read_syssts
@@ -206,7 +131,10 @@ void    hw_usb_clear_bcctrl (uint16_t data)
 uint16_t hw_usb_read_syssts (void)
 {
     return (uint16_t)(USB0.SYSSTS0.WORD);
-} /* End of function hw_usb_read_syssts */
+}
+/******************************************************************************
+ End of function hw_usb_read_syssts
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_read_dvstctr
@@ -217,20 +145,12 @@ uint16_t hw_usb_read_syssts (void)
 uint16_t hw_usb_read_dvstctr (void)
 {
     return (uint16_t)(USB0.DVSTCTR0.WORD);
-} /* End of function hw_usb_read_dvstctr */
+}
+/******************************************************************************
+ End of function hw_usb_read_dvstctr
+ ******************************************************************************/
 
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
-/******************************************************************************
- Function Name   : hw_usb_write_dvstctr
- Description     : Write data to the specified port's DVSTCTR register.
- Arguments       : uint16_t  data  : Setting value  
- Return value    : none
- ******************************************************************************/
-void hw_usb_write_dvstctr (uint16_t data)
-{
-    USB0.DVSTCTR0.WORD = data;
-} /* End of function hw_usb_write_dvstctr */
-
 /******************************************************************************
  Function Name   : hw_usb_rmw_dvstctr
  Description     : Read-modify-write the specified port's DVSTCTR.
@@ -246,7 +166,10 @@ void hw_usb_rmw_dvstctr (uint16_t data, uint16_t bitptn)
     buf &= (~bitptn);
     buf |= (data & bitptn);
     USB0.DVSTCTR0.WORD = buf;
-} /* End of function hw_usb_rmw_dvstctr */
+}
+/******************************************************************************
+ End of function hw_usb_rmw_dvstctr
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_clear_dvstctr
@@ -258,7 +181,10 @@ void hw_usb_rmw_dvstctr (uint16_t data, uint16_t bitptn)
 void hw_usb_clear_dvstctr (uint16_t bitptn)
 {
     USB0.DVSTCTR0.WORD &= (~bitptn);
-} /* End of function hw_usb_clear_dvstctr */
+}
+/******************************************************************************
+ End of function hw_usb_clear_dvstctr
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_set_vbout
@@ -274,7 +200,10 @@ void hw_usb_set_vbout (void)
 #else  /* USB_CFG_VBUS == USB_CFG_HIGH */
     USB0.DVSTCTR0.WORD &= (~USB_VBUSEN);
 #endif /* USB_CFG_VBUS == USB_CFG_HIGH */
-} /* End of function hw_usb_set_vbout */
+}
+/******************************************************************************
+ End of function hw_usb_set_vbout
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_clear_vbout
@@ -290,7 +219,10 @@ void hw_usb_clear_vbout (void)
 #else  /* USB_CFG_VBUS == USB_CFG_HIGH */
     USB0.DVSTCTR0.WORD |= USB_VBUSEN;
 #endif /* USB_CFG_VBUS == USB_CFG_HIGH */
-} /* End of function hw_usb_clear_vbout */
+}
+/******************************************************************************
+ End of function hw_usb_clear_vbout
+ ******************************************************************************/
 
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 
@@ -322,7 +254,10 @@ uint16_t hw_usb_read_fifo16 (uint16_t pipemode)
     }
 
     return data;
-} /* End of function hw_usb_read_fifo16 */
+}
+/******************************************************************************
+ End of function hw_usb_read_fifo16
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_write_fifo16
@@ -349,7 +284,10 @@ void hw_usb_write_fifo16 (uint16_t pipemode, uint16_t data)
             USB_DEBUG_HOOK(USB_DEBUG_HOOK_STD | USB_DEBUG_HOOK_CODE6);
         break;
     }
-} /* End of function hw_usb_write_fifo16 */
+}
+/******************************************************************************
+ End of function hw_usb_write_fifo16
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_write_fifo8
@@ -376,7 +314,10 @@ void hw_usb_write_fifo8 (uint16_t pipemode, uint8_t data)
             USB_DEBUG_HOOK(USB_DEBUG_HOOK_STD | USB_DEBUG_HOOK_CODE9);
         break;
     }
-} /* End of function hw_usb_write_fifo8 */
+}
+/******************************************************************************
+ End of function hw_usb_write_fifo8
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_get_fifosel_adr
@@ -406,7 +347,10 @@ static void *hw_usb_get_fifosel_adr (uint16_t pipemode)
     }
 
     return p_reg;
-} /* End of function hw_usb_get_fifosel_adr */
+}
+/******************************************************************************
+ End of function hw_usb_get_fifosel_adr
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_read_fifosel
@@ -421,7 +365,10 @@ uint16_t hw_usb_read_fifosel (uint16_t pipemode)
     p_reg = (uint16_t *) hw_usb_get_fifosel_adr(pipemode);
 
     return *p_reg;
-} /* End of function hw_usb_read_fifosel */
+}
+/******************************************************************************
+ End of function hw_usb_read_fifosel
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_rmw_fifosel
@@ -444,24 +391,12 @@ void hw_usb_rmw_fifosel (uint16_t pipemode, uint16_t data, uint16_t bitptn)
     buf &= (~bitptn);
     buf |= (data & bitptn);
     *p_reg = buf;
-} /*  End of function hw_usb_rmw_fifosel */
-
+}
 /******************************************************************************
- Function Name   : hw_usb_set_dclrm
- Description     : Set DCLRM-bits (FIFO buffer auto clear) of the FIFOSEL cor-
-                 : responding to specified PIPEMODE.
- Arguments       : uint16_t  pipemode  : CUSE/D0DMA/D1DMA
- Return value    : none
+ End of function hw_usb_rmw_fifosel
  ******************************************************************************/
-void hw_usb_set_dclrm (uint16_t pipemode)
-{
-    R_BSP_VOLATILE_EVENACCESS uint16_t *p_reg;
 
-    p_reg = (uint16_t *) hw_usb_get_fifosel_adr(pipemode);
-
-    (*p_reg) |= USB_DCLRM;
-} /* End of function hw_usb_set_dclrm */
-
+#if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))
 /******************************************************************************
  Function Name   : hw_usb_clear_dclrm
  Description     : Reset DCLRM-bits (FIFO buffer not auto-cleared) of the FIFOSEL 
@@ -476,7 +411,10 @@ void hw_usb_clear_dclrm (uint16_t pipemode)
     p_reg = hw_usb_get_fifosel_adr(pipemode);
 
     (*p_reg) &= (~USB_DCLRM);
-} /*  End of function hw_usb_clear_dclrm */
+}
+/******************************************************************************
+ End of function hw_usb_clear_dclrm
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_set_dreqe
@@ -491,8 +429,13 @@ void hw_usb_set_dreqe (uint16_t pipemode)
 
     p_reg = hw_usb_get_fifosel_adr(pipemode);
 
+    (*p_reg) &= (~USB_DREQE);
+
     (*p_reg) |= USB_DREQE;
-} /*  End of function hw_usb_set_dreqe */
+}
+/******************************************************************************
+ End of function hw_usb_set_dreqe
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_clear_dreqe
@@ -508,7 +451,11 @@ void hw_usb_clear_dreqe (uint16_t pipemode)
     p_reg = hw_usb_get_fifosel_adr(pipemode);
 
     (*p_reg) &= (~USB_DREQE);
-}  /*  End of function hw_usb_clear_dreqe */
+}
+/******************************************************************************
+ End of function hw_usb_clear_dreqe
+ ******************************************************************************/
+#endif  /* ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE)) */
 
 /******************************************************************************
  Function Name   : hw_usb_set_mbw
@@ -531,12 +478,17 @@ void hw_usb_set_mbw (uint16_t pipemode, uint16_t data)
     {
         (*p_reg) |= data;
     }
-} /* End of function hw_usb_set_mbw */
+}
+/******************************************************************************
+ End of function hw_usb_set_mbw
+ ******************************************************************************/
 
+#if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))
 /******************************************************************************
  Function Name   : hw_usb_set_curpipe
  Description     : Set pipe to the number given; in the FIFOSEL corresponding 
                  : to specified PIPEMODE.    
+ Arguments       : uint16_t  pipemode   : CUSE/D0DMA/D1DMA
                  : uint16_t  pipeno     : Pipe number.
  Return value    : none
  ******************************************************************************/
@@ -564,7 +516,11 @@ void hw_usb_set_curpipe (uint16_t pipemode, uint16_t pipeno)
     reg |= pipeno;
 
     *p_reg = reg;
-} /* End of function hw_usb_set_curpipe */
+}
+/******************************************************************************
+ End of function hw_usb_set_curpipe
+ ******************************************************************************/
+#endif    /* ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE)) */
 
 /******************************************************************************
  Function Name   : hw_usb_get_fifoctr_adr
@@ -600,7 +556,10 @@ static void *hw_usb_get_fifoctr_adr (uint16_t pipemode)
     }
 
     return p_reg;
-} /* End of function hw_usb_get_fifoctr_adr */
+}
+/******************************************************************************
+ End of function hw_usb_get_fifoctr_adr
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_read_fifoctr
@@ -616,7 +575,10 @@ uint16_t hw_usb_read_fifoctr (uint16_t pipemode)
     p_reg = (uint16_t *) hw_usb_get_fifoctr_adr(pipemode);
 
     return *p_reg;
-} /* End of function hw_usb_read_fifoctr */
+}
+/******************************************************************************
+ End of function hw_usb_read_fifoctr
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_set_bval
@@ -632,7 +594,10 @@ void hw_usb_set_bval (uint16_t pipemode)
     p_reg = (uint16_t *) hw_usb_get_fifoctr_adr(pipemode);
 
     (*p_reg) |= USB_BVAL;
-} /* End of function hw_usb_set_bval */
+}
+/******************************************************************************
+ End of function hw_usb_set_bval
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_set_bclr
@@ -648,21 +613,9 @@ void hw_usb_set_bclr (uint16_t pipemode)
     p_reg = (uint16_t *) hw_usb_get_fifoctr_adr(pipemode);
 
     *p_reg = USB_BCLR;
-} /* End of function hw_usb_set_bclr */
-
-/******************************************************************************
- Function Name   : hw_usb_write_intenb
- Description     : Data is written to INTENB register, 
-                 : enabling/disabling the various USB interrupts.
- Arguments       : uint16_t  data  : The value to write.
- Return value    : none
- ******************************************************************************/
-void hw_usb_write_intenb (uint16_t data)
-{
-    USB0.INTENB0.WORD = data;
 }
 /******************************************************************************
- End of function hw_usb_write_intenb
+ End of function hw_usb_set_bclr
  ******************************************************************************/
 
 /******************************************************************************
@@ -676,7 +629,10 @@ void hw_usb_write_intenb (uint16_t data)
 void hw_usb_set_intenb (uint16_t data)
 {
     USB0.INTENB0.WORD |= data;
-} /* End of function hw_usb_set_intenb */
+}
+/******************************************************************************
+ End of function hw_usb_set_intenb
+ ******************************************************************************/
 
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
 /******************************************************************************
@@ -689,8 +645,11 @@ void hw_usb_set_intenb (uint16_t data)
 void hw_usb_clear_enb_vbse (void)
 {
     USB0.INTENB0.WORD &= (~USB_VBSE);
-} /* End of function hw_usb_clear_enb_vbse */
 
+}
+/******************************************************************************
+ End of function hw_usb_clear_enb_vbse
+******************************************************************************/
 /******************************************************************************
  Description     : Clear the SOFE-bit of INTENB register,
  : to prohibit Frame Number Update interrupts.
@@ -702,21 +661,10 @@ void hw_usb_clear_enb_sofe (void)
 {
     USB0.INTENB0.WORD &= (~USB_SOFE);
 
-} /* End of function hw_usb_clear_enb_sofe */
-
+}
 /******************************************************************************
- Function Name   : hw_usb_write_brdyenb
- Description     : Data is written to BRDYENB register, 
-                 : enabling/disabling each respective pipe's BRDY interrupt. 
-                 : (The BRDY interrupt indicates that a FIFO port is accessible.)
- Arguments       : uint16_t  data   : Setting value
- Return value    : none
+ End of function hw_usb_clear_enb_sofe
  ******************************************************************************/
-void hw_usb_write_brdyenb (uint16_t data)
-{
-    USB0.BRDYENB.WORD = data;
-
-}  /* End of function hw_usb_write_brdyenb */
 
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 
@@ -730,7 +678,10 @@ void hw_usb_write_brdyenb (uint16_t data)
 void hw_usb_set_brdyenb (uint16_t pipeno)
 {
     USB0.BRDYENB.WORD |= (1 << pipeno);
-} /* End of function hw_usb_set_brdyenb */
+}
+/******************************************************************************
+ End of function hw_usb_set_brdyenb
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_clear_brdyenb
@@ -742,22 +693,10 @@ void hw_usb_set_brdyenb (uint16_t pipeno)
 void hw_usb_clear_brdyenb (uint16_t pipeno)
 {
     USB0.BRDYENB.WORD &= (~(1 << pipeno));
-} /* End of function hw_usb_clear_brdyenb */
-
-#if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
+}
 /******************************************************************************
- Function Name   : hw_usb_write_nrdyenb
- Description     : Data is written to NRDYENB register, 
-                 : enabling/disabling each respective pipe's NRDY interrupt
- Arguments       : uint16_t  data   : Setting value
- Return value    : none
+ End of function hw_usb_clear_brdyenb
  ******************************************************************************/
-void hw_usb_write_nrdyenb (uint16_t data)
-{
-    USB0.NRDYENB.WORD = data;
-} /* End of function hw_usb_write_nrdyenb */
-
-#endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 
 /******************************************************************************
  Function Name   : hw_usb_set_nrdyenb
@@ -769,7 +708,10 @@ void hw_usb_write_nrdyenb (uint16_t data)
 void hw_usb_set_nrdyenb (uint16_t pipeno)
 {
     USB0.NRDYENB.WORD |= (1 << pipeno);
-} /* End of function hw_usb_set_nrdyenb */
+}
+/******************************************************************************
+ End of function hw_usb_set_nrdyenb
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_clear_nrdyenb
@@ -782,25 +724,10 @@ void hw_usb_clear_nrdyenb (uint16_t pipeno)
 {
 
     USB0.NRDYENB.WORD &= (~(1 << pipeno));
-
-} /* End of function hw_usb_clear_nrdyenb */
-
-#if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
+}
 /******************************************************************************
- Function Name   : hw_usb_write_bempenb
- Description     : Data is written to BEMPENB register, 
-                 : enabling/disabling each respective pipe's BEMP interrupt. 
-                 : (The BEMP interrupt indicates that the USB buffer is empty, 
-                 : and so the FIFO can now be written to.)
- Arguments       : uint16_t  data   : The value to write.
- Return value    : none
+ End of function hw_usb_clear_nrdyenb
  ******************************************************************************/
-void hw_usb_write_bempenb (uint16_t data)
-{
-    USB0.BEMPENB.WORD = data;
-} /* End of function hw_usb_write_bempenb */
-
-#endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 
 /******************************************************************************
  Function Name   : hw_usb_set_bempenb
@@ -814,8 +741,10 @@ void hw_usb_set_bempenb (uint16_t pipeno)
 
     g_usb_cstd_bemp_skip[pipeno] = USB_OFF;
     USB0.BEMPENB.WORD |= (1 << pipeno);
-
-} /* End of function hw_usb_set_bempenb */
+}
+/******************************************************************************
+ End of function hw_usb_set_bempenb
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_clear_bempenb
@@ -827,8 +756,12 @@ void hw_usb_set_bempenb (uint16_t pipeno)
 void hw_usb_clear_bempenb (uint16_t pipeno)
 {
     USB0.BEMPENB.WORD &= (~(1 << pipeno));
-} /* End of function hw_usb_clear_bempenb */
+}
+/******************************************************************************
+ End of function hw_usb_clear_bempenb
+ ******************************************************************************/
 
+#if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
 /******************************************************************************
  Function Name   : hw_usb_read_intsts
  Description     : Returns INTSTS0 register content.
@@ -838,18 +771,12 @@ void hw_usb_clear_bempenb (uint16_t pipeno)
 uint16_t hw_usb_read_intsts (void)
 {
     return USB0.INTSTS0.WORD;
-} /* End of function hw_usb_read_intsts */
-
+}
 /******************************************************************************
- Function Name   : hw_usb_write_intsts
- Description     : Data is written to INTSTS0 register.
- Arguments       : uint16_t  data  : The value to write.      
- Return value    : none
- ******************************************************************************/
-void hw_usb_write_intsts (uint16_t data)
-{
-    USB0.INTSTS0.WORD = data;
-} /* End of function hw_usb_write_intsts */
+ End of function hw_usb_read_intsts
+******************************************************************************/
+#endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI */
+
 
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
 /******************************************************************************
@@ -863,31 +790,10 @@ void hw_usb_clear_sts_sofr (void)
 {
     USB0.INTSTS0.WORD = (uint16_t) ~USB_SOFR;
 
-} /*  End of function hw_usb_clear_sts_sofr */
-
+}
 /******************************************************************************
- Function Name   : hw_usb_read_brdysts
- Description     : Returns BRDYSTS register content.
- Arguments       : none
- Return value    : BRDYSTS content
+ End of function hw_usb_clear_sts_sofr
  ******************************************************************************/
-uint16_t hw_usb_read_brdysts (void)
-{
-    return USB0.BRDYSTS.WORD;
-
-} /* End of function hw_usb_read_brdysts */
-
-/******************************************************************************
- Function Name   : hw_usb_write_brdysts
- Description     : Data is written to BRDYSTS register, to set the BRDY interrupt status.
- Arguments       : uint16_t  data  : The value to write.
- Return value    : none
- ******************************************************************************/
-void hw_usb_write_brdysts (uint16_t data)
-{
-    USB0.BRDYSTS.WORD = data;
-} /* End of function hw_usb_write_brdysts() */
-
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 
 /******************************************************************************
@@ -900,22 +806,10 @@ void hw_usb_write_brdysts (uint16_t data)
 void hw_usb_clear_sts_brdy (uint16_t pipeno)
 {
     USB0.BRDYSTS.WORD = (uint16_t) (~(1 << pipeno)) & USB_BRDYSTS_MASK;
-} /* End of function hw_usb_clear_sts_brdy */
-
-#if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
+}
 /******************************************************************************
- Function Name   : hw_usb_write_nrdy_sts
- Description     : Data is written to NRDYSTS register, to
-                 : set the NRDY interrupt status.
- Arguments       : uint16_t  data  : The value to write.
- Return value    : none
+ End of function hw_usb_clear_sts_brdy
  ******************************************************************************/
-void hw_usb_write_nrdy_sts (uint16_t data)
-{
-    USB0.NRDYSTS.WORD = data;
-} /*  End of function hw_usb_write_nrdy_sts */
-
-#endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 
 /******************************************************************************
  Function Name   : hw_usb_clear_status_nrdy
@@ -927,21 +821,10 @@ void hw_usb_write_nrdy_sts (uint16_t data)
 void hw_usb_clear_status_nrdy (uint16_t pipeno)
 {
     USB0.NRDYSTS.WORD = (uint16_t) ((~(1 << pipeno)) & USB_NRDYSTS_MASK);
-} /* End of function hw_usb_clear_status_nrdy */
-
-#if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
+}
 /******************************************************************************
- Function Name   : hw_usb_write_bempsts
- Description     : Data is written to BEMPSTS register, to set the BEMP interrupt status.
- Arguments       : uint16_t  data  : Setting value
- Return value    : none
+ End of function hw_usb_clear_status_nrdy
  ******************************************************************************/
-void hw_usb_write_bempsts (uint16_t data)
-{
-    USB0.BEMPSTS.WORD = data;
-} /* End of function hw_usb_write_bempsts */
-
-#endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 
 /******************************************************************************
  Function Name   : hw_usb_clear_status_bemp
@@ -953,7 +836,10 @@ void hw_usb_write_bempsts (uint16_t data)
 void hw_usb_clear_status_bemp (uint16_t pipeno)
 {
     USB0.BEMPSTS.WORD = (uint16_t) ((~(1 << pipeno)) & USB_BEMPSTS_MASK);
-} /* End of function hw_usb_clear_status_bemp */
+}
+/******************************************************************************
+ End of function hw_usb_clear_status_bemp
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_read_frmnum
@@ -976,7 +862,10 @@ uint16_t hw_usb_read_frmnum (void)
 uint16_t hw_usb_read_usbreq (void)
 {
     return (uint16_t)USB0.USBREQ.WORD;
-} /* End of function hw_usb_read_usbreq */
+}
+/******************************************************************************
+ End of function hw_usb_read_usbreq
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_read_usbval
@@ -987,7 +876,10 @@ uint16_t hw_usb_read_usbreq (void)
 uint16_t hw_usb_read_usbval (void)
 {
     return (uint16_t)USB0.USBVAL;
-} /* End of function hw_usb_read_usbval */
+}
+/******************************************************************************
+ End of function hw_usb_read_usbval
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_read_usbindx
@@ -998,7 +890,10 @@ uint16_t hw_usb_read_usbval (void)
 uint16_t hw_usb_read_usbindx (void)
 {
     return (uint16_t)USB0.USBINDX;
-} /* End of function hw_usb_read_usbindx */
+}
+/******************************************************************************
+ End of function hw_usb_read_usbindx
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_read_usbleng
@@ -1009,19 +904,11 @@ uint16_t hw_usb_read_usbindx (void)
 uint16_t hw_usb_read_usbleng (void)
 {
     return (uint16_t)USB0.USBLENG;
-} /* End of function hw_usb_read_usbleng */
-#endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_REPI */
-
+}
 /******************************************************************************
- Function Name   : hw_usb_read_dcpcfg
- Description     : Returns DCPCFG register content.
- Arguments       : none
- Return value    : DCPCFG content
+ End of function hw_usb_read_usbleng
  ******************************************************************************/
-uint16_t hw_usb_read_dcpcfg (void)
-{
-    return (uint16_t)USB0.DCPCFG.WORD;
-} /* End of function hw_usb_read_dcpcfg */
+#endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_REPI */
 
 /******************************************************************************
  Function Name   : hw_usb_write_dcpcfg
@@ -1032,18 +919,24 @@ uint16_t hw_usb_read_dcpcfg (void)
 void hw_usb_write_dcpcfg (uint16_t data)
 {
     USB0.DCPCFG.WORD = data;
-} /* End of function hw_usb_write_dcpcfg */
+}
+/******************************************************************************
+ End of function hw_usb_write_dcpcfg
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_read_dcpmaxp
  Description     : Returns DCPMAXP register content.
- Arguments       : void
+ Arguments       : none
  Return value    : DCPMAXP content
  ******************************************************************************/
 uint16_t hw_usb_read_dcpmaxp (void)
 {
     return (uint16_t)USB0.DCPMAXP.WORD;
-} /* End of function hw_usb_read_dcpmaxp */
+}
+/******************************************************************************
+ End of function hw_usb_read_dcpmaxp
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_write_dcpmxps
@@ -1054,7 +947,10 @@ uint16_t hw_usb_read_dcpmaxp (void)
 void hw_usb_write_dcpmxps (uint16_t data)
 {
     USB0.DCPMAXP.WORD = data;
-} /* End of function hw_usb_write_dcpmxps */
+}
+/******************************************************************************
+ End of function hw_usb_write_dcpmxps
+ ******************************************************************************/
 
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
 /******************************************************************************
@@ -1066,7 +962,10 @@ void hw_usb_write_dcpmxps (uint16_t data)
 uint16_t hw_usb_read_dcpctr (void)
 {
     return (uint16_t)USB0.DCPCTR.WORD;
-} /* End of function hw_usb_read_dcpctr */
+}
+/******************************************************************************
+ End of function hw_usb_read_dcpctr
+ ******************************************************************************/
 
 #endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_REPI */
 
@@ -1079,7 +978,10 @@ uint16_t hw_usb_read_dcpctr (void)
 void hw_usb_write_pipesel (uint16_t data)
 {
     USB0.PIPESEL.WORD = data;
-} /* End of function hw_usb_write_pipesel */
+}
+/******************************************************************************
+ End of function hw_usb_write_pipesel
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_read_pipecfg
@@ -1090,7 +992,10 @@ void hw_usb_write_pipesel (uint16_t data)
 uint16_t hw_usb_read_pipecfg (void)
 {
     return (uint16_t)USB0.PIPECFG.WORD;
-} /* End of function hw_usb_read_pipecfg */
+}
+/******************************************************************************
+ End of function hw_usb_read_pipecfg
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_write_pipecfg
@@ -1101,7 +1006,11 @@ uint16_t hw_usb_read_pipecfg (void)
 void hw_usb_write_pipecfg (uint16_t data)
 {
     USB0.PIPECFG.WORD = data;
-} /*  End of function hw_usb_write_pipecfg */
+}
+/******************************************************************************
+ End of function hw_usb_write_pipecfg
+ ******************************************************************************/
+
 
 /******************************************************************************
  Function Name   : hw_usb_read_pipemaxp
@@ -1112,7 +1021,10 @@ void hw_usb_write_pipecfg (uint16_t data)
 uint16_t hw_usb_read_pipemaxp (void)
 {
     return (uint16_t)USB0.PIPEMAXP.WORD;
-} /* End of function hw_usb_read_pipemaxp */
+}
+/******************************************************************************
+ End of function hw_usb_read_pipemaxp
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_write_pipemaxp
@@ -1123,7 +1035,10 @@ uint16_t hw_usb_read_pipemaxp (void)
 void hw_usb_write_pipemaxp (uint16_t data)
 {
     USB0.PIPEMAXP.WORD = data;
-} /* End of function hw_usb_write_pipemaxp*/
+}
+/******************************************************************************
+ End of function hw_usb_write_pipemaxp
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_write_pipeperi
@@ -1134,7 +1049,10 @@ void hw_usb_write_pipemaxp (uint16_t data)
 void hw_usb_write_pipeperi (uint16_t data)
 {
     USB0.PIPEPERI.WORD = data;
-} /* End of function hw_usb_write_pipeperi*/
+}
+/******************************************************************************
+ End of function hw_usb_write_pipeperi
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_read_pipectr
@@ -1157,33 +1075,11 @@ uint16_t hw_usb_read_pipectr (uint16_t pipeno)
         p_reg = (uint16_t *)&(USB0.PIPE1CTR) + (pipeno - 1);
     }
     return *p_reg;
-} /*  End of function hw_usb_read_pipectr */
-
-#if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
+}
 /******************************************************************************
- Function Name   : hw_usb_write_pipectr
- Description     : Specified data is written to the specified pipe's PIPEPERI register.
- Arguments       : uint16_t  pipeno : Pipe number
-                 : uint16_t  data   : Setting value
- Return value    : none
+ End of function hw_usb_read_pipectr
  ******************************************************************************/
-void hw_usb_write_pipectr (uint16_t pipeno, uint16_t data)
-{
-    R_BSP_VOLATILE_EVENACCESS uint16_t *p_reg;
 
-    if (USB_PIPE0 == pipeno)
-    {
-        p_reg = (uint16_t *) &(USB0.DCPCTR);
-    }
-    else
-    {
-        p_reg = (uint16_t *) &(USB0.PIPE1CTR) + (pipeno - 1);
-    }
-    *p_reg = data;
-
-} /* End of function hw_usb_write_pipectr */
-
-#endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 
 /******************************************************************************
  Function Name   : hw_usb_set_aclrm
@@ -1198,7 +1094,10 @@ void hw_usb_set_aclrm (uint16_t pipeno)
 
     p_reg = (uint16_t *)&(USB0.PIPE1CTR) + (pipeno - 1);
     (*p_reg) |= USB_ACLRM;
-}  /*  End of function hw_usb_set_aclrm */
+}
+/******************************************************************************
+ End of function hw_usb_set_aclrm
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_clear_aclrm
@@ -1214,7 +1113,10 @@ void hw_usb_clear_aclrm (uint16_t pipeno)
 
     p_reg = (uint16_t *)&(USB0.PIPE1CTR) + (pipeno - 1);
     (*p_reg) &= (~USB_ACLRM);
-}  /* End of function hw_usb_clear_aclrm */
+}
+/******************************************************************************
+ End of function hw_usb_clear_aclrm
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_set_sqclr
@@ -1237,7 +1139,10 @@ void hw_usb_set_sqclr (uint16_t pipeno)
         p_reg = ((uint16_t *)&(USB0.PIPE1CTR) + (pipeno - 1));
         (*p_reg) |= USB_SQCLR;
     }
-} /* End of function hw_usb_set_sqclr*/
+}
+/******************************************************************************
+ End of function hw_usb_set_sqclr
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_set_sqset
@@ -1260,7 +1165,11 @@ void hw_usb_set_sqset (uint16_t pipeno)
         p_reg = ((uint16_t *)&(USB0.PIPE1CTR) + (pipeno - 1));
         (*p_reg) |= USB_SQSET;
     }
-} /* End of function hw_usb_set_sqset */
+
+}
+/******************************************************************************
+ End of function hw_usb_set_sqset
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_set_pid
@@ -1285,7 +1194,10 @@ void hw_usb_set_pid (uint16_t pipeno, uint16_t data)
 
     (*p_reg) &= (~USB_PID);
     (*p_reg) |= data;
-} /* End of function hw_usb_set_pid */
+}
+/******************************************************************************
+ End of function hw_usb_set_pid
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_clear_pid
@@ -1309,7 +1221,10 @@ void hw_usb_clear_pid (uint16_t pipeno, uint16_t data)
     }
 
     (*p_reg) &= (~data);
-} /* End of function hw_usb_clear_pid */
+}
+/******************************************************************************
+ End of function hw_usb_clear_pid
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_set_trenb
@@ -1324,7 +1239,10 @@ void hw_usb_set_trenb (uint16_t pipeno)
 
     p_reg = (uint16_t *)&(USB0.PIPE1TRE) + ((pipeno - 1) * 2);
     (*p_reg) |= USB_TRENB;
-} /* End of function hw_usb_set_trenb*/
+}
+/******************************************************************************
+ End of function hw_usb_set_trenb
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_clear_trenb
@@ -1339,7 +1257,10 @@ void hw_usb_clear_trenb (uint16_t pipeno)
 
     p_reg = (uint16_t *)&(USB0.PIPE1TRE) + ((pipeno - 1) * 2);
     (*p_reg) &= (~USB_TRENB);
-} /* End of function hw_usb_clear_trenb */
+}
+/******************************************************************************
+ End of function hw_usb_clear_trenb
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_set_trclr
@@ -1355,7 +1276,10 @@ void hw_usb_set_trclr (uint16_t pipeno)
     p_reg = (uint16_t *)&(USB0.PIPE1TRE) + ((pipeno - 1) * 2);
 
     (*p_reg) |= USB_TRCLR;
-} /* End of function hw_usb_set_trclr */
+}
+/******************************************************************************
+ End of function hw_usb_set_trclr
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_write_pipetrn
@@ -1371,11 +1295,43 @@ void hw_usb_write_pipetrn (uint16_t pipeno, uint16_t data)
 
     p_reg = (uint16_t *)&(USB0.PIPE1TRN) + ((pipeno - 1) * 2);
     *p_reg = data;
-} /*  End of function hw_usb_write_pipetrn */
-
+}
+/******************************************************************************
+ End of function hw_usb_write_pipetrn
+ ******************************************************************************/
 
 
 #if USB_CFG_BC == USB_CFG_ENABLE
+#if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
+/******************************************************************************
+Function Name   : hw_usb_set_bcctrl
+Description     : Set BCCTRL's bits.
+Arguments       : uint16_t      data   : Setting value
+Return value    : none
+******************************************************************************/
+void    hw_usb_set_bcctrl (uint16_t data)
+{
+    USB0.USBBCCTRL0.WORD |= data;
+}
+/******************************************************************************
+ End of function hw_usb_set_bcctrl
+ ******************************************************************************/
+
+/******************************************************************************
+Function Name   : hw_usb_clear_bcctrl
+Description     : Clear BCCTRL's bits.
+Arguments       : uint16_t  data    : Setting value
+Return value    : none
+******************************************************************************/
+void    hw_usb_clear_bcctrl (uint16_t data)
+{
+    USB0.USBBCCTRL0.WORD &= (~data);
+}
+/******************************************************************************
+ End of function hw_usb_clear_bcctrl
+ ******************************************************************************/
+#endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI */
+
 /******************************************************************************
  Function Name   : hw_usb_read_bcctrl
  Description     : Returns BCCTRL register content.
@@ -1385,7 +1341,10 @@ void hw_usb_write_pipetrn (uint16_t pipeno, uint16_t data)
 uint16_t hw_usb_read_bcctrl (void)
 {
     return USB0.USBBCCTRL0.WORD;
-} /* End of function hw_usb_read_bcctrl() */
+}
+/******************************************************************************
+ End of function hw_usb_read_bcctrl
+ ******************************************************************************/
 #endif  /* USB_CFG_BC == USB_CFG_ENABLE */
 
 
@@ -1400,7 +1359,10 @@ uint16_t hw_usb_read_bcctrl (void)
 void hw_usb_set_vdmsrce (void)
 {
     USB0.USBBCCTRL0.WORD |= USB_VDMSRCE;
-} /* End of function hw_usb_set_vdmsrce */
+}
+/******************************************************************************
+ End of function hw_usb_set_vdmsrce
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_clear_vdmsrce
@@ -1411,7 +1373,10 @@ void hw_usb_set_vdmsrce (void)
 void hw_usb_clear_vdmsrce (void)
 {
     USB0.USBBCCTRL0.WORD &= (~USB_VDMSRCE);
-} /* End of function hw_usb_clear_vdmsrce */
+}
+/******************************************************************************
+ End of function hw_usb_clear_vdmsrce
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_set_idpsinke
@@ -1422,7 +1387,10 @@ void hw_usb_clear_vdmsrce (void)
 void hw_usb_set_idpsinke (void)
 {
     USB0.USBBCCTRL0.WORD |= USB_IDPSINKE;
-} /* End of function hw_usb_set_idpsinke */
+}
+/******************************************************************************
+ End of function hw_usb_set_idpsinke
+ ******************************************************************************/
 
 /******************************************************************************
  Function Name   : hw_usb_clear_idpsinke
@@ -1433,7 +1401,10 @@ void hw_usb_set_idpsinke (void)
 void hw_usb_clear_idpsinke (void)
 {
     USB0.USBBCCTRL0.WORD &= (~USB_IDPSINKE);
-} /* End of function hw_usb_clear_idpsinke */
+}
+/******************************************************************************
+ End of function hw_usb_clear_idpsinke
+ ******************************************************************************/
 
 #endif  /* USB_CFG_BC == USB_CFG_ENABLE */
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */

@@ -47,6 +47,7 @@
 *                              Added "WAIT_LOOP" comments for every loop operation.
 *		  : 31.08.2019 1.16    Supported RX72M device.
 *                              Added Bypass setting.
+*		  : 30.11.2019 1.17    Supported RX72N device.
 **********************************************************************************************************************/
 
 #ifndef _PTP_CONFIG_H

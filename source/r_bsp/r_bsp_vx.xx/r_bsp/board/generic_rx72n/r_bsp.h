@@ -24,6 +24,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 08.10.2019 1.00     First Release
+*         : 23.04.2021 1.01     Added the include of fsp_common_api.h and r_fsp_error.h.
 ***********************************************************************************************************************/
 
 /* Make sure that no other platforms have already been defined. Do not touch this! */
@@ -74,6 +75,9 @@ INCLUDE APPROPRIATE MCU AND BOARD FILES
 #include    "mcu/all/r_bsp_software_interrupt.h"
 #include    "mcu/all/r_rx_intrinsic_functions.h"
 #include    "mcu/all/r_rtos.h"
+
+#include    "mcu/all/fsp_common_api.h"
+#include    "mcu/all/r_fsp_error.h"
 
 #ifdef __cplusplus
 }

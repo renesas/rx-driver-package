@@ -24,6 +24,7 @@
 *           28.09.2018 1.00    Initial Release.
 *                              Fix GSCE Code Checker errors.
 *           20.05.2019 3.00    Added support for GNUC and ICCRX.
+*           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
 ***********************************************************************************************************************/
 
 #ifndef SCI_RX66T_H
@@ -89,6 +90,23 @@ Macro definitions
 Typedef definitions
 ******************************************************************************/
 
+typedef struct st_scif_fifo_ctrl
+{
+    uint8_t     *p_tx_buf;            /* user's buffer */
+    uint8_t     *p_rx_buf;            /* user's buffer */
+    uint16_t    tx_cnt;             /* bytes remaining to add to FIFO */
+    uint16_t    rx_cnt;             /* bytes waiting to receive from FIFO */
+#if (TX_DTC_DMACA_ENABLE) || (RX_DTC_DMACA_ENABLE)
+    uint8_t     *p_tx_fraction_buf;
+    uint8_t     *p_rx_fraction_buf;
+    uint16_t    tx_fraction;
+    uint16_t    rx_fraction;
+#endif
+    uint16_t    total_length;       /* used for DTC in txi_handler */
+} sci_fifo_ctrl_t;
+
+/* CHANNEL CONTROL BLOCK */
+
 /* ROM INFO */
 
 typedef struct st_sci_ch_rom    /* SCI ROM info for channel control block */
@@ -118,6 +136,27 @@ typedef struct st_sci_ch_rom    /* SCI ROM info for channel control block */
     volatile  uint32_t R_BSP_EVENACCESS_SFR *icu_grp;
     uint8_t                         rxi_en_mask;    /* ICU enable/disable rxi mask */
     uint8_t                         txi_en_mask;    /* ICU enable/disable txi mask */
+
+    /*
+        * In case using DTC/DMAC
+     */
+#if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+    uint8_t                         dtc_dmaca_tx_enable;
+    uint8_t                         dtc_dmaca_rx_enable;
+    uint8_t                         dtc_dmaca_tx_block_size;
+    uint8_t                         dtc_dmaca_rx_block_size;
+#endif
+#if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+    dtc_activation_source_t         dtc_tx_act_src;
+    dtc_activation_source_t         dtc_rx_act_src;
+#endif
+#if ((TX_DTC_DMACA_ENABLE & 0x02) || (RX_DTC_DMACA_ENABLE & 0x02))
+    dmaca_activation_source_t       dmaca_tx_act_src;
+    dmaca_activation_source_t       dmaca_rx_act_src;
+    uint8_t                         dmaca_tx_channel;
+    uint8_t                         dmaca_rx_channel;
+    uint8_t                         chan;
+#endif
 } sci_ch_rom_t;
 
 
@@ -157,6 +196,13 @@ typedef struct st_sci_ch_ctrl       /* SCI channel control (for handle) */
     uint8_t         rx_curr_thresh; /* RX FIFO threshold(current) */
     uint8_t         tx_dflt_thresh; /* TX FIFO threshold(default) */
     uint8_t         tx_curr_thresh; /* TX FIFO threshold(current) */
+#endif
+#if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+    uint8_t                         qindex_app_tx;
+    uint8_t                         qindex_int_tx;
+    uint8_t                         qindex_app_rx;
+    uint8_t                         qindex_int_rx;
+    sci_fifo_ctrl_t                queue[2];
 #endif
 } sci_ch_ctrl_t;
 

@@ -23,6 +23,7 @@
 /**********************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 26.07.2019 1.00     First Release
+*         : 20.11.2020 1.01     Fixed the vbatt_voltage_stability_wait function for updated TN-RX*-A0214A.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -68,7 +69,6 @@ void R_BSP_VbattInitialSetting(void)
 }
 #endif
 
-#if (BSP_CFG_VBATT_ENABLE == 0)
 /***********************************************************************************************************************
 * Function Name: vbatt_voltage_stability_wait
 * Description  : Wait for power voltage stabilization of VBATT function.
@@ -77,11 +77,15 @@ void R_BSP_VbattInitialSetting(void)
 ***********************************************************************************************************************/
 void vbatt_voltage_stability_wait (void)
 {
+#if (BSP_CFG_VBATT_ENABLE == 0)
     /* Protect off. DO NOT USE R_BSP_RegisterProtectDisable()! (not initialized yet) */
     SYSTEM.PRCR.WORD = 0xA508;
 
     /* Disable vbatt function. */
     SYSTEM.VBATTCR.BIT.VBATTDIS = 1;
+
+    /* Wait 5 ms. */
+    R_BSP_SoftwareDelay((uint32_t)5, BSP_DELAY_MILLISECS);
 
     /* WAIT_LOOP */
     while (0 != SYSTEM.VBATTSR.BIT.VBATRLVDETF)
@@ -92,7 +96,10 @@ void vbatt_voltage_stability_wait (void)
 
     /* Protect on. */
     SYSTEM.PRCR.WORD = 0xA500;
+#elif (BSP_CFG_VBATT_ENABLE == 1)
+    /* Wait 30 us. */
+    R_BSP_SoftwareDelay((uint32_t)30, BSP_DELAY_MICROSECS);
+#endif /* (BSP_CFG_VBATT_ENABLE == 1) */
 
 } /* End of function vbatt_voltage_stability_wait() */
-#endif /* (defined(BSP_CFG_VBATT_ENABLE) && (BSP_CFG_VBATT_ENABLE == 0)) */
 

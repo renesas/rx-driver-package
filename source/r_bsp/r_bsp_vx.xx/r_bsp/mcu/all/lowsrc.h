@@ -25,6 +25,9 @@
 *         : 28.02.2019 2.00     Merged processing of all devices.
 *                               Added support for GNUC and ICCRX.
 *                               Fixed coding style.
+*         : 31.07.2020 2.01     Fixed an issue that caused build errors when the _REENTRANT option was specified in 
+*                               the CCRX compiler.
+*         : 29.01.2021 3.01     Added tha __write function and __read function for ICCRX.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -58,9 +61,9 @@ long write(long  fileno, const unsigned char *buf, long  count);
 long read(long fileno, unsigned char *buf, long count);
 long lseek(long fileno, long offset, long base);
 #ifdef _REENTRANT
-long *errno_addr(void)
-long wait_sem(long semnum)
-long signal_sem(long semnum)
+long *errno_addr(void);
+long wait_sem(long semnum);
+long signal_sem(long semnum);
 #endif
 #endif /* defined(__CCRX__) */
 
@@ -74,6 +77,11 @@ void fstat(void);
 void isatty(void);
 void lseek(void);
 #endif /* defined(__GNUC__) */
+
+#if defined(__ICCRX__)
+size_t __write(int handle, const unsigned char *buf, size_t bufSize);
+size_t __read(int handle, unsigned char *buf, size_t bufSize);
+#endif /* defined(__ICCRX__) */
 
 #endif  /* End of multiple inclusion prevention macro */
 

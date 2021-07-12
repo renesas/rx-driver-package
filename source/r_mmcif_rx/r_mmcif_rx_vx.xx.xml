@@ -43,8 +43,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_mmcif_rx</name>
-        <version>1.07</version>
-        <zipsource>r_mmcif_rx_v1.07.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_mmcif_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>5.50</version>

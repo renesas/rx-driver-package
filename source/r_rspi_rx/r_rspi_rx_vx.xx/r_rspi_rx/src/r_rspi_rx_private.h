@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013(2014-2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013(2014-2020) Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rspi_rx_private.h
@@ -39,6 +39,8 @@
 *         : 20.06.2019 2.02     Supported RX23W.
 *         : 30.07.2019 2.03     Supported RX72M.
 *         : 22.11.2019 2.04     Supported RX72N and RX66N.
+*         : 10.03.2020 2.05     Supported RX23E-A.
+*         : 10.09.2020 3.00     Deleted spti_dmacdtc_flg and spri_dmacdtc_flg in rspi_config_block_t.
 ***********************************************************************************************************************/
 
 #ifndef RSPI_PRIVATE_H
@@ -65,7 +67,8 @@ Macro definitions
    || defined(BSP_MCU_RX62T) || defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX113) \
    || defined(BSP_MCU_RX231) || defined(BSP_MCU_RX230) || defined(BSP_MCU_RX130) \
    || defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX24U) \
-   || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX23W)
+   || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX23W) \
+   || defined(BSP_MCU_RX23E_A)
 
 #define RSPI_MAX_CHANNELS   (1)
 #else
@@ -220,8 +223,6 @@ typedef struct rspi_config_block_s
     uint8_t current_slave;  // Number of the currently assigned slave. 
     bool rspi_chnl_opened;  // This variable determines whether the peripheral has already been initialized. 
     void   (*pcallback)(void *pcbdat); // pointer to user callback function. 
-    rspi_trans_flg_t spti_dmacdtc_flg; // DMAC/DTC transfer flag
-    rspi_trans_flg_t spri_dmacdtc_flg; // DMAC/DTC receive flag
 } rspi_config_block_t;
 
 #endif /* RSPI_PRIVATE_H */

@@ -182,7 +182,7 @@ bsp_int_ctrl_t int_ctrl;
  *****************************************************************************/
 
 
-#endif /* defined(BSP_MCU_RX231) */
+#endif /* defined(BSP_MCU_RX23W) */
 
 /* End of File */
 

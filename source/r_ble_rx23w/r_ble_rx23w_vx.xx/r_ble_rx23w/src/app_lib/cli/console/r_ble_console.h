@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name: r_ble_console.h
@@ -56,6 +56,10 @@
 extern volatile bool g_cli_tx_flg;
 extern volatile bool g_cli_rx_flg;
 
+/*******************************************************************************************************************//**
+ * The callback invoked when the CLI event (SCI interrupt) trigger
+***********************************************************************************************************************/
+typedef void (*ble_cli_event_cb_t)(void);
 
 /*********************************************************************************************************************
  * Function Name: console_init
@@ -64,6 +68,14 @@ extern volatile bool g_cli_rx_flg;
  * Return Value : None
  ********************************************************************************************************************/
 void console_init(void);
+
+/*********************************************************************************************************************
+ * Function Name: console_register_cb
+ * Description  : Register console event callback function
+ * Arguments    : cb       - callback pointer
+ * Return Value : none
+ ********************************************************************************************************************/
+void console_register_event_cb(ble_cli_event_cb_t cb);
 
 /*********************************************************************************************************************
  * Function Name: console_terminate

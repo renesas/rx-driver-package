@@ -42,6 +42,8 @@
 *                               usb_lcd_clock_source_select function.
 *                               Fixed warning of clock_source_select function with IAR compiler.
 *         : 14.02.2020 2.02     Fixed warning of clock_source_select function with CCRX and IAR compiler.
+*         : 29.01.2021 2.03     Fixed the initialization settings of sub-clock for Technical Update Information
+*                               (TN-RX*-A0238B).
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -532,6 +534,13 @@ static void clock_source_select (void)
 
         /* WAIT_LOOP */
         while (0 != RTC.RCR2.BIT.START)
+        {
+            /* Confirm that the written value can be read correctly. */
+            R_BSP_NOP();
+        }
+
+        /* WAIT_LOOP */
+        while (0 != RTC.RCR2.BIT.CNTMD)
         {
             /* Confirm that the written value can be read correctly. */
             R_BSP_NOP();

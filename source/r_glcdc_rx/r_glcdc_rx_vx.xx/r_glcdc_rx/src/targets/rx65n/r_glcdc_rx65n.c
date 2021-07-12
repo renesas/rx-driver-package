@@ -14,34 +14,35 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
+ * Copyright (C) 2017-2020 Renesas Electronics Corporation. All rights reserved.
+ **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_glcdc_rx65n.c
- * Version      : 1.30
+ * Version      : 1.40
  * Description  : Internal function program using in GLCDC API functions.
- ************************************************************************************************************************/
+ **********************************************************************************************************************/
 /***********************************************************************************************************************
  * History : DD.MM.YYYY Version   Description
  *         : 24.02.2017 1.00      First Release
  *         : 04.04.2019 1.10      Added support for GNUC and ICCRX.
  *         : 20.09.2019 1.30      Added the interrupt control processing to before and after 
  *                                GROUP Interrupt request(EN()) executing.
+ *         : 30.06.2020 1.40      Fixed preprocessor condition of BSP version.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
  Includes <System Includes> , "Project Includes"
- ************************************************************************************************************************/
+ **********************************************************************************************************************/
 #include "../../r_glcdc_private.h"
 
 /* Check MCU Group */
 #if defined(BSP_MCU_RX65N_2MB)
 /***********************************************************************************************************************
  Imported global variables and functions (from other files)
- ***********************************************************************************************************************/
+ **********************************************************************************************************************/
 
 /***********************************************************************************************************************
  Private global variables and functions
- ***********************************************************************************************************************/
+ **********************************************************************************************************************/
 
 /*******************************************************************************
  * Outline      : Interrupt setting.
@@ -57,7 +58,7 @@ void r_glcdc_interrupt_setting(glcdc_interrupt_cfg_t const * const p_interrupt)
 {
     bsp_int_ctrl_t grpal1;
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
     bsp_int_ctrl_t int_ctrl;
 #endif
 
@@ -72,7 +73,7 @@ void r_glcdc_interrupt_setting(glcdc_interrupt_cfg_t const * const p_interrupt)
         b0     VPOSINTEN  - VPOS Interrupt Enable. - Enable VPOS interrupt request. */
         GLCDC.INTEN.BIT.VPOSINTEN = 1;
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
         R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 #endif
 
@@ -80,7 +81,7 @@ void r_glcdc_interrupt_setting(glcdc_interrupt_cfg_t const * const p_interrupt)
         b8 EN8 - Interrupt Request Enable 8 - Interrupt request is enabled. */
         EN(GLCDC,VPOS) = 1;
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
         R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 #endif
 
@@ -91,7 +92,7 @@ void r_glcdc_interrupt_setting(glcdc_interrupt_cfg_t const * const p_interrupt)
         b0 VPOSINTEN  - VPOS Interrupt Enable. - Disable VPOS interrupt request. */
         GLCDC.INTEN.BIT.VPOSINTEN = 0;
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
         R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 #endif        
 
@@ -99,7 +100,7 @@ void r_glcdc_interrupt_setting(glcdc_interrupt_cfg_t const * const p_interrupt)
         b8 EN8 - Interrupt Request Enable 8 - Interrupt request is disabled. */
         EN(GLCDC,VPOS) = 0;
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
         R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 #endif
 
@@ -119,7 +120,7 @@ void r_glcdc_interrupt_setting(glcdc_interrupt_cfg_t const * const p_interrupt)
         b1 GR1UFINTEN - GR1UF Interrupt enable. */
         GLCDC.INTEN.BIT.GR1UFINTEN = 1;
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
         R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 #endif    
 
@@ -127,7 +128,7 @@ void r_glcdc_interrupt_setting(glcdc_interrupt_cfg_t const * const p_interrupt)
         b9 EN9 - Interrupt Request Enable 9 - Interrupt request is enabled. */
         EN(GLCDC,GR1UF) = 1;
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
         R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 #endif
     }
@@ -137,7 +138,7 @@ void r_glcdc_interrupt_setting(glcdc_interrupt_cfg_t const * const p_interrupt)
         b1 GR1UFINTEN - GR1UF Interrupt disable. */
         GLCDC.INTEN.BIT.GR1UFINTEN = 0;
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
         R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 #endif  
 
@@ -145,7 +146,7 @@ void r_glcdc_interrupt_setting(glcdc_interrupt_cfg_t const * const p_interrupt)
         b9 EN9 - Interrupt Request Enable 9 - Interrupt request is disabled. */
         EN(GLCDC,GR1UF) = 0;
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
         R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 #endif
 
@@ -165,7 +166,7 @@ void r_glcdc_interrupt_setting(glcdc_interrupt_cfg_t const * const p_interrupt)
         b2 GR2UFINTEN - GR2UF Interrupt enable. */
         GLCDC.INTEN.BIT.GR2UFINTEN = 1;
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
         R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 #endif
 
@@ -173,7 +174,7 @@ void r_glcdc_interrupt_setting(glcdc_interrupt_cfg_t const * const p_interrupt)
         b10 EN10 - Interrupt Request Enable 10 - Interrupt request is enabled. */
         EN(GLCDC,GR2UF) = 1;
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
         R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 #endif
     }
@@ -183,7 +184,7 @@ void r_glcdc_interrupt_setting(glcdc_interrupt_cfg_t const * const p_interrupt)
         b2 GR2UFINTEN - GR2UF Interrupt disable. */
         GLCDC.INTEN.BIT.GR2UFINTEN = 0;
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
         R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 #endif
 
@@ -191,7 +192,7 @@ void r_glcdc_interrupt_setting(glcdc_interrupt_cfg_t const * const p_interrupt)
         b10 EN10 - Interrupt Request Enable 10 - Interrupt request is disabled. */
         EN(GLCDC,GR2UF) = 0;
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
         R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 #endif
 

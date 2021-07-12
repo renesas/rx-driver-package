@@ -32,6 +32,7 @@
 *                              Changed MINT interrupt handler operation.
 *		  : 31.08.2019 1.13    Supported RX72M device.
 *                              Added Bypass setting.
+*		  : 30.11.2019 1.14    Supported RX72N device.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -64,7 +65,7 @@ Private global variables and functions
  
 /***********************************************************************************************************************
 * Function Name: ptp_dev_enab
-* Description  : Enable the EPTPC of RX64M/71M/72M
+* Description  : Enable the EPTPC of RX64M/71M/72M/72N
 * Return Value : None
 ***********************************************************************************************************************/
 void ptp_dev_enab(void)
@@ -83,7 +84,7 @@ void ptp_dev_enab(void)
 		R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR); /* WP ON */
 	}
 
-#if (1 == BSP_MCU_RX72M)
+#if ((1 == BSP_MCU_RX72M) || (1 == BSP_MCU_RX72N))
 	R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR); /* WP OFF */
 	MSTP_EPTPC = 0; /* Enable EPTPC */
 	R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR); /* WP ON */
@@ -93,7 +94,7 @@ void ptp_dev_enab(void)
 
 /***********************************************************************************************************************
 * Function Name: ptp_dev_start
-* Description  : Start RX64M/71M/72M Device for PTP driver
+* Description  : Start RX64M/71M/72M/72N Device for PTP driver
 *                - Set EPTPC interrupt level
 *                - Enable EPTPC interrupt
 *                - Register EPTPC Interrupt handler
@@ -134,7 +135,7 @@ ptpl_return_t ptp_dev_start(void)
 
 /***********************************************************************************************************************
 * Function Name: ptp_dev_stop
-* Description  : Stop RX64M/71M/72M Device for PTP driver
+* Description  : Stop RX64M/71M/72M/72N Device for PTP driver
 *                - Disable EPTPC interrupt
 *                - Release EPTPC Interrupt handler
 * Return Value : PTPL_OK

@@ -22,25 +22,24 @@
 /* --------------------------------------------- Global Definitions */
 
 /**
- * \defgroup ltrn_module LTRANSPORT (Mesh Lower Transport Layer)
+ * \defgroup ltrn_module Lower Transport Layer (LTRN)
+ * \ingroup mesh_core_block
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
- *  Mesh Lower Transport (LTRANSPORT) module to the Application and other upper
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
+ *  Mesh Lower Transport (LTRN) module to the Application and other upper
  *  layers of the stack.
- */
-
-/**
- * \defgroup ltrn_defines Defines
- * \{
- * Describes defines for the module.
  */
 
 /**
  * \defgroup ltrn_constants Constants
  * \{
- * Describes Constants defined by the module.
+ * \brief This section describes the EtherMind Mesh Lower Transport Layer Constants.
  */
 
+/**
+ * \name format types
+ * \{
+ */
 /** Unsgemented Access Message */
 #define MS_UNSEGMENTED_ACCESS_MSG     0x00
 
@@ -52,58 +51,40 @@
 
 /** Segmented Control Message */
 #define MS_SEGMENTED_CTRL_MSG         0x03
+/** \} */
 
-/** Transport Message Type */
-typedef UCHAR   MS_TRN_MSG_TYPE;
-
+/**
+ * \name message types
+ * \{
+ */
 /** Transport Layer Control Packet */
 #define MS_TRN_CTRL_PKT            0x01
 
 /** Access Layer Packet */
 #define MS_TRN_ACCESS_PKT          0x00
-
 /** \} */
-
-/**
- *  \defgroup ltrn_events Events
- *  \{
- *  This section lists the Asynchronous Events notified to Application by the
- *  Module.
- */
-/** \} */
-/** \} */
-
-/**
- *  \defgroup ltrn_marcos Utility Macros
- *  \{
- *  Initialization and other Utility Macros offered by the module.
- */
 
 /** \} */
 
 /* --------------------------------------------- Data Types/ Structures */
 
 /**
- *  \addtogroup ltrn_defines Defines
+ *  \addtogroup ltrn_types_structures Types/Structures
  *  \{
- */
-
-/**
- *  \addtogroup ltrn_structures Structures
- *  \{
+ *  \brief This section describes the EtherMind Mesh Lower Transport Layer Types/Structures.
  */
 /** LPN Handle */
 typedef UINT8 LPN_HANDLE;
 
-
-/** \} */
+/** Transport Message Type */
+typedef UCHAR   MS_TRN_MSG_TYPE;
 
 /** \} */
 
 /**
  *  \defgroup ltrn_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
+ *  \brief This section Describes the module Notification Callback interface offered
  *  to the application
  */
 /**
@@ -125,20 +106,24 @@ typedef API_RESULT (*LTRN_NTF_CB)
             UCHAR             * data_param,
             UINT16              data_len
         ) DECL_REENTRANT;
-/** \} */
 
 /**
- *  \addtogroup ltrn_defines Defines
- *  \{
+ * Lower TRANSPORT Transmit State Application Asynchronous Notification
+ * Callback.
+ *
+ * Lower TRANSPORT calls the registered callback to to indicate the current
+ * transmit state of the Lower TRANSPORT layer Segmentation & Reassembly
+ * Context to the application.
+ *
+ * \param subnet_handle     Associated Subnet Handle.
+ * \param status            status of the current Lower TRANSPORT layer
+ *                          Segmentation & Reassembly Context State.
  */
-
-/**
- *  \addtogroup ltrn_structures Structures
- *  \{
- */
-
-/** \} */
-
+typedef API_RESULT (*LTRN_TX_STATE_ACCESS_CB)
+        (
+            MS_SUBNET_HANDLE  subnet_handle,
+            UINT16            status
+        ) DECL_REENTRANT;
 /** \} */
 
 /** TCF (Transport Control Field) - Transport Field Value */
@@ -149,12 +134,13 @@ typedef API_RESULT (*LTRN_NTF_CB)
 /**
  * \defgroup ltrn_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Lower Transport Layer APIs.
+ * \brief This section describes the EtherMind Mesh Lower Transport Layer APIs.
  */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/** \cond DOC_EXCLUDE */
 /**
  *  \brief Register Inerface with Lower Transport Layer
  *
@@ -171,6 +157,7 @@ API_RESULT MS_ltrn_register
            (
                /* IN */ LTRN_NTF_CB    ltrn_cb
            );
+/** \endcond */
 
 /**
  *  \brief API to send transport PDUs
@@ -237,6 +224,29 @@ API_RESULT MS_ltrn_send_pdu
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
 API_RESULT MS_ltrn_clear_sar_contexts(void);
+
+/** \cond DOC_EXCLUDE */
+/**
+ *  \brief Register Inerface with Lower Transport Layer to fetch the current
+ *         transmit state.
+ *
+ *  \par Description
+ *  This routine registers interface with the Lower Transport Layer to fetch the current transmit
+ *  state of the Lower Transport Layer.
+ *
+ *  \param [in] tx_state_cb
+ *         Upper Layer Lower Transport TX state Notification Callback
+ *
+ *  \return API_SUCCESS when tx_state_cb is not null and the Lower Transport
+ *          Tx state is engaged or,
+ *          API_SUCCESS when tx_state_cb parameter is NULL or
+ *          API_FAILURE when Lower Transport Tx state is free.
+ */
+API_RESULT MS_ltrn_register_tx_state_access
+           (
+               /* IN */ LTRN_TX_STATE_ACCESS_CB    tx_state_cb
+           );
+/** \endcond */
 
 #ifdef __cplusplus
 };

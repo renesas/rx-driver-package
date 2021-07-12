@@ -15,14 +15,10 @@
 #define _H_MS_ERROR_
 
 /**
- * \addtogroup ms_common_defines Defines
+ * \defgroup MS_ERROR_CODES Error Code Definitions
+ * \ingroup ms_common_module
  * \{
- */
-
-/**
- * \defgroup MS_ERROR_CODES Mesh Error Codes
- * \{
- *  This section contains all the error codes defined for Mesh stack
+ *  \brief This section contains all the error codes defined for Mesh stack
  *  and profiles.
  *  <p>
  *  \anchor error_code_overview
@@ -64,16 +60,13 @@
  *    ... Correct !
  */
 
-/**
- * \defgroup ms_error_codes_defines Defines
- * \{
- */
-
 /** Definition of API_RESULT */
 
 #ifndef API_RESULT_DEFINED
 typedef UINT16    API_RESULT;
+/** \cond */
 #define API_RESULT_DEFINED
+/** \endcond */
 #endif /* API_RESULT_DEFINED */
 
 /* Definitions of API_SUCCESS & API_FAILURE */
@@ -89,31 +82,29 @@ typedef UINT16    API_RESULT;
 /** Status - 'Failure' */
 #define API_FAILURE             0xFFFF
 
-/** \} */
-
 /* ====================== EtherMind Module Error IDs ====================== */
 
 /**
  * \defgroup ms_error_codes_groups Error Grouping
+ * \ingroup ms_common_module
  * \{
  */
 
 /**
- * \defgroup ms_error_codes_groups_std Specification Error Codes (0x00 - 0x0F)
+ * \name Specification Error Codes (0x00XX - 0x0FXX)
  * Error IDs for Bluetooth Specification Defined Error Codes (0x00 - 0x0F).
  * \{
  */
 
 /** Error Codes for Mesh - \ref ms_error_codes_module_mesh */
 #define MS_ERR_ID                               0x0000
-/** \cond ignore */
-/** \endcond */
 
 /** \} */
 
+/** \cond */
 /**
- * \defgroup ms_error_codes_groups_core Core Modules (0x10 - 0x1F)
- * Error IDs for Mesh Core Modules (0x10 - 0x1F).
+ * \name Common Modules (0x10 - 0x1F)
+ * Error IDs for Mesh Common Modules (0x10 - 0x1F).
  * \{
  */
 
@@ -123,41 +114,47 @@ typedef UINT16    API_RESULT;
 #define TIMER_ERR_ID                            0x1200
 
 /** \} */
+/** \endcond */
 
 /**
- * \defgroup ms_error_codes_groups_protocols Protocols (0x20 - 0x3F)
+ * \name Protocols (0x20 - 0x3F)
  * Error IDs for Mesh Protocol Modules (0x20 - 0x3F).
  * \{
  */
 
 /** Error Codes for Bearer - \ref ms_error_codes_module_brr */
 #define BRR_ERR_ID                              0x2000
+/** Error Codes for Network - \ref ms_error_codes_module_net */
 #define NET_ERR_ID                              0x2100
+/** Error Codes for Lower Transport - \ref ms_error_codes_module_ltrn */
 #define LTRN_ERR_ID                             0x2200
+/** Error Codes for Transport - \ref ms_error_codes_module_trn */
 #define TRN_ERR_ID                              0x2300
+/** Error Codes for Access - \ref ms_error_codes_module_access */
 #define ACCESS_ERR_ID                           0x2400
-
+/** Error Codes for Provisioning - \ref ms_error_codes_module_provisioning */
 #define PROV_ERR_ID                             0x3000
-
+/** Error Codes for Health Server - \ref ms_error_codes_module_health_server */
 #define HEALTH_ERR_ID                           0x8000
 
 /** \} */
 
-
 /** \} */
 
-/** \} */
-/** \} */
+/**
+ * \defgroup ms_error_codes_defs Error Codes
+ * \ingroup ms_common_module
+ * \{
+ */
 
 /* ================== EtherMind Common Reason Error Codes ================= */
 
 /**
- * \addtogroup ms_common_defines Defines
- * \{
+ * \cond ignore_this
  */
 
 /**
- * \defgroup ms_error_codes_module_common Common
+ * \defgroup ms_error_codes_module_common Common Error Codes
  * \{
  */
 
@@ -168,16 +165,14 @@ typedef UINT16    API_RESULT;
 #define MEMORY_ALLOCATION_FAILED                0x0005
 
 /** \} */
-/** \} */
+
+/** \endcond */
 
 /* ======================================= Section 'Mesh' */
-/**
- * \addtogroup MS_ERROR_CODES
- * \{
- */
 
 /**
  * \defgroup ms_error_codes_module_mesh Mesh Result Codes
+ * \ingroup MS_ERROR_CODES
  * \{
  */
 #define MS_SUCCESS                              (0x0000 | MS_ERR_ID)
@@ -217,18 +212,14 @@ typedef UINT16    API_RESULT;
 #define MS_INVALID_BINDING                      (0x0011 | MS_ERR_ID)
 
 /** \} */
-/** \} */
 
 /* ===================== EtherMind Module Error Codes ===================== */
 
 /* ======================================= Section 'Timer' */
-/**
- * \cond ignore_this
- * \{
- */
 
+/** \cond */
 /**
- * \defgroup ms_error_codes_module_timer Timer
+ * \defgroup ms_error_codes_module_timer Timer Error Codes
  * \{
  */
 
@@ -252,16 +243,16 @@ typedef UINT16    API_RESULT;
 #define TIMER_TIMEOUT_ZERO_NOT_ALLOWED          (0x0017 | TIMER_ERR_ID)
 
 /** \} */
-/** \} */
+/** \endcond */
 
 /* ======================================= Section 'Bearer' */
 /**
- * \addtogroup brr_defines
+ * \addtogroup ms_error_codes_defs
  * \{
  */
 
 /**
- * \defgroup ms_error_codes_module_brr Error Code
+ * \defgroup ms_error_codes_module_brr Bearer Error Codes
  * \{
  */
 
@@ -287,12 +278,12 @@ typedef UINT16    API_RESULT;
 
 /* ======================================= Section 'Network' */
 /**
- * \addtogroup net_defines
+ * \addtogroup ms_error_codes_defs
  * \{
  */
 
 /**
- * \defgroup ms_error_codes_module_net Error Code
+ * \defgroup ms_error_codes_module_net Network Error Codes
  * \{
  */
 
@@ -314,13 +305,26 @@ typedef UINT16    API_RESULT;
 #define NET_TX_QUEUE_EMPTY                      (0x0015 | NET_ERR_ID)
 
 /**
+ * \name Network Callback Error Codes
  * Error Codes returned by Network Callback, indicating if it detected
  * an invalid packet format or if the packet to be further processed,
  * by the network layer like to be relayed or proxied etc.
+ * \{
  */
 #define NET_INVALID_RX_PKT_FORMAT               (0x0016 | NET_ERR_ID)
 #define NET_RX_LOCAL_SRC_ADDR_PKT               (0x0017 | NET_ERR_ID)
 #define NET_POST_PROCESS_RX_PKT                 (0x0018 | NET_ERR_ID)
+#define NET_RX_ALREADY_RELAYED_PKT              (0x0019 | NET_ERR_ID)
+/** \} */
+
+/**
+ * \name Network Crypto Interface
+ * This corresponds to all errors returned by Crypto Interface to
+ * Network layer.
+ * \{
+ */
+#define NET_CRYPTO_UNLIKELY_ERR                 (0x0020 | NET_ERR_ID)
+/** \} */
 
 #define NET_API_NOT_SUPPORTED                   (0x00FF | NET_ERR_ID)
 
@@ -329,12 +333,12 @@ typedef UINT16    API_RESULT;
 
 /* ======================================= Section 'Lower Transport' */
 /**
- * \addtogroup ltrn_defines
+ * \addtogroup ms_error_codes_defs
  * \{
  */
 
 /**
- * \defgroup ms_error_codes_module_ltrn Error Code
+ * \defgroup ms_error_codes_module_ltrn Lower Transport Error Codes
  * \{
  */
 
@@ -359,12 +363,12 @@ typedef UINT16    API_RESULT;
 
 /* ======================================= Section 'Transport' */
 /**
- * \addtogroup trn_defines
+ * \addtogroup ms_error_codes_defs
  * \{
  */
 
 /**
- * \defgroup ms_error_codes_module_trn Error Code
+ * \defgroup ms_error_codes_module_trn Transport Error Codes
  * \{
  */
 
@@ -387,6 +391,15 @@ typedef UINT16    API_RESULT;
 #define TRN_INCOMPLETE_PKT_RECEIVED             (0x0016 | TRN_ERR_ID)
 #define TRN_INVALID_FRNDSHIP_STATE              (0x0017 | TRN_ERR_ID)
 
+/**
+ * \name Transport Crypto Interface
+ * This corresponds to all errors returned by Crypto Interface to
+ * Transport layer.
+ * \{
+ */
+#define TRN_CRYPTO_UNLIKELY_ERR                 (0x0018 | TRN_ERR_ID)
+/** \} */
+
 #define TRN_API_NOT_SUPPORTED                   (0x00FF | TRN_ERR_ID)
 
 /** \} */
@@ -394,12 +407,12 @@ typedef UINT16    API_RESULT;
 
 /* ======================================= Section 'Access' */
 /**
- * \addtogroup access_defines
+ * \addtogroup ms_error_codes_defs
  * \{
  */
 
 /**
- * \defgroup ms_error_codes_module_access Error Code
+ * \defgroup ms_error_codes_module_access Access Error Codes
  * \{
  */
 
@@ -427,6 +440,11 @@ typedef UINT16    API_RESULT;
 #define ACCESS_MASTER_NID_ON_LPN                   (0x0026 | ACCESS_ERR_ID)
 #define ACCESS_INVALID_PUBLICATION_STATE           (0x0027 | ACCESS_ERR_ID)
 
+#define ACCESS_IV_VAL_NOT_PERMITTED                (0x0030 | ACCESS_ERR_ID)
+#define ACCESS_IV_UPDATE_TOO_SOON                  (0x0031 | ACCESS_ERR_ID)
+#define ACCESS_IV_INCORRECT_STATE                  (0x0032 | ACCESS_ERR_ID)
+#define ACCESS_IV_UPDATE_DEFERRED_IN_BUSY          (0x0033 | ACCESS_ERR_ID)
+
 #define ACCESS_API_NOT_SUPPORTED                   (0x00FF | ACCESS_ERR_ID)
 
 /** \} */
@@ -434,12 +452,12 @@ typedef UINT16    API_RESULT;
 
 /* ======================================= Section 'Provisioning' */
 /**
- * \addtogroup prov_defines
+ * \addtogroup ms_error_codes_defs
  * \{
  */
 
 /**
-* \defgroup ms_error_codes_module_provisioning Error Code
+* \defgroup ms_error_codes_module_provisioning Provisioning Error Codes
 * \{
 */
 
@@ -467,12 +485,12 @@ typedef UINT16    API_RESULT;
 
 /* ======================================= Section 'Health Server' */
 /**
-* \addtogroup health_server_defines
+* \addtogroup ms_error_codes_defs
 * \{
 */
 
 /**
-* \defgroup ms_error_codes_module_health_server Error Code
+* \defgroup ms_error_codes_module_health_server Health Server Error Codes
 * \{
 */
 
@@ -493,6 +511,10 @@ typedef UINT16    API_RESULT;
 #define HEALTH_CONTEXT_ASSERT_FAILED                  (0x0014 | HEALTH_ERR_ID)
 
 /** \} */
+/** \} */
+
+/** \} */
+
 /** \} */
 
 #endif /* _H_MS_ERROR_ */

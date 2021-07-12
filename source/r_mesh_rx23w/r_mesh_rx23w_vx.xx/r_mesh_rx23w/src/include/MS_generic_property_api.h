@@ -20,10 +20,22 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup generic_property_module GENERIC_PROPERTY (Mesh Generic Property Model)
+ * \defgroup generic_property_module Generic Property Model (GENERIC_PROPERTY)
+ * \ingroup mesh_models_block
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Generic Property Model (GENERIC_PROPERTY) module to the Application.
+ */
+
+/**
+ * \defgroup property_constants Constants
+ * \{
+ * Describes Constants defined by the module.
+ */
+
+/**
+ *  \name Property Type
+ *  \{
  */
 
 /** Generic Manufacturer Properties */
@@ -35,7 +47,13 @@
 /** Generic User Properties */
 #define MS_GENERIC_PROP_TYPE_USER            0x02
 
-/** User Access field values */
+/** \} */
+
+/**
+ *  \name User Access field values
+ *  \{
+ */
+
 /** User Access - Prohibited */
 #define MS_GENERIC_USER_ACCESS_PROHIBITED    0x00
 /** User Access - the device property can be read */
@@ -45,7 +63,15 @@
 /** User Access - the device property can be read and written */
 #define MS_GENERIC_USER_ACCESS_READ_WRITE    0x03
 
+/** Invalid Device Property */
 #define MS_GENERIC_USER_ACCESS_INVALID_PROPERTY_ID 0xFF
+
+/** \} */
+
+/**
+ *  \name Device Property field values
+ *  \{
+ */
 
 /** Device Property - Light Control Time Occupancy Delay */
 #define MS_DEV_PROP_LIGHT_CONTROL_TIME_OCCUPANCY_DELAY          0x003A
@@ -116,12 +142,15 @@
 /** Device Property - Present Ambient Light Level */
 #define MS_DEV_PROP_PRESENT_AMBIENT_LIGHT_LEVEL                 0x004E
 
+/** \} */
+
+/** \} */
 
 /* --------------------------------------------- Data Types/ Structures */
 /**
  *  \defgroup generic_property_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
+ *  \brief This section Describes the module Notification Callback interface offered
  *  to the application
  */
 
@@ -153,14 +182,14 @@ typedef API_RESULT (* MS_GENERIC_PROPERTY_SERVER_CB)
  * Generic Property Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_GENERIC_PROPERTY_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -170,6 +199,7 @@ typedef API_RESULT (* MS_GENERIC_PROPERTY_CLIENT_CB)
 /**
  *  \defgroup generic_property_structures Structures
  *  \{
+ *  \brief This section describes the EtherMind Mesh Generic Property Model Structures.
  */
 
 /**
@@ -392,12 +422,12 @@ typedef struct MS_generic_client_properties_status_struct
 /**
  * \defgroup generic_property_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Generic Property Model APIs.
+ * \brief This section describes the EtherMind Mesh Generic Property Model APIs.
  */
 /**
- * \defgroup generic_user_property_ser_api_defs Generic User Property Server API Definitions
+ * \defgroup generic_user_property_ser_api_defs Generic User Property Server API
  * \{
- * This section describes the Generic User Property Server APIs.
+ * \brief This section describes the Generic User Property Server APIs.
  */
 
 /**
@@ -595,9 +625,9 @@ API_RESULT MS_generic_client_property_server_state_update
 /** \} */
 
 /**
- * \defgroup generic_property_cli_api_defs Generic Property Client API Definitions
+ * \defgroup generic_property_cli_api_defs Generic Property Client API
  * \{
- * This section describes the Generic Property Client APIs.
+ * \brief This section describes the Generic Property Client APIs.
  */
 
 /**
@@ -659,6 +689,9 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
+/** \name Messsage Send
+ *  \{
+ */
 /**
  *  \brief API to get the list of Generic User Property states of an element.
  *
@@ -903,6 +936,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
             param,\
             MS_ACCESS_GENERIC_CLIENT_PROPERTIES_STATUS_OPCODE\
         )
+/** \} */
 /** \} */
 /** \} */
 /** \} */

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_sci_rx_if.h
@@ -48,6 +48,11 @@
 *           16.09.2019 3.21    Fixed issue in RX631/RX63N sci_initialize_ints()
 *           25.11.2019 3.30    Added support RX13T.
 *           30.12.2019 3.40    Added support RX66N, RX72N.
+*           31.03.2020 3.50    Added support RX23E-A.
+*           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
+*                              Merged IrDA functionality to SCI FIT.
+*           30.09.2020 3.70    Fixed issue of duplicate device group for SCI11 in MDF file.
+*                              Fixed issue of missing SSCL, SSDA in MDF file.
 ***********************************************************************************************************************/
 
 #ifndef SCI_IF_H
@@ -69,7 +74,24 @@ Macro definitions
 
 /* Version Number of API. */
 #define SCI_VERSION_MAJOR  (3)
-#define SCI_VERSION_MINOR  (40)
+#define SCI_VERSION_MINOR  (70)
+
+#define SCI_DTC_DMACA_DISABLE  (0x0)
+#define SCI_DTC_ENABLE         (0x1)
+#define SCI_DMACA_ENABLE       (0x2)
+
+#define TX_DTC_DMACA_ENABLE (SCI_CFG_CH8_TX_DTC_DMACA_ENABLE | SCI_CFG_CH9_TX_DTC_DMACA_ENABLE | \
+                            SCI_CFG_CH10_TX_DTC_DMACA_ENABLE | SCI_CFG_CH11_TX_DTC_DMACA_ENABLE | \
+                            SCI_CFG_CH1_TX_DTC_DMACA_ENABLE  | SCI_CFG_CH2_TX_DTC_DMACA_ENABLE | \
+                            SCI_CFG_CH3_TX_DTC_DMACA_ENABLE  | SCI_CFG_CH4_TX_DTC_DMACA_ENABLE | \
+                            SCI_CFG_CH5_TX_DTC_DMACA_ENABLE  | SCI_CFG_CH6_TX_DTC_DMACA_ENABLE | \
+                            SCI_CFG_CH7_TX_DTC_DMACA_ENABLE  | SCI_CFG_CH12_TX_DTC_DMACA_ENABLE | SCI_CFG_CH0_TX_DTC_DMACA_ENABLE)
+#define RX_DTC_DMACA_ENABLE (SCI_CFG_CH8_RX_DTC_DMACA_ENABLE | SCI_CFG_CH9_RX_DTC_DMACA_ENABLE | \
+                            SCI_CFG_CH10_RX_DTC_DMACA_ENABLE | SCI_CFG_CH11_RX_DTC_DMACA_ENABLE | \
+                            SCI_CFG_CH1_RX_DTC_DMACA_ENABLE  | SCI_CFG_CH2_RX_DTC_DMACA_ENABLE | \
+                            SCI_CFG_CH3_RX_DTC_DMACA_ENABLE  | SCI_CFG_CH4_RX_DTC_DMACA_ENABLE | \
+                            SCI_CFG_CH5_RX_DTC_DMACA_ENABLE  | SCI_CFG_CH6_RX_DTC_DMACA_ENABLE | \
+                            SCI_CFG_CH7_RX_DTC_DMACA_ENABLE  | SCI_CFG_CH12_RX_DTC_DMACA_ENABLE | SCI_CFG_CH0_RX_DTC_DMACA_ENABLE)
 
 #define SCI_CLK_INT         (0x00U) /* use internal clock for baud generation */
 #define SCI_CLK_EXT8X       (0x03U) /* use external clock 8x baud rate (ASYNC) */
@@ -82,6 +104,18 @@ Macro definitions
 #define SCI_EVEN_PARITY     (0x00U)
 #define SCI_STOPBITS_2      (0x08U)
 #define SCI_STOPBITS_1      (0x00U)
+
+#if SCI_CFG_IRDA_INCLUDED
+/* IrDA Output Pulse Width Select Data (do NOT change values) */
+#define SCI_IRDA_OUT_WIDTH_3_16  (0x00U)
+#define SCI_IRDA_OUT_WIDTH_2     (0x01U)
+#define SCI_IRDA_OUT_WIDTH_4     (0x02U)
+#define SCI_IRDA_OUT_WIDTH_8     (0x03U)
+#define SCI_IRDA_OUT_WIDTH_16    (0x04U)
+#define SCI_IRDA_OUT_WIDTH_32    (0x05U)
+#define SCI_IRDA_OUT_WIDTH_64    (0x06U)
+#define SCI_IRDA_OUT_WIDTH_128   (0x07U)
+#endif
 
 /*****************************************************************************
 Typedef definitions
@@ -111,7 +145,8 @@ typedef enum e_sci_mode     // SCI operational modes
     SCI_MODE_ASYNC,         // Asynchronous
     SCI_MODE_SSPI,          // Simple SPI
     SCI_MODE_SYNC,          // Synchronous
-    SCI_MODE_MAX,           // End of modes currently supported
+    SCI_MODE_IRDA,          // Infrared Data Association
+    SCI_MODE_MAX            // End of modes currently supported
 } sci_mode_t;
 
 
@@ -126,13 +161,21 @@ typedef enum e_sci_err      /* SCI API error codes */
     SCI_ERR_NULL_PTR,       // received null ptr; missing required argument
     SCI_ERR_XCVR_BUSY,      // cannot start data transfer; transceiver busy
 
-    /* Asynchronous mode only */
+    /* Asynchronous/IrDA mode only */
     SCI_ERR_QUEUE_UNAVAILABLE,  // can't open tx or rx queue or both
     SCI_ERR_INSUFFICIENT_SPACE, // not enough space in transmit queue
     SCI_ERR_INSUFFICIENT_DATA,  // not enough data in receive queue
 
     /* Synchronous/SSPI modes only */
-    SCI_ERR_XFER_NOT_DONE   // data transfer still in progress
+    SCI_ERR_XFER_NOT_DONE,   // data transfer still in progress
+    
+    /* DTC/DMAC error */
+    SCI_ERR_DTC,
+    SCI_ERR_DMACA,
+
+    /* Not support when use DTC/DMAC */
+    SCI_ERR_DTC_DMACA_NOT_SUPPORT 
+
 } sci_err_t;
 
 
@@ -170,6 +213,14 @@ typedef struct st_sci_uart
     uint8_t     int_priority;   // interrupt priority; 1=low, 15=high
 } sci_uart_t;
 
+/* Open() p_cfg structure when mode=SCI_MODE_IRDA */
+typedef struct st_sci_irda
+{
+    uint32_t    baud_rate;      /* ie 9600, 19200, 115200                     */
+    uint8_t     clk_out_width;  /* IrDA Output Pulse Width                    */
+    uint8_t     int_priority;   /* txi, tei, rxi INT priority; 1=low, 15=high */
+} sci_irda_t;
+
 
 /* Open() p_cfg structure when mode = SCI_MODE_SYNC or SCI_MODE_SSPI */
 typedef struct st_sci_sync_sspi
@@ -186,6 +237,7 @@ typedef union
     sci_uart_t      async;
     sci_sync_sspi_t sync;
     sci_sync_sspi_t sspi;
+    sci_irda_t      irda;
 } sci_cfg_t;
 
 
@@ -193,20 +245,28 @@ typedef union
 
 typedef enum e_sci_cb_evt   // callback function events
 {
-    /* Async Events */
+    /* Async/Irda Events */
     SCI_EVT_TEI,            // TEI interrupt occurred; transmitter is idle
     SCI_EVT_RX_CHAR,        // received a character; already placed in queue
-    SCI_EVT_RX_CHAR_MATCH,  // received a matched character; already placed in queue
     SCI_EVT_RXBUF_OVFL,     // rx queue is full; can't save anymore data
     SCI_EVT_FRAMING_ERR,    // receiver hardware framing error
+
+    /* Async Events */
     SCI_EVT_PARITY_ERR,     // receiver hardware parity error
+    SCI_EVT_RX_CHAR_MATCH,  // received a matched character; already placed in queue
 
     /* SSPI/Sync Events */
     SCI_EVT_XFER_DONE,      // transfer completed
     SCI_EVT_XFER_ABORTED,   // transfer aborted
 
     /* Common Events */
-    SCI_EVT_OVFL_ERR        // receiver hardware overrun error
+    SCI_EVT_OVFL_ERR,        // receiver hardware overrun error
+
+    /* Receive Sync Done */
+    SCI_EVT_RX_SYNC_DONE,
+
+    /* Receive Async Done */
+    SCI_EVT_RX_DONE
 } sci_cb_evt_t;
 
 typedef struct st_sci_cb_args // callback arguments
@@ -242,11 +302,13 @@ typedef enum e_sci_cmd
     SCI_CMD_START_BIT_EDGE,           /* detect start bit as falling edge of RXDn pin
                                          (default detect as low level on RXDn pin) */
     SCI_CMD_GENERATE_BREAK,           /* generate break condition */
+    SCI_CMD_COMPARE_RECEIVED_DATA,    /* Compare received data with comparison data */
+
+    /* Async/IrDA commands */
     SCI_CMD_TX_Q_FLUSH,               /* flush transmit queue */
     SCI_CMD_RX_Q_FLUSH,               /* flush receive queue */
     SCI_CMD_TX_Q_BYTES_FREE,          /* get count of unused transmit queue bytes */
     SCI_CMD_RX_Q_BYTES_AVAIL_TO_READ, /* get num bytes ready for reading */
-    SCI_CMD_COMPARE_RECEIVED_DATA,    /* Compare received data with comparison data */
 
     /* Async/Sync commands */
     SCI_CMD_EN_CTS_IN,                /* enable CTS input (default RTS output) */
@@ -259,7 +321,10 @@ typedef enum e_sci_cmd
     SCI_CMD_INVERT_DATA,              /* logic level of send/receive data is invert */
 
     /* SSPI commands */
-    SCI_CMD_CHANGE_SPI_MODE           /* change clock polarity and phase in SSPI mode */
+    SCI_CMD_CHANGE_SPI_MODE,           /* change clock polarity and phase in SSPI mode */
+    SCI_CMD_CHECK_TX_DONE,           /* see if tx requests complete; SCI_SUCCESS if yes */
+    SCI_CMD_CHECK_RX_DONE,            /* see if rx request complete in sync mode; SCI_SUCCESS if yes */
+    SCI_CMD_CHECK_RX_SYNC_DONE
 } sci_cmd_t;
 
 /* SCI_CMD_CHANGE_BAUD/CHANGE_BITRATE take a ptr to this structure for *p_args */
@@ -290,7 +355,7 @@ sci_err_t R_SCI_Send(sci_hdl_t const    hdl,
                      uint8_t            *p_src,
                      uint16_t const     length);
                     
-sci_err_t R_SCI_SendReceive(sci_hdl_t const hdl,        // SSPI/SYNC only
+sci_err_t R_SCI_SendReceive(sci_hdl_t const hdl,        /* SSPI/SYNC only */
                             uint8_t         *p_src,
                             uint8_t         *p_dst,
                             uint16_t const  length);

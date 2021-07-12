@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_simple_graphic_rx
 VERSION = 		0.80
-MDF =			NOT_SUPPORTED
+MDF = NOT_SUPPORTED
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

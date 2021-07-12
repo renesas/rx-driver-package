@@ -23,6 +23,8 @@
 * History : DD.MM.YYYY Version Description
 *         : 06.11.2013 2.00    First GSCE Release.
 *         : 25.11.2019 4.30    Changed for FIT+RTOS
+*         : 31.08.2020 4.70    Added condition for _RI_TRACE_TIMER macro
+*                              Fixed warning when using RI600V4 with device has 2 CMT channels
 ***********************************************************************************************************************/
 #ifndef CMT_CONFIG_HEADER_FILE
 #define CMT_CONFIG_HEADER_FILE
@@ -33,8 +35,14 @@ Configuration Options
 /* The interrupt priority level to be used for CMT interrupts. */
 #define CMT_RX_CFG_IPR         (5)
 
-/* Reserve software trace timer channel(CMT1). */
-#define _RI_TRACE_TIMER 1
+#if (BSP_CFG_RTOS_USED == 4) && (BSP_CFG_RENESAS_RTOS_USED == 0) /* RI600V4 */
+#define _RI_TRACE_TIMER 1 /* RI600V4 uses CMT1 channel for the trace feature.*/
+#elif (BSP_CFG_RTOS_USED == 4) && (BSP_CFG_RENESAS_RTOS_USED == 1) /* RI600PX */
+#include "r_bsp_config.h"
+#define _RI_TRACE_TIMER BSP_CFG_RTOS_SYSTEM_TIMER /* RI600PX does not actually have the trace feature.*/
+#else
+#define _RI_TRACE_TIMER 1 /* It’s guaranteed that definition _RI_TRACE_TIMER is never used unless BSP_CFG_RTOS_USED == 4.*/
+#endif
 
 #endif /* CMT_CONFIG_HEADER_FILE */
 

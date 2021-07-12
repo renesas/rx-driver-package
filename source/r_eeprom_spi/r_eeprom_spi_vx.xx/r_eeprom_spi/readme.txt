@@ -5,12 +5,12 @@ r_eeprom_spi (SPI serial EEPROM control software)
 
 Document Number 
 ---------------
-R01AN2325EJ0301
-R01AN2325JJ0301
+R01AN2325EJ0302
+R01AN2325JJ0302
 
 Version
 -------
-v3.01
+v3.02
 
 Overview
 --------
@@ -46,37 +46,36 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp    v5.20
+* r_bsp    v5.52
 
 How to add to your project
 --------------------------
-This module must be added to each project in which it is used.
-Renesas recommends using "Smart Configurator" described in (1) or (3).
-However, "Smart Configurator" only supports some RX devices.
-Please use the methods of (2) or (4) for unsupported RX devices.
-
-(1)	Adding the FIT module to your project using "Smart Configurator" in e2 studio
-By using the "Smart Configurator" in e2 studio, 
-the FIT module is automatically added to your project.
-Refer to "Renesas e2 studio Smart Configurator User Guide (R20AN0451)" for details.
-
-(2)	Adding the FIT module to your project using "FIT Configurator" in e2 studio
-By using the "FIT Configurator" in e2 studio,
-the FIT module is automatically added to your project.
-Refer to "Adding Firmware Integration Technology Modules to Projects (R01AN1723)" for details.
-
-(3)	Adding the FIT module to your project using "Smart Configurator" on CS+
-By using the "Smart Configurator Standalone version" in CS+,
-the FIT module is automatically added to your project.
-Refer to "Renesas e2 studio Smart Configurator User Guide (R20AN0451)" for details.
-
-(4)	Adding the FIT module to your project in CS+
-In CS+, please manually add the FIT module to your project.
-Refer to "Adding Firmware Integration Technology Modules to CS+ Projects (R01AN1826)" for details.
+This module must be added to each project in which it is used. Renesas recommends the method using the
+Smart Configurator described in (1) or (3) or (5) below. However, the Smart Configurator only supports some
+RX devices. Please use the methods of (2) or (4) for RX devices that are not supported by the Smart
+Configurator.
+(1) Adding the FIT module to your project using the Smart Configurator in e2 studio
+By using the Smart Configurator in e2 studio, the FIT module is automatically added to your project.
+Refer to ÅgRX Smart Configurator UserÅfs Guide: e2 studio (R20AN0451)Åh for details.
+(2) Adding the FIT module to your project using the FIT Configurator in e2 studio
+By using the FIT Configurator in e2 studio, the FIT module is automatically added to your project.
+Refer to ÅgRX Family Adding Firmware Integration Technology Modules to Projects (R01AN1723)Åh
+for details.
+(3) Adding the FIT module to your project using the Smart Configurator in CS+
+By using the Smart Configurator Standalone version in CS+, the FIT module is automatically added
+to your project. Refer to ÅgRX Smart Configurator UserÅfs Guide: CS+ (R20AN0470)Åh for details.
+(4) Adding the FIT module to your project in CS+
+In CS+, please manually add the FIT module to your project. Refer to ÅgRX Family Adding Firmware
+Integration Technology Modules to CS+ Projects (R01AN1826)Åh for details.
+(5) Adding the FIT module to your project using the Smart Configurator in IAREW
+By using the Smart Configurator Standalone version, the FIT module is automatically added to your
+project. Refer to ÅgRX Smart Configurator UserÅfs Guide: IAREW (R20AN0535)Åh for details.
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.01 release 00
+* Renesas RX v3.02 release 00
+* GCC for Renesas RX 8.3.0
+* IAR C/C++ Compiler for Renesas RX 4.14.1
 
 File Structure
 --------------
@@ -87,9 +86,9 @@ r_eeprom_spi
 +---doc
 |   |
 |   +---en
-|   |       r01an2325ej0301-rx-serial.pdf
+|   |       r01an2325ej0302-rx-serial.pdf
 |   +---ja
-|           r01an2325jj0301-rx-serial.pdf
+|           r01an2325jj0302-rx-serial.pdf
 |
 +---ref
 |       r_eeprom_spi_config_reference.h
@@ -108,10 +107,10 @@ r_eeprom_spi
         |   r_eeprom_spi_dev_port.h
         |
         +---using_gpio_fit_module
-        |      r_eeprom_spi_dev_port.c
+        |      r_eeprom_spi_dev_port_gpio.c
         |
         +---using_iodefine
-               r_eeprom_spi_dev_port.c
+               r_eeprom_spi_dev_port_iodefine.c
 
 r_config
     r_eeprom_spi_config.h

@@ -42,6 +42,7 @@
 *         : 08.10.2019 3.02     Added the following include path.
 *                                - r_bsp_software_interrupt.h
 *                               Changed include of r_bsp_config.h for added support of Renesas RTOS(RI600V4 or RI600PX).
+*         : 23.04.2021 3.03     Added the include of fsp_common_api.h and r_fsp_error.h.
 ***********************************************************************************************************************/
 
 /* Make sure that no other platforms have already been defined. Do not touch this! */
@@ -89,6 +90,9 @@ INCLUDE APPROPRIATE MCU AND BOARD FILES
 #include    "mcu/all/r_bsp_software_interrupt.h"
 #include    "mcu/all/r_rx_intrinsic_functions.h"
 #include    "mcu/all/r_rtos.h"
+
+#include    "mcu/all/fsp_common_api.h"
+#include    "mcu/all/r_fsp_error.h"
 
 #ifdef __cplusplus
 }

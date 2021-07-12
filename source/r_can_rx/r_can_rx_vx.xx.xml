@@ -8,6 +8,8 @@
     <version>2.08.00</version>
     <version>3.00.00</version>
     <version>3.01.00</version>
+    <version>3.02.00</version>
+    <version>3.03.00</version>
   </toolchain>
   <toolchain>
     <brand>GNU</brand>
@@ -15,6 +17,8 @@
     <version>4.08.04.201801</version>
     <version>4.08.04.201803</version>
     <version>4.08.04.201902</version>
+    <version>8.03.00.201904</version>
+    <version>8.03.00.202004</version>
   </toolchain>
   <toolchain>
     <brand>IAR</brand>
@@ -22,6 +26,7 @@
     <version>4.10.01</version>
     <version>4.11.01</version>
     <version>4.12.01</version>
+    <version>4.20.01</version>
   </toolchain>
 
   <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -47,13 +52,13 @@
     <version>x.xx</version>
     <dependency>
       <module>r_bsp</module>
-      <version>5.50</version>
+      <version>5.63</version>
     </dependency>
     <zipsource>r_can_rx_vx.xx.zip</zipsource>
     <application>Communications</application>
     <application>Connectivity</application>
     <function>CAN</function>
-    <desc>CAN API for the RX64M, RX65N, RX66N, RX66T, RX71M, RX72M, RX72N, RX72T.</desc>
+    <desc>CAN API for the RX64M, RX651, RX65N, RX66N, RX66T, RX71M, RX72M, RX72N, RX72T.</desc>
     <details>The module allows the user to communicate over the CAN bus. The driver can be configured for interrupt or polling operation. This and any other settings are to be made using the r_can_rx_config.h file.</details>
     <incdir>r_config</incdir>
     <incdir>r_can_rx</incdir>

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2020 Renesas Electronics Corporation. All rights reserved.
 **********************************************************************************************************************/
 /**********************************************************************************************************************
 * File Name    : r_flash_type1_if.h
@@ -28,6 +28,7 @@
 *                17.11.2016 2.10    Added flash_stop() declaration.
 *                                   Added FLASH_FREQ_xx and FLASH_FCU_INT_xxx #defines
 *                05.10.2016 3.00    Merged functions common to other flash types into r_flash_group.c.
+*                26.06.2020 4.60    Added FLASH_ACCESS_WINDOW_END_NEXT_REG_VALUE #define.
 **********************************************************************************************************************/
 
 #ifndef R_FLASH_TYPE1_IF_HEADER_FILE
@@ -50,6 +51,8 @@ Macro definitions
 #define FLASH_FREQ_HI           (32000000)
 #define FLASH_FCU_INT_ENABLE    // no FCU
 #define FLASH_FCU_INT_DISABLE   // no FCU
+
+#define FLASH_ACCESS_WINDOW_END_NEXT_REG_VALUE  (0x200)
 
 /***********************************************************************************************************************
 Typedef definitions

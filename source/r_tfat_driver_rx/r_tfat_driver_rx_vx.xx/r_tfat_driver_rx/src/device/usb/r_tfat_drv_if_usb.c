@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014(2015-2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014(2015-2020) Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_tfat_drv_if_usb.c
@@ -31,8 +31,11 @@
 *              : 22.06.2015 1.02     Added support MCU RX231.
 *              : 01.04.2016 1.03     Updated the xml file.
 *              : 30.09.2016 x.xx      Added support MCU RX65N.
-*              : 14.12.2018 1.05     Supporting USB dirver for RTOS
-*              : 08.08.2019 2.00     Supporting offer of C source for TFAT.
+*              : 14.12.2018 1.05     Supporting USB driver for RTOS
+*              : 08.08.2019 2.00     Added support for FreeRTOS and 
+*                                    Renesas uITRON (RI600V4).
+*                                    Added support for GNUC and ICCRX.
+*              : 10.09.2020 2.20     Added support for the format function.
 *******************************************************************************/
 
 /******************************************************************************
@@ -46,7 +49,7 @@ Includes   <System Includes> , "Project Includes"
 #include "r_usb_basic_if.h"
 #include "ff.h"                  /* TFAT define */
 #include "diskio.h"              /* TFAT define */
-#include "r_usb_hmsc_if.h"          /* version info. */
+#include "r_usb_hmsc_if.h"       /* version info. */
 
 /* version info. */
 #ifndef USB_VERSION_MAJOR
@@ -194,7 +197,7 @@ DRESULT usb_disk_read (
 #ifdef TFAT_DRV_USB_API_TYPE1
     usb_hmsc_smp_drive2_addr(pdrv);             /* Drive no. -> USB IP no. and IO Reg Base address */
 #else
-    usb_hmsc_smp_drive2_addr(pdrv, &tfat_ptr); /* Drive no. -> USB IP no. and IO Reg Base address */
+    usb_hmsc_smp_drive2_addr(pdrv, &tfat_ptr);  /* Drive no. -> USB IP no. and IO Reg Base address */
 #endif
     /* Check Detach */
 #if defined(TFAT_DRV_USB_API_TYPE1) || defined(TFAT_DRV_USB_API_TYPE2)
@@ -227,7 +230,7 @@ DRESULT usb_disk_read (
         R_usb_hmsc_WaitLoop(); /* Task Schedule */
         err = USB_TRCV_MSG(USB_HSTRG_MBX, (usb_msg_t** ) & mess, (uint16_t )0); /* Receive read complete msg */
     }
-    while ((err != USB_OK) && (res[1] != USB_FALSE));
+    while ((err != USB_OK) && (res[1] != USB_FALSE)); /* WAIT_LOOP */
 
     if (err == USB_OK)
     { /* Complete R_USB_HmscStrgReadSector() */
@@ -286,7 +289,7 @@ DRESULT usb_disk_write (
 #ifdef TFAT_DRV_USB_API_TYPE1
     usb_hmsc_smp_drive2_addr(pdrv);             /* Drive no. -> USB IP no. and IO Reg Base address */
 #else
-    usb_hmsc_smp_drive2_addr(pdrv, &tfat_ptr); /* Drive no. -> USB IP no. and IO Reg Base address */
+    usb_hmsc_smp_drive2_addr(pdrv, &tfat_ptr);  /* Drive no. -> USB IP no. and IO Reg Base address */
 #endif
 
     /* Check Detach */
@@ -321,7 +324,7 @@ DRESULT usb_disk_write (
         R_usb_hmsc_WaitLoop(); /* Task Schedule */
         err = USB_TRCV_MSG(USB_HSTRG_MBX, (usb_msg_t** ) & mess, (uint16_t )0); /* Receive write complete msg */
     }
-    while ((err != USB_OK) && (res[1] != USB_FALSE));
+    while ((err != USB_OK) && (res[1] != USB_FALSE)); /* WAIT_LOOP */
 
     if ( USB_OK == err)
     { /* Complete R_USB_HmscStrgWriteSector() */
@@ -359,14 +362,134 @@ DRESULT usb_disk_write (
 ******************************************************************************/
 DRESULT usb_disk_ioctl (
     uint8_t pdrv,          /* Drive number             */
-    uint8_t cmd,        /* Control command code     */
-    void* buff            /* Data transfer buffer     */
+    uint8_t cmd,           /* Control command code     */
+    void* buff             /* Data transfer buffer     */
 )
 {
+#if FF_USE_MKFS == 1
+#if (BSP_CFG_RTOS_USED == 0)
+    usb_utr_t  *p_mess;
+    uint16_t   res[10];
+#endif /* (BSP_CFG_RTOS_USED == 0) */
+    usb_utr_t  tfat_ptr;
+    uint32_t   num_blocks;
+    uint32_t   block_length;
+    uint16_t   err;
+    uint8_t    buffer[8];
+#endif
 
-    /*  Please put the code for disk_ioctl driver interface
-     function over here.  */
-    /*  Please refer the application note for details.  */
+    if ((NULL == buff) && (CTRL_SYNC != cmd))
+    {
+        return RES_PARERR;
+    }
+
+    switch (cmd)
+    {
+        case CTRL_SYNC:
+
+        break;
+
+        case GET_SECTOR_COUNT:
+        case GET_BLOCK_SIZE:
+#if FF_USE_MKFS
+            /* Check Detach */
+            if (USB_FALSE == R_USB_HmscGetDevSts(pdrv))
+            {
+                return RES_ERROR;
+            }
+
+            usb_hmsc_smp_drive2_addr(pdrv, &tfat_ptr);  /* Drive no. -> USB IP no. and IO Reg Base address */
+            err = usb_hmsc_strg_user_command(&tfat_ptr, pdrv, USB_ATAPI_READ_CAPACITY, buffer, usb_hstd_dummy_function);
+            if (USB_OK != err)
+            {
+                return RES_ERROR;
+            }
+#if (BSP_CFG_RTOS_USED == 0)
+            /* Wait for complete usb_hmsc_strg_user_command() */
+            do
+            {
+            /* Check Detach */
+#if defined(TFAT_DRV_USB_API_TYPE1) || defined(TFAT_DRV_USB_API_TYPE2)
+                R_usb_hstd_DeviceInformation(&tfat_ptr, tfat_ptr.keyword, (uint16_t *)res); /* Get device connect state */
+#else
+                res[1] = R_USB_HmscGetDevSts(pdrv);
+#endif
+                /*
+                 * The completion judgment of usb_hmsc_strg_user_command() is the message sent by getting
+                 * the memory block of the previous stage. R_usb_hmsc_WaitLoop() and R_USB_RCV_MSG()
+                 * were required to receive the message.
+                 */
+                R_usb_hmsc_WaitLoop(); /* Task Schedule */
+                err = USB_TRCV_MSG(USB_HSTRG_MBX, (usb_msg_t**) &p_mess, (uint16_t)0); /* Receive capacities complete msg */
+            }
+            while ((err != USB_OK) && (res[1] != USB_FALSE)); /* WAIT_LOOP */
+
+            if (USB_OK == err)
+            { /* Complete usb_hmsc_strg_user_command() */
+                err = p_mess->result;
+                USB_REL_BLK(USB_HSTRG_MPL, (usb_mh_t)p_mess);
+            }
+            else
+            { /* Device detach */
+                R_usb_hmsc_WaitLoop(); /* Task Schedule */
+                err = USB_TRCV_MSG(USB_HSTRG_MBX, (usb_msg_t**) &p_mess, (uint16_t)0); /* Receive capacities complete msg */
+                if (err == USB_OK)
+                {
+                    USB_REL_BLK(USB_HSTRG_MPL, (usb_mh_t)p_mess);
+                }
+                err = USB_ERROR;
+            }
+#endif /* (BSP_CFG_RTOS_USED == 0) */
+
+            /* eight bytes of READ CAPACITY data */
+            block_length = (uint32_t) buffer[7];
+            block_length |= ((uint32_t) buffer[6] << 8);
+            block_length |= ((uint32_t) buffer[5] << 16);
+            block_length |= ((uint32_t) buffer[4] << 24);
+            block_length = block_length / USB_HMSC_STRG_SECTSIZE;
+
+            if (GET_SECTOR_COUNT == cmd)
+            {
+                num_blocks = (uint32_t) buffer[3];
+                num_blocks |= ((uint32_t) buffer[2] << 8);
+                num_blocks |= ((uint32_t) buffer[1] << 16);
+                num_blocks |= ((uint32_t) buffer[0] << 24);
+                num_blocks = (num_blocks + 1) * block_length;
+                /* Get USB number of blocks */
+                ((uint32_t *)buff)[0] = num_blocks;
+            }
+            else if (GET_BLOCK_SIZE == cmd)
+            {
+                /* Get USB block length */
+                ((uint32_t *)buff)[0] = block_length;
+            }
+            else
+            {
+                return RES_ERROR;
+            }
+
+            return RES_OK;
+#else
+            return RES_PARERR;
+#endif
+        break;
+
+        case GET_SECTOR_SIZE:
+#if FF_MAX_SS == FF_MIN_SS
+            return RES_PARERR;
+#else
+            ((uint32_t *)buff)[0] = (uint32_t)USB_HMSC_STRG_SECTSIZE;
+#endif
+        break;
+
+        case CTRL_TRIM:
+
+        break;
+
+        default:
+            return RES_PARERR;
+        break;
+    }
     return RES_OK;
 }
 

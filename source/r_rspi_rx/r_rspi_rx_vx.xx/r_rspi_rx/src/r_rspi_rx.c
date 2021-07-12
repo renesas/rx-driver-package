@@ -14,12 +14,14 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013(2014-2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013(2014-2020) Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rspi_rx.c
 * Device(s)    : RX Family
-* Tool-Chain   : Renesas RX Standard Toolchain 3.01.00
+* Tool-Chain   : Renesas RX Standard Toolchain 3.02.00
+*                GCC for Renesas RX 8.03.00
+*                IAR C/C++ Compiler for Renesas RX 4.14.1
 * OS           : None
 * H/W Platform :
 * Description  : Functions for using RSPI on RX devices.
@@ -45,6 +47,9 @@
 *           22.11.2019 2.04     Supported RX72N and RX66N.
 *                               Modified comment of API function to Doxygen style.
 *                               Added support for atomic control.
+*           10.03.2020 2.05     Supported RX23E-A.
+*           10.09.2020 3.00     Fixed bug, updated functions rspi_spriX_isr, rspi_sptiX_isr (X = 0, 1, 2) and added
+*                               two functions R_RSPI_DisableSpti and R_RSPI_DisableRSPI.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -934,11 +939,16 @@ static rspi_err_t  rspi_write_read_common(rspi_handle_t handle,
 
 #if defined BSP_MCU_RX23T || defined BSP_MCU_RX23W || defined BSP_MCU_RX24T || defined BSP_MCU_RX24U || \
     defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX110 || defined BSP_MCU_RX111 || \
-    defined BSP_MCU_RX113 || defined BSP_MCU_RX130 || defined BSP_MCU_RX230 || defined BSP_MCU_RX231
+    defined BSP_MCU_RX113 || defined BSP_MCU_RX130 || defined BSP_MCU_RX230 || defined BSP_MCU_RX231 || \
+    defined BSP_MCU_RX23E_A
     if((RSPI_TRANS_MODE_DMAC == g_rspi_tcb [channel] .data_tran_mode) ||
        (RSPI_TRANS_MODE_DTC == g_rspi_tcb [channel] .data_tran_mode))
     {
-        if(RSPI_WORD_DATA == g_rspi_tcb[channel].bytes_per_transfer)
+        if(RSPI_LONG_DATA == g_rspi_tcb[channel].bytes_per_transfer)
+        {
+            (*g_rspi_channels[channel]).SPDCR.BIT.SPLW = 1;
+        }
+        else
         {
             (*g_rspi_channels[channel]).SPDCR.BIT.SPLW = 0;
         }
@@ -1032,7 +1042,8 @@ static rspi_err_t  rspi_write_read_common(rspi_handle_t handle,
  * @retval    RSPI_ERR_NULL_PTR
  *             A required pointer argument is NULL
  * @details   Use this function when disabling interrupts from within the callback function generated at DMAC
- *            transfer-end.
+ *            transfer-end.\n 
+ *            Please call this function after calling R_RSPI_DisableSpti().
  * @note      Do not use this function for software transfers or DTC transfers. Doing so could disrupt the transfer.
  */
 rspi_err_t R_RSPI_IntSptiIerClear(rspi_handle_t handle)
@@ -1104,7 +1115,8 @@ rspi_err_t R_RSPI_IntSptiIerClear(rspi_handle_t handle)
  * @retval    RSPI_ERR_NULL_PTR
  *             A required pointer argument is NULL
  * @details   Use this function when disabling interrupts from within the callback function generated at DMAC
- *            transfer-end.
+ *            transfer-end.\n 
+ *            Please call this function before calling R_RSPI_DisableRSPI().
  * @note      Do not use this function for software transfers or DTC transfers. Doing so could disrupt the transfer.
  */
 rspi_err_t R_RSPI_IntSpriIerClear(rspi_handle_t handle)
@@ -1164,6 +1176,74 @@ rspi_err_t R_RSPI_IntSpriIerClear(rspi_handle_t handle)
     return RSPI_SUCCESS;
 }
 
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_DisableSpti()
+ *****************************************************************************************************************/ /**
+ * @brief     This function disables the generation of transmit buffer empty interrupt request.
+ * @param[in] handle
+ *            RSPI handle number
+ * @retval    RSPI_SUCCESS
+ *             Successful operation.
+ * @retval    RSPI_ERR_NULL_PTR
+ *             A required pointer argument is NULL
+ * @details   Use this function when disabling interrupts from within the callback function generated at DMAC 
+ *            transfer-end.\n 
+ *            Please call this function before calling R_RSPI_IntSptiIerClear().
+ * @note      Do not use this function for software transfers or DTC transfers. Doing so could disrupt the transfer.
+ */
+rspi_err_t R_RSPI_DisableSpti(rspi_handle_t handle)
+{
+    uint8_t channel = handle->channel;
+
+    #if RSPI_CFG_PARAM_CHECKING_ENABLE == 1
+    if ( NULL == handle )
+    {
+        R_RSPI_LOG_FUNC(RSPI_DEBUG_ERR_ID, (uint32_t)RSPI_STR, __LINE__);
+        return RSPI_ERR_NULL_PTR;
+    }
+    #endif
+
+    (*g_rspi_channels[channel]).SPCR.BYTE &= (uint8_t)(~RSPI_SPCR_SPTIE);    // Write SPTIE bit to 0.
+
+    return RSPI_SUCCESS;
+}
+
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_DisableRSPI()
+ *****************************************************************************************************************/ /**
+ * @brief     This function is set to disable the RSPI function.
+ * @param[in] handle
+ *            RSPI handle number
+ * @retval    RSPI_SUCCESS
+ *             Successful operation.
+ * @retval    RSPI_ERR_NULL_PTR
+ *             A required pointer argument is NULL
+ * @details   Use this function when disabling interrupts from within the callback function generated at DMAC
+ *            transfer-end.\n 
+ *            Please call this function after calling R_RSPI_IntSpriIerClear().
+ * @note      Do not use this function for software transfers or DTC transfers. Doing so could disrupt the transfer.
+ */
+rspi_err_t R_RSPI_DisableRSPI(rspi_handle_t handle)
+{
+    uint8_t channel = handle->channel;
+
+    #if RSPI_CFG_PARAM_CHECKING_ENABLE == 1
+    if ( NULL == handle )
+    {
+        R_RSPI_LOG_FUNC(RSPI_DEBUG_ERR_ID, (uint32_t)RSPI_STR, __LINE__);
+        return RSPI_ERR_NULL_PTR;
+    }
+    #endif
+
+    (*g_rspi_channels[channel]).SPCR.BYTE &= (uint8_t)(~RSPI_SPCR_SPE);    // Write SPE bit to 0.
+
+#if RSPI_CFG_REQUIRE_LOCK == 1
+    /* Release lock for this channel. */
+    R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_RSPI0 + channel));
+#endif
+
+    return RSPI_SUCCESS;
+}
 
 /*******************************************************************************
 * Function Name: r_rspi_get_buffregaddress
@@ -2309,6 +2389,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spri0_isr(void)
     else
     {
         R_RSPI_IntSpriIerClear(&g_rspi_handles[0]);
+        R_RSPI_DisableRSPI(&g_rspi_handles[0]);
         /* Transfer complete. Call the user callback function passing pointer to the result structure. */
         if ((FIT_NO_FUNC != g_rspi_handles[0].pcallback) && (NULL != g_rspi_handles[0].pcallback))
         {
@@ -2343,6 +2424,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spri1_isr(void)
     else
     {
         R_RSPI_IntSpriIerClear(&g_rspi_handles[1]);
+        R_RSPI_DisableRSPI(&g_rspi_handles[1]);
         /* Transfer complete. Call the user callback function passing pointer to the result structure. */
         if ((FIT_NO_FUNC != g_rspi_handles[1].pcallback) && (NULL != g_rspi_handles[1].pcallback))
         {
@@ -2377,6 +2459,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spri2_isr(void)
     else
     {
         R_RSPI_IntSpriIerClear(&g_rspi_handles[2]);
+        R_RSPI_DisableRSPI(&g_rspi_handles[2]);
         /* Transfer complete. Call the user callback function passing pointer to the result structure. */
         if ((FIT_NO_FUNC != g_rspi_handles[2].pcallback) && (NULL != g_rspi_handles[2].pcallback))
         {
@@ -2430,6 +2513,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spti0_isr(void)
     }
     else
     {
+        R_RSPI_DisableSpti(&g_rspi_handles[0]);
         R_RSPI_IntSptiIerClear(&g_rspi_handles[0]);
     }
 } /* end rspi_spti0_isr */
@@ -2476,6 +2560,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spti1_isr(void)
     }
     else
     {
+        R_RSPI_DisableSpti(&g_rspi_handles[1]);
         R_RSPI_IntSptiIerClear(&g_rspi_handles[1]);
     }
 } /* end rspi_spti1_isr */
@@ -2522,6 +2607,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spti2_isr(void)
     }
     else
     {
+        R_RSPI_DisableSpti(&g_rspi_handles[2]);
         R_RSPI_IntSptiIerClear(&g_rspi_handles[2]);
     }
 } /* end rspi_spti2_isr */

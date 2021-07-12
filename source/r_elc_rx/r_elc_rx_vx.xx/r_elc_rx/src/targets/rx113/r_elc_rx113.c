@@ -18,11 +18,15 @@
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_elc_rx113.c
- * Version      : 1.0
+ * Version      : 2.00
  * Description  : Functions for using Event Link Controller module
  ************************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *           01.07.2016 1.0     Initial Release
+ *           10.06.2020 2.00    Added support for atomic control.
+ *                              Supported the following compilers:
+ *                              - GCC for Renesas RX
+ *                              - IAR C/C++ Compiler for Renesas RX
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  Includes   <System Includes> , "Project Includes"
@@ -65,10 +69,22 @@ extern elc_interrupt_set_t g_elc_callback_icu_lpt;
  ***********************************************************************************************************************/
 void elc_module_control (elc_module_stop_t select)
 {
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
+    bsp_int_ctrl_t int_ctrl;
+#endif
+
     /* Enable PRCR access */
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);
 
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
+    R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
+#endif
+
     MSTP_ELC = select;
+
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
+    R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
+#endif
 
     /* Disable PRCR access */
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR);
@@ -117,7 +133,7 @@ void elc_open_init_register (void)
     ICU.IR[80].BIT.IR = 0;      /* Interrupt Request Register initialize */
     ICU.IPR[80].BIT.IPR = 0;    /* Interrupt Source Priority Register initialize */
 
-    IEN(ELC,ELSR18I)= 0;        /* Interrupt Request Enable Register initialize */
+    R_BSP_InterruptRequestDisable(VECT(ELC,ELSR18I)); /* Interrupt Request Enable Register initialize */
     IR(ELC,ELSR18I) = 0;        /* Interrupt Request Register initialize */
     ICU.IPR[VECT_ELC_ELSR18I].BYTE = 0; /* Interrupt Source Priority Register initialize */
     
@@ -137,16 +153,16 @@ void elc_open_init_register (void)
  ***********************************************************************************************************************/
 void elc_set_eventlink_setting (elc_event_signal_t * const p_elc_event_signal, elc_link_module_t * const p_elc_module)
 {
-    volatile __evenaccess uint8_t *pbase_register_address;
-    volatile __evenaccess uint8_t *poffset_address;
-    volatile __evenaccess uint8_t *pset_address;
+    volatile uint8_t R_BSP_EVENACCESS_SFR *pbase_register_address;
+    volatile uint8_t R_BSP_EVENACCESS_SFR *poffset_address;
+    volatile uint8_t R_BSP_EVENACCESS_SFR *pset_address;
 
     elc_set_port_link_module(p_elc_module);
     elc_set_port_event_signal(p_elc_event_signal);
 
-    pbase_register_address = (volatile uint8_t *) &ELC.ELCR;
-    poffset_address = (volatile uint8_t *) ((p_elc_module->link_module) + ELC_ELSR0_ADDRESS_OFFSET);
-    (uint32_t) pset_address = (uint32_t) pbase_register_address + (uint32_t) poffset_address;
+    pbase_register_address = (volatile uint8_t R_BSP_EVENACCESS_SFR *) &ELC.ELCR;
+    poffset_address = (volatile uint8_t R_BSP_EVENACCESS_SFR *) ((p_elc_module->link_module) + ELC_ELSR0_ADDRESS_OFFSET);
+    pset_address = (volatile uint8_t R_BSP_EVENACCESS_SFR *) ((uint32_t) pbase_register_address + (uint32_t) poffset_address);
     *pset_address = (p_elc_event_signal->event_signal);
 
     elc_set_timer_operation(p_elc_module);
@@ -291,7 +307,7 @@ static void elc_set_interrupt_operation (elc_link_module_t * const p_elc_module)
         case ELC_ICU1:
             ICU.IPR[VECT_ELC_ELSR18I].BYTE = p_elc_module->link_module_interrupt_level;
             IR(ELC,ELSR18I)= 0;
-            IEN(ELC,ELSR18I) = 1;
+            R_BSP_InterruptRequestEnable(VECT(ELC,ELSR18I));
         break;
 
         case ELC_ICU_LPT:
@@ -316,9 +332,9 @@ static void elc_set_interrupt_operation (elc_link_module_t * const p_elc_module)
  ***********************************************************************************************************************/
 void elc_control_cmd_event_clear (const elc_module_t clear_select)
 {
-    volatile __evenaccess uint8_t *pbase_register_address;
-    volatile __evenaccess uint8_t *poffset_address;
-    static volatile __evenaccess uint8_t *pset_address;
+    volatile uint8_t R_BSP_EVENACCESS_SFR *pbase_register_address;
+    volatile uint8_t R_BSP_EVENACCESS_SFR *poffset_address;
+    static volatile uint8_t R_BSP_EVENACCESS_SFR *pset_address;
 
     switch (clear_select)
     {
@@ -328,7 +344,7 @@ void elc_control_cmd_event_clear (const elc_module_t clear_select)
             ICU.IPR[80].BIT.IPR = 0;
         break;
         case ELC_ICU1 :
-            IEN(ELC,ELSR18I)= 0;
+            R_BSP_InterruptRequestDisable(VECT(ELC,ELSR18I));
             IR(ELC,ELSR18I) = 0;
             ICU.IPR[VECT_ELC_ELSR18I].BYTE = 0;
         break;
@@ -336,9 +352,9 @@ void elc_control_cmd_event_clear (const elc_module_t clear_select)
         break;
     }
 
-    pbase_register_address = (volatile uint8_t *) &ELC.ELCR;
-    poffset_address = (volatile uint8_t *) (clear_select + ELC_ELSR0_ADDRESS_OFFSET);
-    (uint32_t) pset_address = (uint32_t) pbase_register_address + (uint32_t) poffset_address;
+    pbase_register_address = (volatile uint8_t R_BSP_EVENACCESS_SFR *) &ELC.ELCR;
+    poffset_address = (volatile uint8_t R_BSP_EVENACCESS_SFR *) (clear_select + ELC_ELSR0_ADDRESS_OFFSET);
+    pset_address = (volatile uint8_t R_BSP_EVENACCESS_SFR *) ((uint32_t) pbase_register_address + (uint32_t) poffset_address);
     *pset_address = 0x00;
 
 }
@@ -544,10 +560,10 @@ elc_err_t elc_set_err_check_um_note (elc_event_signal_t * const p_elc_event_sign
  * Arguments    : none
  * Return Value : none
  ***********************************************************************************************************************/
-#pragma interrupt elc_intelc_icu_lpt_isr(vect = 80)
-static void elc_intelc_icu_lpt_isr (void)
+R_BSP_PRAGMA_STATIC_INTERRUPT(elc_intelc_icu_lpt_isr, 80)
+R_BSP_ATTRIB_STATIC_INTERRUPT void elc_intelc_icu_lpt_isr (void)
 {
-    if((NULL != g_elc_callback_icu_lpt) &&  (FIT_NO_FUNC != g_elc_callback_icu_lpt))
+    if ((NULL != g_elc_callback_icu_lpt) &&  (FIT_NO_FUNC != g_elc_callback_icu_lpt))
     {
        elc_icu_lpt = ELC_EVT_ICU_LPT;
        g_elc_callback_icu_lpt(&elc_icu_lpt);
@@ -563,10 +579,10 @@ static void elc_intelc_icu_lpt_isr (void)
  * Arguments    : none
  * Return Value : none
  ***********************************************************************************************************************/
-#pragma interrupt elc_intelc_icu1_isr(vect = VECT_ELC_ELSR18I)
-static void elc_intelc_icu1_isr (void)
+R_BSP_PRAGMA_STATIC_INTERRUPT(elc_intelc_icu1_isr, VECT_ELC_ELSR18I)
+R_BSP_ATTRIB_STATIC_INTERRUPT void elc_intelc_icu1_isr (void)
 {
-    if((NULL != g_elc_callback_icu1) &&  (FIT_NO_FUNC != g_elc_callback_icu1))
+    if ((NULL != g_elc_callback_icu1) &&  (FIT_NO_FUNC != g_elc_callback_icu1))
     {
        elc_icu1 = ELC_EVT_ICU1;
        g_elc_callback_icu1(&elc_icu1);

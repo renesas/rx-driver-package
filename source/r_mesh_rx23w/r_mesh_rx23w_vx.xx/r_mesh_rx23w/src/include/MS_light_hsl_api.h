@@ -20,9 +20,10 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup light_hsl_module LIGHT_HSL (Mesh Light Hsl Model)
+ * \defgroup light_hsl_module Light Hsl Model (LIGHT_HSL)
+ * \ingroup mesh_models_block
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Light Hsl Model (LIGHT_HSL) module to the Application.
  */
 
@@ -32,7 +33,7 @@
 /**
  *  \defgroup light_hsl_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
+ *  \brief This section Describes the module Notification Callback interface offered
  *  to the application
  */
 
@@ -108,14 +109,14 @@ typedef API_RESULT (* MS_LIGHT_HSL_SATURATION_SERVER_CB)
  * Light Hsl Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_LIGHT_HSL_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -125,6 +126,7 @@ typedef API_RESULT (* MS_LIGHT_HSL_CLIENT_CB)
 /**
  *  \defgroup light_hsl_structures Structures
  *  \{
+ *  \brief This section describes the EtherMind Mesh Light HSL Model Structures.
  */
 
 /**
@@ -432,12 +434,12 @@ typedef struct MS_light_hsl_saturation_status_struct
 /**
  * \defgroup light_hsl_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Light Hsl Model APIs.
+ * \brief This section describes the EtherMind Mesh Light Hsl Model APIs.
  */
 /**
- * \defgroup light_hsl_ser_api_defs Light Hsl Server API Definitions
+ * \defgroup light_hsl_ser_api_defs Light Hsl Server API
  * \{
- * This section describes the Light Hsl Server APIs.
+ * \brief This section describes the Light Hsl Server APIs.
  */
 
 /**
@@ -592,9 +594,9 @@ API_RESULT MS_light_hsl_saturation_server_state_update
 /** \} */
 
 /**
- * \defgroup light_hsl_cli_api_defs Light Hsl Client API Definitions
+ * \defgroup light_hsl_cli_api_defs Light Hsl Client API
  * \{
- * This section describes the Light Hsl Client APIs.
+ * \brief This section describes the Light Hsl Client APIs.
  */
 
 /**
@@ -656,6 +658,9 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
+/** \name Messsage Send
+ *  \{
+ */
 /**
  *  \brief API to get the Light HSL Lightness, Light HSL Hue, and Light HSL Saturation states of an element.
  *
@@ -956,6 +961,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
             param,\
             0xFFFFFFFF\
         )
+/** \} */
 /** \} */
 /** \} */
 /** \} */

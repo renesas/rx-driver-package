@@ -256,13 +256,13 @@ void r_ssi_clear_flag_roirq ( volatile struct st_ssi R_SSI_EVENACCESS * p_ssi_re
 R_BSP_PRAGMA_STATIC_INLINE(r_ssi_module_stop)
 void r_ssi_module_stop (const ssi_ch_t Channel, const ssi_mstp_t ssi_mstp)
 {
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
 	bsp_int_ctrl_t int_ctrl;
 #endif
 
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);
 
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 #endif
 
@@ -281,7 +281,7 @@ void r_ssi_module_stop (const ssi_ch_t Channel, const ssi_mstp_t ssi_mstp)
             ; /* no operation */
         break;
     }
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 #endif
 

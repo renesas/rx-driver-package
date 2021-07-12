@@ -69,8 +69,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_cmtw_rx</name>
-        <version>2.20</version>
-        <zipsource>r_cmtw_rx_v2.20.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_cmtw_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>5.50</version>

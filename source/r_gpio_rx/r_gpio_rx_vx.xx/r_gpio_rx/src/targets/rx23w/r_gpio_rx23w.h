@@ -23,6 +23,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 28.06.2019 1.00    First Release
+*         : 01.04.2021 1.10    Added support for RX23W 83pins
 ***********************************************************************************************************************/
 #ifndef GPIO_RX23W
 #define GPIO_RX23W
@@ -43,7 +44,7 @@ Macro definitions
 /* General information about number of ports and pins on this device. */
 #define GPIO_INFO_NUM_PORTS                 (19)
 
-#if (BSP_PACKAGE_PINS == 85)
+#if ((BSP_PACKAGE_PINS == 85) ||(BSP_PACKAGE_PINS == 83))
     #define GPIO_INFO_NUM_PINS              (44)
 #elif (BSP_PACKAGE_PINS == 56)
     #define GPIO_INFO_NUM_PINS              (30)
@@ -71,7 +72,7 @@ Macro definitions
 /***********************************************************************************************************************
 Typedef definitions
 ***********************************************************************************************************************/
-#if (BSP_PACKAGE_PINS == 85)
+#if ((BSP_PACKAGE_PINS == 85) || (BSP_PACKAGE_PINS == 83))
 /* This enumerator has each available GPIO port on this MCU. This list will change depending on the MCU chosen. */
 typedef enum
 {

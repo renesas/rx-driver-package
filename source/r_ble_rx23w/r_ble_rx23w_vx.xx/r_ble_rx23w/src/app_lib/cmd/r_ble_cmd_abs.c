@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 #include <string.h>
 #include <stdlib.h>
@@ -33,6 +33,9 @@
 
 #define pf R_BLE_CLI_Printf
 
+#define BLE_CMD_ADV_OWN_ADDR_TYPE_STR   (10)
+#define BLE_CMD_ADV_TYPE_STR            (10)
+
 static void exec_abs_adv(int argc, char *argv[]);
 static void exec_abs_scan(int argc, char *argv[]);
 static void exec_abs_set_priv(int argc, char *argv[]);
@@ -50,6 +53,10 @@ static void exec_abs_ver(int argc, char *argv[]);
 #if (BLE_CFG_LIB_TYPE == 0) 
 static void delete_sync_hdl(st_ble_evt_data_t * p_data);
 #endif /* (BLE_CFG_LIB_TYPE == 0) */
+
+static char gs_adv_own_addr_type[BLE_CMD_ADV_OWN_ADDR_TYPE_STR];
+static char gs_adv_type[BLE_CMD_ADV_TYPE_STR];
+static uint8_t gs_adv_wl;
 
 static uint8_t gs_adv_data[] =
 {
@@ -71,6 +78,14 @@ typedef struct
 
 static st_device_info_t connected_device_info[BLE_CFG_RF_CONN_MAX];
 
+#if (BLE_CFG_ABS_API_EN != 0)
+extern st_ble_dev_addr_t g_ble_priv_dummy_addr;
+extern st_ble_gap_rslv_list_key_set_t g_ble_peer_dummy_irk;
+#else /* (BLE_CFG_ABS_API_EN != 0) */
+st_ble_dev_addr_t g_ble_priv_dummy_addr;
+st_ble_gap_rslv_list_key_set_t g_ble_peer_dummy_irk;
+#endif /* (BLE_CFG_ABS_API_EN != 0) */
+
 static st_ble_abs_legacy_adv_param_t gs_legacy_adv_param =
 {
     .p_addr                    = NULL,
@@ -84,9 +99,10 @@ static st_ble_abs_legacy_adv_param_t gs_legacy_adv_param =
     .sres_data_length          = sizeof(gs_sres_data),
     .adv_ch_map                = BLE_GAP_ADV_CH_ALL,
     .filter                    = BLE_ABS_ADV_ALLOW_CONN_ANY,
-    .o_addr_type               = BLE_GAP_ADDR_PUBLIC,
+    .o_addr_type               = BLE_GAP_ADDR_RAND,
 };
 
+#if (BLE_CFG_LIB_TYPE == 0)
 static st_ble_abs_ext_adv_param_t gs_ext_adv_param =
 {
     .p_addr                    = NULL,
@@ -98,10 +114,11 @@ static st_ble_abs_ext_adv_param_t gs_ext_adv_param =
     .adv_data_length           = sizeof(gs_adv_data),
     .adv_ch_map                = BLE_GAP_ADV_CH_ALL,
     .filter                    = BLE_ABS_ADV_ALLOW_CONN_ANY,
-    .o_addr_type               = BLE_GAP_ADDR_PUBLIC,
+    .o_addr_type               = BLE_GAP_ADDR_RAND,
     .adv_phy                   = BLE_GAP_ADV_PHY_1M,
     .sec_adv_phy               = BLE_GAP_ADV_PHY_1M,
 };
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
 
 static st_ble_abs_non_conn_adv_param_t gs_non_conn_adv_param =
 {
@@ -111,18 +128,21 @@ static st_ble_abs_non_conn_adv_param_t gs_non_conn_adv_param =
     .duration                  = 0x0000,
     .adv_data_length           = sizeof(gs_adv_data),
     .adv_ch_map                = BLE_GAP_ADV_CH_ALL,
-    .o_addr_type               = BLE_GAP_ADDR_PUBLIC,
+    .o_addr_type               = BLE_GAP_ADDR_RAND,
     .adv_phy                   = BLE_GAP_ADV_PHY_1M,
     .sec_adv_phy               = BLE_GAP_ADV_PHY_1M,
 };
 
+#if (BLE_CFG_LIB_TYPE == 0)
 static st_ble_abs_perd_adv_param_t gs_periodic_adv_param =
 {
     .p_perd_adv_data           = gs_adv_data,
     .perd_intv                 = 0x0040,
     .perd_adv_data_length      = sizeof(gs_adv_data),
 };
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
 
+#if (BLE_CFG_LIB_TYPE != 2) 
 static st_ble_abs_scan_phy_param_t gs_phy_param_1M =
 {
     .fast_intv                 = 0x0200,
@@ -153,9 +173,23 @@ static st_ble_abs_scan_param_t gs_scan_param =
     .fast_period               = 0x0100,
     .slow_period               = 0x0000,
     .filter_data_length        = 0,
-    .dev_filter                = BLE_GAP_SCAN_ALLOW_ADV_ALL,
+    .dev_filter                = BLE_ABS_SCAN_ALL_STATIC,
     .filter_dups               = BLE_GAP_SCAN_FILT_DUPLIC_DISABLE,
 };
+
+#if (BLE_CFG_LIB_TYPE == 0) 
+static st_ble_abs_scan_param_t gs_sync_scan_param =
+{
+    .p_phy_param_1M            = &gs_phy_param_sync,
+    .p_phy_param_coded         = NULL,
+    .p_filter_data             = NULL,
+    .fast_period               = 0x0000,
+    .slow_period               = 0x0000,
+    .filter_data_length        = 0,
+    .dev_filter                = BLE_ABS_SCAN_WLST_STATIC,
+    .filter_dups               = BLE_GAP_SCAN_FILT_DUPLIC_DISABLE,
+};
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
 
 static st_ble_abs_conn_phy_param_t gs_conn_phy_1m =
 {
@@ -168,13 +202,15 @@ static st_ble_dev_addr_t gs_conn_bd_addr;
 
 static st_ble_abs_conn_param_t gs_conn_param =
 {
-    .filter                    = BLE_GAP_INIT_FILT_USE_ADDR,
+    .filter                    = BLE_ABS_CONN_USE_ADDR_STATIC,
     .conn_to                   = 7,
     .p_conn_1M                 = &gs_conn_phy_1m,
     .p_conn_2M                 = NULL,
     .p_conn_coded              = NULL,
     .p_addr                    = &gs_conn_bd_addr,
 };
+
+#endif /* (BLE_CFG_LIB_TYPE != 2) */
 
 static uint16_t gs_pairing_conn_hdl = BLE_GAP_INVALID_CONN_HDL;
 static uint8_t gs_version_proc = 0x00;
@@ -306,20 +342,142 @@ const st_ble_cli_cmd_t * const abs_cmd[] = {
     &g_abs_cmd,
 };
 
-
+#if (BLE_CFG_LIB_TYPE == 0)
+static uint8_t gs_adv_cmd_status;
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
 
 /*----------------------------------------------------------------------------------------------------------------------
     adv command
 ----------------------------------------------------------------------------------------------------------------------*/
+static ble_status_t set_adv_addr_type(st_ble_dev_addr_t ** pp_addr, st_ble_dev_addr_t * o_rnd_addr, uint8_t * o_addr_type, uint8_t * o_addr)
+{
+    ble_status_t ret;
+#if (BLE_CFG_LIB_TYPE == 0)
+    (void)&o_rnd_addr;
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
+
+    ret = BLE_SUCCESS;
+
+    if(strcmp(gs_adv_own_addr_type, "rnd") == 0)
+    {
+        * o_addr_type = BLE_GAP_ADDR_RAND;
+        * pp_addr = NULL;
+#if (BLE_CFG_LIB_TYPE == 0)
+        memcpy(o_addr, o_rnd_addr->addr, BLE_BD_ADDR_LEN);
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
+    }
+    else if(strcmp(gs_adv_own_addr_type, "rpa_pub") == 0)
+    {
+        * o_addr_type = BLE_GAP_ADDR_RPA_ID_PUBLIC;
+        * pp_addr = &g_ble_priv_dummy_addr;
+        memset(o_addr, 0x00, BLE_BD_ADDR_LEN);
+    }
+    else if(strcmp(gs_adv_own_addr_type, "rpa_rnd") == 0)
+    {
+        * o_addr_type = BLE_GAP_ADDR_RPA_ID_RANDOM;
+        * pp_addr = &g_ble_priv_dummy_addr;
+#if (BLE_CFG_LIB_TYPE == 0)
+        memcpy(o_addr, o_rnd_addr->addr, BLE_BD_ADDR_LEN);
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
+    }
+    else if(strcmp(gs_adv_own_addr_type, "pub") == 0)
+    {
+        * o_addr_type = BLE_GAP_ADDR_PUBLIC;
+        * pp_addr = NULL;
+        memset(o_addr, 0x00, BLE_BD_ADDR_LEN);
+    }
+    else
+    {
+        ret = BLE_ERR_INVALID_ARG;
+    }
+
+    return ret;
+}
+
+void start_adv_cmd(st_ble_dev_addr_t * o_rnd_addr)
+{
+    ble_status_t ret;
+
+    ret = BLE_SUCCESS;
+
+#if (BLE_CFG_LIB_TYPE == 0)
+    if(0 == gs_adv_cmd_status)
+    {
+        return;
+    }
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
+   
+    if(strcmp(gs_adv_type, "legacy") == 0)
+    {
+        gs_legacy_adv_param.filter = (0 == gs_adv_wl) ? BLE_ABS_ADV_ALLOW_CONN_ANY : BLE_ABS_ADV_ALLOW_CONN_WLST;
+        ret = set_adv_addr_type(&gs_legacy_adv_param.p_addr, o_rnd_addr, &gs_legacy_adv_param.o_addr_type, gs_legacy_adv_param.o_addr);
+        if(BLE_SUCCESS == ret)
+        {
+            ret = R_BLE_ABS_StartLegacyAdv(&gs_legacy_adv_param);
+        }
+    }
+    else if(strcmp(gs_adv_type, "ext") == 0)
+    {
+#if (BLE_CFG_LIB_TYPE == 0)
+        gs_ext_adv_param.filter = (0 == gs_adv_wl) ? BLE_ABS_ADV_ALLOW_CONN_ANY : BLE_ABS_ADV_ALLOW_CONN_WLST;
+        ret = set_adv_addr_type(&gs_ext_adv_param.p_addr, o_rnd_addr, &gs_ext_adv_param.o_addr_type, gs_ext_adv_param.o_addr);
+        if(BLE_SUCCESS == ret)
+        {
+            ret = R_BLE_ABS_StartExtAdv(&gs_ext_adv_param);
+        }
+#else /* (BLE_CFG_LIB_TYPE == 0) */
+        ret = BLE_ERR_UNSUPPORTED;
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
+    }
+    else if(strcmp(gs_adv_type, "non-conn") == 0)
+    {
+        gs_non_conn_adv_param.adv_intv = 0x00000180;
+        ret = set_adv_addr_type(&gs_non_conn_adv_param.p_addr, o_rnd_addr, &gs_non_conn_adv_param.o_addr_type, gs_non_conn_adv_param.o_addr);
+        if(BLE_SUCCESS == ret)
+        {
+            ret = R_BLE_ABS_StartNonConnAdv(&gs_non_conn_adv_param);
+        }
+    }
+    else if(strcmp(gs_adv_type, "periodic") == 0)
+    {
+#if (BLE_CFG_LIB_TYPE == 0)
+        gs_non_conn_adv_param.adv_intv = 0x00000100;
+        gs_non_conn_adv_param.adv_data_length = 0;
+        gs_periodic_adv_param.param = gs_non_conn_adv_param;
+        ret = set_adv_addr_type(&gs_periodic_adv_param.param.p_addr, o_rnd_addr, &gs_periodic_adv_param.param.o_addr_type, gs_periodic_adv_param.param.o_addr);
+        if(BLE_SUCCESS == ret)
+        {
+            ret = R_BLE_ABS_StartPerdAdv(&gs_periodic_adv_param);
+        }
+#else /* (BLE_CFG_LIB_TYPE == 0) */
+        ret = BLE_ERR_UNSUPPORTED;
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
+    }
+    else
+    {
+        R_BLE_CLI_PrintUnrecognized();
+    }
+
+    if(BLE_SUCCESS != ret)
+    {
+        R_BLE_CLI_PrintError(ret);
+    }
+
+    gs_adv_wl = 0;
+
+#if (BLE_CFG_LIB_TYPE == 0)
+    gs_adv_cmd_status = 0;
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
+
+}
 
 static void exec_abs_adv(int argc, char *argv[])
 {
     ble_status_t ret;
-
-    if (argc != 3)
+    
+    if ((3 > argc) || (5 < argc))
     {
-        pf("gap %s: unrecognized operands\n", argv[0]);
-        R_BLE_CLI_SetCmdComp();
+        R_BLE_CLI_PrintUnrecognized();
         return;
     }
 
@@ -327,31 +485,71 @@ static void exec_abs_adv(int argc, char *argv[])
 
     if (strcmp(argv[2], "start") == 0)
     {
-        if(strcmp(argv[1], "legacy") == 0)
+        strncpy(gs_adv_type, (const char*)argv[1], sizeof(gs_adv_type));
+
+#if (BLE_CFG_LIB_TYPE == 0)
+        gs_adv_cmd_status = 1;
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
+
+        if (strcmp(argv[argc-1], "-wl") == 0)
         {
-            ret = R_BLE_ABS_StartLegacyAdv(&gs_legacy_adv_param);
+            if((strcmp(argv[1], "non-conn") == 0) || (strcmp(argv[1], "periodic") == 0))
+            {
+                R_BLE_CLI_PrintUnrecognized();
+                return;
+            }
+            else
+            {
+                gs_adv_wl = 1;
+            }
         }
-        else if(strcmp(argv[1], "ext") == 0)
+
+        if((3 == argc) || ((4 == argc) && (1 == gs_adv_wl)))
         {
-            ret = R_BLE_ABS_StartExtAdv(&gs_ext_adv_param);
-        }
-        else if(strcmp(argv[1], "non-conn") == 0)
-        {
-            gs_non_conn_adv_param.adv_intv = 0x00000180;
-            ret = R_BLE_ABS_StartNonConnAdv(&gs_non_conn_adv_param);
+            strncpy(gs_adv_own_addr_type, "rnd", sizeof(gs_adv_own_addr_type));
         }
         else
         {
-            if(strcmp(argv[1], "periodic") == 0)
+            strncpy(gs_adv_own_addr_type, (const char*)argv[3], sizeof(gs_adv_own_addr_type));
+        }
+#if (BLE_CFG_LIB_TYPE == 0)
+        if((strcmp(gs_adv_own_addr_type, "rnd") == 0) || (strcmp(gs_adv_own_addr_type, "rpa_rnd") == 0))
+        {
+            ret = R_BLE_VS_GetBdAddr(BLE_VS_ADDR_AREA_REG, BLE_GAP_ADDR_RAND);
+            if(BLE_SUCCESS != ret)
             {
-                gs_non_conn_adv_param.adv_intv = 0x00000100;
-                gs_non_conn_adv_param.adv_data_length = 0;
-                gs_periodic_adv_param.param = gs_non_conn_adv_param;
-                ret = R_BLE_ABS_StartPerdAdv(&gs_periodic_adv_param);
+                gs_adv_cmd_status = 0;
+                gs_adv_wl = 0;
+                R_BLE_CLI_PrintError(ret);
+            }
+
+            return;
+        }
+        else
+        {
+            if((strcmp(gs_adv_own_addr_type, "pub") != 0) && (strcmp(gs_adv_own_addr_type, "rpa_pub") != 0))
+            {
+                gs_adv_cmd_status = 0;
+                gs_adv_wl = 0;
+                R_BLE_CLI_PrintUnrecognized();
+                return;
             }
         }
+#else /* (BLE_CFG_LIB_TYPE == 0) */
+        if((strcmp(gs_adv_own_addr_type, "pub") != 0) && 
+            (strcmp(gs_adv_own_addr_type, "rnd") != 0) &&
+            (strcmp(gs_adv_own_addr_type, "rpa_pub") != 0) &&
+            (strcmp(gs_adv_own_addr_type, "rpa_rnd") != 0))
+        {
+            R_BLE_CLI_PrintUnrecognized();
+            gs_adv_wl = 0;
+            return;
+        }
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
+
+        start_adv_cmd(NULL);
     }
-    else if (strcmp(argv[2], "stop") == 0)
+    else
     {
         uint8_t adv_hdl = 0xFF;
         if(strcmp(argv[1], "legacy") == 0)
@@ -366,25 +564,33 @@ static void exec_abs_adv(int argc, char *argv[])
         {
             adv_hdl = 0x02;
         }
+        else if(strcmp(argv[1], "periodic") == 0)
+        {
+            adv_hdl = 0x03;
+        }
         else 
         {
-            if(strcmp(argv[1], "periodic") == 0)
-            {
-                adv_hdl = 0x03;
-            }
+            R_BLE_CLI_PrintUnrecognized();
+            return;
         }
 
-        ret = R_BLE_GAP_StopAdv(adv_hdl);
-    }
-    else
-    {
-        pf("gap %s: unrecognized operand '%s'\n", argv[0], argv[1], argv[2]);
+        if (strcmp(argv[2], "stop") == 0)
+        {
+            ret = R_BLE_GAP_StopAdv(adv_hdl);
+        }
+        else if (strcmp(argv[2], "remove") == 0)
+        {
+            ret = R_BLE_GAP_RemoveAdvSet(BLE_GAP_RMV_ADV_SET_REM_OP, adv_hdl);
+        }
+        else
+        {
+            R_BLE_CLI_PrintUnrecognized();
+        }
     }
 
     if(BLE_SUCCESS != ret)
     {
-        pf("gap adv %s %s command error. result : 0x%04x\n", argv[1], argv[2], ret);
-        R_BLE_CLI_SetCmdComp();
+        R_BLE_CLI_PrintError(ret);
     }
 
 }
@@ -392,33 +598,135 @@ static void exec_abs_adv(int argc, char *argv[])
 /*----------------------------------------------------------------------------------------------------------------------
     scan command
 ----------------------------------------------------------------------------------------------------------------------*/
+#if (BLE_CFG_LIB_TYPE != 2) 
+static uint8_t check_scan_addr_type(char* argv)
+{
+    uint8_t scan_addr = 0xFF;
+    if (strcmp(argv, "pub") == 0)
+    {
+        scan_addr = BLE_GAP_ADDR_PUBLIC;
+    }
+    else if (strcmp(argv, "rnd") == 0)
+    {
+        scan_addr = BLE_GAP_ADDR_RAND;
+    }
+    else if (strcmp(argv, "rpa_pub") == 0)
+    {
+        scan_addr = BLE_GAP_ADDR_RPA_ID_PUBLIC;
+    }
+    else if (strcmp(argv, "rpa_rnd") == 0)
+    {
+        scan_addr = BLE_GAP_ADDR_RPA_ID_RANDOM;
+    }
+    return scan_addr;
+}
+#endif /* (BLE_CFG_LIB_TYPE != 2) */
 
 static void exec_abs_scan(int argc, char *argv[])
 {
+#if (BLE_CFG_LIB_TYPE == 2) 
+    R_BLE_CLI_PrintError(BLE_ERR_UNSUPPORTED);
+#else /* (BLE_CFG_LIB_TYPE == 2) */
     ble_status_t ret;
+    uint8_t scan_wl;
+    uint8_t scan_addr;
 
-    if (strcmp(argv[1], "stop") == 0)
+    if((argc == 2) && (strcmp(argv[1], "stop") == 0))
     {
+        R_BLE_CLI_SetCmdComp();
         ret = R_BLE_GAP_StopScan();
     }
     else
     {
-        if(argc == 3)
+        if (5 < argc)
         {
-            uint16_t len;
-            gs_scan_param.filter_ad_type = (uint8_t)strtol(argv[1], NULL, 0);
-            R_BLE_CMD_ParseValues(argv[2], gs_filt_data, &len);
-            gs_scan_param.filter_data_length = len;
+            R_BLE_CLI_PrintUnrecognized();
+            return;
+        }
+
+        scan_wl = 0;
+        if (strcmp(argv[argc-1], "-wl") == 0)
+        {
+            scan_wl = 1;
+        }
+
+        scan_addr = 0xFF;
+
+        gs_scan_param.filter_data_length = 0;
+        if (1 < argc)
+        {
+            scan_addr = check_scan_addr_type(argv[1]);
+            if(scan_addr == 0xFF)
+            {
+                if( (scan_wl == 0) && (argc == 2) )
+                {
+                    R_BLE_CLI_PrintUnrecognized();
+                    return;
+                }
+                else if( argc >= 3 )
+                {
+                    uint16_t len;
+                    gs_scan_param.filter_ad_type = (uint8_t)strtol(argv[1], NULL, 0);
+                    R_BLE_CMD_ParseValues(argv[2], gs_filt_data, &len);
+                    if(len == 0)
+                    {
+                        R_BLE_CLI_PrintUnrecognized();
+                        return;
+                    }
+                    else
+                    {
+                        gs_scan_param.filter_data_length = len;
+                    }
+                }
+            }
+            else
+            {
+                if (3 < argc)
+                {
+                    R_BLE_CLI_PrintUnrecognized();
+                    return;
+                }
+                else if( (argc == 3) && (scan_wl != 1) )
+                {
+                    R_BLE_CLI_PrintUnrecognized();
+                    return;
+                }
+            }
+        }
+        if (3 < argc)
+        {
+            scan_addr = check_scan_addr_type(argv[3]);
+            if(scan_addr == 0xFF)
+            {
+                if( (scan_wl == 1) && (argc != 4) )
+                {
+                    R_BLE_CLI_PrintUnrecognized();
+                    return;
+                }
+            }
+            else
+            {
+                if( (scan_wl == 1) && (argc != 5) )
+                {
+                    R_BLE_CLI_PrintUnrecognized();
+                    return;
+                }
+            }
+        }
+
+        if(0xFF == scan_addr)
+        {
+            gs_phy_param_1M.scan_type = BLE_GAP_SCAN_PASSIVE;
+            scan_addr = BLE_GAP_ADDR_RAND;
         }
         else
         {
-            gs_scan_param.filter_data_length = 0;
+            gs_phy_param_1M.scan_type = BLE_GAP_SCAN_ACTIVE;
         }
 
-        gs_scan_param.p_phy_param_1M = &gs_phy_param_1M;
-        gs_scan_param.fast_period = 0x0100;
-        gs_scan_param.slow_period = 0x0000;
-        gs_scan_param.dev_filter = BLE_GAP_SCAN_ALLOW_ADV_ALL;
+        gs_scan_param.dev_filter = (0 == scan_wl) ? 
+                    (BLE_GAP_SCAN_ALLOW_ADV_ALL  | (scan_addr << 4)) : 
+                    (BLE_GAP_SCAN_ALLOW_ADV_WLST | (scan_addr << 4));
 
 #if (BLE_CFG_LIB_TYPE == 0) 
         gs_sync_scan = 0;
@@ -428,10 +736,9 @@ static void exec_abs_scan(int argc, char *argv[])
 
     if(BLE_SUCCESS != ret)
     {
-        pf("gap scan command error. result : 0x%04x\n", ret);
-        R_BLE_CLI_SetCmdComp();
+        R_BLE_CLI_PrintError(ret);
     }
-
+#endif /* (BLE_CFG_LIB_TYPE == 2) */
 }
 
 static void abort_abs_scan(void)
@@ -442,34 +749,120 @@ static void abort_abs_scan(void)
 /*----------------------------------------------------------------------------------------------------------------------
     conn command
 ----------------------------------------------------------------------------------------------------------------------*/
+#if (BLE_CFG_LIB_TYPE != 2) 
+static void abs_conn_set_event(void)
+{
+    ble_status_t ret;
+    ret = R_BLE_ABS_CreateConn(&gs_conn_param);
+    if (ret != BLE_SUCCESS)
+    {
+        R_BLE_CLI_PrintError(ret);
+    }
+}
+#endif /* (BLE_CFG_LIB_TYPE != 2) */
+
 static void exec_abs_conn(int argc, char *argv[])
 {
-    if (argc != 3)
+#if (BLE_CFG_LIB_TYPE == 2) 
+    R_BLE_CLI_PrintError(BLE_ERR_UNSUPPORTED);
+#else /* (BLE_CFG_LIB_TYPE == 2) */
+    ble_status_t ret;
+    uint8_t set_event_conn;
+    uint8_t conn_wl;
+
+    if ((3 > argc) || (6 < argc))
     {
-        pf("gap %s: unrecognized operands\n", argv[0]);
-        R_BLE_CLI_SetCmdComp();
+        R_BLE_CLI_PrintUnrecognized();
         return;
+    }
+
+    conn_wl = 0;
+    if (strcmp(argv[argc-1], "-wl") == 0)
+    {
+        conn_wl = 1;
     }
 
     R_BLE_CMD_ParseAddr(argv[1], gs_conn_bd_addr.addr);
 
-    if (strcmp(argv[2], "rnd") == 0)
+    if ((strcmp(argv[2], "pub") == 0) || (strcmp(argv[2], "rpa_pub") == 0))
+    {
+        gs_conn_bd_addr.type = BLE_GAP_ADDR_PUBLIC;
+    }
+    else if ((strcmp(argv[2], "rnd") == 0) || (strcmp(argv[2], "rpa_rnd") == 0))
     {
         gs_conn_bd_addr.type = BLE_GAP_ADDR_RAND;
     }
     else
     {
-        gs_conn_bd_addr.type = BLE_GAP_ADDR_PUBLIC;
+        R_BLE_CLI_PrintUnrecognized();
+        return;
     }
 
-    ble_status_t ret;
-    ret = R_BLE_ABS_CreateConn(&gs_conn_param);
+    gs_conn_param.filter = BLE_ABS_CONN_USE_ADDR_STATIC;
+    set_event_conn = 0;
+
+    if (3 < argc)
+    {
+        if (strcmp(argv[3], "rpa_pub") == 0)
+        {
+            gs_conn_param.filter = BLE_ABS_CONN_USE_ADDR_RPA_PUBLIC;
+        }
+        else if (strcmp(argv[3], "rpa_rnd") == 0)
+        {
+            gs_conn_param.filter = BLE_ABS_CONN_USE_ADDR_RPA_STATIC;
+        }
+        else if (strcmp(argv[3], "rnd") == 0)
+        {
+            gs_conn_param.filter = BLE_ABS_CONN_USE_ADDR_STATIC;
+        }
+        else if (strcmp(argv[3], "pub") == 0)
+        {
+            gs_conn_param.filter = BLE_ABS_CONN_USE_ADDR_PUBLIC;
+        }
+        else if (strcmp(argv[3], "-wl") != 0)
+        {
+            R_BLE_CLI_PrintUnrecognized();
+            return;
+        }
+    }
+
+    if(0 != conn_wl)
+    {
+        gs_conn_param.filter = gs_conn_param.filter + BLE_GAP_INIT_FILT_USE_WLST;
+    }
+
+    if(((5 == argc) && (0 == conn_wl)) ||
+       ((6 == argc) && (0 != conn_wl)))
+    {
+        if(BLE_ABS_CONN_USE_ADDR_RPA_PUBLIC > gs_conn_param.filter)
+        {
+            R_BLE_CLI_PrintUnrecognized();
+            return;
+        }
+
+        if (strcmp(argv[4], "dummy_irk") == 0)
+        {
+            set_event_conn = 1;
+            ret = R_BLE_GAP_ConfRslvList(BLE_GAP_LIST_ADD_DEV, &gs_conn_bd_addr, &g_ble_peer_dummy_irk, 1);
+            R_BLE_SetEvent(abs_conn_set_event);
+        }
+        else
+        {
+            R_BLE_CLI_PrintUnrecognized();
+            return;
+        }
+    }
+
+    if(0 == set_event_conn)
+    {
+        ret = R_BLE_ABS_CreateConn(&gs_conn_param);
+    }
+
     if (ret != BLE_SUCCESS)
     {
-        pf("gap conn command error. result : 0x%04x\n", ret);
-        R_BLE_CLI_SetCmdComp();
+        R_BLE_CLI_PrintError(ret);
     }
-
+#endif /* (BLE_CFG_LIB_TYPE == 2) */
 }
 
 static void abort_abs_conn(void)
@@ -506,11 +899,14 @@ static void exec_abs_conn_cfg(int argc, char *argv[])
         }
         else
         {
-            pf("gap conn_cfg update %s: unrecognized operands\n", argv[0]);
+            R_BLE_CLI_PrintUnrecognized();
         }
     }
     else if (strcmp(argv[1], "phy") == 0)
     {
+#if (BLE_CFG_LIB_TYPE == 2) 
+        ret = BLE_ERR_UNSUPPORTED;
+#else /* (BLE_CFG_LIB_TYPE == 2) */
         st_ble_gap_set_phy_param_t phy;
         if (argc == 6)
         {
@@ -523,11 +919,15 @@ static void exec_abs_conn_cfg(int argc, char *argv[])
         }
         else
         {
-            pf("gap conn_cfg phy %s: unrecognized operands\n", argv[0]);
+            R_BLE_CLI_PrintUnrecognized();
         }
+#endif /* (BLE_CFG_LIB_TYPE == 2) */
     }
     else if (strcmp(argv[1], "def_phy") == 0)
     {
+#if (BLE_CFG_LIB_TYPE == 2) 
+        ret = BLE_ERR_UNSUPPORTED;
+#else /* (BLE_CFG_LIB_TYPE == 2) */
         st_ble_gap_set_def_phy_param_t phy;
         if (argc == 4)
         {
@@ -538,8 +938,9 @@ static void exec_abs_conn_cfg(int argc, char *argv[])
         }
         else
         {
-            pf("gap conn_cfg def_phy %s: unrecognized operands\n", argv[0]);
+            R_BLE_CLI_PrintUnrecognized();
         }
+#endif /* (BLE_CFG_LIB_TYPE == 2) */
     }
     else if (strcmp(argv[1], "data_len") == 0)
     {
@@ -555,18 +956,17 @@ static void exec_abs_conn_cfg(int argc, char *argv[])
         }
         else
         {
-            pf("gap conn_cfg data_len %s: unrecognized operands\n", argv[0]);
+            R_BLE_CLI_PrintUnrecognized();
         }
     }
     else
     {
-        pf("gap %s: unrecognized operand '%s'\n", argv[0]);
+        R_BLE_CLI_PrintUnrecognized();
     }
 
     if(BLE_SUCCESS != ret)
     {
-        pf("gap conn_cfg %s command error. result : 0x%04x\n", argv[1], ret);
-        R_BLE_CLI_SetCmdComp();
+        R_BLE_CLI_PrintError(ret);
     }
 
 }
@@ -583,18 +983,17 @@ static void exec_abs_set_priv(int argc, char *argv[])
     int32_t i;
     char * p_mode;
     uint8_t * p_irk;
+    st_ble_dev_addr_t rem_addr;
 
     ret = BLE_SUCCESS;
 
     if (strcmp(argv[1], "set") == 0)
     {
-        priv = 0;
-
         if (argc == 4)
         {
             if(32 != strlen(argv[2]))
             {
-                pf("gap %s: invalid irk size.'\n");
+                pf("invalid irk size\n");
                 R_BLE_CLI_SetCmdComp();
                 return;
             }
@@ -608,42 +1007,135 @@ static void exec_abs_set_priv(int argc, char *argv[])
             p_mode = argv[3];
             p_irk = irk;
         }
-        else
+        else if (argc == 3)
         {
             p_mode = argv[2];
             p_irk = NULL;
         }
-
-        if (strcmp(p_mode, "dev") == 0)
+        else
         {
-            priv = 1;
+            R_BLE_CLI_PrintError(BLE_ERR_INVALID_ARG);
+            return;
+        }
+
+        if (strcmp(p_mode, "net") == 0)
+        {
+            priv = BLE_ABS_PRIV_NET_STATIC_IDADDR;
+        }
+        else if (strcmp(p_mode, "dev") == 0)
+        {
+            priv = BLE_ABS_PRIV_DEV_STATIC_IDADDR;
+        }
+        else if(strcmp(p_mode, "net_pub") == 0)
+        {
+            priv = BLE_ABS_PRIV_NET_PUBLIC_IDADDR;
+        }
+        else if (strcmp(p_mode, "dev_pub") == 0)
+        {
+            priv = BLE_ABS_PRIV_DEV_PUBLIC_IDADDR;
+        }
+        else if(strcmp(p_mode, "net_rnd") == 0)
+        {
+            priv = BLE_ABS_PRIV_NET_STATIC_IDADDR;
+        }
+        else if (strcmp(p_mode, "dev_rnd") == 0)
+        {
+            priv = BLE_ABS_PRIV_DEV_STATIC_IDADDR;
+        }
+        else
+        {
+            R_BLE_CLI_PrintUnrecognized();
+            return;
         }
 
         ret = R_BLE_ABS_SetLocPrivacy(p_irk, priv);
+    }
+    else if (strcmp(argv[1], "remove") == 0)
+    {
 
+        if (argc != 4)
+        {
+            R_BLE_CLI_PrintUnrecognized();
+            return;
+        }
+
+        R_BLE_CMD_ParseAddr(argv[2], rem_addr.addr);
+
+        if (strcmp(argv[3], "pub") == 0)
+        {
+            rem_addr.type = BLE_GAP_ADDR_PUBLIC;
+        }
+        else if (strcmp(argv[3], "rnd") == 0)
+        {
+            rem_addr.type = BLE_GAP_ADDR_RAND;
+        }
+        else
+        {
+            R_BLE_CLI_PrintUnrecognized();
+            return;
+        }
+
+        ret = R_BLE_GAP_ConfRslvList(BLE_GAP_LIST_REM_DEV, &rem_addr, NULL, 1);
+    }
+    else if (strcmp(argv[1], "get") == 0)
+    {
+        /* set dummy address */
+        memset(&rem_addr, 0x00, sizeof(st_ble_dev_addr_t));
+
+        if ((argc != 3) && (argc != 5))
+        {
+            R_BLE_CLI_PrintUnrecognized();
+            return;
+        }
+
+        if (5 == argc)
+        {
+            R_BLE_CMD_ParseAddr(argv[3], rem_addr.addr);
+
+            if (strcmp(argv[4], "pub") == 0)
+            {
+                rem_addr.type = BLE_GAP_ADDR_PUBLIC;
+            }
+            else if (strcmp(argv[4], "rnd") == 0)
+            {
+                rem_addr.type = BLE_GAP_ADDR_RAND;
+            }
+            else
+            {
+                R_BLE_CLI_PrintUnrecognized();
+                return;
+            }
+        }
+
+        if (strcmp(argv[2], "lrpa") == 0)
+        {
+            ret = R_BLE_GAP_ReadRpa(&rem_addr);
+        }
+        else
+        {
+            R_BLE_CLI_PrintUnrecognized();
+            return;
+        }
+    }
+    else if (strcmp(argv[1], "off") == 0)
+    {
+        if (argc != 2)
+        {
+            R_BLE_CLI_PrintUnrecognized();
+            return;
+        }
+
+        ret = R_BLE_GAP_EnableRpa(0);
     }
     else
     {
-#ifndef USE_EXTERNAL_CONTROLLER
-        st_ble_dev_addr_t addr;
-        uint8_t local_irk[BLE_GAP_IRK_SIZE];
-        R_BLE_SECD_ReadLocInfo(&addr, local_irk, NULL);
-
-        pf("addr : %2x:%2x:%2x:%2x:%2x:%2x type : %2x \n", 
-            addr.addr[5], addr.addr[4], addr.addr[3], addr.addr[2], addr.addr[1], addr.addr[0], addr.type);
-
-        pf("gap rand : %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x \n", 
-            local_irk[0], local_irk[1], local_irk[2], local_irk[3],
-            local_irk[4], local_irk[5], local_irk[6], local_irk[7],
-            local_irk[8], local_irk[9], local_irk[10], local_irk[11],
-            local_irk[12], local_irk[13], local_irk[14], local_irk[15]);
-#endif /* USE_EXTERNAL_CONTROLLER */
+        R_BLE_CLI_PrintUnrecognized();
+        return;
     }
 
     if (ret != BLE_SUCCESS)
     {
-        pf("gap priv %s command error. result : 0x%04x\n", argv[1], ret);
-        R_BLE_CLI_SetCmdComp();
+        R_BLE_CLI_PrintError(ret);
     }
 
 }
@@ -661,8 +1153,7 @@ static void exec_abs_white(int argc, char *argv[])
     {
         if (argc != 4)
         {
-            pf("gap %s: unrecognized operands\n", argv[0]);
-            R_BLE_CLI_SetCmdComp();
+            R_BLE_CLI_PrintUnrecognized();
             return;
         }
         st_ble_dev_addr_t dev;
@@ -673,9 +1164,14 @@ static void exec_abs_white(int argc, char *argv[])
         {
             dev.type = BLE_GAP_ADDR_RAND;
         }
-        else
+        else if (strcmp(argv[3], "pub") == 0)
         {
             dev.type = BLE_GAP_ADDR_PUBLIC;
+        }
+        else
+        {
+            R_BLE_CLI_PrintUnrecognized();
+            return;
         }
         
         ret = R_BLE_GAP_ConfWhiteList(BLE_GAP_LIST_ADD_DEV, &dev, 1);
@@ -686,7 +1182,7 @@ static void exec_abs_white(int argc, char *argv[])
 
         if (argc != 4)
         {
-            pf("gap %s: unrecognized operands\n", argv[0]);
+            R_BLE_CLI_PrintUnrecognized();
             return;
         }
         R_BLE_CMD_ParseAddr(argv[2], dev.addr);
@@ -695,9 +1191,14 @@ static void exec_abs_white(int argc, char *argv[])
         {
             dev.type = BLE_GAP_ADDR_RAND;
         }
-        else
+        else if (strcmp(argv[3], "pub") == 0)
         {
             dev.type = BLE_GAP_ADDR_PUBLIC;
+        }
+        else
+        {
+            R_BLE_CLI_PrintUnrecognized();
+            return;
         }
 
         ret = R_BLE_GAP_ConfWhiteList(BLE_GAP_LIST_REM_DEV, &dev, 1);
@@ -708,13 +1209,12 @@ static void exec_abs_white(int argc, char *argv[])
     }
     else
     {
-        pf("gap %s: unrecognized operand '%s'\n", argv[0], argv[1]);
+        R_BLE_CLI_PrintUnrecognized();
     }
 
     if (ret != BLE_SUCCESS)
     {
-        pf("gap wl %s command error. result : 0x%04x\n", argv[1], ret);
-        R_BLE_CLI_SetCmdComp();
+        R_BLE_CLI_PrintError(ret);
     }
 }
 
@@ -722,6 +1222,22 @@ static void exec_abs_white(int argc, char *argv[])
 /*----------------------------------------------------------------------------------------------------------------------
     periodic sync command
 ----------------------------------------------------------------------------------------------------------------------*/
+#if (BLE_CFG_LIB_TYPE == 0) 
+static void abs_sync_set_event(void)
+{
+    ble_status_t ret;
+
+    gs_sync_scan = 1;
+    
+    ret = R_BLE_ABS_StartScan(&gs_sync_scan_param);
+
+    if (ret != BLE_SUCCESS)
+    {
+        R_BLE_CLI_PrintError(ret);
+    }
+}
+#endif /* (BLE_CFG_LIB_TYPE == 0)  */
+
 static void exec_abs_sync(int argc, char *argv[])
 {
 #if (BLE_CFG_LIB_TYPE == 0) 
@@ -734,8 +1250,7 @@ static void exec_abs_sync(int argc, char *argv[])
     {
         if (argc != 4)
         {
-            pf("gap %s: unrecognized operands\n", argv[0]);
-            R_BLE_CLI_SetCmdComp();
+            R_BLE_CLI_PrintUnrecognized();
             return;
         }
         R_BLE_CMD_ParseAddr(argv[2], advr.addr);
@@ -743,31 +1258,30 @@ static void exec_abs_sync(int argc, char *argv[])
         {
             advr.type = BLE_GAP_ADDR_RAND;
         }
-        else
+        else if (strcmp(argv[3], "pub") == 0)
         {
             advr.type = BLE_GAP_ADDR_PUBLIC;
         }
+        else
+        {
+            R_BLE_CLI_PrintUnrecognized();
+            return;
+        }
 
         /* white list */
-        R_BLE_GAP_ConfWhiteList(BLE_GAP_LIST_ADD_DEV, &advr, 1);
+        ret = R_BLE_GAP_ConfWhiteList(BLE_GAP_LIST_ADD_DEV, &advr, 1);
 
-        /* scan */
-        gs_scan_param.p_phy_param_1M = &gs_phy_param_sync;
-        gs_scan_param.p_filter_data = NULL;
-        gs_scan_param.filter_data_length = 0;
-        gs_scan_param.fast_period = 0;
-        gs_scan_param.slow_period = 0;
-        gs_scan_param.dev_filter = BLE_GAP_SCAN_ALLOW_ADV_WLST;
-        gs_sync_scan = 1;
-        ret = R_BLE_ABS_StartScan(&gs_scan_param);
-
+        if(BLE_SUCCESS == ret)
+        {
+            /* scan */
+            R_BLE_SetEvent(abs_sync_set_event);
+        }
     }
     else if (strcmp(argv[1], "term") == 0)
     {
         if ((argc != 2) && (argc != 3))
         {
-            pf("gap %s: unrecognized operands\n", argv[0]);
-            R_BLE_CLI_SetCmdComp();
+            R_BLE_CLI_PrintUnrecognized();
             return;
         }
 
@@ -784,29 +1298,30 @@ static void exec_abs_sync(int argc, char *argv[])
                 {
                     ret = R_BLE_GAP_TerminateSync((uint16_t)(gs_sync_hdl >> 16));
                 }
+                else
+                {
+                    ret = BLE_ERR_INVALID_HDL;
+                }
             }
         }
         else
         {
-            uint8_t sync_hdl;
-            sync_hdl = (uint8_t)strtol(argv[2], NULL, 0);
+            uint16_t sync_hdl;
+            sync_hdl = (uint16_t)strtol(argv[2], NULL, 0);
             ret = R_BLE_GAP_TerminateSync(sync_hdl);
         }
     }
     else
     {
-        pf("gap %s: unrecognized operand '%s'\n", argv[0], argv[1]);
-        R_BLE_CLI_SetCmdComp();
+        R_BLE_CLI_PrintUnrecognized();
     }
 
     if (ret != BLE_SUCCESS)
     {
-        pf("gap sync %s command error. result : 0x%04x\n", argv[1], ret);
-        R_BLE_CLI_SetCmdComp();
+        R_BLE_CLI_PrintError(ret);
     }
 #else  /* (BLE_CFG_LIB_TYPE == 0)  */
-    pf("gap sync not supported.\n");
-    R_BLE_CLI_SetCmdComp();    
+    R_BLE_CLI_PrintError(BLE_ERR_UNSUPPORTED);
 #endif /* (BLE_CFG_LIB_TYPE == 0)  */
 }
 
@@ -845,8 +1360,7 @@ static void exec_abs_disconn(int argc, char *argv[])
 {
     if (argc != 2)
     {
-        pf("gap %s: unrecognized operands\n", argv[0]);
-        R_BLE_CLI_SetCmdComp();
+        R_BLE_CLI_PrintUnrecognized();
         return;
     }
 
@@ -858,8 +1372,7 @@ static void exec_abs_disconn(int argc, char *argv[])
     ret = R_BLE_GAP_Disconnect(conn_hdl, 0x13);
     if (ret != BLE_SUCCESS)
     {
-        pf("gap disconn command error. result : 0x%04x\n", ret);
-        R_BLE_CLI_SetCmdComp();
+        R_BLE_CLI_PrintError(ret);
     }
 }
 
@@ -889,8 +1402,7 @@ static void exec_abs_ver(int argc, char *argv[])
     ret = R_BLE_GAP_GetVerInfo();
     if (ret != BLE_SUCCESS)
     {
-        pf("gap ver command error. result : 0x%04x\n", ret);
-        R_BLE_CLI_SetCmdComp();
+        R_BLE_CLI_PrintError(ret);
         gs_version_proc = 0x00;
     }
     else
@@ -913,8 +1425,7 @@ static void exec_abs_auth(int argc, char *argv[])
 
     if (argc > 6)
     {
-        pf("gap %s: unrecognized operands\n", argv[0]);
-        R_BLE_CLI_SetCmdComp();
+        R_BLE_CLI_PrintUnrecognized();
         return;
     }
 
@@ -925,7 +1436,12 @@ static void exec_abs_auth(int argc, char *argv[])
     }
     else if(strcmp(argv[1], "passkey") == 0)
     {
-        passkey = (uint32_t)strtol(argv[2], NULL, 0);
+        if(3 != argc)
+        {
+            R_BLE_CLI_PrintUnrecognized();
+            return;
+        }
+        passkey = (uint32_t)strtol(argv[2], NULL, 10);
         ret = R_BLE_GAP_ReplyPasskeyEntry(gs_pairing_conn_hdl, passkey, BLE_GAP_PAIRING_ACCEPT);
     }
     else if(strcmp(argv[1], "numcmp") == 0)
@@ -957,34 +1473,56 @@ static void exec_abs_auth(int argc, char *argv[])
                 {
                     remote = BLE_GAP_SEC_DEL_REM_SA;
                     R_BLE_CMD_ParseAddr(argv[4], rem_dev.addr);
-                    rem_dev.type = (uint8_t)((strcmp(argv[5], "rnd") == 0) ? BLE_GAP_ADDR_RAND : BLE_GAP_ADDR_PUBLIC);
+
+                    if (strcmp(argv[5], "rnd") == 0)
+                    {
+                        rem_dev.type = BLE_GAP_ADDR_RAND;
+                    }
+                    else if (strcmp(argv[5], "pub") == 0)
+                    {
+                        rem_dev.type = BLE_GAP_ADDR_PUBLIC;
+                    }
+                    else
+                    {
+                        R_BLE_CLI_PrintUnrecognized();
+                        return;
+                    }
                 }
                 else if(strcmp(argv[3], "all") == 0)
                 {
                     remote = BLE_GAP_SEC_DEL_REM_ALL;
                 }
+                else if(strcmp(argv[3], "not_conn") == 0)
+                {
+                    remote = BLE_GAP_SEC_DEL_REM_NOT_CONN;
+                }
                 else
                 {
-                    if(strcmp(argv[3], "not_conn") == 0)
-                    {
-                        remote = BLE_GAP_SEC_DEL_REM_NOT_CONN;
-                    }
+                    R_BLE_CLI_PrintUnrecognized();
+                    return;
                 }
 #if (BLE_CFG_EN_SEC_DATA == 1)
                 cb = R_BLE_SECD_DelRemKeys;
 #endif /* (BLE_CFG_EN_SEC_DATA == 1) */
             }
+            else
+            {
+                R_BLE_CLI_PrintUnrecognized();
+                return;
+            }
+        }
+        else if(strcmp(argv[2], "all") == 0)
+        {
+            local = BLE_GAP_SEC_DEL_LOC_ALL;
+            remote = BLE_GAP_SEC_DEL_REM_ALL;
+#if (BLE_CFG_EN_SEC_DATA == 1)
+            cb = R_BLE_SECD_DelRemKeys;
+#endif /* (BLE_CFG_EN_SEC_DATA == 1) */
         }
         else
         {
-            if(strcmp(argv[2], "all") == 0)
-            {
-                local = BLE_GAP_SEC_DEL_LOC_ALL;
-                remote = BLE_GAP_SEC_DEL_REM_ALL;
-#if (BLE_CFG_EN_SEC_DATA == 1)
-                cb = R_BLE_SECD_DelRemKeys;
-#endif /* (BLE_CFG_EN_SEC_DATA == 1) */
-            }
+            R_BLE_CLI_PrintUnrecognized();
+            return;
         }
 
         R_BLE_GAP_DeleteBondInfo(local, remote, &rem_dev, cb);
@@ -996,11 +1534,14 @@ static void exec_abs_auth(int argc, char *argv[])
 #endif /* (BLE_CFG_EN_SEC_DATA == 1) */
 
     }
+    else
+    {
+        R_BLE_CLI_PrintUnrecognized();
+    }
 
     if (ret != BLE_SUCCESS)
     {
-        pf("gap auth %s command error. result : 0x%04x\n", argv[1], ret);
-        R_BLE_CLI_SetCmdComp();
+        R_BLE_CLI_PrintError(ret);
     }
 }
 
@@ -1013,7 +1554,9 @@ void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t * 
         case BLE_GAP_EVENT_STACK_ON:
         {
             memset(connected_device_info,0xFF,sizeof(connected_device_info));
-
+#if (BLE_CFG_LIB_TYPE == 0)
+            gs_adv_cmd_status = 0;
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
         } break;
 
         case BLE_GAP_EVENT_LOC_VER_INFO:
@@ -1107,31 +1650,10 @@ void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t * 
                 }
 
                 connected_device_info[i].conn_hdl = conn_evt_param->conn_hdl;
-
-                switch (conn_evt_param->remote_addr_type)
-                {
-                    case BLE_GAP_ADDR_PUBLIC:
-                    case BLE_GAP_ADDR_RPA_ID_PUBLIC:
-                    {
-                        memcpy(connected_device_info[i].addr.addr,
-                               conn_evt_param->remote_addr,
-                               BLE_BD_ADDR_LEN);
-                        connected_device_info[i].addr.type = BLE_GAP_ADDR_PUBLIC;
-                    } break;
-
-                    case BLE_GAP_ADDR_RAND:
-                    case BLE_GAP_ADDR_RPA_ID_RANDOM:
-                    {
-                        memcpy(connected_device_info[i].addr.addr,
-                               conn_evt_param->remote_addr,
-                               BLE_BD_ADDR_LEN);
-                        connected_device_info[i].addr.type = BLE_GAP_ADDR_RAND;
-                    } break;
-
-                    default:
-                        break;
-
-                }
+                connected_device_info[i].addr.type = conn_evt_param->remote_addr_type;
+                memcpy(connected_device_info[i].addr.addr,
+                        conn_evt_param->remote_addr,
+                        BLE_BD_ADDR_LEN);
 
                 pf("gap: connected conn_hdl:0x%04X, addr:%s\n",
                    connected_device_info[i].conn_hdl,
@@ -1186,9 +1708,9 @@ void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t * 
             st_ble_gap_data_len_chg_evt_t * p_data_len = (st_ble_gap_data_len_chg_evt_t *)p_data->p_param;
             pf("receive BLE_GAP_EVENT_DATA_LEN_CHG result : 0x%04x, conn_hdl : 0x%04x \n", result, p_data_len->conn_hdl);
             pf("tx_octets : 0x%04x\n", p_data_len->tx_octets);
-            pf("tx_time	  : 0x%04x\n", p_data_len->tx_time);
+            pf("tx_time   : 0x%04x\n", p_data_len->tx_time);
             pf("rx_octets : 0x%04x\n", p_data_len->rx_octets);
-            pf("rx_time	  : 0x%04x\n", p_data_len->rx_time);
+            pf("rx_time   : 0x%04x\n", p_data_len->rx_time);
             R_BLE_CLI_SetCmdComp();
         } break;
 
@@ -1260,7 +1782,6 @@ void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t * 
 
             gs_pairing_conn_hdl = p_numcmp_evt_param->conn_hdl;
             pf("numeric : %06d\n", p_numcmp_evt_param->numeric);
-            R_BLE_GAP_ReplyNumComp(p_numcmp_evt_param->conn_hdl, BLE_GAP_PAIRING_ACCEPT);
         } break;
 
         case BLE_GAP_EVENT_PEER_KEY_INFO:
@@ -1286,8 +1807,34 @@ void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t * 
                     p_peer_key->key_ex_param.p_keys_info->enc_info[13],
                     p_peer_key->key_ex_param.p_keys_info->enc_info[14],
                     p_peer_key->key_ex_param.p_keys_info->enc_info[15]);
-            R_BLE_CLI_SetCmdComp();
 
+            if(0 != (p_peer_key->key_ex_param.keys & BLE_GAP_KEY_DIST_IDKEY))
+            {
+                pf("IRK : %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x \n", 
+                    p_peer_key->key_ex_param.p_keys_info->id_info[0],
+                    p_peer_key->key_ex_param.p_keys_info->id_info[1],
+                    p_peer_key->key_ex_param.p_keys_info->id_info[2],
+                    p_peer_key->key_ex_param.p_keys_info->id_info[3],
+                    p_peer_key->key_ex_param.p_keys_info->id_info[4],
+                    p_peer_key->key_ex_param.p_keys_info->id_info[5],
+                    p_peer_key->key_ex_param.p_keys_info->id_info[6],
+                    p_peer_key->key_ex_param.p_keys_info->id_info[7],
+                    p_peer_key->key_ex_param.p_keys_info->id_info[8],
+                    p_peer_key->key_ex_param.p_keys_info->id_info[9],
+                    p_peer_key->key_ex_param.p_keys_info->id_info[10],
+                    p_peer_key->key_ex_param.p_keys_info->id_info[11],
+                    p_peer_key->key_ex_param.p_keys_info->id_info[12],
+                    p_peer_key->key_ex_param.p_keys_info->id_info[13],
+                    p_peer_key->key_ex_param.p_keys_info->id_info[14],
+                    p_peer_key->key_ex_param.p_keys_info->id_info[15]);
+                
+                st_ble_dev_addr_t remote;
+                memcpy(remote.addr, &p_peer_key->key_ex_param.p_keys_info->id_addr_info[1], BLE_BD_ADDR_LEN);
+                remote.type = p_peer_key->key_ex_param.p_keys_info->id_addr_info[0];
+                pf("remote id addr : %s \n", BLE_BD_ADDR_STR(remote.addr, remote.type));
+            }
+
+            R_BLE_CLI_SetCmdComp();
         } break;
         
         case BLE_GAP_EVENT_PAIRING_COMP:
@@ -1310,7 +1857,6 @@ void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t * 
         case BLE_GAP_EVENT_SCAN_OFF:
         {
             pf("receive BLE_GAP_EVENT_SCAN_OFF result : 0x%04x\n", result);
-            R_BLE_CLI_SetCmdComp();
 #if (BLE_CFG_LIB_TYPE == 0) 
             if(3 == gs_sync_scan)
             {
@@ -1326,6 +1872,36 @@ void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t * 
             R_BLE_CLI_SetCmdComp();
         } break;
 
+        case BLE_GAP_EVENT_RSLV_LIST_CONF_COMP :
+        {
+            pf("receive BLE_GAP_EVENT_RSLV_LIST_CONF_COMP result : 0x%04x\n", result);
+            R_BLE_CLI_SetCmdComp();
+        } break;
+
+        case BLE_GAP_EVENT_PRIV_MODE_SET_COMP :
+        {
+            pf("receive BLE_GAP_EVENT_PRIV_MODE_SET_COMP result : 0x%04x\n", result);
+            R_BLE_CLI_SetCmdComp();
+        } break;
+
+        case BLE_GAP_EVENT_RPA_EN_COMP :
+        {
+            pf("receive BLE_GAP_EVENT_RPA_EN_COMP result : 0x%04x\n", result);
+            R_BLE_CLI_SetCmdComp();
+        } break;
+
+        case BLE_GAP_EVENT_RD_RPA_COMP :
+        {
+            st_ble_gap_rd_rpa_evt_t * p_param;
+            p_param = (st_ble_gap_rd_rpa_evt_t *)p_data->p_param;
+            pf("receive BLE_GAP_EVENT_RD_RPA_COMP result : 0x%04x\n", result);
+            if(BLE_SUCCESS == result)
+            {
+                pf(" local rpa:%s \n", BLE_BD_ADDR_STR(p_param->addr.addr, p_param->addr.type));
+                R_BLE_CLI_SetCmdComp();
+            }
+        } break;
+
 #if (BLE_CFG_LIB_TYPE == 0) 
         case BLE_GAP_EVENT_PERD_ADV_ON:
         {
@@ -1337,7 +1913,7 @@ void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t * 
         {
             pf("receive BLE_GAP_EVENT_PERD_ADV_OFF result : 0x%04x\n", result);
             R_BLE_CLI_SetCmdComp();
-    } break;
+        } break;
 
         case BLE_GAP_EVENT_CREATE_SYNC_COMP:
         {
@@ -1359,7 +1935,7 @@ void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t * 
             R_BLE_CLI_SetCmdComp();
             if(2 == gs_sync_scan)
             {
-                R_BLE_GAP_CreateSync(NULL, 0, 100, 100);
+                R_BLE_GAP_CreateSync(NULL, 0, 0x0000, 0x4000);
             }
         } break;
 
@@ -1397,20 +1973,23 @@ void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t * 
                 pf("sync not established\n");
                 gs_sync_scan = 0;
             }
-            R_BLE_GAP_StopScan();
             R_BLE_CLI_SetCmdComp();
 
         } break;
 
         case BLE_GAP_EVENT_SYNC_TERM:
         {
-            pf("sync terminated\n");
-            delete_sync_hdl(p_data);
-            if(1 == gs_sync_term)
+            pf("receive BLE_GAP_EVENT_SYNC_TERM result : 0x%04x \n", result);
+            if(BLE_SUCCESS == result)
             {
-                if(0xFFFF != (uint16_t)(gs_sync_hdl >> 16))
+                pf("sync terminated\n");
+                delete_sync_hdl(p_data);
+                if(1 == gs_sync_term)
                 {
-                    R_BLE_GAP_TerminateSync((uint16_t)(gs_sync_hdl >> 16));
+                    if(0xFFFF != (uint16_t)(gs_sync_hdl >> 16))
+                    {
+                        R_BLE_GAP_TerminateSync((uint16_t)(gs_sync_hdl >> 16));
+                    }
                 }
             }
             R_BLE_CLI_SetCmdComp();
@@ -1422,6 +2001,13 @@ void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t * 
             delete_sync_hdl(p_data);
             R_BLE_CLI_SetCmdComp();
         } break;
+
+        case BLE_GAP_EVENT_ADV_SET_REMOVE_COMP:
+        {
+            st_ble_gap_rem_adv_set_evt_t * p_adv_set = (st_ble_gap_rem_adv_set_evt_t *)p_data->p_param;
+            pf("receive BLE_GAP_EVENT_ADV_SET_REMOVE_COMP result : 0x%04x, adv_hdl : 0x%04x\n", result, p_adv_set->adv_hdl);
+            R_BLE_CLI_SetCmdComp();
+        } break;
 #endif /* (BLE_CFG_LIB_TYPE == 0)  */
 
         default:
@@ -1431,11 +2017,12 @@ void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t * 
 
 #else /* (BLE_CFG_CMD_LINE_EN == 1) && (BLE_CFG_HCI_MODE_EN == 0) */
 
-void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t *data)
+void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t * p_data)
 {
     (void)type;
     (void)result;
-    (void)data;
+    (void)&p_data;
+    return;
 }
 
 const st_ble_cli_cmd_t g_abs_cmd;

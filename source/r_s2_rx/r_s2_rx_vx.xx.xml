@@ -19,8 +19,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_s2_rx</name>
-        <version>3.04</version>
-        <zipsource>r_s2_rx_v3.04.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_s2_rx_vx.xx.zip</zipsource>
         <application>Sound Audio</application>
         <desc>ADPCM compress/de-compress codec software library</desc>
         <details>ADPCM compress/de-compress codec software library</details>

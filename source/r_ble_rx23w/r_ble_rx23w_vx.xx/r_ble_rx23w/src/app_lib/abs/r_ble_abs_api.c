@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_ble_abs_api.c
@@ -107,6 +107,10 @@
 #define BLE_ABS_PV_STATUS_SET_MODE                                      (0x00000004)
 /*  enable resolvable private address function */
 #define BLE_ABS_PV_STATUS_EN_RPA                                        (0x00000008)
+/*  get address */
+#define BLE_ABS_PV_STATUS_GET_ADDR                                      (0x00000010)
+/*  register the stored irk */
+#define BLE_ABS_PV_STATUS_REG_STR_IRK                                   (0x00000020)
 
 /**********************************/
 /*  Define for create connection  */
@@ -122,7 +126,7 @@
 
 /*  minimum advertising data length */
 #define BLE_ABS_LEGACY_ADV_DATA_LEN                                     (31)
-#define BLE_ABS_CONN_EXT_ADV_DATA_LEN                                   (229)
+#define BLE_ABS_CONN_EXT_ADV_DATA_LEN                                   (245)
 
 
 /***********************************************************************************************************************
@@ -168,8 +172,18 @@ static uint32_t gs_scan_t_hdl; /* Scaning timer for legacy scaning */
 static st_abs_adv_param_t gs_adv_sets[BLE_MAX_NO_OF_ADV_SETS_SUPPORTED]; /* Advertising set information. */
 static st_abs_scan_param_t gs_abs_scan; /* Scan information. */
 static st_ble_dev_addr_t gs_loc_bd_addr; /* Local device address. */
-static uint8_t gs_privacy_mode = BLE_GAP_NET_PRIV_MODE; /* Privacy mode. */
+static uint8_t gs_privacy_mode; /* Privacy mode. */
 static uint32_t gs_set_privacy_status = 0; /* Local privacy status. */
+static uint8_t gs_loc_irk[BLE_GAP_IRK_SIZE]; /* Local IRK */
+
+st_ble_dev_addr_t g_ble_priv_dummy_addr;
+st_ble_gap_rslv_list_key_set_t g_ble_peer_dummy_irk = {
+    .local_irk_type = BLE_GAP_RL_LOC_KEY_REGISTERED
+};
+
+#if (BSP_CFG_RTOS_USED == 1)
+static ble_event_cb_t gs_abs_reset_cb;
+#endif /* (BSP_CFG_RTOS_USED == 1) */
 
 static ble_status_t set_pair_param(st_ble_abs_pairing_param_t * p_pairing_param);
 static ble_status_t conv_legacy_adv_param(st_ble_abs_legacy_adv_param_t * p_param, 
@@ -182,15 +196,20 @@ static ble_status_t conv_non_conn_adv_param(st_ble_abs_non_conn_adv_param_t * p_
                                             st_ble_gap_adv_param_t * p_adv_param,
                                             uint8_t adv_hdl);
 static ble_status_t abs_adv_rept_hdlr(st_ble_evt_data_t * p_event_data);
-static ble_status_t check_scan_phy_param(st_ble_abs_scan_phy_param_t * p_scan_phy);
+#if (BLE_CFG_LIB_TYPE != 2)
+static ble_status_t check_scan_phy_param(st_ble_abs_scan_phy_param_t * p_scan_phy, uint16_t fast_period);
 static ble_status_t set_scan_param(st_ble_abs_scan_param_t * p_scan_param);
+static void cancel_conn_func(uint32_t hdl);
+static void set_conn_param(st_ble_abs_conn_phy_param_t * p_abs_conn_param, 
+                           st_ble_gap_conn_phy_param_t * p_conn_phy_param,
+                           st_ble_gap_conn_param_t * p_conn_param);
+#endif /* (BLE_CFG_LIB_TYPE != 2) */
 
 static void abs_gapcb(uint16_t event_type, ble_status_t event_result, st_ble_evt_data_t * p_event_data);
 static void abs_vscb(uint16_t event_type, ble_status_t event_result, st_ble_vs_evt_data_t * p_event_data);
 static void set_abs_cb(ble_gap_app_cb_t cb, ble_vs_app_cb_t vs_cb);
 static void set_adv_status(uint8_t adv_hdl, uint32_t set, uint32_t clear);
 static void set_adv_param(void * p_adv_param, uint8_t adv_hdl);
-static void cancel_conn_func(uint32_t hdl);
 #if (BLE_CFG_LIB_TYPE != 0)
 static void adv_to_func(uint32_t hdl);
 static void ads_scan_on_hdlr(void);
@@ -198,26 +217,22 @@ static void ads_scan_on_hdlr(void);
 
 static void set_scan_status(uint32_t set, uint32_t clear);
 static void update_data_status(uint32_t status, uint8_t * p_data, uint16_t data_len, uint8_t adv_hdl);
-static void ads_conn_ind_hdlr(void);
+static void ads_conn_ind_hdlr(uint8_t role);
 static void ads_scan_to_hdlr(uint32_t hdl);
 static void ads_scan_off_hdlr(void);
-static void abs_loc_ver_hdlr(st_ble_evt_data_t * p_event_data);
 static void abs_adv_param_set_hdlr(st_ble_evt_data_t * p_event_data);
 static void abs_adv_data_set_hdlr(st_ble_evt_data_t * p_event_data);
 static void abs_perd_param_hdlr(void);
 static void abs_adv_off_hdlr(st_ble_evt_data_t * p_event_data);
-static void abs_conf_rslv_hdlr(st_ble_evt_data_t * p_event_data);
-static void abs_rand_hdlr(st_ble_vs_evt_data_t * p_event_data);
-static void set_irk_to_rslv(uint8_t * p_lc_irk);
+static void abs_conf_rslv_hdlr(st_ble_evt_data_t * p_event_data, ble_status_t event_result);
+static void abs_rand_hdlr(st_ble_vs_evt_data_t * p_event_data, ble_status_t event_result);
+static void set_irk_to_rslv(uint8_t * p_lc_irk, ble_status_t event_result);
 static void adv_start(uint8_t adv_hdl);
 static void adv_set_data(uint8_t adv_hdl, uint8_t data_type);
 static void set_legacy_sres_data(void);
 static void conv_scan_phy_param(st_ble_abs_scan_phy_param_t * p_abs_phy, 
                          st_ble_gap_scan_phy_param_t * p_gap_phy, 
                          st_ble_gap_scan_on_t * p_scan_enable);
-static void set_conn_param(st_ble_abs_conn_phy_param_t * p_abs_conn_param, 
-                           st_ble_gap_conn_phy_param_t * p_conn_phy_param,
-                           st_ble_gap_conn_param_t * p_conn_param);
 static void conv_scan_param(st_ble_gap_scan_param_t * p_scan_param, 
                             st_ble_gap_scan_on_t * p_scan_enable, 
                             uint32_t status);
@@ -225,8 +240,11 @@ static void set_conn_adv_intv(st_ble_gap_adv_param_t * p_adv_param,
                                  uint32_t fast_adv_intv, 
                                  uint32_t slow_adv_intv, 
                                  uint16_t fast_period);
+static void abs_get_addr_hdlr(st_ble_vs_evt_data_t * p_event_data, ble_status_t event_result);
 
-
+#if (BSP_CFG_RTOS_USED == 1)
+static void abs_reset_internal(void);
+#endif /* (BSP_CFG_RTOS_USED == 1) */
 
 /***********************************************************************************************************************
  Exported global functions
@@ -241,6 +259,24 @@ static void set_conn_adv_intv(st_ble_gap_adv_param_t * p_adv_param,
  **********************************************************************************************************************/
 void R_BLE_ABS_Reset(ble_event_cb_t init_cb)
 {
+#if (BLE_CFG_LIB_TYPE != 0)
+    R_BLE_TIMER_Stop(gs_adv_t_hdl);
+    R_BLE_TIMER_Delete(&gs_adv_t_hdl);
+    gs_adv_t_hdl = BLE_TIMER_INVALID_HDL;
+
+    R_BLE_TIMER_Stop(gs_scan_t_hdl);
+    R_BLE_TIMER_Delete(&gs_scan_t_hdl);
+    gs_scan_t_hdl = BLE_TIMER_INVALID_HDL;
+#endif /* (BLE_CFG_LIB_TYPE != 0) */
+
+    R_BLE_TIMER_Stop(gs_conn_t_hdl);
+    R_BLE_TIMER_Delete(&gs_conn_t_hdl);
+    gs_conn_t_hdl = BLE_TIMER_INVALID_HDL;
+
+#if (BSP_CFG_RTOS_USED == 1)
+    gs_abs_reset_cb = init_cb;
+    R_BLE_SetEvent(abs_reset_internal);
+#else /* (BSP_CFG_RTOS_USED == 1) */
     R_BLE_Close();
 
     R_BLE_GAP_Terminate();
@@ -251,6 +287,7 @@ void R_BLE_ABS_Reset(ble_event_cb_t init_cb)
     {
         R_BLE_SetEvent(init_cb);
     }
+#endif /* (BSP_CFG_RTOS_USED == 1) */
 }
 
 /***********************************************************************************************************************
@@ -262,13 +299,13 @@ void R_BLE_ABS_Reset(ble_event_cb_t init_cb)
  *              : The result of this API call is notified in BLE_GAP_EVENT_STACK_ON event.
  * Arguments    : st_ble_abs_init_param_t * p_init_param      ; callback functions and pairing parameters
  * Return Value : BLE_SUCCESS(0x0000)                         ; Success 
- *                BLE_ERR_INVALID_PTR(0x0001)                 ; gap_cb is specified as NULL. 
- *                BLE_ERR_INVALID_ARG(0x0003)                 ; The pairing parameter is out of range. 
- *                BLE_ERR_INVALID_STATE(0x0008)               ; The reason for this error is as follows:
- *                                                            ;    - Host Stack was already initialized.
- *                                                            ;    - The task for host stack is not running.  
- *                BLE_ERR_CONTEXT_FULL(0x000B)                ; Callback function has already registered.
- *                BLE_ERR_MEM_ALLOC_FAILED(0x000C)            ; Insufficient memory is needed to generate this function. 
+ *              : BLE_ERR_INVALID_PTR(0x0001)                 ; p_init_param or gap_cb is specified as NULL. 
+ *              : BLE_ERR_INVALID_ARG(0x0003)                 ; The pairing parameter is out of range. 
+ *              : BLE_ERR_INVALID_STATE(0x0008)               ; The reason for this error is as follows:
+ *              :                                             ;    - Host Stack was already initialized.
+ *              :                                             ;    - The task for host stack is not running.  
+ *              : BLE_ERR_CONTEXT_FULL(0x000B)                ; Callback function has already registered.
+ *              : BLE_ERR_MEM_ALLOC_FAILED(0x000C)            ; Insufficient memory is needed to generate this function. 
  **********************************************************************************************************************/
 ble_status_t R_BLE_ABS_Init(st_ble_abs_init_param_t * p_init_param)
 {
@@ -302,6 +339,7 @@ ble_status_t R_BLE_ABS_Init(st_ble_abs_init_param_t * p_init_param)
     gs_conn_t_hdl = BLE_TIMER_INVALID_HDL;
 #if (BLE_CFG_LIB_TYPE != 0)
     gs_adv_t_hdl = BLE_TIMER_INVALID_HDL;
+    gs_scan_t_hdl = BLE_TIMER_INVALID_HDL;
 #endif /* (BLE_CFG_LIB_TYPE != 0) */
     gs_set_privacy_status = 0;
 
@@ -342,7 +380,6 @@ ble_status_t R_BLE_ABS_Init(st_ble_abs_init_param_t * p_init_param)
         }
     }
 
-#if (BLE_CFG_LIB_TYPE != 2)
     if(NULL != p_init_param->p_gattc_cbs)
     {
         retval = R_BLE_GATTC_Init(p_init_param->p_gattc_cbs->cb_num);
@@ -374,7 +411,6 @@ ble_status_t R_BLE_ABS_Init(st_ble_abs_init_param_t * p_init_param)
             }
         }
     }
-#endif /* (BLE_CFG_LIB_TYPE != 2) */
 
     retval = R_BLE_VS_Init(abs_vscb);
 
@@ -385,15 +421,17 @@ ble_status_t R_BLE_ABS_Init(st_ble_abs_init_param_t * p_init_param)
  * Function Name: R_BLE_ABS_StartLegacyAdv
  * Description  : Start Legacy Advertising after setting advertising parameters, advertising data and scan response data.
  *              : The legacy advertising uses the advertising set whose advertising handle is 0.
- *              : The advertising type is connectable and scannable(ADV_IND).
- *              : The address type of local device is Public Identity Address or 
- *              : RPA(If the resolving list contains no matching entry, use the public address.).
+ *              : The advertising type is connectable scannable undirect.
  *              : Scan request event(BLE_GAP_EVENT_SCAN_REQ_RECV) is not notified.
  * Arguments    : st_ble_abs_legacy_adv_param_t * p_adv_param ; Parameters for Legacy Advertising.
  * Return Value : BLE_SUCCESS(0x0000)                         ; Success 
  *              : BLE_ERR_INVALID_PTR(0x0001)                 ; p_adv_param is specified as NULL.
  *              : BLE_ERR_INVALID_ARG(0x0003)                 ; The advertising parameter is out of range. 
- *              : BLE_ERR_INVALID_STATE(0x0008)               ; Host stack hasn't been initialized. 
+ *              : BLE_ERR_UNSUPPORTED(0x0007)                 ; Not supported.
+ *              : BLE_ERR_INVALID_STATE(0x0008)               ; The reason for this error is as follows:
+ *              :                                             ;    - Host stack hasn't been initialized. 
+ *              :                                             ;    - Legacy Advertising has been already started by 
+ *              :                                             ;      R_BLE_ABS_StartLegacyAdv().  
  *              : BLE_ERR_MEM_ALLOC_FAILED(0x000C)            ; Insufficient memory is needed for this function.
  **********************************************************************************************************************/
 ble_status_t R_BLE_ABS_StartLegacyAdv(st_ble_abs_legacy_adv_param_t * p_adv_param)
@@ -472,16 +510,18 @@ ble_status_t R_BLE_ABS_StartLegacyAdv(st_ble_abs_legacy_adv_param_t * p_adv_para
  * Function Name: R_BLE_ABS_StartExtAdv
  * Description  : Start Extended Advertising after setting advertising parameters, advertising data.
  *              : The extended advertising uses the advertising set whose advertising handle is 1.
- *              : The advertising type is connectable and non-scannable.
- *              : The address type of local device is Public Identity Address or 
- *              : RPA(If the resolving list contains no matching entry, use the public address.).
+ *              : The advertising type is connectable non-scannable undirect.
  *              : Scan request event(BLE_GAP_EVENT_SCAN_REQ_RECV) is not notified.
  *              : Secondary Advertising Max Skip is 0.
  * Arguments    : st_ble_abs_ext_adv_param_t * p_adv_param    ; Parameters for Extended Advertising.
  * Return Value : BLE_SUCCESS(0x0000)                         ; Success 
  *              : BLE_ERR_INVALID_PTR(0x0001)                 ; p_adv_param is specified as NULL.
  *              : BLE_ERR_INVALID_ARG(0x0003)                 ; The advertising parameter is out of range. 
- *              : BLE_ERR_INVALID_STATE(0x0008)               ; Host stack hasn't been initialized. 
+ *              : BLE_ERR_UNSUPPORTED(0x0007)                 ; Not supported.
+ *              : BLE_ERR_INVALID_STATE(0x0008)               ; The reason for this error is as follows:
+ *              :                                             ;    - Host stack hasn't been initialized. 
+ *              :                                             ;    - Extended Advertising has been already started by 
+ *              :                                             ;      R_BLE_ABS_StartExtAdv().  
  *              : BLE_ERR_MEM_ALLOC_FAILED(0x000C)            ; Insufficient memory is needed for this function.
  **********************************************************************************************************************/
 ble_status_t R_BLE_ABS_StartExtAdv(st_ble_abs_ext_adv_param_t * p_adv_param)
@@ -544,16 +584,18 @@ ble_status_t R_BLE_ABS_StartExtAdv(st_ble_abs_ext_adv_param_t * p_adv_param)
  * Function Name: R_BLE_ABS_StartNonConnAdv
  * Description  : Start Non-Connectable Advertising after setting advertising parameters, advertising data.
  *              : The non-connectable advertising uses the advertising set whose advertising handle is 2.
- *              : The advertising type is non-connectable and non-scannable.
- *              : The address type of local device is Public Identity Address or 
- *              : RPA(If the resolving list contains no matching entry, use the public address.).
+ *              : The advertising type is non-connectable non-scannable undirect.
  *              : Scan request event(BLE_GAP_EVENT_SCAN_REQ_RECV) is not notified.
  *              : Secondary Advertising Max Skip is 0.
  * Arguments    : st_ble_abs_non_conn_adv_param_t * p_adv_param ; Parameters for Non-Connectable Advertising.
  * Return Value : BLE_SUCCESS(0x0000)                           ; Success 
  *              : BLE_ERR_INVALID_PTR(0x0001)                   ; p_adv_param is specified as NULL.
  *              : BLE_ERR_INVALID_ARG(0x0003)                   ; The advertising parameter is out of range. 
- *              : BLE_ERR_INVALID_STATE(0x0008)                 ; Host stack hasn't been initialized. 
+ *              : BLE_ERR_UNSUPPORTED(0x0007)                   ; Not supported.
+ *              : BLE_ERR_INVALID_STATE(0x0008)                 ; The reason for this error is as follows:
+ *              :                                               ;    - Host stack hasn't been initialized. 
+ *              :                                               ;    - Non-Connectable Advertising has been already 
+ *              :                                               ;      started by R_BLE_ABS_StartNonConnAdv().  
  *              : BLE_ERR_MEM_ALLOC_FAILED(0x000C)              ; Insufficient memory is needed for this function.
  **********************************************************************************************************************/
 ble_status_t R_BLE_ABS_StartNonConnAdv(st_ble_abs_non_conn_adv_param_t * p_adv_param)
@@ -618,16 +660,18 @@ ble_status_t R_BLE_ABS_StartNonConnAdv(st_ble_abs_non_conn_adv_param_t * p_adv_p
  * Description  : Start Periodic Advertising after setting advertising parameters, periodic advertising parameters, 
  *              : advertising data and periodic advertising data.
  *              : The periodic advertising uses the advertising set whose advertising handle is 3.
- *              : The advertising type is non-connectable and non-scannable.
- *              : The address type of local device is Public Identity Address or 
- *              : RPA(If the resolving list contains no matching entry, use the public address.).
+ *              : The advertising type is non-connectable non-scannable undirect.
  *              : Scan request event(BLE_GAP_EVENT_SCAN_REQ_RECV) is not notified.
  *              : Secondary Advertising Max Skip is 0.
  * Arguments    : st_ble_abs_perd_adv_param_t * p_adv_param ; Advertising parameters for Periodic Advertising.
  * Return Value : BLE_SUCCESS(0x0000)                       ; Success 
  *              : BLE_ERR_INVALID_PTR(0x0001)               ; p_adv_param is specified as NULL.
  *              : BLE_ERR_INVALID_ARG(0x0003)               ; The advertising parameter is out of range. 
- *              : BLE_ERR_INVALID_STATE(0x0008)             ; Host stack hasn't been initialized. 
+ *              : BLE_ERR_UNSUPPORTED(0x0007)               ; Not supported.
+ *              : BLE_ERR_INVALID_STATE(0x0008)             ; The reason for this error is as follows:
+ *              :                                           ;    - Host stack hasn't been initialized. 
+ *              :                                           ;    - Periodic Advertising has been already 
+ *              :                                           ;      started by R_BLE_ABS_StartPerdAdv().  
  *              : BLE_ERR_MEM_ALLOC_FAILED(0x000C)          ; Insufficient memory is needed for this function.
  **********************************************************************************************************************/
 ble_status_t R_BLE_ABS_StartPerdAdv(st_ble_abs_perd_adv_param_t * p_adv_param)
@@ -686,20 +730,21 @@ ble_status_t R_BLE_ABS_StartPerdAdv(st_ble_abs_perd_adv_param_t * p_adv_param)
 /***********************************************************************************************************************
  * Function Name: R_BLE_ABS_StartScan
  * Description  : Start scaning after setting scan parameters.
- *              : The scanner address type is Public Identity Address.
  *              : Fast scan is followed by slow scan. 
  *              : The end of fast scan or slow scan is notified with BLE_GAP_EVENT_SCAN_TO event.
  *              : If fast_period is 0, only slow scan is carried out.
  *              : If scan_period is 0, slow scan continues.
- * Arguments    : st_ble_abs_scan_param_t * p_scan_param ; Scan parameters.
+ * Arguments    : st_ble_abs_scan_param_t * p_scan_param    ; Scan parameters.
  * Return Value : BLE_SUCCESS(0x0000)                       ; Success 
  *              : BLE_ERR_INVALID_PTR(0x0001)               ; p_scan_param is specified as NULL. 
  *              : BLE_ERR_INVALID_ARG(0x0003)               ; The scan parameter is out of range.
+ *              : BLE_ERR_UNSUPPORTED(0x0007)               ; Not supported.
  *              : BLE_ERR_INVALID_STATE(0x0008)             ; Host stack hasn't been initialized. 
  *              : BLE_ERR_MEM_ALLOC_FAILED(0x000C)          ; Insufficient memory is needed for this function.
  **********************************************************************************************************************/
 ble_status_t R_BLE_ABS_StartScan(st_ble_abs_scan_param_t * p_scan_param)
 {
+#if (BLE_CFG_LIB_TYPE != 2)
     st_ble_gap_scan_param_t gap_scan_param;
     st_ble_gap_scan_phy_param_t phy_param_1M;
 #if (BLE_CFG_LIB_TYPE == 0)
@@ -762,49 +807,75 @@ ble_status_t R_BLE_ABS_StartScan(st_ble_abs_scan_param_t * p_scan_param)
     }
 
     return retval;
+#else /* (BLE_CFG_LIB_TYPE != 2) */
+    return BLE_ERR_UNSUPPORTED;
+#endif /* (BLE_CFG_LIB_TYPE != 2) */
+
 } /* End of function R_BLE_ABS_StartScan() */
 
 /***********************************************************************************************************************
  * Function Name: R_BLE_ABS_SetLocPrivacy
- * Description  : Generate a IRK, add it to the resolving list, set privacy mode and enable RPA function.
- *              : Register vendor specific callback function, if IRK is generated by this function.
+ * Description  : Get address, generate a IRK, add it to the resolving list, set privacy mode and enable RPA function.
+ *              : Register vendor specific callback function. 
  *              : After configuring local device privacy, 
- *              : BLE_GAP_ADDR_RPA_ID_PUBLIC is specified as own device address 
- *              : in theadvertising/scan/create connection API.
- * Arguments    : uint8_t * p_lc_irk                        ; IRK to be registered in the resolving list. 
- *              :                                           ; If p_lc_irk is specified as NULL, the new IRK is generated.
- *              : uint8_t privacy_mode                      ; Privacy mode.
- * Return Value : BLE_SUCCESS(0x0000)                       ; Success 
- *              : BLE_ERR_INVALID_ARG(0x0003)               ; The privacy_mode parameter is out of range.
- *              : BLE_ERR_INVALID_STATE(0x0008)             ; Host stack hasn't been initialized or 
- *                                                          ; configuring the resolving list or privacy mode.
- *              : BLE_ERR_MEM_ALLOC_FAILED(0x000C)          ; Insufficient memory is needed for this function.
+ *              : the address specified by the privacy_mode parameter is set to the local identity device address. 
+ *              : When calling the advertising/scan/create connection API with local RPA address type, 
+ *              : local device RPA is included in the packets.
+ * Arguments    : uint8_t * p_lc_irk                    ; IRK to be registered in the resolving list. 
+ *              :                                       ; If p_lc_irk is specified as NULL, the new IRK is generated.
+ *              : uint8_t privacy_mode                  ; Privacy mode and Local device identity address type.
+ *              :                                       ; Select one of the following.
+ *              :                                       ;   BLE_ABS_PRIV_NET_PUBLIC_IDADDR
+ *              :                                       ;   BLE_ABS_PRIV_DEV_PUBLIC_IDADDR
+ *              :                                       ;   BLE_ABS_PRIV_NET_STATIC_IDADDR
+ *              :                                       ;   BLE_ABS_PRIV_DEV_STATIC_IDADDR
+ * Return Value : BLE_SUCCESS(0x0000)                   ; Success 
+ *              : BLE_ERR_INVALID_ARG(0x0003)           ; The privacy_mode parameter is out of range.
+ *              : BLE_ERR_UNSUPPORTED(0x0007)           ; Not supported.
+ *              : BLE_ERR_INVALID_STATE(0x0008)         ; The reason for this error is as follows:
+ *              :                                       ;    - Host stack hasn't been initialized.
+ *              :                                       ;    - R_BLE_ABS_SetLocPrivacy() has been already started.
+ *              : BLE_ERR_MEM_ALLOC_FAILED(0x000C)      ; Insufficient memory is needed for this function.
  **********************************************************************************************************************/
 ble_status_t R_BLE_ABS_SetLocPrivacy(uint8_t * p_lc_irk, uint8_t privacy_mode)
 {
     ble_status_t retval;
-    retval = BLE_SUCCESS;
+    uint8_t addr_type;
 
-    if(BLE_GAP_DEV_PRIV_MODE < privacy_mode)
+    if(BLE_GAP_DEV_PRIV_MODE < (privacy_mode & BLE_ABS_PRIV_MODE_MASK))
     {
         return BLE_ERR_INVALID_ARG;
     }
 
-    if(NULL == p_lc_irk)
+    addr_type = ((privacy_mode & BLE_ABS_PRIV_ADDRESS_MASK) >> 4);
+    if(BLE_GAP_ADDR_RAND < addr_type)
     {
-        retval = R_BLE_VS_GetRand(BLE_GAP_IRK_SIZE);
-        gs_set_privacy_status = (BLE_SUCCESS == retval) ? BLE_ABS_PV_STATUS_CREATE_IRK : 0 ;
+        return BLE_ERR_INVALID_ARG;
+    }
+
+    /* status check */
+    if(0 != gs_set_privacy_status)
+    {
+        return BLE_ERR_INVALID_STATE;
+    }
+
+    if(NULL != p_lc_irk)
+    {
+        memcpy(gs_loc_irk, p_lc_irk, BLE_GAP_IRK_SIZE);
+        gs_set_privacy_status = BLE_ABS_PV_STATUS_REG_STR_IRK;
+    }
+
+    retval = R_BLE_VS_GetBdAddr(BLE_VS_ADDR_AREA_REG, addr_type);
+
+    if(BLE_SUCCESS == retval)
+    {
+        gs_privacy_mode = privacy_mode;
+        gs_set_privacy_status |= BLE_ABS_PV_STATUS_GET_ADDR;
     }
     else
     {
-        set_irk_to_rslv(p_lc_irk);
-        if(0 == gs_set_privacy_status)
-        {
-            retval = BLE_ERR_INVALID_OPERATION;
-        }
+        gs_set_privacy_status = 0;
     }
-
-    gs_privacy_mode = privacy_mode;
 
     return retval;
 } /* End of function R_BLE_ABS_SetLocPrivacy() */
@@ -812,7 +883,6 @@ ble_status_t R_BLE_ABS_SetLocPrivacy(uint8_t * p_lc_irk, uint8_t privacy_mode)
 /***********************************************************************************************************************
  * Function Name: R_BLE_ABS_CreateConn
  * Description  : Request create connection.
- *              : The initiator address type is Public Identity Address.
  *              : The scan interval is 60ms and the scan window is 30ms in case of 1M PHY or 2M PHY.
  *              : The scan interval is 180ms and the scan window is 90ms in case of coded PHY.
  *              : The Minimum CE Length and the Maximum CE Length are 0xFFFF.
@@ -823,11 +893,15 @@ ble_status_t R_BLE_ABS_SetLocPrivacy(uint8_t * p_lc_irk, uint8_t privacy_mode)
  * Return Value : BLE_SUCCESS(0x0000)                       ; Success 
  *              : BLE_ERR_INVALID_PTR(0x0001)               ; p_conn_param is specified as NULL. 
  *              : BLE_ERR_INVALID_ARG(0x0003)               ; The create connection parameter is out of range.
+ *              : BLE_ERR_UNSUPPORTED(0x0007)               ; Not supported.
  *              : BLE_ERR_INVALID_STATE(0x0008)             ; Host stack hasn't been initialized. 
+ *              : BLE_ERR_ALREADY_IN_PROGRESS(0x000A)       ; The same BD_ADDR as the address of a connected remote 
+ *              :                                           ; device is specified. 
  *              : BLE_ERR_MEM_ALLOC_FAILED(0x000C)          ; Insufficient memory is needed for this function.
  **********************************************************************************************************************/
 ble_status_t R_BLE_ABS_CreateConn(st_ble_abs_conn_param_t * p_conn_param)
 {
+#if (BLE_CFG_LIB_TYPE != 2)
     if(NULL == p_conn_param)
     {
         return BLE_ERR_INVALID_PTR;
@@ -839,17 +913,20 @@ ble_status_t R_BLE_ABS_CreateConn(st_ble_abs_conn_param_t * p_conn_param)
     }
 
     st_ble_gap_create_conn_param_t conn_param;
-    conn_param.init_filter_policy = p_conn_param->filter;
-    conn_param.own_addr_type = BLE_GAP_ADDR_PUBLIC;
+    conn_param.init_filter_policy = (p_conn_param->filter & BLE_ABS_SCAN_FILT_MASK);
+    conn_param.own_addr_type = (p_conn_param->filter & BLE_ABS_CONN_LOC_ADDR_MASK) >> 4;
 
-    if(BLE_GAP_INIT_FILT_USE_ADDR == p_conn_param->filter)
+    if(NULL != p_conn_param->p_addr)
     {
         memcpy(conn_param.remote_bd_addr, p_conn_param->p_addr->addr, BLE_BD_ADDR_LEN);
         conn_param.remote_bd_addr_type = p_conn_param->p_addr->type;
     }
     else
     {
-        conn_param.remote_bd_addr_type = BLE_GAP_ADDR_PUBLIC;
+        if(BLE_GAP_INIT_FILT_USE_ADDR == conn_param.init_filter_policy)
+        {
+            return BLE_ERR_INVALID_ARG;
+        }
     }
 
     /*  set connection parameters for 1M */
@@ -893,10 +970,14 @@ ble_status_t R_BLE_ABS_CreateConn(st_ble_abs_conn_param_t * p_conn_param)
         else
         {
             R_BLE_TIMER_Delete(&gs_conn_t_hdl);
+            gs_conn_t_hdl = BLE_TIMER_INVALID_HDL; 
         }
     }
 
     return retval;
+#else /* (BLE_CFG_LIB_TYPE != 2) */
+    return BLE_ERR_UNSUPPORTED;
+#endif /* (BLE_CFG_LIB_TYPE != 2) */
 } /* End of function R_BLE_ABS_CreateConn() */
 
 /***********************************************************************************************************************
@@ -909,6 +990,7 @@ ble_status_t R_BLE_ABS_CreateConn(st_ble_abs_conn_param_t * p_conn_param)
  * Arguments    : uint16_t conn_hdl                         ; Connection handle identifying the remote device 
  *                                                          ; which local device starts pairing or encryption with.
  * Return Value : BLE_SUCCESS(0x0000)                       ; Success 
+ *              : BLE_ERR_UNSUPPORTED(0x0007)               ; Not supported.
  *              : BLE_ERR_INVALID_STATE(0x0008)             ; Host stack hasn't been initialized or 
  *                                                          ; while generating OOB data, this function was called.
  *              : BLE_ERR_MEM_ALLOC_FAILED(0x000C)          ; Insufficient memory is needed for this function.
@@ -944,6 +1026,7 @@ ble_status_t R_BLE_ABS_StartAuth(uint16_t conn_hdl)
  *              : st_ble_gap_conn_param_t * p_conn_param            ; GAP connection parameters
  * Return Value : none
  **********************************************************************************************************************/
+#if (BLE_CFG_LIB_TYPE != 2)
 static void set_conn_param(st_ble_abs_conn_phy_param_t * p_abs_conn_param, 
                     st_ble_gap_conn_phy_param_t * p_conn_phy_param,
                     st_ble_gap_conn_param_t * p_conn_param)
@@ -961,6 +1044,7 @@ static void set_conn_param(st_ble_abs_conn_phy_param_t * p_abs_conn_param,
         p_conn_phy_param->p_conn_param = p_conn_param;
     }
 } /* End of function set_conn_param() */
+#endif /* (BLE_CFG_LIB_TYPE != 2) */
 
 /***********************************************************************************************************************
  * Function Name: set_pair_param
@@ -1012,10 +1096,12 @@ static void adv_to_func(uint32_t hdl)
  * Arguments    : uint32_t hdl                                       ; Timer handle
  * Return Value : none
  **********************************************************************************************************************/
+#if (BLE_CFG_LIB_TYPE != 2)
 static void cancel_conn_func(uint32_t hdl)
 {
     R_BLE_GAP_CancelCreateConn();
 } /* End of function cancel_conn_func() */
+#endif /* (BLE_CFG_LIB_TYPE != 2) */
 
 /***********************************************************************************************************************
  * Function Name: set_legacy_sres_data
@@ -1523,6 +1609,9 @@ static void abs_adv_off_hdlr(st_ble_evt_data_t * p_event_data)
 
     }
 #else /* (BLE_CFG_LIB_TYPE == 0) */
+    R_BLE_TIMER_Stop(gs_adv_t_hdl);
+    R_BLE_TIMER_Delete(&gs_adv_t_hdl);
+    
     if(gs_adv_sets[BLE_ABS_COMMON_HDL].status & BLE_ABS_ADV_COMM_TO)
     {
         p_adv_off_param->reason = 0x02;
@@ -1674,21 +1763,6 @@ static ble_status_t abs_adv_rept_hdlr(st_ble_evt_data_t * p_event_data)
 } /* End of function abs_adv_rept_hdlr() */
 
 /***********************************************************************************************************************
- * Function Name: abs_loc_ver_hdlr
- * Description  : Handler for GAP BLE_GAP_EVENT_LOC_VER_INFO event.
- * Arguments    : st_ble_evt_data_t * p_event_data         ; BLE_GAP_EVENT_LOC_VER_INFO event parameters
- * Return Value : none
- **********************************************************************************************************************/
-static void abs_loc_ver_hdlr(st_ble_evt_data_t * p_event_data)
-{
-    st_ble_gap_loc_dev_info_evt_t * ev_param;
-    ev_param = (st_ble_gap_loc_dev_info_evt_t *)p_event_data->p_param;
-    gs_loc_bd_addr = ev_param->l_dev_addr;
-
-    return;
-} /* End of function abs_loc_ver_hdlr() */
-
-/***********************************************************************************************************************
  * Function Name: conv_scan_phy_param
  * Description  : Convert Abstraction API scan phy parameters to GAP scan phy parameters.
  * Arguments    : st_ble_abs_scan_phy_param_t * p_abs_phy        ; Abstraction API scan parameters
@@ -1727,8 +1801,8 @@ static void conv_scan_param(st_ble_gap_scan_param_t * p_gap_scan_param,
                      st_ble_gap_scan_on_t * p_gap_scan_enable, 
                      uint32_t status)
 {
-    p_gap_scan_param->o_addr_type = BLE_GAP_ADDR_PUBLIC;
-    p_gap_scan_param->filter_policy = gs_abs_scan.param.dev_filter;
+    p_gap_scan_param->o_addr_type = (gs_abs_scan.param.dev_filter & BLE_ABS_SCAN_LOC_ADDR_MASK) >> 4;
+    p_gap_scan_param->filter_policy = (gs_abs_scan.param.dev_filter & BLE_ABS_SCAN_FILT_MASK);
     p_gap_scan_enable->proc_type = BLE_GAP_SC_PROC_OBS;
     p_gap_scan_enable->period = 0;
     p_gap_scan_enable->filter_dups = gs_abs_scan.param.filter_dups;
@@ -1870,22 +1944,29 @@ static void ads_scan_to_hdlr(uint32_t hdl)
 /***********************************************************************************************************************
  * Function Name: ads_conn_ind_hdlr
  * Description  : Handler for GAP BLE_GAP_EVENT_CONN_IND event.
- * Arguments    : none
+ * Arguments    : uint8_t role                           ; role : BLE_MASTER or BLE_SLAVE
  * Return Value : none
  **********************************************************************************************************************/
-static void ads_conn_ind_hdlr(void)
+static void ads_conn_ind_hdlr(uint8_t role)
 {
-    R_BLE_TIMER_Stop(gs_conn_t_hdl);
-    R_BLE_TIMER_Delete(&gs_conn_t_hdl);
-
+    if(BLE_MASTER == role)
+    {
+        R_BLE_TIMER_Stop(gs_conn_t_hdl);
+        R_BLE_TIMER_Delete(&gs_conn_t_hdl);
+        gs_conn_t_hdl = BLE_TIMER_INVALID_HDL;
+    }
 #if (BLE_CFG_LIB_TYPE != 0)
-    R_BLE_TIMER_Stop(gs_adv_t_hdl);
-    R_BLE_TIMER_Delete(&gs_adv_t_hdl);
+    else
+    {
+        R_BLE_TIMER_Stop(gs_adv_t_hdl);
+        R_BLE_TIMER_Delete(&gs_adv_t_hdl);
+        gs_adv_t_hdl = BLE_TIMER_INVALID_HDL;
 
-    set_adv_status(BLE_ABS_COMMON_HDL, 
-                    0, 
-                    (BLE_ABS_ADV_STATUS_ADV_SLOW_START | BLE_ABS_ADV_STATUS_ADV_FAST_START | 
-                    BLE_ABS_ADV_COMM_LEG));
+        set_adv_status(BLE_ABS_COMMON_HDL, 
+                        0, 
+                        (BLE_ABS_ADV_STATUS_ADV_SLOW_START | BLE_ABS_ADV_STATUS_ADV_FAST_START | 
+                        BLE_ABS_ADV_COMM_LEG));
+    }
 #endif /* (BLE_CFG_LIB_TYPE != 0) */
 
     return;
@@ -2034,13 +2115,13 @@ static ble_status_t conv_ext_adv_param(st_ble_abs_ext_adv_param_t * p_param, st_
     {
         memcpy(p_adv_param->p_addr, p_param->p_addr->addr, BLE_BD_ADDR_LEN);
         p_adv_param->p_addr_type = p_param->p_addr->type;
-        p_adv_param->adv_prop_type = BLE_GAP_EXT_PROP_ADV_CONN_NOSCAN_DIRECT;
     }
     else
     {
         p_adv_param->p_addr_type = BLE_GAP_ADDR_PUBLIC;
-        p_adv_param->adv_prop_type = BLE_GAP_EXT_PROP_ADV_CONN_NOSCAN_UNDIRECT;
     }
+
+    p_adv_param->adv_prop_type = BLE_GAP_EXT_PROP_ADV_CONN_NOSCAN_UNDIRECT;
 
     if(BLE_ABS_ADV_ALLOW_CONN_WLST < p_param->filter)
     {
@@ -2096,13 +2177,12 @@ static ble_status_t conv_non_conn_adv_param(st_ble_abs_non_conn_adv_param_t * p_
 
     p_adv_param->o_addr_type = p_param->o_addr_type;
 #if (BLE_CFG_LIB_TYPE != 0)
-    p_param->adv_phy = BLE_ABS_ADV_PHY_LEGACY;
-#endif /* (BLE_CFG_LIB_TYPE != 0) */
+    p_adv_param->adv_phy = BLE_GAP_ADV_PHY_1M;
+#else /* (BLE_CFG_LIB_TYPE != 0) */
     if((BLE_GAP_ADV_PHY_1M < p_param->adv_phy) && (BLE_GAP_ADV_PHY_CD != p_param->adv_phy))
     {
         return BLE_ERR_INVALID_ARG;
     }
-#if (BLE_CFG_LIB_TYPE == 0)
     else
     {
         if((BLE_ABS_ADV_PHY_LEGACY == p_param->adv_phy) && (BLE_ABS_PERD_HDL == adv_hdl))
@@ -2110,35 +2190,39 @@ static ble_status_t conv_non_conn_adv_param(st_ble_abs_non_conn_adv_param_t * p_
             return BLE_ERR_INVALID_ARG;
         }
     }
-#endif /* (BLE_CFG_LIB_TYPE == 0) */
 
     p_adv_param->adv_phy = (uint8_t)((BLE_ABS_ADV_PHY_LEGACY == p_param->adv_phy) 
                                       ? BLE_GAP_ADV_PHY_1M
                                       : p_param->adv_phy);
+#endif /* (BLE_CFG_LIB_TYPE != 0) */
 
     if(p_param->p_addr)
     {
         memcpy(p_adv_param->p_addr, p_param->p_addr->addr, BLE_BD_ADDR_LEN);
         p_adv_param->p_addr_type = p_param->p_addr->type;
-        p_adv_param->adv_prop_type = (uint16_t)((BLE_ABS_ADV_PHY_LEGACY != p_param->adv_phy) 
-                                                 ? BLE_GAP_EXT_PROP_ADV_NOCONN_NOSCAN_DIRECT
-                                                 : BLE_GAP_LEGACY_PROP_ADV_NONCONN_IND);
     }
     else
     {
         p_adv_param->p_addr_type = BLE_GAP_ADDR_PUBLIC;
-        p_adv_param->adv_prop_type = (uint16_t)((BLE_ABS_ADV_PHY_LEGACY != p_param->adv_phy) 
-                                                 ? BLE_GAP_EXT_PROP_ADV_NOCONN_NOSCAN_UNDIRECT 
-                                                 : BLE_GAP_LEGACY_PROP_ADV_NONCONN_IND);
     }
+
+#if (BLE_CFG_LIB_TYPE != 0)
+    p_adv_param->adv_prop_type = BLE_GAP_LEGACY_PROP_ADV_NONCONN_IND;
+#else /* (BLE_CFG_LIB_TYPE != 0) */
+    p_adv_param->adv_prop_type = (uint16_t)((BLE_ABS_ADV_PHY_LEGACY != p_param->adv_phy) 
+                                                ? BLE_GAP_EXT_PROP_ADV_NOCONN_NOSCAN_UNDIRECT
+                                                : BLE_GAP_LEGACY_PROP_ADV_NONCONN_IND);
+#endif /* (BLE_CFG_LIB_TYPE != 0) */
 
     p_adv_param->filter_policy = BLE_ABS_ADV_ALLOW_CONN_ANY;
     p_adv_param->sec_adv_max_skip = 0x00;
 
+#if (BLE_CFG_LIB_TYPE == 0)
     if((BLE_GAP_ADV_PHY_1M > p_param->sec_adv_phy) || (BLE_GAP_ADV_PHY_CD < p_param->sec_adv_phy))
     {
         return BLE_ERR_INVALID_ARG;
     }
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
 
     p_adv_param->sec_adv_phy = p_param->sec_adv_phy;
     p_adv_param->scan_req_ntf_flag = BLE_GAP_SCAN_REQ_NTF_DISABLE;
@@ -2240,14 +2324,22 @@ static void set_adv_param(void * p_adv_param, uint8_t adv_hdl)
  * Function Name: check_scan_phy_param
  * Description  : Check scan phy parameters.
  * Arguments    : st_ble_abs_scan_phy_param_t * p_scan_phy   ; scan phy parameters to be stored.
+ *              : uint16_t fast_period                       ; scan fast_period value.
  * Return Value : BLE_SUCCESS(0x0000)                        ; Success 
  *              : BLE_ERR_INVALID_ARG(0x0003)                ; Scan phy parameter is out of range.
  **********************************************************************************************************************/
-static ble_status_t check_scan_phy_param(st_ble_abs_scan_phy_param_t * p_scan_phy)
+#if (BLE_CFG_LIB_TYPE != 2)
+static ble_status_t check_scan_phy_param(st_ble_abs_scan_phy_param_t * p_scan_phy, uint16_t fast_period)
 {
-    if((BLE_GAP_SCAN_INTV_MIN > p_scan_phy->fast_intv) ||
-       (BLE_GAP_SCAN_INTV_MIN > p_scan_phy->slow_intv) ||
-       (BLE_GAP_SCAN_INTV_MIN > p_scan_phy->fast_window) ||
+    if( fast_period )
+    {
+        if((BLE_GAP_SCAN_INTV_MIN > p_scan_phy->fast_intv) ||
+           (BLE_GAP_SCAN_INTV_MIN > p_scan_phy->fast_window) )
+        {
+            return BLE_ERR_INVALID_ARG;
+        }
+    }
+    if((BLE_GAP_SCAN_INTV_MIN > p_scan_phy->slow_intv) ||
        (BLE_GAP_SCAN_INTV_MIN > p_scan_phy->slow_window) ||
        (BLE_GAP_SCAN_ACTIVE < p_scan_phy->scan_type))
     {
@@ -2256,6 +2348,7 @@ static ble_status_t check_scan_phy_param(st_ble_abs_scan_phy_param_t * p_scan_ph
 
     return BLE_SUCCESS;
 }
+#endif /* (BLE_CFG_LIB_TYPE != 2) */
 
 /***********************************************************************************************************************
  * Function Name: set_scan_param
@@ -2264,6 +2357,7 @@ static ble_status_t check_scan_phy_param(st_ble_abs_scan_phy_param_t * p_scan_ph
  * Return Value : BLE_SUCCESS(0x0000)                        ; Success 
  *              : BLE_ERR_INVALID_ARG(0x0003)                ; Scan phy parameter is out of range.
  **********************************************************************************************************************/
+#if (BLE_CFG_LIB_TYPE != 2)
 static ble_status_t set_scan_param(st_ble_abs_scan_param_t * p_scan_param)
 {
     ble_status_t retval;
@@ -2271,7 +2365,7 @@ static ble_status_t set_scan_param(st_ble_abs_scan_param_t * p_scan_param)
     /* check abs scan parameters */
     if(p_scan_param->p_phy_param_1M)
     {
-        retval = check_scan_phy_param(p_scan_param->p_phy_param_1M);
+        retval = check_scan_phy_param(p_scan_param->p_phy_param_1M, p_scan_param->fast_period);
         if(BLE_SUCCESS != retval)
         {
             return retval;
@@ -2281,7 +2375,7 @@ static ble_status_t set_scan_param(st_ble_abs_scan_param_t * p_scan_param)
 #if (BLE_CFG_LIB_TYPE == 0)
     if(p_scan_param->p_phy_param_coded)
     {
-        retval = check_scan_phy_param(p_scan_param->p_phy_param_coded);
+        retval = check_scan_phy_param(p_scan_param->p_phy_param_coded, p_scan_param->fast_period);
         if(BLE_SUCCESS != retval)
         {
             return retval;
@@ -2315,6 +2409,7 @@ static ble_status_t set_scan_param(st_ble_abs_scan_param_t * p_scan_param)
 
     return BLE_SUCCESS;
 } /* End of function set_scan_param() */
+#endif /* (BLE_CFG_LIB_TYPE != 2) */
 
 /***********************************************************************************************************************
  * Function Name: set_scan_status
@@ -2335,23 +2430,17 @@ static void set_scan_status(uint32_t set, uint32_t clear)
  * Arguments    : uint8_t * p_lc_irk        ; IRK to be registered in the Resolving List.
  * Return Value : none
  **********************************************************************************************************************/
-static void set_irk_to_rslv(uint8_t * p_lc_irk)
+static void set_irk_to_rslv(uint8_t * p_lc_irk, ble_status_t event_result)
 {
-    st_ble_gap_rslv_list_key_set_t peer_irk;
-    st_ble_dev_addr_t rem_addr;
     ble_status_t retval;
-
-    memset(peer_irk.remote_irk, 0xAA, BLE_GAP_IRK_SIZE);
-    peer_irk.local_irk_type = BLE_GAP_RL_LOC_KEY_REGISTERED;
-    memset(rem_addr.addr, 0x55, BLE_BD_ADDR_LEN);
-    rem_addr.type = BLE_GAP_ADDR_PUBLIC;
 
     R_BLE_GAP_SetLocIdInfo(&gs_loc_bd_addr, p_lc_irk);
 
     /*  store local id info */
     R_BLE_SECD_WriteLocInfo(&gs_loc_bd_addr, p_lc_irk, NULL);
 
-    retval = R_BLE_GAP_ConfRslvList(BLE_GAP_LIST_ADD_DEV, &rem_addr, &peer_irk, 1);
+    retval = R_BLE_GAP_ConfRslvList(BLE_GAP_LIST_ADD_DEV, &g_ble_priv_dummy_addr, &g_ble_peer_dummy_irk, 1);
+    retval |= event_result;
     gs_set_privacy_status = (BLE_SUCCESS == retval) ? BLE_ABS_PV_STATUS_ADD_RSLV : 0 ;
 
     return;
@@ -2363,7 +2452,7 @@ static void set_irk_to_rslv(uint8_t * p_lc_irk)
  * Arguments    : st_ble_evt_data_t * p_event_data         ; BLE_GAP_EVENT_RSLV_LIST_CONF_COMP event parameters
  * Return Value : none
  **********************************************************************************************************************/
-static void abs_conf_rslv_hdlr(st_ble_evt_data_t * p_event_data)
+static void abs_conf_rslv_hdlr(st_ble_evt_data_t * p_event_data, ble_status_t event_result)
 {
     if(gs_set_privacy_status)
     {
@@ -2373,10 +2462,10 @@ static void abs_conf_rslv_hdlr(st_ble_evt_data_t * p_event_data)
         p_rslv_list_conf = (st_ble_gap_rslv_list_conf_evt_t *)p_event_data->p_param;
         if(BLE_GAP_LIST_ADD_DEV == p_rslv_list_conf->op_code)
         {
-            st_ble_dev_addr_t rem_addr;
-            memset(rem_addr.addr, 0x55, BLE_BD_ADDR_LEN);
-            rem_addr.type = 0x00;
-            retval = R_BLE_GAP_SetPrivMode(&rem_addr, &gs_privacy_mode, 1);
+            uint8_t privacy;
+            privacy = gs_privacy_mode & BLE_ABS_PRIV_MODE_MASK;
+            retval = R_BLE_GAP_SetPrivMode(&g_ble_priv_dummy_addr, &privacy, 1);
+            retval |= event_result;
             gs_set_privacy_status = (BLE_SUCCESS == retval) 
                                     ? BLE_ABS_PV_STATUS_SET_MODE 
                                     : 0 ;
@@ -2412,10 +2501,6 @@ static void abs_gapcb(uint16_t event_type, ble_status_t event_result, st_ble_evt
                 R_BLE_GAP_SetLocIdInfo(&idaddr, irk);
             }
         }
-        break;
-
-        case BLE_GAP_EVENT_LOC_VER_INFO :
-            abs_loc_ver_hdlr(p_event_data);
         break;
 
         case BLE_GAP_EVENT_ADV_REPT_IND :
@@ -2477,7 +2562,11 @@ static void abs_gapcb(uint16_t event_type, ble_status_t event_result, st_ble_evt
         break;
 
         case BLE_GAP_EVENT_CONN_IND :
-            ads_conn_ind_hdlr();
+            {
+                st_ble_gap_conn_evt_t * p_param;
+                p_param = (st_ble_gap_conn_evt_t *)p_event_data->p_param;
+                ads_conn_ind_hdlr(p_param->role);
+            }
         break;
 
         case BLE_GAP_EVENT_CREATE_CONN_COMP:
@@ -2485,11 +2574,12 @@ static void abs_gapcb(uint16_t event_type, ble_status_t event_result, st_ble_evt
             {
                 R_BLE_TIMER_Stop(gs_conn_t_hdl);
                 R_BLE_TIMER_Delete(&gs_conn_t_hdl);
+                gs_conn_t_hdl = BLE_TIMER_INVALID_HDL;
             }
         break;
 
         case BLE_GAP_EVENT_RSLV_LIST_CONF_COMP :
-            abs_conf_rslv_hdlr(p_event_data);
+            abs_conf_rslv_hdlr(p_event_data, event_result);
         break;
 
         case BLE_GAP_EVENT_RPA_EN_COMP :
@@ -2501,6 +2591,7 @@ static void abs_gapcb(uint16_t event_type, ble_status_t event_result, st_ble_evt
             {
                 ble_status_t retval;
                 retval = R_BLE_GAP_EnableRpa(BLE_GAP_RPA_ENABLED);
+                retval |= event_result;
                 gs_set_privacy_status = (BLE_SUCCESS == retval) 
                                          ? BLE_ABS_PV_STATUS_EN_RPA 
                                          : 0 ;
@@ -2569,17 +2660,52 @@ static void abs_gapcb(uint16_t event_type, ble_status_t event_result, st_ble_evt
  * Arguments    : st_ble_vs_evt_data_t * p_event_data         ; BLE_VS_EVENT_GET_RAND event parameters
  * Return Value : none
  **********************************************************************************************************************/
-static void abs_rand_hdlr(st_ble_vs_evt_data_t * p_event_data)
+static void abs_rand_hdlr(st_ble_vs_evt_data_t * p_event_data, ble_status_t event_result)
 {
     if(gs_set_privacy_status)
     {
         st_ble_vs_get_rand_comp_evt_t * p_rand_param;
         p_rand_param = (st_ble_vs_get_rand_comp_evt_t *)p_event_data->p_param;
-        set_irk_to_rslv(p_rand_param->p_rand);
+        memcpy(gs_loc_irk, p_rand_param->p_rand, BLE_GAP_IRK_SIZE);
+        set_irk_to_rslv(p_rand_param->p_rand, event_result);
     }
 
     return;
 } /* End of function abs_rand_hdlr() */
+
+/***********************************************************************************************************************
+ * Function Name: abs_get_addr_hdlr
+ * Description  : Handler for Vendor Specific BLE_VS_EVENT_GET_ADDR_COMP event.
+ * Arguments    : st_ble_vs_evt_data_t * p_event_data         ; BLE_VS_EVENT_GET_ADDR_COMP event parameters
+ * Return Value : none
+ **********************************************************************************************************************/
+static void abs_get_addr_hdlr(st_ble_vs_evt_data_t * p_event_data, ble_status_t event_result)
+{
+    st_ble_vs_get_bd_addr_comp_evt_t * p_get_addr;
+    ble_status_t retval;
+
+    if(BLE_ABS_PV_STATUS_GET_ADDR == (BLE_ABS_PV_STATUS_GET_ADDR & gs_set_privacy_status))
+    {
+        /* get local device address to static variable. */
+        p_get_addr = (st_ble_vs_get_bd_addr_comp_evt_t *)p_event_data->p_param;
+        gs_loc_bd_addr = p_get_addr->addr;
+
+        /* register the address as identity address and set resolving list.*/
+        if(BLE_ABS_PV_STATUS_REG_STR_IRK == (BLE_ABS_PV_STATUS_REG_STR_IRK & gs_set_privacy_status))
+        {
+            set_irk_to_rslv(gs_loc_irk, event_result);
+        }
+        else
+        {
+            /* generate 128 bit random value for local IRK. */
+            retval = R_BLE_VS_GetRand(BLE_GAP_IRK_SIZE);
+            retval |= event_result;
+            gs_set_privacy_status = (BLE_SUCCESS == retval) ? BLE_ABS_PV_STATUS_CREATE_IRK : 0 ;
+        }
+    }
+
+    return;
+} /* End of function abs_get_addr_hdlr() */
 
 /***********************************************************************************************************************
  * Function Name: abs_vscb
@@ -2594,7 +2720,11 @@ static void abs_vscb(uint16_t event_type, ble_status_t event_result, st_ble_vs_e
     switch(event_type)
     {
         case BLE_VS_EVENT_GET_RAND :
-            abs_rand_hdlr(p_event_data);
+            abs_rand_hdlr(p_event_data, event_result);
+        break;
+
+        case BLE_VS_EVENT_GET_ADDR_COMP:
+            abs_get_addr_hdlr(p_event_data, event_result);
         break;
 
         default :
@@ -2608,6 +2738,31 @@ static void abs_vscb(uint16_t event_type, ble_status_t event_result, st_ble_vs_e
 
     return;
 } /* End of function abs_vscb() */
+
+/***********************************************************************************************************************
+ * Function Name: abs_reset_internal
+ * Description  : BLE is reset with this function on Renesas FreeRTOS.  
+ *              : The process is carried out in the following order.
+ *              : R_BLE_Close() -> R_BLE_GAP_Terminate() -> R_BLE_Open() -> R_BLE_SetEvent().
+ *              : The gs_abs_reset_cb callback initializes the others (Host Stack, timer, etc...).
+ * Arguments    : None
+ * Return Value : none
+ **********************************************************************************************************************/
+#if (BSP_CFG_RTOS_USED == 1)
+static void abs_reset_internal(void)
+{
+    R_BLE_Close();
+
+    R_BLE_GAP_Terminate();
+
+    R_BLE_Open();
+
+    if(gs_abs_reset_cb)
+    {
+        R_BLE_SetEvent(gs_abs_reset_cb);
+    }
+}
+#endif /* (BSP_CFG_RTOS_USED == 1) */
 
 #else /* (BLE_CFG_ABS_API_EN == 1) && (BLE_CFG_HCI_MODE_EN == 0) */
 

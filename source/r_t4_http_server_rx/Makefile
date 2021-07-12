@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_t4_http_server_rx
 VERSION = 		1.06
-MDF =			NOT_SUPPORTED
+MDF = NOT_SUPPORTED
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

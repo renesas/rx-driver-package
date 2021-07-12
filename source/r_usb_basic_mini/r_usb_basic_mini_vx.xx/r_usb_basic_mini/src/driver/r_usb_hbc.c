@@ -1,50 +1,46 @@
-/*******************************************************************************
+/***********************************************************************************************************************
  * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only
- * intended for use with Renesas products. No other uses are authorized. This
- * software is owned by Renesas Electronics Corporation and is protected under
- * all applicable laws, including copyright laws.
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
  * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
- * LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
- * TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
- * ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
- * FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
- * ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
- * BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software
- * and to discontinue the availability of this software. By using this software,
- * you agree to the additional terms and conditions found by accessing the
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+ * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2013(2019) Renesas Electronics Corporation. All rights reserved.
- *****************************************************************************/
-/******************************************************************************
+ *
+ * Copyright (C) 2013(2020) Renesas Electronics Corporation. All rights reserved.
+ ***********************************************************************************************************************/
+/***********************************************************************************************************************
 * File Name    : r_usb_hbc.c
-* Version      : 1.01
 * Description  : This is the USB host battery charging code.
-*******************************************************************************/
-/*******************************************************************************
+ ***********************************************************************************************************************/
+/**********************************************************************************************************************
 * History   : DD.MM.YYYY Version Description
 *           : 01.09.2014 1.00    First Release
 *           : 01.06.2015 1.01    Added RX231.
 *           : 30.11.2018 1.10    Supporting Smart Configurator
 *           : 31.05.2019 1.11    Added support for GNUC and ICCRX.
-*******************************************************************************/
-/*******************************************************************************
+*           : 30.06.2020 1.20    Added support for RTOS.
+ ***********************************************************************************************************************/
+
+/******************************************************************************
  Includes   <System Includes> , "Project Includes"
  ******************************************************************************/
 #include "r_usb_basic_mini_if.h"
 #include "r_usb_bitdefine.h"
 #include "r_usb_typedef.h"
-#include "r_usb_reg_access.h"            /* Definition of the USB register access macro */
+#include "r_usb_reg_access.h"
 #include "r_usb_extern.h"
 
-#if (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST
-
+#if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
 #if USB_CFG_BC == USB_CFG_ENABLE
-/*******************************************************************************
+/******************************************************************************
  Macro definitions
  ******************************************************************************/
 /* PD Detect Define */
@@ -57,11 +53,11 @@
 #else   /* USB_CFG_DCP == USB_CFG_ENABLE */
 #define USB_BC_DCPMODE      (0x00u)
 #endif  /* USB_CFG_DCP == USB_CFG_ENABLE */
-/*******************************************************************************
+/******************************************************************************
  Typedef definitions
  ******************************************************************************/
 
-/*******************************************************************************
+/******************************************************************************
  Private global variables and functions
  ******************************************************************************/
 USB_STATIC    void      usb_hstd_bc_err(void);
@@ -77,8 +73,8 @@ USB_STATIC    void      usb_hstd_bc_sdp_entry(void);
 USB_STATIC    void      usb_hstd_bc_sdp_exit(void);
 USB_STATIC    void      usb_hstd_bc_dcp_entry(void);
 
-/*******************************************************************************
- Exported global variables (to be accessed by other files)
+/******************************************************************************
+ Exported global variables andfunctions(to be accessed by other files)
  ******************************************************************************/
 /* variables */
 usb_bc_status_t g_usb_hstd_bc;
@@ -87,19 +83,22 @@ usb_bc_status_t g_usb_hstd_bc;
 void (*gp_usb_hstd_bc_func[USB_BC_STATE_MAX][USB_BC_EVENT_MAX])(void) =
 {
     /* VBUS_ON              ATTACH               DETACH */
-    { usb_hstd_bc_init_vb , usb_hstd_bc_err    , usb_hstd_bc_err    },
-    { usb_hstd_bc_err     , usb_hstd_bc_det_at , usb_hstd_bc_err    },
-    { usb_hstd_bc_err     , usb_hstd_bc_err    , usb_hstd_bc_cdp_dt },
-    { usb_hstd_bc_err     , usb_hstd_bc_err    , usb_hstd_bc_sdp_dt },
-    { usb_hstd_bc_err     , usb_hstd_bc_err    , usb_hstd_bc_err    }
+    {   usb_hstd_bc_init_vb , usb_hstd_bc_err , usb_hstd_bc_err},   /* USB_BC_STATE_INIT */
+    {   usb_hstd_bc_err , usb_hstd_bc_det_at , usb_hstd_bc_err},    /* USB_BC_STATE_DET */
+    {   usb_hstd_bc_err , usb_hstd_bc_err , usb_hstd_bc_cdp_dt},    /* USB_BC_STATE_CDP */
+    {   usb_hstd_bc_err , usb_hstd_bc_err , usb_hstd_bc_sdp_dt},    /* USB_BC_STATE_SDP */
+    {   usb_hstd_bc_err , usb_hstd_bc_err , usb_hstd_bc_err}        /* USB_BC_STATE_DCP */
 };
 
 
+/******************************************************************************
+ Renesas Abstracted USB host battery charging driver functions
+ ******************************************************************************/
 
 /******************************************************************************
 Function Name   : usb_hstd_pddetint_process
 Description     : PDDETINT process
-Argument        : none
+Arguments       : none
 Return          : none
 ******************************************************************************/
 void usb_hstd_pddetint_process(void)
@@ -111,24 +110,24 @@ void usb_hstd_pddetint_process(void)
     do
     {
         buf[0] = hw_usb_read_bcctrl();
-        usb_cpu_delay_1us(10);
+        usb_cpu_delay_1us(100);
         buf[1] = hw_usb_read_bcctrl();
-        usb_cpu_delay_1us(10);
+        usb_cpu_delay_1us(100);
         buf[2] = hw_usb_read_bcctrl();
     }
     while (((buf[0] & USB_PDDETSTS) != (buf[1] & USB_PDDETSTS)) ||
             ((buf[1] & USB_PDDETSTS) != (buf[2] & USB_PDDETSTS)) );
 
-    if ((buf[0] & USB_PDDETSTS) == USB_PDDETSTS )       /* VDPSRC Detect */
+    if (USB_PDDETSTS == (buf[0] & USB_PDDETSTS)) /* VDPSRC Detect */
     {
-        if ((buf[0] & USB_VDMSRCE) != USB_VDMSRCE )
+        if (USB_VDMSRCE != (buf[0] & USB_VDMSRCE) )
         {
             hw_usb_set_vdmsrce();
         }
     }
     else                                                /* VDPSRC Not detect */
     {
-        if ((buf[0] & USB_VDMSRCE) == USB_VDMSRCE )
+        if (USB_VDMSRCE == (buf[0] & USB_VDMSRCE) )
         {
             hw_usb_clear_vdmsrce();
             g_usb_hstd_bc.pd_detect = USB_BC_PDDET;
@@ -140,7 +139,7 @@ void usb_hstd_pddetint_process(void)
 /******************************************************************************
 Function Name   : usb_hstd_bc_err
 Description     : BC State change function [ERROR]
-Argument        : none
+Arguments       : none
 Return          : none
 ******************************************************************************/
 USB_STATIC void usb_hstd_bc_err(void)
@@ -152,7 +151,7 @@ USB_STATIC void usb_hstd_bc_err(void)
 /******************************************************************************
 Function Name   : usb_hstd_bc_init_vb
 Description     : BC State change function [INIT] [VbusOn]
-Argument        : none
+Arguments       : none
 Return          : none
 ******************************************************************************/
 USB_STATIC void usb_hstd_bc_init_vb(void)
@@ -174,7 +173,7 @@ USB_STATIC void usb_hstd_bc_init_vb(void)
 /******************************************************************************
 Function Name   : usb_hstd_bc_det_at
 Description     : BC State change function [DET] [Attach]
-Argument        : none
+Arguments       : none
 Return          : none
 ******************************************************************************/
 USB_STATIC void usb_hstd_bc_det_at(void)
@@ -196,7 +195,7 @@ USB_STATIC void usb_hstd_bc_det_at(void)
 /******************************************************************************
 Function Name   : usb_hstd_bc_cdp_dt
 Description     : BC State change function [CDP] [Detach]
-Argument        : none
+Arguments       : none
 Return          : none
 ******************************************************************************/
 USB_STATIC void usb_hstd_bc_cdp_dt(void)
@@ -210,7 +209,7 @@ USB_STATIC void usb_hstd_bc_cdp_dt(void)
 /******************************************************************************
 Function Name   : usb_hstd_bc_sdp_dt
 Description     : BC State change function [SDP] [Detach]
-Argument        : none
+Arguments       : none
 Return          : none
 ******************************************************************************/
 USB_STATIC void usb_hstd_bc_sdp_dt(void)
@@ -224,7 +223,7 @@ USB_STATIC void usb_hstd_bc_sdp_dt(void)
 /******************************************************************************
 Function Name   : usb_hstd_bc_det_entry
 Description     : BC State entry function [DET]
-Argument        : none
+Arguments       : none
 Return          : none
 ******************************************************************************/
 USB_STATIC void usb_hstd_bc_det_entry(void)
@@ -239,7 +238,7 @@ USB_STATIC void usb_hstd_bc_det_entry(void)
 /******************************************************************************
 Function Name   : usb_hstd_bc_det_exit
 Description     : BC State exit function [DET]
-Argument        : none
+Arguments       : none
 Return          : none
 ******************************************************************************/
 USB_STATIC void usb_hstd_bc_det_exit(void)
@@ -254,7 +253,7 @@ USB_STATIC void usb_hstd_bc_det_exit(void)
 /******************************************************************************
 Function Name   : usb_hstd_bc_cdp_entry
 Description     : BC State entry function [CDP]
-Argument        : none
+Arguments       : none
 Return          : none
 ******************************************************************************/
 USB_STATIC void usb_hstd_bc_cdp_entry(void)
@@ -266,7 +265,7 @@ USB_STATIC void usb_hstd_bc_cdp_entry(void)
 /******************************************************************************
 Function Name   : usb_hstd_bc_cdp_exit
 Description     : BC State exit function [CDP]
-Argument        : none
+Arguments       : none
 Return          : none
 ******************************************************************************/
 USB_STATIC void usb_hstd_bc_cdp_exit(void)
@@ -278,18 +277,19 @@ USB_STATIC void usb_hstd_bc_cdp_exit(void)
 /******************************************************************************
 Function Name   : usb_hstd_bc_sdp_entry
 Description     : BC State entry function [SDP]
-Argument        : none
+Arguments       : none
 Return          : none
 ******************************************************************************/
 USB_STATIC void usb_hstd_bc_sdp_entry(void)
 {
+    /* Do Nothing */
 }   /*  End of function  usb_hstd_bc_sdp_entry() */
 
 
 /******************************************************************************
 Function Name   : usb_hstd_bc_sdp_exit
 Description     : BC State exit function [SDP]
-Argument        : none
+Arguments       : none
 Return          : none
 ******************************************************************************/
 USB_STATIC void usb_hstd_bc_sdp_exit(void)
@@ -301,7 +301,7 @@ USB_STATIC void usb_hstd_bc_sdp_exit(void)
 /******************************************************************************
 Function Name   : usb_hstd_bc_dcp_entry
 Description     : BC State entry function [DCP]
-Argument        : none
+Arguments       : none
 Return          : none
 ******************************************************************************/
 USB_STATIC void usb_hstd_bc_dcp_entry(void)

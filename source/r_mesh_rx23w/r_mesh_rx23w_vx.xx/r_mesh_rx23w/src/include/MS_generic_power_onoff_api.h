@@ -20,9 +20,10 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup generic_power_onoff_module GENERIC_POWER_ONOFF (Mesh Generic Power Onoff Model)
+ * \defgroup generic_power_onoff_module Generic Power OnOff Model (GENERIC_POWER_ONOFF)
+ * \ingroup mesh_models_block
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Generic Power Onoff Model (GENERIC_POWER_ONOFF) module to the Application.
  */
 
@@ -32,7 +33,7 @@
 /**
  *  \defgroup generic_power_onoff_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
+ *  \brief This section Describes the module Notification Callback interface offered
  *  to the application
  */
 
@@ -64,14 +65,14 @@ typedef API_RESULT (* MS_GENERIC_POWER_ONOFF_SERVER_CB)
  * Generic Power Onoff Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_GENERIC_POWER_ONOFF_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -103,6 +104,7 @@ typedef API_RESULT (* MS_GENERIC_POWER_ONOFF_SETUP_SERVER_CB)
 /**
  *  \defgroup generic_power_onoff_structures Structures
  *  \{
+ *  \brief This section describes the EtherMind Mesh Generic Power OnOff Model Structures.
  */
 
 /**
@@ -133,12 +135,12 @@ typedef struct MS_generic_onpowerup_struct
 /**
  * \defgroup generic_power_onoff_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Generic Power Onoff Model APIs.
+ * \brief This section describes the EtherMind Mesh Generic Power Onoff Model APIs.
  */
 /**
- * \defgroup generic_power_onoff_ser_api_defs Generic Power Onoff Server API Definitions
+ * \defgroup generic_power_onoff_ser_api_defs Generic Power Onoff Server API
  * \{
- * This section describes the Generic Power Onoff Server APIs.
+ * \brief This section describes the Generic Power Onoff Server APIs.
  */
 
 /**
@@ -239,9 +241,9 @@ API_RESULT MS_generic_power_onoff_setup_server_state_update
 /** \} */
 
 /**
- * \defgroup generic_power_onoff_cli_api_defs Generic Power Onoff Client API Definitions
+ * \defgroup generic_power_onoff_cli_api_defs Generic Power Onoff Client API
  * \{
- * This section describes the Generic Power Onoff Client APIs.
+ * \brief This section describes the Generic Power Onoff Client APIs.
  */
 
 /**
@@ -303,6 +305,9 @@ API_RESULT MS_generic_power_onoff_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
+/** \name Messsage Send
+ *  \{
+ */
 /**
  *  \brief API to get the Generic OnPowerUp state of an element.
  *
@@ -358,6 +363,7 @@ API_RESULT MS_generic_power_onoff_client_send_reliable_pdu
             param,\
             0xFFFFFFFF\
         )
+/** \} */
 /** \} */
 /** \} */
 /** \} */

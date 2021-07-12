@@ -19,8 +19,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_jpege_rx</name>
-        <version>1.01</version>
-        <zipsource>r_jpege_rx_v1.01.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_jpege_rx_vx.xx.zip</zipsource>
         <application>JPEG</application>
         <desc>JPEG Encoder for Renesas MCUs.</desc>
         <details>JPEG Encoder for Renesas MCUs.</details>

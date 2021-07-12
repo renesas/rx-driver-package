@@ -73,6 +73,10 @@ r_riic_rx
         |      r_riic_rx231.c
         |      r_riic_rx231_private.h
         |
+        +---rx23e-a
+        |      r_riic_rx23e_a.c
+        |      r_riic_rx23e_a_private.h
+        |
         +---rx23t
         |      r_riic_rx23t.c
         |      r_riic_rx23t_private.h

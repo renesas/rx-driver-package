@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_cmt_rx.c
@@ -52,6 +52,9 @@
 *                              Fixed to comply with GSCE Coding Standards Rev.6.00.
 *                              Changed for FIT+RTOS
 *         : 29.11.2019 4.31    Fixed issues in power_on() and power_off().
+*         : 31.03.2020 4.40    Added support for RX23E-A.
+*         : 29.05.2020 4.50    Added support BLE for RX23W; CMT2, CMT3 are protected for RX23W.
+*         : 31.08.2020 4.70    Fixed warning when using RI600V4 with device has 2 CMT channels
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -66,14 +69,19 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Define the number of CMT channels based on MCU type. */
 #if defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX113) || defined(BSP_MCU_RX71_ALL)    || \
-    defined(BSP_MCU_RX231)    || defined(BSP_MCU_RX23_ALL) || defined(BSP_MCU_RX24_ALL) || \
-    defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66_ALL) || defined(BSP_MCU_RX72_ALL)
+    defined(BSP_MCU_RX231)    || defined(BSP_MCU_RX230) || defined(BSP_MCU_RX23W) || defined(BSP_MCU_RX23T)    ||\
+    defined(BSP_MCU_RX24_ALL) || defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66_ALL) || defined(BSP_MCU_RX72_ALL)
     #define CMT_RX_NUM_CHANNELS        (4)
-#elif defined(BSP_MCU_RX111)  || defined(BSP_MCU_RX110)    || defined(BSP_MCU_RX130)  || defined(BSP_MCU_RX13T)
+#elif defined(BSP_MCU_RX111)  || defined(BSP_MCU_RX110)    || defined(BSP_MCU_RX130)  || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX23E_A)
     #define CMT_RX_NUM_CHANNELS        (2)
 #else
     #error "Error! Number of channels for this MCU is not defined in r_cmt_rx.c"
 #endif
+
+#if defined(BSP_MCU_RX23W)
+#undef CMT_RX_NUM_CHANNELS
+#define CMT_RX_NUM_CHANNELS (2)
+#endif /* BSP_MCU_RX23W */
 
 /* Max number of ticks for counter without overflowing/underflowing. */
 #define CMT_RX_MAX_TIMER_TICKS         (0x10000)
@@ -81,7 +89,7 @@ Macro definitions
 /* Starting with RX63x MCUs, there are 2 peripheral clocks: PCLKA and PCLKB. PCLKA is only used by the Ethernet block.
    This means that PCLKB would match functionality of PCLK in RX62x devices as far as the CMT is concerned. */
 #if defined(BSP_MCU_RX11_ALL) || defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71_ALL) || defined(BSP_MCU_RX113)    || \
-    defined(BSP_MCU_RX231)    || defined(BSP_MCU_RX23_ALL) || defined(BSP_MCU_RX13_ALL) || defined(BSP_MCU_RX24_ALL) || \
+    defined(BSP_MCU_RX23_ALL) || defined(BSP_MCU_RX13_ALL) || defined(BSP_MCU_RX24_ALL) || \
     defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66_ALL) || defined(BSP_MCU_RX72_ALL)
     #define CMT_PCLK_HZ                 (BSP_PCLKB_HZ)
 #else
@@ -89,7 +97,7 @@ Macro definitions
 #endif
 
 /* Which MCUs have register protection. */
-#if defined(BSP_MCU_RX11_ALL) || defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71_ALL) || defined(BSP_MCU_RX231)    || \
+#if defined(BSP_MCU_RX11_ALL) || defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71_ALL) || \
     defined(BSP_MCU_RX23_ALL) || defined(BSP_MCU_RX13_ALL) || defined(BSP_MCU_RX24_ALL) || defined(BSP_MCU_RX65_ALL) || \
     defined(BSP_MCU_RX66_ALL) || defined(BSP_MCU_RX72_ALL)
     #define CMT_REG_PROTECT             (1)
@@ -200,7 +208,24 @@ static cmt_modes_t g_cmt_modes[CMT_RX_NUM_CHANNELS];
 static const uint32_t g_cmt_clock_dividers[] = { 8, 32, 128, 512 };
 
 /* Array that holds user's callback functions. */
+#if BSP_CFG_RTOS_USED == 0      /* Non-OS */
 static void  (* g_cmt_callbacks[CMT_RX_NUM_CHANNELS])(void * pdata);
+#elif BSP_CFG_RTOS_USED == 1    /* FreeRTOS */
+static void  (* g_cmt_callbacks[CMT_RX_NUM_CHANNELS])(void * pdata);
+#elif BSP_CFG_RTOS_USED == 2    /* SEGGER embOS */
+#elif BSP_CFG_RTOS_USED == 3    /* Micrium MicroC/OS */
+#elif BSP_CFG_RTOS_USED == 4    /* Renesas RI600V4 & RI600PX */
+    #if CMT_RX_NUM_CHANNELS == 2
+        #if ((BSP_CFG_RTOS_SYSTEM_TIMER != 0 && _RI_TRACE_TIMER != 0) ||\
+            (BSP_CFG_RTOS_SYSTEM_TIMER != 1 && _RI_TRACE_TIMER != 1))
+static void  (* g_cmt_callbacks[CMT_RX_NUM_CHANNELS])(void * pdata);
+        #endif
+    #else
+            static void  (* g_cmt_callbacks[CMT_RX_NUM_CHANNELS])(void * pdata);
+    #endif
+#else
+            static void  (* g_cmt_callbacks[CMT_RX_NUM_CHANNELS])(void * pdata);
+#endif
 
 /* Internal functions. */
 static bool cmt_lock_state(void);
@@ -212,7 +237,24 @@ static void cmt_counter_start(uint32_t channel);
 static void cmt_counter_start_priority(uint32_t channel, cmt_priority_t priority);
 static void cmt_counter_stop(uint32_t channel);
 static bool cmt_setup_channel(uint32_t channel, uint32_t frequency_hz);
+#if BSP_CFG_RTOS_USED == 0      /* Non-OS */
 static void cmt_isr_common(uint32_t channel);
+#elif BSP_CFG_RTOS_USED == 1    /* FreeRTOS */
+static void cmt_isr_common(uint32_t channel);
+#elif BSP_CFG_RTOS_USED == 2    /* SEGGER embOS */
+#elif BSP_CFG_RTOS_USED == 3    /* Micrium MicroC/OS */
+#elif BSP_CFG_RTOS_USED == 4    /* Renesas RI600V4 & RI600PX */
+    #if CMT_RX_NUM_CHANNELS == 2
+        #if ((BSP_CFG_RTOS_SYSTEM_TIMER != 0 && _RI_TRACE_TIMER != 0) ||\
+            (BSP_CFG_RTOS_SYSTEM_TIMER != 1 && _RI_TRACE_TIMER != 1))
+            static void cmt_isr_common(uint32_t channel);
+        #endif
+    #else
+        static void cmt_isr_common(uint32_t channel);
+    #endif
+#else
+static void cmt_isr_common(uint32_t channel);
+#endif
 static bool cmt_create(uint32_t frequency_hz, void (* callback)(void * pdata), cmt_modes_t mode, uint32_t * channel);
 static bool cmt_create_priority(uint32_t frequency_hz, void (* callback)(void * pdata), cmt_modes_t mode, uint32_t channel, cmt_priority_t priority);
 
@@ -388,7 +430,8 @@ bool R_CMT_Stop (uint32_t channel)
     if (channel >= CMT_RX_NUM_CHANNELS)
 #endif/* BSP_CFG_RTOS_USED */
     {
-        /* Invalid channel number was used. */
+        /* Invalid channel number was used.*/
+        /*In case using RX23W, Channel 2 and 3 are reserved by BLE FIT modules v.1.00*/
         return false;
     }
 
@@ -857,7 +900,25 @@ static bool cmt_create (uint32_t frequency_hz, void (* callback)(void * pdata), 
             g_cmt_modes[*channel] = mode;
     
             /* Save callback function to be used. */
+#if BSP_CFG_RTOS_USED == 0      /* Non-OS */
             g_cmt_callbacks[*channel] = callback;
+#elif BSP_CFG_RTOS_USED == 1        /* FreeRTOS */
+            g_cmt_callbacks[*channel] = callback;
+#elif BSP_CFG_RTOS_USED == 2    /* SEGGER embOS */
+#elif BSP_CFG_RTOS_USED == 3    /* Micrium MicroC/OS */
+#elif BSP_CFG_RTOS_USED == 4    /* Renesas RI600V4 & RI600PX */
+    #if CMT_RX_NUM_CHANNELS == 2
+        #if ((BSP_CFG_RTOS_SYSTEM_TIMER != 0 && _RI_TRACE_TIMER != 0) ||\
+            (BSP_CFG_RTOS_SYSTEM_TIMER != 1 && _RI_TRACE_TIMER != 1))
+            g_cmt_callbacks[*channel] = callback;
+        #endif
+    #else
+            g_cmt_callbacks[*channel] = callback;
+    #endif
+#else
+            g_cmt_callbacks[*channel] = callback;
+#endif
+
     
             /* Start channel counting. */
             cmt_counter_start(*channel);
@@ -925,7 +986,24 @@ static bool cmt_create_priority (uint32_t frequency_hz, void (* callback)(void *
             g_cmt_modes[channel] = mode;
 
             /* Save callback function to be used. */
+#if BSP_CFG_RTOS_USED == 0      /* Non-OS */
             g_cmt_callbacks[channel] = callback;
+#elif BSP_CFG_RTOS_USED == 1        /* FreeRTOS */
+            g_cmt_callbacks[channel] = callback;
+#elif BSP_CFG_RTOS_USED == 2    /* SEGGER embOS */
+#elif BSP_CFG_RTOS_USED == 3    /* Micrium MicroC/OS */
+#elif BSP_CFG_RTOS_USED == 4    /* Renesas RI600V4 & RI600PX */
+    #if CMT_RX_NUM_CHANNELS == 2
+        #if ((BSP_CFG_RTOS_SYSTEM_TIMER != 0 && _RI_TRACE_TIMER != 0) ||\
+            (BSP_CFG_RTOS_SYSTEM_TIMER != 1 && _RI_TRACE_TIMER != 1))
+            g_cmt_callbacks[channel] = callback;
+        #endif
+    #else
+            g_cmt_callbacks[channel] = callback;
+    #endif
+#else
+            g_cmt_callbacks[channel] = callback;
+#endif
 
             /* Start channel counting. */
             cmt_counter_start_priority(channel, priority);
@@ -1519,6 +1597,7 @@ uint32_t R_CMT_GetVersion (void)
 *                    Which channel this is for.
 * Return Value : none
 ***********************************************************************************************************************/
+#if BSP_CFG_RTOS_USED == 0      /* Non-OS */
 R_BSP_PRAGMA_STATIC_INLINE(cmt_isr_common)
 void cmt_isr_common (uint32_t channel)
 {
@@ -1535,6 +1614,86 @@ void cmt_isr_common (uint32_t channel)
         g_cmt_callbacks[channel]((void *)&channel);
     }
 }
+/* End of function cmt_isr_common */
+#elif BSP_CFG_RTOS_USED == 1    /* FreeRTOS */
+R_BSP_PRAGMA_STATIC_INLINE(cmt_isr_common)
+void cmt_isr_common (uint32_t channel)
+{
+    /* If this is one-shot mode then stop timer. */
+    if (CMT_RX_MODE_ONE_SHOT == g_cmt_modes[channel])
+    {
+        R_CMT_Stop(channel);
+    }
+
+    /* Check for valid callback pointer before calling it. */
+    if ((NULL != g_cmt_callbacks[channel]) && ((uint32_t)FIT_NO_FUNC != (uint32_t)g_cmt_callbacks[channel]))
+    {
+        /* Valid callback found, jump to it. */
+        g_cmt_callbacks[channel]((void *)&channel);
+    }
+}
+/* End of function cmt_isr_common */
+#elif BSP_CFG_RTOS_USED == 2    /* SEGGER embOS */
+#elif BSP_CFG_RTOS_USED == 3    /* Micrium MicroC/OS */
+#elif BSP_CFG_RTOS_USED == 4    /* Renesas RI600V4 & RI600PX */
+    #if CMT_RX_NUM_CHANNELS == 2
+        #if ((BSP_CFG_RTOS_SYSTEM_TIMER != 0 && _RI_TRACE_TIMER != 0) ||\
+            (BSP_CFG_RTOS_SYSTEM_TIMER != 1 && _RI_TRACE_TIMER != 1))
+            R_BSP_PRAGMA_STATIC_INLINE(cmt_isr_common)
+            void cmt_isr_common (uint32_t channel)
+            {
+                /* If this is one-shot mode then stop timer. */
+                if (CMT_RX_MODE_ONE_SHOT == g_cmt_modes[channel])
+                {
+                    R_CMT_Stop(channel);
+                }
+
+                /* Check for valid callback pointer before calling it. */
+                if ((NULL != g_cmt_callbacks[channel]) && ((uint32_t)FIT_NO_FUNC != (uint32_t)g_cmt_callbacks[channel]))
+                {
+                    /* Valid callback found, jump to it. */
+                    g_cmt_callbacks[channel]((void *)&channel);
+                }
+            }
+            /* End of function cmt_isr_common */
+        #endif
+    #else
+        R_BSP_PRAGMA_STATIC_INLINE(cmt_isr_common)
+        void cmt_isr_common (uint32_t channel)
+        {
+            /* If this is one-shot mode then stop timer. */
+            if (CMT_RX_MODE_ONE_SHOT == g_cmt_modes[channel])
+            {
+                R_CMT_Stop(channel);
+            }
+
+            /* Check for valid callback pointer before calling it. */
+            if ((NULL != g_cmt_callbacks[channel]) && ((uint32_t)FIT_NO_FUNC != (uint32_t)g_cmt_callbacks[channel]))
+            {
+                /* Valid callback found, jump to it. */
+                g_cmt_callbacks[channel]((void *)&channel);
+            }
+        }
+        /* End of function cmt_isr_common */
+    #endif /* End of  CMT_RX_NUM_CHANNELS */
+#else /* Non-OS & others */
+    R_BSP_PRAGMA_STATIC_INLINE(cmt_isr_common)
+    void cmt_isr_common (uint32_t channel)
+    {
+        /* If this is one-shot mode then stop timer. */
+        if (CMT_RX_MODE_ONE_SHOT == g_cmt_modes[channel])
+        {
+            R_CMT_Stop(channel);
+        }
+
+        /* Check for valid callback pointer before calling it. */
+        if ((NULL != g_cmt_callbacks[channel]) && ((uint32_t)FIT_NO_FUNC != (uint32_t)g_cmt_callbacks[channel]))
+        {
+            /* Valid callback found, jump to it. */
+            g_cmt_callbacks[channel]((void *)&channel);
+        }
+    }
+#endif /* BSP_CFG_RTOS_USED */
 /* End of function cmt_isr_common */
 
 /***********************************************************************************************************************

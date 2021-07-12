@@ -19,11 +19,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2008(2009-2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2008(2009-2020) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_eeprom_spi_private.h
-* Version      : 3.00
+* Version      : 3.02
 * Description  : EEPROM driver private header file
 *************************************************************************************************/
 /************************************************************************************************
@@ -43,6 +43,7 @@
 *              : 30.01.2015 2.31     Added RX71M.
 *              : 29.05.2015 2.32     Added RX231 and RX230.
 *              : 21.12.2018 3.00     Delete r_eeprom_spi_drvif_dev0.c and r_eeprom_spi_drvif_dev1.c related statement
+*              : 10.12.2020 3.02     Modified the header file name in the comment.
 *************************************************************************************************/
 #ifndef __EEPROM_SPI_PRIVATE_H__
 #define __EEPROM_SPI_PRIVATE_H__
@@ -249,7 +250,7 @@ eeprom_status_t r_eeprom_spi_drvif_rx_data(uint8_t devno, uint32_t rxcnt, uint8_
 void            r_eeprom_spi_drvif_1ms_interval(void);
 eeprom_status_t r_eeprom_spi_drvif_set_loghdladdress(uint32_t user_long_que);
 
-/* r_eeprom_spi_dev_port.c */
+/* r_eeprom_spi_dev_port_gpio.c or r_eeprom_spi_dev_port_iodefine.c */
 void            r_eeprom_spi_cs_init(uint8_t devno);
 void            r_eeprom_spi_cs_reset(uint8_t devno);
 void            r_eeprom_spi_set_cs(uint8_t devno, uint8_t lv);

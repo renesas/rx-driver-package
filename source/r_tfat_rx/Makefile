@@ -1,6 +1,6 @@
 MODULE_NAME = 	r_tfat_rx
-VERSION = 		4.00
-MDF =			NOT_SUPPORTED
+VERSION = 		4.02
+MDF = NOT_SUPPORTED
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules

@@ -5,13 +5,13 @@ r_vbatt_rx
 
 Document Number
 ---------------
-R01AN2796JJ0104
-R01AN2796EJ0104
+R01AN2796JJ0105
+R01AN2796EJ0105
 
 
 Version
 -------
-v1.04
+v1.05
 
 
 Overview
@@ -69,7 +69,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp     v5.20
+* r_bsp     v5.50
 
 
 How to add to your project
@@ -112,14 +112,14 @@ and support functions. The r_bsp package is easily configured through the platfo
 which is located in the r_bsp folder. To configure the r_bsppackage, open up platform.h 
 and uncomment the #include for the board you are using.
 For example, to run the demo on a RSKRX231 board, the user would uncomment the #include for 
-Åe./board/rskrx231/r_bsp.hÅf macro and make sure all other board #includes are commented out.
+'./board/rskrx231/r_bsp.h' macro and make sure all other board #includes are commented out.
 
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.01.00
-* GCC for Renesas RX 4.8.4.201801
-* IAR C/C++ Compiler for Renesas RX version 4.10.1
+* Renesas RX v3.02.00
+* GCC for Renesas RX 8.03.00.201904
+* IAR C/C++ Compiler for Renesas RX version 4.13.1
 
 
 File Structure
@@ -130,10 +130,10 @@ r_vbatt_rx
 |
 +---doc
 |   +---en
-|   |   r01an2796ej0104-rx-vbatt.pdf
+|   |   r01an2796ej0105-rx-vbatt.pdf
 |   |
 |   +---ja
-|       r01an2796jj0104-rx-vbatt.pdf
+|       r01an2796jj0105-rx-vbatt.pdf
 |
 +---ref
 |       r_vbatt_config_reference.h

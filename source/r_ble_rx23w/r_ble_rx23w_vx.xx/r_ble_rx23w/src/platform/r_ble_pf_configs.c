@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -175,11 +175,11 @@ BLE_SECTION_C(2) const uint16_t g_ble_sync_set_max = BLE_CFG_RF_SYNC_SET_MAX;
 /**** LL connection entry area (1byte) ****/
 /******************************************/
 #if (BLE_CFG_LIB_TYPE == 1)
-#define BLE_CNTL_CONN_ENT         (328)
+#define BLE_CNTL_CONN_ENT         (308)
 #elif (BLE_CFG_LIB_TYPE == 2)
-#define BLE_CNTL_CONN_ENT         (316)
+#define BLE_CNTL_CONN_ENT         (264)
 #else /* (BLE_CFG_LIB_TYPE == x) */
-#define BLE_CNTL_CONN_ENT         (336)
+#define BLE_CNTL_CONN_ENT         (316)
 #endif /* (BLE_CFG_LIB_TYPE == x) */
 #define BLE_CNTL_CONN_ENT_MAX                       \
 (                                                   \
@@ -190,7 +190,7 @@ BLE_SECTION_C(2) const uint16_t g_ble_sync_set_max = BLE_CFG_RF_SYNC_SET_MAX;
 /******************************************/
 /**** LL Advertising set area (1byte)  ****/
 /******************************************/
-#define BLE_CNTL_ADV_SET          (152)
+#define BLE_CNTL_ADV_SET          (156)
 #define BLE_CNTL_ADV_SET_MAX                        \
 (                                                   \
     (BLE_CNTL_ADV_SET * BLE_CFG_RF_ADV_SET_MAX) +   \
@@ -229,11 +229,13 @@ BLE_SECTION_C(4) const uint32_t  g_ble_dev_data_cf_addr = BLE_DEV_DATA_CF_ADDR;
 BLE_SECTION_C(4) const uint32_t  g_ble_dev_data_cf_addr = 0U;
 #endif /* (BLE_CFG_DEV_DATA_CF_BLOCK >= 0) && (BLE_CFG_DEV_DATA_CF_BLOCK <= 255) */
 
+#if (BLE_CFG_EN_SEC_DATA != 0)
 #if ((BLE_CFG_DEV_DATA_DF_BLOCK  >= 0) && (BLE_CFG_DEV_DATA_DF_BLOCK  <= 7)) && \
     ((BLE_CFG_SECD_DATA_DF_BLOCK >= 0) && (BLE_CFG_SECD_DATA_DF_BLOCK <= 7)) && \
     (BLE_CFG_DEV_DATA_DF_BLOCK == BLE_CFG_SECD_DATA_DF_BLOCK)
 #error "error: The same block number is specified for BLE_CFG_DEV_DATA_DF_BLOCK and BLE_CFG_SECD_DATA_DF_BLOCK"
 #endif /* (BLE_CFG_DEV_DATA_DF_BLOCK == BLE_CFG_SECD_DATA_DF_BLOCK) */
+#endif /* (BLE_CFG_EN_SEC_DATA != 0) */
 
 #if (BLE_CFG_DEV_DATA_DF_BLOCK >= 0) && (BLE_CFG_DEV_DATA_DF_BLOCK <= 7)
 BLE_SECTION_C(4) const uint32_t  g_ble_dev_data_df_addr = BLE_DEV_DATA_DF_ADDR;

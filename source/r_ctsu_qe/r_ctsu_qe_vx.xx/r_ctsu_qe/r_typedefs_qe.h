@@ -27,9 +27,14 @@
 /***********************************************************************************************************************
 * History      : DD.MM.YYYY Version Description
 *              : 04.10.2018 1.00    First Release
+*              : 04.06.2019 1.10    Added error codes QE_ERR_OT_xxx, QE_ERR_ABNORMAL_TSCAP, QE_ERR_SENSOR_OVERFLOW,
+*                                     QE_ERR_SENSOR_SATURATION, and QE_ERR_UNSUPPORTED_CLK_CFG.
+*                                   Added offset_tuning flag to ctsu_status_t.
+*                                   Modified port_cfg_t for GCC/IAR.
+*                                   Modified p_port_cfg to be "const".
 ***********************************************************************************************************************/
-#ifndef QE_TYPEDEFS_H_FILE
-#define QE_TYPEDEFS_H_FILE
+#ifndef R_TYPEDEFS_QE_H
+#define R_TYPEDEFS_QE_H
 
 /***********************************************************************************************************************
 * Includes
@@ -43,27 +48,27 @@
 #define QE_MAX_METHODS          (8)
 #define QE_CALIB_TIME           (4)
 #define QE_SLIDER_MAX_ELEMENTS  (10)
-#define QE_WHEEL_MAX_ELEMENTS   QE_SLIDER_MAX_ELEMENTS
+#define QE_WHEEL_MAX_ELEMENTS   (QE_SLIDER_MAX_ELEMENTS)
 #define QE_UNUSED_CHAN          (0xFF)
 #define QE_CUR_METHOD           (0xFF)
 
 /* 1 channel measurement time 0.5ms table */
-#define _19_2UA     (40960)
-#define _18_0UA     (38400)
-#define _16_8UA     (35840)
-#define _15_6UA     (33280)
-#define _14_4UA     (30720)
-#define _13_2UA     (28160)
-#define _12_0UA     (25600)
-#define _10_8UA     (23040)
-#define _09_6UA     (20480)
-#define _08_4UA     (17920)
-#define _07_2UA     (15360)
-#define _06_0UA     (12800)
-#define _04_8UA     (10240)
-#define _03_6UA     (7680)
-#define _02_4UA     (5120)
-#define _01_2UA     (2560)
+#define QE_19_2UA   (40960)
+#define QE_18_0UA   (38400)
+#define QE_16_8UA   (35840)
+#define QE_15_6UA   (33280)
+#define QE_14_4UA   (30720)
+#define QE_13_2UA   (28160)
+#define QE_12_0UA   (25600)
+#define QE_10_8UA   (23040)
+#define QE_09_6UA   (20480)
+#define QE_08_4UA   (17920)
+#define QE_07_2UA   (15360)
+#define QE_06_0UA   (12800)
+#define QE_04_8UA   (10240)
+#define QE_03_6UA   (7680)
+#define QE_02_4UA   (5120)
+#define QE_01_2UA   (2560)
 
 /* TS sensor numbers */
 #define QE_TS0      (0)
@@ -129,7 +134,16 @@ typedef enum e_qe_err
     QE_ERR_BUSY,
     QE_ERR_ALREADY_OPEN,
     QE_ERR_CHAN_NOT_FOUND,
-    QE_ERR_TUNING_IN_PROGRESS,
+    QE_ERR_UNSUPPORTED_CLK_CFG, // unsupported clock configuration
+    QE_ERR_SENSOR_SATURATION,   // sensor value detected beyond linear portion of correction curve
+    QE_ERR_TUNING_IN_PROGRESS,  // offset tuning for method not complete
+    QE_ERR_ABNORMAL_TSCAP,      // abnormal TSCAP detected during scan
+    QE_ERR_SENSOR_OVERFLOW,     // sensor overflow detected during scan
+    QE_ERR_OT_MAX_OFFSET,       // CTSU SO0 offset reached max value and sensor offset tuning incomplete
+    QE_ERR_OT_MIN_OFFSET,       // CTSU SO0 offset reached min value and sensor offset tuning incomplete
+    QE_ERR_OT_WINDOW_SIZE,      // offset tuning window too small for sensor to establish a reference count
+    QE_ERR_OT_MAX_ATTEMPTS,     // 1+ sensors still not tuned for method
+    QE_ERR_OT_INCOMPLETE,       // 1+ sensors still not tuned for method
     QE_ERR_TRIGGER_TYPE,        // function not available for trigger type
 } qe_err_t;
 
@@ -154,9 +168,13 @@ typedef struct st_elem_ch
 /* Port Configuration */
 typedef struct st_port_cfg
 {
-    volatile __evenaccess unsigned char *p_pmr;         // ptr to PMR register
-    uint8_t                             ts_board_mask;  // mask for all TSs utilized on target board
-    uint8_t                             ts_method_mask; // mask for TSs used with this method
+#if (!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5))
+    volatile __evenaccess unsigned char *p_pmr;
+#else
+    volatile uint8_t R_BSP_EVENACCESS_SFR   *p_pmr;         // ptr to PMR register
+#endif
+    uint8_t                                 ts_board_mask;  // mask for all TSs utilized on target board
+    uint8_t                                 ts_method_mask; // mask for TSs used with this method
 } port_cfg_t;
 
 
@@ -166,12 +184,13 @@ typedef union
     uint8_t         byte;                   // flag data
     struct
     {
-        uint8_t     sens_over       : 1;    // sensor counter overflow flag
-        uint8_t     ref_over        : 1;    // reference counter overflow flag
-        uint8_t     icomp_error     : 1;    // TSCAP voltage error
-        uint8_t     ctsu_measure    : 1;    // CTSU measurement on flag (correction completed)
-        uint8_t     data_update     : 1;    // data updated (scan complete) flag
-        uint8_t     dummy           : 3;    // 7-5 dummy
+        uint8_t     sens_over        : 1;   // sensor counter overflow flag
+        uint8_t     ref_over         : 1;   // reference counter overflow flag
+        uint8_t     icomp_error      : 1;   // TSCAP voltage error
+        uint8_t     ctsu_measure     : 1;   // CTSU measurement-on flag (correction completed)
+        uint8_t     data_update      : 1;   // 1 = last scan completed successfully
+        uint8_t     offset_tuning    : 1;   // 1 = Touch offset tuning in progress
+        uint8_t     dummy            : 2;
     } flag;
 } ctsu_status_t;
 
@@ -197,7 +216,7 @@ typedef struct st_ctsu_cfg
     elem_ch_t const *p_elem_ch;         // ptr to element channel array
     elem_regs_t     *p_elem_regs;       // ptr to element register configuration array
     uint16_t        *p_scan_buf;        // ptr to buffer to hold scan data
-    port_cfg_t      *p_port_cfg;        // ptr to port configuration array
+    port_cfg_t const *p_port_cfg;       // ptr to port configuration array
     uint8_t         num_elements;       // number of elements in scan configuration
     uint8_t         num_ports;          // number of port configurations
     uint8_t         method;             // scan configuration ID
@@ -257,11 +276,11 @@ typedef struct st_touch_cfg
     uint8_t         num_buttons;
     uint8_t         num_sliders;
     uint8_t         num_wheels;
-    uint8_t         touch_on;           // 0-255 The cumulative number of determinations of [ON]; SELF_TOUCH_ON
-    uint8_t         touch_off;          // 0-255 The cumulative number of determinations of [OFF]; SELF_TOUCH_OFF
-    uint8_t         drift_enable;       // Drift function enable; SELF_DRIFT_ENABLE
-    uint16_t        drift_freq;         // 0-65535; SELF_DRIFT_FREQUENCY
-    uint16_t        max_on_time;        // 0-65535 Maximum continuous [ON], 0:no use; SELF_MSA
+    uint8_t         touch_on;           // 0-255; touch "debounce" count
+    uint8_t         touch_off;          // 0-255; touch stopped "debounce" count
+    uint8_t         drift_enable;       // drift function enable
+    uint16_t        drift_freq;         // 0-65535 (number of scans)
+    uint16_t        max_on_time;        // 0-65535 max continuous scan cnt (MSA); 0=check is off
 } touch_cfg_t;
 
 
@@ -269,4 +288,4 @@ typedef struct st_touch_cfg
 * Global functions
 ***********************************************************************************************************************/
 
-#endif // QE_TYPEDEFS_H_FILE
+#endif /* R_TYPEDEFS_QE_H */

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : qe_common.c
@@ -22,7 +22,9 @@
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * History      : DD.MM.YYYY Version Description
-*              :            1.00    First Release
+*              : 18.09.2018 1.00    First Release
+*              : 21.01.2019 1.01    Correspond to GCC Compiler
+*              : 18.04.2019 1.02    Change the Minor Format
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -57,6 +59,15 @@ External global variables and functions
 Private global variables and functions
 ***********************************************************************************************************************/
 
+void qetouch_dummy_nop( void )
+{
+#if (!defined(R_BSP_VERSION_MAJOR) || (R_BSP_VERSION_MAJOR < 5))
+    nop();
+#else
+    R_BSP_NOP();
+#endif
+} /* End of function qetouch_dummy_nop() */
+
 
 /***********************************************************************************************************************
 * Function Name: ctsu_sensor_data_address_set
@@ -66,8 +77,8 @@ Private global variables and functions
 ***********************************************************************************************************************/
 void ctsu_sensor_data_address_set( void )
 {
-    nop();
-}
+    qetouch_dummy_nop();
+} /* End of function ctsu_sensor_data_address_set() */
 
 
 /***********************************************************************************************************************
@@ -78,8 +89,8 @@ void ctsu_sensor_data_address_set( void )
 ***********************************************************************************************************************/
 void touch_parameter_address_set( void )
 {
-    nop();
-}
+    qetouch_dummy_nop();
+} /* End of function touch_parameter_address_set() */
 
 
 /***********************************************************************************************************************
@@ -91,7 +102,5 @@ void touch_parameter_address_set( void )
 ***********************************************************************************************************************/
 void qetouch_timer_callback(void *p_args)
 {
-    nop();
-}
-
-
+    qetouch_dummy_nop();
+} /* End of function qetouch_timer_callback() */

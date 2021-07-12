@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014(2015-2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014(2015-2020) Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_tfat_driver_rx_if.h
@@ -35,6 +35,8 @@
 *              : 08.08.2019 2.00     Added support for FreeRTOS and 
 *                                    Renesas uITRON (RI600V4).
 *                                    Added support for GNUC and ICCRX.
+*              : 10.06.2020 2.10     Added support MMC Firmware and 
+*                                    FLASH Firmware.
 *******************************************************************************/
 #ifndef _R_TFAT_DRIVER_RX_IF_H_
 #define _R_TFAT_DRIVER_RX_IF_H_
@@ -51,11 +53,12 @@ Includes   <System Includes> , "Project Includes"
 Macro definitions
 *******************************************************************************/
 /* used memory define */
-#define TFAT_CTRL_NONE    0
-#define TFAT_CTRL_USB     1
-#define TFAT_CTRL_SDMEM   2
-//#define TFAT_CTRL_MMC     3
-#define TFAT_CTRL_USB_MINI     4
+#define TFAT_CTRL_NONE          0
+#define TFAT_CTRL_USB           1
+#define TFAT_CTRL_SDMEM         2
+#define TFAT_CTRL_MMC           3
+#define TFAT_CTRL_USB_MINI      4
+#define TFAT_CTRL_SERIAL_FLASH  5
 
 /*******************************************************************************
 Typedef definitions
@@ -80,7 +83,7 @@ typedef enum
 Exported global functions (to be accessed by other files)
 *******************************************************************************/
 extern DRESULT drv_change_alloc(TFAT_DRV_NUM tfat_drv, uint8_t dev_type, uint8_t dev_drv_num );
-
+void disk_1ms_interval (void);
 #endif    /* _R_TFAT_DRIVER_RX_IF_H_ */
 
 /*******************************************************************************

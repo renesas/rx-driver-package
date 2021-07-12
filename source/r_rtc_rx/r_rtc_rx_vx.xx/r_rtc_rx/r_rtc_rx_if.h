@@ -47,6 +47,8 @@
 *           30.07.2019 2.77    Added support for RX72M.
 *           22.11.2019 2.78    Added support for RX66N.
 *                              Added support for RX72N.
+*           01.06.2020 2.79    Changed Minor version to 2.79.
+*           30.11.2020 2.80    Changed Minor version to 2.80 for e2studio 2020-10 support.
 ***********************************************************************************************************************/
 
 #ifndef RTC_RX_INTERFACE_HEADER_FILE
@@ -63,7 +65,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
 #define RTC_RX_VERSION_MAJOR        (2)
-#define RTC_RX_VERSION_MINOR        (78)
+#define RTC_RX_VERSION_MINOR        (80)
 
 /***********************************************************************************************************************
 BSP version detection

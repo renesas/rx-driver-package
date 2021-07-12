@@ -10,12 +10,19 @@
 #ifndef _H_MS_MODEL_STATES_
 #define _H_MS_MODEL_STATES_
 
+/**
+ * \defgroup mesh_model_states Model States
+ * \ingroup mesh_models_block
+ * \{
+ */
 
 /* --------------------------------------------- Global Definitions */
 
-
 /* --------------------------------------------- Data Types/ Structures */
-/** Model State Type Defines */
+/**
+ * \name Model State Type Defines
+ * \{
+ */
 #define MS_STATE_GENERIC_ONOFF_T                      0
 #define MS_STATE_GENERIC_LEVEL_T                      1
 #define MS_STATE_GENERIC_DEFAULT_TRANSITION_TIME_T    2
@@ -91,10 +98,21 @@
 
 #define MS_MAX_NUM_OF_STATES                          (MS_STATE_MOVE_LEVEL_T + 1)
 
-/* Additional supporting structure type defines */
+/** \} */
+
+/**
+ * \name Additional supporting structure type defines
+ * \{
+ */
 #define MS_EXT_TID_AND_TRANSITION_STRUCT_T            128
 #define MS_EXT_STATUS_STRUCT_T                        129
 #define MS_STATE_SENSOR_SERIES_T                      130
+/** \} */
+
+/**
+ * \name Mesh Model State Structures
+ * \{
+ */
 
 /**
  * Generic OnOff state is a Boolean value that represents the state of an
@@ -1397,5 +1415,10 @@ typedef struct _MS_ACCESS_STATE_TRANSITION_TYPE
 
 }MS_ACCESS_STATE_TRANSITION_TYPE;
 
+/** \} */
+
 /* --------------------------------------------- Function */
+
+/** \} */
+
 #endif /*_H_MS_MODEL_STATES_ */

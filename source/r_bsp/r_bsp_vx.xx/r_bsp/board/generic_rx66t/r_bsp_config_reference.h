@@ -34,13 +34,22 @@
 *                                Added the following macro definition.
 *                                 - BSP_CFG_RTOS_SYSTEM_TIMER
 *         : 08.10.2019 2.02      Added the following macro definition.
-*                                - BSP_CFG_SWINT_UNIT1_ENABLE
-*                                - BSP_CFG_SWINT_UNIT2_ENABLE
-*                                - BSP_CFG_SWINT_TASK_BUFFER_NUMBER
-*                                - BSP_CFG_SWINT_IPR_INITIAL_VALUE
+*                                 - BSP_CFG_SWINT_UNIT1_ENABLE
+*                                 - BSP_CFG_SWINT_UNIT2_ENABLE
+*                                 - BSP_CFG_SWINT_TASK_BUFFER_NUMBER
+*                                 - BSP_CFG_SWINT_IPR_INITIAL_VALUE
 *                                Modified comment for added support of Renesas RTOS (RI600V4 or RI600PX).
 *                                Added the following macro definition.
-*                                - BSP_CFG_RENESAS_RTOS_USED
+*                                 - BSP_CFG_RENESAS_RTOS_USED
+*         : 31.07.2020 2.03      Modified comment.
+*         : 20.11.2020 2.04      Added the following macro definition.
+*                                 - BSP_CFG_ID_CODE_ENABLE
+*         : 29.01.2021 2.05      Added the following macro definition.
+*                                 - BSP_CFG_SCI_UART_TERMINAL_ENABLE
+*                                 - BSP_CFG_SCI_UART_TERMINAL_CHANNEL
+*                                 - BSP_CFG_SCI_UART_TERMINAL_BITRATE
+*                                 - BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY
+*         : 26.02.2021 2.06      Added a comment for Azure RTOS to BSP_CFG_RTOS_USED.
 ***********************************************************************************************************************/
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
 #define R_BSP_CONFIG_REF_HEADER_FILE
@@ -210,6 +219,12 @@ Configuration Options
 #define BSP_CFG_ID_CODE_LONG_3          (0xFFFFFFFF)
 /* 4th ID Code section, address 0x0012005C. From MSB to LSB: ID code 16, ID code 15, ID code 14, ID code 13. */
 #define BSP_CFG_ID_CODE_LONG_4          (0xFFFFFFFF)
+
+/* ID code select.
+   0 = ID code is disabled.
+   1 = ID code is enabled.
+*/
+#define BSP_CFG_ID_CODE_ENABLE          (0)
 
 /* Clock source select (CKSEL).
    0 = Low Speed On-Chip Oscillator  (LOCO)
@@ -479,7 +494,7 @@ Configuration Options
    the code flash memory by third party software. This feature is disabled by default.
    TMEF - TM Enable Flag Register
        b31:b27 Reserved (set to 1)
-       b26:b24 TMEFF  - TM Enable - 000: TM function is enabled.
+       b26:b24 TMEF   - TM Enable - 000: TM function is enabled.
                                   - 111: TM function is disabled.
        b23:b0  Reserved (set to 1)
        NOTE: If the dual bank function has not been incorporated in a device,
@@ -505,6 +520,7 @@ Configuration Options
    2 = embOS is used.(This is not available.)
    3 = MicroC_OS is used.(This is not available.)
    4 = Renesas ITRON OS (RI600V4 or RI600PX) is used.
+   5 = Azure RTOS is used.(This is not available.)
 */
 #define BSP_CFG_RTOS_USED               (0)
 
@@ -665,6 +681,25 @@ Configuration Options
          It is possible to dynamically change the IPR.
 */
 #define BSP_CFG_SWINT_IPR_INITIAL_VALUE     (0x1)
+
+/* This macro is used for serial terminal on the board selected by smart configurator.
+   0 = SCI UART Terminal is disabled.
+   1 = SCI UART Terminal is enabled.
+*/
+#define BSP_CFG_SCI_UART_TERMINAL_ENABLE         (0)
+
+/* This macro is channel number for serial terminal.
+*/
+#define BSP_CFG_SCI_UART_TERMINAL_CHANNEL        (11)
+
+/* This macro is bit-rate for serial terminal.
+*/
+#define BSP_CFG_SCI_UART_TERMINAL_BITRATE        (115200)
+
+/* This macro is interrupt priority for serial terminal.
+   0(low) - 15(high)
+*/
+#define BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY   (15)
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

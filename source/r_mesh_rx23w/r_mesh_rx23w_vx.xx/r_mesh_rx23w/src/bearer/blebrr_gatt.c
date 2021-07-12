@@ -18,22 +18,6 @@
 #include "blebrr.h"
 
 /*******************************************************************************
-* Macro definitions
-*******************************************************************************/
-/* GATT Proxy Segmentation and Reassembly related states */
-#define BLEBRR_GATT_SAR_COMPLETE_PKT        0x00
-#define BLEBRR_GATT_SAR_START_PKT           0x01
-#define BLEBRR_GATT_SAR_CONTINUE_PKT        0x02
-#define BLEBRR_GATT_SAR_END_PKT             0x03
-
-/* GATT Proxy Segmentation and Reassembly related state values */
-#define BLEBRR_GATT_SAR_INIT_STATE          0x00
-#define BLEBRR_GATT_SAR_TX_PROGRESS         0x01
-
-/* GATT PDU Size in octets */
-#define BLEBRR_GATT_PDU_SIZE                75
-
-/*******************************************************************************
 * Global Variables and Private Functions declaration
 *******************************************************************************/
 /** GATT bearer Information */
@@ -52,25 +36,25 @@ static UCHAR blebrr_gatt_mode = 0xFF;
 /***************************************************************************//**
 * @brief Sets new GATT bearer mode
 *******************************************************************************/
-void blebrr_gatt_mode_set(UCHAR flag)
+void R_MS_BRR_Set_GattMode(UCHAR mode)
 {
     /**
-     * The valid values for 'flag' are:
+     * The valid values for 'mode' are:
      *  0x00: BLEBRR_GATT_PROV_MODE  GATT Provisioning Mode
      *  0x01: BLEBRR_GATT_PROXY_MODE GATT Proxy Mode
      *  All other values are RFU.
      */
-     blebrr_gatt_mode = ((flag == BLEBRR_GATT_PROV_MODE) || (flag == BLEBRR_GATT_PROXY_MODE))?
-                        flag: 0xFF;
+     blebrr_gatt_mode =
+        ((mode == BLEBRR_GATT_PROV_MODE) || (mode == BLEBRR_GATT_PROXY_MODE)) ? mode : 0xFF;
 
      /* Notify GATT mode setting to blebrr pl */
-     blebrr_set_gattmode_pl (blebrr_gatt_mode);
+     blebrr_set_gattmode_pl(blebrr_gatt_mode);
 }
 
 /***************************************************************************//**
 * @brief Gets current GATT bearer mode
 *******************************************************************************/
-UCHAR blebrr_gatt_mode_get(void)
+UCHAR R_MS_BRR_Get_GattMode(void)
 {
     /**
      * The valid return values are:
@@ -81,25 +65,13 @@ UCHAR blebrr_gatt_mode_get(void)
    return blebrr_gatt_mode;
 }
 
-static API_RESULT blebrr_gatt_send
-                       (
-                           BRR_HANDLE * handle,
-                           UCHAR type,
-                           void * pdata,
-                           UINT16 datalen
-                       )
+static API_RESULT blebrr_gatt_send(BRR_HANDLE * handle, UCHAR  type, void * pdata, UINT16 datalen)
 {
     API_RESULT retval;
 
     MS_IGNORE_UNUSED_PARAM(type);
 
-    retval = blebrr_gatt_send_pl
-             (
-                 handle,
-                 pdata,
-                 datalen
-             );
-
+    retval = blebrr_gatt_send_pl(handle, pdata, datalen);
     if (API_SUCCESS != retval)
     {
         BLEBRR_LOG("Error - 0x%04X\n", retval);
@@ -111,12 +83,7 @@ static API_RESULT blebrr_gatt_send
 /***************************************************************************//**
 * @brief Handles packet received over GATT Bearer
 *******************************************************************************/
-API_RESULT blebrr_pl_recv_gattpacket
-           (
-               BRR_HANDLE * handle,
-               UCHAR * pdata,
-               UINT16 pdatalen
-           )
+API_RESULT blebrr_pl_recv_gattpacket(BRR_HANDLE * handle, UCHAR * pdata, UINT16 pdatalen)
 {
     if (NULL != blebrr_gatt.bearer_recv)
     {
@@ -135,13 +102,7 @@ API_RESULT blebrr_pl_recv_gattpacket
 /***************************************************************************//**
 * @brief Registers GATT Bearer with Mesh Stack
 *******************************************************************************/
-API_RESULT blebrr_pl_gatt_connection
-           (
-               BRR_HANDLE * handle,
-               UCHAR        role,
-               UCHAR        mode,
-               UINT16       mtu
-           )
+API_RESULT blebrr_pl_gatt_connection(BRR_HANDLE * handle, UCHAR role, UINT16 mtu, UCHAR mode)
 {
     MS_BUFFER buffer;
     API_RESULT retval;
@@ -185,10 +146,7 @@ API_RESULT blebrr_pl_gatt_connection
 /***************************************************************************//**
 * @brief Unregisters GATT Bearer from Mesh Stack
 *******************************************************************************/
-API_RESULT blebrr_pl_gatt_disconnection
-           (
-               BRR_HANDLE * handle
-           )
+API_RESULT blebrr_pl_gatt_disconnection(BRR_HANDLE * handle)
 {
     API_RESULT retval;
 
@@ -196,4 +154,3 @@ API_RESULT blebrr_pl_gatt_disconnection
 
     return retval;
 }
-

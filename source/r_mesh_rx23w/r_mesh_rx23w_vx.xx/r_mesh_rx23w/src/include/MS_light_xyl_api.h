@@ -20,9 +20,10 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup light_xyl_module LIGHT_XYL (Mesh Light Xyl Model)
+ * \defgroup light_xyl_module Light Xyl Model (LIGHT_XYL)
+ * \ingroup mesh_models_block
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Light Xyl Model (LIGHT_XYL) module to the Application.
  */
 
@@ -32,7 +33,7 @@
 /**
  *  \defgroup light_xyl_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
+ *  \brief This section Describes the module Notification Callback interface offered
  *  to the application
  */
 
@@ -64,14 +65,14 @@ typedef API_RESULT (* MS_LIGHT_XYL_SERVER_CB)
  * Light Xyl Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_LIGHT_XYL_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -81,6 +82,7 @@ typedef API_RESULT (* MS_LIGHT_XYL_CLIENT_CB)
 /**
  *  \defgroup light_xyl_structures Structures
  *  \{
+ *  \brief This section describes the EtherMind Mesh Light xyL Model Structures.
  */
 
 /**
@@ -266,12 +268,12 @@ typedef struct MS_light_xyl_range_status_struct
 /**
  * \defgroup light_xyl_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Light Xyl Model APIs.
+ * \brief This section describes the EtherMind Mesh Light Xyl Model APIs.
  */
 /**
- * \defgroup light_xyl_ser_api_defs Light Xyl Server API Definitions
+ * \defgroup light_xyl_ser_api_defs Light Xyl Server API
  * \{
- * This section describes the Light Xyl Server APIs.
+ * \brief This section describes the Light Xyl Server APIs.
  */
 
 /**
@@ -330,9 +332,9 @@ API_RESULT MS_light_xyl_server_state_update
 /** \} */
 
 /**
- * \defgroup light_xyl_cli_api_defs Light Xyl Client API Definitions
+ * \defgroup light_xyl_cli_api_defs Light Xyl Client API
  * \{
- * This section describes the Light Xyl Client APIs.
+ * \brief This section describes the Light Xyl Client APIs.
  */
 
 /**
@@ -394,6 +396,9 @@ API_RESULT MS_light_xyl_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
+/** \name Messsage Send
+ *  \{
+ */
 /**
  *  \brief API to get the Light xyL Lightness, Light xyL x, and Light xyL y states of an element.
  *
@@ -583,6 +588,7 @@ API_RESULT MS_light_xyl_client_send_reliable_pdu
             param,\
             0xFFFFFFFF\
         )
+/** \} */
 /** \} */
 /** \} */
 /** \} */

@@ -29,7 +29,9 @@
  *           31.10.2017 1.21    Added the demo for RX113, RX231
  *           16.11.2018 1.22    Added XML document number
  *           01.04.2019 1.23    Changed Minor version to 1.23.
-  ***********************************************************************************************************************/
+ *           10.06.2020 2.00    Added support for RX23W
+ *           30.11.2020 2.01    Changed minor version to 2.01 for e2studio 2020-10 support.
+ ***********************************************************************************************************************/
 #ifndef LPT_IF_H
 #define LPT_IF_H
 
@@ -42,8 +44,8 @@
   Macro definitions
 *******************************************************************************/
 /* Version Number of API. */
-#define LPT_VERSION_MAJOR  (1)
-#define LPT_VERSION_MINOR  (23)
+#define LPT_VERSION_MAJOR  (2)
+#define LPT_VERSION_MINOR  (01)
 
 /* Wait time for Call R_LPT_Close after Called R_LPT_Open immediately */
 #define LPT_RSTWAIT_USEC   (LPT_LPTSRCCLK_CYC)

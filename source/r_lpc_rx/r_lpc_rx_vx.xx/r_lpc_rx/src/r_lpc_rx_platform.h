@@ -26,6 +26,7 @@
  *         : 01.10.2016 1.00    First Release
  *         : 01.07.2019 1.42    Added RX23W.
  *         : 14.11.2019 2.00    Removed RX210.
+ *         : 10.06.2020 2.01    Added RX65N, RX66N, RX72M and RX72N.
  ***********************************************************************************************************************/
 #ifndef R_LPC_RX_PLATFORM_H
     #define R_LPC_RX_PLATFORM_H
@@ -50,8 +51,16 @@
         #include "./targets/rx23w/r_lpc_rx23w_if.h"
     #elif defined(BSP_MCU_RX64M)
         #include "./targets/rx64m/r_lpc_rx64m_if.h"
+    #elif defined(BSP_MCU_RX65N)
+        #include "./targets/rx65n/r_lpc_rx65n_if.h"
+    #elif defined(BSP_MCU_RX66N)
+        #include "./targets/rx66n/r_lpc_rx66n_if.h"
     #elif defined(BSP_MCU_RX71M)
         #include "./targets/rx71m/r_lpc_rx71m_if.h"
+    #elif defined(BSP_MCU_RX72M)
+        #include "./targets/rx72m/r_lpc_rx72m_if.h"
+    #elif defined(BSP_MCU_RX72N)
+        #include "./targets/rx72n/r_lpc_rx72n_if.h"
     #else
         #error "This MCU is not supported by the current r_lpc_rx module."
     #endif
