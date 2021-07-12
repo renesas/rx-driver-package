@@ -1,4 +1,4 @@
-RELEASE_TAG_COMMIT_NUMBER = f64b94dff3c76b405876da4ea77f63e068163b0a
+RELEASE_TAG_COMMIT_NUMBER = adae03371a5fcb913975d61796554ff203113265
 VERSIONS_FILE_NAME = versions.xml
 MODULE_NAME_LIST = 	r_aeropoint_rx r_ble_qe_utility r_ble_rx23w r_bsp r_byteq r_can_rx r_cmt_rx r_cmtw_rx r_comms_i2c_rx\
 					r_ctsu_qe r_dac_rx r_datfrx_rx r_dmaca_rx r_drw2d_rx r_dsmif_rx r_dtc_rx\
