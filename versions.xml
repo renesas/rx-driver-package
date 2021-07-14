@@ -1,14 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<modules rdp_version="xxxx">
-  <module>
-    <name>r_aeropoint_rx</name>
-    <version>1.00</version>
-    <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_aeropoint_rx_v1.00.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_aeropoint_rx_v1.00.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_aeropoint_rx_v1.00.mdf</url>
-    </urls>
-  </module>
+<modules rdp_version="1.25">
   <module>
     <name>r_ble_qe_utility</name>
     <version>1.10</version>
@@ -69,15 +60,6 @@
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_cmtw_rx_v2.30.xml</url>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_cmtw_rx_v2.30.mdf</url>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_cmtw_rx_v2.30_extend.mdf</url>
-    </urls>
-  </module>
-  <module>
-    <name>r_comms_i2c_rx</name>
-    <version>1.00</version>
-    <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_comms_i2c_rx_v1.00.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_comms_i2c_rx_v1.00.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_comms_i2c_rx_v1.00_extend.mdf</url>
     </urls>
   </module>
   <module>
@@ -199,15 +181,6 @@
     </urls>
   </module>
   <module>
-    <name>r_fwup</name>
-    <version>1.01</version>
-    <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_fwup_v1.01.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_fwup_v1.01.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_fwup_v1.01_extend.mdf</url>
-    </urls>
-  </module>
-  <module>
     <name>r_glcdc_rx</name>
     <version>1.50</version>
     <urls>
@@ -224,15 +197,6 @@
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_gpio_rx_v3.90.zip</url>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_gpio_rx_v3.90.xml</url>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_gpio_rx_v3.90_extend.mdf</url>
-    </urls>
-  </module>
-  <module>
-    <name>r_hs300x_rx</name>
-    <version>1.00</version>
-    <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_hs300x_rx_v1.00.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_hs300x_rx_v1.00.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_hs300x_rx_v1.00_extend.mdf</url>
     </urls>
   </module>
   <module>
@@ -846,7 +810,7 @@
     </urls>
   </module>
 </modules>
-<modules rdp_version="xxxx">
+<modules rdp_version="1.30">
   <module>
     <name>r_aeropoint_rx</name>
     <version>1.00</version>
