@@ -1,5 +1,5 @@
 RELEASE_TAG_COMMIT_NUMBER_V125 = f64b94dff3c76b405876da4ea77f63e068163b0a
-RELEASE_TAG_COMMIT_NUMBER_V130 = adae03371a5fcb913975d61796554ff203113265
+RELEASE_TAG_COMMIT_NUMBER_V130 = 832154e21601376167011bc36bb0c3488107fb70
 VERSIONS_FILE_NAME = versions.xml
 MODULE_NAME_LIST_V125 = 	r_ble_qe_utility r_ble_rx23w r_bsp r_byteq r_can_rx r_cmt_rx r_cmtw_rx\
 					r_ctsu_qe r_dac_rx r_datfrx_rx r_dmaca_rx r_drw2d_rx r_dsmif_rx r_dtc_rx\
@@ -12,7 +12,7 @@ MODULE_NAME_LIST_V125 = 	r_ble_qe_utility r_ble_rx23w r_bsp r_byteq r_can_rx r_c
 					r_sdsi_rx r_simple_glcdc_config_rx r_simple_graphic_rx r_src_api_rx\
 					r_ssi_api_rx r_sys_time_rx r_t4_dns_client_rx r_t4_driver_rx r_t4_file_driver_rx\
 					r_t4_ftp_server_rx r_t4_http_server_rx r_t4_rx r_t4_sntp_client_rx r_socket_rx\
-					r_tfat_driver_rx r_tfat_rx r_tsip_rx_lib r_touch_qe r_uid_rx\
+					r_tfat_driver_rx r_tfat_rx r_touch_qe r_uid_rx\
 					r_usb_basic r_usb_basic_mini r_usb_hcdc r_usb_hcdc_mini\
 					r_usb_hhid r_usb_hhid_mini r_usb_hmsc r_usb_hmsc_mini\
 					r_usb_pcdc r_usb_pcdc_mini r_usb_phid r_usb_phid_mini\
@@ -40,23 +40,31 @@ MODULE_NAME_LIST_V130 = 	r_aeropoint_rx r_ble_qe_utility r_ble_rx23w r_bsp r_byt
 all:
 	rm -f ./$(VERSIONS_FILE_NAME);
 	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > ./$(VERSIONS_FILE_NAME)
+	mkdir ./repo
+	mkdir ./repo/v125
+	git clone https://github.com/renesas/rx-driver-package.git -b V1.25 ./repo/v125
 	echo "<modules rdp_version=\"1.25\">" >> ./$(VERSIONS_FILE_NAME)
 	for i in $(MODULE_NAME_LIST_V125); do \
-		cd ./source/$$i/; \
-		sh ../../tools/version_xml_generator.sh ./Makefile release_tag_commit_number=$(RELEASE_TAG_COMMIT_NUMBER_V125) >> ../../$(VERSIONS_FILE_NAME);\
-		make; \
-		cd ../../; \
+		cd ./repo/v125/source/$$i/; \
+		sh ../../tools/version_xml_generator.sh ./Makefile release_tag_commit_number=$(RELEASE_TAG_COMMIT_NUMBER_V125) >> ../../../../$(VERSIONS_FILE_NAME);\
+		cd ../../../..; \
 	done
 	echo "</modules>" >> ./$(VERSIONS_FILE_NAME)
+	mkdir ./repo/v130
+	git clone https://github.com/renesas/rx-driver-package.git -b V1.30 ./repo/v130
 	echo "<modules rdp_version=\"1.30\">" >> ./$(VERSIONS_FILE_NAME)
 	for i in $(MODULE_NAME_LIST_V130); do \
+		cd ./repo/v130/source/$$i/; \
+		sh ../../tools/version_xml_generator.sh ./Makefile release_tag_commit_number=$(RELEASE_TAG_COMMIT_NUMBER_V130) >> ../../../../$(VERSIONS_FILE_NAME);\
+		cd ../../../..; \
+	done
+	echo "</modules>" >> ./$(VERSIONS_FILE_NAME)
+	rm -rf ./repo
+	for i in $(MODULE_NAME_LIST_V130); do \
 		cd ./source/$$i/; \
-		sh ../../tools/version_xml_generator.sh ./Makefile release_tag_commit_number=$(RELEASE_TAG_COMMIT_NUMBER_V130) >> ../../$(VERSIONS_FILE_NAME);\
 		make; \
 		cd ../../; \
 	done
-	echo "</modules>" >> ./$(VERSIONS_FILE_NAME)
-
 		
 clean:
 	for i in $(MODULE_NAME_LIST_V125); do \
