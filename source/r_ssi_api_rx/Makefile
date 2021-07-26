@@ -9,7 +9,7 @@ $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).zip: $(TARGET_FOLDER)/$(MODULE_NAME)
 	cd ./$(MODULE_NAME)_vx.xx; \
 	mkdir $(CONFIG_FOLDER); \
 	cp $(MODULE_NAME)/ref/$(MODULE_NAME)_config_reference.h $(CONFIG_FOLDER)/$(MODULE_NAME)_config.h; \
-	zip ../$(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).zip -r ./$(MODULE_NAME) -r ./$(CONFIG_FOLDER); \
+	zip ../$(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).zip -r ./$(MODULE_NAME) -r ./$(CONFIG_FOLDER) ./$(MODULE_NAME).ftl; \
 	rm -rf $(CONFIG_FOLDER); \
 	cd ../;	\
 
