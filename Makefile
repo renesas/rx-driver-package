@@ -1,5 +1,5 @@
 RELEASE_TAG_COMMIT_NUMBER_V125 = f64b94dff3c76b405876da4ea77f63e068163b0a
-RELEASE_TAG_COMMIT_NUMBER_V130 = ec140149452eb5a7a208cf96bffefd198a32c071
+RELEASE_TAG_COMMIT_NUMBER_V130 = 954aaaacd5343200e9e3427d1b91c53a2f7804d1
 VERSIONS_FILE_NAME = versions.xml
 MODULE_NAME_LIST_V125 = 	r_ble_qe_utility r_ble_rx23w r_bsp r_byteq r_can_rx r_cmt_rx r_cmtw_rx\
 					r_ctsu_qe r_dac_rx r_datfrx_rx r_dmaca_rx r_drw2d_rx r_dsmif_rx r_dtc_rx\
