@@ -1,5 +1,7 @@
 RELEASE_TAG_COMMIT_NUMBER_V125 = f64b94dff3c76b405876da4ea77f63e068163b0a
 RELEASE_TAG_COMMIT_NUMBER_V130 = b992ea9f7368466f35f5a135e53f841417176701
+RELEASE_TAG_COMMIT_VERSION_V125 = 1.25
+RELEASE_TAG_COMMIT_VERSION_V130 = 1.30
 VERSIONS_FILE_NAME = versions.xml
 MODULE_NAME_LIST_V125 = 	r_ble_qe_utility r_ble_rx23w r_bsp r_byteq r_can_rx r_cmt_rx r_cmtw_rx\
 					r_ctsu_qe r_dac_rx r_datfrx_rx r_dmaca_rx r_drw2d_rx r_dsmif_rx r_dtc_rx\
@@ -40,22 +42,22 @@ MODULE_NAME_LIST_V130 = 	r_aeropoint_rx r_ble_qe_utility r_ble_rx23w r_bsp r_byt
 all:
 	rm -f ./$(VERSIONS_FILE_NAME);
 	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > ./$(VERSIONS_FILE_NAME)
+	echo "<modules>" >> ./$(VERSIONS_FILE_NAME)
 	mkdir ./repo
 	mkdir ./repo/v125
 	git clone https://github.com/renesas/rx-driver-package.git -b V1.25 ./repo/v125
-	echo "<modules rdp_version=\"1.25\">" >> ./$(VERSIONS_FILE_NAME)
+	cp ./tools/version_xml_generator.sh ./repo/v125/tools/version_xml_generator.sh
 	for i in $(MODULE_NAME_LIST_V125); do \
 		cd ./repo/v125/source/$$i/; \
-		sh ../../tools/version_xml_generator.sh ./Makefile release_tag_commit_number=$(RELEASE_TAG_COMMIT_NUMBER_V125) >> ../../../../$(VERSIONS_FILE_NAME);\
+		sh ../../tools/version_xml_generator.sh ./Makefile release_tag_commit_number=$(RELEASE_TAG_COMMIT_NUMBER_V125) release_tag_commit_version=$(RELEASE_TAG_COMMIT_VERSION_V125) >> ../../../../$(VERSIONS_FILE_NAME);\
 		cd ../../../..; \
 	done
-	echo "</modules>" >> ./$(VERSIONS_FILE_NAME)
 	mkdir ./repo/v130
 	git clone https://github.com/renesas/rx-driver-package.git -b V1.30 ./repo/v130
-	echo "<modules rdp_version=\"1.30\">" >> ./$(VERSIONS_FILE_NAME)
+	cp ./tools/version_xml_generator.sh ./repo/v130/tools/version_xml_generator.sh
 	for i in $(MODULE_NAME_LIST_V130); do \
 		cd ./repo/v130/source/$$i/; \
-		sh ../../tools/version_xml_generator.sh ./Makefile release_tag_commit_number=$(RELEASE_TAG_COMMIT_NUMBER_V130) >> ../../../../$(VERSIONS_FILE_NAME);\
+		sh ../../tools/version_xml_generator.sh ./Makefile release_tag_commit_number=$(RELEASE_TAG_COMMIT_NUMBER_V130) release_tag_commit_version=$(RELEASE_TAG_COMMIT_VERSION_V130) >> ../../../../$(VERSIONS_FILE_NAME);\
 		cd ../../../..; \
 	done
 	echo "</modules>" >> ./$(VERSIONS_FILE_NAME)

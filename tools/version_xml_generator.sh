@@ -21,9 +21,9 @@ BEGIN {
 	
 	while(1)
 	{
-		if(ARGC != 3)
+		if(ARGC != 4)
 		{
-			printf("error: 2 aruguments are needed. arg number = %d\n", ARGC - 1);
+			printf("error: 3 aruguments are needed. arg number = %d\n", ARGC - 1);
 			for(i=1; i<ARGC; i++)
 			{
 				printf("arg[%d]=%s\n",i, ARGV[i]);
@@ -81,6 +81,9 @@ BEGIN {
 		input_release_tag_commit_number_depth = split(input_release_tag_commit_number_string, input_release_tag_commit_number_string_array, /=/);
 		release_tag_commit_number = input_release_tag_commit_number_string_array[input_release_tag_commit_number_depth];
 	#	printf("module commit number found: %s\n", release_tag_commit_number);
+		input_release_tag_commit_version_string = ARGV[3];
+		input_release_tag_commit_version_depth = split(input_release_tag_commit_version_string, input_release_tag_commit_version_string_array, /=/);
+		release_tag_commit_version = input_release_tag_commit_version_string_array[input_release_tag_commit_version_depth];
 
 		zip_file_name = sprintf("%s_v%s.zip", module_name, module_version);
 	#	printf("%s\n", zip_file_name);
@@ -110,7 +113,8 @@ BEGIN {
 		depth = 1;
 		
 		print_indent(depth);
-		printf("<module>\r\n");
+		# printf("<module>\r\n");
+		printf("<module rdp_version=\"%s\">\r\n", release_tag_commit_version);
 		depth++;
 		
 		print_indent(depth);
