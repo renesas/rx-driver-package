@@ -152,11 +152,11 @@
     </urls>
   </module>
   <module rdp_version="1.25">
-    <name>r_ether_rx</name>
-    <version>1.20</version>
+    <name>r_ether_rx</name>
+    <version>1.20</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_ether_rx_v1.20.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_ether_rx_v1.20.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_ether_rx_v1.20.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_ether_rx_v1.20.xml</url>
     </urls>
   </module>
   <module rdp_version="1.25">
