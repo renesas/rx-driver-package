@@ -1,6 +1,6 @@
 RELEASE_TAG_COMMIT_NUMBER_V125 = f64b94dff3c76b405876da4ea77f63e068163b0a
 RELEASE_TAG_COMMIT_NUMBER_V130 = b992ea9f7368466f35f5a135e53f841417176701
-RELEASE_TAG_COMMIT_NUMBER_V131 = 8e3bc5b83bd8d1da99966819071ee83c83a9fd67
+RELEASE_TAG_COMMIT_NUMBER_V131 = 711d3fb48c57a6a42372f24bf61735e75bc9a8de
 RELEASE_TAG_COMMIT_VERSION_V125 = 1.25
 RELEASE_TAG_COMMIT_VERSION_V130 = 1.30
 RELEASE_TAG_COMMIT_VERSION_V131 = 1.31
@@ -85,7 +85,7 @@ all:
 	cp ./tools/version_xml_generator.sh ./repo/v131/tools/version_xml_generator.sh
 	for i in $(MODULE_NAME_LIST_V131); do \
 		cd ./repo/v131/source/$$i/; \
-		sh ../../tools/version_xml_generator.sh ./Makefile release_tag_commit_number=$(RELEASE_TAG_COMMIT_NUMBER_V131) release_tag_commit_version=$(RELEASE_TAG_COMMIT_VERSION_V130) >> ../../../../$(VERSIONS_FILE_NAME);\
+		sh ../../tools/version_xml_generator.sh ./Makefile release_tag_commit_number=$(RELEASE_TAG_COMMIT_NUMBER_V131) release_tag_commit_version=$(RELEASE_TAG_COMMIT_VERSION_V131) >> ../../../../$(VERSIONS_FILE_NAME);\
 		cd ../../../..; \
 	done
 	echo "</modules>" >> ./$(VERSIONS_FILE_NAME)
