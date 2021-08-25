@@ -73,9 +73,6 @@ usb_err_t   R_USB_HmscStrgCmd(usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint16_t comma
     uint8_t     side;
     uint16_t    ret;
 
-    utr.ip = p_ctrl->module;
-    utr.ipp = usb_hstd_get_usb_ip_adr(utr.ip);
-
 #if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
     if (USB_NULL == p_ctrl)
     {
@@ -109,6 +106,9 @@ usb_err_t   R_USB_HmscStrgCmd(usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint16_t comma
         return USB_ERR_NG;
     }
 
+    utr.ip = p_ctrl->module;
+    utr.ipp = usb_hstd_get_usb_ip_adr(utr.ip);
+
     ret = usb_hmsc_strg_user_command(&utr, side, command, p_buf, usb_hmsc_strg_cmd_complete);
     if (USB_PAR == ret)
     {
@@ -126,6 +126,7 @@ usb_err_t   R_USB_HmscStrgCmd(usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint16_t comma
             p_ctrl->pipe    = utr.keyword;  /* Pipe number setting */
             p_ctrl->address = usb_hstd_get_devsel(&utr, p_ctrl->pipe) >> 12;
             p_ctrl->size = 0;
+            p_ctrl->type = USB_HMSC;
 #if (BSP_CFG_RTOS_USED == 1)                /* FreeRTOS */
             p_ctrl->p_data = (void *)xTaskGetCurrentTaskHandle();
 #endif /* (BSP_CFG_RTOS_USED == 1) */
@@ -148,6 +149,7 @@ usb_err_t   R_USB_HmscStrgCmd(usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint16_t comma
         p_ctrl->pipe    = utr.keyword;  /* Pipe number setting */
         p_ctrl->address = usb_hstd_get_devsel(&utr, p_ctrl->pipe) >> 12;
         p_ctrl->size = 0;
+        p_ctrl->type = USB_HMSC;
 
         switch (utr.result)
         {
@@ -198,11 +200,8 @@ usb_err_t   R_USB_HmscStrgCmd(usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint16_t comma
 usb_err_t     R_USB_HmscGetDriveNo(usb_ctrl_t *p_ctrl, uint8_t *p_drive)
 {
     usb_info_t  info;
-    usb_utr_t   utr;
     volatile uint16_t   address;
-
-    utr.ip = p_ctrl->module;
-    utr.ipp = usb_hstd_get_usb_ip_adr(utr.ip);
+    usb_err_t   err;
 
 #if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
     if (USB_NULL == p_ctrl)
@@ -227,8 +226,8 @@ usb_err_t     R_USB_HmscGetDriveNo(usb_ctrl_t *p_ctrl, uint8_t *p_drive)
 
 #endif  /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
 
-    R_USB_GetInformation(p_ctrl, &info);
-    if (USB_STS_CONFIGURED != info.status)
+    err = R_USB_GetInformation(p_ctrl, &info);
+    if ((USB_STS_CONFIGURED != info.status) || (USB_SUCCESS != err))
     {
         return USB_ERR_NG;
     }

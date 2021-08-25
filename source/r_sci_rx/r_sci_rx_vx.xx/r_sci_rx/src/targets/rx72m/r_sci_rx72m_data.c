@@ -23,6 +23,7 @@
 * History : DD.MM.YYYY Version Description
 *           15.08.2019 1.00    Initial Release.
 *           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
+*           31.03.2021 3.80    Updated macro definition enable and disable TXI, RXI, ERI, TEI.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -97,7 +98,7 @@ const sci_ch_rom_t  ch0_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                     BSP_INT_SRC_BL0_SCI0_TEI0, sci0_tei0_isr,
                                 #endif
                                 BSP_INT_SRC_BL0_SCI0_ERI0, sci0_eri0_isr,
-                                BIT0_MASK, BIT1_MASK,
+                                SCI_BIT0, SCI_BIT1,
                                 &ICU.IPR[IPR_SCI0_RXI0].BYTE,
                                 &ICU.IPR[IPR_SCI0_TXI0].BYTE,
                                 &ICU.IR[IR_SCI0_RXI0].BYTE,
@@ -105,7 +106,7 @@ const sci_ch_rom_t  ch0_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                 &ICU.IER[IER_SCI0_RXI0].BYTE,
                                 &ICU.IER[IER_SCI0_TXI0].BYTE,
                                 (volatile uint32_t R_BSP_EVENACCESS_SFR*)&ICU.GENBL0.LONG,
-                                BIT2_MASK, BIT3_MASK,
+                                SCI_BIT2, SCI_BIT3,
                                 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 SCI_CFG_CH0_TX_DTC_DMACA_ENABLE,
                                 SCI_CFG_CH0_RX_DTC_DMACA_ENABLE,
@@ -154,7 +155,7 @@ const sci_ch_rom_t  ch1_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                     BSP_INT_SRC_BL0_SCI1_TEI1, sci1_tei1_isr,
                                 #endif
                                 BSP_INT_SRC_BL0_SCI1_ERI1, sci1_eri1_isr,
-                                BIT2_MASK, BIT3_MASK,
+                                SCI_BIT2, SCI_BIT3,
                                 &ICU.IPR[IPR_SCI1_RXI1].BYTE,
                                 &ICU.IPR[IPR_SCI1_TXI1].BYTE,
                                 &ICU.IR[IR_SCI1_RXI1].BYTE,
@@ -162,7 +163,7 @@ const sci_ch_rom_t  ch1_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                 &ICU.IER[IER_SCI1_RXI1].BYTE,
                                 &ICU.IER[IER_SCI1_TXI1].BYTE,
                                 (volatile uint32_t R_BSP_EVENACCESS_SFR*)&ICU.GENBL0.LONG,
-                                BIT4_MASK, BIT5_MASK,
+                                SCI_BIT4, SCI_BIT5,
                                 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 SCI_CFG_CH1_TX_DTC_DMACA_ENABLE,
                                 SCI_CFG_CH1_RX_DTC_DMACA_ENABLE,
@@ -211,7 +212,7 @@ const sci_ch_rom_t  ch2_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                     BSP_INT_SRC_BL0_SCI2_TEI2, sci2_tei2_isr,
                                 #endif
                                 BSP_INT_SRC_BL0_SCI2_ERI2, sci2_eri2_isr,
-                                BIT4_MASK, BIT5_MASK,
+                                SCI_BIT4, SCI_BIT5,
                                 &ICU.IPR[IPR_SCI2_RXI2].BYTE,
                                 &ICU.IPR[IPR_SCI2_TXI2].BYTE,
                                 &ICU.IR[IR_SCI2_RXI2].BYTE,
@@ -219,7 +220,7 @@ const sci_ch_rom_t  ch2_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                 &ICU.IER[IER_SCI2_RXI2].BYTE,
                                 &ICU.IER[IER_SCI2_TXI2].BYTE,
                                 (volatile uint32_t R_BSP_EVENACCESS_SFR*)&ICU.GENBL0.LONG,
-                                BIT6_MASK, BIT7_MASK,
+                                SCI_BIT6, SCI_BIT7,
                                 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 SCI_CFG_CH2_TX_DTC_DMACA_ENABLE,
                                 SCI_CFG_CH2_RX_DTC_DMACA_ENABLE,
@@ -268,7 +269,7 @@ const sci_ch_rom_t  ch3_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                     BSP_INT_SRC_BL0_SCI3_TEI3, sci3_tei3_isr,
                                 #endif
                                 BSP_INT_SRC_BL0_SCI3_ERI3, sci3_eri3_isr,
-                                BIT6_MASK, BIT7_MASK,
+                                SCI_BIT6, SCI_BIT7,
                                 &ICU.IPR[IPR_SCI3_RXI3].BYTE,
                                 &ICU.IPR[IPR_SCI3_TXI3].BYTE,
                                 &ICU.IR[IR_SCI3_RXI3].BYTE,
@@ -276,7 +277,7 @@ const sci_ch_rom_t  ch3_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                 &ICU.IER[IER_SCI3_RXI3].BYTE,
                                 &ICU.IER[IER_SCI3_TXI3].BYTE,
                                 (volatile uint32_t R_BSP_EVENACCESS_SFR*)&ICU.GENBL0.LONG,
-                                BIT0_MASK, BIT1_MASK,
+                                SCI_BIT0, SCI_BIT1,
                                 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 SCI_CFG_CH3_TX_DTC_DMACA_ENABLE,
                                 SCI_CFG_CH3_RX_DTC_DMACA_ENABLE,
@@ -325,7 +326,7 @@ const sci_ch_rom_t  ch4_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                     BSP_INT_SRC_BL0_SCI4_TEI4, sci4_tei4_isr,
                                 #endif
                                 BSP_INT_SRC_BL0_SCI4_ERI4, sci4_eri4_isr,
-                                BIT8_MASK, BIT9_MASK,
+                                SCI_BIT8, SCI_BIT9,
                                 &ICU.IPR[IPR_SCI4_RXI4].BYTE,
                                 &ICU.IPR[IPR_SCI4_TXI4].BYTE,
                                 &ICU.IR[IR_SCI4_RXI4].BYTE,
@@ -333,7 +334,7 @@ const sci_ch_rom_t  ch4_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                 &ICU.IER[IER_SCI4_RXI4].BYTE,
                                 &ICU.IER[IER_SCI4_TXI4].BYTE,
                                 (volatile uint32_t R_BSP_EVENACCESS_SFR*)&ICU.GENBL0.LONG,
-                                BIT2_MASK, BIT3_MASK,
+                                SCI_BIT2, SCI_BIT3,
                                 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 SCI_CFG_CH4_TX_DTC_DMACA_ENABLE,
                                 SCI_CFG_CH4_RX_DTC_DMACA_ENABLE,
@@ -382,7 +383,7 @@ const sci_ch_rom_t  ch5_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                     BSP_INT_SRC_BL0_SCI5_TEI5, sci5_tei5_isr,
                                 #endif
                                 BSP_INT_SRC_BL0_SCI5_ERI5, sci5_eri5_isr,
-                                BIT10_MASK, BIT11_MASK,
+                                SCI_BIT10, SCI_BIT11,
                                 &ICU.IPR[IPR_SCI5_RXI5].BYTE,
                                 &ICU.IPR[IPR_SCI5_TXI5].BYTE,
                                 &ICU.IR[IR_SCI5_RXI5].BYTE,
@@ -390,7 +391,7 @@ const sci_ch_rom_t  ch5_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                 &ICU.IER[IER_SCI5_RXI5].BYTE,
                                 &ICU.IER[IER_SCI5_TXI5].BYTE,
                                 (volatile uint32_t R_BSP_EVENACCESS_SFR*)&ICU.GENBL0.LONG,
-                                BIT4_MASK, BIT5_MASK,
+                                SCI_BIT4, SCI_BIT5,
                                 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 SCI_CFG_CH5_TX_DTC_DMACA_ENABLE,
                                 SCI_CFG_CH5_RX_DTC_DMACA_ENABLE,
@@ -439,7 +440,7 @@ const sci_ch_rom_t  ch6_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                     BSP_INT_SRC_BL0_SCI6_TEI6, sci6_tei6_isr,
                                 #endif
                                 BSP_INT_SRC_BL0_SCI6_ERI6, sci6_eri6_isr,
-                                BIT12_MASK, BIT13_MASK,
+                                SCI_BIT12, SCI_BIT13,
                                 &ICU.IPR[IPR_SCI6_RXI6].BYTE,
                                 &ICU.IPR[IPR_SCI6_TXI6].BYTE,
                                 &ICU.IR[IR_SCI6_RXI6].BYTE,
@@ -447,7 +448,7 @@ const sci_ch_rom_t  ch6_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                 &ICU.IER[IER_SCI6_RXI6].BYTE,
                                 &ICU.IER[IER_SCI6_TXI6].BYTE,
                                 (volatile uint32_t R_BSP_EVENACCESS_SFR*)&ICU.GENBL0.LONG,
-                                BIT6_MASK, BIT7_MASK,
+                                SCI_BIT6, SCI_BIT7,
                                 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 SCI_CFG_CH6_TX_DTC_DMACA_ENABLE,
                                 SCI_CFG_CH6_RX_DTC_DMACA_ENABLE,
@@ -496,7 +497,7 @@ const sci_ch_rom_t  ch7_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                     BSP_INT_SRC_AL0_SCI7_TEI7, sci7_tei7_isr,
                                 #endif
                                 BSP_INT_SRC_AL0_SCI7_ERI7, sci7_eri7_isr,
-                                BIT22_MASK, BIT23_MASK,
+                                SCI_BIT22, SCI_BIT23,
                                 &ICU.IPR[IPR_SCI7_RXI7].BYTE,
                                 &ICU.IPR[IPR_SCI7_TXI7].BYTE,
                                 &ICU.IR[IR_SCI7_RXI7].BYTE,
@@ -504,7 +505,7 @@ const sci_ch_rom_t  ch7_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                 &ICU.IER[IER_SCI7_RXI7].BYTE,
                                 &ICU.IER[IER_SCI7_TXI7].BYTE,
                                 (volatile uint32_t R_BSP_EVENACCESS_SFR*)&ICU.GENAL0.LONG,
-                                BIT2_MASK, BIT3_MASK,
+                                SCI_BIT2, SCI_BIT3,
                                 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 SCI_CFG_CH7_TX_DTC_DMACA_ENABLE,
                                 SCI_CFG_CH7_RX_DTC_DMACA_ENABLE,
@@ -553,7 +554,7 @@ const sci_ch_rom_t  ch8_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                     BSP_INT_SRC_AL0_SCI8_TEI8, sci8_tei8_isr,
                                 #endif
                                 BSP_INT_SRC_AL0_SCI8_ERI8, sci8_eri8_isr,
-                                BIT0_MASK, BIT1_MASK,
+                                SCI_BIT0, SCI_BIT1,
                                 &ICU.IPR[IPR_SCI8_RXI8].BYTE,
                                 &ICU.IPR[IPR_SCI8_TXI8].BYTE,
                                 &ICU.IR[IR_SCI8_RXI8].BYTE,
@@ -561,7 +562,7 @@ const sci_ch_rom_t  ch8_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                 &ICU.IER[IER_SCI8_RXI8].BYTE,
                                 &ICU.IER[IER_SCI8_TXI8].BYTE,
                                 (volatile uint32_t R_BSP_EVENACCESS_SFR*)&ICU.GENAL0.LONG,
-                                BIT4_MASK, BIT5_MASK,
+                                SCI_BIT4, SCI_BIT5,
                                 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 SCI_CFG_CH8_TX_DTC_DMACA_ENABLE,
                                 SCI_CFG_CH8_RX_DTC_DMACA_ENABLE,
@@ -610,7 +611,7 @@ const sci_ch_rom_t  ch9_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                     BSP_INT_SRC_AL0_SCI9_TEI9, sci9_tei9_isr,
                                 #endif
                                 BSP_INT_SRC_AL0_SCI9_ERI9, sci9_eri9_isr,
-                                BIT4_MASK, BIT5_MASK,
+                                SCI_BIT4, SCI_BIT5,
                                 &ICU.IPR[IPR_SCI9_RXI9].BYTE,
                                 &ICU.IPR[IPR_SCI9_TXI9].BYTE,
                                 &ICU.IR[IR_SCI9_RXI9].BYTE,
@@ -618,7 +619,7 @@ const sci_ch_rom_t  ch9_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *)
                                 &ICU.IER[IER_SCI9_RXI9].BYTE,
                                 &ICU.IER[IER_SCI9_TXI9].BYTE,
                                 (volatile uint32_t R_BSP_EVENACCESS_SFR*)&ICU.GENAL0.LONG,
-                                BIT6_MASK, BIT7_MASK,
+                                SCI_BIT6, SCI_BIT7,
                                 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 SCI_CFG_CH9_TX_DTC_DMACA_ENABLE,
                                 SCI_CFG_CH9_RX_DTC_DMACA_ENABLE,
@@ -667,7 +668,7 @@ const sci_ch_rom_t  ch10_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *
                                     BSP_INT_SRC_AL0_SCI10_TEI10, sci10_tei10_isr,
                                 #endif
                                 BSP_INT_SRC_AL0_SCI10_ERI10, sci10_eri10_isr,
-                                BIT8_MASK, BIT9_MASK,
+                                SCI_BIT8, SCI_BIT9,
                                 &ICU.IPR[IPR_SCI10_RXI10].BYTE,
                                 &ICU.IPR[IPR_SCI10_TXI10].BYTE,
                                 &ICU.IR[IR_SCI10_RXI10].BYTE,
@@ -675,7 +676,7 @@ const sci_ch_rom_t  ch10_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *
                                 &ICU.IER[IER_SCI10_RXI10].BYTE,
                                 &ICU.IER[IER_SCI10_TXI10].BYTE,
                                 (volatile uint32_t R_BSP_EVENACCESS_SFR*)&ICU.GENAL0.LONG,
-                                BIT0_MASK, BIT1_MASK,
+                                SCI_BIT0, SCI_BIT1,
                                 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 SCI_CFG_CH10_TX_DTC_DMACA_ENABLE,
                                 SCI_CFG_CH10_RX_DTC_DMACA_ENABLE,
@@ -724,7 +725,7 @@ const sci_ch_rom_t  ch11_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *
                                     BSP_INT_SRC_AL0_SCI11_TEI11, sci11_tei11_isr,
                                 #endif
                                 BSP_INT_SRC_AL0_SCI11_ERI11, sci11_eri11_isr,
-                                BIT12_MASK, BIT13_MASK,
+                                SCI_BIT12, SCI_BIT13,
                                 &ICU.IPR[IPR_SCI11_RXI11].BYTE,
                                 &ICU.IPR[IPR_SCI11_TXI11].BYTE,
                                 &ICU.IR[IR_SCI11_RXI11].BYTE,
@@ -732,7 +733,7 @@ const sci_ch_rom_t  ch11_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *
                                 &ICU.IER[IER_SCI11_RXI11].BYTE,
                                 &ICU.IER[IER_SCI11_TXI11].BYTE,
                                 (volatile uint32_t R_BSP_EVENACCESS_SFR*)&ICU.GENAL0.LONG,
-                                BIT2_MASK, BIT3_MASK,
+                                SCI_BIT2, SCI_BIT3,
                                 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 SCI_CFG_CH11_TX_DTC_DMACA_ENABLE,
                                 SCI_CFG_CH11_RX_DTC_DMACA_ENABLE,
@@ -781,7 +782,7 @@ const sci_ch_rom_t  ch12_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *
                                     BSP_INT_SRC_BL0_SCI12_TEI12, sci12_tei12_isr,
                                 #endif
                                 BSP_INT_SRC_BL0_SCI12_ERI12, sci12_eri12_isr,
-                                BIT16_MASK, BIT17_MASK,
+                                SCI_BIT16, SCI_BIT17,
                                 &ICU.IPR[IPR_SCI12_RXI12].BYTE,
                                 &ICU.IPR[IPR_SCI12_TXI12].BYTE,
                                 &ICU.IR[IR_SCI12_RXI12].BYTE,
@@ -789,7 +790,7 @@ const sci_ch_rom_t  ch12_rom = {(volatile struct st_sci7 R_BSP_EVENACCESS_SFR  *
                                 &ICU.IER[IER_SCI12_RXI12].BYTE,
                                 &ICU.IER[IER_SCI12_TXI12].BYTE,
                                 (volatile uint32_t R_BSP_EVENACCESS_SFR*)&ICU.GENBL0.LONG,
-                                BIT4_MASK, BIT5_MASK,
+                                SCI_BIT4, SCI_BIT5,
                                 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 SCI_CFG_CH12_TX_DTC_DMACA_ENABLE,
                                 SCI_CFG_CH12_RX_DTC_DMACA_ENABLE,

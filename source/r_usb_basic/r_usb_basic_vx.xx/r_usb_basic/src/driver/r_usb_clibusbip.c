@@ -497,7 +497,10 @@ void usb_cstd_usb_task (void)
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
         usb_pstd_pcd_task();
 #if defined(USB_CFG_PMSC_USE)
-        usb_pmsc_task();
+        if (USB_NULL != (g_usb_open_class[USB_CFG_USE_USBIP] & (1 << USB_PMSC)))      /* Check USB Open device class */
+        {
+            usb_pmsc_task();
+        }
 #endif /* defined(USB_CFG_PMSC_USE) */
 #endif /*( (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI )*/
     }

@@ -36,8 +36,8 @@ void R_SDHI_PinSetInit()
     /* Set ${pin.pinName} pin */
     PORT${pin.portNum}.PMR.BIT.B${pin.pinBitNum} = 0U;
     <#if pin.pinName == "SDHI_CLK" || pin.pinName == "SDHI_CMD" || pin.pinName == "SDHI_D0" || pin.pinName == "SDHI_D1" || pin.pinName == "SDHI_D2" || pin.pinName == "SDHI_D3" >
-        <#if headerInfo.device?contains("R5F565N") || headerInfo.device?contains("R5F5651")>
-            <#if pin.portNum == "7" || pin.portNum == "C" || pin.portNum == "D" >
+        <#if headerInfo.device?contains("R5F565N") || headerInfo.device?contains("R5F5651") || headerInfo.device?contains("R5F5671")>
+            <#if pin.portNum == "7" || pin.portNum == "C" || pin.portNum == "D" || pin.portNum == "E" >
     PORT${pin.portNum}.DSCR.BIT.B${pin.pinBitNum} = 1U;
             </#if>
         <#elseif headerInfo.device?contains("R5F564M") || headerInfo.device?contains("R5F571M")>

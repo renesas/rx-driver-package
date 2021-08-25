@@ -5,12 +5,12 @@ r_flash_rx
 
 Document Number 
 ---------------
-r01an2184ej0460
-r01an2184jj0460
+r01an2184ej0470
+r01an2184jj0470
 
 Version
 -------
-v4.60
+v4.70
 
 Overview
 --------
@@ -49,6 +49,7 @@ Supported MCUs
 * RX651, RX65N Group
 * RX66N Group
 * RX66T Group
+* RX671 Group
 * RX71M Group
 * RX72M Group
 * RX72N Group
@@ -72,6 +73,7 @@ Boards Tested On
 * RSKRX65N
 * RSKRX65N-2MB
 * RSKRX66T
+* RSKRX671
 * RSKRX71M
 * RSKRX72M
 * RSKRX72N
@@ -94,7 +96,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp      V5.50
+* r_bsp      V6.10
 
 How to add to your project
 --------------------------
@@ -125,9 +127,9 @@ How to add to your project
 
 Toolchain(s) Used
 -----------------
-* Renesas RXC 3.01.00
-* GNU GNURX 4.08.04.201902
-* IAR ICCRX 4.12.01
+* Renesas RXC 3.02.00
+* GNU GNURX 8.03.00.202002
+* IAR ICCRX 4.14.01
 
 
 File Structure
@@ -138,9 +140,9 @@ r_flash_rx
 |
 +---doc
 |   +-- en
-|   |   +-- r01an2184ej0460-rx-flash.pdf
+|   |   +-- r01an2184ej0470-rx-flash.pdf
 |   +-- ja
-|       +-- r01an2184jj0460-rx-flash.pdf
+|       +-- r01an2184jj0470-rx-flash.pdf
 |
 +---ref
 |   +-- r_flash_rx_config_reference.h
@@ -222,6 +224,9 @@ r_flash_rx
         |
         +--rx66t
              +-- r_flash_rx66t.h
+        |
+        +--rx671
+             +-- r_flash_rx671.h
         |
         +--rx71m
              +-- r_flash_rx71m.h

@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer 
  *
- * Copyright (C) 2013-2020 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_riic_rx_config_reference.h
@@ -62,6 +62,7 @@
  *         : 10.10.2019 2.44     Added RX13T support.
  *         : 22.11.2019 2.45     Added RX66N, RX72N support.
  *         : 10.03.2020 2.46     Added RX23E-A support.
+ *         : 30.06.2021 2.48     Added RX671 support.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIIC_CONFIG_H
@@ -92,6 +93,7 @@
 /*  RX65N: ch0, ch1, ch2 */
 /*  RX66T: ch0,    ,     */
 /*  RX66N: ch0, ch1, ch2 */
+/*  RX671: ch0, ch1, ch2 */
 /*  RX71M: ch0,    , ch2 */
 /*  RX72T: ch0,    ,     */
 /*  RX72M: ch0, ch1, ch2 */

@@ -31,6 +31,7 @@
  *         : 31.05.2019 1.26 Added support for GNUC and ICCRX.
  *         : 30.07.2019 1.27 RX72M is added.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2020 1.31 RX671 is added.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -607,13 +608,13 @@ uint16_t usb_hstd_support_speed_check (usb_utr_t *ptr)
         break;
         case USB_LSMODE :
 #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T)\
-    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N)
+    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) || defined(BSP_MCU_RX671)
             conn_inf = USB_LSCONNECT;
 #else   /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T)\
-    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) */
+    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) || defined(BSP_MCU_RX671) */
             conn_inf = USB_NOCONNECT;
 #endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T)\
-    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) */
+    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) || defined(BSP_MCU_RX671) */
         break;
         case USB_HSPROC :
             conn_inf = USB_NOCONNECT;
@@ -955,10 +956,10 @@ usb_regadr_t usb_hstd_get_usb_ip_adr (uint16_t ipnum)
         ptr = (usb_regadr_t)&USBA;
 
 #endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
-#if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)
+#if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671)
         ptr = (usb_regadr_t)&USB1;
 
-#endif  /* defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) */
+#endif  /* defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671) */
     }
 #endif /* USB_NUM_USBIP == 2 */
     else

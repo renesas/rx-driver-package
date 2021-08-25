@@ -11,6 +11,7 @@ DD.MM.YYYY Version Description
 26.03.2018 1.02    First release.
 28.06.2019 1.03    Folder name was changed.
 28.02.2020 1.10    Supported Smart Configurator.
+27.05.2021 1.11    Supported GNU-RX and IAR compiler.
 
 File Structure
 --------------

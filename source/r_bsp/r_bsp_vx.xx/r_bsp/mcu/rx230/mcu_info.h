@@ -34,6 +34,8 @@
 *                               - BSP_MCU_CPU_VERSION
 *                               - CPU_CYCLES_PER_LOOP
 *                               Fixed coding style.
+*         : 18.05.2021 3.01     Added the following macro definition.
+*                               - BSP_MCU_VBATT_INITIALIZE
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -212,6 +214,8 @@ Macro definitions
 #define BSP_MCU_NMI_LVD1
 #define BSP_MCU_NMI_LVD2
 #define BSP_MCU_NMI_VBATT
+
+#define BSP_MCU_VBATT_INITIALIZE
 
 #endif /* MCU_INFO */
 

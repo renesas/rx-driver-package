@@ -14,11 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2015-2020 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015-2021 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_tsip_rx_if.h
- * Version      : 1.11
+ * Version      : 1.12
  * Description  : Interface definition for the r_tsip_rx module.
  *                TSIP means the "Trusted Secure IP" that is Renesas original security IP.
  *                Strong point 1:
@@ -49,6 +49,7 @@
  *         : 30.06.2020 1.10     Added support for ARC4, ECC(P-384) API
  *         : 30.09.2020 1.11     Added support for DH, ECDHE P-512r1 API, and generalization of KDF.
  *         :                     Added support for Key wrap API with TSIP-Lite.
+ *         : 30.06.2021 1.12     Added support for RX23W chip version D
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -68,6 +69,7 @@
 #error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
 #endif
 #if (defined BSP_MCU_RX231 || defined BSP_MCU_RX23W) && (BSP_CFG_MCU_PART_VERSION == 0xB)  /* B */
+#elif defined BSP_MCU_RX23W && BSP_CFG_MCU_PART_VERSION == 0xD  /* D */
 #elif (defined BSP_MCU_RX66T || defined BSP_MCU_RX72T) && ((BSP_CFG_MCU_PART_FUNCTION == 0xE /* E */) || \
     (BSP_CFG_MCU_PART_FUNCTION == 0xF /* F */) || (BSP_CFG_MCU_PART_FUNCTION == 0x10 /* G */))
 #elif (defined BSP_MCU_RX65N || defined BSP_MCU_RX651) && (BSP_CFG_MCU_PART_ENCRYPTION_INCLUDED == true)
@@ -79,7 +81,7 @@
 
 /* Version Number of API. */
 #define TSIP_VERSION_MAJOR    (1u)
-#define TSIP_VERSION_MINOR    (11u)
+#define TSIP_VERSION_MINOR    (12u)
 
 /* Various information. */
 #define R_TSIP_SRAM_WORD_SIZE   (20u)

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_irq_rx_private.h
@@ -48,6 +48,7 @@
 *         : 30.12.2019  3.40    Added support RX66N, RX72N.
 *         : 31.03.2020  3.50    Added support RX23E-A.
 *         : 30.06.2020  3.60    Changed revision to reflect demo upgrade.
+*         : 31.03.2021  3.70    Added support RX671.
 ***********************************************************************************************************************/
 #ifndef R_IRQ_PRIVATE_H_
 #define R_IRQ_PRIVATE_H_
@@ -60,7 +61,7 @@ Macro definitions
 ******************************************************************************/
 /* Version Number of API. */
 #define IRQ_RX_VERSION_MAJOR           (3)
-#define IRQ_RX_VERSION_MINOR           (60)
+#define IRQ_RX_VERSION_MINOR           (70)
 
 /* Bit position of interrupt enable bits in interrupt enable register. */
 #define IRQ_IEN_MASK_IRQ0   (0x01)
@@ -157,6 +158,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ0      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ0_PORT) || ('j' == IRQ_PORT_IRQ0_PORT))
 #define IRQ_PORT_IRQ0      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ0_PORT) || ('h' == IRQ_PORT_IRQ0_PORT))
+#define IRQ_PORT_IRQ0      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ0_PORT */
 
 #if ('0' == IRQ_PORT_IRQ0_BIT)
@@ -220,6 +223,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ1      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ1_PORT) || ('j' == IRQ_PORT_IRQ1_PORT))
 #define IRQ_PORT_IRQ1      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ1_PORT) || ('h' == IRQ_PORT_IRQ1_PORT))
+#define IRQ_PORT_IRQ1      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ1_PORT */
 
 #if ('0' == IRQ_PORT_IRQ1_BIT)
@@ -283,6 +288,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ2      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ2_PORT) || ('j' == IRQ_PORT_IRQ2_PORT))
 #define IRQ_PORT_IRQ2      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ2_PORT) || ('h' == IRQ_PORT_IRQ2_PORT))
+#define IRQ_PORT_IRQ2      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ2_PORT */
 
 #if ('0' == IRQ_PORT_IRQ2_BIT)
@@ -346,6 +353,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ3      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ3_PORT) || ('j' == IRQ_PORT_IRQ3_PORT))
 #define IRQ_PORT_IRQ3      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ3_PORT) || ('h' == IRQ_PORT_IRQ3_PORT))
+#define IRQ_PORT_IRQ3      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ3_PORT */
 
 #if ('0' == IRQ_PORT_IRQ3_BIT)
@@ -409,6 +418,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ4      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ4_PORT) || ('j' == IRQ_PORT_IRQ4_PORT))
 #define IRQ_PORT_IRQ4      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ4_PORT) || ('h' == IRQ_PORT_IRQ4_PORT))
+#define IRQ_PORT_IRQ4      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ4_PORT */
 
 #if ('0' == IRQ_PORT_IRQ4_BIT)
@@ -472,6 +483,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ5      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ5_PORT) || ('j' == IRQ_PORT_IRQ5_PORT))
 #define IRQ_PORT_IRQ5      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ5_PORT) || ('h' == IRQ_PORT_IRQ5_PORT))
+#define IRQ_PORT_IRQ5      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ5_PORT */
 
 #if ('0' == IRQ_PORT_IRQ5_BIT)
@@ -535,6 +548,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ6      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ6_PORT) || ('j' == IRQ_PORT_IRQ6_PORT))
 #define IRQ_PORT_IRQ6      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ6_PORT) || ('h' == IRQ_PORT_IRQ6_PORT))
+#define IRQ_PORT_IRQ6      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ6_PORT */
 
 #if ('0' == IRQ_PORT_IRQ6_BIT)
@@ -598,6 +613,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ7      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ7_PORT) || ('j' == IRQ_PORT_IRQ7_PORT))
 #define IRQ_PORT_IRQ7      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ7_PORT) || ('h' == IRQ_PORT_IRQ7_PORT))
+#define IRQ_PORT_IRQ7      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ7_PORT */
 
 #if ('0' == IRQ_PORT_IRQ7_BIT)
@@ -661,6 +678,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ8      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ8_PORT) || ('j' == IRQ_PORT_IRQ8_PORT))
 #define IRQ_PORT_IRQ8      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ8_PORT) || ('h' == IRQ_PORT_IRQ8_PORT))
+#define IRQ_PORT_IRQ8      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ8_PORT */
 
 #if ('0' == IRQ_PORT_IRQ8_BIT)
@@ -724,6 +743,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ9      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ9_PORT) || ('j' == IRQ_PORT_IRQ9_PORT))
 #define IRQ_PORT_IRQ9      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ9_PORT) || ('h' == IRQ_PORT_IRQ9_PORT))
+#define IRQ_PORT_IRQ9      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ9_PORT */
 
 #if ('0' == IRQ_PORT_IRQ9_BIT)
@@ -787,6 +808,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ10      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ10_PORT) || ('j' == IRQ_PORT_IRQ10_PORT))
 #define IRQ_PORT_IRQ10      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ10_PORT) || ('h' == IRQ_PORT_IRQ10_PORT))
+#define IRQ_PORT_IRQ10      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ10_PORT */
 
 #if ('0' == IRQ_PORT_IRQ10_BIT)
@@ -850,6 +873,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ11      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ11_PORT) || ('j' == IRQ_PORT_IRQ11_PORT))
 #define IRQ_PORT_IRQ11      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ11_PORT) || ('h' == IRQ_PORT_IRQ11_PORT))
+#define IRQ_PORT_IRQ11      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ11_PORT */
 
 #if ('0' == IRQ_PORT_IRQ11_BIT)
@@ -913,6 +938,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ12      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ12_PORT) || ('j' == IRQ_PORT_IRQ12_PORT))
 #define IRQ_PORT_IRQ12      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ12_PORT) || ('h' == IRQ_PORT_IRQ12_PORT))
+#define IRQ_PORT_IRQ12      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ12_PORT */
 
 #if ('0' == IRQ_PORT_IRQ12_BIT)
@@ -976,6 +1003,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ13      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ13_PORT) || ('j' == IRQ_PORT_IRQ13_PORT))
 #define IRQ_PORT_IRQ13      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ13_PORT) || ('h' == IRQ_PORT_IRQ13_PORT))
+#define IRQ_PORT_IRQ13      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ13_PORT */
 
 #if ('0' == IRQ_PORT_IRQ13_BIT)
@@ -1039,6 +1068,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ14      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ14_PORT) || ('j' == IRQ_PORT_IRQ14_PORT))
 #define IRQ_PORT_IRQ14      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ14_PORT) || ('h' == IRQ_PORT_IRQ14_PORT))
+#define IRQ_PORT_IRQ14      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ14_PORT */
 
 #if ('0' == IRQ_PORT_IRQ14_BIT)
@@ -1102,6 +1133,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ15      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ15_PORT) || ('j' == IRQ_PORT_IRQ15_PORT))
 #define IRQ_PORT_IRQ15      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ15_PORT) || ('h' == IRQ_PORT_IRQ15_PORT))
+#define IRQ_PORT_IRQ15      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ15_PORT */
 
 #if ('0' == IRQ_PORT_IRQ15_BIT)

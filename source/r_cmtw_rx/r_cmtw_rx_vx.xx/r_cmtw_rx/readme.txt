@@ -32,9 +32,6 @@ r_cmtw_rx
 |   +---ja
 |       r01an2199jj{VERSION_NUMBER}-rx-cmtw.pdf
 |
-+---ref
-|       r_cmtw_rx_config_reference.h
-|
 \---src
         r_cmtw_rx.c
 

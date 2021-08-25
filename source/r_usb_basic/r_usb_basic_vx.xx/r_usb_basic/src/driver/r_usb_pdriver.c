@@ -29,6 +29,7 @@
  *         : 30.09.2017 1.22 Rename "usb_pstd_buf2fifo"->"usb_pstd_buf_to_fifo" and Function move from"r_usb_plibusbip.c"
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2020 1.31 RX671 is added.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -1467,9 +1468,7 @@ void usb_peri_devdefault (usb_utr_t *ptr, uint16_t mode, uint16_t data2)
 {
     uint8_t *ptable;
     uint16_t len;
-#if (defined(USB_CFG_PCDC_USE) | defined(USB_CFG_PHID_USE))
     usb_ctrl_t ctrl;
-#endif
 
     usb_peri_detach(ptr, USB_NULL, USB_NULL);
 
@@ -1512,10 +1511,8 @@ void usb_peri_devdefault (usb_utr_t *ptr, uint16_t mode, uint16_t data2)
     usb_pstd_clr_pipe_table ();
     usb_peri_pipe_info(ptable, mode, len);
 
-#if (defined(USB_CFG_PCDC_USE) | defined(USB_CFG_PHID_USE))
     ctrl.module = USB_CFG_USE_USBIP;
     usb_set_event(USB_STS_DEFAULT, &ctrl);
-#endif
 
 } /* End of function usb_peri_devdefault() */
 
@@ -1532,6 +1529,7 @@ uint16_t usb_peri_pipe_info (uint8_t *table, uint16_t speed, uint16_t length)
     uint16_t ofdsc;
     uint16_t retval = USB_ERROR;
     uint8_t         pipe_no;
+    uint8_t class;
 
     /* Check Endpoint Descriptor */
     ofdsc = table[0];
@@ -1539,11 +1537,19 @@ uint16_t usb_peri_pipe_info (uint8_t *table, uint16_t speed, uint16_t length)
     /* WAIT_LOOP */
     while (ofdsc < length)
     {
+
+        /* Interface Descriptor */
+        if ( USB_DT_INTERFACE == table[ofdsc + USB_EP_B_DESCRIPTORTYPE])
+        {
+            /* bInterfaceClass set */
+            class = table[ofdsc + USB_IF_B_INTERFACECLASS];
+        }
+
         /* Endpoint Descriptor */
         if ( USB_DT_ENDPOINT == table[ofdsc + USB_EP_B_DESCRIPTORTYPE])
         {
             /* EP Table pipe Information set */
-            pipe_no = usb_pstd_set_pipe_table (&table[ofdsc]);
+            pipe_no = usb_pstd_set_pipe_table (&table[ofdsc], class);
             if (USB_NULL != pipe_no)
             {
                 retval = USB_OK;
@@ -1572,7 +1578,10 @@ void usb_peri_configured (usb_utr_t *ptr, uint16_t data1, uint16_t data2)
     usb_set_event(USB_STS_CONFIGURED, &ctrl);
 
 #if defined(USB_CFG_PMSC_USE)
-    usb_pmsc_receive_cbw();
+    if (USB_NULL != (g_usb_open_class[USB_CFG_USE_USBIP] & (1 << USB_PMSC)))      /* Check USB Open device class */
+    {
+        usb_pmsc_receive_cbw();
+    }
 #endif
 } /* End of function usb_configured() */
 
@@ -1644,7 +1653,10 @@ void usb_peri_resume(usb_utr_t *ptr, uint16_t data1, uint16_t data2)
 void usb_peri_interface(usb_utr_t *ptr, uint16_t data1, uint16_t data2)
 {
 #if defined(USB_CFG_PMSC_USE)
-    usb_pmsc_receive_cbw();
+    if (USB_NULL != (g_usb_open_class[USB_CFG_USE_USBIP] & (1 << USB_PMSC)))      /* Check USB Open device class */
+    {
+        usb_pmsc_receive_cbw();
+    }
 #else   /* defined(USB_CFG_PMSC_USE) */
     /* Non processing */
 #endif  /* defined(USB_CFG_PMSC_USE) */

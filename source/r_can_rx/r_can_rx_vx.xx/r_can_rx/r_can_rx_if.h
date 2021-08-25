@@ -44,6 +44,8 @@
 *         : 04.01.2021 4.10    - Changed can_tx_callback to can_txf_callback in case txf_cb_func is NULL in R_CAN_Create().
 *                              - Added support demo for CAN v4.10.
 *         : 01.04.2021 5.00    - Added support for setting different bitrate for different channels.
+*         : 07.04.2021 5.10    - Changed sid to id in R_CAN_RxSet().
+*                              - Added support RX671.
 ***********************************************************************************************************************/
 #ifndef CAN_INTERFACE_HEADER_FILE
 #define CAN_INTERFACE_HEADER_FILE 
@@ -64,7 +66,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define RCAN_RX_VERSION_MAJOR           (5)
-#define RCAN_RX_VERSION_MINOR           (00)
+#define RCAN_RX_VERSION_MINOR           (10)
 /* The process of getting the version number is done through the macro below. The version number is encoded where the
    top 2 bytes are the major version number and the bottom 2 bytes are the minor version number. For example,
    Version 4.25 would be returned as 0x00040019. */
@@ -79,7 +81,7 @@ Macro definitions
 #endif
 
 #if (CAN_USE_CAN2 == 1)
-    #if ((BSP_MCU_RX65N == 1) || (BSP_MCU_RX66T == 1) || (BSP_MCU_RX72T == 1))
+    #if ((BSP_MCU_RX65N == 1) || (BSP_MCU_RX66T == 1) || (BSP_MCU_RX671 == 1) || (BSP_MCU_RX72T == 1))
         #error " - CAN2 does not exist on this device! -"
     #endif
 #endif
@@ -268,7 +270,7 @@ uint32_t    R_CAN_TxCheck(const uint32_t ch_nr, const uint32_t mbox_nr);
 uint32_t    R_CAN_TxStopMsg(const uint32_t ch_nr, const uint32_t  mb_mode, const uint32_t mbox_nr);
 
 /* RECEIVE */
-uint32_t    R_CAN_RxSet(const uint32_t ch_nr, const uint32_t mbox_nr, const uint32_t sid, const uint32_t frame_type);
+uint32_t    R_CAN_RxSet(const uint32_t ch_nr, const uint32_t mbox_nr, const uint32_t id, const uint32_t frame_type);
 uint32_t    R_CAN_RxSetXid(const uint32_t ch_nr, const uint32_t mbox_nr, uint32_t xid, const uint32_t frame_type);
 uint32_t    R_CAN_RxPoll(const uint32_t ch_nr, const uint32_t mbox_nr);
 uint32_t    R_CAN_RxRead(const uint32_t ch_nr, const uint32_t mb_mode, const uint32_t mbox_nr, can_frame_t * const frame_p);

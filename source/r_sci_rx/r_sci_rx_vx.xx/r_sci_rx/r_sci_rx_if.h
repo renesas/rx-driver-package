@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_sci_rx_if.h
@@ -53,6 +53,8 @@
 *                              Merged IrDA functionality to SCI FIT.
 *           30.09.2020 3.70    Fixed issue of duplicate device group for SCI11 in MDF file.
 *                              Fixed issue of missing SSCL, SSDA in MDF file.
+*           31.03.2021 3.80    Added support for RX671.
+*                              Added support circular buffer in mode asynchronous.
 ***********************************************************************************************************************/
 
 #ifndef SCI_IF_H
@@ -63,7 +65,7 @@ Includes   <System Includes> , "Project Includes"
 ***********************************************************************************************************************/
 #include "platform.h"
 #include "r_sci_rx_config.h"  /* SCI config definitions */
-
+#include "r_byteq_config.h"
 /***********************************************************************************************************************
 Macro definitions
 ***********************************************************************************************************************/
@@ -72,9 +74,15 @@ Macro definitions
     #error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
 #endif
 
+#if (SCI_CFG_USE_CIRCULAR_BUFFER == 1)
+#if (BYTEQ_CFG_PROTECT_QUEUE == 0)
+    #error "Circular buffer must be protected."
+#endif
+#endif
+
 /* Version Number of API. */
 #define SCI_VERSION_MAJOR  (3)
-#define SCI_VERSION_MINOR  (70)
+#define SCI_VERSION_MINOR  (80)
 
 #define SCI_DTC_DMACA_DISABLE  (0x0)
 #define SCI_DTC_ENABLE         (0x1)
@@ -289,7 +297,7 @@ typedef enum e_sci_cmd
     SCI_CMD_CHANGE_TX_FIFO_THRESH,    /* change TX FIFO threshold */
     SCI_CMD_CHANGE_RX_FIFO_THRESH,    /* change RX FIFO threshold */
 #endif
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)
     SCI_CMD_SET_RXI_PRIORITY,         /* change RXI priority level */
     SCI_CMD_SET_TXI_PRIORITY,         /* change TXI priority level */
 #endif
@@ -324,7 +332,15 @@ typedef enum e_sci_cmd
     SCI_CMD_CHANGE_SPI_MODE,           /* change clock polarity and phase in SSPI mode */
     SCI_CMD_CHECK_TX_DONE,           /* see if tx requests complete; SCI_SUCCESS if yes */
     SCI_CMD_CHECK_RX_DONE,            /* see if rx request complete in sync mode; SCI_SUCCESS if yes */
-    SCI_CMD_CHECK_RX_SYNC_DONE
+    SCI_CMD_CHECK_RX_SYNC_DONE,
+
+    /*Sampling/transition timing adjust commands*/
+    SCI_CMD_RX_SAMPLING_ENABLE,
+    SCI_CMD_RX_SAMPLING_DISABLE,
+    SCI_CMD_TX_TRANSITION_TIMING_ENABLE,
+    SCI_CMD_TX_TRANSITION_TIMING_DISABLE,
+    SCI_CMD_SAMPLING_TIMING_ADJUST,
+    SCI_CMD_TRANSITION_TIMING_ADJUST
 } sci_cmd_t;
 
 /* SCI_CMD_CHANGE_BAUD/CHANGE_BITRATE take a ptr to this structure for *p_args */

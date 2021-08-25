@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_byteq
-VERSION = 		1.82
+VERSION = 		1.90
 MDF = V2
 
 CONFIG_FOLDER = r_config

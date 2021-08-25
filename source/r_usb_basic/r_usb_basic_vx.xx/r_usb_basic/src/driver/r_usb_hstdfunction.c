@@ -240,18 +240,28 @@ void usb_hdriver_init (usb_utr_t *ptr, usb_cfg_t *cfg)
 void usb_class_driver_start (usb_utr_t *ptr)
 {
 #if defined(USB_CFG_HCDC_USE)
-    usb_hcdc_driver_start(ptr);
+    if (USB_HCDC == ptr->keyword)
+    {
+        usb_hcdc_driver_start(ptr);
+    }
+#endif /* defined(USB_CFG_PCDC_USE) */
 
-#endif /* defined(USB_CFG_HCDC_USE) */
-#if defined(USB_CFG_HMSC_USE)
-    usb_hmsc_driver_start(ptr->ip);
-    usb_hmsc_storage_driver_start(ptr->ip);
+#if defined(USB_CFG_HHID_USE)
+    if (USB_HHID == ptr->keyword)
+    {
+        usb_hhid_driver_start(ptr);
+    }
 
 #endif /* defined(USB_CFG_HMSC_USE) */
-#if defined(USB_CFG_HHID_USE)
-    usb_hhid_driver_start(ptr);
 
-#endif /* defined(USB_CFG_HHID_USE) */
+#if defined(USB_CFG_HMSC_USE)
+    if (USB_HMSC == ptr->keyword)
+    {
+        usb_hmsc_driver_start(ptr->ip);
+        usb_hmsc_storage_driver_start(ptr->ip);
+    }
+
+#endif /* defined(USB_CFG_HMSC_USE) */
 
 } /* End of function usb_class_driver_start() */
 
@@ -275,6 +285,7 @@ void class_trans_result(usb_utr_t *ptr, uint16_t data1, uint16_t data2)
 #endif /* (BSP_CFG_RTOS_USED != 0) */
 } /* End of function class_trans_result() */
 
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
 /******************************************************************************
  Function Name   : class_trans_wait_tmo
  Description     : Receive the result of the class request with a timeout.
@@ -325,6 +336,9 @@ uint16_t class_trans_wait_tmo(usb_utr_t *ptr, uint16_t tmo)
     }
 
 } /* End of function class_trans_wait_tmo() */
+#endif /* (BSP_CFG_RTOS_USED != 0) */
+
+
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 
 /******************************************************************************

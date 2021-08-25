@@ -49,6 +49,7 @@
 *         : 30.06.2020 3.60    Changed revision to reflect demo upgrade.
 *         : 01.04.2021 3.70    Added support RX23W-83pins
 *         : 01.04.2021 3.80    Added support RX72M 144pins, 100pins.
+*         : 07.04.2021 3.90    Added support RX671.
 ***********************************************************************************************************************/
 
 #ifndef MPC_RX_INTERFACE_HEADER_FILE
@@ -72,7 +73,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define MPC_RX_VERSION_MAJOR           (3)
-#define MPC_RX_VERSION_MINOR           (80)
+#define MPC_RX_VERSION_MINOR           (90)
 
 /***********************************************************************************************************************
 Typedef definitions

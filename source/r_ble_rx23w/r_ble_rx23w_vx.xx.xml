@@ -39,6 +39,8 @@
             <version>5.60</version>
             <version>5.61</version>
             <version>5.62</version>
+            <version>5.63</version>
+            <version>5.64</version>
         </dependency>
         <dependency>
             <module>r_lpc_rx</module>

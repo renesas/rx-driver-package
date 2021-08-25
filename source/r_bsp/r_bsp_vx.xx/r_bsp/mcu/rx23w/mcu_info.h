@@ -25,6 +25,8 @@
 * History : DD.MM.YYYY Version  Description
 *         : 29.03.2019 1.00     First Release
 *         : 31.07.2020 1.01     Added support for RX23W with 83 pin package.
+*         : 18.05.2021 1.02     Added the following macro definition.
+*                               - BSP_MCU_VBATT_INITIALIZE
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -197,5 +199,8 @@ Macro definitions
 #define BSP_MCU_NMI_IWDT_ERROR
 #define BSP_MCU_NMI_LVD1
 #define BSP_MCU_NMI_VBATT
+
+#define BSP_MCU_VBATT_INITIALIZE
+
 #endif /* MCU_INFO */
 

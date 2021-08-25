@@ -23,6 +23,8 @@
 * History : DD.MM.YYYY Version Description
 *           30.12.2019 1.00    Initial Release.
 *           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
+*           31.03.2021 3.80    Added support circular buffer in mode asynchronous.
+*                              Updated macro definition enable and disable TXI, RXI, ERI, TEI.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -430,8 +432,8 @@ void sci_initialize_ints(sci_hdl_t const hdl,
     /* CLEAR INTERRUPT FLAGS */
     *hdl->rom->ir_rxi = 0;
     *hdl->rom->ir_txi = 0;
-    (*hdl->rom->icu_grp) &= (~hdl->rom->tei_ch_mask);
-    (*hdl->rom->icu_grp) &= (~hdl->rom->eri_ch_mask);
+    DISABLE_TEI_INT;
+    DISABLE_ERI_INT;
 
     /* REGISTER GROUP INTERRUPTS WITH BSP */
     #if SCI_CFG_TEI_INCLUDED
@@ -599,20 +601,28 @@ sci_err_t sci_async_cmds(sci_hdl_t const hdl,
 
         case (SCI_CMD_TX_Q_FLUSH):
         {
+#if (SCI_CFG_USE_CIRCULAR_BUFFER == 1)
+            R_BYTEQ_Flush(hdl->u_tx_data.que);
+#else
             /* Disable TXI interrupt */
             DISABLE_TXI_INT;
             R_BYTEQ_Flush(hdl->u_tx_data.que);
             ENABLE_TXI_INT;
-            break;
+#endif
+        break;
         }
 
         case (SCI_CMD_RX_Q_FLUSH):
         {
+#if (SCI_CFG_USE_CIRCULAR_BUFFER == 1)
+            R_BYTEQ_Flush(hdl->u_rx_data.que);
+#else
             /* Disable RXI interrupt */
             DISABLE_RXI_INT;
             R_BYTEQ_Flush(hdl->u_rx_data.que);
             ENABLE_RXI_INT;
-            break;
+#endif
+        break;
         }
 
         case (SCI_CMD_TX_Q_BYTES_FREE):
@@ -870,9 +880,7 @@ sci_err_t sci_sync_cmds(sci_hdl_t const hdl,
 #endif
 #endif
 
-
-            (*hdl->rom->icu_grp) &= (~hdl->rom->eri_ch_mask);  /* clear eri interrupt flag */
-
+            DISABLE_ERI_INT;                        /* clear eri interrupt flag */
             ENABLE_ERI_INT;                         /* enable rx err interrupts in ICU */
             ENABLE_RXI_INT;                         /* enable receive interrupts in ICU */
 

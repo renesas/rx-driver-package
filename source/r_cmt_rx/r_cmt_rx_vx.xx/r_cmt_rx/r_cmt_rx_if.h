@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_cmt_rx_if.h
@@ -50,6 +50,7 @@
 *         : 30.06.2020 4.60    Changed revision to reflect demo upgrade.
 *         : 31.08.2020 4.70    Added condition for _RI_TRACE_TIMER macro
 *                              Fixed warning when using RI600V4 with device has 2 CMT channels
+*         : 31.03.2021 4.80    Added support for RX671.
 ***********************************************************************************************************************/
 #ifndef CMT_HEADER_FILE
 #define CMT_HEADER_FILE
@@ -68,7 +69,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define CMT_RX_VERSION_MAJOR            (4)
-#define CMT_RX_VERSION_MINOR            (70)
+#define CMT_RX_VERSION_MINOR            (80)
 
 /* This define is used with the R_CMT_Control() function if not channel needs to input. */
 #define CMT_RX_NO_CHANNEL               (0xFFFFFFFF)

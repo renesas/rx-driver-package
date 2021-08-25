@@ -22,18 +22,21 @@ r_lpc_rx
 |    |
 |    +---en
 |    |    |
-|    |    +---r01an2769ej0201-rx-lpc.pdf
+|    |    +---r01an2769ej0202-rx-lpc.pdf
 |    |
 |    +---ja
 |         |
-|         +---r01an2769jj0201-rx-lpc.pdf
+|         +---r01an2769jj0202-rx-lpc.pdf
 |    
 +---ref
 |    r_lpc_rx_config_reference.h
 |
-+---src
+\---src
+     |    r_lpc_rx.c
+     |    r_lpc_rx_platform.h
+     |    r_lpc_rx_private.h
      |
-     +---targets
+     \---targets
           |
           +---rx110
           |    r_lpc_rx110.c
@@ -85,6 +88,11 @@ r_lpc_rx
           |    r_lpc_rx66n_if.h
           |    r_lpc_rx66n_private.h
           |
+          +---rx671
+          |    r_lpc_rx671.c
+          |    r_lpc_rx671_if.h
+          |    r_lpc_rx671_private.h
+          |
           +---rx71m
           |    r_lpc_rx71m.c
           |    r_lpc_rx71m_if.h
@@ -95,7 +103,7 @@ r_lpc_rx
           |    r_lpc_rx72m_if.h
           |    r_lpc_rx72m_private.h
           |
-          +---rx72n
+          \---rx72n
                r_lpc_rx72n.c
                r_lpc_rx72n_if.h
                r_lpc_rx72n_private.h

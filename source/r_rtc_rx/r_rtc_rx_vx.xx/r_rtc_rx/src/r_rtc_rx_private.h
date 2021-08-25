@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rtc_rx_private.h
@@ -54,6 +54,11 @@
 *           30.07.2019 2.77    Added support for RX72M.
 *           22.11.2019 2.78    Added support for RX66N.
 *                              Added support for RX72N.
+*           30.06.2021 2.81    Added support for RX671.
+*                              Added the following macro definitions.
+*                              - RTC_CAPTURE_TAMPICR1_CH0EN
+*                              - RTC_CAPTURE_TAMPICR1_CH1EN
+*                              - RTC_CAPTURE_TAMPICR1_CH2EN
 ***********************************************************************************************************************/
 
 #ifndef R_RTC_PRIVATE_H
@@ -76,6 +81,9 @@ Macro definitions
 #define RTC_CAPTURE_ENABLE_MASK (0x80)
 #define RTC_CAPTURE_EVENT_MASK  (0x04)
 #define RTC_CAPTURE_EDGE_MASK   (0x03)
+#define RTC_CAPTURE_TAMPICR1_CH0EN  (0x01)
+#define RTC_CAPTURE_TAMPICR1_CH1EN  (0x02)
+#define RTC_CAPTURE_TAMPICR1_CH2EN  (0x04)
 
 #define RTC_INT_ENABLE          (0x07)  /* Enable the AIE bit, the CIE bit and the PIE bit. */
                                         /* The carry interrupt (CIE bit) is used to read the current time. */
@@ -115,7 +123,7 @@ Macro definitions
     #elif defined(RTC_CFG_DRIVE_CAPACITY_STD)
         #define RTC_DRIVE_CAPACITY      (4)
     #endif
-#else /* RX130, RX230, RX231, RX23W, RX64M, RX65N, RX71M, RX72M, RX66N, RX72N */
+#else /* RX130, RX230, RX231, RX23W, RX64M, RX65N, RX671, RX71M, RX72M, RX66N, RX72N */
     #if defined(RTC_CFG_DRIVE_CAPACITY_LO)
         #define RTC_DRIVE_CAPACITY      (1)
     #elif defined(RTC_CFG_DRIVE_CAPACITY_STD)

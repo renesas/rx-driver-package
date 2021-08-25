@@ -30,6 +30,7 @@
  *         : 31.05.2019 1.26 Added support for GNUC and ICCRX.
  *         : 30.07.2019 1.27 RX72M is added.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 31.05.2021 1.31 RX671 USB1 is added.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -210,11 +211,11 @@ void hw_usb_pmodule_init( void )
     }
 
 #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX72T)\
-    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N)
+    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) || defined(BSP_MCU_RX671)
     USB_M0.PHYSLEW.LONG = 0x5;
 
 #endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX72T)\
-    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) */
+    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) || defined(BSP_MCU_RX671) */
 
     USB_M0.SYSCFG.WORD &= (~USB_DRPD);
 
@@ -266,7 +267,7 @@ void hw_usb_pmodule_init( void )
 
 #endif  /* (USB_CFG_CLKSEL == USB_CFG_20MHZ) || (USB_CFG_CLKSEL == USB_CFG_24MHZ) */
 
-    USB_M1.BUSWAIT.WORD = (USB_CFG_BUSWAIT | 0x0F00);
+    USB_M1.BUSWAIT.WORD = USB_CFG_BUSWAIT;
 
     USB_M1.PHYSET.WORD |= USB_REPSEL_16;
 
@@ -284,13 +285,19 @@ void hw_usb_pmodule_init( void )
     USB_M1.INTENB0.WORD = (USB_BEMPE | USB_BRDYE | USB_VBSE | USB_DVSE | USB_CTRE);
 
 #endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
-#if defined(BSP_MCU_RX63N)
+#if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671)
     USB_M1.SYSCFG.WORD |= USB_SCKE;
     /* WAIT_LOOP */
     while (USB_SCKE != (USB_M1.SYSCFG.WORD & USB_SCKE))
     {
         /* Wait for Set of SCKE */
     }
+
+#if defined(BSP_MCU_RX671)
+    USB_M1.PHYSLEW.LONG = 0x5;
+
+#endif  /* defined(BSP_MCU_RX671) */
+
     USB_M1.SYSCFG.WORD &= (~USB_DRPD);
 
     USB_M1.SYSCFG.WORD |= USB_USBE;
@@ -307,7 +314,7 @@ void hw_usb_pmodule_init( void )
     USB_M1.INTENB0.WORD = (USB_BEMPE | USB_BRDYE | USB_VBSE | USB_DVSE | USB_CTRE);
 /*    hw_usb_set_mbw(USB_NULL, USB_CUSE, USB1_CFIFO_MBW); */
 
-#endif  /* defined(BSP_MCU_RX63N) */
+#endif  /* defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671) */
 #endif  /* USB_CFG_USE_USBIP == USB_CFG_IP0 */
 }
 /******************************************************************************

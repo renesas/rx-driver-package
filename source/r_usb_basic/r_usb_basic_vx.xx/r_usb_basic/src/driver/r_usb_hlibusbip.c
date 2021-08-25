@@ -30,6 +30,7 @@
  *         : 30.09.2017 1.22 Rename "usb_hstd_buf2fifo"->"usb_hstd_buf_to_fifo" and Function move for"r_usb_hdriver.c"
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2020 1.31 RX671 is added.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -1057,7 +1058,14 @@ void usb_hstd_brdy_pipe_process (usb_utr_t *ptr, uint16_t bitsts)
                     g_usb_cstd_dma_size[ip][dma_ch] = buffer & USB_DTLN;
                     if (set_dma_block_cnt > trans_dma_block_cnt)
                     {
-                        g_usb_cstd_dma_size[ip][dma_ch] += ((set_dma_block_cnt - (trans_dma_block_cnt + 1)) * maxps);
+                        if (0 == g_usb_cstd_dma_size[ip][dma_ch])   /* DTLN = 0 (Received 0 length packet) */
+                        {
+                            g_usb_cstd_dma_size[ip][dma_ch] += ((set_dma_block_cnt - trans_dma_block_cnt) * maxps);
+                        }
+                        else
+                        {
+                            g_usb_cstd_dma_size[ip][dma_ch] += ((set_dma_block_cnt - (trans_dma_block_cnt + 1)) * maxps);
+                        }
                     }
 
                     /* Check data count */
@@ -1329,7 +1337,7 @@ uint8_t usb_hstd_make_pipe_reg_info (uint16_t ip_no, uint16_t address, uint16_t 
 #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M)
         if (USB_IP1 == ip_no)
         {   /* PIPEBUF is USBA module only */
-            pipe_buf = usb_cstd_get_pipe_buf_value(pipe_no);
+            pipe_buf = usb_hstd_get_pipe_buf_value(usb_class, pipe_no);
             pipe_table_work->pipe_buf  = pipe_buf;
         }
 #endif /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
@@ -1371,6 +1379,37 @@ void usb_hstd_clr_pipe_table (uint16_t ip_no, uint16_t device_address)
     }
 
 } /* eof usb_hstd_clr_pipe_table() */
+
+/******************************************************************************
+Function Name   : usb_hstd_clr_pipe_table_ip
+Description     : Clear pipe table.
+Arguments       : uint16_t ip_no          : USB Module no.(USB_IP0/USB_IP1)
+Return value    : none
+******************************************************************************/
+void usb_hstd_clr_pipe_table_ip (uint16_t ip_no)
+{
+    uint8_t pipe_no;
+
+    /* Search use pipe block */
+    /* WAIT_LOOP */
+    for (pipe_no = USB_MIN_PIPE_NO; pipe_no < (USB_MAX_PIPE_NO +1); pipe_no++)
+    {   /* Check use block */
+        if (USB_TRUE == g_usb_pipe_table[ip_no][pipe_no].use_flag)
+        {   /* Check USB Device address */
+            g_usb_pipe_table[ip_no][pipe_no].use_flag = USB_FALSE;
+            g_usb_pipe_table[ip_no][pipe_no].pipe_cfg = USB_NULL;
+            g_usb_pipe_table[ip_no][pipe_no].pipe_maxp = USB_NULL;
+            g_usb_pipe_table[ip_no][pipe_no].pipe_peri = USB_NULL;
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M)
+            if (USB_IP1 == ip_no)
+            {   /* PIPEBUF is USBA module only */
+                g_usb_pipe_table[ip_no][pipe_no].pipe_buf = USB_NULL;
+            }
+#endif /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
+        }
+    }
+
+} /* eof usb_hstd_clr_pipe_table_ip() */
 
 /******************************************************************************
 Function Name   : usb_hstd_set_pipe_reg

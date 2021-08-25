@@ -23,6 +23,7 @@ Supported MCUs
 * RX65N/RX651 Groups
 * RX66T Group
 * RX66N Group
+* RX671 Group
 * RX71M Group
 * RX72M Group
 * RX72N Group
@@ -36,6 +37,7 @@ Boards Tested On
 * RSKRX65N+ 2MB
 * RSKRX66N
 * RSKRX66T
+* RSKRX671
 * RSKRX71M+
 * RSKRX72M
 * RSKRX72N
@@ -77,9 +79,6 @@ r_can_rx
 |       r01an2472eu{VERSION_NUMBER}-rx-can.pdf
 |   +-- ja
 |       r01an2472ju{VERSION_NUMBER}-rx-can.pdf
-|
-+---ref
-|       r_can_rx_config_reference.h (copy to ../r_config)
 |
 +---src
         r_can_rx.c

@@ -51,6 +51,7 @@
 *         : 17.12.2019 1.02     Modified the comment of description.
 *         : 20.11.2020 1.03     Changed to suppress the warning that occurs when the warning level is raised in 
 *                               the IAR compiler.
+*         : 18.05.2021 1.04     Added definition for Address exceptions.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -1599,6 +1600,7 @@ R_BSP_PRAGMA(bitfields=default)\
 /* #define excep_floating_point_isr */
 /* #define non_maskable_isr */
 /* #define undefined_interrupt_source_isr */
+/* #define excep_address_isr */
 
 #elif defined(__GNUC__)
 
@@ -1618,6 +1620,7 @@ R_BSP_PRAGMA(bitfields=default)\
 /* #define excep_floating_point_isr */
 /* #define non_maskable_isr */
 /* #define undefined_interrupt_source_isr */
+/* #define excep_address_isr */
 
 #elif defined(__ICCRX__)
 
@@ -1637,6 +1640,7 @@ R_BSP_PRAGMA(bitfields=default)\
 #define excep_floating_point_isr            _float_placeholder
 #define non_maskable_isr                    __NMI_handler
 #define undefined_interrupt_source_isr      __undefined_interrupt_source_handler
+#define excep_address_isr                   __excep_address_inst
 
 #endif
 

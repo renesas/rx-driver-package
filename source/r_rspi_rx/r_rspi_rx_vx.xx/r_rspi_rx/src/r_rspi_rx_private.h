@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013(2014-2020) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013(2014-2021) Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rspi_rx_private.h
@@ -41,6 +41,7 @@
 *         : 22.11.2019 2.04     Supported RX72N and RX66N.
 *         : 10.03.2020 2.05     Supported RX23E-A.
 *         : 10.09.2020 3.00     Deleted spti_dmacdtc_flg and spri_dmacdtc_flg in rspi_config_block_t.
+*         : 30.06.2021 3.01     Supported RX671.
 ***********************************************************************************************************************/
 
 #ifndef RSPI_PRIVATE_H
@@ -61,7 +62,7 @@ Macro definitions
 #define RSPI_MAX_CHANNELS   (2)
 #elif defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX630) || defined(BSP_MCU_RX631) \
    || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) \
-   || defined(BSP_MCU_RX66N)
+   || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX671)
 #define RSPI_MAX_CHANNELS   (3)
 #elif defined(BSP_MCU_RX210) || defined(BSP_MCU_RX110) || defined(BSP_MCU_RX111) \
    || defined(BSP_MCU_RX62T) || defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX113) \
@@ -124,8 +125,15 @@ Macro definitions
                                                                    An under run error occurs */
 #define RSPI_SPSR_PERF  (0x08) /* 0: No parity error.           1: A parity error occurred. */
 #define RSPI_SPSR_UDRF  (0x10) /* 0: No under run error         1: An under run error occurs */
+#define RSPI_SPSR_SPCF  (0x40) /* 0: Communication does not start or communication is in progress */
+                               /* 1: Communication has ended */
 #define RSPI_SPSR_MASK  (0xA0) /* Protect reserved bits. */
+
+#ifdef BSP_MCU_RX671
+#define RSPI_SPSR_MODF_UDRF_MASK    (0xEB)  /* Protect reserved bits. */
+#else
 #define RSPI_SPSR_MODF_UDRF_MASK    (0xAB)  /* Protect reserved bits. */
+#endif
 
 /* RSPI Data Control Register (SPDCR) masks*/
 #define RSPI_SPDCR_SPFC   (0x03) /* 0: Transfer n+1 frames at a time */
@@ -170,8 +178,27 @@ Macro definitions
 
 #define RSPI_SPB_16_MASK  (0x0C00)  /* Length settings with any of these bits set do not need 32-bit access. */
 
+#if defined(BSP_MCU_RX671)
+/* RSPI Data Control Register 2 (SPDCR2) */
+#define RSPI_SPDCR2_BYSW  (0x01)    /* 0: Byte swapping of SPDR data disabled. 1: Byte swapping of SPDR data enabled */
+#define RSPI_SPDCR2_DINV  (0x02)    /* 0: Data bits in the transmit buffer are transferred to the shift register as they are.
+                                       Data bits in the shift register are transferred to the receive buffer as they are. */
+                                    /* 1: Data bits in the transmit buffer are transferred to the shift register with inverting.
+                                       Data bits in the shift register are transferred to the receive buffer with inverting.*/
+#define RSPI_SPDCR2_MASK  (0x03)    /* Protect reserved bits. */
+#else
 /* RSPI Data Control Register 2 (SPDCR2) */
 #define RSPI_SPDCR2_MASK  (0x01) /* Protect reserved bits. */
+#endif
+
+/* RSPI Control Register 3 (SPCR3) */
+#define RSPI_SPCR3_RXMD   (0x01)    /* 0: Full-duplex or transmit-only simplex communications (enables the transmitter) */
+                                    /* 1: Receive-only simplex communications (disables the transmitter) */
+#define RSPI_SPCR3_SCKDDIS (0x02)   /* 0: Inserts delays between data bytes during burst transfer */
+                                    /* 1: Does not insert delays between data bytes during burst transfer */
+#define RSPI_SPCR3_SPCIE (0x10)     /* 0: Disables the generation of communication end interrupt requests */
+                                    /* 1: Enables the generation of communication end interrupt requests */
+#define RSPI_SPCR3_MASK  (0x13)     /* Protect reserved bits. */
 
 /* Clock phase and polarity settings. */
 #define RSPI_DATA_ON_ODD_CLK  (0x0000)    /* 0: Data sampling on odd clock edge. */

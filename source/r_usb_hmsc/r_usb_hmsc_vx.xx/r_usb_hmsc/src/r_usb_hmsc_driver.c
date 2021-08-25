@@ -109,6 +109,7 @@ static usb_utr_t gs_usb_hmsc_req_tran_result_msg;  /* Send:usb_hmsc_trans_result
 #endif /* (BSP_CFG_RTOS_USED) */
 
 uint32_t    g_usb_hmsc_cmd_data_length[USB_NUM_USBIP];
+uint32_t    g_usb_hmsc_cmd_data_length_rtos_tmp[USB_NUM_USBIP];
 
 /******************************************************************************
  Exported global variables
@@ -711,7 +712,9 @@ static uint16_t usb_hmsc_data_act (usb_utr_t *mess)
     {
         if (USB_MSG_HMSC_DATA_IN == usb_shmsc_process[mess->ip]) /* DataIn */
         {
+            g_usb_hmsc_cmd_data_length[mess->ip] = 0;
             hmsc_retval = usb_hmsc_get_data(mess, side, pbuff, size);
+            g_usb_hmsc_cmd_data_length[mess->ip] = g_usb_hmsc_cmd_data_length_rtos_tmp[mess->ip];
             if (USB_HMSC_OK != hmsc_retval)
             {
                 USB_PRINTF1("### DataIN : GetData error(drive:%d) \n", side);
@@ -1472,6 +1475,7 @@ static uint16_t usb_hmsc_get_data (usb_utr_t *ptr, uint16_t side, uint8_t *buff,
     {
         case USB_DATA_SHT: /* Continue */
         case USB_DATA_OK:
+            g_usb_hmsc_cmd_data_length[ptr->ip] = ptr->tranlen;
             g_usb_hmsc_in_pipectr[ptr->ip][side] = hw_usb_read_pipectr(ptr, pipe);
             return USB_HMSC_OK;
         break;
@@ -2261,6 +2265,7 @@ void usb_hmsc_drive_complete (usb_utr_t *ptr, uint16_t addr, uint16_t data2)
 
     ctrl.module = ptr->ip; /* Module number setting */
     ctrl.address = addr;
+    ctrl.type = USB_HMSC;
 
     usb_set_event(USB_STS_CONFIGURED, &ctrl); /* Set Event()  */
 } /* End of function usb_hmsc_drive_complete() */
@@ -2435,6 +2440,7 @@ void usb_hmsc_strg_cmd_complete (usb_utr_t *mess, uint16_t devadr, uint16_t data
     ctrl.pipe = mess->keyword; /* Pipe number setting */
     ctrl.address = usb_hstd_get_devsel(mess, ctrl.pipe) >> 12;
     ctrl.size = 0;
+    ctrl.type = USB_HMSC;
 
     switch (mess->result)
     {
@@ -2575,6 +2581,7 @@ uint16_t usb_hmsc_trans_wait_tmo(uint16_t tmo)
         USB_PRINTF1("### HMSC trcv_msg error (%ld)\n", err);
         return USB_ERROR;
     }
+    g_usb_hmsc_cmd_data_length_rtos_tmp[mess->ip] = mess->tranlen;
 
     return (mess->status);
 } /* End of function usb_hmsc_trans_wait_tmo() */

@@ -63,6 +63,7 @@
 *         :                    Modified comment of API function to Doxygen style.
 *         :                    Fixed to comply with GSCE Coding Standards Rev.6.00.
 *         : 30.12.2019 3.40    Added support for RX66N, RX72N.
+*         : 31.03.2021 3.70    Added support for RX671.
 *******************************************************************************/
 
 /*******************************************************************************

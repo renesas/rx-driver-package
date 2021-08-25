@@ -10,7 +10,7 @@ R01AN2025JJ
 
 Version
 -------
-v1.30
+v1.31
 
 Overview
 --------
@@ -33,6 +33,8 @@ Supported MCUs
 * RX72M Group
 * RX72N Group
 * RX66N Group
+* RX671 Group
+
 
 
 Boards Tested On
@@ -44,6 +46,7 @@ Boards Tested On
 * RSKRX72T
 * RSKRX72M
 * RSKRX72N
+* RSKRX671
 
  
 Limitations
@@ -63,7 +66,7 @@ How to add to your project
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v.3.01.00
+* Renesas RX v.3.03.00
 * GCC for Renesas RX 4.08.04.201902
 * IAR C/C++ Compiler for Renesas version 4.12.01
 
@@ -75,9 +78,9 @@ r_usb_basic
 |
 +---doc
 |     \en
-|     |   r01an2025ej0130_usb.pdf
+|     |   r01an2025ej0131_usb.pdf
 |     \jp
-|         r01an2025jj0130_usb.pdf
+|         r01an2025jj0131_usb.pdf
 |
 +---ref
 |       r_usb_config_reference.h

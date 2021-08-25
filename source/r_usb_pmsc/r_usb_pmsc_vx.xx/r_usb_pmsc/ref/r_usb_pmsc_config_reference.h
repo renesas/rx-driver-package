@@ -46,7 +46,7 @@
 
 /* Vendor Information in INQUIRY Data Format */
 /* Note : Be sure to specify 8 bytes of data in double quotation marks. */
-#define USB_CFG_PMSC_VENDOR             ("Renesas ")
+#define USB_CFG_PMSC_VENDOR             ("Vendor  ")
 
 /* Product Identification in INQUIRY Data Format */
 /* Note : Be sure to specify 16 bytes of data in double quotation marks. */

@@ -47,6 +47,7 @@
 *                              Fixed warnings in IAR.
 *         : 30.12.2019 2.30    Modified comment of API function to Doxygen style.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.00.
+*         : 31.03.2021 2.60    Supported RX671.
 *******************************************************************************/
 
 /*******************************************************************************
@@ -736,6 +737,7 @@ static bool r_dmaca_set_transfer_data(uint8_t channel, dmaca_transfer_data_cfg_t
 {
 #if (1 == DMACA_CFG_PARAM_CHECKING_ENABLE)
 
+#if !defined(BSP_MCU_RX671)
     /* Check source address value. */
     if ((0x00000000 != ((uint32_t)p_cfg->p_src_addr & DMACA_INVALID_SRC_ADDR_MASK)) &&
 
@@ -753,6 +755,7 @@ static bool r_dmaca_set_transfer_data(uint8_t channel, dmaca_transfer_data_cfg_t
     {
         return false;
     }
+#endif
 
     /* Offset addition can be specified only for channel 0. */
     if (0 == channel)

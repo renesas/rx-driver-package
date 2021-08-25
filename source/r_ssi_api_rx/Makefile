@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_ssi_api_rx
-VERSION = 		2.02
+VERSION = 		2.03
 MDF = V2
 
 CONFIG_FOLDER = r_config

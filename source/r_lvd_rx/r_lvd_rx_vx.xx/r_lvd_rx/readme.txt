@@ -82,7 +82,10 @@ r_lvd_rx
         |       r_lvd_rx66n.h
         |
         +---rx66t
-        |       r_lvd_rx66n.h
+        |       r_lvd_rx66t.h
+        |
+        +---rx671
+        |       r_lvd_rx671.h
         |
         +---rx71m
         |       r_lvd_rx71m.h

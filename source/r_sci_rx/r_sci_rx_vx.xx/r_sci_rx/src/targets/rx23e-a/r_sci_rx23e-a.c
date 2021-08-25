@@ -23,6 +23,7 @@
 * History : DD.MM.YYYY Version Description
 *           31.03.2020 1.00    Initial Release.
 *           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
+*           31.03.2021 3.80    Added support circular buffer in mode asynchronous.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -705,19 +706,27 @@ sci_err_t sci_async_cmds(sci_hdl_t const hdl,
 #endif
         case (SCI_CMD_TX_Q_FLUSH):
         {
+#if (SCI_CFG_USE_CIRCULAR_BUFFER == 1)
+            R_BYTEQ_Flush(hdl->u_tx_data.que);
+#else
             /* Disable TXI interrupt */
             DISABLE_TXI_INT;
             R_BYTEQ_Flush(hdl->u_tx_data.que);
             ENABLE_TXI_INT;
+#endif
         break;
         }
 
         case (SCI_CMD_RX_Q_FLUSH):
         {
+#if (SCI_CFG_USE_CIRCULAR_BUFFER == 1)
+            R_BYTEQ_Flush(hdl->u_rx_data.que);
+#else
             /* Disable RXI interrupt */
             DISABLE_RXI_INT;
             R_BYTEQ_Flush(hdl->u_rx_data.que);
             ENABLE_RXI_INT;
+#endif
         break;
         }
 

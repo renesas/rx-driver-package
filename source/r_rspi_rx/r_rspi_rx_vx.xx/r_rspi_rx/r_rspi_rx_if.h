@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013 (2014-2020) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013 (2014-2021) Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rspi_rx_if.h
@@ -41,6 +41,7 @@
 *         : 22.11.2019 2.04     Supported RX72N and RX66N.
 *         : 10.03.2020 2.05     Supported RX23E-A.
 *         : 10.09.2020 3.00     Added new API function R_RSPI_DisableRSPI() and R_RSPI_DisableSpti().
+*         : 30.06.2021 3.01     Supported RX671.
 ***********************************************************************************************************************/
 
 #ifndef RSPI_API_HEADER_FILE
@@ -67,7 +68,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define RSPI_RX_VERSION_MAJOR           (3)
-#define RSPI_RX_VERSION_MINOR           (00)
+#define RSPI_RX_VERSION_MINOR           (01)
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -168,6 +169,9 @@ typedef struct rspi_cmd_setregs_s
     uint8_t spnd_val;   // RSPI Next-Access Delay Register (SPND)
     uint8_t spcr2_val;  // RSPI Control Register 2 (SPCR2)
     uint8_t spdcr2_val; // RSPI Data Control Register 2 (SPDCR2)
+#if defined(BSP_MCU_RX671)
+    uint8_t spcr3_val;  // RSPI Control Register 3 (SPCR3)
+#endif
 } rspi_cmd_setregs_t;
 
 /* Data structure for the Set Transfer mode command. */

@@ -31,6 +31,7 @@
  *         : 31.05.2019 1.26 Added support for GNUC and ICCRX.
  *         : 30.07.2019 1.27 RX72M is added.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 31.05.2021 1.31 RX671 USB1 is added.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -469,11 +470,11 @@ void usb_pstd_set_stall_pipe0(void)
 uint8_t *usb_pstd_write_fifo(uint16_t count, uint16_t pipemode, uint8_t *write_p)
 {
     uint16_t even;
-#if ((USB_CFG_USE_USBIP == USB_CFG_IP1) && (!defined(BSP_MCU_RX63N)))
+#if ((USB_CFG_USE_USBIP == USB_CFG_IP1) && (!(defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX671))))
     uint16_t odd;
 #endif  /* USB_CFG_USE_USBIP == USB_CFG_IP1 */
 
-#if (USB_CFG_USE_USBIP == USB_CFG_IP0) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)
+#if (USB_CFG_USE_USBIP == USB_CFG_IP0) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671)
     /* WAIT_LOOP */
     for (even = (uint16_t)(count >> 1); (0 != even); --even)
     {
@@ -556,18 +557,18 @@ uint8_t *usb_pstd_write_fifo(uint16_t count, uint16_t pipemode, uint8_t *write_p
 uint8_t *usb_pstd_read_fifo(uint16_t count, uint16_t pipemode, uint8_t *read_p)
 {
     uint16_t even;
-#if ((USB_CFG_USE_USBIP == USB_CFG_IP1) && (!defined(BSP_MCU_RX63N)))
+#if ((USB_CFG_USE_USBIP == USB_CFG_IP1) && (!(defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX671))))
     uint16_t odd;
 #endif  /* USB_CFG_USE_USBIP == USB_CFG_IP0 */
     uint32_t odd_byte_data_temp;
 
-#if !((USB_CFG_USE_USBIP == USB_CFG_IP0) || defined(BSP_MCU_RX63N)) || defined(BSP_MCU_RX62N)
+#if !((USB_CFG_USE_USBIP == USB_CFG_IP0) || defined(BSP_MCU_RX63N)) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671)
 #if USB_CFG_ENDIAN != USB_CFG_LITTLE
     uint16_t    i;
 #endif  /* USB_CFG_ENDIAN != USB_CFG_LITTLE */
 #endif /* !((USB_CFG_USE_USBIP == USB_CFG_IP0) || defined(BSP_MCU_RX63N)) */
 
-#if (USB_CFG_USE_USBIP == USB_CFG_IP0) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)
+#if (USB_CFG_USE_USBIP == USB_CFG_IP0) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671)
     /* WAIT_LOOP */
     for (even = (uint16_t)(count >> 1); (0 != even); --even)
     {

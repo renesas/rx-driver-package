@@ -33,6 +33,7 @@
  *         : 31.05.2019 1.26 Added support for GNUC and ICCRX.
  *         : 30.07.2019 1.27 RX72M is added.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2020 1.31 RX671 is added.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -140,9 +141,6 @@ uint8_t g_usb_hhub_data[USB_NUM_USBIP][USB_MAXDEVADDR + 1u][8];
 
 /* HUB down port status */
 uint16_t g_usb_shhub_down_port[USB_NUM_USBIP][USB_MAXDEVADDR + 1u];
-
-/* Down port remote wake up */
-uint16_t g_usb_shhub_remote[USB_NUM_USBIP][USB_MAXDEVADDR + 1u];
 
 /* Up-hubaddr, up-hubport, portnum, pipenum */
 usb_hub_info_t g_usb_shhub_info_data[USB_NUM_USBIP][USB_MAXDEVADDR + 1u];
@@ -259,7 +257,6 @@ void usb_hhub_open (usb_utr_t *ptr, uint16_t devaddr, uint16_t data2)
         g_usb_shhub_down_port[ptr->ip][devaddr] = 0;
 
         /* Down port remote wake up */
-        g_usb_shhub_remote[ptr->ip][devaddr] = 0;
         g_usb_pipe_table[ptr->ip][USB_HUB_PIPE].pipe_maxp |= hubaddr;
 
         g_usb_shhub_process[ptr->ip] = USB_MSG_CLS_INIT;
@@ -326,7 +323,6 @@ void usb_hhub_open (usb_utr_t *ptr, uint16_t devaddr, uint16_t data2)
         g_usb_shhub_down_port[ptr->ip][devaddr] = 0;
 
         /* Down port remote wake up */
-        g_usb_shhub_remote[ptr->ip][devaddr] = 0;
         g_usb_pipe_table[ptr->ip][USB_HUB_PIPE].pipe_maxp |= hubaddr;
 
         usb_hstd_set_pipe_reg (ptr, USB_HUB_PIPE);
@@ -390,7 +386,6 @@ void usb_hhub_close (usb_utr_t *ptr, uint16_t hubaddr, uint16_t data2)
     }
 
     g_usb_shhub_down_port[ptr->ip][hubaddr] = 0;
-    g_usb_shhub_remote[ptr->ip][hubaddr] = 0;
     usb_hstd_clr_pipe_table (ptr->ip, hubaddr);
 }
 /******************************************************************************
@@ -1395,10 +1390,10 @@ static uint16_t usb_hhub_port_attach (uint16_t hubaddr, uint16_t portnum, usb_cl
     usb_er_t err;
     usb_utr_t *ptr;
 #if ((!defined(BSP_MCU_RX64M)) && (!defined(BSP_MCU_RX65N)) && (!defined(BSP_MCU_RX71M)) && (!defined(BSP_MCU_RX72T))\
-    && (!defined(BSP_MCU_RX72M)) && (!defined(BSP_MCU_RX72N)) && (!defined(BSP_MCU_RX66N)))
+    && (!defined(BSP_MCU_RX72M)) && (!defined(BSP_MCU_RX72N)) && (!defined(BSP_MCU_RX66N) && (!defined(BSP_MCU_RX671))))
     usb_ctrl_t ctrl;
 #endif  /* (!defined(BSP_MCU_RX64M)) && (!defined(BSP_MCU_RX65N)) && (!defined(BSP_MCU_RX71M))\
- && (!defined(BSP_MCU_RX72T)) && (!defined(BSP_MCU_RX72M)) && (!defined(BSP_MCU_RX72N)) && (!defined(BSP_MCU_RX66N)) */
+ && (!defined(BSP_MCU_RX72T)) && (!defined(BSP_MCU_RX72M)) && (!defined(BSP_MCU_RX72N)) && (!defined(BSP_MCU_RX66N)) && (!defined(BSP_MCU_RX671)) */
 
     ptr = (usb_utr_t *) mess;
     hubaddr = g_usb_shhub_hub_addr[ptr->ip];
@@ -1443,10 +1438,10 @@ static uint16_t usb_hhub_port_attach (uint16_t hubaddr, uint16_t portnum, usb_cl
                     break;
                     case 0x02 :
 #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T)\
-    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N)
+    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) || defined(BSP_MCU_RX671)
                         g_usb_hstd_device_speed[ptr->ip] = USB_LSCONNECT;
 #else   /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T)\
-    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) */
+    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) || defined(BSP_MCU_RX671) */
                         g_usb_hstd_device_speed[ptr->ip] = USB_NOCONNECT;
 
                         ctrl.address = 0;                               /* USB Device address */
@@ -1454,7 +1449,7 @@ static uint16_t usb_hhub_port_attach (uint16_t hubaddr, uint16_t portnum, usb_cl
                         usb_set_event(USB_STS_NOT_SUPPORT, &ctrl);      /* Set Event()  */
 
 #endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T)\
-    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) */
+    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) || defined(BSP_MCU_RX671) */
                         USB_PRINTF0(" Low-Speed Device\n");
                     break;
                     case 0x04 :
@@ -1566,6 +1561,7 @@ static uint16_t usb_hhub_port_attach (uint16_t hubaddr, uint16_t portnum, usb_cl
                 retval = usb_hhub_request_result(mess->result);
                 if (USB_OK == retval)
                 {
+                    devaddr = usb_hhub_get_cnn_devaddr(ptr, hubaddr, portnum);
                     usb_hhub_port_detach(ptr, hubaddr, portnum);
                     g_usb_shhub_info_data[ptr->ip][devaddr].up_addr = 0; /* Up-hubaddr clear */
                     g_usb_shhub_info_data[ptr->ip][devaddr].up_port_num = 0; /* Up-hubport clear */
@@ -1745,12 +1741,6 @@ static void usb_hhub_event (usb_clsinfo_t *mess)
                 retval = usb_hhub_request_result(mess->result);
                 if (USB_OK == retval)
                 {
-                    if (0 != (port_status & USB_BIT_PORT_SUSPEND)) /* PORT_SUSPEND */
-                    {
-                        /* C_PORT_SUSPEND */
-                        /* HUB down port status */
-                        g_usb_shhub_remote[ptr->ip][hubaddr] |= USB_BITSET(g_usb_shhub_event_port[ptr->ip]);
-                    }
                     next_port_check = USB_TRUE;
                 }
             break;
@@ -2611,7 +2601,6 @@ static void usb_hhub_initial (usb_utr_t *ptr, uint16_t data1, uint16_t data2)
     {
         memset(g_usb_hhub_data[ptr->ip][i], 0, 8);
         g_usb_shhub_down_port[ptr->ip][i] = 0;
-        g_usb_shhub_remote[ptr->ip][i] = 0;
         memset((void*)&g_usb_shhub_info_data[ptr->ip][i], 0, sizeof(usb_hub_info_t));
         memset((void*)&g_usb_shhub_data_mess[ptr->ip][i], 0, sizeof(usb_utr_t));
     }
@@ -2957,9 +2946,6 @@ static void usb_hhub_port_detach (usb_utr_t *ptr, uint16_t hubaddr, uint16_t por
 
     /* HUB down port status */
     g_usb_shhub_down_port[ptr->ip][hubaddr] &= (uint16_t) (~USB_BITSET(portnum));
-
-    /* HUB down port RemoteWakeup */
-    g_usb_shhub_remote[ptr->ip][hubaddr] &= (uint16_t) (~USB_BITSET(portnum));
 
     /* Now down port device search */
     devaddr = usb_hhub_get_cnn_devaddr(ptr, hubaddr, portnum);

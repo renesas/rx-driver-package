@@ -31,6 +31,7 @@
  *         : 31.05.2019 1.26 Added support for GNUC and ICCRX.
  *         : 30.07.2019 1.27 RX72M is added.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2020 1.31 RX671 is added.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -190,9 +191,7 @@ static uint16_t usb_hstd_enumeration (usb_utr_t *ptr)
     uint8_t *descriptor_table;
     uint16_t pipenum, devsel;
 
-#if (BSP_CFG_RTOS_USED == 0)    /* Non-OS */
     usb_ctrl_t ctrl;
-#endif /* (BSP_CFG_RTOS_USED == 0) */
 
     /* Attach Detect Mode */
     enume_mode = USB_NONDEVICE;
@@ -377,6 +376,11 @@ static uint16_t usb_hstd_enumeration (usb_utr_t *ptr)
                         }
                     }
                     enume_mode = USB_COMPLETEPIPESET;
+#if (BSP_CFG_RTOS_USED != 0)    /* RTOS */
+                    ctrl.address = g_usb_hstd_device_addr[ptr->ip];     /* USB Device address */
+                    ctrl.module = ptr->ip;                              /* Module number setting */
+                    usb_set_event(USB_STS_NOT_SUPPORT, &ctrl);          /* Set Event()  */
+#endif /* (BSP_CFG_RTOS_USED != 0) */
                 break;
 
                 default :
@@ -1721,17 +1725,17 @@ void usb_hstd_mgr_task (usb_vp_int_t stacd)
                             case USB_LSCONNECT : /* Low Speed Device Connect */
                                 USB_PRINTF0(" Low-Speed Device\n");
 #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T)\
-    || defined(BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N)
+    || defined(BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) || defined(BSP_MCU_RX671)
                                 usb_hstd_ls_connect_function(ptr);
 #else   /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T)\
-    || defined(BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) */
+    || defined(BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) || defined(BSP_MCU_RX671) */
                                 g_usb_hstd_mgr_mode[ptr->ip] = USB_DETACHED;
 
                                 ctrl.address = 0;                               /* USB Device address */
                                 ctrl.module = ptr->ip;                          /* Module number setting */
                                 usb_set_event(USB_STS_NOT_SUPPORT, &ctrl);      /* Set Event()  */
 
-#endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX71M) */
+#endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX671) */
                             break;
                             default :
                                 USB_PRINTF0(" Device/Detached\n");
@@ -2177,7 +2181,7 @@ usb_er_t usb_hstd_mgr_open (usb_utr_t *ptr)
     memset(g_usb_hstd_config_descriptor[ptr->ip], 0, USB_CONFIGSIZE);
     memset((void *)&g_usb_hstd_class_request[ptr->ip], 0, (5*2));
     memset((void *)&g_usb_hstd_class_ctrl[ptr->ip], 0, sizeof(usb_utr_t));
-    memset((void *)&p_usb_shstd_mgr_msg[ptr->ip], 0, sizeof(usb_mgrinfo_t));
+    p_usb_shstd_mgr_msg[ptr->ip] = 0;
 
     g_usb_hstd_enum_seq[ptr->ip] = 0;
     g_usb_hstd_check_enu_result[ptr->ip] = 0;

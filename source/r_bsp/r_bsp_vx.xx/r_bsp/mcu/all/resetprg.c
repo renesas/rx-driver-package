@@ -37,6 +37,7 @@
 *         : 08.10.2019 3.10      Changed for added support of Renesas RTOS (RI600V4 or RI600PX).
 *         : 20.11.2020 3.11      Changed vbatt_voltage_stability_wait function.
 *         : 26.02.2021 3.12      Changed BSP_CFG_RTOS_USED for Azure RTOS.
+*         : 18.05.2021 3.13      Changed vbatt_voltage_stability_wait function.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -237,7 +238,7 @@ R_BSP_POR_FUNCTION(R_BSP_STARTUP_FUNCTION)
 #endif /* defined(__CCRX__), defined(__GNUC__) */
 
     /* Wait for power voltage stabilization of VBATT function. */
-#if defined(BSP_CFG_VBATT_ENABLE)
+#ifdef BSP_MCU_VBATT_INITIALIZE
     vbatt_voltage_stability_wait();
 #endif
 

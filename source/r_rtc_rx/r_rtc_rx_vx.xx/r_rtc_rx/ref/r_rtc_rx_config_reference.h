@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rtc_rx_config.h
@@ -40,6 +40,7 @@
 *           30.07.2019 2.77    Added support for RX72M.
 *           22.11.2019 2.78    Added support for RX66N.
 *                              Added support for RX72N.
+*           30.06.2021 2.81    Added support for RX671.
 ***********************************************************************************************************************/
 
 #ifndef R_RTC_RX_CONFIG_H
@@ -60,14 +61,14 @@ Configuration Options
 #define RTC_CFG_CALCULATE_YDAY          (0)
 
 
-/* SPECIFY SUB-CLOCK OSCILLATOR DRIVE CAPACITY ON RX11x, RX130, RX23x, RX64M or RX71M, RX65N, RX72M, RX66N, RX72N 
+/* SPECIFY SUB-CLOCK OSCILLATOR DRIVE CAPACITY ON RX11x, RX130, RX23x, RX64M or RX71M, RX65N, RX671, RX72M, RX66N, RX72N 
  * uncomment appropriate level: standard, low, middle, or high
  */
 
-/* Supported by the RX11x, RX130, RX23x, RX64M or RX71M, RX65N, RX72M, RX66N, RX72N */
+/* Supported by the RX11x, RX130, RX23x, RX64M or RX71M, RX65N, RX671, RX72M, RX66N, RX72N */
 #define RTC_CFG_DRIVE_CAPACITY_STD
 
-/* Supported by the RX11x, RX130, RX23x, RX64M or RX71M, RX65N, RX72M, RX66N, RX72N */
+/* Supported by the RX11x, RX130, RX23x, RX64M or RX71M, RX65N, RX671, RX72M, RX66N, RX72N */
 //#define RTC_CFG_DRIVE_CAPACITY_LO
 
 /* Supported by the RX11x only */

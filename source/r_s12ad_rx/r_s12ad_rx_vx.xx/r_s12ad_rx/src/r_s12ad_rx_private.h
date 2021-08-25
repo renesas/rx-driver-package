@@ -43,6 +43,7 @@
 *           10.06.2020 4.60    Added RX23T and RX24T and RX24U support.
 *           01.03.2021 4.70    Added RX72M 144pins and 100pins support.
 *                              Added RX23W 83pins support.
+*           31.05.2020 4.80    Added RX671 support.
 *******************************************************************************/
 
 #ifndef S12AD_PRV_PRIVATE_H
@@ -62,14 +63,15 @@ Macro definitions
     #error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
 #endif
 
-/* Macro for accessing RX64M/RX65x/RX66T/RX71M/RX72T/RX24T/RX24U data register pointers for a given unit (0, 1 or 2) */
+/* Macro for accessing RX64M/RX65x/RX66T/RX71M/RX72T/RX24T/RX24U/RX671 data register pointers for 
+ a given unit (0, 1 or 2) */
 #if (defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX24U))
 #define ADC_PRV_GET_DATA_ARR(x)     (((x)==0) ? gp_dreg0_ptrs : \
                                     ((x)==1) ? gp_dreg1_ptrs : \
                                                 gp_dreg2_ptrs)
 #else
 #define ADC_PRV_GET_DATA_ARR(x)         (((x)==0) ? gp_dreg0_ptrs : gp_dreg1_ptrs)
-#endif /* #if (defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T)) */
+#endif /* #if (defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX671)) */
 
 #if (defined(BSP_MCU_RX110) || defined(BSP_MCU_RX111))
 
@@ -437,6 +439,34 @@ Macro definitions
 
 #endif /* definedBSP_MCU_RX66T */
 
+#if (defined(BSP_MCU_RX671))
+
+#if BSP_PACKAGE_PINS == 145
+#define ADC_PRV_INVALID_CH_MASK0    (0xFFFFFF00)    /* all channels valid (0-7) */
+#define ADC_PRV_INVALID_CH_MASK1    (0xFFFFC000)    /* all channels valid (0-11, sensors) */
+
+#elif BSP_PACKAGE_PINS == 144
+#define ADC_PRV_INVALID_CH_MASK0    (0xFFFFFF00)    /* all channels valid (0-7) */
+#define ADC_PRV_INVALID_CH_MASK1    (0xFFFFC000)    /* all channels valid (0-11, sensors) */
+
+#elif BSP_PACKAGE_PINS == 100
+#define ADC_PRV_INVALID_CH_MASK0    (0xFFFFFF00)    /* all channels valid (0-7) */
+#define ADC_PRV_INVALID_CH_MASK1    (0xFFFFCF00)    /* channels 0-7, sensors valid */
+
+#elif BSP_PACKAGE_PINS == 64
+#define ADC_PRV_INVALID_CH_MASK0    (0xFFFFFFF0)    /* channels 0-3 valid */
+#define ADC_PRV_INVALID_CH_MASK1    (0xFFFFCFC0)    /* channels 0-5, sensors valid */
+
+#elif BSP_PACKAGE_PINS == 48
+#define ADC_PRV_INVALID_CH_MASK0    (0xFFFFFFF0)    /* channels 0-3 valid */
+#define ADC_PRV_INVALID_CH_MASK1    (0xFFFFCFC3)    /* channels 2-5, sensors valid */
+
+#else
+    #error "ERROR - BSP_CFG_MCU_PART_PACKAGE - Unknown package chosen in r_bsp_config.h"
+#endif /* BSP_PACKAGE_PINS == 145 */
+
+#endif /* definedBSP_MCU_RX671 */
+
 #if (defined(BSP_MCU_RX72T))
 
 #if BSP_PACKAGE_PINS == 144
@@ -558,11 +588,12 @@ typedef struct st_adc_ctrl          // ADC Control Block
 
 #if (defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) \
     || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) \
-    || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N))
+    || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX671))
     uint32_t        cmpi_mask;      // for GRPBL1
 #endif    
 #if (defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) \
-    || defined(BSP_MCU_RX72M)  || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N))
+    || defined(BSP_MCU_RX72M)  || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) \
+    || defined(BSP_MCU_RX671))
     uint32_t        cmpi_maskb;     // for GRPBL1 WINDOWB
 #endif
 } adc_ctrl_t;
@@ -596,7 +627,8 @@ extern adc_err_t adc_control(uint8_t const       unit,
 #if (!defined(BSP_MCU_RX64M) && !defined(BSP_MCU_RX65_ALL) && !defined(BSP_MCU_RX66T) \
     && !defined(BSP_MCU_RX71M) && !defined(BSP_MCU_RX72T) && !defined(BSP_MCU_RX72M) \
     && !defined(BSP_MCU_RX13T) && !defined(BSP_MCU_RX66N) && !defined(BSP_MCU_RX72N) \
-    && !defined(BSP_MCU_RX23T) && !defined(BSP_MCU_RX24T) && !defined(BSP_MCU_RX24U))
+    && !defined(BSP_MCU_RX23T) && !defined(BSP_MCU_RX24T) && !defined(BSP_MCU_RX24U) \
+    && !defined(BSP_MCU_RX671))
 /******************************************************************************
 * Function Name: adc_enable_s12adi0
 * Description  : This function clears the S12ADI0 interrupt flag and enables
@@ -610,7 +642,8 @@ void adc_enable_s12adi0(void);
 #endif /* #if (!defined(BSP_MCU_RX64M) && !defined(BSP_MCU_RX65_ALL) && !defined(BSP_MCU_RX66T) \
     && !defined(BSP_MCU_RX71M) && !defined(BSP_MCU_RX72T) && !defined(BSP_MCU_RX72M) \
     && !defined(BSP_MCU_RX13T) && !defined(BSP_MCU_RX66N) && !defined(BSP_MCU_RX72N) \
-    && !defined(BSP_MCU_RX23T) && !defined(BSP_MCU_RX24T) && !defined(BSP_MCU_RX24U)) */
+    && !defined(BSP_MCU_RX23T) && !defined(BSP_MCU_RX24T) && !defined(BSP_MCU_RX24U) \
+    && !defined(BSP_MCU_RX671)) */
 
 
 #endif /* S12AD_PRV_PRIVATE_H */

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name     : r_sci_rx_config.h
@@ -41,6 +41,8 @@
 *           31.03.2020 3.50    Added support RX23E-A.
 *           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
 *                              Merged IrDA functionality to SCI FIT.
+*           31.03.2021 3.80    Added support for RX671.
+*                              Added support circular buffer in mode asynchronous.
 ***********************************************************************************************************************/
 #ifndef SCI_CONFIG_H
 #define SCI_CONFIG_H
@@ -63,6 +65,11 @@ Configuration Options
 #define SCI_CFG_SSPI_INCLUDED   (0)
 #define SCI_CFG_IRDA_INCLUDED   (0)
 
+/* Use circular buffer in mode asynchronous */
+/* 1=Use , 0=Unused */
+/* When SCI_CFG_USE_CIRCULAR is 1, please set BSP_CFG_RUN_IN_USER_MODE = 0  and BYTEQ_CFG_PROTECT_QUEUE = 1*/
+#define SCI_CFG_USE_CIRCULAR_BUFFER (0)
+
 /* SPECIFY BYTE VALUE TO TRANSMIT WHILE CLOCKING IN DATA IN SSPI MODES */
 #define SCI_CFG_DUMMY_TX_BYTE   (0xFF)
 
@@ -78,21 +85,21 @@ Configuration Options
  * i = this channel is available in IrDA interface.
  * RX MCU supported channels
  *
- * CH#  110 111 113 130 230  231  23T 24T 24U 64M 71M 65N 66T 72T 23W 72M 13T 72N 66N RX23E-A
- * ---  --- --- --- --- --- ----- --- --- --- --- --- --- --- --- --- --- --- --- --- -------
- * CH0           X   Xa  X    X                X   X   Xn              X       X   X      
- * CH1   X   X*  X*  Xu  X    X    Xu  Xu  Xu  X   X   Xs  X   X   X   X   X   X   X     Xu
- * CH2           X                             X   X   Xu              X       X   X      
- * CH3                                         X   X   Xs              X       X   X      
- * CH4                                         X   X   Xn              X       X   X      
- * CH5   X   X   Xi  X   Xi   Xu,i X   X   X   X   X   X   X   X   Xi  X   X   X   X     X
- * CH6           X   X   X    X        X   X   X   X   Xn  X   X       Xu      X   X     X
- * CH7                                         Xu  Xu  Xn              X       X   X      
- * CH8           X   Xa  X    X            X           X   X   X   Xu  X       X   X      
- * CH9           X   Xa  X    X            X           Xs  X   X       X       X   X      
- * CH10                                                X               X       X   X      
- * CH11                                    X           Xs  X   X       X       X   X      
- * CH12  X   X   X   X   X    X                X   X   Xs  X   X   X   X   X   X   X     X
+ * CH#  110 111 113 130 230  231  23T 24T 24U 64M 71M 65N 66T 72T 23W 72M 13T 72N 66N RX23E-A 671
+ * ---  --- --- --- --- --- ----- --- --- --- --- --- --- --- --- --- --- --- --- --- ------- ---
+ * CH0           X   Xa  X    X                X   X   Xn              X       X   X           X
+ * CH1   X   X*  X*  Xu  X    X    Xu  Xu  Xu  X   X   Xs  X   X   X   X   X   X   X     Xu    X
+ * CH2           X                             X   X   Xu              X       X   X           X
+ * CH3                                         X   X   Xs              X       X   X           X
+ * CH4                                         X   X   Xn              X       X   X           X
+ * CH5   X   X   Xi  X   Xi   Xu,i X   X   X   X   X   X   X   X   Xi  X   X   X   X     X     X
+ * CH6           X   X   X    X        X   X   X   X   Xn  X   X       Xu      X   X     X     X
+ * CH7                                         Xu  Xu  Xn              X       X   X           X
+ * CH8           X   Xa  X    X            X           X   X   X   Xu  X       X   X           X
+ * CH9           X   Xa  X    X            X           Xs  X   X       X       X   X           X
+ * CH10                                                X               X       X   X           X
+ * CH11                                    X           Xs  X   X       X       X   X           X
+ * CH12  X   X   X   X   X    X                X   X   Xs  X   X   X   X   X   X   X     X     X
 */
                                    
 #define SCI_CFG_CH0_INCLUDED    (0)
@@ -160,7 +167,7 @@ Configuration Options
 * This sets the priority level for receiver overrun, framing, and parity errors
 * as well as TEI interrupts for all SCI channels.
 */
-#define SCI_CFG_ERI_TEI_PRIORITY (3)     /* (RX64M/RX71M/RX65N/RX72M/RX72N/RX66N ONLY) 1 lowest, 15 highest */
+#define SCI_CFG_ERI_TEI_PRIORITY (3)     /* (RX64M/RX71M/RX65N/RX72M/RX72N/RX66N/RX671 ONLY) 1 lowest, 15 highest */
 
 /* ENABLE TX/RX FIFO; (SCIi supported MCU ONLY) 1=included, 0=not */
 #define SCI_CFG_CH7_FIFO_INCLUDED   (0)
@@ -186,6 +193,7 @@ Configuration Options
 #define SCI_CFG_CH11_RX_FIFO_THRESH (8)
 
 /* ENABLE Received Data match function (SCIj and SCIi supported MCU RX65N/RX66T/RX72T/RX72M/RX72N/RX66N ONLY) 1=included, 0=not */
+/*((SCIk and SCIm supported MCU RX671 ONLY) 1=included, 0=not */
 #define SCI_CFG_CH0_DATA_MATCH_INCLUDED  (0)
 #define SCI_CFG_CH1_DATA_MATCH_INCLUDED  (0)
 #define SCI_CFG_CH2_DATA_MATCH_INCLUDED  (0)
@@ -256,6 +264,34 @@ Configuration Options
 #define SCI_CFG_CH10_RX_DMACA_CH_NUM     (1)
 #define SCI_CFG_CH11_RX_DMACA_CH_NUM     (1)
 #define SCI_CFG_CH12_RX_DMACA_CH_NUM     (1)
+
+/* Set enable/ disable transmit signal transition timing adjust feature for each channel*/
+#define SCI_CFG_CH0_TX_SIGNAL_TRANSITION_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH1_TX_SIGNAL_TRANSITION_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH2_TX_SIGNAL_TRANSITION_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH3_TX_SIGNAL_TRANSITION_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH4_TX_SIGNAL_TRANSITION_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH5_TX_SIGNAL_TRANSITION_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH6_TX_SIGNAL_TRANSITION_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH7_TX_SIGNAL_TRANSITION_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH8_TX_SIGNAL_TRANSITION_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH9_TX_SIGNAL_TRANSITION_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH10_TX_SIGNAL_TRANSITION_TIMING_INCLUDED   (0)
+#define SCI_CFG_CH11_TX_SIGNAL_TRANSITION_TIMING_INCLUDED   (0)
+
+/* Set enable/ disable receive data sampling timing adjust feature for each channel*/
+#define SCI_CFG_CH0_RX_DATA_SAMPLING_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH1_RX_DATA_SAMPLING_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH2_RX_DATA_SAMPLING_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH3_RX_DATA_SAMPLING_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH4_RX_DATA_SAMPLING_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH5_RX_DATA_SAMPLING_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH6_RX_DATA_SAMPLING_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH7_RX_DATA_SAMPLING_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH8_RX_DATA_SAMPLING_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH9_RX_DATA_SAMPLING_TIMING_INCLUDED    (0)
+#define SCI_CFG_CH10_RX_DATA_SAMPLING_TIMING_INCLUDED   (0)
+#define SCI_CFG_CH11_RX_DATA_SAMPLING_TIMING_INCLUDED   (0)
 
 /* SPECIFY IRDA CHANNELS TO INCLUDE SOFTWARE (SUPPORTED MCU RX113/RX23W/RX231/RX230 ONLY) 1=included, 0=not */
 #define SCI_CFG_CH5_IRDA_INCLUDED    (0)

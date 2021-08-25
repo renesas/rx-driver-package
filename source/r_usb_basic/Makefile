@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_usb_basic
-VERSION = 		1.30
+VERSION = 		1.31
 MDF = V2
 
 CONFIG_FOLDER = r_config

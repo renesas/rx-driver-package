@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /**********************************************************************************************************************
 * File Name    : r_sci_rx.c
@@ -55,6 +55,9 @@
 *          30.12.2019  3.40    Added support RX66N, RX72N.
 *          25.08.2020  3.60    Added feature using DTC/DMAC in SCI transfer.
 *                              Merged IrDA functionality to SCI FIT.
+*          31.03.2021  3.80    Added support for RX671.
+*                              Added support circular buffer in mode asynchronous.
+*                              Removed usage of BYTEQ in DMAC/DTC mode.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -76,6 +79,7 @@ Includes   <System Includes> , "Project Includes"
 #if (SCI_CFG_ASYNC_INCLUDED || SCI_CFG_IRDA_INCLUDED)
 #include "r_byteq_if.h"
 #endif
+
 
 
 /*****************************************************************************
@@ -394,7 +398,15 @@ sci_err_t R_SCI_Open(uint8_t const      chan,
 #if (SCI_CFG_ASYNC_INCLUDED)
     if (SCI_MODE_ASYNC == mode)
     {
+#if (TX_DTC_DMACA_ENABLE & 0x01 || TX_DTC_DMACA_ENABLE & 0x02)
+        /* DTC/DMAC don't use the queue */
+        if ((SCI_DTC_ENABLE != g_handles[chan]->rom->dtc_dmaca_tx_enable) && (SCI_DMACA_ENABLE != g_handles[chan]->rom->dtc_dmaca_tx_enable))
+        {
+            err = sci_init_queues(chan);
+        }
+#else
         err = sci_init_queues(chan);
+#endif
         if (SCI_SUCCESS != err)
         {
             g_handles[chan]->mode = SCI_MODE_OFF;
@@ -414,8 +426,17 @@ sci_err_t R_SCI_Open(uint8_t const      chan,
             /* DE-INITIALIZE TX AND RX QUEUES */
             if (SCI_MODE_ASYNC == mode)
             {
+#if (TX_DTC_DMACA_ENABLE & 0x01 || TX_DTC_DMACA_ENABLE & 0x02)
+                /* DTC/DMAC don't use the queue */
+                if ((SCI_DTC_ENABLE != g_handles[chan]->rom->dtc_dmaca_tx_enable) && (SCI_DMACA_ENABLE != g_handles[chan]->rom->dtc_dmaca_tx_enable))
+                {
+                    R_BYTEQ_Close(g_handles[chan]->u_tx_data.que);
+                    R_BYTEQ_Close(g_handles[chan]->u_rx_data.que);
+                }
+#else
                 R_BYTEQ_Close(g_handles[chan]->u_tx_data.que);
                 R_BYTEQ_Close(g_handles[chan]->u_rx_data.que);
+#endif
             }
 #endif
             g_handles[chan]->mode = SCI_MODE_OFF;
@@ -790,6 +811,13 @@ static sci_err_t sci_init_async(sci_hdl_t const      hdl,
         {
             hdl->baud_rate = p_cfg->baud_rate;   // save baud rate for break generation
         }
+#if SCI_CFG_RX_DATA_SAMPLING_TIMING_INCLUDED
+        hdl->rom->regs->SPTR.BIT.RTADJ = 1;      /* Enable receive data sampling timing adjust*/
+#endif
+
+#if SCI_CFG_TX_SIGNAL_TRANSITION_TIMING_INCLUDED
+        hdl->rom->regs->SPTR.BIT.TTADJ = 1;      /* Enable transmit signal transition timing adjust*/
+#endif
     }
     else
     {
@@ -920,12 +948,14 @@ static sci_err_t sci_init_sync(sci_hdl_t const         hdl,
 *
 * @retval   SCI_ERR_INSUFFICIENT_SPACE  Insufficient space in queue to load all data (Asynchronous)
 *
-* @retval   SCI_ERR_XCVR_BUSY  Channel currently busy (SSPI/Synchronous)
+* @retval   SCI_ERR_XCVR_BUSY  Channel currently busy (SSPI/Synchronous/Asynchronous)
 *
 *
 * @details  In asynchronous mode, this function places data into a transmit queue if the transmitter for the SCI channel
-* referenced by the handle is not in use. In SSPI and Synchronous modes, no data is queued and transmission begins immediately
-* if the transceiver is not already in use. All transmissions are handled at the interrupt level.\n
+* referenced by the handle is not in use. When circular buffer (SCI_CFG_USE_CIRCULAR_BUFFER (1)) is
+* used, the function allows data to be put on a transmit queue during transmission.
+* In SSPI and Synchronous modes, no data is queued and transmission begins immediately if the transceiver
+* is not already in use.\n
 * Note that the toggling of Slave Select lines when in SSPI mode is not handled by this driver. The Slave Select line
 * for the target device must be enabled prior to calling this function.
 * Also, toggling of the CTS/RTS pin in Synchronous/Asynchronous mode is not handled by this driver.
@@ -1000,15 +1030,41 @@ static sci_err_t sci_send_async_data(sci_hdl_t const hdl,
     sci_err_t   err = SCI_SUCCESS;
     uint16_t    cnt;
     byteq_err_t byteq_err = BYTEQ_ERR_QUEUE_FULL;
-
+#if (SCI_CFG_USE_CIRCULAR_BUFFER == 1)
+#if (TX_DTC_DMACA_ENABLE & 0x01 || TX_DTC_DMACA_ENABLE & 0x02)
+    /* Keep checking tx_idle when using DTC/DMAC */
+    if (SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_tx_enable || SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_tx_enable)
+    {
+        if (true != hdl->tx_idle  )
+        {
+            return SCI_ERR_XCVR_BUSY;
+        }
+    }
+#endif
+#else
     if (true != hdl->tx_idle  )
     {
         return SCI_ERR_XCVR_BUSY;
     }
-
+#endif
 #if SCI_CFG_FIFO_INCLUDED
     if (true == hdl->fifo_ctrl)
     {
+#if (SCI_CFG_USE_CIRCULAR_BUFFER == 1)
+#if (TX_DTC_DMACA_ENABLE & 0x01 || TX_DTC_DMACA_ENABLE & 0x02)
+        /* Keep checking tx_idle when using DTC/DMAC */
+        if (SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_tx_enable || SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_tx_enable)
+        {
+            /* TX FIFO use check */
+            if (0x00 < hdl->rom->regs->FDR.BIT.T)
+            {
+                return SCI_ERR_XCVR_BUSY;
+            }
+            /* reset TX FIFO */
+            hdl->rom->regs->FCR.BIT.TFRST = 0x01;
+        }
+#endif
+#else
         /* TX FIFO use check */
         if (0x00 < hdl->rom->regs->FDR.BIT.T)
         {
@@ -1017,6 +1073,7 @@ static sci_err_t sci_send_async_data(sci_hdl_t const hdl,
 
         /* reset TX FIFO */
         hdl->rom->regs->FCR.BIT.TFRST = 0x01;
+#endif
 
 #if (TX_DTC_DMACA_ENABLE != 0)
         sci_fifo_ctrl_t *p_tctrl;
@@ -1060,7 +1117,14 @@ static sci_err_t sci_send_async_data(sci_hdl_t const hdl,
                 /* WAIT_LOOP */
                 for (cnt = 0; cnt < length; cnt++)
                 {
+#if (SCI_CFG_USE_CIRCULAR_BUFFER == 1)
                     byteq_err = sci_put_byte(hdl, *p_src++);
+                    
+                    /* Allow TX interrupt occur */
+                    ENABLE_TXI_INT;
+#else
+                    byteq_err = sci_put_byte(hdl, *p_src++);
+#endif
                     if (BYTEQ_SUCCESS != byteq_err)
                     {
                         /* If the return value is not BYTEQ_SUCCESS. */
@@ -1104,7 +1168,12 @@ static sci_err_t sci_send_async_data(sci_hdl_t const hdl,
                 /* WAIT_LOOP */
                 for (cnt = 0; cnt < length; cnt++)
                 {
+#if (SCI_CFG_USE_CIRCULAR_BUFFER == 1)
                     byteq_err = sci_put_byte(hdl, *p_src++);
+                    ENABLE_TXI_INT;
+#else
+                    byteq_err = sci_put_byte(hdl, *p_src++);
+#endif
                     if (BYTEQ_SUCCESS != byteq_err)
                     {
                         /* If the return value is not BYTEQ_SUCCESS. */
@@ -1115,11 +1184,26 @@ static sci_err_t sci_send_async_data(sci_hdl_t const hdl,
             }
         }
     }
+#if (SCI_CFG_USE_CIRCULAR_BUFFER == 1)
+#if (TX_DTC_DMACA_ENABLE & 0x01 || TX_DTC_DMACA_ENABLE & 0x02)
+        /* Keep checking tx_idle when using DTC/DMAC */
+        if (SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_tx_enable || SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_tx_enable)
+        {
+            if (SCI_SUCCESS == err)
+            {
+                hdl->tx_idle = false;
+                ENABLE_TXI_INT;
+            }
+        }
+#endif
+#else
     if (SCI_SUCCESS == err)
     {
         hdl->tx_idle = false;
         ENABLE_TXI_INT;
     }
+#endif
+
 
     return err;
 } /* End of function sci_send_async_data() */
@@ -1363,12 +1447,15 @@ static void sci_transfer(sci_hdl_t const hdl)
 {
     uint16_t    num;
     uint8_t     byte;
-
+    byteq_err_t err;
+    
     /* Get bytes from tx queue */
-    (void)R_BYTEQ_Get(hdl->u_tx_data.que, (uint8_t *)&byte);
-
-    /* TDR/FTDR register write access */
-    SCI_TDR(byte);
+    err = R_BYTEQ_Get(hdl->u_tx_data.que, (uint8_t *)&byte);
+    if(BYTEQ_SUCCESS == err)
+    {
+        /* TDR/FTDR register write access */
+        SCI_TDR(byte);
+    }
 
     /* Get data byte number from que and if the number of data bytes is 0, to disable the transfer */
     R_BYTEQ_Used(hdl->u_tx_data.que, &num);
@@ -1717,10 +1804,14 @@ static sci_err_t sci_receive_async_data(sci_hdl_t const hdl,
             /* WAIT_LOOP */
             for (cnt = 0; cnt < length; cnt++)
             {
+#if (SCI_CFG_USE_CIRCULAR_BUFFER == 1)
+                byteq_err = R_BYTEQ_Get(hdl->u_rx_data.que, p_dst++);
+#else
                 /* Disable RXI Interrupt */
                 DISABLE_RXI_INT;
                 byteq_err = R_BYTEQ_Get(hdl->u_rx_data.que, p_dst++);
                 ENABLE_RXI_INT;
+#endif
                 if (BYTEQ_SUCCESS != byteq_err)
                 {
                     err = SCI_ERR_INSUFFICIENT_DATA;
@@ -2021,8 +2112,6 @@ static sci_err_t sci_send_sync_data_dma_dtc(sci_hdl_t const hdl, uint8_t *p_src,
 ******************************************************************************/
 static sci_err_t sci_send_sync_data_fifo_dma_dtc(sci_hdl_t const hdl, uint8_t *p_src, uint8_t *p_dst, uint16_t const length, bool save_rx_data)
 {
-     bsp_int_ctrl_t int_ctrl;
-
     #if (SCI_CFG_SSPI_INCLUDED || SCI_CFG_SYNC_INCLUDED)
         sci_fifo_ctrl_t *p_rctrl;
     #endif
@@ -2088,15 +2177,11 @@ static sci_err_t sci_send_sync_data_fifo_dma_dtc(sci_hdl_t const hdl, uint8_t *p
     #if ((RX_DTC_DMACA_ENABLE) && (SCI_CFG_SSPI_INCLUDED || SCI_CFG_SYNC_INCLUDED))
             hdl->rom->regs->SSRFIFO.BIT.RDF = 0;
     #endif
-            R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
             DISABLE_TXI_INT;               /* disable interrupt in icu */
 
-            R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
             hdl->tx_idle = false;
 
-            R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
             ENABLE_TXI_INT;
-            R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
         }
 
         return err;
@@ -2552,7 +2637,7 @@ void rxi_handler(sci_hdl_t const hdl)
 #if (SCI_CFG_SSPI_INCLUDED || SCI_CFG_SYNC_INCLUDED)
                 if ((SCI_MODE_SYNC == hdl->mode) || (SCI_MODE_SSPI == hdl->mode))
                 {
-                	hdl->tx_idle = true;
+                    hdl->tx_idle = true;
                 }
 #endif
                 if (NULL != p_rctrl->p_rx_fraction_buf)
@@ -2825,7 +2910,7 @@ sci_err_t R_SCI_Control(sci_hdl_t const     hdl,
             return SCI_ERR_NULL_PTR;
         }
 #endif
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)
         if ((SCI_CMD_SET_TXI_PRIORITY == cmd) || (SCI_CMD_SET_RXI_PRIORITY == cmd))
         {
             return SCI_ERR_NULL_PTR;
@@ -2854,7 +2939,7 @@ sci_err_t R_SCI_Control(sci_hdl_t const     hdl,
         }
     }
 #endif
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)
     if ((SCI_CMD_SET_TXI_PRIORITY == cmd) || (SCI_CMD_SET_RXI_PRIORITY == cmd))
     {
         /* Casting void* type is valid */
@@ -2972,7 +3057,7 @@ sci_err_t R_SCI_Control(sci_hdl_t const     hdl,
     }
 #endif /* End of SCI_CFG_FIFO_INCLUDED */
 
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)
     case (SCI_CMD_SET_TXI_PRIORITY):
     {
         /* Casting void type to uint8_t type is valid */
@@ -3045,8 +3130,8 @@ sci_err_t R_SCI_Close(sci_hdl_t const hdl)
 
     /* disable ICU interrupts */
         sci_disable_ints(hdl);
-		
-	/* stop IrDA function */	
+
+    /* stop IrDA function */    
     if (SCI_MODE_IRDA == hdl->mode)
     {
 #if (SCI_CFG_IRDA_INCLUDED)
@@ -3058,8 +3143,17 @@ sci_err_t R_SCI_Close(sci_hdl_t const hdl)
 #if (SCI_CFG_ASYNC_INCLUDED || SCI_CFG_IRDA_INCLUDED)
     if ((SCI_MODE_ASYNC == hdl->mode) || (SCI_MODE_IRDA == hdl->mode))
     {
+#if (TX_DTC_DMACA_ENABLE & 0x01 || TX_DTC_DMACA_ENABLE & 0x02)
+        /* DTC/DMAC don't use the queue */
+        if ((SCI_DTC_ENABLE != hdl->rom->dtc_dmaca_tx_enable) && (SCI_DMACA_ENABLE != hdl->rom->dtc_dmaca_tx_enable))
+        {
+            R_BYTEQ_Close(hdl->u_tx_data.que);
+            R_BYTEQ_Close(hdl->u_rx_data.que);
+        }
+#else
         R_BYTEQ_Close(hdl->u_tx_data.que);
         R_BYTEQ_Close(hdl->u_rx_data.que);
+#endif
     }
 #endif
 #if SCI_CFG_FIFO_INCLUDED

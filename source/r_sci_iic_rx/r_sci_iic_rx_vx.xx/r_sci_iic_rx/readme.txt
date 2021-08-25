@@ -108,6 +108,10 @@ r_sci_iic_rx
         |       r_sci_iic_rx66n.c
         |       r_sci_iic_rx66n_private.h
         |
+        +---rx671
+        |       r_sci_iic_rx671.c
+        |       r_sci_iic_rx671_private.h
+        |
         +---rx71m
         |       r_sci_iic_rx71m.c
         |       r_sci_iic_rx71m_private.h

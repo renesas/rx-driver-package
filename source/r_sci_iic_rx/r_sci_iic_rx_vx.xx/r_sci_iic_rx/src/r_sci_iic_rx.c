@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer 
  *
- * Copyright (C) 2013(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2013(2021) Renesas Electronics Corporation. All rights reserved.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_sci_iic_rx.c
@@ -45,6 +45,7 @@
  *         : 22.11.2019 2.45     RX66N, RX72N support added.
  *                               Modified comment of API function to Doxygen style.
  *         : 10.03.2020 2.46     RX23E-A support added.
+ *         : 30.06.2021 2.48     RX671 support added.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  Includes   <System Includes> , "Project Includes"

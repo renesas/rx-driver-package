@@ -476,12 +476,6 @@ The upper 10 bits are fixed at 1. The lower 4 bits are fixed at 0.</description>
             <description>For some BSP functions, it is necessary to ensure that, while these functions are executing, interrupts from other FIT modules do not occur. By controlling the IPL, these functions disable interrupts that are at or below the specified interrupt priority level.
 Please set this value more than IPR for other FIT module interrupts. Don't change if there is no special processing with higher priority than all fit modules.</description>
         </property>
-        <property id="BSP_CFG_CLKOUT_OUTPUT" display="Configure clock output(CLKOUT) pin" default="0" type="combobox">
-            <option id="BSP_CFG_CLKOUT_OUTPUT.0" display="Disabled" value="0"/>
-            <option id="BSP_CFG_CLKOUT_OUTPUT.1" display="Enabled" value="1"/>
-            <description>0 = CLKOUT pin output stopped. (Fixed to the low level)
-1 = CLKOUT pin output enabled.</description>
-        </property>
         <property id="BSP_CFG_SWINT_UNIT1_ENABLE" display="Software Interrupt Unit1 (SWINT1)" default="1" type="combobox">
             <option id="BSP_CFG_SWINT_UNIT1_ENABLE.0" display="Unused" value="0"/>
             <option id="BSP_CFG_SWINT_UNIT1_ENABLE.1" display="Used" value="1"/>

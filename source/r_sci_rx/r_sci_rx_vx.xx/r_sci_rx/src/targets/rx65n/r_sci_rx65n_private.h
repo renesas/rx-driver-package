@@ -26,6 +26,7 @@
 *           01.02.2019 2.20    Fixed GSCE Code Checker errors.
 *           20.05.2019 3.00    Added support for GNUC and ICCRX.
 *           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
+*           31.03.2021 3.80    Updated macro definition enable and disable TXI, RXI, ERI, TEI.
 ***********************************************************************************************************************/
 
 #ifndef SCI_RX65N_H
@@ -80,15 +81,15 @@ Macro definitions
 #endif
 
 /* Macros to enable and disable ICU interrupts */
-#define ENABLE_RXI_INT      (*hdl->rom->icu_rxi |= hdl->rom->rxi_en_mask)
-#define DISABLE_RXI_INT     (*hdl->rom->icu_rxi &= (uint8_t)~hdl->rom->rxi_en_mask)
-#define ENABLE_TXI_INT      (*hdl->rom->icu_txi |= hdl->rom->txi_en_mask)
-#define DISABLE_TXI_INT     (*hdl->rom->icu_txi &= (uint8_t)~hdl->rom->txi_en_mask)
+#define ENABLE_RXI_INT      (R_BSP_BIT_SET(hdl->rom->icu_rxi, hdl->rom->rxi_bit_num))
+#define DISABLE_RXI_INT     (R_BSP_BIT_CLEAR(hdl->rom->icu_rxi, hdl->rom->rxi_bit_num))
+#define ENABLE_TXI_INT      (R_BSP_BIT_SET(hdl->rom->icu_txi, hdl->rom->txi_bit_num))
+#define DISABLE_TXI_INT     (R_BSP_BIT_CLEAR(hdl->rom->icu_txi, hdl->rom->txi_bit_num))
 
-#define ENABLE_ERI_INT      (*hdl->rom->icu_grp |= hdl->rom->eri_ch_mask)
-#define DISABLE_ERI_INT     (*hdl->rom->icu_grp &= ~hdl->rom->eri_ch_mask)
-#define ENABLE_TEI_INT      (*hdl->rom->icu_grp |= hdl->rom->tei_ch_mask)
-#define DISABLE_TEI_INT     (*hdl->rom->icu_grp &= ~hdl->rom->tei_ch_mask)
+#define ENABLE_ERI_INT      (R_BSP_BIT_SET((uint8_t*)(hdl->rom->icu_grp) + (hdl->rom->eri_bit_num >> 3), hdl->rom->eri_bit_num & 7))
+#define DISABLE_ERI_INT     (R_BSP_BIT_CLEAR((uint8_t*)(hdl->rom->icu_grp) + (hdl->rom->eri_bit_num >> 3), hdl->rom->eri_bit_num & 7))
+#define ENABLE_TEI_INT      (R_BSP_BIT_SET((uint8_t*)(hdl->rom->icu_grp) + (hdl->rom->tei_bit_num >> 3), hdl->rom->tei_bit_num & 7))
+#define DISABLE_TEI_INT     (R_BSP_BIT_CLEAR((uint8_t*)(hdl->rom->icu_grp) + (hdl->rom->tei_bit_num >> 3), hdl->rom->tei_bit_num & 7))
 
 #define NUM_DIVISORS_ASYNC  (9)
 #define NUM_DIVISORS_SYNC   (4)
@@ -127,8 +128,8 @@ typedef struct st_sci_ch_rom    /* SCI ROM info for channel control block */
 #endif
     bsp_int_src_t                   eri_vector;
     bsp_int_cb_t                    eri_isr;
-    uint32_t                        tei_ch_mask;    /* ICU IR and IEN mask */
-    uint32_t                        eri_ch_mask;    /* ICU IR and IEN mask */
+    uint32_t                        tei_bit_num;    /* ICU IR and IEN bit number */
+    uint32_t                        eri_bit_num;    /* ICU IR and IEN bit number */
     volatile  uint8_t R_BSP_EVENACCESS_SFR  *ipr_rxi;       /* ptr to IPR register */
     volatile  uint8_t R_BSP_EVENACCESS_SFR  *ipr_txi;       /* ptr to IPR register */
     volatile  uint8_t R_BSP_EVENACCESS_SFR  *ir_rxi;        /* ptr to RXI IR register */
@@ -141,8 +142,8 @@ typedef struct st_sci_ch_rom    /* SCI ROM info for channel control block */
     volatile  uint8_t R_BSP_EVENACCESS_SFR  *icu_rxi;       /* ptr to ICU register */
     volatile  uint8_t R_BSP_EVENACCESS_SFR  *icu_txi;
     volatile  uint32_t R_BSP_EVENACCESS_SFR *icu_grp;
-    uint8_t                         rxi_en_mask;    /* ICU enable/disable rxi mask */
-    uint8_t                         txi_en_mask;    /* ICU enable/disable txi mask */
+    uint8_t                         rxi_bit_num;    /* ICU enable/disable rxi bit number */
+    uint8_t                         txi_bit_num;    /* ICU enable/disable txi bit number */
     /*
         * In case using DTC/DMAC
      */

@@ -3,14 +3,9 @@ PLEASE REFER TO THE APPLICATION NOTE FOR THIS MIDDLEWARE FOR MORE INFORMATION
 r_dtc_rx
 =========
 
-Document Number 
----------------
-R01AN1819EJ0360
-R01AN1819JJ0360
-
 Version
 -------
-v3.50
+v3.70
 
 Overview
 --------
@@ -42,6 +37,7 @@ Supported MCUs
 * RX65N MCU
 * RX651 MCU
 * RX66T MCU
+* RX671 MCU
 * RX66N MCU
 * RX72T MCU
 * RX23W MCU
@@ -49,30 +45,6 @@ Supported MCUs
 * RX13T MCU
 * RX72N MCU
 
-Boards Tested On
-----------------
-* RSKRX110
-* RSKRX111
-* RSKRX113
-* RSKRX130
-* RSKRX130_512KB
-* RSKRX230
-* RSKRX231
-* RSKRX23E-A
-* RSKRX64M
-* RSKRX71M
-* RSKRX23T
-* RSKRX24T
-* RSKRX24U
-* RSKRX65N
-* RSKRX65N_2MB
-* RSKRX66T
-* RSKRX66N
-* RSKRX72T
-* RSKRX23W
-* RSKRX72M
-* RSKRX13T
-* RSKRX72N
 Limitations
 -----------
 * None
@@ -110,12 +82,6 @@ Refer to "Renesas e2 studio Smart Configurator User Guide (R20AN0451)" for detai
 (4)	Adding the FIT module to your project in CS+
 In CS+, please manually add the FIT module to your project.
 Refer to "Adding Firmware Integration Technology Modules to CS+ Projects (R01AN1826)" for details.
-
-Toolchain(s) Used
------------------
-* Renesas RX v3.02.00
-* GCC for Renesas RX 8.03.00.201904
-* IAR C/C++ Compiler for Renesas RX 4.12.1
 
 File Structure
 --------------
@@ -170,6 +136,11 @@ r_dtc_rx
         |       r_dtc_rx_target_if.h
         |
         +---rx66t
+        |       r_dtc_rx_target.c
+        |       r_dtc_rx_target.h
+        |       r_dtc_rx_target_if.h
+        |
+        +---rx671
         |       r_dtc_rx_target.c
         |       r_dtc_rx_target.h
         |       r_dtc_rx_target_if.h
@@ -230,9 +201,9 @@ r_dtc_rx
         |       r_dtc_rx_target_if.h
         |
         +---rx231
-                r_dtc_rx_target.c
-                r_dtc_rx_target.h
-                r_dtc_rx_target_if.h
+        |       r_dtc_rx_target.c
+        |       r_dtc_rx_target.h
+        |       r_dtc_rx_target_if.h
         |
         +---rx23E-A
                 r_dtc_rx_target.c

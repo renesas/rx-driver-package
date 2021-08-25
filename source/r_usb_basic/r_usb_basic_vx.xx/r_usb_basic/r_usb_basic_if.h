@@ -50,6 +50,25 @@ Includes   <System Includes> , "Project Includes"
 /******************************************************************************
  Macro definitions
  ******************************************************************************/
+#if defined(USB_CFG_PCDC_2COM_USE)
+#define USB_CFG_PCDC_USE /* USB_CFG_DEVICE_CLASS */
+#endif /* defined(USB_CFG_PHID_USE) */
+
+#if defined(USB_CFG_PCDC_PHID_USE)
+#define USB_CFG_PCDC_USE /* USB_CFG_DEVICE_CLASS */
+#define USB_CFG_PHID_USE /* USB_CFG_DEVICE_CLASS */
+#endif /* defined(USB_CFG_PHID_USE) */
+
+#if defined(USB_CFG_PCDC_PMSC_USE)
+#define USB_CFG_PCDC_USE /* USB_CFG_DEVICE_CLASS */
+#define USB_CFG_PMSC_USE /* USB_CFG_DEVICE_CLASS */
+#endif /* defined(USB_CFG_PMSC_USE) */
+
+#if defined(USB_CFG_PHID_PMSC_USE)
+#define USB_CFG_PHID_USE /* USB_CFG_DEVICE_CLASS */
+#define USB_CFG_PMSC_USE /* USB_CFG_DEVICE_CLASS */
+#endif /* defined(USB_CFG_PMSC_USE) */
+
 /* USB Request Type Register */
 #define     USB_BREQUEST                        (0xFF00u)   /* b15-8 */
 
@@ -301,7 +320,9 @@ typedef enum usb_status
 /* USB class type */
 typedef enum usb_class
 {
-    USB_PCDC = 0, USB_PCDCC, USB_PHID, USB_PVND,
+    USB_PCDC = 0, USB_PCDCC, USB_PCDC2, USB_PCDCC2, USB_PHID, USB_PVND,
+
+    USB_PCDC_PHID, USB_PCDC_PMSC, USB_PHID_PMSC,
 
     USB_HCDC, USB_HCDCC, USB_HHID, USB_HVND,
 

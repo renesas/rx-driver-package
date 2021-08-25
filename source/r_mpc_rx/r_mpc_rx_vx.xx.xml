@@ -53,6 +53,7 @@
         <version>4.10.01</version>
         <version>4.11.01</version>
         <version>4.12.01</version>
+        <version>4.14.01</version>
         <version>4.20.01</version>
     </toolchain>
 
@@ -79,6 +80,7 @@
         <group omit_board="true">RX65N</group>
         <group omit_board="true">RX66N</group>
         <group omit_board="true">RX66T</group>
+        <group omit_board="true">RX671</group>
         <group omit_board="true">RX71M</group>
         <group omit_board="true">RX72T</group>
         <group omit_board="true">RX72M</group>
@@ -95,7 +97,7 @@
         <zipsource>r_mpc_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.63</version>
+            <version>6.10</version>
         </dependency>
         <dependency>
             <module>r_gpio_rx</module>
@@ -120,9 +122,10 @@
             <version>3.70</version>
             <version>3.80</version>
             <version>3.90</version>
+            <version>4.00</version>
         </dependency>
         <application>MCU Setup</application>
-        <desc>Multi-Function Pin Controller Driver</desc>
+        <desc>MPC Driver</desc>
         <details>Implements a Multi-Function Pin Controller driver. Allows users to easily setup the MPC registers for their device using r_gpio_rx pin definitions.</details>
         <function>MPC</function>
         <incdir>r_mpc_rx</incdir>

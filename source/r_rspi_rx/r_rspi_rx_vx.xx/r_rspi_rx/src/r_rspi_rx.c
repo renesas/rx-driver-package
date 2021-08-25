@@ -14,12 +14,12 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013(2014-2020) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013(2014-2021) Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rspi_rx.c
 * Device(s)    : RX Family
-* Tool-Chain   : Renesas RX Standard Toolchain 3.02.00
+* Tool-Chain   : Renesas RX Standard Toolchain 3.03.00
 *                GCC for Renesas RX 8.03.00
 *                IAR C/C++ Compiler for Renesas RX 4.14.1
 * OS           : None
@@ -50,6 +50,13 @@
 *           10.03.2020 2.05     Supported RX23E-A.
 *           10.09.2020 3.00     Fixed bug, updated functions rspi_spriX_isr, rspi_sptiX_isr (X = 0, 1, 2) and added
 *                               two functions R_RSPI_DisableSpti and R_RSPI_DisableRSPI.
+*           30.06.2021 3.01     Supported RX671.
+*                               Fixed bug. Set the RSPCK auto-stop function enable bit(SPCR2.SCKASE) and update
+*                               functions rspi_sptiX_isr (X = 0, 1, 2) to ensure RSPI can communication normally when it
+*                               is in high speed reception.
+*                               Fixed two warning when the MCU is RX111 etc., the unused function(rspi_spei_grp_isr) 
+*                               and variable(int_ctrl) will be valid.
+*                               Added communication completion interrupt for rx671.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -59,7 +66,7 @@ Includes   <System Includes> , "Project Includes"
 #include "r_rspi_rx_if.h"
 
 #if RSPI_CFG_LONGQ_ENABLE == 1
-/* Uses LONGQ driver headef file. */
+/* Uses LONGQ driver header file. */
 #include "r_longq_if.h"
 #endif /* RSPI_CFG_LONGQ_ENABLE */
 
@@ -107,6 +114,9 @@ typedef struct rspi_ctrl_reg_values_s
     uint8_t spnd_val;   // RSPI Next-Access Delay Register (SPND)
     uint8_t spcr2_val;  // RSPI Control Register 2 (SPCR2)
     uint8_t spdcr2_val; // RSPI Data Control Register 2 (SPDCR2)
+#if defined(BSP_MCU_RX671)
+    uint8_t spcr3_val;  // RSPI Control Register 3 (SPCR3)
+#endif
 } rspi_ctrl_reg_values_t;
 
 /***********************************************************************************************************************
@@ -172,8 +182,15 @@ static rspi_ctrl_reg_values_t g_ctrl_reg_values[] =
     RSPI_SPCKD_DEF,     // Clock Delay Register (SPCKD)
     RSPI_SSLND_DEF,     // Slave Select Negation Delay Register (SSLND)
     RSPI_SPND_DEF,      // Next-Access Delay Register (SPND)
-    RSPI_SPCR2_DEF,     // Control Register 2 (SPCR2)
+#if RSPI_CFG_HIGH_SPEED_READ == 1
+    RSPI_SPCR2_HIGH_SPEED, // Control Register 2 (SPCR2) High-speed mode
+#else
+    RSPI_SPCR2_DEF,     // Control Register 2 (SPCR2) Default-speed mode
+#endif
     RSPI_SPDCR2_DEF,    // Data Control Register 2 (SPDCR2)
+#if defined(BSP_MCU_RX671)
+    RSPI_SPCR3_DEF,  // RSPI Control Register 3 (SPCR3)
+#endif
 #if   RSPI_NUM_CHANNELS > 1
     RSPI_SPCR_DEF, // Control Register (SPCR)
     RSPI_SSLP_DEF,      // Slave Select Polarity Register (SSLP)
@@ -184,8 +201,15 @@ static rspi_ctrl_reg_values_t g_ctrl_reg_values[] =
     RSPI_SPCKD_DEF,     // Clock Delay Register (SPCKD)
     RSPI_SSLND_DEF,     // Slave Select Negation Delay Register (SSLND)
     RSPI_SPND_DEF,      // Next-Access Delay Register (SPND)
-    RSPI_SPCR2_DEF,     // Control Register 2 (SPCR2)
+#if RSPI_CFG_HIGH_SPEED_READ == 1
+    RSPI_SPCR2_HIGH_SPEED, // Control Register 2 (SPCR2) High-speed mode
+#else
+    RSPI_SPCR2_DEF,     // Control Register 2 (SPCR2) Default-speed mode
+#endif
     RSPI_SPDCR2_DEF,    // Data Control Register 2 (SPDCR2)
+#if defined(BSP_MCU_RX671)
+    RSPI_SPCR3_DEF,  // RSPI Control Register 3 (SPCR3)
+#endif
 #endif
 #if   RSPI_NUM_CHANNELS >2
     RSPI_SPCR_DEF, // Control Register (SPCR)
@@ -197,8 +221,15 @@ static rspi_ctrl_reg_values_t g_ctrl_reg_values[] =
     RSPI_SPCKD_DEF,     // Clock Delay Register (SPCKD)
     RSPI_SSLND_DEF,     // Slave Select Negation Delay Register (SSLND)
     RSPI_SPND_DEF,      // Next-Access Delay Register (SPND)
-    RSPI_SPCR2_DEF,     // Control Register 2 (SPCR2)
+#if RSPI_CFG_HIGH_SPEED_READ == 1
+    RSPI_SPCR2_HIGH_SPEED, // Control Register 2 (SPCR2) High-speed mode
+#else
+    RSPI_SPCR2_DEF,     // Control Register 2 (SPCR2) Default-speed mode
+#endif
     RSPI_SPDCR2_DEF,    // Data Control Register 2 (SPDCR2)
+#if defined(BSP_MCU_RX671)
+    RSPI_SPCR3_DEF,  // RSPI Control Register 3 (SPCR3)
+#endif
 #endif
 };
 
@@ -250,7 +281,11 @@ static void rspi_interrupts_clear(uint8_t channel);
 /* Disable or enable RSPI interrupts. */
 static void rspi_interrupts_enable(uint8_t channel, bool enabled);
 
+#if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || \
+    defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
+    defined BSP_MCU_RX671
 static void rspi_spei_grp_isr(void *pdata);
+#endif
 /**********************************************************************************************************************
  * Function Name: R_RSPI_Open
  *****************************************************************************************************************/ /**
@@ -403,6 +438,12 @@ rspi_err_t   R_RSPI_Open(uint8_t                channel,
     || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N
     /* Set RSPI data control register 2 (SPDCR2) */
     (*g_rspi_channels[channel]).SPDCR2.BYTE = (uint8_t)(my_settings->spdcr2_val & RSPI_SPDCR2_MASK);
+#elif defined BSP_MCU_RX671
+    /* Set RSPI data control register 2 (SPDCR2) */
+    (*g_rspi_channels[channel]).SPDCR2.BYTE = (uint8_t)(my_settings->spdcr2_val & RSPI_SPDCR2_MASK);
+
+    /* Set RSPI control register 3 (SPCR3) */
+    (*g_rspi_channels[channel]).SPCR3.BYTE = (uint8_t)(my_settings->spcr3_val & RSPI_SPCR3_MASK);
 #endif
 
     /* Determine master/slave mode setting based on channel settings argument.
@@ -609,6 +650,12 @@ rspi_err_t  R_RSPI_Control(rspi_handle_t handle,
              || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N
             /* Set RSPI data control register 2 (SPDCR2) */
             (*g_rspi_channels[channel]).SPDCR2.BYTE = (uint8_t)(p_setregs_struct->spdcr2_val & RSPI_SPDCR2_MASK);
+        #elif defined BSP_MCU_RX671
+            /* Set RSPI data control register 2 (SPDCR2) */
+            (*g_rspi_channels[channel]).SPDCR2.BYTE = (uint8_t)(p_setregs_struct->spdcr2_val & RSPI_SPDCR2_MASK);
+
+            /* Set RSPI control register 3 (SPCR3) */
+            (*g_rspi_channels[channel]).SPCR3.BYTE = (uint8_t)(p_setregs_struct->spcr3_val & RSPI_SPCR3_MASK);
         #endif
         }
         break;
@@ -867,7 +914,7 @@ rspi_err_t  R_RSPI_WriteRead(rspi_handle_t        handle,
 *                psrc-
 *                   For write operations, pointer to the source buffer of the data to be sent.
 *                pdest-
-*                   For read operations, pointer to destination buffer into which receuved data will be copied.
+*                   For read operations, pointer to destination buffer into which received data will be copied.
 *                length-
 *                   The number of data words to be transferred.
 * Return Value : RSPI_SUCCESS
@@ -917,15 +964,15 @@ static rspi_err_t  rspi_write_read_common(rspi_handle_t handle,
     g_rspi_tcb[channel].transfer_mode = tx_rx_mode;
 
 #if defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || defined BSP_MCU_RX72T || defined BSP_MCU_RX72M \
-    || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N
-    if((RSPI_TRANS_MODE_DMAC == g_rspi_tcb [channel] .data_tran_mode) ||
+    || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || defined BSP_MCU_RX671
+    if ((RSPI_TRANS_MODE_DMAC == g_rspi_tcb [channel] .data_tran_mode) ||
        (RSPI_TRANS_MODE_DTC == g_rspi_tcb [channel] .data_tran_mode))
     {
-        if(RSPI_BYTE_DATA == g_rspi_tcb[channel].bytes_per_transfer)
+        if (RSPI_BYTE_DATA == g_rspi_tcb[channel].bytes_per_transfer)
         {
             (*g_rspi_channels[channel]).SPDCR.BIT.SPBYT = 1;
         }
-        else if(RSPI_WORD_DATA == g_rspi_tcb[channel].bytes_per_transfer)
+        else if (RSPI_WORD_DATA == g_rspi_tcb[channel].bytes_per_transfer)
         {
             (*g_rspi_channels[channel]).SPDCR.BIT.SPLW = 0;
         }
@@ -941,10 +988,10 @@ static rspi_err_t  rspi_write_read_common(rspi_handle_t handle,
     defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX110 || defined BSP_MCU_RX111 || \
     defined BSP_MCU_RX113 || defined BSP_MCU_RX130 || defined BSP_MCU_RX230 || defined BSP_MCU_RX231 || \
     defined BSP_MCU_RX23E_A
-    if((RSPI_TRANS_MODE_DMAC == g_rspi_tcb [channel] .data_tran_mode) ||
+    if ((RSPI_TRANS_MODE_DMAC == g_rspi_tcb [channel] .data_tran_mode) ||
        (RSPI_TRANS_MODE_DTC == g_rspi_tcb [channel] .data_tran_mode))
     {
-        if(RSPI_LONG_DATA == g_rspi_tcb[channel].bytes_per_transfer)
+        if (RSPI_LONG_DATA == g_rspi_tcb[channel].bytes_per_transfer)
         {
             (*g_rspi_channels[channel]).SPDCR.BIT.SPLW = 1;
         }
@@ -1004,16 +1051,24 @@ static rspi_err_t  rspi_write_read_common(rspi_handle_t handle,
 
     /* WAIT_LOOP */
     /* Clear error sources: the SPSR.MODF, OVRF, PERF and UDRF flags. */
-    while((*g_rspi_channels[channel]).SPSR.BYTE & (((RSPI_SPSR_OVRF | RSPI_SPSR_MODF) | RSPI_SPSR_PERF) | RSPI_SPSR_UDRF))
+    while ((*g_rspi_channels[channel]).SPSR.BYTE & (((RSPI_SPSR_OVRF | RSPI_SPSR_MODF) | RSPI_SPSR_PERF) | RSPI_SPSR_UDRF))
     {
         (*g_rspi_channels[channel]).SPSR.BYTE = RSPI_SPSR_MASK;
     }
 
-    (*g_rspi_channels[channel]).SPCR2.BIT.SPIIE = 0; // Disable idle interrrupt.
+    (*g_rspi_channels[channel]).SPCR2.BIT.SPIIE = 0; // Disable idle interrupt.
     if (0 == (*g_rspi_channels[channel]).SPCR2.BIT.SPIIE)
     {
         R_BSP_NOP();
     }
+
+#if defined BSP_MCU_RX671
+    (*g_rspi_channels[channel]).SPCR3.BIT.SPCIE = 0; // Disable Communication End Interrupt.
+    if (0 == (*g_rspi_channels[channel]).SPCR3.BIT.SPCIE)
+    {
+        R_BSP_NOP();
+    }
+#endif
 
     rspi_interrupts_clear(channel);
     rspi_interrupts_enable(channel, true);           // Enable interrupts in ICU.
@@ -1445,7 +1500,8 @@ static uint32_t rspi_baud_set(uint8_t channel, uint32_t bps_target)
     #if defined(BSP_MCU_RX62_ALL)
         f = BSP_PCLK_HZ;
     #elif defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) ||defined (BSP_MCU_RX65N) ||defined (BSP_MCU_RX66T) || \
-          defined (BSP_MCU_RX72T) || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N)
+          defined (BSP_MCU_RX72T) || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) || \
+          defined BSP_MCU_RX671
         f = BSP_PCLKA_HZ;
     #else
         f = BSP_PCLKB_HZ;
@@ -1673,7 +1729,8 @@ static void power_on_off (uint8_t channel, uint8_t on_or_off)
 static void rspi_ir_priority_set(uint8_t channel, uint8_t rspi_priority)
 {
     #if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || \
-        defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N
+        defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
+        defined BSP_MCU_RX671
     bsp_int_ctrl_t int_ctrl_data;
     int_ctrl_data.ipl = (uint32_t)rspi_priority;
     #endif
@@ -1685,8 +1742,12 @@ static void rspi_ir_priority_set(uint8_t channel, uint8_t rspi_priority)
             IPR(RSPI0, SPRI0) = rspi_priority; // One priority register for all RSPI interrupts (exc RX64M).
              /* RX64M has individual RSPI interrupt priority registers. Set the rest of them */
             #if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || \
-                defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N
+                defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
+                defined BSP_MCU_RX671
             IPR(RSPI0, SPTI0) = rspi_priority;
+            #ifdef  BSP_MCU_RX671
+            IPR(RSPI0, SPCI0) = rspi_priority;
+            #endif
             /* Enable the group interrupt for the SPEI0 interrupt. (sets priority also). */
             R_BSP_InterruptControl(BSP_INT_SRC_AL0_RSPI0_SPEI0, BSP_INT_CMD_GROUP_INTERRUPT_ENABLE, &int_ctrl_data);
             #endif
@@ -1703,8 +1764,11 @@ static void rspi_ir_priority_set(uint8_t channel, uint8_t rspi_priority)
             IPR(RSPI1, SPRI1) = rspi_priority;
             /* RX71M has individual RSPI interrupt priority registers. Set the rest of them */
             #if defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || \
-                defined BSP_MCU_RX66N
+                defined BSP_MCU_RX66N || defined BSP_MCU_RX671
             IPR(RSPI1, SPTI1) = rspi_priority;
+            #ifdef  BSP_MCU_RX671
+            IPR(RSPI1, SPCI1) = rspi_priority;
+            #endif
             /* Enable the group interrupt for the SPEI1 interrupt. (sets priority also). */
             R_BSP_InterruptControl(BSP_INT_SRC_AL0_RSPI1_SPEI1, BSP_INT_CMD_GROUP_INTERRUPT_ENABLE, &int_ctrl_data);
             #endif
@@ -1719,8 +1783,12 @@ static void rspi_ir_priority_set(uint8_t channel, uint8_t rspi_priority)
         #if RSPI_CFG_USE_CHAN2 == 1
         case 2:
             IPR(RSPI2, SPRI2) = rspi_priority;
-            #if defined BSP_MCU_RX65N || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N
+            #if defined BSP_MCU_RX65N || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
+            defined BSP_MCU_RX671
             IPR(RSPI2, SPTI2) = rspi_priority;
+            #ifdef  BSP_MCU_RX671
+            IPR(RSPI2, SPCI2) = rspi_priority;
+            #endif
             /* Enable the group interrupt for the SPEI2 interrupt. (sets priority also). */
             R_BSP_InterruptControl(BSP_INT_SRC_AL0_RSPI2_SPEI2, BSP_INT_CMD_GROUP_INTERRUPT_ENABLE, &int_ctrl_data);
             #endif
@@ -1755,6 +1823,9 @@ static void rspi_interrupts_clear(uint8_t channel)
             IR(RSPI0, SPRI0) = 0 ;
             /* Clear any pending transmit buffer empty interrupts */
             IR(RSPI0, SPTI0) = 0 ;
+            #ifdef BSP_MCU_RX671
+            IR(RSPI0, SPCI0) = 0 ;
+            #endif
             #ifndef BSP_MCU_RX63_ALL
             #ifndef BSP_MCU_RX64M
             #ifndef BSP_MCU_RX71M
@@ -1764,8 +1835,10 @@ static void rspi_interrupts_clear(uint8_t channel)
             #ifndef BSP_MCU_RX72M
             #ifndef BSP_MCU_RX72N
             #ifndef BSP_MCU_RX66N
+            #ifndef BSP_MCU_RX671
             /* Clear any pending error interrupt */
             IR(RSPI0, SPEI0) = 0;
+            #endif
             #endif
             #endif
             #endif
@@ -1789,6 +1862,9 @@ static void rspi_interrupts_clear(uint8_t channel)
             IR(RSPI1, SPRI1) = 0 ;
             /* Clear any pending transmit buffer empty interrupts */
             IR(RSPI1, SPTI1) = 0 ;
+            #ifdef BSP_MCU_RX671
+            IR(RSPI1, SPCI1) = 0 ;
+            #endif
             #ifndef BSP_MCU_RX63_ALL
             #ifndef BSP_MCU_RX64M
             #ifndef BSP_MCU_RX71M
@@ -1796,8 +1872,10 @@ static void rspi_interrupts_clear(uint8_t channel)
             #ifndef BSP_MCU_RX72M
             #ifndef BSP_MCU_RX72N
             #ifndef BSP_MCU_RX66N
+            #ifndef BSP_MCU_RX671
             /* Clear any pending error interrupt */
             IR(RSPI1, SPEI1) = 0;
+            #endif
             #endif
             #endif
             #endif
@@ -1818,12 +1896,17 @@ static void rspi_interrupts_clear(uint8_t channel)
         case 2:
             IR(RSPI2, SPRI2) = 0 ;
             IR(RSPI2, SPTI2) = 0 ;
+            #ifdef BSP_MCU_RX671
+            IR(RSPI2, SPCI2) = 0 ;
+            #endif
             #ifndef BSP_MCU_RX63_ALL
             #ifndef BSP_MCU_RX65N
             #ifndef BSP_MCU_RX72M
             #ifndef BSP_MCU_RX72N
             #ifndef BSP_MCU_RX66N
+            #ifndef BSP_MCU_RX671
             IR(RSPI2, SPEI2) = 0;
+            #endif
             #endif
             #endif
             #endif
@@ -1863,11 +1946,15 @@ static void rspi_interrupts_clear(uint8_t channel)
 ***********************************************************************************************************************/
 static void rspi_interrupts_enable(uint8_t channel, bool enabled)
 {
+#if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || \
+    defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
+    defined BSP_MCU_RX671
     #if (RSPI_CFG_USE_CHAN0 == 1) || (RSPI_CFG_USE_CHAN1 == 1) || (RSPI_CFG_USE_CHAN2 == 1)
-    #if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
-    bsp_int_ctrl_t int_ctrl;
+        #if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
+        bsp_int_ctrl_t int_ctrl;
+        #endif
     #endif
-    #endif
+#endif
 
     switch (channel)
     {
@@ -1877,21 +1964,20 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             if (enabled)
             {
                 R_BSP_InterruptRequestEnable(VECT(RSPI0,SPRI0));
+                R_BSP_InterruptRequestEnable(VECT(RSPI0,SPTI0));
+                #ifdef BSP_MCU_RX671
+                R_BSP_InterruptRequestEnable(VECT(RSPI0,SPCI0));
+                #endif
             }
             else
             {
                 R_BSP_InterruptRequestDisable(VECT(RSPI0,SPRI0));
-            }
-            /* Disable  or enable transmit buffer empty interrupt */
-            if (enabled)
-            {
-                R_BSP_InterruptRequestEnable(VECT(RSPI0,SPTI0));
-            }
-            else
-            {
                 R_BSP_InterruptRequestDisable(VECT(RSPI0,SPTI0));
+                #ifdef BSP_MCU_RX671
+                R_BSP_InterruptRequestDisable(VECT(RSPI0,SPCI0));
+                #endif
             }
-            
+
             #ifndef BSP_MCU_RX63_ALL
             #ifndef BSP_MCU_RX64M
             #ifndef BSP_MCU_RX71M
@@ -1901,6 +1987,7 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             #ifndef BSP_MCU_RX72M
             #ifndef BSP_MCU_RX72N
             #ifndef BSP_MCU_RX66N
+            #ifndef BSP_MCU_RX671
             /* Disable or enable error interrupt */
             if (enabled)
             {
@@ -1919,6 +2006,7 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             #endif
             #endif
             #endif
+            #endif
 
             if (0 == IEN(RSPI0, SPTI0))
             {
@@ -1926,7 +2014,8 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             }
             
             #if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || \
-                defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N
+                defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
+                defined BSP_MCU_RX671
             if (enabled)
             {
                 /* Register the error callback function with the BSP group interrupt handler. */
@@ -1978,11 +2067,17 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             {
                 R_BSP_InterruptRequestEnable(VECT(RSPI1,SPRI1));
                 R_BSP_InterruptRequestEnable(VECT(RSPI1,SPTI1));
+                #ifdef BSP_MCU_RX671
+                R_BSP_InterruptRequestEnable(VECT(RSPI1,SPCI1));
+                #endif
             }
             else
             {
                 R_BSP_InterruptRequestDisable(VECT(RSPI1,SPRI1));
                 R_BSP_InterruptRequestDisable(VECT(RSPI1,SPTI1));
+                #ifdef BSP_MCU_RX671
+                R_BSP_InterruptRequestDisable(VECT(RSPI1,SPCI1));
+                #endif
             }
             #ifndef BSP_MCU_RX63_ALL
             #ifndef BSP_MCU_RX64M
@@ -1991,6 +2086,7 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             #ifndef BSP_MCU_RX72M
             #ifndef BSP_MCU_RX72N
             #ifndef BSP_MCU_RX66N
+            #ifndef BSP_MCU_RX671
             /* Disable or enable error interrupt */
             if (enabled)
             {
@@ -2007,6 +2103,7 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             #endif
             #endif
             #endif
+            #endif
 
             if (0 == IEN(RSPI1, SPTI1))
             {
@@ -2014,7 +2111,7 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             }
 
             #if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX72M || \
-                defined BSP_MCU_RX72N || defined BSP_MCU_RX66N
+                defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || defined BSP_MCU_RX671
             if (enabled)
             {
                 /* Register the error callback function with the BSP group interrupt handler. */
@@ -2067,17 +2164,24 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             {
                 R_BSP_InterruptRequestEnable(VECT(RSPI2,SPRI2));
                 R_BSP_InterruptRequestEnable(VECT(RSPI2,SPTI2));
+                #ifdef BSP_MCU_RX671
+                R_BSP_InterruptRequestEnable(VECT(RSPI2,SPCI2));
+                #endif
             }
             else
             {
                 R_BSP_InterruptRequestDisable(VECT(RSPI2,SPRI2));
                 R_BSP_InterruptRequestDisable(VECT(RSPI2,SPTI2));
+                #ifdef BSP_MCU_RX671
+                R_BSP_InterruptRequestDisable(VECT(RSPI2,SPCI2));
+                #endif
             }
             #ifndef BSP_MCU_RX63_ALL
             #ifndef BSP_MCU_RX65N
             #ifndef BSP_MCU_RX72M
             #ifndef BSP_MCU_RX72N
             #ifndef BSP_MCU_RX66N
+            #ifndef BSP_MCU_RX671
             if (enabled)
             {
                 R_BSP_InterruptRequestEnable(VECT(RSPI2,SPEI2));
@@ -2091,12 +2195,13 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             #endif
             #endif
             #endif
+            #endif
             if (0 == IEN(RSPI2, SPTI2))
             {
                 R_BSP_NOP();
             }
 
-            #if defined BSP_MCU_RX65N || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N
+            #if defined BSP_MCU_RX65N || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || defined BSP_MCU_RX671
             if (enabled)
             {
                 /* Register the error callback function with the BSP group interrupt handler. */
@@ -2292,11 +2397,14 @@ static void rspi_tx_common(uint8_t channel)
         }
         g_rspi_tcb[channel].tx_count++;
     }
-    
+
     else
     {
         /* Last data was transferred. */
         (*g_rspi_channels[channel]).SPCR.BIT.SPTIE = 0;  // Disable SPTI interrupt.
+        #ifdef BSP_MCU_RX671
+        (*g_rspi_channels[channel]).SPCR3.BIT.SPCIE = 1; // Enable SPCI interrupt.
+        #endif
     }
  }
 
@@ -2345,6 +2453,8 @@ static void rspi_rx_common(uint8_t channel)
          (*g_rspi_channels[channel]).SPCR.BIT.SPTIE = 0;  // Disable SPTI interrupt.
 #endif
          (*g_rspi_channels[channel]).SPCR.BIT.SPRIE = 0;  // Disable SPRI interrupt.
+
+#ifndef BSP_MCU_RX671
          (*g_rspi_channels[channel]).SPCR.BIT.SPE   = 0;  // Disable RSPI.
          if (0 == (*g_rspi_channels[channel]).SPCR.BIT.SPE)
          {
@@ -2363,6 +2473,7 @@ static void rspi_rx_common(uint8_t channel)
              g_rspi_cb_data[channel].event_code = RSPI_EVT_TRANSFER_COMPLETE;
              g_rspi_handles[channel].pcallback((void*)&(g_rspi_cb_data[channel]));
          }
+#endif
     }
 }
 
@@ -2485,21 +2596,24 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spti0_isr(void)
 {
     if (RSPI_TRANS_MODE_SW == g_rspi_tcb[0].data_tran_mode)
     {
-        g_rxdata[0] = RSPI0.SPDR.LONG; // Read rx-data register into temp buffer.
+        if (0 == g_rspi_tcb[0].tx_count)
+        {
+            g_rxdata[0] = RSPI0.SPDR.LONG; // Read rx-data register into temp buffer.
+        }
 
-            /* If master mode then disable further spti interrupts on first transmit.
-            If slave mode then we do two transmits to fill the double buffer,
-            then disable spti interrupts.
-            The receive interrupt will handle any remaining data. */
+        /* If master mode then disable further spti interrupts on first transmit.
+        If slave mode then we do two transmits to fill the double buffer,
+        then disable spti interrupts.
+        The receive interrupt will handle any remaining data. */
 #if RSPI_CFG_HIGH_SPEED_READ == 0
-            if ((RSPI0.SPCR.BIT.MSTR) || (g_rspi_tcb[0].tx_count > 0))
+        if ((RSPI0.SPCR.BIT.MSTR) || (g_rspi_tcb[0].tx_count > 0))
+        {
+            RSPI0.SPCR.BIT.SPTIE = 0;  // Disable SPTI interrupt.
+            if (0 == RSPI0.SPCR.BIT.SPTIE)
             {
-                RSPI0.SPCR.BIT.SPTIE = 0;  // Disable SPTI interrupt.
-                if (0 == RSPI0.SPCR.BIT.SPTIE)
-                {
-                    R_BSP_NOP();
-                }
+                R_BSP_NOP();
             }
+        }
 #endif
         rspi_tx_common(0);
 
@@ -2532,21 +2646,24 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spti1_isr(void)
 {
     if (RSPI_TRANS_MODE_SW == g_rspi_tcb[1].data_tran_mode)
     {
-        g_rxdata[1] = RSPI1.SPDR.LONG; // Read rx-data register into temp buffer.
+        if (0 == g_rspi_tcb[1].tx_count)
+        {
+            g_rxdata[1] = RSPI1.SPDR.LONG; // Read rx-data register into temp buffer.
+        }
 
-            /* If master mode then disable further spti interrupts on first transmit.
-            If slave mode then we do two transmits to fill the double buffer,
-            then disable spti interrupts.
-            The receive interrupt will handle any remaining data. */
+        /* If master mode then disable further spti interrupts on first transmit.
+        If slave mode then we do two transmits to fill the double buffer,
+        then disable spti interrupts.
+        The receive interrupt will handle any remaining data. */
 #if RSPI_CFG_HIGH_SPEED_READ == 0
-            if ((RSPI1.SPCR.BIT.MSTR) || (g_rspi_tcb[1].tx_count > 0))
+        if ((RSPI1.SPCR.BIT.MSTR) || (g_rspi_tcb[1].tx_count > 0))
+        {
+            RSPI1.SPCR.BIT.SPTIE = 0;  // Disable SPTI interrupt.
+            if (0 == RSPI1.SPCR.BIT.SPTIE)
             {
-                RSPI1.SPCR.BIT.SPTIE = 0;  // Disable SPTI interrupt.
-                if (0 == RSPI1.SPCR.BIT.SPTIE)
-                {
-                    R_BSP_NOP();
-                }
+                R_BSP_NOP();
             }
+        }
 #endif
         rspi_tx_common(1);
 
@@ -2579,21 +2696,24 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spti2_isr(void)
 {
     if (RSPI_TRANS_MODE_SW == g_rspi_tcb[2].data_tran_mode)
     {
-        g_rxdata[2] = RSPI2.SPDR.LONG; // Read rx-data register into temp buffer.
+        if (0 == g_rspi_tcb[2].tx_count)
+        {
+            g_rxdata[2] = RSPI2.SPDR.LONG; // Read rx-data register into temp buffer.
+        }
 
-            /* If master mode then disable further spti interrupts on first transmit.
-            If slave mode then we do two transmits to fill the double buffer,
-            then disable spti interrupts.
-            The receive interrupt will handle any remaining data. */
+        /* If master mode then disable further spti interrupts on first transmit.
+        If slave mode then we do two transmits to fill the double buffer,
+        then disable spti interrupts.
+        The receive interrupt will handle any remaining data. */
 #if RSPI_CFG_HIGH_SPEED_READ == 0
-            if ((RSPI2.SPCR.BIT.MSTR) || (g_rspi_tcb[2].tx_count > 0))
+        if ((RSPI2.SPCR.BIT.MSTR) || (g_rspi_tcb[2].tx_count > 0))
+        {
+            RSPI2.SPCR.BIT.SPTIE = 0;  // Disable SPTI interrupt.
+            if (0 == RSPI2.SPCR.BIT.SPTIE)
             {
-                RSPI2.SPCR.BIT.SPTIE = 0;  // Disable SPTI interrupt.
-                if (0 == RSPI2.SPCR.BIT.SPTIE)
-                {
-                    R_BSP_NOP();
-                }
+                R_BSP_NOP();
             }
+        }
 #endif
         rspi_tx_common(2);
 
@@ -2676,6 +2796,10 @@ static void rspi_spei_isr_common(uint8_t channel)
     {
         R_BSP_NOP();
     }
+    #ifdef BSP_MCU_RX671
+    /* Disable communication end interrupt requests of the RSPI. */
+     (*g_rspi_channels[channel]).SPCR3.BIT.SPCIE = 0;
+    #endif
 
     #if RSPI_CFG_REQUIRE_LOCK == 1
     /* Release lock for this channel. */
@@ -2707,6 +2831,7 @@ static void rspi_spei_isr_common(uint8_t channel)
 #ifndef BSP_MCU_RX72M
 #ifndef BSP_MCU_RX72N
 #ifndef BSP_MCU_RX66N
+#ifndef BSP_MCU_RX671
     #if RSPI_CFG_USE_CHAN0 == 1
     R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spei0_isr, VECT(RSPI0, SPEI0))
     R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spei0_isr(void)
@@ -2730,6 +2855,7 @@ static void rspi_spei_isr_common(uint8_t channel)
         rspi_spei_isr_common(2);
     } /* end rspi_spei2_isr */
     #endif
+#endif
 #endif
 #endif
 #endif
@@ -2770,6 +2896,9 @@ static void rspi_spei_isr_common(uint8_t channel)
     #endif
 #endif
 
+#if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || \
+    defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
+    defined BSP_MCU_RX671
 /******************************************************************************
 * Function Name:    rspi_spei_grp_isr
 * Description  :    BSP group interrupt handler for register the error callback function
@@ -2780,7 +2909,8 @@ static void rspi_spei_grp_isr(void *pdata)
 {
     /* Called from BSP group interrupt handler. */
     #if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || \
-        defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N
+        defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
+        defined BSP_MCU_RX671
     #if RSPI_CFG_USE_CHAN0 == 1
     if (IS(RSPI0, SPEI0))
     {
@@ -2790,7 +2920,7 @@ static void rspi_spei_grp_isr(void *pdata)
     #endif
 
     #if defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || \
-        defined BSP_MCU_RX66N
+        defined BSP_MCU_RX66N || defined BSP_MCU_RX671
     #if RSPI_CFG_USE_CHAN1 == 1
     if (IS(RSPI1, SPEI1))
     {
@@ -2799,7 +2929,8 @@ static void rspi_spei_grp_isr(void *pdata)
     #endif
     #endif
     
-    #if defined BSP_MCU_RX65N || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N
+    #if defined BSP_MCU_RX65N || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
+        defined BSP_MCU_RX671
     #if RSPI_CFG_USE_CHAN2 == 1
     if (IS(RSPI2, SPEI2))
     {
@@ -2808,5 +2939,92 @@ static void rspi_spei_grp_isr(void *pdata)
     #endif
     #endif
 }
+#endif
 
+#if defined BSP_MCU_RX671
+/******************************************************************************
+* Function Name:    rspi_spci_isr_common
+* Description  :    common ISR handler for SPCI RSPI Communication End
+* Arguments    :    RSPI channel
+* Return Value :    N/A
+******************************************************************************/
+static void rspi_spci_isr_common(uint8_t channel)
+{
+    uint8_t status_flags = (*g_rspi_channels[channel]).SPSR.BYTE;
+    rspi_evt_t event = RSPI_EVT_ERR_UNDEF;
+
+    g_rspi_cb_data[channel].event_code = event;
+    if (status_flags & RSPI_SPSR_SPCF)
+    {
+        /* Clear Communication End Flag: SPCF flag. */
+        (*g_rspi_channels[channel]).SPSR.BIT.SPCF = 0;
+        /* Disable communication end interrupt requests of the RSPI. */
+        (*g_rspi_channels[channel]).SPCR3.BIT.SPCIE = 0;
+
+        (*g_rspi_channels[channel]).SPCR.BIT.SPE = 0;  // Disable RSPI.
+        if (0 == (*g_rspi_channels[channel]).SPCR.BIT.SPE)
+        {
+            R_BSP_NOP();
+        }
+
+        #if RSPI_CFG_REQUIRE_LOCK == 1
+        /* Release lock for this channel. */
+        R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_RSPI0 + channel));
+        #endif
+        /* Transfer complete. Call the user callback function passing pointer to the result structure. */
+        if ((FIT_NO_FUNC != g_rspi_handles[channel].pcallback) && (NULL != g_rspi_handles[channel].pcallback))
+        {
+            g_rspi_cb_data[channel].handle = &(g_rspi_handles[channel]);
+            g_rspi_cb_data[channel].event_code = RSPI_EVT_TRANSFER_COMPLETE;
+            g_rspi_handles[channel].pcallback((void*)&(g_rspi_cb_data[channel]));
+        }
+    }
+
+} /* end rspi_spci_isr_common() */
+
+#if RSPI_CFG_USE_CHAN0 == 1
+/******************************************************************************
+* Function Name:    rspi_spci0_isr
+* Description  :    RSPI SPCI Communication End ISR.
+*                   Each ISR calls a common function but passes its channel number.
+* Arguments    :    N/A
+* Return Value :    N/A
+******************************************************************************/
+    R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spci0_isr, VECT(RSPI0, SPCI0))
+    R_BSP_ATTRIB_INTERRUPT void rspi_spci0_isr(void)
+    {
+        rspi_spci_isr_common(0);
+    } /* end rspi_spci0_isr */
+#endif
+
+#if RSPI_CFG_USE_CHAN1 == 1
+/******************************************************************************
+* Function Name:    rspi_spci1_isr
+* Description  :    RSPI SPCI Communication End ISR.
+*                   Each ISR calls a common function but passes its channel number.
+* Arguments    :    N/A
+* Return Value :    N/A
+******************************************************************************/
+    R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spci1_isr, VECT(RSPI1, SPCI1))
+    R_BSP_ATTRIB_INTERRUPT void rspi_spci1_isr(void)
+    {
+        rspi_spci_isr_common(1);
+    } /* end rspi_spci1_isr */
+#endif
+
+#if RSPI_CFG_USE_CHAN2 == 1
+    /******************************************************************************
+    * Function Name:    rspi_spci2_isr
+    * Description  :    RSPI SPCI Communication End ISR.
+    *                   Each ISR calls a common function but passes its channel number.
+    * Arguments    :    N/A
+    * Return Value :    N/A
+    ******************************************************************************/
+    R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spci2_isr, VECT(RSPI2, SPCI2))
+    R_BSP_ATTRIB_INTERRUPT void rspi_spci2_isr(void)
+    {
+        rspi_spci_isr_common(2);
+    } /* end rspi_spci2_isr */
+#endif
+#endif
 /* end SPRI  */

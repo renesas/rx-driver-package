@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="USB_CFG_PMSC_BULK_IN" display="Setting the USB Bulk In pipe" default="USB_PIPE1" type="combobox">
+            <option id="USB_CFG_PMSC_BULK_IN.USB_PIPE1" display="Using USB PIPE1" value="USB_PIPE1"/>
+            <option id="USB_CFG_PMSC_BULK_IN.USB_PIPE2" display="Using USB PIPE2" value="USB_PIPE2"/>
+            <option id="USB_CFG_PMSC_BULK_IN.USB_PIPE3" display="Using USB PIPE3" value="USB_PIPE3"/>
+            <option id="USB_CFG_PMSC_BULK_IN.USB_PIPE4" display="Using USB PIPE4" value="USB_PIPE4"/>
+            <option id="USB_CFG_PMSC_BULK_IN.USB_PIPE5" display="Using USB PIPE5" value="USB_PIPE5"/>
+            <constraint display="Selected pipe must not be used multiple times" actionOnFail="error">("${USB_CFG_PMSC_BULK_IN}" != "${USB_CFG_PMSC_BULK_OUT}")</constraint>
+            <description>Using USB PIPE1
+Using USB PIPE2
+Using USB PIPE3
+Using USB PIPE4
+Using USB PIPE5</description>
+        </property>
+        <property id="USB_CFG_PMSC_BULK_OUT" display="Setting the USB Bulk Out pipe" default="USB_PIPE2" type="combobox">
+            <option id="USB_CFG_PMSC_BULK_OUT.USB_PIPE1" display="Using USB PIPE1" value="USB_PIPE1"/>
+            <option id="USB_CFG_PMSC_BULK_OUT.USB_PIPE2" display="Using USB PIPE2" value="USB_PIPE2"/>
+            <option id="USB_CFG_PMSC_BULK_OUT.USB_PIPE3" display="Using USB PIPE3" value="USB_PIPE3"/>
+            <option id="USB_CFG_PMSC_BULK_OUT.USB_PIPE4" display="Using USB PIPE4" value="USB_PIPE4"/>
+            <option id="USB_CFG_PMSC_BULK_OUT.USB_PIPE5" display="Using USB PIPE5" value="USB_PIPE5"/>
+            <constraint display="Selected pipe must not be used multiple times" actionOnFail="error">("${USB_CFG_PMSC_BULK_IN}" != "${USB_CFG_PMSC_BULK_OUT}")</constraint>
+            <description>Using USB PIPE1
+Using USB PIPE2
+Using USB PIPE3
+Using USB PIPE4
+Using USB PIPE5</description>
+        </property>
+        <property id="USB_CFG_PMSC_VENDOR" display="Setting the vendor information in Inquiry data format" default="&quot;Renesas &quot;" type="textbox">
+            <constraint display="8 bytes of data in double quotation marks">/^"((.?){8})"$/.test('${USB_CFG_PMSC_VENDOR}')</constraint>
+            <description></description>
+        </property>
+        <property id="USB_CFG_PMSC_PRODUCT" display="Setting the product identification in Inquiry data format" default="&quot;Mass Storage    &quot;" type="textbox">
+            <constraint display="16 bytes of data in double quotation marks">/^"((.?){16})"$/.test('${USB_CFG_PMSC_PRODUCT}')</constraint>
+            <description></description>
+        </property>
+        <property id="USB_CFG_PMSC_REVISION" display="Setting the product revision Level in Inquiry data format" default="&quot;1.00&quot;" type="textbox">
+            <constraint display="4 bytes of data in double quotation marks">/^"((.?){4})"$/.test('${USB_CFG_PMSC_REVISION}')</constraint>
+            <description></description>
+        </property>
+        <property id="USB_CFG_PMSC_TRANS_COUNT" display="Setting the number of the data blocks transferred at one time (512bytes * n)" default="8" type="textbox">
+            <constraint display="Value must be in the range 0-65536">("${USB_CFG_PMSC_TRANS_COUNT}" &gt;= 0) &amp;&amp; ("${USB_CFG_PMSC_TRANS_COUNT}" &lt;= 65536)</constraint>
+            <description></description>
+        </property>
+    </configuration>
+</module>

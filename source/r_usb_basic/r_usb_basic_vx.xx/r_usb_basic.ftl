@@ -26,10 +26,14 @@ void ${Function_Name}()
 </#macro> 
 
 <#macro channelpincode pin>
+<#if (headerInfo.device?contains("R5F5671") && (pin.pinName == 'USB0_DP' || pin.pinName == 'USB0_DM'))>
+    /* Skip setting for ${pin.pinName} - Delete this line if unnecessary */
+<#else>
 
     /* Set ${pin.pinName} pin */
     MPC.${pin.assignedPinName}PFS.BYTE = 0x${pin.pinMPC}U;
     PORT${pin.portNum}.PMR.BIT.B${pin.pinBitNum} = 1U;
+</#if>
 </#macro> 
 
 <#macro endsection>

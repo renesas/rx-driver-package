@@ -36,6 +36,7 @@
         <version>3.00.00</version>
         <version>3.01.00</version>
         <version>3.02.00</version>
+        <version>3.03.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -44,6 +45,7 @@
         <version>4.08.04.201803</version>
         <version>4.08.04.201902</version>
         <version>8.03.00.201904</version>
+        <version>8.03.00.202004</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -53,6 +55,7 @@
         <version>4.12.01</version>
         <version>4.13.01</version>
         <version>4.14.01</version>
+        <version>4.20.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -79,6 +82,7 @@
         <group omit_board="true">RX65N</group>
         <group omit_board="true">RX66N</group>
         <group omit_board="true">RX66T</group>
+        <group omit_board="true">RX671</group>
         <group omit_board="true">RX71M</group>
         <group omit_board="true">RX72T</group>
         <group omit_board="true">RX72M</group>
@@ -94,11 +98,11 @@
         <zipsource>r_s12ad_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.62</version>
+            <version>6.10</version>
         </dependency>
         <application>Analog</application>
         <application>Motor Control</application>
-        <desc>Multi-Channel A/D and Sensor Driver.</desc>
+        <desc>ADC Driver</desc>
         <details>This A/D driver supports the temperature sensor, internal reference voltage sensor, and all analog channels available on the MCU. Single scan and continuous scanning are supported. Group and Double Trigger modes are supported. Triggers may be synchronous, asynchronous, or initiated by software. </details>
         <function>ADC</function>
         <function>Sensors</function>

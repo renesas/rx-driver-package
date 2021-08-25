@@ -30,6 +30,7 @@
  *                           "R_USB_HhidGetReportLength","R_USB_HhidClassRequest","R_USB_HhidPipeTransfer" is deleted.
  *         : 31.03.2018 1.23 Supporting Smart Configurator.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2021 1.31 RX671 is added.
  ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -66,13 +67,14 @@ usb_err_t R_USB_HhidGetType(usb_ctrl_t *p_ctrl, uint8_t *p_type)
 {
     usb_err_t   err;
     usb_info_t  info;
-    usb_utr_t   utr;
-
-    utr.ip = p_ctrl->module;
-    utr.ipp = usb_hstd_get_usb_ip_adr(utr.ip);
 
 #if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
-    if ((USB_NULL == p_ctrl) || (USB_NULL == p_type))
+    if (USB_NULL == p_ctrl)
+    {
+        return USB_ERR_PARA;
+    }
+
+    if (USB_NULL == p_type)
     {
         return USB_ERR_PARA;
     }
@@ -129,11 +131,13 @@ usb_err_t R_USB_HhidGetMxps(usb_ctrl_t *p_ctrl, uint16_t *p_mxps, uint8_t dir)
     uint16_t    pipe;
     uint16_t    pipe_bit_map;
 
-    utr.ip = p_ctrl->module;
-    utr.ipp = usb_hstd_get_usb_ip_adr(utr.ip);
-
 #if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
-    if ((USB_NULL == p_ctrl) || (USB_NULL == p_mxps))
+    if (USB_NULL == p_ctrl)
+    {
+        return USB_ERR_PARA;
+    }
+
+    if (USB_NULL == p_mxps)
     {
         return USB_ERR_PARA;
     }
@@ -150,6 +154,12 @@ usb_err_t R_USB_HhidGetMxps(usb_ctrl_t *p_ctrl, uint16_t *p_mxps, uint8_t dir)
         return USB_ERR_PARA;
     }
 #endif /* defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX63T) || defined(BSP_MCU_RX72T) */
+
+    if ((USB_IN != dir) && (USB_OUT != dir))
+    {
+        return USB_ERR_PARA;
+    }
+
 #endif /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
 
     err = R_USB_GetInformation(p_ctrl, &info);
@@ -170,11 +180,7 @@ usb_err_t R_USB_HhidGetMxps(usb_ctrl_t *p_ctrl, uint16_t *p_mxps, uint8_t dir)
     }
     else
     {
-#if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
-        return USB_ERR_PARA;
-#else  /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
         return USB_ERR_NG;
-#endif /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
     }
 
     err = R_USB_GetUsePipe (p_ctrl, &pipe_bit_map);
@@ -187,6 +193,9 @@ usb_err_t R_USB_HhidGetMxps(usb_ctrl_t *p_ctrl, uint16_t *p_mxps, uint8_t dir)
     {
         return USB_ERR_NG;
     }
+
+    utr.ip = p_ctrl->module;
+    utr.ipp = usb_hstd_get_usb_ip_adr(utr.ip);
 
     *p_mxps = usb_cstd_get_maxpacket_size(&utr, pipe);
     return USB_SUCCESS;

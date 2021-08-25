@@ -32,6 +32,7 @@
 *         : 07.02.2019 1.80    Updated version to 1.80.
 *         : 10.06.2020 1.81    Updated version to 1.81.
 *         : 30.11.2020 1.82    Updated version to 1.82 for e2studio 2020-10 support.
+*         : 31.03.2021 1.90    Updated for queue protection.
 ***********************************************************************************************************************/
 
 #ifndef BYTEQ_IF_H
@@ -41,14 +42,19 @@
 Includes   <System Includes> , "Project Includes"
 ***********************************************************************************************************************/
 #include "platform.h"
-
+#include "r_byteq_config.h"
 /***********************************************************************************************************************
 Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
 #define BYTEQ_VERSION_MAJOR (1)
-#define BYTEQ_VERSION_MINOR (82)
+#define BYTEQ_VERSION_MINOR (90)
 
+#if (BYTEQ_CFG_PROTECT_QUEUE == 1)
+#if (BSP_CFG_RUN_IN_USER_MODE == 1)
+    #error "Protect circular buffer must use in supervisor mode."
+#endif
+#endif
 
 /*****************************************************************************
 Typedef definitions

@@ -14,6 +14,7 @@
 //  2012-08-03 CSe  clearing interrupt before calling registered IRQ handler
 //  2018-01-24      added support for RX
 //  2020-02-28      added ICU_GROUPAL1 Enable/Disable Switch
+//  2021-05-27      supported GNU-RX and IAR compiler.
 //--------------------------------------------------------------------------
 
 #include <stdlib.h>
@@ -22,6 +23,10 @@
 #include "dave_base_rx.h"
 
 #define ICU_GROUPAL1_ENABLE    (0) /*ICU_GROUPAL1 Enable/Disable*/
+
+#if (ICU_GROUPAL1_ENABLE == 1)
+#include "platform.h"
+#endif
 
 #define DAVE_STAT        (0x0)  /* STATUS register offset              */
 #define DAVE_IRQ_CTRL    (0x30) /* IRQCTL register offset              */
@@ -300,14 +305,14 @@ void drw_int_isr(void)
     }
 }
 #if ICU_GROUPAL1_ENABLE
-#pragma interrupt excep_icu_groupal1_isr(vect=113)
+R_BSP_PRAGMA_STATIC_INTERRUPT(excep_icu_groupal1_isr, VECT(ICU,GROUPAL1))
 /***********************************************************************
  * Function Name: excep_icu_groupal1_isr
  * Description  : GRPAL1 interrupt routine for DRW2D.
  * Arguments    : none
  * Return Value : none
  **********************************************************************/
-static void excep_icu_groupal1_isr(void)
+R_BSP_ATTRIB_STATIC_INTERRUPT void excep_icu_groupal1_isr(void)
 {
     unsigned long isflag;
 

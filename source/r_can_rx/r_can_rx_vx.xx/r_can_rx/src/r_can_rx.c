@@ -58,6 +58,8 @@
 *                              - Fixed processing in R_CAN_RxSetMask() function.
 *         : 04.01.2021 4.10    - Changed can_tx_callback to can_txf_callback in case txf_cb_func is NULL in R_CAN_Create().
 *         : 01.04.2021 5.00    - Added support for setting different bitrate for different channels.
+*         : 07.04.2021 5.10    - Fixed comment of R_CAN_RxSetFIFO and R_CAN_RxSetFIFOXid.
+*                              - Updated Doxygen comment.
 ***********************************************************************************************************************/
 /******************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -170,7 +172,7 @@ static void     can_module_stop_state_cancel(const uint32_t ch_nr);
 * Function Name: R_CAN_Create
 ********************************************************************************************************************//**
 * @brief Initializes CAN peripheral - Sets user communication callback functions, configures CAN interrupts, sets
-* bitrate, mailbox defaults, and enters CAN Operation Mode.\n
+* different bitrate for different channels, mailbox defaults, and enters CAN Operation Mode.\n
 * This function sets the CAN interrupt levels and user callbacks. This function will also call R_CAN_SetBitrate()
 * and sets the mask to default: not mask any frames.
 * @param[in] ch_nr - CAN channel to use (0-2 MCU dependent).
@@ -180,27 +182,37 @@ static void     can_module_stop_state_cancel(const uint32_t ch_nr);
 * @param[in] tx_cb_func - The name of a function in your application which will be called by the CAN driver when
 * a mailbox has finished transmitting. If you are using polled mode, or do not want a callback for interrupt mode
 * for some reason, specify NULL.
+* @param[in] txf_cb_func - The name of a function in your application which will be called by the CAN driver when
+* every time mailbox in the transmit FIFO has finished transmitting or the transmit FIFO becomes empty due to completion
+* of transmission. If you do not want a callback for interrupt mode for some reason, specify NULL.
 * @param[in] rx_cb_func - The name of a function in your application which will be called by the CAN driver when a
 * mailbox has finished receiving. If you are using polled mode, or do not want a callback for interrupt mode for
-* some reason, specify NULL.t
+* some reason, specify NULL.
+* @param[in] rxf_cb_func - The name of a function in your application which will be called by the CAN driver when
+* every time mailbox in  the receive FIFO has finished receiving or the receive FIFO becomes buffer warning by completion
+* of reception. If you do not want a callback for interrupt mode for some reason, specify NULL.
 * @param[in] err_cb_func - The name of a function in your application which will be called by the CAN driver when
 * there is a CAN error. If you are using polled mode, or do not want a callback for interrupt mode for some reason,
 * specify NULL.
 * @retval R_CAN_OK                Action completed successfully.
 * @retval R_CAN_SW_BAD_MBX        Bad mailbox number.
 * @retval R_CAN_BAD_CH_NR         The channel number does not exist.
+* @retval R_CAN_BAD_MODE          The mode number does not exist.
 * @retval R_CAN_SW_RST_ERR        The CAN peripheral did not enter Reset mode
 * @retval R_CAN_MODULE_STOP_ERR   Whole CAN peripheral is in stop state (low power). Perhaps the PRCR register was
 * not used to unlock the module stop register.\n
 * See also R_CAN_Control() return values.
 * @details This function wakes the peripheral from CAN Sleep mode and puts it in CAN Reset mode. It configures the
 * mailboxes with these default settings:\n
+* Sets mailbox mode: either normal mailbox mode or FIFO mailbox mode.\n
 * Overwrite an unread mailbox data when new frames arrive.\n
 * Sets the device to use ID priority (normal CAN behavior, not the optional mailbox number priority).\n
 * Sets all mailboxes' masks invalid.\n
 * R_CAN_Create calls the R_CAN_SetBitrate function and configures CAN interrupts if USE_CAN_POLL is commented
 * in r_can_rx_config.h.\n
 * Before returning, it clears all mailboxes, sets the peripheral into Operation mode, and clears any errors.
+* @note Users need to declare the baud rate prescaler division and bit timing values to set the bitrate of the CAN
+* channel through the p_cfg argument before call R_CAN_Create() function.
 */
 uint32_t R_CAN_Create(const uint32_t ch_nr, const uint32_t mb_mode, const can_bitrate_config_t p_cfg, void (*tx_cb_func)(void), void (*txf_cb_func)(void), void (*rx_cb_func)(void), void (*rxf_cb_func)(void), void (*err_cb_func)(void))
 {
@@ -395,11 +407,11 @@ uint32_t R_CAN_Create(const uint32_t ch_nr, const uint32_t mb_mode, const can_bi
 * Port actions:\n
 *  ENABLE                      Enable the CAN port pins and the CAN transceiver.\n
 *  DISABLE                     Disable the CAN port pins and the CAN transceiver.\n
-*  CANPORT_TEST_LISTEN_ONLY        Set to Listen Only mode. No ACKs or Error frames are sent.\n
+*  CANPORT_TEST_LISTEN_ONLY    Set to Listen Only mode. No ACKs or Error frames are sent.\n
 *  CANPORT_TEST_0_EXT_LOOPBACK Use external bus and loopback. Useful for initial debug. See separate test section.\n
 *  CANPORT_TEST_1_INT_LOOPBACK Only internal mailbox communication. Useful for initial debug. See separate test
 *                               section.\n
-*  CANPORT_RETURN_TO_NORMAL        Return to normal port usage.\n
+*  CANPORT_RETURN_TO_NORMAL    Return to normal port usage.\n
 * @retval R_CAN_OK                Action completed successfully.
 * @retval R_CAN_SW_BAD_MBX        Bad mailbox number.
 * @retval R_CAN_BAD_CH_NR         The channel number does not exist.
@@ -711,21 +723,30 @@ uint32_t R_CAN_Control(const uint32_t  ch_nr, const uint32_t  action_type)
 * Function Name: R_CAN_TxSet
 ********************************************************************************************************************//**
 * @brief Set up a mailbox to transmit. The API will write to a mailbox the specified ID, data length and data
-* frame payload, then set the mailbox to transmit mode and send a frame onto the bus by calling R_CAN_Tx().\n
+* frame payload, then set the mailbox to transmit mode and send a frame onto the bus by calling R_CAN_Tx().
 * @param[in] ch_nr - CAN channel to use (0-2 MCU dependent).
+* @param[in] mb_mode - Normal mailbox (0), FIFO mailbox (1).
 * @param[in] mbox_nr - Mailbox to use.
 * @param[in] frame_p - Pointer to a data frame structure in memory. It is an address to the data structure containing
 * the ID, DLC and data that constitute the data frame the mailbox will transmit.
 * @param[in] frame_type \n
-*  DATA_FRAME  Send a normal data frame.\n
+*  DATA_FRAME      Send a normal data frame.\n
 *  REMOTE_FRAME    Send a remote data frame request.
 * @retval R_CAN_OK                The mailbox was set up for transmission.
 * @retval R_CAN_SW_BAD_MBX        Bad mailbox number.
 * @retval R_CAN_BAD_CH_NR         The channel number does not exist.
+* @retval R_CAN_BAD_MODE          The mode number does not exist.
+* @retval CAN_ERR_BOX_FULL        Receive FIFO is full (4 unread messages).
 * @retval R_CAN_BAD_ACTION_TYPE   No such action type exists for this function.
-* @details This function first waits for any previous transmission of the specified mailbox to complete. It then
-* interrupt disables the mailbox temporarily when setting up the mailbox: Sets the ID value for the mailbox, the
-* Data Length Code indicated by frame_p, selects data frame or remote frame request and finally copies the data frame
+* @details This function sets up transmitting for normal mailboxes or transmit FIFO mailboxes.\n
+* To transmit FIFO mailboxes, this function first interrupt disables the mailbox temporarily when setting up the maibox.
+* It then check to ensure transmit FIFO is not full to perform setting up the mailbox: Copies the data frame payload
+* bytes (0-7) into the mailbox, selects data frame or remote frame request, sets the ID value for the mailbox and
+* finally the Data Length Code indicated by frame_p. The mailbox is interrupt enabled as well as transmit FIFO interrupt
+* generation timing again unless USE_CAN_POLL was defined. Finally R_CAN_Tx is called to deliver the message.\n
+* To normal mailboxes, this function first waits for any previous transmission of the specified mailbox to complete.
+* It then interrupt disables the mailbox temporarily when setting up the mailbox: Sets the ID value for the mailbox,
+* the Data Length Code indicated by frame_p, selects dataframe or remote frame request and finally copies the data frame
 * payload bytes (0-7) into the mailbox. The mailbox is interrupt enabled again unless USE_CAN_POLL was defined.
 * Finally R_CAN_Tx is called to deliver the message.
 */
@@ -918,19 +939,28 @@ uint32_t R_CAN_TxSet(const uint32_t         ch_nr,
 * frame payload, then set the mailbox to transmit mode and send a frame onto the bus by calling R_CAN_Tx(). If this
 * function is used, the ID will be a 29-bit ID.
 * @param[in] ch_nr - CAN channel to use (0-2 MCU dependent).
+* @param[in] mb_mode - Normal mailbox (0), FIFO mailbox (1).
 * @param[in] mbox_nr - Mailbox to use.
 * @param[in] frame_p - Pointer to a data frame structure in memory. It is an address to the data structure containing
 * the ID, DLC and data that constitute the dataframe the mailbox will transmit.
 * @param[in] frame_type \n
-*  DATA_FRAME  Send a normal data frame.\n
+*  DATA_FRAME      Send a normal data frame.\n
 *  REMOTE_FRAME    Send a remote data frame request.
 * @retval R_CAN_OK                The mailbox was set up for transmission.
 * @retval R_CAN_SW_BAD_MBX        Bad mailbox number.
 * @retval R_CAN_BAD_CH_NR         The channel number does not exist.
+* @retval R_CAN_BAD_MODE          The mode number does not exist.
+* @retval CAN_ERR_BOX_FULL        Receive FIFO is full (4 unread messages).
 * @retval R_CAN_BAD_ACTION_TYPE   No such action type exists for this function.
-* @details This function first waits for any previous transmission of the specified mailbox to complete. It then
-* interrupt disables the mailbox temporarily when setting up the mailbox: Sets the ID value for the mailbox, the
-* Data Length Code indicated by frame_p, selects dataframe or remote frame request and finally copies the data frame
+* @details This function sets up transmitting for normal mailboxes or transmit FIFO mailboxes.\n
+* To transmit FIFO mailboxes, this function first interrupt disables the mailbox temporarily when setting up the maibox.
+* It then check to ensure transmit FIFO is not full to perform setting up the mailbox: Copies the data frame payload
+* bytes (0-7) into the mailbox, selects data frame or remote frame request, sets the ID value for the mailbox and
+* finally the Data Length Code indicated by frame_p. The mailbox is interrupt enabled as well as transmit FIFO interrupt
+* generation timing again unless USE_CAN_POLL was defined. Finally R_CAN_Tx is called to deliver the message.\n
+* To normal mailboxes, this function first waits for any previous transmission of the specified mailbox to complete.
+* It then interrupt disables the mailbox temporarily when setting up the mailbox: Sets the ID value for the mailbox,
+* the Data Length Code indicated by frame_p, selects dataframe or remote frame request and finally copies the data frame
 * payload bytes (0-7) into the mailbox. The mailbox is interrupt enabled again unless USE_CAN_POLL was defined.
 * Finally R_CAN_Tx is called to deliver the message.
 */
@@ -963,10 +993,12 @@ uint32_t R_CAN_TxSetXid(const uint32_t     ch_nr,
 * @brief Starts actual message transmission onto the CAN bus. This API will wait until the mailbox finishes handling
 * a prior frame, then set the mailbox to transmit mode.
 * @param[in] ch_nr - CAN channel to use (0-2 MCU dependent).
+* @param[in] mb_mode - Normal mailbox (0), FIFO mailbox (1).
 * @param[in] mbox_nr - Which CAN mailbox to use. (0-32)
 * @retval R_CAN_OK - The mailbox was set to transmit a previously configured mailbox.
 * @retval R_CAN_SW_BAD_MBX - Bad mailbox number.
 * @retval R_CAN_BAD_CH_NR - The channel number does not exist.
+* @retval R_CAN_BAD_MODE - The mode number does not exist.
 * @retval R_CAN_SW_SET_TX_TMO - Waiting for previous transmission to finish timed out.
 * @retval R_CAN_SW_SET_RX_TMO - Waiting for previous reception to complete timed out.
 * @details R_CAN_TxSet must have been called at least once for this mailbox after system start to set up the mailbox
@@ -1081,16 +1113,17 @@ uint32_t R_CAN_TxCheck(const uint32_t ch_nr, const uint32_t mbox_nr)
 * Function Name: R_CAN_TxStopMsg
 ********************************************************************************************************************//**
 * @brief Stop a mailbox that has been asked to transmit a frame
-* @param[in] ch_nr \n
-*    CAN channel to use (0-2 MCU dependent).
-* @param[in] mbox_nr \n
-*    Which CAN mailbox to use. (0-32)
+* @param[in] ch_nr - CAN channel to use (0-2 MCU dependent).
+* @param[in] mb_mode - Normal mailbox (0), FIFO mailbox (1).
+* @param[in] mbox_nr - Which CAN mailbox to use. (0-32)
 * @retval R_CAN_OK            Action completed successfully.
 * @retval R_CAN_SW_BAD_MBX    Bad mailbox number.
+* @retval R_CAN_BAD_MODE      The mode number does not exist.
 * @retval R_CAN_BAD_CH_NR     The channel number does not exist.
 * @retval R_CAN_SW_ABORT_ERR  Waiting for an abort timed out.
-* @details This function clears the mailbox control flags so that a transmission is stopped (TrmReq is set to 0.)
-* A software counter then waits for an abort for a maximum period of time.\n
+* @details This function clears the mailbox control or transmit FIFO control flags so that a transmission is stopped
+* (TrmReq is set to 0 for normal mailboxes or TFE is set to 0 for transmit FIFO mailboxes). A software counter then
+* waits for an abort for a maximum period of time.\n
 * If the message was not stopped, R_CAN_SW_ABORT_ERR is returned. Note that the cause of this could be that the
 * message was already sent.
 */
@@ -1157,12 +1190,9 @@ uint32_t R_CAN_TxStopMsg(const uint32_t ch_nr, const uint32_t  mb_mode, const ui
 * @brief Set up a mailbox to receive.\n
 * The API sets up a given mailbox to receive data frames with the given CAN 11-bit ID. Incoming data frames with the
 * same ID will be stored in the mailbox.
-* @param[in] ch_nr \n
-*               CAN channel to use (0-2 MCU dependent).
-* @param[in] mbox_nr \n
-*               Which CAN mailbox to use. (0-32)
-* @param[in] id \n
-*               The CAN ID which the mailbox should receive.
+* @param[in] ch_nr - CAN channel to use (0-2 MCU dependent).
+* @param[in] mbox_nr - Which CAN mailbox to use. (0-32)
+* @param[in] id - The CAN ID which the mailbox should receive.
 * @param[in] frame_type \n
 *  DATA_FRAME      Send a normal data frame. \n
 *  REMOTE_FRAME    Send a remote data frame request.
@@ -1260,25 +1290,27 @@ uint32_t R_CAN_RxSet(const uint32_t  ch_nr,
 /***********************************************************************************************************************
 * Function Name: R_CAN_RxSetFIFO
 ********************************************************************************************************************//**
-* @brief Set up a mailbox to FIFO receive.\n
-* The API sets up a given mailbox to receive data frames with the given CAN 11-bit ID. Incoming data frames with the
-* same ID will be stored in the mailbox.
-* @param[in] ch_nr \n
-*               CAN channel to use (0-2 MCU dependent).
-* @param[in] mbox_nr \n
-*               Which CAN mailbox to use. (0-32)
-* @param[in] FIDCRO_value \n
-*               The register FIDCR0 which the mailbox id will be received .
-* @param[in] FIDCR1_value \n
-*               The register FIDCR1 which the mailbox id will be received.
-* @param[in] MKR6_value \n
-*               The mask register 6.
-* @param[in] MKR7_value \n
-*               The mask register 7.
+* @brief Set up a mailbox to receive.\n
+* The API sets up a given FIFO mailbox to receive data frames with the given CAN 11-bit ID. Incoming data frames with
+* the same ID will be stored in the mailbox.
+* @param[in] ch_nr - CAN channel to use (0-2 MCU dependent).
+* @param[in] mb_mode - Normal mailbox (0), FIFO mailbox (1).
+* @param[in] mbox_nr - Which CAN mailbox to use. (0-32)
+* @param[in] fidcr0_value - The CAN ID which the mailbox should receive.
+* @param[in] fidcr1_value - The CAN ID which the mailbox should receive.
+* @param[in] mkr6_value - The mask register.
+* @param[in] mkr7_value - The mask register.
 * @param[in] frame_type \n
 *  DATA_FRAME      receive a normal data frame. \n
 *  REMOTE_FRAME    receive a remote data frame request.
-* @details The function will set up value id which will be receive and the value of mask register in mode FIFO.
+* @retval R_CAN_OK                Action completed successfully.
+* @retval R_CAN_SW_BAD_MBX        Bad mailbox number.
+* @retval R_CAN_BAD_CH_NR         The channel number does not exist.
+* @retval R_CAN_BAD_MODE          The mode number does not exist.
+* @retval CAN_ERR_NOT_FIFO_MODE   Current mailbox mode is not FIFO mailbox mode.
+* @details The function will first temporarily interrupt disable the mailbox. Then it sets whether to receive normal
+* CAN data frames or remote frame requests. It also sets the FIFO mailbox to the given ID value. Next, it performs
+* setting value for mask register, refer to section R_CAN_RxSetMask in the application note for details.
 */
 uint32_t R_CAN_RxSetFIFO(const uint32_t  ch_nr,
                          const uint32_t  mb_mode,
@@ -1456,12 +1488,9 @@ uint32_t R_CAN_RxSetFIFO(const uint32_t  ch_nr,
 * @brief Set up a mailbox to receive.\n
 * The API sets up a given mailbox to receive data frames with the given CAN 11-bit ID. Incoming data frames with the
 * same ID will be stored in the mailbox, except the ID will be a 29-bit ID.
-* @param[in] ch_nr \n
-*               CAN channel to use (0-2 MCU dependent).
-* @param[in] mbox_nr \n
-*               Which CAN mailbox to use. (0-32)
-* @param[in] xid \n
-*               The CAN ID which the mailbox should receive.
+* @param[in] ch_nr - CAN channel to use (0-2 MCU dependent).
+* @param[in] mbox_nr - Which CAN mailbox to use. (0-32)
+* @param[in] xid - The CAN ID which the mailbox should receive.
 * @param[in] frame_type \n
 *  DATA_FRAME      Send a normal data frame. \n
 *  REMOTE_FRAME    Send a remote data frame request.
@@ -1489,26 +1518,27 @@ uint32_t R_CAN_RxSetXid(const uint32_t     ch_nr,
 /***********************************************************************************************************************
 * Function Name: R_CAN_RxSetFIFOXid
 ********************************************************************************************************************//**
-* @brief Set up a mailbox to receive.\n
-* The API sets up a given mailbox to receive data frames with the given CAN 11-bit ID. Incoming data frames with the
-* same ID will be stored in the mailbox, except the ID will be a 29-bit ID.
-* @param[in] ch_nr \n
-*               CAN channel to use (0-2 MCU dependent).
-* @param[in] mbox_nr \n
-*               Which CAN mailbox to use. (0-32)
-* @param[in] xid \n
-*               The CAN ID which the mailbox should receive.
+ * @brief Set up a mailbox to receive.\n
+* The API sets up a given FIFO mailbox to receive data frames with the given CAN 29-bit ID. Incoming data frames with
+* the same ID will be stored in the mailbox.
+* @param[in] ch_nr - CAN channel to use (0-2 MCU dependent).
+* @param[in] mb_mode - Normal mailbox (0), FIFO mailbox (1).
+* @param[in] mbox_nr - Which CAN mailbox to use. (0-32)
+* @param[in] xfidcr0_value - The CAN ID which the mailbox should receive.
+* @param[in] xfidcr1_value - The CAN ID which the mailbox should receive.
+* @param[in] mkr6_value - The mask register.
+* @param[in] mkr7_value - The mask register.
 * @param[in] frame_type \n
-*  DATA_FRAME      Send a normal data frame. \n
-*  REMOTE_FRAME    Send a remote data frame request.
+*  DATA_FRAME      receive a normal data frame. \n
+*  REMOTE_FRAME    receive a remote data frame request.
 * @retval R_CAN_OK                Action completed successfully.
 * @retval R_CAN_SW_BAD_MBX        Bad mailbox number.
 * @retval R_CAN_BAD_CH_NR         The channel number does not exist.
-* @retval R_CAN_SW_SET_TX_TMO     Waiting for previous transmission to finish timed out.
-* @retval R_CAN_SW_SET_RX_TMO     Waiting for previous reception to complete timed out.
-* @details The function will first wait for any previous transmission/reception to complete, then temporarily
-* interrupt disable the mailbox. It sets the mailbox to the given standard ID value, and whether to receive normal
-* CAN dataframes or remote frame requests.
+* @retval R_CAN_BAD_MODE          The mode number does not exist.
+* @retval CAN_ERR_NOT_FIFO_MODE   Current mailbox mode is not FIFO mailbox mode.
+* @details The function will first temporarily interrupt disable the mailbox. Then it sets whether to receive normal
+* CAN data frames or remote frame requests. It also sets the FIFO mailbox to the given ID value. Next, it performs
+* setting value for mask register, refer to section R_CAN_RxSetMask in the application note for details.
 */
 uint32_t R_CAN_RxSetFIFOXid(const uint32_t     ch_nr,
                             const uint32_t     mb_mode,
@@ -1530,10 +1560,8 @@ uint32_t R_CAN_RxSetFIFOXid(const uint32_t     ch_nr,
 * Function Name: R_CAN_RxPoll
 ********************************************************************************************************************//**
 * @brief Checks if a mailbox has received a message
-* @param[in] ch_nr \n
-*               CAN channel to use (0-2 MCU dependent).
-* @param[in] mbox_nr \n
-*               Which CAN mailbox to check (0-32).
+* @param[in] ch_nr - CAN channel to use (0-2 MCU dependent).
+* @param[in] mbox_nr - Which CAN mailbox to check (0-32).
 * @retval R_CAN_OK            There is a message waiting.
 * @retval R_CAN_NOT_OK        No message waiting.
 * @retval R_CAN_RXPOLL_TMO    Message pending but timed out.
@@ -1591,21 +1619,23 @@ uint32_t R_CAN_RxPoll(const uint32_t  ch_nr, const uint32_t  mbox_nr)
 ********************************************************************************************************************//**
 * @brief Read the CAN data frame content from a mailbox. The API checks if a given mailbox has received a message.
 * If so, a copy of the mailbox’s dataframe will be written to the given structure.
-* @param[in] ch_nr \n
-*               CAN channel to use (0-2 MCU dependent).
-* @param[in] mbox_nr \n
-*               Which CAN mailbox to check (0-32).
-* @param[in] frame_p \n
-*              Refers to a pointer to a data frame structure in memory. It is an address to the data structure into
-*              which the function will place a copy of the mailbox’s received CAN data frame.
+* @param[in] ch_nr - CAN channel to use (0-2 MCU dependent).
+* @param[in] mb_mode - Normal mailbox (0), FIFO mailbox (1).
+* @param[in] mbox_nr - Which CAN mailbox to check (0-32).
+* @param[in] frame_p - Refers to a pointer to a data frame structure in memory. It is an address to the data structure
+*                       into which the function will place a copy of the mailbox’s received CAN data frame.
 * @retval R_CAN_OK            There is a message waiting.
+* @retval R_CAN_BAD_MODE      The mode number does not exist.
 * @retval R_CAN_SW_BAD_MBX    Bad mailbox number.
 * @retval R_CAN_BAD_CH_NR     The channel number does not exist.
+* @retval CAN_ERR_BOX_EMPTY   No unread message in receive FIFO.
 * @retval R_CAN_MSGLOST       Message was overwritten or lost.
-* @details Use R_CAN_RxPoll() first to check whether the mailbox has received a message. \n
-* This function is used to fetch the message from a mailbox, either when using polled mode or from a CAN receive
-* interrupt.
-
+* @details This function is used to receive the message by the normal mailboxes or receive FIFO mailboxes.\n
+To receive FIFO mailboxes, it checks Receive FIFO Empty Status Flag to ensure unread message in receive FIFO.
+If have, it loads the ID value, the Data Length Code and the data frame payload bytes (0-7) of message into the mailbox.
+Finally, it checks Message Lost then write FF to Receive FIFO Pointer Control Register.\n
+To normal mailboxes, Use R_CAN_RxPoll() first to check whether the mailbox has received a message.\n
+This function is used to fetch the message from a mailbox, either when using polled mode or from a CAN receive interrupt.
 */
 uint32_t R_CAN_RxRead(const uint32_t       ch_nr,
                       const uint32_t       mb_mode,
@@ -1759,17 +1789,15 @@ uint32_t R_CAN_RxRead(const uint32_t       ch_nr,
 ********************************************************************************************************************//**
 * @brief Sets the CAN ID Acceptance Masks. To accept only one ID, set mask to all ones. To accept all messages, set
 * mask to all zeros. To accept a range of messages, set the corresponding ID bits to zero.
-* @param[in] ch_nr \n
-*               CAN channel to use (0-2 MCU dependent).
-* @param[in] mbox_nr \n
-*               Which mailbox to mask (0-32). Four mailboxes will be affected within its group.
-* @param[in] mask_value \n
-*               Mask value. (0-0x7FF)
+* @param[in] ch_nr -  CAN channel to use (0-2 MCU dependent).
+* @param[in] mbox_nr - Which mailbox to mask (0-32). Four mailboxes will be affected within its group.
+* @param[in] mask_value - Mask value. (0-0x7FF)
 * @details Receive mailboxes can use a mask to filter out one message, or expand receiving to a range of messages
 * (CAN IDs). The mask enables this using the mailbox group’s ID field. There is one mask for mailbox 0-3, one
 * for 4-7, etc. Changing a mask will therefore affect the behavior of adjacent mailboxes. \n
 *  Each '0' in the mask means "mask this bit", or "don't look at that bit"; accept anything.\n
-*  Each '1' means check if the CAN-ID bit in this position matches the CAN-ID of the mailbox.
+*  Each '1' means check if the CAN-ID bit in this position matches the CAN-ID of the mailbox.\n
+*  See section R_CAN_RxSetMask in the application note for details.
 */
 void R_CAN_RxSetMask( const uint32_t  ch_nr,
                       const uint32_t  mbox_nr,
@@ -1869,8 +1897,7 @@ uint32_t can_wait_tx_rx(const uint32_t  ch_nr, const uint32_t  mbox_nr)
 * Function Name: R_CAN_CheckErr
 ********************************************************************************************************************//**
 * @brief Check for bus errors. The API checks the CAN status, or Error State, of the CAN peripheral.
-* @param[in] ch_nr \n
-*               CAN channel to use (0-2 MCU dependent).
+* @param[in] ch_nr - CAN channel to use (0-2 MCU dependent).
 * @retval R_CAN_BAD_CH_NR               The channel number does not exist.
 * @retval R_CAN_STATE_ERROR_ACTIVE      CAN bus status is normal.
 * @retval R_CAN_STATE_ERROR_PASSIVE     Node has sent at least 127 Error frames for either the Transmit Error Counter,
@@ -1884,7 +1911,8 @@ uint32_t can_wait_tx_rx(const uint32_t  ch_nr, const uint32_t  mbox_nr)
 * routine. \n
 * If an error state is encountered the application can just wait and monitor for the peripheral to recover, as the
 * CAN peripheral takes itself on or off line depending on its state. After a recovery is discovered, the application
-* should restart.
+* should restart.\n
+* See section R_CAN_CheckErr in the application note for details.
 */
 uint32_t R_CAN_CheckErr(const uint32_t ch_nr)
 {
@@ -1934,14 +1962,15 @@ uint32_t R_CAN_CheckErr(const uint32_t ch_nr)
 * @param[in] p_cfg - It is an address to the data structure containing the BRP, TSEG1, TSEG2, and SJW that constitute
 * the bitrate for channel ch_nr.
 * @details Setting the baud rate or data speed on the CAN bus requires some understanding of CAN bit timing and MCU
-* frequency, as well as reading hardware manual figures and tables. Some calculations need to be done to set up the
-* baud rate: Selects the baud rate prescaler division value, time segment 2 control, time segment 1 control, and
-* resynchronization jump width control indicated by p_cfg.
+* frequency, as well as reading hardware manual figures and tables.\n
+* Some calculations need to be done to set up the baud rate: Selects the baud rate prescaler division value, time
+* segment 2 control, time segment 1 control, and resynchronization jump width control indicated by p_cfg.
 * First some explanations. The CAN system clock, fcanclk, is the internal clock period of the CAN peripheral.
 * This CAN system clock is determined by the CAN Baud Rate Prescaler value and the peripheral bus clock. One Time
 * Quantum is equal to the period of the CAN clock.\n
 * One CAN bus bit-time is an integer sum of a number of Time Quanta, Tq. Each bitrate register is then given a
 * certain number of Tq of the total number of Time Quanta that make up one CAN bit period, or Tqtot.\n
+* See section R_CAN_SetBitrate in the application note for details.
 */
 void R_CAN_SetBitrate(const uint32_t ch_nr, const can_bitrate_config_t p_cfg)
 {

@@ -19,11 +19,11 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014-2019 Renesas Electronics Corporation. All rights reserved.    
+* Copyright (C) 2014-2021 Renesas Electronics Corporation. All rights reserved.    
 *******************************************************************************/
 /******************************************************************************
 * File Name    : r_ssi_api_rx_if.h
-* Version      : 2.00
+* Version      : 2.03
 * Tool-Chain   : RX Family C Compiler
 *                GCC for Renesas RX
 *                IAR C/C++ Compiler for Renesas RX
@@ -41,6 +41,7 @@
 *         : 25.06.2019   2.00      SSIE support added.
 *         : 31.10.2019   2.01      Version number updated.
 *         : 30.06.2020   2.02      Version number updated.
+*         : 30.06.2021   2.03      RX671 support added.
 *
 ******************************************************************************/
 #ifndef SSI_API_RX_H_
@@ -57,7 +58,7 @@ Macro definitions
 ******************************************************************************/
 /* Version Number of API. */
 #define SSI_API_VERSION_MAJOR           (2)
-#define SSI_API_VERSION_MINOR           (02)
+#define SSI_API_VERSION_MINOR           (03)
 
 /******************************************************************************
 Typedef definitions

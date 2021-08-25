@@ -29,6 +29,7 @@
  *         : 01.07.2019 1.42    Changed Minor version to 1.42.
  *         : 14.11.2019 2.00    Changed version to 2.00.
  *         : 10.06.2020 2.01    Changed version to 2.01.
+ *         : 05.03.2021 2.02    Changed version to 2.02.
  ***********************************************************************************************************************/
 
 #ifndef R_LPC_RX_IF_H
@@ -53,7 +54,7 @@
 
 /* Version Number of API. */
     #define LPC_RX_VERSION_MAJOR           (2)
-    #define LPC_RX_VERSION_MINOR           (1)
+    #define LPC_RX_VERSION_MINOR           (2)
 
 /***********************************************************************************************************************
  Typedef definitions
@@ -73,7 +74,7 @@ typedef enum lpc_err
 } lpc_err_t;
 
 typedef void (*lpc_callback_set_t) (void *pdata); /* Callback function type */
- 
+
 /***********************************************************************************************************************
  Exported global variables
  ***********************************************************************************************************************/

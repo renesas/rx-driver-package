@@ -29,6 +29,8 @@
 *         : 01.06.2018 1.70     Added the comment to while statement.
 *         : 07.02.2019 1.80     Deleted the inline expansion of the R_BYTEQ_GetVersion function.
 *         : 10.06.2020 1.81     Modified comment of API function to Doxygen style.
+*         : 31.03.2021 1.90     Updated for queue protection in R_BYTEQ_Put, R_BYTEQ_Get, R_BYTEQ_Flush,
+*                               R_BYTEQ_Used, R_BYTEQ_Unused functions.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -177,10 +179,7 @@ byteq_err_t R_BYTEQ_Open(uint8_t * const        p_buf,
 * @retval    BYTEQ_ERR_NULL_PTR: hdl is NULL.
 * @retval    BYTEQ_ERR_QUEUE_FULL: Queue full; cannot add byte to queue.
 * @details   This function adds the contents of \e byte to the queue associated with \e hdl.
-* @note      If the queue is accessed at both the interrupt and application level, it is up to the user to disable and 
-*            enable the associated interrupt before and after calling this function from the application level. If the 
-*            queue is accessed by tasks of different priorities, it is up to the user to prevent task switching or to 
-*            utilize a mutex or semaphore to reserve the queue.
+* @note      None
 */
 byteq_err_t R_BYTEQ_Put(byteq_hdl_t const   hdl,
                         uint8_t const       byte)
@@ -203,7 +202,26 @@ byteq_err_t R_BYTEQ_Put(byteq_hdl_t const   hdl,
     {
         hdl->in_index = 0;
     }
+
+#if (BYTEQ_CFG_PROTECT_QUEUE == 1)
+    uint32_t    psw_bit_i_val;
+    
+    /* Get current value bit I of PSW register. */
+    psw_bit_i_val = (R_BSP_GET_PSW() & 0x00010000);
+    
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+        hdl->count++;                           // adjust count
+        R_BSP_InterruptsEnable();
+    } 
+    else
+    {
+        hdl->count++;                           // adjust count
+    }
+#else
     hdl->count++;                           // adjust count
+#endif
         
     return BYTEQ_SUCCESS;
 }
@@ -221,10 +239,7 @@ byteq_err_t R_BYTEQ_Put(byteq_hdl_t const   hdl,
 * @retval  BYTEQ_ERR_QUEUE_EMPTY: Queue empty; no data available to fetch
 * @details This function removes the oldest byte of data in the queue associated with \e hdl and loads it into the 
 *          location pointed to by \e p_byte.
-* @note    If the queue is accessed at both the interrupt and application level, it is up to the user to disable and 
-*          enable the associated interrupt before and after calling this function from the application level. If the 
-*          queue is accessed by tasks of different priorities, it is up to the user to prevent task switching or to 
-*          utilize a mutex or semaphore to reserve the queue.
+* @note    None
 */
 byteq_err_t R_BYTEQ_Get(byteq_hdl_t const   hdl,
                         uint8_t * const     p_byte)
@@ -250,7 +265,26 @@ byteq_err_t R_BYTEQ_Get(byteq_hdl_t const   hdl,
     {
         hdl->out_index = 0;
     }
+
+#if (BYTEQ_CFG_PROTECT_QUEUE == 1)
+    uint32_t    psw_bit_i_val;
+    
+    /* Get current value bit I of PSW register. */
+    psw_bit_i_val = (R_BSP_GET_PSW() & 0x00010000);
+    
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+        hdl->count--;                           // adjust count
+        R_BSP_InterruptsEnable();
+    }
+     else
+    {
+        hdl->count--;                           // adjust count
+    }
+#else
     hdl->count--;                           // adjust count
+#endif
 
     return BYTEQ_SUCCESS;
 }        
@@ -264,10 +298,7 @@ byteq_err_t R_BYTEQ_Get(byteq_hdl_t const   hdl,
 * @retval    BYTEQ_SUCCESS: Successful; queue reset
 * @retval    BYTEQ_ERR_NULL_PTR: hdl is NULL.
 * @details   This function resets the queue identified by \e hdl to an empty state.
-* @note      If the queue is accessed at both the interrupt and application level, it is up to the user to disable and 
-*            enable the associated interrupt before and after calling this function from the application level. If the 
-*            queue is accessed by tasks of different priorities, it is up to the user to prevent task switching or to 
-*            utilize a mutex or semaphore to reserve the queue.
+* @note      None
 */
 byteq_err_t R_BYTEQ_Flush(byteq_hdl_t const hdl)
 {
@@ -278,11 +309,38 @@ byteq_err_t R_BYTEQ_Flush(byteq_hdl_t const hdl)
     }
 #endif
 
+#if (BYTEQ_CFG_PROTECT_QUEUE == 1)
+    uint32_t    psw_bit_i_val;
+    
+    /* Get current value bit I of PSW register. */
+    psw_bit_i_val = (R_BSP_GET_PSW() & 0x00010000);
+    
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+
+        /* RESET QUEUE */
+        hdl->in_index = 0;
+        hdl->out_index = 0;
+        hdl->count = 0;
+
+        R_BSP_InterruptsEnable();
+    }
+    else
+    {
+        /* RESET QUEUE */
+    
+        hdl->in_index = 0;
+        hdl->out_index = 0;
+        hdl->count = 0;
+    }
+#else
     /* RESET QUEUE */
     
     hdl->in_index = 0;
     hdl->out_index = 0;
     hdl->count = 0;
+#endif
 
     return BYTEQ_SUCCESS;
 }
@@ -299,10 +357,7 @@ byteq_err_t R_BYTEQ_Flush(byteq_hdl_t const hdl)
 * @retval    BYTEQ_ERR_INVALID_ARG: p_cnt is NULL.
 * @details   This function loads the number of bytes in the queue associated with \e hdl and into the location pointed 
 *            to by \e p_cnt.
-* @note      If the queue is accessed at both the interrupt and application level, it is up to the user to disable and 
-*            enable the associated interrupt before and after calling this function from the application level. If the 
-*            queue is accessed by tasks of different priorities, it is up to the user to prevent task switching or to 
-*            utilize a mutex or semaphore to reserve the queue.
+* @note      None
 */
 byteq_err_t R_BYTEQ_Used(byteq_hdl_t const  hdl,
                          uint16_t * const   p_cnt)
@@ -318,7 +373,25 @@ byteq_err_t R_BYTEQ_Used(byteq_hdl_t const  hdl,
     }
 #endif
 
+#if (BYTEQ_CFG_PROTECT_QUEUE == 1)
+    uint32_t    psw_bit_i_val;
+
+    /* Get current value bit I of PSW register. */
+    psw_bit_i_val = (R_BSP_GET_PSW() & 0x00010000);
+
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+        *p_cnt = hdl->count;
+        R_BSP_InterruptsEnable();
+    }
+    else
+    {
+        *p_cnt = hdl->count;
+    }
+#else
     *p_cnt = hdl->count;
+#endif
     return BYTEQ_SUCCESS;
 }
 
@@ -334,10 +407,7 @@ byteq_err_t R_BYTEQ_Used(byteq_hdl_t const  hdl,
 * @retval    BYTEQ_ERR_INVALID_ARG: p_cnt is NULL.
 * @details   This function loads the number of unused bytes in the queue associated with \e hdl and into the location 
 *            pointed to by \e p_cnt.
-* @note      If the queue is accessed at both the interrupt and application level, it is up to the user to disable and 
-*            enable the associated interrupt before and after calling this function from the application level. If the 
-*            queue is accessed by tasks of different priorities, it is up to the user to prevent task switching or to 
-*            utilize a mutex or semaphore to reserve the queue.
+* @note      None
 */
 byteq_err_t R_BYTEQ_Unused(byteq_hdl_t const  hdl,
                            uint16_t * const   p_cnt)
@@ -353,7 +423,26 @@ byteq_err_t R_BYTEQ_Unused(byteq_hdl_t const  hdl,
     }
 #endif
 
+#if (BYTEQ_CFG_PROTECT_QUEUE == 1)
+    uint32_t    psw_bit_i_val;
+
+    /* Get current value bit I of PSW register. */
+    psw_bit_i_val = (R_BSP_GET_PSW() & 0x00010000);
+
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+        *p_cnt = (uint16_t) (hdl->size - hdl->count);
+        R_BSP_InterruptsEnable();
+    }
+    else
+    {
+        *p_cnt = (uint16_t) (hdl->size - hdl->count);
+    }
+#else
     *p_cnt = (uint16_t) (hdl->size - hdl->count);
+#endif
+
     return BYTEQ_SUCCESS;
 }
 

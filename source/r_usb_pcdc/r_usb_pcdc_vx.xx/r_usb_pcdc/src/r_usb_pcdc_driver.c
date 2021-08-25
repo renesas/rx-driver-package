@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2021) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_pcdc_driver.c
@@ -30,6 +30,7 @@
  *                           "pcdc_write_complete"->"usb_pcdc_write_complete"
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2021 1.31 RX671 is added and VCOM 2Port supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -78,15 +79,30 @@ void usb_pcdc_read_complete (usb_utr_t *mess, uint16_t data1, uint16_t data2)
     if ( USB_TRUE == g_usb_peri_connected)
     {
         /* Set Receive data length */
-        ctrl.size = mess->read_req_len - mess->tranlen;
+        ctrl.size = 0;
         ctrl.pipe = mess->keyword;  /* Pipe number setting */
-        ctrl.type = USB_PCDC;       /* Device class setting  */
+
+#if defined(USB_CFG_PCDC_2COM_USE)
+        if (USB_CFG_PCDC_BULK_OUT == ctrl.pipe)
+        {
+            ctrl.type = USB_PCDC; /* CDC Data class  */
+        }
+        else
+        {
+            ctrl.type = USB_PCDC2; /* CDC Data class  */
+        }
+#else  /* defined(USB_CFG_PCDC_2COM_USE) */
+        ctrl.type = USB_PCDC; /* CDC Data class  */
+#endif /* defined(USB_CFG_PCDC_2COM_USE) */
+
         switch (mess->status)
         {
             case USB_DATA_OK :
+                ctrl.size = mess->read_req_len - mess->tranlen;
                 ctrl.status = USB_SUCCESS;
             break;
             case USB_DATA_SHT :
+                ctrl.size = mess->read_req_len - mess->tranlen;
                 ctrl.status = USB_ERR_SHORT;
             break;
             case USB_DATA_OVR :
@@ -123,16 +139,38 @@ void usb_pcdc_write_complete (usb_utr_t *mess, uint16_t data1, uint16_t data2)
     if ( USB_TRUE == g_usb_peri_connected)
     {
         ctrl.pipe = mess->keyword; /* Pipe number setting */
+
+#if defined(USB_CFG_PCDC_2COM_USE)
         if (USB_CFG_PCDC_BULK_IN == ctrl.pipe)
         {
             ctrl.type = USB_PCDC; /* CDC Data class  */
         }
-
+        /* USB_CFG_PCDC_INT_IN */
+        else if (USB_CFG_PCDC_INT_IN == ctrl.pipe)
+        {
+            ctrl.type = USB_PCDCC; /* CDC Control class  */
+        }
+        else if (USB_CFG_PCDC_BULK_IN2 == ctrl.pipe)
+        {
+            ctrl.type = USB_PCDC2; /* CDC Data class  */
+        }
+        /* USB_CFG_PCDC_INT_IN2 */
+        else
+        {
+            ctrl.type = USB_PCDCC2; /* CDC Control class  */
+        }
+#else  /* defined(USB_CFG_PCDC_2COM_USE) */
+        if (USB_CFG_PCDC_BULK_IN == ctrl.pipe)
+        {
+            ctrl.type = USB_PCDC; /* CDC Data class  */
+        }
         /* USB_CFG_PCDC_INT_IN */
         else
         {
             ctrl.type = USB_PCDCC; /* CDC Control class  */
         }
+#endif /* defined(USB_CFG_PCDC_2COM_USE) */
+
         if (USB_DATA_NONE == mess->status)
         {
             ctrl.status = USB_SUCCESS;

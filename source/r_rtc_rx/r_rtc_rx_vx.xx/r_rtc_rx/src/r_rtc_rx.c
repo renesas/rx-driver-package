@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rtc_rx.c
@@ -46,6 +46,7 @@
 *           30.07.2019 2.77    Added support for RX72M.
 *           22.11.2019 2.78    Added support for RX66N and RX72N.
 *                              Modified comment of API function to Doxygen style.
+*           30.06.2021 2.81    Added support for RX671.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************

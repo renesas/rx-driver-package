@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate>r_pinset_type2</fileTemplate>
+    <resourceInfo>
+      <peripheral name="RSCI">
+        <channel number="RSCI10" group="RX671">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${RSCI_CFG_CH10_INCLUDED} == ${RSCI_CFG_CH10_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SCK010">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="RXD010/SMISO010/SSCL010">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TXD010/SMOSI010/SSDA010">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SS010#">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="CTS010#">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="RTS010#">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+        </channel>
+        <channel number="RSCI11" group="RX671">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${RSCI_CFG_CH11_INCLUDED} == ${RSCI_CFG_CH11_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SCK011">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="RXD011/SMISO011/SSCL011">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="TXD011/SMOSI011/SSDA011">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SS011#">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="CTS011#">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="RTS011#">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+        </channel>
+      </peripheral>
+    </resourceInfo>
+    <configuration>
+        <property id="RSCI_CFG_PARAM_CHECKING_ENABLE" display="Parameter checking" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+            <option id="RSCI_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="System Default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <option id="RSCI_CFG_PARAM_CHECKING_ENABLE.0" display="Not" value="0"/>
+            <option id="RSCI_CFG_PARAM_CHECKING_ENABLE.1" display="Include" value="1"/>
+            <description>Selects whether to include parameter checking in the code.
+BSP_CFG_PARAM_CHECKING_ENABLE = System default.
+0 = compile out parameter checking.
+1 = includes parameter checking.</description>
+        </property>
+        <property id="RSCI_CFG_ASYNC_INCLUDED" display="Use ASYNC mode" default="1" type="combobox">
+            <option id="RSCI_CFG_ASYNC_INCLUDED.0" display="Not" value="0"/>
+            <option id="RSCI_CFG_ASYNC_INCLUDED.1" display="Include" value="1"/>
+            <description>SPECIFY WHETHER TO INCLUDE CODE FOR DIFFERENT RSCI MODES 
+Setting an equate to 1 includes code specific to that mode. </description>
+        </property>
+        <property id="RSCI_CFG_SYNC_INCLUDED" display="Use SYNC mode" default="0" type="combobox">
+            <option id="RSCI_CFG_SYNC_INCLUDED.0" display="Not" value="0"/>
+            <option id="RSCI_CFG_SYNC_INCLUDED.1" display="Include" value="1"/>
+            <description>SPECIFY WHETHER TO INCLUDE CODE FOR DIFFERENT RSCI MODES 
+Setting an equate to 1 includes code specific to that mode. </description>
+        </property>
+        <property id="RSCI_CFG_SSPI_INCLUDED" display="Use SSPI mode" default="0" type="combobox">
+            <option id="RSCI_CFG_SSPI_INCLUDED.0" display="Not" value="0"/>
+            <option id="RSCI_CFG_SSPI_INCLUDED.1" display="Include" value="1"/>
+            <description>SPECIFY WHETHER TO INCLUDE CODE FOR DIFFERENT RSCI MODES
+Setting an equate to 1 includes code specific to that mode. </description>
+        </property>
+        <property id="RSCI_CFG_DUMMY_TX_BYTE" display="Byte value to transmit while clocking in data in SSPI mode" default="0xFF" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${RSCI_CFG_DUMMY_TX_BYTE}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 256">("${RSCI_CFG_DUMMY_TX_BYTE}" &gt;= 0) &amp;&amp; ("${RSCI_CFG_DUMMY_TX_BYTE}" &lt;= 256)</constraint>
+            <description>SPECIFY BYTE VALUE TO TRANSMIT WHILE CLOCKING IN DATA IN SSPI MODES </description>
+        </property>
+        <property id="RSCI_CFG_CH10_INCLUDED" display="Include software support for channel 10" default="0" type="combobox">
+            <option id="RSCI_CFG_CH10_INCLUDED.0" display="Not" value="0"/>
+            <option id="RSCI_CFG_CH10_INCLUDED.1" display="Include" value="1"/>
+            <description>SPECIFY CHANNELS TO INCLUDE SOFTWARE SUPPORT FOR 1=included, 0=not 
+NOTE: If using ASYNC mode, adjust BYTEQ_CFG_MAX_CTRL_BLKS in r_byteq_config.h to provide 2 queues per channel (static mode only).
+- * = port connector RSKRX11x
+- u = channel used by the USB-UART port (G1CUSB0)
+- a = this channel is used only for RX130-512KB
+- n = this channel is not available for RX65N-64pin.
+- s = this channel is not available in simple SPI mode.
+RX MCU supported channels (refer to Hardware Manual for information)</description>
+        </property>
+        <property id="RSCI_CFG_CH11_INCLUDED" display="Include software support for channel 11" default="0" type="combobox">
+            <option id="RSCI_CFG_CH11_INCLUDED.0" display="Not" value="0"/>
+            <option id="RSCI_CFG_CH11_INCLUDED.1" display="Include" value="1"/>
+            <description>SPECIFY CHANNELS TO INCLUDE SOFTWARE SUPPORT FOR 1=included, 0=not 
+NOTE: If using ASYNC mode, adjust BYTEQ_CFG_MAX_CTRL_BLKS in r_byteq_config.h to provide 2 queues per channel (static mode only).
+- * = port connector RSKRX11x
+- u = channel used by the USB-UART port (G1CUSB0)
+- a = this channel is used only for RX130-512KB
+- n = this channel is not available for RX65N-64pin.
+- s = this channel is not available in simple SPI mode.
+RX MCU supported channels (refer to Hardware Manual for information)</description>
+        </property>
+        <property id="RSCI_CFG_CH10_TX_BUFSIZ" display="ASYNC mode TX queue buffer size for channel 10" default="80" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${RSCI_CFG_CH10_TX_BUFSIZ}")</constraint>
+            <constraint display="Value must be in the range 2 ~ 65536">("${RSCI_CFG_CH10_TX_BUFSIZ}" &gt;= 2) &amp;&amp; ("${RSCI_CFG_CH10_TX_BUFSIZ}" &lt;= 65536)</constraint>
+            <description>SPECIFY ASYNC MODE TX QUEUE BUFFER SIZES (will not allocate if chan not enabled </description>
+        </property>
+        <property id="RSCI_CFG_CH11_TX_BUFSIZ" display="ASYNC mode TX queue buffer size for channel 11" default="80" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${RSCI_CFG_CH11_TX_BUFSIZ}")</constraint>
+            <constraint display="Value must be in the range 2 ~ 65536">("${RSCI_CFG_CH11_TX_BUFSIZ}" &gt;= 2) &amp;&amp; ("${RSCI_CFG_CH11_TX_BUFSIZ}" &lt;= 65536)</constraint>
+            <description>SPECIFY ASYNC MODE TX QUEUE BUFFER SIZES (will not allocate if chan not enabled </description>
+        </property>
+        <property id="RSCI_CFG_CH10_RX_BUFSIZ" display="ASYNC mode RX queue buffer size for channel 10" default="80" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${RSCI_CFG_CH10_RX_BUFSIZ}")</constraint>
+            <constraint display="Value must be in the range 2 ~ 65536">("${RSCI_CFG_CH10_RX_BUFSIZ}" &gt;= 2) &amp;&amp; ("${RSCI_CFG_CH10_RX_BUFSIZ}" &lt;= 65536)</constraint>
+            <description>SPECIFY ASYNC MODE RX QUEUE BUFFER SIZES (will not allocate if chan not enabled </description>
+        </property>
+        <property id="RSCI_CFG_CH11_RX_BUFSIZ" display="ASYNC mode RX queue buffer size for channel 11" default="80" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${RSCI_CFG_CH11_RX_BUFSIZ}")</constraint>
+            <constraint display="Value must be in the range 2 ~ 65536">("${RSCI_CFG_CH11_RX_BUFSIZ}" &gt;= 2) &amp;&amp; ("${RSCI_CFG_CH11_RX_BUFSIZ}" &lt;= 65536)</constraint>
+            <description>SPECIFY ASYNC MODE RX QUEUE BUFFER SIZES (will not allocate if chan not enabled </description>
+        </property>
+        <property id="RSCI_CFG_TEI_INCLUDED" display="Transmit end interrupt" default="0" type="combobox">
+            <option id="RSCI_CFG_TEI_INCLUDED.0" display="Disable" value="0"/>
+            <option id="RSCI_CFG_TEI_INCLUDED.1" display="Enable" value="1"/>
+            <description>ENABLE TRANSMIT END INTERRUPT (ASYNCHRONOUS)
+This interrupt only occurs when the last bit of the last byte of data has been sent and the transmitter has become idle. The interrupt calls the user's callback function specified in R_RSCI_Open() and passes it an RSCI_EVT_TEI event. A typical use of this feature is to disable an external transceiver to save power. It would then be up to the user's code to re-enable the transceiver before sending again. Not including this feature reduces code space used by the interrupt. Note that this equate is only for including the TEI code. The interrupt itself must be enabled using an R_RSCI_Control(hdl, RSCI_CMD_EN_TEI, NULL) call.</description>
+        </property>
+        <property id="RSCI_CFG_ERI_TEI_PRIORITY" display="GROUPAL0 (ERI, TEI) interrupt priority" default="3" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${RSCI_CFG_ERI_TEI_PRIORITY}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 15">("${RSCI_CFG_ERI_TEI_PRIORITY}" &gt;= 0) &amp;&amp; ("${RSCI_CFG_ERI_TEI_PRIORITY}" &lt;= 15)</constraint>
+            <description>SET GROUPAL0 (ERI, TEI) INTERRUPT PRIORITY; RX671.
+This sets the priority level for receiver overrun, framing, and parity errors as well as TEI interrupts for all RSCI channels.
+</description>
+        </property>
+        <property id="RSCI_CFG_CH10_FIFO_INCLUDED" display="TX/RX FIFO for channel 10" default="0" type="combobox">
+            <option id="RSCI_CFG_CH10_FIFO_INCLUDED.0" display="Not" value="0"/>
+            <option id="RSCI_CFG_CH10_FIFO_INCLUDED.1" display="Include" value="1"/>
+            <description>ENABLE TX/RX FIFO; (RSCI supported MCU ONLY) 1=included, 0=not </description>
+        </property>
+        <property id="RSCI_CFG_CH11_FIFO_INCLUDED" display="TX/RX FIFO for channel 11" default="0" type="combobox">
+            <option id="RSCI_CFG_CH11_FIFO_INCLUDED.0" display="Not" value="0"/>
+            <option id="RSCI_CFG_CH11_FIFO_INCLUDED.1" display="Include" value="1"/>
+            <description>ENABLE TX/RX FIFO; (RSCI supported MCU ONLY) 1=included, 0=not </description>
+        </property>
+        <property id="RSCI_CFG_CH10_TX_FIFO_THRESH" display="TX FIFO threshold for channel 10" default="8" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${RSCI_CFG_CH10_TX_FIFO_THRESH}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 15">("${RSCI_CFG_CH10_TX_FIFO_THRESH}" &gt;= 0) &amp;&amp; ("${RSCI_CFG_CH10_TX_FIFO_THRESH}" &lt;= 15)</constraint>
+            <description>SET TX FIFO THRESHOLD; (RSCI supported MCU ONLY) 0 lowest, 15 highest 
+TX FIFO THRESHOLD is invalid in Clock Synchronous Mode and Simple SPI Mode. 
+Set the same value for TX FIFO THRESHOLD and RX FIFO THRESHOLD in Clock Synchronous Mode and Simple SPI Mode. </description>
+        </property>
+        <property id="RSCI_CFG_CH11_TX_FIFO_THRESH" display="TX FIFO threshold for channel 11" default="8" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${RSCI_CFG_CH11_TX_FIFO_THRESH}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 15">("${RSCI_CFG_CH11_TX_FIFO_THRESH}" &gt;= 0) &amp;&amp; ("${RSCI_CFG_CH11_TX_FIFO_THRESH}" &lt;= 15)</constraint>
+            <description>SET TX FIFO THRESHOLD; (RSCI supported MCU ONLY) 0 lowest, 15 highest 
+TX FIFO THRESHOLD is invalid in Clock Synchronous Mode and Simple SPI Mode. 
+Set the same value for TX FIFO THRESHOLD and RX FIFO THRESHOLD in Clock Synchronous Mode and Simple SPI Mode.</description>
+        </property>
+        <property id="RSCI_CFG_CH10_RX_FIFO_THRESH" display="RX FIFO threshold for channel 10" default="8" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${RSCI_CFG_CH10_RX_FIFO_THRESH}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 15">("${RSCI_CFG_CH10_RX_FIFO_THRESH}" &gt;= 0) &amp;&amp; ("${RSCI_CFG_CH10_RX_FIFO_THRESH}" &lt;= 15)</constraint>
+            <description>SET RX FIFO THRESHOLD; (RSCI supported MCU ONLY) 1 lowest, 15 highest </description>
+        </property>
+        <property id="RSCI_CFG_CH11_RX_FIFO_THRESH" display="RX FIFO threshold for channel 11" default="8" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${RSCI_CFG_CH11_RX_FIFO_THRESH}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 15">("${RSCI_CFG_CH11_RX_FIFO_THRESH}" &gt;= 0) &amp;&amp; ("${RSCI_CFG_CH11_RX_FIFO_THRESH}" &lt;= 15)</constraint>
+            <description>SET RX FIFO THRESHOLD; (RSCI supported MCU ONLY) 1 lowest, 15 highest </description>
+        </property>
+        <property id="RSCI_CFG_CH10_DATA_MATCH_INCLUDED" display="Received data match function for channel 10" default="0" type="combobox">
+            <option id="RSCI_CFG_CH10_DATA_MATCH_INCLUDED.0" display="Not" value="0"/>
+            <option id="RSCI_CFG_CH10_DATA_MATCH_INCLUDED.1" display="Include" value="1"/>
+            <description>ENABLE Received Data match function (RSCI supported MCU RX671 ONLY) 1=included, 0=not</description>
+        </property>
+        <property id="RSCI_CFG_CH11_DATA_MATCH_INCLUDED" display="Received data match function for channel 11" default="0" type="combobox">
+            <option id="RSCI_CFG_CH11_DATA_MATCH_INCLUDED.0" display="Not" value="0"/>
+            <option id="RSCI_CFG_CH11_DATA_MATCH_INCLUDED.1" display="Include" value="1"/>
+            <description>ENABLE Received Data match function (RSCI supported MCU RX671 ONLY) 1=included, 0=not</description>
+        </property>
+        <property id="RSCI_CFG_CH10_RX_DATA_SAMPLING_TIMING_INCLUDED" display="Receive data sampling timing adjustment CH10" default="0" type="combobox">
+            <option id="RSCI_CFG_CH10_RX_DATA_SAMPLING_TIMING_INCLUDED.0" display="Disable" value="0"/>
+            <option id="RSCI_CFG_CH10_RX_DATA_SAMPLING_TIMING_INCLUDED.1" display="Enable" value="1"/>
+            <constraint display="This feature is available on RX671 only" actionOnFail="disable">("${Device.group}" == "RX671")</constraint>
+            <constraint display="This feature is available in ASYNC Mode" actionOnFail="disable">${RSCI_CFG_ASYNC_INCLUDED} == ${RSCI_CFG_ASYNC_INCLUDED.1}</constraint>
+            <constraint display="Please include channel 10 to set value for this feature" actionOnFail="disable">${RSCI_CFG_CH10_INCLUDED} == ${RSCI_CFG_CH10_INCLUDED.1}</constraint>
+            <description>Disable or enable sampling timing adjust feature for CH10
+Enable =1 , Disable =0.</description>
+        </property>
+        <property id="RSCI_CFG_CH11_RX_DATA_SAMPLING_TIMING_INCLUDED" display="Receive data sampling timing adjustment CH11" default="0" type="combobox">
+            <option id="RSCI_CFG_CH11_RX_DATA_SAMPLING_TIMING_INCLUDED.0" display="Disable" value="0"/>
+            <option id="RSCI_CFG_CH11_RX_DATA_SAMPLING_TIMING_INCLUDED.1" display="Enable" value="1"/>
+            <constraint display="This feature is available on RX671 only" actionOnFail="disable">("${Device.group}" == "RX671")</constraint>
+            <constraint display="This feature is available in ASYNC Mode" actionOnFail="disable">${RSCI_CFG_ASYNC_INCLUDED} == ${RSCI_CFG_ASYNC_INCLUDED.1}</constraint>
+            <constraint display="Please include channel 11 to set value for this feature" actionOnFail="disable">${RSCI_CFG_CH11_INCLUDED} == ${RSCI_CFG_CH11_INCLUDED.1}</constraint>
+            <description>Disable or enable sampling timing adjust feature for CH11
+Enable =1 , Disable =0.</description>
+        </property>
+        <property id="RSCI_CFG_CH10_TX_SIGNAL_TRANSITION_TIMING_INCLUDED" display="Transmit signal transition timing adjustment CH10" default="0" type="combobox">
+            <option id="RSCI_CFG_CH10_TX_SIGNAL_TRANSITION_TIMING_INCLUDED.0" display="Disable" value="0"/>
+            <option id="RSCI_CFG_CH10_TX_SIGNAL_TRANSITION_TIMING_INCLUDED.1" display="Enable" value="1"/>
+            <constraint display="This feature is available on RX671 only" actionOnFail="disable">("${Device.group}" == "RX671")</constraint>
+            <constraint display="This feature is available in ASYNC Mode" actionOnFail="disable">${RSCI_CFG_ASYNC_INCLUDED} == ${RSCI_CFG_ASYNC_INCLUDED.1}</constraint>
+            <constraint display="Please include channel 10 to set value for this feature" actionOnFail="disable">${RSCI_CFG_CH10_INCLUDED} == ${RSCI_CFG_CH10_INCLUDED.1}</constraint>
+            <description>Disable or enable Transmit signal transition timing adjustment for CH10
+Enable =1 , Disable =0.</description>
+        </property>
+        <property id="RSCI_CFG_CH11_TX_SIGNAL_TRANSITION_TIMING_INCLUDED" display="Transmit signal transition timing adjustment CH11" default="0" type="combobox">
+            <option id="RSCI_CFG_CH11_TX_SIGNAL_TRANSITION_TIMING_INCLUDED.0" display="Disable" value="0"/>
+            <option id="RSCI_CFG_CH11_TX_SIGNAL_TRANSITION_TIMING_INCLUDED.1" display="Enable" value="1"/>
+            <constraint display="This feature is available on RX671 only" actionOnFail="disable">("${Device.group}" == "RX671")</constraint>
+            <constraint display="This feature is available in ASYNC Mode" actionOnFail="disable">${RSCI_CFG_ASYNC_INCLUDED} == ${RSCI_CFG_ASYNC_INCLUDED.1}</constraint>
+            <constraint display="Please include channel 11 to set value for this feature" actionOnFail="disable">${RSCI_CFG_CH11_INCLUDED} == ${RSCI_CFG_CH11_INCLUDED.1}</constraint>
+            <description>Disable or enable Transmit signal transition timing adjustment for CH11
+Enable =1 , Disable =0.</description>
+        </property>
+    </configuration>
+</module>

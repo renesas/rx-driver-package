@@ -36,13 +36,19 @@
  Macro definitions (USER DEFINE)
  ******************************************************************************/
 /** [Setting pipe to be used]
- * USB_CFG_PCDC_BULK_IN   : Pipe number (USB_PIPE1 to USB_PIPE5)  CDC Data class Bulk In Pipe
- * USB_CFG_PCDC_BULK_OUT  : Pipe number (USB_PIPE1 to USB_PIPE5)  CDC Data class Bulk Out Pipe
- * USB_CFG_PCDC_INT_IN    : Pipe number (USB_PIPE6 to USB_PIPE9)  CDC Data class Interrupt In Pipe
+ * USB_CFG_PCDC_BULK_IN   : Pipe number (USB_PIPE1 to USB_PIPE5)  1st VCOM CDC Data class Bulk In Pipe
+ * USB_CFG_PCDC_BULK_OUT  : Pipe number (USB_PIPE1 to USB_PIPE5)  1st VCOM CDC Data class Bulk Out Pipe
+ * USB_CFG_PCDC_INT_IN    : Pipe number (USB_PIPE6 to USB_PIPE9)  1st VCOM CDC Data class Interrupt In Pipe
+ * USB_CFG_PCDC_BULK_IN2  : Pipe number (USB_PIPE1 to USB_PIPE5)  2nd VCOM CDC Data class Bulk In Pipe
+ * USB_CFG_PCDC_BULK_OUT2 : Pipe number (USB_PIPE1 to USB_PIPE5)  2nd VCOM CDC Data class Bulk Out Pipe
+ * USB_CFG_PCDC_INT_IN2   : Pipe number (USB_PIPE6 to USB_PIPE9)  2nd VCOM CDC Data class Interrupt In Pipe
  */
 #define USB_CFG_PCDC_BULK_IN        (USB_PIPE1)
 #define USB_CFG_PCDC_BULK_OUT       (USB_PIPE2)
 #define USB_CFG_PCDC_INT_IN         (USB_PIPE6)
+#define USB_CFG_PCDC_BULK_IN2       (USB_PIPE3)
+#define USB_CFG_PCDC_BULK_OUT2      (USB_PIPE4)
+#define USB_CFG_PCDC_INT_IN2        (USB_PIPE7)
 
 #endif  /* R_USB_PCDC_CONFIG_H */
 /******************************************************************************

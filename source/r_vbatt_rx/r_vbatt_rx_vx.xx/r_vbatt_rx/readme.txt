@@ -5,13 +5,13 @@ r_vbatt_rx
 
 Document Number
 ---------------
-R01AN2796JJ0105
-R01AN2796EJ0105
+R01AN2796JJ0200
+R01AN2796EJ0200
 
 
 Version
 -------
-v1.05
+v2.00
 
 
 Overview
@@ -41,6 +41,7 @@ Supported MCUs
 * RX230 Group
 * RX231 Group
 * RX23W Group
+* RX671 Group
 
 
 Boards Tested On
@@ -48,6 +49,7 @@ Boards Tested On
 * RSKRX230
 * RSKRX231
 * RSSKRX23W
+* RSSKRX671
 
 
 Technical Update of applying
@@ -69,7 +71,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp     v5.50
+* r_bsp     v6.10
 
 
 How to add to your project
@@ -119,7 +121,7 @@ Toolchain(s) Used
 -----------------
 * Renesas RX v3.02.00
 * GCC for Renesas RX 8.03.00.201904
-* IAR C/C++ Compiler for Renesas RX version 4.13.1
+* IAR C/C++ Compiler for Renesas RX version 4.14.1
 
 
 File Structure
@@ -130,35 +132,34 @@ r_vbatt_rx
 |
 +---doc
 |   +---en
-|   |   r01an2796ej0105-rx-vbatt.pdf
+|   |   r01an2796ej0200-rx-vbatt.pdf
 |   |
 |   +---ja
-|       r01an2796jj0105-rx-vbatt.pdf
-|
-+---ref
-|       r_vbatt_config_reference.h
+|       r01an2796jj0200-rx-vbatt.pdf
 |
 +---src
     |
     +---targets
         |
+        +---rx23w
+        |       r_vbatt_rx23w.c
+        |       r_vbatt_rx23w_private.h
         |
-        +---vbatt
-            |   r_vbatt_rx.c
-            |   r_vbatt_rx_platform.h
-            |   r_vbatt_rx_private.h
-            |
-            +---rx23w
-            |       r_vbatt_rx23w.c
-            |       r_vbatt_rx23w_private.h
-            |
-            +---rx230
-            |       r_vbatt_rx230.c
-            |       r_vbatt_rx230_private.h
-            |
-            +---rx231
-                    r_vbatt_rx231.c
-                    r_vbatt_rx231_private.h
+        +---rx230
+        |       r_vbatt_rx230.c
+        |       r_vbatt_rx230_private.h
+        |
+        +---rx231
+        |       r_vbatt_rx231.c
+        |       r_vbatt_rx231_private.h
+        |
+        +---rx671
+                r_vbatt_rx671.c
+                r_vbatt_rx671_private.h
+    |
+    |   r_vbatt_rx.c
+    |   r_vbatt_rx_platform.h
+    |   r_vbatt_rx_private.h
 
 r_config
     r_vbatt_rx_config.h

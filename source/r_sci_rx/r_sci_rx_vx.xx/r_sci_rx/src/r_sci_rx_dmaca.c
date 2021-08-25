@@ -22,6 +22,7 @@
 ***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *           25.08.2020 1.00    Initial Release
+*           31.03.2021 3.80    Added support for RX671.
 ***********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -225,7 +226,7 @@ sci_err_t sci_txfifo_dmaca_create(sci_hdl_t const hdl, uint8_t *p_src, uint16_t 
                 err_dmaca = R_DMACA_Create(hdl->rom->dmaca_tx_channel, &tx_cfg_dmaca);
             }
 
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)
             err_dmaca = R_DMACA_Int_Enable(hdl->rom->dmaca_tx_channel, *hdl->rom->ipr_txi);
 #else
             err_dmaca = R_DMACA_Int_Enable(hdl->rom->dmaca_tx_channel, *hdl->rom->ipr);
@@ -561,7 +562,7 @@ sci_err_t sci_tx_dmaca_create(sci_hdl_t const hdl, uint8_t *p_src, uint16_t cons
                     err_dmaca = R_DMACA_Create(hdl->rom->dmaca_tx_channel, &tx_cfg_dmaca);
                 }
 
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)
                     err_dmaca = R_DMACA_Int_Enable(hdl->rom->dmaca_tx_channel, *hdl->rom->ipr_txi);
 #else
                     err_dmaca = R_DMACA_Int_Enable(hdl->rom->dmaca_tx_channel, *hdl->rom->ipr);
@@ -728,7 +729,7 @@ sci_err_t sci_rx_dmaca_create(sci_hdl_t const hdl, uint8_t *p_dst, uint16_t cons
                 }
                 if (DMACA_SUCCESS == err_dmaca)
                 {
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)
                     err_dmaca = R_DMACA_Int_Enable(hdl->rom->dmaca_rx_channel, *hdl->rom->ipr_rxi);
 #else
                     err_dmaca = R_DMACA_Int_Enable(hdl->rom->dmaca_rx_channel, *hdl->rom->ipr);

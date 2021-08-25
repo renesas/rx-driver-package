@@ -30,6 +30,7 @@
  *         : 31.05.2019 1.26 Added support for GNUC and ICCRX.
  *         : 30.07.2019 1.27 RX72M is added.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2020 1.31 RX671 is added.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -1340,11 +1341,7 @@ void usb_peri_class_request(usb_setup_t *preq, uint16_t ctsq)
             break;
 
             case USB_CS_WRDS :
-#if defined(USB_CFG_PMSC_USE)
-                usb_peri_class_request_wds(preq);   /* class request (control write data stage) */
-#else   /* defined(USB_CFG_PMSC_USE) */
                 usb_peri_class_request_rwds(preq);  /* class request (control write data stage) */
-#endif  /* defined(USB_CFG_PMSC_USE) */
             break;
 
             case USB_CS_WRND :
@@ -1395,10 +1392,19 @@ void usb_peri_class_request_rwds (usb_setup_t * req)
 {
 #if defined(USB_CFG_PMSC_USE)
 
+#if defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE)
     usb_ctrl_t ctrl;
+#endif /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
 
     /* Is a request receive target Interface? */
+#if defined(USB_CFG_PCDC_2COM_USE) || defined(USB_CFG_PCDC_PHID_USE) || defined(USB_CFG_PCDC_PMSC_USE)\
+ || defined(USB_CFG_PHID_PMSC_USE)  
+    if (USB_INTERFACE == (req->type & USB_BMREQUESTTYPERECIP))
+#else /* defined(USB_CFG_PCDC_2COM_USE) || defined(USB_CFG_PCDC_PHID_USE) || defined(USB_CFG_PCDC_PMSC_USE)\
+ || defined(USB_CFG_PHID_PMSC_USE) */
     if ((0 == req->index) && (USB_INTERFACE == (req->type & USB_BMREQUESTTYPERECIP)))
+#endif /* defined(USB_CFG_PCDC_2COM_USE) || defined(USB_CFG_PCDC_PHID_USE) || defined(USB_CFG_PCDC_PMSC_USE)\
+ || defined(USB_CFG_PHID_PMSC_USE) */
     {
         if (USB_GET_MAX_LUN == (req->type & USB_BREQUEST))
         {
@@ -1406,19 +1412,34 @@ void usb_peri_class_request_rwds (usb_setup_t * req)
         }
         else
         {
-            /* Get Line Coding Request */
+#if defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE)
             ctrl.module = USB_CFG_USE_USBIP;
             ctrl.setup  = *req; /* Save setup data. */
             ctrl.size   = 0;
             ctrl.status = USB_ACK;
             ctrl.type   = USB_REQUEST;
             usb_set_event(USB_STS_REQUEST, &ctrl);
+#else /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
+
+            /* Set Stall */
+            usb_pstd_set_stall_pipe0(); /* Req Error */
+#endif /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
         }
     }
     else
     {
+#if defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE)
+        ctrl.module = USB_CFG_USE_USBIP;
+        ctrl.setup  = *req; /* Save setup data. */
+        ctrl.size   = 0;
+        ctrl.status = USB_ACK;
+        ctrl.type   = USB_REQUEST;
+        usb_set_event(USB_STS_REQUEST, &ctrl);
+#else /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
+
         /* Set Stall */
         usb_pstd_set_stall_pipe0(); /* Req Error */
+#endif /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
     }
 
 #else   /* defined(USB_CFG_PMSC_USE) */
@@ -1436,18 +1457,6 @@ void usb_peri_class_request_rwds (usb_setup_t * req)
 #endif  /* defined(USB_CFG_PMSC_USE) */
 } /* End of function usb_peri_class_request_rwds */
 
-#if defined(USB_CFG_PMSC_USE)
-/******************************************************************************
- Function Name   : usb_peri_class_request_wds
- Description     : Class request processing (control write data stage)
- Arguments       : usb_setup_t *req : Pointer to usb_setup_t structure
- Return value    : none
- ******************************************************************************/
-void usb_peri_class_request_wds (usb_setup_t * req)
-{
-    usb_pstd_set_stall_pipe0();
-} /* End of function usb_peri_class_request_wds */
-#endif  /* defined(USB_CFG_PMSC_USE) */
 
 /******************************************************************************
  Function Name   : usb_peri_other_request
@@ -1477,8 +1486,20 @@ void usb_peri_class_request_wnss (usb_setup_t *req)
 {
 #if defined(USB_CFG_PMSC_USE)
 
+#if defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE)
+    usb_ctrl_t ctrl;
+#endif /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
+
+
     /* Is a request receive target Interface? */
+#if defined(USB_CFG_PCDC_2COM_USE) || defined(USB_CFG_PCDC_PHID_USE) || defined(USB_CFG_PCDC_PMSC_USE)\
+ || defined(USB_CFG_PHID_PMSC_USE)
+    if (USB_INTERFACE == (req->type & USB_BMREQUESTTYPERECIP))
+#else /* defined(USB_CFG_PCDC_2COM_USE) || defined(USB_CFG_PCDC_PHID_USE) || defined(USB_CFG_PCDC_PMSC_USE)\
+ || defined(USB_CFG_PHID_PMSC_USE) */
     if ((0 == req->index) && (USB_INTERFACE == (req->type & USB_BMREQUESTTYPERECIP)))
+#endif /* defined(USB_CFG_PCDC_2COM_USE) || defined(USB_CFG_PCDC_PHID_USE) || defined(USB_CFG_PCDC_PMSC_USE)\
+ || defined(USB_CFG_PHID_PMSC_USE) */
     {
         if (USB_MASS_STORAGE_RESET == (req->type & USB_BREQUEST))
         {
@@ -1486,12 +1507,34 @@ void usb_peri_class_request_wnss (usb_setup_t *req)
         }
         else
         {
+#if defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE)
+            ctrl.module = USB_CFG_USE_USBIP;
+            ctrl.setup  = *req; /* Save setup data. */
+            ctrl.size   = 0;
+            ctrl.status = USB_ACK;
+            ctrl.type   = USB_REQUEST;
+            usb_set_event(USB_STS_REQUEST, &ctrl);
+#else /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
+            /* Set Stall */
             usb_pstd_set_stall_pipe0(); /* Req Error */
+
+#endif /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
         }
     }
     else
     {
+#if defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE)
+            ctrl.module = USB_CFG_USE_USBIP;
+            ctrl.setup  = *req; /* Save setup data. */
+            ctrl.size   = 0;
+            ctrl.status = USB_ACK;
+            ctrl.type   = USB_REQUEST;
+            usb_set_event(USB_STS_REQUEST, &ctrl);
+#else /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
+
+        /* Set Stall */
         usb_pstd_set_stall_pipe0(); /* Req Error */
+#endif /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
     }
 
     if (USB_MASS_STORAGE_RESET != (req->type & USB_BREQUEST))

@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_dtc_rx
-VERSION = 		3.60
+VERSION = 		3.70
 MDF = V2
 
 CONFIG_FOLDER = r_config

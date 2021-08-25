@@ -40,6 +40,7 @@
         <version>3.00.00</version>
         <version>3.01.00</version>
         <version>3.02.00</version>
+        <version>3.03.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -47,6 +48,7 @@
         <version>4.08.04.201803</version>
         <version>4.08.04.201902</version>
         <version>8.03.00.201904</version>
+        <version>8.03.00.202002</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -55,6 +57,7 @@
         <version>4.11.01</version>
         <version>4.12.01</version>
         <version>4.13.01</version>
+        <version>4.14.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -80,10 +83,11 @@
         <group omit_board="true">RX65N</group>
         <group omit_board="true">RX66N</group>
         <group omit_board="true">RX66T</group>
+        <group omit_board="true">RX671</group>
         <group omit_board="true">RX71M</group>
         <group omit_board="true">RX72M</group>
-        <group omit_board="true">RX72T</group>
         <group omit_board="true">RX72N</group>
+        <group omit_board="true">RX72T</group>
     </target>
 
     <!-- only one package entry allowed -->
@@ -95,7 +99,7 @@
         <zipsource>r_sci_iic_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.61</version>
+            <version>6.10</version>
         </dependency>
         <application>Communications</application>
         <application>External Memory</application>

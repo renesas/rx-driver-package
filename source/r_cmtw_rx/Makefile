@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_cmtw_rx
-VERSION = 		2.30
+VERSION = 		2.40
 MDF = V1,V2
 
 CONFIG_FOLDER = r_config

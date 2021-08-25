@@ -19,7 +19,7 @@ Features
 * Master transmission, master reception, slave transmission, and slave reception.
 * Multi-master configuration which is that communication is arbitrated between multiple masters and a single slave.
 * Communication mode can be normal or fast mode and the maximum communication rate is 400 kbps at a maximum. 
-  However channel 0 of RX64M, RX65N, RX66N, RX71M, RX72M and RX72N supports fast mode plus and the maximum communication rate is 1 Mbps.
+  However channel 0 of RX64M, RX65N, RX66N, RX671, RX71M, RX72M and RX72N supports fast mode plus and the maximum communication rate is 1 Mbps.
 
 File Structure
 --------------
@@ -108,6 +108,10 @@ r_riic_rx
         +---rx66n
         |      r_riic_rx66n.c
         |      r_riic_rx66n_private.h
+        |
+        +---rx671
+        |      r_riic_rx671.c
+        |      r_riic_rx671_private.h
         |
         +---rx71m
         |       r_riic_rx71m.c

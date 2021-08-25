@@ -24,6 +24,7 @@
 *           19.12.2016 1.00    Initial Release.
 *           20.05.2019 3.00    Added support for GNUC and ICCRX.
 *           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
+*           31.03.2021 3.80    Updated macro definition enable and disable TXI, RXI, ERI, TEI.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -103,7 +104,7 @@ const sci_ch_rom_t  ch1_rom = {(volatile struct st_sci R_BSP_EVENACCESS_SFR *)&S
                                 &ICU.IER[IER_SCI1_TXI1].BYTE,
                                 &ICU.IER[IER_SCI1_TEI1].BYTE,
                                 &ICU.IER[IER_SCI1_ERI1].BYTE,
-                                BIT2_MASK, BIT3_MASK, BIT4_MASK, BIT5_MASK
+                                SCI_BIT2, SCI_BIT3, SCI_BIT4, SCI_BIT5
                                 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 , SCI_CFG_CH1_TX_DTC_DMACA_ENABLE
                                 , SCI_CFG_CH1_RX_DTC_DMACA_ENABLE
@@ -140,7 +141,7 @@ const sci_ch_rom_t  ch5_rom = {(volatile struct st_sci R_BSP_EVENACCESS_SFR *)&S
                                 &ICU.IER[IER_SCI5_TXI5].BYTE,
                                 &ICU.IER[IER_SCI5_TEI5].BYTE,
                                 &ICU.IER[IER_SCI5_ERI5].BYTE,
-                                BIT6_MASK, BIT7_MASK, BIT0_MASK, BIT1_MASK
+                                SCI_BIT6, SCI_BIT7, SCI_BIT0, SCI_BIT1
                                 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 , SCI_CFG_CH5_TX_DTC_DMACA_ENABLE
                                 , SCI_CFG_CH5_RX_DTC_DMACA_ENABLE
@@ -176,7 +177,7 @@ const sci_ch_rom_t  ch6_rom = {(volatile struct st_sci R_BSP_EVENACCESS_SFR *)&S
                                 &ICU.IER[IER_SCI6_TXI6].BYTE,
                                 &ICU.IER[IER_SCI6_TEI6].BYTE,
                                 &ICU.IER[IER_SCI6_ERI6].BYTE,
-                                BIT2_MASK, BIT3_MASK, BIT4_MASK, BIT5_MASK
+                                SCI_BIT2, SCI_BIT3, SCI_BIT4, SCI_BIT5
                                 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 , SCI_CFG_CH6_TX_DTC_DMACA_ENABLE
                                 , SCI_CFG_CH6_RX_DTC_DMACA_ENABLE
@@ -212,7 +213,7 @@ const sci_ch_rom_t  ch8_rom = {(volatile struct st_sci R_BSP_EVENACCESS_SFR *)&S
                                 &ICU.IER[IER_SCI8_TXI8].BYTE,
                                 &ICU.IER[IER_SCI8_TEI8].BYTE,
                                 &ICU.IER[IER_SCI8_ERI8].BYTE,
-                                BIT6_MASK, BIT7_MASK, BIT0_MASK, BIT1_MASK
+                                SCI_BIT6, SCI_BIT7, SCI_BIT0, SCI_BIT1
                                 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 , SCI_CFG_CH8_TX_DTC_DMACA_ENABLE
                                 , SCI_CFG_CH8_RX_DTC_DMACA_ENABLE
@@ -248,7 +249,7 @@ const sci_ch_rom_t  ch9_rom = {(volatile struct st_sci R_BSP_EVENACCESS_SFR *)&S
                                 &ICU.IER[IER_SCI9_TXI9].BYTE,
                                 &ICU.IER[IER_SCI9_TEI9].BYTE,
                                 &ICU.IER[IER_SCI9_ERI9].BYTE,
-                                BIT2_MASK, BIT3_MASK, BIT4_MASK, BIT5_MASK
+                                SCI_BIT2, SCI_BIT3, SCI_BIT4, SCI_BIT5
                                 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 , SCI_CFG_CH9_TX_DTC_DMACA_ENABLE
                                 , SCI_CFG_CH9_RX_DTC_DMACA_ENABLE
@@ -284,7 +285,7 @@ const sci_ch_rom_t  ch11_rom = {(volatile struct st_sci R_BSP_EVENACCESS_SFR *)&
                                 &ICU.IER[IER_SCI11_TXI11].BYTE,
                                 &ICU.IER[IER_SCI11_TEI11].BYTE,
                                 &ICU.IER[IER_SCI11_ERI11].BYTE,
-                                BIT2_MASK, BIT3_MASK, BIT4_MASK, BIT5_MASK
+                                SCI_BIT2, SCI_BIT3, SCI_BIT4, SCI_BIT5
                                 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 , SCI_CFG_CH11_TX_DTC_DMACA_ENABLE
                                 , SCI_CFG_CH11_RX_DTC_DMACA_ENABLE

@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_sdhi_rx
-VERSION = 		2.06
+VERSION = 		2.07
 MDF = V2
 
 CONFIG_FOLDER = r_config

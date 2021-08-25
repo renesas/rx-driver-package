@@ -2,10 +2,22 @@
 
 <refinfo>
 
+    <!-- multiple versions permitted -->
     <toolchain>
         <brand>Renesas</brand>
         <product>RXC</product>
         <version>3.02.00</version>
+        <version>3.03.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>8.03.00 202004</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.20.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -26,6 +38,10 @@
         <name>r_drw2d_rx</name>
         <version>x.xx</version>
         <zipsource>r_drw2d_rx_vx.xx.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>5.63</version>
+        </dependency>
         <application>other</application>
         <desc>Drawing 2D engine driver for RX MCUs</desc>
         <details>Drawing 2D engine(DRW2D) driver for RX MCUs</details>

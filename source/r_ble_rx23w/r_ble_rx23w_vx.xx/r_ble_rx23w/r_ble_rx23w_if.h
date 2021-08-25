@@ -30,6 +30,7 @@
 *         : 10.07.2020 2.00    Update to BLE FIT module v2.00.
 *         : 24.12.2020 2.10    Update to BLE FIT module v2.10.
 *         : 30.03.2021 2.11    Update to BLE FIT module v2.11.
+*         : 30.06.2021 2.20    Update to BLE FIT module v2.20.
 ***********************************************************************************************************************/
 
 /*******************************************************************************************************************//**
@@ -91,7 +92,7 @@
  * @def BLE_VERSION_MINOR
  * BLE Module Minor Version.
  */
-#define BLE_VERSION_MINOR                                               (11)
+#define BLE_VERSION_MINOR                                               (20)
 
 /** 
  * @def BLE_LIB_ALL_FEATS

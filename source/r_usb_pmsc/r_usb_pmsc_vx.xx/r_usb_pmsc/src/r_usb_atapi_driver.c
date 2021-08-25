@@ -71,6 +71,7 @@ static uint8_t          g_usb_atapi_is_data_stage = USB_FALSE;      /* Data SetU
 static uint8_t          g_usb_pmsc_media_buffer[USB_ATAPI_BLOCK_UNIT * USB_CFG_PMSC_TRANS_COUNT];
 static usb_pmsc_cdb_t   *g_usb_atapi_cbwcb;                        /* CBWCB pointer */
 static uint32_t         g_usb_atapi_cur_lba;                        /* the current Logical Block Address */
+static uint8_t          g_usb_pmsc_atapi_data[256];
 
 /* Inquiry data */
 static uint8_t   g_usb_atapi_inquiry_tbl[USB_ATAPI_INQUIRY_SIZE] =
@@ -255,6 +256,16 @@ static const uint8_t   g_usb_atapi_ms_capa_tbl[USB_ATAPI_MODE_SENSE10_CAP_P_SIZE
 /* Mode Sense data (Timer & Protect Page) */
 static const uint8_t   g_usb_atapi_ms_op_cmd_tbl[USB_ATAPI_MODE_SENSE10_OP_CMD_SIZE] =
 {
+    /* Mode Parameter List */
+    0x00,   /* [0]Mode Data Length */
+    0x08,   /* [1]Mode Data Length */
+    0x00,   /* [2]Medium Type Code(00h-FFh Vendor Specific) */
+    0x00,   /* [3]b7:WP(Write Protect), b6-b0:Reserved */
+    0x00,   /* [4]Reserved */
+    0x00,   /* [5]Reserved */
+    0x00,   /* [6]Reserved */
+    0x00,   /* [7]Reserved */
+    /* Page(Removable Block Access Capacities Page 12byte) */
     0x1C,   /* [0]b7:PS, b6:Reserved, b5-b0:Page Code(1Ch) */
     0x06,   /* [1]Page Length(06h) */
     0x00,   /* [2]Reserved */
@@ -638,6 +649,14 @@ static void pmsc_atapi_get_read_data(uint32_t *size, uint8_t **buff)
         *size = g_usb_pmsc_message.ul_size;
     }
 
+    if ((g_usb_pmsc_dtl > *size) && (g_usb_pmsc_dtl <256))
+    {
+        memcpy (&g_usb_pmsc_atapi_data[0], *buff, *size);
+        memset ((void *)&g_usb_pmsc_atapi_data[*size], 0, (g_usb_pmsc_dtl - *size));
+        *buff = &g_usb_pmsc_atapi_data[0];
+        *size = g_usb_pmsc_dtl;
+        g_usb_pmsc_message.ul_size = g_usb_pmsc_dtl;
+    }
 } /* End of function pmsc_atapi_get_read_data() */
 
 /***********************************************************************************************************************
@@ -715,8 +734,7 @@ void pmsc_atapi_command_processing(uint8_t *cbw, uint16_t usb_result, usb_cb_t c
                         }
                         else
                         {
-                            if ((USB_ATAPI_MODE_SENSE10 == g_usb_atapi_cbwcb->s_usb_ptn0.uc_opcode)
-                                || (USB_ATAPI_READ_FORMAT_CAPACITY == g_usb_atapi_cbwcb->s_usb_ptn0.uc_opcode))
+                            if (USB_ATAPI_READ10 != g_usb_atapi_cbwcb->s_usb_ptn0.uc_opcode)
                             {
                                 if (g_usb_pmsc_dtl > g_usb_pmsc_message.ul_size)
                                 {
@@ -733,7 +751,7 @@ void pmsc_atapi_command_processing(uint8_t *cbw, uint16_t usb_result, usb_cb_t c
                             }
                             else
                             {
-                                status = (uint16_t)USB_PMSC_CMD_FAILED;             /* case 5 & 7*/
+                                status = (uint16_t)USB_PMSC_CMD_FAILED;         /* case 7*/
                             }
                         }
                         g_usb_pmsc_dtl = g_usb_pmsc_dtl - g_usb_pmsc_message.ul_size;

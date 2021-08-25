@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rtc_rx_hw.c
@@ -58,6 +58,10 @@
 *           30.07.2019 2.77    Added support for RX72M.
 *           22.11.2019 2.78    Added support for RX72N.
 *                              Added support for RX66N.
+*           30.06.2021 2.81    Added support for RX671.
+*                              Added processing for RX671 to rtc_config_capture function.
+*                              Fixed an issue that RCR1.RTCOS bit will be overwritten by "0" in the processing 
+*                              rtc_enable_ints function after rtc_set_output function.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -102,7 +106,7 @@ void rtc_init (void)
     }
 
     /* Enable the sub-clock for RTC */
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N)
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX671) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N)
     RTC.RCR4.BIT.RCKSEL = 0;            // do not use main clock
 #endif
     RTC.RCR3.BIT.RTCEN = 1;             // enable sub-clock
@@ -511,6 +515,32 @@ End of function rtc_enable_alarms
 void rtc_config_capture (rtc_capture_cfg_t *p_capture)
 {
     uint8_t byte;
+#if defined(BSP_MCU_RX671)
+
+    /* ---- Disable protection using PRCR register. ---- */
+    R_BSP_RegisterProtectDisable (BSP_REG_PROTECT_LPC_CGC_SWR);
+
+    if ((p_capture->pin) == 0)
+    {
+        SYSTEM.TAMPICR1.BYTE |= RTC_CAPTURE_TAMPICR1_CH0EN;
+    }
+    else if ((p_capture->pin) == 1)
+    {
+        SYSTEM.TAMPICR1.BYTE |= RTC_CAPTURE_TAMPICR1_CH1EN;
+    }
+    else if ((p_capture->pin) == 2)
+    {
+        SYSTEM.TAMPICR1.BYTE |= RTC_CAPTURE_TAMPICR1_CH2EN;
+    }
+    else
+    {
+        /* do nothing */
+    }
+
+    /* ---- Enable protection using PRCR register. ---- */
+    R_BSP_RegisterProtectEnable (BSP_REG_PROTECT_LPC_CGC_SWR);
+
+#endif
 
     /*  The time capture event input enable */
     g_pcap_ctrl[p_capture->pin].rtccr = RTC_CAPTURE_ENABLE_MASK;
@@ -599,6 +629,13 @@ rtc_err_t rtc_check_capture (rtc_pin_t pin, tm_t *p_time)
 
         /* Event detection disable */
         g_pcap_ctrl[pin].rtccr &= (~RTC_CAPTURE_EDGE_MASK);
+
+        /* WAIT_LOOP */
+        while (0 != (g_pcap_ctrl[pin].rtccr & RTC_CAPTURE_EDGE_MASK))
+        {
+            /* Confirm that it has changed */
+            R_BSP_NOP();
+        }
 
         /* READ TIME */
         /* mask off unknown bits and hour am/pm field */
@@ -854,9 +891,9 @@ void rtc_enable_ints (void)
 {
 
     /* Enable RTC interrupts (PIE, CIE and AIE), not ICU yet */
-    RTC.RCR1.BYTE = RTC_INT_ENABLE;
+    RTC.RCR1.BYTE |= RTC_INT_ENABLE;
     /* WAIT_LOOP */
-    while (RTC_INT_ENABLE != RTC.RCR1.BYTE)
+    while (RTC_INT_ENABLE != (RTC.RCR1.BYTE & RTC_INT_ENABLE))
     {
         /* Confirm that it has changed */
         R_BSP_NOP();

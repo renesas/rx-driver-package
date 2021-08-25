@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_rspi_rx
-VERSION = 		3.00
+VERSION = 		3.01
 MDF = V1,V2
 
 CONFIG_FOLDER = r_config

@@ -33,6 +33,7 @@
         <version>3.00.00</version>
         <version>3.01.00</version>
         <version>3.02.00</version>
+        <version>3.03.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -40,6 +41,7 @@
         <version>4.08.04.201803</version>
         <version>4.08.04.201902</version>
         <version>8.03.00.201904</version>
+        <version>8.03.00.202004</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -48,6 +50,8 @@
         <version>4.10.01</version>
         <version>4.11.01</version>
         <version>4.12.01</version>
+        <version>4.14.01</version>
+        <version>4.20.01</version>
     </toolchain>
     <!-- only one target entry allowed; multiple sub tags permitted -->
     <target>
@@ -72,6 +76,7 @@
         <group omit_board="true">RX65N</group>
         <group omit_board="true">RX66T</group>
         <group omit_board="true">RX66N</group>
+        <group omit_board="true">RX671</group>
         <group omit_board="true">RX71M</group>
         <group omit_board="true">RX72T</group>
         <group omit_board="true">RX72M</group>
@@ -87,7 +92,7 @@
         <zipsource>r_sci_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.52</version>
+            <version>6.10</version>
         </dependency>
         <dependency>
             <module>r_byteq</module>
@@ -97,9 +102,12 @@
             <version>1.70</version>
             <version>1.71</version>
             <version>1.80</version>
+            <version>1.81</version>
+            <version>1.82</version>
+            <version>1.90</version>
         </dependency>
         <application>Serial Interface (Clock Sync./Clock Async.)</application>
-        <desc>Multi-Channel Multi-Mode SCI Driver.</desc>
+        <desc>SCI Driver</desc>
         <details>This module allows any number of SCI channels on the MCU to run in full duplex Asynchronous mode, single master Simple SPI mode, or master Synchronous mode simultaneously. The driver is interrupt driven and non-blocking. Transmit and receive buffer queues are used in Asynchronous mode and their sizes may be configured independently for each channel. Resources for unused channels or modes may be removed via settings in the driver's config.h file.</details>
         <function>SCI</function>
         <incdir>r_config</incdir>

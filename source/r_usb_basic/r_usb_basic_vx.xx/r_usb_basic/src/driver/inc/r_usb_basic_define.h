@@ -33,6 +33,7 @@
  *         : 31.05.2019 1.26 Added support for GNUC and ICCRX.
  *         : 30.07.2019 1.27 RX72M is added.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2021 1.31 RX671 is added.
  ***********************************************************************************************************************/
 
 #ifndef R_USB_BASIC_DEFINE_H
@@ -94,7 +95,7 @@
  **********************************************************************************************************************/
 /* Version Number of API. */
 #define USB_VERSION_MAJOR   (1)
-#define USB_VERSION_MINOR   (30)
+#define USB_VERSION_MINOR   (31)
 
 #define CLSDATASIZE         (512u)              /* Transfer data size for Standard Request */
 #if (BSP_CFG_RTOS_USED != 0)                    /* Use RTOS */
@@ -260,21 +261,24 @@
  Macro definitions
  ******************************************************************************/
 /* The number of USBIP */
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)\
+ || defined(BSP_MCU_RX671)
     #define USB_NUM_USBIP           (2u)
 
-#else   /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) */
+#else   /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)\
+ || defined(BSP_MCU_RX671) */
     #define USB_NUM_USBIP           (1u)
 
-#endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) */
+#endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)\
+ || defined(BSP_MCU_RX671) */
 
 /* USB module definition */
 #define USB_M0  (USB0)
-#if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)
+#if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671)
 /*    #define USB_M1  (USB1) */
 #define USB_M1  (*(struct st_usb0    R_BSP_VOLATILE_EVENACCESS *)0xA0200)
 
-#endif  /* defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) */
+#endif  /* defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671) */
 #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M)
     #define USB_M1  (USBA)
 #endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
@@ -363,6 +367,23 @@
 
 #define USB_CFG_FS              (1)
 #define USB_CFG_HS              (2)
+
+#define USB_CFG_BUSWAIT_0       (0x0f00u)
+#define USB_CFG_BUSWAIT_1       (0x0f01u)
+#define USB_CFG_BUSWAIT_2       (0x0f02u)
+#define USB_CFG_BUSWAIT_3       (0x0f00u)
+#define USB_CFG_BUSWAIT_4       (0x0f04u)
+#define USB_CFG_BUSWAIT_5       (0x0f05u)
+#define USB_CFG_BUSWAIT_6       (0x0f06u)
+#define USB_CFG_BUSWAIT_7       (0x0f07u)
+#define USB_CFG_BUSWAIT_8       (0x0f08u)
+#define USB_CFG_BUSWAIT_9       (0x0f09u)
+#define USB_CFG_BUSWAIT_10      (0x0f0au)
+#define USB_CFG_BUSWAIT_11      (0x0f0bu)
+#define USB_CFG_BUSWAIT_12      (0x0f0cu)
+#define USB_CFG_BUSWAIT_13      (0x0f0du)
+#define USB_CFG_BUSWAIT_14      (0x0f0eu)
+#define USB_CFG_BUSWAIT_15      (0x0f0fu)
 
 /******************************************************************************
  USB specification define

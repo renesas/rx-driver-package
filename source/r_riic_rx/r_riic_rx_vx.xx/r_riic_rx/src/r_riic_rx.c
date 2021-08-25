@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer 
  *
- * Copyright (C) 2013(2019) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2013(2021) Renesas Electronics Corporation. All rights reserved.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_riic_rx.c
@@ -71,6 +71,8 @@
  *              : 10.10.2019 2.44     Added RX13T support.
  *              : 22.11.2019 2.45     Added RX66N, RX72N support.
  *                                    Modified comment of API function to Doxygen style.
+ *              : 30.06.2021 2.48     Modified "riic information" comment.
+ *                                    Modified the problem of recursive call.
  **********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -84,7 +86,7 @@
 Exported global variables (to be accessed by other files)
 ***********************************************************************************************************************/
 /*----------------------------------------------------------------------------*/
-/*   riic infomation                                                          */
+/*   riic information                                                          */
 /*----------------------------------------------------------------------------*/
 riic_ch_dev_status_t g_riic_ChStatus[MAX_RIIC_CH_NUM]; /* Channel status */
 
@@ -98,7 +100,7 @@ volatile riic_callback g_riic_callbackfunc_s[MAX_RIIC_CH_NUM];
  Private global variables and functions
  **********************************************************************************************************************/
 /*----------------------------------------------------------------------------*/
-/*   riic infomation                                                          */
+/*   riic information                                                          */
 /*----------------------------------------------------------------------------*/
 static riic_info_t * priic_info_m[MAX_RIIC_CH_NUM]; /* IIC driver information */
 static riic_info_t * priic_info_s[MAX_RIIC_CH_NUM]; /* IIC driver information */
@@ -3161,6 +3163,9 @@ static void riic_enable (riic_info_t * p_riic_info)
     /* Includes I/O register read operation at the end of the following function. */
     riic_init_io_register(p_riic_info);
 
+    /* Clears the interrupt request register. */
+    riic_clear_ir_flag(p_riic_info);
+
     /* Sets the internal status. */
     riic_api_status_set(p_riic_info, RIIC_STS_IDLE);
 
@@ -3250,8 +3255,8 @@ static void riic_init_io_register (riic_info_t * p_riic_info)
     *picmr2_reg = g_riic_icmr2_init[p_riic_info->ch_no];
     *picmr3_reg = g_riic_icmr3_init[p_riic_info->ch_no];
 
-    /* Disables IIC interrupt. */
-    riic_int_disable(p_riic_info);
+    /* Disable interrupts each target MCU.  */
+    riic_mcu_int_disable(p_riic_info->ch_no);
 
 #ifdef TN_RXA012A
     riic_timeout_counter_clear(p_riic_info->ch_no);

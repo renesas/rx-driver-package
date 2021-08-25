@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>3.01.00</version>
+        <version>3.02.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>4.08.04.201801</version>
+        <version>4.08.04.201803</version>
+        <version>4.08.04.201902</version>
+        <version>8.03.00.201904</version>
+        <version>8.03.00.202002</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.10.01</version>
+        <version>4.11.01</version>
+        <version>4.12.01</version>
+        <version>4.14.01</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX100</series>
+        <series>RX600</series>
+        <series>RX700</series>
+        <series>RX200</series>
+        <group omit_board="true">RX110</group>
+        <group omit_board="true">RX111</group>
+        <group omit_board="true">RX113</group>
+        <group omit_board="true">RX130</group>
+        <group omit_board="true">RX13T</group>
+        <group omit_board="true">RX230</group>
+        <group omit_board="true">RX231</group>
+        <group omit_board="true">RX23E-A</group>
+        <group omit_board="true">RX23T</group>
+        <group omit_board="true">RX23W</group>
+        <group omit_board="true">RX24T</group>
+        <group omit_board="true">RX24U</group>
+        <group omit_board="true">RX64M</group>
+        <group omit_board="true">RX651</group>
+        <group omit_board="true">RX65N</group>
+        <group omit_board="true">RX66N</group>
+        <group omit_board="true">RX66T</group>
+        <group omit_board="true">RX671</group>
+        <group omit_board="true">RX71M</group>
+        <group omit_board="true">RX72M</group>
+        <group omit_board="true">RX72N</group>
+        <group omit_board="true">RX72T</group>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, functions, and incdirs permitted -->
+
+    <package>
+        <type>fitmodule</type>
+        <name>r_flash_rx</name>
+        <version>4.70</version>
+        <dependency>
+                <module>r_bsp</module>
+                <version>5.20</version>
+                <version>5.30</version>
+                <version>5.40</version>
+                <version>5.50</version>
+                <version>5.52</version>
+                <version>6.10</version>
+        </dependency>
+        <zipsource>r_flash_rx_v4.70.zip</zipsource>
+        <application>Non-Volatile Storage</application>
+        <function>Flash</function>
+        <function>Data Flash</function>
+        <desc>Flash API for RX100, RX200, RX600. and RX700.</desc>
+        <details>This module allows the user to program, erase, write and blankcheck the Code and/or Data flash.</details>
+        <incdir>r_config</incdir>
+        <incdir>r_flash_rx</incdir>
+        <incdir>r_flash_rx/src</incdir>
+        <incdir>r_flash_rx/src/flash_type_1</incdir>
+        <incdir>r_flash_rx/src/flash_type_3</incdir>
+        <incdir>r_flash_rx/src/flash_type_4</incdir>
+        <incdir>r_flash_rx/src/targets</incdir>
+    </package>
+
+    <sampleapplicationnote>
+        <documentno>R01AN2184</documentno>
+    </sampleapplicationnote>
+
+</refinfo>

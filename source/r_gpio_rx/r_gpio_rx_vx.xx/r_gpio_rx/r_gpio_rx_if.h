@@ -53,6 +53,7 @@
 *         : 15.01.2021 3.70    Removed PH7 for RX111, RX113.
 *         : 01.04.2021 3.80    Added support for RX23W 83pins
 *         : 01.04.2021 3.90    Added support for RX72M 144pins, 100pins 
+*         : 07.04.2021 4.00    Added support for RX671.
 ***********************************************************************************************************************/
 
 #ifndef GPIO_RX_INTERFACE_HEADER_FILE
@@ -99,6 +100,8 @@ Includes   <System Includes> , "Project Includes"
     #include "./src/targets/rx66t/r_gpio_rx66t.h"
 #elif defined(BSP_MCU_RX66N)
     #include "./src/targets/rx66n/r_gpio_rx66n.h"
+#elif defined(BSP_MCU_RX671)
+    #include "./src/targets/rx671/r_gpio_rx671.h"
 #elif defined(BSP_MCU_RX71M)
     #include "./src/targets/rx71m/r_gpio_rx71m.h"
 #elif defined(BSP_MCU_RX72T)
@@ -120,8 +123,8 @@ Macro definitions
 #endif
 
 /* Version Number of API. */
-#define GPIO_RX_VERSION_MAJOR           (3)
-#define GPIO_RX_VERSION_MINOR           (90)
+#define GPIO_RX_VERSION_MAJOR           (4)
+#define GPIO_RX_VERSION_MINOR           (00)
 
 /***********************************************************************************************************************
 Typedef definitions

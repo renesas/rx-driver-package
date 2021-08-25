@@ -28,6 +28,7 @@
  *         : 04.22.2019 1.41    Delete inline definition of GetVersion function
  *         : 14.11.2019 2.00    Added support for GNUC and ICCRX.
  *         : 10.06.2020 2.01    Modified comment of API function to Doxygen style.
+ *         : 05.03.2021 2.02    Added RX671 to Doxygen comment.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
   Includes <System Includes> , "Project Includes"
@@ -51,7 +52,7 @@
  *                              programmed or erased (P/E).
  * @details   Depending upon the mode chosen and the MCU, the maximum speed of the internal clocks ICLK, PCLKB, PCLKD 
  *            and FCLK is limited. For example, in Low-Speed operating mode on the RX110, RX111, RX113, RX130, RX230, 
- *            RX231, RX23W, only the sub-clock can be used as the system clock. See Table 11.3 (RX64M, RX65N, RX66N, 
+ *            RX231, RX23W, only the sub-clock can be used as the system clock. See Table 11.3 (RX64M, RX65N, RX66N,RX671 
  *            RX71M, RX72M, RX72N) and Table 11.4(RX110, RX111, RX113, RX130, RX230, RX231, RX23W) in the Hardware manual
  *            for clock limitations. If the argument to this function cannot support the current internal clock 
  *            frequencies, then an error is returned. When switching the clock source from a lower frequency to 
@@ -173,7 +174,7 @@ lpc_err_t R_LPC_LowPowerModeActivate (lpc_callback_set_t pcallback)
  *               make sure the internal clock after returning from sleep mode does not exceed the limits of middle speed
  *               mode.
  *
- *            -# RX64M, RX65N, RX66N, RX71M, RX72M, RX72N MCUs:\n
+ *            -# RX64M, RX65N, RX66N, RX671, RX71M, RX72M, RX72N MCUs:\n
  *            \- When entering sleep mode, select LOCO or the sub-clock as the clock source.
  * @note      None 
  */

@@ -383,6 +383,7 @@ void usb_hcdc_configured (usb_utr_t *ptr, uint16_t devadr, uint16_t data2)
     usb_hcdc_set_pipe_registration(ptr, devadr); /* Host CDC Pipe registration */
     ctrl.module = ptr->ip; /* Module number setting */
     ctrl.address = devadr;
+    ctrl.type = USB_HCDC;
     usb_set_event(USB_STS_CONFIGURED, &ctrl); /* Set Event()  */
 }
 /******************************************************************************

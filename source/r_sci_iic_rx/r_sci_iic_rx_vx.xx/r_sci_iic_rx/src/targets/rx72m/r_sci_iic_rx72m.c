@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer 
  *
- * Copyright (C) 2016(2019) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2016(2021) Renesas Electronics Corporation. All rights reserved.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_sci_iic_rx72m.c
@@ -24,6 +24,7 @@
  * History : DD.MM.YYYY Version  Description
  *         : 30.07.2019 2.43     First Release
  *         : 22.11.2019 2.45     Modified the peripheral module clock of SCI7, SCI8 and SCI9.
+ *         : 30.06.2021 2.48     Added support for atomic control.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  Includes   <System Includes> , "Project Includes"
@@ -700,14 +701,26 @@ void r_sci_iic_power_on (uint8_t channel)
     uint32_t mstp;
     uint32_t stop_mask;
 
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
+    bsp_int_ctrl_t int_ctrl;
+#endif
+
     /* Enable writing to MSTP registers. */
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);
+
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
+    R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
+#endif
 
     /* Enable selected SCI_IIC Channel. */
     /* Bring module out of stop state. */
     mstp = (*prom->pmstp);
     stop_mask = prom->stop_mask;
     (*prom->pmstp) = mstp & (~stop_mask);
+
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
+    R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
+#endif
 
     /* Disable writing to MSTP registers. */
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR);
@@ -727,14 +740,26 @@ void r_sci_iic_power_off (uint8_t channel)
     uint32_t mstp;
     uint32_t stop_mask;
 
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
+    bsp_int_ctrl_t int_ctrl;
+#endif
+
     /* Enable writing to MSTP registers. */
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);
+
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
+    R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
+#endif
 
     /* Disable selected SCI_IIC Channel. */
     /* Put module in stop state. */
     mstp = (*prom->pmstp);
     stop_mask = prom->stop_mask;
     (*prom->pmstp) = mstp | stop_mask;
+
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
+    R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
+#endif
 
     /* Disable writing to MSTP registers. */
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR);
@@ -893,9 +918,16 @@ void r_sci_iic_int_disable (sci_iic_info_t * p_sci_iic_info)
     uint8_t txi_en_mask;
     uint32_t icu_tei;
     uint32_t tei_en_mask;
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
+    bsp_int_ctrl_t int_ctrl;
+#endif
 
     /* TEI interrupt set to callback function of group interrupt in bsp */
     R_BSP_InterruptWrite(prom->grp_tei_def, (bsp_int_cb_t) (FIT_NO_FUNC));
+
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
+    R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
+#endif
 
     /* Disables interrupt. */
     /* Disables TXI interrupt request enable register. */
@@ -907,6 +939,10 @@ void r_sci_iic_int_disable (sci_iic_info_t * p_sci_iic_info)
     icu_tei = (*prom->picu_tei);
     tei_en_mask = prom->tei_en_mask;
     (*prom->picu_tei) = icu_tei & (~tei_en_mask);
+
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
+    R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
+#endif
 
     /* Clears interrupt source priority. */
     (*prom->pipr) = 0; /* Clears TXI interrupt source priority register. */
@@ -943,8 +979,9 @@ void r_sci_iic_int_enable (sci_iic_info_t * p_sci_iic_info)
     uint32_t icu_tei;
     uint32_t tei_en_mask;
     uint8_t ipr_set_val;
-    
-    
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
+    bsp_int_ctrl_t int_ctrl;
+#endif
 
     /* Clears the interrupt request register. */
     sci_iic_clear_ir_flag(p_sci_iic_info);
@@ -952,6 +989,10 @@ void r_sci_iic_int_enable (sci_iic_info_t * p_sci_iic_info)
     /* TEI interrupt set to callback function of group interrupt in bsp */
     grp_tei_def = prom->grp_tei_def;
     R_BSP_InterruptWrite(grp_tei_def, (bsp_int_cb_t) (*prom->grp_tei_func));
+
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
+    R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
+#endif
 
     /* Enables interrupt. */
     /* Enables TXI interrupt request enable register. */
@@ -963,6 +1004,10 @@ void r_sci_iic_int_enable (sci_iic_info_t * p_sci_iic_info)
     icu_tei = (*prom->picu_tei);
     tei_en_mask = prom->tei_en_mask;
     (*prom->picu_tei) = icu_tei | tei_en_mask;
+
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
+    R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
+#endif
 
     /* Sets interrupt source priority. */
     ipr_set_val = prom->ipr_set_val;

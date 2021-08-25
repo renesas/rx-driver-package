@@ -25,6 +25,7 @@
 *           15.08.2019 3.20    Fixed warnings in IAR.
 *           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
 *                              Merged IrDA functionality to SCI FIT.
+*           31.03.2021 3.80    Added support circular buffer in mode asynchronous.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -724,19 +725,27 @@ sci_err_t sci_async_cmds(sci_hdl_t const hdl,
 #endif
         case (SCI_CMD_TX_Q_FLUSH):
         {
+#if (SCI_CFG_USE_CIRCULAR_BUFFER == 1)
+            R_BYTEQ_Flush(hdl->u_tx_data.que);
+#else
             /* Disable TXI interrupt */
             DISABLE_TXI_INT;
             R_BYTEQ_Flush(hdl->u_tx_data.que);
             ENABLE_TXI_INT;
+#endif
         break;
         }
 
         case (SCI_CMD_RX_Q_FLUSH):
         {
+#if (SCI_CFG_USE_CIRCULAR_BUFFER == 1)
+            R_BYTEQ_Flush(hdl->u_rx_data.que);
+#else
             /* Disable RXI interrupt */
             DISABLE_RXI_INT;
             R_BYTEQ_Flush(hdl->u_rx_data.que);
             ENABLE_RXI_INT;
+#endif
         break;
         }
 
@@ -1127,7 +1136,7 @@ sci_err_t sci_irda_open(uint8_t const      chan,
     {
         return SCI_ERR_BAD_CHAN;
     }
-	
+    
     /* Check argument p_cfg, p_hdl */
     if (0 == p_cfg->baud_rate)
     {
@@ -1433,7 +1442,7 @@ static sci_err_t sci_irda_init_bit_rate(sci_hdl_t const  hdl,
 
     /* Set CSK,ABCS bit and BRR register */
     hdl->rom->regs->BRR = (uint8_t)tmp;
-	hdl->rom->regs->SEMR.BIT.ABCS = p_baud_info[i].abcs;
+    hdl->rom->regs->SEMR.BIT.ABCS = p_baud_info[i].abcs;
     hdl->rom->regs->SEMR.BIT.BGDM = p_baud_info[i].bgdm;
     hdl->rom->regs->SMR.BIT.CKS = p_baud_info[i].cks;
 

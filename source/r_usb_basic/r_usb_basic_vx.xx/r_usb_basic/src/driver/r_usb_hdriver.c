@@ -31,6 +31,7 @@
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 16.11.2018 1.24 Supporting RTOS Thread safe
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2020 1.31 RX671 is added.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -101,7 +102,7 @@ static usb_utr_t usb_shstd_clr_stall_ctrl[USB_NUM_USBIP];
 static void     usb_hvnd_configured (usb_utr_t *ptr, uint16_t dev_addr, uint16_t data2);
 static void     usb_hvnd_detach (usb_utr_t *ptr, uint16_t dev_addr, uint16_t data2);
 static void     usb_hvnd_enumeration (usb_clsinfo_t *mess, uint16_t **table);
-static void     usb_hvnd_pipe_info (uint8_t *table, uint16_t speed, uint16_t length);
+static void     usb_hvnd_pipe_info (usb_utr_t *ptr, uint8_t *table, uint16_t speed, uint16_t length);
 #endif /* defined(USB_CFG_HVND_USE) */
 
 #if (BSP_CFG_RTOS_USED == 0)    /* Non-OS */
@@ -1831,43 +1832,25 @@ void usb_hstd_driver_registration (usb_utr_t *ptr, usb_hcdreg_t *callback)
  Function Name   : usb_hstd_driver_release
  Description     : Release the Device Class Driver.
  Arguments       : usb_utr_t *ptr       : Pointer to usb_utr_t structure.
-                 : uint8_t   devclass   : Interface class
  Return          : none
  ******************************************************************************/
-void usb_hstd_driver_release (usb_utr_t *ptr, uint8_t devclass)
+void usb_hstd_driver_release (usb_utr_t *ptr)
 {
     usb_hcdreg_t *driver;
     uint16_t i;
-    uint16_t flg;
 
-    if (USB_IFCLS_NOT == devclass)
+    /* WAIT_LOOP */
+    for (i = 0u; i < (USB_MAXDEVADDR + 1u); i++)
     {
-        /* Device driver number */
-        g_usb_hstd_device_num[ptr->ip] = 0;
+        driver = &g_usb_hstd_device_drv[ptr->ip][i];
+        driver->rootport = USB_NOPORT; /* Root port */
+        driver->devaddr = USB_NODEVICE; /* Device address */
+        driver->devstate = USB_DETACHED; /* Device state */
+
+        /* Interface Class : NO class */
+        driver->ifclass = (uint16_t) USB_IFCLS_NOT;
     }
-    else
-    {
-        /* WAIT_LOOP */
-        for (flg = 0u, i = 0u
-        ; (i < (USB_MAXDEVADDR + 1u)) && (0u == flg); i++)
-        {
-            driver = &g_usb_hstd_device_drv[ptr->ip][i];
-            if (driver->ifclass == devclass)
-            {
-
-                driver->rootport = USB_NOPORT; /* Root port */
-                driver->devaddr = USB_NODEVICE; /* Device address */
-                driver->devstate = USB_DETACHED; /* Device state */
-
-                /* Interface Class : NO class */
-                driver->ifclass = (uint16_t) USB_IFCLS_NOT;
-
-                g_usb_hstd_device_num[ptr->ip]--;
-                USB_PRINTF1("*** Release class %d driver ***\n",devclass);
-                flg = 1u; /* break; */
-            }
-        }
-    }
+    g_usb_hstd_device_num[ptr->ip] = 0;
 }
 /******************************************************************************
  End of function usb_hstd_driver_release
@@ -2077,7 +2060,6 @@ usb_err_t usb_hstd_hcd_open (usb_utr_t *ptr)
 {
     static uint8_t is_init = USB_NO;
     uint16_t i;
-    uint16_t j;
     usb_err_t err = USB_SUCCESS;
 
     if (USB_MAXDEVADDR < USB_DEVICEADDR)
@@ -2138,7 +2120,7 @@ usb_err_t usb_hstd_hcd_open (usb_utr_t *ptr)
     /* WAIT_LOOP */
     for (i = USB_PIPE0; i <= USB_MAX_PIPE_NO; i++)
     {
-        g_p_usb_hstd_pipe[j][i] = (usb_utr_t*) USB_NULL;
+        g_p_usb_hstd_pipe[ptr->ip][i] = (usb_utr_t*) USB_NULL;
     }
 
 #if USB_CFG_BC == USB_CFG_ENABLE
@@ -2280,22 +2262,33 @@ void usb_host_registration (usb_utr_t *ptr)
 {
 
 #if defined(USB_CFG_HCDC_USE)
-    usb_hcdc_registration(ptr);
-
+    if (USB_HCDC == ptr->keyword)
+    {
+        usb_hcdc_registration(ptr);
+    }
 #endif /* defined(USB_CFG_PCDC_USE) */
 
 #if defined(USB_CFG_HHID_USE)
-    usb_hhid_registration(ptr);
+    if (USB_HHID == ptr->keyword)
+    {
+        usb_hhid_registration(ptr);
+    }
 
 #endif /* defined(USB_CFG_HMSC_USE) */
 
 #if defined(USB_CFG_HMSC_USE)
-    usb_hmsc_registration(ptr);
+    if (USB_HMSC == ptr->keyword)
+    {
+        usb_hmsc_registration(ptr);
+    }
 
 #endif /* defined(USB_CFG_HMSC_USE) */
 
 #if defined(USB_CFG_HVND_USE)
-    usb_hvnd_registration(ptr);
+    if (USB_HVND == ptr->keyword)
+    {
+        usb_hvnd_registration(ptr);
+    }
 
 #endif /* defined(USB_CFG_HVND_USE) */
 }
@@ -2407,6 +2400,7 @@ void usb_hvnd_configured (usb_utr_t *ptr, uint16_t dev_addr, uint16_t data2)
 
     ctrl.module = ptr->ip; /* Module number setting */
     ctrl.address = dev_addr;
+    ctrl.type = USB_HVND;
     if (0 != dev_addr)
     {
 
@@ -2464,7 +2458,7 @@ void usb_hvnd_enumeration (usb_clsinfo_t *mess, uint16_t **table)
     total_len |= (uint16_t) *(pdesc + 2);
 
     /* Pipe Information table set */
-    usb_hvnd_pipe_info(pdesc, speed, total_len);
+    usb_hvnd_pipe_info(mess, pdesc, speed, total_len);
 
 #if (BSP_CFG_RTOS_USED == 0)    /* Non-OS */
     usb_hstd_return_enu_mgr(mess, USB_OK); /* Return to MGR */
@@ -2482,7 +2476,7 @@ void usb_hvnd_enumeration (usb_clsinfo_t *mess, uint16_t **table)
  : uint16_t length       : Configuration Descriptor Length
  Return value    : none
  ******************************************************************************/
-void usb_hvnd_pipe_info (uint8_t *table, uint16_t speed, uint16_t length)
+void usb_hvnd_pipe_info (usb_utr_t *ptr, uint8_t *table, uint16_t speed, uint16_t length)
 {
     uint16_t ofdsc;
     uint16_t pipe_no;
@@ -2497,14 +2491,14 @@ void usb_hvnd_pipe_info (uint8_t *table, uint16_t speed, uint16_t length)
         /* Search within Interface */
         if (USB_DT_ENDPOINT == table[ofdsc + 1])
         {
-            pipe_no = usb_hstd_make_pipe_reg_info (USB_IP0, 1, USB_HVND, speed, &table[ofdsc], &ep_tbl);
+            pipe_no = usb_hstd_make_pipe_reg_info (ptr->ip, 1, USB_HVND, speed, &table[ofdsc], &ep_tbl);
             if ( USB_NULL == pipe_no)
             {
                 return;
             }
             else
             {
-                usb_hstd_set_pipe_info (USB_IP0, pipe_no, &ep_tbl);
+                usb_hstd_set_pipe_info (ptr->ip, pipe_no, &ep_tbl);
             }
 
             ofdsc += table[ofdsc];

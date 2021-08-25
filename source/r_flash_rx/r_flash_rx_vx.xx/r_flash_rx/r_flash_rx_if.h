@@ -149,6 +149,7 @@
 *           27.09.2019 4.40    Added support for RX23E-A.
 *           18.11.2019 4.50    Added support for RX66N, and RX72N.
 *           26.06.2020 4.60    Modified some minor problem.
+*           23.10.2020 4.70    Added support for RX671.
 ***********************************************************************************************************************/
 
 #ifndef FLASH_INTERFACE_HEADER_FILE
@@ -166,7 +167,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Driver Version Number. */
 #define FLASH_RX_VERSION_MAJOR           (4)
-#define FLASH_RX_VERSION_MINOR           (60)
+#define FLASH_RX_VERSION_MINOR           (70)
 
 
 /***********************************************************************************************************************
@@ -190,7 +191,7 @@ Typedef definitions
 #define FLASH_TYPE              FLASH_TYPE_3
 
 #elif (defined(MCU_RX651) || defined(MCU_RX65N) || defined(MCU_RX72M) || \
-       defined(MCU_RX66N) || defined(MCU_RX72N))
+       defined(MCU_RX66N) || defined(MCU_RX72N) || defined(MCU_RX671))
 #define FLASH_TYPE              FLASH_TYPE_4
 #endif
 
@@ -226,12 +227,12 @@ Typedef definitions
 #endif
 
 #if (defined(MCU_RX66T) || defined(MCU_RX72T) || defined(MCU_RX72M) || \
-     defined(MCU_RX66N) || defined(MCU_RX72N))
+     defined(MCU_RX66N) || defined(MCU_RX72N) || defined(MCU_RX671))
 #define FLASH_HAS_NON_CACHED_RANGES     1
 #endif
 
 #if (defined(MCU_RX64_ALL) || defined(MCU_RX65_ALL) || defined(MCU_RX66_ALL) || \
-     defined(MCU_RX71_ALL) || defined(MCU_RX72_ALL))
+     defined(MCU_RX71_ALL) || defined(MCU_RX72_ALL) || defined(MCU_RX67_ALL))
 #define FLASH_HAS_DIFF_CF_BLOCK_SIZES   1
 #endif
 
@@ -239,7 +240,7 @@ Typedef definitions
 #define FLASH_HAS_BOOT_SWAP     1
 #endif
 
-#if ((FLASH_TYPE == 4) && (MCU_ROM_SIZE_BYTES >= 1572864))
+#if (((FLASH_TYPE == 4) && (MCU_ROM_SIZE_BYTES >= 1572864)) || defined(MCU_RX67_ALL))
 #define FLASH_HAS_APP_SWAP      1
 #endif
 

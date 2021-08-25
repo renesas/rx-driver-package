@@ -54,6 +54,10 @@
  *  #define USB_CFG_PHID_USE : Peripheral Human Interface Device Class
  *  #define USB_CFG_PMSC_USE : Peripheral Mass Storage Class
  *  #define USB_CFG_PVND_USE : Peripheral VENDER Class
+ *  #define USB_CFG_PCDC_2COM_USE : Peripheral Composite device(CDC VCOM 2Port)
+ *  #define USB_CFG_PCDC_PHID_USE : Peripheral Composite device(CDC + HID)
+ *  #define USB_CFG_PCDC_PMSC_USE : Peripheral Composite device(CDC + MSC)
+ *  #define USB_CFG_PHID_PMSC_USE : Peripheral Composite device(HID + MSC)
  * */
 #define USB_CFG_HCDC_USE /* USB_CFG_DEVICE_CLASS */
 
@@ -62,13 +66,13 @@
  * USB_CFG_ENABLE       : Uses DTC
  * USB_CFG_DISABLE      : Does not use DTC
  */
-#define    USB_CFG_DTC              (USB_CFG_DISABLE)
+#define USB_CFG_DTC              (USB_CFG_DISABLE)
 
 /**  [DMA use setting]
  * USB_CFG_ENABLE       : Uses DMA
  * USB_CFG_DISABLE      : Does not use DMA
  */
-#define    USB_CFG_DMA              (USB_CFG_DISABLE)
+#define USB_CFG_DMA              (USB_CFG_DISABLE)
 
 /** [DMA Channel setting(USB0 module Send transfer)]
  * USB_CFG_CH0          : Uses DMAC0
@@ -77,7 +81,7 @@
  * USB_CFG_CH3          : Uses DMAC3
  * USB_CFG_CH7          : Uses DMAC7
  */
-#define     USB_CFG_USB0_DMA_TX     (USB_CFG_CH0)
+#define USB_CFG_USB0_DMA_TX     (USB_CFG_CH0)
 
 /** [DMA Channel setting(USB0 module Receive transfer)]
  * USB_CFG_CH0          : Uses DMAC0
@@ -86,7 +90,7 @@
  * USB_CFG_CH3          : Uses DMAC3
  * USB_CFG_CH7          : Uses DMAC7
  */
-#define     USB_CFG_USB0_DMA_RX     (USB_CFG_CH1)
+#define USB_CFG_USB0_DMA_RX     (USB_CFG_CH1)
 
 /** [DMA Channel setting(USB1 module Send transfer)]
  * USB_CFG_CH0          : Uses DMAC0
@@ -95,7 +99,7 @@
  * USB_CFG_CH3          : Uses DMAC3
  * USB_CFG_CH7          : Uses DMAC7
  */
-#define     USB_CFG_USB1_DMA_TX     (USB_CFG_CH2)
+#define USB_CFG_USB1_DMA_TX     (USB_CFG_CH2)
 
 /** [DMA Channel setting(USB1 module Receive transfer)]
  * USB_CFG_CH0          : Uses DMAC0
@@ -104,7 +108,7 @@
  * USB_CFG_CH3          : Uses DMAC3
  * USB_CFG_CH7          : Uses DMAC7
  */
-#define     USB_CFG_USB1_DMA_RX     (USB_CFG_CH3)
+#define USB_CFG_USB1_DMA_RX     (USB_CFG_CH3)
 
 /** [Setting Battery Charging (BC) function]
  * USB_CFG_ENABLE       : Uses BC function.
@@ -120,24 +124,24 @@
 #define USB_CFG_CLKSEL              (USB_CFG_24MHZ)
 
 /** [CPU Bus Access Wait Select(CPU Bus Wait Register (BUSWAIT)BWAIT[3:0])]
- *  0                   : 2 access cycles  waits
- *  1                   : 3 access cycles  waits
- *  2                   : 4 access cycles  waits
- *  3                   : 5 access cycles  waits
- *  4                   : 6 access cycles  waits
- *  5                   : 7 access cycles  waits
- *  6                   : 8 access cycles  waits
- *  7                   : 9 access cycles  waits
- *  8                   : 10 access cycles waits
- *  9                   : 11 access cycles waits
- *  10                  : 12 access cycles waits
- *  11                  : 13 access cycles waits
- *  12                  : 14 access cycles waits
- *  13                  : 15 access cycles waits
- *  14                  : 16 access cycles waits
- *  15                  : 17 access cycles waits
+ *  USB_CFG_BUSWAIT_0   : 2 access cycles  waits
+ *  USB_CFG_BUSWAIT_1   : 3 access cycles  waits
+ *  USB_CFG_BUSWAIT_2   : 4 access cycles  waits
+ *  USB_CFG_BUSWAIT_3   : 5 access cycles  waits
+ *  USB_CFG_BUSWAIT_4   : 6 access cycles  waits
+ *  USB_CFG_BUSWAIT_5   : 7 access cycles  waits
+ *  USB_CFG_BUSWAIT_6   : 8 access cycles  waits
+ *  USB_CFG_BUSWAIT_7   : 9 access cycles  waits
+ *  USB_CFG_BUSWAIT_8   : 10 access cycles waits
+ *  USB_CFG_BUSWAIT_9   : 11 access cycles waits
+ *  USB_CFG_BUSWAIT_10  : 12 access cycles waits
+ *  USB_CFG_BUSWAIT_11  : 13 access cycles waits
+ *  USB_CFG_BUSWAIT_12  : 14 access cycles waits
+ *  USB_CFG_BUSWAIT_13  : 15 access cycles waits
+ *  USB_CFG_BUSWAIT_14  : 16 access cycles waits
+ *  USB_CFG_BUSWAIT_15  : 17 access cycles waits
  */
-#define USB_CFG_BUSWAIT             (7)
+#define USB_CFG_BUSWAIT             (USB_CFG_BUSWAIT_7)
 
 /* 
  * SET USB INTERRUPT PRIORITY; 

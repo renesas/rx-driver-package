@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate>r_pinset_type2</fileTemplate>
+    <resourceInfo>
+      <peripheral name="QSPIX">
+        <channel number="QSPIX0">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${QSPIX_CFG_USE_CH0} == ${QSPIX_CFG_USE_CH0.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="QSPCLK">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="QSSL">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="QIO0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="QIO1">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="QIO2">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="QIO3">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+        </channel>
+      </peripheral>
+    </resourceInfo>
+    <configuration>
+        <property id="QSPIX_CFG_PARAM_CHECKING_ENABLE" display="Parameter check" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+            <option id="QSPIX_CFG_PARAM_CHECKING_ENABLE.0" display="Disable parameter checks" value="0"/>
+            <option id="QSPIX_CFG_PARAM_CHECKING_ENABLE.1" display="Enable parameter checks" value="1"/>
+            <option id="QSPIX_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="Use system default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <description>Checking of arguments passed to QSPIX API functions can be enable or disabled.
+Disabling argument checking is provided for systems that absolutely require faster and smaller code.
+By default the module is configured to use the setting of the system-wide BSP_CFG_PARAM_CHECKING_ENABLE macro.
+This can be overridden for the local module by redefining QSPIX_CFG_PARAM_CHECKING_ENABLE.
+To control parameter checking locally, set QSPIX_CFG_PARAM_CHECKING_ENABLE to 1 to enable it,
+otherwise set to 0 skip checking.
+</description>
+        </property>
+        <property id="QSPIX_CFG_USE_CH0" display="Use QSPIX channel 0" default="1" type="combobox">
+            <option id="QSPIX_CFG_USE_CH0.0" display="Unused" value="0"/>
+            <option id="QSPIX_CFG_USE_CH0.1" display="Used" value="1"/>
+            <description>Enable the QSPIX channels to use in this build. (0) = not used. (1) = used.</description>
+        </property>
+        <property id="QSPIX_CFG_ERI_INCLUDED" display="QSPIX ROM access error interrupt" default="1" type="combobox">
+            <option id="QSPIX_CFG_ERI_INCLUDED.0" display="Disable ROM error access interrupt" value="0"/>
+            <option id="QSPIX_CFG_ERI_INCLUDED.1" display="Enable ROM error access interrupt" value="1"/>
+            <description>Enable or disable ROM access error interrupt</description>
+        </property>
+        <property id="QSPIX_CFG_ERI_IR_PRIORITY" display="QSPIX ROM access error Interrupt priority level" default="5" type="combobox">
+            <option id="QSPIX_CFG_ERI_IR_PRIORITY.1" display="Level 1 (lowest)" value="1"/>
+            <option id="QSPIX_CFG_ERI_IR_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="QSPIX_CFG_ERI_IR_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="QSPIX_CFG_ERI_IR_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="QSPIX_CFG_ERI_IR_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="QSPIX_CFG_ERI_IR_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="QSPIX_CFG_ERI_IR_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="QSPIX_CFG_ERI_IR_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="QSPIX_CFG_ERI_IR_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="QSPIX_CFG_ERI_IR_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="QSPIX_CFG_ERI_IR_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="QSPIX_CFG_ERI_IR_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="QSPIX_CFG_ERI_IR_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="QSPIX_CFG_ERI_IR_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="QSPIX_CFG_ERI_IR_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="This setting becomes valid when ROM error access interrupt is enabled." actionOnFail="disable">"${QSPIX_CFG_ERI_INCLUDED}" == "1" </constraint>
+            <description>Set value must be in the range 1 (lowest) to 15 (highest).
+This setting becomes valid when "QSPIX ROM access error interrupt" is "1".</description>
+        </property>
+    </configuration>
+</module>

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2020 Renesas Electronics Corporation. All rights reserved.    
+* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.    
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_iwdt_rx_if.h
@@ -46,6 +46,7 @@
 *           30.12.2019 3.40    Added support for RX66N, RX72N.
 *           31.03.2020 3.50    Added support for RX23E-A.
 *         : 30.06.2020 3.60    Changed revision to reflect demo upgrade.
+*           31.03.2021 3.70    Added support for RX671.
 ***********************************************************************************************************************/
 
 #ifndef IWDT_RX_IF_H
@@ -66,7 +67,7 @@ Macro definitions
 #endif
 /* Version Number of API. */
 #define IWDT_RX_VERSION_MAJOR   (3)
-#define IWDT_RX_VERSION_MINOR   (60)
+#define IWDT_RX_VERSION_MINOR   (70)
 
 #define OFS0_IWDT_DISABLED      (0x00000002)
 
@@ -101,7 +102,7 @@ typedef enum e_iwdt_timeout           // IWDT Time-Out Period
     IWDT_TIMEOUT_512 =0x0001u,        // 512  (cycles)
     IWDT_TIMEOUT_1024=0x0002u,        // 1024 (cycles)
     IWDT_TIMEOUT_2048=0x0003u,        // 2048 (cycles)
-#else /* RX64M, RX71M, RX65N, RX66T, RX66N, RX72T, RX72M, RX72N */
+#else /* RX64M, RX71M, RX65N, RX66T, RX66N, RX72T, RX72M, RX72N, RX671 */
     IWDT_TIMEOUT_1024 =0x0000u,        // 1024 (cycles)
     IWDT_TIMEOUT_4096 =0x0001u,        // 4096 (cycles)
     IWDT_TIMEOUT_8192 =0x0002u,        // 8192 (cycles)

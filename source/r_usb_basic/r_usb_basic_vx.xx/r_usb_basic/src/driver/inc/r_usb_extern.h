@@ -51,6 +51,7 @@
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 16.11.2018 1.24 Supporting RTOS Thread safe
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2020 1.31 RX671 is added.
  ***********************************************************************************************************************/
 
 #ifndef R_USB_EXTERN_H
@@ -143,6 +144,8 @@ extern uint16_t g_usb_peri_connected;                           /* Peri CDC appl
 
 /* r_usb_usbif_api.c */
 extern uint16_t g_usb_usbmode;                                  /* USB mode HOST/PERI */
+extern uint16_t g_usb_open_class[USB_NUM_USBIP];
+
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
 extern usb_utr_t g_usb_hdata[USB_NUM_USBIP][USB_MAXPIPE_NUM + 1];
 
@@ -219,7 +222,8 @@ usb_er_t  usb_ctrl_stop (usb_ctrl_t *p_ctrl);
 void      usb_cstd_debug_hook (uint16_t error_code);
 
 #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M)
-uint16_t  usb_cstd_get_pipe_buf_value (uint16_t pipe_no);
+uint16_t  usb_hstd_get_pipe_buf_value (uint16_t usb_class, uint16_t pipe_no);
+uint16_t  usb_pstd_get_pipe_buf_value (uint16_t pipe_no);
 #endif /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
 
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
@@ -243,7 +247,7 @@ usb_er_t  usb_hstd_transfer_end (usb_utr_t *ptr, uint16_t pipe, uint16_t status)
 usb_er_t  usb_hstd_change_device_state (usb_utr_t *ptr, usb_cb_t complete, uint16_t msginfo, uint16_t member);
 usb_er_t  usb_hstd_mgr_open (usb_utr_t *ptr);
 void      usb_hstd_driver_registration (usb_utr_t *ptr, usb_hcdreg_t *callback);
-void      usb_hstd_driver_release (usb_utr_t *ptr, uint8_t devclass);
+void      usb_hstd_driver_release (usb_utr_t *ptr);
 void      usb_hstd_set_pipe_info (uint16_t ip_no, uint16_t pipe_no, usb_pipe_table_reg_t *src_ep_tbl);
 void      usb_hstd_return_enu_mgr (usb_utr_t *ptr, uint16_t cls_result);
 usb_err_t usb_hstd_hcd_open (usb_utr_t *ptr);
@@ -262,11 +266,11 @@ void      usb_pstd_fifo_to_buf (uint16_t pipe, uint16_t  useport);
 uint16_t  usb_pstd_read_data (uint16_t pipe, uint16_t pipemode);
 void      usb_pstd_data_end (uint16_t pipe, uint16_t status);
 
-uint8_t   usb_pstd_set_pipe_table (uint8_t  *descriptor);
+uint8_t   usb_pstd_set_pipe_table (uint8_t  *descriptor, uint8_t class);
 void      usb_pstd_clr_pipe_table (void);
 void      usb_pstd_set_pipe_reg (void);
 void      usb_pstd_clr_pipe_reg (void);
-uint8_t   usb_pstd_get_pipe_no (uint8_t type, uint8_t dir);
+uint8_t   usb_pstd_get_pipe_no (uint8_t type, uint8_t dir, uint8_t class);
 
 
 /* r_usb_cintfifo.c */
@@ -427,6 +431,7 @@ usb_er_t  usb_hstd_set_pipe_reg_for_devadr (usb_utr_t *ptr, uint16_t device_addr
 uint8_t   usb_hstd_get_pipe_no (uint16_t ip_no, uint16_t address, uint16_t usb_class, uint8_t type, uint8_t dir);
 uint16_t  usb_hstd_get_pipe_peri_value (uint16_t speed, uint8_t binterval);
 void      usb_hstd_clr_pipe_table (uint16_t ip_no, uint16_t device_address);
+void      usb_hstd_clr_pipe_table_ip (uint16_t ip_no);
 void      usb_hstd_set_pipe_reg (usb_utr_t *ptr, uint16_t pipe_no);
 
 uint16_t  usb_hstd_chk_dev_addr (usb_utr_t *ptr, uint16_t addr);
@@ -592,7 +597,6 @@ void      usb_peri_interface(usb_utr_t *ptr, uint16_t data1, uint16_t data2);
 void      usb_peri_class_request(usb_setup_t *preq, uint16_t ctsq);
 void      usb_peri_class_request_ioss (usb_setup_t *req);
 void      usb_peri_class_request_rwds (usb_setup_t * req);
-void      usb_peri_class_request_wds (usb_setup_t * req);
 void      usb_peri_other_request (usb_setup_t *req);
 void      usb_peri_class_request_wnss (usb_setup_t *req);
 void      usb_peri_class_request_rss (usb_setup_t *req);

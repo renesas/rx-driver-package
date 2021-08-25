@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013(2014-2017) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013(2014-2021) Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rspi_defaults.h
@@ -27,6 +27,9 @@
 *         : 25.10.2013 1.00     First Release
 *         : 30.09.2016 1.50     Added #define RSPI_SPDCR2_DEF.
 *         : 31.07.2017 1.70     Supported RX65N-2MB, RX130-512KB.
+*         : 30.06.2021 3.01     Supported RX671.
+*                               Fixed bug. Set the RSPCK auto-stop function enable bit(SPCR2.SCKASE) to ensure RSPI can 
+*                               communication normally when it is in high speed reception.
 ***********************************************************************************************************************/
 
 #ifndef R_RSPI_DEFS_H
@@ -90,8 +93,15 @@
 #define RSPI_SPCR2_SPIIE_DEF (0x00)     /* 0: Disable Idle interrupt */
 #define RSPI_SPCR2_PTE_DEF   (0x00)     /* 0: Disable parity self diagnostic. */
 #define RSPI_SPCR2_SCKASE_DEF (0x00)    /* 0: Disables the RSPCK auto-stop function */
+#if (!defined(BSP_MCU_RX110) && !defined(BSP_MCU_RX111) && !defined(BSP_MCU_RX113))
+    #define RSPI_SPCR2_SCKASE_ENABLE (0x10) /* 1: Enables the RSPCK auto-stop function */
+#else
+    #define RSPI_SPCR2_SCKASE_ENABLE (0x00)
+#endif
 #define RSPI_SPCR2_DEF       (RSPI_SPCR2_SPPE_DEF | RSPI_SPCR2_SPOE_DEF | RSPI_SPCR2_SPIIE_DEF | RSPI_SPCR2_PTE_DEF | \
                               RSPI_SPCR2_SCKASE_DEF)
+#define RSPI_SPCR2_HIGH_SPEED (RSPI_SPCR2_SPPE_DEF | RSPI_SPCR2_SPOE_DEF | RSPI_SPCR2_SPIIE_DEF | RSPI_SPCR2_PTE_DEF | \
+                               RSPI_SPCR2_SCKASE_ENABLE)
 
 /* RSPI Command Registers 0 to 7 (SPCMD0 to SPCMD7). One set of defaults supported */
 #define RSPI_SPCMD_CPHA_DEF   (0x0000)  /* 0: Data sampling on odd edge, data variation on even edge. */
@@ -110,5 +120,12 @@
 
 /* RSPI Data Control Register 2 (SPDCR2) */
 #define RSPI_SPDCR2_DEF       (0x00)
+
+/* RSPI Control Register 3 (SPCR3) */
+#define RSPI_SPCR3_RXMD_DEF    (0x00) /* 0: Full-duplex or transmit-only simplex communications (enables the transmitter) */
+#define RSPI_SPCR3_SCKDDIS_DEF (0x00) /* 0: Does not insert delays between data bytes during burst transfer */
+#define RSPI_SPCR3_SPCIE_DEF   (0x00) /* 0: Disables the generation of communication end interrupt requests */
+
+#define RSPI_SPCR3_DEF         (RSPI_SPCR3_RXMD_DEF | RSPI_SPCR3_SCKDDIS_DEF | RSPI_SPCR3_SPCIE_DEF)
 
 #endif /* R_RSPI_DEFS_H_ */

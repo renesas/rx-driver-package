@@ -30,6 +30,7 @@
  *         : 30.09.2017 1.22 Move Typedef from r_usb_basic_if.h
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 31.05.2021 1.31 RX671 USB1 is added.
  ***********************************************************************************************************************/
 
 #ifndef R_USB_TYPEDEF_H
@@ -83,9 +84,9 @@ enum e_driver_type
 typedef struct st_usba R_BSP_VOLATILE_EVENACCESS * usb_regadr1_t;
 #endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
 
-#if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)
+#if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671)
 typedef struct st_usb0 R_BSP_VOLATILE_EVENACCESS * usb_regadr1_t;
-#endif  /* defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) */
+#endif  /* defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671) */
 
 #if defined(BSP_MCU_RX72T)
 typedef struct st_usb  R_BSP_VOLATILE_EVENACCESS * usb_regadr_t;

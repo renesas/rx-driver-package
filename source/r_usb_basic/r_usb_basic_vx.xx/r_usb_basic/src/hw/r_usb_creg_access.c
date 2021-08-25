@@ -31,6 +31,7 @@
  *         : 30.09.2017 1.22 RX62N/RX630/RX63T-H is added. and Add "__evenaccess" for I/O reg access local variable.
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 31.05.2021 1.31 RX671 USB1 is added.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -357,7 +358,7 @@ void hw_usb_clear_usbe (usb_utr_t *ptr)
  ******************************************************************************/
 void hw_usb_set_buswait(usb_utr_t *ptr)
 {
-    ptr -> ipp1 -> BUSWAIT.WORD = (0x0f00 | USB_CFG_BUSWAIT);
+    ptr -> ipp1 -> BUSWAIT.WORD = USB_CFG_BUSWAIT;
 }
 /******************************************************************************
  End of function hw_usb_set_buswait
@@ -769,10 +770,10 @@ uint16_t hw_usb_read_fifo16 (usb_utr_t *ptr, uint16_t pipemode)
             data = USB_M1.CFIFO.WORD.H;
 
 #endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
-#if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)
+#if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671)
             data = USB_M1.CFIFO.WORD;
 
-#endif  /* defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) */
+#endif  /* defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671) */
 #else   /* USB_CFG_USE_USBIP == USB_CFG_IP1 */
             data = USB_M0.CFIFO.WORD;
 

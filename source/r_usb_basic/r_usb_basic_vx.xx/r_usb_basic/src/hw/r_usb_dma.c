@@ -30,6 +30,7 @@
  *                              "usb_dma_buf2fifo_restart"->"usb_cstd_dma_send_restart"
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2020 1.31 RX671 is added.
  ***********************************************************************************************************************/
 
 /*******************************************************************************
@@ -47,6 +48,10 @@ Includes   <System Includes>, "Project Includes"
 #endif /* (BSP_CFG_RTOS_USED != 0) */
 
 #define ACTIVE_CNT_NUMBER       (100)
+
+#if defined(BSP_MCU_RX66T)
+    #undef  BSP_MCU_RX72T
+#endif /* #if defined(BSP_MCU_RX66T) */
 
 #if USB_CFG_DTC == USB_CFG_ENABLE
 #include "r_dtc_rx_if.h"
@@ -91,12 +96,12 @@ uint32_t  g_fifo_address[USB_NUM_USBIP][USB_FIFO_ACCESS_NUM_MAX][USB_FIFO_ACCSES
 #if USB_NUM_USBIP == 2
   {
     /* IP1 */
-#if defined(BSP_MCU_RX63N)
+#if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX671)
     {(uint32_t)0,                   (uint32_t)&USB_M1.CFIFO.WORD,   (uint32_t)&USB_M1.CFIFO.BYTE.L},    /* USB0 CFIFO  address */
     {(uint32_t)0,                   (uint32_t)&USB_M1.D0FIFO.WORD,  (uint32_t)&USB_M1.D0FIFO.BYTE.L},   /* USB0 D0FIFO address */
     {(uint32_t)0,                   (uint32_t)&USB_M1.D1FIFO.WORD,  (uint32_t)&USB_M1.D1FIFO.BYTE.L},
 
-#endif  /* defined(BSP_MCU_RX63N) */
+#endif  /* defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX671) */
 
 #if defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX64M)
 
@@ -1508,12 +1513,12 @@ void usb_cstd_dma_rcv_setting(usb_utr_t *ptr, uint32_t des_addr, uint16_t usepor
     td_cfg.chain_transfer_enable = DTC_CHAIN_TRANSFER_DISABLE;
     td_cfg.chain_transfer_mode  = DTC_CHAIN_TRANSFER_CONTINUOUSLY;
     td_cfg.response_interrupt = DTC_INTERRUPT_AFTER_ALL_COMPLETE;
-#if defined(BSP_MCU_RX65N)
+#if defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX671)
     td_cfg.writeback_disable = DTC_WRITEBACK_ENABLE;     /* Write-back disable or enable */
     td_cfg.sequence_end = DTC_SEQUENCE_TRANSFER_CONTINUE;          /* Sequence transfer end or continue */
     td_cfg.refer_index_table_enable = DTC_REFER_INDEX_TABLE_DISABLE; /* Index table refer or not refer */
     td_cfg.disp_add_enable = DTC_SRC_ADDR_DISP_ADD_DISABLE;       /* The displacement value is added or not added */
-#endif /* defined(BSP_MCU_RX65N) */
+#endif /* defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX671) */
 
     /* Call R_DTC_Create(). */
     R_DTC_Create((dtc_activation_source_t)vect, &g_usb_dtc_transfer_data[dma_ch], &td_cfg, 0);
@@ -1711,12 +1716,12 @@ void usb_cstd_dma_send_setting(usb_utr_t *ptr, uint32_t src_adr, uint16_t usepor
     td_cfg.chain_transfer_enable = DTC_CHAIN_TRANSFER_DISABLE;
     td_cfg.chain_transfer_mode  = DTC_CHAIN_TRANSFER_CONTINUOUSLY;
     td_cfg.response_interrupt   = DTC_INTERRUPT_AFTER_ALL_COMPLETE;
-#if defined(BSP_MCU_RX65N)
+#if defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX671)
     td_cfg.writeback_disable = DTC_WRITEBACK_ENABLE;     /* Write-back disable or enable */
     td_cfg.sequence_end = DTC_SEQUENCE_TRANSFER_CONTINUE;          /* Sequence transfer end or continue */
     td_cfg.refer_index_table_enable = DTC_REFER_INDEX_TABLE_DISABLE; /* Index table refer or not refer */
     td_cfg.disp_add_enable = DTC_SRC_ADDR_DISP_ADD_DISABLE;       /* The displacement value is added or not added */
-#endif /* defined(BSP_MCU_RX65N) */
+#endif /* defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX671) */
 
     /* Call R_DTC_Create(). */
     R_DTC_Create((dtc_activation_source_t)vect, &g_usb_dtc_transfer_data[dma_ch], &td_cfg, 0);

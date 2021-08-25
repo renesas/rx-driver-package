@@ -34,6 +34,7 @@
         <version>3.00.00</version>
         <version>3.01.00</version>
         <version>3.02.00</version>
+        <version>3.03.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -41,6 +42,7 @@
         <version>4.08.04.201803</version>
         <version>4.08.04.201902</version>
         <version>8.03.00.201904</version>
+        <version>8.03.00.202004</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -49,6 +51,8 @@
         <version>4.10.01</version>
         <version>4.11.01</version>
         <version>4.12.01</version>
+        <version>4.14.01</version>
+        <version>4.20.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -73,6 +77,7 @@
         <group omit_board="true">RX64M</group>
         <group omit_board="true">RX65N</group>
         <group omit_board="true">RX66T</group>
+        <group omit_board="true">RX671</group>
         <group omit_board="true">RX66N</group>
         <group omit_board="true">RX71M</group>
         <group omit_board="true">RX72T</group>
@@ -89,7 +94,7 @@
         <zipsource>r_dtc_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.52</version>
+            <version>6.10</version>
         </dependency>
         <application>DTC</application>
         <desc>DTC driver</desc>

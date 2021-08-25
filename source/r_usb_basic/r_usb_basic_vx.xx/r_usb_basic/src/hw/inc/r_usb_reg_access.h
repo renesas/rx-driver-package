@@ -31,6 +31,7 @@
  *         : 20.12.2017 1.23 Delete support for Host 2port.
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 31.05.2021 1.31 RX671 USB1 is added.
  ***********************************************************************************************************************/
 #ifndef HW_USB_REG_ACCESS_H
 #define HW_USB_REG_ACCESS_H
@@ -78,14 +79,14 @@
 
 #endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
 
-#if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)
+#if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671)
 #define USB1_CFIFO8     (USB_M1.CFIFO.BYTE.L)
 #define USB1_D0FIFO8    (USB_M1.D0FIFO.BYTE.L)
 #define USB1_D1FIFO8    (USB_M1.D1FIFO.BYTE.L)
 #define USB1_CFIFO16    (USB_M1.CFIFO.WORD)
 #define USB1_D0FIFO16   (USB_M1.D0FIFO.WORD)
 #define USB1_D1FIFO16   (USB_M1.D1FIFO.WORD)
-#endif  /* defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) */
+#endif  /* defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671) */
 
 /****************/
 /*  INITIARIZE  */

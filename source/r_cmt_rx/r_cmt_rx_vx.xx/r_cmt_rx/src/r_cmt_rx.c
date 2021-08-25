@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_cmt_rx.c
@@ -55,6 +55,7 @@
 *         : 31.03.2020 4.40    Added support for RX23E-A.
 *         : 29.05.2020 4.50    Added support BLE for RX23W; CMT2, CMT3 are protected for RX23W.
 *         : 31.08.2020 4.70    Fixed warning when using RI600V4 with device has 2 CMT channels
+*         : 31.03.2021 4.80    Added support for RX671.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -70,7 +71,9 @@ Macro definitions
 /* Define the number of CMT channels based on MCU type. */
 #if defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX113) || defined(BSP_MCU_RX71_ALL)    || \
     defined(BSP_MCU_RX231)    || defined(BSP_MCU_RX230) || defined(BSP_MCU_RX23W) || defined(BSP_MCU_RX23T)    ||\
-    defined(BSP_MCU_RX24_ALL) || defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66_ALL) || defined(BSP_MCU_RX72_ALL)
+    defined(BSP_MCU_RX24_ALL) || defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66_ALL) || defined(BSP_MCU_RX72_ALL)||\
+    defined(BSP_MCU_RX671)
+
     #define CMT_RX_NUM_CHANNELS        (4)
 #elif defined(BSP_MCU_RX111)  || defined(BSP_MCU_RX110)    || defined(BSP_MCU_RX130)  || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX23E_A)
     #define CMT_RX_NUM_CHANNELS        (2)
@@ -90,7 +93,7 @@ Macro definitions
    This means that PCLKB would match functionality of PCLK in RX62x devices as far as the CMT is concerned. */
 #if defined(BSP_MCU_RX11_ALL) || defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71_ALL) || defined(BSP_MCU_RX113)    || \
     defined(BSP_MCU_RX23_ALL) || defined(BSP_MCU_RX13_ALL) || defined(BSP_MCU_RX24_ALL) || \
-    defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66_ALL) || defined(BSP_MCU_RX72_ALL)
+    defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66_ALL) || defined(BSP_MCU_RX72_ALL) ||defined(BSP_MCU_RX671)
     #define CMT_PCLK_HZ                 (BSP_PCLKB_HZ)
 #else
     #define CMT_PCLK_HZ                 (BSP_PCLK_HZ)
@@ -99,7 +102,7 @@ Macro definitions
 /* Which MCUs have register protection. */
 #if defined(BSP_MCU_RX11_ALL) || defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71_ALL) || \
     defined(BSP_MCU_RX23_ALL) || defined(BSP_MCU_RX13_ALL) || defined(BSP_MCU_RX24_ALL) || defined(BSP_MCU_RX65_ALL) || \
-    defined(BSP_MCU_RX66_ALL) || defined(BSP_MCU_RX72_ALL)
+    defined(BSP_MCU_RX66_ALL) || defined(BSP_MCU_RX72_ALL) || defined(BSP_MCU_RX671)
     #define CMT_REG_PROTECT             (1)
 #else
     #define CMT_REG_PROTECT             (0)

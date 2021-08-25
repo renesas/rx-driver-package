@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_ctsu_qe
-VERSION = 		1.11
+VERSION = 		2.00
 MDF = V2
 
 CONFIG_FOLDER = r_config

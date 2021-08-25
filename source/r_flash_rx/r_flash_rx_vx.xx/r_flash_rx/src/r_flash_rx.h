@@ -46,6 +46,7 @@
 *                              Added include path for rx230.
 *           18.11.2019 4.50    Added RX66N, and RX72N.
 *           26.06.2020 4.60    Added prototypes for flash_InterruptRequestEnable() and flash_InterruptRequestDisable().
+*           23.10.2020 4.70    Added RX671.
 ***********************************************************************************************************************/
 
 #ifndef FLASH_RX_HEADER_FILE
@@ -80,13 +81,15 @@
 #elif defined(MCU_RX24U)
     #include "./src/targets/rx24u/r_flash_rx24u.h"
 #elif defined(MCU_RX64M)
-    #include <targets/rx64m/r_flash_rx64m.h>
+    #include "./src/targets/rx64m/r_flash_rx64m.h"
 #elif defined(MCU_RX651) || defined(MCU_RX65N)
     #include "./src/targets/rx65n/r_flash_rx65n.h"
 #elif defined(MCU_RX66T)
     #include "./src/targets/rx66t/r_flash_rx66t.h"
 #elif defined(MCU_RX66N)
     #include "./src/targets/rx66n/r_flash_rx66n.h"
+#elif defined(MCU_RX671)
+    #include "./src/targets/rx671/r_flash_rx671.h"
 #elif defined(MCU_RX71M)
     #include "./src/targets/rx71m/r_flash_rx71m.h"
 #elif defined(MCU_RX72T)

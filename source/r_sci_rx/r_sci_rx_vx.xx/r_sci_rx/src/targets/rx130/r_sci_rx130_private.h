@@ -25,6 +25,7 @@
 *           07.03.2017 2.00    Added RX130-512KB support.
 *           20.05.2019 3.00    Added support for GNUC and ICCRX.
 *           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
+*           31.03.2021 3.80    Updated macro definition enable and disable TXI, RXI, ERI, TEI.
 ***********************************************************************************************************************/
 
 #ifndef SCI_RX130_H
@@ -74,15 +75,15 @@ Macro definitions
 #define SCI_SSR_CLR_MASK          (0xC0U)     /* SSR register cleare mask (11000000b) */
 
 /* Macros to enable and disable ICU interrupts */
-#define ENABLE_RXI_INT      (*hdl->rom->icu_rxi |= hdl->rom->rxi_en_mask)
-#define DISABLE_RXI_INT     (*hdl->rom->icu_rxi &= (uint8_t)~hdl->rom->rxi_en_mask)
-#define ENABLE_TXI_INT      (*hdl->rom->icu_txi |= hdl->rom->txi_en_mask)
-#define DISABLE_TXI_INT     (*hdl->rom->icu_txi &= (uint8_t)~hdl->rom->txi_en_mask)
+#define ENABLE_RXI_INT      (R_BSP_BIT_SET(hdl->rom->icu_rxi, hdl->rom->rxi_bit_num))
+#define DISABLE_RXI_INT     (R_BSP_BIT_CLEAR(hdl->rom->icu_rxi, hdl->rom->rxi_bit_num))
+#define ENABLE_TXI_INT      (R_BSP_BIT_SET(hdl->rom->icu_txi, hdl->rom->txi_bit_num))
+#define DISABLE_TXI_INT     (R_BSP_BIT_CLEAR(hdl->rom->icu_txi, hdl->rom->txi_bit_num))
 
-#define ENABLE_ERI_INT      (*hdl->rom->icu_eri |= hdl->rom->eri_en_mask)
-#define DISABLE_ERI_INT     (*hdl->rom->icu_eri &= (uint8_t)~hdl->rom->eri_en_mask)
-#define ENABLE_TEI_INT      (*hdl->rom->icu_tei |= hdl->rom->tei_en_mask)
-#define DISABLE_TEI_INT     (*hdl->rom->icu_tei &= (uint8_t)~hdl->rom->tei_en_mask)
+#define ENABLE_ERI_INT      (R_BSP_BIT_SET(hdl->rom->icu_eri, hdl->rom->eri_bit_num))
+#define DISABLE_ERI_INT     (R_BSP_BIT_CLEAR(hdl->rom->icu_eri, hdl->rom->eri_bit_num))
+#define ENABLE_TEI_INT      (R_BSP_BIT_SET(hdl->rom->icu_tei, hdl->rom->tei_bit_num))
+#define DISABLE_TEI_INT     (R_BSP_BIT_CLEAR(hdl->rom->icu_tei, hdl->rom->tei_bit_num))
 
 /*****************************************************************************
 Typedef definitions
@@ -126,10 +127,10 @@ typedef struct st_sci_ch_rom    /* SCI ROM info for channel control block */
     volatile  uint8_t R_BSP_EVENACCESS_SFR  *icu_txi;
     volatile  uint8_t R_BSP_EVENACCESS_SFR  *icu_tei;
     volatile  uint8_t R_BSP_EVENACCESS_SFR  *icu_eri;
-    uint8_t                         eri_en_mask;    /* ICU enable/disable eri mask */
-    uint8_t                         rxi_en_mask;    /* ICU enable/disable rxi mask */
-    uint8_t                         txi_en_mask;    /* ICU enable/disable txi mask */
-    uint8_t                         tei_en_mask;    /* ICU enable/disable tei mask */
+    uint8_t                         eri_bit_num;    /* ICU enable/disable eri bit number */
+    uint8_t                         rxi_bit_num;    /* ICU enable/disable rxi bit number */
+    uint8_t                         txi_bit_num;    /* ICU enable/disable txi bit number */
+    uint8_t                         tei_bit_num;    /* ICU enable/disable tei bit number */
 
     /*
         * In case using DTC/DMAC

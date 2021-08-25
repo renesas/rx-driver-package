@@ -31,6 +31,8 @@
 *                              Added support FIFO mode for RX72M (SCI7 to SCI11).
 *           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
 *                              Merged IrDA functionality to SCI FIT.
+*           31.03.2021 3.80    Added support for RX671.
+*                              Added support for bit number of SCI FIT.
 ***********************************************************************************************************************/
 
 #ifndef SCI_RX_H
@@ -52,6 +54,40 @@ Includes   <System Includes> , "Project Includes"
 /***********************************************************************************************************************
 Macro definitions
 ***********************************************************************************************************************/
+/* Bit number */
+#define SCI_BIT0    (0)
+#define SCI_BIT1    (1)
+#define SCI_BIT2    (2)
+#define SCI_BIT3    (3)
+#define SCI_BIT4    (4)
+#define SCI_BIT5    (5)
+#define SCI_BIT6    (6)
+#define SCI_BIT7    (7)
+#define SCI_BIT8    (8)
+#define SCI_BIT9    (9)
+#define SCI_BIT10   (10)
+#define SCI_BIT11   (11)
+#define SCI_BIT12   (12)
+#define SCI_BIT13   (13)
+#define SCI_BIT14   (14)
+#define SCI_BIT15   (15)
+#define SCI_BIT16   (16)
+#define SCI_BIT17   (17)
+#define SCI_BIT18   (18)
+#define SCI_BIT19   (19)
+#define SCI_BIT20   (20)
+#define SCI_BIT21   (21)
+#define SCI_BIT22   (22)
+#define SCI_BIT23   (23)
+#define SCI_BIT24   (24)
+#define SCI_BIT25   (25)
+#define SCI_BIT26   (26)
+#define SCI_BIT27   (27)
+#define SCI_BIT28   (28)
+#define SCI_BIT29   (29)
+#define SCI_BIT30   (30)
+#define SCI_BIT31   (31)
+
 /* Bit position masks */
 #define BIT0_MASK   (0x00000001U)
 #define BIT1_MASK   (0x00000002U)
@@ -111,6 +147,36 @@ Macro definitions
      (SCI_CFG_CH10_DATA_MATCH_INCLUDED) ||   \
      (SCI_CFG_CH11_DATA_MATCH_INCLUDED))
     #define SCI_CFG_DATA_MATCH_INCLUDED (1)
+#endif
+
+#if ((SCI_CFG_CH0_RX_DATA_SAMPLING_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH1_RX_DATA_SAMPLING_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH2_RX_DATA_SAMPLING_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH3_RX_DATA_SAMPLING_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH4_RX_DATA_SAMPLING_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH5_RX_DATA_SAMPLING_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH6_RX_DATA_SAMPLING_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH7_RX_DATA_SAMPLING_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH8_RX_DATA_SAMPLING_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH9_RX_DATA_SAMPLING_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH10_RX_DATA_SAMPLING_TIMING_INCLUDED) ||   \
+     (SCI_CFG_CH11_RX_DATA_SAMPLING_TIMING_INCLUDED))
+    #define SCI_CFG_RX_DATA_SAMPLING_TIMING_INCLUDED (1)
+#endif
+
+#if ((SCI_CFG_CH0_TX_SIGNAL_TRANSITION_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH1_TX_SIGNAL_TRANSITION_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH2_TX_SIGNAL_TRANSITION_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH3_TX_SIGNAL_TRANSITION_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH4_TX_SIGNAL_TRANSITION_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH5_TX_SIGNAL_TRANSITION_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH6_TX_SIGNAL_TRANSITION_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH7_TX_SIGNAL_TRANSITION_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH8_TX_SIGNAL_TRANSITION_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH9_TX_SIGNAL_TRANSITION_TIMING_INCLUDED)  ||   \
+     (SCI_CFG_CH10_TX_SIGNAL_TRANSITION_TIMING_INCLUDED) ||   \
+     (SCI_CFG_CH11_TX_SIGNAL_TRANSITION_TIMING_INCLUDED))
+    #define SCI_CFG_TX_SIGNAL_TRANSITION_TIMING_INCLUDED (1)
 #endif
 
 #if SCI_CFG_FIFO_INCLUDED
