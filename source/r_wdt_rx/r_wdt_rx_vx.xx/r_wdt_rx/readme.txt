@@ -29,9 +29,6 @@ r_wdt_rx
 |    +--en
 |        +-- r01an3200ej{VERSION_NUMBER}-rx-wdt.pdf
 |
-+---ref
-|    +-- r_wdt_rx_config_reference.h
-|
 +---src
      +-- r_wdt_rx.c
      
