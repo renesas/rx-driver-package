@@ -17,8 +17,6 @@ So please download tested FIT Modules from [Renesas official website](https://ww
     - C:\Users\\<user_name>\\.eclipse\com.renesas.platform_download\FITModules
     
 # early prototype of FIT Modules
-- r_drw2d_rx
-- r_emwin_rx
 - r_simple_glcdc_config_rx
 - r_simple_graphic_rx
 - r_t4_dns_client_rx
@@ -26,9 +24,7 @@ So please download tested FIT Modules from [Renesas official website](https://ww
 - r_t4_ftp_server_rx
 - r_t4_http_server_rx
 - r_t4_sntp_client_rx
-- r_socket_rx
 - r_wifi_esp32
 - r_wifi_esp8266
 - r_wifi_sx_ulpgn
 - r_st7735_lcd_driver_rx
-- r_sdc_sdio_rx
