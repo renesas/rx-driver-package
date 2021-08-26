@@ -2271,16 +2271,16 @@ void touch_uart_callback (void *pargs)
 
             if (1 == write_byte)
             {
-                (* port_adress) = (uint32_t)(g_touch_uart_rx_buf[10]);
+                (* port_adress) |= (uint32_t)(g_touch_uart_rx_buf[10]);
             }
             else if (2 == write_byte)
             {
-                (* port_adress) = (uint32_t)(g_touch_uart_rx_buf[10] |
+                (* port_adress) |= (uint32_t)(g_touch_uart_rx_buf[10] |
                                              (g_touch_uart_rx_buf[11] << 8 ));
             }
             else
             {
-                (* port_adress) = (uint32_t)(g_touch_uart_rx_buf[10] |
+                (* port_adress) |= (uint32_t)(g_touch_uart_rx_buf[10] |
                                              (g_touch_uart_rx_buf[11] << 8 ) |
                                              (g_touch_uart_rx_buf[12] << 16) |
                                              (g_touch_uart_rx_buf[13] << 24));
