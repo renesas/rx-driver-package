@@ -1,6 +1,6 @@
 RELEASE_TAG_COMMIT_NUMBER_V125 = f64b94dff3c76b405876da4ea77f63e068163b0a
 RELEASE_TAG_COMMIT_NUMBER_V130 = b992ea9f7368466f35f5a135e53f841417176701
-RELEASE_TAG_COMMIT_NUMBER_V131 = 80a36441596ed611e3a5aeb618864526c3e57579
+RELEASE_TAG_COMMIT_NUMBER_V131 = e19e6ea4a303d672131f04d462eb118b6897a07b
 RELEASE_TAG_COMMIT_VERSION_V125 = 1.25
 RELEASE_TAG_COMMIT_VERSION_V130 = 1.30
 RELEASE_TAG_COMMIT_VERSION_V131 = 1.31
@@ -63,11 +63,13 @@ all:
 	rm -f ./$(VERSIONS_FILE_NAME);
 	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > ./$(VERSIONS_FILE_NAME)
 	echo "<modules>" >> ./$(VERSIONS_FILE_NAME)
+	rm -rf ./repo
 	mkdir ./repo
 	mkdir ./repo/v125
 	git clone https://github.com/renesas/rx-driver-package.git -b V1.25 ./repo/v125
 	cp ./tools/version_xml_generator.sh ./repo/v125/tools/version_xml_generator.sh
 	for i in $(MODULE_NAME_LIST_V125); do \
+		sed -i 's/\r//g' ./repo/v125/source/$$i/Makefile; \
 		if [ "$$i" = 'r_usb_hmsc' ]; then sed -i 's/V2/NOT_SUPPORTED/g' ./repo/v125/source/r_usb_hmsc/Makefile; fi; \
 		cd ./repo/v125/source/$$i/; \
 		sh ../../tools/version_xml_generator.sh ./Makefile release_tag_commit_number=$(RELEASE_TAG_COMMIT_NUMBER_V125) release_tag_commit_version=$(RELEASE_TAG_COMMIT_VERSION_V125) >> ../../../../$(VERSIONS_FILE_NAME);\
@@ -77,6 +79,7 @@ all:
 	git clone https://github.com/renesas/rx-driver-package.git -b V1.30 ./repo/v130
 	cp ./tools/version_xml_generator.sh ./repo/v130/tools/version_xml_generator.sh
 	for i in $(MODULE_NAME_LIST_V130); do \
+		sed -i 's/\r//g' ./repo/v130/source/$$i/Makefile; \
 		if [ "$$i" = 'r_usb_hmsc' ]; then sed -i 's/V2/NOT_SUPPORTED/g' ./repo/v130/source/r_usb_hmsc/Makefile; fi; \
 		cd ./repo/v130/source/$$i/; \
 		sh ../../tools/version_xml_generator.sh ./Makefile release_tag_commit_number=$(RELEASE_TAG_COMMIT_NUMBER_V130) release_tag_commit_version=$(RELEASE_TAG_COMMIT_VERSION_V130) >> ../../../../$(VERSIONS_FILE_NAME);\
@@ -86,6 +89,7 @@ all:
 	git clone https://github.com/renesas/rx-driver-package.git -b V1.31 ./repo/v131
 	cp ./tools/version_xml_generator.sh ./repo/v131/tools/version_xml_generator.sh
 	for i in $(MODULE_NAME_LIST_V131); do \
+		sed -i 's/\r//g' ./repo/v131/source/$$i/Makefile; \
 		cd ./repo/v131/source/$$i/; \
 		sh ../../tools/version_xml_generator.sh ./Makefile release_tag_commit_number=$(RELEASE_TAG_COMMIT_NUMBER_V131) release_tag_commit_version=$(RELEASE_TAG_COMMIT_VERSION_V131) >> ../../../../$(VERSIONS_FILE_NAME);\
 		cd ../../../..; \
