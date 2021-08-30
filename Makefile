@@ -68,7 +68,7 @@ all:
 	git clone https://github.com/renesas/rx-driver-package.git -b V1.25 ./repo/v125
 	cp ./tools/version_xml_generator.sh ./repo/v125/tools/version_xml_generator.sh
 	for i in $(MODULE_NAME_LIST_V125); do \
-		if [ $$i == 'r_usb_hmsc' ]; then sed -i 's/V2/NOT_SUPPORTED/g' ./repo/v125/source/r_usb_hmsc/Makefile; fi; \
+		if [ "$$i" = 'r_usb_hmsc' ]; then sed -i 's/V2/NOT_SUPPORTED/g' ./repo/v125/source/r_usb_hmsc/Makefile; fi; \
 		cd ./repo/v125/source/$$i/; \
 		sh ../../tools/version_xml_generator.sh ./Makefile release_tag_commit_number=$(RELEASE_TAG_COMMIT_NUMBER_V125) release_tag_commit_version=$(RELEASE_TAG_COMMIT_VERSION_V125) >> ../../../../$(VERSIONS_FILE_NAME);\
 		cd ../../../..; \
@@ -77,7 +77,7 @@ all:
 	git clone https://github.com/renesas/rx-driver-package.git -b V1.30 ./repo/v130
 	cp ./tools/version_xml_generator.sh ./repo/v130/tools/version_xml_generator.sh
 	for i in $(MODULE_NAME_LIST_V130); do \
-		if [ $$i == 'r_usb_hmsc' ]; then sed -i 's/V2/NOT_SUPPORTED/g' ./repo/v130/source/r_usb_hmsc/Makefile; fi; \
+		if [ "$$i" = 'r_usb_hmsc' ]; then sed -i 's/V2/NOT_SUPPORTED/g' ./repo/v130/source/r_usb_hmsc/Makefile; fi; \
 		cd ./repo/v130/source/$$i/; \
 		sh ../../tools/version_xml_generator.sh ./Makefile release_tag_commit_number=$(RELEASE_TAG_COMMIT_NUMBER_V130) release_tag_commit_version=$(RELEASE_TAG_COMMIT_VERSION_V130) >> ../../../../$(VERSIONS_FILE_NAME);\
 		cd ../../../..; \
