@@ -95,6 +95,9 @@ all:
 		cd ../../../..; \
 	done
 	echo "</modules>" >> ./$(VERSIONS_FILE_NAME)
+	sed -i 's/<version>6\.14g_130/\<version\>6\.14\.g\.130/g' ./$(VERSIONS_FILE_NAME)
+	sed -i 's/<version>1\.11_lib/\<version\>1\.11-lib/g' ./$(VERSIONS_FILE_NAME)
+	sed -i 's/<version>1\.12_lib/\<version\>1\.12\.l/g' ./$(VERSIONS_FILE_NAME)
 	sed -i 's/\r//g' ./$(VERSIONS_FILE_NAME)
 	rm -rf ./repo
 	for i in $(MODULE_NAME_LIST_V131); do \
