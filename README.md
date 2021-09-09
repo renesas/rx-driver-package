@@ -1,7 +1,7 @@
 # rx-driver-package
 This is RX Driver Package GitHub repository.
-This repository includes some of early prototype version of FIT Modules, or un-tested FIT Modules.
-So please download tested FIT Modules from [Renesas official website](https://www.renesas.com/products/software-tools/software-os-middleware-driver/software-package/rx-driver-package.html).
+This is Renesas MCU "RX Family" official device driver package called as "RX Driver Package" GitHub repository. This repository is referred from Renesas tools (Smart Configurator) to download appropriate version for user project. Please refer to the URL below for more information.
+[Renesas official website](https://www.renesas.com/products/software-tools/software-os-middleware-driver/software-package/rx-driver-package.html).
 
 # These software
 - can be used for any users.
