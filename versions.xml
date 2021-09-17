@@ -2210,783 +2210,792 @@
     <name>r_aeropoint_rx</name>
     <version>1.00</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_aeropoint_rx_v1.00.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_aeropoint_rx_v1.00.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_aeropoint_rx_v1.00.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_aeropoint_rx_v1.00.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_aeropoint_rx_v1.00.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_aeropoint_rx_v1.00.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_ble_qe_utility</name>
     <version>1.10</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_ble_qe_utility_v1.10.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_ble_qe_utility_v1.10.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_ble_qe_utility_v1.10.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_ble_qe_utility_v1.10.xml</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_ble_rx23w</name>
     <version>2.20</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_ble_rx23w_v2.20.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_ble_rx23w_v2.20.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_ble_rx23w_v2.20_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_ble_rx23w_v2.20.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_ble_rx23w_v2.20.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_ble_rx23w_v2.20_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_bsp</name>
     <version>6.21</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_bsp_v6.21.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_bsp_v6.21.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_bsp_v6.21.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_bsp_v6.21.xml</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_byteq</name>
     <version>1.90</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_byteq_v1.90.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_byteq_v1.90.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_byteq_v1.90_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_byteq_v1.90.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_byteq_v1.90.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_byteq_v1.90_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_can_rx</name>
     <version>5.10</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_can_rx_v5.10.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_can_rx_v5.10.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_can_rx_v5.10.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_can_rx_v5.10.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_can_rx_v5.10.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_can_rx_v5.10.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_cmt_rx</name>
     <version>4.90</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_cmt_rx_v4.90.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_cmt_rx_v4.90.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_cmt_rx_v4.90_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_cmt_rx_v4.90.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_cmt_rx_v4.90.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_cmt_rx_v4.90_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_cmtw_rx</name>
     <version>2.40</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_cmtw_rx_v2.40.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_cmtw_rx_v2.40.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_cmtw_rx_v2.40.mdf</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_cmtw_rx_v2.40_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_cmtw_rx_v2.40.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_cmtw_rx_v2.40.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_cmtw_rx_v2.40.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_cmtw_rx_v2.40_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_comms_i2c_rx</name>
     <version>1.10</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_comms_i2c_rx_v1.10.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_comms_i2c_rx_v1.10.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_comms_i2c_rx_v1.10_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_comms_i2c_rx_v1.10.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_comms_i2c_rx_v1.10.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_comms_i2c_rx_v1.10_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_ctsu_qe</name>
     <version>2.00</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_ctsu_qe_v2.00.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_ctsu_qe_v2.00.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_ctsu_qe_v2.00_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_ctsu_qe_v2.00.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_ctsu_qe_v2.00.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_ctsu_qe_v2.00_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_dac_rx</name>
     <version>4.60</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_dac_rx_v4.60.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_dac_rx_v4.60.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_dac_rx_v4.60_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_dac_rx_v4.60.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_dac_rx_v4.60.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_dac_rx_v4.60_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_datfrx_rx</name>
     <version>2.01</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_datfrx_rx_v2.01.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_datfrx_rx_v2.01.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_datfrx_rx_v2.01_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_datfrx_rx_v2.01.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_datfrx_rx_v2.01.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_datfrx_rx_v2.01_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_dmaca_rx</name>
     <version>2.60</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_dmaca_rx_v2.60.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_dmaca_rx_v2.60.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_dmaca_rx_v2.60_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_dmaca_rx_v2.60.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_dmaca_rx_v2.60.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_dmaca_rx_v2.60_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_drw2d_rx</name>
     <version>1.11</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_drw2d_rx_v1.11.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_drw2d_rx_v1.11.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_drw2d_rx_v1.11.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_drw2d_rx_v1.11.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_drw2d_rx_v1.11.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_drw2d_rx_v1.11.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_dsmif_rx</name>
     <version>1.00</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_dsmif_rx_v1.00.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_dsmif_rx_v1.00.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_dsmif_rx_v1.00.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_dsmif_rx_v1.00.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_dsmif_rx_v1.00.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_dsmif_rx_v1.00.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_dtc_rx</name>
     <version>3.80</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_dtc_rx_v3.80.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_dtc_rx_v3.80.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_dtc_rx_v3.80_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_dtc_rx_v3.80.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_dtc_rx_v3.80.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_dtc_rx_v3.80_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_eeprom_spi</name>
     <version>3.02</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_eeprom_spi_v3.02.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_eeprom_spi_v3.02.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_eeprom_spi_v3.02_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_eeprom_spi_v3.02.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_eeprom_spi_v3.02.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_eeprom_spi_v3.02_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_elc_rx</name>
     <version>2.01</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_elc_rx_v2.01.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_elc_rx_v2.01.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_elc_rx_v2.01_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_elc_rx_v2.01.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_elc_rx_v2.01.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_elc_rx_v2.01_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_emwin_rx</name>
     <version>6.14g_130</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_emwin_rx_v6.14g_130.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_emwin_rx_v6.14g_130.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_emwin_rx_v6.14g_130.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_emwin_rx_v6.14g_130.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_emwin_rx_v6.14g_130.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_emwin_rx_v6.14g_130.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_ether_rx</name>
     <version>1.21</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_ether_rx_v1.21.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_ether_rx_v1.21.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_ether_rx_v1.21.mdf</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_ether_rx_v1.21_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_ether_rx_v1.21.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_ether_rx_v1.21.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_ether_rx_v1.21.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_ether_rx_v1.21_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_flash_rx</name>
     <version>4.80</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_flash_rx_v4.80.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_flash_rx_v4.80.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_flash_rx_v4.80_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_flash_rx_v4.80.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_flash_rx_v4.80.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_flash_rx_v4.80_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_flash_spi</name>
     <version>3.02</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_flash_spi_v3.02.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_flash_spi_v3.02.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_flash_spi_v3.02_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_flash_spi_v3.02.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_flash_spi_v3.02.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_flash_spi_v3.02_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_fwup</name>
     <version>1.01</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_fwup_v1.01.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_fwup_v1.01.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_fwup_v1.01_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_fwup_v1.01.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_fwup_v1.01.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_fwup_v1.01_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_fs2012_rx</name>
     <version>1.00</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_fs2012_rx_v1.00.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_fs2012_rx_v1.00.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_fs2012_rx_v1.00_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_fs2012_rx_v1.00.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_fs2012_rx_v1.00.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_fs2012_rx_v1.00_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_glcdc_rx</name>
     <version>1.50</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_glcdc_rx_v1.50.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_glcdc_rx_v1.50.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_glcdc_rx_v1.50.mdf</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_glcdc_rx_v1.50_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_glcdc_rx_v1.50.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_glcdc_rx_v1.50.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_glcdc_rx_v1.50.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_glcdc_rx_v1.50_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_gpio_rx</name>
     <version>4.10</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_gpio_rx_v4.10.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_gpio_rx_v4.10.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_gpio_rx_v4.10_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_gpio_rx_v4.10.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_gpio_rx_v4.10.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_gpio_rx_v4.10_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_hs300x_rx</name>
     <version>1.10</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_hs300x_rx_v1.10.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_hs300x_rx_v1.10.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_hs300x_rx_v1.10_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_hs300x_rx_v1.10.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_hs300x_rx_v1.10.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_hs300x_rx_v1.10_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_irda_sci_rx</name>
     <version>1.01</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_irda_sci_rx_v1.01.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_irda_sci_rx_v1.01.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_irda_sci_rx_v1.01.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_irda_sci_rx_v1.01.xml</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_irq_rx</name>
     <version>3.80</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_irq_rx_v3.80.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_irq_rx_v3.80.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_irq_rx_v3.80.mdf</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_irq_rx_v3.80_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_irq_rx_v3.80.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_irq_rx_v3.80.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_irq_rx_v3.80.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_irq_rx_v3.80_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_iwdt_rx</name>
     <version>3.80</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_iwdt_rx_v3.80.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_iwdt_rx_v3.80.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_iwdt_rx_v3.80_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_iwdt_rx_v3.80.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_iwdt_rx_v3.80.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_iwdt_rx_v3.80_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_jpegd_rx</name>
     <version>2.06</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_jpegd_rx_v2.06.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_jpegd_rx_v2.06.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_jpegd_rx_v2.06.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_jpegd_rx_v2.06.xml</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_jpege_rx</name>
     <version>1.01</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_jpege_rx_v1.01.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_jpege_rx_v1.01.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_jpege_rx_v1.01.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_jpege_rx_v1.01.xml</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_lcdc_rx</name>
     <version>1.02</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_lcdc_rx_v1.02.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_lcdc_rx_v1.02.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_lcdc_rx_v1.02_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_lcdc_rx_v1.02.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_lcdc_rx_v1.02.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_lcdc_rx_v1.02_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_longq</name>
     <version>1.82</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_longq_v1.82.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_longq_v1.82.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_longq_v1.82_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_longq_v1.82.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_longq_v1.82.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_longq_v1.82_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_lpc_rx</name>
     <version>2.03</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_lpc_rx_v2.03.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_lpc_rx_v2.03.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_lpc_rx_v2.03_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_lpc_rx_v2.03.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_lpc_rx_v2.03.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_lpc_rx_v2.03_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_lpt_rx</name>
     <version>3.00</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_lpt_rx_v3.00.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_lpt_rx_v3.00.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_lpt_rx_v3.00_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_lpt_rx_v3.00.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_lpt_rx_v3.00.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_lpt_rx_v3.00_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_lvd_rx</name>
     <version>3.80</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_lvd_rx_v3.80.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_lvd_rx_v3.80.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_lvd_rx_v3.80_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_lvd_rx_v3.80.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_lvd_rx_v3.80.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_lvd_rx_v3.80_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_memdrv_rx</name>
     <version>1.03</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_memdrv_rx_v1.03.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_memdrv_rx_v1.03.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_memdrv_rx_v1.03_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_memdrv_rx_v1.03.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_memdrv_rx_v1.03.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_memdrv_rx_v1.03_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_mesh_rx23w</name>
     <version>1.10</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_mesh_rx23w_v1.10.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_mesh_rx23w_v1.10.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_mesh_rx23w_v1.10_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_mesh_rx23w_v1.10.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_mesh_rx23w_v1.10.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_mesh_rx23w_v1.10_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_mmcif_rx</name>
     <version>1.07</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_mmcif_rx_v1.07.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_mmcif_rx_v1.07.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_mmcif_rx_v1.07_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_mmcif_rx_v1.07.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_mmcif_rx_v1.07.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_mmcif_rx_v1.07_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_mpc_rx</name>
     <version>4.00</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_mpc_rx_v4.00.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_mpc_rx_v4.00.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_mpc_rx_v4.00_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_mpc_rx_v4.00.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_mpc_rx_v4.00.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_mpc_rx_v4.00_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_pdc_rx</name>
     <version>2.05</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_pdc_rx_v2.05.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_pdc_rx_v2.05.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_pdc_rx_v2.05.mdf</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_pdc_rx_v2.05_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_pdc_rx_v2.05.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_pdc_rx_v2.05.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_pdc_rx_v2.05.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_pdc_rx_v2.05_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_ptp_light_rx</name>
     <version>1.14</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_ptp_light_rx_v1.14.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_ptp_light_rx_v1.14.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_ptp_light_rx_v1.14.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_ptp_light_rx_v1.14.xml</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_ptp_rx</name>
     <version>1.17</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_ptp_rx_v1.17.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_ptp_rx_v1.17.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_ptp_rx_v1.17.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_ptp_rx_v1.17.xml</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_qspi_smstr_rx</name>
     <version>1.14</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_qspi_smstr_rx_v1.14.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_qspi_smstr_rx_v1.14.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_qspi_smstr_rx_v1.14.mdf</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_qspi_smstr_rx_v1.14_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_qspi_smstr_rx_v1.14.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_qspi_smstr_rx_v1.14.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_qspi_smstr_rx_v1.14.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_qspi_smstr_rx_v1.14_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_qspix_rx</name>
     <version>1.00</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_qspix_rx_v1.00.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_qspix_rx_v1.00.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_qspix_rx_v1.00_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_qspix_rx_v1.00.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_qspix_rx_v1.00.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_qspix_rx_v1.00_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_riic_rx</name>
     <version>2.49</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_riic_rx_v2.49.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_riic_rx_v2.49.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_riic_rx_v2.49.mdf</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_riic_rx_v2.49_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_riic_rx_v2.49.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_riic_rx_v2.49.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_riic_rx_v2.49.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_riic_rx_v2.49_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_riichs_rx</name>
     <version>1.00</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_riichs_rx_v1.00.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_riichs_rx_v1.00.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_riichs_rx_v1.00.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_riichs_rx_v1.00.xml</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_rscan_rx</name>
     <version>2.31</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_rscan_rx_v2.31.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_rscan_rx_v2.31.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_rscan_rx_v2.31.mdf</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_rscan_rx_v2.31_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_rscan_rx_v2.31.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_rscan_rx_v2.31.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_rscan_rx_v2.31.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_rscan_rx_v2.31_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_rsci_rx</name>
     <version>1.00</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_rsci_rx_v1.00.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_rsci_rx_v1.00.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_rsci_rx_v1.00.mdf</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_rsci_rx_v1.00_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_rsci_rx_v1.00.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_rsci_rx_v1.00.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_rsci_rx_v1.00.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_rsci_rx_v1.00_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_rspi_rx</name>
     <version>3.02</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_rspi_rx_v3.02.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_rspi_rx_v3.02.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_rspi_rx_v3.02.mdf</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_rspi_rx_v3.02_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_rspi_rx_v3.02.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_rspi_rx_v3.02.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_rspi_rx_v3.02.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_rspi_rx_v3.02_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_rspia_rx</name>
     <version>1.00</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_rspia_rx_v1.00.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_rspia_rx_v1.00.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_rspia_rx_v1.00_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_rspia_rx_v1.00.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_rspia_rx_v1.00.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_rspia_rx_v1.00_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_rtc_rx</name>
     <version>2.82</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_rtc_rx_v2.82.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_rtc_rx_v2.82.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_rtc_rx_v2.82.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_rtc_rx_v2.82.xml</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_s2_rx</name>
     <version>3.04</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_s2_rx_v3.04.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_s2_rx_v3.04.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_s2_rx_v3.04.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_s2_rx_v3.04.xml</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_s12ad_rx</name>
     <version>4.90</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_s12ad_rx_v4.90.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_s12ad_rx_v4.90.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_s12ad_rx_v4.90.mdf</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_s12ad_rx_v4.90_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_s12ad_rx_v4.90.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_s12ad_rx_v4.90.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_s12ad_rx_v4.90.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_s12ad_rx_v4.90_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_sci_iic_rx</name>
     <version>2.49</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sci_iic_rx_v2.49.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sci_iic_rx_v2.49.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sci_iic_rx_v2.49.mdf</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sci_iic_rx_v2.49_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sci_iic_rx_v2.49.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sci_iic_rx_v2.49.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sci_iic_rx_v2.49.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sci_iic_rx_v2.49_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_sci_rx</name>
     <version>3.90</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sci_rx_v3.90.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sci_rx_v3.90.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sci_rx_v3.90.mdf</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sci_rx_v3.90_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sci_rx_v3.90.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sci_rx_v3.90.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sci_rx_v3.90.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sci_rx_v3.90_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_scif_rx</name>
     <version>2.01</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_scif_rx_v2.01.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_scif_rx_v2.01.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_scif_rx_v2.01.mdf</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_scif_rx_v2.01_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_scif_rx_v2.01.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_scif_rx_v2.01.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_scif_rx_v2.01.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_scif_rx_v2.01_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_sdc_sdmem_rx</name>
     <version>3.00</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sdc_sdmem_rx_v3.00.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sdc_sdmem_rx_v3.00.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sdc_sdmem_rx_v3.00_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sdc_sdmem_rx_v3.00.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sdc_sdmem_rx_v3.00.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sdc_sdmem_rx_v3.00_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_sdhi_rx</name>
     <version>2.07</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sdhi_rx_v2.07.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sdhi_rx_v2.07.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sdhi_rx_v2.07_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sdhi_rx_v2.07.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sdhi_rx_v2.07.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sdhi_rx_v2.07_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_sdsi_rx</name>
     <version>2.02</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sdsi_rx_v2.02.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sdsi_rx_v2.02.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sdsi_rx_v2.02.mdf</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sdsi_rx_v2.02_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sdsi_rx_v2.02.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sdsi_rx_v2.02.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sdsi_rx_v2.02.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sdsi_rx_v2.02_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_src_api_rx</name>
     <version>1.14</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_src_api_rx_v1.14.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_src_api_rx_v1.14.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_src_api_rx_v1.14_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_src_api_rx_v1.14.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_src_api_rx_v1.14.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_src_api_rx_v1.14_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_ssi_api_rx</name>
     <version>2.03</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_ssi_api_rx_v2.03.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_ssi_api_rx_v2.03.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_ssi_api_rx_v2.03_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_ssi_api_rx_v2.03.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_ssi_api_rx_v2.03.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_ssi_api_rx_v2.03_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_sys_time_rx</name>
     <version>1.01</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sys_time_rx_v1.01.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_sys_time_rx_v1.01.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sys_time_rx_v1.01.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_sys_time_rx_v1.01.xml</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_t4_driver_rx</name>
     <version>1.09</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_t4_driver_rx_v1.09.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_t4_driver_rx_v1.09.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_t4_driver_rx_v1.09.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_t4_driver_rx_v1.09.xml</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_t4_rx</name>
     <version>2.10</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_t4_rx_v2.10.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_t4_rx_v2.10.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_t4_rx_v2.10_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_t4_rx_v2.10.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_t4_rx_v2.10.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_t4_rx_v2.10_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_tfat_driver_rx</name>
     <version>2.20</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_tfat_driver_rx_v2.20.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_tfat_driver_rx_v2.20.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_tfat_driver_rx_v2.20_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_tfat_driver_rx_v2.20.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_tfat_driver_rx_v2.20.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_tfat_driver_rx_v2.20_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_tfat_rx</name>
     <version>4.02</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_tfat_rx_v4.02.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_tfat_rx_v4.02.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_tfat_rx_v4.02.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_tfat_rx_v4.02.xml</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_tsip_rx</name>
     <version>1.12_lib</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_tsip_rx_v1.12_lib.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_tsip_rx_v1.12_lib.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_tsip_rx_v1.12_lib_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_tsip_rx_v1.12_lib.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_tsip_rx_v1.12_lib.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_tsip_rx_v1.12_lib_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_uid_rx</name>
     <version>1.14</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_uid_rx_v1.14.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_uid_rx_v1.14.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_uid_rx_v1.14.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_uid_rx_v1.14.xml</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_usb_basic</name>
     <version>1.31</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_basic_v1.31.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_basic_v1.31.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_basic_v1.31_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_basic_v1.31.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_basic_v1.31.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_basic_v1.31_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_usb_basic_mini</name>
     <version>1.20</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_basic_mini_v1.20.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_basic_mini_v1.20.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_basic_mini_v1.20_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_basic_mini_v1.20.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_basic_mini_v1.20.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_basic_mini_v1.20_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_usb_hcdc</name>
     <version>1.31</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_hcdc_v1.31.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_hcdc_v1.31.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_hcdc_v1.31_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_hcdc_v1.31.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_hcdc_v1.31.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_hcdc_v1.31_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_usb_hcdc_mini</name>
     <version>1.20</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_hcdc_mini_v1.20.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_hcdc_mini_v1.20.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_hcdc_mini_v1.20_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_hcdc_mini_v1.20.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_hcdc_mini_v1.20.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_hcdc_mini_v1.20_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_usb_hhid</name>
     <version>1.31</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_hhid_v1.31.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_hhid_v1.31.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_hhid_v1.31_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_hhid_v1.31.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_hhid_v1.31.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_hhid_v1.31_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_usb_hhid_mini</name>
     <version>1.20</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_hhid_mini_v1.20.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_hhid_mini_v1.20.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_hhid_mini_v1.20_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_hhid_mini_v1.20.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_hhid_mini_v1.20.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_hhid_mini_v1.20_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_usb_hmsc</name>
     <version>1.31</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_hmsc_v1.31.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_hmsc_v1.31.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_hmsc_v1.31.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_hmsc_v1.31.xml</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_usb_hmsc_mini</name>
     <version>1.20</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_hmsc_mini_v1.20.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_hmsc_mini_v1.20.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_hmsc_mini_v1.20_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_hmsc_mini_v1.20.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_hmsc_mini_v1.20.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_hmsc_mini_v1.20_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_usb_pcdc</name>
     <version>1.31</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_pcdc_v1.31.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_pcdc_v1.31.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_pcdc_v1.31_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_pcdc_v1.31.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_pcdc_v1.31.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_pcdc_v1.31_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_usb_pcdc_mini</name>
     <version>1.20</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_pcdc_mini_v1.20.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_pcdc_mini_v1.20.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_pcdc_mini_v1.20_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_pcdc_mini_v1.20.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_pcdc_mini_v1.20.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_pcdc_mini_v1.20_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_usb_phid</name>
     <version>1.31</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_phid_v1.31.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_phid_v1.31.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_phid_v1.31_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_phid_v1.31.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_phid_v1.31.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_phid_v1.31_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_usb_phid_mini</name>
     <version>1.20</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_phid_mini_v1.20.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_phid_mini_v1.20.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_phid_mini_v1.20_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_phid_mini_v1.20.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_phid_mini_v1.20.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_phid_mini_v1.20_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_usb_pmsc</name>
     <version>1.31</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_pmsc_v1.31.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_pmsc_v1.31.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_pmsc_v1.31_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_pmsc_v1.31.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_pmsc_v1.31.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_pmsc_v1.31_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_usb_pmsc_mini</name>
     <version>1.20</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_pmsc_mini_v1.20.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_pmsc_mini_v1.20.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_usb_pmsc_mini_v1.20_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_pmsc_mini_v1.20.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_pmsc_mini_v1.20.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_usb_pmsc_mini_v1.20_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_vbatt_rx</name>
     <version>2.00</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_vbatt_rx_v2.00.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_vbatt_rx_v2.00.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_vbatt_rx_v2.00_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_vbatt_rx_v2.00.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_vbatt_rx_v2.00.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_vbatt_rx_v2.00_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>r_wdt_rx</name>
     <version>2.50</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_wdt_rx_v2.50.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_wdt_rx_v2.50.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/r_wdt_rx_v2.50_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_wdt_rx_v2.50.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_wdt_rx_v2.50.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_wdt_rx_v2.50_extend.mdf</url>
+    </urls>
+  </module>
+  <module rdp_version="1.32">
+    <name>r_zmod4xxx_rx</name>
+    <version>1.00</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_zmod4xxx_rx_v1.00.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_zmod4xxx_rx_v1.00.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_zmod4xxx_rx_v1.00_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.32">
     <name>rm_touch_qe</name>
     <version>2.00</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/rm_touch_qe_v2.00.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/rm_touch_qe_v2.00.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/0331292199a2701f02817962132d5f03505ad107/FITModules/rm_touch_qe_v2.00_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/rm_touch_qe_v2.00.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/rm_touch_qe_v2.00.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/rm_touch_qe_v2.00_extend.mdf</url>
     </urls>
   </module>
 </modules>
