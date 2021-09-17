@@ -40,6 +40,7 @@
 *         : 25.11.2019 3.30    Added support RX13T
 *                              Modified comment of API function to Doxygen style.
 *         : 30.12.2019 3.40    Added support RX72N, RX66N.
+*         : 15.04.2021 4.10    Updated Doxygen comment.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -273,6 +274,8 @@ void R_GPIO_PinDirectionSet (gpio_port_pin_t pin, gpio_dir_t dir)
 * @details Depending on the MCU, pins have various settings that can be configured other than the direction and
 * output level. Some examples include enabling open-drain outputs, internal pull-ups, and changing drive capacity
 * levels. These features vary per chip which means that the options for this function will also vary.
+* @note User should not configure the DSCR bit corresponding to a pin whose drive capacity is fixed, otherwise
+* GPIO_ERR_INVALID_MODE would be returned.
 */
 gpio_err_t R_GPIO_PinControl (gpio_port_pin_t pin, gpio_cmd_t cmd)
 {

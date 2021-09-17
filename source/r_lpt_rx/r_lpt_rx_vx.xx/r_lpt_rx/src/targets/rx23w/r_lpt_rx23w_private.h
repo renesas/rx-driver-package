@@ -1,4 +1,4 @@
-/***********************************************************************************************************************
+/**********************************************************************************************************************
  * DISCLAIMER
  * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
  * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
@@ -7,25 +7,24 @@
  * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
  * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO
+ * THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
  * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
  * this software. By using this software, you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2020 Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
-/***********************************************************************************************************************
+ * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+ *********************************************************************************************************************/
+/**********************************************************************************************************************
  * File Name    : r_lpt_rx23w_private.h
- * Version      : 1.00
+ * Version      : 3.00
  * Description  : Functions for using even link controller
- ************************************************************************************************************************
+ **********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *         : 10.06.2020 1.00    First Release
- ***********************************************************************************************************************/
-#ifndef LPT_RX23W_PRIVATE_H
-#define LPT_RX23W_PRIVATE_H
+ *         : 31.03.2021 3.00    Added error code if selected LOCO clock
+ *********************************************************************************************************************/
 /*******************************************************************************
 Includes <System Includes> , "Project Includes"
 *******************************************************************************/
@@ -34,20 +33,23 @@ Includes <System Includes> , "Project Includes"
 /*******************************************************************************
   Macro definitions
 *******************************************************************************/
-#define LPT_CONV_US         ((uint32_t)(1000)*(uint32_t)(1000)) /* Value converted to microseconds */
-#define LPT_CALCSCALE_OFFSET ((uint32_t)1000)           /* OFFSET value deal with clock source change to MHz */
+#ifndef LPT_RX130_PRIVATE_H
+#define LPT_RX130_PRIVATE_H
+
+#define LPT_CONV_US          (1000 * 1000)    /* Value converted to microseconds */
+#define LPT_CALCSCALE_OFFSET (1000)           /* OFFSET value deal with clock source change to MHz */
 
 /* Minimum cycle */
-#define LPT_MIN_PERIOD      ((uint32_t)(0x00000002))    /* Minimum cycle */
+#define LPT_MIN_PERIOD      (0x00000001)    /* Minimum cycle */
 /* Maximum cycle */
-#define LPT_MAX_PERIOD      ((uint32_t)(0x0000FFFF))    /* Maximum cycle (shall not overflow with uint16_t) */
+#define LPT_MAX_PERIOD      (0x0000FFFF)    /* Maximum cycle (shall not overflow with uint16_t) */
 
 /* Common register setting */
-#define LPT_LPTCR1_INIT     ((uint8_t)(0x01))           /* Initial value of LPTCR1 */
-#define LPT_LPTCR2_INIT     ((uint8_t)(0x01))           /* Initial value of LPTCR2 */
-#define LPT_LPTPRD_INIT     ((uint16_t)(0xFFFF))        /* Initial value of LPTPRD */
-#define LPT_LPCMR0_INIT     ((uint16_t)(0xFFFF))        /* Initial value of LPCMR0 */
-#define LPT_LPWUCR_INIT     ((uint16_t)(0x0000))        /* Initial value of LPWUCR */
+#define LPT_LPTCR1_INIT     (0x01)           /* Initial value of LPTCR1 */
+#define LPT_LPTCR2_INIT     (0x01)           /* Initial value of LPTCR2 */
+#define LPT_LPTPRD_INIT     (0xFFFF)         /* Initial value of LPTPRD */
+#define LPT_LPCMR0_INIT     (0xFFFF)         /* Initial value of LPCMR0 */
+#define LPT_LPWUCR_INIT     (0x0000)         /* Initial value of LPWUCR */
 
 /* Low-Power Timer Clock Division Ratio Select Data (do NOT change values) */
 #define LPT_DIVISION_RATIO_2    (0x01U)
@@ -55,8 +57,6 @@ Includes <System Includes> , "Project Includes"
 #define LPT_DIVISION_RATIO_8    (0x03U)
 #define LPT_DIVISION_RATIO_16   (0x04U)
 #define LPT_DIVISION_RATIO_32   (0x05U)
-
-#define LPT_DIVISION_RATIO_NUM  (5)     /* Number of LPT division ratio */
 
 /*------------------------------------------------------------------------------
   Parameter check of Configuration Options
@@ -73,6 +73,8 @@ Includes <System Includes> , "Project Includes"
 #elif (LPT_CLOCK_SOURCE == 1)
     #define LPT_LPTSRCCLK_HZ    (15000)                 /* IWDTCLK frequency */
     #define LPT_LPTSRCCLK_CYC   (79)                    /* 1cycle/IWDTCLK(min:12.75kHz max:17.25kHz) */
+#elif (LPT_CLOCK_SOURCE == 3)
+    #error "ERROR - LPT_CLOCK_SOURCE - Unsupported LOCO lpt clock source chosen in r_lpt_rx23w_private.h"
 #else
     #error "ERROR - LPT_CFG_LPT_CLOCK_SOURCE - Unknown lpt clock source chosen in r_lpt_rx23w_private.h"
 #endif
@@ -85,6 +87,6 @@ Includes <System Includes> , "Project Includes"
 
 #endif /* LPT_RX23W_PRIVATE_H */
 
-/***********************************************************************************************************************
+/**********************************************************************************************************************
  * End of File
- ***********************************************************************************************************************/
+ *********************************************************************************************************************/

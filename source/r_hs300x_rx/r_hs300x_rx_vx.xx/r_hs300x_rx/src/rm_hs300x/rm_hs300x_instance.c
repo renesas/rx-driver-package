@@ -1,22 +1,21 @@
-/* ${REA_DISCLAIMER_PLACEHOLDER} */
-/******************************************************************************************************************//**
- * @file          rm_hs3001_instance.c
- * Version      : 1.0
- * @brief         3.5a. Each file will maintain one of the file headers shown below.
- *                   i. If the file contains the main() function then it will have the expanded header shown in the
- *                      first example.
- *                  ii. If the file does not contain the main() function then it is allowed to have the smaller header
- *                      shown in the second example.
- *                   b. Doxygen format headers (@brief, ... . ) may be used for API and CFG files to enable simple
- *                      documentation of the API and configuration for customers. Refer to section 4.4 & 1.7.
- *                   c. Where files are not dependent upon any entry (such as a specific HW Platform), the entry
- *                   should be omitted, or specify the widest possible description of the entry.
- *********************************************************************************************************************/
-/**********************************************************************************************************************
- * History : DD.MM.YYYY Version  Description
- *         : 01.01.2018 1.00     First Release
- *         : 27.03.2019 6.00.00  CStd V6.0. Release
- *********************************************************************************************************************/
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
+* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
+* applicable laws, including copyright laws. 
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
+* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
+* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
+* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
+* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
+* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
 
 /**********************************************************************************************************************
  Includes   <System Includes> , "Project Includes"
@@ -33,15 +32,11 @@
  *********************************************************************************************************************/
 #if (1 <= RM_HS300X_CFG_DEVICE_NUM_MAX)
 void rm_hs300x_callback0(rm_comms_callback_args_t * p_args);
- #if (1 == RM_HS300X_CFG_DEVICE0_CALLBACK_ENABLE)
- void RM_HS300X_CFG_DEVICE0_CALLBACK(rm_hs300x_callback_args_t * p_args);
- #endif
+void RM_HS300X_CFG_DEVICE0_CALLBACK(rm_hs300x_callback_args_t * p_args);
 #endif
 #if (2 <= RM_HS300X_CFG_DEVICE_NUM_MAX)
 void rm_hs300x_callback1(rm_comms_callback_args_t * p_args);
- #if (1 == RM_HS300X_CFG_DEVICE1_CALLBACK_ENABLE)
- void RM_HS300X_CFG_DEVICE1_CALLBACK(rm_hs300x_callback_args_t * p_args);
- #endif
+void RM_HS300X_CFG_DEVICE1_CALLBACK(rm_hs300x_callback_args_t * p_args);
 #endif
 
 /**********************************************************************************************************************

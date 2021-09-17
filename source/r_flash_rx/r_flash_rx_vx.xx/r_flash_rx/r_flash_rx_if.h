@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_rx_if.h
@@ -150,6 +150,7 @@
 *           18.11.2019 4.50    Added support for RX66N, and RX72N.
 *           26.06.2020 4.60    Modified some minor problem.
 *           23.10.2020 4.70    Added support for RX671.
+*           23.04.2021 4.80    Added support for RX140.
 ***********************************************************************************************************************/
 
 #ifndef FLASH_INTERFACE_HEADER_FILE
@@ -167,7 +168,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Driver Version Number. */
 #define FLASH_RX_VERSION_MAJOR           (4)
-#define FLASH_RX_VERSION_MINOR           (70)
+#define FLASH_RX_VERSION_MINOR           (80)
 
 
 /***********************************************************************************************************************
@@ -183,7 +184,8 @@ Typedef definitions
 #if (defined(MCU_RX110) || defined(MCU_RX111) || defined(MCU_RX113) || \
      defined(MCU_RX130) || defined(MCU_RX231) || defined(MCU_RX23T) || \
      defined(MCU_RX24T) || defined(MCU_RX24U) || defined(MCU_RX230) || \
-     defined(MCU_RX23W) || defined(MCU_RX13T) || defined(MCU_RX23E_A))
+     defined(MCU_RX23W) || defined(MCU_RX13T) || defined(MCU_RX23E_A) || \
+     defined(MCU_RX140))
 #define FLASH_TYPE              FLASH_TYPE_1
 
 #elif (defined(MCU_RX64M) || defined(MCU_RX66T) || defined(MCU_RX71M) || \
@@ -195,6 +197,11 @@ Typedef definitions
 #define FLASH_TYPE              FLASH_TYPE_4
 #endif
 
+#define FLASH_TYPE_VARIETY_A    (1)
+
+#if (defined(MCU_RX140))
+#define FLASH_TYPE_VARIETY      (FLASH_TYPE_VARIETY_A)
+#endif
 
 /* FEATURE GROUPINGS */
 
@@ -295,7 +302,8 @@ typedef enum _flash_err
     FLASH_ERR_UNSUPPORTED,  // Command not supported for this flash type
     FLASH_ERR_SECURITY,     // Pgm/Erase error due to part locked (FAW.FSPR)
     FLASH_ERR_TIMEOUT,      // Timeout Condition
-    FLASH_ERR_ALREADY_OPEN  // Open() called twice without intermediate Close()
+    FLASH_ERR_ALREADY_OPEN, // Open() called twice without intermediate Close()
+    FLASH_ERR_HOCO          // The HOCO is not running.
 } flash_err_t;
 
 

@@ -55,6 +55,7 @@
 *                              Fixed issue of missing SSCL, SSDA in MDF file.
 *           31.03.2021 3.80    Added support for RX671.
 *                              Added support circular buffer in mode asynchronous.
+*           15.04.2021 3.90    Added support for RX140.
 ***********************************************************************************************************************/
 
 #ifndef SCI_IF_H
@@ -82,7 +83,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define SCI_VERSION_MAJOR  (3)
-#define SCI_VERSION_MINOR  (80)
+#define SCI_VERSION_MINOR  (90)
 
 #define SCI_DTC_DMACA_DISABLE  (0x0)
 #define SCI_DTC_ENABLE         (0x1)

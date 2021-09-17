@@ -56,6 +56,8 @@
 *         : 29.05.2020 4.50    Added support BLE for RX23W; CMT2, CMT3 are protected for RX23W.
 *         : 31.08.2020 4.70    Fixed warning when using RI600V4 with device has 2 CMT channels
 *         : 31.03.2021 4.80    Added support for RX671.
+*         : 15.04.2021 4.90    Added support for RX140.
+*                              Updated Doxygen comment.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -75,7 +77,7 @@ Macro definitions
     defined(BSP_MCU_RX671)
 
     #define CMT_RX_NUM_CHANNELS        (4)
-#elif defined(BSP_MCU_RX111)  || defined(BSP_MCU_RX110)    || defined(BSP_MCU_RX130)  || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX23E_A)
+#elif defined(BSP_MCU_RX111)  || defined(BSP_MCU_RX110)    || defined(BSP_MCU_RX130)  || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX23E_A) || defined(BSP_MCU_RX140)
     #define CMT_RX_NUM_CHANNELS        (2)
 #else
     #error "Error! Number of channels for this MCU is not defined in r_cmt_rx.c"
@@ -93,7 +95,7 @@ Macro definitions
    This means that PCLKB would match functionality of PCLK in RX62x devices as far as the CMT is concerned. */
 #if defined(BSP_MCU_RX11_ALL) || defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71_ALL) || defined(BSP_MCU_RX113)    || \
     defined(BSP_MCU_RX23_ALL) || defined(BSP_MCU_RX13_ALL) || defined(BSP_MCU_RX24_ALL) || \
-    defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66_ALL) || defined(BSP_MCU_RX72_ALL) ||defined(BSP_MCU_RX671)
+    defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66_ALL) || defined(BSP_MCU_RX72_ALL) ||defined(BSP_MCU_RX671) || defined(BSP_MCU_RX140)
     #define CMT_PCLK_HZ                 (BSP_PCLKB_HZ)
 #else
     #define CMT_PCLK_HZ                 (BSP_PCLK_HZ)
@@ -102,7 +104,7 @@ Macro definitions
 /* Which MCUs have register protection. */
 #if defined(BSP_MCU_RX11_ALL) || defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71_ALL) || \
     defined(BSP_MCU_RX23_ALL) || defined(BSP_MCU_RX13_ALL) || defined(BSP_MCU_RX24_ALL) || defined(BSP_MCU_RX65_ALL) || \
-    defined(BSP_MCU_RX66_ALL) || defined(BSP_MCU_RX72_ALL) || defined(BSP_MCU_RX671)
+    defined(BSP_MCU_RX66_ALL) || defined(BSP_MCU_RX72_ALL) || defined(BSP_MCU_RX671) || defined(BSP_MCU_RX140)
     #define CMT_REG_PROTECT             (1)
 #else
     #define CMT_REG_PROTECT             (0)
@@ -266,7 +268,7 @@ static bool cmt_create_priority(uint32_t frequency_hz, void (* callback)(void * 
 ********************************************************************************************************************//**
 * @brief This function finds an unused CMT channel, configures it for the requested frequency,
 * associates a user callback function with the timer’s interrupt, and powers up and starts the timer
-* @param[in] frequency_hz Desired frequency in Hz. The range and resolution of the timer is determined by settings of the peripheral clock.
+* @param[in] frequency_hz Desired frequency in Hz(1 ~PCLK/8 Hz) note 1. The range and resolution of the timer is determined by settings of the peripheral clock.
 * The best pre-scaler for the CMT channel is chosen by the driver.\n
 * @param[in] callback Pointer to the user’s callback function.  It should receive a single void * argument.\n
 * @param[in] *channel The CMT FIT module finds the first CMT channel that is not in use and assigns it to the caller.
@@ -296,7 +298,7 @@ bool R_CMT_CreatePeriodic (uint32_t frequency_hz, void (* callback)(void * pdata
 * ******************************************************************************************************************//**
 * @brief This function configures desired CMT channel for the requested frequency and desired interrupt priority level,
 * associates a user callback function with the timer’s interrupt, powers up and starts the timer
-* @param[in] frequency_hz Desired frequency in Hz. The range and resolution of the timer is determined by settings of the peripheral clock.
+* @param[in] frequency_hz Desired frequency in Hz(1 ~PCLK/8 Hz) note 1. The range and resolution of the timer is determined by settings of the peripheral clock.
 * The best pre-scaler for the CMT channel is chosen by the driver.\n
 * @param[in] callback Pointer to the user’s callback function. It should receive a single void * argument.\n
 * @param[in] channel Desired CMT channel that is used to configure.\n
@@ -329,6 +331,9 @@ bool R_CMT_CreatePeriodic (uint32_t frequency_hz, void (* callback)(void * pdata
 * At some point, too much time is consumed to leave any time for other useful work.
 * So this will limit the maximum frequency that can be generated.
 *  The maximum practical frequency will depend on your system design, but in general, frequencies up to a few kilohertz are reasonable.\n
+* 2. Invalid settings\n
+* The function will return false if one of the following invalid settings occurs:
+* The  invalid channel, invalid priority, channel was in used, or frequency could not be used.
 */
 bool R_CMT_CreatePeriodicAssignChannelPriority (uint32_t frequency_hz, void (* callback)(void * pdata), uint32_t channel, cmt_priority_t priority)
 {
@@ -341,7 +346,7 @@ bool R_CMT_CreatePeriodicAssignChannelPriority (uint32_t frequency_hz, void (* c
 * ******************************************************************************************************************//**
  @brief This function finds an unused CMT channel, configures it for the requested period,
 * associates a user callback function with the timer’s interrupt, and powers up and starts the timer
-* @param[in] period_us Desired period in microseconds.
+* @param[in] period_us Desired period in microseconds (1 ~ 1,000,000us).
 * The range and resolution of the timer is determined by settings of the peripheral clock.
 * The best pre-scaler for the CMT channel is chosen by the driver.\n
 * @param[in] callback Pointer to the user’s callback function.  It should data a single void * argument.\n
@@ -366,7 +371,7 @@ bool R_CMT_CreateOneShot (uint32_t period_us, void (* callback)(void * pdata), u
 ********************************************************************************************************************//**
 * @brief This function configures the desired CMT channel for the requested period with desired interrupt priority level,
 * associates a user callback function with the timer’s interrupt, powers up and starts the timer
-* @param[in] period_us Desired period in microseconds.
+* @param[in] period_us Desired period in microseconds (1 ~ 1,000,000us).
 * The range and resolution of the timer is determined by settings of the peripheral clock.
 * The best pre-scaler for the CMT channel is chosen by the driver.\n
 * @param[in] callback Pointer to the user’s callback function. It should data a single void * argument.\n

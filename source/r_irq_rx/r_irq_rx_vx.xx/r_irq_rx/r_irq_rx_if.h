@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /******************************************************************************
 * File Name    : r_irq_rx_if.h
@@ -30,6 +30,7 @@
 *         : 30.09.2015 1.70    Using the definition of VECT_ICU_IRQ7  to check the number of IRQs.
 *         : 08.09.2016 2.10    Applied the coding rules of Renesas.
 *         : 20.05.2019 3.00    Added support for GNUC and ICCRX.
+*         : 15.04.2021 3.80    Added R_IRQ_IRClear() function to clear IR flag.
 ******************************************************************************/
 #ifndef IRQ_RX_IF_H /* Multiple inclusion protection. */
 #define IRQ_RX_IF_H
@@ -175,6 +176,9 @@ irq_err_t   R_IRQ_InterruptEnable (irq_handle_t  const handle,
 
 /* Returns the version number of the module. */
 uint32_t  R_IRQ_GetVersion(void);
+
+/* Clears IR Flag */
+irq_err_t   R_IRQ_IRClear (irq_handle_t  const handle);
 
 #endif /* IRQ_RX_IF_H    */
 

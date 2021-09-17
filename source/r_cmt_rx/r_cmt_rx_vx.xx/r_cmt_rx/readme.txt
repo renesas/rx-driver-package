@@ -30,8 +30,6 @@ r_cmt_rx
 |   +---ja
 |       r01an1856jj{VERSION_NUMBER}-rx-timer.pdf
 |
-+---ref
-|       r_cmt_rx_config_reference.h
 |
 \---src
         r_cmt_rx.c

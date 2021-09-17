@@ -28,6 +28,7 @@
  *           10.06.2020 2.00    Updated version to 2.00 for RX23W release
  *                              Added support for GNUC and ICCRX.
  *                              Fixed coding style.
+ *           10.12.2020 2.01    Updated version to 2.01 for RX140 release
 ***********************************************************************************************************************/
 #ifndef R_ELC_RX_IF_H
     #define R_ELC_RX_IF_H
@@ -47,7 +48,7 @@
 
 /* Version Number of API. */
     #define ELC_RX_VERSION_MAJOR            (2)
-    #define ELC_RX_VERSION_MINOR            (00)
+    #define ELC_RX_VERSION_MINOR            (01)
 
 /***********************************************************************************************************************
  Typedef definitions

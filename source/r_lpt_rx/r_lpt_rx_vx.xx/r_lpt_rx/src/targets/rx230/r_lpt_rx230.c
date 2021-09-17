@@ -1,4 +1,4 @@
-/***********************************************************************************************************************
+/**********************************************************************************************************************
  * DISCLAIMER
  * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
  * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
@@ -7,32 +7,33 @@
  * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
  * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO
+ * THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
  * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
  * this software. By using this software, you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
-/***********************************************************************************************************************
+ * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+ *********************************************************************************************************************/
+/**********************************************************************************************************************
  * File Name    : r_lpt_rx230.c
- * Version      : 1.11
+ * Version      : 3.00
  * Description  : Functions for using even link controller
- ************************************************************************************************************************
+ **********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *         : 01.07.2016 1.00    First Release
  *         : 04.08.2016 1.11    Added command LPT_CMD_COUNT_RESET to R_LPT_Control()
  *         : 01.04.2019 1.23    Added "WAIT_LOOP" keyword.
- ***********************************************************************************************************************/
+ *         : 31.03.2021 3.00    Added function R_LPT_InitChan, R_LPT_SetCMT, R_LPT_FinalChan
+ *********************************************************************************************************************/
 /*******************************************************************************
 Includes <System Includes> , "Project Includes"
 *******************************************************************************/
 /* Access to peripherals and board defines. */
 #include "platform.h"
 
-#if defined (BSP_MCU_RX230) /* This pre-processer need for complie when module added by FIT-Plugin */
+#if defined (BSP_MCU_RX230) /* This pre-processer need for compile when module added by FIT-Plugin */
 /* Include specifics for chosen MCU.  */
 #include "r_lpt_rx_private.h"
 
@@ -42,7 +43,7 @@ Includes <System Includes> , "Project Includes"
 static uint32_t lpt_regval_calc(uint32_t const period, uint32_t const srcclk, uint8_t const divratio);
 
 /*------- global variables -------*/
-const uint8_t g_lpt_division_ratio[LPT_DIVISION_RATIO_NUM] = {  /* for register set */
+const uint8_t g_lpt_division_ratio[] = {  /* for register set */
     LPT_DIVISION_RATIO_2,
     LPT_DIVISION_RATIO_4,
     LPT_DIVISION_RATIO_8,
@@ -50,7 +51,7 @@ const uint8_t g_lpt_division_ratio[LPT_DIVISION_RATIO_NUM] = {  /* for register 
     LPT_DIVISION_RATIO_32
 };
 
-const uint8_t g_lpt_divratio_value[LPT_DIVISION_RATIO_NUM] = {  /* for calculation */
+const uint8_t g_lpt_divratio_value[] = {  /* for calculation */
     2,  /* LPT_DIVISION_RATIO_2  */
     4,  /* LPT_DIVISION_RATIO_4  */
     8,  /* LPT_DIVISION_RATIO_8  */
@@ -122,7 +123,7 @@ static uint32_t lpt_regval_calc(uint32_t const period, uint32_t const srcclk, ui
 
 /*****************************************************************************
 * Function Name: lpt_open
-* Description  : Initialization for using the LPT
+* Description  : Initialization for using the LPT.
 * Arguments    : period -
 *                    LPT period (microsecond)
 * Return Value : LPT_SUCCESS -
@@ -134,41 +135,39 @@ static uint32_t lpt_regval_calc(uint32_t const period, uint32_t const srcclk, ui
 *       calling this function.
 *
 ******************************************************************************/
-lpt_err_t lpt_open(uint32_t const period)
+lpt_err_t lpt_open(uint32_t const lpt_period)
 {
     lpt_err_t   err = LPT_SUCCESS;
     uint32_t    calc_period;
-    uint16_t    compare0_value;
     uint16_t    period_value = LPT_MAX_PERIOD;
     uint8_t     ratio_value = LPT_DIVISION_RATIO_2;
     uint8_t     ratio_select;
     bool        prdset_flag = false;
+    size_t      array_num = (sizeof (g_lpt_division_ratio)) / (sizeof (g_lpt_division_ratio[0]));
 
     /* WAIT_LOOP */
-    for(ratio_select = 0; LPT_DIVISION_RATIO_NUM > ratio_select; ratio_select++)
+    for (ratio_select = 0; (array_num > ratio_select); ratio_select++)
     {
         /* The if statement just before this processing confirms that the calculation result is 0xFFFF or less.
           Thus the value is typecasted to uint16_t correctly and stored within the proper range. */
-        calc_period = lpt_regval_calc(period, LPT_LPTSRCCLK_HZ, g_lpt_divratio_value[ratio_select]);
-        if((LPT_MIN_PERIOD <= calc_period)
+        calc_period = lpt_regval_calc(lpt_period, LPT_LPTSRCCLK_HZ, g_lpt_divratio_value[ratio_select]);
+        if ((LPT_MIN_PERIOD <= calc_period)
         && (LPT_MAX_PERIOD >= calc_period))
         {
             ratio_value  = g_lpt_division_ratio[ratio_select];  /* Source clock divider */
             period_value = (uint16_t)calc_period;               /* low-power timer cycle. */
             prdset_flag  = true;                                /* LPTPRD value decision */
-            ratio_select = LPT_DIVISION_RATIO_NUM;              /* LOOP stop */
+            ratio_select = array_num;              /* LOOP stop */
         }
     }
 
 #if (LPT_CFG_PARAM_CHECKING_ENABLE == 1)
-    if(false == prdset_flag)                                        /* Error check */
+    if (false == prdset_flag)                                        /* Error check */
     {
         /* When the value is out of range, the error is treated as an argument error. */
         return LPT_ERR_INVALID_ARG;
     }
 #endif  /* LPT_CFG_PARAM_CHECKING_ENABLE */
-
-    compare0_value = (uint16_t)(period_value -1);
 
     /* Disable protection for registers related to the LPT. */
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPT);
@@ -180,14 +179,8 @@ lpt_err_t lpt_open(uint32_t const period)
     LPT.LPTCR1.BIT.LPCNTPSSEL = (uint8_t)(ratio_value & 0x07);
     LPT.LPTCR1.BIT.LPCNTCKSEL = LPT_CLOCK_SOURCE;
 
-    /* Enable low-power compare match 0. */
-    LPT.LPTCR1.BIT.LPCMRE0  = 1;
-
     /* Set the low-power timer cycle. */
     LPT.LPTPRD.WORD         = period_value;
-
-    /* Set compare match 0 for comparison with the LPT. */
-    LPT.LPCMR0.WORD         = compare0_value;
 
     /* Supply the low-power timer clock. */
     LPT.LPTCR2.BIT.LPCNTSTP = 0;
@@ -196,7 +189,7 @@ lpt_err_t lpt_open(uint32_t const period)
     LPT.LPTCR3.BIT.LPCNTRST = 1;
 
     /* WAIT_LOOP */
-    while ( 0 != LPT.LPTCR3.BIT.LPCNTRST )
+    while (0 != LPT.LPTCR3.BIT.LPCNTRST)
     {
         /* Wait for completion of the low-power timer reset. */
     }
@@ -223,13 +216,13 @@ void lpt_close(void)
     /* Stop the low-power timer. */
     LPT.LPTCR3.BIT.LPCNTEN  = 0;
 
-    if ( 0 == LPT.LPTCR2.BIT.LPCNTSTP )
+    if (0 == LPT.LPTCR2.BIT.LPCNTSTP)
     {
         /* Reset the low-power timer. */
         LPT.LPTCR3.BIT.LPCNTRST = 1;
 
         /* WAIT_LOOP */
-        while ( 0 != LPT.LPTCR3.BIT.LPCNTRST )
+        while (0 != LPT.LPTCR3.BIT.LPCNTRST)
         {
             /* Wait for completion of the low-power timer reset. */
         }
@@ -239,19 +232,19 @@ void lpt_close(void)
     }
 
     /* Stop the low-power timer clock. */
-    LPT.LPTCR2.BYTE         = LPT_LPTCR2_INIT;
+    LPT.LPTCR2.BYTE         = (uint8_t)LPT_LPTCR2_INIT;
 
     /* Initialize low-power timer compare match 0. */
-    LPT.LPCMR0.WORD         = LPT_LPCMR0_INIT;
+    LPT.LPCMR0.WORD         = (uint16_t)LPT_LPCMR0_INIT;
 
     /* Reset the low-power timer cycle. */
-    LPT.LPTPRD.WORD         = LPT_LPTPRD_INIT;
+    LPT.LPTPRD.WORD         = (uint16_t)LPT_LPTPRD_INIT;
 
     /* Initialize low-power timer control register 1. */
-    LPT.LPTCR1.BYTE         = LPT_LPTCR1_INIT;
+    LPT.LPTCR1.BYTE         = (uint8_t)LPT_LPTCR1_INIT;
 
     /* Low-power timer: disable to wakeup from standby mode. */
-    LPT.LPWUCR.WORD         = LPT_LPWUCR_INIT;
+    LPT.LPWUCR.WORD         = (uint16_t)LPT_LPWUCR_INIT;
 
     /* Enable Enable protection for registers related to the LPT. */
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPT);
@@ -315,13 +308,13 @@ lpt_err_t lpt_count_reset(void)
 {
     lpt_err_t   err = LPT_SUCCESS;
 
-    if ( 1 == LPT.LPTCR2.BIT.LPCNTSTP )
+    if (1 == LPT.LPTCR2.BIT.LPCNTSTP)
     {
         /* When CLOCK is not supplied to the LPT , the error is treated as a condition error. */
         return LPT_ERR_CONDITION_NOT_MET;
     }
 
-    if ( 0 != LPT.LPTCR3.BIT.LPCNTEN )
+    if (0 != LPT.LPTCR3.BIT.LPCNTEN)
     {
         /* When LPT start, the error is treated as a condition error. */
         return LPT_ERR_CONDITION_NOT_MET;
@@ -334,7 +327,7 @@ lpt_err_t lpt_count_reset(void)
     LPT.LPTCR3.BIT.LPCNTRST = 1;
 
     /* WAIT_LOOP */
-    while ( 0 != LPT.LPTCR3.BIT.LPCNTRST )
+    while (0 != LPT.LPTCR3.BIT.LPCNTRST)
     {
         /* Wait for completion of the low-power timer reset. */
     }
@@ -349,8 +342,187 @@ lpt_err_t lpt_count_reset(void)
 /*****************************************************************************
  * End of function lpt_count_reset()
  *****************************************************************************/
+
+/*****************************************************************************
+* Function Name: lpt_initchan
+* Description  : Initialize the LPT configuration.
+* Arguments    : chan -
+*                    LPT channel
+*                cmt_period -
+*                    CMT period(unit:us)
+* Return Value : LPT_SUCCESS -
+*                    LPT Initialize successfully
+*                LPT_ERR_INVALID_ARG -
+*                    cmt_period is invalid.
+*                LPT_ERR_CONDITION_NOT_MET -
+*                    LPT count not stop.
+*                LPT_ERR_INVALID_CH -
+*                    Selected channel is invalid.
+******************************************************************************/
+lpt_err_t lpt_initchan(lpt_ch_t chan, uint32_t const cmt_period)
+{
+    lpt_err_t   err = LPT_SUCCESS;
+    uint32_t    calc_period;
+    uint8_t     ratio_value;
+
+    if (LPT_CH0 != chan)
+    {
+        /* When selected invalid channnel, the error is treated as a invalid channel error. */
+        return LPT_ERR_INVALID_CH;
+    }
+
+    if (0 != LPT.LPTCR3.BIT.LPCNTEN)
+    {
+        /* When LPT start, the error is treated as a condition error. */
+        return LPT_ERR_CONDITION_NOT_MET;
+    }
+
+    /* Calculate the value from the argument cmt_period */
+    ratio_value = g_lpt_divratio_value[LPT.LPTCR1.BIT.LPCNTPSSEL - 1];
+    calc_period = lpt_regval_calc(cmt_period, LPT_LPTSRCCLK_HZ, ratio_value);
+
+    if (!((LPT_MIN_PERIOD <= calc_period) && (LPT_MAX_PERIOD >= calc_period)))
+    {
+        /* If cmt_period is not a computable value, the error is treated as a invalid error. */
+        return LPT_ERR_INVALID_ARG;
+    }
+
+    if (LPT.LPTPRD.WORD < calc_period)
+    {
+        /* If cmt_period is greater than LPTPRD, the error is treated as a invalid error. */
+        return LPT_ERR_INVALID_ARG;
+    }
+
+    /* Disable protection for registers related to the LPT. */
+    R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPT);
+
+    /* Enable low-power compare match and set compare match value. */
+    LPT.LPTCR1.BIT.LPCMRE0 = 1;
+
+    /* Cast type of "calc_period" to match type of LPCMR0 register. */
+    LPT.LPCMR0.WORD = (uint16_t)calc_period;
+
+    /* Enable protection for registers related to the LPT. */
+    R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPT);
+
+    return (err);
+}
+/*****************************************************************************
+ * End of function lpt_initchan()
+ *****************************************************************************/
+
+/*****************************************************************************
+* Function Name: lpt_setcmt
+* Description  : Set the value of compare match 0 or 1.
+* Arguments    : chan -
+*                    LPT channel
+*                cmt_period -
+*                    CMT period(unit:us)
+* Return Value : LPT_SUCCESS -
+*                    Compare match value set successfully.
+*                LPT_ERR_INVALID_ARG -
+*                    cmt_period is invalid.
+*                LPT_ERR_CONDITION_NOT_MET -
+*                    LPT count not stop.
+*                LPT_ERR_INVALID_CH -
+*                    Selected channel is invalid.
+******************************************************************************/
+lpt_err_t lpt_setcmt(lpt_ch_t chan, uint32_t const cmt_period)
+{
+    lpt_err_t   err = LPT_SUCCESS;
+    uint32_t    calc_period;
+    uint8_t     ratio_value;
+
+    if (LPT_CH0 != chan)
+    {
+        /* When selected invalid channnel, the error is treated as a invalid channel error. */
+        return LPT_ERR_INVALID_CH;
+    }
+
+    if (0 != LPT.LPTCR3.BIT.LPCNTEN)
+    {
+        /* When LPT start, the error is treated as a condition error. */
+        return LPT_ERR_CONDITION_NOT_MET;
+    }
+
+    /* Calculate the value from the argument cmt_period */
+    ratio_value = g_lpt_divratio_value[LPT.LPTCR1.BIT.LPCNTPSSEL - 1];
+    calc_period = lpt_regval_calc(cmt_period, LPT_LPTSRCCLK_HZ, ratio_value);
+
+    if (!((LPT_MIN_PERIOD <= calc_period) && (LPT_MAX_PERIOD >= calc_period)))
+    {
+        /* If cmt_period is not a computable value, the error is treated as a invalid error. */
+        return LPT_ERR_INVALID_ARG;
+    }
+
+    if (LPT.LPTPRD.WORD < calc_period)
+    {
+        /* If cmt_period is greater than LPTPRD, the error is treated as a invalid error. */
+        return LPT_ERR_INVALID_ARG;
+    }
+
+    /* Disable protection for registers related to the LPT. */
+    R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPT);
+
+    /* Set compare match for comparison with the LPT. */
+    LPT.LPCMR0.WORD = (uint16_t)calc_period;
+
+    /* Enable protection for registers related to the LPT. */
+    R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPT);
+
+    return (err);
+}
+/*****************************************************************************
+ * End of function lpt_setcmt()
+ *****************************************************************************/
+
+/*****************************************************************************
+* Function Name: lpt_finalchan
+* Description  : Finalize the LPT configuration.
+* Arguments    : chan -
+*                    LPT channel
+* Return Value : LPT_SUCCESS -
+*                    LPT Initialize successfully
+*                LPT_ERR_CONDITION_NOT_MET -
+*                    LPT count not stop.
+*                LPT_ERR_INVALID_CH -
+*                    Selected channel is invalid.
+******************************************************************************/
+lpt_err_t lpt_finalchan(lpt_ch_t chan)
+{
+    lpt_err_t   err = LPT_SUCCESS;
+
+    if (LPT_CH0 != chan)
+    {
+        /* When selected invalid channnel, the error is treated as a invalid channel error. */
+        return LPT_ERR_INVALID_CH;
+    }
+
+    if (0 != LPT.LPTCR3.BIT.LPCNTEN)
+    {
+        /* When LPT start, the error is treated as a condition error. */
+        return LPT_ERR_CONDITION_NOT_MET;
+    }
+
+    /* Disable protection for registers related to the LPT. */
+    R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPT);
+
+    /* Disable low-power compare match. */
+    LPT.LPTCR1.BIT.LPCMRE0 = 0;
+
+    /* Finalize low-power timer compare match 0. */
+    LPT.LPCMR0.WORD         = (uint16_t)LPT_LPCMR0_INIT;
+
+    /* Enable protection for registers related to the LPT. */
+    R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPT);
+
+    return (err);
+}
+/*****************************************************************************
+ * End of function lpt_finalchan()
+ *****************************************************************************/
 #endif /* #if defined (BSP_MCU_RX230) */
 
-/***********************************************************************************************************************
+/**********************************************************************************************************************
  * End of File
- ***********************************************************************************************************************/
+ *********************************************************************************************************************/

@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
+* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
+* applicable laws, including copyright laws. 
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
+* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
+* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
+* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
+* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
+* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+  <fileVersion>1.00</fileVersion>
+  <formatVersion>2.00</formatVersion>
+  <fileTemplate>
+  </fileTemplate>
+  <configuration>
+    <property id="RM_ZMOD4XXX_CFG_PARAM_CHECKING_ENABLE" display="Parameter Checking" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+      <option id="RM_ZMOD4XXX_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="System Default" value="BSP_CFG_PARAM_CHECKING_ENABLE" />
+      <option id="RM_ZMOD4XXX_CFG_PARAM_CHECKING_ENABLE.0" display="Disabled" value="0" />
+      <option id="RM_ZMOD4XXX_CFG_PARAM_CHECKING_ENABLE.1" display="Enabled" value="1" />
+      <description>Select whether to include parameter checking in the code.
+"Disabled": Compiles out parameter checking.
+"Enabled": Includes parameter checking.
+"System Default": Sets this to "BSP_CFG_PARAM_CHECKING_ENABLE"</description>
+    </property>
+
+    <propertyCdt id="RM_ZMOD4XXX_CFG_OPERATION_MODE" display="Operation mode of ZMOD4XXX Sensors" default="1" type="combobox" family="RX">
+      <option id="RM_ZMOD4XXX_CFG_OPERATION_MODE.1" display="IAQ 1st Gen. (Continuous)" value="1">
+        <!-- CC-RX -->
+        <!-- RXv1 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v1/iaq_1st_gen/ccrx/lib_iaq_1st_gen.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv1"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- RXv2 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v2/iaq_1st_gen/ccrx/lib_iaq_1st_gen.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv2"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- RXv3 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v3/iaq_1st_gen/ccrx/lib_iaq_1st_gen.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv3"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- GCC -->
+        <!-- RXv1 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v1/iaq_1st_gen/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v1"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_iaq_1st_gen" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v1"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <!-- RXv2 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v2/iaq_1st_gen/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v2"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_iaq_1st_gen" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v2"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <!-- RXv3 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v3/iaq_1st_gen/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v3"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_iaq_1st_gen" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v3"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+      </option>
+      <option id="RM_ZMOD4XXX_CFG_OPERATION_MODE.2" display="IAQ 1st Gen. (Low Power)" value="2">
+        <!-- CC-RX -->
+        <!-- RXv1 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v1/iaq_1st_gen/ccrx/lib_iaq_1st_gen.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv1"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- RXv2 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v2/iaq_1st_gen/ccrx/lib_iaq_1st_gen.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv2"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- RXv3 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v3/iaq_1st_gen/ccrx/lib_iaq_1st_gen.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv3"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- GCC -->
+        <!-- RXv1 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v1/iaq_1st_gen/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v1"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_iaq_1st_gen" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v1"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <!-- RXv2 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v2/iaq_1st_gen/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v2"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_iaq_1st_gen" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v2"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <!-- RXv3 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v3/iaq_1st_gen/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v3"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_iaq_1st_gen" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v3"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+      </option>
+      <option id="RM_ZMOD4XXX_CFG_OPERATION_MODE.3" display="IAQ 2nd Gen." value="3">
+        <!-- CC-RX -->
+        <!-- RXv1 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v1/iaq_2nd_gen/ccrx/lib_iaq_2nd_gen.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv1"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- RXv2 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v2/iaq_2nd_gen/ccrx/lib_iaq_2nd_gen.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv2"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- RXv3 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v3/iaq_2nd_gen/ccrx/lib_iaq_2nd_gen.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv3"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- GCC -->
+        <!-- RXv1 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v1/iaq_2nd_gen/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v1"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_iaq_2nd_gen" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v1"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <!-- RXv2 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v2/iaq_2nd_gen/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v2"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_iaq_2nd_gen" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v2"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <!-- RXv3 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v3/iaq_2nd_gen/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v3"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_iaq_2nd_gen" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v3"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+      </option>
+      <option id="RM_ZMOD4XXX_CFG_OPERATION_MODE.4" display="Odor" value="4">
+        <!-- CC-RX -->
+        <!-- RXv1 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v1/odor/ccrx/lib_odor.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv1"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- RXv2 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v2/odor/ccrx/lib_odor.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv2"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- RXv3 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v3/odor/ccrx/lib_odor.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv3"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- GCC -->
+        <!-- RXv1 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v1/odor/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v1"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_odor" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v1"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <!-- RXv2 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v2/odor/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v2"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_odor" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v2"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <!-- RXv3 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v3/odor/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v3"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_odor" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v3"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+      </option>
+      <option id="RM_ZMOD4XXX_CFG_OPERATION_MODE.5" display="Sulfur-based Odor" value="5">
+        <!-- CC-RX -->
+        <!-- RXv1 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v1/sulfur_odor/ccrx/lib_sulfur_odor.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv1"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- RXv2 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v2/sulfur_odor/ccrx/lib_sulfur_odor.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv2"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- RXv3 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v3/sulfur_odor/ccrx/lib_sulfur_odor.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv3"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- GCC -->
+        <!-- RXv1 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v1/sulfur_odor/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v1"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_sulfur_odor" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v1"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <!-- RXv2 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v2/sulfur_odor/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v2"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_sulfur_odor" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v2"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <!-- RXv3 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v3/sulfur_odor/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v3"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_sulfur_odor" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v3"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+      </option>
+      <option id="RM_ZMOD4XXX_CFG_OPERATION_MODE.6" display="OAQ 1st Gen." value="6">
+        <!-- CC-RX -->
+        <!-- RXv1 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v1/oaq_1st_gen/ccrx/lib_oaq_1st_gen.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv1"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- RXv2 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v2/oaq_1st_gen/ccrx/lib_oaq_1st_gen.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv2"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- RXv3 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v3/oaq_1st_gen/ccrx/lib_oaq_1st_gen.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv3"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- GCC -->
+        <!-- RXv1 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v1/oaq_1st_gen/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v1"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_oaq_1st_gen" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v1"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <!-- RXv2 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v2/oaq_1st_gen/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v2"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_oaq_1st_gen" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v2"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <!-- RXv3 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v3/oaq_1st_gen/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v3"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_oaq_1st_gen" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v3"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+      </option>
+      <option id="RM_ZMOD4XXX_CFG_OPERATION_MODE.7" display="OAQ 2nd Gen." value="7">
+        <!-- CC-RX -->
+        <!-- RXv1 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v1/oaq_2nd_gen/ccrx/lib_oaq_2nd_gen.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv1"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- RXv2 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v2/oaq_2nd_gen/ccrx/lib_oaq_2nd_gen.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv2"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- RXv3 -->
+        <buildOption optionId="ccrx.linker.option.inputFile" value="r_zmod4xxx_rx/lib/v3/oaq_2nd_gen/ccrx/lib_oaq_2nd_gen.lib">
+          <buildCondition optionId="ccrx.common.option.isa" value="rxv3"/>
+          <buildCondition optionId="ccrx.common.option.endian" value="little"/>
+        </buildOption>
+        <!-- GCC -->
+        <!-- RXv1 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v1/oaq_2nd_gen/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v1"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_oaq_2nd_gen" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v1"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <!-- RXv2 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v2/oaq_2nd_gen/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v2"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_oaq_2nd_gen" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v2"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <!-- RXv3 -->
+        <buildOption optionId="gcc.rx.option.linker.userDefinedArchives" value="r_zmod4xxx_rx/lib/v3/oaq_2nd_gen/rx-elf-gcc">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v3"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+        <buildOption optionId="gcc.core.option.linker.archives.userArchiveLibraryFiles" value="_oaq_2nd_gen" relative="false">
+          <buildCondition optionId="gcc.core.option.cpu.architecture" value="v3"/>
+          <buildCondition optionId="gcc.core.option.cpu.dataEndian" value="little"/>
+        </buildOption>
+      </option> 
+
+      <description>Set the operation mode of ZMOD4XXX Sensors controlled by the FIT module.
+"IAQ 1st Gen. (Continuous)": ZMOD4410 IAQ 1st Generation (Continuous mode).
+"IAQ 1st Gen. (Low Power)": ZMOD4410 IAQ 1st Generation (Low Power mode).
+"IAQ 2nd Gen.": ZMOD4410 IAQ 2nd Generation.
+"Odor": ZMOD4410 Odor.
+"Sulfur-based Odor": ZMOD4410 Sulfur-based Odor.
+"OAQ 1st Gen.": ZMOD4510 OAQ 1st Generation.
+"OAQ 2nd Gen.": ZMOD4510 OAQ 2nd Generation.</description>
+    </propertyCdt>
+
+    <property id="RM_ZMOD4XXX_CFG_DEVICE0_COMMS_INSTANCE" display="I2C Communication device No. for ZMOD4XXX sensor device0" default="g_comms_i2c_device0" type="combobox">
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_COMMS_INSTANCE.1" display="I2C Communication Device0" value="g_comms_i2c_device0" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_COMMS_INSTANCE.2" display="I2C Communication Device1" value="g_comms_i2c_device1" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_COMMS_INSTANCE.3" display="I2C Communication Device2" value="g_comms_i2c_device2" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_COMMS_INSTANCE.4" display="I2C Communication Device3" value="g_comms_i2c_device3" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_COMMS_INSTANCE.5" display="I2C Communication Device4" value="g_comms_i2c_device4" />
+      <description>Set the using I2C communication device number for ZMOD4XXX Sensors controlled by the FIT module.
+[Note]: Be sure to specify a valid I2C communication device number.</description>
+    </property>
+    <property id="RM_ZMOD4XXX_CFG_DEVICE0_COMMS_I2C_CALLBACK" display="I2C callback function for ZMOD4XXX sensor device0" default="zmod4xxx_user_i2c_callback0" type="textbox">
+      <constraint display="Must not be empty">"" != "${RM_ZMOD4XXX_CFG_DEVICE0_COMMS_I2C_CALLBACK}"</constraint>
+      <description>Specify the I2C Callback function name of the ZMOD4XXX Sensor API.</description>
+    </property>
+    <property id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_ENABLE" display="Enable IRQ from ZMOD4XXX sensor device0" default="0" type="combobox">
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_ENABLE.0" display="Disabled" value="0" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_ENABLE.1" display="Enabled" value="1" />
+      <description>Specify the Enalbe IRQ.
+- When Disabled, Don't enable IRQ"
+- When Enabled, enable the IRQ"</description>
+    </property>
+    <property id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_CALLBACK" display="IRQ Callback function for ZMOD4XXX sensor device0" default="zmod4xxx_user_irq_callback0" type="textbox">
+      <constraint display="When IRQ is enabled" actionOnFail="disable">${RM_ZMOD4XXX_CFG_DEVICE0_IRQ_ENABLE} == ${RM_ZMOD4XXX_CFG_DEVICE0_IRQ_ENABLE.1}</constraint>
+      <constraint display="Must not be empty">"" != "${RM_ZMOD4XXX_CFG_DEVICE0_IRQ_CALLBACK}"</constraint>
+      <description>Specify the IRQ Callback function name of the ZMOD4XXX Sensor API.</description>
+    </property>
+    <property id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_NUMBER" display="IRQ number for ZMOD4XXX sensor device0" default="IRQ_NUM_0" type="combobox">
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_NUMBER.0" display="IRQ0" value="IRQ_NUM_0" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_NUMBER.1" display="IRQ1" value="IRQ_NUM_1" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_NUMBER.2" display="IRQ2" value="IRQ_NUM_2" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_NUMBER.3" display="IRQ3" value="IRQ_NUM_3" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_NUMBER.4" display="IRQ4" value="IRQ_NUM_4" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_NUMBER.5" display="IRQ5" value="IRQ_NUM_5" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_NUMBER.6" display="IRQ6" value="IRQ_NUM_6" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_NUMBER.7" display="IRQ7" value="IRQ_NUM_7" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_NUMBER.8" display="IRQ8" value="IRQ_NUM_8" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_NUMBER.9" display="IRQ9" value="IRQ_NUM_9" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_NUMBER.10" display="IRQ10" value="IRQ_NUM_10" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_NUMBER.11" display="IRQ11" value="IRQ_NUM_11" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_NUMBER.12" display="IRQ12" value="IRQ_NUM_12" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_NUMBER.13" display="IRQ13" value="IRQ_NUM_13" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_NUMBER.14" display="IRQ14" value="IRQ_NUM_14" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_NUMBER.15" display="IRQ15" value="IRQ_NUM_15" />
+      <constraint display="When IRQ is enabled" actionOnFail="disable">${RM_ZMOD4XXX_CFG_DEVICE0_IRQ_ENABLE} == ${RM_ZMOD4XXX_CFG_DEVICE0_IRQ_ENABLE.1}</constraint>
+      <description>Set the IRQ number for the ZMOD4XXX Sensor.
+[Note]: Be sure to specify a valid IRQ number.</description>
+    </property>
+    <property id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_TRIGGER" display="IRQ trigger for ZMOD4XXX sensor device0" default="IRQ_TRIG_RISING" type="combobox">
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_TRIGGER.lowLevel" display="Low Level" value="IRQ_TRIG_LOWLEV" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_TRIGGER.falling" display="Falling" value="IRQ_TRIG_FALLING" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_TRIGGER.rising" display="Rising" value="IRQ_TRIG_RISING" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_TRIGGER.bothEdges" display="Both Edges" value="IRQ_TRIG_BOTH_EDGE" />
+      <constraint display="When IRQ is enabled" actionOnFail="disable">${RM_ZMOD4XXX_CFG_DEVICE0_IRQ_ENABLE} == ${RM_ZMOD4XXX_CFG_DEVICE0_IRQ_ENABLE.1}</constraint>
+      <description>Set the IRQ trigger for the ZMOD4XXX Sensor.</description>
+    </property>
+    <property id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_PRIORITY" display="IRQ interrupt priority for ZMOD4XXX sensor device0" default="IRQ_PRI_10" type="combobox">
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_PRIORITY.0" display="Priority 0" value="IRQ_PRI_0" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_PRIORITY.1" display="Priority 1" value="IRQ_PRI_1" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_PRIORITY.2" display="Priority 2" value="IRQ_PRI_2" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_PRIORITY.3" display="Priority 3" value="IRQ_PRI_3" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_PRIORITY.4" display="Priority 4" value="IRQ_PRI_4" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_PRIORITY.5" display="Priority 5" value="IRQ_PRI_5" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_PRIORITY.6" display="Priority 6" value="IRQ_PRI_6" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_PRIORITY.7" display="Priority 7" value="IRQ_PRI_7" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_PRIORITY.8" display="Priority 8" value="IRQ_PRI_8" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_PRIORITY.9" display="Priority 9" value="IRQ_PRI_9" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_PRIORITY.10" display="Priority 10" value="IRQ_PRI_10" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_PRIORITY.11" display="Priority 11" value="IRQ_PRI_11" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_PRIORITY.12" display="Priority 12" value="IRQ_PRI_12" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_PRIORITY.13" display="Priority 13" value="IRQ_PRI_13" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_PRIORITY.14" display="Priority 14" value="IRQ_PRI_14" />
+      <option id="RM_ZMOD4XXX_CFG_DEVICE0_IRQ_PRIORITY.15" display="Priority 15" value="IRQ_PRI_15" />
+      <constraint display="When IRQ is enabled" actionOnFail="disable">${RM_ZMOD4XXX_CFG_DEVICE0_IRQ_ENABLE} == ${RM_ZMOD4XXX_CFG_DEVICE0_IRQ_ENABLE.1}</constraint>
+      <description>Set the IRQ interrupt priority for the ZMOD4XXX Sensor.</description>
+    </property>
+  </configuration>
+</module>

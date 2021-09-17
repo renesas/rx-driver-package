@@ -14,15 +14,16 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_lpt_rx231_private.h
- * Version      : 1.00
+ * Version      : 3.00
  * Description  : Functions for using even link controller
  ************************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *         : 01.07.2016 1.00    First Release
+ *         : 31.03.2021 3.00    Added error code if selected LOCO clock
  ***********************************************************************************************************************/
 #ifndef LPT_RX231_PRIVATE_H
 #define LPT_RX231_PRIVATE_H
@@ -38,7 +39,7 @@ Includes <System Includes> , "Project Includes"
 #define LPT_CALCSCALE_OFFSET ((uint32_t)1000)           /* OFFSET value deal with clock source change to MHz */
 
 /* Minimum cycle */
-#define LPT_MIN_PERIOD      ((uint32_t)(0x00000002))    /* Minimum cycle */
+#define LPT_MIN_PERIOD      ((uint32_t)(0x00000001))    /* Minimum cycle */
 /* Maximum cycle */
 #define LPT_MAX_PERIOD      ((uint32_t)(0x0000FFFF))    /* Maximum cycle (shall not overflow with uint16_t) */
 
@@ -56,8 +57,6 @@ Includes <System Includes> , "Project Includes"
 #define LPT_DIVISION_RATIO_16   (0x04U)
 #define LPT_DIVISION_RATIO_32   (0x05U)
 
-#define LPT_DIVISION_RATIO_NUM  (5)     /* Number of LPT division ratio */
-
 /*------------------------------------------------------------------------------
   Parameter check of Configuration Options
 ------------------------------------------------------------------------------*/
@@ -73,6 +72,8 @@ Includes <System Includes> , "Project Includes"
 #elif (LPT_CLOCK_SOURCE == 1)
     #define LPT_LPTSRCCLK_HZ    (15000)                 /* IWDTCLK frequency */
     #define LPT_LPTSRCCLK_CYC   (79)                    /* 1cycle/IWDTCLK(min:12.75kHz max:17.25kHz) */
+#elif (LPT_CLOCK_SOURCE == 3)
+    #error "ERROR - LPT_CLOCK_SOURCE - Unsupported LOCO lpt clock source chosen in r_lpt_rx231_private.h"
 #else
     #error "ERROR - LPT_CFG_LPT_CLOCK_SOURCE - Unknown lpt clock source chosen in r_lpt_rx231_private.h"
 #endif

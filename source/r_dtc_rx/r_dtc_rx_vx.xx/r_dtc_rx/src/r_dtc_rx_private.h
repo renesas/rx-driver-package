@@ -52,6 +52,7 @@
 *         : 30.12.2019 3.40    Added support for RX66N, RX72N.
 *         : 31.03.2020 3.50    Added support for RX23E-A.
 *         : 31.03.2021 3.70    Added support for RX671.
+*         : 15.04.2021 3.80    Added support for RX140.
 *******************************************************************************/
 #ifndef DTC_RX_PRIVATE_H
 #define DTC_RX_PRIVATE_H
@@ -136,6 +137,15 @@ Includes   <System Includes> , "Project Includes"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
+#elif defined(BSP_MCU_RX140)
+    #if (DTC_CFG_USE_DMAC_FIT_MODULE == DTC_ENABLE)
+        #error "This MCU does not have DMAC module."
+        #error "Change to DTC_CFG_USE_DMAC_FIT_MODULE (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
+    #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE) && (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE)
+        #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
+    #include ".\src\targets\rx140\r_dtc_rx_target.h"
 #elif defined(BSP_MCU_RX64M)
     #include ".\src\targets\rx64m\r_dtc_rx_target.h"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)

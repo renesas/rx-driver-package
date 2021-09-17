@@ -26,6 +26,7 @@
 *         : 08.04.2019 1.00     First Release
 *         : 31.07.2019 1.01     Fixed initialization for option-setting memory.
 *         : 08.10.2019 1.02     Changed for added support of Renesas RTOS (RI600V4 or RI600PX).
+*         : 30.06.2021 1.03     Added excep_address_isr in the Exception vector table.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -176,7 +177,7 @@ R_BSP_ATTRIB_SECTION_CHANGE_EXCEPTVECT void (* const Except_Vectors[])(void) =
     excep_access_isr,                  /* 0x54  Exception(Access exception) */
     undefined_interrupt_source_isr,    /* 0x58  Reserved */
     excep_undefined_inst_isr,          /* 0x5c  Exception(Undefined Instruction) */
-    undefined_interrupt_source_isr,    /* 0x60  Reserved */
+    excep_address_isr,                 /* 0x60  Exception(Address exception) */
     excep_floating_point_isr,          /* 0x64  Exception(Floating Point) */
     undefined_interrupt_source_isr,    /* 0x68  Reserved */
     undefined_interrupt_source_isr,    /* 0x6c  Reserved */

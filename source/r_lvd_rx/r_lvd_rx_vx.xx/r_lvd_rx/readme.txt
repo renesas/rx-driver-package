@@ -26,9 +26,6 @@ r_lvd_rx
 |   \---ja
 |       r01an3152jj{VERSION_NUMBER}-rx-lvd.pdf
 |
-+---ref
-|       r_lvd_rx_config_reference.h
-|
 +---src
     |   r_lvd_rx.c
     |   r_lvd_rx_hw.c
@@ -42,63 +39,7 @@ r_lvd_rx
         +---rx111
         |       r_lvd_rx111.h
         |
-        +---rx113
-        |       r_lvd_rx113.h
-        |
-        +---rx130
-        |       r_lvd_rx130.h
-        |
-        +---rx13t
-        |       r_lvd_rx13t.h
-        |
-        +---rx230
-        |       r_lvd_rx230.h
-        |
-        +---rx231
-        |       r_lvd_rx231.h
-        |
-        +---rx23e-a
-        |       r_lvd_rx23e-a.h
-        |
-        +---rx23t
-        |       r_lvd_rx23t.h
-        |
-        +---rx23w
-        |       r_lvd_rx23w.h
-        |
-        +---rx24t
-        |       r_lvd_rx24t.h
-        |
-        +---rx24u
-        |       r_lvd_rx24u.h
-        |
-        +---rx64m
-        |       r_lvd_rx64m.h
-        |
-        +---rx65n
-        |       r_lvd_rx65n.h
-        |
-        +---rx66n
-        |       r_lvd_rx66n.h
-        |
-        +---rx66t
-        |       r_lvd_rx66t.h
-        |
-        +---rx671
-        |       r_lvd_rx671.h
-        |
-        +---rx71m
-        |       r_lvd_rx71m.h
-        |
-        +---rx72m
-        |       r_lvd_rx72m.h
-        |
-        +---rx72n
-        |       r_lvd_rx72n.h
-        |
-        +---rx72t
-        |       r_lvd_rx72t.h
-        |
+        :
 
 r_config
     r_lvd_rx_config.h

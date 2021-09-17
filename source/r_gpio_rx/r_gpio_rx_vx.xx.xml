@@ -66,6 +66,7 @@
         <group omit_board="true">RX113</group>
         <group omit_board="true">RX130</group>
         <group omit_board="true">RX13T</group>
+        <group omit_board="true">RX140</group>
         <group omit_board="true">RX230</group>
         <group omit_board="true">RX231</group>
         <group omit_board="true">RX23T</group>
@@ -93,7 +94,7 @@
         <zipsource>r_gpio_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>6.10</version>
+            <version>6.20</version>
         </dependency>
         <application>I/O Port</application>
         <desc>GPIO Driver</desc>

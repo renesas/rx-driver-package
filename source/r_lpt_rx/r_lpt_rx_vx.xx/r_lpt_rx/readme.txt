@@ -49,6 +49,10 @@ r_lpt_rx
         |      r_lpt_rx130.c
         |      r_lpt_rx130_private.h
         |
+        +---rx140
+        |      r_lpt_rx140.c
+        |      r_lpt_rx140_private.h
+        |
         +---rx230
         |      r_lpt_rx230.c
         |      r_lpt_rx230_private.h

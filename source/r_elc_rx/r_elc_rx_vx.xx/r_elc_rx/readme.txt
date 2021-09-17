@@ -29,10 +29,10 @@ r_elc_rx
 +---doc
 |   |
 |   +-- ja
-|   |   +-- r01an3066jj0200-rx-elc.pdf
+|   |   +-- r01an3066jj0201-rx-elc.pdf
 |   |
 |   +-- en
-|       +-- r01an3066ej0200-rx-elc.pdf
+|       +-- r01an3066ej0201-rx-elc.pdf
 |
 +---ref
 |       r_elc_rx_config_reference.h
@@ -51,6 +51,10 @@ r_elc_rx
         +-- rx130
         |   +-- r_elc_rx130.c
         |   +-- r_elc_rx130_private.h
+        |
+        +-- rx140
+        |   +-- r_elc_rx140.c
+        |   +-- r_elc_rx140_private.h
         |
         +-- rx230
         |   +-- r_elc_rx230.c

@@ -43,7 +43,8 @@
 *           10.06.2020 4.60    Added RX23T and RX24T and RX24U support.
 *           01.03.2021 4.70    Added RX72M 144pins and 100pins support.
 *                              Added RX23W 83pins support.
-*           31.05.2020 4.80    Added RX671 support.
+*           31.05.2021 4.80    Added RX671 support.
+*           30.07.2021 4.90    Added RX140 support.
 *******************************************************************************/
 
 #ifndef S12AD_PRV_PRIVATE_H
@@ -166,6 +167,36 @@ Macro definitions
 #else
     #error "ERROR - BSP_CFG_MCU_PART_PACKAGE - Unknown package chosen in r_bsp_config.h"
 #endif  /* BSP_PACKAGE_PINS == 48 */
+
+#endif
+
+
+#ifdef BSP_MCU_RX140
+
+/* Temp sensor and internal v ref are in bit locations 9 and 10 in each mask for rx140 */
+#if BSP_PACKAGE_PINS == 80
+
+/* valid: 0000 0111 0011 1111 0000 0111 1111 1111; invalid 1111 1000 1100 0000 1111 1000 0000 0000 */
+#define ADC_PRV_INVALID_CH_MASK     (0xF8C0F800)
+
+#elif BSP_PACKAGE_PINS == 64
+
+/* valid: 0000 0000 0011 1111 0000 0111 1111 1111; invalid 1111 1111 1100 0000 1111 1000 0000 0000 */
+#define ADC_PRV_INVALID_CH_MASK     (0xFFC0F800)
+
+#elif BSP_PACKAGE_PINS == 48
+
+/* valid: 0000 0000 0001 1110 0000 0111 1110 0111; invalid 1111 1111 1110 0001 1111 1000 0001 1000 */
+#define ADC_PRV_INVALID_CH_MASK     (0xFFE1F818)
+
+#elif BSP_PACKAGE_PINS == 32
+
+/* valid: 0000 0000 0001 1110 0000 0111 1110 0111; invalid 1111 1111 1110 0001 1111 1000 1111 1000 */
+#define ADC_PRV_INVALID_CH_MASK     (0xFFE1F8F8)
+
+#else
+    #error "ERROR - BSP_CFG_MCU_PART_PACKAGE - Unknown package chosen in r_bsp_config.h"
+#endif /* #if BSP_PACKAGE_PINS == 80 */
 
 #endif
 

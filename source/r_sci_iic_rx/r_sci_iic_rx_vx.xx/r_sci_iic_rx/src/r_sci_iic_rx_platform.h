@@ -40,6 +40,7 @@
  *         : 22.11.2019 2.45     RX66N, RX72N support added.
  *         : 10.03.2020 2.46     RX23E-A support added.
  *         : 30.06.2021 2.48     RX671 support added.
+ *         : 31.07.2021 2.49     RX140 support added.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef SCI_IIC_PLATFORM_H
@@ -58,6 +59,8 @@
         #include "./targets/rx130/r_sci_iic_rx130_private.h"
     #elif defined(BSP_MCU_RX13T)
         #include "./targets/rx13t/r_sci_iic_rx13t_private.h"
+    #elif defined(BSP_MCU_RX140)
+        #include "./targets/rx140/r_sci_iic_rx140_private.h"
     #elif defined(BSP_MCU_RX230)
         #include "./targets/rx230/r_sci_iic_rx230_private.h"
     #elif defined(BSP_MCU_RX231)

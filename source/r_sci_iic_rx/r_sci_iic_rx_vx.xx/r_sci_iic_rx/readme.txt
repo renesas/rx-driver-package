@@ -33,10 +33,6 @@ r_sci_iic_rx
 |   +---ja
 |       r01an1691jj{VERSION_NUMBER}-rx-sci-iic.pdf
 |
-+---ref
-|       r_sci_iic_rx_config_reference.h
-|       r_sci_iic_rx_pin_config_reference.h
-|
 +---src
     |   r_sci_iic_rx.c
     |   r_sci_iic_rx_platform.h
@@ -63,6 +59,10 @@ r_sci_iic_rx
         +---rx13t
         |       r_sci_iic_rx13t.c
         |       r_sci_iic_rx13t_private.h
+        |
+        +---rx140
+        |       r_sci_iic_rx140.c
+        |       r_sci_iic_rx140_private.h
         |
         +---rx230
         |       r_sci_iic_rx230.c

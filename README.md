@@ -1,7 +1,7 @@
 # rx-driver-package
-This is RX Driver Package GitHub repository.
-This is Renesas MCU "RX Family" official device driver package called as "RX Driver Package" GitHub repository. This repository is referred from Renesas tools (Smart Configurator) to download appropriate version for user project. Please refer to the URL below for more information.
-[Renesas official website](https://www.renesas.com/products/software-tools/software-os-middleware-driver/software-package/rx-driver-package.html).
+- This is RX Driver Package GitHub repository.
+- This is Renesas MCU "RX Family" official device driver package called as "RX Driver Package" GitHub repository. This repository is referred from Renesas tools (Smart Configurator) to download appropriate version for user project. Please refer to the URL below for more information.
+  - [Renesas official website](https://www.renesas.com/products/software-tools/software-os-middleware-driver/software-package/rx-driver-package.html).
 
 # License
 - These software:
@@ -16,16 +16,16 @@ This is Renesas MCU "RX Family" official device driver package called as "RX Dri
 - Official package can be installed by SmartConfigurator in automatically.
 - This repository "FITModules" folder can be installed(overwritten) into following folder in manually. SmartConfigurator can detect these FITModules folder.
     - C:\Users\\<user_name>\\.eclipse\com.renesas.platform_download\FITModules
-    
-# early prototype of FIT Modules
-- r_simple_glcdc_config_rx
-- r_simple_graphic_rx
-- r_t4_dns_client_rx
-- r_t4_file_driver_rx
-- r_t4_ftp_server_rx
-- r_t4_http_server_rx
-- r_t4_sntp_client_rx
-- r_wifi_esp32
-- r_wifi_esp8266
-- r_wifi_sx_ulpgn
-- r_st7735_lcd_driver_rx
+- You can update each FIT Modules files by using Makefile (GNU Make 4.3 with ZIP command) command.
+    - make
+        - Latest official package.
+    - make latest
+        - Latest official package. (Same as make command.)
+    - make clean
+        - Clean FITModules folder.
+    - make fix_xml
+        - Modify latest package in versions.xml. 
+    - make update_xml
+        - Add latest package to versions.xml. 
+    - make {GItHub Tags} (e.g. make V1.32)
+        - Get the old version of package. 

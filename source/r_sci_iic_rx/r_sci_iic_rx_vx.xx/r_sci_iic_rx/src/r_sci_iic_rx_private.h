@@ -47,6 +47,7 @@
  *         : 22.11.2019 2.45     RX66N, RX72N support added.
  *         : 10.03.2020 2.46     RX23E-A support added.
  *         : 30.06.2021 2.48     RX671 support added.
+ *         : 31.07.2021 2.49     RX140 support added.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef SCI_IIC_PRIVATE_H

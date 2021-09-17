@@ -55,6 +55,7 @@
 *         : 31.03.2020 3.50    Added support for RX23E-A.
 *         : 30.06.2020 3.60    Changed revision to reflect demo upgrade.
 *         : 31.03.2021 3.70    Added support for RX671.
+*         : 15.04.2021 3.80    Added support for RX140.
 *******************************************************************************/
 #ifndef DTC_RX_IF_H
 #define DTC_RX_IF_H
@@ -77,7 +78,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define DTC_VERSION_MAJOR  (3)
-#define DTC_VERSION_MINOR  (70)
+#define DTC_VERSION_MINOR  (80)
 
 /*******************************************************************************
 Typedef definitions
@@ -238,6 +239,8 @@ typedef struct st_transfer_data { /* 4 long-words */
     #include ".\src\targets\rx111\r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX110)
     #include ".\src\targets\rx110\r_dtc_rx_target_if.h"
+#elif defined(BSP_MCU_RX140)
+    #include ".\src\targets\rx140\r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX64M)
     #include ".\src\targets\rx64m\r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX71M)

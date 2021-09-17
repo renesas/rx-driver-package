@@ -12,7 +12,6 @@ The RIIC is in compliance with single master mode of the XP I2C-bus (Inter-IC-Bu
 The driver supports one channels available on the mcu.
 The driver can be reducedin size by removing code used for parameter checking orfor unused channels.
 These configuration options can be found in "r_config\r_riic_rx_config.h".
-An original copy of the configuration file is stored in "r_riic_rx\ref\r_riic_rx_config_reference.h".
 
 Features
 --------
@@ -35,10 +34,6 @@ r_riic_rx
 |   +---ja
 |       r01an1692jj{VERSION_NUMBER}-rx-riic.pdf
 |
-+---ref
-|       r_riic_rx_config_reference.h
-|       r_riic_rx_pin_config_reference.h
-|
 +---src
     |   r_riic_rx.c
     |   r_riic_rx_private.h
@@ -60,6 +55,10 @@ r_riic_rx
         +---rx130
         |      r_riic_rx130.c
         |      r_riic_rx130_private.h
+        |
+        +---rx140
+        |      r_riic_rx140.c
+        |      r_riic_rx140_private.h
         |
         +---rx13t
         |      r_riic_rx13t.c

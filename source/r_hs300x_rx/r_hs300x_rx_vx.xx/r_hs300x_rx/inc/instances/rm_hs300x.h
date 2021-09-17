@@ -1,4 +1,21 @@
-/* ${REA_DISCLAIMER_PLACEHOLDER} */
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
+* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
+* applicable laws, including copyright laws. 
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
+* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
+* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
+* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
+* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
+* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
 
 /*******************************************************************************************************************//**
  * @addtogroup RM_HS300X
@@ -14,10 +31,12 @@
 #include "rm_hs300x_api.h"
 
 #if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
-#include "r_hs300x_rx_config.h"
+ #include "r_hs300x_rx_config.h"
 #elif defined(__CCRL__) || defined(__ICCRL__) || defined(__RL78__)
+ #include "r_hs300x_rl_config.h"
 #else
-#include "rm_hs300x_cfg.h"
+ #include "rm_hs300x_cfg.h"
+
 /* Common macro for FSP header files. There is also a corresponding FSP_FOOTER macro at the end of this file. */
 FSP_HEADER
 #endif
@@ -30,13 +49,23 @@ FSP_HEADER
  * Typedef definitions
  **********************************************************************************************************************/
 
+/** HS300X programming mode process block */
+typedef struct st_rm_hs300x_programmnig_mode_params
+{
+    volatile bool              enter;                  ///< Enter flag.
+    volatile bool              blocking;               ///< Blocking flag.
+    volatile bool              communication_finished; ///< Communication flag for blocking.
+    volatile rm_hs300x_event_t event;                  ///< Callback event
+} rm_hs300x_programmnig_mode_params_t;
+
 /** HS300x Control Block */
 typedef struct rm_hs300x_instance_ctrl
 {
-    uint32_t                    open;                 ///< Open flag
-    rm_hs300x_cfg_t const     * p_cfg;                ///< Pointer to HS300X Configuration
-    rm_comms_instance_t const * p_comms_i2c_instance; ///< Pointer of I2C Communications Middleware instance structure
-    void const                * p_context;            ///< Pointer to the user-provided context
+    uint32_t                            open;                 ///< Open flag
+    rm_hs300x_cfg_t const             * p_cfg;                ///< Pointer to HS300X Configuration
+    rm_comms_instance_t const         * p_comms_i2c_instance; ///< Pointer of I2C Communications Middleware instance structure
+    void const                        * p_context;            ///< Pointer to the user-provided context
+    rm_hs300x_programmnig_mode_params_t programming_mode;     ///< Programming mode flag
 
     /* Pointer to callback and optional working memory */
     void (* p_callback)(rm_hs300x_callback_args_t * p_args);
@@ -58,12 +87,16 @@ extern rm_hs300x_api_t const g_hs300x_on_hs300x;
 fsp_err_t RM_HS300X_Open(rm_hs300x_ctrl_t * const p_api_ctrl, rm_hs300x_cfg_t const * const p_cfg);
 fsp_err_t RM_HS300X_Close(rm_hs300x_ctrl_t * const p_api_ctrl);
 fsp_err_t RM_HS300X_MeasurementStart(rm_hs300x_ctrl_t * const p_api_ctrl);
-fsp_err_t RM_HS300X_Read(rm_hs300x_ctrl_t * const     p_api_ctrl,
-                         rm_hs300x_raw_data_t * const p_raw_data);
+fsp_err_t RM_HS300X_Read(rm_hs300x_ctrl_t * const p_api_ctrl, rm_hs300x_raw_data_t * const p_raw_data);
 fsp_err_t RM_HS300X_DataCalculate(rm_hs300x_ctrl_t * const     p_api_ctrl,
                                   rm_hs300x_raw_data_t * const p_raw_data,
                                   rm_hs300x_data_t * const     p_hs300x_data);
-void rm_hs300x_callback (rm_comms_callback_args_t * p_args);
+fsp_err_t RM_HS300X_ProgrammingModeEnter(rm_hs300x_ctrl_t * const p_api_ctrl);
+fsp_err_t RM_HS300X_ResolutionChange(rm_hs300x_ctrl_t * const     p_api_ctrl,
+                                     rm_hs300x_data_type_t const  data_type,
+                                     rm_hs300x_resolution_t const resolution);
+fsp_err_t RM_HS300X_SensorIdGet(rm_hs300x_ctrl_t * const p_api_ctrl, uint32_t * const p_sensor_id);
+fsp_err_t RM_HS300X_ProgrammingModeExit(rm_hs300x_ctrl_t * const p_api_ctrl);
 
 #if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
 #elif defined(__CCRL__) || defined(__ICCRL__) || defined(__RL78__)

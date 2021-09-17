@@ -28,9 +28,6 @@ r_iwdt_rx
 |    +--en
 |         +-- r01an1820ej{VERSION_NUMBER}-rx-iwdt.pdf
 |
-+---ref
-|    +-- r_iwdt_rx_config_reference.h
-|
 +---src
      +-- r_iwdt_rx.c
 

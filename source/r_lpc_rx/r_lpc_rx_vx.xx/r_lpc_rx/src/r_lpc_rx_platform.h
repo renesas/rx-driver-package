@@ -28,6 +28,7 @@
  *         : 14.11.2019 2.00    Removed RX210.
  *         : 10.06.2020 2.01    Added RX65N, RX66N, RX72M and RX72N.
  *         : 05.03.2021 2.02    Added RX671.
+ *         : 31.07.2021 2.03    Added RX140.
  ***********************************************************************************************************************/
 #ifndef R_LPC_RX_PLATFORM_H
     #define R_LPC_RX_PLATFORM_H
@@ -44,6 +45,8 @@
         #include "./targets/rx113/r_lpc_rx113_if.h"
     #elif defined(BSP_MCU_RX130)
         #include "./targets/rx130/r_lpc_rx130_if.h"
+    #elif defined(BSP_MCU_RX140)
+        #include "./targets/rx140/r_lpc_rx140_if.h"
     #elif defined(BSP_MCU_RX230)
         #include "./targets/rx230/r_lpc_rx230_if.h"
     #elif defined(BSP_MCU_RX231)

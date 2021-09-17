@@ -33,6 +33,7 @@
 *                              Merged IrDA functionality to SCI FIT.
 *           31.03.2021 3.80    Added support for RX671.
 *                              Added support for bit number of SCI FIT.
+*           15.04.2021 3.90    Added support for RX140.
 ***********************************************************************************************************************/
 
 #ifndef SCI_RX_H
@@ -297,6 +298,11 @@ extern void eri_handler(sci_hdl_t const hdl);
         #error "Change to SCI_CFG_CHxx_TX_DTC_DMACA_ENABLE and SCI_CFG_CHxx_RX_DTC_DMACA_ENABLE (1) or (0) in r_sci_rx_config.h."
     #endif
 #elif defined(BSP_MCU_RX110)
+    #if ((SCI_DMACA_ENABLE == (TX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)) || (SCI_DMACA_ENABLE == (RX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)))
+        #error "This MCU does not have DMAC module."
+        #error "Change to SCI_CFG_CHxx_TX_DTC_DMACA_ENABLE and SCI_CFG_CHxx_RX_DTC_DMACA_ENABLE (1) or (0) in r_sci_rx_config.h."
+    #endif
+#elif defined(BSP_MCU_RX140)
     #if ((SCI_DMACA_ENABLE == (TX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)) || (SCI_DMACA_ENABLE == (RX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)))
         #error "This MCU does not have DMAC module."
         #error "Change to SCI_CFG_CHxx_TX_DTC_DMACA_ENABLE and SCI_CFG_CHxx_RX_DTC_DMACA_ENABLE (1) or (0) in r_sci_rx_config.h."

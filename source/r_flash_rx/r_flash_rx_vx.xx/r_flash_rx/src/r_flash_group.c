@@ -51,6 +51,7 @@
 *                                   Changed to call internal function.
 *                                   Modified compile condition of the 256k boundary for erase and blank check.
 *                                   Modified minor problem.
+*              : 23.04.2021 4.80    Added support for RX140.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -59,6 +60,7 @@ Includes   <System Includes> , "Project Includes"
 #include "r_flash_rx_if.h"
 #include "r_flash_rx.h"
 #include "r_flash_fcu.h"
+#include "r_flash_nofcu.h"
 #include "r_flash_group.h"
 
 /***********************************************************************************************************************
@@ -198,6 +200,10 @@ static flash_err_t set_non_cached_regs(flash_non_cached_t *p_cfg, flash_non_cach
 *                    Open() has been called twice without an intermediate Close().
 *                FLASH_ERR_FAILURE
 *                    Initialization failed.
+*                FLASH_ERR_FREQUENCY
+*                    Illegal flash frequency.
+*                FLASH_ERR_HOCO
+*                    HOCO not running.
 ***********************************************************************************************************************/
 flash_err_t r_flash_open(void)
 {
@@ -215,6 +221,12 @@ flash_err_t r_flash_open(void)
     {
         return FLASH_ERR_FREQUENCY;
     }
+#if (FLASH_TYPE == FLASH_TYPE_1) && (FLASH_TYPE_VARIETY == FLASH_TYPE_VARIETY_A)
+    if (1 == SYSTEM.HOCOCR.BIT.HCSTP)
+    {
+        return FLASH_ERR_HOCO;
+    }
+#endif
 #endif
     /* Lock driver to initialize */
     if (FLASH_SUCCESS != flash_lock_state(FLASH_INITIALIZATION))
@@ -239,7 +251,7 @@ flash_err_t r_flash_open(void)
     /* Disable Interrupts. Enabled when callback set with Control() FLASH_CMD_SET_BGO_CALLBACK. */
     flash_interrupt_config(false, NULL);
 
-#if ((FLASH_TYPE == 1) && !defined(FLASH_NO_DATA_FLASH))
+#if ((FLASH_TYPE == FLASH_TYPE_1) && !defined(FLASH_NO_DATA_FLASH))
     R_DF_Enable_DataFlashAccess();
 #endif
 

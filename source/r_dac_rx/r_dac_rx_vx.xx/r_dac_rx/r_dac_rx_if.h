@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_dac_rx_if.h
@@ -45,7 +45,8 @@
 *                              Removed support for Generation 1 devices
 *           30.12.2019 4.40    Added support for RX72N, RX66N.
 *                              Added support for RX65N, RX72M Amplifier Stabilization Wait Control.
-*         : 30.06.2020 4.50    Changed revision to reflect demo upgrade.
+*           30.06.2020 4.50    Changed revision to reflect demo upgrade.
+*           15.04.2021 4.60    Added support for RX140.
 ***********************************************************************************************************************/
 #ifndef DAC_RX_IF_H
 #define DAC_RX_IF_H
@@ -66,7 +67,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define DAC_VERSION_MAJOR  (4)
-#define DAC_VERSION_MINOR  (50)
+#define DAC_VERSION_MINOR  (60)
 
 
 #if defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX13T)
@@ -153,7 +154,7 @@ typedef struct st_dac_cfg
     dac_out_ref out_sel_ref;                    // 1 for output channel 0 as Vref, 2 for output channel 1 as Vref
 } dac_cfg_t;
 
-#else //defined(BSP_MCU_RX130) || defined(BSP_MCU_RX24U)
+#else //defined(BSP_MCU_RX130) || defined(BSP_MCU_RX24U) || defined(BSP_MCU_RX140)
 typedef struct st_dac_cfg
 {
     bool        fmt_flush_right;

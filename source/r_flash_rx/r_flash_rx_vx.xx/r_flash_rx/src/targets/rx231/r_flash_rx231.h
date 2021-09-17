@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2021 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /******************************************************************************
 * File Name    : r_flash_rx231.h
@@ -33,6 +33,7 @@
 *                              FLASH_CF_LOWEST_VALID_BLOCK and FLASH_CF_BLOCK_INVALID.
 *         : 25.05.2017 2.10    Removed equates for MCU_CFG_PART_MEMORY_SIZE 3.
 *         : 07.08.2017 2.20    Added WAIT_MAX_ERASE_DF alias.
+*         : 07.06.2021 4.80    Added WAIT_MAX_EXRDY_CMD_TIMEOUT.
 ******************************************************************************/
 
 #ifndef _FLASH_API_RX231_H
@@ -400,5 +401,13 @@ typedef enum _flash_block_address
 
 #define WAIT_MAX_ERASE_CF   WAIT_MAX_ERASE_CF_1K
 #define WAIT_MAX_ERASE_DF   WAIT_MAX_ERASE_DF_1K
+
+/*  According to HW Manual the Max Setting Time for Start-up area switching and Access window is around 573.3ms.
+    This is with a FCLK of 1MHz. 
+    The calculation below calculates the number of ICLK ticks needed for the timeout delay.
+    The 573.3ms number is adjusted linearly depending on the FCLK frequency.
+*/
+#define WAIT_MAX_EXRDY_CMD_TIMEOUT \
+        ((int32_t)(573300 *(MCU_CFG_ICLK_HZ/1000000)))
 
 #endif /* _FLASH_API_RX231_H */

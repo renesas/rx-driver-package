@@ -1,4 +1,21 @@
-/* ${REA_DISCLAIMER_PLACEHOLDER} */
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
+* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
+* applicable laws, including copyright laws. 
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
+* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
+* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
+* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
+* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
+* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
 
 /*******************************************************************************************************************//**
  * @ingroup RENESAS_INTERFACES
@@ -48,6 +65,7 @@ FSP_HEADER
 /**********************************************************************************************************************
  * Typedef definitions
  **********************************************************************************************************************/
+
 /** Event in the callback function */
 typedef enum e_rm_hs300x_event
 {
@@ -55,10 +73,26 @@ typedef enum e_rm_hs300x_event
     RM_HS300X_EVENT_ERROR,
 } rm_hs300x_event_t;
 
+/** Data type of HS300X */
+typedef enum e_rm_hs300x_data_type
+{
+    RM_HS300X_HUMIDITY_DATA = 0,
+    RM_HS300X_TEMPERATURE_DATA,
+} rm_hs300x_data_type_t;
+
+/** Resolution type of HS300X */
+typedef enum e_rm_hs300x_resolution
+{
+    RM_HS300X_RESOLUTION_8BIT  = 0x00,
+    RM_HS300X_RESOLUTION_10BIT = 0x04,
+    RM_HS300X_RESOLUTION_12BIT = 0x08,
+    RM_HS300X_RESOLUTION_14BIT = 0x0C,
+} rm_hs300x_resolution_t;
+
 /** HS300X callback parameter definition */
 typedef struct st_rm_hs300x_callback_args
 {
-    void const * p_context;
+    void const      * p_context;
     rm_hs300x_event_t event;
 } rm_hs300x_callback_args_t;
 
@@ -86,9 +120,9 @@ typedef struct st_rm_hs300x_data
 /** HS300X Configuration */
 typedef struct st_rm_hs300x_cfg
 {
-    rm_comms_instance_t const * p_instance; ///< Pointer to Communications Middleware instance.
-    void const                * p_context;  ///< Pointer to the user-provided context.
-    void const                * p_extend;   ///< Pointer to extended configuration by instance of interface.
+    rm_comms_instance_t const * p_instance;                  ///< Pointer to Communications Middleware instance.
+    void const                * p_context;                   ///< Pointer to the user-provided context.
+    void const                * p_extend;                    ///< Pointer to extended configuration by instance of interface.
     void (* p_callback)(rm_hs300x_callback_args_t * p_args); ///< Pointer to callback function.
 } rm_hs300x_cfg_t;
 
@@ -137,6 +171,42 @@ typedef struct st_rm_hs300x_api
      */
     fsp_err_t (* dataCalculate)(rm_hs300x_ctrl_t * const p_ctrl, rm_hs300x_raw_data_t * const p_raw_data,
                                 rm_hs300x_data_t * const p_hs300x_data);
+
+    /** Enter the programming mode.
+     * @par Implemented as
+     * - @ref RM_HS300X_ProgrammingModeEnter()
+     *
+     * @param[in]  p_ctrl           Pointer to control structure.
+     */
+    fsp_err_t (* programmingModeEnter)(rm_hs300x_ctrl_t * const p_ctrl);
+
+    /** Change the sensor resolution.
+     * @par Implemented as
+     * - @ref RM_HS300X_ResolutionChange()
+     *
+     * @param[in]  p_ctrl           Pointer to control structure.
+     * @param[in]  data_type        Data type of HS300X.
+     * @param[in]  resolution       Resolution type of HS300X.
+     */
+    fsp_err_t (* resolutionChange)(rm_hs300x_ctrl_t * const p_ctrl, rm_hs300x_data_type_t const data_type,
+                                   rm_hs300x_resolution_t const resolution);
+
+    /** Get the sensor ID.
+     * @par Implemented as
+     * - @ref RM_HS300X_SensorIdGet()
+     *
+     * @param[in]  p_ctrl           Pointer to control structure.
+     * @param[in]  p_sensor_id      Pointer to sensor ID of HS300X.
+     */
+    fsp_err_t (* sensorIdGet)(rm_hs300x_ctrl_t * const p_ctrl, uint32_t * const p_sensor_id);
+
+    /** Exit the programming mode.
+     * @par Implemented as
+     * - @ref RM_HS300X_ProgrammingModeExit()
+     *
+     * @param[in]  p_ctrl           Pointer to control structure.
+     */
+    fsp_err_t (* programmingModeExit)(rm_hs300x_ctrl_t * const p_ctrl);
 
     /** Close HS300X.
      * @par Implemented as

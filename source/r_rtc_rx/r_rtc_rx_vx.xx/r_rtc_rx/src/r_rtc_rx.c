@@ -47,6 +47,7 @@
 *           22.11.2019 2.78    Added support for RX66N and RX72N.
 *                              Modified comment of API function to Doxygen style.
 *           30.06.2021 2.81    Added support for RX671.
+*           31.07.2021 2.82    Added support for RX140.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -393,7 +394,7 @@ rtc_err_t R_RTC_Control (rtc_cmd_t cmd, void *p_args)
     rtc_periodic_cfg_t  *p_periodic;
     rtc_alarm_ctrl_t    *p_alm_ctrl;
     tm_t                *p_time;
-#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130)
+#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130) && !defined(BSP_MCU_RX140)
     rtc_capture_cfg_t   *p_capture;
     rtc_pin_t           pin;
 #endif
@@ -492,7 +493,7 @@ rtc_err_t R_RTC_Control (rtc_cmd_t cmd, void *p_args)
             rtc_reset();
         break;
 
-#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130)
+#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130) && !defined(BSP_MCU_RX140)
         case RTC_CMD_CONFIG_CAPTURE :
             p_capture = (rtc_capture_cfg_t *) p_args;
 #if (RTC_CFG_PARAM_CHECKING_ENABLE)
@@ -531,7 +532,7 @@ rtc_err_t R_RTC_Control (rtc_cmd_t cmd, void *p_args)
             rtc_disable_capture(pin);
         break;
 
-#endif /* not RX11x, RX130 */
+#endif /* not RX11x, RX130, RX140 */
 
         default :
             return RTC_ERR_BAD_PARAM;

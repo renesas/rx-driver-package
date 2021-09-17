@@ -46,6 +46,7 @@
  *                               Modified comment of API function to Doxygen style.
  *         : 10.03.2020 2.46     RX23E-A support added.
  *         : 30.06.2021 2.48     RX671 support added.
+ *         : 31.07.2021 2.49     RX140 support added.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  Includes   <System Includes> , "Project Includes"
@@ -590,6 +591,7 @@ sci_iic_return_t R_SCI_IIC_GetStatus (sci_iic_info_t *p_sci_iic_info, sci_iic_mc
 static sci_iic_return_t sci_iic_getstatus (sci_iic_info_t * p_sci_iic_info, sci_iic_mcu_status_t * p_sci_iic_status)
 {
     sci_iic_mcu_status_t sts_flag;
+	sts_flag.LONG = 0;
     sci_regs_t pregs = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom->regs;
     R_BSP_VOLATILE_EVENACCESS uint8_t * const ppidr = SCI_IIC_PRV_PIDR_BASE_REG;
     R_BSP_VOLATILE_EVENACCESS const sci_iic_ch_rom_t * prom = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom;

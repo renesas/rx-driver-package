@@ -59,6 +59,7 @@
 *                              - RTC_CAPTURE_TAMPICR1_CH0EN
 *                              - RTC_CAPTURE_TAMPICR1_CH1EN
 *                              - RTC_CAPTURE_TAMPICR1_CH2EN
+*           31.07.2021 2.82    Added support for RX140.
 ***********************************************************************************************************************/
 
 #ifndef R_RTC_PRIVATE_H
@@ -90,6 +91,7 @@ Macro definitions
 #define RTC_DUMMY_READ          (3)     /* Three times of dummy read */
 
 
+#if !defined(BSP_MCU_RX140)
 #if !defined(RTC_CFG_DRIVE_CAPACITY_LO) && !defined(RTC_CFG_DRIVE_CAPACITY_MD) && !defined(RTC_CFG_DRIVE_CAPACITY_HI) && !defined(RTC_CFG_DRIVE_CAPACITY_STD)
     #error "ERROR - A drive capacity #define must be uncommented in r_rtc_rx_config.h"
 #endif
@@ -134,6 +136,7 @@ Macro definitions
         #error "ERROR - RTC_CFG_DRIVE_CAPACITY_HI in r_rtc_rx_config.h is invalid selection for MCU."
     #endif
 #endif
+#endif
 
 
 /***********************************************************************************************************************
@@ -170,7 +173,7 @@ typedef struct  /* maps to portion of st_rtc in iodefine.h */
 Exported global functions (to be accessed by other files)
 ***********************************************************************************************************************/
 
-#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130)
+#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130) && !defined(BSP_MCU_RX140)
 extern volatile rtc_cap_ctrl_t  *g_pcap_ctrl;
 extern volatile rtc_cap_time_t  *g_pcap_time;
 void            rtc_config_capture(rtc_capture_cfg_t *p_capture);

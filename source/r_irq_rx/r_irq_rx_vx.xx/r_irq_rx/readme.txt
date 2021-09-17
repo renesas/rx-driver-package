@@ -44,9 +44,6 @@ r_irq_rx\
 |   +---ja\
 |       r01an1668jj{VERSION_NUMBER}-rx-int.pdf
 |
-+---ref\
-|       r_irq_rx_config_reference.h
-|
 +---src\
         r_irq_rx_private.h
         r_irq_rx.c

@@ -14,15 +14,17 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2020 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_lpt_rx_config.h
-* Version      : 1.0
+* Version      : 2.01
 * Description  : Functions for using even link controller
 ************************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 01.03.2016 1.00    First Release
+*         : 25.09.2020 2.01    Added support for RX140
+*                              Added PWM output
 ***********************************************************************************************************************/
 #ifndef LPT_CONFIG_H
 #define LPT_CONFIG_H
@@ -39,6 +41,7 @@
 /* LPT (Low Power Timer) Clock source select (LPTCR1.LPCNTCKSEL)
    0 = Sub-clock oscillator
    1 = IWDT-dedicated on-chip oscillator
+   2 = Low-speed on-chip oscillator
 */ 
 #ifndef BSP_CFG_LPT_CLOCK_SOURCE
 #define LPT_CFG_LPT_CLOCK_SOURCE    (0)

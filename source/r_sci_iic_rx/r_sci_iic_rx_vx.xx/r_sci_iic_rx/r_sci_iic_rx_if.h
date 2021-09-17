@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer 
  *
- * Copyright (C) 2013(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2013(2021) Renesas Electronics Corporation. All rights reserved.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_sci_iic_rx_if.h
@@ -46,6 +46,7 @@
  *         : 10.03.2020 2.46     Changed minor version to '46' for RX23E-A support.
  *         : 30.10.2020 2.47     Changed minor version to '47' for e2studio 2020-10 support.
  *         : 30.06.2021 2.48     Changed minor version to '48' for RX671 support.
+ *         : 31.07.2021 2.49     Changed minor version to '49' for RX140 support.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef SCI_IIC_IF_H
@@ -63,7 +64,7 @@ R_BSP_PRAGMA_UNPACK
 
  /* Version Number of API. */
     #define SCI_IIC_VERSION_MAJOR  (2)
-    #define SCI_IIC_VERSION_MINOR  (48)
+    #define SCI_IIC_VERSION_MINOR  (49)
 
 /*----------------------------------------------------------------------------*/
 /*   Define return values and values of channel state flag.                   */

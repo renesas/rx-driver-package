@@ -57,6 +57,7 @@
 *                               Fixed two warning when the MCU is RX111 etc., the unused function(rspi_spei_grp_isr) 
 *                               and variable(int_ctrl) will be valid.
 *                               Added communication completion interrupt for rx671.
+*           31.07.2021 3.02     Supported RX140.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -435,7 +436,7 @@ rspi_err_t   R_RSPI_Open(uint8_t                channel,
     (*g_rspi_channels[channel]).SPCMD0.BIT.CPOL = spcmd_command_word.cpol;
 
 #if defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || defined BSP_MCU_RX72T || defined BSP_MCU_RX72M \
-    || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N
+    || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || defined BSP_MCU_RX140
     /* Set RSPI data control register 2 (SPDCR2) */
     (*g_rspi_channels[channel]).SPDCR2.BYTE = (uint8_t)(my_settings->spdcr2_val & RSPI_SPDCR2_MASK);
 #elif defined BSP_MCU_RX671
@@ -647,7 +648,7 @@ rspi_err_t  R_RSPI_Control(rspi_handle_t handle,
         /* Set slave select polarity register (SSLP). */
             (*g_rspi_channels[channel]).SSLP.BYTE = (uint8_t)(p_setregs_struct->sslp_val & RSPI_SSLP_MASK);
         #if defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || defined BSP_MCU_RX72T || defined BSP_MCU_RX72M \
-             || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N
+             || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || defined BSP_MCU_RX140
             /* Set RSPI data control register 2 (SPDCR2) */
             (*g_rspi_channels[channel]).SPDCR2.BYTE = (uint8_t)(p_setregs_struct->spdcr2_val & RSPI_SPDCR2_MASK);
         #elif defined BSP_MCU_RX671
@@ -964,7 +965,7 @@ static rspi_err_t  rspi_write_read_common(rspi_handle_t handle,
     g_rspi_tcb[channel].transfer_mode = tx_rx_mode;
 
 #if defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || defined BSP_MCU_RX72T || defined BSP_MCU_RX72M \
-    || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || defined BSP_MCU_RX671
+    || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || defined BSP_MCU_RX671 || defined BSP_MCU_RX140
     if ((RSPI_TRANS_MODE_DMAC == g_rspi_tcb [channel] .data_tran_mode) ||
        (RSPI_TRANS_MODE_DTC == g_rspi_tcb [channel] .data_tran_mode))
     {
@@ -2990,11 +2991,11 @@ static void rspi_spci_isr_common(uint8_t channel)
 * Arguments    :    N/A
 * Return Value :    N/A
 ******************************************************************************/
-    R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spci0_isr, VECT(RSPI0, SPCI0))
-    R_BSP_ATTRIB_INTERRUPT void rspi_spci0_isr(void)
-    {
-        rspi_spci_isr_common(0);
-    } /* end rspi_spci0_isr */
+R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spci0_isr, VECT(RSPI0, SPCI0))
+R_BSP_ATTRIB_INTERRUPT void rspi_spci0_isr(void)
+{
+    rspi_spci_isr_common(0);
+} /* end rspi_spci0_isr */
 #endif
 
 #if RSPI_CFG_USE_CHAN1 == 1
@@ -3005,26 +3006,26 @@ static void rspi_spci_isr_common(uint8_t channel)
 * Arguments    :    N/A
 * Return Value :    N/A
 ******************************************************************************/
-    R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spci1_isr, VECT(RSPI1, SPCI1))
-    R_BSP_ATTRIB_INTERRUPT void rspi_spci1_isr(void)
-    {
-        rspi_spci_isr_common(1);
-    } /* end rspi_spci1_isr */
+R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spci1_isr, VECT(RSPI1, SPCI1))
+R_BSP_ATTRIB_INTERRUPT void rspi_spci1_isr(void)
+{
+    rspi_spci_isr_common(1);
+} /* end rspi_spci1_isr */
 #endif
 
 #if RSPI_CFG_USE_CHAN2 == 1
-    /******************************************************************************
-    * Function Name:    rspi_spci2_isr
-    * Description  :    RSPI SPCI Communication End ISR.
-    *                   Each ISR calls a common function but passes its channel number.
-    * Arguments    :    N/A
-    * Return Value :    N/A
-    ******************************************************************************/
-    R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spci2_isr, VECT(RSPI2, SPCI2))
-    R_BSP_ATTRIB_INTERRUPT void rspi_spci2_isr(void)
-    {
-        rspi_spci_isr_common(2);
-    } /* end rspi_spci2_isr */
+/******************************************************************************
+* Function Name:    rspi_spci2_isr
+* Description  :    RSPI SPCI Communication End ISR.
+*                   Each ISR calls a common function but passes its channel number.
+* Arguments    :    N/A
+* Return Value :    N/A
+******************************************************************************/
+R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spci2_isr, VECT(RSPI2, SPCI2))
+R_BSP_ATTRIB_INTERRUPT void rspi_spci2_isr(void)
+{
+    rspi_spci_isr_common(2);
+} /* end rspi_spci2_isr */
 #endif
 #endif
 /* end SPRI  */

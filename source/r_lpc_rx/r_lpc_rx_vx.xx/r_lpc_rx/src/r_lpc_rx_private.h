@@ -18,13 +18,14 @@
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_lpc_rx_private.h
- * Version      : 1.0
+ * Version      : 2.03
  * Description  : The LPC module configures the MCU for the different operating and low power modes.
  *                This file is the LPC module's interface header file and should be included by the application that
  *                intends to use the API.
  ************************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *           01.10.2016 1.0     Initial Release
+ *           31.07.2021 2.03    Add lpc_snooze_mode_configure() function declaration　for rx140
  ***********************************************************************************************************************/
 #ifndef R_LPC_RX_PRIVATE_H
     #define R_LPC_RX_PRIVATE_H
@@ -48,8 +49,9 @@ lpc_err_t lpc_operating_mode_set (lpc_operating_mode_t e_mode);
 lpc_err_t lpc_low_power_mode_configure (lpc_low_power_mode_t e_mode);
 lpc_err_t lpc_lowpower_activate (lpc_callback_set_t pcallback);
 lpc_err_t lpc_return_clock_switch (lpc_clock_switch_t e_clock_source, bool enable);
-
-
+#ifdef LPC_VALID_SNOOZE_MODE
+lpc_err_t lpc_snooze_mode_configure(lpc_snooze_mode_t * snooze_mode);
+#endif
 #endif /* R_LPC_RX_PRIVATE_H */
 /***********************************************************************************************************************
  * End of File

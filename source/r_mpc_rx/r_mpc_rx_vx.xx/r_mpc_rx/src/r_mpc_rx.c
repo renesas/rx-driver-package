@@ -38,6 +38,7 @@
 *         : 25.11.2019 3.30    Added support RX13T
 *                              Modified comment of API function to Doxygen style
 *         : 30.12.2019 3.40    Added support RX72N, RX66N
+*         : 15.04.2021 4.00    Updated Doxygen comment.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -75,7 +76,7 @@ static uint8_t volatile * mpc_base_addr_get(uint8_t volatile * base_addr, uint16
 ********************************************************************************************************************//**
 * @brief This function reads the function configuration of a pin.
 * @param[in] pin - Which pin to read configuration information for.
-* @param[in] pconfig - Pointer to structure where pin configuration information will be stored. See Section 2.9.1, MPC
+* @param[in] pconfig - Pointer to structure where pin configuration information will be stored. See Section 2.10.1, MPC
 * Pin Configuration.
 * @details This function will read the configuration information for a pin and store it in a structure supplied by the
 * user.
@@ -117,7 +118,7 @@ void R_MPC_Read (gpio_port_pin_t pin, mpc_config_t * pconfig)
 ********************************************************************************************************************//**
 * @brief This function sets the function of a pin.
 * @param[in] pin - Which pin to configure.
-* @param[in] pconfig - Pointer to structure with pin configuration information. See section 2.9.1, MPC Pin
+* @param[in] pconfig - Pointer to structure with pin configuration information. See section 2.10.1, MPC Pin
 * Configuration.
 * @retval [MPC_SUCCESS] Successful; pin configured.
 * @retval [MPC_ERR_INVALID_CFG] Error; invalid configuration input.

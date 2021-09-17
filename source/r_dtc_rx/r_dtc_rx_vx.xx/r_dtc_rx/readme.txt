@@ -5,7 +5,7 @@ r_dtc_rx
 
 Version
 -------
-v3.70
+v3.80
 
 Overview
 --------
@@ -26,6 +26,7 @@ Supported MCUs
 * RX111 MCU
 * RX113 MCU
 * RX130 MCU
+* RX140 MCU
 * RX230 MCU
 * RX231 MCU
 * RX23E-A MCU
@@ -95,9 +96,6 @@ r_dtc_rx
 |   |       r01an1819ej{VERSION_NUMBER}-rx-dtc-dmac2.pdf
 |   +---ja
 |           r01an1819jj{VERSION_NUMBER}-rx-dtc-dmac2.pdf
-|
-+---ref
-|       r_dtc_rx_config_reference.h
 |
 +---src
     |   r_dtc_rx.c
@@ -191,6 +189,11 @@ r_dtc_rx
         |       r_dtc_rx_target_if.h
         |
         +---rx13t
+        |       r_dtc_rx_target.c
+        |       r_dtc_rx_target.h
+        |       r_dtc_rx_target_if.h
+        |
+        +---rx140
         |       r_dtc_rx_target.c
         |       r_dtc_rx_target.h
         |       r_dtc_rx_target_if.h

@@ -47,6 +47,7 @@
 *           31.03.2020 3.50    Added support for RX23E-A.
 *         : 30.06.2020 3.60    Changed revision to reflect demo upgrade.
 *           31.03.2021 3.70    Added support for RX671.
+*           15.04.2021 3.80    Added support for RX140.
 ***********************************************************************************************************************/
 
 #ifndef IWDT_RX_IF_H
@@ -67,7 +68,7 @@ Macro definitions
 #endif
 /* Version Number of API. */
 #define IWDT_RX_VERSION_MAJOR   (3)
-#define IWDT_RX_VERSION_MINOR   (70)
+#define IWDT_RX_VERSION_MINOR   (80)
 
 #define OFS0_IWDT_DISABLED      (0x00000002)
 
@@ -97,7 +98,7 @@ typedef enum e_iwdt_err       // IWDT API error codes
 
 typedef enum e_iwdt_timeout           // IWDT Time-Out Period
 {
-#if defined(BSP_MCU_RX11_ALL) || defined(BSP_MCU_RX130) || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX23_ALL) || defined(BSP_MCU_RX24U)
+#if defined(BSP_MCU_RX11_ALL) || defined(BSP_MCU_RX130) || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX23_ALL) || defined(BSP_MCU_RX24U)|| defined(BSP_MCU_RX140)
     IWDT_TIMEOUT_128 =0x0000u,        // 128  (cycles) 
     IWDT_TIMEOUT_512 =0x0001u,        // 512  (cycles)
     IWDT_TIMEOUT_1024=0x0002u,        // 1024 (cycles)

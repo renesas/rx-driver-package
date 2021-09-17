@@ -49,6 +49,7 @@
 *           01.03.2021 4.70    Added RX72M 144pins and 100pins support.
 *                              Added RX23W 83pins support.
 *           31.05.2021 4.80    Added RX671 support.
+*           30.07.2021 4.90    Added RX140 support.
 ***********************************************************************************************************************/
 
 #ifndef S12AD_PRV_IF_H
@@ -71,6 +72,8 @@ Includes   <System Includes> , "Project Includes"
 #include "./src/targets/rx130/r_s12ad_rx130_if.h"
 #elif defined(BSP_MCU_RX13T)
 #include "./src/targets/rx13T/r_s12ad_rx13t_if.h"
+#elif defined(BSP_MCU_RX140)
+#include "./src/targets/rx140/r_s12ad_rx140_if.h"
 #elif defined(BSP_MCU_RX230)
 #include "./src/targets/rx230/r_s12ad_rx230_if.h"
 #elif defined(BSP_MCU_RX231)
@@ -110,7 +113,7 @@ Macro definitions
 *******************************************************************************/
 /* Version Number of API. */
 #define ADC_VERSION_MAJOR       (4)
-#define ADC_VERSION_MINOR       (80)
+#define ADC_VERSION_MINOR       (90)
 
 /*****************************************************************************
 Typedef definitions

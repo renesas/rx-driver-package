@@ -25,6 +25,8 @@
         <version>4.08.04.201902</version>
         <version>8.03.00.201904</version>
         <version>8.03.00.202002</version>
+        <version>8.03.00.202004</version>
+        <version>8.03.00.202102</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -34,6 +36,7 @@
         <version>4.12.01</version>
         <version>4.13.01</version>
         <version>4.14.01</version>
+        <version>4.20.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -47,6 +50,7 @@
         <group omit_board="true">RX111</group>
         <group omit_board="true">RX113</group>
         <group omit_board="true">RX130</group>
+        <group omit_board="true">RX140</group>
         <group omit_board="true">RX230</group>
         <group omit_board="true">RX231</group>
         <group omit_board="true">RX23E-A</group>
@@ -74,7 +78,7 @@
         <zipsource>r_rspi_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>6.10</version>
+            <version>6.20</version>
         </dependency>
         <application>Serial Communications</application>
         <desc>RSPI Driver</desc>
@@ -85,7 +89,7 @@
         <incdir>r_rspi_rx/src</incdir>
     </package>
     <sampleapplicationnote>
-        <documentno>R01AN2662</documentno>
+        <documentno>R01AN1827</documentno>
     </sampleapplicationnote>
 
 </refinfo>

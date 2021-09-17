@@ -31,9 +31,6 @@ r_dac_rx
 |    +[en]
 |      +-- r01an1818ej{VERSION_NUMBER}-rx-dac.pdf
 |
-+-- ref
-|    +-- r_dac_rx_config_reference.h
-|
 +-- src
      +-- r_dac_rx.c
 

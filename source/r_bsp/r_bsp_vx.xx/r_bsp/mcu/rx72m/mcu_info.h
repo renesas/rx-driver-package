@@ -25,6 +25,8 @@
 * History : DD.MM.YYYY Version  Description
 *         : 08.04.2019 1.00     First Release
 *         : 20.11.2020 1.01     Added support for RX72M with 100 pin and 144 pin packages.
+*         : 30.06.2021 1.02     Added the following macro definition.
+*                               - BSP_MCU_EXCEP_ADDRESS_ISR
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -254,6 +256,7 @@ Macro definitions
 #define BSP_MCU_EXCEP_ACCESS_ISR
 #define BSP_MCU_EXCEP_UNDEFINED_INST_ISR
 #define BSP_MCU_EXCEP_FLOATING_POINT_ISR
+#define BSP_MCU_EXCEP_ADDRESS_ISR
 #define BSP_MCU_NON_MASKABLE_ISR
 #define BSP_MCU_UNDEFINED_INTERRUPT_SOURCE_ISR
 #define BSP_MCU_BUS_ERROR_ISR

@@ -29,6 +29,7 @@
  *         : 14.11.2019 2.00    Added support for GNUC and ICCRX.
  *         : 10.06.2020 2.01    Modified comment of API function to Doxygen style.
  *         : 05.03.2021 2.02    Added RX671 to Doxygen comment.
+ *         : 31.07.2021 2.03    Added support for snooze mode in Low Power Consumption.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
   Includes <System Includes> , "Project Includes"
@@ -51,11 +52,11 @@
  * @retval    LPC_ERR_P_E_MODE: The operating power control mode cannot be switched while the flash memory is being 
  *                              programmed or erased (P/E).
  * @details   Depending upon the mode chosen and the MCU, the maximum speed of the internal clocks ICLK, PCLKB, PCLKD 
- *            and FCLK is limited. For example, in Low-Speed operating mode on the RX110, RX111, RX113, RX130, RX230, 
- *            RX231, RX23W, only the sub-clock can be used as the system clock. See Table 11.3 (RX64M, RX65N, RX66N,RX671 
- *            RX71M, RX72M, RX72N) and Table 11.4(RX110, RX111, RX113, RX130, RX230, RX231, RX23W) in the Hardware manual
- *            for clock limitations. If the argument to this function cannot support the current internal clock 
- *            frequencies, then an error is returned. When switching the clock source from a lower frequency to 
+ *            and FCLK is limited. For example, in Low-Speed operating mode on the RX110, RX111, RX113, RX130, RX140,
+ *            RX230, RX231, RX23W, only the sub-clock can be used as the system clock. See Table 11.3 (RX64M, RX65N,
+ *            RX66N,RX671,RX71M, RX72M, RX72N) and Table 11.4(RX110, RX111, RX113, RX130, RX140, RX230, RX231, RX23W) in the
+ *            Hardware manual for clock limitations. If the argument to this function cannot support the current internal
+ *            clock frequencies, then an error is returned. When switching the clock source from a lower frequency to
  *            a higher frequency, make certain that the operating power control mode is configured to support the range.
  *            Failure to do so will result in improper CPU operation.
  * @note      When switching operating power control modes and internal clock frequencies, it is important to first make
@@ -101,6 +102,30 @@ lpc_err_t R_LPC_LowPowerModeConfigure (lpc_low_power_mode_t e_mode)
 /***********************************************************************************************************************
  End of function R_LPC_LowPowerModeConfigure
  ***********************************************************************************************************************/
+
+#ifdef LPC_VALID_SNOOZE_MODE
+/***********************************************************************************************************************
+ * Function Name: R_LPC_SnoozeModeConfigure
+ ******************************************************************************************************************/ /**
+ * @brief This function configures the conditions for entering the snooze mode, returning to the software standby mode
+ *        or releasing from the snooze mode.
+ *        (See section "3.4" in the application note)
+ * @param[in] snooze_mode  The snooze_mode  for all supported MCUs are specified in enum \e lpc_snooze_mode_t.
+ * @retval    LPC_SUCCESS
+ * @retval    LPC_ERR_ILLEGAL
+ * @details   For the peripheral functions that can be operated in snooze mode, refer to the user's manual hardware.
+ * @note      In order for each peripheral function to operate in snooze mode, it is necessary to meet the conditions for
+ *            each peripheral function to be used before switching to software standby.
+ */
+lpc_err_t R_LPC_SnoozeModeConfigure (lpc_snooze_mode_t * snooze_mode)
+{
+    return lpc_snooze_mode_configure(snooze_mode);
+}
+/***********************************************************************************************************************
+ End of function R_LPC_SnoozeModeConfigure
+ ***********************************************************************************************************************/
+#endif
+
 
 /***********************************************************************************************************************
  * Function Name: R_LPC_LowPowerModeActivate
@@ -167,7 +192,7 @@ lpc_err_t R_LPC_LowPowerModeActivate (lpc_callback_set_t pcallback)
  *               sure the internal clock after returning from sleep mode does not exceed the limits 
  *               of middle speed mode.
  *
- *            -# RX130, RX230, RX231, RX23W MCUs :\n
+ *            -# RX130, RX140, RX230, RX231, RX23W MCUs :\n
  *            \- When entering Sleep Mode, the system clock should be the Sub-Clock oscillator. On exiting sleep, the 
  *               operating mode will return to whatever the operating power control mode was before entering sleep.\n
  *            \- If Middle Speed mode is the return mode and the Main OSC is chosen as the Sleep Return clock source, 

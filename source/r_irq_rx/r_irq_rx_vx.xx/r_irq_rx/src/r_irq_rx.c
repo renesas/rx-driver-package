@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_irq_rx.c
@@ -35,6 +35,7 @@
 *         : 20.05.2019  3.00    Added support for GNUC and ICCRX.
 *         : 15.08.2019  3.20    Fixed warnings in IAR.
 *         : 25.11.2019  3.30    Modified comment of API function to Doxygen style.
+*         : 15.04.2021  3.80    Added R_IRQ_IRClear() function to clear IR flag.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -904,6 +905,60 @@ uint32_t R_IRQ_GetVersion(void)
 }
 /***********************************************************************************************************************
 End of function R_IRQ_GetVersion
+***********************************************************************************************************************/
+
+/***********************************************************************************************************************
+* Function Name: R_IRQ_IRClear
+********************************************************************************************************************//**
+ * @brief This function clears the IR flag for the specified IRQ.
+ * @param[in] handle Handle for the IRQ.
+ * @retval IRQ_SUCCESS: Operation successfully completed.
+ * @retval IRQ_ERR_NOT_OPENED: The IRQ has not been opened.  Perform R_IRQ_Open() first.
+ * @retval IRQ_ERR_BAD_NUM: IRQ number is invalid or unavailable.
+ * @retval IRQ_ERR_INVALID_PTR: handle is NULL.
+ * @details The function clears the IR flag for the IRQ specified by the handle argument.
+ * @note
+ * The IR flag is cleared only when edge detection is used. \n
+ * When the interrupt request destination is the DTC or DMAC, do not write 0 to the IR flag.
+ */
+irq_err_t   R_IRQ_IRClear (irq_handle_t  const handle)
+{
+    irq_err_t ret = IRQ_SUCCESS;
+
+    /* Validate input arguments. */
+#if IRQ_CFG_PARAM_CHECKING == 1
+    if (NULL == handle)
+    {
+        return IRQ_ERR_INVALID_PTR;
+    }
+    if (IRQ_NUM_MAX <= handle->irq_num)
+    {
+        return IRQ_ERR_BAD_NUM;
+    }
+    if (!(girq_opened[handle->irq_num])) /* Check for IRQ not opened. */
+    {
+        return  IRQ_ERR_NOT_OPENED;
+    }
+#endif
+
+    /* Edge detection */
+    if (IRQ_TRIG_LOWLEV != ICU.IRQCR[handle->irq_num].BIT.IRQMD)
+    {
+        /* Clear the corresponding IRn.IR flag to 0 */
+        ICU.IR[IRQ_VECT_BASE + handle->irq_num].BYTE = 0;
+
+        /* Check IR flag */
+        if (0 != ICU.IR[IRQ_VECT_BASE + handle->irq_num].BYTE)
+        {
+            /* Wait for the write completion. */
+            R_BSP_NOP();
+        }
+    }
+        
+    return ret;
+}
+/***********************************************************************************************************************
+End of function R_IRQ_IRClear
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************

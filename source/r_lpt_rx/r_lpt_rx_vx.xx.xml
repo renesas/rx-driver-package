@@ -10,16 +10,21 @@
         <version>3.00.00</version>
         <version>3.01.00</version>
         <version>3.02.00</version>
+        <version>3.03.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
         <version>8.03.00.201904</version>
+        <version>8.03.00.202002</version>
+        <version>8.03.00.202004</version>
+        <version>8.03.00.202102</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
         <product>ICCRX</product>
         <version>4.14.01</version>
+        <version>4.20.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -29,6 +34,7 @@
         <series>RX200</series>
         <group omit_board="true">RX113</group>
         <group omit_board="true">RX130</group>
+        <group omit_board="true">RX140</group>
         <group omit_board="true">RX230</group>
         <group omit_board="true">RX231</group>
         <group omit_board="true">RX23W</group>
@@ -43,7 +49,7 @@
         <zipsource>r_lpt_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.61</version>
+            <version>6.20</version>
         </dependency>
         <application>Low Power Consumption</application>
         <application>Low Power</application>

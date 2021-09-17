@@ -32,6 +32,7 @@
 *           30.12.2019 3.40    Added support RX66N, RX72N.
 *           31.03.2020 3.50    Added support RX23E-A.
 *           31.03.2021 3.80    Added support for RX671.
+*           15.04.2021 3.90    Added support for RX140.
 ************************************************************************************************************************/
 
 #ifndef SCI_RX_PLATFORM_H
@@ -52,6 +53,8 @@ Includes   <System Includes> , "Project Includes"
 #include "./targets/rx130/r_sci_rx130_private.h"  /* RX130 */
 #elif defined(BSP_MCU_RX13T)
 #include "./targets/rx13t/r_sci_rx13t_private.h"  /* RX13T */
+#elif defined(BSP_MCU_RX140)
+#include "./targets/rx140/r_sci_rx140_private.h"  /* RX140 */
 #elif defined(BSP_MCU_RX230)
 #include "./targets/rx230/r_sci_rx230_private.h"  /* RX230 */
 #elif defined(BSP_MCU_RX231)

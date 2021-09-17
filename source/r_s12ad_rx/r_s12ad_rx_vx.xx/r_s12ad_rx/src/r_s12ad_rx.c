@@ -51,6 +51,7 @@
 *                              - Added the interrupt function of A/D scan end interrupt for Group B.
 *           10.06.2020 4.60    Added RX23T and RX24T and RX24U support.
 *           01.09.2020 4.80    Added RX671 support.
+*           30.07.2021 4.90    Added RX140 support.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -310,7 +311,8 @@ adc_err_t R_ADC_ReadAll(adc_data_t * const  p_all_data)
     || defined(BSP_MCU_RX231) || defined(BSP_MCU_RX230)    || defined(BSP_MCU_RX23W) \
     || defined(BSP_MCU_RX130) || defined(BSP_MCU_RX13T)    || defined(BSP_MCU_RX66N) \
     || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX23E_A)  || defined(BSP_MCU_RX23T) \
-    || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX24U)    || defined(BSP_MCU_RX671))
+    || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX24U)    || defined(BSP_MCU_RX671) \
+    || defined(BSP_MCU_RX140))
 
     return adc_read_all(p_all_data);
 
@@ -349,8 +351,9 @@ adc_err_t R_ADC_ReadAll(adc_data_t * const  p_all_data)
     || definedBSP_MCU_RX231 || definedBSP_MCU_RX230    || definedBSP_MCU_RX23W \
     || definedBSP_MCU_RX130 || definedBSP_MCU_RX13T    || definedBSP_MCU_RX66N \
     || definedBSP_MCU_RX72N || definedBSP_MCU_RX23E_A  || definedBSP_MCU_RX23T \
-    || definedBSP_MCU_RX24T || definedBSP_MCU_RX24U    || definedBSP_MCU_RX671) */
-
+    || definedBSP_MCU_RX24T || definedBSP_MCU_RX24U    || definedBSP_MCU_RX671 \ 
+    || definedBSP_MCU_RX140 */
+    
 } /* End of function R_ADC_ReadAll() */
 
 /**********************************************************************************************************************
@@ -372,8 +375,9 @@ adc_err_t   R_ADC_Close(uint8_t const unit)
     || defined(BSP_MCU_RX231) || defined(BSP_MCU_RX230)    || defined(BSP_MCU_RX23W) \
     || defined(BSP_MCU_RX130) || defined(BSP_MCU_RX13T)    || defined(BSP_MCU_RX66N) \
     || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX23E_A)  || defined(BSP_MCU_RX23T) \
-    || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX24U)    || defined(BSP_MCU_RX671))
-
+    || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX24U)    || defined(BSP_MCU_RX671) \
+    || defined(BSP_MCU_RX140))
+    
     return adc_close(unit);
 
 #else /* rx110/rx111/rx113 */
@@ -440,7 +444,8 @@ adc_err_t   R_ADC_Close(uint8_t const unit)
     || definedBSP_MCU_RX231 || definedBSP_MCU_RX230    || definedBSP_MCU_RX23W \
     || definedBSP_MCU_RX130 || definedBSP_MCU_RX13T    || definedBSP_MCU_RX66N \
     || definedBSP_MCU_RX72N || definedBSP_MCU_RX23E_A  || definedBSP_MCU_RX23T \
-    || definedBSP_MCU_RX24T || definedBSP_MCU_RX24U    || definedBSP_MCU_RX671 */
+    || definedBSP_MCU_RX24T || definedBSP_MCU_RX24U    || definedBSP_MCU_RX671 \
+    || definedBSP_MCU_RX140 */
 } /* End of function R_ADC_Close() */
 
 

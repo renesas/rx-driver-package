@@ -24,6 +24,8 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 08.10.2019 1.00     First Release
+*         : 30.06.2021 1.01     Added the following macro definition.
+*                               - BSP_MCU_EXCEP_ADDRESS_ISR
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -248,6 +250,7 @@ Macro definitions
 #define BSP_MCU_EXCEP_ACCESS_ISR
 #define BSP_MCU_EXCEP_UNDEFINED_INST_ISR
 #define BSP_MCU_EXCEP_FLOATING_POINT_ISR
+#define BSP_MCU_EXCEP_ADDRESS_ISR
 #define BSP_MCU_NON_MASKABLE_ISR
 #define BSP_MCU_UNDEFINED_INTERRUPT_SOURCE_ISR
 #define BSP_MCU_BUS_ERROR_ISR

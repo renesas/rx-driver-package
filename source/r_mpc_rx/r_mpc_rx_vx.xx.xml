@@ -69,6 +69,7 @@
         <group omit_board="true">RX113</group>
         <group omit_board="true">RX130</group>
         <group omit_board="true">RX13T</group>
+        <group omit_board="true">RX140</group>
         <group omit_board="true">RX230</group>
         <group omit_board="true">RX231</group>
         <group omit_board="true">RX23E-A</group>
@@ -97,7 +98,7 @@
         <zipsource>r_mpc_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>6.10</version>
+            <version>6.20</version>
         </dependency>
         <dependency>
             <module>r_gpio_rx</module>
@@ -123,6 +124,7 @@
             <version>3.80</version>
             <version>3.90</version>
             <version>4.00</version>
+            <version>4.10</version>
         </dependency>
         <application>MCU Setup</application>
         <desc>MPC Driver</desc>

@@ -28,13 +28,6 @@
     <formatVersion>2.15</formatVersion>
     <fileTemplate></fileTemplate>
     <configuration>
-        <property id="BSP_CFG_STARTUP_DISABLE" display="Startup select" default="0" type="combobox">
-            <option id="BSP_CFG_STARTUP_DISABLE.0" display="Enable (use BSP startup)" value="0"/>
-            <option id="BSP_CFG_STARTUP_DISABLE.1" display="Disable" value="1"/>
-            <description>0 = Enable BSP startup program.
-1 = Disable BSP startup program. (e.g. Using user startup program.)
-NOTE: This setting is available only when using CCRX.</description>
-        </property>
         <property id="BSP_CFG_USER_STACK_ENABLE" display="User stack setting" default="1" type="combobox">
             <option id="BSP_CFG_USER_STACK_ENABLE.0" display="1 stack" value="0"/>
             <option id="BSP_CFG_USER_STACK_ENABLE.1" display="2 stacks" value="1"/>

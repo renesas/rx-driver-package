@@ -34,8 +34,6 @@ r_rtc_rx
 |   +---ja
 |       r01an1817jj{VERSION_NUMBER}-rx-rtc.pdf
 |
-+---ref
-|    +-- r_rtc_rx_config_reference.h
 |
 +---src
      +-- r_rtc_rx.c

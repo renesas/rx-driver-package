@@ -42,6 +42,7 @@
 *         : 10.03.2020 2.05     Supported RX23E-A.
 *         : 10.09.2020 3.00     Deleted spti_dmacdtc_flg and spri_dmacdtc_flg in rspi_config_block_t.
 *         : 30.06.2021 3.01     Supported RX671.
+*         : 31.07.2021 3.02     Supported RX140.
 ***********************************************************************************************************************/
 
 #ifndef RSPI_PRIVATE_H
@@ -69,7 +70,7 @@ Macro definitions
    || defined(BSP_MCU_RX231) || defined(BSP_MCU_RX230) || defined(BSP_MCU_RX130) \
    || defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX24U) \
    || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX23W) \
-   || defined(BSP_MCU_RX23E_A)
+   || defined(BSP_MCU_RX23E_A) || defined(BSP_MCU_RX140)
 
 #define RSPI_MAX_CHANNELS   (1)
 #else

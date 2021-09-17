@@ -30,6 +30,8 @@
 *                               - BSP_INT_ERR_INVALID_IPL
 *                               Added the following enumeration constant.
 *                               - BSP_INT_SRC_EMPTY
+*         : 30.06.2021 1.11     Added the following enumeration constant.
+*                               - BSP_INT_SRC_EXC_ADDRESS
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -67,6 +69,7 @@ typedef enum
     BSP_INT_SRC_IWDT_ERROR,               /* IWDT underflow/refresh error has occurred */
     BSP_INT_SRC_LVD1,                     /* Voltage monitoring 1 interrupt */
     BSP_INT_SRC_LVD2,                     /* Voltage monitoring 2 interrupt */
+    BSP_INT_SRC_EXC_ADDRESS,              /* Address exception */
     BSP_INT_SRC_UNDEFINED_INTERRUPT,      /* Interrupt has triggered for a vector that user did not write a handler. */
     BSP_INT_SRC_BUS_ERROR,                /* Bus error: illegal address access or timeout */
     BSP_INT_SRC_RAM,                      /* RAM error interrupt */

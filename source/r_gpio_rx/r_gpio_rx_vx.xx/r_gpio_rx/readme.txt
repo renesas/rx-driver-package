@@ -27,10 +27,7 @@ r_gpio_rx
 |   |    r01an1721jj{VERSION_NUMBER}-rx-gpio.pdf
 |   +---en
 |        r01an1721ej{VERSION_NUMBER}-rx-gpio.pdf
-|       
-+---ref
-|       r_gpio_rx_config_reference.h
-|       
+|           
 \---src
     |   r_gpio_rx.c
     |   

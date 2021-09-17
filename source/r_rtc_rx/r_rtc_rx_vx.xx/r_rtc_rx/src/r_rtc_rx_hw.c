@@ -62,6 +62,7 @@
 *                              Added processing for RX671 to rtc_config_capture function.
 *                              Fixed an issue that RCR1.RTCOS bit will be overwritten by "0" in the processing 
 *                              rtc_enable_ints function after rtc_set_output function.
+*           31.07.2021 2.82    Added support for RX140.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -80,7 +81,7 @@ Macro definitions
 /***********************************************************************************************************************
 Private global variables and functions
 ***********************************************************************************************************************/
-#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130)
+#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130) && !defined(BSP_MCU_RX140)
 volatile rtc_cap_ctrl_t *g_pcap_ctrl = (rtc_cap_ctrl_t *) &RTC.RTCCR0.BYTE;
 volatile rtc_cap_time_t *g_pcap_time = (rtc_cap_time_t *) &RTC.RSECCP0.BYTE;
 #endif
@@ -95,7 +96,7 @@ volatile rtc_cap_time_t *g_pcap_time = (rtc_cap_time_t *) &RTC.RSECCP0.BYTE;
 ***********************************************************************************************************************/
 void rtc_init (void)
 {
-
+#if (!defined(BSP_MCU_RX140))
     /* Set sub-clock drive capacity */
     RTC.RCR3.BIT.RTCDV = RTC_DRIVE_CAPACITY;
     /* WAIT_LOOP */
@@ -116,6 +117,7 @@ void rtc_init (void)
         /* Confirm that it has changed */
         R_BSP_NOP();
     }
+#endif
 
     /* Wait for six the sub-clock cycles */
     R_BSP_SoftwareDelay((uint32_t) 184, (bsp_delay_units_t) BSP_DELAY_MICROSECS); //Approx.184us (32768Hz * 6cycles = 183.10...us)
@@ -504,7 +506,7 @@ End of function rtc_enable_alarms
 ***********************************************************************************************************************/
 
 
-#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130)
+#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130) && !defined(BSP_MCU_RX140)
 /***********************************************************************************************************************
 * Function Name: rtc_config_capture
 * Description  : This function configures the capture facility for the specified pin.
@@ -696,7 +698,7 @@ void rtc_disable_capture (rtc_pin_t pin)
 End of function rtc_disable_capture
 ***********************************************************************************************************************/
 
-#endif /* not RX11x, RX130 */
+#endif /* not RX11x, RX130, RX140 */
 
 
 /***********************************************************************************************************************

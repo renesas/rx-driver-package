@@ -1,30 +1,21 @@
-/**********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO
- * THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2020 Renesas Electronics Corporation. All rights reserved.
- *********************************************************************************************************************/
-/******************************************************************************************************************//**
- * @file          rm_comms_i2c_rx_instance.c
- * Version      : 1.00
- * @brief         This source file includes the API functions, global variables and the sub-modules.
- *********************************************************************************************************************/
-/**********************************************************************************************************************
- * History : DD.MM.YYYY Version  Description
- *         : 30.09.2020  1.00    First Release
- *********************************************************************************************************************/
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
+* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
+* applicable laws, including copyright laws. 
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
+* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
+* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
+* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
+* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
+* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
 
 /******************************************************************************************************************//**
  * @addtogroup rm_comm_i2c_bus_rx_instance
@@ -50,42 +41,55 @@
 /**********************************************************************************************************************
  Local Typedef definitions
  *********************************************************************************************************************/
-#if (1 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
+ /* COMMS I2C Shared Bus */
+#if (1 <= COMMS_I2C_CFG_BUS_NUM_MAX)
 void rm_comms_i2c_bus0_callback(void);
- #if (1 == COMMS_I2C_CFG_BUS0_CALLBACK_ENABLE)
- void COMMS_I2C_CFG_BUS0_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for bus0 */
+#endif
+#if (2 <= COMMS_I2C_CFG_BUS_NUM_MAX)
+void rm_comms_i2c_bus1_callback(void);
+#endif
+#if (3 <= COMMS_I2C_CFG_BUS_NUM_MAX)
+void rm_comms_i2c_bus2_callback(void);
+#endif
+#if (4 <= COMMS_I2C_CFG_BUS_NUM_MAX)
+void rm_comms_i2c_bus3_callback(void);
+#endif
+#if (5 <= COMMS_I2C_CFG_BUS_NUM_MAX)
+void rm_comms_i2c_bus4_callback(void);
+#endif
+
+ /* COMMS I2C Device */
+#if (1 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
+ #if (1 == COMMS_I2C_CFG_DEVICE0_CALLBACK_ENABLE)
+ void COMMS_I2C_CFG_DEVICE0_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for device0 */
  #endif
 #endif
 #if (2 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
-void rm_comms_i2c_bus1_callback(void);
- #if (1 == COMMS_I2C_CFG_BUS1_CALLBACK_ENABLE)
- void COMMS_I2C_CFG_BUS1_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for bus1 */
+ #if (1 == COMMS_I2C_CFG_DEVICE1_CALLBACK_ENABLE)
+ void COMMS_I2C_CFG_DEVICE1_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for device1 */
  #endif
 #endif
 #if (3 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
-void rm_comms_i2c_bus2_callback(void);
- #if (1 == COMMS_I2C_CFG_BUS2_CALLBACK_ENABLE)
- void COMMS_I2C_CFG_BUS2_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for bus2 */
+ #if (1 == COMMS_I2C_CFG_DEVICE2_CALLBACK_ENABLE)
+ void COMMS_I2C_CFG_DEVICE2_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for device2 */
  #endif
 #endif
 #if (4 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
-void rm_comms_i2c_bus3_callback(void);
- #if (1 == COMMS_I2C_CFG_BUS3_CALLBACK_ENABLE)
- void COMMS_I2C_CFG_BUS3_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for bus3 */
+ #if (1 == COMMS_I2C_CFG_DEVICE3_CALLBACK_ENABLE)
+ void COMMS_I2C_CFG_DEVICE3_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for device3 */
  #endif
 #endif
 #if (5 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
-void rm_comms_i2c_bus4_callback(void);
- #if (1 == COMMS_I2C_CFG_BUS4_CALLBACK_ENABLE)
- void COMMS_I2C_CFG_BUS4_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for bus4 */
+ #if (1 == COMMS_I2C_CFG_DEVICE4_CALLBACK_ENABLE)
+ void COMMS_I2C_CFG_DEVICE4_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for device4 */
  #endif
 #endif
 
 /**********************************************************************************************************************
  Exported global variables
  *********************************************************************************************************************/
-#if (1 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
-rm_comms_i2c_instance_ctrl_t g_comms_i2c_device0_ctrl;
+ /* COMMS I2C Shared Bus */
+#if (1 <= COMMS_I2C_CFG_BUS_NUM_MAX)
  #if BSP_CFG_RTOS == 1
   #if COMMS_I2C_CFG_RTOS_BLOCKING_SUPPORT_ENABLE
 TX_SEMAPHORE g_comms_i2c_bus0_blocking_semaphore_handle;
@@ -172,28 +176,9 @@ rm_comms_i2c_bus_extended_cfg_t g_comms_i2c_bus0_extended_cfg =
  #endif
  #endif
 };
-const rm_comms_i2c_device_cfg_t g_comms_i2c_device0_lower_level_cfg =
-{
-    .slave_address      = COMMS_I2C_CFG_BUS0_SLAVE_ADDR,
-    .slave_address_bits = COMMS_I2C_CFG_BUS0_ADDR_MODE, /* 7bit address mode */
-};
-const rm_comms_cfg_t g_comms_i2c_device0_cfg =
-{
-    .semaphore_timeout = COMMS_I2C_CFG_BUS0_BLOCKING_TIMEOUT, 
-    .p_lower_level_cfg = (void *)&g_comms_i2c_device0_lower_level_cfg,
-    .p_extend          = (void *)&g_comms_i2c_bus0_extended_cfg,
-    .p_callback        = (void (*)(rm_comms_callback_args_t *))COMMS_I2C_CFG_BUS0_CALLBACK,
-};
-const rm_comms_instance_t g_comms_i2c_device0 =
-{
-    .p_ctrl = &g_comms_i2c_device0_ctrl,
-    .p_cfg  = &g_comms_i2c_device0_cfg,
-    .p_api  = &g_comms_on_comms_i2c,
-};
 #endif
 
-#if (2 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
-rm_comms_i2c_instance_ctrl_t g_comms_i2c_device1_ctrl;
+#if (2 <= COMMS_I2C_CFG_BUS_NUM_MAX)
 #if BSP_CFG_RTOS == 1
  #if COMMS_I2C_CFG_RTOS_BLOCKING_SUPPORT_ENABLE
 TX_SEMAPHORE g_comms_i2c_bus1_blocking_semaphore_handle;
@@ -280,28 +265,9 @@ rm_comms_i2c_bus_extended_cfg_t g_comms_i2c_bus1_extended_cfg =
  #endif
  #endif
 };
-const rm_comms_i2c_device_cfg_t g_comms_i2c_device1_lower_level_cfg =
-{
-    .slave_address      = COMMS_I2C_CFG_BUS1_SLAVE_ADDR,
-    .slave_address_bits = COMMS_I2C_CFG_BUS1_ADDR_MODE, /* 7bit address mode */
-};
-const rm_comms_cfg_t g_comms_i2c_device1_cfg =
-{
-    .semaphore_timeout = COMMS_I2C_CFG_BUS1_BLOCKING_TIMEOUT, 
-    .p_lower_level_cfg = (void *)&g_comms_i2c_device1_lower_level_cfg,
-    .p_extend          = (void *)&g_comms_i2c_bus1_extended_cfg,
-    .p_callback        = (void (*)(rm_comms_callback_args_t *))COMMS_I2C_CFG_BUS1_CALLBACK,
-};
-const rm_comms_instance_t g_comms_i2c_device1 =
-{
-    .p_ctrl = &g_comms_i2c_device1_ctrl,
-    .p_cfg  = &g_comms_i2c_device1_cfg,
-    .p_api  = &g_comms_on_comms_i2c,
-};
 #endif
 
-#if (3 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
-rm_comms_i2c_instance_ctrl_t g_comms_i2c_device2_ctrl;
+#if (3 <= COMMS_I2C_CFG_BUS_NUM_MAX)
 #if BSP_CFG_RTOS == 1
  #if COMMS_I2C_CFG_RTOS_BLOCKING_SUPPORT_ENABLE
 TX_SEMAPHORE g_comms_i2c_bus2_blocking_semaphore_handle;
@@ -388,28 +354,9 @@ rm_comms_i2c_bus_extended_cfg_t g_comms_i2c_bus2_extended_cfg =
  #endif
  #endif
 };
-const rm_comms_i2c_device_cfg_t g_comms_i2c_device2_lower_level_cfg =
-{
-    .slave_address      = COMMS_I2C_CFG_BUS2_SLAVE_ADDR,
-    .slave_address_bits = COMMS_I2C_CFG_BUS2_ADDR_MODE, /* 7bit address mode */
-};
-const rm_comms_cfg_t g_comms_i2c_device2_cfg =
-{
-    .semaphore_timeout = COMMS_I2C_CFG_BUS2_BLOCKING_TIMEOUT, 
-    .p_lower_level_cfg = (void *)&g_comms_i2c_device2_lower_level_cfg,
-    .p_extend          = (void *)&g_comms_i2c_bus2_extended_cfg,
-    .p_callback        = (void (*)(rm_comms_callback_args_t *))COMMS_I2C_CFG_BUS2_CALLBACK,
-};
-const rm_comms_instance_t g_comms_i2c_device2 =
-{
-    .p_ctrl = &g_comms_i2c_device2_ctrl,
-    .p_cfg  = &g_comms_i2c_device2_cfg,
-    .p_api  = &g_comms_on_comms_i2c,
-};
 #endif
 
-#if (4 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
-rm_comms_i2c_instance_ctrl_t g_comms_i2c_device3_ctrl;
+#if (4 <= COMMS_I2C_CFG_BUS_NUM_MAX)
 #if BSP_CFG_RTOS == 1
  #if COMMS_I2C_CFG_RTOS_BLOCKING_SUPPORT_ENABLE
 TX_SEMAPHORE g_comms_i2c_bus3_blocking_semaphore_handle;
@@ -496,28 +443,9 @@ rm_comms_i2c_bus_extended_cfg_t g_comms_i2c_bus3_extended_cfg =
  #endif
  #endif
 };
-const rm_comms_i2c_device_cfg_t g_comms_i2c_device3_lower_level_cfg =
-{
-    .slave_address      = COMMS_I2C_CFG_BUS3_SLAVE_ADDR,
-    .slave_address_bits = COMMS_I2C_CFG_BUS3_ADDR_MODE, /* 7bit address mode */
-};
-const rm_comms_cfg_t g_comms_i2c_device3_cfg =
-{
-    .semaphore_timeout = COMMS_I2C_CFG_BUS3_BLOCKING_TIMEOUT,
-    .p_lower_level_cfg = (void *)&g_comms_i2c_device3_lower_level_cfg,
-    .p_extend          = (void *)&g_comms_i2c_bus3_extended_cfg,
-    .p_callback        = (void (*)(rm_comms_callback_args_t *))COMMS_I2C_CFG_BUS3_CALLBACK,
-};
-const rm_comms_instance_t g_comms_i2c_device3 =
-{
-    .p_ctrl = &g_comms_i2c_device3_ctrl,
-    .p_cfg  = &g_comms_i2c_device3_cfg,
-    .p_api  = &g_comms_on_comms_i2c,
-};
 #endif
 
-#if (5 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
-rm_comms_i2c_instance_ctrl_t g_comms_i2c_device4_ctrl;
+#if (5 <= COMMS_I2C_CFG_BUS_NUM_MAX)
 #if BSP_CFG_RTOS == 1
  #if COMMS_I2C_CFG_RTOS_BLOCKING_SUPPORT_ENABLE
 TX_SEMAPHORE g_comms_i2c_bus4_blocking_semaphore_handle;
@@ -604,17 +532,130 @@ rm_comms_i2c_bus_extended_cfg_t g_comms_i2c_bus4_extended_cfg =
  #endif
  #endif
 };
+#endif
+
+ /* COMMS I2C Device */
+#if (1 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
+rm_comms_i2c_instance_ctrl_t g_comms_i2c_device0_ctrl;
+const rm_comms_i2c_device_cfg_t g_comms_i2c_device0_lower_level_cfg =
+{
+    .slave_address      = COMMS_I2C_CFG_DEVICE0_SLAVE_ADDR,
+    .slave_address_bits = COMMS_I2C_CFG_DEVICE0_ADDR_MODE, /* 7bit address mode */
+};
+const rm_comms_cfg_t g_comms_i2c_device0_cfg =
+{
+    .semaphore_timeout = COMMS_I2C_CFG_DEVICE0_BLOCKING_TIMEOUT, 
+    .p_lower_level_cfg = (void *)&g_comms_i2c_device0_lower_level_cfg,
+    .p_extend          = (void *)(&(COMMS_I2C_CFG_DEVICE0_BUS_CH)),
+#if (1 == COMMS_I2C_CFG_DEVICE0_CALLBACK_ENABLE)
+    .p_callback        = (void (*)(rm_comms_callback_args_t *))COMMS_I2C_CFG_DEVICE0_CALLBACK,
+#else
+    .p_callback        = NULL,
+#endif
+};
+const rm_comms_instance_t g_comms_i2c_device0 =
+{
+    .p_ctrl = &g_comms_i2c_device0_ctrl,
+    .p_cfg  = &g_comms_i2c_device0_cfg,
+    .p_api  = &g_comms_on_comms_i2c,
+};
+#endif
+
+#if (2 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
+rm_comms_i2c_instance_ctrl_t g_comms_i2c_device1_ctrl;
+const rm_comms_i2c_device_cfg_t g_comms_i2c_device1_lower_level_cfg =
+{
+    .slave_address      = COMMS_I2C_CFG_DEVICE1_SLAVE_ADDR,
+    .slave_address_bits = COMMS_I2C_CFG_DEVICE1_ADDR_MODE, /* 7bit address mode */
+};
+const rm_comms_cfg_t g_comms_i2c_device1_cfg =
+{
+    .semaphore_timeout = COMMS_I2C_CFG_DEVICE1_BLOCKING_TIMEOUT, 
+    .p_lower_level_cfg = (void *)&g_comms_i2c_device1_lower_level_cfg,
+    .p_extend          = (void *)(&(COMMS_I2C_CFG_DEVICE1_BUS_CH)),
+#if (1 == COMMS_I2C_CFG_DEVICE1_CALLBACK_ENABLE)
+    .p_callback        = (void (*)(rm_comms_callback_args_t *))COMMS_I2C_CFG_DEVICE1_CALLBACK,
+#else
+    .p_callback        = NULL,
+#endif
+};
+const rm_comms_instance_t g_comms_i2c_device1 =
+{
+    .p_ctrl = &g_comms_i2c_device1_ctrl,
+    .p_cfg  = &g_comms_i2c_device1_cfg,
+    .p_api  = &g_comms_on_comms_i2c,
+};
+#endif
+
+#if (3 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
+rm_comms_i2c_instance_ctrl_t g_comms_i2c_device2_ctrl;
+const rm_comms_i2c_device_cfg_t g_comms_i2c_device2_lower_level_cfg =
+{
+    .slave_address      = COMMS_I2C_CFG_DEVICE2_SLAVE_ADDR,
+    .slave_address_bits = COMMS_I2C_CFG_DEVICE2_ADDR_MODE, /* 7bit address mode */
+};
+const rm_comms_cfg_t g_comms_i2c_device2_cfg =
+{
+    .semaphore_timeout = COMMS_I2C_CFG_DEVICE2_BLOCKING_TIMEOUT, 
+    .p_lower_level_cfg = (void *)&g_comms_i2c_device2_lower_level_cfg,
+    .p_extend          = (void *)(&(COMMS_I2C_CFG_DEVICE2_BUS_CH)),
+#if (1 == COMMS_I2C_CFG_DEVICE2_CALLBACK_ENABLE)
+    .p_callback        = (void (*)(rm_comms_callback_args_t *))COMMS_I2C_CFG_DEVICE2_CALLBACK,
+#else
+    .p_callback        = NULL,
+#endif
+};
+const rm_comms_instance_t g_comms_i2c_device2 =
+{
+    .p_ctrl = &g_comms_i2c_device2_ctrl,
+    .p_cfg  = &g_comms_i2c_device2_cfg,
+    .p_api  = &g_comms_on_comms_i2c,
+};
+#endif
+
+#if (4 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
+rm_comms_i2c_instance_ctrl_t g_comms_i2c_device3_ctrl;
+const rm_comms_i2c_device_cfg_t g_comms_i2c_device3_lower_level_cfg =
+{
+    .slave_address      = COMMS_I2C_CFG_DEVICE3_SLAVE_ADDR,
+    .slave_address_bits = COMMS_I2C_CFG_DEVICE3_ADDR_MODE, /* 7bit address mode */
+};
+const rm_comms_cfg_t g_comms_i2c_device3_cfg =
+{
+    .semaphore_timeout = COMMS_I2C_CFG_DEVICE3_BLOCKING_TIMEOUT, 
+    .p_lower_level_cfg = (void *)&g_comms_i2c_device3_lower_level_cfg,
+    .p_extend          = (void *)(&(COMMS_I2C_CFG_DEVICE3_BUS_CH)),
+#if (1 == COMMS_I2C_CFG_DEVICE3_CALLBACK_ENABLE)
+    .p_callback        = (void (*)(rm_comms_callback_args_t *))COMMS_I2C_CFG_DEVICE3_CALLBACK,
+#else
+    .p_callback        = NULL,
+#endif
+};
+const rm_comms_instance_t g_comms_i2c_device3 =
+{
+    .p_ctrl = &g_comms_i2c_device3_ctrl,
+    .p_cfg  = &g_comms_i2c_device3_cfg,
+    .p_api  = &g_comms_on_comms_i2c,
+};
+#endif
+
+#if (5 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
+rm_comms_i2c_instance_ctrl_t g_comms_i2c_device4_ctrl;
 const rm_comms_i2c_device_cfg_t g_comms_i2c_device4_lower_level_cfg =
 {
-    .slave_address      = COMMS_I2C_CFG_BUS4_SLAVE_ADDR,
-    .slave_address_bits = COMMS_I2C_CFG_BUS4_ADDR_MODE, /* 7bit address mode */
+    .slave_address      = COMMS_I2C_CFG_DEVICE4_SLAVE_ADDR,
+    .slave_address_bits = COMMS_I2C_CFG_DEVICE4_ADDR_MODE, /* 7bit address mode */
 };
 const rm_comms_cfg_t g_comms_i2c_device4_cfg =
 {
-    .semaphore_timeout = COMMS_I2C_CFG_BUS4_BLOCKING_TIMEOUT,
+    .semaphore_timeout = COMMS_I2C_CFG_DEVICE4_BLOCKING_TIMEOUT, 
     .p_lower_level_cfg = (void *)&g_comms_i2c_device4_lower_level_cfg,
-    .p_extend          = (void *)&g_comms_i2c_bus4_extended_cfg,
-    .p_callback        = (void (*)(rm_comms_callback_args_t *))COMMS_I2C_CFG_BUS4_CALLBACK,
+    .p_extend          = (void *)(&(COMMS_I2C_CFG_DEVICE4_BUS_CH)),
+#if (1 == COMMS_I2C_CFG_DEVICE4_CALLBACK_ENABLE)
+    .p_callback        = (void (*)(rm_comms_callback_args_t *))COMMS_I2C_CFG_DEVICE4_CALLBACK,
+#else
+    .p_callback        = NULL,
+#endif
 };
 const rm_comms_instance_t g_comms_i2c_device4 =
 {
@@ -624,7 +665,7 @@ const rm_comms_instance_t g_comms_i2c_device4 =
 };
 #endif
 
-#if (1 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
+#if (1 <= COMMS_I2C_CFG_BUS_NUM_MAX)
 /**********************************************************************************************************************
  * Function Name: rm_comms_i2c_bus0_callback
  * Description  : The function callback by r_riic_rx or r_sci_iic_rx
@@ -634,14 +675,17 @@ const rm_comms_instance_t g_comms_i2c_device4 =
  *********************************************************************************************************************/
 void rm_comms_i2c_bus0_callback(void)
 {
-    rm_comms_i2c_callback (&g_comms_i2c_device0_ctrl);
+    if (NULL != g_comms_i2c_bus0_extended_cfg.p_current_ctrl)
+    {
+        rm_comms_i2c_callback (g_comms_i2c_bus0_extended_cfg.p_current_ctrl);
+    }    
 }
 /**********************************************************************************************************************
  * End of function rm_comms_i2c_bus0_callback
  *********************************************************************************************************************/
 #endif
 
-#if (2 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
+#if (2 <= COMMS_I2C_CFG_BUS_NUM_MAX)
 /**********************************************************************************************************************
  * Function Name: rm_comms_i2c_bus1_callback
  * Description  : The function callback
@@ -651,14 +695,17 @@ void rm_comms_i2c_bus0_callback(void)
  *********************************************************************************************************************/
 void rm_comms_i2c_bus1_callback(void)
 {
-    rm_comms_i2c_callback (&g_comms_i2c_device1_ctrl);
+    if (NULL != g_comms_i2c_bus1_extended_cfg.p_current_ctrl)
+    {
+        rm_comms_i2c_callback (g_comms_i2c_bus1_extended_cfg.p_current_ctrl);
+    }    
 }
 /**********************************************************************************************************************
  * End of function rm_comms_i2c_bus1_callback
  *********************************************************************************************************************/
 #endif
 
-#if (3 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
+#if (3 <= COMMS_I2C_CFG_BUS_NUM_MAX)
 /**********************************************************************************************************************
  * Function Name: rm_comms_i2c_bus2_callback
  * Description  : The function callback
@@ -668,14 +715,17 @@ void rm_comms_i2c_bus1_callback(void)
  *********************************************************************************************************************/
 void rm_comms_i2c_bus2_callback(void)
 {
-    rm_comms_i2c_callback (&g_comms_i2c_device2_ctrl);
+    if (NULL != g_comms_i2c_bus2_extended_cfg.p_current_ctrl)
+    {
+        rm_comms_i2c_callback (g_comms_i2c_bus2_extended_cfg.p_current_ctrl);
+    }    
 }
 /**********************************************************************************************************************
  * End of function rm_comms_i2c_bus2_callback
  *********************************************************************************************************************/
 #endif
 
-#if (4 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
+#if (4 <= COMMS_I2C_CFG_BUS_NUM_MAX)
 /**********************************************************************************************************************
  * Function Name: rm_comms_i2c_bus3_callback
  * Description  : The function callback
@@ -685,14 +735,17 @@ void rm_comms_i2c_bus2_callback(void)
  *********************************************************************************************************************/
 void rm_comms_i2c_bus3_callback(void)
 {
-    rm_comms_i2c_callback (&g_comms_i2c_device3_ctrl);
+    if (NULL != g_comms_i2c_bus3_extended_cfg.p_current_ctrl)
+    {
+        rm_comms_i2c_callback (g_comms_i2c_bus3_extended_cfg.p_current_ctrl);
+    }    
 }
 /**********************************************************************************************************************
  * End of function rm_comms_i2c_bus3_callback
  *********************************************************************************************************************/
 #endif
 
-#if (5 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
+#if (5 <= COMMS_I2C_CFG_BUS_NUM_MAX)
 /**********************************************************************************************************************
  * Function Name: rm_comms_i2c_bus4_callback
  * Description  : The function callback
@@ -702,7 +755,10 @@ void rm_comms_i2c_bus3_callback(void)
  *********************************************************************************************************************/
 void rm_comms_i2c_bus4_callback(void)
 {
-    rm_comms_i2c_callback (&g_comms_i2c_device4_ctrl);
+    if (NULL != g_comms_i2c_bus4_extended_cfg.p_current_ctrl)
+    {
+        rm_comms_i2c_callback (g_comms_i2c_bus4_extended_cfg.p_current_ctrl);
+    }    
 }
 /**********************************************************************************************************************
  * End of function rm_comms_i2c_bus4_callback

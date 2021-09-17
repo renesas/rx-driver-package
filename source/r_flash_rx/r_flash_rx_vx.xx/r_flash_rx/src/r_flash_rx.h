@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_rx.h
@@ -47,6 +47,7 @@
 *           18.11.2019 4.50    Added RX66N, and RX72N.
 *           26.06.2020 4.60    Added prototypes for flash_InterruptRequestEnable() and flash_InterruptRequestDisable().
 *           23.10.2020 4.70    Added RX671.
+*           23.04.2021 4.80    Added RX140.
 ***********************************************************************************************************************/
 
 #ifndef FLASH_RX_HEADER_FILE
@@ -66,6 +67,8 @@
     #include "./src/targets/rx130/r_flash_rx130.h"
 #elif defined(MCU_RX13T)
     #include "./src/targets/rx13t/r_flash_rx13t.h"
+#elif defined(MCU_RX140)
+    #include "./src/targets/rx140/r_flash_rx140.h"
 #elif defined(MCU_RX230)
     #include "./src/targets/rx230/r_flash_rx230.h"
 #elif defined(MCU_RX231)

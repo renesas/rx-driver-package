@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2021 Renesas Electronics Corporation. All rights reserved.
 ********************************************************************************************************************/
 /*******************************************************************************************************************
 * File Name : r_flash_type1.c
@@ -39,6 +39,7 @@
 *           18.11.2016 3.00    Removed functions common to other MCUs for new merged source code.
 *           02.08.2017 3.10    Removed #include "r_mcu_config.h". Now in targets.h (r_flash_rx_if.h includes)
 *           19.04.2019 4.00    Added support for GNUC and ICCRX.
+*           23.04.2021 4.80    Added RX140.
 ********************************************************************************************************************/
 
 /********************************************************************************************************************
@@ -46,274 +47,381 @@ Includes   <System Includes> , "Project Includes"
 ********************************************************************************************************************/
 /* Includes board and MCU related header files. */
 #include "r_flash_rx_if.h"
-#if (FLASH_TYPE == FLASH_TYPE_1)
 
-/* Private header file for this package. */
+#if (FLASH_TYPE == FLASH_TYPE_1)
+#include "r_flash_nofcu.h"
 #include "r_flash_type1_if.h"
-#include "r_flash_common.h"
-#include "r_flash_rx.h"
-#include "r_dataflash.h"
-#include "r_codeflash.h"
-#include "r_codeflash_extra.h"
 #include "r_flash_group.h"
 
-/*********************************************************************************************************************
- Macro definitions
- *********************************************************************************************************************/
-
-/*********************************************************************************************************************
- Typedef definitions
- *********************************************************************************************************************/
-
-/***********************************************************************************************************************
+/**********************************************************************************************************************
  Private global variables and functions
-***********************************************************************************************************************/
-
-/*********************************************************************************************************************
- External variables and functions
  *********************************************************************************************************************/
-
-
 #if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
+
+static void flash_cf_set_startup_area(uint32_t value);
+static void flash_cf_set_access_window(const uint32_t start_addr_startup_value, const uint32_t end_addr);
+
 #define FLASH_PE_MODE_SECTION    R_BSP_ATTRIB_SECTION_CHANGE(P, FRAM)
 #define FLASH_SECTION_CHANGE_END R_BSP_ATTRIB_SECTION_CHANGE_END
-#else
-#define FLASH_PE_MODE_SECTION
-#define FLASH_SECTION_CHANGE_END
-#endif
 
-/***********************************************************************************************************
-* Function Name: flash_get_status
-* Description  : Returns the current state of the flash
-*                NOTE1: This function does not have to execute from in RAM. It must be in RAM though if
-*                CF BGO is enabled and this function is called during a ROM P/E operation.
-* Arguments    : none
-* Return Value : FLASH_SUCCESS -
-*                    Flash is ready to use
-*                FLASH_ERR_BUSY -
-*                    Flash is busy with another operation or is uninitialized
-***********************************************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: flash_get_current_swap_state
+ * Description  : Return which startup area (Default or Alternate) is active
+ * Arguments    : none
+ * Return Value : startup_area_select - 0 ==> The start-up area is selected
+ *                                            according to the start-up area
+ *                                            settings of the extra area
+ *                                      2 ==> The start-up area is switched to
+ *                                            the default area temporarily.
+ *                                      3 ==> The start-up area is switched to
+ *                                            the alternate area temporarily.
+ *********************************************************************************************************************/
 FLASH_PE_MODE_SECTION
-flash_err_t flash_get_status (void)
+uint8_t flash_get_current_swap_state(void)
 {
+    uint8_t startup_area_select;
 
-    /* Return flash status */
-    if( g_flash_state == FLASH_READY )
+    startup_area_select = FLASH.FISR.BIT.SAS;
+    return(startup_area_select);
+}
+
+/**********************************************************************************************************************
+ * Function Name: flash_set_current_swap_state
+ * Description  : Setting for switching the start-up area
+ * Arguments    : value for SAS bits; switch startup area if value = SAS_SWITCH_AREA
+ * Return Value : none
+ *********************************************************************************************************************/
+FLASH_PE_MODE_SECTION
+void flash_set_current_swap_state(uint8_t value)
+{
+    uint8_t sas_flag;
+
+    if (FLASH_SAS_SWITCH_AREA == value)                 // switch startup areas
     {
-        return FLASH_SUCCESS;
+        if(FLASH_SAS_EXTRA == FLASH.FISR.BIT.SAS)       // switch based upon FISR.SAS reset area
+        {
+            if(SASMF_DEFAULT == FLASH.FSCMR.BIT.SASMF)
+            {
+                sas_flag = FLASH_SAS_ALTERNATE;
+            }
+            else
+            {
+                sas_flag = FLASH_SAS_DEFAULT;
+            }
+        }
+        else
+        {
+            if(FLASH_SAS_ALTERNATE == FLASH.FISR.BIT.SAS)   // switch based upon current state
+            {
+                sas_flag = FLASH_SAS_DEFAULT;
+            }
+            else
+            {
+                sas_flag = FLASH_SAS_ALTERNATE;
+            }
+        }
     }
     else
     {
-        return FLASH_ERR_BUSY;
+        sas_flag = value;       /* to set SAS to desired area */
     }
-}
 
+    flash_pe_mode_enter(FLASH_TYPE_CODE_FLASH);
 
-/*******************************************************************************
-* Outline      : Intrinsic function to specify the number of loops
-* Header       : none
-* Function Name: r_df_delay
-* Description  : Wait processing that loops at a fixed five cycles.
-* Arguments    : R1 : Waiting loop counter
-* Return Value : none
-*******************************************************************************/
-FLASH_PE_MODE_SECTION
-R_BSP_PRAGMA_STATIC_INLINE_ASM(r_flash_delay)
-void r_flash_delay (unsigned long loop_cnt)
-{
-    R_BSP_ASM_INTERNAL_USED(loop_cnt)
-    R_BSP_ASM_BEGIN
-    R_BSP_ASM(    BRA.B   R_BSP_ASM_LAB_NEXT(0)    )
-    R_BSP_ASM(    NOP                              )
-    R_BSP_ASM_LAB(0:                               )
-    R_BSP_ASM(    NOP                              )
-    R_BSP_ASM(    SUB     #01H, R1                 )
-    R_BSP_ASM(    BNE.B   R_BSP_ASM_LAB_PREV(0)    )
-    R_BSP_ASM_END
-}
+    FLASH.FISR.BIT.SAS = sas_flag;
 
-/*******************************************************************************
-* Outline      : Function that specifies the execution time
-* Header       : none
-* Function Name: r_flash_delay_us
-* Description  : The number of loops is calculated based on the execution time (Î¼s)
-*              : and the sytem clock (ICLK) frequency, and the intrinsic function
-*              : that specifies the number of loops is called.
-* Arguments    : us  : Execution time
-               : khz : ICLK frequency when calling the function
-* Return Value : none
-*******************************************************************************/
-FLASH_PE_MODE_SECTION
-void r_flash_delay_us (unsigned long us, unsigned long khz)
-{
-
-    signed long loop_cnt; /* Argument of R_DELAY function */
-
-    /* Calculation of a loop count */
-    loop_cnt = us * khz;
-    loop_cnt = (loop_cnt / WAIT_DIV_LOOP_CYCLE );      /* Division about cycle of 1 loop */
-    loop_cnt = loop_cnt - WAIT_OVERHEAD_COUNT;         /* Overhead is reduced from a loop count. */
-
-    /* R_DELAY function is performed when loop_cnt is 1 or more. */
-    if(loop_cnt > 0)
+    while(sas_flag != FLASH.FISR.BIT.SAS)
     {
-        r_flash_delay((unsigned long)loop_cnt);
+        /* Confirm that the written value can be read correctly. */
     }
+
+    flash_pe_mode_exit();
 }
 
-#if ((FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_BGO == 1)) || (FLASH_CFG_DATA_FLASH_BGO == 1)
-/******************************************************************************
-* Function Name: Excep_FCU_FRDYI
-* Description  : ISR that is called when FCU is done with flash operation
-*                NOTE: This function MUST execute from RAM only when
-*                      FLASH_CFG_CODE_FLASH_BGO is enabled.
-* Arguments    : none
-* Return Value : none
-******************************************************************************/
-R_BSP_PRAGMA_STATIC_INTERRUPT(Excep_FCU_FRDYI,VECT(FCU,FRDYI))
+/**********************************************************************************************************************
+ * Function Name: flash_get_current_startup_area
+ * Description  : Return which startup area (Default or Alternate) is active
+ * Arguments    : none
+ * Return Value : startup_area_flag - 0 ==> Alternate area
+ *                                    1 ==> Default area
+ *********************************************************************************************************************/
 FLASH_PE_MODE_SECTION
-R_BSP_ATTRIB_STATIC_INTERRUPT void Excep_FCU_FRDYI(void)
+uint8_t flash_get_current_startup_area(void)
 {
+    uint8_t startup_area_flag;
+    uint16_t reg_fscmr;
+
+    reg_fscmr = FLASH.FSCMR.WORD;
+    startup_area_flag  = (uint8_t)((reg_fscmr >> 8) & 0x01);
+    return(startup_area_flag);
+}
+
+/**********************************************************************************************************************
+ * Function Name: flash_toggle_startup_area
+ * Description  : Check the current start-up area setting
+ *                and specifies the area currently not used as the start-up area.
+ * Arguments    : none
+ * Return Value : FLASH_SUCCESS -
+ *                Switched successfully.
+ *                FLASH_ERR_FAILURE -
+ *                Unable to Switch to P/E Mode.
+ *                FLASH_ERR_PARAM -
+ *                Illegal parameter passed
+ *********************************************************************************************************************/
+FLASH_PE_MODE_SECTION
+flash_err_t flash_toggle_startup_area(void)
+{
+    uint8_t startup_area_flag;
+    uint16_t reg_fscmr;
     flash_err_t err = FLASH_SUCCESS;
 
-#if ((FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_BGO == 1))
+    err = flash_pe_mode_enter(FLASH_TYPE_CODE_FLASH);
+    if (FLASH_SUCCESS != err)
+    {
+        return(err);
+    }
 
-    if (FLASH_CUR_CF_BGO_ERASE  == g_current_parameters.current_operation)
+    g_current_parameters.current_operation = FLASH_CUR_CF_TOGGLE_STARTUPAREA;
+    g_current_parameters.wait_cnt          = WAIT_MAX_EXRDY_CMD_TIMEOUT;
+    
+    reg_fscmr = FLASH.FSCMR.WORD;
+    startup_area_flag  = (uint8_t)((reg_fscmr >> 8) & 0x01);
+
+    if (DEFAULT_AREA == startup_area_flag)
     {
-        err = R_CF_Erase_Check();
-        if (FLASH_SUCCESS == err)
-        {
-            g_flash_int_ready_cb_args.event = FLASH_INT_EVENT_ERASE_COMPLETE;
-        }
-        else
-        {
-            g_flash_int_ready_cb_args.event = FLASH_INT_EVENT_ERR_FAILURE;
-        }
-    }
-    else if (FLASH_CUR_CF_BGO_WRITE  == g_current_parameters.current_operation)
-    {
-        err = R_CF_Write_Check();
-        if (FLASH_SUCCESS == err)
-        {
-            g_flash_int_ready_cb_args.event = FLASH_INT_EVENT_WRITE_COMPLETE;
-        }
-        else if ((FLASH_ERR_FAILURE == err) || (FLASH_ERR_TIMEOUT == err))
-        {
-            g_flash_int_ready_cb_args.event = FLASH_INT_EVENT_ERR_FAILURE;
-        }
-        else
-        {
-            /* Nothing to do */
-        }
-    }
-    else if (FLASH_CUR_CF_BGO_BLANKCHECK == g_current_parameters.current_operation)
-    {
-        err = R_CF_BlankCheck_Check();
-        if (FLASH_SUCCESS == err)
-        {
-            g_flash_int_ready_cb_args.event = FLASH_INT_EVENT_BLANK;
-        }
-        else
-        {
-            g_flash_int_ready_cb_args.event = FLASH_INT_EVENT_NOT_BLANK;
-        }
-    }
-    else if (FLASH_CUR_CF_ACCESSWINDOW == g_current_parameters.current_operation)
-    {
-        err = r_cf_extra_check();
-        if (FLASH_SUCCESS == err)
-        {
-            g_flash_int_ready_cb_args.event = FLASH_INT_EVENT_SET_ACCESSWINDOW;
-        }
-        else
-        {
-            g_flash_int_ready_cb_args.event = FLASH_INT_EVENT_ERR_FAILURE;
-        }
-    }
-    else if (FLASH_CUR_CF_TOGGLE_STARTUPAREA == g_current_parameters.current_operation)
-    {
-        err = r_cf_extra_check();
-        if (FLASH_SUCCESS == err)
-        {
-            g_flash_int_ready_cb_args.event = FLASH_INT_EVENT_TOGGLE_STARTUPAREA;
-        }
-        else
-        {
-            g_flash_int_ready_cb_args.event = FLASH_INT_EVENT_ERR_FAILURE;
-        }
+        flash_cf_set_startup_area(STARTUP_AREA_VALUE);
     }
     else
     {
-        /* Nothing to do */
+        flash_cf_set_startup_area(DEFAULT_AREA_VALUE);
     }
-#endif  // #if ((FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_BGO == 1))
 
+    reg_fscmr = FLASH.FSCMR.WORD;
 
-#ifndef FLASH_NO_DATA_FLASH     /* RX110/23T has no DF */
-#if (FLASH_CFG_DATA_FLASH_BGO == 1)
-    if (FLASH_CUR_DF_BGO_ERASE == g_current_parameters.current_operation)
+    /* Return if in BGO mode. Processing will finish in FRDYI interrupt */
+    if ((g_current_parameters.bgo_enabled_df == true)
+     || (g_current_parameters.bgo_enabled_cf == true))
     {
-        err = R_DF_Erase_Check();
-        if (FLASH_SUCCESS == err)
-        {
-            g_flash_int_ready_cb_args.event = FLASH_INT_EVENT_ERASE_COMPLETE;
-        }
-        else
-        {
-            g_flash_int_ready_cb_args.event = FLASH_INT_EVENT_ERR_FAILURE;
-        }
+        return err;
     }
-    else if (FLASH_CUR_DF_BGO_WRITE  == g_current_parameters.current_operation)
-    {
-        err = R_DF_Write_Check();
-        if (FLASH_SUCCESS == err)
-        {
-            g_flash_int_ready_cb_args.event = FLASH_INT_EVENT_WRITE_COMPLETE;
-        }
-        else if ((FLASH_ERR_FAILURE == err) || (FLASH_ERR_TIMEOUT == err))
-        {
-            g_flash_int_ready_cb_args.event = FLASH_INT_EVENT_ERR_FAILURE;
-        }
-        else
-        {
-            /* Nothing to do */
-        }
-    }
-    else if (FLASH_CUR_DF_BGO_BLANKCHECK  == g_current_parameters.current_operation)
-    {
-        err = R_DF_BlankCheck_Check();
-        if (FLASH_SUCCESS == err)
-        {
-            g_flash_int_ready_cb_args.event = FLASH_INT_EVENT_BLANK;
-        }
-        else
-        {
-            g_flash_int_ready_cb_args.event = FLASH_INT_EVENT_NOT_BLANK;
-        }
-    }
-    else
-    {
-        /* Nothing to do */
-    }
-#endif  // FLASH_CFG_DATA_FLASH_BGO
-#endif  // #ifndef FLASH_NO_DATA_FLASH
 
-    if (FLASH_ERR_BUSY != err)
-    {
-        /* Release lock and Set current state to Idle */
-        flash_pe_mode_exit();
-        flash_release_state();
-        g_current_parameters.current_operation = FLASH_CUR_IDLE;
+    /* In blocking mode, wait for EXRDY or timeout. */
+    err = flash_wait_exrdy();
 
-        /* call back function execute */
-        flash_ready_isr_handler((void *) &g_flash_int_ready_cb_args);
-    }
+    /* In blocking mode, The return value from flash_wait_exrdy() is in any case, do the flash_pe_mode_exit(). */
+    flash_pe_mode_exit();
+
+    return err;
 }
 
-#endif  // ((FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_BGO == 1)) || (FLASH_CFG_DATA_FLASH_BGO == 1)
+/**********************************************************************************************************************
+ * Function Name: flash_cf_set_startup_area
+ * Description  : Set the start-up area information that is specified by the argument.
+ * Arguments    : value : Setting information for the FWBH register
+ * Return Value : none
+ *********************************************************************************************************************/
+FLASH_PE_MODE_SECTION
+static void flash_cf_set_startup_area (uint32_t value)
+{
+    /* Select Extra Area */
+    FLASH.FASR.BIT.EXS = 1;
+
+#if defined(MCU_RX23_ALL) || defined(MCU_RX24_ALL) || (FLASH_TYPE_VARIETY == FLASH_TYPE_VARIETY_A)
+    FLASH.FWB3 = (uint16_t)(0xFFFF);
+    FLASH.FWB2 = (uint16_t)(0xFFFF);
+    FLASH.FWB1 = (uint16_t)(0xFFFF);
+    FLASH.FWB0 = (uint16_t)(value);
+#else
+    FLASH.FWBH = (uint16_t)(0xFFFF);
+    FLASH.FWBL = (uint16_t)(value);
+#endif
+
+    /* Execute Startup Area Flag command */
+    FLASH.FEXCR.BYTE = FEXCR_STARTUP;
+}
+
+/**********************************************************************************************************************
+ * Function Name: flash_get_access_window
+ * Description  : Return the read address form of the current access window area setting
+ * Arguments    : none
+ * Return Value : FLASH_SUCCESS
+ *********************************************************************************************************************/
+FLASH_PE_MODE_SECTION
+flash_err_t flash_get_access_window(flash_access_window_config_t *pAccessInfo)
+{
+    if (FLASH_ACCESS_WINDOW_END_VALUE == FLASH.FAWSMR)
+    {
+        pAccessInfo->start_addr = (uint32_t)FLASH_CF_BLOCK_END;
+    }
+    else
+    {
+#if (FLASH_TYPE_VARIETY == FLASH_TYPE_VARIETY_A)
+        pAccessInfo->start_addr = ((FLASH.FAWSMR << 11) | CODEFLASH_ADDR_OFFSET);
+#else
+        pAccessInfo->start_addr = ((FLASH.FAWSMR << 10) | CODEFLASH_ADDR_OFFSET | 0xFC000000);
+#endif
+    }
+    if (FLASH_ACCESS_WINDOW_END_VALUE == FLASH.FAWEMR)
+    {
+        pAccessInfo->end_addr = (uint32_t)FLASH_CF_BLOCK_END;
+    }
+    else
+    {
+#if (FLASH_TYPE_VARIETY == FLASH_TYPE_VARIETY_A)
+        pAccessInfo->end_addr = ((FLASH.FAWEMR << 11) | CODEFLASH_ADDR_OFFSET);
+#else
+        pAccessInfo->end_addr = ((FLASH.FAWEMR << 10) | CODEFLASH_ADDR_OFFSET | 0xFC000000);
+#endif
+    }
+
+    return FLASH_SUCCESS;
+}
+
+/**********************************************************************************************************************
+ * Function Name: flash_set_access_window
+ * Description  : Specifies the setting for the access window.
+ * Arguments    : start_addr : start address of Access Window Setting
+ *                end_addr   : end address of Access Window Setting. This should be one
+ *                            beyond the actual last byte to allow write access for.
+ *                            here as required by the spec.
+ * Return Value : FLASH_SUCCESS            - Command executed successfully
+ *                FLASH_ERR_ACCESSW        - AccessWindow setting error
+ *********************************************************************************************************************/
+FLASH_PE_MODE_SECTION
+flash_err_t flash_set_access_window(flash_access_window_config_t  *pAccessInfo)
+{
+    flash_err_t err = FLASH_SUCCESS;
+    uint32_t    start_addr_idx;
+    uint32_t    end_addr_idx;
+
+    err = flash_pe_mode_enter(FLASH_TYPE_CODE_FLASH);
+    if (FLASH_SUCCESS != err)
+    {
+        return(err);
+    }
+
+    g_current_parameters.current_operation = FLASH_CUR_CF_ACCESSWINDOW;
+    g_current_parameters.wait_cnt          = WAIT_MAX_EXRDY_CMD_TIMEOUT;
+    
+    /* Conversion to the P/E address from the read address */
+    if ((uint32_t)FLASH_CF_BLOCK_END == pAccessInfo->start_addr)
+    {
+#if (FLASH_TYPE_VARIETY == FLASH_TYPE_VARIETY_A)
+        start_addr_idx = FLASH_ACCESS_WINDOW_END_VALUE << 11;
+#else
+        start_addr_idx = FLASH_ACCESS_WINDOW_END_VALUE << 10;
+#endif
+    }
+    else
+    {
+        start_addr_idx = (pAccessInfo->start_addr) - CODEFLASH_ADDR_OFFSET;
+    }
+    if ((uint32_t)FLASH_CF_BLOCK_END == pAccessInfo->end_addr)
+    {
+#if (FLASH_TYPE_VARIETY == FLASH_TYPE_VARIETY_A)
+        end_addr_idx = FLASH_ACCESS_WINDOW_END_VALUE << 11;
+#else
+        end_addr_idx = FLASH_ACCESS_WINDOW_END_VALUE << 10;
+#endif
+    }
+    else
+    {
+        end_addr_idx = (pAccessInfo->end_addr) - CODEFLASH_ADDR_OFFSET;
+    }
+
+    flash_cf_set_access_window(start_addr_idx, end_addr_idx);
+
+    /* Return if in BGO mode. Processing will finish in FRDYI interrupt */
+    if ((g_current_parameters.bgo_enabled_df == true)
+     || (g_current_parameters.bgo_enabled_cf == true))
+    {
+        return err;
+    }
+
+    /* In blocking mode, wait for EXRDY or timeout. */
+    err = flash_wait_exrdy();
+
+    /* In blocking mode, The return value from flash_wait_exrdy() is in any case, do the flash_pe_mode_exit(). */
+    flash_pe_mode_exit();
+
+    return err;
+}
+
+/**********************************************************************************************************************
+ * Function Name: flash_cf_set_access_window
+ * Description  : Issues a command to the extra area.
+ * Arguments    : start_addr_startup_value : start Address of the AccessWindow, or StartupAreaflag setting value
+ *                end_addr : end Address of AccessWindow Setting, or Dummy value (start-up area information program)
+ * Return Value : none
+ *********************************************************************************************************************/
+FLASH_PE_MODE_SECTION
+static void flash_cf_set_access_window(const uint32_t start_addr_startup_value, const uint32_t end_addr)
+{
+    /* Select Extra Area */
+    FLASH.FASR.BIT.EXS = 1;
+
+#if (FLASH_TYPE_VARIETY == FLASH_TYPE_VARIETY_A)
+    FLASH.FWB1 = (uint16_t)((end_addr >> 11) & 0xFFF);
+    FLASH.FWB0 = (uint16_t)((start_addr_startup_value >> 11) & 0xFFF);
+#elif defined(MCU_RX23_ALL) || defined(MCU_RX24_ALL)
+    FLASH.FWB1 = (uint16_t)((end_addr >> 10) & 0xFFF);
+    FLASH.FWB0 = (uint16_t)((start_addr_startup_value >> 10) & 0xFFF);
+#else
+    FLASH.FWBH = (uint16_t)(end_addr >> 10);
+    FLASH.FWBL = (uint16_t)(start_addr_startup_value >> 10);
+#endif
+
+    /* Execute Access Window command */
+    FLASH.FEXCR.BYTE = FEXCR_AW;
+}
+
+/**********************************************************************************************************************
+ * Function Name: flash_wait_exrdy
+ * Description  : Waits for completing of the command execution
+ *                and verifies the result of the execution.
+ * Arguments    : none
+ * Return Value : FLASH_SUCCESS          - Command executed successfully
+ *                FLASH_ERR_TIMEOUT      - Command timed out.
+ *                FLASH_ERR_ACCESSW      - Extra area command error
+ *********************************************************************************************************************/
+FLASH_PE_MODE_SECTION
+flash_err_t flash_wait_exrdy(void)
+{
+    /* Check EXFREADY Flag bit*/
+    while (1 != FLASH.FSTATR1.BIT.EXRDY)
+    {
+        /* Check that execute command is completed. */
+        /* Wait until FRDY is 0 unless timeout occurs. */
+        g_current_parameters.wait_cnt--;
+
+        if (g_current_parameters.wait_cnt <= 0)
+        {
+            /* if FRDY is not set to 1 after max timeout, return error*/
+            return FLASH_ERR_TIMEOUT;
+        }
+    }
+
+    /* Clear FEXCR register */
+    FLASH.FEXCR.BYTE = FEXCR_CLEAR;
+
+    while (0 != FLASH.FSTATR1.BIT.EXRDY)
+    {
+        /* Check that execute command is completed. */
+    }
+
+    if ((0 != FLASH.FSTATR0.BIT.EILGLERR) || (0 != FLASH.FSTATR0.BIT.PRGERR))
+    {
+        flash_reset();
+        return FLASH_ERR_ACCESSW;
+    }
+
+    return FLASH_SUCCESS;
+}
 
 FLASH_SECTION_CHANGE_END /* end FLASH_SECTION_ROM */
 
-#endif  // (FLASH_TYPE == FLASH_TYPE_1)
+#endif /* (FLASH_CFG_CODE_FLASH_ENABLE == 1) */
+
+#endif /* #if (FLASH_TYPE == FLASH_TYPE_1) */
 
 /* end of file */

@@ -41,6 +41,7 @@
 *              : 31.03.2020 3.50     Added support for RX23E-A.
 *              : 30.06.2020 3.60     Changed revision to reflect demo upgrade.
 *              : 31.03.2021 3.70     Added support for RX671.
+*              : 15.04.2021 3.80     Added support for RX140.
 ***********************************************************************************************************************/
 #ifndef LVD_PRIVATE_TARGETS_HEADER_FILE
 #define LVD_PRIVATE_TARGETS_HEADER_FILE
@@ -61,6 +62,8 @@ Includes <System Includes> , "Project Includes"
     #include "./targets/rx130/r_lvd_rx130.h"
 #elif defined(BSP_MCU_RX13T)
     #include "./targets/rx13t/r_lvd_rx13t.h"
+#elif defined(BSP_MCU_RX140)
+    #include "./targets/rx140/r_lvd_rx140.h"
 #elif defined(BSP_MCU_RX23T)
     #include "./targets/rx23t/r_lvd_rx23t.h"
 #elif defined(BSP_MCU_RX230)
@@ -102,7 +105,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
 #define LVD_RX_VERSION_MAJOR                    (3)
-#define LVD_RX_VERSION_MINOR                    (70)
+#define LVD_RX_VERSION_MINOR                    (80)
 
 /***********************************************************************************************************************
 Typedef definitions

@@ -62,6 +62,7 @@
  *         : 10.03.2020 2.46     Changed minor version to '46' for RX23E-A support.
  *         : 30.10.2020 2.47     Changed minor version to '47' for e2studio 2020-10 support.
  *         : 30.06.2021 2.48     Changed minor version to '48' for RX671 support.
+ *         : 31.07.2021 2.49     Changed minor version to '49' for RX140 support.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIIC_IF_H
@@ -84,7 +85,7 @@ R_BSP_PRAGMA_UNPACK
 
 /* Version Number of API. */
     #define RIIC_VERSION_MAJOR      (2)
-    #define RIIC_VERSION_MINOR      (48)
+    #define RIIC_VERSION_MINOR      (49)
 
 /*----------------------------------------------------------------------------*/
 /*   Defines the argument of the R_RIIC_Control function.                     */

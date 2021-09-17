@@ -28,9 +28,6 @@ r_mpc_rx
 |   +---ja
 |       r01an1724jj{VERSION_NUMBER}-rx-mpc.pdf
 |
-+---ref
-|       r_mpc_rx_config_reference.h
-|
 \---src
         r_mpc_rx.c
         
