@@ -25,6 +25,7 @@ MODULE_NAME_LIST_LATEST = 	r_aeropoint_rx \
 					r_usb_pcdc r_usb_pcdc_mini r_usb_phid r_usb_phid_mini r_usb_pmsc r_usb_pmsc_mini \
 					r_vbatt_rx \
 					r_wdt_rx \
+					r_zmod4xxx_rx \
 					rm_touch_qe \
 
 all:
