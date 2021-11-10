@@ -2981,6 +2981,15 @@
     </urls>
   </module>
   <module rdp_version="1.32">
+    <name>r_wifi_sx_ulpgn</name>
+    <version>1.00</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_wifi_sx_ulpgn_v1.00.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_wifi_sx_ulpgn_v1.00.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/4d1f351eddf59b83a9546d8487a8af800c774436/FITModules/r_wifi_sx_ulpgn_v1.00_extend.mdf</url>
+    </urls>
+  </module>
+  <module rdp_version="1.32">
     <name>r_zmod4xxx_rx</name>
     <version>1.00</version>
     <urls>
