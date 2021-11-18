@@ -1,228 +1,314 @@
+/**********************************************************************************************************************
+ * DISCLAIMER
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
+ * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO
+ * THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
+ * following link:
+ * http://www.renesas.com/disclaimer
+ *
+ * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+ *********************************************************************************************************************/
+/**********************************************************************************************************************
+ * File Name    : r_wifi_sx_ulpgn_private.h
+ * Version      : 1.0
+ * Description  : Private functions definition for SX-ULPGN.
+ *********************************************************************************************************************/
+/**********************************************************************************************************************
+ * History : DD.MM.YYYY Version  Description
+ *         : dd.mm.2021 1.00     First Release
+ *********************************************************************************************************************/
+
+/**********************************************************************************************************************
+ Includes   <System Includes> , "Project Includes"
+ *********************************************************************************************************************/
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
+#include <stdarg.h>
+
+#include "r_wifi_sx_ulpgn_if.h"
+#include "r_wifi_sx_ulpgn_os_wrap.h"
+#include "r_sci_rx_if.h"
+#include "r_byteq_if.h"
+#include "r_sci_rx_pinset.h"
+
+/**********************************************************************************************************************
+ Macro definitions
+ *********************************************************************************************************************/
 #ifndef R_WIFI_SX_ULPGN_PRIVATE_H
 #define R_WIFI_SX_ULPGN_PRIVATE_H
 
-#include "r_wifi_sx_ulpgn_if.h"
- 
+#if !defined(WIFI_CFG_SCI_CHANNEL)
+#error "Error! Need to define WIFI_CFG_SCI_CHANNEL in r_wifi_sx_ulpgn_config.h"
+#endif
+
+#if !defined(WIFI_CFG_SCI_SECOND_CHANNEL)
+#error "Error! Need to define WIFI_CFG_SCI_SECOND_CHANNEL in r_wifi_sx_ulpgn_config.h"
+#endif
+
+#if SCI_CFG_TEI_INCLUDED != 1
+#error "Error! Need to set SCI_CFG_TEI_INCLUDED is '1' in r_sci_rx_config.h"
+#endif
+
 /* Configuration */
-#define WIFI_NUMBER_OF_USE_UART			(2)
+#define UART_TBL_MAX                   (2)       // HSUART port table (default:2)
+#define SOCK_TBL_MAX                   (WIFI_CFG_CREATABLE_SOCKETS)            // Socket table (default:4)
+#define SOCK_BUF_MAX                   (WIFI_CFG_SOCKETS_RECEIVE_BUFFER_SIZE)  // Socket buffer
+#define CERT_PROFILE_MAX               (5)       // Number of Certificate profiles
+#define CERT_HOSTNAME_MAX              (256)     // Number of Certificate host name
 
-#define WIFI_UART_COMMAND_PORT			(0)
-#define WIFI_UART_DATA_PORT			    (1)
+#define ATCMD_RESP_TIMEOUT             (15000)   // Timeout threshold for AT command response (msec)
+#define SX_ULPGN_AT_CMD_BUF_MAX        (512)
+#define SX_ULPGN_AT_RESP_BUF_MAX       (2048)
+#define SX_ULPGN_AT_TIMEOUT            (10000)
+#define SX_ULPGN_BAUD_DEFAULT          (115200)
+#define SX_ULPGN_ATBSIZE               (1420)
 
+/* Change socket */
+#define SOCKET_CHANGE_DELAY            (30)
+#define ATUSTAT_ATTEMPTS               (2)
+
+#if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
 /* Reset port pin macros.  */
-#define WIFI_RESET_DDR(x, y)               (WIFI_RESET_DDR_PREPROC(x, y))
-#define WIFI_RESET_DDR_PREPROC(x, y)       ((PORT ## x .PDR.BIT.B ## y))
-#define WIFI_RESET_DR(x, y)               (WIFI_RESET_DR_PREPROC(x, y))
-#define WIFI_RESET_DR_PREPROC(x, y)       ((PORT ## x .PODR.BIT.B ## y))
+#define WIFI_RESET_DDR(x, y)           (WIFI_RESET_DDR_PREPROC(x, y))
+#define WIFI_RESET_DDR_PREPROC(x, y)   ((PORT ## x .PDR.BIT.B ## y))
+#define WIFI_RESET_DR(x, y)            (WIFI_RESET_DR_PREPROC(x, y))
+#define WIFI_RESET_DR_PREPROC(x, y)    ((PORT ## x .PODR.BIT.B ## y))
 
 /* RTS port pin macros.  */
-#define WIFI_RTS_DDR(x, y)               (WIFI_RTS_DDR_PREPROC(x, y))
-#define WIFI_RTS_DDR_PREPROC(x, y)       ((PORT ## x .PDR.BIT.B ## y))
-#define WIFI_RTS_DR(x, y)               (WIFI_RTS_DR_PREPROC(x, y))
-#define WIFI_RTS_DR_PREPROC(x, y)       ((PORT ## x .PODR.BIT.B ## y))
+#define WIFI_RTS_DDR(x, y)             (WIFI_RTS_DDR_PREPROC(x, y))
+#define WIFI_RTS_DDR_PREPROC(x, y)     ((PORT ## x .PDR.BIT.B ## y))
+#define WIFI_RTS_DR(x, y)              (WIFI_RTS_DR_PREPROC(x, y))
+#define WIFI_RTS_DR_PREPROC(x, y)      ((PORT ## x .PODR.BIT.B ## y))
+#endif
 
-#define WIFI_RETURN_TEXT_OK          "OK\r\n"
-#define WIFI_RETURN_TEXT_ERROR       "ERROR\r\n"
-#define WIFI_RETURN_TEXT_READY       "ready\r\n"
-#define WIFI_RETURN_TEXT_OK_GO_SEND  "OK\r\n> "
-#define WIFI_RETURN_TEXT_SEND_BYTE   " bytes\r\n"
-#define WIFI_RETURN_TEXT_SEND_OK     "SEND OK\r\n"
-#define WIFI_RETURN_TEXT_SEND_FAIL   "SEND FAIL\r\n"
-#define WIFI_RETURN_TEXT_CONNECT     "CONNECT\r\n"
-#define WIFI_RETURN_TEXT_BUSY        "BUSY\r\n"
-#define WIFI_RETURN_TEXT_NOCARRIER   "NO CARRIER\r\n"
-#define WIFI_RETURN_TEXT_NOANSWER    "NO ANSWER\r\n"
+/* IP address(xxx.xxx.xxx.xxx) into ULONG */
+#define IPADR_UB_TO_UL(adr1, adr2, adr3, adr4) \
+    ((((adr1) & 0x000000FF) << 24) | (((adr2) & 0x000000FF) << 16) |\
+    (((adr3) & 0x000000FF) << 8)  | (((adr4) & 0x000000FF)))
 
+/* Debug mode */
+#define DEBUGLOG                        (0)
+#define DEBUG_ATCMD                     (0)
 
+/* Debug print mode */
+#define FREERTOS_IDT                    (0)
+#if FREERTOS_IDT != 0
+#define DBG_PRINTF                      vLoggingPrintf
+#else
+#define DBG_PRINTF                      printf
+#endif
 
-#define WIFI_AT_COMMAND_BUFF_SIZE		256
-#define WIFI_AT_RESPONSE_BUFF_SIZE		256
-
-#define WIFI_SOCKET_SENDABLE_DATASIZE   1420
-
-#define WIFI_UART_BAUDRATE_DEFAULT      115200
-
-
-#define DEBUGLOG 0
-//#define DEBUGLOG 1
-//#define DEBUGLOG 2
-
-
-typedef enum
-{
-	WIFI_RETURN_ENUM_OK            = 0,
-	WIFI_RETURN_ENUM_ERROR,
-	WIFI_RETURN_ENUM_READY,
-	WIFI_RETURN_ENUM_CONNECT,
-	WIFI_RETURN_ENUM_BUSY,
-	WIFI_RETURN_ENUM_NOCARRIER,
-	WIFI_RETURN_ENUM_PROCESSING,
-	WIFI_RETURN_ENUM_INTERNAL_TIMEOUT,
-	WIFI_RETURN_ENUM_MAX,
-}wifi_return_code_t;
-
-typedef enum
-{
-    WIFI_SYSTEM_CLOSE=0,
-    WIFI_SYSTEM_OPEN,
-    WIFI_SYSTEM_CONNECT,
-} wifi_system_status_t;
-
-typedef enum
-{
-    WIFI_SOCKET_STATUS_CLOSED=0,	//CLOSED
-    WIFI_SOCKET_STATUS_SOCKET,		//SOCKET
-    WIFI_SOCKET_STATUS_BOUND,		//BOUND
-    WIFI_SOCKET_STATUS_LISTEN,		//LISTEN
-    WIFI_SOCKET_STATUS_CONNECTED,	//CONNECTED
-    WIFI_SOCKET_STATUS_MAX,	        //MAX
-} wifi_socket_status_t;
-
-typedef enum
-{
-	WIFI_COMMAND_NONE = 0,
-	WIFI_COMMAND_SET_REBOOT,
-	WIFI_COMMAND_SET_ECHO_OFF,
-	WIFI_COMMAND_SET_UART_CHANGE_TO_2,
-	WIFI_COMMAND_SET_UART_CHANGE_TO_21,
-	WIFI_COMMAND_SET_UART_HISPEED,
-	WIFI_COMMAND_SET_UART_FLOW_TIMEOUT,
-	WIFI_COMMAND_SET_ESCAPE_GUARD_TIME,
-	WIFI_COMMAND_SET_BUFFER_THRESHOLD,
-	WIFI_COMMAND_SET_WIFI_DISCONNECT,
-	WIFI_COMMAND_SET_AT_RECV_TIMEOUT,
-	WIFI_COMMAND_SET_AUTOCLOSE,
-	WIFI_COMMAND_SET_AUTO_TRANSPARENT_MODE,
-	WIFI_COMMAND_SET_DNS_SRV_ADDRESS,
-	WIFI_COMMAND_SET_STATIC_IP,
-	WIFI_COMMAND_SET_WIFI_AUTOCONNECT,
-	WIFI_COMMAND_SET_WIFI_ACT_MODE,
-	WIFI_COMMAND_SET_DHCP_MODE,
-	WIFI_COMMAND_SET_MULTIPLE_SOCKET,
-	WIFI_COMMAND_SET_WIFI_CONNECT,
-	WIFI_COMMAND_SET_DNSQUERY,
-	WIFI_COMMAND_SET_PING,
-	WIFI_COMMAND_SET_SSLCONFIG,
-	WIFI_COMMAND_SET_SOCKET_CREATE,
-	WIFI_COMMAND_SET_SOCKET_CONNECT,
-	WIFI_COMMAND_SET_SOCKET_SEND_START,
-	WIFI_COMMAND_SET_SOCKET_SEND_DATA,
-	WIFI_COMMAND_SET_SOCKET_CLOSE,
-	WIFI_COMMAND_SET_SOCKET_CHANGE,
-	WIFI_COMMAND_SET_TRANSPARENT_MODE,
-	WIFI_COMMAND_SET_COMMAND_MODE,
-	WIFI_COMMAND_GET_SOCKET_STATUS,
-	WIFI_COMMAND_GET_MODULE_VERSION,
-	WIFI_COMMAND_GET_UART_BAUDRATE,
-	WIFI_COMMAND_GET_APLIST,
-	WIFI_COMMAND_GET_MACADDRESS,
-	WIFI_COMMAND_GET_IPADDRESS,
-	WIFI_COMMAND_GET_SENT_RECV_SIZE,
-	WIFI_COMMAND_GET_CURRENT_SSID,
-	WIFI_COMMAND_LIST_MAX
-}wifi_command_list_t;
-
-typedef enum
-{
-	WIFI_RETURN_STRING_TEXT            = 0,
-	WIFI_RETURN_STRING_MAX,
-}wifi_return_string_t;
-
-typedef struct wifi_socket_tag
-{
-	uint8_t socket_create_flag;
-	uint8_t socket_status;
-	uint8_t ipversion;
-	uint8_t protocol;
-	uint32_t receive_num;
-	uint32_t receive_count;
-	uint32_t put_error_count;
-	uint8_t socket_recv_buff[WIFI_CFG_SOCKETS_RECEIVE_BUFFER_SIZE];
-	byteq_hdl_t socket_byteq_hdl;
-    TickType_t send_starttime;
-    TickType_t send_thistime;
-    TickType_t send_endtime;
-    TickType_t recv_starttime;
-    TickType_t recv_thistime;
-    TickType_t recv_endtime;
-    uint8_t send_timeout_overflow_flag;
-    uint8_t recv_timeout_overflow_flag;
-    uint8_t ssl_flag;
-    uint8_t ssl_type;
-    uint8_t ssl_cert_key_id;
-    uint8_t ssl_ca_id;
-}wifi_socket_t;
-
+/**********************************************************************************************************************
+ Global Typedef definitions
+ *********************************************************************************************************************/
+/* UART table information */
 typedef struct
 {
-	sci_hdl_t   wifi_uart_sci_handle;
-	sci_cfg_t   sci_config;
-	uint8_t     *command_buff;
-	uint32_t    command_buff_size;
-	uint8_t     *response_buff;
-	uint32_t    response_buff_size;
-	TickType_t  starttime;
-	TickType_t  thistime;
-	TickType_t  endtime;
-	TickType_t  startbytetime;
-	TickType_t  thisbytetime;
-	TickType_t  endbytetime;
-	volatile uint8_t     tx_end_flag;
-	uint8_t     timeout_overflow_flag;
-	uint8_t     byte_timeout_overflow_flag;
-}wifi_at_communication_info_t;
+    sci_hdl_t   sci_hdl;
+    sci_cfg_t   sci_config;
+    volatile uint8_t tx_end_flag;
+} st_uart_tbl_t;
 
+/* Socket Timer */
 typedef struct
 {
-	wifi_command_list_t 	at_command_id;
-	int32_t				 	socket_no;
-	wifi_return_code_t	    result;
-	uint32_t	    		ticket_no;
-}wifi_at_execute_queue_t;
+    OS_TICK   threshold;        /* Timeout threshold */
+    OS_TICK   tick_sta;         /* Tick of Timer start  */
+} st_sock_timer_t;
 
-extern wifi_at_communication_info_t g_wifi_uart[WIFI_NUMBER_OF_USE_UART];
+/* Socket table information */
+typedef struct
+{
+    uint8_t     status;
+    uint8_t     ipver;
+    uint8_t     protocol;
+    byteq_hdl_t byteq_hdl;
+    uint32_t    put_err_cnt;
+    uint8_t     recv_buf[SOCK_BUF_MAX];
+    st_sock_timer_t timer_tx;
+    st_sock_timer_t timer_rx;
+    struct
+    {
+        uint8_t    enable;
+        uint8_t    cert_id;
+    } ssl;
+} st_sock_tbl_t;
 
-extern wifi_system_status_t g_wifi_system_state;
-extern uint8_t g_wifi_at_command_buff[WIFI_AT_COMMAND_BUFF_SIZE];
-extern uint8_t g_wifi_at_response_buff[WIFI_AT_RESPONSE_BUFF_SIZE];
+/* Certificate profile */
+typedef struct
+{
+    char        host_name[CERT_HOSTNAME_MAX];   /* host name      */
+    uint32_t    host_address;   /* host address   */
+    uint8_t     cert_id;        /* certificate id */
+} st_cert_profile_t;
 
-extern wifi_socket_t g_wifi_socket[WIFI_CFG_CREATABLE_SOCKETS];
+/* WIFI FIT module status */
+typedef enum
+{
+    MODULE_DISCONNECTED = 0,    /* Disconnected WIFI module */
+    MODULE_CONNECTED,           /* Connected WIFI module    */
+    MODULE_ACCESSPOINT,         /* Connected access point   */
+} e_wifi_module_status_t;
 
-extern uint8_t g_wifi_macaddress[6];
-extern wifi_ip_configuration_t g_wifi_ipconfig;
-extern uint32_t g_wifi_dnsaddress;
-extern uint32_t g_wifi_dnsquery_subcount;
+/* return code for common functions */
+typedef enum
+{
+    E_OK      = 0,              /* return = OK      */
+    E_FAIL    = -1              /* return = failure */
+} e_func_result_t;
 
+/* UART HW flow control */
+typedef enum
+{
+    RTS_OFF   = 0,              /* RTS = ON         */
+    RTS_ON                      /* RTS = OFF        */
+} e_flow_ctrl_t;
 
-extern wifi_scan_result_t *gp_wifi_ap_results;
-extern uint32_t g_wifi_aplistmax;
-extern uint32_t g_wifi_aplist_stored_num;
-extern uint32_t g_wifi_aplist_count;
-extern uint32_t g_wifi_aplist_subcount;
+/* Mode in single channel */
+typedef enum
+{
+    MODE_COMMAND     = 0,       /* Command mode     */
+    MODE_TRANSPARENT            /* Transparent mode */
+} e_single_ch_mode_t;
 
-extern uint8_t g_wifi_current_ssid[33];
+/* Result code */
+typedef enum
+{
+    AT_OK               = 0,    /* OK               */
+    AT_CONNECT          = 1,    /* CONNECT          */
+    AT_RING             = 2,    /* RING             */
+    AT_NOCARRIER        = 3,    /* NO CARRIER       */
+    AT_ERROR            = 4,    /* ERROR            */
+    AT_NODIALTONE       = 6,    /* NO DIALTONE      */
+    AT_BUSY             = 7,    /* BUSY             */
+    AT_NOANSER          = 8,    /* NO ANSWER        */
+    AT_INTERNAL_TIMEOUT = 253,  /* INTERNAL TIMEOUT */
+    AT_INTERNAL_ERROR   = 254,  /* INTERNAL ERROR   */
+    AT_MAX              = 255   /* STOPPER          */
+} e_rslt_code_t;
 
-extern uint32_t g_wifi_atustat_recv;
-extern uint32_t g_wifi_atustat_sent;
+typedef enum
+{
+    DATA_NOT_FOUND = 0,
+    DATA_FOUND,
+} e_atcmd_read_t;
 
-extern wifi_at_execute_queue_t g_wifi_at_execute_queue[10];
-extern uint8_t g_wifi_set_queue_index;
-extern uint8_t g_wifi_get_queue_index;
+/* Cast uint32_t -> uint8_t */
+typedef union
+{
+    uint32_t    ul;
+    struct
+    {
+        uint8_t hh;
+        uint8_t hl;
+        uint8_t lh;
+        uint8_t ll;
+    } b;
+} u_cast_t;
 
-extern uint32_t g_wifi_sci_err_flag;
+/**********************************************************************************************************************
+ External global variables
+ *********************************************************************************************************************/
+extern st_uart_tbl_t g_uart_tbl[UART_TBL_MAX];
 
-extern uint8_t g_wifi_socket_status;
-extern uint8_t  g_wifi_transparent_mode;
+/**********************************************************************************************************************
+ Exported global functions
+ *********************************************************************************************************************/
 
-extern const uint8_t * const wifi_socket_status_tbl[];
+/* r_wifi_sx_ulpgn_atcmd.c */
+/**********************************************************************************************************************
+ * Function Name: at_send
+ * Description  : Send AT commands on UART.
+ * Arguments    : port
+ *                cmd
+ * Return Value : None
+ *********************************************************************************************************************/
+void at_send (uint8_t port, const char *cmd, ...);
 
-void wifi_init_at_execute_queue(void);
-uint32_t    wifi_set_request_in_queue( wifi_command_list_t command, int32_t socket );
-wifi_at_execute_queue_t * wifi_get_current_running_queue(void);
-void    wifi_set_result_to_current_running_queue( wifi_return_code_t result );
-int8_t  wifi_get_result_from_queue( uint32_t ticket_no, wifi_return_code_t *result);
-int32_t wifi_start_recv_task( void );
-void wifi_delete_recv_task( void );
+/**********************************************************************************************************************
+ * Function Name: at_recv
+ * Description  : Receive response and return RESULT CODE.
+ * Arguments    : port
+ * Return Value : AT_OK
+ *                AT_CONNECT
+ *                AT_RING
+ *                AT_NOCARRIER
+ *                AT_ERROR
+ *                AT_NODIALTONE
+ *                AT_BUSY
+ *                AT_NOANSER
+ *                AT_TIMEOUT
+ *                AT_INTERNAL_TIMEOUT
+ *                AT_INTERNAL_ERROR
+ *********************************************************************************************************************/
+e_rslt_code_t at_recv (uint8_t port);
 
+/**********************************************************************************************************************
+ * Function Name: at_exec
+ * Description  : Send AT commands and Receive response on UART.
+ * Arguments    : port
+ *                cmd
+ * Return Value : Same as at_recv() function.
+ *********************************************************************************************************************/
+e_rslt_code_t at_exec (uint8_t port, const char *cmd, ...);
 
-#endif /*#define R_WIFI_SX_ULPGN_PRIVATE_H */
+/**********************************************************************************************************************
+ * Function Name: at_read
+ * Description  : Read buffer with prefix. (example at_read("abcd = %s\r\n", p_char) )
+ * Arguments    : response_fmt
+ * Return Value : 0     : data not found
+ *                other : data found
+ *********************************************************************************************************************/
+uint32_t at_read (const char *response_fmt, ...);
+
+/**********************************************************************************************************************
+ * Function Name: at_read_wo_prefix
+ * Description  : Read buffer without prefix. (example at_read_wo_prefix("%s\r\n", p_char) )
+ * Arguments    : response_fmt
+ * Return Value : same as vsscanf() function.
+ *********************************************************************************************************************/
+int32_t at_read_wo_prefix (const char *response_fmt, ...);
+
+/**********************************************************************************************************************
+ * Function Name: at_move_to_next_line
+ * Description  : Move pointer to next line of response buffer.
+ * Arguments    : None
+ * Return Value : None
+ *********************************************************************************************************************/
+void at_move_to_next_line (void);
+
+/**********************************************************************************************************************
+ * Function Name: at_move_to_first_line
+ * Description  : Set pointer to first line of response buffer.
+ * Arguments    : None
+ * Return Value : None
+ *********************************************************************************************************************/
+void at_move_to_first_line (void);
+
+/**********************************************************************************************************************
+ * Function Name: at_get_current_line
+ * Description  : Get pointer on current line of response buffer.
+ * Arguments    : None
+ * Return Value : Pointer of current line
+ *********************************************************************************************************************/
+uint8_t * at_get_current_line (void);
+
+/**********************************************************************************************************************
+ * Function Name: post_err_event
+ * Description  : Post error event to user callback function.
+ * Arguments    : err_event - error event
+ *                sock_idx  - socket index
+ * Return Value : None
+ *********************************************************************************************************************/
+void post_err_event (wifi_err_event_enum_t err_event, uint32_t sock_idx);
+
+#endif /* R_WIFI_SX_ULPGN_PRIVATE_H */

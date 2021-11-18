@@ -28,7 +28,7 @@
             <constraint display="Value must be in the range 0~12">("${WIFI_CFG_SCI_CHANNEL}" &gt;= 0) &amp;&amp; ("${WIFI_CFG_SCI_CHANNEL}" &lt;= 12)</constraint>
             <description>SCI channel for SX-ULPGN AT command communication.</description>
         </property>
-        <property id="WIFI_CFG_SCI_SECOND_CHANNEL" display="SCI Channel number for SX-ULPGN Second Command Port for AT command communication" default="0" type="combobox">
+        <property id="WIFI_CFG_SCI_SECOND_CHANNEL" display="SCI Channel number for SX-ULPGN Second Command Port for AT command communication" default="1" type="combobox">
             <option id="WIFI_CFG_SCI_SECOND_CHANNEL.0" display="0" value="0"/>
             <option id="WIFI_CFG_SCI_SECOND_CHANNEL.1" display="1" value="1"/>
             <option id="WIFI_CFG_SCI_SECOND_CHANNEL.2" display="2" value="2"/>
@@ -43,25 +43,23 @@
             <option id="WIFI_CFG_SCI_SECOND_CHANNEL.11" display="11" value="11"/>
             <option id="WIFI_CFG_SCI_SECOND_CHANNEL.12" display="12" value="12"/>
             <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_SCI_SECOND_CHANNEL}")</constraint>
-            <constraint display="Value must be in the range 0~12">("${WIFI_CFG_SCI_SECOND_CHANNEL}" &gt;= 0) &amp;&amp; ("${WIFI_CFG_SCI_SECOND_CHANNEL}" &lt;= 12)</constraint>
+            <constraint display="Value must be in the range 0~12">("${WIFI_CFG_SCI_SECOND_CHANNEL}" &gt;= 0) &amp;&amp; ("${WIFI_CFG_SCI_SECOND_CHANNEL}" &lt;= 12) &amp;&amp; ("${WIFI_CFG_SCI_SECOND_CHANNEL}" != "${WIFI_CFG_SCI_CHANNEL}")</constraint>
             <description>SCI Channel number for SX-ULPGN Second Command Port for AT command communication</description>
         </property>
-        <property id="WIFI_CFG_SCI_INTERRUPT_LEVEL" display="Interrupt Level for WIFI_CFG_SCI_CHANNEL" default="14" type="textbox">
+        <property id="WIFI_CFG_SCI_INTERRUPT_LEVEL" display="Interrupt Level for WIFI_CFG_SCI_CHANNEL" default="4" type="textbox">
             <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_SCI_INTERRUPT_LEVEL}")</constraint>
             <constraint display="Value must be in the range 1~15">("${WIFI_CFG_SCI_INTERRUPT_LEVEL}" &gt;= 1) &amp;&amp; ("${WIFI_CFG_SCI_INTERRUPT_LEVEL}" &lt;= 15)</constraint>
             <description>Interrupt Level for WIFI_CFG_SCI_CHANNEL</description>
         </property>
+        <property id="WIFI_CFG_SCI_PCLK_HZ" display="Peripheral clock speed for WIFI_CFG_SCI_CHANNEL" default="60000000" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_SCI_PCLK_HZ}")</constraint>
+            <constraint display="Value must be in the range 60000000~120000000">("${WIFI_CFG_SCI_PCLK_HZ}" &gt;= 60000000) &amp;&amp; ("${WIFI_CFG_SCI_PCLK_HZ}" &lt;= 120000000)</constraint>
+            <description>Communication baudrate for WIFI_CFG_SCI_CHANNEL.</description>
+        </property>
         <property id="WIFI_CFG_SCI_BAUDRATE" display="Communication baudrate for WIFI_CFG_SCI_CHANNEL" default="460800" type="textbox">
             <constraint display="Value must be an decimal value" actionOnFail="disable">testInteger("${WIFI_CFG_SCI_BAUDRATE}")</constraint>
             <constraint display="Value must be in the range 115200~460800">("${WIFI_CFG_SCI_BAUDRATE}" &gt;= 115200) &amp;&amp; ("${WIFI_CFG_SCI_BAUDRATE}" &lt;= 460800)</constraint>
-            <description>Communication baudrate for WIFI_CFG_SCI_CHANNEL.
-</description>
-        </property>
-        <property id="WIFI_CFG_SCI_USE_FLOW_CONTROL" display="FlowControl select" default="1" type="combobox">
-            <option id="WIFI_CFG_SCI_USE_FLOW_CONTROL.0" display="0" value="0"/>
-            <option id="WIFI_CFG_SCI_USE_FLOW_CONTROL.1" display="1" value="1"/>
-            <description>0: Not Use
-1:Use (CTS is SCI peripheral function pin, RTS is General port)</description>
+            <description>Communication baudrate for WIFI_CFG_SCI_CHANNEL.</description>
         </property>
         <property id="WIFI_CFG_RESET_PORT" display="General-purpose port PDR register connected to the SX-ULPGN EN pin" default="D" type="combobox">
             <option id="WIFI_CFG_RESET_PORT.0" display="PORT0" value="0"/>
@@ -129,7 +127,7 @@
         </property>
         <property id="WIFI_CFG_CREATABLE_SOCKETS" display="Creatable Sockets number" default="4" type="textbox">
             <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_CREATABLE_SOCKETS}")</constraint>
-            <constraint display="Value must be in the range 1~5">("${WIFI_CFG_CREATABLE_SOCKETS}" &gt;= 1) &amp;&amp; ("${WIFI_CFG_CREATABLE_SOCKETS}" &lt;= 5)</constraint>
+            <constraint display="Value must be in the range 1~5">("${WIFI_CFG_CREATABLE_SOCKETS}" &gt;= 1) &amp;&amp; ("${WIFI_CFG_CREATABLE_SOCKETS}" &lt;= 4)</constraint>
             <description>Creatable Sockets number. 
 Value must be in the range 1-4.</description>
         </property>
