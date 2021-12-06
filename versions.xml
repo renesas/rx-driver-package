@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <modules>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>6.20</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/e6e0bc1e5b27535cf8a3dc958183eeac998d7eaa/FITModules/r_bsp_v6.20.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/e6e0bc1e5b27535cf8a3dc958183eeac998d7eaa/FITModules/r_bsp_v6.20.xml</url>
+    </urls>
+  </module>
   <module rdp_version="1.25">
     <name>r_ble_qe_utility</name>
     <version>1.00</version>
