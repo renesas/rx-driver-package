@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>CyberTHOR</brand>
+        <product>GNURX-ELF</product>
+        <version>4.08.04</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX100</series>
+        <series>RX200</series>
+        <series>RX600</series>
+        <series>RX700</series>
+        <group>RX110</group>
+        <group>RX111</group>
+        <group>RX113</group>
+        <group>RX130</group>
+        <group>RX230</group>
+        <group>RX231</group>
+        <group>RX64M</group>
+        <group>RX651</group>
+        <group>RX65N</group>
+        <group>RX71M</group>
+        <board>RSKRX110</board>
+        <board>RSKRX111</board>
+        <board>RSKRX113</board>
+        <board>RSKRX130</board>
+        <board>RSKRX130_512KB</board>
+        <board>RSKRX230</board>
+        <board>RSKRX231</board>
+        <board>RSKRX64M</board>
+        <board>RSKRX65N</board>
+        <board>RSKRX65N_2MB</board>
+        <board>RSKRX71M</board>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_bsp</name>
+        <version>Generic(v=3.8a)</version>
+        <zipsource>r_bsp_gcc_v1.10.zip</zipsource>
+        <application>Generic</application>
+        <desc>Board Support Packages.</desc>
+        <details>The r_bsp package provides a foundation for code to be built on top of. It provides startup code, iodefines, and MCU information for different boards. There are 2 folders that make up the r_bsp package. The 'mcu' folder contains files that are common to a MCU group. These files provide functionality such as easy register access, CPU functions, and a file named 'mcu_info.h' for each MCU group. The 'mcu_info.h' file has information about the MCU on the board and is configured based on the information given in r_bsp_config.h. The information in 'mcu_info.h' is used to help configure Renesas middleware that uses the r_bsp package. The 'board' folder has a folder with startup code for each supported board.  Which MCU and board is chosen is decided by the settings in 'platform.h'. The user can choose which board they are using by uncommenting the include path that applies to their board. For example, if you are using the RSK+RX62N then you would uncomment the #include "./board/rskrx62n/r_bsp.h" include path. Users are encouraged to add their own boards to the 'board' directory. BSPs are configured by using the r_bsp_config.h file. Each board will have a reference configuration file named r_bsp_config_reference.h. The user should copy this file to their project, rename it to r_bsp_config.h, and use the options inside the file to configure the BSP for their project.</details>
+        <function>BSP</function>
+        <incdir>r_bsp</incdir>
+        <incdir>r_config</incdir>
+    </package>
+
+</refinfo>

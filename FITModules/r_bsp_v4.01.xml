@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
+* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
+* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
+* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
+* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
+* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
+* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+-->
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>1.00.00</version>
+        <version>1.00.20</version>
+        <version>1.01.00</version>
+        <version>1.02.00</version>
+        <version>1.02.01</version>
+        <version>2.01.00</version>
+        <version>2.02.00</version>
+        <version>2.03.00</version>
+        <version>2.05.00</version>
+        <version>2.06.00</version>
+        <version>2.07.00</version>
+        <version>2.08.00</version>
+        <version>3.00.00</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX100</series>
+        <series>RX200</series>
+        <series>RX600</series>
+        <series>RX700</series>
+        <group>RX110</group>
+        <group>RX111</group>
+        <group>RX113</group>
+        <group>RX130</group>
+        <group>RX210</group>
+        <group>RX21A</group>
+        <group>RX220</group>
+        <group>RX230</group>
+        <group>RX231</group>
+        <group>RX23T</group>
+        <group>RX24T</group>
+        <group>RX24U</group>
+        <group>RX610</group>
+        <group>RX62G</group>
+        <group>RX62N</group>
+        <group>RX62T</group>
+        <group>RX630</group>
+        <group>RX631</group>
+        <group>RX63N</group>
+        <group>RX63T</group>
+        <group>RX64M</group>
+        <group>RX651</group>
+        <group>RX65N</group>
+        <group>RX66T</group>
+        <group>RX71M</group>
+        <group>RX72T</group>
+        <board>GENERIC_RX110</board>
+        <board>GENERIC_RX111</board>
+        <board>GENERIC_RX113</board>
+        <board>GENERIC_RX130</board>
+        <board>GENERIC_RX230</board>
+        <board>GENERIC_RX231</board>
+        <board>GENERIC_RX23T</board>
+        <board>GENERIC_RX24T</board>
+        <board>GENERIC_RX24U</board>
+        <board>GENERIC_RX64M</board>
+        <board>GENERIC_RX65N</board>
+        <board device_compatibility="RX651,RX65N">GENERIC_RX65N</board>
+        <board>GENERIC_RX66T</board>
+        <board>GENERIC_RX71M</board>
+        <board>GENERIC_RX72T</board>
+        <board>HSBRX21AP</board>
+        <board>RDKRX62N</board>
+        <board>RDKRX631</board>
+        <board>RDKRX63N</board>
+        <board>RSKRX210</board>
+        <board>RSKRX220</board>
+        <board>RSKRX610</board>
+        <board>RSKRX62G</board>
+        <board>RSKRX62N</board>
+        <board>RSKRX62T</board>
+        <board>RSKRX630</board>
+        <board>RSKRX631</board>
+        <board>RSKRX63N</board>
+        <board>RSKRX63T_144PIN</board>
+        <board>RSKRX63T_64PIN</board>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_bsp</name>
+        <version>4.01</version>
+        <zipsource>r_bsp_v4.01.zip</zipsource>
+        <application>Generic</application>
+        <desc>Board Support Packages.</desc>
+        <details>The r_bsp package provides a foundation for code to be built on top of. It provides startup code, iodefines, and MCU information for different boards. There are 2 folders that make up the r_bsp package. The 'mcu' folder contains files that are common to a MCU group. These files provide functionality such as easy register access, CPU functions, and a file named 'mcu_info.h' for each MCU group. The 'mcu_info.h' file has information about the MCU on the board and is configured based on the information given in r_bsp_config.h. The information in 'mcu_info.h' is used to help configure Renesas middleware that uses the r_bsp package. The 'board' folder has a folder with startup code for each supported board.  Which MCU and board is chosen is decided by the settings in 'platform.h'. The user can choose which board they are using by uncommenting the include path that applies to their board. For example, if you are using the RSK+RX62N then you would uncomment the #include "./board/rskrx62n/r_bsp.h" include path. Users are encouraged to add their own boards to the 'board' directory. BSPs are configured by using the r_bsp_config.h file. Each board will have a reference configuration file named r_bsp_config_reference.h. The user should copy this file to their project, rename it to r_bsp_config.h, and use the options inside the file to configure the BSP for their project.</details>
+        <function>BSP</function>
+        <incdir>r_bsp</incdir>
+        <incdir>r_config</incdir>
+    </package>
+
+</refinfo>
