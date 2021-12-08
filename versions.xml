@@ -2,10 +2,178 @@
 <modules>
   <module rdp_version="exceptional_modules">
     <name>r_bsp</name>
+    <version>Generic(v=3.60a)</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_gcc_v1.00.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_gcc_v1.00.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>Generic(v=3.8a)</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_gcc_v1.10.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_gcc_v1.10.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>Generic(v=3.91a)</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_gcc_v1.20.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_gcc_v1.20.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>Generic(v=4.0a)</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_gcc_v1.30.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_gcc_v1.30.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>Generic(v=3.8b)</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_iar_v1.00.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_iar_v1.00.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>Generic(v=3.91b)</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_iar_v1.10.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_iar_v1.10.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>Generic(v=4.0b)</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_iar_v1.20.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_iar_v1.20.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>Generic(v=3.40)</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_user_v1.10.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_user_v1.10.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>Generic(v=3.60)</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_user_v1.30.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_user_v1.30.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>3.80</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v3.80.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v3.80.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>3.91</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v3.91.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v3.91.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>4.00</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v4.00.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v4.00.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>4.01</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v4.01.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v4.01.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>5.20</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v5.20.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v5.20.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>5.21</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v5.21.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v5.21.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>5.40</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v5.40.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v5.40.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>5.50</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v5.50.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v5.50.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>5.61</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v5.61.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v5.61.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>5.62</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v5.62.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v5.62.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>5.63</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v5.63.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v5.63.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
+    <version>5.64</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v5.64.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v5.64.xml</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_bsp</name>
     <version>6.20</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/e6e0bc1e5b27535cf8a3dc958183eeac998d7eaa/FITModules/r_bsp_v6.20.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/e6e0bc1e5b27535cf8a3dc958183eeac998d7eaa/FITModules/r_bsp_v6.20.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v6.20.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1ee8ea47443ebc2d3f6c43f344554402378b193f/FITModules/r_bsp_v6.20.xml</url>
     </urls>
   </module>
   <module rdp_version="1.25">
