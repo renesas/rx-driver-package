@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="TFAT_USB_DRIVE_NUM" display="Number of USB drives" default="0" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${TFAT_USB_DRIVE_NUM}")</constraint>
+            <constraint display="Value must be less than 10">("${TFAT_USB_DRIVE_NUM}" &gt;= 0) &amp;&amp; ("${TFAT_USB_DRIVE_NUM}" &lt;= 10)</constraint>
+            <description>Value must be an integer
+Value must be less than 10</description>
+        </property>
+        <property id="TFAT_SDMEM_DRIVE_NUM" display="Number of SD memory card drives" default="0" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${TFAT_SDMEM_DRIVE_NUM}")</constraint>
+            <constraint display="Value must be less than 10">("${TFAT_SDMEM_DRIVE_NUM}" &gt;= 0) &amp;&amp; ("${TFAT_SDMEM_DRIVE_NUM}" &lt;= 10)</constraint>
+            <description>Value must be an integer
+Value must be less than 10</description>
+        </property>
+        <property id="TFAT_USB_MINI_DRIVE_NUM" display="Number of USB mini drives" default="0" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${TFAT_USB_MINI_DRIVE_NUM}")</constraint>
+            <constraint display="Value must be less than 10">("${TFAT_USB_MINI_DRIVE_NUM}" &gt;= 0) &amp;&amp; ("${TFAT_USB_MINI_DRIVE_NUM}" &lt;= 10)</constraint>
+            <description>Value must be an integer
+Value must be less than 10</description>
+        </property>
+        <property id="TFAT_DRIVE_ALLOC_NUM_0" display="Memory Drive 0" default="NULL" type="combobox">
+            <option id="TFAT_DRIVE_ALLOC_NUM_0.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_0.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_0.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_0.NULL" display="None" value="NULL"/>
+            <description>Selects whether to include parameter checking in the code.
+USB       = Use USB memory driver.
+SD Card  = Use SD memory card driver
+USB mini = Use USB memory driver.
+NULL      = Nou use this memory drive.</description>
+        </property>
+        <property id="TFAT_DRIVE_ALLOC_NUM_1" display="Memory Drive 1" default="NULL" type="combobox">
+            <option id="TFAT_DRIVE_ALLOC_NUM_1.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_1.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_1.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_1.NULL" display="None" value="NULL"/>
+            <description>Selects whether to include parameter checking in the code.
+USB       = Use USB memory driver.
+SD Card  = Use SD memory card driver
+USB mini = Use USB memory driver.
+NULL      = Nou use this memory drive.</description>
+        </property>
+        <property id="TFAT_DRIVE_ALLOC_NUM_2" display="Memory Drive 2" default="NULL" type="combobox">
+            <option id="TFAT_DRIVE_ALLOC_NUM_2.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_2.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_2.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_2.NULL" display="None" value="NULL"/>
+            <description>Selects whether to include parameter checking in the code.
+USB       = Use USB memory driver.
+SD Card  = Use SD memory card driver
+USB mini = Use USB memory driver.
+NULL      = Nou use this memory drive.</description>
+        </property>
+        <property id="TFAT_DRIVE_ALLOC_NUM_3" display="Memory Drive 3" default="NULL" type="combobox">
+            <option id="TFAT_DRIVE_ALLOC_NUM_3.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_3.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_3.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_3.NULL" display="None" value="NULL"/>
+            <description>Selects whether to include parameter checking in the code.
+USB       = Use USB memory driver.
+SD Card  = Use SD memory card driver
+USB mini = Use USB memory driver.
+NULL      = Nou use this memory drive.</description>
+        </property>
+        <property id="TFAT_DRIVE_ALLOC_NUM_4" display="Memory Drive 4" default="NULL" type="combobox">
+            <option id="TFAT_DRIVE_ALLOC_NUM_4.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_4.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_4.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_4.NULL" display="None" value="NULL"/>
+            <description>Selects whether to include parameter checking in the code.
+USB       = Use USB memory driver.
+SD Card  = Use SD memory card driver
+USB mini = Use USB memory driver.
+NULL      = Nou use this memory drive.</description>
+        </property>
+        <property id="TFAT_DRIVE_ALLOC_NUM_5" display="Memory Drive 5" default="NULL" type="combobox">
+            <option id="TFAT_DRIVE_ALLOC_NUM_5.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_5.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_5.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_5.NULL" display="None" value="NULL"/>
+            <description>Selects whether to include parameter checking in the code.
+USB       = Use USB memory driver.
+SD Card  = Use SD memory card driver
+USB mini = Use USB memory driver.
+NULL      = Nou use this memory drive.</description>
+        </property>
+        <property id="TFAT_DRIVE_ALLOC_NUM_6" display="Memory Drive 6" default="NULL" type="combobox">
+            <option id="TFAT_DRIVE_ALLOC_NUM_6.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_6.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_6.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_6.NULL" display="None" value="NULL"/>
+            <description>Selects whether to include parameter checking in the code.
+USB       = Use USB memory driver.
+SD Card  = Use SD memory card driver
+USB mini = Use USB memory driver.
+NULL      = Nou use this memory drive.</description>
+        </property>
+        <property id="TFAT_DRIVE_ALLOC_NUM_7" display="Memory Drive 7" default="NULL" type="combobox">
+            <option id="TFAT_DRIVE_ALLOC_NUM_7.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_7.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_7.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_7.NULL" display="None" value="NULL"/>
+            <description>Selects whether to include parameter checking in the code.
+USB       = Use USB memory driver.
+SD Card  = Use SD memory card driver
+USB mini = Use USB memory driver.
+NULL      = Nou use this memory drive.</description>
+        </property>
+        <property id="TFAT_DRIVE_ALLOC_NUM_8" display="Memory Drive 8" default="NULL" type="combobox">
+            <option id="TFAT_DRIVE_ALLOC_NUM_8.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_8.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_8.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_8.NULL" display="None" value="NULL"/>
+            <description>Selects whether to include parameter checking in the code.
+USB       = Use USB memory driver.
+SD Card  = Use SD memory card driver
+USB mini = Use USB memory driver.
+NULL      = Nou use this memory drive.</description>
+        </property>
+        <property id="TFAT_DRIVE_ALLOC_NUM_9" display="Memory Drive 9" default="NULL" type="combobox">
+            <option id="TFAT_DRIVE_ALLOC_NUM_9.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_9.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_9.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_9.NULL" display="None" value="NULL"/>
+            <description>Selects whether to include parameter checking in the code.
+USB       = Use USB memory driver.
+SD Card  = Use SD memory card driver
+USB mini = Use USB memory driver.
+NULL      = Nou use this memory drive.</description>
+        </property>
+    </configuration>
+</module>

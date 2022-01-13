@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>2.08.00</version>
+        <version>3.01.00</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family omit_series="true">RX</family>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_tfat_driver_rx</name>
+        <version>1.05</version>
+        <zipsource>r_tfat_driver_rx_v1.05.zip</zipsource>
+        <dependency>
+            <module>r_cmt_rx</module>
+            <version>3.21</version>
+        </dependency>
+        <dependency>
+            <module>r_sys_time_rx</module>
+            <version>1.00</version>
+        </dependency>
+        <dependency>
+            <module>r_tfat_rx</module>
+            <version>3.04</version>
+        </dependency>
+        <application>Storage &#38; Memory</application>
+        <desc>Memory Driver Interface for Open Source FAT File System.</desc>
+        <details>This memory driver interface connects TFAT library and Device Drivers(USB etc).<br/>
+TFAT library is a FAT file system which just requres small memory.<br/>
+TFAT library is based on FatFs.<br/>
+<br/>
+Please refer to the<br/>
+ https://www.renesas.com/mw/tfat<br/></details>
+        <function>storage</function>
+        <incdir>r_tfat_driver_rx</incdir>
+        <incdir>r_tfat_driver_rx/src</incdir>
+    </package>
+
+</refinfo>
