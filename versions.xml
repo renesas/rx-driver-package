@@ -695,19 +695,19 @@
   </module>
   <module rdp_version="1.25">
     <name>r_tfat_driver_rx</name>
-    <version>2.00</version>
+    <version>1.05</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_tfat_driver_rx_v2.00.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_tfat_driver_rx_v2.00.xml</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_tfat_driver_rx_v2.00_extend.mdf</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/47eb3a78fe5b4b279e2b2c53f820261cc75767f8/FITModules/r_tfat_driver_rx_v1.05.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/47eb3a78fe5b4b279e2b2c53f820261cc75767f8/FITModules/r_tfat_driver_rx_v1.05.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/47eb3a78fe5b4b279e2b2c53f820261cc75767f8/FITModules/r_tfat_driver_rx_v1.05_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.25">
     <name>r_tfat_rx</name>
-    <version>4.00</version>
+    <version>3.04</version>
     <urls>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_tfat_rx_v4.00.zip</url>
-      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/f64b94dff3c76b405876da4ea77f63e068163b0a/FITModules/r_tfat_rx_v4.00.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/47eb3a78fe5b4b279e2b2c53f820261cc75767f8/FITModules/r_tfat_rx_v3.04.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/47eb3a78fe5b4b279e2b2c53f820261cc75767f8/FITModules/r_tfat_rx_v3.04.xml</url>
     </urls>
   </module>
   <module rdp_version="1.25">
