@@ -23,6 +23,8 @@
 * History : DD.MM.YYYY Version Description
 *           31.03.2021 1.00    Initial Release
 *                              Supported for RX671.
+*           03.12.2021 2.00    Updated new features in Asynchronous mode
+*                              and added support for Manchester mode.
 ***********************************************************************************************************************/
 
 #ifndef RSCI_RX671_H
@@ -33,7 +35,7 @@ Includes   <System Includes> , "Project Includes"
 ***********************************************************************************************************************/
 #include "../../r_rsci_rx_private.h"
 
-#if (RSCI_CFG_ASYNC_INCLUDED)
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
 #include "r_byteq_if.h"
 #endif
 
@@ -47,8 +49,13 @@ Macro definitions
 #define RSCI_SCR0_RIE_MASK    (0x00010000U)     /* receive interrupt enable */
 #define RSCI_SCR0_TE_MASK     (0x00000010U)     /* transmitter enable */
 #define RSCI_SCR0_RE_MASK     (0x00000001U)     /* receiver enable */
-#define RSCI_EN_XCVR_MASK    (RSCI_SCR0_RE_MASK | RSCI_SCR0_TE_MASK | RSCI_SCR0_RIE_MASK | RSCI_SCR0_TIE_MASK)
+#define RSCI_EN_XCVR_MASK     (RSCI_SCR0_RE_MASK | RSCI_SCR0_TE_MASK | RSCI_SCR0_RIE_MASK | RSCI_SCR0_TIE_MASK)
 
+/* RSCI MMCR register masks */
+#define RSCI_MMCR_PFERIE_MASK    (0x01000000U)     /* preface error interrupt enable */
+#define RSCI_MMCR_SYERIE_MASK    (0x02000000U)     /* sync error interrupt enable */
+#define RSCI_MMCR_SBERIE_MASK    (0x04000000U)     /* transmitter enable */
+#define RSCI_EN_MMCR_ERR_MASK    (RSCI_MMCR_PFERIE_MASK | RSCI_MMCR_SYERIE_MASK | RSCI_MMCR_SBERIE_MASK )
 
 /* RSCI SSR register receiver error masks */
 #define RSCI_SSR_ORER_MASK         (0x01000000U)     /* overflow error */
@@ -57,10 +64,24 @@ Macro definitions
 #define RSCI_RCVR_ERR_MASK         (RSCI_SSR_ORER_MASK | RSCI_SSR_AFER_MASK | RSCI_SSR_APER_MASK)
 
 /* RSCI SSCR register receiver error masks */
-#define RSCI_SSCR_ORERC_MASK         (0x01000000U)     /* overflow error */
-#define RSCI_SSCR_AFERC_MASK         (0x10000000U)     /* framing error */
-#define RSCI_SSCR_APERC_MASK         (0x08000000U)     /* parity err */
-#define RSCI_RCVRC_ERR_MASK         (RSCI_SSCR_ORERC_MASK | RSCI_SSCR_AFERC_MASK | RSCI_SSCR_APERC_MASK)
+#define RSCI_SSCR_ORERC_MASK        (0x01000000U)     /* overflow error */
+#define RSCI_SSCR_AFERC_MASK        (0x10000000U)     /* framing error */
+#define RSCI_SSCR_APERC_MASK        (0x08000000U)     /* parity err */
+#define RSCI_SSCR_ERR_CLEAR_MASK    (RSCI_SSCR_ORERC_MASK | RSCI_SSCR_AFERC_MASK | RSCI_SSCR_APERC_MASK)
+
+/* RSCI MMSR register receiver error masks */
+#define RSCI_MMSR_PFER_MASK        (0x00000001U)     /* preface error */
+#define RSCI_MMSR_SYER_MASK        (0X00000002U)     /* sync error */
+#define RSCI_MMSR_SBER_MASK        (0x00000004U)     /* start bit error */
+#define RSCI_MMSR_MCER_MASK        (0x00000010U)     /* manchester code error */
+#define RSCI_MMSR_ERR_MASK         (RSCI_MMSR_PFER_MASK | RSCI_MMSR_SYER_MASK | RSCI_MMSR_SBER_MASK | RSCI_MMSR_MCER_MASK)
+
+/* RSCI MMSCR register receiver error clear masks */
+#define RSCI_MMSCR_PFERC_MASK      (0x00000001U)     /* preface error clear */
+#define RSCI_MMSCR_SYERC_MASK      (0X00000002U)     /* sync error clear */
+#define RSCI_MMSCR_SBERC_MASK      (0x00000004U)     /* start bit error clear */
+#define RSCI_MMSCR_MCERC_MASK      (0x00000010U)     /* manchester code error clear */
+#define RSCI_MMSCR_ERR_CLEAR_MASK  (RSCI_MMSCR_PFERC_MASK | RSCI_MMSCR_SYERC_MASK | RSCI_MMSCR_SBERC_MASK | RSCI_MMSCR_MCERC_MASK)
 
 /* Macros to enable and disable ICU interrupts */
 #define ENABLE_RXI_INT      (*hdl->rom->icu_rxi |= hdl->rom->rxi_en_mask)
@@ -137,15 +158,15 @@ typedef struct st_rsci_ch_ctrl       /* RSCI channel control (for handle) */
     void          (*callback)(void *p_args); /* function ptr for rcvr errs */
     union
     {
-#if (RSCI_CFG_ASYNC_INCLUDED)
-        byteq_hdl_t     que;        /* async transmit queue handle */
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
+        byteq_hdl_t     que;        /* async/manc transmit queue handle */
 #endif
         uint8_t         *buf;       /* sspi/sync tx buffer ptr */
     } u_tx_data;
     union
     {
-#if (RSCI_CFG_ASYNC_INCLUDED)
-        byteq_hdl_t     que;        /* async receive queue handle */
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
+        byteq_hdl_t     que;        /* async/manc receive queue handle */
 #endif
         uint8_t         *buf;       /* sspi/sync rx buffer ptr */
     } u_rx_data;
@@ -163,6 +184,14 @@ typedef struct st_rsci_ch_ctrl       /* RSCI channel control (for handle) */
     uint8_t         rx_curr_thresh; /* RX FIFO threshold(current) */
     uint8_t         tx_dflt_thresh; /* TX FIFO threshold(default) */
     uint8_t         tx_curr_thresh; /* TX FIFO threshold(current) */
+#endif
+#if RSCI_CFG_MANC_INCLUDED
+    uint8_t         rx_decoding_pol;    /* Decoding conversion select */
+    uint8_t         rx_preface_length;  /* RX Preface length */
+    uint8_t         rx_preface_pattern; /* RX Preface pattern */
+    uint8_t         tx_encoding_pol;    /* Encoding conversion select */
+    uint8_t         tx_preface_length;  /* TX Preface length */
+    uint8_t         tx_preface_pattern; /* TX Preface pattern */
 #endif
 } rsci_ch_ctrl_t;
 
@@ -189,7 +218,7 @@ Exported global variables and functions
 ******************************************************************************/
 extern const rsci_hdl_t g_rsci_handles[];
 
-#if (RSCI_CFG_ASYNC_INCLUDED)
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
 extern const baud_divisor_t rsci_async_baud[];
 #endif
 #if (RSCI_CFG_SSPI_INCLUDED || RSCI_CFG_SYNC_INCLUDED)
@@ -230,6 +259,12 @@ extern rsci_err_t rsci_async_cmds(rsci_hdl_t const hdl,
 extern rsci_err_t rsci_sync_cmds(rsci_hdl_t const hdl,
                         rsci_cmd_t const cmd,
                         void            *p_args);
+#endif
+
+#if (RSCI_CFG_MANC_INCLUDED)
+extern rsci_err_t rsci_manc_cmds(rsci_hdl_t const hdl,
+                         rsci_cmd_t const cmd,
+                         void            *p_args);
 #endif
 
 extern rsci_err_t rsci_mcu_param_check(uint8_t const chan);

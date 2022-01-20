@@ -1,12 +1,10 @@
 
 /**
  *  \file blebrr_pl.c
- *
- *
  */
 
 /*
- *  Copyright (C) 2013. Mindtree Limited.
+ *  Copyright (C) 2013-2021. Mindtree Limited.
  *  All rights reserved.
  */
 
@@ -24,30 +22,37 @@
 * FIT module configuration check
 *******************************************************************************/
 #if (BLE_CFG_LIB_TYPE != 0) && (BLE_CFG_LIB_TYPE != 1)
-#error "Bearer Wrapper not support the Compact type of BLE Protocol Stack"
+#error Compact type of BLE Protocol Stack not available for Mesh FIT; because \
+Compact type not support Scan. Set the BLE_CFG_LIB_TYPE to either 0 or 1.
 #endif /* (BLE_CFG_LIB_TYPE != 0) && (BLE_CFG_LIB_TYPE != 1) */
+
+#if (BLE_CFG_ABS_API_EN != 0)
+#error Abstraction API of BLE FIT Module not supported; because \
+BLE Initialization process conflicts with Mesh Bearer. Set the BLE_CFG_ABS_API_EN to 0.
+#endif /* (BLE_CFG_ABS_API_EN != 0) */
 
 /*******************************************************************************
 * Macro definitions
 *******************************************************************************/
-#define BLEBRR_DEFAULT_ADV_HNDL             0x00
-#define BLEBRR_DEFAULT_DURATION             0x00
-#define BLEBRR_DEFAULT_MAX_EXT_ADV_EVTS     0x00
+#define BLEBRR_DEFAULT_ADV_HNDL             0x00        /* Advertising handle  : 0x00 */
+#define BLEBRR_DEFAULT_DURATION             0x00        /* Advertising duration: unlimited */
+#define BLEBRR_DEFAULT_MAX_EXT_ADV_EVTS     0x00        /* The maximum number of advertising events: unlimited */
 
-#define BLEBRR_NCON_ADVINTMIN               0x20
-#define BLEBRR_NCON_ADVINTMAX               0x20
+#define BLEBRR_NCON_ADVINTMIN               0xA0        /* Min Advertising interval: 100[msec] */
+#define BLEBRR_NCON_ADVINTMAX               0xA0        /* Max Advertising interval: 100[msec] */
 #define BLEBRR_NCON_ADVTYPE                 BLE_GAP_LEGACY_PROP_ADV_NONCONN_IND
 #define BLEBRR_NCON_ADDRTYPE                BLEBRR_VS_ADDR_TYPE
 #define BLEBRR_NCON_ADVCHMAP                BLE_GAP_ADV_CH_ALL
 #define BLEBRR_NCON_ADVFILTERPOLICY         BLE_GAP_ADV_ALLOW_SCAN_ANY_CONN_ANY
+#define BLEBRR_ADV_DATALEN                  31          /* Max advertising data length: 31[bytes] */
 
-#define BLEBRR_CON_ADVINTMIN                0x20
-#define BLEBRR_CON_ADVINTMAX                0x20
+#define BLEBRR_CON_ADVINTMIN                0xA0        /* Min Advertising interval: 100[msec] */
+#define BLEBRR_CON_ADVINTMAX                0xA0        /* Max Advertising interval: 100[msec] */
 #define BLEBRR_CON_ADVTYPE                  BLE_GAP_LEGACY_PROP_ADV_IND
 #define BLEBRR_CON_ADDRTYPE                 BLEBRR_VS_ADDR_TYPE
 #define BLEBRR_CON_ADVCHMAP                 BLE_GAP_ADV_CH_ALL
 #define BLEBRR_CON_ADVFILTERPOLICY          BLE_GAP_ADV_ALLOW_SCAN_ANY_CONN_ANY
-#define BLEBRR_CON_SCANRSP_DATALEN          31
+#define BLEBRR_CON_SCANRSP_DATALEN          31          /* Max scan response data length: 31[bytes] */
 
 #define BLEBRR_SCAN_ADDRTYPE                BLEBRR_VS_ADDR_TYPE
 #define BLEBRR_SCAN_PROCTYPE                BLE_GAP_SC_PROC_OBS
@@ -56,30 +61,31 @@
  * NOTE: To avoid missing any incoming Advertising packets,
  * BLEBRR_SCAN_WINDOW should be equal to BLEBRR_SCAN_INTERVAL.
  */
-#define BLEBRR_SCAN_INTERVAL                0x0060
-#define BLEBRR_SCAN_WINDOW                  0x0060
+#define BLEBRR_SCAN_INTERVAL                0x0060      /* Scan interval: 60[msec] */
+#define BLEBRR_SCAN_WINDOW                  0x0060      /* Scan window  : 60[msec] */
 #define BLEBRR_SCAN_FILTERPOLICY            BLE_GAP_SCAN_ALLOW_ADV_ALL
 #define BLEBRR_SCAN_FILTERDUPS              BLE_GAP_SCAN_FILT_DUPLIC_DISABLE
 
 #define BLEBRR_INIT_FILTERPOLICY            BLE_GAP_INIT_FILT_USE_ADDR
 #define BLEBRR_INIT_ADDRTYPE                BLEBRR_VS_ADDR_TYPE
-#define BLEBRR_INIT_SCANINTERVAL            0x0060
-#define BLEBRR_INIT_SCANWINDOW              0x0060
+#define BLEBRR_INIT_SCANINTERVAL            0x0060      /* Scan interval: 60[msec] */
+#define BLEBRR_INIT_SCANWINDOW              0x0060      /* Scan window  : 60[msec] */
 
-#define BLEBRR_CONN_FILTER_POLICY_WL        0x01
-#define BLEBRR_CONN_FILTER_POLICY_NWL       0x00
-#define BLEBRR_CONN_INTERVAL_MIN            0x0040
-#define BLEBRR_CONN_INTERVAL_MAX            0x0040
-#define BLEBRR_CONN_LATENCY                 0x0000
-#define BLEBRR_CONN_SUPERVISION_TO          0x03BB
-#define BLEBRR_CONN_MIN_CE_LEN              0x0000
-#define BLEBRR_CONN_MAX_CE_LEN              0x0000
+#define BLEBRR_CONN_INTERVAL_MIN            0x0040      /* Min connection interval: 80[msec] */
+#define BLEBRR_CONN_INTERVAL_MAX            0x0040      /* Max connection interval: 80[msec] */
+#define BLEBRR_CONN_LATENCY                 0x0000      /* Slave latency          : 0[events] */
+#define BLEBRR_CONN_SUPERVISION_TO          0x03BB      /* Supervision timeout    : 9550[msec] */
+#define BLEBRR_CONN_MIN_CE_LEN              0xFFFF      /* Min connection event length: over 40[sec], virtually unlimited */
+#define BLEBRR_CONN_MAX_CE_LEN              0xFFFF      /* Max connection event length: over 40[sec], virtually unlimited */
 
 #define BLEBRR_GATT_MAX_ENV                 (MESH_CFG_NUM_NETWORK_INTERFACES - 1)
 
 /*******************************************************************************
 * Global Variables and Private Functions declaration
 *******************************************************************************/
+static UCHAR blebrr_adv_data[BLEBRR_ADV_DATALEN];
+static UCHAR blebrr_scanrsp_data[BLEBRR_CON_SCANRSP_DATALEN];
+
 static st_ble_gap_adv_param_t blebrr_noncon_adv_param_pl =
 {
     .adv_hdl           = BLEBRR_DEFAULT_ADV_HNDL,
@@ -111,7 +117,7 @@ static st_ble_gap_adv_data_t blebrr_adv_data_param_pl =
     .adv_hdl          = BLEBRR_DEFAULT_ADV_HNDL,
     .data_type        = BLE_GAP_ADV_DATA_MODE,
     .data_length      = 0,
-    .p_data           = NULL,
+    .p_data           = blebrr_adv_data,
     .zero_length_flag = BLE_GAP_DATA_0_CLEAR,
 };
 
@@ -120,9 +126,20 @@ static st_ble_gap_adv_data_t blebrr_srsp_data_param_pl =
     .adv_hdl          = BLEBRR_DEFAULT_ADV_HNDL,
     .data_type        = BLE_GAP_SCAN_RSP_DATA_MODE,
     .data_length      = 0,
+    .p_data           = blebrr_scanrsp_data,
+    .zero_length_flag = BLE_GAP_DATA_0_CLEAR,
+};
+
+#if (BLE_CFG_LIB_TYPE == 0)
+static st_ble_gap_adv_data_t blebrr_clear_srsp_data_param_pl =
+{
+    .adv_hdl          = BLEBRR_DEFAULT_ADV_HNDL,
+    .data_type        = BLE_GAP_SCAN_RSP_DATA_MODE,
+    .data_length      = 0,
     .p_data           = NULL,
     .zero_length_flag = BLE_GAP_DATA_0_CLEAR,
 };
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
 
 static st_ble_gap_scan_phy_param_t blebrr_scan_1m_phy_param_pl =
 {
@@ -180,109 +197,61 @@ static blebrr_gatt_env_t blebrr_gatt_env[BLEBRR_GATT_MAX_ENV];
 static BLEBRR_INIT_CB       blebrr_init_cb;
 static BLEBRR_GATT_IFACE_CB blebrr_gatt_iface_pl_cb;
 
-/* Bearer Scan Response Data related */
-static UCHAR blebrr_scanrsp_data[BLEBRR_CON_SCANRSP_DATALEN];
-static UCHAR blebrr_scanrsp_datalen;
+static UCHAR blebrr_advertise_type;
+static UCHAR blebrr_is_scanrsp_data_set = MS_FALSE;
 
-UCHAR blebrr_advstate;
 UCHAR blebrr_scanstate;
 #if BLEBRR_GATT_CLIENT
 static UCHAR blebrr_scanstate_gatt;
 static UCHAR blebrr_scan_mode;
 #endif /* BLEBRR_GATT_CLIENT */
 
-static uint16_t appl_mesh_prov_data_out_ccd_cb
-                (
-                    uint16_t conn_hdl,
-                    uint8_t enabled
-                );
-static uint16_t appl_mesh_prov_data_in_wt_cb
-                (
-                    uint16_t conn_hdl,
-                    uint16_t offset,
-                    uint16_t length,
-                    uint8_t  * value
-                );
-static uint16_t appl_mesh_proxy_data_out_ccd_cb
-                (
-                    uint16_t conn_hdl,
-                    uint8_t enabled
-                );
-static uint16_t appl_mesh_proxy_data_in_wt_cb
-                (
-                    uint16_t conn_hdl,
-                    uint16_t offset,
-                    uint16_t length,
-                    uint8_t  * value
-                );
+static uint16_t appl_mesh_prov_data_out_ccd_cb(uint16_t conn_hdl, uint8_t enabled);
+static uint16_t appl_mesh_prov_data_in_wt_cb(uint16_t conn_hdl, uint16_t length, uint8_t * value);
+static uint16_t appl_mesh_proxy_data_out_ccd_cb(uint16_t conn_hdl, uint8_t enabled);
+static uint16_t appl_mesh_proxy_data_in_wt_cb(uint16_t conn_hdl, uint16_t length, uint8_t * value);
 
-static mesh_prov_cb appl_mesh_prov_cb =
+static mesh_gatt_cb appl_mesh_prov_cb =
 {
-    .prov_data_in_cb      = appl_mesh_prov_data_in_wt_cb,
-    .prov_data_out_ccd_cb = appl_mesh_prov_data_out_ccd_cb,
+    .data_in_cb      = appl_mesh_prov_data_in_wt_cb,
+    .data_out_ccd_cb = appl_mesh_prov_data_out_ccd_cb,
 };
 
-static mesh_proxy_cb appl_mesh_proxy_cb =
+static mesh_gatt_cb appl_mesh_proxy_cb =
 {
-    .proxy_data_in_cb      = appl_mesh_proxy_data_in_wt_cb,
-    .proxy_data_out_ccd_cb = appl_mesh_proxy_data_out_ccd_cb,
+    .data_in_cb      = appl_mesh_proxy_data_in_wt_cb,
+    .data_out_ccd_cb = appl_mesh_proxy_data_out_ccd_cb,
 };
 
 #if BLEBRR_GATT_CLIENT
-static void mesh_prov_data_out_notif_cb
-     (
-         uint16_t  conn_hdl,
-         uint16_t  length,
-         uint8_t   * value
-     );
-static void mesh_prov_notif_config_status_cb
-     (
-         uint16_t  conn_hdl,
-         uint8_t   flag,
-         uint8_t   status
-     );
+static void mesh_prov_data_out_notif_cb(uint16_t conn_hdl, uint16_t length, uint8_t * value);
+static void mesh_prov_notif_config_status_cb(uint16_t conn_hdl, uint8_t flag, uint8_t status);
 static void mesh_prov_discovery_comp_cb(uint16_t conn_hdl, API_RESULT status);
-static void mesh_proxy_data_out_notif_cb
-     (
-         uint16_t  conn_hdl,
-         uint16_t  length,
-         uint8_t   * value
-     );
-static void mesh_proxy_notif_config_status_cb
-     (
-         uint16_t  conn_hdl,
-         uint8_t   flag,
-         uint8_t   status
-     );
+static void mesh_prov_service_changed_cb(uint16_t conn_hdl);
+static void mesh_proxy_data_out_notif_cb(uint16_t conn_hdl, uint16_t length, uint8_t * value);
+static void mesh_proxy_notif_config_status_cb(uint16_t conn_hdl, uint8_t flag, uint8_t status);
 static void mesh_proxy_discovery_comp_cb(uint16_t conn_hdl, API_RESULT status);
+static void mesh_proxy_service_changed_cb(uint16_t conn_hdl);
 
-static mesh_client_prov_cb mesh_prov_callbacks =
+static mesh_gatt_client_cb mesh_prov_callbacks =
 {
-    .mesh_prov_data_out_notif = mesh_prov_data_out_notif_cb,
-    .mesh_prov_ntf_status     = mesh_prov_notif_config_status_cb,
-    .mesh_prov_disc_comp      = mesh_prov_discovery_comp_cb,
+    .data_out_notif = mesh_prov_data_out_notif_cb,
+    .ntf_status     = mesh_prov_notif_config_status_cb,
+    .disc_comp      = mesh_prov_discovery_comp_cb,
+    .serv_changed   = mesh_prov_service_changed_cb,
 };
 
-static mesh_client_proxy_cb mesh_proxy_callbacks =
+static mesh_gatt_client_cb mesh_proxy_callbacks =
 {
-    .mesh_proxy_data_out_notif = mesh_proxy_data_out_notif_cb,
-    .mesh_proxy_ntf_status     = mesh_proxy_notif_config_status_cb,
-    .mesh_proxy_disc_comp      = mesh_proxy_discovery_comp_cb,
+    .data_out_notif = mesh_proxy_data_out_notif_cb,
+    .ntf_status     = mesh_proxy_notif_config_status_cb,
+    .disc_comp      = mesh_proxy_discovery_comp_cb,
+    .serv_changed   = mesh_proxy_service_changed_cb,
 };
 #endif /* BLEBRR_GATT_CLIENT */
 
-static void blebrr_gap_cb
-            (
-                uint16_t        type,
-                ble_status_t    result,
-                st_ble_evt_data_t * data
-            );
-static void blebrr_vs_cb
-            (
-                uint16_t        type,
-                ble_status_t    result,
-                st_ble_vs_evt_data_t * data
-            );
+static void blebrr_gap_cb(uint16_t type, ble_status_t result, st_ble_evt_data_t * data);
+static void blebrr_vs_cb(uint16_t type, ble_status_t result, st_ble_vs_evt_data_t * data);
 
 static st_ble_dev_addr_t blebrr_invald_dev_addr = {0};
 
@@ -325,6 +294,11 @@ API_RESULT R_MS_BRR_Init(BLEBRR_INIT_CB init_cb)
         BLEBRR_LOG("R_BLE_GATTS_Init(...) failed with status 0x%04X\n", status);
     }
 
+    /**
+     * Since Mesh GATT Services use only Write Without Response and Notification,
+     * registering Prepare Queue by R_BLE_GATTS_SetPrepareQueue() is not needed.
+     */
+
     /* Initialize GATT Mesh Services */
     mesh_serv_init(2);
 
@@ -354,7 +328,7 @@ API_RESULT R_MS_BRR_Init(BLEBRR_INIT_CB init_cb)
     return API_SUCCESS;
 }
 
-static blebrr_gatt_env_t * blebrr_find_gatt_env_by_connhdl(uint16_t conn_hdl)
+blebrr_gatt_env_t * blebrr_find_gatt_env_by_connhdl(uint16_t conn_hdl)
 {
     for (uint16_t idx = 0; idx < BLEBRR_GATT_MAX_ENV; idx++)
     {
@@ -363,7 +337,7 @@ static blebrr_gatt_env_t * blebrr_find_gatt_env_by_connhdl(uint16_t conn_hdl)
             return &blebrr_gatt_env[idx];
         }
     }
-    BLEBRR_LOG("DBG: ERROR: Could not find gatt_env by conn_hdl\n");
+    BLEBRR_LOG("ERROR: Could not find gatt_env by conn_hdl\n");
     return NULL;
 }
 
@@ -376,7 +350,7 @@ static blebrr_gatt_env_t * blebrr_find_gatt_env_by_brrhdl(BRR_HANDLE brr_hdl)
             return &blebrr_gatt_env[idx];
         }
     }
-    BLEBRR_LOG("DBG: ERROR: Could not find gatt_env by brr_hdl\n");
+    BLEBRR_LOG("ERROR: Could not find gatt_env by brr_hdl\n");
     return NULL;
 }
 
@@ -424,25 +398,26 @@ API_RESULT blebrr_scan_pl(UCHAR enable)
 /***************************************************************************//**
 * @brief Sets Scan Response Data to BLE Protocol Stack
 *******************************************************************************/
-API_RESULT R_MS_BRR_Set_ScanRspData(UCHAR * srp_data, UCHAR srp_datalen)
+API_RESULT R_MS_BRR_Set_ScanRspData(const UCHAR * srp_data, UCHAR srp_datalen)
 {
-    /* Initialize the Globals */
-    memset(blebrr_scanrsp_data, 0x0, sizeof(blebrr_scanrsp_data));
-    blebrr_scanrsp_datalen = 0;
+    /* Initialize the global */
+    blebrr_srsp_data_param_pl.data_length = 0;
 
-    /* Copy Scan Response Data to global */
-    if (NULL != srp_data)
+    if (0 != srp_datalen)
     {
-        if ((0 != srp_datalen) && (BLEBRR_CON_SCANRSP_DATALEN >= srp_datalen))
+        if ((NULL != srp_data) && (BLEBRR_CON_SCANRSP_DATALEN >= srp_datalen))
         {
+            /* Copy Scan Response Data to global */
             memcpy(blebrr_scanrsp_data, srp_data, srp_datalen);
-            blebrr_scanrsp_datalen = srp_datalen;
-    
-            return API_SUCCESS;
+            blebrr_srsp_data_param_pl.data_length = srp_datalen;
+        }
+        else
+        {
+            return API_FAILURE;
         }
     }
 
-    return API_FAILURE;
+    return API_SUCCESS;
 }
 
 /***************************************************************************//**
@@ -451,71 +426,44 @@ API_RESULT R_MS_BRR_Set_ScanRspData(UCHAR * srp_data, UCHAR srp_datalen)
 API_RESULT blebrr_advertise_data_pl(CHAR type, UCHAR * pdata, UINT16 pdatalen)
 {
     ble_status_t ret;
-    API_RESULT   retval = API_FAILURE;
+    API_RESULT   retval = API_SUCCESS;
 
     /* Is request to enable? */
     if ((NULL != pdata) && (0 != pdatalen))
     {
-        /* Set Advertising Parameters */
-        if (BRR_BCON_PASSIVE == type)
+        /*BLEBRR_LOG("blebrr_advertise_data_pl(): %s\n",
+            (BRR_BCON_PASSIVE == type) ? "Non-connectable ADV" : "Connectable ADV");*/
+        blebrr_advertise_type = type;
+
+        /* Copy Advertising Data to global */
+        memcpy(blebrr_adv_data, pdata, pdatalen);
+        blebrr_adv_data_param_pl.data_length = pdatalen;
+
+        #if (BLE_CFG_LIB_TYPE == 0)
+        /* Was Scan Response data set just before transmitting Non-connectable Advertising? */
+        if ((BRR_BCON_PASSIVE == type) && (MS_TRUE == blebrr_is_scanrsp_data_set))
         {
             /**
-             * Invoke GAP API for Setting Legacy Non-connectable ADV Parameters.
+             * Invoke GAP API for Clearing Scan Response data
              */
-            ret = R_BLE_GAP_SetAdvParam(&blebrr_noncon_adv_param_pl);
+            ret = R_BLE_GAP_SetAdvSresData(&blebrr_clear_srsp_data_param_pl);
             if (BLE_SUCCESS != ret)
             {
-                BLEBRR_LOG("R_BLE_GAP_SetAdvParam is failed: 0x%04X\n", ret);
+                BLEBRR_LOG("R_BLE_GAP_SetAdvSresData for Clear is failed: 0x%04X\n", ret);
             }
         }
         else
+        #endif /* (BLE_CFG_LIB_TYPE == 0) */
         {
             /**
-             * Invoke GAP API for Setting Legacy Connectablev ADV Parameters.
+             * Invoke GAP API for Setting Non-connectable/Connectable Advertising Parameters
              */
-            ret = R_BLE_GAP_SetAdvParam(&blebrr_con_adv_param_pl);
+            ret = R_BLE_GAP_SetAdvParam((BRR_BCON_PASSIVE == type) ?
+                        &blebrr_noncon_adv_param_pl : &blebrr_con_adv_param_pl);
             if (BLE_SUCCESS != ret)
             {
                 BLEBRR_LOG("R_BLE_GAP_SetAdvParam is failed: 0x%04X\n", ret);
             }
-
-            /* Set Scan Response Data */
-            if ((BLE_SUCCESS == ret) && (0 != blebrr_scanrsp_datalen))
-            {
-                /**
-                 * Invoke GAP API for Setting Scan Response Data.
-                 */
-                blebrr_srsp_data_param_pl.p_data      = blebrr_scanrsp_data;
-                blebrr_srsp_data_param_pl.data_length = blebrr_scanrsp_datalen;
-                ret = R_BLE_GAP_SetAdvSresData(&blebrr_srsp_data_param_pl);
-                if (BLE_SUCCESS != ret)
-                {
-                    /* Scan Response Data Setting Failure */
-                    BLEBRR_LOG("R_BLE_GAP_SetAdvSresData for SRSP is failed: 0x%04X\n", ret);
-                }
-            }
-        }
-
-        /* Set Advertising Data */
-        if (BLE_SUCCESS == ret)
-        {
-            /**
-             * Invoke GAP API for Setting Legacy Non-connectable/Connectable ADV Data.
-             */
-            blebrr_adv_data_param_pl.p_data      = pdata;
-            blebrr_adv_data_param_pl.data_length = pdatalen;
-            ret = R_BLE_GAP_SetAdvSresData(&blebrr_adv_data_param_pl);
-            if (BLE_SUCCESS != ret)
-            {
-                /* Advertising Data Setting Failure */
-                BLEBRR_LOG("R_BLE_GAP_SetAdvSresData for ADV is failed: 0x%04X\n", ret);
-            }
-        }
-
-        /* Enable Advertising */
-        if (BLE_SUCCESS == ret)
-        {
-            retval = blebrr_advertise_pl(MS_TRUE);
         }
     }
     else
@@ -528,16 +476,80 @@ API_RESULT blebrr_advertise_data_pl(CHAR type, UCHAR * pdata, UINT16 pdatalen)
 }
 
 /***************************************************************************//**
+* @brief Handles BLE_GAP_EVENT_ADV_PARAM_SET_COMP event
+*******************************************************************************/
+static void blebrr_adv_param_set_comp_hdlr(void)
+{
+    ble_status_t ret;
+
+    /**
+     * Invoke GAP API for Setting Advertising Data
+     */
+    ret = R_BLE_GAP_SetAdvSresData(&blebrr_adv_data_param_pl);
+    if (BLE_SUCCESS != ret)
+    {
+        BLEBRR_LOG("R_BLE_GAP_SetAdvSresData for ADV is failed: 0x%04X\n", ret);
+    }
+}
+
+/***************************************************************************//**
+* @brief Handles BLE_GAP_EVENT_ADV_DATA_UPD_COMP event
+*******************************************************************************/
+static void blebrr_adv_data_upd_comp_hdlr(UCHAR data_type)
+{
+    ble_status_t ret;
+
+    /* Is Scan Response data cleared? */
+    if ((BRR_BCON_PASSIVE == blebrr_advertise_type) &&
+        (MS_TRUE == blebrr_is_scanrsp_data_set))
+    {
+        blebrr_is_scanrsp_data_set = MS_FALSE;
+
+        /**
+         * Invoke GAP API for Setting Non-connectable Advertising Parameters
+         */
+        ret = R_BLE_GAP_SetAdvParam(&blebrr_noncon_adv_param_pl);
+        if (BLE_SUCCESS != ret)
+        {
+            BLEBRR_LOG("R_BLE_GAP_SetAdvParam is failed: 0x%04X\n", ret);
+        }
+    }
+    /* Is Scan Response data needed for Connectable Advertising? */
+    else if ((BLE_GAP_ADV_DATA_MODE == data_type) &&
+             (BRR_BCON_ACTIVE == blebrr_advertise_type) &&
+             ((0 != blebrr_srsp_data_param_pl.data_length) || (MS_TRUE == blebrr_is_scanrsp_data_set)))
+    {
+        /**
+         * Invoke GAP API for Setting Scan Response Data
+         */
+        ret = R_BLE_GAP_SetAdvSresData(&blebrr_srsp_data_param_pl);
+        if (BLE_SUCCESS != ret)
+        {
+            BLEBRR_LOG("R_BLE_GAP_SetAdvSresData for SRSP is failed: 0x%04X\n", ret);
+        }
+    }
+    else
+    {
+        #if (BLE_CFG_LIB_TYPE == 0)
+        /* Is Scan Response data set? */
+        if (BLE_GAP_SCAN_RSP_DATA_MODE == data_type)
+        {
+            blebrr_is_scanrsp_data_set = MS_TRUE;
+        }
+        #endif /* (BLE_CFG_LIB_TYPE == 0) */
+
+        blebrr_advertise_pl(MS_TRUE);
+    }
+}
+
+/***************************************************************************//**
 * @brief Starts or Stops Advertisement
 *******************************************************************************/
 API_RESULT blebrr_advertise_pl(UCHAR state)
 {
     ble_status_t ret;
 
-    /* Update global state */
-    blebrr_advstate = state;
-
-    if (MS_TRUE == blebrr_advstate)
+    if (MS_TRUE == state)
     {
         ret = R_BLE_GAP_StartAdv
               (
@@ -569,14 +581,13 @@ API_RESULT blebrr_advertise_pl(UCHAR state)
 API_RESULT blebrr_gatt_send_pl(BRR_HANDLE * handle, UCHAR * data, UINT16 datalen)
 {
     UCHAR      type;
-    API_RESULT retval = API_FAILURE;
-    ble_status_t ret;
+    ble_status_t ret = BLE_ERR_INVALID_ARG;
     blebrr_gatt_env_t * gatt_env;
 
     gatt_env = blebrr_find_gatt_env_by_brrhdl(*handle);
     if (NULL == gatt_env)
     {
-        return API_FAILURE;
+        return BLE_ERR_NOT_FOUND;
     }
 
     /* Get the current mode */
@@ -595,12 +606,11 @@ API_RESULT blebrr_gatt_send_pl(BRR_HANDLE * handle, UCHAR * data, UINT16 datalen
                         data,
                         datalen
                     );
-            retval = (BLE_SUCCESS == ret) ? API_SUCCESS : API_FAILURE;
         }
         #if BLEBRR_GATT_CLIENT
         else
         {
-            retval = mesh_prov_client_data_in_write(gatt_env->conn_hdl, data, datalen);
+            ret = mesh_prov_client_data_in_write(gatt_env->conn_hdl, data, datalen);
         }
         #endif /* BLEBRR_GATT_CLIENT */
     }
@@ -615,17 +625,21 @@ API_RESULT blebrr_gatt_send_pl(BRR_HANDLE * handle, UCHAR * data, UINT16 datalen
                         data,
                         datalen
                     );
-            retval = (BLE_SUCCESS == ret) ? API_SUCCESS : API_FAILURE;
         }
         #if BLEBRR_GATT_CLIENT
         else
         {
-            retval = mesh_proxy_client_data_in_write(gatt_env->conn_hdl, data, datalen);
+            ret = mesh_proxy_client_data_in_write(gatt_env->conn_hdl, data, datalen);
         }
         #endif /* BLEBRR_GATT_CLIENT */
     }
 
-    return retval;
+    if (BLE_SUCCESS != ret)
+    {
+        BLEBRR_LOG("GATT Send failed with reason 0x%04X, type:0x%02X role:0x%02X\n", ret, type, gatt_env->role);
+    }
+
+    return (BLE_SUCCESS == ret) ? API_SUCCESS : API_FAILURE;
 }
 
 /***************************************************************************//**
@@ -666,27 +680,24 @@ static API_RESULT blebrr_gatt_com_channel_setup_pl
         gatt_env = blebrr_find_gatt_env_by_connhdl(conn_hdl);
         if (NULL != gatt_env)
         {
-            if ((BLEBRR_SERVER_ROLE == role) || (BLEBRR_CLIENT_ROLE == role))
+            /* Store the GATT role */
+            gatt_env->role = role;
+
+            /* Adjust the MTU for 1 Bytes of ATT Opcode and 2 Bytes of Handle */
+            /* NOTE: This MTU Size is used for GATT bearer communication by Mesh Stack,
+             * so MTU Exchange needs to finish before Mesh GATT Service Notification is enabled.
+             */
+            mtu = mesh_serv_get_mtu(conn_hdl) - 3;
+
+            if (BRR_HANDLE_INVALID == gatt_env->brr_hdl)
             {
-                /* Store the GATT role to be used during write */
-                gatt_env->role = role;
+                /* Add Device to the Bearer */
+                retval = blebrr_pl_gatt_connection(&gatt_env->brr_hdl, role, mtu, mode);
 
-                /* Adjust the MTU for 1 Bytes of ATT Opcode and 2 Bytes of Handle */
-                /* NOTE: This MTU Size is used for GATT bearer communication by Mesh Stack,
-                 * so MTU Exchange needs to finish before Mesh GATT Service Notification is enabled.
-                 */
-                mtu = mesh_serv_get_mtu() - 3;
-
+                /* Check if valid Bearer Handle is returned */
                 if (BRR_HANDLE_INVALID == gatt_env->brr_hdl)
                 {
-                    /* Add Device to the Bearer */
-                    retval = blebrr_pl_gatt_connection(&gatt_env->brr_hdl, role, mtu, mode);
-
-                    /* Check if valid Bearer Handle is returned */
-                    if (BRR_HANDLE_INVALID == gatt_env->brr_hdl)
-                    {
-                        gatt_env = NULL;
-                    }
+                    gatt_env = NULL;
                 }
             }
         }
@@ -711,12 +722,10 @@ static API_RESULT blebrr_gatt_com_channel_setup_pl
         gatt_env = blebrr_find_gatt_env_by_connhdl(conn_hdl);
         if (NULL != gatt_env)
         {
-            gatt_env->role = BLEBRR_INVALID_ROLE;
-
             if (BRR_HANDLE_INVALID != gatt_env->brr_hdl)
             {
                 /* Delete Device from the Bearer */
-                retval = blebrr_pl_gatt_disconnection(&gatt_env->brr_hdl);
+                retval = blebrr_pl_gatt_disconnection(&gatt_env->brr_hdl, gatt_env->role, mode);
                 gatt_env->brr_hdl = BRR_HANDLE_INVALID;
             }
         }
@@ -762,19 +771,14 @@ static API_RESULT appl_mesh_prov_data_out_ccd_cb(uint16_t conn_hdl, uint8_t enab
     return API_SUCCESS;
 }
 
-static API_RESULT appl_mesh_prov_data_in_wt_cb
-                (
-                    uint16_t conn_hdl,
-                    uint16_t offset,
-                    uint16_t length,
-                    uint8_t  * value
-                )
+static API_RESULT appl_mesh_prov_data_in_wt_cb(uint16_t conn_hdl, uint16_t length, uint8_t * value)
 {
     blebrr_gatt_env_t * gatt_env;
 
     gatt_env = blebrr_find_gatt_env_by_connhdl(conn_hdl);
-    if (NULL == gatt_env)
+    if ((NULL == gatt_env) || (BRR_HANDLE_INVALID == gatt_env->brr_hdl))
     {
+        BLEBRR_LOG("ERROR: failed to inform mesh stack of Provisioning Data by WWR\n");
         return API_FAILURE;
     }
 
@@ -813,19 +817,14 @@ static API_RESULT appl_mesh_proxy_data_out_ccd_cb(uint16_t conn_hdl, uint8_t ena
     return API_SUCCESS;
 }
 
-static API_RESULT appl_mesh_proxy_data_in_wt_cb
-                (
-                    uint16_t conn_hdl,
-                    uint16_t offset,
-                    uint16_t length,
-                    uint8_t  * value
-                )
+static API_RESULT appl_mesh_proxy_data_in_wt_cb(uint16_t conn_hdl, uint16_t length, uint8_t * value)
 {
     blebrr_gatt_env_t * gatt_env;
 
     gatt_env = blebrr_find_gatt_env_by_connhdl(conn_hdl);
-    if (NULL == gatt_env)
+    if ((NULL == gatt_env) || (BRR_HANDLE_INVALID == gatt_env->brr_hdl))
     {
+        BLEBRR_LOG("ERROR: failed to inform mesh stack of Proxy Data by WWR\n");
         return API_FAILURE;
     }
 
@@ -843,17 +842,18 @@ static API_RESULT appl_mesh_proxy_data_in_wt_cb
 }
 
 #if BLEBRR_GATT_CLIENT
-static void mesh_prov_data_out_notif_cb
-     (
-         uint16_t  conn_hdl,
-         uint16_t  length,
-         uint8_t   * value
-     )
+static void mesh_gatt_expand_mtu_cb(uint16_t conn_hdl)
+{
+    /* Start Service Discovery */
+    R_MS_BRR_Discover_Service(conn_hdl, blebrr_create_conn_client_mode);
+}
+
+static void mesh_prov_data_out_notif_cb(uint16_t conn_hdl, uint16_t length, uint8_t * value)
 {
     blebrr_gatt_env_t * gatt_env;
 
     gatt_env = blebrr_find_gatt_env_by_connhdl(conn_hdl);
-    if (NULL != gatt_env)
+    if ((NULL != gatt_env) && (BRR_HANDLE_INVALID != gatt_env->brr_hdl))
     {
         blebrr_pl_recv_gattpacket
         (
@@ -862,14 +862,13 @@ static void mesh_prov_data_out_notif_cb
             length
         );
     }
+    else
+    {
+        BLEBRR_LOG("ERROR: failed to inform mesh stack of Provisioning Data by Notification\n");
+    }
 }
 
-static void mesh_prov_notif_config_status_cb
-     (
-         uint16_t  conn_hdl,
-         uint8_t   flag,
-         uint8_t   status
-     )
+static void mesh_prov_notif_config_status_cb(uint16_t conn_hdl, uint8_t flag, uint8_t status)
 {
     if (status == 0x00)
     {
@@ -903,30 +902,23 @@ static void mesh_prov_discovery_comp_cb(uint16_t conn_hdl, API_RESULT status)
     {
         R_MS_BRR_Config_Notification(conn_hdl, MS_TRUE, BLEBRR_GATT_PROV_MODE);
     }
-    else
-    {
-        gatt_env = blebrr_find_gatt_env_by_connhdl(conn_hdl);
-        blebrr_gatt_iface_pl_cb
-        (
-            BLEBRR_GATT_IFACE_NOT_FOUND,
-            BLEBRR_GATT_PROV_MODE,
-            conn_hdl,
-            (NULL != gatt_env) ? &gatt_env->bd_addr : &blebrr_invald_dev_addr
-        );
-    }
+
+    gatt_env = blebrr_find_gatt_env_by_connhdl(conn_hdl);
+    blebrr_gatt_iface_pl_cb
+    (
+        (API_SUCCESS == status) ? BLEBRR_GATT_IFACE_FOUND : BLEBRR_GATT_IFACE_NOT_FOUND,
+        BLEBRR_GATT_PROV_MODE,
+        conn_hdl,
+        (NULL != gatt_env) ? &gatt_env->bd_addr : &blebrr_invald_dev_addr
+    );
 }
 
-static void mesh_proxy_data_out_notif_cb
-     (
-         uint16_t  conn_hdl,
-         uint16_t  length,
-         uint8_t   * value
-     )
+static void mesh_proxy_data_out_notif_cb(uint16_t conn_hdl, uint16_t length, uint8_t * value)
 {
     blebrr_gatt_env_t * gatt_env;
 
     gatt_env = blebrr_find_gatt_env_by_connhdl(conn_hdl);
-    if (NULL != gatt_env)
+    if ((NULL != gatt_env) && (BRR_HANDLE_INVALID != gatt_env->brr_hdl))
     {
         blebrr_pl_recv_gattpacket
         (
@@ -935,14 +927,13 @@ static void mesh_proxy_data_out_notif_cb
             length
         );
     }
+    else
+    {
+        BLEBRR_LOG("ERROR: failed to inform mesh stack of Proxy Data by Notification\n");
+    }
 }
 
-static void mesh_proxy_notif_config_status_cb
-     (
-         uint16_t  conn_hdl,
-         uint8_t   flag,
-         uint8_t   status
-     )
+static void mesh_proxy_notif_config_status_cb(uint16_t conn_hdl, uint8_t flag, uint8_t status)
 {
     if (status == 0x00)
     {
@@ -976,17 +967,53 @@ static void mesh_proxy_discovery_comp_cb(uint16_t conn_hdl, API_RESULT status)
     {
         R_MS_BRR_Config_Notification(conn_hdl, MS_TRUE, BLEBRR_GATT_PROXY_MODE);
     }
-    else
-    {
-        gatt_env = blebrr_find_gatt_env_by_connhdl(conn_hdl);
-        blebrr_gatt_iface_pl_cb
-        (
-            BLEBRR_GATT_IFACE_NOT_FOUND,
-            BLEBRR_GATT_PROXY_MODE,
-            conn_hdl,
-            (NULL != gatt_env) ? &gatt_env->bd_addr : &blebrr_invald_dev_addr
-        );
-    }
+
+    gatt_env = blebrr_find_gatt_env_by_connhdl(conn_hdl);
+    blebrr_gatt_iface_pl_cb
+    (
+        (API_SUCCESS == status) ? BLEBRR_GATT_IFACE_FOUND : BLEBRR_GATT_IFACE_NOT_FOUND,
+        BLEBRR_GATT_PROXY_MODE,
+        conn_hdl,
+        (NULL != gatt_env) ? &gatt_env->bd_addr : &blebrr_invald_dev_addr
+    );
+}
+
+/***************************************************************************//**
+* @brief Callback function to receive Mesh GATT Service Changed Indication received
+*******************************************************************************/
+static void mesh_prov_service_changed_cb(uint16_t conn_hdl)
+{
+    blebrr_gatt_env_t * gatt_env;
+
+    BLEBRR_LOG("Service Changed Indication received !!!\n");
+
+    gatt_env = blebrr_find_gatt_env_by_connhdl(conn_hdl);
+    blebrr_gatt_iface_pl_cb
+    (
+        BLEBRR_GATT_IFACE_CHANGED,
+        BLEBRR_GATT_PROV_MODE,
+        conn_hdl,
+        (NULL != gatt_env) ? &gatt_env->bd_addr : &blebrr_invald_dev_addr
+    );
+}
+
+/***************************************************************************//**
+* @brief Callback function to receive Mesh GATT Service Changed Indication received
+*******************************************************************************/
+static void mesh_proxy_service_changed_cb(uint16_t conn_hdl)
+{
+    blebrr_gatt_env_t * gatt_env;
+
+    BLEBRR_LOG("Service Changed Indication received !!!\n");
+
+    gatt_env = blebrr_find_gatt_env_by_connhdl(conn_hdl);
+    blebrr_gatt_iface_pl_cb
+    (
+        BLEBRR_GATT_IFACE_CHANGED,
+        BLEBRR_GATT_PROXY_MODE,
+        conn_hdl,
+        (NULL != gatt_env) ? &gatt_env->bd_addr : &blebrr_invald_dev_addr
+    );
 }
 #endif /* BLEBRR_GATT_CLIENT */
 
@@ -1017,7 +1044,7 @@ API_RESULT R_MS_BRR_Scan_GattBearer(UCHAR enable, UCHAR mode)
 
     if ((MS_TRUE == enable) && (0x00 == blebrr_scanstate))
     {
-        /* Scan is not working. Enable Scan by blebrr_scan_enable() */
+        /* Scan is not working */
         retval = API_FAILURE;
     }
     else
@@ -1104,6 +1131,26 @@ API_RESULT R_MS_BRR_Create_Connection(st_ble_dev_addr_t * remote_addr, UCHAR mod
 }
 
 /***************************************************************************//**
+* @brief Cancels creating a connection
+*******************************************************************************/
+API_RESULT R_MS_BRR_Cancel_CreateConnection(void)
+{
+    #if BLEBRR_GATT_CLIENT
+    ble_status_t ret;
+
+    ret = R_BLE_GAP_CancelCreateConn();
+    if (BLE_SUCCESS != ret)
+    {
+        BLEBRR_LOG("R_BLE_GAP_CancelCreateConn is failed: 0x%04X\n", ret);
+        return API_FAILURE;
+    }
+    return API_SUCCESS;
+    #else /* BLEBRR_GATT_CLIENT */
+    return API_FAILURE;
+    #endif /* BLEBRR_GATT_CLIENT */
+}
+
+/***************************************************************************//**
 * @brief Disconnects
 *******************************************************************************/
 API_RESULT R_MS_BRR_Disconnect(UINT16 conn_hdl)
@@ -1139,9 +1186,9 @@ API_RESULT R_MS_BRR_Discover_Service(UINT16 conn_hdl, UCHAR mode)
         mesh_client_proxy_init(&mesh_proxy_callbacks);
     }
 
-    return mesh_client_discover_services(conn_hdl, mode);
+    return (BLE_SUCCESS == mesh_client_discover_services(conn_hdl, mode)) ? API_SUCCESS : API_FAILURE;
     #else /* BLEBRR_GATT_CLIENT */
-    BLEBRR_LOG("\nBLE_CLIENT_ROLE Disabled!\n");
+    BLEBRR_LOG("\nBLEBRR_GATT_CLIENT Disabled!\n");
     return API_FAILURE;
     #endif /* BLEBRR_GATT_CLIENT */
 }
@@ -1162,9 +1209,22 @@ API_RESULT R_MS_BRR_Config_Notification(UINT16 conn_hdl, UCHAR config_ntf, UCHAR
         R_MS_BRR_Set_GattMode(BLEBRR_GATT_PROXY_MODE);
     }
 
-    return  mesh_client_config_ntf(conn_hdl, config_ntf, mode);
+    return  (BLE_SUCCESS == mesh_client_config_ntf(conn_hdl, config_ntf, mode)) ? API_SUCCESS : API_FAILURE;
     #else /* BLEBRR_GATT_CLIENT */
-    BLEBRR_LOG("\nBLE_CLIENT_ROLE Disabled!\n");
+    BLEBRR_LOG("\nBLEBRR_GATT_CLIENT Disabled!\n");
+    return API_FAILURE;
+    #endif /* BLEBRR_GATT_CLIENT */
+}
+
+/***************************************************************************//**
+* @brief Enables or Disables GATT Service Changed Indication
+*******************************************************************************/
+API_RESULT R_MS_BRR_Config_ServChanged(UINT16 conn_hdl, UCHAR config_ind)
+{
+    #if BLEBRR_GATT_CLIENT
+    return  (BLE_SUCCESS == mesh_client_config_serv_changed(conn_hdl, config_ind)) ? API_SUCCESS : API_FAILURE;
+    #else /* BLEBRR_GATT_CLIENT */
+    BLEBRR_LOG("\nBLEBRR_GATT_CLIENT Disabled!\n");
     return API_FAILURE;
     #endif /* BLEBRR_GATT_CLIENT */
 }
@@ -1174,18 +1234,41 @@ API_RESULT R_MS_BRR_Config_Notification(UINT16 conn_hdl, UCHAR config_ntf, UCHAR
 *******************************************************************************/
 API_RESULT blebrr_set_gattmode_pl(UCHAR serv_mode)
 {
-    ble_status_t ret;
+    ble_status_t ret = BLE_ERR_INVALID_ARG;
 
     /* Setting Provisioning or Proxy Mode */
     if (BLEBRR_GATT_PROV_MODE == serv_mode)
     {
         BLEBRR_LOG ("Enabling Mesh Provisioning Service...\n");
-        ret = mesh_serv_prov_init(&appl_mesh_prov_cb);
+        if (BLE_SUCCESS == mesh_serv_proxy_deinit())
+        {
+            ret = mesh_serv_prov_init(&appl_mesh_prov_cb);
+        }
     }
     else if (BLEBRR_GATT_PROXY_MODE == serv_mode)
     {
         BLEBRR_LOG ("Enabling Mesh Proxy Service...\n");
-        ret = mesh_serv_proxy_init(&appl_mesh_proxy_cb);
+        if (BLE_SUCCESS == mesh_serv_prov_deinit())
+        {
+            ret = mesh_serv_proxy_init(&appl_mesh_proxy_cb);
+        }
+    }
+
+    /**
+     * 7.1 "SERVICE CHANGED" in Bluetooth Core Vol3, PartG:
+     *  The <<Service Changed>> characteristic is a control-point attribute that 
+     *  shall be used to indicate to connected devices that services have changed
+     *  (i.e., added, removed or modified).
+     */
+    if (BLE_SUCCESS == ret)
+    {
+        for (uint8_t idx = 0; idx < BLEBRR_GATT_MAX_ENV; idx++)
+        {
+            if (BLE_GAP_INVALID_CONN_HDL != blebrr_gatt_env[idx].conn_hdl)
+            {
+                ret = mesh_indicate_serv_changed(blebrr_gatt_env[idx].conn_hdl);
+            }
+        }
     }
 
     return (BLE_SUCCESS == ret) ? API_SUCCESS : API_FAILURE;
@@ -1260,12 +1343,7 @@ void blebrr_handle_conn_param_req_pl
 /***************************************************************************//**
 * @brief callback function to receive GAP(Generic Access Profile) events from BLE Protocol Stack
 *******************************************************************************/
-static void blebrr_gap_cb
-            (
-                uint16_t            type,
-                ble_status_t        result,
-                st_ble_evt_data_t * data
-            )
+static void blebrr_gap_cb(uint16_t type, ble_status_t result, st_ble_evt_data_t * data)
 {
     blebrr_gatt_env_t * gatt_env;
     st_ble_dev_addr_t   peer_addr;
@@ -1323,15 +1401,6 @@ static void blebrr_gap_cb
                     conn_evt_param->conn_hdl,
                     BLE_BD_ADDR_STR(peer_addr.addr, peer_addr.type));
 
-                /* Stop Advertising */
-                #if 1
-                if (BLEBRR_GATT_PROV_MODE == R_MS_BRR_Get_GattMode())
-                {
-                    extern void prov_stop_beaconing(void);
-                    prov_stop_beaconing();
-                }
-                #endif
-
                 gatt_env = blebrr_find_gatt_env_by_connhdl(BLE_GAP_INVALID_CONN_HDL);
                 if (NULL != gatt_env)
                 {
@@ -1354,12 +1423,13 @@ static void blebrr_gap_cb
                     }
 
                     #if BLEBRR_GATT_CLIENT
-                    /* Check if the device requested by R_BLE_GAP_CreateConn() */
-                    if (0 == memcmp(peer_addr.addr, blebrr_create_conn_param_pl.remote_bd_addr, BLE_BD_ADDR_LEN))
+                    if (BLE_MASTER == conn_evt_param->role)
                     {
-                        /* Start Service Discovery */
-                        R_MS_BRR_Discover_Service(conn_evt_param->conn_hdl, blebrr_create_conn_client_mode);
+                        /* Clear the device address set to the argument of R_MS_BRR_Create_Connection() */
                         memset(blebrr_create_conn_param_pl.remote_bd_addr, 0, BLE_BD_ADDR_LEN);
+
+                        /* Request the peer GATT Server to expand MTU size */
+                        mesh_client_expand_mtu(conn_evt_param->conn_hdl, mesh_gatt_expand_mtu_cb);
                     }
                     #endif /* BLEBRR_GATT_CLIENT */
                 }
@@ -1393,7 +1463,7 @@ static void blebrr_gap_cb
                 if (BRR_HANDLE_INVALID != gatt_env->brr_hdl)
                 {
                     /* Remove Device from the Bearer */
-                    blebrr_pl_gatt_disconnection(&gatt_env->brr_hdl);
+                    blebrr_pl_gatt_disconnection(&gatt_env->brr_hdl, gatt_env->role, R_MS_BRR_Get_GattMode());
                     gatt_env->brr_hdl = BRR_HANDLE_INVALID;
                 }
 
@@ -1415,6 +1485,27 @@ static void blebrr_gap_cb
                     (NULL != gatt_env) ? &gatt_env->bd_addr : &blebrr_invald_dev_addr
                 );
             }
+        }
+        break;
+
+        case BLE_GAP_EVENT_CONN_CANCEL_COMP:
+        {
+            #if BLEBRR_GATT_CLIENT
+            st_ble_dev_addr_t cancel_addr;
+            cancel_addr.type = blebrr_create_conn_param_pl.remote_bd_addr_type;
+            memcpy(cancel_addr.addr, blebrr_create_conn_param_pl.remote_bd_addr, BLE_BD_ADDR_LEN);
+
+            /**
+             * Inform Application of GATT/BLE Link Layer Canceling Connection Creation.
+             */
+            blebrr_gatt_iface_pl_cb
+            (
+                BLEBRR_GATT_IFACE_CANCEL,
+                BLEBRR_GATT_UNINIT_MODE,
+                BLE_GAP_INVALID_CONN_HDL,
+                &cancel_addr
+            );
+            #endif /* BLEBRR_GATT_CLIENT */
         }
         break;
 
@@ -1537,12 +1628,31 @@ static void blebrr_gap_cb
         }
         break;
 
+        case BLE_GAP_EVENT_ADV_PARAM_SET_COMP:
+        {
+            if (BLE_SUCCESS == result)
+            {
+                blebrr_adv_param_set_comp_hdlr();
+            }
+        }
+        break;
+
+        case BLE_GAP_EVENT_ADV_DATA_UPD_COMP:
+        {
+            if (BLE_SUCCESS == result)
+            {
+                st_ble_gap_adv_data_evt_t * adv_data_evt = (st_ble_gap_adv_data_evt_t*)data->p_param;
+                blebrr_adv_data_upd_comp_hdlr(adv_data_evt->data_type);
+            }
+        }
+        break;
+
         /**
          * Advertising has been enabled by invoking R_BLE_GAP_StartAdv()
          */
         case BLE_GAP_EVENT_ADV_ON:
         {
-            blebrr_pl_advertise_setup(blebrr_advstate);
+            blebrr_pl_advertise_setup((BLE_SUCCESS == result) ? MS_TRUE : MS_FALSE);
         }
         break;
 
@@ -1551,7 +1661,7 @@ static void blebrr_gap_cb
          */
         case BLE_GAP_EVENT_ADV_OFF:
         {
-            blebrr_pl_advertise_setup(blebrr_advstate);
+            blebrr_pl_advertise_setup(MS_FALSE);
         }
         break;
 
@@ -1563,12 +1673,7 @@ static void blebrr_gap_cb
 /***************************************************************************//**
 * @brief callback function to receive VS(Vendor Specific) events from BLE Protocol Stack
 *******************************************************************************/
-static void blebrr_vs_cb
-            (
-                uint16_t             type,
-                ble_status_t         result,
-                st_ble_vs_evt_data_t * data
-            )
+static void blebrr_vs_cb(uint16_t type, ble_status_t result, st_ble_vs_evt_data_t * data)
 {
     switch (type)
     {

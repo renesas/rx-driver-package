@@ -50,6 +50,7 @@
 *                              Added RX23W 83pins support.
 *           31.05.2021 4.80    Added RX671 support.
 *           30.07.2021 4.90    Added RX140 support.
+*           01.11.2021 4.91    Fixed MDF file.
 ***********************************************************************************************************************/
 
 #ifndef S12AD_PRV_IF_H
@@ -113,7 +114,7 @@ Macro definitions
 *******************************************************************************/
 /* Version Number of API. */
 #define ADC_VERSION_MAJOR       (4)
-#define ADC_VERSION_MINOR       (90)
+#define ADC_VERSION_MINOR       (91)
 
 /*****************************************************************************
 Typedef definitions

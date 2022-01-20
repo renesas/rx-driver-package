@@ -280,7 +280,7 @@ typedef struct MS_light_xyl_range_status_struct
  *  \brief API to initialize Light_Xyl Server model
  *
  *  \par Description
- *  This is to initialize Light_Xyl Server model and to register with Acess layer.
+ *  This is to initialize Light_Xyl Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -318,6 +318,8 @@ API_RESULT MS_light_xyl_server_init
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -327,7 +329,9 @@ API_RESULT MS_light_xyl_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 /** \} */
 
@@ -341,7 +345,7 @@ API_RESULT MS_light_xyl_server_state_update
  *  \brief API to initialize Light_Xyl Client model
  *
  *  \par Description
- *  This is to initialize Light_Xyl Client model and to register with Acess layer.
+ *  This is to initialize Light_Xyl Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -375,6 +379,21 @@ API_RESULT MS_light_xyl_client_init
 API_RESULT MS_light_xyl_client_get_model_handle
            (
                /* OUT */ MS_ACCESS_MODEL_HANDLE  * model_handle
+           );
+
+/**
+ *  \brief API to set Light_Xyl client model handle
+ *
+ *  \par Description
+ *  This is to set the handle of Light_Xyl client model.
+ *
+ *  \param [in] model_handle   Model handle to be assigned.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_light_xyl_client_set_model_handle
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE  model_handle
            );
 
 /**
@@ -426,7 +445,7 @@ API_RESULT MS_light_xyl_client_send_reliable_pdu
  *  The Light xyL Set is an acknowledged message used to set the Light xyL Lightness, Light xyL x state, and the Light xyL y states of an element.
  *  The response to the Light xyL Set message is a Light xyL Status message.
  *
- *  \param [in] param Light xyL Set message
+ *  \param [in] param Light xyL Set message parameter @ref MS_LIGHT_XYL_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -446,7 +465,7 @@ API_RESULT MS_light_xyl_client_send_reliable_pdu
  *  the Light xyL Lightness, Light xyL x, and the Light xyL y states of an
  *  element.
  *
- *  \param [in] param Light xyL Set message
+ *  \param [in] param Light xyL Set message parameter @ref MS_LIGHT_XYL_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -501,7 +520,7 @@ API_RESULT MS_light_xyl_client_send_reliable_pdu
  *  Light xyL Default Set is an acknowledged message used to set the Light Lightness Default, the Light xyL x Default, and Light xyL y Default states of an element.
  *  The response to the Light xyL Default Set message is a Light xyL Default Status message.
  *
- *  \param [in] param Light HSL Default Set message
+ *  \param [in] param Light HSL Default Set message parameter @ref MS_LIGHT_XYL_DEFAULT_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -521,7 +540,7 @@ API_RESULT MS_light_xyl_client_send_reliable_pdu
  *  set the Light Lightness Default, the Light xyL x Default, and Light xyL y
  *  Default states of an element.
  *
- *  \param [in] param Light HSL Default Set message
+ *  \param [in] param Light HSL Default Set message parameter @ref MS_LIGHT_XYL_DEFAULT_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -558,7 +577,7 @@ API_RESULT MS_light_xyl_client_send_reliable_pdu
  *  Light xyL Range Set is an acknowledged message used to set the Light xyL x Range and Light xyL y Range states of an element.
  *  The response to the Light xyL Range Set message is a Light xyL Range Status message.
  *
- *  \param [in] param Light xyL Range Set message
+ *  \param [in] param Light xyL Range Set message parameter @ref MS_LIGHT_XYL_RANGE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -577,7 +596,7 @@ API_RESULT MS_light_xyl_client_send_reliable_pdu
  *  Light xyL Range Set Unacknowledged is an unacknowledged message used to set
  *  the Light xyL x Range and Light xyL y Range states of an element.
  *
- *  \param [in] param Light xyL Range Set message
+ *  \param [in] param Light xyL Range Set message parameter @ref MS_LIGHT_XYL_RANGE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */

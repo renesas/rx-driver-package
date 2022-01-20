@@ -52,6 +52,7 @@
         <version>4.12.01</version>
         <version>4.14.01</version>
         <version>4.20.01</version>
+        <version>4.20.03</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->

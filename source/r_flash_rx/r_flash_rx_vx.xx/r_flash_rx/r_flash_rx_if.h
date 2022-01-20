@@ -151,6 +151,7 @@
 *           26.06.2020 4.60    Modified some minor problem.
 *           23.10.2020 4.70    Added support for RX671.
 *           23.04.2021 4.80    Added support for RX140.
+*           10.12.2021 4.81    Added support for Tool News R20TS0765, R20TS0772, and some minor updates.
 ***********************************************************************************************************************/
 
 #ifndef FLASH_INTERFACE_HEADER_FILE
@@ -168,7 +169,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Driver Version Number. */
 #define FLASH_RX_VERSION_MAJOR           (4)
-#define FLASH_RX_VERSION_MINOR           (80)
+#define FLASH_RX_VERSION_MINOR           (81)
 
 
 /***********************************************************************************************************************
@@ -269,7 +270,6 @@ Typedef definitions
 
 #if (defined(MCU_RX64M) || defined(MCU_RX71M))
 #define FLASH_HAS_FCU_RAM_ENABLE    (1)
-#define FLASH_HAS_2BIT_ERR_CHK      (1)
 #endif
 
 #if ((FLASH_TYPE == 4) && (FLASH_HAS_APP_SWAP == 1) && (BSP_CFG_CODE_FLASH_BANK_MODE == 0) && (FLASH_CFG_CODE_FLASH_ENABLE == 1))

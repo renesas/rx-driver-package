@@ -495,13 +495,13 @@ typedef struct _ACCESS_CONFIG_NODEID_SET_PARAM
  */
 typedef struct _ACCESS_CONFIG_MODEL_APP_BIND_PARAM
 {
-    /** Address of the element */
+    /** Remote Element Address */
     UINT16 element_address;
 
     /** Index of the AppKey */
     UINT16 appkey_index;
 
-    /** SIG Model ID or Vendor Model ID */
+    /** Remote SIG Model ID or Vendor Model ID */
     MS_ACCESS_MODEL_ID model;
 
     /**
@@ -510,6 +510,12 @@ typedef struct _ACCESS_CONFIG_MODEL_APP_BIND_PARAM
      */
     MS_ACCESS_MODEL_ID client_model;
 
+    /**
+     * Local Element Handle where the above Client Model ID
+     * is to be searched.
+     */
+    MS_ACCESS_ELEMENT_HANDLE element_handle;
+
 } ACCESS_CONFIG_MODEL_APP_BIND_PARAM;
 
 /**
@@ -517,13 +523,13 @@ typedef struct _ACCESS_CONFIG_MODEL_APP_BIND_PARAM
  */
 typedef struct _ACCESS_CONFIG_MODEL_APP_UNBIND_PARAM
 {
-    /** Address of the element */
+    /** Remote Element Address */
     UINT16 element_address;
 
     /** Index of the AppKey */
     UINT16 appkey_index;
 
-    /** SIG Model ID or Vendor Model ID */
+    /** Remote SIG Model ID or Vendor Model ID */
     MS_ACCESS_MODEL_ID model;
 
     /**
@@ -531,6 +537,12 @@ typedef struct _ACCESS_CONFIG_MODEL_APP_UNBIND_PARAM
      * Used only for MS_config_client_model_app_unbind().
      */
     MS_ACCESS_MODEL_ID client_model;
+
+    /**
+     * Local Element Handle where the above Client Model ID
+     * is to be searched.
+     */
+    MS_ACCESS_ELEMENT_HANDLE element_handle;
 
 } ACCESS_CONFIG_MODEL_APP_UNBIND_PARAM;
 
@@ -690,7 +702,7 @@ typedef struct _ACCESS_CONFIG_NETWORK_TRANSMIT_SET_PARAM
  *  \brief API to initialize Configuration Client model
  *
  *  \par Description
- *  This is to initialize Configuration Client model and to register with Acess layer.
+ *  This is to initialize Configuration Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.

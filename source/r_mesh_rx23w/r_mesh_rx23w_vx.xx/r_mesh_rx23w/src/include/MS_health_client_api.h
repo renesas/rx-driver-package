@@ -149,7 +149,7 @@ typedef struct MS_health_attention_struct
  *  \brief API to initialize Health Client model
  *
  *  \par Description
- *  This is to initialize Health Client model and to register with Acess layer.
+ *  This is to initialize Health Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -204,7 +204,7 @@ API_RESULT MS_health_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
-/** \name Messsage Send
+/** \name Message Send
  *  \{
  */
 /**
@@ -214,8 +214,7 @@ API_RESULT MS_health_client_send_reliable_pdu
  *  The Health Fault Get is an acknowledged message used to get the current
  *  Registered Fault state identified by Company ID of an element.
  *
- *  \param [in] param
- *         Pointer to the structure populated as in \ref ACCESS_HEALTH_FAULT_GET_PARAM
+ *  \param [in] param Health Fault Get message parameter @ref MS_HEALTH_FAULT_GET_CLEAR_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -234,8 +233,7 @@ API_RESULT MS_health_client_send_reliable_pdu
  *  The Health Fault Clear Unacknowledged is an unacknowledged message used
  *  to clear the current Registered Fault state identified by Company ID of an element.
  *
- *  \param [in] param
- *         Pointer to the structure populated as in \ref ACCESS_HEALTH_FAULT_CLEAR_PARAM
+ *  \param [in] param Health Fault Clear Unacknowledged message parameter @ref MS_HEALTH_FAULT_GET_CLEAR_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -254,8 +252,7 @@ API_RESULT MS_health_client_send_reliable_pdu
  *  The Health Fault Clear is an acknowledged message used to clear the
  *  current Registered Fault state identified by Company ID of an element.
  *
- *  \param [in] param
- *         Pointer to the structure populated as in \ref ACCESS_HEALTH_FAULT_CLEAR_PARAM
+ *  \param [in] param Health Fault Clear message parameter @ref MS_HEALTH_FAULT_GET_CLEAR_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -275,8 +272,7 @@ API_RESULT MS_health_client_send_reliable_pdu
  *  procedure of an element. The procedure is implementation specific and may
  *  result in changing the Health Fault state of an element.
  *
- *  \param [in] param
- *         Pointer to the structure populated as in \ref ACCESS_HEALTH_FAULT_TEST_PARAM
+ *  \param [in] param Health Fault Test message parameter @ref MS_HEALTH_FAULT_TEST_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -295,6 +291,8 @@ API_RESULT MS_health_client_send_reliable_pdu
  *  The Health Fault Test Unacknowledged is an unacknowledged message used
  *  to invoke a self-test procedure of an element. The procedure is implementation
  *  specific and may result in changing the Health Fault state of an element.
+ *
+ *  \param [in] param Health Fault Test Unacknowledged message parameter @ref MS_HEALTH_FAULT_TEST_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -330,8 +328,7 @@ API_RESULT MS_health_client_send_reliable_pdu
  *  The Health Period Set Unacknowledged is an unacknowledged message used
  *  to set the current Health Period state of an element.
  *
- *  \param [in] param
- *         Pointer to the structure populated as in \ref ACCESS_HEALTH_PERIOD_SET_PARAM
+ *  \param [in] param Health Period Set Unacknowledged message parameter @ref MS_HEALTH_PERIOD_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -350,8 +347,7 @@ API_RESULT MS_health_client_send_reliable_pdu
  *  The Health Period Set is an acknowledged message used to set the
  *  current Health Period state of an element.
  *
- *  \param [in] param
- *         Pointer to the structure populated as in \ref ACCESS_HEALTH_PERIOD_SET_PARAM
+ *  \param [in] param Health Period Set message parameter @ref MS_HEALTH_PERIOD_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -387,8 +383,7 @@ API_RESULT MS_health_client_send_reliable_pdu
  *  The Health Attention Set is an acknowledged message used to set the
  *  Attention Timer state of an element.
  *
- *  \param [in] param
- *         Pointer to the structure populated as in \ref ACCESS_HEALTH_ATTENTION_SET_PARAM
+ *  \param [in] param Health Attention Set message parameter @ref MS_HEALTH_ATTENTION_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -407,8 +402,7 @@ API_RESULT MS_health_client_send_reliable_pdu
  *  The Health Attention Set Unacknowledged is an unacknowledged message
  *  used to set the Attention Timer state of an element.
  *
- *  \param [in] param
- *         Pointer to the structure populated as in \ref ACCESS_HEALTH_ATTENTION_SET_PARAM
+ *  \param [in] param Health Attention Set Unacknowledged message parameter @ref MS_HEALTH_ATTENTION_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */

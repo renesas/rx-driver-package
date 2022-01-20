@@ -66,9 +66,9 @@
     #error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
 #endif
 
- /* Version Number of API. */
+/* Version Number of API. */
     #define ETHER_RX_VERSION_MAJOR  (1)
-    #define ETHER_RX_VERSION_MINOR  (21)
+    #define ETHER_RX_VERSION_MINOR  (22)
 
 /* When using the Read functions, ETHER_NO_DATA is the return value that indicates that no received data. */
     #define ETHER_NO_DATA           (0)
@@ -306,8 +306,8 @@ void R_ETHER_LinkProcess (uint32_t channel);
 ether_return_t R_ETHER_WakeOnLAN (uint32_t channel);
 ether_return_t R_ETHER_CheckWrite (uint32_t channel);
 ether_return_t R_ETHER_Control (ether_cmd_t const cmd, ether_param_t const control);
-ether_return_t R_ETHER_WritePHY(uint32_t channel, uint16_t address, uint16_t data);
-ether_return_t R_ETHER_ReadPHY(uint32_t channel, uint16_t address, uint16_t *p_data);
+ether_return_t R_ETHER_WritePHY (uint32_t channel, uint16_t address, uint16_t data);
+ether_return_t R_ETHER_ReadPHY (uint32_t channel, uint16_t address, uint16_t *p_data);
 uint32_t R_ETHER_GetVersion (void);
 
 #endif  /* R_ETHER_RX_IF_H*/

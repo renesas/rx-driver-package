@@ -31,6 +31,7 @@
 *         : 10.06.2020 1.81     Modified comment of API function to Doxygen style.
 *         : 31.03.2021 1.90     Updated for queue protection in R_BYTEQ_Put, R_BYTEQ_Get, R_BYTEQ_Flush,
 *                               R_BYTEQ_Used, R_BYTEQ_Unused functions.
+*         : 29.10.2021 2.00     Updated for critical section protection in R_BYTEQ_Put, R_BYTEQ_Get functions.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -196,19 +197,46 @@ byteq_err_t R_BYTEQ_Put(byteq_hdl_t const   hdl,
         return BYTEQ_ERR_QUEUE_FULL;        // return if queue is full
     }
 
+#if ((BYTEQ_CFG_CRITICAL_SECTION == 1)||(BYTEQ_CFG_PROTECT_QUEUE == 1))
+    uint32_t    psw_bit_i_val;
+    /* Get current value bit I of PSW register. */
+    psw_bit_i_val = (R_BSP_GET_PSW() & 0x00010000);
+#endif
+
+#if (BYTEQ_CFG_CRITICAL_SECTION == 1)
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+        /* load byte into queue */
+        hdl->buffer[hdl->in_index++] = byte;    // add byte
+        R_BSP_InterruptsEnable();
+
+        R_BSP_InterruptsDisable();
+        if (hdl->in_index >= hdl->size)         // adjust index
+        {
+            hdl->in_index = 0;
+        }
+        R_BSP_InterruptsEnable();
+    } 
+    else
+    {
+        /* load byte into queue */
+        hdl->buffer[hdl->in_index++] = byte;    // add byte
+        if (hdl->in_index >= hdl->size)         // adjust index
+        {
+            hdl->in_index = 0;
+        }
+    }
+#else
     /* load byte into queue */
     hdl->buffer[hdl->in_index++] = byte;    // add byte
     if (hdl->in_index >= hdl->size)         // adjust index
     {
         hdl->in_index = 0;
     }
+#endif
 
 #if (BYTEQ_CFG_PROTECT_QUEUE == 1)
-    uint32_t    psw_bit_i_val;
-    
-    /* Get current value bit I of PSW register. */
-    psw_bit_i_val = (R_BSP_GET_PSW() & 0x00010000);
-    
     if(0 != psw_bit_i_val)
     {
         R_BSP_InterruptsDisable();
@@ -260,18 +288,43 @@ byteq_err_t R_BYTEQ_Get(byteq_hdl_t const   hdl,
         return BYTEQ_ERR_QUEUE_EMPTY;       // return if queue empty        
     }
 
+#if ((BYTEQ_CFG_CRITICAL_SECTION == 1)||(BYTEQ_CFG_PROTECT_QUEUE == 1))
+    uint32_t    psw_bit_i_val;
+    /* Get current value bit I of PSW register. */
+    psw_bit_i_val = (R_BSP_GET_PSW() & 0x00010000);
+#endif
+
+#if (BYTEQ_CFG_CRITICAL_SECTION == 1)
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+        *p_byte = hdl->buffer[hdl->out_index++]; // get byte
+        R_BSP_InterruptsEnable();
+
+        R_BSP_InterruptsDisable();
+        if (hdl->out_index >= hdl->size)        // adjust index
+        {
+            hdl->out_index = 0;
+        }
+        R_BSP_InterruptsEnable();
+    } 
+    else
+    {
+        *p_byte = hdl->buffer[hdl->out_index++]; // get byte
+        if (hdl->out_index >= hdl->size)        // adjust index
+        {
+            hdl->out_index = 0;
+        }
+    }
+#else
     *p_byte = hdl->buffer[hdl->out_index++]; // get byte
     if (hdl->out_index >= hdl->size)        // adjust index
     {
         hdl->out_index = 0;
     }
+#endif
 
 #if (BYTEQ_CFG_PROTECT_QUEUE == 1)
-    uint32_t    psw_bit_i_val;
-    
-    /* Get current value bit I of PSW register. */
-    psw_bit_i_val = (R_BSP_GET_PSW() & 0x00010000);
-    
     if(0 != psw_bit_i_val)
     {
         R_BSP_InterruptsDisable();
@@ -287,7 +340,7 @@ byteq_err_t R_BYTEQ_Get(byteq_hdl_t const   hdl,
 #endif
 
     return BYTEQ_SUCCESS;
-}        
+}
 
 
 /***********************************************************************************************************************
@@ -432,11 +485,14 @@ byteq_err_t R_BYTEQ_Unused(byteq_hdl_t const  hdl,
     if(0 != psw_bit_i_val)
     {
         R_BSP_InterruptsDisable();
+        
+        /* Get p_cnt. */
         *p_cnt = (uint16_t) (hdl->size - hdl->count);
         R_BSP_InterruptsEnable();
     }
     else
     {
+        /* Get p_cnt. */
         *p_cnt = (uint16_t) (hdl->size - hdl->count);
     }
 #else

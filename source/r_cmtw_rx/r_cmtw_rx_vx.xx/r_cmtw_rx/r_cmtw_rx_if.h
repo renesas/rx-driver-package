@@ -36,6 +36,7 @@
 *         : 30.12.2019 2.20    Added support RX66N, RX72N.
 *         : 30.06.2020 2.30    Changed revision to reflect demo upgrade.
 *         : 31.03.2021 2.40    Added support RX671.
+*         : 13.09.2021 2.50    Added the demo for RX671.
 ***********************************************************************************************************************/
 #ifndef CMTW_RX_IF_H
 #define CMTW_RX_IF_H
@@ -57,7 +58,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define CMTW_RX_VERSION_MAJOR       (02)
-#define CMTW_RX_VERSION_MINOR       (40)
+#define CMTW_RX_VERSION_MINOR       (50)
 
 /***********************************************************************************************************************
 Typedef definitions

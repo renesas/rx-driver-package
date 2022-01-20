@@ -160,7 +160,7 @@ typedef struct MS_generic_battery_status_struct
  *  \brief API to initialize Generic_Battery Server model
  *
  *  \par Description
- *  This is to initialize Generic_Battery Server model and to register with Acess layer.
+ *  This is to initialize Generic_Battery Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -192,6 +192,8 @@ API_RESULT MS_generic_battery_server_init
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -201,7 +203,9 @@ API_RESULT MS_generic_battery_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 /** \} */
 
@@ -215,7 +219,7 @@ API_RESULT MS_generic_battery_server_state_update
  *  \brief API to initialize Generic_Battery Client model
  *
  *  \par Description
- *  This is to initialize Generic_Battery Client model and to register with Acess layer.
+ *  This is to initialize Generic_Battery Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -249,6 +253,21 @@ API_RESULT MS_generic_battery_client_init
 API_RESULT MS_generic_battery_client_get_model_handle
            (
                /* OUT */ MS_ACCESS_MODEL_HANDLE  * model_handle
+           );
+
+/**
+ *  \brief API to set Generic_Battery client model handle
+ *
+ *  \par Description
+ *  This is to set the handle of Generic_Battery client model.
+ *
+ *  \param [in] model_handle   Model handle to be assigned.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_generic_battery_client_set_model_handle
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE  model_handle
            );
 
 /**

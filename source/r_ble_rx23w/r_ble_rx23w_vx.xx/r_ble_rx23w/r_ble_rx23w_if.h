@@ -31,6 +31,7 @@
 *         : 24.12.2020 2.10    Update to BLE FIT module v2.10.
 *         : 30.03.2021 2.11    Update to BLE FIT module v2.11.
 *         : 30.06.2021 2.20    Update to BLE FIT module v2.20.
+*         : 15.10.2021 2.30    Update to BLE FIT module v2.30.
 ***********************************************************************************************************************/
 
 /*******************************************************************************************************************//**
@@ -92,7 +93,7 @@
  * @def BLE_VERSION_MINOR
  * BLE Module Minor Version.
  */
-#define BLE_VERSION_MINOR                                               (20)
+#define BLE_VERSION_MINOR                                               (30)
 
 /** 
  * @def BLE_LIB_ALL_FEATS
@@ -1222,6 +1223,49 @@ typedef enum {
  * @brief GATT Attribute Handle End Range.
  */
 #define BLE_GATT_ATTR_HDL_END_RANGE                                     (0xFFFF)
+
+/* GATT Characteristic Properties */
+
+/** 
+ * @def BLE_GATT_CHAR_PROP_BROADCAST
+ * @brief Broadcast Characteristic Property.
+ */
+#define BLE_GATT_CHAR_PROP_BROADCAST                                    (0x01)
+/** 
+ * @def BLE_GATT_CHAR_PROP_READ
+ * @brief Read Characteristic Property.
+ */
+#define BLE_GATT_CHAR_PROP_READ                                         (0x02)
+/** 
+ * @def BLE_GATT_CHAR_PROP_WRITE_WITHOUT_RESP
+ * @brief Write Without Response Characteristic Property.
+ */
+#define BLE_GATT_CHAR_PROP_WRITE_WITHOUT_RESP                           (0x04)
+/** 
+ * @def BLE_GATT_CHAR_PROP_WRITE
+ * @brief Write Characteristic Property.
+ */
+#define BLE_GATT_CHAR_PROP_WRITE                                        (0x08)
+/** 
+ * @def BLE_GATT_CHAR_PROP_NOTIFY
+ * @brief Notify Characteristic Property.
+ */
+#define BLE_GATT_CHAR_PROP_NOTIFY                                       (0x10)
+/** 
+ * @def BLE_GATT_CHAR_PROP_INDICATE
+ * @brief Indicate Characteristic Property.
+ */
+#define BLE_GATT_CHAR_PROP_INDICATE                                     (0x20)
+/** 
+ * @def BLE_GATT_CHAR_PROP_AUTH_SIGN_WRITES
+ * @brief Authenticated Signed Writes Characteristic Property.
+ */
+#define BLE_GATT_CHAR_PROP_AUTH_SIGN_WRITES                             (0x40)
+/** 
+ * @def BLE_GATT_CHAR_PROP_EXT_PROP
+ * @brief Extended Properties Characteristic Property.
+ */
+#define BLE_GATT_CHAR_PROP_EXT_PROP                                     (0x80)
 
 
 /* GATT Server Macro */

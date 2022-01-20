@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_lvd_rx
-VERSION = 		3.80
+VERSION = 		3.90
 MDF = V2
 
 CONFIG_FOLDER = r_config

@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2020  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.14 - Graphical user interface for embedded applications **
+** emWin V6.22 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -20,11 +20,11 @@ Licensor:                 SEGGER Software GmbH
 Licensed to:              Renesas Electronics Europe GmbH, Arcadiastrasse 10, 40472 Duesseldorf, Germany
 Licensed SEGGER software: emWin
 License number:           GUI-00678
-License model:            License and Service Agreement, signed December 16th, 2016 and Amendment No. 1, signed May 16th, 2019
-License valid for:        RX65N, RX651, RX72M, RX72N, RX661, RX66N
+License model:            License and Service Agreement, signed December 16th, 2016, Amendment No. 1 signed May 16th, 2019 and Amendment No. 2, signed September 20th, 2021 by Carsten Jauch, Managing Director
+License valid for:        RX (based on RX-V1, RX-V2 or RX-V3)
 ----------------------------------------------------------------------
 Support and Update Agreement (SUA)
-SUA period:               2016-12-22 - 2020-12-31
+SUA period:               2016-12-22 - 2022-12-31
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
 File        : SWIPELIST.h
@@ -103,6 +103,7 @@ Purpose     : SWIPELIST include
 #define SWIPELIST_CI_BK_ITEM_UNSEL     0    // Background of an unselected item.
 #define SWIPELIST_CI_BK_ITEM_SEL       1    // Background of a selected item.
 #define SWIPELIST_CI_BK_SEP_ITEM       2    // Background of a separator item.
+#define SWIPELIST_CI_BK                3    // Background of unused area.
 
 /*********************************************************************
 *
@@ -120,6 +121,19 @@ Purpose     : SWIPELIST include
 #define SWIPELIST_BA_TOP	     (0 << 2)
 #define SWIPELIST_BA_BOTTOM	   (1 << 2)
 
+/*********************************************************************
+*
+*       SWIPELIST notification codes
+*
+*  Description
+*    Notifications sent by SWIPELIST widget to its parent widget through
+*    a WM_NOTIFY_PARENT message.
+*
+*    For notifications relating overlap, see SWIPELIST_SetOverlap().
+*/
+#define SWIPELIST_NOTIFICATION_OVERLAP_TOP_ENTERED       (WM_NOTIFICATION_WIDGET + 0)    // Sent when the overlap area was entered at the top of the SWIPELIST.
+#define SWIPELIST_NOTIFICATION_OVERLAP_BOTTOM_ENTERED    (WM_NOTIFICATION_WIDGET + 1)    // Sent when the overlap area was entered at the bottom of the SWIPELIST.
+#define SWIPELIST_NOTIFICATION_OVERLAP_RELEASED          (WM_NOTIFICATION_WIDGET + 2)    // Sent after a dragged overlap area has been released.
 
 /*********************************************************************
 *
@@ -155,8 +169,6 @@ void SWIPELIST_Callback(WM_MESSAGE * pMsg);
 *
 **********************************************************************
 */
-
-
 int                SWIPELIST_AddItem                 (SWIPELIST_Handle hObj, const char * sText, int ItemSize);
 int                SWIPELIST_AddItemText             (SWIPELIST_Handle hObj, unsigned ItemIndex, const char * sText);
 int                SWIPELIST_AddSepItem              (SWIPELIST_Handle hObj, const char * sText, int ItemSize);
@@ -171,6 +183,7 @@ int                SWIPELIST_GetItemSize             (SWIPELIST_Handle hObj, uns
 U32                SWIPELIST_GetItemUserData         (SWIPELIST_Handle hObj, unsigned ItemIndex);
 int                SWIPELIST_GetNumItems             (SWIPELIST_Handle hObj);
 int                SWIPELIST_GetNumText              (SWIPELIST_Handle hObj, unsigned ItemIndex);
+unsigned           SWIPELIST_GetOverlap              (SWIPELIST_Handle hObj);
 int                SWIPELIST_GetReleasedItem         (SWIPELIST_Handle hObj);
 int                SWIPELIST_GetScrollPos            (SWIPELIST_Handle hObj);
 int                SWIPELIST_GetSelItem              (SWIPELIST_Handle hObj);
@@ -196,6 +209,7 @@ void               SWIPELIST_SetBorderSize           (SWIPELIST_Handle hObj, uns
 void               SWIPELIST_SetFont                 (SWIPELIST_Handle hObj, unsigned Index, const GUI_FONT * pFont);
 void               SWIPELIST_SetItemSize             (SWIPELIST_Handle hObj, unsigned ItemIndex, unsigned Size);
 void               SWIPELIST_SetItemUserData         (SWIPELIST_Handle hObj, unsigned ItemIndex, U32 UserData);
+void               SWIPELIST_SetOverlap              (SWIPELIST_Handle hObj, unsigned Overlap);
 void               SWIPELIST_SetOwnerDraw            (SWIPELIST_Handle hObj, WIDGET_DRAW_ITEM_FUNC * pfDrawItem);
 void               SWIPELIST_SetScrollPos            (SWIPELIST_Handle hObj, int Pos);
 void               SWIPELIST_SetScrollPosItem        (SWIPELIST_Handle hObj, unsigned ItemIndex);
@@ -217,6 +231,7 @@ int              SWIPELIST_GetDefaultBitmapSpace     (void);
 GUI_COLOR        SWIPELIST_GetDefaultBkColor         (unsigned Index);
 int              SWIPELIST_GetDefaultBorderSize      (unsigned Index);
 const GUI_FONT * SWIPELIST_GetDefaultFont            (unsigned Index);
+unsigned         SWIPELIST_GetDefaultOverlap         (void);
 GUI_COLOR        SWIPELIST_GetDefaultSepColor        (void);
 unsigned         SWIPELIST_GetDefaultSepSize         (void);
 GUI_COLOR        SWIPELIST_GetDefaultTextColor       (unsigned Index);
@@ -227,6 +242,7 @@ void             SWIPELIST_SetDefaultBitmapSpace     (unsigned Size);
 void             SWIPELIST_SetDefaultBkColor         (unsigned Index, GUI_COLOR Color);
 void             SWIPELIST_SetDefaultBorderSize      (unsigned Index, unsigned Size);
 void             SWIPELIST_SetDefaultFont            (unsigned Index, const GUI_FONT * pFont);
+void             SWIPELIST_SetDefaultOverlap         (unsigned Overlap);
 void             SWIPELIST_SetDefaultSepColor        (GUI_COLOR Color);
 void             SWIPELIST_SetDefaultSepSize         (unsigned Size);
 void             SWIPELIST_SetDefaultTextColor       (unsigned Index, GUI_COLOR Color);

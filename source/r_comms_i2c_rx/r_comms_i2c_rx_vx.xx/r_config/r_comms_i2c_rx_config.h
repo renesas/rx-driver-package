@@ -80,7 +80,6 @@
 #define COMMS_I2C_CFG_DEVICE0_BUS_CH           (g_comms_i2c_bus0_extended_cfg)
 #define COMMS_I2C_CFG_DEVICE0_SLAVE_ADDR       (0x00) /* Slave address */
 #define COMMS_I2C_CFG_DEVICE0_ADDR_MODE        (1) /* Address mode */
-#define COMMS_I2C_CFG_DEVICE0_CALLBACK_ENABLE  (1) /* Callback function */
 #define COMMS_I2C_CFG_DEVICE0_CALLBACK         (comms_i2c_user_callback0) /* Callback function */
 #define COMMS_I2C_CFG_DEVICE0_BLOCKING_TIMEOUT (0xFFFFFFFF) /* Blocking timeout in the RTOS  (0x00 ~ 0xFFFFFFFF) */
 
@@ -88,7 +87,6 @@
 #define COMMS_I2C_CFG_DEVICE1_BUS_CH           (g_comms_i2c_bus0_extended_cfg)
 #define COMMS_I2C_CFG_DEVICE1_SLAVE_ADDR       (0x00) /* Slave address */
 #define COMMS_I2C_CFG_DEVICE1_ADDR_MODE        (1) /* Address mode */
-#define COMMS_I2C_CFG_DEVICE1_CALLBACK_ENABLE  (1) /* Callback function */
 #define COMMS_I2C_CFG_DEVICE1_CALLBACK         (comms_i2c_user_callback1) /* Callback function */
 #define COMMS_I2C_CFG_DEVICE1_BLOCKING_TIMEOUT (0xFFFFFFFF) /* Blocking timeout in the RTOS  (0x00 ~ 0xFFFFFFFF) */
 
@@ -96,7 +94,6 @@
 #define COMMS_I2C_CFG_DEVICE2_BUS_CH           (g_comms_i2c_bus0_extended_cfg)
 #define COMMS_I2C_CFG_DEVICE2_SLAVE_ADDR       (0x00) /* Slave address */
 #define COMMS_I2C_CFG_DEVICE2_ADDR_MODE        (1) /* Address mode */
-#define COMMS_I2C_CFG_DEVICE2_CALLBACK_ENABLE  (1) /* Callback function */
 #define COMMS_I2C_CFG_DEVICE2_CALLBACK         (comms_i2c_user_callback2) /* Callback function */
 #define COMMS_I2C_CFG_DEVICE2_BLOCKING_TIMEOUT (0xFFFFFFFF) /* Blocking timeout in the RTOS  (0x00 ~ 0xFFFFFFFF) */
 
@@ -104,7 +101,6 @@
 #define COMMS_I2C_CFG_DEVICE3_BUS_CH           (g_comms_i2c_bus0_extended_cfg)
 #define COMMS_I2C_CFG_DEVICE3_SLAVE_ADDR       (0x00) /* Slave address */
 #define COMMS_I2C_CFG_DEVICE3_ADDR_MODE        (1) /* Address mode */
-#define COMMS_I2C_CFG_DEVICE3_CALLBACK_ENABLE  (1) /* Callback function */
 #define COMMS_I2C_CFG_DEVICE3_CALLBACK         (comms_i2c_user_callback3) /* Callback function */
 #define COMMS_I2C_CFG_DEVICE3_BLOCKING_TIMEOUT (0xFFFFFFFF) /* Blocking timeout in the RTOS  (0x00 ~ 0xFFFFFFFF) */
 
@@ -112,7 +108,6 @@
 #define COMMS_I2C_CFG_DEVICE4_BUS_CH           (g_comms_i2c_bus0_extended_cfg)
 #define COMMS_I2C_CFG_DEVICE4_SLAVE_ADDR       (0x00) /* Slave address */
 #define COMMS_I2C_CFG_DEVICE4_ADDR_MODE        (1) /* Address mode */
-#define COMMS_I2C_CFG_DEVICE4_CALLBACK_ENABLE  (1) /* Callback function */
 #define COMMS_I2C_CFG_DEVICE4_CALLBACK         (comms_i2c_user_callback4) /* Callback function */
 #define COMMS_I2C_CFG_DEVICE4_BLOCKING_TIMEOUT (0xFFFFFFFF) /* Blocking timeout in the RTOS  (0x00 ~ 0xFFFFFFFF) */
 

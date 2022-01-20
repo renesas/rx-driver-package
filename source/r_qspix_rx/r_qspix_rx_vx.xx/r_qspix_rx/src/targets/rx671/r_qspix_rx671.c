@@ -24,6 +24,9 @@
 /*******************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 31.03.2021 1.00     First Release
+*              : 20.09.2021 1.10     Fixed r_qspix_write_indirect()
+*              : 29.11.2021 1.20     Supported to call R_QSPIX_Write_Indirect() 
+*                                    multiple times
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_qspix_rx671.c
@@ -750,9 +753,15 @@ qspix_err_t r_qspix_write_indirect(uint8_t channel,
     }
 #endif
 
-    /* Switch to indirect access mode */
-    QSPIX.SPMR1.BIT.AMOD = QSPIX_INDIRECT_ACCESS_MODE;
-    QSPIX.SPMR2.BIT.IOMOD = QSPIX_EXTENDED_SPI_PROTOCOL;
+    /* Check current access mode */
+    if (QSPIX_INDIRECT_ACCESS_MODE != QSPIX.SPMR1.BIT.AMOD)
+    {
+        /* Switch to indirect access mode */
+        QSPIX.SPMR2.BIT.IOMOD = QSPIX_EXTENDED_SPI_PROTOCOL;
+
+        /* Open bus cycle process */
+        QSPIX.SPMR1.BIT.AMOD = QSPIX_INDIRECT_ACCESS_MODE;
+    }
 
     /* Write data to QSPI. */
     for (uint32_t i = 0; i < bytes; i++)

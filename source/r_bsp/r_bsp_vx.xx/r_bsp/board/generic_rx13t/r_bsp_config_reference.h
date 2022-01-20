@@ -40,6 +40,18 @@
 *                                - BSP_CFG_SCI_UART_TERMINAL_BITRATE
 *                                - BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY
 *         : 26.02.2021 1.04     Added a comment for Azure RTOS to BSP_CFG_RTOS_USED.
+*         : 30.11.2021 2.00     Added the following macro definitions.
+*                                - BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE
+*                                - BSP_CFG_HOCO_OSCILLATE_ENABLE
+*                                - BSP_CFG_LOCO_OSCILLATE_ENABLE
+*                                - BSP_CFG_IWDT_CLOCK_OSCILLATE_ENABLE
+*                                - BSP_CFG_HOCO_TRIMMING_ENABLE
+*                                - BSP_CFG_HOCO_TRIMMING_REG_VALUE
+*                                - BSP_CFG_CONFIGURATOR_VERSION
+*                                - BSP_CFG_CPLUSPLUS
+*                               Changed initial value of the following macro definitions.
+*                                - BSP_CFG_MCU_PART_GROUP
+*                                - BSP_CFG_MCU_PART_SERIES
 ***********************************************************************************************************************/
 
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
@@ -93,16 +105,16 @@ Configuration Options
 #define BSP_CFG_MCU_PART_MEMORY_SIZE    (0x5)
 
 /* Group name.
-   Character(s) = Value for macro = Description
-   3T           = 0x0             = RX13T Group
+   Character(s) = Description
+   3T           = RX13T Group
 */
-#define BSP_CFG_MCU_PART_GROUP          (0x0)
+#define BSP_CFG_MCU_PART_GROUP          "RX13T"
 
 /* Series name.
-   Character(s) = Value for macro = Description
-   51           = 0x0             = RX100 Series
+   Character(s) = Description
+   51           = RX100 Series
 */
-#define BSP_CFG_MCU_PART_SERIES         (0x0)
+#define BSP_CFG_MCU_PART_SERIES         "RX100"
 
 /* Memory type.
    Character(s) = Value for macro = Description
@@ -183,6 +195,30 @@ Configuration Options
 #define BSP_CFG_ID_CODE_LONG_3          (0xFFFFFFFF)
 /* 4th ID Code section, address 0xFFFFFFAC. From MSB to LSB: ID code 12, ID code 13, ID code 14, ID code 15. */
 #define BSP_CFG_ID_CODE_LONG_4          (0xFFFFFFFF)
+
+/* Select whether to oscillate the Main Clock Oscillator.
+   0 = Stop Oscillating the Main Clock. (default)
+   1 = Enable oscillating the Main Clock.
+*/
+#define BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE    (0)
+
+/* Select whether to oscillate the High Speed On-Chip Oscillator (HOCO).
+   0 = Stop Oscillating the HOCO.
+   1 = Enable Oscillating the HOCO. (default)
+*/
+#define BSP_CFG_HOCO_OSCILLATE_ENABLE          (1)
+
+/* Select whether to oscillate the Low Speed On-Chip Oscillator (LOCO).
+   0 = Stop Oscillating the LOCO. (default)
+   1 = Enable Oscillating the LOCO.
+*/
+#define BSP_CFG_LOCO_OSCILLATE_ENABLE          (0)
+
+/* Select whether to oscillate the IWDT-Dedicated On-Chip Oscillator (IWDT).
+   0 = Stop Oscillating the IWDT Clock. (default)
+   1 = Enable Oscillating the IWDT Clock.
+*/
+#define BSP_CFG_IWDT_CLOCK_OSCILLATE_ENABLE    (0)
 
 /* Clock source select (CKSEL).
    0 = Low Speed On-Chip Oscillator  (LOCO)
@@ -268,6 +304,21 @@ Configuration Options
    Wait time when LOCO = 4.0 MHz (0.25 us, TYP.)
 */
 #define BSP_CFG_MOSC_WAIT_TIME          (0x04)
+
+/* Select whether to initialize the HOCO trimming register.
+   0 = Disable reset the HOCO trimming register in the initial setting process.
+   1 = Enable reset the HOCO trimming register in the initial setting process.
+   Note: The trimming value is adjusted at shipment on the specified conditions and the value after a reset varies 
+         with the chips. When re-writing the HOCO trimming register, enable this macro definition.
+*/
+#define BSP_CFG_HOCO_TRIMMING_ENABLE    (0)
+
+/* Set the frequency trimming value for the HOCO.
+   0(Frequency: Low) - 63(Frequency: High)
+   Note: The trimming value is adjusted at shipment on the specified conditions and the value after a reset varies 
+         with the chips. When re-writing the HOCO trimming register, set this macro definition.
+*/
+#define BSP_CFG_HOCO_TRIMMING_REG_VALUE      (0)
 
 /* Configure IWDT settings.
    OFS0 - Option Function Select Register 0
@@ -406,6 +457,11 @@ Configuration Options
 */
 #define BSP_CFG_CONFIGURATOR_SELECT                 (0)
 
+/* Version number of Smart Configurator.
+   This macro definition is updated by Smart Configurator.
+*/
+#define BSP_CFG_CONFIGURATOR_VERSION                (100)
+
 /* For some BSP functions, it is necessary to ensure that, while these functions are executing, interrupts from other 
    FIT modules do not occur. By controlling the IPL, these functions disable interrupts that are at or below the 
    specified interrupt priority level.
@@ -458,6 +514,12 @@ Configuration Options
    0(low) - 15(high)
 */
 #define BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY   (15)
+
+/* This macro is used for C++ project and updated by Smart Configurator.
+   0 = This project is a C project.(Not a C++ project).
+   1 = This project is a C++ project.
+*/
+#define BSP_CFG_CPLUSPLUS             (0)
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

@@ -19,12 +19,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011(2012-2015) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2011(2012-2021) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * System Name  : FLASH SPI driver software
 * File Name    : r_flash_spi_type_sub.c
-* Version      : 2.32
+* Version      : 3.03
 * Device       : -
 * Abstract     : Sub module
 * Tool-Chain   : -
@@ -37,6 +37,8 @@
 * History      : DD.MM.YYYY Version  Description
 *              : 23.07.2014 2.21     Created
 *              : 29.05.2015 2.32     Revised functions of same as Ver.2.32 of EEPROM SPI FIT module.
+*              : 31.12.2021 3.03     Added variable "read_after_write" "read_after_write_add" and
+*                                    "read_after_write_data" for controlling SPI bus.
 *************************************************************************************************/
 
 
@@ -78,45 +80,45 @@ Macro definitions
 
 
 /*--------- Command transmission processing ----------*/
-#define R_FLASH_SPI_MX_CMD_WREN(devno)      r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_WREN,   (uint32_t)0, \
-                                                            FLASH_SPI_MX_CMD_SIZE)
-#define R_FLASH_SPI_MX_CMD_WRDI(devno)      r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_WRDI,   (uint32_t)0, \
-                                                            FLASH_SPI_MX_CMD_SIZE)
-#define R_FLASH_SPI_MX_CMD_RDSR(devno)      r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_RDSR,   (uint32_t)0, \
-                                                            FLASH_SPI_MX_CMD_SIZE)
-#define R_FLASH_SPI_MX_CMD_WRSR(devno)      r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_WRSR,   (uint32_t)0, \
-                                                            FLASH_SPI_MX_CMD_SIZE)
-#define R_FLASH_SPI_MX_CMD_RDCR(devno)      r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_RDCR,   (uint32_t)0, \
-                                                            FLASH_SPI_MX_CMD_SIZE)
-#define R_FLASH_SPI_MX_CMD_RDSCUR(devno)    r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_RDSCUR, (uint32_t)0, \
-                                                            FLASH_SPI_MX_CMD_SIZE)
-#define R_FLASH_SPI_MX_CMD_SE(devno, addr, addr_size)    r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_SE, \
-                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size)
-#define R_FLASH_SPI_MX_CMD_BE32K(devno, addr, addr_size) r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_BE32K, \
-                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size)
-#define R_FLASH_SPI_MX_CMD_BE64K(devno, addr, addr_size) r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_BE64K, \
-                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size)
-#define R_FLASH_SPI_MX_CMD_CE(devno, addr)  r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_CE,   (uint32_t)addr, \
-                                                            FLASH_SPI_MX_CMD_SIZE)
-#define R_FLASH_SPI_MX_CMD_RDID(devno)      r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_RDID,   (uint32_t)0, \
-                                                            FLASH_SPI_MX_CMD_SIZE)
-#define R_FLASH_SPI_MX_CMD_ENTER4(devno)    r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_EN4B,   (uint32_t)0, \
-                                                            FLASH_SPI_MX_CMD_SIZE)
-#define R_FLASH_SPI_MX_CMD_EXIT4(devno)     r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_EX4B,   (uint32_t)0, \
-                                                            FLASH_SPI_MX_CMD_SIZE)
+#define R_FLASH_SPI_MX_CMD_WREN(devno, read_after_write)      r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_WREN,   (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write)
+#define R_FLASH_SPI_MX_CMD_WRDI(devno, read_after_write)      r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_WRDI,   (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write)
+#define R_FLASH_SPI_MX_CMD_RDSR(devno, read_after_write)      r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_RDSR,   (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write)
+#define R_FLASH_SPI_MX_CMD_WRSR(devno, read_after_write)      r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_WRSR,   (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write)
+#define R_FLASH_SPI_MX_CMD_RDCR(devno, read_after_write)      r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_RDCR,   (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write)
+#define R_FLASH_SPI_MX_CMD_RDSCUR(devno, read_after_write)    r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_RDSCUR, (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write)
+#define R_FLASH_SPI_MX_CMD_SE(devno, addr, addr_size, read_after_write)    r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_SE, \
+                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size, read_after_write)
+#define R_FLASH_SPI_MX_CMD_BE32K(devno, addr, addr_size, read_after_write) r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_BE32K, \
+                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size, read_after_write)
+#define R_FLASH_SPI_MX_CMD_BE64K(devno, addr, addr_size, read_after_write) r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_BE64K, \
+                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size, read_after_write)
+#define R_FLASH_SPI_MX_CMD_CE(devno, addr, read_after_write)  r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_CE,   (uint32_t)addr, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write)
+#define R_FLASH_SPI_MX_CMD_RDID(devno, read_after_write)      r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_RDID,   (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write)
+#define R_FLASH_SPI_MX_CMD_ENTER4(devno, read_after_write)    r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_EN4B,   (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write)
+#define R_FLASH_SPI_MX_CMD_EXIT4(devno, read_after_write)     r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_EX4B,   (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write)
 /* READ Command */
 /* 1 Dummy cycle is indicated as "1". */
-#define R_FLASH_SPI_MX_CMD_FREAD(devno, addr, addr_size) r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_FREAD, \
-                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size+1)
-#define R_FLASH_SPI_MX_CMD_DREAD(devno, addr, addr_size) r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_DREAD, \
-                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size+1)
-#define R_FLASH_SPI_MX_CMD_QREAD(devno, addr, addr_size) r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_QREAD, \
-                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size+1)
+#define R_FLASH_SPI_MX_CMD_FREAD(devno, addr, addr_size, read_after_write) r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_FREAD, \
+                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size+1, read_after_write)
+#define R_FLASH_SPI_MX_CMD_DREAD(devno, addr, addr_size, read_after_write) r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_DREAD, \
+                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size+1, read_after_write)
+#define R_FLASH_SPI_MX_CMD_QREAD(devno, addr, addr_size, read_after_write) r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_QREAD, \
+                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size+1, read_after_write)
 /* Page Program Command */
-#define R_FLASH_SPI_MX_CMD_PP(devno, addr, addr_size)   r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_PP,  \
-                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE)
-#define R_FLASH_SPI_MX_CMD_4PP(devno, addr, addr_size)  r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_4PP, \
-                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE)
+#define R_FLASH_SPI_MX_CMD_PP(devno, addr, addr_size, read_after_write)   r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_PP,  \
+                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE, read_after_write)
+#define R_FLASH_SPI_MX_CMD_4PP(devno, addr, addr_size, read_after_write)  r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_4PP, \
+                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE, read_after_write)
 
 
 /************************************************************************************************
@@ -140,11 +142,11 @@ Private global variables and functions
 *************************************************************************************************/
 static uint32_t gs_flash_mx_cmdbuf[FLASH_SPI_DEV_NUM][8/sizeof(uint32_t)];
                                                         /* Command transmission buffer          */
-static flash_spi_status_t r_flash_spi_mx_send_cmd(uint8_t devno, uint8_t cmd, uint32_t addr, uint8_t cmdsize);
+static flash_spi_status_t r_flash_spi_mx_send_cmd(uint8_t devno, uint8_t cmd, uint32_t addr, uint8_t cmdsize, bool read_after_write);
                                                         /* Command transmission                 */
 static flash_spi_status_t r_flash_spi_mx_write_en(uint8_t devno);
                                                         /* Writing enable                       */
-static flash_spi_status_t r_flash_spi_mx_write_stsreg(uint8_t devno, flash_spi_reg_info_t * p_reg);
+static flash_spi_status_t r_flash_spi_mx_write_stsreg(uint8_t devno, flash_spi_reg_info_t * p_reg, bool read_after_write);
 static flash_spi_status_t r_flash_spi_mx_poll_prog_erase(uint8_t devno, flash_spi_poll_mode_t mode);
 static flash_spi_status_t r_flash_spi_mx_poll_reg_write(uint8_t devno);
 static void               r_flash_spi_mx_cmd_set(uint8_t devno, uint8_t cmd, uint32_t addr, uint8_t cmdsize);
@@ -184,13 +186,14 @@ void r_flash_spi_mx_reset_port(uint8_t devno)
 * Arguments    : uint8_t            cmd                 ;   Command data
 *              : uint32_t           addr                ;   Address data
 *              : uint8_t            cmdsize             ;   Command size
+*              : bool               read_after_write    ;   Control SPI bus
 * Return Value : FLASH_SPI_SUCCESS                      ;   Successful operation
 *              : FLASH_SPI_ERR_HARD                     ;   Hardware error
 *              : FLASH_SPI_ERR_OTHER                    ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
-static flash_spi_status_t r_flash_spi_mx_send_cmd(uint8_t devno, uint8_t cmd, uint32_t addr, uint8_t cmdsize)
+static flash_spi_status_t r_flash_spi_mx_send_cmd(uint8_t devno, uint8_t cmd, uint32_t addr, uint8_t cmdsize, bool read_after_write)
 {
     flash_spi_status_t        ret = FLASH_SPI_SUCCESS;
 
@@ -199,7 +202,7 @@ static flash_spi_status_t r_flash_spi_mx_send_cmd(uint8_t devno, uint8_t cmd, ui
     /* The upper layer software should set to the single mode. */
     /* Send a command using the single mode. */
     /* Cast from 8-bit data to 32-bit data. */
-    ret = r_flash_spi_drvif_tx(devno, (uint32_t)cmdsize, (uint8_t *)&gs_flash_mx_cmdbuf[devno][0]);
+    ret = r_flash_spi_drvif_tx(devno, (uint32_t)cmdsize, (uint8_t *)&gs_flash_mx_cmdbuf[devno][0], read_after_write);
     if (FLASH_SPI_SUCCESS > ret)
     {
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
@@ -230,7 +233,7 @@ static flash_spi_status_t r_flash_spi_mx_write_en(uint8_t devno)
 
     /* The upper layer software should set to the single mode. */
     /* Issue the Write Enable (WREN) command using the single mode. */
-    ret = R_FLASH_SPI_MX_CMD_WREN(devno);
+    ret = R_FLASH_SPI_MX_CMD_WREN(devno, FALSE);
     if (FLASH_SPI_SUCCESS > ret)
     {
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
@@ -266,7 +269,7 @@ flash_spi_status_t r_flash_spi_mx_write_di(uint8_t devno)
 
     /* The upper layer software should set to the single mode. */
     /* Issue the Write Disable (WRDI) command using the single mode. */
-    ret = R_FLASH_SPI_MX_CMD_WRDI(devno);
+    ret = R_FLASH_SPI_MX_CMD_WRDI(devno, FALSE);
     if (FLASH_SPI_SUCCESS > ret)
     {
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
@@ -318,7 +321,7 @@ flash_spi_status_t r_flash_spi_mx_read_stsreg(uint8_t devno, uint8_t * p_status)
 
     /* The upper layer software should set to the single mode. */
     /* Issue the Read Status Register (RDSR) command using the single mode. */
-    ret = R_FLASH_SPI_MX_CMD_RDSR(devno);
+    ret = R_FLASH_SPI_MX_CMD_RDSR(devno, TRUE);
     if (FLASH_SPI_SUCCESS > ret)
     {
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
@@ -393,7 +396,7 @@ flash_spi_status_t r_flash_spi_mx_read_configreg(uint8_t devno, uint8_t * p_conf
 
     /* The upper layer software should set to the single mode. */
     /* Issue the Read Configuration Register (RDCR) command using the single mode. */
-    ret = R_FLASH_SPI_MX_CMD_RDCR(devno);
+    ret = R_FLASH_SPI_MX_CMD_RDCR(devno, TRUE);
     if (FLASH_SPI_SUCCESS > ret)
     {
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
@@ -466,7 +469,7 @@ flash_spi_status_t r_flash_spi_mx_read_scurreg(uint8_t devno, uint8_t * p_scur)
 
     /* The upper layer software should set to the single mode. */
     /* Issue the Read Security Register (RDSCUR) command using the single mode. */
-    ret = R_FLASH_SPI_MX_CMD_RDSCUR(devno);
+    ret = R_FLASH_SPI_MX_CMD_RDSCUR(devno, TRUE);
     if (FLASH_SPI_SUCCESS > ret)
     {
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
@@ -524,6 +527,7 @@ flash_spi_status_t r_flash_spi_mx_read_scurreg(uint8_t devno, uint8_t * p_scur)
 *              :
 * Arguments    : uint8_t            devno               ;   Device No. (FLASH_SPI_DEVn)
 *              : uint8_t            wpsts               ;   Write-protection setting data
+*              : bool               read_after_write    ;   Control SPI bus
 * Return Value : FLASH_SPI_SUCCESS                      ;   Successful operation
 *              : FLASH_SPI_ERR_PARAM                    ;   Parameter error
 *              : FLASH_SPI_ERR_HARD                     ;   Hardware error
@@ -532,7 +536,7 @@ flash_spi_status_t r_flash_spi_mx_read_scurreg(uint8_t devno, uint8_t * p_scur)
 * Notes        : A SRWD bit is fixed to 0.
 *              : Please confirm the status register.
 *************************************************************************************************/
-flash_spi_status_t r_flash_spi_mx_set_write_protect(uint8_t devno, uint8_t wpsts)
+flash_spi_status_t r_flash_spi_mx_set_write_protect(uint8_t devno, uint8_t wpsts, bool read_after_write)
 {
     flash_spi_status_t      ret = FLASH_SPI_SUCCESS;
     flash_spi_reg_info_t    reg;
@@ -593,7 +597,7 @@ flash_spi_status_t r_flash_spi_mx_set_write_protect(uint8_t devno, uint8_t wpsts
     /* Execute the Write Status Register (WRSR) command operation using the single mode. */
     /* Execute the Read Status Register (RDSR) command operation using the single mode 
        in r_flash_spi_mx_write_stsreg(). */
-    ret = r_flash_spi_mx_write_stsreg(devno, &reg);
+    ret = r_flash_spi_mx_write_stsreg(devno, &reg, read_after_write);
     if (FLASH_SPI_SUCCESS > ret)
     {
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
@@ -638,6 +642,7 @@ flash_spi_status_t r_flash_spi_mx_set_write_protect(uint8_t devno, uint8_t wpsts
 *              :     uint8_t     status           ;   Status register setting data
 *              :     uint8_t     config1          ;   Configuration or Configuration-1 register setting data
 *              :     uint8_t     config2          ;   Configuration-2 register setting data
+*              :     bool        read_after_write ;   Control SPI bus
 * Return Value : FLASH_SPI_SUCCESS                ;   Successful operation
 *              : FLASH_SPI_ERR_PARAM              ;   Parameter error
 *              : FLASH_SPI_ERR_HARD               ;   Hardware error
@@ -645,7 +650,7 @@ flash_spi_status_t r_flash_spi_mx_set_write_protect(uint8_t devno, uint8_t wpsts
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
-flash_spi_status_t r_flash_spi_mx_write_configuration(uint8_t devno, flash_spi_reg_info_t * p_reg)
+flash_spi_status_t r_flash_spi_mx_write_configuration(uint8_t devno, flash_spi_reg_info_t * p_reg, bool read_after_write)
 {
     flash_spi_status_t      ret = FLASH_SPI_SUCCESS;
 
@@ -662,7 +667,7 @@ flash_spi_status_t r_flash_spi_mx_write_configuration(uint8_t devno, flash_spi_r
     /* Execute the Write Status Register (WRSR) command operation using the single mode. */
     /* Execute the Read Status Register (RDSR) command operation using the single mode 
        in r_flash_spi_mx_write_stsreg(). */
-    ret = r_flash_spi_mx_write_stsreg(devno, p_reg);
+    ret = r_flash_spi_mx_write_stsreg(devno, p_reg, read_after_write);
     if (FLASH_SPI_SUCCESS > ret)
     {
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
@@ -677,6 +682,7 @@ flash_spi_status_t r_flash_spi_mx_write_configuration(uint8_t devno, flash_spi_r
 * Function Name: r_flash_spi_mx_quad_enable
 * Description  : Makes a setting using Quad Enable (QE Bit) mode.
 * Arguments    : uint8_t         devno                  ;   Device No. (FLASH_SPI_DEVn)
+*              : bool            read_after_write       ;   Control SPI bus
 * Return Value : FLASH_SPI_SUCCESS                      ;   Successful operation
 *              : FLASH_SPI_ERR_PARAM                    ;   Parameter error
 *              : FLASH_SPI_ERR_HARD                     ;   Hardware error
@@ -685,7 +691,7 @@ flash_spi_status_t r_flash_spi_mx_write_configuration(uint8_t devno, flash_spi_r
 * Notes        : A SRWD bit is fixed to 0.
 *              : Please confirm the status register and configuration register after this processing.
 *************************************************************************************************/
-flash_spi_status_t r_flash_spi_mx_quad_enable(uint8_t devno)
+flash_spi_status_t r_flash_spi_mx_quad_enable(uint8_t devno, bool read_after_write)
 {
     flash_spi_status_t      ret = FLASH_SPI_SUCCESS;
     flash_spi_reg_info_t    reg;
@@ -725,7 +731,7 @@ flash_spi_status_t r_flash_spi_mx_quad_enable(uint8_t devno)
     /* Execute the Write Status Register (WRSR) command operation using the single mode. */
     /* Execute the Read Status Register (RDSR) command operation using the single mode 
        in r_flash_spi_mx_write_stsreg(). */
-    ret = r_flash_spi_mx_write_stsreg(devno, &reg);
+    ret = r_flash_spi_mx_write_stsreg(devno, &reg, read_after_write);
     if (FLASH_SPI_SUCCESS > ret)
     {
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
@@ -740,6 +746,7 @@ flash_spi_status_t r_flash_spi_mx_quad_enable(uint8_t devno)
 * Function Name: r_flash_spi_mx_quad_disable
 * Description  : Makes a setting using Quad Disable (QE Bit) mode.
 * Arguments    : uint8_t         devno                  ;   Device No. (FLASH_SPI_DEVn)
+*              : bool            read_after_write       ;   Control SPI bus
 * Return Value : FLASH_SPI_SUCCESS                      ;   Successful operation
 *              : FLASH_SPI_ERR_PARAM                    ;   Parameter error
 *              : FLASH_SPI_ERR_HARD                     ;   Hardware error
@@ -748,7 +755,7 @@ flash_spi_status_t r_flash_spi_mx_quad_enable(uint8_t devno)
 * Notes        : A SRWD bit is fixed to 0.
 *              : Please confirm the status register and configuration register after this processing.
 *************************************************************************************************/
-flash_spi_status_t r_flash_spi_mx_quad_disable(uint8_t devno)
+flash_spi_status_t r_flash_spi_mx_quad_disable(uint8_t devno, bool read_after_write)
 {
     flash_spi_status_t      ret = FLASH_SPI_SUCCESS;
     flash_spi_reg_info_t    reg;
@@ -788,7 +795,7 @@ flash_spi_status_t r_flash_spi_mx_quad_disable(uint8_t devno)
     /* Execute the Write Status Register (WRSR) command operation using the single mode. */
     /* Execute the Read Status Register (RDSR) command operation using the single mode 
        in r_flash_spi_mx_write_stsreg(). */
-    ret = r_flash_spi_mx_write_stsreg(devno, &reg);
+    ret = r_flash_spi_mx_write_stsreg(devno, &reg, read_after_write);
     if (FLASH_SPI_SUCCESS > ret)
     {
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
@@ -849,13 +856,14 @@ flash_spi_status_t r_flash_spi_mx_quad_disable(uint8_t devno)
 *              :     uint8_t     status           ;   Status register setting data
 *              :     uint8_t     config1          ;   Configuration or Configuration-1 register setting data
 *              :     uint8_t     config2          ;   Configuration-2 register setting data
+*              :     bool        read_after_write ;   Control SPI bus
 * Return Value : FLASH_SPI_SUCCESS                ;   Successful operation
 *              : FLASH_SPI_ERR_HARD               ;   Hardware error
 *              : FLASH_SPI_ERR_OTHER              ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
-static flash_spi_status_t r_flash_spi_mx_write_stsreg(uint8_t devno, flash_spi_reg_info_t * p_reg)
+static flash_spi_status_t r_flash_spi_mx_write_stsreg(uint8_t devno, flash_spi_reg_info_t * p_reg, bool read_after_write)
 {
 #if (FLASH_SPI_CFG_WEL_CHK == 1)
     uint8_t             stsreg = 0;                     /* Status buffer                        */
@@ -906,7 +914,7 @@ static flash_spi_status_t r_flash_spi_mx_write_stsreg(uint8_t devno, flash_spi_r
     data_size    = FLASH_SPI_MX_CMD_SIZE + FLASH_SPI_MX_WSTSREG_SIZE;
 
     /* Transmit data to the status register using the single mode. */
-    ret = r_flash_spi_drvif_tx(devno, data_size, &data_buff[0]);
+    ret = r_flash_spi_drvif_tx(devno, data_size, &data_buff[0], read_after_write);
     if (FLASH_SPI_SUCCESS > ret)
     {
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
@@ -963,15 +971,15 @@ flash_spi_status_t r_flash_spi_mx_read(uint8_t devno, flash_spi_info_t * p_flash
 
     if (FLASH_SPI_SINGLE == p_flash_spi_info->op_mode)
     {
-        ret = R_FLASH_SPI_MX_CMD_FREAD(devno, p_flash_spi_info->addr, addr_size);
+        ret = R_FLASH_SPI_MX_CMD_FREAD(devno, p_flash_spi_info->addr, addr_size, TRUE);
     }
     else if (FLASH_SPI_DUAL == p_flash_spi_info->op_mode)
     {
-        ret = R_FLASH_SPI_MX_CMD_DREAD(devno, p_flash_spi_info->addr, addr_size);
+        ret = R_FLASH_SPI_MX_CMD_DREAD(devno, p_flash_spi_info->addr, addr_size, TRUE);
     }
     else
     {
-        ret = R_FLASH_SPI_MX_CMD_QREAD(devno, p_flash_spi_info->addr, addr_size);
+        ret = R_FLASH_SPI_MX_CMD_QREAD(devno, p_flash_spi_info->addr, addr_size, TRUE);
     }
 
     if (FLASH_SPI_SUCCESS > ret)
@@ -1073,6 +1081,8 @@ flash_spi_status_t r_flash_spi_mx_read(uint8_t devno, flash_spi_info_t * p_flash
 *              :    uint32_t        cnt                 ;   Number of bytes to be written
 *              :    uint32_t        data_cnt            ;   Number of bytes to be written in a page
 *              :    uint8_t       * p_data              ;   Write data storage buffer pointer
+*              :    bool            read_after_write_add;   Whether or not to close SPI bus cycle
+*              :    bool            read_after_write_data;  Whether or not to close SPI bus cycle
 * Return Value : FLASH_SPI_SUCCESS                      ;   Successful operation
 *              : FLASH_SPI_ERR_PARAM                    ;   Parameter error
 *              : FLASH_SPI_ERR_HARD                     ;   Hardware error
@@ -1080,7 +1090,7 @@ flash_spi_status_t r_flash_spi_mx_read(uint8_t devno, flash_spi_info_t * p_flash
 *------------------------------------------------------------------------------------------------
 * Notes        : A write exceeding the write page isn't allowed.
 *************************************************************************************************/
-flash_spi_status_t r_flash_spi_mx_write_page(uint8_t devno, flash_spi_info_t * p_flash_spi_info)
+flash_spi_status_t r_flash_spi_mx_write_page(uint8_t devno, flash_spi_info_t * p_flash_spi_info, bool read_after_write_add, bool read_after_write_data)
 {
 #if (FLASH_SPI_CFG_WEL_CHK == 1)
     uint8_t             stsreg = 0;                     /* Status buffer                        */
@@ -1140,11 +1150,11 @@ flash_spi_status_t r_flash_spi_mx_write_page(uint8_t devno, flash_spi_info_t * p
 
     if (FLASH_SPI_SINGLE == p_flash_spi_info->op_mode)
     {
-        ret = R_FLASH_SPI_MX_CMD_PP(devno, p_flash_spi_info->addr, addr_size);
+        ret = R_FLASH_SPI_MX_CMD_PP(devno, p_flash_spi_info->addr, addr_size, TRUE);
     }
     else
     {
-        ret = R_FLASH_SPI_MX_CMD_4PP(devno, p_flash_spi_info->addr, addr_size);
+        ret = R_FLASH_SPI_MX_CMD_4PP(devno, p_flash_spi_info->addr, addr_size, TRUE);
     }
 
     if (FLASH_SPI_SUCCESS > ret)
@@ -1159,11 +1169,11 @@ flash_spi_status_t r_flash_spi_mx_write_page(uint8_t devno, flash_spi_info_t * p
     r_flash_spi_mx_cmd_set(devno, 0, p_flash_spi_info->addr, FLASH_SPI_MX_CMD_SIZE+addr_size);
     if (FLASH_SPI_SINGLE == p_flash_spi_info->op_mode)
     {
-        ret = r_flash_spi_drvif_tx_add(devno, addr_size, ++p_cmdbuf, FLASH_SPI_SINGLE);
+        ret = r_flash_spi_drvif_tx_add(devno, addr_size, ++p_cmdbuf, FLASH_SPI_SINGLE, read_after_write_add);
     }
     else
     {
-        ret = r_flash_spi_drvif_tx_add(devno, addr_size, ++p_cmdbuf, FLASH_SPI_QUAD);
+        ret = r_flash_spi_drvif_tx_add(devno, addr_size, ++p_cmdbuf, FLASH_SPI_QUAD, read_after_write_add);
     }
 
     if (FLASH_SPI_SUCCESS > ret)
@@ -1197,7 +1207,7 @@ flash_spi_status_t r_flash_spi_mx_write_page(uint8_t devno, flash_spi_info_t * p
 
     /* Transmit data to memory. */
     ret = r_flash_spi_drvif_tx_data(devno, p_flash_spi_info->data_cnt, p_flash_spi_info->p_data,
-                                    p_flash_spi_info->op_mode);
+                                    p_flash_spi_info->op_mode, read_after_write_data);
     if (FLASH_SPI_SUCCESS > ret)
     {
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
@@ -1345,7 +1355,7 @@ flash_spi_status_t r_flash_spi_mx_erase(uint8_t devno, flash_spi_erase_info_t * 
             p_flash_spi_erase_info->addr &= FLASH_SPI_MX_DEV1_SECT_ADDR;
 #endif  /* #if (FLASH_SPI_CFG_DEV1_INCLUDED == 1) */
         }
-        ret = R_FLASH_SPI_MX_CMD_SE(devno, p_flash_spi_erase_info->addr, addr_size);
+        ret = R_FLASH_SPI_MX_CMD_SE(devno, p_flash_spi_erase_info->addr, addr_size, FALSE);
     }
     else if (FLASH_SPI_MODE_B32K_ERASE == p_flash_spi_erase_info->mode)
     {
@@ -1361,7 +1371,7 @@ flash_spi_status_t r_flash_spi_mx_erase(uint8_t devno, flash_spi_erase_info_t * 
             p_flash_spi_erase_info->addr &= FLASH_SPI_MX_DEV1_B32K_ADDR;
 #endif  /* #if (FLASH_SPI_CFG_DEV1_INCLUDED == 1) */
         }
-        ret = R_FLASH_SPI_MX_CMD_BE32K(devno, p_flash_spi_erase_info->addr, addr_size);
+        ret = R_FLASH_SPI_MX_CMD_BE32K(devno, p_flash_spi_erase_info->addr, addr_size, FALSE);
     }
     else if (FLASH_SPI_MODE_B64K_ERASE == p_flash_spi_erase_info->mode)
     {
@@ -1377,12 +1387,12 @@ flash_spi_status_t r_flash_spi_mx_erase(uint8_t devno, flash_spi_erase_info_t * 
             p_flash_spi_erase_info->addr &= FLASH_SPI_MX_DEV1_B64K_ADDR;
 #endif  /* #if (FLASH_SPI_CFG_DEV1_INCLUDED == 1) */
         }
-        ret = R_FLASH_SPI_MX_CMD_BE64K(devno, p_flash_spi_erase_info->addr, addr_size);
+        ret = R_FLASH_SPI_MX_CMD_BE64K(devno, p_flash_spi_erase_info->addr, addr_size, FALSE);
     }
     else
     {
         p_flash_spi_erase_info->addr &= 0x00000000;
-        ret = R_FLASH_SPI_MX_CMD_CE(devno, p_flash_spi_erase_info->addr);
+        ret = R_FLASH_SPI_MX_CMD_CE(devno, p_flash_spi_erase_info->addr, FALSE);
     }
 
     if (FLASH_SPI_SUCCESS > ret)
@@ -1423,7 +1433,7 @@ flash_spi_status_t r_flash_spi_mx_rdid(uint8_t devno, uint8_t * p_data)
 
     /* The upper layer software should set to the single mode. */
     /* Issue the Read Configuration Register (RDCR) command using the single mode. */
-    ret = R_FLASH_SPI_MX_CMD_RDID(devno);
+    ret = R_FLASH_SPI_MX_CMD_RDID(devno, TRUE);
     if (FLASH_SPI_SUCCESS > ret)
     {
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
@@ -1740,7 +1750,7 @@ flash_spi_status_t r_flash_spi_mx_enter_4addr(uint8_t devno)
         r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
 
         /* Issue the Enter 4-byte Address Mode command using the single mode. */
-        ret = R_FLASH_SPI_MX_CMD_ENTER4(devno);
+        ret = R_FLASH_SPI_MX_CMD_ENTER4(devno, FALSE);
         if (FLASH_SPI_SUCCESS > ret)
         {
             R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);

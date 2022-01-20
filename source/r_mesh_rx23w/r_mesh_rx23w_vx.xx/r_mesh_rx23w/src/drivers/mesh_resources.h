@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 #ifndef _MESH_MEMPOOL_
@@ -41,6 +41,7 @@
 #define SIZEOF_NET_CACHE_ELEMENT_EX                     (16)
 #define SIZEOF_NET_CACHE_ELEMENT_EX_CONFIGURABLE \
             (SIZEOF_UINT32 * (1 + BITARRAY_SIZE(MESH_CFG_NET_SEQNUM_CACHE_SIZE)))
+#define SIZEOF_NET_TX_Q_ELEMENT                         (12)
 #define SIZEOF_PROXY_FILTER_LIST_FIXED                  (8)
 #define SIZEOF_PROXY_ADDR                               (2)
 #define SIZEOF_PROXY_FILTER_LIST_CONFIGURABLE \
@@ -67,8 +68,13 @@
 #define SIZEOF_MS_ELEMENT_ADDR_ENTRY                    (4)
 #define SIZEOF_MS_NON_VIRTUAL_ADDR_ENTRY                (4)
 #define SIZEOF_MS_VIRTUAL_ADDR_ENTRY                    (20)
+#define SIZEOF_MS_ACCESS_PERIODIC_STEP_TIMER_TYPE       (16)
 #define SIZEOF_PROV_BRR_INFO                            (1)
+#define SIZEOF_MS_ACCESS_STATE_TRANSITION_TYPE          (16)
 #define SIZEOF_MS_HEALTH_SERVER_T                       (88)
+#define SIZEOF_LOCAL_APPKEY_INDEX_LIST                  (2)
+#define SIZEOF_LOCAL_ADDR_LIST                          (2)
+#define SIZEOF_LOCAL_NETKEY_INDEX_LIST                  (2)
 
 /* Array Size */
 #define SIZEOF_MEM_BRR_BEARER \
@@ -77,6 +83,8 @@
             (ALIGN_UINT32(SIZEOF_NET_CACHE_ELEMENT_EX) * MESH_CFG_NET_CACHE_SIZE)
 #define SIZEOF_MEM_NET_CACHE_EX_CONFIGURABLE \
             (ALIGN_UINT32(SIZEOF_NET_CACHE_ELEMENT_EX_CONFIGURABLE) * MESH_CFG_NET_CACHE_SIZE)
+#define SIZEOF_MEM_NET_TX_QUEUE \
+            (ALIGN_UINT32(SIZEOF_NET_TX_Q_ELEMENT) * MESH_CFG_NET_TX_QUEUE_SIZE)
 #define SIZEOF_MEM_NET_PROXY_LIST_FIXED \
             (ALIGN_UINT32(SIZEOF_PROXY_FILTER_LIST_FIXED) * (MESH_CFG_NUM_NETWORK_INTERFACES - 1))
 #define SIZEOF_MEM_NET_PROXY_LIST_CONFIGURABLE \
@@ -113,37 +121,53 @@
             (ALIGN_UINT32(SIZEOF_MS_NON_VIRTUAL_ADDR_ENTRY) * MESH_CFG_MAX_NON_VIRTUAL_ADDRS)
 #define SIZEOF_MEM_MS_VIRTUAL_ADDR_TABLE \
             (ALIGN_UINT32(SIZEOF_MS_VIRTUAL_ADDR_ENTRY) * MESH_CFG_MAX_VIRTUAL_ADDRS)
+#define SIZEOF_MEM_MS_PERIODIC_STEP_TIMERS \
+            (ALIGN_UINT32(SIZEOF_MS_ACCESS_PERIODIC_STEP_TIMER_TYPE) * MESH_CFG_MAX_NUM_PERIODIC_STEP_TIMERS)
 #define SIZEOF_MEM_PROV_BRR \
             (ALIGN_UINT32(SIZEOF_PROV_BRR_INFO) * MESH_CFG_NUM_PROVISIONING_INTERFACES)
+#define SIZEOF_MEM_MS_TRANSITION_TIMERS \
+            (ALIGN_UINT32(SIZEOF_MS_ACCESS_STATE_TRANSITION_TYPE) * MESH_CFG_MAX_NUM_TRANSITION_TIMERS)
 #define SIZEOF_MEM_HEALTH_SERVER \
             (ALIGN_UINT32(SIZEOF_MS_HEALTH_SERVER_T) * MESH_CFG_HEALTH_SERVER_MAX)
+#define SIZEOF_MEM_LOCAL_APPKEY_INDEX_LIST \
+            (ALIGN_UINT32(SIZEOF_LOCAL_APPKEY_INDEX_LIST) * MESH_CFG_MAX_APPS)
+#define SIZEOF_MEM_LOCAL_ADDR_LIST \
+            (ALIGN_UINT32(SIZEOF_LOCAL_ADDR_LIST) * (MESH_CFG_MAX_VIRTUAL_ADDRS + MESH_CFG_MAX_NON_VIRTUAL_ADDRS))
+#define SIZEOF_MEM_LOCAL_NETKEY_INDEX_LIST \
+            (ALIGN_UINT32(SIZEOF_LOCAL_NETKEY_INDEX_LIST) * MESH_CFG_MAX_SUBNETS)
 
 /* Memory Pool Size */
 #define MESH_MEMPOOL_SIZE \
             ( \
-                + SIZEOF_MEM_BRR_BEARER \
-                + SIZEOF_MEM_NET_CACHE_EX \
-                + SIZEOF_MEM_NET_CACHE_EX_CONFIGURABLE \
-                + SIZEOF_MEM_NET_PROXY_LIST_FIXED \
-                + SIZEOF_MEM_NET_PROXY_LIST_CONFIGURABLE \
-                + SIZEOF_MEM_NETIF_BRR_HANDLE \
-                + SIZEOF_MEM_REPLAY_CACHE \
-                + SIZEOF_MEM_REASSEMBLED_CACHE \
-                + SIZEOF_MEM_LTRN_SAR_CTX \
-                + SIZEOF_MEM_LPN_ELEMENT_FIXED \
-                + SIZEOF_MEM_LPN_ELEMENT_CONFIGURABLE \
-                + SIZEOF_MEM_MS_ACCESS_ELEMENT_LIST \
-                + SIZEOF_MEM_MS_ACCESS_MODEL_LIST_FIXED \
-                + SIZEOF_MEM_MS_ACCESS_MODEL_LIST_CONFIGURABLE \
-                + SIZEOF_MEM_MS_SUBNET_TABLE_FIXED \
-                + SIZEOF_MEM_MS_SUBNET_TABLE_CONFIGURABLE \
-                + SIZEOF_MEM_APPKEY_TABLE \
-                + SIZEOF_MEM_MS_DEV_KEY_TABLE \
-                + SIZEOF_MEM_MS_ELEMENT_ADDR_TABLE \
-                + SIZEOF_MEM_MS_NON_VIRTUAL_ADDR_TABLE \
-                + SIZEOF_MEM_MS_VIRTUAL_ADDR_TABLE \
-                + SIZEOF_MEM_PROV_BRR \
-                + SIZEOF_MEM_HEALTH_SERVER \
+              SIZEOF_MEM_BRR_BEARER \
+            + SIZEOF_MEM_NET_CACHE_EX \
+            + SIZEOF_MEM_NET_CACHE_EX_CONFIGURABLE \
+            + SIZEOF_MEM_NET_TX_QUEUE \
+            + SIZEOF_MEM_NET_PROXY_LIST_FIXED \
+            + SIZEOF_MEM_NET_PROXY_LIST_CONFIGURABLE \
+            + SIZEOF_MEM_NETIF_BRR_HANDLE \
+            + SIZEOF_MEM_REPLAY_CACHE \
+            + SIZEOF_MEM_REASSEMBLED_CACHE \
+            + SIZEOF_MEM_LTRN_SAR_CTX \
+            + SIZEOF_MEM_LPN_ELEMENT_FIXED \
+            + SIZEOF_MEM_LPN_ELEMENT_CONFIGURABLE \
+            + SIZEOF_MEM_MS_ACCESS_ELEMENT_LIST \
+            + SIZEOF_MEM_MS_ACCESS_MODEL_LIST_FIXED \
+            + SIZEOF_MEM_MS_ACCESS_MODEL_LIST_CONFIGURABLE \
+            + SIZEOF_MEM_MS_SUBNET_TABLE_FIXED \
+            + SIZEOF_MEM_MS_SUBNET_TABLE_CONFIGURABLE \
+            + SIZEOF_MEM_APPKEY_TABLE \
+            + SIZEOF_MEM_MS_DEV_KEY_TABLE \
+            + SIZEOF_MEM_MS_ELEMENT_ADDR_TABLE \
+            + SIZEOF_MEM_MS_NON_VIRTUAL_ADDR_TABLE \
+            + SIZEOF_MEM_MS_VIRTUAL_ADDR_TABLE \
+            + SIZEOF_MEM_MS_PERIODIC_STEP_TIMERS \
+            + SIZEOF_MEM_PROV_BRR \
+            + SIZEOF_MEM_MS_TRANSITION_TIMERS \
+            + SIZEOF_MEM_HEALTH_SERVER \
+            + SIZEOF_MEM_LOCAL_APPKEY_INDEX_LIST \
+            + SIZEOF_MEM_LOCAL_ADDR_LIST \
+            + SIZEOF_MEM_LOCAL_NETKEY_INDEX_LIST \
             )
 
 /* Storage Record Composition Size */
@@ -199,7 +223,8 @@
 
 /* Storage Size */
 #define MESH_STORAGE_SIZE \
-            ( MESH_STORAGE_SIGNATURE_SIZE \
+            ( \
+              MESH_STORAGE_SIGNATURE_SIZE \
             + REC_ELEMENTS_SIZE \
             + REC_MODELS_SIZE \
             + REC_SUBNETS_SIZE \
@@ -209,7 +234,8 @@
             + REC_VIRTUAL_ADDRS_SIZE \
             + REC_NON_VIRTUAL_ADDRS_SIZE \
             + REC_SEQ_NUMBER_SIZE \
-            + REC_TX_STATES_FEATURES_SIZE )
+            + REC_TX_STATES_FEATURES_SIZE \
+            )
 
 /*******************************************************************************
 * Prototype declarations

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_fcu.c
@@ -34,6 +34,8 @@
 *                                   Removed include of r_flash_type3_if.h.
 *              : 26.06.2020 4.60    Changed to call internal function.
 *                                   Modified minor problem.
+*              : 10.12.2021 4.81    Added support for Tool News R20TS0765, R20TS0772.
+*                                   Modified to transition to Data Flash P/E Mode in flash_fcuram_codecopy().
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -150,7 +152,7 @@ flash_err_t flash_fcuram_codecopy(void)
 
 
     /* Clear the ECC error flag in FCURAM */
-    err = flash_pe_mode_enter(FLASH_TYPE_CODE_FLASH);
+    err = flash_pe_mode_enter(FLASH_TYPE_DATA_FLASH);
     if (err == FLASH_SUCCESS)
     {
         flash_stop();
@@ -459,8 +461,8 @@ flash_err_t flash_erase(uint32_t block_address, uint32_t num_blocks)
         *g_pfcu_cmd_area = (uint8_t) FLASH_FACI_CMD_FINAL;
 
         /* Return if in BGO mode. Processing will finish in FRDYI interrupt */
-        if ((g_current_parameters.current_operation == FLASH_CUR_CF_BGO_ERASE)
-         || (g_current_parameters.current_operation == FLASH_CUR_DF_BGO_ERASE))
+        if ((g_current_parameters.bgo_enabled_cf == true)
+         || (g_current_parameters.bgo_enabled_df == true))
         {
             break;
         }
@@ -648,16 +650,15 @@ flash_err_t flash_write(uint32_t src_start_address,
             g_current_parameters.total_count--;
         }
 
-        /* Issue write end command */
-        *g_pfcu_cmd_area = (uint8_t) FLASH_FACI_CMD_FINAL;
-
         /* Reset fcu write count */
         g_current_parameters.current_count = 0;
 
+        /* Issue write end command */
+        *g_pfcu_cmd_area = (uint8_t) FLASH_FACI_CMD_FINAL;
+
         /* Return if in BGO mode. Processing will finish in FRDYI interrupt */
-        if ((g_current_parameters.current_operation == FLASH_CUR_CF_BGO_WRITE)
-         || (g_current_parameters.current_operation == FLASH_CUR_DF_BGO_WRITE)
-         || (g_current_parameters.current_operation == FLASH_CUR_STOP))
+        if ((g_current_parameters.bgo_enabled_cf == true)
+         || (g_current_parameters.bgo_enabled_df == true))
         {
             break;
         }
@@ -716,11 +717,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void Excep_FCU_FRDYI(void)
                 g_current_parameters.total_count--;
             }
 
-            /* Issue write end command */
-            *g_pfcu_cmd_area = (uint8_t) FLASH_FACI_CMD_FINAL;
-
             /* Reset fcu write count */
             g_current_parameters.current_count = 0;
+
+            /* Issue write end command */
+            *g_pfcu_cmd_area = (uint8_t) FLASH_FACI_CMD_FINAL;
 
             /* Exit ISR until next FRDY interrupt to continue operation (write next min size) */
             return;

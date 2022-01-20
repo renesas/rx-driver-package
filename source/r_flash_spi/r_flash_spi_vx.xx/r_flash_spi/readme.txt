@@ -5,12 +5,12 @@ r_flash_spi (Serial Flash memory control software)
 
 Document Number 
 ---------------
-R01AN2662EJ0302
-R01AN2662JJ0302
+R01AN2662EJ0303
+R01AN2662JJ0303
 
 Version
 -------
-v3.02
+v3.03
 
 Overview
 --------
@@ -45,7 +45,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp    v5.52
+* r_bsp    v7.20
 
 How to add to your project
 --------------------------
@@ -80,9 +80,9 @@ Refer to "RX Smart Configurator User's Guide: IAREW (R20AN0535)" for details.
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.02 release 00
+* Renesas RX v3.03 release 00
 * GCC for Renesas RX 8.3.0
-* IAR C/C++ Compiler for Renesas RX 4.14.1
+* IAR C/C++ Compiler for Renesas RX 4.20.1
 
 File Structure
 --------------
@@ -93,13 +93,9 @@ r_flash_spi
 +---doc
 |   |
 |   +---en
-|   |       r01an2662ej0302-rx.pdf
+|   |       r01an2662ej0303-rx.pdf
 |   +---ja
-|           r01an2662jj0302-rx.pdf
-|
-+---ref
-|       r_flash_spi_config_reference.h
-|       r_flash_spi_pin_config_reference.h
+|           r01an2662jj0303-rx.pdf
 |
 +---src
     |   r_flash_spi.c
@@ -111,17 +107,9 @@ r_flash_spi
     +---flash_types
     |   |   r_flash_spi_type.c
     |   |
-    |   +---flash_m25p
-    |   |
-    |   +---flash_m45pe
-    |   |
     |   +---flash_mx
-    |   |       r_flash_spi_type_sub.c
-    |   |       r_flash_spi_type_sub.h
-    |   |
-    |   +---flash_n25q
-    |   |
-    |   +---flash_s25fl
+    |           r_flash_spi_type_sub.c
+    |           r_flash_spi_type_sub.h
     |
     +---dev_port
         |   r_flash_spi_dev_port.h

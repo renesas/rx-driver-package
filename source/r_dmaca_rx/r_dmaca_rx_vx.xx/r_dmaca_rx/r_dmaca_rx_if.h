@@ -43,6 +43,7 @@
 *         : 31.03.2020 2.40    Supported RX23E-A.
 *         : 30.06.2020 2.50    Changed revision to reflect demo upgrade.
 *         : 31.03.2021 2.60    Supported RX671.
+*         : 13.09.2021 2.70    Added RX671 Demo.
 *******************************************************************************/
 #ifndef DMACA_RX_IF_H
 #define DMACA_RX_IF_H
@@ -66,7 +67,7 @@ Macro definitions
 
 /* Version Number of API */
 #define DMACA_VERSION_MAJOR  (2)
-#define DMACA_VERSION_MINOR  (60)
+#define DMACA_VERSION_MINOR  (70)
 
 /* DMAC activation is disabled. */
 #define DMACA_ACTIVE_DISABLE              (0x00u)

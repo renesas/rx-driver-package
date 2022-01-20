@@ -55,7 +55,7 @@
     <version>x.xx</version>
     <dependency>
       <module>r_bsp</module>
-      <version>6.10</version>
+      <version>6.20</version>
     </dependency>
     <zipsource>r_can_rx_vx.xx.zip</zipsource>
     <application>Communications</application>

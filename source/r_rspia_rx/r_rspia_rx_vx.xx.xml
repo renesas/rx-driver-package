@@ -58,7 +58,7 @@
         <zipsource>r_rspia_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>6.10</version>
+            <version>6.20</version>
         </dependency>
         <application>Serial Communications</application>
         <desc>RSPIA Driver</desc>
@@ -68,5 +68,9 @@
         <incdir>r_rspia_rx</incdir> 
         <incdir>r_rspia_rx/src</incdir> 
     </package>
+
+    <sampleapplicationnote>
+        <documentno>R01AN5684</documentno>
+    </sampleapplicationnote>
 
 </refinfo>

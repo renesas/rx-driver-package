@@ -24,6 +24,10 @@
 /*******************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 31.03.2021 1.00     First Release
+*              : 20.09.2021 1.10     Fixed R_QSPIX_Write_Indirect()
+*                                    Added the demo for RX671
+*              : 29.11.2021 1.20     Supported to call R_QSPIX_Write_Indirect() 
+*                                    multiple times
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_qspix_rx_if.h
@@ -39,15 +43,12 @@ Includes   <System Includes> , "Project Includes"
 #include "r_qspix_rx_private.h"
 #include "r_qspix_rx_config.h"
 
-
-
-
 /*******************************************************************************
 Macro definitions
 *******************************************************************************/
 /* Version Number of API. */
 #define QSPIX_VERSION_MAJOR           (1)
-#define QSPIX_VERSION_MINOR           (00)
+#define QSPIX_VERSION_MINOR           (20)
 
 /* Definition of QSPIX channel */
 #define QSPIX_CH0                         (0)

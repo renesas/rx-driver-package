@@ -10,7 +10,7 @@ R01AN4860JJ
 
 Version
 -------
-v2.20
+v2.30
 
 Overview
 --------
@@ -102,7 +102,7 @@ Refer to "Adding Firmware Integration Technology Modules to CS+ Projects (R01AN1
 Toolchain(s) Used
 -----------------
 * Renesas RX v2.08
-* IAR C/C++ Compiler for Renesas RX version 4.14.1
+* IAR C/C++ Compiler for Renesas RX version 4.20.1
 
 File Structure
 --------------
@@ -115,9 +115,9 @@ File Structure
  |  |    |  r_ble_api_spec.chm
  |  |    |
  |  |    +---en
- |  |    |      r01an4860ej0220-rx23w-ble.pdf
+ |  |    |      r01an4860ej0230-rx23w-ble.pdf
  |  |    +---ja
- |  |           r01an4860jj0220-rx23w-ble.pdf
+ |  |           r01an4860jj0230-rx23w-ble.pdf
  |  |
  |  +---lib
  |  |      ble_fit_lib_selector.bat
@@ -129,9 +129,6 @@ File Structure
  |  |      lib_ble_ps_hci_ccrx_a.lib
  |  |      lib_ble_ps_hci_ccrx_b.lib
  |  |      lib_ble_ps_hci_ccrx_c.lib
- |  |
- |  +---ref
- |  |      r_ble_rx23w_config_reference.h
  |  |
  |  +---src
  |       +---app_lib

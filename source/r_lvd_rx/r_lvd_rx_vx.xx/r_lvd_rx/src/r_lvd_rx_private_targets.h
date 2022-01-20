@@ -42,6 +42,7 @@
 *              : 30.06.2020 3.60     Changed revision to reflect demo upgrade.
 *              : 31.03.2021 3.70     Added support for RX671.
 *              : 15.04.2021 3.80     Added support for RX140.
+*              : 13.09.2021 3.90     Changed revision to reflect demo upgrade.
 ***********************************************************************************************************************/
 #ifndef LVD_PRIVATE_TARGETS_HEADER_FILE
 #define LVD_PRIVATE_TARGETS_HEADER_FILE
@@ -105,7 +106,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
 #define LVD_RX_VERSION_MAJOR                    (3)
-#define LVD_RX_VERSION_MINOR                    (80)
+#define LVD_RX_VERSION_MINOR                    (90)
 
 /***********************************************************************************************************************
 Typedef definitions

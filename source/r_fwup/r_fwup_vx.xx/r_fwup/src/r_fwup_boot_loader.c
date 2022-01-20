@@ -24,6 +24,7 @@
  * History : DD.MM.YYYY Version Description
  *           16.02.2021 1.00    First Release
  *           19.05.2021 1.01    Added support for RX72N,RX66T,RX130
+ *           08.07.2021 1.02    Added support for GCC
  *********************************************************************************************************************/
 
 #include <stdio.h>
@@ -187,6 +188,8 @@ int32_t R_FWUP_SecureBoot (void)
                 DEBUG_LOG("RX65N secure boot program\r\n");
 #elif (BSP_MCU_RX66T)
                 DEBUG_LOG("RX66T secure boot program\r\n");
+#elif (BSP_MCU_RX671)
+                DEBUG_LOG("RX671 secure boot program\r\n");
 #elif (BSP_MCU_RX72N)
                 DEBUG_LOG("RX72N secure boot program\r\n");
 #elif (BSP_MCU_RX231)
@@ -850,7 +853,7 @@ int32_t R_FWUP_SecureBoot (void)
                                     }
                                 }
 #if (FWUP_FLASH_BANK_MODE == 0) /* Dual mode */
-                                DEBUG_LOG("copy secure boot (part1) from bank0 to bank1...");
+                                DEBUG_LOG("copy secure boot from bank0 to bank1...");
 
                                 flash_api_error_code = fwup_flash_write((uint32_t)BOOT_LOADER_LOW_ADDRESS,
                                     (uint32_t)BOOT_LOADER_MIRROR_LOW_ADDRESS,
@@ -1176,7 +1179,7 @@ int32_t R_FWUP_SecureBoot (void)
                                         (uint32_t) (((float) ((s_load_fw_control_block.offset)
                                                 / (float) ((BOOT_LOADER_FLASH_CF_BLOCK_SIZE
                                                         * BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER))) * 100));
-                                DEBUG_LOG2("installing firmware...%d%(%d/%dKB).\r",
+                                DEBUG_LOG2("installing firmware...%u%%(%d/%dKB).\r",
                                         s_load_fw_control_block.progress,
                                         s_load_fw_control_block.offset / 1024,
                                         (BOOT_LOADER_FLASH_CF_BLOCK_SIZE *
@@ -1258,7 +1261,7 @@ int32_t R_FWUP_SecureBoot (void)
                                 static uint32_t s_previous_offset = 0;
                                 if ((s_load_const_data_control_block.offset / 1024) != s_previous_offset)
                                 {
-                                    DEBUG_LOG2("installing const data...%d%(%d/%dKB).\r",
+                                    DEBUG_LOG2("installing const data...%u%%(%d/%dKB).\r",
                                             s_load_const_data_control_block.progress,
                                             s_load_const_data_control_block.offset / 1024,
                                             BSP_DATA_FLASH_SIZE_BYTES/1024);
@@ -1507,7 +1510,7 @@ int32_t R_FWUP_SecureBoot (void)
                                     break; // @suppress("Case break statement")
                                 }
 #if (FWUP_FLASH_BANK_MODE == 0) /* Dual mode */
-                                DEBUG_LOG("copy secure boot (part1) from bank0 to bank1...");
+                                DEBUG_LOG("copy secure boot from bank0 to bank1...");
                                 flash_api_error_code = fwup_flash_write((uint32_t)BOOT_LOADER_LOW_ADDRESS,
                                     (uint32_t)BOOT_LOADER_MIRROR_LOW_ADDRESS,
                                     BOOT_LOADER_PGM_SIZE);
@@ -2299,7 +2302,7 @@ void my_sci_callback (void *pArgs)
 
         /* From RXI interrupt; rx queue is full; 'lost' data is in p_args->byte
          You will need to increase buffer size or reduce baud rate */
-        nop();
+        R_BSP_NOP();
         g_error_count1++;
     }
     else if (SCI_EVT_OVFL_ERR == p_args->event)
@@ -2307,7 +2310,7 @@ void my_sci_callback (void *pArgs)
 
         /* From receiver overflow error interrupt; error data is in p_args->byte
          Error condition is cleared in calling interrupt routine */
-        nop();
+        R_BSP_NOP();
         g_error_count2++;
     }
     else if (SCI_EVT_FRAMING_ERR == p_args->event)
@@ -2315,14 +2318,14 @@ void my_sci_callback (void *pArgs)
 
         /* From receiver framing error interrupt; error data is in p_args->byte
          Error condition is cleared in calling interrupt routine */
-        nop();
+        R_BSP_NOP();
     }
     else if (SCI_EVT_PARITY_ERR == p_args->event)
     {
 
         /* From receiver parity error interrupt; error data is in p_args->byte
          Error condition is cleared in calling interrupt routine */
-        nop();
+        R_BSP_NOP();
     }
     else
     {

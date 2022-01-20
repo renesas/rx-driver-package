@@ -207,7 +207,7 @@ typedef struct MS_time_role_struct
  *  \brief API to initialize Time Server model
  *
  *  \par Description
- *  This is to initialize Time Server model and to register with Acess layer.
+ *  This is to initialize Time Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -245,6 +245,8 @@ API_RESULT MS_time_server_init
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -254,7 +256,9 @@ API_RESULT MS_time_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 /** \} */
 
@@ -268,7 +272,7 @@ API_RESULT MS_time_server_state_update
  *  \brief API to initialize Time Client model
  *
  *  \par Description
- *  This is to initialize Time Client model and to register with Acess layer.
+ *  This is to initialize Time Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -305,6 +309,21 @@ API_RESULT MS_time_client_get_model_handle
            );
 
 /**
+ *  \brief API to set Time client model handle
+ *
+ *  \par Description
+ *  This is to set the handle of Time client model.
+ *
+ *  \param [in] model_handle   Model handle to be assigned.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_time_client_set_model_handle
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE  model_handle
+           );
+
+/**
  *  \brief API to send acknowledged commands
  *
  *  \par Description
@@ -323,7 +342,7 @@ API_RESULT MS_time_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
-/** \name Messsage Send
+/** \name Message Send
  *  \{
  */
 /**
@@ -351,7 +370,7 @@ API_RESULT MS_time_client_send_reliable_pdu
  *  Time Set is an acknowledged message used to set the Time state of an element.
  *  The response to the Time Set message is a Time Status message.
  *
- *  \param [in] param Time Set message
+ *  \param [in] param Time Set message parameter @ref MS_TIME_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -388,7 +407,7 @@ API_RESULT MS_time_client_send_reliable_pdu
  *  \par Description
  *  Time Zone Set is an acknowledged message used to set the Time Zone Offset New state and the TAI of Zone Change state.
  *
- *  \param [in] param Time Zone Set message
+ *  \param [in] param Time Zone Set message parameter @ref MS_TIME_ZONE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -425,7 +444,7 @@ API_RESULT MS_time_client_send_reliable_pdu
  *  \par Description
  *  TAI-UTC Delta Set is an acknowledged message used to set the TAI-UTC Delta New state and the TAI of Delta Change state.
  *
- *  \param [in] param TAI-UTC Delta Set message
+ *  \param [in] param TAI-UTC Delta Set message parameter @ref MS_TAI_UTC_DELTA_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -462,7 +481,7 @@ API_RESULT MS_time_client_send_reliable_pdu
  *  Time Role Set is an acknowledged message used to set the Time Role state of an element.
  *  The response to the Time Role Set message is a Time Role Status message.
  *
- *  \param [in] param Time Role Set message
+ *  \param [in] param Time Role Set message parameter @ref MS_TIME_ROLE_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */

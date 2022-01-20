@@ -66,7 +66,7 @@ Toolchain(s) Used
 -----------------
 * Renesas RX v3.03
 * GNURX 8.3.0.202004
-* ICCRX 4.20.1
+* ICCRX 4.20.3
 
 File Structure
 --------------

@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_gpio_rx
-VERSION = 		4.10
+VERSION = 		4.20
 MDF = V2
 
 CONFIG_FOLDER = r_config

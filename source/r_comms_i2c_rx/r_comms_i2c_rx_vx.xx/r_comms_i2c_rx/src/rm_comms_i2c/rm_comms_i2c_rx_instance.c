@@ -60,29 +60,19 @@ void rm_comms_i2c_bus4_callback(void);
 
  /* COMMS I2C Device */
 #if (1 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
- #if (1 == COMMS_I2C_CFG_DEVICE0_CALLBACK_ENABLE)
- void COMMS_I2C_CFG_DEVICE0_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for device0 */
- #endif
+void COMMS_I2C_CFG_DEVICE0_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for device0 */
 #endif
 #if (2 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
- #if (1 == COMMS_I2C_CFG_DEVICE1_CALLBACK_ENABLE)
- void COMMS_I2C_CFG_DEVICE1_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for device1 */
- #endif
+void COMMS_I2C_CFG_DEVICE1_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for device1 */
 #endif
 #if (3 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
- #if (1 == COMMS_I2C_CFG_DEVICE2_CALLBACK_ENABLE)
- void COMMS_I2C_CFG_DEVICE2_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for device2 */
- #endif
+void COMMS_I2C_CFG_DEVICE2_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for device2 */
 #endif
 #if (4 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
- #if (1 == COMMS_I2C_CFG_DEVICE3_CALLBACK_ENABLE)
- void COMMS_I2C_CFG_DEVICE3_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for device3 */
- #endif
+void COMMS_I2C_CFG_DEVICE3_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for device3 */
 #endif
 #if (5 <= COMMS_I2C_CFG_DEVICE_NUM_MAX)
- #if (1 == COMMS_I2C_CFG_DEVICE4_CALLBACK_ENABLE)
- void COMMS_I2C_CFG_DEVICE4_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for device4 */
- #endif
+void COMMS_I2C_CFG_DEVICE4_CALLBACK(rm_comms_callback_args_t * p_args); /* Callback function for device4 */
 #endif
 
 /**********************************************************************************************************************
@@ -101,9 +91,9 @@ CHAR g_comms_i2c_bus0_recursive_mutex_name[] = "g_comms_i2c_bus0 recursive mutex
   #endif
  #elif BSP_CFG_RTOS == 2 // FreeRTOS
   #if COMMS_I2C_CFG_RTOS_BLOCKING_SUPPORT_ENABLE
-extern SemaphoreHandle_t g_comms_i2c_bus0_blocking_semaphore_handle;
+SemaphoreHandle_t g_comms_i2c_bus0_blocking_semaphore_handle;
    #if COMMS_I2C_CFG_RTOS_BUS_LOCK_SUPPORT_ENABLE
-extern SemaphoreHandle_t g_comms_i2c_bus0_recursive_mutex_handle;
+SemaphoreHandle_t g_comms_i2c_bus0_recursive_mutex_handle;
    #endif
   #endif
  #endif
@@ -116,7 +106,6 @@ rm_comms_i2c_semaphore_t g_comms_i2c_bus0_blocking_semaphore =
    #if BSP_CFG_RTOS == 1 // ThreadX
  .p_semaphore_name = &g_comms_i2c_bus0_blocking_semaphore_name[0],
    #elif BSP_CFG_RTOS == 2 // FreeRTOS
- .p_semaphore_memory = NULL,
    #endif
 };
    #if COMMS_I2C_CFG_RTOS_BUS_LOCK_SUPPORT_ENABLE
@@ -127,7 +116,6 @@ rm_comms_i2c_mutex_t g_comms_i2c_bus0_recursive_mutex =
     #if BSP_CFG_RTOS == 1 // ThreadX
  .p_mutex_name = &g_comms_i2c_bus0_recursive_mutex_name[0],
     #elif BSP_CFG_RTOS == 2 // FreeRTOS
- .p_mutex_memory = NULL,
     #endif
 };
    #endif
@@ -146,7 +134,7 @@ sci_iic_info_t g_comms_i2c_bus0_driver_info =
     .p_slv_adr      = &g_comms_i2c_bus0_slave_address,
 };
  #endif
-const i2c_driver_instance_t g_comms_i2c_bus0_driver_instance =
+const i2c_master_instance_t g_comms_i2c_bus0_driver_instance =
 {
     .driver_type    = COMMS_I2C_CFG_BUS0_DRIVER_TYPE,
 	.driver_channel = COMMS_I2C_CFG_BUS0_DRIVER_CH,
@@ -190,9 +178,9 @@ CHAR g_comms_i2c_bus1_recursive_mutex_name[] = "g_comms_i2c_bus1 recursive mutex
  #endif
 #elif BSP_CFG_RTOS == 2 // FreeRTOS
  #if COMMS_I2C_CFG_RTOS_BLOCKING_SUPPORT_ENABLE
-extern SemaphoreHandle_t g_comms_i2c_bus1_blocking_semaphore_handle;
+SemaphoreHandle_t g_comms_i2c_bus1_blocking_semaphore_handle;
   #if COMMS_I2C_CFG_RTOS_BUS_LOCK_SUPPORT_ENABLE
-extern SemaphoreHandle_t g_comms_i2c_bus1_recursive_mutex_handle;
+SemaphoreHandle_t g_comms_i2c_bus1_recursive_mutex_handle;
   #endif
  #endif
 #endif
@@ -205,7 +193,6 @@ rm_comms_i2c_semaphore_t g_comms_i2c_bus1_blocking_semaphore =
   #if BSP_CFG_RTOS == 1 // ThreadX
 .p_semaphore_name = &g_comms_i2c_bus1_blocking_semaphore_name[0],
   #elif BSP_CFG_RTOS == 2 // FreeRTOS
-.p_semaphore_memory = NULL,
   #endif
 };
   #if COMMS_I2C_CFG_RTOS_BUS_LOCK_SUPPORT_ENABLE
@@ -216,7 +203,6 @@ rm_comms_i2c_mutex_t g_comms_i2c_bus1_recursive_mutex =
    #if BSP_CFG_RTOS == 1 // ThreadX
 .p_mutex_name = &g_comms_i2c_bus1_recursive_mutex_name[0],
    #elif BSP_CFG_RTOS == 2 // FreeRTOS
-.p_mutex_memory = NULL,
    #endif
 };
   #endif
@@ -235,7 +221,7 @@ sci_iic_info_t g_comms_i2c_bus1_driver_info =
     .p_slv_adr      = &g_comms_i2c_bus1_slave_address,
 };
  #endif
-const i2c_driver_instance_t g_comms_i2c_bus1_driver_instance =
+const i2c_master_instance_t g_comms_i2c_bus1_driver_instance =
 {
     .driver_type    = COMMS_I2C_CFG_BUS1_DRIVER_TYPE,
 	.driver_channel = COMMS_I2C_CFG_BUS1_DRIVER_CH,
@@ -279,9 +265,9 @@ CHAR g_comms_i2c_bus2_recursive_mutex_name[] = "g_comms_i2c_bus2 recursive mutex
  #endif
 #elif BSP_CFG_RTOS == 2 // FreeRTOS
  #if COMMS_I2C_CFG_RTOS_BLOCKING_SUPPORT_ENABLE
-extern SemaphoreHandle_t g_comms_i2c_bus2_blocking_semaphore_handle;
+SemaphoreHandle_t g_comms_i2c_bus2_blocking_semaphore_handle;
   #if COMMS_I2C_CFG_RTOS_BUS_LOCK_SUPPORT_ENABLE
-extern SemaphoreHandle_t g_comms_i2c_bus2_recursive_mutex_handle;
+SemaphoreHandle_t g_comms_i2c_bus2_recursive_mutex_handle;
   #endif
  #endif
 #endif
@@ -294,7 +280,6 @@ rm_comms_i2c_semaphore_t g_comms_i2c_bus2_blocking_semaphore =
   #if BSP_CFG_RTOS == 1 // ThreadX
 .p_semaphore_name = &g_comms_i2c_bus2_blocking_semaphore_name[0],
   #elif BSP_CFG_RTOS == 2 // FreeRTOS
-.p_semaphore_memory = NULL,
   #endif
 };
   #if COMMS_I2C_CFG_RTOS_BUS_LOCK_SUPPORT_ENABLE
@@ -305,7 +290,6 @@ rm_comms_i2c_mutex_t g_comms_i2c_bus2_recursive_mutex =
    #if BSP_CFG_RTOS == 1 // ThreadX
 .p_mutex_name = &g_comms_i2c_bus2_recursive_mutex_name[0],
    #elif BSP_CFG_RTOS == 2 // FreeRTOS
-.p_mutex_memory = NULL,
    #endif
 };
   #endif
@@ -324,7 +308,7 @@ sci_iic_info_t g_comms_i2c_bus2_driver_info =
     .p_slv_adr      = &g_comms_i2c_bus2_slave_address,
 };
  #endif
-const i2c_driver_instance_t g_comms_i2c_bus2_driver_instance =
+const i2c_master_instance_t g_comms_i2c_bus2_driver_instance =
 {
     .driver_type    = COMMS_I2C_CFG_BUS2_DRIVER_TYPE,
 	.driver_channel = COMMS_I2C_CFG_BUS2_DRIVER_CH,
@@ -368,9 +352,9 @@ CHAR g_comms_i2c_bus3_recursive_mutex_name[] = "g_comms_i2c_bus3 recursive mutex
  #endif
 #elif BSP_CFG_RTOS == 2 // FreeRTOS
  #if COMMS_I2C_CFG_RTOS_BLOCKING_SUPPORT_ENABLE
-extern SemaphoreHandle_t g_comms_i2c_bus3_blocking_semaphore_handle;
+SemaphoreHandle_t g_comms_i2c_bus3_blocking_semaphore_handle;
   #if COMMS_I2C_CFG_RTOS_BUS_LOCK_SUPPORT_ENABLE
-extern SemaphoreHandle_t g_comms_i2c_bus3_recursive_mutex_handle;
+SemaphoreHandle_t g_comms_i2c_bus3_recursive_mutex_handle;
   #endif
  #endif
 #endif
@@ -383,7 +367,6 @@ rm_comms_i2c_semaphore_t g_comms_i2c_bus3_blocking_semaphore =
   #if BSP_CFG_RTOS == 1 // ThreadX
 .p_semaphore_name = &g_comms_i2c_bus3_blocking_semaphore_name[0],
   #elif BSP_CFG_RTOS == 2 // FreeRTOS
-.p_semaphore_memory = NULL,
   #endif
 };
   #if COMMS_I2C_CFG_RTOS_BUS_LOCK_SUPPORT_ENABLE
@@ -394,7 +377,6 @@ rm_comms_i2c_mutex_t g_comms_i2c_bus3_recursive_mutex =
    #if BSP_CFG_RTOS == 1 // ThreadX
 .p_mutex_name = &g_comms_i2c_bus3_recursive_mutex_name[0],
    #elif BSP_CFG_RTOS == 2 // FreeRTOS
-.p_mutex_memory = NULL,
    #endif
 };
   #endif
@@ -413,7 +395,7 @@ sci_iic_info_t g_comms_i2c_bus3_driver_info =
     .p_slv_adr      = &g_comms_i2c_bus3_slave_address,
 };
  #endif
-const i2c_driver_instance_t g_comms_i2c_bus3_driver_instance =
+const i2c_master_instance_t g_comms_i2c_bus3_driver_instance =
 {
     .driver_type    = COMMS_I2C_CFG_BUS3_DRIVER_TYPE,
 	.driver_channel = COMMS_I2C_CFG_BUS3_DRIVER_CH,
@@ -457,9 +439,9 @@ CHAR g_comms_i2c_bus4_recursive_mutex_name[] = "g_comms_i2c_bus4 recursive mutex
  #endif
 #elif BSP_CFG_RTOS == 2 // FreeRTOS
  #if COMMS_I2C_CFG_RTOS_BLOCKING_SUPPORT_ENABLE
-extern SemaphoreHandle_t g_comms_i2c_bus4_blocking_semaphore_handle;
+SemaphoreHandle_t g_comms_i2c_bus4_blocking_semaphore_handle;
   #if COMMS_I2C_CFG_RTOS_BUS_LOCK_SUPPORT_ENABLE
-extern SemaphoreHandle_t g_comms_i2c_bus4_recursive_mutex_handle;
+SemaphoreHandle_t g_comms_i2c_bus4_recursive_mutex_handle;
   #endif
  #endif
 #endif
@@ -472,7 +454,6 @@ rm_comms_i2c_semaphore_t g_comms_i2c_bus4_blocking_semaphore =
   #if BSP_CFG_RTOS == 1 // ThreadX
 .p_semaphore_name = &g_comms_i2c_bus4_blocking_semaphore_name[0],
   #elif BSP_CFG_RTOS == 2 // FreeRTOS
-.p_semaphore_memory = NULL,
   #endif
 };
   #if COMMS_I2C_CFG_RTOS_BUS_LOCK_SUPPORT_ENABLE
@@ -483,7 +464,6 @@ rm_comms_i2c_mutex_t g_comms_i2c_bus4_recursive_mutex =
    #if BSP_CFG_RTOS == 1 // ThreadX
 .p_mutex_name = &g_comms_i2c_bus4_recursive_mutex_name[0],
    #elif BSP_CFG_RTOS == 2 // FreeRTOS
-.p_mutex_memory = NULL,
    #endif
 };
   #endif
@@ -502,7 +482,7 @@ sci_iic_info_t g_comms_i2c_bus4_driver_info =
     .p_slv_adr      = &g_comms_i2c_bus4_slave_address,
 };
  #endif
-const i2c_driver_instance_t g_comms_i2c_bus4_driver_instance =
+const i2c_master_instance_t g_comms_i2c_bus4_driver_instance =
 {
     .driver_type    = COMMS_I2C_CFG_BUS4_DRIVER_TYPE,
 	.driver_channel = COMMS_I2C_CFG_BUS4_DRIVER_CH,
@@ -547,11 +527,7 @@ const rm_comms_cfg_t g_comms_i2c_device0_cfg =
     .semaphore_timeout = COMMS_I2C_CFG_DEVICE0_BLOCKING_TIMEOUT, 
     .p_lower_level_cfg = (void *)&g_comms_i2c_device0_lower_level_cfg,
     .p_extend          = (void *)(&(COMMS_I2C_CFG_DEVICE0_BUS_CH)),
-#if (1 == COMMS_I2C_CFG_DEVICE0_CALLBACK_ENABLE)
     .p_callback        = (void (*)(rm_comms_callback_args_t *))COMMS_I2C_CFG_DEVICE0_CALLBACK,
-#else
-    .p_callback        = NULL,
-#endif
 };
 const rm_comms_instance_t g_comms_i2c_device0 =
 {
@@ -573,11 +549,7 @@ const rm_comms_cfg_t g_comms_i2c_device1_cfg =
     .semaphore_timeout = COMMS_I2C_CFG_DEVICE1_BLOCKING_TIMEOUT, 
     .p_lower_level_cfg = (void *)&g_comms_i2c_device1_lower_level_cfg,
     .p_extend          = (void *)(&(COMMS_I2C_CFG_DEVICE1_BUS_CH)),
-#if (1 == COMMS_I2C_CFG_DEVICE1_CALLBACK_ENABLE)
     .p_callback        = (void (*)(rm_comms_callback_args_t *))COMMS_I2C_CFG_DEVICE1_CALLBACK,
-#else
-    .p_callback        = NULL,
-#endif
 };
 const rm_comms_instance_t g_comms_i2c_device1 =
 {
@@ -599,11 +571,7 @@ const rm_comms_cfg_t g_comms_i2c_device2_cfg =
     .semaphore_timeout = COMMS_I2C_CFG_DEVICE2_BLOCKING_TIMEOUT, 
     .p_lower_level_cfg = (void *)&g_comms_i2c_device2_lower_level_cfg,
     .p_extend          = (void *)(&(COMMS_I2C_CFG_DEVICE2_BUS_CH)),
-#if (1 == COMMS_I2C_CFG_DEVICE2_CALLBACK_ENABLE)
     .p_callback        = (void (*)(rm_comms_callback_args_t *))COMMS_I2C_CFG_DEVICE2_CALLBACK,
-#else
-    .p_callback        = NULL,
-#endif
 };
 const rm_comms_instance_t g_comms_i2c_device2 =
 {
@@ -625,11 +593,7 @@ const rm_comms_cfg_t g_comms_i2c_device3_cfg =
     .semaphore_timeout = COMMS_I2C_CFG_DEVICE3_BLOCKING_TIMEOUT, 
     .p_lower_level_cfg = (void *)&g_comms_i2c_device3_lower_level_cfg,
     .p_extend          = (void *)(&(COMMS_I2C_CFG_DEVICE3_BUS_CH)),
-#if (1 == COMMS_I2C_CFG_DEVICE3_CALLBACK_ENABLE)
     .p_callback        = (void (*)(rm_comms_callback_args_t *))COMMS_I2C_CFG_DEVICE3_CALLBACK,
-#else
-    .p_callback        = NULL,
-#endif
 };
 const rm_comms_instance_t g_comms_i2c_device3 =
 {
@@ -651,11 +615,7 @@ const rm_comms_cfg_t g_comms_i2c_device4_cfg =
     .semaphore_timeout = COMMS_I2C_CFG_DEVICE4_BLOCKING_TIMEOUT, 
     .p_lower_level_cfg = (void *)&g_comms_i2c_device4_lower_level_cfg,
     .p_extend          = (void *)(&(COMMS_I2C_CFG_DEVICE4_BUS_CH)),
-#if (1 == COMMS_I2C_CFG_DEVICE4_CALLBACK_ENABLE)
     .p_callback        = (void (*)(rm_comms_callback_args_t *))COMMS_I2C_CFG_DEVICE4_CALLBACK,
-#else
-    .p_callback        = NULL,
-#endif
 };
 const rm_comms_instance_t g_comms_i2c_device4 =
 {

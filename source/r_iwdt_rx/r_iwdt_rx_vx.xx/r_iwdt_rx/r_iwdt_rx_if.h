@@ -48,6 +48,7 @@
 *         : 30.06.2020 3.60    Changed revision to reflect demo upgrade.
 *           31.03.2021 3.70    Added support for RX671.
 *           15.04.2021 3.80    Added support for RX140.
+*           13.09.2021 3.90    Added the demo for RX671.
 ***********************************************************************************************************************/
 
 #ifndef IWDT_RX_IF_H
@@ -68,7 +69,7 @@ Macro definitions
 #endif
 /* Version Number of API. */
 #define IWDT_RX_VERSION_MAJOR   (3)
-#define IWDT_RX_VERSION_MINOR   (80)
+#define IWDT_RX_VERSION_MINOR   (90)
 
 #define OFS0_IWDT_DISABLED      (0x00000002)
 

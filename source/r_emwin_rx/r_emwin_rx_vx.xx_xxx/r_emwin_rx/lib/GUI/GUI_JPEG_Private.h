@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2020  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.14 - Graphical user interface for embedded applications **
+** emWin V6.22 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -20,11 +20,11 @@ Licensor:                 SEGGER Software GmbH
 Licensed to:              Renesas Electronics Europe GmbH, Arcadiastrasse 10, 40472 Duesseldorf, Germany
 Licensed SEGGER software: emWin
 License number:           GUI-00678
-License model:            License and Service Agreement, signed December 16th, 2016 and Amendment No. 1, signed May 16th, 2019
-License valid for:        RX65N, RX651, RX72M, RX72N, RX661, RX66N
+License model:            License and Service Agreement, signed December 16th, 2016, Amendment No. 1 signed May 16th, 2019 and Amendment No. 2, signed September 20th, 2021 by Carsten Jauch, Managing Director
+License valid for:        RX (based on RX-V1, RX-V2 or RX-V3)
 ----------------------------------------------------------------------
 Support and Update Agreement (SUA)
-SUA period:               2016-12-22 - 2020-12-31
+SUA period:               2016-12-22 - 2022-12-31
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
 File        : GUI_JPEG_Private.h
@@ -159,7 +159,7 @@ typedef struct {
 
 typedef struct GUI_JPEG_DCONTEXT GUI_JPEG_DCONTEXT;
 
-struct GUI_JPEG_DCONTEXT {
+typedef struct {
   //
   // Function pointer for reading one byte
   //
@@ -181,6 +181,11 @@ struct GUI_JPEG_DCONTEXT {
   U8         StartOfFile;
   U8         aStuff[4];        // Stuff back buffer
   U8         NumBytesStuffed;  // Number of stuffed bytes
+  U8         IsProgressive;    // Flag is set to 1 if JPEG is progressive
+} GUI_JPEG_GETINFO;
+
+struct GUI_JPEG_DCONTEXT {
+  GUI_JPEG_GETINFO Info;
   //
   // Bit buffer
   //
@@ -228,7 +233,6 @@ struct GUI_JPEG_DCONTEXT {
   // Common
   //
   U8 TransformationRequired;
-  U8 IsProgressive;             // Flag is set to 1 if JPEG is progressive
   U8 ScanType;                  // Gray, Yh1v1, Yh1v2, Yh2v1, Yh2v2
   int MaxMCUsPerRow;            // Maximum number of MCUs per row
   int MaxMCUsPerCol;            // Maximum number of MCUs per column
@@ -289,6 +293,7 @@ GUI_COLOR GUI_JPEG__GetColorGray            (const U8 ** ppData, unsigned SkipCn
 GUI_COLOR GUI_JPEG__GetColorRGB             (const U8 ** ppData, unsigned SkipCnt);
 int       GUI_JPEG__GetData                 (void * p, const U8 ** ppData, unsigned NumBytesReq, U32 Off);
 int       GUI_JPEG__InitDraw                (GUI_HMEM hContext);
+int       GUI_JPEG__ReadInfo                (GUI_HMEM hContext);
 int       GUI_JPEG__ReadUntilSOF            (GUI_HMEM hContext);
 void      GUI_JPEG__SetNextBand             (GUI_JPEG_DCONTEXT * pContext);
 int       GUI_JPEG__SkipLine                (GUI_JPEG_DCONTEXT * pContext);

@@ -36,6 +36,7 @@
 *                               Fixed coding style.
 *         : 18.05.2021 3.01     Added the following macro definition.
 *                               - BSP_MCU_VBATT_INITIALIZE
+*         : 30.11.2021 3.02     Deleted the compile switch for BSP_CFG_MCU_PART_SERIES and BSP_CFG_MCU_PART_GROUP.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -58,21 +59,13 @@ Macro definitions
 #define CPU_CYCLES_PER_LOOP    (4)
 
 /* MCU Series. */
-#if BSP_CFG_MCU_PART_SERIES == 0x0
-    #define BSP_MCU_SERIES_RX200    (1)
-#else
-    #error "ERROR - BSP_CFG_MCU_PART_SERIES - Unknown MCU Series chosen in r_bsp_config.h"
-#endif
+#define BSP_MCU_SERIES_RX200   (1)
 
 /* This macro means that this MCU is part of the RX23x collection of MCUs (i.e. RX230). */
-#define BSP_MCU_RX23_ALL            (1)
+#define BSP_MCU_RX23_ALL       (1)
 
 /* MCU Group name. */
-#if BSP_CFG_MCU_PART_GROUP == 0x3
-    #define BSP_MCU_RX230           (1)
-#else
-    #error "ERROR - BSP_CFG_MCU_PART_GROUP - Unknown MCU Group chosen in r_bsp_config.h"
-#endif
+#define BSP_MCU_RX230          (1)
 
 /* Package. */
 #if   BSP_CFG_MCU_PART_PACKAGE == 0x0

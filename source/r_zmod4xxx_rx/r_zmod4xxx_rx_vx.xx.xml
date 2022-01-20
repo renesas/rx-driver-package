@@ -58,11 +58,7 @@
     </dependency>
     <dependency>
       <module>r_comms_i2c_rx</module>
-      <version>1.10</version>
-    </dependency>
-    <dependency>
-      <module>r_cmt_rx</module>
-      <version>4.80</version>
+      <version>1.20</version>
     </dependency>
     <dependency>
       <module>r_irq_rx</module>

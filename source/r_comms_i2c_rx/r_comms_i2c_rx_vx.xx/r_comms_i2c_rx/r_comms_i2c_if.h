@@ -45,16 +45,14 @@ typedef struct st_rm_comms_i2c_device_cfg
     uint32_t const slave_address_bits; ///< Indicates how slave fields should be interpreted
 } rm_comms_i2c_device_cfg_t;
 
-#if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
 /* RX Driver Instance */
-typedef struct st_i2c_driver_instance
+typedef struct st_i2c_master_instance
 {
     uint32_t const     driver_type;
     uint32_t const     driver_channel;
     void const       * p_info;
     void (* callback)(void);
-} i2c_driver_instance_t;
-#endif
+} i2c_master_instance_t;
 
 /**********************************************************************************************************************
  * Exported global variables

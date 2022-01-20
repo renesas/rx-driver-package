@@ -32,6 +32,7 @@
  *         : 30.07.2019 1.17     Added WAIT LOOP.
  *         : 22.11.2019 1.20     Added macro ETHER_CFG_NON_BLOCKING to choose whether to use PMGI.
  *                               Added pmgi_initial, pmgi_access, pmgi_read_reg, pmgi_close function for NON-BLOCKING.
+ *         : 20.11.2021 1.22     Correction of ETHER_CFG_USE_PHY_ICS1894_32.
  ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -68,7 +69,7 @@ uint16_t phy_read (uint32_t ether_channel, uint16_t reg_addr);
 void phy_write (uint32_t ether_channel, uint16_t reg_addr, uint16_t data);
 static void phy_preamble (uint32_t ether_channel);
 static void phy_reg_set (uint32_t ether_channel, uint16_t reg_addr, int32_t option);
-static void phy_reg_read (uint32_t ether_channel, uint16_t *pdata);
+static void phy_reg_read (uint32_t ether_channel, uint16_t * pdata);
 static void phy_reg_write (uint32_t ether_channel, uint16_t data);
 static void phy_trans_zto0 (uint32_t ether_channel);
 static void phy_trans_1to0 (uint32_t ether_channel);
@@ -84,9 +85,9 @@ static uint16_t local_advertise[ETHER_CHANNEL_MAX]; /* the capabilities of the l
  */
 #if ETHER_CFG_NON_BLOCKING == 1
 
-  /* Used to prevent having duplicate code for each channel. This only works if the channels are identical (just at
-   different locations in memory). This is easy to tell by looking in iodefine.h and seeing if the same structure
-   was used for all channels. */
+/* Used to prevent having duplicate code for each channel. This only works if the channels are identical (just at
+ * different locations in memory). This is easy to tell by looking in iodefine.h and seeing if the same structure
+ * was used for all channels. */
 volatile struct st_pmgi R_BSP_EVENACCESS_SFR * gp_pmgi_channels[PMGI_CHANNEL_MAX] =
 {
 /* Initialize the array for up to 3 channels. Add more as needed. */
@@ -111,7 +112,7 @@ volatile struct st_pmgi R_BSP_EVENACCESS_SFR * gp_pmgi_channels[PMGI_CHANNEL_MAX
  *                R_PHY_ERROR -
  *                    
  ***********************************************************************************************************************/
-int16_t phy_init (uint32_t ether_channel)
+int16_t phy_init(uint32_t ether_channel)
 {
     uint16_t reg;
     uint32_t count;
@@ -142,6 +143,17 @@ int16_t phy_init (uint32_t ether_channel)
         phy_write(ether_channel, PHY_REG_PHY_CONTROL_1, reg);
 #endif /* ETHER_CFG_USE_PHY_KSZ8041NL != 0 */
 
+        /* 
+         * When ICS1894_32 of the Renesas Electronics Corporation. is used, 
+         * the pin that outputs the state of LINK is used combinedly with ACTIVITY in default. 
+         * The setting of the pin is changed so that only the state of LINK is output. 
+         */
+#if ETHER_CFG_USE_PHY_ICS1894_32 != 0
+        reg = phy_read(ether_channel, PHY_REG_20_EXTENDED_CONTROL);
+        reg |= 0x0007;
+        phy_write(ether_channel, PHY_REG_20_EXTENDED_CONTROL, reg);
+#endif /* ETHER_CFG_USE_PHY_ICS1894_32 != 0 */
+
         return R_PHY_OK;
     }
 
@@ -157,7 +169,7 @@ int16_t phy_init (uint32_t ether_channel)
  *                    Using state of pause frames
  * Return Value : none
  ***********************************************************************************************************************/
-void phy_start_autonegotiate (uint32_t ether_channel, uint8_t pause)
+void phy_start_autonegotiate(uint32_t ether_channel, uint8_t pause)
 {
     volatile uint16_t reg = 0;
 
@@ -212,7 +224,7 @@ void phy_start_autonegotiate (uint32_t ether_channel, uint8_t pause)
  * Note         : The value returned to local_pause and patner_pause is used 
  *                as it is as an argument of ether_pause_resolution function. 
  ***********************************************************************************************************************/
-int16_t phy_set_autonegotiate (uint32_t ether_channel, uint16_t *pline_speed_duplex, uint16_t *plocal_pause,
+int16_t phy_set_autonegotiate(uint32_t ether_channel, uint16_t *pline_speed_duplex, uint16_t *plocal_pause,
         uint16_t *ppartner_pause)
 {
     uint16_t reg;
@@ -261,20 +273,24 @@ int16_t phy_set_autonegotiate (uint32_t ether_channel, uint16_t *pline_speed_dup
         }
 
         /* Establish the line speed and the duplex */
+#if ETHER_CFG_USE_PHY_ICS1894_32 == 0
         if (PHY_AN_LINK_PARTNER_10H == (reg & PHY_AN_LINK_PARTNER_10H))
         {
             (*pline_speed_duplex) = PHY_LINK_10H;
         }
+#endif /* ETHER_CFG_USE_PHY_ICS1894_32 == 0 */
 
         if (PHY_AN_LINK_PARTNER_10F == (reg & PHY_AN_LINK_PARTNER_10F))
         {
             (*pline_speed_duplex) = PHY_LINK_10F;
         }
 
+#if ETHER_CFG_USE_PHY_ICS1894_32 == 0
         if (PHY_AN_LINK_PARTNER_100H == (reg & PHY_AN_LINK_PARTNER_100H))
         {
             (*pline_speed_duplex) = PHY_LINK_100H;
         }
+#endif /* ETHER_CFG_USE_PHY_ICS1894_32 == 0 */
 
         if (PHY_AN_LINK_PARTNER_100F == (reg & PHY_AN_LINK_PARTNER_100F))
         {
@@ -292,7 +308,7 @@ int16_t phy_set_autonegotiate (uint32_t ether_channel, uint16_t *pline_speed_dup
  *                    Ethernet channel number
  * Return Value : -1 if links is down, 0 otherwise 
  ***********************************************************************************************************************/
-int16_t phy_get_link_status (uint32_t ether_channel)
+int16_t phy_get_link_status(uint32_t ether_channel)
 {
     uint16_t reg;
 
@@ -328,7 +344,7 @@ int16_t phy_get_link_status (uint32_t ether_channel)
  *                    address of the PHY register
  * Return Value : read value
  ***********************************************************************************************************************/
-uint16_t phy_read (uint32_t ether_channel, uint16_t reg_addr)
+uint16_t phy_read(uint32_t ether_channel, uint16_t reg_addr)
 {
     uint16_t data;
 
@@ -356,7 +372,7 @@ uint16_t phy_read (uint32_t ether_channel, uint16_t reg_addr)
  *                    value
  * Return Value : none
  ***********************************************************************************************************************/
-void phy_write (uint32_t ether_channel, uint16_t reg_addr, uint16_t data)
+void phy_write(uint32_t ether_channel, uint16_t reg_addr, uint16_t data)
 {
     /*
      * The value is read from the PHY register by the frame format of MII Management Interface provided
@@ -377,7 +393,7 @@ void phy_write (uint32_t ether_channel, uint16_t reg_addr, uint16_t data)
  *                    Ethernet channel number
  * Return Value : none
  ***********************************************************************************************************************/
-static void phy_preamble (uint32_t ether_channel)
+static void phy_preamble(uint32_t ether_channel)
 {
     int16_t i;
 
@@ -405,7 +421,7 @@ static void phy_preamble (uint32_t ether_channel)
  *                    mode
  * Return Value : none
  ***********************************************************************************************************************/
-static void phy_reg_set (uint32_t ether_channel, uint16_t reg_addr, int32_t option)
+static void phy_reg_set(uint32_t ether_channel, uint16_t reg_addr, int32_t option)
 {
     int32_t i;
     uint16_t data;
@@ -463,7 +479,7 @@ static void phy_reg_set (uint32_t ether_channel, uint16_t reg_addr, int32_t opti
  *                    pointer to store the data read
  * Return Value : none
  ***********************************************************************************************************************/
-static void phy_reg_read (uint32_t ether_channel, uint16_t *pdata)
+static void phy_reg_read(uint32_t ether_channel, uint16_t *pdata)
 {
     int32_t i;
     int32_t j;
@@ -472,7 +488,7 @@ static void phy_reg_read (uint32_t ether_channel, uint16_t *pdata)
     volatile uint32_t R_BSP_EVENACCESS_SFR * petherc_pir;
 
     ret = phy_get_pir_address(ether_channel, &petherc_pir);
-    if ( R_PHY_ERROR == ret)
+    if (R_PHY_ERROR == ret)
     {
         return;
     }
@@ -527,7 +543,7 @@ static void phy_reg_read (uint32_t ether_channel, uint16_t *pdata)
  *                    value to write
  * Return Value : none
  ***********************************************************************************************************************/
-static void phy_reg_write (uint32_t ether_channel, uint16_t data)
+static void phy_reg_write(uint32_t ether_channel, uint16_t data)
 {
     int32_t i;
 
@@ -560,14 +576,14 @@ static void phy_reg_write (uint32_t ether_channel, uint16_t data)
  *                    Ethernet channel number
  * Return Value : none
  ***********************************************************************************************************************/
-static void phy_trans_zto0 (uint32_t ether_channel)
+static void phy_trans_zto0(uint32_t ether_channel)
 {
     int32_t j;
     int16_t ret;
     volatile uint32_t R_BSP_EVENACCESS_SFR * petherc_pir;
 
     ret = phy_get_pir_address(ether_channel, &petherc_pir);
-    if ( R_PHY_ERROR == ret)
+    if (R_PHY_ERROR == ret)
     {
         return;
     }
@@ -610,7 +626,7 @@ static void phy_trans_zto0 (uint32_t ether_channel)
  *                    Ethernet channel number
  * Return Value : none
  ***********************************************************************************************************************/
-static void phy_trans_1to0 (uint32_t ether_channel)
+static void phy_trans_1to0(uint32_t ether_channel)
 {
     /*
      * The processing of TA (turnaround) about writing of the frame format of MII Management Interface which is
@@ -627,14 +643,14 @@ static void phy_trans_1to0 (uint32_t ether_channel)
  *                    Ethernet channel number
  * Return Value : none
  ***********************************************************************************************************************/
-static void phy_mii_write1 (uint32_t ether_channel)
+static void phy_mii_write1(uint32_t ether_channel)
 {
     int32_t j;
     int16_t ret;
     volatile uint32_t R_BSP_EVENACCESS_SFR * petherc_pir;
 
     ret = phy_get_pir_address(ether_channel, &petherc_pir);
-    if ( R_PHY_ERROR == ret)
+    if (R_PHY_ERROR == ret)
     {
         return;
     }
@@ -677,14 +693,14 @@ static void phy_mii_write1 (uint32_t ether_channel)
  *                    Ethernet channel number
  * Return Value : none
  ***********************************************************************************************************************/
-static void phy_mii_write0 (uint32_t ether_channel)
+static void phy_mii_write0(uint32_t ether_channel)
 {
     int32_t j;
     int16_t ret;
     volatile uint32_t R_BSP_EVENACCESS_SFR * petherc_pir;
 
     ret = phy_get_pir_address(ether_channel, &petherc_pir);
-    if ( R_PHY_ERROR == ret)
+    if (R_PHY_ERROR == ret)
     {
         return;
     }
@@ -729,7 +745,7 @@ static void phy_mii_write0 (uint32_t ether_channel)
  *                    Pointer of the PHY interface register
  * Return Value : none
  ***********************************************************************************************************************/
-static int16_t phy_get_pir_address (uint32_t ether_channel, volatile uint32_t R_BSP_EVENACCESS_SFR ** pppir_addr)
+static int16_t phy_get_pir_address(uint32_t ether_channel, volatile uint32_t R_BSP_EVENACCESS_SFR ** pppir_addr)
 {
     const ether_control_t * pether_ch;
     uint32_t phy_access;

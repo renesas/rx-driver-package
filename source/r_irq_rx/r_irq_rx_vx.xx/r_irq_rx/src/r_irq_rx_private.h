@@ -50,6 +50,7 @@
 *         : 30.06.2020  3.60    Changed revision to reflect demo upgrade.
 *         : 31.03.2021  3.70    Added support RX671.
 *         : 15.04.2021  3.80    Added support RX140.
+*         : 13.09.2021  3.90    Added RX671 Demo.
 ***********************************************************************************************************************/
 #ifndef R_IRQ_PRIVATE_H_
 #define R_IRQ_PRIVATE_H_
@@ -62,7 +63,7 @@ Macro definitions
 ******************************************************************************/
 /* Version Number of API. */
 #define IRQ_RX_VERSION_MAJOR           (3)
-#define IRQ_RX_VERSION_MINOR           (80)
+#define IRQ_RX_VERSION_MINOR           (90)
 
 /* Bit position of interrupt enable bits in interrupt enable register. */
 #define IRQ_IEN_MASK_IRQ0   (0x01)

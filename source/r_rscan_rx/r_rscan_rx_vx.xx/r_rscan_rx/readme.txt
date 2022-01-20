@@ -5,13 +5,13 @@ r_rscan_rx
 
 Document Number 
 ---------------
-R01AN2805EU0231
-R01AN2805JU0231
+R01AN2805EU0232
+R01AN2805JU0232
 
 
 Version
 -------
-v2.31
+v2.32
 
 
 Overview
@@ -94,9 +94,9 @@ How to add to your project
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.02
-* GCC for Renesas RX 8.03.00.201904
-* IAR C/C++ Compiler for Renesas RX 4.12.1
+* Renesas RX v3.03
+* GCC for Renesas RX 8.3.0.202004
+* IAR C/C++ Compiler for Renesas RX 4.20.3
 
 
 File Structure
@@ -107,12 +107,9 @@ r_rscan_rx
   |
   +---doc
   |   +-- en 
-  |   |   r01an2805eu0231-rx-rscan.pdf
+  |   |   r01an2805eu0232-rx-rscan.pdf
   |   +-- ja
-  |       r01an2805ju0231-rx-rscan.pdf
-  |
-  +---ref
-  |     r_rscan_rx_config_reference.h
+  |       r01an2805ju0232-rx-rscan.pdf
   |
   +---src
         r_rscan_rx.c

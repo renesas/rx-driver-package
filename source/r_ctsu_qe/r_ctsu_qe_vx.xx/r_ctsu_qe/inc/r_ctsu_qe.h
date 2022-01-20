@@ -35,6 +35,10 @@
 #include "r_ctsu_qe_config.h"
 #include "r_ctsu_qe_api.h"
 
+
+/* Common macro for FSP header files. There is also a corresponding FSP_FOOTER macro at the end of this file. */
+FSP_HEADER
+
 /***********************************************************************************************************************
  * Macro definitions
  **********************************************************************************************************************/
@@ -62,10 +66,12 @@
 /* For parts with CTSUCHAC2/3/4 and CTSUTRC2/3/4 registers (more than 16 TS pins) */
 #if defined(BSP_MCU_RX671)
 #define BSP_FEATURE_CTSU_CTSUCHAC_REGISTER_COUNT  (3)
+#define BSP_FEATURE_CTSU_CTSUCHTRC_REGISTER_COUNT (3)
 #endif
 
 #if (defined(BSP_MCU_RX23_ALL) || defined(BSP_MCU_RX130))
 #define BSP_FEATURE_CTSU_CTSUCHAC_REGISTER_COUNT  (5)
+#define BSP_FEATURE_CTSU_CTSUCHTRC_REGISTER_COUNT (5)
 #endif
 
 
@@ -75,27 +81,6 @@
 
  #define CTSU_DIAG_HIGH_CURRENT_SOURCE    (16) ///< number of high current source table at Diagnosis
  #define CTSU_DIAG_LOW_CURRENT_SOURCE     (10) ///< number of low current source table at Diagnosis
-#endif
-
-#if defined(BSP_MCU_RX140)
-#define BSP_FEATURE_CTSU_VERSION                  (2)
-#else
-#define BSP_FEATURE_CTSU_VERSION                  (1)
- #endif
-
- #if  (defined(BSP_MCU_RX113) || defined(BSP_MCU_RX130) || defined(BSP_MCU_RX23_ALL))
-#define CTSU_CFG_MCU_PROCESS_MF3                  (1)
- #endif
- #if  defined(BSP_MCU_RX671)
-#define CTSU_CFG_MCU_PROCESS_40N_PHASE2           (1)
- #endif
-
-#if (defined(BSP_MCU_RX113) || defined(BSP_MCU_RX130))
-#define CTSU_HAS_TRIMMER_REG	(1)
-#endif
-
-#if (defined(BSP_MCU_RX130))
-#define CTSU_HAS_TXVSEL         (1)
 #endif
 
 /***********************************************************************************************************************
@@ -174,7 +159,6 @@ typedef enum e_ctsu_range
     CTSU_RANGE_160UA,                  ///< 160uA mode
     CTSU_RANGE_NUM                     ///< number of range
 } ctsu_range_t;
-
 
 /** CTSUWR write register value */
 typedef struct st_ctsu_wr
@@ -329,11 +313,11 @@ typedef struct st_ctsu_instance_ctrl
     uint8_t                  ctsucr1;            ///< Copy from (atune1 << 3, md << 6) by Open API. CLK, ATUNE0, CSW, and PON is set by HAL driver.
     ctsu_ctsuwr_t          * p_ctsuwr;           ///< CTSUWR write register value. g_ctsu_ctsuwr[] is set by Open API.
     ctsu_self_buf_t        * p_self_raw;         ///< Pointer to Self raw data. g_ctsu_self_raw[] is set by Open API.
-    uint16_t               * p_self_corr;
+    uint16_t               * p_self_corr;        ///< Pointer to Self correction data. g_ctsu_self_corr[] is set by Open API.
     uint16_t               * p_self_data;        ///< Pointer to Self moving average data. g_ctsu_self_data[] is set by Open API.
     ctsu_mutual_buf_t      * p_mutual_raw;       ///< Pointer to Mutual raw data. g_ctsu_mutual_raw[] is set by Open API.
-    uint16_t               * p_mutual_pri_corr;
-    uint16_t               * p_mutual_snd_corr;
+    uint16_t               * p_mutual_pri_corr;  ///< Pointer to Mutual primary correction data. g_ctsu_self_corr[] is set by Open API.
+    uint16_t               * p_mutual_snd_corr;  ///< Pointer to Mutual secondary correction data. g_ctsu_self_corr[] is set by Open API.
     uint16_t               * p_mutual_pri_data;  ///< Pointer to Mutual primary moving average data. g_ctsu_mutual_pri_data[] is set by Open API.
     uint16_t               * p_mutual_snd_data;  ///< Pointer to Mutual secondary moving average data. g_ctsu_mutual_snd_data[] is set by Open API.
     ctsu_correction_info_t * p_correction_info;  ///< Pointer to correction info
@@ -349,9 +333,13 @@ typedef struct st_ctsu_instance_ctrl
     uint8_t                  ctsuchtrc2;         ///< TS16-TS23 mutual-tx mask
     uint8_t                  ctsuchtrc3;         ///< TS24-TS31 mutual-tx mask
     uint8_t                  ctsuchtrc4;         ///< TS32-TS39 mutual-tx mask
-    uint16_t                 self_elem_index;
-    uint16_t                 mutual_elem_index;
-    uint16_t                 ctsu_elem_index;
+    uint16_t                 self_elem_index;    ///< self element index number for Current instance.
+    uint16_t                 mutual_elem_index;  ///< mutual element index number for Current instance.
+    uint16_t                 ctsu_elem_index;    ///< CTSU element index number for Current instance.
+#if (BSP_FEATURE_CTSU_VERSION == 2)
+    uint8_t * p_selected_freq_self;              ///< Frequency selected by self-capacity
+    uint8_t * p_selected_freq_mutual;            ///< Frequency selected by mutual-capacity
+#endif
 #if (BSP_FEATURE_CTSU_VERSION == 1)
  #if (CTSU_CFG_DIAG_SUPPORT_ENABLE == 1)
     ctsu_diag_info_t * p_diag_info;              ///< pointer to diagnosis info
@@ -359,21 +347,26 @@ typedef struct st_ctsu_instance_ctrl
 #endif
 
 #if (BSP_FEATURE_CTSU_VERSION == 2)
-    ctsu_range_t range;                          ///< According to atune12. (20uA : 0, 40uA : 1, 80uA : 2, 160uA : 3)
-    uint8_t      ctsucr2;                        ///< Copy from (posel, atune1, md) by Open API. FCMODE and SDPSEL and LOAD is set by HAL driver.
+    ctsu_range_t range;                            ///< According to atune12. (20uA : 0, 40uA : 1, 80uA : 2, 160uA : 3)
+    uint8_t      ctsucr2;                          ///< Copy from (posel, atune1, md) by Open API. FCMODE and SDPSEL and LOAD is set by HAL driver.
  #if (CTSU_CFG_NUM_CFC != 0)
-    uint64_t              cfc_rx_bitmap;         ///< Bitmap of CFC receive terminal.
-    ctsu_corrcfc_info_t * p_corrcfc_info;        ///< pointer to CFC correction info
+    uint64_t              cfc_rx_bitmap;           ///< Bitmap of CFC receive terminal.
+    ctsu_corrcfc_info_t * p_corrcfc_info;          ///< pointer to CFC correction info
  #endif
  #if (CTSU_CFG_DIAG_SUPPORT_ENABLE == 1)
-    ctsu_diag_info_t * p_diag_info;              ///< pointer to diagnosis info
+    ctsu_diag_info_t * p_diag_info;                ///< pointer to diagnosis info
  #endif
 #endif
-    ctsu_cfg_t const * p_ctsu_cfg;               ///< Pointer to initial configurations.
-    void (* p_callback)(ctsu_callback_args_t *); ///< Callback provided when a CTSUFN occurs.
-    ctsu_event_t      error_status;    ///error status variable.
-    ctsu_callback_args_t * p_callback_memory;    //[Diagnosis]
-    void const           * p_context;            ///< Placeholder for user data.
+    ctsu_cfg_t const * p_ctsu_cfg;                 ///< Pointer to initial configurations.
+    void (* p_callback)(ctsu_callback_args_t *);   ///< Callback provided when a CTSUFN occurs.
+    uint8_t                interrupt_reverse_flag; ///< Flag in which read interrupt and end interrupt are reversed
+    ctsu_event_t           error_status;           ///< error status variable to send to QE for serial tuning.
+    ctsu_callback_args_t * p_callback_memory;      ///< Pointer to non-secure memory that can be used to pass arguments to a callback in non-secure memory.
+    void const           * p_context;              ///< Placeholder for user data.
+    bool     serial_tuning_enable;                 ///< Flag of serial tuning status.
+    uint16_t serial_tuning_mutual_cnt;             ///< Word index into ctsuwr register array.
+    uint16_t tuning_self_target_value;             ///< Target self value for initial offset tuning
+    uint16_t tuning_mutual_target_value;           ///< Target mutual value for initial offset tuning
 } ctsu_instance_ctrl_t;
 
 /**********************************************************************************************************************
@@ -399,6 +392,10 @@ fsp_err_t R_CTSU_CallbackSet(ctsu_ctrl_t * const          p_api_ctrl,
                              ctsu_callback_args_t * const p_callback_memory);
 fsp_err_t R_CTSU_Diagnosis(ctsu_ctrl_t * const p_ctrl);
 fsp_err_t R_CTSU_Close(ctsu_ctrl_t * const p_ctrl);
+fsp_err_t R_CTSU_SpecificDataGet(ctsu_ctrl_t * const       p_ctrl,
+                                 uint16_t                * p_specific_data,
+                                 ctsu_specific_data_type_t specific_data_type);
+fsp_err_t R_CTSU_DataInsert(ctsu_ctrl_t * const p_ctrl, uint16_t * p_insert_data);
 
 /* Common macro for FSP header files. There is also a corresponding FSP_HEADER macro at the top of this file. */
 FSP_FOOTER

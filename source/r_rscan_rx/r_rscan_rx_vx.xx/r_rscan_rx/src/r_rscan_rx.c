@@ -27,6 +27,7 @@
 *           15.10.2019 2.20    Added support for RX23E-A
 *                              Added support for atomic control
 *                              Fixed warning in IAR
+*           13.09.2021 2.32    Updated Doxygen comment.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -84,27 +85,30 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void can_ch0_error_isr(void);
 R_BSP_ATTRIB_STATIC_INTERRUPT void can_ch0_tx_isr(void);
 
 
-/******************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_CAN_Open
-* Description  : This function applies clock to the CAN peripheral, sets the
-*                mode to RESET, configures the timestamp and all receive
-*                mailboxes.
-*
-* Arguments    : p_cfg-
-*                    Pointer to configuration structure (see below)
-*                p_callback-
-*                    Optional pointer to function called from RXIF or global
-*                    error interrupts.
-* Return Value : CAN_SUCCESS-
-*                    Successful
-*                CAN_ERR_OPENED-
-*                    Call to Open already made
-*                CAN_ERR_INVALID_ARG-
-*                    An element of the p_cfg structure contains an invalid value.
-*                CAN_ERR_MISSING_CALLBACK-
-*                    A callback function was not provided and a main callback
-*                    interrupt is enabled in config.h
-*******************************************************************************/
+********************************************************************************************************************//**
+ * @brief This function initializes the driver's internal structures and all of the receive mailboxes.
+ * @param[in] p_cfg - Pointer to configuration structure. The element type definitions are provided in Section 2.10.1.
+ * See Section R_CAN_Open() in the application note for details.
+ * @param[in] p_callback - Optional pointer to main callback function.
+ * Must be present if interrupts are enabled in r_rscan_rx_config.h for RX FIFOs or global errors \n
+ * event \n
+ * First parameter for callback function. \n
+ * p_args \n
+ * Second parameter for callback function (unused).
+ * @retval CAN_SUCCESS: Successful.
+ * @retval CAN_ERR_OPENED: Call to Open already made.
+ * @retval CAN_ERR_INVALID_ARG: An element of the p_cfg structure contains an invalid value.
+ * @retval CAN_ERR_MISSING_CALLBACK: A callback function was not provided and
+ * a main callback interrupt is enabled in config.h
+ * @details This function initializes the driver's internal structures, applies clock to the peripheral, and sets the Global
+ * and Channel Modes to Reset. The timestamp is configured as per the p_cfg argument, and all receive mailboxes are initialized.\n
+ * If interrupts are enabled in r_rscan_rx_config.h for receive FIFO thresholds, or DLC or FIFO overflow errors, a callback function
+ * must be provided here. Otherwise, NULL is entered.
+ * @note The ports pins used by the RSCAN peripheral should be initialized prior to calling R_CAN_Open(). Here are some examples:
+ * See Section R_CAN_Open() in the application note for details.
+ */
 can_err_t R_CAN_Open(can_cfg_t  *p_cfg, void(* const p_callback)(can_cb_evt_t   event,void *p_args))
 {
 can_err_t   err = CAN_SUCCESS;
@@ -206,28 +210,34 @@ bsp_int_ctrl_t int_ctrl;
 * End of function R_CAN_Open
 *******************************************************************************/
 
-/******************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_CAN_InitChan
-* Description  : This function applies clock to the channel, puts the channel
-*                in Reset mode, and sets the bit rate registers.
-*
-* Arguments    : chan -
-*                    Channel to initialize (ignored)
-*                p_baud-
-*                    Pointer to bit rate structure
-*                p_chcallback-
-*                    Optional pointer to function called for transmit,
-*                    gateway receive, and channel error interrupts
-* Return Value : CAN_SUCCESS-
-*                    Successful
-*                CAN_ERR_ILLEGAL_MODE-
-*                    Not in global reset mode (results from Open())
-*                CAN_ERR_INVALID_ARG-
-*                    An invalid argument was provided
-*                CAN_ERR_MISSING_CALLBACK-
-*                    A callback function was not provided and a channel
-*                    interrupt is enabled in config.h
-*******************************************************************************/
+********************************************************************************************************************//**
+ * @brief This function sets the bit rate clock for the channel and initializes all of the transmit mailboxes.
+ * @param[in] chan - Channel to initialize (0 is only valid value).
+ * @param[in] p_baud - Pointer to bit rate structure. See the "Bit Timing Setting" section under CAN Module in the Hardware.
+ * Manual for calculating settings. Some default values are provided in r_rscan_rx_if.h.
+ * See Section R_CAN_InitChan() in the application note for details.
+ * @param[in] p_chcallback - Optional pointer to channel callback function. Must be present if interrupts are enabled in
+ * r_rscan_rx_config.h for TX mailboxes, TX FIFOs, History FIFOs, or bus errors. \n
+ * channel\n
+ *      First parameter for channel callback function. Specifies the channel interrupt occurred on (always 0).\n
+ * event\n
+ *      Second parameter for channel callback function. Specifies the interrupt source\n
+ * p_args\n
+ *      Third parameter for callback function (unused).
+ * @retval CAN_SUCCESS:                 Successful
+ * @retval CAN_ERR_ILLEGAL_MODE:        Not in global reset mode (results from call to Open())
+ * @retval CAN_ERR_INVALID_ARG:         An invalid argument was provided
+ * @retval CAN_ERR_MISSING_CALLBACK:    A callback function was not provided and a channel interrupt is enabled in config.h
+ * @details This function initializes all of the channel's transmit mailboxes, sets the bit rate, and enables interrupt
+ * sources for the channel as specified in the r_rscan_rx_config.h file. Default values for p_baud are provided in
+ * r_rscan_rx_if.h. \n
+ * If interrupts are enabled in r_rscan_rx_config.h for TX mailboxes, TX FIFOs, History FIFOs, or bus errors, a callback function
+ * must be provided here. Otherwise, NULL is entered.
+ * @note
+ * None.
+ */
 can_err_t R_CAN_InitChan(uint8_t        chan,
                          can_bitrate_t  *p_baud,
                          void          (* const p_chcallback)(uint8_t      chan,
@@ -317,30 +327,27 @@ can_err_t   err         = CAN_SUCCESS;
  *****************************************************************************/
 
 
-/******************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_CAN_ConfigFIFO
-* Description  : This function configures the FIFO specified by the box id
-*                passed in. It does not become enabled until the channel
-*                mode has changed.
-*                RFCCx.RFE - enable in global operating or global test mode
-*                CFCCk.CFE - enable in chan comm or chan halt mode
-*                THLCCm.THLE - enable in chan comm or chan halt mode
-*
-* Arguments    : fifo_id -
-*                    Box ID for FIFO to configure.
-*                threshold -
-*                    Number of entries in FIFO to set interrupt flag
-*                txmbx_id -
-*                    Associated tx mailbox for TXFIFOs.
-* Return Value : CAN_SUCCESS-
-*                    Successful
-*                CAN_ERR_ILLEGAL_MODE-
-*                    Not in global reset mode (results from Open())
-*                CAN_ERR_CH_NO_INIT-
-*                    Channel not initialized, and non-RX FIFO is requested
-*                CAN_ERR_INVALID_ARG-
-*                    An argument contains an invalid value.
-*******************************************************************************/
+********************************************************************************************************************//**
+ * @brief This function initializes a FIFO for usage. This function should not be called if FIFOs are not used.
+ * @param[in] fifo_id - Box id for FIFO (see Section 2.10.1)
+ * @param[in] threshold - Number of messages needed in FIFO to set interrupt flag. Note that the only
+ * valid thresholds for the History FIFOs is 1 or 6 entries. All others may use 1, 2, 3, or full (4).
+ * @param[in] txmbx_id - Box id for associated transmit mailbox (for transmit FIFOs only). This argument is ignored for
+ * receive and history FIFOs.
+ * @retval CAN_SUCCESS:                 Successful
+ * @retval CAN_ERR_ILLEGAL_MODE:        Not in global reset mode (results from call to Open())
+ * @retval CAN_ERR_CH_NO_INIT:          Channel not initialized yet
+ * @retval CAN_ERR_INVALID_ARG:         An invalid argument was provided
+ * @retval CAN_ERR_MAX_ONE_GWFIFO:      Can only configure one gateway FIFO
+ * @details FIFO usage is optional.\n
+ * This function is used to activate a FIFO. Transmit and receive FIFOs are 4 entries deep (history FIFO is 8 deep).
+ * The transmit FIFO must have associated with it a standard transmit mailbox. The number of the mailbox determines
+ * the priority of the FIFO when transmitting (mailbox 0 = highest priority; mailbox 3 = lowest).
+ * @note
+ * None.
+ */
 can_err_t R_CAN_ConfigFIFO(can_box_t            fifo_id,
                            can_fifo_threshold_t threshold,
                            can_box_t            txmbx_id)
@@ -546,25 +553,29 @@ void can_enable_ints(void)
  *****************************************************************************/
 
 
-/******************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_CAN_AddRxRule
-* Description  : This function
-*
-* Arguments    : p_cfg-
-*                    Pointer to configuration structure (see below)
-*                p_callback-
-*                    Optional pointer to function called from RXIF or global
-*                    error interrupts.
-* Return Value : CAN_SUCCESS-
-*                    Successful
-*                CAN_ERR_ILLEGAL_MODE
-*                    Not in global reset mode (results from Open())
-*                CAN_ERR_INVALID_ARG-
-*                    An element of the p_cfg structure contains an invalid value.
-*                CAN_ERR_MISSING_CALLBACK-
-*                    A callback function was not provided and a main callback
-*                    interrupt is enabled in config.h
-*******************************************************************************/
+********************************************************************************************************************//**
+ * @brief This function adds a receive rule to a channel. Specifies receive message filter and destination routing.
+ * @param[in] chan - Channel to apply rule to (always 0).
+ * @param[in] p_filter - Pointer to rule information.
+ * See Section R_CAN_AddRxRule() in the application note for details.
+ * @param[in] dst_box - Destination box (receive mailbox or receive FIFO) to route message to (see Section 2.10.1).
+ * @retval CAN_SUCCESS:             Successful
+ * @retval CAN_ERR_ILLEGAL_MODE:    Not in global reset mode (results from call to Open())
+ * @retval CAN_ERR_CH_NO_INIT:      Channel not initialized yet
+ * @retval CAN_ERR_INVALID_ARG:     An invalid argument was provided
+ * @retval CAN_ERR_MAX_RULES:       Max rules already present (as defined in r_rscan_rx_config.h)
+ * @details This function is used to add a receive rule to a channel. There are two parts to this. The first part is
+ * specifying a filter as to which fields to inspect on received messages. The second part is to specify a destination
+ * to route the message to if it passes the filter test. \n
+ * A "1" in the id_mask field indicates that the corresponding bit in a received message ID will be checked against the bit
+ * in the id field in this filter (see Examples). See section R_CAN_AddRxRule() in the application note for details. \n
+ * The label field in the rule is optional. It is associated with each message that passes the filter. This may serve as a
+ * quick identification of a message when it is fetched from a receive box (mailbox or FIFO) using R_CAN_GetMsg()..\n
+ * @note
+ * Rules cannot be entered after entering communications mode.
+ */
 can_err_t R_CAN_AddRxRule(uint8_t       chan,
                           can_filter_t  *p_filter,
                           can_box_t     dst_box)
@@ -671,23 +682,37 @@ can_rxrule_t    *rule_arr = (can_rxrule_t *)&RSCAN.GAFLIDL0.WORD;
  *****************************************************************************/
 
 
-/******************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_CAN_Control
-* Description  : This function
-*
-* Arguments    : cmd-
-*                    Command to execute
-*                arg1-
-*                    for CAN_CMD_ABORT_TX, this is a transmit mailbox id
-* Return Value : CAN_SUCCESS-
-*                    Successful
-*                CAN_ERR_NOT_OPENED-
-*                    Call to Open not made
-*                CAN_ERR_INVALID_ARG-
-*                    An invalid value passed for one of the parameters.
-*                CAN_ERR_CH_NO_INIT-
-*                    Channel must be initialized before calling command
-*******************************************************************************/
+********************************************************************************************************************//**
+ * @brief This function handles special operations and mode changes.
+ * @param[in] cmd - Specifies which command to run.
+ * See Section R_CAN_Control() in the application note for details.
+ * @param[in] arg1 - Argument which is specific to command. Most commands do not require an argument.
+ * For the command CAN_CMD_ABORT_TX, the argument is a transmit mailbox id (see Section 2.10.1).
+ * @retval CAN_SUCCESS:             Successful
+ * @retval CAN_ERR_INVALID_ARG:     An invalid argument was provided
+ * @retval CAN_ERR_ILLEGAL_MODE:    Changing to requested mode is illegal from current mode.
+ * @details This function is used for resetting the timestamp counter, aborting transmission of mailbox messages,
+ * and changing the CAN mode.\n
+ * The following sequence of function calls is used to setup the CAN:\n
+ *      R_CAN_Open();\n
+ *      R_CAN_InitChan();\n
+ *      R_CAN_ConfigFIFO();  // do for 0 or more FIFOs\n
+ *      R_CAN_AddRxRule();  // do for 1-16 rules\n
+ * Once the CAN is setup, the peripheral should enter normal communications mode or a test mode. \n
+ *      R_CAN_Control(); //Use CAN_CMD_SET_MODE_COMM or CAN_CMD_SET_MODE_TST_xxx\n
+ * Note: If a Bus Off condition is detected on a channel, the channel enters Halt Mode and all communications cease.
+ * They cannot resume until after a Bus Off Recovery condition is detected and the application calls
+ * R_CAN_Control(CAN_CMD_SET_MODE_COMM).
+ * @note
+ * Summary of different test modes:\n
+ *      Standard Test Mode: Allows for CRC testing \n
+ *      Listen-only Mode: Used for detecting communication speed. Cannot call R_CAN_SendMsg() in this mode.\n
+ *      Internal Loopback Mode: Messages sent on a channel are handled as received messages and processed on that
+ *      same channel. Here, the CAN transceiver is bypassed. \n
+ *      External Loopback Mode: Same as Internal Loopback mode, only the transceiver is used.
+ */
 can_err_t R_CAN_Control(can_cmd_t   cmd,
                         uint32_t    arg1)
 {
@@ -891,28 +916,26 @@ static void can_enable_chan_fifos()
  *****************************************************************************/
 
 
-/******************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_CAN_SendMsg
-* Description  : This function checks to see if the transmit mailbox or FIFO
-*                is already full. If not, the appropriate registers are loaded
-*                with the message and marked as ready to send. If the message
-*                is for a transmit mailbox, this function will block until
-*                transmission is complete. For TXFIFOs and interrupt driven
-*                transmit mailboxes, this function does not wait for transmit
-*                complete.
-* Arguments    : box_id-
-*                    TXMBX or TXFIFO
-*                p_txmsg-
-*                    Pointer to structure containing message info to send
-* Return Value : CAN_SUCCESS-
-*                    Successful
-*                CAN_ERR_BOX_FULL
-*                    Cannot send at this time
-*                CAN_ERR_INVALID_ARG-
-*                    An invalid value passed for one of the parameters.
-*                CAN_ERR_ILLEGAL_MODE-
-*                    Channel not in proper mode
-*******************************************************************************/
+********************************************************************************************************************//**
+ * @brief This function loads a message into a transmit mailbox or FIFO for transmission.
+ * @param[in] box_id - Transmit box id (mailbox or FIFO, see Section 2.10.1).
+ * @param[in] p_txmsg - Pointer to message to send.
+ * See Section R_CAN_SendMsg() in the application note for details.
+ * @retval CAN_SUCCESS:             Successful
+ * @retval CAN_ERR_INVALID_ARG:     An invalid argument was provided
+ * @retval CAN_ERR_BOX_FULL:        Transmit mailbox or FIFO is full
+ * @retval CAN_ERR_ILLEGAL_MODE:    Cannot send message in current mode.
+ * @details This function places a message into a 1-message deep transmit mailbox or 4-message deep transmit FIFO.
+ * If there is already a message waiting to send in the mailbox, or 4 messages already exist in the FIFO,
+ * CAN_ERR_BOX_FULL is returned immediately. If the box_id is for a transmit mailbox and interrupts are not
+ * enabled (CAN_CFG_INT_MBX_TX_COMPLETE is 0), this function blocks until the message is sent. If interrupts are
+ * enabled or the message is for a transmit FIFO, the function will return immediately after loading the message into
+ * the transmit registers.
+ * @note
+ * None.
+ */
 can_err_t R_CAN_SendMsg(can_box_t   box_id,
                         can_txmsg_t *p_txmsg)
 {
@@ -1019,25 +1042,23 @@ can_msg_t       *msg_regs;
 *******************************************************************************/
 
 
-/******************************************************************************
+
+/***********************************************************************************************************************
 * Function Name: R_CAN_GetMsg
-* Description  : This function checks to see if the receive mailbox or FIFO
-*                contains a message. If it does, the p_rxmsg buffer is loaded
-*                with the message info.
-*
-* Arguments    : box_id-
-*                    RXMBX or RXFIFO
-*                p_rxmsg-
-*                    Pointer to structure to hold message info
-* Return Value : CAN_SUCCESS-
-*                    Successful
-*                CAN_ERR_BOX_EMPTY
-*                    No message currently waiting in receive mailbox or FIFO
-*                CAN_ERR_INVALID_ARG-
-*                    An invalid value passed for one of the parameters.
-*                CAN_ERR_ILLEGAL_MODE-
-*                    System not in proper mode
-*******************************************************************************/
+********************************************************************************************************************//**
+ * @brief This function fetches a message from a receive mailbox or FIFO.
+ * @param[in] box_id - Receive box id (mailbox or FIFO; see Section 2.10.1).
+ * @param[in] p_rxmsg - Pointer to message buffer to load.
+ * See Section R_CAN_GetMsg() in the application note for details.
+ * @retval CAN_SUCCESS:             Successful
+ * @retval CAN_ERR_CH_NO_INIT:      Channel not initialized yet
+ * @retval CAN_ERR_INVALID_ARG:     An invalid argument was provided
+ * @retval CAN_ERR_BOX_EMPTY:       No message available to fetch
+ * @details This function loads the message from a receive mailbox or FIFO into the message buffer provided. If there
+ * are no messages in the box, this function does not block and returns a CAN_ERR_BOX_EMPTY.
+ * @note
+ * None.
+ */
 can_err_t R_CAN_GetMsg(can_box_t   box_id,
                        can_rxmsg_t *p_rxmsg)
 {
@@ -1126,25 +1147,23 @@ uint16_t            tmp;
  *****************************************************************************/
 
 
-/******************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_CAN_GetHistoryEntry
-* Description  : This function determines if there is an entry in the History
-*                FIFO, and if so, determines the box_id of the transmit source
-*                and loads the label associated with the message sent.
-*
-* Arguments    : box_id-
-*                    History FIFO
-*                p_entry-
-*                    Pointer to structure to hold message info
-* Return Value : CAN_SUCCESS-
-*                    Successful
-*                CAN_ERR_BOX_EMPTY
-*                    No entries in FIFO
-*                CAN_ERR_INVALID_ARG-
-*                    An invalid value passed for one of the parameters.
-*                CAN_ERR_ILLEGAL_MODE-
-*                    Channel not in proper mode
-*******************************************************************************/
+********************************************************************************************************************//**
+ * @brief This function fetches a log entry from a transmit history FIFO.
+ * @param[in] box_id - Transmit history FIFO (see Section 2.10.1).
+ * @param[in] p_entry  - Pointer to entry buffer to load.
+ * See Section R_CAN_GetHistoryEntry() in the application note for details.
+ * @retval CAN_SUCCESS:             Successful
+ * @retval CAN_ERR_INVALID_ARG:     An invalid argument was provided
+ * @retval CAN_ERR_BOX_EMPTY:       No entry available to fetch
+ * @details An entry is added to the history FIFO each time an R_CAN_SendMsg() is called with the "log_history" in the
+ * argument structure is set to TRUE. This function loads a log entry from a transmit history FIFO into the entry buffer
+ * provided. If there are no entries in the FIFO, this function does not block and returns a CAN_ERR_BOX_EMPTY. The use
+ * of this feature is not required for normal operations.
+ * @note
+ * None.
+ */
 can_err_t R_CAN_GetHistoryEntry(can_box_t       box_id,
                                 can_history_t   *p_entry)
 {
@@ -1197,22 +1216,22 @@ can_err_t   err = CAN_SUCCESS;
  *****************************************************************************/
 
 
-/******************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_CAN_GetStatusMask
-* Description  : This function returns various status masks based upon the
-*                the type requested.
-* Arguments    : type-
-*                    Which type of status to return
-*                chan-
-*                    Optional channel number. Needed for CAN_STAT_CH_xxx types.
-*                    Always 0 for RX231.
-*                p_err-
-*                    Pointer to hold error code
-* Return Value : CAN_SUCCESS-
-*                    Successful
-*                CAN_ERR_INVALID_ARG-
-*                    An invalid value passed for one of the parameters.
-*******************************************************************************/
+********************************************************************************************************************//**
+ * @brief This function returns a 32-bit mask based upon the status requested. Bit \#defines have the form CAN_MASK_xxx.
+ * @param[in] type - Specifies which status to return.
+ * See Section R_CAN_GetStatusMask() in the application note for details.
+ * @param[in] chan - Specifies which channel to return status for (must be 0). Applies only to CAN_STAT_CH_xxx requests.
+ * @param[in] p_err - Pointer to returned error code.\n
+         CAN_SUCCESS:           Successful\n
+         CAN_ERR_INVALID_ARG:   An invalid argument was provided
+ * @return 32-bit box or error mask whose bit definitions have the form CAN_MASK_xxx and are defined in Section 2.10.10
+ * @details This function returns a mask based upon the status type requested. All bit masks have the form CAN_MASK_xxx.
+ * (see Section 2.10.10).
+ * @note
+ * None.
+ */
 uint32_t  R_CAN_GetStatusMask(can_stat_t    type,
                               uint8_t       chan,
                               can_err_t     *p_err)
@@ -1318,18 +1337,20 @@ can_fifo_mask_t stat;
  *****************************************************************************/
 
 
-/******************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_CAN_GetCountFIFO
-* Description  : This function returns the number of entries used in a FIFO.
-* Arguments    : box_id-
-*                    FIFO box id
-*                p_err-
-*                    Pointer to hold error code
-* Return Value : CAN_SUCCESS-
-*                    Successful
-*                CAN_ERR_INVALID_ARG-
-*                    An invalid value passed for one of the parameters.
-*******************************************************************************/
+********************************************************************************************************************//**
+ * @brief This function returns the number of items in a FIFO.
+ * @param[in] box_id - Specifies which FIFO to check (see Section 2.10.1)..
+ * @param[in] p_err - Pointer to returned error code.\n
+         CAN_SUCCESS:           Successful\n
+         CAN_ERR_INVALID_ARG:   An invalid argument was provided
+ * @return Number of items in the FIFO.
+ * @details This function returns the number of items in the FIFO specified by box_id. This function is not required
+ * for normal operations.
+ * @note
+ * All FIFO usage is optional.
+ */
 uint32_t R_CAN_GetCountFIFO(can_box_t  box_id,
                             can_err_t  *p_err)
 {
@@ -1367,21 +1388,22 @@ uint32_t R_CAN_GetCountFIFO(can_box_t  box_id,
  *****************************************************************************/
 
 
-/******************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_CAN_GetCountErr
-* Description  : This function returns the number transmit or receive errors
-*                on a channel.
-* Arguments    : type-
-*                    transmit or receive
-*                chan-
-*                    channel (always 0)
-*                p_err-
-*                    pointer to hold error code
-* Return Value : CAN_SUCCESS-
-*                    Successful
-*                CAN_ERR_INVALID_ARG-
-*                    An invalid value passed for one of the parameters.
-*******************************************************************************/
+********************************************************************************************************************//**
+ * @brief Returns the number of transmit or receive errors.
+ * @param[in] type - Specifies which status to return.
+ * See Section R_CAN_GetCountErr() in the application note for details.
+ * @param[in] chan - Specifies which channel to return error count for (must be 0).
+ * @param[in] p_err - Pointer to returned error code.\n
+         CAN_SUCCESS:           Successful\n
+         CAN_ERR_INVALID_ARG:   An invalid argument was provided
+ * @return The number of errors detected.
+ * @details This function returns the number of receive or transmit errors on a channel based upon the count type requested.
+ * @note
+ * This use of this function is optional. It can be used to detect the health of the network and how close the network is
+ * to entering the Error Passive state (128 errors) or Bus Off state (255 errors).
+ */
 uint32_t R_CAN_GetCountErr(can_count_t  type,
                            uint8_t      chan,
                            can_err_t    *p_err)
@@ -1411,12 +1433,14 @@ uint32_t R_CAN_GetCountErr(can_count_t  type,
  *****************************************************************************/
 
 
-/******************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_CAN_Close
-* Description  : This function
-* Arguments    : None
-* Return Value : None
-*******************************************************************************/
+********************************************************************************************************************//**
+ * @brief This function removes clock from the CAN peripheral and disables the associated interrupts.
+ * @details This function halts all existing communications, disables all interrupts (if any), and shuts down the peripheral.
+ * @note
+ * None.
+ */
 void R_CAN_Close(void)
 {
 #if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
@@ -1467,14 +1491,16 @@ bsp_int_ctrl_t int_ctrl;
  *****************************************************************************/
 
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_CAN_GetVersion
-* Description  : Returns the version of this module. The version number is
-*                encoded such that the top two bytes are the major version
-*                number and the bottom two bytes are the minor version number.
-* Arguments    : none
-* Return Value : version number
-******************************************************************************/
+********************************************************************************************************************//**
+ * @brief This function returns the driver version number at runtime.
+ * @return Version number.
+ * @details Returns the version of this module. The version number is encoded such that the top two bytes are the major
+ * version number and the bottom two bytes are the minor version number.
+ * @note
+ * None.
+ */
 uint32_t  R_CAN_GetVersion(void)
 {
     uint32_t const version = (CAN_VERSION_MAJOR << 16) | CAN_VERSION_MINOR;

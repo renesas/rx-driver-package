@@ -24,6 +24,7 @@
  * History : DD.MM.YYYY Version Description
  *           16.02.2021 1.00    First Release
  *           19.05.2021 1.01    Added support for RX72N,RX66T,RX130
+ *           08.07.2021 1.02    Added support for GCC
  *********************************************************************************************************************/
 
 /* C Runtime includes. */
@@ -1101,7 +1102,7 @@ OTA_Err_t R_FWUP_CheckFileSignature( OTA_FileContext_t * const C )
                                         (uint32_t)flash_aligned_address, FLASH_CF_MIN_PGM_SIZE);
             if(flash_err != FLASH_SUCCESS)
             {
-                nop();
+                R_BSP_NOP();
             }
             while (OTA_FLASHING_IN_PROGRESS == gs_header_flashing_task);
             s_load_fw_control_block.total_image_length += tmp->content.length;
@@ -1161,7 +1162,7 @@ OTA_Err_t R_FWUP_CheckFileSignature( OTA_FileContext_t * const C )
                                         (uint32_t)flash_aligned_address, FLASH_CF_MIN_PGM_SIZE);
             if(flash_err != FLASH_SUCCESS)
             {
-                nop();  /* When an error occurs, consider an error notification method according to the system. */
+                R_BSP_NOP();  /* When an error occurs, consider an error notification method according to the system. */
             }
             while (OTA_FLASHING_IN_PROGRESS == gs_header_flashing_task);
             xSemaphoreGive(xSemaphoreFlashig);
@@ -1686,7 +1687,7 @@ static int32_t ota_context_update_user_firmware_header( OTA_FileContext_t * C )
         flash_err = fwup_flash_write((uint32_t)block, (uint32_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS, length);
         if(flash_err != FLASH_SUCCESS)
         {
-            nop();  /* When an error occurs, consider an error notification method according to the system. */
+            R_BSP_NOP();  /* When an error occurs, consider an error notification method according to the system. */
         }
         while (OTA_FLASHING_IN_PROGRESS == gs_header_flashing_task);
     }
@@ -1947,11 +1948,11 @@ static flash_err_t ota_flashing_task( uint8_t *p_packet, uint32_t ulOffset, uint
                                     length);
     if(length != FWUP_WRITE_BLOCK_SIZE)
     {
-        nop();
+        R_BSP_NOP();
     }
     if(flash_err != FLASH_SUCCESS)
     {
-        nop();  /* When an error occurs, consider an error notification method according to the system. */
+        R_BSP_NOP();  /* When an error occurs, consider an error notification method according to the system. */
     }
     s_load_fw_control_block.total_image_length += length;
 
@@ -1977,11 +1978,11 @@ static void ota_flashing_task( void * pvParameters )
                                     (uint32_t)BOOT_LOADER_USER_FIRMWARE_HEADER_LENGTH), length);
         if(packet_block_for_queue2.length != 1024)
         {
-            nop();
+            R_BSP_NOP();
         }
         if(flash_err != FLASH_SUCCESS)
         {
-            nop();  /* When an error occurs, consider an error notification method according to the system. */
+            R_BSP_NOP();  /* When an error occurs, consider an error notification method according to the system. */
         }
         s_load_fw_control_block.total_image_length += length;
         vPortFree(packet_block_for_queue2.p_packet);
@@ -1999,7 +2000,7 @@ static void ota_flashing_callback(void *event)
 
     if((event_code != FLASH_INT_EVENT_WRITE_COMPLETE) || (event_code == FLASH_INT_EVENT_ERASE_COMPLETE))
     {
-        nop(); /* trap */
+        R_BSP_NOP(); /* trap */
     }
     if (event_code == FLASH_INT_EVENT_WRITE_COMPLETE &&
             FWUP_STATE_FLASH_WRITE_WAIT == fwup_get_status())
@@ -2025,7 +2026,7 @@ static void ota_header_flashing_callback(void *event)
 
     if((event_code != FLASH_INT_EVENT_WRITE_COMPLETE) || (event_code == FLASH_INT_EVENT_ERASE_COMPLETE))
     {
-        nop(); /* trap */
+        R_BSP_NOP(); /* trap */
     }
 #endif /* FLASH_CFG_CODE_FLASH_BGO */
 }
@@ -2159,7 +2160,7 @@ void fwup_flash_set_bank_toggle (void)
 #if (FWUP_FLASH_BANK_MODE == 0)  /* Dual bank mode */
     (void)R_FLASH_Control(FLASH_CMD_BANK_TOGGLE, NULL);
 #else  /* Linear mode */
-    nop();
+    R_BSP_NOP();
 #endif /* FWUP_FLASH_BANK_MODE */
 }
 /**********************************************************************************************************************
@@ -2363,7 +2364,7 @@ e_comm_err_t fwup_communication_open (void)
     /* If there were an error this would demonstrate error detection of API calls. */
     if (SCI_SUCCESS != my_sci_err)
     {
-        nop(); // Your error handling code would go here.
+        R_BSP_NOP(); // Your error handling code would go here.
         ret = COMM_ERROR;
     }
 #else /* FWUP_CFG_COMMUNICATION_FUNCTION == FWUP_COMMUNICATION_SCI */
@@ -2401,7 +2402,7 @@ e_comm_err_t fwup_communication_close (void)
     /* If there were an error this would demonstrate error detection of API calls. */
     if (SCI_SUCCESS != my_sci_err)
     {
-        nop(); // Your error handling code would go here.
+        R_BSP_NOP(); // Your error handling code would go here.
         ret = COMM_ERROR;
     }
 #else
@@ -2467,25 +2468,25 @@ static void fwup_communication_callback(void *pArgs)
     {
         /* From RXI interrupt; rx queue is full; 'lost' data is in p_args->byte
            You will need to increase buffer size or reduce baud rate */
-        nop();
+        R_BSP_NOP();
     }
     else if (SCI_EVT_OVFL_ERR == p_args->event)
     {
         /* From receiver overflow error interrupt; error data is in p_args->byte
            Error condition is cleared in calling interrupt routine */
-        nop();
+        R_BSP_NOP();
     }
     else if (SCI_EVT_FRAMING_ERR == p_args->event)
     {
         /* From receiver framing error interrupt; error data is in p_args->byte
            Error condition is cleared in calling interrupt routine */
-        nop();
+        R_BSP_NOP();
     }
     else if (SCI_EVT_PARITY_ERR == p_args->event)
     {
         /* From receiver parity error interrupt; error data is in p_args->byte
            Error condition is cleared in calling interrupt routine */
-        nop();
+        R_BSP_NOP();
     }
     else
     {
@@ -2996,7 +2997,7 @@ bool fwup_get_boot_protect(void)
     }
     if (err != FLASH_SUCCESS)
     {
-        nop(); // Your error handling code would go here.
+        R_BSP_NOP(); // Your error handling code would go here.
     }
 #elif (FLASH_TYPE == FLASH_TYPE_1) /* FLASH_TYPE_1 */
     flash_access_window_config_t access_window;
@@ -3178,7 +3179,7 @@ void my_sw_charput_function (uint8_t data)
  **********************************************************************************************************************/
 void my_sw_charget_function (void)
 {
-    nop();
+    R_BSP_NOP();
 }
 /**********************************************************************************************************************
  End of function my_sw_charget_function

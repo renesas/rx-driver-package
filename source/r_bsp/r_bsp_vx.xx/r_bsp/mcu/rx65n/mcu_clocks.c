@@ -41,6 +41,18 @@
 *         : 14.02.2020 2.02     Fixed warning of clock_source_select function with CCRX and IAR compiler.
 *         : 29.01.2021 2.03     Fixed the initialization settings of sub-clock for Technical Update Information
 *                               (TN-RX*-A0236B).
+*         : 30.11.2021 3.00     Added the following macro definition.
+*                               - BSP_PRV_PLL_CLK_OPERATING
+*                               Changed compile switch of clock settings by the following new macro definitions.
+*                               - BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE
+*                               - BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE
+*                               - BSP_CFG_HOCO_OSCILLATE_ENABLE
+*                               - BSP_CFG_LOCO_OSCILLATE_ENABLE
+*                               - BSP_PRV_PLL_CLK_OPERATING
+*                               Added the setting of the IWDT-Dedicated On-Chip Oscillator in operating_frequency_set 
+*                               function.
+*                               Added comments for when use simulator.
+*                               Added version check of smart configurator.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -58,6 +70,20 @@ Macro definitions
 #define BSP_PRV_CKSEL_PLL             (0x4)
 
 #define BSP_PRV_NORMALIZE_X10  (10)   /* used to avoid floating point arithmetic */
+
+/* This macro runs or stops the PLL circuit.
+   If the following conditions are satisfied, PLL circuit will operate.
+   1. System clock source is PLL circuit.
+ */
+#if (BSP_CFG_CLOCK_SOURCE == 4)
+    #define BSP_PRV_PLL_CLK_OPERATING    (1)    /* PLL circuit is operating. */
+#else /* PLL is not used as clock source. */
+    #define BSP_PRV_PLL_CLK_OPERATING    (0)    /* PLL circuit is stopped. */
+#endif
+
+#if BSP_CFG_CONFIGURATOR_VERSION < 2120
+#error "To use this version of BSP, you need to upgrade Smart configurator. Please upgrade Smart configurator. If you don't use Smart Configurator, please change value of BSP_CFG_CONFIGURATOR_VERSION in r_bsp_config.h."
+#endif
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -78,7 +104,7 @@ static void clock_source_select(void);
 
 /***********************************************************************************************************************
 * Function Name: get_iclk_freq_hz
-* Description  : Return the current ICLK frequency in Hz.  Called by R_BSP_GetIClkFreqHz().
+* Description  : Return the current ICLK frequency in Hz. Called by R_BSP_GetIClkFreqHz().
 *                The system clock source can be changed at any time via SYSTEM.SCKCR3.BIT.CKSEL, so in order to
 *                determine the ICLK frequency we need to first find the current system clock source and then,
 *                in some cases where the clock source can be configured for multiple frequencies, calculate the
@@ -254,7 +280,7 @@ static void operating_frequency_set (void)
        This is done to ensure that the register has been written before the next register access. The RX has a 
        pipeline architecture so the next instruction could be executed before the previous write had finished.
     */
-    if(1 ==  SYSTEM.BCKCR.BIT.BCLKDIV)
+    if(1 == SYSTEM.BCKCR.BIT.BCLKDIV)
     {
         R_BSP_NOP();
     }
@@ -356,7 +382,7 @@ static void operating_frequency_set (void)
        This is done to ensure that the register has been written before the next register access. The RX has a 
        pipeline architecture so the next instruction could be executed before the previous write had finished.
     */
-    if(tmp_clock ==  SYSTEM.SCKCR.LONG)
+    if(tmp_clock == SYSTEM.SCKCR.LONG)
     {
         R_BSP_NOP();
     }
@@ -384,7 +410,7 @@ static void operating_frequency_set (void)
        This is done to ensure that the register has been written before the next register access. The RX has a 
        pipeline architecture so the next instruction could be executed before the previous write had finished.
     */
-    if((uint16_t)tmp_clock ==  SYSTEM.SCKCR2.WORD)
+    if((uint16_t)tmp_clock == SYSTEM.SCKCR2.WORD)
     {
         R_BSP_NOP();
     }
@@ -399,12 +425,24 @@ static void operating_frequency_set (void)
        This is done to ensure that the register has been written before the next register access. The RX has a 
        pipeline architecture so the next instruction could be executed before the previous write had finished.
     */
-    if((uint16_t)tmp_clock ==  SYSTEM.SCKCR3.WORD)
+    if((uint16_t)tmp_clock == SYSTEM.SCKCR3.WORD)
     {
         R_BSP_NOP();
     }
 
-#if BSP_CFG_CLOCK_SOURCE != 0
+#if BSP_CFG_IWDT_CLOCK_OSCILLATE_ENABLE == 1
+    /* IWDT clock is stopped after reset. Oscillate the IWDT. */
+    SYSTEM.ILOCOCR.BIT.ILCSTP = 0;
+
+    /* WAIT_LOOP */
+    while (1 != SYSTEM.OSCOVFSR.BIT.ILCOVF)
+    {
+        /* If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
+        R_BSP_NOP();
+    }
+#endif
+
+#if BSP_CFG_LOCO_OSCILLATE_ENABLE == 0
     /* We can now turn LOCO off since it is not going to be used. */
     SYSTEM.LOCOCR.BYTE = 0x01;
 
@@ -429,7 +467,7 @@ static void clock_source_select (void)
 {
     volatile uint8_t i;
     volatile uint8_t dummy;
-#if (BSP_CFG_CLOCK_SOURCE == 3) || (BSP_CFG_RTC_ENABLE == 1)
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) || (BSP_CFG_RTC_ENABLE == 1)
     uint8_t tmp;
 #endif
 
@@ -439,8 +477,7 @@ static void clock_source_select (void)
     /* Set the oscillation source of the main clock oscillator. */
     SYSTEM.MOFCR.BIT.MOSEL = BSP_CFG_MAIN_CLOCK_SOURCE;
 
-    /* Use HOCO if HOCO is chosen or if PLL is chosen with HOCO as source. */
-#if (BSP_CFG_CLOCK_SOURCE == 1) || ((BSP_CFG_CLOCK_SOURCE == 4) && (BSP_CFG_PLL_SRC == 1))
+#if BSP_CFG_HOCO_OSCILLATE_ENABLE == 1
     /* HOCO is chosen. Start it operating if it is not already operating. */
     if (1 == SYSTEM.HOCOCR.BIT.HCSTP)
     {
@@ -475,7 +512,7 @@ static void clock_source_select (void)
            This is done to ensure that the register has been written before the next register access. The RX has a 
            pipeline architecture so the next instruction could be executed before the previous write had finished.
          */
-        if(0x00 ==  SYSTEM.HOCOCR.BYTE)
+        if(0x00 == SYSTEM.HOCOCR.BYTE)
         {
             R_BSP_NOP();
         }
@@ -484,10 +521,11 @@ static void clock_source_select (void)
     /* WAIT_LOOP */
     while(0 == SYSTEM.OSCOVFSR.BIT.HCOVF)
     {
-        /* The delay period needed is to make sure that the HOCO has stabilized. */
+        /* The delay period needed is to make sure that the HOCO has stabilized.
+           If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
         R_BSP_NOP();
     }
-#else /* (BSP_CFG_CLOCK_SOURCE != 1) || ((BSP_CFG_CLOCK_SOURCE == 4) && (BSP_CFG_PLL_SRC == 0)) */
+#else /* (BSP_CFG_HOCO_OSCILLATE_ENABLE == 0) */
     /* If HOCO is already operating, it doesn't stop. */
     if (1 == SYSTEM.HOCOCR.BIT.HCSTP)
     {
@@ -499,14 +537,14 @@ static void clock_source_select (void)
         /* WAIT_LOOP */
         while(0 == SYSTEM.OSCOVFSR.BIT.HCOVF)
         {
-            /* The delay period needed is to make sure that the HOCO has stabilized. */
+            /* The delay period needed is to make sure that the HOCO has stabilized.
+               If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
             R_BSP_NOP();
         }
     }
-#endif /* (BSP_CFG_CLOCK_SOURCE == 1) || ((BSP_CFG_CLOCK_SOURCE == 4) && (BSP_CFG_PLL_SRC == 1)) */
+#endif /* BSP_CFG_HOCO_OSCILLATE_ENABLE == 1 */
 
-    /* Use Main clock if Main clock is chosen or if PLL is chosen with Main clock as source. */
-#if (BSP_CFG_CLOCK_SOURCE == 2) || ((BSP_CFG_CLOCK_SOURCE == 4) && (BSP_CFG_PLL_SRC == 0))
+#if BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE == 1
     /* Main clock oscillator is chosen. Start it operating. */
 
     /* If the main oscillator is >10MHz then the main clock oscillator forced oscillation control register (MOFCR) must
@@ -548,7 +586,7 @@ static void clock_source_select (void)
        This is done to ensure that the register has been written before the next register access. The RX has a 
        pipeline architecture so the next instruction could be executed before the previous write had finished.
      */
-    if(0x00 ==  SYSTEM.MOSCCR.BYTE)
+    if(0x00 == SYSTEM.MOSCCR.BYTE)
     {
         R_BSP_NOP();
     }
@@ -556,12 +594,13 @@ static void clock_source_select (void)
     /* WAIT_LOOP */
     while(0 == SYSTEM.OSCOVFSR.BIT.MOOVF)
     {
-        /* The delay period needed is to make sure that the Main clock has stabilized. */
+        /* The delay period needed is to make sure that the Main clock has stabilized.
+           If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
         R_BSP_NOP();
     }
-#else /* (BSP_CFG_CLOCK_SOURCE != 2) || ((BSP_CFG_CLOCK_SOURCE == 4) && (BSP_CFG_PLL_SRC == 1)) */
+#else /* (BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE == 0) */
     /* Main clock is stopped after reset. */
-#endif /* (BSP_CFG_CLOCK_SOURCE == 2) || ((BSP_CFG_CLOCK_SOURCE == 4) && (BSP_CFG_PLL_SRC == 0)) */
+#endif /* BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE == 1 */
 
     /* Sub-clock setting. */
 
@@ -623,11 +662,12 @@ static void clock_source_select (void)
         /* WAIT_LOOP */
         while (0 != SYSTEM.OSCOVFSR.BIT.SOOVF)
         {        
-            /* The delay period needed is to make sure that the sub-clock has stopped. */
+            /* The delay period needed is to make sure that the sub-clock has stopped.
+               If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
             R_BSP_NOP();
         }
 
-#if (BSP_CFG_CLOCK_SOURCE == 3) || (BSP_CFG_RTC_ENABLE == 1)
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) || (BSP_CFG_RTC_ENABLE == 1)
         /* Set the drive capacity of the sub-clock oscillator */
         #if   (BSP_CFG_SOSC_DRV_CAP == 0) /* Standard CL */
             tmp = 0x06;
@@ -674,10 +714,11 @@ static void clock_source_select (void)
         /* WAIT_LOOP */
         while (1 != SYSTEM.OSCOVFSR.BIT.SOOVF)
         {
-            /* The delay period needed is to make sure that the sub-clock  has stabilized. */
+            /* The delay period needed is to make sure that the sub-clock has stabilized.
+               If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
             R_BSP_NOP();
         }
-#endif /* (BSP_CFG_CLOCK_SOURCE == 3) || (BSP_CFG_RTC_ENABLE == 1) */
+#endif /* (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) || (BSP_CFG_RTC_ENABLE == 1) */
 
 #if BSP_CFG_RTC_ENABLE == 1
         /* ---- Set wait time until the sub-clock oscillator stabilizes ---- */
@@ -698,9 +739,9 @@ static void clock_source_select (void)
         {
             R_BSP_NOP();
         }
-#endif
+#endif /* BSP_CFG_RTC_ENABLE == 1 */
 
-#if (BSP_CFG_CLOCK_SOURCE == 3) || (BSP_CFG_RTC_ENABLE == 1)
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) || (BSP_CFG_RTC_ENABLE == 1)
         /* Wait for six the sub-clock cycles */
         /* 6 count of sub-clock : (1000000/32768)*6=183.10546875us
            In the case of LOCO frequency is 264kHz : 183.10546875/(1000000/264000)=48.33984375cycle
@@ -708,7 +749,7 @@ static void clock_source_select (void)
         R_BSP_SoftwareDelay((uint32_t)210, BSP_DELAY_MICROSECS);
 #endif
 
-#if (BSP_CFG_CLOCK_SOURCE == 3) && (BSP_CFG_RTC_ENABLE == 0)
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) && (BSP_CFG_RTC_ENABLE == 0)
         /* Stop prescaler and counter */
         /* RCR2 - RTC Control Register 2
         b7  CNTMD - Count Mode Select - The calendar count mode.
@@ -742,7 +783,8 @@ static void clock_source_select (void)
         /* WAIT_LOOP */
         while (0 != RTC.RCR2.BIT.RESET)
         {
-            /* Confirm that the written value can be read correctly. */
+            /* Confirm that the written value can be read correctly.
+               If you use simulator, the flag is not set to 0, resulting in an infinite loop. */
             R_BSP_NOP();
         }
 
@@ -766,12 +808,12 @@ static void clock_source_select (void)
         {
             R_BSP_NOP();
         }
-#endif /* (BSP_CFG_CLOCK_SOURCE == 3) && (BSP_CFG_RTC_ENABLE == 0) */
+#endif /* (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) && (BSP_CFG_RTC_ENABLE == 0) */
     }
     /* Warm start setting */
     else
     {
-#if (BSP_CFG_CLOCK_SOURCE == 3) || ((BSP_CFG_CLOCK_SOURCE != 3) && (BSP_CFG_RTC_ENABLE == 0))
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) || ((BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 0) && (BSP_CFG_RTC_ENABLE == 0))
         /* SOSCCR - Sub-Clock Oscillator Control Register
         b7:b1    Reserved - The write value should be 0.
         b0       SOSTP    - Sub-clock oscillator Stop - Sub-clock oscillator is stopped. */
@@ -792,9 +834,9 @@ static void clock_source_select (void)
             /* Confirm that the Sub clock stopped. */
             R_BSP_NOP();
         }
-#endif
+#endif /* (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) || ((BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 0) && (BSP_CFG_RTC_ENABLE == 0)) */
 
-#if BSP_CFG_CLOCK_SOURCE == 3
+#if BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1
         /* Set wait time until the sub-clock oscillator stabilizes */
         /* SOSCWTCR - Sub-Clock Oscillator Wait Control Register
         b7:b5    Reserved - The write value should be 0.
@@ -812,13 +854,14 @@ static void clock_source_select (void)
         {
             R_BSP_NOP();
         }
-#endif
+#endif /* BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1 */
 
-#if (BSP_CFG_CLOCK_SOURCE == 3) || (BSP_CFG_RTC_ENABLE == 1)
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) || (BSP_CFG_RTC_ENABLE == 1)
         /* WAIT_LOOP */
         while (1 != SYSTEM.OSCOVFSR.BIT.SOOVF)
         {
-            /* The delay period needed is to make sure that the sub-clock  has stabilized. */
+            /* The delay period needed is to make sure that the sub-clock has stabilized.
+               If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
             R_BSP_NOP();
         }
 #endif
@@ -829,7 +872,7 @@ static void clock_source_select (void)
 #endif
     }
 
-#if BSP_CFG_CLOCK_SOURCE == 4
+#if BSP_PRV_PLL_CLK_OPERATING == 1
 
     /* Set PLL Input Divisor. */
     SYSTEM.PLLCR.BIT.PLIDIV = BSP_CFG_PLL_DIV - 1;
@@ -851,7 +894,8 @@ static void clock_source_select (void)
     /* WAIT_LOOP */
     while(0 == SYSTEM.OSCOVFSR.BIT.PLOVF)
     {
-        /* The delay period needed is to make sure that the PLL has stabilized. */
+        /* The delay period needed is to make sure that the PLL has stabilized.
+           If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
         R_BSP_NOP();
     }
 #else
@@ -860,7 +904,7 @@ static void clock_source_select (void)
 
     /* LOCO is saved for last since it is what is running by default out of reset. This means you do not want to turn
        it off until another clock has been enabled and is ready to use. */
-#if BSP_CFG_CLOCK_SOURCE == 0
+#if BSP_CFG_LOCO_OSCILLATE_ENABLE == 1
     /* LOCO is chosen. This is the default out of reset. */
 #else
     /* LOCO is not chosen but it cannot be turned off yet since it is still being used. */

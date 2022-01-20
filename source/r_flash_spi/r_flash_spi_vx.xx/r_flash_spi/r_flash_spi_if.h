@@ -19,11 +19,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011(2012-2020) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2011(2012-2021) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_flash_spi_if.h
-* Version      : 3.02
+* Version      : 3.03
 * Description  : FLASH SPI driver interface header file
 *************************************************************************************************/
 /************************************************************************************************
@@ -36,6 +36,7 @@
 *              : 20.05.2019 3.01     Added support for GNUC and ICCRX.
 *                                    Fixed coding style.
 *              : 10.12.2020 3.02     Changed version to 3.02.
+*              : 31.12.2021 3.03     Changed version to 3.03.
 *************************************************************************************************/
 #ifndef __FLASH_SPI_IF_H__
 #define __FLASH_SPI_IF_H__
@@ -59,7 +60,7 @@ Macro definitions
 
 /* Driver version */
 #define FLASH_SPI_VERSION_MAJOR       (3)
-#define FLASH_SPI_VERSION_MINOR       (02)
+#define FLASH_SPI_VERSION_MINOR       (03)
 
 
 /*--------------- Define no. of slots ----------------*/

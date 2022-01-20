@@ -55,6 +55,7 @@
 *         : 01.04.2021 3.90    Added support for RX72M 144pins, 100pins 
 *         : 07.04.2021 4.00    Added support for RX671.
 *         : 15.04.2021 4.10    Added support for RX140.
+*         : 13.09.2021 4.20    Added the demo for RX671.
 ***********************************************************************************************************************/
 
 #ifndef GPIO_RX_INTERFACE_HEADER_FILE
@@ -127,7 +128,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define GPIO_RX_VERSION_MAJOR           (4)
-#define GPIO_RX_VERSION_MINOR           (10)
+#define GPIO_RX_VERSION_MINOR           (20)
 
 /***********************************************************************************************************************
 Typedef definitions

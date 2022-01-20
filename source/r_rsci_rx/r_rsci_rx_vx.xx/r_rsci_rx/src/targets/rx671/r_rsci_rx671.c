@@ -23,6 +23,9 @@
 * History : DD.MM.YYYY Version Description
 *           31.03.2021 1.00    Initial Release
 *                              Supported for RX671.
+*           13.09.2021 1.10    Fixed setting of transfer data direction in async mode.
+*           03.12.2021 2.00    Updated new features in Asynchronous mode
+*                              and added support for Manchester mode.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -83,7 +86,7 @@ rsci_err_t rsci_mcu_param_check(uint8_t const chan)
 ******************************************************************************/
 void rsci_init_register(rsci_hdl_t const hdl)
 {
-    /* SCI transmit enable bit and receive enable bit check & disable */
+    /* RSCI transmit enable bit and receive enable bit check & disable */
     /* WAIT_LOOP */
     while ((0 != hdl->rom->regs->SCR0.BIT.TE) || (0 != hdl->rom->regs->SCR0.BIT.RE))
     {
@@ -113,27 +116,25 @@ void rsci_init_register(rsci_hdl_t const hdl)
     /* SCR0 register initialize */
     hdl->rom->regs->SCR0.LONG = 0x00000000;
 
-    /* SSCR register initialize */
+    /* SSR register initialize */
     if (1 == RSCI_SSR_ORER)
     {
-       RSCI_SSCR_ORERC = 0;
+       RSCI_SSCR_ORERC = 1;
     }
 
     if (1 == RSCI_SSR_APER)
     {
-       RSCI_SSCR_APERC = 0;
+       RSCI_SSCR_APERC = 1;
     }
 
     if (1 == RSCI_SSR_AFER)
     {
-       RSCI_SSCR_AFERC = 0;
+       RSCI_SSCR_AFERC = 1;
     }
-
-
 
     /* SCR3 register initialize: Transfer Data Invert, Transfer Data Direction Select */
     hdl->rom->regs->SCR3.BIT.DINV = 0;
-    hdl->rom->regs->SCR3.BIT.DDIR = 0;
+    hdl->rom->regs->SCR3.BIT.DDIR = 1;
 
     /* SCR1 register initialize */
     hdl->rom->regs->SCR1.BIT.SPB2DT = 0;
@@ -164,6 +165,12 @@ void rsci_init_register(rsci_hdl_t const hdl)
     /* SCR1 & SCR3 register initialize: */
     hdl->rom->regs->SCR1.BIT.CTSE = 0;
     hdl->rom->regs->SCR3.LONG &= 0xFFFFFF00;
+
+    /* MMCR register initialize */
+    hdl->rom->regs->MMCR.LONG = 0x00000000;
+
+    /* MMSR register initialize */
+    hdl->rom->regs->MMSCR.LONG &= 0x00000017;
 
 #if RSCI_CFG_FIFO_INCLUDED
     if (true == hdl->fifo_ctrl)
@@ -250,9 +257,9 @@ int32_t rsci_init_bit_rate(rsci_hdl_t const  hdl,
 #endif
 
     /* SELECT PROPER TABLE BASED UPON MODE */
-    if (RSCI_MODE_ASYNC == hdl->mode)
+    if ((RSCI_MODE_ASYNC == hdl->mode) || (RSCI_MODE_MANC == hdl->mode))
     {
-#if (RSCI_CFG_ASYNC_INCLUDED)
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
         p_baud_info = rsci_async_baud;
         num_divisors = NUM_DIVISORS_ASYNC;
 #endif
@@ -280,7 +287,14 @@ int32_t rsci_init_bit_rate(rsci_hdl_t const  hdl,
             /* Casting int16_t to uint32_t is valid. Because clock divisor is positive integer */
             if (ratio < (uint32_t)(p_baud_info[i].divisor * 256))
             {
-                break;
+                if ((0 == i) && (RSCI_MODE_MANC == hdl->mode))
+                {
+                    continue;
+                }
+                else
+                {
+                    break;
+                }
             }
         }
 
@@ -308,7 +322,7 @@ int32_t rsci_init_bit_rate(rsci_hdl_t const  hdl,
     {
         if (true == hdl->fifo_ctrl)
         {
-            if (1 == hdl->rom->regs->SCR3.BIT.MOD)
+            if ((0x2U == hdl->rom->regs->SCR3.BIT.MOD) || (0x3U == hdl->rom->regs->SCR3.BIT.MOD))
             {
                 if (0 == hdl->rom->regs->SCR2.BIT.CKS)
                 {
@@ -326,6 +340,9 @@ int32_t rsci_init_bit_rate(rsci_hdl_t const  hdl,
     hdl->rom->regs->SCR2.BIT.CKS = p_baud_info[i].cks;
     hdl->rom->regs->SCR2.BIT.ABCSE= p_baud_info[i].abcse;
 
+    /* Configure internal clock for baud rate */
+    hdl->rom->regs->SCR3.BIT.CKE = 0x00;
+
     /* CALCULATE BIT RATE ERROR.
      * RETURN IF ERROR LESS THAN 1% OR IF IN SYNCHRONOUS/SSPI MODE.
      */
@@ -335,6 +352,8 @@ int32_t rsci_init_bit_rate(rsci_hdl_t const  hdl,
     error = ( ((float)pclk / ((baud * divisor) * tmp)) - 1) * 100;
     abs_error  = (error < 0) ? (-error) : error;
 
+    /* Do not use Modulation Duty Setting in clock synchronous mode, simple SPI mode,
+     * smart card Interface mode, manchester mode and extended serial mode.*/
     if ((abs_error <= 1.0) || (RSCI_MODE_ASYNC != hdl->mode))
     {
         hdl->rom->regs->SCR2.BIT.BRME = 0;          // disable MDDR
@@ -427,7 +446,7 @@ void rsci_initialize_ints(rsci_hdl_t const hdl,
     ENABLE_ERI_INT;
     ENABLE_RXI_INT;
 
-    /* ENABLE INTERRUPTS IN SCI PERIPHERAL */
+    /* ENABLE INTERRUPTS IN RSCI PERIPHERAL */
     /* Note: Enable interrupts after xcvr or will get "extra" interrupt */
     hdl->rom->regs->SCR0.LONG |= RSCI_EN_XCVR_MASK;    // enable TE, RE, TXI, and RXI/ERI
 
@@ -520,7 +539,7 @@ rsci_err_t rsci_async_cmds(rsci_hdl_t const hdl,
             hdl->rom->regs->SCR1.BIT.NFCS = 0;          /* clock divided by 1 (default) */
             RSCI_IR_TXI_CLEAR;
             hdl->rom->regs->SCR0.LONG |= RSCI_EN_XCVR_MASK;
-        break;
+            break;
         }
 
         case (RSCI_CMD_OUTPUT_BAUD_CLK):
@@ -530,7 +549,7 @@ rsci_err_t rsci_async_cmds(rsci_hdl_t const hdl,
             hdl->rom->regs->SCR3.BIT.CKE = 0x01;     /* output baud clock on SCK pin */
             RSCI_IR_TXI_CLEAR;
             hdl->rom->regs->SCR0.LONG |= RSCI_EN_XCVR_MASK;
-        break;
+            break;
         }
 
         case (RSCI_CMD_START_BIT_EDGE):
@@ -540,13 +559,13 @@ rsci_err_t rsci_async_cmds(rsci_hdl_t const hdl,
             hdl->rom->regs->SCR3.BIT.RXDESEL = 1;   /* detect start bit on falling edge */
             RSCI_IR_TXI_CLEAR;
             hdl->rom->regs->SCR0.LONG |= RSCI_EN_XCVR_MASK;
-        break;
+            break;
         }
 
     #if RSCI_CFG_TEI_INCLUDED
         case (RSCI_CMD_EN_TEI):  /* SCI_CMD_EN_TEI is obsolete command, but it exists only for compatibility with older version. */
         {
-        break;
+            break;
         }
     #endif
 
@@ -556,7 +575,7 @@ rsci_err_t rsci_async_cmds(rsci_hdl_t const hdl,
             DISABLE_TXI_INT;
             R_BYTEQ_Flush(hdl->u_tx_data.que);
             ENABLE_TXI_INT;
-        break;
+            break;
         }
 
         case (RSCI_CMD_RX_Q_FLUSH):
@@ -565,21 +584,21 @@ rsci_err_t rsci_async_cmds(rsci_hdl_t const hdl,
             DISABLE_RXI_INT;
             R_BYTEQ_Flush(hdl->u_rx_data.que);
             ENABLE_RXI_INT;
-        break;
+            break;
         }
 
         case (RSCI_CMD_TX_Q_BYTES_FREE):
         {
             /* Casting pointer void* to uint16_t* type is valid */
             R_BYTEQ_Unused(hdl->u_tx_data.que, (uint16_t *) p_args);
-        break;
+            break;
         }
 
         case (RSCI_CMD_RX_Q_BYTES_AVAIL_TO_READ):
         {
             /* Casting pointer void* type to uint16_t* type is valid  */
             R_BYTEQ_Used(hdl->u_rx_data.que, (uint16_t *) p_args);
-        break;
+            break;
         }
 
         case (RSCI_CMD_GENERATE_BREAK):
@@ -621,7 +640,7 @@ rsci_err_t rsci_async_cmds(rsci_hdl_t const hdl,
                 RSCI_IR_TXI_CLEAR;
                 hdl->rom->regs->SCR0.LONG |= RSCI_EN_XCVR_MASK;
             }
-        break;
+            break;
         }
 
     #if RSCI_CFG_DATA_MATCH_INCLUDED
@@ -631,38 +650,37 @@ rsci_err_t rsci_async_cmds(rsci_hdl_t const hdl,
             hdl->rom->regs->SSR.BIT.DPER = 0; /* Clear Match Data Parity Error Flag */
             hdl->rom->regs->SCR0.BIT.DCME = 1; /* Enable Data match function */
             hdl->rom->regs->SCR4.BIT.CMPD = *((unsigned char *)p_args); /* Comparison data */
-        break;
+            break;
         }
     #endif
 
-#if defined(BSP_MCU_RX671)
-
+    #if (RSCI_CFG_RX_DATA_SAMPLING_TIMING_INCLUDED || RSCI_CFG_TX_SIGNAL_TRANSITION_TIMING_INCLUDED)
         /* Enable receive data sampling timing adjust feature*/
         case RSCI_CMD_RX_SAMPLING_ENABLE:
         {
             hdl->rom->regs->SCR4.BIT.RTADJ = 1;
-        break;
+            break;
         }
 
         /* Disable receive data sampling timing adjust feature*/
         case RSCI_CMD_RX_SAMPLING_DISABLE:
         {
             hdl->rom->regs->SCR4.BIT.RTADJ = 0;
-        break;
+            break;
         }
 
         /* Enable transmit signal transition timing adjust feature*/
         case RSCI_CMD_TX_TRANSITION_TIMING_ENABLE:
         {
             hdl->rom->regs->SCR4.BIT.TTADJ = 1;
-        break;
+            break;
         }
 
         /* Disable transmit signal transition timing adjust feature*/
         case RSCI_CMD_TX_TRANSITION_TIMING_DISABLE:
         {
             hdl->rom->regs->SCR4.BIT.TTADJ = 0;
-        break;
+            break;
         }
 
         /* Set value for receive data sampling timing adjust feature*/
@@ -716,11 +734,11 @@ rsci_err_t rsci_async_cmds(rsci_hdl_t const hdl,
                     err = RSCI_ERR_INVALID_ARG;
                 }
             }
-        break;
+            break;
         }
         /*Set va transmit signal transition timing adjust feature*/
         case RSCI_CMD_TRANSITION_TIMING_ADJUST:
-       {
+        {
            if (0 == hdl->rom->regs->SCR2.BIT.ABCSE)
            {
                /* Casting pointer void* to uint8_t* type is valid */
@@ -754,20 +772,178 @@ rsci_err_t rsci_async_cmds(rsci_hdl_t const hdl,
                }
            }
 
-       break;
+        break;
        }
 
-#endif
+    #endif
         default:
         {
             err = RSCI_ERR_INVALID_ARG;
-        break;
+            break;
         }
     }
 
     return err;
 } /* End of function rsci_async_cmds() */
 #endif /* End of RSCI_CFG_ASYNC_INCLUDED */
+
+#if (RSCI_CFG_MANC_INCLUDED)
+/*****************************************************************************
+* Function Name: rsci_manc_cmds
+* Description  : This function performs special software operations specific
+*                to the Manchester code communication.
+*
+* Arguments    : hdl -
+*                    handle for channel (ptr to chan control block)
+*                cmd -
+*                    command to run
+*                p_args -
+*                    pointer argument(s) specific to command
+* Return Value : RSCI_SUCCESS -
+*                    Command completed successfully.
+*                RSCI_ERR_NULL_PTR -
+*                    p_args is NULL when required for cmd
+*                RSCI_ERR_INVALID_ARG -
+*                    The cmd value or p_args contains an invalid value.
+******************************************************************************/
+rsci_err_t rsci_manc_cmds(rsci_hdl_t const hdl,
+                         rsci_cmd_t const cmd,
+                         void            *p_args)
+{
+    rsci_err_t   err=RSCI_SUCCESS;
+
+#if RSCI_CFG_PARAM_CHECKING_ENABLE
+
+    /* Check parameters */
+    if (((NULL == p_args) || (FIT_NO_PTR == p_args))
+     && ((RSCI_CMD_TX_Q_BYTES_FREE == cmd) || (RSCI_CMD_RX_Q_BYTES_AVAIL_TO_READ == cmd)
+        || (RSCI_CMD_SET_TRASMIT_PREFACE_LENGTH == cmd) || (RSCI_CMD_SET_RECEIVE_PREFACE_LENGTH == cmd)))
+    {
+        return RSCI_ERR_NULL_PTR;
+    }
+    if (RSCI_CMD_SET_TRASMIT_PREFACE_LENGTH == cmd)
+    {
+        /* Casting void* type is valid */
+        if (15 < (*(uint8_t *)p_args))
+        {
+            return RSCI_ERR_INVALID_ARG;
+        }
+    }
+    if (RSCI_CMD_SET_RECEIVE_PREFACE_LENGTH == cmd)
+    {
+        /* Casting void* type is valid */
+        if (15 < (*(uint8_t *)p_args))
+        {
+            return RSCI_ERR_INVALID_ARG;
+        }
+    }
+#endif
+
+    switch(cmd)
+    {
+        case (RSCI_CMD_TX_Q_FLUSH):
+        {
+            /* Disable TXI interrupt */
+            DISABLE_TXI_INT;
+            R_BYTEQ_Flush(hdl->u_tx_data.que);
+            ENABLE_TXI_INT;
+            break;
+        }
+
+        case (RSCI_CMD_RX_Q_FLUSH):
+        {
+            /* Disable RXI interrupt */
+            DISABLE_RXI_INT;
+            R_BYTEQ_Flush(hdl->u_rx_data.que);
+            ENABLE_RXI_INT;
+            break;
+        }
+
+        case (RSCI_CMD_TX_Q_BYTES_FREE):
+        {
+            /* Casting pointer void* to uint16_t* type is valid */
+            R_BYTEQ_Unused(hdl->u_tx_data.que, (uint16_t *) p_args);
+            break;
+        }
+
+        case (RSCI_CMD_RX_Q_BYTES_AVAIL_TO_READ):
+        {
+            /* Casting pointer void* type to uint16_t* type is valid  */
+            R_BYTEQ_Used(hdl->u_rx_data.que, (uint16_t *) p_args);
+            break;
+        }
+
+        case (RSCI_CMD_SET_TRASMIT_PREFACE_LENGTH):
+        {
+            /* change TX preface length */
+            hdl->rom->regs->SCR0.LONG &= (~RSCI_EN_XCVR_MASK);
+            RSCI_SCR0_DUMMY_READ;
+
+            /* Casting void* type is valid */
+            hdl->rom->regs->MMCR.BIT.TPLEN = *((uint8_t *)p_args);
+            RSCI_IR_TXI_CLEAR;
+            hdl->rom->regs->SCR0.LONG |= RSCI_EN_XCVR_MASK;
+            break;
+        }
+
+        case (RSCI_CMD_SET_RECEIVE_PREFACE_LENGTH):
+        {
+            /* change RX preface length */
+            hdl->rom->regs->SCR0.LONG &= (~RSCI_EN_XCVR_MASK);
+            RSCI_SCR0_DUMMY_READ;
+
+            /* Casting void* type is valid */
+            hdl->rom->regs->MMCR.BIT.RPLEN = *((uint8_t *)p_args);
+            RSCI_IR_TXI_CLEAR;
+            hdl->rom->regs->SCR0.LONG |= RSCI_EN_XCVR_MASK;
+            break;
+        }
+
+        case (RSCI_CMD_START_BIT_PATTERN_LOW_TO_HIGH):
+        {
+            hdl->rom->regs->SCR0.LONG &= (~RSCI_EN_XCVR_MASK);
+            RSCI_SCR0_DUMMY_READ;
+            hdl->rom->regs->MMCR.BIT.SBPTN = 0;
+            RSCI_IR_TXI_CLEAR;
+            hdl->rom->regs->SCR0.LONG |= RSCI_EN_XCVR_MASK;
+            break;
+        }
+
+        case (RSCI_CMD_START_BIT_PATTERN_HIGH_TO_LOW):
+        {
+            hdl->rom->regs->SCR0.LONG &= (~RSCI_EN_XCVR_MASK);
+            RSCI_SCR0_DUMMY_READ;
+            hdl->rom->regs->MMCR.BIT.SBPTN = 1;
+            RSCI_IR_TXI_CLEAR;
+            hdl->rom->regs->SCR0.LONG |= RSCI_EN_XCVR_MASK;
+            break;
+        }
+
+        case (RSCI_CMD_EN_SYNC):
+        {
+            hdl->rom->regs->SCR0.LONG &= (~RSCI_EN_XCVR_MASK);
+            RSCI_SCR0_DUMMY_READ;
+            hdl->rom->regs->MMCR.BIT.SYNCE = 1;
+
+            /* Update start bit length to using sync pulse select
+             * , regardless of the assigned initial value of this bit
+             */
+            hdl->rom->regs->MMCR.BIT.SBLEN = 1;
+            RSCI_IR_TXI_CLEAR;
+            hdl->rom->regs->SCR0.LONG |= RSCI_EN_XCVR_MASK;
+            break;
+        }
+
+        default:
+        {
+            err = RSCI_ERR_INVALID_ARG;
+            break;
+        }
+    }
+
+    return err;
+} /* End of function rsci_manc_cmds() */
+#endif /* End of RSCI_CFG_MANC_INCLUDED */
 
 #if (RSCI_CFG_SSPI_INCLUDED || RSCI_CFG_SYNC_INCLUDED)
 /*****************************************************************************
@@ -805,37 +981,7 @@ rsci_err_t rsci_sync_cmds(rsci_hdl_t const hdl,
             {
                 err = RSCI_ERR_XFER_NOT_DONE;
             }
-        break;
-        }
-
-        case (RSCI_CMD_XFER_LSB_FIRST):
-        {
-            hdl->rom->regs->SCR0.LONG &= (~RSCI_EN_XCVR_MASK);
-            RSCI_SCR0_DUMMY_READ;
-            hdl->rom->regs->SCR3.BIT.DDIR = 1;
-            RSCI_IR_TXI_CLEAR;
-            hdl->rom->regs->SCR0.LONG |= RSCI_EN_XCVR_MASK;
-        break;
-        }
-
-        case (RSCI_CMD_XFER_MSB_FIRST):
-        {
-            hdl->rom->regs->SCR0.LONG &= (~RSCI_EN_XCVR_MASK);
-            RSCI_SCR0_DUMMY_READ;
-            hdl->rom->regs->SCR3.BIT.DDIR = 0;
-            RSCI_IR_TXI_CLEAR;
-            hdl->rom->regs->SCR0.LONG |= RSCI_EN_XCVR_MASK;
-        break;
-        }
-
-        case (RSCI_CMD_INVERT_DATA):
-        {
-            hdl->rom->regs->SCR0.LONG &= (~RSCI_EN_XCVR_MASK);
-            RSCI_SCR0_DUMMY_READ;
-            hdl->rom->regs->SCR3.BIT.DINV ^= 1;
-            RSCI_IR_TXI_CLEAR;
-            hdl->rom->regs->SCR0.LONG |= RSCI_EN_XCVR_MASK;
-        break;
+            break;
         }
 
         case (RSCI_CMD_ABORT_XFER):
@@ -870,7 +1016,7 @@ rsci_err_t rsci_sync_cmds(rsci_hdl_t const hdl,
             /* Enable receive interrupt in peripheral after rcvr or will get "extra" interrupt */
             hdl->rom->regs->SCR0.LONG |= (RSCI_SCR0_RE_MASK | RSCI_SCR0_TE_MASK);
             hdl->rom->regs->SCR0.LONG |= RSCI_SCR0_RIE_MASK;
-        break;
+            break;
         }
         case (RSCI_CMD_CHANGE_SPI_MODE):
         {
@@ -902,13 +1048,13 @@ rsci_err_t rsci_sync_cmds(rsci_hdl_t const hdl,
             hdl->rom->regs->SCR3.LONG |= (*((uint8_t *)p_args));
             RSCI_IR_TXI_CLEAR;
             hdl->rom->regs->SCR0.LONG |= RSCI_EN_XCVR_MASK;
-        break;
+            break;
         }
 
         default:
         {
             err = RSCI_ERR_INVALID_ARG;
-        break;
+            break;
         }
     }
 
@@ -921,7 +1067,7 @@ ISRs
 ******************************************************************************/
 
 
-#if (RSCI_CFG_ASYNC_INCLUDED)
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
 
 /*****************************************************************************
 * rsciN_txiN_isr
@@ -953,7 +1099,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rsci11_txi_isr(void)
 } /* End of function rsci11_txi_isr() */
 #endif /* End of RSCI_CFG_CH11_INCLUDED  */
 
-#endif /* End of RSCI_CFG_ASYNC_INCLUDED */
+#endif /* End of (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED) */
 
 #if RSCI_CFG_TEI_INCLUDED
 /*****************************************************************************

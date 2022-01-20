@@ -32,6 +32,9 @@
 *           15.10.2019 2.20    Added support for RX23E-A
 *                              Fixed warning in IAR
 *           31.03.2020 2.21    Changed Minor version to 2.21.
+*           30.06.2020 2.30    Changed Minor version to 2.30.
+*           30.10.2020 2.31    Changed Minor version to 2.31.
+*           13.09.2021 2.32    Changed Minor version to 2.32.
 ***********************************************************************************************************************/
 
 #ifndef CAN_INTERFACE_HEADER_FILE
@@ -53,7 +56,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define CAN_VERSION_MAJOR           (2)
-#define CAN_VERSION_MINOR           (31)
+#define CAN_VERSION_MINOR           (32)
 
 
 /* Channel numbers */

@@ -6,8 +6,8 @@ r_rsci_rx
 Overview
 --------------------------------------------------------------------------------
 The r_rsci_rx module is a multi-channel, multi-mode, interrupt-driven driver which
-supports Asynchronous, Master Synchronous, and Single Master Simple SPI (SSPI)
-operation for the RSCI peripherals. The API includes standard functions 
+supports Asynchronous, Master Synchronous, Single Master Simple SPI (SSPI), and
+Manchester operation for the RSCI peripherals. The API includes standard functions 
 to initialize a channel and to send and receive data, as well as a special control 
 function for taking actions such as issuing a break signal or enabling noise 
 cancellation. The driver supports all channels available on the mcu. The driver 
@@ -19,8 +19,8 @@ channels, or unused modes. These configuration options can be found in
 Features
 --------
 * (RX671) Simultaneous operation of up to 2 channels
-* Simultaneous operation of Async, Sync, or SSPI modes on different channels.
-* Queueing of incoming and outgoing data for Asynchronous channels.
+* Simultaneous operation of Async, Sync, SSPI or Manc modes on different channels.
+* Queueing of incoming and outgoing data for Asynchronous or Manchester channels.
 * Interrupt driven.
 
 
@@ -32,9 +32,9 @@ r_rsci_rx
 |
 +---doc
 |   +---ja
-|   |    r01an{SERIAL_NUMBER}js{VERSION_NUMBER}-rx-rsci.pdf
+|   |    r01an5759js0200-rx-rsci.pdf
 |   +---en
-|        r01an{SERIAL_NUMBER}es{VERSION_NUMBER}-rx-rsci.pdf
+|        r01an5759es0200-rx-rsci.pdf
 |
 +---src
     |   r_rsci_rx.c

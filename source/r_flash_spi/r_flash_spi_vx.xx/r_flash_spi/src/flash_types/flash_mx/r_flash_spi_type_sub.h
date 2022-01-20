@@ -19,17 +19,19 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2008(2009-2014) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2008(2009-2021) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_flash_spi_tyep_sub.h
-* Version      : 2.32
+* Version      : 3.03
 * Description  : FLASH SPI driver memory type header file
 *************************************************************************************************/
 /************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 23.07.2014 2.21     Created
 *              : 29.05.2015 2.32     Revised functions of same as Ver.2.32 of EEPROM SPI FIT module.
+*              : 31.12.2021 3.03     Added variable "read_after_write" "read_after_write_add" and
+*                                    "read_after_write_data" for controlling SPI bus.
 *************************************************************************************************/
 #ifndef __FLASH_SPI_TYPE_SUB_H__
 #define __FLASH_SPI_TYPE_SUB_H__
@@ -56,6 +58,8 @@ Macro definitions
 #define FLASH_SPI_MX_WSTSREG_SIZE       (uint32_t)(3)   /* Status register size (bytes) for Write   */
 #endif
 #define FLASH_SPI_MX_IDDATA_SIZE        (uint32_t)(3)   /* ID data size (bytes)                     */
+#define TRUE                            (bool)(true)    /* not close SPI bus cycle                  */
+#define FALSE                           (bool)(false)   /* close SPI bus cycle                      */
 
 /*-------- Definitions of device information ---------*/
 /* ==== FLASH device 0 ==== */
@@ -333,12 +337,12 @@ flash_spi_status_t r_flash_spi_mx_write_di(uint8_t devno);
 flash_spi_status_t r_flash_spi_mx_read_stsreg(uint8_t devno, uint8_t * p_status);
 flash_spi_status_t r_flash_spi_mx_read_configreg(uint8_t devno, uint8_t * p_config);
 flash_spi_status_t r_flash_spi_mx_read_scurreg(uint8_t devno, uint8_t * p_scur);
-flash_spi_status_t r_flash_spi_mx_set_write_protect(uint8_t devno, uint8_t wpsts);
-flash_spi_status_t r_flash_spi_mx_write_configuration(uint8_t devno, flash_spi_reg_info_t * p_reg);
-flash_spi_status_t r_flash_spi_mx_quad_enable(uint8_t devno);
-flash_spi_status_t r_flash_spi_mx_quad_disable(uint8_t devno);
+flash_spi_status_t r_flash_spi_mx_set_write_protect(uint8_t devno, uint8_t wpsts, bool read_after_write);
+flash_spi_status_t r_flash_spi_mx_write_configuration(uint8_t devno, flash_spi_reg_info_t * p_reg, bool read_after_write);
+flash_spi_status_t r_flash_spi_mx_quad_enable(uint8_t devno, bool read_after_write);
+flash_spi_status_t r_flash_spi_mx_quad_disable(uint8_t devno, bool read_after_write);
 flash_spi_status_t r_flash_spi_mx_read(uint8_t devno, flash_spi_info_t * p_flash_spi_info);
-flash_spi_status_t r_flash_spi_mx_write_page(uint8_t devno, flash_spi_info_t  * p_flash_spi_info);
+flash_spi_status_t r_flash_spi_mx_write_page(uint8_t devno, flash_spi_info_t  * p_flash_spi_info, bool read_after_write_add, bool read_after_write_data);
 flash_spi_status_t r_flash_spi_mx_erase(uint8_t devno, flash_spi_erase_info_t * p_flash_spi_erase_info);
 flash_spi_status_t r_flash_spi_mx_rdid(uint8_t devno, uint8_t * p_data);
 flash_spi_status_t r_flash_spi_mx_polling(uint8_t devno, flash_spi_poll_mode_t mode);

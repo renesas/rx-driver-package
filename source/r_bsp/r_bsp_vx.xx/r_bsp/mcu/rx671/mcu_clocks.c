@@ -23,6 +23,8 @@
 /**********************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 18.05.2021 1.00     First Release
+*         : 30.11.2021 1.01     Modified comment.
+*                               Added comments for when use simulator.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -76,7 +78,7 @@ static void bsp_clkout_initial_configure(void);
 
 /***********************************************************************************************************************
 * Function Name: get_iclk_freq_hz
-* Description  : Return the current ICLK frequency in Hz.  Called by R_BSP_GetIClkFreqHz().
+* Description  : Return the current ICLK frequency in Hz. Called by R_BSP_GetIClkFreqHz().
 *                The system clock source can be changed at any time via SYSTEM.SCKCR3.BIT.CKSEL, so in order to
 *                determine the ICLK frequency we need to first find the current system clock source and then,
 *                in some cases where the clock source can be configured for multiple frequencies, calculate the
@@ -256,7 +258,7 @@ static void operating_frequency_set (void)
        This is done to ensure that the register has been written before the next register access. The RX has a 
        pipeline architecture so the next instruction could be executed before the previous write had finished.
     */
-    if(1 ==  SYSTEM.BCKCR.BIT.BCLKDIV)
+    if(1 == SYSTEM.BCKCR.BIT.BCLKDIV)
     {
         R_BSP_NOP();
     }
@@ -358,7 +360,7 @@ static void operating_frequency_set (void)
        This is done to ensure that the register has been written before the next register access. The RX has a 
        pipeline architecture so the next instruction could be executed before the previous write had finished.
     */
-    if(tmp_clock ==  SYSTEM.SCKCR.LONG)
+    if(tmp_clock == SYSTEM.SCKCR.LONG)
     {
         R_BSP_NOP();
     }
@@ -386,7 +388,7 @@ static void operating_frequency_set (void)
        This is done to ensure that the register has been written before the next register access. The RX has a 
        pipeline architecture so the next instruction could be executed before the previous write had finished.
     */
-    if((uint16_t)tmp_clock ==  SYSTEM.SCKCR2.WORD)
+    if((uint16_t)tmp_clock == SYSTEM.SCKCR2.WORD)
     {
         R_BSP_NOP();
     }
@@ -401,17 +403,19 @@ static void operating_frequency_set (void)
        This is done to ensure that the register has been written before the next register access. The RX has a 
        pipeline architecture so the next instruction could be executed before the previous write had finished.
     */
-    if((uint16_t)tmp_clock ==  SYSTEM.SCKCR3.WORD)
+    if((uint16_t)tmp_clock == SYSTEM.SCKCR3.WORD)
     {
         R_BSP_NOP();
     }
 
 #if BSP_CFG_IWDT_CLOCK_OSCILLATE_ENABLE == 1
-    /* IWDT clock is stopped after reset.Oscillate the IWDT. */
-    SYSTEM.ILOCOCR.BIT.ILCSTP = 0U;
+    /* IWDT clock is stopped after reset. Oscillate the IWDT. */
+    SYSTEM.ILOCOCR.BIT.ILCSTP = 0;
 
-    while (1U != SYSTEM.OSCOVFSR.BIT.ILCOVF)
+    /* WAIT_LOOP */
+    while (1 != SYSTEM.OSCOVFSR.BIT.ILCOVF)
     {
+        /* If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
         R_BSP_NOP();
     }
 #endif
@@ -493,7 +497,7 @@ static void clock_source_select (void)
        This is done to ensure that the register has been written before the next register access. The RX has a 
        pipeline architecture so the next instruction could be executed before the previous write had finished.
      */
-    if(0x00 ==  SYSTEM.MOSCCR.BYTE)
+    if(0x00 == SYSTEM.MOSCCR.BYTE)
     {
         R_BSP_NOP();
     }
@@ -501,7 +505,8 @@ static void clock_source_select (void)
     /* WAIT_LOOP */
     while(0 == SYSTEM.OSCOVFSR.BIT.MOOVF)
     {
-        /* The delay period needed is to make sure that the Main clock has stabilized. */
+        /* The delay period needed is to make sure that the Main clock has stabilized.
+           If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
         R_BSP_NOP();
     }
 #else /* (BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE == 0) */
@@ -580,7 +585,7 @@ static void clock_source_select (void)
 
             /* WAIT_LOOP */
             while (0 != SYSTEM.OSCOVFSR.BIT.SOOVF)
-            {        
+            {
                 /* The delay period needed is to make sure that the sub-clock has stopped. */
                 R_BSP_NOP();
             }
@@ -637,7 +642,8 @@ static void clock_source_select (void)
             /* WAIT_LOOP */
             while (1 != SYSTEM.OSCOVFSR.BIT.SOOVF)
             {
-                /* The delay period needed is to make sure that the sub-clock  has stabilized. */
+                /* The delay period needed is to make sure that the sub-clock has stabilized.
+                   If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
                 R_BSP_NOP();
             }
 #endif /* (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) || (BSP_CFG_RTC_ENABLE == 1) */
@@ -705,7 +711,8 @@ static void clock_source_select (void)
             /* WAIT_LOOP */
             while (0 != RTC.RCR2.BIT.RESET)
             {
-                /* Confirm that the written value can be read correctly. */
+                /* Confirm that the written value can be read correctly.
+                   If you use simulator, the flag is not set to 0, resulting in an infinite loop. */
                 R_BSP_NOP();
             }
 
@@ -781,7 +788,8 @@ static void clock_source_select (void)
             /* WAIT_LOOP */
             while (1 != SYSTEM.OSCOVFSR.BIT.SOOVF)
             {
-                /* The delay period needed is to make sure that the sub-clock  has stabilized. */
+                /* The delay period needed is to make sure that the sub-clock has stabilized.
+                   If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
                 R_BSP_NOP();
             }
 #endif
@@ -890,7 +898,7 @@ static void clock_source_select (void)
            This is done to ensure that the register has been written before the next register access. The RX has a 
            pipeline architecture so the next instruction could be executed before the previous write had finished.
          */
-        if(0x00 ==  SYSTEM.HOCOCR.BYTE)
+        if(0x00 == SYSTEM.HOCOCR.BYTE)
         {
             R_BSP_NOP();
         }
@@ -904,7 +912,8 @@ static void clock_source_select (void)
     /* WAIT_LOOP */
     while(0 == SYSTEM.OSCOVFSR.BIT.HCOVF)
     {
-        /* The delay period needed is to make sure that the HOCO has stabilized. */
+        /* The delay period needed is to make sure that the HOCO has stabilized.
+           If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
         R_BSP_NOP();
     }
 #else /* (BSP_CFG_HOCO_OSCILLATE_ENABLE == 0) */
@@ -919,7 +928,8 @@ static void clock_source_select (void)
         /* WAIT_LOOP */
         while(0 == SYSTEM.OSCOVFSR.BIT.HCOVF)
         {
-            /* The delay period needed is to make sure that the HOCO has stabilized. */
+            /* The delay period needed is to make sure that the HOCO has stabilized.
+               If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
             R_BSP_NOP();
         }
     }
@@ -947,7 +957,8 @@ static void clock_source_select (void)
     /* WAIT_LOOP */
     while(0 == SYSTEM.OSCOVFSR.BIT.PLOVF)
     {
-        /* The delay period needed is to make sure that the PLL has stabilized. */
+        /* The delay period needed is to make sure that the PLL has stabilized.
+           If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
         R_BSP_NOP();
     }
 #else

@@ -31,6 +31,7 @@
         <group>RX65N</group>
         <group>RX66N</group>
         <group>RX66T</group>
+        <group>RX671</group>
         <group>RX72M</group>
         <group>RX72N</group>
         <group>RX72T</group>
@@ -38,6 +39,7 @@
         <board>RSSKRX23W</board>
         <board>RSKRX65N_2MB</board>
         <board>RSKRX66T</board>
+        <board>RSKRX671</board>
         <board>RSKRX72M</board>
         <board>RSKRX72N</board>
         <board>RSKRX72T</board>
@@ -48,11 +50,11 @@
     <package>
         <type>fitmodule</type>
         <name>r_tsip_rx</name>
-        <version>1.12.l</version>
+        <version>1.14.l</version>
         <zipsource>r_tsip_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.52</version>
+            <version>6.11</version>
         </dependency>
         <application>Generic</application>
         <desc>TSIP(Trusted Secure IP) driver.</desc>
@@ -87,6 +89,13 @@ The ".l" in version number means library version.</details>
             <libdir toolchain="RXC" endian="little" path="rel">r_tsip_rx/lib/ccrx/r_tsip_rx72m_rx72n_rx66n_little.lib</libdir>
         </library>
         <library>
+            <family>RX</family>
+            <series>RX600</series>
+            <groups>RX671</groups>
+            <libdir toolchain="RXC" endian="big" path="rel">r_tsip_rx/lib/ccrx/r_tsip_rx671_big.lib</libdir>
+            <libdir toolchain="RXC" endian="little" path="rel">r_tsip_rx/lib/ccrx/r_tsip_rx671_little.lib</libdir>
+        </library>
+        <library>
             <groups omit_series="true">RX231</groups>
             <groups omit_series="true">RX23W</groups>
             <libdir toolchain="GNURX" endian="big" path="rel">r_tsip_rx/lib/gcc/r_tsip_rx231_rx23w_big.a</libdir>
@@ -110,6 +119,13 @@ The ".l" in version number means library version.</details>
             <groups omit_series="true">RX72N</groups>
             <libdir toolchain="GNURX" endian="big" path="rel">r_tsip_rx/lib/gcc/r_tsip_rx72m_rx72n_rx66n_big.a</libdir>
             <libdir toolchain="GNURX" endian="little" path="rel">r_tsip_rx/lib/gcc/r_tsip_rx72m_rx72n_rx66n_little.a</libdir>
+        </library>
+        <library>
+            <family>RX</family>
+            <series>RX600</series>
+            <groups>RX671</groups>
+            <libdir toolchain="GNURX" endian="big" path="rel">r_tsip_rx/lib/gcc/r_tsip_rx671_big.a</libdir>
+            <libdir toolchain="GNURX" endian="little" path="rel">r_tsip_rx/lib/gcc/r_tsip_rx671_little.a</libdir>
         </library>
     </package>
 

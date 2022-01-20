@@ -153,7 +153,7 @@ typedef struct MS_generic_default_transition_time_struct
  *  \brief API to initialize Generic_Default_Transition_Time Server model
  *
  *  \par Description
- *  This is to initialize Generic_Default_Transition_Time Server model and to register with Acess layer.
+ *  This is to initialize Generic_Default_Transition_Time Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -200,7 +200,7 @@ API_RESULT MS_generic_default_transition_time_server_get_time
  *  \brief API to initialize Generic_Default_Transition_Time Client model
  *
  *  \par Description
- *  This is to initialize Generic_Default_Transition_Time Client model and to register with Acess layer.
+ *  This is to initialize Generic_Default_Transition_Time Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -237,6 +237,21 @@ API_RESULT MS_generic_default_transition_time_client_get_model_handle
            );
 
 /**
+ *  \brief API to set Generic_Default_Transition_Time client model handle
+ *
+ *  \par Description
+ *  This is to set the handle of Generic_Default_Transition_Time client model.
+ *
+ *  \param [in] model_handle   Model handle to be assigned.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_generic_default_transition_time_client_set_model_handle
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE  model_handle
+           );
+
+/**
  *  \brief API to send acknowledged commands
  *
  *  \par Description
@@ -255,7 +270,7 @@ API_RESULT MS_generic_default_transition_time_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
-/** \name Messsage Send
+/** \name Message Send
  *  \{
  */
 /**
@@ -287,7 +302,7 @@ API_RESULT MS_generic_default_transition_time_client_send_reliable_pdu
  *  The response to the Generic Default Transition Time Set message is a Generic Default
  *  Transition Time Status message.
  *
- *  \param [in] param Transition Time
+ *  \param [in] param Generic Default Transition Time Set message parameter @ref MS_GENERIC_DEFAULT_TRANSITION_TIME_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -306,7 +321,7 @@ API_RESULT MS_generic_default_transition_time_client_send_reliable_pdu
  *  Generic Default Transition Time Set Unacknowledged is an unacknowledged message used to set
  *  the Generic Default Transition Time state of an element.
  *
- *  \param [in] param Transition Time
+ *  \param [in] param Generic Default Transition Time Set Unacknowledged message parameter @ref MS_GENERIC_DEFAULT_TRANSITION_TIME_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */

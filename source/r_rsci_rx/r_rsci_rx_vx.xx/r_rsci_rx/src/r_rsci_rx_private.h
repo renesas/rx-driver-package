@@ -23,6 +23,8 @@
 * History : DD.MM.YYYY Version Description
 *           31.03.2021 1.00    Initial Release
 *                              Supported for RX671.
+*           03.12.2021 2.00    Updated new features in Asynchronous mode
+*                              and added support for Manchester mode.
 ***********************************************************************************************************************/
 
 #ifndef RSCI_RX_H
@@ -102,6 +104,18 @@ Macro definitions
 #define RSCI_SSCR_AFERC      (hdl->rom->regs->SSCR.BIT.AFERC)
 #define RSCI_SSCR            (hdl->rom->regs->SSCR.LONG)
 
+#define RSCI_MMSR_PFER      (hdl->rom->regs->MMSR.BIT.PFER)
+#define RSCI_MMSR_SYER      (hdl->rom->regs->MMSR.BIT.SYER)
+#define RSCI_MMSR_SBER      (hdl->rom->regs->MMSR.BIT.SBER)
+#define RSCI_MMSR_MCER      (hdl->rom->regs->MMSR.BIT.MCER)
+#define RSCI_MMSR           (hdl->rom->regs->MMSR.LONG)
+
+#define RSCI_MMSCR_PFER      (hdl->rom->regs->MMSCR.BIT.PFERC)
+#define RSCI_MMSCR_SYER      (hdl->rom->regs->MMSCR.BIT.SYERC)
+#define RSCI_MMSCR_SBER      (hdl->rom->regs->MMSCR.BIT.SBERC)
+#define RSCI_MMSCR_MCER      (hdl->rom->regs->MMSCR.BIT.MCERC)
+#define RSCI_MMSCR           (hdl->rom->regs->MMSCR.LONG)
+
 #if RSCI_CFG_FIFO_INCLUDED
 #define RSCI_FIFO_FRAME_SIZE (32)
 #endif
@@ -129,7 +143,7 @@ Typedef definitions
 /*****************************************************************************
 Private global variables and functions
 ******************************************************************************/
-#if (RSCI_CFG_ASYNC_INCLUDED)
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
 extern void rsci_txi_handler(rsci_hdl_t const hdl);
 #endif
 

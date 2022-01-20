@@ -5,11 +5,11 @@ rm_touch_qe
 
 Document Number 
 ---------------
-r01an4470jj0200
+r01an4470jj0201
 
 Version
 -------
-v2.00
+v2.01
 
 Overview
 --------
@@ -57,7 +57,7 @@ Peripherals Used Directly
 Required Packages
 -----------------
 * r_bsp      v6.20
-* r_ctsu_qe  v2.00
+* r_ctsu_qe  v2.01
 
 
 Toolchain(s) Used
@@ -67,22 +67,22 @@ Toolchain(s) Used
 
 File Structure
 --------------
-rm_touch_qe (v2.00)
+rm_touch_qe (v2.01)
 |   +-- readme.txt
-|   +-- rm_touch_qe_if.h (v2.00)
+|   +-- rm_touch_qe_if.h (v2.01)
 |
 +---inc
-|   +-- rm_touch_qe.h (v2.00)
-|   +-- rm_touch_qe_api.h (v2.00)
+|   +-- rm_touch_qe.h (v2.01)
+|   +-- rm_touch_qe_api.h (v2.01)
 |
 +---wrapper
 |   +-- r_touch_wrapper_qe.c
 |   +-- r_touch_wrapper_qe_h
 |
 +---src
-    +-- rm_touch_qe.c (v2.00)
+    +-- rm_touch_qe.c (v2.01)
 
 r_config
-    rm_touch_qe_config.h (v2.00)
+    rm_touch_qe_config.h (v2.01)
 
 

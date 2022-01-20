@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2020  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.14 - Graphical user interface for embedded applications **
+** emWin V6.22 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -20,11 +20,11 @@ Licensor:                 SEGGER Software GmbH
 Licensed to:              Renesas Electronics Europe GmbH, Arcadiastrasse 10, 40472 Duesseldorf, Germany
 Licensed SEGGER software: emWin
 License number:           GUI-00678
-License model:            License and Service Agreement, signed December 16th, 2016 and Amendment No. 1, signed May 16th, 2019
-License valid for:        RX65N, RX651, RX72M, RX72N, RX661, RX66N
+License model:            License and Service Agreement, signed December 16th, 2016, Amendment No. 1 signed May 16th, 2019 and Amendment No. 2, signed September 20th, 2021 by Carsten Jauch, Managing Director
+License valid for:        RX (based on RX-V1, RX-V2 or RX-V3)
 ----------------------------------------------------------------------
 Support and Update Agreement (SUA)
-SUA period:               2016-12-22 - 2020-12-31
+SUA period:               2016-12-22 - 2022-12-31
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
 File        : GUI_VNC.h
@@ -58,6 +58,10 @@ extern "C" {     /* Make sure we have C-declarations in C++ programs */
 
 #define GUI_DES_ENCRYPT 0
 #define GUI_DES_DECRYPT 1
+
+#ifndef   GUI_VNC_BUFFER_SIZE
+  #define GUI_VNC_BUFFER_SIZE        1000
+#endif
 
 //
 // File transfer
@@ -142,6 +146,10 @@ typedef struct GUI_VNC_CONTEXT {
   int (* pfStoreData)(struct GUI_VNC_CONTEXT * pContext, BUFFER_CB * pBCB, const U8 * pData, int NumBytes);
   int (* pfFlush)    (struct GUI_VNC_CONTEXT * pContext, BUFFER_CB * pBCB);
   int (* pfRead)     (struct GUI_VNC_CONTEXT * pContext, U8 *, int Len);
+  //
+  // Color format
+  //
+  LCD_PIXELINDEX (* pfColor2Index)(LCD_COLOR Color);
 } GUI_VNC_CONTEXT;
 
 typedef struct {
@@ -187,9 +195,9 @@ void GUI_VNC__SetRFBExtensionHandler(int (* pFunc)(U32, GUI_VNC_CONTEXT *, BUFFE
 //
 // External routine to link the server to the system ... USER defined !
 //
-int  GUI_VNC_X_StartServer  (int LayerIndex, int ServerIndex);
-int  GUI_VNC_X_StartServerFT(int LayerIndex, int ServerIndex);
-void GUI_VNC_X_getpeername  (U32 * Addr);
+int  GUI_VNC_X_StartServer  (int LayerIndex,  int ServerIndex);
+int  GUI_VNC_X_StartServerFT(int LayerIndex,  int ServerIndex);
+void GUI_VNC_X_getpeername  (int ServerIndex, U32 * Addr);
 
 #if defined(__cplusplus)
   }

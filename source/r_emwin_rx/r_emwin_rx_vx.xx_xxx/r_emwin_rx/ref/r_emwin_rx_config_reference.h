@@ -21,12 +21,14 @@
 * Description  : Configures the emWin module.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
-* History : DD.MM.YYYY Version Description
-*         : 31.07.2020 1.00    First Release
-*         : 04.09.2020 1.10    Update to adjust r_emwin_rx_config.h file.
-*         : 11.12.2020 1.20    Update to adjust emWin v6.14g. Modify multi-touch and timer function.
-*                              Adjust GCC and IAR compilers.
-*         : 31.03.2021 1.30    Update to adjust the spec of Smart Configurator and QE for Display.
+* History : DD.MM.YYYY Version        Description
+*         : 31.07.2020 6.14.a.1.00    First Release
+*         : 04.09.2020 6.14.a.1.10    Update to adjust r_emwin_rx_config.h file.
+*         : 11.12.2020 6.14.g.1.20    Update to adjust emWin v6.14g. Modify multi-touch and timer function.
+*                                     Adjust GCC and IAR compilers.
+*         : 31.03.2021 6.14.g.1.30    Update to adjust the spec of Smart Configurator and QE for Display.
+*         : 29.12.2021 6.20.  1.00    Update emWin library to v6.22.
+*                                     Adjust configuration option with Smart Configurator.
 ***********************************************************************************************************************/
 #ifndef R_EMWIN_RX_CONFIG_H
 #define R_EMWIN_RX_CONFIG_H
@@ -37,6 +39,8 @@
   *  Enabled when using QE for Display[RX]
   *  QE for Display[RX] adds the macro definition "QE_EMWIN_CONFIGURATION" to the compile options.
   */
+#include "platform.h"
+#include "r_glcdc_rx_if.h"
 #include "qe_emwin_config.h"
 
 #else
@@ -72,5 +76,25 @@ Configuration Options
 #define EMWIN_DISPLAY_ORIENTATION     (ORIENTATION_0)
 
 #endif /* QE_EMWIN_CONFIGURATION */
+
+
+#define DISP_DRV_GUIDRV_LIN     0
+#define DISP_DRV_GUIDRV_OTHER   99
+#define LCD_IF_GLCDC            0
+#define LCD_IF_OTHER            99
+#define TOUCH_IF_SCI_IIC        0
+#define TOUCH_IF_OTHER          99
+
+#define EMWIN_NUM_BUFFERS             (2)
+#define EMWIN_GUI_FRAME_BUFFER3       (0x00000000)
+#define EMWIN_DMAC_NUMBER             (0)
+#define EMWIN_INIT_DMAC               (1)
+
+#define EMWIN_DISPLAY_DRIVER          (DISP_DRV_GUIDRV_LIN)
+#define EMWIN_LCD_IF                  (LCD_IF_GLCDC)
+
+#define EMWIN_USE_TOUCH               (1)
+#define EMWIN_TOUCH_IF                (TOUCH_IF_SCI_IIC)
+#define EMWIN_TOUCH_IF_NUMBER         (EMWIN_SCI_IIC_NUMBER)
 
 #endif /* R_EMWIN_RX_CONFIG_H */

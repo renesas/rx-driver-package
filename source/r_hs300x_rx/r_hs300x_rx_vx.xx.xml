@@ -58,7 +58,7 @@
     </dependency>
     <dependency>
       <module>r_comms_i2c_rx</module>
-      <version>1.10</version>
+      <version>1.20</version>
     </dependency>
     <application>Sensors</application>
     <application>HS300x Humidity and Temperature Sensor</application>

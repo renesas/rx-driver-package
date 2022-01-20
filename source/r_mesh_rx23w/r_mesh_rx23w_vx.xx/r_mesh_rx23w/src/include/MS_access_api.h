@@ -567,7 +567,7 @@ API_RESULT MS_access_get_model_handle
  *         Data packet length
  *
  *  \param [in] reliable
- *         MS_TRUE for reliable message. MS_FALSE otherwise.
+ *         Set MS_TRUE if requires lower transport Ack, otherwise set MS_FALSE.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -1103,7 +1103,7 @@ API_RESULT MS_access_cm_add_update_netkey
  *  This routine adds NID, privacy and encryption keys associated with a friendship.
  *
  *  \param [in] subnet_handle    Identifies associated subnet.
- *  \param [in] friend_offset    Friend Offset.
+ *  \param [in] friend_index     Friend Index.
  *  \param [in] lpn_addr         Address of the LPN.
  *  \param [in] friend_addr      Address of the Friend.
  *  \param [in] lpn_counter      Number of Friend Request messages the LPN has sent.
@@ -1114,7 +1114,7 @@ API_RESULT MS_access_cm_add_update_netkey
 API_RESULT MS_access_cm_add_friend_sec_credential
            (
                /* IN */ MS_SUBNET_HANDLE    subnet_handle,
-               /* IN */ UINT16              friend_offset,
+               /* IN */ UINT16              friend_index,
                /* IN */ MS_NET_ADDR         lpn_addr,
                /* IN */ MS_NET_ADDR         friend_addr,
                /* IN */ UINT16              lpn_counter,

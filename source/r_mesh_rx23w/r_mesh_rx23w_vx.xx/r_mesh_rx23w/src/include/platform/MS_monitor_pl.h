@@ -28,12 +28,12 @@
  */
 
 /** \cond definitions for internal module */
-/** Mesh Monitor PDU/SNB IDs */
-#define MS_MONITOR_ID_ACCESS_PDU        (0)
-#define MS_MONITOR_ID_TRANS_PDU         (1)
-#define MS_MONITOR_ID_LTRANS_PDU        (2)
-#define MS_MONITOR_ID_NET_PDU           (3)
-#define MS_MONITOR_ID_NET_SNB           (4)
+/** Mesh Monitor PDU/Logs IDs */
+#define MS_MONITOR_ID_NET_PDU           (0)
+#define MS_MONITOR_ID_LTRANS_PDU        (1)
+#define MS_MONITOR_ID_TRANS_PDU         (2)
+#define MS_MONITOR_ID_ACCESS_PDU        (3)
+#define MS_MONITOR_ID_GENERIC_LOG       (4)
 #define MS_MONITOR_ID_MAX               (5)
 /** \endcond */
 
@@ -42,26 +42,26 @@
  */
 /** None */
 #define MS_MONITOR_NONE                 (0)
-/** All PDUs and SNB */
+/** All PDUs and Logs */
 #define MS_MONITOR_ALL                  ((1 << MS_MONITOR_ID_MAX) - 1)
-/** Access PDU */
-#define MS_MONITOR_ACCESS_PDU           (1 << MS_MONITOR_ID_ACCESS_PDU)
-/** Upper Transport PDU */
-#define MS_MONITOR_TRANS_PDU            (1 << MS_MONITOR_ID_TRANS_PDU)
-/** Lower Transport PDU */
-#define MS_MONITOR_LTRANS_PDU           (1 << MS_MONITOR_ID_LTRANS_PDU)
 /** Network PDU */
 #define MS_MONITOR_NET_PDU              (1 << MS_MONITOR_ID_NET_PDU)
-/** Network Secure Network Beacon */
-#define MS_MONITOR_NET_SNB              (1 << MS_MONITOR_ID_NET_SNB)
+/** Lower Transport PDU */
+#define MS_MONITOR_LTRANS_PDU           (1 << MS_MONITOR_ID_LTRANS_PDU)
+/** Upper Transport PDU */
+#define MS_MONITOR_TRANS_PDU            (1 << MS_MONITOR_ID_TRANS_PDU)
+/** Access PDU */
+#define MS_MONITOR_ACCESS_PDU           (1 << MS_MONITOR_ID_ACCESS_PDU)
+/** Generic Logging */
+#define MS_MONITOR_GENERIC_LOG          (1 << MS_MONITOR_ID_GENERIC_LOG)
 /** \} */
 
 /** \name Mesh Monitor Direction
  *  \{
  */
-/** Outgoing PDU/SNB */
+/** Outgoing PDU */
 #define MS_MONITOR_DIR_TX               (0)
-/** Incoming PDU/SNB */
+/** Incoming PDU */
 #define MS_MONITOR_DIR_RX               (1)
 /** \} */
 
@@ -73,56 +73,30 @@
 /**
  * \addtogroup ms_common_structures
  * \{
- * \name Mesh Monitor
+ * \name Mesh Monitor Parameter
  * \{
  */
 
-typedef struct {
+typedef struct
+{
     /** Mesh Monitor Configuration */
     UCHAR cfg;
 
     /** Access PDU callback function */
-    void (*access_pdu)(
-                UCHAR           dir,
-                UINT32          opcode,
-                const UCHAR *   pdata,
-                UINT16          datalen);
+    void (*access_pdu)(UCHAR dir, UINT16 log_msg_id, void * data);
 
     /** Upper Transport PDU callback function */
-    void (*trans_pdu)(
-                UCHAR           dir,
-                UINT16          appkey_handle,
-                UCHAR           akf,
-                UCHAR           aid,
-                const UCHAR *   pdata,
-                UINT16          datalen);
+    void (*trans_pdu)(UCHAR dir, UINT16 log_msg_id, void * data);
 
     /** Lower Transport PDU callback function */
-    void (*ltrans_pdu)(
-                UCHAR           dir,
-                UCHAR           reliable,
-                UCHAR           szmic,
-                UINT16          seq_zero,
-                const UCHAR *   pdata,
-                UINT16          datalen);
+    void (*ltrans_pdu)(UCHAR dir, UINT16 log_msg_id, void * data);
 
     /** Network PDU callback function */
-    void (*net_pdu)(
-                UCHAR           dir,
-                const MS_NET_HEADER * hdr,
-                const UCHAR *   pdata,
-                UINT16          datalen,
-                UCHAR           is_relay);
+    void (*net_pdu)(UCHAR dir, UINT16 log_msg_id, void * data);
 
-    /** Network SNB callback function */
-    void (*net_snb)(
-                UCHAR           dir,
-                MS_SUBNET_HANDLE subnet_handle,
-                UINT32          iv_index,
-                UCHAR           flags,
-                UCHAR           is_new_key,
-                const UCHAR *   pdata,
-                UINT16          datalen);
+    /** Generic Logging callback function */
+    void (*generic_log)(UCHAR module_id, UINT16 log_msg_type, UINT16 status, void * data);
+
 } MS_MONITOR_PL;
 
 /** \} */
@@ -148,8 +122,7 @@ typedef struct {
  *    - Access PDU
  *    - Upper Transport PDU
  *    - Lower Transport PDU
- *    - Network PDU
- *    - Network SNB
+ *    - Network PDU/SNB
  *
  *  \param [in] monitor     mesh monitor callbacks
  *

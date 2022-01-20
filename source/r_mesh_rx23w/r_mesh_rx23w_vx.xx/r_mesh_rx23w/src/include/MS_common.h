@@ -865,6 +865,75 @@ typedef struct _MS_CONFIG
      */
     UINT16 config_MS_NET_SEQ_NUMBER_BLOCK_SIZE;
 
+    /** Network Transmit Count for network packets - default value */
+    UINT8 config_MS_NET_TX_COUNT;
+
+    /** Network Interval Steps for network packets - default value */
+    UINT8 config_MS_NET_TX_INTERVAL_STEPS;
+
+    /** Network Transmit Count for relayed packets - default value */
+    UINT8 config_MS_NET_RELAY_TX_COUNT;
+
+    /** Network Interval Steps for relayed packets - default value */
+    UINT8 config_MS_NET_RELAY_TX_INTERVAL_STEPS;
+
+    /** Secure Network Beacon Interval - default value */
+    UINT16 config_MS_CONFIG_SERVER_SNB_TIMEOUT;
+
+    /**
+     * Poxy ADV Network ID timeout for each Subnet in milliseconds.
+     */
+    UINT16 config_MS_PROXY_SUBNET_NETID_ADV_TIMEOUT;
+
+    /**
+     * Poxy ADV Node Identity timeout for each Subnet in milliseconds.
+     */
+    UINT16 config_MS_PROXY_SUBNET_NODEID_ADV_TIMEOUT;
+
+    /**
+     * Poxy ADV Node Identity overall time period in milliseconds.
+     */
+    UINT32 config_MS_PROXY_NODEID_ADV_TIMEOUT;
+
+    /** Friend Poll Retry Count - default value */
+    UINT16 config_MS_FRND_POLL_RETRY_COUNT;
+
+    /** Lower Transport Segment Transmission Timeout in milliseconds */
+    UINT16 config_MS_LTRN_RTX_TIMEOUT;
+
+    /** Lower Transport Segment Transmission Count - default value */
+    UINT8  config_MS_LTRN_RTX_COUNT;
+
+    /** Lower Transport Acknowledgement Timeout in milliseconds */
+    UINT16 config_MS_LTRN_ACK_TIMEOUT;
+
+    /** Lower Transport Incomplete Timeout in milliseconds */
+    UINT16 config_MS_LTRN_INCOMPLETE_TIMEOUT;
+
+    /** Friendship Receive Window - default value */
+    UINT8  config_MS_FRND_RECEIVE_WINDOW;
+
+    /** Friend Clear Confirmation Timeout in milliseconds */
+    UINT16 config_MS_LPN_CLEAR_RETRY_TIMEOUT_INITIAL;
+
+    /** Friendship Retry Timeout in milliseconds */
+    UINT16 config_MS_TRN_FRNDREQ_RETRY_TIMEOUT;
+
+    /** Unprovisioned Device Beacon Interleaved Beacon Timeout */
+    UINT16 config_MS_UNPROV_DEVICE_BEACON_TIMEOUT;
+
+    /**
+     * Maximum number of messages that can be queued in Network layer
+     * for Transmission.
+     */
+    UINT16 config_MS_NET_TX_QUEUE_SIZE;
+
+    /** Maximum number of Transition Timers */
+    UINT16 config_MS_MAX_NUM_TRANSITION_TIMERS;
+
+    /** Maximum number of Periodic Step Timers */
+    UINT16 config_MS_MAX_NUM_PERIODIC_STEP_TIMERS;
+
     /**
      *  Maximum number of Health Server Instances.
      */
@@ -1051,6 +1120,27 @@ API_RESULT MS_common_get_transition_time_from_ms
            (
                /* IN */  UINT32 transition_time_in_ms,
                /* OUT */ UINT8 * transition_time
+           );
+
+/**
+ *  \brief To convert transition time to milisecond.
+ *
+ *  \par Description
+ *  API to convert Generic Default Transition Time state format to
+ *  required transition time value in miliseconds.
+ *
+ *  \param [in] transition_time
+ *         Transition time in Generic Default Transition Time state format.
+ *
+ *  \param [out] transition_time_in_ms
+ *         Converted value of Transition Time in milisecond.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_common_get_transition_time_in_ms
+           (
+               /* IN */  UINT8 transition_time,
+               /* OUT */ UINT32 * transition_time_in_ms
            );
 
 /**

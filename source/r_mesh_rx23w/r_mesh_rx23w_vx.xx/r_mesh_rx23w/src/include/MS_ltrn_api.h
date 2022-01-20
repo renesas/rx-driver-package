@@ -53,6 +53,9 @@
 #define MS_SEGMENTED_CTRL_MSG         0x03
 /** \} */
 
+/** Transport Message Type */
+typedef UCHAR   MS_TRN_MSG_TYPE;
+
 /**
  * \name message types
  * \{
@@ -62,6 +65,7 @@
 
 /** Access Layer Packet */
 #define MS_TRN_ACCESS_PKT          0x00
+
 /** \} */
 
 /** \} */
@@ -75,9 +79,6 @@
  */
 /** LPN Handle */
 typedef UINT8 LPN_HANDLE;
-
-/** Transport Message Type */
-typedef UCHAR   MS_TRN_MSG_TYPE;
 
 /** \} */
 
@@ -108,6 +109,41 @@ typedef API_RESULT (*LTRN_NTF_CB)
         ) DECL_REENTRANT;
 
 /**
+ * Lower TRANSPORT Friend Segment Ack Asynchronous Notification Callback for Transport Layer.
+ *
+ * Lower TRANSPORT calls the registered callback to indicate Friend Segment Ack event
+ * to the transport layer.
+ *
+ * \param subnet_handle     Associated Subnet Handle.
+ */
+typedef void (*LTRN_FRND_HANDLE_SEGMENT_ACK_CB)
+        (
+            MS_SUBNET_HANDLE    subnet_handle
+        ) DECL_REENTRANT;
+
+/**
+ * Lower TRANSPORT Add to Queue Asynchronous Notification Callback for Transport Layer.
+ *
+ * Lower TRANSPORT calls the registered callback to indicate add to queue to the
+ * transport layer.
+ *
+ * \param lpn_index         LPN identifier.
+ * \param pkt_type          Packet Type.
+ * \param net_hdr           Network Header.
+ * \param pdu               PDU associated with the event.
+ * \param pdu_len           Size of the PDU.
+ */
+typedef API_RESULT (*LTRN_ADD_TO_QUEUE_CB)
+        (
+            LPN_HANDLE       lpn_index,
+            UINT8            pkt_type,
+            MS_NET_HEADER  * net_hdr,
+            UINT8          * pdu,
+            UINT8            pdu_len
+        ) DECL_REENTRANT;
+
+/* TODO: Move this also part of the callback structure */
+/**
  * Lower TRANSPORT Transmit State Application Asynchronous Notification
  * Callback.
  *
@@ -124,6 +160,21 @@ typedef API_RESULT (*LTRN_TX_STATE_ACCESS_CB)
             MS_SUBNET_HANDLE  subnet_handle,
             UINT16            status
         ) DECL_REENTRANT;
+
+/** Lower Transport Callback Data Structure */
+typedef struct _MS_LTRN_CB_STRUCT
+{
+    /** Data reception callback */
+    LTRN_NTF_CB ntf_cb;
+
+    /** Friend Segment Ack callback */
+    LTRN_FRND_HANDLE_SEGMENT_ACK_CB seg_ack_cb;
+
+    /** Add to Queue callback */
+    LTRN_ADD_TO_QUEUE_CB add_to_queue_cb;
+
+} MS_LTRN_CB_STRUCT;
+
 /** \} */
 
 /** TCF (Transport Control Field) - Transport Field Value */
@@ -148,14 +199,14 @@ extern "C" {
  *  This routine registers interface with the Lower Transport Layer.
  *  Transport Layer supports single Application, hence this rouine shall be called once.
  *
- *  \param [in] ltrn_cb
- *         Upper Layer Notification Callback
+ *  \param [in] cb
+ *         Pointer to data structure holding Upper Layer Notification Callbacks
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
 API_RESULT MS_ltrn_register
            (
-               /* IN */ LTRN_NTF_CB    ltrn_cb
+               /* IN */ MS_LTRN_CB_STRUCT    * cb
            );
 /** \endcond */
 
@@ -225,6 +276,35 @@ API_RESULT MS_ltrn_send_pdu
  */
 API_RESULT MS_ltrn_clear_sar_contexts(void);
 
+/**
+ *  \brief To clear all Segmentation and Reassembly Contexts for a given Subnet
+ *
+ *  \par Description
+ *  This routine clears all Segmentation and Reassembly Contexts.
+ *
+ *  \param [in] subnet_handle    Subnet Handle whose respective SAR Contexts
+ *                               are to be cleared.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_ltrn_clear_subnet_sar_contexts
+           (
+               /* IN */ MS_SUBNET_HANDLE   subnet_handle
+           );
+
+/**
+ *  \brief To reinitialize all Lower Transport Replay Cache Entries
+ *
+ *  \par Description
+ *  This routine clears and reinitializes all Transport Replay Cache Entries.
+ *  This needs to be invoked by the upper layer when the Network moves to a
+ *  newer IV Index (Normal State) and the Sequence
+ *  numbers are reset.
+ *
+ *  \return None
+ */
+void MS_ltrn_reinit_replay_cache(void);
+
 /** \cond DOC_EXCLUDE */
 /**
  *  \brief Register Inerface with Lower Transport Layer to fetch the current
@@ -246,6 +326,18 @@ API_RESULT MS_ltrn_register_tx_state_access
            (
                /* IN */ LTRN_TX_STATE_ACCESS_CB    tx_state_cb
            );
+
+/**
+ *  \brief To trigger any LTRN pending Transmissions.
+ *
+ *  \par Description
+ *  Trigger pending transmits is an interface to check for pending segments in
+ *  the tx queue and schedule for transmission, which is mainly used by the LPN
+ *  operation.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_ltrn_trigger_pending_transmits(void);
 /** \endcond */
 
 #ifdef __cplusplus

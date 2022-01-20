@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2020-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 /*******************************************************************************
@@ -27,30 +27,13 @@
 #if SYSTEMTIME_EN
 
 /*******************************************************************************
-* Macro definitions
-*******************************************************************************/
-#if (BSP_PCLKB_HZ == 32000000)
-#define TMR_TIMEOUT_TIME_MS             (16768)
-#define TMR_TIMEOUT_TIME_CLK            (0xFFDC - 1)
-#define TMR_CONV_TIME_MS                (32)
-#define TMR_CONV_TIME_CLK               (125)
-#define SYSTEMTIME_
-#elif (BSP_PCLKB_HZ == 54000000)
-#define TMR_TIMEOUT_TIME_MS             (9728)
-#define TMR_TIMEOUT_TIME_CLK            (0xFA7D - 1)
-#define TMR_CONV_TIME_MS                (512)
-#define TMR_CONV_TIME_CLK               (3375)
-#else
-#define TMR_TIMEOUT_TIME_MS             (8192)
-#define TMR_TIMEOUT_TIME_CLK            (BSP_PCLKB_HZ / 1000)
-#define TMR_CONV_TIME_MS                (8192)
-#define TMR_CONV_TIME_CLK               (BSP_PCLKB_HZ / 1000)
-#endif
-
-/*******************************************************************************
 * Global Variables and Private Functions declaration
 *******************************************************************************/
 static uint32_t gs_systemtime_ms;
+static uint16_t gs_tmr_timeout_ms;
+static uint16_t gs_tmr_timeout_clk;
+static uint16_t gs_tmr_conv_ms;
+static uint16_t gs_tmr_conv_clk;
 
 /*******************************************************************************
 * Functions
@@ -61,6 +44,7 @@ static uint32_t gs_systemtime_ms;
 uint8_t mesh_systemtime_init(void)
 {
     /* TMR2 and TMR3 are cascaded-connected and used as a 16-bit count timer */
+    /* PCLKB for TMR2 and TMR3 is divided by '8192' */
 
     /* Lock TMR2 and TMR3 */
     if (false == R_BSP_HardwareLock(BSP_LOCK_TMR2))
@@ -75,6 +59,34 @@ uint8_t mesh_systemtime_init(void)
 
     gs_systemtime_ms = 0;
 
+    /* NOTE: PCLKB must be lower than 65.535MHz */
+    {
+        const uint16_t clk_div = 8192; /* clock divisor of PCLKB, i.e. multiplier for time */
+        uint16_t clk_per_ms = (uint16_t)(BSP_PCLKB_HZ / 1000); /* [clk/ms] */
+        uint16_t grt_cmn_div = 0; /* greatest common divisor */
+
+        /* calculate log_2 of a greatest common divisor of (BSP_PCLKB_HZ / 1000) and 8192 */
+        while (grt_cmn_div <= 13) /* 13=log_2(8192) */
+        {
+            grt_cmn_div++;
+            /* equivalent to "(clk_per_ms % (2^grt_cmn_div)) != 0" */
+            if (clk_per_ms != ((clk_per_ms >> grt_cmn_div) << grt_cmn_div))
+            {
+                grt_cmn_div--;
+                break;
+            }
+        }
+
+        /* calculate a greatest common divisor */
+        grt_cmn_div = 1 << grt_cmn_div;
+
+        /* calculate [ms] vs [clk] conversion parameters */
+        gs_tmr_conv_clk = clk_per_ms / grt_cmn_div;                        /* 0x7D[clk]   at PCLKB=32MHz */
+        gs_tmr_conv_ms  = clk_div    / grt_cmn_div;                        /* 32[ms]      at PCLKB=32MHz */
+        gs_tmr_timeout_clk = gs_tmr_conv_clk * (0xFFFF / gs_tmr_conv_clk); /* 0xFFDC[clk] at PCLKB=32MHz */
+        gs_tmr_timeout_ms  = gs_tmr_conv_ms  * (0xFFFF / gs_tmr_conv_clk); /* 16768[ms]   at PCLKB=32MHz */
+    }
+
     /* Enable writing to MSTP registers. */
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);
 
@@ -85,9 +97,8 @@ uint8_t mesh_systemtime_init(void)
     TMR2.TCCR.BYTE = 0x18;
 
     /* Set Compare Match A Value */
-    /* NOTE: 0xFFDC[clk] is equivalent to 16,768[ms] at PCLKB=32MHz */
-    /* NOTE: 0xFA7D[clk] is equivalent to  9,728[ms] at PCLKB=54MHz */
-    TMR23.TCORA = TMR_TIMEOUT_TIME_CLK;
+    /* e.g. 0xFFDC[clk] is equivalent to 16,768[ms] at PCLKB=32MHz */
+    TMR23.TCORA = gs_tmr_timeout_clk - 1;
 
     /* Clear Count by Compare Match A */
     TMR2.TCR.BIT.CCLR = 0x1;
@@ -126,9 +137,8 @@ uint8_t mesh_systemtime_is_active(void)
 uint32_t mesh_systemtime_read(void)
 {
     /* Convert clocks to milliseconds */
-    /* NOTE:  125[clk] is equivalent to  32[ms] at PCLKB=32MHz */
-    /* NOTE: 3375[clk] is equivalent to 512[ms] at PCLKB=54MHz */
-    uint32_t timer_ms = (TMR23.TCNT * TMR_CONV_TIME_MS) / TMR_CONV_TIME_CLK;
+    /* e.g. 125[clk] is equivalent to 32[ms] at PCLKB=32MHz */
+    uint32_t timer_ms = (TMR23.TCNT * gs_tmr_conv_ms) / gs_tmr_conv_clk;
 
     return (timer_ms + gs_systemtime_ms);
 }
@@ -175,9 +185,8 @@ R_BSP_PRAGMA_STATIC_INTERRUPT(mesh_tmr2_isr, VECT(TMR2, CMIA2))
 R_BSP_ATTRIB_STATIC_INTERRUPT void mesh_tmr2_isr(void)
 {
     /* Add Timeout time when Compare Match Interrupt occurs */
-    /* NOTE: Interrupt Cycle is 0xFFDC[clk]=16,768[ms] at PCLKB=32MHz */
-    /* NOTE: Interrupt Cycle is 0xFA7D[clk]= 9,728[ms] at PCLKB=54MHz */
-    gs_systemtime_ms += TMR_TIMEOUT_TIME_MS;
+    /* e.g. Interrupt Cycle is 0xFFDC[clk]=16,768[ms] at PCLKB=32MHz */
+    gs_systemtime_ms += gs_tmr_timeout_ms;
 }
 
 #endif /* SYSTEMTIME_EN */

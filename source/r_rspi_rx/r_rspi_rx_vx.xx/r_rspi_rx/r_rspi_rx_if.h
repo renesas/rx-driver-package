@@ -43,6 +43,7 @@
 *         : 10.09.2020 3.00     Added new API function R_RSPI_DisableRSPI() and R_RSPI_DisableSpti().
 *         : 30.06.2021 3.01     Supported RX671.
 *         : 31.07.2021 3.02     Supported RX140.
+*         : 31.10.2021 3.03     Version number change.
 ***********************************************************************************************************************/
 
 #ifndef RSPI_API_HEADER_FILE
@@ -69,7 +70,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define RSPI_RX_VERSION_MAJOR           (3)
-#define RSPI_RX_VERSION_MINOR           (02)
+#define RSPI_RX_VERSION_MINOR           (03)
 
 /***********************************************************************************************************************
 Typedef definitions

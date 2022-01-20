@@ -41,16 +41,6 @@
  * \defgroup net_addressing Addressing
  * \{
  * Describes five basic type of addresses, the Network Layer defines.
- *
- * Address Validity
- *
- *  | Address Type | Valid in Source Address Field  | Valid in Destination Address Field |
- *  | :----------: | :----------------------------: | :--------------------------------: |
- *  | Unassigned   | No                             | No                                 |
- *  | Unicast      | Yes                            | Yes                                |
- *  | Virtual      | No                             | Yes                                |
- *  | Group        | No                             | Yes                                |
- *  | Broadcast    | No                             | Yes                                |
  */
 
 /**
@@ -76,7 +66,7 @@
 /**
  * \name Unicast Address.
  * A unicast address is a unique address allocated to each component within a node.
- *  A unicast address has bit 15 cleared to zero.
+ * A unicast address has most significant bit (bit 15) set to zero.
  * The unicast address shall not have the value 0x0000,
  * and therefore can have any value from 0x0001 to 0x7FFF inclusive.
  *
@@ -159,6 +149,19 @@
 #define MS_NET_ADDR_ALL_NODES                   0xFFFF
 /** \} */
 
+
+/**
+ * Address Validity
+ *
+ *  | Address Type | Valid in Source Address Field  | Valid in Destination Address Field |
+ *  | :----------: | :----------------------------: | :--------------------------------: |
+ *  | Unassigned   | No                             | No                                 |
+ *  | Unicast      | Yes                            | Yes                                |
+ *  | Virtual      | No                             | Yes                                |
+ *  | Group        | No                             | Yes                                |
+ *  | Broadcast    | No                             | Yes                                |
+ */
+
 /**
  * \name Network Layer Feature Idenfiers
  * \{
@@ -177,6 +180,14 @@
 
 /** Invalid AppKey Handle */
 #define MS_INVALID_APPKEY_HANDLE  0xFFFF
+
+/**
+ * Invalid NID Identifier.
+ * The NID is a 7-bit value that identifies the security material that is used
+ * to secure Network PDUs.
+ * Treating 0xFF as Invalid NID value.
+ */
+#define MS_INVALID_NID            0xFF
 
 /** \} */
 
@@ -302,9 +313,9 @@ typedef struct _MS_NET_HEADER
     UINT8 nid;
 
     /**
-	 * Indicates use of a new Netkey to which the network
-	 * is being updated to
-	 */
+     * Indicates use of a new Netkey to which the network
+     * is being updated to
+     */
     UINT8 new_key;
 
     /** Network Control - 1 bit */
@@ -458,6 +469,121 @@ typedef API_RESULT (*NET_TX_STATE_ACCESS_CB)
         (((MS_NET_ADDR_UNASSIGNED != (addr)) && \
          ((0x01 != (ctl)) || (MS_FALSE == MS_IS_VIRTUAL_ADDR(addr)))) \
          ? MS_TRUE : MS_FALSE)
+
+
+/**
+ *  \brief Set Proxy WhiteList Filter.
+ *
+ *  \par Description This function is used by the Proxy Client
+ *  to set the filter type on the Proxy Server to \ref MS_PROXY_WHITELIST_FILTER.
+ *
+ *  \param [in] nh Network Interface Handle
+ *  \param [in] sh Subnet Handle
+ *
+ *  \note This API will be used by the Proxy Client only.
+ *
+ *  \return API_SUCCESS or Error Code on failure
+ */
+#define MS_proxy_set_whitelist_filter(nh,sh)    \
+        MS_proxy_set_filter                     \
+        (                                       \
+            (nh),                               \
+            (sh),                               \
+            MS_PROXY_WHITELIST_FILTER           \
+        );
+
+/**
+ *  \brief Set Proxy BlackList Filter.
+ *
+ *  \par Description This function is used by the Proxy Client
+ *  to set the filter type on the Proxy Server to \ref MS_PROXY_BLACKLIST_FILTER.
+ *
+ *  \param [in] nh Network Interface Handle
+ *  \param [in] sh Subnet Handle
+ *
+ *  \note This API will be used by the Proxy Client only.
+ *
+ *  \return API_SUCCESS or Error Code on failure
+ */
+#define MS_proxy_set_blacklist_filter(nh,sh)    \
+        MS_proxy_set_filter                     \
+        (                                       \
+            (nh),                               \
+            (sh),                               \
+            MS_PROXY_BLACKLIST_FILTER           \
+        );
+
+/**
+ *  \brief Add addressess to Proxy Filter List.
+ *
+ *  \par Description This function is used by the Proxy Client
+ *  to add Addressess to the Proxy Server's filter List.
+ *
+ *  \param [in] nh Network Interface Handle
+ *  \param [in] sh Subnet Handle
+ *  \param [in] a  Pointer to List of Address to be added
+ *  \param [in] c  Count of Addressess present in the provided List
+ *
+ *  \note This API will be used by the Proxy Client only.
+ *
+ *  \return API_SUCCESS or Error Code on failure
+ */
+#define MS_proxy_add_to_list(nh,sh,a,c)         \
+        MS_proxy_filter_op                      \
+        (                                       \
+            (nh),                               \
+            (sh),                               \
+            MS_PROXY_ADD_TO_FILTER_OPCODE,      \
+            (a),                                \
+            (c)                                 \
+        );
+
+/**
+ *  \brief Delete addresses from Proxy Filter List.
+ *
+ *  \par Description This function is used by the Proxy Client
+ *  to delete/remove Addresses from the Proxy Server's filter List.
+ *
+ *  \param [in] nh Network Interface Handle
+ *  \param [in] sh Subnet Handle
+ *  \param [in] a  Pointer to List of Address to be deleted/removed
+ *  \param [in] c  Count of Addressess present in the provided List
+ *
+ *  \note This API will be used by the Proxy Client only.
+ *
+ *  \return API_SUCCESS or Error Code on failure
+ */
+#define MS_proxy_del_from_list(nh,sh,a,c)       \
+        MS_proxy_filter_op                      \
+        (                                       \
+            (nh),                               \
+            (sh),                               \
+            MS_PROXY_REM_FROM_FILTER_OPCODE,    \
+            (a),                                \
+            (c)                                 \
+        );
+
+/**
+ *  \brief API to send NETWORK PDUs
+ *
+ *  \par Description
+ *  This routine sends NETWORK PDUs to peer device on all available Network
+ *  Interfaces.
+ *
+ *  \param [in] hdr
+ *         Network Header
+ *
+ *  \param [in] subnet_handle
+ *         Subnet Handle
+ *
+ *  \param [in] buffer
+ *         Lower Transport Payload
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+#define MS_net_send_pdu(hd,sh,buf) \
+        MS_net_send_pdu_on_netif((NULL), (hd), (sh), (buf))
+
 /** \} */
 
 /** \} */
@@ -511,10 +637,18 @@ API_RESULT MS_net_broadcast_secure_beacon
            );
 
 /**
- *  \brief API to send NETWORK PDUs
+ *  \brief Extension API to send NETWORK PDUs on selected Network Interfaces
  *
  *  \par Description
- *  This routine sends NETWORK PDUs to peer device.
+ *  This routine sends NETWORK PDUs on all or selected Network Interfaces
+ *
+ *  \param [in] handle
+ *         Network Interface Handle reference.
+ *         If no \ref NETIF_HANDLE is provided i.e. is handle is NULL
+ *         it implies that the intention is to send the Network PDU over
+ *         all network interfaces. If a valid \ref NETIF_HANDLE reference
+ *         is provided, then the Network PDU will be sent on that particular
+ *         Network Interface Handle.
  *
  *  \param [in] hdr
  *         Network Header
@@ -527,8 +661,9 @@ API_RESULT MS_net_broadcast_secure_beacon
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
-API_RESULT MS_net_send_pdu
+API_RESULT MS_net_send_pdu_on_netif
            (
+               /* IN */ NETIF_HANDLE     * handle,
                /* IN */ MS_NET_HEADER    * hdr,
                /* IN */ MS_SUBNET_HANDLE   subnet_handle,
                /* IN */ MS_BUFFER        * buffer
@@ -650,99 +785,6 @@ API_RESULT MS_proxy_filter_op
 /**
  * \endcond
  */
-
-/**
- *  \brief Set Proxy WhiteList Filter.
- *
- *  \par Description This function is used by the Proxy Client
- *  to set the filter type on the Proxy Server to \ref MS_PROXY_WHITELIST_FILTER.
- *
- *  \param [in] nh Network Interface Handle
- *  \param [in] sh Subnet Handle
- *
- *  \note This API will be used by the Proxy Client only.
- *
- *  \return API_SUCCESS or Error Code on failure
- */
-#define MS_proxy_set_whitelist_filter(nh,sh)    \
-        MS_proxy_set_filter                     \
-        (                                       \
-            (nh),                               \
-            (sh),                               \
-            MS_PROXY_WHITELIST_FILTER           \
-        );
-
-/**
- *  \brief Set Proxy BlackList Filter.
- *
- *  \par Description This function is used by the Proxy Client
- *  to set the filter type on the Proxy Server to \ref MS_PROXY_BLACKLIST_FILTER.
- *
- *  \param [in] nh Network Interface Handle
- *  \param [in] sh Subnet Handle
- *
- *  \note This API will be used by the Proxy Client only.
- *
- *  \return API_SUCCESS or Error Code on failure
- */
-#define MS_proxy_set_blacklist_filter(nh,sh)    \
-        MS_proxy_set_filter                     \
-        (                                       \
-            (nh),                               \
-            (sh),                               \
-            MS_PROXY_BLACKLIST_FILTER           \
-        );
-
-/**
- *  \brief Add addressess to Proxy Filter List.
- *
- *  \par Description This function is used by the Proxy Client
- *  to add Addressess to the Proxy Server's filter List.
- *
- *  \param [in] nh Network Interface Handle
- *  \param [in] sh Subnet Handle
- *  \param [in] a  Pointer to List of Address to be added
- *  \param [in] c  Count of Addressess present in the provided List
- *
- *  \note This API will be used by the Proxy Client only.
- *
- *  \return API_SUCCESS or Error Code on failure
- */
-#define MS_proxy_add_to_list(nh,sh,a,c)         \
-        MS_proxy_filter_op                      \
-        (                                       \
-            (nh),                               \
-            (sh),                               \
-            MS_PROXY_ADD_TO_FILTER_OPCODE,      \
-            (a),                                \
-            (c)                                 \
-        );
-
-/**
- *  \brief Delete addresses from Proxy Filter List.
- *
- *  \par Description This function is used by the Proxy Client
- *  to delete/remove Addresses from the Proxy Server's filter List.
- *
- *  \param [in] nh Network Interface Handle
- *  \param [in] sh Subnet Handle
- *  \param [in] a  Pointer to List of Address to be deleted/removed
- *  \param [in] c  Count of Addressess present in the provided List
- *
- *  \note This API will be used by the Proxy Client only.
- *
- *  \return API_SUCCESS or Error Code on failure
- */
-#define MS_proxy_del_from_list(nh,sh,a,c)       \
-        MS_proxy_filter_op                      \
-        (                                       \
-            (nh),                               \
-            (sh),                               \
-            MS_PROXY_REM_FROM_FILTER_OPCODE,    \
-            (a),                                \
-            (c)                                 \
-        );
-
 /** \} */
 #endif /* MS_PROXY_CLIENT */
 
@@ -765,6 +807,9 @@ API_RESULT MS_proxy_filter_op
  *              \ref MS_PROXY_NODE_ID_ADV_MODE
  *
  *  \note This API will be used by the Proxy Server only.
+ *  \note If MESH_CFG_MAX_SUBNETS is set to subnet_handle and \ref MS_PROXY_NODE_ID_ADV_MODE
+ *  is set to proxy_adv_mode, Proxy Advertisement with Node Identity is performed for all the
+ *  known subnets.
  *
  *  \return API_SUCCESS or Error Code on failure
  */
@@ -813,6 +858,25 @@ API_RESULT MS_net_alloc_seq_num(/* OUT */ UINT32   * seq_num);
 API_RESULT MS_net_get_seq_num_state(/* OUT */ NET_SEQ_NUMBER_STATE * seq_num_state);
 
 /**
+ * \cond ignore_this Ignore this block while generating doxygen document
+ */
+/**
+ *  \brief To get current Sequence Number state.
+ *
+ *  \par Description This function is used to get current
+ *  Sequence Number state, which acquiring lock.
+ *  Used from persistent storage.
+ *
+ *  \param [out] seq_num_state  Location where Seq Number state to be filled.
+ *
+ *  \return API_SUCCESS or Error Code on failure
+ */
+API_RESULT MS_net_get_seq_num_state_wl(/* OUT */ NET_SEQ_NUMBER_STATE * seq_num_state);
+/**
+ * \endcond
+ */
+
+/**
  *  \brief To set current Sequence Number state.
  *
  *  \par Description This function is used to set current
@@ -823,6 +887,25 @@ API_RESULT MS_net_get_seq_num_state(/* OUT */ NET_SEQ_NUMBER_STATE * seq_num_sta
  *  \return API_SUCCESS or Error Code on failure
  */
 API_RESULT MS_net_set_seq_num_state(/* IN */ NET_SEQ_NUMBER_STATE * seq_num_state);
+
+/**
+ * \cond ignore_this Ignore this block while generating doxygen document
+ */
+/**
+ *  \brief To set current Sequence Number state.
+ *
+ *  \par Description This function is used to set current
+ *  Sequence Number state, without acquiring lock.
+ *  User from persistent storage module.
+ *
+ *  \param [in] seq_num_state  Location from where Seq Number state to be taken.
+ *
+ *  \return API_SUCCESS or Error Code on failure
+ */
+API_RESULT MS_net_set_seq_num_state_wl(/* IN */ NET_SEQ_NUMBER_STATE * seq_num_state);
+/**
+ * \endcond
+ */
 
 /** \cond DOC_EXCLUDE */
 /**
@@ -844,6 +927,35 @@ API_RESULT MS_net_register_tx_state_access
                 /* IN */ NET_TX_STATE_ACCESS_CB    tx_state_cb
            );
 /** \endcond */
+
+#ifdef MS_NET_IGNORE_CACHE_WRAP
+/**
+ *  \brief Function to ignore netcache wrapping.
+ *
+ *  \par Description
+ *  This routine enables/disables ignoring of netcache wrapping.
+ *
+ *  \param [in] ignore
+ *         MS_TRUE: Ignores cache wrapping. Old packets will be processed.
+ *         MS_FALSE: Old packets will be dropped. Default behaviour.
+ *
+ *  \return None
+ */
+void MS_net_cache_wrap_ignore(UCHAR ignore);
+#endif /* MS_NET_IGNORE_CACHE_WRAP */
+
+/**
+ *  \brief To reinitialize all Network Layer Cache Entries
+ *
+ *  \par Description
+ *  This routine clears and reinitializes all Network Cache Entries.
+ *  This needs to be invoked by the upper layer when the Network moves to a
+ *  newer IV Index (Normal State) and the Sequence
+ *  numbers are reset.
+ *
+ *  \return None
+ */
+void MS_net_reinit_net_cache(void);
 
 #ifdef __cplusplus
 };

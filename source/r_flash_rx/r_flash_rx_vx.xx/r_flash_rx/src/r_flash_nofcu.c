@@ -23,6 +23,8 @@
 /**********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *           23.04.2021 4.80    First Release. (Changed the structure of FLASH_TYPE_1 code with the addition of RX140.)
+ *           12.12.2021 4.81    Modified some global variables problems.
+ *           10.12.2021 4.81    Added support for Tool News R20TS0772, and removed unnecessary code in flash_write().
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -503,8 +505,8 @@ flash_err_t flash_erase(const uint32_t block_address, const uint32_t num_blocks)
     }
 
     /* Return if in BGO mode. Processing will finish in FRDYI interrupt */
-    if ((g_current_parameters.current_operation == FLASH_CUR_CF_BGO_ERASE)
-     || (g_current_parameters.current_operation == FLASH_CUR_DF_BGO_ERASE))
+    if ((g_current_parameters.bgo_enabled_cf == true)
+     || (g_current_parameters.bgo_enabled_df == true))
     {
         return err;
     }
@@ -559,8 +561,8 @@ flash_err_t flash_blankcheck(const uint32_t start_address, const uint32_t num_by
     }
 
     /* Return if in BGO mode. Processing will finish in FRDYI interrupt */
-    if ((g_current_parameters.current_operation == FLASH_CUR_CF_BGO_BLANKCHECK)
-     || (g_current_parameters.current_operation == FLASH_CUR_DF_BGO_BLANKCHECK))
+    if ((g_current_parameters.bgo_enabled_cf == true)
+     || (g_current_parameters.bgo_enabled_df == true))
     {
         return err;
     }
@@ -625,6 +627,8 @@ flash_err_t flash_write(const uint32_t src_address, const uint32_t dest_address,
 
     while(g_current_parameters.total_count > 0)
     {
+        g_current_parameters.total_count--;
+
         /* Conversion to the P/E address from the read address */
         if (FLASH.FENTRYR.WORD == 0x0080)
         {
@@ -639,17 +643,9 @@ flash_err_t flash_write(const uint32_t src_address, const uint32_t dest_address,
         }
 #endif
 
-        g_current_parameters.total_count--;
-
-        if (g_current_parameters.current_operation == FLASH_CUR_STOP)   // err occurred; addr known good; protection err
-        {
-            err = FLASH_ERR_ACCESSW;
-            break;
-        }
-
         /* Return if in BGO mode. Processing will finish in FRDYI interrupt */
-        if ((g_current_parameters.current_operation == FLASH_CUR_CF_BGO_WRITE)
-         || (g_current_parameters.current_operation == FLASH_CUR_DF_BGO_WRITE))
+        if ((g_current_parameters.bgo_enabled_cf == true)
+         || (g_current_parameters.bgo_enabled_df == true))
         {
             break;
         }

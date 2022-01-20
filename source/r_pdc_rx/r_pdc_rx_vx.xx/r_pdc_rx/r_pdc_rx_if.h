@@ -14,11 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2017 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_pdc_rx_if.h
- * Version      : 2.05
+ * Version      : 2.06
  * Description  : PDC module device driver
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
@@ -30,6 +30,8 @@
  *         : 30.07.2019 2.04     Changed Minor version to 2.04.
  *                               Added changes for RX72M.
  *         : 22.11.2019 2.05     Changed Minor version to 2.05.
+ *         : 07.01.2022 2.06     Changed Minor version to 2.06.
+ *                               Added PDC_ERR_ONGOING to pdc_return_t.
  ***********************************************************************************************************************/
 /* Guards against multiple inclusion. */
 #ifndef PDC_RX_IF_H
@@ -55,7 +57,7 @@
 
 /* Version Number of API. */
     #define PDC_RX_VERSION_MAJOR  (2)
-    #define PDC_RX_VERSION_MINOR  (5)
+    #define PDC_RX_VERSION_MINOR  (6)
 
 /* Selects the active sense of the VSYNC signal. */
     #define PDC_VSYNC_SIGNAL_POLARITY_HIGH    (0)
@@ -107,7 +109,8 @@ typedef enum e_pdc_return /* PDC API error codes */
     PDC_ERR_NULL_PTR, /* Argument pointer value was NULL. */
     PDC_ERR_LOCK_FUNC, /* PDC resources is in use by another process. */
     PDC_ERR_INTERNAL, /* Module internal error is detected. */
-    PDC_ERR_RST_TIMEOUT /* PDC is resetting after constant time is passed */
+    PDC_ERR_RST_TIMEOUT, /* PDC is resetting after constant time is passed */
+    PDC_ERR_ONGOING      /* Operations for reception are ongoing. */
 } pdc_return_t;
 
 /* Pointer to callback functions of PDC */

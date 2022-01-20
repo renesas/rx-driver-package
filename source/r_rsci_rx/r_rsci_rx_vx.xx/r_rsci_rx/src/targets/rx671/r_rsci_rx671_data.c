@@ -23,6 +23,8 @@
 * History : DD.MM.YYYY Version Description
 *           31.03.2021 1.00    Initial Release
 *                              Supported for RX671.
+*           03.12.2021 2.00    Updated new features in Asynchronous mode
+*                              and added support for Manchester mode.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -46,14 +48,15 @@ Private global variables and functions
 
 /* BAUD DIVISOR INFO */
 
-/* Asynchronous */
+/* Asynchronous or Manchester */
 /* BRR = (PCLK/(divisor * baud)) - 1 */
 /* when abcs=0 & bgdm=0 & abcse =0, divisor = 64*pow(2,2n-1) */
 /* when abcs=1 & bgdm=0 & abcse =0 OR abcs=0 & bgdm=1 & abcse =0, divisor = 32*pow(2,2n-1) */
 /* when abcs=1 & bgdm=1 & abcse =0, divisor = 16*pow(2,2n-1) */
-/* when abcs=(1 or 0) & bgdm= (1 or 0) & abcse =1, divisor = 12*pow(2,2n-1). This case not available for SCI12 */
+/* when abcs=(1 or 0) & bgdm= (1 or 0) & abcse =1, divisor = 12*pow(2,2n-1). */
+/* In manchester mode, only ABCSE bit = 0 can be selected. */
 
-#if (RSCI_CFG_ASYNC_INCLUDED)
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
 /* NOTE: diff than RSCI async baud table, but should provide same results */
 const baud_divisor_t rsci_async_baud[NUM_DIVISORS_ASYNC]=
 {
@@ -79,11 +82,11 @@ const baud_divisor_t rsci_async_baud[NUM_DIVISORS_ASYNC]=
 /* NOTE: Identical to RSCI sync baud table */
 const baud_divisor_t rsci_sync_baud[NUM_DIVISORS_SYNC]=
 {
-    /* divisor result, abcs, bgdm, n */
-    {4,   0, 0, 0},
-    {16,  0, 0, 1},
-    {64,  0, 0, 2},
-    {256, 0, 0, 3}
+    /* divisor result, abcs, bgdm, abcse, n */
+    {4,   0, 0, 0, 0},
+    {16,  0, 0, 0, 1},
+    {64,  0, 0, 0, 2},
+    {256, 0, 0, 0, 3}
 };
 #endif
 
@@ -125,6 +128,14 @@ rsci_ch_ctrl_t   g_rsci_ch10_ctrl = {&g_rsci_ch10_rom, RSCI_MODE_OFF, 0, NULL, N
                              , RSCI_CFG_CH10_TX_FIFO_THRESH
                              , RSCI_CFG_CH10_TX_FIFO_THRESH
                              #endif
+                             #if RSCI_CFG_MANC_INCLUDED
+                             , RSCI_CFG_CH10_RX_SEL_DECODING_POL
+                             , RSCI_CFG_CH10_RX_PREFACE_LENGTH
+                             , RSCI_CFG_CH10_RX_PREFACE_PATTERN
+                             , RSCI_CFG_CH10_TX_SEL_ENCODING_POL
+                             , RSCI_CFG_CH10_TX_PREFACE_LENGTH
+                             , RSCI_CFG_CH10_TX_PREFACE_PATTERN
+                             #endif
                             };
 #endif /* End of RSCI_CFG_CH10_INCLUDED */
 
@@ -163,6 +174,14 @@ rsci_ch_ctrl_t   g_rsci_ch11_ctrl = {&g_rsci_ch11_rom, RSCI_MODE_OFF, 0, NULL, N
                              , RSCI_CFG_CH11_RX_FIFO_THRESH
                              , RSCI_CFG_CH11_TX_FIFO_THRESH
                              , RSCI_CFG_CH11_TX_FIFO_THRESH
+                             #endif
+                             #if RSCI_CFG_MANC_INCLUDED
+                             , RSCI_CFG_CH11_RX_SEL_DECODING_POL
+                             , RSCI_CFG_CH11_RX_PREFACE_LENGTH
+                             , RSCI_CFG_CH11_RX_PREFACE_PATTERN
+                             , RSCI_CFG_CH11_TX_SEL_ENCODING_POL
+                             , RSCI_CFG_CH11_TX_PREFACE_LENGTH
+                             , RSCI_CFG_CH11_TX_PREFACE_PATTERN
                              #endif
                             };
 #endif /* End of RSCI_CFG_CH11_INCLUDED */

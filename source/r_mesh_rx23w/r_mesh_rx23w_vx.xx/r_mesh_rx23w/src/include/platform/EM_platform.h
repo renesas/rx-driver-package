@@ -20,10 +20,12 @@
 #include <string.h>
 #include <math.h>
 #include "EM_os.h"
+#include "MS_common_pl.h"
 #include "MS_mempool_pl.h"
 #include "MS_storage_pl.h"
 #include "MS_systemtime_pl.h"
 #include "MS_monitor_pl.h"
+#include "MS_logger.h"
 #include "prov_pl.h"
 
 /* --------------------------------------------- Global Definitions */

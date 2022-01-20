@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rsci_rx_if.h
@@ -23,6 +23,9 @@
 * History : DD.MM.YYYY Version Description
 *           31.03.2021 1.00    Initial Release
 *                              Supported for RX671.
+*           13.09.2021 1.10    Added the demo for RX671.
+*           03.12.2021 2.00    Updated new features in Asynchronous mode
+*                              and added support for Manchester mode.
 ***********************************************************************************************************************/
 
 #ifndef RSCI_IF_H
@@ -38,12 +41,12 @@ Includes   <System Includes> , "Project Includes"
 Macro definitions
 ***********************************************************************************************************************/
 
-#if R_BSP_VERSION_MAJOR < 5
-    #error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
+#if R_BSP_VERSION_MAJOR < 6
+    #error "This module must use BSP module of Rev.6.00 or higher. Please use the BSP module of Rev.6.00 or higher."
 #endif
 
 /* Version Number of API. */
-#define RSCI_VERSION_MAJOR  (1)
+#define RSCI_VERSION_MAJOR  (2)
 #define RSCI_VERSION_MINOR  (00)
 
 #define RSCI_CLK_INT         (0x00U) /* use internal clock for baud generation */
@@ -51,12 +54,13 @@ Macro definitions
 #define RSCI_CLK_EXT16X      (0x02U) /* use external clock 16x baud rate (ASYNC) */
 #define RSCI_DATA_7BIT       (0x03U)
 #define RSCI_DATA_8BIT       (0x02U)
-#define RSCI_PARITY_ON       (0x01U)
-#define RSCI_PARITY_OFF      (0x00U)
 #define RSCI_ODD_PARITY      (0x01U)
 #define RSCI_EVEN_PARITY     (0x00U)
+#define RSCI_NONE_PARITY     (0x02U)
 #define RSCI_STOPBITS_2      (0x01U)
 #define RSCI_STOPBITS_1      (0x00U)
+#define RSCI_STARTBITS_3     (0x01U)
+#define RSCI_STARTBITS_1     (0x00U)
 
 /*****************************************************************************
 Typedef definitions
@@ -75,7 +79,8 @@ typedef enum e_rsci_mode     // RSCI operational modes
     RSCI_MODE_ASYNC,         // Asynchronous
     RSCI_MODE_SSPI,          // Simple SPI
     RSCI_MODE_SYNC,          // Synchronous
-    RSCI_MODE_MAX=5            // End of modes currently supported
+    RSCI_MODE_MANC,          // Manchester
+    RSCI_MODE_MAX=5          // End of modes currently supported
 } rsci_mode_t;
 
 
@@ -90,7 +95,7 @@ typedef enum e_rsci_err      /* RSCI API error codes */
     RSCI_ERR_NULL_PTR,       // received null ptr; missing required argument
     RSCI_ERR_XCVR_BUSY,      // cannot start data transfer; transceiver busy
 
-    /* Asynchronous mode only */
+    /* Asynchronous/Manchester mode only */
     RSCI_ERR_QUEUE_UNAVAILABLE,  // can't open tx or rx queue or both
     RSCI_ERR_INSUFFICIENT_SPACE, // not enough space in transmit queue
     RSCI_ERR_INSUFFICIENT_DATA,  // not enough data in receive queue
@@ -112,15 +117,10 @@ typedef struct st_rsci_ch_ctrl * rsci_hdl_t;
 typedef enum e_rsci_spi_mode
 {
     RSCI_SPI_MODE_OFF = 4,   /* channel is in synchronous mode */
-
-    RSCI_SPI_MODE_0 = 0x01,  /* SCR3 Register CPHA=1, CPOL=0
-                               Mode 0: 00 CPHA=0 resting lo, CPHA=0 leading edge/rising */
-    RSCI_SPI_MODE_1 = 0x02,  /* SCR3 Register CPHA=0, CPOL=1
-                               Mode 1: 01 CPHA=0 resting lo, CPHA=1 trailing edge/falling */
-    RSCI_SPI_MODE_2 = 0x03,  /* SCR3 Register CPHA=1, CPOL=1
-                               Mode 2: 10 CPHA=1 resting hi, CPHA=0 leading edge/falling */
-    RSCI_SPI_MODE_3 = 0x00   /* SCR3 Register CPHA=0, CPOL=0
-                               Mode 3: 11 CPHA=1 resting hi, CPHA=1 trailing edge/rising */
+    RSCI_SPI_MODE_0 = 0x00,  /* SCR3 Register CPHA=0, CPOL=0; Mode 0: 00 */
+    RSCI_SPI_MODE_1 = 0x01,  /* SCR3 Register CPHA=1, CPOL=0; Mode 1: 01 */
+    RSCI_SPI_MODE_2 = 0x02,  /* SCR3 Register CPHA=0, CPOL=1; Mode 2: 10 */
+    RSCI_SPI_MODE_3 = 0x03   /* SCR3 Register CPHA=1, CPOL=1; Mode 3: 11 */
 } rsci_spi_mode_t;
 
 
@@ -130,9 +130,10 @@ typedef struct st_rsci_uart
     uint32_t    baud_rate;      // ie 9600, 19200, 115200
     uint8_t     clk_src;        // use RSCI_CLK_INT/EXT8X/EXT16X
     uint8_t     data_size;      // use RSCI_DATA_nBIT
-    uint8_t     parity_en;      // use RSCI_PARITY_ON/OFF
-    uint8_t     parity_type;    // use RSCI_ODD/EVEN_PARITY
+    uint8_t     parity_type;    // use RSCI_ODD/EVEN/NONE_PARITY
     uint8_t     stop_bits;      // use RSCI_STOPBITS_1/2
+    bool        msb_first;
+    bool        invert_data;
     uint8_t     int_priority;   // interrupt priority; 1=low, 15=high
 } rsci_uart_t;
 
@@ -140,17 +141,31 @@ typedef struct st_rsci_uart
 typedef struct st_rsci_sync_sspi
 {
     rsci_spi_mode_t  spi_mode;       // clock polarity and phase; unused for sync
-    uint32_t        bit_rate;       // ie 1000000 for 1Mbps
-    bool            msb_first;
-    bool            invert_data;
-    uint8_t         int_priority;   // interrupt priority; 1=low, 15=high
+    uint32_t         bit_rate;       // ie 1000000 for 1Mbps
+    bool             msb_first;
+    bool             invert_data;
+    uint8_t          int_priority;   // interrupt priority; 1=low, 15=high
 } rsci_sync_sspi_t;
+
+/* Open() p_cfg structure when mode=RSCI_MODE_MANC */
+typedef struct st_rsci_manc
+{
+    uint32_t    baud_rate;      // ie 9600, 19200, 115200
+    uint8_t     data_size;      // use RSCI_DATA_nBIT
+    uint8_t     parity_type;    // use RSCI_ODD/EVEN/NONE_PARITY
+    uint8_t     start_bits;     // use RSCI_STARTBITS_1/3
+    uint8_t     stop_bits;      // use RSCI_STOPBITS_1/2
+    bool        msb_first;
+    bool        invert_data;
+    uint8_t     int_priority;   // interrupt priority; 1=low, 15=high
+} rsci_manc_t;
 
 typedef union
 {
     rsci_uart_t      async;
     rsci_sync_sspi_t sync;
     rsci_sync_sspi_t sspi;
+    rsci_manc_t      manc;
 } rsci_cfg_t;
 
 
@@ -158,28 +173,29 @@ typedef union
 
 typedef enum e_rsci_cb_evt   // callback function events
 {
-    /* Async Events */
+    /* Async/Manc Events */
     RSCI_EVT_TEI,            // TEI interrupt occurred; transmitter is idle
     RSCI_EVT_RX_CHAR,        // received a character; already placed in queue
     RSCI_EVT_RXBUF_OVFL,     // rx queue is full; can't save anymore data
     RSCI_EVT_FRAMING_ERR,    // receiver hardware framing error
+    RSCI_EVT_PARITY_ERR,     // receiver hardware parity error
 
     /* Async Events */
-    RSCI_EVT_PARITY_ERR,     // receiver hardware parity error
     RSCI_EVT_RX_CHAR_MATCH,  // received a matched character; already placed in queue
 
     /* SSPI/Sync Events */
     RSCI_EVT_XFER_DONE,      // transfer completed
     RSCI_EVT_XFER_ABORTED,   // transfer aborted
 
+    /* Manc Events */
+    RSCI_EVT_MANCHESTER_CODE_ERR,   // receiver hardware manchester code error
+    RSCI_EVT_RECEIVE_SYNC_ERR,      // receiver hardware receive sync error
+    RSCI_EVT_START_BIT_ERR,         // receiver hardware start bit error
+    RSCI_EVT_PREFACE_ERR,           // receiver hardware preface error
+
     /* Common Events */
-    RSCI_EVT_OVFL_ERR,        // receiver hardware overrun error
+    RSCI_EVT_OVFL_ERR        // receiver hardware overrun error
 
-    /* Receive Sync Done */
-    RSCI_EVT_RX_SYNC_DONE,
-
-    /* Receive Async Done */
-    RSCI_EVT_RX_DONE
 } rsci_cb_evt_t;
 
 typedef struct st_rsci_cb_args // callback arguments
@@ -206,6 +222,9 @@ typedef enum e_rsci_cmd
     RSCI_CMD_SET_RXI_PRIORITY,         /* change RXI priority level */
     RSCI_CMD_SET_TXI_PRIORITY,         /* change TXI priority level */
 #endif
+    RSCI_CMD_XFER_LSB_FIRST,           /* start from LSB bit when sending */
+    RSCI_CMD_XFER_MSB_FIRST,           /* start from MSB bit when sending */
+    RSCI_CMD_INVERT_DATA,              /* logic level of send/receive data is invert */
 
     /* Async commands */
     RSCI_CMD_EN_NOISE_CANCEL,          /* enable noise cancellation */
@@ -217,25 +236,22 @@ typedef enum e_rsci_cmd
     RSCI_CMD_GENERATE_BREAK,           /* generate break condition */
     RSCI_CMD_COMPARE_RECEIVED_DATA,    /* Compare received data with comparison data */
 
-    /* Async commands */
+    /* Async/Manc commands */
     RSCI_CMD_TX_Q_FLUSH,               /* flush transmit queue */
     RSCI_CMD_RX_Q_FLUSH,               /* flush receive queue */
     RSCI_CMD_TX_Q_BYTES_FREE,          /* get count of unused transmit queue bytes */
     RSCI_CMD_RX_Q_BYTES_AVAIL_TO_READ, /* get num bytes ready for reading */
 
-    /* Async/Sync commands */
+    /* Async/Sync commands/Manc */
     RSCI_CMD_EN_CTS_IN,                /* enable CTS input (default RTS output) */
 
     /* SSPI/Sync commands */
-    RSCI_CMD_CHECK_XFER_DONE,          /* see if send, rcv, or both are done; RRSCI_SUCCESS if yes */
+    RSCI_CMD_CHECK_XFER_DONE,          /* see if send, rcv, or both are done; RSCI_SUCCESS if yes */
     RSCI_CMD_ABORT_XFER,
-    RSCI_CMD_XFER_LSB_FIRST,           /* start from LSB bit when sending */
-    RSCI_CMD_XFER_MSB_FIRST,           /* start from MSB bit when sending */
-    RSCI_CMD_INVERT_DATA,              /* logic level of send/receive data is invert */
 
     /* SSPI commands */
-    RSCI_CMD_CHANGE_SPI_MODE,           /* change clock polarity and phase in SSPI mode */
-    RSCI_CMD_CHECK_TX_DONE,           /* see if tx requests complete; RSCI_SUCCESS if yes */
+    RSCI_CMD_CHANGE_SPI_MODE,          /* change clock polarity and phase in SSPI mode */
+    RSCI_CMD_CHECK_TX_DONE,            /* see if tx requests complete; RSCI_SUCCESS if yes */
     RSCI_CMD_CHECK_RX_DONE,            /* see if rx request complete in sync mode; RSCI_SUCCESS if yes */
     RSCI_CMD_CHECK_RX_SYNC_DONE,
 
@@ -245,7 +261,14 @@ typedef enum e_rsci_cmd
     RSCI_CMD_TX_TRANSITION_TIMING_ENABLE,
     RSCI_CMD_TX_TRANSITION_TIMING_DISABLE,
     RSCI_CMD_SAMPLING_TIMING_ADJUST,
-    RSCI_CMD_TRANSITION_TIMING_ADJUST
+    RSCI_CMD_TRANSITION_TIMING_ADJUST,
+
+    /* Manchester commands */
+    RSCI_CMD_START_BIT_PATTERN_LOW_TO_HIGH, /* start bit is a low to high */
+    RSCI_CMD_START_BIT_PATTERN_HIGH_TO_LOW, /* start bit is a high to low */
+    RSCI_CMD_EN_SYNC,                       /* enable sync, start bit pattern set with SYNC bit in TDR */
+    RSCI_CMD_SET_TRASMIT_PREFACE_LENGTH,    /* set preface length in transmit data */
+    RSCI_CMD_SET_RECEIVE_PREFACE_LENGTH,    /* set preface length in received frames */
 } rsci_cmd_t;
 
 /* RSCI_CMD_CHANGE_BAUD/CHANGE_BITRATE take a ptr to this structure for *p_args */

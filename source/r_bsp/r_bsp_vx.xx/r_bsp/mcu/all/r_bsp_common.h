@@ -68,14 +68,18 @@
 *         : 18.05.2021 1.45     Changed Major/Minor version to 6.11.
 *         : 30.06.2021 1.45     Changed Minor version to 6.20.
 *         : 20.08.2021 1.46     Changed Minor version to 6.21.
+*         : 30.11.2021 1.47     Changed Major/Minor version to 7.00.
+*                               Modified the compile switch.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
 Includes   <System Includes> , "Project Includes"
 ***********************************************************************************************************************/
+#include    "r_bsp_config.h"
+
 /* C99 (or later) is necessary because r_rx_compiler.h uses Pragma operator and variadic macros.
  * This means that r_typedefs.h is not used in any case. */
-#if !defined(__cplusplus) && !defined(CPPAPP)
+#if (BSP_CFG_CPLUSPLUS == 0) && !defined(CPPAPP)
 /* All implementation is C99 (or later) */
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
 #include    <stdint.h>
@@ -85,13 +89,13 @@ Includes   <System Includes> , "Project Includes"
 #else
 #error "This version of FIT needs C99 (or later)."
 #endif
-#else /* defined(__cplusplus) || defined(CPPAPP) */
+#else /* (BSP_CFG_CPLUSPLUS == 1) || defined(CPPAPP) */
 /* Interface might be referred from C++ */
 #include    <stdint.h>
 #include    <stdbool.h>
 #include    <stdio.h>
 #include    <stddef.h>
-#endif /* !defined(__cplusplus) && !defined(CPPAPP) */
+#endif /* (BSP_CFG_CPLUSPLUS == 0) && !defined(CPPAPP) */
 
 #if defined(__CCRX__) || defined(__ICCRX__)
 /* Intrinsic functions provided by compiler. */
@@ -110,8 +114,8 @@ Macro definitions
 #define R_BSP_COMMON_H
 
 /* Version Number of r_bsp. */
-#define R_BSP_VERSION_MAJOR           (6)
-#define R_BSP_VERSION_MINOR           (21)
+#define R_BSP_VERSION_MAJOR           (7)
+#define R_BSP_VERSION_MINOR           (00)
 
 /* This macro is used to suppress compiler messages about not only a parameter but also a auto variable not being used
  * in a function. The nice thing about using this implementation is that it does not take any extra RAM or ROM.

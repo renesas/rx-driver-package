@@ -185,7 +185,7 @@ div.divider-global:nth-of-type(even) {
           <!-- Modifiable information starts here                                 -->
           <!-- Don't forget to edit the title tag either                          -->
           <!-- ****************************************************************** -->
-          <h1>Release notes for emWin Version 6.14g</h1>
+          <h1>Release notes for emWin Version 6.22</h1>
         </div>
       </div>
     </div>
@@ -215,32 +215,320 @@ div.divider-global:nth-of-type(even) {
       <h2><a name="features">New Features</a></h2>
 
       <!-------------------------------------------------------------------------->
-      <h3>Version 6.14g</h3>
+      <h3>Version 6.22</h3>
+      <ol class="maintext">
+        <li>Fonts (FreeType only):
+          <ul type=square>
+            <li>New function GUI_BDF_EmboldenFont() added.</li>
+            <li>New function GUI_BDF_EmboldenFontEx() added.</li>
+            <li>New function GUI_BDF_SetLetterSpacing() added.</li>
+            <li>New function GUI_FT_GetMeasurementChars() added.</li>
+            <li>New function GUI_FT_SetMeasurementChars() added.</li>
+            <li>New function GUI_TTF_EmboldenFont() added.</li>
+            <li>New function GUI_TTF_EmboldenFontEx() added.</li>
+            <li>New function GUI_TTF_ObliqueFont() added.</li>
+            <li>New function GUI_TTF_ObliqueFontEx() added.</li>
+          </ul>
+        </li>
+        <li>Window manager:
+          <ul type=square>
+            <li>New function WM_DeleteWindowSecure() added</li>
+          </ul>
+        </li>
+        <li>Widgets:
+          <ul type=square>
+            <li>New function DROPDOWN_EnableMotion() added.
+            <li>New function LISTVIEW_GetDefaultBkColor() added.
+            <li>New function LISTVIEW_GetDefaultFont() added.
+            <li>New function LISTVIEW_GetDefaultGridColor() added.
+            <li>New function LISTVIEW_GetDefaultScrollStepH() added.
+            <li>New function LISTVIEW_GetDefaultTextColor() added.
+            <li>New function LISTVIEW_SetDefaultScrollStepH() added.
+            <li>New function LISTVIEW_SetScrollStepH() added.
+            <li>New function LISTVIEW_GetScrollStepH() added.
+            <li>New function LISTVIEW_SetScrollPos() added.
+            <li>New function MULTIEDIT_GetDefaultAlign() added.
+            <li>New function MULTIEDIT_GetDefaultBkColor() added.
+            <li>New function MULTIEDIT_GetDefaultCursorColor() added.
+            <li>New function MULTIEDIT_GetDefaultFont() added.
+            <li>New function MULTIEDIT_GetDefaultHBorder() added.
+            <li>New function MULTIEDIT_GetDefaultTextColor() added.
+            <li>New function MULTIEDIT_SetDefaultAlign() added.
+            <li>New function MULTIEDIT_SetDefaultBkColor() added.
+            <li>New function MULTIEDIT_SetDefaultCursorColor() added.
+            <li>New function MULTIEDIT_SetDefaultFont() added.
+            <li>New function MULTIEDIT_SetDefaultHBorder() added.
+            <li>New function MULTIEDIT_SetDefaultTextColor() added.
+            <li>New function SWITCH_DisableAnimation() added.
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.20</h3>
+      <ol class="maintext">
+        <li>Core:
+          <ul type=square>
+            <li>New function GUI_GetShowMissingCharacters() added.</li>
+            <li>New function GUI_DrawArcHR() added.</li>
+            <li>New function GUI_DrawPieHR() added.</li>
+          </ul>
+        </li>
+        <li>Antialiasing:
+          <ul type=square>
+            <li>New function GUI_AA_DrawPie() added.</li>
+          </ul>
+        </li>
+        <li>Widgets:
+          <ul type=square>
+            <li>IMAGE:
+              <br>New function IMAGE_SetAlign() added.
+              <br>New function IMAGE_SetOffset() added.
+              <br>New function IMAGE_SetAlpha() added.
+              <br>New function IMAGE_SetAngle() added.
+              <br>New function IMAGE_SetScale() added.
+              <br>New function IMAGE_EnableLQ() added.
+            </li>
+            <li>LISTBOX:
+              <br>LISTBOX now sends WM_NOTIFICATION_SCROLL_CHANGED when motion scrolling or keys are used.
+            </li>
+            <li>LISTVIEW:
+              <br>New function LISTVIEW_GetScrollPos() added.
+              <br>New function LISTVIEW_GetRow() added.
+              <br>New function LISTVIEW_GetCol() added.
+              <br>LISTVIEW now sends WM_NOTIFICATION_SCROLL_CHANGED when motion scrolling or keys are used.
+            </li>
+          </ul>
+        </li>
+        <li>Movies:
+          <ul type=square>
+            <li>Bitmap-based emWin movie files added.</li>
+          </ul>
+        </li>
+        <li>Display driver:
+          <ul type=square>
+            <li>GUIDRV_SLinEPD_SSD1673 now supports SSD1680.</li>
+            <li>GUIDRV_SLinEPD now supports UC8451.</li>
+            <li>GUIDRV_FlexColor now supports ST7715.</li>
+          </ul>
+        </li>
+        <li>VNC:
+          <ul type=square>
+            <li>Multiple VNC connections via WebSocket and BSD to the same layer are now possible.</li>
+          </ul>
+        </li>
+        <li>Tools:
+          <ul type=square>
+            <li>Bitmap Converter:
+              <br>Added function to convert animated GIFs into new bitmap-based emWin movie file format.
+            </li>
+            <li>emVNC:
+              <br>Ports can now be specified.
+            </li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.18b</h3>
       <ol class="maintext">
         <li>Widgets:
           <ul type=square>
-            <li>LISTBOX widget:
-              <br>- New function LISTBOX_GetVisItemIndices() added.
-              <br>- New function LISTBOX_IsItemPartiallyVisible() added.
-            </li>
-            <li>LISTVIEW widget:
-              <br>- New function LISTVIEW_GetVisRowIndices() added.
-              <br>- New function LISTVIEW_IsRowPartiallyVisible() added.
+            <li>GAUGE:
+              <br>New function GAUGE_GetRange() added.
             </li>
           </ul>
         </li>
       </ol>
       
       <!-------------------------------------------------------------------------->
-      <h3>Version 6.14e</h3>
+      <h3>Version 6.18a</h3>
+      <ol class="maintext">
+        <li>Core:
+          <ul type=square>
+            <li>New function GUI_PID_RegisterReadHook() added.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.18</h3>
+      <ol class="maintext">
+        <li>Fonts:
+          <ul type=square>
+            <li>New function GUI_BDF_CreateFont() added.</li>
+            <li>New function GUI_BDF_DeleteFont() added.</li>
+            <li>New function GUI_BDF_GetFamilyName() added.</li>
+            <li>New function GUI_BDF_GetStyleName() added.</li>
+            <li>New function GUI_GetFallbackFont() added.</li>
+            <li>New function GUI_SetFallbackFont() added.</li>
+            <li>New function GUI_SetFuncGetFallbackFont() added.</li>
+          </ul>
+        </li>
+        <li>Display drivers:
+          <ul type=square>
+            <li>GUIDRV_FlexColor:
+              <br>- Support for Sitronix ST7626 added.
+            </li>
+          </ul>
+        </li>
+        <li>Simulation:
+          <ul type=square>
+            <li>New function SIM_GUI_EnableModifierKey() added.</li>
+            <li>New function SIM_GUI_IsModifierKeyEnabled() added.</li>
+          </ul>
+        </li>
+        <li>Memory Devices:
+          <ul type=square>
+            <li>New function GUI_MEMDEV_GetBitsPerPixel() added.</li>
+            <li>New function GUI_MEMDEV_GetSelMemdev() added.</li>
+          </ul>
+        </li>
+        <li>Core:
+          <ul type=square>
+            <li>New function GUI_SetAfterExitHook() added.</li>
+          </ul>
+        </li>
+        <li>Animations:
+          <ul type=square>
+            <li>New function GUI_ANIM_AddItemById() added.</li>
+            <li>New function GUI_ANIM_CreateWithId() added.</li>
+            <li>New function GUI_ANIM_DeleteById() added.</li>
+            <li>New function GUI_ANIM_Get() added.</li>
+            <li>New function GUI_ANIM_StartExId() added.</li>
+            <li>New function GUI_ANIM_StopById() added.</li>
+          </ul>
+        </li>
+        <li>Configuration:
+          <ul type=square>
+            <li>Hardware acceleration:
+              <br>- New function GUI_SetFuncDrawCircle() added.
+              <br>- New function GUI_SetFuncDrawLine() added.
+              <br>- New function GUI_SetFuncDrawRoundedRect() added.
+              <br>- New function GUI_SetFuncFillCircle() added.
+              <br>- New function GUI_SetFuncFillRoundedRect() added.
+            </li>
+          </ul>
+        </li>
+        <li>Widgets:
+          <ul type=square>
+            <li>LISTBOX:
+              <br>New function LISTBOX_GetVisItemIndices() added.
+              <br>New function LISTBOX_IsItemPartiallyVisible() added.
+              <br>Added support of the following keys to LISTBOX: GUI_KEY_HOME, GUI_KEY_END, GUI_KEY_PGUP, GUI_KEY_PGDOWN.
+            </li>
+            <li>KEYBOARD:
+              <br>New function KEYBOARD_SetRadius() added.
+              <br>New function KEYBOARD_SetSpace() added.
+            </li>
+          </ul>
+        </li>
+        <li>emWinView:
+          <ul type=square>
+            <li>The tool has been <b>completely rewritten</b> with a much better, more intuitive and comprehensive interface:
+              <br>- New Selection/Measurement tool.
+              <br>- Keyboard input gets send to emWin application.
+              <br>- Transparency is shown for multi-layer configurations.
+              <br>- ...and much more.
+            </li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.16</h3>
       <ol class="maintext">
         <li>Widgets:
           <ul type=square>
-            <li>MULTIEDIT widget:
-              <br>- New function MULTIEDIT_EnableMotion() added.
-              <br>- New function MULTIEDIT_SetCursorColor() added.
-              <br>- New function MULTIEDIT_SetInvertCursor() added.
+            <li>EDIT:
+              <br>New function EDIT_GetMinMax() added.
             </li>
+            <li>SPINBOX:
+              <br>New function SPINBOX_GetRange() added.
+            </li>
+            <li>TEXT:
+              <br>New function TEXT_GetFrameColor() added.
+              <br>New function TEXT_GetDefaultFrameColor() added.
+              <br>New function TEXT_SetFrameColor() added.
+              <br>New function TEXT_SetDefaultFrameColor() added.
+            </li>
+            <li>PROGBAR:
+              <br>Now sends WM_NOTIFICATION_VALUE_CHANGED to parent when its value has changed.
+            </li>
+            <li>KEYBOARD:
+              <br>New keyboard layout KEYBOARD_ARA for Arabic added.
+            </li>
+            <li>MULTIEDIT:
+              <br>New function MULTIEDIT_EnableMotion() added.
+              <br>New function MULTIEDIT_SetCursorColor() added.
+              <br>New function MULTIEDIT_SetInvertCursor() added.
+            </li>
+            <li>HEADER:
+              <br>New function HEADER_SetColumnsResizeable() added.
+            </li>
+            <li>BUTTON:
+              <br>New function BUTTON_SetToggleMode() added.
+              <br>New function BUTTON_Toggle() added.
+              <br>BUTTON_REACT_ON_LEVEL is now the default way how PID events are handled by a BUTTON.
+            </li>
+            <li>SWIPELIST:
+              <br>New function SWIPELIST_GetOverlap() added.
+              <br>New function SWIPELIST_SetOverlap() added.
+              <br>New function SWIPELIST_SetDefaultOverlap() added.
+              <br>New function SWIPELIST_GetDefaultOverlap() added.
+            </li>
+            <li>LISTVIEW:
+              <br>New function LISTVIEW_IsItemPartiallyVisible() added.
+              <br>New function LISTVIEW_GetVisRowIndices() added.
+            </li>
+          </ul>
+        </li>
+        <li>Core:
+          <ul type=square>
+            <li>New function GUI_CreateBitmapFromStreamRLE1() added.</li>
+          </ul>
+        </li>
+        <li>Antialiasing:
+          <ul type=square>
+            <li>New function GUI_AA_DrawRoundedFrame() added.</li>
+            <li>New function GUI_AA_DrawRoundedFrameEx() added.</li>
+          </ul>
+        </li>
+        <li>Memory Devices:
+          <ul type=square>
+            <li>New function GUI_MEMDEV_SerializeExBMP() added.</li>
+          </ul>
+        </li>
+        <li>Bitmap Converter:
+          <ul type=square>
+            <li>Reading of C and DTA files added.</li>
+            <li>New bitmap format RLE1 (compressed 1bpp) added.</li>
+            <li>Added section about memory footprint.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.14g</h3>
+      <ol class="maintext">
+        <li>Display drivers:
+          <ul type=square>
+            <li>GUIDRV_FlexColor: When drawing a single pixel a possible cache where not taken into account. Fixed.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.14f</h3>
+      <ol class="maintext">
+        <li>Window manager:
+          <ul type=square>
+            <li>Since version V6.14e the function WM_BringToTop() does not unlock the GUI in all cases. Fixed.</li>
+          </ul>
+        </li>
+        <li>Widget:
+          <ul type=square>
+            <li>SWITCH: If the size of the used bitmaps is larger than the widgets size ghost pixels appear surround the widget. Fixed.</li>
           </ul>
         </li>
       </ol>
@@ -248,19 +536,10 @@ div.divider-global:nth-of-type(even) {
       <!-------------------------------------------------------------------------->
       <h3>Version 6.14d</h3>
       <ol class="maintext">
-        <li>Core:
+        <li>Widget:
           <ul type=square>
-            <li>New functions GUI_DrawGradientRoundedMH(), GUI_DrawGradientRoundedMHEx(), GUI_DrawGradientRoundedMV() and GUI_DrawGradientRoundedMVEx() added.</li>
-          </ul>
-        </li>
-        <li>Memory devices:
-          <ul type=square>
-            <li>New function GUI_MEMDEV_SerializeExBMP() added.</li>
-          </ul>
-        </li>
-        <li>Widgets:
-          <ul type=square>
-            <li>TEXT: Support for framed fonts added.</li>
+            <li>KEYBOARD: Under certain circumstances a crash occurred when calculating the width of a long press character. Fixed.</li>
+            <li>ROTARY: When reacting on a key the widget did not unlock the widget handle. Fixed.</li>
           </ul>
         </li>
       </ol>
@@ -268,9 +547,14 @@ div.divider-global:nth-of-type(even) {
       <!-------------------------------------------------------------------------->
       <h3>Version 6.14c</h3>
       <ol class="maintext">
-        <li>Widgets:
+        <li>Widget:
           <ul type=square>
-            <li>SPINBOX: New function SPINBOX_GetRange() added.</li>
+            <li>SPINBOX: emWin would crash when the buttons of the SPINBOX exceeded the size of the widget. Fixed.</li>
+            <li>HEADER: Clicks on header columns were not processed correctly in fixed mode. Fixed.</li>
+            <li>LISTVIEW: Sometimes wrong items would be selected when motion was enabled. Fixed.</li>
+            <li>LISTVIEW: Motion scrolling would not scroll to the end. Fixed.</li>
+            <li>LISTVIEW: LISTVIEW_SetAutoscrollH/V did not remove scrollbars when parameter was 0 (off). Fixed.</li>
+            <li>EDIT: Fixed a bug with Arabic and automatic text scrolling.</li>
           </ul>
         </li>
       </ol>
@@ -278,9 +562,36 @@ div.divider-global:nth-of-type(even) {
       <!-------------------------------------------------------------------------->
       <h3>Version 6.14b</h3>
       <ol class="maintext">
-        <li>Widgets:
+        <li>Widget:
           <ul type=square>
-            <li>EDIT: New function EDIT_GetMinMax() added.</li>
+            <li>MULTIEDIT: The cursor was placed incorrectly when entering Arabic ligatures and numbers in bi-directional text mode. Fixed.</li>
+            <li>MULTIEDIT: Home and end keys were swapped when used with Arabic text. Fixed.</li>
+            <li>MULTIEDIT: When pressing the end key, the cursor jumped to the penultimate character when the line contained a null-terminator. Fixed.</li>
+            <li>MULTIEDIT: The cursor jumped to the beginning of the line when entering (Arabic) numbers in bi-directional text mode. Fixed.</li>
+            <li>MULTIEDIT: The initial cursor position was wrong with Arabic text. Fixed.</li>
+            <li>MULTIEDIT: The cursor vanished when scrolling down and then up by using arrow keys. Fixed.</li>
+          </ul>
+        </li>
+        <li>BitmapConverter:
+          <ul type=square>
+            <li>The file open dialog would not be opened if the tool was newly installed. Fixed.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.14a</h3>
+      <ol class="maintext">
+        <li>Widget:
+          <ul type=square>
+            <li>KEYBOARD: A KEYBOARD without a layout can cause a crash. Fixed.</li>
+            <li>EDIT: Cursor was blinking wrong when changing cursor position. Fixed</li>
+          </ul>
+        </li>
+        <li>AppWizard:
+          <ul type=square>
+            <li>An incomplete interaction to shift a screen can cause a crash. Fixed.</li>
+            <li>The Gauge object doesn't react properly on messages. Fixed.</li>
           </ul>
         </li>
       </ol>
@@ -2605,6 +2916,210 @@ div.divider-global:nth-of-type(even) {
       <h2><a name="pcorr">Program corrections</a></h2>
 
       <!-------------------------------------------------------------------------->
+      <h3>Version 6.22</h3>
+      <ol class="maintext">
+        <li>Tools:
+          <ul type=square>
+            <li>FontCvt loads and saves monospaced BDF fonts as non-monospaced. Fixed.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.20b</h3>
+      <ol class="maintext">
+        <li>Widget:
+          <ul type=square>
+            <li>SWITCH: Did not free it's text handles when deleting the widget. Fixed.</li>
+            <li>QRCODE: Did not free it's text handle when deleting the widget. Fixed.</li>
+          </ul>
+        </li>
+        <li>Animations:
+          <ul type=square>
+            <li>GUI_ANIM_DeleteAll() did not delete all currently existing animations. Fixed.</li>
+          </ul>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.20a</h3>
+      <ol class="maintext">
+        <li>Widget:
+          <ul type=square>
+            <li>LISTBOX: LISTBOX was detecting a false vertical motion and sending unnecessarily a WM_NOTIFICATION_SCROLL_CHANGED message. Fixed.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.20</h3>
+      <ol class="maintext">
+        <li>Core:
+          <ul type=square>
+            <li>Grayscale JPEGs were not visible if drawn into a 32bpp memory device with the GUI_USE_ARGB flag set. Fixed.</li>
+          </ul>
+        </li>
+        <li>Memory Devices:
+          <ul type=square>
+            <li>GUI_MEMDEV_WriteEx() did not restore currently set color index. Fixed.</li>
+          </ul>
+        </li>
+        <li>Widgets:
+          <ul type=square>
+            <li>KEYBOARD:
+              <br>Touch input moved out of KEYBOARD window would not be recognized. Fixed.
+            </li>
+            <li>LISTBOX:
+              <br>Motion support could cause a crash. Fixed.
+            </li>
+            <li>LISTVIEW:
+              <br>It was not possible to attach a custom scrollbar if "autoscroll" was not enabled. Fixed.
+            </li>
+            <li>LISTWHEEL:
+              <br>LISTWHEEL_SetSel() did not send a WM_NOTIFICATION_SEL_CHANGED to parent. Fixed.
+            </li>
+          </ul>
+        </li>
+        <li>Tools:
+          <ul type=square>
+            <li>Bitmap Converter:
+              <br>Palette colors from C bitmap files were not read correctly in ABGR mode. Fixed.
+              <br>It was not possible to reduce colors via the commandline. Fixed.
+            </li>
+            <li>emWinView:
+              <br>Settings such as zoom, grid, etc. would be lost after closing the simulation. Fixed.
+              <br>Default background of WM_HBKWIN would be shown grey instead of black. Fixed.
+            </li>
+          </ul>
+        </li>
+        <li>VNC:
+          <ul type=square>
+            <li>Connection via WebSocket would result in an error. Fixed.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.18c</h3>
+      <ol class="maintext">
+        <li>Widget:
+          <ul type=square>
+            <li>TEXT: If a string with the same length as the previous one was set to be displayed the TEXT widget was not updated. Fixed.</li>
+          </ul>
+        </li>
+        <li>Language Support:
+          <ul type=square>
+            <li>Shift-JIS fonts: Sometimes characters from dump would be displayed at the end of a Japanese string. Fixed.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.18b</h3>
+      <ol class="maintext">
+        <li>Memory Devices:
+          <ul type=square>
+            <li>GUI_MEMDEV_RotateHQxxx() functions showed unwanted artifacts. Fixed.</li>
+          </ul>
+        </li>
+        <li>Widget:
+          <ul type=square>
+            <li>ROTARY: Wrong alpha values used by marker device. Fixed.</li>         
+          </ul>
+        </li>
+        <li>AppWizard:
+          <ul type=square>
+            <li>Details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+        <li>Core:
+          <ul type=square>
+            <li>Under very rare circumstances allocating a fixed block failed in spite of enough memory was available. Fixed.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.18a</h3>
+      <ol class="maintext">
+        <li>AppWizard:
+          <ul type=square>
+            <li>Details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.18</h3>
+      <ol class="maintext">
+        <li>Widget:
+          <ul type=square>
+            <li>SPINBOX sends WM_NOTIFICATION_MOVED_OUT also if this happens on the SPINBOX buttons.</li>         
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.16e</h3>
+      <ol class="maintext">
+        <li>Core:
+          <ul type=square>
+            <li>GUI_GetBlankCols(): Did not work within windows. Problem solved. </li>
+          </ul>
+        </li>
+        <li>Anti Aliasing:
+          <ul type=square>
+            <li>GUI_AA_DrawCircle(): Setting a HW function only for drawing and not for filling did not work. Problem solved. </li>
+          </ul>
+        </li>
+        <li>AppWizard:
+          <ul type=square>
+            <li>Details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.16d</h3>
+      <ol class="maintext">
+        <li>AppWizard:
+          <ul type=square>
+            <li>Libraries and BSPs do not contain GUIDRV_Lin. Fixed</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.16b</h3>
+      <ol class="maintext">
+        <li>Core:
+          <ul type=square>
+            <li>Crash in QR code functions in case of too less memory. Fixed.</li>
+          </ul>
+        </li>
+        <li>Widget:
+          <ul type=square>
+            <li>EDIT: Missing GUI_UNLOCK in EDIT_GetBorderSize() and EDIT_SetBorderSize(). Fixed.</li>
+          </ul>
+        </li>
+        <li>AppWizard:
+          <ul type=square>
+            <li>Multiple changes/enhancements in AppWizard code. Details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.16a</h3>
+      <ol class="maintext">
+        <li>Widget:
+          <ul type=square>
+            <li>SWIPELIST: Widgets attached to items were not positioned properly. Fixed.</li>
+            <li>SWIPELIST: Widget with the same or greater size as an item were not alloed to be attached. Fixed</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
       <h3>Version 6.14g</h3>
       <ol class="maintext">
         <li>Display drivers:
@@ -3012,6 +3527,7 @@ div.divider-global:nth-of-type(even) {
         <li>Widget:
           <ul type=square>
             <li>Under certain circumstances a set user draw function does not work properly. Fixed.</li>
+            <li>GRAPH: Under certain circumstances the GRAPH gets not updated properly when adding a value. Fixed.</li>
           </ul>
         </li>
       </ol>
@@ -5202,6 +5718,18 @@ div.divider-global:nth-of-type(even) {
       <h2><a name="history">Release history</a></h2>
       <table width="100%" border="0" cellspacing="5">
         <tr> <td width=20%><b>Version</b></td> <td width=30%><b>Release date</b></td> <td><b>Availability</b></td> </tr>
+        <tr> <td>V6.22 </td> <td>2021-11-17</td> <td>General release</td> </tr>
+        <tr> <td>V6.20 </td> <td>2021-08-11</td> <td>General release</td> </tr>
+        <tr> <td>V6.18c</td> <td>2021-07-02</td> <td>Point release</td>   </tr>
+        <tr> <td>V6.18b</td> <td>2021-06-08</td> <td>Point release</td>   </tr>
+        <tr> <td>V6.18a</td> <td>2021-05-12</td> <td>General release</td> </tr>
+        <tr> <td>V6.18 </td> <td>2021-05-03</td> <td>Point release</td>   </tr>
+        <tr> <td>V6.16e</td> <td>2021-04-01</td> <td>Point release</td>   </tr>
+        <tr> <td>V6.16d</td> <td>2021-03-24</td> <td>Point release</td>   </tr>
+        <tr> <td>V6.16c</td> <td>2021-03-04</td> <td>General release</td> </tr>
+        <tr> <td>V6.16b</td> <td>2021-01-07</td> <td>Point release</td>   </tr>
+        <tr> <td>V6.16a</td> <td>2020-12-02</td> <td>Point release</td>   </tr>
+        <tr> <td>V6.16 </td> <td>2020-11-13</td> <td>General release</td> </tr>
         <tr> <td>V6.14g</td> <td>2020-10-06</td> <td>Point release</td>   </tr>
         <tr> <td>V6.14f</td> <td>2020-09-01</td> <td>Point release</td>   </tr>
         <tr> <td>V6.14e</td> <td>2020-08-24</td> <td>Point release</td>   </tr>
@@ -5464,7 +5992,7 @@ div.divider-global:nth-of-type(even) {
 <div class="footer">
   <div class="container">
     <div>
-      <p>Copyright 2001-2020 SEGGER Microcontroller GmbH. All rights reserved.<br>
+      <p>Copyright 2001-2021 SEGGER Microcontroller GmbH. All rights reserved.<br>
         For more information, please visit our website&nbsp;<a href="https://www.segger.com/" target="_blank">www.segger.com</a>&nbsp;or contact us at&nbsp;<a href="mailto:info@segger.com">info@segger.com</a>&nbsp;</p>
     </div>
   </div>

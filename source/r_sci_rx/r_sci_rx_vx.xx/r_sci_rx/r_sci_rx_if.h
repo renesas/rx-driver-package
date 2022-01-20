@@ -55,7 +55,14 @@
 *                              Fixed issue of missing SSCL, SSDA in MDF file.
 *           31.03.2021 3.80    Added support for RX671.
 *                              Added support circular buffer in mode asynchronous.
-*           15.04.2021 3.90    Added support for RX140.
+*           15.04.2021 3.90    Added support for RX140
+*           16.08.2021 3.91    Updated Application Notes
+*                              R_SCI_Send() function: Added notes to describe using TEI callback function.
+*           13.09.2021 4.00    Added the demo for RX671.
+*           15.11.2021 4.10    Added command SCI_CMD_SET_TXI_RXI_PRIORITY in R_SCI_Control()
+*                              for changing TXI and RXI priority level simultaneously.
+*                              Added support command SCI_CMD_SET_TXI_PRIORITY and SCI_CMD_SET_RXI_PRIORITY 
+*                              in R_SCI_Control() for Series RX100 and RX200.
 ***********************************************************************************************************************/
 
 #ifndef SCI_IF_H
@@ -82,8 +89,8 @@ Macro definitions
 #endif
 
 /* Version Number of API. */
-#define SCI_VERSION_MAJOR  (3)
-#define SCI_VERSION_MINOR  (90)
+#define SCI_VERSION_MAJOR  (4)
+#define SCI_VERSION_MINOR  (10)
 
 #define SCI_DTC_DMACA_DISABLE  (0x0)
 #define SCI_DTC_ENABLE         (0x1)
@@ -298,11 +305,9 @@ typedef enum e_sci_cmd
     SCI_CMD_CHANGE_TX_FIFO_THRESH,    /* change TX FIFO threshold */
     SCI_CMD_CHANGE_RX_FIFO_THRESH,    /* change RX FIFO threshold */
 #endif
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)
     SCI_CMD_SET_RXI_PRIORITY,         /* change RXI priority level */
     SCI_CMD_SET_TXI_PRIORITY,         /* change TXI priority level */
-#endif
-
+    SCI_CMD_SET_TXI_RXI_PRIORITY,     /* change TXI and RXI priority level simultaneously */
     /* Async commands */
     SCI_CMD_EN_NOISE_CANCEL,          /* enable noise cancellation */
     SCI_CMD_EN_TEI,                   /* SCI_CMD_EN_TEI is obsolete command,

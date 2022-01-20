@@ -227,7 +227,7 @@ typedef struct _MS_HEALTH_SERVER_SELF_TEST
  *  \brief API to initialize Health Server model
  *
  *  \par Description
- *  This is to initialize Health Server model and to register with Acess layer.
+ *  This is to initialize Health Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.

@@ -19,12 +19,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011(2012-2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2011(2012-2021) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * System Name  : FLASH SPI driver software
 * File Name    : r_flash_spi_drvif.c
-* Version      : 3.00
+* Version      : 3.03
 * Device       : -
 * Abstract     : IO I/F module
 * Tool-Chain   : -
@@ -38,6 +38,8 @@
 *              : 23.07.2014 2.21     Created
 *              : 29.05.2015 2.32     Revised functions of same as Ver.2.32 of EEPROM SPI FIT module.
 *              : 21.12.2018 3.00     Change flash drive interface to Memory Access Driver Interface
+*              : 31.12.2021 3.03     Added variable "read_after_write" "read_after_write_add" and
+*                                    "read_after_write_data" for controlling SPI bus.
 *************************************************************************************************/
 
 
@@ -356,13 +358,14 @@ flash_spi_status_t r_flash_spi_drvif_enable_rx_data(uint8_t devno)
 * Arguments    : uint8_t         devno                       ;   Device No. (FLASH_SPI_DEVn)
 *              : uint32_t        txcnt                       ;   Number of bytes to be write
 *              : uint8_t       * p_data                      ;   Write data storage buffer pointer
+*              : bool            read_after_write            ;   Control SPI bus
 * Return Value : FLASH_SPI_SUCCESS                           ;   Successful operation
 *              : FLASH_SPI_ERR_HARD                          ;   Hardware error
 *              : FLASH_SPI_ERR_OTHER                         ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
-flash_spi_status_t r_flash_spi_drvif_tx(uint8_t devno, uint32_t txcnt, uint8_t * p_data)
+flash_spi_status_t r_flash_spi_drvif_tx(uint8_t devno, uint32_t txcnt, uint8_t * p_data, bool read_after_write)
 {
     memdrv_err_t ret_drv = MEMDRV_SUCCESS;
     st_memdrv_info_t  memdrv_info;
@@ -370,6 +373,7 @@ flash_spi_status_t r_flash_spi_drvif_tx(uint8_t devno, uint32_t txcnt, uint8_t *
     memdrv_info.cnt     = txcnt;
     memdrv_info.p_data  = p_data;
     memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
+    memdrv_info.read_after_write = read_after_write;
 
     ret_drv = R_MEMDRV_Tx(devno,&memdrv_info);
 
@@ -391,19 +395,21 @@ flash_spi_status_t r_flash_spi_drvif_tx(uint8_t devno, uint32_t txcnt, uint8_t *
 * Arguments    : uint8_t         devno                       ;   Device No. (FLASH_SPI_DEVn)
 *              : uint32_t        txcnt                       ;   Number of bytes to be write
 *              : uint8_t       * p_data                      ;   Write data storage buffer pointer
+*              : bool            read_after_write_add        ;   Whether or not to close SPI bus cycle
 * Return Value : FLASH_SPI_SUCCESS                           ;   Successful operation
 *              : FLASH_SPI_ERR_HARD                          ;   Hardware error
 *              : FLASH_SPI_ERR_OTHER                         ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
-flash_spi_status_t r_flash_spi_drvif_tx_add(uint8_t devno, uint32_t txcnt, uint8_t * p_data, flash_spi_opmode_t op_mode)
+flash_spi_status_t r_flash_spi_drvif_tx_add(uint8_t devno, uint32_t txcnt, uint8_t * p_data, flash_spi_opmode_t op_mode, bool read_after_write_add)
 {
     memdrv_err_t ret_drv = MEMDRV_SUCCESS;
     st_memdrv_info_t  memdrv_info;
 
     memdrv_info.cnt     = txcnt;
     memdrv_info.p_data  = p_data;
+    memdrv_info.read_after_write = read_after_write_add;
 
     switch (op_mode)
     {
@@ -441,19 +447,21 @@ flash_spi_status_t r_flash_spi_drvif_tx_add(uint8_t devno, uint32_t txcnt, uint8
 * Arguments    : uint8_t         devno                       ;   Device No. (FLASH_SPI_DEVn)
 *              : uint32_t        txcnt                       ;   Number of bytes to be write
 *              : uint8_t       * p_data                      ;   Write data storage buffer pointer
+*              : bool            read_after_write_data       ;   Whether or not to close SPI bus cycle
 * Return Value : FLASH_SPI_SUCCESS                           ;   Successful operation
 *              : FLASH_SPI_ERR_HARD                          ;   Hardware error
 *              : FLASH_SPI_ERR_OTHER                         ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
-flash_spi_status_t r_flash_spi_drvif_tx_data(uint8_t devno, uint32_t txcnt, uint8_t * p_data, flash_spi_opmode_t op_mode)
+flash_spi_status_t r_flash_spi_drvif_tx_data(uint8_t devno, uint32_t txcnt, uint8_t * p_data, flash_spi_opmode_t op_mode, bool read_after_write_data)
 {
     memdrv_err_t ret_drv = MEMDRV_SUCCESS;
     st_memdrv_info_t  memdrv_info;
 
     memdrv_info.cnt     = txcnt;
     memdrv_info.p_data  = p_data;
+    memdrv_info.read_after_write = read_after_write_data;
 
     switch (op_mode)
     {

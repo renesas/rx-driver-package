@@ -485,27 +485,6 @@ API_RESULT MS_brr_start_proxy_adv
            );
 
 /**
- *  \brief API to disable broadcast of given beacon type
- *
- *  \par Description
- *  This routine stops advertising of given beacon type.
- *
- *  \param [in] bcon
- *         The Bearer Beacon (Unprovisioned/Secure Network).
- *
- *  \param [in] type
- *         The type of braodcast beacon (Active/Passive).
- *
- *  \return API_SUCCESS or an error code indicating reason for failure
- */
-API_RESULT MS_brr_bcast_end
-           (
-               /* IN */ UCHAR    bcon,
-               /* IN */ UCHAR    type
-           );
-
-
-/**
  *  \brief Send a bearer PDU
  *
  *  \par Description

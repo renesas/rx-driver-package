@@ -58,6 +58,7 @@
 *                               and variable(int_ctrl) will be valid.
 *                               Added communication completion interrupt for rx671.
 *           31.07.2021 3.02     Supported RX140.
+*           31.10.2021 3.03     Added idle interrupt other than rx671.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -286,6 +287,7 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled);
     defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
     defined BSP_MCU_RX671
 static void rspi_spei_grp_isr(void *pdata);
+static void rspi_spii_grp_isr(void *pdata);
 #endif
 /**********************************************************************************************************************
  * Function Name: R_RSPI_Open
@@ -1498,9 +1500,7 @@ static uint32_t rspi_baud_set(uint8_t channel, uint32_t bps_target)
 
     /* Starting with RX63x MCUs and later, there are 2 peripheral clocks: PCLKA and PCLKB.
      * PCLKB matches the functionality of PCLK in RX62x devices as far as the RSPI is concerned. */
-    #if defined(BSP_MCU_RX62_ALL)
-        f = BSP_PCLK_HZ;
-    #elif defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) ||defined (BSP_MCU_RX65N) ||defined (BSP_MCU_RX66T) || \
+    #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) ||defined (BSP_MCU_RX65N) ||defined (BSP_MCU_RX66T) || \
           defined (BSP_MCU_RX72T) || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) || \
           defined BSP_MCU_RX671
         f = BSP_PCLKA_HZ;
@@ -1827,7 +1827,6 @@ static void rspi_interrupts_clear(uint8_t channel)
             #ifdef BSP_MCU_RX671
             IR(RSPI0, SPCI0) = 0 ;
             #endif
-            #ifndef BSP_MCU_RX63_ALL
             #ifndef BSP_MCU_RX64M
             #ifndef BSP_MCU_RX71M
             #ifndef BSP_MCU_RX65N
@@ -1839,7 +1838,6 @@ static void rspi_interrupts_clear(uint8_t channel)
             #ifndef BSP_MCU_RX671
             /* Clear any pending error interrupt */
             IR(RSPI0, SPEI0) = 0;
-            #endif
             #endif
             #endif
             #endif
@@ -1866,7 +1864,6 @@ static void rspi_interrupts_clear(uint8_t channel)
             #ifdef BSP_MCU_RX671
             IR(RSPI1, SPCI1) = 0 ;
             #endif
-            #ifndef BSP_MCU_RX63_ALL
             #ifndef BSP_MCU_RX64M
             #ifndef BSP_MCU_RX71M
             #ifndef BSP_MCU_RX65N
@@ -1876,7 +1873,6 @@ static void rspi_interrupts_clear(uint8_t channel)
             #ifndef BSP_MCU_RX671
             /* Clear any pending error interrupt */
             IR(RSPI1, SPEI1) = 0;
-            #endif
             #endif
             #endif
             #endif
@@ -1900,14 +1896,12 @@ static void rspi_interrupts_clear(uint8_t channel)
             #ifdef BSP_MCU_RX671
             IR(RSPI2, SPCI2) = 0 ;
             #endif
-            #ifndef BSP_MCU_RX63_ALL
             #ifndef BSP_MCU_RX65N
             #ifndef BSP_MCU_RX72M
             #ifndef BSP_MCU_RX72N
             #ifndef BSP_MCU_RX66N
             #ifndef BSP_MCU_RX671
             IR(RSPI2, SPEI2) = 0;
-            #endif
             #endif
             #endif
             #endif
@@ -1924,15 +1918,6 @@ static void rspi_interrupts_clear(uint8_t channel)
         default:
         break;
     }
-    #ifdef BSP_MCU_RX63_ALL
-        #if RSPI_CFG_USE_RX63_ERROR_INTERRUPT == 1
-        IR(ICU, GROUP12) = 0;
-        if (0 == IR(ICU, GROUP12))
-        {
-            R_BSP_NOP();
-        }
-        #endif
-    #endif
 }
 /* End of function rspi_interrupts_clear(). */
 
@@ -1978,8 +1963,6 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
                 R_BSP_InterruptRequestDisable(VECT(RSPI0,SPCI0));
                 #endif
             }
-
-            #ifndef BSP_MCU_RX63_ALL
             #ifndef BSP_MCU_RX64M
             #ifndef BSP_MCU_RX71M
             #ifndef BSP_MCU_RX65N
@@ -1989,16 +1972,25 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             #ifndef BSP_MCU_RX72N
             #ifndef BSP_MCU_RX66N
             #ifndef BSP_MCU_RX671
-            /* Disable or enable error interrupt */
+            /* Disable or enable error interrupt and idle interrupt */
             if (enabled)
             {
                 R_BSP_InterruptRequestEnable(VECT(RSPI0,SPEI0));
+                /* if RSPI mode is master,enable SPII interrupt. */
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    R_BSP_InterruptRequestEnable(VECT(RSPI0,SPII0));
+                }
             }
             else
             {
                 R_BSP_InterruptRequestDisable(VECT(RSPI0,SPEI0));
+                /* if RSPI mode is master,enable SPII interrupt. */
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    R_BSP_InterruptRequestDisable(VECT(RSPI0,SPII0));
+                }
             }
-            #endif
             #endif
             #endif
             #endif
@@ -2021,7 +2013,13 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             {
                 /* Register the error callback function with the BSP group interrupt handler. */
                 R_BSP_InterruptWrite(BSP_INT_SRC_AL0_RSPI0_SPEI0, (bsp_int_cb_t)rspi_spei_grp_isr);
-
+                /* Register the idle callback function with the BSP group interrupt handler. */
+                #ifndef BSP_MCU_RX671
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    R_BSP_InterruptWrite(BSP_INT_SRC_AL0_RSPI0_SPII0, (bsp_int_cb_t)rspi_spii_grp_isr);
+                }
+                #endif
                 #if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
                     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
                 #endif
@@ -2029,6 +2027,13 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
                 /* Enable error interrupt source bit */
                 ICU.GENAL0.BIT.EN17 = 1;
 
+                /* Enable idle interrupt source bit */
+                #ifndef BSP_MCU_RX671
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    ICU.GENAL0.BIT.EN16 = 1;
+                }
+                #endif
                 #if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
                     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
                 #endif
@@ -2037,11 +2042,27 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
                 {
                     R_BSP_NOP();
                 }
+                #ifndef BSP_MCU_RX671
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    if (0 == ICU.GENAL0.BIT.EN16)
+                    {
+                        R_BSP_NOP();
+                    }
+                }
+                #endif
             }
             else
             {
                 /* De-register the error callback function with the BSP group interrupt handler. */
                 R_BSP_InterruptWrite(BSP_INT_SRC_AL0_RSPI0_SPEI0, FIT_NO_FUNC);
+                /* De-register the idle callback function with the BSP group interrupt handler. */
+                #ifndef BSP_MCU_RX671
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    R_BSP_InterruptWrite(BSP_INT_SRC_AL0_RSPI0_SPII0, FIT_NO_FUNC);
+                }
+                #endif
                 /* Disable error interrupt source bit */
                 
                 #if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
@@ -2049,6 +2070,12 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
                 #endif
 
                 ICU.GENAL0.BIT.EN17 = 0;
+                #ifndef BSP_MCU_RX671
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    ICU.GENAL0.BIT.EN16 = 0;
+                }
+                #endif
 
                 #if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
                     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
@@ -2057,6 +2084,15 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
                 {
                     R_BSP_NOP();
                 }
+                #ifndef BSP_MCU_RX671
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    if (0 == ICU.GENAL0.BIT.EN16)
+                    {
+                        R_BSP_NOP();
+                    }
+                }
+                #endif
             }
             #endif
         break;
@@ -2080,7 +2116,6 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
                 R_BSP_InterruptRequestDisable(VECT(RSPI1,SPCI1));
                 #endif
             }
-            #ifndef BSP_MCU_RX63_ALL
             #ifndef BSP_MCU_RX64M
             #ifndef BSP_MCU_RX71M
             #ifndef BSP_MCU_RX65N
@@ -2088,16 +2123,25 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             #ifndef BSP_MCU_RX72N
             #ifndef BSP_MCU_RX66N
             #ifndef BSP_MCU_RX671
-            /* Disable or enable error interrupt */
+            /* Disable or enable error interrupt and idle interrupt */
             if (enabled)
             {
                 R_BSP_InterruptRequestEnable(VECT(RSPI1,SPEI1));
+                /* if RSPI mode is master,enable SPII interrupt. */
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    R_BSP_InterruptRequestEnable(VECT(RSPI1,SPII1));
+                }
             }
             else
             {
                 R_BSP_InterruptRequestDisable(VECT(RSPI1,SPEI1));
+                /* if RSPI mode is master,enable SPII interrupt. */
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    R_BSP_InterruptRequestDisable(VECT(RSPI1,SPII1));
+                }
             }
-            #endif
             #endif
             #endif
             #endif
@@ -2117,13 +2161,26 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             {
                 /* Register the error callback function with the BSP group interrupt handler. */
                 R_BSP_InterruptWrite(BSP_INT_SRC_AL0_RSPI1_SPEI1, (bsp_int_cb_t)rspi_spei_grp_isr);
-                /* Enable error interrupt source bit */
+                #ifndef BSP_MCU_RX671
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    /* Register the idle callback function with the BSP group interrupt handler. */
+                    R_BSP_InterruptWrite(BSP_INT_SRC_AL0_RSPI1_SPII1, (bsp_int_cb_t)rspi_spii_grp_isr);
+                }
+                #endif
+                /* Enable error and idle interrupt source bit */
 
                 #if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
                 R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
                 #endif
 
                 ICU.GENAL0.BIT.EN19 = 1;
+                #ifndef BSP_MCU_RX671
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    ICU.GENAL0.BIT.EN18 = 1;
+                }
+                #endif
 
                 #if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
                 R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
@@ -2133,11 +2190,27 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
                 {
                     R_BSP_NOP();
                 }
+                #ifndef BSP_MCU_RX671
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    if (0 == ICU.GENAL0.BIT.EN18)
+                    {
+                        R_BSP_NOP();
+                    }
+                }
+                #endif
             }
             else
             {
                 /* De-register the error callback function with the BSP group interrupt handler. */
                 R_BSP_InterruptWrite(BSP_INT_SRC_AL0_RSPI1_SPEI1, FIT_NO_FUNC);
+                #ifndef BSP_MCU_RX671
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    /* De-register the idle callback function with the BSP group interrupt handler. */
+                    R_BSP_InterruptWrite(BSP_INT_SRC_AL0_RSPI1_SPII1, FIT_NO_FUNC);
+                }
+                #endif
                 /* Disable error interrupt source bit */
 
                 #if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
@@ -2145,6 +2218,12 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
                 #endif
 
                 ICU.GENAL0.BIT.EN19 = 0;
+                #ifndef BSP_MCU_RX671
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    ICU.GENAL0.BIT.EN18 = 0;
+                }
+                #endif
 
                 #if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
                 R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
@@ -2154,6 +2233,15 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
                 {
                     R_BSP_NOP();
                 }
+                #ifndef BSP_MCU_RX671
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    if (0 == ICU.GENAL0.BIT.EN18)
+                    {
+                        R_BSP_NOP();
+                    }
+                }
+                #endif
             }
             #endif
         break;
@@ -2177,7 +2265,6 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
                 R_BSP_InterruptRequestDisable(VECT(RSPI2,SPCI2));
                 #endif
             }
-            #ifndef BSP_MCU_RX63_ALL
             #ifndef BSP_MCU_RX65N
             #ifndef BSP_MCU_RX72M
             #ifndef BSP_MCU_RX72N
@@ -2186,12 +2273,21 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             if (enabled)
             {
                 R_BSP_InterruptRequestEnable(VECT(RSPI2,SPEI2));
+                /* if RSPI mode is master,enable SPII interrupt. */
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    R_BSP_InterruptRequestEnable(VECT(RSPI2,SPII2));
+                }
             }
             else
             {
                 R_BSP_InterruptRequestDisable(VECT(RSPI2,SPEI2));
+                /* if RSPI mode is master,enable SPII interrupt. */
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    R_BSP_InterruptRequestDisable(VECT(RSPI2,SPII2));
+                }
             }
-            #endif
             #endif
             #endif
             #endif
@@ -2207,6 +2303,13 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             {
                 /* Register the error callback function with the BSP group interrupt handler. */
                 R_BSP_InterruptWrite(BSP_INT_SRC_AL0_RSPI2_SPEI2, (bsp_int_cb_t)rspi_spei_grp_isr);
+                #ifndef BSP_MCU_RX671
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    /* Register the idle callback function with the BSP group interrupt handler. */
+                    R_BSP_InterruptWrite(BSP_INT_SRC_AL0_RSPI2_SPII2, (bsp_int_cb_t)rspi_spii_grp_isr);
+                }
+                #endif
                 /* Enable error interrupt source bit */
 
                 #if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
@@ -2214,6 +2317,12 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
                 #endif
                 
                 ICU.GENAL0.BIT.EN21 = 1;
+                #ifndef BSP_MCU_RX671
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    ICU.GENAL0.BIT.EN20 = 1;
+                }
+                #endif
 
                 #if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
                 R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
@@ -2223,11 +2332,27 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
                 {
                     R_BSP_NOP();
                 }
+                #ifndef BSP_MCU_RX671
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    if (0 == ICU.GENAL0.BIT.EN20)
+                    {
+                        R_BSP_NOP();
+                    }
+                }
+                #endif
             }
             else
             {
                 /* De-register the error callback function with the BSP group interrupt handler. */
                 R_BSP_InterruptWrite(BSP_INT_SRC_AL0_RSPI2_SPEI2, FIT_NO_FUNC);
+                #ifndef BSP_MCU_RX671
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    /* De-register the idle callback function with the BSP group interrupt handler. */
+                    R_BSP_InterruptWrite(BSP_INT_SRC_AL0_RSPI2_SPII2, FIT_NO_FUNC);
+                }
+                #endif
                 /* Disable error interrupt source bit */
 
                 #if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
@@ -2235,6 +2360,12 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
                 #endif
 
                 ICU.GENAL0.BIT.EN21 = 0;
+                #ifndef BSP_MCU_RX671
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    ICU.GENAL0.BIT.EN20 = 0;
+                }
+                #endif
 
                 #if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
                 R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
@@ -2244,6 +2375,15 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
                 {
                     R_BSP_NOP();
                 }
+                #ifndef BSP_MCU_RX671
+                if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+                {
+                    if (0 == ICU.GENAL0.BIT.EN20)
+                    {
+                        R_BSP_NOP();
+                    }
+                }
+                #endif
             }
             #endif
         break;
@@ -2252,23 +2392,6 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
         default:
         break;
     }
-
-    #ifdef BSP_MCU_RX63_ALL
-        #if RSPI_CFG_USE_RX63_ERROR_INTERRUPT == 1
-        if (enabled)
-        {
-            R_BSP_InterruptRequestEnable(VECT(ICU,GROUP12));
-        }
-        else
-        {
-            R_BSP_InterruptRequestDisable(VECT(ICU,GROUP12));
-        }
-        if (0 == IEN(ICU, GROUP12))
-        {
-            R_BSP_NOP();
-        }
-        #endif
-    #endif
 
 }
 /* End of function rspi_interrupts_enable(). */
@@ -2405,6 +2528,12 @@ static void rspi_tx_common(uint8_t channel)
         (*g_rspi_channels[channel]).SPCR.BIT.SPTIE = 0;  // Disable SPTI interrupt.
         #ifdef BSP_MCU_RX671
         (*g_rspi_channels[channel]).SPCR3.BIT.SPCIE = 1; // Enable SPCI interrupt.
+        #else
+         /* If RSPI MODE are msater mode, execute the following code. */
+         if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
+         {
+            (*g_rspi_channels[channel]).SPCR2.BIT.SPIIE = 1; // Enable SPII interrupt.
+         }
         #endif
     }
  }
@@ -2456,23 +2585,27 @@ static void rspi_rx_common(uint8_t channel)
          (*g_rspi_channels[channel]).SPCR.BIT.SPRIE = 0;  // Disable SPRI interrupt.
 
 #ifndef BSP_MCU_RX671
-         (*g_rspi_channels[channel]).SPCR.BIT.SPE   = 0;  // Disable RSPI.
-         if (0 == (*g_rspi_channels[channel]).SPCR.BIT.SPE)
+         /* In IDLE interrupt enabled,if RSPI MODE are slave mode, execute the following code. */
+         if (0 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
          {
-             R_BSP_NOP();
-         }
+             (*g_rspi_channels[channel]).SPCR.BIT.SPE   = 0;  // Disable RSPI.
+             if (0 == (*g_rspi_channels[channel]).SPCR.BIT.SPE)
+             {
+                R_BSP_NOP();
+             }
 
-         #if RSPI_CFG_REQUIRE_LOCK == 1
-         /* Release lock for this channel. */
-         R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_RSPI0 + channel));
-         #endif
+             #if RSPI_CFG_REQUIRE_LOCK == 1
+             /* Release lock for this channel. */
+             R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_RSPI0 + channel));
+             #endif
 
-         /* Transfer complete. Call the user callback function passing pointer to the result structure. */
-         if ((FIT_NO_FUNC != g_rspi_handles[channel].pcallback) && (NULL != g_rspi_handles[channel].pcallback))
-         {
-             g_rspi_cb_data[channel].handle = &(g_rspi_handles[channel]);
-             g_rspi_cb_data[channel].event_code = RSPI_EVT_TRANSFER_COMPLETE;
-             g_rspi_handles[channel].pcallback((void*)&(g_rspi_cb_data[channel]));
+             /* Transfer complete. Call the user callback function passing pointer to the result structure. */
+             if ((FIT_NO_FUNC != g_rspi_handles[channel].pcallback) && (NULL != g_rspi_handles[channel].pcallback))
+             {
+                 g_rspi_cb_data[channel].handle = &(g_rspi_handles[channel]);
+                 g_rspi_cb_data[channel].event_code = RSPI_EVT_TRANSFER_COMPLETE;
+                 g_rspi_handles[channel].pcallback((void*)&(g_rspi_cb_data[channel]));
+             }
          }
 #endif
     }
@@ -2800,6 +2933,9 @@ static void rspi_spei_isr_common(uint8_t channel)
     #ifdef BSP_MCU_RX671
     /* Disable communication end interrupt requests of the RSPI. */
      (*g_rspi_channels[channel]).SPCR3.BIT.SPCIE = 0;
+    #else
+    /* Disable idle interrupt requests of the RSPI. */
+     (*g_rspi_channels[channel]).SPCR2.BIT.SPIIE = 0;
     #endif
 
     #if RSPI_CFG_REQUIRE_LOCK == 1
@@ -2823,7 +2959,6 @@ static void rspi_spei_isr_common(uint8_t channel)
 * Arguments    :    N/A
 * Return Value :    N/A
 ******************************************************************************/
-#ifndef BSP_MCU_RX63_ALL  /* This interrupt not present in RX63 or RX64M series. */
 #ifndef BSP_MCU_RX64M
 #ifndef BSP_MCU_RX65N
 #ifndef BSP_MCU_RX66T
@@ -2864,37 +2999,6 @@ static void rspi_spei_isr_common(uint8_t channel)
 #endif
 #endif
 #endif
-#endif
-#endif
-
-#ifdef BSP_MCU_RX63_ALL
-    #if RSPI_CFG_USE_RX63_ERROR_INTERRUPT == 1
-    R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spei_63_isr, VECT(ICU, GROUP12))
-    R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spei_63_isr(void)
-    {
-        /* Get the interrupt source from the group interrupt source register. */
-        #if RSPI_CFG_USE_CHAN0 == 1
-        if (IS(RSPI0, SPEI0))
-        {
-            rspi_spei_isr_common(0);
-        }
-        #endif
-
-        #if RSPI_CFG_USE_CHAN1 == 1
-        if (IS(RSPI1, SPEI1))
-        {
-            rspi_spei_isr_common(1);
-        }
-        #endif
-
-        #if RSPI_CFG_USE_CHAN2 == 1
-        if (IS(RSPI2, SPEI2))
-        {
-            rspi_spei_isr_common(2);
-        }
-        #endif
-    } /* end rspi_spei_63_isr */
-    #endif
 #endif
 
 #if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || \
@@ -3027,5 +3131,138 @@ R_BSP_ATTRIB_INTERRUPT void rspi_spci2_isr(void)
     rspi_spci_isr_common(2);
 } /* end rspi_spci2_isr */
 #endif
+#endif
+/******************************************************************************
+* Function Name:    rspi_spii_isr_common
+* Description  :    common ISR handler for IDLE RSPI Communication
+* Arguments    :    RSPI channel
+* Return Value :    N/A
+******************************************************************************/
+static void rspi_spii_isr_common(uint8_t channel)
+{
+    uint8_t status_flags = (*g_rspi_channels[channel]).SPSR.BYTE;
+    rspi_evt_t event = RSPI_EVT_ERR_UNDEF;
+
+    g_rspi_cb_data[channel].event_code = event;
+    if( (status_flags & RSPI_SPSR_IDLNF) == 0x00 )
+    {
+        /* Disable idle interrupt requests of the RSPI. */
+        (*g_rspi_channels[channel]).SPCR2.BIT.SPIIE = 0;
+        /* Disable RSPI. */
+        (*g_rspi_channels[channel]).SPCR.BIT.SPE = 0;
+        if (0 == (*g_rspi_channels[channel]).SPCR.BIT.SPE)
+        {
+            R_BSP_NOP();
+        }
+        #if RSPI_CFG_REQUIRE_LOCK == 1
+        /* Release lock for this channel. */
+        R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_RSPI0 + channel));
+        #endif
+
+        /* Transfer complete. Call the user callback function passing pointer to the result structure. */
+        if ((FIT_NO_FUNC != g_rspi_handles[channel].pcallback) && (NULL != g_rspi_handles[channel].pcallback))
+        {
+            g_rspi_cb_data[channel].handle = &(g_rspi_handles[channel]);
+            g_rspi_cb_data[channel].event_code = RSPI_EVT_TRANSFER_COMPLETE;
+            g_rspi_handles[channel].pcallback((void*)&(g_rspi_cb_data[channel]));
+        }
+    }
+} /* end rspi_spii_isr_common() */
+
+/******************************************************************************
+* Function Name:    rspi_spii0_isr, rspi_spii1_isr, rspi_spii2_isr
+* Description  :    RSPI SPEI IDLE ISR.
+*                   Each ISR calls a common function but passes its channel number.
+* Arguments    :    N/A
+* Return Value :    N/A
+******************************************************************************/
+#ifndef BSP_MCU_RX64M
+#ifndef BSP_MCU_RX65N
+#ifndef BSP_MCU_RX66T
+#ifndef BSP_MCU_RX71M
+#ifndef BSP_MCU_RX72T
+#ifndef BSP_MCU_RX72M
+#ifndef BSP_MCU_RX72N
+#ifndef BSP_MCU_RX66N
+#ifndef BSP_MCU_RX671
+
+    #if RSPI_CFG_USE_CHAN0 == 1
+
+    R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spii0_isr, VECT(RSPI0, SPII0))
+    R_BSP_ATTRIB_INTERRUPT void rspi_spii0_isr(void)
+    {
+        rspi_spii_isr_common(0);
+    } /* end rspi_spii0_isr */
+    #endif
+
+    #if RSPI_CFG_USE_CHAN1 == 1
+    R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spii1_isr, VECT(RSPI1, SPII1))
+    R_BSP_ATTRIB_INTERRUPT void rspi_spii1_isr(void)
+    {
+        rspi_spii_isr_common(1);
+    } /* end rspi_spii1_isr */
+    #endif
+
+    #if RSPI_CFG_USE_CHAN2 == 1
+    R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spii2_isr, VECT(RSPI2, SPII2))
+    R_BSP_ATTRIB_INTERRUPT void rspi_spii2_isr(void)
+    {
+        rspi_spii_isr_common(2);
+    } /* end rspi_spii2_isr */
+    #endif
+
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
+
+#if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || \
+    defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
+    defined BSP_MCU_RX671
+/******************************************************************************
+* Function Name:    rspi_spii_grp_isr
+* Description  :    BSP group interrupt handler for register the idle callback function
+* Arguments    :    pdata
+* Return Value :    N/A
+******************************************************************************/
+static void rspi_spii_grp_isr(void *pdata)
+{
+    /* Called from BSP group interrupt handler. */
+    #if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || \
+        defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N
+
+    #if RSPI_CFG_USE_CHAN0 == 1
+    if (IS(RSPI0, SPII0))
+    {
+        rspi_spii_isr_common(0);
+    }
+    #endif
+    #endif
+
+    #if defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || \
+        defined BSP_MCU_RX66N
+    #if RSPI_CFG_USE_CHAN1 == 1
+    if (IS(RSPI1, SPII1))
+    {
+        rspi_spii_isr_common(1);
+    }
+    #endif
+    #endif
+    
+    #if defined BSP_MCU_RX65N || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N
+
+    #if RSPI_CFG_USE_CHAN2 == 1
+    if (IS(RSPI2, SPII2))
+    {
+        rspi_spii_isr_common(2);
+    }
+    #endif
+    #endif
+}
 #endif
 /* end SPRI  */

@@ -19,11 +19,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011(2012-2020) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2011(2012-2021) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_flash_spi_private.h
-* Version      : 3.02
+* Version      : 3.03
 * Description  : FLASH SPI driver private header file
 *************************************************************************************************/
 /************************************************************************************************
@@ -33,6 +33,8 @@
 *              : 11.02.2019 3.00     Added parameter check of  Configuration Options.
 *              : 10.12.2020 3.02     Fixed a bug that build does not pass due to #error 
 *                                    when Flash of 1Gbit or more is selected.
+*              : 31.12.2021 3.03     Added variable "read_after_write" "read_after_write_add" and
+*                                    "read_after_write_data" for controlling SPI bus.
 *************************************************************************************************/
 #ifndef __FLASH_SPI_PRIVATE_H__
 #define __FLASH_SPI_PRIVATE_H__
@@ -321,11 +323,11 @@ flash_spi_status_t r_flash_spi_drvif_disable(uint8_t devno);
 flash_spi_status_t r_flash_spi_drvif_enable(uint8_t devno);
 flash_spi_status_t r_flash_spi_drvif_enable_tx_data(uint8_t devno);
 flash_spi_status_t r_flash_spi_drvif_enable_rx_data(uint8_t devno);
-flash_spi_status_t r_flash_spi_drvif_tx(uint8_t devno, uint32_t txcnt, uint8_t * p_data);
+flash_spi_status_t r_flash_spi_drvif_tx(uint8_t devno, uint32_t txcnt, uint8_t * p_data, bool read_after_write);
 flash_spi_status_t r_flash_spi_drvif_tx_add(uint8_t devno, uint32_t txcnt, uint8_t * p_data,
-                                            flash_spi_opmode_t op_mode);
+                                            flash_spi_opmode_t op_mode, bool read_after_write_add);
 flash_spi_status_t r_flash_spi_drvif_tx_data(uint8_t devno, uint32_t txcnt, uint8_t * p_data,
-                                             flash_spi_opmode_t op_mode);
+                                             flash_spi_opmode_t op_mode, bool read_after_write_data);
 flash_spi_status_t r_flash_spi_drvif_rx(uint8_t devno, uint32_t rxcnt, uint8_t * p_data);
 flash_spi_status_t r_flash_spi_drvif_add(uint8_t devno, uint32_t rxcnt, uint8_t * p_data,
                                          flash_spi_opmode_t op_mode);

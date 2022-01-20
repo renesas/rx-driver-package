@@ -225,7 +225,7 @@ typedef struct MS_light_lc_property_status_struct
  *  \brief API to initialize Light_Lc Server model
  *
  *  \par Description
- *  This is to initialize Light_Lc Server model and to register with Acess layer.
+ *  This is to initialize Light_Lc Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -263,6 +263,8 @@ API_RESULT MS_light_lc_server_init
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -272,7 +274,9 @@ API_RESULT MS_light_lc_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 /** \} */
 
@@ -286,7 +290,7 @@ API_RESULT MS_light_lc_server_state_update
  *  \brief API to initialize Light_Lc Client model
  *
  *  \par Description
- *  This is to initialize Light_Lc Client model and to register with Acess layer.
+ *  This is to initialize Light_Lc Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -320,6 +324,21 @@ API_RESULT MS_light_lc_client_init
 API_RESULT MS_light_lc_client_get_model_handle
            (
                /* OUT */ MS_ACCESS_MODEL_HANDLE  * model_handle
+           );
+
+/**
+ *  \brief API to set Light_Lc client model handle
+ *
+ *  \par Description
+ *  This is to set the handle of Light_Lc client model.
+ *
+ *  \param [in] model_handle   Model handle to be assigned.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_light_lc_client_set_model_handle
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE  model_handle
            );
 
 /**
@@ -369,7 +388,7 @@ API_RESULT MS_light_lc_client_send_reliable_pdu
  *  The Light LC Mode Set is an acknowledged message used to set the Light LC Mode state of an element.
  *  The response to the Light LC Mode Set message is a Light LC Mode Status message.
  *
- *  \param [in] param Light LC Mode Set message
+ *  \param [in] param Light LC Mode Set message parameter @ref MS_LIGHT_LC_MODE_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -388,7 +407,7 @@ API_RESULT MS_light_lc_client_send_reliable_pdu
  *  The Light LC Mode Set Unacknowledged is an unacknowledged message used to
  *  set the Light LC Mode state of an element.
  *
- *  \param [in] param Light LC Mode Set message
+ *  \param [in] param Light LC Mode Set message parameter @ref MS_LIGHT_LC_MODE_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -425,7 +444,7 @@ API_RESULT MS_light_lc_client_send_reliable_pdu
  *  The Light LC OM Set is an acknowledged message used to set the Light LC Occupancy Mode state of an element.
  *  The response to the Light LC OM Set message is a Light LC OM Status message.
  *
- *  \param [in] param Light LC OM Set message
+ *  \param [in] param Light LC OM Set message parameter @ref MS_LIGHT_LC_OM_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -444,7 +463,7 @@ API_RESULT MS_light_lc_client_send_reliable_pdu
  *  The Light LC OM Set Unacknowledged is an unacknowledged message used to set
  *  the Light LC Occupancy Mode state of an element.
  *
- *  \param [in] param Light LC OM Set message
+ *  \param [in] param Light LC OM Set message parameter @ref MS_LIGHT_LC_OM_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -481,7 +500,7 @@ API_RESULT MS_light_lc_client_send_reliable_pdu
  *  The Light LC Light OnOff Set is an acknowledged message used to set the Light LC Light OnOff state of an element.
  *  The response to the Light LC Light OnOff Set message is a Light LC Light OnOff Status message.
  *
- *  \param [in] param Light LC Light OnOff Set message
+ *  \param [in] param Light LC Light OnOff Set message parameter @ref MS_LIGHT_LC_LIGHT_ONOFF_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -500,7 +519,7 @@ API_RESULT MS_light_lc_client_send_reliable_pdu
  *  The Light LC Light OnOff Set Unacknowledged is an unacknowledged message
  *  used to set the Light LC Light OnOff state of an element.
  *
- *  \param [in] param Light LC Light OnOff Set message
+ *  \param [in] param Light LC Light OnOff Set message parameter @ref MS_LIGHT_LC_LIGHT_ONOFF_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -519,7 +538,7 @@ API_RESULT MS_light_lc_client_send_reliable_pdu
  *  Light LC Property Get is an acknowledged message used to get the Light LC Property state of an element.
  *  The response to the Light LC Property Get message is a Light LC Property Status message.
  *
- *  \param [in] param Light LC Property Get message
+ *  \param [in] param Light LC Property Get message parameter @ref MS_LIGHT_LC_PROPERTY_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -538,7 +557,7 @@ API_RESULT MS_light_lc_client_send_reliable_pdu
  *  The Light LC Property Set is an acknowledged message used to set the Light LC Property state of an element.
  *  The response to the Light LC Property Set message is a Light LC Property Status message.
  *
- *  \param [in] param Light LC Property Set message
+ *  \param [in] param Light LC Property Set message parameter @ref MS_LIGHT_LC_PROPERTY_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -557,7 +576,7 @@ API_RESULT MS_light_lc_client_send_reliable_pdu
  *  The Light LC Property Set Unacknowledged is an unacknowledged message used
  *  to set the Light LC Property state of an element.
  *
- *  \param [in] param Light LC Property Set message
+ *  \param [in] param Light LC Property Set message parameter @ref MS_LIGHT_LC_PROPERTY_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */

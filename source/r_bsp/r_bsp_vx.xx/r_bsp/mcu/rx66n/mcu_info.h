@@ -27,6 +27,7 @@
 *         : 10.12.2019 1.01     Fixed macro definition of BSP_MCU_RX66_ALL.
 *         : 30.06.2021 1.02     Added the following macro definition.
 *                               - BSP_MCU_EXCEP_ADDRESS_ISR
+*         : 30.11.2021 1.03     Deleted the compile switch for BSP_CFG_MCU_PART_SERIES and BSP_CFG_MCU_PART_GROUP.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -49,21 +50,13 @@ Macro definitions
 #define CPU_CYCLES_PER_LOOP    (3)
 
 /* MCU Series. */
-#if BSP_CFG_MCU_PART_SERIES == 0x0
-    #define BSP_MCU_SERIES_RX600    (1)
-#else
-    #error "ERROR - BSP_CFG_MCU_PART_SERIES - Unknown MCU Series chosen in r_bsp_config.h"
-#endif
+#define BSP_MCU_SERIES_RX600   (1)
 
 /* This macro means that this MCU is part of the RX66x collection of MCUs (i.e. RX66N). */
-#define BSP_MCU_RX66_ALL            (1)
+#define BSP_MCU_RX66_ALL       (1)
 
 /* MCU Group name. */
-#if BSP_CFG_MCU_PART_GROUP == 0x0
-    #define BSP_MCU_RX66N           (1)
-#else
-    #error "ERROR - BSP_CFG_MCU_PART_GROUP - Unknown MCU Group chosen in r_bsp_config.h"
-#endif
+#define BSP_MCU_RX66N          (1)
 
 /* Package. */
 #if   BSP_CFG_MCU_PART_PACKAGE == 0x0

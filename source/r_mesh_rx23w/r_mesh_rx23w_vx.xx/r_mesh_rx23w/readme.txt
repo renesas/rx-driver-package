@@ -5,12 +5,12 @@ r_mesh_rx23w
 
 Document Number
 ---------------
-R01AN4930EJ0110
-R01AN4930JJ0110
+R01AN4930EJ0120
+R01AN4930JJ0120
 
 Version
 -------
-v1.10
+v1.20
 
 Overview
 --------
@@ -98,15 +98,12 @@ File Structure
 |   |   |   blemesh_api.chm
 |   |   |   
 |   |   +---en
-|   |   |       r01an4930ej0110-rx23w-blemesh.pdf
+|   |   |       r01an4930ej0120-rx23w-blemesh.pdf
 |   |   +---ja
-|   |           r01an4930jj0110-rx23w-blemesh.pdf
+|   |           r01an4930jj0120-rx23w-blemesh.pdf
 |   |           
 |   +---lib
 |   |       lib_ble_ms_ccrx.lib
-|   |       
-|   +---ref
-|   |       r_mesh_rx23w_config_reference.h
 |   |       
 |   +---src
 |       |   
@@ -117,10 +114,8 @@ File Structure
 |       |       blebrr_pl.c
 |       |       gatt_clients.c
 |       |       gatt_clients.h
-|       |       gatt_db_prov.c
-|       |       gatt_db_prov.h
-|       |       gatt_db_proxy.c
-|       |       gatt_db_proxy.h
+|       |       gatt_db.c
+|       |       gatt_db.h
 |       |       gatt_services.c
 |       |       gatt_services.h
 |       |       
@@ -169,7 +164,9 @@ File Structure
 |                   EM_os.h
 |                   EM_platform.h
 |                   EM_timer.h
+|                   MS_common_pl.h
 |                   MS_features.h
+|                   MS_logger.h
 |                   MS_mempool_pl.h
 |                   MS_monitor_pl.h
 |                   MS_storage_pl.h

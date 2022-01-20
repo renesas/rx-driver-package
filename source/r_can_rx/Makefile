@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_can_rx
-VERSION = 		5.10
+VERSION = 		5.20
 MDF = V1
 
 CONFIG_FOLDER = r_config

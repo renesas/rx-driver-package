@@ -64,6 +64,22 @@
 *                               - BSP_CFG_SCI_UART_TERMINAL_BITRATE
 *                               - BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY
 *         : 26.02.2021 3.05    Added a comment for Azure RTOS to BSP_CFG_RTOS_USED.
+*         : 30.11.2021 4.00    Added the following macro definitions.
+*                               - BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE
+*                               - BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE
+*                               - BSP_CFG_HOCO_OSCILLATE_ENABLE
+*                               - BSP_CFG_LOCO_OSCILLATE_ENABLE
+*                               - BSP_CFG_IWDT_CLOCK_OSCILLATE_ENABLE
+*                               - BSP_CFG_CLKOUT_SOURCE
+*                               - BSP_CFG_CLKOUT_DIV
+*                               - BSP_CFG_CLKOUT_OUTPUT
+*                               - BSP_CFG_HOCO_TRIMMING_ENABLE
+*                               - BSP_CFG_HOCO_TRIMMING_REG_VALUE
+*                               - BSP_CFG_CONFIGURATOR_VERSION
+*                               - BSP_CFG_CPLUSPLUS
+*                              Changed initial value of the following macro definitions.
+*                               - BSP_CFG_MCU_PART_GROUP
+*                               - BSP_CFG_MCU_PART_SERIES
 ***********************************************************************************************************************/
 
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
@@ -127,16 +143,16 @@ Configuration Options
 #define BSP_CFG_MCU_PART_MEMORY_SIZE    (0x6)
 
 /* Group name.
-   Character(s) = Value for macro = Description
-   30           = 0x3             = RX230 Group
+   Character(s) = Description
+   30           = RX230 Group
 */
-#define BSP_CFG_MCU_PART_GROUP          (0x3)
+#define BSP_CFG_MCU_PART_GROUP          "RX230"
 
 /* Series name.
-   Character(s) = Value for macro = Description
-   52           = 0x0             = RX200 Series
+   Character(s) = Description
+   52           = RX200 Series
 */
-#define BSP_CFG_MCU_PART_SERIES         (0x0)
+#define BSP_CFG_MCU_PART_SERIES         "RX200"
 
 /* Memory type.
    Character(s) = Value for macro = Description
@@ -218,6 +234,36 @@ Configuration Options
 /* 4th ID Code section, address 0xFFFFFFAC. From MSB to LSB: ID code 12, ID code 13, ID code 14, ID code 15. */
 #define BSP_CFG_ID_CODE_LONG_4          (0xFFFFFFFF)
 
+/* Select whether to oscillate the Main Clock Oscillator.
+   0 = Stop Oscillating the Main Clock.
+   1 = Enable oscillating the Main Clock. (default)
+*/
+#define BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE    (1)
+
+/* Select whether to oscillate the Sub Clock Oscillator.
+   0 = Stop Oscillating the Sub Clock. (default)
+   1 = Enable Oscillating the Sub Clock.
+*/
+#define BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE     (0)
+
+/* Select whether to oscillate the High Speed On-Chip Oscillator (HOCO).
+   0 = Stop Oscillating the HOCO. (default)
+   1 = Enable Oscillating the HOCO.
+*/
+#define BSP_CFG_HOCO_OSCILLATE_ENABLE          (0)
+
+/* Select whether to oscillate the Low Speed On-Chip Oscillator (LOCO).
+   0 = Stop Oscillating the LOCO. (default)
+   1 = Enable Oscillating the LOCO.
+*/
+#define BSP_CFG_LOCO_OSCILLATE_ENABLE          (0)
+
+/* Select whether to oscillate the IWDT-Dedicated On-Chip Oscillator (IWDT).
+   0 = Stop Oscillating the IWDT Clock. (default)
+   1 = Enable Oscillating the IWDT Clock.
+*/
+#define BSP_CFG_IWDT_CLOCK_OSCILLATE_ENABLE    (0)
+
 /* Clock source select (CKSEL).
    0 = Low Speed On-Chip Oscillator  (LOCO)
    1 = High Speed On-Chip Oscillator (HOCO)
@@ -239,6 +285,16 @@ Configuration Options
    1 = External clock input
 */
 #define BSP_CFG_MAIN_CLOCK_SOURCE       (0)
+
+/* Configure clock source of clock output(CLKOUT) pin (CKOSEL).
+   Available clock sources:
+   0 = LOCO
+   1 = HOCO
+   2 = Main clock oscillator (default)
+   3 = Sub-clock oscillator
+   4 = PLL circuit
+ */
+#define BSP_CFG_CLKOUT_SOURCE           (2)
 
 /* The sub-clock oscillation control for using the RTC.
    When '1' is selected, the registers related to RTC are initialized and the sub-clock oscillator is operated.
@@ -322,6 +378,23 @@ Configuration Options
    Values 0=no output, 1 = BCK frequency, 2= BCK/2 frequency */
 #define BSP_CFG_BCLK_OUTPUT             (0)
 
+/* CLKOUT Output Frequency Division Ratio Select. (CKODIV)
+   Values
+   0 = x1/1 (default)
+   1 = x1/2
+   2 = x1/4
+   3 = x1/8
+   4 = x1/16
+ */
+#define BSP_CFG_CLKOUT_DIV              (0)
+
+/* Configure clock output(CLKOUT) pin (CKOSTP).
+   Values
+   0 = CLKOUT pin output stopped. (Fixed to the low level) (default)
+   1 = CLKOUT pin output enabled.
+ */
+#define BSP_CFG_CLKOUT_OUTPUT           (0)
+
 /* Main Clock Oscillator Wait Time (MOSCWTCR).
    Set these bits to select the oscillation stabilization wait time of the main clock oscillator.
    Set the main clock oscillation stabilization time to longer than or equal to the stabilization 
@@ -341,8 +414,23 @@ Configuration Options
 */
 #define BSP_CFG_MOSC_WAIT_TIME          (0x04)
 
+/* Select whether to initialize the HOCO trimming register.
+   0 = Disable reset the HOCO trimming register in the initial setting process.
+   1 = Enable reset the HOCO trimming register in the initial setting process.
+   Note: The trimming value is adjusted at shipment on the specified conditions and the value after a reset varies 
+         with the chips. When re-writing the HOCO trimming register, enable this macro definition.
+*/
+#define BSP_CFG_HOCO_TRIMMING_ENABLE    (0)
+
+/* Set the frequency trimming value for the HOCO.
+   0(Frequency: Low) - 63(Frequency: High)
+   Note: The trimming value is adjusted at shipment on the specified conditions and the value after a reset varies 
+         with the chips. When re-writing the HOCO trimming register, set this macro definition.
+*/
+#define BSP_CFG_HOCO_TRIMMING_REG_VALUE      (0)
+
 /* Sub-Clock Oscillator Wait Time (Use R_BSP_SoftwareDelay).
-   Setting delay init is in milliseconds.
+   Setting delay unit is in milliseconds.
 */
 #define BSP_CFG_SOSC_WAIT_TIME          (1482)
 
@@ -502,6 +590,11 @@ Configuration Options
 */
 #define BSP_CFG_CONFIGURATOR_SELECT                 (0)
 
+/* Version number of Smart Configurator.
+   This macro definition is updated by Smart Configurator.
+*/
+#define BSP_CFG_CONFIGURATOR_VERSION                (100)
+
 /* For some BSP functions, it is necessary to ensure that, while these functions are executing, interrupts from other 
    FIT modules do not occur. By controlling the IPL, these functions disable interrupts that are at or below the 
    specified interrupt priority level.
@@ -560,6 +653,12 @@ Configuration Options
    0(low) - 15(high)
 */
 #define BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY   (15)
+
+/* This macro is used for C++ project and updated by Smart Configurator.
+   0 = This project is a C project.(Not a C++ project).
+   1 = This project is a C++ project.
+*/
+#define BSP_CFG_CPLUSPLUS             (0)
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_emwin_rx
-VERSION = 		6.14g_130
+VERSION = 		6.22_100
 MDF = V1
 
 CONFIG_FOLDER = r_config

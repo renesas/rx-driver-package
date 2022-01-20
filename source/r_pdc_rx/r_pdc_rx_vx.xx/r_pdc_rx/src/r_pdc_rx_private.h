@@ -18,7 +18,7 @@
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_pdc_rx_private.h
- * Version      : 2.05
+ * Version      : 2.06
  * Device       : RX64M/RX71M/RX651/RX65N/RX72M/RX66N/RX72N
  * Tool-Chain   : RX Family C Compiler
  * H/W Platform : 
@@ -31,6 +31,7 @@
  *         :                     Change loop values of PDC reset wating process "219" to "10000000".
  *         : 30.07.2019 2.04     Added changes for RX72M.
  *         : 22.11.2019 2.05     Added changes for RX66N and RX72N.
+ *         : 07.01.2022 2.06     Added define "PDC_PCSR_RECEIVE_END_FLAG_MASK"
  ***********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef PDC_RX_PRIVATE_H
@@ -113,6 +114,9 @@
 /* Defines for loop values of continuous reset limitation waiting process */
     #define PDC_CONT_RESET_LOOP_VALUES  (72)
 
+/* Defines for error flag and frame end flag mask data */
+    #define PDC_PCSR_RECEIVE_END_FLAG_MASK  (0x0000007C)
+    
 /***********************************************************************************************************************
  Typedef definitions
  ***********************************************************************************************************************/

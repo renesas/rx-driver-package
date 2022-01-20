@@ -645,6 +645,38 @@ typedef API_RESULT (* PROV_UI_NOTIFY_CB)
 #define MS_prov_data(phandle, pdata) \
         MS_prov_send_pdu ((phandle), PROV_PDU_TYPE_DATA, (pdata), sizeof (PROV_DATA_S))
 
+/**
+ *  \brief Utility API to fetch current ECDH Public Key to be used for
+ *         Provisioning
+ *
+ *  \par Description
+ *  This API can be used by the application to fetch the current ECDH P256
+ *  Public Key which is to be used for the Provisioning Procedure.
+ *
+ *  \param [out] public_key to a pointer of \ref UCHAR array of length
+ *               \ref PROV_PUBKEY_SIZE
+ *
+ *  \return API_SUCCESS or Error Code on failure
+ */
+#define MS_prov_get_local_public_key(pk) \
+        MS_prov_access_local_public_key(MS_FALSE, (pk))
+
+/**
+ *  \brief Utility API to set current ECDH Public Key to be used for
+ *         Provisioning
+ *
+ *  \par Description
+ *  This API can be used by the application to set the current ECDH P256
+ *  Public Key which is to be used for the Provisioning Procedure.
+ *
+ *  \param [out] public_key to a pointer of \ref UCHAR array of length
+ *               \ref PROV_PUBKEY_SIZE
+ *
+ *  \return API_SUCCESS or Error Code on failure
+ */
+#define MS_prov_set_local_public_key(pk) \
+        MS_prov_access_local_public_key(MS_TRUE, (pk))
+
 /** \} */
 
 /* --------------------------------------------- API Declarations */
@@ -707,13 +739,11 @@ API_RESULT MS_prov_setup
  *  and exchanges the capabilities for provisioning.
  *
  *  \param [in] bearer Provisioning bearer on which to be bound - PB-ADV or PB-GATT
- *  \param [in] pdevice Pointer to the device strcuture \ref PROV_DEVICE_S.
+ *  \param [in] pdevice Pointer to the device strcuture \ref PROV_DEVICE_S. This parameter
+ *  is ignored if the role is PROV_ROLE_DEVICE.
  *  \param [in] attention The attention duration in seconds to be configured by the
- *  device. This parameter is dont care if the role is PROV_ROLE_DEVICE.
+ *  device. This parameter is ignored if the role is PROV_ROLE_DEVICE.
  *  \param [out] phandle The handle to the context setup on successful allocation.
- *
- *  \note This API is for use by the Provisioner application only upon
- *  reception of an Unprovisioned Device Beacon.
  *
  *  \return API_SUCCESS or Error Code on failure
  */
@@ -789,21 +819,24 @@ API_RESULT MS_prov_abort
            );
 
 /**
- *  \brief Utility API to fetch current ECDH Public Key to be used for
+ *  \brief Utility API to get or set current ECDH Public Key to be used for
  *         Provisioning
  *
  *  \par Description
  *  This API can be used by the application to fetch the current ECDH P256
  *  Public Key which is to be used for the Provisioning Procedure.
  *
- *  \param [out] public_key to a pointer of \ref UCHAR array of length
+ *  \param [in] set MS_TRUE/MS_FALSE to Set or Get the Public Key
+ *
+ *  \param [inout] public_key to a pointer of \ref UCHAR array of length
  *               \ref PROV_PUBKEY_SIZE
  *
  *  \return API_SUCCESS or Error Code on failure
  */
-API_RESULT MS_prov_get_local_public_key
+API_RESULT MS_prov_access_local_public_key
            (
-               /* OUT */ UCHAR  * public_key
+               /* IN */    UCHAR    set,
+               /* INOUT */ UCHAR  * public_key
            );
 
 #ifdef __cplusplus

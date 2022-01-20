@@ -5,12 +5,12 @@ r_tsip_rx
 
 Document Number
 ---------------
-R20AN0548JJ0112-RX-TSIP-SECURITY
-R20AN0548EJ0112-RX-TSIP-SECURITY
+R20AN0548JJ0114-RX-TSIP-SECURITY
+R20AN0548EJ0114-RX-TSIP-SECURITY
 
 Version
 -------
-v1.12.l
+v1.14.l
 
 Overview
 --------
@@ -34,6 +34,7 @@ Supported MCUs
 * RX65N, RX651 Group
 * RX66N Group
 * RX66T Group
+* RX671 Group
 * RX72M Group
 * RX72N Group
 * RX72T Group
@@ -44,6 +45,7 @@ Boards Tested On
 * RSSKRX23W
 * RSKRX65N_2MB
 * RSKRX66T
+* RSKRX671
 * RSKRX72M
 * RSKRX72N
 * RSKRX72T
@@ -58,7 +60,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp      V5.52
+* r_bsp      V6.11
 
 How to add to your project
 --------------------------
@@ -66,9 +68,6 @@ This module must be added to each project in which it is used.
 Renesas recommends using "Smart Configurator" described in (1) or (3).
 However, "Smart Configurator" only supports some RX devices.
 Please use the methods of (2) or (4) for unsupported RX devices.
-
-This module dose not automatically link to the library.
-Please manually link the library corresponding to the MCU and compliler.
 
 (1) Adding the FIT module to your project using "Smart Configurator" in e2 studio
 By using the "Smart Configurator" in e2 studio, 
@@ -103,9 +102,9 @@ r_tsip_rx
 |
 +---doc
 |   +---ja
-|   |    r20an0548jj0112-rx-tsip-security.pdf
+|   |    r20an0548jj0114-rx-tsip-security.pdf
 |   +---en
-|        r20an0548ej0112-rx-tsip-security.pdf
+|        r20an0548ej0114-rx-tsip-security.pdf
 |
 +---ref
 |       r_tsip_rx_config_reference.h
@@ -121,6 +120,8 @@ r_tsip_rx
     |    r_tsip_rx72m_rx72n_rx66n_little.lib
     |    r_tsip_rx231_rx23w_big.lib
     |    r_tsip_rx231_rx23w_little.lib
+    |    r_tsip_rx671_big.lib
+    |    r_tsip_rx671_little.lib
     +---gcc
     |    libr_tsip_rx65n_big.a
     |    libr_tsip_rx65n_little.a
@@ -130,6 +131,8 @@ r_tsip_rx
     |    libr_tsip_rx72m_rx72n_rx66n_little.a
     |    libr_tsip_rx231_rx23w_big.a
     |    libr_tsip_rx231_rx23w_little.a
+    |    libr_tsip_rx671_big.a
+    |    libr_tsip_rx671_little.a
     +---iar
     |    r_tsip_rx65n_big.a
     |    r_tsip_rx65n_little.a
@@ -139,6 +142,8 @@ r_tsip_rx
     |    r_tsip_rx72m_rx72n_rx66n_little.a
     |    r_tsip_rx231_rx23w_big.a
     |    r_tsip_rx231_rx23w_little.a
+    |    r_tsip_rx671_big.a
+    |    r_tsip_rx671_little.a
 r_config
     r_tsip_rx_config.h
 

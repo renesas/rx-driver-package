@@ -598,6 +598,14 @@ typedef struct MS_state_sensor_cadence_struct
     UINT16 status_trigger_delta_up_len;
 
     /** Minimum interval between two consecutive Status messages */
+    /**
+     * APPLICATION NOTE:
+     * The Current Sensor Server Model implementation does not inherantly
+     * check for the time interval between two consecutive status messages.
+     * The application layer which manages the data for the Sensor Server
+     * Model holds the responsibility for interleaving consecutive status
+     * messages with the configured Minimum time interval for statuses.
+     */
     UCHAR  status_min_interval;
 
     /** Low value for the fast cadence range */

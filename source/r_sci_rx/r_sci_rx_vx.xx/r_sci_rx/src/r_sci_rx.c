@@ -58,6 +58,10 @@
 *          31.03.2021  3.80    Added support for RX671.
 *                              Added support circular buffer in mode asynchronous.
 *                              Removed usage of BYTEQ in DMAC/DTC mode.
+*          15.11.2021  4.10    Added command SCI_CMD_SET_TXI_RXI_PRIORITY in R_SCI_Control()
+*                              for changing TXI and RXI priority level simultaneously.
+*                              Added support command SCI_CMD_SET_TXI_PRIORITY and SCI_CMD_SET_RXI_PRIORITY 
+*                              in R_SCI_Control() for Series RX100 and RX200.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -2910,12 +2914,10 @@ sci_err_t R_SCI_Control(sci_hdl_t const     hdl,
             return SCI_ERR_NULL_PTR;
         }
 #endif
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)
-        if ((SCI_CMD_SET_TXI_PRIORITY == cmd) || (SCI_CMD_SET_RXI_PRIORITY == cmd))
+        if ((SCI_CMD_SET_TXI_PRIORITY == cmd) || (SCI_CMD_SET_RXI_PRIORITY == cmd) || (SCI_CMD_SET_TXI_RXI_PRIORITY == cmd))
         {
             return SCI_ERR_NULL_PTR;
         }
-#endif
     }
     if ((SCI_MODE_OFF == hdl->mode) || (SCI_MODE_MAX <= hdl->mode))
     {
@@ -2939,8 +2941,7 @@ sci_err_t R_SCI_Control(sci_hdl_t const     hdl,
         }
     }
 #endif
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)
-    if ((SCI_CMD_SET_TXI_PRIORITY == cmd) || (SCI_CMD_SET_RXI_PRIORITY == cmd))
+    if ((SCI_CMD_SET_TXI_PRIORITY == cmd) || (SCI_CMD_SET_RXI_PRIORITY == cmd) || (SCI_CMD_SET_TXI_RXI_PRIORITY == cmd))
     {
         /* Casting void* type is valid */
         if ((1 > (*(uint8_t *)p_args)) || (BSP_MCU_IPL_MAX < (*(uint8_t *)p_args)))
@@ -2948,7 +2949,6 @@ sci_err_t R_SCI_Control(sci_hdl_t const     hdl,
             return SCI_ERR_INVALID_ARG;
         }
     }
-#endif
 #endif /* End of SCI_CFG_PARAM_CHECKING_ENABLE */
     
     /* COMMANDS COMMON TO ALL MODES */
@@ -3057,18 +3057,47 @@ sci_err_t R_SCI_Control(sci_hdl_t const     hdl,
     }
 #endif /* End of SCI_CFG_FIFO_INCLUDED */
 
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)
     case (SCI_CMD_SET_TXI_PRIORITY):
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)
     {
         /* Casting void type to uint8_t type is valid */
         *hdl->rom->ipr_txi = *((uint8_t *)p_args);
         break;
     }
-
+#else
+    {
+        /* Casting void type to uint8_t type is valid */
+        *hdl->rom->ipr = *((uint8_t *)p_args);
+        break;
+    }
+#endif
     case (SCI_CMD_SET_RXI_PRIORITY):
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)
     {
         /* Casting void type to uint8_t type is valid */
         *hdl->rom->ipr_rxi = *((uint8_t *)p_args);
+        break;
+    }
+#else
+    {
+        /* Casting void type to uint8_t type is valid */
+        *hdl->rom->ipr = *((uint8_t *)p_args);
+        break;
+    }
+#endif
+
+    case (SCI_CMD_SET_TXI_RXI_PRIORITY):
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)
+    {
+        /* Casting void type to uint8_t type is valid */
+        *hdl->rom->ipr_txi = *((uint8_t *)p_args);
+        *hdl->rom->ipr_rxi = *((uint8_t *)p_args);
+        break;
+    }
+#else
+    {
+        /* Casting void type to uint8_t type is valid */
+        *hdl->rom->ipr = *((uint8_t *)p_args);
         break;
     }
 #endif

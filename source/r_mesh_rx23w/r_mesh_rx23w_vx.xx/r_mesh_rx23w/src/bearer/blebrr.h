@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2013. Mindtree Limited.
+ *  Copyright (C) 2013-2021. Mindtree Limited.
  *  All rights reserved.
  */
 
@@ -67,6 +67,8 @@
 #define BLEBRR_GATT_PROV_MODE                   0x00
 /** Mesh Proxy Service Mode */
 #define BLEBRR_GATT_PROXY_MODE                  0x01
+/** Uninitialized Mode */
+#define BLEBRR_GATT_UNINIT_MODE                 0xFF
 /** \} */
 
 /** \cond definitions for internal module */
@@ -91,10 +93,16 @@
 #define BLEBRR_GATT_IFACE_ENABLE                0x02
 /** GATT Bearer communication is Disabled */
 #define BLEBRR_GATT_IFACE_DISABLE               0x03
+/** Mesh GATT Service is found as a result of Service Discovery */
+#define BLEBRR_GATT_IFACE_FOUND                 0x04
 /** Mesh GATT Service is not found as a result of Service Discovery */
-#define BLEBRR_GATT_IFACE_NOT_FOUND             0x04
+#define BLEBRR_GATT_IFACE_NOT_FOUND             0x05
+/** GATT Database of peer connected device is changed */
+#define BLEBRR_GATT_IFACE_CHANGED               0x06
 /** Report of Connectable Device having Mesh GATT Service */
-#define BLEBRR_GATT_IFACE_SCAN                  0x05
+#define BLEBRR_GATT_IFACE_SCAN                  0x07
+/** Creating Connection is Canceled */
+#define BLEBRR_GATT_IFACE_CANCEL                0x08
 /** \} */
 
 /** \} */
@@ -143,20 +151,19 @@ API_RESULT blebrr_scan_pl(UCHAR enable);
 API_RESULT blebrr_advertise_data_pl(CHAR type, UCHAR * pdata, UINT16 pdatalen);
 API_RESULT blebrr_advertise_pl(UCHAR state);
 API_RESULT blebrr_set_gattmode_pl(UCHAR serv_mode);
+blebrr_gatt_env_t * blebrr_find_gatt_env_by_connhdl(uint16_t conn_hdl);
 
 /* Functions implemented in blebrr.c */
-void  blebrr_scan_enable(void);
-void  blebrr_pl_scan_setup(UCHAR enable);
-void  blebrr_pl_advertise_setup(UCHAR enable);
-void  blebrr_pl_advertise_end(void);
-void  blebrr_pl_recv_advpacket(UCHAR type, UCHAR * pdata, UINT16 pdatalen, UCHAR rssi);
+void blebrr_adv_enable(void);
+void blebrr_adv_disable(void);
+void blebrr_pl_scan_setup(UCHAR enable);
+void blebrr_pl_advertise_setup(UCHAR enable);
+void blebrr_pl_recv_advpacket(UCHAR type, UCHAR * pdata, UINT16 pdatalen, UCHAR rssi);
 
 /* Functions implemented in blebrr_gatt.c */
 API_RESULT blebrr_pl_gatt_connection(BRR_HANDLE * handle, UCHAR role, UINT16 mtu, UCHAR mode);
-API_RESULT blebrr_pl_gatt_disconnection(BRR_HANDLE * handle);
+API_RESULT blebrr_pl_gatt_disconnection(BRR_HANDLE * handle, UCHAR role, UCHAR mode);
 API_RESULT blebrr_pl_recv_gattpacket(BRR_HANDLE * handle, UCHAR * pdata, UINT16 pdatalen);
-
-extern INT32 cry_rand_generate(UCHAR * prand, UINT16 randlen);
 /** \endcond */
 
 /*******************************************************************************
@@ -207,8 +214,6 @@ API_RESULT R_MS_BRR_Init(BLEBRR_INIT_CB init_cb);
  *  is enabled after connection is established. Then, GATT Bearer registered is 
  *  removed from Mesh Stack when Notification is disabled or when connection is 
  *  terminated.
- *
- *  \return API_SUCCESS or an error code indicating reason for failure
  */
 void  R_MS_BRR_Setup(void);
 
@@ -220,7 +225,7 @@ void  R_MS_BRR_Setup(void);
  *
  *  \param [in] cb          callback function to notify GATT interface events
  *
- *  \return API_SUCCESS or an error code indicating reason for failure
+ *  \return API_SUCCESS or API_FAILURE
  */
 API_RESULT R_MS_BRR_Register_GattIfaceCallback(BLEBRR_GATT_IFACE_CB cb);
 
@@ -246,7 +251,7 @@ UCHAR R_MS_BRR_Get_GattMode(void);
  *
  *  \param [in] conn_hdl    connection handle to identify device
  *
- *  \return API_SUCCESS or an error code indicating reason for failure
+ *  \return API_SUCCESS or API_FAILURE
  */
 API_RESULT R_MS_BRR_Disconnect(UINT16 conn_hdl);
 
@@ -262,9 +267,9 @@ API_RESULT R_MS_BRR_Disconnect(UINT16 conn_hdl);
  *
  *  \note Scan Response Data specified by this API is used only when Connectable Advertising for Provisioning and Proxy.
  *
- *  \return API_SUCCESS or an error code indicating reason for failure
+ *  \return API_SUCCESS or API_FAILURE
  */
-API_RESULT R_MS_BRR_Set_ScanRspData(UCHAR * srp_data, UCHAR srp_datalen);
+API_RESULT R_MS_BRR_Set_ScanRspData(const UCHAR * srp_data, UCHAR srp_datalen);
 
 /**
  *  \brief Manage Reporting Connectable Device having Mesh GATT Service.
@@ -280,19 +285,17 @@ API_RESULT R_MS_BRR_Set_ScanRspData(UCHAR * srp_data, UCHAR srp_datalen);
  *  \note Scan Operation state is managed by Mesh Stack API.
  *  \note Duplication Filter is not implemented.
  *
- *  \return API_SUCCESS or an error code indicating reason for failure
+ *  \return API_SUCCESS or API_FAILURE
  */
 API_RESULT R_MS_BRR_Scan_GattBearer(UCHAR enable, UCHAR mode);
 
-/**
- * Request to Create Connection.
- * Completion of establishing a connection is notified by BLEBRR_GATT_IFACE_UP
- */
 /**
  *  \brief Request to Create Connection.
  *
  *  \par Description
  *  API to request to Create Connection.
+ *  Completion of the establishing a connection is notified by BLEBRR_GATT_IFACE_UP.
+ *  After establishing a connection, R_MS_BRR_Discover_Service() is invoked automatically.
  *
  *  \param [in] remote_addr remove device address to 
  *  \param [in] mode        GATT interface mode, either BLEBRR_GATT_PROV_MODE or BLEBRR_GATT_PROXY_MODE
@@ -301,9 +304,21 @@ API_RESULT R_MS_BRR_Scan_GattBearer(UCHAR enable, UCHAR mode);
  *  \note By invoking this API, BLE Link Layer transitions to Initiating state and notifies no Advertising Report
  *  until connection is established. Thus Mesh Stack cannot receive message from ADV bearer during Initiating state.
  *
- *  \return API_SUCCESS or an error code indicating reason for failure
+ *  \return API_SUCCESS or API_FAILURE
  */
 API_RESULT R_MS_BRR_Create_Connection(st_ble_dev_addr_t * remote_addr, UCHAR mode);
+
+/**
+ *  \brief Cancel Creating a Connection.
+ *
+ *  \par Description
+ *  API to Cancel Createing a Connection while BLE Link Layer is Initiating state.
+ *
+ *  \note This API is for GATT Client only.
+ *
+ *  \return API_SUCCESS or API_FAILURE
+ */
+API_RESULT R_MS_BRR_Cancel_CreateConnection(void);
 
 /**
  *  \brief Start Service Discovery for Mesh GATT Service.
@@ -319,7 +334,7 @@ API_RESULT R_MS_BRR_Create_Connection(st_ble_dev_addr_t * remote_addr, UCHAR mod
  *
  *  \note This API is for GATT Client only.
  *
- *  \return API_SUCCESS or an error code indicating reason for failure
+ *  \return API_SUCCESS or API_FAILURE
  */
 API_RESULT R_MS_BRR_Discover_Service(UINT16 conn_hdl, UCHAR mode);
 
@@ -335,9 +350,24 @@ API_RESULT R_MS_BRR_Discover_Service(UINT16 conn_hdl, UCHAR mode);
  *
  *  \note This API is for GATT Client only.
  *
- *  \return API_SUCCESS or an error code indicating reason for failure
+ *  \return API_SUCCESS or API_FAILURE
  */
 API_RESULT R_MS_BRR_Config_Notification(UINT16 conn_hdl, UCHAR config_ntf, UCHAR mode);
+
+/**
+ *  \brief Configure Service Changed Indication of GATT Service.
+ *
+ *  \par Description
+ *  API to configure Service Changed Indication of GATT Service.
+ *
+ *  \param [in] conn_hdl    connection handle to identify device
+ *  \param [in] config_ntf  indication configuration flag; enable if MS_TRUE, or disable if MS_FALSE
+ *
+ *  \note This API is for GATT Client only.
+ *
+ *  \return API_SUCCESS or API_FAILURE
+ */
+API_RESULT R_MS_BRR_Config_ServChanged(UINT16 conn_hdl, UCHAR config_ind);
 
 /** \} */
 

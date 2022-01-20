@@ -29,6 +29,7 @@
 *                               - BSP_MCU_CPU_VERSION
 *                               - CPU_CYCLES_PER_LOOP
 *                               Fixed coding style.
+*         : 30.11.2021 2.01     Deleted the compile switch for BSP_CFG_MCU_PART_SERIES and BSP_CFG_MCU_PART_GROUP.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -51,21 +52,13 @@ Macro definitions
 #define CPU_CYCLES_PER_LOOP    (4)
 
 /* MCU Series. */
-#if BSP_CFG_MCU_PART_SERIES == 0x0
-    #define BSP_MCU_SERIES_RX200    (1)
-#else
-    #error "ERROR - BSP_CFG_MCU_PART_SERIES - Unknown MCU Series chosen in r_bsp_config.h"
-#endif
+#define BSP_MCU_SERIES_RX200   (1)
 
 /* This macro means that this MCU is part of the RX24x collection of MCUs (i.e. RX24U). */
-#define BSP_MCU_RX24_ALL            (1)
+#define BSP_MCU_RX24_ALL       (1)
 
 /* MCU Group name. */
-#if BSP_CFG_MCU_PART_GROUP == 0x0
-    #define BSP_MCU_RX24U           (1)
-#else
-    #error "ERROR - BSP_CFG_MCU_PART_GROUP - Unknown MCU Group chosen in r_bsp_config.h"
-#endif
+#define BSP_MCU_RX24U          (1)
 
 /* Package. */
 #if   BSP_CFG_MCU_PART_PACKAGE == 0x3

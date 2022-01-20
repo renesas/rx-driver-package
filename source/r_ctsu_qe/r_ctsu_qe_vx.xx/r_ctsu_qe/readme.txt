@@ -5,11 +5,11 @@ r_ctsu_qe
 
 Document Number 
 ---------------
-r01an4469jj0200
+r01an4469jj0201
 
 Version
 -------
-v2.00
+v2.01
 
 Overview
 --------
@@ -47,7 +47,8 @@ Boards Tested On
 
 Limitations
 -----------
--
+* 1 frequency scan and 2 frequency scan are prohibited in CTSU2.
+
 
 Peripherals Used Directly
 -------------------------
@@ -57,7 +58,7 @@ Peripherals Used Directly
 Required Packages
 -----------------
 * r_bsp       v6.20
-* r_touch_qe  v2.00
+* r_touch_qe  v2.01
 
 
 Toolchain(s) Used
@@ -67,17 +68,17 @@ Toolchain(s) Used
 
 File Structure
 --------------
-r_ctsu_qe (v2.00)
+r_ctsu_qe (v2.01)
 |   +-- readme.txt
-|   +-- r_ctsu_qe_if.h (v2.00)
+|   +-- r_ctsu_qe_if.h (v2.01)
 
 +---src
-|   +-- r_ctsu_qe.h (v2.00)
-|   +-- r_ctsu_qe_api.h (v2.00)
+|   +-- r_ctsu_qe.h (v2.01)
+|   +-- r_ctsu_qe_api.h (v2.01)
 |
 +---src
-    +-- r_ctsu_qe.c (v2.00)
+    +-- r_ctsu_qe.c (v2.01)
 
 r_config
-    r_ctsu_qe_config.h (v2.00)
+    r_ctsu_qe_config.h (v2.01)
 

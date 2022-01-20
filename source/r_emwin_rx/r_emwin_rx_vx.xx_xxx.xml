@@ -6,17 +6,17 @@
     <toolchain>
         <brand>Renesas</brand>
         <product>RXC</product>
-        <version>3.02.00</version>
+        <version>3.03.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
-        <version>8.03.00.201904</version>
+        <version>8.03.00.202004</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
         <product>ICCRX</product>
-        <version>4.14.01</version>
+        <version>4.20.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -36,37 +36,37 @@
     <package>
         <type>fitmodule</type>
         <name>r_emwin_rx</name>
-        <version>6.14.g.1.30</version>
+        <version>6.22.1.00</version>
         <zipsource>r_emwin_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_cmt_rx</module>
-            <version>4.40</version>
+            <version>4.90</version>
         </dependency>
         <dependency>
             <module>r_dmaca_rx</module>
-            <version>2.40</version>
+            <version>2.60</version>
         </dependency>
         <dependency>
             <module>r_drw2d_rx</module>
-            <version>1.10</version>
+            <version>1.11</version>
         </dependency>
         <dependency>
             <module>r_glcdc_rx</module>
-            <version>1.40</version>
+            <version>1.50</version>
         </dependency>
         <dependency>
             <module>r_gpio_rx</module>
-            <version>3.50</version>
+            <version>4.10</version>
         </dependency>
         <dependency>
             <module>r_sci_iic_rx</module>
-            <version>2.46</version>
+            <version>2.49</version>
         </dependency>
         <application>Graphic</application>
         <desc>Graphic Library with Graphical User Interface</desc>
         <details>emWin is designed to provide an efficient, processor- and display controller-independent graphical user interface for any application that operates with a graphical display. It is compatible with single-task and multitask environments, with a proprietary operating system or with any commercial RTOS. emWin is shipped as C source code. It may be adapted to any size physical and virtual display with any display controller and CPU.
-The version number 6.14g means the version of emWin library, and 1.30 means that of FIT module.
-This FIT module includes an installer of AppWizard v1.10.</details>
+The version number 6.22 means the version of emWin library, and 1.00 means that of FIT module.
+This FIT module includes an installer of AppWizard v1.24.</details>
         <function>-</function>
         <incdir>r_config</incdir>
         <incdir>r_emwin_rx</incdir>

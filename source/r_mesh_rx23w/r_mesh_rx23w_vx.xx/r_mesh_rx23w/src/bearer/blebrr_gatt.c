@@ -7,7 +7,7 @@
  */
 
 /*
- *  Copyright (C) 2016. Mindtree Ltd.
+ *  Copyright (C) 2016-2021. Mindtree Ltd.
  *  All rights reserved.
  */
 
@@ -28,7 +28,7 @@ static BRR_BEARER_INFO blebrr_gatt;
 static BRR_BEARER_CH_INFO blebrr_gatt_ch_info;
 
 /** GATT Current mode identifier - PROV or PROXY */
-static UCHAR blebrr_gatt_mode = 0xFF;
+static UCHAR blebrr_gatt_mode = BLEBRR_GATT_UNINIT_MODE;
 
 /*******************************************************************************
 * Functions
@@ -44,11 +44,16 @@ void R_MS_BRR_Set_GattMode(UCHAR mode)
      *  0x01: BLEBRR_GATT_PROXY_MODE GATT Proxy Mode
      *  All other values are RFU.
      */
-     blebrr_gatt_mode =
-        ((mode == BLEBRR_GATT_PROV_MODE) || (mode == BLEBRR_GATT_PROXY_MODE)) ? mode : 0xFF;
+    if ((BLEBRR_GATT_PROV_MODE == mode) || (BLEBRR_GATT_PROXY_MODE == mode))
+    {
+        if (blebrr_gatt_mode != mode)
+        {
+            blebrr_gatt_mode = mode;
 
-     /* Notify GATT mode setting to blebrr pl */
-     blebrr_set_gattmode_pl(blebrr_gatt_mode);
+            /* Notify GATT mode setting to blebrr pl */
+            blebrr_set_gattmode_pl(blebrr_gatt_mode);
+        }
+    }
 }
 
 /***************************************************************************//**
@@ -72,10 +77,6 @@ static API_RESULT blebrr_gatt_send(BRR_HANDLE * handle, UCHAR  type, void * pdat
     MS_IGNORE_UNUSED_PARAM(type);
 
     retval = blebrr_gatt_send_pl(handle, pdata, datalen);
-    if (API_SUCCESS != retval)
-    {
-        BLEBRR_LOG("Error - 0x%04X\n", retval);
-    }
 
     return retval;
 }
@@ -121,22 +122,15 @@ API_RESULT blebrr_pl_gatt_connection(BRR_HANDLE * handle, UCHAR role, UINT16 mtu
     buffer.length = sizeof(blebrr_gatt_ch_info);
     retval = MS_brr_add_bearer(BRR_TYPE_GATT, &blebrr_gatt, handle);
 
-    /* Check the PDU type received and Add bearer to Mesh stack */
     if (BLEBRR_GATT_PROXY_MODE == mode)
     {
-        if (BLEBRR_SERVER_ROLE == role)
+        if (BLEBRR_CLIENT_ROLE == role)
         {
-            /* Start observing */
-            blebrr_scan_enable();
-        }
-        else if (BLEBRR_CLIENT_ROLE == role)
-        {
-            /* Do Nothing */
             /**
-             * Currently, not enabling scan for Proxy Client.
+             * Disable ADV Bearer for Proxy Client
              * Typically, Proxy Client supports only GATT Bearer.
-             * Hence, not initiating 'SCAN' on Bearer UP event.
              */
+            blebrr_adv_disable();
         }
     }
 
@@ -146,11 +140,19 @@ API_RESULT blebrr_pl_gatt_connection(BRR_HANDLE * handle, UCHAR role, UINT16 mtu
 /***************************************************************************//**
 * @brief Unregisters GATT Bearer from Mesh Stack
 *******************************************************************************/
-API_RESULT blebrr_pl_gatt_disconnection(BRR_HANDLE * handle)
+API_RESULT blebrr_pl_gatt_disconnection(BRR_HANDLE * handle, UCHAR role, UCHAR mode)
 {
     API_RESULT retval;
 
     retval = MS_brr_remove_bearer(BRR_TYPE_GATT, handle);
+
+    if (BLEBRR_GATT_PROXY_MODE == mode)
+    {
+        if (BLEBRR_CLIENT_ROLE == role)
+        {
+            blebrr_adv_enable();
+        }
+    }
 
     return retval;
 }

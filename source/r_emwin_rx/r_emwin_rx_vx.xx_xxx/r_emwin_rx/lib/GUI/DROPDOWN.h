@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2020  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.14 - Graphical user interface for embedded applications **
+** emWin V6.22 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -20,11 +20,11 @@ Licensor:                 SEGGER Software GmbH
 Licensed to:              Renesas Electronics Europe GmbH, Arcadiastrasse 10, 40472 Duesseldorf, Germany
 Licensed SEGGER software: emWin
 License number:           GUI-00678
-License model:            License and Service Agreement, signed December 16th, 2016 and Amendment No. 1, signed May 16th, 2019
-License valid for:        RX65N, RX651, RX72M, RX72N, RX661, RX66N
+License model:            License and Service Agreement, signed December 16th, 2016, Amendment No. 1 signed May 16th, 2019 and Amendment No. 2, signed September 20th, 2021 by Carsten Jauch, Managing Director
+License valid for:        RX (based on RX-V1, RX-V2 or RX-V3)
 ----------------------------------------------------------------------
 Support and Update Agreement (SUA)
-SUA period:               2016-12-22 - 2020-12-31
+SUA period:               2016-12-22 - 2022-12-31
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
 File        : DROPDOWN.h
@@ -57,6 +57,7 @@ Purpose     : Multiple choice object include
 #define DROPDOWN_CF_AUTOSCROLLBAR   (1 << 0)    // Enable automatic use of a scroll bar. For details, refer to DROPDOWN_SetAutoScroll().
 #define DROPDOWN_CF_UP              (1 << 1)    // Creates a DROPDOWN widget which opens the dropdown list above the widget. This flag is useful if
                                                 // the space below the widget is not sufficient for the dropdown list.
+#define DROPDOWN_CF_MOTION          (1 << 2)    // Enables motion support on the vertical axis.
 
 /*********************************************************************
 *
@@ -80,6 +81,17 @@ Purpose     : Multiple choice object include
 #define DROPDOWN_SKINFLEX_PI_FOCUSED  1
 #define DROPDOWN_SKINFLEX_PI_ENABLED  2
 #define DROPDOWN_SKINFLEX_PI_DISABLED 3
+
+/*********************************************************************
+*
+*       DROPDOWN notification codes
+*
+*  Description
+*    Notifications sent by DROPDOWN widget to its parent widget through
+*    a WM_NOTIFY_PARENT message.
+*/
+#define DROPDOWN_NOTIFICATION_EXPANDED   (WM_NOTIFICATION_WIDGET + 0)     // Sent when the list of the DROPDOWN has been expanded.
+#define DROPDOWN_NOTIFICATION_COLLAPSED  (WM_NOTIFICATION_WIDGET + 1)     // Sent when the list of the DROPDOWN has been collapsed.
 
 /*********************************************************************
 *
@@ -127,10 +139,12 @@ void DROPDOWN_Callback(WM_MESSAGE * pMsg);
 */
 void             DROPDOWN_AddKey           (DROPDOWN_Handle hObj, int Key);
 void             DROPDOWN_AddString        (DROPDOWN_Handle hObj, const char* s);
+void             DROPDOWN_Clear            (DROPDOWN_Handle hObj);
 void             DROPDOWN_Collapse         (DROPDOWN_Handle hObj);
 void             DROPDOWN_DecSel           (DROPDOWN_Handle hObj);
 void             DROPDOWN_DecSelExp        (DROPDOWN_Handle hObj);
 void             DROPDOWN_DeleteItem       (DROPDOWN_Handle hObj, unsigned int Index);
+void             DROPDOWN_EnableMotion     (DROPDOWN_Handle hObj, int Flags);
 void             DROPDOWN_Expand           (DROPDOWN_Handle hObj);
 GUI_COLOR        DROPDOWN_GetBkColor       (DROPDOWN_Handle hObj, unsigned int Index);
 GUI_COLOR        DROPDOWN_GetColor         (DROPDOWN_Handle hObj, unsigned int Index);
@@ -138,11 +152,13 @@ const GUI_FONT * DROPDOWN_GetFont          (DROPDOWN_Handle hObj);
 unsigned         DROPDOWN_GetItemDisabled  (DROPDOWN_Handle hObj, unsigned Index);
 unsigned         DROPDOWN_GetItemSpacing   (DROPDOWN_Handle hObj);
 int              DROPDOWN_GetItemText      (DROPDOWN_Handle hObj, unsigned Index, char * pBuffer, int MaxSize);
+const char     * DROPDOWN_GetItemTextLocked(DROPDOWN_Handle hObj, unsigned Index);
 LISTBOX_Handle   DROPDOWN_GetListbox       (DROPDOWN_Handle hObj);
 int              DROPDOWN_GetNumItems      (DROPDOWN_Handle hObj);
 int              DROPDOWN_GetSel           (DROPDOWN_Handle hObj);
 int              DROPDOWN_GetSelExp        (DROPDOWN_Handle hObj);
 GUI_COLOR        DROPDOWN_GetTextColor     (DROPDOWN_Handle hObj, unsigned int Index);
+U8               DROPDOWN_GetUpMode        (DROPDOWN_Handle hObj);
 int              DROPDOWN_GetUserData      (DROPDOWN_Handle hObj, void * pDest, int NumBytes);
 void             DROPDOWN_IncSel           (DROPDOWN_Handle hObj);
 void             DROPDOWN_IncSelExp        (DROPDOWN_Handle hObj);
@@ -158,6 +174,7 @@ void             DROPDOWN_SetScrollbarColor(DROPDOWN_Handle hObj, unsigned Index
 void             DROPDOWN_SetScrollbarWidth(DROPDOWN_Handle hObj, unsigned Width);
 void             DROPDOWN_SetSel           (DROPDOWN_Handle hObj, int Sel);
 void             DROPDOWN_SetSelExp        (DROPDOWN_Handle hObj, int Sel);
+void             DROPDOWN_SetText          (DROPDOWN_Handle hObj, const GUI_ConstString * ppText);
 void             DROPDOWN_SetTextAlign     (DROPDOWN_Handle hObj, int Align);
 void             DROPDOWN_SetTextColor     (DROPDOWN_Handle hObj, unsigned int Index, GUI_COLOR Color);
 void             DROPDOWN_SetTextHeight    (DROPDOWN_Handle hObj, unsigned TextHeight);

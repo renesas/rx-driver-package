@@ -19,12 +19,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011(2012-2015) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2011(2012-2021) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * System Name  : FLASH SPI driver software
 * File Name    : r_flash_spi_type.c
-* Version      : 2.32
+* Version      : 3.03
 * Device       : -
 * Abstract     : User I/F file
 * Tool-Chain   : -
@@ -37,6 +37,8 @@
 * History      : DD.MM.YYYY Version  Description
 *              : 23.07.2014 2.21     Created
 *              : 29.05.2015 2.32     Revised functions of same as Ver.2.32 of EEPROM SPI FIT module.
+*              : 31.12.2021 3.03     Added variable "read_after_write" "read_after_write_add" and
+*                                    "read_after_write_data" for controlling SPI bus.
 *************************************************************************************************/
 
 
@@ -414,7 +416,7 @@ flash_spi_status_t r_flash_spi_set_write_protect(uint8_t devno, uint8_t wpsts)
         case FLASH_SPI_TYPE_MX66L:
         case FLASH_SPI_TYPE_MX25R:
 #if (FLASH_SPI_CFG_DEV0_MX25L == 1) || (FLASH_SPI_CFG_DEV0_MX66L == 1) ||(FLASH_SPI_CFG_DEV0_MX25R == 1)
-            ret = r_flash_spi_mx_set_write_protect(devno, wpsts);
+            ret = r_flash_spi_mx_set_write_protect(devno, wpsts, FALSE);
 #endif
         break;
         case FLASH_SPI_TYPE_N25Q:
@@ -966,7 +968,7 @@ flash_spi_status_t r_flash_spi_write_data_page(uint8_t devno, flash_spi_info_t *
         case FLASH_SPI_TYPE_MX66L:
         case FLASH_SPI_TYPE_MX25R:
 #if (FLASH_SPI_CFG_DEV0_MX25L == 1) || (FLASH_SPI_CFG_DEV0_MX66L == 1) ||(FLASH_SPI_CFG_DEV0_MX25R == 1)
-            ret = r_flash_spi_mx_write_page(devno, p_flash_spi_info);
+            ret = r_flash_spi_mx_write_page(devno, p_flash_spi_info, TRUE, FALSE);
 #endif
         break;
         case FLASH_SPI_TYPE_N25Q:
@@ -1721,7 +1723,7 @@ flash_spi_status_t r_flash_spi_write_configuration(uint8_t devno, flash_spi_reg_
         case FLASH_SPI_TYPE_MX66L:
         case FLASH_SPI_TYPE_MX25R:
 #if (FLASH_SPI_CFG_DEV0_MX25L == 1) || (FLASH_SPI_CFG_DEV0_MX66L == 1) ||(FLASH_SPI_CFG_DEV0_MX25R == 1)
-            ret = r_flash_spi_mx_write_configuration(devno, p_reg);
+            ret = r_flash_spi_mx_write_configuration(devno, p_reg, FALSE);
 #endif
         break;
         case FLASH_SPI_TYPE_N25Q:
@@ -2103,7 +2105,7 @@ flash_spi_status_t r_flash_spi_quad_enable(uint8_t devno)
         case FLASH_SPI_TYPE_MX66L:
         case FLASH_SPI_TYPE_MX25R:
 #if (FLASH_SPI_CFG_DEV0_MX25L == 1) || (FLASH_SPI_CFG_DEV0_MX66L == 1) ||(FLASH_SPI_CFG_DEV0_MX25R == 1)
-            ret = r_flash_spi_mx_quad_enable(devno);
+            ret = r_flash_spi_mx_quad_enable(devno, FALSE);
 #endif
         break;
         case FLASH_SPI_TYPE_N25Q:
@@ -2230,7 +2232,7 @@ flash_spi_status_t r_flash_spi_quad_disable(uint8_t devno)
         case FLASH_SPI_TYPE_MX66L:
         case FLASH_SPI_TYPE_MX25R:
 #if (FLASH_SPI_CFG_DEV0_MX25L == 1) || (FLASH_SPI_CFG_DEV0_MX66L == 1) ||(FLASH_SPI_CFG_DEV0_MX25R == 1)
-            ret = r_flash_spi_mx_quad_disable(devno);
+            ret = r_flash_spi_mx_quad_disable(devno, FALSE);
 #endif
         break;
         case FLASH_SPI_TYPE_N25Q:

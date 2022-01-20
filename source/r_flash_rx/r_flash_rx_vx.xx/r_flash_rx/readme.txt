@@ -5,12 +5,12 @@ r_flash_rx
 
 Document Number 
 ---------------
-r01an2184ej0480
-r01an2184jj0480
+r01an2184ej0481
+r01an2184jj0481
 
 Version
 -------
-v4.80
+v4.81
 
 Overview
 --------
@@ -142,9 +142,9 @@ r_flash_rx
 |
 +---doc
 |   +-- en
-|   |   +-- r01an2184ej0480-rx-flash.pdf
+|   |   +-- r01an2184ej0481-rx-flash.pdf
 |   +-- ja
-|       +-- r01an2184jj0480-rx-flash.pdf
+|       +-- r01an2184jj0481-rx-flash.pdf
 |
 +---ref
 |   +-- r_flash_rx_config_reference.h

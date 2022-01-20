@@ -48,7 +48,7 @@
         <zipsource>r_vbatt_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>6.10</version>
+            <version>6.20</version>
         </dependency>
         <application>Low Voltage Detection</application>
         <application>Power Supply</application>
@@ -61,5 +61,9 @@ So, the user can detect whether RTC count value is valid or not by this module.
         <incdir>r_vbatt_rx</incdir>
         <incdir>r_vbatt_rx/src</incdir>
     </package>
+
+    <sampleapplicationnote>
+        <documentno>R01AN2796</documentno>
+    </sampleapplicationnote>
 
 </refinfo>

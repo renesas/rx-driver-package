@@ -26,6 +26,7 @@
 *         : 20.08.2021 1.01     Fixed compile switch of PLL clock settings.
 *                               Added the Waiting for the IWDT clock oscillation stabilization in 
 *                               operating_frequency_set function.
+*         : 30.11.2021 1.02     Added comments for when use simulator.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -80,7 +81,7 @@ static void bsp_clkout_initial_configure(void);
 
 /***********************************************************************************************************************
 * Function Name: get_iclk_freq_hz
-* Description  : Return the current ICLK frequency in Hz.  Called by R_BSP_GetIClkFreqHz().
+* Description  : Return the current ICLK frequency in Hz. Called by R_BSP_GetIClkFreqHz().
 *                The system clock source can be changed at any time via SYSTEM.SCKCR3.BIT.CKSEL, so in order to
 *                determine the ICLK frequency we need to first find the current system clock source and then,
 *                in some cases where the clock source can be configured for multiple frequencies, calculate the
@@ -254,7 +255,7 @@ static void operating_frequency_set (void)
        This is done to ensure that the register has been written before the next register access. The RX has a 
        pipeline architecture so the next instruction could be executed before the previous write had finished.
     */
-    if(tmp_clock ==  SYSTEM.SCKCR.LONG)
+    if(tmp_clock == SYSTEM.SCKCR.LONG)
     {
         R_BSP_NOP();
     }
@@ -269,7 +270,7 @@ static void operating_frequency_set (void)
        This is done to ensure that the register has been written before the next register access. The RX has a 
        pipeline architecture so the next instruction could be executed before the previous write had finished.
     */
-    if((uint16_t)tmp_clock ==  SYSTEM.SCKCR3.WORD)
+    if((uint16_t)tmp_clock == SYSTEM.SCKCR3.WORD)
     {
         R_BSP_NOP();
     }
@@ -349,7 +350,7 @@ static void clock_source_select (void)
            This is done to ensure that the register has been written before the next register access. The RX has a 
            pipeline architecture so the next instruction could be executed before the previous write had finished.
          */
-        if(0x00 ==  SYSTEM.HOCOCR.BYTE)
+        if(0x00 == SYSTEM.HOCOCR.BYTE)
         {
             R_BSP_NOP();
         }
@@ -357,7 +358,8 @@ static void clock_source_select (void)
         /* WAIT_LOOP */
         while(0 == SYSTEM.OSCOVFSR.BIT.HCOVF)
         {
-            /* The delay period needed is to make sure that the HOCO has stabilized. */
+            /* The delay period needed is to make sure that the HOCO has stabilized.
+               If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
             R_BSP_NOP();
         }
     }
@@ -395,7 +397,8 @@ static void clock_source_select (void)
     /* WAIT_LOOP */
     while (0 == SYSTEM.OSCOVFSR.BIT.MOOVF)
     {
-        /* Make sure clock has stabilized. */
+        /* Make sure clock has stabilized.
+           If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
         R_BSP_NOP();
     }
 #else /* (BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE == 0) */
@@ -510,7 +513,8 @@ static void clock_source_select (void)
         /* WAIT_LOOP */
         while (0 != RTC.RCR2.BIT.RESET)
         {
-            /* Confirm that the written value can be read correctly. */
+            /* Confirm that the written value can be read correctly.
+               If you use simulator, the flag is not set to 0, resulting in an infinite loop. */
             R_BSP_NOP();
         }
 
@@ -564,7 +568,8 @@ static void clock_source_select (void)
     /* WAIT_LOOP */
     while (0 == SYSTEM.OSCOVFSR.BIT.PLOVF)
     {
-        /* Make sure clock has stabilized. */
+        /* Make sure clock has stabilized.
+           If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
         R_BSP_NOP();
     }
 #endif

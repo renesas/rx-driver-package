@@ -23,6 +23,8 @@
 * History : DD.MM.YYYY Version Description
 *           31.03.2021 1.00    Initial Release
 *                              Supported for RX671.
+*           03.12.2021 2.00    Updated new features in Asynchronous mode
+*                              and added support for Manchester mode.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -37,7 +39,7 @@ Includes   <System Includes> , "Project Includes"
 #include "r_rsci_rx_platform.h"
 
 
-#if (RSCI_CFG_ASYNC_INCLUDED)
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
 #include "r_byteq_if.h"
 #endif
 
@@ -53,15 +55,9 @@ Macro definitions
 /*****************************************************************************
 Private global variables and functions
 ******************************************************************************/
-#if (RSCI_CFG_ASYNC_INCLUDED)
-static rsci_err_t rsci_init_async(rsci_hdl_t const     hdl,
-                                rsci_uart_t * const  p_cfg,
-                                uint8_t * const     p_priority);
-
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
 static rsci_err_t rsci_init_queues(uint8_t const  chan);
-#endif
 
-#if (RSCI_CFG_ASYNC_INCLUDED)
 static rsci_err_t rsci_send_async_data(rsci_hdl_t const hdl,
                                      uint8_t         *p_src,
                                      uint16_t const  length);
@@ -71,13 +67,24 @@ static byteq_err_t rsci_put_byte(rsci_hdl_t const    hdl,
 
 static void rsci_transfer(rsci_hdl_t const hdl);
 
-#if RSCI_CFG_FIFO_INCLUDED
-static void rsci_fifo_transfer(rsci_hdl_t const hdl);
-#endif
-
 static rsci_err_t rsci_receive_async_data(rsci_hdl_t const hdl,
                                         uint8_t         *p_dst,
                                         uint16_t const  length);
+#endif
+
+#if (RSCI_CFG_ASYNC_INCLUDED)
+static rsci_err_t rsci_init_async(rsci_hdl_t const     hdl,
+                                rsci_uart_t * const  p_cfg,
+                                uint8_t * const     p_priority);
+#if RSCI_CFG_FIFO_INCLUDED
+static void rsci_fifo_transfer(rsci_hdl_t const hdl);
+#endif
+#endif
+
+#if (RSCI_CFG_MANC_INCLUDED)
+static rsci_err_t rsci_init_manc(rsci_hdl_t const     hdl,
+                                rsci_manc_t * const  p_cfg,
+                                uint8_t * const     p_priority);
 #endif
 
 #if (RSCI_CFG_SSPI_INCLUDED || RSCI_CFG_SYNC_INCLUDED)
@@ -94,39 +101,32 @@ static rsci_err_t rsci_send_sync_data(rsci_hdl_t const hdl,
 static rsci_err_t rsci_receive_sync_data(rsci_hdl_t const hdl,
                                        uint8_t         *p_dst,
                                        uint16_t const  length);
+#if RSCI_CFG_FIFO_INCLUDED
+static void rsci_fifo_receive_sync(rsci_hdl_t const hdl);
 #endif
+
+#endif /* #if (RSCI_CFG_SSPI_INCLUDED || RSCI_CFG_SYNC_INCLUDED) */
 
 static void power_on(rsci_hdl_t const hdl);
 static void power_off(rsci_hdl_t const hdl);
 
 #if RSCI_CFG_FIFO_INCLUDED
 static rsci_err_t rsci_init_fifo(rsci_hdl_t const hdl);
-#endif
-
-static void rsci_receive(rsci_hdl_t const hdl);
-
-#if RSCI_CFG_FIFO_INCLUDED
-
-#if (RSCI_CFG_SSPI_INCLUDED || RSCI_CFG_SYNC_INCLUDED)
-static void rsci_fifo_receive_sync(rsci_hdl_t const hdl);
-#endif
 
 static void rsci_fifo_receive(rsci_hdl_t const hdl);
 
+static void rsci_fifo_error(rsci_hdl_t const hdl);
 #endif
+
+static void rsci_receive(rsci_hdl_t const hdl);
+static void rsci_error(rsci_hdl_t const hdl);
 
 #if RSCI_CFG_DATA_MATCH_INCLUDED
 static void rsci_receive_data_match(rsci_hdl_t const hdl);
 #endif
 
-static void rsci_error(rsci_hdl_t const hdl);
-
-#if RSCI_CFG_FIFO_INCLUDED
-static void rsci_fifo_error(rsci_hdl_t const hdl);
-#endif
-
 /* queue buffers */
-#if (RSCI_CFG_ASYNC_INCLUDED)
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
 
 #if RSCI_CFG_CH10_INCLUDED
 static uint8_t  ch10_tx_buf[RSCI_CFG_CH10_TX_BUFSIZ];
@@ -138,8 +138,7 @@ static uint8_t  ch11_tx_buf[RSCI_CFG_CH11_TX_BUFSIZ];
 static uint8_t  ch11_rx_buf[RSCI_CFG_CH11_RX_BUFSIZ];
 #endif
 
-
-#endif /* #if (RSCI_CFG_ASYNC_INCLUDED) */
+#endif /* #if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED) */
 
 extern const rsci_hdl_t g_rsci_handles[RSCI_NUM_CH];
 
@@ -160,6 +159,7 @@ typedef enum e_rsci_mode     // RSCI operational modes
     RSCI_MODE_ASYNC,         // Asynchronous
     RSCI_MODE_SSPI,          // Simple SPI
     RSCI_MODE_SYNC,          // Synchronous
+    RSCI_MODE_MANC,          // Manchester
     RSCI_MODE_MAX            // End of modes currently supported
 } rsci_mode_t;
 * @endcode
@@ -170,6 +170,7 @@ typedef union
     rsci_uart_t      async;
     rsci_sync_sspi_t sync;
     rsci_sync_sspi_t sspi;
+    rsci_manc_t      manc;
 } rsci_cfg_t;
 * @endcode
 *
@@ -260,6 +261,13 @@ rsci_err_t R_RSCI_Open(uint8_t const      chan,
         err = rsci_init_async(g_rsci_handles[chan], (rsci_uart_t *)p_cfg, &priority);
 #endif
     }
+    else if (RSCI_MODE_MANC == mode)
+    {
+#if (RSCI_CFG_MANC_INCLUDED)
+        /* Casting rsci_cfg_t type to rsci_manc_t type is valid */
+        err = rsci_init_manc(g_rsci_handles[chan], (rsci_manc_t *)p_cfg, &priority);
+#endif
+    }
     else
     {
 #if (RSCI_CFG_SSPI_INCLUDED || RSCI_CFG_SYNC_INCLUDED)
@@ -275,9 +283,9 @@ rsci_err_t R_RSCI_Open(uint8_t const      chan,
     }
     g_rsci_handles[chan]->callback = p_callback;
 
-    /* INITIALIZE TX AND RX QUEUES ASYNC */
-#if (RSCI_CFG_ASYNC_INCLUDED)
-    if (RSCI_MODE_ASYNC == mode)
+    /* INITIALIZE TX AND RX QUEUES ASYNC/MANC */
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
+    if ((RSCI_MODE_ASYNC == mode) || (RSCI_MODE_MANC == mode))
     {
         err = rsci_init_queues(chan);
         if (RSCI_SUCCESS != err)
@@ -289,7 +297,7 @@ rsci_err_t R_RSCI_Open(uint8_t const      chan,
 #endif
 
 #if RSCI_CFG_FIFO_INCLUDED
-    if (true == g_rsci_handles[chan]->fifo_ctrl)
+    if ((true == g_rsci_handles[chan]->fifo_ctrl) && (RSCI_MODE_MANC != mode))
     {
         /* INITIALIZE TX AND RX FIFO */
         err = rsci_init_fifo(g_rsci_handles[chan]);
@@ -378,7 +386,7 @@ static void power_off(rsci_hdl_t const hdl)
     return;
 }  /* End of function power_off() */
 
-#if (RSCI_CFG_ASYNC_INCLUDED)
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
 /*****************************************************************************
 * Function Name: rsci_init_queues
 * Description  : This function attaches transmit and receive queues to the
@@ -430,7 +438,7 @@ static rsci_err_t rsci_init_queues(uint8_t const chan)
     }
     return err;
 }  /* End of function rsci_init_queues() */
-#endif /* End of RSCI_CFG_ASYNC_INCLUDED */
+#endif /* End of RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED */
 
 #if RSCI_CFG_FIFO_INCLUDED
 /*****************************************************************************
@@ -486,7 +494,7 @@ static rsci_err_t rsci_init_fifo(rsci_hdl_t const hdl)
 *                registers for an RSCI channel.
 *
 * NOTE: p_cfg is checked to be non-NULL prior to this function.
-*       The TE and RE bits in SCR must be 0 prior to calling this function.
+*       The TE and RE bits in SCR0 must be 0 prior to calling this function.
 *
 * Arguments    : hdl - 
 *                    handle for channel (ptr to chan control block)
@@ -510,27 +518,14 @@ static rsci_err_t rsci_init_async(rsci_hdl_t const      hdl,
 
 #if RSCI_CFG_PARAM_CHECKING_ENABLE
     if (((RSCI_DATA_8BIT != p_cfg->data_size) && (RSCI_DATA_7BIT != p_cfg->data_size))
+     || ((RSCI_EVEN_PARITY != p_cfg->parity_type) && (RSCI_ODD_PARITY != p_cfg->parity_type)
+          && (RSCI_NONE_PARITY != p_cfg->parity_type))
      || ((RSCI_STOPBITS_1 != p_cfg->stop_bits) && (RSCI_STOPBITS_2 != p_cfg->stop_bits))
      || ((p_cfg->int_priority < (BSP_MCU_IPL_MIN+1)) || (p_cfg->int_priority > BSP_MCU_IPL_MAX)))
     {
         return RSCI_ERR_INVALID_ARG;
     }
 
-    if (RSCI_PARITY_ON == p_cfg->parity_en)
-    {
-        if ((RSCI_EVEN_PARITY != p_cfg->parity_type) && (RSCI_ODD_PARITY != p_cfg->parity_type))
-        {
-            return RSCI_ERR_INVALID_ARG;
-        }
-    }
-    else if (RSCI_PARITY_OFF != p_cfg->parity_en)
-    {
-        return RSCI_ERR_INVALID_ARG;
-    }
-    else
-    {
-        /* Do Nothing */
-    }
     if (RSCI_CLK_INT == p_cfg->clk_src)
     {
         if (0 == p_cfg->baud_rate)
@@ -554,16 +549,33 @@ static rsci_err_t rsci_init_async(rsci_hdl_t const      hdl,
 
         
     /* Configure for asynchronous mode, single processor, and user settings */
-    if (RSCI_PARITY_OFF == p_cfg->parity_en)
+    if (RSCI_NONE_PARITY == p_cfg->parity_type)
     {
-        p_cfg->parity_type = 0;         // ensure random value is not ORed into SMR
+        p_cfg->parity_type = 0;         // ensure random value is not ORed into SCR1
+        hdl->rom->regs->SCR1.BIT.PE = 0;
+    }
+    else
+    {
+        hdl->rom->regs->SCR1.BIT.PE = 1;
     }
 
-    /* Configure Character Length, Stop Bit Length, Parity Enable, Parity Mode */
+    /* Configure Character Length, Stop Bit Length, Parity Mode */
     hdl->rom->regs->SCR3.BIT.CHR = (uint8_t)((p_cfg->data_size));
     hdl->rom->regs->SCR3.BIT.STOP = (uint8_t)((p_cfg->stop_bits));
-    hdl->rom->regs->SCR1.BIT.PE = (uint8_t)((p_cfg->parity_en));
     hdl->rom->regs->SCR1.BIT.PM = (uint8_t)((p_cfg->parity_type));
+
+    /* Configure data inversion */
+    hdl->rom->regs->SCR3.BIT.DINV = (uint8_t)((true == p_cfg->invert_data) ? 1 : 0);
+
+    /* Configure bit order */
+    if (RSCI_DATA_7BIT != p_cfg->data_size)
+    {
+        hdl->rom->regs->SCR3.BIT.DDIR = (uint8_t)((true == p_cfg->msb_first) ? 0 : 1);
+    }
+    else
+    {
+        hdl->rom->regs->SCR3.BIT.DDIR = 1; /* LSB first is fixed in 7-bit data length*/
+    }
 
     /* SETUP CLOCK FOR BAUD RATE */
     if (RSCI_CLK_INT == p_cfg->clk_src)
@@ -606,7 +618,7 @@ static rsci_err_t rsci_init_async(rsci_hdl_t const      hdl,
 *                registers for an RSCI channel.
 *
 * NOTE: p_cfg is checked to be non-NULL prior to this function.
-*       The TE and RE bits in SCR must be 0 prior to calling this function.
+*       The TE and RE bits in SCR0 must be 0 prior to calling this function.
 *
 * Arguments    : hdl -
 *                    handle for channel (ptr to chan control block)
@@ -660,13 +672,13 @@ static rsci_err_t rsci_init_sync(rsci_hdl_t const         hdl,
     hdl->tx_idle = true;
     hdl->tx_dummy = false;
 
-    /* Configure SMR for SSPI/SYNC mode */
+    /* Configure SCR3 for SSPI/SYNC mode */
 
     /* Configure SPI register for clock polarity/phase and single master */
     if (RSCI_MODE_SSPI == hdl->mode)
     {
         hdl->rom->regs->SCR3.BIT.MOD = 0x03;
-        hdl->rom->regs->SCR3.LONG &= 0xFFFFFF00;      /* clear previous mode */
+        hdl->rom->regs->SCR3.LONG &= 0xFFFFFFFE;      /* clear previous spi mode */
         hdl->rom->regs->SCR3.LONG |= p_cfg->spi_mode;
     }
     else    /* synchronous operation */
@@ -694,11 +706,126 @@ static rsci_err_t rsci_init_sync(rsci_hdl_t const         hdl,
 } /* End of function rsci_init_sync() */
 #endif /* End of RSCI_CFG_SSPI_INCLUDED || RSCI_CFG_SYNC_INCLUDED */
 
+#if (RSCI_CFG_MANC_INCLUDED)
+/*****************************************************************************
+* Function Name: rsci_init_manc
+* Description  : This function initializes the control block and manchester
+*                registers for an RSCI channel.
+*
+* NOTE: p_cfg is checked to be non-NULL prior to this function.
+*       The TE and RE bits in SCR0 must be 0 prior to calling this function.
+*
+* Arguments    : hdl -
+*                    handle for channel (ptr to chan control block)
+*                p_cfg -
+*                    ptr to Manchester configuration argument structure
+*                p_priority -
+*                    pointer to location to load interrupt priority into
+* Return Value : RSCI_SUCCESS -
+*                    channel initialized successfully
+*                RSCI_ERR_INVALID_ARG -
+*                    element of p_cfg contains illegal value
+******************************************************************************/
+static rsci_err_t rsci_init_manc(rsci_hdl_t const      hdl,
+                                rsci_manc_t * const   p_cfg,
+                                uint8_t * const      p_priority)
+{
+    rsci_err_t   err=RSCI_SUCCESS;
+
+    int32_t     bit_err;
+    /* Check arguments */
+
+#if RSCI_CFG_PARAM_CHECKING_ENABLE
+    if (((RSCI_DATA_8BIT != p_cfg->data_size) && (RSCI_DATA_7BIT != p_cfg->data_size))
+     || ((RSCI_EVEN_PARITY != p_cfg->parity_type) && (RSCI_ODD_PARITY != p_cfg->parity_type)
+          && (RSCI_NONE_PARITY != p_cfg->parity_type))
+     || ((RSCI_STOPBITS_1 != p_cfg->stop_bits) && (RSCI_STOPBITS_2 != p_cfg->stop_bits))
+     || ((RSCI_STARTBITS_1 != p_cfg->start_bits) && (RSCI_STARTBITS_3 != p_cfg->start_bits))
+     || ((p_cfg->int_priority < (BSP_MCU_IPL_MIN+1)) || (p_cfg->int_priority > BSP_MCU_IPL_MAX)))
+    {
+        return RSCI_ERR_INVALID_ARG;
+    }
+    if ((15 < hdl->rx_preface_length) || (15 < hdl->tx_preface_length))
+    {
+        return RSCI_ERR_INVALID_ARG;
+    }
+    if ((3 < hdl->rx_preface_pattern) || (3 < hdl->tx_preface_pattern))
+    {
+        return RSCI_ERR_INVALID_ARG;
+    }
+#endif /* End of RSCI_CFG_PARAM_CHECKING_ENABLE */
+
+
+    /* Initialize channel control block flags */
+    hdl->tx_idle = true;
+
+
+    /* Configure for asynchronous mode, single processor, and user settings */
+    if (RSCI_NONE_PARITY == p_cfg->parity_type)
+    {
+        p_cfg->parity_type = 0;         // ensure random value is not ORed into SCR1
+        hdl->rom->regs->SCR1.BIT.PE = 0;
+    }
+    else
+    {
+        hdl->rom->regs->SCR1.BIT.PE = 1;
+    }
+
+    /* Configure Character Length, Stop Bit Length, Parity Mode, Start bit Length */
+    hdl->rom->regs->SCR3.BIT.CHR = (uint8_t)((p_cfg->data_size));
+    hdl->rom->regs->SCR3.BIT.STOP = (uint8_t)((p_cfg->stop_bits));
+    hdl->rom->regs->SCR1.BIT.PM = (uint8_t)((p_cfg->parity_type));
+    hdl->rom->regs->MMCR.BIT.SBLEN = (uint8_t)((p_cfg->start_bits));
+
+    /* Configure SCR3 for Manchester mode */
+    hdl->rom->regs->SCR3.BIT.MOD = 0x05;
+
+    /* Configure data inversion */
+    hdl->rom->regs->SCR3.BIT.DINV = (uint8_t)((true == p_cfg->invert_data) ? 1 : 0);
+
+    /* Configure bit order */
+    if (RSCI_DATA_7BIT != p_cfg->data_size)
+    {
+        hdl->rom->regs->SCR3.BIT.DDIR = (uint8_t)((true == p_cfg->msb_first) ? 0 : 1);
+    }
+    else
+    {
+        hdl->rom->regs->SCR3.BIT.DDIR = 1; /* LSB first is fixed in 7-bit data length*/
+    }
+
+    /* Configure Decoding, Encoding, TX/RX Preface Length, TX/RX Preface Pattern */
+    hdl->rom->regs->MMCR.BIT.DECS = hdl->rx_decoding_pol;
+    hdl->rom->regs->MMCR.BIT.ENCS = hdl->tx_encoding_pol;
+    hdl->rom->regs->MMCR.BIT.RPLEN = hdl->rx_preface_length;
+    hdl->rom->regs->MMCR.BIT.TPLEN = hdl->tx_preface_length;
+    hdl->rom->regs->MMCR.BIT.RPPAT = hdl->rx_preface_pattern;
+    hdl->rom->regs->MMCR.BIT.TPPAT = hdl->tx_preface_pattern;
+
+    /* SETUP CLOCK FOR BAUD RATE */
+    /* Only use internal clock for baud rate in Manchester */
+    bit_err = rsci_init_bit_rate(hdl, hdl->pclk_speed, p_cfg->baud_rate);
+    if (1000 == bit_err)
+    {
+        err = RSCI_ERR_INVALID_ARG;          // impossible baud rate; 100% error
+    }
+    else
+    {
+        hdl->baud_rate = p_cfg->baud_rate;   // save baud rate for break generation
+    }
+
+    /* SETUP EXTRA ERROR INTERRUPT FOR MANCHESTER */
+    hdl->rom->regs->MMCR.LONG |= RSCI_EN_MMCR_ERR_MASK;    // enable PFERIE, SYERIE, SBERIE
+
+    *p_priority = p_cfg->int_priority;
+    return err;
+}  /* End of function rsci_init_async() */
+#endif /* End of RSCI_CFG_MANC_INCLUDED */
+
 
 /***********************************************************************************************************************
 * Function Name: R_RSCI_Send
 ********************************************************************************************************************//**
-* @brief  Initiates transmit if transmitter is not in use. Queues data for later transmit when in Asynchronous mode.
+* @brief  Initiates transmit if transmitter is not in use. Queues data for later transmit when in Asynchronous or Manchester mode.
 *
 * @param[in]    hdl  Handle for channel. Set hdl when R_RSCI_Open() is successfully processed.
 *
@@ -706,18 +833,18 @@ static rsci_err_t rsci_init_sync(rsci_hdl_t const         hdl,
 *
 * @param[in]    length  Number of bytes to send
 *
-* @retval   RSCI_SUCCESS  Transmit initiated or loaded into queue (Asynchronous)
+* @retval   RSCI_SUCCESS  Transmit initiated or loaded into queue (Asynchronous/Manchester)
 *
 * @retval   RSCI_ERR_NULL_PTR  hdl value is NULL
 *
 * @retval   RSCI_ERR_BAD_MODE  Mode specified not currently supported
 *
-* @retval   RSCI_ERR_INSUFFICIENT_SPACE  Insufficient space in queue to load all data (Asynchronous)
+* @retval   RSCI_ERR_INSUFFICIENT_SPACE  Insufficient space in queue to load all data (Asynchronous/Manchester)
 *
 * @retval   RSCI_ERR_XCVR_BUSY  Channel currently busy (SSPI/Synchronous)
 *
 *
-* @details  In asynchronous mode, this function places data into a transmit queue if the transmitter for the RSCI channel
+* @details  In asynchronous or manchester mode, this function places data into a transmit queue if the transmitter for the RSCI channel
 * referenced by the handle is not in use. In SSPI and Synchronous modes, no data is queued and transmission begins immediately
 * if the transceiver is not already in use. All transmissions are handled at the interrupt level.\n
 * Note that the toggling of Slave Select lines when in SSPI mode is not handled by this driver. The Slave Select line
@@ -749,10 +876,10 @@ rsci_err_t R_RSCI_Send(rsci_hdl_t const    hdl,
     }
 #endif
 
-    if (RSCI_MODE_ASYNC == hdl->mode)
+    if ((RSCI_MODE_ASYNC == hdl->mode) || (RSCI_MODE_MANC == hdl->mode))
     {
-        /* ASYNC */
-#if (RSCI_CFG_ASYNC_INCLUDED)
+        /* ASYNC or MANC */
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
         err = rsci_send_async_data(hdl, p_src, length);
 #endif
     }
@@ -768,7 +895,7 @@ rsci_err_t R_RSCI_Send(rsci_hdl_t const    hdl,
 } /* End of function R_RSCI_Send() */
 
 
-#if (RSCI_CFG_ASYNC_INCLUDED)
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
 /*****************************************************************************
 * Function Name: rsci_send_async_data
 * Description  : This function determines if the tx byte queue of the channel
@@ -785,7 +912,7 @@ rsci_err_t R_RSCI_Send(rsci_hdl_t const    hdl,
 *                RSCI_ERR_XCVR_BUSY -
 *                    channel currently busy
 *                RSCI_ERR_INSUFFICIENT_SPACE -
-*                    not enough space in tx queue to store data (Async)
+*                    not enough space in tx queue to store data (Async/Manc)
 ******************************************************************************/
 static rsci_err_t rsci_send_async_data(rsci_hdl_t const hdl,
                                      uint8_t         *p_src,
@@ -801,7 +928,7 @@ static rsci_err_t rsci_send_async_data(rsci_hdl_t const hdl,
     }
 
 #if RSCI_CFG_FIFO_INCLUDED
-    if (true == hdl->fifo_ctrl)
+    if ((true == hdl->fifo_ctrl) && (RSCI_MODE_MANC != hdl->mode))
     {
         /* TX FIFO use check */
         if (0x00 < hdl->rom->regs->TFSR.BIT.T)
@@ -898,7 +1025,7 @@ static byteq_err_t rsci_put_byte(rsci_hdl_t const   hdl,
 
     return err;
 } /* End of function rsci_put_byte() */
-#endif /* RSCI_CFG_ASYNC_INCLUDED */
+#endif /* (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)*/
 
 
 #if (RSCI_CFG_SSPI_INCLUDED || RSCI_CFG_SYNC_INCLUDED)
@@ -1061,7 +1188,7 @@ rsci_err_t R_RSCI_SendReceive(rsci_hdl_t const hdl,
 #endif /* End of RSCI_CFG_SSPI_INCLUDED || RSCI_CFG_SYNC_INCLUDED */
 
 
-#if (RSCI_CFG_ASYNC_INCLUDED)
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
 /*****************************************************************************
 * Function Name: rsci_transfer
 * Description  : Transfer for RSCI
@@ -1094,7 +1221,7 @@ static void rsci_transfer(rsci_hdl_t const hdl)
         hdl->tx_idle = true;    // set flag if queue empty
     }
 } /* End of function rsci_transfer() */
-#endif /* RSCI_CFG_ASYNC_INCLUDED */
+#endif /* (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED) */
 
 #if (RSCI_CFG_ASYNC_INCLUDED)
 #if RSCI_CFG_FIFO_INCLUDED
@@ -1136,7 +1263,7 @@ static void rsci_fifo_transfer(rsci_hdl_t const hdl)
 #endif /*End of RSCI_CFG_FIFO_INCLUDED */
 #endif /* RSCI_CFG_ASYNC_INCLUDED */
 
-#if (RSCI_CFG_ASYNC_INCLUDED)
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
 /*****************************************************************************
 * Function Name: rsci_txi_handler
 * Description  : TXI interrupt handler for RSCI
@@ -1147,7 +1274,7 @@ static void rsci_fifo_transfer(rsci_hdl_t const hdl)
 void rsci_txi_handler(rsci_hdl_t const hdl)
 {
 #if RSCI_CFG_FIFO_INCLUDED
-    if (true == hdl->fifo_ctrl)
+    if ((true == hdl->fifo_ctrl) && (RSCI_MODE_MANC != hdl->mode))
     {
         {
 #if (RSCI_CFG_ASYNC_INCLUDED)
@@ -1160,14 +1287,14 @@ void rsci_txi_handler(rsci_hdl_t const hdl)
 #endif /* RSCI_CFG_FIFO_INCLUDED */
     {
         {
-#if (RSCI_CFG_ASYNC_INCLUDED)
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
             /* RSCI Transfer */
             rsci_transfer(hdl);
 #endif
         }
     }
 } /* End of function rsci_txi_handler() */
-#endif /* (RSCI_CFG_ASYNC_INCLUDED) */
+#endif /* (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED) */
 
 
 #if RSCI_CFG_TEI_INCLUDED
@@ -1202,7 +1329,7 @@ void rsci_tei_handler(rsci_hdl_t const hdl)
 /***********************************************************************************************************************
 * Function Name: R_RSCI_Receive
 ********************************************************************************************************************//**
-* @brief In Asynchronous mode, fetches data from a queue which is filled by RXI interrupts. In other modes, initiates
+* @brief In Asynchronous or Manchester mode, fetches data from a queue which is filled by RXI interrupts. In other modes, initiates
 * reception if transceiver is not in use.
 * @param[in]    hdl Handle for channel. Set hdl when R_RSCI_Open() is successfully processed.
 *
@@ -1210,18 +1337,18 @@ void rsci_tei_handler(rsci_hdl_t const hdl)
 *
 * @param[in]    length  Number of bytes to read
 *
-* @retval RSCI_SUCCESS  Requested number of bytes were loaded into p_dst (Asynchronous) Clocking in of data initiated
+* @retval RSCI_SUCCESS  Requested number of bytes were loaded into p_dst (Asynchronous/Manchester) Clocking in of data initiated
 * (SSPI/Synchronous)
 *
 * @retval RSCI_ERR_NULL_PTR  hdl value is NULL
 *
 * @retval RSCI_ERR_BAD_MODE  Mode specified not currently supported
 *
-* @retval RSCI_ERR_INSUFFICIENT_DATA  Insufficient data in receive queue to fetch all data (Asynchronous)
+* @retval RSCI_ERR_INSUFFICIENT_DATA  Insufficient data in receive queue to fetch all data (Asynchronous/Manchester)
 *
 * @retval RSCI_ERR_XCVR_BUSY  Channel currently busy (SSPI/Synchronous)
 *
-* @details In Asynchronous mode, this function gets data received on an RSCI channel referenced by the handle from its
+* @details In Asynchronous or Manchester mode, this function gets data received on an RSCI channel referenced by the handle from its
 * receive queue. This function will not block if the requested number of bytes is not available. In
 * SSPI/Synchronous modes, the clocking in of data begins immediately if the transceiver is not already in use.
 * The value assigned to RSCI_CFG_DUMMY_TX_BYTE in r_rsci_config.h is clocked out while the receive data is being clocked in.\n
@@ -1259,10 +1386,10 @@ rsci_err_t   err = RSCI_SUCCESS;
     }
 #endif
 
-    if (RSCI_MODE_ASYNC == hdl->mode)
+    if ((RSCI_MODE_ASYNC == hdl->mode) || (RSCI_MODE_MANC == hdl->mode))
     {
-        /* mode is ASYNC */
-#if (RSCI_CFG_ASYNC_INCLUDED)
+        /* mode is ASYNC/MANC */
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
         err = rsci_receive_async_data(hdl, p_dst, length);
 #endif
     }
@@ -1277,7 +1404,7 @@ rsci_err_t   err = RSCI_SUCCESS;
     return err;
 } /* End of function R_RSCI_Receive() */
 
-#if (RSCI_CFG_ASYNC_INCLUDED)
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
 /*****************************************************************************
 * Function Name: rsci_receive_async_data
 * Description  : This function determines if the rx byte queue of the channel 
@@ -1326,7 +1453,7 @@ static rsci_err_t rsci_receive_async_data(rsci_hdl_t const hdl,
     }
     return err;
 } /* End of function rsci_receive_async_data() */
-#endif /* RSCI_CFG_ASYNC_INCLUDED */
+#endif /* (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED) */
 
 #if (RSCI_CFG_SSPI_INCLUDED || RSCI_CFG_SYNC_INCLUDED)
 /*****************************************************************************
@@ -1424,9 +1551,9 @@ static void rsci_receive(rsci_hdl_t const hdl)
 
     /* Read byte */
     RSCI_RDR(byte);
-    if (RSCI_MODE_ASYNC == hdl->mode)
+    if ((RSCI_MODE_ASYNC == hdl->mode) || (RSCI_MODE_MANC == hdl->mode))
     {
-#if (RSCI_CFG_ASYNC_INCLUDED)
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
 
         /* Place byte in queue */
         if (R_BYTEQ_Put(hdl->u_rx_data.que, byte) == BYTEQ_SUCCESS)
@@ -1447,7 +1574,7 @@ static void rsci_receive(rsci_hdl_t const hdl)
            /* Casting to void type is valid */
             hdl->callback((void *)&args);
         }
-#endif
+#endif  /* End of RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED */
     }
     else
     {
@@ -1757,7 +1884,7 @@ void rsci_rxi_handler(rsci_hdl_t const hdl)
 #endif
     {
 #if RSCI_CFG_FIFO_INCLUDED
-        if (true == hdl->fifo_ctrl)
+        if ((true == hdl->fifo_ctrl) && (RSCI_MODE_MANC != hdl->mode))
         {
              /* RSCI FIFO Receive */
              rsci_fifo_receive(hdl);
@@ -1783,24 +1910,41 @@ static void rsci_error(rsci_hdl_t const hdl)
 {
     rsci_cb_args_t   args;
     uint8_t         byte;
-    uint32_t         reg;
+    uint32_t reg_ssr = RSCI_SSR;
+    uint32_t reg_mmsr = RSCI_MMSR;
 
-    reg = RSCI_SSR;
-    if (0 != (reg & RSCI_RCVR_ERR_MASK))
+    if ((0 != (reg_ssr & RSCI_RCVR_ERR_MASK)) || (0 != (reg_mmsr & RSCI_MMSR_ERR_MASK)))
     {
-        if (0 != (reg & RSCI_SSR_ORER_MASK))
+        if (0 != (reg_ssr & RSCI_SSR_ORER_MASK))
         {
             args.event = RSCI_EVT_OVFL_ERR;
         }
-#if (RSCI_CFG_ASYNC_INCLUDED)
-        //else if (0 != (reg & SCI_SSR_PER_MASK))
-        else if (0 != (reg & RSCI_SSR_APER_MASK))
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
+        else if (0 != (reg_ssr & RSCI_SSR_APER_MASK))
         {
             args.event = RSCI_EVT_PARITY_ERR;
         }
-        else if (0 != (reg & RSCI_SSR_AFER_MASK))
+        else if (0 != (reg_ssr & RSCI_SSR_AFER_MASK))
         {
             args.event = RSCI_EVT_FRAMING_ERR;
+        }
+#endif
+#if RSCI_CFG_MANC_INCLUDED
+        else if (0 != (reg_mmsr & RSCI_MMSR_MCER_MASK))
+        {
+            args.event = RSCI_EVT_MANCHESTER_CODE_ERR;
+        }
+        else if (0 != (reg_mmsr & RSCI_MMSR_SYER_MASK))
+        {
+            args.event = RSCI_EVT_RECEIVE_SYNC_ERR;
+        }
+        else if (0 != (reg_mmsr & RSCI_MMSR_SBER_MASK))
+        {
+            args.event = RSCI_EVT_START_BIT_ERR;
+        }
+        else if (0 != (reg_mmsr & RSCI_MMSR_PFER_MASK))
+        {
+            args.event = RSCI_EVT_PREFACE_ERR;
         }
 #endif
         else
@@ -1813,14 +1957,14 @@ static void rsci_error(rsci_hdl_t const hdl)
 
         /* Clear error condition */
         /* WAIT_LOOP */
-        while (0 != (RSCI_SSR & RSCI_RCVR_ERR_MASK))
+        while ((0 != (RSCI_SSR & RSCI_RCVR_ERR_MASK)) || (0 != (RSCI_MMSR & RSCI_MMSR_ERR_MASK)))
         {
             RSCI_RDR(byte);
 
-            reg      = RSCI_SSR;
-            RSCI_SSCR = (uint32_t)RSCI_RCVRC_ERR_MASK;      /* APER, AFER, ORER clear */
+            RSCI_SSCR |= RSCI_SSCR_ERR_CLEAR_MASK;      /* APER, AFER, ORER clear */
+            RSCI_MMSCR |= RSCI_MMSCR_ERR_CLEAR_MASK;    /* PFER, SYER, SBER, MCER clear */
 
-            if (0 != (RSCI_SSR & RSCI_RCVR_ERR_MASK))
+            if ((0 != (RSCI_SSR & RSCI_RCVR_ERR_MASK)) || (0 != (RSCI_MMSR & RSCI_MMSR_ERR_MASK)))
             {
                 R_BSP_NOP(); /* read and Compare */
             }
@@ -1902,7 +2046,7 @@ static void rsci_fifo_error(rsci_hdl_t const hdl)
             while (0x00 != (RSCI_SSR & RSCI_RCVR_ERR_MASK))   /* Check APER, AFER, ORER flags */
             {
                 ssrfifo_data = RSCI_SSR;                     /* SSRFIFO dummy read */
-                RSCI_SSCR = (uint32_t)RSCI_RCVRC_ERR_MASK;      /* APER, AFER, ORER clear */
+                RSCI_SSCR |= RSCI_SSCR_ERR_CLEAR_MASK;      /* APER, AFER, ORER clear */
                 if (0x00 != (RSCI_SSR & RSCI_RCVR_ERR_MASK))
                 {
                     R_BSP_NOP();                                /* read and Compare */
@@ -1925,7 +2069,7 @@ static void rsci_fifo_error(rsci_hdl_t const hdl)
 void rsci_eri_handler(rsci_hdl_t const hdl)
 {
 #if RSCI_CFG_FIFO_INCLUDED
-    if (true == hdl->fifo_ctrl)
+    if ((true == hdl->fifo_ctrl) && (RSCI_MODE_MANC != hdl->mode))
     {
         /* RSCI FIFO Error */
         rsci_fifo_error(hdl);
@@ -2084,6 +2228,36 @@ rsci_err_t R_RSCI_Control(rsci_hdl_t const     hdl,
         break;
     }
 
+    case (RSCI_CMD_XFER_LSB_FIRST):
+    {
+        hdl->rom->regs->SCR0.LONG &= (~RSCI_EN_XCVR_MASK);
+        RSCI_SCR0_DUMMY_READ;
+        hdl->rom->regs->SCR3.BIT.DDIR = 1;
+        RSCI_IR_TXI_CLEAR;
+        hdl->rom->regs->SCR0.LONG |= RSCI_EN_XCVR_MASK;
+        break;
+    }
+
+    case (RSCI_CMD_XFER_MSB_FIRST):
+    {
+        hdl->rom->regs->SCR0.LONG &= (~RSCI_EN_XCVR_MASK);
+        RSCI_SCR0_DUMMY_READ;
+        hdl->rom->regs->SCR3.BIT.DDIR = 0;
+        RSCI_IR_TXI_CLEAR;
+        hdl->rom->regs->SCR0.LONG |= RSCI_EN_XCVR_MASK;
+        break;
+    }
+
+    case (RSCI_CMD_INVERT_DATA):
+    {
+        hdl->rom->regs->SCR0.LONG &= (~RSCI_EN_XCVR_MASK);
+        RSCI_SCR0_DUMMY_READ;
+        hdl->rom->regs->SCR3.BIT.DINV ^= 1;
+        RSCI_IR_TXI_CLEAR;
+        hdl->rom->regs->SCR0.LONG |= RSCI_EN_XCVR_MASK;
+        break;
+    }
+
 #if RSCI_CFG_FIFO_INCLUDED
     case (RSCI_CMD_CHANGE_TX_FIFO_THRESH):
     {
@@ -2157,6 +2331,15 @@ rsci_err_t R_RSCI_Control(rsci_hdl_t const     hdl,
             err = rsci_async_cmds(hdl, cmd, p_args);
 #endif
         }
+
+        /* MANC-SPECIFIC COMMANDS */
+        else if (RSCI_MODE_MANC == hdl->mode)
+        {
+#if (RSCI_CFG_MANC_INCLUDED)
+            err = rsci_manc_cmds(hdl, cmd, p_args);
+#endif
+        }
+
         /* SSPI/SYNC-SPECIFIC COMMANDS */
         else
         {
@@ -2200,15 +2383,15 @@ rsci_err_t R_RSCI_Close(rsci_hdl_t const hdl)
         rsci_disable_ints(hdl);
 
     /* free tx and rx queues */
-#if (RSCI_CFG_ASYNC_INCLUDED)
-    if (RSCI_MODE_ASYNC == hdl->mode)
+#if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
+    if ((RSCI_MODE_ASYNC == hdl->mode) || (RSCI_MODE_MANC == hdl->mode))
     {
         R_BYTEQ_Close(hdl->u_tx_data.que);
         R_BYTEQ_Close(hdl->u_rx_data.que);
     }
 #endif
 #if RSCI_CFG_FIFO_INCLUDED
-    if (true == hdl->fifo_ctrl)
+    if ((true == hdl->fifo_ctrl) && (RSCI_MODE_MANC != hdl->mode))
     {
         /* reset FIFO threshold */
         hdl->rx_curr_thresh = hdl->rx_dflt_thresh;

@@ -221,7 +221,7 @@ typedef struct MS_scene_struct
  *  \brief API to initialize Scene Server model
  *
  *  \par Description
- *  This is to initialize Scene Server model and to register with Acess layer.
+ *  This is to initialize Scene Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -282,7 +282,7 @@ API_RESULT MS_scene_server_state_update
  *  \brief API to initialize Scene Client model
  *
  *  \par Description
- *  This is to initialize Scene Client model and to register with Acess layer.
+ *  This is to initialize Scene Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -319,6 +319,21 @@ API_RESULT MS_scene_client_get_model_handle
            );
 
 /**
+ *  \brief API to set Scene client model handle
+ *
+ *  \par Description
+ *  This is to set the handle of Scene client model.
+ *
+ *  \param [in] model_handle   Model handle to be assigned.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_scene_client_set_model_handle
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE  model_handle
+           );
+
+/**
  *  \brief API to send acknowledged commands
  *
  *  \par Description
@@ -337,7 +352,7 @@ API_RESULT MS_scene_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
-/** \name Messsage Send
+/** \name Message Send
  *  \{
  */
 /**
@@ -365,7 +380,7 @@ API_RESULT MS_scene_client_send_reliable_pdu
  *  Scene Recall is an acknowledged message that is used to recall the current state of an element from a previously stored scene.
  *  The response to the Scene Recall message is a Scene Status message.
  *
- *  \param [in] param Scene Recall message
+ *  \param [in] param Scene Recall message parameter @ref MS_SCENE_RECALL_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -383,7 +398,7 @@ API_RESULT MS_scene_client_send_reliable_pdu
  *  \par Description
  *  Scene Recall Unacknowledged is an unacknowledged message used to recall the current state of an element from a previously stored Scene.
  *
- *  \param [in] param Scene Recall message
+ *  \param [in] param Scene Recall message parameter @ref MS_SCENE_RECALL_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -420,7 +435,7 @@ API_RESULT MS_scene_client_send_reliable_pdu
  *  Scene Store is an acknowledged message used to store the current state of an element as a Scene, which can be recalled later.
  *  The response to the Scene Store message is a Scene Register Status message.
  *
- *  \param [in] param Scene Store message
+ *  \param [in] param Scene Store message parameter @ref MS_SCENE_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -438,7 +453,7 @@ API_RESULT MS_scene_client_send_reliable_pdu
  *  \par Description
  *  Scene Store Unacknowledged is an unacknowledged message used to store the current state of an element as a Scene, which can be recalled later.
  *
- *  \param [in] param Scene Store message
+ *  \param [in] param Scene Store message parameter @ref MS_SCENE_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -457,7 +472,7 @@ API_RESULT MS_scene_client_send_reliable_pdu
  *  Scene Delete is an acknowledged message used to delete a Scene from the Scene Register state of an element.
  *  The response to the Scene Delete message is a Scene Register Status message.
  *
- *  \param [in] param Scene Delete parameter
+ *  \param [in] param Scene Delete message parameter @ref MS_SCENE_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -475,7 +490,7 @@ API_RESULT MS_scene_client_send_reliable_pdu
  *  \par Description
  *  Scene Delete Unacknowledged is an unacknowledged message used to delete a scene from the Scene Register state of an element.
  *
- *  \param [in] param Scene Delete parameter
+ *  \param [in] param Scene Delete message parameter @ref MS_SCENE_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */

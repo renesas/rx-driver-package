@@ -19,11 +19,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018(2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018(2021) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_memdrv_rx_if.h
-* Version      : 1.01
+* Version      : 1.04
 * Description  : Memory driver header file
 *************************************************************************************************/
 /************************************************************************************************
@@ -33,6 +33,7 @@
 *                                    Fixed coding style.
 *              : 22.11.2019 1.02     Modify the parameter type of structure Memory Driver I/F information.
 *              : 10.09.2020 1.03     Changed version to 1.03.
+*              : 30.10.2021 1.04     Add the definition of QSPIX.
 *************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -52,7 +53,7 @@ Macro definitions
 #define MEMDRV_IF_H
 /* Version Number of API. */
 #define MEMDRV_VERSION_MAJOR                 (1)
-#define MEMDRV_VERSION_MINOR                 (03)
+#define MEMDRV_VERSION_MINOR                 (04)
 
 /* Define device no. */
 #define MEMDRV_DEV0                          (0)
@@ -80,6 +81,7 @@ Macro definitions
 #define MEMDRV_DRVR_RX_FIT_RSPI              (0x00000100ul)
 #define MEMDRV_DRVR_RX_FIT_QSPI_SMSTR        (0x00000200ul)
 #define MEMDRV_DRVR_RX_FIT_SCI_SPI           (0x00000400ul)
+#define MEMDRV_DRVR_RX_FIT_QSPIX_IAM         (0x00000800ul)
 
 /* Definitions of data transfer method */
 #define MEMDRV_TRNS_CPU                      (0x00001000ul)
@@ -91,8 +93,8 @@ Macro definitions
 #define MEMDRV_MODE_DUAL                     ((uint8_t)(0x02))
 #define MEMDRV_MODE_QUAD                     ((uint8_t)(0x03))
 
-#define MEMDRV_TRNS_CMD                      (0x0703)
-#define MEMDRV_TRNS_DATA_CMD                 (0x0203)
+#define MEMDRV_TRNS_CMD                      (0x0703)       /* data length is 8 bits, CPOL is 1, CHPA is 1 */
+#define MEMDRV_TRNS_DATA_CMD                 (0x0203)       /* data length is 32 bits, CPOL is 1, CHPA is 1 */
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -115,6 +117,7 @@ typedef struct
     uint32_t    cnt;
     uint8_t   * p_data;
     uint8_t     io_mode;
+    bool        read_after_write;
     uint8_t     rsv[3];
 } st_memdrv_info_t;
 /***********************************************************************************************************************

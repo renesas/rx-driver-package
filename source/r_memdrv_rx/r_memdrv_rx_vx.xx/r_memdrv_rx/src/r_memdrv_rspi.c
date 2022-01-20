@@ -71,7 +71,7 @@ Macro definitions
 #define RSPI_TIMER_MIN_TIME        (100)       /* 100ms             */
 #define RSPI_SECTOR_SIZE           (512)       /* 1 sector size     */
 #define RSPI_TRAN_SIZE             (4)
-#define RSPI_EXCHG_MAX_COUNT       (65532)
+#define RSPI_EXCHG_MAX_COUNT       (65532)     /* The maximum value of type uint16_t divisible by 4 */
 /************************************************************************************************
 Typedef definitions
 *************************************************************************************************/

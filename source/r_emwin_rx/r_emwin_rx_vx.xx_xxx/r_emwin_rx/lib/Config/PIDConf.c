@@ -18,16 +18,18 @@
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : PIDConf.c
- * Version      : 1.30
+ * Version      : 1.00
  * Description  : Touch panel configuration.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
- * History : DD.MM.YYYY Version  Description
- *         : 31.07.2020 1.00     First Release
- *         : 04.09.2020 1.10     Update to adjust r_emwin_rx_config.h file.
- *         : 11.12.2020 1.20     Update to adjust emWin v6.14g. Modify multi-touch and timer function.
- *                               Adjust GCC and IAR compilers.
- *         : 31.03.2021 1.30     Update to adjust the spec of Smart Configurator and QE for Display.
+ * History : DD.MM.YYYY Version        Description
+ *         : 31.07.2020 6.14.a.1.00    First Release
+ *         : 04.09.2020 6.14.a.1.10    Update to adjust r_emwin_rx_config.h file.
+ *         : 11.12.2020 6.14.g.1.20    Update to adjust emWin v6.14g. Modify multi-touch and timer function.
+ *                                     Adjust GCC and IAR compilers.
+ *         : 31.03.2021 6.14.g.1.30    Update to adjust the spec of Smart Configurator and QE for Display.
+ *         : 29.12.2021 6.20.  1.00    Update emWin library to v6.22.
+ *                                     Adjust configuration option with Smart Configurator.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -36,13 +38,9 @@
 #include "GUI.h"
 #include "GUIConf.h"
 
-#if (GUI_SUPPORT_TOUCH == 1)
-#include "platform.h"
-#include "r_sci_iic_rx_if.h"
-#include "r_cmt_rx_if.h"
 #include "r_gpio_rx_if.h"
 #include "r_emwin_rx_config.h"
-#endif
+#include "../../src/r_emwin_rx_private.h"
 
 /**********************************************************************************************************************
  Macro definitions
@@ -51,7 +49,7 @@
 /**********************************************************************************************************************
  Local Typedef definitions
  *********************************************************************************************************************/
-#if (GUI_SUPPORT_TOUCH == 1)
+#if (EMWIN_USE_TOUCH == 1)
 /* Holds information about coordinates and ID. */
 typedef struct
 {
@@ -86,86 +84,78 @@ typedef struct
 /**********************************************************************************************************************
  Private (static) variables and functions
  *********************************************************************************************************************/
-#if (GUI_SUPPORT_TOUCH == 1)
+#if (EMWIN_USE_TOUCH == 1)
 static int32_t s_layer_index;
-static uint8_t s_a_buffer[GUI_PID_BUFFER_SIZE * 6 + 3] = {0};
 
-static sci_iic_info_t s_iic_info;
-static uint8_t s_iic_busy;
 
 #if (EMWIN_USE_MULTITOUCH == 1)
 static uint8_t s_a_active_ids[EMWIN_MAX_NUM_TOUCHPOINTS];
 #endif
 #endif
 
-#if (GUI_SUPPORT_TOUCH == 1)
+#if (EMWIN_USE_TOUCH == 1)
 #if (EMWIN_USE_MULTITOUCH == 0)
 /**********************************************************************************************************************
- * Function Name: cb_sci_iic
+ * Function Name: pidconf_cb_single
  * Description  : .
  * Arguments    : .
  * Return Value : .
  *********************************************************************************************************************/
-static void cb_sci_iic(void)
+e_emwin_rx_err_t pidconf_cb_single(uint8_t * p_addr, uint32_t size)
 {
-    sci_iic_mcu_status_t      iic_status;
-    volatile sci_iic_return_t ret;
+    static GUI_PID_STATE s_state_pid;
+    static int32_t       s_is_touched;
+    st_report_data_t     report;
+    st_touch_data_t      touch_point;
+    uint8_t *            p_buffer;
+    e_emwin_rx_err_t     emwin_ret = EMWIN_RX_SUCCESS;
 
-    ret = R_SCI_IIC_GetStatus(&s_iic_info, &iic_status);
-    if ((SCI_IIC_SUCCESS == ret) && (1 == iic_status.BIT.NACK))
+    /* Handle just one touch info. */
+    s_state_pid.Layer  = s_layer_index;          /* Set layer who should handle touch */
+    p_buffer           =  p_addr;
+    report.device_mode = *p_buffer++;            /* Get device mode, 000b - Work Mode, 001b - Factory Mode */
+    report.gesture_id  = *p_buffer++;            /* GestureID:  0x10 Move UP
+                                                  *             0x14 Move Left
+                                                  *             0x18 Move Down
+                                                  *             0x1C Move Right
+                                                  *             0x48 Zoom In
+                                                  *             0x49 Zoom Out
+                                                  *             0x00 No Gesture */
+    report.num_points   = *p_buffer++;           /* Number of points */
+    touch_point.x_high  = (*p_buffer ++) & 0x0F; /* Get the upper 4 bits of the x position */
+    touch_point.x_low   = *p_buffer++;           /* and the lower 8 bits */
+    touch_point.y_high  = (*p_buffer ++) & 0x0F; /* Get the upper 4 bits of the y position */
+    touch_point.y_low   = *p_buffer++;           /* and the lower 8 bits */
+
+    /* Check if we have a touch detected */
+    if (report.num_points)
     {
-        static GUI_PID_STATE s_state_pid;
-        static int32_t       s_is_touched;
-        st_report_data_t     report;
-        st_touch_data_t      touch_point;
-        uint8_t              * p_buffer;
+        s_is_touched        = 1; /* Remember that we have a touch, needed for generating up events */
+        s_state_pid.Pressed = 1; /* State is pressed */
 
-        /* Handle just one touch info. */
-        s_state_pid.Layer  = s_layer_index;          /* Set layer who should handle touch */
-        p_buffer           =  s_a_buffer;
-        report.device_mode = *p_buffer++;            /* Get device mode, 000b - Work Mode, 001b - Factory Mode */
-        report.gesture_id  = *p_buffer++;            /* GestureID:  0x10 Move UP
-                                                      *             0x14 Move Left
-                                                      *             0x18 Move Down
-                                                      *             0x1C Move Right
-                                                      *             0x48 Zoom In
-                                                      *             0x49 Zoom Out
-                                                      *             0x00 No Gesture */
-        report.num_points   = *p_buffer++;           /* Number of points */
-        touch_point.x_high  = (*p_buffer ++) & 0x0F; /* Get the upper 4 bits of the x position */
-        touch_point.x_low   = *p_buffer++;           /* and the lower 8 bits */
-        touch_point.y_high  = (*p_buffer ++) & 0x0F; /* Get the upper 4 bits of the y position */
-        touch_point.y_low   = *p_buffer++;           /* and the lower 8 bits */
+        /* Shift bits for x- and y- coordinate to the correct position */
+        s_state_pid.x       = (((touch_point.x_high & 0x0F) << 8) | touch_point.x_low);
+        s_state_pid.y       = (((touch_point.y_high & 0x0F) << 8) | touch_point.y_low);
 
-        /* Check if we have a touch detected */
-        if (report.num_points)
-        {
-            s_is_touched        = 1; /* Remember that we have a touch, needed for generating up events */
-            s_state_pid.Pressed = 1; /* State is pressed */
+        /* Pass touch data to emWin */
+        GUI_TOUCH_StoreStateEx(&s_state_pid);
+    }
+    else
+    {
+        if (s_is_touched)
+        {                            /* If we had a touch, */
+            s_is_touched        = 0; /* now we don't. */
+            s_state_pid.Pressed = 0; /* So, state is not pressed. */
 
-            /* Shift bits for x- and y- coordinate to the correct position */
-            s_state_pid.x       = (((touch_point.x_high & 0x0F) << 8) | touch_point.x_low);
-            s_state_pid.y       = (((touch_point.y_high & 0x0F) << 8) | touch_point.y_low);
-
-            /* Pass touch data to emWin */
+            /* Tell emWin */
             GUI_TOUCH_StoreStateEx(&s_state_pid);
         }
-        else
-        {
-            if (s_is_touched)
-            {                            /* If we had a touch, */
-                s_is_touched        = 0; /* now we don't. */
-                s_state_pid.Pressed = 0; /* So, state is not pressed. */
-
-                /* Tell emWin */
-                GUI_TOUCH_StoreStateEx(&s_state_pid);
-            }
-        }
-        s_iic_busy = 0;
     }
+
+    return emwin_ret;
 }
 /**********************************************************************************************************************
- * End of function cb_sci_iic
+ * End of function pidconf_cb_single
  *********************************************************************************************************************/
 #else /* EMWIN_USE_MULTITOUCH == 0 */
 
@@ -353,153 +343,119 @@ static void create_move_and_down_inputs(st_point_data_t * p_point_data, int32_t 
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
- * Function Name: cb_sci_iic
+ * Function Name: pidconf_cb_multi
  * Description  : .
  * Arguments    : .
  * Return Value : .
  *********************************************************************************************************************/
-static void cb_sci_iic(void)
+e_emwin_rx_err_t pidconf_cb_multi(uint8_t * p_addr, uint32_t size)
 {
-    sci_iic_mcu_status_t      iic_status;
-    volatile sci_iic_return_t ret;
-    GUI_MTOUCH_INPUT          * p_input;
-    GUI_MTOUCH_EVENT          event;
-    GUI_MTOUCH_INPUT          a_input[EMWIN_MAX_NUM_TOUCHPOINTS];
-    st_point_data_t           a_point_data[EMWIN_MAX_NUM_TOUCHPOINTS];
-    st_report_data_t          report;
-    st_touch_data_t           touch_point;
-    int32_t                   num_inputs;
-    int32_t                   i;
-    uint8_t                   num_points = 0;
-    int32_t                   x_coord;
-    int32_t                   y_coord;
-    uint8_t                   * p_buffer;
+    GUI_MTOUCH_INPUT    * p_input;
+    GUI_MTOUCH_EVENT    event;
+    GUI_MTOUCH_INPUT    a_input[EMWIN_MAX_NUM_TOUCHPOINTS];
+    st_point_data_t     a_point_data[EMWIN_MAX_NUM_TOUCHPOINTS];
+    st_report_data_t    report;
+    st_touch_data_t     touch_point;
+    int32_t             num_inputs;
+    int32_t             i;
+    uint8_t             num_points = 0;
+    int32_t             x_coord;
+    int32_t             y_coord;
+    uint8_t             * p_buffer;
+    e_emwin_rx_err_t      emwin_ret = EMWIN_RX_SUCCESS;
 
-    ret = R_SCI_IIC_GetStatus(&s_iic_info, &iic_status);
-    if ((SCI_IIC_SUCCESS == ret) && (1 == iic_status.BIT.NACK))
+    p_buffer           =  p_addr;
+    report.device_mode = *p_buffer++;            /* Get device mode, 000b - Work Mode, 001b - Factory Mode */
+    report.gesture_id  = *p_buffer++;            /* GestureID:  0x10 Move UP
+                                                  *             0x14 Move Left
+                                                  *             0x18 Move Down
+                                                  *             0x1C Move Right
+                                                  *             0x48 Zoom In
+                                                  *             0x49 Zoom Out
+                                                  *             0x00 No Gesture */
+    report.num_points  = *p_buffer++;            /* Number of points */
+    if(report.num_points <= EMWIN_MAX_NUM_TOUCHPOINTS)
     {
-        p_buffer           =  s_a_buffer;
-        report.device_mode = *p_buffer++;            /* Get device mode, 000b - Work Mode, 001b - Factory Mode */
-        report.gesture_id  = *p_buffer++;            /* GestureID:  0x10 Move UP
-                                                      *             0x14 Move Left
-                                                      *             0x18 Move Down
-                                                      *             0x1C Move Right
-                                                      *             0x48 Zoom In
-                                                      *             0x49 Zoom Out
-                                                      *             0x00 No Gesture */
-        report.num_points  = *p_buffer++;            /* Number of points */
-        if(report.num_points <= EMWIN_MAX_NUM_TOUCHPOINTS)
-        {
-            num_points     =  report.num_points;
-        }
-
-        /* Reading point data is only required if there is a touch point */
-        if (num_points)
-        {
-            /* Get coordinates and IDs from buffer */
-            /* WAIT_LOOP */
-            for (i = 0; i < num_points; i++)
-            {
-                touch_point.x_high  = (*p_buffer++) & 0x0F; /* Get the upper 4 bits of the x position */
-                touch_point.x_low   =  *p_buffer++;         /* and the lower 8 bits */
-                touch_point.id      = (*p_buffer)   & 0xF0; /* Extract the touch point ID */
-                touch_point.y_high  = (*p_buffer++) & 0x0F; /* Get the upper 4 bits of the y position */
-                touch_point.y_low   =  *p_buffer++;         /* and the lower 8 bits */
-
-                /* Increment buffer twice since we have two dummy bytes */
-                p_buffer++;
-                p_buffer++;
-
-                /* Calculate coordinate values */
-                x_coord = ((touch_point.x_high & 0x0F) << 8 | touch_point.x_low);
-                y_coord = ((touch_point.y_high & 0x0F) << 8 | touch_point.y_low);
-
-                /* Add 1 to ID because TC counts from 0 and emWin can't handle an ID with 0 */
-                a_point_data[i].id    = touch_point.id + 1;
-                a_point_data[i].x_pos = x_coord;
-                a_point_data[i].y_pos = y_coord;
-            }
-        }
-
-        /* Independent of num_points check if UP-inputs need to be generated */
-        p_input    = a_input;
-        num_inputs = 0;
-        create_up_inputs(a_point_data, num_points, &p_input, &num_inputs);
-
-        /* Create MOVE- and DOWN-inputs only for current points */
-        if (num_points)
-        {
-            create_move_and_down_inputs(a_point_data, num_points, p_input);
-            num_inputs += num_points;
-        }
-
-        /* If any input exists, store an event into emWin buffer */
-        if (num_inputs)
-        {
-            event.LayerIndex = s_layer_index;
-            event.NumPoints  = num_inputs;
-            GUI_MTOUCH_StoreEvent(&event, a_input);
-        }
-        s_iic_busy = 0;
+        num_points     =  report.num_points;
     }
+
+    /* Reading point data is only required if there is a touch point */
+    if (num_points)
+    {
+        /* Get coordinates and IDs from buffer */
+        /* WAIT_LOOP */
+        for (i = 0; i < num_points; i++)
+        {
+            touch_point.x_high  = (*p_buffer++) & 0x0F; /* Get the upper 4 bits of the x position */
+            touch_point.x_low   =  *p_buffer++;         /* and the lower 8 bits */
+            touch_point.id      = (*p_buffer)   & 0xF0; /* Extract the touch point ID */
+            touch_point.y_high  = (*p_buffer++) & 0x0F; /* Get the upper 4 bits of the y position */
+            touch_point.y_low   =  *p_buffer++;         /* and the lower 8 bits */
+
+            /* Increment buffer twice since we have two dummy bytes */
+            p_buffer++;
+            p_buffer++;
+
+            /* Calculate coordinate values */
+            x_coord = ((touch_point.x_high & 0x0F) << 8 | touch_point.x_low);
+            y_coord = ((touch_point.y_high & 0x0F) << 8 | touch_point.y_low);
+
+            /* Add 1 to ID because TC counts from 0 and emWin can't handle an ID with 0 */
+            a_point_data[i].id    = touch_point.id + 1;
+            a_point_data[i].x_pos = x_coord;
+            a_point_data[i].y_pos = y_coord;
+        }
+    }
+
+    /* Independent of num_points check if UP-inputs need to be generated */
+    p_input    = a_input;
+    num_inputs = 0;
+    create_up_inputs(a_point_data, num_points, &p_input, &num_inputs);
+
+    /* Create MOVE- and DOWN-inputs only for current points */
+    if (num_points)
+    {
+        create_move_and_down_inputs(a_point_data, num_points, p_input);
+        num_inputs += num_points;
+    }
+
+    /* If any input exists, store an event into emWin buffer */
+    if (num_inputs)
+    {
+        event.LayerIndex = s_layer_index;
+        event.NumPoints  = num_inputs;
+        GUI_MTOUCH_StoreEvent(&event, a_input);
+    }
+
+    return emwin_ret;
 }
 /**********************************************************************************************************************
- * End of function cb_sci_iic
+ * End of function pidconf_cb_multi
  *********************************************************************************************************************/
 #endif /* EMWIN_USE_MULTITOUCH == 0 */
+#endif /* EMWIN_USE_TOUCH == 1 */
 
 /**********************************************************************************************************************
- * Function Name: exec
+ * Function Name: r_emwin_rx_pidconf_cb
  * Description  : .
  * Arguments    : .
  * Return Value : .
  *********************************************************************************************************************/
-static void exec(void)
+e_emwin_rx_err_t r_emwin_rx_pidconf_cb(uint8_t * p_addr, uint32_t size)
 {
-    /* Read all touch points to clear the buffer on TC side */
-    static uint8_t s_slave_addr_eeprom[] = { EMWIN_SLAVE_ADDRESS }; /* Slave address */
-    static uint8_t s_access_addr1[]      = { 0x00 };                /* 1st data field */
-    volatile sci_iic_return_t ret;
-
-    if (s_iic_busy)
-    {
-        return;
-    }
-
-    /* Sets IIC Information */
-    s_iic_info.p_slv_adr    = s_slave_addr_eeprom;
-    s_iic_info.p_data1st    = s_access_addr1;
-    s_iic_info.p_data2nd    = s_a_buffer;
-    s_iic_info.dev_sts      = SCI_IIC_NO_INIT;
-    s_iic_info.cnt1st       = sizeof(s_access_addr1);
-    s_iic_info.cnt2nd       = sizeof(s_a_buffer);
-    s_iic_info.callbackfunc = &cb_sci_iic;
-
-    /* Start Master Receive */
-    ret = R_SCI_IIC_MasterReceive(&s_iic_info);
-    if (SCI_IIC_SUCCESS == ret)
-    {
-        s_iic_busy = 1;
-    }
+    e_emwin_rx_err_t     emwin_ret = EMWIN_RX_SUCCESS;
+#if (EMWIN_USE_TOUCH == 1)
+#if (EMWIN_USE_MULTITOUCH == 0)
+    emwin_ret = pidconf_cb_single(p_addr, size);
+#else /* EMWIN_USE_MULTITOUCH == 1 */
+    emwin_ret = pidconf_cb_multi(p_addr, size);
+#endif /* EMWIN_USE_MULTITOUCH == 0 */
+#endif /* EMWIN_USE_TOUCH == 1 */
+    return emwin_ret;
 }
 /**********************************************************************************************************************
- * End of function exec
+ * End of function r_emwin_rx_pidconf_cb
  *********************************************************************************************************************/
-
-/**********************************************************************************************************************
- * Function Name: cb_timer
- * Description  : .
- * Arguments    : .
- * Return Value : .
- *********************************************************************************************************************/
-static void cb_timer(void * p_data)
-{
-    exec();
-}
-/**********************************************************************************************************************
- * End of function cb_timer
- *********************************************************************************************************************/
-#endif /* GUI_SUPPORT_TOUCH == 1 */
 
 /**********************************************************************************************************************
  * Function Name: PID_X_SetLayerIndex
@@ -509,7 +465,7 @@ static void cb_timer(void * p_data)
  *********************************************************************************************************************/
 void PID_X_SetLayerIndex(int layer_index)
 {
-#if (GUI_SUPPORT_TOUCH == 1)
+#if (EMWIN_USE_TOUCH == 1)
     s_layer_index = layer_index;
 #endif
 }
@@ -525,9 +481,8 @@ void PID_X_SetLayerIndex(int layer_index)
  *********************************************************************************************************************/
 void PID_X_Init(void)
 {
-#if (GUI_SUPPORT_TOUCH == 1)
-    uint32_t channel;
-    sci_iic_return_t sci_ret;
+#if (EMWIN_USE_TOUCH == 1)
+    e_emwin_rx_err_t pid_ret;
 
     GUI_X_Delay(300);
 
@@ -540,18 +495,12 @@ void PID_X_Init(void)
     GUI_X_Delay(300);
 #endif
 
-    /* Sets IIC Information */
-    s_iic_info.ch_no = EMWIN_SCI_IIC_NUMBER;
-
-    /* SCI open */
-    sci_ret = R_SCI_IIC_Open(&s_iic_info);
-    if (SCI_IIC_SUCCESS != sci_ret)
+    pid_ret = r_emwin_rx_pid_open();
+    if (EMWIN_RX_SUCCESS != pid_ret)
     {
         return; /* Error */
     }
 
-    /* Create timer for executing touch */
-    R_CMT_CreatePeriodic(50, cb_timer, &channel);
 #if (EMWIN_USE_MULTITOUCH == 1)
     GUI_MTOUCH_Enable(1);
 #endif
@@ -561,7 +510,7 @@ void PID_X_Init(void)
  * End of function PID_X_Init
  *********************************************************************************************************************/
 
-#if (GUI_SUPPORT_TOUCH == 1)
+#if (EMWIN_USE_TOUCH == 1)
 /**********************************************************************************************************************
  * Function Name: GUI_TOUCH_X_ActivateX
  * Description  : This routine is not implemented.
@@ -627,4 +576,4 @@ int GUI_TOUCH_X_MeasureY(void)
 /**********************************************************************************************************************
  * End of function GUI_TOUCH_X_MeasureY
  *********************************************************************************************************************/
-#endif /* GUI_SUPPORT_TOUCH == 1 */
+#endif /* EMWIN_USE_TOUCH == 1 */

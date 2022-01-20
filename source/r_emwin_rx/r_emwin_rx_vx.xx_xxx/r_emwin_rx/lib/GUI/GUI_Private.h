@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2020  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.14 - Graphical user interface for embedded applications **
+** emWin V6.22 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -20,11 +20,11 @@ Licensor:                 SEGGER Software GmbH
 Licensed to:              Renesas Electronics Europe GmbH, Arcadiastrasse 10, 40472 Duesseldorf, Germany
 Licensed SEGGER software: emWin
 License number:           GUI-00678
-License model:            License and Service Agreement, signed December 16th, 2016 and Amendment No. 1, signed May 16th, 2019
-License valid for:        RX65N, RX651, RX72M, RX72N, RX661, RX66N
+License model:            License and Service Agreement, signed December 16th, 2016, Amendment No. 1 signed May 16th, 2019 and Amendment No. 2, signed September 20th, 2021 by Carsten Jauch, Managing Director
+License valid for:        RX (based on RX-V1, RX-V2 or RX-V3)
 ----------------------------------------------------------------------
 Support and Update Agreement (SUA)
-SUA period:               2016-12-22 - 2020-12-31
+SUA period:               2016-12-22 - 2022-12-31
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
 File        : GUI_Private.h
@@ -334,8 +334,8 @@ void GUI__AddSpaceHex       (U32 v, U8 Len, char ** ps);
 void GUI__CalcTextRect      (const char * pText, const GUI_RECT * pTextRectIn, GUI_RECT * pTextRectOut, int TextAlign);
 int  GUI__IsPointInRect     (GUI_RECT * pRect, int x, int y);
 
-void GUI__DrawNonExistingCharacter(LCD_DRAWMODE DrawMode);
-int  GUI__GetNonExistingCharWidth (void);
+void GUI__DrawNonExistingCharacter(U16 c, LCD_DRAWMODE DrawMode);
+int  GUI__GetNonExistingCharWidth (U16 c, int * pSizeX);
 
 void GUI__ClearTextBackground(int xDist, int yDist);
 
@@ -469,6 +469,7 @@ int GUI_GetBitsPerPixelEx(int LayerIndex);
 *   THEY HAVE TO CORRESPOND TO THE DEFINITIONS WITHIN THE CODE OF THE BITMAPCONVERTER!
 */
 #define GUI_STREAM_FORMAT_INDEXED    100 /* DO NOT CHANGE */
+#define GUI_STREAM_FORMAT_RLE1       32  /* DO NOT CHANGE */
 #define GUI_STREAM_FORMAT_RLE4       6   /* DO NOT CHANGE */
 #define GUI_STREAM_FORMAT_RLE8       7   /* DO NOT CHANGE */
 #define GUI_STREAM_FORMAT_565        8   /* DO NOT CHANGE */
@@ -739,8 +740,8 @@ GUI_EXTERN           WM_tfHandlePID * WM_pfHandlePID;
 GUI_EXTERN   void (* GUI_pfDispCharStyle)(U16 Char);
 GUI_EXTERN   void (* GUI_pfDispCharLine)(int x0);
 
-GUI_EXTERN           int GUI__BufferSize; // Required buffer size in pixels for alpha blending and/or antialiasing
-GUI_EXTERN           int GUI_AA__ClipX0;  // x0-clipping value for AA module
+GUI_EXTERN           int GUI_AA__BufferSize;  // Required buffer size in pixels for alpha blending and/or antialiasing
+GUI_EXTERN           int GUI_AA__ClipX0;      // x0-clipping value for AA module
 
 GUI_EXTERN           I8  GUI__aNumBuffers[GUI_NUM_LAYERS]; // Number of buffers used per layer
 GUI_EXTERN           U8  GUI__PreserveTrans;

@@ -70,7 +70,7 @@
 		<zipsource>r_ctsu_qe_vx.xx.zip</zipsource>
 		<application>Capacitive Touch</application>
         <function>Capacitive Touch</function>
-		<desc>CTSU QE API for select RX100 and RX200 and RX600 MCUs.</desc>
+		<desc>CTSU QE API</desc>
 		<details>This module allows the user to scan capacitive touch sensors using the CTSU peripheral.</details>
 		<incdir>r_config</incdir>
 		<incdir>r_pincfg</incdir>

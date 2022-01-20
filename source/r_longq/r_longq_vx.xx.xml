@@ -25,14 +25,19 @@
     <toolchain>
         <brand>Renesas</brand>
         <product>RXC</product>
+        <version>3.03.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
+        <version>8.03.00.202004</version>
+        <version>8.03.00.202102</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
         <product>ICCRX</product>
+        <version>4.20.01</version>
+        <version>4.20.03</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -49,7 +54,7 @@
         <zipsource>r_longq_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.61</version>
+            <version>6.20</version>
         </dependency>
         <application>Communications</application>
         <application>Storage and Memory</application>

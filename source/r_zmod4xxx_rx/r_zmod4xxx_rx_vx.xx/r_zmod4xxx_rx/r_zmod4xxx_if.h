@@ -25,8 +25,7 @@
  **********************************************************************************************************************/
 #include "rm_zmod4xxx.h"
 #include "r_zmod4xxx_rx_config.h"
-#include "r_cmt_rx_if.h"
-#if RM_ZMOD4XXX_CFG_DEVICE0_IRQ_ENABLE
+#if RM_ZMOD4XXX_CFG_IRQ_ENABLE
 #include "r_irq_rx_if.h"
 #include "r_irq_rx_pinset.h"
 #endif
@@ -34,20 +33,8 @@
 /**********************************************************************************************************************
  * Typedef definitions
  *********************************************************************************************************************/
-/* Timer */
-typedef struct st_timer_instance
-{
-    uint32_t channel;
-    void (* p_callback)(void * pdata);
-} timer_instance_t;
-
-typedef struct st_timer_callback_args
-{
-    void * p_context;
-} timer_callback_args_t;
-
 /* IRQ */
-#if RM_ZMOD4XXX_CFG_DEVICE0_IRQ_ENABLE
+#if RM_ZMOD4XXX_CFG_IRQ_ENABLE
 typedef struct st_external_irq_instance
 {
     irq_number_t number;
@@ -65,6 +52,13 @@ typedef struct st_external_irq_callback_args
  /**********************************************************************************************************************
  * Exported global functions
  *********************************************************************************************************************/
-extern const rm_zmod4xxx_instance_t g_zmod4xxx_sensor0;
+#if (1 <= RM_ZMOD4XXX_CFG_DEVICE_NUM_MAX)
+extern const rm_zmod4xxx_instance_t         g_zmod4xxx_sensor0;
+extern       rm_zmod4xxx_lib_extended_cfg_t g_zmod4xxx_sensor0_extended_cfg;
+#endif
+#if (2 <= RM_ZMOD4XXX_CFG_DEVICE_NUM_MAX)
+extern const rm_zmod4xxx_instance_t         g_zmod4xxx_sensor1;
+extern       rm_zmod4xxx_lib_extended_cfg_t g_zmod4xxx_sensor1_extended_cfg;
+#endif
 
 #endif /* R_ZMOD4XXX_IF_H_ */

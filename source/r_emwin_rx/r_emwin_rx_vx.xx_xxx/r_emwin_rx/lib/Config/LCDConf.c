@@ -18,47 +18,32 @@
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : LCDConf.c
- * Version      : 1.30
+ * Version      : 1.00
  * Description  : Display controller configuration (single layer).
  *********************************************************************************************************************/
 /**********************************************************************************************************************
- * History : DD.MM.YYYY Version  Description
- *         : 31.07.2020 1.00     First Release
- *         : 04.09.2020 1.10     Update to adjust r_emwin_rx_config.h file.
- *         : 11.12.2020 1.20     Update to adjust emWin v6.14g. Modify multi-touch and timer function.
- *                               Adjust GCC and IAR compilers.
- *         : 31.03.2021 1.30     Update to adjust the spec of Smart Configurator and QE for Display.
+ * History : DD.MM.YYYY Version        Description
+ *         : 31.07.2020 6.14.a.1.00    First Release
+ *         : 04.09.2020 6.14.a.1.10    Update to adjust r_emwin_rx_config.h file.
+ *         : 11.12.2020 6.14.g.1.20    Update to adjust emWin v6.14g. Modify multi-touch and timer function.
+ *                                     Adjust GCC and IAR compilers.
+ *         : 31.03.2021 6.14.g.1.30    Update to adjust the spec of Smart Configurator and QE for Display.
+ *         : 29.12.2021 6.20.  1.00    Update emWin library to v6.22.
+ *                                     Adjust configuration option with Smart Configurator.
  *********************************************************************************************************************/
-
-/* MultiBuffering:
- *  emWin requires 3 buffers to be able to work with efficiently.
- *  The available On-chip RAM unfortunately restricts use of
- *  3 buffers for MultiBuffering to 1- and 4bpp mode.
- *  In 8bpp the line offset is 512, because LNOFF needs to be a
- *  multiple of 0x40 (see GRnFLM3.LNOFF). In that case
- *  0x200 * 0x110 * 3 = 0x66000 bytes are required. But
- *  unfortunately the size of the memory area is only 0x60000.
- *  In that case DoubleBuffering is used. In that mode the CPU has to
- *  wait for the next VSYNC interrupt in case of a new frame buffer.
- *
- * 32bpp mode:
- *  Has not been tested because of a lack of RAM. */
 
 /**********************************************************************************************************************
  Includes   <System Includes> , "Project Includes"
  *********************************************************************************************************************/
-#include <stdint.h>
 #include <stdlib.h>
 #include "GUI.h"
 #include "GUIDRV_Lin.h"
 #include "LCDConf.h"
 
-#include "platform.h"
-#include "r_glcdc_rx_if.h"
-#include "r_pinset.h"
 #include "r_dmaca_rx_if.h"
 #include "r_gpio_rx_if.h"
 #include "r_emwin_rx_if.h"
+#include "../../src/r_emwin_rx_private.h"
 
 #if (USE_DAVE2D == 1)
 #include "dave_base.h"
@@ -68,19 +53,9 @@
 /**********************************************************************************************************************
  Macro definitions
  *********************************************************************************************************************/
-/* Color format selection */
-#define FORMAT_RGB_565   (GLCDC_IN_FORMAT_16BITS_RGB565)
-#define FORMAT_RGB_888   (GLCDC_IN_FORMAT_32BITS_RGB888)
-#define FORMAT_ARGB_1555 (GLCDC_IN_FORMAT_16BITS_ARGB1555)
-#define FORMAT_ARGB_4444 (GLCDC_IN_FORMAT_16BITS_ARGB4444)
-#define FORMAT_ARGB_8888 (GLCDC_IN_FORMAT_32BITS_ARGB8888)
-#define FORMAT_CLUT_8    (GLCDC_IN_FORMAT_CLUT8)
-#define FORMAT_CLUT_4    (GLCDC_IN_FORMAT_CLUT4)
-#define FORMAT_CLUT_1    (GLCDC_IN_FORMAT_CLUT1)
-
-/* Color conversion, display driver and multiple buffers */
+/* Display driver */
+#if (EMWIN_DISPLAY_DRIVER == DISP_DRV_GUIDRV_LIN)
 #if   (EMWIN_BITS_PER_PIXEL == 32)
-#define COLOR_CONVERSION (GUICC_M8888I)
 #if (EMWIN_DISPLAY_ORIENTATION == ORIENTATION_0)
 #define DISPLAY_DRIVER   (GUIDRV_LIN_32)      /* Default */
 #elif (EMWIN_DISPLAY_ORIENTATION == ORIENTATION_CW)
@@ -90,10 +65,7 @@
 #else
 #define DISPLAY_DRIVER   (GUIDRV_LIN_OXY_32)  /* 180 */
 #endif
-#define NUM_BUFFERS      (1)
-#define COLOR_FORMAT     (FORMAT_RGB_ARGB8888)
 #elif (EMWIN_BITS_PER_PIXEL == 16)
-#define COLOR_CONVERSION (GUICC_M565)
 #if (EMWIN_DISPLAY_ORIENTATION == ORIENTATION_0)
 #define DISPLAY_DRIVER   (GUIDRV_LIN_16)      /* Default */
 #elif (EMWIN_DISPLAY_ORIENTATION == ORIENTATION_CW)
@@ -103,10 +75,7 @@
 #else
 #define DISPLAY_DRIVER   (GUIDRV_LIN_OXY_16)  /* 180 */
 #endif
-#define NUM_BUFFERS      (2)
-#define COLOR_FORMAT     (FORMAT_RGB_565)
 #elif (EMWIN_BITS_PER_PIXEL == 8)
-#define COLOR_CONVERSION (GUICC_8666)
 #if (EMWIN_DISPLAY_ORIENTATION == ORIENTATION_0)
 #define DISPLAY_DRIVER   (GUIDRV_LIN_8)      /* Default */
 #elif (EMWIN_DISPLAY_ORIENTATION == ORIENTATION_CW)
@@ -116,10 +85,7 @@
 #else
 #define DISPLAY_DRIVER   (GUIDRV_LIN_OXY_8)  /* 180 */
 #endif
-#define NUM_BUFFERS      (2)
-#define COLOR_FORMAT     (FORMAT_CLUT_8)
 #elif (EMWIN_BITS_PER_PIXEL == 4)
-#define COLOR_CONVERSION (GUICC_16)
 #if (EMWIN_DISPLAY_ORIENTATION == ORIENTATION_0)
 #define DISPLAY_DRIVER   (GUIDRV_LIN_4)      /* Default */
 #elif (EMWIN_DISPLAY_ORIENTATION == ORIENTATION_CW)
@@ -129,10 +95,7 @@
 #else
 #define DISPLAY_DRIVER   (GUIDRV_LIN_OXY_4)  /* 180 */
 #endif
-#define NUM_BUFFERS      (2)
-#define COLOR_FORMAT     (FORMAT_CLUT_4)
 #elif (EMWIN_BITS_PER_PIXEL == 1)
-#define COLOR_CONVERSION (GUICC_1)
 #if (EMWIN_DISPLAY_ORIENTATION == ORIENTATION_0)
 #define DISPLAY_DRIVER   (GUIDRV_LIN_1)      /* Default */
 #elif (EMWIN_DISPLAY_ORIENTATION == ORIENTATION_CW)
@@ -142,21 +105,23 @@
 #else
 #define DISPLAY_DRIVER   (GUIDRV_LIN_OXY_1)  /* 180 */
 #endif
-#define NUM_BUFFERS      (2)
-#define COLOR_FORMAT     (FORMAT_CLUT_1)
+#endif
+#else /* EMWIN_DISPLAY_DRIVER == DISP_DRV_GUIDRV_OTHER */
+#define DISPLAY_DRIVER   (NULL)
+#warning "Warning!! It is necessary to set definition of the display driver."
 #endif
 
-/* Buffer size and stride */
-#define BYTES_PER_LINE   ((EMWIN_BITS_PER_PIXEL * EMWIN_XSIZE_PHYS) / 8)
-#define LINE_OFFSET      (((BYTES_PER_LINE + 63) / 64) * 64)
-#define VXSIZE_PHYS      ((LINE_OFFSET * 8) / EMWIN_BITS_PER_PIXEL)
-#define BYTES_PER_BUFFER (LINE_OFFSET * EMWIN_YSIZE_PHYS)
-
-/* Color number */
-#if ((USE_DAVE2D == 0) && (EMWIN_BITS_PER_PIXEL < 16))
-#define NUM_COLORS (1 << EMWIN_BITS_PER_PIXEL)
-#else
-#define NUM_COLORS  (256)
+/* Color Conversion Routine */
+#if   (EMWIN_BITS_PER_PIXEL == 32)
+#define COLOR_CONVERSION (GUICC_M8888I)
+#elif (EMWIN_BITS_PER_PIXEL == 16)
+#define COLOR_CONVERSION (GUICC_M565)
+#elif (EMWIN_BITS_PER_PIXEL == 8)
+#define COLOR_CONVERSION (GUICC_8666)
+#elif (EMWIN_BITS_PER_PIXEL == 4)
+#define COLOR_CONVERSION (GUICC_16)
+#elif (EMWIN_BITS_PER_PIXEL == 1)
+#define COLOR_CONVERSION (GUICC_1)
 #endif
 
 /**********************************************************************************************************************
@@ -173,49 +138,6 @@ typedef int DRAW_CIRCLE (int x0, int y0, int r);
 typedef int DRAW_LINE (int x0, int y0, int x1, int y1);
 #endif
 
-/* GLCDC FIT module setting check */
-#if ((GLCDC_CFG_CONFIGURATION_MODE == 1) || defined(QE_DISPLAY_CONFIGURATION))
-
-#if (EMWIN_XSIZE_PHYS != LCD_CH0_DISP_HW) || (EMWIN_XSIZE_PHYS != LCD_CH0_IN_GR2_HSIZE)
-#warning "Warning!! There is a problem in the setting of the GLCDC FIT module.\n Missing the graphic layer 2 width setting."
-#endif
-
-#if (EMWIN_YSIZE_PHYS != LCD_CH0_DISP_VW) || (EMWIN_YSIZE_PHYS != LCD_CH0_IN_GR2_VSIZE)
-#warning "Warning!! There is a problem in the setting of the GLCDC FIT module.\n Missing the graphic layer 2 height setting."
-#endif
-
-#if (LINE_OFFSET != LCD_CH0_IN_GR2_LINEOFFSET)
-#warning "Warning!! There is a problem in the setting of the GLCDC FIT module.\n Missing the graphic layer 2 line offset setting."
-#endif
-
-#ifndef __GNUC__
-#if (LCD_CH0_IN_GR1_PBASE != NULL)
-#warning "Warning!! There is a problem in the setting of the GLCDC FIT module.\n Missing the graphic layer 1 setting."
-#endif
-#else
-    /* Please check the graphic layer 1 setting. */
-#endif
-
-#if (LCD_CH0_DETECT_VPOS != true)
-#warning "Warning!! There is a problem in the setting of the GLCDC FIT module.\n Missing the line detection setting."
-#endif
-
-#if (LCD_CH0_INTERRUPT_VPOS_ENABLE != true)
-#warning "Warning!! There is a problem in the setting of the GLCDC FIT module.\n Missing the line detection interrupt setting."
-#endif
-
-#if (LCD_CH0_CALLBACK_ENABLE != true)
-#warning "Warning!! There is a problem in the setting of the GLCDC FIT module.\n Missing the callback function setting. "
-#endif
-
-#endif /* ((GLCDC_CFG_CONFIGURATION_MODE != 1) && !defined(QE_DISPLAY_CONFIGURATION)) */
-
-
-/* emWin FIT module setting check */
-#if (EMWIN_BITS_PER_PIXEL != 16)
-#warning "Warning!! The setting of the color depth is not suitale for emWin FIT module."
-#endif
-
 /**********************************************************************************************************************
  Exported global variables
  *********************************************************************************************************************/
@@ -225,15 +147,23 @@ typedef int DRAW_LINE (int x0, int y0, int x1, int y1);
  *********************************************************************************************************************/
 static const uint32_t s_a_buffer_ptr[] =
 {
-    EMWIN_GUI_FRAME_BUFFER1,  /* Begin of On-Chip RAM */
-    EMWIN_GUI_FRAME_BUFFER2   /* Begin of Expansion RAM */
+    EMWIN_GUI_FRAME_BUFFER1,
+#if (EMWIN_NUM_BUFFERS > 1)
+    EMWIN_GUI_FRAME_BUFFER2,
+#if (EMWIN_NUM_BUFFERS > 2)
+    EMWIN_GUI_FRAME_BUFFER3,
+#if (EMWIN_NUM_BUFFERS > 3)
+    #warning "Warning!! It is necessary to implement frame buffer addresses."
+#endif
+#endif
+#endif
 };
-
-static volatile int32_t s_pending_buffer = -1;
 
 static uint32_t s_write_buffer_index;
 
-static glcdc_runtime_cfg_t s_runtime_cfg;
+#if (EMWIN_BITS_PER_PIXEL < 16)
+static uint32_t s_a_clut[NUM_COLORS];
+#endif
 
 /* Dave2D */
 #if (USE_DAVE2D == 1)
@@ -241,12 +171,6 @@ static uint32_t        s_dave_active;
 static d2_device       * sp_d2_handle;
 static d2_renderbuffer * sp_renderbuffer;
 #endif
-
-#if (EMWIN_BITS_PER_PIXEL < 16)
-static uint32_t s_a_clut[NUM_COLORS];
-#endif
-
-static volatile bool s_first_interrupt_flag;           /* It is used for interrupt control of GLCDC module */
 
 #if (USE_DAVE2D == 1)
 static void lcd_fill_rect (int32_t layer_index, int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t pixel_index);
@@ -260,21 +184,13 @@ static void lcd_fill_rect (int32_t layer_index, int32_t x0, int32_t y0, int32_t 
  *********************************************************************************************************************/
 static void switch_buffers_on_vsync(int32_t index)
 {
-    uint32_t addr;
-    glcdc_err_t ret;
+    e_emwin_rx_err_t ret;
+    uint32_t *       p_addr;
 
-    s_pending_buffer = 1;
+    p_addr = (uint32_t *)s_a_buffer_ptr[index];
+    ret    = r_emwin_rx_lcd_switch_buffer(p_addr);
 
-    /* WAIT_LOOP */
-    while (1 == s_pending_buffer)
-    {
-        /* Wait until s_pending_buffer is cleared by ISR */
-        R_BSP_NOP();
-    }
-    addr = s_a_buffer_ptr[index];
-    s_runtime_cfg.input.p_base = (uint32_t *)addr; /* Specify the start address of the frame buffer */
-    ret = R_GLCDC_LayerChange(GLCDC_FRAME_LAYER_2, &s_runtime_cfg); /* Graphic 2 Register Value Reflection Enable */
-    if (GLCDC_SUCCESS == ret)
+    if (EMWIN_RX_SUCCESS == ret)
     {
         GUI_MULTIBUF_ConfirmEx(0, index); /* Tell emWin that buffer is used */
     }
@@ -297,110 +213,15 @@ static void switch_buffers_on_vsync(int32_t index)
  *********************************************************************************************************************/
 static void init_controller(void)
 {
-    glcdc_cfg_t glcdc_cfg;
-    glcdc_err_t ret;
+    e_emwin_rx_err_t ret;
 
     /* Register Dave2D interrupt */
 #if (USE_DAVE2D == 1)
     R_BSP_InterruptWrite(BSP_INT_SRC_AL1_DRW2D_DRW_IRQ, (bsp_int_cb_t)drw_int_isr);
 #endif
 
-#if (!defined(QE_DISPLAY_CONFIGURATION) && (GLCDC_CFG_CONFIGURATION_MODE == 0))
-    /* Configuration example for RX72N envision kit. */
-
-    /* Set the frequency of the LCD_CLK and PXCLK to suit the format and set the PANELCLK.CLKEN bit to 1 */
-    glcdc_cfg.output.clksrc = GLCDC_CLK_SRC_INTERNAL;              /* Select PLL clock */
-    glcdc_cfg.output.clock_div_ratio = GLCDC_PANEL_CLK_DIVISOR_24; /* 240 / 24 = 10 MHz */
-
-    /* Definition of Background Screen */
-    glcdc_cfg.output.htiming.front_porch = 5;
-    glcdc_cfg.output.vtiming.front_porch = 8;
-    glcdc_cfg.output.htiming.back_porch = 40;
-    glcdc_cfg.output.vtiming.back_porch = 8;
-    glcdc_cfg.output.htiming.display_cyc = EMWIN_XSIZE_PHYS;
-    glcdc_cfg.output.vtiming.display_cyc = EMWIN_YSIZE_PHYS;
-    glcdc_cfg.output.htiming.sync_width = 1;
-    glcdc_cfg.output.vtiming.sync_width = 1;
-
-    /* Graphic 1 configuration */
-    glcdc_cfg.input[GLCDC_FRAME_LAYER_1].p_base = NULL;
-
-    /* Graphic 2 configuration */
-    glcdc_cfg.input[GLCDC_FRAME_LAYER_2].p_base = (uint32_t *)s_a_buffer_ptr[0];
-    glcdc_cfg.input[GLCDC_FRAME_LAYER_2].offset = LINE_OFFSET;
-    glcdc_cfg.input[GLCDC_FRAME_LAYER_2].format = COLOR_FORMAT;
-    glcdc_cfg.blend[GLCDC_FRAME_LAYER_2].visible = true;
-    glcdc_cfg.blend[GLCDC_FRAME_LAYER_2].blend_control = GLCDC_BLEND_CONTROL_NONE;
-    glcdc_cfg.blend[GLCDC_FRAME_LAYER_2].frame_edge = false;
-    glcdc_cfg.input[GLCDC_FRAME_LAYER_2].frame_edge = false;
-    glcdc_cfg.input[GLCDC_FRAME_LAYER_2].coordinate.y = 0;
-    glcdc_cfg.input[GLCDC_FRAME_LAYER_2].vsize = EMWIN_YSIZE_PHYS;
-    glcdc_cfg.input[GLCDC_FRAME_LAYER_2].coordinate.x = 0;
-    glcdc_cfg.input[GLCDC_FRAME_LAYER_2].hsize = EMWIN_XSIZE_PHYS;
-    glcdc_cfg.blend[GLCDC_FRAME_LAYER_2].start_coordinate.x = 0;
-    glcdc_cfg.blend[GLCDC_FRAME_LAYER_2].end_coordinate.x= EMWIN_YSIZE_PHYS;
-    glcdc_cfg.blend[GLCDC_FRAME_LAYER_2].start_coordinate.y = 0;
-    glcdc_cfg.blend[GLCDC_FRAME_LAYER_2].end_coordinate.y= EMWIN_XSIZE_PHYS;
-
-    /* Timing configuration */
-    glcdc_cfg.output.tcon_vsync = GLCDC_TCON_PIN_0;
-    glcdc_cfg.output.tcon_hsync = GLCDC_TCON_PIN_2;
-    glcdc_cfg.output.tcon_de    = GLCDC_TCON_PIN_3;
-    glcdc_cfg.output.data_enable_polarity = GLCDC_SIGNAL_POLARITY_HIACTIVE;
-    glcdc_cfg.output.hsync_polarity = GLCDC_SIGNAL_POLARITY_LOACTIVE;
-    glcdc_cfg.output.vsync_polarity = GLCDC_SIGNAL_POLARITY_LOACTIVE;
-    glcdc_cfg.output.sync_edge = GLCDC_SIGNAL_SYNC_EDGE_RISING;
-
-    /* Output interface */
-    glcdc_cfg.output.format = GLCDC_OUT_FORMAT_16BITS_RGB565;
-    glcdc_cfg.output.color_order = GLCDC_COLOR_ORDER_RGB;
-    glcdc_cfg.output.endian = GLCDC_ENDIAN_LITTLE;
-
-    /* Brightness Adjustment */
-    glcdc_cfg.output.brightness.b = 0x200;
-    glcdc_cfg.output.brightness.g = 0x200;
-    glcdc_cfg.output.brightness.r = 0x200;
-
-    /* Contrast Adjustment Value */
-    glcdc_cfg.output.contrast.b = 0x80;
-    glcdc_cfg.output.contrast.g = 0x80;
-    glcdc_cfg.output.contrast.r = 0x80;
-
-    /* Disable Gamma */
-    glcdc_cfg.output.gamma.enable = false;
-
-    /* Disable Chromakey */
-    glcdc_cfg.chromakey[GLCDC_FRAME_LAYER_2].enable = false;
-
-    /* Disable Dithering */
-    glcdc_cfg.output.dithering.dithering_on = false;
-
-    /* CLUT Adjustment Value */
-    glcdc_cfg.clut[GLCDC_FRAME_LAYER_2].enable = false;
-
-    /* Enable VPOS ISR */
-    glcdc_cfg.detection.vpos_detect = true;
-    glcdc_cfg.interrupt.vpos_enable = true;
-    glcdc_cfg.detection.gr1uf_detect = false;
-    glcdc_cfg.detection.gr2uf_detect = false;
-    glcdc_cfg.interrupt.gr1uf_enable = false;
-    glcdc_cfg.interrupt.gr2uf_enable = false;
-
-    /* Set function to be called on VSYNC */
-    glcdc_cfg.p_callback = (void (*)(void *))_VSYNC_ISR;
-
-#endif /* ((QE_DISPLAY_CONFIGURATION) && (GLCDC_CFG_CONFIGURATION_MODE == 0)) */
-
-    /* Initialize a first time interrupt flag
-     *   Unintended specified line notification from graphic 2 and graphic 1, 2 underflow is detected only
-     *   for first time after release GLCDC software reset.
-     *   This variable is a flag to skip the first time interrupt processing.
-     *   Refer to Graphic LCD Controller (GLCDC) section of User's Manual: Hardware for details. */
-    s_first_interrupt_flag = false;
-
-    /* R_GLCDC_Open function release stop state of GLCDC. */
-    ret = R_GLCDC_Open(&glcdc_cfg);
-    if (GLCDC_SUCCESS != ret)
+    ret = r_emwin_rx_lcd_open();
+    if (EMWIN_RX_SUCCESS != ret)
     {
         /* WAIT_LOOP */
         while (1)
@@ -408,13 +229,6 @@ static void init_controller(void)
             R_BSP_NOP(); /* Error */
         }
     }
-
-    s_runtime_cfg.blend = glcdc_cfg.blend[GLCDC_FRAME_LAYER_2];
-    s_runtime_cfg.input = glcdc_cfg.input[GLCDC_FRAME_LAYER_2];
-    s_runtime_cfg.chromakey = glcdc_cfg.chromakey[GLCDC_FRAME_LAYER_2];
-
-    /* Function select of multiplex pins (Display B) */
-    R_GLCDC_PinSet();
 
 #if (EMWIN_USE_DISP_SIGNAL_PIN == 1)
     /* Set DISP signal on */
@@ -428,8 +242,10 @@ static void init_controller(void)
     R_GPIO_PinWrite(EMWIN_BACKLIGHT_PIN, GPIO_LEVEL_HIGH);
 #endif
 
+#if (EMWIN_INIT_DMAC == 1)
     /* Init DMA */
     R_DMACA_Init();
+#endif
 
     /* Extended Bus Master Priority Control Register */
     BSC.EBMAPCR.BIT.PR1SEL = 3;
@@ -451,24 +267,14 @@ static void init_controller(void)
 static void set_lut_entry(LCD_COLOR color, uint8_t pos)
 {
 #if (EMWIN_BITS_PER_PIXEL < 16)
-    glcdc_clut_cfg_t p_clut_cfg;
-    glcdc_err_t      ret;
+    e_emwin_rx_err_t ret;
 
-    s_a_clut[pos] = color;
     if (pos == (NUM_COLORS - 1))
     {
-        p_clut_cfg.enable = true;
-        p_clut_cfg.p_base = s_a_clut;
-        p_clut_cfg.size = NUM_COLORS;
-        p_clut_cfg.start = 0;
-#ifdef __ICCRX__
-        R_GLCDC_Control(GLCDC_CMD_START_DISPLAY, (void const * const)FIT_NO_FUNC); /* Enable background generation block */
-#else
-        R_GLCDC_Control(GLCDC_CMD_START_DISPLAY, FIT_NO_FUNC); /* Enable background generation block */
-#endif
-        GUI_Delay(100);
-        ret = R_GLCDC_ClutUpdate(GLCDC_FRAME_LAYER_2, &p_clut_cfg);
-        if (GLCDC_SUCCESS != ret)
+        s_a_clut[pos] = color;
+
+        ret = r_emwin_rx_lcd_clut_update(s_a_clut);
+        if (EMWIN_RX_SUCCESS != ret)
         {
             /* WAIT_LOOP */
             while (1)
@@ -494,30 +300,31 @@ static void set_lut_entry(LCD_COLOR color, uint8_t pos)
  *********************************************************************************************************************/
 static void display_on_off(int32_t on_off)
 {
-    if (on_off)
-    {
-#ifdef __ICCRX__
-        R_GLCDC_Control(GLCDC_CMD_START_DISPLAY, (void const * const)FIT_NO_FUNC); /* Enable background generation block */
-#else
-        R_GLCDC_Control(GLCDC_CMD_START_DISPLAY, FIT_NO_FUNC); /* Enable background generation block */
+    e_emwin_rx_lcd_switch_t lcd_switch;
+#if (EMWIN_USE_BACKLIGHT_PIN == 1)
+    gpio_level_t            gpio_level;
 #endif
 
+    if (on_off)
+    {
+        lcd_switch = EMWIN_RX_LCD_SWITCH_ON;
 #if (EMWIN_USE_BACKLIGHT_PIN == 1)
-        R_GPIO_PinWrite(EMWIN_BACKLIGHT_PIN, GPIO_LEVEL_HIGH);
+        gpio_level = GPIO_LEVEL_HIGH;
 #endif
     }
     else
     {
-#ifdef __ICCRX__
-        R_GLCDC_Control(GLCDC_CMD_STOP_DISPLAY, (void const * const)FIT_NO_FUNC); /* Disable background generation block */
-#else
-        R_GLCDC_Control(GLCDC_CMD_STOP_DISPLAY, FIT_NO_FUNC); /* Disable background generation block */
-#endif
-
+        lcd_switch = EMWIN_RX_LCD_SWITCH_OFF;
 #if (EMWIN_USE_BACKLIGHT_PIN == 1)
-        R_GPIO_PinWrite(EMWIN_BACKLIGHT_PIN, GPIO_LEVEL_LOW);
+        gpio_level = GPIO_LEVEL_LOW;
 #endif
     }
+
+    r_emwin_rx_lcd_switch(lcd_switch);
+
+#if (EMWIN_USE_BACKLIGHT_PIN == 1)
+    R_GPIO_PinWrite(EMWIN_BACKLIGHT_PIN, gpio_level);
+#endif
 }
 /**********************************************************************************************************************
  * End of function display_on_off
@@ -705,12 +512,12 @@ static void lcd_fill_rect_xor(int32_t layer_index, int32_t x0, int32_t y0, int32
  *********************************************************************************************************************/
 static void lcd_fill_rect(int32_t layer_index, int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t pixel_index)
 {
-    uint32_t mode;
-    d2_color color;
-    GUI_RECT rect;
-    int32_t  x_size;
-    int32_t  y_size;
-    uint8_t  alpha;
+    uint32_t     mode;
+    d2_color     color;
+    GUI_RECT     rect;
+    int32_t      x_size;
+    int32_t      y_size;
+    uint8_t      alpha;
     GUI_DRAWMODE draw_mode;
 
     draw_mode = GUI_GetDrawMode();
@@ -724,7 +531,8 @@ static void lcd_fill_rect(int32_t layer_index, int32_t x0, int32_t y0, int32_t x
         mode = get_d2_mode();
 
         /* Generate render operations */
-        d2_framebuffer(sp_d2_handle, (void *)s_a_buffer_ptr[s_write_buffer_index], EMWIN_XSIZE_PHYS, EMWIN_XSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
+        d2_framebuffer(sp_d2_handle, (void *)s_a_buffer_ptr[s_write_buffer_index],
+                        EMWIN_XSIZE_PHYS, EMWIN_XSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
         d2_selectrenderbuffer(sp_d2_handle, sp_renderbuffer);
         color = GUI_Index2Color(pixel_index);
         d2_setcolor(sp_d2_handle, 0, color);
@@ -754,7 +562,8 @@ static void lcd_fill_rect(int32_t layer_index, int32_t x0, int32_t y0, int32_t x
  * Arguments    : .
  * Return Value : .
  *********************************************************************************************************************/
-static void draw_memdev_alpha(void * p_dst, const void * p_src, int32_t x_size, int32_t y_size, int32_t bytes_per_line_dst, int32_t bytes_per_line_src)
+static void draw_memdev_alpha(void * p_dst, const void * p_src, int32_t x_size, int32_t y_size,
+                                int32_t bytes_per_line_dst, int32_t bytes_per_line_src)
 {
     uint32_t pitch_src;
     uint32_t pitch_dst;
@@ -762,7 +571,7 @@ static void draw_memdev_alpha(void * p_dst, const void * p_src, int32_t x_size, 
 
     pitch_dst = bytes_per_line_dst / 4;
     pitch_src = bytes_per_line_src / 4;
-    mode = get_d2_mode();
+    mode      = get_d2_mode();
 
     /* Set address of destination memory device as frame buffer to be used */
     d2_framebuffer(sp_d2_handle, p_dst, pitch_dst, pitch_dst, y_size, d2_mode_argb8888);
@@ -789,16 +598,18 @@ static void draw_memdev_alpha(void * p_dst, const void * p_src, int32_t x_size, 
  * Arguments    : .
  * Return Value : .
  *********************************************************************************************************************/
-static void draw_bitmap_alpha(int32_t layer_index, int32_t x, int32_t y, const void * p, int32_t x_size, int32_t y_size, int32_t bytes_per_line)
+static void draw_bitmap_alpha(int32_t layer_index, int32_t x, int32_t y, const void * p, int32_t x_size, int32_t y_size,
+                                int32_t bytes_per_line)
 {
     uint32_t pitch;
     uint32_t mode;
 
     pitch = bytes_per_line / 4;
-    mode = get_d2_mode();
+    mode  = get_d2_mode();
 
     /* Generate render operations */
-    d2_framebuffer(sp_d2_handle, (void *)s_a_buffer_ptr[s_write_buffer_index], EMWIN_XSIZE_PHYS, EMWIN_XSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
+    d2_framebuffer(sp_d2_handle, (void *)s_a_buffer_ptr[s_write_buffer_index],
+                    EMWIN_XSIZE_PHYS, EMWIN_XSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
     d2_selectrenderbuffer(sp_d2_handle, sp_renderbuffer);
     d2_setblitsrc(sp_d2_handle, (void *)p, pitch, x_size, y_size, d2_mode_argb8888);
     d2_blitcopy(sp_d2_handle, x_size, y_size, 0, 0, x_size * 16, y_size * 16, x * 16, y * 16, d2_bf_usealpha);
@@ -817,7 +628,8 @@ static void draw_bitmap_alpha(int32_t layer_index, int32_t x, int32_t y, const v
  * Arguments    : .
  * Return Value : .
  *********************************************************************************************************************/
-static void draw_bitmap_16bpp(int32_t layer_index, int32_t x, int32_t y, const void * p, int32_t x_size, int32_t y_size, int32_t bytes_per_line)
+static void draw_bitmap_16bpp(int32_t layer_index, int32_t x, int32_t y, const void * p, int32_t x_size, int32_t y_size,
+                                int32_t bytes_per_line)
 {
     uint32_t mode;
     uint32_t mode_src;
@@ -828,7 +640,8 @@ static void draw_bitmap_16bpp(int32_t layer_index, int32_t x, int32_t y, const v
     mode_src = d2_mode_rgb565;
 
     /* Generate render operations */
-    d2_framebuffer(sp_d2_handle, (void *)s_a_buffer_ptr[s_write_buffer_index], EMWIN_XSIZE_PHYS, EMWIN_XSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
+    d2_framebuffer(sp_d2_handle, (void *)s_a_buffer_ptr[s_write_buffer_index],
+                    EMWIN_XSIZE_PHYS, EMWIN_XSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
     d2_selectrenderbuffer(sp_d2_handle, sp_renderbuffer);
     d2_setblitsrc(sp_d2_handle, (void *)p, bytes_per_line / 2, x_size, y_size, mode_src);
     d2_blitcopy(sp_d2_handle, x_size, y_size, 0, 0, x_size * 16, y_size * 16, x * 16, y * 16, 0);
@@ -858,7 +671,8 @@ static int32_t circle_aa(int32_t x0, int32_t y0, int32_t r, int32_t w)
     mode = get_d2_mode();
 
     /* Generate render operations */
-    d2_framebuffer(sp_d2_handle, (void *)s_a_buffer_ptr[s_write_buffer_index], EMWIN_XSIZE_PHYS, EMWIN_XSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
+    d2_framebuffer(sp_d2_handle, (void *)s_a_buffer_ptr[s_write_buffer_index],
+                    EMWIN_XSIZE_PHYS, EMWIN_XSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
     d2_selectrenderbuffer(sp_d2_handle, sp_renderbuffer);
     color = GUI_Index2Color(GUI_GetColorIndex());
     d2_setcolor(sp_d2_handle, 0, color);
@@ -915,17 +729,17 @@ static int32_t draw_circle_aa(int32_t x0, int32_t y0, int32_t r)
  *********************************************************************************************************************/
 static int32_t fill_polygon_aa(const GUI_POINT * p_points, int32_t num_points, int32_t x0, int32_t y0)
 {
-    uint32_t mode;
+    uint32_t   mode;
     d2_point * p_data;
     d2_point * p_data_i;
-    int32_t  i;
-    int32_t  ret;
-    GUI_RECT rect;
-    uint32_t color;
+    int32_t    i;
+    int32_t    ret;
+    GUI_RECT   rect;
+    uint32_t   color;
 
-    mode = get_d2_mode();
+    mode   = get_d2_mode();
     p_data = malloc(sizeof(d2_point) * num_points * 2);
-    ret = 1;
+    ret    = 1;
     modify_coord(&x0, &y0);
     if (p_data)
     {
@@ -971,17 +785,17 @@ static int32_t fill_polygon_aa(const GUI_POINT * p_points, int32_t num_points, i
 static int32_t draw_poly_outline_aa(const GUI_POINT * p_points, int32_t num_points, int32_t Thickness,
                                     int32_t x, int32_t y)
 {
-    uint32_t mode;
+    uint32_t   mode;
     d2_point * p_data;
     d2_point * p_data_i;
-    int32_t  i;
-    int32_t  ret;
-    GUI_RECT rect;
-    uint32_t color;
+    int32_t    i;
+    int32_t    ret;
+    GUI_RECT   rect;
+    uint32_t   color;
 
-    mode = get_d2_mode();
+    mode   = get_d2_mode();
     p_data = malloc(sizeof(d2_point) * num_points * 2);
-    ret = 1;
+    ret    = 1;
     modify_coord(&x, &y);
     if (p_data)
     {
@@ -1156,7 +970,7 @@ static void copy_buffer(int32_t layer_index, int32_t index_src, int32_t index_ds
     dmaca_stat_t              dmac_status;
 
     GUI_USE_PARA(layer_index);
-    ret = R_DMACA_Open(DMACA_CH0);
+    ret = R_DMACA_Open(EMWIN_DMAC_NUMBER);
     if (DMACA_SUCCESS != ret)
     {
         /* WAIT_LOOP */
@@ -1186,7 +1000,8 @@ static void copy_buffer(int32_t layer_index, int32_t index_src, int32_t index_ds
     td_cfg.p_des_addr           = (void *)s_a_buffer_ptr[index_dst];
     td_cfg.transfer_count       = EMWIN_YSIZE_PHYS;
     td_cfg.block_size           = LINE_OFFSET >> 2;
-    ret = R_DMACA_Create(DMACA_CH0, &td_cfg);
+
+    ret = R_DMACA_Create(EMWIN_DMAC_NUMBER, &td_cfg);
     if (DMACA_SUCCESS != ret)
     {
         /* WAIT_LOOP */
@@ -1196,7 +1011,7 @@ static void copy_buffer(int32_t layer_index, int32_t index_src, int32_t index_ds
         }
     }
 
-    ret = R_DMACA_Control(DMACA_CH0, DMACA_CMD_ENABLE, &dmac_status);
+    ret = R_DMACA_Control(EMWIN_DMAC_NUMBER, DMACA_CMD_ENABLE, &dmac_status);
     if (DMACA_SUCCESS != ret)
     {
         /* WAIT_LOOP */
@@ -1206,7 +1021,7 @@ static void copy_buffer(int32_t layer_index, int32_t index_src, int32_t index_ds
         }
     }
 
-    ret = R_DMACA_Control(DMACA_CH0, DMACA_CMD_SOFT_REQ_NOT_CLR_REQ, &dmac_status);
+    ret = R_DMACA_Control(EMWIN_DMAC_NUMBER, DMACA_CMD_SOFT_REQ_NOT_CLR_REQ, &dmac_status);
     if (DMACA_SUCCESS != ret)
     {
         /* WAIT_LOOP */
@@ -1218,7 +1033,7 @@ static void copy_buffer(int32_t layer_index, int32_t index_src, int32_t index_ds
 
     do
     {
-        ret = R_DMACA_Control(DMACA_CH0, DMACA_CMD_STATUS_GET, &dmac_status);
+        ret = R_DMACA_Control(EMWIN_DMAC_NUMBER, DMACA_CMD_STATUS_GET, &dmac_status);
         if (DMACA_SUCCESS != ret)
         {
             /* WAIT_LOOP */
@@ -1229,7 +1044,7 @@ static void copy_buffer(int32_t layer_index, int32_t index_src, int32_t index_ds
         }
     } while (0 == (dmac_status.dtif_stat)); /* WAIT_LOOP */
 
-    ret = R_DMACA_Close(DMACA_CH0);
+    ret = R_DMACA_Close(EMWIN_DMAC_NUMBER);
     if (DMACA_SUCCESS != ret)
     {
         /* WAIT_LOOP */
@@ -1238,6 +1053,7 @@ static void copy_buffer(int32_t layer_index, int32_t index_src, int32_t index_ds
             R_BSP_NOP(); /* Error */
         }
     }
+
     s_write_buffer_index = index_dst;
 }
 /**********************************************************************************************************************
@@ -1261,7 +1077,7 @@ void * R_EMWIN_GetBufferAddr(void)
 #if (USE_DAVE2D == 1)
 /**********************************************************************************************************************
  * Function Name: R_EMWIN_GetD2
- * Description  : .
+ * Description  : Get Dave2D handle.
  * Arguments    : .
  * Return Value : .
  *********************************************************************************************************************/
@@ -1275,7 +1091,7 @@ d2_device * R_EMWIN_GetD2(void)
 
 /**********************************************************************************************************************
  * Function Name: R_EMWIN_EnableDave2D
- * Description  : .
+ * Description  : Enable Dave2D functions.
  * Arguments    : .
  * Return Value : .
  *********************************************************************************************************************/
@@ -1302,7 +1118,7 @@ void R_EMWIN_EnableDave2D(void)
 
 /**********************************************************************************************************************
  * Function Name: R_EMWIN_DisableDave2D
- * Description  : .
+ * Description  : Disable Dave2D functions.
  * Arguments    : .
  * Return Value : .
  *********************************************************************************************************************/
@@ -1329,7 +1145,7 @@ void R_EMWIN_DisableDave2D(void)
 
 /**********************************************************************************************************************
  * Function Name: R_EMWIN_GetDaveActive
- * Description  : .
+ * Description  : Get status of Dave2D functions.
  * Arguments    : .
  * Return Value : .
  *********************************************************************************************************************/
@@ -1355,8 +1171,8 @@ void LCD_X_Config(void)
     d2_s32  d2_ret;
 #endif
 
-#if (NUM_BUFFERS > 1)
-    GUI_MULTIBUF_ConfigEx(0, NUM_BUFFERS);
+#if (EMWIN_NUM_BUFFERS > 1)
+    GUI_MULTIBUF_ConfigEx(0, EMWIN_NUM_BUFFERS);
 #endif
 
     /* Set display driver and color conversion for 1st layer */
@@ -1495,42 +1311,4 @@ int LCD_X_DisplayDriver(unsigned layer_index, unsigned cmd, void * p_data)
 }
 /**********************************************************************************************************************
  * End of function LCD_X_DisplayDriver
- *********************************************************************************************************************/
-
-/**********************************************************************************************************************
- * Function Name: _VSYNC_ISR
- * Description  : .
- * Arguments    : .
- * Return Value : .
- *********************************************************************************************************************/
-void _VSYNC_ISR(void * p)
-{
-    if (false == s_first_interrupt_flag)
-    {
-        s_first_interrupt_flag = true;
-
-        /* Do nothing */
-    }
-    else
-    {
-        glcdc_callback_args_t * p_decode;
-        p_decode = (glcdc_callback_args_t*) p;
-
-        if (GLCDC_EVENT_GR1_UNDERFLOW == p_decode->event)
-        {
-            R_BSP_NOP(); /* GR1 underflow , if necessary */
-        }
-        else if (GLCDC_EVENT_GR2_UNDERFLOW == p_decode->event)
-        {
-            R_BSP_NOP(); /* GR2 underflow , if necessary */
-        }
-        else /* GLCDC_EVENT_LINE_DETECTION */
-        {
-            /* Sets a flag to be able to notice the interrupt */
-            s_pending_buffer = 0;
-        }
-    }
-}
-/**********************************************************************************************************************
- * End of function _VSYNC_ISR
  *********************************************************************************************************************/

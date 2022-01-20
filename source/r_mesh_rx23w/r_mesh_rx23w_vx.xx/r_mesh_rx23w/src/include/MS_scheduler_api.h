@@ -206,7 +206,7 @@ typedef struct MS_scheduler_action_set_struct
  *  \brief API to initialize Scheduler Server model
  *
  *  \par Description
- *  This is to initialize Scheduler Server model and to register with Acess layer.
+ *  This is to initialize Scheduler Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -244,6 +244,8 @@ API_RESULT MS_scheduler_server_init
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -253,7 +255,9 @@ API_RESULT MS_scheduler_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 /** \} */
 
@@ -267,7 +271,7 @@ API_RESULT MS_scheduler_server_state_update
  *  \brief API to initialize Scheduler Client model
  *
  *  \par Description
- *  This is to initialize Scheduler Client model and to register with Acess layer.
+ *  This is to initialize Scheduler Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -301,6 +305,21 @@ API_RESULT MS_scheduler_client_init
 API_RESULT MS_scheduler_client_get_model_handle
            (
                /* OUT */ MS_ACCESS_MODEL_HANDLE  * model_handle
+           );
+
+/**
+ *  \brief API to set Scheduler client model handle
+ *
+ *  \par Description
+ *  This is to set the handle of Scheduler client model.
+ *
+ *  \param [in] model_handle   Model handle to be assigned.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_scheduler_client_set_model_handle
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE  model_handle
            );
 
 /**
@@ -352,7 +371,7 @@ API_RESULT MS_scheduler_client_send_reliable_pdu
  *  of the Schedule Register state of an element, identified by the Index field.
  *  The response to the Scheduler Action Get message is a Scheduler Action Status message.
  *
- *  \param [in] param Scheduler Action Get message
+ *  \param [in] param Scheduler Action Get message parameter @ref MS_SCHEDULER_ACTION_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -372,7 +391,7 @@ API_RESULT MS_scheduler_client_send_reliable_pdu
  *  identified by the Index field.
  *  The response to the Scheduler Action Set message is a Scheduler Action Status message.
  *
- *  \param [in] param Scheduler Action Set message
+ *  \param [in] param Scheduler Action Set message parameter @ref MS_SCHEDULER_ACTION_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -391,7 +410,7 @@ API_RESULT MS_scheduler_client_send_reliable_pdu
  *  Scheduler Action Set Unacknowledged is an unacknowledged message used to set the entry of the Schedule Register state of an element,
  *  identified by the Index field.
  *
- *  \param [in] param Scheduler Action Set message
+ *  \param [in] param Scheduler Action Set message parameter @ref MS_SCHEDULER_ACTION_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */

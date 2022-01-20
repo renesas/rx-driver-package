@@ -7,6 +7,12 @@
         <brand>Renesas</brand>
         <product>RXC</product>
         <version>3.02.00</version>
+        <version>3.03.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>8.03.00.202004</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -17,15 +23,26 @@
         <series>RX600</series>
         <series>RX700</series>
         <group>RX130</group>
+        <group>RX230</group>
         <group>RX231</group>
+        <group>RX23E-A</group>
+        <group>RX23W</group>
         <group>RX65N</group>
+        <group>RX66N</group>
         <group>RX66T</group>
+        <group>RX671</group>
+        <group>RX72M</group>
         <group>RX72N</group>
         <board>RSKRX130</board>
+        <board>RSKRX230</board>
         <board>RSKRX231</board>
         <board>RSKRX65N</board>
         <board>RSKRX66T</board>
+        <board>RSKRX671</board>
+        <board>RSKRX72M</board>
         <board>RSKRX72N</board>
+        <board>RSSKRX23EA</board>
+        <board>RSSKRX23W</board>
     </target>
 
     <!-- only one package entry allowed -->
@@ -37,19 +54,19 @@
         <zipsource>r_fwup_vx.xx.zip</zipsource>
         <dependency>
             <module>r_byteq</module>
-            <version>1.80</version>
+            <version>1.81</version>
         </dependency>
         <dependency>
             <module>r_cmt_rx</module>
-            <version>4.40</version>
+            <version>4.80</version>
         </dependency>
         <dependency>
             <module>r_flash_rx</module>
-            <version>4.60</version>
+            <version>4.70</version>
         </dependency>
         <dependency>
             <module>r_sci_rx</module>
-            <version>3.50</version>
+            <version>3.80</version>
         </dependency>
         <dependency>
             <module>r_sys_time_rx</module>

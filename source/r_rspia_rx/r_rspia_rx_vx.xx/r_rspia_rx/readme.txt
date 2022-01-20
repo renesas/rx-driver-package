@@ -5,12 +5,12 @@ r_rspia_rx
 
 Document Number 
 ---------------
-R01AN5684ES0100
-R01AN5684JS0100
+R01AN5684ES0110
+R01AN5684JS0110
 
 Version
 -------
-v1.00
+v1.10
 
 Overview
 --------
@@ -81,7 +81,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp     v6.10
+* r_bsp     v6.20
 
 How to add to your project
 --------------------------
@@ -111,9 +111,9 @@ Refer to "Adding Firmware Integration Technology Modules to CS+ Projects (R01AN1
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.02.00
-* GCC for Renesas RX 8.3.0
-* IAR C/C++ Compiler for Renesas RX 4.14.1
+* Renesas RX
+* GCC for Renesas RX
+* IAR C/C++ Compiler for Renesas RX
 
 File Structure
 --------------
@@ -124,9 +124,9 @@ r_rspia_rx
 +---doc
 |   |
 |   +---en
-|   |       r01an5684es0100-rx-serial.pdf
+|   |       r01an5684es0110-rx-serial.pdf
 |   +---ja
-|           r01an5684js0100-rx-serial.pdf
+|           r01an5684js0110-rx-serial.pdf
 |
 +---src
         r_rspia_defaults.h

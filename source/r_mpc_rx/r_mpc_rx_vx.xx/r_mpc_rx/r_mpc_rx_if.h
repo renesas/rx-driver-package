@@ -51,6 +51,7 @@
 *         : 01.04.2021 3.80    Added support RX72M 144pins, 100pins.
 *         : 07.04.2021 3.90    Added support RX671.
 *         : 15.04.2021 4.00    Added support RX140.
+*         : 13.09.2021 4.10    Added the demo for RX671.
 ***********************************************************************************************************************/
 
 #ifndef MPC_RX_INTERFACE_HEADER_FILE
@@ -74,7 +75,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define MPC_RX_VERSION_MAJOR           (4)
-#define MPC_RX_VERSION_MINOR           (00)
+#define MPC_RX_VERSION_MINOR           (10)
 
 /***********************************************************************************************************************
 Typedef definitions

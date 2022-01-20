@@ -431,7 +431,7 @@ typedef struct _MS_TRN_FRNDSHIP_INFO
 } MS_TRN_FRNDSHIP_INFO;
 
 /* Invalid LPN Handle */
-#define LPN_HANDLE_INVALID              MS_CONFIG_LIMITS(MS_MAX_LPNS)
+#define LPN_HANDLE_INVALID              MESH_CFG_MAX_LPNS
 
 /** Hearbeat Publication state */
 typedef struct _MS_TRN_HEARTBEAT_PUBLICATION_INFO

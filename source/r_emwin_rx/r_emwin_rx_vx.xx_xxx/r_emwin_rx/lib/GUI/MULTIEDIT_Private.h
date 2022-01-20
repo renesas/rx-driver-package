@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2020  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.14 - Graphical user interface for embedded applications **
+** emWin V6.22 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -20,11 +20,11 @@ Licensor:                 SEGGER Software GmbH
 Licensed to:              Renesas Electronics Europe GmbH, Arcadiastrasse 10, 40472 Duesseldorf, Germany
 Licensed SEGGER software: emWin
 License number:           GUI-00678
-License model:            License and Service Agreement, signed December 16th, 2016 and Amendment No. 1, signed May 16th, 2019
-License valid for:        RX65N, RX651, RX72M, RX72N, RX661, RX66N
+License model:            License and Service Agreement, signed December 16th, 2016, Amendment No. 1 signed May 16th, 2019 and Amendment No. 2, signed September 20th, 2021 by Carsten Jauch, Managing Director
+License valid for:        RX (based on RX-V1, RX-V2 or RX-V3)
 ----------------------------------------------------------------------
 Support and Update Agreement (SUA)
-SUA period:               2016-12-22 - 2020-12-31
+SUA period:               2016-12-22 - 2022-12-31
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
 File        : MULTIEDIT_Private.h
@@ -63,11 +63,24 @@ Purpose     : MULTIEDIT include
 #define INVALID_CURSORXY (1 << 3)
 #define INVALID_LINEPOSB (1 << 4)
 
+//
+// MULTIEDIT properties
+//
+typedef struct {
+  GUI_COLOR        aBkColor    [NUM_DISP_MODES];
+  GUI_COLOR        aColor      [NUM_DISP_MODES];
+  GUI_COLOR        aCursorColor[2];
+  U16              Align;
+  const GUI_FONT * pFont;
+  U8               HBorder;
+} MULTIEDIT_PROPS;
+
+//
+// MULTIEDIT object
+//
 typedef struct {
   WIDGET           Widget;
-  GUI_COLOR        aBkColor[NUM_DISP_MODES];
-  GUI_COLOR        aColor[NUM_DISP_MODES];
-  GUI_COLOR        aCursorColor[2];
+  MULTIEDIT_PROPS  Props;
   WM_HMEM          hText;
   U16              MaxNumChars;         /* Maximum number of characters including the prompt */
   U16              NumChars;            /* Number of characters (text and prompt) in object */
@@ -84,14 +97,11 @@ typedef struct {
   U16              CacheLineNumber;     /*  */
   U16              CacheFirstVisibleLine;
   U16              CacheFirstVisibleByte;
-  U16              Align;
   WM_SCROLL_STATE  ScrollStateV;
   WM_SCROLL_STATE  ScrollStateH;
-  const GUI_FONT * pFont;
-  U8               Flags;
+  U16              Flags;
   U8               InvalidFlags;         /* Flags to save validation status */
   U8               EditMode;
-  U8               HBorder;
   U8               Radius;               // Currently only used by AppWizard
   WM_HTIMER        hTimer;
   U8               CursorVis;            /* Indicates whether cursor is visible or not*/
@@ -101,6 +111,14 @@ typedef struct {
   int              MotionPosY;
   U8               MotionActive;
 } MULTIEDIT_OBJ;
+
+/*********************************************************************
+*
+*       Private (module internal) data
+*
+**********************************************************************
+*/
+extern MULTIEDIT_PROPS MULTIEDIT_DefaultProps;
 
 #if defined(__cplusplus)
   }

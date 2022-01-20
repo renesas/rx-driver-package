@@ -18,16 +18,18 @@
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_emwin_rx_if.h
- * Version      : 1.30
+ * Version      : 1.00
  * Description  : This module enables to use emWin, Graphic Library with Graphical User Interface.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
- * History : DD.MM.YYYY Version  Description
- *         : 31.07.2020 1.00     First Release
- *         : 04.09.2020 1.10     Update to adjust r_emwin_rx_config.h file.
- *         : 11.12.2020 1.20     Update to adjust emWin v6.14g. Modify multi-touch and timer function.
- *                               Adjust GCC and IAR compilers.
- *         : 31.03.2021 1.30     Update to adjust the spec of Smart Configurator and QE for Display.
+ * History : DD.MM.YYYY Version        Description
+ *         : 31.07.2020 6.14.a.1.00    First Release
+ *         : 04.09.2020 6.14.a.1.10    Update to adjust r_emwin_rx_config.h file.
+ *         : 11.12.2020 6.14.g.1.20    Update to adjust emWin v6.14g. Modify multi-touch and timer function.
+ *                                     Adjust GCC and IAR compilers.
+ *         : 31.03.2021 6.14.g.1.30    Update to adjust the spec of Smart Configurator and QE for Display.
+ *         : 29.12.2021 6.20.  1.00    Update emWin library to v6.22.
+ *                                     Adjust configuration option with Smart Configurator.
  *********************************************************************************************************************/
 #ifndef EMWIN_RX_IF_H
 #define EMWIN_RX_IF_H
@@ -46,10 +48,10 @@
  *********************************************************************************************************************/
 /* Version number of emWin FIT module. */
 #define EMWIN_VERSION_EMWIN_MAJOR   (6)
-#define EMWIN_VERSION_EMWIN_MINOR   (14)
-#define EMWIN_VERSION_EMWIN_CHAR    ('g')
+#define EMWIN_VERSION_EMWIN_MINOR   (22)
+#define EMWIN_VERSION_EMWIN_CHAR    ('\0')
 #define EMWIN_VERSION_FIT_MAJOR     (1)
-#define EMWIN_VERSION_FIT_MINOR     (30)
+#define EMWIN_VERSION_FIT_MINOR     (0)
 
 /**********************************************************************************************************************
  Global Typedef definitions
@@ -71,14 +73,63 @@ typedef struct
 /**********************************************************************************************************************
  Exported global functions
  *********************************************************************************************************************/
+
+/**********************************************************************************************************************
+ * Function Name: R_EMWIN_GetBufferAddr
+ * Description  : .
+ * Arguments    : .
+ * Return Value : .
+ *********************************************************************************************************************/
 void * R_EMWIN_GetBufferAddr (void);
+
 #if (EMWIN_USE_DRW2D == 1)
+/**********************************************************************************************************************
+ * Function Name: R_EMWIN_GetD2
+ * Description  : Get Dave2D handle.
+ * Arguments    : .
+ * Return Value : .
+ *********************************************************************************************************************/
 d2_device * R_EMWIN_GetD2 (void);
+
+/**********************************************************************************************************************
+ * Function Name: R_EMWIN_EnableDave2D
+ * Description  : Enable Dave2D functions.
+ * Arguments    : .
+ * Return Value : .
+ *********************************************************************************************************************/
 void R_EMWIN_EnableDave2D (void);
+
+/**********************************************************************************************************************
+ * Function Name: R_EMWIN_DisableDave2D
+ * Description  : Disable Dave2D functions.
+ * Arguments    : .
+ * Return Value : .
+ *********************************************************************************************************************/
 void R_EMWIN_DisableDave2D (void);
+
+/**********************************************************************************************************************
+ * Function Name: R_EMWIN_GetDaveActive
+ * Description  : Get status of Dave2D functions.
+ * Arguments    : .
+ * Return Value : .
+ *********************************************************************************************************************/
 uint32_t R_EMWIN_GetDaveActive (void);
-#endif
+#endif /* EMWIN_USE_DRW2D == 1 */
+
+/**********************************************************************************************************************
+ * Function Name: _VSYNC_ISR
+ * Description  : Callback function of LCD interface.
+ * Arguments    : .
+ * Return Value : .
+ *********************************************************************************************************************/
 void _VSYNC_ISR (void * p);
+
+/**********************************************************************************************************************
+ * Function Name: R_EMWIN_GetVersion
+ * Description  : This function will return the version of the currently installed emWin FIT module.
+ * Arguments    : .
+ * Return Value : .
+ *********************************************************************************************************************/
 void R_EMWIN_GetVersion (st_emwin_version_t * version);
 
 #endif /* EMWIN_RX_IF_H */

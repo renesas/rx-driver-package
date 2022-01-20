@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2020-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 #ifndef _MESH_SYSTEMTIME_
@@ -24,12 +24,18 @@
 * Includes   <System Includes> , "Project Includes"
 *******************************************************************************/
 #include "platform.h"
+#include "r_ble_rx23w_config.h"
 
 /*******************************************************************************
 * Compilation Switches
 *******************************************************************************/
-#define SYSTEMTIME_EN                   (1)
+#define SYSTEMTIME_EN                   (0)
 #define SYSTEMTIME_STRING_EN            (1)
+
+#if BLE_CFG_CMD_LINE_EN
+#undef  SYSTEMTIME_EN
+#define SYSTEMTIME_EN                   (1)
+#endif /* BLE_CFG_CMD_LINE_EN */
 
 #if SYSTEMTIME_EN
 

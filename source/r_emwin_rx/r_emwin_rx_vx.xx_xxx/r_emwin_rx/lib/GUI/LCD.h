@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2020  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.14 - Graphical user interface for embedded applications **
+** emWin V6.22 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -20,11 +20,11 @@ Licensor:                 SEGGER Software GmbH
 Licensed to:              Renesas Electronics Europe GmbH, Arcadiastrasse 10, 40472 Duesseldorf, Germany
 Licensed SEGGER software: emWin
 License number:           GUI-00678
-License model:            License and Service Agreement, signed December 16th, 2016 and Amendment No. 1, signed May 16th, 2019
-License valid for:        RX65N, RX651, RX72M, RX72N, RX661, RX66N
+License model:            License and Service Agreement, signed December 16th, 2016, Amendment No. 1 signed May 16th, 2019 and Amendment No. 2, signed September 20th, 2021 by Carsten Jauch, Managing Director
+License valid for:        RX (based on RX-V1, RX-V2 or RX-V3)
 ----------------------------------------------------------------------
 Support and Update Agreement (SUA)
-SUA period:               2016-12-22 - 2020-12-31
+SUA period:               2016-12-22 - 2022-12-31
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
 File        : LCD.h
@@ -179,6 +179,7 @@ extern const LCD_API_COLOR_CONV LCD_API_ColorConv_8666_1;
 extern const LCD_API_COLOR_CONV LCD_API_ColorConv_88666I;
 extern const LCD_API_COLOR_CONV LCD_API_ColorConv_888;
 extern const LCD_API_COLOR_CONV LCD_API_ColorConv_8888;
+extern const LCD_API_COLOR_CONV LCD_API_ColorConv_8888I;
 extern const LCD_API_COLOR_CONV LCD_API_ColorConv_M111;
 extern const LCD_API_COLOR_CONV LCD_API_ColorConv_M1555I;
 extern const LCD_API_COLOR_CONV LCD_API_ColorConv_M222;
@@ -237,6 +238,7 @@ extern const LCD_API_COLOR_CONV LCD_API_ColorConv_M8888I;
 #define GUICC_88666I    &LCD_API_ColorConv_88666I
 #define GUICC_888       &LCD_API_ColorConv_888
 #define GUICC_8888      &LCD_API_ColorConv_8888
+#define GUICC_8888I     &LCD_API_ColorConv_8888I
 #define GUICC_M111      &LCD_API_ColorConv_M111
 #define GUICC_M1555I    &LCD_API_ColorConv_M1555I
 #define GUICC_M222      &LCD_API_ColorConv_M222
@@ -766,6 +768,7 @@ unsigned char LCD_X_Read00(void);
 unsigned char LCD_X_Read01(void);
 void LCD_X_Write00 (unsigned char c);
 void LCD_X_Write01 (unsigned char c);
+void LCD_X_WriteM00(unsigned char * pData, int NumBytes);
 void LCD_X_WriteM01(unsigned char * pData, int NumBytes);
 
 #if defined(__cplusplus)

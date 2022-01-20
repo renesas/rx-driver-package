@@ -57,6 +57,7 @@
 *                                Added the error check of BSP_CFG_CLOCK_SOURCE.
 *                                Added the following enumeration constant.
 *                                - BSP_MCU_GROUP_INTERRUPT_BE0
+*         : 30.11.2021 3.01      Deleted the compile switch for BSP_CFG_MCU_PART_SERIES and BSP_CFG_MCU_PART_GROUP.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -79,23 +80,15 @@ Macro definitions
 #define CPU_CYCLES_PER_LOOP    (4)
 
 /* MCU Series. */
-#if BSP_CFG_MCU_PART_SERIES == 0x0
-    #define BSP_MCU_SERIES_RX600    (1)
-#else
-    #error "ERROR - BSP_CFG_MCU_PART_SERIES - Unknown MCU Series chosen in r_bsp_config.h"
-#endif
+#define BSP_MCU_SERIES_RX600   (1)
 
 /* This macro means that this MCU is part of the RX65x collection of MCUs (i.e. RX651/N). */
-#define BSP_MCU_RX65_ALL            (1)
+#define BSP_MCU_RX65_ALL       (1)
 
 /* MCU Group name. */
-#if BSP_CFG_MCU_PART_GROUP == 0x0
-    #define BSP_MCU_RX65N           (1)
-    #if (BSP_CFG_MCU_PART_MEMORY_SIZE == 0xC) || (BSP_CFG_MCU_PART_MEMORY_SIZE == 0xE)
-        #define BSP_MCU_RX65N_2MB   (1)
-    #endif
-#else
-    #error "ERROR - BSP_CFG_MCU_PART_GROUP - Unknown MCU Group chosen in r_bsp_config.h"
+#define BSP_MCU_RX65N          (1)
+#if (BSP_CFG_MCU_PART_MEMORY_SIZE == 0xC) || (BSP_CFG_MCU_PART_MEMORY_SIZE == 0xE)
+    #define BSP_MCU_RX65N_2MB  (1)
 #endif
 
 /* Package. */

@@ -18,7 +18,7 @@
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_pdc_rx.c
- * Version      : 2.05
+ * Version      : 2.06
  * Description  : PDC module device driver
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
@@ -29,6 +29,8 @@
  *         : 30.07.2019 2.04     Added WAIT LOOP
  *         : 22.11.2019 2.05     Added support for atomic control.
  *                               Modified comment of API function to Doxygen style.
+ *         : 07.01.2022 2.06     added check process to R_PDC_Close.
+ *                               added check process to R_PDC_Control.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  Includes   <System Includes> , "Project Includes"
@@ -180,6 +182,7 @@ pdc_return_t R_PDC_Open (pdc_data_cfg_t *p_data_cfg)
  * @brief Ends operation by the PDC and puts it into the module stop state.
  * @retval    PDC_SUCCESS      Processing finished successfully.
  * @retval    PDC_ERR_NOT_OPEN R_PDC_Open has not been run.
+ * @retval    PDC_ERR_ONGOING  operations for reception are ongoing.
  * @details   This function is performed to shut down the PDC. See section 3.2 in application note for details.
  * @note      Use this API function after running R_PDC_Open and confirming that the return value is PDC_SUCCESS.
  */
@@ -194,6 +197,16 @@ pdc_return_t R_PDC_Close (void)
     {
         return PDC_ERR_NOT_OPEN;
     }
+
+    /* Check that the PDC operations for reception are ongoing. */
+    if ((PDC_ENABLE_OPERATION == PDC.PCCR1.BIT.PCE) && (0x00000000 == (PDC_PCSR_RECEIVE_END_FLAG_MASK & PDC.PCSR.LONG)))
+    {
+        return PDC_ERR_ONGOING;
+    }
+
+    /* Disables PDC operation.
+     The PCCR0 register should only be set while the PCE bit in the PCCR1 register is 0. */
+    PDC.PCCR1.BIT.PCE = PDC_DISABLE_OPERATION;
 
     /* Disables interrupts (PCFEI, PCERI, and PCDFI) used by the PDC. */
     R_BSP_InterruptRequestDisable(VECT(PDC, PCDFI));
@@ -212,10 +225,6 @@ pdc_return_t R_PDC_Close (void)
 #if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 #endif
-
-    /* Disables PDC operation.
-     The PCCR0 register should only be set while the PCE bit in the PCCR1 register is 0. */
-    PDC.PCCR1.BIT.PCE = PDC_DISABLE_OPERATION;
 
     /* Stops supply of parallel data transfer clock output (PCKO). */
     PDC.PCCR0.BIT.PCKOE = PDC_DISABLE_PCKO_OUTPUT;
@@ -255,6 +264,7 @@ pdc_return_t R_PDC_Close (void)
  * @retval    PDC_ERR_INVALID_COMMAND The argument command is invalid.
  * @retval    PDC_ERR_NULL_PTR        The argument p_data_cfg or p_stat is a NULL pointer.
  * @retval    PDC_ERR_RST_TIMEOUT     PDC reset was not canceled even after the specified amount of time elapsed.
+ * @retval    PDC_ERR_ONGOING         operations for reception are ongoing.
  * @details   See section 3.3 in application note for details.
  * @note      Running this API function when receive operation is in progress will overwrite the PDC registers,
  *            thereby causing receive operation to stop. Since running this API function before the frame-end interrupt
@@ -273,6 +283,15 @@ pdc_return_t R_PDC_Control (pdc_command_t command, pdc_data_cfg_t * p_data_cfg, 
     if (false == is_opened)
     {
         return PDC_ERR_NOT_OPEN;
+    }
+    
+    /* Check that the PDC operations for reception are ongoing. */
+    if (PDC_CMD_STATUS_GET != command)
+    {
+        if ((PDC_ENABLE_OPERATION == PDC.PCCR1.BIT.PCE) && (0x00000000 == (PDC_PCSR_RECEIVE_END_FLAG_MASK & PDC.PCSR.LONG)))
+        {
+            return PDC_ERR_ONGOING;
+        }
     }
 
     switch (command)

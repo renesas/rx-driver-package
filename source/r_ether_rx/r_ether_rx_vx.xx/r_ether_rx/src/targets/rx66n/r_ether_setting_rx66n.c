@@ -56,7 +56,8 @@ Exported global variables (to be accessed by other files)
 Private global variables and functions
 ***********************************************************************************************************************/
 
-/* Check the setting values is valid. Please review the setting values in r_ether_rx_config.h if error message is output */
+/* Check the setting values is valid. Please review the setting values
+ * in r_ether_rx_config.h if error message is output */
     #if !((ETHER_CFG_AL1_INT_PRIORTY >= 1) && (ETHER_CFG_AL1_INT_PRIORTY <= 15))
         #error "ERROR- ETHER_CFG_AL1_INT_PRIORTY - Interrupt priority level is out of range defined in r_ether_rx_config.h."
     #endif

@@ -434,7 +434,7 @@ typedef struct MS_generic_client_properties_status_struct
  *  \brief API to initialize Generic_User_Property Server model
  *
  *  \par Description
- *  This is to initialize Generic_User_Property Server model and to register with Acess layer.
+ *  This is to initialize Generic_User_Property Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -459,7 +459,7 @@ API_RESULT MS_generic_user_property_server_init
  *  \brief API to initialize Generic_Admin_Property Server model
  *
  *  \par Description
- *  This is to initialize Generic_Admin_Property Server model and to register with Acess layer.
+ *  This is to initialize Generic_Admin_Property Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -484,7 +484,7 @@ API_RESULT MS_generic_admin_property_server_init
  *  \brief API to initialize Generic_Manufacturer_Property Server model
  *
  *  \par Description
- *  This is to initialize Generic_Manufacturer_Property Server model and to register with Acess layer.
+ *  This is to initialize Generic_Manufacturer_Property Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -509,7 +509,7 @@ API_RESULT MS_generic_manufacturer_property_server_init
  *  \brief API to initialize Generic_Client_Property Server model
  *
  *  \par Description
- *  This is to initialize Generic_Client_Property Server model and to register with Acess layer.
+ *  This is to initialize Generic_Client_Property Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -541,6 +541,8 @@ API_RESULT MS_generic_client_property_server_init
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -550,7 +552,9 @@ API_RESULT MS_generic_user_property_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 
 /**
@@ -564,6 +568,8 @@ API_RESULT MS_generic_user_property_server_state_update
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -573,7 +579,9 @@ API_RESULT MS_generic_admin_property_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 
 /**
@@ -587,6 +595,8 @@ API_RESULT MS_generic_admin_property_server_state_update
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -596,7 +606,9 @@ API_RESULT MS_generic_manufacturer_property_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 
 /**
@@ -610,6 +622,8 @@ API_RESULT MS_generic_manufacturer_property_server_state_update
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -619,7 +633,9 @@ API_RESULT MS_generic_client_property_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 
 /** \} */
@@ -634,7 +650,7 @@ API_RESULT MS_generic_client_property_server_state_update
  *  \brief API to initialize Generic_Property Client model
  *
  *  \par Description
- *  This is to initialize Generic_Property Client model and to register with Acess layer.
+ *  This is to initialize Generic_Property Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -671,6 +687,21 @@ API_RESULT MS_generic_property_client_get_model_handle
            );
 
 /**
+ *  \brief API to set Generic_Property client model handle
+ *
+ *  \par Description
+ *  This is to set the handle of Generic_Property client model.
+ *
+ *  \param [in] model_handle   Model handle to be assigned.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_generic_property_client_set_model_handle
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE  model_handle
+           );
+
+/**
  *  \brief API to send acknowledged commands
  *
  *  \par Description
@@ -689,7 +720,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
-/** \name Messsage Send
+/** \name Message Send
  *  \{
  */
 /**
@@ -717,7 +748,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  Generic User Property Get is an acknowledged message used to get the Generic User Property state of an element.
  *  The response to the Generic User Property Get message is a Generic User Property Status message.
  *
- *  \param [in] param Generic User Property Get message
+ *  \param [in] param Generic User Property Get message parameter @ref MS_GENERIC_USER_PROPERTY_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -736,7 +767,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  Generic User Property Set is an acknowledged message used to set the Generic User Property state of an element.
  *  The response to the Generic User Property Set message is a Generic User Property Status message.
  *
- *  \param [in] param Generic User Property Set message
+ *  \param [in] param Generic User Property Set message parameter @ref MS_GENERIC_USER_PROPERTY_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -755,7 +786,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  Generic User Property Set Unacknowledged is an unacknowledged message used to set
  *  the Generic User Property state of an element.
  *
- *  \param [in] param Generic User Property Set message
+ *  \param [in] param Generic User Property Set message parameter @ref MS_GENERIC_USER_PROPERTY_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -792,7 +823,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  Generic Admin Property Get is an acknowledged message used to get the Generic Admin Property state of an element.
  *  The response to the Generic Admin Property Get message is a Generic Admin Property Status message.
  *
- *  \param [in] param Generic Admin Property Get message
+ *  \param [in] param Generic Admin Property Get message parameter @ref MS_GENERIC_ADMIN_PROPERTY_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -811,7 +842,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  Generic Admin Property Set is an acknowledged message used to set the Generic Admin Property state of an element.
  *  The response to the Generic Admin Property Set message is a Generic Admin Property Status message.
  *
- *  \param [in] param Generic Admin Property Set message
+ *  \param [in] param Generic Admin Property Set message parameter @ref MS_GENERIC_ADMIN_PROPERTY_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -830,7 +861,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  Generic Admin Property Set Unacknowledged is an unacknowledged message used to set
  *  the Generic Admin Property state of an element.
  *
- *  \param [in] param Generic Admin Property Set message
+ *  \param [in] param Generic Admin Property Set message parameter @ref MS_GENERIC_ADMIN_PROPERTY_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -869,7 +900,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  Generic Manufacturer Property Get is an acknowledged message used to get the Generic Manufacturer Property state of an element.
  *  The response to the Generic Manufacturer Property Get message is a Generic Manufacturer Property Status message.
  *
- *  \param [in] param Generic Manufacturer Property Get message
+ *  \param [in] param Generic Manufacturer Property Get message parameter @ref MS_GENERIC_MANUFACTURER_PROPERTY_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -888,7 +919,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  Generic Manufacturer Property Set is an acknowledged message used to set the Generic Manufacturer Property User Access state of an element.
  *  The response to the Generic Manufacturer Property Set message is a Generic Manufacturer Property Status message.
  *
- *  \param [in] param Generic Manufacturer Property Set message
+ *  \param [in] param Generic Manufacturer Property Set message parameter @ref MS_GENERIC_MANUFACTURER_PROPERTY_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -906,7 +937,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  \par Description
  *  The Generic Manufacturer Property Set Unacknowledged is an unacknowledged message used to set the Generic Manufacturer Property User Access state of an element.
  *
- *  \param [in] param Generic Manufacturer Property Set message
+ *  \param [in] param Generic Manufacturer Property Set message parameter @ref MS_GENERIC_MANUFACTURER_PROPERTY_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -925,7 +956,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  Generic Client Properties Get is an acknowledged message used to get the list of Generic Client Property states of an element.
  *  The response to the Generic Client Properties Get message is a Generic Client Properties Status message.
  *
- *  \param [in] param Generic Client Properties Get message
+ *  \param [in] param Generic Client Properties Get message parameter @ref MS_GENERIC_CLIENT_PROPERTIES_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */

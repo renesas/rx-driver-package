@@ -31,13 +31,13 @@
 
 #define TOUCH_CFG_UART_MONITOR_SUPPORT    (0)
 
-#define TOUCH_CFG_UART_TUNING_SUPPORT     (1)
+#define TOUCH_CFG_UART_TUNING_SUPPORT     (0)
 
-#define TOUCH_CFG_UART_NUMBER             (5)
+#define TOUCH_CFG_UART_NUMBER             (0)
 
 #define TOUCH_CFG_UART_BAUDRATE           (115200)
 
-#define TOUCH_CFG_UART_PRIORITY           (15)
+#define TOUCH_CFG_UART_PRIORITY           (0)
 
 #ifndef QE_TOUCH_CONFIGURATION
 #define TOUCH_CFG_NUM_BUTTONS             (1)

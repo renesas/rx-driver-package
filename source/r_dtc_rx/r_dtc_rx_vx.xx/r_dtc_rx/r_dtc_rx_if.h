@@ -56,6 +56,7 @@
 *         : 30.06.2020 3.60    Changed revision to reflect demo upgrade.
 *         : 31.03.2021 3.70    Added support for RX671.
 *         : 15.04.2021 3.80    Added support for RX140.
+*         : 13.09.2021 3.90    Added the Demo for RX671.
 *******************************************************************************/
 #ifndef DTC_RX_IF_H
 #define DTC_RX_IF_H
@@ -78,7 +79,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define DTC_VERSION_MAJOR  (3)
-#define DTC_VERSION_MINOR  (80)
+#define DTC_VERSION_MINOR  (90)
 
 /*******************************************************************************
 Typedef definitions

@@ -331,7 +331,7 @@ typedef struct MS_light_ctl_temperature_range_status_struct
  *  \brief API to initialize Light_Ctl Server model
  *
  *  \par Description
- *  This is to initialize Light_Ctl Server model and to register with Acess layer.
+ *  This is to initialize Light_Ctl Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -362,7 +362,7 @@ API_RESULT MS_light_ctl_server_init
  *  \brief API to initialize Light_Ctl_Temperature Server model
  *
  *  \par Description
- *  This is to initialize Light_Ctl_Temperature Server model and to register with Acess layer.
+ *  This is to initialize Light_Ctl_Temperature Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -394,6 +394,8 @@ API_RESULT MS_light_ctl_temperature_server_init
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -403,7 +405,9 @@ API_RESULT MS_light_ctl_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 
 /**
@@ -417,6 +421,8 @@ API_RESULT MS_light_ctl_server_state_update
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -426,7 +432,9 @@ API_RESULT MS_light_ctl_temperature_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 
 /** \} */
@@ -441,7 +449,7 @@ API_RESULT MS_light_ctl_temperature_server_state_update
  *  \brief API to initialize Light_Ctl Client model
  *
  *  \par Description
- *  This is to initialize Light_Ctl Client model and to register with Acess layer.
+ *  This is to initialize Light_Ctl Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -475,6 +483,21 @@ API_RESULT MS_light_ctl_client_init
 API_RESULT MS_light_ctl_client_get_model_handle
            (
                /* OUT */ MS_ACCESS_MODEL_HANDLE  * model_handle
+           );
+
+/**
+ *  \brief API to set Light_Ctl client model handle
+ *
+ *  \par Description
+ *  This is to set the handle of Light_Ctl client model.
+ *
+ *  \param [in] model_handle   Model handle to be assigned.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_light_ctl_client_set_model_handle
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE  model_handle
            );
 
 /**
@@ -525,7 +548,7 @@ API_RESULT MS_light_ctl_client_send_reliable_pdu
  *  and the Light CTL Delta UV state of an element.
  *  The response to the Light CTL Set message is a Light CTL Status message.
  *
- *  \param [in] param Light CTL Set message
+ *  \param [in] param Light CTL Set message parameter @ref MS_LIGHT_CTL_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -544,7 +567,7 @@ API_RESULT MS_light_ctl_client_send_reliable_pdu
  *  Light CTL Set Unacknowledged is an unacknowledged message used to set the Light CTL Lightness state, Light CTL Temperature state,
  *  and the Light CTL Delta UV state of an element
  *
- *  \param [in] param Light CTL Set message
+ *  \param [in] param Light CTL Set message parameter @ref MS_LIGHT_CTL_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -582,7 +605,7 @@ API_RESULT MS_light_ctl_client_send_reliable_pdu
  *  and the Light CTL Delta UV state of an element.
  *  The response to the Light CTL Temperature Set message is a Light CTL Temperature Status message.
  *
- *  \param [in] param Light CTL Temperature Set message
+ *  \param [in] param Light CTL Temperature Set message parameter @ref MS_LIGHT_CTL_TEMPERATURE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -601,7 +624,7 @@ API_RESULT MS_light_ctl_client_send_reliable_pdu
  *  The Light CTL Temperature Set Unacknowledged is an unacknowledged message used to set the Light CTL Temperature state
  *  and the Light CTL Delta UV state of an element
  *
- *  \param [in] param Light CTL Temperature Set message
+ *  \param [in] param Light CTL Temperature Set message parameter @ref MS_LIGHT_CTL_TEMPERATURE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -639,7 +662,7 @@ API_RESULT MS_light_ctl_client_send_reliable_pdu
  *  and the Light CTL Delta UV Default state of an element.
  *  The response to the Light CTL Set message is a Light CTL Status message.
  *
- *  \param [in] param Light CTL Default Set message
+ *  \param [in] param Light CTL Default Set message parameter @ref MS_LIGHT_CTL_DEFAULT_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -658,7 +681,7 @@ API_RESULT MS_light_ctl_client_send_reliable_pdu
  *  The Light CTL Default Set Unacknowledged is an unacknowledged message used to set the Light CTL Temperature
  *  Default state and the Light CTL Delta UV Default state of an element.
  *
- *  \param [in] param Light CTL Default Set message
+ *  \param [in] param Light CTL Default Set message parameter @ref MS_LIGHT_CTL_DEFAULT_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -695,7 +718,7 @@ API_RESULT MS_light_ctl_client_send_reliable_pdu
  *  Light CTL Temperature Range Set Unacknowledged is an unacknowledged message used to set
  *  the Light CTL Temperature Range state of an element.
  *
- *  \param [in] param Light CTL Temperature Range Set message
+ *  \param [in] param Light CTL Temperature Range Set message parameter @ref MS_LIGHT_CTL_TEMPERATURE_RANGE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -714,7 +737,7 @@ API_RESULT MS_light_ctl_client_send_reliable_pdu
  *  Light CTL Temperature Range Set is an acknowledged message used to set the Light CTL Temperature Range state of an element.
  *  The response to the Light CTL Temperature Range Get message is a Light CTL Temperature Range Status message.
  *
- *  \param [in] param Light CTL Temperature Range Set message
+ *  \param [in] param Light CTL Temperature Range Set message parameter @ref MS_LIGHT_CTL_TEMPERATURE_RANGE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */

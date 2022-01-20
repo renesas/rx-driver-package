@@ -5,13 +5,13 @@ r_vbatt_rx
 
 Document Number
 ---------------
-R01AN2796JJ0200
-R01AN2796EJ0200
+R01AN2796JJ0210
+R01AN2796EJ0210
 
 
 Version
 -------
-v2.00
+v2.10
 
 
 Overview
@@ -119,9 +119,9 @@ For example, to run the demo on a RSKRX231 board, the user would uncomment the #
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.02.00
-* GCC for Renesas RX 8.03.00.201904
-* IAR C/C++ Compiler for Renesas RX version 4.14.1
+* Renesas RX v3.03.00
+* GCC for Renesas RX 8.03.00.202004
+* IAR C/C++ Compiler for Renesas RX version 4.20.03
 
 
 File Structure
@@ -132,10 +132,10 @@ r_vbatt_rx
 |
 +---doc
 |   +---en
-|   |   r01an2796ej0200-rx-vbatt.pdf
+|   |   r01an2796ej0210-rx-vbatt.pdf
 |   |
 |   +---ja
-|       r01an2796jj0200-rx-vbatt.pdf
+|       r01an2796jj0210-rx-vbatt.pdf
 |
 +---src
     |

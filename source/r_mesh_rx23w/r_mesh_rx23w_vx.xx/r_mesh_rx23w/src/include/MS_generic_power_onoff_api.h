@@ -147,7 +147,7 @@ typedef struct MS_generic_onpowerup_struct
  *  \brief API to initialize Generic_Power_Onoff Server model
  *
  *  \par Description
- *  This is to initialize Generic_Power_Onoff Server model and to register with Acess layer.
+ *  This is to initialize Generic_Power_Onoff Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -179,6 +179,8 @@ API_RESULT MS_generic_power_onoff_server_init
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -188,14 +190,16 @@ API_RESULT MS_generic_power_onoff_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 
 /**
  *  \brief API to initialize Generic_Power_Onoff_Setup Server model
  *
  *  \par Description
- *  This is to initialize Generic_Power_Onoff_Setup Server model and to register with Acess layer.
+ *  This is to initialize Generic_Power_Onoff_Setup Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -227,6 +231,8 @@ API_RESULT MS_generic_power_onoff_setup_server_init
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -236,7 +242,9 @@ API_RESULT MS_generic_power_onoff_setup_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 /** \} */
 
@@ -250,7 +258,7 @@ API_RESULT MS_generic_power_onoff_setup_server_state_update
  *  \brief API to initialize Generic_Power_Onoff Client model
  *
  *  \par Description
- *  This is to initialize Generic_Power_Onoff Client model and to register with Acess layer.
+ *  This is to initialize Generic_Power_Onoff Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -287,6 +295,21 @@ API_RESULT MS_generic_power_onoff_client_get_model_handle
            );
 
 /**
+ *  \brief API to set Generic_Power_Onoff client model handle
+ *
+ *  \par Description
+ *  This is to set the handle of Generic_Power_Onoff client model.
+ *
+ *  \param [in] model_handle   Model handle to be assigned.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_generic_power_onoff_client_set_model_handle
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE  model_handle
+           );
+
+/**
  *  \brief API to send acknowledged commands
  *
  *  \par Description
@@ -305,7 +328,7 @@ API_RESULT MS_generic_power_onoff_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
-/** \name Messsage Send
+/** \name Message Send
  *  \{
  */
 /**
@@ -333,7 +356,7 @@ API_RESULT MS_generic_power_onoff_client_send_reliable_pdu
  *  Generic OnPowerUp Set is an acknowledged message used to set the Generic OnPowerUp state of an element.
  *  The response to the Generic OnPowerUp Set message is a Generic OnPowerUp Status message.
  *
- *  \param [in] param Generic OnPowerUp Set message
+ *  \param [in] param Generic OnPowerUp Set message parameter @ref MS_GENERIC_ONPOWERUP_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -352,7 +375,7 @@ API_RESULT MS_generic_power_onoff_client_send_reliable_pdu
  *  Generic OnPowerUp Set Unacknowledged is an unacknowledged message used to set
  *  the Generic OnPowerUp state of an element.
  *
- *  \param [in] param Generic OnPowerUp Set message
+ *  \param [in] param Generic OnPowerUp Set message parameter @ref MS_GENERIC_ONPOWERUP_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */

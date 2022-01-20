@@ -446,7 +446,7 @@ typedef struct MS_light_hsl_saturation_status_struct
  *  \brief API to initialize Light_Hsl Server model
  *
  *  \par Description
- *  This is to initialize Light_Hsl Server model and to register with Acess layer.
+ *  This is to initialize Light_Hsl Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -477,7 +477,7 @@ API_RESULT MS_light_hsl_server_init
  *  \brief API to initialize Light_Hsl_Hue Server model
  *
  *  \par Description
- *  This is to initialize Light_Hsl_Hue Server model and to register with Acess layer.
+ *  This is to initialize Light_Hsl_Hue Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -502,7 +502,7 @@ API_RESULT MS_light_hsl_hue_server_init
  *  \brief API to initialize Light_Hsl_Saturation Server model
  *
  *  \par Description
- *  This is to initialize Light_Hsl_Saturation Server model and to register with Acess layer.
+ *  This is to initialize Light_Hsl_Saturation Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -534,6 +534,8 @@ API_RESULT MS_light_hsl_saturation_server_init
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -543,7 +545,9 @@ API_RESULT MS_light_hsl_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 
 /**
@@ -557,6 +561,8 @@ API_RESULT MS_light_hsl_server_state_update
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -566,7 +572,9 @@ API_RESULT MS_light_hsl_hue_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 
 /**
@@ -580,6 +588,8 @@ API_RESULT MS_light_hsl_hue_server_state_update
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -589,7 +599,9 @@ API_RESULT MS_light_hsl_saturation_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 /** \} */
 
@@ -603,7 +615,7 @@ API_RESULT MS_light_hsl_saturation_server_state_update
  *  \brief API to initialize Light_Hsl Client model
  *
  *  \par Description
- *  This is to initialize Light_Hsl Client model and to register with Acess layer.
+ *  This is to initialize Light_Hsl Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -640,6 +652,21 @@ API_RESULT MS_light_hsl_client_get_model_handle
            );
 
 /**
+ *  \brief API to set Light_Hsl client model handle
+ *
+ *  \par Description
+ *  This is to set the handle of Light_Hsl client model.
+ *
+ *  \param [in] model_handle   Model handle to be assigned.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_light_hsl_client_set_model_handle
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE  model_handle
+           );
+
+/**
  *  \brief API to send acknowledged commands
  *
  *  \par Description
@@ -658,7 +685,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
-/** \name Messsage Send
+/** \name Message Send
  *  \{
  */
 /**
@@ -686,7 +713,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  The Light HSL Set Unacknowledged is an unacknowledged message used to set the Light HSL Lightness state, Light HSL Hue state,
  *  and the Light HSL Saturation state of an element.
  *
- *  \param [in] param Light HSL Set message
+ *  \param [in] param Light HSL Set message parameter @ref MS_LIGHT_HSL_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -706,7 +733,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  and the Light HSL Saturation state of an element.
  *  The response to the Light HSL Set message is a Light HSL Status message.
  *
- *  \param [in] param Light HSL Set message
+ *  \param [in] param Light HSL Set message parameter @ref MS_LIGHT_HSL_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -764,7 +791,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  and Light HSL Saturation Default states of an element.
  *  The response to the Light HSL Default Set message is a Light HSL Default Status message.
  *
- *  \param [in] param Light HSL Default Set message
+ *  \param [in] param Light HSL Default Set message parameter @ref MS_LIGHT_HSL_DEFAULT_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -783,7 +810,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  Light HSL Default Set Unacknowledged is an unacknowledged message used to set the Light Lightness Default, the Light HSL Hue Default,
  *  and Light HSL Saturation Default states of an element.
  *
- *  \param [in] param Light HSL Default Set message
+ *  \param [in] param Light HSL Default Set message parameter @ref MS_LIGHT_HSL_DEFAULT_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -820,7 +847,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  Light HSL Range Set is an acknowledged message used to set the Light HSL Hue Range and Light HSL Saturation Range states of an element.
  *  The response to the Light HSL Range Set message is a Light HSL Range Status message.
  *
- *  \param [in] param Light HSL Range Set message
+ *  \param [in] param Light HSL Range Set message parameter @ref MS_LIGHT_HSL_RANGE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -838,7 +865,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  \par Description
  *  Light HSL Range Set Unacknowledged is an unacknowledged message used to set the Light HSL Hue Range and Light HSL Saturation Range states of an element.
  *
- *  \param [in] param Light HSL Range Set message
+ *  \param [in] param Light HSL Range Set message parameter @ref MS_LIGHT_HSL_RANGE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -875,7 +902,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  The Light HSL Hue Set is an acknowledged message used to set the target Light HSL Hue state of an element.
  *  The response to the Light HSL Hue Set message is a Light HSL Hue Status message.
  *
- *  \param [in] param Light HSL Hue Set message
+ *  \param [in] param Light HSL Hue Set message parameter @ref MS_LIGHT_HSL_HUE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -894,7 +921,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  The Light HSL Hue Set Unacknowledged is an unacknowledged message used to
  *  set the target Light HSL Hue state of an element.
  *
- *  \param [in] param Light HSL Hue Set message
+ *  \param [in] param Light HSL Hue Set message parameter @ref MS_LIGHT_HSL_HUE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -931,7 +958,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  The Light HSL Saturation Set is an acknowledged message used to set the target Light HSL Saturation state of an element.
  *  The response to the Light HSL Saturation Set message is a Light HSL Saturation Status message.
  *
- *  \param [in] param Light HSL Saturation Set message
+ *  \param [in] param Light HSL Saturation Set message parameter @ref MS_LIGHT_HSL_SATURATION_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -950,7 +977,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  The Light HSL Saturation Set Unacknowledged is an unacknowledged message
  *  used to set the target Light HSL Saturation state of an element.
  *
- *  \param [in] param Light HSL Saturation Set message
+ *  \param [in] param Light HSL Saturation Set message parameter @ref MS_LIGHT_HSL_SATURATION_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */

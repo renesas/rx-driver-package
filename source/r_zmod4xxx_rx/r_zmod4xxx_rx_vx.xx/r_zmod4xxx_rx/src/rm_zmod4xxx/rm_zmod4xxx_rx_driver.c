@@ -25,7 +25,7 @@
 /**********************************************************************************************************************
  * Macro definitions
  *********************************************************************************************************************/
-#define RM_ZMOD4XXX_TIMER_1000HZ    (1000)
+
 /**********************************************************************************************************************
  * Local Typedef definitions
  *********************************************************************************************************************/
@@ -33,12 +33,10 @@
 /**********************************************************************************************************************
  * Exported global variables
  *********************************************************************************************************************/
-fsp_err_t rm_zmod4xxx_timer_open(rm_zmod4xxx_ctrl_t * const p_api_ctrl);
-fsp_err_t rm_zmod4xxx_timer_close(rm_zmod4xxx_ctrl_t * const p_api_ctrl);
-fsp_err_t rm_zmod4xxx_timer_start(rm_zmod4xxx_ctrl_t * const p_api_ctrl, uint32_t const delay_ms);
-fsp_err_t rm_zmod4xxx_timer_stop(rm_zmod4xxx_ctrl_t * const p_api_ctrl);
+fsp_err_t rm_zmod4xxx_delay_ms(rm_zmod4xxx_ctrl_t * const p_ctrl, uint32_t const delay_ms);
 fsp_err_t rm_zmod4xxx_irq_open(rm_zmod4xxx_ctrl_t * const p_api_ctrl);
 fsp_err_t rm_zmod4xxx_irq_close(rm_zmod4xxx_ctrl_t * const p_api_ctrl);
+void      rm_zmod4xxx_irq_callback(external_irq_callback_args_t * p_args);
 
 /**********************************************************************************************************************
  * Private (static) variables and functions
@@ -49,94 +47,18 @@ fsp_err_t rm_zmod4xxx_irq_close(rm_zmod4xxx_ctrl_t * const p_api_ctrl);
  **********************************************************************************************************************/
 
 /*******************************************************************************************************************//**
- * @brief Open timer driver and set callback function.
+ * @brief Delay some milliseconds.
  *
  * @retval FSP_SUCCESS              successfully configured.
  **********************************************************************************************************************/
-fsp_err_t rm_zmod4xxx_timer_open (rm_zmod4xxx_ctrl_t * const p_api_ctrl)
+fsp_err_t rm_zmod4xxx_delay_ms (rm_zmod4xxx_ctrl_t * const p_ctrl, uint32_t const delay_ms)
 {
-    rm_zmod4xxx_instance_ctrl_t * p_ctrl           = (rm_zmod4xxx_instance_ctrl_t *) p_api_ctrl;
-    timer_instance_t            * p_timer_instance = (timer_instance_t *) p_ctrl->p_timer_instance;
-    bool ret;
+    FSP_PARAMETER_NOT_USED(p_ctrl);
 
-    /* Open timer driver */
-    ret = R_CMT_CreatePeriodic(RM_ZMOD4XXX_TIMER_1000HZ, p_timer_instance->p_callback, &p_timer_instance->channel);
-    FSP_ERROR_RETURN(true == ret, FSP_ERR_ASSERTION);
-
-    /* Pause timer */
-    ret = R_CMT_Control(p_timer_instance->channel, CMT_RX_CMD_PAUSE, NULL);
-    FSP_ERROR_RETURN(true == ret, FSP_ERR_ASSERTION);
+    /* Software delay */
+    R_BSP_SoftwareDelay(delay_ms, BSP_DELAY_MILLISECS);
 
     return FSP_SUCCESS;
-}
-
-/*******************************************************************************************************************//**
- * @brief Close timer driver.
- *
- * @retval FSP_SUCCESS              successfully configured.
- **********************************************************************************************************************/
-fsp_err_t rm_zmod4xxx_timer_close (rm_zmod4xxx_ctrl_t * const p_api_ctrl)
-{
-    rm_zmod4xxx_instance_ctrl_t * p_ctrl           = (rm_zmod4xxx_instance_ctrl_t *) p_api_ctrl;
-    timer_instance_t            * p_timer_instance = (timer_instance_t *) p_ctrl->p_timer_instance;
-
-    /* Close timer driver */
-    R_CMT_Stop(p_timer_instance->channel);
-
-    return FSP_SUCCESS;
-}
-
-/*******************************************************************************************************************//**
- * @brief Start timer count.
- *
- * @retval FSP_SUCCESS              successfully configured.
- **********************************************************************************************************************/
-fsp_err_t rm_zmod4xxx_timer_start (rm_zmod4xxx_ctrl_t * const p_api_ctrl, uint32_t const delay_ms)
-{
-    rm_zmod4xxx_instance_ctrl_t * p_ctrl           = (rm_zmod4xxx_instance_ctrl_t *) p_api_ctrl;
-    timer_instance_t            * p_timer_instance = (timer_instance_t *) p_ctrl->p_timer_instance;
-    bool ret;
-
-    /* Set delay times */
-    p_ctrl->init_process_params.delay_ms = delay_ms;
-
-    /* Restart timer driver */
-    ret = R_CMT_Control(p_timer_instance->channel, CMT_RX_CMD_RESTART, NULL);
-    FSP_ERROR_RETURN(true == ret, FSP_ERR_ASSERTION);
-
-    return FSP_SUCCESS;
-}
-
-/*******************************************************************************************************************//**
- * @brief Stop timer count.
- *
- * @retval FSP_SUCCESS              successfully configured.
- **********************************************************************************************************************/
-fsp_err_t rm_zmod4xxx_timer_stop (rm_zmod4xxx_ctrl_t * const p_api_ctrl)
-{
-    rm_zmod4xxx_instance_ctrl_t * p_ctrl           = (rm_zmod4xxx_instance_ctrl_t *) p_api_ctrl;
-    timer_instance_t            * p_timer_instance = (timer_instance_t *) p_ctrl->p_timer_instance;
-    bool ret;
-
-    /* Pouse timer */
-    ret = R_CMT_Control(p_timer_instance->channel, CMT_RX_CMD_PAUSE, NULL);
-    FSP_ERROR_RETURN(true == ret, FSP_ERR_ASSERTION);
-
-    return FSP_SUCCESS;
-}
-
-/*******************************************************************************************************************//**
- * @brief The callback function called in the Timer driver.
- **********************************************************************************************************************/
-void rm_zmod4xxx_timer_callback (timer_callback_args_t * p_args)
-{
-    rm_zmod4xxx_instance_ctrl_t * p_ctrl           = (rm_zmod4xxx_instance_ctrl_t *) p_args->p_context;
-
-    if (0 < p_ctrl->init_process_params.delay_ms)
-    {
-        /* Decrement */
-        p_ctrl->init_process_params.delay_ms--;
-    }
 }
 
 /*******************************************************************************************************************//**
@@ -146,7 +68,7 @@ void rm_zmod4xxx_timer_callback (timer_callback_args_t * p_args)
  **********************************************************************************************************************/
 fsp_err_t rm_zmod4xxx_irq_open (rm_zmod4xxx_ctrl_t * const p_api_ctrl)
 {
-#if RM_ZMOD4XXX_CFG_DEVICE0_IRQ_ENABLE
+#if RM_ZMOD4XXX_CFG_IRQ_ENABLE
     fsp_err_t err = FSP_SUCCESS;
     rm_zmod4xxx_instance_ctrl_t * p_ctrl         = (rm_zmod4xxx_instance_ctrl_t *) p_api_ctrl;
     external_irq_instance_t     * p_irq_instance = (external_irq_instance_t *) p_ctrl->p_irq_instance;
@@ -196,7 +118,7 @@ fsp_err_t rm_zmod4xxx_irq_open (rm_zmod4xxx_ctrl_t * const p_api_ctrl)
  **********************************************************************************************************************/
 fsp_err_t rm_zmod4xxx_irq_close (rm_zmod4xxx_ctrl_t * const p_api_ctrl)
 {
-#if RM_ZMOD4XXX_CFG_DEVICE0_IRQ_ENABLE
+#if RM_ZMOD4XXX_CFG_IRQ_ENABLE
     rm_zmod4xxx_instance_ctrl_t * p_ctrl         = (rm_zmod4xxx_instance_ctrl_t *) p_api_ctrl;
     external_irq_instance_t     * p_irq_instance = (external_irq_instance_t *) p_ctrl->p_irq_instance;
 
@@ -206,9 +128,6 @@ fsp_err_t rm_zmod4xxx_irq_close (rm_zmod4xxx_ctrl_t * const p_api_ctrl)
     return FSP_SUCCESS;
 }
 
-/*******************************************************************************************************************//**
- * @brief The callback function called in the IRQ driver.
- **********************************************************************************************************************/
 void rm_zmod4xxx_irq_callback (external_irq_callback_args_t * p_args)
 {
     rm_zmod4xxx_instance_ctrl_t * p_ctrl = (rm_zmod4xxx_instance_ctrl_t *) p_args->p_context;

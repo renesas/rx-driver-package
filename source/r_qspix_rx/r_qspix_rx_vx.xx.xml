@@ -33,6 +33,7 @@
         <product>GNURX</product>
         <version>8.03.00.201904</version>
         <version>8.03.00.202004</version>
+        <version>8.03.00.202102</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -58,16 +59,20 @@
         <zipsource>r_qspix_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>6.10</version>
+            <version>6.20</version>
         </dependency>
         <application>Communications</application>
         <desc>QSPIX Driver</desc>
-        <details>The Quad Serial Peripheral Interface (QSPIX) module is a memory controller for connecting serial ROM that has an SPI compatible interface..
+        <details>The Quad Serial Peripheral Interface (QSPIX) module is a memory controller for connecting serial ROM that has an SPI compatible interface.
 </details>
         <function>QSPIX</function>
         <incdir>r_config</incdir>
         <incdir>r_qspix_rx</incdir>
         <incdir>r_qspix_rx/src</incdir>
     </package>
+
+    <sampleapplicationnote>
+        <documentno>R01AN5685</documentno>
+    </sampleapplicationnote>
 
 </refinfo>

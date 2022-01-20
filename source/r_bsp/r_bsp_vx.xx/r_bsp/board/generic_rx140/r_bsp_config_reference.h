@@ -25,6 +25,12 @@
 ************************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 30.06.2021 1.00     First release
+*         : 30.11.2021 1.01     Added the following macro definitions.
+*                               - BSP_CFG_CONFIGURATOR_VERSION
+*                               - BSP_CFG_CPLUSPLUS
+*                               Changed initial value of the following macro definitions.
+*                               - BSP_CFG_MCU_PART_GROUP
+*                               - BSP_CFG_MCU_PART_SERIES
 ***********************************************************************************************************************/
 
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
@@ -91,16 +97,16 @@ Configuration Options
 #define BSP_CFG_MCU_PART_MEMORY_SIZE    (0x6)
 
 /* Group name.
-   Character(s) = Value for macro = Description
-   40           = 0x0             = RX140 Group
+   Character(s) = Description
+   40           = RX140 Group
 */
-#define BSP_CFG_MCU_PART_GROUP          (0x0)
+#define BSP_CFG_MCU_PART_GROUP          "RX140"
 
 /* Series name.
-   Character(s) = Value for macro = Description
-   51           = 0x0             = RX100 Series
+   Character(s) = Description
+   51           = RX100 Series
 */
-#define BSP_CFG_MCU_PART_SERIES         (0x0)
+#define BSP_CFG_MCU_PART_SERIES         "RX100"
 
 /* Memory type.
    Character(s) = Value for macro = Description
@@ -524,6 +530,11 @@ Configuration Options
 */
 #define BSP_CFG_CONFIGURATOR_SELECT                 (0)
 
+/* Version number of Smart Configurator.
+   This macro definition is updated by Smart Configurator.
+*/
+#define BSP_CFG_CONFIGURATOR_VERSION                (100)
+
 /* For some BSP functions, it is necessary to ensure that, while these functions are executing, interrupts from other 
    FIT modules do not occur. By controlling the IPL, these functions disable interrupts that are at or below the 
    specified interrupt priority level.
@@ -576,6 +587,12 @@ Configuration Options
    0(low) - 15(high)
 */
 #define BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY   (15)
+
+/* This macro is used for C++ project and updated by Smart Configurator.
+   0 = This project is a C project.(Not a C++ project).
+   1 = This project is a C++ project.
+*/
+#define BSP_CFG_CPLUSPLUS             (0)
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

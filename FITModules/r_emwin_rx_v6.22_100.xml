@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>3.03.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>8.03.00.202004</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.20.01</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX600</series>
+        <series>RX700</series>
+        <group omit_board="true">RX651</group>
+        <group omit_board="true">RX65N</group>
+        <group omit_board="true">RX66N</group>
+        <group omit_board="true">RX72M</group>
+        <group omit_board="true">RX72N</group>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_emwin_rx</name>
+        <version>6.22.1.00</version>
+        <zipsource>r_emwin_rx_v6.22_100.zip</zipsource>
+        <dependency>
+            <module>r_cmt_rx</module>
+            <version>4.90</version>
+        </dependency>
+        <dependency>
+            <module>r_dmaca_rx</module>
+            <version>2.60</version>
+        </dependency>
+        <dependency>
+            <module>r_drw2d_rx</module>
+            <version>1.11</version>
+        </dependency>
+        <dependency>
+            <module>r_glcdc_rx</module>
+            <version>1.50</version>
+        </dependency>
+        <dependency>
+            <module>r_gpio_rx</module>
+            <version>4.10</version>
+        </dependency>
+        <dependency>
+            <module>r_sci_iic_rx</module>
+            <version>2.49</version>
+        </dependency>
+        <application>Graphic</application>
+        <desc>Graphic Library with Graphical User Interface</desc>
+        <details>emWin is designed to provide an efficient, processor- and display controller-independent graphical user interface for any application that operates with a graphical display. It is compatible with single-task and multitask environments, with a proprietary operating system or with any commercial RTOS. emWin is shipped as C source code. It may be adapted to any size physical and virtual display with any display controller and CPU.
+The version number 6.22 means the version of emWin library, and 1.00 means that of FIT module.
+This FIT module includes an installer of AppWizard v1.24.</details>
+        <function>-</function>
+        <incdir>r_config</incdir>
+        <incdir>r_emwin_rx</incdir>
+        <incdir>r_emwin_rx/lib/Config</incdir>
+        <incdir>r_emwin_rx/lib/GUI</incdir>
+        <library>
+            <family omit_series="true">RX</family>
+            <libdir toolchain="RXC" endian="big" path="rel">r_emwin_rx/lib/GUI/emWinLib_CCRX.lib</libdir>
+            <libdir toolchain="RXC" endian="little" path="rel">r_emwin_rx/lib/GUI/emWinLib_CCRX.lib</libdir>
+        </library>
+        <library>
+            <family omit_series="true">RX</family>
+            <libdir toolchain="GNURX" endian="big" path="rel">r_emwin_rx/lib/GUI/emWinLib_GCC.a</libdir>
+            <libdir toolchain="GNURX" endian="little" path="rel">r_emwin_rx/lib/GUI/emWinLib_GCC.a</libdir>
+        </library>
+        <library>
+            <family omit_series="true">RX</family>
+            <ccrx_ver>RXV2</ccrx_ver>
+            <libdir toolchain="ICCRX" endian="big" path="rel">r_emwin_rx/lib/GUI/emWinLib_RXv2_IAR.a</libdir>
+            <libdir toolchain="ICCRX" endian="little" path="rel">r_emwin_rx/lib/GUI/emWinLib_RXv2_IAR.a</libdir>
+        </library>
+        <library>
+            <family omit_series="true">RX</family>
+            <ccrx_ver>RXV3</ccrx_ver>
+            <libdir toolchain="ICCRX" endian="big" path="rel">r_emwin_rx/lib/GUI/emWinLib_RXv3_IAR.a</libdir>
+            <libdir toolchain="ICCRX" endian="little" path="rel">r_emwin_rx/lib/GUI/emWinLib_RXv3_IAR.a</libdir>
+        </library>
+        <stdlibs>math.h</stdlibs>
+        <heap>0x3000</heap>
+        <buildOption optionId="ccrx.compiler.option.nostuffC" value="true"/>
+    </package>
+
+    <unsupportedfile>
+        <toolchainfile>
+            <product>RXC</product>
+            <folder>doc/Training/AlphaBlending/</folder>
+            <folder>doc/Training/AnimatedSprites/</folder>
+            <folder>doc/Training/AntiAliasing/</folder>
+            <folder>doc/Training/BitmapConverter/</folder>
+            <folder>doc/Training/Colors/</folder>
+            <folder>doc/Training/Configuration/</folder>
+            <folder>doc/Training/Core/</folder>
+            <folder>doc/Training/FontConverter/</folder>
+            <folder>doc/Training/GUIBuilder/</folder>
+            <folder>doc/Training/ImageFiles/</folder>
+            <folder>doc/Training/LanguageResources/</folder>
+            <folder>doc/Training/MemoryDevices/</folder>
+            <folder>doc/Training/Skinning/</folder>
+            <folder>doc/Training/VNC-Server/</folder>
+            <folder>doc/Training/WidgetLibrary/</folder>
+            <folder>doc/Training/WM/</folder>
+            <file>lib/GUI/emWinLib_RXv2_IAR.a</file>
+            <file>lib/GUI/emWinLib_RXv3_IAR.a</file>
+            <file>lib/GUI/libemWinLib_GCC.a</file>
+        </toolchainfile>
+        <toolchainfile>
+            <product>GNURX</product>
+            <folder>doc/Training/AlphaBlending/</folder>
+            <folder>doc/Training/AnimatedSprites/</folder>
+            <folder>doc/Training/AntiAliasing/</folder>
+            <folder>doc/Training/BitmapConverter/</folder>
+            <folder>doc/Training/Colors/</folder>
+            <folder>doc/Training/Configuration/</folder>
+            <folder>doc/Training/Core/</folder>
+            <folder>doc/Training/FontConverter/</folder>
+            <folder>doc/Training/GUIBuilder/</folder>
+            <folder>doc/Training/ImageFiles/</folder>
+            <folder>doc/Training/LanguageResources/</folder>
+            <folder>doc/Training/MemoryDevices/</folder>
+            <folder>doc/Training/Skinning/</folder>
+            <folder>doc/Training/VNC-Server/</folder>
+            <folder>doc/Training/WidgetLibrary/</folder>
+            <folder>doc/Training/WM/</folder>
+            <file>lib/GUI/emWinLib_RXv2_IAR.a</file>
+            <file>lib/GUI/emWinLib_RXv3_IAR.a</file>
+            <file>lib/GUI/emWinLib_CCRX.lib</file>
+        </toolchainfile>
+        <toolchainfile>
+            <product>ICCRX</product>
+            <folder>doc/Training/AlphaBlending/</folder>
+            <folder>doc/Training/AnimatedSprites/</folder>
+            <folder>doc/Training/AntiAliasing/</folder>
+            <folder>doc/Training/BitmapConverter/</folder>
+            <folder>doc/Training/Colors/</folder>
+            <folder>doc/Training/Configuration/</folder>
+            <folder>doc/Training/Core/</folder>
+            <folder>doc/Training/FontConverter/</folder>
+            <folder>doc/Training/GUIBuilder/</folder>
+            <folder>doc/Training/ImageFiles/</folder>
+            <folder>doc/Training/LanguageResources/</folder>
+            <folder>doc/Training/MemoryDevices/</folder>
+            <folder>doc/Training/Skinning/</folder>
+            <folder>doc/Training/VNC-Server/</folder>
+            <folder>doc/Training/WidgetLibrary/</folder>
+            <folder>doc/Training/WM/</folder>
+            <file>lib/GUI/emWinLib_CCRX.lib</file>
+            <file>lib/GUI/libemWinLib_GCC.a</file>
+        </toolchainfile>
+        <toolchainfile>
+            <product>ICCRX</product>
+            <ccrx_ver>RXV2</ccrx_ver>
+            <endian>big</endian>
+            <file>lib/GUI/emWinLib_RXv3_IAR.a</file>
+        </toolchainfile>
+        <toolchainfile>
+            <product>ICCRX</product>
+            <ccrx_ver>RXV2</ccrx_ver>
+            <endian>little</endian>
+            <file>lib/GUI/emWinLib_RXv3_IAR.a</file>
+        </toolchainfile>
+        <toolchainfile>
+            <product>ICCRX</product>
+            <ccrx_ver>RXV3</ccrx_ver>
+            <endian>big</endian>
+            <file>lib/GUI/emWinLib_RXv2_IAR.a</file>
+        </toolchainfile>
+        <toolchainfile>
+            <product>ICCRX</product>
+            <ccrx_ver>RXV3</ccrx_ver>
+            <endian>little</endian>
+            <file>lib/GUI/emWinLib_RXv2_IAR.a</file>
+        </toolchainfile>
+    </unsupportedfile>
+
+</refinfo>

@@ -29,6 +29,8 @@
 *         : 01.06.2018 1.70    Added the comment to while statement.
 *         : 07.02.2019 1.80    Deleted the inline expansion of the R_LONGQ_GetVersion function.
 *         : 10.06.2020 1.81    Modified comment of API function to Doxygen style.
+*         : 29.10.2021 1.90    Updated for queue protection in R_LONGQ_Put, R_LONGQ_Get, R_LONGQ_Flush,
+*                              R_LONGQ_Used, R_LONGQ_Unused functions.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -184,10 +186,7 @@ longq_err_t R_LONGQ_Open(uint32_t * const       p_buf,
 *            \e ignore_overflow was set to \e false during Open(), then \e LONG_ERR_QUEUE_FULL is returned. If the queue
 *            is full and \e ignore_overflow was set to \e true during Open(), then \e datum overwrites the oldest entry
 *            in the queue and \e LONGQ_SUCCESS is returned.
-* @note      If the queue is accessed at both the interrupt and application level, it is up to the user to disable and 
-*            enable the associated interrupt before and after calling this function from the application level. If the 
-*            queue is accessed by tasks of different priorities, it is up to the user to prevent task switching or to 
-*            utilize a mutex or semaphore to reserve the queue.
+* @note      None
 */
 longq_err_t R_LONGQ_Put(longq_hdl_t const   hdl,
                         uint32_t const      datum)
@@ -206,13 +205,79 @@ longq_err_t R_LONGQ_Put(longq_hdl_t const   hdl,
         return LONGQ_ERR_QUEUE_FULL;        // return if queue is full
     }
 
+#if ((LONGQ_CFG_CRITICAL_SECTION == 1)||(LONGQ_CFG_PROTECT_QUEUE == 1))
+    uint32_t    psw_bit_i_val;
+    /* Get current value bit I of PSW register. */
+    psw_bit_i_val = (R_BSP_GET_PSW() & 0x00010000);
+#endif
+
+#if (LONGQ_CFG_CRITICAL_SECTION == 1)
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+        /* load datum into queue */
+        hdl->buffer[hdl->in_index++] = datum;   // add entry
+        R_BSP_InterruptsEnable();
+
+        R_BSP_InterruptsDisable();
+        if (hdl->in_index >= hdl->size)         // adjust index
+        {
+            hdl->in_index = 0;
+        }
+        R_BSP_InterruptsEnable();
+    } 
+    else
+    {
+        /* load datum into queue */
+        hdl->buffer[hdl->in_index++] = datum;   // add entry
+        if (hdl->in_index >= hdl->size)         // adjust index
+        {
+            hdl->in_index = 0;
+        }
+    }
+#else
     /* load datum into queue */
     hdl->buffer[hdl->in_index++] = datum;   // add entry
     if (hdl->in_index >= hdl->size)         // adjust index
     {
         hdl->in_index = 0;
     }
+#endif
 
+#if (LONGQ_CFG_PROTECT_QUEUE == 1)
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+        /* if queue is full but overflow allowed, adjust out index */
+        if ((hdl->count >= hdl->size) && (true == hdl->ignore_ovfl))
+        {
+            if ((++hdl->out_index) >= hdl->size)  // adjust index
+            {
+                hdl->out_index = 0;
+            }
+        }
+        else // otherwise adjust count
+        {
+            hdl->count++;
+        }
+        R_BSP_InterruptsEnable();
+    } 
+    else
+    {
+        /* if queue is full but overflow allowed, adjust out index */
+        if ((hdl->count >= hdl->size) && (true == hdl->ignore_ovfl))
+        {
+            if ((++hdl->out_index) >= hdl->size)  // adjust index
+            {
+                hdl->out_index = 0;
+            }
+        }
+        else // otherwise adjust count
+        {
+            hdl->count++;
+        }
+    }
+#else
     /* if queue is full but overflow allowed, adjust out index */
     if ((hdl->count >= hdl->size) && (true == hdl->ignore_ovfl))
     {
@@ -225,6 +290,7 @@ longq_err_t R_LONGQ_Put(longq_hdl_t const   hdl,
     {
         hdl->count++;
     }
+#endif
 
     return LONGQ_SUCCESS;
 }
@@ -241,10 +307,7 @@ longq_err_t R_LONGQ_Put(longq_hdl_t const   hdl,
 * @retval    LONGQ_ERR_QUEUE_EMPTY: Queue empty; no data available to fetch
 * @details   This function removes the oldest entry (if available) in the queue associated with \e hdl and loads it into 
 *            the location pointed to by \e p_datum.
-* @note      If the queue is accessed at both the interrupt and application level, it is up to the user to disable and 
-*            enable the associated interrupt before and after calling this function from the application level. If the 
-*            queue is accessed by tasks of different priorities, it is up to the user to prevent task switching or to 
-*            utilize a mutex or semaphore to reserve the queue.
+* @note      None
 */
 longq_err_t R_LONGQ_Get(longq_hdl_t const   hdl,
                         uint32_t * const    p_datum)
@@ -263,15 +326,59 @@ longq_err_t R_LONGQ_Get(longq_hdl_t const   hdl,
         return LONGQ_ERR_QUEUE_EMPTY;       // return if queue empty        
     }
 
+#if ((LONGQ_CFG_CRITICAL_SECTION == 1)||(LONGQ_CFG_PROTECT_QUEUE == 1))
+    uint32_t    psw_bit_i_val;
+    /* Get current value bit I of PSW register. */
+    psw_bit_i_val = (R_BSP_GET_PSW() & 0x00010000);
+#endif
+
+#if (LONGQ_CFG_CRITICAL_SECTION == 1)
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+        *p_datum = hdl->buffer[hdl->out_index++]; // get datum
+        R_BSP_InterruptsEnable();
+
+        R_BSP_InterruptsDisable();
+        if (hdl->out_index >= hdl->size)        // adjust index
+        {
+            hdl->out_index = 0;
+        }
+        R_BSP_InterruptsEnable();
+    }
+    else
+    {
+        *p_datum = hdl->buffer[hdl->out_index++]; // get datum
+        if (hdl->out_index >= hdl->size)        // adjust index
+        {
+            hdl->out_index = 0;
+        }
+    }
+#else
     *p_datum = hdl->buffer[hdl->out_index++]; // get datum
     if (hdl->out_index >= hdl->size)        // adjust index
     {
         hdl->out_index = 0;
     }
+#endif
+
+#if (LONGQ_CFG_PROTECT_QUEUE == 1)
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+        hdl->count--;                           // adjust count
+        R_BSP_InterruptsEnable();
+    }
+     else
+    {
+        hdl->count--;                           // adjust count
+    }
+#else
     hdl->count--;                           // adjust count
+#endif
 
     return LONGQ_SUCCESS;
-}        
+}
 
 
 /***********************************************************************************************************************
@@ -282,10 +389,7 @@ longq_err_t R_LONGQ_Get(longq_hdl_t const   hdl,
 * @retval    LONGQ_SUCCESS: Successful; queue reset
 * @retval    LONGQ_ERR_NULL_PTR: hdl is NULL
 * @details   This function resets the queue identified by \e hdl to an empty state.
-* @note      If the queue is accessed at both the interrupt and application level, it is up to the user to disable and 
-*            enable the associated interrupt before and after calling this function from the application level. If the 
-*            queue is accessed by tasks of different priorities, it is up to the user to prevent task switching or to 
-*            utilize a mutex or semaphore to reserve the queue.
+* @note      None
 */
 longq_err_t R_LONGQ_Flush(longq_hdl_t const hdl)
 {
@@ -296,11 +400,34 @@ longq_err_t R_LONGQ_Flush(longq_hdl_t const hdl)
     }
 #endif
 
+#if (LONGQ_CFG_PROTECT_QUEUE == 1)
+    uint32_t    psw_bit_i_val;
+
+    /* Get current value bit I of PSW register. */
+    psw_bit_i_val = (R_BSP_GET_PSW() & 0x00010000);
+
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+        /* RESET QUEUE */
+        hdl->in_index = 0;
+        hdl->out_index = 0;
+        hdl->count = 0;
+        R_BSP_InterruptsEnable();
+    }
+    else
+    {
+        /* RESET QUEUE */
+        hdl->in_index = 0;
+        hdl->out_index = 0;
+        hdl->count = 0;
+    }
+#else
     /* RESET QUEUE */
-    
     hdl->in_index = 0;
     hdl->out_index = 0;
     hdl->count = 0;
+#endif
 
     return LONGQ_SUCCESS;
 }
@@ -316,10 +443,7 @@ longq_err_t R_LONGQ_Flush(longq_hdl_t const hdl)
 * @retval    LONGQ_ERR_NULL_PTR: hdl or p_cnt is NULL.
 * @details   This function loads the number of entries in the queue associated with \e hdl and into the location pointed
 *            to by \e p_cnt.
-* @note      If the queue is accessed at both the interrupt and application level, it is up to the user to disable and 
-*            enable the associated interrupt before and after calling this function from the application level. If the 
-*            queue is accessed by tasks of different priorities, it is up to the user to prevent task switching or to 
-*            utilize a mutex or semaphore to reserve the queue.
+* @note      None
 */
 longq_err_t R_LONGQ_Used(longq_hdl_t const  hdl,
                          uint16_t * const   p_cnt)
@@ -331,7 +455,25 @@ longq_err_t R_LONGQ_Used(longq_hdl_t const  hdl,
     }
 #endif
 
+#if (LONGQ_CFG_PROTECT_QUEUE == 1)
+    uint32_t    psw_bit_i_val;
+
+    /* Get current value bit I of PSW register. */
+    psw_bit_i_val = (R_BSP_GET_PSW() & 0x00010000);
+
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+        *p_cnt = hdl->count;
+        R_BSP_InterruptsEnable();
+    }
+    else
+    {
+        *p_cnt = hdl->count;
+    }
+#else
     *p_cnt = hdl->count;
+#endif
     return LONGQ_SUCCESS;
 }
 
@@ -346,10 +488,7 @@ longq_err_t R_LONGQ_Used(longq_hdl_t const  hdl,
 * @retval    LONGQ_ERR_NULL_PTR: hdl or p_cnt is NULL.
 * @details   This function loads the number of unused elements in the queue associated with \e hdl and into the location 
 *            pointed to by \e p_cnt.
-* @note      If the queue is accessed at both the interrupt and application level, it is up to the user to disable and 
-*            enable the associated interrupt before and after calling this function from the application level. If the 
-*            queue is accessed by tasks of different priorities, it is up to the user to prevent task switching or to 
-*            utilize a mutex or semaphore to reserve the queue.
+* @note      None
 */
 longq_err_t R_LONGQ_Unused(longq_hdl_t const  hdl,
                            uint16_t * const   p_cnt)
@@ -361,7 +500,28 @@ longq_err_t R_LONGQ_Unused(longq_hdl_t const  hdl,
     }
 #endif
 
+#if (LONGQ_CFG_PROTECT_QUEUE == 1)
+    uint32_t    psw_bit_i_val;
+
+    /* Get current value bit I of PSW register. */
+    psw_bit_i_val = (R_BSP_GET_PSW() & 0x00010000);
+
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+
+        /* Get p_cnt. */
+        *p_cnt = (uint16_t) (hdl->size - hdl->count);
+        R_BSP_InterruptsEnable();
+    }
+    else
+    {
+        /* Get p_cnt. */
+        *p_cnt = (uint16_t) (hdl->size - hdl->count);
+    }
+#else
     *p_cnt = (uint16_t) (hdl->size - hdl->count);
+#endif
     return LONGQ_SUCCESS;
 }
 

@@ -23,6 +23,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 29.03.2019 1.00     First Release
+*         : 30.11.2021 2.00     Added the bsp_clkout_initial_configure function.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -48,6 +49,9 @@ void mcu_clock_setup(void);
 #if BSP_CFG_CLKOUT_RF_MAIN == 1
 void operating_frequency_set(void);
 void usb_lpc_clock_source_select(void);
+#if BSP_CFG_CLKOUT_OUTPUT != 0
+void bsp_clkout_initial_configure(void)
+#endif
 #endif
 /* End of multiple inclusion prevention macro */
 #endif

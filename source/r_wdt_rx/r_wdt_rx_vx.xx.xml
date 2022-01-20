@@ -80,7 +80,7 @@
         <zipsource>r_wdt_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>6.10</version>
+            <version>6.20</version>
         </dependency>
         <application>Security</application>
         <desc>WDT Driver</desc>

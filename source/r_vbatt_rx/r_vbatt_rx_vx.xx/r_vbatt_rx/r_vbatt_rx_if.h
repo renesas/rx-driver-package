@@ -35,6 +35,7 @@
 *                                    Updated version to 1.04
 *              : 10.06.2020 1.05     Updated version to 1.05
 *              : 31.03.2021 2.00     Added support for RX671
+*              : 13.09.2021 2.10     Added the demo for RX671
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_vbatt_rx_if.h
@@ -56,7 +57,7 @@ Macro definitions
 *******************************************************************************/
 /* Version Number of API. */
 #define VBATT_VERSION_MAJOR           (2)
-#define VBATT_VERSION_MINOR           (00)
+#define VBATT_VERSION_MINOR           (10)
 
 
 /* VBATT function grouping */

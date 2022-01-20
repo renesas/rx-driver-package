@@ -33,6 +33,7 @@
         <product>GNURX</product>
         <version>8.03.00.201904</version>
         <version>8.03.00.202004</version>
+        <version>8.03.00.202102</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -57,11 +58,14 @@
         <zipsource>r_rsci_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>6.10</version>
+            <version>6.20</version>
         </dependency>
         <dependency>
             <module>r_byteq</module>
             <version>1.80</version>
+            <version>1.81</version>
+            <version>1.82</version>
+            <version>1.90</version>
         </dependency>
         <application>Serial Interface (Clock Sync./Clock Async.)</application>
         <desc>RSCI Driver</desc>

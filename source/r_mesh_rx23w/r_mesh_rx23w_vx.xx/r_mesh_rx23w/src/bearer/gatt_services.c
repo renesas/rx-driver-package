@@ -1,14 +1,10 @@
 
 /**
  *  \file gatt_services.c
- *
- *  Generic Module to handle both
- *  - Mesh Provisioning Service :: 0x1827
- *  - Mesh Proxy Service        :: 0x1828
  */
 
 /*
- *  Copyright (C) 2018. Mindtree Limited.
+ *  Copyright (C) 2018-2021. Mindtree Limited.
  *  All rights reserved.
  */
 
@@ -18,25 +14,23 @@
 #include "gatt_services.h"
 
 /*******************************************************************************
+* Macro definitions
+*******************************************************************************/
+#if BLE_MESH_PROVS_DECL_HDL < BLE_MESH_PROXYS_DECL_HDL
+#define BLEBRR_MESH_SERV_ATTR_HDL_START     BLE_MESH_PROVS_DECL_HDL
+#define BLEBRR_MESH_SERV_ATTR_HDL_END       BLE_MESH_PROXYS_DATA_OUT_CLI_CNFG_DESC_HDL
+#else /* BLE_MESH_PROVS_DECL_HDL > BLE_MESH_PROXYS_DECL_HDL */
+#define BLEBRR_MESH_SERV_ATTR_HDL_START     BLE_MESH_PROXYS_DECL_HDL
+#define BLEBRR_MESH_SERV_ATTR_HDL_END       BLE_MESH_PROVS_DATA_OUT_CLI_CNFG_DESC_HDL
+#endif
+
+/*******************************************************************************
 * Global Variables and Private Functions declaration
 *******************************************************************************/
-static mesh_prov_cb   * prov_cb;
-static mesh_proxy_cb  * proxy_cb;
+static mesh_gatt_cb * prov_cb;
+static mesh_gatt_cb * proxy_cb;
 
-static uint8_t        g_mesh_serv_state;
-static uint16_t       g_mesh_curr_mtu;
-
-static void mesh_prov_handle_conn
-            (
-                uint16_t connHandle,
-                uint8_t changeType
-            );
-
-static void mesh_proxy_handle_conn
-            (
-                uint16_t connHandle,
-                uint8_t changeType
-            );
+static uint8_t gs_mesh_serv_mode = BLEBRR_GATT_UNINIT_MODE;
 
 /*******************************************************************************
 * Functions
@@ -49,14 +43,12 @@ static void mesh_serv_set_cccd
             )
 {
     uint8_t data[2];
-
-    BT_PACK_LE_2_BYTE(data, &cli_cnfg);
-
     st_ble_gatt_value_t gatt_value = {
         .p_value     = data,
         .value_len = 2,
     };
 
+    BT_PACK_LE_2_BYTE(data, &cli_cnfg);
     R_BLE_GATTS_SetAttr(conn_hdl, attr_hdl, &gatt_value);
 }
 
@@ -70,7 +62,6 @@ static void mesh_serv_get_cccd
     st_ble_gatt_value_t gatt_value;
 
     R_BLE_GATTS_GetAttr(conn_hdl, attr_hdl, &gatt_value);
-
     BT_UNPACK_LE_2_BYTE(cli_cnfg, gatt_value.p_value);
 }
 
@@ -92,10 +83,9 @@ static void mesh_prov_gatt_db_cb
             {
                 if (NULL != prov_cb)
                 {
-                    prov_cb->prov_data_in_cb
+                    prov_cb->data_in_cb
                     (
                         conn_hdl,
-                        0, /* Offset is currently ZERO */
                         params->value.value_len,
                         params->value.p_value
                     );
@@ -128,10 +118,9 @@ static void mesh_proxy_gatt_db_cb
             {
                 if (NULL != proxy_cb)
                 {
-                    proxy_cb->proxy_data_in_cb
+                    proxy_cb->data_in_cb
                     (
                         conn_hdl,
-                        0, /* Offset is currently ZERO */
                         params->value.value_len,
                         params->value.p_value
                     );
@@ -155,8 +144,20 @@ static void mesh_serv_gatts_cb
 {
     ble_status_t status;
 
+    MS_IGNORE_UNUSED_PARAM(result);
+    MS_IGNORE_UNUSED_PARAM(status);
+
     MESH_SERVER_LOG("\nmesh_serv_gatts_cb :: type 0x%04X: Service 0x%02X \n",
-    type, g_mesh_serv_state);
+    type, gs_mesh_serv_mode);
+
+    if (BLE_GATTS_EVENT_CONN_IND != type)
+    {
+        if (NULL == blebrr_find_gatt_env_by_connhdl(data->conn_hdl))
+        {
+            /* not found */
+            return;
+        }
+    }
 
     switch (type)
     {
@@ -164,13 +165,15 @@ static void mesh_serv_gatts_cb
         {
             MESH_SERVER_LOG("[MESH SERV] Received BLE_GATTS_EVENT_CONN_IND");
 
-            if (MESH_PROV_SERVICE_DONE == g_mesh_serv_state)
+            if (BLEBRR_GATT_PROV_MODE == gs_mesh_serv_mode)
             {
-                mesh_prov_handle_conn(data->conn_hdl, MS_TRUE);
+                /* Reset the PROV DATA OUT CCCD Value */
+                mesh_serv_set_cccd(data->conn_hdl, BLE_MESH_PROVS_DATA_OUT_CLI_CNFG_DESC_HDL, BLE_GATTS_CLI_CNFG_DEFAULT);
             }
-            else if (MESH_PROXY_SERVICE_DONE == g_mesh_serv_state)
+            else if (BLEBRR_GATT_PROXY_MODE == gs_mesh_serv_mode)
             {
-                mesh_proxy_handle_conn(data->conn_hdl, MS_TRUE);
+                /* Reset the PROXY DATA OUT CCCD Value */
+                mesh_serv_set_cccd(data->conn_hdl, BLE_MESH_PROXYS_DATA_OUT_CLI_CNFG_DESC_HDL, BLE_GATTS_CLI_CNFG_DEFAULT);
             }
             else
             {
@@ -187,56 +190,34 @@ static void mesh_serv_gatts_cb
 
         case BLE_GATTS_EVENT_EX_MTU_REQ:
         {
-            st_ble_gatts_ex_mtu_req_evt_t *db_access_evt_param =
-                (st_ble_gatts_ex_mtu_req_evt_t *)data->p_param;
-            uint16_t p_cli_mtu;
-
-            /* Extract Peer Requested MTU Value */
-            p_cli_mtu = db_access_evt_param->mtu;
-
-            MESH_SERVER_LOG("[MESH SERV] Received BLE_GATTS_EVENT_EX_MTU_REQ with Value %d",
-            p_cli_mtu);
-
-            /* Set the MTU to be Responded */
-            g_mesh_curr_mtu = (p_cli_mtu >= g_mesh_curr_mtu) ?
-                              g_mesh_curr_mtu : p_cli_mtu;
-
-            /* Responding with Default MTU here */
-            status = R_BLE_GATTS_RspExMtu(data->conn_hdl, g_mesh_curr_mtu);
+            /* Responding with Configured MTU Size */
+            status = R_BLE_GATTS_RspExMtu(data->conn_hdl, BLE_CFG_GATT_MTU_SIZE);
 
             MESH_SERVER_LOG("R_BLE_GATTS_RspExMtu Sent with MTU: %d, Status : 0x%04X",
-            g_mesh_curr_mtu, status);
-
-            if (BLE_SUCCESS != status)
-            {
-                g_mesh_curr_mtu = BLE_GATT_DEFAULT_MTU;
-            }
-
-            MESH_SERVER_LOG("Negotiated Current ATT MTU: %d",
-            g_mesh_curr_mtu);
+            BLE_CFG_GATT_MTU_SIZE, status);
         }
         break;
 
         case BLE_GATTS_EVENT_DB_ACCESS_IND:
         {
-            st_ble_gatts_db_access_evt_t *db_access_evt_param =
+            st_ble_gatts_db_access_evt_t * p_db_access =
                 (st_ble_gatts_db_access_evt_t *)data->p_param;
 
             /* Check for Current Active Service */
-            if (MESH_PROV_SERVICE_DONE == g_mesh_serv_state)
+            if (BLEBRR_GATT_PROV_MODE == gs_mesh_serv_mode)
             {
                 mesh_prov_gatt_db_cb
                 (
                     data->conn_hdl,
-                    db_access_evt_param->p_params
+                    p_db_access->p_params
                 );
             }
-            else if (MESH_PROXY_SERVICE_DONE == g_mesh_serv_state)
+            else if (BLEBRR_GATT_PROXY_MODE == gs_mesh_serv_mode)
             {
                 mesh_proxy_gatt_db_cb
                 (
                     data->conn_hdl,
-                    db_access_evt_param->p_params
+                    p_db_access->p_params
                 );
             }
             else
@@ -252,10 +233,9 @@ static void mesh_serv_gatts_cb
             st_ble_gatts_write_rsp_evt_t *db_wt_rsp_evt_param =
                 (st_ble_gatts_write_rsp_evt_t *)data->p_param;
             uint16_t cli_cnfg;
-            uint16_t t_cccd_val;
 
             /* Check for Current Active Service */
-            if (MESH_PROV_SERVICE_DONE == g_mesh_serv_state)
+            if (BLEBRR_GATT_PROV_MODE == gs_mesh_serv_mode)
             {
                 /* Check if the Write RSP if for Prov CCCD */
                 if (BLE_MESH_PROVS_DATA_OUT_CLI_CNFG_DESC_HDL == db_wt_rsp_evt_param->attr_hdl)
@@ -268,21 +248,18 @@ static void mesh_serv_gatts_cb
                         &cli_cnfg
                     );
 
-                    t_cccd_val = (cli_cnfg == BLE_GATTS_CLI_CNFG_NOTIFICATION) ?
-                                                 MS_TRUE : MS_FALSE;
-
                     /* Invoke CCCD Update Callback */
                     if (NULL != prov_cb)
                     {
-                        prov_cb->prov_data_out_ccd_cb
+                        prov_cb->data_out_ccd_cb
                         (
                             data->conn_hdl,
-                            t_cccd_val
+                            (uint8_t)((cli_cnfg == BLE_GATTS_CLI_CNFG_NOTIFICATION) ? MS_TRUE : MS_FALSE)
                         );
                     }
                 }
             }
-            else if (MESH_PROXY_SERVICE_DONE == g_mesh_serv_state)
+            else if (BLEBRR_GATT_PROXY_MODE == gs_mesh_serv_mode)
             {
                 /* Check if the Write RSP if for Proxy CCCD */
                 if (BLE_MESH_PROXYS_DATA_OUT_CLI_CNFG_DESC_HDL == db_wt_rsp_evt_param->attr_hdl)
@@ -295,16 +272,13 @@ static void mesh_serv_gatts_cb
                         &cli_cnfg
                     );
 
-                    t_cccd_val = (cli_cnfg == BLE_GATTS_CLI_CNFG_NOTIFICATION) ?
-                                                 MS_TRUE : MS_FALSE;
-
                     /* Invoke CCCD Update Callback */
                     if (NULL != proxy_cb)
                     {
-                        proxy_cb->proxy_data_out_ccd_cb
+                        proxy_cb->data_out_ccd_cb
                         (
                             data->conn_hdl,
-                            t_cccd_val
+                            (uint8_t)((cli_cnfg == BLE_GATTS_CLI_CNFG_NOTIFICATION) ? MS_TRUE : MS_FALSE)
                         );
                     }
                 }
@@ -325,11 +299,13 @@ static void mesh_serv_gatts_cb
 *******************************************************************************/
 ble_status_t mesh_serv_init(uint8_t priority)
 {
-    /* Register Internal MEsh Services Callback to GATT Server */
+    /* Initialize GATT Database */
+    R_BLE_GATTS_SetDbInst(&g_gatt_db_table);
+
+    /* Register Internal Mesh Services Callback to GATT Server */
     R_BLE_GATTS_RegisterCb(mesh_serv_gatts_cb, priority);
 
-    g_mesh_serv_state = MESH_NO_SERVICES;
-    g_mesh_curr_mtu   = BLE_GATT_DEFAULT_MTU;
+    gs_mesh_serv_mode = BLEBRR_GATT_UNINIT_MODE;
 
     return BLE_SUCCESS;
 }
@@ -337,86 +313,63 @@ ble_status_t mesh_serv_init(uint8_t priority)
 /***************************************************************************//**
 * @brief Gets current MTU size
 *******************************************************************************/
-uint16_t mesh_serv_get_mtu(void)
+uint16_t mesh_serv_get_mtu(uint16_t conn_hdl)
 {
-    return g_mesh_curr_mtu;
-}
+    ble_status_t status;
+    uint16_t mtu;
 
-#if 0 /* unused */
-/***************************************************************************//**
-* @brief Sets new MTU size
-*******************************************************************************/
-ble_status_t mesh_serv_set_mtu(uint16_t mtu)
-{
-    g_mesh_curr_mtu = (BLE_GATT_DEFAULT_MTU > mtu) ?
-                       BLE_GATT_DEFAULT_MTU : mtu;
-
-    return BLE_SUCCESS;
+    status = R_BLE_GATT_GetMtu(conn_hdl, &mtu);
+    return (BLE_SUCCESS == status) ? mtu : 0;
 }
-#endif /* unused */
 
 /***************************************************************************//**
 * @brief Sets Mesh Provisioning Service instance to BLE Protocol Stack
 *******************************************************************************/
-ble_status_t mesh_serv_prov_init(mesh_prov_cb *cb)
+ble_status_t mesh_serv_prov_init(mesh_gatt_cb *cb)
 {
-    ble_status_t status = BLE_SUCCESS;
-    static uint8_t prov_init_first_time = 0x00;
-
     if (NULL != cb)
     {
-        if (0x00 == prov_init_first_time)
-        {
-            /* Initialize GATTS. */
-            status = R_BLE_GATTS_SetDbInst(&g_gatt_db_table_mesh_prov);
-            if (BLE_SUCCESS != status)
-            {
-                MESH_SERVER_LOG("R_BLE_GATTS_SetDbInst is failed: 0x%04X", status)
-            }
+        /* Enable Mesh Provisioning Service */
+        g_gatt_db_attr_table[BLE_MESH_PROVS_DECL_HDL].aux_prop &= ~BLE_GATT_DB_ATTR_DISABLED;
+        g_gatt_db_attr_table[BLE_MESH_PROVS_DATA_IN_DECL_HDL].aux_prop  &= ~BLE_GATT_DB_ATTR_DISABLED;
+        g_gatt_db_attr_table[BLE_MESH_PROVS_DATA_IN_VAL_HDL].aux_prop   &= ~BLE_GATT_DB_ATTR_DISABLED;
+        g_gatt_db_attr_table[BLE_MESH_PROVS_DATA_OUT_DECL_HDL].aux_prop &= ~BLE_GATT_DB_ATTR_DISABLED;
+        g_gatt_db_attr_table[BLE_MESH_PROVS_DATA_OUT_VAL_HDL].aux_prop  &= ~BLE_GATT_DB_ATTR_DISABLED;
+        g_gatt_db_attr_table[BLE_MESH_PROVS_DATA_OUT_CLI_CNFG_DESC_HDL].aux_prop &= ~BLE_GATT_DB_ATTR_DISABLED;
 
-            /* Save the Callback Provided */
-            prov_cb = cb;
+        /* Save the Callback Provided */
+        prov_cb = cb;
 
-            /* Set the Current Service State */
-            g_mesh_serv_state = MESH_PROV_SERVICE_DONE;
-
-            prov_init_first_time = 0x01;
-        }
+        /* Set the Current Service State */
+        gs_mesh_serv_mode = BLEBRR_GATT_PROV_MODE;
     }
 
-    return (status);
+    return BLE_SUCCESS;
 }
 
 /***************************************************************************//**
 * @brief Sets Mesh Proxy Service instance to BLE Protocol Stack
 *******************************************************************************/
-ble_status_t mesh_serv_proxy_init(mesh_proxy_cb *cb)
+ble_status_t mesh_serv_proxy_init(mesh_gatt_cb *cb)
 {
-    ble_status_t status = BLE_SUCCESS;
-    static uint8_t proxy_init_first_time = 0x00;
-
     if (NULL != cb)
     {
-        if (0x00 == proxy_init_first_time)
-        {
-            /* Initialize GATTS. */
-            status = R_BLE_GATTS_SetDbInst(&g_gatt_db_table_mesh_proxy);
-            if (BLE_SUCCESS != status)
-            {
-                MESH_SERVER_LOG("R_BLE_GATTS_SetDbInst is failed: 0x%04X", status);
-            }
+        /* Enable Mesh Proxy Service */
+        g_gatt_db_attr_table[BLE_MESH_PROXYS_DECL_HDL].aux_prop &= ~BLE_GATT_DB_ATTR_DISABLED;
+        g_gatt_db_attr_table[BLE_MESH_PROXYS_DATA_IN_DECL_HDL].aux_prop  &= ~BLE_GATT_DB_ATTR_DISABLED;
+        g_gatt_db_attr_table[BLE_MESH_PROXYS_DATA_IN_VAL_HDL].aux_prop   &= ~BLE_GATT_DB_ATTR_DISABLED;
+        g_gatt_db_attr_table[BLE_MESH_PROXYS_DATA_OUT_DECL_HDL].aux_prop &= ~BLE_GATT_DB_ATTR_DISABLED;
+        g_gatt_db_attr_table[BLE_MESH_PROXYS_DATA_OUT_VAL_HDL].aux_prop  &= ~BLE_GATT_DB_ATTR_DISABLED;
+        g_gatt_db_attr_table[BLE_MESH_PROXYS_DATA_OUT_CLI_CNFG_DESC_HDL].aux_prop &= ~BLE_GATT_DB_ATTR_DISABLED;
 
-            /* Save the Callback Provided */
-            proxy_cb = cb;
+        /* Save the Callback Provided */
+        proxy_cb = cb;
 
-            /* Set the Current Service State */
-            g_mesh_serv_state = MESH_PROXY_SERVICE_DONE;
-
-            proxy_init_first_time = 0x01;
-        }
+        /* Set the Current Service State */
+        gs_mesh_serv_mode = BLEBRR_GATT_PROXY_MODE;
     }
 
-    return (status);
+    return BLE_SUCCESS;
 }
 
 /***************************************************************************//**
@@ -424,17 +377,18 @@ ble_status_t mesh_serv_proxy_init(mesh_proxy_cb *cb)
 *******************************************************************************/
 ble_status_t mesh_serv_prov_deinit(void)
 {
-    uint8_t status = BLE_SUCCESS;
-
     /* Reset the Callback Provided */
     prov_cb = NULL;
 
-    /**
-     * Deregister Mesh Prov Service attribute list and
-     * CBs from GATT Server Application
-     */
+    /* Disable Mesh Provisioning Service */
+    g_gatt_db_attr_table[BLE_MESH_PROVS_DECL_HDL].aux_prop |= BLE_GATT_DB_ATTR_DISABLED;
+    g_gatt_db_attr_table[BLE_MESH_PROVS_DATA_IN_DECL_HDL].aux_prop  |= BLE_GATT_DB_ATTR_DISABLED;
+    g_gatt_db_attr_table[BLE_MESH_PROVS_DATA_IN_VAL_HDL].aux_prop   |= BLE_GATT_DB_ATTR_DISABLED;
+    g_gatt_db_attr_table[BLE_MESH_PROVS_DATA_OUT_DECL_HDL].aux_prop |= BLE_GATT_DB_ATTR_DISABLED;
+    g_gatt_db_attr_table[BLE_MESH_PROVS_DATA_OUT_VAL_HDL].aux_prop  |= BLE_GATT_DB_ATTR_DISABLED;
+    g_gatt_db_attr_table[BLE_MESH_PROVS_DATA_OUT_CLI_CNFG_DESC_HDL].aux_prop |= BLE_GATT_DB_ATTR_DISABLED;
 
-    return ( status );
+    return BLE_SUCCESS;
 }
 
 /***************************************************************************//**
@@ -442,17 +396,18 @@ ble_status_t mesh_serv_prov_deinit(void)
 *******************************************************************************/
 ble_status_t mesh_serv_proxy_deinit(void)
 {
-    uint8_t status = BLE_SUCCESS;
-
     /* Reset the Callback Provided */
     proxy_cb = NULL;
 
-    /**
-     * Deregister Mesh Prov Service attribute list and
-     * CBs from GATT Server Application
-     */
+    /* Disable Mesh Proxy Service */
+    g_gatt_db_attr_table[BLE_MESH_PROXYS_DECL_HDL].aux_prop |= BLE_GATT_DB_ATTR_DISABLED;
+    g_gatt_db_attr_table[BLE_MESH_PROXYS_DATA_IN_DECL_HDL].aux_prop  |= BLE_GATT_DB_ATTR_DISABLED;
+    g_gatt_db_attr_table[BLE_MESH_PROXYS_DATA_IN_VAL_HDL].aux_prop   |= BLE_GATT_DB_ATTR_DISABLED;
+    g_gatt_db_attr_table[BLE_MESH_PROXYS_DATA_OUT_DECL_HDL].aux_prop |= BLE_GATT_DB_ATTR_DISABLED;
+    g_gatt_db_attr_table[BLE_MESH_PROXYS_DATA_OUT_VAL_HDL].aux_prop  |= BLE_GATT_DB_ATTR_DISABLED;
+    g_gatt_db_attr_table[BLE_MESH_PROXYS_DATA_OUT_CLI_CNFG_DESC_HDL].aux_prop |= BLE_GATT_DB_ATTR_DISABLED;
 
-    return ( status );
+    return BLE_SUCCESS;
 }
 
 /***************************************************************************//**
@@ -467,7 +422,7 @@ ble_status_t mesh_prov_notify_data_out
               )
 {
     uint16_t cli_cnfg;
-    ble_status_t ret;
+    ble_status_t ret = BLE_ERR_INVALID_STATE;
 
     /* Get the PROV DATA OUT CCCD Value */
     mesh_serv_get_cccd(conn_hndl, BLE_MESH_PROVS_DATA_OUT_CLI_CNFG_DESC_HDL, &cli_cnfg);
@@ -480,10 +435,6 @@ ble_status_t mesh_prov_notify_data_out
             .value.value_len = val_len,
         };
         ret = R_BLE_GATTS_Notification(conn_hndl, &ntf_data);
-    }
-    else
-    {
-        ret = BLE_ERR_INVALID_STATE;
     }
 
     return ret;
@@ -501,7 +452,7 @@ ble_status_t mesh_proxy_notify_data_out
           )
 {
     uint16_t cli_cnfg;
-    ble_status_t ret;
+    ble_status_t ret = BLE_ERR_INVALID_STATE;
 
     /* Get the PROXY DATA OUT CCCD Value */
     mesh_serv_get_cccd(conn_hndl, BLE_MESH_PROXYS_DATA_OUT_CLI_CNFG_DESC_HDL, &cli_cnfg);
@@ -515,40 +466,28 @@ ble_status_t mesh_proxy_notify_data_out
         };
         ret = R_BLE_GATTS_Notification(conn_hndl, &ntf_data);
     }
-    else
-    {
-        ret = BLE_ERR_INVALID_STATE;
-    }
 
     return ret;
 }
 
-static void mesh_prov_handle_conn( uint16_t connHandle, uint8_t changeType )
+ble_status_t mesh_indicate_serv_changed(uint16_t conn_hdl)
 {
-    /* Reset the PROV DATA OUT CCCD Value */
-    if (MS_TRUE == changeType)
+    uint16_t cli_cnfg;
+    uint16_t hdls[2] = {BLEBRR_MESH_SERV_ATTR_HDL_START, BLEBRR_MESH_SERV_ATTR_HDL_END};
+    ble_status_t ret = BLE_ERR_INVALID_STATE;
+
+    /* Get the SERVICE CHANGED CCCD Value */
+    mesh_serv_get_cccd(conn_hdl, BLE_GATS_SERV_CHGED_CLI_CNFG_DESC_HDL, &cli_cnfg);
+
+    if (cli_cnfg == BLE_GATTS_CLI_CNFG_INDICATION)
     {
-        mesh_serv_set_cccd
-        (
-            connHandle,
-            BLE_MESH_PROVS_DATA_OUT_CLI_CNFG_DESC_HDL,
-            BLE_GATTS_CLI_CNFG_DEFAULT
-        );
+        st_ble_gatt_hdl_value_pair_t ind_data = {
+            .attr_hdl = BLE_GATS_SERV_CHGED_VAL_HDL,
+            .value.p_value = (uint8_t *)hdls,
+            .value.value_len = sizeof(hdls),
+        };
+        ret = R_BLE_GATTS_Indication(conn_hdl, &ind_data);
     }
+
+    return ret;
 }
-
-static void mesh_proxy_handle_conn( uint16_t connHandle, uint8_t changeType )
-{
-    /* Reset the PROXY DATA OUT CCCD Value */
-    if (MS_TRUE == changeType)
-    {
-        mesh_serv_set_cccd
-        (
-            connHandle,
-            BLE_MESH_PROXYS_DATA_OUT_CLI_CNFG_DESC_HDL,
-            BLE_GATTS_CLI_CNFG_DEFAULT
-        );
-    }
-}
-
-

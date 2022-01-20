@@ -343,6 +343,14 @@ typedef struct MS_sensor_cadence_status_struct
     UINT16 status_trigger_delta_up_len;
 
     /** Minimum interval between two consecutive Status messages. */
+    /**
+     * APPLICATION NOTE:
+     * The Current Sensor Server Model implementation does not inherantly
+     * check for the time interval between two consecutive status messages.
+     * The application layer which manages the data for the Sensor Server
+     * Model holds the responsibility for interleaving consecutive status
+     * messages with the configured Minimum time interval for statuses.
+     */
     UCHAR  status_min_interval;
 
     /** Low value for the fast cadence range. */
@@ -465,7 +473,7 @@ typedef struct MS_sensor_setting_status_struct
  *  \brief API to initialize Sensor Server model
  *
  *  \par Description
- *  This is to initialize Sensor Server model and to register with Acess layer.
+ *  This is to initialize Sensor Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -493,7 +501,7 @@ API_RESULT MS_sensor_server_init
  *  \brief API to initialize Sensor_Setup Server model
  *
  *  \par Description
- *  This is to initialize Sensor_Setup Server model and to register with Acess layer.
+ *  This is to initialize Sensor_Setup Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -525,6 +533,8 @@ API_RESULT MS_sensor_setup_server_init
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -534,7 +544,9 @@ API_RESULT MS_sensor_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 
 /**
@@ -548,6 +560,8 @@ API_RESULT MS_sensor_server_state_update
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -557,7 +571,9 @@ API_RESULT MS_sensor_setup_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 /** \} */
 
@@ -571,7 +587,7 @@ API_RESULT MS_sensor_setup_server_state_update
  *  \brief API to initialize Sensor Client model
  *
  *  \par Description
- *  This is to initialize Sensor Client model and to register with Acess layer.
+ *  This is to initialize Sensor Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -608,6 +624,21 @@ API_RESULT MS_sensor_client_get_model_handle
            );
 
 /**
+ *  \brief API to set Sensor client model handle
+ *
+ *  \par Description
+ *  This is to set the handle of Sensor client model.
+ *
+ *  \param [in] model_handle   Model handle to be assigned.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_sensor_client_set_model_handle
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE  model_handle
+           );
+
+/**
  *  \brief API to send acknowledged commands
  *
  *  \par Description
@@ -626,7 +657,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
-/** \name Messsage Send
+/** \name Message Send
  *  \{
  */
 /**
@@ -636,7 +667,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  Sensor Descriptor Get is an acknowledged message used to get the Sensor Descriptor state of all sensors within an element.
  *  The response to a Sensor Descriptor Get message is a Sensor Descriptor Status message.
  *
- *  \param [in] param Sensor Descriptor Get message
+ *  \param [in] param Sensor Descriptor Get message parameter @ref MS_SENSOR_DESCRIPTOR_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -655,7 +686,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  Sensor Get is an acknowledged message used to get the Sensor Data state.
  *  The response to the Sensor Get message is a Sensor Status message.
  *
- *  \param [in] param Sensor Get message
+ *  \param [in] param Sensor Get message parameter @ref MS_SENSOR_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -674,7 +705,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  Sensor Column Get is an acknowledged message used to get the Sensor Series Column state.
  *  The response to the Sensor Column Get message is a Sensor Column Status message
  *
- *  \param [in] param Sensor Column Get message
+ *  \param [in] param Sensor Column Get message parameter @ref MS_SENSOR_COLUMN_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -693,7 +724,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  Sensor Series Get is an acknowledged message used to get a sequence of the Sensor Series Column states.
  *  The response to the Sensor Series Get message is a Sensor Series Status message.
  *
- *  \param [in] param Sensor Series Get message
+ *  \param [in] param Sensor Series Get message parameter @ref MS_SENSOR_SERIES_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -712,7 +743,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  Sensor Cadence Get is an acknowledged message used to get the Sensor Cadence state of an element.
  *  The response to the Sensor Cadence Get message is a Sensor Cadence Status message.
  *
- *  \param [in] param Sensor Cadence Get message
+ *  \param [in] param Sensor Cadence Get message parameter @ref MS_SENSOR_CADENCE_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -731,7 +762,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  Sensor Cadence Set is an acknowledged message used to set the Sensor Cadence state of an element.
  *  The response to the Sensor Cadence Set message is a Sensor Cadence Status message.
  *
- *  \param [in] param Sensor Cadence Set message
+ *  \param [in] param Sensor Cadence Set message parameter @ref MS_SENSOR_CADENCE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -749,7 +780,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  \par Description
  *  Sensor Cadence Set Unacknowledged is an unacknowledged message used to set the Sensor Cadence state of an element.
  *
- *  \param [in] param Sensor Cadence Set message
+ *  \param [in] param Sensor Cadence Set message parameter @ref MS_SENSOR_CADENCE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -768,7 +799,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  Sensor Settings Get is an acknowledged message used to get the list of Sensor Setting states of an element.
  *  The response to the Sensor Settings Get message is a Sensor Settings Status message
  *
- *  \param [in] param Sensor Settings Get message
+ *  \param [in] param Sensor Settings Get message parameter @ref MS_SENSOR_SETTINGS_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -787,7 +818,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  Sensor Setting Get is an acknowledged message used to get the Sensor Setting state of an element.
  *  The response to the Sensor Setting Get message is a Sensor Setting Status message.
  *
- *  \param [in] param Sensor Setting Get message
+ *  \param [in] param Sensor Setting Get message parameter @ref MS_SENSOR_SETTING_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -806,7 +837,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  Sensor Setting Set is an acknowledged message used to set the Sensor Setting state of an element.
  *  The response to the Sensor Setting Set message is a Sensor Setting Status message.
  *
- *  \param [in] param Sensor Setting Set message
+ *  \param [in] param Sensor Setting Set message parameter @ref MS_SENSOR_SETTING_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -824,7 +855,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  \par Description
  *  Sensor Setting Set Unacknowledged is an unacknowledged message used to set the Sensor Setting state of an element.
  *
- *  \param [in] param Sensor Setting Set message
+ *  \param [in] param Sensor Setting Set message parameter @ref MS_SENSOR_SETTING_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */

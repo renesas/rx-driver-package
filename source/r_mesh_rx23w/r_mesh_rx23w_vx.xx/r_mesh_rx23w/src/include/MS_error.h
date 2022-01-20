@@ -315,6 +315,7 @@ typedef UINT16    API_RESULT;
 #define NET_RX_LOCAL_SRC_ADDR_PKT               (0x0017 | NET_ERR_ID)
 #define NET_POST_PROCESS_RX_PKT                 (0x0018 | NET_ERR_ID)
 #define NET_RX_ALREADY_RELAYED_PKT              (0x0019 | NET_ERR_ID)
+#define NET_RX_LPN_SRC_ADDR_TO_RELAY_PKT        (0x0020 | NET_ERR_ID)
 /** \} */
 
 /**
@@ -439,6 +440,7 @@ typedef UINT16    API_RESULT;
 #define ACCESS_DEV_KEY_TABLE_FULL                  (0x0025 | ACCESS_ERR_ID)
 #define ACCESS_MASTER_NID_ON_LPN                   (0x0026 | ACCESS_ERR_ID)
 #define ACCESS_INVALID_PUBLICATION_STATE           (0x0027 | ACCESS_ERR_ID)
+#define ACCESS_INVALID_PUBLICATION_TTL             (0x0028 | ACCESS_ERR_ID)
 
 #define ACCESS_IV_VAL_NOT_PERMITTED                (0x0030 | ACCESS_ERR_ID)
 #define ACCESS_IV_UPDATE_TOO_SOON                  (0x0031 | ACCESS_ERR_ID)
