@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_gpio_rx.c
@@ -41,6 +41,7 @@
 *                              Modified comment of API function to Doxygen style.
 *         : 30.12.2019 3.40    Added support RX72N, RX66N.
 *         : 15.04.2021 4.10    Updated Doxygen comment.
+*         : 11.11.2021 4.30    Update according to GSCE Code Checker 6.00
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -313,7 +314,7 @@ gpio_err_t R_GPIO_PinControl (gpio_port_pin_t pin, gpio_cmd_t cmd)
 
             /* Get value at pin's address */
            *addr   = (uint8_t)((*addr) | (1 << pin_number));
-        break;
+           break;
         }
         case GPIO_CMD_DSCR_DISABLE:
         {
@@ -329,7 +330,7 @@ gpio_err_t R_GPIO_PinControl (gpio_port_pin_t pin, gpio_cmd_t cmd)
 
             /* Get value at pin's address */
             *addr   = (uint8_t)((*addr) & (~(1 << pin_number)));
-        break;
+            break;
         }
 #endif  /* GPIO_DSCR_IS_SUPPORTED */
 #if defined (GPIO_DSCR2_IS_SUPPORTED)
@@ -347,7 +348,7 @@ gpio_err_t R_GPIO_PinControl (gpio_port_pin_t pin, gpio_cmd_t cmd)
 
             /* Set value to pin */
             *addr   = (uint8_t)((*addr) | (1 << pin_number));
-        break;
+            break;
         }
 
         case GPIO_CMD_DSCR2_DISABLE:
@@ -364,7 +365,7 @@ gpio_err_t R_GPIO_PinControl (gpio_port_pin_t pin, gpio_cmd_t cmd)
 
             /* Set value to pin */
             *addr   = (uint8_t)((*addr) & (~(1 << pin_number)));
-        break;
+            break;
         }
 #endif  /* GPIO_DSCR2_IS_SUPPORTED */
         case GPIO_CMD_ASSIGN_TO_GPIO:
@@ -374,7 +375,7 @@ gpio_err_t R_GPIO_PinControl (gpio_port_pin_t pin, gpio_cmd_t cmd)
 
             /* Set value to pin */
             *addr  = (uint8_t)((*addr) & (~(1 << pin_number)));
-        break;
+            break;
         }
 
         case GPIO_CMD_ASSIGN_TO_PERIPHERAL:
@@ -384,7 +385,7 @@ gpio_err_t R_GPIO_PinControl (gpio_port_pin_t pin, gpio_cmd_t cmd)
 
             /* Set value to pin */
             *addr  = (uint8_t)((*addr) | (1 << pin_number));
-        break;
+            break;
         }
 
         case GPIO_CMD_IN_PULL_UP_DISABLE:
@@ -401,7 +402,7 @@ gpio_err_t R_GPIO_PinControl (gpio_port_pin_t pin, gpio_cmd_t cmd)
 
             /* Set value to pin */
             *addr  = (uint8_t)((*addr) & (~(1 << pin_number)));
-        break;
+            break;
         }
 
         case GPIO_CMD_IN_PULL_UP_ENABLE:
@@ -418,14 +419,14 @@ gpio_err_t R_GPIO_PinControl (gpio_port_pin_t pin, gpio_cmd_t cmd)
 
             /* Set value to pin */
             *addr  = (uint8_t)((*addr) | (1 << pin_number));
-        break;
+            break;
         }
 
         case GPIO_CMD_OUT_CMOS:
         {
             gpio_set_output_type(pin, GPIO_PIN_OUT_CMOS);
 
-        break;
+            break;
         }
 
         case GPIO_CMD_OUT_OPEN_DRAIN_N_CHAN:
@@ -440,26 +441,26 @@ gpio_err_t R_GPIO_PinControl (gpio_port_pin_t pin, gpio_cmd_t cmd)
 
             gpio_set_output_type(pin, GPIO_PIN_OUT_OPEN_DRAIN_N_CHAN);
 
-        break;
+            break;
         }
         case GPIO_CMD_OUT_OPEN_DRAIN_P_CHAN:
         {
-        #if (GPIO_CFG_PARAM_CHECKING_ENABLE == 1)
+#if (GPIO_CFG_PARAM_CHECKING_ENABLE == 1)
             if (false == gpio_pin_function_check(&g_gpio_open_drain_p_support[0], port_number, pin_number))
             {
                 err = GPIO_ERR_INVALID_MODE;
                 break;
             }
-        #endif
+#endif
             gpio_set_output_type(pin, GPIO_PIN_OUT_OPEN_DRAIN_P_CHAN);
 
-        break;
+            break;
         }
 
         default:
         {
             err = GPIO_ERR_INVALID_CMD;
-        break;
+            break;
         }
     }
 

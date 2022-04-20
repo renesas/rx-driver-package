@@ -24,7 +24,8 @@
  * History : DD.MM.YYYY Version Description
  *           16.02.2021 1.00    First Release
  *           19.05.2021 1.01    Added support for RX72N,RX66T,RX130
- *           08.07.2021 1.02    Added support for GCC
+ *           08.07.2021 1.02    Added support for RX671 and GCC
+ *           10.08.2021 1.03    Added support for IAR
  *********************************************************************************************************************/
 #ifndef FWUP_CONFIG_H
 #define FWUP_CONFIG_H

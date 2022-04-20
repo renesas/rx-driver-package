@@ -5,11 +5,11 @@ rm_touch_qe
 
 Document Number 
 ---------------
-r01an4470jj0201
+r01an4470jj0210
 
 Version
 -------
-v2.01
+v2.10
 
 Overview
 --------
@@ -44,6 +44,7 @@ Boards Tested On
 ----------------
 * RX130 Capacitive Touch Kit
 * RSKRX231
+* RX140 Capacitive Touch Kit
 
 Limitations
 -----------
@@ -57,7 +58,7 @@ Peripherals Used Directly
 Required Packages
 -----------------
 * r_bsp      v6.20
-* r_ctsu_qe  v2.01
+* r_ctsu_qe  v2.10
 
 
 Toolchain(s) Used
@@ -67,22 +68,22 @@ Toolchain(s) Used
 
 File Structure
 --------------
-rm_touch_qe (v2.01)
+rm_touch_qe (v2.10)
 |   +-- readme.txt
-|   +-- rm_touch_qe_if.h (v2.01)
+|   +-- rm_touch_qe_if.h (v2.10)
 |
 +---inc
-|   +-- rm_touch_qe.h (v2.01)
-|   +-- rm_touch_qe_api.h (v2.01)
+|   +-- rm_touch_qe.h (v2.10)
+|   +-- rm_touch_qe_api.h (v2.10)
 |
 +---wrapper
 |   +-- r_touch_wrapper_qe.c
 |   +-- r_touch_wrapper_qe_h
 |
 +---src
-    +-- rm_touch_qe.c (v2.01)
+    +-- rm_touch_qe.c (v2.10)
 
 r_config
-    rm_touch_qe_config.h (v2.01)
+    rm_touch_qe_config.h (v2.10)
 
 

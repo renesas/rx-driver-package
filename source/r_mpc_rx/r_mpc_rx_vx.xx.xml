@@ -36,6 +36,7 @@
         <version>3.01.00</version>
         <version>3.02.00</version>
         <version>3.03.00</version>
+        <version>3.04.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -44,7 +45,8 @@
         <version>4.08.04.201902</version>
         <version>8.03.00.201904</version>
         <version>8.03.00.202004</version>
-
+        <version>8.03.00.202102</version>
+        <version>8.03.00.202104</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -87,7 +89,6 @@
         <group omit_board="true">RX72T</group>
         <group omit_board="true">RX72M</group>
         <group omit_board="true">RX72N</group>
-
     </target>
 
     <!-- only one package entry allowed -->
@@ -99,7 +100,7 @@
         <zipsource>r_mpc_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>6.20</version>
+            <version>7.10</version>
         </dependency>
         <dependency>
             <module>r_gpio_rx</module>
@@ -127,6 +128,8 @@
             <version>4.00</version>
             <version>4.10</version>
             <version>4.20</version>
+            <version>4.30</version>
+            <version>4.40</version>
         </dependency>
         <application>MCU Setup</application>
         <desc>MPC Driver</desc>

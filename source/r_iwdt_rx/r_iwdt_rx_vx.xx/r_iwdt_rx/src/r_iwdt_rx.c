@@ -34,7 +34,7 @@
 *                              Bug fix: R_WDT_Open(), R_IWDT_Open() invalidated if either module is in auto-start mode.
 *           20.05.2019 3.00    Added support for GNUC and ICCRX.
 *           15.08.2019 3.20    Fixed warnings in IAR.
-*         : 25.11.2019 3.30    Added support for RX13T.
+*           25.11.2019 3.30    Added support for RX13T.
 *                              Modified comment of API function to Doxygen style.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.00.
 ***********************************************************************************************************************/

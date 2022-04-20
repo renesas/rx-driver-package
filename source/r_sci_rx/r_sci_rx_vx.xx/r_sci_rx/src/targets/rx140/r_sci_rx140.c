@@ -22,6 +22,7 @@
 ***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *           15.04.2021 1.00    Initial Release.
+*           29.12.2021 1.10    Updated condition of loop in "sci_init_bit_rate()" function
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -319,7 +320,7 @@ int32_t sci_init_bit_rate(sci_hdl_t const  hdl,
     /* WAIT_LOOP */
     if ((SCI_CH1 == hdl->rom->chan) || (SCI_CH5 == hdl->rom->chan))   /* ABCSE bit is available on CH1, CH5 */
     {
-            for(i = 1; i < num_divisors; i++)
+            for(i = 0; i < num_divisors; i++)
              {
                 /* Casting int16_t to uint32_t is valid. Because clock divisor is positive integer */
                 if (ratio < (uint32_t)(p_baud_info[i].divisor * 256))
@@ -331,7 +332,7 @@ int32_t sci_init_bit_rate(sci_hdl_t const  hdl,
     }
     else
     {
-            for(i = 0; i < num_divisors; i++)
+            for(i = 1; i < num_divisors; i++)
              {
                 /* Casting int16_t to uint32_t is valid. Because clock divisor is positive integer */
                 if (ratio < (uint32_t)(p_baud_info[i].divisor * 256))

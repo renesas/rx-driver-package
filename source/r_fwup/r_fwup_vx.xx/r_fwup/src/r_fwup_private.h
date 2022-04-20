@@ -24,7 +24,8 @@
  * History : DD.MM.YYYY Version Description
  *           16.02.2021 1.00    First Release
  *           19.05.2021 1.01    Added support for RX72N,RX66T,RX130
- *           08.07.2021 1.02    Added support for GCC
+ *           08.07.2021 1.02    Added support for RX671 and GCC
+ *           10.08.2021 1.03    Added support for IAR
  *********************************************************************************************************************/
 
 
@@ -63,8 +64,8 @@
 #define FWUP_COMM_SDHI_AFRTOS           (7)   /* Connect wireless module to SDHI with Amazon FreeRTOS.*/
 #define FWUP_COMM_SCI_FS                (8)   /* External storage (SD card + file system) connected to SCI.*/
 #define FWUP_COMM_USB_FS                (9)   /* External storage (USB memory + file system) connected to USB.*/
-#define FWUP_COMM_SDHI_FS              (10)   /* External storage (SD card + file system) connected to SDHI.*/
-#define FWUP_COMM_QSPI_FS              (11)   /* External storage (Serial flash + file system) connected to QSPI.*/
+#define FWUP_COMM_SDHI_FS               (10)  /* External storage (SD card + file system) connected to SDHI.*/
+#define FWUP_COMM_QSPI_FS               (11)  /* External storage (Serial flash + file system) connected to QSPI.*/
 
 /* Set the algorithm of signature verification. */
 #define FWUP_SIGNATURE_ECDSA            (0)   /* ECDSA. */

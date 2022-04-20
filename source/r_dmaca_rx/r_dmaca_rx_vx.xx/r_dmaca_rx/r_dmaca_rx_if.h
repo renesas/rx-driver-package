@@ -44,6 +44,7 @@
 *         : 30.06.2020 2.50    Changed revision to reflect demo upgrade.
 *         : 31.03.2021 2.60    Supported RX671.
 *         : 13.09.2021 2.70    Added RX671 Demo.
+*         : 14.03.2022 2.80    Supported RX66T-48pin.
 *******************************************************************************/
 #ifndef DMACA_RX_IF_H
 #define DMACA_RX_IF_H
@@ -67,7 +68,7 @@ Macro definitions
 
 /* Version Number of API */
 #define DMACA_VERSION_MAJOR  (2)
-#define DMACA_VERSION_MINOR  (70)
+#define DMACA_VERSION_MINOR  (80)
 
 /* DMAC activation is disabled. */
 #define DMACA_ACTIVE_DISABLE              (0x00u)

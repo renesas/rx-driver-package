@@ -29,6 +29,9 @@
 #if RM_ZMOD4410_IAQ_2ND_GEN_CFG_LIB_ENABLE
 #include "iaq_2nd_gen/iaq_2nd_gen.h"
 #endif
+#if RM_ZMOD4410_IAQ_2ND_GEN_ULP_CFG_LIB_ENABLE
+#include "iaq_2nd_gen_ulp/iaq_2nd_gen_ulp.h"
+#endif
 #if RM_ZMOD4410_ODOR_CFG_LIB_ENABLE
 #include "odor/odor.h"
 #endif
@@ -105,6 +108,12 @@ iaq_2nd_gen_results_t           g_zmod4xxx_sensor0_lib_results;
 uint8_t                         g_zmod4xxx_sensor0_product_data[7];
 extern rm_zmod4xxx_api_t const  g_zmod4xxx_on_zmod4410_iaq_2nd_gen;
 extern zmod4xxx_conf            g_zmod4410_iaq_2nd_gen_sensor_type[];
+#elif RM_ZMOD4410_IAQ_2ND_GEN_ULP_CFG_LIB_ENABLE && (RM_ZMOD4XXX_CFG_DEVICE0_OPERATION_MODE == 8)
+iaq_2nd_gen_ulp_handle_t            g_zmod4xxx_sensor0_lib_handle;
+iaq_2nd_gen_ulp_results_t           g_zmod4xxx_sensor0_lib_results;
+uint8_t                         g_zmod4xxx_sensor0_product_data[7];
+extern rm_zmod4xxx_api_t const  g_zmod4xxx_on_zmod4410_iaq_2nd_gen_ulp;
+extern zmod4xxx_conf            g_zmod4410_iaq_2nd_gen_ulp_sensor_type[];
 #elif RM_ZMOD4410_ODOR_CFG_LIB_ENABLE && (RM_ZMOD4XXX_CFG_DEVICE0_OPERATION_MODE == 4)
 odor_params                     g_zmod4xxx_sensor0_lib_handle;
 odor_results_t                  g_zmod4xxx_sensor0_lib_results;
@@ -153,6 +162,11 @@ rm_zmod4xxx_lib_extended_cfg_t g_zmod4xxx_sensor0_extended_cfg =
     .product_id = 0x2310,
     .p_api = (void *)&g_zmod4xxx_on_zmod4410_iaq_2nd_gen,
     .p_data_set = (void *)g_zmod4410_iaq_2nd_gen_sensor_type,
+#elif RM_ZMOD4410_IAQ_2ND_GEN_ULP_CFG_LIB_ENABLE && (RM_ZMOD4XXX_CFG_DEVICE0_OPERATION_MODE == 8)
+    .lib_type = RM_ZMOD4410_LIB_TYPE_IAQ_2ND_GEN_ULP,
+    .product_id = 0x2310,
+    .p_api = (void *)&g_zmod4xxx_on_zmod4410_iaq_2nd_gen_ulp,
+    .p_data_set = (void *)g_zmod4410_iaq_2nd_gen_ulp_sensor_type,
 #elif RM_ZMOD4410_ODOR_CFG_LIB_ENABLE && (RM_ZMOD4XXX_CFG_DEVICE0_OPERATION_MODE == 4)
     .lib_type = RM_ZMOD4410_LIB_TYPE_ODOR,
     .product_id = 0x2310,
@@ -246,6 +260,12 @@ iaq_2nd_gen_results_t           g_zmod4xxx_sensor1_lib_results;
 uint8_t                         g_zmod4xxx_sensor1_product_data[7];
 extern rm_zmod4xxx_api_t const  g_zmod4xxx_on_zmod4410_iaq_2nd_gen;
 extern zmod4xxx_conf            g_zmod4410_iaq_2nd_gen_sensor_type[];
+#elif RM_ZMOD4410_IAQ_2ND_GEN_ULP_CFG_LIB_ENABLE && (RM_ZMOD4XXX_CFG_DEVICE1_OPERATION_MODE == 8)
+iaq_2nd_gen_ulp_handle_t            g_zmod4xxx_sensor1_lib_handle;
+iaq_2nd_gen_ulp_results_t           g_zmod4xxx_sensor1_lib_results;
+uint8_t                         g_zmod4xxx_sensor1_product_data[7];
+extern rm_zmod4xxx_api_t const  g_zmod4xxx_on_zmod4410_iaq_2nd_gen_ulp;
+extern zmod4xxx_conf            g_zmod4410_iaq_2nd_gen_ulp_sensor_type[];
 #elif RM_ZMOD4410_ODOR_CFG_LIB_ENABLE && (RM_ZMOD4XXX_CFG_DEVICE1_OPERATION_MODE == 4)
 odor_params                     g_zmod4xxx_sensor1_lib_handle;
 odor_results_t                  g_zmod4xxx_sensor1_lib_results;
@@ -294,6 +314,11 @@ rm_zmod4xxx_lib_extended_cfg_t g_zmod4xxx_sensor1_extended_cfg =
     .product_id = 0x2310,
     .p_api = (void *)&g_zmod4xxx_on_zmod4410_iaq_2nd_gen,
     .p_data_set = (void *)g_zmod4410_iaq_2nd_gen_sensor_type,
+#elif RM_ZMOD4410_IAQ_2ND_GEN_ULP_CFG_LIB_ENABLE && (RM_ZMOD4XXX_CFG_DEVICE1_OPERATION_MODE == 8)
+    .lib_type = RM_ZMOD4410_LIB_TYPE_IAQ_2ND_GEN_ULP,
+    .product_id = 0x2310,
+    .p_api = (void *)&g_zmod4xxx_on_zmod4410_iaq_2nd_gen_ulp,
+    .p_data_set = (void *)g_zmod4410_iaq_2nd_gen_ulp_sensor_type,
 #elif RM_ZMOD4410_ODOR_CFG_LIB_ENABLE && (RM_ZMOD4XXX_CFG_DEVICE1_OPERATION_MODE == 4)
     .lib_type = RM_ZMOD4410_LIB_TYPE_ODOR,
     .product_id = 0x2310,

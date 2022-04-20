@@ -24,7 +24,8 @@
  * History : DD.MM.YYYY Version Description
  *           16.02.2021 1.00    First Release
  *           19.05.2021 1.01    Added support for RX72N,RX66T,RX130
- *           08.07.2021 1.02    Added support for GCC
+ *           08.07.2021 1.02    Added support for RX671 and GCC
+ *           10.08.2021 1.03    Added support for IAR
  *********************************************************************************************************************/
 
 /* C Runtime includes. */
@@ -122,49 +123,48 @@ bool g_is_opened = false;
 
 
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
-OTA_Err_t R_FWUP_CreateFileForRx( OTA_FileContext_t * const C );
-OTA_Err_t R_FWUP_Abort( OTA_FileContext_t * const C );
-int16_t R_FWUP_WriteBlock( OTA_FileContext_t * const C, uint32_t ulOffset,
-                            uint8_t * const pacData, uint32_t ulBlockSize );
-OTA_Err_t R_FWUP_CloseFile( OTA_FileContext_t * const C );
-OTA_Err_t R_FWUP_CheckFileSignature( OTA_FileContext_t * const C );
-uint8_t * R_FWUP_ReadAndAssumeCertificate( const uint8_t * const pucCertName, uint32_t * const ulSignerCertSize );
-OTA_Err_t R_FWUP_ResetDevice( void );
-OTA_Err_t R_FWUP_ActivateNewImage( void );
-OTA_Err_t R_FWUP_SetPlatformImageState( OTA_ImageState_t eState );
-OTA_PAL_ImageState_t R_FWUP_GetPlatformImageState( void );
-OTA_Err_t R_FWUP_GetVersion(void);
-
-static flash_err_t ota_flashing_task( uint8_t *block, uint32_t ulOffset, uint32_t length );
+OTA_Err_t R_FWUP_CreateFileForRx (OTA_FileContext_t * const C);
+OTA_Err_t R_FWUP_Abort (OTA_FileContext_t * const C);
+int16_t R_FWUP_WriteBlock (OTA_FileContext_t * const C, uint32_t ulOffset,
+                            uint8_t * const pacData, uint32_t ulBlockSize);
+OTA_Err_t R_FWUP_CloseFile (OTA_FileContext_t * const C);
+OTA_Err_t R_FWUP_CheckFileSignature (OTA_FileContext_t * const C);
+uint8_t * R_FWUP_ReadAndAssumeCertificate (const uint8_t * const pucCertName, uint32_t * const ulSignerCertSize);
+OTA_Err_t R_FWUP_ResetDevice (void);
+OTA_Err_t R_FWUP_ActivateNewImage (void);
+OTA_Err_t R_FWUP_SetPlatformImageState (OTA_ImageState_t eState);
+OTA_PAL_ImageState_t R_FWUP_GetPlatformImageState (void);
 #if (FWUP_CFG_SIGNATURE_VERIFICATION == FWUP_SIGNATURE_ECDSA)
-int32_t fwup_verification_sha256_ecdsa(const uint8_t * pucData, uint32_t ulSize,
+int32_t fwup_verification_sha256_ecdsa (const uint8_t * pucData, uint32_t ulSize,
                                             const uint8_t * pucSignature, uint32_t ulSignatureSize);
 #endif
-static int32_t ota_context_validate( OTA_FileContext_t * C );
-static void ota_context_close( OTA_FileContext_t * C );
-static void ota_flashing_callback(void *event);
-static void ota_header_flashing_callback(void *event);
+
+static flash_err_t ota_flashing_task (uint8_t * block, uint32_t ulOffset, uint32_t length);
+static int32_t ota_context_validate (OTA_FileContext_t * C);
+static void ota_context_close (OTA_FileContext_t * C);
+static void ota_flashing_callback (void * event);
+static void ota_header_flashing_callback (void * event);
 #elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
-static void ota_flashing_task( void * pvParameters );
-static CK_RV prvGetCertificateHandle( CK_FUNCTION_LIST_PTR pxFunctionList,
+static void ota_flashing_task (void * pvParameters);
+static CK_RV prvGetCertificateHandle (CK_FUNCTION_LIST_PTR pxFunctionList,
                                     CK_SESSION_HANDLE xSession,
                                     const char * pcLabelName,
-                                    CK_OBJECT_HANDLE_PTR pxCertHandle );
-static CK_RV prvGetCertificate( const char * pcLabelName,
+                                    CK_OBJECT_HANDLE_PTR pxCertHandle);
+static CK_RV prvGetCertificate (const char * pcLabelName,
                                 uint8_t ** ppucData,
-                                uint32_t * pulDataSize );
-static int32_t ota_context_validate( OTA_FileContext_t * C );
-static int32_t ota_context_update_user_firmware_header( OTA_FileContext_t * C );
-static void ota_context_close( OTA_FileContext_t * C );
-static void ota_flashing_callback(void *event);
-static void ota_header_flashing_callback(void *event);
+                                uint32_t * pulDataSize);
+static int32_t ota_context_validate (OTA_FileContext_t * C);
+static int32_t ota_context_update_user_firmware_header (OTA_FileContext_t * C);
+static void ota_context_close (OTA_FileContext_t * C);
+static void ota_flashing_callback (void * event);
+static void ota_header_flashing_callback (void * event);
 #else
     /* Fix me for other OS environment */
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS */
 
 /* Abstraction function. */
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
-static void fwup_communication_callback(void *pArgs);
+static void fwup_communication_callback (void * pArgs);
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS */
 static void fwup_state_monitoring_callback (void);
 #if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
@@ -183,23 +183,23 @@ static flash_err_t fwup_flash_accesswindow_set(flash_access_window_config_t * ad
 #endif /* FLASH_TYPE */
 #endif /* FWUP_CFG_BOOT_PROTECT_ENABLE */
 #else  /* Setting other than Bootloader */
-static void fwup_software_delay_ms(uint32_t delay);
+static void fwup_software_delay_ms (uint32_t delay);
 #endif  /* FWUP_IMPLEMENTATION_BOOTLOADER */
 
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
-static st_fragmented_block_list_t *fragmented_flash_block_list_insert(st_fragmented_block_list_t *head,
-                                                                        uint32_t offset, uint8_t *binary,
+static st_fragmented_block_list_t *fragmented_flash_block_list_insert (st_fragmented_block_list_t * head,
+                                                                        uint32_t offset, uint8_t * binary,
                                                                         uint32_t length);
-static st_fragmented_block_list_t *fragmented_flash_block_list_delete(st_fragmented_block_list_t *head,
+static st_fragmented_block_list_t *fragmented_flash_block_list_delete (st_fragmented_block_list_t * head,
                                                                         uint32_t offset);
-static st_fragmented_block_list_t *fragmented_flash_block_list_print(st_fragmented_block_list_t *head);
-static st_fragmented_block_list_t *fragmented_flash_block_list_assemble(st_fragmented_block_list_t *head,
-                                                                        st_flash_block_t *flash_block);
+static st_fragmented_block_list_t *fragmented_flash_block_list_print (st_fragmented_block_list_t * head);
+static st_fragmented_block_list_t *fragmented_flash_block_list_assemble (st_fragmented_block_list_t * head,
+                                                                        st_flash_block_t * flash_block);
 
 static volatile st_load_fw_control_block_t s_load_fw_control_block;
-static st_fragmented_block_list_t *fragmented_flash_block_list;
-static st_fwup_control_block_t *firmware_update_control_block_bank0 =
-    (st_fwup_control_block_t*)BOOT_LOADER_UPDATE_EXECUTE_AREA_LOW_ADDRESS;
+static st_fragmented_block_list_t * fragmented_flash_block_list;
+static st_fwup_control_block_t * firmware_update_control_block_bank0 =
+    (st_fwup_control_block_t *)BOOT_LOADER_UPDATE_EXECUTE_AREA_LOW_ADDRESS;
 static volatile uint32_t gs_header_flashing_task;
 #elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
     /* Fix me for other OS environment */
@@ -211,9 +211,9 @@ static volatile uint32_t gs_header_flashing_task;
 static sci_hdl_t s_fwup_communication_handle;
 
 #elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
-static st_fwup_control_block_t *sp_fwup_control_block_bank1 =
+static st_fwup_control_block_t * sp_fwup_control_block_bank1 =
     (st_fwup_control_block_t*)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS;
-static OTA_FileContext_t g_file_context;
+static OTA_FileContext_t s_file_context;
 static sci_hdl_t s_fwup_communication_handle;
 static st_sci_receive_control_block_t s_sci_receive_control_block;
 static st_sci_buffer_control_t s_sci_buffer_control[FWUP_SCI_CONTROL_BLOCK_TOTAL_NUM];
@@ -292,7 +292,7 @@ fwup_err_t R_FWUP_Open(void)
     flash_spi_error_code = fwup_flash_spi_open();
     if (FLASH_SPI_SUCCESS != flash_spi_error_code)
     {
-        comm_api_error_code = fwup_communication_close();                   // Closing the Communication module.
+        comm_api_error_code             = fwup_communication_close();       // Closing the Communication module.
         state_monitoring_api_error_code = fwup_state_monitoring_close();    // Closing the State monitoring module.
         return FWUP_ERR_FLASH;
     }
@@ -303,22 +303,22 @@ fwup_err_t R_FWUP_Open(void)
     flash_api_error_code = fwup_flash_open();
     if (FLASH_SUCCESS != flash_api_error_code)
     {
-        comm_api_error_code = fwup_communication_close();                   // Closing the Communication module.
+        comm_api_error_code             = fwup_communication_close();       // Closing the Communication module.
         state_monitoring_api_error_code = fwup_state_monitoring_close();    // Closing the State monitoring module.
         return FWUP_ERR_FLASH;
     }
 #elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
     /* Check the Platform image state */
-    if (eOTA_PAL_ImageState_Valid != R_FWUP_GetPlatformImageState())
+    if (R_FWUP_GetPlatformImageState() != eOTA_PAL_ImageState_Valid)
     {
         return FWUP_ERR_IMAGE_STATE;
     }
 
     /* Initialization of Flash module. */
-    ota_error_code = R_FWUP_CreateFileForRx(&g_file_context);
+    ota_error_code = R_FWUP_CreateFileForRx(&s_file_context);
     if (kOTA_Err_None != ota_error_code)
     {
-        comm_api_error_code = fwup_communication_close();                   // Closing the Communication module.
+        comm_api_error_code             = fwup_communication_close();       // Closing the Communication module.
         state_monitoring_api_error_code = fwup_state_monitoring_close();    // Closing the State monitoring module.
         return FWUP_ERR_FLASH;
     }
@@ -326,8 +326,8 @@ fwup_err_t R_FWUP_Open(void)
     /* Initialize receive buffer */
     s_sci_buffer_control[FWUP_SCI_CONTROL_BLOCK_A].buffer_full_flag = FWUP_SCI_RECEIVE_BUFFER_EMPTY;
     s_sci_buffer_control[FWUP_SCI_CONTROL_BLOCK_B].buffer_full_flag = FWUP_SCI_RECEIVE_BUFFER_EMPTY;
-    s_sci_receive_control_block.p_sci_buffer_control = &s_sci_buffer_control[FWUP_SCI_CONTROL_BLOCK_A];
-    s_sci_receive_control_block.current_state = FWUP_SCI_CONTROL_BLOCK_A;
+    s_sci_receive_control_block.p_sci_buffer_control                = & s_sci_buffer_control[FWUP_SCI_CONTROL_BLOCK_A];
+    s_sci_receive_control_block.current_state                       = FWUP_SCI_CONTROL_BLOCK_A;
 
     fwup_update_status(FWUP_STATE_DATA_RECEIVE_START);
 #endif  /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT */
@@ -367,6 +367,25 @@ fwup_err_t R_FWUP_Close(void)
  *********************************************************************************************************************/
 #endif  /* (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_BOOTLOADER) || (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS) */
 
+/***********************************************************************************************************************
+ * Function Name: R_FWUP_GetVersion
+ *******************************************************************************************************************//**
+ * @brief   Returns the current version of the FWUP FIT module.
+ * @return  Version of the FWUP FIT module.
+ * @details This function will return the version of the currently installed FIT module.
+ *          The version number is encoded where the top 2 bytes are the major version number
+ *          and the bottom 2 bytes are the minor version number.
+ *          For example, Version 4.25 would be returned as 0x00040019.
+ */
+uint32_t R_FWUP_GetVersion(void)
+{
+    /* These version macros are defined in r_flash_if.h. */
+    return ((((uint32_t)FWUP_VERSION_MAJOR) << 16) | (uint32_t)FWUP_VERSION_MINOR);
+}
+/**********************************************************************************************************************
+ End of function R_FWUP_GetVersion
+ *********************************************************************************************************************/
+
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
 /***********************************************************************************************************************
  * Function Name: R_FWUP_Operation
@@ -399,7 +418,7 @@ fwup_err_t R_FWUP_Operation(void)
     st_fwup_control_block_t * p_block_header;
     Sig256_t p_sig;
 
-    DEFINE_OTA_METHOD_NAME( "R_FWUP_Operation" );
+    DEFINE_OTA_METHOD_NAME("R_FWUP_Operation");
 
     /* Check that the Firmware update module has been opened. */
     if (false == g_is_opened)
@@ -410,17 +429,17 @@ fwup_err_t R_FWUP_Operation(void)
     }
 
     /* Check State transit monitoring flag */
-    if (STATE_MONITORING_ERROR == fwup_state_monitoring_is_error())
+    if (fwup_state_monitoring_is_error() == STATE_MONITORING_ERROR)
     {
         fwup_update_status(FWUP_STATE_FATAL_ERROR);
         OTA_LOG_L1("[%s] ERROR: Transit state did not change for more than 1 min.\r\n", OTA_METHOD_NAME);
         return FWUP_ERR_STATE_MONITORING;
     }
 
-    if (FWUP_STATE_DATA_RECEIVE_START == fwup_get_status())
+    if (fwup_get_status() == FWUP_STATE_DATA_RECEIVE_START)
     {
         /* Check the Platform image state */
-        if (eOTA_PAL_ImageState_Valid != R_FWUP_GetPlatformImageState())
+        if (R_FWUP_GetPlatformImageState() != eOTA_PAL_ImageState_Valid)
         {
             fwup_update_status(FWUP_STATE_FATAL_ERROR);
             OTA_LOG_L1("[%s] ERROR: Illegal Image State.\r\n", OTA_METHOD_NAME);
@@ -437,7 +456,7 @@ fwup_err_t R_FWUP_Operation(void)
             OTA_LOG_L1("-------------------------------------------------\r\n");
 
             /* Erase Temporary area */
-            cb_func_info.pcallback = ota_header_flashing_callback;
+            cb_func_info.pcallback    = ota_header_flashing_callback;
             cb_func_info.int_priority = FLASH_INTERRUPT_PRIORITY;
             fwup_flash_set_callback((void *)&cb_func_info);
             gs_header_flashing_task = OTA_FLASHING_IN_PROGRESS;
@@ -446,11 +465,14 @@ fwup_err_t R_FWUP_Operation(void)
                                     BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER) == FLASH_SUCCESS)
             {
 #if (FLASH_CFG_CODE_FLASH_BGO == 1)
-                while(OTA_FLASHING_IN_PROGRESS == gs_header_flashing_task);
+                while (OTA_FLASHING_IN_PROGRESS == gs_header_flashing_task)
+                {
+                    ;
+                }
 #endif
                 fwup_flash_close();
                 fwup_flash_open();
-                cb_func_info.pcallback = ota_flashing_callback;
+                cb_func_info.pcallback    = ota_flashing_callback;
                 cb_func_info.int_priority = FLASH_INTERRUPT_PRIORITY;
                 fwup_flash_set_callback(&cb_func_info);
 
@@ -458,7 +480,7 @@ fwup_err_t R_FWUP_Operation(void)
             }
             else
             {
-                OTA_LOG_L1( "[%s] ERROR - R_FLASH_Erase() returns error.\r\n", OTA_METHOD_NAME );
+                OTA_LOG_L1("[%s] ERROR - R_FLASH_Erase() returns error.\r\n", OTA_METHOD_NAME);
                 return FWUP_ERR_FLASH;
             }
         }
@@ -471,16 +493,19 @@ fwup_err_t R_FWUP_Operation(void)
     switch (fwup_get_status())
     {
         case FWUP_STATE_INITIALIZING:
+
             /* Firmware Update module is not open */
             fwup_update_status(FWUP_STATE_FATAL_ERROR);
             OTA_LOG_L1("[%s] ERROR: Not Open.\r\n", OTA_METHOD_NAME);
             ret = FWUP_ERR_NOT_OPEN;
             break;
         case FWUP_STATE_DATA_RECEIVE_START:
+
             /* Obtaining firmware data for update from the communication module */
             ret = FWUP_IN_PROGRESS;
             break;
         case FWUP_STATE_DATA_RECEIVE:
+
             /* Write firmware data to Flash */
             if (FWUP_SCI_RECEIVE_BUFFER_FULL == s_sci_buffer_control[FWUP_SCI_CONTROL_BLOCK_A].buffer_full_flag)
             {
@@ -488,23 +513,27 @@ fwup_err_t R_FWUP_Operation(void)
                 s_sci_buffer_control[FWUP_SCI_CONTROL_BLOCK_A].buffer_full_flag = FWUP_SCI_RECEIVE_BUFFER_EMPTY;
                 write_flag = true;
             }
-            else if  (FWUP_SCI_RECEIVE_BUFFER_FULL == s_sci_buffer_control[FWUP_SCI_CONTROL_BLOCK_B].buffer_full_flag)
+            else if (FWUP_SCI_RECEIVE_BUFFER_FULL == s_sci_buffer_control[FWUP_SCI_CONTROL_BLOCK_B].buffer_full_flag)
             {
                 memcpy(firm_data, s_sci_buffer_control[FWUP_SCI_CONTROL_BLOCK_B].buffer, FWUP_WRITE_BLOCK_SIZE);
                 s_sci_buffer_control[FWUP_SCI_CONTROL_BLOCK_B].buffer_full_flag = FWUP_SCI_RECEIVE_BUFFER_EMPTY;
                 write_flag = true;
+            }
+            else
+            {
+                ;  /* Do nothing */
             }
 
             if (true == write_flag)
             {
                 uint32_t u_offset;
                 fwup_update_status(FWUP_STATE_FLASH_WRITE_WAIT);
-                u_offset = s_load_fw_control_block.total_image_length;
-                i_bytes_written = R_FWUP_WriteBlock(&g_file_context, s_load_fw_control_block.total_image_length,
+                u_offset        = s_load_fw_control_block.total_image_length;
+                i_bytes_written = R_FWUP_WriteBlock(&s_file_context, s_load_fw_control_block.total_image_length,
                                                     firm_data, FWUP_WRITE_BLOCK_SIZE);
                 if (i_bytes_written < 0)
                 {
-                    OTA_LOG_L1( "[%s] ERROR: (%d) writing file block\r\n", OTA_METHOD_NAME, i_bytes_written );
+                    OTA_LOG_L1("[%s] ERROR: (%d) writing file block\r\n", OTA_METHOD_NAME, i_bytes_written);
                     ret = FWUP_FAIL;
                 }
                 else
@@ -520,11 +549,13 @@ fwup_err_t R_FWUP_Operation(void)
             }
             break;
         case FWUP_STATE_FLASH_WRITE_WAIT:
+
             /* Waiting for writing to Flash */
             ret = FWUP_IN_PROGRESS;
             break;
         case FWUP_STATE_FLASH_WRITE_COMPLETE:
             OTA_LOG_L1("OK\r\n");
+
             /* Writing to Flash completed */
             if (BOOT_LOADER_TOTAL_UPDATE_SIZE == s_load_fw_control_block.total_image_length)
             {
@@ -541,12 +572,12 @@ fwup_err_t R_FWUP_Operation(void)
 
             /* Update Signature information to OTA_FileContext */
             p_block_header = (st_fwup_control_block_t *)sp_fwup_control_block_bank1;
-            p_sig.usSize = p_block_header->signature_size;
+            p_sig.usSize   = p_block_header->signature_size;
             memcpy(p_sig.ucData, p_block_header->signature, kOTA_MaxSignatureSize);
-            g_file_context.pxSignature = &p_sig;
+            s_file_context.pxSignature = &p_sig;
 
             /* Perform signature verification, and close process */
-            if (kOTA_Err_None == R_FWUP_CloseFile(&g_file_context))
+            if (kOTA_Err_None == R_FWUP_CloseFile(&s_file_context))
             {
                 OTA_LOG_L1("[%s] Check signature of update firmware is complete.\r\n", OTA_METHOD_NAME);
                 R_FWUP_SetPlatformImageState(eOTA_ImageState_Testing);
@@ -561,6 +592,7 @@ fwup_err_t R_FWUP_Operation(void)
             }
             break;
         case FWUP_STATE_FINALIZE:
+
             /* Already Firmware update completed */
             ret = FWUP_SUCCESS;
             break;
@@ -592,7 +624,7 @@ fwup_err_t R_FWUP_SetEndOfLife(void)
     uint32_t length;
     flash_err_t flash_err;
 
-    DEFINE_OTA_METHOD_NAME( "R_FWUP_SetEndOfLife" );
+    DEFINE_OTA_METHOD_NAME("R_FWUP_SetEndOfLife");
 
     if (false == g_is_opened)
     {
@@ -609,21 +641,24 @@ fwup_err_t R_FWUP_SetEndOfLife(void)
 #if (FLASH_CFG_DATA_FLASH_BGO == 1)
     flash_interrupt_config_t cb_func_info;
 
-    cb_func_info.pcallback = ota_header_flashing_callback;
+    cb_func_info.pcallback    = ota_header_flashing_callback;
     cb_func_info.int_priority = FLASH_INTERRUPT_PRIORITY;
-    flash_err = fwup_flash_set_callback((void *)&cb_func_info);
+    flash_err                 = fwup_flash_set_callback((void *)&cb_func_info);
     if(FLASH_SUCCESS == flash_err)
     {
         gs_header_flashing_task = OTA_FLASHING_IN_PROGRESS;
         if (fwup_flash_erase((flash_block_address_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_ERASE_ADDRESS,
                 BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER) == FLASH_SUCCESS)
         {
-            while (OTA_FLASHING_IN_PROGRESS == gs_header_flashing_task);
-            OTA_LOG_L1( "[%s] erase install area (code flash):OK\r\n", OTA_METHOD_NAME );
+            while (OTA_FLASHING_IN_PROGRESS == gs_header_flashing_task)
+            {
+                ;
+            }
+            OTA_LOG_L1("[%s] erase install area (code flash):OK\r\n", OTA_METHOD_NAME);
         }
         else
         {
-            OTA_LOG_L1( "[%s] erase install area (code flash):NG\r\n", OTA_METHOD_NAME );
+            OTA_LOG_L1("[%s] erase install area (code flash):NG\r\n", OTA_METHOD_NAME);
             ret = FWUP_ERR_FLASH;
         }
     }
@@ -648,22 +683,28 @@ fwup_err_t R_FWUP_SetEndOfLife(void)
     {
         /* Set EOL to image flag of bank1. */
         memcpy(block, (const void *)sp_fwup_control_block_bank1, BOOT_LOADER_USER_FIRMWARE_HEADER_LENGTH);
-        p_block_header = (st_fwup_control_block_t *)block;
+        p_block_header             = (st_fwup_control_block_t *)block;
         p_block_header->image_flag = LIFECYCLE_STATE_EOL;
-        length = BOOT_LOADER_USER_FIRMWARE_HEADER_LENGTH;
+        length                     = BOOT_LOADER_USER_FIRMWARE_HEADER_LENGTH;
 
 #if (FLASH_CFG_DATA_FLASH_BGO == 1)
         /* Write new image_flag and new signature to Header. */
         gs_header_flashing_task = OTA_FLASHING_IN_PROGRESS;
-        flash_err = fwup_flash_write((uint32_t)block, (uint32_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS, length);
-        if(FLASH_SUCCESS != flash_err)
+        flash_err               = fwup_flash_write((uint32_t)block,
+                                    (uint32_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS,
+                                    length);
+
+        if (FLASH_SUCCESS != flash_err)
         {
             ret = FWUP_ERR_FLASH;
         }
         else
         {
-            while (OTA_FLASHING_IN_PROGRESS == gs_header_flashing_task);
-            OTA_LOG_L1( "[%s] update bank1 LIFECYCLE_STATE to [LIFECYCLE_STATE_EOL]\r\n", OTA_METHOD_NAME );
+            while (OTA_FLASHING_IN_PROGRESS == gs_header_flashing_task)
+            {
+                ;
+            }
+            OTA_LOG_L1("[%s] update bank1 LIFECYCLE_STATE to [LIFECYCLE_STATE_EOL]\r\n", OTA_METHOD_NAME);
             s_load_fw_control_block.eSavedAgentState = eOTA_ImageState_EOL;
         }
 #else
@@ -678,7 +719,7 @@ fwup_err_t R_FWUP_SetEndOfLife(void)
             OTA_LOG_L1( "[%s] update bank1 LIFECYCLE_STATE to [LIFECYCLE_STATE_EOL]\r\n", OTA_METHOD_NAME );
             s_load_fw_control_block.eSavedAgentState = eOTA_ImageState_EOL;
         }
-#endif /* FLASH_CFG_DATA_FLASH_BGO */
+#endif /* FLASH_CFG_DATA_FLASH_BGO == 1 */
     }
     return ret;
 }
@@ -706,29 +747,29 @@ void R_FWUP_SoftwareReset(void)
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT != FWUP_IMPLEMENTATION_BOOTLOADER)
 OTA_Err_t R_FWUP_CreateFileForRx( OTA_FileContext_t * const C )
 {
-    DEFINE_OTA_METHOD_NAME( "R_FWUP_CreateFileForRx" );
+    DEFINE_OTA_METHOD_NAME("R_FWUP_CreateFileForRx");
     OTA_LOG_L1("[%s] is called.\r\n", OTA_METHOD_NAME);
     OTA_Err_t eResult = kOTA_Err_Uninitialized;
 
-    if( C != NULL )
+    if (NULL != C)
     {
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
 #if (FLASH_CFG_CODE_FLASH_BGO == 1)
         fwup_flash_close();
 #endif
-        if(fwup_flash_open() == FLASH_SUCCESS)
+        if (fwup_flash_open() == FLASH_SUCCESS)
         {
-            s_load_fw_control_block.OTA_FileContext = C;
+            s_load_fw_control_block.OTA_FileContext    = C;
             s_load_fw_control_block.total_image_length = 0;
-            s_load_fw_control_block.eSavedAgentState = eOTA_ImageState_Unknown;
-            OTA_LOG_L1( "[%s] Receive file created.\r\n", OTA_METHOD_NAME );
-            C->pucFile = (uint8_t *)&s_load_fw_control_block;
-            eResult = kOTA_Err_None;
+            s_load_fw_control_block.eSavedAgentState   = eOTA_ImageState_Unknown;
+            OTA_LOG_L1("[%s] Receive file created.\r\n", OTA_METHOD_NAME);
+            C->pucFile = (uint8_t *) &s_load_fw_control_block;
+            eResult    = kOTA_Err_None;
         }
         else
         {
             eResult = kOTA_Err_RxFileCreateFailed;
-            OTA_LOG_L1( "[%s] ERROR - R_FLASH_Open() returns error.\r\n", OTA_METHOD_NAME );
+            OTA_LOG_L1("[%s] ERROR - R_FLASH_Open() returns error.\r\n", OTA_METHOD_NAME);
         }
 #elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
         if( C->pucFilePath != NULL )
@@ -794,7 +835,7 @@ OTA_Err_t R_FWUP_CreateFileForRx( OTA_FileContext_t * const C )
     else
     {
         eResult = kOTA_Err_RxFileCreateFailed;
-        OTA_LOG_L1( "[%s] ERROR - Invalid context provided.\r\n", OTA_METHOD_NAME );
+        OTA_LOG_L1("[%s] ERROR - Invalid context provided.\r\n", OTA_METHOD_NAME);
     }
 
     return eResult;
@@ -803,12 +844,12 @@ OTA_Err_t R_FWUP_CreateFileForRx( OTA_FileContext_t * const C )
 
 OTA_Err_t R_FWUP_Abort( OTA_FileContext_t * const C )
 {
-    DEFINE_OTA_METHOD_NAME( "R_FWUP_Abort" );
+    DEFINE_OTA_METHOD_NAME("R_FWUP_Abort");
     OTA_LOG_L1("[%s] is called.\r\n", OTA_METHOD_NAME);
 
     OTA_Err_t eResult = kOTA_Err_None;
 
-    if( ota_context_validate(C) == R_OTA_ERR_INVALID_CONTEXT )
+    if (ota_context_validate(C) == R_OTA_ERR_INVALID_CONTEXT)
     {
         eResult = kOTA_Err_FileClose;
     }
@@ -850,17 +891,17 @@ OTA_Err_t R_FWUP_Abort( OTA_FileContext_t * const C )
 /*-----------------------------------------------------------*/
 
 /* Write a block of data to the specified file. */
-int16_t R_FWUP_WriteBlock( OTA_FileContext_t * const C,
+int16_t R_FWUP_WriteBlock(OTA_FileContext_t * const C,
                             uint32_t ulOffset,
                             uint8_t * const pacData,
-                            uint32_t ulBlockSize )
+                            uint32_t ulBlockSize)
 {
     int16_t sNumBytesWritten = R_OTA_ERR_QUEUE_SEND_FAIL;
 
-    DEFINE_OTA_METHOD_NAME( "R_FWUP_WriteBlock" );
+    DEFINE_OTA_METHOD_NAME("R_FWUP_WriteBlock");
     OTA_LOG_L1("[%s] is called.\r\n", OTA_METHOD_NAME);
 
-    #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
+#if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
     st_flash_block_t flash_block;
     static uint8_t flash_block_array[FLASH_CF_MIN_PGM_SIZE];
     uint8_t *packet_buffer;
@@ -939,9 +980,9 @@ int16_t R_FWUP_WriteBlock( OTA_FileContext_t * const C,
 
     xSemaphoreGive(xSemaphoreWriteBlock);
 #elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
-    if (FLASH_SUCCESS == ota_flashing_task(pacData, ulOffset, ulBlockSize))
+    if (ota_flashing_task(pacData, ulOffset, ulBlockSize) == FLASH_SUCCESS)
     {
-        sNumBytesWritten = ( int16_t ) ulBlockSize;
+        sNumBytesWritten = (int16_t) ulBlockSize;
     }
     else
     {
@@ -956,11 +997,11 @@ int16_t R_FWUP_WriteBlock( OTA_FileContext_t * const C,
 }
 /*-----------------------------------------------------------*/
 
-OTA_Err_t R_FWUP_CloseFile( OTA_FileContext_t * const C )
+OTA_Err_t R_FWUP_CloseFile(OTA_FileContext_t * const C)
 {
     OTA_Err_t eResult = kOTA_Err_None;
 
-    DEFINE_OTA_METHOD_NAME( "R_FWUP_CloseFile" );
+    DEFINE_OTA_METHOD_NAME("R_FWUP_CloseFile");
 
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
     /* Check State transit monitoring flag */
@@ -975,12 +1016,12 @@ OTA_Err_t R_FWUP_CloseFile( OTA_FileContext_t * const C )
         fwup_update_status(FWUP_STATE_CHECK_SIGNATURE);   /* Update the firmware update status */
     }
 #endif
-    if( ota_context_validate(C) == R_OTA_ERR_INVALID_CONTEXT )
+    if (ota_context_validate(C) == R_OTA_ERR_INVALID_CONTEXT)
     {
         eResult = kOTA_Err_FileClose;
     }
 
-    if( C->pxSignature != NULL )
+    if (NULL != C->pxSignature)
     {
         eResult = R_FWUP_CheckFileSignature(C);
     }
@@ -1064,9 +1105,9 @@ OTA_Err_t R_FWUP_CloseFile( OTA_FileContext_t * const C )
 }
 /*-----------------------------------------------------------*/
 
-OTA_Err_t R_FWUP_CheckFileSignature( OTA_FileContext_t * const C )
+OTA_Err_t R_FWUP_CheckFileSignature(OTA_FileContext_t * const C)
 {
-    DEFINE_OTA_METHOD_NAME( "R_FWUP_CheckFileSignature" );
+    DEFINE_OTA_METHOD_NAME("R_FWUP_CheckFileSignature");
 
     OTA_Err_t eResult;
 
@@ -1120,7 +1161,7 @@ OTA_Err_t R_FWUP_CheckFileSignature( OTA_FileContext_t * const C )
             sp_fwup_control_block_bank1->signature,
             sp_fwup_control_block_bank1->signature_size);
 
-    if(0 == verification_result)
+    if (0 == verification_result)
     {
         eResult = kOTA_Err_None;
     }
@@ -1282,17 +1323,17 @@ uint8_t * R_FWUP_ReadAndAssumeCertificate( const uint8_t * const pucCertName,
 
 /*-----------------------------------------------------------*/
 
-OTA_Err_t R_FWUP_ResetDevice( void )
+OTA_Err_t R_FWUP_ResetDevice(void)
 {
     DEFINE_OTA_METHOD_NAME("R_FWUP_ResetDevice");
 
-    OTA_LOG_L1( "[%s] Resetting the device.\r\n", OTA_METHOD_NAME );
+    OTA_LOG_L1("[%s] Resetting the device.\r\n", OTA_METHOD_NAME);
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
-    if (eOTA_ImageState_EOL == s_load_fw_control_block.eSavedAgentState && FLASH_CFG_DATA_FLASH_BGO == 1)
+    if ((eOTA_ImageState_EOL == s_load_fw_control_block.eSavedAgentState) && (FLASH_CFG_DATA_FLASH_BGO == 1))
     {
         /* If the status is rejected, aborted, or error, swap bank and return to the previous image.
            Then the boot loader will start and erase the image that failed to update. */
-        OTA_LOG_L1( "[%s] Swap bank...\r\n", OTA_METHOD_NAME );
+        OTA_LOG_L1("[%s] Swap bank...\r\n", OTA_METHOD_NAME);
         R_BSP_SET_PSW(0);
         fwup_interrupts_disable();
         fwup_flash_close();
@@ -1301,7 +1342,10 @@ OTA_Err_t R_FWUP_ResetDevice( void )
         fwup_register_protect_disable();
         fwup_software_delay_ms(5000);
         R_BSP_SoftwareReset();
-        while(1);   /* software reset */
+        while (1)
+        {
+            ;   /* software reset */
+        }
     }
     else
     {
@@ -1311,15 +1355,18 @@ OTA_Err_t R_FWUP_ResetDevice( void )
         fwup_register_protect_disable();
         fwup_software_delay_ms(5000);
         R_BSP_SoftwareReset();
-        while(1);    /* software reset */
+        while (1)
+        {
+            ;    /* software reset */
+        }
     }
-#else
+#else  /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS */
     /* Software reset issued (Not swap bank) */
     R_BSP_SET_PSW(0);
     fwup_interrupts_disable();
     fwup_register_protect_disable();
     R_BSP_SoftwareReset();
-    while(1);    /* software reset */
+    while (1);    /* software reset */
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS */
 
     /* We shouldn't actually get here if the board supports the auto reset.
@@ -1329,11 +1376,11 @@ OTA_Err_t R_FWUP_ResetDevice( void )
 }
 /*-----------------------------------------------------------*/
 
-OTA_Err_t R_FWUP_ActivateNewImage( void )
+OTA_Err_t R_FWUP_ActivateNewImage(void)
 {
     DEFINE_OTA_METHOD_NAME("R_FWUP_ActivateNewImage");
 
-    OTA_LOG_L1( "[%s] Changing the Startup Bank\r\n", OTA_METHOD_NAME );
+    OTA_LOG_L1("[%s] Changing the Startup Bank\r\n", OTA_METHOD_NAME);
 
     /* reset for self testing */
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
@@ -1349,11 +1396,11 @@ OTA_Err_t R_FWUP_ActivateNewImage( void )
 }
 /*-----------------------------------------------------------*/
 
-OTA_Err_t R_FWUP_SetPlatformImageState( OTA_ImageState_t eState )
+OTA_Err_t R_FWUP_SetPlatformImageState(OTA_ImageState_t eState)
 {
     flash_interrupt_config_t cb_func_info;
 
-    DEFINE_OTA_METHOD_NAME( "R_FWUP_SetPlatformImageState" );
+    DEFINE_OTA_METHOD_NAME("R_FWUP_SetPlatformImageState");
     OTA_LOG_L1("[%s] is called.\r\n", OTA_METHOD_NAME);
 
     OTA_Err_t eResult = kOTA_Err_Uninitialized;
@@ -1366,39 +1413,42 @@ OTA_Err_t R_FWUP_SetPlatformImageState( OTA_ImageState_t eState )
             case eOTA_ImageState_Accepted:
                 fwup_flash_close();
                 fwup_flash_open();
-                cb_func_info.pcallback = ota_header_flashing_callback;
+                cb_func_info.pcallback    = ota_header_flashing_callback;
                 cb_func_info.int_priority = FLASH_INTERRUPT_PRIORITY;
                 fwup_flash_set_callback((void *)&cb_func_info);
                 gs_header_flashing_task = OTA_FLASHING_IN_PROGRESS;
                 if (fwup_flash_erase((flash_block_address_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_ERASE_ADDRESS,
                                     BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER) == FLASH_SUCCESS)
                 {
-                    while (OTA_FLASHING_IN_PROGRESS == gs_header_flashing_task);
-                    OTA_LOG_L1( "[%s] erase install area (code flash):OK\r\n", OTA_METHOD_NAME );
-                    OTA_LOG_L1( "[%s] Accepted and committed final image.\r\n", OTA_METHOD_NAME );
+                    while (OTA_FLASHING_IN_PROGRESS == gs_header_flashing_task)
+                    {
+                        ;
+                    }
+                    OTA_LOG_L1("[%s] erase install area (code flash):OK\r\n", OTA_METHOD_NAME);
+                    OTA_LOG_L1("[%s] Accepted and committed final image.\r\n", OTA_METHOD_NAME);
                     eResult = kOTA_Err_None;
                 }
                 else
                 {
-                    OTA_LOG_L1( "[%s] erase install area (code flash):NG\r\n", OTA_METHOD_NAME );
-                    OTA_LOG_L1( "[%s] Accepted final image but commit failed.\r\n", OTA_METHOD_NAME );
+                    OTA_LOG_L1("[%s] erase install area (code flash):NG\r\n", OTA_METHOD_NAME);
+                    OTA_LOG_L1("[%s] Accepted final image but commit failed.\r\n", OTA_METHOD_NAME);
                     eResult = kOTA_Err_CommitFailed;
                 }
                 break;
             case eOTA_ImageState_Rejected:
-                OTA_LOG_L1( "[%s] Rejected image.\r\n", OTA_METHOD_NAME );
+                OTA_LOG_L1("[%s] Rejected image.\r\n", OTA_METHOD_NAME);
                 eResult = kOTA_Err_None;
                 break;
             case eOTA_ImageState_Aborted:
-                OTA_LOG_L1( "[%s] Aborted image.\r\n", OTA_METHOD_NAME );
+                OTA_LOG_L1("[%s] Aborted image.\r\n", OTA_METHOD_NAME);
                 eResult = kOTA_Err_None;
                 break;
             case eOTA_ImageState_Testing:
-                OTA_LOG_L1( "[%s] Testing.\r\n", OTA_METHOD_NAME );
+                OTA_LOG_L1("[%s] Testing.\r\n", OTA_METHOD_NAME);
                 eResult = kOTA_Err_None;
                 break;
             default:
-                OTA_LOG_L1( "[%s] Unknown state received %d.\r\n", OTA_METHOD_NAME, ( int32_t ) eState );
+                OTA_LOG_L1("[%s] Unknown state received %d.\r\n", OTA_METHOD_NAME, (int32_t)eState);
                 eResult = kOTA_Err_BadImageState;
                 break;
         }
@@ -1408,23 +1458,24 @@ OTA_Err_t R_FWUP_SetPlatformImageState( OTA_ImageState_t eState )
         switch (eState)
         {
             case eOTA_ImageState_Accepted:
-                OTA_LOG_L1( "[%s] Not in commit pending so can not mark image valid (%d).\r\n", OTA_METHOD_NAME);
+                OTA_LOG_L1("[%s] Not in commit pending so can not mark image valid (%d).\r\n",
+                        OTA_METHOD_NAME, (int32_t)eState);
                 eResult = kOTA_Err_CommitFailed;
                 break;
             case eOTA_ImageState_Rejected:
-                OTA_LOG_L1( "[%s] Rejected image.\r\n", OTA_METHOD_NAME );
+                OTA_LOG_L1("[%s] Rejected image.\r\n", OTA_METHOD_NAME);
                 eResult = kOTA_Err_None;
                 break;
             case eOTA_ImageState_Aborted:
-                OTA_LOG_L1( "[%s] Aborted image.\r\n", OTA_METHOD_NAME );
+                OTA_LOG_L1("[%s] Aborted image.\r\n", OTA_METHOD_NAME);
                 eResult = kOTA_Err_None;
                 break;
             case eOTA_ImageState_Testing:
-                OTA_LOG_L1( "[%s] Testing.\r\n", OTA_METHOD_NAME );
+                OTA_LOG_L1("[%s] Testing.\r\n", OTA_METHOD_NAME);
                 eResult = kOTA_Err_None;
                 break;
             default:
-                OTA_LOG_L1( "[%s] Unknown state received %d.\r\n", OTA_METHOD_NAME, ( int32_t ) eState );
+                OTA_LOG_L1("[%s] Unknown state received %d.\r\n", OTA_METHOD_NAME, (int32_t)eState);
                 eResult = kOTA_Err_BadImageState;
                 break;
         }
@@ -1436,9 +1487,9 @@ OTA_Err_t R_FWUP_SetPlatformImageState( OTA_ImageState_t eState )
 }
 /*-----------------------------------------------------------*/
 
-OTA_PAL_ImageState_t R_FWUP_GetPlatformImageState( void )
+OTA_PAL_ImageState_t R_FWUP_GetPlatformImageState(void)
 {
-    DEFINE_OTA_METHOD_NAME( "R_FWUP_GetPlatformImageState" );
+    DEFINE_OTA_METHOD_NAME("R_FWUP_GetPlatformImageState");
     OTA_LOG_L1("[%s] is called.\r\n", OTA_METHOD_NAME);
 
     OTA_PAL_ImageState_t ePalState = eOTA_PAL_ImageState_Unknown;
@@ -1465,22 +1516,6 @@ OTA_PAL_ImageState_t R_FWUP_GetPlatformImageState( void )
     return ePalState; /*lint !e64 !e480 !e481 I/O calls and return type are used per design. */
 }
 /*-----------------------------------------------------------*/
-
-/***********************************************************************************************************************
- * Function Name: R_FWUP_GetVersion
- *******************************************************************************************************************//**
- * @brief   Returns the current version of the FWUP FIT module.
- * @return  Version of the FWUP FIT module.
- * @details This function will return the version of the currently installed FIT module.
- *          The version number is encoded where the top 2 bytes are the major version number
- *          and the bottom 2 bytes are the minor version number.
- *          For example, Version 4.25 would be returned as 0x00040019.
- */
-uint32_t R_FWUP_GetVersion (void)
-{
-    /* These version macros are defined in r_flash_if.h. */
-    return ((((uint32_t)FWUP_VERSION_MAJOR) << 16) | (uint32_t)FWUP_VERSION_MINOR);
-}
 
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
 /* Provide access to private members for testing. */
@@ -1611,9 +1646,9 @@ static CK_RV prvGetCertificate( const char * pcLabelName,
     /* Fix me for other OS environment */
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS */
 
-static int32_t ota_context_validate( OTA_FileContext_t * C )
+static int32_t ota_context_validate(OTA_FileContext_t * C)
 {
-    return ( NULL != C );
+    return (NULL != C);
 }
 
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
@@ -1698,9 +1733,9 @@ static int32_t ota_context_update_user_firmware_header( OTA_FileContext_t * C )
     /* Fix me for other OS environment */
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS */
 
-static void ota_context_close( OTA_FileContext_t * C )
+static void ota_context_close(OTA_FileContext_t * C)
 {
-    if( NULL != C )
+    if (NULL != C)
     {
         C->pucFile = NULL;
     }
@@ -1935,22 +1970,22 @@ static st_fragmented_block_list_t *fragmented_flash_block_list_assemble(st_fragm
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS */
 
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
-static flash_err_t ota_flashing_task( uint8_t *p_packet, uint32_t ulOffset, uint32_t length )
+static flash_err_t ota_flashing_task(uint8_t *p_packet, uint32_t ulOffset, uint32_t length)
 {
-    flash_err_t flash_err;
-    static uint8_t block[FWUP_WRITE_BLOCK_SIZE];
+    flash_err_t    flash_err;
+    static uint8_t s_block[FWUP_WRITE_BLOCK_SIZE];
 
-    DEFINE_OTA_METHOD_NAME( "ota_flashing_task" );
+    DEFINE_OTA_METHOD_NAME("ota_flashing_task");
 
-    memcpy(block, p_packet, length);
-    flash_err = fwup_flash_write((uint32_t)block,
+    memcpy(s_block, p_packet, length);
+    flash_err = fwup_flash_write((uint32_t)s_block,
                                     (uint32_t)(ulOffset + (uint32_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS),
                                     length);
-    if(length != FWUP_WRITE_BLOCK_SIZE)
+    if (FWUP_WRITE_BLOCK_SIZE != length)
     {
         R_BSP_NOP();
     }
-    if(flash_err != FLASH_SUCCESS)
+    if (FLASH_SUCCESS != flash_err)
     {
         R_BSP_NOP();  /* When an error occurs, consider an error notification method according to the system. */
     }
@@ -1995,15 +2030,15 @@ static void ota_flashing_task( void * pvParameters )
 static void ota_flashing_callback(void *event)
 {
 #if (FLASH_CFG_CODE_FLASH_BGO == 1)
-    uint32_t event_code;
-    event_code = *((uint32_t*)event);
+    flash_int_cb_args_t * p_event = event;
 
-    if((event_code != FLASH_INT_EVENT_WRITE_COMPLETE) || (event_code == FLASH_INT_EVENT_ERASE_COMPLETE))
+    if ((FLASH_INT_EVENT_WRITE_COMPLETE != p_event->event) ||
+        (FLASH_INT_EVENT_ERASE_COMPLETE == p_event->event))
     {
         R_BSP_NOP(); /* trap */
     }
-    if (event_code == FLASH_INT_EVENT_WRITE_COMPLETE &&
-            FWUP_STATE_FLASH_WRITE_WAIT == fwup_get_status())
+    if ((FLASH_INT_EVENT_WRITE_COMPLETE == p_event->event) &&
+        (fwup_get_status()              == FWUP_STATE_FLASH_WRITE_WAIT))
     {
         fwup_update_status(FWUP_STATE_FLASH_WRITE_COMPLETE);  /* Update the firmware update status */
     }
@@ -2019,12 +2054,12 @@ static void ota_flashing_callback(void *event)
 static void ota_header_flashing_callback(void *event)
 {
 #if (FLASH_CFG_CODE_FLASH_BGO == 1)
-    uint32_t event_code;
-    event_code = *((uint32_t*)event);
+    flash_int_cb_args_t * p_event = event;
 
     gs_header_flashing_task = OTA_FLASHING_COMPLETE;
 
-    if((event_code != FLASH_INT_EVENT_WRITE_COMPLETE) || (event_code == FLASH_INT_EVENT_ERASE_COMPLETE))
+    if ((FLASH_INT_EVENT_WRITE_COMPLETE != p_event->event) ||
+        (FLASH_INT_EVENT_ERASE_COMPLETE == p_event->event))
     {
         R_BSP_NOP(); /* trap */
     }
@@ -2044,7 +2079,7 @@ static void ota_header_flashing_callback(void *event)
  *          This is a function for abstracting the flash access.
  *          Note that this function must be called before any other API function.
  */
-flash_err_t fwup_flash_open (void)
+flash_err_t fwup_flash_open(void)
 {
     flash_err_t ret = FLASH_SUCCESS;
 
@@ -2069,7 +2104,7 @@ flash_err_t fwup_flash_open (void)
  *          It disables the flash interrupts (if enabled) and sets the driver to an uninitialized state.
  *          This is a function for abstracting the flash access.
  */
-flash_err_t fwup_flash_close (void)
+flash_err_t fwup_flash_close(void)
 {
     flash_err_t ret = FLASH_SUCCESS;
 
@@ -2100,9 +2135,9 @@ flash_err_t fwup_flash_close (void)
  * @details       Register the callback function.
  *                This is a function for abstracting the flash access.
  */
-flash_err_t fwup_flash_set_callback (flash_interrupt_config_t *cb_func_info)
+flash_err_t fwup_flash_set_callback(flash_interrupt_config_t *cb_func_info)
 {
-    flash_err_t ret;
+    flash_err_t ret = FLASH_SUCCESS;
 
 #if (FLASH_CFG_CODE_FLASH_BGO == 1)
     ret = R_FLASH_Control(FLASH_CMD_SET_BGO_CALLBACK, (void *)cb_func_info);
@@ -2134,7 +2169,7 @@ flash_err_t fwup_flash_set_callback (flash_interrupt_config_t *cb_func_info)
 #if (FWUP_FLASH_BANK_MODE == 0)  /* Dual bank mode */
 flash_err_t fwup_flash_get_bank_info(flash_bank_t *bank_info)
 {
-    flash_err_t ret;
+    flash_err_t ret = FLASH_SUCCESS;
 
 #if (BSP_MCU_SERIES_RX700 || BSP_MCU_SERIES_RX600)
     ret = R_FLASH_Control(FLASH_CMD_BANK_GET, bank_info);
@@ -2155,7 +2190,7 @@ flash_err_t fwup_flash_get_bank_info(flash_bank_t *bank_info)
  * @details       Switch boot bank.
  *                This is a function for abstracting the flash access.
  */
-void fwup_flash_set_bank_toggle (void)
+void fwup_flash_set_bank_toggle(void)
 {
 #if (FWUP_FLASH_BANK_MODE == 0)  /* Dual bank mode */
     (void)R_FLASH_Control(FLASH_CMD_BANK_TOGGLE, NULL);
@@ -2222,20 +2257,20 @@ static flash_err_t fwup_flash_accesswindow_set(flash_access_window_config_t * ad
  *            the MCU device specified in the r_bsp module.
  *            This is a function for abstracting the flash access.
  */
-flash_err_t fwup_flash_erase (flash_block_address_t block_start_address, uint32_t num_blocks)
+flash_err_t fwup_flash_erase(flash_block_address_t block_start_address, uint32_t num_blocks)
 {
     flash_err_t ret;
 
 #if (FLASH_CFG_CODE_FLASH_BGO == 1)
     ret = R_FLASH_Erase(block_start_address, num_blocks);
 #elif (FLASH_CFG_CODE_FLASH_BGO == 0)
-#if ((defined(MCU_RX111) || defined(MCU_RX113) || defined(MCU_RX130)) && (MCU_ROM_SIZE_BYTES > 0x40000L)) // for memory plain
-    // The RX111, RX113, and RX130 code flash products with more than 256KB have two memory plains.
-    // Code flashes that cross memory plain boundaries cannot be erased.
+#if ((defined(MCU_RX111) || defined(MCU_RX113) || defined(MCU_RX130)) && (MCU_ROM_SIZE_BYTES > 0x40000L)) /* for memory plain */
+    /* The RX111, RX113, and RX130 code flash products with more than 256KB have two memory plains. */
+    /* Code flashes that cross memory plain boundaries cannot be erased. */
     uint32_t i;
 
     if ((block_start_address <= FLASH_CF_BLOCK_END) &&
-            (block_start_address >= FLASH_CF_LOWEST_VALID_BLOCK))    // Check code flash address.
+            (block_start_address >= FLASH_CF_LOWEST_VALID_BLOCK))    /* Check code flash address. */
     {
         for (i = 0; i < num_blocks; i++)
         {
@@ -2246,7 +2281,7 @@ flash_err_t fwup_flash_erase (flash_block_address_t block_start_address, uint32_
             {
                 break;
             }
-    }
+        }
     }
     else
     {
@@ -2295,7 +2330,7 @@ flash_err_t fwup_flash_erase (flash_block_address_t block_start_address, uint32_
  *            whether the code flash or data flash is being written to.
  *            This is a function for abstracting the flash access.
  */
-flash_err_t fwup_flash_write (uint32_t src_address, uint32_t dest_address, uint32_t num_bytes)
+flash_err_t fwup_flash_write(uint32_t src_address, uint32_t dest_address, uint32_t num_bytes)
 {
     flash_err_t ret;
 
@@ -2330,7 +2365,7 @@ flash_err_t fwup_flash_write (uint32_t src_address, uint32_t dest_address, uint3
  *          This is a function for abstracting the Communication for firmware data download.
  *          Note that this function must be called before any other API function.
  */
-e_comm_err_t fwup_communication_open (void)
+e_comm_err_t fwup_communication_open(void)
 {
     e_comm_err_t ret = COMM_SUCCESS;
 #if (BSP_MCU_SERIES_RX700 || BSP_MCU_SERIES_RX600 || BSP_MCU_SERIES_RX200 || BSP_MCU_SERIES_RX100)
@@ -2341,12 +2376,12 @@ e_comm_err_t fwup_communication_open (void)
     sci_err_t my_sci_err;
 
     /* Set up the configuration data structure for asynchronous (UART) operation. */
-    my_sci_config.async.baud_rate = FWUP_CFG_SERIAL_TERM_SCI_BITRATE;
-    my_sci_config.async.clk_src = SCI_CLK_INT;
-    my_sci_config.async.data_size = SCI_DATA_8BIT;
-    my_sci_config.async.parity_en = SCI_PARITY_OFF;
-    my_sci_config.async.parity_type = SCI_EVEN_PARITY;
-    my_sci_config.async.stop_bits = SCI_STOPBITS_1;
+    my_sci_config.async.baud_rate    = FWUP_CFG_SERIAL_TERM_SCI_BITRATE;
+    my_sci_config.async.clk_src      = SCI_CLK_INT;
+    my_sci_config.async.data_size    = SCI_DATA_8BIT;
+    my_sci_config.async.parity_en    = SCI_PARITY_OFF;
+    my_sci_config.async.parity_type  = SCI_EVEN_PARITY;
+    my_sci_config.async.stop_bits    = SCI_STOPBITS_1;
     my_sci_config.async.int_priority = FWUP_CFG_SERIAL_TERM_SCI_INTERRUPT_PRIORITY;
 
     /* OPEN ASYNC CHANNEL
@@ -2389,7 +2424,7 @@ e_comm_err_t fwup_communication_open (void)
  * @details This function closes the Communication module.
  *          This is a function for abstracting the Communication for firmware data download.
  */
-e_comm_err_t fwup_communication_close (void)
+e_comm_err_t fwup_communication_close(void)
 {
     e_comm_err_t ret = COMM_SUCCESS;
 
@@ -2421,22 +2456,24 @@ return ret;
 
 static void fwup_communication_callback(void *pArgs)
 {
-    sci_cb_args_t   *p_args;
+    sci_cb_args_t * p_args;
 
     p_args = (sci_cb_args_t *)pArgs;
 
 #if (BSP_MCU_SERIES_RX700 || BSP_MCU_SERIES_RX600 || BSP_MCU_SERIES_RX200 || BSP_MCU_SERIES_RX100)
-#if (FWUP_CFG_COMMUNICATION_FUNCTION == FWUP_COMMUNICATION_SCI)  // Case of SCI.
-    if (SCI_EVT_RX_CHAR == p_args->event)
+#if (FWUP_CFG_COMMUNICATION_FUNCTION == FWUP_COMMUNICATION_SCI)  /* Case of SCI. */
+    switch (p_args->event)
     {
+    case SCI_EVT_RX_CHAR:
+
         /* From RXI interrupt; received character data is in p_args->byte */
-        if(s_sci_receive_control_block.p_sci_buffer_control->buffer_occupied_byte_size <
-                sizeof(s_sci_receive_control_block.p_sci_buffer_control->buffer) &&
-            s_sci_receive_control_block.p_sci_buffer_control->buffer_full_flag == FWUP_SCI_RECEIVE_BUFFER_EMPTY)
+        if ((s_sci_receive_control_block.p_sci_buffer_control->buffer_occupied_byte_size <
+                sizeof(s_sci_receive_control_block.p_sci_buffer_control->buffer)) &&
+            (FWUP_SCI_RECEIVE_BUFFER_EMPTY == s_sci_receive_control_block.p_sci_buffer_control->buffer_full_flag))
         {
             R_SCI_Receive(p_args->hdl, &s_sci_receive_control_block.p_sci_buffer_control->
                                         buffer[s_sci_receive_control_block.p_sci_buffer_control->
-                                        buffer_occupied_byte_size++],
+                                        buffer_occupied_byte_size++ ],
                                         1);
             if (s_sci_receive_control_block.p_sci_buffer_control->buffer_occupied_byte_size ==
                 sizeof(s_sci_receive_control_block.p_sci_buffer_control->buffer))
@@ -2453,44 +2490,44 @@ static void fwup_communication_callback(void *pArgs)
                 s_sci_receive_control_block.p_sci_buffer_control->buffer_full_flag = FWUP_SCI_RECEIVE_BUFFER_FULL;
                 if (FWUP_SCI_CONTROL_BLOCK_A == s_sci_receive_control_block.current_state)
                 {
-                    s_sci_receive_control_block.current_state = FWUP_SCI_CONTROL_BLOCK_B;
+                    s_sci_receive_control_block.current_state        = FWUP_SCI_CONTROL_BLOCK_B;
                     s_sci_receive_control_block.p_sci_buffer_control = &s_sci_buffer_control[FWUP_SCI_CONTROL_BLOCK_B];
                 }
                 else
                 {
-                    s_sci_receive_control_block.current_state = FWUP_SCI_CONTROL_BLOCK_A;
+                    s_sci_receive_control_block.current_state        = FWUP_SCI_CONTROL_BLOCK_A;
                     s_sci_receive_control_block.p_sci_buffer_control = &s_sci_buffer_control[FWUP_SCI_CONTROL_BLOCK_A];
                 }
             }
         }
-    }
-    else if (SCI_EVT_RXBUF_OVFL == p_args->event)
-    {
+        break;
+    case SCI_EVT_RXBUF_OVFL:
+
         /* From RXI interrupt; rx queue is full; 'lost' data is in p_args->byte
            You will need to increase buffer size or reduce baud rate */
         R_BSP_NOP();
-    }
-    else if (SCI_EVT_OVFL_ERR == p_args->event)
-    {
+        break;
+    case SCI_EVT_OVFL_ERR:
+
         /* From receiver overflow error interrupt; error data is in p_args->byte
            Error condition is cleared in calling interrupt routine */
         R_BSP_NOP();
-    }
-    else if (SCI_EVT_FRAMING_ERR == p_args->event)
-    {
+        break;
+    case SCI_EVT_FRAMING_ERR:
+
         /* From receiver framing error interrupt; error data is in p_args->byte
            Error condition is cleared in calling interrupt routine */
         R_BSP_NOP();
-    }
-    else if (SCI_EVT_PARITY_ERR == p_args->event)
-    {
+        break;
+    case SCI_EVT_PARITY_ERR:
+
         /* From receiver parity error interrupt; error data is in p_args->byte
            Error condition is cleared in calling interrupt routine */
         R_BSP_NOP();
-    }
-    else
-    {
-        /* Do nothing */
+        break;
+    default:
+        R_BSP_NOP();  /* Do nothing */
+        break;
     }
 #else /* FWUP_CFG_COMMUNICATION_FUNCTION == FWUP_COMMUNICATION_SCI */
     /* Fix me for other communication module */
@@ -2512,9 +2549,9 @@ static void fwup_communication_callback(void *pArgs)
  * @details Update the Firmware update status.
  *          Also update state transit flag.
  */
-void fwup_update_status (e_fwup_state_t state)
+void fwup_update_status(e_fwup_state_t state)
 {
-    s_fwup_state = state;
+    s_fwup_state                       = state;
     s_state_transit.state_transit_flag = true;
 }
 /**********************************************************************************************************************
@@ -2527,7 +2564,7 @@ void fwup_update_status (e_fwup_state_t state)
  * @brief   Return the current Firmware update status.
  * @brief   Return the current Firmware update status.
  */
-e_fwup_state_t fwup_get_status (void)
+e_fwup_state_t fwup_get_status(void)
 {
     return s_fwup_state;
 }
@@ -2544,7 +2581,7 @@ e_fwup_state_t fwup_get_status (void)
  * @details Open the State transit monitoring module, and some initial settings.
  *          This is a function for abstracting the State transit monitoring module.
  */
-e_state_monitoring_err_t fwup_state_monitoring_open (void)
+e_state_monitoring_err_t fwup_state_monitoring_open(void)
 {
     e_state_monitoring_err_t ret = MONI_SUCCESS;
 #if (BSP_MCU_SERIES_RX700 || BSP_MCU_SERIES_RX600 || BSP_MCU_SERIES_RX200 || BSP_MCU_SERIES_RX100)
@@ -2573,17 +2610,18 @@ e_state_monitoring_err_t fwup_state_monitoring_open (void)
  * @details Start the status monitoring by State transit monitoring module.
  *          This is a function for abstracting the State transit monitoring module.
  */
-e_state_monitoring_err_t fwup_state_monitoring_start (void)
+e_state_monitoring_err_t fwup_state_monitoring_start(void)
 {
     e_state_monitoring_err_t ret = MONI_SUCCESS;
 #if (BSP_MCU_SERIES_RX700 || BSP_MCU_SERIES_RX600 || BSP_MCU_SERIES_RX200 || BSP_MCU_SERIES_RX100)
     sys_time_err_t sys_time_api_error_code;
 
     /* Set System-timer for check status */
-    s_state_transit.check_status_counter = 0;
+    s_state_transit.check_status_counter     = 0;
     s_state_transit.state_transit_error_flag = STATE_MONITORING_IN_PROGRESS;
-    s_state_transit.last_secure_boot_state = s_fwup_state;
-    s_state_transit.state_transit_flag = true;
+    s_state_transit.last_secure_boot_state   = s_fwup_state;
+    s_state_transit.state_transit_flag       = true;
+
     sys_time_api_error_code = R_SYS_TIME_RegisterPeriodicCallback(fwup_state_monitoring_callback,
             MONITORING_STATUS_INTERVAL);
     if (SYS_TIME_SUCCESS != sys_time_api_error_code)
@@ -2608,7 +2646,7 @@ e_state_monitoring_err_t fwup_state_monitoring_start (void)
  * @details Close the all callback process of State transit monitoring module.
  *          This is a function for abstracting the System timer module.
  */
-e_state_monitoring_err_t fwup_state_monitoring_close (void)
+e_state_monitoring_err_t fwup_state_monitoring_close(void)
 {
     e_state_monitoring_err_t ret = MONI_SUCCESS;
 #if (BSP_MCU_SERIES_RX700 || BSP_MCU_SERIES_RX600 || BSP_MCU_SERIES_RX200 || BSP_MCU_SERIES_RX100)
@@ -2646,7 +2684,7 @@ e_state_monitoring_err_t fwup_state_monitoring_close (void)
  * @details Start the status monitoring by State transit monitoring module.
  *          This is a function for abstracting the State transit monitoring module.
  */
-e_state_monitoring_flag_t fwup_state_monitoring_is_error (void)
+e_state_monitoring_flag_t fwup_state_monitoring_is_error(void)
 {
     e_state_monitoring_flag_t ret = STATE_MONITORING_IN_PROGRESS;
 
@@ -2670,11 +2708,11 @@ e_state_monitoring_flag_t fwup_state_monitoring_is_error (void)
  * @brief   Callback function of State transit monitoring module.
  * @details Callback function of State transit monitoring module..
  */
-static void fwup_state_monitoring_callback (void)
+static void fwup_state_monitoring_callback(void)
 {
 #if (BSP_MCU_SERIES_RX700 || BSP_MCU_SERIES_RX600 || BSP_MCU_SERIES_RX200 || BSP_MCU_SERIES_RX100)
-    if ((s_fwup_state == s_state_transit.last_secure_boot_state) &&
-        (false == s_state_transit.state_transit_flag) &&
+    if ((s_fwup_state      == s_state_transit.last_secure_boot_state) &&
+        (false             == s_state_transit.state_transit_flag) &&
         (fwup_get_status() != FWUP_STATE_FINALIZE))
     {
 
@@ -2690,8 +2728,8 @@ static void fwup_state_monitoring_callback (void)
 
         /* Status chenged, or Status is same but changed */
         s_state_transit.last_secure_boot_state = fwup_get_status();
-        s_state_transit.check_status_counter = 0;
-        s_state_transit.state_transit_flag = false;
+        s_state_transit.check_status_counter   = 0;
+        s_state_transit.state_transit_flag     = false;
     }
 #else
     /* Fix me for other State transit monitoring module */
@@ -2707,7 +2745,7 @@ static void fwup_state_monitoring_callback (void)
  * @brief   Set interrupt disable.
  * @details Set interrupt disable.
  */
-void fwup_interrupts_disable (void)
+void fwup_interrupts_disable(void)
 {
 #if (BSP_MCU_SERIES_RX700 || BSP_MCU_SERIES_RX600 || BSP_MCU_SERIES_RX200 || BSP_MCU_SERIES_RX100)
     R_BSP_InterruptsDisable();
@@ -2725,7 +2763,7 @@ void fwup_interrupts_disable (void)
  * @brief   Callback function of State transit monitoring module.
  * @details Callback function of State transit monitoring module..
  */
-void fwup_register_protect_disable (void)
+void fwup_register_protect_disable(void)
 {
 #if (BSP_MCU_SERIES_RX700 || BSP_MCU_SERIES_RX600 || BSP_MCU_SERIES_RX200 || BSP_MCU_SERIES_RX100)
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);
@@ -3009,11 +3047,11 @@ bool fwup_get_boot_protect(void)
     if (access_window.start_addr == (uint32_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS &&
         access_window.end_addr == (uint32_t)BOOT_LOADER_LOW_ADDRESS)
     {
-    	ret = true;
+        ret = true;
     }
     else
     {
-    	ret = false;
+        ret = false;
     }
 #else
     /* Fix me for other flash type */
@@ -3023,12 +3061,12 @@ bool fwup_get_boot_protect(void)
 
 flash_err_t fwup_set_boot_protect(void)
 {
-#if (FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_1) // FLASH_TYPE_4, 1
-    flash_err_t ret;
+    flash_err_t ret = FLASH_SUCCESS;
+#if (FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_1) /* FLASH_TYPE_4, 1 */
     flash_access_window_config_t access_window;
 
     /* Set access window */
-#if (FWUP_FLASH_BANK_MODE == 0) // Dual mode
+#if (FWUP_FLASH_BANK_MODE == 0) /* Dual mode */
     access_window.start_addr = (uint32_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS;
     access_window.end_addr = (uint32_t)BOOT_LOADER_MIRROR_LOW_ADDRESS;
 #else    // Linear mode
@@ -3039,7 +3077,6 @@ flash_err_t fwup_set_boot_protect(void)
     /* Set access window, Set FSPR bit for boot protection also */
     ret = fwup_flash_accesswindow_set(&access_window);
 #elif (FLASH_TYPE == FLASH_TYPE_3) /* FLASH_TYPE_3 */
-    flash_err_t ret;
     flash_lockbit_config_t info;
 
     info.block_start_address = FLASH_CF_BLOCK_0;
@@ -3073,17 +3110,17 @@ flash_err_t fwup_set_boot_protect(void)
  * Arguments    :
  * Return Value : none
  **********************************************************************************************************************/
-int32_t fwup_verification_sha256_ecdsa (const uint8_t *pucData, uint32_t ulSize, const uint8_t *pucSignature,
+int32_t fwup_verification_sha256_ecdsa(const uint8_t *pucData, uint32_t ulSize, const uint8_t *pucSignature,
         uint32_t ulSignatureSize)
 {
-    int32_t x_result = -1;
-    uint8_t puc_hash[TC_SHA256_DIGEST_SIZE];
-    uint8_t data_length;
-    uint8_t public_key[64];
-    uint8_t binary[256];
-    uint8_t *p_head_pointer;
-    uint8_t *p_current_pointer;
-    uint8_t *p_tail_pointer;
+    int32_t   x_result = -1;
+    uint8_t   puc_hash[TC_SHA256_DIGEST_SIZE];
+    uint8_t   data_length;
+    uint8_t   public_key[64];
+    uint8_t   binary[256];
+    uint8_t * p_head_pointer;
+    uint8_t * p_current_pointer;
+    uint8_t * p_tail_pointer;
 
     /* Hash message */
     struct tc_sha256_state_struct x_ctx;
@@ -3092,17 +3129,17 @@ int32_t fwup_verification_sha256_ecdsa (const uint8_t *pucData, uint32_t ulSize,
     tc_sha256_final(puc_hash, &x_ctx);
 
     /* extract public key from g_code_signer_public_key (pem format) */
-    p_head_pointer = (uint8_t*) strstr((char*) g_code_signer_public_key, "-----BEGIN PUBLIC KEY-----");
+    p_head_pointer = (uint8_t*)strstr((char*)g_code_signer_public_key, "-----BEGIN PUBLIC KEY-----");
     if (p_head_pointer)
     {
         p_head_pointer += strlen("-----BEGIN PUBLIC KEY-----");
-        p_tail_pointer = (uint8_t*) strstr((char*) g_code_signer_public_key, "-----END PUBLIC KEY-----");
+        p_tail_pointer =  (uint8_t*)strstr((char*)g_code_signer_public_key, "-----END PUBLIC KEY-----");
         base64_decode(p_head_pointer, binary, p_tail_pointer - p_head_pointer);
         p_current_pointer = binary;
-        data_length = *(p_current_pointer + 1);
+        data_length       = *(p_current_pointer + 1);
         while (1)
         {
-            switch ( *p_current_pointer)
+            switch (*p_current_pointer)
             {
                 case 0x30: /* found "SEQUENCE" */
                     p_current_pointer += 2;
@@ -3148,7 +3185,7 @@ int32_t fwup_verification_sha256_ecdsa (const uint8_t *pucData, uint32_t ulSize,
  *                    Send data with SCI
  * Return Value : none
  **********************************************************************************************************************/
-void my_sw_charput_function (uint8_t data)
+void my_sw_charput_function(uint8_t data)
 {
     uint32_t arg = 0;
 

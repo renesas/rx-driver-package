@@ -1,5 +1,5 @@
 MODULE_NAME = 	rm_touch_qe
-VERSION = 		2.01
+VERSION = 		2.10
 MDF = V2
 
 CONFIG_FOLDER = r_config

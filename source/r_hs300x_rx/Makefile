@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_hs300x_rx
-VERSION = 1.11
+VERSION = 1.22
 MDF = V2
 
 CONFIG_FOLDER = r_config

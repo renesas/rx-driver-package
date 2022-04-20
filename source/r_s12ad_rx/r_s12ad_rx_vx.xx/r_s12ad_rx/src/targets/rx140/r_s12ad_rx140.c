@@ -23,6 +23,7 @@
 /**********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *           30.07.2021 1.00    Initial Release.
+*           30.11.2021 4.93    Changed stop wait time processing of R_ADC_Close ().
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -314,7 +315,7 @@ adc_err_t adc_open(uint8_t     const   unit,
     p_regs->ADHVREFCNT.BIT.ADSLP = 0;             // Clear sleep bit for normal operation
     R_BSP_SoftwareDelay(1, BSP_DELAY_MICROSECS);  // Wait at least 1us
 
-	p_regs->ADCCR.BIT.CCS = (ADC_CONVERT_2CYCLES == p_cfg->conv_cycle) ? 1 : 0;
+    p_regs->ADCCR.BIT.CCS = (ADC_CONVERT_2CYCLES == p_cfg->conv_cycle) ? 1 : 0;
 
     /* SAVE CALLBACK FUNCTION POINTER */
     g_dcb.p_callback = p_callback;
@@ -1083,7 +1084,8 @@ static void adc_enable_s12gbadi(void)
 *******************************************************************************/
 adc_err_t adc_close(uint8_t const  unit)
 {
-    volatile uint8_t i;
+    volatile uint8_t    i;
+    uint32_t            adc_wait_microsecs;
 
     /* Get S12AD register address */
     aregs_t     *p_regs = (aregs_t *)&S12AD;
@@ -1121,13 +1123,20 @@ adc_err_t adc_close(uint8_t const  unit)
         R_BSP_NOP();
     }
 
-    /* Wait for 2 ADCLK cycles (MAX: 128 ICLK cycles) */
-    /* WAIT_LOOP */
-    for (i = 0; i < 128; i++)
+    /* Wait for 3 ADCLK cycles (1 PCLKB + 2 ADCLK when ADCLK is faster than PCLKB */
+    if (BSP_PCLKD_HZ > BSP_PCLKB_HZ)
     {
-        R_BSP_NOP();
+        /* 1PCLK + 2ADCLK Round up the decimal point */
+        adc_wait_microsecs =  (uint32_t)((1000000 + (BSP_PCLKB_HZ - 1)) / BSP_PCLKB_HZ)
+                            + (uint32_t)((2000000 + (BSP_PCLKD_HZ - 1)) / BSP_PCLKD_HZ);
     }
-
+    else
+    {
+        /* 3ADCLK Round up the decimal point */
+        adc_wait_microsecs =  (uint32_t)((3000000 + (BSP_PCLKD_HZ - 1)) / BSP_PCLKD_HZ);
+    }
+    R_BSP_SoftwareDelay (adc_wait_microsecs, BSP_DELAY_MICROSECS);
+    
     /* Power down peripheral */
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);
 

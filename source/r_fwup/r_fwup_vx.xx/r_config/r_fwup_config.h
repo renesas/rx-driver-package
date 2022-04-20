@@ -24,7 +24,8 @@
  * History : DD.MM.YYYY Version Description
  *           16.02.2021 1.00    First Release
  *           19.05.2021 1.01    Added support for RX72N,RX66T,RX130
- *           08.07.2021 1.02    Added support for GCC
+ *           08.07.2021 1.02    Added support for RX671 and GCC
+ *           10.08.2021 1.03    Added support for IAR
  *********************************************************************************************************************/
 #ifndef FWUP_CONFIG_H
 #define FWUP_CONFIG_H
@@ -55,21 +56,21 @@ Configuration Options
     0 = Not use. (default)
     1 = Use.
  */
-#define FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER	(0)
+#define FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER    (0)
 
 /* Select the algorithm of signature verification.
     0 = ECDSA. (default)
 */
-#define FWUP_CFG_SIGNATURE_VERIFICATION			(0)
+#define FWUP_CFG_SIGNATURE_VERIFICATION         (0)
 
 /* Enable Boot Protect Setting.
-	0 = Disable.(Prohibit) (default)
-	1 = Enable.(Allow)     [Note]
+    0 = Disable.(Prohibit) (default)
+    1 = Enable.(Allow)     [Note]
 
-	[Note]
-	When enabled (1), FAW.FSPR bit = 0 is set. After this setting,
-	the area other than the area specified in FAW can never be rewritten.
-	Be careful when setting this variable.
+    [Note]
+    When enabled (1), FAW.FSPR bit = 0 is set. After this setting,
+    the area other than the area specified in FAW can never be rewritten.
+    Be careful when setting this variable.
  */
 #define FWUP_CFG_BOOT_PROTECT_ENABLE     (0)
 

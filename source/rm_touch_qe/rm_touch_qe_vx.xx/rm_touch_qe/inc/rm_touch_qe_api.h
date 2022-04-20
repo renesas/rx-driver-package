@@ -235,6 +235,18 @@ typedef struct st_touch_api
      * @param[in]  input_drift_freq    Drift frequency value.
      */
     fsp_err_t (* driftControl)(touch_ctrl_t * const p_ctrl, uint16_t input_drift_freq);
+
+    /** Monitor Address Get.
+     * @par Implemented as
+     * - @ref RM_TOUCH_MonitorAddressGet()
+     *
+     * @param[in]  p_ctrl       Pointer to control structure.
+     * @param[out]  p_monitor_buf    monitoring buffer address.
+     * @param[out]  p_monitor_id     monitoring ID variable address.
+     * @param[out]  p_monitor_size   monitoring size array address.
+     */
+    fsp_err_t (* monitorAddressGet)(touch_ctrl_t * const p_ctrl, uint32_t * p_monitor_buf,
+    		                        uint32_t * p_monitor_id, uint32_t * p_monitor_size);
 } touch_api_t;
 
 /** This structure encompasses everything that is needed to use an instance of this interface. */

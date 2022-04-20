@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_mpc_rx
-VERSION = 		4.10
+VERSION = 		4.30
 MDF = V2
 
 CONFIG_FOLDER = r_config

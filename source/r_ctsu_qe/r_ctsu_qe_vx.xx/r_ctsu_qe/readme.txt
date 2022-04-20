@@ -5,11 +5,11 @@ r_ctsu_qe
 
 Document Number 
 ---------------
-r01an4469jj0201
+r01an4469jj0210
 
 Version
 -------
-v2.01
+v2.10
 
 Overview
 --------
@@ -26,6 +26,9 @@ Features
 * Uses initialization data from QE Tool for Capacitive Touch
 * diagnosis function support.
 * Temperature correcttion function support.
+* MEC function support.
+* Automatic correction support.
+* Automatic judgement support.
  
 
 Supported MCUs
@@ -43,11 +46,12 @@ Boards Tested On
 ----------------
 * RX130 Capacitive Touch Kit
 * RSKRX231
+* RX140 Capacitive Touch Kit
 
 
 Limitations
 -----------
-* 1 frequency scan and 2 frequency scan are prohibited in CTSU2.
+-
 
 
 Peripherals Used Directly
@@ -58,7 +62,7 @@ Peripherals Used Directly
 Required Packages
 -----------------
 * r_bsp       v6.20
-* r_touch_qe  v2.01
+* r_touch_qe  v2.10
 
 
 Toolchain(s) Used
@@ -68,17 +72,17 @@ Toolchain(s) Used
 
 File Structure
 --------------
-r_ctsu_qe (v2.01)
+r_ctsu_qe (v2.10)
 |   +-- readme.txt
-|   +-- r_ctsu_qe_if.h (v2.01)
+|   +-- r_ctsu_qe_if.h (v2.10)
 
 +---src
-|   +-- r_ctsu_qe.h (v2.01)
-|   +-- r_ctsu_qe_api.h (v2.01)
+|   +-- r_ctsu_qe.h (v2.10)
+|   +-- r_ctsu_qe_api.h (v2.10)
 |
 +---src
-    +-- r_ctsu_qe.c (v2.01)
+    +-- r_ctsu_qe.c (v2.10)
 
 r_config
-    r_ctsu_qe_config.h (v2.01)
+    r_ctsu_qe_config.h (v2.10)
 

@@ -532,6 +532,7 @@ wifi_err_t R_WIFI_SX_ULPGN_Scan(wifi_scan_result_t * ap_results, uint32_t max_ne
     int32_t        i;
     static uint8_t retry_max = 3;
     static uint8_t ssid_tmp[33];
+    uint32_t       vals[6];
 
     /* Disconnected WiFi module? */
     if (MODULE_DISCONNECTED == wifi_system_state_get())
@@ -586,14 +587,21 @@ wifi_err_t R_WIFI_SX_ULPGN_Scan(wifi_scan_result_t * ap_results, uint32_t max_ne
 
         /* bssid */
         at_read("bssid = %2x:%2x:%2x:%2x:%2x:%2x\r\n",
-                &ap_results[i].bssid[0], &ap_results[i].bssid[1], &ap_results[i].bssid[2],
-                &ap_results[i].bssid[3], &ap_results[i].bssid[4], &ap_results[i].bssid[5]);
+            &vals[0], &vals[1], &vals[2], &vals[3], &vals[4], &vals[5]);
+        ap_results[i].bssid[0] = (uint8_t)(vals[0] & 0xff);
+        ap_results[i].bssid[1] = (uint8_t)(vals[1] & 0xff);
+        ap_results[i].bssid[2] = (uint8_t)(vals[2] & 0xff);
+        ap_results[i].bssid[3] = (uint8_t)(vals[3] & 0xff);
+        ap_results[i].bssid[4] = (uint8_t)(vals[4] & 0xff);
+        ap_results[i].bssid[5] = (uint8_t)(vals[5] & 0xff);
 
         /* channel */
-        at_read("channel = %d\r\n", &ap_results[i].channel);
+        at_read("channel = %d\r\n", &vals[0]);
+        ap_results[i].channel = (int8_t)(vals[0] & 0xff);
 
         /* indicator */
-        at_read("indicator = %d\r\n", &ap_results[i].rssi);
+        at_read("indicator = %d\r\n", &vals[0]);
+        ap_results[i].rssi = (int8_t)(vals[0] & 0xff);
 
         /* security */
         if (0 == strncmp((const char *)at_get_current_line(), "security = NONE!", 16))
@@ -840,7 +848,8 @@ int32_t R_WIFI_SX_ULPGN_IsConnected(void)
 wifi_err_t R_WIFI_SX_ULPGN_GetMacAddress(uint8_t * mac_address)
 {
     wifi_err_t api_ret = WIFI_SUCCESS;
-    uint8_t mac[6];
+    uint32_t mac[6];
+    uint32_t i;
 
     /* Disconnected WiFi module? */
     if (MODULE_DISCONNECTED == wifi_system_state_get())
@@ -866,7 +875,10 @@ wifi_err_t R_WIFI_SX_ULPGN_GetMacAddress(uint8_t * mac_address)
     {
         /* Get MAC address */
         at_read("Mac Addr     =   %2x:%2x:%2x:%2x:%2x:%2x\r\n", &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]);
-        memcpy(mac_address, mac, sizeof(mac));
+        for (i = 0; i < 6; i++)
+        {
+            mac_address[i] = (uint8_t)(mac[i] & 0xff);
+        }
     }
     else
     {
@@ -1673,7 +1685,7 @@ int32_t R_WIFI_SX_ULPGN_GetTcpSocketStatus(uint8_t socket_number)
     int32_t  ret = (-1);
     static char sock_status[24];
     static char sock_type[8];
-    static uint8_t  sock_ver;
+    static uint32_t  sock_ver;
     uint16_t i;
 
     static const uint8_t * p_sock_sts_tbl[ULPGN_SOCKET_STATUS_MAX] =
@@ -2428,6 +2440,7 @@ static int32_t get_server_certificate(wifi_certificate_infomation_t * p_cert)
 {
     uint8_t i;
     int32_t ret = E_FAIL;
+    uint32_t num_of_files;
 
     /* Initialize */
     memset(p_cert, 0, sizeof(wifi_certificate_infomation_t));
@@ -2436,7 +2449,8 @@ static int32_t get_server_certificate(wifi_certificate_infomation_t * p_cert)
     if (AT_OK == at_exec(g_cmd_port, "ATNSSLCERT=?\r"))
     {
         at_move_to_next_line();
-        at_read_wo_prefix("%d\r\n", &p_cert->num_of_files);
+        at_read_wo_prefix("%d\r\n", &num_of_files);
+        p_cert->num_of_files = (uint8_t)(num_of_files & 0xff);
         for (i = 0; i < p_cert->num_of_files; i++ )
         {
             at_move_to_next_line();

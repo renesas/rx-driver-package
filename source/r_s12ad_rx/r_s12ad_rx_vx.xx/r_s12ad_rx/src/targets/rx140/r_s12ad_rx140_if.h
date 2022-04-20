@@ -22,6 +22,7 @@
 ***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *           30.07.2021 1.00    Initial Release.
+*           19.11.2021 4.92    Fixed macro definition of ADC_SST_CNT_MIN.
 ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -35,7 +36,11 @@ Includes   <System Includes> , "Project Includes"
 /******************************************************************************
 Macro definitions
 *******************************************************************************/
-#define ADC_SST_CNT_MIN     (5)     /* For PCLKB:ADCLK = 1:1, 1:2, 1:4, 1:8 */
+#if (BSP_CFG_PCKB_DIV > BSP_CFG_PCKD_DIV)
+#define ADC_SST_CNT_MIN     (6)    /* For PCLKB < ADCLK */
+#else
+#define ADC_SST_CNT_MIN     (5)    /* For PCLKB >= ADCLK */
+#endif /* (BSP_CFG_PCKB_DIV > BSP_CFG_PCKD_DIV) */
 #define ADC_SST_CNT_MAX     (255)
 #define ADC_SST_CNT_DEFAULT (13)
 

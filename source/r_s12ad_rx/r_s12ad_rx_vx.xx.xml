@@ -100,7 +100,7 @@
         <zipsource>r_s12ad_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>6.20</version>
+            <version>7.10</version>
         </dependency>
         <application>Analog</application>
         <application>Motor Control</application>

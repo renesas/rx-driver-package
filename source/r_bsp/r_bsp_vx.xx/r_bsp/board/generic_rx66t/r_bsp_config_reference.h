@@ -64,6 +64,10 @@
 *                                Changed initial value of the following macro definitions.
 *                                 - BSP_CFG_MCU_PART_GROUP
 *                                 - BSP_CFG_MCU_PART_SERIES
+*         : 11.02.2022 3.01      Added support for RX66T with 48 pin package.
+*                                Changed initial value of the following macro definitions.
+*                                 - BSP_CFG_SWINT_UNIT1_ENABLE
+*                                 - BSP_CFG_SWINT_UNIT2_ENABLE
 ***********************************************************************************************************************/
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
 #define R_BSP_CONFIG_REF_HEADER_FILE
@@ -108,6 +112,7 @@ Configuration Options
    FF           = 0x2             = LQFP/80/0.65
    FN           = 0x7             = LFQFP/80/0.50
    FM           = 0x8             = LFQFP/64/0.50
+   FL           = 0x6             = LFQFP/48/0.50
 */
 #define BSP_CFG_MCU_PART_PACKAGE        (0x5)
 
@@ -732,8 +737,8 @@ Configuration Options
    1 = Software interrupt is used.
    NOTE: When this macro is set to 1, the software interrupt is initialized in bsp startup routine. 
 */
-#define BSP_CFG_SWINT_UNIT1_ENABLE    (1)
-#define BSP_CFG_SWINT_UNIT2_ENABLE    (1)
+#define BSP_CFG_SWINT_UNIT1_ENABLE    (0)
+#define BSP_CFG_SWINT_UNIT2_ENABLE    (0)
 
 /* Software Interrupt Task Buffer Number.
    For software interrupt, this value is number of buffering user tasks.

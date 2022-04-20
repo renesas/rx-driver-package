@@ -57,6 +57,8 @@
 *         : 31.03.2021 3.70    Added support for RX671.
 *         : 15.04.2021 3.80    Added support for RX140.
 *         : 13.09.2021 3.90    Added the Demo for RX671.
+*         : 14.03.2022 4.00    Added interrupt vector "DTCE_RNG_RNGRDI" for RX140.
+                               Added support for RX66T-48pin.
 *******************************************************************************/
 #ifndef DTC_RX_IF_H
 #define DTC_RX_IF_H
@@ -78,8 +80,8 @@ Macro definitions
 #endif
 
 /* Version Number of API. */
-#define DTC_VERSION_MAJOR  (3)
-#define DTC_VERSION_MINOR  (90)
+#define DTC_VERSION_MAJOR  (4)
+#define DTC_VERSION_MINOR  (00)
 
 /*******************************************************************************
 Typedef definitions

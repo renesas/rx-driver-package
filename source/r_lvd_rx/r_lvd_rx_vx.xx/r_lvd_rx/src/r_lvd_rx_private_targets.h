@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_lvd_rx_private_targets.h
@@ -43,6 +43,7 @@
 *              : 31.03.2021 3.70     Added support for RX671.
 *              : 15.04.2021 3.80     Added support for RX140.
 *              : 13.09.2021 3.90     Changed revision to reflect demo upgrade.
+*              : 14.03.2022 4.00     Added support for RX66T 48pins.
 ***********************************************************************************************************************/
 #ifndef LVD_PRIVATE_TARGETS_HEADER_FILE
 #define LVD_PRIVATE_TARGETS_HEADER_FILE
@@ -105,8 +106,8 @@ Includes <System Includes> , "Project Includes"
 Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
-#define LVD_RX_VERSION_MAJOR                    (3)
-#define LVD_RX_VERSION_MINOR                    (90)
+#define LVD_RX_VERSION_MAJOR                    (4)
+#define LVD_RX_VERSION_MINOR                    (00)
 
 /***********************************************************************************************************************
 Typedef definitions

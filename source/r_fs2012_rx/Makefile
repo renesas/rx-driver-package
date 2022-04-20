@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_fs2012_rx
-VERSION = 1.01
+VERSION = 1.02
 MDF = V2
 
 CONFIG_FOLDER = r_config

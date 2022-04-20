@@ -23,6 +23,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 15.04.2021 1.00    First Release
+*         : 11.11.2021 2.00    Added support PH6 and PH7.
 ***********************************************************************************************************************/
 #ifndef GPIO_RX140
 #define GPIO_RX140
@@ -106,7 +107,13 @@ typedef enum
     GPIO_PORTD_PIN_MASK = 0x07,    /* Available pins: PD0 to PD2               */
     GPIO_PORTE_PIN_MASK = 0x3F,    /* Available pins: PE0 to PE5               */
     GPIO_PORTG_PIN_MASK = 0x80,    /* Available pins: PG7                      */
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 0)
+    /* Stop Oscillating the Sub Clock */
+    GPIO_PORTH_PIN_MASK = 0xCF,    /* Available pins: PH0 to PH3, PH6, PH7     */
+#else
+    /* Enable Oscillating the Sub Clock */
     GPIO_PORTH_PIN_MASK = 0x0F,    /* Available pins: PH0 to PH3               */
+#endif
     GPIO_PORTJ_PIN_MASK = 0xC2,    /* Available pins: PJ1, PJ6, PJ7            */
 } gpio_pin_bit_mask_t;
 
@@ -180,6 +187,11 @@ typedef enum
     GPIO_PORT_H_PIN_1 = 0x1101,
     GPIO_PORT_H_PIN_2 = 0x1102,
     GPIO_PORT_H_PIN_3 = 0x1103,
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 0)
+    /* Stop Oscillating the Sub Clock */
+    GPIO_PORT_H_PIN_6 = 0x1106,
+    GPIO_PORT_H_PIN_7 = 0x1107,
+#endif
     GPIO_PORT_J_PIN_1 = 0x1201,
     GPIO_PORT_J_PIN_6 = 0x1206,
     GPIO_PORT_J_PIN_7 = 0x1207,
@@ -218,7 +230,13 @@ typedef enum
     GPIO_PORTC_PIN_MASK = 0xFC,    /* Available pins: PC2 to PC7                */
     GPIO_PORTE_PIN_MASK = 0x3F,    /* Available pins: PE0 to PE5                */
     GPIO_PORTG_PIN_MASK = 0x80,    /* Available pins: PG7                       */
+#if ((BSP_CFG_MCU_PART_MEMORY_SIZE != 0x3) && (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 0))
+    /* ROM capacity other than 64KB and stop Oscillating the Sub Clock */
+    GPIO_PORTH_PIN_MASK = 0xCF,    /* Available pins: PH0 to PH3, PH6, PH7      */
+#else
+    /* ROM capacity of 64KB or enable Oscillating the Sub Clock */
     GPIO_PORTH_PIN_MASK = 0x0F,    /* Available pins: PH0 to PH3                */
+#endif
     GPIO_PORTJ_PIN_MASK = 0xC0,    /* Available pins: PJ6, PJ7                  */
 } gpio_pin_bit_mask_t;
 
@@ -277,6 +295,11 @@ typedef enum
     GPIO_PORT_H_PIN_1 = 0x1101,
     GPIO_PORT_H_PIN_2 = 0x1102,
     GPIO_PORT_H_PIN_3 = 0x1103,
+#if ((BSP_CFG_MCU_PART_MEMORY_SIZE != 0x3) && (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 0))
+    /* ROM capacity other than 64KB and stop Oscillating the Sub Clock */
+    GPIO_PORT_H_PIN_6 = 0x1106,
+    GPIO_PORT_H_PIN_7 = 0x1107,
+#endif
     GPIO_PORT_J_PIN_6 = 0x1206,
     GPIO_PORT_J_PIN_7 = 0x1207,
 } gpio_port_pin_t;

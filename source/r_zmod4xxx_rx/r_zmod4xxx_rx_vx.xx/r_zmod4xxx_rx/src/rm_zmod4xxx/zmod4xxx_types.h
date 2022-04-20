@@ -30,6 +30,10 @@
 #include <stdint.h>
 #include <stdio.h>
 
+ #ifdef __cplusplus
+extern "C" {
+ #endif
+
 /**
  * @brief Variables that describe the library version
  */
@@ -122,4 +126,8 @@ typedef struct
     zmod4xxx_conf      * meas_conf;    /**< pointer to the measurement configuration */
 } zmod4xxx_dev_t;
 
-#endif // _ZMOD4XXX_TYPES_H
+ #ifdef __cplusplus
+}
+ #endif
+
+#endif                                 // _ZMOD4XXX_TYPES_H

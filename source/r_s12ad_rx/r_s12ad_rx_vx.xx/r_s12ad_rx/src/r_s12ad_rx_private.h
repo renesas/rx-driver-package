@@ -45,6 +45,7 @@
 *                              Added RX23W 83pins support.
 *           31.05.2021 4.80    Added RX671 support.
 *           30.07.2021 4.90    Added RX140 support.
+*           30.11.2021 4.93    Added RX66T 48pins support.
 *******************************************************************************/
 
 #ifndef S12AD_PRV_PRIVATE_H
@@ -463,6 +464,11 @@ Macro definitions
 #define ADC_PRV_INVALID_CH_MASK0    (0xFFFFFF78)    /* channels 0-2, 7 valid */
 #define ADC_PRV_INVALID_CH_MASK1    (0xFFFFFF78)    /* channels 0-2, 7 valid */
 #define ADC_PRV_INVALID_CH_MASK2    (0xFFF0F3F8)    /* channels 0-2, 10, 11, 16, 17, sensors valid */
+
+#elif BSP_PACKAGE_PINS == 48
+#define ADC_PRV_INVALID_CH_MASK0    (0xFFFFFFF0)    /* channels 0-3 valid */
+#define ADC_PRV_INVALID_CH_MASK1    (0xFFFFFFFE)    /* channels 0 valid */
+#define ADC_PRV_INVALID_CH_MASK2    (0xFFF3F2FF)    /* channels 8, 10, 11, sensors valid */
 
 #else
     #error "ERROR - BSP_CFG_MCU_PART_PACKAGE - Unknown package chosen in r_bsp_config.h"

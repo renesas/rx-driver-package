@@ -10,6 +10,7 @@
         <version>3.01.00</version>  
         <version>3.02.00</version>  
         <version>3.03.00</version>  
+        <version>3.04.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -17,6 +18,8 @@
         <version>4.08.04.201803</version>
         <version>8.03.00.201904</version>
         <version>8.03.00.202004</version>
+        <version>8.03.00.202102</version>
+        <version>8.03.00.202104</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -31,7 +34,9 @@
     <!-- only one target entry allowed; multiple sub tags permitted -->
     <target>
         <family>RX</family>
+        <series>RX100</series>
         <series>RX200</series>
+        <group omit_board="true">RX140</group>
         <group omit_board="true">RX231</group>
         <group omit_board="true">RX230</group>
         <group omit_board="true">RX24T</group>
@@ -49,14 +54,14 @@
         <version>x.xx</version>
         <dependency>
             <module>r_bsp</module>
-            <version>5.52</version>
+            <version>7.10</version>
         </dependency>
         <zipsource>r_rscan_rx_vx.xx.zip</zipsource>
         <application>Communications</application>
         <application>Connectivity</application>
         <function>CAN</function>
         <function>RSCAN</function>
-        <desc>CAN API for the RX200 Series.</desc>
+        <desc>RSCAN Driver</desc>
         <details>This module allows the user to communicate via CAN using either mailboxes or FIFOs (or a combination thereof). The driver can be configured for interrupt or polling operation. All possible interrupt sources are enabled or disabled through settings in the config.h file.</details>
         <incdir>r_rscan_rx</incdir>
         <incdir>r_rscan_rx/src</incdir>

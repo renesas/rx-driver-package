@@ -293,6 +293,17 @@ typedef struct st_ctsu_diag_info
     uint32_t      chacb;                                                                        ///< Diagnosis CHACB
 } ctsu_diag_info_t;
  #endif
+
+ #if (CTSU_CFG_AUTO_JUDGE_ENABLE == 1)
+typedef struct st_ctsu_auto_judge
+{
+   uint32_t ajthr;      ///< Automatic judgement Threshold
+   uint32_t ajmmar;     ///< Automatic judgement Measurement moving average result
+   uint32_t ajblact;    ///< Automatic judgement Baseline average calculation
+   uint32_t ajblar;     ///< Automatic judgement Baseline average results
+   uint32_t ajrr;       ///< Automatic judgement Result
+} ctsu_auto_judge_t;
+ #endif
 #endif
 
 /** CTSU private control block. DO NOT MODIFY. Initialization occurs when R_CTSU_Open() is called. */
@@ -356,6 +367,18 @@ typedef struct st_ctsu_instance_ctrl
  #if (CTSU_CFG_DIAG_SUPPORT_ENABLE == 1)
     ctsu_diag_info_t * p_diag_info;                ///< pointer to diagnosis info
  #endif
+ #if (CTSU_CFG_AUTO_JUDGE_ENABLE == 1)
+    ctsu_auto_judge_t * p_auto_judge;               ///< Array of automatic judgement register write variables. g_ctsu_auto_judge[] is set by Open API.
+    uint32_t            adress_auto_judge;          ///< Automatic judgement Variable start address
+    uint32_t            adress_ctsuwr;              ///< CTSUWR variable start address for automatic judgement
+    uint32_t            adress_self_raw;            ///< Self raw variable start address for automatic judgement
+    uint32_t            adress_mutual_raw;          ///< Mutual raw variable start address for automatic judgement
+    uint32_t            count_auto_judge;           ///< Automatic judgement transfer count
+    uint32_t            count_ctsuwr_self_mutual;   ///< CTSUWR, Self raw, Mutual raw transfer count for automatic judgement
+    uint8_t             blini_flag;                 ///< Flags for controlling baseline initialization bit for automatic judgement
+    uint8_t             ajmmat;                     ///< Copy from config by Open API for automatic judgement
+    uint8_t             ajbmat;                     ///< Copy from config by Open  for automatic judgement
+ #endif
 #endif
     ctsu_cfg_t const * p_ctsu_cfg;                 ///< Pointer to initial configurations.
     void (* p_callback)(ctsu_callback_args_t *);   ///< Callback provided when a CTSUFN occurs.
@@ -367,6 +390,9 @@ typedef struct st_ctsu_instance_ctrl
     uint16_t serial_tuning_mutual_cnt;             ///< Word index into ctsuwr register array.
     uint16_t tuning_self_target_value;             ///< Target self value for initial offset tuning
     uint16_t tuning_mutual_target_value;           ///< Target mutual value for initial offset tuning
+    uint8_t                    tsod;               ///< Copy from tsod by Open API.
+    uint8_t                    mec_ts;             ///< Copy from mec_ts by Open API.
+    uint8_t                    mec_shield_ts;      ///< Copy from mec_shield_ts by Open API.
 } ctsu_instance_ctrl_t;
 
 /**********************************************************************************************************************
@@ -396,6 +422,8 @@ fsp_err_t R_CTSU_SpecificDataGet(ctsu_ctrl_t * const       p_ctrl,
                                  uint16_t                * p_specific_data,
                                  ctsu_specific_data_type_t specific_data_type);
 fsp_err_t R_CTSU_DataInsert(ctsu_ctrl_t * const p_ctrl, uint16_t * p_insert_data);
+fsp_err_t R_CTSU_AutoJudgementDataGet(ctsu_ctrl_t * const p_ctrl, uint64_t * p_button_status);
+fsp_err_t R_CTSU_OffsetTuning(ctsu_ctrl_t * const p_ctrl);
 
 /* Common macro for FSP header files. There is also a corresponding FSP_HEADER macro at the top of this file. */
 FSP_FOOTER

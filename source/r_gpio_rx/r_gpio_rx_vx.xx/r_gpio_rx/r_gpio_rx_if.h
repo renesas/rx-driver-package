@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_gpio_rx_if.h
@@ -56,6 +56,8 @@
 *         : 07.04.2021 4.00    Added support for RX671.
 *         : 15.04.2021 4.10    Added support for RX140.
 *         : 13.09.2021 4.20    Added the demo for RX671.
+*         : 11.11.2021 4.30    Added support for RX140-256KB.
+*         : 14.03.2022 4.40    Added support for RX66T 48pins.
 ***********************************************************************************************************************/
 
 #ifndef GPIO_RX_INTERFACE_HEADER_FILE
@@ -128,7 +130,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define GPIO_RX_VERSION_MAJOR           (4)
-#define GPIO_RX_VERSION_MINOR           (20)
+#define GPIO_RX_VERSION_MINOR           (40)
 
 /***********************************************************************************************************************
 Typedef definitions

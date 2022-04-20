@@ -24,6 +24,7 @@
 * History : DD.MM.YYYY Version  Description
 *         : 30.06.2021 1.00     First Release
 *         : 20.08.2021 1.01     Fixed the initial value of PDR register of PORTH for 80 and 64 pins.
+*         : 11.02.2022 1.02     Fixed the initial value of PDR register of PORTH for 80 and 64 pins.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -55,7 +56,7 @@ Macro definitions
     #define BSP_PRV_PORTD_NE_PIN_MASK     (0xF8)
     #define BSP_PRV_PORTE_NE_PIN_MASK     (0xC0)
     #define BSP_PRV_PORTG_NE_PIN_MASK     (0x7F)
-    #define BSP_PRV_PORTH_NE_PIN_MASK     (0xF0)
+    #define BSP_PRV_PORTH_NE_PIN_MASK     (0x30)
     #define BSP_PRV_PORTJ_NE_PIN_MASK     (0x3D)
 #elif BSP_PACKAGE_PINS == 64
     /* Refer User's Manual: Hardware Table 18.4. */
@@ -71,7 +72,11 @@ Macro definitions
     #define BSP_PRV_PORTD_NE_PIN_MASK     (0xFF)
     #define BSP_PRV_PORTE_NE_PIN_MASK     (0xC0)
     #define BSP_PRV_PORTG_NE_PIN_MASK     (0x7F)
+  #if BSP_CFG_MCU_PART_MEMORY_SIZE == 0x3
     #define BSP_PRV_PORTH_NE_PIN_MASK     (0xF0)
+  #else
+    #define BSP_PRV_PORTH_NE_PIN_MASK     (0x30)
+  #endif
     #define BSP_PRV_PORTJ_NE_PIN_MASK     (0x3F)
 #elif BSP_PACKAGE_PINS == 48
     /* Refer User's Manual: Hardware Table 18.5. */

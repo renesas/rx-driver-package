@@ -75,6 +75,61 @@
 #define COMMS_I2C_CFG_BUS4_DRIVER_CH        (0) /* Channel No. */
 #define COMMS_I2C_CFG_BUS4_TIMEOUT          (0xFFFFFFFF) /* Bus timeout in the RTOS (0x00 ~ 0xFFFFFFFF) */
 
+/* For Bus No.5 */
+#define COMMS_I2C_CFG_BUS5_DRIVER_TYPE      (COMMS_DRIVER_NONE) /* Driver type of I2C Bus */
+#define COMMS_I2C_CFG_BUS5_DRIVER_CH        (0) /* Channel No. */
+#define COMMS_I2C_CFG_BUS5_TIMEOUT          (0xFFFFFFFF) /* Bus timeout in the RTOS (0x00 ~ 0xFFFFFFFF) */
+
+/* For Bus No.6 */
+#define COMMS_I2C_CFG_BUS6_DRIVER_TYPE      (COMMS_DRIVER_NONE) /* Driver type of I2C Bus */
+#define COMMS_I2C_CFG_BUS6_DRIVER_CH        (0) /* Channel No. */
+#define COMMS_I2C_CFG_BUS6_TIMEOUT          (0xFFFFFFFF) /* Bus timeout in the RTOS (0x00 ~ 0xFFFFFFFF) */
+
+/* For Bus No.7 */
+#define COMMS_I2C_CFG_BUS7_DRIVER_TYPE      (COMMS_DRIVER_NONE) /* Driver type of I2C Bus */
+#define COMMS_I2C_CFG_BUS7_DRIVER_CH        (0) /* Channel No. */
+#define COMMS_I2C_CFG_BUS7_TIMEOUT          (0xFFFFFFFF) /* Bus timeout in the RTOS (0x00 ~ 0xFFFFFFFF) */
+
+/* For Bus No.8 */
+#define COMMS_I2C_CFG_BUS8_DRIVER_TYPE      (COMMS_DRIVER_NONE) /* Driver type of I2C Bus */
+#define COMMS_I2C_CFG_BUS8_DRIVER_CH        (0) /* Channel No. */
+#define COMMS_I2C_CFG_BUS8_TIMEOUT          (0xFFFFFFFF) /* Bus timeout in the RTOS (0x00 ~ 0xFFFFFFFF) */
+
+/* For Bus No.9 */
+#define COMMS_I2C_CFG_BUS9_DRIVER_TYPE      (COMMS_DRIVER_NONE) /* Driver type of I2C Bus */
+#define COMMS_I2C_CFG_BUS9_DRIVER_CH        (0) /* Channel No. */
+#define COMMS_I2C_CFG_BUS9_TIMEOUT          (0xFFFFFFFF) /* Bus timeout in the RTOS (0x00 ~ 0xFFFFFFFF) */
+
+/* For Bus No.10 */
+#define COMMS_I2C_CFG_BUS10_DRIVER_TYPE      (COMMS_DRIVER_NONE) /* Driver type of I2C Bus */
+#define COMMS_I2C_CFG_BUS10_DRIVER_CH        (0) /* Channel No. */
+#define COMMS_I2C_CFG_BUS10_TIMEOUT          (0xFFFFFFFF) /* Bus timeout in the RTOS (0x00 ~ 0xFFFFFFFF) */
+
+/* For Bus No.11 */
+#define COMMS_I2C_CFG_BUS11_DRIVER_TYPE      (COMMS_DRIVER_NONE) /* Driver type of I2C Bus */
+#define COMMS_I2C_CFG_BUS11_DRIVER_CH        (0) /* Channel No. */
+#define COMMS_I2C_CFG_BUS11_TIMEOUT          (0xFFFFFFFF) /* Bus timeout in the RTOS (0x00 ~ 0xFFFFFFFF) */
+
+/* For Bus No.12 */
+#define COMMS_I2C_CFG_BUS12_DRIVER_TYPE      (COMMS_DRIVER_NONE) /* Driver type of I2C Bus */
+#define COMMS_I2C_CFG_BUS12_DRIVER_CH        (0) /* Channel No. */
+#define COMMS_I2C_CFG_BUS12_TIMEOUT          (0xFFFFFFFF) /* Bus timeout in the RTOS (0x00 ~ 0xFFFFFFFF) */
+
+/* For Bus No.13 */
+#define COMMS_I2C_CFG_BUS13_DRIVER_TYPE      (COMMS_DRIVER_NONE) /* Driver type of I2C Bus */
+#define COMMS_I2C_CFG_BUS13_DRIVER_CH        (0) /* Channel No. */
+#define COMMS_I2C_CFG_BUS13_TIMEOUT          (0xFFFFFFFF) /* Bus timeout in the RTOS (0x00 ~ 0xFFFFFFFF) */
+
+/* For Bus No.14 */
+#define COMMS_I2C_CFG_BUS14_DRIVER_TYPE      (COMMS_DRIVER_NONE) /* Driver type of I2C Bus */
+#define COMMS_I2C_CFG_BUS14_DRIVER_CH        (0) /* Channel No. */
+#define COMMS_I2C_CFG_BUS14_TIMEOUT          (0xFFFFFFFF) /* Bus timeout in the RTOS (0x00 ~ 0xFFFFFFFF) */
+
+/* For Bus No.15 */
+#define COMMS_I2C_CFG_BUS15_DRIVER_TYPE      (COMMS_DRIVER_NONE) /* Driver type of I2C Bus */
+#define COMMS_I2C_CFG_BUS15_DRIVER_CH        (0) /* Channel No. */
+#define COMMS_I2C_CFG_BUS15_TIMEOUT          (0xFFFFFFFF) /* Bus timeout in the RTOS (0x00 ~ 0xFFFFFFFF) */
+
 /* SPECIFY SLAVE ADDRESS AND CALLBACK FUNCTION EACH DEVICE */
 /* For Device No.0 */
 #define COMMS_I2C_CFG_DEVICE0_BUS_CH           (g_comms_i2c_bus0_extended_cfg)
@@ -111,11 +166,99 @@
 #define COMMS_I2C_CFG_DEVICE4_CALLBACK         (comms_i2c_user_callback4) /* Callback function */
 #define COMMS_I2C_CFG_DEVICE4_BLOCKING_TIMEOUT (0xFFFFFFFF) /* Blocking timeout in the RTOS  (0x00 ~ 0xFFFFFFFF) */
 
+/* For Device No.5 */
+#define COMMS_I2C_CFG_DEVICE5_BUS_CH           (g_comms_i2c_bus0_extended_cfg)
+#define COMMS_I2C_CFG_DEVICE5_SLAVE_ADDR       (0x00) /* Slave address */
+#define COMMS_I2C_CFG_DEVICE5_ADDR_MODE        (1) /* Address mode */
+#define COMMS_I2C_CFG_DEVICE5_CALLBACK         (comms_i2c_user_callback5) /* Callback function */
+#define COMMS_I2C_CFG_DEVICE5_BLOCKING_TIMEOUT (0xFFFFFFFF) /* Blocking timeout in the RTOS  (0x00 ~ 0xFFFFFFFF) */
+
+/* For Device No.6 */
+#define COMMS_I2C_CFG_DEVICE6_BUS_CH           (g_comms_i2c_bus0_extended_cfg)
+#define COMMS_I2C_CFG_DEVICE6_SLAVE_ADDR       (0x00) /* Slave address */
+#define COMMS_I2C_CFG_DEVICE6_ADDR_MODE        (1) /* Address mode */
+#define COMMS_I2C_CFG_DEVICE6_CALLBACK         (comms_i2c_user_callback6) /* Callback function */
+#define COMMS_I2C_CFG_DEVICE6_BLOCKING_TIMEOUT (0xFFFFFFFF) /* Blocking timeout in the RTOS  (0x00 ~ 0xFFFFFFFF) */
+
+/* For Device No.7 */
+#define COMMS_I2C_CFG_DEVICE7_BUS_CH           (g_comms_i2c_bus0_extended_cfg)
+#define COMMS_I2C_CFG_DEVICE7_SLAVE_ADDR       (0x00) /* Slave address */
+#define COMMS_I2C_CFG_DEVICE7_ADDR_MODE        (1) /* Address mode */
+#define COMMS_I2C_CFG_DEVICE7_CALLBACK         (comms_i2c_user_callback7) /* Callback function */
+#define COMMS_I2C_CFG_DEVICE7_BLOCKING_TIMEOUT (0xFFFFFFFF) /* Blocking timeout in the RTOS  (0x00 ~ 0xFFFFFFFF) */
+
+/* For Device No.8 */
+#define COMMS_I2C_CFG_DEVICE8_BUS_CH           (g_comms_i2c_bus0_extended_cfg)
+#define COMMS_I2C_CFG_DEVICE8_SLAVE_ADDR       (0x00) /* Slave address */
+#define COMMS_I2C_CFG_DEVICE8_ADDR_MODE        (1) /* Address mode */
+#define COMMS_I2C_CFG_DEVICE8_CALLBACK         (comms_i2c_user_callback8) /* Callback function */
+#define COMMS_I2C_CFG_DEVICE8_BLOCKING_TIMEOUT (0xFFFFFFFF) /* Blocking timeout in the RTOS  (0x00 ~ 0xFFFFFFFF) */
+
+/* For Device No.9 */
+#define COMMS_I2C_CFG_DEVICE9_BUS_CH           (g_comms_i2c_bus0_extended_cfg)
+#define COMMS_I2C_CFG_DEVICE9_SLAVE_ADDR       (0x00) /* Slave address */
+#define COMMS_I2C_CFG_DEVICE9_ADDR_MODE        (1) /* Address mode */
+#define COMMS_I2C_CFG_DEVICE9_CALLBACK         (comms_i2c_user_callback9) /* Callback function */
+#define COMMS_I2C_CFG_DEVICE9_BLOCKING_TIMEOUT (0xFFFFFFFF) /* Blocking timeout in the RTOS  (0x00 ~ 0xFFFFFFFF) */
+
+/* For Device No.10 */
+#define COMMS_I2C_CFG_DEVICE10_BUS_CH           (g_comms_i2c_bus0_extended_cfg)
+#define COMMS_I2C_CFG_DEVICE10_SLAVE_ADDR       (0x00) /* Slave address */
+#define COMMS_I2C_CFG_DEVICE10_ADDR_MODE        (1) /* Address mode */
+#define COMMS_I2C_CFG_DEVICE10_CALLBACK         (comms_i2c_user_callback10) /* Callback function */
+#define COMMS_I2C_CFG_DEVICE10_BLOCKING_TIMEOUT (0xFFFFFFFF) /* Blocking timeout in the RTOS  (0x00 ~ 0xFFFFFFFF) */
+
+/* For Device No.11 */
+#define COMMS_I2C_CFG_DEVICE11_BUS_CH           (g_comms_i2c_bus0_extended_cfg)
+#define COMMS_I2C_CFG_DEVICE11_SLAVE_ADDR       (0x00) /* Slave address */
+#define COMMS_I2C_CFG_DEVICE11_ADDR_MODE        (1) /* Address mode */
+#define COMMS_I2C_CFG_DEVICE11_CALLBACK         (comms_i2c_user_callback11) /* Callback function */
+#define COMMS_I2C_CFG_DEVICE11_BLOCKING_TIMEOUT (0xFFFFFFFF) /* Blocking timeout in the RTOS  (0x00 ~ 0xFFFFFFFF) */
+
+/* For Device No.12 */
+#define COMMS_I2C_CFG_DEVICE12_BUS_CH           (g_comms_i2c_bus0_extended_cfg)
+#define COMMS_I2C_CFG_DEVICE12_SLAVE_ADDR       (0x00) /* Slave address */
+#define COMMS_I2C_CFG_DEVICE12_ADDR_MODE        (1) /* Address mode */
+#define COMMS_I2C_CFG_DEVICE12_CALLBACK         (comms_i2c_user_callback12) /* Callback function */
+#define COMMS_I2C_CFG_DEVICE12_BLOCKING_TIMEOUT (0xFFFFFFFF) /* Blocking timeout in the RTOS  (0x00 ~ 0xFFFFFFFF) */
+
+/* For Device No.13 */
+#define COMMS_I2C_CFG_DEVICE13_BUS_CH           (g_comms_i2c_bus0_extended_cfg)
+#define COMMS_I2C_CFG_DEVICE13_SLAVE_ADDR       (0x00) /* Slave address */
+#define COMMS_I2C_CFG_DEVICE13_ADDR_MODE        (1) /* Address mode */
+#define COMMS_I2C_CFG_DEVICE13_CALLBACK         (comms_i2c_user_callback13) /* Callback function */
+#define COMMS_I2C_CFG_DEVICE13_BLOCKING_TIMEOUT (0xFFFFFFFF) /* Blocking timeout in the RTOS  (0x00 ~ 0xFFFFFFFF) */
+
+/* For Device No.14 */
+#define COMMS_I2C_CFG_DEVICE14_BUS_CH           (g_comms_i2c_bus0_extended_cfg)
+#define COMMS_I2C_CFG_DEVICE14_SLAVE_ADDR       (0x00) /* Slave address */
+#define COMMS_I2C_CFG_DEVICE14_ADDR_MODE        (1) /* Address mode */
+#define COMMS_I2C_CFG_DEVICE14_CALLBACK         (comms_i2c_user_callback14) /* Callback function */
+#define COMMS_I2C_CFG_DEVICE14_BLOCKING_TIMEOUT (0xFFFFFFFF) /* Blocking timeout in the RTOS  (0x00 ~ 0xFFFFFFFF) */
+
+/* For Device No.15 */
+#define COMMS_I2C_CFG_DEVICE15_BUS_CH           (g_comms_i2c_bus0_extended_cfg)
+#define COMMS_I2C_CFG_DEVICE15_SLAVE_ADDR       (0x00) /* Slave address */
+#define COMMS_I2C_CFG_DEVICE15_ADDR_MODE        (1) /* Address mode */
+#define COMMS_I2C_CFG_DEVICE15_CALLBACK         (comms_i2c_user_callback15) /* Callback function */
+#define COMMS_I2C_CFG_DEVICE15_BLOCKING_TIMEOUT (0xFFFFFFFF) /* Blocking timeout in the RTOS  (0x00 ~ 0xFFFFFFFF) */
+
 #if (COMMS_I2C_CFG_BUS0_DRIVER_TYPE == COMMS_DRIVER_I2C ) \
 ||  (COMMS_I2C_CFG_BUS1_DRIVER_TYPE == COMMS_DRIVER_I2C ) \
 ||  (COMMS_I2C_CFG_BUS2_DRIVER_TYPE == COMMS_DRIVER_I2C ) \
 ||  (COMMS_I2C_CFG_BUS3_DRIVER_TYPE == COMMS_DRIVER_I2C ) \
-||  (COMMS_I2C_CFG_BUS4_DRIVER_TYPE == COMMS_DRIVER_I2C )
+||  (COMMS_I2C_CFG_BUS4_DRIVER_TYPE == COMMS_DRIVER_I2C ) \
+||  (COMMS_I2C_CFG_BUS5_DRIVER_TYPE == COMMS_DRIVER_I2C ) \
+||  (COMMS_I2C_CFG_BUS6_DRIVER_TYPE == COMMS_DRIVER_I2C ) \
+||  (COMMS_I2C_CFG_BUS7_DRIVER_TYPE == COMMS_DRIVER_I2C ) \
+||  (COMMS_I2C_CFG_BUS8_DRIVER_TYPE == COMMS_DRIVER_I2C ) \
+||  (COMMS_I2C_CFG_BUS9_DRIVER_TYPE == COMMS_DRIVER_I2C ) \
+||  (COMMS_I2C_CFG_BUS10_DRIVER_TYPE == COMMS_DRIVER_I2C ) \
+||  (COMMS_I2C_CFG_BUS11_DRIVER_TYPE == COMMS_DRIVER_I2C ) \
+||  (COMMS_I2C_CFG_BUS12_DRIVER_TYPE == COMMS_DRIVER_I2C ) \
+||  (COMMS_I2C_CFG_BUS13_DRIVER_TYPE == COMMS_DRIVER_I2C ) \
+||  (COMMS_I2C_CFG_BUS14_DRIVER_TYPE == COMMS_DRIVER_I2C ) \
+||  (COMMS_I2C_CFG_BUS15_DRIVER_TYPE == COMMS_DRIVER_I2C )
 #define COMMS_I2C_CFG_DRIVER_I2C            (1) /* 1: Used I2C */
 #else
 #define COMMS_I2C_CFG_DRIVER_I2C            (0) /* 0: Unused I2C*/
@@ -124,7 +267,18 @@
 ||  (COMMS_I2C_CFG_BUS1_DRIVER_TYPE == COMMS_DRIVER_SCI_I2C ) \
 ||  (COMMS_I2C_CFG_BUS2_DRIVER_TYPE == COMMS_DRIVER_SCI_I2C ) \
 ||  (COMMS_I2C_CFG_BUS3_DRIVER_TYPE == COMMS_DRIVER_SCI_I2C ) \
-||  (COMMS_I2C_CFG_BUS4_DRIVER_TYPE == COMMS_DRIVER_SCI_I2C )
+||  (COMMS_I2C_CFG_BUS4_DRIVER_TYPE == COMMS_DRIVER_SCI_I2C ) \
+||  (COMMS_I2C_CFG_BUS5_DRIVER_TYPE == COMMS_DRIVER_SCI_I2C ) \
+||  (COMMS_I2C_CFG_BUS6_DRIVER_TYPE == COMMS_DRIVER_SCI_I2C ) \
+||  (COMMS_I2C_CFG_BUS7_DRIVER_TYPE == COMMS_DRIVER_SCI_I2C ) \
+||  (COMMS_I2C_CFG_BUS8_DRIVER_TYPE == COMMS_DRIVER_SCI_I2C ) \
+||  (COMMS_I2C_CFG_BUS9_DRIVER_TYPE == COMMS_DRIVER_SCI_I2C ) \
+||  (COMMS_I2C_CFG_BUS10_DRIVER_TYPE == COMMS_DRIVER_SCI_I2C ) \
+||  (COMMS_I2C_CFG_BUS11_DRIVER_TYPE == COMMS_DRIVER_SCI_I2C ) \
+||  (COMMS_I2C_CFG_BUS12_DRIVER_TYPE == COMMS_DRIVER_SCI_I2C ) \
+||  (COMMS_I2C_CFG_BUS13_DRIVER_TYPE == COMMS_DRIVER_SCI_I2C ) \
+||  (COMMS_I2C_CFG_BUS14_DRIVER_TYPE == COMMS_DRIVER_SCI_I2C ) \
+||  (COMMS_I2C_CFG_BUS15_DRIVER_TYPE == COMMS_DRIVER_SCI_I2C )
 #define COMMS_I2C_CFG_DRIVER_SCI_I2C        (1) /* 1: Used SCI I2C */
 #else
 #define COMMS_I2C_CFG_DRIVER_SCI_I2C        (0) /* 0: Unused SCI I2C */

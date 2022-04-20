@@ -28,6 +28,7 @@
 /*******************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 15.04.2021 1.00    First Release
+*         : 23.02.2022 4.00    Added interrupt vector "DTCE_RNG_RNGRDI" for RX140.
 *******************************************************************************/
 #ifndef DTC_RX_TARGET_H
 #define DTC_RX_TARGET_H
@@ -40,7 +41,7 @@ Includes   <System Includes> , "Project Includes"
 Macro definitions
 *******************************************************************************/
 /* The number of activation sources */
-#define DTC_NUM_INTERRUPT_SRC       (66)
+#define DTC_NUM_INTERRUPT_SRC       (67)
 
 #if (DTC_ENABLE == DTC_CFG_USE_SEQUENCE_TRANSFER)
 /* Size of DTC Vector table and DTC Index table (in byte units) */

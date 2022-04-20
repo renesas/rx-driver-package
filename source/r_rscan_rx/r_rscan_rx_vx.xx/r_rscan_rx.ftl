@@ -29,7 +29,10 @@ void ${Function_Name}()
     PORT${pin.portNum}.PODR.BIT.B${pin.pinBitNum} = 1U;
     MPC.${pin.assignedPinName}PFS.BYTE = 0x${pin.pinMPC}U;
     PORT${pin.portNum}.PDR.BIT.B${pin.pinBitNum} = 1U;
+    <#if headerInfo.device?contains("R5F5140")>
+    <#else>
     PORT${pin.portNum}.DSCR.BIT.B${pin.pinBitNum} = 1U;
+    </#if>
     PORT${pin.portNum}.PMR.BIT.B${pin.pinBitNum} = 1U;
     <#elseif pin.pinName?contains("CRXD")>
     PORT${pin.portNum}.PODR.BIT.B${pin.pinBitNum} = 0U;

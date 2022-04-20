@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.    
+* Copyright (C) 2013-2022 Renesas Electronics Corporation. All rights reserved.    
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_iwdt_rx_if.h
@@ -45,10 +45,11 @@
 *                              Fixed to comply with GSCE Coding Standards Rev.6.00.
 *           30.12.2019 3.40    Added support for RX66N, RX72N.
 *           31.03.2020 3.50    Added support for RX23E-A.
-*         : 30.06.2020 3.60    Changed revision to reflect demo upgrade.
+*           30.06.2020 3.60    Changed revision to reflect demo upgrade.
 *           31.03.2021 3.70    Added support for RX671.
 *           15.04.2021 3.80    Added support for RX140.
 *           13.09.2021 3.90    Added the demo for RX671.
+*           14.03.2022 4.00    Added support for RX66T-48Pin.
 ***********************************************************************************************************************/
 
 #ifndef IWDT_RX_IF_H
@@ -68,8 +69,8 @@ Macro definitions
     #error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
 #endif
 /* Version Number of API. */
-#define IWDT_RX_VERSION_MAJOR   (3)
-#define IWDT_RX_VERSION_MINOR   (90)
+#define IWDT_RX_VERSION_MAJOR   (4)
+#define IWDT_RX_VERSION_MINOR   (00)
 
 #define OFS0_IWDT_DISABLED      (0x00000002)
 

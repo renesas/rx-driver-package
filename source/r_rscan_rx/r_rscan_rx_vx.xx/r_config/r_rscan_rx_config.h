@@ -18,12 +18,13 @@
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_rscan_rx_config.h
- * Description  : Configures the RSCAN driver module for the RX231/RX23W/RX23E-A MCU
+ * Description  : Configures the RSCAN driver module for the RX231/RX23W/RX23E-A/RX140 MCU
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 22.03.2015 1.00    Initial Release
 *         : 31.03.2020 2.21    Added support for RX23E-A
+*         : 11.11.2021 2.40    Added support for RX140 (products with 128-Kbyte or larger ROM).
 ***********************************************************************************************************************/
 #ifndef RSCAN_CONFIG_HEADER_FILE
 #define RSCAN_CONFIG_HEADER_FILE
@@ -42,7 +43,7 @@
 /*
  * Setting for CAN clock source.
  * 0 = PCLKB/2
- * 1 = CANMCLK = EXTAL pin              // RSKRX231,RSKRX23W
+ * 1 = CANMCLK = EXTAL pin              // RSKRX231, RSKRX23W, RX23E-A, RX140
  */
 #define CAN_CFG_CLOCK_SOURCE            (1)
 

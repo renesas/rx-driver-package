@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_irq_rx_private.h
@@ -51,6 +51,7 @@
 *         : 31.03.2021  3.70    Added support RX671.
 *         : 15.04.2021  3.80    Added support RX140.
 *         : 13.09.2021  3.90    Added RX671 Demo.
+*         : 14.03.2022  4.00    Added support RX66T-48Pin.
 ***********************************************************************************************************************/
 #ifndef R_IRQ_PRIVATE_H_
 #define R_IRQ_PRIVATE_H_
@@ -62,8 +63,8 @@
 Macro definitions
 ******************************************************************************/
 /* Version Number of API. */
-#define IRQ_RX_VERSION_MAJOR           (3)
-#define IRQ_RX_VERSION_MINOR           (90)
+#define IRQ_RX_VERSION_MAJOR           (4)
+#define IRQ_RX_VERSION_MINOR           (00)
 
 /* Bit position of interrupt enable bits in interrupt enable register. */
 #define IRQ_IEN_MASK_IRQ0   (0x01)

@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_comms_i2c_rx
-VERSION = 1.20
+VERSION = 1.21
 MDF = V2
 
 CONFIG_FOLDER = r_config

@@ -380,14 +380,14 @@ Please set this value more than IPR for other FIT module interrupts. Don't chang
    0 = Disable the battery backup function.
    1 = Enable the battery backup function.</description>
         </property>
-        <property id="BSP_CFG_SWINT_UNIT1_ENABLE" display="Software Interrupt Unit1 (SWINT1)" default="1" type="combobox">
+        <property id="BSP_CFG_SWINT_UNIT1_ENABLE" display="Software Interrupt Unit1 (SWINT1)" default="0" type="combobox">
             <option id="BSP_CFG_SWINT_UNIT1_ENABLE.0" display="Unused" value="0"/>
             <option id="BSP_CFG_SWINT_UNIT1_ENABLE.1" display="Used" value="1"/>
             <description>0 = Software interrupt is not used.
 1 = Software interrupt is used.
 NOTE: When this macro is set to 1, the software interrupt is initialized in bsp startup routine. </description>
         </property>
-        <property id="BSP_CFG_SWINT_UNIT2_ENABLE" display="Software Interrupt Unit2 (SWINT2)" default="1" type="combobox">
+        <property id="BSP_CFG_SWINT_UNIT2_ENABLE" display="Software Interrupt Unit2 (SWINT2)" default="0" type="combobox">
             <option id="BSP_CFG_SWINT_UNIT2_ENABLE.0" display="Unused" value="0"/>
             <option id="BSP_CFG_SWINT_UNIT2_ENABLE.1" display="Used" value="1"/>
             <description>0 = Software interrupt is not used.

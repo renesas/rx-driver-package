@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_dac_rx_if.h
@@ -47,6 +47,7 @@
 *                              Added support for RX65N, RX72M Amplifier Stabilization Wait Control.
 *           30.06.2020 4.50    Changed revision to reflect demo upgrade.
 *           15.04.2021 4.60    Added support for RX140.
+*           14.03.2022 4.70    Added support for RX66T-48Pin.
 ***********************************************************************************************************************/
 #ifndef DAC_RX_IF_H
 #define DAC_RX_IF_H
@@ -67,7 +68,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define DAC_VERSION_MAJOR  (4)
-#define DAC_VERSION_MINOR  (60)
+#define DAC_VERSION_MINOR  (70)
 
 
 #if defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX13T)

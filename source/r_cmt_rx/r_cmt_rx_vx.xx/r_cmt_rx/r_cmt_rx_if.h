@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_cmt_rx_if.h
@@ -53,6 +53,7 @@
 *         : 31.03.2021 4.80    Added support for RX671.
 *         : 15.04.2021 4.90    Added support for RX140.
 *         : 13.09.2021 5.00    Added demo for RX671
+*         : 14.03.2022 5.10    Added support for RX66T-48pin
 ***********************************************************************************************************************/
 #ifndef CMT_HEADER_FILE
 #define CMT_HEADER_FILE
@@ -71,7 +72,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define CMT_RX_VERSION_MAJOR            (5)
-#define CMT_RX_VERSION_MINOR            (00)
+#define CMT_RX_VERSION_MINOR            (10)
 
 /* This define is used with the R_CMT_Control() function if not channel needs to input. */
 #define CMT_RX_NO_CHANNEL               (0xFFFFFFFF)

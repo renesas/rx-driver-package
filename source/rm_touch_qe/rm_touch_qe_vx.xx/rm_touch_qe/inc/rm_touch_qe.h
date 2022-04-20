@@ -40,6 +40,9 @@ FSP_HEADER
 /***********************************************************************************************************************
  * Macro definitions
  **********************************************************************************************************************/
+#if (CTSU_CFG_AUTO_JUDGE_ENABLE == 1)
+#define TOUCH_AUTO_JUGE_MONITOR   (1)
+#endif
 
 /***********************************************************************************************************************
  * Typedef definitions
@@ -183,7 +186,10 @@ fsp_err_t RM_TOUCH_SensitivityRatioGet(touch_ctrl_t * const       p_ctrl,
                                        touch_sensitivity_info_t * p_touch_sensitivity_info);
 fsp_err_t RM_TOUCH_ThresholdAdjust(touch_ctrl_t * const p_ctrl, touch_sensitivity_info_t * p_touch_sensitivity_info);
 fsp_err_t RM_TOUCH_DriftControl(touch_ctrl_t * const p_ctrl, uint16_t input_drift_freq);
-
+fsp_err_t RM_TOUCH_MonitorAddressGet (touch_ctrl_t * const p_ctrl,
+                                        uint32_t * p_monitor_buf,
+                                        uint32_t * p_monitor_id,
+                                        uint32_t * p_monitor_size);
 /* Common macro for FSP header files. There is also a corresponding FSP_HEADER macro at the top of this file. */
 FSP_FOOTER
 

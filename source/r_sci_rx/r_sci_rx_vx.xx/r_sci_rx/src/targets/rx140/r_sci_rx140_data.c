@@ -22,6 +22,7 @@
 ***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *           15.04.2021 1.00    Initial Release.
+*           29.12.2021 1.10    Updated ABCSE in "sync_baud" array.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -50,7 +51,7 @@ Private global variables and functions
 /* when abcs=0 & bgdm=0 & abcse =0, divisor = 64*pow(2,2n-1) */
 /* when abcs=1 & bgdm=0 & abcse =0 OR abcs=0 & bgdm=1 & abcse =0, divisor = 32*pow(2,2n-1) */
 /* when abcs=1 & bgdm=1 & abcse =0, divisor = 16*pow(2,2n-1) */
-/* when abcs=(1 or 0) & bgdm= (1 or 0) & abcse =1, divisor = 12*pow(2,2n-1). This case not available for SCI12 */
+/* when abcs=(1 or 0) & bgdm= (1 or 0) & abcse =1, divisor = 12*pow(2,2n-1). This case not available for SCI6,SCI8,SC9,SCI12 */
 
 #if (SCI_CFG_ASYNC_INCLUDED)
 /* NOTE: diff than SCI async baud table, but should provide same results */
@@ -78,11 +79,11 @@ const baud_divisor_t async_baud[NUM_DIVISORS_ASYNC]=
 /* NOTE: Identical to SCI sync baud table */
 const baud_divisor_t sync_baud[NUM_DIVISORS_SYNC]=
 {
-    /* divisor result, abcs, bgdm, n */
-    {4,   0, 0, 0},
-    {16,  0, 0, 1},
-    {64,  0, 0, 2},
-    {256, 0, 0, 3}
+    /* divisor result, abcs, bgdm, abcse, n */
+    {4,   0, 0, 0, 0},
+    {16,  0, 0, 0, 1},
+    {64,  0, 0, 0, 2},
+    {256, 0, 0, 0, 3}
 };
 #endif
 

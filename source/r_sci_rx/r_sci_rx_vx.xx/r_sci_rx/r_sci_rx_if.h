@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_sci_rx_if.h
@@ -63,6 +63,8 @@
 *                              for changing TXI and RXI priority level simultaneously.
 *                              Added support command SCI_CMD_SET_TXI_PRIORITY and SCI_CMD_SET_RXI_PRIORITY 
 *                              in R_SCI_Control() for Series RX100 and RX200.
+*           29.12.2021 4.20    Added support for RX140-256KB.
+*           14.03.2022 4.30    Added support for RX66T-48Pin.
 ***********************************************************************************************************************/
 
 #ifndef SCI_IF_H
@@ -90,7 +92,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define SCI_VERSION_MAJOR  (4)
-#define SCI_VERSION_MINOR  (10)
+#define SCI_VERSION_MINOR  (30)
 
 #define SCI_DTC_DMACA_DISABLE  (0x0)
 #define SCI_DTC_ENABLE         (0x1)

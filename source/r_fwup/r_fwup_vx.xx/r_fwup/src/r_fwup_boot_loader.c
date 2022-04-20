@@ -24,7 +24,8 @@
  * History : DD.MM.YYYY Version Description
  *           16.02.2021 1.00    First Release
  *           19.05.2021 1.01    Added support for RX72N,RX66T,RX130
- *           08.07.2021 1.02    Added support for GCC
+ *           08.07.2021 1.02    Added support for RX671 and GCC
+ *           10.08.2021 1.03    Added support for IAR
  *********************************************************************************************************************/
 
 #include <stdio.h>
@@ -55,15 +56,16 @@
 #include "tinycrypt/ecc_dsa.h"
 #include "tinycrypt/constants.h"
 
-#define BOOT_LOADER_SCI_CONTROL_BLOCK_A (0)
-#define BOOT_LOADER_SCI_CONTROL_BLOCK_B (1)
+#define BOOT_LOADER_SCI_CONTROL_BLOCK_A         (0)
+#define BOOT_LOADER_SCI_CONTROL_BLOCK_B         (1)
 #define BOOT_LOADER_SCI_CONTROL_BLOCK_TOTAL_NUM (2)
 
-#define BOOT_LOADER_SCI_RECEIVE_BUFFER_EMPTY (0)
-#define BOOT_LOADER_SCI_RECEIVE_BUFFER_FULL  (1)
+#define BOOT_LOADER_SCI_RECEIVE_BUFFER_EMPTY    (0)
+#define BOOT_LOADER_SCI_RECEIVE_BUFFER_FULL     (1)
 
-#define FLASH_DF_TOTAL_BLOCK_SIZE (FLASH_DF_BLOCK_INVALID - FLASH_DF_BLOCK_0)
-#define INTEGRITY_CHECK_SCHEME_HASH_SHA256_STANDALONE "hash-sha256"
+#define FLASH_DF_TOTAL_BLOCK_SIZE               (FLASH_DF_BLOCK_INVALID - FLASH_DF_BLOCK_0)
+
+#define INTEGRITY_CHECK_SCHEME_HASH_SHA256_STANDALONE      "hash-sha256"
 #define INTEGRITY_CHECK_SCHEME_SIG_SHA256_ECDSA_STANDALONE "sig-sha256-ecdsa"
 
 typedef struct st_load_const_data_ctrl_block
@@ -96,26 +98,26 @@ static st_sci_receive_control_block_t s_sci_receive_control_block;
 static st_sci_buffer_control_t s_sci_buffer_control[BOOT_LOADER_SCI_CONTROL_BLOCK_TOTAL_NUM];
 
 /* static int32_t secure_boot(void); */
-static int32_t firm_block_read (uint32_t *firmware, uint32_t offset);
-static int32_t const_data_block_read (uint32_t *const_data, uint32_t offset);
+static int32_t firm_block_read (uint32_t * firmware, uint32_t offset);
+static int32_t const_data_block_read (uint32_t * const_data, uint32_t offset);
 static void bank_swap_with_software_reset (void);
 static void software_reset (void);
-static const uint8_t* get_status_string (uint8_t status);
+static const uint8_t * get_status_string (uint8_t status);
 #if (FLASH_CFG_CODE_FLASH_BGO == 1)
-static void my_flash_callback(void *event);
+static void my_flash_callback (void * event);
 #endif
 
-static st_fwup_control_block_t *sp_fwup_control_block_bank0 =
-        (st_fwup_control_block_t *) BOOT_LOADER_UPDATE_EXECUTE_AREA_LOW_ADDRESS;
-static st_fwup_control_block_t *sp_fwup_control_block_bank1 =
-        (st_fwup_control_block_t *) BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS;
+static st_fwup_control_block_t * sp_fwup_control_block_bank0 =
+        (st_fwup_control_block_t *)BOOT_LOADER_UPDATE_EXECUTE_AREA_LOW_ADDRESS;
+static st_fwup_control_block_t * sp_fwup_control_block_bank1 =
+        (st_fwup_control_block_t *)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS;
 static st_load_fw_control_block_t s_load_fw_control_block;
 static st_load_const_data_ctrl_block_t s_load_const_data_control_block;
 static uint32_t s_block_buffer[BOOT_LOADER_FLASH_CF_BLOCK_SIZE / 4];
 static uint32_t s_flash_error_code;
 
 /* CODE CHECKER, this is OK as a comment precedes the cast. */
-static const uint8_t *sp_boot_loader_magic_code = (uint8_t*) BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS;
+static const uint8_t * sp_boot_loader_magic_code = (uint8_t*) BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS;
 
 
 /***********************************************************************************************************************
@@ -124,28 +126,28 @@ static const uint8_t *sp_boot_loader_magic_code = (uint8_t*) BOOT_LOADER_UPDATE_
  * Arguments    :
  * Return Value :
  **********************************************************************************************************************/
-int32_t R_FWUP_SecureBoot (void)
+int32_t R_FWUP_SecureBoot(void)
 {
-    flash_err_t flash_api_error_code = FLASH_SUCCESS;
-    int32_t secure_boot_error_code = FWUP_IN_PROGRESS;
-    e_state_monitoring_err_t monitoring_error_code = MONI_SUCCESS;  // 20201Q_No5
+    flash_err_t              flash_api_error_code   = FLASH_SUCCESS;
+    int32_t                  secure_boot_error_code = FWUP_IN_PROGRESS;
+    e_state_monitoring_err_t monitoring_error_code  = MONI_SUCCESS;  // 20201Q_No5
 #if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-    flash_spi_status_t flash_spi_error_code = FLASH_SPI_SUCCESS;
+    flash_spi_status_t     flash_spi_error_code = FLASH_SPI_SUCCESS;
     flash_spi_erase_info_t flash_spi_erase_info;
-    uint32_t flash_spi_erase_total_size;
+    uint32_t               flash_spi_erase_total_size;
 #endif /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) */
 #if (FWUP_FLASH_BANK_MODE == 0)
     uint32_t bank_info = 255;
-    #else
+#else
     uint32_t tmp_offset;
-    uint8_t loop_cnt;
+    uint8_t  loop_cnt;
 #endif /* FWUP_FLASH_BANK_MODE */
 #if (FLASH_CFG_CODE_FLASH_BGO == 1)
     flash_interrupt_config_t cb_func_info;
 #endif /* (FLASH_CFG_CODE_FLASH_BGO == 1) */
 
-    st_fwup_control_block_t *p_fwup_control_block_tmp =
-        (st_fwup_control_block_t *) s_block_buffer;
+    st_fwup_control_block_t * p_fwup_control_block_tmp =
+            (st_fwup_control_block_t *)s_block_buffer;
     int32_t verification_result = -1;
 
     /* Check that the R_FWUP_Open has been executed. */
@@ -180,7 +182,7 @@ int32_t R_FWUP_SecureBoot (void)
                 R_SCI_PinSet_serial_term();
 
                 s_load_fw_control_block.progress = 0;
-                s_load_fw_control_block.offset = 0;
+                s_load_fw_control_block.offset   = 0;
 
                 /* startup system */
                 DEBUG_LOG("-------------------------------------------------\r\n");
@@ -247,7 +249,7 @@ int32_t R_FWUP_SecureBoot (void)
                     DEBUG_LOG("bank1(temporary area) on code flash integrity check...");
 
                     /* Firmware verification for the signature type. */
-                    if ( !strcmp((const char* )sp_fwup_control_block_bank1->signature_type,
+                    if (!strcmp((const char*)sp_fwup_control_block_bank1->signature_type,
                             INTEGRITY_CHECK_SCHEME_HASH_SHA256_STANDALONE))
                     {
                         uint8_t hash_sha256[TC_SHA256_DIGEST_SIZE];
@@ -264,7 +266,7 @@ int32_t R_FWUP_SecureBoot (void)
                         verification_result = memcmp(sp_fwup_control_block_bank1->signature, hash_sha256,
                                 sizeof(hash_sha256));
                     }
-                    else if ( !strcmp((const char* )sp_fwup_control_block_bank1->signature_type,
+                    else if (!strcmp((const char*)sp_fwup_control_block_bank1->signature_type,
                             INTEGRITY_CHECK_SCHEME_SIG_SHA256_ECDSA_STANDALONE))
                     {
 
@@ -696,14 +698,20 @@ int32_t R_FWUP_SecureBoot (void)
                             "swap bank...[FWUP_STATE_BANK1_UPDATE_LIFECYCLE_WRITE_COMPLETE and LIFECYCLE_STATE_VALID]\r\n");
                     R_BSP_SoftwareDelay(3000, BSP_DELAY_MILLISECS);
                     bank_swap_with_software_reset();
-                    while (1);
+                    while (1)
+                    {
+                        ;
+                    }
                 }
                 else
                 {
                     DEBUG_LOG("software reset...\r\n");
                     R_BSP_SoftwareDelay(3000, BSP_DELAY_MILLISECS);
                     software_reset();
-                    while (1);
+                    while (1)
+                    {
+                        ;
+                    }
                 }
                 break;
 
@@ -788,9 +796,10 @@ int32_t R_FWUP_SecureBoot (void)
 #else /* FWUP_CFG_BOOT_PROTECT_ENABLE == 1 */
 #if (FWUP_FLASH_BANK_MODE == 0) /* Dual mode */
                                     DEBUG_LOG("erase bank1 secure boot mirror area...");
-                                    flash_api_error_code = fwup_flash_erase((flash_block_address_t)BOOT_LOADER_MIRROR_ERASE_ADDRESS,
+                                    flash_api_error_code
+                                        = fwup_flash_erase((flash_block_address_t)BOOT_LOADER_MIRROR_ERASE_ADDRESS,
                                             (uint32_t)BOOT_LOADER_MIRROR_BLOCK_NUMBER);
-                                    if(FLASH_SUCCESS != flash_api_error_code)
+                                    if (FLASH_SUCCESS != flash_api_error_code)
                                     {
                                         DEBUG_LOG("NG\r\n");
                                         DEBUG_LOG2("R_FLASH_Erase() returns error code = %d.\r\n", s_flash_error_code);
@@ -818,7 +827,10 @@ int32_t R_FWUP_SecureBoot (void)
                                     DEBUG_LOG("swap bank...");
                                     R_BSP_SoftwareDelay(3000, BSP_DELAY_MILLISECS);
                                     bank_swap_with_software_reset();
-                                    while (1);
+                                    while (1)
+                                    {
+                                        ;
+                                    }
                                 }
 #endif /* (FWUP_FLASH_BANK_MODE) */
                                 else
@@ -858,7 +870,7 @@ int32_t R_FWUP_SecureBoot (void)
                                 flash_api_error_code = fwup_flash_write((uint32_t)BOOT_LOADER_LOW_ADDRESS,
                                     (uint32_t)BOOT_LOADER_MIRROR_LOW_ADDRESS,
                                     BOOT_LOADER_PGM_SIZE);
-                                if(FLASH_SUCCESS != flash_api_error_code)
+                                if (FLASH_SUCCESS != flash_api_error_code)
                                 {
                                     DEBUG_LOG("NG\r\n");
                                     DEBUG_LOG2("R_FLASH_Write() returns error code = %d.\r\n", s_flash_error_code);
@@ -1285,7 +1297,7 @@ int32_t R_FWUP_SecureBoot (void)
                                         //*************************************************************
                                         verification_result = -1;
 #else /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 0) */
-                                        if ( !strcmp((const char* )sp_fwup_control_block_bank1->signature_type,
+                                        if (!strcmp((const char *)sp_fwup_control_block_bank1->signature_type,
                                                 INTEGRITY_CHECK_SCHEME_HASH_SHA256_STANDALONE))
                                         {
                                             uint8_t hash_sha256[TC_SHA256_DIGEST_SIZE];
@@ -1303,7 +1315,7 @@ int32_t R_FWUP_SecureBoot (void)
                                             verification_result = memcmp(sp_fwup_control_block_bank1->signature,
                                                     hash_sha256, sizeof(hash_sha256));
                                         }
-                                        else if ( !strcmp((const char* )sp_fwup_control_block_bank1->signature_type,
+                                        else if (!strcmp((const char*)sp_fwup_control_block_bank1->signature_type,
                                                 INTEGRITY_CHECK_SCHEME_SIG_SHA256_ECDSA_STANDALONE))
                                         {
                                             verification_result = fwup_verification_sha256_ecdsa(
@@ -1365,7 +1377,10 @@ int32_t R_FWUP_SecureBoot (void)
                         DEBUG_LOG("swap bank...");
                         R_BSP_SoftwareDelay(3000, BSP_DELAY_MILLISECS);
                         bank_swap_with_software_reset();
-                        while (1);
+                        while (1)
+                        {
+                            ;
+                        }
                         break;
 
                     case LIFECYCLE_STATE_INSTALLING:
@@ -1377,7 +1392,7 @@ int32_t R_FWUP_SecureBoot (void)
                                 DEBUG_LOG("bank0(execute area) on code flash integrity check...");
 
                                 /* Firmware verification for the signature type. */
-                                if ( !strcmp((const char* )sp_fwup_control_block_bank0->signature_type,
+                                if (!strcmp((const char *)sp_fwup_control_block_bank0->signature_type,
                                         INTEGRITY_CHECK_SCHEME_HASH_SHA256_STANDALONE))
                                 {
 
@@ -1394,7 +1409,7 @@ int32_t R_FWUP_SecureBoot (void)
                                     verification_result = memcmp(sp_fwup_control_block_bank0->signature,
                                             hash_sha256, sizeof(hash_sha256));
                                 }
-                                else if ( !strcmp((const char* )sp_fwup_control_block_bank0->signature_type,
+                                else if (!strcmp((const char *)sp_fwup_control_block_bank0->signature_type,
                                         INTEGRITY_CHECK_SCHEME_SIG_SHA256_ECDSA_STANDALONE))
                                 {
                                     verification_result = fwup_verification_sha256_ecdsa(
@@ -1415,7 +1430,8 @@ int32_t R_FWUP_SecureBoot (void)
                                     DEBUG_LOG("OK\r\n");
 
                                     /* CODE CHECKER, this is OK as a comment precedes the cast. */
-                                    if ( !strncmp((const char* )sp_boot_loader_magic_code, BOOT_LOADER_MAGIC_CODE, BOOT_LOADER_MAGIC_CODE_LENGTH))
+                                    if (!strncmp((const char *)sp_boot_loader_magic_code,
+                                            BOOT_LOADER_MAGIC_CODE, BOOT_LOADER_MAGIC_CODE_LENGTH))
                                     {
                                         fwup_update_status(FWUP_STATE_BANK0_INSTALL_SET_BOOT_PROTECT);
                                     }
@@ -1457,10 +1473,10 @@ int32_t R_FWUP_SecureBoot (void)
 #else /* FWUP_CFG_BOOT_PROTECT_ENABLE == 1 */
 #if (FWUP_FLASH_BANK_MODE == 0) /* Dual mode */
                                         DEBUG_LOG("erase bank1 secure boot mirror area...");
-                                        flash_api_error_code =
-                                            fwup_flash_erase((flash_block_address_t)BOOT_LOADER_MIRROR_ERASE_ADDRESS,
+                                        flash_api_error_code
+                                            = fwup_flash_erase((flash_block_address_t)BOOT_LOADER_MIRROR_ERASE_ADDRESS,
                                                     (uint32_t)BOOT_LOADER_MIRROR_BLOCK_NUMBER);
-                                        if(FLASH_SUCCESS != flash_api_error_code)
+                                        if (FLASH_SUCCESS != flash_api_error_code)
                                         {
                                             DEBUG_LOG("NG\r\n");
                                             DEBUG_LOG2("R_FLASH_Erase() returns error code = %d.\r\n",
@@ -1514,7 +1530,7 @@ int32_t R_FWUP_SecureBoot (void)
                                 flash_api_error_code = fwup_flash_write((uint32_t)BOOT_LOADER_LOW_ADDRESS,
                                     (uint32_t)BOOT_LOADER_MIRROR_LOW_ADDRESS,
                                     BOOT_LOADER_PGM_SIZE);
-                                if(FLASH_SUCCESS != flash_api_error_code)
+                                if (FLASH_SUCCESS != flash_api_error_code)
                                 {
                                     DEBUG_LOG("NG\r\n");
                                     DEBUG_LOG2("R_FLASH_Write() returns error code = %d.\r\n", s_flash_error_code);
@@ -1593,7 +1609,7 @@ int32_t R_FWUP_SecureBoot (void)
                                 DEBUG_LOG("bank0(execute area) on code flash integrity check...");
 
                                 /* Firmware verification for the signature type. */
-                                if ( !strcmp((const char* )sp_fwup_control_block_bank0->signature_type,
+                                if (!strcmp((const char*)sp_fwup_control_block_bank0->signature_type,
                                         INTEGRITY_CHECK_SCHEME_HASH_SHA256_STANDALONE))
                                 {
 
@@ -1610,7 +1626,7 @@ int32_t R_FWUP_SecureBoot (void)
                                     verification_result = memcmp(sp_fwup_control_block_bank0->signature,
                                             hash_sha256, sizeof(hash_sha256));
                                 }
-                                else if ( !strcmp((const char* )sp_fwup_control_block_bank0->signature_type,
+                                else if (!strcmp((const char*)sp_fwup_control_block_bank0->signature_type,
                                         INTEGRITY_CHECK_SCHEME_SIG_SHA256_ECDSA_STANDALONE))
                                 {
                                     verification_result = fwup_verification_sha256_ecdsa(
@@ -1633,8 +1649,8 @@ int32_t R_FWUP_SecureBoot (void)
                                     {
                                         DEBUG_LOG("erase install area (code flash): ");
 #if (FLASH_CFG_CODE_FLASH_BGO == 1)
-                                        flash_api_error_code =
-                                            fwup_flash_erase(
+                                        flash_api_error_code
+                                            = fwup_flash_erase(
                                                 (flash_block_address_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_ERASE_ADDRESS,
                                                 BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER);
                                         if (FLASH_SUCCESS != flash_api_error_code)
@@ -1799,8 +1815,8 @@ int32_t R_FWUP_SecureBoot (void)
                                     /* The status of bank1 is NOT EOL */
                                     DEBUG_LOG("erase install area (code flash): ");
 #if (FLASH_CFG_CODE_FLASH_BGO == 1)
-                                    flash_api_error_code =
-                                        fwup_flash_erase(
+                                    flash_api_error_code
+                                        = fwup_flash_erase(
                                             (flash_block_address_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_ERASE_ADDRESS,
                                             BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER);
                                     if (FLASH_SUCCESS != flash_api_error_code)
@@ -1935,8 +1951,8 @@ int32_t R_FWUP_SecureBoot (void)
                                         get_status_string(p_fwup_control_block_tmp->image_flag));
                                 DEBUG_LOG("bank1(temporary area) block0 write (to update LIFECYCLE_STATE)...");
 #if (FLASH_CFG_CODE_FLASH_BGO == 1)
-                                flash_api_error_code =
-                                    fwup_flash_write((uint32_t)p_fwup_control_block_tmp,
+                                flash_api_error_code
+                                    = fwup_flash_write((uint32_t)p_fwup_control_block_tmp,
                                         (uint32_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS,
                                         BOOT_LOADER_FLASH_CF_BLOCK_SIZE);
                                 if (FLASH_SUCCESS != flash_api_error_code)
@@ -2071,6 +2087,9 @@ int32_t R_FWUP_SecureBoot (void)
                                 R_BSP_SoftwareDelay(1000, BSP_DELAY_MILLISECS);
                                 secure_boot_error_code = FWUP_END_OF_LIFE;
                             break;
+                            default:
+                                R_BSP_NOP();  /* Don't run this part.*/
+                            break;
                         }
                     break;
 
@@ -2118,7 +2137,7 @@ int32_t R_FWUP_SecureBoot (void)
  * Arguments    :
  * Return Value :
  **********************************************************************************************************************/
-void R_FWUP_ExecuteFirmware (void)
+void R_FWUP_ExecuteFirmware(void)
 {
 #if (BSP_MCU_SERIES_RX700 || BSP_MCU_SERIES_RX600 || BSP_MCU_SERIES_RX200 || BSP_MCU_SERIES_RX100)
     uint32_t addr;
@@ -2141,7 +2160,7 @@ void R_FWUP_ExecuteFirmware (void)
  * Arguments    :
  * Return Value :
  **********************************************************************************************************************/
-static void software_reset (void)
+static void software_reset(void)
 {
 
     /* stop all interrupt completely */
@@ -2150,7 +2169,9 @@ static void software_reset (void)
     fwup_register_protect_disable();
     R_BSP_SoftwareReset();
     while (1)
-        ; /* software reset */
+    {
+        R_BSP_NOP(); /* software reset */
+    }
 }
 /**********************************************************************************************************************
  End of function software_reset
@@ -2162,7 +2183,7 @@ static void software_reset (void)
  * Arguments    :
  * Return Value :
  **********************************************************************************************************************/
-static void bank_swap_with_software_reset (void)
+static void bank_swap_with_software_reset(void)
 {
 
     /* stop all interrupt completely */
@@ -2172,7 +2193,9 @@ static void bank_swap_with_software_reset (void)
     fwup_register_protect_disable();
     R_BSP_SoftwareReset();
     while (1)
-        ; /* software reset */
+    {
+        R_BSP_NOP(); /* software reset */
+    }
 }
 /**********************************************************************************************************************
  End of function bank_swap_with_software_reset
@@ -2184,7 +2207,7 @@ static void bank_swap_with_software_reset (void)
  * Arguments    :
  * Return Value :
  **********************************************************************************************************************/
-static int32_t firm_block_read (uint32_t *firmware, uint32_t offset)
+static int32_t firm_block_read(uint32_t *firmware, uint32_t offset)
 {
     int32_t error_code = -1;
     if (BOOT_LOADER_SCI_RECEIVE_BUFFER_FULL == s_sci_buffer_control[BOOT_LOADER_SCI_CONTROL_BLOCK_A].buffer_full_flag)
@@ -2216,7 +2239,7 @@ static int32_t firm_block_read (uint32_t *firmware, uint32_t offset)
  * Arguments    :
  * Return Value :
  **********************************************************************************************************************/
-static int32_t const_data_block_read (uint32_t *const_data, uint32_t offset)
+static int32_t const_data_block_read(uint32_t *const_data, uint32_t offset)
 {
     int32_t error_code = -1;
     if (BOOT_LOADER_SCI_RECEIVE_BUFFER_FULL == s_sci_buffer_control[BOOT_LOADER_SCI_CONTROL_BLOCK_A].buffer_full_flag)
@@ -2250,16 +2273,17 @@ static int32_t const_data_block_read (uint32_t *const_data, uint32_t offset)
  *                contains event and associated data.
  * Return Value : none
  ******************************************************************************/
-void my_sci_callback (void *pArgs)
+void my_sci_callback(void *pArgs)
 {
-    sci_cb_args_t *p_args;
+    sci_cb_args_t * p_args;
 
     p_args = (sci_cb_args_t*) pArgs;     /* CODE CHECKER, this is OK as a comment aligns with the cast */
 
-    if (SCI_EVT_RX_CHAR == p_args->event)
+    switch (p_args->event)
     {
+    case SCI_EVT_RX_CHAR:
 
-        /* From RXI interrupt; received character data is in p_args->byte */
+    	/* From RXI interrupt; received character data is in p_args->byte */
         if (s_sci_receive_control_block.p_sci_buffer_control->buffer_occupied_byte_size <
                 (sizeof(s_sci_receive_control_block.p_sci_buffer_control->buffer)))
         {
@@ -2283,54 +2307,49 @@ void my_sci_callback (void *pArgs)
                 if (BOOT_LOADER_SCI_CONTROL_BLOCK_A == s_sci_receive_control_block.current_state)
                 {
                     s_sci_receive_control_block.current_state = BOOT_LOADER_SCI_CONTROL_BLOCK_B;
-                    s_sci_receive_control_block.p_sci_buffer_control =
-                            &s_sci_buffer_control[BOOT_LOADER_SCI_CONTROL_BLOCK_B];
+                    s_sci_receive_control_block.p_sci_buffer_control
+                            = &s_sci_buffer_control[BOOT_LOADER_SCI_CONTROL_BLOCK_B];
                 }
                 else
                 {
                     s_sci_receive_control_block.current_state = BOOT_LOADER_SCI_CONTROL_BLOCK_A;
-                    s_sci_receive_control_block.p_sci_buffer_control =
-                            &s_sci_buffer_control[BOOT_LOADER_SCI_CONTROL_BLOCK_A];
+                    s_sci_receive_control_block.p_sci_buffer_control
+                            = &s_sci_buffer_control[BOOT_LOADER_SCI_CONTROL_BLOCK_A];
                 }
                 g_rcv_count1++;
             }
             g_rcv_count2++;
         }
-    }
-    else if (SCI_EVT_RXBUF_OVFL == p_args->event)
-    {
+        break;
+    case SCI_EVT_RXBUF_OVFL:
 
         /* From RXI interrupt; rx queue is full; 'lost' data is in p_args->byte
          You will need to increase buffer size or reduce baud rate */
         R_BSP_NOP();
         g_error_count1++;
-    }
-    else if (SCI_EVT_OVFL_ERR == p_args->event)
-    {
+        break;
+    case SCI_EVT_OVFL_ERR:
 
         /* From receiver overflow error interrupt; error data is in p_args->byte
          Error condition is cleared in calling interrupt routine */
         R_BSP_NOP();
         g_error_count2++;
-    }
-    else if (SCI_EVT_FRAMING_ERR == p_args->event)
-    {
+        break;
+    case SCI_EVT_FRAMING_ERR:
 
         /* From receiver framing error interrupt; error data is in p_args->byte
          Error condition is cleared in calling interrupt routine */
         R_BSP_NOP();
-    }
-    else if (SCI_EVT_PARITY_ERR == p_args->event)
-    {
+        break;
+    case SCI_EVT_PARITY_ERR:
 
         /* From receiver parity error interrupt; error data is in p_args->byte
          Error condition is cleared in calling interrupt routine */
         R_BSP_NOP();
-    }
-    else
-    {
-
-        /* Do nothing */
+        break;
+    default:
+        R_BSP_NOP(); /* Do nothing */
+        break;
     }
 }
 /**********************************************************************************************************************
@@ -2346,17 +2365,16 @@ void my_sci_callback (void *pArgs)
 ***********************************************************************************************************************/
 static void my_flash_callback(void *event)
 {
-    uint32_t event_code = FLASH_ERR_FAILURE;
-    event_code = *((uint32_t*)event);
+    flash_int_cb_args_t * p_event = event;
 
     s_flash_error_code = FLASH_ERR_FAILURE;
 
-    if((event_code == FLASH_INT_EVENT_WRITE_COMPLETE) || (event_code == FLASH_INT_EVENT_ERASE_COMPLETE))
+    if ((FLASH_INT_EVENT_WRITE_COMPLETE == p_event->event) || (FLASH_INT_EVENT_ERASE_COMPLETE == p_event->event))
     {
         s_flash_error_code = FLASH_SUCCESS;
     }
 
-    switch(fwup_get_status())
+    switch (fwup_get_status())
     {
         case FWUP_STATE_BANK1_UPDATE_LIFECYCLE_ERASE_WAIT:
             fwup_update_status(FWUP_STATE_BANK1_UPDATE_LIFECYCLE_ERASE_COMPLETE);
@@ -2409,7 +2427,7 @@ static void my_flash_callback(void *event)
 * Arguments    :
 * Return Value :
 ***********************************************************************************************************************/
-static const uint8_t* get_status_string (uint8_t status)
+static const uint8_t* get_status_string(uint8_t status)
 {
     static const uint8_t s_status_string[][64] =
     {
@@ -2420,35 +2438,31 @@ static const uint8_t* get_status_string (uint8_t status)
     { "LIFECYCLE_STATE_INVALID" },
     { "LIFECYCLE_STATE_EOL" },
     { "LIFECYCLE_STATE_UNKNOWN" } };
-    const uint8_t *p_tmp;
+    const uint8_t * p_tmp;
 
-    if (LIFECYCLE_STATE_BLANK == status)
+    switch (status)
     {
+    case LIFECYCLE_STATE_BLANK:
         p_tmp = s_status_string[0];
-    }
-    else if (LIFECYCLE_STATE_TESTING == status)
-    {
+        break;
+    case LIFECYCLE_STATE_TESTING:
         p_tmp = s_status_string[1];
-    }
-    else if (LIFECYCLE_STATE_INSTALLING == status)
-    {
+        break;
+    case LIFECYCLE_STATE_INSTALLING:
         p_tmp = s_status_string[2];
-    }
-    else if (LIFECYCLE_STATE_VALID == status)
-    {
+        break;
+    case LIFECYCLE_STATE_VALID:
         p_tmp = s_status_string[3];
-    }
-    else if (LIFECYCLE_STATE_INVALID == status)
-    {
+        break;
+    case LIFECYCLE_STATE_INVALID:
         p_tmp = s_status_string[4];
-    }
-    else if (LIFECYCLE_STATE_EOL == status)
-    {
+        break;
+    case LIFECYCLE_STATE_EOL:
         p_tmp = s_status_string[5];
-    }
-    else
-    {
+        break;
+    default:
         p_tmp = s_status_string[6];
+        break;
     }
     return p_tmp;
 }

@@ -36,6 +36,9 @@
 /* Data transfer of INTCTSUWR and INTCTSURD. To use DTC, set this to 1. */
 #define CTSU_CFG_DTC_SUPPORT_ENABLE         (0)
 
+/* Overall automatic judgement setting. To use, set this to 1. */
+#define CTSU_CFG_AUTO_JUDGE_ENABLE          (0)
+
 /* Interrupt priority level */
 #define CTSU_CFG_INTCTSUWR_PRIORITY_LEVEL   (2)
 #define CTSU_CFG_INTCTSURD_PRIORITY_LEVEL   (2)

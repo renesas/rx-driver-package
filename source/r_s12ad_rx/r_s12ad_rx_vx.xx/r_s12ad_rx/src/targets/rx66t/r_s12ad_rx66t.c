@@ -27,6 +27,7 @@
 *           05.04.2019 4.00    Added support for GNUC and ICCRX.
 *                              Fixed adc_en_comparator_level0 process for IAR 4.11.1.
 *           22.11.2019 4.40    Added support for atomic control.
+*           30.11.2021 4.93    Changed stop wait time processing of R_ADC_Close ().
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -2791,6 +2792,7 @@ adc_err_t adc_close(uint8_t const  unit)
     /* Get S12AD register address */
     aregs_t     *p_regs = ADC_PRV_GET_REGS_PTR(unit);
     volatile    uint8_t i;
+    uint32_t    adc_wait_microsecs;
 #if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
     bsp_int_ctrl_t int_ctrl;
 #endif
@@ -2887,13 +2889,20 @@ adc_err_t adc_close(uint8_t const  unit)
         /* Dommy read and compare */
         R_BSP_NOP();
     }
-
-    /* Wait for three clock cycles of ADCLK before entering the module stop mode */
-    /* WAIT_LOOP */
-    for (i = 0; i < 192; i++)
+    
+    /* Wait for 2 ADCLK cycles (1 PCLKB + 1 ADCLK when ADCLK is faster than PCLKB */
+    if (BSP_PCLKD_HZ > BSP_PCLKB_HZ)
     {
-        R_BSP_NOP();
+        /* 1PCLK + 1ADCLK Round up the decimal point */
+        adc_wait_microsecs =  (uint32_t)((1000000 + (BSP_PCLKB_HZ - 1)) / BSP_PCLKB_HZ)
+                            + (uint32_t)((1000000 + (BSP_PCLKD_HZ - 1)) / BSP_PCLKD_HZ);
     }
+    else
+    {
+        /* 2ADCLK Round up the decimal point */
+        adc_wait_microsecs =  (uint32_t)((2000000 + (BSP_PCLKD_HZ - 1)) / BSP_PCLKD_HZ);
+    }
+    R_BSP_SoftwareDelay (adc_wait_microsecs, BSP_DELAY_MICROSECS);
 
     /* Disabled the internal reference voltage monitoring function */
     if (2 == unit)

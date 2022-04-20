@@ -32,6 +32,7 @@
 *                                Added the following enumeration constant.
 *                                - BSP_MCU_GROUP_INTERRUPT_BE0
 *         : 30.11.2021 2.01      Deleted the compile switch for BSP_CFG_MCU_PART_SERIES and BSP_CFG_MCU_PART_GROUP.
+*         : 11.02.2022 2.02      Added support for RX66T with 48 pin package.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -81,6 +82,9 @@ Macro definitions
 #elif BSP_CFG_MCU_PART_PACKAGE == 0x8
     #define BSP_PACKAGE_LFQFP64     (1)
     #define BSP_PACKAGE_PINS        (64)
+#elif BSP_CFG_MCU_PART_PACKAGE == 0x6
+    #define BSP_PACKAGE_LFQFP48     (1)
+    #define BSP_PACKAGE_PINS        (48)
 #else
     #error "ERROR - BSP_CFG_MCU_PART_PACKAGE - Unknown package chosen in r_bsp_config.h"
 #endif

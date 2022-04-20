@@ -225,6 +225,13 @@
  #endif
  #define TOUCH_TUNING_VARIABLE_SELF_TARGET_VALUE       (0x17)
  #define TOUCH_TUNING_VARIABLE_MUTUAL_TARGET_VALUE     (0x18)
+ #if (BSP_FEATURE_CTSU_VERSION == 2)
+  #if (CTSU_CFG_MULTIPLE_ELECTRODE_CONNECTION_ENABLE == 1)
+ #define TOUCH_TUNING_VARIABLE_QE_TSOD                 (0x19)
+ #define TOUCH_TUNING_VARIABLE_QE_MEC_TS               (0x1A)
+ #define TOUCH_TUNING_VARIABLE_QE_MEC_SHIELD_TS        (0x1B)
+  #endif
+ #endif
 #endif
 
 #if ((TOUCH_CFG_MONITOR_ENABLE && (TOUCH_CFG_UART_MONITOR_SUPPORT == 1)) || (TOUCH_CFG_UART_TUNING_SUPPORT == 1))
@@ -419,6 +426,13 @@ static volatile uint8_t      g_touch_tuning_qe_txvsel;
 static volatile uint8_t      g_touch_tuning_phase_run;
 static uint16_t              g_touch_tuning_self_target_value;
 static uint16_t              g_touch_tuning_mutual_target_value;
+ #if (BSP_FEATURE_CTSU_VERSION == 2)
+  #if (CTSU_CFG_MULTIPLE_ELECTRODE_CONNECTION_ENABLE == 1)
+static volatile uint8_t      g_touch_tuning_qe_tsod;
+static volatile uint8_t      g_touch_tuning_qe_mec_ts;
+static volatile uint8_t      g_touch_tuning_qe_mec_shield_ts;
+  #endif
+ #endif
 
 static volatile touch_tuning_mode_t g_touch_tuning_mode_save;
 
@@ -470,6 +484,7 @@ const touch_api_t g_touch_on_ctsu =
     .sensitivityRatioGet = RM_TOUCH_SensitivityRatioGet,
     .thresholdAdjust     = RM_TOUCH_ThresholdAdjust,
     .driftControl        = RM_TOUCH_DriftControl,
+    .monitorAddressGet   = RM_TOUCH_MonitorAddressGet,
 };
 
 touch_instance_ctrl_t * gp_touch_isr_context;
@@ -1602,6 +1617,50 @@ fsp_err_t RM_TOUCH_DriftControl (touch_ctrl_t * const p_ctrl, uint16_t input_dri
     p_instance_ctrl->binfo.drift_freq = input_drift_freq;
 
     return FSP_SUCCESS;
+}
+
+/*******************************************************************************************************************//**
+ * @brief This function get the variable address of QE Monitor. 
+ * This function is used for QE Monitor when both automatic judgement and software judgement are operated.
+ * Implements @ref touch_api_t::monitorAddressGet
+ *
+ * @retval FSP_SUCCESS              Successfully QE monitor variable address was got.
+ * @retval FSP_ERR_ASSERTION        Null pointer passed as a parameter.
+ * @retval FSP_ERR_NOT_OPEN         Module is not open.
+ * @retval FSP_ERR_NOT_ENABLED      Requested operation is not enabled
+ **********************************************************************************************************************/
+fsp_err_t RM_TOUCH_MonitorAddressGet (touch_ctrl_t * const p_ctrl,
+                                        uint32_t * p_monitor_buf,
+                                        uint32_t * p_monitor_id,
+                                        uint32_t * p_monitor_size)
+{
+#if (CTSU_CFG_AUTO_JUDGE_ENABLE == 1)
+ #if TOUCH_CFG_MONITOR_ENABLE
+    touch_instance_ctrl_t * p_instance_ctrl = (touch_instance_ctrl_t *) p_ctrl;
+
+  #if (TOUCH_CFG_PARAM_CHECKING_ENABLE == 1)
+    FSP_ASSERT(p_instance_ctrl);
+    TOUCH_ERROR_RETURN(TOUCH_OPEN == p_instance_ctrl->open, FSP_ERR_NOT_OPEN);
+  #endif
+
+    * p_monitor_buf  = (uint32_t)g_touch_monitor_buf;
+    * p_monitor_id   = (uint32_t)&g_touch_monitor_id;
+    * p_monitor_size = (uint32_t)g_touch_monitor_size;
+    return FSP_SUCCESS;
+ #else
+    FSP_PARAMETER_NOT_USED(p_monitor_buf);
+    FSP_PARAMETER_NOT_USED(p_monitor_id);
+    FSP_PARAMETER_NOT_USED(p_monitor_size);
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    return FSP_ERR_NOT_ENABLED;
+ #endif
+#else
+    FSP_PARAMETER_NOT_USED(p_monitor_buf);
+    FSP_PARAMETER_NOT_USED(p_monitor_id);
+    FSP_PARAMETER_NOT_USED(p_monitor_size);
+    FSP_PARAMETER_NOT_USED(p_ctrl);
+    return FSP_ERR_NOT_ENABLED;
+#endif
 }
 
 /*******************************************************************************************************************//**
@@ -2916,6 +2975,27 @@ void touch_uart_callback (void *pargs)
                     touch_tuning_get16(&g_touch_tuning_mutual_target_value, 7);
                     break;
                 }
+   #if (BSP_FEATURE_CTSU_VERSION == 2)
+    #if (CTSU_CFG_MULTIPLE_ELECTRODE_CONNECTION_ENABLE == 1)
+                case TOUCH_TUNING_VARIABLE_QE_TSOD:
+                {
+                    touch_tuning_get8((uint8_t *)&g_touch_tuning_qe_tsod, 7);
+                    break;
+                }
+
+                case TOUCH_TUNING_VARIABLE_QE_MEC_TS:
+                {
+                    touch_tuning_get8((uint8_t *)&g_touch_tuning_qe_mec_ts, 7);
+                    break;
+                }
+
+                case TOUCH_TUNING_VARIABLE_QE_MEC_SHIELD_TS :
+                {
+                    touch_tuning_get8((uint8_t *)&g_touch_tuning_qe_mec_shield_ts, 7);
+                    break;
+                }
+    #endif
+   #endif
 
                 default:
                 {
@@ -3151,6 +3231,33 @@ void touch_uart_callback (void *pargs)
                     break;
                 }
 
+   #if (BSP_FEATURE_CTSU_VERSION == 2)
+    #if (CTSU_CFG_MULTIPLE_ELECTRODE_CONNECTION_ENABLE == 1)
+                case TOUCH_TUNING_VARIABLE_QE_TSOD:
+                {
+                    element_id               = g_touch_uart_rx_buf[6];
+                    g_touch_tuning_tx_buf[6] = (uint8_t) element_id;
+                    touch_tuning_send8(g_touch_tuning_qe_tsod, 7);
+                    break;
+                }
+
+                case TOUCH_TUNING_VARIABLE_QE_MEC_TS:
+                {
+                    element_id               = g_touch_uart_rx_buf[6];
+                    g_touch_tuning_tx_buf[6] = (uint8_t) element_id;
+                    touch_tuning_send8((uint8_t )g_touch_tuning_qe_mec_ts, 7);
+                    break;
+                }
+
+                case TOUCH_TUNING_VARIABLE_QE_MEC_SHIELD_TS :
+                {
+                     element_id               = g_touch_uart_rx_buf[6];
+                    g_touch_tuning_tx_buf[6] = (uint8_t) element_id;
+                    touch_tuning_send8((uint8_t )g_touch_tuning_qe_mec_shield_ts, 7);
+                    break;
+                }
+    #endif
+   #endif
                 default:
                 {
                     break;
@@ -3767,6 +3874,12 @@ void touch_tuning_scan_register_setting (touch_instance_ctrl_t * const p_instanc
     p_ctsu_instance_ctrl->ctsucr2  = (uint8_t) (g_touch_tuning_qe_atune & 0x02);
     p_ctsu_instance_ctrl->ctsucr2 |= (uint8_t) ((g_touch_tuning_md & 0x04) >> 2);
     p_ctsu_instance_ctrl->ctsucr2 |= (uint8_t) (g_touch_tuning_qe_posel << 4);
+
+  #if (CTSU_CFG_MULTIPLE_ELECTRODE_CONNECTION_ENABLE == 1)
+    p_ctsu_instance_ctrl->tsod          = g_touch_tuning_qe_tsod;
+    p_ctsu_instance_ctrl->mec_ts        = g_touch_tuning_qe_mec_ts;
+    p_ctsu_instance_ctrl->mec_shield_ts = g_touch_tuning_qe_mec_shield_ts;
+  #endif
  #endif
 
  #if (BSP_FEATURE_CTSU_VERSION == 2)
@@ -3831,6 +3944,16 @@ void touch_tuning_ts_setup (touch_instance_ctrl_t * const p_instance_ctrl)
         /* Get the number of measurable elements */
         touch_tuning_count_element(element_maska, &p_ctsu_instance_ctrl->num_elements);
         touch_tuning_count_element(element_maskb, &p_ctsu_instance_ctrl->num_elements);
+
+ #if (BSP_FEATURE_CTSU_VERSION == 2)
+  #if (CTSU_CFG_MULTIPLE_ELECTRODE_CONNECTION_ENABLE == 1)
+       if (1 == g_touch_tuning_qe_tsod)
+       {
+           p_ctsu_instance_ctrl->num_elements = 1;
+       }
+  #endif
+ #endif
+
     }
     else if (TOUCH_TUNING_SCAN_MUTUAL == g_touch_tuning_scan_mode)
     {
@@ -3975,6 +4098,11 @@ void touch_tuning_open (touch_instance_ctrl_t * const p_instance_ctrl)
         p_ctsu_instance_ctrl->p_self_corr =
             (p_ctsu_instance_ctrl->p_self_corr -
              ((p_ctsu_instance_ctrl->self_elem_index - p_ctsu_instance_ctrl->num_elements) * CTSU_CFG_NUM_SUMULTI));
+#if (BSP_FEATURE_CTSU_VERSION == 2)
+        p_ctsu_instance_ctrl->p_selected_freq_self =
+        	(p_ctsu_instance_ctrl->p_selected_freq_self -
+        	 ((p_ctsu_instance_ctrl->ctsu_elem_index - p_ctsu_instance_ctrl->num_elements)));
+#endif
     }
  #endif
 
@@ -3997,6 +4125,12 @@ void touch_tuning_open (touch_instance_ctrl_t * const p_instance_ctrl)
         p_ctsu_instance_ctrl->p_mutual_snd_data =
             (p_ctsu_instance_ctrl->p_mutual_snd_data -
              ((p_ctsu_instance_ctrl->mutual_elem_index - p_ctsu_instance_ctrl->num_elements)));
+#if (BSP_FEATURE_CTSU_VERSION == 2)
+        p_ctsu_instance_ctrl->p_selected_freq_mutual =
+        	(p_ctsu_instance_ctrl->p_selected_freq_mutual -
+        	 ((p_ctsu_instance_ctrl->ctsu_elem_index - p_ctsu_instance_ctrl->num_elements)));
+#endif
+
     }
  #endif
     p_ctsu_instance_ctrl->p_tuning_count =

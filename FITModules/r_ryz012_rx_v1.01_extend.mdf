@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="BLE_CFG_SCI_CHANNEL" display="SCI Channel number for RYZ012 AT command communication" default="6" type="combobox">
+            <option id="BLE_CFG_SCI_CHANNEL.0" display="SCI0" value="0"/>
+            <option id="BLE_CFG_SCI_CHANNEL.1" display="SCI1" value="1"/>
+            <option id="BLE_CFG_SCI_CHANNEL.2" display="SCI2" value="2"/>
+            <option id="BLE_CFG_SCI_CHANNEL.3" display="SCI3" value="3"/>
+            <option id="BLE_CFG_SCI_CHANNEL.4" display="SCI4" value="4"/>
+            <option id="BLE_CFG_SCI_CHANNEL.5" display="SCI5" value="5"/>
+            <option id="BLE_CFG_SCI_CHANNEL.6" display="SCI6" value="6"/>
+            <option id="BLE_CFG_SCI_CHANNEL.7" display="SCI7" value="7"/>
+            <option id="BLE_CFG_SCI_CHANNEL.8" display="SCI8" value="8"/>
+            <option id="BLE_CFG_SCI_CHANNEL.9" display="SCI9" value="9"/>
+            <option id="BLE_CFG_SCI_CHANNEL.10" display="SCI10" value="10"/>
+            <option id="BLE_CFG_SCI_CHANNEL.11" display="SCI11" value="11"/>
+            <option id="BLE_CFG_SCI_CHANNEL.12" display="SCI12" value="12"/>
+            <constraint display="Value must be an decimal value">testInteger("${BLE_CFG_SCI_CHANNEL}")</constraint>
+            <constraint display="Value must be in the range 0~12">("${BLE_CFG_SCI_CHANNEL}" &gt;= 0) &amp;&amp; ("${BLE_CFG_SCI_CHANNEL}" &lt;= 12)</constraint>
+            <description>SCI channel for RYZ012 AT command communication.</description>
+        </property>
+        <property id="BLE_CFG_RESET_PORT" display="Configure RESET Port (PMOD-8) for RYZ012." default="F" type="combobox">
+            <option id="BLE_CFG_RESET_PORT.0" display="PORT0" value="0"/>
+            <option id="BLE_CFG_RESET_PORT.1" display="PORT1" value="1"/>
+            <option id="BLE_CFG_RESET_PORT.2" display="PORT2" value="2"/>
+            <option id="BLE_CFG_RESET_PORT.3" display="PORT3" value="3"/>
+            <option id="BLE_CFG_RESET_PORT.4" display="PORT4" value="4"/>
+            <option id="BLE_CFG_RESET_PORT.5" display="PORT5" value="5"/>
+            <option id="BLE_CFG_RESET_PORT.6" display="PORT6" value="6"/>
+            <option id="BLE_CFG_RESET_PORT.7" display="PORT7" value="7"/>
+            <option id="BLE_CFG_RESET_PORT.8" display="PORT8" value="8"/>
+            <option id="BLE_CFG_RESET_PORT.9" display="PORT9" value="9"/>
+            <option id="BLE_CFG_RESET_PORT.A" display="PORTA" value="A"/>
+            <option id="BLE_CFG_RESET_PORT.B" display="PORTB" value="B"/>
+            <option id="BLE_CFG_RESET_PORT.C" display="PORTC" value="C"/>
+            <option id="BLE_CFG_RESET_PORT.D" display="PORTD" value="D"/>
+            <option id="BLE_CFG_RESET_PORT.E" display="PORTE" value="E"/>
+            <option id="BLE_CFG_RESET_PORT.F" display="PORTF" value="F"/>
+            <option id="BLE_CFG_RESET_PORT.G" display="PORTG" value="G"/>
+            <option id="BLE_CFG_RESET_PORT.H" display="PORTH" value="H"/>
+            <option id="BLE_CFG_RESET_PORT.J" display="PORTJ" value="J"/>
+            <option id="BLE_CFG_RESET_PORT.K" display="PORTK" value="K"/>
+            <option id="BLE_CFG_RESET_PORT.L" display="PORTL" value="L"/>
+            <option id="BLE_CFG_RESET_PORT.M" display="PORTM" value="M"/>
+            <option id="BLE_CFG_RESET_PORT.N" display="PORTN" value="N"/>
+            <option id="BLE_CFG_RESET_PORT.Q" display="PORTQ" value="Q"/>
+            <description>Configure RESET Port (PMOD-8) for RYZ012.</description>
+        </property>
+        <property id="BLE_CFG_RESET_PIN" display="Configure RESET Pin (PMOD-8) for RYZ012." default="5" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${BLE_CFG_RESET_PIN}")</constraint>
+            <constraint display="Value must be in the range 0~7">("${BLE_CFG_RESET_PIN}" &gt;= 0) &amp;&amp; ("${BLE_CFG_RESET_PIN}" &lt;= 7)</constraint>
+            <description>Configure RESET pin (PMOD-8) for RYZ012. </description>
+        </property>
+        <property id="BLE_CFG_SCI_MODE_PORT" display="Configure SCI Mode(UART/SPI) Port (PMOD-9) for RYZ012." default="G" type="combobox">
+            <option id="BLE_CFG_SCI_MODE_PORT.0" display="PORT0" value="0"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.1" display="PORT1" value="1"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.2" display="PORT2" value="2"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.3" display="PORT3" value="3"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.4" display="PORT4" value="4"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.5" display="PORT5" value="5"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.6" display="PORT6" value="6"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.7" display="PORT7" value="7"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.8" display="PORT8" value="8"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.9" display="PORT9" value="9"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.A" display="PORTA" value="A"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.B" display="PORTB" value="B"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.C" display="PORTC" value="C"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.D" display="PORTD" value="D"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.E" display="PORTE" value="E"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.F" display="PORTF" value="F"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.G" display="PORTG" value="G"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.H" display="PORTH" value="H"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.J" display="PORTJ" value="J"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.K" display="PORTK" value="K"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.L" display="PORTL" value="L"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.M" display="PORTM" value="M"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.N" display="PORTN" value="N"/>
+            <option id="BLE_CFG_SCI_MODE_PORT.Q" display="PORTQ" value="Q"/>
+            <description>Configure SCI Mode(UART/SPI) Port for RYZ012.</description>
+        </property>
+        <property id="BLE_CFG_SCI_MODE_PIN" display="Configure SCI Mode(UART/SPI) Pin (PMOD-9) for RYZ012." default="4" type="textbox">
+            <constraint display="Value must be an decimal value">testInteger("${BLE_CFG_SCI_MODE_PIN}")</constraint>
+            <constraint display="Value must be in the range 0~7">("${BLE_CFG_SCI_MODE_PIN}" &gt;= 0) &amp;&amp; ("${BLE_CFG_SCI_MODE_PIN}" &lt;= 7)</constraint>
+            <description>Configure SCI Mode(UART/SPI) Pin (PMOD-9) for RYZ012.</description>
+        </property>
+    </configuration>
+</module>

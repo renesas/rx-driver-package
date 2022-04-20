@@ -28,6 +28,7 @@
 /*******************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 15.04.2021 1.00    First Release
+*         : 23.02.2022 4.00    Added interrupt vector "DTCE_RNG_RNGRDI" for RX140.
 *******************************************************************************/
 
 /*******************************************************************************
@@ -57,6 +58,7 @@ const dtc_activation_source_t g_source_array[DTC_NUM_INTERRUPT_SRC] =
     DTCE_S12AD_S12ADI0,DTCE_S12AD_GBADI,
     DTCE_ELC_ELSR18I,
     DTCE_AES_AESWRI,DTCE_AES_AESRDI,
+    DTCE_RNG_RNGRDI,
     DTCE_MTU0_TGIA0,DTCE_MTU0_TGIB0,DTCE_MTU0_TGIC0,DTCE_MTU0_TGID0,
     DTCE_MTU1_TGIA1,DTCE_MTU1_TGIB1,
     DTCE_MTU2_TGIA2,DTCE_MTU2_TGIB2,

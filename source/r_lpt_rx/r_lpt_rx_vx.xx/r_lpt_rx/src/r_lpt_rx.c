@@ -14,11 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer 
  *
- * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_lpt_rx.c
- * Version      : 3.00
+ * Version      : 3.01
  * Description  : Functions for using Low Power Timer
  **********************************************************************************************************************
  * History : DD.MM.YYYY Version Description  
@@ -32,6 +32,7 @@
  *         : 25.09.2020 2.01    Added support for RX140
  *         : 31.03.2021 3.00    Added function R_LPT_InitChan, R_LPT_SetCMT, R_LPT_FinalChan, R_LPT_InitPWM
  *                              Added command LPT_CMD_PWM_START and LPT_CMD_PWM_STOP to R_LPT_Control()
+ *         : 31.01.2022 3.01    Fixed R_LPT_Open function
  *********************************************************************************************************************/
 /**********************************************************************************************************************
   Includes <System Includes> , "Project Includes"
@@ -78,6 +79,9 @@
  *            (counting stop is disabled) in other modes.\n
  *            MCU executes the program after MCU waits for the stability time for Main Clock Oscillator Wait Control
  *            Register (SMOSCWTCR) when MCU is resumed from software standby mode.
+ *            Set snooze mode before calling this function when using snooze mode.
+ *            If wakeup from software standby mode using low-power timer is enabled, disable entry snooze mode setting.
+
  */
 lpt_err_t R_LPT_Open(uint32_t const lpt_period)
 {

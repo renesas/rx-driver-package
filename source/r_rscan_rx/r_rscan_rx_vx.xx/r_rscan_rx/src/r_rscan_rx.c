@@ -28,6 +28,7 @@
 *                              Added support for atomic control
 *                              Fixed warning in IAR
 *           13.09.2021 2.32    Updated Doxygen comment.
+*           11.11.2021 2.40    Added support for RX140 (products with 128-Kbyte or larger ROM).
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -112,7 +113,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void can_ch0_tx_isr(void);
 can_err_t R_CAN_Open(can_cfg_t  *p_cfg, void(* const p_callback)(can_cb_evt_t   event,void *p_args))
 {
 can_err_t   err = CAN_SUCCESS;
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
 bsp_int_ctrl_t int_ctrl;
 #endif
 
@@ -141,11 +142,11 @@ bsp_int_ctrl_t int_ctrl;
 
     /* Apply clock to the CAN interface */
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 #endif
     MSTP(RSCAN) = 0;
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 #endif
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR);
@@ -1443,7 +1444,7 @@ uint32_t R_CAN_GetCountErr(can_count_t  type,
  */
 void R_CAN_Close(void)
 {
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
 bsp_int_ctrl_t int_ctrl;
 #endif
     if (TRUE == g_dcb.opened)
@@ -1475,11 +1476,11 @@ bsp_int_ctrl_t int_ctrl;
 
         /* Remove clock from the CAN interface */
         R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
         R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 #endif
         MSTP(RSCAN) = 1;
-#if (R_BSP_VERSION_MAJOR >= 5) && (R_BSP_VERSION_MINOR >= 30)
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
         R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 #endif
         R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR);

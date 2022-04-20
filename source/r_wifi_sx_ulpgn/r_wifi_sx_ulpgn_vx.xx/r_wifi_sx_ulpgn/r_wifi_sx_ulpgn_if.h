@@ -39,8 +39,8 @@
 #define R_WIFI_SX_ULPGN_CFG_IF_H
 
 /* Driver Version Number. */
-#define WIFI_SX_ULPGN_CFG_VERSION_MAJOR           (1)
-#define WIFI_SX_ULPGN_CFG_VERSION_MINOR           (13)
+#define WIFI_SX_ULPGN_CFG_VERSION_MAJOR           (WIFI_SX_ULPGN_CFG_VERSION_MAJOR_VALUE)
+#define WIFI_SX_ULPGN_CFG_VERSION_MINOR           (WIFI_SX_ULPGN_CFG_VERSION_MINOR_VALUE)
 
 /* Configuration */
 #define WIFI_SOCKET_IP_PROTOCOL_TCP               (0)       // Socket type = TCP

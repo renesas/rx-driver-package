@@ -14,11 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_lpt_rx231.c
- * Version      : 3.00
+ * Version      : 3.01
  * Description  : Functions for using even link controller
  **********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
@@ -26,6 +26,7 @@
  *         : 04.08.2016 1.11    Added command LPT_CMD_COUNT_RESET to R_LPT_Control()
  *         : 01.04.2019 1.23    Added "WAIT_LOOP" keyword.
  *         : 31.03.2021 3.00    Added function R_LPT_InitChan, R_LPT_SetCMT, R_LPT_FinalChan
+ *         : 31.01.2022 3.01    Fixed warning
  *********************************************************************************************************************/
 /*******************************************************************************
 Includes <System Includes> , "Project Includes"
@@ -143,7 +144,9 @@ lpt_err_t lpt_open(uint32_t const lpt_period)
     uint16_t    period_value = LPT_MAX_PERIOD;
     uint8_t     ratio_value = LPT_DIVISION_RATIO_2;
     uint8_t     ratio_select;
+#if (LPT_CFG_PARAM_CHECKING_ENABLE == 1)
     bool        prdset_flag = false;
+#endif  /* LPT_CFG_PARAM_CHECKING_ENABLE */
     size_t      array_num = (sizeof (g_lpt_division_ratio)) / (sizeof (g_lpt_division_ratio[0]));
 
     /* WAIT_LOOP */
@@ -157,7 +160,9 @@ lpt_err_t lpt_open(uint32_t const lpt_period)
         {
             ratio_value  = g_lpt_division_ratio[ratio_select];  /* Source clock divider */
             period_value = (uint16_t)calc_period;               /* low-power timer cycle. */
+#if (LPT_CFG_PARAM_CHECKING_ENABLE == 1)
             prdset_flag  = true;                                /* LPTPRD value decision */
+#endif  /* LPT_CFG_PARAM_CHECKING_ENABLE */
             ratio_select = array_num;              /* LOOP stop */
         }
     }

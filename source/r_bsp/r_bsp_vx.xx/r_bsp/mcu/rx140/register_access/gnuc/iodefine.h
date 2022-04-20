@@ -31,6 +31,10 @@
 *            : V0.50A (2020-12-16)  [Hardware Manual Revision : 0.50]
 *            : V1.00  (2021-03-26)  [Hardware Manual Revision : 1.00]
 *            : V1.00A (2021-05-27)  [Hardware Manual Revision : 1.00]
+*            : V1.00B (2021-09-03)  [Hardware Manual Revision : 1.00]
+*            : V1.00C (2021-10-12)  [Hardware Manual Revision : 1.00]
+*            : V1.10  (2021-11-10)  [Hardware Manual Revision : 1.10]
+*            : V1.10A (2021-12-16)  [Hardware Manual Revision : 1.10]
 *
 * NOTE       : THIS IS A TYPICAL EXAMPLE.
 *
@@ -131,7 +135,7 @@
 #define	IEN_ELC_ELSR18I		IEN2
 #define	IEN_AES_AESWRI		IEN7
 #define	IEN_AES_AESRDI		IEN0
-#define	IEN_TRNG_TRNGRDI	IEN1
+#define	IEN_RNG_RNGRDI		IEN1
 #define	IEN_MTU0_TGIA0		IEN2
 #define	IEN_MTU0_TGIB0		IEN3
 #define	IEN_MTU0_TGIC0		IEN4
@@ -251,7 +255,7 @@
 #define	VECT_ELC_ELSR18I	106
 #define	VECT_AES_AESWRI		111
 #define	VECT_AES_AESRDI		112
-#define	VECT_TRNG_TRNGRDI	113
+#define	VECT_RNG_RNGRDI		113
 #define	VECT_MTU0_TGIA0		114
 #define	VECT_MTU0_TGIB0		115
 #define	VECT_MTU0_TGIC0		116
@@ -481,7 +485,7 @@ IR_RTC_ALM=92,IR_RTC_PRD,
 IR_S12AD_S12ADI0=102,IR_S12AD_GBADI,
 IR_ELC_ELSR18I=106,
 IR_AES_AESWRI=111,IR_AES_AESRDI,
-IR_TRNG_TRNGRDI,
+IR_RNG_RNGRDI,
 IR_MTU0_TGIA0,IR_MTU0_TGIB0,IR_MTU0_TGIC0,IR_MTU0_TGID0,IR_MTU0_TCIV0,IR_MTU0_TGIE0,IR_MTU0_TGIF0,
 IR_MTU1_TGIA1,IR_MTU1_TGIB1,IR_MTU1_TCIV1,IR_MTU1_TCIU1,
 IR_MTU2_TGIA2,IR_MTU2_TGIB2,IR_MTU2_TCIV2,IR_MTU2_TCIU2,
@@ -515,7 +519,7 @@ DTCE_ICU_IRQ0=64,DTCE_ICU_IRQ1,DTCE_ICU_IRQ2,DTCE_ICU_IRQ3,DTCE_ICU_IRQ4,DTCE_IC
 DTCE_S12AD_S12ADI0=102,DTCE_S12AD_GBADI,
 DTCE_ELC_ELSR18I=106,
 DTCE_AES_AESWRI=111,DTCE_AES_AESRDI,
-DTCE_TRNG_TRNGRDI,
+DTCE_RNG_RNGRDI,
 DTCE_MTU0_TGIA0,DTCE_MTU0_TGIB0,DTCE_MTU0_TGIC0,DTCE_MTU0_TGID0,
 DTCE_MTU1_TGIA1=121,DTCE_MTU1_TGIB1,
 DTCE_MTU2_TGIA2=125,DTCE_MTU2_TGIB2,
@@ -557,7 +561,7 @@ IER_RTC_ALM=0x0B,IER_RTC_PRD=0x0B,
 IER_S12AD_S12ADI0=0x0C,IER_S12AD_GBADI=0x0C,
 IER_ELC_ELSR18I=0x0D,
 IER_AES_AESWRI=0x0D,IER_AES_AESRDI=0x0E,
-IER_TRNG_TRNGRDI=0x0E,
+IER_RNG_RNGRDI=0x0E,
 IER_MTU0_TGIA0=0x0E,IER_MTU0_TGIB0=0x0E,IER_MTU0_TGIC0=0x0E,IER_MTU0_TGID0=0x0E,IER_MTU0_TCIV0=0x0E,IER_MTU0_TGIE0=0x0E,IER_MTU0_TGIF0=0x0F,
 IER_MTU1_TGIA1=0x0F,IER_MTU1_TGIB1=0x0F,IER_MTU1_TCIV1=0x0F,IER_MTU1_TCIU1=0x0F,
 IER_MTU2_TGIA2=0x0F,IER_MTU2_TGIB2=0x0F,IER_MTU2_TCIV2=0x0F,IER_MTU2_TCIU2=0x10,
@@ -600,7 +604,7 @@ IPR_RTC_ALM=92,IPR_RTC_PRD=93,
 IPR_S12AD_S12ADI0=102,IPR_S12AD_GBADI=103,
 IPR_ELC_ELSR18I=106,
 IPR_AES_AESWRI=111,IPR_AES_AESRDI=111,
-IPR_TRNG_TRNGRDI=113,
+IPR_RNG_RNGRDI=113,
 IPR_MTU0_TGIA0=114,IPR_MTU0_TGIB0=114,IPR_MTU0_TGIC0=114,IPR_MTU0_TGID0=114,IPR_MTU0_TCIV0=118,IPR_MTU0_TGIE0=118,IPR_MTU0_TGIF0=118,
 IPR_MTU1_TGIA1=121,IPR_MTU1_TGIB1=121,IPR_MTU1_TCIV1=123,IPR_MTU1_TCIU1=123,
 IPR_MTU2_TGIA2=125,IPR_MTU2_TGIB2=125,IPR_MTU2_TCIV2=127,IPR_MTU2_TCIU2=127,
@@ -629,7 +633,7 @@ IPR_DOC_=57,
 IPR_CTSU_=60,
 IPR_SYSTEM_=81,
 IPR_AES_=111,
-IPR_TRNG_=113,
+IPR_RNG_=113,
 IPR_MTU1_TGI=121,
 IPR_MTU1_TCI=123,
 IPR_MTU2_TGI=125,
@@ -1057,8 +1061,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1075,8 +1079,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1134,8 +1138,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1167,8 +1171,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1198,8 +1202,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1275,8 +1279,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1285,63 +1289,9 @@ typedef struct st_ctsu {
 			unsigned long CHAC33 : 1;
 			unsigned long CHAC34 : 1;
 			unsigned long CHAC35 : 1;
-			unsigned long CHAC36 : 1;
-			unsigned long CHAC37 : 1;
-			unsigned long CHAC38 : 1;
-			unsigned long CHAC39 : 1;
-			unsigned long CHAC40 : 1;
-			unsigned long CHAC41 : 1;
-			unsigned long CHAC42 : 1;
-			unsigned long CHAC43 : 1;
-			unsigned long CHAC44 : 1;
-			unsigned long CHAC45 : 1;
-			unsigned long CHAC46 : 1;
-			unsigned long CHAC47 : 1;
-			unsigned long CHAC48 : 1;
-			unsigned long CHAC49 : 1;
-			unsigned long CHAC50 : 1;
-			unsigned long CHAC51 : 1;
-			unsigned long CHAC52 : 1;
-			unsigned long CHAC53 : 1;
-			unsigned long CHAC54 : 1;
-			unsigned long CHAC55 : 1;
-			unsigned long CHAC56 : 1;
-			unsigned long CHAC57 : 1;
-			unsigned long CHAC58 : 1;
-			unsigned long CHAC59 : 1;
-			unsigned long CHAC60 : 1;
-			unsigned long CHAC61 : 1;
-			unsigned long CHAC62 : 1;
-			unsigned long CHAC63 : 1;
+			unsigned long  : 28;
 #else
-			unsigned long CHAC63 : 1;
-			unsigned long CHAC62 : 1;
-			unsigned long CHAC61 : 1;
-			unsigned long CHAC60 : 1;
-			unsigned long CHAC59 : 1;
-			unsigned long CHAC58 : 1;
-			unsigned long CHAC57 : 1;
-			unsigned long CHAC56 : 1;
-			unsigned long CHAC55 : 1;
-			unsigned long CHAC54 : 1;
-			unsigned long CHAC53 : 1;
-			unsigned long CHAC52 : 1;
-			unsigned long CHAC51 : 1;
-			unsigned long CHAC50 : 1;
-			unsigned long CHAC49 : 1;
-			unsigned long CHAC48 : 1;
-			unsigned long CHAC47 : 1;
-			unsigned long CHAC46 : 1;
-			unsigned long CHAC45 : 1;
-			unsigned long CHAC44 : 1;
-			unsigned long CHAC43 : 1;
-			unsigned long CHAC42 : 1;
-			unsigned long CHAC41 : 1;
-			unsigned long CHAC40 : 1;
-			unsigned long CHAC39 : 1;
-			unsigned long CHAC38 : 1;
-			unsigned long CHAC37 : 1;
-			unsigned long CHAC36 : 1;
+			unsigned long  : 28;
 			unsigned long CHAC35 : 1;
 			unsigned long CHAC34 : 1;
 			unsigned long CHAC33 : 1;
@@ -1352,8 +1302,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1429,8 +1379,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1439,63 +1389,9 @@ typedef struct st_ctsu {
 			unsigned long CHTRC33 : 1;
 			unsigned long CHTRC34 : 1;
 			unsigned long CHTRC35 : 1;
-			unsigned long CHTRC36 : 1;
-			unsigned long CHTRC37 : 1;
-			unsigned long CHTRC38 : 1;
-			unsigned long CHTRC39 : 1;
-			unsigned long CHTRC40 : 1;
-			unsigned long CHTRC41 : 1;
-			unsigned long CHTRC42 : 1;
-			unsigned long CHTRC43 : 1;
-			unsigned long CHTRC44 : 1;
-			unsigned long CHTRC45 : 1;
-			unsigned long CHTRC46 : 1;
-			unsigned long CHTRC47 : 1;
-			unsigned long CHTRC48 : 1;
-			unsigned long CHTRC49 : 1;
-			unsigned long CHTRC50 : 1;
-			unsigned long CHTRC51 : 1;
-			unsigned long CHTRC52 : 1;
-			unsigned long CHTRC53 : 1;
-			unsigned long CHTRC54 : 1;
-			unsigned long CHTRC55 : 1;
-			unsigned long CHTRC56 : 1;
-			unsigned long CHTRC57 : 1;
-			unsigned long CHTRC58 : 1;
-			unsigned long CHTRC59 : 1;
-			unsigned long CHTRC60 : 1;
-			unsigned long CHTRC61 : 1;
-			unsigned long CHTRC62 : 1;
-			unsigned long CHTRC63 : 1;
+			unsigned long  : 28;
 #else
-			unsigned long CHTRC63 : 1;
-			unsigned long CHTRC62 : 1;
-			unsigned long CHTRC61 : 1;
-			unsigned long CHTRC60 : 1;
-			unsigned long CHTRC59 : 1;
-			unsigned long CHTRC58 : 1;
-			unsigned long CHTRC57 : 1;
-			unsigned long CHTRC56 : 1;
-			unsigned long CHTRC55 : 1;
-			unsigned long CHTRC54 : 1;
-			unsigned long CHTRC53 : 1;
-			unsigned long CHTRC52 : 1;
-			unsigned long CHTRC51 : 1;
-			unsigned long CHTRC50 : 1;
-			unsigned long CHTRC49 : 1;
-			unsigned long CHTRC48 : 1;
-			unsigned long CHTRC47 : 1;
-			unsigned long CHTRC46 : 1;
-			unsigned long CHTRC45 : 1;
-			unsigned long CHTRC44 : 1;
-			unsigned long CHTRC43 : 1;
-			unsigned long CHTRC42 : 1;
-			unsigned long CHTRC41 : 1;
-			unsigned long CHTRC40 : 1;
-			unsigned long CHTRC39 : 1;
-			unsigned long CHTRC38 : 1;
-			unsigned long CHTRC37 : 1;
-			unsigned long CHTRC36 : 1;
+			unsigned long  : 28;
 			unsigned long CHTRC35 : 1;
 			unsigned long CHTRC34 : 1;
 			unsigned long CHTRC33 : 1;
@@ -1506,8 +1402,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1543,8 +1439,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1566,8 +1462,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1583,8 +1479,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1636,8 +1532,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1657,8 +1553,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1679,14 +1575,14 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
 #ifdef __RX_LITTLE_ENDIAN__
 			unsigned long CCOCFEN : 1;
-			unsigned long MCACFEN : 1;
+			unsigned long  : 1;
 			unsigned long MAJIRIMD : 1;
 			unsigned long  : 1;
 			unsigned long DTCLESS : 1;
@@ -1706,7 +1602,7 @@ typedef struct st_ctsu {
 			unsigned long DTCLESS : 1;
 			unsigned long  : 1;
 			unsigned long MAJIRIMD : 1;
-			unsigned long MCACFEN : 1;
+			unsigned long  : 1;
 			unsigned long CCOCFEN : 1;
 #endif
 	} BIT;
@@ -1714,26 +1610,26 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
 #ifdef __RX_LITTLE_ENDIAN__
-			unsigned long SCNTACCOEFFn : 16;
-			unsigned long SCNTACCOUNTn : 16;
+			unsigned long SCNTACCOEFF : 16;
+			unsigned long SCNTACCOUNT : 16;
 #else
-			unsigned long SCNTACCOUNTn : 16;
-			unsigned long SCNTACCOEFFn : 16;
+			unsigned long SCNTACCOUNT : 16;
+			unsigned long SCNTACCOEFF : 16;
 #endif
 	} BIT;
-	} CTSUSCNTACTn;
+	} CTSUSCNTACT;
 	char           wk2[4];
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1751,8 +1647,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1770,8 +1666,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1789,8 +1685,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1818,8 +1714,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1834,10 +1730,6 @@ typedef struct st_ctsu {
 	} CTSUAJTHR;
 	union {
 		unsigned long LONG;
-		struct {
-			unsigned short H;
-			unsigned short L;
-		} WORD;
 		struct {
 			
 #ifdef __RX_LITTLE_ENDIAN__
@@ -1854,10 +1746,6 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
-			unsigned short L;
-		} WORD;
-		struct {
 			
 #ifdef __RX_LITTLE_ENDIAN__
 			unsigned long AJBLACT : 32;
@@ -1869,8 +1757,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -1886,8 +1774,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			
@@ -4246,7 +4134,42 @@ typedef struct st_mpc {
 #endif
 	} BIT;
 	} PH3PFS;
-	char           wk13[5];
+	char           wk13[2];
+	union {
+		unsigned char BYTE;
+		struct {
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PSEL : 5;
+			unsigned char  : 1;
+			unsigned char ISEL : 1;
+			unsigned char  : 1;
+#else
+			unsigned char  : 1;
+			unsigned char ISEL : 1;
+			unsigned char  : 1;
+			unsigned char PSEL : 5;
+#endif
+	} BIT;
+	} PH6PFS;
+	union {
+		unsigned char BYTE;
+		struct {
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PSEL : 5;
+			unsigned char  : 1;
+			unsigned char ISEL : 1;
+			unsigned char  : 1;
+#else
+			unsigned char  : 1;
+			unsigned char ISEL : 1;
+			unsigned char  : 1;
+			unsigned char PSEL : 5;
+#endif
+	} BIT;
+	} PH7PFS;
+	char           wk14[1];
 	union {
 		unsigned char BYTE;
 		struct {
@@ -4262,7 +4185,7 @@ typedef struct st_mpc {
 #endif
 	} BIT;
 	} PJ1PFS;
-	char           wk14[4];
+	char           wk15[4];
 	union {
 		unsigned char BYTE;
 		struct {
@@ -7467,9 +7390,13 @@ typedef struct st_porth {
 			unsigned char B1 : 1;
 			unsigned char B2 : 1;
 			unsigned char B3 : 1;
-			unsigned char  : 4;
+			unsigned char  : 2;
+			unsigned char B6 : 1;
+			unsigned char B7 : 1;
 #else
-			unsigned char  : 4;
+			unsigned char B7 : 1;
+			unsigned char B6 : 1;
+			unsigned char  : 2;
 			unsigned char B3 : 1;
 			unsigned char B2 : 1;
 			unsigned char B1 : 1;
@@ -17992,20 +17919,7 @@ typedef struct st_system {
 #endif
 	} BIT;
 	} SOMCR;
-	char           wk12[27];
-	union {
-		unsigned char BYTE;
-		struct {
-			
-#ifdef __RX_LITTLE_ENDIAN__
-			unsigned char PSMC : 2;
-			unsigned char  : 6;
-#else
-			unsigned char  : 6;
-			unsigned char PSMC : 2;
-#endif
-	} BIT;
-	} PSMCR;
+	char           wk12[28];
 	union {
 		unsigned char BYTE;
 		struct {

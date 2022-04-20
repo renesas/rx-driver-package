@@ -64,6 +64,9 @@
 *                                Changed initial value of the following macro definitions.
 *                                 - BSP_CFG_MCU_PART_GROUP
 *                                 - BSP_CFG_MCU_PART_SERIES
+*         : 11.02.2022 4.01      Changed initial value of the following macro definitions.
+*                                 - BSP_CFG_SWINT_UNIT1_ENABLE
+*                                 - BSP_CFG_SWINT_UNIT2_ENABLE
 ***********************************************************************************************************************/
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
 #define R_BSP_CONFIG_REF_HEADER_FILE
@@ -726,8 +729,8 @@ Configuration Options
    1 = Software interrupt is used.
    NOTE: When this macro is set to 1, the software interrupt is initialized in bsp startup routine. 
 */
-#define BSP_CFG_SWINT_UNIT1_ENABLE    (1)
-#define BSP_CFG_SWINT_UNIT2_ENABLE    (1)
+#define BSP_CFG_SWINT_UNIT1_ENABLE    (0)
+#define BSP_CFG_SWINT_UNIT2_ENABLE    (0)
 
 /* Software Interrupt Task Buffer Number.
    For software interrupt, this value is number of buffering user tasks.

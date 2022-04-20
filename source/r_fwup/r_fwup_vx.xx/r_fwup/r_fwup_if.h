@@ -23,7 +23,8 @@
  * History : DD.MM.YYYY Version Description
  *           16.02.2021 1.00    First Release
  *           19.05.2021 1.01    Added support for RX72N,RX66T,RX130
- *           08.07.2021 1.02    Added support for GCC
+ *           08.07.2021 1.02    Added support for RX671 and GCC
+ *           10.08.2021 1.03    Added support for IAR
 **********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -41,7 +42,7 @@
  **********************************************************************************************************************/
 /* Version Number of API. */
 #define FWUP_VERSION_MAJOR  (1)
-#define FWUP_VERSION_MINOR  (02)
+#define FWUP_VERSION_MINOR  (03)
 
 /*****************************************************************************
  Typedef definitions
@@ -87,8 +88,8 @@ OTA_Err_t R_FWUP_ResetDevice( void );
 OTA_Err_t R_FWUP_ActivateNewImage( void );
 OTA_Err_t R_FWUP_SetPlatformImageState( OTA_ImageState_t eState );
 OTA_PAL_ImageState_t R_FWUP_GetPlatformImageState( void );
-OTA_Err_t R_FWUP_GetVersion(void);
-    #endif
+#endif
+uint32_t R_FWUP_GetVersion(void);
 
 #endif /* FWUP_IF_H */
 

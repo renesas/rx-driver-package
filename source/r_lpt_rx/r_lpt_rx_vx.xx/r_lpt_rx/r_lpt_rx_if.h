@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer 
  *
- * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.    
+ * Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.    
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_lpt_rx_if.h
@@ -48,7 +48,7 @@
 
 /* Version Number of API. */
 #define LPT_VERSION_MAJOR  (3)
-#define LPT_VERSION_MINOR  (00)
+#define LPT_VERSION_MINOR  (01)
 
 /* Wait time for Call R_LPT_Close after Called R_LPT_Open immediately */
 #define LPT_RSTWAIT_USEC   (LPT_LPTSRCCLK_CYC)

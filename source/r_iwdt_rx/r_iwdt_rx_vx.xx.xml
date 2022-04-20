@@ -36,6 +36,7 @@
         <version>3.01.00</version>
         <version>3.02.00</version>
         <version>3.03.00</version>
+        <version>3.04.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -44,6 +45,7 @@
         <version>4.08.04.201902</version>
         <version>8.03.00.201904</version>
         <version>8.03.00.202004</version>
+        <version>8.03.00.202104</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -97,7 +99,7 @@
         <zipsource>r_iwdt_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>6.20</version>
+            <version>7.10</version>
         </dependency>
         <application>Security</application>
         <desc>IWDT Driver</desc>
