@@ -14,16 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_wifi_sx_ulpgn_api.c
- * Version      : 1.0
  * Description  : API functions definition for SX ULPGN.
- *********************************************************************************************************************/
-/**********************************************************************************************************************
- * History : DD.MM.YYYY Version  Description
- *         : DD.MM.YYYY 1.00     First Release
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -193,9 +188,18 @@ static st_cert_profile_t s_cert_profile[CERT_PROFILE_MAX];
 static wifi_certificate_infomation_t s_cert_info;
 
 /* IP address */
-static u_cast_t s_ip;
-static u_cast_t s_msk;
-static u_cast_t s_dns;
+static uint8_t s_ip_hh;
+static uint8_t s_ip_hl;
+static uint8_t s_ip_lh;
+static uint8_t s_ip_ll;
+static uint8_t s_msk_hh;
+static uint8_t s_msk_hl;
+static uint8_t s_msk_lh;
+static uint8_t s_msk_ll;
+static uint8_t s_dns_hh;
+static uint8_t s_dns_hl;
+static uint8_t s_dns_lh;
+static uint8_t s_dns_ll;
 
 /* OS parameters */
 static OS_MUTEX s_binary_sem_tx;
@@ -488,8 +492,11 @@ wifi_err_t R_WIFI_SX_ULPGN_SetDnsServerAddress(uint32_t dns_address1, uint32_t d
     if (0 != dns_address1)
     {
         /* set dns address1 */
-        s_dns.ul = dns_address1;
-        if (AT_OK != at_exec(g_cmd_port, "ATNDNSSVR1=%d.%d.%d.%d\r", s_dns.b.ll, s_dns.b.lh, s_dns.b.hl, s_dns.b.hh))
+        s_dns_hh = (uint8_t)(dns_address1 >> 24);
+        s_dns_hl = (uint8_t)(dns_address1 >> 16);
+        s_dns_lh = (uint8_t)(dns_address1 >>  8);
+        s_dns_ll = (uint8_t)(dns_address1      );
+        if (AT_OK != at_exec(g_cmd_port, "ATNDNSSVR1=%d.%d.%d.%d\r", s_dns_hh, s_dns_hl, s_dns_lh, s_dns_ll))
         {
             api_ret = WIFI_ERR_MODULE_COM;
             goto RELEASE_MUTEX;
@@ -499,8 +506,11 @@ wifi_err_t R_WIFI_SX_ULPGN_SetDnsServerAddress(uint32_t dns_address1, uint32_t d
     if (0 != dns_address2)
     {
         /* set dns address2 */
-        s_dns.ul = dns_address2;
-        if (AT_OK != at_exec(g_cmd_port, "ATNDNSSVR2=%d.%d.%d.%d\r", s_dns.b.ll, s_dns.b.lh, s_dns.b.hl, s_dns.b.hh))
+        s_dns_hh = (uint8_t)(dns_address2 >> 24);
+        s_dns_hl = (uint8_t)(dns_address2 >> 16);
+        s_dns_lh = (uint8_t)(dns_address2 >>  8);
+        s_dns_ll = (uint8_t)(dns_address2      );
+        if (AT_OK != at_exec(g_cmd_port, "ATNDNSSVR2=%d.%d.%d.%d\r", s_dns_hh, s_dns_hl, s_dns_lh, s_dns_ll))
         {
             api_ret = WIFI_ERR_MODULE_COM;
         }
@@ -700,13 +710,22 @@ wifi_err_t R_WIFI_SX_ULPGN_Connect(const uint8_t * ssid, const uint8_t * pass,
     if (0 == dhcp_enable)
     {
         /* Set static IP address */
-        s_ip.ul  = ip_config->ipaddress;
-        s_msk.ul = ip_config->subnetmask;
-        s_dns.ul = ip_config->gateway;
+        s_ip_hh = (uint8_t)(ip_config->ipaddress >> 24);
+        s_ip_hl = (uint8_t)(ip_config->ipaddress >> 16);
+        s_ip_lh = (uint8_t)(ip_config->ipaddress >>  8);
+        s_ip_ll = (uint8_t)(ip_config->ipaddress      );
+        s_msk_hh = (uint8_t)(ip_config->subnetmask >> 24);
+        s_msk_hl = (uint8_t)(ip_config->subnetmask >> 16);
+        s_msk_lh = (uint8_t)(ip_config->subnetmask >>  8);
+        s_msk_ll = (uint8_t)(ip_config->subnetmask      );
+        s_dns_hh = (uint8_t)(ip_config->gateway >> 24);
+        s_dns_hl = (uint8_t)(ip_config->gateway >> 16);
+        s_dns_lh = (uint8_t)(ip_config->gateway >>  8);
+        s_dns_ll = (uint8_t)(ip_config->gateway      );
         if (AT_OK != at_exec(g_cmd_port, "ATNSET=%d.%d.%d.%d,%d.%d.%d.%d,%d.%d.%d.%d\r",
-                             s_ip.b.ll,  s_ip.b.lh,  s_ip.b.hl,  s_ip.b.hh,
-                             s_msk.b.ll, s_msk.b.lh, s_msk.b.hl, s_msk.b.hh,
-                             s_dns.b.ll, s_dns.b.lh, s_dns.b.hl, s_dns.b.hh))
+                             s_ip_hh, s_ip_hl, s_ip_lh, s_ip_ll,
+                             s_msk_hh, s_msk_hl, s_msk_lh, s_msk_ll,
+                             s_dns_hh, s_dns_hl, s_dns_lh, s_dns_ll))
         {
             api_ret = WIFI_ERR_MODULE_COM;
             goto RELEASE_MUTEX;
@@ -1174,9 +1193,12 @@ wifi_err_t R_WIFI_SX_ULPGN_ConnectSocket(uint8_t socket_number, uint32_t ip_addr
     socket_type = g_sock_tbl[socket_number].protocol;
 
     /* Open client mode TCP or UDP socket. */
-    s_ip.ul = ip_address;
+    s_ip_hh = (uint8_t)(ip_address >> 24);
+    s_ip_hl = (uint8_t)(ip_address >> 16);
+    s_ip_lh = (uint8_t)(ip_address >>  8);
+    s_ip_ll = (uint8_t)(ip_address      );
     if (AT_OK != at_exec(g_cmd_port, "%s=%d.%d.%d.%d,%d\r",
-                         atcmd_tbl[socket_type], s_ip.b.ll, s_ip.b.lh, s_ip.b.hl, s_ip.b.hh, port))
+                         atcmd_tbl[socket_type], s_ip_hh, s_ip_hl, s_ip_lh, s_ip_ll, port))
     {
         at_exec(g_cmd_port, "ATNCLOSE\r");
         R_BSP_SoftwareDelay(500, BSP_DELAY_MILLISECS);
@@ -1188,7 +1210,7 @@ wifi_err_t R_WIFI_SX_ULPGN_ConnectSocket(uint8_t socket_number, uint32_t ip_addr
     if (WIFI_SOCKET_IP_PROTOCOL_UDP == socket_type)
     {
         if (AT_OK != at_exec(g_cmd_port, "ATNSENDTO=%d.%d.%d.%d,%d\r",
-                             s_ip.b.ll, s_ip.b.lh, s_ip.b.hl, s_ip.b.hh, port))
+                             s_ip_hh, s_ip_hl, s_ip_lh, s_ip_ll, port))
         {
             at_exec(g_cmd_port, "ATNCLOSE\r");
             R_BSP_SoftwareDelay(500, BSP_DELAY_MILLISECS);
@@ -1637,8 +1659,11 @@ wifi_err_t R_WIFI_SX_ULPGN_Ping(uint32_t ip_address, uint16_t count, uint32_t in
             os_wrap_sleep(interval_ms, UNIT_MSEC);
         }
 
-        s_ip.ul = ip_address;
-        if (AT_OK == at_exec(g_cmd_port, "ATNPING=%d.%d.%d.%d\r", s_ip.b.ll, s_ip.b.lh, s_ip.b.hl, s_ip.b.hh))
+        s_ip_hh = (uint8_t)(ip_address >> 24);
+        s_ip_hl = (uint8_t)(ip_address >> 16);
+        s_ip_lh = (uint8_t)(ip_address >>  8);
+        s_ip_ll = (uint8_t)(ip_address      );
+        if (AT_OK == at_exec(g_cmd_port, "ATNPING=%d.%d.%d.%d\r", s_ip_hh, s_ip_hl, s_ip_lh, s_ip_ll))
         {
             success_count++;
         }

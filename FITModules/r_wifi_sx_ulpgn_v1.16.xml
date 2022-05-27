@@ -29,8 +29,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_wifi_sx_ulpgn</name>
-        <version>1.14</version>
-        <zipsource>r_wifi_sx_ulpgn_v1.14.zip</zipsource>
+        <version>1.16</version>
+        <zipsource>r_wifi_sx_ulpgn_v1.16.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>5.64</version>

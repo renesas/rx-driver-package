@@ -43,7 +43,7 @@
             <option id="WIFI_CFG_SCI_SECOND_CHANNEL.11" display="11" value="11"/>
             <option id="WIFI_CFG_SCI_SECOND_CHANNEL.12" display="12" value="12"/>
             <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_SCI_SECOND_CHANNEL}")</constraint>
-            <constraint display="Value must be in the range 0~12">("${WIFI_CFG_SCI_SECOND_CHANNEL}" &gt;= 0) &amp;&amp; ("${WIFI_CFG_SCI_SECOND_CHANNEL}" &lt;= 12) &amp;&amp; ("${WIFI_CFG_SCI_SECOND_CHANNEL}" != "${WIFI_CFG_SCI_CHANNEL}")</constraint>
+            <constraint display="Value must be in the range 0~12">("${WIFI_CFG_SCI_SECOND_CHANNEL}" &gt;= 0) &amp;&amp; ("${WIFI_CFG_SCI_SECOND_CHANNEL}" &lt;= 12)</constraint>
             <description>SCI Channel number for SX-ULPGN Second Command Port for AT command communication</description>
         </property>
         <property id="WIFI_CFG_SCI_INTERRUPT_LEVEL" display="Interrupt Level for WIFI_CFG_SCI_CHANNEL" default="4" type="textbox">
@@ -54,7 +54,7 @@
         <property id="WIFI_CFG_SCI_PCLK_HZ" display="Peripheral clock speed for WIFI_CFG_SCI_CHANNEL" default="60000000" type="textbox">
             <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_SCI_PCLK_HZ}")</constraint>
             <constraint display="Value must be in the range 60000000~120000000">("${WIFI_CFG_SCI_PCLK_HZ}" &gt;= 60000000) &amp;&amp; ("${WIFI_CFG_SCI_PCLK_HZ}" &lt;= 120000000)</constraint>
-            <description>Communication baudrate for WIFI_CFG_SCI_CHANNEL.</description>
+            <description>Peripheral clock speed for WIFI_CFG_SCI_CHANNEL.</description>
         </property>
         <property id="WIFI_CFG_SCI_BAUDRATE" display="Communication baudrate for WIFI_CFG_SCI_CHANNEL" default="460800" type="textbox">
             <constraint display="Value must be an decimal value" actionOnFail="disable">testInteger("${WIFI_CFG_SCI_BAUDRATE}")</constraint>

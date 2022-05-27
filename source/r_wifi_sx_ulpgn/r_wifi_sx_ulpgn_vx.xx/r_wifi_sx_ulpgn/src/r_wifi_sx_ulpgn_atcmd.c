@@ -14,16 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_wifi_sx_ulpgn_atcmd.c
- * Version      : 1.0
  * Description  : AT command functions definition.
- *********************************************************************************************************************/
-/**********************************************************************************************************************
- * History : DD.MM.YYYY Version  Description
- *         : DD.MM.2021 1.00     First Release
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -93,7 +88,8 @@ static uint32_t s_start_pos = 0;
  *********************************************************************************************************************/
 void at_send(uint8_t port, const char *cmd, ...)
 {
-    va_list   args;
+    va_list args;
+    uint16_t str_length;
 
     /* Initialize */
     s_rcv_cnt = 0;
@@ -106,8 +102,14 @@ void at_send(uint8_t port, const char *cmd, ...)
     vsprintf((char *)s_cmd_buf, cmd, args);
     va_end(args);
 
+    str_length = (uint16_t)strlen((const char *)s_cmd_buf);
+    if (str_length > (CMD_BUF_MAX - 1))
+    {
+        str_length = CMD_BUF_MAX - 1;
+    }
+
     /* Send AT command */
-    R_SCI_Send(g_uart_tbl[port].sci_hdl, s_cmd_buf, strlen((const char *)s_cmd_buf));
+    R_SCI_Send(g_uart_tbl[port].sci_hdl, s_cmd_buf, str_length);
 
     /* wait for transmission end */
     while (0 == g_uart_tbl[port].tx_end_flag)
@@ -220,6 +222,8 @@ e_rslt_code_t at_recv(uint8_t port)
 e_rslt_code_t at_exec(uint8_t port, const char *cmd, ...)
 {
     va_list args;
+    uint16_t str_length;
+    e_rslt_code_t ret;
 
     /* Initialize */
     s_rcv_cnt = 0;
@@ -232,11 +236,21 @@ e_rslt_code_t at_exec(uint8_t port, const char *cmd, ...)
     vsprintf((char *)s_cmd_buf, cmd, args);
     va_end(args);
 
+    str_length = (uint16_t)strlen((const char *)s_cmd_buf);
+    if (str_length > (CMD_BUF_MAX - 1))
+    {
+        str_length = CMD_BUF_MAX - 1;
+    }
+
     /* Send AT command */
-    R_SCI_Send(g_uart_tbl[port].sci_hdl, s_cmd_buf, strlen((const char *)s_cmd_buf));
+    R_SCI_Send(g_uart_tbl[port].sci_hdl, s_cmd_buf, str_length);
 
     /* Receive response */
-    return at_recv(port);
+    ret = at_recv(port);
+
+    memset(s_cmd_buf, 0, str_length);
+
+    return ret;
 }
 /**********************************************************************************************************************
  * End of function at_exec
