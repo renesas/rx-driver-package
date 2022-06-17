@@ -14,20 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cpin.c
  * Description  : Function to execute the AT command (CPIN).
- *********************************************************************************************************************/
-/**********************************************************************************************************************
- * History : DD.MM.YYYY Version  Description
- *         : xx.xx.xxxx 1.00     First Release
- *         : 02.09.2021 1.01     Fixed reset timing
- *         : 21.10.2021 1.02     Support for Azure RTOS
- *                               Support for GCC for Renesas GNURX Toolchain
- *         : 15.11.2021 1.03     Improved receiving behavior, removed socket buffers
- *         : 24.01.2022 1.04     R_CELLULAR_SetPSM and R_CELLULAR_SetEDRX have been added as new APIs
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -55,19 +46,31 @@
 /*************************************************************************************************
  * Function Name  @fn            atc_cpin
  ************************************************************************************************/
-e_cellular_err_t atc_cpin(st_cellular_ctrl_t * const p_ctrl)
+e_cellular_err_t atc_cpin(st_cellular_ctrl_t * const p_ctrl, const st_cellular_cfg_t * const p_cfg)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
     e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
+    uint8_t str[8 + 1] = {0};
 
-    const uint8_t * const p_command_arg[CELLULAR_MAX_ARG_COUNT] =
-                                    {(uint8_t *)&p_ctrl->sim_pin_code}; // &uint8_t[]->uint8_t *
+    if (NULL == p_cfg)
+    {
+        strncpy((char *)str, CELLULAR_STRING_CONVERT(CELLULAR_CFG_PIN_CODE), sizeof(str));    // (uint8_t *)->(char *)
+    }
+    else
+    {
+        strncpy((char *)str, (char *)p_cfg->sim_pin_code, sizeof(str));  // (uint8_t *)->(char *)
+    }
+
+    const uint8_t * const p_command_arg[CELLULAR_MAX_ARG_COUNT] = {str}; // (&uint8_t[])->(uint8_t *)
 
     atc_generate(p_ctrl->sci_ctrl.atc_buff,
         (const uint8_t *)&gp_at_command[ATC_PIN_LOCK_RELEASE][0],   // (const uint8_t *const *)->(const uint8_t **)
             (const uint8_t **)&p_command_arg);                      // (const uint8_t *const *)->(const uint8_t **)
 
     at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_PIN_LOCK_RELEASE);
+
+    memset(p_ctrl->sci_ctrl.atc_buff, 0x00, CELLULAR_ATC_BUFF_SIZE);
+    memset(str, 0x00, sizeof(str));
 
     if (CELLULAR_ATC_OK != at_ret)
     {

@@ -14,20 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_byte_pool_control.c
  * Description  : Manages the memory byte pool.
- *********************************************************************************************************************/
-/**********************************************************************************************************************
- * History : DD.MM.YYYY Version  Description
- *         : xx.xx.xxxx 1.00     First Release
- *         : 02.09.2021 1.01     Fixed reset timing
- *         : 21.10.2021 1.02     Support for Azure RTOS
- *                               Support for GCC for Renesas GNURX Toolchain
- *         : 15.11.2021 1.03     Improved receiving behavior, removed socket buffers
- *         : 24.01.2022 1.04     R_CELLULAR_SetPSM and R_CELLULAR_SetEDRX have been added as new APIs
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -47,7 +38,7 @@
 /**********************************************************************************************************************
  * Exported global variables
  *********************************************************************************************************************/
-TX_BLOCK_POOL g_cellular_scoket_pool;
+TX_BLOCK_POOL g_cellular_socket_pool;
 TX_BLOCK_POOL g_cellular_event_pool;
 TX_BLOCK_POOL g_cellular_thread_pool;
 TX_BLOCK_POOL g_cellular_semaphore_pool;
@@ -69,7 +60,7 @@ e_cellular_err_t cellular_block_pool_create(void)
     e_cellular_err_t ret = CELLULAR_SUCCESS;
     UINT rtos_ret;
 
-    rtos_ret = tx_block_pool_create(&g_cellular_scoket_pool, "socket pool",
+    rtos_ret = tx_block_pool_create(&g_cellular_socket_pool, "socket pool",
             sizeof(st_cellular_socket_ctrl_t), cellular_socket_pool, TOTAL_SOCKET_BLOCK_SIZE);
 
     if (TX_SUCCESS == rtos_ret)
@@ -110,7 +101,7 @@ e_cellular_err_t cellular_block_pool_delete(void)
     e_cellular_err_t ret = CELLULAR_SUCCESS;
     UINT rtos_ret;
 
-    rtos_ret = tx_block_pool_delete(&g_cellular_scoket_pool);
+    rtos_ret = tx_block_pool_delete(&g_cellular_socket_pool);
 
     if (TX_SUCCESS == rtos_ret)
     {

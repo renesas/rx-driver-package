@@ -14,20 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : at_command.c
  * Description  : Function to generate AT command.
- *********************************************************************************************************************/
-/**********************************************************************************************************************
- * History : DD.MM.YYYY Version  Description
- *         : xx.xx.xxxx 1.00     First Release
- *         : 02.09.2021 1.01     Fixed reset timing
- *         : 21.10.2021 1.02     Support for Azure RTOS
- *                               Support for GCC for Renesas GNURX Toolchain
- *         : 15.11.2021 1.03     Improved receiving behavior, removed socket buffers
- *         : 24.01.2022 1.04     R_CELLULAR_SetPSM and R_CELLULAR_SetEDRX have been added as new APIs
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -62,14 +53,17 @@ const uint8_t g_ryz014_ap_config[]               = RYZ014_ATC_AP_CONFIG;
 const uint8_t g_ryz014_user_config[]             = RYZ014_ATC_USER_CONFIG;
 const uint8_t g_ryz014_socket_config_1[]         = RYZ014_ATC_SOCKET_CONFIG_1;
 const uint8_t g_ryz014_socket_config_2[]         = RYZ014_ATC_SOCKET_CONFIG_2;
+const uint8_t g_ryz014_listening_socket[]        = RYZ014_ATC_LISTENING_SOCKET;
 const uint8_t g_ryz014_connect_check[]           = RYZ014_ATC_CONNECT_CHECK;
 const uint8_t g_ryz014_set_connect_status[]      = RYZ014_ATC_SET_CONNECT_STATUS;
 const uint8_t g_ryz014_shutdown[]                = RYZ014_ATC_SHUTDOWN;
 const uint8_t g_ryz014_get_time[]                = RYZ014_ATC_GET_TIME;
 const uint8_t g_ryz014_set_time[]                = RYZ014_ATC_SET_TIME;
 const uint8_t g_ryz014_reset[]                   = RYZ014_ATC_RESET;
-const uint8_t g_ryz014_cereg_off[]               = RYZ014_ATC_CEREG_OFF;
-const uint8_t g_ryz014_auto_connect_off[]        = RYZ014_ATC_AUTO_CONNECT_OFF;
+const uint8_t g_ryz014_set_notice_level[]        = RYZ014_ATC_SET_NOTICE_LEVEL;
+const uint8_t g_ryz014_get_notice_level[]        = RYZ014_ATC_GET_NOTICE_LEVEL;
+const uint8_t g_ryz014_auto_connect[]            = RYZ014_ATC_AUTO_CONNECT;
+const uint8_t g_ryz014_auto_connect_check[]      = RYZ014_ATC_AUTO_CONNECT_CHECK;
 const uint8_t g_ryz014_sim_st_off[]              = RYZ014_ATC_SIM_ST_OFF;
 const uint8_t g_ryz014_get_service_status[]      = RYZ014_ATC_GET_SERVICE_STATUS;
 const uint8_t g_ryz014_set_provider[]            = RYZ014_ATC_SET_PROVIDER;
@@ -81,8 +75,9 @@ const uint8_t g_ryz014_atc_set_psm[]             = RYZ014_ATC_SET_PSM;
 const uint8_t g_ryz014_atc_get_edrx[]            = RYZ014_ATC_GET_EDRX;
 const uint8_t g_ryz014_atc_set_edrx[]            = RYZ014_ATC_SET_EDRX;
 const uint8_t g_ryz014_atc_get_signal[]          = RYZ014_ATC_GET_SIGNAL_STRENGTH;
-const uint8_t g_ryz014_atc_get_sw_version[]      = RYZ014_ATC_GET_SW_VERSION;
+const uint8_t g_ryz014_atc_get_sw_revision[]     = RYZ014_ATC_GET_SW_REVISION;
 const uint8_t g_ryz014_atc_get_serial_num[]      = RYZ014_ATC_GET_SERIAL_NUMBER;
+const uint8_t g_ryz014_atc_get_svn[]             = RYZ014_ATC_GET_SVN;
 const uint8_t g_ryz014_atc_get_module_name[]     = RYZ014_ATC_GET_MODULE_NAME;
 const uint8_t g_ryz014_atc_get_maker_name[]      = RYZ014_ATC_GET_MAKER_NAME;
 const uint8_t g_ryz014_atc_get_imsi[]            = RYZ014_ATC_GET_IMSI;
@@ -90,6 +85,10 @@ const uint8_t g_ryz014_atc_send_command_sim[]    = RYZ014_ATC_SEND_COMMAND_TO_SI
 const uint8_t g_ryz014_atc_set_psm_config[]      = RYZ014_ATC_SET_PSM_CONFIG;
 const uint8_t g_ryz014_atc_set_ring_config[]     = RYZ014_ATC_SET_RING_CONFIG;
 const uint8_t g_ryz014_atc_set_ind_notify[]      = RYZ014_ATC_SET_IND_NOTIFY;
+const uint8_t g_ryz014_atc_get_phone_num[]       = RYZ014_ATC_GET_PHONE_NUM;
+const uint8_t g_ryz014_atc_get_iccid[]           = RYZ014_ATC_GET_ICCID;
+const uint8_t g_ryz014_atc_ping[]                = RYZ014_ATC_PING;
+const uint8_t g_ryz014_atc_get_cellinfo[]        = RYZ014_ATC_GET_CELLINFO;
 const uint8_t g_ryz014_no_command[]              = RYZ014_NO_COMMAND;
 #if (CELLULAR_IMPLEMENT_TYPE == 'B')
 const uint8_t g_ryz014_write_certificate[]       = RYZ014_ATC_WRITE_CERTIFICATE;
@@ -115,14 +114,17 @@ const uint8_t * const gp_at_command[ATC_LIST_MAX] =
     {g_ryz014_user_config},
     {g_ryz014_socket_config_1},
     {g_ryz014_socket_config_2},
+    {g_ryz014_listening_socket},
     {g_ryz014_connect_check},
     {g_ryz014_set_connect_status},
     {g_ryz014_shutdown},
     {g_ryz014_get_time},
     {g_ryz014_set_time},
     {g_ryz014_reset},
-    {g_ryz014_cereg_off},
-    {g_ryz014_auto_connect_off},
+    {g_ryz014_set_notice_level},
+    {g_ryz014_get_notice_level},
+    {g_ryz014_auto_connect},
+    {g_ryz014_auto_connect_check},
     {g_ryz014_sim_st_off},
     {g_ryz014_get_service_status},
     {g_ryz014_set_provider},
@@ -134,8 +136,9 @@ const uint8_t * const gp_at_command[ATC_LIST_MAX] =
     {g_ryz014_atc_get_edrx},
     {g_ryz014_atc_set_edrx},
     {g_ryz014_atc_get_signal},
-    {g_ryz014_atc_get_sw_version},
+    {g_ryz014_atc_get_sw_revision},
     {g_ryz014_atc_get_serial_num},
+    {g_ryz014_atc_get_svn},
     {g_ryz014_atc_get_module_name},
     {g_ryz014_atc_get_maker_name},
     {g_ryz014_atc_get_imsi},
@@ -143,6 +146,10 @@ const uint8_t * const gp_at_command[ATC_LIST_MAX] =
     {g_ryz014_atc_set_psm_config},
     {g_ryz014_atc_set_ring_config},
     {g_ryz014_atc_set_ind_notify},
+    {g_ryz014_atc_get_phone_num},
+    {g_ryz014_atc_get_iccid},
+    {g_ryz014_atc_ping},
+    {g_ryz014_atc_get_cellinfo},
     {g_ryz014_no_command},
 #if (CELLULAR_IMPLEMENT_TYPE == 'B')
     {g_ryz014_write_certificate},

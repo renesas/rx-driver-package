@@ -14,20 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_apconnect.c
  * Description  : Function for connecting to an access point.
- *********************************************************************************************************************/
-/**********************************************************************************************************************
- * History : DD.MM.YYYY Version  Description
- *         : xx.xx.xxxx 1.00     First Release
- *         : 02.09.2021 1.01     Fixed reset timing
- *         : 21.10.2021 1.02     Support for Azure RTOS
- *                               Support for GCC for Renesas GNURX Toolchain
- *         : 15.11.2021 1.03     Improved receiving behavior, removed socket buffers
- *         : 24.01.2022 1.04     R_CELLULAR_SetPSM and R_CELLULAR_SetEDRX have been added as new APIs
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -52,12 +43,13 @@
 /**********************************************************************************************************************
  * Private (static) variables and functions
  *********************************************************************************************************************/
-static e_cellular_err_t cellular_apconnect (st_cellular_ctrl_t * const p_ctrl);
+static e_cellular_err_t cellular_apconnect (st_cellular_ctrl_t * const p_ctrl,
+                                                const st_cellular_ap_cfg_t * const p_ap_cfg);
 
 /**************************************************************************
  * Function Name  @fn            R_CELLULAR_APConnect
  *************************************************************************/
-e_cellular_err_t R_CELLULAR_APConnect(st_cellular_ctrl_t * const p_ctrl)
+e_cellular_err_t R_CELLULAR_APConnect(st_cellular_ctrl_t * const p_ctrl, const st_cellular_ap_cfg_t * const p_ap_cfg)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semahore_ret = CELLULAR_SEMAPHORE_SUCCESS;
@@ -89,13 +81,30 @@ e_cellular_err_t R_CELLULAR_APConnect(st_cellular_ctrl_t * const p_ctrl)
         {
             if (CELLULAR_SUCCESS == ret)
             {
-                ret = atc_cgdcont(p_ctrl);
+                ret = atc_cfun_check(p_ctrl);
             }
 
-            if ((CELLULAR_SUCCESS == ret) &&
-                    (strlen((char *)p_ctrl->ap_user_name) && strlen((char *)p_ctrl->ap_pass)))    //(&uint8_t[]->char *)
+            if (CELLULAR_SUCCESS == ret)
             {
-                ret = atc_cgauth(p_ctrl);
+                if (CELLULAR_MODULE_OPERATING_LEVEL4 != p_ctrl->module_status)
+                {
+                    ret = atc_cfun(p_ctrl, CELLULAR_MODULE_OPERATING_LEVEL4);
+                }
+            }
+
+            if (CELLULAR_SUCCESS == ret)
+            {
+                ret = atc_cgdcont(p_ctrl, p_ap_cfg);
+            }
+
+            /* A && (B || C) */
+            if ((CELLULAR_SUCCESS == ret) &&
+                    (((NULL != p_ap_cfg) && strlen((char *)p_ap_cfg->ap_user_name) &&   //(uint8_t *) -> (char *)
+                            strlen((char *)p_ap_cfg->ap_pass)) ||                       //(uint8_t *) -> (char *)
+                    (strlen(CELLULAR_STRING_CONVERT(CELLULAR_CFG_AP_USERID)) &&
+                            strlen(CELLULAR_STRING_CONVERT(CELLULAR_CFG_AP_PASSWORD)))))
+            {
+                ret = atc_cgauth(p_ctrl, p_ap_cfg);
             }
 
             if (CELLULAR_SUCCESS == ret)
@@ -112,7 +121,7 @@ e_cellular_err_t R_CELLULAR_APConnect(st_cellular_ctrl_t * const p_ctrl)
             }
             if (CELLULAR_SUCCESS == ret)
             {
-                ret = cellular_apconnect(p_ctrl);
+                ret = cellular_apconnect(p_ctrl, p_ap_cfg);
             }
             cellular_give_semaphore(p_ctrl->at_semaphore);
         }
@@ -131,12 +140,20 @@ e_cellular_err_t R_CELLULAR_APConnect(st_cellular_ctrl_t * const p_ctrl)
 /**************************************************************************
  * Function Name  @fn            cellular_apconnect
  *************************************************************************/
-static e_cellular_err_t cellular_apconnect(st_cellular_ctrl_t * const p_ctrl)
+static e_cellular_err_t cellular_apconnect(st_cellular_ctrl_t * const p_ctrl,
+                                                const st_cellular_ap_cfg_t * const p_ap_cfg)
 {
     uint16_t cgatt_cnt = 0;
     e_cellular_err_t ret;
 
-    CELLULAR_LOG_INFO(("Trying access point [%s] connecting.", p_ctrl->ap_name));
+    if (NULL == p_ap_cfg)
+    {
+        CELLULAR_LOG_INFO(("Trying access point [%s] connecting.", CELLULAR_STRING_CONVERT(CELLULAR_CFG_AP_NAME)));
+    }
+    else
+    {
+        CELLULAR_LOG_INFO(("Trying access point [%s] connecting.", p_ap_cfg->ap_name));
+    }
 
     while (1)
     {
@@ -151,7 +168,15 @@ static e_cellular_err_t cellular_apconnect(st_cellular_ctrl_t * const p_ctrl)
 
         if (CELLULAR_SYSTEM_CONNECT == p_ctrl->system_state)
         {
-            CELLULAR_LOG_INFO(("Established connection to [%s].", p_ctrl->ap_name));
+            if (NULL == p_ap_cfg)
+            {
+                CELLULAR_LOG_INFO(("Established connection to [%s].", CELLULAR_STRING_CONVERT(CELLULAR_CFG_AP_NAME)));
+            }
+            else
+            {
+                CELLULAR_LOG_INFO(("Established connection to [%s].", p_ap_cfg->ap_name));
+            }
+            ret = CELLULAR_SUCCESS;
             break;
         }
 
