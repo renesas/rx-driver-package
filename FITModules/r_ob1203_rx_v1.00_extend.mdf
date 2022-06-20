@@ -1,0 +1,1256 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+ * Copyright [2020-2022] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ *
+ * This software and documentation are supplied by Renesas Electronics America Inc. and may only be used with products
+ * of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.  Renesas products are
+ * sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for the selection and use
+ * of Renesas products and Renesas assumes no liability.  No license, express or implied, to any intellectual property
+ * right is granted by Renesas. This software is protected under all applicable laws, including copyright laws. Renesas
+ * reserves the right to change or discontinue this software and/or this documentation. THE SOFTWARE AND DOCUMENTATION
+ * IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND TO THE FULLEST EXTENT
+ * PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY, INCLUDING WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE SOFTWARE OR
+ * DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.  TO THE MAXIMUM
+ * EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR DOCUMENTATION
+ * (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER, INCLUDING,
+ * WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY LOST PROFITS,
+ * OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE POSSIBILITY
+ * OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
+ **********************************************************************************************************************/
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+  <fileVersion>1.00</fileVersion>
+  <formatVersion>2.00</formatVersion>
+  <fileTemplate>
+  </fileTemplate>
+  <configuration>
+    <property id="RM_OB1203_CFG_PARAM_CHECKING_ENABLE" display="Parameter Checking" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+      <option id="RM_OB1203_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="System Default" value="BSP_CFG_PARAM_CHECKING_ENABLE" />
+      <option id="RM_OB1203_CFG_PARAM_CHECKING_ENABLE.0" display="Disabled" value="0" />
+      <option id="RM_OB1203_CFG_PARAM_CHECKING_ENABLE.1" display="Enabled" value="1" />
+      <description>Select whether to include parameter checking in the code.
+"Disabled": Compiles out parameter checking.
+"Enabled": Includes parameter checking.
+"System Default": Sets this to "BSP_CFG_PARAM_CHECKING_ENABLE"</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE_NUM_MAX" display="Number of OB1203 Sensors" default="1" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE_NUM_MAX.1" display="1" value="1" />
+      <option id="RM_OB1203_CFG_DEVICE_NUM_MAX.2" display="2" value="2" />
+      <description>Set the number of OB1203 Sensors controlled by the FIT module.
+[Note]: Up to 2 OB1203 sensors can be controlled.</description>
+    </property>
+
+    <!-- Device0 -->
+    <property id="RM_OB1203_CFG_DEVICE0_SENSOR_MODE" display="Sensor mode of OB1203 Sensor device0" default="0" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_SENSOR_MODE.0" display="Not selected" value="0" />
+      <option id="RM_OB1203_CFG_DEVICE0_SENSOR_MODE.1" display="Light sensor mode" value="1" />
+      <option id="RM_OB1203_CFG_DEVICE0_SENSOR_MODE.2" display="Proximity sensor mode" value="2" />
+      <option id="RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3" display="Light Proximity sensor mode" value="3" />
+      <option id="RM_OB1203_CFG_DEVICE0_SENSOR_MODE.4" display="PPG sensor mode" value="4" />
+      <description>Set the sensor mode of OB1203 Sensors controlled by the FIT module.
+"Light sensor mode": Light sensor mode.
+"Proximity sensor mode": Proximity sensor mode.
+"Light Proximity sensor mode": Light sensor and Proximity sensor mode.
+"PPG sensor mode": PPG sensor mode.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_COMMS_INSTANCE" display="I2C Communication device No. for OB1203 sensor device0" default="g_comms_i2c_device0" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_COMMS_INSTANCE.1" display="I2C Communication Device0" value="g_comms_i2c_device0" />
+      <option id="RM_OB1203_CFG_DEVICE0_COMMS_INSTANCE.2" display="I2C Communication Device1" value="g_comms_i2c_device1" />
+      <option id="RM_OB1203_CFG_DEVICE0_COMMS_INSTANCE.3" display="I2C Communication Device2" value="g_comms_i2c_device2" />
+      <option id="RM_OB1203_CFG_DEVICE0_COMMS_INSTANCE.4" display="I2C Communication Device3" value="g_comms_i2c_device3" />
+      <option id="RM_OB1203_CFG_DEVICE0_COMMS_INSTANCE.5" display="I2C Communication Device4" value="g_comms_i2c_device4" />
+      <option id="RM_OB1203_CFG_DEVICE0_COMMS_INSTANCE.6" display="I2C Communication Device5" value="g_comms_i2c_device5" />
+      <option id="RM_OB1203_CFG_DEVICE0_COMMS_INSTANCE.7" display="I2C Communication Device6" value="g_comms_i2c_device6" />
+      <option id="RM_OB1203_CFG_DEVICE0_COMMS_INSTANCE.8" display="I2C Communication Device7" value="g_comms_i2c_device7" />
+      <option id="RM_OB1203_CFG_DEVICE0_COMMS_INSTANCE.9" display="I2C Communication Device8" value="g_comms_i2c_device8" />
+      <option id="RM_OB1203_CFG_DEVICE0_COMMS_INSTANCE.10" display="I2C Communication Device9" value="g_comms_i2c_device9" />
+      <option id="RM_OB1203_CFG_DEVICE0_COMMS_INSTANCE.11" display="I2C Communication Device10" value="g_comms_i2c_device10" />
+      <option id="RM_OB1203_CFG_DEVICE0_COMMS_INSTANCE.12" display="I2C Communication Device11" value="g_comms_i2c_device11" />
+      <option id="RM_OB1203_CFG_DEVICE0_COMMS_INSTANCE.13" display="I2C Communication Device12" value="g_comms_i2c_device12" />
+      <option id="RM_OB1203_CFG_DEVICE0_COMMS_INSTANCE.14" display="I2C Communication Device13" value="g_comms_i2c_device13" />
+      <option id="RM_OB1203_CFG_DEVICE0_COMMS_INSTANCE.15" display="I2C Communication Device14" value="g_comms_i2c_device14" />
+      <option id="RM_OB1203_CFG_DEVICE0_COMMS_INSTANCE.16" display="I2C Communication Device15" value="g_comms_i2c_device15" />
+      <constraint display="This I2C communication device is used by other device.">("${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.1}" || "${RM_OB1203_CFG_DEVICE0_COMMS_INSTANCE}" != "${RM_OB1203_CFG_DEVICE1_COMMS_INSTANCE}")</constraint>
+      <description>Set the using I2C communication device number for OB1203 Sensors controlled by the FIT module.
+[Note]: Be sure to specify a valid I2C communication device number.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_COMMS_I2C_CALLBACK" display="I2C callback function for OB1203 sensor device0" default="ob1203_user_i2c_callback0" type="textbox">
+      <constraint display="Must not be empty">"" != "${RM_OB1203_CFG_DEVICE0_COMMS_I2C_CALLBACK}"</constraint>
+      <description>Specify the I2C Callback function name of the OB1203 Sensor API.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_IRQ_ENABLE" display="Enable IRQ from OB1203 sensor device0" default="0" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_ENABLE.0" display="Disabled" value="0" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_ENABLE.1" display="Enabled" value="1" />
+      <description>Specify the Enalbe IRQ.
+- When Disabled, Don't enable IRQ"
+- When Enabled, enable the IRQ"</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_IRQ_CALLBACK" display="IRQ Callback function for OB1203 sensor device0" default="ob1203_user_irq_callback0" type="textbox">
+      <constraint display="When IRQ is enabled" actionOnFail="disable">${RM_OB1203_CFG_DEVICE0_IRQ_ENABLE} == ${RM_OB1203_CFG_DEVICE0_IRQ_ENABLE.1}</constraint>
+      <constraint display="Must not be empty">"" != "${RM_OB1203_CFG_DEVICE0_IRQ_CALLBACK}"</constraint>
+      <description>Specify the IRQ Callback function name of the OB1203 Sensor API.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_IRQ_NUMBER" display="IRQ number for OB1203 sensor device0" default="IRQ_NUM_0" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_NUMBER.0" display="IRQ0" value="IRQ_NUM_0" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_NUMBER.1" display="IRQ1" value="IRQ_NUM_1" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_NUMBER.2" display="IRQ2" value="IRQ_NUM_2" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_NUMBER.3" display="IRQ3" value="IRQ_NUM_3" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_NUMBER.4" display="IRQ4" value="IRQ_NUM_4" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_NUMBER.5" display="IRQ5" value="IRQ_NUM_5" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_NUMBER.6" display="IRQ6" value="IRQ_NUM_6" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_NUMBER.7" display="IRQ7" value="IRQ_NUM_7" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_NUMBER.8" display="IRQ8" value="IRQ_NUM_8" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_NUMBER.9" display="IRQ9" value="IRQ_NUM_9" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_NUMBER.10" display="IRQ10" value="IRQ_NUM_10" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_NUMBER.11" display="IRQ11" value="IRQ_NUM_11" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_NUMBER.12" display="IRQ12" value="IRQ_NUM_12" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_NUMBER.13" display="IRQ13" value="IRQ_NUM_13" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_NUMBER.14" display="IRQ14" value="IRQ_NUM_14" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_NUMBER.15" display="IRQ15" value="IRQ_NUM_15" />
+      <constraint display="When IRQ is enabled" actionOnFail="disable">${RM_OB1203_CFG_DEVICE0_IRQ_ENABLE} == ${RM_OB1203_CFG_DEVICE0_IRQ_ENABLE.1}</constraint>
+      <description>Set the IRQ number for the OB1203 Sensor.
+[Note]: Be sure to specify a valid IRQ number.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_IRQ_TRIGGER" display="IRQ trigger for OB1203 sensor device0" default="IRQ_TRIG_RISING" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_TRIGGER.lowLevel" display="Low Level" value="IRQ_TRIG_LOWLEV" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_TRIGGER.falling" display="Falling" value="IRQ_TRIG_FALLING" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_TRIGGER.rising" display="Rising" value="IRQ_TRIG_RISING" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_TRIGGER.bothEdges" display="Both Edges" value="IRQ_TRIG_BOTH_EDGE" />
+      <constraint display="When IRQ is enabled" actionOnFail="disable">${RM_OB1203_CFG_DEVICE0_IRQ_ENABLE} == ${RM_OB1203_CFG_DEVICE0_IRQ_ENABLE.1}</constraint>
+      <constraint display="When using one or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.1}" 
+      || "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <description>Set the IRQ trigger for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_IRQ_PRIORITY" display="IRQ interrupt priority for OB1203 sensor device0" default="IRQ_PRI_10" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_PRIORITY.0" display="Priority 0" value="IRQ_PRI_0" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_PRIORITY.1" display="Priority 1" value="IRQ_PRI_1" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_PRIORITY.2" display="Priority 2" value="IRQ_PRI_2" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_PRIORITY.3" display="Priority 3" value="IRQ_PRI_3" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_PRIORITY.4" display="Priority 4" value="IRQ_PRI_4" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_PRIORITY.5" display="Priority 5" value="IRQ_PRI_5" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_PRIORITY.6" display="Priority 6" value="IRQ_PRI_6" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_PRIORITY.7" display="Priority 7" value="IRQ_PRI_7" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_PRIORITY.8" display="Priority 8" value="IRQ_PRI_8" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_PRIORITY.9" display="Priority 9" value="IRQ_PRI_9" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_PRIORITY.10" display="Priority 10" value="IRQ_PRI_10" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_PRIORITY.11" display="Priority 11" value="IRQ_PRI_11" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_PRIORITY.12" display="Priority 12" value="IRQ_PRI_12" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_PRIORITY.13" display="Priority 13" value="IRQ_PRI_13" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_PRIORITY.14" display="Priority 14" value="IRQ_PRI_14" />
+      <option id="RM_OB1203_CFG_DEVICE0_IRQ_PRIORITY.15" display="Priority 15" value="IRQ_PRI_15" />
+      <constraint display="When IRQ is enabled" actionOnFail="disable">${RM_OB1203_CFG_DEVICE0_IRQ_ENABLE} == ${RM_OB1203_CFG_DEVICE0_IRQ_ENABLE.1}</constraint>
+      <description>Set the IRQ interrupt priority for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_SEMAPHORE_TIMEOUT" display="Semaphore timeout for OB1203 sensor device0 (RTOS only)" default="0xFFFFFFFF" type="textbox">
+      <constraint display="Must be integer value (0x00 - 0xFFFFFFFF)">((0x00 &lt;= ${RM_OB1203_CFG_DEVICE0_SEMAPHORE_TIMEOUT}) &amp;&amp; (0xFFFFFFFF &gt;= ${RM_OB1203_CFG_DEVICE0_SEMAPHORE_TIMEOUT}))</constraint>
+      <description>Specify the semaphore timeout for OB1203 sensor device0.</description>
+    </property>
+     <!-- General -->
+    <property id="RM_OB1203_CFG_DEVICE0_LIGHT_PROX_DEVICE_INTERRUPT" display="General : Device interrupt for Light Proximity mode of OB1203 sensor device0" default="RM_OB1203_OPERATION_MODE_STANDBY" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_PROX_DEVICE_INTERRUPT.1" display="Light mode interrupt" value="RM_OB1203_OPERATION_MODE_LIGHT" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_PROX_DEVICE_INTERRUPT.2" display="Proximity mode interrupt" value="RM_OB1203_OPERATION_MODE_PROXIMITY" />
+      <constraint display="When Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="When IRQ is enabled" actionOnFail="disable">${RM_OB1203_CFG_DEVICE0_IRQ_ENABLE} == ${RM_OB1203_CFG_DEVICE0_IRQ_ENABLE.1}</constraint>
+      <description>Specify the operation mode using device interrupt for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PPG_PROX_GAIN" display="General : Gain for Proximity mode and PPG mode of OB1203 sensor device0" default="RM_OB1203_PPG_PROX_GAIN_1" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_PROX_GAIN.0" display="1" value="RM_OB1203_PPG_PROX_GAIN_1" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_PROX_GAIN.1" display="1.5" value="RM_OB1203_PPG_PROX_GAIN_1P5" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_PROX_GAIN.2" display="2" value="RM_OB1203_PPG_PROX_GAIN_2" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_PROX_GAIN.3" display="4" value="RM_OB1203_PPG_PROX_GAIN_4" />
+      <constraint display="When Proximity, Light Proximity and PPG mode is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.4}"
+      </constraint>
+      <description>Specify the gain of ADC output and noise for the Proximity mode and PPG mode.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_LED_ORDER" display="General : LED order of OB1203 sensor device0" default="RM_OB1203_LED_IR_FIRST_RED_SECOND" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_LED_ORDER.1" display="IR LED first, Red LED second" value="RM_OB1203_LED_IR_FIRST_RED_SECOND" />
+      <option id="RM_OB1203_CFG_DEVICE0_LED_ORDER.2" display="Red LED first, IR LED second" value="RM_OB1203_LED_RED_FIRST_IR_SECOND" />
+      <constraint display="When Proximity, Light Proximity and PPG mode is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.4}"
+      </constraint>
+      <description>Specify the LED order of the OB1203 Sensor.</description>
+    </property>
+    <!-- Light mode -->
+    <property id="RM_OB1203_CFG_DEVICE0_LIGHT_SENSOR_MODE" display="Light mode : Operation mode for ob1203 sensor device0" default="RM_OB1203_LIGHT_SENSOR_MODE_LS" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_SENSOR_MODE.1" display="LS mode" value="RM_OB1203_LIGHT_SENSOR_MODE_LS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_SENSOR_MODE.2" display="CS mode" value="RM_OB1203_LIGHT_SENSOR_MODE_CS" />
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the operation mode for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_LIGHT_INTERRUPT_TYPE" display="Light mode : Interrupt type for OB1203 sensor device0" default="RM_OB1203_LIGHT_INTERRUPT_TYPE_THRESHOLD" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_INTERRUPT_TYPE.1" display="Threshold" value="RM_OB1203_LIGHT_INTERRUPT_TYPE_THRESHOLD" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_INTERRUPT_TYPE.2" display="Variation" value="RM_OB1203_LIGHT_INTERRUPT_TYPE_VARIATION" />
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the interrupt type for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_LIGHT_INTERRUPT_SOURCE" display="Light mode : Interrupt source for OB1203 sensor device0" default="RM_OB1203_LIGHT_INTERRUPT_SOURCE_CLEAR_CHANNEL" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_INTERRUPT_SOURCE.1" display="Clear channel" value="RM_OB1203_LIGHT_INTERRUPT_SOURCE_CLEAR_CHANNEL" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_INTERRUPT_SOURCE.2" display="Green channel" value="RM_OB1203_LIGHT_INTERRUPT_SOURCE_GREEN_CHANNEL" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_INTERRUPT_SOURCE.3" display="Red channel (CS mode only)" value="RM_OB1203_LIGHT_INTERRUPT_SOURCE_RED_CHANNEL" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_INTERRUPT_SOURCE.4" display="Blue channel (CS mode only)" value="RM_OB1203_LIGHT_INTERRUPT_SOURCE_BLUE_CHANNEL" />
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the interrupt source for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_LIGHT_INTERRUPT_PERSIST" display="Light mode : The number of Similar Consecutive Interrupt Events of Light mode for OB1203 sensor device0" default="0x2" type="textbox">
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE0_LIGHT_INTERRUPT_PERSIST}"</constraint>
+      <constraint display="Value must be 4bits or less">0xF &gt;= "${RM_OB1203_CFG_DEVICE0_LIGHT_INTERRUPT_PERSIST}"</constraint>
+      <description>Specify the number of similar consecutive Light mode interrupt events that must occur before the interrupt is asserted (4bits).
+Min = 0x00 and Max 0x0F.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_LIGHT_SLEEP_AFTER_INTERRUPT" display="Light mode : Sleep after interrupt for OB1203 sensor device0" default="RM_OB1203_SLEEP_AFTER_INTERRUPT_DISABLE" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_SLEEP_AFTER_INTERRUPT.0" display="Disabled" value="RM_OB1203_SLEEP_AFTER_INTERRUPT_DISABLE" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_SLEEP_AFTER_INTERRUPT.1" display="Enabled" value="RM_OB1203_SLEEP_AFTER_INTERRUPT_ENABLE" />
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the sleep after interrupt for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_LIGHT_GAIN" display="Light mode : Gain of OB1203 sensor device0" default="RM_OB1203_LIGHT_GAIN_1" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_GAIN.1" display="1" value="RM_OB1203_LIGHT_GAIN_1" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_GAIN.2" display="3" value="RM_OB1203_LIGHT_GAIN_3" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_GAIN.3" display="6" value="RM_OB1203_LIGHT_GAIN_6" />
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the gain for detection range of the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_LIGHT_UPPER_THRESHOLD" display="Light mode : Upper threshold of OB1203 sensor device0" default="0x00CCC" type="textbox">
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE0_LIGHT_UPPER_THRESHOLD}"</constraint>
+      <constraint display="Value must be 20bits or less">0xFFFFF &gt;= "${RM_OB1203_CFG_DEVICE0_LIGHT_UPPER_THRESHOLD}"</constraint>
+      <description>Specify the upper threshold value (20bits).
+Min = 0x00000 and Max = 0xFFFFF.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_LIGHT_LOWER_THRESHOLD" display="Light mode : Lower threshold of OB1203 sensor device0" default="0x00000" type="textbox">
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE0_LIGHT_LOWER_THRESHOLD}"</constraint>
+      <constraint display="Value must be 20bits or less">0xFFFFF &gt;= "${RM_OB1203_CFG_DEVICE0_LIGHT_LOWER_THRESHOLD}"</constraint>
+      <description>Specify the lower threshold value (20bits).
+Min = 0x00000 and Max = 0xFFFFF.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_LIGHT_VARIANCE_THRESHOLD" display="Light mode : Variance thresold of OB1203 sensor device0" default="RM_OB1203_VARIANCE_THRESHOLD_128_COUNTS" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_VARIANCE_THRESHOLD.1" display="+/- 8 counts" value="RM_OB1203_VARIANCE_THRESHOLD_8_COUNTS"/>
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_VARIANCE_THRESHOLD.2" display="+/- 16 counts" value="RM_OB1203_VARIANCE_THRESHOLD_16_COUNTS"/>
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_VARIANCE_THRESHOLD.3" display="+/- 32 counts" value="RM_OB1203_VARIANCE_THRESHOLD_32_COUNTS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_VARIANCE_THRESHOLD.4" display="+/- 64 counts" value="RM_OB1203_VARIANCE_THRESHOLD_64_COUNTS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_VARIANCE_THRESHOLD.5" display="+/- 128 counts" value="RM_OB1203_VARIANCE_THRESHOLD_128_COUNTS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_VARIANCE_THRESHOLD.6" display="+/- 256 counts" value="RM_OB1203_VARIANCE_THRESHOLD_256_COUNTS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_VARIANCE_THRESHOLD.7" display="+/- 512 counts" value="RM_OB1203_VARIANCE_THRESHOLD_512_COUNTS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_VARIANCE_THRESHOLD.8" display="+/- 1024 counts" value="RM_OB1203_VARIANCE_THRESHOLD_1024_COUNTS" />
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify variance threshold for the OB1203 Sensor. New data varies by selected counts compared to previous result.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD" display="Light mode : Resolution and measurement period of OB1203 sensor device0" default="RM_OB1203_LIGHT_RESOLUTION_18BIT_PERIOD_100MS" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.1" display="Resolution:13 bits. Measurement Period:25ms" value="RM_OB1203_LIGHT_RESOLUTION_13BIT_PERIOD_25MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.2" display="Resolution:13 bits. Measurement Period:50ms" value="RM_OB1203_LIGHT_RESOLUTION_13BIT_PERIOD_50MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.3" display="Resolution:13 bits. Measurement Period:100ms" value="RM_OB1203_LIGHT_RESOLUTION_13BIT_PERIOD_100MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.4" display="Resolution:13 bits. Measurement Period:200ms" value="RM_OB1203_LIGHT_RESOLUTION_13BIT_PERIOD_200MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.5" display="Resolution:13 bits. Measurement Period:500ms" value="RM_OB1203_LIGHT_RESOLUTION_13BIT_PERIOD_500MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.6" display="Resolution:13 bits. Measurement Period:1000ms" value="RM_OB1203_LIGHT_RESOLUTION_13BIT_PERIOD_1000MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.7" display="Resolution:13 bits. Measurement Period:2000ms" value="RM_OB1203_LIGHT_RESOLUTION_13BIT_PERIOD_2000MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.8" display="Resolution:16 bits. Measurement Period:25ms" value="RM_OB1203_LIGHT_RESOLUTION_16BIT_PERIOD_25MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.9" display="Resolution:16 bits. Measurement Period:50ms" value="RM_OB1203_LIGHT_RESOLUTION_16BIT_PERIOD_50MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.10" display="Resolution:16 bits. Measurement Period:100ms" value="RM_OB1203_LIGHT_RESOLUTION_16BIT_PERIOD_100MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.11" display="Resolution:16 bits. Measurement Period:200ms" value="RM_OB1203_LIGHT_RESOLUTION_16BIT_PERIOD_200MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.12" display="Resolution:16 bits. Measurement Period:500ms" value="RM_OB1203_LIGHT_RESOLUTION_16BIT_PERIOD_500MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.13" display="Resolution:16 bits. Measurement Period:1000ms" value="RM_OB1203_LIGHT_RESOLUTION_16BIT_PERIOD_1000MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.14" display="Resolution:16 bits. Measurement Period:2000ms" value="RM_OB1203_LIGHT_RESOLUTION_16BIT_PERIOD_2000MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.15" display="Resolution:17 bits. Measurement Period:50ms" value="RM_OB1203_LIGHT_RESOLUTION_17BIT_PERIOD_50MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.16" display="Resolution:17 bits. Measurement Period:100ms" value="RM_OB1203_LIGHT_RESOLUTION_17BIT_PERIOD_100MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.17" display="Resolution:17 bits. Measurement Period:200ms" value="RM_OB1203_LIGHT_RESOLUTION_17BIT_PERIOD_200MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.18" display="Resolution:17 bits. Measurement Period:500ms" value="RM_OB1203_LIGHT_RESOLUTION_17BIT_PERIOD_500MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.19" display="Resolution:17 bits. Measurement Period:1000ms" value="RM_OB1203_LIGHT_RESOLUTION_17BIT_PERIOD_1000MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.20" display="Resolution:17 bits. Measurement Period:2000ms" value="RM_OB1203_LIGHT_RESOLUTION_17BIT_PERIOD_2000MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.21" display="Resolution:18 bits. Measurement Period:100ms" value="RM_OB1203_LIGHT_RESOLUTION_18BIT_PERIOD_100MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.22" display="Resolution:18 bits. Measurement Period:200ms" value="RM_OB1203_LIGHT_RESOLUTION_18BIT_PERIOD_200MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.23" display="Resolution:18 bits. Measurement Period:500ms" value="RM_OB1203_LIGHT_RESOLUTION_18BIT_PERIOD_500MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.24" display="Resolution:18 bits. Measurement Period:1000ms" value="RM_OB1203_LIGHT_RESOLUTION_18BIT_PERIOD_1000MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.25" display="Resolution:18 bits. Measurement Period:2000ms" value="RM_OB1203_LIGHT_RESOLUTION_18BIT_PERIOD_2000MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.26" display="Resolution:19 bits. Measurement Period:200ms" value="RM_OB1203_LIGHT_RESOLUTION_19BIT_PERIOD_200MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.27" display="Resolution:19 bits. Measurement Period:500ms" value="RM_OB1203_LIGHT_RESOLUTION_19BIT_PERIOD_500MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.28" display="Resolution:19 bits. Measurement Period:1000ms" value="RM_OB1203_LIGHT_RESOLUTION_19BIT_PERIOD_1000MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.29" display="Resolution:19 bits. Measurement Period:2000ms" value="RM_OB1203_LIGHT_RESOLUTION_19BIT_PERIOD_2000MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.30" display="Resolution:20 bits. Measurement Period:500ms" value="RM_OB1203_LIGHT_RESOLUTION_20BIT_PERIOD_500MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.31" display="Resolution:20 bits. Measurement Period:1000ms" value="RM_OB1203_LIGHT_RESOLUTION_20BIT_PERIOD_1000MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_LIGHT_RESOLUTION_PERIOD.32" display="Resolution:20 bits. Measurement Period:2000ms" value="RM_OB1203_LIGHT_RESOLUTION_20BIT_PERIOD_2000MS" />
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the Light mode resolution and measurement period for the OB1203 Sensor.</description>
+    </property>
+    <!-- Proximity mode -->
+    <property id="RM_OB1203_CFG_DEVICE0_PROX_SLEEP_AFTER_INTERRUPT" display="Proximity mode : Sleep after interrupt for OB1203 sensor device0" default="RM_OB1203_SLEEP_AFTER_INTERRUPT_DISABLE" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_SLEEP_AFTER_INTERRUPT.0" display="Disabled" value="RM_OB1203_SLEEP_AFTER_INTERRUPT_DISABLE" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_SLEEP_AFTER_INTERRUPT.1" display="Enabled" value="RM_OB1203_SLEEP_AFTER_INTERRUPT_ENABLE" />
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the sleep after interrupt for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PROX_INTERRUPT_TYPE" display="Proximity mode : Interrupt type for OB1203 sensor device0" default="RM_OB1203_PROX_INTERRUPT_TYPE_NORMAL" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_INTERRUPT_TYPE.1" display="Normal" value="RM_OB1203_PROX_INTERRUPT_TYPE_NORMAL" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_INTERRUPT_TYPE.2" display="Logic" value="RM_OB1203_PROX_INTERRUPT_TYPE_LOGIC" />
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the interrupt type for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PROX_INTERRUPT_PERSIST" display="Proximity mode : The number of Similar Consecutive Interrupt Events for OB1203 sensor device0" default="0x2" type="textbox">
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE0_PROX_INTERRUPT_PERSIST}"</constraint>
+      <constraint display="Value must be 4bits or less">0xF &gt;= "${RM_OB1203_CFG_DEVICE0_PROX_INTERRUPT_PERSIST}"</constraint>
+      <description>Specify the number of similar consecutive Proximity mode interrupt events that must occur before the interrupt is asserted (4bits).
+Min = 0x00 and Max 0x0F.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PROX_LED_CURRENT" display="Proximity mode : LED current of OB1203 sensor device0" default="0x100" type="textbox">
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE0_PROX_LED_CURRENT}"</constraint>
+      <constraint display="Value must be 10bits or less">0x3FF &gt;= "${RM_OB1203_CFG_DEVICE0_PROX_LED_CURRENT}"</constraint>
+      <description>Specify the Current for LED (10bits).
+Min = 0x000 and Max = 0x3FF.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PROX_ANA_CAN" display="Proximity mode : LED analog cancellation for OB1203 sensor device0" default="RM_OB1203_ANALOG_CANCELLATION_DISABLE" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_ANA_CAN.0" display="Disabled" value="RM_OB1203_ANALOG_CANCELLATION_DISABLE" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_ANA_CAN.1" display="Enabled (50% offset of the full-scale value)" value="RM_OB1203_ANALOG_CANCELLATION_ENABLE" />
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the analob cancellation level for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PROX_DIG_CAN" display="Proximity mode : LED digital cancellation of Proximity mode for OB1203 sensor device0" default="0x100" type="textbox">
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE0_PROX_DIG_CAN}"</constraint>
+      <constraint display="Value must be 16bits or less">0xFFFF &gt;= "${RM_OB1203_CFG_DEVICE0_PROX_DIG_CAN}"</constraint>
+      <description>Specify the digital cancellation level (16bits) of Proximity mode for the OB1203 Sensor.
+Min = 0x0000 and Max = 0xFFFF.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PROX_NUM_LED_PULSES" display="Proximity mode : Number of LED pulses of OB1203 sensor device0" default="RM_OB1203_NUM_LED_PULSES_8" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_NUM_LED_PULSES.1" display="1 pulse" value="RM_OB1203_NUM_LED_PULSES_1" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_NUM_LED_PULSES.2" display="2 pulses" value="RM_OB1203_NUM_LED_PULSES_2" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_NUM_LED_PULSES.3" display="4 pulses" value="RM_OB1203_NUM_LED_PULSES_4" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_NUM_LED_PULSES.4" display="8 pulses" value="RM_OB1203_NUM_LED_PULSES_8" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_NUM_LED_PULSES.5" display="16 pulses" value="RM_OB1203_NUM_LED_PULSES_16" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_NUM_LED_PULSES.6" display="32 pulses" value="RM_OB1203_NUM_LED_PULSES_32" />
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the number of LED pulses for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PROX_UPPER_THRESHOLD" display="Proximity mode : Upper threshold for OB1203 sensor device0" default="0x0600" type="textbox">
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE0_PROX_UPPER_THRESHOLD}"</constraint>
+      <constraint display="Value must be 16bits or less">0xFFFF &gt;= "${RM_OB1203_CFG_DEVICE0_PROX_UPPER_THRESHOLD}"</constraint>
+      <description>Specify the upper threshold value (16bits) of Proximity mode for the OB1203 Sensor.
+Min = 0x0000 and Max = 0xFFFF.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PROX_LOWER_THRESHOLD" display="Proximity mode : Lower threshold for OB1203 sensor device0" default="0x0000" type="textbox">
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE0_PROX_LOWER_THRESHOLD}"</constraint>
+      <constraint display="Value must be 16bits or less">0xFFFF &gt;= "${RM_OB1203_CFG_DEVICE0_PROX_LOWER_THRESHOLD}"</constraint>
+      <description>Specify the lower threshold value (16bits) of Proximity mode for the OB1203 Sensor.
+Min = 0x0000 and Max = 0xFFFF.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD" display="Proximity mode : Pulse width and measurement period for OB1203 sensor device0" default="RM_OB1203_PROX_WIDTH_42US_PERIOD_100MS" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.1" display="Pulse width:26us. Measurement Period:3.125ms. (Except for the number 32 of LED pulses)" value="RM_OB1203_PROX_WIDTH_26US_PERIOD_3P125MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.2" display="Pulse width:26us. Measurement Period:6.25ms." value="RM_OB1203_PROX_WIDTH_26US_PERIOD_6P25MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.3" display="Pulse width:26us. Measurement Period:12.5ms." value="RM_OB1203_PROX_WIDTH_26US_PERIOD_12P5MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.4" display="Pulse width:26us. Measurement Period:25ms." value="RM_OB1203_PROX_WIDTH_26US_PERIOD_25MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.5" display="Pulse width:26us. Measurement Period:50ms." value="RM_OB1203_PROX_WIDTH_26US_PERIOD_50MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.6" display="Pulse width:26us. Measurement Period:100ms." value="RM_OB1203_PROX_WIDTH_26US_PERIOD_100MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.7" display="Pulse width:26us. Measurement Period:200ms." value="RM_OB1203_PROX_WIDTH_26US_PERIOD_200MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.8" display="Pulse width:26us. Measurement Period:400ms." value="RM_OB1203_PROX_WIDTH_26US_PERIOD_400MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.9" display="Pulse width:42us. Measurement Period:3.125ms. (Except for the number 32 of LED pulses)" value="RM_OB1203_PROX_WIDTH_42US_PERIOD_3P125MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.10" display="Pulse width:42us. Measurement Period:6.25ms." value="RM_OB1203_PROX_WIDTH_42US_PERIOD_6P25MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.11" display="Pulse width:42us. Measurement Period:12.5ms." value="RM_OB1203_PROX_WIDTH_42US_PERIOD_12P5MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.12" display="Pulse width:42us. Measurement Period:25ms." value="RM_OB1203_PROX_WIDTH_42US_PERIOD_25MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.13" display="Pulse width:42us. Measurement Period:50ms." value="RM_OB1203_PROX_WIDTH_42US_PERIOD_50MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.14" display="Pulse width:42us. Measurement Period:100ms." value="RM_OB1203_PROX_WIDTH_42US_PERIOD_100MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.15" display="Pulse width:42us. Measurement Period:200ms." value="RM_OB1203_PROX_WIDTH_42US_PERIOD_200MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.16" display="Pulse width:42us. Measurement Period:400ms." value="RM_OB1203_PROX_WIDTH_42US_PERIOD_400MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.17" display="Pulse width:71us. Measurement Period:3.125ms. (Except for the number 16 and 32 of LED pulses)" value="RM_OB1203_PROX_WIDTH_71US_PERIOD_3P125MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.18" display="Pulse width:71us. Measurement Period:6.25ms. (Except for the number 32 of LED pulses)" value="RM_OB1203_PROX_WIDTH_71US_PERIOD_6P25MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.19" display="Pulse width:71us. Measurement Period:12.5ms." value="RM_OB1203_PROX_WIDTH_71US_PERIOD_12P5MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.20" display="Pulse width:71us. Measurement Period:25ms." value="RM_OB1203_PROX_WIDTH_71US_PERIOD_25MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.21" display="Pulse width:71us. Measurement Period:50ms." value="RM_OB1203_PROX_WIDTH_71US_PERIOD_50MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.22" display="Pulse width:71us. Measurement Period:100ms." value="RM_OB1203_PROX_WIDTH_71US_PERIOD_100MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.23" display="Pulse width:71us. Measurement Period:200ms." value="RM_OB1203_PROX_WIDTH_71US_PERIOD_200MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_WIDTH_PERIOD.24" display="Pulse width:71us. Measurement Period:400ms." value="RM_OB1203_PROX_WIDTH_71US_PERIOD_400MS" />
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the Proximity mode pulse width and measurement period for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PROX_MOVING_AVERAGE" display="Proximity mode : Moving average for OB1203 sensor device0" default="RM_OB1203_MOVING_AVERAGE_DISABLE" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_MOVING_AVERAGE.0" display="Disabled" value="RM_OB1203_MOVING_AVERAGE_DISABLE" />
+      <option id="RM_OB1203_CFG_DEVICE0_PROX_MOVING_AVERAGE.1" display="Enabled" value="RM_OB1203_MOVING_AVERAGE_ENABLE" />
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the moving average of Proximity mode for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PROX_HYSTERESIS" display="Proximity mode : Hysteresis for OB1203 sensor device0" default="0x00" type="textbox">
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE0_PROX_HYSTERESIS}"</constraint>
+      <constraint display="Value must be 7bits or less">0x7F &gt;= "${RM_OB1203_CFG_DEVICE0_PROX_HYSTERESIS}"</constraint>
+      <description>Specify the hysteresis level (7bits) of Proximity mode for the OB1203 Sensor.
+Mix = 0x00 and Max = 0x7F.</description>
+    </property>
+    <!-- PPG mode -->
+    <property id="RM_OB1203_CFG_DEVICE0_PPG_SENSOR_MODE" display="PPG mode : Operation mode for OB1203 sensor device0" default="RM_OB1203_PPG_SENSOR_MODE_PPG2" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_SENSOR_MODE.1" display="PPG1 mode" value="RM_OB1203_PPG_SENSOR_MODE_PPG1" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_SENSOR_MODE.2" display="PPG2 mode" value="RM_OB1203_PPG_SENSOR_MODE_PPG2" />
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.4}" 
+      </constraint>
+      <description>Specify the operation mode of PPG mode for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PPG_INTERRUPT_TYPE" display="PPG mode : Interupt type for OB1203 sensor device0" default="RM_OB1203_PPG_INTERRUPT_TYPE_DATA" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_INTERRUPT_TYPE.1" display="Data" value="RM_OB1203_PPG_INTERRUPT_TYPE_DATA" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_INTERRUPT_TYPE.2" display="FIFO Almost Full" value="RM_OB1203_PPG_INTERRUPT_TYPE_FIFO_AFULL" />
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.4}" 
+      </constraint>
+      <description>Specify the operation mode of PPG mode for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PPG_IR_LED_CURRENT" display="PPG mode : IR LED current for OB1203 sensor device0" default="0x366" type="textbox">
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.4}" 
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE0_PPG_IR_LED_CURRENT}"</constraint>
+      <constraint display="Value must be 10bits or less">0x3FF &gt;= "${RM_OB1203_CFG_DEVICE0_PPG_IR_LED_CURRENT}"</constraint>
+      <description>Specify the current for IR LED (10bits) for the OB1203 Sensor.
+Min = 0x000 and Max = 0x3FF.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PPG_RED_LED_CURRENT" display="PPG mode : Red LED current for OB1203 sensor device0" default="0x1B3" type="textbox">
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.4}" 
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE0_PPG_RED_LED_CURRENT}"</constraint>
+      <constraint display="Value must be 9bits or less">0x1FF &gt;= "${RM_OB1203_CFG_DEVICE0_PPG_RED_LED_CURRENT}"</constraint>
+      <description>Specify the current for Red LED (9bits) for the OB1203 Sensor.
+Min = 0x000 and Max = 0x1FF.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PPG_POWER_SAVE_MODE" display="PPG mode : Power save mode for OB1203 sensor device0" default="RM_OB1203_POWER_SAVE_MODE_DISABLE" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_POWER_SAVE_MODE.0" display="Disabled" value="RM_OB1203_POWER_SAVE_MODE_DISABLE" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_POWER_SAVE_MODE.1" display="Enabled" value="RM_OB1203_POWER_SAVE_MODE_ENABLE" />
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.4}" 
+      </constraint>
+      <description>Specify the power save mode for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PPG_IR_LED_ANA_CAN" display="PPG mode : IR LED analog cancellation for OB1203 sensor device0" default="RM_OB1203_ANALOG_CANCELLATION_DISABLE" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_IR_LED_ANA_CAN.0" display="Disabled" value="RM_OB1203_ANALOG_CANCELLATION_DISABLE" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_IR_LED_ANA_CAN.1" display="Enabled (50% offset of the full-scale value)" value="RM_OB1203_ANALOG_CANCELLATION_ENABLE" />
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.4}" 
+      </constraint>
+      <description>Specify the IR LED analog cancellation level for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PPG_RED_LED_ANA_CAN" display="PPG mode : Red LED analog cancellation for OB1203 sensor device0" default="RM_OB1203_ANALOG_CANCELLATION_DISABLE" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_RED_LED_ANA_CAN.0" display="Disabled" value="RM_OB1203_ANALOG_CANCELLATION_DISABLE" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_RED_LED_ANA_CAN.1" display="Enabled (50% offset of the full-scale value)" value="RM_OB1203_ANALOG_CANCELLATION_ENABLE" />
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.4}" 
+      </constraint>
+      <description>Specify the Red LED analog cancellation level for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PPG_NUM_AVERAGED_SAMPLES" display="PPG mode : Number of averaged PPG samples for OB1203 sensor device0" default="RM_OB1203_NUM_AVERAGED_SAMPLES_8" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_NUM_AVERAGED_SAMPLES.1" display="1 (No averaging)" value="RM_OB1203_NUM_AVERAGED_SAMPLES_1" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_NUM_AVERAGED_SAMPLES.2" display="2 consecutives samples are averaged" value="RM_OB1203_NUM_AVERAGED_SAMPLES_2" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_NUM_AVERAGED_SAMPLES.3" display="4 consecutives samples are averaged" value="RM_OB1203_NUM_AVERAGED_SAMPLES_4" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_NUM_AVERAGED_SAMPLES.4" display="8 consecutives samples are averaged" value="RM_OB1203_NUM_AVERAGED_SAMPLES_8" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_NUM_AVERAGED_SAMPLES.5" display="16 consecutives samples are averaged" value="RM_OB1203_NUM_AVERAGED_SAMPLES_16" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_NUM_AVERAGED_SAMPLES.6" display="32 consecutives samples are averaged" value="RM_OB1203_NUM_AVERAGED_SAMPLES_32" />
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.4}" 
+      </constraint>
+      <description>Specify the number of averaged for PPG samples for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD" display="PPG mode : Pulse width and measurement period for OB1203 sensor device0" default="RM_OB1203_PPG_WIDTH_130US_PERIOD_1P25MS" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.1" display="Pulse width:130us. Measurement Period:0.3125ms. (PPG1 mode only)" value="RM_OB1203_PPG_WIDTH_130US_PERIOD_0P3125MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.2" display="Pulse width:130us. Measurement Period:0.625ms." value="RM_OB1203_PPG_WIDTH_130US_PERIOD_0P625MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.3" display="Pulse width:130us. Measurement Period:1ms." value="RM_OB1203_PPG_WIDTH_130US_PERIOD_1MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.4" display="Pulse width:130us. Measurement Period:1.25ms." value="RM_OB1203_PPG_WIDTH_130US_PERIOD_1P25MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.5" display="Pulse width:130us. Measurement Period:2.5ms." value="RM_OB1203_PPG_WIDTH_130US_PERIOD_2P5MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.6" display="Pulse width:130us. Measurement Period:5ms." value="RM_OB1203_PPG_WIDTH_130US_PERIOD_5MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.7" display="Pulse width:130us. Measurement Period:10ms." value="RM_OB1203_PPG_WIDTH_130US_PERIOD_10MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.8" display="Pulse width:130us. Measurement Period:20ms." value="RM_OB1203_PPG_WIDTH_130US_PERIOD_20MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.9" display="Pulse width:247us. Measurement Period:0.625ms. (PPG1 mode only)" value="RM_OB1203_PPG_WIDTH_247US_PERIOD_0P625MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.10" display="Pulse width:247us. Measurement Period:1ms." value="RM_OB1203_PPG_WIDTH_247US_PERIOD_1MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.11" display="Pulse width:247us. Measurement Period:1.25ms." value="RM_OB1203_PPG_WIDTH_247US_PERIOD_1P25MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.12" display="Pulse width:247us. Measurement Period:2.5ms." value="RM_OB1203_PPG_WIDTH_247US_PERIOD_2P5MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.13" display="Pulse width:247us. Measurement Period:5ms." value="RM_OB1203_PPG_WIDTH_247US_PERIOD_5MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.14" display="Pulse width:247us. Measurement Period:10ms." value="RM_OB1203_PPG_WIDTH_247US_PERIOD_10MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.15" display="Pulse width:247us. Measurement Period:20ms." value="RM_OB1203_PPG_WIDTH_247US_PERIOD_20MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.16" display="Pulse width:481us. Measurement Period:1ms. (PPG1 mode only)" value="RM_OB1203_PPG_WIDTH_481US_PERIOD_1MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.17" display="Pulse width:481us. Measurement Period:1.25ms. (PPG1 mode only)" value="RM_OB1203_PPG_WIDTH_481US_PERIOD_1P25MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.18" display="Pulse width:481us. Measurement Period:2.5ms." value="RM_OB1203_PPG_WIDTH_481US_PERIOD_2P5MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.19" display="Pulse width:481us. Measurement Period:5ms." value="RM_OB1203_PPG_WIDTH_481US_PERIOD_5MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.20" display="Pulse width:481us. Measurement Period:10ms." value="RM_OB1203_PPG_WIDTH_481US_PERIOD_10MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.21" display="Pulse width:481us. Measurement Period:20ms." value="RM_OB1203_PPG_WIDTH_481US_PERIOD_20MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.22" display="Pulse width:949us. Measurement Period:2.5ms. (PPG1 mode only)" value="RM_OB1203_PPG_WIDTH_949US_PERIOD_2P5MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.23" display="Pulse width:949us. Measurement Period:5ms." value="RM_OB1203_PPG_WIDTH_949US_PERIOD_5MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.24" display="Pulse width:949us. Measurement Period:10ms." value="RM_OB1203_PPG_WIDTH_949US_PERIOD_10MS" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_WIDTH_PERIOD.25" display="Pulse width:949us. Measurement Period:20ms." value="RM_OB1203_PPG_WIDTH_949US_PERIOD_20MS" />
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.4}" 
+      </constraint>
+      <description>Specify the pulse width and measurement period for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PPG_FIFO_ROLLOVER" display="PPG mode : FIFO Rollover for OB1203 sensor device0" default="RM_OB1203_FIFO_ROLLOVER_ENABLE" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_FIFO_ROLLOVER.0" display="Disabled" value="RM_OB1203_FIFO_ROLLOVER_DISABLE" />
+      <option id="RM_OB1203_CFG_DEVICE0_PPG_FIFO_ROLLOVER.1" display="Enabled" value="RM_OB1203_FIFO_ROLLOVER_ENABLE" />
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.4}" 
+      </constraint>
+      <description>Specify the FIFO rollover for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE0_PPG_FIFO_EMPTY_NUM" display="PPG mode : FIFO Almost Full Value for OB1203 sensor device0" default="0xC" type="textbox">
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE0_SENSOR_MODE.4}" 
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE0_PPG_FIFO_EMPTY_NUM}"</constraint>
+      <constraint display="Value must be 4bits or less">0xF &gt;= "${RM_OB1203_CFG_DEVICE0_PPG_FIFO_EMPTY_NUM}"</constraint>
+      <description>Specify the number of empty FIFO words when the FIFO almost full interrupt is issued (4bits).
+Min = 0x0 and Max = 0xF.
+In PPG mode, only even values must be used.</description>
+    </property>
+
+    <!-- Device1 -->
+    <property id="RM_OB1203_CFG_DEVICE1_SENSOR_MODE" display="Sensor mode of OB1203 Sensor device1" default="0" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_SENSOR_MODE.0" display="Not selected" value="0" />
+      <option id="RM_OB1203_CFG_DEVICE1_SENSOR_MODE.1" display="Light sensor mode" value="1" />
+      <option id="RM_OB1203_CFG_DEVICE1_SENSOR_MODE.2" display="Proximity sensor mode" value="2" />
+      <option id="RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3" display="Light Proximity sensor mode" value="3" />
+      <option id="RM_OB1203_CFG_DEVICE1_SENSOR_MODE.4" display="PPG sensor mode" value="4" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <description>Set the sensor mode of OB1203 Sensors controlled by the FIT module.
+"Light sensor mode": Light sensor mode.
+"Proximity sensor mode": Proximity sensor mode.
+"Light Proximity sensor mode": Light sensor and Proximity sensor mode.
+"PPG sensor mode": PPG sensor mode.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_COMMS_INSTANCE" display="I2C Communication device No. for OB1203 sensor device1" default="g_comms_i2c_device1" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_COMMS_INSTANCE.1" display="I2C Communication Device0" value="g_comms_i2c_device0" />
+      <option id="RM_OB1203_CFG_DEVICE1_COMMS_INSTANCE.2" display="I2C Communication Device1" value="g_comms_i2c_device1" />
+      <option id="RM_OB1203_CFG_DEVICE1_COMMS_INSTANCE.3" display="I2C Communication Device2" value="g_comms_i2c_device2" />
+      <option id="RM_OB1203_CFG_DEVICE1_COMMS_INSTANCE.4" display="I2C Communication Device3" value="g_comms_i2c_device3" />
+      <option id="RM_OB1203_CFG_DEVICE1_COMMS_INSTANCE.5" display="I2C Communication Device4" value="g_comms_i2c_device4" />
+      <option id="RM_OB1203_CFG_DEVICE1_COMMS_INSTANCE.6" display="I2C Communication Device5" value="g_comms_i2c_device5" />
+      <option id="RM_OB1203_CFG_DEVICE1_COMMS_INSTANCE.7" display="I2C Communication Device6" value="g_comms_i2c_device6" />
+      <option id="RM_OB1203_CFG_DEVICE1_COMMS_INSTANCE.8" display="I2C Communication Device7" value="g_comms_i2c_device7" />
+      <option id="RM_OB1203_CFG_DEVICE1_COMMS_INSTANCE.9" display="I2C Communication Device8" value="g_comms_i2c_device8" />
+      <option id="RM_OB1203_CFG_DEVICE1_COMMS_INSTANCE.10" display="I2C Communication Device9" value="g_comms_i2c_device9" />
+      <option id="RM_OB1203_CFG_DEVICE1_COMMS_INSTANCE.11" display="I2C Communication Device10" value="g_comms_i2c_device10" />
+      <option id="RM_OB1203_CFG_DEVICE1_COMMS_INSTANCE.12" display="I2C Communication Device11" value="g_comms_i2c_device11" />
+      <option id="RM_OB1203_CFG_DEVICE1_COMMS_INSTANCE.13" display="I2C Communication Device12" value="g_comms_i2c_device12" />
+      <option id="RM_OB1203_CFG_DEVICE1_COMMS_INSTANCE.14" display="I2C Communication Device13" value="g_comms_i2c_device13" />
+      <option id="RM_OB1203_CFG_DEVICE1_COMMS_INSTANCE.15" display="I2C Communication Device14" value="g_comms_i2c_device14" />
+      <option id="RM_OB1203_CFG_DEVICE1_COMMS_INSTANCE.16" display="I2C Communication Device15" value="g_comms_i2c_device15" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="This I2C communication device is used by other device.">("${RM_OB1203_CFG_DEVICE0_COMMS_INSTANCE}" != "${RM_OB1203_CFG_DEVICE1_COMMS_INSTANCE}")</constraint>
+      <description>Set the using I2C communication device number for OB1203 Sensors controlled by the FIT module.
+[Note]: Be sure to specify a valid I2C communication device number.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_COMMS_I2C_CALLBACK" display="I2C callback function for OB1203 sensor device1" default="ob1203_user_i2c_callback1" type="textbox">
+      <constraint display="Must not be empty">"" != "${RM_OB1203_CFG_DEVICE1_COMMS_I2C_CALLBACK}"</constraint>
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <description>Specify the I2C Callback function name of the OB1203 Sensor API.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_IRQ_ENABLE" display="Enable IRQ from OB1203 sensor device1" default="0" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_ENABLE.0" display="Disabled" value="0" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_ENABLE.1" display="Enabled" value="1" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <description>Specify the Enalbe IRQ.
+- When Disabled, Don't enable IRQ"
+- When Enabled, enable the IRQ"</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_IRQ_CALLBACK" display="IRQ Callback function for OB1203 sensor device1" default="ob1203_user_irq_callback1" type="textbox">
+      <constraint display="When IRQ is enabled" actionOnFail="disable">${RM_OB1203_CFG_DEVICE1_IRQ_ENABLE} == ${RM_OB1203_CFG_DEVICE1_IRQ_ENABLE.1}</constraint>
+      <constraint display="Must not be empty">"" != "${RM_OB1203_CFG_DEVICE1_IRQ_CALLBACK}"</constraint>
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <description>Specify the IRQ Callback function name of the OB1203 Sensor API.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_IRQ_NUMBER" display="IRQ number for OB1203 sensor device1" default="IRQ_NUM_0" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_NUMBER.0" display="IRQ0" value="IRQ_NUM_0" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_NUMBER.1" display="IRQ1" value="IRQ_NUM_1" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_NUMBER.2" display="IRQ2" value="IRQ_NUM_2" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_NUMBER.3" display="IRQ3" value="IRQ_NUM_3" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_NUMBER.4" display="IRQ4" value="IRQ_NUM_4" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_NUMBER.5" display="IRQ5" value="IRQ_NUM_5" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_NUMBER.6" display="IRQ6" value="IRQ_NUM_6" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_NUMBER.7" display="IRQ7" value="IRQ_NUM_7" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_NUMBER.8" display="IRQ8" value="IRQ_NUM_8" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_NUMBER.9" display="IRQ9" value="IRQ_NUM_9" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_NUMBER.10" display="IRQ10" value="IRQ_NUM_10" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_NUMBER.11" display="IRQ11" value="IRQ_NUM_11" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_NUMBER.12" display="IRQ12" value="IRQ_NUM_12" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_NUMBER.13" display="IRQ13" value="IRQ_NUM_13" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_NUMBER.14" display="IRQ14" value="IRQ_NUM_14" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_NUMBER.15" display="IRQ15" value="IRQ_NUM_15" />
+      <constraint display="When IRQ is enabled" actionOnFail="disable">${RM_OB1203_CFG_DEVICE1_IRQ_ENABLE} == ${RM_OB1203_CFG_DEVICE1_IRQ_ENABLE.1}</constraint>
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <description>Set the IRQ number for the OB1203 Sensor.
+[Note]: Be sure to specify a valid IRQ number.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_IRQ_TRIGGER" display="IRQ trigger for OB1203 sensor device1" default="IRQ_TRIG_RISING" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_TRIGGER.lowLevel" display="Low Level" value="IRQ_TRIG_LOWLEV" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_TRIGGER.falling" display="Falling" value="IRQ_TRIG_FALLING" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_TRIGGER.rising" display="Rising" value="IRQ_TRIG_RISING" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_TRIGGER.bothEdges" display="Both Edges" value="IRQ_TRIG_BOTH_EDGE" />
+      <constraint display="When IRQ is enabled" actionOnFail="disable">${RM_OB1203_CFG_DEVICE1_IRQ_ENABLE} == ${RM_OB1203_CFG_DEVICE1_IRQ_ENABLE.1}</constraint>
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <description>Set the IRQ trigger for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_IRQ_PRIORITY" display="IRQ interrupt priority for OB1203 sensor device1" default="IRQ_PRI_10" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_PRIORITY.0" display="Priority 0" value="IRQ_PRI_0" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_PRIORITY.1" display="Priority 1" value="IRQ_PRI_1" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_PRIORITY.2" display="Priority 2" value="IRQ_PRI_2" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_PRIORITY.3" display="Priority 3" value="IRQ_PRI_3" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_PRIORITY.4" display="Priority 4" value="IRQ_PRI_4" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_PRIORITY.5" display="Priority 5" value="IRQ_PRI_5" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_PRIORITY.6" display="Priority 6" value="IRQ_PRI_6" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_PRIORITY.7" display="Priority 7" value="IRQ_PRI_7" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_PRIORITY.8" display="Priority 8" value="IRQ_PRI_8" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_PRIORITY.9" display="Priority 9" value="IRQ_PRI_9" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_PRIORITY.10" display="Priority 10" value="IRQ_PRI_10" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_PRIORITY.11" display="Priority 11" value="IRQ_PRI_11" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_PRIORITY.12" display="Priority 12" value="IRQ_PRI_12" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_PRIORITY.13" display="Priority 13" value="IRQ_PRI_13" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_PRIORITY.14" display="Priority 14" value="IRQ_PRI_14" />
+      <option id="RM_OB1203_CFG_DEVICE1_IRQ_PRIORITY.15" display="Priority 15" value="IRQ_PRI_15" />
+      <constraint display="When IRQ is enabled" actionOnFail="disable">${RM_OB1203_CFG_DEVICE1_IRQ_ENABLE} == ${RM_OB1203_CFG_DEVICE1_IRQ_ENABLE.1}</constraint>
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <description>Set the IRQ interrupt priority for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_SEMAPHORE_TIMEOUT" display="Semaphore timeout for OB1203 sensor device1 (RTOS only)" default="0xFFFFFFFF" type="textbox">
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="Must be integer value (0x00 - 0xFFFFFFFF)">((0x00 &lt;= ${RM_OB1203_CFG_DEVICE1_SEMAPHORE_TIMEOUT}) &amp;&amp; (0xFFFFFFFF &gt;= ${RM_OB1203_CFG_DEVICE1_SEMAPHORE_TIMEOUT}))</constraint>
+      <description>Specify the semaphore timeout for OB1203 sensor device1.</description>
+    </property>
+     <!-- General -->
+    <property id="RM_OB1203_CFG_DEVICE1_LIGHT_PROX_DEVICE_INTERRUPT" display="General : Device interrupt for Light Proximity mode of OB1203 sensor device1" default="RM_OB1203_OPERATION_MODE_STANDBY" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_PROX_DEVICE_INTERRUPT.1" display="Light mode interrupt" value="RM_OB1203_OPERATION_MODE_LIGHT" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_PROX_DEVICE_INTERRUPT.2" display="Proximity mode interrupt" value="RM_OB1203_OPERATION_MODE_PROXIMITY" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="When IRQ is enabled" actionOnFail="disable">${RM_OB1203_CFG_DEVICE1_IRQ_ENABLE} == ${RM_OB1203_CFG_DEVICE1_IRQ_ENABLE.1}</constraint>
+      <description>Specify the operation mode using device interrupt for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PPG_PROX_GAIN" display="General : Gain for Proximity mode and PPG mode of OB1203 sensor device1" default="RM_OB1203_PPG_PROX_GAIN_1" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_PROX_GAIN.0" display="1" value="RM_OB1203_PPG_PROX_GAIN_1" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_PROX_GAIN.1" display="1.5" value="RM_OB1203_PPG_PROX_GAIN_1P5" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_PROX_GAIN.2" display="2" value="RM_OB1203_PPG_PROX_GAIN_2" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_PROX_GAIN.3" display="4" value="RM_OB1203_PPG_PROX_GAIN_4" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Proximity, Light Proximity and PPG mode is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.4}"
+      </constraint>
+      <description>Specify the gain of ADC output and noise for the Proximity mode and PPG mode.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_LED_ORDER" display="General : LED order of OB1203 sensor device1" default="RM_OB1203_LED_IR_FIRST_RED_SECOND" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_LED_ORDER.1" display="IR LED first, Red LED second" value="RM_OB1203_LED_IR_FIRST_RED_SECOND" />
+      <option id="RM_OB1203_CFG_DEVICE1_LED_ORDER.2" display="Red LED first, IR LED second" value="RM_OB1203_LED_RED_FIRST_IR_SECOND" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Proximity, Light Proximity and PPG mode is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.4}"
+      </constraint>
+      <description>Specify the LED order of the OB1203 Sensor.</description>
+    </property>
+    <!-- Light mode -->
+    <property id="RM_OB1203_CFG_DEVICE1_LIGHT_SENSOR_MODE" display="Light mode : Operation mode for ob1203 sensor device1" default="RM_OB1203_LIGHT_SENSOR_MODE_LS" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_SENSOR_MODE.1" display="LS mode" value="RM_OB1203_LIGHT_SENSOR_MODE_LS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_SENSOR_MODE.2" display="CS_mode" value="RM_OB1203_LIGHT_SENSOR_MODE_CS" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the operation mode for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_LIGHT_INTERRUPT_TYPE" display="Light mode : Interrupt type for OB1203 sensor device1" default="RM_OB1203_LIGHT_INTERRUPT_TYPE_THRESHOLD" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_INTERRUPT_TYPE.1" display="Threshold" value="RM_OB1203_LIGHT_INTERRUPT_TYPE_THRESHOLD" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_INTERRUPT_TYPE.2" display="Variation" value="RM_OB1203_LIGHT_INTERRUPT_TYPE_VARIATION" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the interrupt type for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_LIGHT_INTERRUPT_SOURCE" display="Light mode : Interrupt source for OB1203 sensor device1" default="RM_OB1203_LIGHT_INTERRUPT_SOURCE_CLEAR_CHANNEL" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_INTERRUPT_SOURCE.1" display="Clear channel" value="RM_OB1203_LIGHT_INTERRUPT_SOURCE_CLEAR_CHANNEL" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_INTERRUPT_SOURCE.2" display="Green channel" value="RM_OB1203_LIGHT_INTERRUPT_SOURCE_GREEN_CHANNEL" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_INTERRUPT_SOURCE.3" display="Red channel (CS mode only)" value="RM_OB1203_LIGHT_INTERRUPT_SOURCE_RED_CHANNEL" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_INTERRUPT_SOURCE.4" display="Blue channel (CS mode only)" value="RM_OB1203_LIGHT_INTERRUPT_SOURCE_BLUE_CHANNEL" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the interrupt source for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_LIGHT_INTERRUPT_PERSIST" display="Light mode : The number of Similar Consecutive Interrupt Events of Light mode for OB1203 sensor device1" default="0x2" type="textbox">
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE1_LIGHT_INTERRUPT_PERSIST}"</constraint>
+      <constraint display="Value must be 4bits or less">0xF &gt;= "${RM_OB1203_CFG_DEVICE1_LIGHT_INTERRUPT_PERSIST}"</constraint>
+      <description>Specify the number of similar consecutive Light mode interrupt events that must occur before the interrupt is asserted (4bits).
+Min = 0x00 and Max 0x0F.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_LIGHT_SLEEP_AFTER_INTERRUPT" display="Light mode : Sleep after interrupt for OB1203 sensor device1" default="RM_OB1203_SLEEP_AFTER_INTERRUPT_DISABLE" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_SLEEP_AFTER_INTERRUPT.0" display="Disabled" value="RM_OB1203_SLEEP_AFTER_INTERRUPT_DISABLE" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_SLEEP_AFTER_INTERRUPT.1" display="Enabled" value="RM_OB1203_SLEEP_AFTER_INTERRUPT_ENABLE" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the sleep after interrupt for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_LIGHT_GAIN" display="Light mode : Gain of OB1203 sensor device1" default="RM_OB1203_LIGHT_GAIN_1" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_GAIN.1" display="1" value="RM_OB1203_LIGHT_GAIN_1" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_GAIN.2" display="3" value="RM_OB1203_LIGHT_GAIN_3" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_GAIN.3" display="6" value="RM_OB1203_LIGHT_GAIN_6" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the gain for detection range of the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_LIGHT_UPPER_THRESHOLD" display="Light mode : Upper threshold of OB1203 sensor device1" default="0x00CCC" type="textbox">
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE1_LIGHT_UPPER_THRESHOLD}"</constraint>
+      <constraint display="Value must be 20bits or less">0xFFFFF &gt;= "${RM_OB1203_CFG_DEVICE1_LIGHT_UPPER_THRESHOLD}"</constraint>
+      <description>Specify the upper threshold value (20bits).
+Min = 0x00000 and Max = 0xFFFFF.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_LIGHT_LOWER_THRESHOLD" display="Light mode : Lower threshold of OB1203 sensor device1" default="0x00000" type="textbox">
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE1_LIGHT_LOWER_THRESHOLD}"</constraint>
+      <constraint display="Value must be 20bits or less">0xFFFFF &gt;= "${RM_OB1203_CFG_DEVICE1_LIGHT_LOWER_THRESHOLD}"</constraint>
+      <description>Specify the lower threshold value (20bits).
+Min = 0x00000 and Max = 0xFFFFF.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_LIGHT_VARIANCE_THRESHOLD" display="Light mode : Variance thresold of OB1203 sensor device1" default="RM_OB1203_VARIANCE_THRESHOLD_128_COUNTS" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_VARIANCE_THRESHOLD.1" display="+/- 8 counts" value="RM_OB1203_VARIANCE_THRESHOLD_8_COUNTS"/>
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_VARIANCE_THRESHOLD.2" display="+/- 16 counts" value="RM_OB1203_VARIANCE_THRESHOLD_16_COUNTS"/>
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_VARIANCE_THRESHOLD.3" display="+/- 32 counts" value="RM_OB1203_VARIANCE_THRESHOLD_32_COUNTS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_VARIANCE_THRESHOLD.4" display="+/- 64 counts" value="RM_OB1203_VARIANCE_THRESHOLD_64_COUNTS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_VARIANCE_THRESHOLD.5" display="+/- 128 counts" value="RM_OB1203_VARIANCE_THRESHOLD_128_COUNTS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_VARIANCE_THRESHOLD.6" display="+/- 256 counts" value="RM_OB1203_VARIANCE_THRESHOLD_256_COUNTS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_VARIANCE_THRESHOLD.7" display="+/- 512 counts" value="RM_OB1203_VARIANCE_THRESHOLD_512_COUNTS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_VARIANCE_THRESHOLD.8" display="+/- 1024 counts" value="RM_OB1203_VARIANCE_THRESHOLD_1024_COUNTS" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify variance threshold for the OB1203 Sensor. New data varies by selected counts compared to previous result.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD" display="Light mode : Resolution and measurement period of OB1203 sensor device1" default="RM_OB1203_LIGHT_RESOLUTION_18BIT_PERIOD_100MS" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.1" display="Resolution:13 bits. Measurement Period:25ms" value="RM_OB1203_LIGHT_RESOLUTION_13BIT_PERIOD_25MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.2" display="Resolution:13 bits. Measurement Period:50ms" value="RM_OB1203_LIGHT_RESOLUTION_13BIT_PERIOD_50MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.3" display="Resolution:13 bits. Measurement Period:100ms" value="RM_OB1203_LIGHT_RESOLUTION_13BIT_PERIOD_100MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.4" display="Resolution:13 bits. Measurement Period:200ms" value="RM_OB1203_LIGHT_RESOLUTION_13BIT_PERIOD_200MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.5" display="Resolution:13 bits. Measurement Period:500ms" value="RM_OB1203_LIGHT_RESOLUTION_13BIT_PERIOD_500MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.6" display="Resolution:13 bits. Measurement Period:1000ms" value="RM_OB1203_LIGHT_RESOLUTION_13BIT_PERIOD_1000MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.7" display="Resolution:13 bits. Measurement Period:2000ms" value="RM_OB1203_LIGHT_RESOLUTION_13BIT_PERIOD_2000MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.8" display="Resolution:16 bits. Measurement Period:25ms" value="RM_OB1203_LIGHT_RESOLUTION_16BIT_PERIOD_25MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.9" display="Resolution:16 bits. Measurement Period:50ms" value="RM_OB1203_LIGHT_RESOLUTION_16BIT_PERIOD_50MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.10" display="Resolution:16 bits. Measurement Period:100ms" value="RM_OB1203_LIGHT_RESOLUTION_16BIT_PERIOD_100MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.11" display="Resolution:16 bits. Measurement Period:200ms" value="RM_OB1203_LIGHT_RESOLUTION_16BIT_PERIOD_200MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.12" display="Resolution:16 bits. Measurement Period:500ms" value="RM_OB1203_LIGHT_RESOLUTION_16BIT_PERIOD_500MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.13" display="Resolution:16 bits. Measurement Period:1000ms" value="RM_OB1203_LIGHT_RESOLUTION_16BIT_PERIOD_1000MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.14" display="Resolution:16 bits. Measurement Period:2000ms" value="RM_OB1203_LIGHT_RESOLUTION_16BIT_PERIOD_2000MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.15" display="Resolution:17 bits. Measurement Period:50ms" value="RM_OB1203_LIGHT_RESOLUTION_17BIT_PERIOD_50MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.16" display="Resolution:17 bits. Measurement Period:100ms" value="RM_OB1203_LIGHT_RESOLUTION_17BIT_PERIOD_100MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.17" display="Resolution:17 bits. Measurement Period:200ms" value="RM_OB1203_LIGHT_RESOLUTION_17BIT_PERIOD_200MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.18" display="Resolution:17 bits. Measurement Period:500ms" value="RM_OB1203_LIGHT_RESOLUTION_17BIT_PERIOD_500MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.19" display="Resolution:17 bits. Measurement Period:1000ms" value="RM_OB1203_LIGHT_RESOLUTION_17BIT_PERIOD_1000MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.20" display="Resolution:17 bits. Measurement Period:2000ms" value="RM_OB1203_LIGHT_RESOLUTION_17BIT_PERIOD_2000MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.21" display="Resolution:18 bits. Measurement Period:100ms" value="RM_OB1203_LIGHT_RESOLUTION_18BIT_PERIOD_100MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.22" display="Resolution:18 bits. Measurement Period:200ms" value="RM_OB1203_LIGHT_RESOLUTION_18BIT_PERIOD_200MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.23" display="Resolution:18 bits. Measurement Period:500ms" value="RM_OB1203_LIGHT_RESOLUTION_18BIT_PERIOD_500MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.24" display="Resolution:18 bits. Measurement Period:1000ms" value="RM_OB1203_LIGHT_RESOLUTION_18BIT_PERIOD_1000MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.25" display="Resolution:18 bits. Measurement Period:2000ms" value="RM_OB1203_LIGHT_RESOLUTION_18BIT_PERIOD_2000MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.26" display="Resolution:19 bits. Measurement Period:200ms" value="RM_OB1203_LIGHT_RESOLUTION_19BIT_PERIOD_200MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.27" display="Resolution:19 bits. Measurement Period:500ms" value="RM_OB1203_LIGHT_RESOLUTION_19BIT_PERIOD_500MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.28" display="Resolution:19 bits. Measurement Period:1000ms" value="RM_OB1203_LIGHT_RESOLUTION_19BIT_PERIOD_1000MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.29" display="Resolution:19 bits. Measurement Period:2000ms" value="RM_OB1203_LIGHT_RESOLUTION_19BIT_PERIOD_2000MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.30" display="Resolution:20 bits. Measurement Period:500ms" value="RM_OB1203_LIGHT_RESOLUTION_20BIT_PERIOD_500MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.31" display="Resolution:20 bits. Measurement Period:1000ms" value="RM_OB1203_LIGHT_RESOLUTION_20BIT_PERIOD_1000MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_LIGHT_RESOLUTION_PERIOD.32" display="Resolution:20 bits. Measurement Period:2000ms" value="RM_OB1203_LIGHT_RESOLUTION_20BIT_PERIOD_2000MS" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Light and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.1}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the Light mode resolution and measurement period for the OB1203 Sensor.</description>
+    </property>
+    <!-- Proximity mode -->
+    <property id="RM_OB1203_CFG_DEVICE1_PROX_SLEEP_AFTER_INTERRUPT" display="Proximity mode : Sleep after interrupt for OB1203 sensor device1" default="RM_OB1203_SLEEP_AFTER_INTERRUPT_DISABLE" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_SLEEP_AFTER_INTERRUPT.0" display="Disabled" value="RM_OB1203_SLEEP_AFTER_INTERRUPT_DISABLE" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_SLEEP_AFTER_INTERRUPT.1" display="Enabled" value="RM_OB1203_SLEEP_AFTER_INTERRUPT_ENABLE" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the sleep after interrupt for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PROX_INTERRUPT_TYPE" display="Proximity mode : Interrupt type for OB1203 sensor device1" default="RM_OB1203_PROX_INTERRUPT_TYPE_NORMAL" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_INTERRUPT_TYPE.1" display="Normal" value="RM_OB1203_PROX_INTERRUPT_TYPE_NORMAL" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_INTERRUPT_TYPE.2" display="Logic" value="RM_OB1203_PROX_INTERRUPT_TYPE_LOGIC" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the interrupt type for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PROX_INTERRUPT_PERSIST" display="Proximity mode : The number of Similar Consecutive Interrupt Events for OB1203 sensor device1" default="0x2" type="textbox">
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE1_PROX_INTERRUPT_PERSIST}"</constraint>
+      <constraint display="Value must be 4bits or less">0xF &gt;= "${RM_OB1203_CFG_DEVICE1_PROX_INTERRUPT_PERSIST}"</constraint>
+      <description>Specify the number of similar consecutive Proximity mode interrupt events that must occur before the interrupt is asserted (4bits).
+Min = 0x00 and Max 0x0F.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PROX_LED_CURRENT" display="Proximity mode : LED current of OB1203 sensor device1" default="0x100" type="textbox">
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE1_PROX_LED_CURRENT}"</constraint>
+      <constraint display="Value must be 10bits or less">0x3FF &gt;= "${RM_OB1203_CFG_DEVICE1_PROX_LED_CURRENT}"</constraint>
+      <description>Specify the Current for LED (10bits).
+Min = 0x000 and Max = 0x3FF.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PROX_ANA_CAN" display="Proximity mode : LED analog cancellation for OB1203 sensor device1" default="RM_OB1203_ANALOG_CANCELLATION_DISABLE" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_ANA_CAN.0" display="Disabled" value="RM_OB1203_ANALOG_CANCELLATION_DISABLE" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_ANA_CAN.1" display="Enabled (50% offset of the full-scale value)" value="RM_OB1203_ANALOG_CANCELLATION_ENABLE" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the analob cancellation level for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PROX_DIG_CAN" display="Proximity mode : LED digital cancellation of Proximity mode for OB1203 sensor device1" default="0x100" type="textbox">
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE1_PROX_DIG_CAN}"</constraint>
+      <constraint display="Value must be 16bits or less">0xFFFF &gt;= "${RM_OB1203_CFG_DEVICE1_PROX_DIG_CAN}"</constraint>
+      <description>Specify the digital cancellation level (16bits) of Proximity mode for the OB1203 Sensor.
+Min = 0x0000 and Max = 0xFFFF.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PROX_NUM_LED_PULSES" display="Proximity mode : Number of LED pulses of OB1203 sensor device1" default="RM_OB1203_NUM_LED_PULSES_8" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_NUM_LED_PULSES.1" display="1 pulse" value="RM_OB1203_NUM_LED_PULSES_1" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_NUM_LED_PULSES.2" display="2 pulses" value="RM_OB1203_NUM_LED_PULSES_2" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_NUM_LED_PULSES.3" display="4 pulses" value="RM_OB1203_NUM_LED_PULSES_4" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_NUM_LED_PULSES.4" display="8 pulses" value="RM_OB1203_NUM_LED_PULSES_8" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_NUM_LED_PULSES.5" display="16 pulses" value="RM_OB1203_NUM_LED_PULSES_16" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_NUM_LED_PULSES.6" display="32 pulses" value="RM_OB1203_NUM_LED_PULSES_32" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the number of LED pulses for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PROX_UPPER_THRESHOLD" display="Proximity mode : Upper threshold for OB1203 sensor device1" default="0x0600" type="textbox">
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE1_PROX_UPPER_THRESHOLD}"</constraint>
+      <constraint display="Value must be 16bits or less">0xFFFF &gt;= "${RM_OB1203_CFG_DEVICE1_PROX_UPPER_THRESHOLD}"</constraint>
+      <description>Specify the upper threshold value (16bits) of Proximity mode for the OB1203 Sensor.
+Min = 0x0000 and Max = 0xFFFF.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PROX_LOWER_THRESHOLD" display="Proximity mode : Lower threshold for OB1203 sensor device1" default="0x0000" type="textbox">
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE1_PROX_LOWER_THRESHOLD}"</constraint>
+      <constraint display="Value must be 16bits or less">0xFFFF &gt;= "${RM_OB1203_CFG_DEVICE1_PROX_LOWER_THRESHOLD}"</constraint>
+      <description>Specify the lower threshold value (16bits) of Proximity mode for the OB1203 Sensor.
+Min = 0x0000 and Max = 0xFFFF.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD" display="Proximity mode : Pulse width and measurement period for OB1203 sensor device1" default="RM_OB1203_PROX_WIDTH_42US_PERIOD_100MS" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.1" display="Pulse width:26us. Measurement Period:3.125ms. (Except for the number 32 of LED pulses)" value="RM_OB1203_PROX_WIDTH_26US_PERIOD_3P125MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.2" display="Pulse width:26us. Measurement Period:6.25ms." value="RM_OB1203_PROX_WIDTH_26US_PERIOD_6P25MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.3" display="Pulse width:26us. Measurement Period:12.5ms." value="RM_OB1203_PROX_WIDTH_26US_PERIOD_12P5MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.4" display="Pulse width:26us. Measurement Period:25ms." value="RM_OB1203_PROX_WIDTH_26US_PERIOD_25MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.5" display="Pulse width:26us. Measurement Period:50ms." value="RM_OB1203_PROX_WIDTH_26US_PERIOD_50MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.6" display="Pulse width:26us. Measurement Period:100ms." value="RM_OB1203_PROX_WIDTH_26US_PERIOD_100MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.7" display="Pulse width:26us. Measurement Period:200ms." value="RM_OB1203_PROX_WIDTH_26US_PERIOD_200MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.8" display="Pulse width:26us. Measurement Period:400ms." value="RM_OB1203_PROX_WIDTH_26US_PERIOD_400MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.9" display="Pulse width:42us. Measurement Period:3.125ms. (Except for the number 32 of LED pulses)" value="RM_OB1203_PROX_WIDTH_42US_PERIOD_3P125MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.10" display="Pulse width:42us. Measurement Period:6.25ms." value="RM_OB1203_PROX_WIDTH_42US_PERIOD_6P25MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.11" display="Pulse width:42us. Measurement Period:12.5ms." value="RM_OB1203_PROX_WIDTH_42US_PERIOD_12P5MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.12" display="Pulse width:42us. Measurement Period:25ms." value="RM_OB1203_PROX_WIDTH_42US_PERIOD_25MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.13" display="Pulse width:42us. Measurement Period:50ms." value="RM_OB1203_PROX_WIDTH_42US_PERIOD_50MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.14" display="Pulse width:42us. Measurement Period:100ms." value="RM_OB1203_PROX_WIDTH_42US_PERIOD_100MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.15" display="Pulse width:42us. Measurement Period:200ms." value="RM_OB1203_PROX_WIDTH_42US_PERIOD_200MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.16" display="Pulse width:42us. Measurement Period:400ms." value="RM_OB1203_PROX_WIDTH_42US_PERIOD_400MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.17" display="Pulse width:71us. Measurement Period:3.125ms. (Except for the number 16 and 32 of LED pulses)" value="RM_OB1203_PROX_WIDTH_71US_PERIOD_3P125MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.18" display="Pulse width:71us. Measurement Period:6.25ms. (Except for the number 32 of LED pulses)" value="RM_OB1203_PROX_WIDTH_71US_PERIOD_6P25MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.19" display="Pulse width:71us. Measurement Period:12.5ms." value="RM_OB1203_PROX_WIDTH_71US_PERIOD_12P5MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.20" display="Pulse width:71us. Measurement Period:25ms." value="RM_OB1203_PROX_WIDTH_71US_PERIOD_25MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.21" display="Pulse width:71us. Measurement Period:50ms." value="RM_OB1203_PROX_WIDTH_71US_PERIOD_50MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.22" display="Pulse width:71us. Measurement Period:100ms." value="RM_OB1203_PROX_WIDTH_71US_PERIOD_100MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.23" display="Pulse width:71us. Measurement Period:200ms." value="RM_OB1203_PROX_WIDTH_71US_PERIOD_200MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_WIDTH_PERIOD.24" display="Pulse width:71us. Measurement Period:400ms." value="RM_OB1203_PROX_WIDTH_71US_PERIOD_400MS" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the Proximity mode pulse width and measurement period for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PROX_MOVING_AVERAGE" display="Proximity mode : Moving average for OB1203 sensor device1" default="RM_OB1203_MOVING_AVERAGE_DISABLE" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_MOVING_AVERAGE.0" display="Disabled" value="RM_OB1203_MOVING_AVERAGE_DISABLE" />
+      <option id="RM_OB1203_CFG_DEVICE1_PROX_MOVING_AVERAGE.1" display="Enabled" value="RM_OB1203_MOVING_AVERAGE_ENABLE" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <description>Specify the moving average of Proximity mode for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PROX_HYSTERESIS" display="Proximity mode : Hysteresis for OB1203 sensor device1" default="0x00" type="textbox">
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When Proximity and Light Proximity is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.2}" 
+      || "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.3}"
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE1_PROX_HYSTERESIS}"</constraint>
+      <constraint display="Value must be 7bits or less">0x7F &gt;= "${RM_OB1203_CFG_DEVICE1_PROX_HYSTERESIS}"</constraint>
+      <description>Specify the hysteresis level (7bits) of Proximity mode for the OB1203 Sensor.
+Mix = 0x00 and Max = 0x7F.</description>
+    </property>
+    <!-- PPG mode -->
+    <property id="RM_OB1203_CFG_DEVICE1_PPG_SENSOR_MODE" display="PPG mode : Operation mode for OB1203 sensor device1" default="RM_OB1203_PPG_SENSOR_MODE_PPG2" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_SENSOR_MODE.1" display="PPG1 mode" value="RM_OB1203_PPG_SENSOR_MODE_PPG1" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_SENSOR_MODE.2" display="PPG2 mode" value="RM_OB1203_PPG_SENSOR_MODE_PPG2" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.4}" 
+      </constraint>
+      <description>Specify the operation mode of PPG mode for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PPG_INTERRUPT_TYPE" display="PPG mode : Interupt type for OB1203 sensor device1" default="RM_OB1203_PPG_INTERRUPT_TYPE_DATA" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_INTERRUPT_TYPE.1" display="Data" value="RM_OB1203_PPG_INTERRUPT_TYPE_DATA" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_INTERRUPT_TYPE.2" display="FIFO Almost Full" value="RM_OB1203_PPG_INTERRUPT_TYPE_FIFO_AFULL" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.4}" 
+      </constraint>
+      <description>Specify the operation mode of PPG mode for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PPG_IR_LED_CURRENT" display="PPG mode : IR LED current for OB1203 sensor device1" default="0x366" type="textbox">
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.4}" 
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE1_PPG_IR_LED_CURRENT}"</constraint>
+      <constraint display="Value must be 10bits or less">0x3FF &gt;= "${RM_OB1203_CFG_DEVICE1_PPG_IR_LED_CURRENT}"</constraint>
+      <description>Specify the current for IR LED (10bits) for the OB1203 Sensor.
+Min = 0x000 and Max = 0x3FF.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PPG_RED_LED_CURRENT" display="PPG mode : Red LED current for OB1203 sensor device1" default="0x1B3" type="textbox">
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.4}" 
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE1_PPG_RED_LED_CURRENT}"</constraint>
+      <constraint display="Value must be 9bits or less">0x1FF &gt;= "${RM_OB1203_CFG_DEVICE1_PPG_RED_LED_CURRENT}"</constraint>
+      <description>Specify the current for Red LED (9bits) for the OB1203 Sensor.
+Min = 0x000 and Max = 0x1FF.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PPG_POWER_SAVE_MODE" display="PPG mode : Power save mode for OB1203 sensor device1" default="RM_OB1203_POWER_SAVE_MODE_DISABLE" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_POWER_SAVE_MODE.0" display="Disabled" value="RM_OB1203_POWER_SAVE_MODE_DISABLE" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_POWER_SAVE_MODE.1" display="Enabled" value="RM_OB1203_POWER_SAVE_MODE_ENABLE" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.4}" 
+      </constraint>
+      <description>Specify the power save mode for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PPG_IR_LED_ANA_CAN" display="PPG mode : IR LED analog cancellation for OB1203 sensor device1" default="RM_OB1203_ANALOG_CANCELLATION_DISABLE" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_IR_LED_ANA_CAN.0" display="Disabled" value="RM_OB1203_ANALOG_CANCELLATION_DISABLE" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_IR_LED_ANA_CAN.1" display="Enabled (50% offset of the full-scale value)" value="RM_OB1203_ANALOG_CANCELLATION_ENABLE" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.4}" 
+      </constraint>
+      <description>Specify the IR LED analog cancellation level for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PPG_RED_LED_ANA_CAN" display="PPG mode : Red LED analog cancellation for OB1203 sensor device1" default="RM_OB1203_ANALOG_CANCELLATION_DISABLE" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_RED_LED_ANA_CAN.0" display="Disabled" value="RM_OB1203_ANALOG_CANCELLATION_DISABLE" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_RED_LED_ANA_CAN.1" display="Enabled (50% offset of the full-scale value)" value="RM_OB1203_ANALOG_CANCELLATION_ENABLE" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.4}" 
+      </constraint>
+      <description>Specify the Red LED analog cancellation level for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PPG_NUM_AVERAGED_SAMPLES" display="PPG mode : Number of averaged PPG samples for OB1203 sensor device1" default="RM_OB1203_NUM_AVERAGED_SAMPLES_8" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_NUM_AVERAGED_SAMPLES.1" display="1 (No averaging)" value="RM_OB1203_NUM_AVERAGED_SAMPLES_1" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_NUM_AVERAGED_SAMPLES.2" display="2 consecutives samples are averaged" value="RM_OB1203_NUM_AVERAGED_SAMPLES_2" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_NUM_AVERAGED_SAMPLES.3" display="4 consecutives samples are averaged" value="RM_OB1203_NUM_AVERAGED_SAMPLES_4" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_NUM_AVERAGED_SAMPLES.4" display="8 consecutives samples are averaged" value="RM_OB1203_NUM_AVERAGED_SAMPLES_8" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_NUM_AVERAGED_SAMPLES.5" display="16 consecutives samples are averaged" value="RM_OB1203_NUM_AVERAGED_SAMPLES_16" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_NUM_AVERAGED_SAMPLES.6" display="32 consecutives samples are averaged" value="RM_OB1203_NUM_AVERAGED_SAMPLES_32" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.4}" 
+      </constraint>
+      <description>Specify the number of averaged for PPG samples for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD" display="PPG mode : Pulse width and measurement period for OB1203 sensor device1" default="RM_OB1203_PPG_WIDTH_130US_PERIOD_1P25MS" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.1" display="Pulse width:130us. Measurement Period:0.3125ms. (PPG1 mode only)" value="RM_OB1203_PPG_WIDTH_130US_PERIOD_0P3125MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.2" display="Pulse width:130us. Measurement Period:0.625ms." value="RM_OB1203_PPG_WIDTH_130US_PERIOD_0P625MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.3" display="Pulse width:130us. Measurement Period:1ms." value="RM_OB1203_PPG_WIDTH_130US_PERIOD_1MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.4" display="Pulse width:130us. Measurement Period:1.25ms." value="RM_OB1203_PPG_WIDTH_130US_PERIOD_1P25MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.5" display="Pulse width:130us. Measurement Period:2.5ms." value="RM_OB1203_PPG_WIDTH_130US_PERIOD_2P5MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.6" display="Pulse width:130us. Measurement Period:5ms." value="RM_OB1203_PPG_WIDTH_130US_PERIOD_5MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.7" display="Pulse width:130us. Measurement Period:10ms." value="RM_OB1203_PPG_WIDTH_130US_PERIOD_10MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.8" display="Pulse width:130us. Measurement Period:20ms." value="RM_OB1203_PPG_WIDTH_130US_PERIOD_20MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.9" display="Pulse width:247us. Measurement Period:0.625ms. (PPG1 mode only)" value="RM_OB1203_PPG_WIDTH_247US_PERIOD_0P625MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.10" display="Pulse width:247us. Measurement Period:1ms." value="RM_OB1203_PPG_WIDTH_247US_PERIOD_1MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.11" display="Pulse width:247us. Measurement Period:1.25ms." value="RM_OB1203_PPG_WIDTH_247US_PERIOD_1P25MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.12" display="Pulse width:247us. Measurement Period:2.5ms." value="RM_OB1203_PPG_WIDTH_247US_PERIOD_2P5MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.13" display="Pulse width:247us. Measurement Period:5ms." value="RM_OB1203_PPG_WIDTH_247US_PERIOD_5MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.14" display="Pulse width:247us. Measurement Period:10ms." value="RM_OB1203_PPG_WIDTH_247US_PERIOD_10MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.15" display="Pulse width:247us. Measurement Period:20ms." value="RM_OB1203_PPG_WIDTH_247US_PERIOD_20MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.16" display="Pulse width:481us. Measurement Period:1ms. (PPG1 mode only)" value="RM_OB1203_PPG_WIDTH_481US_PERIOD_1MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.17" display="Pulse width:481us. Measurement Period:1.25ms. (PPG1 mode only)" value="RM_OB1203_PPG_WIDTH_481US_PERIOD_1P25MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.18" display="Pulse width:481us. Measurement Period:2.5ms." value="RM_OB1203_PPG_WIDTH_481US_PERIOD_2P5MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.19" display="Pulse width:481us. Measurement Period:5ms." value="RM_OB1203_PPG_WIDTH_481US_PERIOD_5MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.20" display="Pulse width:481us. Measurement Period:10ms." value="RM_OB1203_PPG_WIDTH_481US_PERIOD_10MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.21" display="Pulse width:481us. Measurement Period:20ms." value="RM_OB1203_PPG_WIDTH_481US_PERIOD_20MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.22" display="Pulse width:949us. Measurement Period:2.5ms. (PPG1 mode only)" value="RM_OB1203_PPG_WIDTH_949US_PERIOD_2P5MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.23" display="Pulse width:949us. Measurement Period:5ms." value="RM_OB1203_PPG_WIDTH_949US_PERIOD_5MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.24" display="Pulse width:949us. Measurement Period:10ms." value="RM_OB1203_PPG_WIDTH_949US_PERIOD_10MS" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_WIDTH_PERIOD.25" display="Pulse width:949us. Measurement Period:20ms." value="RM_OB1203_PPG_WIDTH_949US_PERIOD_20MS" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.4}" 
+      </constraint>
+      <description>Specify the pulse width and measurement period for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PPG_FIFO_ROLLOVER" display="PPG mode : FIFO Rollover for OB1203 sensor device1" default="RM_OB1203_FIFO_ROLLOVER_ENABLE" type="combobox">
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_FIFO_ROLLOVER.0" display="Disabled" value="RM_OB1203_FIFO_ROLLOVER_DISABLE" />
+      <option id="RM_OB1203_CFG_DEVICE1_PPG_FIFO_ROLLOVER.1" display="Enabled" value="RM_OB1203_FIFO_ROLLOVER_ENABLE" />
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.4}" 
+      </constraint>
+      <description>Specify the FIFO rollover for the OB1203 Sensor.</description>
+    </property>
+    <property id="RM_OB1203_CFG_DEVICE1_PPG_FIFO_EMPTY_NUM" display="PPG mode : FIFO Almost Full Value for OB1203 sensor device1" default="0xC" type="textbox">
+      <constraint display="When using two or more OB1203 sensor devices" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE_NUM_MAX}" == "${RM_OB1203_CFG_DEVICE_NUM_MAX.2}"
+      </constraint>
+      <constraint display="When PPG is enabled" actionOnFail="disable">
+      "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE}" == "${RM_OB1203_CFG_DEVICE1_SENSOR_MODE.4}" 
+      </constraint>
+      <constraint display="Value must be a non-negative integer">0 &lt;= "${RM_OB1203_CFG_DEVICE1_PPG_FIFO_EMPTY_NUM}"</constraint>
+      <constraint display="Value must be 4bits or less">0xF &gt;= "${RM_OB1203_CFG_DEVICE1_PPG_FIFO_EMPTY_NUM}"</constraint>
+      <description>Specify the number of empty FIFO words when the FIFO almost full interrupt is issued (4bits).
+Min = 0x0 and Max = 0xF.
+In PPG mode, only even values must be used.</description>
+    </property>
+  </configuration>
+</module>
