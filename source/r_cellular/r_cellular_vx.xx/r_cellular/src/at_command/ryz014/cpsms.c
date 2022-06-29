@@ -14,11 +14,20 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cpsms.c
  * Description  : Function to execute the AT command (CPSMS).
+ *********************************************************************************************************************/
+/**********************************************************************************************************************
+ * History : DD.MM.YYYY Version  Description
+ *         : xx.xx.xxxx 1.00     First Release
+ *         : 02.09.2021 1.01     Fixed reset timing
+ *         : 21.10.2021 1.02     Support for Azure RTOS
+ *                               Support for GCC for Renesas GNURX Toolchain
+ *         : 15.11.2021 1.03     Improved receiving behavior, removed socket buffers
+ *         : 24.01.2022 1.04     R_CELLULAR_SetPSM and R_CELLULAR_SetEDRX have been added as new APIs
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -47,10 +56,8 @@
  * Function Name  @fn            atc_cpsms
  ************************************************************************************************/
 e_cellular_err_t atc_cpsms(st_cellular_ctrl_t * const p_ctrl, const e_cellular_psm_mode_t mode,
-                            const e_cellular_tau_cycle_t tau,
-                            const e_cellular_cycle_multiplier_t tau_multiplier,
-                            const e_cellular_active_cycle_t active,
-                            const e_cellular_cycle_multiplier_t active_multiplier)
+                            const e_cellular_tau_cycle_t tau, const e_cellular_cycle_multiplier_t tau_multiplier,
+                            const e_cellular_active_cycle_t active, const e_cellular_cycle_multiplier_t active_multiplier)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
     e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;

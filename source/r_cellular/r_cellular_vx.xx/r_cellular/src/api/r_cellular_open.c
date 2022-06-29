@@ -14,11 +14,20 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_open.c
  * Description  : Function to establish the communication state with the module.
+ *********************************************************************************************************************/
+/**********************************************************************************************************************
+ * History : DD.MM.YYYY Version  Description
+ *         : xx.xx.xxxx 1.00     First Release
+ *         : 02.09.2021 1.01     Fixed reset timing
+ *         : 21.10.2021 1.02     Support for Azure RTOS
+ *                               Support for GCC for Renesas GNURX Toolchain
+ *         : 15.11.2021 1.03     Improved receiving behavior, removed socket buffers
+ *         : 24.01.2022 1.04     R_CELLULAR_SetPSM and R_CELLULAR_SetEDRX have been added as new APIs
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -125,13 +134,19 @@ e_cellular_err_t R_CELLULAR_Open(st_cellular_ctrl_t * const p_ctrl, const st_cel
 
     CELLULAR_LOG_INFO(("First sending AT command to RYZ014A -> Succeeded."));
 
+    ret = atc_sqnautoconnect(p_ctrl);
+    if (CELLULAR_SUCCESS != ret)
+    {
+        goto R_CELLULAR_Open_fail;
+    }
+
     ret = atc_sqnsimst(p_ctrl);
     if (CELLULAR_SUCCESS != ret)
     {
         goto R_CELLULAR_Open_fail;
     }
 
-    ret = atc_cereg(p_ctrl, CELLULAR_ENABLE_NETWORK_RESULT_CODE_LEVEL1);
+    ret = atc_cereg_off(p_ctrl);
     if (CELLULAR_SUCCESS != ret)
     {
         goto R_CELLULAR_Open_fail;
@@ -146,7 +161,7 @@ e_cellular_err_t R_CELLULAR_Open(st_cellular_ctrl_t * const p_ctrl, const st_cel
     ret = atc_cpin_check(p_ctrl);
     if (CELLULAR_SUCCESS != ret)
     {
-        ret = atc_cpin(p_ctrl, p_cfg);
+        ret = atc_cpin(p_ctrl);
         if (CELLULAR_SUCCESS != ret)
         {
             CELLULAR_LOG_ERROR(("PIN CODE ERROR."));
@@ -201,6 +216,10 @@ static e_cellular_err_t cellular_config_init(st_cellular_ctrl_t * const p_ctrl, 
 
     if (NULL == p_cfg)
     {
+        strcpy((char *)p_ctrl->ap_name, CELLULAR_STRING_CONVERT(CELLULAR_CFG_AP_NAME));       // (&uint8_t[])->(char *)
+        strcpy((char *)p_ctrl->ap_user_name, CELLULAR_STRING_CONVERT(CELLULAR_CFG_AP_USERID));// (&uint8_t[])->(char *)
+        strcpy((char *)p_ctrl->ap_pass, CELLULAR_STRING_CONVERT(CELLULAR_CFG_AP_PASSWORD));   // (&uint8_t[])->(char *)
+        strcpy((char *)p_ctrl->sim_pin_code, CELLULAR_STRING_CONVERT(CELLULAR_CFG_PIN_CODE)); // (&uint8_t[])->(char *)
         p_ctrl->creatable_socket = CELLULAR_CREATABLE_SOCKETS;
         malloc_ret = cellular_malloc((size_t)p_ctrl->creatable_socket * sizeof(st_cellular_socket_ctrl_t)); // -> long
         if (NULL != malloc_ret)
@@ -213,7 +232,7 @@ static e_cellular_err_t cellular_config_init(st_cellular_ctrl_t * const p_ctrl, 
             for (count = 0; count < p_ctrl->creatable_socket; count++ )
             {
                 p_ctrl->p_socket_ctrl[count].send_timeout     = CELLULAR_TX_TIMEOUT;
-                p_ctrl->p_socket_ctrl[count].exchange_timeout = CELLULAR_CFG_EX_TIMEOUT;
+                p_ctrl->p_socket_ctrl[count].exchange_timeout = CELLULAR_EX_TIMEOUT;
                 p_ctrl->p_socket_ctrl[count].connect_timeout  = CELLULAR_CONNECT_TIMEOUT;
                 p_ctrl->p_socket_ctrl[count].packet_data_size = CELLULAR_PACKET_DATA_SIZE;
             }
@@ -227,7 +246,10 @@ static e_cellular_err_t cellular_config_init(st_cellular_ctrl_t * const p_ctrl, 
     }
     else
     {
-        if ((CELLULAR_MAX_SIM_PASS_LENGTH < strlen((const char *)p_cfg->sim_pin_code)) || // (&uint8_t[])->(char *)
+        if ((CELLULAR_MAX_AP_NAME_LENGTH < strlen((const char *)p_cfg->ap_name)) ||       // (&uint8_t[])->(char *)
+            (CELLULAR_MAX_AP_ID_LENGTH < strlen((const char *)p_cfg->ap_user_name)) ||    // (&uint8_t[])->(char *)
+            (CELLULAR_MAX_AP_PASS_LENGTH < strlen((const char *)p_cfg->ap_pass)) ||       // (&uint8_t[])->(char *)
+            (CELLULAR_MAX_SIM_PASS_LENGTH < strlen((const char *)p_cfg->sim_pin_code)) || // (&uint8_t[])->(char *)
             (CELLULAR_START_SOCKET_NUMBER > p_cfg->creatable_socket) ||
             (CELLULAR_CREATABLE_SOCKETS < p_cfg->creatable_socket) ||
             (CELLULAR_BAUDRATE != p_cfg->baud_rate) ||
@@ -243,6 +265,10 @@ static e_cellular_err_t cellular_config_init(st_cellular_ctrl_t * const p_ctrl, 
         }
         else
         {
+            strcpy((char *)p_ctrl->ap_name, (const char *)p_cfg->ap_name);            // (&uint8_t[])->(char *)
+            strcpy((char *)p_ctrl->ap_user_name, (const char *)p_cfg->ap_user_name);  // (&uint8_t[])->(char *)
+            strcpy((char *)p_ctrl->ap_pass, (const char *)p_cfg->ap_pass);            // (&uint8_t[])->(char *)
+            strcpy((char *)p_ctrl->sim_pin_code, (const char *)p_cfg->sim_pin_code);  // (&uint8_t[])->(char *)
             p_ctrl->creatable_socket    = p_cfg->creatable_socket;
             malloc_ret = cellular_malloc((size_t)p_ctrl->creatable_socket * sizeof(st_cellular_socket_ctrl_t)); // long
             if (NULL != malloc_ret)

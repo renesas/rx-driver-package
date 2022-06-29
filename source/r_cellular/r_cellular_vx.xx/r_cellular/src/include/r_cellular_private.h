@@ -14,11 +14,20 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_private.h
  * Description  : Configures the driver.
+ *********************************************************************************************************************/
+/**********************************************************************************************************************
+ * History : DD.MM.YYYY Version  Description
+ *         : xx.xx.xxxx 1.00     First Release
+ *         : 02.09.2021 1.01     Fixed reset timing
+ *         : 21.10.2021 1.02     Support for Azure RTOS
+ *                               Support for GCC for Renesas GNURX Toolchain
+ *         : 15.11.2021 1.03     Improved receiving behavior, removed socket buffers
+ *         : 24.01.2022 1.04     R_CELLULAR_SetPSM and R_CELLULAR_SetEDRX have been added as new APIs
  *********************************************************************************************************************/
 
 #ifndef CELLULAR_PRIVATE_H
@@ -59,22 +68,27 @@
 #define CELLULAR_MAX_AP_PASS_LENGTH         (64)
 #define CELLULAR_MAX_SIM_PASS_LENGTH        (8)
 
-#define CELLULAR_MAX_ICCID_LENGTH           (22)
-#define CELLULAR_MAX_IMEI_LENGTH            (15)
-#define CELLULAR_MAX_IMSI_LENGTH            (15)
-#define CELLULAR_MAX_PHONENUM_LENGTH        (11)
-#define CELLULAR_MAX_RSSI_LENGTH            (2)
-#define CELLULAR_MAX_BER_LENGTH             (2)
-#define CELLULAR_MAX_SVN_LENGTH             (2)
-#define CELLULAR_MAX_REVISION_LENGTH        (9)
-
-#define CELLULAR_START_FLG_OFF              (0)
-#define CELLULAR_START_FLG_ON               (1)
-
 /* Convert a macro value to a string */
 #define CELLULAR_STRING_MACRO(str)          #str
 /* Call CELLULAR_STRING_MACRO */
 #define CELLULAR_STRING_CONVERT(arg)        (CELLULAR_STRING_MACRO(arg))
+
+#if (defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__) && defined(__LIT)) \
+    || (defined(__CCRL__) || defined(__ICCRL78__) || defined(__RL))
+/* Converts IP address to 32 bits in little endian. */
+#define CELLULAR_IP_ADDER_CONVERT(IPv4_0, IPv4_1, IPv4_2, IPv4_3)\
+                                ( ( ( ( uint32_t ) ( IPv4_3 ) ) << 24UL ) |    \
+                                ( ( ( uint32_t ) ( IPv4_2 ) ) << 16UL ) |    \
+                                ( ( ( uint32_t ) ( IPv4_1 ) ) << 8UL ) |    \
+                                ( ( uint32_t ) ( IPv4_0 ) ) )
+#else
+/* Convert IP address to 32 bits in big endian. */
+#define CELLULAR_IP_ADDER_CONVERT(IPv4_0, IPv4_1, IPv4_2, IPv4_3)\
+                                ( ( ( ( uint32_t ) ( IPv4_0 ) ) << 24UL ) |    \
+                                ( ( ( uint32_t ) ( IPv4_1 ) ) << 16UL ) |    \
+                                ( ( ( uint32_t ) ( IPv4_2 ) ) << 8UL ) |    \
+                                ( ( uint32_t ) ( IPv4_3 ) ) )
+#endif
 
 #if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
 /* Driver Type */
@@ -91,20 +105,10 @@
 #define CELLULAR_SET_DR_PREPROC(x, y)          ((PORT ## x .PODR.BIT.B ## y))
 
 #define CELLULAR_PIN_DIRECTION_MODE_OUTPUT     (1)
-#define CELLULAR_PIN_DATA_HI                   (1)
 
-#if SCI_CFG_TEI_INCLUDED == (0)
-#error "The r_cellular requires TEI to be enabled, i.e., SCI_CFG_TEI_INCLUDED is set to (1). Please confirm r_sci_rx settings, /smc_gen/r_config/r_sci_rx_config.h."
-#endif
-
-#if BSP_CFG_RTOS_USED == (1)
-/* The r_cellular requires configTICK_RATE_HZ is 1000, RTOS tick interrupt cycle should be 1ms. Please configure the value. */
-#elif BSP_CFG_RTOS_USED == (5)
-#if TX_TIMER_TICKS_PER_SECOND != (1000)
-#error "The r_cellular requires TX_TIMER_TICKS_PER_SECOND is 1000, RTOS tick interrupt cycle should be 1ms. Please configure the value."
-#endif
-#endif
-
+#define BUILD_TIME_ERROR_MESSAGE_MCU_NOT_SUPPORT    "your MCU/compiler does not support this driver."
+#define BUILD_TIME_ERROR_MESSAGE_BOARD_NOT_SUPPORT  "your board does not support this driver, \
+                                                    please define board name macro like BSP_BOARD_RX65N_CLOUD_KIT."
 #elif defined(__CCRL__) || defined(__ICCRL78__) || defined(__RL)
 /* Driver Type */
 #define CELLULAR_IMPLEMENT_TYPE ('B')

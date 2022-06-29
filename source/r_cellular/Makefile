@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_cellular
-VERSION = 		1.06
+VERSION = 		1.04
 MDF = V2
 
 CONFIG_FOLDER = r_config
@@ -21,9 +21,7 @@ $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).xml:
 	rm -f tmp.xml
 
 $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION)_extend.mdf:
-	cp ./$(MODULE_NAME)_vx.xx_extend.mdf tmp.mdf
-	sed s/x.xx/$(VERSION)/ tmp.mdf > $@
-	rm -f tmp.mdf
+	cp ./$(MODULE_NAME)_vx.xx_extend.mdf $@
 
 .PHONY: clean
 clean:

@@ -14,11 +14,20 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_sendsocket.c
  * Description  : Function to send data to a socket.
+ *********************************************************************************************************************/
+/**********************************************************************************************************************
+ * History : DD.MM.YYYY Version  Description
+ *         : xx.xx.xxxx 1.00     First Release
+ *         : 02.09.2021 1.01     Fixed reset timing
+ *         : 21.10.2021 1.02     Support for Azure RTOS
+ *                               Support for GCC for Renesas GNURX Toolchain
+ *         : 15.11.2021 1.03     Improved receiving behavior, removed socket buffers
+ *         : 24.01.2022 1.04     R_CELLULAR_SetPSM and R_CELLULAR_SetEDRX have been added as new APIs
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -186,8 +195,7 @@ static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8
 
         p_ctrl->sci_ctrl.tx_end_flg = CELLULAR_TX_END_FLAG_OFF;
 
-        sci_ret = R_SCI_Send(p_ctrl->sci_ctrl.sci_hdl,
-                                (uint8_t *)p_data + complete_length, send_size); // (const uint8_t *) -> (uint8_t *)
+        sci_ret = R_SCI_Send(p_ctrl->sci_ctrl.sci_hdl, (const uint8_t *)p_data + complete_length, send_size);
         if (SCI_SUCCESS != sci_ret)
         {
             ret = CELLULAR_ERR_MODULE_COM;

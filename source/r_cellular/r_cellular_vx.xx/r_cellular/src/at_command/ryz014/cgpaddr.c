@@ -14,11 +14,20 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cgpaddr.c
  * Description  : Function to execute the AT command (CGPADDR).
+ *********************************************************************************************************************/
+/**********************************************************************************************************************
+ * History : DD.MM.YYYY Version  Description
+ *         : xx.xx.xxxx 1.00     First Release
+ *         : 02.09.2021 1.01     Fixed reset timing
+ *         : 21.10.2021 1.02     Support for Azure RTOS
+ *                               Support for GCC for Renesas GNURX Toolchain
+ *         : 15.11.2021 1.03     Improved receiving behavior, removed socket buffers
+ *         : 24.01.2022 1.04     R_CELLULAR_SetPSM and R_CELLULAR_SetEDRX have been added as new APIs
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -57,7 +66,7 @@ e_cellular_err_t atc_cgpaddr(st_cellular_ctrl_t * const p_ctrl, const uint8_t co
     const uint8_t * const p_command_arg[CELLULAR_MAX_ARG_COUNT] = {str};
 
     atc_generate(p_ctrl->sci_ctrl.atc_buff,
-        (const uint8_t *)&gp_at_command[ATC_GET_IPADDR][0],     // (const uint8_t *const *)->(const uint8_t **)
+        (const uint8_t *)&gp_at_command[ATC_GET_IPADDR][0],   // (const uint8_t *const *)->(const uint8_t **)
             (const uint8_t **)&p_command_arg);                  // (const uint8_t *const *)->(const uint8_t **)
 
     at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_GET_IPADDR);

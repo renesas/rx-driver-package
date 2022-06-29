@@ -6,7 +6,7 @@
 ***********************************************************************************************************************/
 -->
 <module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
-    <fileVersion>1.06</fileVersion>
+    <fileVersion>1.04</fileVersion>
     <formatVersion>2.00</formatVersion>
 
     <fileTemplate></fileTemplate>
@@ -17,12 +17,12 @@
 Example: ibasis.iot, plus.4g, etc</description>
         </property>
         <property id="CELLULAR_CFG_AP_USERID" display="Access point login ID" default="" type="textbox">
-            <constraint display="Character limit over(32 or less)" actionOnFail="error">/^(.{0,32})$/.test("${CELLULAR_CFG_AP_USERID}")</constraint>
+            <constraint display="Character limit over(32 or less)" actionOnFail="error">/^([a-zA-Z0-9_.]{0,32})$/.test("${CELLULAR_CFG_AP_USERID}")</constraint>
             <description>Enter the login ID of the access point.
 Example: (empty), plus, etc.</description>
         </property>
         <property id="CELLULAR_CFG_AP_PASSWORD" display="Access point password" default="" type="textbox">
-            <constraint display="Character limit over(64 or less)" actionOnFail="error">/^(.{0,64})$/.test("${CELLULAR_CFG_AP_PASSWORD}")</constraint>
+            <constraint display="Character limit over(64 or less)" actionOnFail="error">/^([a-zA-Z0-9_.]{0,64})$/.test("${CELLULAR_CFG_AP_PASSWORD}")</constraint>
             <description>Enter the login password for the access point.
 Example: (empty), 4g, etc.</description>
         </property>
@@ -31,24 +31,11 @@ Example: (empty), 4g, etc.</description>
             <description>Enter the PIN lock code of your SIM card.
 Example: (empty), 0000, etc.</description>
         </property>
-        <property id="CELLULAR_CFG_AUTH_TYPE" display="Authentication protocol type." default="2" type="combobox">
-            <option id="CELLULAR_CFG_AUTH_TYPE.0" display="0" value="0"/>
-            <option id="CELLULAR_CFG_AUTH_TYPE.1" display="1" value="1"/>
-            <option id="CELLULAR_CFG_AUTH_TYPE.2" display="2" value="2"/>
-            <description>Authentication protocol type.
-0: None, 1: PAP, 2: CHAP</description>
-        </property>
         <property id="CELLULAR_CFG_ATC_RETRY_GATT" display="Connection retry limit" default="100" type="textbox">
             <constraint display="Value must be an integer" actionOnFail="disable">testInteger("${CELLULAR_CFG_ATC_RETRY_GATT}")</constraint>
             <constraint display="Value must be in the range 0 ~ 100" actionOnFail="error">("${CELLULAR_CFG_ATC_RETRY_GATT}" &gt;= 0) &amp;&amp; ("${CELLULAR_CFG_ATC_RETRY_GATT}" &lt;= 100)</constraint>
             <description>Connection retry limit to access point.
 Set between 0~100.</description>
-        </property>
-        <property id="CELLULAR_CFG_EX_TIMEOUT" display="TCP connection timeout" default="120" type="textbox">
-            <constraint display="Value must be an integer" actionOnFail="disable">testInteger("${CELLULAR_CFG_EX_TIMEOUT}")</constraint>
-            <constraint display="Value must be in the range 0 ~ 65535" actionOnFail="error">("${CELLULAR_CFG_EX_TIMEOUT}" &gt;= 0) &amp;&amp; ("${CELLULAR_CFG_EX_TIMEOUT}" &lt;= 65535)</constraint>
-            <description>TCP connection timeout to peer.
-Set between 0~65535.</description>
         </property>
         <property id="CELLULAR_CFG_INT_PRIORITY" display="Task priority" default="4" type="textbox">
             <constraint display="Value must be an integer" actionOnFail="disable">testInteger("${CELLULAR_CFG_INT_PRIORITY}")</constraint>

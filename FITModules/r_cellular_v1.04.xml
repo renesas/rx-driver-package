@@ -25,8 +25,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_cellular</name>
-        <version>1.06</version>
-        <zipsource>r_cellular_v1.06.zip</zipsource>
+        <version>1.04</version>
+        <zipsource>r_cellular_v1.04.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>6.20</version>

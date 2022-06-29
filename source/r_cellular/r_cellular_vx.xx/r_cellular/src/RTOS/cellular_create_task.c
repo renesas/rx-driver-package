@@ -14,11 +14,20 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_create_task.c
  * Description  : Function to create a task using RTOS features.
+ *********************************************************************************************************************/
+/**********************************************************************************************************************
+ * History : DD.MM.YYYY Version  Description
+ *         : xx.xx.xxxx 1.00     First Release
+ *         : 02.09.2021 1.01     Fixed reset timing
+ *         : 21.10.2021 1.02     Support for Azure RTOS
+ *                               Support for GCC for Renesas GNURX Toolchain
+ *         : 15.11.2021 1.03     Improved receiving behavior, removed socket buffers
+ *         : 24.01.2022 1.04     R_CELLULAR_SetPSM and R_CELLULAR_SetEDRX have been added as new APIs
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -49,10 +58,11 @@ st_cellular_ctrl_t * gp_cellular_ctrl;
  * Function Name  @fn            cellular_create_task
  ***************************************************************************/
 #if BSP_CFG_RTOS_USED == (1)
-e_cellular_err_t cellular_create_task(void (*pxTaskCode)(void *),
+e_cellular_err_t
 #elif BSP_CFG_RTOS_USED == (5)
-void * cellular_create_task(void (*pxTaskCode)(ULONG),
+void *
 #endif
+cellular_create_task(void *(pxTaskCode)(void *),
                         const char * const pcName,
                         const uint16_t usStackDepth,
                         void * const pvParameters,
@@ -84,8 +94,8 @@ void * cellular_create_task(void (*pxTaskCode)(ULONG),
     if (NULL != p_ret)
     {
         tx_ret = tx_thread_create((TX_THREAD *)p_ret, (CHAR *)pcName,
-                                    pxTaskCode, 0ul,
-                                    (void *)(usStackDepth  / sizeof(ULONG)), usStackDepth,
+                                    pxTaskCode, 0u,
+                                    (usStackDepth  / sizeof(ULONG)), usStackDepth,
                                     uxPriority, uxPriority,
                                     TX_NO_TIME_SLICE, TX_AUTO_START);
         if(tx_ret != TX_SUCCESS)

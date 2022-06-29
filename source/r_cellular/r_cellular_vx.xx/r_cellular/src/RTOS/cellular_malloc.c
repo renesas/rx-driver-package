@@ -14,11 +14,20 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_malloc.c
  * Description  : Function to get memory.
+ *********************************************************************************************************************/
+/**********************************************************************************************************************
+ * History : DD.MM.YYYY Version  Description
+ *         : xx.xx.xxxx 1.00     First Release
+ *         : 02.09.2021 1.01     Fixed reset timing
+ *         : 21.10.2021 1.02     Support for Azure RTOS
+ *                               Support for GCC for Renesas GNURX Toolchain
+ *         : 15.11.2021 1.03     Improved receiving behavior, removed socket buffers
+ *         : 24.01.2022 1.04     R_CELLULAR_SetPSM and R_CELLULAR_SetEDRX have been added as new APIs
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -38,7 +47,7 @@
  * Exported global variables
  *********************************************************************************************************************/
 #if BSP_CFG_RTOS_USED == (5)
-extern TX_BLOCK_POOL g_cellular_socket_pool;
+extern TX_BLOCK_POOL g_cellular_scoket_pool;
 extern TX_BLOCK_POOL g_cellular_event_pool;
 extern TX_BLOCK_POOL g_cellular_thread_pool;
 extern TX_BLOCK_POOL g_cellular_semaphore_pool;
@@ -69,7 +78,7 @@ void * cellular_malloc(const size_t size)
             tx_block_allocate(&g_cellular_semaphore_pool, &p_ret, TX_NO_WAIT);
             break;
         default:
-            tx_block_allocate(&g_cellular_socket_pool, &p_ret, TX_NO_WAIT);
+            tx_block_allocate(&g_cellular_scoket_pool, &p_ret, TX_NO_WAIT);
             break;
     }
 #endif

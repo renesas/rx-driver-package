@@ -14,11 +14,20 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : ryz014_private.h
  * Description  : Internal configuration settings for RYZ014A driver.
+ *********************************************************************************************************************/
+/**********************************************************************************************************************
+ * History : DD.MM.YYYY Version  Description
+ *         : xx.xx.xxxx 1.00     First Release
+ *         : 02.09.2021 1.01     Fixed reset timing
+ *         : 21.10.2021 1.02     Support for Azure RTOS
+ *                               Support for GCC for Renesas GNURX Toolchain
+ *         : 15.11.2021 1.03     Improved receiving behavior, removed socket buffers
+ *         : 24.01.2022 1.04     R_CELLULAR_SetPSM and R_CELLULAR_SetEDRX have been added as new APIs
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -36,6 +45,7 @@
 
 #define CELLULAR_START_SOCKET_NUMBER    (1)         /* Start socket number */
 #define CELLULAR_PACKET_DATA_SIZE       (0)         /* Packet data size (0~1500,0=auto) */
+#define CELLULAR_EX_TIMEOUT             (60)        /* Exchange timeout (1sec,0~65535,0=no_limit) */
 #define CELLULAR_CONNECT_TIMEOUT        (200)       /* connection timeout (0.1sec,10~1200,0=no_limit) */
 #define CELLULAR_TX_TIMEOUT             (10)        /* Transmit timeout (0.1sec,0~255,0=no_limit) */
 #define CELLULAR_BAUDRATE               (921600)    /* Baudrate */
@@ -85,20 +95,17 @@
 #define RYZ014_ATC_RECV_SCOKET              "AT+SQNSRECV=%s,%s\r"
 #define RYZ014_ATC_DNS_LOOKUP               "AT+SQNDNSLKUP=\"%s\",0\r"
 #define RYZ014_ATC_AP_CONFIG                "AT+CGDCONT=1,\"IPV4V6\",\"%s\",,,,0,0,0,0,0,0,1,,0\r"
-#define RYZ014_ATC_USER_CONFIG              "AT+CGAUTH=1,%s,\"%s\",\"%s\"\r"
+#define RYZ014_ATC_USER_CONFIG              "AT+CGAUTH=1,1,\"%s\",\"%s\"\r"
 #define RYZ014_ATC_SOCKET_CONFIG_1          "AT+SQNSCFG=%s,1,%s,%s,%s,%s\r"
 #define RYZ014_ATC_SOCKET_CONFIG_2          "AT+SQNSCFGEXT=%s,1,0,0\r"
-#define RYZ014_ATC_LISTENING_SOCKET         "AT+SQNSL=%s,%s,%s,0\r"
 #define RYZ014_ATC_CONNECT_CHECK            "AT+CGATT?\r"
 #define RYZ014_ATC_SET_CONNECT_STATUS       "AT+CGATT=%s\r"
 #define RYZ014_ATC_SHUTDOWN                 "AT+SQNSSHDN\r"
 #define RYZ014_ATC_GET_TIME                 "AT+CCLK?\r"
 #define RYZ014_ATC_SET_TIME                 "AT+CCLK=\"%s/%s/%s,%s:%s:%s%s\"\r"
 #define RYZ014_ATC_RESET                    "AT^RESET\r"
-#define RYZ014_ATC_SET_NOTICE_LEVEL         "AT+CEREG=%s\r"
-#define RYZ014_ATC_GET_NOTICE_LEVEL         "AT+CEREG?\r"
-#define RYZ014_ATC_AUTO_CONNECT             "AT+SQNAUTOCONNECT=%s\r"
-#define RYZ014_ATC_AUTO_CONNECT_CHECK       "AT+SQNAUTOCONNECT?\r"
+#define RYZ014_ATC_CEREG_OFF                "AT+CEREG=0\r"
+#define RYZ014_ATC_AUTO_CONNECT_OFF         "AT+SQNAUTOCONNECT=0\r"
 #define RYZ014_ATC_SIM_ST_OFF               "AT+SQNSIMST=0\r"
 #define RYZ014_ATC_GET_SERVICE_STATUS       "AT+COPS?\r"
 #define RYZ014_ATC_SET_PROVIDER             "AT+COPS=%s,2,\"%s%s\"\r"
@@ -110,9 +117,8 @@
 #define RYZ014_ATC_GET_EDRX                 "AT+SQNEDRX?\r"
 #define RYZ014_ATC_SET_EDRX                 "AT+SQNEDRX=%s,4,\"%s\",\"%s\"\r"
 #define RYZ014_ATC_GET_SIGNAL_STRENGTH      "AT+CSQ\r"
-#define RYZ014_ATC_GET_SW_REVISION          "AT+CGMR\r"
+#define RYZ014_ATC_GET_SW_VERSION           "AT+CGMR\r"
 #define RYZ014_ATC_GET_SERIAL_NUMBER        "AT+CGSN\r"
-#define RYZ014_ATC_GET_SVN                  "AT+CGSN=3\r"
 #define RYZ014_ATC_GET_MODULE_NAME          "AT+CGMM\r"
 #define RYZ014_ATC_GET_MAKER_NAME           "AT+CGMI\r"
 #define RYZ014_ATC_GET_IMSI                 "AT+CIMI\r"
@@ -120,10 +126,6 @@
 #define RYZ014_ATC_SET_PSM_CONFIG           "AT+SQNIPSCFG=%s,5000\r"
 #define RYZ014_ATC_SET_RING_CONFIG          "AT+SQNRICFG=%s,3,1000\r"
 #define RYZ014_ATC_SET_IND_NOTIFY           "AT+CMER=3,0,0,%s,0,0,0\r"
-#define RYZ014_ATC_GET_PHONE_NUM            "AT+CNUM\r"
-#define RYZ014_ATC_GET_ICCID                "AT+SQNCCID?\r"
-#define RYZ014_ATC_PING                     "AT+PING=\"%s\"\r"
-#define RYZ014_ATC_GET_CELLINFO             "AT+SQNMONI=%s\r"
 #define RYZ014_ATC_SET_SQN_PROVIDER         "AT+SQNCTM=\"%s\"\r"
 #define RYZ014_NO_COMMAND                   "\r"
 #if (CELLULAR_IMPLEMENT_TYPE == 'B')
@@ -153,17 +155,14 @@ typedef enum
     ATC_USER_CONFIG,
     ATC_SOCKET_CONFIG_1,
     ATC_SOCKET_CONFIG_2,
-    ATC_LISTENING_SOCKET,
     ATC_CONNECT_CHECK,
     ATC_SET_CONNECT_STATUS,
     ATC_SHUTDOWN,
     ATC_GET_TIME,
     ATC_SET_TIME,
     ATC_RESET,
-    ATC_SET_NOTICE_LEVEL,
-    ATC_GET_NOTICE_LEVEL,
-    ATC_AUTO_CONNECT,
-    ATC_AUTO_CONNECT_CHECK,
+    ATC_CEREG_OFF,
+    ATC_AUTO_CONNECT_OFF,
     ATC_SIM_ST_OFF,
     ATC_GET_SERVICE_STATUS,
     ATC_SET_PROVIDER,
@@ -175,9 +174,8 @@ typedef enum
     ATC_GET_EDRXS,
     ATC_SET_EDRXS,
     ATC_GET_SIGNAL_STRENGTH,
-    ATC_GET_SW_REVISION,
+    ATC_GET_SW_VERSION,
     ATC_GET_SERIAL_NUMBER,
-    ATC_GET_SVN,
     ATC_GET_MODULE_NAME,
     ATC_GET_MAKER_NAME,
     ATC_GET_IMSI,
@@ -185,10 +183,6 @@ typedef enum
     ATC_SET_PSM_CONFIG,
     ATC_SET_RING_CONFIG,
     ATC_SET_IND_NOTIFY,
-    ATC_GET_PHONE_NUM,
-    ATC_GET_ICCID,
-    ATC_PING,
-    ATC_GET_CELLINFO,
     ATC_SQNSSENDEXT_END,
 #if (CELLULAR_IMPLEMENT_TYPE == 'B')
     ATC_WRITE_CERTIFICATE,

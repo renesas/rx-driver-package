@@ -14,11 +14,20 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : sqnautoconnect.c
  * Description  : Function to execute the AT command (SQNAUTOCONNECT)
+ *********************************************************************************************************************/
+/**********************************************************************************************************************
+ * History : DD.MM.YYYY Version  Description
+ *         : xx.xx.xxxx 1.00     First Release
+ *         : 02.09.2021 1.01     Fixed reset timing
+ *         : 21.10.2021 1.02     Support for Azure RTOS
+ *                               Support for GCC for Renesas GNURX Toolchain
+ *         : 15.11.2021 1.03     Improved receiving behavior, removed socket buffers
+ *         : 24.01.2022 1.04     R_CELLULAR_SetPSM and R_CELLULAR_SetEDRX have been added as new APIs
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -46,21 +55,16 @@
 /*************************************************************************************************
  * Function Name  @fn            atc_sqnautoconnect
  ************************************************************************************************/
-e_cellular_err_t atc_sqnautoconnect(st_cellular_ctrl_t * const p_ctrl, e_cellular_auto_connect_t const type)
+e_cellular_err_t atc_sqnautoconnect(st_cellular_ctrl_t * const p_ctrl)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
     e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
-    uint8_t str[2] = {0};
-
-    sprintf((char *)str, "%d", type); // (uint8_t *)->(char *)
-
-    const uint8_t * const p_command_arg[CELLULAR_MAX_ARG_COUNT] = {str};
 
     atc_generate(p_ctrl->sci_ctrl.atc_buff,
-        (const uint8_t *)&gp_at_command[ATC_AUTO_CONNECT][0],   // (const uint8_t *const *)->(const uint8_t **)
-            (const uint8_t **)&p_command_arg);                  // (const uint8_t *const *)->(const uint8_t **)
+        (const uint8_t *)&gp_at_command[ATC_AUTO_CONNECT_OFF][0], // (const uint8_t *const *)->(const uint8_t **)
+            NULL);
 
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_AUTO_CONNECT);
+    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_AUTO_CONNECT_OFF);
 
     if (CELLULAR_ATC_OK != at_ret)
     {
@@ -71,29 +75,4 @@ e_cellular_err_t atc_sqnautoconnect(st_cellular_ctrl_t * const p_ctrl, e_cellula
 }
 /**********************************************************************************************************************
  * End of function atc_sqnautoconnect
- *********************************************************************************************************************/
-
-/*************************************************************************************************
- * Function Name  @fn            atc_sqnautoconnect_check
- ************************************************************************************************/
-e_cellular_err_t atc_sqnautoconnect_check(st_cellular_ctrl_t * const p_ctrl)
-{
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
-
-    atc_generate(p_ctrl->sci_ctrl.atc_buff,
-        (const uint8_t *)&gp_at_command[ATC_AUTO_CONNECT_CHECK][0],   // (const uint8_t *const *)->(const uint8_t **)
-            NULL);
-
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_AUTO_CONNECT_CHECK);
-
-    if (CELLULAR_ATC_OK != at_ret)
-    {
-        ret = CELLULAR_ERR_MODULE_COM;
-    }
-
-    return ret;
-}
-/**********************************************************************************************************************
- * End of function atc_sqnautoconnect_check
  *********************************************************************************************************************/
