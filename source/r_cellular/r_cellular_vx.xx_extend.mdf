@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>x.xx</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="CELLULAR_CFG_AP_NAME" display="Access point name" default="ibasis.iot" type="textbox">
+            <constraint display="Character limit over(64 or less)" actionOnFail="error">/^([a-zA-Z0-9_.]{1,64})$/.test("${CELLULAR_CFG_AP_NAME}")</constraint>
+            <description>Enter the access point name.
+Example: ibasis.iot, plus.4g, etc</description>
+        </property>
+        <property id="CELLULAR_CFG_AP_USERID" display="Access point login ID" default="" type="textbox">
+            <constraint display="Character limit over(32 or less)" actionOnFail="error">/^(.{0,32})$/.test("${CELLULAR_CFG_AP_USERID}")</constraint>
+            <description>Enter the login ID of the access point.
+Example: (empty), plus, etc.</description>
+        </property>
+        <property id="CELLULAR_CFG_AP_PASSWORD" display="Access point password" default="" type="textbox">
+            <constraint display="Character limit over(64 or less)" actionOnFail="error">/^(.{0,64})$/.test("${CELLULAR_CFG_AP_PASSWORD}")</constraint>
+            <description>Enter the login password for the access point.
+Example: (empty), 4g, etc.</description>
+        </property>
+        <property id="CELLULAR_CFG_PIN_CODE" display="SIM card PIN code" default="" type="textbox">
+            <constraint display="Character limit over(8 or less)" actionOnFail="error">/^([a-zA-Z0-9_.]{0,8})$/.test("${CELLULAR_CFG_PIN_CODE}")</constraint>
+            <description>Enter the PIN lock code of your SIM card.
+Example: (empty), 0000, etc.</description>
+        </property>
+        <property id="CELLULAR_CFG_AUTH_TYPE" display="Authentication protocol type." default="2" type="combobox">
+            <option id="CELLULAR_CFG_AUTH_TYPE.0" display="0" value="0"/>
+            <option id="CELLULAR_CFG_AUTH_TYPE.1" display="1" value="1"/>
+            <option id="CELLULAR_CFG_AUTH_TYPE.2" display="2" value="2"/>
+            <description>Authentication protocol type.
+0: None, 1: PAP, 2: CHAP</description>
+        </property>
+        <property id="CELLULAR_CFG_ATC_RETRY_GATT" display="Connection retry limit" default="100" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="disable">testInteger("${CELLULAR_CFG_ATC_RETRY_GATT}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 100" actionOnFail="error">("${CELLULAR_CFG_ATC_RETRY_GATT}" &gt;= 0) &amp;&amp; ("${CELLULAR_CFG_ATC_RETRY_GATT}" &lt;= 100)</constraint>
+            <description>Connection retry limit to access point.
+Set between 0~100.</description>
+        </property>
+        <property id="CELLULAR_CFG_EX_TIMEOUT" display="TCP connection timeout" default="120" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="disable">testInteger("${CELLULAR_CFG_EX_TIMEOUT}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 65535" actionOnFail="error">("${CELLULAR_CFG_EX_TIMEOUT}" &gt;= 0) &amp;&amp; ("${CELLULAR_CFG_EX_TIMEOUT}" &lt;= 65535)</constraint>
+            <description>TCP connection timeout to peer.
+Set between 0~65535.</description>
+        </property>
+        <property id="CELLULAR_CFG_INT_PRIORITY" display="Task priority" default="4" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="disable">testInteger("${CELLULAR_CFG_INT_PRIORITY}")</constraint>
+            <constraint display="Value must be in the range 2 ~ 15" actionOnFail="error">("${CELLULAR_CFG_INT_PRIORITY}" &gt;= 2) &amp;&amp; ("${CELLULAR_CFG_INT_PRIORITY}" &lt;= 15)</constraint>
+            <description>Priority of the task.
+Set between 2~15.</description>
+        </property>
+        <property id="CELLULAR_CFG_SEMAPHORE_BLOCK_TIME" display="Maximum semaphore acquisition latency(msec)" default="15000" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="disable">testInteger("${CELLULAR_CFG_SEMAPHORE_BLOCK_TIME}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 15000" actionOnFail="error">("${CELLULAR_CFG_SEMAPHORE_BLOCK_TIME}" &gt;= 1) &amp;&amp; ("${CELLULAR_CFG_SEMAPHORE_BLOCK_TIME}" &lt;= 15000)</constraint>
+            <description>Maximum time to wait until a semaphore can be acquired.(msec)
+Set between 1~15000.</description>
+        </property>
+        <property id="CELLULAR_CFG_DEBUGLOG" display="Debug log output level." default="0" type="combobox">
+            <option id="CELLULAR_CFG_DEBUGLOG.0" display="0" value="0"/>
+            <option id="CELLULAR_CFG_DEBUGLOG.1" display="1" value="1"/>
+            <option id="CELLULAR_CFG_DEBUGLOG.2" display="2" value="2"/>
+            <option id="CELLULAR_CFG_DEBUGLOG.3" display="3" value="3"/>
+            <option id="CELLULAR_CFG_DEBUGLOG.4" display="4" value="4"/>
+            <description>Debug log output level.
+0: OFF, 1: ERROR, 2: +WARN, 3: +INFO, 4: +DEBUG(AT command data)</description>
+        </property>
+        <property id="CELLULAR_CFG_RESET_SIGNAL_LOGIC" display="Reset signal logic." default="1" type="combobox">
+            <option id="CELLULAR_CFG_RESET_SIGNAL_LOGIC.0" display="0" value="0"/>
+            <option id="CELLULAR_CFG_RESET_SIGNAL_LOGIC.1" display="1" value="1"/>
+            <description>Reset signal logic. Active High=1, Active Low=0. If you use PMOD-RYZ014A, reset circuit is active high for reset.</description>
+        </property>
+        <property id="CELLULAR_CFG_UART_SCI_CH" display="SCI Channel" default="0" type="combobox">
+            <option id="CELLULAR_CFG_UART_SCI_CH.0" display="0" value="0"/>
+            <option id="CELLULAR_CFG_UART_SCI_CH.1" display="1" value="1"/>
+            <option id="CELLULAR_CFG_UART_SCI_CH.2" display="2" value="2"/>
+            <option id="CELLULAR_CFG_UART_SCI_CH.3" display="3" value="3"/>
+            <option id="CELLULAR_CFG_UART_SCI_CH.4" display="4" value="4"/>
+            <option id="CELLULAR_CFG_UART_SCI_CH.5" display="5" value="5"/>
+            <option id="CELLULAR_CFG_UART_SCI_CH.6" display="6" value="6"/>
+            <option id="CELLULAR_CFG_UART_SCI_CH.7" display="7" value="7"/>
+            <option id="CELLULAR_CFG_UART_SCI_CH.8" display="8" value="8"/>
+            <option id="CELLULAR_CFG_UART_SCI_CH.9" display="9" value="9"/>
+            <option id="CELLULAR_CFG_UART_SCI_CH.10" display="10" value="10"/>
+            <option id="CELLULAR_CFG_UART_SCI_CH.11" display="11" value="11"/>
+            <option id="CELLULAR_CFG_UART_SCI_CH.12" display="12" value="12"/>
+            <description>SCI channel number.</description>
+        </property>
+        <property id="CELLULAR_CFG_RTS_PORT" display="RTS port number" default="2" type="combobox">
+            <option id="CELLULAR_CFG_RTS_PORT.0" display="PORT0" value="0"/>
+            <option id="CELLULAR_CFG_RTS_PORT.1" display="PORT1" value="1"/>
+            <option id="CELLULAR_CFG_RTS_PORT.2" display="PORT2" value="2"/>
+            <option id="CELLULAR_CFG_RTS_PORT.3" display="PORT3" value="3"/>
+            <option id="CELLULAR_CFG_RTS_PORT.4" display="PORT4" value="4"/>
+            <option id="CELLULAR_CFG_RTS_PORT.5" display="PORT5" value="5"/>
+            <option id="CELLULAR_CFG_RTS_PORT.6" display="PORT6" value="6"/>
+            <option id="CELLULAR_CFG_RTS_PORT.7" display="PORT7" value="7"/>
+            <option id="CELLULAR_CFG_RTS_PORT.8" display="PORT8" value="8"/>
+            <option id="CELLULAR_CFG_RTS_PORT.9" display="PORT9" value="9"/>
+            <option id="CELLULAR_CFG_RTS_PORT.A" display="PORTA" value="A"/>
+            <option id="CELLULAR_CFG_RTS_PORT.B" display="PORTB" value="B"/>
+            <option id="CELLULAR_CFG_RTS_PORT.C" display="PORTC" value="C"/>
+            <option id="CELLULAR_CFG_RTS_PORT.D" display="PORTD" value="D"/>
+            <option id="CELLULAR_CFG_RTS_PORT.E" display="PORTE" value="E"/>
+            <option id="CELLULAR_CFG_RTS_PORT.F" display="PORTF" value="F"/>
+            <option id="CELLULAR_CFG_RTS_PORT.G" display="PORTG" value="G"/>
+            <option id="CELLULAR_CFG_RTS_PORT.H" display="PORTH" value="H"/>
+            <option id="CELLULAR_CFG_RTS_PORT.J" display="PORTJ" value="J"/>
+            <option id="CELLULAR_CFG_RTS_PORT.K" display="PORTK" value="K"/>
+            <option id="CELLULAR_CFG_RTS_PORT.L" display="PORTL" value="L"/>
+            <option id="CELLULAR_CFG_RTS_PORT.M" display="PORTM" value="M"/>
+            <option id="CELLULAR_CFG_RTS_PORT.N" display="PORTN" value="N"/>
+            <option id="CELLULAR_CFG_RTS_PORT.Q" display="PORTQ" value="Q"/>
+            <description>RTS port setting.</description>
+        </property>
+        <property id="CELLULAR_CFG_RTS_PIN" display="RTS pin number" default="2" type="combobox">
+            <option id="CELLULAR_CFG_RTS_PIN.0" display="BIT0" value="0"/>
+            <option id="CELLULAR_CFG_RTS_PIN.1" display="BIT1" value="1"/>
+            <option id="CELLULAR_CFG_RTS_PIN.2" display="BIT2" value="2"/>
+            <option id="CELLULAR_CFG_RTS_PIN.3" display="BIT3" value="3"/>
+            <option id="CELLULAR_CFG_RTS_PIN.4" display="BIT4" value="4"/>
+            <option id="CELLULAR_CFG_RTS_PIN.5" display="BIT5" value="5"/>
+            <option id="CELLULAR_CFG_RTS_PIN.6" display="BIT6" value="6"/>
+            <option id="CELLULAR_CFG_RTS_PIN.7" display="BIT7" value="7"/>
+            <description>RTS pin setting</description>
+        </property>
+        <property id="CELLULAR_CFG_RESET_PORT" display="Reset port number" default="D" type="combobox">
+            <option id="CELLULAR_CFG_RESET_PORT.0" display="PORT0" value="0"/>
+            <option id="CELLULAR_CFG_RESET_PORT.1" display="PORT1" value="1"/>
+            <option id="CELLULAR_CFG_RESET_PORT.2" display="PORT2" value="2"/>
+            <option id="CELLULAR_CFG_RESET_PORT.3" display="PORT3" value="3"/>
+            <option id="CELLULAR_CFG_RESET_PORT.4" display="PORT4" value="4"/>
+            <option id="CELLULAR_CFG_RESET_PORT.5" display="PORT5" value="5"/>
+            <option id="CELLULAR_CFG_RESET_PORT.6" display="PORT6" value="6"/>
+            <option id="CELLULAR_CFG_RESET_PORT.7" display="PORT7" value="7"/>
+            <option id="CELLULAR_CFG_RESET_PORT.8" display="PORT8" value="8"/>
+            <option id="CELLULAR_CFG_RESET_PORT.9" display="PORT9" value="9"/>
+            <option id="CELLULAR_CFG_RESET_PORT.A" display="PORTA" value="A"/>
+            <option id="CELLULAR_CFG_RESET_PORT.B" display="PORTB" value="B"/>
+            <option id="CELLULAR_CFG_RESET_PORT.C" display="PORTC" value="C"/>
+            <option id="CELLULAR_CFG_RESET_PORT.D" display="PORTD" value="D"/>
+            <option id="CELLULAR_CFG_RESET_PORT.E" display="PORTE" value="E"/>
+            <option id="CELLULAR_CFG_RESET_PORT.F" display="PORTF" value="F"/>
+            <option id="CELLULAR_CFG_RESET_PORT.G" display="PORTG" value="G"/>
+            <option id="CELLULAR_CFG_RESET_PORT.H" display="PORTH" value="H"/>
+            <option id="CELLULAR_CFG_RESET_PORT.J" display="PORTJ" value="J"/>
+            <option id="CELLULAR_CFG_RESET_PORT.K" display="PORTK" value="K"/>
+            <option id="CELLULAR_CFG_RESET_PORT.L" display="PORTL" value="L"/>
+            <option id="CELLULAR_CFG_RESET_PORT.M" display="PORTM" value="M"/>
+            <option id="CELLULAR_CFG_RESET_PORT.N" display="PORTN" value="N"/>
+            <option id="CELLULAR_CFG_RESET_PORT.Q" display="PORTQ" value="Q"/>
+            <description>RESET port setting.</description>
+        </property>
+        <property id="CELLULAR_CFG_RESET_PIN" display="Reset pin number" default="0" type="combobox">
+            <option id="CELLULAR_CFG_RESET_PIN.0" display="BIT0" value="0"/>
+            <option id="CELLULAR_CFG_RESET_PIN.1" display="BIT1" value="1"/>
+            <option id="CELLULAR_CFG_RESET_PIN.2" display="BIT2" value="2"/>
+            <option id="CELLULAR_CFG_RESET_PIN.3" display="BIT3" value="3"/>
+            <option id="CELLULAR_CFG_RESET_PIN.4" display="BIT4" value="4"/>
+            <option id="CELLULAR_CFG_RESET_PIN.5" display="BIT5" value="5"/>
+            <option id="CELLULAR_CFG_RESET_PIN.6" display="BIT6" value="6"/>
+            <option id="CELLULAR_CFG_RESET_PIN.7" display="BIT7" value="7"/>
+            <description>RESET pin setting.</description>
+        </property>
+    </configuration>
+</module>
