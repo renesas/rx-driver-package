@@ -22,14 +22,11 @@ r_lpc_rx
 |    |
 |    +---en
 |    |    |
-|    |    +---r01an2769ej0203-rx-lpc.pdf
+|    |    +---r01an2769ej0204-rx-lpc.pdf
 |    |
 |    +---ja
 |         |
-|         +---r01an2769jj0203-rx-lpc.pdf
-|    
-+---ref
-|    r_lpc_rx_config_reference.h
+|         +---r01an2769jj0204-rx-lpc.pdf
 |
 +---src
      |    r_lpc_rx.c
@@ -87,6 +84,11 @@ r_lpc_rx
           |    r_lpc_rx65n.c
           |    r_lpc_rx65n_if.h
           |    r_lpc_rx65n_private.h
+          |
+          +---rx660
+          |    r_lpc_rx660.c
+          |    r_lpc_rx660_if.h
+          |    r_lpc_rx660_private.h
           |
           +---rx66n
           |    r_lpc_rx66n.c

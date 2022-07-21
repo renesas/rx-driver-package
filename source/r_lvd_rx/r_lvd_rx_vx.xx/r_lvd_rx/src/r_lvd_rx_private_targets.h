@@ -44,6 +44,7 @@
 *              : 15.04.2021 3.80     Added support for RX140.
 *              : 13.09.2021 3.90     Changed revision to reflect demo upgrade.
 *              : 14.03.2022 4.00     Added support for RX66T 48pins.
+*              : 31.03.2022 4.10     Added support for RX660.
 ***********************************************************************************************************************/
 #ifndef LVD_PRIVATE_TARGETS_HEADER_FILE
 #define LVD_PRIVATE_TARGETS_HEADER_FILE
@@ -88,6 +89,8 @@ Includes <System Includes> , "Project Includes"
     #include "./targets/rx66n/r_lvd_rx66n.h"
 #elif defined(BSP_MCU_RX66T)
     #include "./targets/rx66t/r_lvd_rx66t.h"
+#elif defined(BSP_MCU_RX660)
+    #include "./targets/rx660/r_lvd_rx660.h"
 #elif defined(BSP_MCU_RX671)
     #include "./targets/rx671/r_lvd_rx671.h"
 #elif defined(BSP_MCU_RX71M)
@@ -107,7 +110,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
 #define LVD_RX_VERSION_MAJOR                    (4)
-#define LVD_RX_VERSION_MINOR                    (00)
+#define LVD_RX_VERSION_MINOR                    (10)
 
 /***********************************************************************************************************************
 Typedef definitions

@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2014(2021) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2022) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_pcdc_driver.c
@@ -31,6 +31,7 @@
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.04.2021 1.31 RX671 is added and VCOM 2Port supported.
+ *         : 30.06.2022 1.40 USBX PCDC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -44,6 +45,9 @@
 #include "r_usb_pcdc.h"
 #include "r_usb_bitdefine.h"
 
+#if (BSP_CFG_RTOS_USED != 5)    /* Other than Azure RTOS */
+
+#if defined(USB_CFG_PCDC_USE)
 /******************************************************************************
  Macro definitions
  ******************************************************************************/
@@ -189,7 +193,9 @@ void usb_pcdc_write_complete (usb_utr_t *mess, uint16_t data1, uint16_t data2)
 /******************************************************************************
  End of function usb_pcdc_write_complete
  ******************************************************************************/
+#endif /* defined(USB_CFG_PCDC_USE) */
 
+#endif /* (BSP_CFG_RTOS_USED != 5) */
 /******************************************************************************
  End  Of File
  ******************************************************************************/

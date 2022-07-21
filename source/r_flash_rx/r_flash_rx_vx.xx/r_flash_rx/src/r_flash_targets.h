@@ -34,6 +34,7 @@
 *           18.11.2019 4.50    Added RX66N, and RX72N.
 *           23.10.2020 4.70    Added RX671.
 *           23.04.2021 4.80    Added RX140.
+*           23.12.2021 4.90    Added RX660.
 ***********************************************************************************************************************/
 
 #ifndef FLASH_TARGETS_HEADER_FILE
@@ -99,6 +100,9 @@ Macro definitions
     #define MCU_RX651
     #define MCU_RX65N
     #define MCU_RX65_ALL
+#elif defined(BSP_MCU_RX660)
+    #define MCU_RX660
+    #define MCU_RX66_ALL
 #elif defined(BSP_MCU_RX66T)
     #define MCU_RX66T
     #define MCU_RX66_ALL

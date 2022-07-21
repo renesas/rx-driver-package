@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 #include <string.h>
@@ -23,11 +23,6 @@
 
 #ifndef R_BLE_CMD_H
 #define R_BLE_CMD_H
-
-/***********************************************************************************************************************
-* History : DD.MM.YYYY Version Description           
-*         : 23.08.2019 1.00    First Release
-***********************************************************************************************************************/
 
 /*******************************************************************************************************************//**
  * @brief Parse comma separated hex values.

@@ -25,6 +25,8 @@
 *           20.05.2019 3.00    Added support for GNUC and ICCRX.
 *           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
 *           31.03.2021 3.80    Updated macro definition enable and disable TXI, RXI, ERI, TEI.
+*           31.03.2022 4.40    Added receive flag when using DTC/DMAC.
+*                              Updated channel variables in struct st_sci_ch_rom.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -112,6 +114,8 @@ const sci_ch_rom_t  ch1_rom = {(volatile struct st_sci R_BSP_EVENACCESS_SFR *)&S
                                 #if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
                                 , DTCE_SCI1_TXI1
                                 , DTCE_SCI1_RXI1
+                                /* Casting to uint8_t type is valid */
+                                , (uint8_t)SCI_CH1
                                 #endif
                                 };
 
@@ -122,7 +126,7 @@ sci_ch_ctrl_t   ch1_ctrl = {&ch1_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             #endif
                             , BSP_PCLKB_HZ
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif
@@ -150,6 +154,8 @@ const sci_ch_rom_t  ch5_rom = {(volatile struct st_sci R_BSP_EVENACCESS_SFR *)&S
                                 #if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
                                 , DTCE_SCI5_TXI5
                                 , DTCE_SCI5_RXI5
+                                /* Casting to uint8_t type is valid */
+                                , (uint8_t)SCI_CH5
                                 #endif
                                 };
 /* channel control block */
@@ -159,7 +165,7 @@ sci_ch_ctrl_t   ch5_ctrl = {&ch5_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             #endif
                             , BSP_PCLKB_HZ
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif

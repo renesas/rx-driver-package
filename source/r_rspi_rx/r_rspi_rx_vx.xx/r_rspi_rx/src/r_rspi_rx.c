@@ -59,6 +59,7 @@
 *                               Added communication completion interrupt for rx671.
 *           31.07.2021 3.02     Supported RX140.
 *           31.10.2021 3.03     Added idle interrupt other than rx671.
+*           31.12.2021 3.04     Supported RX660.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -116,7 +117,7 @@ typedef struct rspi_ctrl_reg_values_s
     uint8_t spnd_val;   // RSPI Next-Access Delay Register (SPND)
     uint8_t spcr2_val;  // RSPI Control Register 2 (SPCR2)
     uint8_t spdcr2_val; // RSPI Data Control Register 2 (SPDCR2)
-#if defined(BSP_MCU_RX671)
+#if defined BSP_MCU_RX671 || defined BSP_MCU_RX660
     uint8_t spcr3_val;  // RSPI Control Register 3 (SPCR3)
 #endif
 } rspi_ctrl_reg_values_t;
@@ -190,7 +191,7 @@ static rspi_ctrl_reg_values_t g_ctrl_reg_values[] =
     RSPI_SPCR2_DEF,     // Control Register 2 (SPCR2) Default-speed mode
 #endif
     RSPI_SPDCR2_DEF,    // Data Control Register 2 (SPDCR2)
-#if defined(BSP_MCU_RX671)
+#if defined BSP_MCU_RX671 || defined BSP_MCU_RX660
     RSPI_SPCR3_DEF,  // RSPI Control Register 3 (SPCR3)
 #endif
 #if   RSPI_NUM_CHANNELS > 1
@@ -285,7 +286,7 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled);
 
 #if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || \
     defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
-    defined BSP_MCU_RX671
+    defined BSP_MCU_RX671 || defined BSP_MCU_RX660
 static void rspi_spei_grp_isr(void *pdata);
 static void rspi_spii_grp_isr(void *pdata);
 #endif
@@ -441,7 +442,7 @@ rspi_err_t   R_RSPI_Open(uint8_t                channel,
     || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || defined BSP_MCU_RX140
     /* Set RSPI data control register 2 (SPDCR2) */
     (*g_rspi_channels[channel]).SPDCR2.BYTE = (uint8_t)(my_settings->spdcr2_val & RSPI_SPDCR2_MASK);
-#elif defined BSP_MCU_RX671
+#elif defined BSP_MCU_RX671 || defined BSP_MCU_RX660
     /* Set RSPI data control register 2 (SPDCR2) */
     (*g_rspi_channels[channel]).SPDCR2.BYTE = (uint8_t)(my_settings->spdcr2_val & RSPI_SPDCR2_MASK);
 
@@ -653,7 +654,7 @@ rspi_err_t  R_RSPI_Control(rspi_handle_t handle,
              || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || defined BSP_MCU_RX140
             /* Set RSPI data control register 2 (SPDCR2) */
             (*g_rspi_channels[channel]).SPDCR2.BYTE = (uint8_t)(p_setregs_struct->spdcr2_val & RSPI_SPDCR2_MASK);
-        #elif defined BSP_MCU_RX671
+        #elif defined BSP_MCU_RX671 || defined BSP_MCU_RX660
             /* Set RSPI data control register 2 (SPDCR2) */
             (*g_rspi_channels[channel]).SPDCR2.BYTE = (uint8_t)(p_setregs_struct->spdcr2_val & RSPI_SPDCR2_MASK);
 
@@ -967,7 +968,8 @@ static rspi_err_t  rspi_write_read_common(rspi_handle_t handle,
     g_rspi_tcb[channel].transfer_mode = tx_rx_mode;
 
 #if defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || defined BSP_MCU_RX72T || defined BSP_MCU_RX72M \
-    || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || defined BSP_MCU_RX671 || defined BSP_MCU_RX140
+    || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || defined BSP_MCU_RX671 || defined BSP_MCU_RX140 \
+    || defined BSP_MCU_RX660
     if ((RSPI_TRANS_MODE_DMAC == g_rspi_tcb [channel] .data_tran_mode) ||
        (RSPI_TRANS_MODE_DTC == g_rspi_tcb [channel] .data_tran_mode))
     {
@@ -1502,7 +1504,7 @@ static uint32_t rspi_baud_set(uint8_t channel, uint32_t bps_target)
      * PCLKB matches the functionality of PCLK in RX62x devices as far as the RSPI is concerned. */
     #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) ||defined (BSP_MCU_RX65N) ||defined (BSP_MCU_RX66T) || \
           defined (BSP_MCU_RX72T) || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) || \
-          defined BSP_MCU_RX671
+          defined (BSP_MCU_RX671) || defined (BSP_MCU_RX660)
         f = BSP_PCLKA_HZ;
     #else
         f = BSP_PCLKB_HZ;
@@ -1731,7 +1733,7 @@ static void rspi_ir_priority_set(uint8_t channel, uint8_t rspi_priority)
 {
     #if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || \
         defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
-        defined BSP_MCU_RX671
+        defined BSP_MCU_RX671 || defined BSP_MCU_RX660
     bsp_int_ctrl_t int_ctrl_data;
     int_ctrl_data.ipl = (uint32_t)rspi_priority;
     #endif
@@ -1744,9 +1746,9 @@ static void rspi_ir_priority_set(uint8_t channel, uint8_t rspi_priority)
              /* RX64M has individual RSPI interrupt priority registers. Set the rest of them */
             #if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || \
                 defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
-                defined BSP_MCU_RX671
+                defined BSP_MCU_RX671 || defined BSP_MCU_RX660
             IPR(RSPI0, SPTI0) = rspi_priority;
-            #ifdef  BSP_MCU_RX671
+            #ifdef BSP_MCU_RX671
             IPR(RSPI0, SPCI0) = rspi_priority;
             #endif
             /* Enable the group interrupt for the SPEI0 interrupt. (sets priority also). */
@@ -1836,8 +1838,10 @@ static void rspi_interrupts_clear(uint8_t channel)
             #ifndef BSP_MCU_RX72N
             #ifndef BSP_MCU_RX66N
             #ifndef BSP_MCU_RX671
+            #ifndef BSP_MCU_RX660
             /* Clear any pending error interrupt */
             IR(RSPI0, SPEI0) = 0;
+            #endif
             #endif
             #endif
             #endif
@@ -1934,7 +1938,7 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
 {
 #if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || \
     defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
-    defined BSP_MCU_RX671
+    defined BSP_MCU_RX671 || defined BSP_MCU_RX660
     #if (RSPI_CFG_USE_CHAN0 == 1) || (RSPI_CFG_USE_CHAN1 == 1) || (RSPI_CFG_USE_CHAN2 == 1)
         #if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
         bsp_int_ctrl_t int_ctrl;
@@ -1972,6 +1976,7 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             #ifndef BSP_MCU_RX72N
             #ifndef BSP_MCU_RX66N
             #ifndef BSP_MCU_RX671
+            #ifndef BSP_MCU_RX660
             /* Disable or enable error interrupt and idle interrupt */
             if (enabled)
             {
@@ -2000,6 +2005,7 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             #endif
             #endif
             #endif
+            #endif
 
             if (0 == IEN(RSPI0, SPTI0))
             {
@@ -2008,7 +2014,7 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             
             #if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || \
                 defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
-                defined BSP_MCU_RX671
+                defined BSP_MCU_RX671 || defined BSP_MCU_RX660
             if (enabled)
             {
                 /* Register the error callback function with the BSP group interrupt handler. */
@@ -2968,6 +2974,7 @@ static void rspi_spei_isr_common(uint8_t channel)
 #ifndef BSP_MCU_RX72N
 #ifndef BSP_MCU_RX66N
 #ifndef BSP_MCU_RX671
+#ifndef BSP_MCU_RX660
     #if RSPI_CFG_USE_CHAN0 == 1
     R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spei0_isr, VECT(RSPI0, SPEI0))
     R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spei0_isr(void)
@@ -3000,10 +3007,11 @@ static void rspi_spei_isr_common(uint8_t channel)
 #endif
 #endif
 #endif
+#endif
 
 #if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || \
     defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
-    defined BSP_MCU_RX671
+    defined BSP_MCU_RX671 || defined BSP_MCU_RX660
 /******************************************************************************
 * Function Name:    rspi_spei_grp_isr
 * Description  :    BSP group interrupt handler for register the error callback function
@@ -3015,7 +3023,7 @@ static void rspi_spei_grp_isr(void *pdata)
     /* Called from BSP group interrupt handler. */
     #if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || \
         defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
-        defined BSP_MCU_RX671
+        defined BSP_MCU_RX671 || defined BSP_MCU_RX660
     #if RSPI_CFG_USE_CHAN0 == 1
     if (IS(RSPI0, SPEI0))
     {
@@ -3185,6 +3193,7 @@ static void rspi_spii_isr_common(uint8_t channel)
 #ifndef BSP_MCU_RX72N
 #ifndef BSP_MCU_RX66N
 #ifndef BSP_MCU_RX671
+#ifndef BSP_MCU_RX660
 
     #if RSPI_CFG_USE_CHAN0 == 1
 
@@ -3220,10 +3229,11 @@ static void rspi_spii_isr_common(uint8_t channel)
 #endif
 #endif
 #endif
+#endif
 
 #if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || \
     defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
-    defined BSP_MCU_RX671
+    defined BSP_MCU_RX671 || defined BSP_MCU_RX660
 /******************************************************************************
 * Function Name:    rspi_spii_grp_isr
 * Description  :    BSP group interrupt handler for register the idle callback function
@@ -3234,7 +3244,8 @@ static void rspi_spii_grp_isr(void *pdata)
 {
     /* Called from BSP group interrupt handler. */
     #if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || \
-        defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N
+        defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || \
+        defined BSP_MCU_RX660
 
     #if RSPI_CFG_USE_CHAN0 == 1
     if (IS(RSPI0, SPII0))

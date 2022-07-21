@@ -14,15 +14,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_ble_abs_api.c
  * Description  : Functions for BLE Abstraction API. 
- **********************************************************************************************************************/
-/**********************************************************************************************************************
- * History      : DD.MM.YYYY Version  Description
- *              : 23.08.2019 1.00     First Release
  **********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -169,8 +165,11 @@ static uint32_t gs_adv_t_hdl; /* Advertising timer for legacy advertising */
 static uint32_t gs_scan_t_hdl; /* Scaning timer for legacy scaning */
 #endif /* (BLE_CFG_LIB_TYPE != 0) */
 
-static st_abs_adv_param_t gs_adv_sets[BLE_MAX_NO_OF_ADV_SETS_SUPPORTED]; /* Advertising set information. */
+#if (BLE_CFG_LIB_TYPE != 2)
 static st_abs_scan_param_t gs_abs_scan; /* Scan information. */
+#endif /* (BLE_CFG_LIB_TYPE != 2) */
+
+static st_abs_adv_param_t gs_adv_sets[BLE_MAX_NO_OF_ADV_SETS_SUPPORTED]; /* Advertising set information. */
 static st_ble_dev_addr_t gs_loc_bd_addr; /* Local device address. */
 static uint8_t gs_privacy_mode; /* Privacy mode. */
 static uint32_t gs_set_privacy_status = 0; /* Local privacy status. */
@@ -188,21 +187,38 @@ static ble_event_cb_t gs_abs_reset_cb;
 static ble_status_t set_pair_param(st_ble_abs_pairing_param_t * p_pairing_param);
 static ble_status_t conv_legacy_adv_param(st_ble_abs_legacy_adv_param_t * p_param, 
                                           st_ble_gap_adv_param_t * p_adv_param);
-#if (BLE_CFG_LIB_TYPE == 0)
-static ble_status_t conv_ext_adv_param(st_ble_abs_ext_adv_param_t * p_param, 
-                                       st_ble_gap_adv_param_t * p_adv_param);
-#endif /* (BLE_CFG_LIB_TYPE == 0) */
 static ble_status_t conv_non_conn_adv_param(st_ble_abs_non_conn_adv_param_t * p_param, 
                                             st_ble_gap_adv_param_t * p_adv_param,
                                             uint8_t adv_hdl);
-static ble_status_t abs_adv_rept_hdlr(st_ble_evt_data_t * p_event_data);
+#if (BLE_CFG_LIB_TYPE == 0)
+static ble_status_t conv_ext_adv_param(st_ble_abs_ext_adv_param_t * p_param, 
+                                       st_ble_gap_adv_param_t * p_adv_param);
+static void abs_perd_param_hdlr(void);
+#else  /* (BLE_CFG_LIB_TYPE == 0) */
+static void adv_to_func(uint32_t hdl);
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
+
+#if (BLE_CFG_LIB_TYPE == 1)
+static void ads_scan_on_hdlr(void);
+#endif /* (BLE_CFG_LIB_TYPE == 1) */
+
 #if (BLE_CFG_LIB_TYPE != 2)
+static ble_status_t abs_adv_rept_hdlr(st_ble_evt_data_t * p_event_data);
 static ble_status_t check_scan_phy_param(st_ble_abs_scan_phy_param_t * p_scan_phy, uint16_t fast_period);
 static ble_status_t set_scan_param(st_ble_abs_scan_param_t * p_scan_param);
 static void cancel_conn_func(uint32_t hdl);
 static void set_conn_param(st_ble_abs_conn_phy_param_t * p_abs_conn_param, 
                            st_ble_gap_conn_phy_param_t * p_conn_phy_param,
                            st_ble_gap_conn_param_t * p_conn_param);
+static void set_scan_status(uint32_t set, uint32_t clear);
+static void ads_scan_to_hdlr(uint32_t hdl);
+static void ads_scan_off_hdlr(void);
+static void conv_scan_phy_param(st_ble_abs_scan_phy_param_t * p_abs_phy, 
+                         st_ble_gap_scan_phy_param_t * p_gap_phy, 
+                         st_ble_gap_scan_on_t * p_scan_enable);
+static void conv_scan_param(st_ble_gap_scan_param_t * p_scan_param, 
+                            st_ble_gap_scan_on_t * p_scan_enable, 
+                            uint32_t status);
 #endif /* (BLE_CFG_LIB_TYPE != 2) */
 
 static void abs_gapcb(uint16_t event_type, ble_status_t event_result, st_ble_evt_data_t * p_event_data);
@@ -210,19 +226,11 @@ static void abs_vscb(uint16_t event_type, ble_status_t event_result, st_ble_vs_e
 static void set_abs_cb(ble_gap_app_cb_t cb, ble_vs_app_cb_t vs_cb);
 static void set_adv_status(uint8_t adv_hdl, uint32_t set, uint32_t clear);
 static void set_adv_param(void * p_adv_param, uint8_t adv_hdl);
-#if (BLE_CFG_LIB_TYPE != 0)
-static void adv_to_func(uint32_t hdl);
-static void ads_scan_on_hdlr(void);
-#endif /* (BLE_CFG_LIB_TYPE != 0) */
 
-static void set_scan_status(uint32_t set, uint32_t clear);
 static void update_data_status(uint32_t status, uint8_t * p_data, uint16_t data_len, uint8_t adv_hdl);
 static void ads_conn_ind_hdlr(uint8_t role);
-static void ads_scan_to_hdlr(uint32_t hdl);
-static void ads_scan_off_hdlr(void);
 static void abs_adv_param_set_hdlr(st_ble_evt_data_t * p_event_data);
 static void abs_adv_data_set_hdlr(st_ble_evt_data_t * p_event_data);
-static void abs_perd_param_hdlr(void);
 static void abs_adv_off_hdlr(st_ble_evt_data_t * p_event_data);
 static void abs_conf_rslv_hdlr(st_ble_evt_data_t * p_event_data, ble_status_t event_result);
 static void abs_rand_hdlr(st_ble_vs_evt_data_t * p_event_data, ble_status_t event_result);
@@ -230,12 +238,6 @@ static void set_irk_to_rslv(uint8_t * p_lc_irk, ble_status_t event_result);
 static void adv_start(uint8_t adv_hdl);
 static void adv_set_data(uint8_t adv_hdl, uint8_t data_type);
 static void set_legacy_sres_data(void);
-static void conv_scan_phy_param(st_ble_abs_scan_phy_param_t * p_abs_phy, 
-                         st_ble_gap_scan_phy_param_t * p_gap_phy, 
-                         st_ble_gap_scan_on_t * p_scan_enable);
-static void conv_scan_param(st_ble_gap_scan_param_t * p_scan_param, 
-                            st_ble_gap_scan_on_t * p_scan_enable, 
-                            uint32_t status);
 static void set_conn_adv_intv(st_ble_gap_adv_param_t * p_adv_param, 
                                  uint32_t fast_adv_intv, 
                                  uint32_t slow_adv_intv, 
@@ -272,6 +274,8 @@ void R_BLE_ABS_Reset(ble_event_cb_t init_cb)
     R_BLE_TIMER_Stop(gs_conn_t_hdl);
     R_BLE_TIMER_Delete(&gs_conn_t_hdl);
     gs_conn_t_hdl = BLE_TIMER_INVALID_HDL;
+
+    R_BLE_TIMER_Terminate();
 
 #if (BSP_CFG_RTOS_USED == 1)
     gs_abs_reset_cb = init_cb;
@@ -335,8 +339,10 @@ ble_status_t R_BLE_ABS_Init(st_ble_abs_init_param_t * p_init_param)
         gs_adv_sets[i].status = 0;
     }
 
-    gs_abs_scan.status = 0;
     gs_conn_t_hdl = BLE_TIMER_INVALID_HDL;
+#if (BLE_CFG_LIB_TYPE != 2)
+    gs_abs_scan.status = 0;
+#endif /* (BLE_CFG_LIB_TYPE != 2) */
 #if (BLE_CFG_LIB_TYPE != 0)
     gs_adv_t_hdl = BLE_TIMER_INVALID_HDL;
     gs_scan_t_hdl = BLE_TIMER_INVALID_HDL;
@@ -1075,13 +1081,14 @@ static ble_status_t set_pair_param(st_ble_abs_pairing_param_t * p_pairing_param)
     return BLE_SUCCESS;
 } /* End of function set_pair_param() */
 
-#if (BLE_CFG_LIB_TYPE != 0)
+
 /***********************************************************************************************************************
  * Function Name: adv_to_func
  * Description  : Advertising timer handler for legacy advertising.
  * Arguments    : uint32_t hdl                                       ; Timer handle
  * Return Value : none
  **********************************************************************************************************************/
+#if (BLE_CFG_LIB_TYPE != 0)
 static void adv_to_func(uint32_t hdl)
 {
     R_BLE_GAP_StopAdv(BLE_ABS_COMMON_HDL);
@@ -1254,7 +1261,7 @@ void abs_adv_param_set_hdlr(st_ble_evt_data_t * p_event_data)
             }
             else
             {
-                adv_start(BLE_ABS_NON_CONN_HDL);
+                adv_start(BLE_ABS_COMMON_HDL);
             }
         }
     }
@@ -1444,9 +1451,9 @@ static void adv_set_data(uint8_t adv_hdl, uint8_t data_type)
  * Arguments    : none
  * Return Value : none
  **********************************************************************************************************************/
+#if (BLE_CFG_LIB_TYPE == 0)
 static void abs_perd_param_hdlr(void)
 {
-#if (BLE_CFG_LIB_TYPE == 0)
     if(gs_adv_sets[BLE_ABS_PERD_HDL].status & BLE_ABS_ADV_STATUS_PERD_PARAM)
     {
         if((gs_adv_sets[BLE_ABS_PERD_HDL].param.perd.param.adv_data_length) && 
@@ -1468,9 +1475,9 @@ static void abs_perd_param_hdlr(void)
         }
     }
 
-#endif /* (BLE_CFG_LIB_TYPE == 0) */
     return;
 } /* End of function abs_perd_param_hdlr() */
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
 
 /***********************************************************************************************************************
  * Function Name: abs_adv_data_set_hdlr
@@ -1669,6 +1676,7 @@ static void abs_adv_off_hdlr(st_ble_evt_data_t * p_event_data)
  * Return Value : BLE_SUCCESS(0x0000)                       ; Success 
  *              : BLE_ERR_NOT_FOUND(0x000D)                 ; Filtering data is not included in the advertising data.
  **********************************************************************************************************************/
+#if (BLE_CFG_LIB_TYPE != 2)
 static ble_status_t abs_adv_rept_hdlr(st_ble_evt_data_t * p_event_data)
 {
     st_ble_gap_adv_rept_evt_t * p_adv_rept_param;
@@ -1682,23 +1690,27 @@ static ble_status_t abs_adv_rept_hdlr(st_ble_evt_data_t * p_event_data)
 
     p_adv_rept_param = (st_ble_gap_adv_rept_evt_t *)p_event_data->p_param;
 
+#if (BLE_CFG_LIB_TYPE == 0)
+    if(0x01 == p_adv_rept_param->adv_rpt_type)
+    {
+        p_buf = p_adv_rept_param->param.p_ext_adv_rpt->p_data;
+        len = p_adv_rept_param->param.p_ext_adv_rpt->len;
+    }
+    else if(0x02 == p_adv_rept_param->adv_rpt_type)
+    {
+        p_buf = p_adv_rept_param->param.p_per_adv_rpt->p_data;
+        len = p_adv_rept_param->param.p_per_adv_rpt->len;
+    }
+#else  /* (BLE_CFG_LIB_TYPE == 0) */
     if(0x00 == p_adv_rept_param->adv_rpt_type)
     {
         p_buf = p_adv_rept_param->param.p_adv_rpt->p_data;
         len = p_adv_rept_param->param.p_adv_rpt->len;
     }
-    else if(0x01 == p_adv_rept_param->adv_rpt_type)
-    {
-        p_buf = p_adv_rept_param->param.p_ext_adv_rpt->p_data;
-        len = p_adv_rept_param->param.p_ext_adv_rpt->len;
-    }
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
     else
     {
-        if(0x02 == p_adv_rept_param->adv_rpt_type)
-        {
-            p_buf = p_adv_rept_param->param.p_per_adv_rpt->p_data;
-            len = p_adv_rept_param->param.p_per_adv_rpt->len;
-        }
+        return BLE_ERR_INVALID_DATA;
     }
 
     /* If the AD data length is longer than the filter length, memory compare is performed. */
@@ -1761,6 +1773,7 @@ static ble_status_t abs_adv_rept_hdlr(st_ble_evt_data_t * p_event_data)
 
     return BLE_ERR_NOT_FOUND;
 } /* End of function abs_adv_rept_hdlr() */
+#endif /* (BLE_CFG_LIB_TYPE != 2) */
 
 /***********************************************************************************************************************
  * Function Name: conv_scan_phy_param
@@ -1770,6 +1783,7 @@ static ble_status_t abs_adv_rept_hdlr(st_ble_evt_data_t * p_event_data)
  *              : st_ble_gap_scan_on_t * p_scan_enable           ; GAP scan enable parameters
  * Return Value : none
  **********************************************************************************************************************/
+#if (BLE_CFG_LIB_TYPE != 2)
 static void conv_scan_phy_param(st_ble_abs_scan_phy_param_t * p_abs_phy, 
                          st_ble_gap_scan_phy_param_t * p_gap_phy, 
                          st_ble_gap_scan_on_t * p_scan_enable)
@@ -1788,6 +1802,7 @@ static void conv_scan_phy_param(st_ble_abs_scan_phy_param_t * p_abs_phy,
         p_scan_enable->duration = gs_abs_scan.param.slow_period;
     }
 } /* End of function conv_scan_phy_param() */
+#endif /* (BLE_CFG_LIB_TYPE != 2) */
 
 /***********************************************************************************************************************
  * Function Name: conv_scan_param
@@ -1797,6 +1812,7 @@ static void conv_scan_phy_param(st_ble_abs_scan_phy_param_t * p_abs_phy,
  *              : uint32_t status                                 ; Scan status
  * Return Value : none
  **********************************************************************************************************************/
+#if (BLE_CFG_LIB_TYPE != 2)
 static void conv_scan_param(st_ble_gap_scan_param_t * p_gap_scan_param, 
                      st_ble_gap_scan_on_t * p_gap_scan_enable, 
                      uint32_t status)
@@ -1847,6 +1863,7 @@ static void conv_scan_param(st_ble_gap_scan_param_t * p_gap_scan_param,
 
     return;
 } /* End of function conv_scan_param() */
+#endif /* (BLE_CFG_LIB_TYPE != 2) */
 
 /***********************************************************************************************************************
  * Function Name: ads_scan_on_hdlr
@@ -1854,12 +1871,12 @@ static void conv_scan_param(st_ble_gap_scan_param_t * p_gap_scan_param,
  * Arguments    : none
  * Return Value : none
  **********************************************************************************************************************/
-#if (BLE_CFG_LIB_TYPE != 0)
+#if (BLE_CFG_LIB_TYPE == 1)
 static void ads_scan_on_hdlr(void)
 {
     if(gs_abs_scan.status & BLE_ABS_SCAN_STATUS_SLOW_START)
     {
-        if(0 != gs_abs_scan.param.slow_period)
+        if((0 != gs_abs_scan.param.slow_period) && (BLE_TIMER_INVALID_HDL == gs_scan_t_hdl))
         {
             R_BLE_TIMER_Create(&gs_scan_t_hdl, 
                                (gs_abs_scan.param.slow_period * 10), 
@@ -1868,7 +1885,7 @@ static void ads_scan_on_hdlr(void)
         }
     }
 }
-#endif /* (BLE_CFG_LIB_TYPE != 0) */
+#endif /* (BLE_CFG_LIB_TYPE == 1) */
 
 /***********************************************************************************************************************
  * Function Name: ads_scan_off_hdlr
@@ -1876,16 +1893,18 @@ static void ads_scan_on_hdlr(void)
  * Arguments    : none
  * Return Value : none
  **********************************************************************************************************************/
+#if (BLE_CFG_LIB_TYPE != 2)
 static void ads_scan_off_hdlr(void)
 {
-#if (BLE_CFG_LIB_TYPE != 0)
+#if (BLE_CFG_LIB_TYPE == 1)
     R_BLE_TIMER_Stop(gs_scan_t_hdl);
     R_BLE_TIMER_Delete(&gs_scan_t_hdl);
     gs_scan_t_hdl = BLE_TIMER_INVALID_HDL;
-#else /* BLE_CFG_LIB_TYPE != 0 */
+#else /* (BLE_CFG_LIB_TYPE == 1) */
     set_scan_status(0, 0xFFFFFFFF);
-#endif /* (BLE_CFG_LIB_TYPE != 0) */
+#endif /* (BLE_CFG_LIB_TYPE == 1) */
 }
+#endif /* (BLE_CFG_LIB_TYPE != 2) */
 
 /***********************************************************************************************************************
  * Function Name: ads_scan_to_hdlr
@@ -1893,6 +1912,7 @@ static void ads_scan_off_hdlr(void)
  * Arguments    : uint32_t hdl                                 ; Timer handle
  * Return Value : none
  **********************************************************************************************************************/
+#if (BLE_CFG_LIB_TYPE != 2)
 static void ads_scan_to_hdlr(uint32_t hdl)
 {
     st_ble_gap_scan_param_t scan_param;
@@ -1940,6 +1960,7 @@ static void ads_scan_to_hdlr(uint32_t hdl)
 
     return;
 } /* End of function ads_scan_to_hdlr() */
+#endif /* (BLE_CFG_LIB_TYPE != 2) */
 
 /***********************************************************************************************************************
  * Function Name: ads_conn_ind_hdlr
@@ -1991,7 +2012,7 @@ static void set_abs_cb(ble_gap_app_cb_t gap_cb, ble_vs_app_cb_t vs_cb)
  * Arguments    : st_ble_gap_adv_param_t * p_adv_param      ; GAP advertising parameters.
  *              : uint32_t fast_adv_intv                    ; Fast advertising interval.
  *              : uint32_t slow_adv_intv                    ; Slow advertising interval.
- *              : uint16_t fast_periodv                     ; Fast advertising period.
+ *              : uint16_t fast_period                      ; Fast advertising period.
  * Return Value : none
  **********************************************************************************************************************/
 static void set_conn_adv_intv(st_ble_gap_adv_param_t * p_adv_param, 
@@ -2418,11 +2439,13 @@ static ble_status_t set_scan_param(st_ble_abs_scan_param_t * p_scan_param)
  *              : uint32_t clear       ; Clear bits.
  * Return Value : none
  **********************************************************************************************************************/
+#if (BLE_CFG_LIB_TYPE != 2)
 static void set_scan_status(uint32_t set, uint32_t clear)
 {
     gs_abs_scan.status |= set;
     gs_abs_scan.status &= ~clear;
 } /* End of function set_scan_status() */
+#endif /* (BLE_CFG_LIB_TYPE != 2) */
 
 /***********************************************************************************************************************
  * Function Name: set_irk_to_rslv
@@ -2503,12 +2526,6 @@ static void abs_gapcb(uint16_t event_type, ble_status_t event_result, st_ble_evt
         }
         break;
 
-        case BLE_GAP_EVENT_ADV_REPT_IND :
-            if(BLE_SUCCESS != abs_adv_rept_hdlr(p_event_data))
-            {
-                return;
-            }
-        break;
 
         case BLE_GAP_EVENT_ADV_PARAM_SET_COMP :
             abs_adv_param_set_hdlr(p_event_data);
@@ -2518,6 +2535,7 @@ static void abs_gapcb(uint16_t event_type, ble_status_t event_result, st_ble_evt
             abs_adv_data_set_hdlr(p_event_data);
         break;
 
+#if (BLE_CFG_LIB_TYPE == 0)
         case BLE_GAP_EVENT_PERD_ADV_PARAM_SET_COMP :
             abs_perd_param_hdlr();
         break;
@@ -2530,43 +2548,20 @@ static void abs_gapcb(uint16_t event_type, ble_status_t event_result, st_ble_evt
             set_adv_status(BLE_ABS_PERD_HDL, 0, BLE_ABS_ADV_STATUS_PERD_START);
         break;
 
-        case BLE_GAP_EVENT_ADV_ON :
-            if(BLE_SUCCESS != event_result)
-            {
-#if (BLE_CFG_LIB_TYPE == 0)
-                st_ble_gap_adv_set_evt_t * p_param;
-                p_param = (st_ble_gap_adv_set_evt_t *)p_event_data->p_param;
-                set_adv_status(p_param->adv_hdl, 0, 0xFFFFFFFF);
-#else /* (BLE_CFG_LIB_TYPE != 0) */
-                set_adv_status(BLE_ABS_COMMON_HDL, 0, 0xFFFFFFFF);
-#endif /* (BLE_CFG_LIB_TYPE != 0) */
-            }
-        break;
-
-        case BLE_GAP_EVENT_ADV_OFF :
-            abs_adv_off_hdlr(p_event_data);
-        break;
-
         case BLE_GAP_EVENT_SCAN_TO :
             ads_scan_to_hdlr(BLE_TIMER_INVALID_HDL);
         break;
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
 
-#if (BLE_CFG_LIB_TYPE != 0)
+#if (BLE_CFG_LIB_TYPE == 1)
         case BLE_GAP_EVENT_SCAN_ON :
             ads_scan_on_hdlr();
         break;
-#endif /* (BLE_CFG_LIB_TYPE != 0) */
+#endif /* (BLE_CFG_LIB_TYPE == 1) */
 
+#if (BLE_CFG_LIB_TYPE != 2)
         case BLE_GAP_EVENT_SCAN_OFF :
             ads_scan_off_hdlr();
-        break;
-
-        case BLE_GAP_EVENT_CONN_IND :
-            {
-                st_ble_gap_conn_evt_t * p_param;
-                p_param = (st_ble_gap_conn_evt_t *)p_event_data->p_param;
-                ads_conn_ind_hdlr(p_param->role);
-            }
         break;
 
         case BLE_GAP_EVENT_CREATE_CONN_COMP:
@@ -2575,6 +2570,39 @@ static void abs_gapcb(uint16_t event_type, ble_status_t event_result, st_ble_evt
                 R_BLE_TIMER_Stop(gs_conn_t_hdl);
                 R_BLE_TIMER_Delete(&gs_conn_t_hdl);
                 gs_conn_t_hdl = BLE_TIMER_INVALID_HDL;
+            }
+        break;
+
+        case BLE_GAP_EVENT_ADV_REPT_IND :
+            if(BLE_SUCCESS != abs_adv_rept_hdlr(p_event_data))
+            {
+                return;
+            }
+        break;
+#endif /* (BLE_CFG_LIB_TYPE != 2) */
+
+        case BLE_GAP_EVENT_ADV_ON :
+            if(BLE_SUCCESS != event_result)
+            {
+#if (BLE_CFG_LIB_TYPE == 0)
+                st_ble_gap_adv_set_evt_t * p_param;
+                p_param = (st_ble_gap_adv_set_evt_t *)p_event_data->p_param;
+                set_adv_status(p_param->adv_hdl, 0, 0xFFFFFFFF);
+#else /* (BLE_CFG_LIB_TYPE == 0) */
+                set_adv_status(BLE_ABS_COMMON_HDL, 0, 0xFFFFFFFF);
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
+            }
+        break;
+
+        case BLE_GAP_EVENT_ADV_OFF :
+            abs_adv_off_hdlr(p_event_data);
+        break;
+
+        case BLE_GAP_EVENT_CONN_IND :
+            {
+                st_ble_gap_conn_evt_t * p_param;
+                p_param = (st_ble_gap_conn_evt_t *)p_event_data->p_param;
+                ads_conn_ind_hdlr(p_param->role);
             }
         break;
 

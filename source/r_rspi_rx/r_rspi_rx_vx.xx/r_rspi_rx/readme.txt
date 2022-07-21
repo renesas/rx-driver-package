@@ -5,12 +5,12 @@ r_rspi_rx
 
 Document Number 
 ---------------
-R01AN1827EJ0303
-R01AN1827JJ0303
+R01AN1827EJ0304
+R01AN1827JJ0304
 
 Version
 -------
-v3.03
+v3.04
 
 Overview
 --------
@@ -86,6 +86,7 @@ Supported/Tested MCUs
 * RX66N
 * RX671
 * RX140
+* RX660
 
 Boards Tested On
 ----------------
@@ -111,6 +112,7 @@ Boards Tested On
 * RSKRX72N
 * RSKRX671
 * RSKRX140
+* RSKRX660
 
 Limitations
 -----------
@@ -122,7 +124,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp     v6.20
+* r_bsp     v7.20
 
 How to add to your project
 --------------------------
@@ -170,9 +172,9 @@ r_rspi_rx
 +---doc
 |   |
 |   +---en
-|   |       r01an1827ej0303-rx-serial.pdf
+|   |       r01an1827ej0304-rx-serial.pdf
 |   +---ja
-|           r01an1827jj0303-rx-serial.pdf
+|           r01an1827jj0304-rx-serial.pdf
 |
 +---src
         r_rspi_defaults.h

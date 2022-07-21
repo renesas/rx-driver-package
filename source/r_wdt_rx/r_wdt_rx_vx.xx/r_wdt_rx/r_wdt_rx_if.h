@@ -37,6 +37,7 @@
 *           31.03.2021 2.50    Added support RX671.
 *           13.09.2021 2.60    Added RX671 demo.
 *           14.03.2022 2.70    Added support for RX66T-48Pin.
+*           31.03.2022 2.80    Added support for RX660.
 ***********************************************************************************************************************/
 
 #ifndef WDT_RX_IF_H
@@ -60,7 +61,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define WDT_RX_VERSION_MAJOR   (2)
-#define WDT_RX_VERSION_MINOR   (70)
+#define WDT_RX_VERSION_MINOR   (80)
 
 #define OFS0_WDT_DISABLED              (0x00020000)
 

@@ -46,6 +46,7 @@
 *           31.05.2021 4.80    Added RX671 support.
 *           30.07.2021 4.90    Added RX140 support.
 *           30.11.2021 4.93    Added RX66T 48pins support.
+*           29.12.2021 5.00    Added RX660 support.
 *******************************************************************************/
 
 #ifndef S12AD_PRV_PRIVATE_H
@@ -425,6 +426,29 @@ Macro definitions
 
 #endif /* definedBSP_MCU_RX65_ALL */
 
+#if (defined(BSP_MCU_RX660))
+
+#if BSP_PACKAGE_PINS == 144
+#define ADC_PRV_INVALID_CH_MASK0    (0xFC000000)    /* all channels valid (0-23 sensors) */
+
+#elif BSP_PACKAGE_PINS == 100
+#define ADC_PRV_INVALID_CH_MASK0    (0xFC000000)    /* all channels valid (0-23 sensors) */
+
+#elif BSP_PACKAGE_PINS == 80
+#define ADC_PRV_INVALID_CH_MASK0    (0xFCF8C000)    /* channels 0-13 16-18 sensors valid */
+
+#elif BSP_PACKAGE_PINS == 64
+#define ADC_PRV_INVALID_CH_MASK0    (0xFCFFC000)    /* channels 0-13 sensors valid */
+
+#elif BSP_PACKAGE_PINS == 48
+#define ADC_PRV_INVALID_CH_MASK0    (0xFCFFE118)    /* channels 0-2 5-7 9-12 sensors valid */
+
+#else
+    #error "ERROR - BSP_CFG_MCU_PART_PACKAGE - Unknown package chosen in r_bsp_config.h"
+#endif /* BSP_PACKAGE_PINS == 177 */
+
+#endif /* definedBSP_MCU_RX65_ALL */
+
 #if (defined(BSP_MCU_RX66T))
 
 #if BSP_PACKAGE_PINS == 144
@@ -625,12 +649,13 @@ typedef struct st_adc_ctrl          // ADC Control Block
 
 #if (defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) \
     || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) \
-    || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX671))
+    || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX671) \
+	|| defined(BSP_MCU_RX660))
     uint32_t        cmpi_mask;      // for GRPBL1
 #endif    
 #if (defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) \
     || defined(BSP_MCU_RX72M)  || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) \
-    || defined(BSP_MCU_RX671))
+    || defined(BSP_MCU_RX671)  || defined(BSP_MCU_RX660))
     uint32_t        cmpi_maskb;     // for GRPBL1 WINDOWB
 #endif
 } adc_ctrl_t;

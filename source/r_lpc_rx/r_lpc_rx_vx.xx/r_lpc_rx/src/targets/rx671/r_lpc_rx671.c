@@ -510,7 +510,12 @@ static lpc_err_t lpc_lowpower_activate_check (void)
             return LPC_ERR_ILLEGAL;         /* Cannot enter SW_Stanbay if P/E mode entry */
         }
 
-        
+        /* Check FLLCR1(b0) */
+        if (0x00 != (SYSTEM.FLLCR1.BYTE & 0x01))
+        {
+            return LPC_ERR_ILLEGAL;         /* Cannot enter SW_Stanbay if HOCO's FLL function entry */
+        }
+
         if (0x01 == SYSTEM.DPSBYCR.BIT.DPSBY)   /* check if entering deep software standby */
         {
             if (0x00000000 == (LPC_OFS0_REG_VALUE & 0x00000002))    /* IWDT auto start check */

@@ -143,6 +143,7 @@
 *                               Deleted the board folders of RSKRX63N.
 *         : 18.05.2021 6.11     Added support for GENERIC_RX671.
 *         : 30.06.2021 6.20     Added support for GENERIC_RX140.
+*         : 22.04.2022 7.20     Added support for GENERIC_RX660.
 ***********************************************************************************************************************/
 
 /* Multiple inclusion prevention macro */
@@ -157,6 +158,9 @@ DEFINE YOUR SYSTEM - UNCOMMENT THE INCLUDE PATH FOR THE PLATFORM YOU ARE USING.
 
 /* GENERIC_RX65N */
 //#include "./board/generic_rx65n/r_bsp.h"
+
+/* GENERIC_RX660 */
+//#include "./board/generic_rx660/r_bsp.h"
 
 /* GENERIC_RX66N */
 //#include "./board/generic_rx66n/r_bsp.h"

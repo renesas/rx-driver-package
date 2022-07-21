@@ -25,6 +25,7 @@
 *         : 18.05.2021 1.00     First Release
 *         : 30.11.2021 1.01     Modified comment.
 *                               Added comments for when use simulator.
+*         : 22.04.2022 1.02     Added comments for Technical Update Information(TN-RX*-A0257A).
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -571,7 +572,8 @@ static void clock_source_select (void)
 
             /* SOSCCR - Sub-Clock Oscillator Control Register
             b7:b1    Reserved - The write value should be 0.
-            b0       SOSTP    - Sub-clock oscillator Stop - Sub-clock oscillator is stopped. */
+            b0       SOSTP    - Sub-clock oscillator Stop - Sub-clock oscillator is stopped.
+            NOTE: Please refer Tool News(TN-RX*-A0257A) for details. */
             SYSTEM.SOSCCR.BYTE = 0x01;
 
             /* Dummy read and compare. cf."5. I/O Registers", "(2) Notes on writing to I/O registers" in User's manual.

@@ -43,6 +43,7 @@
 *         : 10.09.2020 3.00     Deleted spti_dmacdtc_flg and spri_dmacdtc_flg in rspi_config_block_t.
 *         : 30.06.2021 3.01     Supported RX671.
 *         : 31.07.2021 3.02     Supported RX140.
+*         : 31.12.2021 3.04     Supported RX660.
 ***********************************************************************************************************************/
 
 #ifndef RSPI_PRIVATE_H
@@ -70,7 +71,7 @@ Macro definitions
    || defined(BSP_MCU_RX231) || defined(BSP_MCU_RX230) || defined(BSP_MCU_RX130) \
    || defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX24U) \
    || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX23W) \
-   || defined(BSP_MCU_RX23E_A) || defined(BSP_MCU_RX140)
+   || defined(BSP_MCU_RX23E_A) || defined(BSP_MCU_RX140) || defined(BSP_MCU_RX660)
 
 #define RSPI_MAX_CHANNELS   (1)
 #else
@@ -130,7 +131,7 @@ Macro definitions
                                /* 1: Communication has ended */
 #define RSPI_SPSR_MASK  (0xA0) /* Protect reserved bits. */
 
-#ifdef BSP_MCU_RX671
+#if defined BSP_MCU_RX671 || defined BSP_MCU_RX660
 #define RSPI_SPSR_MODF_UDRF_MASK    (0xEB)  /* Protect reserved bits. */
 #else
 #define RSPI_SPSR_MODF_UDRF_MASK    (0xAB)  /* Protect reserved bits. */
@@ -179,7 +180,7 @@ Macro definitions
 
 #define RSPI_SPB_16_MASK  (0x0C00)  /* Length settings with any of these bits set do not need 32-bit access. */
 
-#if defined(BSP_MCU_RX671)
+#if defined BSP_MCU_RX671 || defined BSP_MCU_RX660
 /* RSPI Data Control Register 2 (SPDCR2) */
 #define RSPI_SPDCR2_BYSW  (0x01)    /* 0: Byte swapping of SPDR data disabled. 1: Byte swapping of SPDR data enabled */
 #define RSPI_SPDCR2_DINV  (0x02)    /* 0: Data bits in the transmit buffer are transferred to the shift register as they are.

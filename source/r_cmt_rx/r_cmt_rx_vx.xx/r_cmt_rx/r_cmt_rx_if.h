@@ -52,8 +52,9 @@
 *                              Fixed warning when using RI600V4 with device has 2 CMT channels
 *         : 31.03.2021 4.80    Added support for RX671.
 *         : 15.04.2021 4.90    Added support for RX140.
-*         : 13.09.2021 5.00    Added demo for RX671
-*         : 14.03.2022 5.10    Added support for RX66T-48pin
+*         : 13.09.2021 5.00    Added demo for RX671.
+*         : 14.03.2022 5.10    Added support for RX66T-48pin.
+*         : 31.03.2022 5.20    Added support for RX660.
 ***********************************************************************************************************************/
 #ifndef CMT_HEADER_FILE
 #define CMT_HEADER_FILE
@@ -72,7 +73,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define CMT_RX_VERSION_MAJOR            (5)
-#define CMT_RX_VERSION_MINOR            (10)
+#define CMT_RX_VERSION_MINOR            (20)
 
 /* This define is used with the R_CMT_Control() function if not channel needs to input. */
 #define CMT_RX_NO_CHANNEL               (0xFFFFFFFF)

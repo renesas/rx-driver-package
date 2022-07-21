@@ -36,6 +36,9 @@
  * Macro definitions
  *********************************************************************************************************************/
 
+/* Definitions of Timeout */
+#define RM_OB1203_TIMEOUT                      (100)
+
 /* Definitions of Command */
  #define RM_OB1203_COMMAND_MEASUREMENT_START    (0x01)
  #define RM_OB1203_COMMAND_INTERRUPT_ENABLE     (0x01)
@@ -74,6 +77,7 @@ extern fsp_err_t rm_ob1203_int_cfg_register_write(rm_ob1203_ctrl_t * const p_api
 extern fsp_err_t rm_ob1203_ppg_ps_gain_register_write(rm_ob1203_ctrl_t * const p_api_ctrl, uint8_t const ppg_ps_gain);
 extern fsp_err_t rm_ob1203_ppg_ps_cfg_register_write(rm_ob1203_ctrl_t * const p_api_ctrl, uint8_t const ppg_ps_cfg);
 extern fsp_err_t rm_ob1203_all_interrupt_bits_clear(rm_ob1203_ctrl_t * const p_api_ctrl);
+extern fsp_err_t rm_ob1203_delay_ms(rm_ob1203_ctrl_t * const p_ctrl, uint32_t const delay_ms);
 
  #if BSP_CFG_RTOS
 extern fsp_err_t rm_ob1203_os_semaphore_acquire(rm_ob1203_semaphore_t const * p_semaphore, uint32_t const timeout);
@@ -273,6 +277,9 @@ static fsp_err_t rm_ob1203_prox_measurement_stop (rm_ob1203_ctrl_t * const p_api
 {
     fsp_err_t err = FSP_SUCCESS;
     rm_ob1203_instance_ctrl_t * p_ctrl = (rm_ob1203_instance_ctrl_t *) p_api_ctrl;
+#if (BSP_CFG_RTOS == 0) && (defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__))
+    uint16_t counter = 0;
+#endif
 
     if (RM_OB1203_OPERATION_MODE_PROXIMITY == p_ctrl->p_mode->mode_irq)
     {
@@ -307,7 +314,9 @@ static fsp_err_t rm_ob1203_prox_measurement_stop (rm_ob1203_ctrl_t * const p_api
         /* Wait callback */
         while(false == p_ctrl->rx_communication_finished)
         {
-            ;
+            rm_ob1203_delay_ms(p_ctrl, 1);
+            counter++;
+            FSP_ERROR_RETURN(RM_OB1203_TIMEOUT >= counter, FSP_ERR_TIMEOUT);
         }
 
         /* Clear all interrupt bits */
@@ -364,6 +373,9 @@ static fsp_err_t rm_ob1203_prox_read (rm_ob1203_ctrl_t * const p_api_ctrl, rm_ob
     fsp_err_t err = FSP_SUCCESS;
     rm_ob1203_instance_ctrl_t  * p_ctrl = (rm_ob1203_instance_ctrl_t *) p_api_ctrl;
     rm_comms_write_read_params_t write_read_params;
+#if (BSP_CFG_RTOS == 0) && (defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__))
+    uint16_t counter = 0;
+#endif
 
     if (RM_OB1203_OPERATION_MODE_PROXIMITY == p_ctrl->p_mode->mode_irq)
     {
@@ -403,7 +415,9 @@ static fsp_err_t rm_ob1203_prox_read (rm_ob1203_ctrl_t * const p_api_ctrl, rm_ob
         /* Wait callback */
         while(false == p_ctrl->rx_communication_finished)
         {
-            ;
+            rm_ob1203_delay_ms(p_ctrl, 1);
+            counter++;
+            FSP_ERROR_RETURN(RM_OB1203_TIMEOUT >= counter, FSP_ERR_TIMEOUT);
         }
 
         /* Clear all interrupt bits */

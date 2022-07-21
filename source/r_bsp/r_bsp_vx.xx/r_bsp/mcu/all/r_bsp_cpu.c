@@ -39,6 +39,8 @@
 *         : 10.12.2019 3.13     Modified the following functions.
 *                               - R_BSP_RegisterProtectEnable
 *                               - R_BSP_RegisterProtectDisable
+*         : 22.04.2022 3.14     Modified the following functions.
+*                               - R_BSP_VoltageLevelSetting
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -56,17 +58,29 @@ Macro definitions
 #endif
 
 #ifdef BSP_MCU_VOLTAGE_LEVEL_SETTING
+#ifdef BSP_MCU_VOLTAGE_LEVEL_SETTING_USB
 /* The macro definition for combinations where settings of USBVON bit conflict. */
 #define BSP_PRV_USBVON_CONFLICT (BSP_VOL_USB_POWEROFF | BSP_VOL_USB_POWERON)
+
+/* Bit number of VOLSR register. */
+#define BSP_PRV_VOLSR_USBVON_BIT_NUM  (2)
+#endif /* BSP_MCU_VOLTAGE_LEVEL_SETTING_USB */
+
+#ifdef BSP_MCU_VOLTAGE_LEVEL_SETTING_AD
 /* The macro definition for combinations where settings of PGAVLS bit conflict. */
 #define BSP_PRV_PGAVLS_CONFLICT (BSP_VOL_AD_NEGATIVE_VOLTAGE_INPUT | BSP_VOL_AD_NEGATIVE_VOLTAGE_NOINPUT)
+
+/* Bit number of VOLSR register. */
+#define BSP_PRV_VOLSR_PGAVLS_BIT_NUM  (6)
+#endif /* BSP_MCU_VOLTAGE_LEVEL_SETTING_AD */
+
+#ifdef BSP_MCU_VOLTAGE_LEVEL_SETTING_RIIC
 /* The macro definition for combinations where settings of RICVLS bit conflict. */
 #define BSP_PRV_RICVLS_CONFLICT (BSP_VOL_RIIC_4_5V_OROVER | BSP_VOL_RIIC_UNDER_4_5V)
 /* Bit number of VOLSR register. */
 #define BSP_PRV_VOLSR_RICVLS_BIT_NUM  (7)
-#define BSP_PRV_VOLSR_PGAVLS_BIT_NUM  (6)
-#define BSP_PRV_VOLSR_USBVON_BIT_NUM  (2)
-#endif
+#endif /* BSP_MCU_VOLTAGE_LEVEL_SETTING_RIIC */
+#endif /* BSP_MCU_VOLTAGE_LEVEL_SETTING */
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -516,22 +530,29 @@ bool R_BSP_VoltageLevelSetting (uint8_t ctrl_ptn)
 
 #if BSP_CFG_PARAM_CHECKING_ENABLE == 1
     /* ---- CHECK ARGUMENTS ---- */
+#ifdef BSP_MCU_VOLTAGE_LEVEL_SETTING_USB
     if (BSP_PRV_USBVON_CONFLICT == (ctrl_ptn & BSP_PRV_USBVON_CONFLICT))
     {
         return false;
     }
+#endif /* BSP_MCU_VOLTAGE_LEVEL_SETTING_USB */
 
+#ifdef BSP_MCU_VOLTAGE_LEVEL_SETTING_AD
     if (BSP_PRV_PGAVLS_CONFLICT == (ctrl_ptn & BSP_PRV_PGAVLS_CONFLICT))
     {
         return false;
     }
+#endif /* BSP_MCU_VOLTAGE_LEVEL_SETTING_AD */
 
+#ifdef BSP_MCU_VOLTAGE_LEVEL_SETTING_RIIC
     if (BSP_PRV_RICVLS_CONFLICT == (ctrl_ptn & BSP_PRV_RICVLS_CONFLICT))
     {
         return false;
     }
-#endif
+#endif /* BSP_MCU_VOLTAGE_LEVEL_SETTING_RIIC */
+#endif /* BSP_CFG_PARAM_CHECKING_ENABLE == 1 */
 
+#ifdef BSP_MCU_VOLTAGE_LEVEL_SETTING_USB
     /* Check USB module stop state. */
     if(0 != (ctrl_ptn & BSP_PRV_USBVON_CONFLICT))
     {
@@ -541,7 +562,9 @@ bool R_BSP_VoltageLevelSetting (uint8_t ctrl_ptn)
             return false;
         }
     }
+#endif /* BSP_MCU_VOLTAGE_LEVEL_SETTING_USB */
 
+#ifdef BSP_MCU_VOLTAGE_LEVEL_SETTING_AD
     /* Check AD module stop state. */
     if(0 != (ctrl_ptn & BSP_PRV_PGAVLS_CONFLICT))
     {
@@ -551,16 +574,28 @@ bool R_BSP_VoltageLevelSetting (uint8_t ctrl_ptn)
             return false;
         }
     }
+#endif /* BSP_MCU_VOLTAGE_LEVEL_SETTING_AD */
 
+#ifdef BSP_MCU_VOLTAGE_LEVEL_SETTING_RIIC
     /* Check RIIC module stop state. */
     if(0 != (ctrl_ptn & BSP_PRV_RICVLS_CONFLICT))
     {
         /* Casting is valid because it matches the type to the right side or argument. */
+#ifdef RIIC0
         if(0 == MSTP(RIIC0))
         {
             return false;
         }
+#endif
+
+#ifdef RIIC2
+        if(0 == MSTP(RIIC2))
+        {
+            return false;
+        }
+#endif
     }
+#endif /* BSP_MCU_VOLTAGE_LEVEL_SETTING_RIIC */
 
     /* Protect off. */
     SYSTEM.PRCR.WORD = 0xA502;
@@ -568,6 +603,7 @@ bool R_BSP_VoltageLevelSetting (uint8_t ctrl_ptn)
     /* Casting is valid because it matches the type to the right side or argument. */
     p_volsr_addr = (uint8_t *)&SYSTEM.VOLSR.BYTE;
 
+#ifdef BSP_MCU_VOLTAGE_LEVEL_SETTING_RIIC
     /* Updated the RICVLS bit. */
     if(0 != (ctrl_ptn & BSP_VOL_RIIC_UNDER_4_5V))
     {
@@ -578,7 +614,9 @@ bool R_BSP_VoltageLevelSetting (uint8_t ctrl_ptn)
     {
         R_BSP_BIT_CLEAR(p_volsr_addr, BSP_PRV_VOLSR_RICVLS_BIT_NUM);
     }
+#endif /* BSP_MCU_VOLTAGE_LEVEL_SETTING_RIIC */
 
+#ifdef BSP_MCU_VOLTAGE_LEVEL_SETTING_AD
     /* Updated the PGAVLS bit. */
     if(0 != (ctrl_ptn & BSP_VOL_AD_NEGATIVE_VOLTAGE_NOINPUT))
     {
@@ -589,7 +627,9 @@ bool R_BSP_VoltageLevelSetting (uint8_t ctrl_ptn)
     {
         R_BSP_BIT_CLEAR(p_volsr_addr, BSP_PRV_VOLSR_PGAVLS_BIT_NUM);
     }
+#endif /* BSP_MCU_VOLTAGE_LEVEL_SETTING_AD */
 
+#ifdef BSP_MCU_VOLTAGE_LEVEL_SETTING_USB
     /* Updated the USBVON bit. */
     if(0 != (ctrl_ptn & BSP_VOL_USB_POWERON))
     {
@@ -600,6 +640,7 @@ bool R_BSP_VoltageLevelSetting (uint8_t ctrl_ptn)
     {
         R_BSP_BIT_CLEAR(p_volsr_addr, BSP_PRV_VOLSR_USBVON_BIT_NUM);
     }
+#endif /* BSP_MCU_VOLTAGE_LEVEL_SETTING_USB */
 
     /* Protect on. */
     SYSTEM.PRCR.WORD = 0xA500;

@@ -14,13 +14,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name: r_ble_cli.h
  * Description : Command Line Interface Library.
- * History : DD.MM.YYYY Version Description           
- *         : 23.08.2019 1.00    First Release
  **********************************************************************************************************************/
 
 /*******************************************************************************************************************//**

@@ -23,6 +23,7 @@
 * History : DD.MM.YYYY Version Description
 *           15.04.2021 1.00    Initial Release.
 *           29.12.2021 1.10    Updated ABCSE in "sync_baud" array.
+*           31.03.2022 4.40    Added receive flag when using DTC/DMAC.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -130,7 +131,7 @@ sci_ch_ctrl_t   ch1_ctrl = {&ch1_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             #endif
                             , BSP_PCLKB_HZ
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif /* End of SCI_CFG_CH1_INCLUDED */
@@ -176,7 +177,7 @@ sci_ch_ctrl_t   ch5_ctrl = {&ch5_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             #endif
                             , BSP_PCLKB_HZ
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif /* End of SCI_CFG_CH5_INCLUDED */
@@ -222,7 +223,7 @@ sci_ch_ctrl_t   ch6_ctrl = {&ch6_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             #endif
                             , BSP_PCLKB_HZ
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif /* End of SCI_CFG_CH6_INCLUDED */
@@ -268,7 +269,7 @@ sci_ch_ctrl_t   ch8_ctrl = {&ch8_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             #endif
                             , BSP_PCLKB_HZ
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif /* End of SCI_CFG_CH8_INCLUDED */
@@ -314,7 +315,7 @@ sci_ch_ctrl_t   ch9_ctrl = {&ch9_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             #endif
                             , BSP_PCLKB_HZ
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif /* End of SCI_CFG_CH9_INCLUDED */
@@ -359,7 +360,7 @@ sci_ch_ctrl_t   ch12_ctrl = {&ch12_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                              #endif
                              , BSP_PCLKB_HZ
                              #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                             , 0, 0, 0, 0, 0
+                             , true, 0, 0, 0, 0, 0
                              #endif
                             };
 #endif /* End of SCI_CFG_CH12_INCLUDED */

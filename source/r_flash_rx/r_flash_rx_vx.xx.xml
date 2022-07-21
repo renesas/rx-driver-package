@@ -9,6 +9,7 @@
         <version>3.01.00</version>
         <version>3.02.00</version>
         <version>3.03.00</version>
+        <version>3.04.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -56,6 +57,7 @@
         <group omit_board="true">RX64M</group>
         <group omit_board="true">RX651</group>
         <group omit_board="true">RX65N</group>
+        <group omit_board="true">RX660</group>
         <group omit_board="true">RX66N</group>
         <group omit_board="true">RX66T</group>
         <group omit_board="true">RX671</group>
@@ -84,6 +86,7 @@
                 <version>6.21</version>
                 <version>7.00</version>
                 <version>7.10</version>
+                <version>7.20</version>
         </dependency>
         <zipsource>r_flash_rx_vx.xx.zip</zipsource>
         <application>Non-Volatile Storage</application>

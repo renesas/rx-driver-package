@@ -24,28 +24,25 @@
  * @brief Profile Common Library
  * @details This library provides APIs to encode/decode default type and data types.
 ***********************************************************************************************************************/
-/***********************************************************************************************************************
-* History : DD.MM.YYYY Version Description           
-*         : 23.08.2019 1.00    First Release
-*         : 31.10.2019 1.01    Add doxygen comments.
-***********************************************************************************************************************/
-
-#ifndef R_BLE_SERV_COMMON_H
-#define R_BLE_SERV_COMMON_H
 
 /***********************************************************************************************************************
 Includes   <System Includes> , "Project Includes"
 ***********************************************************************************************************************/
-#if defined(__CCRX__) || defined(__ICCRX__)
-/*RX23W*/
+#if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__) /*RX23W*/
 #include "r_ble_rx23w_if.h"
-#else
-/*RA4W*/
+
+#elif defined(_RENESAS_RA_) /*RA4W1*/
 #include "r_ble_api.h"
 #include "rm_ble_abs.h"
+
+#else /*RE01B*/
+#include "r_ble_api.h"
 #endif
 
 #include "r_ble_profile_cmn.h"
+
+#ifndef R_BLE_SERV_COMMON_H
+#define R_BLE_SERV_COMMON_H
 
 /** @defgroup profile_cmn_macro Macros 
  *  @{
@@ -84,14 +81,17 @@ Includes   <System Includes> , "Project Includes"
  */
 #define BLE_SERV_SER_CNFG_UUID (0x2903)
 
-#if defined(__CCRX__) || defined(__ICCRX__)
-/*RX23W*/
+#if defined(__CCRX__) || defined(__ICCRX__)|| defined(__RX__) /*RX23W*/
 #define BLE_PRF_MTU_SIZE (BLE_CFG_GATT_MTU_SIZE)
 #define BLE_PRF_CONN_MAX (BLE_CFG_RF_CONN_MAX)
-#else
-/*RA4W*/
+
+#elif defined(_RENESAS_RA_) /*RA4W1*/
 #define BLE_PRF_MTU_SIZE (BLE_ABS_CFG_GATT_MTU_SIZE)
 #define BLE_PRF_CONN_MAX (BLE_ABS_CFG_RF_CONNECTION_MAXIMUM)
+
+#else   /*RE01B*/
+#define BLE_PRF_MTU_SIZE (BLE_CFG_GATT_MTU_SIZE)
+#define BLE_PRF_CONN_MAX (BLE_CFG_RF_CONN_MAX)
 #endif
 /*@}*/
 

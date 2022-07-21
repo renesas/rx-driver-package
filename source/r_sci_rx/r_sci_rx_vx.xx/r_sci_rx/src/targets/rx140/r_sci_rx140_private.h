@@ -22,6 +22,7 @@
 ************************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *           15.04.2021 1.00    Initial Release.
+*           31.03.2022 4.40    Added receive flag when using DTC/DMAC.
 ***********************************************************************************************************************/
 
 #ifndef SCI_RX140_H
@@ -179,11 +180,12 @@ typedef struct st_sci_ch_ctrl       /* SCI channel control (for handle) */
 #endif
     uint32_t        pclk_speed;     /* saved peripheral clock speed for break generation */
 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+    bool                            rx_idle;
     uint8_t                         qindex_app_tx;
     uint8_t                         qindex_int_tx;
     uint8_t                         qindex_app_rx;
     uint8_t                         qindex_int_rx;
-    sci_fifo_ctrl_t                queue[2];
+    sci_fifo_ctrl_t                 queue[2];
 #endif
 } sci_ch_ctrl_t;
 

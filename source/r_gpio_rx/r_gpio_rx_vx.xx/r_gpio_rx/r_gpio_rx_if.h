@@ -58,6 +58,7 @@
 *         : 13.09.2021 4.20    Added the demo for RX671.
 *         : 11.11.2021 4.30    Added support for RX140-256KB.
 *         : 14.03.2022 4.40    Added support for RX66T 48pins.
+*         : 31.03.2022 4.50    Added support for RX660.
 ***********************************************************************************************************************/
 
 #ifndef GPIO_RX_INTERFACE_HEADER_FILE
@@ -108,6 +109,8 @@ Includes   <System Includes> , "Project Includes"
     #include "./src/targets/rx66n/r_gpio_rx66n.h"
 #elif defined(BSP_MCU_RX671)
     #include "./src/targets/rx671/r_gpio_rx671.h"
+#elif defined(BSP_MCU_RX660)
+    #include "./src/targets/rx660/r_gpio_rx660.h"
 #elif defined(BSP_MCU_RX71M)
     #include "./src/targets/rx71m/r_gpio_rx71m.h"
 #elif defined(BSP_MCU_RX72T)
@@ -130,7 +133,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define GPIO_RX_VERSION_MAJOR           (4)
-#define GPIO_RX_VERSION_MINOR           (40)
+#define GPIO_RX_VERSION_MINOR           (50)
 
 /***********************************************************************************************************************
 Typedef definitions

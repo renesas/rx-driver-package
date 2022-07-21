@@ -14,13 +14,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name: r_ble_console.h
  * Description : Console Library.
- * History : DD.MM.YYYY Version Description           
- *         : 23.08.2019 1.00    First Release
  **********************************************************************************************************************/
 
 /*******************************************************************************************************************//**
@@ -52,7 +50,7 @@
 #define KEY_ESC   (0x1B)
 #define KEY_DEL   (0x7F)
 
-/* extern Tx flas */
+/* extern Tx flags */
 extern volatile bool g_cli_tx_flg;
 extern volatile bool g_cli_rx_flg;
 

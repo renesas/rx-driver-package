@@ -27,6 +27,7 @@
         <product>RXC</product>
         <version>3.02.00</version>
         <version>3.03.00</version>
+        <version>3.04.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -34,6 +35,7 @@
         <version>8.03.00.201904</version>
         <version>8.03.00.202004</version>
         <version>8.03.00.202102</version>
+        <version>8.03.00.202104</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -47,6 +49,7 @@
         <family>RX</family>
         <series>RX600</series>
         <group omit_board="true">RX671</group>
+        <group omit_board="true">RX660</group>
     </target>
 
     <!-- only one package entry allowed -->
@@ -58,7 +61,7 @@
         <zipsource>r_rsci_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>6.20</version>
+            <version>7.20</version>
         </dependency>
         <dependency>
             <module>r_byteq</module>
@@ -66,10 +69,11 @@
             <version>1.81</version>
             <version>1.82</version>
             <version>1.90</version>
+            <version>2.00</version>
         </dependency>
         <application>Serial Interface (Clock Sync./Clock Async.)</application>
         <desc>RSCI Driver</desc>
-        <details>This module allows any number of RSCI channels on the MCU to run in full duplex Asynchronous mode, single master Simple SPI mode, or master Synchronous mode simultaneously. The driver is interrupt driven and non-blocking. Transmit and receive buffer queues are used in Asynchronous mode and their sizes may be configured independently for each channel. Resources for unused channels or modes may be removed via settings in the driver's config.h file.</details>
+        <details>This module allows any number of RSCI channels on the MCU to run in full duplex Asynchronous mode, single master Simple SPI mode, master Synchronous mode, or Manchester mode simultaneously. The driver is interrupt driven and non-blocking. Transmit and receive buffer queues are used in Asynchronous or Manchester mode and their sizes may be configured independently for each channel. Resources for unused channels or modes may be removed via settings in the driver's config.h file.</details>
         <function>RSCI</function>
         <incdir>r_config</incdir>
         <incdir>r_rsci_rx</incdir>

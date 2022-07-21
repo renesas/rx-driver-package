@@ -59,6 +59,7 @@
 *         : 13.09.2021 3.90    Added the Demo for RX671.
 *         : 14.03.2022 4.00    Added interrupt vector "DTCE_RNG_RNGRDI" for RX140.
                                Added support for RX66T-48pin.
+*         : 31.03.2022 4.10    Added support for RX660.
 *******************************************************************************/
 #ifndef DTC_RX_IF_H
 #define DTC_RX_IF_H
@@ -81,7 +82,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define DTC_VERSION_MAJOR  (4)
-#define DTC_VERSION_MINOR  (00)
+#define DTC_VERSION_MINOR  (10)
 
 /*******************************************************************************
 Typedef definitions
@@ -262,6 +263,8 @@ typedef struct st_transfer_data { /* 4 long-words */
     #include ".\src\targets\rx66t\r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX671)
     #include ".\src\targets\rx671\r_dtc_rx_target_if.h"
+#elif defined(BSP_MCU_RX660)
+    #include ".\src\targets\rx660\r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX66N)
     #include ".\src\targets\rx66n\r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX23W)

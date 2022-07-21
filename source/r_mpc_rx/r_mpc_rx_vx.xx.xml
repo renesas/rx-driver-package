@@ -85,6 +85,7 @@
         <group omit_board="true">RX66N</group>
         <group omit_board="true">RX66T</group>
         <group omit_board="true">RX671</group>
+        <group omit_board="true">RX660</group>
         <group omit_board="true">RX71M</group>
         <group omit_board="true">RX72T</group>
         <group omit_board="true">RX72M</group>
@@ -100,7 +101,7 @@
         <zipsource>r_mpc_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.10</version>
+            <version>7.20</version>
         </dependency>
         <dependency>
             <module>r_gpio_rx</module>
@@ -130,6 +131,7 @@
             <version>4.20</version>
             <version>4.30</version>
             <version>4.40</version>
+            <version>4.50</version>
         </dependency>
         <application>MCU Setup</application>
         <desc>MPC Driver</desc>

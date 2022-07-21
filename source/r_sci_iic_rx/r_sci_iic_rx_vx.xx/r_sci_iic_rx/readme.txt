@@ -7,11 +7,9 @@ Overview
 --------
 The SCI simple I2C mode fit module provides a method to transmit and receive data between the master and slave devices using the serial communications interface (SCI). The SCI simple I2C mode is in compliance with single master mode of the XP I2C-bus (Inter-IC-Bus) interface.
 
-The driver supports three channels available on the mcu.
-The driver can be reducedin size by removing code used for parameter checking orfor unused channels.
+The driver supports the channels available on the mcu. (Maximum 13 channels)
+The driver can be reduced in size by removing code used for parameter checking or for unused channels.
 These configuration options can be found in "r_config\r_sci_iic_rx_config.h".
-An original copy of the configuration file is stored in 
-"r_sci_iic_rx\ref\r_sci_iic_rx_config_reference.h".
 
 Features
 --------
@@ -99,6 +97,10 @@ r_sci_iic_rx
         +---rx65n
         |       r_sci_iic_rx65n.c
         |       r_sci_iic_rx65n_private.h
+        |
+        +---rx660
+        |       r_sci_iic_rx660.c
+        |       r_sci_iic_rx660_private.h
         |
         +---rx66t
         |       r_sci_iic_rx66t.c

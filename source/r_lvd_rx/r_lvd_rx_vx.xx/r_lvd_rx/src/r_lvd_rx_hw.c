@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_lvd_rx_hw.c
@@ -39,6 +39,8 @@
 *                                    Added macro LVD_GROUP_INT_ICUD.
 *              : 31.03.2019 3.70     Added support RX671.
 *                                   Added macro LVD_GROUP_INT_ICUE.
+*              : 31.03.2022 4.10     Added support RX660.
+*                                   Added macro LVD_GROUP_INT_ICUF.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -1149,7 +1151,8 @@ void lvd_hw_enable_dfilter(lvd_channel_t ch, bool b_enable_flag)
 #if ((LVD_GROUP_INT_ICUA == LVD_GROUP_INT)||\
      (LVD_GROUP_INT_ICUB == LVD_GROUP_INT)||\
      (LVD_GROUP_INT_ICUD == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUE == LVD_GROUP_INT))
+     (LVD_GROUP_INT_ICUE == LVD_GROUP_INT)||\
+     (LVD_GROUP_INT_ICUF == LVD_GROUP_INT))
 void lvd_hw_enable_mi(lvd_channel_t ch, uint16_t prio, bool b_enable_flag)
 {
     if (LVD_CHANNEL_1 == ch)
@@ -1496,7 +1499,8 @@ void lvd_hw_wait_delay(uint32_t usec)
 #if ((LVD_GROUP_INT_ICUA == LVD_GROUP_INT)||\
      (LVD_GROUP_INT_ICUB == LVD_GROUP_INT)||\
      (LVD_GROUP_INT_ICUD == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUE == LVD_GROUP_INT))
+     (LVD_GROUP_INT_ICUE == LVD_GROUP_INT)||\
+     (LVD_GROUP_INT_ICUF == LVD_GROUP_INT))
 R_BSP_PRAGMA_STATIC_INTERRUPT(lvd_ch1_isr,VECT(LVD1,LVD1))
 #elif (LVD_GROUP_INT_ICUb == LVD_GROUP_INT)
 R_BSP_PRAGMA_STATIC_INTERRUPT(lvd_ch1_isr,VECT(LVD,LVD1))
@@ -1533,7 +1537,8 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void lvd_ch1_isr(void)
 #if ((LVD_GROUP_INT_ICUA == LVD_GROUP_INT)||\
      (LVD_GROUP_INT_ICUB == LVD_GROUP_INT)||\
      (LVD_GROUP_INT_ICUD == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUE == LVD_GROUP_INT))
+     (LVD_GROUP_INT_ICUE == LVD_GROUP_INT)||\
+     (LVD_GROUP_INT_ICUF == LVD_GROUP_INT))
 R_BSP_PRAGMA_STATIC_INTERRUPT(lvd_ch2_isr,VECT(LVD2,LVD2))
 #elif (LVD_GROUP_INT_ICUb ==LVD_GROUP_INT)
 R_BSP_PRAGMA_STATIC_INTERRUPT(lvd_ch2_isr,VECT(LVD,LVD2))

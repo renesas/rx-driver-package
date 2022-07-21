@@ -22,7 +22,9 @@
 ***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *           31.03.2021 1.00    Initial Release.
-*           31.03.2021 3.80    Updated macro definition enable and disable TXI, RXI, ERI, TEI.
+*                              Updated macro definition enable and disable TXI, RXI, ERI, TEI.
+*           31.03.2022 4.40    Updated SCI sync baud table.
+*                              Added receive flag when using DTC/DMAC.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -79,11 +81,11 @@ const baud_divisor_t async_baud[NUM_DIVISORS_ASYNC]=
 /* NOTE: Identical to SCI sync baud table */
 const baud_divisor_t sync_baud[NUM_DIVISORS_SYNC]=
 {
-    /* divisor result, abcs, bgdm, n */
-    {4,   0, 0, 0},
-    {16,  0, 0, 1},
-    {64,  0, 0, 2},
-    {256, 0, 0, 3}
+    /* divisor result, abcs, bgdm, abcse, n */
+    {4,   0, 0, 0, 0},
+    {16,  0, 0, 0, 1},
+    {64,  0, 0, 0, 2},
+    {256, 0, 0, 0, 3}
 };
 #endif
 
@@ -142,7 +144,7 @@ sci_ch_ctrl_t   ch0_ctrl = {&ch0_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , 0
                             #endif
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif /* End of SCI_CFG_CH0_INCLUDED */
@@ -200,7 +202,7 @@ sci_ch_ctrl_t   ch1_ctrl = {&ch1_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , 0
                             #endif
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif /* End of SCI_CFG_CH1_INCLUDED */
@@ -258,7 +260,7 @@ sci_ch_ctrl_t   ch2_ctrl = {&ch2_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , 0
                             #endif
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif /* End of SCI_CFG_CH2_INCLUDED */
@@ -316,7 +318,7 @@ sci_ch_ctrl_t   ch3_ctrl = {&ch3_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , 0
                             #endif
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif  /* End of SCI_CFG_CH3_INCLUDED */
@@ -374,7 +376,7 @@ sci_ch_ctrl_t   ch4_ctrl = {&ch4_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , 0
                             #endif
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif  /* End of SCI_CFG_CH4_INCLUDED */
@@ -432,7 +434,7 @@ sci_ch_ctrl_t   ch5_ctrl = {&ch5_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , 0
                             #endif
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif /* End of SCI_CFG_CH5_INCLUDED */
@@ -490,7 +492,7 @@ sci_ch_ctrl_t   ch6_ctrl = {&ch6_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , 0
                             #endif
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif /* End of SCI_CFG_CH6_INCLUDED */
@@ -548,7 +550,7 @@ sci_ch_ctrl_t   ch7_ctrl = {&ch7_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , 0
                             #endif
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif /* End of SCI_CFG_CH7_INCLUDED */
@@ -606,7 +608,7 @@ sci_ch_ctrl_t   ch8_ctrl = {&ch8_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , 0
                             #endif
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif /* End of SCI_CFG_CH8_INCLUDED */
@@ -664,7 +666,7 @@ sci_ch_ctrl_t   ch9_ctrl = {&ch9_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , 0
                             #endif
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif /* End of SCI_CFG_CH9_INCLUDED */
@@ -722,7 +724,7 @@ sci_ch_ctrl_t   ch10_ctrl = {&ch10_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                              , SCI_CFG_CH10_TX_FIFO_THRESH
                              #endif
                              #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                             , 0, 0, 0, 0, 0
+                             , true, 0, 0, 0, 0, 0
                              #endif
                             };
 #endif /* End of SCI_CFG_CH10_INCLUDED */
@@ -780,7 +782,7 @@ sci_ch_ctrl_t   ch11_ctrl = {&ch11_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                              , SCI_CFG_CH11_TX_FIFO_THRESH
                              #endif
                              #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                             , 0, 0, 0, 0, 0
+                             , true, 0, 0, 0, 0, 0
                              #endif
                             };
 #endif /* End of SCI_CFG_CH11_INCLUDED */
@@ -838,7 +840,7 @@ sci_ch_ctrl_t   ch12_ctrl = {&ch12_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                              , 0
                              #endif
                              #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                             , 0, 0, 0, 0, 0
+                             , true, 0, 0, 0, 0, 0
                              #endif
                             };
 #endif /* End of SCI_CFG_CH12_INCLUDED */

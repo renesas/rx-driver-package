@@ -44,6 +44,7 @@
 *         : 30.06.2021 3.01     Supported RX671.
 *         : 31.07.2021 3.02     Supported RX140.
 *         : 31.10.2021 3.03     Version number change.
+*         : 31.12.2021 3.04     Supported RX660.
 ***********************************************************************************************************************/
 
 #ifndef RSPI_API_HEADER_FILE
@@ -70,7 +71,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define RSPI_RX_VERSION_MAJOR           (3)
-#define RSPI_RX_VERSION_MINOR           (03)
+#define RSPI_RX_VERSION_MINOR           (04)
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -171,7 +172,7 @@ typedef struct rspi_cmd_setregs_s
     uint8_t spnd_val;   // RSPI Next-Access Delay Register (SPND)
     uint8_t spcr2_val;  // RSPI Control Register 2 (SPCR2)
     uint8_t spdcr2_val; // RSPI Data Control Register 2 (SPDCR2)
-#if defined(BSP_MCU_RX671)
+#if defined BSP_MCU_RX671 || defined BSP_MCU_RX660
     uint8_t spcr3_val;  // RSPI Control Register 3 (SPCR3)
 #endif
 } rspi_cmd_setregs_t;

@@ -22,7 +22,8 @@
 ************************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *           31.03.2021 1.00    Initial Release.
-*           31.03.2021 3.80    Updated macro definition enable and disable TXI, RXI, ERI, TEI.
+*                              Updated macro definition enable and disable TXI, RXI, ERI, TEI.
+*           31.03.2022 4.40    Added receive flag when using DTC/DMAC.
 ***********************************************************************************************************************/
 
 #ifndef SCI_RX671_H
@@ -201,11 +202,12 @@ typedef struct st_sci_ch_ctrl       /* SCI channel control (for handle) */
     uint8_t         tx_curr_thresh; /* TX FIFO threshold(current) */
 #endif
 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+    bool                            rx_idle;
     uint8_t                         qindex_app_tx;
     uint8_t                         qindex_int_tx;
     uint8_t                         qindex_app_rx;
     uint8_t                         qindex_int_rx;
-    sci_fifo_ctrl_t                queue[2];
+    sci_fifo_ctrl_t                 queue[2];
 #endif
 } sci_ch_ctrl_t;
 

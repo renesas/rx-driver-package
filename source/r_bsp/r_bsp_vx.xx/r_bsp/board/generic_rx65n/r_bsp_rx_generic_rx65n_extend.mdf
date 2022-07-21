@@ -144,12 +144,6 @@ If you set this value and then forget it then you can clear the ID code by conne
             <constraint display="Value must be in the range 0x00000000~0xFFFFFFFF">("${BSP_CFG_ROMCODE_REG_VALUE}" &gt;= 0) &amp;&amp; ("${BSP_CFG_ROMCODE_REG_VALUE}" &lt;= 0xFFFFFFFF)</constraint>
             <description>ROMCODE register value.</description>
         </property>
-        <property id="BSP_CFG_CODE_FLASH_BANK_MODE" display="Select the bank mode" default="1" type="combobox">
-            <option id="BSP_CFG_CODE_FLASH_BANK_MODE.0" display="Dual mode" value="0"/>
-            <option id="BSP_CFG_CODE_FLASH_BANK_MODE.1" display="Linear mode" value="1"/>
-            <description>0 = Dual mode.
-1 = Linear mode.</description>
-        </property>
         <property id="BSP_CFG_CODE_FLASH_START_BANK" display="Select the startup bank" default="0" type="combobox">
             <option id="BSP_CFG_CODE_FLASH_START_BANK.0" display="Bank 1: FFE00000h~FFEFFFFFh; Bank 0:  FFF00000h~FFFFFFFFh." value="0"/>
             <option id="BSP_CFG_CODE_FLASH_START_BANK.1" display="Bank 1: FFF00000h~FFFFFFFFh; Bank 0: FFE00000h~FFEFFFFFh." value="1"/>

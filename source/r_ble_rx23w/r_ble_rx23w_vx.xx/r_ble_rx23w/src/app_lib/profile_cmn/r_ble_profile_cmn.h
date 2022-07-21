@@ -43,9 +43,9 @@
  *  @{
  *  @brief Utility Macros from Profile Common Library
  *  @details Packing Macros and Unpacking Macros for Little Endian and MIN/MAX Macro are defined.\n
- *  By default both the packing and unpaking macros uses pointer to
+ *  By default both the packing and unpacking macros uses pointer to
  *  a single or multi-octet variable which to be packed to or unpacked from
- *  a buffer (unsinged character array).\n
+ *  a buffer (unsigned character array).\n
  */
 
 /** 
@@ -265,12 +265,6 @@
 #endif
 
 /*@}*/
-
-/***********************************************************************************************************************
-* History : DD.MM.YYYY Version Description           
-*         : 23.08.2019 1.00    First Release
-*         : 31.10.2019 1.01    Add doxygen comments.
-***********************************************************************************************************************/
 
 /** @defgroup profile_cmn_struct Structures
  *  @{

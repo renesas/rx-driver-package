@@ -5,7 +5,7 @@ r_dmaca_rx
 
 Version
 -------
-v2.80
+v2.90
 
 Overview
 --------
@@ -31,6 +31,7 @@ Supported MCUs
 * RX651 Group
 * RX66N Group
 * RX66T Group
+* RX660 Group
 * RX671 Group
 * RX71M Group
 * RX72T Group
@@ -107,6 +108,10 @@ r_dmaca_rx
         |       r_dmaca_rx_target.h
         |
         +---rx66t
+        |       r_dmaca_rx_target.c
+        |       r_dmaca_rx_target.h
+        |
+        +---rx660
         |       r_dmaca_rx_target.c
         |       r_dmaca_rx_target.h
         |

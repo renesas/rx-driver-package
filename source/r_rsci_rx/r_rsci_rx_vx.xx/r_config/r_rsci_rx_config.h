@@ -25,6 +25,7 @@
 *                              Supported for RX671.
 *           03.12.2021 1.00    Updated new features in Asynchronous mode
 *                              and added support for Manchester mode.
+*           31.03.2022 2.10    Added comments for RX660 support
 ***********************************************************************************************************************/
 #ifndef RSCI_CONFIG_H
 #define RSCI_CONFIG_H
@@ -56,10 +57,10 @@ Configuration Options
  * to provide 2 queues per channel (static mode only).
  * RX MCU supported channels
  *
- * CH#   671
- * ---   ---
- * CH10   X
- * CH11   X
+ * CH#    671  660
+ * ----   ---  ---
+ * CH10    X    X 
+ * CH11    X    X 
 
 */
 
@@ -83,33 +84,33 @@ Configuration Options
 * transceiver to save power. It would then be up to the user's code to 
 * re-enable the transceiver before sending again. Not including this feature
 * reduces code space used by the interrupt. Note that this equate is only
-* for including the TEI code. The interrupt itself must be enabled using an
-* R_RSCI_Control(hdl, RSCI_CMD_EN_TEI, NULL) call.
+* for including the TEI code.
 */
 #define RSCI_CFG_TEI_INCLUDED    (0)      /* 1=included, 0=not */
 
 /* 
-* SET GROUPAL0 (ERI,TEI) INTERRUPT PRIORITY; RX671
+* SET GROUPAL0 (ERI,TEI) INTERRUPT PRIORITY; RX671/RX660 ONLY
 * This sets the priority level for receiver overrun, framing, and parity errors
 * as well as TEI interrupts for all RSCI channels.
+* In Manchester mode, there are also Manchester code, preface, start bit, and receive Sync errors
 */
-#define RSCI_CFG_ERI_TEI_PRIORITY (3)     /* (RX671 ONLY) 1 lowest, 15 highest */
+#define RSCI_CFG_ERI_TEI_PRIORITY (3)     /* 1 lowest, 15 highest */
 
-/* ENABLE TX/RX FIFO; (RSCIi supported MCU ONLY) 1=included, 0=not */
+/* ENABLE TX/RX FIFO; 1=included, 0=not */
 #define RSCI_CFG_CH10_FIFO_INCLUDED  (0)
 #define RSCI_CFG_CH11_FIFO_INCLUDED  (0)
 
-/* SET TX FIFO THRESHOLD; (RSCIi supported MCU ONLY) 0 lowest, 31 highest */
+/* SET TX FIFO THRESHOLD; 0 lowest, 31 highest */
 /* TX FIFO THRESHOLD is invalid in Clock Synchronous Mode and Simple SPI Mode. */
 /* Set the same value for TX FIFO THRESHOLD and RX FIFO THRESHOLD in Clock Synchronous Mode and Simple SPI Mode. */
 #define RSCI_CFG_CH10_TX_FIFO_THRESH (8)
 #define RSCI_CFG_CH11_TX_FIFO_THRESH (8)
 
-/* SET RX FIFO THRESHOLD; (RSCIi supported MCU ONLY) 1 lowest, 31 highest */
+/* SET RX FIFO THRESHOLD; 0 lowest, 31 highest */
 #define RSCI_CFG_CH10_RX_FIFO_THRESH (8)
 #define RSCI_CFG_CH11_RX_FIFO_THRESH (8)
 
-/* ENABLE Received Data match function (RSCIj and RSCIi supported MCU RX671 ONLY) 1=included, 0=not */
+/* ENABLE Received Data match function; 1=included, 0=not */
 #define RSCI_CFG_CH10_DATA_MATCH_INCLUDED (0)
 #define RSCI_CFG_CH11_DATA_MATCH_INCLUDED (0)
 

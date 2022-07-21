@@ -26,6 +26,7 @@
 *           13.09.2021 1.10    Added the demo for RX671.
 *           03.12.2021 2.00    Updated new features in Asynchronous mode
 *                              and added support for Manchester mode.
+*           31.03.2022 2.10    Supported for RX660.
 ***********************************************************************************************************************/
 
 #ifndef RSCI_IF_H
@@ -41,13 +42,13 @@ Includes   <System Includes> , "Project Includes"
 Macro definitions
 ***********************************************************************************************************************/
 
-#if R_BSP_VERSION_MAJOR < 6
-    #error "This module must use BSP module of Rev.6.00 or higher. Please use the BSP module of Rev.6.00 or higher."
+#if ((R_BSP_VERSION_MAJOR < 6) && (R_BSP_VERSION_MINOR < 10))
+    #error "This module must use BSP module of Rev.6.10 or higher. Please use the BSP module of Rev.6.10 or higher."
 #endif
 
 /* Version Number of API. */
 #define RSCI_VERSION_MAJOR  (2)
-#define RSCI_VERSION_MINOR  (00)
+#define RSCI_VERSION_MINOR  (10)
 
 #define RSCI_CLK_INT         (0x00U) /* use internal clock for baud generation */
 #define RSCI_CLK_EXT8X       (0x03U) /* use external clock 8x baud rate (ASYNC) */
@@ -101,7 +102,7 @@ typedef enum e_rsci_err      /* RSCI API error codes */
     RSCI_ERR_INSUFFICIENT_DATA,  // not enough data in receive queue
 
     /* Synchronous/SSPI modes only */
-    RSCI_ERR_XFER_NOT_DONE,   // data transfer still in progress
+    RSCI_ERR_XFER_NOT_DONE   // data transfer still in progress
     
 
 } rsci_err_t;
@@ -218,18 +219,14 @@ typedef enum e_rsci_cmd
     RSCI_CMD_CHANGE_TX_FIFO_THRESH,    /* change TX FIFO threshold */
     RSCI_CMD_CHANGE_RX_FIFO_THRESH,    /* change RX FIFO threshold */
 #endif
-#if defined(BSP_MCU_RX671)
     RSCI_CMD_SET_RXI_PRIORITY,         /* change RXI priority level */
     RSCI_CMD_SET_TXI_PRIORITY,         /* change TXI priority level */
-#endif
     RSCI_CMD_XFER_LSB_FIRST,           /* start from LSB bit when sending */
     RSCI_CMD_XFER_MSB_FIRST,           /* start from MSB bit when sending */
     RSCI_CMD_INVERT_DATA,              /* logic level of send/receive data is invert */
 
     /* Async commands */
     RSCI_CMD_EN_NOISE_CANCEL,          /* enable noise cancellation */
-    RSCI_CMD_EN_TEI,                   /* RSCI_CMD_EN_TEI is obsolete command,
-                                         but it exists only for compatibility with older version. */
     RSCI_CMD_OUTPUT_BAUD_CLK,          /* output baud clock on the SCK pin */
     RSCI_CMD_START_BIT_EDGE,           /* detect start bit as falling edge of RXDn pin
                                          (default detect as low level on RXDn pin) */
@@ -242,7 +239,7 @@ typedef enum e_rsci_cmd
     RSCI_CMD_TX_Q_BYTES_FREE,          /* get count of unused transmit queue bytes */
     RSCI_CMD_RX_Q_BYTES_AVAIL_TO_READ, /* get num bytes ready for reading */
 
-    /* Async/Sync commands/Manc */
+    /* Async/Sync/Manc commands */
     RSCI_CMD_EN_CTS_IN,                /* enable CTS input (default RTS output) */
 
     /* SSPI/Sync commands */
@@ -251,9 +248,6 @@ typedef enum e_rsci_cmd
 
     /* SSPI commands */
     RSCI_CMD_CHANGE_SPI_MODE,          /* change clock polarity and phase in SSPI mode */
-    RSCI_CMD_CHECK_TX_DONE,            /* see if tx requests complete; RSCI_SUCCESS if yes */
-    RSCI_CMD_CHECK_RX_DONE,            /* see if rx request complete in sync mode; RSCI_SUCCESS if yes */
-    RSCI_CMD_CHECK_RX_SYNC_DONE,
 
     /*Sampling/transition timing adjust commands*/
     RSCI_CMD_RX_SAMPLING_ENABLE,

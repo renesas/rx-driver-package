@@ -25,6 +25,7 @@
 *         : 22.03.2015 1.00    Initial Release
 *         : 31.03.2020 2.21    Added support for RX23E-A
 *         : 11.11.2021 2.40    Added support for RX140 (products with 128-Kbyte or larger ROM).
+*         : 30.06.2022 2.41    Changed the default value of CAN clock source to PCLK.
 ***********************************************************************************************************************/
 #ifndef RSCAN_CONFIG_HEADER_FILE
 #define RSCAN_CONFIG_HEADER_FILE
@@ -45,7 +46,7 @@
  * 0 = PCLKB/2
  * 1 = CANMCLK = EXTAL pin              // RSKRX231, RSKRX23W, RX23E-A, RX140
  */
-#define CAN_CFG_CLOCK_SOURCE            (1)
+#define CAN_CFG_CLOCK_SOURCE            (0)
 
 /*
  * CAN Interrupt Priority

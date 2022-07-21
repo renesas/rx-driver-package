@@ -48,6 +48,7 @@
 *           26.06.2020 4.60    Added prototypes for flash_InterruptRequestEnable() and flash_InterruptRequestDisable().
 *           23.10.2020 4.70    Added RX671.
 *           23.04.2021 4.80    Added RX140.
+*           23.12.2021 4.90    Added RX660.
 ***********************************************************************************************************************/
 
 #ifndef FLASH_RX_HEADER_FILE
@@ -87,6 +88,8 @@
     #include "./src/targets/rx64m/r_flash_rx64m.h"
 #elif defined(MCU_RX651) || defined(MCU_RX65N)
     #include "./src/targets/rx65n/r_flash_rx65n.h"
+#elif defined(MCU_RX660)
+    #include "./src/targets/rx660/r_flash_rx660.h"
 #elif defined(MCU_RX66T)
     #include "./src/targets/rx66t/r_flash_rx66t.h"
 #elif defined(MCU_RX66N)

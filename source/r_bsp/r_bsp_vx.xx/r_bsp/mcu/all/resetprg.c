@@ -39,6 +39,7 @@
 *         : 26.02.2021 3.12      Changed BSP_CFG_RTOS_USED for Azure RTOS.
 *         : 18.05.2021 3.13      Changed vbatt_voltage_stability_wait function.
 *         : 30.11.2021 3.14      Changed the compile switch of _CALL_INIT.
+*         : 28.04,2022 3.15      Added the section of ResetPRG only for CCRX.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -119,6 +120,15 @@ Pre-processor Directives
 ***********************************************************************************************************************/
 /* Set this as the entry point from a power-on reset */
 #if defined(__CCRX__)
+#if BSP_CFG_CONFIGURATOR_VERSION < 2140
+    /* The PResetPRG section of compiler setting are not added by Smart configurator if you are using Smart Configurator
+       for RX V2.13.0 (equivalent to e2 studio 2022-04) or earlier version.
+       Please update Smart configurator to Smart Configurator for RX V2.14.0 (equivalent to e2 studio 2022-07) or 
+       later version.
+     */
+    #error "To use this version of BSP, you need to upgrade Smart configurator. Please upgrade Smart configurator. If you don't use Smart Configurator, please change value of BSP_CFG_CONFIGURATOR_VERSION in r_bsp_config.h."
+#endif
+#pragma section ResetPRG /* Put PResetPRG section at the start address of the code flash. */
 #pragma entry PowerON_Reset_PC
 #endif /* defined(__CCRX__) */
 

@@ -61,15 +61,15 @@
         <incdir>r_ether_rx</incdir>
         <section>
             <address>0x00010000</address>
-            <name>B_ETHERNET_BUFFERS_1</name>
+            <name>B_ETHERNET_BUFFERS*</name>
         </section>
         <section>
             <address>0x00010000</address>
-            <name>B_RX_DESC_1</name>
+            <name>B_RX_DESC*</name>
         </section>
         <section>
             <address>0x00010000</address>
-            <name>B_TX_DESC_1</name>
+            <name>B_TX_DESC*</name>
         </section>
     </package>
 

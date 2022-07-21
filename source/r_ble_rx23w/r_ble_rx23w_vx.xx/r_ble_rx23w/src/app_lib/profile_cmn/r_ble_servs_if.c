@@ -36,6 +36,7 @@ static void find_attr(uint16_t attr_hdl,
             {
                 *pp_serv = gs_servs[s];
                 *pp_char = gs_servs[s]->pp_chars[c];
+                return;
             }
         }
     }
@@ -61,8 +62,14 @@ static void desc_write_evt_handler(uint16_t conn_hdl, uint16_t attr_hdl, st_ble_
 
                     void *p_app_value;
                     p_app_value = malloc(p_char->pp_descs[d]->app_size);
-
-                    ret = p_char->pp_descs[d]->decode(p_app_value, (const st_ble_gatt_value_t *)p_value);
+                    if(NULL == p_app_value)
+                    {
+                        ret = BLE_ERR_MEM_ALLOC_FAILED;
+                    }
+                    else
+                    {
+                        ret = p_char->pp_descs[d]->decode(p_app_value, (const st_ble_gatt_value_t *)p_value);
+                    }
 
                     if (NULL != p_char->pp_descs[d]->write_req_cb)
                     {
@@ -72,13 +79,18 @@ static void desc_write_evt_handler(uint16_t conn_hdl, uint16_t attr_hdl, st_ble_
                     {
                         st_ble_servs_evt_data_t evt_data = {
                             .conn_hdl  = conn_hdl,
-                            .param_len = p_char->pp_descs[d]->app_size,
+                            .param_len = (NULL != p_app_value)?p_char->pp_descs[d]->app_size:0,
                             .p_param   = p_app_value,
                         };
-                        p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->pp_descs[d]->desc_idx, p_char->pp_descs[d]->inst_idx, BLE_SERVS_WRITE_REQ), BLE_SUCCESS, &evt_data);
+                        if (NULL != p_serv->cb)
+                        {
+                            p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->pp_descs[d]->desc_idx, p_char->pp_descs[d]->inst_idx, BLE_SERVS_WRITE_REQ), ret, &evt_data);
+                        }
                     }
-
-                    free(p_app_value);
+                    if (NULL != p_app_value)
+                    {
+                        free(p_app_value);
+                    }
                     break;
                 }
             }
@@ -99,16 +111,8 @@ static void desc_read_evt_handler(uint16_t conn_hdl, uint16_t attr_hdl)
         {
             for (uint8_t d = 0; d < p_char->num_of_descs; d++)
             {
-                if ((p_char->pp_descs[d]->attr_hdl == attr_hdl) &&
-                    (NULL != p_char->pp_descs[d]->decode))
+                if (p_char->pp_descs[d]->attr_hdl == attr_hdl)
                 {
-                    void *p_app_value;
-                    p_app_value = malloc(p_char->pp_descs[d]->app_size);
-
-                    st_ble_gatt_value_t gatt_value;
-                    R_BLE_GATTS_GetAttr(conn_hdl, attr_hdl, &gatt_value);
-                    p_char->pp_descs[d]->decode(p_app_value, &gatt_value);
-
                     if (NULL != p_char->pp_descs[d]->read_req_cb)
                     {
                         p_char->pp_descs[d]->read_req_cb(&p_char->pp_descs[d], conn_hdl);
@@ -116,14 +120,15 @@ static void desc_read_evt_handler(uint16_t conn_hdl, uint16_t attr_hdl)
                     else
                     {
                         st_ble_servs_evt_data_t evt_data = {
-                            .conn_hdl                    = conn_hdl,
-                            .param_len                   = 0,
-                            .p_param                     = NULL,
+                            .conn_hdl   = conn_hdl,
+                            .param_len  = 0,
+                            .p_param    = NULL,
                         };
-                        p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->pp_descs[d]->desc_idx, p_char->pp_descs[d]->inst_idx, BLE_SERVS_READ_REQ), BLE_SUCCESS, &evt_data);
+                        if (NULL != p_serv->cb)
+                        {
+                            p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->pp_descs[d]->desc_idx, p_char->pp_descs[d]->inst_idx, BLE_SERVS_READ_REQ), BLE_SUCCESS, &evt_data);
+                        }
                     }
-
-                    free(p_app_value);
                     break;
                 }
             }
@@ -159,7 +164,10 @@ static void ble_gatts_db_app_cb(uint16_t conn_hdl, uint8_t db_op, uint16_t attr_
                     .param_len = 0,
                     .p_param   = NULL,
                 };
-                p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->char_idx, p_char->inst_idx, BLE_SERVS_READ_REQ), BLE_SUCCESS, &evt_data);
+                if (NULL != p_serv->cb)
+                {
+                    p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->char_idx, p_char->inst_idx, BLE_SERVS_READ_REQ), BLE_SUCCESS, &evt_data);
+                }
             }
         } break;
 
@@ -171,8 +179,14 @@ static void ble_gatts_db_app_cb(uint16_t conn_hdl, uint8_t db_op, uint16_t attr_
                 void *p_app_value;
 
                 p_app_value = malloc(p_char->app_size);
-                ret = p_char->decode(p_app_value, p_value);
-
+                if(NULL == p_app_value)
+                {
+                    ret = BLE_ERR_MEM_ALLOC_FAILED;
+                }
+                else
+                {
+                    ret = p_char->decode(p_app_value, p_value);
+                }
                 if (NULL != p_char->write_req_cb)
                 {
                     p_char->write_req_cb(p_char, conn_hdl, ret, p_app_value);
@@ -181,14 +195,19 @@ static void ble_gatts_db_app_cb(uint16_t conn_hdl, uint8_t db_op, uint16_t attr_
                 {
                     st_ble_servs_evt_data_t evt_data = {
                         .conn_hdl  = conn_hdl,
-                        .param_len = p_char->app_size,
+                        .param_len = (NULL != p_app_value)?p_char->app_size:0,
                         .p_param   = p_app_value,
                     };
 
-                    p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->char_idx, p_char->inst_idx, BLE_SERVS_WRITE_REQ), ret, &evt_data);
+                    if (NULL != p_serv->cb)
+                    {
+                        p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->char_idx, p_char->inst_idx, BLE_SERVS_WRITE_REQ), ret, &evt_data);
+                    }
                 }
-
-                free(p_app_value);
+                if (NULL != p_app_value)
+                {
+                    free(p_app_value);
+                }
             }
         } break;
 
@@ -200,23 +219,34 @@ static void ble_gatts_db_app_cb(uint16_t conn_hdl, uint8_t db_op, uint16_t attr_
                 void *p_app_value;
 
                 p_app_value = malloc(p_char->app_size);
-                ret = p_char->decode(p_app_value, p_value);
-
+                if(NULL == p_app_value)
+                {
+                    ret = BLE_ERR_MEM_ALLOC_FAILED;
+                }
+                else
+                {
+                    ret = p_char->decode(p_app_value, p_value);
+                }
                 if (NULL != p_char->write_cmd_cb)
                 {
-                    p_char->write_cmd_cb(p_char, conn_hdl, ret, &p_app_value);
+                    p_char->write_cmd_cb(p_char, conn_hdl, ret, p_app_value);
                 }
                 else
                 {
                     st_ble_servs_evt_data_t evt_data = {
                         .conn_hdl  = conn_hdl,
-                        .param_len = p_char->app_size,
+                        .param_len = (NULL != p_app_value)?p_char->app_size:0,
                         .p_param   = p_app_value,
                     };
-                    p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->char_idx, p_char->inst_idx, BLE_SERVS_WRITE_CMD), ret, &evt_data);
+                    if (NULL != p_serv->cb)
+                    {
+                        p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->char_idx, p_char->inst_idx, BLE_SERVS_WRITE_CMD), ret, &evt_data);
+                    }
                 }
-
-                free(p_app_value);
+                if (NULL != p_app_value)
+                {
+                    free(p_app_value);
+                }
             }
         } break;
 
@@ -234,10 +264,6 @@ static void ble_gatts_db_app_cb(uint16_t conn_hdl, uint8_t db_op, uint16_t attr_
         case BLE_GATTS_OP_CHAR_PEER_HLD_DESC_READ_REQ:
         {
             desc_read_evt_handler(conn_hdl, attr_hdl);
-        } break;
-
-        case BLE_GATTS_OP_CHAR_REQ_AUTHOR:
-        {
         } break;
 
         default:
@@ -288,7 +314,10 @@ void R_BLE_SERVS_GattsCb(uint16_t type, ble_status_t result, st_ble_gatts_evt_da
                             .param_len = 0,
                             .p_param   = NULL,
                         };
-                        p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->char_idx, p_char->inst_idx, BLE_SERVS_HDL_VAL_CNF), result, &evt_data);
+                        if (NULL != p_serv->cb)
+                        {
+                            p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->char_idx, p_char->inst_idx, BLE_SERVS_HDL_VAL_CNF), result, &evt_data);
+                        }
                     }
                 }
             }
@@ -324,24 +353,36 @@ void R_BLE_SERVS_GattsCb(uint16_t type, ble_status_t result, st_ble_gatts_evt_da
 
                     void *p_app_value;
                     p_app_value = malloc(p_char->app_size);
-
-                    ret = R_BLE_SERVS_GetChar(p_char, p_data->conn_hdl, p_app_value);
+                    if(NULL == p_app_value)
+                    {
+                        ret = BLE_ERR_MEM_ALLOC_FAILED;
+                    }
+                    else
+                    {
+                        ret = R_BLE_SERVS_GetChar(p_char, p_data->conn_hdl, p_app_value);
+                    }
 
                     if (NULL != p_char->write_comp_cb)
                     {
-                        p_char->write_comp_cb(p_char, p_data->conn_hdl, result, p_app_value);
+                        p_char->write_comp_cb(p_char, p_data->conn_hdl, ret, p_app_value);
                     }
                     else
                     {
                         st_ble_servs_evt_data_t evt_data = {
                             .conn_hdl  = p_data->conn_hdl,
-                            .param_len = p_char->app_size,
+                            .param_len = (NULL != p_app_value)?p_char->app_size:0,
                             .p_param   = p_app_value,
                         };
-                        p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->char_idx, p_char->inst_idx, BLE_SERVS_WRITE_COMP), ret, &evt_data);
+                        if (NULL != p_serv->cb)
+                        {
+                            p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->char_idx, p_char->inst_idx, BLE_SERVS_WRITE_COMP), ret, &evt_data);
+                        }
                     }
 
-                    free(p_app_value);
+                    if (NULL != p_app_value)
+                    {
+                        free(p_app_value);
+                    }
                 }
                 /* Descriptor */
                 else
@@ -357,11 +398,17 @@ void R_BLE_SERVS_GattsCb(uint16_t type, ble_status_t result, st_ble_gatts_evt_da
 
                                 void *p_app_value;
                                 p_app_value = malloc(p_char->pp_descs[d]->app_size);
+                                if(NULL == p_app_value)
+                                {
+                                    ret = BLE_ERR_MEM_ALLOC_FAILED;
+                                }
+                                else
+                                {
+                                    st_ble_gatt_value_t gatt_value;
+                                    R_BLE_GATTS_GetAttr(p_data->conn_hdl, p_write_rsp_evt_param->attr_hdl, &gatt_value);
 
-                                st_ble_gatt_value_t gatt_value;
-                                R_BLE_GATTS_GetAttr(p_data->conn_hdl, p_write_rsp_evt_param->attr_hdl, &gatt_value);
-
-                                ret = p_char->pp_descs[d]->decode(p_app_value, &gatt_value);
+                                    ret = p_char->pp_descs[d]->decode(p_app_value, &gatt_value);
+                                }
 
                                 if (NULL != p_char->pp_descs[d]->write_comp_cb)
                                 {
@@ -371,13 +418,18 @@ void R_BLE_SERVS_GattsCb(uint16_t type, ble_status_t result, st_ble_gatts_evt_da
                                 {
                                     st_ble_servs_evt_data_t evt_data = {
                                         .conn_hdl  = p_data->conn_hdl,
-                                        .param_len = p_char->pp_descs[d]->app_size,
+                                        .param_len = (NULL != p_app_value)?p_char->pp_descs[d]->app_size:0,
                                         .p_param   = p_app_value,
                                     };
-                                    p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->pp_descs[d]->desc_idx, p_char->pp_descs[d]->inst_idx, BLE_SERVS_WRITE_COMP), BLE_SUCCESS, &evt_data);
+                                    if (NULL != p_serv->cb)
+                                    {
+                                        p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->pp_descs[d]->desc_idx, p_char->pp_descs[d]->inst_idx, BLE_SERVS_WRITE_COMP), ret, &evt_data);
+                                    }
                                 }
-
-                                free(p_app_value);
+                                if (NULL != p_app_value)
+                                {
+                                    free(p_app_value);
+                                }
                                 break;
                             }
                         }
@@ -406,7 +458,8 @@ void R_BLE_SERVS_GattsCb(uint16_t type, ble_status_t result, st_ble_gatts_evt_da
 
             if ((NULL != p_serv) && (NULL != p_char))
             {
-                if (BLE_GATTC_EXECUTE_WRITE_EXEC_FLAG == p_exe_write_evt_param->exe_flag) {
+                if (BLE_GATTC_EXECUTE_WRITE_EXEC_FLAG == p_exe_write_evt_param->exe_flag)
+                {
                     /* Characteristic */
                     if (((p_char->start_hdl + 1) == s_write_long_attr_hdl) && (NULL != p_char->decode))
                     {
@@ -414,24 +467,34 @@ void R_BLE_SERVS_GattsCb(uint16_t type, ble_status_t result, st_ble_gatts_evt_da
 
                         void *p_app_value;
                         p_app_value = malloc(p_char->app_size);
-
-                        ret = R_BLE_SERVS_GetChar(p_char, p_data->conn_hdl, p_app_value);
-
+                        if(NULL == p_app_value)
+                        {
+                            ret = BLE_ERR_MEM_ALLOC_FAILED;
+                        }
+                        else
+                        {
+                            ret = R_BLE_SERVS_GetChar(p_char, p_data->conn_hdl, p_app_value);
+                        }
                         if (NULL != p_char->write_comp_cb)
                         {
-                            p_char->write_comp_cb(p_char, p_data->conn_hdl, result, p_app_value);
+                            p_char->write_comp_cb(p_char, p_data->conn_hdl, ret, p_app_value);
                         }
                         else
                         {
                             st_ble_servs_evt_data_t evt_data = {
-                                .conn_hdl = p_data->conn_hdl,
-                                .param_len = p_char->app_size,
-                                .p_param = p_app_value,
+                                .conn_hdl  = p_data->conn_hdl,
+                                .param_len = (NULL != p_app_value)?p_char->app_size:0,
+                                .p_param   = p_app_value,
                             };
-                            p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->char_idx, p_char->inst_idx, BLE_SERVS_WRITE_COMP), ret, &evt_data);
+                            if (NULL != p_serv->cb)
+                            {
+                                p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->char_idx, p_char->inst_idx, BLE_SERVS_WRITE_COMP), ret, &evt_data);
+                            }
                         }
-
-                        free(p_app_value);
+                        if (NULL != p_app_value)
+                        {
+                            free(p_app_value);
+                        }
                         s_write_long_attr_hdl = BLE_GATT_INVALID_ATTR_HDL_VAL;
                     }
                     /* Descriptor */
@@ -446,13 +509,22 @@ void R_BLE_SERVS_GattsCb(uint16_t type, ble_status_t result, st_ble_gatts_evt_da
                                 {
                                     ble_status_t ret;
 
-                                    void *p_app_value;
+                                    void *p_app_value = NULL;
                                     p_app_value = malloc(p_char->pp_descs[d]->app_size);
+                                    if(NULL == p_app_value)
+                                    {
+                                        ret = BLE_ERR_MEM_ALLOC_FAILED;
+                                    }
+                                    else
+                                    {
+                                        st_ble_gatt_value_t gatt_value;
+                                        ret = R_BLE_GATTS_GetAttr(p_data->conn_hdl, s_write_long_attr_hdl, &gatt_value);
 
-                                    st_ble_gatt_value_t gatt_value;
-                                    R_BLE_GATTS_GetAttr(p_data->conn_hdl, s_write_long_attr_hdl, &gatt_value);
-
-                                    ret = p_char->pp_descs[d]->decode(p_app_value, &gatt_value);
+                                        if (BLE_SUCCESS == ret)
+                                        {
+                                            ret = p_char->pp_descs[d]->decode(p_app_value, &gatt_value);
+                                        }
+                                    }
 
                                     if (NULL != p_char->pp_descs[d]->write_comp_cb)
                                     {
@@ -461,14 +533,20 @@ void R_BLE_SERVS_GattsCb(uint16_t type, ble_status_t result, st_ble_gatts_evt_da
                                     else
                                     {
                                         st_ble_servs_evt_data_t evt_data = {
-                                            .conn_hdl = p_data->conn_hdl,
-                                            .param_len = p_char->pp_descs[d]->app_size,
-                                            .p_param = p_app_value,
+                                            .conn_hdl  = p_data->conn_hdl,
+                                            .param_len = (NULL != p_app_value)?p_char->pp_descs[d]->app_size:0,
+                                            .p_param   = p_app_value,
                                         };
-                                        p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->pp_descs[d]->desc_idx, p_char->pp_descs[d]->inst_idx, BLE_SERVS_WRITE_COMP), BLE_SUCCESS, &evt_data);
+                                        if (NULL != p_serv->cb)
+                                        {
+                                            p_serv->cb(BLE_SERVS_MULTI_ATTR_EVENT(p_char->pp_descs[d]->desc_idx, p_char->pp_descs[d]->inst_idx, BLE_SERVS_WRITE_COMP), ret, &evt_data);
+                                        }
                                     }
 
-                                    free(p_app_value);
+                                    if (NULL != p_app_value)
+                                    {
+                                        free(p_app_value);
+                                    }
                                     s_write_long_attr_hdl = BLE_GATT_INVALID_ATTR_HDL_VAL;
                                     break;
                                 }
@@ -575,8 +653,7 @@ ble_status_t R_BLE_SERVS_SendHdlVal(const st_ble_servs_char_info_t *p_attr, uint
     R_BLE_SERVS_GetDesc(p_attr->pp_descs[0], conn_hdl, &cccd);
 
     void *p_gatt_value = malloc(p_attr->db_size);
-
-    if (NULL == p_gatt_value)
+    if(NULL == p_gatt_value)
     {
         return BLE_ERR_MEM_ALLOC_FAILED;
     }
@@ -651,8 +728,7 @@ ble_status_t R_BLE_SERVS_SetChar(const st_ble_servs_char_info_t *p_attr, uint16_
     }
 
     void *p_gatt_value = malloc(p_attr->db_size);
-
-    if (NULL == p_gatt_value)
+    if(NULL == p_gatt_value)
     {
         return BLE_ERR_MEM_ALLOC_FAILED;
     }
@@ -715,8 +791,7 @@ ble_status_t R_BLE_SERVS_SetDesc(const st_ble_servs_desc_info_t *p_attr, uint16_
     }
 
     void *p_gatt_value = malloc(p_attr->db_size);
-
-    if (NULL == p_gatt_value)
+    if(NULL == p_gatt_value)
     {
         return BLE_ERR_MEM_ALLOC_FAILED;
     }

@@ -25,7 +25,9 @@
  ************************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *           01.10.2016 1.0     Initial Release
- *           31.07.2021 2.03    Add lpc_snooze_mode_configure() function declaration　for rx140
+ *           31.07.2021 2.03    Add lpc_snooze_mode_configure() function declaration for rx140
+ *           31.12.2021 2.04    Delete lpc_operating_mode_set() and lpc_return_clock_switch()
+ *                              function declaration for rx660
  ***********************************************************************************************************************/
 #ifndef R_LPC_RX_PRIVATE_H
     #define R_LPC_RX_PRIVATE_H
@@ -45,7 +47,9 @@
 /***********************************************************************************************************************
  Public Functions
  ***********************************************************************************************************************/
+#ifndef LPC_INVALID_OPERATING_MODE
 lpc_err_t lpc_operating_mode_set (lpc_operating_mode_t e_mode);
+#endif
 lpc_err_t lpc_low_power_mode_configure (lpc_low_power_mode_t e_mode);
 lpc_err_t lpc_lowpower_activate (lpc_callback_set_t pcallback);
 lpc_err_t lpc_return_clock_switch (lpc_clock_switch_t e_clock_source, bool enable);

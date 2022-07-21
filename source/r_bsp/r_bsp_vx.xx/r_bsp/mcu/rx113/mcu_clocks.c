@@ -60,6 +60,7 @@
 *                               Added the bsp_clkout_initial_configure function.
 *                               Added comments for when use simulator.
 *                               Added version check of smart configurator.
+*         : 22.04.2022 3.01     Deleted version check of smart configurator.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -86,10 +87,6 @@ Macro definitions
     #define BSP_PRV_PLL_CLK_OPERATING    (1)    /* PLL circuit is operating. */
 #else /* PLL is not used as clock source. */
     #define BSP_PRV_PLL_CLK_OPERATING    (0)    /* PLL circuit is stopped. */
-#endif
-
-#if BSP_CFG_CONFIGURATOR_VERSION < 2120
-#error "To use this version of BSP, you need to upgrade Smart configurator. Please upgrade Smart configurator. If you don't use Smart Configurator, please change value of BSP_CFG_CONFIGURATOR_VERSION in r_bsp_config.h."
 #endif
 
 /***********************************************************************************************************************

@@ -22,6 +22,8 @@
 ***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *           25.08.2020 1.00    Initial Release
+*           31.03.2022 4.40    Fixed the issue with DTC mode which incorrectly uses the same transfer information 
+*                              for all channels.
 ***********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -31,6 +33,7 @@
 #include "r_sci_rx_private.h"
 #include "r_sci_rx_if.h"
 #if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+#include <stdlib.h>
 #include "r_dtc_rx_if.h"
 #include "r_sci_rx_dtc.h"
 #include "r_sci_rx_platform.h"
@@ -50,14 +53,14 @@
  *********************************************************************************************************************/
 dtc_cmd_arg_t           tx_args_dtc;
 dtc_transfer_data_cfg_t tx_cfg_dtc;
-dtc_transfer_data_t     tx_info_dtc;
 dtc_cmd_arg_t           rx_args_dtc;
 dtc_transfer_data_cfg_t rx_cfg_dtc;
-dtc_transfer_data_t     rx_info_dtc;
+sci_dtc_info_transfer_t *gp_dtc_info_head = NULL;
 
 /**********************************************************************************************************************
  Private (static) variables and functions
  *********************************************************************************************************************/
+sci_err_t sci_dtc_info_transfer_create(sci_hdl_t const hdl, sci_dtc_info_transfer_t **p_info_transfer);
 static uint8_t tx_dummy_buf = SCI_CFG_DUMMY_TX_BYTE;
 static uint8_t rx_dummy_buf = 0;
 
@@ -79,15 +82,22 @@ static uint8_t rx_dummy_buf = 0;
 sci_err_t sci_txfifo_dtc_create(sci_hdl_t const hdl, uint8_t *p_src, uint16_t const length)
 {
     sci_fifo_ctrl_t        *p_tctrl;
-    sci_err_t err_scif = SCI_SUCCESS;
+    sci_err_t err_sci = SCI_SUCCESS;
     dtc_err_t  err_dtc = DTC_SUCCESS;
+    sci_dtc_info_transfer_t *p_info_transfer = NULL;
 
     p_tctrl = &hdl->queue[hdl->qindex_app_tx];
 
     tx_args_dtc.act_src               = hdl->rom->dtc_tx_act_src;
     tx_args_dtc.chain_transfer_nr     = 0;
-    tx_args_dtc.p_transfer_data       = &tx_info_dtc;
     tx_args_dtc.p_data_cfg            = &tx_cfg_dtc;
+
+    err_sci = sci_dtc_info_transfer_create(hdl, &p_info_transfer);
+    if(SCI_SUCCESS != err_sci)
+    {
+        return err_sci;
+    }
+    tx_args_dtc.p_transfer_data = &p_info_transfer->tx_info_dtc;
 
     tx_cfg_dtc.transfer_mode          = DTC_TRANSFER_MODE_BLOCK;
     tx_cfg_dtc.data_size              = DTC_DATA_SIZE_BYTE;
@@ -125,7 +135,7 @@ sci_err_t sci_txfifo_dtc_create(sci_hdl_t const hdl, uint8_t *p_src, uint16_t co
 
         p_tctrl->tx_fraction = (length - (tx_cfg_dtc.transfer_count * tx_cfg_dtc.block_size));
 
-        err_dtc = R_DTC_Create(tx_args_dtc.act_src, &tx_info_dtc, &tx_cfg_dtc, 0);
+        err_dtc = R_DTC_Create(tx_args_dtc.act_src, &p_info_transfer->tx_info_dtc, &tx_cfg_dtc, 0);
         if (DTC_SUCCESS == err_dtc)
         {
             err_dtc = R_DTC_Control(DTC_CMD_ACT_SRC_ENABLE, NULL, &tx_args_dtc);
@@ -145,10 +155,10 @@ sci_err_t sci_txfifo_dtc_create(sci_hdl_t const hdl, uint8_t *p_src, uint16_t co
 
     if (DTC_SUCCESS != err_dtc)
     {
-        err_scif = SCI_ERR_DTC;
+        err_sci = SCI_ERR_DTC;
     }
 
-    return err_scif;
+    return err_sci;
 }
 /**********************************************************************************************************************
  End of function sci_txfifo_dtc_create
@@ -173,15 +183,22 @@ sci_err_t sci_txfifo_dtc_create(sci_hdl_t const hdl, uint8_t *p_src, uint16_t co
 sci_err_t sci_rxfifo_dtc_create(sci_hdl_t const hdl, uint8_t *p_dst, uint16_t const length)
 {
     sci_fifo_ctrl_t        *p_rctrl;
-    sci_err_t err_scif = SCI_SUCCESS;
+    sci_err_t err_sci = SCI_SUCCESS;
     dtc_err_t  err_dtc = DTC_SUCCESS;
+    sci_dtc_info_transfer_t *p_info_transfer = NULL;
 
     p_rctrl = &hdl->queue[hdl->qindex_app_rx];
 
     rx_args_dtc.act_src               = hdl->rom->dtc_rx_act_src;
     rx_args_dtc.chain_transfer_nr     = 0;
-    rx_args_dtc.p_transfer_data       = &rx_info_dtc;
     rx_args_dtc.p_data_cfg            = &rx_cfg_dtc;
+
+    err_sci = sci_dtc_info_transfer_create(hdl, &p_info_transfer);
+    if(SCI_SUCCESS != err_sci)
+    {
+        return err_sci;
+    }
+    rx_args_dtc.p_transfer_data = &p_info_transfer->rx_info_dtc;
 
     rx_cfg_dtc.transfer_mode          = DTC_TRANSFER_MODE_BLOCK;
     rx_cfg_dtc.data_size              = DTC_DATA_SIZE_BYTE;
@@ -220,7 +237,7 @@ sci_err_t sci_rxfifo_dtc_create(sci_hdl_t const hdl, uint8_t *p_dst, uint16_t co
         p_rctrl->rx_fraction = (length - (rx_cfg_dtc.transfer_count * rx_cfg_dtc.block_size));
         SCI_PRV_RX_FIFO_THRESHOLD = hdl->rx_dflt_thresh;
 
-        err_dtc = R_DTC_Create(rx_args_dtc.act_src, &rx_info_dtc, &rx_cfg_dtc, 0);
+        err_dtc = R_DTC_Create(rx_args_dtc.act_src, &p_info_transfer->rx_info_dtc, &rx_cfg_dtc, 0);
         if (DTC_SUCCESS == err_dtc)
         {
             err_dtc = R_DTC_Control(DTC_CMD_ACT_SRC_ENABLE, NULL, &rx_args_dtc);
@@ -241,10 +258,10 @@ sci_err_t sci_rxfifo_dtc_create(sci_hdl_t const hdl, uint8_t *p_dst, uint16_t co
 
     if (DTC_SUCCESS != err_dtc)
     {
-        err_scif = SCI_ERR_DTC;
+        err_sci = SCI_ERR_DTC;
     }
 
-    return err_scif;
+    return err_sci;
 }
 /**********************************************************************************************************************
  End of function sci_rxfifo_dtc_create
@@ -268,15 +285,23 @@ sci_err_t sci_rxfifo_dtc_create(sci_hdl_t const hdl, uint8_t *p_dst, uint16_t co
 sci_err_t sci_rx_dtc_create(sci_hdl_t const hdl, uint8_t *p_dst, uint16_t const length)
 {
     sci_fifo_ctrl_t        *p_rctrl;
-    sci_err_t err_scif = SCI_SUCCESS;
+    sci_err_t err_sci = SCI_SUCCESS;
     dtc_err_t  err_dtc = DTC_SUCCESS;
+    sci_dtc_info_transfer_t *p_info_transfer = NULL;
 
     p_rctrl = &hdl->queue[hdl->qindex_app_rx];
 
     rx_args_dtc.act_src               = hdl->rom->dtc_rx_act_src;
     rx_args_dtc.chain_transfer_nr     = 0;
-    rx_args_dtc.p_transfer_data       = &rx_info_dtc;
     rx_args_dtc.p_data_cfg            = &rx_cfg_dtc;
+
+    err_sci = sci_dtc_info_transfer_create(hdl, &p_info_transfer);
+    if(SCI_SUCCESS != err_sci)
+    {
+        return err_sci;
+    }
+    rx_args_dtc.p_transfer_data = &p_info_transfer->rx_info_dtc;
+
 
     rx_cfg_dtc.transfer_mode          = DTC_TRANSFER_MODE_NORMAL;
     rx_cfg_dtc.data_size              = DTC_DATA_SIZE_BYTE;
@@ -311,7 +336,7 @@ sci_err_t sci_rx_dtc_create(sci_hdl_t const hdl, uint8_t *p_dst, uint16_t const 
 
         p_rctrl->rx_fraction = 0;
 
-        err_dtc = R_DTC_Create(rx_args_dtc.act_src, &rx_info_dtc, &rx_cfg_dtc, 0);
+        err_dtc = R_DTC_Create(rx_args_dtc.act_src, &p_info_transfer->rx_info_dtc, &rx_cfg_dtc, 0);
         if (DTC_SUCCESS == err_dtc)
         {
             err_dtc = R_DTC_Control(DTC_CMD_ACT_SRC_ENABLE, NULL, &rx_args_dtc);
@@ -328,10 +353,10 @@ sci_err_t sci_rx_dtc_create(sci_hdl_t const hdl, uint8_t *p_dst, uint16_t const 
 
     if (DTC_SUCCESS != err_dtc)
     {
-        err_scif = SCI_ERR_DTC;
+        err_sci = SCI_ERR_DTC;
     }
 
-    return err_scif;
+    return err_sci;
 }
 /**********************************************************************************************************************
  End of function sci_rx_dtc_create
@@ -354,15 +379,22 @@ sci_err_t sci_rx_dtc_create(sci_hdl_t const hdl, uint8_t *p_dst, uint16_t const 
 sci_err_t sci_tx_dtc_create(sci_hdl_t const hdl, uint8_t *p_src, uint16_t const length)
 {
     sci_fifo_ctrl_t        *p_tctrl;
-    sci_err_t err_scif = SCI_SUCCESS;
+    sci_err_t err_sci = SCI_SUCCESS;
     dtc_err_t  err_dtc = DTC_SUCCESS;
+    sci_dtc_info_transfer_t *p_info_transfer = NULL;
 
     p_tctrl = &hdl->queue[hdl->qindex_app_tx];
 
     tx_args_dtc.act_src               = hdl->rom->dtc_tx_act_src;
     tx_args_dtc.chain_transfer_nr     = 0;
-    tx_args_dtc.p_transfer_data       = &tx_info_dtc;
     tx_args_dtc.p_data_cfg            = &tx_cfg_dtc;
+
+    err_sci = sci_dtc_info_transfer_create(hdl, &p_info_transfer);
+    if(SCI_SUCCESS != err_sci)
+    {
+        return err_sci;
+    }
+    tx_args_dtc.p_transfer_data = &p_info_transfer->tx_info_dtc;
 
     tx_cfg_dtc.transfer_mode          = DTC_TRANSFER_MODE_NORMAL;
     tx_cfg_dtc.data_size              = DTC_DATA_SIZE_BYTE;
@@ -397,7 +429,7 @@ sci_err_t sci_tx_dtc_create(sci_hdl_t const hdl, uint8_t *p_src, uint16_t const 
 
         p_tctrl->tx_fraction = 0;
 
-        err_dtc = R_DTC_Create(tx_args_dtc.act_src, &tx_info_dtc, &tx_cfg_dtc, 0);
+        err_dtc = R_DTC_Create(tx_args_dtc.act_src, &p_info_transfer->tx_info_dtc, &tx_cfg_dtc, 0);
         if (DTC_SUCCESS == err_dtc)
         {
             err_dtc = R_DTC_Control(DTC_CMD_ACT_SRC_ENABLE, NULL, &tx_args_dtc);
@@ -414,13 +446,112 @@ sci_err_t sci_tx_dtc_create(sci_hdl_t const hdl, uint8_t *p_src, uint16_t const 
 
     if (DTC_SUCCESS != err_dtc)
     {
-        err_scif = SCI_ERR_DTC;
+        err_sci = SCI_ERR_DTC;
     }
 
-    return err_scif;
+    return err_sci;
 }
 /**********************************************************************************************************************
  End of function sci_tx_dtc_create
+ *********************************************************************************************************************/
+
+/**********************************************************************************************************************
+* Function Name: sci_dtc_info_transfer_create
+* Description  : This function creates a allocated memory for information transfer address for DTC transfer
+* Arguments    : hdl -
+*                    handle for channel (ptr to chan control block)
+*                p_info_transfer -
+*                    pointer to information transfer address of DTC
+* Return Value : SCI_SUCCESS -
+*                    Create allocated memory for information transfer address successfully
+*                SCI_ERR_DTC -
+*                    Create allocated memory for information transfer address NOT successfully
+ *********************************************************************************************************************/
+sci_err_t sci_dtc_info_transfer_create(sci_hdl_t const hdl, sci_dtc_info_transfer_t **p_info_transfer)
+{
+    sci_err_t err_sci = SCI_SUCCESS;
+    sci_dtc_info_transfer_t **p_current_info = &gp_dtc_info_head;
+    sci_dtc_info_transfer_t *p_new_info = NULL;
+    uint8_t chan = hdl->rom->chan;
+
+    /* Check allocated memory for start pointer */
+    if(NULL == *p_current_info)
+    {
+        p_new_info = (sci_dtc_info_transfer_t *) malloc(sizeof(sci_dtc_info_transfer_t));
+        if(NULL == p_new_info)
+        {
+            return SCI_ERR_DTC;
+        }
+        p_new_info->chan = chan;
+        p_new_info->next = NULL;
+        *p_current_info = p_new_info;
+        *p_info_transfer = *p_current_info;
+    }
+    else /* Allocated memory */
+    {
+        /* Check allocated memory for current channel */
+        while(NULL != *p_current_info)
+        {
+            if(chan == (*p_current_info)->chan)
+            {
+                *p_info_transfer = *p_current_info;
+                return err_sci;
+            }
+            p_current_info = &((*p_current_info)->next);
+        }
+
+        /* Create new allocated memory for a channel */
+        p_new_info = (sci_dtc_info_transfer_t *) malloc(sizeof(sci_dtc_info_transfer_t));
+        if(NULL == p_new_info)
+        {
+            return SCI_ERR_DTC;
+        }
+        p_new_info->chan = chan;
+        p_new_info->next = NULL;
+        *p_current_info = p_new_info;
+        *p_info_transfer = *p_current_info;
+    }
+    return err_sci;
+}
+
+/**********************************************************************************************************************
+ End of function sci_dtc_info_transfer_create
+ *********************************************************************************************************************/
+
+/**********************************************************************************************************************
+* Function Name: sci_dtc_info_transfer_delete
+* Description  : This function deletes the allocated memory of information transfer address for the current channel
+* Arguments    : hdl -
+*                    handle for channel (ptr to chan control block)
+* Return Value : None-
+ *********************************************************************************************************************/
+void sci_dtc_info_transfer_delete(sci_hdl_t const hdl)
+{
+    sci_dtc_info_transfer_t **p_current_info = &gp_dtc_info_head;
+    sci_dtc_info_transfer_t *p_next_info = NULL;
+    uint8_t chan = hdl->rom->chan;
+
+    /* Check allocated memory for current channel */
+    while(NULL != *p_current_info)
+    {
+        if(chan == (*p_current_info)->chan)
+        {
+            /* Store the next pointer of current list */
+            p_next_info = (*p_current_info)->next;
+
+            /*Destroy allocated memory for the current channel */
+            free(*p_current_info);
+            *p_current_info = NULL;
+
+            /* Re-assign the position current list for the next list */
+            *p_current_info = p_next_info;
+            break;
+        }
+        p_current_info = &((*p_current_info)->next);
+    }
+}
+/**********************************************************************************************************************
+ End of function sci_dtc_info_transfer_delete
  *********************************************************************************************************************/
 
 #endif /* ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01)) */

@@ -65,6 +65,10 @@
 *                              in R_SCI_Control() for Series RX100 and RX200.
 *           29.12.2021 4.20    Added support for RX140-256KB.
 *           14.03.2022 4.30    Added support for RX66T-48Pin.
+*           31.03.2022 4.40    Fixed the issue with DTC mode which incorrectly uses the same transfer information 
+*                              for all channels.
+*                              Fixed issue of consecutively calling R_SCI_Receive() function in using DTC/DMAC.
+*                              Added support for RX660.
 ***********************************************************************************************************************/
 
 #ifndef SCI_IF_H
@@ -92,7 +96,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define SCI_VERSION_MAJOR  (4)
-#define SCI_VERSION_MINOR  (30)
+#define SCI_VERSION_MINOR  (40)
 
 #define SCI_DTC_DMACA_DISABLE  (0x0)
 #define SCI_DTC_ENABLE         (0x1)

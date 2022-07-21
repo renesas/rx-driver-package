@@ -47,6 +47,7 @@
 *                               Added the setting of the HOCO trimming register.
 *                               Added comments for when use simulator.
 *                               Added version check of smart configurator.
+*         : 22.04.2022 2.01     Deleted version check of smart configurator.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -90,10 +91,6 @@ Macro definitions
 #define BSP_PRV_HOCO_SCKCR     (0x22022222)
 #else
     #error "Error! Invalid setting for BSP_CFG_MCU_VCC_MV in r_bsp_config.h"
-#endif
-
-#if BSP_CFG_CONFIGURATOR_VERSION < 2120
-#error "To use this version of BSP, you need to upgrade Smart configurator. Please upgrade Smart configurator. If you don't use Smart Configurator, please change value of BSP_CFG_CONFIGURATOR_VERSION in r_bsp_config.h."
 #endif
 
 /***********************************************************************************************************************

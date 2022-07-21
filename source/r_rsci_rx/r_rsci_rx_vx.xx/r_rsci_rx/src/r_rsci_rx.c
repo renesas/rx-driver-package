@@ -25,6 +25,7 @@
 *                              Supported for RX671.
 *           03.12.2021 2.00    Updated new features in Asynchronous mode
 *                              and added support for Manchester mode.
+*           31.03.2022 2.10    Supported for RX660.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -196,10 +197,10 @@ typedef union
 *
 * @retval   RSCI_ERR_INVALID_ARG  An element of the p_cfg structure contains an invalid value.
 *
-* @retval   RSCI_ERR_QUEUE_UNAVAILABLE  Cannot open transmit or receive queue or both (Asynchronous mode).
+* @retval   RSCI_ERR_QUEUE_UNAVAILABLE  Cannot open transmit or receive queue or both (Asynchronous or Manchester mode).
 * @details  Initializes an RSCI channel for a particular mode and provides a Handle in *p_hdl for use with other API
-* functions. RXI and ERI interrupts are enabled in all modes. TXI is enabled in Asynchronous mode
-* @note  The driver calculates the optimum values for BRR, SEMR.ABCS, and SMR.CKS using BSP_PCLKA_HZ and
+* functions. RXI and ERI interrupts are enabled in all modes. TXI is enabled in Asynchronous or Manchester mode
+* @note  The driver calculates the optimum values for SCR2.BRR, SCR2.ABCS, and SCR2.CKS using BSP_PCLKA_HZ and
 * BSP_PCLKB_HZ as defined in mcu_info.h of the board support package. This however does not guarantee
 * a low bit error rate for all peripheral clock/baud rate combinations.
 * If an external clock is used in Asynchronous mode, the pin direction must be selected before calling the
@@ -849,7 +850,7 @@ static rsci_err_t rsci_init_manc(rsci_hdl_t const      hdl,
 * if the transceiver is not already in use. All transmissions are handled at the interrupt level.\n
 * Note that the toggling of Slave Select lines when in SSPI mode is not handled by this driver. The Slave Select line
 * for the target device must be enabled prior to calling this function.
-* Also, toggling of the CTS/RTS pin in Synchronous/Asynchronous mode is not handled by this driver.
+* Also, toggling of the CTS/RTS pin in Synchronous/Asynchronous/Manchester mode is not handled by this driver.
 * @note None
 */
 rsci_err_t R_RSCI_Send(rsci_hdl_t const    hdl,
@@ -1013,7 +1014,7 @@ static rsci_err_t rsci_send_async_data(rsci_hdl_t const hdl,
 * Return Value : RSCI_SUCCESS -
 *                    data transfer started
 *                RSCI_ERR_INSUFFICIENT_SPACE -
-*                    not enough space in tx queue to store data (Async)
+*                    not enough space in tx queue to store data (Async/Manc)
 ******************************************************************************/
 static byteq_err_t rsci_put_byte(rsci_hdl_t const   hdl,
                                 uint8_t const     byte)
@@ -1087,7 +1088,7 @@ static rsci_err_t rsci_send_sync_data(rsci_hdl_t const hdl,
             hdl->rom->regs->FCR.BIT.RFRST = 0x01;
 
             {
-                /* If length is lower than SCI_CFG_CHXX_RX_FIFO_THRESH, FCR.BIT.RTRG register is set to length */
+                /* If length is lower than RSCI_CFG_CHX_RX_FIFO_THRESH, FCR.BIT.RTRG register is set to length */
                 if (length < hdl->rx_curr_thresh)
                 {
                     hdl->rom->regs->FCR.BIT.RTRG = length;
@@ -1833,7 +1834,7 @@ static void rsci_receive_data_match(rsci_hdl_t const hdl)
 #if (RSCI_CFG_ASYNC_INCLUDED)
         if (0 == hdl->rom->regs->SCR0.BIT.DCME) /* DCME automatically set 0 when data matched */
         {
-            hdl->rom->regs->SSR.BIT.DCMF = 0; /* Clear Data Match Flag */
+            hdl->rom->regs->SSCR.BIT.DCMFC = 1; /* Clear Data Match Flag */
 
             if ((0 == hdl->rom->regs->SSR.BIT.DFER )  &&  (0 == hdl->rom->regs->SSR.BIT.DPER )) /* Check framing error and parity error */
             {
@@ -2141,12 +2142,10 @@ rsci_err_t R_RSCI_Control(rsci_hdl_t const     hdl,
             return RSCI_ERR_NULL_PTR;
         }
 #endif
-#if defined(BSP_MCU_RX671)
         if ((RSCI_CMD_SET_TXI_PRIORITY == cmd) || (RSCI_CMD_SET_RXI_PRIORITY == cmd))
         {
             return RSCI_ERR_NULL_PTR;
         }
-#endif
     }
     if ((RSCI_MODE_OFF == hdl->mode) || (RSCI_MODE_MAX <= hdl->mode))
     {
@@ -2170,7 +2169,6 @@ rsci_err_t R_RSCI_Control(rsci_hdl_t const     hdl,
         }
     }
 #endif
-#if defined(BSP_MCU_RX671)
     if ((RSCI_CMD_SET_TXI_PRIORITY == cmd) || (RSCI_CMD_SET_RXI_PRIORITY == cmd))
     {
         /* Casting void* type is valid */
@@ -2179,7 +2177,6 @@ rsci_err_t R_RSCI_Control(rsci_hdl_t const     hdl,
             return RSCI_ERR_INVALID_ARG;
         }
     }
-#endif
 #endif /* End of RSCI_CFG_PARAM_CHECKING_ENABLE */
     
     /* COMMANDS COMMON TO ALL MODES */
@@ -2306,7 +2303,6 @@ rsci_err_t R_RSCI_Control(rsci_hdl_t const     hdl,
     }
 #endif /* End of RSCI_CFG_FIFO_INCLUDED */
 
-#if defined(BSP_MCU_RX671)
     case (RSCI_CMD_SET_TXI_PRIORITY):
     {
         /* Casting void type to uint8_t type is valid */
@@ -2320,7 +2316,6 @@ rsci_err_t R_RSCI_Control(rsci_hdl_t const     hdl,
         *hdl->rom->ipr_rxi = *((uint8_t *)p_args);
         break;
     }
-#endif
 
     default:
     {

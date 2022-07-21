@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_fcu.c
@@ -625,6 +625,15 @@ flash_err_t flash_write(uint32_t src_start_address,
     /* TOTAL NUMBER OF BYTES TO WRITE LOOP */
     while (g_current_parameters.total_count > 0)
     {
+#if (FLASH_TYPE == FLASH_TYPE_4)
+        if ((g_current_parameters.bgo_enabled_cf == true)
+         || (g_current_parameters.bgo_enabled_df == true))
+        {
+            /* Disable FRDYI interrupt request */
+            flash_InterruptRequestDisable(VECT(FCU,FRDYI));
+        }
+#endif
+
         /* Setup fcu command */
         FLASH.FSADDR.LONG = g_current_parameters.dest_addr;
         *g_pfcu_cmd_area = (uint8_t) FLASH_FACI_CMD_PROGRAM;
@@ -660,6 +669,10 @@ flash_err_t flash_write(uint32_t src_start_address,
         if ((g_current_parameters.bgo_enabled_cf == true)
          || (g_current_parameters.bgo_enabled_df == true))
         {
+#if (FLASH_TYPE == FLASH_TYPE_4)
+            /* Enable FRDYI interrupt request */
+            flash_InterruptRequestEnable(VECT(FCU,FRDYI));
+#endif
             break;
         }
 

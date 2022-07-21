@@ -14,20 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_gettime.c
  * Description  : Function to get the time in a module.
- *********************************************************************************************************************/
-/**********************************************************************************************************************
- * History : DD.MM.YYYY Version  Description
- *         : xx.xx.xxxx 1.00     First Release
- *         : 02.09.2021 1.01     Fixed reset timing
- *         : 21.10.2021 1.02     Support for Azure RTOS
- *                               Support for GCC for Renesas GNURX Toolchain
- *         : 15.11.2021 1.03     Improved receiving behavior, removed socket buffers
- *         : 24.01.2022 1.04     R_CELLULAR_SetPSM and R_CELLULAR_SetEDRX have been added as new APIs
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -75,21 +66,13 @@ e_cellular_err_t R_CELLULAR_GetTime(st_cellular_ctrl_t * const p_ctrl, st_cellul
 
     if (CELLULAR_SUCCESS == ret)
     {
-        memset(p_time, 0, sizeof(p_time));
         semaphore_ret = cellular_take_semaphore(p_ctrl->at_semaphore);
         if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
         {
+            memset(p_time, 0, sizeof(st_cellular_datetime_t));
+            p_ctrl->recv_data = p_time;
             ret = atc_cclk_check(p_ctrl);
-            if (CELLULAR_SUCCESS == ret)
-            {
-                p_time->year = p_ctrl->sci_ctrl.time.year;
-                p_time->month = p_ctrl->sci_ctrl.time.month;
-                p_time->day = p_ctrl->sci_ctrl.time.day;
-                p_time->hour = p_ctrl->sci_ctrl.time.hour;
-                p_time->min = p_ctrl->sci_ctrl.time.min;
-                p_time->sec = p_ctrl->sci_ctrl.time.sec;
-                p_time->timezone = p_ctrl->sci_ctrl.time.timezone;
-            }
+            p_ctrl->recv_data = NULL;
             cellular_give_semaphore(p_ctrl->at_semaphore);
         }
         else

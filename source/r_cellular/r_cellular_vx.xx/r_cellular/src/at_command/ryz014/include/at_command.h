@@ -14,20 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : at_command.h
  * Description  : Configures the AT command.
- *********************************************************************************************************************/
-/**********************************************************************************************************************
- * History : DD.MM.YYYY Version  Description
- *         : xx.xx.xxxx 1.00     First Release
- *         : 02.09.2021 1.01     Fixed reset timing
- *         : 21.10.2021 1.02     Support for Azure RTOS
- *                               Support for GCC for Renesas GNURX Toolchain
- *         : 15.11.2021 1.03     Improved receiving behavior, removed socket buffers
- *         : 24.01.2022 1.04     R_CELLULAR_SetPSM and R_CELLULAR_SetEDRX have been added as new APIs
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -115,36 +106,42 @@ e_cellular_err_t atc_cgatt_check (st_cellular_ctrl_t * const p_ctrl);
  * Description    @details       Execute the AT command (CGAUTH). / Set AP user name and password.
  * Arguments      @param[in/out] p_ctrl -
  *                                  Pointer to managed structure.
+ *                @param[in]     p_ap_cfg -
+ *                                  Pointer to AP information structure.
  * Return Value   @retval        CELLULAR_SUCCESS -
  *                                  Successfully executed AT command.
  *                @retval        CELLULAR_ERR_MODULE_COM -
  *                                  Communication with module failed.
  ************************************************************************************************/
-e_cellular_err_t atc_cgauth (st_cellular_ctrl_t * const p_ctrl);
+e_cellular_err_t atc_cgauth (st_cellular_ctrl_t * const p_ctrl, const st_cellular_ap_cfg_t * const p_ap_cfg);
 
 /*************************************************************************************************
  * Function Name  @fn            atc_cgdcont
  * Description    @details       Execute the AT command (CGDCONT). / Set AP name.
  * Arguments      @param[in/out] p_ctrl -
  *                                  Pointer to managed structure.
+ *                @param[in]     p_ap_cfg -
+ *                                  Pointer to AP information structure.
  * Return Value   @retval        CELLULAR_SUCCESS -
  *                                  Successfully executed AT command.
  *                @retval        CELLULAR_ERR_MODULE_COM -
  *                                  Communication with module failed.
  ************************************************************************************************/
-e_cellular_err_t atc_cgdcont (st_cellular_ctrl_t * const p_ctrl);
+e_cellular_err_t atc_cgdcont (st_cellular_ctrl_t * const p_ctrl, const st_cellular_ap_cfg_t * const p_ap_cfg);
 
 /*************************************************************************************************
  * Function Name  @fn            atc_cpin
  * Description    @details       Execute the AT command (CPIN). / PIN/PUK code entry.
  * Arguments      @param[in/out] p_ctrl -
  *                                  Pointer to managed structure.
+ *                @param[in]     p_cfg -
+ *                                  Pointer to the configuration structure.
  * Return Value   @retval        CELLULAR_SUCCESS -
  *                                  Successfully executed AT command.
  *                @retval        CELLULAR_ERR_MODULE_COM -
  *                                  Communication with module failed.
  ************************************************************************************************/
-e_cellular_err_t atc_cpin (st_cellular_ctrl_t * const p_ctrl);
+e_cellular_err_t atc_cpin (st_cellular_ctrl_t * const p_ctrl, const st_cellular_cfg_t * const p_cfg);
 
 /*************************************************************************************************
  * Function Name  @fn            atc_cpin_check
@@ -335,9 +332,24 @@ e_cellular_err_t atc_cclk_check (st_cellular_ctrl_t * const p_ctrl);
 e_cellular_err_t atc_reset (st_cellular_ctrl_t * const p_ctrl);
 
 /********************************************************************************************************
- * Function Name  @fn            atc_cereg_off
- * Description    @details       Execute the AT command (AT+CEREG=0). / Disable notification of
- *                                                                      network registration information.
+ * Function Name  @fn            atc_cereg
+ * Description    @details       Execute the AT command (AT+CEREG). / Enable/disable network registration
+ *                                                                    information notification
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ *                @param[in]     mode -
+ *                                  Setting the notification level.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully executed AT command.
+ *                @retval        CELLULAR_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ *******************************************************************************************************/
+e_cellular_err_t atc_cereg (st_cellular_ctrl_t * const p_ctrl , const e_cellular_network_result_t level);
+
+/********************************************************************************************************
+ * Function Name  @fn            atc_cereg_check
+ * Description    @details       Execute the AT command (AT+CEREG?). / Check network registration
+ *                                                                     information notification
  * Arguments      @param[in/out] p_ctrl -
  *                                  Pointer to managed structure.
  * Return Value   @retval        CELLULAR_SUCCESS -
@@ -345,19 +357,33 @@ e_cellular_err_t atc_reset (st_cellular_ctrl_t * const p_ctrl);
  *                @retval        CELLULAR_ERR_MODULE_COM -
  *                                  Communication with module failed.
  *******************************************************************************************************/
-e_cellular_err_t atc_cereg_off (st_cellular_ctrl_t * const p_ctrl);
+e_cellular_err_t atc_cereg_check (st_cellular_ctrl_t * const p_ctrl);
 
-/**********************************************************************************************************
+/***************************************************************************************************************
  * Function Name  @fn            atc_sqnautoconnect
- * Description    @details       Execute the AT command (AT+SQNAUTOCONNECT=0). / Disable Auto-Connect mode.
+ * Description    @details       Execute the AT command (AT+SQNAUTOCONNECT). / Disable/Enable Auto-Connect mode.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ *                @param[in]     type -
+ *                                  Enable/disable automatic connection.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully executed AT command.
+ *                @retval        CELLULAR_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ **************************************************************************************************************/
+e_cellular_err_t atc_sqnautoconnect (st_cellular_ctrl_t * const p_ctrl, e_cellular_auto_connect_t const type);
+
+/***************************************************************************************************************
+ * Function Name  @fn            atc_sqnautoconnect_check
+ * Description    @details       Execute the AT command (AT+SQNAUTOCONNECT?). / Check automatic connection mode.
  * Arguments      @param[in/out] p_ctrl -
  *                                  Pointer to managed structure.
  * Return Value   @retval        CELLULAR_SUCCESS -
  *                                  Successfully executed AT command.
  *                @retval        CELLULAR_ERR_MODULE_COM -
  *                                  Communication with module failed.
- *********************************************************************************************************/
-e_cellular_err_t atc_sqnautoconnect (st_cellular_ctrl_t * const p_ctrl);
+ **************************************************************************************************************/
+e_cellular_err_t atc_sqnautoconnect_check (st_cellular_ctrl_t * const p_ctrl);
 
 /**********************************************************************************************************
  * Function Name  @fn            atc_sqnsimst
@@ -465,8 +491,9 @@ e_cellular_err_t atc_cgpaddr (st_cellular_ctrl_t * const p_ctrl, const uint8_t c
  *                                  Communication with module failed.
  ***********************************************************************************************************/
 e_cellular_err_t atc_cpsms (st_cellular_ctrl_t * const p_ctrl, const e_cellular_psm_mode_t mode,
-                            const e_cellular_tau_cycle_t, const e_cellular_cycle_multiplier_t tau_multiplier,
-                            const e_cellular_active_cycle_t, const e_cellular_cycle_multiplier_t active_multiplier);
+                            const e_cellular_tau_cycle_t tau, const e_cellular_cycle_multiplier_t tau_multiplier,
+                            const e_cellular_active_cycle_t active,
+                            const e_cellular_cycle_multiplier_t active_multiplier);
 
 /*************************************************************************************************
  * Function Name  @fn            atc_cpsms_check
@@ -525,7 +552,7 @@ e_cellular_err_t atc_csq (st_cellular_ctrl_t * const p_ctrl);
 
 /*************************************************************************************************
  * Function Name  @fn            atc_cgmr
- * Description    @details       Execute the AT command (AT+CGMR). / Get software version.
+ * Description    @details       Execute the AT command (AT+CGMR). / Get software revision.
  * Arguments      @param[in/out] p_ctrl -
  *                                  Pointer to managed structure.
  * Return Value   @retval        CELLULAR_SUCCESS -
@@ -546,6 +573,18 @@ e_cellular_err_t atc_cgmr (st_cellular_ctrl_t * const p_ctrl);
  *                                  Communication with module failed.
  ************************************************************************************************/
 e_cellular_err_t atc_cgsn (st_cellular_ctrl_t * const p_ctrl);
+
+/*************************************************************************************************
+ * Function Name  @fn            atc_cgsn3
+ * Description    @details       Execute the AT command (AT+CGSN=3). / Get SVN.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully executed AT command.
+ *                @retval        CELLULAR_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ ************************************************************************************************/
+e_cellular_err_t atc_cgsn3 (st_cellular_ctrl_t * const p_ctrl);
 
 /*************************************************************************************************
  * Function Name  @fn            atc_cgmm
@@ -655,6 +694,77 @@ e_cellular_err_t atc_sqnricfg (st_cellular_ctrl_t * const p_ctrl, e_cellular_psm
  ********************************************************************************************************************/
 e_cellular_err_t atc_cmer (st_cellular_ctrl_t * const p_ctrl, e_cellular_psm_mode_t mode);
 
+/*********************************************************************************************************************
+ * Function Name  @fn            atc_cnum
+ * Description    @details       Execute the AT command (AT+CNUM). / Get Phone Number.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully executed AT command.
+ *                @retval        CELLULAR_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ ********************************************************************************************************************/
+e_cellular_err_t atc_cnum (st_cellular_ctrl_t * const p_ctrl);
+
+/*********************************************************************************************************************
+ * Function Name  @fn            atc_sqnccid
+ * Description    @details       Execute the AT command (AT+SQNCCID). / Get ICCID.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully executed AT command.
+ *                @retval        CELLULAR_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ ********************************************************************************************************************/
+e_cellular_err_t atc_sqnccid (st_cellular_ctrl_t * const p_ctrl);
+
+/*********************************************************************************************************************
+ * Function Name  @fn            atc_sqnsl
+ * Description    @details       Execute the AT command (AT+SQNSL). / Open a socket listening for TCP connections.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ *                @param[in]     socket_no -
+ *                                  Number to connect socket.
+ *                @param[in]     ip_version -
+ *                                  IP address version.
+ *                @param[in]     port -
+ *                                  Released port number.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully executed AT command.
+ *                @retval        CELLULAR_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ ********************************************************************************************************************/
+e_cellular_err_t atc_sqnsl (st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_no,
+                                const uint8_t ip_version, const uint16_t port);
+
+/*********************************************************************************************************************
+ * Function Name  @fn            atc_ping
+ * Description    @details       Execute the AT command (AT+PING). / Perform PING.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ *                @param[in]     p_host -
+ *                                  Host name or IP address.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully executed AT command.
+ *                @retval        CELLULAR_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ ********************************************************************************************************************/
+e_cellular_err_t atc_ping (st_cellular_ctrl_t * const p_ctrl, const uint8_t * const p_host);
+
+/*********************************************************************************************************************
+ * Function Name  @fn            atc_sqnmoni
+ * Description    @details       Execute the AT command (AT+SQNMONI). / Obtaining cell information.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ *                @param[in]     type -
+ *                                  Notification type.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully executed AT command.
+ *                @retval        CELLULAR_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ ********************************************************************************************************************/
+e_cellular_err_t atc_sqnmoni (st_cellular_ctrl_t * const p_ctrl, const e_cellular_info_type_t type);
+
 #if (CELLULAR_IMPLEMENT_TYPE == 'B')
 /****************************************************************************************************************
  * Function Name  @fn            atc_sqnsnvw
@@ -757,7 +867,6 @@ e_cellular_err_t atc_sqnsscfg (st_cellular_ctrl_t * const p_ctrl,
  *                @param[in]     pp_command_arg -
  *                                  Pointer to the argument of the AT command.
  ****************************************************************************/
-void atc_generate (uint8_t * const p_command_buff, const uint8_t * p_command , const uint8_t ** pp_command_arg);
-
+void atc_generate (uint8_t * const p_command_buff, const uint8_t * p_command, const uint8_t ** pp_command_arg);
 
 #endif /* AT_COMMAND_H */

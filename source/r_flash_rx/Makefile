@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_flash_rx
-VERSION = 		4.81
+VERSION = 		4.90
 MDF = V2
 
 CONFIG_FOLDER = r_config

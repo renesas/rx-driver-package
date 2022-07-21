@@ -14,15 +14,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_ble_sec_data.c
  * Description  : Functions for BLE Security Data Management. 
- **********************************************************************************************************************/
-/**********************************************************************************************************************
- * History      : DD.MM.YYYY Version  Description
- *              : 23.08.2019 1.00     First Release
  **********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -600,7 +596,7 @@ static void find_oldest_entry(int32_t * p_entry, uint8_t * p_sec_data)
  *              : uint8_t * p_alloc_bond_num                  ; Bonding Number
  *              : uint8_t * p_sec_data                        ; Security Data Area
  * Return Value : BLE_SUCCESS(0x0000)                         ; Success 
- *                BLE_ERR_INVALID_OPERATION(0x0009)           ; Magic Numver read or write failuire.
+ *                BLE_ERR_INVALID_OPERATION(0x0009)           ; Magic Numver read or write failure.
   *********************************************************************************************************************/
 static ble_status_t update_bond_num(int32_t entry, int32_t op_code, uint8_t * p_alloc_bond_num, uint8_t * p_sec_data)
 {
@@ -670,7 +666,7 @@ static ble_status_t update_bond_num(int32_t entry, int32_t op_code, uint8_t * p_
 
                 if(0xFF != bond_num)
                 {
-                    bond_order = p_sec_data[BLE_SECD_ADDR_REM_START + 
+                    bond_order = p_sec_data[BLE_SECD_SEC_REM_OFFSET + 
                                             entry * BLE_SECD_REM_BOND_SIZE + BLE_SECD_BD_ADDR_SIZE];
                     update_bond_order(entry, p_sec_data, bond_order);
                 }

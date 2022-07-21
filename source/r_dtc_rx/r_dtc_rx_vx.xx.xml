@@ -82,6 +82,7 @@
         <group omit_board="true">RX64M</group>
         <group omit_board="true">RX65N</group>
         <group omit_board="true">RX66T</group>
+        <group omit_board="true">RX660</group>
         <group omit_board="true">RX671</group>
         <group omit_board="true">RX66N</group>
         <group omit_board="true">RX71M</group>
@@ -99,7 +100,7 @@
         <zipsource>r_dtc_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.10</version>
+            <version>7.20</version>
         </dependency>
         <application>DTC</application>
         <desc>DTC driver</desc>

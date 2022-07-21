@@ -26,6 +26,7 @@
 *           13.09.2021 1.10    Fixed setting of transfer data direction in async mode.
 *           03.12.2021 2.00    Updated new features in Asynchronous mode
 *                              and added support for Manchester mode.
+*           22.12.2021 2.10    Removed RSCI_CMD_EN_TEI command.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -561,13 +562,6 @@ rsci_err_t rsci_async_cmds(rsci_hdl_t const hdl,
             hdl->rom->regs->SCR0.LONG |= RSCI_EN_XCVR_MASK;
             break;
         }
-
-    #if RSCI_CFG_TEI_INCLUDED
-        case (RSCI_CMD_EN_TEI):  /* SCI_CMD_EN_TEI is obsolete command, but it exists only for compatibility with older version. */
-        {
-            break;
-        }
-    #endif
 
         case (RSCI_CMD_TX_Q_FLUSH):
         {

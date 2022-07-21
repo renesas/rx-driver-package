@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015(2022) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_rx_mcu.c
@@ -33,6 +33,7 @@
  *         : 30.07.2019 1.27 RX72M is added.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.04.2021 1.31 RX671 is added.
+ *         : 30.06.2022 1.40 USBX PCDC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -44,6 +45,11 @@
 #include "r_usb_extern.h"
 #include "r_usb_bitdefine.h"
 #include "r_usb_reg_access.h"
+
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+#include "r_usb_cstd_rtos.h"
+#endif                                 /* #if (BSP_CFG_RTOS_USED == 5) */
+
 
 #if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))
 #include "r_usb_dmac.h"
@@ -712,6 +718,8 @@ void usb_cpu_delay_xms (uint16_t time)
     vTaskDelay((TickType_t)(time/portTICK_PERIOD_MS));
 #elif (BSP_CFG_RTOS_USED == 4)      /* Renesas RI600V4 & RI600PX */
     dly_tsk((RELTIM)time);
+#elif (BSP_CFG_RTOS_USED == 5)      /* Azure RTOS */
+    tx_thread_sleep(time);
 #endif /* (BSP_CFG_RTOS_USED == 1) */
 }
 /******************************************************************************

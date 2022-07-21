@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_lvd_rx_private.h
@@ -34,6 +34,8 @@
 *                                    Added define for LVD_GROUP_INT_ICUD.
 *              : 31.03.2021 3.70     Added support for RX671.
 *                                    Added define for LVD_GROUP_INT_ICUE.
+*              : 31.03.2022 4.10     Added support for RX660.
+*                                    Added define for LVD_GROUP_INT_ICUF.
 ***********************************************************************************************************************/
 #ifndef LVD_PRIVATE_HEADER_FILE
 #define LVD_PRIVATE_HEADER_FILE
@@ -97,6 +99,7 @@ Macro definitions
 #define LVD_GROUP_INT_ICUB                      (0x200)
 #define LVD_GROUP_INT_ICUD                      (0x300)
 #define LVD_GROUP_INT_ICUE                      (0x400)
+#define LVD_GROUP_INT_ICUF                      (0x500)
 
 /***********************************************************************************************************************
 Typedef definitions

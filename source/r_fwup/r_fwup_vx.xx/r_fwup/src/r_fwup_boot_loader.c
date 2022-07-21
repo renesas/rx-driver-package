@@ -26,13 +26,16 @@
  *           19.05.2021 1.01    Added support for RX72N,RX66T,RX130
  *           08.07.2021 1.02    Added support for RX671 and GCC
  *           10.08.2021 1.03    Added support for IAR
+ *           25.03.2022 1.04    Change the supported FreeRTOS version
+ *                              Select data area from DF/CF
+ *                              Added support for RX140-256KB
  *********************************************************************************************************************/
 
 #include <stdio.h>
 #include <string.h>
 #include "r_fwup_config.h"  /* Firmware update config definitions */
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == 2) /* FWUP_IMPLEMENTATION_AFRTOS */
-#include "aws_iot_ota_agent.h"
+#include "ota_platform_interface.h"
 #endif
 #include "r_smc_entry.h"
 #include "r_flash_rx_if.h"
@@ -40,9 +43,6 @@
 #include "r_sys_time_rx_if.h"
 #include "r_fwup_if.h"
 #include "r_fwup_private.h"
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-#include "r_flash_spi_if.h"
-#endif /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) */
 
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_BOOTLOADER)
 #include "r_sci_rx_pinset.h"
@@ -75,16 +75,6 @@ typedef struct st_load_const_data_ctrl_block
     uint32_t progress;
 } st_load_const_data_ctrl_block_t;
 
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-extern flash_spi_status_t fwup_flash_spi_open(void);
-extern flash_spi_status_t fwup_flash_spi_close(void);
-extern flash_spi_status_t fwup_flash_spi_erase(flash_spi_erase_info_t *);
-extern flash_spi_status_t fwup_flash_spi_write(uint8_t *, uint32_t, uint32_t);
-extern flash_spi_status_t fwup_flash_spi_read(uint32_t, uint32_t, uint8_t *);
-extern flash_spi_status_t fwup_flash_spi_polling_erase(void);
-extern flash_spi_status_t fwup_flash_spi_polling_write(void);
-#endif /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) */
-
 const uint8_t g_code_signer_public_key[] = CODE_SIGNER_PUBLIC_KEY_PEM;
 const uint32_t g_code_signer_public_key_length = sizeof(g_code_signer_public_key);
 
@@ -103,6 +93,10 @@ static int32_t const_data_block_read (uint32_t * const_data, uint32_t offset);
 static void bank_swap_with_software_reset (void);
 static void software_reset (void);
 static const uint8_t * get_status_string (uint8_t status);
+#if (FWUP_CFG_OTA_DATA_STORAGE == 1)
+static flash_err_t s_copy_data_area(void);
+static flash_err_t s_set_copy_flag(void);
+#endif /* FWUP_CFG_OTA_DATA_STORAGE == 1 */
 #if (FLASH_CFG_CODE_FLASH_BGO == 1)
 static void my_flash_callback (void * event);
 #endif
@@ -115,6 +109,9 @@ static st_load_fw_control_block_t s_load_fw_control_block;
 static st_load_const_data_ctrl_block_t s_load_const_data_control_block;
 static uint32_t s_block_buffer[BOOT_LOADER_FLASH_CF_BLOCK_SIZE / 4];
 static uint32_t s_flash_error_code;
+#if (FWUP_CFG_OTA_DATA_STORAGE == 1)
+static uint8_t s_last_image_flag;
+#endif /* FWUP_CFG_OTA_DATA_STORAGE == 1 */
 
 /* CODE CHECKER, this is OK as a comment precedes the cast. */
 static const uint8_t * sp_boot_loader_magic_code = (uint8_t*) BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS;
@@ -131,11 +128,6 @@ int32_t R_FWUP_SecureBoot(void)
     flash_err_t              flash_api_error_code   = FLASH_SUCCESS;
     int32_t                  secure_boot_error_code = FWUP_IN_PROGRESS;
     e_state_monitoring_err_t monitoring_error_code  = MONI_SUCCESS;  // 20201Q_No5
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-    flash_spi_status_t     flash_spi_error_code = FLASH_SPI_SUCCESS;
-    flash_spi_erase_info_t flash_spi_erase_info;
-    uint32_t               flash_spi_erase_total_size;
-#endif /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) */
 #if (FWUP_FLASH_BANK_MODE == 0)
     uint32_t bank_info = 255;
 #else
@@ -145,6 +137,9 @@ int32_t R_FWUP_SecureBoot(void)
 #if (FLASH_CFG_CODE_FLASH_BGO == 1)
     flash_interrupt_config_t cb_func_info;
 #endif /* (FLASH_CFG_CODE_FLASH_BGO == 1) */
+#if (FWUP_CFG_OTA_DATA_STORAGE == 1)
+    bool    do_copy_flag = false;
+#endif /* FWUP_CFG_OTA_DATA_STORAGE == 1 */
 
     st_fwup_control_block_t * p_fwup_control_block_tmp =
             (st_fwup_control_block_t *)s_block_buffer;
@@ -157,7 +152,7 @@ int32_t R_FWUP_SecureBoot(void)
         (void)fwup_communication_open();
         fwup_update_status(FWUP_STATE_FATAL_ERROR);
         DEBUG_LOG("ERROR: Not Open.\r\n");
-        secure_boot_error_code = FWUP_ERR_ALREADY_OPEN;
+        secure_boot_error_code = FWUP_ERR_NOT_OPEN;
         return secure_boot_error_code;
     }
 
@@ -196,8 +191,12 @@ int32_t R_FWUP_SecureBoot(void)
                 DEBUG_LOG("RX72N secure boot program\r\n");
 #elif (BSP_MCU_RX231)
                 DEBUG_LOG("RX231 secure boot program\r\n");
+#elif (BSP_MCU_RX140)
+                DEBUG_LOG("RX140 secure boot program\r\n");
 #elif (BSP_MCU_RX130)
                 DEBUG_LOG("RX130 secure boot program\r\n");
+#else
+                DEBUG_LOG("Secure boot program\r\n");
 #endif
                 DEBUG_LOG("-------------------------------------------------\r\n");
 
@@ -389,7 +388,6 @@ int32_t R_FWUP_SecureBoot(void)
                         while (1);
                     }
 
-#if(FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 0)
                     DEBUG_LOG("erase bank0 execute area ...");
                     flash_api_error_code = fwup_flash_erase(
                             (flash_block_address_t) BOOT_LOADER_UPDATE_EXECUTE_AREA_ERASE_ADDRESS,
@@ -431,9 +429,6 @@ int32_t R_FWUP_SecureBoot(void)
                         break;
                     }
                     DEBUG_LOG("OK\r\n");
-#elif(FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 0) */
-
-#endif /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 0) */
 
                     DEBUG_LOG2("integrity check scheme = %-.32s\r\n",
                             sp_fwup_control_block_bank0->signature_type);
@@ -508,59 +503,6 @@ int32_t R_FWUP_SecureBoot(void)
                 {
                     DEBUG_LOG("End Of Life process start.\r\n");
 
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-                    flash_spi_error_code = fwup_flash_spi_polling_erase();
-                    if(FLASH_SPI_SUCCESS_BUSY == flash_spi_error_code)
-                    {
-                        /* Check serail flash erase polling continuously */
-                        fwup_update_status(FWUP_STATE_EOL_BANK1_ERASE_WAIT);
-                    }
-                    else if (FLASH_SPI_SUCCESS == flash_spi_error_code)
-                    {
-                        /* Serial flash erase finished */
-                        if ((BOOT_LOADER_TOTAL_UPDATE_SIZE - flash_spi_erase_total_size) <
-                            BOOT_LOADER_SERIAL_FLASH_BLOCK_SIZE)
-                        {
-                            /* last erase block of serial flash */
-                            flash_spi_erase_total_size = BOOT_LOADER_TOTAL_UPDATE_SIZE;
-                        }
-                        else
-                        {
-                            flash_spi_erase_total_size += BOOT_LOADER_SERIAL_FLASH_BLOCK_SIZE;
-                        }
-                        if (flash_spi_erase_total_size != BOOT_LOADER_TOTAL_UPDATE_SIZE)
-                        {
-                            /* serial flash erase is not finished */
-                            /* Set start address of serial flash */
-                            flash_spi_erase_info.addr = BOOT_LOADER_SERIAL_FLASH_START_ADDRESS +
-                                    flash_spi_erase_total_size;
-                            flash_spi_erase_info.mode = FLASH_SPI_MODE_B64K_ERASE; /* Set serial flash erase mode */
-                            flash_spi_error_code = fwup_flash_spi_erase(&flash_spi_erase_info);
-                            if(FLASH_SPI_SUCCESS != flash_spi_error_code)
-                            {
-                                DEBUG_LOG2("R_FLASH_SPI_Erase() returns error. %d.\r\n", flash_spi_error_code);
-                                DEBUG_LOG("system error.\r\n");
-                                fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                                secure_boot_error_code = FWUP_FAIL;
-                                break; // @suppress("Case break statement")
-                            }
-                            fwup_update_status(FWUP_STATE_EOL_BANK1_ERASE_WAIT);
-                        }
-                        else
-                        {
-                            fwup_update_status(FWUP_STATE_EOL_BANK1_ERASE_COMPLETE);
-                        }
-                    }
-                    else
-                    {
-                        DEBUG_LOG("NG\r\n");
-                        DEBUG_LOG2("R_FLASH_SPI_Polling() returns error code. %d.\r\n", flash_spi_error_code);
-                        DEBUG_LOG("system error.\r\n");
-                        fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                        secure_boot_error_code = FWUP_FAIL;
-                        break; // @suppress("Case break statement")
-                    }
-#else /* F(FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) */
                     /* CODE CHECKER, this is OK as a comment precedes the cast. */
                     memcpy(s_block_buffer, (void*)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS,
                             BOOT_LOADER_FLASH_CF_BLOCK_SIZE);
@@ -619,9 +561,6 @@ int32_t R_FWUP_SecureBoot(void)
                     R_BSP_SoftwareDelay(1000, BSP_DELAY_MILLISECS);
                     secure_boot_error_code = FWUP_END_OF_LIFE;
                     break; // @suppress("Case break statement")
-
-#endif /* F(FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) */
-
                 }
 #endif /* (FWUP_FLASH_BANK_MODE == 1) */
                 else
@@ -736,6 +675,16 @@ int32_t R_FWUP_SecureBoot(void)
             case FWUP_STATE_BANK0_UPDATE_CHECK:
             case FWUP_STATE_BANK1_UPDATE_CODE_FLASH_ERASE_WAIT:
             case FWUP_STATE_BANK1_UPDATE_CODE_FLASH_ERASE_COMPLETE:
+            case FWUP_STATE_BANK1_UPDATE_DATA_AREA_ERASE:
+            case FWUP_STATE_BANK1_UPDATE_DATA_AREA_ERASE_WAIT:
+            case FWUP_STATE_BANK1_UPDATE_DATA_AREA_ERASE_COMPLETE:
+            case FWUP_STATE_BANK1_UPDATE_DATA_AREA_COPY_WAIT:
+            case FWUP_STATE_BANK1_UPDATE_DATA_AREA_COPY_COMPLETE:
+            case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_ERASE:
+            case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_ERASE_WAIT:
+            case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_ERASE_COMPLETE:
+            case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_WRITE_WAIT:
+            case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_WRITE_COMPLETE:
             case FWUP_STATE_EOL_BANK1_ERASE_WAIT:
             case FWUP_STATE_EOL_BANK1_ERASE_COMPLETE:
             case FWUP_STATE_EOL_BANK1_LIFECYCLE_WRITE_WAIT:
@@ -929,22 +878,13 @@ int32_t R_FWUP_SecureBoot(void)
                                     }
                                 }
 #endif
+
                                 DEBUG_LOG("========== install user program phase ==========\r\n");
+#if (FWUP_CFG_OTA_DATA_STORAGE == 1)
+                                DEBUG_LOG("erase install area (data area on code flash ): ");
+#else  /* (FWUP_CFG_OTA_DATA_STORAGE == 0) */
                                 DEBUG_LOG("erase install area (data flash): ");
-#if (FLASH_CFG_DATA_FLASH_BGO == 1)
-                                flash_api_error_code = fwup_flash_erase(
-                                    (flash_block_address_t)BOOT_LOADER_USER_CONST_DATA_LOW_ADDRESS,
-                                    BOOT_LOADER_UPDATE_CONST_DATA_TARGET_BLOCK_NUMBER);
-                                if (FLASH_SUCCESS != flash_api_error_code)
-                                {
-                                    DEBUG_LOG2("R_FLASH_Erase() returns error. %d.\r\n", s_flash_error_code);
-                                    DEBUG_LOG("system error.\r\n");
-                                    fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                                    secure_boot_error_code = FWUP_FAIL;
-                                    break; // @suppress("Case break statement")
-                                }
-                                fwup_update_status(FWUP_STATE_INSTALL_DATA_FLASH_ERASE_WAIT);
-#else  /* (FLASH_CFG_DATA_FLASH_BGO == 0) */
+#endif  /* FWUP_CFG_OTA_DATA_STORAGE */
                                 flash_api_error_code = fwup_flash_erase(
                                         (flash_block_address_t) BOOT_LOADER_USER_CONST_DATA_LOW_ADDRESS,
                                         BOOT_LOADER_UPDATE_CONST_DATA_TARGET_BLOCK_NUMBER);
@@ -956,6 +896,10 @@ int32_t R_FWUP_SecureBoot(void)
                                     secure_boot_error_code = FWUP_FAIL;
                                     break; // @suppress("Case break statement")
                                 }
+
+#if (FLASH_CFG_DATA_FLASH_BGO == 1)
+                                fwup_update_status(FWUP_STATE_INSTALL_DATA_FLASH_ERASE_WAIT);
+#else  /* (FLASH_CFG_DATA_FLASH_BGO == 0) */
                                 fwup_update_status(FWUP_STATE_INSTALL_DATA_FLASH_ERASE_COMPLETE);
 #endif  /* FLASH_CFG_DATA_FLASH_BGO */
                                 break;
@@ -979,7 +923,6 @@ int32_t R_FWUP_SecureBoot(void)
                                     break; // @suppress("Case break statement")
                                 }
                                 DEBUG_LOG("erase install area (code flash): ");
-#if (FLASH_CFG_CODE_FLASH_BGO == 1)
                                 flash_api_error_code = fwup_flash_erase(
                                     (flash_block_address_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_ERASE_ADDRESS,
                                     BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER);
@@ -991,96 +934,15 @@ int32_t R_FWUP_SecureBoot(void)
                                     secure_boot_error_code = FWUP_FAIL;
                                     break; // @suppress("Case break statement")
                                 }
+#if (FLASH_CFG_CODE_FLASH_BGO == 1)
                                 fwup_update_status(FWUP_STATE_BANK0_INSTALL_CODE_FLASH_ERASE_WAIT);
 #else /* (FLASH_CFG_CODE_FLASH_BGO == 0) */
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-                                flash_spi_erase_total_size = 0x0;
-                                /* Set start address of serial flash */
-                                flash_spi_erase_info.addr = BOOT_LOADER_SERIAL_FLASH_START_ADDRESS;
-                                flash_spi_erase_info.mode = FLASH_SPI_MODE_B64K_ERASE; /* Set serial flash erase mode */
-                                flash_spi_error_code = fwup_flash_spi_erase(&flash_spi_erase_info);
-                                if(FLASH_SPI_SUCCESS != flash_spi_error_code)
-                                {
-                                    DEBUG_LOG2("R_FLASH_SPI_Erase() returns error. %d.\r\n", flash_spi_error_code);
-                                    fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                                    secure_boot_error_code = FWUP_FAIL;
-                                    break;
-                                }
-                                fwup_update_status(FWUP_STATE_BANK0_INSTALL_CODE_FLASH_ERASE_WAIT);
-#else /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 0) */
-                                flash_api_error_code = fwup_flash_erase(
-                                        (flash_block_address_t) BOOT_LOADER_UPDATE_TEMPORARY_AREA_ERASE_ADDRESS,
-                                        BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER);
-                                if (FLASH_SUCCESS != flash_api_error_code)
-                                {
-                                    DEBUG_LOG2("R_FLASH_Erase() returns error. %d.\r\n", s_flash_error_code);
-                                    DEBUG_LOG("system error.\r\n");
-                                    fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                                    secure_boot_error_code = FWUP_FAIL;
-                                    break;
-                                }
                                 fwup_update_status(FWUP_STATE_BANK0_INSTALL_CODE_FLASH_ERASE_COMPLETE);
-#endif /* FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER */
 #endif  /* FLASH_CFG_CODE_FLASH_BGO == 1 */
                                 break;
 
                             case FWUP_STATE_BANK0_INSTALL_CODE_FLASH_ERASE_WAIT:
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-                                flash_spi_error_code = fwup_flash_spi_polling_erase();
-                                if(FLASH_SPI_SUCCESS_BUSY == flash_spi_error_code)
-                                {
-                                    /* Check serail flash erase polling continuously */
-                                    fwup_update_status(FWUP_STATE_BANK0_INSTALL_CODE_FLASH_ERASE_WAIT);
-                                }
-                                else if (FLASH_SPI_SUCCESS == flash_spi_error_code)
-                                {
-                                    /* Serial flash erase finished */
-                                    if ((BOOT_LOADER_TOTAL_UPDATE_SIZE - flash_spi_erase_total_size) <
-                                        BOOT_LOADER_SERIAL_FLASH_BLOCK_SIZE)
-                                    {
-                                        /* last erase block of serial flash */
-                                        flash_spi_erase_total_size = BOOT_LOADER_TOTAL_UPDATE_SIZE;
-                                    }
-                                    else
-                                    {
-                                        flash_spi_erase_total_size += BOOT_LOADER_SERIAL_FLASH_BLOCK_SIZE;
-                                    }
-                                    if (flash_spi_erase_total_size != BOOT_LOADER_TOTAL_UPDATE_SIZE)
-                                    {
-                                        /* serial flash erase is not finished */
-                                        /* Set start address of serial flash */
-                                        flash_spi_erase_info.addr = BOOT_LOADER_SERIAL_FLASH_START_ADDRESS +
-                                                                        flash_spi_erase_total_size;
-                                        /* Set serial flash erase mode */
-                                        flash_spi_erase_info.mode = FLASH_SPI_MODE_B64K_ERASE;
-                                        flash_spi_error_code = fwup_flash_spi_erase(&flash_spi_erase_info);
-                                        if(FLASH_SPI_SUCCESS != flash_spi_error_code)
-                                        {
-                                            DEBUG_LOG2("R_FLASH_SPI_Erase() returns error. %d.\r\n",
-                                                    flash_spi_error_code);
-                                            fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                                            secure_boot_error_code = FWUP_FAIL;
-                                            break; // @suppress("Case break statement")
-                                        }
-                                        fwup_update_status(FWUP_STATE_BANK0_INSTALL_CODE_FLASH_ERASE_WAIT);
-                                    }
-                                    else
-                                    {
-                                        fwup_update_status(FWUP_STATE_BANK0_INSTALL_CODE_FLASH_ERASE_COMPLETE);
-                                    }
-                                }
-                                else
-                                {
-                                    DEBUG_LOG("NG\r\n");
-                                    DEBUG_LOG2("R_FLASH_SPI_Polling() returns error code = %d.\r\n",
-                                            flash_spi_error_code);
-                                    fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                                    secure_boot_error_code = FWUP_FAIL;
-                                    break; // @suppress("Case break statement")
-                                }
-#else /* FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1 */
                                 /* this state will be update by flash callback */
-#endif /* FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1 */
                                 break;
 
                             case FWUP_STATE_BANK0_INSTALL_CODE_FLASH_ERASE_COMPLETE:
@@ -1113,23 +975,6 @@ int32_t R_FWUP_SecureBoot(void)
                                 if ( !firm_block_read(s_load_fw_control_block.flash_buffer,
                                         s_load_fw_control_block.offset))
                                 {
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-                                    flash_spi_error_code = fwup_flash_spi_write(
-                                        (uint8_t)&s_load_fw_control_block.flash_buffer,
-                                        (uint32_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS +
-                                            s_load_fw_control_block.offset,
-                                            sizeof(s_load_fw_control_block.flash_buffer));
-                                    if(FLASH_SPI_SUCCESS != flash_spi_error_code)
-                                    {
-                                        DEBUG_LOG("NG\r\n");
-                                        DEBUG_LOG2("R_FLASH_SPI_Erase() returns error code = %d.\r\n",
-                                                flash_spi_error_code);
-                                        fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                                        secure_boot_error_code = FWUP_FAIL;
-                                        break; // @suppress("Case break statement")
-                                    }
-                                    fwup_update_status(FWUP_STATE_BANK0_INSTALL_SECURE_BOOT_ERASE_WAIT);
-#else /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 0) */
                                     flash_api_error_code = fwup_flash_write(
                                             (uint32_t) s_load_fw_control_block.flash_buffer,
                                             (uint32_t) BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS
@@ -1145,35 +990,14 @@ int32_t R_FWUP_SecureBoot(void)
                                     }
 #if (FLASH_CFG_CODE_FLASH_BGO == 1)
                                     fwup_update_status(FWUP_STATE_BANK0_INSTALL_CODE_FLASH_WRITE_WAIT);
-#elif (FLASH_CFG_CODE_FLASH_BGO == 0)
+#else /* FLASH_CFG_CODE_FLASH_BGO == 0 */
                                     fwup_update_status(FWUP_STATE_BANK0_INSTALL_CODE_FLASH_WRITE_COMPLETE);
 #endif  /* FLASH_CFG_CODE_FLASH_BGO */
-#endif /* FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1 */
                                 }
                                 break;
 
                             case FWUP_STATE_BANK0_INSTALL_CODE_FLASH_WRITE_WAIT:
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-                                flash_spi_error_code = fwup_flash_spi_polling_write();
-                                if(FLASH_SPI_SUCCESS_BUSY == flash_spi_error_code)
-                                {
-                                    fwup_update_status(FWUP_STATE_BANK0_INSTALL_CODE_FLASH_WRITE_WAIT);
-                                }
-                                else if (FLASH_SPI_SUCCESS == flash_spi_error_code)
-                                {
-                                    fwup_update_status(FWUP_STATE_BANK0_INSTALL_CODE_FLASH_WRITE_COMPLETE);
-                                }
-                                else
-                                {
-                                    DEBUG_LOG("NG\r\n");
-                                    DEBUG_LOG2("R_FLASH_SPI_Polling() returns error. %d.\r\n", flash_spi_error_code);
-                                    fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                                    secure_boot_error_code = FWUP_FAIL;
-                                    break; // @suppress("Case break statement")
-                                }
-#else /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 0) */
                                 /* this state will be update by flash callback */
-#endif /* FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER */
                                 break;
 
                             case FWUP_STATE_BANK0_INSTALL_CODE_FLASH_WRITE_COMPLETE:
@@ -1290,13 +1114,6 @@ int32_t R_FWUP_SecureBoot(void)
                                         DEBUG_LOG("bank1(temporary area) on code flash integrity check...");
 
                                         /* Firmware verification for the signature type. */
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-                                        //*************************************************************
-                                        // CAUTION : Unfinished implementation.
-                                        //   Signing verification of serial flash data by ECDSA.
-                                        //*************************************************************
-                                        verification_result = -1;
-#else /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 0) */
                                         if (!strcmp((const char *)sp_fwup_control_block_bank1->signature_type,
                                                 INTEGRITY_CHECK_SCHEME_HASH_SHA256_STANDALONE))
                                         {
@@ -1315,11 +1132,11 @@ int32_t R_FWUP_SecureBoot(void)
                                             verification_result = memcmp(sp_fwup_control_block_bank1->signature,
                                                     hash_sha256, sizeof(hash_sha256));
                                         }
-                                        else if (!strcmp((const char*)sp_fwup_control_block_bank1->signature_type,
+                                        else if (!strcmp((const char *)sp_fwup_control_block_bank1->signature_type,
                                                 INTEGRITY_CHECK_SCHEME_SIG_SHA256_ECDSA_STANDALONE))
                                         {
                                             verification_result = fwup_verification_sha256_ecdsa(
-                                                    (const uint8_t*) BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS
+                                                    (const uint8_t *) BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS
                                                             + BOOT_LOADER_USER_FIRMWARE_HEADER_LENGTH,
                                                     (BOOT_LOADER_FLASH_CF_BLOCK_SIZE
                                                             * BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER)
@@ -1331,7 +1148,6 @@ int32_t R_FWUP_SecureBoot(void)
                                         {
                                             verification_result = -1;
                                         }
-#endif /* F(FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) */
 
                                         if (0 == verification_result)
                                         {
@@ -1587,8 +1403,46 @@ int32_t R_FWUP_SecureBoot(void)
                                     }
                                 }
 #endif
+#if (FWUP_CFG_OTA_DATA_STORAGE == 1)
+                                fwup_update_status(FWUP_STATE_BANK1_UPDATE_COPY_FLAG_ERASE);
+#else
                                 fwup_update_status(FWUP_STATE_FINALIZE);
+#endif /* FWUP_CFG_OTA_DATA_STORAGE == 1 */
                                 break;
+
+#if (FWUP_CFG_OTA_DATA_STORAGE == 1)
+                            case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_ERASE:
+                                if (FWUP_COPY_FLAG_ON != sp_fwup_control_block_bank1->data_copy_flag)
+                                {
+                                    /* set data_copy_flag */
+                                    flash_api_error_code = s_set_copy_flag();
+
+                                    if (FLASH_SUCCESS != flash_api_error_code)
+                                    {
+                                        fwup_update_status(FWUP_STATE_FATAL_ERROR);
+                                        secure_boot_error_code = FWUP_FAIL;
+                                    }
+                                }
+                                else
+                                {
+                                    fwup_update_status(FWUP_STATE_FINALIZE);
+                                }
+                                break;
+
+                            case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_ERASE_WAIT:
+                            case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_ERASE_COMPLETE:
+                            case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_WRITE_WAIT:
+                            case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_WRITE_COMPLETE:
+                                /* set data_copy_flag */
+                                flash_api_error_code = s_set_copy_flag();
+
+                                if (FLASH_SUCCESS != flash_api_error_code)
+                                {
+                                    fwup_update_status(FWUP_STATE_FATAL_ERROR);
+                                    secure_boot_error_code = FWUP_FAIL;
+                                }
+                                break;
+#endif /* FWUP_CFG_OTA_DATA_STORAGE == 1 */
 
                             case FWUP_STATE_FINALIZE:
                                 DEBUG_LOG("jump to user program\r\n");
@@ -1645,42 +1499,13 @@ int32_t R_FWUP_SecureBoot(void)
                                 if (0 == verification_result)
                                 {
                                     DEBUG_LOG("OK\r\n");
+
+#if (FWUP_CFG_OTA_DATA_STORAGE == 1)
+                                    s_last_image_flag = sp_fwup_control_block_bank1->image_flag; /* Keep bank1 image_flag */
+#endif /* FWUP_CFG_OTA_DATA_STORAGE == 1 */
                                     if (LIFECYCLE_STATE_BLANK != sp_fwup_control_block_bank1->image_flag)
                                     {
                                         DEBUG_LOG("erase install area (code flash): ");
-#if (FLASH_CFG_CODE_FLASH_BGO == 1)
-                                        flash_api_error_code
-                                            = fwup_flash_erase(
-                                                (flash_block_address_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_ERASE_ADDRESS,
-                                                BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER);
-                                        if (FLASH_SUCCESS != flash_api_error_code)
-                                        {
-                                            DEBUG_LOG2("R_FLASH_Erase() returns error. %d.\r\n", s_flash_error_code);
-                                            DEBUG_LOG("system error.\r\n");
-                                            fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                                            secure_boot_error_code = FWUP_FAIL;
-                                            break;
-                                        }
-                                        fwup_update_status(FWUP_STATE_BANK1_UPDATE_CODE_FLASH_ERASE_WAIT);
-#else /* (FLASH_CFG_CODE_FLASH_BGO == 0) */
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-                                        flash_spi_erase_total_size = 0x0;
-                                        /* Set start address of serial flash */
-                                        flash_spi_erase_info.addr = BOOT_LOADER_SERIAL_FLASH_START_ADDRESS;
-                                        /* Set serial flash erase mode */
-                                        flash_spi_erase_info.mode = FLASH_SPI_MODE_B64K_ERASE;
-                                        flash_spi_error_code = fwup_flash_spi_erase(&flash_spi_erase_info);
-                                        if(FLASH_SPI_SUCCESS != flash_spi_error_code)
-                                        {
-                                            DEBUG_LOG2("R_FLASH_SPI_Erase() returns error. %d.\r\n",
-                                                    flash_spi_error_code);
-                                            DEBUG_LOG("system error.\r\n");
-                                            fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                                            secure_boot_error_code = FWUP_FAIL;
-                                            break; // @suppress("Case break statement")
-                                        }
-                                        fwup_update_status(FWUP_STATE_BANK1_UPDATE_CODE_FLASH_ERASE_WAIT);
-#else /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 0) */
                                         flash_api_error_code = fwup_flash_erase(
                                                 (flash_block_address_t) BOOT_LOADER_UPDATE_TEMPORARY_AREA_ERASE_ADDRESS,
                                                 BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER);
@@ -1692,13 +1517,19 @@ int32_t R_FWUP_SecureBoot(void)
                                             secure_boot_error_code = FWUP_FAIL;
                                             break; // @suppress("Case break statement")
                                         }
+#if (FLASH_CFG_CODE_FLASH_BGO == 1)
+                                        fwup_update_status(FWUP_STATE_BANK1_UPDATE_CODE_FLASH_ERASE_WAIT);
+#else /* (FLASH_CFG_CODE_FLASH_BGO == 0) */
                                         fwup_update_status(FWUP_STATE_BANK1_UPDATE_CODE_FLASH_ERASE_COMPLETE);
-#endif /* FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER */
 #endif  /* FLASH_CFG_CODE_FLASH_BGO == 1 */
                                     }
                                     else
                                     {
+#if (FWUP_CFG_OTA_DATA_STORAGE == 0)
                                         fwup_update_status(FWUP_STATE_FINALIZE);
+#else /* FWUP_CFG_OTA_DATA_STORAGE == 1 */
+                                        fwup_update_status(FWUP_STATE_BANK1_UPDATE_DATA_AREA_ERASE);
+#endif /* FWUP_CFG_OTA_DATA_STORAGE */
                                     }
                                 }
                                 else
@@ -1713,69 +1544,18 @@ int32_t R_FWUP_SecureBoot(void)
                                 break;
 
                             case FWUP_STATE_BANK1_UPDATE_CODE_FLASH_ERASE_WAIT:
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-                                flash_spi_error_code = fwup_flash_spi_polling_erase();
-                                if(FLASH_SPI_SUCCESS_BUSY == flash_spi_error_code)
-                                {
-                                    /* Check serial flash erase polling continuously */
-                                    fwup_update_status(FWUP_STATE_BANK0_INSTALL_CODE_FLASH_ERASE_WAIT);
-                                }
-                                else if (FLASH_SPI_SUCCESS == flash_spi_error_code)
-                                {
-                                    /* Serial flash erase finished */
-                                    if ((BOOT_LOADER_TOTAL_UPDATE_SIZE - flash_spi_erase_total_size) <
-                                            BOOT_LOADER_SERIAL_FLASH_BLOCK_SIZE)
-                                    {
-                                        /* last erase block of serial flash */
-                                        flash_spi_erase_total_size = BOOT_LOADER_TOTAL_UPDATE_SIZE;
-                                    }
-                                    else
-                                    {
-                                        flash_spi_erase_total_size += BOOT_LOADER_SERIAL_FLASH_BLOCK_SIZE;
-                                    }
-                                    if (flash_spi_erase_total_size != BOOT_LOADER_TOTAL_UPDATE_SIZE)
-                                    {
-                                        /* serial flash erase is not finished */
-                                        /* Set start address of serial flash */
-                                        flash_spi_erase_info.addr =
-                                                BOOT_LOADER_SERIAL_FLASH_START_ADDRESS + flash_spi_erase_total_size;
-                                        /* Set serial flash erase mode */
-                                        flash_spi_erase_info.mode = FLASH_SPI_MODE_B64K_ERASE;
-                                        flash_spi_error_code = fwup_flash_spi_erase(&flash_spi_erase_info);
-                                        if(FLASH_SPI_SUCCESS != flash_spi_error_code)
-                                        {
-                                            DEBUG_LOG2("R_FLASH_SPI_Erase() returns error. %d.\r\n",
-                                                    flash_spi_error_code);
-                                            fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                                            secure_boot_error_code = FWUP_FAIL;
-                                            break; // @suppress("Case break statement")
-                                        }
-                                        fwup_update_status(FWUP_STATE_BANK1_UPDATE_CODE_FLASH_ERASE_WAIT);
-                                    }
-                                    else
-                                    {
-                                        fwup_update_status(FWUP_STATE_BANK1_UPDATE_CODE_FLASH_ERASE_COMPLETE);
-                                    }
-                                }
-                                else
-                                {
-                                    DEBUG_LOG("NG\r\n");
-                                    DEBUG_LOG2("R_FLASH_SPI_Polling() returns error code = %d.\r\n",
-                                            flash_spi_error_code);
-                                    fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                                    secure_boot_error_code = FWUP_FAIL;
-                                    break; // @suppress("Case break statement")
-                                }
-#else /* F(FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) */
                                 /* this state will be update by flash callback */
-#endif /* F(FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) */
                                 break;
 
                             case FWUP_STATE_BANK1_UPDATE_CODE_FLASH_ERASE_COMPLETE:
                                 if (FLASH_SUCCESS == s_flash_error_code)
                                 {
                                     DEBUG_LOG("OK\r\n");
+#if (FWUP_CFG_OTA_DATA_STORAGE == 0)
                                     fwup_update_status(FWUP_STATE_FINALIZE);
+#else /* FWUP_CFG_OTA_DATA_STORAGE == 1 */
+                                    fwup_update_status(FWUP_STATE_BANK1_UPDATE_DATA_AREA_ERASE);
+#endif /* FWUP_CFG_OTA_DATA_STORAGE */
                                 }
                                 else
                                 {
@@ -1786,6 +1566,71 @@ int32_t R_FWUP_SecureBoot(void)
                                 }
 
                                 break;
+
+#if (FWUP_CFG_OTA_DATA_STORAGE == 1)
+                            case FWUP_STATE_BANK1_UPDATE_DATA_AREA_ERASE:
+                                if (LIFECYCLE_STATE_BLANK == s_last_image_flag)
+                                {
+                                    if (FWUP_COPY_FLAG_ON != sp_fwup_control_block_bank1->data_copy_flag)
+                                    {
+                                        do_copy_flag = true;
+                                    }
+                                }
+                                else if (LIFECYCLE_STATE_INVALID != s_last_image_flag)
+                                {
+                                    do_copy_flag = true;
+                                }
+                                else
+                                {
+                                    R_BSP_NOP();
+                                }
+
+                                if (true == do_copy_flag)
+                                {
+                                    /* Copy data Execute area to Temporary area */
+                                    flash_api_error_code = s_copy_data_area();
+
+                                    if (FLASH_SUCCESS != flash_api_error_code)
+                                    {
+                                        fwup_update_status(FWUP_STATE_FATAL_ERROR);
+                                        secure_boot_error_code = FWUP_FAIL;
+                                    }
+                                }
+                                else
+                                {
+                                    fwup_update_status(FWUP_STATE_FINALIZE);
+                                }
+                                break;
+
+                            case FWUP_STATE_BANK1_UPDATE_DATA_AREA_ERASE_WAIT:
+                            case FWUP_STATE_BANK1_UPDATE_DATA_AREA_ERASE_COMPLETE:
+                            case FWUP_STATE_BANK1_UPDATE_DATA_AREA_COPY_WAIT:
+                            case FWUP_STATE_BANK1_UPDATE_DATA_AREA_COPY_COMPLETE:
+                                /* Copy data from Execute area to Temporary area */
+                                flash_api_error_code = s_copy_data_area();
+
+                                if (FLASH_SUCCESS != flash_api_error_code)
+                                {
+                                    fwup_update_status(FWUP_STATE_FATAL_ERROR);
+                                    secure_boot_error_code = FWUP_FAIL;
+                                }
+                                break;
+
+                            case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_ERASE:
+                            case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_ERASE_WAIT:
+                            case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_ERASE_COMPLETE:
+                            case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_WRITE_WAIT:
+                            case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_WRITE_COMPLETE:
+                                /* set data_copy_flag */
+                                flash_api_error_code = s_set_copy_flag();
+
+                                if (FLASH_SUCCESS != flash_api_error_code)
+                                {
+                                    fwup_update_status(FWUP_STATE_FATAL_ERROR);
+                                    secure_boot_error_code = FWUP_FAIL;
+                                }
+                                break;
+#endif /* FWUP_CFG_OTA_DATA_STORAGE == 1 */
 
                             case FWUP_STATE_FINALIZE:
                                 DEBUG_LOG("jump to user program\r\n");
@@ -1814,39 +1659,6 @@ int32_t R_FWUP_SecureBoot(void)
 
                                     /* The status of bank1 is NOT EOL */
                                     DEBUG_LOG("erase install area (code flash): ");
-#if (FLASH_CFG_CODE_FLASH_BGO == 1)
-                                    flash_api_error_code
-                                        = fwup_flash_erase(
-                                            (flash_block_address_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_ERASE_ADDRESS,
-                                            BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER);
-                                    if (FLASH_SUCCESS != flash_api_error_code)
-                                    {
-                                        DEBUG_LOG("NG.\r\n");
-                                        DEBUG_LOG2("R_FLASH_Erase() returns error. %d.\r\n", s_flash_error_code);
-                                        DEBUG_LOG("system error.\r\n");
-                                        fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                                        secure_boot_error_code = FWUP_FAIL;
-                                        break;
-                                    }
-                                    fwup_update_status(FWUP_STATE_EOL_BANK1_ERASE_WAIT);
-#else
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-                                    flash_spi_erase_total_size = 0x0;
-                                    /* Set start address of serial flash */
-                                    flash_spi_erase_info.addr = BOOT_LOADER_SERIAL_FLASH_START_ADDRESS;
-                                    /* Set serial flash erase mode */
-                                    flash_spi_erase_info.mode = FLASH_SPI_MODE_B64K_ERASE;
-                                    flash_spi_error_code = fwup_flash_spi_erase(&flash_spi_erase_info);
-                                    if(FLASH_SPI_SUCCESS != flash_spi_error_code)
-                                    {
-                                        DEBUG_LOG2("R_FLASH_SPI_Erase() returns error. %d.\r\n", flash_spi_error_code);
-                                        DEBUG_LOG("system error.\r\n");
-                                        fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                                        secure_boot_error_code = FWUP_FAIL;
-                                        break;
-                                    }
-                                    fwup_update_status(FWUP_STATE_EOL_BANK1_ERASE_WAIT);
-#else /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 0) */
                                     flash_api_error_code = fwup_flash_erase(
                                             (flash_block_address_t) BOOT_LOADER_UPDATE_TEMPORARY_AREA_ERASE_ADDRESS,
                                             BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER);
@@ -1859,71 +1671,16 @@ int32_t R_FWUP_SecureBoot(void)
                                         secure_boot_error_code = FWUP_FAIL;
                                         break;
                                     }
+#if (FLASH_CFG_CODE_FLASH_BGO == 1)
+                                    fwup_update_status(FWUP_STATE_EOL_BANK1_ERASE_WAIT);
+#else
                                     fwup_update_status(FWUP_STATE_EOL_BANK1_ERASE_COMPLETE);
-#endif /* FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER */
 #endif  /* (FLASH_CFG_CODE_FLASH_BGO == 1) */
                                 }
                             break;
 
                             case FWUP_STATE_EOL_BANK1_ERASE_WAIT:
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-                                flash_spi_error_code = fwup_flash_spi_polling_erase();
-                                if(FLASH_SPI_SUCCESS_BUSY == flash_spi_error_code)
-                                {
-                                    /* Check serail flash erase polling continuously */
-                                    fwup_update_status(FWUP_STATE_EOL_BANK1_ERASE_WAIT);
-                                }
-                                else if (FLASH_SPI_SUCCESS == flash_spi_error_code)
-                                {
-                                    /* Serial flash erase finished */
-                                    if ((BOOT_LOADER_TOTAL_UPDATE_SIZE - flash_spi_erase_total_size) <
-                                            BOOT_LOADER_SERIAL_FLASH_BLOCK_SIZE)
-                                    {
-                                        /* last erase block of serial flash */
-                                        flash_spi_erase_total_size = BOOT_LOADER_TOTAL_UPDATE_SIZE;
-                                    }
-                                    else
-                                    {
-                                        flash_spi_erase_total_size += BOOT_LOADER_SERIAL_FLASH_BLOCK_SIZE;
-                                    }
-                                    if (flash_spi_erase_total_size != BOOT_LOADER_TOTAL_UPDATE_SIZE)
-                                    {
-                                        /* serial flash erase is not finished */
-                                        /* Set start address of serial flash */
-                                        flash_spi_erase_info.addr = BOOT_LOADER_SERIAL_FLASH_START_ADDRESS +
-                                            flash_spi_erase_total_size;
-                                        /* Set serial flash erase mode */
-                                        flash_spi_erase_info.mode = FLASH_SPI_MODE_B64K_ERASE;
-                                        flash_spi_error_code = fwup_flash_spi_erase(&flash_spi_erase_info);
-                                        if(FLASH_SPI_SUCCESS != flash_spi_error_code)
-                                        {
-                                            DEBUG_LOG2("R_FLASH_SPI_Erase() returns error. %d.\r\n",
-                                                    flash_spi_error_code);
-                                            DEBUG_LOG("system error.\r\n");
-                                            fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                                            secure_boot_error_code = FWUP_FAIL;
-                                            break;
-                                        }
-                                        fwup_update_status(FWUP_STATE_EOL_BANK1_ERASE_WAIT);
-                                    }
-                                    else
-                                    {
-                                        fwup_update_status(FWUP_STATE_EOL_BANK1_ERASE_COMPLETE);
-                                    }
-                                }
-                                else
-                                {
-                                    DEBUG_LOG("NG\r\n");
-                                    DEBUG_LOG2("R_FLASH_SPI_Polling() returns error code. %d.\r\n",
-                                            flash_spi_error_code);
-                                    DEBUG_LOG("system error.\r\n");
-                                    fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                                    secure_boot_error_code = FWUP_FAIL;
-                                    break;
-                                }
-#else /* F(FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) */
                                 /* this state will be update by flash callback */
-#endif /* F(FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) */
                             break;
 
                             case FWUP_STATE_EOL_BANK1_ERASE_COMPLETE:
@@ -1950,37 +1707,6 @@ int32_t R_FWUP_SecureBoot(void)
                                         get_status_string(sp_fwup_control_block_bank1->image_flag),
                                         get_status_string(p_fwup_control_block_tmp->image_flag));
                                 DEBUG_LOG("bank1(temporary area) block0 write (to update LIFECYCLE_STATE)...");
-#if (FLASH_CFG_CODE_FLASH_BGO == 1)
-                                flash_api_error_code
-                                    = fwup_flash_write((uint32_t)p_fwup_control_block_tmp,
-                                        (uint32_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS,
-                                        BOOT_LOADER_FLASH_CF_BLOCK_SIZE);
-                                if (FLASH_SUCCESS != flash_api_error_code)
-                                {
-                                    DEBUG_LOG2("R_FLASH_Write() returns error. %d.\r\n", s_flash_error_code);
-                                    DEBUG_LOG("system error.\r\n");
-                                    fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                                    secure_boot_error_code = FWUP_FAIL;
-                                    break;
-                                }
-                                fwup_update_status(FWUP_STATE_EOL_BANK1_LIFECYCLE_WRITE_WAIT);
-#else /* (FLASH_CFG_CODE_FLASH_BGO == 0) */
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-                                    flash_spi_error_code =
-                                        fwup_flash_spi_write((uint8_t)&p_fwup_control_block_tmp,
-                                            (uint32_t)BOOT_LOADER_SERIAL_FLASH_START_ADDRESS,
-                                            BOOT_LOADER_USER_FIRMWARE_HEADER_LENGTH);
-                                    if(FLASH_SPI_SUCCESS != flash_spi_error_code)
-                                    {
-                                        DEBUG_LOG("NG\r\n");
-                                        DEBUG_LOG2("R_FLASH_SPI_Erase() returns error code = %d.\r\n",
-                                            flash_spi_error_code);
-                                        fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                                        secure_boot_error_code = FWUP_FAIL;
-                                        break;
-                                    }
-                                    fwup_update_status(FWUP_STATE_EOL_BANK1_LIFECYCLE_WRITE_WAIT);
-#else /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 0) */
                                 flash_api_error_code = fwup_flash_write((uint32_t) p_fwup_control_block_tmp,
                                         (uint32_t) BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS,
                                         BOOT_LOADER_FLASH_CF_BLOCK_SIZE);
@@ -1992,35 +1718,15 @@ int32_t R_FWUP_SecureBoot(void)
                                     secure_boot_error_code = FWUP_FAIL;
                                     break;
                                 }
+#if (FLASH_CFG_CODE_FLASH_BGO == 1)
+                                fwup_update_status(FWUP_STATE_EOL_BANK1_LIFECYCLE_WRITE_WAIT);
+#else /* (FLASH_CFG_CODE_FLASH_BGO == 0) */
                                 fwup_update_status(FWUP_STATE_EOL_BANK1_LIFECYCLE_WRITE_COMPLETE);
-#endif /* FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER */
 #endif  /* (FLASH_CFG_CODE_FLASH_BGO == 1) */
                             break;
 
                             case FWUP_STATE_EOL_BANK1_LIFECYCLE_WRITE_WAIT:
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-                                flash_spi_error_code = fwup_flash_spi_polling_write();
-                                if(FLASH_SPI_SUCCESS_BUSY == flash_spi_error_code)
-                                {
-                                    fwup_update_status(FWUP_STATE_EOL_BANK1_LIFECYCLE_WRITE_WAIT);
-                                }
-                                else if (FLASH_SPI_SUCCESS == flash_spi_error_code)
-                                {
-                                    fwup_update_status(FWUP_STATE_EOL_BANK1_LIFECYCLE_WRITE_COMPLETE);
-                                }
-                                else
-                                {
-                                    DEBUG_LOG("NG\r\n");
-                                    DEBUG_LOG2("R_FLASH_SPI_Polling() returns error code. %d.\r\n",
-                                            flash_spi_error_code);
-                                    DEBUG_LOG("system error.\r\n");
-                                    fwup_update_status(FWUP_STATE_FATAL_ERROR);
-                                    secure_boot_error_code = FWUP_FAIL;
-                                    break;
-                                }
-#else
                                 /* this state will be update by flash callback */
-#endif /* F(FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) */
                             break;
 
                             case FWUP_STATE_EOL_BANK1_LIFECYCLE_WRITE_COMPLETE:
@@ -2115,8 +1821,7 @@ int32_t R_FWUP_SecureBoot(void)
         (FWUP_FAIL == secure_boot_error_code) ||
         (FWUP_END_OF_LIFE == secure_boot_error_code))
     {
-        monitoring_error_code = fwup_state_monitoring_close();
-        fwup_communication_close();
+        monitoring_error_code = fwup_state_monitoring_stop();
         if (MONI_SUCCESS != monitoring_error_code)
         {
             DEBUG_LOG2("R_SYS_TIME_Close() returns error. %d.\r\n", monitoring_error_code);
@@ -2265,6 +1970,219 @@ static int32_t const_data_block_read(uint32_t *const_data, uint32_t offset)
  End of function const_data_block_read
  *********************************************************************************************************************/
 
+#if (FWUP_CFG_OTA_DATA_STORAGE == 1)
+/***********************************************************************************************************************
+ * Function Name: s_copy_data_area
+ * Description  :
+ * Arguments    :
+ * Return Value :
+ **********************************************************************************************************************/
+static flash_err_t s_copy_data_area(void)
+{
+    flash_err_t ret = FLASH_SUCCESS;
+
+    switch (fwup_get_status())
+    {
+        case FWUP_STATE_BANK1_UPDATE_DATA_AREA_ERASE:
+            /* Erase data area of Temporary */
+            DEBUG_LOG("copy data area (code flash): ");
+            ret = fwup_flash_erase(
+                    (flash_block_address_t) BOOT_LOADER_UPDATE_TEMPORARY_DATA_LOW_ADDRESS,
+                    BOOT_LOADER_UPDATE_CONST_DATA_TARGET_BLOCK_NUMBER);
+
+            if (FLASH_SUCCESS != ret)
+            {
+                DEBUG_LOG("NG\r\n");
+                DEBUG_LOG2("R_FLASH_Erase() returns error code = %d.\r\n", ret);
+            }
+            else
+            {
+#if (FLASH_CFG_CODE_FLASH_BGO == 1)
+                fwup_update_status(FWUP_STATE_BANK1_UPDATE_DATA_AREA_ERASE_WAIT);
+#else
+                fwup_update_status(FWUP_STATE_BANK1_UPDATE_DATA_AREA_ERASE_COMPLETE);
+#endif /* FLASH_CFG_CODE_FLASH_BGO == 1 */
+            }
+            break;
+
+        case FWUP_STATE_BANK1_UPDATE_DATA_AREA_ERASE_WAIT:
+            /* Wait of erase */
+            R_BSP_NOP();
+            break;
+
+        case FWUP_STATE_BANK1_UPDATE_DATA_AREA_ERASE_COMPLETE:
+            if (FLASH_SUCCESS != s_flash_error_code)
+            {
+                DEBUG_LOG("NG\r\n");
+                DEBUG_LOG2("R_FLASH_Erase() callback error. %d.\r\n", s_flash_error_code);
+                DEBUG_LOG("system error.\r\n");
+                ret = FLASH_ERR_FAILURE;
+            }
+            else
+            {
+                /* Copy data from Execute to Temporary */
+                ret = fwup_flash_write((uint32_t)BOOT_LOADER_UPDATE_EXECUTE_DATA_LOW_ADDRESS,
+                        (uint32_t)BOOT_LOADER_UPDATE_TEMPORARY_DATA_LOW_ADDRESS,
+                        BOOT_LOADER_CF_DF_BLOCK_SIZE);
+
+                if (FLASH_SUCCESS != ret)
+                {
+                    DEBUG_LOG("NG\r\n");
+                    DEBUG_LOG2("R_FLASH_Write() returns error code = %d.\r\n", ret);
+                }
+                else
+                {
+#if (FLASH_CFG_CODE_FLASH_BGO == 1)
+                    fwup_update_status(FWUP_STATE_BANK1_UPDATE_DATA_AREA_COPY_WAIT);
+#else
+                    fwup_update_status(FWUP_STATE_BANK1_UPDATE_DATA_AREA_COPY_COMPLETE);
+#endif /* FLASH_CFG_CODE_FLASH_BGO == 1 */
+                }
+            }
+            break;
+
+        case FWUP_STATE_BANK1_UPDATE_DATA_AREA_COPY_WAIT:
+            /* Wait of copy */
+            R_BSP_NOP();
+            break;
+
+        case FWUP_STATE_BANK1_UPDATE_DATA_AREA_COPY_COMPLETE:
+            if (FLASH_SUCCESS != s_flash_error_code)
+            {
+                DEBUG_LOG("NG\r\n");
+                DEBUG_LOG2("R_FLASH_Write() callback error. %d.\r\n", s_flash_error_code);
+                DEBUG_LOG("system error.\r\n");
+                ret = FLASH_ERR_FAILURE;
+            }
+            else
+            {
+                DEBUG_LOG("OK\r\n");
+                fwup_update_status(FWUP_STATE_BANK1_UPDATE_COPY_FLAG_ERASE);
+            }
+            break;
+
+        default:
+            break;
+    }
+
+    return ret;
+}
+/**********************************************************************************************************************
+ End of function s_copy_data_area
+ *********************************************************************************************************************/
+
+/***********************************************************************************************************************
+ * Function Name: s_set_copy_flag
+ * Description  :
+ * Arguments    :
+ * Return Value :
+ **********************************************************************************************************************/
+static flash_err_t s_set_copy_flag(void)
+{
+    flash_err_t ret = FLASH_SUCCESS;
+
+    st_fwup_control_block_t * p_fwup_control_block
+            = (st_fwup_control_block_t *)s_block_buffer;
+
+    switch (fwup_get_status())
+    {
+        case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_ERASE:
+            DEBUG_LOG("modify data copy flag: ");
+            /* Backup rsu header block data */
+            memcpy(s_block_buffer, (void*)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS,
+                    BOOT_LOADER_FLASH_CF_BLOCK_SIZE);
+
+            /* Change data_copy_flag */
+            p_fwup_control_block->data_copy_flag = FWUP_COPY_FLAG_ON;
+
+            /* Erase 1 block of Temporary area */
+            ret = fwup_flash_erase(
+                    (flash_block_address_t) BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS, 1);
+
+            if (FLASH_SUCCESS != ret)
+            {
+                DEBUG_LOG("NG\r\n");
+                DEBUG_LOG2("R_FLASH_Erase() returns error. %d.\r\n", s_flash_error_code);
+                DEBUG_LOG("system error.\r\n");
+            }
+            else
+            {
+#if (FLASH_CFG_CODE_FLASH_BGO == 1)
+                fwup_update_status(FWUP_STATE_BANK1_UPDATE_COPY_FLAG_ERASE_WAIT);
+#else
+                fwup_update_status(FWUP_STATE_BANK1_UPDATE_COPY_FLAG_ERASE_COMPLETE);
+#endif /* FLASH_CFG_CODE_FLASH_BGO == 1 */
+            }
+            break;
+
+        case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_ERASE_WAIT:
+            /* Wait of erase */
+            R_BSP_NOP();
+            break;
+
+        case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_ERASE_COMPLETE:
+            if (FLASH_SUCCESS != s_flash_error_code)
+            {
+                DEBUG_LOG("NG\r\n");
+                DEBUG_LOG2("R_FLASH_Erase() callback error. %d.\r\n", s_flash_error_code);
+                DEBUG_LOG("system error.\r\n");
+                ret = FLASH_ERR_FAILURE;
+            }
+            else
+            {
+                /* Write rsu header block */
+                ret = fwup_flash_write((uint32_t) p_fwup_control_block,
+                        (uint32_t) BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS,
+                        BOOT_LOADER_FLASH_CF_BLOCK_SIZE);
+
+                if (FLASH_SUCCESS != ret)
+                {
+                    DEBUG_LOG("NG\r\n");
+                    DEBUG_LOG2("R_WRITE_Write() returns error code = %d.\r\n", ret);
+                    ret = FLASH_ERR_FAILURE;
+                }
+                else
+                {
+#if (FLASH_CFG_CODE_FLASH_BGO == 1)
+                    fwup_update_status(FWUP_STATE_BANK1_UPDATE_COPY_FLAG_WRITE_WAIT);
+#else
+                    fwup_update_status(FWUP_STATE_BANK1_UPDATE_COPY_FLAG_WRITE_COMPLETE);
+#endif /* FLASH_CFG_CODE_FLASH_BGO == 1 */
+                }
+            }
+            break;
+
+        case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_WRITE_WAIT:
+            /* Wait of write */
+            R_BSP_NOP();
+            break;
+
+        case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_WRITE_COMPLETE:
+            if (FLASH_SUCCESS != s_flash_error_code)
+            {
+                DEBUG_LOG("NG\r\n");
+                DEBUG_LOG2("R_FLASH_Write() callback error. %d.\r\n", s_flash_error_code);
+                DEBUG_LOG("system error.\r\n");
+                ret = FLASH_ERR_FAILURE;
+            }
+            else
+            {
+                DEBUG_LOG("OK\r\n");
+                fwup_update_status(FWUP_STATE_FINALIZE);
+            }
+            break;
+
+        default:
+            break;
+    }
+
+    return ret;
+}
+/**********************************************************************************************************************
+ End of function s_set_copy_flag
+ *********************************************************************************************************************/
+#endif /* FWUP_CFG_OTA_DATA_STORAGE == 1 */
+
 /*****************************************************************************
  * Function Name: my_sci_callback
  * Description  : This is a template for an SCI Async Mode callback function.
@@ -2403,6 +2321,18 @@ static void my_flash_callback(void *event)
         case FWUP_STATE_BANK1_UPDATE_CODE_FLASH_ERASE_WAIT:
             fwup_update_status(FWUP_STATE_BANK1_UPDATE_CODE_FLASH_ERASE_COMPLETE);
             break;
+        case FWUP_STATE_BANK1_UPDATE_DATA_AREA_ERASE_WAIT:
+            fwup_update_status(FWUP_STATE_BANK1_UPDATE_DATA_AREA_ERASE_COMPLETE);
+            break;
+        case FWUP_STATE_BANK1_UPDATE_DATA_AREA_COPY_WAIT:
+            fwup_update_status(FWUP_STATE_BANK1_UPDATE_DATA_AREA_COPY_COMPLETE);
+            break;
+        case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_ERASE_WAIT:
+            fwup_update_status(FWUP_STATE_BANK1_UPDATE_COPY_FLAG_ERASE_COMPLETE);
+            break;
+        case FWUP_STATE_BANK1_UPDATE_COPY_FLAG_WRITE_WAIT:
+            fwup_update_status(FWUP_STATE_BANK1_UPDATE_COPY_FLAG_WRITE_COMPLETE);
+            break;
         case FWUP_STATE_EOL_BANK1_ERASE_WAIT:
             fwup_update_status(FWUP_STATE_EOL_BANK1_ERASE_COMPLETE);
             break;
@@ -2469,4 +2399,26 @@ static const uint8_t* get_status_string(uint8_t status)
 /**********************************************************************************************************************
  End of function get_status_string
  *********************************************************************************************************************/
+
+#if (FWUP_UNIT_TEST == 1)
+void g_setting_unit_test_s_flash_error_code (uint32_t val)
+{
+    s_flash_error_code = val;
+}
+
+void g_setting_unit_test_s_sci_buffer_control (void)
+{
+    s_sci_buffer_control[0].buffer_full_flag = BOOT_LOADER_SCI_RECEIVE_BUFFER_FULL;
+}
+
+void g_setting_unit_test_s_load_fw_control_block (uint32_t addr)
+{
+    s_load_fw_control_block.offset = addr;
+}
+
+void g_setting_unit_test_s_load_const_data_control_block (uint32_t addr)
+{
+    s_load_const_data_control_block.offset = addr;
+}
+#endif /* FWUP_UNIT_TEST */
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_BOOTLOADER */

@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015(2022) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_psignal.c
@@ -28,6 +28,7 @@
  *         : 30.09.2016 1.20 RX65N/RX651 is added.
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.06.2022 1.40 USBX PCDC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -39,6 +40,14 @@
 #include "r_usb_extern.h"
 #include "r_usb_bitdefine.h"
 #include "r_usb_reg_access.h"
+
+#if (BSP_CFG_RTOS_USED == 5)
+ #include "ux_api.h"
+ #include "ux_system.h"
+ #include "ux_utility.h"
+ #include "ux_device_stack.h"
+#endif  /* (BSP_CFG_RTOS_USED == 5) */
+
 
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
 /******************************************************************************
@@ -71,6 +80,34 @@ void usb_pstd_bus_reset (void)
     usb_pstd_clr_mem();
     connect_info = usb_cstd_port_speed(USB_NULL);
 
+ #if (BSP_CFG_RTOS_USED == 5)   /* Azure RTOS */
+    switch (connect_info)
+    {
+        case USB_HSCONNECT:
+        {
+            _ux_system_slave->ux_system_slave_speed = (uint32_t) UX_HIGH_SPEED_DEVICE;
+            break;
+        }
+
+        case USB_FSCONNECT:
+        {
+            _ux_system_slave->ux_system_slave_speed = (uint32_t) UX_FULL_SPEED_DEVICE;
+            break;
+        }
+
+        case USB_LSCONNECT:
+        {
+            _ux_system_slave->ux_system_slave_speed = (uint32_t) UX_LOW_SPEED_DEVICE;
+            break;
+        }
+
+        default:
+        {
+            break;
+        }
+    }
+ #endif                                /* #if (BSP_CFG_RTOS_USED == 5) */
+
     /* Callback */
     if (USB_NULL != g_usb_pstd_driver.devdefault)
     {
@@ -79,6 +116,10 @@ void usb_pstd_bus_reset (void)
 #else   /* USB_CFG_BC == USB_CFG_ENABLE */
         (*g_usb_pstd_driver.devdefault)(USB_NULL, connect_info, USB_NULL);
 #endif  /* USB_CFG_BC == USB_CFG_ENABLE */
+
+#if (BSP_CFG_RTOS_USED == 5)   /* Azure RTOS */
+        usb_peri_usbx_initialize_complete();
+#endif     /* #if (BSP_CFG_RTOS_USED == 5) */
     }
 
     /* DCP configuration register  (0x5C) */
@@ -141,13 +182,18 @@ void usb_pstd_detach_process (void)
         {
             usb_pstd_forced_termination(i, (uint16_t) USB_DATA_STOP);
             usb_cstd_clr_pipe_cnfg(USB_NULL, i);
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+            g_usb_peri_usbx_is_detach[i] = USB_YES;
+            rtos_release_semaphore(&g_usb_peri_usbx_sem[i]);
+            rtos_delete_semaphore(&g_usb_peri_usbx_sem[i]);
+#endif  /* #if (BSP_CFG_RTOS_USED == 5) */
         }
     }
 
     /* Callback */
     if (USB_NULL != g_usb_pstd_driver.devdetach)
     {
-        (*g_usb_pstd_driver.devdetach)(USB_NULL, USB_NO_ARG, USB_NULL);
+        (*g_usb_pstd_driver.devdetach)(USB_NULL, USB_POWERED, USB_NULL);
     }
     usb_pstd_stop_clock();
 }

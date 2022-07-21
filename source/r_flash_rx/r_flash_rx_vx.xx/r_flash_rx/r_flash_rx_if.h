@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_rx_if.h
@@ -152,6 +152,8 @@
 *           23.10.2020 4.70    Added support for RX671.
 *           23.04.2021 4.80    Added support for RX140.
 *           10.12.2021 4.81    Added support for Tool News R20TS0765, R20TS0772, and some minor updates.
+*           13.05.2022 4.90    Added support for RX660.
+*                              Added support for Tool News R20TS0818. 
 ***********************************************************************************************************************/
 
 #ifndef FLASH_INTERFACE_HEADER_FILE
@@ -169,7 +171,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Driver Version Number. */
 #define FLASH_RX_VERSION_MAJOR           (4)
-#define FLASH_RX_VERSION_MINOR           (81)
+#define FLASH_RX_VERSION_MINOR           (90)
 
 
 /***********************************************************************************************************************
@@ -190,7 +192,7 @@ Typedef definitions
 #define FLASH_TYPE              FLASH_TYPE_1
 
 #elif (defined(MCU_RX64M) || defined(MCU_RX66T) || defined(MCU_RX71M) || \
-       defined(MCU_RX72T))
+       defined(MCU_RX72T) || defined(MCU_RX660))
 #define FLASH_TYPE              FLASH_TYPE_3
 
 #elif (defined(MCU_RX651) || defined(MCU_RX65N) || defined(MCU_RX72M) || \

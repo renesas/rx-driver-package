@@ -60,6 +60,7 @@
 *                              - RTC_CAPTURE_TAMPICR1_CH1EN
 *                              - RTC_CAPTURE_TAMPICR1_CH2EN
 *           31.07.2021 2.82    Added support for RX140.
+*           31.12.2021 2.83    Added support for RX660.
 ***********************************************************************************************************************/
 
 #ifndef R_RTC_PRIVATE_H
@@ -91,7 +92,7 @@ Macro definitions
 #define RTC_DUMMY_READ          (3)     /* Three times of dummy read */
 
 
-#if !defined(BSP_MCU_RX140)
+#if !defined(BSP_MCU_RX140) || !defined(BSP_MCU_RX660)
 #if !defined(RTC_CFG_DRIVE_CAPACITY_LO) && !defined(RTC_CFG_DRIVE_CAPACITY_MD) && !defined(RTC_CFG_DRIVE_CAPACITY_HI) && !defined(RTC_CFG_DRIVE_CAPACITY_STD)
     #error "ERROR - A drive capacity #define must be uncommented in r_rtc_rx_config.h"
 #endif

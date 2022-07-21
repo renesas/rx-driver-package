@@ -5,13 +5,13 @@ r_rscan_rx
 
 Document Number 
 ---------------
-R01AN2805EU0240
-R01AN2805JU0240
+R01AN2805EU0241
+R01AN2805JU0241
 
 
 Version
 -------
-v2.40
+v2.41
 
 
 Overview

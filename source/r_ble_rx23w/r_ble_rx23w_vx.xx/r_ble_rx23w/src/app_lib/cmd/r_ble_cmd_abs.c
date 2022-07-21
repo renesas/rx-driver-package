@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 #include <string.h>
 #include <stdlib.h>
@@ -279,7 +279,7 @@ static const st_ble_cli_cmd_t gap_sync_cmd =
     .exec   = exec_abs_sync,
     .abort  = abort_abs_sync,
     .p_help = "Usage: gap sync create | term  \n"
-              "Start sync establishment | teminate sync. ",
+              "Start sync establishment | terminate sync. ",
 };
 
 static const st_ble_cli_cmd_t gap_conn_cfg_cmd =
@@ -1649,6 +1649,12 @@ void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t * 
                     }
                 }
 
+                if(BLE_CFG_RF_CONN_MAX == i)
+                {
+                    R_BLE_CLI_SetCmdComp();
+                    break;
+                }
+
                 connected_device_info[i].conn_hdl = conn_evt_param->conn_hdl;
                 connected_device_info[i].addr.type = conn_evt_param->remote_addr_type;
                 memcpy(connected_device_info[i].addr.addr,
@@ -1836,7 +1842,7 @@ void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t * 
 
             R_BLE_CLI_SetCmdComp();
         } break;
-        
+
         case BLE_GAP_EVENT_PAIRING_COMP:
         {
             pf("receive BLE_GAP_EVENT_PAIRING_COMP result : 0x%04x\n", result);

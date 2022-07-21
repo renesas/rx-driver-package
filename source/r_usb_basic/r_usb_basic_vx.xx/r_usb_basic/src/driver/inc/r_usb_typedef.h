@@ -31,6 +31,7 @@
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 31.05.2021 1.31 RX671 USB1 is added.
+ *         : 30.06.2022 1.40 USBX PCDC is supported.
  ***********************************************************************************************************************/
 
 #ifndef R_USB_TYPEDEF_H
@@ -125,7 +126,7 @@ typedef struct usb_utr
     void        *p_usr_data;
 #if (BSP_CFG_RTOS_USED != 0)    /* Use RTOS */
     uint16_t    setup_data[5];  /* Save setup for Request */
-    rtos_task_id_t   task_id;   /* Task Handle */
+    rtos_current_task_id_t   task_id;   /* Task Handle */
 #endif /* (BSP_CFG_RTOS_USED != 0) */
 } usb_message_t;
 

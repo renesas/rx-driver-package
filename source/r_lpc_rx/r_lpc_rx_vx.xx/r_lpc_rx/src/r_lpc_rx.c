@@ -30,6 +30,7 @@
  *         : 10.06.2020 2.01    Modified comment of API function to Doxygen style.
  *         : 05.03.2021 2.02    Added RX671 to Doxygen comment.
  *         : 31.07.2021 2.03    Added support for snooze mode in Low Power Consumption.
+ *         : 31.12.2021 2.04    Removes the lower operating power consumption related functions of RX660.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
   Includes <System Includes> , "Project Includes"
@@ -40,6 +41,7 @@
 /* Include specifics for chosen MCU. */
 #include "r_lpc_rx_private.h"
 
+#ifndef LPC_INVALID_OPERATING_MODE
 /***********************************************************************************************************************
  * Function Name: R_LPC_OperatingModeSet
  ******************************************************************************************************************/ /**
@@ -79,6 +81,7 @@ lpc_err_t R_LPC_OperatingModeSet (lpc_operating_mode_t e_mode)
 /***********************************************************************************************************************
  End of function R_LPC_OperatingModeSet
  ***********************************************************************************************************************/
+#endif
 
 /***********************************************************************************************************************
  * Function Name: R_LPC_LowPowerModeConfigure
@@ -170,7 +173,6 @@ lpc_err_t R_LPC_LowPowerModeActivate (lpc_callback_set_t pcallback)
  End of function R_LPC_LowPowerModeActivate
  ***********************************************************************************************************************/
 
-
 /***********************************************************************************************************************
  * Function Name: R_LPC_ReturnClockSwitch
  ******************************************************************************************************************/ /**
@@ -201,6 +203,7 @@ lpc_err_t R_LPC_LowPowerModeActivate (lpc_callback_set_t pcallback)
  *
  *            -# RX64M, RX65N, RX66N, RX671, RX71M, RX72M, RX72N MCUs:\n
  *            \- When entering sleep mode, select LOCO or the sub-clock as the clock source.
+ *
  * @note      None 
  */
 lpc_err_t R_LPC_ReturnClockSwitch (lpc_clock_switch_t e_clock_source, bool enable)

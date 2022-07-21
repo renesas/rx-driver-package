@@ -14,11 +14,10 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2022 Renesas Electronics Corporation. All rights reserved.
 **********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name: r_ble_console.c
- * Version : 1.0
  * Description : Command Line Interface Library (For RX23W).
  *********************************************************************************************************************/
 #include <stdio.h>

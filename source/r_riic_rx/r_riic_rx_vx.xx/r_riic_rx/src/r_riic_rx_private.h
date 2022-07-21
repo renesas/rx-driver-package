@@ -70,6 +70,7 @@
  *         : 10.03.2020 2.46     Added RX23E-A support.
  *         : 30.06.2021 2.48     Added RX671 support.
  *         : 31.07.2021 2.49     Added RX140 support.
+ *         : 31.12.2021 2.50     Added RX660 support.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIIC_PRIVATE_H
@@ -93,6 +94,8 @@
         #include "./targets/rx64m/r_riic_rx64m_private.h"
     #elif defined(BSP_MCU_RX65N)
         #include "./targets/rx65n/r_riic_rx65n_private.h"
+    #elif defined(BSP_MCU_RX660)
+        #include "./targets/rx660/r_riic_rx660_private.h"
     #elif defined(BSP_MCU_RX66T)
         #include "./targets/rx66t/r_riic_rx66t_private.h"
     #elif defined(BSP_MCU_RX671)

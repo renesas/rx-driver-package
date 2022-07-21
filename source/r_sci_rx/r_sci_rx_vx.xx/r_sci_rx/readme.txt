@@ -13,8 +13,7 @@ function for taking actions such as issuing a break signal or enabling noise
 cancellation. The driver supports all channels available on the mcu. The driver 
 can be reduced in size by removing code used for parameter checking, unused 
 channels, or unused modes. These configuration options can be found in 
-"r_config\r_sci_rx_config.h". An original copy of the configuration file 
-is stored in "r_sci_rx\ref\r_sci_rx_config_reference.h".
+"r_config\r_sci_rx_config.h".
 
 
 Features
@@ -36,6 +35,7 @@ Features
 * (RX66N) Simultaneous operation of up to 13 channels
 * (RX23E-A) Simultaneous operation of up to 4 channels
 * (RX671) Simultaneous operation of up to 13 channels
+* (RX660) Simultaneous operation of up to 13 channels
 * Simultaneous operation of Async, Sync, or SSPI modes on different channels.
 * Queueing of incoming and outgoing data for Asynchronous channels.
 * Interrupt driven.

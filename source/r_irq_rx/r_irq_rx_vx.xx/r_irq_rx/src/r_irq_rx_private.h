@@ -52,6 +52,7 @@
 *         : 15.04.2021  3.80    Added support RX140.
 *         : 13.09.2021  3.90    Added RX671 Demo.
 *         : 14.03.2022  4.00    Added support RX66T-48Pin.
+*         : 31.03.2022  4.10    Added support RX660.
 ***********************************************************************************************************************/
 #ifndef R_IRQ_PRIVATE_H_
 #define R_IRQ_PRIVATE_H_
@@ -64,7 +65,7 @@ Macro definitions
 ******************************************************************************/
 /* Version Number of API. */
 #define IRQ_RX_VERSION_MAJOR           (4)
-#define IRQ_RX_VERSION_MINOR           (00)
+#define IRQ_RX_VERSION_MINOR           (10)
 
 /* Bit position of interrupt enable bits in interrupt enable register. */
 #define IRQ_IEN_MASK_IRQ0   (0x01)

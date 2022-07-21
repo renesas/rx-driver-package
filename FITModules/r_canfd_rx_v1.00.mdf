@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate>r_pinset_type2</fileTemplate>
+    <resourceInfo>
+      <peripheral name="CANFD">
+        <channel number="CANFD0">
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="CRX0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="CTX0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+        </channel>
+      </peripheral>
+    </resourceInfo>
+    <configuration>
+        <property id="CANFD_CFG_PARAM_CHECKING_ENABLE" display="Parameter Checking" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+            <option id="CANFD_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="Default (BSP)" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <option id="CANFD_CFG_PARAM_CHECKING_ENABLE.1" display="Enabled" value="1"/>
+            <option id="CANFD_CFG_PARAM_CHECKING_ENABLE.0" display="Disabled" value="0"/>
+            <description>Selects whether to include parameter checking in the code.
+BSP_CFG_PARAM_CHECKING_ENABLE = Default (BSP).</description>
+        </property>
+        <property id="CANFD_CFG_AFL_CH0_RULE_NUM" display="Reception|Acceptance Filtering|Channel 0 Rule Count" default="32" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CANFD_CFG_AFL_CH0_RULE_NUM}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 32" actionOnFail="error">("${CANFD_CFG_AFL_CH0_RULE_NUM}" &gt;= 0) &amp;&amp; ("${CANFD_CFG_AFL_CH0_RULE_NUM}" &lt;= 32)</constraint>
+            <description>Number of acceptance filter list rules dedicated to Channel 0.</description>
+        </property>
+        <property id="CANFD_CFG_FD_PROTOCOL_EXCEPTION" display="Flexible Data (FD)|Protocol Exceptions" default="0" type="combobox">
+            <option id="CANFD_CFG_FD_PROTOCOL_EXCEPTION.0" display="Enabled (ISO 11898-1)" value="0"/>
+            <option id="CANFD_CFG_FD_PROTOCOL_EXCEPTION.(R_CANFD_GFDCFG_PXEDIS_Msk)" display="Disabled" value="(R_CANFD_GFDCFG_PXEDIS_Msk)"/>
+            <description>Select whether to enter the protocol exception handling state when a RES bit is sampled recessive as defined in ISO 11898-1.</description>
+        </property>
+        <property id="CANFD_CFG_GLOBAL_ERR_SOURCES" display="Global Error Interrupt|Sources" default="0x3" type="combobox">
+            <option id="CANFD_CFG_GLOBAL_ERR_SOURCES.0x3" display="None" value="0x3"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_SOURCES.R_CANFD_GCR_DEIE_Msk | 0x3" display="DLC Check" value="R_CANFD_GCR_DEIE_Msk | 0x3"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_SOURCES.R_CANFD_GCR_MLIE_Msk | 0x3" display="Message Lost" value="R_CANFD_GCR_MLIE_Msk | 0x3"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_SOURCES.R_CANFD_GCR_POIE_Msk | 0x3" display="FD Payload Overflow" value="R_CANFD_GCR_POIE_Msk | 0x3"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_SOURCES.R_CANFD_GCR_DEIE_Msk | R_CANFD_GCR_MLIE_Msk | 0x3" display="DLC Check + Message Lost" value="R_CANFD_GCR_DEIE_Msk | R_CANFD_GCR_MLIE_Msk | 0x3"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_SOURCES.R_CANFD_GCR_DEIE_Msk | R_CANFD_GCR_POIE_Msk | 0x3" display="DLC Check + FD Payload Overflow" value="R_CANFD_GCR_DEIE_Msk | R_CANFD_GCR_POIE_Msk | 0x3"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_SOURCES.R_CANFD_GCR_MLIE_Msk | R_CANFD_GCR_POIE_Msk | 0x3" display="Message Lost + FD Payload Overflow" value="R_CANFD_GCR_MLIE_Msk | R_CANFD_GCR_POIE_Msk | 0x3"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_SOURCES.R_CANFD_GCR_DEIE_Msk | R_CANFD_GCR_MLIE_Msk | R_CANFD_GCR_POIE_Msk | 0x3" display="DLC Check + Message Lost + FD Payload Overflow" value="R_CANFD_GCR_DEIE_Msk | R_CANFD_GCR_MLIE_Msk | R_CANFD_GCR_POIE_Msk | 0x3"/>
+            <description>Select which errors should trigger an interrupt.</description>
+        </property>
+        <property id="CANFD_CFG_TX_PRIORITY" display="Transmission Priority" default="(R_CANFD_GCFG_TPRI_Msk)" type="combobox">
+            <option id="CANFD_CFG_TX_PRIORITY.0" display="Message ID" value="0"/>
+            <option id="CANFD_CFG_TX_PRIORITY.(R_CANFD_GCFG_TPRI_Msk)" display="Buffer Number" value="(R_CANFD_GCFG_TPRI_Msk)"/>
+            <description>Select how messages should be prioritized for transmission. In either case, lower numbers indicate higher priority.</description>
+        </property>
+        <property id="CANFD_CFG_DLC_CHECK" display="DLC Check" default="0" type="combobox">
+            <option id="CANFD_CFG_DLC_CHECK.0" display="Disabled" value="0"/>
+            <option id="CANFD_CFG_DLC_CHECK.(R_CANFD_GCFG_DCE_Msk)" display="Enabled" value="(R_CANFD_GCFG_DCE_Msk)"/>
+            <option id="CANFD_CFG_DLC_CHECK.(R_CANFD_GCFG_DCE_Msk | R_CANFD_GCFG_DRE_Msk)" display="DLC Replacement Enable" value="(R_CANFD_GCFG_DCE_Msk | R_CANFD_GCFG_DRE_Msk)"/>
+            <description>When enabled received messages will be rejected if their DLC field is less than the value configured in the associated AFL rule. If 'DLC Replacement Enable' is selected and a message passes the DLC check the DLC field is set to the value in the associated AFL rule and any excess data is discarded.</description>
+        </property>
+        <property id="CANFD_CFG_FD_OVERFLOW" display="Flexible Data (FD)|Payload Overflow" default="0" type="combobox">
+            <option id="CANFD_CFG_FD_OVERFLOW.0" display="Reject" value="0"/>
+            <option id="CANFD_CFG_FD_OVERFLOW.(R_CANFD_GCFG_OMRC_Msk)" display="Truncate" value="(R_CANFD_GCFG_OMRC_Msk)"/>
+            <description>Configure whether received messages larger than the destination buffer should be truncated or rejected.</description>
+        </property>
+        <property id="CANFD_CFG_CANFDCLK_SOURCE" display="Configure the CANFD Clock source" default="0" type="combobox">
+            <option id="CANFD_CFG_CANFDCLK_SOURCE.0" display="PLL" value="0"/>
+            <option id="CANFD_CFG_CANFDCLK_SOURCE.1" display="Crystal" value="1"/>
+            <description>Configure the CANFD Clock source to be either PLL (default) or crystal direct.</description>
+        </property>
+        <property id="CANFD_CFG_RXMB_NUMBER" display="Reception|Message Buffers|Number of Buffers" default="0" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CANFD_CFG_RXMB_NUMBER}")</constraint>
+            <constraint display="RX Message Buffer number must be an integer between 0 and 32" actionOnFail="error">("${CANFD_CFG_RXMB_NUMBER}" &gt;= 0) &amp;&amp; ("${CANFD_CFG_RXMB_NUMBER}" &lt;= 32)</constraint>
+            <description>Number of message buffers available for reception.\n\nAs there is no interrupt for message buffer reception it is recommended to use RX FIFOs instead. Set this value to 0 to disable RX Message Buffers.</description>
+        </property>
+        <property id="CANFD_CFG_RXMB_SIZE" display="Reception|Message Buffers|Payload Size" default="0" type="combobox">
+            <option id="CANFD_CFG_RXMB_SIZE.0" display="8 bytes" value="0"/>
+            <option id="CANFD_CFG_RXMB_SIZE.1" display="12 bytes" value="1"/>
+            <option id="CANFD_CFG_RXMB_SIZE.2" display="16 bytes" value="2"/>
+            <option id="CANFD_CFG_RXMB_SIZE.3" display="20 bytes" value="3"/>
+            <option id="CANFD_CFG_RXMB_SIZE.4" display="24 bytes" value="4"/>
+            <option id="CANFD_CFG_RXMB_SIZE.5" display="32 bytes" value="5"/>
+            <option id="CANFD_CFG_RXMB_SIZE.6" display="48 bytes" value="6"/>
+            <option id="CANFD_CFG_RXMB_SIZE.7" display="64 bytes" value="7"/>
+            <description>Payload size for all RX Message Buffers.</description>
+        </property>
+        <property id="CANFD_CFG_GLOBAL_ERR_IPL" display="Global Error Interrupt|Priority" default="12" type="combobox">
+            <option id="CANFD_CFG_GLOBAL_ERR_IPL.0" display="Priority 0 (highest)" value="0"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_IPL.1" display="Priority 1" value="1"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_IPL.2" display="Priority 2" value="2"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_IPL.3" display="Priority 3" value="3"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_IPL.4" display="Priority 4" value="4"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_IPL.5" display="Priority 5" value="5"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_IPL.6" display="Priority 6" value="6"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_IPL.7" display="Priority 7" value="7"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_IPL.8" display="Priority 8" value="8"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_IPL.9" display="Priority 9" value="9"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_IPL.10" display="Priority 10" value="10"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_IPL.11" display="Priority 11" value="11"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_IPL.12" display="Priority 12" value="12"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_IPL.13" display="Priority 13" value="13"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_IPL.14" display="Priority 14" value="14"/>
+            <option id="CANFD_CFG_GLOBAL_ERR_IPL.15" display="Priority 15" value="15"/>
+            <description>This interrupt is fired for each of the error sources selected below.</description>
+        </property>
+        <property id="CANFD_CFG_RX_FIFO_IPL" display="Reception|FIFOs|Interrupt Priority" default="12" type="combobox">
+            <option id="CANFD_CFG_RX_FIFO_IPL.0" display="Priority 0 (highest)" value="0"/>
+            <option id="CANFD_CFG_RX_FIFO_IPL.1" display="Priority 1" value="1"/>
+            <option id="CANFD_CFG_RX_FIFO_IPL.2" display="Priority 2" value="2"/>
+            <option id="CANFD_CFG_RX_FIFO_IPL.3" display="Priority 3" value="3"/>
+            <option id="CANFD_CFG_RX_FIFO_IPL.4" display="Priority 4" value="4"/>
+            <option id="CANFD_CFG_RX_FIFO_IPL.5" display="Priority 5" value="5"/>
+            <option id="CANFD_CFG_RX_FIFO_IPL.6" display="Priority 6" value="6"/>
+            <option id="CANFD_CFG_RX_FIFO_IPL.7" display="Priority 7" value="7"/>
+            <option id="CANFD_CFG_RX_FIFO_IPL.8" display="Priority 8" value="8"/>
+            <option id="CANFD_CFG_RX_FIFO_IPL.9" display="Priority 9" value="9"/>
+            <option id="CANFD_CFG_RX_FIFO_IPL.10" display="Priority 10" value="10"/>
+            <option id="CANFD_CFG_RX_FIFO_IPL.11" display="Priority 11" value="11"/>
+            <option id="CANFD_CFG_RX_FIFO_IPL.12" display="Priority 12" value="12"/>
+            <option id="CANFD_CFG_RX_FIFO_IPL.13" display="Priority 13" value="13"/>
+            <option id="CANFD_CFG_RX_FIFO_IPL.14" display="Priority 14" value="14"/>
+            <option id="CANFD_CFG_RX_FIFO_IPL.15" display="Priority 15" value="15"/>
+            <description>This priority level will apply to all FIFO interrupts globally.</description>
+        </property>
+        <property id="CANFD_CFG_RXFIFO0_INT_THRESHOLD" display="Reception|FIFOs|FIFO 0|Interrupt Threshold" default="(3U)" type="combobox">
+            <option id="CANFD_CFG_RXFIFO0_INT_THRESHOLD.(0U)" display="1/8 full" value="(0U)"/>
+            <option id="CANFD_CFG_RXFIFO0_INT_THRESHOLD.(1U)" display="1/4 full" value="(1U)"/>
+            <option id="CANFD_CFG_RXFIFO0_INT_THRESHOLD.(2U)" display="3/8 full" value="(2U)"/>
+            <option id="CANFD_CFG_RXFIFO0_INT_THRESHOLD.(3U)" display="1/2 full" value="(3U)"/>
+            <option id="CANFD_CFG_RXFIFO0_INT_THRESHOLD.(4U)" display="5/8 full" value="(4U)"/>
+            <option id="CANFD_CFG_RXFIFO0_INT_THRESHOLD.(5U)" display="3/4 full" value="(5U)"/>
+            <option id="CANFD_CFG_RXFIFO0_INT_THRESHOLD.(6U)" display="7/8 full" value="(6U)"/>
+            <option id="CANFD_CFG_RXFIFO0_INT_THRESHOLD.(7U)" display="full" value="(7U)"/>
+            <description>Set the interrupt threshold value for RX FIFO 0. This setting is only applicable when the Interrupt Mode is set to 'At Threshold Value'.</description>
+        </property>
+        <property id="CANFD_CFG_RXFIFO0_DEPTH" display="Reception|FIFOs|FIFO 0|Depth" default="3" type="combobox">
+            <option id="CANFD_CFG_RXFIFO0_DEPTH.1" display="4 stages" value="1"/>
+            <option id="CANFD_CFG_RXFIFO0_DEPTH.2" display="8 stages" value="2"/>
+            <option id="CANFD_CFG_RXFIFO0_DEPTH.3" display="16 stages" value="3"/>
+            <option id="CANFD_CFG_RXFIFO0_DEPTH.4" display="32 stages" value="4"/>
+            <option id="CANFD_CFG_RXFIFO0_DEPTH.5" display="48 stages" value="5"/>
+            <description>Select the number of stages for RX FIFO 0.</description>
+        </property>
+        <property id="CANFD_CFG_RXFIFO0_PAYLOAD" display="Reception|FIFOs|FIFO 0|Payload Size" default="7" type="combobox">
+            <option id="CANFD_CFG_RXFIFO0_PAYLOAD.0" display="8 bytes" value="0"/>
+            <option id="CANFD_CFG_RXFIFO0_PAYLOAD.1" display="12 bytes" value="1"/>
+            <option id="CANFD_CFG_RXFIFO0_PAYLOAD.2" display="16 bytes" value="2"/>
+            <option id="CANFD_CFG_RXFIFO0_PAYLOAD.3" display="20 bytes" value="3"/>
+            <option id="CANFD_CFG_RXFIFO0_PAYLOAD.4" display="24 bytes" value="4"/>
+            <option id="CANFD_CFG_RXFIFO0_PAYLOAD.5" display="32 bytes" value="5"/>
+            <option id="CANFD_CFG_RXFIFO0_PAYLOAD.6" display="48 bytes" value="6"/>
+            <option id="CANFD_CFG_RXFIFO0_PAYLOAD.7" display="64 bytes" value="7"/>
+            <description>Select the message payload size for RX FIFO 0.</description>
+        </property>
+        <property id="CANFD_CFG_RXFIFO0_INT_MODE" display="Reception|FIFOs|FIFO 0|Interrupt Mode" default="(R_CANFD_RFCR_RFIE_Msk | R_CANFD_RFCR_RFIM_Msk)" type="combobox">
+            <option id="CANFD_CFG_RXFIFO0_INT_MODE.0" display="Disabled" value="0"/>
+            <option id="CANFD_CFG_RXFIFO0_INT_MODE.(R_CANFD_RFCR_RFIE_Msk)" display="At Threshold Value" value="(R_CANFD_RFCR_RFIE_Msk)"/>
+            <option id="CANFD_CFG_RXFIFO0_INT_MODE.(R_CANFD_RFCR_RFIE_Msk | R_CANFD_RFCR_RFIM_Msk)" display="Every Frame" value="(R_CANFD_RFCR_RFIE_Msk | R_CANFD_RFCR_RFIM_Msk)"/>
+            <description>Set the interrupt mode for RX FIFO 0. Threshold mode will only fire an interrupt each time an incoming message crosses the threshold value set below.</description>
+        </property>
+        <property id="CANFD_CFG_RXFIFO0_ENABLE" display="Reception|FIFOs|FIFO 0|Enable" default="1" type="combobox">
+            <option id="CANFD_CFG_RXFIFO0_ENABLE.1" display="Enabled" value="1"/>
+            <option id="CANFD_CFG_RXFIFO0_ENABLE.0" display="Disabled" value="0"/>
+            <description>Enable or disable RX FIFO 0.</description>
+        </property>
+        <property id="CANFD_CFG_RXFIFO1_INT_THRESHOLD" display="Reception|FIFOs|FIFO 1|Interrupt Threshold" default="(3U)" type="combobox">
+            <option id="CANFD_CFG_RXFIFO1_INT_THRESHOLD.(0U)" display="1/8 full" value="(0U)"/>
+            <option id="CANFD_CFG_RXFIFO1_INT_THRESHOLD.(1U)" display="1/4 full" value="(1U)"/>
+            <option id="CANFD_CFG_RXFIFO1_INT_THRESHOLD.(2U)" display="3/8 full" value="(2U)"/>
+            <option id="CANFD_CFG_RXFIFO1_INT_THRESHOLD.(3U)" display="1/2 full" value="(3U)"/>
+            <option id="CANFD_CFG_RXFIFO1_INT_THRESHOLD.(4U)" display="5/8 full" value="(4U)"/>
+            <option id="CANFD_CFG_RXFIFO1_INT_THRESHOLD.(5U)" display="3/4 full" value="(5U)"/>
+            <option id="CANFD_CFG_RXFIFO1_INT_THRESHOLD.(6U)" display="7/8 full" value="(6U)"/>
+            <option id="CANFD_CFG_RXFIFO1_INT_THRESHOLD.(7U)" display="full" value="(7U)"/>
+            <description>Set the interrupt threshold value for RX FIFO 1. This setting is only applicable when the Interrupt Mode is set to 'At Threshold Value'.</description>
+        </property>
+        <property id="CANFD_CFG_RXFIFO1_DEPTH" display="Reception|FIFOs|FIFO 1|Depth" default="3" type="combobox">
+            <option id="CANFD_CFG_RXFIFO1_DEPTH.1" display="4 stages" value="1"/>
+            <option id="CANFD_CFG_RXFIFO1_DEPTH.2" display="8 stages" value="2"/>
+            <option id="CANFD_CFG_RXFIFO1_DEPTH.3" display="16 stages" value="3"/>
+            <option id="CANFD_CFG_RXFIFO1_DEPTH.4" display="32 stages" value="4"/>
+            <option id="CANFD_CFG_RXFIFO1_DEPTH.5" display="48 stages" value="5"/>
+            <description>Select the number of stages for RX FIFO 1.</description>
+        </property>
+        <property id="CANFD_CFG_RXFIFO1_PAYLOAD" display="Reception|FIFOs|FIFO 1|Payload Size" default="7" type="combobox">
+            <option id="CANFD_CFG_RXFIFO1_PAYLOAD.0" display="8 bytes" value="0"/>
+            <option id="CANFD_CFG_RXFIFO1_PAYLOAD.1" display="12 bytes" value="1"/>
+            <option id="CANFD_CFG_RXFIFO1_PAYLOAD.2" display="16 bytes" value="2"/>
+            <option id="CANFD_CFG_RXFIFO1_PAYLOAD.3" display="20 bytes" value="3"/>
+            <option id="CANFD_CFG_RXFIFO1_PAYLOAD.4" display="24 bytes" value="4"/>
+            <option id="CANFD_CFG_RXFIFO1_PAYLOAD.5" display="32 bytes" value="5"/>
+            <option id="CANFD_CFG_RXFIFO1_PAYLOAD.6" display="48 bytes" value="6"/>
+            <option id="CANFD_CFG_RXFIFO1_PAYLOAD.7" display="64 bytes" value="7"/>
+            <description>Select the message payload size for RX FIFO 1.</description>
+        </property>
+        <property id="CANFD_CFG_RXFIFO1_INT_MODE" display="Reception|FIFOs|FIFO 1|Interrupt Mode" default="(R_CANFD_RFCR_RFIE_Msk | R_CANFD_RFCR_RFIM_Msk)" type="combobox">
+            <option id="CANFD_CFG_RXFIFO1_INT_MODE.0" display="Disabled" value="0"/>
+            <option id="CANFD_CFG_RXFIFO1_INT_MODE.(R_CANFD_RFCR_RFIE_Msk)" display="At Threshold Value" value="(R_CANFD_RFCR_RFIE_Msk)"/>
+            <option id="CANFD_CFG_RXFIFO1_INT_MODE.(R_CANFD_RFCR_RFIE_Msk | R_CANFD_RFCR_RFIM_Msk)" display="Every Frame" value="(R_CANFD_RFCR_RFIE_Msk | R_CANFD_RFCR_RFIM_Msk)"/>
+            <description>Set the interrupt mode for RX FIFO 1. Threshold mode will only fire an interrupt each time an incoming message crosses the threshold value set below.</description>
+        </property>
+        <property id="CANFD_CFG_RXFIFO1_ENABLE" display="Reception|FIFOs|FIFO 1|Enable" default="0" type="combobox">
+            <option id="CANFD_CFG_RXFIFO1_ENABLE.1" display="Enabled" value="1"/>
+            <option id="CANFD_CFG_RXFIFO1_ENABLE.0" display="Disabled" value="0"/>
+            <description>Enable or disable RX FIFO 1.</description>
+        </property>
+        <property id="CANFD0_CFG_IPL" display="Channel Error/Transmit interrupt priority." default="12" type="combobox">
+            <option id="CANFD0_CFG_IPL.0" display="Priority 0 (highest)" value="0"/>
+            <option id="CANFD0_CFG_IPL.1" display="Priority 1" value="1"/>
+            <option id="CANFD0_CFG_IPL.2" display="Priority 2" value="2"/>
+            <option id="CANFD0_CFG_IPL.3" display="Priority 3" value="3"/>
+            <option id="CANFD0_CFG_IPL.4" display="Priority 4" value="4"/>
+            <option id="CANFD0_CFG_IPL.5" display="Priority 5" value="5"/>
+            <option id="CANFD0_CFG_IPL.6" display="Priority 6" value="6"/>
+            <option id="CANFD0_CFG_IPL.7" display="Priority 7" value="7"/>
+            <option id="CANFD0_CFG_IPL.8" display="Priority 8" value="8"/>
+            <option id="CANFD0_CFG_IPL.9" display="Priority 9" value="9"/>
+            <option id="CANFD0_CFG_IPL.10" display="Priority 10" value="10"/>
+            <option id="CANFD0_CFG_IPL.11" display="Priority 11" value="11"/>
+            <option id="CANFD0_CFG_IPL.12" display="Priority 12" value="12"/>
+            <option id="CANFD0_CFG_IPL.13" display="Priority 13" value="13"/>
+            <option id="CANFD0_CFG_IPL.14" display="Priority 14" value="14"/>
+            <option id="CANFD0_CFG_IPL.15" display="Priority 15" value="15"/>
+            <description>This interrupt is fired for each of the error sources selected below.</description>
+        </property>
+        <property id="CANFD0_EXTENDED_CFG_TXMB0_TXI_ENABLE" display="Transmit Interrupts|TX0" default="0ULL" type="combobox">
+            <option id="CANFD0_EXTENDED_CFG_TXMB0_TXI_ENABLE.0ULL" display="Disabled" value="0ULL"/>
+            <option id="CANFD0_EXTENDED_CFG_TXMB0_TXI_ENABLE.1ULL &lt;&lt; 0" display="Enabled" value="1ULL &lt;&lt; 0"/>
+            <description>Select TX0 Message buffers should trigger an interrupt when transmission is complete.</description>
+        </property>
+        <property id="CANFD0_EXTENDED_CFG_TXMB1_TXI_ENABLE" display="Transmit Interrupts|TX1" default="0ULL" type="combobox">
+            <option id="CANFD0_EXTENDED_CFG_TXMB1_TXI_ENABLE.0ULL" display="Disabled" value="0ULL"/>
+            <option id="CANFD0_EXTENDED_CFG_TXMB1_TXI_ENABLE.1ULL &lt;&lt; 1" display="Enabled" value="1ULL &lt;&lt; 1"/>
+            <description>Select TX1 Message buffers should trigger an interrupt when transmission is complete.</description>
+        </property>
+        <property id="CANFD0_EXTENDED_CFG_TXMB2_TXI_ENABLE" display="Transmit Interrupts|TX2" default="0ULL" type="combobox">
+            <option id="CANFD0_EXTENDED_CFG_TXMB2_TXI_ENABLE.0ULL" display="Disabled" value="0ULL"/>
+            <option id="CANFD0_EXTENDED_CFG_TXMB2_TXI_ENABLE.1ULL &lt;&lt; 2" display="Enabled" value="1ULL &lt;&lt; 2"/>
+            <description>Select TX2 Message buffers should trigger an interrupt when transmission is complete.</description>
+        </property>
+        <property id="CANFD0_EXTENDED_CFG_TXMB3_TXI_ENABLE" display="Transmit Interrupts|TX3" default="0ULL" type="combobox">
+            <option id="CANFD0_EXTENDED_CFG_TXMB3_TXI_ENABLE.0ULL" display="Disabled" value="0ULL"/>
+            <option id="CANFD0_EXTENDED_CFG_TXMB3_TXI_ENABLE.1ULL &lt;&lt; 3" display="Enabled" value="1ULL &lt;&lt; 3"/>
+            <description>Select TX3 Message buffers should trigger an interrupt when transmission is complete.</description>
+        </property>
+        <property id="CANFD0_EXTENDED_CFG_WARNING_ERROR_INTERRUPTS" display="Channel Error Interrupts|Error Warning" default="0U" type="combobox">
+            <option id="CANFD0_EXTENDED_CFG_WARNING_ERROR_INTERRUPTS.0U" display="Disabled" value="0U"/>
+            <option id="CANFD0_EXTENDED_CFG_WARNING_ERROR_INTERRUPTS.R_CANFD_CHCR_EWIE_Msk" display="Enabled" value="R_CANFD_CHCR_EWIE_Msk"/>
+            <description>Select Error Warning interrupt sources to enable.</description>
+        </property>
+        <property id="CANFD0_EXTENDED_CFG_PASSING_ERROR_INTERRUPTS" display="Channel Error Interrupts|Error Passive" default="0U" type="combobox">
+            <option id="CANFD0_EXTENDED_CFG_PASSING_ERROR_INTERRUPTS.0U" display="Disabled" value="0U"/>
+            <option id="CANFD0_EXTENDED_CFG_PASSING_ERROR_INTERRUPTS.R_CANFD_CHCR_EPIE_Msk" display="Enabled" value="R_CANFD_CHCR_EPIE_Msk"/>
+            <description>Select error passive interrupt sources to enable.</description>
+        </property>
+        <property id="CANFD0_EXTENDED_CFG_BUS_OFF_ENTRY_ERROR_INTERRUPTS" display="Channel Error Interrupts|Bus-Off Entry" default="0U" type="combobox">
+            <option id="CANFD0_EXTENDED_CFG_BUS_OFF_ENTRY_ERROR_INTERRUPTS.0U" display="Disabled" value="0U"/>
+            <option id="CANFD0_EXTENDED_CFG_BUS_OFF_ENTRY_ERROR_INTERRUPTS.R_CANFD_CHCR_BOEIE_Msk" display="Enabled" value="R_CANFD_CHCR_BOEIE_Msk"/>
+            <description>Select which channel bus-Off Entry error interrupt sources to enable.</description>
+        </property>
+        <property id="CANFD0_EXTENDED_CFG_BUS_OFF_RECOVERY_ERROR_INTERRUPTS" display="Channel Error Interrupts|Bus-Off Recovery" default="0U" type="combobox">
+            <option id="CANFD0_EXTENDED_CFG_BUS_OFF_RECOVERY_ERROR_INTERRUPTS.0U" display="Disabled" value="0U"/>
+            <option id="CANFD0_EXTENDED_CFG_BUS_OFF_RECOVERY_ERROR_INTERRUPTS.R_CANFD_CHCR_BORIE_Msk" display="Enabled" value="R_CANFD_CHCR_BORIE_Msk"/>
+            <description>Select channel bus-Off Recovery error interrupt sources to enable.</description>
+        </property>
+        <property id="CANFD0_EXTENDED_CFG_OVERLOAD_ERROR_INTERRUPTS" display="Channel Error Interrupts|Overload" default="0U" type="combobox">
+            <option id="CANFD0_EXTENDED_CFG_OVERLOAD_ERROR_INTERRUPTS.0U" display="Disabled" value="0U"/>
+            <option id="CANFD0_EXTENDED_CFG_OVERLOAD_ERROR_INTERRUPTS.R_CANFD_CHCR_OLIE_Msk" display="Enabled" value="R_CANFD_CHCR_OLIE_Msk"/>
+            <description>Select channel overload error interrupt sources to enable.</description>
+        </property>
+        <property id="CANFD0_BIT_TIMING_CFG_BRP" display="Bitrate|Manual|Nominal|Prescaler (divisor)" default="1" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CANFD0_BIT_TIMING_CFG_BRP}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 1024" actionOnFail="error">("${CANFD0_BIT_TIMING_CFG_BRP}" &gt;= 1) &amp;&amp; ("${CANFD0_BIT_TIMING_CFG_BRP}" &lt;= 1024)</constraint>
+            <description>Specify clock divisor for nominal bitrate.</description>
+        </property>
+        <property id="CANFD0_BIT_TIMING_CFG_TSEG1" display="Bitrate|Manual|Nominal|Time Segment 1 (Tq)" default="29" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CANFD0_BIT_TIMING_CFG_TSEG1}")</constraint>
+            <constraint display="Value must be in the range 2 ~ 256" actionOnFail="error">("${CANFD0_BIT_TIMING_CFG_TSEG1}" &gt;= 2) &amp;&amp; ("${CANFD0_BIT_TIMING_CFG_TSEG1}" &lt;= 256)</constraint>
+            <description>Select the Time Segment 1 value. Check module usage notes for how to calculate this value.</description>
+        </property>
+        <property id="CANFD0_BIT_TIMING_CFG_TSEG2" display="Bitrate|Manual|Nominal|Time Segment 2 (Tq)" default="10" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CANFD0_BIT_TIMING_CFG_TSEG2}")</constraint>
+            <constraint display="Value must be in the range 2 ~ 128" actionOnFail="error">("${CANFD0_BIT_TIMING_CFG_TSEG2}" &gt;= 2) &amp;&amp; ("${CANFD0_BIT_TIMING_CFG_TSEG2}" &lt;= 128)</constraint>
+            <description>Select the Time Segment 2 value. Check module usage notes for how to calculate this value.</description>
+        </property>
+        <property id="CANFD0_BIT_TIMING_CFG_SJW" display="Bitrate|Manual|Nominal|Sync Jump Width (Tq)" default="4" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CANFD0_BIT_TIMING_CFG_SJW}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 128" actionOnFail="error">("${CANFD0_BIT_TIMING_CFG_SJW}" &gt;= 1) &amp;&amp; ("${CANFD0_BIT_TIMING_CFG_SJW}" &lt;= 128)</constraint>
+            <description>Select the Synchronization Jump Width value. Check module usage notes for how to calculate this value.</description>
+        </property>
+        <property id="CANFD0_DATA_TIMING_CFG_BRP" display="Bitrate|Manual|Data|Prescaler (divisor)" default="1" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CANFD0_DATA_TIMING_CFG_BRP}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 1024" actionOnFail="error">("${CANFD0_DATA_TIMING_CFG_BRP}" &gt;= 1) &amp;&amp; ("${CANFD0_DATA_TIMING_CFG_BRP}" &lt;= 1024)</constraint>
+            <description>Specify clock divisor for data bitrate.</description>
+        </property>
+        <property id="CANFD0_DATA_TIMING_CFG_TSEG1" display="Bitrate|Manual|Data|Time Segment 1 (Tq)" default="5" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CANFD0_DATA_TIMING_CFG_TSEG1}")</constraint>
+            <constraint display="Value must be in the range 2 ~ 32" actionOnFail="error">("${CANFD0_DATA_TIMING_CFG_TSEG1}" &gt;= 2) &amp;&amp; ("${CANFD0_DATA_TIMING_CFG_TSEG1}" &lt;= 32)</constraint>
+            <description>Select the Time Segment 1 value. Check module usage notes for how to calculate this value.</description>
+        </property>
+        <property id="CANFD0_DATA_TIMING_CFG_TSEG2" display="Bitrate|Manual|Data|Time Segment 2 (Tq)" default="2" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CANFD0_DATA_TIMING_CFG_TSEG2}")</constraint>
+            <constraint display="Value must be in the range 2 ~ 16" actionOnFail="error">("${CANFD0_DATA_TIMING_CFG_TSEG2}" &gt;= 2) &amp;&amp; ("${CANFD0_DATA_TIMING_CFG_TSEG2}" &lt;= 16)</constraint>
+            <description>Select the Time Segment 2 value. Check module usage notes for how to calculate this value.</description>
+        </property>
+        <property id="CANFD0_DATA_TIMING_CFG_SJW" display="Bitrate|Manual|Data|Sync Jump Width (Tq)" default="1" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CANFD0_DATA_TIMING_CFG_SJW}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 16" actionOnFail="error">("${CANFD0_DATA_TIMING_CFG_SJW}" &gt;= 1) &amp;&amp; ("${CANFD0_DATA_TIMING_CFG_SJW}" &lt;= 16)</constraint>
+            <description>Select the Synchronization Jump Width value. Check module usage notes for how to calculate this value.</description>
+        </property>
+        <property id="CANFD0_EXTENDED_CFG_DELAY_COMPENSATION" display="Bitrate|Delay Compensation" default="1" type="combobox">
+            <option id="CANFD0_EXTENDED_CFG_DELAY_COMPENSATION.1" display="Enabled" value="1"/>
+            <option id="CANFD0_EXTENDED_CFG_DELAY_COMPENSATION.0" display="Disabled" value="0"/>
+            <description>When enabled the CANFD module will automatically compensate for any transceiver or bus delay between transmitted and received bits. When manually supplying bit timing values with delay compensation enabled be sure the data prescaler is 2 or smaller for correct operation.</description>
+        </property>
+    </configuration>
+</module>

@@ -23,6 +23,7 @@
 * History : DD.MM.YYYY Version Description
 *           31.03.2021 1.00    Initial Release
 *                              Supported for RX671.
+*           31.03.2022 2.10    Supported for RX660.
 ************************************************************************************************************************/
 
 #ifndef RSCI_RX_PLATFORM_H
@@ -35,8 +36,10 @@ Includes   <System Includes> , "Project Includes"
 
 #if defined(BSP_MCU_RX671)
 #include "./targets/rx671/r_rsci_rx671_private.h"  /* RX671 */
+#elif defined(BSP_MCU_RX660)
+#include "./targets/rx660/r_rsci_rx660_private.h"  /* RX660 */
 #else
-#error "ERROR - r_rsci_rx671_private.h not included."
+#error "ERROR - r_rsci_rxXXX_private.h not included."
 #endif
 
 #endif /* RSCI_RX_PLATFORM_H */

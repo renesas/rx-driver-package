@@ -63,6 +63,7 @@
 *                              Fixed an issue that RCR1.RTCOS bit will be overwritten by "0" in the processing 
 *                              rtc_enable_ints function after rtc_set_output function.
 *           31.07.2021 2.82    Added support for RX140.
+*           31.12.2021 2.83    Added support for RX660.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -97,6 +98,8 @@ volatile rtc_cap_time_t *g_pcap_time = (rtc_cap_time_t *) &RTC.RSECCP0.BYTE;
 void rtc_init (void)
 {
 #if (!defined(BSP_MCU_RX140))
+
+    #if (!defined(BSP_MCU_RX660))
     /* Set sub-clock drive capacity */
     RTC.RCR3.BIT.RTCDV = RTC_DRIVE_CAPACITY;
     /* WAIT_LOOP */
@@ -105,11 +108,15 @@ void rtc_init (void)
         /* Confirm that it has changed, it's slow. */
         R_BSP_NOP();
     }
+    #endif
 
     /* Enable the sub-clock for RTC */
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX671) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N)
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX671) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) ||\
+    defined(BSP_MCU_RX660)
     RTC.RCR4.BIT.RCKSEL = 0;            // do not use main clock
 #endif
+
+    #if (!defined(BSP_MCU_RX660))
     RTC.RCR3.BIT.RTCEN = 1;             // enable sub-clock
     /* WAIT_LOOP */
     while (1 != RTC.RCR3.BIT.RTCEN)
@@ -117,6 +124,7 @@ void rtc_init (void)
         /* Confirm that it has changed */
         R_BSP_NOP();
     }
+    #endif
 #endif
 
     /* Wait for six the sub-clock cycles */

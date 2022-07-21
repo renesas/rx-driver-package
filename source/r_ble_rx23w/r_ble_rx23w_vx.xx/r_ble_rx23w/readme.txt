@@ -10,7 +10,7 @@ R01AN4860JJ
 
 Version
 -------
-v2.30
+v2.40
 
 Overview
 --------
@@ -115,9 +115,9 @@ File Structure
  |  |    |  r_ble_api_spec.chm
  |  |    |
  |  |    +---en
- |  |    |      r01an4860ej0230-rx23w-ble.pdf
+ |  |    |      r01an4860ej0240-rx23w-ble.pdf
  |  |    +---ja
- |  |           r01an4860jj0230-rx23w-ble.pdf
+ |  |           r01an4860jj0240-rx23w-ble.pdf
  |  |
  |  +---lib
  |  |      ble_fit_lib_selector.bat
@@ -125,7 +125,6 @@ File Structure
  |  |      lib_ble_ps_ccrx_a.lib
  |  |      lib_ble_ps_ccrx_b.lib
  |  |      lib_ble_ps_ccrx_c.lib
- |  |      lib_ble_ps_hci_ccrx.lib
  |  |      lib_ble_ps_hci_ccrx_a.lib
  |  |      lib_ble_ps_hci_ccrx_b.lib
  |  |      lib_ble_ps_hci_ccrx_c.lib

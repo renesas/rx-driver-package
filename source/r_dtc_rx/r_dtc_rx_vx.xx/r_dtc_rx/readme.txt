@@ -5,7 +5,7 @@ r_dtc_rx
 
 Version
 -------
-v4.00
+v4.10
 
 Overview
 --------
@@ -38,6 +38,7 @@ Supported MCUs
 * RX65N MCU
 * RX651 MCU
 * RX66T MCU
+* RX660 MCU
 * RX671 MCU
 * RX66N MCU
 * RX72T MCU
@@ -134,6 +135,11 @@ r_dtc_rx
         |       r_dtc_rx_target_if.h
         |
         +---rx66t
+        |       r_dtc_rx_target.c
+        |       r_dtc_rx_target.h
+        |       r_dtc_rx_target_if.h
+        |
+        +---rx660
         |       r_dtc_rx_target.c
         |       r_dtc_rx_target.h
         |       r_dtc_rx_target_if.h

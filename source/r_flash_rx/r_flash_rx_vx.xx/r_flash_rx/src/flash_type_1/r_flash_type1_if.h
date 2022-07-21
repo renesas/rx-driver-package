@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2022 Renesas Electronics Corporation. All rights reserved.
 **********************************************************************************************************************/
 /**********************************************************************************************************************
 * File Name    : r_flash_type1_if.h
@@ -30,6 +30,7 @@
 *                05.10.2016 3.00    Merged functions common to other flash types into r_flash_group.c.
 *                26.06.2020 4.60    Added FLASH_ACCESS_WINDOW_END_NEXT_REG_VALUE #define.
 *                23.04.2021 4.80    Added RX140.
+*                13.05.2022 4.90    Added support for Tool News R20TS0818.
 **********************************************************************************************************************/
 
 #ifndef R_FLASH_TYPE1_IF_H
@@ -63,7 +64,13 @@ Macro definitions
 #define FLASH_FCU_INT_ENABLE    // no FCU
 #define FLASH_FCU_INT_DISABLE   // no FCU
 
+#if (FLASH_TYPE_VARIETY == FLASH_TYPE_VARIETY_A)
 #define FLASH_ACCESS_WINDOW_END_VALUE  (0x400)
+#elif defined(MCU_RX23_ALL) || defined(MCU_RX24_ALL)
+#define FLASH_ACCESS_WINDOW_END_VALUE (0x800)
+#else
+#define FLASH_ACCESS_WINDOW_END_VALUE (0x200)
+#endif
 
 /* Definition for function name compatibility */
 #define R_CF_GetCurrentSwapState   flash_get_current_swap_state

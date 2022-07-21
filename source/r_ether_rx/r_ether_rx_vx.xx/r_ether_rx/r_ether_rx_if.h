@@ -68,7 +68,7 @@
 
 /* Version Number of API. */
     #define ETHER_RX_VERSION_MAJOR  (1)
-    #define ETHER_RX_VERSION_MINOR  (22)
+    #define ETHER_RX_VERSION_MINOR  (23)
 
 /* When using the Read functions, ETHER_NO_DATA is the return value that indicates that no received data. */
     #define ETHER_NO_DATA           (0)

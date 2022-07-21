@@ -43,6 +43,7 @@
 *                              Fixed to comply with GSCE Coding Standards Rev.6.00.
 *         : 31.03.2020 2.40    Added support RX23E-A.
 *         : 31.03.2021 2.60    Added support RX671.
+*         : 31.03.2022 2.90    Added support RX660.
 *******************************************************************************/
 #ifndef DMACA_RX_PRIVATE_H
 #define DMACA_RX_PRIVATE_H
@@ -61,6 +62,8 @@ Includes   <System Includes>, "Project Includes"
     #include "./src/targets/rx66n/r_dmaca_rx_target.h"
 #elif defined(BSP_MCU_RX66T)
     #include "./src/targets/rx66t/r_dmaca_rx_target.h"
+#elif defined(BSP_MCU_RX660)
+    #include "./src/targets/rx660/r_dmaca_rx_target.h"
 #elif defined(BSP_MCU_RX671)
     #include "./src/targets/rx671/r_dmaca_rx_target.h"
 #elif defined(BSP_MCU_RX71M)

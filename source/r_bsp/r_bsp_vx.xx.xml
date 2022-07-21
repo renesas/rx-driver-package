@@ -89,6 +89,7 @@
         <group>RX64M</group>
         <group>RX651</group>
         <group>RX65N</group>
+        <group>RX660</group>
         <group>RX66N</group>
         <group>RX66T</group>
         <group>RX671</group>
@@ -112,6 +113,7 @@
         <board>GENERIC_RX64M</board>
         <board>GENERIC_RX65N</board>
         <board device_compatibility="RX651,RX65N">GENERIC_RX65N</board>
+        <board>GENERIC_RX660</board>
         <board>GENERIC_RX66N</board>
         <board>GENERIC_RX66T</board>
         <board>GENERIC_RX671</board>

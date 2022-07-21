@@ -100,6 +100,10 @@ r_riic_rx
         |      r_riic_rx65n.c
         |      r_riic_rx65n_private.h
         |
+        +---rx660
+        |      r_riic_rx660.c
+        |      r_riic_rx660_private.h
+        |
         +---rx66t
         |      r_riic_rx66t.c
         |      r_riic_rx66t_private.h

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /**********************************************************************************************************************
 * File Name    : r_sci_rx.c
@@ -62,6 +62,10 @@
 *                              for changing TXI and RXI priority level simultaneously.
 *                              Added support command SCI_CMD_SET_TXI_PRIORITY and SCI_CMD_SET_RXI_PRIORITY 
 *                              in R_SCI_Control() for Series RX100 and RX200.
+*           31.03.2022 4.40    Fixed the issue with DTC mode which incorrectly uses the same transfer information 
+*                              for all channels.
+*                              Fixed issue of consecutively calling R_SCI_Receive() function in using DTC/DMAC.
+*                              Added support for RX660.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -791,6 +795,13 @@ static sci_err_t sci_init_async(sci_hdl_t const      hdl,
     /* Initialize channel control block flags */
     hdl->tx_idle = true;
 
+#if (RX_DTC_DMACA_ENABLE & 0x01 || RX_DTC_DMACA_ENABLE & 0x02)
+    /* Initialize receive flag when using DTC/DMAC */
+    if ((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
+    {
+        hdl->rx_idle = true;
+    }
+#endif
         
     /* Configure SMR for asynchronous mode, single processor, and user settings */
     if (SCI_PARITY_OFF == p_cfg->parity_en)
@@ -1749,21 +1760,29 @@ static sci_err_t sci_receive_async_data(sci_hdl_t const hdl,
 #if (RX_DTC_DMACA_ENABLE & 0x01)
     if (SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable)
     {
-        sci_fifo_ctrl_t *p_ctrl;
-        p_ctrl = &hdl->queue[hdl->qindex_app_rx];
-        p_ctrl->p_rx_buf = p_dst;
-        p_ctrl->rx_cnt = length;              /* length must be set after buf ptr */
-        p_ctrl->p_rx_fraction_buf = p_dst;
-        p_ctrl->rx_fraction = length;
-#if SCI_CFG_FIFO_INCLUDED
-        if (true == hdl->fifo_ctrl)
+        if(true == hdl->rx_idle)
         {
-             err = sci_rxfifo_dtc_create(hdl, p_dst, length);
+            hdl->rx_idle = false;
+            sci_fifo_ctrl_t *p_ctrl;
+            p_ctrl = &hdl->queue[hdl->qindex_app_rx];
+            p_ctrl->p_rx_buf = p_dst;
+            p_ctrl->rx_cnt = length;              /* length must be set after buf ptr */
+            p_ctrl->p_rx_fraction_buf = p_dst;
+            p_ctrl->rx_fraction = length;
+#if SCI_CFG_FIFO_INCLUDED
+            if (true == hdl->fifo_ctrl)
+            {
+                 err = sci_rxfifo_dtc_create(hdl, p_dst, length);
+            }
+            else
+#endif
+            {
+                err = sci_rx_dtc_create(hdl, p_dst, length);
+            }
         }
         else
-#endif
         {
-            err = sci_rx_dtc_create(hdl, p_dst, length);
+            return SCI_ERR_XCVR_BUSY;
         }
     }
     else
@@ -1772,23 +1791,30 @@ static sci_err_t sci_receive_async_data(sci_hdl_t const hdl,
 #if (RX_DTC_DMACA_ENABLE & 0x02)
         if (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable)
         {
-            sci_fifo_ctrl_t *p_ctrl;
-            p_ctrl = &hdl->queue[hdl->qindex_app_rx];
-            p_ctrl->p_rx_buf = p_dst;
-            p_ctrl->rx_cnt = length;              /* length must be set after buf ptr */
-            p_ctrl->p_rx_fraction_buf = p_dst;
-            p_ctrl->rx_fraction = length;
-#if (SCI_CFG_FIFO_INCLUDED)
-            if (true == hdl->fifo_ctrl)
+            if(true == hdl->rx_idle)
             {
-                err = sci_rxfifo_dmaca_create(hdl, p_dst, length);
+                hdl->rx_idle = false;
+                sci_fifo_ctrl_t *p_ctrl;
+                p_ctrl = &hdl->queue[hdl->qindex_app_rx];
+                p_ctrl->p_rx_buf = p_dst;
+                p_ctrl->rx_cnt = length;              /* length must be set after buf ptr */
+                p_ctrl->p_rx_fraction_buf = p_dst;
+                p_ctrl->rx_fraction = length;
+#if (SCI_CFG_FIFO_INCLUDED)
+                if (true == hdl->fifo_ctrl)
+                {
+                    err = sci_rxfifo_dmaca_create(hdl, p_dst, length);
+                }
+                else
+#endif
+                {
+                    err = sci_rx_dmaca_create(hdl, p_dst, length);
+                }
             }
             else
-#endif
             {
-                err = sci_rx_dmaca_create(hdl, p_dst, length);
+                return SCI_ERR_XCVR_BUSY;
             }
-
         }
         else
 #endif
@@ -2458,6 +2484,8 @@ static void sci_fifo_receive(sci_hdl_t const hdl)
             }
             if (0 == p_rctrl->rx_cnt)
             {
+                hdl->rx_idle = true;
+
                 /* call callback function if available */
                 if ((NULL != hdl->callback) && (FIT_NO_FUNC != hdl->callback))
                 {
@@ -2642,6 +2670,12 @@ void rxi_handler(sci_hdl_t const hdl)
                 if ((SCI_MODE_SYNC == hdl->mode) || (SCI_MODE_SSPI == hdl->mode))
                 {
                     hdl->tx_idle = true;
+                }
+#endif
+#if (SCI_CFG_ASYNC_INCLUDED)
+                if (SCI_MODE_ASYNC == hdl->mode)
+                {
+                    hdl->rx_idle = true;
                 }
 #endif
                 if (NULL != p_rctrl->p_rx_fraction_buf)
@@ -3058,7 +3092,7 @@ sci_err_t R_SCI_Control(sci_hdl_t const     hdl,
 #endif /* End of SCI_CFG_FIFO_INCLUDED */
 
     case (SCI_CMD_SET_TXI_PRIORITY):
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)|| defined(BSP_MCU_RX660)
     {
         /* Casting void type to uint8_t type is valid */
         *hdl->rom->ipr_txi = *((uint8_t *)p_args);
@@ -3072,7 +3106,7 @@ sci_err_t R_SCI_Control(sci_hdl_t const     hdl,
     }
 #endif
     case (SCI_CMD_SET_RXI_PRIORITY):
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)|| defined(BSP_MCU_RX660)
     {
         /* Casting void type to uint8_t type is valid */
         *hdl->rom->ipr_rxi = *((uint8_t *)p_args);
@@ -3087,7 +3121,7 @@ sci_err_t R_SCI_Control(sci_hdl_t const     hdl,
 #endif
 
     case (SCI_CMD_SET_TXI_RXI_PRIORITY):
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)|| defined(BSP_MCU_RX671)|| defined(BSP_MCU_RX660)
     {
         /* Casting void type to uint8_t type is valid */
         *hdl->rom->ipr_txi = *((uint8_t *)p_args);
@@ -3183,6 +3217,12 @@ sci_err_t R_SCI_Close(sci_hdl_t const hdl)
         R_BYTEQ_Close(hdl->u_tx_data.que);
         R_BYTEQ_Close(hdl->u_rx_data.que);
 #endif
+    }
+#endif
+#if (TX_DTC_DMACA_ENABLE & 0x01 || RX_DTC_DMACA_ENABLE & 0x01)
+    if (SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_tx_enable)
+    {
+        sci_dtc_info_transfer_delete(hdl);
     }
 #endif
 #if SCI_CFG_FIFO_INCLUDED

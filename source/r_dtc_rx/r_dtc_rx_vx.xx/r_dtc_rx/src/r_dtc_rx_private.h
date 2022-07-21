@@ -53,6 +53,7 @@
 *         : 31.03.2020 3.50    Added support for RX23E-A.
 *         : 31.03.2021 3.70    Added support for RX671.
 *         : 15.04.2021 3.80    Added support for RX140.
+*         : 31.03.2022 4.10    Added support for RX660.
 *******************************************************************************/
 #ifndef DTC_RX_PRIVATE_H
 #define DTC_RX_PRIVATE_H
@@ -186,6 +187,11 @@ Includes   <System Includes> , "Project Includes"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
+#elif defined(BSP_MCU_RX660)
+    #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE) && (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE)
+        #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
+    #include ".\src\targets\rx660\r_dtc_rx_target.h"
 #elif defined(BSP_MCU_RX671)
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE) && (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."

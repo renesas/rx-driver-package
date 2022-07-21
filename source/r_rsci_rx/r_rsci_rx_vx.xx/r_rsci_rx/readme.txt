@@ -19,6 +19,7 @@ channels, or unused modes. These configuration options can be found in
 Features
 --------
 * (RX671) Simultaneous operation of up to 2 channels
+* (RX660) Simultaneous operation of up to 2 channels
 * Simultaneous operation of Async, Sync, SSPI or Manc modes on different channels.
 * Queueing of incoming and outgoing data for Asynchronous or Manchester channels.
 * Interrupt driven.
@@ -32,9 +33,9 @@ r_rsci_rx
 |
 +---doc
 |   +---ja
-|   |    r01an5759js0200-rx-rsci.pdf
+|   |    r01an5759js{VERSION_NUMBER}-rx-rsci.pdf
 |   +---en
-|        r01an5759es0200-rx-rsci.pdf
+|        r01an5759es{VERSION_NUMBER}-rx-rsci.pdf
 |
 +---src
     |   r_rsci_rx.c
@@ -47,6 +48,10 @@ r_rsci_rx
         |       r_rsci_rx671.c
         |       r_rsci_rx671_data.c
         |       r_rsci_rx671_private.h
+        +---rx660
+        |       r_rsci_rx660.c
+        |       r_rsci_rx660_data.c
+        |       r_rsci_rx660_private.h
         :
 
 r_config

@@ -29,6 +29,7 @@
 *                              Fixed warning in IAR
 *           13.09.2021 2.32    Updated Doxygen comment.
 *           11.11.2021 2.40    Added support for RX140 (products with 128-Kbyte or larger ROM).
+*           30.06.2022 2.41    Updated Doxygen comment.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -341,7 +342,6 @@ can_err_t   err         = CAN_SUCCESS;
  * @retval CAN_ERR_ILLEGAL_MODE:        Not in global reset mode (results from call to Open())
  * @retval CAN_ERR_CH_NO_INIT:          Channel not initialized yet
  * @retval CAN_ERR_INVALID_ARG:         An invalid argument was provided
- * @retval CAN_ERR_MAX_ONE_GWFIFO:      Can only configure one gateway FIFO
  * @details FIFO usage is optional.\n
  * This function is used to activate a FIFO. Transmit and receive FIFOs are 4 entries deep (history FIFO is 8 deep).
  * The transmit FIFO must have associated with it a standard transmit mailbox. The number of the mailbox determines

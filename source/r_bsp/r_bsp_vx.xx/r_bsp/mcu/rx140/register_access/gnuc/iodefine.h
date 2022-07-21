@@ -35,6 +35,8 @@
 *            : V1.00C (2021-10-12)  [Hardware Manual Revision : 1.00]
 *            : V1.10  (2021-11-10)  [Hardware Manual Revision : 1.10]
 *            : V1.10A (2021-12-16)  [Hardware Manual Revision : 1.10]
+*            : V1.10B (2022-03-10)  [Hardware Manual Revision : 1.10]
+*            : V1.10C (2022-03-29)  [Hardware Manual Revision : 1.10]
 *
 * NOTE       : THIS IS A TYPICAL EXAMPLE.
 *
@@ -1067,11 +1069,11 @@ typedef struct st_ctsu {
 		struct {
 			
 #ifdef __RX_LITTLE_ENDIAN__
-			unsigned long TSADCS : 1;
+			unsigned long CTADCS : 1;
 			unsigned long  : 31;
 #else
 			unsigned long  : 31;
-			unsigned long TSADCS : 1;
+			unsigned long CTADCS : 1;
 #endif
 	} BIT;
 	} CTSUADCC;
@@ -1582,9 +1584,7 @@ typedef struct st_ctsu {
 			
 #ifdef __RX_LITTLE_ENDIAN__
 			unsigned long CCOCFEN : 1;
-			unsigned long  : 1;
-			unsigned long MAJIRIMD : 1;
-			unsigned long  : 1;
+			unsigned long  : 3;
 			unsigned long DTCLESS : 1;
 			unsigned long MTUCFEN : 1;
 			unsigned long  : 2;
@@ -1600,9 +1600,7 @@ typedef struct st_ctsu {
 			unsigned long  : 2;
 			unsigned long MTUCFEN : 1;
 			unsigned long DTCLESS : 1;
-			unsigned long  : 1;
-			unsigned long MAJIRIMD : 1;
-			unsigned long  : 1;
+			unsigned long  : 3;
 			unsigned long CCOCFEN : 1;
 #endif
 	} BIT;
@@ -1624,64 +1622,7 @@ typedef struct st_ctsu {
 #endif
 	} BIT;
 	} CTSUSCNTACT;
-	char           wk2[4];
-	union {
-		unsigned long LONG;
-		struct {
-			unsigned short L;
-			unsigned short H;
-		} WORD;
-		struct {
-			
-#ifdef __RX_LITTLE_ENDIAN__
-			unsigned long SO1 : 10;
-			unsigned long  : 6;
-			unsigned long OFFSETCOEFF1 : 16;
-#else
-			unsigned long OFFSETCOEFF1 : 16;
-			unsigned long  : 6;
-			unsigned long SO1 : 10;
-#endif
-	} BIT;
-	} CTSUMACT1;
-	union {
-		unsigned long LONG;
-		struct {
-			unsigned short L;
-			unsigned short H;
-		} WORD;
-		struct {
-			
-#ifdef __RX_LITTLE_ENDIAN__
-			unsigned long SO2 : 10;
-			unsigned long  : 6;
-			unsigned long OFFSETCOEFF2 : 16;
-#else
-			unsigned long OFFSETCOEFF2 : 16;
-			unsigned long  : 6;
-			unsigned long SO2 : 10;
-#endif
-	} BIT;
-	} CTSUMACT2;
-	union {
-		unsigned long LONG;
-		struct {
-			unsigned short L;
-			unsigned short H;
-		} WORD;
-		struct {
-			
-#ifdef __RX_LITTLE_ENDIAN__
-			unsigned long SO3 : 10;
-			unsigned long  : 6;
-			unsigned long OFFSETCOEFF3 : 16;
-#else
-			unsigned long OFFSETCOEFF3 : 16;
-			unsigned long  : 6;
-			unsigned long SO3 : 10;
-#endif
-	} BIT;
-	} CTSUMACT3;
+	char           wk2[16];
 	union {
 		unsigned long LONG;
 		struct {

@@ -42,6 +42,7 @@
 *                              Added support for RX72N.
 *           30.06.2021 2.81    Added support for RX671.
 *           31.07.2021 2.82    Added support for RX140.
+*           31.12.2021 2.83    Added support for RX660.
 ***********************************************************************************************************************/
 
 #ifndef R_RTC_RX_CONFIG_H
@@ -64,7 +65,7 @@ Configuration Options
 
 /* SPECIFY SUB-CLOCK OSCILLATOR DRIVE CAPACITY ON RX11x, RX130, RX23x, RX64M or RX71M, RX65N, RX671, RX72M, RX66N, RX72N 
  * uncomment appropriate level: standard, low, middle, or high
- * Devices with invalid settings: RX140
+ * Devices with invalid settings: RX140, RX660
  */
 
 /* Supported by the RX11x, RX130, RX23x, RX64M or RX71M, RX65N, RX671, RX72M, RX66N, RX72N */

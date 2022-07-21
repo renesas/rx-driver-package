@@ -1046,6 +1046,9 @@ fsp_err_t rm_ob1203_fifo_info_reset (rm_ob1203_ctrl_t * const p_api_ctrl)
 {
     fsp_err_t err = FSP_SUCCESS;
     rm_ob1203_instance_ctrl_t * p_ctrl = (rm_ob1203_instance_ctrl_t *) p_api_ctrl;
+#if (BSP_CFG_RTOS == 0) && (defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__))
+    uint16_t counter = 0;
+#endif
 
     if (RM_OB1203_OPERATION_MODE_PPG == p_ctrl->p_mode->mode_irq)
     {
@@ -1084,7 +1087,9 @@ fsp_err_t rm_ob1203_fifo_info_reset (rm_ob1203_ctrl_t * const p_api_ctrl)
         /* Wait callback */
         while(false == p_ctrl->rx_communication_finished)
         {
-            ;
+            rm_ob1203_delay_ms(p_ctrl, 1);
+            counter++;
+            FSP_ERROR_RETURN(RM_OB1203_TIMEOUT >= counter, FSP_ERR_TIMEOUT);
         }
 
         /* Clear all interrupt bits */

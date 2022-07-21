@@ -45,6 +45,8 @@
 *                               function.
 *                               Added comments for when use simulator.
 *                               Added version check of smart configurator.
+*         : 22.04.2022 2.01     Added comments for Technical Update Information(TN-RX*-A0257A).
+*                               Deleted version check of smart configurator.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -91,10 +93,6 @@ Macro definitions
     #define BSP_PRV_PPLL_CLK_OPERATING    (1)    /* PPLL circuit is operating. */
 #else /* PPLL is not used for USB clock. */
     #define BSP_PRV_PPLL_CLK_OPERATING    (0)    /* PPLL circuit is stopped. */
-#endif
-
-#if BSP_CFG_CONFIGURATOR_VERSION < 2120
-#error "To use this version of BSP, you need to upgrade Smart configurator. Please upgrade Smart configurator. If you don't use Smart Configurator, please change value of BSP_CFG_CONFIGURATOR_VERSION in r_bsp_config.h."
 #endif
 
 /***********************************************************************************************************************
@@ -710,7 +708,8 @@ static void clock_source_select (void)
 
         /* SOSCCR - Sub-Clock Oscillator Control Register
         b7:b1    Reserved - The write value should be 0.
-        b0       SOSTP    - Sub-clock oscillator Stop - Sub-clock oscillator is stopped. */
+        b0       SOSTP    - Sub-clock oscillator Stop - Sub-clock oscillator is stopped.
+        NOTE: Please refer Tool News(TN-RX*-A0257A) for details. */
         SYSTEM.SOSCCR.BYTE = 0x01;
 
         /* Dummy read and compare. cf."5. I/O Registers", "(2) Notes on writing to I/O registers" in User's manual.

@@ -42,6 +42,7 @@
 *                               - CPU_CYCLES_PER_LOOP
 *                               Fixed coding style.
 *         : 30.11.2021 3.01     Deleted the compile switch for BSP_CFG_MCU_PART_SERIES and BSP_CFG_MCU_PART_GROUP.
+*         : 22.04.2022 3.02     Added version check of smart configurator.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -56,6 +57,20 @@ Macro definitions
 /* Multiple inclusion prevention macro */
 #ifndef MCU_INFO
 #define MCU_INFO
+
+#if BSP_CFG_CONFIGURATOR_VERSION < 2120
+    /* The following macros are updated to invalid value by Smart configurator if you are using Smart Configurator for 
+       RX V2.11.0 (equivalent to e2 studio 2021-10) or earlier version.
+       - BSP_CFG_MCU_PART_GROUP, BSP_CFG_MCU_PART_SERIES
+       The following macros are not updated by Smart configurator if you are using Smart Configurator for RX V2.11.0 
+       (equivalent to e2 studio 2021-10) or earlier version.
+       - BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE, BSP_CFG_HOCO_OSCILLATE_ENABLE, BSP_CFG_LOCO_OSCILLATE_ENABLE, 
+         BSP_CFG_IWDT_CLOCK_OSCILLATE_ENABLE, BSP_CFG_CPLUSPLUS
+       Please update Smart configurator to Smart Configurator for RX V2.12.0 (equivalent to e2 studio 2022-01) or 
+       later version.
+     */
+    #error "To use this version of BSP, you need to upgrade Smart configurator. Please upgrade Smart configurator. If you don't use Smart Configurator, please change value of BSP_CFG_CONFIGURATOR_VERSION in r_bsp_config.h."
+#endif
 
 /* MCU CPU Version */
 #define BSP_MCU_CPU_VERSION    (1)

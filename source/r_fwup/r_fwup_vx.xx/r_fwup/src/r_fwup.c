@@ -26,11 +26,15 @@
  *           19.05.2021 1.01    Added support for RX72N,RX66T,RX130
  *           08.07.2021 1.02    Added support for RX671 and GCC
  *           10.08.2021 1.03    Added support for IAR
+ *           25.03.2022 1.04    Change the supported FreeRTOS version
+ *                              Select data area from DF/CF
+ *                              Added support for RX140-256KB
  *********************************************************************************************************************/
 
 /* C Runtime includes. */
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 
 #include "r_fwup_config.h"  /* Firmware update config definitions */
@@ -45,11 +49,6 @@
 #include "r_sci_rx_pinset.h"
 #endif
 
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-#include "r_flash_spi_if.h"
-#endif /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) */
-
-#if (FWUP_CFG_SIGNATURE_VERIFICATION == 0) /* FWUP_SIGNATURE_ECDSA */
 #include "base64_decode.h"
 #include "code_signer_public_key.h"
 
@@ -58,7 +57,7 @@
 #include "tinycrypt/ecc.h"
 #include "tinycrypt/ecc_dsa.h"
 #include "tinycrypt/constants.h"
-#endif
+
 #elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == 1) /* FWUP_IMPLEMENTATION_NONEOS */
 #include "r_smc_entry.h"
 #include "r_flash_rx_if.h"
@@ -69,11 +68,6 @@
 #include "r_sci_rx_pinset.h"
 #endif
 
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-#include "r_flash_spi_if.h"
-#endif /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) */
-
-#if (FWUP_CFG_SIGNATURE_VERIFICATION == 0) /* FWUP_SIGNATURE_ECDSA */
 #include "base64_decode.h"
 #include "code_signer_public_key.h"
 
@@ -82,21 +76,19 @@
 #include "tinycrypt/ecc.h"
 #include "tinycrypt/ecc_dsa.h"
 #include "tinycrypt/constants.h"
-#endif
+
 #elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == 2) /* FWUP_IMPLEMENTATION_AFRTOS */
 /* Amazon FreeRTOS include. */
 #include "FreeRTOS.h"
-#include "aws_iot_ota_agent.h"
+#include "ota_platform_interface.h"
 #ifdef AMAZON_FREERTOS_ENABLE_UNIT_TESTS
 #include "aws_ota_pal_test_access_define.h"
 #endif
 
-#if (FWUP_CFG_SIGNATURE_VERIFICATION == 0) /* FWUP_SIGNATURE_ECDSA */
 #include "iot_crypto.h"
-#include "iot_pkcs11.h"
-#include "aws_ota_codesigner_certificate.h"
-#include "aws_ota_agent_config.h"
-#endif
+#include "core_pkcs11.h"
+#include "ota_demo_config.h"
+#include "ota_platform_interface.h"
 
 /* Renesas RX Driver Package include */
 #include "platform.h"
@@ -107,7 +99,6 @@
 #include "r_fwup_if.h"
 #include "r_fwup_private.h"
 
-#if (FWUP_CFG_SIGNATURE_VERIFICATION == FWUP_SIGNATURE_ECDSA)
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
 const uint8_t g_code_signer_public_key[] = CODE_SIGNER_PUBLIC_KEY_PEM;
 const uint32_t g_code_signer_public_key_length = sizeof(g_code_signer_public_key);
@@ -115,35 +106,44 @@ bool g_is_opened = false;
 #elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
 /* Specify the OTA signature algorithm we support on this platform. */
 /* const char cOTA_JSON_FileSignatureKey[ OTA_FILE_SIG_KEY_STR_MAX_LENGTH ] = "sig-sha1-rsa"; */   /* FIX ME. */
-const char cOTA_JSON_FileSignatureKey[ OTA_FILE_SIG_KEY_STR_MAX_LENGTH ] = "sig-sha256-ecdsa";   /* FIX ME. */
+const char OTA_JsonFileSignatureKey[ OTA_FILE_SIG_KEY_STR_MAX_LENGTH ] = "sig-sha256-ecdsa";   /* FIX ME. */
 #else
 bool g_is_opened = false;
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS */
-#endif
 
 
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
-OTA_Err_t R_FWUP_CreateFileForRx (OTA_FileContext_t * const C);
-OTA_Err_t R_FWUP_Abort (OTA_FileContext_t * const C);
-int16_t R_FWUP_WriteBlock (OTA_FileContext_t * const C, uint32_t ulOffset,
-                            uint8_t * const pacData, uint32_t ulBlockSize);
-OTA_Err_t R_FWUP_CloseFile (OTA_FileContext_t * const C);
-OTA_Err_t R_FWUP_CheckFileSignature (OTA_FileContext_t * const C);
-uint8_t * R_FWUP_ReadAndAssumeCertificate (const uint8_t * const pucCertName, uint32_t * const ulSignerCertSize);
-OTA_Err_t R_FWUP_ResetDevice (void);
-OTA_Err_t R_FWUP_ActivateNewImage (void);
-OTA_Err_t R_FWUP_SetPlatformImageState (OTA_ImageState_t eState);
-OTA_PAL_ImageState_t R_FWUP_GetPlatformImageState (void);
-#if (FWUP_CFG_SIGNATURE_VERIFICATION == FWUP_SIGNATURE_ECDSA)
+OtaPalStatus_t R_FWUP_CreateFileForRx( OtaFileContext_t * const pFileContext );
+OtaPalStatus_t R_FWUP_Abort( OtaFileContext_t * const pFileContext );
+int16_t R_FWUP_WriteBlock( OtaFileContext_t * const pFileContext,
+                           uint32_t ulOffset,
+                           uint8_t * const pData,
+                           uint32_t ulBlockSize );
+OtaPalStatus_t R_FWUP_CloseFile( OtaFileContext_t * const pFileContext );
+OtaPalStatus_t R_FWUP_CheckFileSignature( OtaFileContext_t * const pFileContext );
+uint8_t * R_FWUP_ReadAndAssumeCertificate( const uint8_t * const pucCertName, uint32_t * const ulSignerCertSize );
+OtaPalStatus_t R_FWUP_ResetDevice( OtaFileContext_t * const pFileContext );
+OtaPalStatus_t R_FWUP_ActivateNewImage( OtaFileContext_t * const pFileContext );
+OtaPalStatus_t R_FWUP_SetPlatformImageState( OtaFileContext_t * const pFileContext,
+                                             OtaImageState_t eState );
+OtaPalImageState_t R_FWUP_GetPlatformImageState( OtaFileContext_t * const pFileContext );
 int32_t fwup_verification_sha256_ecdsa (const uint8_t * pucData, uint32_t ulSize,
                                             const uint8_t * pucSignature, uint32_t ulSignatureSize);
-#endif
 
-static flash_err_t ota_flashing_task (uint8_t * block, uint32_t ulOffset, uint32_t length);
-static int32_t ota_context_validate (OTA_FileContext_t * C);
-static void ota_context_close (OTA_FileContext_t * C);
-static void ota_flashing_callback (void * event);
-static void ota_header_flashing_callback (void * event);
+static flash_err_t ota_flashing_task( uint8_t * block, uint32_t ulOffset, uint32_t length );
+static int32_t ota_context_validate( OtaFileContext_t * pFileContext );
+static void ota_context_close( OtaFileContext_t * pFileContext );
+static void ota_flashing_callback( void *event );
+static void ota_header_flashing_callback( void *event );
+static int s_vsnprintf_safe (int8_t * s, size_t n, const int8_t * format, va_list arg);
+static int s_snprintf_safe (int8_t * s,size_t n, const int8_t * format, ...);
+static void s_log_printf_common (uint8_t usLoggingLevel, const int8_t * pcFormat, va_list args);
+static void s_log_printf_error (const int8_t * pcFormat, ...);
+static void s_log_printf_warn (const int8_t * pcFormat, ...);
+static void s_log_printf_info (const int8_t * pcFormat, ...);
+static void s_log_printf_info_nolf (const int8_t * pcFormat, ...);
+static void s_log_printf_info_continue (const int8_t * pcFormat, ...);
+static void s_log_printf_debug (const int8_t * pcFormat, ...);
 #elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
 static void ota_flashing_task (void * pvParameters);
 static CK_RV prvGetCertificateHandle (CK_FUNCTION_LIST_PTR pxFunctionList,
@@ -153,9 +153,9 @@ static CK_RV prvGetCertificateHandle (CK_FUNCTION_LIST_PTR pxFunctionList,
 static CK_RV prvGetCertificate (const char * pcLabelName,
                                 uint8_t ** ppucData,
                                 uint32_t * pulDataSize);
-static int32_t ota_context_validate (OTA_FileContext_t * C);
-static int32_t ota_context_update_user_firmware_header (OTA_FileContext_t * C);
-static void ota_context_close (OTA_FileContext_t * C);
+static int32_t ota_context_validate (OtaFileContext_t * pFileContext);
+static int32_t ota_context_update_user_firmware_header (OtaFileContext_t * pFileContext);
+static void ota_context_close (OtaFileContext_t * pFileContext);
 static void ota_flashing_callback (void * event);
 static void ota_header_flashing_callback (void * event);
 #else
@@ -167,15 +167,6 @@ static void ota_header_flashing_callback (void * event);
 static void fwup_communication_callback (void * pArgs);
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS */
 static void fwup_state_monitoring_callback (void);
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-flash_spi_status_t fwup_flash_spi_open(void);
-flash_spi_status_t fwup_flash_spi_close(void);
-flash_spi_status_t fwup_flash_spi_erase(flash_spi_erase_info_t *);
-flash_spi_status_t fwup_flash_spi_write(uint8_t *, uint32_t, uint32_t);
-flash_spi_status_t fwup_flash_spi_read(uint32_t, uint32_t, uint8_t *);
-flash_spi_status_t fwup_flash_spi_polling_erase(void);
-flash_spi_status_t fwup_flash_spi_polling_write(void);
-#endif /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) */
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_BOOTLOADER)
 #if (FWUP_CFG_BOOT_PROTECT_ENABLE == 1)
 #if (FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_1)
@@ -213,7 +204,7 @@ static sci_hdl_t s_fwup_communication_handle;
 #elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
 static st_fwup_control_block_t * sp_fwup_control_block_bank1 =
     (st_fwup_control_block_t*)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS;
-static OTA_FileContext_t s_file_context;
+static OtaFileContext_t s_file_context;
 static sci_hdl_t s_fwup_communication_handle;
 static st_sci_receive_control_block_t s_sci_receive_control_block;
 static st_sci_buffer_control_t s_sci_buffer_control[FWUP_SCI_CONTROL_BLOCK_TOTAL_NUM];
@@ -230,10 +221,6 @@ static st_packet_block_for_queue_t packet_block_for_queue2;
 
 static e_fwup_state_t s_fwup_state = FWUP_STATE_INITIALIZING;
 static st_state_monitoring_t s_state_transit;
-
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-static uint8_t dev_no_serial_flash = FLASH_SPI_DEV0;
-#endif  /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) */
 
 /*-----------------------------------------------------------*/
 #if ((FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_BOOTLOADER) || (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS))
@@ -259,11 +246,8 @@ fwup_err_t R_FWUP_Open(void)
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_BOOTLOADER)
     flash_err_t flash_api_error_code = FLASH_SUCCESS;
 #elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
-    OTA_Err_t ota_error_code = kOTA_Err_Uninitialized;
+    OtaPalStatus_t ota_error_code;
 #endif  /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT */
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-    flash_spi_status_t flash_spi_error_code = FLASH_SPI_SUCCESS;
-#endif /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) */
 
     /* Check that the R_FWUP_Open has been executed. */
     if (true == g_is_opened)
@@ -275,7 +259,7 @@ fwup_err_t R_FWUP_Open(void)
     comm_api_error_code = fwup_communication_open();
     if (COMM_SUCCESS != comm_api_error_code)
     {
-        ret = FWUP_ERR_COMM;
+        return FWUP_ERR_COMM;
     }
 
     /* Set up the configuration of System-timer for check the status transition. */
@@ -286,18 +270,6 @@ fwup_err_t R_FWUP_Open(void)
         return FWUP_ERR_STATE_MONITORING;
     }
 
-
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-    /* Initialization of serial flash module. */
-    flash_spi_error_code = fwup_flash_spi_open();
-    if (FLASH_SPI_SUCCESS != flash_spi_error_code)
-    {
-        comm_api_error_code             = fwup_communication_close();       // Closing the Communication module.
-        state_monitoring_api_error_code = fwup_state_monitoring_close();    // Closing the State monitoring module.
-        return FWUP_ERR_FLASH;
-    }
-#endif /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) */
-
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_BOOTLOADER)
     /* Initialization of Flash module. */
     flash_api_error_code = fwup_flash_open();
@@ -307,16 +279,12 @@ fwup_err_t R_FWUP_Open(void)
         state_monitoring_api_error_code = fwup_state_monitoring_close();    // Closing the State monitoring module.
         return FWUP_ERR_FLASH;
     }
-#elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
-    /* Check the Platform image state */
-    if (R_FWUP_GetPlatformImageState() != eOTA_PAL_ImageState_Valid)
-    {
-        return FWUP_ERR_IMAGE_STATE;
-    }
 
+    fwup_update_status(FWUP_STATE_INITIALIZING);
+#elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
     /* Initialization of Flash module. */
-    ota_error_code = R_FWUP_CreateFileForRx(&s_file_context);
-    if (kOTA_Err_None != ota_error_code)
+    ota_error_code = R_FWUP_CreateFileForRx( &s_file_context );
+    if ( OtaPalSuccess != ota_error_code )
     {
         comm_api_error_code             = fwup_communication_close();       // Closing the Communication module.
         state_monitoring_api_error_code = fwup_state_monitoring_close();    // Closing the State monitoring module.
@@ -358,7 +326,6 @@ fwup_err_t R_FWUP_Close(void)
     {
         return FWUP_ERR_NOT_OPEN;
     }
-
     g_is_opened = false;
     return ret;
 }
@@ -418,13 +385,11 @@ fwup_err_t R_FWUP_Operation(void)
     st_fwup_control_block_t * p_block_header;
     Sig256_t p_sig;
 
-    DEFINE_OTA_METHOD_NAME("R_FWUP_Operation");
-
     /* Check that the Firmware update module has been opened. */
     if (false == g_is_opened)
     {
         fwup_update_status(FWUP_STATE_FATAL_ERROR);
-        OTA_LOG_L1("[%s] ERROR: Not Open.\r\n", OTA_METHOD_NAME);
+        LogError( ( "ERROR: R_FWUP_Open is not called." ) );
         return FWUP_ERR_NOT_OPEN;
     }
 
@@ -432,17 +397,17 @@ fwup_err_t R_FWUP_Operation(void)
     if (fwup_state_monitoring_is_error() == STATE_MONITORING_ERROR)
     {
         fwup_update_status(FWUP_STATE_FATAL_ERROR);
-        OTA_LOG_L1("[%s] ERROR: Transit state did not change for more than 1 min.\r\n", OTA_METHOD_NAME);
+        LogError( ( "ERROR: Transit state did not change for more than 1 min." ) );
         return FWUP_ERR_STATE_MONITORING;
     }
 
     if (fwup_get_status() == FWUP_STATE_DATA_RECEIVE_START)
     {
         /* Check the Platform image state */
-        if (R_FWUP_GetPlatformImageState() != eOTA_PAL_ImageState_Valid)
+        if (R_FWUP_GetPlatformImageState(&s_file_context) != OtaPalImageStateValid)
         {
             fwup_update_status(FWUP_STATE_FATAL_ERROR);
-            OTA_LOG_L1("[%s] ERROR: Illegal Image State.\r\n", OTA_METHOD_NAME);
+            LogError(("ERROR: Illegal Image State."));
             return FWUP_ERR_IMAGE_STATE;
         }
 
@@ -451,15 +416,17 @@ fwup_err_t R_FWUP_Operation(void)
         if (MONI_SUCCESS == state_monitoring_api_error_code)
         {
             fwup_update_status(FWUP_STATE_DATA_RECEIVE);
-            OTA_LOG_L1("-------------------------------------------------\r\n");
-            OTA_LOG_L1("Firmware update user program\r\n");
-            OTA_LOG_L1("-------------------------------------------------\r\n");
+            LogInfo(("-------------------------------------------------"));
+            LogInfo(("Firmware update user program"));
+            LogInfo(("-------------------------------------------------"));
 
             /* Erase Temporary area */
+#if (FLASH_CFG_CODE_FLASH_BGO == 1)
             cb_func_info.pcallback    = ota_header_flashing_callback;
             cb_func_info.int_priority = FLASH_INTERRUPT_PRIORITY;
             fwup_flash_set_callback((void *)&cb_func_info);
             gs_header_flashing_task = OTA_FLASHING_IN_PROGRESS;
+#endif /* FLASH_CFG_CODE_FLASH_BGO == 1 */
 
             if (fwup_flash_erase((flash_block_address_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_ERASE_ADDRESS,
                                     BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER) == FLASH_SUCCESS)
@@ -469,18 +436,20 @@ fwup_err_t R_FWUP_Operation(void)
                 {
                     ;
                 }
-#endif
+#endif /* FLASH_CFG_CODE_FLASH_BGO == 1 */
                 fwup_flash_close();
                 fwup_flash_open();
+#if (FLASH_CFG_CODE_FLASH_BGO == 1)
                 cb_func_info.pcallback    = ota_flashing_callback;
                 cb_func_info.int_priority = FLASH_INTERRUPT_PRIORITY;
                 fwup_flash_set_callback(&cb_func_info);
+#endif /* FLASH_CFG_CODE_FLASH_BGO == 1 */
 
-                OTA_LOG_L1("Send Update firmware via UART.\r\n");
+                LogInfo(("Send Update firmware via UART."));
             }
             else
             {
-                OTA_LOG_L1("[%s] ERROR - R_FLASH_Erase() returns error.\r\n", OTA_METHOD_NAME);
+                LogError(("ERROR - R_FLASH_Erase() returns error."));
                 return FWUP_ERR_FLASH;
             }
         }
@@ -496,7 +465,7 @@ fwup_err_t R_FWUP_Operation(void)
 
             /* Firmware Update module is not open */
             fwup_update_status(FWUP_STATE_FATAL_ERROR);
-            OTA_LOG_L1("[%s] ERROR: Not Open.\r\n", OTA_METHOD_NAME);
+            LogError(("R_FWUP_Open is not called."));
             ret = FWUP_ERR_NOT_OPEN;
             break;
         case FWUP_STATE_DATA_RECEIVE_START:
@@ -533,14 +502,14 @@ fwup_err_t R_FWUP_Operation(void)
                                                     firm_data, FWUP_WRITE_BLOCK_SIZE);
                 if (i_bytes_written < 0)
                 {
-                    OTA_LOG_L1("[%s] ERROR: (%d) writing file block\r\n", OTA_METHOD_NAME, i_bytes_written);
+                    LogError(("ERROR: (%d) writing file block", i_bytes_written));
                     ret = FWUP_FAIL;
                 }
                 else
                 {
-                    OTA_LOG_L1("[%s] Flash Write: Address = 0x%X, length = %d ... ",
-                        OTA_METHOD_NAME, ((uint32_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS + u_offset),
-                        FWUP_WRITE_BLOCK_SIZE);
+                	LogInfoNoLF(("Flash Write: Address = 0x%X, length = %dbyte ... ",
+                	        ((uint32_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS + u_offset),
+                	        FWUP_WRITE_BLOCK_SIZE));
 #if (FLASH_CFG_DATA_FLASH_BGO == 0)
                     fwup_update_status(FWUP_STATE_FLASH_WRITE_COMPLETE);
 #endif  /* (FLASH_CFG_DATA_FLASH_BGO == 0) */
@@ -554,13 +523,13 @@ fwup_err_t R_FWUP_Operation(void)
             ret = FWUP_IN_PROGRESS;
             break;
         case FWUP_STATE_FLASH_WRITE_COMPLETE:
-            OTA_LOG_L1("OK\r\n");
+            LogInfoContinue(("OK"));
 
             /* Writing to Flash completed */
             if (BOOT_LOADER_TOTAL_UPDATE_SIZE == s_load_fw_control_block.total_image_length)
             {
                 fwup_update_status(FWUP_STATE_CHECK_SIGNATURE);
-                OTA_LOG_L1("[%s] Firmware update to Flash is complete.\r\n", OTA_METHOD_NAME);
+                LogInfo(("Firmware update to Flash is complete."));
             }
             else
             {
@@ -572,21 +541,21 @@ fwup_err_t R_FWUP_Operation(void)
 
             /* Update Signature information to OTA_FileContext */
             p_block_header = (st_fwup_control_block_t *)sp_fwup_control_block_bank1;
-            p_sig.usSize   = p_block_header->signature_size;
-            memcpy(p_sig.ucData, p_block_header->signature, kOTA_MaxSignatureSize);
-            s_file_context.pxSignature = &p_sig;
+            p_sig.size     = p_block_header->signature_size;
+            memcpy(p_sig.data, p_block_header->signature, kOTA_MaxSignatureSize);
+            s_file_context.pSignature = &p_sig;
 
             /* Perform signature verification, and close process */
             if (kOTA_Err_None == R_FWUP_CloseFile(&s_file_context))
             {
-                OTA_LOG_L1("[%s] Check signature of update firmware is complete.\r\n", OTA_METHOD_NAME);
-                R_FWUP_SetPlatformImageState(eOTA_ImageState_Testing);
+                LogInfo(("Check signature of update firmware is complete."));
+                R_FWUP_SetPlatformImageState(&s_file_context, OtaImageStateTesting);
                 fwup_update_status(FWUP_STATE_FINALIZE);
                 ret = FWUP_SUCCESS;
             }
             else
             {
-                OTA_LOG_L1("[%s] Check signature of update firmware was failed.\r\n", OTA_METHOD_NAME);
+                LogInfo(("Check signature of update firmware was failed."));
                 fwup_update_status(FWUP_STATE_FATAL_ERROR);
                 ret = FWUP_FAIL;
             }
@@ -618,25 +587,22 @@ fwup_err_t R_FWUP_Operation(void)
  */
 fwup_err_t R_FWUP_SetEndOfLife(void)
 {
-    fwup_err_t ret = FWUP_SUCCESS;
-    uint8_t block[BOOT_LOADER_USER_FIRMWARE_HEADER_LENGTH];
+    fwup_err_t                ret = FWUP_SUCCESS;
+    uint8_t                   block[BOOT_LOADER_USER_FIRMWARE_HEADER_LENGTH];
     st_fwup_control_block_t * p_block_header;
-    uint32_t length;
-    flash_err_t flash_err;
-
-    DEFINE_OTA_METHOD_NAME("R_FWUP_SetEndOfLife");
+    uint32_t                  length;
+    flash_err_t               flash_err;
 
     if (false == g_is_opened)
     {
         fwup_update_status(FWUP_STATE_FATAL_ERROR);
-        OTA_LOG_L1("[%s] ERROR: Not Open.\r\n", OTA_METHOD_NAME);
+        LogError(("R_FWUP_Open is not called."));
         return FWUP_ERR_NOT_OPEN;
     }
 
-    OTA_LOG_L1("\r\n");
-    OTA_LOG_L1("-------------------------------------------------\r\n");
-    OTA_LOG_L1("End Of Life (EOL) process of user program\r\n");
-    OTA_LOG_L1("-------------------------------------------------\r\n");
+    LogInfo(("-------------------------------------------------"));
+    LogInfo(("End Of Life (EOL) process of user program"));
+    LogInfo(("-------------------------------------------------"));
 
 #if (FLASH_CFG_DATA_FLASH_BGO == 1)
     flash_interrupt_config_t cb_func_info;
@@ -644,9 +610,11 @@ fwup_err_t R_FWUP_SetEndOfLife(void)
     cb_func_info.pcallback    = ota_header_flashing_callback;
     cb_func_info.int_priority = FLASH_INTERRUPT_PRIORITY;
     flash_err                 = fwup_flash_set_callback((void *)&cb_func_info);
-    if(FLASH_SUCCESS == flash_err)
+
+    if (FLASH_SUCCESS == flash_err)
     {
         gs_header_flashing_task = OTA_FLASHING_IN_PROGRESS;
+
         if (fwup_flash_erase((flash_block_address_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_ERASE_ADDRESS,
                 BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER) == FLASH_SUCCESS)
         {
@@ -654,11 +622,11 @@ fwup_err_t R_FWUP_SetEndOfLife(void)
             {
                 ;
             }
-            OTA_LOG_L1("[%s] erase install area (code flash):OK\r\n", OTA_METHOD_NAME);
+            LogInfo(("erase install area (code flash):OK"));
         }
         else
         {
-            OTA_LOG_L1("[%s] erase install area (code flash):NG\r\n", OTA_METHOD_NAME);
+            LogInfo(("erase install area (code flash):NG"));
             ret = FWUP_ERR_FLASH;
         }
     }
@@ -670,12 +638,12 @@ fwup_err_t R_FWUP_SetEndOfLife(void)
     if (fwup_flash_erase((flash_block_address_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_ERASE_ADDRESS,
             BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER) != FLASH_SUCCESS)
     {
-        OTA_LOG_L1( "[%s] erase install area (code flash):NG\r\n", OTA_METHOD_NAME );
+        LogInfo(("erase install area (code flash):NG"));
         ret = FWUP_ERR_FLASH;
     }
     else
     {
-        OTA_LOG_L1( "[%s] erase install area (code flash):OK\r\n", OTA_METHOD_NAME );
+        LogInfo(("erase install area (code flash):OK"));
     }
 #endif /* FLASH_CFG_DATA_FLASH_BGO == 1 */
 
@@ -704,8 +672,8 @@ fwup_err_t R_FWUP_SetEndOfLife(void)
             {
                 ;
             }
-            OTA_LOG_L1("[%s] update bank1 LIFECYCLE_STATE to [LIFECYCLE_STATE_EOL]\r\n", OTA_METHOD_NAME);
-            s_load_fw_control_block.eSavedAgentState = eOTA_ImageState_EOL;
+            LogInfo(("update bank1 LIFECYCLE_STATE to [LIFECYCLE_STATE_EOL]"));
+            s_load_fw_control_block.eSavedAgentState = OtaImageState_EOL;
         }
 #else
         /* Write new image_flag and new signature to Header. */
@@ -716,8 +684,8 @@ fwup_err_t R_FWUP_SetEndOfLife(void)
         }
         else
         {
-            OTA_LOG_L1( "[%s] update bank1 LIFECYCLE_STATE to [LIFECYCLE_STATE_EOL]\r\n", OTA_METHOD_NAME );
-            s_load_fw_control_block.eSavedAgentState = eOTA_ImageState_EOL;
+            LogInfo(("update bank1 LIFECYCLE_STATE to [LIFECYCLE_STATE_EOL]"));
+            s_load_fw_control_block.eSavedAgentState = OtaImageState_EOL;
         }
 #endif /* FLASH_CFG_DATA_FLASH_BGO == 1 */
     }
@@ -735,7 +703,7 @@ fwup_err_t R_FWUP_SetEndOfLife(void)
  */
 void R_FWUP_SoftwareReset(void)
 {
-    (void)R_FWUP_ActivateNewImage();
+    (void)R_FWUP_ActivateNewImage(&s_file_context);
 }
 /**********************************************************************************************************************
  End of function R_FWUP_SoftwareReset
@@ -745,13 +713,13 @@ void R_FWUP_SoftwareReset(void)
 /*-----------------------------------------------------------*/
 
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT != FWUP_IMPLEMENTATION_BOOTLOADER)
-OTA_Err_t R_FWUP_CreateFileForRx( OTA_FileContext_t * const C )
+OtaPalStatus_t R_FWUP_CreateFileForRx( OtaFileContext_t * const pFileContext )
 {
-    DEFINE_OTA_METHOD_NAME("R_FWUP_CreateFileForRx");
-    OTA_LOG_L1("[%s] is called.\r\n", OTA_METHOD_NAME);
-    OTA_Err_t eResult = kOTA_Err_Uninitialized;
+    LogDebug( ( "R_FWUP_CreateFileForRx is called." ) );
+    LogDebug( ( "Compiled in [%s] [%s].", __DATE__, __TIME__ ) );
+    OtaPalMainStatus_t eResult = OtaPalUninitialized;
 
-    if (NULL != C)
+    if (NULL != pFileContext)
     {
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
 #if (FLASH_CFG_CODE_FLASH_BGO == 1)
@@ -759,35 +727,36 @@ OTA_Err_t R_FWUP_CreateFileForRx( OTA_FileContext_t * const C )
 #endif
         if (fwup_flash_open() == FLASH_SUCCESS)
         {
-            s_load_fw_control_block.OTA_FileContext    = C;
+            s_load_fw_control_block.OtaFileContext     = pFileContext;
             s_load_fw_control_block.total_image_length = 0;
-            s_load_fw_control_block.eSavedAgentState   = eOTA_ImageState_Unknown;
-            OTA_LOG_L1("[%s] Receive file created.\r\n", OTA_METHOD_NAME);
-            C->pucFile = (uint8_t *) &s_load_fw_control_block;
-            eResult    = kOTA_Err_None;
+            s_load_fw_control_block.eSavedAgentState   = OtaImageStateUnknown;
+            LogInfo(("Receive file created."));
+            pFileContext->pFile                        = (uint8_t *) &s_load_fw_control_block;
+            eResult                                    = OtaPalSuccess;
         }
         else
         {
-            eResult = kOTA_Err_RxFileCreateFailed;
-            OTA_LOG_L1("[%s] ERROR - R_FLASH_Open() returns error.\r\n", OTA_METHOD_NAME);
+            eResult = OtaPalRxFileCreateFailed;
+            LogError(("ERROR - R_FLASH_Open() returns error."));
         }
 #elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
-        if( C->pucFilePath != NULL )
+        flash_interrupt_config_t cb_func_info;
+
+        if( pFileContext->pFilePath != NULL )
         {
             /* create task/queue/semaphore for flashing */
-            xQueue = xQueueCreate(otaconfigMAX_NUM_BLOCKS_REQUEST, sizeof(st_packet_block_for_queue_t));
-            xTaskCreate(ota_flashing_task, "OTA_FLASHING_TASK",
-                        configMINIMAL_STACK_SIZE, NULL, configMAX_PRIORITIES, &xTask);
+            xQueue = xQueueCreate( otaconfigMAX_NUM_BLOCKS_REQUEST, sizeof( st_packet_block_for_queue_t ) );
+            xTaskCreate( ota_flashing_task, "OTA_FLASHING_TASK",
+                         configMINIMAL_STACK_SIZE, NULL, configMAX_PRIORITIES, &xTask );
             xSemaphoreFlashig = xSemaphoreCreateBinary();
-            xSemaphoreGive(xSemaphoreFlashig);
+            xSemaphoreGive( xSemaphoreFlashig );
             xSemaphoreWriteBlock = xSemaphoreCreateMutex();
-            xSemaphoreGive(xSemaphoreWriteBlock);
+            xSemaphoreGive( xSemaphoreWriteBlock );
             fragmented_flash_block_list = NULL;
 
             fwup_flash_close();
             if(fwup_flash_open() == FLASH_SUCCESS)
             {
-                flash_interrupt_config_t cb_func_info;
                 cb_func_info.pcallback = ota_header_flashing_callback;
                 cb_func_info.int_priority = FLASH_INTERRUPT_PRIORITY;
                 fwup_flash_set_callback((void *)&cb_func_info);
@@ -795,38 +764,40 @@ OTA_Err_t R_FWUP_CreateFileForRx( OTA_FileContext_t * const C )
                 if (fwup_flash_erase((flash_block_address_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_ERASE_ADDRESS,
                                     BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER) != FLASH_SUCCESS)
                 {
-                    eResult = kOTA_Err_RxFileCreateFailed;
-                    OTA_LOG_L1( "[%s] ERROR - R_FLASH_Erase() returns error.\r\n", OTA_METHOD_NAME );
+                    eResult = OtaPalRxFileCreateFailed;
+                    LogError( ( "Failed to erase the flash: R_FLASH_Erase() returns error." ) );
                 }
                 else
                 {
-                    while(OTA_FLASHING_IN_PROGRESS == gs_header_flashing_task);
+                    while( OTA_FLASHING_IN_PROGRESS == gs_header_flashing_task )
+                    {
+                    }
                     fwup_flash_close();
                     fwup_flash_open();
                     cb_func_info.pcallback = ota_flashing_callback;
                     cb_func_info.int_priority = FLASH_INTERRUPT_PRIORITY;
                     fwup_flash_set_callback(&cb_func_info);
-                    s_load_fw_control_block.OTA_FileContext = C;
+                    s_load_fw_control_block.OtaFileContext = pFileContext;
                     s_load_fw_control_block.total_image_length = 0;
-                    s_load_fw_control_block.eSavedAgentState = eOTA_ImageState_Unknown;
-                    OTA_LOG_L1( "[%s] Receive file created.\r\n", OTA_METHOD_NAME );
-                    C->pucFile = (uint8_t *)&s_load_fw_control_block;
+                    s_load_fw_control_block.eSavedAgentState = OtaImageStateUnknown;
+                    LogInfo( ( "Receive file created." ) );
+                    pFileContext->pFile = ( uint8_t * ) &s_load_fw_control_block;
                     fwup_state_monitoring_open();  /* Open State monitoring module */
                     fwup_state_monitoring_start();  /* Start State monitoring module */
                     fwup_update_status(FWUP_STATE_DATA_RECEIVE_START); /* Update the firmware update status */
-                    eResult = kOTA_Err_None;
+                    eResult = OtaPalSuccess;
                 }
             }
             else
             {
-                eResult = kOTA_Err_RxFileCreateFailed;
-                OTA_LOG_L1( "[%s] ERROR - R_FLASH_Open() returns error.\r\n", OTA_METHOD_NAME );
+                eResult = OtaPalRxFileCreateFailed;
+                LogError( ( "Failed to create a file: R_FLASH_Open() returns error." ) );
             }
         }
         else
         {
-            eResult = kOTA_Err_RxFileCreateFailed;
-            OTA_LOG_L1( "[%s] ERROR - Invalid context provided.\r\n", OTA_METHOD_NAME );
+            eResult = OtaPalRxFileCreateFailed;
+            LogError( ( "Failed to create a file: Invalid file context provided." ) );
         }
 #else /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS */
     /* Fix me for other OS environment */
@@ -834,48 +805,50 @@ OTA_Err_t R_FWUP_CreateFileForRx( OTA_FileContext_t * const C )
     }
     else
     {
-        eResult = kOTA_Err_RxFileCreateFailed;
-        OTA_LOG_L1("[%s] ERROR - Invalid context provided.\r\n", OTA_METHOD_NAME);
+        eResult = OtaPalRxFileCreateFailed;
+        LogError(("Failed to create a file: Invalid file context provided."));
     }
 
-    return eResult;
+    return OTA_PAL_COMBINE_ERR(eResult, 0);
 }
 /*-----------------------------------------------------------*/
 
-OTA_Err_t R_FWUP_Abort( OTA_FileContext_t * const C )
+OtaPalStatus_t R_FWUP_Abort( OtaFileContext_t * const pFileContext )
 {
-    DEFINE_OTA_METHOD_NAME("R_FWUP_Abort");
-    OTA_LOG_L1("[%s] is called.\r\n", OTA_METHOD_NAME);
+    LogDebug( ( "R_FWUP_Abort is called." ) );
 
-    OTA_Err_t eResult = kOTA_Err_None;
+    OtaPalMainStatus_t eResult = OtaPalSuccess;
 
-    if (ota_context_validate(C) == R_OTA_ERR_INVALID_CONTEXT)
+    if (ota_context_validate(pFileContext) == 0)
     {
-        eResult = kOTA_Err_FileClose;
+        eResult = OtaPalFileClose;
     }
 
-    if (kOTA_Err_None == eResult)
+    if (OtaPalSuccess == eResult)
     {
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
         /* delete task/queue for flashing */
-        if (NULL != xTask)
+        if( NULL != xTask )
         {
-            vTaskDelete(xTask);
+            vTaskDelete( xTask );
             xTask = NULL;
         }
-        if (NULL != xQueue)
+
+        if( NULL != xQueue )
         {
-            vQueueDelete(xQueue);
+            vQueueDelete( xQueue );
             xQueue = NULL;
         }
-        if (NULL != xSemaphoreFlashig)
+
+        if( NULL != xSemaphoreFlashig )
         {
-            vSemaphoreDelete(xSemaphoreFlashig);
+            vSemaphoreDelete( xSemaphoreFlashig );
             xSemaphoreFlashig = NULL;
         }
-        if (NULL != xSemaphoreWriteBlock)
+
+        if( NULL != xSemaphoreWriteBlock )
         {
-            vSemaphoreDelete(xSemaphoreWriteBlock);
+            vSemaphoreDelete( xSemaphoreWriteBlock );
             xSemaphoreWriteBlock = NULL;
         }
 #else
@@ -885,21 +858,20 @@ OTA_Err_t R_FWUP_Abort( OTA_FileContext_t * const C )
         fwup_flash_close();
     }
 
-    ota_context_close(C);
-    return eResult;
+    ota_context_close(pFileContext);
+    return OTA_PAL_COMBINE_ERR( eResult, 0 );
 }
 /*-----------------------------------------------------------*/
 
 /* Write a block of data to the specified file. */
-int16_t R_FWUP_WriteBlock(OTA_FileContext_t * const C,
+int16_t R_FWUP_WriteBlock( OtaFileContext_t * const pFileContext,
                             uint32_t ulOffset,
-                            uint8_t * const pacData,
-                            uint32_t ulBlockSize)
+                            uint8_t * const pData,
+                            uint32_t ulBlockSize )
 {
     int16_t sNumBytesWritten = R_OTA_ERR_QUEUE_SEND_FAIL;
 
-    DEFINE_OTA_METHOD_NAME("R_FWUP_WriteBlock");
-    OTA_LOG_L1("[%s] is called.\r\n", OTA_METHOD_NAME);
+    LogDebug( ( "R_FWUP_WriteBlock is called." ) );
 
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
     st_flash_block_t flash_block;
@@ -910,27 +882,28 @@ int16_t R_FWUP_WriteBlock(OTA_FileContext_t * const C,
     if (STATE_MONITORING_ERROR == fwup_state_monitoring_is_error())
     {
         fwup_update_status(FWUP_STATE_FATAL_ERROR);
-        OTA_LOG_L1("[%s] ERROR: Transit state did not change for more than 1 min.\r\n", OTA_METHOD_NAME);
+        LogError( ( "ERROR: Transit state did not change for more than 1 min." ) );
         return sNumBytesWritten;
     }
-    xSemaphoreTake(xSemaphoreWriteBlock, portMAX_DELAY);
+    xSemaphoreTake( xSemaphoreWriteBlock, portMAX_DELAY );
 
-    if ((!(ulOffset % FLASH_CF_MIN_PGM_SIZE)) && (!(ulBlockSize % FLASH_CF_MIN_PGM_SIZE)))
+    if( ( !( ulOffset % FLASH_CF_MIN_PGM_SIZE ) ) && ( !( ulBlockSize % FLASH_CF_MIN_PGM_SIZE ) ) )
     {
         fwup_update_status(FWUP_STATE_FLASH_WRITE_WAIT);   /* Update the firmware update status */
-        packet_buffer = pvPortMalloc(ulBlockSize);
-        memcpy(packet_buffer, pacData, ulBlockSize);
+        packet_buffer = pvPortMalloc( ulBlockSize );
+        memcpy( packet_buffer, pData, ulBlockSize );
         packet_block_for_queue1.p_packet = packet_buffer;
-        packet_block_for_queue1.ul_offset = ulOffset;
+        packet_block_for_queue1.ulOffset = ulOffset;
         packet_block_for_queue1.length = ulBlockSize;
-        if(xQueueSend(xQueue, &packet_block_for_queue1, NULL) == pdPASS)
+
+        if( xQueueSend( xQueue, &packet_block_for_queue1, NULL ) == pdPASS )
         {
             sNumBytesWritten = ( int16_t ) ulBlockSize;
         }
         else
         {
-            vPortFree(packet_block_for_queue1.p_packet);
-            OTA_LOG_L1("OTA flashing queue send error.\r\n");
+            vPortFree( packet_block_for_queue1.p_packet );
+            LogError( ( "Failed to write a block: OTA flashing queue send error." ) );
             sNumBytesWritten = R_OTA_ERR_QUEUE_SEND_FAIL;
         }
     }
@@ -938,27 +911,29 @@ int16_t R_FWUP_WriteBlock(OTA_FileContext_t * const C,
     {
         flash_block.p_binary = flash_block_array;
 
-        fragmented_flash_block_list = fragmented_flash_block_list_insert(fragmented_flash_block_list,
-                                                                        ulOffset, pacData, ulBlockSize);
+        fragmented_flash_block_list = fragmented_flash_block_list_insert( fragmented_flash_block_list,
+                                                                            ulOffset, pData, ulBlockSize );
 
-        if (fragmented_flash_block_list != NULL)
+        if( fragmented_flash_block_list != NULL )
         {
-            while(1)
+            while( 1 )
             {
-                fragmented_flash_block_list = fragmented_flash_block_list_assemble(fragmented_flash_block_list,
-                                                                                &flash_block);
-                if (flash_block.p_binary != NULL)
+                fragmented_flash_block_list = fragmented_flash_block_list_assemble( fragmented_flash_block_list,
+                                                                                    &flash_block );
+
+                if( flash_block.p_binary != NULL )
                 {
                     fwup_update_status(FWUP_STATE_FLASH_WRITE_WAIT);   /* Update the firmware update status */
-                    packet_buffer = pvPortMalloc(flash_block.length);
-                    memcpy(packet_buffer, flash_block.p_binary, flash_block.length);
+                    packet_buffer = pvPortMalloc( flash_block.length );
+                    memcpy( packet_buffer, flash_block.p_binary, flash_block.length );
                     packet_block_for_queue1.p_packet = packet_buffer;
-                    packet_block_for_queue1.ul_offset = flash_block.offset;
-                    packet_block_for_queue1.length   = flash_block.length;
-                    if(xQueueSend(xQueue, &packet_block_for_queue1, NULL) != pdPASS)
+                    packet_block_for_queue1.ulOffset = flash_block.offset;
+                    packet_block_for_queue1.length = flash_block.length;
+
+                    if( xQueueSend( xQueue, &packet_block_for_queue1, NULL ) != pdPASS )
                     {
-                        vPortFree(packet_block_for_queue1.p_packet);
-                        OTA_LOG_L1("OTA flashing queue send error.\r\n");
+                        vPortFree( packet_block_for_queue1.p_packet );
+                        LogError( ( "Failed to write a block: OTA flashing queue send error." ) );
                         sNumBytesWritten = R_OTA_ERR_QUEUE_SEND_FAIL;
                         break;
                     }
@@ -969,8 +944,9 @@ int16_t R_FWUP_WriteBlock(OTA_FileContext_t * const C,
                     break;
                 }
             }
+
             /*----------- finalize phase ----------*/
-            fragmented_flash_block_list_print(fragmented_flash_block_list);
+            fragmented_flash_block_list_print( fragmented_flash_block_list );
         }
         else
         {
@@ -978,15 +954,15 @@ int16_t R_FWUP_WriteBlock(OTA_FileContext_t * const C,
         }
     }
 
-    xSemaphoreGive(xSemaphoreWriteBlock);
+    xSemaphoreGive( xSemaphoreWriteBlock );
 #elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
-    if (ota_flashing_task(pacData, ulOffset, ulBlockSize) == FLASH_SUCCESS)
+    if (ota_flashing_task(pData, ulOffset, ulBlockSize) == FLASH_SUCCESS)
     {
         sNumBytesWritten = (int16_t) ulBlockSize;
     }
     else
     {
-        OTA_LOG_L1("OTA flashing queue send error.\r\n");
+        LogInfo(("OTA flashing queue send error."));
         sNumBytesWritten = R_OTA_ERR_QUEUE_SEND_FAIL;
     }
 #else
@@ -997,84 +973,89 @@ int16_t R_FWUP_WriteBlock(OTA_FileContext_t * const C,
 }
 /*-----------------------------------------------------------*/
 
-OTA_Err_t R_FWUP_CloseFile(OTA_FileContext_t * const C)
+OtaPalStatus_t R_FWUP_CloseFile( OtaFileContext_t * const pFileContext )
 {
-    OTA_Err_t eResult = kOTA_Err_None;
-
-    DEFINE_OTA_METHOD_NAME("R_FWUP_CloseFile");
+    OtaPalMainStatus_t eResult = OtaPalSuccess;
 
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
     /* Check State transit monitoring flag */
     if (STATE_MONITORING_ERROR == fwup_state_monitoring_is_error())
     {
         fwup_update_status(FWUP_STATE_FATAL_ERROR);
-        OTA_LOG_L1("[%s] ERROR: Transit state did not change for more than 1 min.\r\n", OTA_METHOD_NAME);
-        return kOTA_Err_Panic;
+        LogError( ( "ERROR: Transit state did not change for more than 1 min." ) );
+        return OtaPalFileClose;
     }
     else
     {
         fwup_update_status(FWUP_STATE_CHECK_SIGNATURE);   /* Update the firmware update status */
     }
 #endif
-    if (ota_context_validate(C) == R_OTA_ERR_INVALID_CONTEXT)
+    if (ota_context_validate(pFileContext) == 0)
     {
-        eResult = kOTA_Err_FileClose;
+        eResult = OtaPalFileClose;
     }
-
-    if (NULL != C->pxSignature)
+    if( OtaPalSuccess == eResult )
     {
-        eResult = R_FWUP_CheckFileSignature(C);
-    }
-    else
-    {
-        eResult = kOTA_Err_SignatureCheckFailed;
+        if (NULL != pFileContext->pSignature)
+        {
+            eResult = OTA_PAL_MAIN_ERR(R_FWUP_CheckFileSignature(pFileContext));
+        }
+        else
+        {
+            eResult = OtaPalSignatureCheckFailed;
+        }
     }
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
     fwup_flash_close();
 #elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
-    if (kOTA_Err_None == eResult)
+    if( OtaPalSuccess == eResult )
     {
         /* Update the user firmware header. */
-        if (ota_context_update_user_firmware_header(C) == R_OTA_ERR_NONE)
+        if( ota_context_update_user_firmware_header( pFileContext ) == R_OTA_ERR_NONE )
         {
-            OTA_LOG_L1( "[%s] User firmware header updated.\r\n", OTA_METHOD_NAME );
+            LogInfo( ( "User firmware image header updated." ) );
         }
         else
         {
-            OTA_LOG_L1( "[%s] ERROR: Failed to update the image header.\r\n", OTA_METHOD_NAME );
-            eResult = kOTA_Err_FileClose;
+            LogError( ( "Failed to update the firmware image header." ) );
+            eResult = OtaPalFileClose;
         }
+
         /* delete task/queue for flashing */
-        if (NULL != xTask)
+        if( NULL != xTask )
         {
-            vTaskDelete(xTask);
+            vTaskDelete( xTask );
             xTask = NULL;
         }
-        if (NULL != xQueue)
+
+        if( NULL != xQueue )
         {
             do
             {
-                if (errQUEUE_FULL == xQueueReceive(xQueue, &packet_block_for_queue2, 0))
+                if( errQUEUE_FULL == xQueueReceive( xQueue, &packet_block_for_queue2, 0 ) )
                 {
                     break;
                 }
                 else
                 {
-                    vPortFree(packet_block_for_queue2.p_packet);
+                    vPortFree( packet_block_for_queue2.p_packet );
                 }
             }
-            while(1);
-            vQueueDelete(xQueue);
+            while( 1 );
+
+            vQueueDelete( xQueue );
             xQueue = NULL;
         }
-        if (NULL != xSemaphoreFlashig)
+
+        if( NULL != xSemaphoreFlashig )
         {
-            vSemaphoreDelete(xSemaphoreFlashig);
+            vSemaphoreDelete( xSemaphoreFlashig );
             xSemaphoreFlashig = NULL;
         }
-        if (NULL != xSemaphoreWriteBlock)
+
+        if( NULL != xSemaphoreWriteBlock )
         {
-            vSemaphoreDelete(xSemaphoreWriteBlock);
+            vSemaphoreDelete( xSemaphoreWriteBlock );
             xSemaphoreWriteBlock = NULL;
         }
 
@@ -1082,8 +1063,8 @@ OTA_Err_t R_FWUP_CloseFile(OTA_FileContext_t * const C)
         if (STATE_MONITORING_ERROR == fwup_state_monitoring_is_error())
         {
             fwup_update_status(FWUP_STATE_FATAL_ERROR);
-            OTA_LOG_L1("[%s] ERROR: Transit state did not change for more than 1 min.\r\n", OTA_METHOD_NAME);
-            eResult = kOTA_Err_Panic;
+            LogError( ( "ERROR: Transit state did not change for more than 1 min." ) );
+            eResult = OtaPalFileClose;
         }
         else
         {
@@ -1094,64 +1075,23 @@ OTA_Err_t R_FWUP_CloseFile(OTA_FileContext_t * const C)
     }
     else
     {
-        s_load_fw_control_block.eSavedAgentState = eOTA_ImageState_Rejected;
+        s_load_fw_control_block.eSavedAgentState = OtaImageStateRejected;
     }
 #else /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS */
     /* Fix me for other OS environment */
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS */
 
-    ota_context_close(C);
-    return eResult;
+    ota_context_close( pFileContext );
+    return OTA_PAL_COMBINE_ERR( eResult, 0 );
 }
 /*-----------------------------------------------------------*/
 
-OTA_Err_t R_FWUP_CheckFileSignature(OTA_FileContext_t * const C)
+OtaPalStatus_t R_FWUP_CheckFileSignature( OtaFileContext_t * const pFileContext )
 {
-    DEFINE_OTA_METHOD_NAME("R_FWUP_CheckFileSignature");
+    OtaPalMainStatus_t eResult = OtaPalUninitialized;
 
-    OTA_Err_t eResult;
-
-#if (FWUP_CFG_SIGNATURE_VERIFICATION == FWUP_SIGNATURE_ECDSA)
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
     int32_t verification_result = -1;
-
-#if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
-    uint32_t flash_aligned_address = 0;
-    uint8_t assembled_flash_buffer[FLASH_CF_MIN_PGM_SIZE];
-    flash_err_t flash_err;
-    flash_interrupt_config_t cb_func_info;
-
-    if (fragmented_flash_block_list != NULL)
-    {
-        st_fragmented_block_list_t *tmp = fragmented_flash_block_list;
-        do
-        {
-            /* Read one page from flash memory. */
-            flash_aligned_address = (uint32_t)((tmp->content.offset & OTA_FLASH_MIN_PGM_SIZE_MASK) +
-                                        BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS);
-            memcpy((uint8_t *)assembled_flash_buffer, (uint8_t *)flash_aligned_address, FLASH_CF_MIN_PGM_SIZE);
-            /* Replace length bytes from offset. */
-            memcpy(&assembled_flash_buffer[tmp->content.offset], tmp->content.binary, tmp->content.length);
-            /* Flashing memory. */
-            fwup_flash_close();
-            fwup_flash_open();
-            cb_func_info.pcallback = ota_header_flashing_callback;
-            cb_func_info.int_priority = FLASH_INTERRUPT_PRIORITY;
-            fwup_flash_set_callback((void *)&cb_func_info);
-            gs_header_flashing_task = OTA_FLASHING_IN_PROGRESS;
-            flash_err = fwup_flash_write((uint32_t)assembled_flash_buffer,
-                                        (uint32_t)flash_aligned_address, FLASH_CF_MIN_PGM_SIZE);
-            if(flash_err != FLASH_SUCCESS)
-            {
-                R_BSP_NOP();
-            }
-            while (OTA_FLASHING_IN_PROGRESS == gs_header_flashing_task);
-            s_load_fw_control_block.total_image_length += tmp->content.length;
-            tmp = fragmented_flash_block_list_delete(tmp, tmp->content.offset);
-        }
-        while(tmp != NULL);
-    }
-#endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS */
 
     /* Firmware verification for the signature type of bank 1. */
     verification_result = fwup_verification_sha256_ecdsa(
@@ -1163,11 +1103,11 @@ OTA_Err_t R_FWUP_CheckFileSignature(OTA_FileContext_t * const C)
 
     if (0 == verification_result)
     {
-        eResult = kOTA_Err_None;
+        eResult = OtaPalSuccess;
     }
     else
     {
-        eResult = kOTA_Err_SignatureCheckFailed;
+        eResult = OtaPalSignatureCheckFailed;
     }
 
 #elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
@@ -1179,7 +1119,7 @@ OTA_Err_t R_FWUP_CheckFileSignature(OTA_FileContext_t * const C)
     flash_err_t flash_err;
     flash_interrupt_config_t cb_func_info;
 
-    if (fragmented_flash_block_list != NULL)
+    if ( fragmented_flash_block_list != NULL )
     {
         st_fragmented_block_list_t *tmp = fragmented_flash_block_list;
         do
@@ -1188,66 +1128,69 @@ OTA_Err_t R_FWUP_CheckFileSignature(OTA_FileContext_t * const C)
             flash_aligned_address = ((tmp->content.offset & OTA_FLASH_MIN_PGM_SIZE_MASK) +
                                         (uint32_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS +
                                             BOOT_LOADER_USER_FIRMWARE_HEADER_LENGTH);
-            memcpy((uint8_t *)assembled_flash_buffer, (uint8_t *)flash_aligned_address, FLASH_CF_MIN_PGM_SIZE);
+            memcpy( ( uint8_t * ) assembled_flash_buffer, ( uint8_t * ) flash_aligned_address, FLASH_CF_MIN_PGM_SIZE);
             /* Replace length bytes from offset. */
-            memcpy(&assembled_flash_buffer[tmp->content.offset], tmp->content.p_binary, tmp->content.length);
+            memcpy( &assembled_flash_buffer[ tmp->content.offset ], tmp->content.p_binary, tmp->content.length);
             /* Flashing memory. */
-            xSemaphoreTake(xSemaphoreFlashig, portMAX_DELAY);
+            xSemaphoreTake( xSemaphoreFlashig, portMAX_DELAY );
             fwup_flash_close();
             fwup_flash_open();
             cb_func_info.pcallback = ota_header_flashing_callback;
             cb_func_info.int_priority = FLASH_INTERRUPT_PRIORITY;
-            R_FLASH_Control(FLASH_CMD_SET_BGO_CALLBACK, (void *)&cb_func_info);
+            fwup_flash_set_callback((void *)&cb_func_info);
             gs_header_flashing_task = OTA_FLASHING_IN_PROGRESS;
-            flash_err = fwup_flash_write((uint32_t)assembled_flash_buffer,
-                                        (uint32_t)flash_aligned_address, FLASH_CF_MIN_PGM_SIZE);
-            if(flash_err != FLASH_SUCCESS)
+            flash_err = fwup_flash_write( ( uint32_t )assembled_flash_buffer,
+                                        ( uint32_t )flash_aligned_address, FLASH_CF_MIN_PGM_SIZE);
+            if( flash_err != FLASH_SUCCESS )
             {
                 R_BSP_NOP();  /* When an error occurs, consider an error notification method according to the system. */
             }
-            while (OTA_FLASHING_IN_PROGRESS == gs_header_flashing_task);
-            xSemaphoreGive(xSemaphoreFlashig);
+            while( OTA_FLASHING_IN_PROGRESS == gs_header_flashing_task )
+            {
+            }
+
+            xSemaphoreGive( xSemaphoreFlashig );
             s_load_fw_control_block.total_image_length += tmp->content.length;
-            tmp = fragmented_flash_block_list_delete(tmp, tmp->content.offset);
+            tmp = fragmented_flash_block_list_delete( tmp, tmp->content.offset );
         }
-        while(tmp != NULL);
+        while( tmp != NULL );
     }
 
     /* Verify an ECDSA-SHA256 signature. */
     if( CRYPTO_SignatureVerificationStart( &pvSigVerifyContext, cryptoASYMMETRIC_ALGORITHM_ECDSA,
                                             cryptoHASH_ALGORITHM_SHA256 ) == pdFALSE )
     {
-        return kOTA_Err_SignatureCheckFailed;
+        return OTA_PAL_COMBINE_ERR( OtaPalSignatureCheckFailed, 0 );
     }
     else
     {
-        OTA_LOG_L1( "[%s] Started %s signature verification, file: %s\r\n", OTA_METHOD_NAME,
-                    cOTA_JSON_FileSignatureKey, ( const char * ) C->pucCertFilepath );
-        pucSignerCert = R_FWUP_ReadAndAssumeCertificate( C->pucCertFilepath, &ulSignerCertSize );
+        LogInfo( ( "Started %s signature verification, file: %s",
+                    OTA_JsonFileSignatureKey, ( const char * ) pFileContext->pCertFilepath ) );
+        pucSignerCert = R_FWUP_ReadAndAssumeCertificate( pFileContext->pCertFilepath, &ulSignerCertSize );
 
         if( pucSignerCert == NULL )
         {
-            eResult = kOTA_Err_BadSignerCert;
+            eResult = OtaPalBadSignerCert;
         }
         else
         {
             CRYPTO_SignatureVerificationUpdate( pvSigVerifyContext,
-                                                (const uint8_t*)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS +
-                                                    BOOT_LOADER_USER_FIRMWARE_HEADER_LENGTH,
-                                                s_load_fw_control_block.total_image_length);
+                                                ( const uint8_t * ) BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS +
+                                                BOOT_LOADER_USER_FIRMWARE_HEADER_LENGTH,
+                                                s_load_fw_control_block.total_image_length );
 
             if( CRYPTO_SignatureVerificationFinal( pvSigVerifyContext, ( char * ) pucSignerCert, ulSignerCertSize,
-                                                    C->pxSignature->ucData, C->pxSignature->usSize ) == pdFALSE )
+                                                    pFileContext->pSignature->data, pFileContext->pSignature->size ) == pdFALSE )
             {
-                OTA_LOG_L1( "[%s] ERROR: Finished %s signature verification, but signature verification failed\r\n",
-                    OTA_METHOD_NAME, cOTA_JSON_FileSignatureKey );
-                eResult = kOTA_Err_SignatureCheckFailed;
+                LogError( ( "Finished %s signature verification, but signature verification failed",
+                            OTA_JsonFileSignatureKey ) );
+                eResult = OtaPalSignatureCheckFailed;
             }
             else
             {
-                OTA_LOG_L1( "[%s] PASS: Finished %s signature verification, signature verification passed\r\n",
-                    OTA_METHOD_NAME, cOTA_JSON_FileSignatureKey );
-                eResult = kOTA_Err_None;
+                LogInfo( ( "Finished %s signature verification, signature verification passed",
+                            OTA_JsonFileSignatureKey ) );
+                eResult = OtaPalSuccess;
             }
         }
     }
@@ -1260,19 +1203,13 @@ OTA_Err_t R_FWUP_CheckFileSignature(OTA_FileContext_t * const C)
 #else /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS */
     /* Fix me for other OS environment */
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS */
-#else /* FWUP_CFG_SIGNATURE_VERIFICATION == FWUP_SIGNATURE_ECDSA */
-    /* Fix me for another signature verification algorithm */
-#endif /* FWUP_CFG_SIGNATURE_VERIFICATION == FWUP_SIGNATURE_ECDSA */
-    return eResult;
+    return OTA_PAL_COMBINE_ERR( eResult, 0 );
 }
 /*-----------------------------------------------------------*/
-#if (FWUP_CFG_SIGNATURE_VERIFICATION == FWUP_SIGNATURE_ECDSA)
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
 uint8_t * R_FWUP_ReadAndAssumeCertificate( const uint8_t * const pucCertName,
                                                     uint32_t * const ulSignerCertSize )
 {
-    DEFINE_OTA_METHOD_NAME( "R_FWUP_ReadAndAssumeCertificate" );
-
     uint8_t * pucCertData;
     uint32_t ulCertSize;
     uint8_t * pucSignerCert = NULL;
@@ -1282,22 +1219,22 @@ uint8_t * R_FWUP_ReadAndAssumeCertificate( const uint8_t * const pucCertName,
 
     if( ( xResult == CKR_OK ) && ( pucSignerCert != NULL ) )
     {
-        OTA_LOG_L1( "[%s] Using cert with label: %s OK\r\n", OTA_METHOD_NAME, ( const char * ) pucCertName );
+        LogInfo( ( "R_FWUP_ReadAndAssumeCertificate using cert with label: %s", ( const char * ) pucCertName ) );
     }
     else
     {
-        OTA_LOG_L1( "[%s] No such certificate file: %s. Using aws_ota_codesigner_certificate.h.\r\n", OTA_METHOD_NAME,
-                    ( const char * ) pucCertName );
+        LogWarn( ( "No such certificate file: %s. Using certificate defined by the otapalconfigCODE_SIGNING_CERTIFICATE macro instead",
+                   ( const char * ) pucCertName ) );
 
         /* Allocate memory for the signer certificate plus a terminating
            zero so we can copy it and return to the caller. */
-        ulCertSize = sizeof( signingcredentialSIGNING_CERTIFICATE_PEM );
+        ulCertSize = sizeof( otapalconfigCODE_SIGNING_CERTIFICATE );
         
         /*lint !e9029 !e9079 !e838 malloc proto requires void*. */
         pucSignerCert = pvPortMalloc( ulCertSize + 1 );
         
         /*lint !e9005 we don't modify the cert but it could be set by PKCS11 so it's not const. */
-        pucCertData = ( uint8_t * ) signingcredentialSIGNING_CERTIFICATE_PEM;
+        pucCertData = ( uint8_t * ) otapalconfigCODE_SIGNING_CERTIFICATE;
 
         if( pucSignerCert != NULL )
         {
@@ -1308,7 +1245,7 @@ uint8_t * R_FWUP_ReadAndAssumeCertificate( const uint8_t * const pucCertName,
         }
         else
         {
-            OTA_LOG_L1( "[%s] Error: No memory for certificate of size %d!\r\n", OTA_METHOD_NAME, ulCertSize );
+            LogError( ( "Failed to store the certificate in dynamic memory: pvPortMalloc failed to allocate a buffer of size %d", ulCertSize ) );
         }
     }
 
@@ -1317,23 +1254,20 @@ uint8_t * R_FWUP_ReadAndAssumeCertificate( const uint8_t * const pucCertName,
 #else /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS */
     /* Fix me for other OS environment */
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS */
-#else /* FWUP_CFG_SIGNATURE_VERIFICATION == FWUP_SIGNATURE_ECDSA */
-    /* Fix me for another signature verification algorithm */
-#endif /* FWUP_CFG_SIGNATURE_VERIFICATION == FWUP_SIGNATURE_ECDSA */
 
 /*-----------------------------------------------------------*/
 
-OTA_Err_t R_FWUP_ResetDevice(void)
+OtaPalStatus_t R_FWUP_ResetDevice( OtaFileContext_t * const pFileContext )
 {
-    DEFINE_OTA_METHOD_NAME("R_FWUP_ResetDevice");
+    ( void ) pFileContext;
 
-    OTA_LOG_L1("[%s] Resetting the device.\r\n", OTA_METHOD_NAME);
+    LogInfo( ( "Resetting the device." ) );
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
-    if ((eOTA_ImageState_EOL == s_load_fw_control_block.eSavedAgentState) && (FLASH_CFG_DATA_FLASH_BGO == 1))
+    if ((OtaImageState_EOL == s_load_fw_control_block.eSavedAgentState) && (FLASH_CFG_DATA_FLASH_BGO == 1))
     {
         /* If the status is rejected, aborted, or error, swap bank and return to the previous image.
            Then the boot loader will start and erase the image that failed to update. */
-        OTA_LOG_L1("[%s] Swap bank...\r\n", OTA_METHOD_NAME);
+        LogInfo(("Swap bank..."));
         R_BSP_SET_PSW(0);
         fwup_interrupts_disable();
         fwup_flash_close();
@@ -1361,158 +1295,192 @@ OTA_Err_t R_FWUP_ResetDevice(void)
         }
     }
 #else  /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS */
-    /* Software reset issued (Not swap bank) */
-    R_BSP_SET_PSW(0);
-    fwup_interrupts_disable();
-    fwup_register_protect_disable();
-    R_BSP_SoftwareReset();
-    while (1);    /* software reset */
+    if( ( OtaImageStateAccepted == s_load_fw_control_block.eSavedAgentState ) ||
+        ( OtaImageStateTesting == s_load_fw_control_block.eSavedAgentState ) )
+    {
+        /* Software reset issued (Not swap bank) */
+        R_BSP_SET_PSW(0);
+        fwup_interrupts_disable();
+        fwup_register_protect_disable();
+        R_BSP_SoftwareReset();
+
+        while( 1 ) /* software reset */
+        {
+        }
+    }
+    else
+    {
+        /* If the status is rejected, aborted, or error, swap bank and return to the previous image.
+         * Then the boot loader will start and erase the image that failed to update. */
+        R_BSP_SET_PSW(0);
+        fwup_interrupts_disable();
+        fwup_flash_set_bank_toggle();
+        fwup_register_protect_disable();
+        R_BSP_SoftwareReset();
+
+        while( 1 ) /* software reset */
+        {
+        }
+    }
+
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS */
 
     /* We shouldn't actually get here if the board supports the auto reset.
      * But, it doesn't hurt anything if we do although someone will need to
      * reset the device for the new image to boot. */
-    return kOTA_Err_None;
+    return OTA_PAL_COMBINE_ERR( OtaPalSuccess, 0 );
 }
 /*-----------------------------------------------------------*/
 
-OTA_Err_t R_FWUP_ActivateNewImage(void)
+OtaPalStatus_t R_FWUP_ActivateNewImage( OtaFileContext_t * const pFileContext )
 {
-    DEFINE_OTA_METHOD_NAME("R_FWUP_ActivateNewImage");
-
-    OTA_LOG_L1("[%s] Changing the Startup Bank\r\n", OTA_METHOD_NAME);
+    LogInfo( ( "Changing the Startup Bank" ) );
 
     /* reset for self testing */
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
     fwup_software_delay_ms(5000);
 #elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
-    vTaskDelay(5000);
+    vTaskDelay( 5000 );
 #else
     /* Fix me for other OS environment */
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS */
-    R_FWUP_ResetDevice();    /* no return from this function */
+    R_FWUP_ResetDevice( pFileContext );    /* no return from this function */
 
-    return kOTA_Err_None;
+    return OTA_PAL_COMBINE_ERR( OtaPalSuccess, 0 );
 }
 /*-----------------------------------------------------------*/
 
-OTA_Err_t R_FWUP_SetPlatformImageState(OTA_ImageState_t eState)
+OtaPalStatus_t R_FWUP_SetPlatformImageState( OtaFileContext_t * const pFileContext,
+                                             OtaImageState_t eState )
 {
     flash_interrupt_config_t cb_func_info;
 
-    DEFINE_OTA_METHOD_NAME("R_FWUP_SetPlatformImageState");
-    OTA_LOG_L1("[%s] is called.\r\n", OTA_METHOD_NAME);
+    LogDebug( ( "R_FWUP_SetPlatformImageState is called." ) );
 
-    OTA_Err_t eResult = kOTA_Err_Uninitialized;
+    OtaPalMainStatus_t eResult = OtaPalUninitialized;
 
     /* Save the image state to eSavedAgentState. */
-    if (eOTA_ImageState_Testing == s_load_fw_control_block.eSavedAgentState)
+    if (OtaImageStateTesting == s_load_fw_control_block.eSavedAgentState)
     {
-        switch (eState)
+        switch ( eState )
         {
-            case eOTA_ImageState_Accepted:
+            case OtaImageStateAccepted:
                 fwup_flash_close();
                 fwup_flash_open();
+#if (FLASH_CFG_CODE_FLASH_BGO == 1)
                 cb_func_info.pcallback    = ota_header_flashing_callback;
                 cb_func_info.int_priority = FLASH_INTERRUPT_PRIORITY;
                 fwup_flash_set_callback((void *)&cb_func_info);
                 gs_header_flashing_task = OTA_FLASHING_IN_PROGRESS;
+#endif /* FLASH_CFG_CODE_FLASH_BGO == 1 */
                 if (fwup_flash_erase((flash_block_address_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_ERASE_ADDRESS,
                                     BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER) == FLASH_SUCCESS)
                 {
+#if (FLASH_CFG_CODE_FLASH_BGO == 1)
                     while (OTA_FLASHING_IN_PROGRESS == gs_header_flashing_task)
                     {
-                        ;
                     }
-                    OTA_LOG_L1("[%s] erase install area (code flash):OK\r\n", OTA_METHOD_NAME);
-                    OTA_LOG_L1("[%s] Accepted and committed final image.\r\n", OTA_METHOD_NAME);
-                    eResult = kOTA_Err_None;
+#endif /* FLASH_CFG_CODE_FLASH_BGO == 1 */
+                    LogInfo( ( "Erase install area (code flash):OK" ) );
+                    LogInfo( ( "Accepted and committed final image." ) );
+                    eResult = OtaPalSuccess;
                 }
                 else
                 {
-                    OTA_LOG_L1("[%s] erase install area (code flash):NG\r\n", OTA_METHOD_NAME);
-                    OTA_LOG_L1("[%s] Accepted final image but commit failed.\r\n", OTA_METHOD_NAME);
-                    eResult = kOTA_Err_CommitFailed;
+                    LogError( ( "Erase install area (code flash):NG" ) );
+                    LogError( ( "Accepted final image but commit failed." ) );
+                    eResult = OtaPalCommitFailed;
                 }
                 break;
-            case eOTA_ImageState_Rejected:
-                OTA_LOG_L1("[%s] Rejected image.\r\n", OTA_METHOD_NAME);
-                eResult = kOTA_Err_None;
+
+            case OtaImageStateRejected:
+                LogInfo( ( "Rejected image." ) );
+                eResult = OtaPalSuccess;
                 break;
-            case eOTA_ImageState_Aborted:
-                OTA_LOG_L1("[%s] Aborted image.\r\n", OTA_METHOD_NAME);
-                eResult = kOTA_Err_None;
+
+            case OtaImageStateAborted:
+                LogInfo( ( "Aborted image." ) );
+                eResult = OtaPalSuccess;
                 break;
-            case eOTA_ImageState_Testing:
-                OTA_LOG_L1("[%s] Testing.\r\n", OTA_METHOD_NAME);
-                eResult = kOTA_Err_None;
+
+            case OtaImageStateTesting:
+                LogInfo( ( "Testing." ) );
+                eResult = OtaPalSuccess;
                 break;
+
             default:
-                OTA_LOG_L1("[%s] Unknown state received %d.\r\n", OTA_METHOD_NAME, (int32_t)eState);
-                eResult = kOTA_Err_BadImageState;
+                LogError( ( "Unknown state received %d.", ( int32_t ) eState ) );
+                eResult = OtaPalBadImageState;
                 break;
         }
     }
     else
     {
-        switch (eState)
+        switch ( eState )
         {
-            case eOTA_ImageState_Accepted:
-                OTA_LOG_L1("[%s] Not in commit pending so can not mark image valid (%d).\r\n",
-                        OTA_METHOD_NAME, (int32_t)eState);
-                eResult = kOTA_Err_CommitFailed;
-                break;
-            case eOTA_ImageState_Rejected:
-                OTA_LOG_L1("[%s] Rejected image.\r\n", OTA_METHOD_NAME);
-                eResult = kOTA_Err_None;
-                break;
-            case eOTA_ImageState_Aborted:
-                OTA_LOG_L1("[%s] Aborted image.\r\n", OTA_METHOD_NAME);
-                eResult = kOTA_Err_None;
-                break;
-            case eOTA_ImageState_Testing:
-                OTA_LOG_L1("[%s] Testing.\r\n", OTA_METHOD_NAME);
-                eResult = kOTA_Err_None;
-                break;
-            default:
-                OTA_LOG_L1("[%s] Unknown state received %d.\r\n", OTA_METHOD_NAME, (int32_t)eState);
-                eResult = kOTA_Err_BadImageState;
-                break;
+        case OtaImageStateAccepted:
+            LogError( ( "Not in commit pending so can not mark image valid (%d).", ( int32_t ) eState ) );
+            eResult = OtaPalCommitFailed;
+            break;
+
+        case OtaImageStateRejected:
+            LogInfo( ( "Rejected image." ) );
+            eResult = OtaPalSuccess;
+            break;
+
+        case OtaImageStateAborted:
+            LogInfo( ( "Aborted image." ) );
+            eResult = OtaPalSuccess;
+            break;
+
+        case OtaImageStateTesting:
+            LogInfo( ( "Testing." ) );
+            eResult = OtaPalSuccess;
+            break;
+
+        default:
+            LogError( ( "Unknown state received %d.", ( int32_t ) eState ) );
+            eResult = OtaPalBadImageState;
+            break;
         }
     }
 
     s_load_fw_control_block.eSavedAgentState = eState;
 
-    return eResult;
+    return OTA_PAL_COMBINE_ERR( eResult, 0 );
 }
 /*-----------------------------------------------------------*/
 
-OTA_PAL_ImageState_t R_FWUP_GetPlatformImageState(void)
+OtaPalImageState_t R_FWUP_GetPlatformImageState( OtaFileContext_t * const pFileContext )
 {
-    DEFINE_OTA_METHOD_NAME("R_FWUP_GetPlatformImageState");
-    OTA_LOG_L1("[%s] is called.\r\n", OTA_METHOD_NAME);
+    ( void ) pFileContext;
 
-    OTA_PAL_ImageState_t ePalState = eOTA_PAL_ImageState_Unknown;
+    LogDebug( ( "R_FWUP_GetPlatformImageState is called." ) );
 
-    switch (s_load_fw_control_block.eSavedAgentState)
+    OtaPalImageState_t ePalState = OtaPalImageStateUnknown;
+
+    switch ( s_load_fw_control_block.eSavedAgentState )
     {
-        case eOTA_ImageState_Testing:
-            ePalState = eOTA_PAL_ImageState_PendingCommit;
-            break;
-        case eOTA_ImageState_Accepted:
-            ePalState = eOTA_PAL_ImageState_Valid;
-            break;
-        case eOTA_ImageState_Unknown: // Uninitialized image state, assume a factory image
-            ePalState = eOTA_PAL_ImageState_Valid;
-            break;
-        case eOTA_ImageState_Rejected:
-        case eOTA_ImageState_Aborted:
-        default:
-            ePalState = eOTA_PAL_ImageState_Invalid;
-            break;
+    case OtaImageStateTesting:
+        ePalState = OtaPalImageStatePendingCommit;
+        break;
+
+    case OtaImageStateAccepted:
+        ePalState = OtaPalImageStateValid;
+        break;
+
+    case OtaImageStateUnknown: /* Uninitialized image state, assume a factory image */
+        ePalState = OtaPalImageStateValid;
+        break;
+
+    case OtaImageStateRejected:
+    case OtaImageStateAborted:
+    default:
+        ePalState = OtaPalImageStateInvalid;
+        break;
     }
 
-    OTA_LOG_L1("Function call: R_FWUP_GetPlatformImageState: [%d]\r\n", ePalState);
+    LogDebug( ( "Function called is R_FWUP_GetPlatformImageState: Platform State is [%d]", ePalState ) );
     return ePalState; /*lint !e64 !e480 !e481 I/O calls and return type are used per design. */
 }
 /*-----------------------------------------------------------*/
@@ -1646,13 +1614,13 @@ static CK_RV prvGetCertificate( const char * pcLabelName,
     /* Fix me for other OS environment */
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS */
 
-static int32_t ota_context_validate(OTA_FileContext_t * C)
+static int32_t ota_context_validate( OtaFileContext_t * pFileContext )
 {
-    return (NULL != C);
+    return( NULL != pFileContext );
 }
 
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
-static int32_t ota_context_update_user_firmware_header( OTA_FileContext_t * C )
+static int32_t ota_context_update_user_firmware_header( OtaFileContext_t * pFileContext )
 {
     int32_t ret = R_OTA_ERR_INVALID_CONTEXT;
     uint8_t block[BOOT_LOADER_USER_FIRMWARE_HEADER_LENGTH];
@@ -1670,22 +1638,25 @@ static int32_t ota_context_update_user_firmware_header( OTA_FileContext_t * C )
     p_block_header->image_flag = LIFECYCLE_STATE_TESTING;
 
     /* Update signature type. */
-    memcpy(p_block_header->signature_type, cOTA_JSON_FileSignatureKey,sizeof(cOTA_JSON_FileSignatureKey));
+    memcpy( p_block_header->signature_type, OTA_JsonFileSignatureKey, sizeof( OTA_JsonFileSignatureKey ) );
 
     /* Parse the signature and extract ECDSA-SHA256 signature data. */
-    source_pointer = C->pxSignature->ucData;
+    source_pointer = pFileContext->pSignature->data;
     destination_pointer = p_block_header->signature;
-    data_length = *(source_pointer + 1) + OTA_SIGUNATURE_SEQUENCE_INFO_LENGTH;
-    memset(destination_pointer, 0, sizeof(destination_pointer));
-    if (OTA_SIGUNATURE_SEQUENCE_TOP_VALUE == *source_pointer)
+    data_length = *( source_pointer + 1 ) + OTA_SIGUNATURE_SEQUENCE_INFO_LENGTH;
+    memset( destination_pointer, 0, sizeof( destination_pointer ) );
+
+    if( OTA_SIGUNATURE_SEQUENCE_TOP_VALUE == *source_pointer )
     {
         source_pointer += OTA_SIGUNATURE_SEQUENCE_INFO_LENGTH;
-        while(1)
+
+        while( 1 )
         {
-            if (OTA_SIGUNATURE_INTEGER_VALUE == *source_pointer)
+            if( OTA_SIGUNATURE_INTEGER_VALUE == *source_pointer )
             {
                 source_pointer++;
-                if (OTA_SIGUNATURE_INCLUDE_NEGATIVE_NUMBER_VALUE == *source_pointer)
+
+                if( OTA_SIGUNATURE_INCLUDE_NEGATIVE_NUMBER_VALUE == *source_pointer )
                 {
                     source_pointer += OTA_SIGUNATURE_SKIP;
                 }
@@ -1693,10 +1664,12 @@ static int32_t ota_context_update_user_firmware_header( OTA_FileContext_t * C )
                 {
                     source_pointer++;
                 }
-                memcpy(destination_pointer, source_pointer, OTA_SIGUNATURE_DATA_HALF_LENGTH);
+
+                memcpy( destination_pointer, source_pointer, OTA_SIGUNATURE_DATA_HALF_LENGTH );
                 source_pointer += OTA_SIGUNATURE_DATA_HALF_LENGTH;
                 destination_pointer += OTA_SIGUNATURE_DATA_HALF_LENGTH;
-                if ((source_pointer - C->pxSignature->ucData) == data_length)
+
+                if( ( source_pointer - pFileContext->pSignature->data ) == data_length )
                 {
                     ret = R_OTA_ERR_NONE;
                     break;
@@ -1719,12 +1692,15 @@ static int32_t ota_context_update_user_firmware_header( OTA_FileContext_t * C )
         fwup_flash_set_callback((void *)&cb_func_info);
         gs_header_flashing_task = OTA_FLASHING_IN_PROGRESS;
         length = BOOT_LOADER_USER_FIRMWARE_HEADER_LENGTH;
-        flash_err = fwup_flash_write((uint32_t)block, (uint32_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS, length);
+        flash_err = fwup_flash_write( ( uint32_t ) block, ( uint32_t ) BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS, length);
+
         if(flash_err != FLASH_SUCCESS)
         {
             R_BSP_NOP();  /* When an error occurs, consider an error notification method according to the system. */
         }
-        while (OTA_FLASHING_IN_PROGRESS == gs_header_flashing_task);
+        while( OTA_FLASHING_IN_PROGRESS == gs_header_flashing_task )
+        {
+        }
     }
 
     return ret;
@@ -1733,33 +1709,34 @@ static int32_t ota_context_update_user_firmware_header( OTA_FileContext_t * C )
     /* Fix me for other OS environment */
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS */
 
-static void ota_context_close(OTA_FileContext_t * C)
+static void ota_context_close( OtaFileContext_t * pFileContext )
 {
-    if (NULL != C)
+    if( NULL != pFileContext )
     {
-        C->pucFile = NULL;
+        pFileContext->pFile = NULL;
     }
 }
 
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
-static st_fragmented_block_list_t *fragmented_flash_block_list_insert(st_fragmented_block_list_t *head,
-                                                                        uint32_t offset, uint8_t *binary,
-                                                                        uint32_t length)
+static st_fragmented_block_list_t * fragmented_flash_block_list_insert( st_fragmented_block_list_t * head,
+                                                                         uint32_t offset,
+                                                                         uint8_t * binary,
+                                                                         uint32_t length )
 {
     st_fragmented_block_list_t *tmp, *current, *previous, *new;
 
-    new = pvPortMalloc(sizeof(st_flash_block_t));
-    new->content.p_binary = pvPortMalloc(length);
+    new = pvPortMalloc( sizeof( st_flash_block_t ) );
+    new->content.p_binary = pvPortMalloc( length );
 
-    if((new != NULL) && (new->content.p_binary != NULL))
+    if( ( new != NULL ) && ( new->content.p_binary != NULL ) )
     {
-        memcpy(new->content.p_binary, binary, length);
+        memcpy( new->content.p_binary, binary, length );
         new->content.offset = offset;
         new->content.length = length;
         new->next = NULL;
 
         /* new head would be returned when head would be specified as NULL. */
-        if(head == NULL)
+        if( head == NULL )
         {
             tmp = new;
         }
@@ -1767,17 +1744,20 @@ static st_fragmented_block_list_t *fragmented_flash_block_list_insert(st_fragmen
         {
             /* search the list to insert new node */
             current = head;
-            while(1)
+
+            while( 1 )
             {
-                if((new->content.offset < current->content.offset) || (current == NULL))
+                if( ( new->content.offset < current->content.offset ) || ( current == NULL ) )
                 {
                     break;
                 }
+
                 previous = current;
                 current = current->next;
             }
+
             /* insert the searched node when current != head */
-            if(current != head)
+            if( current != head )
             {
                 previous->next = new;
                 new->next = current;
@@ -1797,55 +1777,61 @@ static st_fragmented_block_list_t *fragmented_flash_block_list_insert(st_fragmen
     return tmp;
 }
 
-static st_fragmented_block_list_t *fragmented_flash_block_list_delete(st_fragmented_block_list_t *head,
-                                                                        uint32_t offset)
+static st_fragmented_block_list_t * fragmented_flash_block_list_delete( st_fragmented_block_list_t * head,
+                                                                         uint32_t offset )
 {
     st_fragmented_block_list_t *tmp = head, *previous = NULL;
 
-    if(head != NULL)
+    if( head != NULL )
     {
-        while(1)
+        while( 1 )
         {
-            if(tmp->content.offset == offset)
+            if( tmp->content.offset == offset )
             {
                 break;
             }
-            if(tmp->next == NULL)
+
+            if( tmp->next == NULL )
             {
                 tmp = NULL;
                 break;
             }
+
             previous = tmp;
             tmp = tmp->next;
         }
-        if(tmp != NULL)
+
+        if( tmp != NULL )
         {
             /* delete target exists on not head, remove specified and return head in this case */
-            if(previous != NULL)
+            if( previous != NULL )
             {
                 previous->next = tmp->next;
-                vPortFree(tmp->content.p_binary);
-                vPortFree(tmp);
+                vPortFree( tmp->content.p_binary );
+                vPortFree( tmp );
                 tmp = head;
             }
             else
             {
                 /* delete target exists on head with subsequent data,
                    remove head and return specified (as new head) in this case */
-                if(head->next != NULL)
+                if( head->next != NULL )
                 {
                     tmp = head->next;
                 }
-                /* delete target exists on head without subsequent data, remove head and return NULL in this case */
+                /* delete target exists on head without subsequent data,
+                   remove head and return NULL in this case */
                 else
                 {
                     tmp = NULL;
                 }
-                vPortFree(head->content.p_binary);
-                vPortFree(head);
+
+                vPortFree( head->content.p_binary );
+                vPortFree( head );
             }
         }
     }
+
     return tmp;
 }
 
@@ -1857,27 +1843,30 @@ static st_fragmented_block_list_t *fragmented_flash_block_list_print(st_fragment
     total_heap_length = 0;
     total_list_count = 0;
 
-    if(head != NULL)
+    if( head != NULL )
     {
-        while(1){
-            total_heap_length += sizeof(st_fragmented_block_list_t);
+        while( 1 )
+        {
+            total_heap_length += sizeof( st_fragmented_block_list_t );
             total_heap_length += tmp->content.length;
             total_list_count++;
-            if(tmp->next == NULL)
+
+            if( tmp->next == NULL )
             {
                 break;
             }
+
             tmp = tmp->next;
-        };
+        }
     }
-    OTA_LOG_L2("st_fragmented_block_list_t: total_heap_length = [%d], total_list_count = [%d].\r\n",
-                total_heap_length, total_list_count);
+
+    LogDebug( ( "FRAGMENTED_FLASH_BLOCK_LIST: total_heap_length = [%d], total_list_count = [%d].", total_heap_length, total_list_count ) );
 
     return tmp;
 }
 
-static st_fragmented_block_list_t *fragmented_flash_block_list_assemble(st_fragmented_block_list_t *head,
-                                                                        st_flash_block_t *flash_block)
+static st_fragmented_block_list_t * fragmented_flash_block_list_assemble(st_fragmented_block_list_t * head,
+                                                                         st_flash_block_t * flash_block)
 {
     st_fragmented_block_list_t *tmp = head;
     st_fragmented_block_list_t *flash_block_candidate[FLASH_CF_MIN_PGM_SIZE];
@@ -1887,28 +1876,28 @@ static st_fragmented_block_list_t *fragmented_flash_block_list_assemble(st_fragm
     uint32_t index = 0;
 
     /* search aligned FLASH_CF_MIN_PGM_SIZE top offset */
-    while(1)
+    while( 1 )
     {
-        if(!(tmp->content.offset % FLASH_CF_MIN_PGM_SIZE))
+        if( !( tmp->content.offset % FLASH_CF_MIN_PGM_SIZE ) )
         {
             /* extract continuous flash_block candidate */
             assembled_length = 0;
             loop_counter = 0;
-            while(1)
+            while( 1 )
             {
-                if ((tmp != NULL) && (assembled_length < FLASH_CF_MIN_PGM_SIZE))
+                if ( ( tmp != NULL ) && ( assembled_length < FLASH_CF_MIN_PGM_SIZE ) )
                 {
-                    if(loop_counter < FLASH_CF_MIN_PGM_SIZE)
+                    if( loop_counter < FLASH_CF_MIN_PGM_SIZE )
                     {
-                        if((tmp->content.offset + tmp->content.length) >
-                            ((tmp->content.offset & OTA_FLASH_MIN_PGM_SIZE_MASK) + FLASH_CF_MIN_PGM_SIZE))
+                        if( ( tmp->content.offset + tmp->content.length ) >
+                            ( ( tmp->content.offset & OTA_FLASH_MIN_PGM_SIZE_MASK) + FLASH_CF_MIN_PGM_SIZE ) )
                         {
-                            fragmented_length = (FLASH_CF_MIN_PGM_SIZE - assembled_length);
+                            fragmented_length = ( FLASH_CF_MIN_PGM_SIZE - assembled_length );
                             assembled_length += fragmented_length;
                             flash_block_candidate[loop_counter] = tmp;
-                            tmp->next = fragmented_flash_block_list_insert(tmp->next, tmp->content.offset +
+                            tmp->next = fragmented_flash_block_list_insert( tmp->next, tmp->content.offset +
                                             fragmented_length, &tmp->content.p_binary[fragmented_length],
-                                            tmp->content.length - fragmented_length);
+                                            tmp->content.length - fragmented_length );
                             tmp->content.length = fragmented_length;
                         }
                         else
@@ -1932,7 +1921,7 @@ static st_fragmented_block_list_t *fragmented_flash_block_list_assemble(st_fragm
         }
 
         /* break if found completed flash_block_candidate or found end of list */
-        if((assembled_length == FLASH_CF_MIN_PGM_SIZE) || (tmp == NULL))
+        if( ( assembled_length == FLASH_CF_MIN_PGM_SIZE ) || ( tmp == NULL ) )
         {
             break;
         }
@@ -1944,18 +1933,19 @@ static st_fragmented_block_list_t *fragmented_flash_block_list_assemble(st_fragm
     }
 
     /* assemble flash_block */
-    if(assembled_length == FLASH_CF_MIN_PGM_SIZE)
+    if( assembled_length == FLASH_CF_MIN_PGM_SIZE )
     {
         tmp = head;
         /* remove flash_block from list */
-        flash_block->offset = flash_block_candidate[0]->content.offset;
+        flash_block->offset = flash_block_candidate[ 0 ]->content.offset;
         flash_block->length = assembled_length;
-        for(uint32_t i = 0; i < loop_counter; i++)
+
+        for( uint32_t i = 0; i < loop_counter; i++ )
         {
-            memcpy(&flash_block->p_binary[index], flash_block_candidate[i]->content.p_binary,
-                flash_block_candidate[i]->content.length);
-            index = flash_block_candidate[i]->content.length;
-            tmp = fragmented_flash_block_list_delete(tmp, flash_block_candidate[i]->content.offset);
+            memcpy( &flash_block->p_binary[ index ], flash_block_candidate[ i ]->content.p_binary,
+                flash_block_candidate[ i ]->content.length );
+            index = flash_block_candidate[ i ]->content.length;
+            tmp = fragmented_flash_block_list_delete( tmp, flash_block_candidate[ i ]->content.offset );
         }
     }
     else
@@ -1974,8 +1964,6 @@ static flash_err_t ota_flashing_task(uint8_t *p_packet, uint32_t ulOffset, uint3
 {
     flash_err_t    flash_err;
     static uint8_t s_block[FWUP_WRITE_BLOCK_SIZE];
-
-    DEFINE_OTA_METHOD_NAME("ota_flashing_task");
 
     memcpy(s_block, p_packet, length);
     flash_err = fwup_flash_write((uint32_t)s_block,
@@ -1997,28 +1985,29 @@ static flash_err_t ota_flashing_task(uint8_t *p_packet, uint32_t ulOffset, uint3
 static void ota_flashing_task( void * pvParameters )
 {
     flash_err_t flash_err;
-    static uint8_t block[(1 << otaconfigLOG2_FILE_BLOCK_SIZE)];
+    static uint8_t block[ ( 1 << otaconfigLOG2_FILE_BLOCK_SIZE ) ];
     static uint32_t ulOffset;
     static uint32_t length;
 
-    while(1)
+    while( 1 )
     {
-        xQueueReceive(xQueue, &packet_block_for_queue2, portMAX_DELAY);
-        xSemaphoreTake(xSemaphoreFlashig, portMAX_DELAY);
-        memcpy(block, packet_block_for_queue2.p_packet, packet_block_for_queue2.length);
-        ulOffset = packet_block_for_queue2.ul_offset;
+        xQueueReceive( xQueue, &packet_block_for_queue2, portMAX_DELAY );
+        xSemaphoreTake( xSemaphoreFlashig, portMAX_DELAY );
+        memcpy( block, packet_block_for_queue2.p_packet, packet_block_for_queue2.length );
+        ulOffset = packet_block_for_queue2.ulOffset;
         length = packet_block_for_queue2.length;
-        flash_err = fwup_flash_write((uint32_t)block, (ulOffset +
-                                    (uint32_t)BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS +
-                                    (uint32_t)BOOT_LOADER_USER_FIRMWARE_HEADER_LENGTH), length);
-        if(packet_block_for_queue2.length != 1024)
+        flash_err = fwup_flash_write( ( uint32_t ) block, ( ulOffset +
+                                    ( uint32_t ) BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS +
+                                    ( uint32_t ) BOOT_LOADER_USER_FIRMWARE_HEADER_LENGTH ), length );
+        if( packet_block_for_queue2.length != 1024 )
         {
             R_BSP_NOP();
         }
-        if(flash_err != FLASH_SUCCESS)
+        if( flash_err != FLASH_SUCCESS )
         {
             R_BSP_NOP();  /* When an error occurs, consider an error notification method according to the system. */
         }
+
         s_load_fw_control_block.total_image_length += length;
         vPortFree(packet_block_for_queue2.p_packet);
     }
@@ -2027,13 +2016,13 @@ static void ota_flashing_task( void * pvParameters )
     /* Fix me for other OS environment */
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS */
 
-static void ota_flashing_callback(void *event)
+static void ota_flashing_callback( void *event )
 {
 #if (FLASH_CFG_CODE_FLASH_BGO == 1)
     flash_int_cb_args_t * p_event = event;
 
-    if ((FLASH_INT_EVENT_WRITE_COMPLETE != p_event->event) ||
-        (FLASH_INT_EVENT_ERASE_COMPLETE == p_event->event))
+    if ( ( FLASH_INT_EVENT_WRITE_COMPLETE != p_event->event ) ||
+        ( FLASH_INT_EVENT_ERASE_COMPLETE == p_event->event ) )
     {
         R_BSP_NOP(); /* trap */
     }
@@ -2044,22 +2033,22 @@ static void ota_flashing_callback(void *event)
     }
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
     static portBASE_TYPE xHigherPriorityTaskWoken;
-    xSemaphoreGiveFromISR(xSemaphoreFlashig, &xHigherPriorityTaskWoken);
+    xSemaphoreGiveFromISR( xSemaphoreFlashig, &xHigherPriorityTaskWoken );
 #else
     /* Fix me for other OS environment */
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS */
 #endif /* FLASH_CFG_CODE_FLASH_BGO */
 }
 
-static void ota_header_flashing_callback(void *event)
+static void ota_header_flashing_callback( void *event )
 {
 #if (FLASH_CFG_CODE_FLASH_BGO == 1)
     flash_int_cb_args_t * p_event = event;
 
     gs_header_flashing_task = OTA_FLASHING_COMPLETE;
 
-    if ((FLASH_INT_EVENT_WRITE_COMPLETE != p_event->event) ||
-        (FLASH_INT_EVENT_ERASE_COMPLETE == p_event->event))
+    if ( ( FLASH_INT_EVENT_WRITE_COMPLETE != p_event->event ) ||
+        ( FLASH_INT_EVENT_ERASE_COMPLETE == p_event->event ) )
     {
         R_BSP_NOP(); /* trap */
     }
@@ -2397,7 +2386,8 @@ e_comm_err_t fwup_communication_open(void)
 #endif /* FWUP_IMPLEMENTATION_BOOTLOADER */
 
     /* If there were an error this would demonstrate error detection of API calls. */
-    if (SCI_SUCCESS != my_sci_err)
+    if (SCI_SUCCESS != my_sci_err &&
+        SCI_ERR_CH_NOT_CLOSED != my_sci_err)
     {
         R_BSP_NOP(); // Your error handling code would go here.
         ret = COMM_ERROR;
@@ -2588,7 +2578,8 @@ e_state_monitoring_err_t fwup_state_monitoring_open(void)
     sys_time_err_t sys_time_api_error_code;
 
     sys_time_api_error_code = R_SYS_TIME_Open();
-    if (SYS_TIME_SUCCESS != sys_time_api_error_code)
+    if (SYS_TIME_SUCCESS != sys_time_api_error_code &&
+        SYS_TIME_ERR_ALREADY_STARTED != sys_time_api_error_code)
     {
         ret = MONI_ERROR;
     }
@@ -2638,6 +2629,38 @@ e_state_monitoring_err_t fwup_state_monitoring_start(void)
  *********************************************************************************************************************/
 
 /***********************************************************************************************************************
+ * Function Name: fwup_state_monitoring_stop
+ *******************************************************************************************************************//**
+ * @brief   Stop the callback process of State transit monitoring module.
+ * @retval  MONI_SUCCESS          State transit monitoring module closed successfully.
+ * @retval  MONI_ERROR            Closing the State transit monitoring module has terminated Illegally.
+ * @details Stope the callback process of State transit monitoring module.
+ *          This is a function for abstracting the System timer module.
+ */
+e_state_monitoring_err_t fwup_state_monitoring_stop(void)
+{
+    e_state_monitoring_err_t ret = MONI_SUCCESS;
+#if (BSP_MCU_SERIES_RX700 || BSP_MCU_SERIES_RX600 || BSP_MCU_SERIES_RX200 || BSP_MCU_SERIES_RX100)
+    sys_time_err_t sys_time_api_error_code;
+
+    if (true == R_SYS_TIME_IsPeriodicCallbackRegistered(fwup_state_monitoring_callback))
+    {
+        sys_time_api_error_code = R_SYS_TIME_UnregisterPeriodicCallback(fwup_state_monitoring_callback);
+        if (SYS_TIME_SUCCESS != sys_time_api_error_code)
+        {
+            ret = MONI_ERROR;
+        }
+    }
+#else
+    /* Fix me for other State transit monitoring module */
+#endif  /* BSP_MCU_SERIES_RX700 || BSP_MCU_SERIES_RX600 || BSP_MCU_SERIES_RX200 || BSP_MCU_SERIES_RX100 */
+    return ret;
+}
+/**********************************************************************************************************************
+ End of function fwup_state_monitoring_stop
+ *********************************************************************************************************************/
+
+/***********************************************************************************************************************
  * Function Name: fwup_state_monitoring_close
  *******************************************************************************************************************//**
  * @brief   Close the all callback process of State transit monitoring module.
@@ -2652,19 +2675,11 @@ e_state_monitoring_err_t fwup_state_monitoring_close(void)
 #if (BSP_MCU_SERIES_RX700 || BSP_MCU_SERIES_RX600 || BSP_MCU_SERIES_RX200 || BSP_MCU_SERIES_RX100)
     sys_time_err_t sys_time_api_error_code;
 
-    if (true == R_SYS_TIME_IsPeriodicCallbackRegistered(fwup_state_monitoring_callback))
+    sys_time_api_error_code = R_SYS_TIME_Close();
+    if (SYS_TIME_SUCCESS != sys_time_api_error_code &&
+        SYS_TIME_ERR_NOT_STARTED != sys_time_api_error_code)
     {
-        sys_time_api_error_code = R_SYS_TIME_UnregisterPeriodicCallback(fwup_state_monitoring_callback);
-        if (SYS_TIME_SUCCESS != sys_time_api_error_code)
-        {
-            ret = MONI_ERROR;
-        }
-
-        sys_time_api_error_code = R_SYS_TIME_Close();
-        if (SYS_TIME_SUCCESS != sys_time_api_error_code)
-        {
-            ret = MONI_ERROR;
-        }
+        ret = MONI_ERROR;
     }
 #else
     /* Fix me for other State transit monitoring module */
@@ -2726,7 +2741,7 @@ static void fwup_state_monitoring_callback(void)
     else
     {
 
-        /* Status chenged, or Status is same but changed */
+        /* Status changed, or Status is same but changed */
         s_state_transit.last_secure_boot_state = fwup_get_status();
         s_state_transit.check_status_counter   = 0;
         s_state_transit.state_transit_flag     = false;
@@ -2774,202 +2789,6 @@ void fwup_register_protect_disable(void)
 /**********************************************************************************************************************
  End of function fwup_register_protect_disable
  *********************************************************************************************************************/
-
-#if (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1)
-/***********************************************************************************************************************
- * Function Name: fwup_flash_spi_open
- *******************************************************************************************************************//**
- * @brief   The function initializes the Flash SPI module.
- * @retval  FLASH_SPI_SUCCESS        Flash SPI module initialized successfully.
- * @retval  FLASH_SPI_ERR_PARAM        Parameter error.
- * @details This function initializes the Flash SPI module.
- *            It also performs polling processing to confirm the completion of opening.
- *          This is a function for abstracting the flash SPI access.
- */
-flash_spi_status_t fwup_flash_spi_open(void)
-{
-    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
-
-#if (BSP_MCU_SERIES_RX600)
-    ret = R_FLASH_SPI_Open(FWUP_FLASH_SPI_DEV);
-    if (FLASH_SPI_SUCCESS == ret)
-    {
-        /* nothing to do */
-        do
-        {
-            ret = fwup_flash_spi_polling_erase();
-        }
-        while (FLASH_SPI_SUCCESS != ret);
-        ret = R_FLASH_SPI_Set_4byte_Address_Mode(FWUP_FLASH_SPI_DEV);
-    }
-#else
-    /* Fix me for other flash spi control library */
-#endif /* BSP_MCU_SERIES_RX600 */
-    return ret;
-}
-
-/***********************************************************************************************************************
- * Function Name: fwup_flash_spi_close
- *******************************************************************************************************************//**
- * @brief   The function closes the Flash SPI module.
- * @retval  FLASH_SPI_SUCCESS        Flash SPI module closed successfully.
- * @retval  FLASH_SPI_ERR_PARAM        Parameter error.
- * @retval  FLASH_SPI_ERR_OTHER        Other error.
- * @details This function closes the Flash SPI module.
- *          This is a function for abstracting the flash SPI access.
- */
-flash_spi_status_t fwup_flash_spi_close(void)
-{
-    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
-
-#if (BSP_MCU_SERIES_RX600)
-    ret = R_FLASH_SPI_Close(FWUP_FLASH_SPI_DEV);
-#else
-    /* Fix me for other flash spi control library */
-#endif /* BSP_MCU_SERIES_RX600 */
-    return ret;
-}
-
-/***********************************************************************************************************************
- * Function Name: fwup_flash_spi_erase
- *******************************************************************************************************************//**
- * @brief   The function erase the Flash SPI module.
- * @retval  FLASH_SPI_SUCCESS        Flash SPI module erase successfully.
- * @retval  FLASH_SPI_ERR_PARAM        Parameter error.
- * @retval  FLASH_SPI_ERR_HARD        Hardware error.
- * @retval  FLASH_SPI_ERR_OTHER        Other error.
- * @details This function erase the Flash SPI module.
- *             After this function, polling process is required to confirm the completion of erasure.
- *          This is a function for abstracting the flash SPI access.
- */
-flash_spi_status_t fwup_flash_spi_erase(flash_spi_erase_info_t *info)
-{
-    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
-
-#if (BSP_MCU_SERIES_RX600)
-    ret = R_FLASH_SPI_Erase(FWUP_FLASH_SPI_DEV, info);
-#else
-    /* Fix me for other flash spi control library */
-#endif /* BSP_MCU_SERIES_RX600 */
-    return ret;
-}
-
-/***********************************************************************************************************************
- * Function Name: fwup_flash_spi_write
- *******************************************************************************************************************//**
- * @brief   The function write the Flash SPI module.
- * @param[in] dev_no            Device No.
- * @param[in] addr                This is the start address of the serial flash.
- * @param[in] cnt                Number of bytes to be written.
- * @param[in] p_data            Write data storage buffer pointer.
- * @retval  FLASH_SPI_SUCCESS        Flash SPI module write successfully.
- * @retval  FLASH_SPI_ERR_PARAM        Parameter error.
- * @retval  FLASH_SPI_ERR_HARD        Hardware error.
- * @retval  FLASH_SPI_ERR_OTHER        Other error.
- * @details This function write the Flash SPI module.
- *             After this function, polling process is required to confirm the completion of writing.
- *          This is a function for abstracting the flash SPI access.
- */
-flash_spi_status_t fwup_flash_spi_write(uint8_t *p_data, uint32_t addr, uint32_t cnt)
-{
-    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
-
-#if (BSP_MCU_SERIES_RX600)
-    flash_spi_info_t info;
-
-    info.addr = addr;
-    info.cnt = cnt;
-    info.p_data = p_data;
-    info.op_mode = FLASH_SPI_SINGLE;
-    ret = R_FLASH_SPI_Write_Data_Page(FWUP_FLASH_SPI_DEV, &info);
-#else
-    /* Fix me for other flash spi control library */
-#endif /* BSP_MCU_SERIES_RX600 */
-    return ret;
-}
-
-/***********************************************************************************************************************
- * Function Name: fwup_flash_spi_read
- *******************************************************************************************************************//**
- * @brief   The function read the Flash SPI module.
- * @param[in] dev_no            Device No.
- * @param[in] addr                This is the start address of the serial flash.
- * @param[in] cnt                Number of bytes to be written.
- * @param[in] p_data            Read data storage buffer pointer.
- * @retval  FLASH_SPI_SUCCESS        Flash SPI module write successfully.
- * @retval  FLASH_SPI_ERR_PARAM        Parameter error.
- * @retval  FLASH_SPI_ERR_HARD        Hardware error.
- * @retval  FLASH_SPI_ERR_OTHER        Other error.
- * @details This function read the Flash SPI module.
- *             After this function, polling process is required to confirm the completion of writing.
- *          This is a function for abstracting the flash SPI access.
- */
-flash_spi_status_t fwup_flash_spi_read(uint32_t addr, uint32_t cnt, uint8_t *p_data)
-{
-    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
-
-#if (BSP_MCU_SERIES_RX600)
-    flash_spi_info_t info;
-
-    info.addr = addr;
-    info.cnt = cnt;
-    info.p_data = p_data;
-    info.op_mode = FLASH_SPI_SINGLE;
-    ret = R_FLASH_SPI_Read_Data(FWUP_FLASH_SPI_DEV, &info);
-#else
-    /* Fix me for other flash spi control library */
-#endif /* BSP_MCU_SERIES_RX600 */
-    return ret;
-}
-
-/***********************************************************************************************************************
- * Function Name: fwup_flash_spi_polling_erase
- *******************************************************************************************************************//**
- * @brief   The function checks erase busy the Flash SPI module.
- * @retval  FLASH_SPI_SUCCESS        Flash SPI module end successfully, and finished process.
- * @retval  FLASH_SPI_SUCCESS_BUSY    Flash SPI module end successfully, and not finished process.
- * @retval  FLASH_SPI_ERR_PARAM        Parameter error.
- * @retval  FLASH_SPI_ERR_HARD        Hardware error.
- * @retval  FLASH_SPI_ERR_OTHER        Other error.
- * @details This function checks erase busy the Flash SPI module.
- *          This is a function for abstracting the flash SPI access.
- */
-flash_spi_status_t fwup_flash_spi_polling_erase(void)
-{
-    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
-
-#if (BSP_MCU_SERIES_RX600)
-    ret = R_FLASH_SPI_Polling(FWUP_FLASH_SPI_DEV, FLASH_SPI_MODE_ERASE_POLL);
-#else
-    /* Fix me for other flash spi control library */
-#endif /* BSP_MCU_SERIES_RX600 */
-    return ret;
-}
-
-/***********************************************************************************************************************
- * Function Name: fwup_flash_spi_polling_write
- *******************************************************************************************************************//**
- * @brief   The function checks write busy the Flash SPI module.
- * @retval  FLASH_SPI_SUCCESS        Flash SPI module end successfully, and finished process.
- * @retval  FLASH_SPI_SUCCESS_BUSY    Flash SPI module end successfully, and not finished process.
- * @retval  FLASH_SPI_ERR_PARAM        Parameter error.
- * @retval  FLASH_SPI_ERR_HARD        Hardware error.
- * @retval  FLASH_SPI_ERR_OTHER        Other error.
- * @details This function checks write busy the Flash SPI module.
- *          This is a function for abstracting the flash SPI access.
- */
-flash_spi_status_t fwup_flash_spi_polling_write(void)
-{
-    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
-
-#if (BSP_MCU_SERIES_RX600)
-    ret = R_FLASH_SPI_Polling(FWUP_FLASH_SPI_DEV, FLASH_SPI_MODE_PROG_POLL);
-#else
-    /* Fix me for other flash spi control library */
-#endif /* BSP_MCU_SERIES_RX600 */
-    return ret;
-}
-#endif /* (FWUP_CFG_USE_SERIAL_FLASH_FOR_BUFFER == 1) */
 
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
 /***********************************************************************************************************************
@@ -3102,7 +2921,6 @@ flash_err_t fwup_set_boot_protect(void)
 /* Fix me for other OS environment */
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_BOOTLOADER */
 
-#if (FWUP_CFG_SIGNATURE_VERIFICATION == FWUP_SIGNATURE_ECDSA)
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT != FWUP_IMPLEMENTATION_AFRTOS)
 /***********************************************************************************************************************
  * Function Name: fwup_verification_sha256_ecdsa
@@ -3175,7 +2993,6 @@ int32_t fwup_verification_sha256_ecdsa(const uint8_t *pucData, uint32_t ulSize, 
  End of function fwup_verification_sha256_ecdsa
  *********************************************************************************************************************/
 #endif  /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT != FWUP_IMPLEMENTATION_AFRTOS */
-#endif  /* FWUP_CFG_SIGNATURE_VERIFICATION == FWUP_SIGNATURE_ECDSA */
 
 #if ( BSP_CFG_USER_CHARPUT_ENABLED == 1 )
 /***********************************************************************************************************************
@@ -3222,3 +3039,217 @@ void my_sw_charget_function (void)
  End of function my_sw_charget_function
  *********************************************************************************************************************/
 #endif /* BSP_CFG_USER_CHARGET_ENABLED */
+
+#if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
+
+/*-----------------------------------------------------------*/
+
+static int s_vsnprintf_safe(int8_t * s,
+                            size_t n,
+                            const int8_t * format,
+                            va_list arg)
+{
+    int ret;
+
+    ret = vsnprintf( (char *)s, n, (const char *)format, arg );
+
+    /* Check if the string was truncated and if so, update the return value
+     * to reflect the number of characters actually written. */
+    if( ret >= n )
+    {
+        /* Do not include the terminating NULL character to keep the behaviour
+         * same as the standard. */
+        ret = n - 1;
+    }
+    else if( ret < 0 )
+    {
+        /* Encoding error - Return 0 to indicate that nothing was written to the
+         * buffer. */
+        ret = 0;
+    }
+    else
+    {
+        /* Complete string was written to the buffer. */
+    }
+
+    return ret;
+}
+
+/*-----------------------------------------------------------*/
+
+static int s_snprintf_safe( int8_t * s,
+                          size_t n,
+                          const int8_t * format,
+                          ... )
+{
+    int ret;
+    va_list args;
+
+    va_start( args, format );
+    ret = s_vsnprintf_safe( s, n, format, args );
+    va_end( args );
+
+    return ret;
+}
+
+/*-----------------------------------------------------------*/
+
+static void s_log_printf_common(uint8_t usLoggingLevel,
+                                const int8_t * pcFormat,
+                                va_list args)
+{
+    size_t xLength = 0;
+    int8_t pcPrintString[configLOGGING_MAX_MESSAGE_LENGTH];
+
+    if (NULL != pcPrintString)
+    {
+        const int8_t * pcLevelString = NULL;
+        size_t ulFormatLen = 0UL;
+
+        /* Choose the string for the log level metadata for the log message. */
+        switch (usLoggingLevel)
+        {
+            case LOG_ERROR:
+                pcLevelString = "ERROR";
+                break;
+
+            case LOG_WARN:
+                pcLevelString = "WARN";
+                break;
+
+            case LOG_INFO:
+            case LOG_INFO_NOLF:
+                pcLevelString = "INFO";
+                break;
+
+            case LOG_DEBUG:
+                pcLevelString = "DEBUG";
+                break;
+
+            case LOG_INFO_CONTINUE:
+            default:
+                pcLevelString = NULL;
+                break;
+        }
+
+        /* Add the chosen log level information as prefix for the message. */
+        if( ( pcLevelString != NULL ) && ( xLength < configLOGGING_MAX_MESSAGE_LENGTH ) )
+        {
+            xLength += s_snprintf_safe( pcPrintString + xLength, configLOGGING_MAX_MESSAGE_LENGTH - xLength, "[%s] ", pcLevelString );
+        }
+
+        if( xLength < configLOGGING_MAX_MESSAGE_LENGTH )
+        {
+            xLength += s_vsnprintf_safe( pcPrintString + xLength, configLOGGING_MAX_MESSAGE_LENGTH - xLength, pcFormat, args );
+        }
+
+        /* Add newline characters if the message does not end with them.*/
+        ulFormatLen = strlen( (char *)pcFormat );
+
+        if( ( ulFormatLen >= 2 ) &&
+            ( strncmp( (char *)(pcFormat + ulFormatLen), "\r\n", 2 ) != 0 ) &&
+            ( xLength < configLOGGING_MAX_MESSAGE_LENGTH ) &&
+			( LOG_INFO_NOLF != usLoggingLevel) )
+        {
+            xLength += s_snprintf_safe( (int8_t *)(pcPrintString + xLength), configLOGGING_MAX_MESSAGE_LENGTH - xLength, "%s", "\r\n" );
+        }
+
+        pcPrintString[xLength] = '\0';
+
+        /* Only send the buffer to the logging task if it is
+         * not empty. */
+        if (xLength > 0)
+        {
+            printf ("%s", pcPrintString);
+        }
+    }
+}
+
+/*-----------------------------------------------------------*/
+
+static void s_log_printf_error(const int8_t * pcFormat,
+                          ...)
+{
+    va_list args;
+
+    va_start (args, pcFormat);
+    s_log_printf_common (LOG_ERROR, pcFormat, args);
+
+    va_end (args);
+}
+
+/*-----------------------------------------------------------*/
+
+static void s_log_printf_warn(const int8_t * pcFormat,
+                         ...)
+{
+    va_list args;
+
+    va_start (args, pcFormat);
+    s_log_printf_common (LOG_WARN, pcFormat, args);
+
+    va_end (args);
+}
+
+/*-----------------------------------------------------------*/
+
+static void s_log_printf_info(const int8_t * pcFormat,
+                         ...)
+{
+    va_list args;
+
+    va_start (args, pcFormat);
+    s_log_printf_common (LOG_INFO, pcFormat, args);
+
+    va_end (args);
+}
+
+/*-----------------------------------------------------------*/
+
+static void s_log_printf_info_nolf(const int8_t * pcFormat,
+                         ...)
+{
+    va_list args;
+
+    va_start (args, pcFormat);
+    s_log_printf_common (LOG_INFO_NOLF, pcFormat, args);
+
+    va_end (args);
+}
+
+/*-----------------------------------------------------------*/
+
+static void s_log_printf_info_continue(const int8_t * pcFormat,
+                         ...)
+{
+    va_list args;
+
+    va_start (args, pcFormat);
+    s_log_printf_common (LOG_INFO_CONTINUE, pcFormat, args);
+
+    va_end (args);
+}
+
+/*-----------------------------------------------------------*/
+
+static void s_log_printf_debug(const int8_t * pcFormat,
+                          ...)
+{
+    va_list args;
+
+    va_start (args, pcFormat);
+    s_log_printf_common (LOG_DEBUG, pcFormat, args);
+
+    va_end (args);
+}
+
+/*-----------------------------------------------------------*/
+
+#endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS */
+
+#if (FWUP_UNIT_TEST == 1)
+void g_setting_unit_test_s_fwup_state (e_fwup_state_t stat)
+{
+    s_fwup_state = stat;
+}
+#endif /* FWUP_UNIT_TEST */

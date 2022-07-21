@@ -34,6 +34,7 @@
         <version>3.01.00</version>
         <version>3.02.00</version>
         <version>3.03.00</version>
+        <version>3.04.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -43,6 +44,7 @@
         <version>8.03.00.202002</version>
         <version>8.03.00.202004</version>
         <version>8.03.00.202102</version>
+        <version>8.03.00.202104</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -51,6 +53,7 @@
         <version>4.12.01</version>
         <version>4.14.01</version>
         <version>4.20.01</version>
+        <version>4.20.03</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -70,6 +73,7 @@
         <group omit_board="true">RX23W</group>
         <group omit_board="true">RX64M</group>
         <group omit_board="true">RX65N</group>
+        <group omit_board="true">RX660</group>
         <group omit_board="true">RX66N</group>
         <group omit_board="true">RX671</group>
         <group omit_board="true">RX71M</group>
@@ -90,6 +94,7 @@
             <version>5.52</version>
             <version>6.10</version>
             <version>6.20</version>
+            <version>7.20</version>
         </dependency>
         <application>Timer</application>
         <desc>Real-Time Clock driver</desc>

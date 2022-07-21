@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name     : r_sci_rx_config.h
@@ -44,6 +44,7 @@
 *           31.03.2021 3.80    Added support for RX671.
 *                              Added support circular buffer in mode asynchronous.
 *           15.04.2021 3.90    Added support for RX140.
+*           31.03.2022 4.40    Added support for RX660.
 ***********************************************************************************************************************/
 #ifndef SCI_CONFIG_H
 #define SCI_CONFIG_H
@@ -86,21 +87,21 @@ Configuration Options
  * i = this channel is available in IrDA interface.
  * RX MCU supported channels
  *
- * CH#  110 111 113 130 140 230  231  23T 24T 24U 64M 71M 65N 66T 72T 23W 72M 13T 72N 66N RX23E-A 671
- * ---  --- --- --- --- --- --- ----- --- --- --- --- --- --- --- --- --- --- --- --- --- ------- ---
- * CH0           X   Xa      X    X                X   X   Xn              X       X   X           X
- * CH1   X   X*  X*  Xu   X  X    X    Xu  Xu  Xu  X   X   Xs  X   X   X   X   X   X   X     Xu    X
- * CH2           X                                 X   X   Xu              X       X   X           X
- * CH3                                             X   X   Xs              X       X   X           X
- * CH4                                             X   X   Xn              X       X   X           X
- * CH5   X   X   Xi  X    X  Xi   Xu,i X   X   X   X   X   X   X   X   Xi  X   X   X   X     X     X
- * CH6           X   X    X  X    X        X   X   X   X   Xn  X   X       Xu      X   X     X     X
- * CH7                                             Xu  Xu  Xn              X       X   X           X
- * CH8           X   Xa   X  X    X            X           X   X   X   Xu  X       X   X           X
- * CH9           X   Xa   X  X    X            X           Xs  X   X       X       X   X           X
- * CH10                                                    X               X       X   X           X
- * CH11                                        X           Xs  X   X       X       X   X           X
- * CH12  X   X   X   X    X  X    X                X   X   Xs  X   X   X   X   X   X   X     X     X
+ * CH#  110 111 113 130 140 230  231  23T 24T 24U 64M 71M 65N 66T 72T 23W 72M 13T 72N 66N 23E-A 671 660
+ * ---  --- --- --- --- --- --- ----- --- --- --- --- --- --- --- --- --- --- --- --- --- ----- --- ---
+ * CH0           X   Xa      X    X                X   X   Xn              X       X   X          X   X
+ * CH1   X   X*  X*  Xu   X  X    X    Xu  Xu  Xu  X   X   Xs  X   X   X   X   X   X   X    Xu    X   X
+ * CH2           X                                 X   X   Xu              X       X   X          X   X
+ * CH3                                             X   X   Xs              X       X   X          X   X
+ * CH4                                             X   X   Xn              X       X   X          X   X
+ * CH5   X   X   Xi  X    X  Xi   Xu,i X   X   X   X   X   X   X   X   Xi  X   X   X   X    X     X   X
+ * CH6           X   X    X  X    X        X   X   X   X   Xn  X   X       Xu      X   X    X     X   X
+ * CH7                                             Xu  Xu  Xn              X       X   X          X   X
+ * CH8           X   Xa   X  X    X            X           X   X   X   Xu  X       X   X          X   X
+ * CH9           X   Xa   X  X    X            X           Xs  X   X       X       X   X          X   X
+ * CH10                                                    X               X       X   X          X   X
+ * CH11                                        X           Xs  X   X       X       X   X          X   X
+ * CH12  X   X   X   X    X  X    X                X   X   Xs  X   X   X   X   X   X   X    X     X   X
 */
                                    
 #define SCI_CFG_CH0_INCLUDED    (0)
@@ -162,13 +163,13 @@ Configuration Options
 #define SCI_CFG_TEI_INCLUDED    (0)      /* 1=included, 0=not */
 
 /* 
-* SET GROUPBL0 (ERI, TEI) INTERRUPT PRIORITY; RX64M/RX71M/RX65N/RX72M/RX72N/RX66N ONLY
+* SET GROUPBL0 (ERI, TEI) INTERRUPT PRIORITY; RX64M/RX71M/RX65N/RX72M/RX72N/RX66N/RX671/RX660 ONLY
 * SET GROUPBL1; RX65N ONLY
 * SET GROUPAL0 (ERI,TEI) INTERRUPT PRIORITY; RX65N, RX72M, RX72N, RX66N ONLY
 * This sets the priority level for receiver overrun, framing, and parity errors
 * as well as TEI interrupts for all SCI channels.
 */
-#define SCI_CFG_ERI_TEI_PRIORITY (3)     /* (RX64M/RX71M/RX65N/RX72M/RX72N/RX66N/RX671 ONLY) 1 lowest, 15 highest */
+#define SCI_CFG_ERI_TEI_PRIORITY (3)     /* (RX64M/RX71M/RX65N/RX72M/RX72N/RX66N/RX671/RX660 ONLY) 1 lowest, 15 highest */
 
 /* ENABLE TX/RX FIFO; (SCIi supported MCU ONLY) 1=included, 0=not */
 #define SCI_CFG_CH7_FIFO_INCLUDED   (0)
@@ -194,7 +195,7 @@ Configuration Options
 #define SCI_CFG_CH11_RX_FIFO_THRESH (8)
 
 /* ENABLE Received Data match function (SCIj and SCIi supported MCU RX65N/RX66T/RX72T/RX72M/RX72N/RX66N ONLY) 1=included, 0=not */
-/*((SCIk and SCIm supported MCU RX671 ONLY) 1=included, 0=not */
+/*((SCIk and SCIm supported MCU RX671/RX660 ONLY) 1=included, 0=not */
 #define SCI_CFG_CH0_DATA_MATCH_INCLUDED  (0)
 #define SCI_CFG_CH1_DATA_MATCH_INCLUDED  (0)
 #define SCI_CFG_CH2_DATA_MATCH_INCLUDED  (0)

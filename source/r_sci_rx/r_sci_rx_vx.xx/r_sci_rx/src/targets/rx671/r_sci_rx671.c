@@ -22,7 +22,7 @@
 ***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *           31.3.2021 1.00    Initial Release.
-*           31.03.2021 3.80   Added support circular buffer in mode asynchronous.
+*                             Added support circular buffer in mode asynchronous.
 *                             Updated macro definition enable and disable TXI, RXI, ERI, TEI.
 ***********************************************************************************************************************/
 

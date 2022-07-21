@@ -103,7 +103,7 @@ static bool r_ble_disc_next_inc_serv(uint16_t conn_hdl)
                 {
                     if (
                         ((BLE_GATT_16_BIT_UUID_FORMAT == p_inc_serv->uuid_type) &&
-                         (((p_inc_serv->p_uuid[1] << 8) | (p_inc_serv->p_uuid[0])) == gs_inc_servs[i].value.inc_serv_16.service.uuid_16)) ||
+                         ((((uint16_t)p_inc_serv->p_uuid[1] << 8) | (p_inc_serv->p_uuid[0])) == gs_inc_servs[i].value.inc_serv_16.service.uuid_16)) ||
                         ((BLE_GATT_128_BIT_UUID_FORMAT == p_inc_serv->uuid_type) &&
                          (0 == memcmp(p_inc_serv->p_uuid, gs_inc_servs[i].value.inc_serv_128.service.uuid_128, BLE_GATT_128_BIT_UUID_SIZE))))
                     {
@@ -551,7 +551,9 @@ static void r_ble_disc_gattc_cb(uint16_t type, ble_status_t result, st_ble_gattc
 
 ble_status_t R_BLE_DISC_Init(void) // @suppress("API function naming")
 {
+    /* Initialize static variable and stop previous discovery operation */
     r_ble_stop_serv_disc(BLE_GAP_INVALID_CONN_HDL, false);
+
     return R_BLE_GATTC_RegisterCb(r_ble_disc_gattc_cb, 1);
 }
 
@@ -569,6 +571,34 @@ ble_status_t R_BLE_DISC_Start(uint16_t conn_hdl, const st_ble_disc_entry_t *p_en
     gs_comp_cb        = cb;
     gs_prim_entry_pos = 0;
     gs_disc_conn_hdl  = conn_hdl;
+
+    const st_ble_gatt_hdl_range_t serv_init_range = {
+        .start_hdl  = 0x00,
+        .end_hdl    = 0x00,
+    };
+    st_disc_serv_param_t serv_init_param;
+
+    /* Initialize service attribute handle with dummy value */
+    for (uint8_t i = 0; i < gs_num_of_prim_entries; i++)
+    {
+        if(gs_prim_entries[i].uuid_type == BLE_GATT_16_BIT_UUID_FORMAT)
+        {
+            serv_init_param.uuid_type = BLE_GATT_16_BIT_UUID_FORMAT;
+            serv_init_param.value.serv_16.range = serv_init_range;
+            serv_init_param.value.serv_16.uuid_16 = (uint16_t)(((uint16_t)gs_prim_entries[i].p_uuid[1] << 8) | (gs_prim_entries[i].p_uuid[0]));
+        }
+        else
+        {
+            serv_init_param.uuid_type = BLE_GATT_128_BIT_UUID_FORMAT;
+            serv_init_param.value.serv_128.range = serv_init_range;
+            memcpy(serv_init_param.value.serv_128.uuid_128, gs_prim_entries[i].p_uuid, BLE_GATT_128_BIT_UUID_SIZE);
+        }
+        gs_prim_entries[i].serv_cb(
+            conn_hdl,
+            gs_prim_entries[i].idx,
+            BLE_DISC_PRIM_SERV_FOUND,
+            &serv_init_param);
+    }
 
     return r_ble_start_serv_disc(conn_hdl);
 }

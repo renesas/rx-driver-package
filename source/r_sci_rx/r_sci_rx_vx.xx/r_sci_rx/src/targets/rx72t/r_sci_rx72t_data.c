@@ -25,6 +25,8 @@
 *           20.05.2019 3.00    Added support for GNUC and ICCRX.
 *           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
 *           31.03.2021 3.80    Updated macro definition enable and disable TXI, RXI, ERI, TEI.
+*           31.03.2022 4.40    Added receive flag when using DTC/DMAC.
+*                              Updated channel variables in struct st_sci_ch_rom.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -122,6 +124,8 @@ const sci_ch_rom_t  ch1_rom = {(volatile struct st_sci11 R_BSP_EVENACCESS_SFR *)
                                 , IR_SCI1_RXI1
                                 , (uint8_t)SCI_CFG_CH1_TX_DMACA_CH_NUM
                                 , (uint8_t)SCI_CFG_CH1_RX_DMACA_CH_NUM
+                                #endif
+                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 , (uint8_t)SCI_CH1
                                 #endif
                                 };
@@ -140,7 +144,7 @@ sci_ch_ctrl_t   ch1_ctrl = {&ch1_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , 0
                             #endif
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif /* End of SCI_CFG_CH1_INCLUDED */
@@ -178,6 +182,8 @@ const sci_ch_rom_t  ch5_rom = {(volatile struct st_sci11 R_BSP_EVENACCESS_SFR *)
                                 , IR_SCI5_RXI5
                                 , (uint8_t)SCI_CFG_CH5_TX_DMACA_CH_NUM
                                 , (uint8_t)SCI_CFG_CH5_RX_DMACA_CH_NUM
+                                #endif
+                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 , (uint8_t)SCI_CH5
                                 #endif
                                 };
@@ -196,7 +202,7 @@ sci_ch_ctrl_t   ch5_ctrl = {&ch5_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , 0
                             #endif
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif /* End of SCI_CFG_CH5_INCLUDED */
@@ -235,6 +241,8 @@ const sci_ch_rom_t  ch6_rom = {(volatile struct st_sci11 R_BSP_EVENACCESS_SFR *)
                                 , IR_SCI6_RXI6
                                 , (uint8_t)SCI_CFG_CH6_TX_DMACA_CH_NUM
                                 , (uint8_t)SCI_CFG_CH6_RX_DMACA_CH_NUM
+                                #endif
+                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 , (uint8_t)SCI_CH6
                                 #endif
                                 };
@@ -253,7 +261,7 @@ sci_ch_ctrl_t   ch6_ctrl = {&ch6_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , 0
                             #endif
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif /* End of SCI_CFG_CH6_INCLUDED */
@@ -291,6 +299,8 @@ const sci_ch_rom_t  ch8_rom = {(volatile struct st_sci11 R_BSP_EVENACCESS_SFR *)
                                 , IR_SCI8_RXI8
                                 , (uint8_t)SCI_CFG_CH8_TX_DMACA_CH_NUM
                                 , (uint8_t)SCI_CFG_CH8_RX_DMACA_CH_NUM
+                                #endif
+                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 , (uint8_t)SCI_CH8
                                 #endif
                                 };
@@ -309,7 +319,7 @@ sci_ch_ctrl_t   ch8_ctrl = {&ch8_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , 0
                             #endif
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif /* End of SCI_CFG_CH8_INCLUDED */
@@ -348,6 +358,8 @@ const sci_ch_rom_t  ch9_rom = {(volatile struct st_sci11 R_BSP_EVENACCESS_SFR *)
                                 , IR_SCI9_RXI9
                                 , (uint8_t)SCI_CFG_CH9_TX_DMACA_CH_NUM
                                 , (uint8_t)SCI_CFG_CH9_RX_DMACA_CH_NUM
+                                #endif
+                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 , (uint8_t)SCI_CH9
                                 #endif
                                 };
@@ -366,7 +378,7 @@ sci_ch_ctrl_t   ch9_ctrl = {&ch9_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , 0
                             #endif
                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                            , 0, 0, 0, 0, 0
+                            , true, 0, 0, 0, 0, 0
                             #endif
                            };
 #endif /* End of SCI_CFG_CH9_INCLUDED */
@@ -404,6 +416,8 @@ const sci_ch_rom_t  ch11_rom = {(volatile struct st_sci11 R_BSP_EVENACCESS_SFR *
                                 , IR_SCI11_RXI11
                                 , (uint8_t)SCI_CFG_CH11_TX_DMACA_CH_NUM
                                 , (uint8_t)SCI_CFG_CH11_RX_DMACA_CH_NUM
+                                #endif
+                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 , (uint8_t)SCI_CH11
                                 #endif
                                 };
@@ -422,7 +436,7 @@ sci_ch_ctrl_t   ch11_ctrl = {&ch11_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                              , SCI_CFG_CH11_TX_FIFO_THRESH
                              #endif
                              #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                             , 0, 0, 0, 0, 0
+                             , true, 0, 0, 0, 0, 0
                              #endif
                             };
 #endif /* End of SCI_CFG_CH11_INCLUDED */
@@ -461,6 +475,8 @@ const sci_ch_rom_t  ch12_rom = {(volatile struct st_sci11 R_BSP_EVENACCESS_SFR *
                                 , IR_SCI12_RXI12
                                 , (uint8_t)SCI_CFG_CH12_TX_DMACA_CH_NUM
                                 , (uint8_t)SCI_CFG_CH12_RX_DMACA_CH_NUM
+                                #endif
+                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
                                 , (uint8_t)SCI_CH12
                                 #endif
                                 };
@@ -479,7 +495,7 @@ sci_ch_ctrl_t   ch12_ctrl = {&ch12_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                              , 0
                              #endif
                              #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-                             , 0, 0, 0, 0, 0
+                             , true, 0, 0, 0, 0, 0
                              #endif
                             };
 #endif /* End of SCI_CFG_CH12_INCLUDED */

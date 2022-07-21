@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 #ifndef R_BLE_ABS_API_H
 #define R_BLE_ABS_API_H
@@ -22,8 +22,6 @@
 /***********************************************************************************************************************
 * File Name    : r_ble_abs_api.h
 * Description  : Abstraction API
-* History      : DD.MM.YYYY Version Description           
-*              : 23.08.2019 1.00    First Release
 ***********************************************************************************************************************/
 
 /*******************************************************************************************************************//**
@@ -620,7 +618,7 @@ typedef struct
      *  by the fast_period parameter. \n
      *  Time(ms) = fast_adv_intv * 0.625. \n
      *  If the fast_period parameter is 0, this parameter is ignored.
-     *  @note Valid range changes depending on the BLE Protocol Stack library type. \n
+     *  @note Valid range changes depending on the Bluetooth LE Protocol Stack library type. \n
      *  All Features        : 0x00000020 - 0x00FFFFFF \n
      *  Balance and Compact : 0x00000020 - 0x00004000 
      */
@@ -630,7 +628,7 @@ typedef struct
      *  @brief After the elapse of the fast_period, advertising with the slow_adv_intv parameter continues \n
      *  for the period specified by the slow_period parameter. \n
      *  Time(ms) = slow_adv_intv * 0.625.
-     *  @note Valid range changes depending on the BLE Protocol Stack library type. \n
+     *  @note Valid range changes depending on the Bluetooth LE Protocol Stack library type. \n
      *  All Features        : 0x00000020 - 0x00FFFFFF \n
      *  Balance and Compact : 0x00000020 - 0x00004000 \n
      */
@@ -884,7 +882,7 @@ typedef struct
      *  @brief Advertising with the adv_intv parameter continues for the period specified by the duration parameter.\n
      *  Time(ms) = fast_adv_intv * 0.625. \n
      *  If the duration parameter is 0x0000, the advertising with the adv_intv parameter continue.
-     *  @note Valid range changes depending on the BLE Protocol Stack library type. \n
+     *  @note Valid range changes depending on the Bluetooth LE Protocol Stack library type. \n
      *  All Features        : 0x00000020 - 0x00FFFFFF \n
      *  Balance and Compact : 0x00000020 - 0x00004000 \n
      */
@@ -1019,7 +1017,7 @@ typedef struct
      *  @brief Fast scan interval. \n 
      *  Interval(ms) = fast_intv * 0.625. 
      *  
-     *  @note Valid range changes depending on the BLE Protocol Stack library type. \n
+     *  @note Valid range changes depending on the Bluetooth LE Protocol Stack library type. \n
      *  All Features        : 0x0004 - 0xFFFF \n
      *  Balance             : 0x0004 - 0x4000 \n
      *  
@@ -1030,7 +1028,7 @@ typedef struct
      *  @brief Slow Scan interval. \n
      *  Slow Scan interval(ms) = slow_intv * 0.625.
      *  
-     *  @note Valid range changes depending on the BLE Protocol Stack library type. \n
+     *  @note Valid range changes depending on the Bluetooth LE Protocol Stack library type. \n
      *  All Features        : 0x0004 - 0xFFFF \n
      *  Balance             : 0x0004 - 0x4000 \n
      */
@@ -1040,7 +1038,7 @@ typedef struct
      *  @brief Fast Scan window. \n
      *  Fast Scan window(ms) = fast_window * 0.625.
      *  
-     *  @note Valid range changes depending on the BLE Protocol Stack library type. \n
+     *  @note Valid range changes depending on the Bluetooth LE Protocol Stack library type. \n
      *  All Features        : 0x0004 - 0xFFFF \n
      *  Balance             : 0x0004 - 0x4000 \n
      */
@@ -1050,7 +1048,7 @@ typedef struct
      *  @brief Slow Scan window. \n
      *  Slow Scan window(ms) = slow_window * 0.625.
      *  
-     *  @note Valid range changes depending on the BLE Protocol Stack library type. \n
+     *  @note Valid range changes depending on the Bluetooth LE Protocol Stack library type. \n
      *  All Features        : 0x0004 - 0xFFFF \n
      *  Balance             : 0x0004 - 0x4000 \n
      */
@@ -1102,7 +1100,7 @@ typedef struct
 
     /**
      *  @brief The period which scan with the fast scan interval/fast scan window continues for. \n
-     *  Time(ms) = fast_period * 10. \n
+     *  Time = fast_period * 10ms. \n
      *  Valid range is 0x0000 - 0xFFFF. \n
      *  If the fast_period parameter is 0x0000, scan with the fast scan interval/fast scan window is not performed. \n
      *  After the elapse of the fast_period, @ref BLE_GAP_EVENT_SCAN_TO event notifies that the scan has stopped.
@@ -1578,7 +1576,8 @@ void R_BLE_ABS_Reset(ble_event_cb_t init_cb);
  *          - Legacy Advertising has been already started by R_BLE_ABS_StartLegacyAdv().  
  *          - Because the @ref BLE_CFG_RF_ADV_SET_MAX number of advertisings have been started, 
  *            R_BLE_ABS_StartLegacyAdv() cannot allocate an advertising set.
- * @retval  BLE_ERR_INVALID_STATE(0x0008) Host stack hasn't been initialized. 
+ * @retval  BLE_ERR_CONTEXT_FULL(0x000B) The API call could not be processed, 
+ *          because the Host Stack queue was full.
  * @retval  BLE_ERR_MEM_ALLOC_FAILED(0x000C) Insufficient memory is needed to generate this function. 
  * @details 
  *          <b>Events</b>\n
@@ -1605,7 +1604,7 @@ ble_status_t R_BLE_ABS_StartLegacyAdv(st_ble_abs_legacy_adv_param_t * p_adv_para
  *          The relationship between fast_intv, fast_period, 
  *          slow_intv and slow_period field in p_adv_param parameter is shown in @ref Figure 1.1 
  *          
- * @note If the BLE Protocol Stack library type is Balance or Compact, 
+ * @note If the Bluetooth LE Protocol Stack library type is Balance or Compact, 
  *       this function returns @ref BLE_ERR_UNSUPPORTED(0x0007).
  *       
  * @param[in] p_adv_param Advertising parameters for Extended Advertising.
@@ -1618,6 +1617,8 @@ ble_status_t R_BLE_ABS_StartLegacyAdv(st_ble_abs_legacy_adv_param_t * p_adv_para
  *          - Extended Advertising has been already started by R_BLE_ABS_StartExtAdv().  
  *          - Because the @ref BLE_CFG_RF_ADV_SET_MAX number of advertisings have been started, 
  *            R_BLE_ABS_StartExtAdv() cannot allocate an advertising set.
+ * @retval  BLE_ERR_CONTEXT_FULL(0x000B) The API call could not be processed, 
+ *          because the Host Stack queue was full.
  * @retval  BLE_ERR_MEM_ALLOC_FAILED(0x000C) Insufficient memory is needed to generate this function. 
  * @details 
  *          <b>Events</b>\n
@@ -1652,6 +1653,8 @@ ble_status_t R_BLE_ABS_StartExtAdv(st_ble_abs_ext_adv_param_t * p_adv_param);
  *          - Non-Connectable Advertising has been already started by R_BLE_ABS_StartNonConnAdv().  
  *          - Because the @ref BLE_CFG_RF_ADV_SET_MAX number of advertisings have been started, 
  *            R_BLE_ABS_StartNonConnAdv() cannot allocate an advertising set.
+ * @retval  BLE_ERR_CONTEXT_FULL(0x000B) The API call could not be processed, 
+ *          because the Host Stack queue was full.
  * @retval  BLE_ERR_MEM_ALLOC_FAILED(0x000C) Insufficient memory is needed to generate this function. 
  * @details 
  *          <b>Events</b>\n
@@ -1677,7 +1680,7 @@ ble_status_t R_BLE_ABS_StartNonConnAdv(st_ble_abs_non_conn_adv_param_t * p_adv_p
  *          \arg Scan request event( @ref BLE_GAP_EVENT_SCAN_REQ_RECV ) is not notified.
  *          \arg Secondary Advertising Max Skip is 0. 
  *          
- * @note If the BLE Protocol Stack library type is Balance or Compact, 
+ * @note If the Bluetooth LE Protocol Stack library type is Balance or Compact, 
  *       this function returns @ref BLE_ERR_UNSUPPORTED(0x0007).
  *       
  * @param[in] p_adv_param Advertising parameters for Periodic Advertising.
@@ -1690,6 +1693,8 @@ ble_status_t R_BLE_ABS_StartNonConnAdv(st_ble_abs_non_conn_adv_param_t * p_adv_p
  *          - Periodic Advertising has been already started by R_BLE_ABS_StartPerdAdv().  
  *          - Because the @ref BLE_CFG_RF_ADV_SET_MAX number of advertisings have been started, 
  *            R_BLE_ABS_StartPerdAdv() cannot allocate an advertising set.
+ * @retval  BLE_ERR_CONTEXT_FULL(0x000B) The API call could not be processed, 
+ *          because the Host Stack queue was full.
  * @retval  BLE_ERR_MEM_ALLOC_FAILED(0x000C) Insufficient memory is needed to generate this function. 
  * @details 
  *          <b>Events</b>\n
@@ -1719,7 +1724,7 @@ ble_status_t R_BLE_ABS_StartPerdAdv(st_ble_abs_perd_adv_param_t * p_adv_param);
  *          After the fast scanning with fast_intv/fast_window for "fast_period", 
  *          the slow scanning with slow_intv/slow_window runs for "slow_period". \n
  *          The following table shows the events notified at "Scan Start", "Scan Switch", "Scan End" in @ref Figure 1.2. 
- *          | BLE Protocol Stack library      | Scan Start                 | Scan Switch                                               | Scan End                    |
+ *          | Bluetooth LE Protocol Stack library      | Scan Start                 | Scan Switch                                               | Scan End                    |
  *          |:------------------------------- |:-------------------------- |:--------------------------------------------------------- |:--------------------------- |
  *          | all features                    | @ref BLE_GAP_EVENT_SCAN_ON | @ref BLE_GAP_EVENT_SCAN_TO \n @ref BLE_GAP_EVENT_SCAN_ON  | @ref BLE_GAP_EVENT_SCAN_TO  |
  *          | balance                         | @ref BLE_GAP_EVENT_SCAN_ON | @ref BLE_GAP_EVENT_SCAN_OFF \n @ref BLE_GAP_EVENT_SCAN_ON | @ref BLE_GAP_EVENT_SCAN_OFF |
@@ -1727,12 +1732,18 @@ ble_status_t R_BLE_ABS_StartPerdAdv(st_ble_abs_perd_adv_param_t * p_adv_param);
  *          If slow_period is 0, the slow scanning with slow_intv/slow_window continues.
  * 
  *          @image html "abs_api_scan_period_en.svg" "Figure 1.2" width=1000px
+ * 
+ * @note When RPA generation and resolution is enabled in R_BLE_GAP_EnableRpa() API, \n
+ *       active scan will not be performed on remote devices that use RPA that cannot be resolved.
+ * 
  * @param   p_scan_param Scan parameters.
  * @retval  BLE_SUCCESS(0x0000) Success 
  * @retval  BLE_ERR_INVALID_PTR(0x0001) p_scan_param is specified as NULL. 
  * @retval  BLE_ERR_INVALID_ARG(0x0003) The scan parameter is out of range. 
  * @retval  BLE_ERR_UNSUPPORTED(0x0007) Not supported.
  * @retval  BLE_ERR_INVALID_STATE(0x0008) Host stack hasn't been initialized. 
+ * @retval  BLE_ERR_CONTEXT_FULL(0x000B) The API call could not be processed, 
+ *          because the Host Stack queue was full.
  * @retval  BLE_ERR_MEM_ALLOC_FAILED(0x000C) Insufficient memory is needed to generate this function. 
  * @details 
  *          <b>Events</b>\n
@@ -1764,6 +1775,8 @@ ble_status_t R_BLE_ABS_StartScan(st_ble_abs_scan_param_t * p_scan_param);
  * @retval  BLE_ERR_UNSUPPORTED(0x0007) Not supported.
  * @retval  BLE_ERR_INVALID_STATE(0x0008) Host stack hasn't been initialized. 
  * @retval  BLE_ERR_ALREADY_IN_PROGRESS(0x000A) The same BD_ADDR as the address of a connected remote device is specified. 
+ * @retval  BLE_ERR_CONTEXT_FULL(0x000B) The API call could not be processed, 
+ *          because the Host Stack queue was full.
  * @retval  BLE_ERR_MEM_ALLOC_FAILED(0x000C) Insufficient memory is needed to generate this function. 
  * @details 
  *          <b>Events</b>\n
@@ -1793,14 +1806,16 @@ ble_status_t R_BLE_ABS_CreateConn(st_ble_abs_conn_param_t * p_conn_param);
  *          |:--------------------------------------|:-------------------------------------------------------------- |
  *          | BLE_ABS_PRIV_NET_PUBLIC_IDADDR(0x00)  | Privacy Mode : Network Mode, Identity Address : Public Address |
  *          | BLE_ABS_PRIV_DEV_PUBLIC_IDADDR(0x01)  | Privacy Mode : Device Mode,  Identity Address : Public Address |
- *          | BLE_ABS_PRIV_NET_STATIC_IDADDR(0x02)  | Privacy Mode : Network Mode, Identity Address : Static Address |
- *          | BLE_ABS_PRIV_DEV_STATIC_IDADDR(0x03)  | Privacy Mode : Device Mode,  Identity Address : Static Address |
+ *          | BLE_ABS_PRIV_NET_STATIC_IDADDR(0x10)  | Privacy Mode : Network Mode, Identity Address : Static Address |
+ *          | BLE_ABS_PRIV_DEV_STATIC_IDADDR(0x11)  | Privacy Mode : Device Mode,  Identity Address : Static Address |
  * @retval  BLE_SUCCESS(0x0000) Success 
  * @retval  BLE_ERR_INVALID_ARG(0x0003) The privacy_mode parameter is out of range. 
  * @retval  BLE_ERR_UNSUPPORTED(0x0007) Not supported.
  * @retval  BLE_ERR_INVALID_STATE(0x0008) The reason for this error is as follows: \n
  *                                           - Host stack hasn't been initialized.   \n  
  *                                           - R_BLE_ABS_SetLocPrivacy() has been already started.  
+ * @retval  BLE_ERR_CONTEXT_FULL(0x000B) The API call could not be processed, 
+ *          because the Host Stack queue was full.
  * @retval  BLE_ERR_MEM_ALLOC_FAILED(0x000C) Insufficient memory is needed to generate this function. 
  * @details 
  *          <b>Events</b>\n

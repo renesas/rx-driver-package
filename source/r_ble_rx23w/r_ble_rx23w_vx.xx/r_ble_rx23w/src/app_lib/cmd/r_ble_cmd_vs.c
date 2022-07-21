@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 #include <string.h>
 #include <stdlib.h>
@@ -58,7 +58,7 @@ static const st_ble_cli_cmd_t vs_txp_set_cmd =
 {
     .p_name = "set",
     .exec   = exec_vs_set_tx_power,
-    .p_help = "Usage: vs txp set conn_hdl <tx_poewr(0-2)>\n"
+    .p_help = "Usage: vs txp set conn_hdl <tx_power(0-2)>\n"
               "Set Tx power",
 };
 
@@ -95,7 +95,7 @@ static const st_ble_cli_cmd_t vs_txp_cmd =
     .p_cmds      = vs_txp_sub_cmds,
     .num_of_cmds = ARRAY_SIZE(vs_txp_sub_cmds),
     .p_help      = "Sub Command: set, get\n"
-                   "Try 'vs txp sucmd help' for more information",
+                   "Try 'vs txp subcmd help' for more information",
 };
 
 /*----------------------------------------------------------------------------------------------------------------------
@@ -155,7 +155,7 @@ static const st_ble_cli_cmd_t vs_test_rx_cmd =
     .exec   = exec_vs_rx_test_start,
     .abort  = abort_vs_test,
     .p_help = "Usage: vs test rx <ch(0-39)> <phy(1-3)>\n"
-              "Reciever test start",
+              "Receiver test start",
 };
 
 static void exec_vs_test_end(int argc, char *argv[])
@@ -187,7 +187,7 @@ static const st_ble_cli_cmd_t vs_test_cmd =
     .p_cmds      = vs_test_sub_cmds,
     .num_of_cmds = ARRAY_SIZE(vs_test_sub_cmds),
     .p_help      = "Sub Command: tx, rx, end\n"
-                   "Try 'vs test sucmd help' for more information",
+                   "Try 'vs test subcmd help' for more information",
 };
 
 /*----------------------------------------------------------------------------------------------------------------------
@@ -319,7 +319,7 @@ static const st_ble_cli_cmd_t vs_addr_cmd =
     .p_cmds      = vs_addr_sub_cmds,
     .num_of_cmds = ARRAY_SIZE(vs_addr_sub_cmds),
     .p_help      = "Sub Command: set, get\n"
-                   "Try 'vs addr sucmd help' for more information",
+                   "Try 'vs addr subcmd help' for more information",
 };
 
 /*----------------------------------------------------------------------------------------------------------------------
@@ -410,7 +410,7 @@ static const st_ble_cli_cmd_t vs_rand_cmd =
     .p_name = "rand",
     .exec   = exec_vs_get_rand,
     .p_help = "Usage: vs rand <rand_size(4-16)>\n"
-              "Get random numner 4 to 16 bytes",
+              "Get random number 4 to 16 bytes",
 };
 
 /*----------------------------------------------------------------------------------------------------------------------
@@ -471,7 +471,7 @@ static const st_ble_cli_cmd_t vs_scan_ch_map_cmd =
     .p_cmds      = vs_scan_ch_map_sub_cmds,
     .num_of_cmds = ARRAY_SIZE(vs_scan_ch_map_sub_cmds),
     .p_help      = "Sub Command: set, get\n"
-                   "Try 'vs scan_ch_map sucmd help' for more information",
+                   "Try 'vs scan_ch_map subcmd help' for more information",
 };
 
 
@@ -496,7 +496,7 @@ const st_ble_cli_cmd_t g_vs_cmd =
     .p_cmds      = vs_sub_cmds,
     .num_of_cmds = ARRAY_SIZE(vs_sub_cmds),
     .p_help      = "Sub Command: txp, test, addr, scheme, rfctrl, rand\n"
-                   "Try 'vs sucmd help' for more information",
+                   "Try 'vs subcmd help' for more information",
 };
 
 const char * const vs_evt_name[] =

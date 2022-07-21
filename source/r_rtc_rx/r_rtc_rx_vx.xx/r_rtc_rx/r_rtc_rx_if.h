@@ -51,6 +51,7 @@
 *           30.11.2020 2.80    Changed Minor version to 2.80 for e2studio 2020-10 support.
 *           30.06.2021 2.81    Added support for RX671.
 *           31.07.2021 2.82    Added support for RX140.
+*           31.12.2021 2.83    Added support for RX660.
 ***********************************************************************************************************************/
 
 #ifndef RTC_RX_INTERFACE_HEADER_FILE
@@ -67,7 +68,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
 #define RTC_RX_VERSION_MAJOR        (2)
-#define RTC_RX_VERSION_MINOR        (82)
+#define RTC_RX_VERSION_MINOR        (83)
 
 /***********************************************************************************************************************
 BSP version detection
@@ -156,7 +157,7 @@ typedef enum
     RTC_CMD_STOP_COUNTERS,
     RTC_CMD_PARTIAL_RESET,          // primarily output clock, alarms and capture registers
 #if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130) && !defined(BSP_MCU_RX140)
-    RTC_CMD_CONFIG_CAPTURE,         // configure capture pin; RX230, RX231, RX64M, RX65N, RX671, RX71M, RX72M, RX66N, RX72N
+    RTC_CMD_CONFIG_CAPTURE,         // configure capture pin; RX230, RX231, RX64M, RX65N, RX671, RX71M, RX72M, RX660, RX66N, RX72N
     RTC_CMD_CHECK_PIN0_CAPTURE,     // see if capture event occurred; load time if yes
     RTC_CMD_CHECK_PIN1_CAPTURE,
     RTC_CMD_CHECK_PIN2_CAPTURE,

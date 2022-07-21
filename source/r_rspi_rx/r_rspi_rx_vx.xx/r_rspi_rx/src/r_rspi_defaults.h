@@ -30,6 +30,7 @@
 *         : 30.06.2021 3.01     Supported RX671.
 *                               Fixed bug. Set the RSPCK auto-stop function enable bit(SPCR2.SCKASE) to ensure RSPI can 
 *                               communication normally when it is in high speed reception.
+*         : 31.12.2021 3.04     Supported RX660.
 ***********************************************************************************************************************/
 
 #ifndef R_RSPI_DEFS_H

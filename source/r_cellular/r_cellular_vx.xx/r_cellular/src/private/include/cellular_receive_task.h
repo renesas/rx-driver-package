@@ -14,20 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_receive_task.h
  * Description  : Configures the driver.
- *********************************************************************************************************************/
-/**********************************************************************************************************************
- * History : DD.MM.YYYY Version  Description
- *         : xx.xx.xxxx 1.00     First Release
- *         : 02.09.2021 1.01     Fixed reset timing
- *         : 21.10.2021 1.02     Support for Azure RTOS
- *                               Support for GCC for Renesas GNURX Toolchain
- *         : 15.11.2021 1.03     Improved receiving behavior, removed socket buffers
- *         : 24.01.2022 1.04     R_CELLULAR_SetPSM and R_CELLULAR_SetEDRX have been added as new APIs
  *********************************************************************************************************************/
 
 #ifndef CELLULAR_RECEIVE_TASK_H
@@ -56,12 +47,12 @@
 #define ATC_RES_READ_DNS            "+SQNDNSLKUP:"
 #define ATC_RES_PIN_LOCK_STATUS     "+CPIN:"
 #define ATC_RES_SOCKET_CLOSE        "+SQNSH:"
-#define ATC_RES_SYSTEM_START        "+SYSSTART"
+#define ATC_RES_SYSTEM_START        "+SYSSTART\r\n"
 #define ATC_RES_ATTACH_STATUS       "+CGATT:"
 #define ATC_RES_FUNCTION_LEVEL      "+CFUN:"
 #define ATC_RES_TIMEZONE            "+CTZE:"
-#define ATC_RES_REGIST_STATUS_1     "+CREG:"
-#define ATC_RES_REGIST_STATUS_2     "+CEREG:"
+#define ATC_RES_CREG_STATUS         "+CREG:"
+#define ATC_RES_CEREG_STATUS        "+CEREG:"
 #define ATC_RES_GET_TIME            "+CCLK:"
 #define ATC_RES_FATAL_ERROR         "^EXIT: Fatal error\r\n"
 #define ATC_RES_GET_SERVICE_STATUS  "+COPS:"
@@ -74,6 +65,12 @@
 #define ATC_RES_COMMAND_SEND_SIM    "+CRSM:"
 #define ATC_RES_TIMEZONE_INFO       "+CTZV:"
 #define ATC_RES_IND_INFO            "+CIEV:"
+#define ATC_RES_SVN                 "+CGSN:"
+#define ATC_RES_GET_PHONE_NUM       "+CNUM:"
+#define ATC_RES_GET_ICCID           "+SQNCCID:"
+#define ATC_RES_PING                "+PING:"
+#define ATC_RES_GET_CELLINFO        "+SQNMONI:"
+#define ATC_RES_GET_AUTOCONNECT     "+SQNAUTOCONNECT:"
 
 /**********************************************************************************************************************
  * Typedef definitions
@@ -96,10 +93,10 @@ typedef enum
     CELLULAR_RES_ATTACH_STATUS,         // Connection status to access point
     CELLULAR_RES_FUNCTION_LEVEL,        // Module control level
     CELLULAR_RES_TIMEZONE,              // Time zone notification
-    CELLULAR_RES_REGIST_STATUS_1,       // Connected base station information
-    CELLULAR_RES_REGIST_STATUS_2,       // Connected base station information
+    CELLULAR_RES_CREG_STATUS,           // Connected base station information
+    CELLULAR_RES_CEREG_STATUS,          // Connected base station information
     CELLULAR_RES_GET_TIME,              // Time acquisition process
-    CELLULAR_RES_FAITAL_ERROR,          // Fatal error on the module side, reboot required
+    CELLULAR_RES_FATAL_ERROR,           // Fatal error on the module side, reboot required
     CELLULAR_GET_SERVICE_STATUS,        // Get service status
     CELLULAR_GET_PDP_STATUS,            // Get PDP status
     CELLULAR_GET_IP_ADDR,               // Get the IP address in use
@@ -110,6 +107,12 @@ typedef enum
     CELLULAR_RES_TO_COMMAND_SEND_SIM,   // SIM access results
     CELLULAR_RES_TIMEZONE_INFO,         // Get time zone information
     CELLULAR_RES_IND_INFO,              // Get indicator notifications
+    CELLULAR_GET_SVN,                   // Get software version number
+    CELLULAR_GET_PHONE_NUMBER,          // Get phone number
+    CELLULAR_GET_ICCID,                 // Get ICCID
+    CELLULAR_PING,                      // Perform PING.
+    CELLULAR_GET_CELLINFO,              // Get cell information
+    CELLULAR_GET_AUTOCONNECT,           // Get auto-connect settings.
     CELLULAR_RES_MAX,                   // End of analysis result processing
 
     CELLULAR_RES_PUT_CHAR,              // Received data storage process

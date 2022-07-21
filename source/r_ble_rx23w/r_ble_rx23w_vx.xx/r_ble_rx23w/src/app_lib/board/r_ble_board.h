@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 /*******************************************************************************************************************//**
@@ -23,11 +23,7 @@
  * @{
  * @ingroup app_lib
  * @brief Board Control Library
- * @details This library provides APIs to control LEDs and switchs on a board.
-***********************************************************************************************************************/
-/***********************************************************************************************************************
-* History : DD.MM.YYYY Version Description           
-*         : 23.08.2019 1.00    First Release
+ * @details This library provides APIs to control LEDs and switches on a board.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************

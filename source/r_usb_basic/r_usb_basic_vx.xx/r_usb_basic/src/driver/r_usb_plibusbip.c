@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2022) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_plibusbip.c
@@ -31,6 +31,7 @@
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.04.2020 1.31 RX671 is added.
+ *         : 30.06.2022 1.40 USBX PCDC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -65,6 +66,11 @@
 #endif  /* ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE)) */
 
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
+
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+rtos_sem_id_t g_usb_peri_usbx_sem[USB_MAXPIPE_NUM + 1];
+#endif /* (BSP_CFG_RTOS_USED == 5) */
+
 /******************************************************************************
  Renesas Abstracted Host Lib IP functions
  ******************************************************************************/
@@ -559,7 +565,9 @@ uint16_t usb_pstd_read_data(uint16_t pipe, uint16_t pipemode)
         /* Set NAK */
         usb_cstd_set_nak(USB_NULL, pipe);
         count = (uint16_t)g_usb_pstd_data_cnt[pipe];
+#if (BSP_CFG_RTOS_USED != 1)    /* Other than Azure RTOS */
         g_usb_pstd_data_cnt[pipe] = dtln;
+#endif  /* (BSP_CFG_RTOS_USED != 1) */
     }
     else if (g_usb_pstd_data_cnt[pipe] == dtln)
     {
@@ -994,6 +1002,10 @@ uint8_t usb_pstd_set_pipe_table (uint8_t *descriptor, uint8_t class)
   #endif /* USB_CFG_USE_USBIP == USB_CFG_IP1 */
 #endif /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
 
+#if (BSP_CFG_RTOS_USED == 5)
+    rtos_sem_info_t     info;
+#endif  /* (BSP_CFG_RTOS_USED == 5) */
+
     /* Check Endpoint descriptor */
     if (USB_DT_ENDPOINT != descriptor[USB_DEV_B_DESCRIPTOR_TYPE])
     {
@@ -1055,6 +1067,12 @@ uint8_t usb_pstd_set_pipe_table (uint8_t *descriptor, uint8_t class)
         /* set max packet size */
         pipe_maxp   =  (uint16_t)descriptor[USB_EP_B_MAXPACKETSIZE_L];
         pipe_maxp   |= ((uint16_t)descriptor[USB_EP_B_MAXPACKETSIZE_H] << 8);
+
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+        info.p_name    = "USBX_SEM";
+        info.initial_count = 0;
+        rtos_create_semaphore(&g_usb_peri_usbx_sem[pipe_no], &info);
+#endif /* (BSP_CFG_RTOS_USED == 5) */
 
         /* Set Pipe table block */
         g_usb_pipe_table[USB_CFG_USE_USBIP][pipe_no].use_flag  = USB_TRUE;

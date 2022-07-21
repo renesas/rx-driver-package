@@ -478,7 +478,7 @@ static riic_return_t riic_open (riic_info_t * p_riic_info)
  *            Notes:\n
  *            1. When SCL and SDA pin is not external pull-up, this function may return RIIC_ERR_BUS_BUSY by
  *               detecting either SCL or SDA line is as in low state.
- * @note      Available settings for each pattern see Section 3.2 in the application note for details.
+ * @note      Available settings for each pattern see Section 3 in the application note for details.
  */
 riic_return_t R_RIIC_MasterSend (riic_info_t * p_riic_info)
 {
@@ -607,7 +607,7 @@ static riic_return_t riic_master_send (riic_info_t * p_riic_info)
  *            Notes:\n
  *            1. When SCL and SDA pin is not external pull-up, this function may return RIIC_ERR_BUS_BUSY by
  *               detecting either SCL or SDA line is as in low state.
- * @note      Available settings for each receive pattern see Section 3.3 in the application note for details.
+ * @note      Available settings for each receive pattern see Section 3 in the application note for details.
  */
 riic_return_t R_RIIC_MasterReceive (riic_info_t * p_riic_info)
 {
@@ -807,7 +807,7 @@ static riic_return_t riic_master_send_receive (riic_info_t * p_riic_info)
  *            channel status flag specified in the argument g_riic_ChStatus [], that is to be "RIIC_FINISH" or 
  *            "RIIC_NACK". "RIIC_NACK" is set when master device transmitted NACK for notify to the slave that last 
  *            data receive completed.
- * @note      Available settings for each receive pattern see Section 3.4 in the application note for details.
+ * @note      Available settings for each receive pattern see Section 3 in the application note for details.
  */
 riic_return_t R_RIIC_SlaveTransfer (riic_info_t * p_riic_info)
 {
@@ -922,7 +922,7 @@ static riic_return_t riic_slave_transfer (riic_info_t * p_riic_info)
  *            specified by the parameter, and returns the obtained state as 32-bit structure. \n
  *            When this function is called, the RIIC arbitration-lost flag and NACK flag are cleared to 0. If the 
  *            device state is "RIIC_ AL", the value is updated to "RIIC_FINISH". \n
- * @note      The state flag allocation see Section 3.5 in the application note for details.
+ * @note      The state flag allocation see Section 3 in the application note for details.
  */
 riic_return_t R_RIIC_GetStatus (riic_info_t *p_riic_info, riic_mcu_status_t *p_riic_status)
 {
@@ -1230,7 +1230,7 @@ static void riic_getstatus (riic_info_t *p_riic_info, riic_mcu_status_t *p_riic_
  * @param[in] *p_riic_info
  *             This is the pointer to the I2C communication information structure.
  * @param[in] ctrl_ptn
- *             Specifies the output pattern. See Section 3.6 in the application note for details.
+ *             Specifies the output pattern. See Section 3 in the application note for details.
  * @retval    RIIC_SUCCESS             Processing completed successfully
  * @retval    RIIC_ERR_INVALID_CHAN    Nonexistent channel
  * @retval    RIIC_ERR_INVALID_ARG     Invalid parameter

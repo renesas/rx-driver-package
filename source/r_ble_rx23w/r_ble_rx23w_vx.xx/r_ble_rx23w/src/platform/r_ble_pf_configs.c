@@ -14,14 +14,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
 * File Name    : r_ble_pf_configs.c
 * Description  : The Link Layer & Host Stack parameters for the BLE FIT module configurations.
-* History      : DD.MM.YYYY Version Description           
-*              : 23.08.2019 1.00    First Release
 ***********************************************************************************************************************/
 
 #include <stdio.h>
@@ -305,7 +303,7 @@ BLE_SECTION_C(1) const uint8_t g_ble_rf_config[] =
 /**** Tx Power setting              ****/
 /***************************************/
 #if (BLE_CFG_RF_DEF_TX_POW >= 0) && (BLE_CFG_RF_DEF_TX_POW <= 2)
-    /**** Defalut Tx Power Setting ****/
+    /**** Default Tx Power Setting ****/
     (BLE_CFG_RF_DEF_TX_POW << 0) | 
 #else /* BLE_CFG_RF_DEF_TX_POW */
     #error "error: default Tx Power setting (BLE_CFG_RF_DEF_TX_POW)"
@@ -330,10 +328,10 @@ BLE_SECTION_C(1) const uint8_t g_ble_rf_config[] =
     #error "error: Max Tx Power setting (BLE_CFG_RF_MAX_TX_POW)"
 #endif /* BLE_CFG_RF_MAX_TX_POW */
 #if (BLE_CFG_RF_CLKOUT_EN >= 0) && (BLE_CFG_RF_CLKOUT_EN <= 7)
-    /**** RF clock output settng ****/
+    /**** RF clock output setting ****/
     (BLE_CFG_RF_CLKOUT_EN << 4) |
 #else /* BLE_CFG_RF_CLKOUT_EN  */
-    #error "error: RF clock output settng (BLE_CFG_RF_CLKOUT_EN)"
+    #error "error: RF clock output setting (BLE_CFG_RF_CLKOUT_EN)"
 #endif /* BLE_CFG_RF_CLKOUT_EN */
 
     0x00 /* base value */

@@ -57,7 +57,7 @@
         </dependency>
         <dependency>
             <module>r_usb_basic</module>
-            <version>1.31</version>
+            <version>1.40</version>
         </dependency>
         <application>Connectivity</application>
         <desc>USB Peripheral Communications Device Class</desc>

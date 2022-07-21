@@ -64,6 +64,7 @@
  *         : 10.03.2020 2.46     Added RX23E-A support.
  *         : 30.06.2021 2.48     Added RX671 support.
  *         : 31.07.2021 2.49     Added RX140 support.
+ *         : 31.12.2021 2.50     Added RX660 support.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIIC_CONFIG_H
@@ -93,6 +94,7 @@
 /*  RX24U: ch0,    ,     */
 /*  RX64M: ch0,    , ch2 */
 /*  RX65N: ch0, ch1, ch2 */
+/*  RX660: ch0,    , ch2 */
 /*  RX66T: ch0,    ,     */
 /*  RX66N: ch0, ch1, ch2 */
 /*  RX671: ch0, ch1, ch2 */

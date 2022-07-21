@@ -25,11 +25,6 @@
  * @brief Profile Common Server Library Library
  * @details This library provides APIs to implement GATT profile server.
 ***********************************************************************************************************************/
-/***********************************************************************************************************************
-* History : DD.MM.YYYY Version Description           
-*         : 23.08.2019 1.00    First Release
-*         : 31.10.2019 1.01    Add doxygen comments.
-***********************************************************************************************************************/
 #include "r_ble_serv_common.h"
 
 #ifndef R_BLE_SERVS_IF_H

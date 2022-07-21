@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -32,6 +32,8 @@
 *         : 30.03.2021 2.11    Update to BLE FIT module v2.11.
 *         : 30.06.2021 2.20    Update to BLE FIT module v2.20.
 *         : 15.10.2021 2.30    Update to BLE FIT module v2.30.
+*         : 15.04.2022 2.31    Update to BLE FIT module v2.31.
+*         : 30.06.2022 2.40    Update to BLE FIT module v2.40.
 ***********************************************************************************************************************/
 
 /*******************************************************************************************************************//**
@@ -93,7 +95,7 @@
  * @def BLE_VERSION_MINOR
  * BLE Module Minor Version.
  */
-#define BLE_VERSION_MINOR                                               (30)
+#define BLE_VERSION_MINOR                                               (40)
 
 /** 
  * @def BLE_LIB_ALL_FEATS
@@ -5851,7 +5853,7 @@ typedef enum
      *                  <td>
      *                      The reason for this error is as follows.<BR/>
      *                      - Advertising parameters were configured to the advertising set in advertising.<BR/>
-     *                      - The sec_adv_phy field in adv_paran was not specified 
+     *                      - The sec_adv_phy field in adv_param was not specified 
      *                        when Periodic Advertising was started.
      *                  </td>
      *              </tr>
@@ -10770,7 +10772,7 @@ ble_status_t R_BLE_GAP_RemoveAdvSet(uint8_t op_code, uint8_t adv_hdl);
  *                                        in p_conn_param_1M field in p_param is specified as NULL.
  *                                      - When creating a link with 2M PHY, 
  *                                        p_conn_param in p_conn_param_2M field in p_param is specified as NULL.
- *                                      - When creating a link with coded MPHY, 
+ *                                      - When creating a link with coded PHY, 
  *                                        p_conn_param in p_conn_param_coded field in p_param is specified as NULL.
  * @retval  BLE_ERR_INVALID_ARG(0x0003) The reason for this error is as follows:
  *                                      - init_filter_policy in p_param is out of range.
@@ -12610,9 +12612,9 @@ ble_status_t R_BLE_VS_GetScanChMap(void);
  *  so if HCI defines HCI_PACK_2_BYTE for packing a parameter of size 2 byte,
  *  that shall be mapped to BT_PACK_LE_2_BYTE
  *
- *  By default both the packing and unpaking macros uses pointer to
+ *  By default both the packing and unpacking macros uses pointer to
  *  a single or multi-octet variable which to be packed to or unpacked from
- *  a buffer (unsinged character array).
+ *  a buffer (unsigned character array).
  *
  *  For the packing macro, another variation is available,
  *  where the single or multi-octet variable itself is used (not its pointer).

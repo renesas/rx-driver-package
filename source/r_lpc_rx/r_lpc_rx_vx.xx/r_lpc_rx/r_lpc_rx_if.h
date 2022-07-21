@@ -31,6 +31,7 @@
  *         : 10.06.2020 2.01    Changed version to 2.01.
  *         : 05.03.2021 2.02    Changed version to 2.02.
  *         : 31.07.2021 2.03    Changed version to 2.03.
+ *         : 31.12.2021 2.04    Changed version to 2.04.
   ***********************************************************************************************************************/
 
 #ifndef R_LPC_RX_IF_H
@@ -55,7 +56,7 @@
 
 /* Version Number of API. */
     #define LPC_RX_VERSION_MAJOR           (2)
-    #define LPC_RX_VERSION_MINOR           (3)
+    #define LPC_RX_VERSION_MINOR           (4)
 
 /***********************************************************************************************************************
  Typedef definitions
@@ -84,7 +85,9 @@ typedef void (*lpc_callback_set_t) (void *pdata); /* Callback function type */
  Exported global functions (to be accessed by other files)
  ***********************************************************************************************************************/
 uint32_t R_LPC_GetVersion (void);
+#ifndef LPC_INVALID_OPERATING_MODE
 lpc_err_t R_LPC_OperatingModeSet (lpc_operating_mode_t e_mode);
+#endif
 lpc_err_t R_LPC_LowPowerModeConfigure (lpc_low_power_mode_t e_mode);
 lpc_err_t R_LPC_LowPowerModeActivate (void (*pcallback) (void* pdata));
 lpc_err_t R_LPC_ReturnClockSwitch (lpc_clock_switch_t e_clock_source, bool enable);

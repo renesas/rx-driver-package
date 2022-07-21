@@ -48,6 +48,7 @@
 *           30.06.2020 4.50    Changed revision to reflect demo upgrade.
 *           15.04.2021 4.60    Added support for RX140.
 *           14.03.2022 4.70    Added support for RX66T-48Pin.
+*           31.03.2022 4.80    Added support for RX660.
 ***********************************************************************************************************************/
 #ifndef DAC_RX_IF_H
 #define DAC_RX_IF_H
@@ -68,7 +69,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define DAC_VERSION_MAJOR  (4)
-#define DAC_VERSION_MINOR  (70)
+#define DAC_VERSION_MINOR  (80)
 
 
 #if defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX13T)
@@ -145,7 +146,7 @@ typedef struct st_dac_cfg
     uint8_t     sync_unit;                      // 0 or 1
     bool        ch_conv_off_when_output_off;    // applies to both channels
 } dac_cfg_t;
-#elif defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T)
+#elif defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX72T)
 typedef struct st_dac_cfg
 {
     bool        fmt_flush_right;

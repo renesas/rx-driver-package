@@ -39,6 +39,7 @@
 *                               - BSP_CFG_CLKOUT_SOURCE
 *                               - BSP_CFG_SWINT_UNIT1_ENABLE
 *                               Modified comment.
+*         : 22.04.2022 1.03     Modified comment.
 ***********************************************************************************************************************/
 
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
@@ -256,7 +257,7 @@ Configuration Options
    2 = Main clock oscillator (default)
    3 = Sub-clock oscillator
    4 = PLL circuit
-   8 = CTSU output clock
+   8 = CTSU internal clock
  */
 #define BSP_CFG_CLKOUT_SOURCE           (2)
 

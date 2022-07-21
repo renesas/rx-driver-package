@@ -36,6 +36,7 @@
 *           30.10.2020 2.31    Changed Minor version to 2.31.
 *           13.09.2021 2.32    Changed Minor version to 2.32.
 *           11.11.2021 2.40    Added support for RX140 (products with 128-Kbyte or larger ROM).
+*           30.06.2022 2.41    Changed the default value of CAN clock source to PCLK.
 ***********************************************************************************************************************/
 
 #ifndef CAN_INTERFACE_HEADER_FILE
@@ -57,7 +58,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define CAN_VERSION_MAJOR           (2)
-#define CAN_VERSION_MINOR           (40)
+#define CAN_VERSION_MINOR           (41)
 
 
 /* Channel numbers */

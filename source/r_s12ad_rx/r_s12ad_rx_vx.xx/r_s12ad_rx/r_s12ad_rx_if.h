@@ -53,6 +53,7 @@
 *           01.11.2021 4.91    Fixed MDF file.
 *           19.11.2021 4.92    Added RX140 80pins support.
 *           30.11.2021 4.93    Added RX66T 48pins support.
+*           29.12.2021 5.00    Added RX660 support.
 ***********************************************************************************************************************/
 
 #ifndef S12AD_PRV_IF_H
@@ -89,6 +90,8 @@ Includes   <System Includes> , "Project Includes"
 #include "./src/targets/rx64m/r_s12ad_rx64m_if.h"
 #elif defined(BSP_MCU_RX65_ALL)
 #include "./src/targets/rx65n/r_s12ad_rx65n_if.h"
+#elif defined(BSP_MCU_RX660)
+#include "./src/targets/rx660/r_s12ad_rx660_if.h"
 #elif defined(BSP_MCU_RX66N)
 #include "./src/targets/rx66n/r_s12ad_rx66n_if.h"
 #elif defined(BSP_MCU_RX66T)
@@ -115,8 +118,8 @@ Includes   <System Includes> , "Project Includes"
 Macro definitions
 *******************************************************************************/
 /* Version Number of API. */
-#define ADC_VERSION_MAJOR       (4)
-#define ADC_VERSION_MINOR       (93)
+#define ADC_VERSION_MAJOR       (5)
+#define ADC_VERSION_MINOR       (00)
 
 /*****************************************************************************
 Typedef definitions
@@ -147,17 +150,18 @@ typedef enum e_adc_cb_evt           // callback function events
 #if (defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) \
     || defined(BSP_MCU_RX72M)  || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX66N) \
     || defined(BSP_MCU_RX72N)  || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX24U) \
-    || defined(BSP_MCU_RX671))
+    || defined(BSP_MCU_RX671)  || defined(BSP_MCU_RX660))
     ADC_EVT_SCAN_COMPLETE_GROUPC,   // Group C scan complete
 #endif    
 #if (defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) \
     || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) \
-    || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX671))
+    || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX671) \
+    || defined(BSP_MCU_RX660))
     ADC_EVT_CONDITION_MET,          // chans/sensors met comparator condition
 #endif
 #if (defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) \
-    || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) \
-    || defined(BSP_MCU_RX671))
+    || defined(BSP_MCU_RX72M)  || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) \
+    || defined(BSP_MCU_RX671)  || defined(BSP_MCU_RX660))
     ADC_EVT_CONDITION_METB          // chans/sensors met comparator condition
 #endif
 } adc_cb_evt_t;
@@ -167,12 +171,13 @@ typedef struct st_adc_cb_args       // callback arguments
     adc_cb_evt_t   event;
 #if (defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) \
     || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) \
-    || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX671))
+    || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX671) \
+    || defined(BSP_MCU_RX660))
     uint32_t       compare_flags;   // valid only for compare event in Window A
 #endif
 #if (defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) \
     || defined(BSP_MCU_RX72M)  || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) \
-    || defined(BSP_MCU_RX671))
+    || defined(BSP_MCU_RX671)  || defined(BSP_MCU_RX660))
     uint32_t       compare_flagsb;  // valid only for compare event in Window B
 #endif
 #if (defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) \

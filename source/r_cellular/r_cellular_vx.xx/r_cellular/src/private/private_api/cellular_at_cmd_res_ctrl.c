@@ -14,20 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_at_cmd_res_ctrl.c
  * Description  : Function to manage AT command responses.
- *********************************************************************************************************************/
-/**********************************************************************************************************************
- * History : DD.MM.YYYY Version  Description
- *         : xx.xx.xxxx 1.00     First Release
- *         : 02.09.2021 1.01     Fixed reset timing
- *         : 21.10.2021 1.02     Support for Azure RTOS
- *                               Support for GCC for Renesas GNURX Toolchain
- *         : 15.11.2021 1.03     Improved receiving behavior, removed socket buffers
- *         : 24.01.2022 1.04     R_CELLULAR_SetPSM and R_CELLULAR_SetEDRX have been added as new APIs
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -57,7 +48,7 @@
 void cellular_set_atc_number(st_cellular_ctrl_t * const p_ctrl, const e_atc_list_t command)
 {
     p_ctrl->sci_ctrl.at_command = command;
-    p_ctrl->sci_ctrl.atc_flg = CELLULAR_ATC_RESPONCE_UNCONFIRMED;
+    p_ctrl->sci_ctrl.atc_flg = CELLULAR_ATC_RESPONSE_UNCONFIRMED;
     return;
 }
 /**********************************************************************************************************************
@@ -71,7 +62,7 @@ e_cellular_atc_return_t cellular_get_atc_response(st_cellular_ctrl_t * const p_c
 {
     e_cellular_atc_return_t res = ATC_RETURN_NONE;
 
-    if (CELLULAR_ATC_RESPONCE_CONFIRMED == p_ctrl->sci_ctrl.atc_flg)
+    if (CELLULAR_ATC_RESPONSE_CONFIRMED == p_ctrl->sci_ctrl.atc_flg)
     {
         res = p_ctrl->sci_ctrl.atc_res;
     }

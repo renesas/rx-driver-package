@@ -25,6 +25,8 @@
 *           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
 *                              Merged IrDA functionality to SCI FIT.
 *           31.03.2021 3.80    Updated macro definition enable and disable TXI, RXI, ERI, TEI.
+*           31.03.2022 4.40    Added receive flag when using DTC/DMAC.
+*                              Updated channel variables in struct st_sci_ch_rom.
 ***********************************************************************************************************************/
 
 #ifndef SCI_RX23W_H
@@ -283,6 +285,8 @@ typedef struct st_sci_ch_rom    /* SCI ROM info for channel control block */
     dmaca_activation_source_t       dmaca_rx_act_src;
     uint8_t                         dmaca_tx_channel;
     uint8_t                         dmaca_rx_channel;
+#endif
+#if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
     uint8_t                         chan;
 #endif
 } sci_ch_rom_t;
@@ -342,11 +346,12 @@ typedef struct st_sci_ch_ctrl       /* SCI channel control (for handle) */
 #endif
     uint32_t        pclk_speed;     /* saved peripheral clock speed for break generation */
 #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+    bool                            rx_idle;
     uint8_t                         qindex_app_tx;
     uint8_t                         qindex_int_tx;
     uint8_t                         qindex_app_rx;
     uint8_t                         qindex_int_rx;
-    sci_fifo_ctrl_t                queue[2];
+    sci_fifo_ctrl_t                 queue[2];
 #endif
 } sci_ch_ctrl_t;
 

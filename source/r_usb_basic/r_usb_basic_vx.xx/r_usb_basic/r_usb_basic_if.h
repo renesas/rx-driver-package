@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2022) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_basic_if.h
@@ -31,6 +31,7 @@
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 16.11.2018 1.24 Supporting RTOS Thread safe
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.06.2022 1.40 USBX PCDC is supported.
  ***********************************************************************************************************************/
 #ifndef R_USB_BASIC_IF_H
 #define R_USB_BASIC_IF_H
@@ -68,6 +69,11 @@ Includes   <System Includes> , "Project Includes"
 #define USB_CFG_PHID_USE /* USB_CFG_DEVICE_CLASS */
 #define USB_CFG_PMSC_USE /* USB_CFG_DEVICE_CLASS */
 #endif /* defined(USB_CFG_PMSC_USE) */
+
+#if defined(USB_CFG_PMSC_REQUEST_USE)
+#define USB_CFG_TESTREQUEST_USE /* USB_CFG_DEVICE_CLASS */
+#define USB_CFG_PMSC_USE /* USB_CFG_DEVICE_CLASS */
+#endif /* defined(USB_CFG_PMSC_REQUEST_USE) */
 
 /* USB Request Type Register */
 #define     USB_BREQUEST                        (0xFF00u)   /* b15-8 */
@@ -352,13 +358,9 @@ typedef enum usb_transfer
 {
     USB_BULK = 0, USB_INT, USB_ISO,
 } usb_transfer_t;
-#if (BSP_CFG_RTOS_USED == 1)        /* FreeRTOS */
-typedef void (usb_callback_t)(usb_ctrl_t *, rtos_task_id_t, uint8_t);
-#elif (BSP_CFG_RTOS_USED == 2)      /* SEGGER embOS */
-#elif (BSP_CFG_RTOS_USED == 3)      /* Micrium MicroC/OS */
-#elif (BSP_CFG_RTOS_USED == 4)      /* Renesas RI600V4 & RI600PX */
-typedef void (usb_callback_t)(usb_ctrl_t *, rtos_task_id_t, uint8_t);
-#endif /* (BSP_CFG_RTOS_USED == 1) */
+#if (BSP_CFG_RTOS_USED != 0)
+typedef void (usb_callback_t)(usb_ctrl_t *, rtos_current_task_id_t, uint8_t);
+#endif /* (BSP_CFG_RTOS_USED != 0) */
 
 /******************************************************************************
  Export global functions
