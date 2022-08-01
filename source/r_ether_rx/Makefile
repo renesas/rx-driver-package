@@ -8,7 +8,6 @@ TARGET_FOLDER = ../../FITModules
 $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).zip: $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).xml $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).mdf $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION)_extend.mdf
 	cd ./$(MODULE_NAME)_vx.xx; \
 	zip ../$(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).zip -r ./$(MODULE_NAME) -r ./$(CONFIG_FOLDER) ./$(MODULE_NAME).ftl; \
-	rm -rf $(CONFIG_FOLDER); \
 	cd ../;	\
 
 $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).xml:
