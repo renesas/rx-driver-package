@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015(2022) Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_usb_clibusbip.c
@@ -29,6 +29,8 @@
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 16.11.2018 1.24 Supporting RTOS Thread safe
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.06.2022 1.40 USBX PCDC is supported.
+ *         : 30.10.2022 1.41 USBX HMSC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -45,6 +47,7 @@
 #include "r_usb_cstd_rtos.h"
 #endif /* (BSP_CFG_RTOS_USED != 0) */
 
+#if (BSP_CFG_RTOS_USED != 5)    /* Other than Azure RTOS */
 #if defined(USB_CFG_HCDC_USE)
 #include "r_usb_hcdc_if.h"
 
@@ -69,6 +72,7 @@
 #include "r_usb_pmsc_if.h"
 
 #endif /* defined(USB_CFG_PMSC_USE) */
+#endif /* (BSP_CFG_RTOS_USED != 5) */
 
 #if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))
 #include "r_usb_dmac.h"
@@ -81,6 +85,9 @@
 /******************************************************************************
  Exported global variables (to be accessed by other files)
  ******************************************************************************/
+#if (BSP_CFG_RTOS_USED == 5)
+usb_descriptor_t g_usbx_descriptor;
+#endif /* (BSP_CFG_RTOS_USED == 5) */
 
 /******************************************************************************
  Private global variables and functions
@@ -371,6 +378,8 @@ void usb_set_event (usb_status_t event, usb_ctrl_t *p_ctrl)
         g_usb_cstd_event.write_pointer = 0;
     }
 #else /* (BSP_CFG_RTOS_USED == 0) */
+
+#if (BSP_CFG_RTOS_USED != 5)    /* Azure RTOS */
     static uint16_t     count = 0;
 
     p_ctrl->event = event;
@@ -379,22 +388,22 @@ void usb_set_event (usb_status_t event, usb_ctrl_t *p_ctrl)
     switch (event)
     {
         case    USB_STS_DEFAULT :
-            (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_task_id_t)USB_NULL, USB_OFF);
+            (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_current_task_id_t)USB_NULL, USB_OFF);
         break;
         case    USB_STS_CONFIGURED :
-            (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_task_id_t)USB_NULL, USB_OFF);
+            (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_current_task_id_t)(USB_NULL), USB_OFF);
         break;
         case    USB_STS_BC :
         case    USB_STS_OVERCURRENT :
         case    USB_STS_NOT_SUPPORT :
-            (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_task_id_t)USB_NULL, USB_OFF);
+            (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_current_task_id_t)USB_NULL, USB_OFF);
         break;
         case    USB_STS_DETACH :
-            (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_task_id_t)USB_NULL, USB_OFF);
+            (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_current_task_id_t)USB_NULL, USB_OFF);
         break;
  
         case    USB_STS_REQUEST :
-            (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_task_id_t)USB_NULL, USB_ON);
+            (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_current_task_id_t)USB_NULL, USB_ON);
         break;
 
         case    USB_STS_SUSPEND :
@@ -402,13 +411,13 @@ void usb_set_event (usb_status_t event, usb_ctrl_t *p_ctrl)
             if (USB_HOST == g_usb_usbmode)
             {
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
-                (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_task_id_t)p_ctrl->p_data, USB_OFF);
+                (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_current_task_id_t)p_ctrl->p_data, USB_OFF);
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
             }
             else
             {
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
-                (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_task_id_t)USB_NULL, USB_OFF);
+                (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_current_task_id_t)USB_NULL, USB_OFF);
 #endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI */
             }
         break;
@@ -417,7 +426,7 @@ void usb_set_event (usb_status_t event, usb_ctrl_t *p_ctrl)
             if (USB_HOST == g_usb_usbmode)
             {
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
-                (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_task_id_t)p_ctrl->p_data, USB_OFF);
+                (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_current_task_id_t)p_ctrl->p_data, USB_OFF);
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
             }
             else
@@ -426,12 +435,12 @@ void usb_set_event (usb_status_t event, usb_ctrl_t *p_ctrl)
                 if (0 == p_ctrl->setup.length)
                 {
                     /* Processing for USB request has the no data stage */
-                    (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_task_id_t)USB_NULL, USB_OFF);
+                    (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_current_task_id_t)USB_NULL, USB_OFF);
                 }
                 else
                 {
                     /* Processing for USB request has the data state */
-                    (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_task_id_t)p_ctrl->p_data, USB_OFF);
+                    (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_current_task_id_t)p_ctrl->p_data, USB_OFF);
                 }
 #endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI */
             }
@@ -442,7 +451,7 @@ void usb_set_event (usb_status_t event, usb_ctrl_t *p_ctrl)
 #if defined(USB_CFG_HMSC_USE)       
         case    USB_STS_MSC_CMD_COMPLETE:
 #endif /* defined(USB_CFG_HMSC_USE) */
-            (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_task_id_t)p_ctrl->p_data, USB_OFF);
+            (*g_usb_apl_callback)(&g_usb_cstd_event[count], (rtos_current_task_id_t)p_ctrl->p_data, USB_OFF);
         break;
 
         default :
@@ -450,6 +459,7 @@ void usb_set_event (usb_status_t event, usb_ctrl_t *p_ctrl)
         break;
     }
     count = ((count + 1) % USB_EVENT_MAX);
+#endif /* (BSP_CFG_RTOS_USED != 5)    Azure RTOS */
 #endif /*(BSP_CFG_RTOS_USED == 0)*/
 } /* End of function usb_set_event() */
 
@@ -473,10 +483,10 @@ void usb_cstd_usb_task (void)
         if (USB_FLGSET == usb_cstd_check_schedule()) /* Check for any task processing requests flags. */
         {
             /** Use only in non-OS. In RTOS, the kernel will schedule these tasks, no polling. **/
-            usb_hstd_hcd_task((usb_vp_int_t) 0); /* HCD Task */
-            usb_hstd_mgr_task((usb_vp_int_t) 0); /* MGR Task */
+            usb_hstd_hcd_task((rtos_task_arg_t) 0); /* HCD Task */
+            usb_hstd_mgr_task((rtos_task_arg_t) 0); /* MGR Task */
   #if USB_CFG_HUB == USB_CFG_ENABLE
-            usb_hstd_hub_task((usb_vp_int_t) 0); /* HUB Task */
+            usb_hstd_hub_task((rtos_task_arg_t) 0); /* HUB Task */
   #endif  /* USB_CFG_HUB == USB_CFG_ENABLE */
 #if defined(USB_CFG_HCDC_USE) || defined(USB_CFG_HHID_USE) || defined(USB_CFG_HMSC_USE) || defined(USB_CFG_HVND_USE)
 
@@ -495,7 +505,7 @@ void usb_cstd_usb_task (void)
     else
     {
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
-        usb_pstd_pcd_task();
+        usb_pstd_pcd_task((rtos_task_arg_t) 0);
 #if defined(USB_CFG_PMSC_USE)
         if (USB_NULL != (g_usb_open_class[USB_CFG_USE_USBIP] & (1 << USB_PMSC)))      /* Check USB Open device class */
         {
@@ -543,11 +553,11 @@ void usb_class_task (void)
 #endif /* defined(USB_CFG_HMSC_USE) */
 
 #if defined(USB_CFG_HCDC_USE)
-    usb_hcdc_task((usb_vp_int_t) 0); /* USB Host CDC driver task */
+    usb_hcdc_task((rtos_task_arg_t) 0); /* USB Host CDC driver task */
 #endif /* defined(USB_CFG_HCDC_USE) */
 
 #if defined(USB_CFG_HHID_USE)
-    usb_hhid_task((usb_vp_int_t) 0); /* USB Host CDC driver task */
+    usb_hhid_task((rtos_task_arg_t) 0); /* USB Host CDC driver task */
 
 #endif /* defined(USB_CFG_HHID_USE) */
 

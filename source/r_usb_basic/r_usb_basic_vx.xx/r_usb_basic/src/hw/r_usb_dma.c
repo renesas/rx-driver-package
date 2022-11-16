@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2015(2022) Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_usb_dma.c
@@ -31,6 +31,7 @@
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.04.2020 1.31 RX671 is added.
+ *         : 30.06.2022 1.40 USBX PCDC is supported.
  ***********************************************************************************************************************/
 
 /*******************************************************************************
@@ -386,15 +387,39 @@ void usb_cstd_dfifo_end(usb_utr_t *ptr, uint16_t useport)
     {
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
         /* received data size */
-        g_usb_pstd_data_cnt[pipe] -= g_usb_cstd_dma_size[ip][channel];
+ #if (BSP_CFG_RTOS_USED == 5)   /* Azure RTOS */    // saeki-san
+        if (g_usb_pstd_data_cnt[pipe] < g_usb_cstd_dma_size[ip][channel])
+        {
+            g_usb_pstd_data_cnt[pipe] = 0U;
+        }
+        else
+        {
+            g_usb_pstd_data_cnt[pipe] -= g_usb_cstd_dma_size[ip][channel];
+        }
 
+ #else                                /* BSP_CFG_RTOS_USED == 5 */
+        g_usb_pstd_data_cnt[pipe] -= g_usb_cstd_dma_size[ip][channel];
+ #endif /* BSP_CFG_RTOS_USED == 5 */
 #endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_REPI */
     }
     else
     {
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
         /* received data size */
+  #if (BSP_CFG_RTOS_USED == 5)  /* Azure RTOS */    // saeki-san
+        if (g_usb_hstd_data_cnt[ptr->ip][pipe] < g_usb_cstd_dma_size[ip][channel])
+        {
+            g_usb_hstd_data_cnt[ptr->ip][pipe] = 0U;
+        }
+        else
+        {
+            g_usb_hstd_data_cnt[ptr->ip][pipe] -= g_usb_cstd_dma_size[ip][channel];
+        }
+
+  #else /* BSP_CFG_RTOS_USED == 5 */
+        /* received data size */
         g_usb_hstd_data_cnt[ptr->ip][pipe] -= g_usb_cstd_dma_size[ip][channel];
+  #endif /* BSP_CFG_RTOS_USED == 5 */
 
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
     }

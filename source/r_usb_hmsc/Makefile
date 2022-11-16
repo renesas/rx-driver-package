@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_usb_hmsc
-VERSION = 		1.31
+VERSION = 		1.41
 MDF = NOT_SUPPORTED
 
 TARGET_FOLDER = ../../FITModules

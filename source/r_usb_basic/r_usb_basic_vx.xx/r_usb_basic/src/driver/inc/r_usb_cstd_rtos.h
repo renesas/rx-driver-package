@@ -18,7 +18,7 @@
 * you agree to the additional terms and conditions found by accessing the 
 * following link:
 * http://www.renesas.com/disclaimer
-* Copyright (C) 2016(2020) Renesas Electronics Corporation. All rights reserved.    
+* Copyright (C) 2016(2022) Renesas Electronics Corporation. All rights reserved.    
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_usb_cstd_rtos.h
@@ -30,6 +30,8 @@
 *         : 15.06.2016 1.00     First Release
 *         : 16.11.2018 1.24     Supporting RTOS Thread safe
 *         : 01.03.2020 1.30     RX72N/RX66N is added and uITRON is supported.
+*         : 30.06.2022 1.40     USBX PCDC is supported.
+*         : 30.10.2022 1.41     USBX HMSC is supported.
 ******************************************************************************/
 
 #ifndef R_USB_RTOS_H
@@ -48,9 +50,11 @@ Includes   <System Includes> , "Project Includes"
 #include "kernel_id.h"
 #endif /* BSP_CFG_RTOS_USED == 4 */
 
+#if BSP_CFG_RTOS_USED != 5
 #if defined(USB_CFG_HMSC_USE)
 #include "r_usb_hmsc_if.h"
 #endif /* defined(USB_CFG_HMSC_USE) */
+#endif /* BSP_CFG_RTOS_USED != 5 */
 
 #if defined(USB_CFG_HCDC_USE)
 #include "r_usb_hcdc.h"
@@ -105,13 +109,23 @@ Includes   <System Includes> , "Project Includes"
 #define PMSC_TSK_PRI            (4)
 #define HCDC_TSK_PRI            (4)
 #define HHID_TSK_PRI            (4)
+
+#elif BSP_CFG_RTOS_USED == 5    /* Azure RTOS */
+/** USB task's priority **/
+#define USB_TASK_PRI_BASE    (10)
+#define HCD_TSK_PRI          (USB_TASK_PRI_BASE)
+#define HUB_TSK_PRI          (HCD_TSK_PRI + 2)
+#define MGR_TSK_PRI          (HCD_TSK_PRI + 1)
+#define PCD_TSK_PRI          (USB_TASK_PRI_BASE)
+#define PMSC_TSK_PRI         (PCD_TSK_PRI + 1)
+
 #else
 #endif  /* BSP_CFG_RTOS_USED == 1 */
 
 /** USB task stack size in words **/
 #define HCD_STACK_SIZE          (512)
 #define HUB_STACK_SIZE          (512)
-#define MGR_STACK_SIZE          (512)
+#define MGR_STACK_SIZE          (1536)
 #define PCD_STACK_SIZE          (512)
 #define PMSC_STACK_SIZE         (512)
 #define HCDC_STACK_SIZE         (512)

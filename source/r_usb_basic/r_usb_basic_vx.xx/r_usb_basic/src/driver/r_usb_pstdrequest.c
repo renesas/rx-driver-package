@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015(2022) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_pstdrequest.c
@@ -31,6 +31,7 @@
  *         : 30.07.2019 1.27 RX72M is added.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.04.2020 1.31 RX671 is added.
+ *         : 30.06.2022 1.40 USBX PCDC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -45,12 +46,29 @@
 
 #if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
 #include "r_rtos_abstract.h"
+#if (BSP_CFG_RTOS_USED == 5)        /* Azure RTOS */
+ #include "ux_api.h"
+ #include "ux_system.h"
+ #include "ux_utility.h"
+ #include "ux_device_stack.h"
+#endif /* (BSP_CFG_RTOS_USED == 5) */
 #endif /* (BSP_CFG_RTOS_USED != 0) */
 
 #if defined(USB_CFG_PMSC_USE)
 #include "r_usb_pmsc_if.h"
 #endif  /* defined(USB_CFG_PMSC_USE) */
 
+#define NUM_OF_INTERFACE    (8U)
+#define STRING_BUFFER_LEN   (256U)
+#define VALUE_FFH			(0xFFU)
+#define SETUP_REQUEST_USBX  (1)
+#define SETUP_VALUE_USBX    (2)
+#define SETUP_LENGTH_USBX   (6)
+
+/******************************************************************************
+ * Exported global variables (to be accessed by other files)
+ ******************************************************************************/
+extern uint8_t g_usb_peri_usbx_is_configured;
 
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
 /******************************************************************************
@@ -72,10 +90,16 @@ static void usb_pstd_set_configuration3 (void);
 static void usb_pstd_set_interface0 (void);
 static void usb_pstd_set_interface3 (void);
 static void usb_pstd_synch_rame1 ();
+
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+static void usb_peri_class_request_usbx(usb_setup_t * p_req);
+static void usb_peri_class_reqeust_usbx_get_data(usb_setup_t * p_req);
+static uint8_t g_usbx_string[STRING_BUFFER_LEN];
+#endif  /* #if (BSP_CFG_RTOS_USED == 5) */
+
 #if USB_CFG_REQUEST == USB_CFG_ENABLE
 static void usb_pstd_request_event_set (void);
 #endif /* USB_CFG_REQUEST == USB_CFG_ENABLE */
-
 
 /******************************************************************************
  Renesas Abstracted Peripheral standard request functions
@@ -184,7 +208,7 @@ void usb_pstd_stand_req3 (void)
 {
     usb_ctrl_t      ctrl;
 #if (BSP_CFG_RTOS_USED != 0)                    /* Use RTOS */
-    rtos_task_id_t  task_id;
+    rtos_current_task_id_t  task_id;
 #endif /* (BSP_CFG_RTOS_USED != 0) */
 
     switch ((g_usb_pstd_req_type & USB_BREQUEST))
@@ -242,7 +266,7 @@ void usb_pstd_stand_req4 (void)
 {
     usb_ctrl_t      ctrl;
 #if (BSP_CFG_RTOS_USED != 0)                        /* Use RTOS */
-    rtos_task_id_t  task_id;
+    rtos_current_task_id_t  task_id;
 #endif /* (BSP_CFG_RTOS_USED != 0) */
 
     switch ((g_usb_pstd_req_type & USB_BREQUEST))
@@ -309,7 +333,7 @@ void usb_pstd_stand_req5 (void)
 {
     usb_ctrl_t      ctrl;
 #if (BSP_CFG_RTOS_USED != 0)                        /* Use RTOS */
-    rtos_task_id_t  task_id;
+    rtos_current_task_id_t  task_id;
 #endif /* (BSP_CFG_RTOS_USED != 0) */
 
     if (USB_SET_DESCRIPTOR == (g_usb_pstd_req_type & USB_BREQUEST))
@@ -495,6 +519,10 @@ static void usb_pstd_get_descriptor1 (void)
     uint16_t idx;
     uint8_t *p_table;
     uint16_t connect_info;
+ #if (BSP_CFG_RTOS_USED == 5)   /* Azure RTOS */
+    uint8_t i = 0;
+ #endif                                /* #if (BSP_CFG_RTOS_USED == 5) */
+
 
     if (USB_DEVICE == (g_usb_pstd_req_type & USB_BMREQUESTTYPERECIP))
     {
@@ -564,6 +592,49 @@ static void usb_pstd_get_descriptor1 (void)
             case USB_DT_STRING :
                 if (idx < g_usb_pstd_driver.num_string)
                 {
+ #if (BSP_CFG_RTOS_USED == 5)   /* Azure RTOS */
+                    g_usbx_string[1] = USB_DT_STRING;
+                    p_table          = g_usb_pstd_driver.p_stringtbl[idx];
+                    if (0 == idx)
+                    {
+                        if (g_usb_pstd_req_length == 2)
+                        {
+                            /* Lang ID */
+                            len              = g_usb_pstd_req_length;
+                            g_usbx_string[0] = (uint8_t) len;
+                            g_usbx_string[2] = *p_table;
+                            g_usbx_string[3] = *(p_table + 1);
+                        }
+                        else
+                        {
+                            /* Lang ID */
+                            len              = 4;
+                            g_usbx_string[0] = (uint8_t) len;
+                            g_usbx_string[2] = *p_table;
+                            g_usbx_string[3] = *(p_table + 1);
+                        }
+                    }
+                    else
+                    {
+                        /* Other than Land ID */
+                        len              = (uint16_t) (*(p_table + 3));
+                        g_usbx_string[0] = (uint8_t) ((len * 2) + 2);
+                        if (g_usbx_string[0] > g_usb_pstd_req_length)
+                        {
+                            len = (uint16_t) ((g_usb_pstd_req_length - 2) / 2);
+                        }
+
+                        for (i = 0; i < len; i++)
+                        {
+                            g_usbx_string[2 + (i * 2)] = *(p_table + i + 4);
+                            g_usbx_string[3 + (i * 2)] = 0x00;
+                        }
+
+                        len = (uint16_t) ((len * 2) + 2);
+                    }
+
+                    usb_pstd_ctrl_read((uint32_t) len, g_usbx_string);
+#else       /* #if (BSP_CFG_RTOS_USED == 5) */
                     p_table = g_usb_pstd_driver.p_stringtbl[idx];
                     len = (uint16_t) (*(uint8_t*) ((uint32_t) p_table + (uint32_t) 0));
                     if (g_usb_pstd_req_length < len)
@@ -576,6 +647,7 @@ static void usb_pstd_get_descriptor1 (void)
                         /* Control read start */
                         usb_pstd_ctrl_read((uint32_t) len, p_table);
                     }
+#endif      /* #if (BSP_CFG_RTOS_USED == 5) */
                 }
                 else
                 {
@@ -817,6 +889,13 @@ static void usb_pstd_clr_feature3 (void)
                     /* Not specification */
                     usb_pstd_set_stall_pipe0();
                 }
+
+#if (BSP_CFG_RTOS_USED == 5)
+                _ux_device_stack_clear_feature((ULONG) g_usb_pstd_req_type,
+                                               (ULONG) g_usb_pstd_req_value,
+                                               (ULONG) g_usb_pstd_req_index);
+#endif                                /* BSP_CFG_RTOS_USED == 5 */
+
             break;
             case USB_INTERFACE :
 
@@ -888,6 +967,13 @@ static void usb_pstd_clr_feature3 (void)
                     /* Request error */
                     usb_pstd_set_stall_pipe0();
                 }
+
+#if (BSP_CFG_RTOS_USED == 5)   /* Azure RTOS */
+                _ux_device_stack_clear_feature((ULONG) g_usb_pstd_req_type,
+                                               (ULONG) g_usb_pstd_req_value,
+                                               (ULONG) g_usb_pstd_req_index);
+#endif  /* BSP_CFG_RTOS_USED == 5 */
+
             break;
             default :
                 usb_pstd_set_stall_pipe0();
@@ -1057,6 +1143,13 @@ static void usb_pstd_set_feature3 (void)
                 usb_pstd_set_stall_pipe0();
             break;
         }
+
+#if (BSP_CFG_RTOS_USED == 5)
+        _ux_device_stack_set_feature((ULONG) g_usb_pstd_req_type,
+                                     (ULONG) g_usb_pstd_req_value,
+                                     (ULONG) g_usb_pstd_req_index);
+#endif  /* BSP_CFG_RTOS_USED == 5 */
+
     }
     else
     {
@@ -1158,6 +1251,14 @@ static void usb_pstd_set_configuration0 (void)
         {
             /* Registration open function call */
             (*g_usb_pstd_driver.devconfig)(USB_NULL, g_usb_pstd_config_num, USB_NULL);
+
+#if (BSP_CFG_RTOS_USED == 5)
+ #if defined(USB_CFG_PHID_USE)
+            _ux_system_slave->ux_system_slave_remote_wakeup_enabled = UX_FALSE;
+ #endif                               /* #if defined(USB_CFG_PHID_USE) */
+            g_usb_peri_usbx_is_configured = USB_YES;
+            _ux_device_stack_configuration_set((uint32_t) g_usb_pstd_config_num);
+#endif                                /* #if (BSP_CFG_RTOS_USED == 5) */
         }
     }
 }
@@ -1315,6 +1416,105 @@ static void usb_pstd_synch_rame1 (void)
  End of function usb_pstd_synch_rame1
  ******************************************************************************/
 
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+/******************************************************************************
+ * Function Name   : usb_peri_class_request_usbx
+ * Description     : Class request processing for data stage (USBX)
+ * Arguments       : usb_setup_t *p_req : Pointer to usb_setup_t structure
+ * Return value    : none
+ ******************************************************************************/
+static void usb_peri_class_request_usbx (usb_setup_t * p_req)
+{
+    UX_SLAVE_DEVICE      * device;
+    UX_SLAVE_CLASS       * class;
+    UX_SLAVE_CLASS_COMMAND class_command;
+    uint32_t               class_index;
+    UX_SLAVE_TRANSFER    * transfer_request;
+    uint32_t               status;
+
+  #if defined(USB_CFG_PHID_USE)
+    if ((USB_CLASS == (p_req->type & USB_BMREQUESTTYPETYPE)) ||
+        (USB_VENDOR == (p_req->type & USB_BMREQUESTTYPETYPE)) ||
+        (USB_STANDARD == (p_req->type & USB_BMREQUESTTYPETYPE)))
+  #else                                /* #if defined(USB_CFG_PHID_USE) */
+    if ((USB_CLASS == (p_req->type & USB_BMREQUESTTYPETYPE)) ||
+        (USB_VENDOR == (p_req->type & USB_BMREQUESTTYPETYPE)))
+  #endif /* #if defined(USB_CFG_PHID_USE) */
+    {
+        class_command.ux_slave_class_command_request = UX_SLAVE_CLASS_COMMAND_REQUEST;
+        for (class_index = 0; class_index < UX_MAX_SLAVE_INTERFACES; class_index++)
+        {
+            if (USB_INTERFACE == (p_req->type & USB_BMREQUESTTYPERECIP))
+            {
+                if ((p_req->index & VALUE_FFH) != class_index)
+                {
+                    continue;
+                }
+
+                class = _ux_system_slave->ux_system_slave_interface_class_array[class_index];
+                if (UX_NULL == class)
+                {
+                    continue;
+                }
+
+                device           = &_ux_system_slave->ux_system_slave_device;
+                transfer_request =
+                    &device->ux_slave_device_control_endpoint.ux_slave_endpoint_transfer_request;
+                *(transfer_request->ux_slave_transfer_request_setup +
+                  SETUP_REQUEST_USBX) = (uint8_t) (p_req->type >> 8);
+                *(uint16_t *) (transfer_request->ux_slave_transfer_request_setup +
+                               SETUP_VALUE_USBX) = p_req->value;
+                *(uint16_t *) (transfer_request->ux_slave_transfer_request_setup +
+                               SETUP_LENGTH_USBX) = p_req->length;
+  #if defined(USB_CFG_PAUD_USE)
+                *(transfer_request->ux_slave_transfer_request_setup +
+                  FSP_SETUP_REQUEST_TYPE) = (uint8_t) (p_req->type & VALUE_FFH);
+                *(transfer_request->ux_slave_transfer_request_setup +
+                  FSP_SETUP_INDEX_L) = (uint8_t) (p_req->index & VALUE_FFH);
+                *(transfer_request->ux_slave_transfer_request_setup +
+                  FSP_SETUP_INDEX_H) = (uint8_t) (p_req->index >> 8);
+  #endif                               /* #if defined(USB_CFG_PAUD_USE) */
+                class_command.ux_slave_class_command_class_ptr = class;
+                status = class->ux_slave_class_entry_function(&class_command);
+                if (status == UX_SUCCESS)
+                {
+                    break;
+                }
+            }
+        }
+    }
+}                                      /* End of function usb_peri_class_request_usbx */
+
+/******************************************************************************
+ * Function Name   : usb_peri_class_reqeust_usbx_get_data
+ * Description     : Class request processing for data stage (USBX)
+ * Arguments       : usb_setup_t *p_req : Pointer to usb_setup_t structure
+ * Return value    : none
+ ******************************************************************************/
+static void usb_peri_class_reqeust_usbx_get_data (usb_setup_t * p_req)
+{
+    FSP_PARAMETER_NOT_USED(p_req);
+    UX_SLAVE_DEVICE   * device;
+    UX_SLAVE_TRANSFER * transfer_request;
+
+    device           = &_ux_system_slave->ux_system_slave_device;
+    transfer_request = &device->ux_slave_device_control_endpoint.ux_slave_endpoint_transfer_request;
+
+    if (USB_YES == g_usb_pstd_pipe0_request)
+    {
+        while (1)
+        {
+            ;
+        }
+    }
+
+    g_usb_pstd_std_request = USB_YES;
+    usb_pstd_ctrl_write(transfer_request->ux_slave_transfer_request_requested_length,
+                        transfer_request->ux_slave_transfer_request_data_pointer
+                        );
+}                                      /* End of function usb_peri_class_reqeust_usbx_get_data */
+#endif /* #if (BSP_CFG_RTOS_USED == 5) */
+
 /******************************************************************************
  Function Name   : usb_peri_class_request
  Description     : Class request processing for Device class
@@ -1390,11 +1590,35 @@ void usb_peri_class_request_ioss (usb_setup_t *req)
  ******************************************************************************/
 void usb_peri_class_request_rwds (usb_setup_t * req)
 {
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+    usb_ctrl_t ctrl;
+
+    if (0 != (req->type & USB_BMREQUESTTYPEDIR))
+    {
+        /* In Data */
+        usb_peri_class_request_usbx(req);
+    }
+    else
+    {
+        /* Out Data */
+        usb_peri_class_reqeust_usbx_get_data(req);
+    }
+
+    /* Is a request receive target Interface? */
+    ctrl.module = USB_CFG_USE_USBIP;
+    ctrl.setup  = *req; /* Save setup data. */
+    ctrl.size   = 0;
+    ctrl.status = USB_ACK;
+    ctrl.type   = USB_REQUEST;
+    usb_set_event(USB_STS_REQUEST, &ctrl);
+
+#else   /* BSP_CFG_RTOS_USED == 5 */
+
 #if defined(USB_CFG_PMSC_USE)
 
-#if defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE)
+#if defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE)
     usb_ctrl_t ctrl;
-#endif /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
+#endif /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
 
     /* Is a request receive target Interface? */
 #if defined(USB_CFG_PCDC_2COM_USE) || defined(USB_CFG_PCDC_PHID_USE) || defined(USB_CFG_PCDC_PMSC_USE)\
@@ -1412,34 +1636,34 @@ void usb_peri_class_request_rwds (usb_setup_t * req)
         }
         else
         {
-#if defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE)
+#if defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE)
             ctrl.module = USB_CFG_USE_USBIP;
             ctrl.setup  = *req; /* Save setup data. */
             ctrl.size   = 0;
             ctrl.status = USB_ACK;
             ctrl.type   = USB_REQUEST;
             usb_set_event(USB_STS_REQUEST, &ctrl);
-#else /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
+#else /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
 
             /* Set Stall */
             usb_pstd_set_stall_pipe0(); /* Req Error */
-#endif /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
+#endif /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
         }
     }
     else
     {
-#if defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE)
+#if defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE)
         ctrl.module = USB_CFG_USE_USBIP;
         ctrl.setup  = *req; /* Save setup data. */
         ctrl.size   = 0;
         ctrl.status = USB_ACK;
         ctrl.type   = USB_REQUEST;
         usb_set_event(USB_STS_REQUEST, &ctrl);
-#else /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
+#else /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
 
         /* Set Stall */
         usb_pstd_set_stall_pipe0(); /* Req Error */
-#endif /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
+#endif /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
     }
 
 #else   /* defined(USB_CFG_PMSC_USE) */
@@ -1455,6 +1679,7 @@ void usb_peri_class_request_rwds (usb_setup_t * req)
     usb_set_event(USB_STS_REQUEST, &ctrl);
 
 #endif  /* defined(USB_CFG_PMSC_USE) */
+#endif  /* BSP_CFG_RTOS_USED == 5 */
 } /* End of function usb_peri_class_request_rwds */
 
 
@@ -1467,6 +1692,10 @@ void usb_peri_class_request_rwds (usb_setup_t * req)
 void usb_peri_other_request (usb_setup_t *req)
 {
     usb_ctrl_t ctrl;
+
+#if (BSP_CFG_RTOS_USED == 5)        /* Azure RTOS */
+    usb_peri_class_request_usbx(req);
+#endif                              /* #if (BSP_CFG_RTOS_USED == 5) */
 
     ctrl.type   = USB_REQUEST;
     ctrl.setup  = *req; /* Save setup data. */
@@ -1486,9 +1715,9 @@ void usb_peri_class_request_wnss (usb_setup_t *req)
 {
 #if defined(USB_CFG_PMSC_USE)
 
-#if defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE)
+#if defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE)
     usb_ctrl_t ctrl;
-#endif /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
+#endif /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
 
 
     /* Is a request receive target Interface? */
@@ -1503,38 +1732,45 @@ void usb_peri_class_request_wnss (usb_setup_t *req)
     {
         if (USB_MASS_STORAGE_RESET == (req->type & USB_BREQUEST))
         {
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+            usb_cstd_set_buf(USB_NULL, (uint16_t) USB_PIPE0);
+            usb_pstd_ctrl_end(USB_CTRL_END);
+
+            usb_peri_class_request_usbx(req);
+#else   /* (BSP_CFG_RTOS_USED == 5) */
             usb_pmsc_mass_strage_reset (req->value, req->index, req->length);
+#endif  /* (BSP_CFG_RTOS_USED == 5) */
         }
         else
         {
-#if defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE)
+#if defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE)
             ctrl.module = USB_CFG_USE_USBIP;
             ctrl.setup  = *req; /* Save setup data. */
             ctrl.size   = 0;
             ctrl.status = USB_ACK;
             ctrl.type   = USB_REQUEST;
             usb_set_event(USB_STS_REQUEST, &ctrl);
-#else /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
+#else /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
             /* Set Stall */
             usb_pstd_set_stall_pipe0(); /* Req Error */
 
-#endif /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
+#endif /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
         }
     }
     else
     {
-#if defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE)
+#if defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE)
             ctrl.module = USB_CFG_USE_USBIP;
             ctrl.setup  = *req; /* Save setup data. */
             ctrl.size   = 0;
             ctrl.status = USB_ACK;
             ctrl.type   = USB_REQUEST;
             usb_set_event(USB_STS_REQUEST, &ctrl);
-#else /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
+#else /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
 
         /* Set Stall */
         usb_pstd_set_stall_pipe0(); /* Req Error */
-#endif /* defined(USB_CFG_PCDC) || defined(USB_CFG_PHID_USE) */
+#endif /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
     }
 
     if (USB_MASS_STORAGE_RESET != (req->type & USB_BREQUEST))
@@ -1554,8 +1790,16 @@ void usb_peri_class_request_wnss (usb_setup_t *req)
     ctrl.type   = USB_REQUEST;
     usb_set_event(USB_STS_REQUEST, &ctrl);
 
+#if (BSP_CFG_RTOS_USED == 5)
+    usb_cstd_set_buf(USB_NULL, (uint16_t) USB_PIPE0);     /* Set pipe PID_BUF */
+#endif  /* (BSP_CFG_RTOS_USED == 5) */
+
     usb_pstd_ctrl_end((uint16_t) USB_CTRL_END); /* End control transfer. */
 
+#if (BSP_CFG_RTOS_USED == 5)
+    usb_peri_class_request_usbx(req);
+#endif  /* (BSP_CFG_RTOS_USED == 5) */
+    
 #endif  /* defined(USB_CFG_PMSC_USE) */
 
 } /* End of function usb_peri_class_request_wnss */
@@ -1572,7 +1816,7 @@ void usb_peri_class_request_rss (usb_setup_t *req)
     /* Is a request receive target Interface? */
     usb_ctrl_t      ctrl;
 #if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
-    rtos_task_id_t  task_id;
+    rtos_current_task_id_t  task_id;
 #endif /* (BSP_CFG_RTOS_USED != 0) */
 
     if (USB_GET_MAX_LUN == (req->type & USB_BREQUEST))
@@ -1604,7 +1848,7 @@ void usb_peri_class_request_rss (usb_setup_t *req)
     /* Is a request receive target Interface? */
     usb_ctrl_t      ctrl;
 #if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
-    rtos_task_id_t  task_id;
+    rtos_current_task_id_t  task_id;
 #endif /* (BSP_CFG_RTOS_USED != 0) */
 
     ctrl.setup  = *req; /* Save setup data. */
@@ -1623,6 +1867,10 @@ void usb_peri_class_request_rss (usb_setup_t *req)
 
     g_usb_pstd_std_request = USB_NO;
 
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+    usb_cstd_set_buf(USB_NULL, (uint16_t) USB_PIPE0);     /* Set pipe PID_BUF */
+#endif  /* (BSP_CFG_RTOS_USED == 5) */
+
     usb_pstd_ctrl_end((uint16_t) USB_CTRL_END); /* End control transfer. */
 
 #endif  /* defined(USB_CFG_PMSC_USE) */
@@ -1638,7 +1886,7 @@ void usb_peri_class_request_wss (usb_setup_t *req)
 {
     usb_ctrl_t      ctrl;
 #if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
-    rtos_task_id_t  task_id;
+    rtos_current_task_id_t  task_id;
 #endif /* (BSP_CFG_RTOS_USED != 0) */
 
     ctrl.setup = *req;
@@ -1658,6 +1906,11 @@ void usb_peri_class_request_wss (usb_setup_t *req)
     g_usb_pstd_std_request = USB_NO;
 
     usb_pstd_ctrl_end((uint16_t) USB_CTRL_END);
+
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+    usb_peri_class_request_usbx(req);
+#endif                                /* #if (BSP_CFG_RTOS_USED == 5) */
+
 } /* End of function usb_peri_class_request_wss */
 
 #if USB_CFG_REQUEST == USB_CFG_ENABLE

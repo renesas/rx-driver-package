@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2022) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_hstdfunction.c
@@ -30,6 +30,7 @@
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 16.11.2018 1.24 Supporting RTOS Thread safe
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.10.2022 1.41 USBX HMSC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -47,6 +48,7 @@
 #include "r_usb_cstd_rtos.h"
 #endif /* (BSP_CFG_RTOS_USED != 0) */
 
+#if (BSP_CFG_RTOS_USED != 5)
 #if defined(USB_CFG_HCDC_USE)
 #include "r_usb_hcdc_if.h"
 #include "r_usb_hcdc.h"
@@ -60,6 +62,13 @@
 #include "r_usb_hhid_if.h"
 
 #endif /* defined(USB_CFG_HHID_USE) */
+#endif /* (BSP_CFG_RTOS_USED != 5) */
+
+/*******************************************************************************
+ Macro definitions
+ ******************************************************************************/
+#define USB_VALUE_100    (100)
+
 
 /******************************************************************************
  Exported global variables (to be accessed by other files)
@@ -224,13 +233,19 @@ void usb_hdriver_init (usb_utr_t *ptr, usb_cfg_t *cfg)
 
     usb_hstd_mgr_open(ptr); /* Manager open */
     usb_hstd_hcd_open(ptr); /* Hcd open */
+
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+    usb_host_registration(ptr);        /* Class Registration */
+#else /* (BSP_CFG_RTOS_USED == 5) */
 #if defined(USB_CFG_HCDC_USE) || defined(USB_CFG_HHID_USE) || defined(USB_CFG_HMSC_USE) || defined(USB_CFG_HVND_USE)
     usb_class_driver_start(ptr); /* Init host class driver task. */
     usb_host_registration(ptr); /* Class Registration */
 
 #endif  /* defined(USB_CFG_HCDC_USE)||defined(USB_CFG_HHID_USE)||defined(USB_CFG_HMSC_USE)||defined(USB_CFG_HVND_USE) */
+#endif /* (BSP_CFG_RTOS_USED == 5) */
 } /* End of function usb_hdriver_init() */
 
+#if (BSP_CFG_RTOS_USED != 5)
 /******************************************************************************
  Function Name   : usb_class_driver_start
  Description     : Init host class driver task.
@@ -244,7 +259,7 @@ void usb_class_driver_start (usb_utr_t *ptr)
     {
         usb_hcdc_driver_start(ptr);
     }
-#endif /* defined(USB_CFG_PCDC_USE) */
+#endif /* defined(USB_CFG_HCDC_USE) */
 
 #if defined(USB_CFG_HHID_USE)
     if (USB_HHID == ptr->keyword)
@@ -252,7 +267,7 @@ void usb_class_driver_start (usb_utr_t *ptr)
         usb_hhid_driver_start(ptr);
     }
 
-#endif /* defined(USB_CFG_HMSC_USE) */
+#endif /* defined(USB_CFG_HHID_USE) */
 
 #if defined(USB_CFG_HMSC_USE)
     if (USB_HMSC == ptr->keyword)
@@ -264,7 +279,9 @@ void usb_class_driver_start (usb_utr_t *ptr)
 #endif /* defined(USB_CFG_HMSC_USE) */
 
 } /* End of function usb_class_driver_start() */
+#endif /* (BSP_CFG_RTOS_USED != 5) */
 
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
 /******************************************************************************
  Function Name   : class_trans_result
  Description     : Send a message to notify the result of the class request.
@@ -275,17 +292,10 @@ void usb_class_driver_start (usb_utr_t *ptr)
  ******************************************************************************/
 void class_trans_result(usb_utr_t *ptr, uint16_t data1, uint16_t data2)
 {
-#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
     /* Send an internal message */
     rtos_send_mailbox (&g_rtos_usb_cls_mbx_id, (void *)ptr);
-#else  /* BSP_CFG_RTOS_USED != 0 */
-    /* Send an internal message */
-    USB_SND_MSG(USB_CLS_MBX, (usb_msg_t *)ptr);
-
-#endif /* (BSP_CFG_RTOS_USED != 0) */
 } /* End of function class_trans_result() */
 
-#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
 /******************************************************************************
  Function Name   : class_trans_wait_tmo
  Description     : Receive the result of the class request with a timeout.
@@ -296,19 +306,11 @@ void class_trans_result(usb_utr_t *ptr, uint16_t data1, uint16_t data2)
 uint16_t class_trans_wait_tmo(usb_utr_t *ptr, uint16_t tmo)
 {
     usb_utr_t *mess;
-#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
     rtos_err_t err;
 
     /* Receive message with time out */
     err = rtos_receive_mailbox (&g_rtos_usb_cls_mbx_id, (void **)&mess, (rtos_time_t)tmo);
     if (RTOS_SUCCESS != err)
-#else  /* BSP_CFG_RTOS_USED != 0 */
-    usb_er_t err;
-
-    /* Receive message with time out */
-    err = USB_TRCV_MSG(USB_CLS_MBX, (usb_msg_t **)&mess, (usb_tm_t)tmo);
-    if (USB_OK != err)
-#endif /* BSP_CFG_RTOS_USED != 0 */
     {
         USB_PRINTF1("### class_trans_wait_tmo receives message error (%ld)\n", err);
         return USB_ERROR;

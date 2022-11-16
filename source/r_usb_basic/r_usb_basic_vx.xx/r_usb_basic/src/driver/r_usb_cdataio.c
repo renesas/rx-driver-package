@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015(2022) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_cdataio.c
@@ -43,6 +43,8 @@
  *         : 16.11.2018 1.24 Supporting RTOS Thread safe
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.04.2020 1.31 RX671 is added
+ *         : 30.06.2022 1.40 USBX PCDC is supported
+ *         : 30.10.2022 1.41 USBX HMSC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -63,6 +65,10 @@
 #include "r_usb_hcdc_config.h"
 #endif /* defined(USB_CFG_HCDC_USE) */
 
+#if defined(USB_CFG_HHID_USE)
+#include "r_usb_hhid_config.h"
+#endif /* defined(USB_CFG_HHID_USE) */
+
 #if defined(USB_CFG_PCDC_USE)
 #include "r_usb_pcdc_if.h"
 #endif /* defined(USB_CFG_PCDC_USE) */
@@ -75,12 +81,10 @@
 #include "r_usb_phid_if.h"
 #endif /* defined(USB_CFG_PHID_USE) */
 
-#if defined(USB_CFG_HHID_USE)
-#include "r_usb_hhid_config.h"
-#endif /* defined(USB_CFG_HHID_USE) */
-
 #if defined(USB_CFG_HMSC_USE)
+#if (BSP_CFG_RTOS_USED != 5)	/* Azure RTOS */
 #include "r_usb_hmsc.h"
+#endif /* BSP_CFG_RTOS_USED != 5 */
 #endif /* defined(USB_CFG_HMSC_USE) */
 
 #if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))
@@ -185,10 +189,17 @@ void (*g_usb_callback[]) (usb_utr_t *, uint16_t, uint16_t) =
 {
     /* PCDC, PCDCC */
 #if defined(USB_CFG_PCDC_USE)
+ #if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+        USB_NULL, USB_NULL,                              /* USB_PCDC  (0) */
+        USB_NULL, USB_NULL,                              /* USB_PCDCC (1) */
+        USB_NULL, USB_NULL,                              /* USB_PCDC2  (2) */
+        USB_NULL, USB_NULL,                              /* USB_PCDCC2 (3) */
+ #else  /* #if (BSP_CFG_RTOS_USED == 5) */
         usb_pcdc_read_complete, usb_pcdc_write_complete, /* USB_PCDC  (0) */
         USB_NULL, usb_pcdc_write_complete, /* USB_PCDCC (1) */
         usb_pcdc_read_complete, usb_pcdc_write_complete, /* USB_PCDC  (2) */
         USB_NULL, usb_pcdc_write_complete, /* USB_PCDCC (3) */
+ #endif /* #if (BSP_CFG_RTOS_USED == 5) */
 #else
         USB_NULL, USB_NULL, /* USB_PCDC  (0) */
         USB_NULL, USB_NULL, /* USB_PCDCC (1) */
@@ -198,7 +209,11 @@ void (*g_usb_callback[]) (usb_utr_t *, uint16_t, uint16_t) =
 
         /* PHID */
 #if defined(USB_CFG_PHID_USE)
+ #if (BSP_CFG_RTOS_USED != 5)   /* Other than Azure RTOS */
         usb_phid_read_complete, usb_phid_write_complete, /* USB_PHID (4) */
+ #else  /* (BSP_CFG_RTOS_USED != 5) */
+        USB_NULL, USB_NULL, /* USB_PHID  (4) */
+ #endif /* (BSP_CFG_RTOS_USED != 5) */
 #else
         USB_NULL, USB_NULL, /* USB_PHID (4) */
 #endif
@@ -385,7 +400,7 @@ usb_er_t usb_ctrl_write (usb_ctrl_t *p_ctrl, uint8_t *buf, uint32_t size)
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
     usb_ctrl_t ctrl;
 #if (BSP_CFG_RTOS_USED != 0)                /* Use RTOS */
-    rtos_task_id_t  task_id;
+    rtos_current_task_id_t  task_id;
 #endif /* (BSP_CFG_RTOS_USED != 0) */
 
     if (USB_PERI == g_usb_usbmode)

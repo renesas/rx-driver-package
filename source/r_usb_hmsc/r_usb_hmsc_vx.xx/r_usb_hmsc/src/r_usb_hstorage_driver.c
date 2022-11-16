@@ -30,6 +30,7 @@
  *         : 31.03.2018 1.23 Supporting Smart Configurator 
  *         : 31.05.2019 1.26 Added support for GNUC and ICCRX.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.10.2022 1.41 USBX HMSC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -144,21 +145,11 @@ void usb_hmsc_strg_drive_search_act (usb_utr_t *mess)
         break;
 
         case USB_SEQ_2 : /* Check result */
-            if (mess->result != USB_HMSC_OK)
-            {
-                USB_PRINTF0("### Inquiry error\n");
-            }
-            /* Read Format Capacity */
-            usb_hmsc_read_format_capacity(mess, side, (uint8_t*) &g_usb_hmsc_data[mess->ip]);
-            g_usb_hmsc_drive_search_seq[mess->ip]++;
-        break;
-
-        case USB_SEQ_3 : /* Read Capacity */
             usb_hmsc_read_capacity(mess, side, (uint8_t*) &g_usb_hmsc_data[mess->ip]);
             g_usb_hmsc_drive_search_seq[mess->ip]++;
         break;
 
-        case USB_SEQ_4 :
+        case USB_SEQ_3 : /* Read Capacity */
             if (mess->result != USB_HMSC_OK)
             {
                 /* TestUnitReady */
@@ -168,13 +159,13 @@ void usb_hmsc_strg_drive_search_act (usb_utr_t *mess)
             else
             {
                 /* Pass TestUnitReady  */
-                g_usb_hmsc_drive_search_seq[mess->ip] = USB_SEQ_6;
+                g_usb_hmsc_drive_search_seq[mess->ip] = USB_SEQ_5;
                 g_usb_hmsc_read_partition_retry_count[mess->ip] = 0;
                 usb_hmsc_strg_specified_path(mess);
             }
         break;
 
-        case USB_SEQ_5 :
+        case USB_SEQ_4 :
             if (mess->result != USB_HMSC_OK)
             {
                 /* TestUnitReady (Retry) */
@@ -189,7 +180,7 @@ void usb_hmsc_strg_drive_search_act (usb_utr_t *mess)
             }
         break;
 
-        case USB_SEQ_6 :
+        case USB_SEQ_5 :
             /* Don't delete the following processing!! */
             /* (This is necessary for the specific USB memory.) */
             /* Read10 secno = 0, seccnt = 1 */
@@ -197,7 +188,7 @@ void usb_hmsc_strg_drive_search_act (usb_utr_t *mess)
             g_usb_hmsc_drive_search_seq[mess->ip]++;
         break;
 
-        case USB_SEQ_7 :
+        case USB_SEQ_6 :
             if (USB_HMSC_OK == mess->result)
             {
                 g_usb_hmsc_drive_search_seq[mess->ip] = USB_SEQ_0;
@@ -205,7 +196,7 @@ void usb_hmsc_strg_drive_search_act (usb_utr_t *mess)
             }
             else
             {
-                g_usb_hmsc_drive_search_seq[mess->ip] = USB_SEQ_6;
+                g_usb_hmsc_drive_search_seq[mess->ip] = USB_SEQ_5;
                 /* Drive read error */
                 USB_PRINTF0 ("### drive read error  (times ).\n");
                 g_usb_hmsc_read_partition_retry_count[mess->ip]++;   /* Update Retry count */
@@ -452,17 +443,6 @@ uint16_t usb_hmsc_strg_drive_search (usb_utr_t *ptr, uint16_t addr, usb_cb_t com
         }
     }
 
-    /* Read Format Capacity */
-    hmsc_retval = usb_hmsc_read_format_capacity(ptr, side, (uint8_t*) &g_usb_hmsc_data[ptr->ip]);
-    if (USB_HMSC_OK != hmsc_retval)
-    {
-        hmsc_retval = hmsc_error_process(ptr, side, hmsc_retval);
-        if (USB_HMSC_OK != hmsc_retval)
-        {
-            return USB_ERROR;
-        }
-    }
-
     /* Read Capacity */
     hmsc_retval = usb_hmsc_read_capacity(ptr, side, (uint8_t*) &g_usb_hmsc_data[ptr->ip]);
     if (USB_HMSC_OK != hmsc_retval)
@@ -508,6 +488,14 @@ uint16_t usb_hmsc_strg_drive_search (usb_utr_t *ptr, uint16_t addr, usb_cb_t com
             if (USB_HMSC_OK == hmsc_retval)
             {
                 break;
+            }
+            else
+            {
+                hmsc_retval = hmsc_error_process(ptr, side, hmsc_retval);
+                if (USB_HMSC_OK != hmsc_retval)
+                {
+                    return USB_ERROR;
+                }
             }
         }
         else

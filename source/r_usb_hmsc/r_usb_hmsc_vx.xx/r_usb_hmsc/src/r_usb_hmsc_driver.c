@@ -31,6 +31,7 @@
  *         : 31.03.2018 1.23 Supporting Smart Configurator 
  *         : 31.05.2019 1.26 Added support for GNUC and ICCRX.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.10.2022 1.41 USBX HMSC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -750,6 +751,7 @@ static uint16_t usb_hmsc_data_act (usb_utr_t *mess)
                 g_usb_hmsc_in_pipectr[mess->ip][side] = 0;
                 usb_hmsc_clear_stall(mess, g_usb_hmsc_in_pipe[mess->ip][side], class_trans_result);
                 hmsc_retval = usb_hmsc_get_csw(mess, side);
+                usb_hmsc_csw_err_stall[mess->ip] = USB_OFF;
             break;
             case USB_MSC_CSW_PHASE_ERR:
                 USB_PRINTF1("*** Data : CSW-PhaseError(drive:%d) \n", side);

@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2022) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_basic_define.h
@@ -34,6 +34,7 @@
  *         : 30.07.2019 1.27 RX72M is added.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.04.2021 1.31 RX671 is added.
+ *         : 30.06.2022 1.40 USBX PCDC is supported.
  ***********************************************************************************************************************/
 
 #ifndef R_USB_BASIC_DEFINE_H
@@ -95,7 +96,12 @@
  **********************************************************************************************************************/
 /* Version Number of API. */
 #define USB_VERSION_MAJOR   (1)
-#define USB_VERSION_MINOR   (31)
+#define USB_VERSION_MINOR   (40)
+
+#if (BSP_CFG_RTOS_USED == 5)	/* Azure RTOS */
+#define	R_USB_FS0_BASE	(0xA0000)
+#define R_USB_HS0_BASE	(0xA0200)
+#endif /* (BSP_CFG_RTOS_USED == 5) */
 
 #define CLSDATASIZE         (512u)              /* Transfer data size for Standard Request */
 #if (BSP_CFG_RTOS_USED != 0)                    /* Use RTOS */
@@ -561,6 +567,7 @@
 #define USB_FIFO2BUF                        (0x0000u)   /* FIFO --> buffer */
 #define USB_EPNUMFIELD                      (0x000Fu)   /* Endpoint number select */
 #define USB_MAX_EP_NO                       (15u)       /* EP0 EP1 ... EP15 */
+#define USB_ENDPOINT_DIRECTION              (0x0080U) /* EndPoint Address direction */
 
 #define USB_BUF_SIZE(x)                     ((uint16_t)(((x) / 64u) - 1u) << 10u)
 #define USB_BUF_NUMB(x)                     (x)
