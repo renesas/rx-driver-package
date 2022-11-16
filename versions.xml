@@ -185,6 +185,23 @@
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/dcf61db9bd6ae1ce9ef95efff46f98061841afff/FITModules/r_cellular_v1.06_extend.mdf</url>
     </urls>
   </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_usb_basic</name>
+    <version>1.41</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/383924e0243323dc30b0ce116b857497375143a3/FITModules/r_usb_basic_v1.41.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/383924e0243323dc30b0ce116b857497375143a3/FITModules/r_usb_basic_v1.41.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/383924e0243323dc30b0ce116b857497375143a3/FITModules/r_usb_basic_v1.41_extend.mdf</url>
+    </urls>
+  </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_usb_hmsc</name>
+    <version>1.41</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/383924e0243323dc30b0ce116b857497375143a3/FITModules/r_usb_hmsc_v1.41.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/383924e0243323dc30b0ce116b857497375143a3/FITModules/r_usb_hmsc_v1.41.xml</url>
+    </urls>
+  </module>
   <module rdp_version="1.25">
     <name>r_ble_qe_utility</name>
     <version>1.00</version>
