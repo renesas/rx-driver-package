@@ -23,7 +23,16 @@
  * History : DD.MM.YYYY Version Description
  *           16.02.2021 1.00    First Release
  *           19.05.2021 1.01    Added support for RX72N,RX66T,RX130
-**********************************************************************************************************************/
+ *           08.07.2021 1.02    Added support for RX671 and GCC
+ *           10.08.2021 1.03    Added support for IAR
+ *           25.03.2022 1.04    Change the supported FreeRTOS version
+ *                              Select data area from DF/CF
+ *                              Added support for RX140-256KB
+ *           31.05.2022 1.05    Added support for RX660
+ *           05.12.2022 1.06    Added support for Azure ADU
+ *                              Added support for excluding communication drivers
+ *                              Added support for unbuffered FW updates
+ **********************************************************************************************************************/
 
 /***********************************************************************************************************************
  Includes   <System Includes> , "Project Includes"
@@ -40,7 +49,10 @@
  **********************************************************************************************************************/
 /* Version Number of API. */
 #define FWUP_VERSION_MAJOR  (1)
-#define FWUP_VERSION_MINOR  (01)
+#define FWUP_VERSION_MINOR  (06)
+
+#define FWUP_WRITE_BLOCK_SIZE           (1024)
+#define FWUP_BOOT_LOADER_PGM_SIZE       (65536)
 
 /*****************************************************************************
  Typedef definitions
@@ -64,30 +76,50 @@ typedef enum e_fwup_err
  Public Functions
  ******************************************************************************/
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == 0)  /* Bootloader */
-fwup_err_t R_FWUP_Open(void);
-fwup_err_t R_FWUP_Close(void);
+fwup_err_t R_FWUP_Open (void);
+fwup_err_t R_FWUP_Close (void);
 int32_t R_FWUP_SecureBoot (void);
 void R_FWUP_ExecuteFirmware (void);
 #elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == 1)  /* Firmware update w/o OS */
+fwup_err_t R_FWUP_Open (void);
+fwup_err_t R_FWUP_Close (void);
+fwup_err_t R_FWUP_CheckFileSignature(void);
+fwup_err_t R_FWUP_Operation (void);
+fwup_err_t R_FWUP_SetEndOfLife (void);
+void R_FWUP_SoftwareReset (void);
+fwup_err_t R_FWUP_DirectUpdate (void);
+#elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == 2)  /* Firmware update w/o OS and Driver */
 fwup_err_t R_FWUP_Open(void);
 fwup_err_t R_FWUP_Close(void);
-fwup_err_t R_FWUP_Operation(void);
+fwup_err_t R_FWUP_Initialize (void);
+fwup_err_t R_FWUP_PutFirmwareChunk(uint32_t ulOffset, uint8_t * const pData, uint32_t ulBlockSize);
+fwup_err_t R_FWUP_CheckFileSignature(void);
 fwup_err_t R_FWUP_SetEndOfLife(void);
-void R_FWUP_SoftwareReset(void);
-#elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == 2)  /* Firmware update with Amazon FreeRTOS(OTA) */
-OTA_Err_t R_FWUP_CreateFileForRx( OTA_FileContext_t * const C );
-OTA_Err_t R_FWUP_Abort( OTA_FileContext_t * const C );
-int16_t R_FWUP_WriteBlock( OTA_FileContext_t * const C, uint32_t ulOffset,
-                            uint8_t * const pacData, uint32_t ulBlockSize );
-OTA_Err_t R_FWUP_CloseFile( OTA_FileContext_t * const C );
-OTA_Err_t R_FWUP_CheckFileSignature( OTA_FileContext_t * const C );
+void       R_FWUP_SoftwareReset(void);
+#elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == 3)  /* Firmware update with Amazon FreeRTOS(OTA) */
+OtaPalStatus_t R_FWUP_CreateFileForRx( OtaFileContext_t * const pFileContext );
+OtaPalStatus_t R_FWUP_Abort( OtaFileContext_t * const pFileContext );
+int16_t R_FWUP_WriteBlock( OtaFileContext_t * const pFileContext,
+                            uint32_t ulOffset,
+                            uint8_t * const pData,
+                            uint32_t ulBlockSize );
+OtaPalStatus_t R_FWUP_CloseFile( OtaFileContext_t * const pFileContext );
+OtaPalStatus_t R_FWUP_CheckFileSignature( OtaFileContext_t * const pFileContext );
 uint8_t * R_FWUP_ReadAndAssumeCertificate( const uint8_t * const pucCertName, uint32_t * const ulSignerCertSize );
-OTA_Err_t R_FWUP_ResetDevice( void );
-OTA_Err_t R_FWUP_ActivateNewImage( void );
-OTA_Err_t R_FWUP_SetPlatformImageState( OTA_ImageState_t eState );
-OTA_PAL_ImageState_t R_FWUP_GetPlatformImageState( void );
-OTA_Err_t R_FWUP_GetVersion(void);
-    #endif
+OtaPalStatus_t R_FWUP_ResetDevice( OtaFileContext_t * const pFileContext );
+OtaPalStatus_t R_FWUP_ActivateNewImage( OtaFileContext_t * const pFileContext );
+OtaPalStatus_t R_FWUP_SetPlatformImageState( OtaFileContext_t * const pFileContext,
+                                            OtaImageState_t eState );
+OtaPalImageState_t R_FWUP_GetPlatformImageState( OtaFileContext_t * const pFileContext );
+#elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == 4)  /* Firmware update with Azure ADU */
+fwup_err_t R_FWUP_Open (void);
+fwup_err_t R_FWUP_Close (void);
+fwup_err_t R_FWUP_Initialize (void);
+fwup_err_t R_FWUP_PutFirmwareChunk (uint32_t ulOffset, uint8_t * const pData, uint32_t ulBlockSize);
+void R_FWUP_SoftwareReset (void);
+fwup_err_t R_FWUP_SetEndOfLife(void);
+#endif
+uint32_t R_FWUP_GetVersion (void);
 
 #endif /* FWUP_IF_H */
 
