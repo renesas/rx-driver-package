@@ -161,7 +161,7 @@ NOTE: This is invalid when ID code protection is enabled.</description>
         </property>
         <property id="BSP_CFG_TRUSTED_MODE_FUNCTION" display="TMEF - TM Enable Flag Register" default="0xFFFFFFFF" type="textbox">
             <constraint display="Value must be hexadecimal">testHexInteger("${BSP_CFG_TRUSTED_MODE_FUNCTION}")</constraint>
-            <constraint display="Value must be in the range 0x00000000~0xFFFFFFFF">("${BSP_CFG_TRUSTED_MODE_FUNCTION}" &gt;= 0) &amp;&amp; ("${BSP_CFG_TRUSTED_MODE_FUNCTION}" &lt;= 0xFFFFFFFF)</constraint>
+            <constraint display="Value must be 0xF8FFFFFF or 0xFFFFFFFF">("${BSP_CFG_TRUSTED_MODE_FUNCTION}" == 0xF8FFFFFF) || ("${BSP_CFG_TRUSTED_MODE_FUNCTION}" == 0xFFFFFFFF)</constraint>
             <description>TMEF register value.</description>
         </property>
         <property id="BSP_CFG_USER_LOCKING_ENABLED" display="Lock function select" default="0" type="combobox">

@@ -22,6 +22,7 @@
 ************************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 22.11.2021 1.00    Initial Release
+*         : 06.01.2023 1.20    Fixed TXRF flag not cleared in the function canfd_channel_tx_isr()
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * Includes
@@ -45,7 +46,6 @@
 
 #define CANFD_PRV_CTR_MODE_MASK           (R_CANFD_GCR_SLPRQ_Msk + R_CANFD_GCR_GMDC_Msk)
 #define CANFD_PRV_CTR_RESET_BIT           (1U)
-#define CANFD_PRV_TXMB_OFFSET             (32U)
 #define CANFD_PRV_RXMB_MAX                (32U)
 #define CANFD_PRV_TXMB_CHANNEL_OFFSET     (64U)
 
@@ -203,7 +203,7 @@ bsp_int_ctrl_t int_ctrl;
     /* Check that prescaler is in range */
     FSP_ERROR_RETURN((p_data_timing->baud_rate_prescaler <= CANFD_BAUD_RATE_PRESCALER_MAX) &&
                      (p_data_timing->baud_rate_prescaler >= CANFD_BAUD_RATE_PRESCALER_MIN),
-					 FSP_ERR_CAN_INIT_FAILED);
+                     FSP_ERR_CAN_INIT_FAILED);
 
     /* Check that TSEG1 >= TSEG2 >= SJW for data bitrate  */
 
@@ -212,7 +212,7 @@ bsp_int_ctrl_t int_ctrl;
 
     /* Check Time Segment 2 is greater than or equal to the synchronization jump width */
     FSP_ERROR_RETURN((uint32_t) p_data_timing->time_segment_2 >= (uint32_t) p_data_timing->synchronization_jump_width,
-    		FSP_ERR_CAN_INIT_FAILED);
+            FSP_ERR_CAN_INIT_FAILED);
 
     can_bit_timing_cfg_t * p_bit_timing = p_cfg->p_bit_timing;
 
@@ -264,7 +264,7 @@ bsp_int_ctrl_t int_ctrl;
 #endif
     if (0 == p_cfg->channel)
     {
-    	/* Write MSTPCRD to 0: The module stop state is canceled. */
+        /* Write MSTPCRD to 0: The module stop state is canceled. */
         MSTP(CANFD) = 0;
     }
 #if ((R_BSP_VERSION_MAJOR == 7) && (R_BSP_VERSION_MINOR >= 20)) || (R_BSP_VERSION_MAJOR >= 8)
@@ -374,7 +374,7 @@ bsp_int_ctrl_t int_ctrl;
     /* Configure bitrate */
     canfd_ch_block_p->NBCR.LONG =
         (uint32_t) (((p_cfg->p_bit_timing->baud_rate_prescaler - 1) & R_CANFD_NBCR_BRP_Msk) <<
-        		R_CANFD_NBCR_BRP_Pos) |
+                R_CANFD_NBCR_BRP_Pos) |
         ((p_cfg->p_bit_timing->time_segment_1 - 1U) << R_CANFD_NBCR_TSEG1_Pos) |
         ((p_cfg->p_bit_timing->time_segment_2 - 1U) << R_CANFD_NBCR_TSEG2_Pos) |
         ((p_cfg->p_bit_timing->synchronization_jump_width - 1U) << R_CANFD_NBCR_SJW_Pos);
@@ -382,7 +382,7 @@ bsp_int_ctrl_t int_ctrl;
     /* Configure data bitrate for rate switching on FD frames */
     canfd_ch_block_p->DBCR.LONG =
         (uint32_t) (((p_extend->p_data_timing->baud_rate_prescaler - 1) & R_CANFD_DBCR_BRP_Msk) <<
-        		R_CANFD_DBCR_BRP_Pos) |
+                R_CANFD_DBCR_BRP_Pos) |
         ((p_extend->p_data_timing->time_segment_1 - 1U) << R_CANFD_DBCR_TSEG1_Pos) |
         ((p_extend->p_data_timing->time_segment_2 - 1U) << R_CANFD_DBCR_TSEG2_Pos) |
         ((p_extend->p_data_timing->synchronization_jump_width - 1U) << R_CANFD_DBCR_SJW_Pos);
@@ -398,7 +398,7 @@ bsp_int_ctrl_t int_ctrl;
     canfd_ch_block_p->FDCFG.LONG =
         (tdco << R_CANFD_FDCFG_TDCO_Pos) |
         (uint32_t) (p_extend->delay_compensation << R_CANFD_FDCFG_TDCE_Pos) |
-		R_CANFD_FDCFG_TESI_Msk | 1U;
+        R_CANFD_FDCFG_TESI_Msk | 1U;
 
     /* Write TX message buffer interrupt enable bits */
     canfd_block_p->TMIER0.LONG = p_extend->txmb_txi_enable & 0xF;
@@ -486,38 +486,38 @@ fsp_err_t R_CANFD_Close (can_ctrl_t * const p_api_ctrl)
     can_cfg_t * p_cfg = (can_cfg_t *) p_ctrl->p_cfg;
 
 
-	/* Disable interrupts. Must disable group that it belongs to */
-	R_BSP_InterruptRequestDisable(VECT(ICU, GROUPBL2));
+    /* Disable interrupts. Must disable group that it belongs to */
+    R_BSP_InterruptRequestDisable(VECT(ICU, GROUPBL2));
 
-	/* Transition to Global Sleep */
-	r_canfd_mode_transition(p_ctrl, CAN_OPERATION_MODE_GLOBAL_RESET);
-	r_canfd_mode_transition(p_ctrl, CAN_OPERATION_MODE_GLOBAL_SLEEP);
+    /* Transition to Global Sleep */
+    r_canfd_mode_transition(p_ctrl, CAN_OPERATION_MODE_GLOBAL_RESET);
+    r_canfd_mode_transition(p_ctrl, CAN_OPERATION_MODE_GLOBAL_SLEEP);
 
-	/* Stop CANFD module */
-	/* CANFD: Module Stop Control Register D (MSTPCRD) bits 10 are for the CANFD
-	Peripherals.
-	0: The module stop state is canceled.
-	1: Transition to the module stop state is made. */
+    /* Stop CANFD module */
+    /* CANFD: Module Stop Control Register D (MSTPCRD) bits 10 are for the CANFD
+    Peripherals.
+    0: The module stop state is canceled.
+    1: Transition to the module stop state is made. */
 #if ((R_BSP_VERSION_MAJOR == 7) && (R_BSP_VERSION_MINOR >= 20)) || (R_BSP_VERSION_MAJOR >= 8)
 bsp_int_ctrl_t int_ctrl;
 #endif
-	/* First unlock the protect register. */
-	/* Enable writing to PRCR bits while simultaneously enabling PRC1. */
-	R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);
+    /* First unlock the protect register. */
+    /* Enable writing to PRCR bits while simultaneously enabling PRC1. */
+    R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);
 #if ((R_BSP_VERSION_MAJOR == 7) && (R_BSP_VERSION_MINOR >= 20)) || (R_BSP_VERSION_MAJOR >= 8)
 R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 #endif
-	if (0 == p_cfg->channel)
-	{
-		/* Write MSTPCRD to 0: The module stop state is canceled. */
-		MSTP(CANFD) = 1;
-	}
+    if (0 == p_cfg->channel)
+    {
+        /* Write MSTPCRD to 0: The module stop state is canceled. */
+        MSTP(CANFD) = 1;
+    }
 #if ((R_BSP_VERSION_MAJOR == 7) && (R_BSP_VERSION_MINOR >= 20)) || (R_BSP_VERSION_MAJOR >= 8)
 R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 #endif
-	/* Re-lock the protect register. */
-	/* Enable writing to PRCR bits while simultaneously disabling PRC1. */
-	R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR);
+    /* Re-lock the protect register. */
+    /* Enable writing to PRCR bits while simultaneously disabling PRC1. */
+    R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR);
 
     /* Reset global control struct pointer */
     gp_ctrl[p_cfg->channel] = NULL;
@@ -599,7 +599,7 @@ fsp_err_t R_CANFD_Write (can_ctrl_t * const p_api_ctrl, uint32_t buffer, can_fra
 
     /* Set TX message buffer registers: HF1 */
     canfd_block_p->TMB[txmb].HF1.LONG = (uint32_t) r_canfd_bytes_to_dlc(p_frame->data_length_code) <<
-    		                  R_CANFD_TMB_HF1_DLC_Pos;
+                              R_CANFD_TMB_HF1_DLC_Pos;
 
     /* Set FD bits (ESI, BRS and FDF) */
     canfd_block_p->TMB[txmb].HF2.LONG = p_frame->options & 7U;
@@ -915,8 +915,8 @@ static void r_canfd_mb_read (uint32_t buffer, can_frame_t * const frame)
     bool is_mb = buffer < CANFD_PRV_RXMB_MAX;
     /* Get pointer to message buffer (FIFOs use the same buffer structure) */
     volatile canfd_rmb_t * mb_regs =
-    	(is_mb) ? (volatile canfd_rmb_t *)(&CANFD.RMB0 + buffer*76) : /* address of RMBn = &RMB(n-1) + 76 bytes */
-    	(volatile canfd_rmb_t *) (&CANFD.RFB[buffer-CANFD_PRV_RXMB_MAX]);
+        (is_mb) ? (volatile canfd_rmb_t *)(&CANFD.RMB0 + buffer*76) : /* address of RMBn = &RMB(n-1) + 76 bytes */
+        (volatile canfd_rmb_t *) (&CANFD.RFB[buffer-CANFD_PRV_RXMB_MAX]);
 
     /* Get frame data. */
     uint32_t id = mb_regs->HF0.LONG;
@@ -948,12 +948,12 @@ static void r_canfd_mb_read (uint32_t buffer, can_frame_t * const frame)
     if (is_mb)
     {
         /* Clear RXMB New Data bit */
-    	canfd_block_p->RMNDR.LONG &= ~(1U << buffer);
+        canfd_block_p->RMNDR.LONG &= ~(1U << buffer);
     }
     else
     {
         /* Increment RX FIFO pointer */
-    	canfd_block_p->RFPCR[buffer - CANFD_PRV_RXMB_MAX] = UINT8_MAX;
+        canfd_block_p->RFPCR[buffer - CANFD_PRV_RXMB_MAX] = UINT8_MAX;
     }
 }
 
@@ -1129,6 +1129,7 @@ void canfd_channel_tx_isr (void)
     volatile struct st_canfd R_BSP_EVENACCESS_SFR * canfd_block_p;
     canfd_block_p = &CANFD;
 
+    /* Casting gp_ctrl[0] into pointer and struct canfd_instance_ctrl_t */
     canfd_instance_ctrl_t * p_ctrl = (canfd_instance_ctrl_t *) gp_ctrl[0];
     uint32_t                channel = 0;
 
@@ -1138,44 +1139,40 @@ void canfd_channel_tx_isr (void)
     args.p_context = p_ctrl->p_context;
     args.p_frame   = NULL;
 
-    /* Check the byte of CFDGTINTSTS0 that corresponds to the interrupting channel */
-    uint32_t cfdgtintsts = canfd_block_p->TISR.LONG + channel;
-    while (cfdgtintsts)
+    /* Check the byte of tisr that corresponds to the interrupting channel */
+    uint32_t tisr = *((uint8_t *)(&canfd_block_p->TISR.LONG) + channel);
+    while (tisr)
     {
-        uint32_t            txmb;
-        volatile uint32_t * cfdtm_sts;
-
-        channel <<= 1;
+        uint32_t  txmb;
+        volatile uint32_t * p_tmt_sts;
 
         /* Get relevant TX status register bank */
-        if (cfdgtintsts & R_CANFD_TISR_TSIF0_Msk)
+        if (tisr & R_CANFD_TISR_TSIF0_Msk)
         {
-            cfdtm_sts  = (volatile uint32_t *) canfd_block_p->TMTCSR0.LONG;
+            /* Casting the register into the unsigned interger pointer */
+            p_tmt_sts  = (volatile uint32_t *) &canfd_block_p->TMTCSR0.LONG;
             args.event = CAN_EVENT_TX_COMPLETE;
         }
         else
         {
-            cfdtm_sts  = (volatile uint32_t *) canfd_block_p->TMTASR0.LONG;
+            /* Casting the register into the unsigned interger pointer */
+            p_tmt_sts  = (volatile uint32_t *) &canfd_block_p->TMTASR0.LONG;
             args.event = CAN_EVENT_TX_ABORTED;
         }
 
-        channel >>= 1;
-
         /* Calculate lowest TXMB with the specified event */
-        txmb = trailing_zeros(canfd_block_p->TMTASR0.LONG);
-        txmb = (txmb < 8) ? txmb : trailing_zeros(*(cfdtm_sts + 1)) + CANFD_PRV_TXMB_OFFSET;
+        txmb = trailing_zeros(*p_tmt_sts);
 
         /* Clear TX complete/abort flags */
-        canfd_block_p->TMSR[txmb + (CANFD_PRV_TXMB_CHANNEL_OFFSET * channel)].BIT.TXRF = 0;
+        canfd_block_p->TMSR[txmb].BIT.TXRF = 0;
 
         /* Set the callback arguments */
         args.buffer = txmb;
         r_canfd_call_callback(gp_ctrl[args.channel], &args);
 
         /* Check for more interrupts on this channel */
-        cfdgtintsts = canfd_block_p->TISR.LONG + channel;
+        tisr = *((uint8_t *)(&canfd_block_p->TISR.LONG) + channel);
     }
-
     /* Clear interrupt */
     IR(ICU, GROUPBL2)  = 0;
 }

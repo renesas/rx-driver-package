@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.22 - Graphical user interface for embedded applications **
+** emWin V6.26 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -57,6 +57,12 @@ Purpose     : MULTIEDIT include
 
 #define NUM_DISP_MODES 2
 
+/*********************************************************************
+*
+*       Invalid flags
+*
+*  Used for partial invalidation. Stored in pObj->InvalidFlags.
+*/
 #define INVALID_NUMCHARS (1 << 0)
 #define INVALID_NUMLINES (1 << 1)
 #define INVALID_TEXTSIZE (1 << 2)
@@ -100,15 +106,15 @@ typedef struct {
   WM_SCROLL_STATE  ScrollStateV;
   WM_SCROLL_STATE  ScrollStateH;
   U16              Flags;
+  WM_HTIMER        hTimer;
+  GUI_WRAPMODE     WrapMode;
+  int              MotionPosY;
+  WM_HMEM          hContext;             // Motion context.
+  U8               CursorVis;            /* Indicates whether cursor is visible or not*/
+  U8               InvertCursor;
   U8               InvalidFlags;         /* Flags to save validation status */
   U8               EditMode;
   U8               Radius;               // Currently only used by AppWizard
-  WM_HTIMER        hTimer;
-  U8               CursorVis;            /* Indicates whether cursor is visible or not*/
-  U8               InvertCursor;
-  GUI_WRAPMODE     WrapMode;
-  int              MotionPosX;
-  int              MotionPosY;
   U8               MotionActive;
 } MULTIEDIT_OBJ;
 

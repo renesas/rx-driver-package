@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_emwin_rx_if.h
@@ -30,6 +30,9 @@
  *         : 31.03.2021 6.14.g.1.30    Update to adjust the spec of Smart Configurator and QE for Display.
  *         : 29.12.2021 6.20.  1.00    Update emWin library to v6.22.
  *                                     Adjust configuration option with Smart Configurator.
+ *         : 31.08.2022 6.26.c.1.00    Update emWin library to v6.26c.
+ *                                     Update FIT module version.
+ *                                     Added preprocessor condition by LCD interface.
  *********************************************************************************************************************/
 #ifndef EMWIN_RX_IF_H
 #define EMWIN_RX_IF_H
@@ -37,9 +40,9 @@
 /**********************************************************************************************************************
  Includes   <System Includes> , "Project Includes"
  *********************************************************************************************************************/
-#include <stdint.h>
+#include "platform.h"
 #include "r_emwin_rx_config.h"
-#if (EMWIN_USE_DRW2D == 1)
+#if ((EMWIN_LCD_IF == LCD_IF_GLCDC) && (EMWIN_USE_DRW2D == 1))
 #include "dave_driver.h"
 #endif
 
@@ -48,8 +51,8 @@
  *********************************************************************************************************************/
 /* Version number of emWin FIT module. */
 #define EMWIN_VERSION_EMWIN_MAJOR   (6)
-#define EMWIN_VERSION_EMWIN_MINOR   (22)
-#define EMWIN_VERSION_EMWIN_CHAR    ('\0')
+#define EMWIN_VERSION_EMWIN_MINOR   (26)
+#define EMWIN_VERSION_EMWIN_CHAR    ('c')
 #define EMWIN_VERSION_FIT_MAJOR     (1)
 #define EMWIN_VERSION_FIT_MINOR     (0)
 
@@ -74,6 +77,7 @@ typedef struct
  Exported global functions
  *********************************************************************************************************************/
 
+#if (EMWIN_LCD_IF == LCD_IF_GLCDC)
 /**********************************************************************************************************************
  * Function Name: R_EMWIN_GetBufferAddr
  * Description  : .
@@ -123,6 +127,8 @@ uint32_t R_EMWIN_GetDaveActive (void);
  * Return Value : .
  *********************************************************************************************************************/
 void _VSYNC_ISR (void * p);
+
+#endif /* EMWIN_LCD_IF */
 
 /**********************************************************************************************************************
  * Function Name: R_EMWIN_GetVersion

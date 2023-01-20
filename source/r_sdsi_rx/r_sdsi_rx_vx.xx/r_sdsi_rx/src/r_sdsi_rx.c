@@ -19,7 +19,7 @@
 /**********************************************************************************************************************
 * System Name  : SDSI Driver
 * File Name    : r_sdsi_rx.c
-* Version      : 1.00
+* Version      : 2.03
 * Device       : RX
 * Abstract     : API & Sub module
 * Tool-Chain   : -
@@ -33,6 +33,7 @@
 *              : 30.09.2016 1.00    First Release
 *              : 31.07.2017 2.00    Supported RX65N-2MB.
 *              :                    Fixed to correspond to Renesas coding rule.
+*              : 27.12.2022 2.03    Updated slash format of included header file paths for Linux compatibility.
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -40,7 +41,7 @@ Includes <System Includes> , "Project Includes"
 **********************************************************************************************************************/
 #include "platform.h"
 #include "r_sdsi_rx_if.h"
-#include ".\src\r_sdsi_rx_private.h"
+#include "./src/r_sdsi_rx_private.h"
 #ifdef SDSI_CFG_LONGQ_ENABLE                                /* Uses FIT LONGQ module                */
 #include "r_longq_if.h"
 #endif /* SDSI_CFG_LONGQ_ENABLE */

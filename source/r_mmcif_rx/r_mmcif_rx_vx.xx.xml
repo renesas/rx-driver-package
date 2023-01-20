@@ -10,18 +10,21 @@
         <version>2.06.00</version>
         <version>2.07.00</version>
         <version>3.01.00</version>
+        <version>3.04.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
         <version>4.08.04.201803</version>
         <version>4.08.04.201902</version>
+        <version>8.03.00.202202</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
         <product>ICCRX</product>
         <version>4.10.01</version>
         <version>4.12.01</version>
+        <version>4.20.03</version>
     </toolchain>
 
 
@@ -47,7 +50,7 @@
         <zipsource>r_mmcif_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.50</version>
+            <version>7.20</version>
         </dependency>
         <application>Storage and Memory</application>
         <application>MMCIF</application>

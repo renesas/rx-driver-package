@@ -62,6 +62,7 @@
  #include <stdio.h>
  #include <string.h>
  #include <stdint.h>
+ #include "r_usb_basic_define.h"
  #include "r_usb_basic_config.h"
 
  #ifdef __cplusplus
@@ -235,11 +236,11 @@ extern CHAR _ux_version_id[];
 }
  #endif
 
- #if defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || (USB_CFG_PMSC_USE)
+ #if (USB_CFG_MODE == USB_CFG_PERI)
   #define UX_DEVICE_SIDE_ONLY
  #endif
 
- #if defined(USB_CFG_HCDC_USE) || defined(USB_CFG_HHID_USE) || (USB_CFG_HMSC_USE)
+ #if (USB_CFG_MODE == USB_CFG_HOST)
   #define UX_HOST_SIDE_ONLY
  #endif
 

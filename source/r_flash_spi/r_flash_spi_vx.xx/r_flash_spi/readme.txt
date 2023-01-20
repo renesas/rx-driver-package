@@ -5,12 +5,12 @@ r_flash_spi (Serial Flash memory control software)
 
 Document Number 
 ---------------
-R01AN2662EJ0303
-R01AN2662JJ0303
+R01AN2662EJ0310
+R01AN2662JJ0310
 
 Version
 -------
-v3.03
+v3.10
 
 Overview
 --------
@@ -80,9 +80,9 @@ Refer to "RX Smart Configurator User's Guide: IAREW (R20AN0535)" for details.
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.03 release 00
-* GCC for Renesas RX 8.3.0
-* IAR C/C++ Compiler for Renesas RX 4.20.1
+* Renesas RX
+* GCC for Renesas RX
+* IAR C/C++ Compiler for Renesas RX
 
 File Structure
 --------------
@@ -93,9 +93,9 @@ r_flash_spi
 +---doc
 |   |
 |   +---en
-|   |       r01an2662ej0303-rx.pdf
+|   |       r01an2662ej{VERSION_NUMBER}-rx.pdf
 |   +---ja
-|           r01an2662jj0303-rx.pdf
+|           r01an2662jj{VERSION_NUMBER}-rx.pdf
 |
 +---src
     |   r_flash_spi.c
@@ -122,4 +122,3 @@ r_flash_spi
 
 r_config
     r_flash_spi_config.h
-    r_flash_spi_pin_config.h

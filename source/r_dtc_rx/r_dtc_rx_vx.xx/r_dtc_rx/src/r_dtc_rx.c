@@ -65,6 +65,7 @@
 *         : 30.12.2019 3.40    Added support for RX66N, RX72N.
 *         : 31.03.2021 3.70    Added support for RX671.
 *         : 15.04.2021 3.80    Added support for RX140.
+*         : 27.12.2022 4.21    Updated slash format of included header file paths for Linux compatibility.
 *******************************************************************************/
 
 /*******************************************************************************
@@ -73,7 +74,7 @@ Includes   <System Includes> , "Project Includes"
 /* Defines for DTC support */
 #include <stdlib.h>
 #include "r_dtc_rx_if.h"
-#include ".\src\r_dtc_rx_private.h"
+#include "./src/r_dtc_rx_private.h"
 
 
 /*******************************************************************************

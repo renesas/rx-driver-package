@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014(2015-2019) Renesas Electronics Corporation. All rights reserved.    
+* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.    
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -37,6 +37,8 @@
 *              :                    Added RX72M.
 *              : 22.11.2019 1.07    Changed Minor version to 1.07
 *              :                    Added RX72N and RX66N.
+*              : 27.12.2022 1.10    Added new demo projects
+                                    Updated slash format of included header file paths for Linux compatibility
 **********************************************************************************************************************/
 
 #ifndef _MMC_IF_H
@@ -57,7 +59,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define RX_MMC_API_VERSION_MAJOR            (1)
-#define RX_MMC_API_VERSION_MINOR            (7)
+#define RX_MMC_API_VERSION_MINOR            (10)
 
 /* ==== IP selection ==== */
 #define MMC_MMCMEM_MAX_TRANS                (65535)

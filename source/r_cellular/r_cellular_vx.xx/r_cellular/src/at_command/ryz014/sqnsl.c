@@ -50,11 +50,10 @@ e_cellular_err_t atc_sqnsl(st_cellular_ctrl_t * const p_ctrl, const uint8_t sock
                             const uint8_t ip_version, const uint16_t port)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
     uint8_t ip_type = 1;
     uint8_t str[3][10] = {0};
 
-    if (CELLULAR_SOCKET_IP_VERSION_4 != ip_version)
+    if (CELLULAR_PROTOCOL_IPV4 != ip_version)
     {
         ip_type = 2;
     }
@@ -69,12 +68,7 @@ e_cellular_err_t atc_sqnsl(st_cellular_ctrl_t * const p_ctrl, const uint8_t sock
         (const uint8_t *)&gp_at_command[ATC_LISTENING_SOCKET][0],    // (const uint8_t *const *)->(const uint8_t **)
             (const uint8_t **)&p_command_arg);                      // (const uint8_t *const *)->(const uint8_t **)
 
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_LISTENING_SOCKET);
-
-    if (CELLULAR_ATC_OK != at_ret)
-    {
-        ret = CELLULAR_ERR_MODULE_COM;
-    }
+    ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_LISTENING_SOCKET);
 
     return ret;
 }

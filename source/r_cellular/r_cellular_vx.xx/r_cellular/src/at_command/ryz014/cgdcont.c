@@ -49,7 +49,6 @@
 e_cellular_err_t atc_cgdcont(st_cellular_ctrl_t * const p_ctrl, const st_cellular_ap_cfg_t * const p_ap_cfg)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
     uint8_t str[64 + 1] = {0};
 
     if (NULL == p_ap_cfg)
@@ -76,15 +75,10 @@ e_cellular_err_t atc_cgdcont(st_cellular_ctrl_t * const p_ctrl, const st_cellula
                 (const uint8_t *)&gp_at_command[ATC_AP_CONFIG][0], // (const uint8_t *const *)->(const uint8_t **)
                     (const uint8_t **)&p_command_arg);             // (const uint8_t *const *)->(const uint8_t **)
 
-        at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_AP_CONFIG);
+        ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_AP_CONFIG);
 
         memset(p_ctrl->sci_ctrl.atc_buff, 0x00, CELLULAR_ATC_BUFF_SIZE);
         memset(str, 0x00, sizeof(str));
-
-        if (CELLULAR_ATC_OK != at_ret)
-        {
-            ret = CELLULAR_ERR_MODULE_COM;
-        }
     }
 
     return ret;

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 /*******************************************************************************
@@ -23,11 +23,37 @@
 *******************************************************************************/
 /*******************************************************************************
 * History : DD.MM.YYYY Version  Description
-*           30.09.2019 1.00     First Release.
-*           29.11.2019 1.01     Add random-delay to advertising transmission.
-*           30.09.2020 1.10     Refer to "Program Updates (MESH FIT Module)" in
-                                the application note of RX23W Group Bluetooth
-                                Mesh FIT Module (R01AN4930).
+*           30.09.2019  1.00    First Release.
+*           29.11.2019  1.01    No updated in Mesh Configuration.
+*           30.09.2020  1.10    Added the following Mesh Configuration option(s):
+*                               - MESH_CFG_NET_SEQNUM_CACHE_SIZE
+*           30.09.2021  1.20    Added the following Mesh Configuration option(s):
+*                               - MESH_CFG_UNPROV_DEVICE_BEACON_TIMEOUT
+*                               - MESH_CFG_NET_TX_COUNT
+*                               - MESH_CFG_NET_TX_INTERVAL_STEPS
+*                               - MESH_CFG_NET_RELAY_TX_COUNT
+*                               - MESH_CFG_NET_RELAY_TX_INTERVAL_STEPS
+*                               - MESH_CFG_PROXY_SUBNET_NETID_ADV_TIMEOUT
+*                               - MESH_CFG_PROXY_SUBNET_NODEID_ADV_TIMEOUT
+*                               - MESH_CFG_PROXY_NODEID_ADV_TIMEOUT
+*                               - MESH_CFG_NET_TX_QUEUE_SIZE
+*                               - MESH_CFG_FRND_POLL_RETRY_COUNT
+*                               - MESH_CFG_LTRN_RTX_TIMEOUT
+*                               - MESH_CFG_LTRN_RTX_COUNT
+*                               - MESH_CFG_LTRN_ACK_TIMEOUT
+*                               - MESH_CFG_LTRN_INCOMPLETE_TIMEOUT
+*                               - MESH_CFG_FRND_RECEIVE_WINDOW
+*                               - MESH_CFG_LPN_CLEAR_RETRY_TIMEOUT_INITIAL
+*                               - MESH_CFG_TRN_FRNDREQ_RETRY_TIMEOUT
+*                               - MESH_CFG_MAX_NUM_TRANSITION_TIMERS
+*                               - MESH_CFG_MAX_NUM_PERIODIC_STEP_TIMERS
+*                               - MESH_CFG_CONFIG_SERVER_SNB_TIMEOUT
+*           23.12.2022  1.30    Added the following Mesh Configuration option(s):
+*                               - MESH_CFG_LPN_CLEAR_RETRY_COUNT
+*                               - MESH_CFG_LIGHT_LC_SERVER_MAX
+*
+* For details, refer to "Program Updates (MESH FIT Module)" in the application note of 
+* RX23W Group Bluetooth Mesh FIT Module (R01AN4930).
 *******************************************************************************/
 
 #ifndef R_MESH_RX23W_CONFIG_H
@@ -168,7 +194,7 @@ Configuration Options
  *  Minimum Value: 20, Larger value will have lesser timeout load.
  *  Maximum Value: can be anything.
  */
-#define MESH_CFG_PROXY_SUBNET_NETID_ADV_TIMEOUT             100 /* Milliseconds */
+#define MESH_CFG_PROXY_SUBNET_NETID_ADV_TIMEOUT             300 /* Milliseconds */
 
 /*
  *  The interval time in millisecond for proxy advertisement with Node Identity for
@@ -177,7 +203,7 @@ Configuration Options
  *  Minimum Value: 20, Larger value will have lesser timeout load.
  *  Maximum Value: can be anything.
  */
-#define MESH_CFG_PROXY_SUBNET_NODEID_ADV_TIMEOUT            100 /* Milliseconds */
+#define MESH_CFG_PROXY_SUBNET_NODEID_ADV_TIMEOUT            300 /* Milliseconds */
 
 /*
  *  The time period in seconds for proxy advertisement with Node Identity.
@@ -275,7 +301,6 @@ Configuration Options
  */
 #define MESH_CFG_LTRN_ACK_TIMEOUT                           200 /* Milliseconds */
 
-
 /*
  *  The timeout in millisecond for Incomplete Timer.
  *
@@ -283,7 +308,6 @@ Configuration Options
  *  Maximum Value: can be anything.
  */
 #define MESH_CFG_LTRN_INCOMPLETE_TIMEOUT                    20 /* Seconds */
-
 
 /*
  *  Receive window is the time in millisecond for which the Friend will be transmitting the
@@ -316,12 +340,39 @@ Configuration Options
 /*
  *  This parameter defines the initial timeout in milliseconds
  *  to be used to track the Friend Clear Confirm message after
- *  sending of a Friend Clear message
+ *  sending of a Friend Clear message.
+ *
+ *  When the Friend Clear message is originating from an LPN,
+ *  this parameter is used to calculate the total time period
+ *  for which the LPN waits for the reception of Friend Clear
+ *  Confirmation from the Friend Node. The total time period
+ *  for which an LPN waits for Friend clear Confirmation is
+ *  product of this parameter and
+ *  \ref MESH_CFG_LPN_CLEAR_RETRY_COUNT in milliseconds. After each
+ *  individual timeout LPN retires Friend Clear message.
+ *
+ *  When the Friend Clear message is originating from an Friend,
+ *  this parameter is used as the initial timeout value. After
+ *  the first timeout the Friend doubles the timeout and retries
+ *  Friend Clear message.
  *
  *  Minimum Value: 1000 Milliseconds
  *  Maximum Value: As required
  */
 #define MESH_CFG_LPN_CLEAR_RETRY_TIMEOUT_INITIAL            1000 /* Milliseconds */
+
+/*
+ *  This parameter defines the total number of times an LPN
+ *  sends Friend clear message if it has not received Friend
+ *  clear Confirmation from a Friend Node.
+ *  The total time period for which an LPN waits for Friend
+ *  clear Confirmation is product of this parameter and
+ *  \ref MESH_CFG_LPN_CLEAR_RETRY_TIMEOUT_INITIAL in milliseconds.
+ *
+ *  Minimum Value: 1
+ *  Maximum Value: As required
+ */
+#define MESH_CFG_LPN_CLEAR_RETRY_COUNT                       5
 
 /*
  *  This parameter defines the interval time in milliseconds
@@ -416,6 +467,18 @@ Configuration Options
 #define MESH_CFG_HEALTH_SERVER_MAX                          2
 
 /* ----------------------------------------------------------------------- */
+/* =====================  Light LC Server Model ========================== */
+/* ----------------------------------------------------------------------- */
+/*
+ *  This parameter specifies the maximum number of Light LC Servers
+ *  to be supported.
+ *
+ *  Minimum Value: 1
+ *  Maximum Value: can be anything.
+ */
+#define MESH_CFG_LIGHT_LC_SERVER_MAX                        1
+
+/* ----------------------------------------------------------------------- */
 /* =============================  Misc. ================================== */
 /* ----------------------------------------------------------------------- */
 /*
@@ -451,7 +514,6 @@ Configuration Options
  *  Maximum Value: 8
  */
 #define MESH_CFG_DATA_FLASH_BLOCK_NUM                       (5)
-
 
 /* do not edit the following macro definitions */
 
@@ -492,12 +554,14 @@ Configuration Options
     (config).config_MS_LTRN_INCOMPLETE_TIMEOUT       = MESH_CFG_LTRN_INCOMPLETE_TIMEOUT; \
     (config).config_MS_FRND_RECEIVE_WINDOW           = MESH_CFG_FRND_RECEIVE_WINDOW; \
     (config).config_MS_LPN_CLEAR_RETRY_TIMEOUT_INITIAL = MESH_CFG_LPN_CLEAR_RETRY_TIMEOUT_INITIAL; \
+    (config).config_MS_LPN_CLEAR_RETRY_COUNT         = MESH_CFG_LPN_CLEAR_RETRY_COUNT; \
     (config).config_MS_TRN_FRNDREQ_RETRY_TIMEOUT     = MESH_CFG_TRN_FRNDREQ_RETRY_TIMEOUT; \
     (config).config_MS_UNPROV_DEVICE_BEACON_TIMEOUT  = MESH_CFG_UNPROV_DEVICE_BEACON_TIMEOUT; \
     (config).config_MS_NET_TX_QUEUE_SIZE             = MESH_CFG_NET_TX_QUEUE_SIZE; \
     (config).config_MS_MAX_NUM_TRANSITION_TIMERS     = MESH_CFG_MAX_NUM_TRANSITION_TIMERS; \
     (config).config_MS_MAX_NUM_PERIODIC_STEP_TIMERS  = MESH_CFG_MAX_NUM_PERIODIC_STEP_TIMERS; \
     (config).config_MS_HEALTH_SERVER_MAX             = MESH_CFG_HEALTH_SERVER_MAX; \
+    (config).config_MS_LIGHT_LC_SERVER_MAX           = MESH_CFG_LIGHT_LC_SERVER_MAX; \
     (config).config_MS_REPLAY_CACHE_SIZE             = MESH_CFG_REPLAY_CACHE_SIZE; \
     (config).config_MS_DEFAULT_COMPANY_ID            = MESH_CFG_DEFAULT_COMPANY_ID; \
     (config).config_MS_DEFAULT_PID                   = MESH_CFG_DEFAULT_PID; \

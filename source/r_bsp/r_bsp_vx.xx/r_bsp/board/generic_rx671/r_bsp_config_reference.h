@@ -36,6 +36,7 @@
 *         : 11.02.2022 1.02     Changed initial value of the following macro definitions.
 *                               - BSP_CFG_SWINT_UNIT1_ENABLE
 *                               - BSP_CFG_SWINT_UNIT2_ENABLE
+*         : 25.11.2022 1.03     Modified comment.
 ***********************************************************************************************************************/
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
 #define R_BSP_CONFIG_REF_HEADER_FILE
@@ -594,8 +595,6 @@ Configuration Options
        b26:b24 TMEF   - TM Enable - 000: TM function is enabled.
                                   - 111: TM function is disabled.
        b23:b0  Reserved (set to 1)
-       NOTE: If the dual bank function has not been incorporated in a device,
-             TMEFDB bits [b30:b26] are reserved area.
    Default value is 0xFFFFFFFF.
 */
 #define BSP_CFG_TRUSTED_MODE_FUNCTION  (0xFFFFFFFF)

@@ -28,6 +28,9 @@
 *                               - BSP_MCU_EXCEP_ADDRESS_ISR
 *         : 30.11.2021 1.02     Deleted the compile switch for BSP_CFG_MCU_PART_SERIES and BSP_CFG_MCU_PART_GROUP.
 *         : 22.04.2022 1.03     Added version check of smart configurator.
+*         : 25.11.2022 1.04     Added the following macro definition.
+*                               - BSP_EXPANSION_RAM
+*                               Added version check of smart configurator.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -57,6 +60,18 @@ Macro definitions
        later version.
      */
     #error "To use this version of BSP, you need to upgrade Smart configurator. Please upgrade Smart configurator. If you don't use Smart Configurator, please change value of BSP_CFG_CONFIGURATOR_VERSION and BSP_CFG_CODE_FLASH_BANK_MODE in r_bsp_config.h."
+#endif
+
+#if BSP_CFG_EXPANSION_RAM_ENABLE == 1
+#if BSP_CFG_CONFIGURATOR_VERSION < 2160
+    /* The following macros are updated to invalid value by Smart configurator if you are using Smart Configurator for 
+       RX V2.15.0 (equivalent to e2 studio 2022-10) or earlier version.
+       - BSP_CFG_EXPANSION_RAM_ENABLE
+       Please update Smart configurator to Smart Configurator for RX V2.16.0 (equivalent to e2 studio 2023-01) or 
+       later version.
+     */
+    #error "To use this version of BSP, you need to upgrade Smart configurator. Please upgrade Smart configurator. If you don't use Smart Configurator, please change value of BSP_CFG_CONFIGURATOR_VERSION in r_bsp_config.h."
+#endif
 #endif
 
 /* MCU CPU Version */
@@ -96,6 +111,9 @@ Macro definitions
 #else
     #error "ERROR - BSP_CFG_MCU_PART_PACKAGE - Unknown package chosen in r_bsp_config.h"
 #endif
+
+/* RAM */
+#define BSP_EXPANSION_RAM
 
 /* Memory size of your MCU. */
 #if   BSP_CFG_MCU_PART_MEMORY_SIZE == 0xD

@@ -46,22 +46,28 @@
 /*************************************************************************************************
  * Function Name  @fn            atc_sqndnslkup
  ************************************************************************************************/
-e_cellular_err_t atc_sqndnslkup(st_cellular_ctrl_t * const p_ctrl, const uint8_t * const p_domain_name)
+e_cellular_err_t atc_sqndnslkup(st_cellular_ctrl_t * const p_ctrl, const uint8_t * const p_domain_name,
+                                    const uint8_t ip_version)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
+    uint8_t str[2] = {0};
 
-    const uint8_t * const p_command_arg[CELLULAR_MAX_ARG_COUNT] = {p_domain_name};
+    if (CELLULAR_PROTOCOL_IPV4 == ip_version)
+    {
+        sprintf((char *)str, "%d", 0);   // (&uint8_t[])->(char *)
+    }
+    else
+    {
+        sprintf((char *)str, "%d", 1);   // (&uint8_t[])->(char *)
+    }
+
+    const uint8_t * const p_command_arg[CELLULAR_MAX_ARG_COUNT] = {p_domain_name, str};
 
     atc_generate(p_ctrl->sci_ctrl.atc_buff,
         (const uint8_t *)&gp_at_command[ATC_DNS_LOOKUP][0], // (const uint8_t *const *)->(const uint8_t **)
             (const uint8_t **)&p_command_arg);              // (const uint8_t *const *)->(const uint8_t **)
 
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_DNS_LOOKUP);
-    if (CELLULAR_ATC_OK != at_ret)
-    {
-        ret = CELLULAR_ERR_MODULE_COM;
-    }
+    ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_DNS_LOOKUP);
 
     return ret;
 }

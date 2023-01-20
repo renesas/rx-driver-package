@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.22 - Graphical user interface for embedded applications **
+** emWin V6.26 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -84,6 +84,7 @@ typedef struct {
   U8                  DragLimit;
   U8                  ResizeableColumns;
   U8                  Height;
+  U8                  xOff;
 } HEADER_Obj;
 
 /*********************************************************************
@@ -117,11 +118,18 @@ extern WIDGET_SKIN const * HEADER__pSkinDefault;
   HEADER_Obj * HEADER_LockH(HEADER_Handle h);
   #define HEADER_LOCK_H(h)   HEADER_LockH(h)
 #else
-  #define HEADER_LOCK_H(h)   (HEADER_Obj *)GUI_LOCK_H(h)
+  #define HEADER_LOCK_H(h)   (HEADER_Obj *)WM_LOCK_H(h)
 #endif
 
-void HEADER__SetDrawObj(HEADER_Handle hObj, unsigned Index, GUI_DRAW_HANDLE hDrawObj);
-
+/*********************************************************************
+*
+*       Private (module internal) functions
+*
+**********************************************************************
+*/
+void         HEADER__SetDrawObj       (HEADER_Handle hObj, unsigned Index, GUI_DRAW_HANDLE hDrawObj);
+void         HEADER__SetOffset        (HEADER_Handle hObj, U8 xOff);
+const char * HEADER__GetItemTextLocked(HEADER_Handle hObj, unsigned Index, void ** ppUnlock);
 
 #endif // GUI_WINSUPPORT
 #endif // Avoid multiple inclusion

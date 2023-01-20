@@ -49,7 +49,6 @@
 e_cellular_err_t atc_cgauth(st_cellular_ctrl_t * const p_ctrl, const st_cellular_ap_cfg_t * const p_ap_cfg)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
     uint8_t str_1[5] = {0};
     uint8_t str_2[32 + 1] = {0};
     uint8_t str_3[64 + 1] = {0};
@@ -89,17 +88,12 @@ e_cellular_err_t atc_cgauth(st_cellular_ctrl_t * const p_ctrl, const st_cellular
                 (const uint8_t *)&gp_at_command[ATC_USER_CONFIG][0], // (const uint8_t *const *)->(const uint8_t **)
                     (const uint8_t **)&p_command_arg);               // (const uint8_t *const *)->(const uint8_t **)
 
-        at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_USER_CONFIG);
+        ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_USER_CONFIG);
 
         memset(p_ctrl->sci_ctrl.atc_buff, 0x00, CELLULAR_ATC_BUFF_SIZE);
         memset(str_1, 0x00, sizeof(str_1));
         memset(str_2, 0x00, sizeof(str_2));
         memset(str_3, 0x00, sizeof(str_3));
-
-        if (CELLULAR_ATC_OK != at_ret)
-        {
-            ret = CELLULAR_ERR_MODULE_COM;
-        }
     }
 
     return ret;

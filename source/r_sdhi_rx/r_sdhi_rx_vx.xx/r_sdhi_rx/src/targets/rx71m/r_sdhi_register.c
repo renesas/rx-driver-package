@@ -19,7 +19,7 @@
 /**********************************************************************************************************************
 * System Name  : SDHI Driver
 * File Name    : r_sdhi_register.c
-* Version      : 2.00
+* Version      : 2.10
 * Device       : RX71M
 * Abstract     : API & Sub module
 * Tool-Chain   : For RX71M Group e2_studio
@@ -31,6 +31,7 @@
 /**********************************************************************************************************************
 * History      : DD.MM.YYYY Version Description
 *              : 31.07.2017 2.00    First Release
+*              : 27.12.2022 2.10    Updated slash format of included header file paths for Linux compatibility.
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -40,7 +41,7 @@ Includes <System Includes> , "Project Includes"
 #if defined(BSP_MCU_RX71M)
 
 #include "r_sdhi_rx_if.h"
-#include ".\src\r_sdhi_rx_private.h"
+#include "./src/r_sdhi_rx_private.h"
 
 /**********************************************************************************************************************
 Macro definitions

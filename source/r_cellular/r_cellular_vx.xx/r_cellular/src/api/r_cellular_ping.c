@@ -48,48 +48,56 @@
  * Function Name  @fn            R_CELLULAR_Ping
  ***********************************************************************/
 e_cellular_err_t R_CELLULAR_Ping(st_cellular_ctrl_t * const p_ctrl, const uint8_t * const p_host,
-                                    void(* const p_callback)(void * p_args))
+                                    const st_cellular_ping_cfg_t * const p_cfg)
 {
+    uint32_t preemption = 0;
     e_cellular_err_t ret = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
 
-    if ((NULL == p_ctrl) || (NULL == p_host))
+    preemption = cellular_interrupt_disable();
+    if ((NULL == p_ctrl) || (NULL == p_host) ||
+            ((NULL != p_cfg) && ((p_cfg->count < CELLULAR_PING_REQ_MIN) || (p_cfg->count > CELLULAR_PING_REQ_MAX) ||
+            (p_cfg->len < CELLULAR_PING_MES_MIN) || (p_cfg->len > CELLULAR_PING_MES_MAX) ||
+            (p_cfg->interval < CELLULAR_PING_INTER_MIN) || (p_cfg->interval > CELLULAR_PING_INTER_MIN) ||
+            (p_cfg->timeout < CELLULAR_PING_TIMEOUT_MIN) || (p_cfg->timeout > CELLULAR_PING_TIMEOUT_MAX))))
     {
         ret = CELLULAR_ERR_PARAMETER;
     }
     else
     {
-        if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
+        if (0 != (p_ctrl->running_api_count % 2))
+        {
+            ret = CELLULAR_ERR_OTHER_API_RUNNING;
+        }
+        else if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
         {
             ret = CELLULAR_ERR_NOT_OPEN;
         }
         else if (CELLULAR_SYSTEM_OPEN == p_ctrl->system_state)
         {
-            ret =  CELLULAR_ERR_NOT_CONNECT;
+            ret = CELLULAR_ERR_NOT_CONNECT;
         }
         else
         {
-            R_BSP_NOP();
+            p_ctrl->running_api_count += 2;
         }
     }
+    cellular_interrupt_enable(preemption);
 
     if (CELLULAR_SUCCESS == ret)
     {
         semaphore_ret = cellular_take_semaphore(p_ctrl->at_semaphore);
         if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
         {
-            if (NULL != p_callback)
-            {
-                p_ctrl->callback.ping_callback = p_callback;
-            }
-            ret = atc_ping(p_ctrl, p_host);
-            p_ctrl->callback.ping_callback = NULL;
+            ret = atc_ping(p_ctrl, p_host, p_cfg);
             cellular_give_semaphore(p_ctrl->at_semaphore);
         }
         else
         {
             ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
         }
+
+        p_ctrl->running_api_count -= 2;
     }
 
     return ret;

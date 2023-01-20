@@ -31,6 +31,7 @@
 *         : 16.11.2018 1.24     Supporting RTOS Thread safe
 *         : 01.03.2020 1.30     RX72N/RX66N is added and uITRON is supported.
 *         : 30.06.2022 1.40     USBX PCDC is supported.
+*         : 30.10.2022 1.41     USBX HMSC is supported.
 ******************************************************************************/
 
 #ifndef R_USB_RTOS_H
@@ -49,9 +50,11 @@ Includes   <System Includes> , "Project Includes"
 #include "kernel_id.h"
 #endif /* BSP_CFG_RTOS_USED == 4 */
 
+#if BSP_CFG_RTOS_USED != 5
 #if defined(USB_CFG_HMSC_USE)
 #include "r_usb_hmsc_if.h"
 #endif /* defined(USB_CFG_HMSC_USE) */
+#endif /* BSP_CFG_RTOS_USED != 5 */
 
 #if defined(USB_CFG_HCDC_USE)
 #include "r_usb_hcdc.h"
@@ -122,7 +125,7 @@ Includes   <System Includes> , "Project Includes"
 /** USB task stack size in words **/
 #define HCD_STACK_SIZE          (512)
 #define HUB_STACK_SIZE          (512)
-#define MGR_STACK_SIZE          (512)
+#define MGR_STACK_SIZE          (1536)
 #define PCD_STACK_SIZE          (512)
 #define PMSC_STACK_SIZE         (512)
 #define HCDC_STACK_SIZE         (512)

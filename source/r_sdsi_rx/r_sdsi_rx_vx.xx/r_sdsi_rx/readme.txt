@@ -5,12 +5,12 @@ r_sdsi_rx (SD Mode SDSI Driver)
 
 Document Number 
 ---------------
-R01AN3238EJ0202
-R01AN3238JJ0202
+R01AN3238EJ0203
+R01AN3238JJ0203
 
 Version
 -------
-v2.02
+v2.03
 
 Overview
 --------
@@ -27,7 +27,7 @@ Features
 * Supports FBR (Function Basic Register)-based operation
 * Supports access to CIS (Card Information Structure) 108 bytes
 * Supports access to Function1 register (Function Unique register space)
-* Supports direct transfer to MCUÅfs internal RAM
+* Supports direct transfer to MCUfs internal RAM
 * Can call callback function when detecting SDSI interrupt
 
 Supported MCUs
@@ -49,7 +49,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp    v5.20
+* r_bsp    v7.20
 
 How to add to your project
 --------------------------
@@ -79,7 +79,9 @@ Refer to "Adding Firmware Integration Technology Modules to CS+ Projects (R01AN1
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.01 release 00
+* Renesas RX v3.04
+* GCC for Renesas RX v8.3.0.202202
+* IAR C/C++ Compiler for Renesas RX v4.20.3
 
 File Structure
 --------------
@@ -90,9 +92,9 @@ r_sdsi_rx
 +---doc
 |   |
 |   +---en
-|   |       r01an3238ej0202-rx-communication.pdf
+|   |       r01an3238ej0203-rx-communication.pdf
 |   +---ja
-|           r01an3238jj0202-rx-communication.pdf
+|           r01an3238jj0203-rx-communication.pdf
 |
 +---ref
 |       r_sdsi_rx_config_reference.h

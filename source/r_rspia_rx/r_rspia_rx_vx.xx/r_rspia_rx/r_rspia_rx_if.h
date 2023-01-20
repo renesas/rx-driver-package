@@ -24,6 +24,7 @@
 *         : 31.03.2021 1.00     First Release
 *                               Supported for RX671.
 *         : 13.09.2021 1.10     Added the demo for RX671.
+*         : 29.07.2022 1.20     Updated demo projects.
 ***********************************************************************************************************************/
 
 #ifndef RSPIA_API_HEADER_FILE
@@ -51,7 +52,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define RSPIA_RX_VERSION_MAJOR           (1)
-#define RSPIA_RX_VERSION_MINOR           (10)
+#define RSPIA_RX_VERSION_MINOR           (20)
 
 /***********************************************************************************************************************
 Typedef definitions

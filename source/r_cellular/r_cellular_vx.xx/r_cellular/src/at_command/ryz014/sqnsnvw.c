@@ -51,7 +51,6 @@ e_cellular_err_t atc_sqnsnvw(st_cellular_ctrl_t * const p_ctrl, const e_cellular
                                     const uint8_t index, const uint32_t size)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
     uint8_t str[3][12] = {0};
 
     if (CELLULAR_NVM_TYPE_CERTIFICATE == data_type)
@@ -71,13 +70,8 @@ e_cellular_err_t atc_sqnsnvw(st_cellular_ctrl_t * const p_ctrl, const e_cellular
             (const uint8_t *)&gp_at_command[ATC_WRITE_CERTIFICATE][0], // (const uint8_t *const *)->(const uint8_t **)
                 (const uint8_t **)&p_command_arg);                // (const uint8_t *const *)->(const uint8_t **)
 
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout,
+    ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout,
             ATC_RETURN_OK_GO_SEND, ATC_WRITE_CERTIFICATE);
-
-    if (CELLULAR_ATC_OK != at_ret)
-    {
-        ret = CELLULAR_ERR_MODULE_COM;
-    }
 
     return ret;
 }
@@ -92,7 +86,6 @@ e_cellular_err_t atc_sqnsnvw_erase(st_cellular_ctrl_t * const p_ctrl, const e_ce
                                     const uint8_t index)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
     uint8_t str[2][12] = {0};
 
     if (CELLULAR_NVM_TYPE_CERTIFICATE == data_type)
@@ -111,12 +104,7 @@ e_cellular_err_t atc_sqnsnvw_erase(st_cellular_ctrl_t * const p_ctrl, const e_ce
             (const uint8_t *)&gp_at_command[ATC_ERASE_CERTIFICATE][0], // (const uint8_t *const *)->(const uint8_t **)
                 (const uint8_t **)&p_command_arg);                // (const uint8_t *const *)->(const uint8_t **)
 
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_ERASE_CERTIFICATE);
-
-    if (CELLULAR_ATC_OK != at_ret)
-    {
-        ret = CELLULAR_ERR_MODULE_COM;
-    }
+    ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_ERASE_CERTIFICATE);
 
     return ret;
 }

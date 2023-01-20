@@ -178,12 +178,21 @@
  */
 #define MS_LOGGER
 
+/*
+ *  MS_MODEL_SERVER_EXTENDED_INTERFACE
+ *
+ *  This flag enables extended interfaces for Model Servers.
+ *  Currently only for model server initialization. These new interfaces
+ *  are in the format MS_<model_name>_server_init_ext()
+ *                                               ^^^^
+ */
+#define MS_MODEL_SERVER_EXTENDED_INTERFACE
+
 /* ----------------------------------------------------------------------- */
 /* ==== Module Inclusion Flags for EtherMind Mesh Modules ================ */
 /* ----------------------------------------------------------------------- */
-/* Mesh Models */
+/* Mesh Config Model */
 #define MS_MODEL_CONFIG
-
 
 /* ----------------------------------------------------------------------- */
 /* ==== Module Inclusion Flags for EtherMind Mesh Modules ================ */
@@ -194,10 +203,15 @@
  *
  *  Dependency: None.
  */
+/* Mesh Bearer Module */
 #define MS_BRR
+/* Mesh Network Module */
 #define MS_NET
+/* Mesh Lower Transport Module */
 #define MS_LTRN
+/* Mesh Transport Module */
 #define MS_TRN
+/* Mesh Access Module */
 #define MS_ACCESS
 
 /* ----------------------------------------------------------------------- */
@@ -205,12 +219,25 @@
 /* ----------------------------------------------------------------------- */
 
 /*
+ *  MS_BEARER_ADV
+ *
+ *  An advertising bearer.
+ */
+#define MS_BEARER_ADV
+
+/*
+ *  MS_BEARER_GATT
+ *
+ *  A GATT bearer.
+ */
+/* #define MS_BEARER_GATT */
+
+/*
  * BLEBRR_LP_SUPPORT
  *
  * Enables Low Power Mode interfaces in the bearer.
  */
 /* #define BLEBRR_LP_SUPPORT */
-
 
 /* ----------------------------------------------------------------------- */
 /* ==== Network Module Specific Flags ==================================== */
@@ -293,6 +320,107 @@
 /* ==== Transport Module Specific Flags ================================== */
 /* ----------------------------------------------------------------------- */
 /*
+ *  MS_TRN_SEND_UNSEG_MSG_SUPPORT
+ *
+ *  Enables support for sending Unsegmented Transport Message procedure.
+ */
+#define MS_TRN_SEND_UNSEG_MSG_SUPPORT
+
+/*
+ *  MS_TRN_SEND_CTRL_PKT_SUPPORT
+ *
+ *  Enables support for sending Transport Control Packet procedure.
+ */
+#define MS_TRN_SEND_CTRL_PKT_SUPPORT
+
+#ifdef MS_TRN_SEND_CTRL_PKT_SUPPORT
+/*
+ *  MS_TRN_CTRL_FRND_PING_SUPPORT
+ *
+ *  Enables support for sending Transport Control Packet - Friend Poll procedure.
+ */
+#define MS_TRN_CTRL_FRND_POLL_SUPPORT
+
+/*
+ *  MS_TRN_CTRL_FRND_UPDATE_SUPPORT
+ *
+ *  Enables support for sending Transport Control Packet - Friend Update procedure.
+ */
+#define MS_TRN_CTRL_FRND_UPDATE_SUPPORT
+
+/*
+ *  MS_TRN_CTRL_FRND_REQ_SUPPORT
+ *
+ *  Enables support for sending Transport Control Packet - Friend Request procedure.
+ */
+#define MS_TRN_CTRL_FRND_REQ_SUPPORT
+
+/*
+ *  MS_TRN_CTRL_FRND_OFFER_SUPPORT
+ *
+ *  Enables support for sending Transport Control Packet - Friend Offer procedure.
+ */
+#define MS_TRN_CTRL_FRND_OFFER_SUPPORT
+
+/*
+ *  MS_TRN_CTRL_FRND_CLEAR_SUPPORT
+ *
+ *  Enables support for sending Transport Control Packet - Friend Clear procedure.
+ */
+#define MS_TRN_CTRL_FRND_CLEAR_SUPPORT
+
+/*
+ *  MS_TRN_CTRL_FRND_CLEAR_CNF_SUPPORT
+ *
+ *  Enables support for sending Transport Control Packet - Friend Clear Confirmation procedure.
+ */
+#define MS_TRN_CTRL_FRND_CLEAR_CNF_SUPPORT
+
+/*
+ *  MS_TRN_CTRL_FRND_SUBSCRN_LIST_ADD_SUPPORT
+ *
+ *  Enables support for sending Transport Control Packet - Friend Subscription List Add procedure.
+ */
+#define MS_TRN_CTRL_FRND_SUBSCRN_LIST_ADD_SUPPORT
+
+/*
+ *  MS_TRN_CTRL_FRND_SUBSCRN_LIST_REMOVE_SUPPORT
+ *
+ *  Enables support for sending Transport Control Packet - Friend Subscription List Remove procedure.
+ */
+#define MS_TRN_CTRL_FRND_SUBSCRN_LIST_REMOVE_SUPPORT
+
+/*
+ *  MS_TRN_CTRL_FRND_SUBSCRN_LIST_CNF_SUPPORT
+ *
+ *  Enables support for sending Transport Control Packet - Friend Subscription List Confirmation procedure.
+ */
+#define MS_TRN_CTRL_FRND_SUBSCRN_LIST_CNF_SUPPORT
+
+/*
+ *  MS_TRN_CTRL_HEARTBEAT_SUPPORT
+ *
+ *  Enables support for sending Transport Control Packet - Heartbeat procedure.
+ */
+#define MS_TRN_CTRL_HEARTBEAT_SUPPORT
+
+#endif /* MS_TRN_SEND_CTRL_PKT_SUPPORT */
+
+/*
+ *  MS_TRN_NO_NULL_PARAM_CHECK
+ *
+ *  This flag disables 'null' parameter check in Mesh Transport APIs
+ *
+ *  When application using Mesh Transport APIs are validated and
+ *  it is ensured that none of the API call path is using
+ *  an unexpected 'null' parameter, this flag can be enabled
+ *  to reduce the code size.
+ *
+ *  Dependency: None.
+ */
+/* #define MS_TRN_NO_NULL_PARAM_CHECK */
+
+/*
  *  MS_TRN_NO_RANGE_CHECK
  *
  *  This flag disables the check in Mesh Transport APIs to verify if the parameter
@@ -340,6 +468,30 @@
  */
 #define MS_ACESS_IV_INDEX_CHECK_IN_PROGRESS_SUPPORT
 
+/* ----------------------------------------------------------------------- */
+/* ==== Configuration Model Specific Flags =============================== */
+/* ----------------------------------------------------------------------- */
+/*
+ *  MS_CONFIG_SERVER_HAVE_APPL_CB
+ *
+ *  This flag enables Configuration Server to provide a Callback to the
+ *  Application layer.
+ *
+ *  Dependency: None.
+ */
+#define MS_CONFIG_SERVER_HAVE_APPL_CB
+
+/* ----------------------------------------------------------------------- */
+/* ==== Model Specific Flags ============================================= */
+/* ----------------------------------------------------------------------- */
+/*
+ *  MS_LIGHT_LC_SERVER_INTERNAL_FSM
+ *
+ *  This flag enables internal FSM usage for Light LC Server Model.
+ *
+ *  Dependency: None.
+ */
+#define MS_LIGHT_LC_SERVER_INTERNAL_FSM
 
 #endif /* _H_MS_FEATURES_ */
 

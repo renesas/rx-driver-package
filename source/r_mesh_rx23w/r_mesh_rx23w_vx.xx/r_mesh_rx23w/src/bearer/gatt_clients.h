@@ -4,7 +4,7 @@
  */
 
 /*
- *  Copyright (C) 2018-2021. Mindtree Limited.
+ *  Copyright (C) 2018-2022. Mindtree Limited.
  *  All rights reserved.
  */
 
@@ -174,7 +174,7 @@ typedef struct
         mesh_client_discover_services((conhdl), (BLEBRR_GATT_PROV_MODE));
 
 #define mesh_proxy_client_discover_serv(conhdl) \
-        mesh_client_discover_services((conhdl), (BLEBRR_GATT_PROV_MODE));
+        mesh_client_discover_services((conhdl), (BLEBRR_GATT_PROXY_MODE));
 
 #define mesh_prov_client_data_in_write(conhdl, val, len) \
         mesh_client_send_wwr((conhdl), (val), (len), BLEBRR_GATT_PROV_MODE);

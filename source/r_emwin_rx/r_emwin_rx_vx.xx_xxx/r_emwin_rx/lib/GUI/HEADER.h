@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.22 - Graphical user interface for embedded applications **
+** emWin V6.26 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -122,7 +122,6 @@ U8               HEADER_GetBorderV          (HEADER_Handle hObj);
 int              HEADER_GetColumnFromPos    (HEADER_Handle hObj, int x);
 const GUI_FONT * HEADER_GetFont             (HEADER_Handle hObj);
 int              HEADER_GetHeight           (HEADER_Handle hObj);
-const char     * HEADER_GetItemTextLocked   (HEADER_Handle hObj, unsigned Index, void ** ppUnlock);  // Not to be documented!!!
 int              HEADER_GetItemText         (HEADER_Handle hObj, unsigned Index, char * pBuffer, int MaxSize);
 int              HEADER_GetItemWidth        (HEADER_Handle hObj, unsigned Index);
 int              HEADER_GetNumItems         (HEADER_Handle hObj);

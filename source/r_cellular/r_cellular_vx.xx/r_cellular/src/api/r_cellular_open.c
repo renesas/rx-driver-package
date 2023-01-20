@@ -33,6 +33,11 @@
 /**********************************************************************************************************************
  * Macro definitions
  *********************************************************************************************************************/
+#define PHASE_1     (0x01 << 0)
+#define PHASE_2     (0x01 << 1)
+#define PHASE_3     (0x01 << 2)
+#define PHASE_4     (0x01 << 3)
+#define PHASE_5     (0x01 << 4)
 
 /**********************************************************************************************************************
  * Typedef definitions
@@ -41,11 +46,14 @@
 /**********************************************************************************************************************
  * Exported global variables
  *********************************************************************************************************************/
+st_cellular_ctrl_t * gp_cellular_ctrl = NULL;
 
 /**********************************************************************************************************************
  * Private (static) variables and functions
  *********************************************************************************************************************/
+static e_cellular_err_t cellular_init (st_cellular_ctrl_t * const p_ctrl, const st_cellular_cfg_t * const p_cfg);
 static e_cellular_err_t cellular_config_init (st_cellular_ctrl_t * const p_ctrl, const st_cellular_cfg_t * const p_cfg);
+static void cellular_open_fail (st_cellular_ctrl_t * const p_ctrl, const uint8_t open_phase);
 
 /*************************************************************************************************
  * Function Name  @fn            R_CELLULAR_Open
@@ -53,6 +61,7 @@ static e_cellular_err_t cellular_config_init (st_cellular_ctrl_t * const p_ctrl,
 e_cellular_err_t R_CELLULAR_Open(st_cellular_ctrl_t * const p_ctrl, const st_cellular_cfg_t * const p_cfg)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
+    uint8_t open_phase = 0;
 
     CELLULAR_LOG_INFO(("Called: R_CELLULAR_Open()"));
 
@@ -70,12 +79,15 @@ e_cellular_err_t R_CELLULAR_Open(st_cellular_ctrl_t * const p_ctrl, const st_cel
         }
     }
 
+    gp_cellular_ctrl = p_ctrl;
+
 #if BSP_CFG_RTOS_USED == (5)
     ret = cellular_block_pool_create();
     if (CELLULAR_SUCCESS != ret)
     {
         goto R_CELLULAR_Open_fail;
     }
+    open_phase |= PHASE_1;
 #endif
 
     ret = cellular_config_init(p_ctrl, p_cfg);
@@ -83,24 +95,28 @@ e_cellular_err_t R_CELLULAR_Open(st_cellular_ctrl_t * const p_ctrl, const st_cel
     {
         goto R_CELLULAR_Open_fail;
     }
+    open_phase |= PHASE_2;
 
     ret = cellular_serial_open(p_ctrl);
     if (CELLULAR_SUCCESS != ret)
     {
         goto R_CELLULAR_Open_fail;
     }
+    open_phase |= PHASE_3;
 
     ret = cellular_semaphore_init(p_ctrl);
     if (CELLULAR_SUCCESS != ret)
     {
         goto R_CELLULAR_Open_fail;
     }
+    open_phase |= PHASE_4;
 
     ret = cellular_start_recv_task(p_ctrl);
     if (CELLULAR_SUCCESS != ret)
     {
         goto R_CELLULAR_Open_fail;
     }
+    open_phase |= PHASE_5;
 
     if ((CELLULAR_MAIN_TASK_BIT | CELLULAR_RECV_TASK_BIT) !=
             cellular_synchro_event_group(p_ctrl->eventgroup, CELLULAR_MAIN_TASK_BIT,
@@ -110,57 +126,20 @@ e_cellular_err_t R_CELLULAR_Open(st_cellular_ctrl_t * const p_ctrl, const st_cel
         goto R_CELLULAR_Open_fail;
     }
 
-    CELLULAR_SET_DR(CELLULAR_CFG_RESET_PORT, CELLULAR_CFG_RESET_PIN) = CELLULAR_CFG_RESET_SIGNAL_ON;
-    CELLULAR_SET_DDR(CELLULAR_CFG_RESET_PORT, CELLULAR_CFG_RESET_PIN) = CELLULAR_PIN_DIRECTION_MODE_OUTPUT;
-    cellular_delay_task(1); /* hold reset signal time for cellular module */
-    CELLULAR_SET_DR(CELLULAR_CFG_RESET_PORT, CELLULAR_CFG_RESET_PIN) = CELLULAR_CFG_RESET_SIGNAL_OFF;
-    cellular_delay_task(2000); /* wait wake up time for cellular module initialization */
-
-    ret = atc_ate0(p_ctrl);
-    if (CELLULAR_SUCCESS != ret)
-    {
-        CELLULAR_LOG_INFO(("First sending AT command to RYZ014A -> Failed."));
-        goto R_CELLULAR_Open_fail;
-    }
-
-    CELLULAR_LOG_INFO(("First sending AT command to RYZ014A -> Succeeded."));
-
-    ret = atc_sqnsimst(p_ctrl);
+    ret = cellular_module_reset(p_ctrl);
     if (CELLULAR_SUCCESS != ret)
     {
         goto R_CELLULAR_Open_fail;
     }
 
-    ret = atc_cereg(p_ctrl, CELLULAR_ENABLE_NETWORK_RESULT_CODE_LEVEL1);
-    if (CELLULAR_SUCCESS != ret)
-    {
-        goto R_CELLULAR_Open_fail;
-    }
-
-    ret = atc_cfun(p_ctrl, CELLULAR_MODULE_OPERATING_LEVEL4);
-    if (CELLULAR_SUCCESS != ret)
-    {
-        goto R_CELLULAR_Open_fail;
-    }
-
-    ret = atc_cpin_check(p_ctrl);
-    if (CELLULAR_SUCCESS != ret)
-    {
-        ret = atc_cpin(p_ctrl, p_cfg);
-        if (CELLULAR_SUCCESS != ret)
-        {
-            CELLULAR_LOG_ERROR(("PIN CODE ERROR."));
-            goto R_CELLULAR_Open_fail;
-        }
-    }
-    p_ctrl->system_state = CELLULAR_SYSTEM_OPEN;
+    ret = cellular_init(p_ctrl, p_cfg);
 
 R_CELLULAR_Open_fail:
 
     if ((CELLULAR_SUCCESS != ret) && (CELLULAR_ERR_ALREADY_OPEN != ret))
     {
         CELLULAR_LOG_ERROR(("Error: R_CELLULAR_Open()."));
-        R_CELLULAR_Close(p_ctrl);
+        cellular_open_fail(p_ctrl, open_phase);
     }
 
     CELLULAR_LOG_INFO(("Return from: R_CELLULAR_Open() with return code = %d.", ret));
@@ -173,26 +152,7 @@ R_CELLULAR_Open_fail:
 
 /************************************************************************
  * Function Name  @fn            cellular_config_init
- * Short Summary  @brief         Does an example task.
- * Description    @details       Does an example task. Making this longer
- *                               just to see how it wraps. Making this
- *                               long just to see how it wraps.
- * Preconditions  @pre           What should be in place before calling
- *                               this?
- * Warnings       @warning       Any big gotchas?
- * Arguments      @param[in]     input parameters
- *                @param[out]    input parameters
- *                @param[in/out] bidirectional parameters
- * Return Value   @retval        what is passed back on completion
  ***********************************************************************/
-/**********************************************************************************************************************
- * @brief       Get flash memory information (index and size)
- * @param[in]   addr            blinking LED
- * @param[out]  block_index     Index of flash block
- * @param[out]  block_size      Size of flash block
- * @retval      true            success
- * @retval      false           fail
- *********************************************************************************************************************/
 static e_cellular_err_t cellular_config_init(st_cellular_ctrl_t * const p_ctrl, const st_cellular_cfg_t * const p_cfg)
 {
     uint8_t count;
@@ -273,4 +233,115 @@ static e_cellular_err_t cellular_config_init(st_cellular_ctrl_t * const p_ctrl, 
 }
 /**********************************************************************************************************************
  * End of function cellular_config_init
+ *********************************************************************************************************************/
+
+/************************************************************************
+ * Function Name  @fn            cellular_init
+ ***********************************************************************/
+static e_cellular_err_t cellular_init(st_cellular_ctrl_t * const p_ctrl, const st_cellular_cfg_t * const p_cfg)
+{
+    e_cellular_err_t ret = CELLULAR_SUCCESS;
+
+    ret = atc_ate0(p_ctrl);
+    if (CELLULAR_SUCCESS != ret)
+    {
+        CELLULAR_LOG_INFO(("First sending AT command to RYZ014A -> Failed."));
+        goto R_CELLULAR_Open_fail;
+    }
+
+    CELLULAR_LOG_INFO(("First sending AT command to RYZ014A -> Succeeded."));
+
+    ret = atc_sqnsimst(p_ctrl);
+    if (CELLULAR_SUCCESS != ret)
+    {
+        goto R_CELLULAR_Open_fail;
+    }
+
+    ret = atc_cereg(p_ctrl, (e_cellular_network_result_t)CELLULAR_CFG_NETWORK_NOTIFY_LEVEL); //cast
+    if (CELLULAR_SUCCESS != ret)
+    {
+        goto R_CELLULAR_Open_fail;
+    }
+
+    ret = atc_cfun(p_ctrl, CELLULAR_MODULE_OPERATING_LEVEL4);
+    if (CELLULAR_SUCCESS != ret)
+    {
+        goto R_CELLULAR_Open_fail;
+    }
+
+    ret = atc_cpin_check(p_ctrl);
+    if (CELLULAR_SUCCESS != ret)
+    {
+        ret = atc_cpin(p_ctrl, p_cfg);
+        if (CELLULAR_SUCCESS != ret)
+        {
+            CELLULAR_LOG_ERROR(("PIN CODE ERROR."));
+            goto R_CELLULAR_Open_fail;
+        }
+    }
+
+    p_ctrl->system_state = CELLULAR_SYSTEM_OPEN;
+
+R_CELLULAR_Open_fail:
+    {
+        return ret;
+    }
+}
+/**********************************************************************************************************************
+ * End of function cellular_init
+ *********************************************************************************************************************/
+
+/************************************************************************
+ * Function Name  @fn            cellular_open_fail
+ ***********************************************************************/
+static void cellular_open_fail(st_cellular_ctrl_t * const p_ctrl, const uint8_t open_phase)
+{
+    uint8_t i = 0;
+
+    if ((open_phase & PHASE_5) == PHASE_5)
+    {
+        cellular_delete_event_group(p_ctrl->eventgroup);
+        p_ctrl->eventgroup = NULL;
+
+        cellular_delete_task(p_ctrl->recv_taskhandle);
+        p_ctrl->recv_taskhandle = NULL;
+    }
+
+    if ((open_phase & PHASE_4) == PHASE_4)
+    {
+        cellular_delete_semaphore(p_ctrl->at_semaphore);
+        p_ctrl->at_semaphore = NULL;
+
+        for (i = 0; i < p_ctrl->creatable_socket; i++ )
+        {
+            cellular_delete_semaphore(p_ctrl->p_socket_ctrl[i].rx_semaphore);
+            p_ctrl->p_socket_ctrl[i].rx_semaphore = NULL;
+        }
+    }
+
+    if ((open_phase & PHASE_3) == PHASE_3)
+    {
+        cellular_serial_close(p_ctrl);
+    }
+
+    if ((open_phase & PHASE_2) == PHASE_2)
+    {
+        cellular_free(p_ctrl->p_socket_ctrl);
+        p_ctrl->p_socket_ctrl = NULL;
+    }
+
+    if (NULL != p_ctrl)
+    {
+        memset(p_ctrl, 0, sizeof(st_cellular_ctrl_t));
+    }
+
+#if BSP_CFG_RTOS_USED == (5)
+    if ((open_phase & PHASE_1) == PHASE_1)
+    {
+        cellular_block_pool_delete();
+    }
+#endif
+}
+/**********************************************************************************************************************
+ * End of function cellular_open_fail
  *********************************************************************************************************************/

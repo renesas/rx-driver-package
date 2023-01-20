@@ -5,13 +5,13 @@ r_rscan_rx
 
 Document Number 
 ---------------
-R01AN2805EU0241
-R01AN2805JU0241
+R01AN2805EU0250
+R01AN2805JU0250
 
 
 Version
 -------
-v2.41
+v2.50
 
 
 Overview
@@ -37,9 +37,7 @@ order they are sent. Note that any FIFO usage is optional and are not required f
 normal operation.
 
 The driver can be reduced in size by removing code used for parameter checking. 
-This configuration option can be found in "r_config\r_rscan_rx_config.h". An 
-original copy of the configuration file is stored in 
-"r_rscan_rx\ref\r_rscan_rx_config_reference.h".
+This configuration option can be found in "r_config\r_rscan_rx_config.h".
 
 
 Features
@@ -96,8 +94,8 @@ How to add to your project
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.03
-* GCC for Renesas RX 8.3.0.202104
+* Renesas RX v3.04
+* GCC for Renesas RX 8.3.0.202202
 * IAR C/C++ Compiler for Renesas RX 4.20.3
 
 

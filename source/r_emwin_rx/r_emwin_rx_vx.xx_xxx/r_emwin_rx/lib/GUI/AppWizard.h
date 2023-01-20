@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2020  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.20 - Graphical user interface for embedded applications **
+** emWin V6.26 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -51,6 +51,10 @@ Purpose     : Interface of AppWizard
 #include "GAUGE_Private.h"
 #include "KEYBOARD_Private.h"
 #include "MULTIEDIT_Private.h"
+#include "DROPDOWN_Private.h"
+#include "LISTVIEW_Private.h"
+#include "LISTBOX_Private.h"
+#include "WHEEL_Private.h"
 
 #if (GUI_WINSUPPORT && GUI_SUPPORT_MEMDEV && WM_SUPPORT_TRANSPARENCY && GUI_SUPPORT_ROTATION)
 
@@ -141,6 +145,9 @@ Purpose     : Interface of AppWizard
 #define APPW_MSG_GET_FOCUSRECT  (APPW_MSG + 12)
 #define APPW_MSG_GET_TYPE       (APPW_MSG + 13)
 #define APPW_MSG_SET_DRAW       (APPW_MSG + 14)
+#define APPW_MSG_GET_CONTENT    (APPW_MSG + 15)
+#define APPW_MSG_GET_PROP       (APPW_MSG + 16)
+#define APPW_MSG_GET_ITEM       (APPW_MSG + 17)
 
 //
 // Draw modes
@@ -188,11 +195,26 @@ Purpose     : Interface of AppWizard
 #define APPW_EDITMODE_DEC  1
 
 //
+// Flags for Listview-object
+//
+#define APPW_FLAGS_LISTVIEW_SHOWGRID_HEADER (1 << 0)
+#define APPW_FLAGS_LISTVIEW_SHOWGRID_H      (1 << 1)
+#define APPW_FLAGS_LISTVIEW_SHOWGRID_V      (1 << 2)
+
+//
 // Text state
 //
 #define APPW_STATE_TEXT_INVALID  (1U << 0)
 #define APPW_STATE_TEXT_HASTEXT  (1U << 1)
 #define APPW_STATE_TEXT_HASVALUE (1U << 2)
+
+//
+// Listview compare modes
+//
+#define APPW_LISTVIEW_COMPARE_NONE 0
+#define APPW_LISTVIEW_COMPARE_TEXT 1
+#define APPW_LISTVIEW_COMPARE_DEC  2
+#define APPW_LISTVIEW_COMPARE_USER 3
 
 //
 // Conditions
@@ -243,7 +265,11 @@ enum {
   TYPE_OBJECT_KEYBOARD,
   TYPE_OBJECT_PROGBAR,
   TYPE_OBJECT_TIMER,
-  TYPE_OBJECT_MULTIEDIT
+  TYPE_OBJECT_MULTIEDIT,
+  TYPE_OBJECT_DROPDOWN,
+  TYPE_OBJECT_LISTVIEW,
+  TYPE_OBJECT_LISTBOX,
+  TYPE_OBJECT_WHEEL
 };
 
 //
@@ -291,7 +317,8 @@ enum {
   ATOM_VARIABLE,
   ATOM_OBJECT_GEO,
   ATOM_SCREEN_GEO,
-  ATOM_CONSTANT
+  ATOM_CONSTANT,
+  ATOM_OBJECT_PROP
 };
 
 //
@@ -304,6 +331,14 @@ enum {
   ATOM_DETAIL_Y1 = DISPOSE_INDEX_Y1,
   ATOM_DETAIL_XSIZE,
   ATOM_DETAIL_YSIZE
+};
+
+//
+// Atom property definitions
+//
+enum {
+  ATOM_PROP_NUMCOLS = 0,  // Number of columns
+  ATOM_PROP_NUMROWS       // Number of rows
 };
 
 //
@@ -364,6 +399,15 @@ enum {
 };
 
 //
+// Modes for source object of APPW_JOB_SETITEM, APPW_JOB_ADDITEM and APPW_JOB_INSITEM
+//
+enum {
+  APPW_ITEM_MODE_UNDEFINED = 0,
+  APPW_ITEM_MODE_RESOURCE,
+  APPW_ITEM_MODE_OBJECT,
+};
+
+//
 // Jobs of interactions
 //
 enum {
@@ -397,7 +441,7 @@ enum {
   /* 15 */ APPW_JOB_SETALPHA,       // (pPara + 0)->v     - Value to be set
   /* 16 */ APPW_JOB_SETSIZE,        // (pPara + 0)->v     - Value to be used
                                     // (pPara + 1)->v     - Index of axis
-  /* 17 */ APPW_JOB_CASCADECOORD,   // (pPara + 0)->v     - End value
+  /* 17 */ APPW_JOB_CASCADECOORD,   // (pPara + 0)->v     - End value              //TBD: Obsolete
                                     // (pPara + 1)->v     - Index of coordinate
                                     // (pPara + 2)->v     - Emitter Id of trigger
   /* 18 */ APPW_JOB_SHIFTSCREEN,    // (pPara + 0)->v     - Screen Id
@@ -415,8 +459,8 @@ enum {
   /* 22 */ APPW_JOB_TOGGLE,         // === NO PARAMETERS ===
   /* 23 */ APPW_JOB_START,          // === NO PARAMETERS ===
   /* 24 */ APPW_JOB_STOP,           // === NO PARAMETERS ===
-  /* 25 */ APPW_JOB_SETTEXT,        // (pPara + 0)->v     - Text id (if (pPara + 0)->p == NULL)
-                                    // (pPara + 0)->p     - Handle  (if (pPara + 0)->v < 0)
+  /* 25 */ APPW_JOB_SETTEXT,        // (pPara + 0)->v     - Text resource Id (if (pPara + 0)->p == NULL)
+                                    // (pPara + 0)->p     - Handle           (if (pPara + 0)->v < 0)
   /* 26 */ APPW_JOB_SHOWSCREEN,     // (pPara + 0)->v     - Screen Id
   /* 27 */ APPW_JOB_SETLANG,        // (pPara + 0)->v     - Index of language 
   /* 28 */ APPW_JOB_SETFOCUS,       // === NO PARAMETERS ===
@@ -442,109 +486,120 @@ enum {
                                     // (pPara + 3)->v     - If set to 1 the source file name is in const memory
   /* 41 */ APPW_JOB_SETSTART,       // (pPara + 0)->v     - Value
   /* 42 */ APPW_JOB_SETEND,         // (pPara + 0)->v     - Value
-  /* 43 */ APPW_JOB_INVALIDATE      // === NO PARAMETERS ===
+  /* 43 */ APPW_JOB_INVALIDATE,     // === NO PARAMETERS ===
+  /* 44 */ APPW_JOB_SETITEM,        // (pPara + 0)->v     - Type: 0 = text resource, 1 = object
+                                    // (pPara + 1)->v     - 0: Text resource Id, 1: HB/LB: screen Id/object Id
+                                    // (pPara + 2)->v     - Source: Row index    (Listview, Dropdown, Listbox)
+                                    // (pPara + 3)->v     - Source: Column index (Listview only)
+                                    // (pPara + 4)->v     - Target: Row index    (Listview, Dropdown, Listbox)
+                                    // (pPara + 5)->v     - Target: Column index (Listview only)
+  /* 45 */ APPW_JOB_ADDITEM,        // (pPara + 0)->v     - Type: 0 = text resource, 1 = object
+                                    // (pPara + 1)->v     - 0: Text resource Id, 1: HB/LB: screen Id/object Id
+                                    // (pPara + 2)->v     - Source: Row index    (Listview, Dropdown, Listbox)
+                                    // (pPara + 3)->v     - Source: Column index (Listview only)
+                                    // (pPara + 4)->v     - Target: Column index (Listview only)
+  /* 46 */ APPW_JOB_INSITEM,        // (pPara + 0)->v     - Type: 0 = text resource, 1 = object
+                                    // (pPara + 1)->v     - 0: Text resource Id, 1: HB/LB: screen Id/object Id
+                                    // (pPara + 2)->v     - Source: Row index    (Listview, Dropdown, Listbox)
+                                    // (pPara + 3)->v     - Source: Column index (Listview only)
+                                    // (pPara + 4)->v     - Target: Row index    (Listview, Dropdown, Listbox)
+                                    // (pPara + 5)->v     - Target: Column index (Listview only)
+  /* 47 */ APPW_JOB_DELITEM,        // (pPara + 0)->v     - Item index to be deleted
+  /* 48 */ APPW_JOB_MOVETO          // (pPara + 0)->v     - Value
 };
 
 //
-// Commands for setting properties !!! INCLUDING USAGE DESCRIPTION FOR REFERENCE !!!
-//
-// IMPORTANT: Sequence has to be identical to _aSetup[] in APP_StreamWrite.cpp!!!
+// Commands for setting properties
 //
 enum {
-//--------------------------------------------------------------------------------
-// Value                                  Purpose
-//--------------------------------------------------------------------------------
-  /*  0 */ APPW_SET_PROP_COLOR   = 0,  // pSetup->aPara [0].v     = Color
-  /*  1 */ APPW_SET_PROP_COLORS     ,  // pSetup->aPara [0:3].v   = Colors for unpressed, pressed and disabled
-  /*  2 */ APPW_SET_PROP_BKCOLOR    ,  // === same as APPW_SET_PROP_COLOR ===
-  /*  3 */ APPW_SET_PROP_BKCOLORS   ,  // === same as APPW_SET_PROP_COLORS ===
-  /*  4 */ APPW_SET_PROP_SBITMAP    ,  // === same as unpressed image of APPW_SET_PROP_SBITMAPS ===
-  /*  5 */ APPW_SET_PROP_JPEG       ,  // pSetup->aPara [0].p     = INT: Pointer to Image-Data / EXT: Pointer to Image-Filename (EXT)
-                                       // pSetup->aPara [0].v     = 0 (INT) / 1 (EXT)
-                                       // pSetup->aExtra[0].p     = Source file name (=== In AppWizard application only ===)
-                                       // pSetup->aExtra[0].v     = If set to 1 the source file names are in const memory
-                                       // pSetup->aPara [1].v     = File size
-  /*  6 */ APPW_SET_PROP_BMP        ,  // === same as APPW_SET_PROP_JPEG ===
-  /*  7 */ APPW_SET_PROP_GIF        ,  // === same as APPW_SET_PROP_JPEG ===
-  /*  8 */ APPW_SET_PROP_SBITMAPS   ,  // pSetup->aPara [0:3].p   = pObj->apDraw[0:2].pData - unpressed, pressed, disabled, DTA-Data (INT) / DTA-Filename (EXT)
-                                       // pSetup->aPara [0:3].v   = 0 (INT) / 1 (EXT)
-                                       // pSetup->aExtra[0:3].p   = Source file names (=== In AppWizard application only ===)
-                                       // pSetup->aExtra[0:3].v   = If set to 1 the source file names are in const memory
-  /*  9 */ APPW_SET_PROP_REPEAT     ,  // pSetup->aPara [0].v     = Delay
-                                       // pSetup->aPara [1].v     = Period
-  /* 10 */ APPW_SET_PROP_TOGGLE     ,  // === NO PARAMETERS ===
-  /* 11 */ APPW_SET_PROP_TEXTID     ,  // pSetup->aPara [0].p     = Pointer to pointer containing Id-string
-                                       // pSetup->aPara [0].v     = Index value of text calculated in APP_DataUpdateObjects()
-  /* 12 */ APPW_SET_PROP_ALIGNTEXT  ,  // pSetup->aPara [0:2].v   = pObj->AlignBm, pObj->xOffBm, pObj->yOffBm
-  /* 13 */ APPW_SET_PROP_ALIGNBITMAP,  // pSetup->aPara [0:2].v   = pObj->AlignBm, pObj->xOffBm, pObj->yOffBm
-  /* 14 */ APPW_SET_PROP_FONT       ,  // pSetup->aPara [0].p     = XBF-Data (INT) / Pointer to APPW_FILE_INFO structure (EXT)
-                                       // pSetup->aPara [0].v     = 0 (INT) / 1 (EXT)
-  /* 15 */ APPW_SET_PROP_GRADH      ,  // pSetup->aPara [0].v     = n Number of colors
-                                       // pSetup->aPara [0].p     = Pointer to n GUI_GRADIENT_INFO elements
-  /* 16 */ APPW_SET_PROP_GRADV      ,  // === same as APPW_SET_PROP_GRADH ===
-  /* 17 */ APPW_SET_PROP_MOTIONH    ,  // pSetup->aPara [0].p     = Pointer to APPW_ROOT_INFO of left screen (H) top screen (V)
-                                       // pSetup->aExtra[0].p     = Pointer to Id-string          "" (=== In AppWizard application only ===)
-                                       // pSetup->aPara [0].v     = Swiping mode                  ""
-                                       // pSetup->aPara [1].p     = Pointer to APPW_ROOT_INFO  of right screen (H) bottom screen (V)
-                                       // pSetup->aExtra[1].p     = Pointer to Id-string          "" (=== In AppWizard application only ===)
-                                       // pSetup->aPara [1].v     = Swiping mode                  ""
-                                       // pSetup->aPara [2].v     = 'Snap in' period              ""
-  /* 18 */ APPW_SET_PROP_MOTIONV    ,  // === same as APPW_SET_PROP_MOTIONH ===
-  /* 19 */ APPW_SET_PROP_RANGE      ,  // pSetup->aPara [0].v     = Minimum value
-                                       // pSetup->aPara [1].v     = Maximum value
-  /* 20 */ APPW_SET_PROP_OFFSET     ,  // pSetup->aPara [0].v     = Offset
-  /* 21 */ APPW_SET_PROP_POS        ,  // pSetup->aPara [0].v     = Position
-  /* 22 */ APPW_SET_PROP_DECMODE    ,  // pSetup->aPara [0].v     = Len   (parameter of func TEXT_SetDec())
-                                       // pSetup->aPara [1].v     = Shift (parameter of func TEXT_SetDec())
-                                       // pSetup->aPara [2].v     = Sign  (parameter of func TEXT_SetDec())
-                                       // pSetup->aPara [3].v     = Space (parameter of func TEXT_SetDec())
-  /* 23 */ APPW_SET_PROP_HEXMODE    ,  // pSetup->aPara [0].v     = Len   (parameter of func TEXT_SetDec())
-  /* 24 */ APPW_SET_PROP_VALUE      ,  // pSetup->aPara [0].v     = Value to be used
-  /* 25 */ APPW_SET_PROP_INVERT     ,  // === NO PARAMETERS ===
-  /* 26 */ APPW_SET_PROP_PERIOD     ,  // pSetup->aPara [0].v     = Sets period when widget stops motion
-  /* 27 */ APPW_SET_PROP_SNAP       ,  // pSetup->aPara [0].v     = Sets sets snap position in 1/10 degrees
-  /* 28 */ APPW_SET_PROP_SPAN       ,  // pSetup->aPara [0].v     = Minimum value returned by object
-                                       // pSetup->aPara [1].v     = Maximum value returned by object
-  /* 29 */ APPW_SET_PROP_VERTICAL   ,  // === NO PARAMETERS ===
-  /* 30 */ APPW_SET_PROP_PERSISTENT ,  // === NO PARAMETERS ===
-  /* 31 */ APPW_SET_PROP_ROTATE     ,  // === NO PARAMETERS ===
-  /* 32 */ APPW_SET_PROP_FADE       ,  // === NO PARAMETERS ===
-  /* 33 */ APPW_SET_PROP_TILE       ,  // === NO PARAMETERS ===
-  /* 34 */ APPW_SET_PROP_WRAP       ,  // === NO PARAMETERS ===
-  /* 35 */ APPW_SET_PROP_ROUNDEDVAL ,  // === NO PARAMETERS ===
-  /* 36 */ APPW_SET_PROP_ROUNDEDEND ,  // === NO PARAMETERS ===
-  /* 37 */ APPW_SET_PROP_OVERWRITE  ,  // === NO PARAMETERS ===
-  /* 38 */ APPW_SET_PROP_AUTORESTART,  // === NO PARAMETERS ===
-  /* 39 */ APPW_SET_PROP_LQ         ,  // === NO PARAMETERS ===
-  /* 40 */ APPW_SET_PROP_OPAQUE     ,  // === NO PARAMETERS ===
-  /* 41 */ APPW_SET_PROP_STAYONTOP  ,  // === NO PARAMETERS ===
-  /* 42 */ APPW_SET_PROP_UNTOUCHABLE,  // === NO PARAMETERS ===
-  /* 43 */ APPW_SET_PROP_MOTION     ,  // pSetup->aPara [0].v     = Mode to be used (H-, V- or H- and V-mode)
-  /* 44 */ APPW_SET_PROP_TEXTID2    ,  // === same as APPW_SET_PROP_TEXTID ===
-  /* 45 */ APPW_SET_PROP_ALIGN      ,  // pSetup->aPara [0].v     = pObj->Align
-  /* 46 */ APPW_SET_PROP_RADIUS     ,  // pSetup->aPara [0].v     = Radius
-  /* 47 */ APPW_SET_PROP_FRAME      ,  // pSetup->aPara [0].v     = Frame
-  /* 48 */ APPW_SET_PROP_BORDER     ,  // pSetup->aPara [0].v     = Border
-  /* 49 */ APPW_SET_PROP_LENGTH     ,  // pSetup->aPara [0].v     = Length
-  /* 50 */ APPW_SET_PROP_ROTATION   ,  // pSetup->aPara [0].p     = Pointer to GUI_ROTATION structure
-  /* 51 */ APPW_SET_PROP_ECCLEVEL   ,  // pSetup->aPara [0].v     = Error correction level
-  /* 52 */ APPW_SET_PROP_SIZE       ,  // pSetup->aPara [0].v     = Size (for example PixelSize of a QRCode module)
-  /* 53 */ APPW_SET_PROP_VERSION    ,  // pSetup->aPara [0].v     = Version (for example 'version' of a QRCode object)
-  /* 54 */ APPW_SET_PROP_VALUES     ,  // pSetup->aPara [0].v     = Value 0
-                                       // pSetup->aPara [1].v     = Value 1
-  /* 55 */ APPW_SET_PROP_FONT2      ,  // === same as APPW_SET_PROP_FONT ===
-  /* 56 */ APPW_SET_PROP_SLAYOUT    ,  // pSetup->aPara [0].p     = Pointer to layout data
-                                       // pSetup->aExtra[0].p     = Source file name (=== In AppWizard application only ===)
-                                       // pSetup->aPara [0].v     = File size
-                                       // === Used to set a possible second gradient (Progbar) ===
-  /* 57 */ APPW_SET_PROP_GRADH2     ,  // === same as APPW_SET_PROP_GRADH ===
-  /* 58 */ APPW_SET_PROP_GRADV2     ,  // === same as APPW_SET_PROP_GRADV ===
-  /* 59 */ APPW_SET_PROP_COLOR2     ,  // === same as APPW_SET_PROP_COLOR ===
-  /* 60 */ APPW_SET_PROP_PWMODE     ,  // === NO PARAMETERS ===
-  /* 61 */ APPW_SET_PROP_ANGLE      ,  // pSetup->aPara [0].v     = Angle
-  /* 62 */ APPW_SET_PROP_SCALE      ,  // pSetup->aPara [0].v     = Scale
-  /* 63 */ APPW_SET_PROP_ALPHA      ,  // pSetup->aPara [0].v     = Alpha
-  /* 64 */ APPW_SET_PROP_FOCUSABLE     // pSetup->aPara [0].v     = 0 - No focus, 1 - Focus visible, 2 - Focus invisible
+  /*  0 */ APPW_SET_PROP_COLOR = 0   ,
+  /*  1 */ APPW_SET_PROP_SCALE       ,
+  /*  2 */ APPW_SET_PROP_ALPHA       ,
+  /*  3 */ APPW_SET_PROP_ANGLE       ,
+  /*  4 */ APPW_SET_PROP_OPAQUE      ,
+  /*  5 */ APPW_SET_PROP_TILE        ,
+  /*  6 */ APPW_SET_PROP_TOGGLE      ,
+  /*  7 */ APPW_SET_PROP_ALIGNTEXT   ,
+  /*  8 */ APPW_SET_PROP_ALIGNBITMAP ,
+  /*  9 */ APPW_SET_PROP_ALIGNBITMAP2,
+  /* 10 */ APPW_SET_PROP_ALIGNBITMAP3,
+  /*  1 */ APPW_SET_PROP_SBITMAP     ,
+  /*  2 */ APPW_SET_PROP_JPEG        ,
+  /*  3 */ APPW_SET_PROP_BMP         ,
+  /*  4 */ APPW_SET_PROP_GIF         ,
+  /*  5 */ APPW_SET_PROP_DECMODE     ,
+  /*  6 */ APPW_SET_PROP_HEXMODE     ,
+  /*  7 */ APPW_SET_PROP_MORPHMODE   ,
+  /*  8 */ APPW_SET_PROP_GRADH       ,
+  /*  9 */ APPW_SET_PROP_GRADV       ,
+  /* 20 */ APPW_SET_PROP_REPEAT      ,
+  /*  1 */ APPW_SET_PROP_TEXTID      ,
+  /*  2 */ APPW_SET_PROP_SIZE        ,
+  /*  3 */ APPW_SET_PROP_GRADH2      ,
+  /*  4 */ APPW_SET_PROP_GRADV2      ,
+  /*  5 */ APPW_SET_PROP_COLOR2      ,
+  /*  6 */ APPW_SET_PROP_COLOR3      ,
+  /*  7 */ APPW_SET_PROP_TEXTID2     ,
+  /*  8 */ APPW_SET_PROP_COLORS      ,
+  /*  9 */ APPW_SET_PROP_COLORS2     ,
+  /* 30 */ APPW_SET_PROP_COLORS3     ,
+  /*  1 */ APPW_SET_PROP_BKCOLOR     ,
+  /*  2 */ APPW_SET_PROP_BKCOLORS    ,
+  /*  3 */ APPW_SET_PROP_SBITMAPS    ,
+  /*  4 */ APPW_SET_PROP_FONT        ,
+  /*  5 */ APPW_SET_PROP_FONT2       ,
+  /*  6 */ APPW_SET_PROP_MOTIONH     ,
+  /*  7 */ APPW_SET_PROP_MOTIONV     ,
+  /*  8 */ APPW_SET_PROP_RANGE       ,
+  /*  9 */ APPW_SET_PROP_SPAN        ,
+  /* 40 */ APPW_SET_PROP_VALUES      ,
+  /*  1 */ APPW_SET_PROP_SLAYOUT     ,
+  /*  2 */ APPW_SET_PROP_CONTENT     ,
+  /*  3 */ APPW_SET_PROP_SORTCOLS    ,
+  /*  4 */ APPW_SET_PROP_OFFSET      ,
+  /*  5 */ APPW_SET_PROP_POS         ,
+  /*  6 */ APPW_SET_PROP_VALUE       ,
+  /*  7 */ APPW_SET_PROP_PERIOD      ,
+  /*  8 */ APPW_SET_PROP_SNAP        ,
+  /*  9 */ APPW_SET_PROP_ALIGN       ,
+  /* 50 */ APPW_SET_PROP_RADIUS      ,
+  /*  1 */ APPW_SET_PROP_RADIUS2     ,
+  /*  2 */ APPW_SET_PROP_FRAME       ,
+  /*  3 */ APPW_SET_PROP_FRAME2      ,
+  /*  4 */ APPW_SET_PROP_FRAME3      ,
+  /*  5 */ APPW_SET_PROP_BORDER      ,
+  /*  6 */ APPW_SET_PROP_LENGTH      ,
+  /*  7 */ APPW_SET_PROP_HEIGHT      ,
+  /*  8 */ APPW_SET_PROP_HEIGHT2     ,
+  /*  9 */ APPW_SET_PROP_FIXED       ,
+  /* 60 */ APPW_SET_PROP_ROTATION    ,
+  /*  1 */ APPW_SET_PROP_ECCLEVEL    ,
+  /*  2 */ APPW_SET_PROP_VERSION     ,
+  /*  3 */ APPW_SET_PROP_FOCUSABLE   ,
+  /*  4 */ APPW_SET_PROP_MOTION      ,
+  /*  5 */ APPW_SET_PROP_INVERT      ,
+  /*  6 */ APPW_SET_PROP_VERTICAL    ,
+  /*  7 */ APPW_SET_PROP_HORIZONTAL  ,
+  /*  8 */ APPW_SET_PROP_ENDLESS     ,
+  /*  9 */ APPW_SET_PROP_PERSISTENT  ,
+  /* 70 */ APPW_SET_PROP_ROTATE      ,
+  /*  1 */ APPW_SET_PROP_FADE        ,
+  /*  2 */ APPW_SET_PROP_WRAP        ,
+  /*  3 */ APPW_SET_PROP_ROUNDEDVAL  ,
+  /*  4 */ APPW_SET_PROP_ROUNDEDEND  ,
+  /*  5 */ APPW_SET_PROP_OVERWRITE   ,
+  /*  6 */ APPW_SET_PROP_AUTORESTART ,
+  /*  7 */ APPW_SET_PROP_LQ          ,
+  /*  8 */ APPW_SET_PROP_STAYONTOP   ,
+  /*  9 */ APPW_SET_PROP_UNTOUCHABLE ,
+  /* 80 */ APPW_SET_PROP_PWMODE      ,
+  /*  1 */ APPW_SET_PROP_CELLSELECT  ,
+  /*  2 */ APPW_SET_PROP_VISIBLE     ,
+  /*  3 */ APPW_SET_PROP_VISIBLE2    ,
+  /*  4 */ APPW_SET_PROP_VISIBLE3    ,
+  /*  5 */ APPW_SET_PROP_SWITCHOFF   ,
+  /*  6 */ APPW_SET_PROP_WHEELTEXT   ,
+  /*  7 */ APPW_SET_PROP_WHEELBITMAPS,
 };
 
 //
@@ -752,11 +807,11 @@ typedef struct {
 *       APPW_ATOM
 */
 typedef struct {
-  U32 Value;  // LW: ObjectGeo | ObjectValue ? ObjectId : Variable ? VariableId : Value (LW)
-              // HW: ObjectGeo | ObjectValue | ScreenGeo ? ScreenId : Value (HW)
-  I16 Offset; // ObjectGeo | ScreenGeo ? Offset : unused
-  U8  Item;   // Item specification
-  U8  Detail; // Dispose detail to be used
+  U32 Value;   // LW: ObjectGeo | ObjectValue | ObjectProp ? ObjectId : Variable ? VariableId : Value (LW)
+               // HW: ObjectGeo | ObjectValue | ScreenGeo | ObjectProp  ? ScreenId : Value (HW)
+  I16 Offset;  // ObjectGeo | ScreenGeo | ObjectProp ? Offset : unused
+  U8  Item;    // Item specification
+  U8  Detail;  // Detail to be used
 } APPW_ATOM;
 
 /*********************************************************************
@@ -899,7 +954,7 @@ typedef struct {
 typedef struct {
   const char           * pTerm;  // Pointer to term to be calculated
   unsigned               nItem;  // Number of operands
-  const APPW_CALC_ITEM * pItem;  // Pointer to first operand
+  const APPW_ATOM      * pAtom;  // Pointer to first operand (TBD...)
   I32                  * pVal;   // Array for calculating operand values
 } APPW_CALC;
 
@@ -973,6 +1028,30 @@ typedef struct {
   WM_CALLBACK            * cb;
   WM_HWIN                  hWin;
 } APPW_ROOT_INFO;
+
+/*********************************************************************
+*
+*       APPW_CONTENT
+*
+* Purpose:
+*   Structure for holding the text content, header labels and column size
+*   information for text related objects like dropdown, listview and listbox.
+*/
+typedef struct {
+  const char *** pppText;     // Array of pointers:
+                              //   <p>pp: - Pointer to an array containing pointers to arrays
+                              //            with pointers to zero terminated strings
+                              //            containing the text of one column.
+                              //   p<p>p: - Pointer to an array containing pointers to zero
+                              //            terminated strings for the content of one column.
+                              //   pp<p>: - Pointer to zero terminated string.
+  int            NumRows;     // Number of rows
+  int            NumColumns;  // Number of columns
+  const char  ** ppHead;      // Array of pointers to the zero terminated header text strings.
+  const U16    * pSize;       // Pointer to an U16 array containing the column sizes.
+  const U8     * pHeadAlign;  // Pointer to an U8 array containing the header alignment.
+  const U8     * pTextAlign;  // Pointer to an U8 array containing the column alignment.
+} APPW_CONTENT;
 
 /*********************************************************************
 *
@@ -1115,6 +1194,56 @@ struct APPW_DRAWING_ITEM {
   APPW_ATOM                 aAtom[1];  // Further atoms will be attached at the end of the structure
 };
 
+/*********************************************************************
+*
+*       APPW_FONT
+*
+* Purpose:
+*   Font structure and XBF data required to create fonts
+*/
+typedef struct {
+  GUI_FONT     Font;
+  GUI_XBF_DATA FontData;
+} APPW_FONT;
+
+/*********************************************************************
+*
+*       APPW_WHEEL_ADDTEXT
+*
+* Purpose:
+*   Structure to be able to pass data APPW_SET_PROP_WHEELTEXT
+*/
+typedef struct {
+  APPW_PARA_ITEM  ParaText;  // Parameters to be used to reference the text content
+  APPW_PARA_ITEM  aPara[2];  // Parameters to be used to create the actual font in OWheel
+  WHEEL_ITEM_ATTR aAttr[2];  // Alignment parameters and text color
+} APPW_WHEEL_ADDTEXT;
+
+/*********************************************************************
+*
+*       APPW_WHEEL_ADDBITMAPS
+*
+* Purpose:
+*   Structure to be able to pass data on APPW_SET_PROP_WHEELBITMAPS
+*/
+typedef struct {
+  unsigned         aNumItems[2];  // Cell- and center number of draw objects
+  APPW_PARA_ITEM * apPara   [2];  // Parameters to be used to create the draw objects in OWheel
+  WHEEL_ITEM_ATTR  aAttr    [2];  // Cell- and center alignment parameters and (alpha)image color
+} APPW_WHEEL_ADDBITMAPS;
+
+/*********************************************************************
+*
+*       WHEEL_DRAW_OBJECT
+*
+* Purpose:
+*   Replacement for GUI_DRAW objects
+*/
+typedef struct {
+  GUI_DRAW         GUI_Draw;  // Important: Must be the first item
+  APPW_DRAW_OBJECT APP_Draw;  // Additional data required for AppWizard
+} WHEEL_DRAW_OBJECT;
+
 /*####################################################################
 #
 #       Object definitions
@@ -1126,9 +1255,9 @@ struct APPW_DRAWING_ITEM {
 *       WM_OBJECT_BOX
 */
 typedef struct {
-  WIDGET              Widget;
-  APPW_DISPOSE        Dispose;
-  U16                 aIdDraw[2];
+  WIDGET              Widget;      // GUI/WM-Widget
+  APPW_DISPOSE        Dispose;     // Dispose structure
+  U16                 aIdDraw[2];  // Pre- and Post-draw
   unsigned            Mode;
   GUI_COLOR           Color0;
   int                 NumColors;
@@ -1142,9 +1271,9 @@ typedef struct {
 *       WM_OBJECT_BUTTON
 */
 typedef struct {
-  BUTTON_Obj          Widget;
-  APPW_DISPOSE        Dispose;
-  U16                 aIdDraw[2];
+  BUTTON_Obj          Widget;      // GUI/WM-Widget
+  APPW_DISPOSE        Dispose;     // Dispose structure
+  U16                 aIdDraw[2];  // Pre- and Post-draw
   U32                 State;
   unsigned            Mode;
   unsigned            Delay;
@@ -1158,7 +1287,9 @@ typedef struct {
   WM_HTIMER           hTimer;
   GUI_FONT            Font;
   GUI_XBF_DATA        FontData;
-  int                 Radius;
+  U16                 FrameRadius;
+  U16                 FrameSize;
+  GUI_COLOR           FrameColor;
 } WM_OBJECT_BUTTON;
 
 /*********************************************************************
@@ -1166,9 +1297,9 @@ typedef struct {
 *       WM_OBJECT_IMAGE
 */
 typedef struct {
-  IMAGE_OBJ           Widget;
-  APPW_DISPOSE        Dispose;
-  U16                 aIdDraw[2];
+  IMAGE_OBJ           Widget;      // GUI/WM-Widget
+  APPW_DISPOSE        Dispose;     // Dispose structure
+  U16                 aIdDraw[2];  // Pre- and Post-draw
   unsigned            Mode;
   GUI_COLOR           Color;
   const void        * pData;
@@ -1180,10 +1311,10 @@ typedef struct {
 *       WM_OBJECT_ROTARY
 */
 typedef struct {
-  ROTARY_OBJ          Widget;
-  APPW_DISPOSE        Dispose;
-  U16                 aIdDraw[2];
-  APPW_DRAW_OBJECT    apDraw[3];  // 0 = Bk, 1 = Marker, 2 = MarkerHR
+  ROTARY_OBJ          Widget;      // GUI/WM-Widget
+  APPW_DISPOSE        Dispose;     // Dispose structure
+  U16                 aIdDraw[2];  // Pre- and Post-draw
+  APPW_DRAW_OBJECT    apDraw[3];   // 0 = Bk, 1 = Marker, 2 = MarkerHR
   WM_HMEM             hMarkerPara;
 } WM_OBJECT_ROTARY;
 
@@ -1192,9 +1323,9 @@ typedef struct {
 *       WM_OBJECT_SLIDER
 */
 typedef struct {
-  SLIDER_Obj          Widget;
-  APPW_DISPOSE        Dispose;
-  U16                 aIdDraw[2];
+  SLIDER_Obj          Widget;      // GUI/WM-Widget
+  APPW_DISPOSE        Dispose;     // Dispose structure
+  U16                 aIdDraw[2];  // Pre- and Post-draw
   unsigned            Mode;
   APPW_DRAW_OBJECT    apDraw[4];
   GUI_COLOR           aColor[2];
@@ -1207,9 +1338,9 @@ typedef struct {
 *       WM_OBJECT_SWITCH
 */
 typedef struct {
-  SWITCH_Obj          Widget;
-  APPW_DISPOSE        Dispose;
-  U16                 aIdDraw[2];
+  SWITCH_Obj          Widget;      // GUI/WM-Widget
+  APPW_DISPOSE        Dispose;     // Dispose structure
+  U16                 aIdDraw[2];  // Pre- and Post-draw
   U32                 State;
   APPW_DRAW_OBJECT    apDraw[6];
   int                 aTextId[2];
@@ -1222,9 +1353,9 @@ typedef struct {
 *       WM_OBJECT_TEXT
 */
 typedef struct {
-  TEXT_OBJ            Widget;
-  APPW_DISPOSE        Dispose;
-  U16                 aIdDraw[2];
+  TEXT_OBJ            Widget;      // GUI/WM-Widget
+  APPW_DISPOSE        Dispose;     // Dispose structure
+  U16                 aIdDraw[2];  // Pre- and Post-draw
   U32                 State;
   unsigned            Mode;
   unsigned            AlignText;
@@ -1253,15 +1384,15 @@ typedef struct {
 *       WM_OBJECT_EDIT
 */
 typedef struct {
-  EDIT_Obj            Widget;
-  APPW_DISPOSE        Dispose;
-  U16                 aIdDraw[2];
+  EDIT_Obj            Widget;      // GUI/WM-Widget
+  APPW_DISPOSE        Dispose;     // Dispose structure
+  U16                 aIdDraw[2];  // Pre- and Post-draw
   U32                 State;
   unsigned            Mode;
   GUI_FONT            Font;
   GUI_XBF_DATA        FontData;
-  int                 FrameRadius;
-  int                 FrameSize;
+  U16                 FrameRadius;
+  U16                 FrameSize;
   GUI_COLOR           FrameColor;
   int                 IndexText;
   //
@@ -1284,9 +1415,9 @@ typedef struct {
 *       WM_OBJECT_QRCODE
 */
 typedef struct {
-  QRCODE_OBJ          Widget;
-  APPW_DISPOSE        Dispose;
-  U16                 aIdDraw[2];
+  QRCODE_OBJ          Widget;      // GUI/WM-Widget
+  APPW_DISPOSE        Dispose;     // Dispose structure
+  U16                 aIdDraw[2];  // Pre- and Post-draw
   int                 Size;
   //
   // Elements required for setup
@@ -1299,9 +1430,9 @@ typedef struct {
 *       WM_OBJECT_GAUGE
 */
 typedef struct {
-  GAUGE_OBJ           Widget;
-  APPW_DISPOSE        Dispose;
-  U16                 aIdDraw[2];
+  GAUGE_OBJ           Widget;      // GUI/WM-Widget
+  APPW_DISPOSE        Dispose;     // Dispose structure
+  U16                 aIdDraw[2];  // Pre- and Post-draw
 } WM_OBJECT_GAUGE;
 
 /*********************************************************************
@@ -1309,9 +1440,9 @@ typedef struct {
 *       WM_OBJECT_KEYBOARD
 */
 typedef struct {
-  KEYBOARD_OBJ        Widget;
-  APPW_DISPOSE        Dispose;
-  U16                 aIdDraw[2];
+  KEYBOARD_OBJ        Widget;      // GUI/WM-Widget
+  APPW_DISPOSE        Dispose;     // Dispose structure
+  U16                 aIdDraw[2];  // Pre- and Post-draw
   GUI_FONT            aFont[2];
   GUI_XBF_DATA        aFontData[2];
   //
@@ -1326,9 +1457,9 @@ typedef struct {
 *       WM_OBJECT_PROGBAR
 */
 typedef struct {
-  WIDGET              Widget;
-  APPW_DISPOSE        Dispose;
-  U16                 aIdDraw[2];
+  WIDGET              Widget;      // GUI/WM-Widget
+  APPW_DISPOSE        Dispose;     // Dispose structure
+  U16                 aIdDraw[2];  // Pre- and Post-draw
   GUI_COLOR           aColor[2];
   APPW_DRAW_OBJECT    apDraw[2];
   U32                 Value;
@@ -1353,7 +1484,7 @@ typedef struct {
 *       WM_OBJECT_TIMER
 */
 typedef struct {
-  WIDGET              Widget;
+  WIDGET              Widget;      // GUI/WM-Widget
   APPW_DISPOSE        Dispose;
   WM_HTIMER           hTimer;
   U32                 Period;
@@ -1365,27 +1496,88 @@ typedef struct {
 *       WM_OBJECT_MULTIEDIT
 */
 typedef struct {
-  MULTIEDIT_OBJ       Widget;
-  APPW_DISPOSE        Dispose;
-  U16                 aIdDraw[2];
+  MULTIEDIT_OBJ       Widget;      // GUI/WM-Widget
+  APPW_DISPOSE        Dispose;     // Dispose structure
+  U16                 aIdDraw[2];  // Pre- and Post-draw
   U32                 State;
   unsigned            Mode;
   GUI_FONT            Font;
   GUI_XBF_DATA        FontData;
   int                 IndexText;
-  int                 FrameRadius;
-  int                 FrameSize;
+  U16                 FrameRadius;
+  U16                 FrameSize;
   GUI_COLOR           FrameColor;
 } WM_OBJECT_MULTIEDIT;
+
+/*********************************************************************
+*
+*       WM_OBJECT_DROPDOWN
+*/
+typedef struct {
+  DROPDOWN_Obj        Widget;      // GUI/WM-Widget
+  APPW_DISPOSE        Dispose;     // Dispose structure
+  U16                 aIdDraw[2];  // Pre- and Post-draw
+  APPW_DRAW_OBJECT    apDraw[2];
+  GUI_FONT            Font;
+  GUI_XBF_DATA        FontData;
+  U8                  FrameRadius;
+  U8                  FrameSize;
+  GUI_COLOR           FrameColor;
+} WM_OBJECT_DROPDOWN;
+
+/*********************************************************************
+*
+*       WM_OBJECT_LISTVIEW
+*/
+typedef struct {
+  LISTVIEW_Obj        Widget;      // GUI/WM-Widget
+  APPW_DISPOSE        Dispose;     // Dispose structure
+  U16                 aIdDraw[2];  // Pre- and Post-draw
+  APPW_DRAW_OBJECT    apDraw[2];
+  GUI_FONT            aFont[2];
+  GUI_XBF_DATA        aFontData[2];
+  GUI_COLOR           FrameColorHeader;
+  GUI_COLOR           FrameColorList;
+  GUI_COLOR           ColorFocus;
+  U8                  FrameRadius;
+  U8                  FrameSize;
+  U8                  FocusSize;
+  U8                  Flags;
+} WM_OBJECT_LISTVIEW;
+
+/*********************************************************************
+*
+*       WM_OBJECT_LISTBOX
+*/
+typedef struct {
+  LISTBOX_Obj         Widget;      // GUI/WM-Widget
+  APPW_DISPOSE        Dispose;     // Dispose structure
+  U16                 aIdDraw[2];  // Pre- and Post-draw
+  GUI_FONT            Font;
+  GUI_XBF_DATA        FontData;
+  GUI_COLOR           FrameColor;
+  U8                  FrameSize;
+} WM_OBJECT_LISTBOX;
+
+/*********************************************************************
+*
+*       WM_OBJECT_WHEEL
+*/
+typedef struct {
+  WHEEL_OBJ           Widget;      // GUI/WM-Widget
+  APPW_DISPOSE        Dispose;     // Dispose structure
+  U16                 aIdDraw[2];  // Pre- and Post-draw
+  APPW_DRAW_OBJECT    apDraw[3];   // Draw objects for overlay images
+} WM_OBJECT_WHEEL;
 
 /*********************************************************************
 *
 *       WM_OBJECT_WINDOW
 */
 typedef struct {
-  WINDOW_OBJ          Widget;
-  APPW_DISPOSE        Dispose;
-  U16                 aIdDraw[2];
+  WINDOW_OBJ          Widget;      // GUI/WM-Widget
+  APPW_DISPOSE        Dispose;     // Dispose structure
+  U16                 aIdDraw[2];  // Pre- and Post-draw
   U32                 State;
   APPW_ROOT_INFO    * pRoot;
   APPW_SETUP_ITEM   * pSetupMotionH;
@@ -1434,25 +1626,31 @@ DEFAULT_FUNC(SLIDER);
 DEFAULT_FUNC(SWITCH);
 DEFAULT_FUNC(TEXT);
 DEFAULT_FUNC(MULTIEDIT);
+DEFAULT_FUNC(DROPDOWN);
+DEFAULT_FUNC(LISTVIEW);
+DEFAULT_FUNC(LISTBOX);
+DEFAULT_FUNC(WHEEL);
 DEFAULT_CRCB(WINDOW);
 
 //
 // OWindow
 //
-int     WM_OBJECT_WINDOW_SetPara          (WM_HWIN hWin, APPW_ROOT_INFO * pRoot);
-void    WM_OBJECT_WINDOW_EnableUntouchable(int OnOff);
+int  WM_OBJECT_WINDOW_SetPara          (WM_HWIN hWin, APPW_ROOT_INFO * pRoot);
 
 //
 // OTimer
 //
-WM_HWIN WM_OBJECT_TIMER_Create            (APPW_DISPOSE * pDispose, WM_HWIN hParent, int Id);
+WM_HWIN WM_OBJECT_TIMER_Create (APPW_DISPOSE * pDispose, WM_HWIN hParent, int Id);
 
 //
 // AppWizard.c (private functions, not to be documented)
 //
+void                      APPW__EnableUntouchable      (int OnOff);
+void                      APPW__SetUnTouchable         (WM_HWIN hWin);
 void                      APPW__RegisterPID_Hook       (void);
 APPW_DISPOSE            * APPW__GetDispose             (WM_HWIN hWin);
 int                       APPW__DisposeObject          (WM_HWIN hWin, int Index);
+GUI_HMEM                  APPW__GetTextItem            (int Mode, U32 Para, U16 Row, U16 Col);
 void                      APPW_CreatePersistentScreens (void);
 WM_HWIN                   APPW_CreateRoot              (APPW_ROOT_INFO * pRoot, WM_HWIN hParent);
 int                       APPW_Dispose                 (WM_HWIN hWin, unsigned Invalidate);
@@ -1467,20 +1665,23 @@ void                      APPW_GetAtomInfo             (const APPW_ATOM * pAtom,
 I32                       APPW_GetAtomValue            (const APPW_ATOM * pAtom);
 APPW_ROOT_INFO          * APPW_GetCurrentRootInfo      (WM_HWIN hWin);
 GUI_HMEM                  APPW_GetLockedText           (char ** ppBuffer, APPW_PARA_ITEM * pPara);
+int                       APPW_GetOpponent             (int Index);
 const char              * APPW_GetResourcePath         (void);
+GUI_HMEM                  APPW_GetResourceStringLocked (const char * pText, const char ** ppData);
 WM_HWIN                   APPW_GetRoot                 (WM_HWIN hWin);
 APPW_ROOT_INFO          * APPW_GetRootInfo             (WM_HWIN hRoot, int * pRootIndex);
 APPW_ROOT_INFO          * APPW_GetRootInfoByHandle     (WM_HWIN hWin);
 APPW_ROOT_INFO          * APPW_GetRootInfoByIndex      (int RootIndex);
 APPW_ROOT_INFO          * APPW_GetRootInfoByRootId     (U16 RootId);
-int                       APPW_GetOpponent             (int Index);
 U8                        APPW_GetSupportFocus         (void);
+int                       APPW_GetTextBuffered         (int IndexText, char * pBuffer, int SizeOfBuffer);
 void                      APPW_Init                    (const char * pResourcePath);
 void                      APPW_InitResourcePath        (const char * pResourcePath);
 int                       APPW_IsValid                 (WM_HWIN hWin);
 int                       APPW_IsRoot                  (WM_HWIN hWin);
 void                      APPW_MoveDispose             (APPW_DISPOSE * pDisposeOld, APPW_DISPOSE * pDisposeNew, int dx, int dy);
 void                      APPW_MULTIBUF_Enable         (int OnOff);
+void                      APPW_RequestContent          (WM_HWIN hWin, void (* pFunc)(WM_HWIN, const APPW_CONTENT *));
 APPW_ROOT_INFO         ** APPW_SetData                 (APPW_ROOT_INFO ** ppRootInfo, int NumScreens, APPW_VAR_OBJECT * paVarList, int NumVars, APPW_DRAWING_ITEM ** ppDrawingList, int NumDrawings);
 void                      APPW_SetDefaultPosition      (WM_HWIN hRoot, U16 Id);
 void                      APPW_SetDefaultPositionRoot  (WM_HWIN hRoot);
@@ -1491,8 +1692,10 @@ void                      APPW_SetPos                  (WM_HWIN hItem, int xPos,
 void                      APPW_SetStreamedBitmap       (APPW_DRAW_OBJECT * pDraw, APPW_PARA_ITEM * pPara, GUI_BITMAPSTREAM_INFO * pInfo);
 void                      APPW_SetStreamedBitmap_HR    (APPW_DRAW_OBJECT * pDraw, APPW_PARA_ITEM * pPara, GUI_BITMAPSTREAM_INFO * pInfo);
 void                      APPW_SetSupportFocus         (U8 SupportFocus);
+void                      APPW_SetWidgetFocusable      (WM_HWIN hWin, APPW_PARA_ITEM * pPara);
 void                      APPW_TextInitMem             (const APPW_TEXT_INIT * pPara);
 void                      APPW_TextInitExt             (const APPW_TEXT_INIT * pPara);
+
 //
 // AppWizard.c (public functions, to be documented)
 //
@@ -1511,7 +1714,9 @@ int                       APPW_ACTION_SetEnable        (WM_HWIN hWinDst, WM_HWIN
 void                      APPW_ClearShiftScreenActive  (void);
 const APPW_JOB          * APPW_GetJob                  (int Id);
 const APPW_JOB          * APPW_GetJobs                 (int * pNumJobs);
+#if (APPW_SKIP_OBSOLETE == 0)
 const APPW_JOB          * APPW_GetJobsAnim             (int * pNumJobs);
+#endif
 const APPW_JOB          * APPW_GetJobsVar              (int * pNumJobs);
 U8                        APPW_GetTimerActive          (void);
 int                       APPW_ProcessActions          (WM_MESSAGE * pMsg, int RootIndex);
@@ -1547,6 +1752,7 @@ const GUI_XBF_TYPE      * APPW_GetFileType             (U8 Type);
 const APPW_MEMACCESS    * APPW_GetMemAccess            (void);
 void                      APPW_GetStreamedBitmapInfoEXT(const APPW_DRAW_OBJECT * pDraw, GUI_BITMAPSTREAM_INFO * pInfo);
 int                       APPW_MakeFont                (const APPW_SETUP_ITEM * pSetup, GUI_FONT * pFont, GUI_XBF_DATA * pData);
+int                       APPW_MakeFontEx              (const APPW_PARA_ITEM * pPara, GUI_FONT * pFont, GUI_XBF_DATA * pData);
 void                      APPW_SetFileAccess           (APPW_X_FILEACCESS * pFileAccess);
 
 //

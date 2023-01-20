@@ -10,7 +10,7 @@ R01AN4860JJ
 
 Version
 -------
-v2.40
+v2.50
 
 Overview
 --------
@@ -115,12 +115,13 @@ File Structure
  |  |    |  r_ble_api_spec.chm
  |  |    |
  |  |    +---en
- |  |    |      r01an4860ej0240-rx23w-ble.pdf
+ |  |    |      r01an4860ej0250-rx23w-ble.pdf
  |  |    +---ja
- |  |           r01an4860jj0240-rx23w-ble.pdf
+ |  |           r01an4860jj0250-rx23w-ble.pdf
  |  |
  |  +---lib
  |  |      ble_fit_lib_selector.bat
+ |  |      ble_fit_lib_selector.sh
  |  |      lib_ble_ps_ccrx.lib
  |  |      lib_ble_ps_ccrx_a.lib
  |  |      lib_ble_ps_ccrx_b.lib
@@ -159,22 +160,9 @@ File Structure
  |       |    |      r_ble_cmd_vs.c
  |       |    |      r_ble_cmd_vs.h
  |       |    |
- |       |    +---discovery
- |       |    |      r_ble_disc.c
- |       |    |      r_ble_disc.h
- |       |    |
  |       |    +---logger
  |       |    |      r_ble_logger.c
  |       |    |      r_ble_logger.h
- |       |    |
- |       |    +---profile_cmn
- |       |    |      r_ble_profile_cmn.h
- |       |    |      r_ble_servc_if.c
- |       |    |      r_ble_servc_if.h
- |       |    |      r_ble_servs_if.c
- |       |    |      r_ble_servs_if.h
- |       |    |      r_ble_serv_common.c
- |       |    |      r_ble_serv_common.h
  |       |    |
  |       |    +---rtos
  |       |    |      r_ble_rtos.c

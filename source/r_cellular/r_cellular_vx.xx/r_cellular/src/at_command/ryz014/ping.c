@@ -31,7 +31,6 @@
 /**********************************************************************************************************************
  * Macro definitions
  *********************************************************************************************************************/
-#define CELLULAR_PING_TIMEOUT       (60000)
 #if BSP_CFG_RTOS_USED == (5)
 #define MAX_DOMAIN_NAME_LENGTH      (255)
 #define TOTAL_OTHER_BLOCK_SIZE      (MAX_DOMAIN_NAME_LENGTH + 1 + sizeof(void *))
@@ -56,11 +55,12 @@ static uint8_t s_cellular_other_pool[MAX_DOMAIN_NAME_LENGTH + 1];
 /*************************************************************************************************
  * Function Name  @fn            atc_ping
  ************************************************************************************************/
-e_cellular_err_t atc_ping(st_cellular_ctrl_t * const p_ctrl, const uint8_t * const p_host)
+e_cellular_err_t atc_ping(st_cellular_ctrl_t * const p_ctrl, const uint8_t * const p_host,
+                            const st_cellular_ping_cfg_t * const p_cfg)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
     uint8_t len = 0;
+    uint8_t str[4][5] = {0};
     void * p_malloc_ret = NULL;
 #if BSP_CFG_RTOS_USED == (5)
     UINT rtos_ret;
@@ -83,23 +83,41 @@ e_cellular_err_t atc_ping(st_cellular_ctrl_t * const p_ctrl, const uint8_t * con
     {
         strncpy((char *)p_malloc_ret, (char *)p_host, len + 1);   // (uint8_t *)->(char *)
 
-        const uint8_t * const p_command_arg[CELLULAR_MAX_ARG_COUNT] = {p_malloc_ret}; // (&uint8_t[])->(uint8_t *)
+        if (NULL != p_cfg)
+        {
+            sprintf((char *)str[0], "%d", p_cfg->count);    // (uint8_t *)->(char *)
+            sprintf((char *)str[1], "%d", p_cfg->len);      // (uint8_t *)->(char *)
+            sprintf((char *)str[2], "%d", p_cfg->interval); // (uint8_t *)->(char *)
+            sprintf((char *)str[3], "%d", p_cfg->timeout);  // (uint8_t *)->(char *)
+        }
+        else
+        {
+            sprintf((char *)str[0], "%d", CELLULAR_PING_REQ_DEFAULT);       // (uint8_t *)->(char *)
+            sprintf((char *)str[1], "%d", CELLULAR_PING_MES_MIN);           // (uint8_t *)->(char *)
+            sprintf((char *)str[2], "%d", CELLULAR_PING_INTER_MIN);         // (uint8_t *)->(char *)
+            sprintf((char *)str[3], "%d", CELLULAR_PING_TIMEOUT_DEFAULT);   // (uint8_t *)->(char *)
+        }
+
+        const uint8_t * const p_command_arg[CELLULAR_MAX_ARG_COUNT] = {p_malloc_ret, str[0], str[1], str[2], str[3]};
 
         atc_generate(p_ctrl->sci_ctrl.atc_buff,
             (const uint8_t *)&gp_at_command[ATC_PING][0], // (const uint8_t *const *)->(const uint8_t **)
                 (const uint8_t **)&p_command_arg);        // (const uint8_t *const *)->(const uint8_t **)
 
-        at_ret = cellular_execute_at_command(p_ctrl, CELLULAR_PING_TIMEOUT, ATC_RETURN_OK, ATC_PING);
+        if (NULL != p_cfg)
+        {
+            ret = cellular_execute_at_command(p_ctrl, p_cfg->count * p_cfg->timeout * 1000, ATC_RETURN_OK, ATC_PING);
+        }
+        else
+        {
+            ret = cellular_execute_at_command(p_ctrl, CELLULAR_PING_TIMEOUT_DEFAULT * CELLULAR_PING_REQ_DEFAULT * 1000,
+                                                ATC_RETURN_OK, ATC_PING);
+        }
 
         cellular_free(p_malloc_ret);
 #if BSP_CFG_RTOS_USED == (5)
         tx_block_pool_delete(&g_cellular_other_pool);
 #endif
-
-        if (CELLULAR_ATC_OK != at_ret)
-        {
-            ret = CELLULAR_ERR_MODULE_COM;
-        }
     }
     else
     {

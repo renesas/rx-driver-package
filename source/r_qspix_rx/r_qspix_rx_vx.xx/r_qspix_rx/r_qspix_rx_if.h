@@ -28,6 +28,7 @@
 *                                    Added the demo for RX671
 *              : 29.11.2021 1.20     Supported to call R_QSPIX_Write_Indirect() 
 *                                    multiple times
+*              : 29.07.2022 1.30     Updated demo projects
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_qspix_rx_if.h
@@ -48,7 +49,7 @@ Macro definitions
 *******************************************************************************/
 /* Version Number of API. */
 #define QSPIX_VERSION_MAJOR           (1)
-#define QSPIX_VERSION_MINOR           (20)
+#define QSPIX_VERSION_MINOR           (30)
 
 /* Definition of QSPIX channel */
 #define QSPIX_CH0                         (0)

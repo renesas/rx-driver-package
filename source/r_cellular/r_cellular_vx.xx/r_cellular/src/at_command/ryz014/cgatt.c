@@ -49,7 +49,6 @@
 e_cellular_err_t atc_cgatt(st_cellular_ctrl_t * const p_ctrl, const e_atc_ap_status_t mode)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
     uint8_t str[10] = {0};
 
     sprintf((char *)str, "%d", mode); // (uint8_t *)->(char *)
@@ -62,18 +61,11 @@ e_cellular_err_t atc_cgatt(st_cellular_ctrl_t * const p_ctrl, const e_atc_ap_sta
 
     if (ATC_AP_CONNECT == mode)
     {
-        at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout,
-                                                ATC_RETURN_OK, ATC_SET_CONNECT_STATUS);
+        ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_SET_CONNECT_STATUS);
     }
     else
     {
-        at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout,
-                                                ATC_RETURN_OK, ATC_SET_CONNECT_STATUS);
-    }
-
-    if (CELLULAR_ATC_OK != at_ret)
-    {
-        ret = CELLULAR_ERR_MODULE_COM;
+        ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_SET_CONNECT_STATUS);
     }
 
     return ret;
@@ -89,19 +81,12 @@ e_cellular_err_t atc_cgatt(st_cellular_ctrl_t * const p_ctrl, const e_atc_ap_sta
 e_cellular_err_t atc_cgatt_check(st_cellular_ctrl_t * const p_ctrl)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
 
     atc_generate(p_ctrl->sci_ctrl.atc_buff,
         (const uint8_t *)&gp_at_command[ATC_CONNECT_CHECK][0], // (const uint8_t *const *)->(const uint8_t **)
             NULL);
 
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout,
-                                        ATC_RETURN_OK, ATC_CONNECT_CHECK);
-
-    if (CELLULAR_ATC_OK != at_ret)
-    {
-        ret = CELLULAR_ERR_MODULE_COM;
-    }
+    ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_CONNECT_CHECK);
 
     return ret;
 }

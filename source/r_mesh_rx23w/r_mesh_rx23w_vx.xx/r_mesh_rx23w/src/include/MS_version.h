@@ -37,8 +37,8 @@
 
 /**
  *  An increment in the minor number of the stack implies an update to fix
- *  an observed defect or changes resulting from optimzations performed on the
- *  stack or enhancement to accommodate addendums to specifications. Minor
+ *  an observed defect or changes resulting from optimizations performed on the
+ *  stack or enhancement to accommodate specification addendum. Minor
  *  utility functions added may also result in increase in this number, however
  *  none of these changes are categorized as causing an increment in minor
  *  number, cause any change in existing interface. It is possible that an
@@ -56,10 +56,10 @@
 /**
  *  An increment in this number implies a trivial change, changes such as
  *  update in debug log, updating comments, macros, conditions renaming,
- *  internal function/variable names etc are viewed as changes that result in
+ *  internal function/variable names etc. are viewed as changes that result in
  *  increment in this number.
  */
-#define MS_SUB_MINOR_VERSION_NUMBER   19
+#define MS_SUB_MINOR_VERSION_NUMBER   30
 
 /* -------------------------------------------- Macros */
 

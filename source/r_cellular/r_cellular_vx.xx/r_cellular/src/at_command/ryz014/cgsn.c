@@ -49,18 +49,12 @@
 e_cellular_err_t atc_cgsn(st_cellular_ctrl_t * const p_ctrl)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
 
     atc_generate(p_ctrl->sci_ctrl.atc_buff,
         (const uint8_t *)&gp_at_command[ATC_GET_SERIAL_NUMBER][0],   // (const uint8_t *const *)->(const uint8_t **)
             NULL);
 
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_GET_SERIAL_NUMBER);
-
-    if (CELLULAR_ATC_OK != at_ret)
-    {
-        ret = CELLULAR_ERR_MODULE_COM;
-    }
+    ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_GET_SERIAL_NUMBER);
 
     return ret;
 }
@@ -74,18 +68,12 @@ e_cellular_err_t atc_cgsn(st_cellular_ctrl_t * const p_ctrl)
 e_cellular_err_t atc_cgsn3(st_cellular_ctrl_t * const p_ctrl)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
 
     atc_generate(p_ctrl->sci_ctrl.atc_buff,
             (const uint8_t*) &gp_at_command[ATC_GET_SVN][0],   // (const uint8_t *const *)->(const uint8_t **)
             NULL);
 
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_GET_SVN);
-
-    if (CELLULAR_ATC_OK != at_ret)
-    {
-        ret = CELLULAR_ERR_MODULE_COM;
-    }
+    ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_GET_SVN);
 
     return ret;
 }

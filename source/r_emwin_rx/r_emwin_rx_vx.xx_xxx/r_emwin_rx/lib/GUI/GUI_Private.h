@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.22 - Graphical user interface for embedded applications **
+** emWin V6.26 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -326,6 +326,7 @@ int  GUI__GetNumChars       (const char * s);
 int  GUI__GetOverlap        (U16 Char);
 int  GUI__GetLineDistX      (const char * s, int Len);
 int  GUI__GetFontSizeY      (void);
+void GUI__GetTextSize       (GUI_SIZE * pSize, const char * s);
 int  GUI__HandleEOLine      (const char ** ps);
 void GUI__InvertRectColors  (int x0, int y0, int x1, int y1);
 void GUI__InvertRectColorsEx(GUI_RECT * pRect);
@@ -342,7 +343,6 @@ void GUI__ClearTextBackground(int xDist, int yDist);
 int  GUI__WrapGetNumCharsDisp       (const char * pText, int xSize, GUI_WRAPMODE WrapMode);
 int  GUI__WrapGetNumCharsToNextLine (const char * pText, int xSize, GUI_WRAPMODE WrapMode);
 int  GUI__WrapGetNumBytesToNextLine (const char * pText, int xSize, GUI_WRAPMODE WrapMode);
-//void GUI__memset    (U8  * p, U8 Fill, int NumBytes);
 void GUI__memset16  (U16 * p, U16 Fill, int NumWords);
 int  GUI__strlen    (const char * s);
 int  GUI__strcmp    (const char * s0, const char * s1);
@@ -673,6 +673,7 @@ extern GUI_DEVICE * GUI__apDevice[GUI_NUM_LAYERS];
 // Function pointer for drawing string characters with EXT fonts
 //
 extern U16 (* GUI__pfDrawCharEXT)(int RemChars, const char ** ps);
+extern int (* GUI__pfGetShiftY)(U16 Code);
 
 //
 // Function pointer for converting a palette containing a color array into an index array

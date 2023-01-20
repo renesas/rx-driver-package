@@ -704,11 +704,9 @@ typedef struct
     uint8_t o_addr_type;
 
     /**
-     *  @brief  Random address set to the advertising set, when the o_addr_type field is @ref BLE_GAP_ADDR_RAND or @ref BLE_GAP_ADDR_RPA_ID_RANDOM .\n
+     *  @brief  Random address set to the advertising set, when the o_addr_type field is @ref BLE_GAP_ADDR_RAND or @ref BLE_GAP_ADDR_RPA_ID_RANDOM. \n
      *          When the o_addr_type field is @ref BLE_GAP_ADDR_PUBLIC or @ref BLE_GAP_ADDR_RPA_ID_PUBLIC, this field is ignored. 
-     *  @note   If the "Balance" or "Compact" library is used, this field is ignored.
-     *          Instead, set the random address (static address or non-resolvable private address) 
-     *          by @ref R_BLE_GAP_SetRandAddr() or @ref R_BLE_VS_SetBdAddr(). 
+     *  @note   If the "Balance" or "Compact" library is used, this field is ignored and the address specified by o_addr_type field is configured in Link Layer and used.
      */
     uint8_t  o_addr[6];
 
@@ -841,11 +839,8 @@ typedef struct
     uint8_t sec_adv_phy;
 
     /**
-     *  @brief  Random address set to the advertising set, when the o_addr_type field is @ref BLE_GAP_ADDR_RAND or @ref BLE_GAP_ADDR_RPA_ID_RANDOM.\n
+     *  @brief  Random address set to the advertising set, when the o_addr_type field is @ref BLE_GAP_ADDR_RAND or @ref BLE_GAP_ADDR_RPA_ID_RANDOM. \n
      *          When the o_addr_type field is @ref BLE_GAP_ADDR_PUBLIC or @ref BLE_GAP_ADDR_RPA_ID_PUBLIC, this field is ignored. 
-     *  @note   If the "Balance" or "Compact" library is used, this field is ignored.
-     *          Instead, set the random address (static address or non-resolvable private address) 
-     *          by @ref R_BLE_GAP_SetRandAddr() or @ref R_BLE_VS_SetBdAddr(). 
      */
     uint8_t  o_addr[6];
 
@@ -959,11 +954,9 @@ typedef struct
     uint8_t sec_adv_phy;
 
     /**
-     *  @brief  Random address set to the advertising set, when the o_addr_type field is @ref BLE_GAP_ADDR_RAND or @ref BLE_GAP_ADDR_RPA_ID_RANDOM.\n
+     *  @brief  Random address set to the advertising set, when the o_addr_type field is @ref BLE_GAP_ADDR_RAND or @ref BLE_GAP_ADDR_RPA_ID_RANDOM. \n
      *          When the o_addr_type field is @ref BLE_GAP_ADDR_PUBLIC or @ref BLE_GAP_ADDR_RPA_ID_PUBLIC, this field is ignored. 
-     *  @note   If the "Balance" or "Compact" library is used, this field is ignored.
-     *          Instead, set the random address (static address or non-resolvable private address) 
-     *          by @ref R_BLE_GAP_SetRandAddr() or @ref R_BLE_VS_SetBdAddr(). 
+     *  @note   If the "Balance" or "Compact" library is used, this field is ignored and the address specified by o_addr_type field is configured in Link Layer and used.
      */
     uint8_t  o_addr[6];
 
@@ -1564,8 +1557,9 @@ void R_BLE_ABS_Reset(ble_event_cb_t init_cb);
  *          \arg Scan request event( @ref BLE_GAP_EVENT_SCAN_REQ_RECV ) is not notified.
  *           
  *          The relationship between fast_intv, fast_period, slow_intv and slow_period field 
- *          in p_adv_param parameter is shown in @ref Figure 1.1.
- *          @image html "abs_adv_period_en.svg" "Figure 1.1" width=1000px
+ *          in p_adv_param parameter is shown in @ref fig1_1 "Figure 1.1".
+ *          @anchor fig1_1
+ *          @image html "abs_adv_period_en.svg" "Figure 1.1" width=1000px 
  * @param[in] p_adv_param Advertising parameters for Legacy Advertising.
  * @retval  BLE_SUCCESS(0x0000) Success 
  * @retval  BLE_ERR_INVALID_PTR(0x0001) p_adv_param is specified as NULL. 
@@ -1602,10 +1596,10 @@ ble_status_t R_BLE_ABS_StartLegacyAdv(st_ble_abs_legacy_adv_param_t * p_adv_para
  *          \arg Scan request event( @ref BLE_GAP_EVENT_SCAN_REQ_RECV ) is not notified.
  *          \arg Secondary Advertising Max Skip is 0.
  *          The relationship between fast_intv, fast_period, 
- *          slow_intv and slow_period field in p_adv_param parameter is shown in @ref Figure 1.1 
+ *          slow_intv and slow_period field in p_adv_param parameter is shown in @ref fig1_1 "Figure 1.1". 
  *          
  * @note If the Bluetooth LE Protocol Stack library type is Balance or Compact, 
- *       this function returns @ref BLE_ERR_UNSUPPORTED(0x0007).
+ *       this function returns @ref BLE_ERR_UNSUPPORTED "BLE_ERR_UNSUPPORTED(0x0007)".
  *       
  * @param[in] p_adv_param Advertising parameters for Extended Advertising.
  * @retval  BLE_SUCCESS(0x0000) Success 
@@ -1681,7 +1675,7 @@ ble_status_t R_BLE_ABS_StartNonConnAdv(st_ble_abs_non_conn_adv_param_t * p_adv_p
  *          \arg Secondary Advertising Max Skip is 0. 
  *          
  * @note If the Bluetooth LE Protocol Stack library type is Balance or Compact, 
- *       this function returns @ref BLE_ERR_UNSUPPORTED(0x0007).
+ *       this function returns @ref BLE_ERR_UNSUPPORTED "BLE_ERR_UNSUPPORTED(0x0007)".
  *       
  * @param[in] p_adv_param Advertising parameters for Periodic Advertising.
  * @retval  BLE_SUCCESS(0x0000) Success 
@@ -1720,10 +1714,10 @@ ble_status_t R_BLE_ABS_StartPerdAdv(st_ble_abs_perd_adv_param_t * p_adv_param);
  *          The result of this API call is notified in @ref BLE_GAP_EVENT_SCAN_ON event. \n
  *          Advertising report is notified in @ref BLE_GAP_EVENT_ADV_REPT_IND event. \n
  *          The relationship between fast_intv, fast_period, slow_intv and slow_period field 
- *          in p_scan_param parameter is shown in @ref Figure 1.2. \n
+ *          in p_scan_param parameter is shown in @ref fig1_2 "Figure 1.2". \n
  *          After the fast scanning with fast_intv/fast_window for "fast_period", 
  *          the slow scanning with slow_intv/slow_window runs for "slow_period". \n
- *          The following table shows the events notified at "Scan Start", "Scan Switch", "Scan End" in @ref Figure 1.2. 
+ *          The following table shows the events notified at "Scan Start", "Scan Switch", "Scan End" in @ref fig1_2 "Figure 1.2". 
  *          | Bluetooth LE Protocol Stack library      | Scan Start                 | Scan Switch                                               | Scan End                    |
  *          |:------------------------------- |:-------------------------- |:--------------------------------------------------------- |:--------------------------- |
  *          | all features                    | @ref BLE_GAP_EVENT_SCAN_ON | @ref BLE_GAP_EVENT_SCAN_TO \n @ref BLE_GAP_EVENT_SCAN_ON  | @ref BLE_GAP_EVENT_SCAN_TO  |
@@ -1731,8 +1725,8 @@ ble_status_t R_BLE_ABS_StartPerdAdv(st_ble_abs_perd_adv_param_t * p_adv_param);
  *          If fast_period is 0, only the slow scanning with slow_intv/slow_window is performed. \n
  *          If slow_period is 0, the slow scanning with slow_intv/slow_window continues.
  * 
+ *          @anchor fig1_2
  *          @image html "abs_api_scan_period_en.svg" "Figure 1.2" width=1000px
- * 
  * @note When RPA generation and resolution is enabled in R_BLE_GAP_EnableRpa() API, \n
  *       active scan will not be performed on remote devices that use RPA that cannot be resolved.
  * 
@@ -1770,7 +1764,13 @@ ble_status_t R_BLE_ABS_StartScan(st_ble_abs_scan_param_t * p_scan_param);
  *          When a link has been established, @ref BLE_GAP_EVENT_CONN_IND event is notified.
  * @param   p_conn_param Create connection parameters.
  * @retval  BLE_SUCCESS(0x0000) Success 
- * @retval  BLE_ERR_INVALID_PTR(0x0001) p_conn_param is specified as NULL. 
+ * @retval  BLE_ERR_INVALID_PTR(0x0001) The reason for this error is as follows:
+ *                                      - p_conn_param is specified as NULL.
+ *                                      - When creating a link with all features library, @ref st_ble_abs_conn_param_t::p_conn_1M "p_conn_1M" field and 
+ *                                        @ref st_ble_abs_conn_param_t::p_conn_2M "p_conn_2M" field and 
+ *                                        @ref st_ble_abs_conn_param_t::p_conn_coded "p_conn_coded" field 
+ *                                        in p_conn_param are specified as NULL.
+ *                                      - When creating a link with 1M PHY with balance library, @ref st_ble_abs_conn_param_t::p_conn_1M "p_conn_1M" field in p_conn_param is specified as NULL.
  * @retval  BLE_ERR_INVALID_ARG(0x0003) The create connection parameter is out of range. 
  * @retval  BLE_ERR_UNSUPPORTED(0x0007) Not supported.
  * @retval  BLE_ERR_INVALID_STATE(0x0008) Host stack hasn't been initialized. 

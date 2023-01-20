@@ -45,6 +45,9 @@
 *              : 13.09.2021 3.90     Changed revision to reflect demo upgrade.
 *              : 14.03.2022 4.00     Added support for RX66T 48pins.
 *              : 31.03.2022 4.10     Added support for RX660.
+*              : 28.06.2022 4.20     Updated demo projects.
+*              : 12.12.2022 4.30     Fixed default register value of voltage level for RX13T/RX23E-A/RX660/RX72T/RX66T.
+*                                    Fixed condition of the voltage detection level for RX130 channel 2.
 ***********************************************************************************************************************/
 #ifndef LVD_PRIVATE_TARGETS_HEADER_FILE
 #define LVD_PRIVATE_TARGETS_HEADER_FILE
@@ -110,7 +113,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
 #define LVD_RX_VERSION_MAJOR                    (4)
-#define LVD_RX_VERSION_MINOR                    (10)
+#define LVD_RX_VERSION_MINOR                    (30)
 
 /***********************************************************************************************************************
 Typedef definitions

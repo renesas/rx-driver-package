@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_cellular
-VERSION = 		1.06
+VERSION = 		1.09
 MDF = V2
 
 CONFIG_FOLDER = r_config

@@ -49,27 +49,38 @@
  ************************************************************************************************/
 e_cellular_err_t R_CELLULAR_SetTime(st_cellular_ctrl_t * const p_ctrl, const st_cellular_datetime_t * const p_time)
 {
+    uint32_t preemption = 0;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
     e_cellular_err_t ret = CELLULAR_SUCCESS;
 
+    preemption = cellular_interrupt_disable();
     if ((NULL == p_ctrl) || (NULL == p_time))
-    {
-        ret = CELLULAR_ERR_PARAMETER;
-    }
-    else if ((CELLULAR_YEAR_LIMIT < p_time->year) || (CELLULAR_MONTH_LIMIT < p_time->month) ||
-            (CELLULAR_DAY_LIMIT < p_time->day) || (CELLULAR_HOUR_LIMIT < p_time->hour) ||
-            (CELLULAR_MIN_LIMIT < p_time->min) || (CELLULAR_SEC_LIMIT < p_time->sec) ||
-            (CELLULAR_TIMEZONE_LIMIT_H < p_time->timezone) || (CELLULAR_TIMEZONE_LIMIT_L > p_time->timezone))
     {
         ret = CELLULAR_ERR_PARAMETER;
     }
     else
     {
-        if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
+        if (0 != (p_ctrl->running_api_count % 2))
+        {
+            ret = CELLULAR_ERR_OTHER_API_RUNNING;
+        }
+        else if ((CELLULAR_YEAR_LIMIT < p_time->year) || (CELLULAR_MONTH_LIMIT < p_time->month) ||
+            (CELLULAR_DAY_LIMIT < p_time->day) || (CELLULAR_HOUR_LIMIT < p_time->hour) ||
+            (CELLULAR_MIN_LIMIT < p_time->min) || (CELLULAR_SEC_LIMIT < p_time->sec) ||
+            (CELLULAR_TIMEZONE_LIMIT_H < p_time->timezone) || (CELLULAR_TIMEZONE_LIMIT_L > p_time->timezone))
+        {
+            ret = CELLULAR_ERR_PARAMETER;
+        }
+        else if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
         {
             ret = CELLULAR_ERR_NOT_OPEN;
         }
+        else
+        {
+            p_ctrl->running_api_count += 2;
+        }
     }
+    cellular_interrupt_enable(preemption);
 
     if (CELLULAR_SUCCESS == ret)
     {
@@ -83,6 +94,8 @@ e_cellular_err_t R_CELLULAR_SetTime(st_cellular_ctrl_t * const p_ctrl, const st_
         {
             ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
         }
+
+        p_ctrl->running_api_count -= 2;
     }
 
     return ret;

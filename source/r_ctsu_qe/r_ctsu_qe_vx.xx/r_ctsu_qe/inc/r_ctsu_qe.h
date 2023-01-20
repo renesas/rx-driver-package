@@ -56,11 +56,11 @@ FSP_HEADER
  #endif
 
 #if (defined(BSP_MCU_RX113) || defined(BSP_MCU_RX130))
-#define CTSU_HAS_TRIMMER_REG	(1)
+#define BSP_FEATURE_CTSU_HAS_TRMR       (1)
 #endif
 
 #if (defined(BSP_MCU_RX130))
-#define CTSU_HAS_TXVSEL         (1)
+#define BSP_FEATURE_CTSU_HAS_TXVSEL     (1)
 #endif
 
 /* For parts with CTSUCHAC2/3/4 and CTSUTRC2/3/4 registers (more than 16 TS pins) */
@@ -182,6 +182,12 @@ typedef struct st_ctsu_self_buf
     uint16_t ref;                      ///< Reference counter data (Not used)
 } ctsu_self_buf_t;
 #endif
+
+typedef struct ctsu_data
+{
+    uint16_t decimal_point_data;
+    uint16_t int_data;
+} ctsu_data_t;
 
 /** Scan buffer data formats (Mutual) */
 #if (BSP_FEATURE_CTSU_VERSION == 2)
@@ -317,7 +323,10 @@ typedef struct st_ctsu_instance_ctrl
     uint16_t                 num_elements;       ///< Number of elements to scan
     uint16_t                 wr_index;           ///< Word index into ctsuwr register array.
     uint16_t                 rd_index;           ///< Word index into scan data buffer.
-    uint8_t                * p_tuning_count;     ///< Pointer to tuning count of each element. g_ctsu_tuning_count[] is set by Open API.
+    uint8_t * p_element_complete_flag;           ///< Pointer to complete flag of each element. g_ctsu_element_complete_flag[] is set by Open API.
+#if (BSP_FEATURE_CTSU_VERSION == 2)
+    uint8_t * p_frequency_complete_flag;         ///< Pointer to complete flag of each frequency. g_ctsu_frequency_complete_flag[] is set by Open API.
+#endif
     int32_t                * p_tuning_diff;      ///< Pointer to difference from base value of each element. g_ctsu_tuning_diff[] is set by Open API.
     uint16_t                 average;            ///< CTSU Moving average counter.
     uint16_t                 num_moving_average; ///< Copy from config by Open API.
@@ -325,12 +334,12 @@ typedef struct st_ctsu_instance_ctrl
     ctsu_ctsuwr_t          * p_ctsuwr;           ///< CTSUWR write register value. g_ctsu_ctsuwr[] is set by Open API.
     ctsu_self_buf_t        * p_self_raw;         ///< Pointer to Self raw data. g_ctsu_self_raw[] is set by Open API.
     uint16_t               * p_self_corr;        ///< Pointer to Self correction data. g_ctsu_self_corr[] is set by Open API.
-    uint16_t               * p_self_data;        ///< Pointer to Self moving average data. g_ctsu_self_data[] is set by Open API.
+    ctsu_data_t            * p_self_data;        ///< Pointer to Self moving average data. g_ctsu_self_data[] is set by Open API.
     ctsu_mutual_buf_t      * p_mutual_raw;       ///< Pointer to Mutual raw data. g_ctsu_mutual_raw[] is set by Open API.
     uint16_t               * p_mutual_pri_corr;  ///< Pointer to Mutual primary correction data. g_ctsu_self_corr[] is set by Open API.
     uint16_t               * p_mutual_snd_corr;  ///< Pointer to Mutual secondary correction data. g_ctsu_self_corr[] is set by Open API.
-    uint16_t               * p_mutual_pri_data;  ///< Pointer to Mutual primary moving average data. g_ctsu_mutual_pri_data[] is set by Open API.
-    uint16_t               * p_mutual_snd_data;  ///< Pointer to Mutual secondary moving average data. g_ctsu_mutual_snd_data[] is set by Open API.
+    ctsu_data_t            * p_mutual_pri_data;  ///< Pointer to Mutual primary moving average data. g_ctsu_mutual_pri_data[] is set by Open API.
+    ctsu_data_t            * p_mutual_snd_data;  ///< Pointer to Mutual secondary moving average data. g_ctsu_mutual_snd_data[] is set by Open API.
     ctsu_correction_info_t * p_correction_info;  ///< Pointer to correction info
     ctsu_txvsel_t            txvsel;             ///< CTSU Transmission Power Supply Select
     ctsu_txvsel2_t           txvsel2;            ///< CTSU Transmission Power Supply Select 2 (CTSU2 Only)

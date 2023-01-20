@@ -5,12 +5,12 @@ r_rspia_rx
 
 Document Number 
 ---------------
-R01AN5684ES0110
-R01AN5684JS0110
+R01AN5684ES0120
+R01AN5684JS0120
 
 Version
 -------
-v1.10
+v1.20
 
 Overview
 --------
@@ -81,7 +81,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp     v6.20
+* r_bsp     v7.20
 
 How to add to your project
 --------------------------
@@ -124,9 +124,9 @@ r_rspia_rx
 +---doc
 |   |
 |   +---en
-|   |       r01an5684es0110-rx-serial.pdf
+|   |       r01an5684es0120-rx-rspia.pdf
 |   +---ja
-|           r01an5684js0110-rx-serial.pdf
+|           r01an5684js0120-rx-rspia.pdf
 |
 +---src
         r_rspia_defaults.h

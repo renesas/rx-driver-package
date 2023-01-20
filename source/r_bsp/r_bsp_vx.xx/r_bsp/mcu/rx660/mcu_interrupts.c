@@ -23,6 +23,7 @@
 /**********************************************************************************************************************
 * History : DD.MM.YYYY Version   Description
 *         : 22.04.2022 1.00      First Release
+*         : 25.11.2022 1.01      Modified comment.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -455,7 +456,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void group_bl1_handler_isr (void)
 
 /***********************************************************************************************************************
 * Function Name: group_bl2_handler_isr
-* Description  : Interrupt handler for Group BL1 interrupts. The way this code works is that for each possible interrupt
+* Description  : Interrupt handler for Group BL2 interrupts. The way this code works is that for each possible interrupt
 *                in this group the following will be performed:
 *                1) Test to see if an interrupt is requested for this source
 *                2) If an interrupt is requested then the registered callback is called (if one is registered)

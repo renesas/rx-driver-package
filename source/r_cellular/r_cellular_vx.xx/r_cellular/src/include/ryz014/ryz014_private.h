@@ -62,9 +62,21 @@
 #define CELLULAR_AP_CONNECT_RETRY_WAIT  (1000)      /* Retry interval when connecting to AP */
 #define CELLULAR_CFUN_WAIT              (2000)      /* Wait time when executing CFUN command */
 #define CELLULAR_RESET_WAIT             (5000)      /* Wait time when executing RESET command */
-#define CELLULAR_COMMAND_TIMEOUT        (10000)     /* AT command response wait time */
+#define CELLULAR_COMMAND_TIMEOUT        (60000)     /* AT command response wait time */
 #define CELLULAR_MAX_HOSTNAME_LENGTH    (253)       /* Maximum Host name length */
 #define CELLULAR_SOCKETCONNECT_DELAY    (5000)      /* Socket Connect Response delay time (millisecond) */
+#define CELLULAR_SQNRICFG_MODE          (2)         /* All URCs are indicated by activated RING0 line of the@UART0 interface, whatever URC AT channel origin */
+#define CELLULAR_SQNIPSCFG_MODE         (1)         /* Power saving is activated. Module power state is controlled by RTS0 line*/
+#define CELLULAR_PING_REQ_MIN           (1)         /* Minimum number of ping echo requests to send */
+#define CELLULAR_PING_REQ_DEFAULT       (4)         /* Default number of ping echo requests to send */
+#define CELLULAR_PING_REQ_MAX           (64)        /* Maximum number of ping echo requests to send */
+#define CELLULAR_PING_MES_MIN           (32)        /* Minimum length of ping echo request message */
+#define CELLULAR_PING_MES_MAX           (1400)      /* Maximum length of ping echo request message */
+#define CELLULAR_PING_INTER_MIN         (1)         /* Minimum Echo Interval (second) */
+#define CELLULAR_PING_INTER_MAX         (600)       /* Maximum Echo Interval (second) */
+#define CELLULAR_PING_TIMEOUT_MIN       (1)         /* Minimum time to wait for Echo reply (second) */
+#define CELLULAR_PING_TIMEOUT_DEFAULT   (10)        /* Default time to wait for Echo reply (second) */
+#define CELLULAR_PING_TIMEOUT_MAX       (60)        /* Maximum time to wait for Echo reply (second) */
 #if (CELLULAR_IMPLEMENT_TYPE == 'B')
 #define CELLULAR_SECURITY_PROFILE_ID_H  (6)         /* Maximum Security Profile ID Number  */
 #define CELLULAR_SECURITY_PROFILE_ID_L  (1)         /* Minimum Security Profile ID Number  */
@@ -78,12 +90,11 @@
 #define RYZ014_ATC_FUNCTION_LEVEL           "AT+CFUN=%s\r"
 #define RYZ014_ATC_PIN_LOCK_CHECK           "AT+CPIN?\r"
 #define RYZ014_ATC_PIN_LOCK_RELEASE         "AT+CPIN=\"%s\"\r"
-#define RYZ014_ATC_CONNECT_SOCKET           "AT+SQNSD=%s,%s,%s,\"%s.%s.%s.%s\",0,%s,1\r"
-#define RYZ014_ATC_CONNECT_SOCKET_TOHOST    "AT+SQNSD=%s,%s,%s,\"%s\",0,%s,1\r"
+#define RYZ014_ATC_CONNECT_SOCKET           "AT+SQNSD=%s,%s,%s,\"%s\",0,%s,1\r"
 #define RYZ014_ATC_CLOSE_SOCKET             "AT+SQNSH=%s\r"
 #define RYZ014_ATC_SEND_SCOKET              "AT+SQNSSENDEXT=%s,%s\r"
 #define RYZ014_ATC_RECV_SCOKET              "AT+SQNSRECV=%s,%s\r"
-#define RYZ014_ATC_DNS_LOOKUP               "AT+SQNDNSLKUP=\"%s\",0\r"
+#define RYZ014_ATC_DNS_LOOKUP               "AT+SQNDNSLKUP=\"%s\",%s\r"
 #define RYZ014_ATC_AP_CONFIG                "AT+CGDCONT=1,\"IPV4V6\",\"%s\",,,,0,0,0,0,0,0,1,,0\r"
 #define RYZ014_ATC_USER_CONFIG              "AT+CGAUTH=1,%s,\"%s\",\"%s\"\r"
 #define RYZ014_ATC_SOCKET_CONFIG_1          "AT+SQNSCFG=%s,1,%s,%s,%s,%s\r"
@@ -104,7 +115,7 @@
 #define RYZ014_ATC_SET_PROVIDER             "AT+COPS=%s,2,\"%s%s\"\r"
 #define RYZ014_ATC_GET_PDN_STATE            "AT+CGACT?\r"
 #define RYZ014_ATC_ACTIVATE_PDN             "AT+CGACT=1,%s\r"
-#define RYZ014_ATC_GET_IPADDR               "AT+CGPADDR=%s\r"
+#define RYZ014_ATC_GET_IPADDR               "AT+CGPADDR=1\r"
 #define RYZ014_ATC_GET_PSM                  "AT+CPSMS?\r"
 #define RYZ014_ATC_SET_PSM                  "AT+CPSMS=%s,,,\"%s\",\"%s\"\r"
 #define RYZ014_ATC_GET_EDRX                 "AT+SQNEDRX?\r"
@@ -117,14 +128,21 @@
 #define RYZ014_ATC_GET_MAKER_NAME           "AT+CGMI\r"
 #define RYZ014_ATC_GET_IMSI                 "AT+CIMI\r"
 #define RYZ014_ATC_SEND_COMMAND_TO_SIM      "AT+CRSM=%s,%s,%s,%s,%s,\"%s\",\"%s\"\r"
-#define RYZ014_ATC_SET_PSM_CONFIG           "AT+SQNIPSCFG=%s,5000\r"
-#define RYZ014_ATC_SET_RING_CONFIG          "AT+SQNRICFG=%s,3,1000\r"
+#define RYZ014_ATC_SET_INTER_CONFIG         "AT+SQNIPSCFG=%s,%s\r"
+#define RYZ014_ATC_SET_RING_CONFIG          "AT+SQNRICFG=%s,3,%s\r"
+#define RYZ014_ATC_SET_PSM_CONFIG           "AT+SQNPSCFG=%s\r"
 #define RYZ014_ATC_SET_IND_NOTIFY           "AT+CMER=3,0,0,%s,0,0,0\r"
 #define RYZ014_ATC_GET_PHONE_NUM            "AT+CNUM\r"
 #define RYZ014_ATC_GET_ICCID                "AT+SQNCCID?\r"
-#define RYZ014_ATC_PING                     "AT+PING=\"%s\"\r"
+#define RYZ014_ATC_PING                     "AT+PING=\"%s\",%s,%s,%s,%s\r"
 #define RYZ014_ATC_GET_CELLINFO             "AT+SQNMONI=%s\r"
-#define RYZ014_ATC_SET_SQN_PROVIDER         "AT+SQNCTM=\"%s\"\r"
+#define RYZ014_ATC_SET_CTM                  "AT+SQNCTM=\"standard\"\r"
+#define RYZ014_ATC_GET_CTM                  "AT+SQNCTM?\r"
+#define RYZ014_ATC_SET_BAND                 "AT+SQNBANDSEL=0,\"standard\",\"%s\"\r"
+#define RYZ014_ATC_FACTORYRESET             "AT+SQNSFACTORYRESET\r"
+#define RYZ014_ATC_SMCWRX                   "AT+SMCWRX=%s\r"
+#define RYZ014_ATC_SMCWTX                   "AT+SMCWTX=%s,%s,%s\r"
+#define RYZ014_ATC_CGPIAF                   "AT+CGPIAF=1,0,1,0\n"
 #define RYZ014_NO_COMMAND                   "\r"
 #if (CELLULAR_IMPLEMENT_TYPE == 'B')
 #define RYZ014_ATC_WRITE_CERTIFICATE        "AT+SQNSNVW=\"%s\",%s,%s\r"
@@ -144,7 +162,6 @@ typedef enum
     ATC_PIN_LOCK_CHECK,
     ATC_PIN_LOCK_RELEASE,
     ATC_CONNECT_SOCKET,
-    ATC_CONNECT_SOCKET_TOHOST,
     ATC_CLOSE_SOCKET,
     ATC_SEND_SOCKET,
     ATC_RECV_SOCKET,
@@ -182,13 +199,21 @@ typedef enum
     ATC_GET_MAKER_NAME,
     ATC_GET_IMSI,
     ATC_SEND_COMMAND_TO_SIM,
-    ATC_SET_PSM_CONFIG,
+    ATC_SET_INTER_CONFIG,
     ATC_SET_RING_CONFIG,
+    ATC_SET_PSM_CONFIG,
     ATC_SET_IND_NOTIFY,
     ATC_GET_PHONE_NUM,
     ATC_GET_ICCID,
     ATC_PING,
     ATC_GET_CELLINFO,
+    ATC_SET_CTM,
+    ATC_GET_CTM,
+    ATC_SET_BAND,
+    ATC_FACTORYRESET,
+    ATC_SMCWRX,
+    ATC_SMCWTX,
+    ATC_IPV6_CONFIG,
     ATC_SQNSSENDEXT_END,
 #if (CELLULAR_IMPLEMENT_TYPE == 'B')
     ATC_WRITE_CERTIFICATE,
@@ -206,12 +231,7 @@ typedef enum
     ATC_RETURN_ERROR,           // Module response is "ERROR"
     ATC_RETURN_OK_GO_SEND,      // Module response is ">"
     ATC_RETURN_SEND_NO_CARRIER, // Module response is "NO CARRIER"
-    ATC_RETURN_CPIN_READY,      // Module response is "+CPIN: READY"
-    ATC_RETURN_SIM_LOCK,        // Module response is "+CPIN: SIM PIN"
     ATC_RETURN_AP_CONNECTING,   // Module response is "CONNECT"
-    ATC_RETURN_AP_NOT_CONNECT,  // Module is not connected to the access point
-    ATC_RETURN_CFUN1,           // Module control level is 1
-    ATC_RETURN_CFUN4,           // Module control level is 4
     ATC_RETURN_ENUM_MAX,        // Maximum enumeration value
 } e_cellular_atc_return_t;
 

@@ -24,6 +24,8 @@
 *           25.08.2020 1.00    Initial Release
 *           31.03.2021 3.80    Added support for RX671.
 *           31.03.2022 4.40    Added support for RX660.
+*           27.12.2022 4.60    Fixed the issue that rx_idle is not changed to true when reception is complete 
+*                              in DMAC mode.
 ***********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -987,6 +989,12 @@ static void sci_dmac_rx_handler(sci_hdl_t const hdl)
         if ((SCI_MODE_SYNC == hdl->mode) || (SCI_MODE_SSPI == hdl->mode))
         {
             hdl->tx_idle = true;
+        }
+#endif
+#if (SCI_CFG_ASYNC_INCLUDED)
+        if (SCI_MODE_ASYNC == hdl->mode)
+        {
+            hdl->rx_idle = true;
         }
 #endif
         p_ctrl->rx_cnt = p_ctrl->rx_fraction;

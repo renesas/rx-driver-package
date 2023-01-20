@@ -19,7 +19,7 @@
 /**********************************************************************************************************************
 * System Name  : SDHI Driver
 * File Name    : r_sdhi_util.c
-* Version      : 2.06
+* Version      : 2.10
 * Device       : RX
 * Abstract     : API & Sub module
 * Tool-Chain   : For RX e2_studio
@@ -35,13 +35,14 @@
 *                                   Fixed coding style. 
 *              : 30.07.2019 2.05    Added  WAIT LOOP 
 *              : 22.11.2019 2.06    Modified comment of API function to Doxygen style.
+*              : 27.12.2022 2.10    Updated slash format of included header file paths for Linux compatibility.
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
 Includes <System Includes> , "Project Includes"
 **********************************************************************************************************************/
 #include "r_sdhi_rx_if.h"
-#include ".\src\r_sdhi_rx_private.h"
+#include "./src/r_sdhi_rx_private.h"
 
 #ifdef SDHI_CFG_LONGQ_ENABLE                                /* Uses FIT LONGQ module                */
 #include "r_longq_if.h"

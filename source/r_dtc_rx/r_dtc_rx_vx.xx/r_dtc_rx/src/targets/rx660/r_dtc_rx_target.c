@@ -28,6 +28,7 @@
 /*******************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 31.03.2022 1.00    First Release
+*         : 27.12.2022 4.21    Updated slash format of included header file paths for Linux compatibility.
 *******************************************************************************/
 
 /*******************************************************************************
@@ -35,7 +36,7 @@ Includes   <System Includes> , "Project Includes"
 *******************************************************************************/
 /* Defines for DTC support */
 #include "r_dtc_rx_if.h"
-#include ".\src\r_dtc_rx_private.h"
+#include "./src/r_dtc_rx_private.h"
 
 /* Check MCU Group */
 #if defined(BSP_MCU_RX660)

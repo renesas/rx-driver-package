@@ -10,16 +10,19 @@
         <version>2.06.00</version>
         <version>2.07.00</version>
         <version>3.01.00</version>
+        <version>3.04.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
         <version>4.08.04.201803</version>
+        <version>8.03.00.202202</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
         <product>ICCRX</product>
         <version>4.10.01</version>
+        <version>4.20.03</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -38,7 +41,7 @@
         <zipsource>r_sdsi_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.20</version>
+            <version>7.20</version>
         </dependency>
         <application>SDIO Slave</application>
         <application>SDSI</application>

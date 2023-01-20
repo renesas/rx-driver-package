@@ -40,6 +40,7 @@
 *              : 21.12.2018 3.00     Change flash drive interface to Memory Access Driver Interface
 *              : 31.12.2021 3.03     Added variable "read_after_write" "read_after_write_add" and
 *                                    "read_after_write_data" for controlling SPI bus.
+*              : 30.06.2022 3.10     Fixed issues of wrong conditional expression in the if statement.
 *************************************************************************************************/
 
 
@@ -377,7 +378,7 @@ flash_spi_status_t r_flash_spi_drvif_tx(uint8_t devno, uint32_t txcnt, uint8_t *
 
     ret_drv = R_MEMDRV_Tx(devno,&memdrv_info);
 
-    if (MEMDRV_SUCCESS == MEMDRV_ERR_HARD)
+    if (MEMDRV_ERR_HARD == ret_drv)
     {
         return FLASH_SPI_ERR_HARD;
     } 
@@ -429,7 +430,7 @@ flash_spi_status_t r_flash_spi_drvif_tx_add(uint8_t devno, uint32_t txcnt, uint8
 
     ret_drv = R_MEMDRV_TxData(devno,&memdrv_info);
 
-    if (MEMDRV_SUCCESS == MEMDRV_ERR_HARD)
+    if (MEMDRV_ERR_HARD == ret_drv)
     {
         return FLASH_SPI_ERR_HARD;
     } 
@@ -481,7 +482,7 @@ flash_spi_status_t r_flash_spi_drvif_tx_data(uint8_t devno, uint32_t txcnt, uint
 
     ret_drv = R_MEMDRV_TxData(devno,&memdrv_info);
 
-    if (MEMDRV_SUCCESS == MEMDRV_ERR_HARD)
+    if (MEMDRV_ERR_HARD == ret_drv)
     {
         return FLASH_SPI_ERR_HARD;
     } 
@@ -516,7 +517,7 @@ flash_spi_status_t r_flash_spi_drvif_rx(uint8_t devno, uint32_t rxcnt, uint8_t *
 
     ret_drv = R_MEMDRV_Rx(devno,&memdrv_info);
 
-    if (MEMDRV_SUCCESS == MEMDRV_ERR_HARD)
+    if (MEMDRV_ERR_HARD == ret_drv)
     {
         return FLASH_SPI_ERR_HARD;
     } 
@@ -566,7 +567,7 @@ flash_spi_status_t r_flash_spi_drvif_rx_add(uint8_t devno, uint32_t rxcnt, uint8
 
     ret_drv = R_MEMDRV_RxData(devno,&memdrv_info);
 
-    if (MEMDRV_SUCCESS == MEMDRV_ERR_HARD)
+    if (MEMDRV_ERR_HARD == ret_drv)
     {
         return FLASH_SPI_ERR_HARD;
     } 
@@ -616,7 +617,7 @@ flash_spi_status_t r_flash_spi_drvif_rx_data(uint8_t devno, uint32_t rxcnt, uint
 
     ret_drv = R_MEMDRV_RxData(devno,&memdrv_info);
 
-    if (MEMDRV_SUCCESS == MEMDRV_ERR_HARD)
+    if (MEMDRV_ERR_HARD == ret_drv)
     {
         return FLASH_SPI_ERR_HARD;
     } 

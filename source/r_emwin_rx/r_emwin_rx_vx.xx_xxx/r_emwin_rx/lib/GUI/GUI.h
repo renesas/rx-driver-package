@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.22 - Graphical user interface for embedded applications **
+** emWin V6.26 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -59,7 +59,7 @@ extern "C" {     /* Make sure we have C-declarations in C++ programs */
 *
 *       Macros, function replacement
 */
-#define GUI_ABS(a)              ((a < 0) ? (-a) : (a))
+#define GUI_ABS(a)              (((a) < 0) ? (-(a)) : (a))
 #define GUI_COUNTOF(a)          (sizeof(a) / sizeof(a[0]))
 #define GUI_MIN(a,b)            (((a) < (b)) ? (a) : (b))
 #define GUI_MAX(a,b)            (((a) > (b)) ? (a) : (b))
@@ -417,6 +417,7 @@ int              GUI__CompactPixelIndices  (LCD_PIXELINDEX * pBuffer, int NumPix
 int              GUI__CompactPixelIndicesEx(LCD_PIXELINDEX * pBuffer, int NumPixels, int BitsPerPixel, const LCD_API_COLOR_CONV * pColorConvAPI);
 int              GUI__ConvertColor2Index   (LCD_PIXELINDEX * pBuffer, int NumPixels, int BitsPerPixel, const LCD_API_COLOR_CONV * pColorConvAPI, void * pResult);
 void             GUI__Config               (void);
+GUI_HMEM         GUI__CopyText             (GUI_HMEM hItem, const char * pItem);
 I32              GUI__CosHQ                (I32 Ang1000);
 int              GUI__DivideRound          (int a, int b);
 I32              GUI__DivideRound32        (I32 a, I32 b);
@@ -469,17 +470,20 @@ char      GUI_SetDecChar(char c);
 *
 *       Color / Index related functions
 */
-int       GUI_Color2Index(GUI_COLOR color);
-GUI_COLOR GUI_Color2VisColor(GUI_COLOR color);
-char      GUI_ColorIsAvailable(GUI_COLOR color);
-GUI_COLOR GUI_Index2Color(int Index);
-U32       GUI_CalcColorDist (GUI_COLOR Color0, GUI_COLOR  Color1);
+int       GUI_Color2Index      (GUI_COLOR color);
+GUI_COLOR GUI_Color2VisColor   (GUI_COLOR color);
+char      GUI_ColorIsAvailable (GUI_COLOR color);
+int       GUI_ColorIsOpaque    (GUI_COLOR Color);
+GUI_COLOR GUI_Index2Color      (int Index);
+U32       GUI_CalcColorDist    (GUI_COLOR Color0, GUI_COLOR  Color1);
 U32       GUI_CalcVisColorError(GUI_COLOR color);
 
 /*********************************************************************
 *
 *       Error handler
 */
+void GUI_SetOnLogFunc  (void (* pFunc)(const char * s));
+void GUI_SetOnWarnFunc (void (* pFunc)(const char * s));
 void GUI_SetOnErrorFunc(void (* pFunc)(const char * s));
 
 /*********************************************************************
@@ -565,7 +569,6 @@ void GUI_FillEllipseXL         (int x0, int y0, int rx, int ry);
 void GUI_FillPolygon           (const GUI_POINT * pPoints, int NumPoints, int x0, int y0);
 void GUI_FillRect              (int x0, int y0, int x1, int y1);
 void GUI_FillRectEx            (const GUI_RECT * pRect);
-void GUI_FillRoundedFrame      (int x0, int y0, int x1, int y1, int r, int w);
 void GUI_FillRoundedRect       (int x0, int y0, int x1, int y1, int r);
 void GUI_FillRoundedRectEx     (const GUI_RECT * pRect, int r);
 void GUI_FillRoundedRectB      (int x0, int y0, int x1, int y1, int r);
@@ -1674,8 +1677,8 @@ void GUI_AA_FillCircle        (int x0, int y0, int r);
 void GUI_AA_FillEllipse       (int x0, int y0, int rx, int ry);
 void GUI_AA_FillEllipseXL     (int x0, int y0, int rx, int ry);
 void GUI_AA_FillPolygon       (const GUI_POINT * pPoints, int NumPoints, int x0, int y0);
-void GUI_AA_FillRoundedRect   (int x0, int y0, int x1, int y1, int r);
-void GUI_AA_FillRoundedRectEx (const GUI_RECT * pRect, int r);
+int  GUI_AA_FillRoundedRect   (int x0, int y0, int x1, int y1, int r);
+int  GUI_AA_FillRoundedRectEx (const GUI_RECT * pRect, int r);
 void GUI_AA_SetBufferSize     (int BufferSize);
 int  GUI_AA_SetDrawMode       (int Mode);
 void GUI_AA_SetpfDrawCharAA4  (int (* pfDrawChar)(int LayerIndex, int x, int y, U8 const * p, int xSize, int ySize, int BytesPerLine));
@@ -1996,6 +1999,9 @@ extern const tGUI_XBF_APIList GUI_XBF_APIList_Prop_AA4_Ext;
 #define GUI_ID_VSCROLL    0xFE
 #define GUI_ID_HSCROLL    0xFF
 
+#define GUI_ID_VSCROLLER  0xFFE
+#define GUI_ID_HSCROLLER  0xFFF
+
 #define GUI_ID_EDIT0      0x100
 #define GUI_ID_EDIT1      0x101
 #define GUI_ID_EDIT2      0x102
@@ -2293,16 +2299,38 @@ extern const tGUI_XBF_APIList GUI_XBF_APIList_Prop_AA4_Ext;
 #define GUI_ID_KEYBOARD8  0x368
 #define GUI_ID_KEYBOARD9  0x369
 
-#define GUI_ID_ANIM0      0x360
-#define GUI_ID_ANIM1      0x361
-#define GUI_ID_ANIM2      0x362
-#define GUI_ID_ANIM3      0x363
-#define GUI_ID_ANIM4      0x364
-#define GUI_ID_ANIM5      0x365
-#define GUI_ID_ANIM6      0x366
-#define GUI_ID_ANIM7      0x367
-#define GUI_ID_ANIM8      0x368
-#define GUI_ID_ANIM9      0x369
+#define GUI_ID_ANIM0      0x370
+#define GUI_ID_ANIM1      0x371
+#define GUI_ID_ANIM2      0x372
+#define GUI_ID_ANIM3      0x373
+#define GUI_ID_ANIM4      0x374
+#define GUI_ID_ANIM5      0x375
+#define GUI_ID_ANIM6      0x376
+#define GUI_ID_ANIM7      0x377
+#define GUI_ID_ANIM8      0x378
+#define GUI_ID_ANIM9      0x379
+
+#define GUI_ID_SCROLLER0  0x380
+#define GUI_ID_SCROLLER1  0x381
+#define GUI_ID_SCROLLER2  0x382
+#define GUI_ID_SCROLLER3  0x383
+#define GUI_ID_SCROLLER4  0x384
+#define GUI_ID_SCROLLER5  0x385
+#define GUI_ID_SCROLLER6  0x386
+#define GUI_ID_SCROLLER7  0x387
+#define GUI_ID_SCROLLER8  0x388
+#define GUI_ID_SCROLLER9  0x389
+
+#define GUI_ID_WHEEL0     0x390
+#define GUI_ID_WHEEL1     0x391
+#define GUI_ID_WHEEL2     0x392
+#define GUI_ID_WHEEL3     0x393
+#define GUI_ID_WHEEL4     0x394
+#define GUI_ID_WHEEL5     0x395
+#define GUI_ID_WHEEL6     0x396
+#define GUI_ID_WHEEL7     0x397
+#define GUI_ID_WHEEL8     0x398
+#define GUI_ID_WHEEL9     0x399
 
 #define GUI_ID_USER       0x800
 
@@ -2659,6 +2687,7 @@ extern GUI_CONST_STORAGE GUI_FONT GUI_FontComic24B_ASCII, GUI_FontComic24B_1;
 #define GUI_ALIGN_BOTTOM     GUI_TA_BOTTOM
 #define GUI_ALIGN_HORIZONTAL GUI_TA_HORIZONTAL
 #define GUI_ALIGN_VERTICAL   GUI_TA_VERTICAL
+#define GUI_ALIGN_CENTER     (GUI_TA_HCENTER | GUI_TA_VCENTER)
 
 /* General orientation flags */
 #define GUI_MIRROR_X (1u)

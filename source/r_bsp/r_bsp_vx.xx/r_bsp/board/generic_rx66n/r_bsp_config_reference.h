@@ -47,6 +47,9 @@
 *         : 11.02.2022 2.01     Changed initial value of the following macro definitions.
 *                                - BSP_CFG_SWINT_UNIT1_ENABLE
 *                                - BSP_CFG_SWINT_UNIT2_ENABLE
+*         : 25.11.2022 2.02     Modified comment.
+*                               Added the following macro definition.
+*                                - BSP_CFG_EXPANSION_RAM_ENABLE
 ***********************************************************************************************************************/
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
 #define R_BSP_CONFIG_REF_HEADER_FILE
@@ -604,8 +607,6 @@ NOTE: The RAM areas are not contiguous.It is separated by 512 KB each.
        b26:b24 TMEF   - TM Enable - 000: TM function is enabled.
                                   - 111: TM function is disabled.
        b23:b0  Reserved (set to 1)
-       NOTE: If the dual bank function has not been incorporated in a device,
-             TMEFDB bits [b30:b26] are reserved area.
    Default value is 0xFFFFFFFF.
 */
 #define BSP_CFG_TRUSTED_MODE_FUNCTION  (0xFFFFFFFF)
@@ -849,6 +850,12 @@ NOTE: The RAM areas are not contiguous.It is separated by 512 KB each.
    1 = This project is a C++ project.
 */
 #define BSP_CFG_CPLUSPLUS             (0)
+
+/* Select whether to enable sections of the expansion RAM area.
+   0 = Sections of the expansion RAM area is disabled. (default)
+   1 = Sections of the expansion RAM area is enabled.
+*/
+#define BSP_CFG_EXPANSION_RAM_ENABLE  (0)
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

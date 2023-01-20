@@ -22,20 +22,18 @@
 /* --------------------------------------------- Global Definitions */
 /**
  * \defgroup generic_default_transition_time_module Generic Default Transition Time Model (GENERIC_DEFAULT_TRANSITION_TIME)
- * \ingroup mesh_models_block
+ * \ingroup generics_models
  * \{
  *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Generic Default Transition Time Model (GENERIC_DEFAULT_TRANSITION_TIME) module to the Application.
  */
 
-
-
 /* --------------------------------------------- Data Types/ Structures */
 /**
  *  \defgroup generic_default_transition_time_cb Application Callback
  *  \{
- *  \brief This section Describes the module Notification Callback interface offered
- *  to the application
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Generic Default Transition Time Model Layer.
  */
 
 /**
@@ -81,9 +79,17 @@ typedef API_RESULT (* MS_GENERIC_DEFAULT_TRANSITION_TIME_CLIENT_CB)
 /** \} */
 
 /**
+ * \defgroup generic_default_transition_time_defines Defines
+ * \{
+ * \brief This section describes the various Defines in EtherMind
+ * Mesh Generic Default Transition Time Model Layer.
+ */
+
+/**
  *  \defgroup generic_default_transition_time_structures Structures
  *  \{
- *  \brief This section describes the EtherMind Mesh Generic Default Transition Time Model Structures.
+ *  \brief This section describes the various Data-Types and Structures in
+ *  EtherMind Mesh Generic Default Transition Time Model Layer.
  */
 
 /**
@@ -135,18 +141,25 @@ typedef struct MS_generic_default_transition_time_struct
 
 /** \} */
 
-
+/** \} */
 
 /* --------------------------------------------- Function */
 /**
  * \defgroup generic_default_transition_time_api_defs API Definitions
  * \{
- * \brief This section describes the EtherMind Mesh Generic Default Transition Time Model APIs.
+ * \brief This section describes the various APIs exposed by EtherMind Mesh
+ * Generic Default Transition Time Model Layer to the Application.
  */
 /**
- * \defgroup generic_default_transition_time_ser_api_defs Generic Default Transition Time Server API
+ * \defgroup generic_default_transition_time_ser_api_defs Generic Default Transition Time Server API Definitions
  * \{
- * \brief This section describes the Generic Default Transition Time Server APIs.
+ * \brief This section describes the EtherMind Mesh Generic Default Transition
+ * Time Server Model APIs.
+ */
+
+/**
+ * \name Generic Default Transition Time Server Interfaces
+ * \{
  */
 
 /**
@@ -190,10 +203,18 @@ API_RESULT MS_generic_default_transition_time_server_get_time
            );
 /** \} */
 
+/** \} */
+
 /**
- * \defgroup generic_default_transition_time_cli_api_defs Generic Default Transition Time Client API
+ * \defgroup generic_default_transition_time_cli_api_defs Generic Default Transition Time Client API Definitions
  * \{
- * \brief This section describes the Generic Default Transition Time Client APIs.
+ * \brief This section describes the EtherMind Mesh Generic Default Transition
+ * Time Client Model APIs.
+ */
+
+/**
+ * \name Generic Default Transition Time Client Interfaces
+ * \{
  */
 
 /**
@@ -269,10 +290,29 @@ API_RESULT MS_generic_default_transition_time_client_send_reliable_pdu
                /* IN */ void    * param,
                /* IN */ UINT32    rsp_opcode
            );
+/** \} */
 
-/** \name Message Send
- *  \{
+/** \} */
+
+/** \} */
+
+/**
+ * \addtogroup generic_default_transition_time_defines
+ * \{
  */
+
+/**
+ * \defgroup generic_default_transition_time_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind
+ * Mesh Generic Default Transition Time Model Layer.
+ */
+
+/**
+ * \name Generic Default Transition Time Client Macros
+ * \{
+ */
+
 /**
  *  \brief API to get the Generic Default Transition Time state of an element.
  *
@@ -302,7 +342,7 @@ API_RESULT MS_generic_default_transition_time_client_send_reliable_pdu
  *  The response to the Generic Default Transition Time Set message is a Generic Default
  *  Transition Time Status message.
  *
- *  \param [in] param Generic Default Transition Time Set message parameter @ref MS_GENERIC_DEFAULT_TRANSITION_TIME_STRUCT
+ *  \param [in] param Generic Default Transition Time Set message parameter \ref MS_GENERIC_DEFAULT_TRANSITION_TIME_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -321,7 +361,7 @@ API_RESULT MS_generic_default_transition_time_client_send_reliable_pdu
  *  Generic Default Transition Time Set Unacknowledged is an unacknowledged message used to set
  *  the Generic Default Transition Time state of an element.
  *
- *  \param [in] param Generic Default Transition Time Set Unacknowledged message parameter @ref MS_GENERIC_DEFAULT_TRANSITION_TIME_STRUCT
+ *  \param [in] param Generic Default Transition Time Set Unacknowledged message parameter \ref MS_GENERIC_DEFAULT_TRANSITION_TIME_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -333,8 +373,11 @@ API_RESULT MS_generic_default_transition_time_client_send_reliable_pdu
             0xFFFFFFFF\
         )
 /** \} */
+
 /** \} */
+
 /** \} */
+
 /** \} */
 
 #endif /*_H_MS_GENERIC_DEFAULT_TRANSITION_TIME_API_ */

@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2022) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_hlibusbip.c
@@ -31,6 +31,7 @@
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.04.2020 1.31 RX671 is added.
+ *         : 30.10.2022 1.41 USBX HMSC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -52,7 +53,9 @@
 #endif  /* ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE)) */
 
 #if defined(USB_CFG_HMSC_USE)
+#if (BSP_CFG_RTOS_USED != 5)	/* Azure RTOS */
 #include "r_usb_hmsc.h"
+#endif /* (BSP_CFG_RTOS_USED != 5) */
 #endif /* defined(USB_CFG_HMSC_USE) */
 
 #if defined(USB_CFG_HCDC_USE)
@@ -71,6 +74,9 @@
 /******************************************************************************
  Exported global variables (to be accessed by other files)
  ******************************************************************************/
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+extern rtos_sem_id_t g_usb_host_usbx_sem[USB_NUM_USBIP][USB_MAX_PIPE_NO + 1];
+#endif /* (BSP_CFG_RTOS_USED == 5) */
 
 /******************************************************************************
  Private global variables and functions
@@ -818,7 +824,9 @@ uint16_t usb_hstd_read_data (usb_utr_t *ptr, uint16_t pipe, uint16_t pipemode)
         end_flag = USB_READOVER;
         usb_cstd_set_nak(ptr, pipe); /* Set NAK */
         count = (uint16_t) g_usb_hstd_data_cnt[ptr->ip][pipe];
+#if (BSP_CFG_RTOS_USED != 5)
         g_usb_hstd_data_cnt[ptr->ip][pipe] = dtln;
+#endif /* BSP_CFG_RTOS_USED != 5 */
     }
     else if (g_usb_hstd_data_cnt[ptr->ip][pipe] == dtln)
     {
@@ -1374,6 +1382,11 @@ void usb_hstd_clr_pipe_table (uint16_t ip_no, uint16_t device_address)
                     g_usb_pipe_table[ip_no][pipe_no].pipe_buf = USB_NULL;
                 }
 #endif /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
+
+#if (BSP_CFG_RTOS_USED == 5)   /* Azure RTOS */
+                rtos_release_semaphore(&g_usb_host_usbx_sem[ip_no][pipe_no]);
+                rtos_delete_semaphore(&g_usb_host_usbx_sem[ip_no][pipe_no]);
+#endif  /* (BSP_CFG_RTOS_USED == 5) */
             }
         }
     }
@@ -1463,9 +1476,11 @@ uint8_t usb_hstd_get_pipe_no (uint16_t ip_no, uint16_t address, uint16_t usb_cla
 #if defined(USB_CFG_HVND_USE)
     uint16_t    pipe;
 #endif /* defined(USB_CFG_HVND_USE) */
+#if (BSP_CFG_RTOS_USED != 5)
 #if defined(USB_CFG_HMSC_USE)
     uint16_t    side;
 #endif /* defined(USB_CFG_HMSC_USE) */
+#endif  /* (BSP_CFG_RTOS_USED != 5) */
 
     switch (usb_class)
     {
@@ -1591,7 +1606,9 @@ uint8_t usb_hstd_get_pipe_no (uint16_t ip_no, uint16_t address, uint16_t usb_cla
         case USB_HMSC:
 #if defined(USB_CFG_HMSC_USE)
             if (USB_EP_BULK == type)
-            {   /* Add USB IP no. for USB Device address */
+            {
+ #if (BSP_CFG_RTOS_USED != 5)
+                /* Add USB IP no. for USB Device address */
                 if (USB_IP1 == ip_no)
                 {
                     address |= USBA_ADDRESS_OFFSET;
@@ -1605,6 +1622,9 @@ uint8_t usb_hstd_get_pipe_no (uint16_t ip_no, uint16_t address, uint16_t usb_cla
                 {   /* Calculate the pipe number corresponding to the drive number */
                     pipe_no     = (USB_PIPE1 + side);
                 }
+ #else  /* defined(BSP_CFG_RTOS_USED != 5) */
+                pipe_no = USB_PIPE1;
+ #endif /* defined(BSP_CFG_RTOS_USED != 5) */
             }
 #endif /* defined(USB_CFG_HMSC_USE) */
         break;
@@ -1783,7 +1803,7 @@ void usb_rtos_send_msg_to_submbx_addr (usb_utr_t *p_ptr, uint16_t devaddr)
 /******************************************************************************
  End of function usb_rtos_send_msg_to_submbx_addr
  ******************************************************************************/
-#endif /* BSP_CFG_RTOS_USE != 0 */
+#endif /* BSP_CFG_RTOS_USED != 0 */
 
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 

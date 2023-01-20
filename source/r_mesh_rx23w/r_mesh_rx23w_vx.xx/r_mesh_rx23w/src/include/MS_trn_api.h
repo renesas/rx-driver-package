@@ -31,14 +31,22 @@
  */
 
 /**
- * \defgroup trn_constants Constants
+ * \defgroup trn_defines Defines
  * \{
- * \brief This section describes the EtherMind Mesh Transport Layer Constants.
+ * \brief This section describes the various Defines in EtherMind
+ * Mesh Transport Layer.
  */
 
 /**
- * \name Tranport Layer Control Packet Opcodes
- *       RFU: 0x02 - 0x0F
+ * \defgroup trn_constants Constants
+ * \{
+ * \brief This section describes the various Constants in EtherMind
+ * Mesh Transport Layer.
+ */
+
+/**
+ * \name Tranport Layer Control Message Opcodes
+ *       RFU Values: 0x0B - 0x7F
  * \{
  */
 
@@ -94,23 +102,32 @@
 
 /**
  * \name Parameter defines for Friendship Opcodes
- * Friend Update Flags
+ * <b>Friend Update Flags</b>
  *
- * Bit 0: Key Refresh Flag \n
- *        0: Not-In-Phase2 \n
- *        1: In-Phase2
+ * | <b>Bit 0</b> | Key Refresh Flag
+ * |--------------|-----------------
+ * |  <b>0</b>    | Not-In-Phase2
+ * |  <b>1</b>    | In-Phase2
  *
- * Bit 1: IV Update Flag \n
- *        0: Normal operation \n
- *        1: IV Update active
+ * | <b>Bit 1</b> |   IV Update Flag
+ * |--------------|-----------------
+ * |  <b>0</b>    | Normal operation
+ * |  <b>1</b>    | IV Update active
+ *
  * \{
  */
+/** Friend Update Key Refresh Flag Bit Position */
 #define MS_FRNDUPD_FLAG_KEYREF_BIT                      0
+/** Friend Update Key Refresh Not-In-Phase2 */
 #define MS_FRNDUPD_FLAG_KEYREF_NOTINPHASE_2             0x00
+/** Friend Update Key Refresh In-Phase2 */
 #define MS_FRNDUPD_FLAG_KEYREF_INPHASE_2                0x01
 
+/** Friend Update IV Update Flag Bit Position */
 #define MS_FRNDUPD_FLAG_IVUPDATE_BIT                    1
+/** Friend Update IV Update Normal Operation */
 #define MS_FRNDUPD_FLAG_IVUPDATE_NORMAL                 0x00
+/** Friend Update IV Update Active */
 #define MS_FRNDUPD_FLAG_IVUPDATE_ACTIVE                 0x01
 /** \} */
 
@@ -118,7 +135,9 @@
  * \name Friend Update More Data
  * \{
  */
+/** Friend Update Data Queue Empty */
 #define MS_FRNDUPD_MD_QUEUE_EMPTY                       0x00
+/** Friend Update Data Queue Not Empty */
 #define MS_FRNDUPD_MD_QUEUE_NOTEMPTY                    0x01
 /** \} */
 
@@ -126,29 +145,51 @@
  * \name Friend Request Criteria
  * \{
  */
+/** Friend Request RSSI Factor Offset */
 #define MS_FRNDREQ_RSSIFACTOR_OFFSET                    5
+/** Friend Request RSSI Factor Mask */
 #define MS_FRNDREQ_RSSIFACTOR_MASK                      0x60
+/** Friend Request RSSI Factor 1 */
 #define MS_FRNDREQ_RSSIFACTOR_1                         0x00
+/** Friend Request RSSI Factor 1.5 */
 #define MS_FRNDREQ_RSSIFACTOR_1_5                       0x01
+/** Friend Request RSSI Factor 2 */
 #define MS_FRNDREQ_RSSIFACTOR_2                         0x02
+/** Friend Request RSSI Factor 2.5 */
 #define MS_FRNDREQ_RSSIFACTOR_2_5                       0x03
 
+/** Friend Request Receive Window Factor Offset */
 #define MS_FRNDREQ_RCVWINFACTOR_OFFSET                  3
+/** Friend Request Receive Window Factor Mask */
 #define MS_FRNDREQ_RCVWINFACTOR_MASK                    0x18
+/** Friend Request Receive Window Factor 1 */
 #define MS_FRNDREQ_RCVWINFACTOR_1                       0x00
+/** Friend Request Receive Window Factor 1.5 */
 #define MS_FRNDREQ_RCVWINFACTOR_1_5                     0x01
+/** Friend Request Receive Window Factor 2 */
 #define MS_FRNDREQ_RCVWINFACTOR_2                       0x02
+/** Friend Request Receive Window Factor 2.5 */
 #define MS_FRNDREQ_RCVWINFACTOR_2_5                     0x03
 
+/** Friend Request Minimum Queue Size Log Offset */
 #define MS_FRNDREQ_MINQSIZELOG_OFFSET                   0
+/** Friend Request Minimum Queue Size Log Mask */
 #define MS_FRNDREQ_MINQSIZELOG_MASK                     0x07
+/** Friend Request Minimum Queue Size Invalid/Prohibited */
 #define MS_FRNDREQ_MINQSIZE_INVALID                     0x00
+/** Friend Request Minimum Queue Size 2 */
 #define MS_FRNDREQ_MINQSIZE_2                           0x01
+/** Friend Request Minimum Queue Size 4 */
 #define MS_FRNDREQ_MINQSIZE_4                           0x02
+/** Friend Request Minimum Queue Size 8 */
 #define MS_FRNDREQ_MINQSIZE_8                           0x03
+/** Friend Request Minimum Queue Size 16 */
 #define MS_FRNDREQ_MINQSIZE_16                          0x04
+/** Friend Request Minimum Queue Size 32 */
 #define MS_FRNDREQ_MINQSIZE_32                          0x05
+/** Friend Request Minimum Queue Size 64 */
 #define MS_FRNDREQ_MINQSIZE_64                          0x06
+/** Friend Request Minimum Queue Size 128 */
 #define MS_FRNDREQ_MINQSIZE_128                         0x07
 /** \} */
 
@@ -156,17 +197,23 @@
  * \name Heartbeat features
  * \{
  */
+/** Heartbeat feature bit-mask for Relay Feature */
 #define MS_HEARTBEAT_FEATURE_RELAY                      (1 << 0)
+/** Heartbeat feature bit-mask for Proxy Feature */
 #define MS_HEARTBEAT_FEATURE_PROXY                      (1 << 1)
+/** Heartbeat feature bit-mask for Friend Feature */
 #define MS_HEARTBEAT_FEATURE_FRIEND                     (1 << 2)
+/** Heartbeat feature bit-mask for Lowpower Node Feature */
 #define MS_HEARTBEAT_FEATURE_LOWPOWER                   (1 << 3)
 /** \} */
 
 /**
- * \name Friendship constants as defined in the specification
+ * \name Specification Defined Friendship Constants
  * \{
  */
+/** Minimum Delay time in milliseconds for Friend-Offer */
 #define MS_MIN_FRNDOFFER_DELAY                          100 /* ms */
+/** Initial Poll Timeout in milliseconds */
 #define MS_TRN_INITIAL_FRNDPOLL_TIMEOUT                 1000 /* ms */
 /** \} */
 
@@ -175,13 +222,24 @@
 /**
  *  \defgroup trn_events Events
  *  \{
- *  \brief This section lists the Asynchronous Events notified to Application by the
- *  Module.
+ *  \brief This section lists the Asynchronous Events notified to Application
+ *  by EtherMind Mesh Transport Layer.
  */
+/**
+ * \name Friendship Procedure Events
+ * \{
+ */
+/** Friendship Setup Confirmation Event */
 #define MS_TRN_FRIEND_SETUP_CNF                         0x00
+/** Friendship Subscriptionlist Confirmation Event */
 #define MS_TRN_FRIEND_SUBSCRNLIST_CNF                   0x01
+/** Friendship Clear Confirmation Event */
 #define MS_TRN_FRIEND_CLEAR_CNF                         0x02
+/** Friendship Termination Indication Event */
 #define MS_TRN_FRIEND_TERMINATE_IND                     0x03
+/** \} */
+
+/** \} */
 
 /** \} */
 
@@ -190,13 +248,13 @@
 /**
  *  \defgroup trn_cb Application Callback
  *  \{
- *  \brief This section Describes the module Notification Callback interface offered
- *  to the application
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Transport Layer.
  */
 /**
- * TRANSPORT Application Asynchronous Notification Callback.
+ * Transport Application Asynchronous Notification Callback.
  *
- * TRANSPORT calls the registered callback to indicate events occurred to the
+ * Transport calls the registered callback to indicate events occurred to the
  * application.
  *
  * \param brr_type          Bearer Type.
@@ -216,9 +274,9 @@ typedef void (*TRN_NTF_CB)
         ) DECL_REENTRANT;
 
 /**
- * TRANSPORT Application Friendship Asynchronous Notification Callback.
+ * Transport Application Friendship Asynchronous Notification Callback.
  *
- * TRANSPORT calls the registered callback to indicate the status of froednship
+ * Transport calls the registered callback to indicate the status of friendship
  * setup procedure to the application
  *
  * \param subnet_handle     Associated Subnet Handle.
@@ -235,17 +293,24 @@ typedef void (*TRN_FRND_CB)
 /** \} */
 
 /**
- *  \addtogroup trn_structures Structures
+ *  \addtogroup trn_defines Defines
  *  \{
- *  \brief This section describes the EtherMind Mesh Transport Layer Structures.
  */
+
+/**
+ *  \defgroup trn_structures Structures
+ *  \{
+ *  \brief This section describes the various Data-Types and Structures in
+ *  EtherMind Mesh Transport Layer.
+ */
+
 /** Transport Control Packet Opcode Type */
 typedef UCHAR   MS_TRN_CTRL_PKT_OPCODE;
 
 /** Friend Data Structure */
 typedef struct _MS_TRN_FRIEND_ENTRY
 {
-    /** Friend Seqnece Number - 7 bit value */
+    /** Friend Sequence Number - 7 bit value */
     UINT8        fsn;
 
     /** Low Power Node Address */
@@ -256,12 +321,6 @@ typedef struct _MS_TRN_FRIEND_ENTRY
 
     /** Previous Friend Address */
     MS_NET_ADDR  prev_faddr;
-
-    /** Friend Queue */
-    /* UINT32       q; */
-
-    /** Subscription List of LPN */
-    /* UINT32       subscription_list; */
 
 } MS_TRN_FRIEND_ENTRY;
 
@@ -416,21 +475,22 @@ typedef struct _MS_TRN_HEARTBEAT_PARAM
 /** Low Power Node element information */
 typedef struct _MS_TRN_FRNDSHIP_INFO
 {
-    /* Main subnet handle of the element */
+    /** Main subnet handle of the element */
     MS_SUBNET_HANDLE subnet_handle;
 
-    /* Peer LPN/Friend Address */
+    /** Peer LPN/Friend Address */
     MS_NET_ADDR addr;
 
-    /* Low Power Node Counter */
+    /** Low Power Node Counter */
     UINT16 lpn_counter;
 
-    /* Friend Counter - TODO: Should be a global index? */
+    /* TODO: Should be a global index? */
+    /** Friend Counter */
     UINT16 frnd_counter;
 
 } MS_TRN_FRNDSHIP_INFO;
 
-/* Invalid LPN Handle */
+/** Invalid LPN Handle */
 #define LPN_HANDLE_INVALID              MESH_CFG_MAX_LPNS
 
 /** Hearbeat Publication state */
@@ -470,7 +530,7 @@ typedef struct _MS_TRN_HEARTBEAT_PUBLICATION_INFO
 
 }MS_TRN_HEARTBEAT_PUBLICATION_INFO;
 
-/** Hearbeat Subscription state */
+/** Heartbeat Subscription state */
 typedef struct _MS_TRN_HEARTBEAT_SUBSCRIPTION_INFO
 {
     /**
@@ -512,23 +572,29 @@ typedef struct _MS_TRN_HEARTBEAT_SUBSCRIPTION_INFO
 
 /** \} */
 
-/** TCF (Transport Control Field) - Transport Field Value */
-
+/** \} */
 
 /* --------------------------------------------- Function */
 
-/**
- * \defgroup trn_api_defs API Definitions
- * \{
- * \brief This section describes the EtherMind Mesh Transport Layer APIs.
- */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/** \cond DOC_EXCLUDE */
 /**
- *  \brief Register Inerface with Transport Layer
+ * \defgroup trn_api_defs API Definitions
+ * \{
+ * \brief This section describes the various APIs exposed by
+ * EtherMind Mesh Transport Layer to the Application and other upper
+ * layers of the stack.
+ */
+
+/**
+ * \name Transport Interfaces
+ * \{
+ */
+
+/**
+ *  \brief Register Interface with Transport Layer
  *
  *  \par Description
  *  This routine registers interface with the Transport Layer.
@@ -547,7 +613,6 @@ API_RESULT MS_trn_register
                /* IN */ TRN_NTF_CB        trn_cb,
                /* IN */ MS_TRN_MSG_TYPE   msg_type
            );
-/** \endcond */
 
 
 /**
@@ -563,7 +628,7 @@ API_RESULT MS_trn_register
  *         Destination Address
  *
  *  \param [in] label
- *         Lable UUID, represending Virtual Address of Destination
+ *         Lable UUID, representing Virtual Address of Destination
  *
  *  \param [in] subnet_handle
  *         Handle identifying the Subnet
@@ -630,6 +695,7 @@ API_RESULT MS_trn_send_control_pdu
                /* IN */ void                   * param
            );
 
+/** \} */
 
 /**
  * \name Low Power Feature Functions
@@ -716,51 +782,17 @@ API_RESULT MS_trn_lpn_manage_subscription
            );
 
 /**
- *  \brief API to add to friend subscription list.
+ *  \brief To trigger Friend Poll from application
  *
  *  \par Description
- *  This routine is used by the device acting as a low power node
- *  add addresses to the friends subscription list.
- *
- *  \param [in] addr_list
- *         Pointer to the list of addresses to be managed.
- *
- *  \param [in] count
- *         Number of addresses given.
+ *  This routine enables the application to trigger a Friend Poll even before
+ *  the expiry of an active poll period configured during the friendship
+ *  establishment.
+ *  The poll period will get reset at this point.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
-#define MS_trn_lpn_subscrn_list_add(addr_list, count)\
-        MS_trn_lpn_manage_subscription\
-        (\
-            MS_TRN_CTRL_OPCODE_FRND_SUBSCRN_LIST_ADD,\
-            (addr_list),\
-            (count)\
-        );
-
-
-/**
- *  \brief API to remove from friend subscription list.
- *
- *  \par Description
- *  This routine is used by the device acting as a low power node
- *  remove addresses from the friends subscription list.
- *
- *  \param [in] addr_list
- *         Pointer to the list of addresses to be managed.
- *
- *  \param [in] count
- *         Number of addresses given.
- *
- *  \return API_SUCCESS or an error code indicating reason for failure
- */
-#define MS_trn_lpn_subscrn_list_remove(addr_list, count)\
-        MS_trn_lpn_manage_subscription\
-        (\
-            MS_TRN_CTRL_OPCODE_FRND_SUBSCRN_LIST_REMOVE,\
-            (addr_list),\
-            (count)\
-        );
+API_RESULT MS_trn_lpn_poll (void);
 /** \} */
 
 /**
@@ -851,9 +883,9 @@ API_RESULT MS_trn_get_frndship_info
  *  LPN elements. This will be forwarded to the elements when it polls for the
  *  next packet available.
  *
- *  \param [in] subnet_handle    Handle to identitfy the network.
+ *  \param [in] subnet_handle    Handle to identity the network.
  *  \param [in] flag             Flag indicating the Key Refresh and IV Update state.
- *  \param [in] ivindex          Current IV Index of teh network.
+ *  \param [in] ivindex          Current IV Index of the network.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -963,11 +995,78 @@ API_RESULT MS_trn_trigger_heartbeat (/* IN */ UINT8 change_in_feature_bit);
 
 /** \} */
 
+/** \} */
+
+/**
+ *  \addtogroup trn_defines Defines
+ *  \{
+ */
+
+/**
+ * \defgroup trn_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind
+ * Mesh Transport Layer.
+ */
+
+/**
+ * \name LPN Macros
+ * \{
+ */
+/**
+ *  \brief API to add to friend subscription list.
+ *
+ *  \par Description
+ *  This routine is used by the device acting as a low power node
+ *  add addresses to the friends subscription list.
+ *
+ *  \param [in] addr_list
+ *         Pointer to the list of addresses to be managed.
+ *
+ *  \param [in] count
+ *         Number of addresses given.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+#define MS_trn_lpn_subscrn_list_add(addr_list, count)\
+        MS_trn_lpn_manage_subscription\
+        (\
+            MS_TRN_CTRL_OPCODE_FRND_SUBSCRN_LIST_ADD,\
+            (addr_list),\
+            (count)\
+        );
+
+/**
+ *  \brief API to remove from friend subscription list.
+ *
+ *  \par Description
+ *  This routine is used by the device acting as a low power node
+ *  remove addresses from the friends subscription list.
+ *
+ *  \param [in] addr_list
+ *         Pointer to the list of addresses to be managed.
+ *
+ *  \param [in] count
+ *         Number of addresses given.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+#define MS_trn_lpn_subscrn_list_remove(addr_list, count)\
+        MS_trn_lpn_manage_subscription\
+        (\
+            MS_TRN_CTRL_OPCODE_FRND_SUBSCRN_LIST_REMOVE,\
+            (addr_list),\
+            (count)\
+        );
+/** \} */
+
+/** \} */
+
+/** \} */
+
 #ifdef __cplusplus
 };
 #endif
-
-/** \} */
 
 /** \} */
 

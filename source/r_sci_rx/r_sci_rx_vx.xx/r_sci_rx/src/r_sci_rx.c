@@ -66,6 +66,8 @@
 *                              for all channels.
 *                              Fixed issue of consecutively calling R_SCI_Receive() function in using DTC/DMAC.
 *                              Added support for RX660.
+*           27.12.2022 4.60    Fixed the issue that rx_idle is not changed to true when reception is complete 
+*                              in DMAC mode.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -2777,6 +2779,17 @@ static void sci_error(sci_hdl_t const hdl)
             }
         }
 
+#if ((RX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x02) && SCI_CFG_ASYNC_INCLUDED)
+    /* Clear rx_idle flag when using Async mode with DTC/DMAC */
+    if ((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
+    {
+        if (SCI_MODE_ASYNC == hdl->mode)
+        {
+            hdl->rx_idle = true;
+        }
+    }
+#endif
+
         /* Do callback for error */
         if ((NULL != hdl->callback) && (FIT_NO_FUNC != hdl->callback))
         {
@@ -2826,6 +2839,17 @@ static void sci_fifo_error(sci_hdl_t const hdl)
         {
             /* Do Nothing */
         }
+
+#if ((RX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x02) && SCI_CFG_ASYNC_INCLUDED)
+    /* Clear rx_idle flag when using Async mode with DTC/DMAC */
+    if ((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
+    {
+        if (SCI_MODE_ASYNC == hdl->mode)
+        {
+            hdl->rx_idle = true;
+        }
+    }
+#endif
 
         /* Do callback for error */
         if ((NULL != hdl->callback) && (FIT_NO_FUNC != hdl->callback))

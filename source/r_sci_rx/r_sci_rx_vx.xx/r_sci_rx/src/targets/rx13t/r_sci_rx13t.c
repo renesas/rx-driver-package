@@ -24,6 +24,7 @@
 *           25.11.2019 1.00    Initial Release.
 *           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
 *           31.03.2021 3.80    Added support circular buffer in mode asynchronous.
+*           27.12.2022 4.60    Updated macro definition enable and disable nested interrupt for TXI, RXI, ERI, TEI.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -400,6 +401,11 @@ ISRs
  ******************************************************************************/
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_txi1_isr(void)
 {
+#if SCI_CFG_CH1_EN_TXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    
     txi_handler(&ch1_ctrl);
 } /* End of function sci1_txi1_isr() */
 #endif /* End of SCI_CFG_CH1_INCLUDED  */
@@ -411,6 +417,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_txi1_isr(void)
  ******************************************************************************/
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_txi5_isr(void)
 {
+#if SCI_CFG_CH5_EN_TXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    
     txi_handler(&ch5_ctrl);
 } /* End of function sci5_txi5_isr() */
 #endif /* End of SCI_CFG_CH5_INCLUDED  */
@@ -423,6 +434,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_txi5_isr(void)
  ******************************************************************************/
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_txi12_isr(void)
 {
+#if SCI_CFG_CH12_EN_TXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    
     txi_handler(&ch12_ctrl);
 } /* End of function sci12_txi12_isr() */
 #endif /* End of SCI_CFG_CH12_INCLUDED  */
@@ -443,6 +459,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_txi12_isr(void)
  ******************************************************************************/
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_tei1_isr(void)
 {
+#if SCI_CFG_CH1_EN_TEI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    
     tei_handler(&ch1_ctrl);
 } /* End of function sci1_tei1_isr() */
 #endif /* End of SCI_CFG_CH1_INCLUDED  */
@@ -454,6 +475,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_tei1_isr(void)
  ******************************************************************************/
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_tei5_isr(void)
 {
+#if SCI_CFG_CH5_EN_TEI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    
     tei_handler(&ch5_ctrl);
 } /* End of function sci5_tei5_isr() */
 #endif /* End of SCI_CFG_CH5_INCLUDED  */
@@ -465,6 +491,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_tei5_isr(void)
  ******************************************************************************/
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_tei12_isr(void)
 {
+#if SCI_CFG_CH12_EN_TEI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    
     tei_handler(&ch12_ctrl);
 } /* End of function sci12_tei12_isr() */
 #endif /* End of SCI_CFG_CH12_INCLUDED  */
@@ -484,6 +515,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_tei12_isr(void)
  ******************************************************************************/
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_rxi1_isr(void)
 {
+#if SCI_CFG_CH1_EN_RXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    
     rxi_handler(&ch1_ctrl);
 } /* End of function sci1_rxi1_isr() */
 #endif /* End of SCI_CFG_CH1_INCLUDED  */
@@ -495,6 +531,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_rxi1_isr(void)
  ******************************************************************************/
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_rxi5_isr(void)
 {
+#if SCI_CFG_CH5_EN_RXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    
     rxi_handler(&ch5_ctrl);
 } /* End of function sci5_rxi5_isr() */
 #endif /* End of SCI_CFG_CH5_INCLUDED  */
@@ -506,6 +547,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_rxi5_isr(void)
  ******************************************************************************/
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_rxi12_isr(void)
 {
+#if SCI_CFG_CH12_EN_RXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    
     rxi_handler(&ch12_ctrl);
 } /* End of function sci12_rxi12_isr() */
 #endif /* End of SCI_CFG_CH12_INCLUDED  */
@@ -523,6 +569,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_rxi12_isr(void)
 ******************************************************************************/
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_eri1_isr(void)
 {
+#if SCI_CFG_CH1_EN_ERI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    
     eri_handler(&ch1_ctrl);
 } /* End of function sci1_eri1_isr() */
 #endif /* End of SCI_CFG_CH1_INCLUDED  */
@@ -534,6 +585,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_eri1_isr(void)
 ******************************************************************************/
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_eri5_isr(void)
 {
+#if SCI_CFG_CH5_EN_ERI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    
     eri_handler(&ch5_ctrl);
 } /* End of function sci5_eri5_isr() */
 #endif /* End of SCI_CFG_CH5_INCLUDED  */
@@ -546,6 +602,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_eri5_isr(void)
 ******************************************************************************/
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_eri12_isr(void)
 {
+#if SCI_CFG_CH12_EN_ERI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    
     eri_handler(&ch12_ctrl);
 } /* End of function sci12_eri12_isr() */
 #endif /* End of SCI_CFG_CH12_INCLUDED  */

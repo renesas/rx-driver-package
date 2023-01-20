@@ -69,6 +69,10 @@
 *                              for all channels.
 *                              Fixed issue of consecutively calling R_SCI_Receive() function in using DTC/DMAC.
 *                              Added support for RX660.
+*           28.06.2022 4.50    Updated demo projects.
+*           27.12.2022 4.60    Fixed the issue that rx_idle is not changed to true when reception is complete 
+*                              in DMAC mode.
+*                              Updated macro definition enable and disable nested interrupt for TXI, RXI, ERI, TEI.
 ***********************************************************************************************************************/
 
 #ifndef SCI_IF_H
@@ -96,7 +100,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define SCI_VERSION_MAJOR  (4)
-#define SCI_VERSION_MINOR  (40)
+#define SCI_VERSION_MINOR  (60)
 
 #define SCI_DTC_DMACA_DISABLE  (0x0)
 #define SCI_DTC_ENABLE         (0x1)

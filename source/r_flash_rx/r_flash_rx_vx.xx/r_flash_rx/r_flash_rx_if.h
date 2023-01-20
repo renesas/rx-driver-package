@@ -154,6 +154,7 @@
 *           10.12.2021 4.81    Added support for Tool News R20TS0765, R20TS0772, and some minor updates.
 *           13.05.2022 4.90    Added support for RX660.
 *                              Added support for Tool News R20TS0818. 
+*           23.12.2022 4.91    Fixed typos in app note. 
 ***********************************************************************************************************************/
 
 #ifndef FLASH_INTERFACE_HEADER_FILE
@@ -171,7 +172,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Driver Version Number. */
 #define FLASH_RX_VERSION_MAJOR           (4)
-#define FLASH_RX_VERSION_MINOR           (90)
+#define FLASH_RX_VERSION_MINOR           (91)
 
 
 /***********************************************************************************************************************

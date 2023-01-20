@@ -29,6 +29,7 @@
 * History : DD.MM.YYYY Version  Description
 *         : 01.03.2020 1.00     First Release
 *         : 30.06.2022 1.40     USBX PCDC is supported.
+*         : 30.10.2022 1.41     USBX HMSC is supported.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -40,7 +41,9 @@
 /**********************************************************************************************************************
  * Macro definitions
  *********************************************************************************************************************/
-
+#if (BSP_CFG_RTOS_USED == 5)
+#define RTOS_TSK_HIGH_PRIORITY	(0U)
+#endif /* BSP_CFG_RTOS_USED == 5 */
 /**********************************************************************************************************************
  * Typedef definitions
  *********************************************************************************************************************/
@@ -721,6 +724,60 @@ rtos_err_t  rtos_release_semaphore (rtos_sem_id_t *p_id)
 #endif
     return RTOS_SUCCESS;
 }/* End of function rtos_release_semaphore() */
+
+/**********************************************************************************************************************
+ * Function Name: rtos_disable_dispatch
+ * Description  : Disable dispatch of the current task
+ * Arguments    : p_priory      : Pointer to the area to store old task priority
+ * Return Value : RTOS_SUCCESS / RTOS_ERROR
+ *********************************************************************************************************************/
+rtos_err_t  rtos_disable_dispatch (rtos_task_priority_t *p_priority)
+{
+#if     BSP_CFG_RTOS_USED == 1      /* FreeRTOS */
+#elif   BSP_CFG_RTOS_USED == 2      /* SEGGER embOS */
+#elif   BSP_CFG_RTOS_USED == 3      /* Micrium MicroC/OS */
+#elif   BSP_CFG_RTOS_USED == 4      /* Renesas RI600V4 & RI600PX */
+#elif   BSP_CFG_RTOS_USED == 5      /* Azure RTOS */
+    UINT        err;
+    TX_THREAD   *p_current_task_id;
+
+    p_current_task_id = tx_thread_identify();
+    err = tx_thread_preemption_change(p_current_task_id, RTOS_TSK_HIGH_PRIORITY, p_priority);
+    if (TX_SUCCESS != err)
+    {
+        return RTOS_ERROR;
+    }
+#else
+#endif
+    return RTOS_SUCCESS;
+}/* End of function rtos_disable_dispatch() */
+
+/**********************************************************************************************************************
+ * Function Name: rtos_disable_dispatch
+ * Description  : Enable Dispatch of the current task
+ * Arguments    : priory    : Pointer to the area to store old task priority
+ * Return Value : RTOS_SUCCESS / RTOS_ERROR
+ *********************************************************************************************************************/
+rtos_err_t  rtos_enable_dispatch (rtos_task_priority_t priority)
+{
+#if     BSP_CFG_RTOS_USED == 1      /* FreeRTOS */
+#elif   BSP_CFG_RTOS_USED == 2      /* SEGGER embOS */
+#elif   BSP_CFG_RTOS_USED == 3      /* Micrium MicroC/OS */
+#elif   BSP_CFG_RTOS_USED == 4      /* Renesas RI600V4 & RI600PX */
+#elif   BSP_CFG_RTOS_USED == 5      /* Azure RTOS */
+    UINT        err;
+    TX_THREAD   *p_current_task_id;
+
+    p_current_task_id = tx_thread_identify();
+    err = tx_thread_preemption_change(p_current_task_id, priority, &priority);
+    if (TX_SUCCESS != err)
+    {
+        return RTOS_ERROR;
+    }
+#else
+#endif
+    return RTOS_SUCCESS;
+}/* End of function rtos_disable_dispatch() */
 
 #if   BSP_CFG_RTOS_USED == 5      /* Azure RTOS */
 /**********************************************************************************************************************

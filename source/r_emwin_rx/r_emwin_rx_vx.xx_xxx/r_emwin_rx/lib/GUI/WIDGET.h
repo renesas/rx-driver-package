@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.22 - Graphical user interface for embedded applications **
+** emWin V6.26 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -121,8 +121,10 @@ typedef struct {
 #define SWITCH_ID    0x53574954UL /* SWIT */
 #define GAUGE_ID     0x47415547UL /* GAUG */
 #define QRCODE_ID    0x5152434fUL /* QRCO */
+#define SCROLLER_ID  0x5343523cUL /* SCRL */
+#define WHEEL_ID     0x5748454CUL /* WHEL */
 
-#define WIDGET_LOCK(hWin) ((WIDGET*)GUI_LOCK_H(hWin))
+#define WIDGET_LOCK(hWin) ((WIDGET*)WM_LOCK_H(hWin))
 
 /*********************************************************************
 *
@@ -163,6 +165,7 @@ typedef struct {
 */
 
 #define WIDGET_STATE_FOCUS              (1 << 0)
+#define WIDGET_STATE_HORIZONTAL         (0 << 3)
 #define WIDGET_STATE_VERTICAL           (1 << 3)
 #define WIDGET_STATE_FOCUSABLE          (1 << 4)
 #define WIDGET_STATE_INVISIBLEFOCUS     (1 << 5)
@@ -219,15 +222,14 @@ typedef struct {
 *
 *       Messages
 */
-
 #define WM_WIDGET_SET_EFFECT    (WM_WIDGET + 0)
 
 /*********************************************************************
 *
 *       Create flags
 */
-
 #define WIDGET_CF_VERTICAL      WIDGET_STATE_VERTICAL
+#define WIDGET_CF_HORIZONTAL    WIDGET_STATE_HORIZONTAL
 
 /*********************************************************************
 *
@@ -340,7 +342,7 @@ void      WIDGET__GetClientRect      (WIDGET * pWidget, GUI_RECT * pRect);
 void      WIDGET__GetInsideRect      (WIDGET * pWidget, GUI_RECT * pRect);
 void      WIDGET__Init               (WIDGET * pWidget, int Id, U16 State);
 void      WIDGET__RotateRect90       (WIDGET * pWidget, GUI_RECT * pDest, const GUI_RECT * pRect);
-void      WIDGET__SetScrollState     (WM_HWIN hWin, const WM_SCROLL_STATE * pVState, const WM_SCROLL_STATE * pState);
+void      WIDGET__SetScrollState     (WM_HWIN hWin, const WM_SCROLL_STATE * pVState, const WM_SCROLL_STATE * pHState);
 void      WIDGET__FillStringInRect   (const char * pText, const GUI_RECT * pFillRect, const GUI_RECT * pTextRectMax, const GUI_RECT * pTextRectAct);
 void      WIDGET__FillStringInRectEx (const char * pText, const GUI_RECT * pFillRect, const GUI_RECT * pTextRectMax, const GUI_RECT * pTextRectAct, int xOffset);
 

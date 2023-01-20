@@ -39,6 +39,8 @@
 
 #define TOUCH_CFG_UART_PRIORITY           (0)
 
+#define TOUCH_CFG_CHATTERING_SUPPRESSION_TYPE (0)
+
 #ifndef QE_TOUCH_CONFIGURATION
 #define TOUCH_CFG_NUM_BUTTONS             (1)
 #define TOUCH_CFG_NUM_SLIDERS             (0)

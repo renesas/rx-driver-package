@@ -30,6 +30,7 @@
  *         : 16.11.2018 1.24 Supporting RTOS Thread safe
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.06.2022 1.40 USBX PCDC is supported.
+ *         : 30.10.2022 1.41 USBX HMSC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -482,10 +483,10 @@ void usb_cstd_usb_task (void)
         if (USB_FLGSET == usb_cstd_check_schedule()) /* Check for any task processing requests flags. */
         {
             /** Use only in non-OS. In RTOS, the kernel will schedule these tasks, no polling. **/
-            usb_hstd_hcd_task((usb_vp_int_t) 0); /* HCD Task */
-            usb_hstd_mgr_task((usb_vp_int_t) 0); /* MGR Task */
+            usb_hstd_hcd_task((rtos_task_arg_t) 0); /* HCD Task */
+            usb_hstd_mgr_task((rtos_task_arg_t) 0); /* MGR Task */
   #if USB_CFG_HUB == USB_CFG_ENABLE
-            usb_hstd_hub_task((usb_vp_int_t) 0); /* HUB Task */
+            usb_hstd_hub_task((rtos_task_arg_t) 0); /* HUB Task */
   #endif  /* USB_CFG_HUB == USB_CFG_ENABLE */
 #if defined(USB_CFG_HCDC_USE) || defined(USB_CFG_HHID_USE) || defined(USB_CFG_HMSC_USE) || defined(USB_CFG_HVND_USE)
 
@@ -504,7 +505,7 @@ void usb_cstd_usb_task (void)
     else
     {
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
-        usb_pstd_pcd_task();
+        usb_pstd_pcd_task((rtos_task_arg_t) 0);
 #if defined(USB_CFG_PMSC_USE)
         if (USB_NULL != (g_usb_open_class[USB_CFG_USE_USBIP] & (1 << USB_PMSC)))      /* Check USB Open device class */
         {
@@ -552,11 +553,11 @@ void usb_class_task (void)
 #endif /* defined(USB_CFG_HMSC_USE) */
 
 #if defined(USB_CFG_HCDC_USE)
-    usb_hcdc_task((usb_vp_int_t) 0); /* USB Host CDC driver task */
+    usb_hcdc_task((rtos_task_arg_t) 0); /* USB Host CDC driver task */
 #endif /* defined(USB_CFG_HCDC_USE) */
 
 #if defined(USB_CFG_HHID_USE)
-    usb_hhid_task((usb_vp_int_t) 0); /* USB Host CDC driver task */
+    usb_hhid_task((rtos_task_arg_t) 0); /* USB Host CDC driver task */
 
 #endif /* defined(USB_CFG_HHID_USE) */
 

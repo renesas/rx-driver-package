@@ -147,7 +147,7 @@ static e_cellular_err_t cellular_write_certificate(st_cellular_ctrl_t * const p_
 
     while (complete_length < size)
     {
-        cellular_bytetimeout_init(&p_ctrl->sci_ctrl.timeout_ctrl, p_ctrl->sci_ctrl.atc_timeout);
+        cellular_timeout_init(&p_ctrl->sci_ctrl.timeout_ctrl, p_ctrl->sci_ctrl.atc_timeout);
         send_size = cellular_send_size_check(p_ctrl, size, complete_length);
 
         p_ctrl->sci_ctrl.tx_end_flg = CELLULAR_TX_END_FLAG_OFF;
@@ -165,7 +165,7 @@ static e_cellular_err_t cellular_write_certificate(st_cellular_ctrl_t * const p_
                     break;   /* Break the tx_end_flg check loop */
                 }
 
-                timeout = cellular_check_bytetimeout(&p_ctrl->sci_ctrl.timeout_ctrl);
+                timeout = cellular_check_timeout(&p_ctrl->sci_ctrl.timeout_ctrl);
                 if (CELLULAR_TIMEOUT == timeout)
                 {
                     ret = CELLULAR_ERR_MODULE_COM;
@@ -180,7 +180,7 @@ static e_cellular_err_t cellular_write_certificate(st_cellular_ctrl_t * const p_
         }
     }
 
-    cellular_bytetimeout_init(&p_ctrl->sci_ctrl.timeout_ctrl, p_ctrl->sci_ctrl.atc_timeout);
+    cellular_timeout_init(&p_ctrl->sci_ctrl.timeout_ctrl, p_ctrl->sci_ctrl.atc_timeout);
     while (1)
     {
         atc_res = cellular_get_atc_response(p_ctrl);
@@ -197,7 +197,7 @@ static e_cellular_err_t cellular_write_certificate(st_cellular_ctrl_t * const p_
             }
         }
 
-        timeout = cellular_check_bytetimeout(&p_ctrl->sci_ctrl.timeout_ctrl);
+        timeout = cellular_check_timeout(&p_ctrl->sci_ctrl.timeout_ctrl);
         if (CELLULAR_TIMEOUT == timeout)
         {
             ret = CELLULAR_ERR_MODULE_COM;

@@ -23,6 +23,8 @@
 * History : DD.MM.YYYY Version Description
 *         : 22.11.2021 1.00    Initial Release
 *                              Supported for RX660.
+*         : 28.06.2022 1.10    Changed Minor version to 10.
+*         : 06.01.2023 1.20    Changed Minor version to 20.
 ***********************************************************************************************************************/
 #ifndef CAN_INTERFACE_HEADER_FILE
 #define CAN_INTERFACE_HEADER_FILE 
@@ -45,7 +47,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define CANFD_RX_VERSION_MAJOR           (1)
-#define CANFD_RX_VERSION_MINOR           (00)
+#define CANFD_RX_VERSION_MINOR           (20)
 /* The process of getting the version number is done through the macro below. The version number is encoded where the
    top 2 bytes are the major version number and the bottom 2 bytes are the minor version number. For example,
    Version 4.25 would be returned as 0x00040019. */

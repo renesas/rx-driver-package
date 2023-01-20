@@ -31,6 +31,7 @@
 *         : 16.11.2018 1.24     Supporting RTOS Thread safe
 *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
 *         : 30.06.2022 1.40 USBX PCDC is supported.
+*         : 30.10.2022 1.41 USBX HMSC is supported.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -80,12 +81,14 @@ Includes   <System Includes> , "Project Includes"
 /**********************************************************************************************************************
  Typedef definitions
  *********************************************************************************************************************/
-#if   (BSP_CFG_RTOS_USED == 1)      /* FreeRTOS */
+#if (BSP_CFG_RTOS_USED == 1)      /* FreeRTOS */
 typedef TaskHandle_t        rtos_task_id_t;
 typedef QueueHandle_t       rtos_mbx_id_t;
 typedef QueueHandle_t       rtos_mem_id_t;
 typedef SemaphoreHandle_t   rtos_sem_id_t;
 typedef TickType_t          rtos_time_t;
+typedef UBaseType_t         rtos_task_priority_t;
+typedef void *              rtos_task_arg_t;
 typedef rtos_task_id_t      rtos_current_task_id_t;
 #elif (BSP_CFG_RTOS_USED == 2)      /* SEGGER embOS */
 #elif (BSP_CFG_RTOS_USED == 3)      /* Micrium MicroC/OS */
@@ -96,12 +99,16 @@ typedef ID                  rtos_mbx_id_t;
 typedef ID                  rtos_mem_id_t;
 typedef ID                  rtos_sem_id_t;
 typedef TMO                 rtos_time_t;
+typedef PRI                 rtos_task_priority_t;
+typedef VP_INT              rtos_task_arg_t;
 #elif (BSP_CFG_RTOS_USED == 5)      /* Azure RTOS */
 typedef TX_THREAD           rtos_task_id_t;
 typedef TX_QUEUE            rtos_mbx_id_t;
 typedef TX_BLOCK_POOL       rtos_mem_id_t;
 typedef TX_SEMAPHORE        rtos_sem_id_t;
 typedef ULONG               rtos_time_t;
+typedef UINT                rtos_task_priority_t;
+typedef ULONG               rtos_task_arg_t;
 typedef rtos_task_id_t*     rtos_current_task_id_t;
 #else
 #endif
@@ -126,7 +133,7 @@ typedef struct rtos_task_info
     VP              stk;
 #elif (BSP_CFG_RTOS_USED == 5)      /* Azure RTOS */
     CHAR            *p_name;
-    VOID            (*p_entry_func)(ULONG);
+    VOID            (*p_entry_func)(rtos_task_arg_t);
     ULONG           entry_input;
     VOID            *p_stack_start;
     ULONG           stack_size;
@@ -255,6 +262,8 @@ rtos_err_t      rtos_delete_task (rtos_task_id_t *p_id);
 rtos_err_t      rtos_terminate_task (rtos_task_id_t *p_id);
 rtos_err_t      rtos_get_task_id (rtos_current_task_id_t *p_id);
 rtos_err_t      rtos_start_task  (rtos_task_id_t *p_id);
+rtos_err_t      rtos_disable_dispatch(rtos_task_priority_t *p_priority);
+rtos_err_t      rtos_enable_dispatch(rtos_task_priority_t priority);
 #if (BSP_CFG_RTOS_USED == 5)
 rtos_err_t      rtos_task_info_get (rtos_task_id_t *p_id, rtos_task_info_get_t *p_info);
 #endif /* (BSP_CFG_RTOS_USED == 5) */
@@ -275,6 +284,8 @@ rtos_err_t      rtos_release_semaphore (rtos_sem_id_t *p_id);
 rtos_err_t      rtos_semaphore_info_get (rtos_sem_id_t *p_id, rtos_sem_info_get_t *p_info);
 #endif /* (BSP_CFG_RTOS_USED == 5) */
 
+#else  /* BSP_CFG_RTOS_USED != 0 */
+typedef uint16_t             rtos_task_arg_t;
 #endif /* BSP_CFG_RTOS_USED != 0 */
 #endif /* R_RTOS_ABSTRACT_H */
 /******************************************************************************

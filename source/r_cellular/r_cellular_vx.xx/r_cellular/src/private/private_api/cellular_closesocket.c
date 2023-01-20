@@ -49,6 +49,7 @@
  ***********************************************************************/
 e_cellular_err_t cellular_closesocket(st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_no)
 {
+    uint32_t preemption = 0;
     e_cellular_err_t ret = CELLULAR_SUCCESS;
 
     if (CELLULAR_SOCKET_STATUS_CONNECTED ==
@@ -57,6 +58,7 @@ e_cellular_err_t cellular_closesocket(st_cellular_ctrl_t * const p_ctrl, const u
         ret = cellular_shutdownsocket(p_ctrl, socket_no);
     }
 
+    preemption = cellular_interrupt_disable();
     if (CELLULAR_SUCCESS == ret)
     {
         p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].ipversion = 0;
@@ -67,9 +69,11 @@ e_cellular_err_t cellular_closesocket(st_cellular_ctrl_t * const p_ctrl, const u
         p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].socket_status
             = CELLULAR_SOCKET_STATUS_CLOSED;
         p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].port = 0;
-        p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].ipaddr = 0;
+        memset(&p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].ip_addr,
+                0x00, sizeof(st_cellular_ipaddr_t));
         p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].receive_flg = CELLULAR_RECEIVE_FLAG_OFF;
     }
+    cellular_interrupt_enable(preemption);
 
     return ret;
 }

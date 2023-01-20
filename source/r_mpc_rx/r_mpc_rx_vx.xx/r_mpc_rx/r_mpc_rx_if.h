@@ -55,6 +55,8 @@
 *         : 11.11.2021 4.20    Added support for RX140-256KB.
 *         : 14.03.2022 4.30    Added support for RX66T 48pins.
 *         : 31.03.2022 4.40    Added support for RX660.
+*         : 28.06.2022 4.50    Updated demo projects.
+*         : 15.12.2022 4.60    Updated dependency module version.
 ***********************************************************************************************************************/
 
 #ifndef MPC_RX_INTERFACE_HEADER_FILE
@@ -78,7 +80,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define MPC_RX_VERSION_MAJOR           (4)
-#define MPC_RX_VERSION_MINOR           (40)
+#define MPC_RX_VERSION_MINOR           (60)
 
 /***********************************************************************************************************************
 Typedef definitions

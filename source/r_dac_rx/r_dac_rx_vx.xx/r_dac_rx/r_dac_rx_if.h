@@ -49,6 +49,7 @@
 *           15.04.2021 4.60    Added support for RX140.
 *           14.03.2022 4.70    Added support for RX66T-48Pin.
 *           31.03.2022 4.80    Added support for RX660.
+*           29.07.2022 4.90    Updated demo projects.
 ***********************************************************************************************************************/
 #ifndef DAC_RX_IF_H
 #define DAC_RX_IF_H
@@ -69,7 +70,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define DAC_VERSION_MAJOR  (4)
-#define DAC_VERSION_MINOR  (80)
+#define DAC_VERSION_MINOR  (90)
 
 
 #if defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX13T)

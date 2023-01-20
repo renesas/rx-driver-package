@@ -5,12 +5,12 @@ r_tsip_rx
 
 Document Number
 ---------------
-R20AN0548JJ0115-RX-TSIP-SECURITY
-R20AN0548EJ0115-RX-TSIP-SECURITY
+R20AN0548JJ0116-RX-TSIP-SECURITY
+R20AN0548EJ0116-RX-TSIP-SECURITY
 
 Version
 -------
-v1.15.l
+v1.16.l
 
 Overview
 --------
@@ -60,7 +60,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp      V7.00
+* r_bsp      V7.10
 
 How to add to your project
 --------------------------
@@ -102,9 +102,9 @@ r_tsip_rx
 |
 +---doc
 |   +---ja
-|   |    r20an0548jj0115-rx-tsip-security.pdf
+|   |    r20an0548jj0116-rx-tsip-security.pdf
 |   +---en
-|        r20an0548ej0115-rx-tsip-security.pdf
+|        r20an0548ej0116-rx-tsip-security.pdf
 |
 +---lib
     |

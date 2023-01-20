@@ -10,7 +10,7 @@ R01AN2026JJ
 
 Version
 -------
-v1.31
+v1.41
 
 Overview
 --------
@@ -78,9 +78,9 @@ r_usb_hmsc
 |
 +---doc
 |     \en
-|     |   r01an2026ej0131_usb.pdf
+|     |   r01an2026ej0141_usb.pdf
 |     \jp
-|         r01an2026jj0131_usb.pdf
+|         r01an2026jj0141_usb.pdf
 |
 +---ref
 |

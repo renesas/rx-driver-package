@@ -836,7 +836,7 @@ qe_err_t R_TOUCH_GetData(uint8_t method, uint16_t *p_buf, uint8_t *p_cnt)
     {
         for (element_id = 0; element_id < p_ctsu_instance_ctrl->num_elements; element_id++)
         {
-            *p_buf = *(p_ctsu_instance_ctrl->p_self_data + element_id);
+            *p_buf = (p_ctsu_instance_ctrl->p_self_data + element_id)->int_data;
             p_buf++;
         }
     }
@@ -844,7 +844,7 @@ qe_err_t R_TOUCH_GetData(uint8_t method, uint16_t *p_buf, uint8_t *p_cnt)
     {
         for (element_id = 0; element_id < p_ctsu_instance_ctrl->num_elements; element_id++)
         {
-            *p_buf = *(p_ctsu_instance_ctrl->p_mutual_snd_data + element_id) - *(p_ctsu_instance_ctrl->p_mutual_pri_data + element_id);
+            *p_buf = (p_ctsu_instance_ctrl->p_mutual_snd_data + element_id)->int_data - (p_ctsu_instance_ctrl->p_mutual_pri_data + element_id)->int_data;
             p_buf++;
         }
     }

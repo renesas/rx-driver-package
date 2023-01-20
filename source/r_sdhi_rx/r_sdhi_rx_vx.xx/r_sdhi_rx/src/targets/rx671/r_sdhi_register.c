@@ -19,7 +19,7 @@
 /**********************************************************************************************************************
 * System Name  : SDHI Driver
 * File Name    : r_sdhi_register.c
-* Version      : 2.07
+* Version      : 2.10
 * Device       : RX671
 * Abstract     : API & Sub module
 * Tool-Chain   : For RX671 Group e2_studio
@@ -31,6 +31,7 @@
 /**********************************************************************************************************************
 * History      : DD.MM.YYYY Version Description
 *              : 30.06.2021 2.07    First Release
+*              : 27.12.2022 2.10    Updated slash format of included header file paths for Linux compatibility.
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -40,7 +41,7 @@ Includes <System Includes> , "Project Includes"
 #if defined(BSP_MCU_RX671)
 
 #include "r_sdhi_rx_if.h"
-#include ".\src\r_sdhi_rx_private.h"
+#include "./src/r_sdhi_rx_private.h"
 
 /**********************************************************************************************************************
 Macro definitions

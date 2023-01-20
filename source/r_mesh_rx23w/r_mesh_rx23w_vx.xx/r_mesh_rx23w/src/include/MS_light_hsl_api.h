@@ -1,7 +1,7 @@
 /**
  * \file MS_light_hsl_api.h
  *
- * \brief This file defines the Mesh Light Hsl Model Application Interface
+ * \brief This file defines the Mesh Light HSL Model Application Interface
  * - includes Data Structures and Methods for both Server and Client.
  */
 
@@ -20,27 +20,25 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup light_hsl_module Light Hsl Model (LIGHT_HSL)
- * \ingroup mesh_models_block
+ * \defgroup light_hsl_module Light HSL Model (LIGHT_HSL)
+ * \ingroup lighting_models
  * \{
  *  \brief This section describes the interfaces & APIs offered by the EtherMind
- *  Mesh Light Hsl Model (LIGHT_HSL) module to the Application.
+ *  Mesh Light HSL Model (LIGHT_HSL) module to the Application.
  */
-
-
 
 /* --------------------------------------------- Data Types/ Structures */
 /**
  *  \defgroup light_hsl_cb Application Callback
  *  \{
- *  \brief This section Describes the module Notification Callback interface offered
- *  to the application
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Light HSL Model Layer.
  */
 
 /**
- * Light Hsl Server application Asynchronous Notification Callback.
+ * Light HSL Server application Asynchronous Notification Callback.
  *
- * Light Hsl Server calls the registered callback to indicate events occurred to the
+ * Light HSL Server calls the registered callback to indicate events occurred to the
  * application.
  *
  * \param [in] ctx           Context of the message received for a specific model instance.
@@ -59,10 +57,34 @@ typedef API_RESULT (* MS_LIGHT_HSL_SERVER_CB)
 
         ) DECL_REENTRANT;
 
+#ifdef MS_MODEL_SERVER_EXTENDED_INTERFACE
 /**
- * Light Hsl Hue Server application Asynchronous Notification Callback.
+ * Light HSL Setup Server application Asynchronous Notification Callback.
  *
- * Light Hsl Hue Server calls the registered callback to indicate events occurred to the
+ * Light HSL setup Server calls the registered callback to indicate events occurred to the
+ * application.
+ *
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] msg_raw       Uninterpreted/raw received message.
+ * \param [in] req_type      Requested message type.
+ * \param [in] state_params  Model specific state parameters.
+ * \param [in] ext_params    Additional parameters.
+ */
+typedef API_RESULT (* MS_LIGHT_HSL_SETUP_SERVER_CB)
+        (
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT    * ctx,
+            MS_ACCESS_MODEL_REQ_MSG_RAW        * msg_raw,
+            MS_ACCESS_MODEL_REQ_MSG_T          * req_type,
+            MS_ACCESS_MODEL_STATE_PARAMS       * state_params,
+            MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+
+        ) DECL_REENTRANT;
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+
+/**
+ * Light HSL Hue Server application Asynchronous Notification Callback.
+ *
+ * Light HSL Hue Server calls the registered callback to indicate events occurred to the
  * application.
  *
  * \param [in] ctx           Context of the message received for a specific model instance.
@@ -82,9 +104,9 @@ typedef API_RESULT (* MS_LIGHT_HSL_HUE_SERVER_CB)
         ) DECL_REENTRANT;
 
 /**
- * Light Hsl Saturation Server application Asynchronous Notification Callback.
+ * Light HSL Saturation Server application Asynchronous Notification Callback.
  *
- * Light Hsl Saturation Server calls the registered callback to indicate events occurred to the
+ * Light HSL Saturation Server calls the registered callback to indicate events occurred to the
  * application.
  *
  * \param [in] ctx           Context of the message received for a specific model instance.
@@ -104,9 +126,9 @@ typedef API_RESULT (* MS_LIGHT_HSL_SATURATION_SERVER_CB)
         ) DECL_REENTRANT;
 
 /**
- * Light Hsl Client application Asynchronous Notification Callback.
+ * Light HSL Client application Asynchronous Notification Callback.
  *
- * Light Hsl Client calls the registered callback to indicate events occurred to the
+ * Light HSL Client calls the registered callback to indicate events occurred to the
  * application.
  *
  * \param [in] ctx           Context of the message received for a specific model instance.
@@ -124,9 +146,17 @@ typedef API_RESULT (* MS_LIGHT_HSL_CLIENT_CB)
 /** \} */
 
 /**
+ * \defgroup light_hsl_defines Defines
+ * \{
+ * \brief This section describes the various Defines in EtherMind
+ * Mesh Light HSL Model Layer.
+ */
+
+/**
  *  \defgroup light_hsl_structures Structures
  *  \{
- *  \brief This section describes the EtherMind Mesh Light HSL Model Structures.
+ *  \brief This section describes the various Data-Types and Structures in
+ *  EtherMind Light HSL Model Layer.
  */
 
 /**
@@ -428,25 +458,34 @@ typedef struct MS_light_hsl_saturation_status_struct
 
 /** \} */
 
-
+/** \} */
 
 /* --------------------------------------------- Function */
 /**
  * \defgroup light_hsl_api_defs API Definitions
  * \{
- * \brief This section describes the EtherMind Mesh Light Hsl Model APIs.
- */
-/**
- * \defgroup light_hsl_ser_api_defs Light Hsl Server API
- * \{
- * \brief This section describes the Light Hsl Server APIs.
+ * \brief This section describes the various APIs exposed by
+ * EtherMind Mesh Light HSL Model Layer to the Application.
  */
 
 /**
- *  \brief API to initialize Light_Hsl Server model
+ * \defgroup light_hsl_ser_api_defs Light HSL Server API Definitions
+ * \{
+ * \brief This section describes the EtherMind Mesh Light HSL Server
+ * Model APIs.
+ */
+
+/**
+ * \name Light HSL Server Interfaces
+ * \{
+ */
+
+#ifndef MS_MODEL_SERVER_EXTENDED_INTERFACE
+/**
+ *  \brief API to initialize Light_HSL Server model
  *
  *  \par Description
- *  This is to initialize Light_Hsl Server model and to register with Access layer.
+ *  This is to initialize Light_HSL Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -461,7 +500,7 @@ typedef struct MS_light_hsl_saturation_status_struct
  *                   After power cycle of an already provisioned node, the model handle will have
  *                   valid value and the same will be reused for registration.
  *
- *  \param [in] appl_cb    Application Callback to be used by the Light_Hsl Server.
+ *  \param [in] hsl_appl_cb    Application Callback to be used by the Light_HSL Server.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -470,14 +509,49 @@ API_RESULT MS_light_hsl_server_init
                /* IN */    MS_ACCESS_ELEMENT_HANDLE    element_handle,
                /* INOUT */ MS_ACCESS_MODEL_HANDLE    * hsl_model_handle,
                /* INOUT */ MS_ACCESS_MODEL_HANDLE    * hsl_setup_model_handle,
-               /* IN */    MS_LIGHT_HSL_SERVER_CB      appl_cb
+               /* IN */    MS_LIGHT_HSL_SERVER_CB      hsl_appl_cb
            );
-
+#else /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
 /**
- *  \brief API to initialize Light_Hsl_Hue Server model
+ *  \brief API to initialize Light_HSL Server model
  *
  *  \par Description
- *  This is to initialize Light_Hsl_Hue Server model and to register with Access layer.
+ *  This is to initialize Light_HSL Server model and to register with Access layer.
+ *
+ *  \param [in] element_handle
+ *              Element identifier to be associated with the model instance.
+ *
+ *  \param [in, out] hsl_model_handle
+ *                   Model identifier associated with the Light HSL model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in, out] hsl_setup_model_handle
+ *                   Model identifier associated with the Light HSL Setup model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in] hsl_appl_cb    Application Callback to be used by the Light_HSL Server.
+ *
+ *  \param [in] hsl_setup_appl_cb    Application Callback to be used by the Light_HSL_Setup Server.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_light_hsl_server_init_ext
+           (
+               /* IN */    MS_ACCESS_ELEMENT_HANDLE       element_handle,
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE       * hsl_model_handle,
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE       * hsl_setup_model_handle,
+               /* IN */    MS_LIGHT_HSL_SERVER_CB         hsl_appl_cb,
+               /* IN */    MS_LIGHT_HSL_SETUP_SERVER_CB   hsl_setup_appl_cb
+           );
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+
+/**
+ *  \brief API to initialize Light_HSL_Hue Server model
+ *
+ *  \par Description
+ *  This is to initialize Light_HSL_Hue Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -487,7 +561,7 @@ API_RESULT MS_light_hsl_server_init
  *                   After power cycle of an already provisioned node, the model handle will have
  *                   valid value and the same will be reused for registration.
  *
- *  \param [in] appl_cb    Application Callback to be used by the Light_Hsl_Hue Server.
+ *  \param [in] appl_cb    Application Callback to be used by the Light_HSL_Hue Server.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -499,10 +573,10 @@ API_RESULT MS_light_hsl_hue_server_init
            );
 
 /**
- *  \brief API to initialize Light_Hsl_Saturation Server model
+ *  \brief API to initialize Light_HSL_Saturation Server model
  *
  *  \par Description
- *  This is to initialize Light_Hsl_Saturation Server model and to register with Access layer.
+ *  This is to initialize Light_HSL_Saturation Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -512,7 +586,7 @@ API_RESULT MS_light_hsl_hue_server_init
  *                   After power cycle of an already provisioned node, the model handle will have
  *                   valid value and the same will be reused for registration.
  *
- *  \param [in] appl_cb    Application Callback to be used by the Light_Hsl_Saturation Server.
+ *  \param [in] appl_cb    Application Callback to be used by the Light_HSL_Saturation Server.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -539,6 +613,7 @@ API_RESULT MS_light_hsl_saturation_server_init
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
+#ifndef MS_MODEL_SERVER_EXTENDED_INTERFACE
 API_RESULT MS_light_hsl_server_state_update
            (
                /* IN */ MS_ACCESS_MODEL_REQ_MSG_CONTEXT    * ctx,
@@ -549,6 +624,18 @@ API_RESULT MS_light_hsl_server_state_update
                /* IN */ UCHAR                                reply,
                /* IN */ UCHAR                                publish
            );
+#else /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+API_RESULT MS_light_hsl_server_state_update_ext
+           (
+               /* IN */ MS_ACCESS_MODEL_REQ_MSG_CONTEXT    * ctx,
+               /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
+               /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
+               /* IN */ UINT16                               remaining_time,
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
+           );
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
 
 /**
  *  \brief API to send reply or to update state change
@@ -605,17 +692,25 @@ API_RESULT MS_light_hsl_saturation_server_state_update
            );
 /** \} */
 
+/** \} */
+
 /**
- * \defgroup light_hsl_cli_api_defs Light Hsl Client API
+ * \defgroup light_hsl_cli_api_defs Light HSL Client API Definitions
  * \{
- * \brief This section describes the Light Hsl Client APIs.
+ * \brief This section describes the EtherMind Mesh Light HSL Client
+ * Model APIs.
  */
 
 /**
- *  \brief API to initialize Light_Hsl Client model
+ * \name Light HSL Client Interfaces
+ * \{
+ */
+
+/**
+ *  \brief API to initialize Light_HSL Client model
  *
  *  \par Description
- *  This is to initialize Light_Hsl Client model and to register with Access layer.
+ *  This is to initialize Light_HSL Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -625,7 +720,7 @@ API_RESULT MS_light_hsl_saturation_server_state_update
  *                   After power cycle of an already provisioned node, the model handle will have
  *                   valid value and the same will be reused for registration.
  *
- *  \param [in] appl_cb    Application Callback to be used by the Light_Hsl Client.
+ *  \param [in] appl_cb    Application Callback to be used by the Light_HSL Client.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -637,10 +732,10 @@ API_RESULT MS_light_hsl_client_init
            );
 
 /**
- *  \brief API to get Light_Hsl client model handle
+ *  \brief API to get Light_HSL client model handle
  *
  *  \par Description
- *  This is to get the handle of Light_Hsl client model.
+ *  This is to get the handle of Light_HSL client model.
  *
  *  \param [out] model_handle   Address of model handle to be filled/returned.
  *
@@ -652,10 +747,10 @@ API_RESULT MS_light_hsl_client_get_model_handle
            );
 
 /**
- *  \brief API to set Light_Hsl client model handle
+ *  \brief API to set Light_HSL client model handle
  *
  *  \par Description
- *  This is to set the handle of Light_Hsl client model.
+ *  This is to set the handle of Light_HSL client model.
  *
  *  \param [in] model_handle   Model handle to be assigned.
  *
@@ -684,10 +779,29 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
                /* IN */ void    * param,
                /* IN */ UINT32    rsp_opcode
            );
+/** \} */
 
-/** \name Message Send
- *  \{
+/** \} */
+
+/** \} */
+
+/**
+ * \addtogroup light_hsl_defines
+ * \{
  */
+
+/**
+ * \defgroup light_hsl_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind
+ * Mesh Light HSL Model Layer.
+ */
+
+/**
+ * \name Light HSL Client Macros
+ * \{
+ */
+
 /**
  *  \brief API to get the Light HSL Lightness, Light HSL Hue, and Light HSL Saturation states of an element.
  *
@@ -713,7 +827,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  The Light HSL Set Unacknowledged is an unacknowledged message used to set the Light HSL Lightness state, Light HSL Hue state,
  *  and the Light HSL Saturation state of an element.
  *
- *  \param [in] param Light HSL Set message parameter @ref MS_LIGHT_HSL_SET_STRUCT
+ *  \param [in] param Light HSL Set message parameter \ref MS_LIGHT_HSL_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -733,7 +847,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  and the Light HSL Saturation state of an element.
  *  The response to the Light HSL Set message is a Light HSL Status message.
  *
- *  \param [in] param Light HSL Set message parameter @ref MS_LIGHT_HSL_SET_STRUCT
+ *  \param [in] param Light HSL Set message parameter \ref MS_LIGHT_HSL_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -791,7 +905,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  and Light HSL Saturation Default states of an element.
  *  The response to the Light HSL Default Set message is a Light HSL Default Status message.
  *
- *  \param [in] param Light HSL Default Set message parameter @ref MS_LIGHT_HSL_DEFAULT_SET_STRUCT
+ *  \param [in] param Light HSL Default Set message parameter \ref MS_LIGHT_HSL_DEFAULT_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -810,7 +924,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  Light HSL Default Set Unacknowledged is an unacknowledged message used to set the Light Lightness Default, the Light HSL Hue Default,
  *  and Light HSL Saturation Default states of an element.
  *
- *  \param [in] param Light HSL Default Set message parameter @ref MS_LIGHT_HSL_DEFAULT_SET_STRUCT
+ *  \param [in] param Light HSL Default Set message parameter \ref MS_LIGHT_HSL_DEFAULT_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -847,7 +961,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  Light HSL Range Set is an acknowledged message used to set the Light HSL Hue Range and Light HSL Saturation Range states of an element.
  *  The response to the Light HSL Range Set message is a Light HSL Range Status message.
  *
- *  \param [in] param Light HSL Range Set message parameter @ref MS_LIGHT_HSL_RANGE_SET_STRUCT
+ *  \param [in] param Light HSL Range Set message parameter \ref MS_LIGHT_HSL_RANGE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -865,7 +979,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  \par Description
  *  Light HSL Range Set Unacknowledged is an unacknowledged message used to set the Light HSL Hue Range and Light HSL Saturation Range states of an element.
  *
- *  \param [in] param Light HSL Range Set message parameter @ref MS_LIGHT_HSL_RANGE_SET_STRUCT
+ *  \param [in] param Light HSL Range Set message parameter \ref MS_LIGHT_HSL_RANGE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -902,7 +1016,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  The Light HSL Hue Set is an acknowledged message used to set the target Light HSL Hue state of an element.
  *  The response to the Light HSL Hue Set message is a Light HSL Hue Status message.
  *
- *  \param [in] param Light HSL Hue Set message parameter @ref MS_LIGHT_HSL_HUE_SET_STRUCT
+ *  \param [in] param Light HSL Hue Set message parameter \ref MS_LIGHT_HSL_HUE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -921,7 +1035,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  The Light HSL Hue Set Unacknowledged is an unacknowledged message used to
  *  set the target Light HSL Hue state of an element.
  *
- *  \param [in] param Light HSL Hue Set message parameter @ref MS_LIGHT_HSL_HUE_SET_STRUCT
+ *  \param [in] param Light HSL Hue Set message parameter \ref MS_LIGHT_HSL_HUE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -958,7 +1072,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  The Light HSL Saturation Set is an acknowledged message used to set the target Light HSL Saturation state of an element.
  *  The response to the Light HSL Saturation Set message is a Light HSL Saturation Status message.
  *
- *  \param [in] param Light HSL Saturation Set message parameter @ref MS_LIGHT_HSL_SATURATION_SET_STRUCT
+ *  \param [in] param Light HSL Saturation Set message parameter \ref MS_LIGHT_HSL_SATURATION_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -977,7 +1091,7 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
  *  The Light HSL Saturation Set Unacknowledged is an unacknowledged message
  *  used to set the target Light HSL Saturation state of an element.
  *
- *  \param [in] param Light HSL Saturation Set message parameter @ref MS_LIGHT_HSL_SATURATION_SET_STRUCT
+ *  \param [in] param Light HSL Saturation Set message parameter \ref MS_LIGHT_HSL_SATURATION_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -989,8 +1103,83 @@ API_RESULT MS_light_hsl_client_send_reliable_pdu
             0xFFFFFFFF\
         )
 /** \} */
+
+#ifdef MS_MODEL_SERVER_EXTENDED_INTERFACE
+
+/**
+ * \name Light HSL Server and Light HSL setup Server Macros
+ * \{
+ */
+
+/**
+ *  \brief API to initialize Light_HSL Server model
+ *
+ *  \par Description
+ *  This is to initialize Light_HSL Server model and to register with Access layer.
+ *
+ *  \param [in] eh
+ *              Element identifier to be associated with the model instance.
+ *
+ *  \param [in, out] mh
+ *                   Model identifier associated with the Light HSL model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in, out] smh
+ *                   Model identifier associated with the Light HSL Setup model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in] cb    Application Callback to be used by the Light_HSL Server.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+#define MS_light_hsl_server_init(eh,mh,smh,cb) \
+        MS_light_hsl_server_init_ext \
+        (\
+            (eh),\
+            (mh),\
+            (smh),\
+            (cb),\
+            (cb)\
+        )
+
+/**
+ *  \brief API to send reply or to update state change
+ *
+ *  \par Description
+ *  This is to send reply for a request or to inform change in state.
+ *
+ * \param [in] c   Context of the message.
+ * \param [in] cs  Model specific current state parameters.
+ * \param [in] ts  Model specific target state parameters (NULL: to be ignored).
+ * \param [in] rt  Time from current state to target state (0: to be ignored).
+ * \param [in] ex  Additional parameters (NULL: to be ignored).
+ * \param [in] r   If unicast response to be sent
+ * \param [in] p   If state to be published
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+#define MS_light_hsl_server_state_update(c,cs,ts,rt,ex,r,p) \
+        MS_light_hsl_server_state_update_ext \
+        (\
+            (c),\
+            (cs),\
+            (ts),\
+            (rt),\
+            (ex),\
+            (r),\
+            (p)\
+        )
+
 /** \} */
+
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+
 /** \} */
+
+/** \} */
+
 /** \} */
 
 #endif /*_H_MS_LIGHT_HSL_API_ */

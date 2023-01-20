@@ -21,20 +21,18 @@
 /* --------------------------------------------- Global Definitions */
 /**
  * \defgroup scheduler_module Scheduler Model (SCHEDULER)
- * \ingroup mesh_models_block
+ * \ingroup time_and_scenes_models
  * \{
  *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Scheduler Model (SCHEDULER) module to the Application.
  */
 
-
-
 /* --------------------------------------------- Data Types/ Structures */
 /**
  *  \defgroup scheduler_cb Application Callback
  *  \{
- *  \brief This section Describes the module Notification Callback interface offered
- *  to the application
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Scheduler Model Layer.
  */
 
 /**
@@ -59,6 +57,30 @@ typedef API_RESULT (* MS_SCHEDULER_SERVER_CB)
 
         ) DECL_REENTRANT;
 
+#ifdef MS_MODEL_SERVER_EXTENDED_INTERFACE
+/**
+ * Scheduler Setup Server application Asynchronous Notification Callback.
+ *
+ * Scheduler Setup Server calls the registered callback to indicate events occurred to the
+ * application.
+ *
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] msg_raw       Uninterpreted/raw received message.
+ * \param [in] req_type      Requested message type.
+ * \param [in] state_params  Model specific state parameters.
+ * \param [in] ext_params    Additional parameters.
+ */
+typedef API_RESULT (* MS_SCHEDULER_SETUP_SERVER_CB)
+        (
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT    * ctx,
+            MS_ACCESS_MODEL_REQ_MSG_RAW        * msg_raw,
+            MS_ACCESS_MODEL_REQ_MSG_T          * req_type,
+            MS_ACCESS_MODEL_STATE_PARAMS       * state_params,
+            MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+
+        ) DECL_REENTRANT;
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+
 /**
  * Scheduler Client application Asynchronous Notification Callback.
  *
@@ -80,9 +102,17 @@ typedef API_RESULT (* MS_SCHEDULER_CLIENT_CB)
 /** \} */
 
 /**
+ * \defgroup scheduler_defines Defines
+ * \{
+ * \brief This section describes the various Defines in EtherMind
+ * Mesh Scheduler Model Layer.
+ */
+
+/**
  *  \defgroup scheduler_structures Structures
  *  \{
- *  \brief This section describes the EtherMind Mesh Scheduler Model Structures.
+ *  \brief This section describes the various Data-Types and Structures in
+ *  EtherMind Mesh Scheduler Model Layer.
  */
 
 /**
@@ -188,20 +218,29 @@ typedef struct MS_scheduler_action_set_struct
 
 /** \} */
 
-
+/** \} */
 
 /* --------------------------------------------- Function */
 /**
  * \defgroup scheduler_api_defs API Definitions
  * \{
- * \brief This section describes the EtherMind Mesh Scheduler Model APIs.
- */
-/**
- * \defgroup scheduler_ser_api_defs Scheduler Server API
- * \{
- * \brief This section describes the Scheduler Server APIs.
+ * \brief This section describes the various APIs exposed by
+ * EtherMind Mesh Scheduler Model Layer to the Application.
  */
 
+/**
+ * \defgroup scheduler_ser_api_defs Scheduler Server API Definitions
+ * \{
+ * \brief This section describes the EtherMind Mesh Scheduler Server
+ * Model APIs.
+ */
+
+/**
+ * \name Scheduler Server Interfaces
+ * \{
+ */
+
+#ifndef MS_MODEL_SERVER_EXTENDED_INTERFACE
 /**
  *  \brief API to initialize Scheduler Server model
  *
@@ -221,7 +260,7 @@ typedef struct MS_scheduler_action_set_struct
  *                   After power cycle of an already provisioned node, the model handle will have
  *                   valid value and the same will be reused for registration.
  *
- *  \param [in] appl_cb    Application Callback to be used by the Scheduler Server.
+ *  \param [in] scheduler_appl_cb    Application Callback to be used by the Scheduler Server.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -230,8 +269,44 @@ API_RESULT MS_scheduler_server_init
                /* IN */    MS_ACCESS_ELEMENT_HANDLE    element_handle,
                /* INOUT */ MS_ACCESS_MODEL_HANDLE    * scheduler_model_handle,
                /* INOUT */ MS_ACCESS_MODEL_HANDLE    * scheduler_setup_model_handle,
-               /* IN */    MS_SCHEDULER_SERVER_CB      appl_cb
+               /* IN */    MS_SCHEDULER_SERVER_CB      scheduler_appl_cb
            );
+#else /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+/**
+ *  \brief API to initialize Scheduler Server model
+ *
+ *  \par Description
+ *  This is to initialize Scheduler Server model and to register with Access layer.
+ *
+ *  \param [in] element_handle
+ *              Element identifier to be associated with the model instance.
+ *
+ *  \param [in, out] scheduler_model_handle
+ *                   Model identifier associated with the time model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in, out] scheduler_setup_model_handle
+ *                   Model identifier associated with the time setup model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in] scheduler_appl_cb    Application Callback to be used by the Scheduler Server.
+
+ *
+ *  \param [in] scheduler_setup_appl_cb    Application Callback to be used by the Scheduler Setup Server.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_scheduler_server_init_ext
+           (
+               /* IN */    MS_ACCESS_ELEMENT_HANDLE       element_handle,
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE       * scheduler_model_handle,
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE       * scheduler_setup_model_handle,
+               /* IN */    MS_SCHEDULER_SERVER_CB         scheduler_appl_cb,
+               /* IN */    MS_SCHEDULER_SETUP_SERVER_CB   scheduler_setup_appl_cb
+           );
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
 
 /**
  *  \brief API to send reply or to update state change
@@ -249,6 +324,7 @@ API_RESULT MS_scheduler_server_init
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
+#ifndef MS_MODEL_SERVER_EXTENDED_INTERFACE
 API_RESULT MS_scheduler_server_state_update
            (
                /* IN */ MS_ACCESS_MODEL_REQ_MSG_CONTEXT    * ctx,
@@ -259,12 +335,32 @@ API_RESULT MS_scheduler_server_state_update
                /* IN */ UCHAR                                reply,
                /* IN */ UCHAR                                publish
            );
+#else /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+API_RESULT MS_scheduler_server_state_update_ext
+           (
+               /* IN */ MS_ACCESS_MODEL_REQ_MSG_CONTEXT    * ctx,
+               /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
+               /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
+               /* IN */ UINT16                               remaining_time,
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
+           );
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+
+/** \} */
+
 /** \} */
 
 /**
- * \defgroup scheduler_cli_api_defs Scheduler Client API
+ * \defgroup scheduler_cli_api_defs Scheduler Client API Definitions
  * \{
- * \brief This section describes the Scheduler Client APIs.
+ * \brief This section describes the EtherMind Mesh Scheduler Client Model APIs.
+ */
+
+/**
+ * \name Scheduler Client Interfaces
+ * \{
  */
 
 /**
@@ -340,10 +436,29 @@ API_RESULT MS_scheduler_client_send_reliable_pdu
                /* IN */ void    * param,
                /* IN */ UINT32    rsp_opcode
            );
+/** \} */
 
-/** \name Messsage Send
- *  \{
+/** \} */
+
+/** \} */
+
+/**
+ * \addtogroup scheduler_defines
+ * \{
  */
+
+/**
+ * \defgroup scheduler_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind
+ * Mesh Scheduler Model Layer.
+ */
+
+/**
+ * \name Scheduler Client Macros
+ * \{
+ */
+
 /**
  *  \brief API to get the current Schedule Register state of an element.
  *
@@ -371,7 +486,7 @@ API_RESULT MS_scheduler_client_send_reliable_pdu
  *  of the Schedule Register state of an element, identified by the Index field.
  *  The response to the Scheduler Action Get message is a Scheduler Action Status message.
  *
- *  \param [in] param Scheduler Action Get message parameter @ref MS_SCHEDULER_ACTION_GET_STRUCT
+ *  \param [in] param Scheduler Action Get message parameter \ref MS_SCHEDULER_ACTION_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -391,7 +506,7 @@ API_RESULT MS_scheduler_client_send_reliable_pdu
  *  identified by the Index field.
  *  The response to the Scheduler Action Set message is a Scheduler Action Status message.
  *
- *  \param [in] param Scheduler Action Set message parameter @ref MS_SCHEDULER_ACTION_SET_STRUCT
+ *  \param [in] param Scheduler Action Set message parameter \ref MS_SCHEDULER_ACTION_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -410,7 +525,7 @@ API_RESULT MS_scheduler_client_send_reliable_pdu
  *  Scheduler Action Set Unacknowledged is an unacknowledged message used to set the entry of the Schedule Register state of an element,
  *  identified by the Index field.
  *
- *  \param [in] param Scheduler Action Set message parameter @ref MS_SCHEDULER_ACTION_SET_STRUCT
+ *  \param [in] param Scheduler Action Set message parameter \ref MS_SCHEDULER_ACTION_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -422,8 +537,83 @@ API_RESULT MS_scheduler_client_send_reliable_pdu
             0xFFFFFFFF\
         )
 /** \} */
+
+#ifdef MS_MODEL_SERVER_EXTENDED_INTERFACE
+
+/**
+ * \name Scheduler Server and Scheduler setup Server Macros
+ * \{
+ */
+
+/**
+ *  \brief API to initialize Scheduler Server model
+ *
+ *  \par Description
+ *  This is to initialize Scheduler Server model and to register with Access layer.
+ *
+ *  \param [in] eh
+ *              Element identifier to be associated with the model instance.
+ *
+ *  \param [in, out] mh
+ *                   Model identifier associated with the Scheduler model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in, out] smh
+ *                   Model identifier associated with the Scheduler setup model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in] cb    Application Callback to be used by the Scheduler Server.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+#define MS_scheduler_server_init(eh,mh,smh,cb) \
+        MS_scheduler_server_init_ext \
+        (\
+            (eh),\
+            (mh),\
+            (smh),\
+            (cb),\
+            (cb)\
+        )
+
+/**
+ *  \brief API to send reply or to update state change
+ *
+ *  \par Description
+ *  This is to send reply for a request or to inform change in state.
+ *
+ * \param [in] c   Context of the message.
+ * \param [in] cs  Model specific current state parameters.
+ * \param [in] ts  Model specific target state parameters (NULL: to be ignored).
+ * \param [in] rt  Time from current state to target state (0: to be ignored).
+ * \param [in] ex  Additional parameters (NULL: to be ignored).
+ * \param [in] r   If unicast response to be sent
+ * \param [in] p   If state to be published
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+#define MS_scheduler_server_state_update(c,cs,ts,rt,ex,r,p) \
+        MS_scheduler_server_state_update_ext \
+        (\
+            (c),\
+            (cs),\
+            (ts),\
+            (rt),\
+            (ex),\
+            (r),\
+            (p)\
+        )
+
 /** \} */
+
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+
 /** \} */
+
+/** \} */
+
 /** \} */
 
 #endif /*_H_MS_SCHEDULER_API_ */

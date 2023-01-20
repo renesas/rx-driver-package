@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : PIDConf.c
@@ -30,6 +30,11 @@
  *         : 31.03.2021 6.14.g.1.30    Update to adjust the spec of Smart Configurator and QE for Display.
  *         : 29.12.2021 6.20.  1.00    Update emWin library to v6.22.
  *                                     Adjust configuration option with Smart Configurator.
+ *         : 31.08.2022 6.26.c.1.00    Update emWin library to v6.26c.
+ *                                     Supports touch screen orientation.
+ *                                     Supports SPI interface.
+ *                                     Fixed the problem that touch is falsely detected after initialization
+ *                                     when using SCI-IIC interface.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -75,7 +80,8 @@ typedef struct
     uint16_t y_pos;
     uint8_t  id;
 } st_point_data_t;
-#endif
+
+#endif /* (EMWIN_USE_TOUCH == 1) */
 
 /**********************************************************************************************************************
  Exported global variables
@@ -85,23 +91,77 @@ typedef struct
  Private (static) variables and functions
  *********************************************************************************************************************/
 #if (EMWIN_USE_TOUCH == 1)
+
 static int32_t s_layer_index;
+static volatile uint8_t s_touch_orientation = EMWIN_DISPLAY_ORIENTATION;
 
+#if (EMWIN_USE_MULTITOUCH == 0)
 
-#if (EMWIN_USE_MULTITOUCH == 1)
+static e_emwin_rx_err_t pidconf_cb_single(uint8_t * p_addr, uint32_t size);
+
+#else /* (EMWIN_USE_MULTITOUCH == 1) */
+
 static uint8_t s_a_active_ids[EMWIN_MAX_NUM_TOUCHPOINTS];
+static e_emwin_rx_err_t pidconf_cb_multi(uint8_t * p_addr, uint32_t size);
+
+#if ((EMWIN_TOUCH_IF == TOUCH_IF_SCI_SPI) || (EMWIN_TOUCH_IF == TOUCH_IF_RSPI))
+#error "Error!! Multitouch function is not available for serial touch interfaces!"
 #endif
+
 #endif
+
+#endif /* (EMWIN_USE_TOUCH == 1) */
+
+
 
 #if (EMWIN_USE_TOUCH == 1)
 #if (EMWIN_USE_MULTITOUCH == 0)
+#if (EMWIN_TOUCH_IF == TOUCH_IF_SCI_IIC)
+/**********************************************************************************************************************
+ * Function Name: check_initial_touch
+ * Description  : Check whether the touch state is after initialization.
+ * Arguments    : report -
+ *              :     touch status.
+ * Return Value : 0 -
+ *              :     Touch state after initialization.
+ *              : 1 -
+ *              :     Not in touch state after initialization.
+ *********************************************************************************************************************/
+static uint8_t check_initial_touch(st_report_data_t report)
+{
+    volatile static uint8_t s_first_state  = 0;
+    volatile static uint8_t s_second_state = 0;
+    volatile static st_report_data_t s_first_report;
+
+    if ( !s_first_state)
+    {
+        s_first_report = report;
+        s_first_state = 1;
+        return 0;
+    }
+
+    if ( !s_second_state)
+    {
+        if ((s_first_report.num_points == report.num_points) && (s_first_report.gesture_id == report.gesture_id))
+        {
+            return 0;
+        }
+        s_second_state = 1;
+    }
+
+    return 1;
+}
+/**********************************************************************************************************************
+ * End of function check_initial_touch
+ *********************************************************************************************************************/
+
 /**********************************************************************************************************************
  * Function Name: pidconf_cb_single
- * Description  : .
+ * Description  : Functions for IIC interface and single touch.
  * Arguments    : .
  * Return Value : .
  *********************************************************************************************************************/
-e_emwin_rx_err_t pidconf_cb_single(uint8_t * p_addr, uint32_t size)
+static e_emwin_rx_err_t pidconf_cb_single(uint8_t * p_addr, uint32_t size)
 {
     static GUI_PID_STATE s_state_pid;
     static int32_t       s_is_touched;
@@ -109,6 +169,8 @@ e_emwin_rx_err_t pidconf_cb_single(uint8_t * p_addr, uint32_t size)
     st_touch_data_t      touch_point;
     uint8_t *            p_buffer;
     e_emwin_rx_err_t     emwin_ret = EMWIN_RX_SUCCESS;
+    int temp;
+
 
     /* Handle just one touch info. */
     s_state_pid.Layer  = s_layer_index;          /* Set layer who should handle touch */
@@ -127,6 +189,12 @@ e_emwin_rx_err_t pidconf_cb_single(uint8_t * p_addr, uint32_t size)
     touch_point.y_high  = (*p_buffer ++) & 0x0F; /* Get the upper 4 bits of the y position */
     touch_point.y_low   = *p_buffer++;           /* and the lower 8 bits */
 
+    /* Check detection after initialization */
+    if(0 == check_initial_touch(report))
+    {
+        return emwin_ret;
+    }
+
     /* Check if we have a touch detected */
     if (report.num_points)
     {
@@ -136,6 +204,46 @@ e_emwin_rx_err_t pidconf_cb_single(uint8_t * p_addr, uint32_t size)
         /* Shift bits for x- and y- coordinate to the correct position */
         s_state_pid.x       = (((touch_point.x_high & 0x0F) << 8) | touch_point.x_low);
         s_state_pid.y       = (((touch_point.y_high & 0x0F) << 8) | touch_point.y_low);
+
+        /* Touch orientation */
+        if (ORIENTATION_0 == s_touch_orientation)
+        {
+            R_BSP_NOP(); /* no operation */
+        }
+        else if (ORIENTATION_CW == s_touch_orientation)
+        {
+            /* X - Mirror */
+            s_state_pid.x = (EMWIN_XSIZE_PHYS - 1) - s_state_pid.x;
+
+            /* XY Swap */
+            temp          = s_state_pid.x;
+            s_state_pid.x = s_state_pid.y;
+            s_state_pid.y = temp;
+
+        }
+        else if (ORIENTATION_180 == s_touch_orientation)
+        {
+            /* X - Mirror */
+            s_state_pid.x = (EMWIN_XSIZE_PHYS - 1) - s_state_pid.x;
+
+            /* Y - Mirror */
+            s_state_pid.y = (EMWIN_YSIZE_PHYS - 1) - s_state_pid.y;
+
+        }
+        else if (ORIENTATION_CCW == s_touch_orientation)
+        {
+            /* Y - Mirror */
+            s_state_pid.y = (EMWIN_YSIZE_PHYS - 1) - s_state_pid.y;
+
+            /* XY Swap */
+            temp          = s_state_pid.x;
+            s_state_pid.x = s_state_pid.y;
+            s_state_pid.y = temp;
+        }
+        else
+        {
+            R_BSP_NOP(); /* no operation */
+        }
 
         /* Pass touch data to emWin */
         GUI_TOUCH_StoreStateEx(&s_state_pid);
@@ -157,6 +265,123 @@ e_emwin_rx_err_t pidconf_cb_single(uint8_t * p_addr, uint32_t size)
 /**********************************************************************************************************************
  * End of function pidconf_cb_single
  *********************************************************************************************************************/
+
+#elif ((EMWIN_TOUCH_IF == TOUCH_IF_SCI_SPI) || (EMWIN_TOUCH_IF == TOUCH_IF_RSPI))
+/**********************************************************************************************************************
+ * Function Name: pidconf_cb_single
+ * Description  : Functions for SPI interface and single touch.
+ * Arguments    : .
+ * Return Value : .
+ *********************************************************************************************************************/
+static e_emwin_rx_err_t pidconf_cb_single(uint8_t * p_addr, uint32_t size)
+{
+    e_emwin_rx_err_t     emwin_ret = EMWIN_RX_SUCCESS;
+    static GUI_PID_STATE s_state_pid;
+    static int32_t       s_is_touched;
+    uint16_t             xpos;
+    uint16_t             ypos;
+    uint8_t              press;
+    int                  temp;
+
+    /* Handle just one touch info. */
+    s_state_pid.Layer  = s_layer_index;          /* Set layer who should handle touch */
+
+    xpos  = ((uint16_t)(p_addr[0] << 8) + ((uint16_t)(p_addr[1])));
+    ypos  = ((uint16_t)(p_addr[2] << 8) + ((uint16_t)(p_addr[3])));
+    press = p_addr[4];
+
+    /* Check if we have a touch detected */
+    if (press)
+    {
+        s_is_touched        = 1; /* Remember that we have a touch, needed for generating up events */
+        s_state_pid.Pressed = 1; /* State is pressed */
+
+        /* Shift bits for x- and y- coordinate to the correct position */
+        s_state_pid.x       = xpos;
+        s_state_pid.y       = ypos;
+
+        /* Touch orientation */
+        if (ORIENTATION_0 == s_touch_orientation)
+        {
+            R_BSP_NOP(); /* no operation */
+        }
+        else if (ORIENTATION_CW == s_touch_orientation)
+        {
+            /* X - Mirror */
+            s_state_pid.x = (EMWIN_XSIZE_PHYS - 1) - s_state_pid.x;
+
+            /* XY Swap */
+            temp          = s_state_pid.x;
+            s_state_pid.x = s_state_pid.y;
+            s_state_pid.y = temp;
+        }
+        else if (ORIENTATION_180 == s_touch_orientation)
+        {
+            /* X - Mirror */
+            s_state_pid.x = (EMWIN_XSIZE_PHYS - 1) - s_state_pid.x;
+
+            /* Y - Mirror */
+            s_state_pid.y = (EMWIN_YSIZE_PHYS - 1) - s_state_pid.y;
+        }
+        else if (ORIENTATION_CCW == s_touch_orientation)
+        {
+            /* Y - Mirror */
+            s_state_pid.y = (EMWIN_YSIZE_PHYS - 1) - s_state_pid.y;
+
+            /* XY Swap */
+            temp          = s_state_pid.x;
+            s_state_pid.x = s_state_pid.y;
+            s_state_pid.y = temp;
+        }
+        else
+        {
+            R_BSP_NOP(); /* no operation */
+        }
+
+        /* Pass touch data to emWin */
+        GUI_TOUCH_StoreStateEx(&s_state_pid);
+    }
+    else
+    {
+        if (s_is_touched)
+        {                            /* If we had a touch, */
+            s_is_touched        = 0; /* now we don't. */
+            s_state_pid.Pressed = 0; /* So, state is not pressed. */
+
+            /* Tell emWin */
+            GUI_TOUCH_StoreStateEx(&s_state_pid);
+        }
+    }
+
+    return emwin_ret;
+}
+/**********************************************************************************************************************
+ * End of function pidconf_cb_single
+ *********************************************************************************************************************/
+
+#else /* (EMWIN_TOUCH_IF == TOUCH_IF_OTHER) */
+
+#warning "Warning!! Please implement pidconf_cb_single() function!"
+
+/**********************************************************************************************************************
+ * Function Name: pidconf_cb_single
+ * Description  : User definition function.
+ * Arguments    : .
+ * Return Value : .
+ *********************************************************************************************************************/
+static e_emwin_rx_err_t pidconf_cb_single(uint8_t * p_addr, uint32_t size)
+{
+    e_emwin_rx_err_t emwin_ret = EMWIN_RX_SUCCESS;
+
+    /* user program */
+
+    return emwin_ret;
+}
+/**********************************************************************************************************************
+ * End of function pidconf_cb_single
+ *********************************************************************************************************************/
+
+#endif
 #else /* EMWIN_USE_MULTITOUCH == 0 */
 
 /**********************************************************************************************************************
@@ -343,12 +568,50 @@ static void create_move_and_down_inputs(st_point_data_t * p_point_data, int32_t 
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
+ * Function Name: check_initial_touch
+ * Description  : Check whether the touch state is after initialization.
+ * Arguments    : report -
+ *              :     touch status.
+ * Return Value : 0 -
+ *              :     Touch state after initialization.
+ *              : 1 -
+ *              :     Not in touch state after initialization.
+ *********************************************************************************************************************/
+static uint8_t check_initial_touch(st_report_data_t report)
+{
+    volatile static uint8_t s_first_state  = 0;
+    volatile static uint8_t s_second_state = 0;
+    volatile static st_report_data_t s_first_report;
+
+    if ( !s_first_state)
+    {
+        s_first_report = report;
+        s_first_state = 1;
+        return 0;
+    }
+
+    if ( !s_second_state)
+    {
+        if ((s_first_report.num_points == report.num_points) && (s_first_report.gesture_id == report.gesture_id))
+        {
+            return 0;
+        }
+        s_second_state = 1;
+    }
+
+    return 1;
+}
+/**********************************************************************************************************************
+ * End of function check_initial_touch
+ *********************************************************************************************************************/
+
+/**********************************************************************************************************************
  * Function Name: pidconf_cb_multi
  * Description  : .
  * Arguments    : .
  * Return Value : .
  *********************************************************************************************************************/
-e_emwin_rx_err_t pidconf_cb_multi(uint8_t * p_addr, uint32_t size)
+static e_emwin_rx_err_t pidconf_cb_multi(uint8_t * p_addr, uint32_t size)
 {
     GUI_MTOUCH_INPUT    * p_input;
     GUI_MTOUCH_EVENT    event;
@@ -363,6 +626,7 @@ e_emwin_rx_err_t pidconf_cb_multi(uint8_t * p_addr, uint32_t size)
     int32_t             y_coord;
     uint8_t             * p_buffer;
     e_emwin_rx_err_t      emwin_ret = EMWIN_RX_SUCCESS;
+    int32_t             temp;
 
     p_buffer           =  p_addr;
     report.device_mode = *p_buffer++;            /* Get device mode, 000b - Work Mode, 001b - Factory Mode */
@@ -374,6 +638,14 @@ e_emwin_rx_err_t pidconf_cb_multi(uint8_t * p_addr, uint32_t size)
                                                   *             0x49 Zoom Out
                                                   *             0x00 No Gesture */
     report.num_points  = *p_buffer++;            /* Number of points */
+
+    /* Check detection after initialization */
+    if(0 == check_initial_touch(report))
+    {
+        return emwin_ret;
+    }
+
+    /* Check max number touch points */
     if(report.num_points <= EMWIN_MAX_NUM_TOUCHPOINTS)
     {
         num_points     =  report.num_points;
@@ -399,6 +671,46 @@ e_emwin_rx_err_t pidconf_cb_multi(uint8_t * p_addr, uint32_t size)
             /* Calculate coordinate values */
             x_coord = ((touch_point.x_high & 0x0F) << 8 | touch_point.x_low);
             y_coord = ((touch_point.y_high & 0x0F) << 8 | touch_point.y_low);
+
+            /* Touch orientation */
+            if (ORIENTATION_0 == s_touch_orientation)
+            {
+                R_BSP_NOP(); /* no operation */
+            }
+            else if (ORIENTATION_CW == s_touch_orientation)
+            {
+                /* X - Mirror */
+                x_coord = (EMWIN_XSIZE_PHYS - 1) - x_coord;
+
+                /* XY Swap */
+                temp    = x_coord;
+                x_coord = y_coord;
+                y_coord = temp;
+
+            }
+            else if (ORIENTATION_180 == s_touch_orientation)
+            {
+                /* X - Mirror */
+                x_coord = (EMWIN_XSIZE_PHYS - 1) - x_coord;
+
+                /* Y - Mirror */
+                y_coord = (EMWIN_YSIZE_PHYS - 1) - y_coord;
+
+            }
+            else if (ORIENTATION_CCW == s_touch_orientation)
+            {
+                /* Y - Mirror */
+                y_coord = (EMWIN_YSIZE_PHYS - 1) - y_coord;
+
+                /* XY Swap */
+                temp    = x_coord;
+                x_coord = y_coord;
+                y_coord = temp;
+            }
+            else
+            {
+                R_BSP_NOP(); /* no operation */
+            }
 
             /* Add 1 to ID because TC counts from 0 and emWin can't handle an ID with 0 */
             a_point_data[i].id    = touch_point.id + 1;
@@ -488,14 +800,15 @@ void PID_X_Init(void)
 
 #if (EMWIN_USE_TOUCH_IC_RESET_PIN == 1)
     /* Reset touch ic */
-    R_GPIO_PinDirectionSet(EMWIN_TOUCH_IC_RESET_PIN, GPIO_DIRECTION_OUTPUT);
     R_GPIO_PinWrite(EMWIN_TOUCH_IC_RESET_PIN, GPIO_LEVEL_LOW);
+    R_GPIO_PinDirectionSet(EMWIN_TOUCH_IC_RESET_PIN, GPIO_DIRECTION_OUTPUT);
     GUI_X_Delay(10);
     R_GPIO_PinWrite(EMWIN_TOUCH_IC_RESET_PIN, GPIO_LEVEL_HIGH);
     GUI_X_Delay(300);
 #endif
 
     pid_ret = r_emwin_rx_pid_open();
+
     if (EMWIN_RX_SUCCESS != pid_ret)
     {
         return; /* Error */

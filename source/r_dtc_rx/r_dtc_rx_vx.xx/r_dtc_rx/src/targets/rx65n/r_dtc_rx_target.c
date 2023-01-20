@@ -36,6 +36,7 @@
 *                              Fixed to correspond to Renesas coding rule.
 *         : 01.02.2019 2.20    Supported RX65N-64pin.
 *         : 25.11.2019 3.30    Added support for atomic control.
+*         : 27.12.2022 4.21    Updated slash format of included header file paths for Linux compatibility.
 *******************************************************************************/
 
 /*******************************************************************************
@@ -43,7 +44,7 @@ Includes   <System Includes> , "Project Includes"
 *******************************************************************************/
 /* Defines for DTC support */
 #include "r_dtc_rx_if.h"
-#include ".\src\r_dtc_rx_private.h"
+#include "./src/r_dtc_rx_private.h"
 
 /* Check MCU Group */
 #if defined(BSP_MCU_RX65N)

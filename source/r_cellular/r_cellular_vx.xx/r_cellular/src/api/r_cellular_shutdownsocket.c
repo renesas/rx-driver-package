@@ -49,48 +49,56 @@
  ***********************************************************************/
 e_cellular_err_t R_CELLULAR_ShutdownSocket(st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_no)
 {
+    uint32_t preemption = 0;
     e_cellular_err_t ret = CELLULAR_SUCCESS;
 
+    preemption = cellular_interrupt_disable();
     if (NULL == p_ctrl)
     {
         ret = CELLULAR_ERR_PARAMETER;
     }
     else
     {
-        if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
+        if (0 != (p_ctrl->running_api_count % 2))
+        {
+            ret = CELLULAR_ERR_OTHER_API_RUNNING;
+        }
+        else if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
         {
             ret = CELLULAR_ERR_NOT_OPEN;
         }
         else if (CELLULAR_SYSTEM_OPEN == p_ctrl->system_state)
         {
-            ret =  CELLULAR_ERR_NOT_CONNECT;
+            ret = CELLULAR_ERR_NOT_CONNECT;
         }
         else
         {
             R_BSP_NOP();
         }
-    }
 
-    if (CELLULAR_SUCCESS == ret)
-    {
-        if ((CELLULAR_START_SOCKET_NUMBER > socket_no) || (p_ctrl->creatable_socket < socket_no))
+        if (CELLULAR_SUCCESS == ret)
         {
-            ret = CELLULAR_ERR_PARAMETER;
+            if ((CELLULAR_START_SOCKET_NUMBER > socket_no) || (p_ctrl->creatable_socket < socket_no))
+            {
+                ret = CELLULAR_ERR_PARAMETER;
+            }
+            else if (CELLULAR_SOCKET_STATUS_CONNECTED !=
+                        p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].socket_status)
+            {
+                ret = CELLULAR_ERR_SOCKET_NOT_READY;
+            }
+            else
+            {
+                p_ctrl->running_api_count += 2;
+            }
         }
     }
-
-    if (CELLULAR_SUCCESS == ret)
-    {
-        if (CELLULAR_SOCKET_STATUS_CONNECTED !=
-                p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].socket_status)
-        {
-            ret = CELLULAR_ERR_SOCKET_NOT_READY;
-        }
-    }
+    cellular_interrupt_enable(preemption);
 
     if (CELLULAR_SUCCESS == ret)
     {
         ret = cellular_shutdownsocket(p_ctrl, socket_no);
+        p_ctrl->running_api_count -= 2;
     }
 
     return ret;

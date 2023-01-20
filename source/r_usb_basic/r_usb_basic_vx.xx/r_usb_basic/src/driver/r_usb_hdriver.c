@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2022) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_hdriver.c
@@ -32,6 +32,7 @@
  *         : 16.11.2018 1.24 Supporting RTOS Thread safe
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.04.2020 1.31 RX671 is added.
+ *         : 30.10.2022 1.41 USBX HMSC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -60,8 +61,9 @@
 #endif /* defined(USB_CFG_HMSC_USE) */
 
 #if defined(USB_CFG_HMSC_USE)
+#if (BSP_CFG_RTOS_USED != 5)	/* Azure RTOS */
 #include "r_usb_hmsc_if.h"
-
+#endif /* BSP_CFG_RTOS_USED != 5 */
 #endif /* defined(USB_CFG_HMSC_USE) */
 
 #if defined(USB_CFG_PCDC_USE)
@@ -176,6 +178,9 @@ const uint16_t g_usb_apl_devicetpl[] =
 };
 #endif /* defined(USB_CFG_HVND_USE) */
 
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+extern rtos_sem_id_t g_usb_host_usbx_sem[USB_NUM_USBIP][USB_MAX_PIPE_NO + 1];
+#endif /* (BSP_CFG_RTOS_USED == 5) */
 
 /******************************************************************************
  Renesas USB Host Driver functions
@@ -226,7 +231,7 @@ usb_er_t usb_hstd_transfer_start_req (usb_utr_t *ptr)
     uint16_t        connect_inf;
 #else   /* (BSP_CFG_RTOS_USED == 0) */
     rtos_err_t      ret;
-    rtos_task_id_t  task_id;
+    rtos_current_task_id_t  task_id;
     usb_utr_t       *p_tran_data;
 #endif  /* BSP_CFG_RTOS_USED == 0 */
 
@@ -1145,10 +1150,10 @@ static void usb_hstd_clr_stall_result (usb_utr_t *ptr, uint16_t data1, uint16_t 
 /******************************************************************************
  Function Name   : usb_hstd_hcd_task
  Description     : USB Host Control Driver Task.
- Argument        : usb_vp_int_t stacd  : Task Start Code.
+ Argument        : rtos_task_arg_t stacd  : Task Start Code.
  Return          : none
  ******************************************************************************/
-void usb_hstd_hcd_task (usb_vp_int_t stacd)
+void usb_hstd_hcd_task (rtos_task_arg_t stacd)
 {
     usb_utr_t *p_mess;
     usb_utr_t *ptr;
@@ -1163,6 +1168,8 @@ void usb_hstd_hcd_task (usb_vp_int_t stacd)
     rtos_err_t ret;
 #endif /* (BSP_CFG_RTOS_USED == 0) */
     usb_hcdinfo_t* hp;
+
+    (void) stacd;
 
 #if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
     /* WAIT_LOOP */
@@ -1866,6 +1873,10 @@ void usb_hstd_driver_release (usb_utr_t *ptr)
  ******************************************************************************/
 void usb_hstd_set_pipe_info (uint16_t ip_no, uint16_t pipe_no, usb_pipe_table_reg_t *src_ep_tbl)
 {
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+    rtos_sem_info_t info;
+#endif /* (BSP_CFG_RTOS_USED == 5) */
+
     g_usb_pipe_table[ip_no][pipe_no].use_flag  = USB_TRUE;
     g_usb_pipe_table[ip_no][pipe_no].pipe_cfg  = src_ep_tbl->pipe_cfg;
 #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M)
@@ -1876,6 +1887,12 @@ void usb_hstd_set_pipe_info (uint16_t ip_no, uint16_t pipe_no, usb_pipe_table_re
 #endif /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
     g_usb_pipe_table[ip_no][pipe_no].pipe_maxp = src_ep_tbl->pipe_maxp;
     g_usb_pipe_table[ip_no][pipe_no].pipe_peri = src_ep_tbl->pipe_peri;
+
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+    info.p_name         = "USB_FSP_SEMX_HOST";
+    info.initial_count  = 0;
+    rtos_create_semaphore(&g_usb_host_usbx_sem[ip_no][pipe_no], &info);
+#endif /* (BSP_CFG_RTOS_USED == 5) */
 }
 /******************************************************************************
  End of function usb_hstd_set_pipe_info
@@ -1979,7 +1996,7 @@ usb_er_t usb_hstd_change_device_state (usb_utr_t *ptr, usb_cb_t complete, uint16
     usb_er_t            err = USB_SUCCESS;
     rtos_err_t          ret;
     usb_hcdinfo_t       *hp;
-    rtos_task_id_t      task_id;
+    rtos_current_task_id_t      task_id;
 
     switch (msginfo)
     {
@@ -2261,6 +2278,9 @@ void usb_hstd_device_information (usb_utr_t *ptr, uint16_t devaddr, uint16_t *tb
 void usb_host_registration (usb_utr_t *ptr)
 {
 
+#if BSP_CFG_RTOS_USED == 5   /* Azure RTOS */
+    usb_host_usbx_registration(ptr);
+#else                                 /* BSP_CFG_RTOS_USED == 5 */
 #if defined(USB_CFG_HCDC_USE)
     if (USB_HCDC == ptr->keyword)
     {
@@ -2289,8 +2309,9 @@ void usb_host_registration (usb_utr_t *ptr)
     {
         usb_hvnd_registration(ptr);
     }
+ #endif /* defined(USB_CFG_HVND_USE) */
+#endif                                 /* BSP_CFG_RTOS_USED == 5 */
 
-#endif /* defined(USB_CFG_HVND_USE) */
 }
 /******************************************************************************
  End of function usb_host_registration

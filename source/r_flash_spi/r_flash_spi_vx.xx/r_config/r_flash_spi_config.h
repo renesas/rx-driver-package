@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011(2012-2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2011(2012-2022) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_flash_spi_config.h
@@ -31,6 +31,7 @@
 *              : 23.07.2014 2.21     Created
 *              : 29.05.2015 2.32     Revised functions of same as Ver.2.32 of EEPROM SPI FIT module.
 *              : 21.12.2018 3.00     Change flash drive interface to Memory Access Driver Interface
+*              : 30.06.2022 3.10     Added #defines specify the ports used for SS#.
 *************************************************************************************************/
 #ifndef __FLASH_SPI_CONFIG_H__
 #define __FLASH_SPI_CONFIG_H__
@@ -117,18 +118,24 @@ SPECIFY DEVICES TO INCLUDE SOFTWARE SUPPORT
 #define FLASH_SPI_CFG_DEV1_SIZE_2M        (0)       /* Device 1 2M-bit      (256K Bytes)        */
 #define FLASH_SPI_CFG_DEV1_SIZE_4M        (0)       /* Device 1 4M-bit      (512K Bytes)        */
 #define FLASH_SPI_CFG_DEV1_SIZE_16M       (0)       /* Device 1 16M-bit     (2M Bytes)          */
-#define FLASH_SPI_CFG_DEV1_SIZE_32M       (1)       /* Device 1 32M-bit     (4M Bytes)          */
+#define FLASH_SPI_CFG_DEV1_SIZE_32M       (0)       /* Device 1 32M-bit     (4M Bytes)          */
 #define FLASH_SPI_CFG_DEV1_SIZE_64M       (0)       /* Device 1 64M-bit     (8M Bytes)          */
 #define FLASH_SPI_CFG_DEV1_SIZE_128M      (0)       /* Device 1 128M-bit    (16M Bytes)         */
 #define FLASH_SPI_CFG_DEV1_SIZE_256M      (0)       /* Device 1 256M-bit    (32M Bytes)         */
 #define FLASH_SPI_CFG_DEV1_SIZE_512M      (0)       /* Device 1 512M-bit    (64M Bytes)         */
 #define FLASH_SPI_CFG_DEV1_SIZE_1G        (0)       /* Device 1 1G-bit      (16M Bytes)         */
 
-
+/************************************************************************************************
+PIN ASSIGNMENT
+*************************************************************************************************/
+/* The #defines specify the ports used for SS#. */
+#define FLASH_SPI_CS_DEV0_CFG_PORTNO    ('C')         /* Device 0 Port Number : FLASH SS#    */
+#define FLASH_SPI_CS_DEV0_CFG_BITNO     ('0')         /* Device 0 Bit Number  : FLASH SS#    */
+#define FLASH_SPI_CS_DEV1_CFG_PORTNO    ('C')         /* Device 1 Port Number : FLASH SS#    */
+#define FLASH_SPI_CS_DEV1_CFG_BITNO     ('0')         /* Device 1 Bit Number  : FLASH SS#    */
 /************************************************************************************************
 Includes <System Includes> , "Project Includes"
 *************************************************************************************************/
-#include "r_flash_spi_pin_config.h"
 
 #if (FLASH_SPI_CFG_LONGQ_ENABLE == 1)
 #include "r_longq_if.h"

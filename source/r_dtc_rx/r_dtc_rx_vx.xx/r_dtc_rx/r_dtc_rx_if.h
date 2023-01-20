@@ -60,6 +60,8 @@
 *         : 14.03.2022 4.00    Added interrupt vector "DTCE_RNG_RNGRDI" for RX140.
                                Added support for RX66T-48pin.
 *         : 31.03.2022 4.10    Added support for RX660.
+*         : 28.06.2022 4.20    Updated demo projects.
+*         : 27.12.2022 4.21    Updated slash format of included header file paths for Linux compatibility.
 *******************************************************************************/
 #ifndef DTC_RX_IF_H
 #define DTC_RX_IF_H
@@ -82,7 +84,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define DTC_VERSION_MAJOR  (4)
-#define DTC_VERSION_MINOR  (10)
+#define DTC_VERSION_MINOR  (21)
 
 /*******************************************************************************
 Typedef definitions
@@ -230,51 +232,51 @@ typedef struct st_transfer_data { /* 4 long-words */
 /* Moved struct dtc_transfer_data_cfg_t to r_dtc_rx_target_if.h */
 /* Include target mcu interface header file. */
 #if   defined(BSP_MCU_RX23T)
-    #include ".\src\targets\rx23t\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx23t/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX24T)
-    #include ".\src\targets\rx24t\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx24t/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX24U)
-    #include ".\src\targets\rx24u\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx24u/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX130)
-    #include ".\src\targets\rx130\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx130/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX113)
-    #include ".\src\targets\rx113\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx113/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX111)
-    #include ".\src\targets\rx111\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx111/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX110)
-    #include ".\src\targets\rx110\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx110/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX140)
-    #include ".\src\targets\rx140\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx140/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX64M)
-    #include ".\src\targets\rx64m\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx64m/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX71M)
-    #include ".\src\targets\rx71m\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx71m/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX72T)
-    #include ".\src\targets\rx72t\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx72t/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX231)
-    #include ".\src\targets\rx231\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx231/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX23E_A)
-    #include ".\src\targets\rx23e-a\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx23e-a/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX230)
-    #include ".\src\targets\rx230\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx230/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX65N)
-    #include ".\src\targets\rx65n\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx65n/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX66T)
-    #include ".\src\targets\rx66t\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx66t/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX671)
-    #include ".\src\targets\rx671\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx671/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX660)
-    #include ".\src\targets\rx660\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx660/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX66N)
-    #include ".\src\targets\rx66n\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx66n/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX23W)
-    #include ".\src\targets\rx23w\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx23w/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX72M)
-    #include ".\src\targets\rx72m\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx72m/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX13T)
-    #include ".\src\targets\rx13t\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx13t/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX72N)
-    #include ".\src\targets\rx72n\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx72n/r_dtc_rx_target_if.h"
 #else
     #error "This MCU is not supported by the current r_dtc_rx module."
 #endif

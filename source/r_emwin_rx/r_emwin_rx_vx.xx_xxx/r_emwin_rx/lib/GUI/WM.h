@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.22 - Graphical user interface for embedded applications **
+** emWin V6.26 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -114,7 +114,19 @@ extern "C" {     /* Make sure we have C-declarations in C++ programs */
 #define WM_LOCK()   GUI_LOCK()
 #define WM_UNLOCK() GUI_UNLOCK()
 
-#define WM_LOCK_H(hWin) (WM_Obj *)GUI_LOCK_H(hWin)
+/*********************************************************************
+*
+*       Validate window handles
+*/
+#ifndef WM_VALIDATE_HANDLE
+  #define WM_VALIDATE_HANDLE  (0)
+#endif
+
+#if WM_VALIDATE_HANDLE
+  #define WM_LOCK_H(hWin) (WM_Obj *)WM__LockValid(hWin)
+#else
+  #define WM_LOCK_H(hWin) (WM_Obj *)GUI_LOCK_H(hWin)
+#endif
 
 /*********************************************************************
 *
@@ -142,7 +154,7 @@ struct WM_WINDOW_INFO {
 */
 typedef struct {
   int Key;         // The key which has been pressed.
-  int PressedCnt;  // \U{#3E}0 if the key has been pressed, 0 if the key has been released.
+  int PressedCnt;  // >0 if the key has been pressed, 0 if the key has been released.
 } WM_KEY_INFO;
 
 /*********************************************************************
@@ -351,6 +363,8 @@ typedef struct {
 
 #define WM_GET_OFFSET               54      /* Return alignment offset */
 
+#define WM_GET_CONTENT_RECT         55      /* Get content rectangle, e.g. for LISTVIEW: InsideRect minus the HEADER */
+
 #define WM_GESTURE                  0x0119  /* Gesture message */
 
 #define WM_TIMER                    0x0113  /* Timer has expired              (Keep the same as WIN32) */
@@ -386,7 +400,20 @@ typedef struct {
 *    Flags for motion support. The flags are supposed to be OR-combined
 *    with the member \c{Flags} of the WM_MOTION_INFO structure.
 */
-#define WM_MOTION_MANAGE_BY_WINDOW   (1 << 0) // Window movement is managed by window itself.
+#define WM_MOTION_MANAGE_BY_WINDOW   (1 << 0)   // Window movement is managed by window itself.
+
+/*********************************************************************
+*
+*       Motion overlap flags
+*
+*  Description
+*    Flags for setting overlap behavior of widgets. The overlap will
+*    come into effect if a distance has been set.
+*/
+#define WM_MOTION_OVERLAP_TOP        (1 << 0)   // Overlap will be active at the top edge of the widget.
+#define WM_MOTION_OVERLAP_BOTTOM     (1 << 1)   // Overlap will be active at the bottom edge of the widget.
+#define WM_MOTION_OVERLAP_LEFT       (1 << 2)   // Overlap will be active at the left edge of the widget.
+#define WM_MOTION_OVERLAP_RIGHT      (1 << 3)   // Overlap will be active at the right edge of the widget.
 
 /*********************************************************************
 *
@@ -407,6 +434,7 @@ typedef struct {
 #define WM_NOTIFICATION_GOT_FOCUS           8      // This notification message will be sent once a window receives and accepts the focus.
 #define WM_NOTIFICATION_LOST_FOCUS          9      // This notification message will be sent when the window has lost the focus.
 #define WM_NOTIFICATION_SCROLL_CHANGED     10      // This notification message will be sent when the scroll position of an attached SCROLLBAR widget has changed.
+#define WM_NOTIFICATION_SCROLLER_ADDED     16      // This notification message will be sent when a SCROLLER widget has been added to the window.
 
 /* not documented */
 #define WM_NOTIFICATION_MOTION_STOPPED     11
@@ -617,6 +645,7 @@ int     WM_IsEnabled                 (WM_HWIN hObj);
 char    WM_IsCompletelyCovered       (WM_HWIN hWin);    /* Checks if the window is completely covered by other windows */
 char    WM_IsCompletelyVisible       (WM_HWIN hWin);    /* Is the window completely visible ? */
 int     WM_IsFocusable               (WM_HWIN hWin);
+int     WM_IsUntouchable             (WM_HWIN hWin);
 int     WM_IsVisible                 (WM_HWIN hWin);
 int     WM_IsWindow                  (WM_HWIN hWin);    /* Check validity */
 void    WM_Rect2Screen               (WM_HWIN hWin, GUI_RECT * pRect);
@@ -657,6 +686,7 @@ void     WM_MOTION_SetThreshold    (unsigned Threshold);
 /* Motion support, private interface */
 WM_HMEM WM_MOTION__CreateContext(void);
 void    WM_MOTION__DeleteContext(WM_HMEM hContext);
+void    WM_MOTION__Stop         (WM_HWIN hWin);
 
 /* Motion support, private function(s) */
 void     WM__SetMotionCallback (void(* cbMotion) (GUI_PID_STATE * pState, void * p));
@@ -779,6 +809,8 @@ WM_CALLBACK * WM_GetCallback(WM_HWIN hWin);
 /* Get size/origin of a window */
 void      WM_GetClientRect           (GUI_RECT * pRect);
 void      WM_GetClientRectEx         (WM_HWIN hWin, GUI_RECT * pRect);
+void      WM_GetContentRect          (GUI_RECT * pRect);
+void      WM_GetContentRectEx        (WM_HWIN hWin, GUI_RECT * pRect);
 void      WM_GetInsideRect           (GUI_RECT * pRect);
 void      WM_GetInsideRectEx         (WM_HWIN hWin, GUI_RECT * pRect);
 void      WM_GetInsideRectExScrollbar(WM_HWIN hWin, GUI_RECT * pRect); /* not to be documented (may change in future version) */

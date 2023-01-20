@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_eeprom_spi
-VERSION = 		3.02
+VERSION = 		3.10
 MDF = V2
 
 CONFIG_FOLDER = r_config

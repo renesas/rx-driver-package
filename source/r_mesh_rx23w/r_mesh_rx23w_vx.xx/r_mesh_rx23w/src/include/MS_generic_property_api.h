@@ -21,23 +21,30 @@
 /* --------------------------------------------- Global Definitions */
 /**
  * \defgroup generic_property_module Generic Property Model (GENERIC_PROPERTY)
- * \ingroup mesh_models_block
+ * \ingroup generics_models
  * \{
  *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Generic Property Model (GENERIC_PROPERTY) module to the Application.
  */
 
 /**
- * \defgroup property_constants Constants
+ * \defgroup generic_property_defines Defines
  * \{
- * Describes Constants defined by the module.
+ * \brief This section describes the various Defines in EtherMind
+ * Mesh Generic Property Model Layer.
  */
 
 /**
- *  \name Property Type
- *  \{
+ * \defgroup generic_property_constants Constants
+ * \{
+ * \brief This section describes the various Constants in EtherMind
+ * Mesh Generic Property Model Layer.
  */
 
+/**
+ * \name Generic Property Type Values
+ * \{
+ */
 /** Generic Manufacturer Properties */
 #define MS_GENERIC_PROP_TYPE_MANUFACTURER    0x00
 
@@ -46,14 +53,12 @@
 
 /** Generic User Properties */
 #define MS_GENERIC_PROP_TYPE_USER            0x02
-
 /** \} */
 
 /**
- *  \name User Access field values
- *  \{
+ * \name User Access field values
+ * \{
  */
-
 /** User Access - Prohibited */
 #define MS_GENERIC_USER_ACCESS_PROHIBITED    0x00
 /** User Access - the device property can be read */
@@ -62,17 +67,14 @@
 #define MS_GENERIC_USER_ACCESS_WRITE         0x02
 /** User Access - the device property can be read and written */
 #define MS_GENERIC_USER_ACCESS_READ_WRITE    0x03
-
-/** Invalid Device Property */
+/** User Access - Invalud Property ID Value */
 #define MS_GENERIC_USER_ACCESS_INVALID_PROPERTY_ID 0xFF
-
 /** \} */
 
 /**
- *  \name Device Property field values
- *  \{
+ * \name Mesh Device Property Values
+ * \{
  */
-
 /** Device Property - Light Control Time Occupancy Delay */
 #define MS_DEV_PROP_LIGHT_CONTROL_TIME_OCCUPANCY_DELAY          0x003A
 
@@ -141,6 +143,7 @@
 
 /** Device Property - Present Ambient Light Level */
 #define MS_DEV_PROP_PRESENT_AMBIENT_LIGHT_LEVEL                 0x004E
+/** \} */
 
 /** \} */
 
@@ -150,8 +153,8 @@
 /**
  *  \defgroup generic_property_cb Application Callback
  *  \{
- *  \brief This section Describes the module Notification Callback interface offered
- *  to the application
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Generic Property Model Layer.
  */
 
 /**
@@ -197,9 +200,15 @@ typedef API_RESULT (* MS_GENERIC_PROPERTY_CLIENT_CB)
 /** \} */
 
 /**
+ * \addtogroup generic_property_defines
+ * \{
+ */
+
+/**
  *  \defgroup generic_property_structures Structures
  *  \{
- *  \brief This section describes the EtherMind Mesh Generic Property Model Structures.
+ *  \brief This section describes the various Data-Types and Structures in
+ *  EtherMind Mesh Generic Property Model Layer.
  */
 
 /**
@@ -416,18 +425,26 @@ typedef struct MS_generic_client_properties_status_struct
 
 /** \} */
 
-
+/** \} */
 
 /* --------------------------------------------- Function */
 /**
  * \defgroup generic_property_api_defs API Definitions
  * \{
- * \brief This section describes the EtherMind Mesh Generic Property Model APIs.
+ * \brief This section describes the various APIs exposed by
+ * EtherMind Mesh Generic Property Model Layer to the Application.
  */
+
 /**
- * \defgroup generic_user_property_ser_api_defs Generic User Property Server API
+ * \defgroup generic_property_ser_api_defs Generic User Property Server API Definitions
  * \{
- * \brief This section describes the Generic User Property Server APIs.
+ * \brief This section describes the Mesh Generic User Property
+ * Server Model APIs.
+ */
+
+/**
+ * \name Geneic Property Server Interfaces
+ * \{
  */
 
 /**
@@ -640,10 +657,18 @@ API_RESULT MS_generic_client_property_server_state_update
 
 /** \} */
 
+/** \} */
+
 /**
- * \defgroup generic_property_cli_api_defs Generic Property Client API
+ * \defgroup generic_property_cli_api_defs Generic Property Client API Definitions
  * \{
- * \brief This section describes the Generic Property Client APIs.
+ * \brief This section describes the EtherMind Mesh Generic Property
+ * Client Model APIs.
+ */
+
+/**
+ * \name Generic Property Client Interfaces
+ * \{
  */
 
 /**
@@ -719,10 +744,29 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
                /* IN */ void    * param,
                /* IN */ UINT32    rsp_opcode
            );
+/** \} */
 
-/** \name Message Send
- *  \{
+/** \} */
+
+/** \} */
+
+/**
+ * \addtogroup generic_property_defines
+ * \{
  */
+
+/**
+ * \defgroup generic_property_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind
+ * Mesh Generic Property Model Layer.
+ */
+
+/**
+ * \name Generic User Property Client Macros
+ * \{
+ */
+
 /**
  *  \brief API to get the list of Generic User Property states of an element.
  *
@@ -748,7 +792,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  Generic User Property Get is an acknowledged message used to get the Generic User Property state of an element.
  *  The response to the Generic User Property Get message is a Generic User Property Status message.
  *
- *  \param [in] param Generic User Property Get message parameter @ref MS_GENERIC_USER_PROPERTY_GET_STRUCT
+ *  \param [in] param Generic User Property Get message parameter \ref MS_GENERIC_USER_PROPERTY_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -767,7 +811,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  Generic User Property Set is an acknowledged message used to set the Generic User Property state of an element.
  *  The response to the Generic User Property Set message is a Generic User Property Status message.
  *
- *  \param [in] param Generic User Property Set message parameter @ref MS_GENERIC_USER_PROPERTY_SET_STRUCT
+ *  \param [in] param Generic User Property Set message parameter \ref MS_GENERIC_USER_PROPERTY_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -786,7 +830,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  Generic User Property Set Unacknowledged is an unacknowledged message used to set
  *  the Generic User Property state of an element.
  *
- *  \param [in] param Generic User Property Set message parameter @ref MS_GENERIC_USER_PROPERTY_SET_STRUCT
+ *  \param [in] param Generic User Property Set message parameter \ref MS_GENERIC_USER_PROPERTY_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -797,6 +841,13 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
             param,\
             0xFFFFFFFF\
         )
+
+/** \} */
+
+/**
+ * \name Generic Admin Property Client Macros
+ * \{
+ */
 
 /**
  *  \brief API to get the list of Generic Admin Property states of an element.
@@ -823,7 +874,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  Generic Admin Property Get is an acknowledged message used to get the Generic Admin Property state of an element.
  *  The response to the Generic Admin Property Get message is a Generic Admin Property Status message.
  *
- *  \param [in] param Generic Admin Property Get message parameter @ref MS_GENERIC_ADMIN_PROPERTY_GET_STRUCT
+ *  \param [in] param Generic Admin Property Get message parameter \ref MS_GENERIC_ADMIN_PROPERTY_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -842,7 +893,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  Generic Admin Property Set is an acknowledged message used to set the Generic Admin Property state of an element.
  *  The response to the Generic Admin Property Set message is a Generic Admin Property Status message.
  *
- *  \param [in] param Generic Admin Property Set message parameter @ref MS_GENERIC_ADMIN_PROPERTY_SET_STRUCT
+ *  \param [in] param Generic Admin Property Set message parameter \ref MS_GENERIC_ADMIN_PROPERTY_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -861,7 +912,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  Generic Admin Property Set Unacknowledged is an unacknowledged message used to set
  *  the Generic Admin Property state of an element.
  *
- *  \param [in] param Generic Admin Property Set message parameter @ref MS_GENERIC_ADMIN_PROPERTY_SET_STRUCT
+ *  \param [in] param Generic Admin Property Set message parameter \ref MS_GENERIC_ADMIN_PROPERTY_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -872,6 +923,12 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
             param,\
             0xFFFFFFFF\
         )
+/** \} */
+
+/**
+ * \name Generic Manufacturing Property Client Macros
+ * \{
+ */
 
 /**
  *  \brief API to get the list of Generic Manufacturer Property states of an element.
@@ -900,7 +957,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  Generic Manufacturer Property Get is an acknowledged message used to get the Generic Manufacturer Property state of an element.
  *  The response to the Generic Manufacturer Property Get message is a Generic Manufacturer Property Status message.
  *
- *  \param [in] param Generic Manufacturer Property Get message parameter @ref MS_GENERIC_MANUFACTURER_PROPERTY_GET_STRUCT
+ *  \param [in] param Generic Manufacturer Property Get message parameter \ref MS_GENERIC_MANUFACTURER_PROPERTY_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -919,7 +976,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  Generic Manufacturer Property Set is an acknowledged message used to set the Generic Manufacturer Property User Access state of an element.
  *  The response to the Generic Manufacturer Property Set message is a Generic Manufacturer Property Status message.
  *
- *  \param [in] param Generic Manufacturer Property Set message parameter @ref MS_GENERIC_MANUFACTURER_PROPERTY_SET_STRUCT
+ *  \param [in] param Generic Manufacturer Property Set message parameter \ref MS_GENERIC_MANUFACTURER_PROPERTY_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -937,7 +994,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  \par Description
  *  The Generic Manufacturer Property Set Unacknowledged is an unacknowledged message used to set the Generic Manufacturer Property User Access state of an element.
  *
- *  \param [in] param Generic Manufacturer Property Set message parameter @ref MS_GENERIC_MANUFACTURER_PROPERTY_SET_STRUCT
+ *  \param [in] param Generic Manufacturer Property Set message parameter \ref MS_GENERIC_MANUFACTURER_PROPERTY_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -948,7 +1005,12 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
             param,\
             0xFFFFFFFF\
         )
+/** \} */
 
+/**
+ * \name Generic Property Client Macros
+ * \{
+ */
 /**
  *  \brief API to get the list of Generic Client Property states of an element.
  *
@@ -956,7 +1018,7 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
  *  Generic Client Properties Get is an acknowledged message used to get the list of Generic Client Property states of an element.
  *  The response to the Generic Client Properties Get message is a Generic Client Properties Status message.
  *
- *  \param [in] param Generic Client Properties Get message parameter @ref MS_GENERIC_CLIENT_PROPERTIES_GET_STRUCT
+ *  \param [in] param Generic Client Properties Get message parameter \ref MS_GENERIC_CLIENT_PROPERTIES_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -968,8 +1030,11 @@ API_RESULT MS_generic_property_client_send_reliable_pdu
             MS_ACCESS_GENERIC_CLIENT_PROPERTIES_STATUS_OPCODE\
         )
 /** \} */
+
 /** \} */
+
 /** \} */
+
 /** \} */
 
 #endif /*_H_MS_GENERIC_PROPERTY_API_ */

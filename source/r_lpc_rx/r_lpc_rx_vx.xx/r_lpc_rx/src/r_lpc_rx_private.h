@@ -18,7 +18,7 @@
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_lpc_rx_private.h
- * Version      : 2.03
+ * Version      : 2.04
  * Description  : The LPC module configures the MCU for the different operating and low power modes.
  *                This file is the LPC module's interface header file and should be included by the application that
  *                intends to use the API.

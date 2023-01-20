@@ -35,13 +35,13 @@
 #define CELLULAR_IDLE_PRIORITY      (6)
 
 #define ATC_RES_BEGIN_OR_END        "\r\n"
+
 #define ATC_RES_GO_SEND             ">"
 #define ATC_RES_OK                  "OK\r\n"
 #define ATC_RES_ERROR               "ERROR\r\n"
 #define ATC_RES_NO_CARRIER          "NO CARRIER\r\n"
 #define ATC_RES_CONNECT             "CONNECT\r\n"
-#define ATC_RES_CPIN_READY          "READY\r\n"
-#define ATC_RES_CPIN_SIM_LOCK       "SIM PIN\r\n"
+#define ATC_RES_EXIT                "^EXIT:"
 #define ATC_RES_DATA_RECEIVE        "+SQNSRING:"
 #define ATC_RES_DATA_RECEIVE_QIRD   "+SQNSRECV:"
 #define ATC_RES_READ_DNS            "+SQNDNSLKUP:"
@@ -54,7 +54,6 @@
 #define ATC_RES_CREG_STATUS         "+CREG:"
 #define ATC_RES_CEREG_STATUS        "+CEREG:"
 #define ATC_RES_GET_TIME            "+CCLK:"
-#define ATC_RES_FATAL_ERROR         "^EXIT: Fatal error\r\n"
 #define ATC_RES_GET_SERVICE_STATUS  "+COPS:"
 #define ATC_RES_GET_PDP_STATUS      "+CGACT:"
 #define ATC_RES_GET_IP_ADDR         "+CGPADDR:"
@@ -71,6 +70,9 @@
 #define ATC_RES_PING                "+PING:"
 #define ATC_RES_GET_CELLINFO        "+SQNMONI:"
 #define ATC_RES_GET_AUTOCONNECT     "+SQNAUTOCONNECT:"
+#define ATC_RES_GET_CTM             "+SQNCTM:"
+#define ATC_RES_SMCWRX              "+SMCWRX:"
+#define ATC_RES_SMCWTX              "+SMCWTX:"
 
 /**********************************************************************************************************************
  * Typedef definitions
@@ -82,8 +84,7 @@ typedef enum
     CELLULAR_RES_ERROR,                 // Response is ERROR
     CELLULAR_RES_NO_CARRIER,            // Response is NO CARRIER
     CELLULAR_RES_CONNECT,               // Response is CONNECT
-    CELLULAR_RES_CPIN_READY,            // Response is CPIN READY
-    CELLULAR_RES_CPIN_SIM_LOCK,         // Response is CPIN SIM ROCK
+    CELLULAR_RES_EXIT,                  // Exit error detected (module is automatically restarted)
     CELLULAR_RES_DATA_RECEIVE,          // Data receipt notification
     CELLULAR_RES_DATA_RECEIVE_QIRD,     // Receipt data delivery request
     CELLULAR_RES_READ_DNS,              // DNS query results
@@ -96,7 +97,6 @@ typedef enum
     CELLULAR_RES_CREG_STATUS,           // Connected base station information
     CELLULAR_RES_CEREG_STATUS,          // Connected base station information
     CELLULAR_RES_GET_TIME,              // Time acquisition process
-    CELLULAR_RES_FATAL_ERROR,           // Fatal error on the module side, reboot required
     CELLULAR_GET_SERVICE_STATUS,        // Get service status
     CELLULAR_GET_PDP_STATUS,            // Get PDP status
     CELLULAR_GET_IP_ADDR,               // Get the IP address in use
@@ -113,6 +113,9 @@ typedef enum
     CELLULAR_PING,                      // Perform PING.
     CELLULAR_GET_CELLINFO,              // Get cell information
     CELLULAR_GET_AUTOCONNECT,           // Get auto-connect settings.
+    CELLULAR_GET_CTM,                   // Get Conformance Test Mode.
+    CELLULAR_SMCWRX,                    // SMCWRX Command results.
+    CELLULAR_SMCWTX,                    // SMCWTX Command results.
     CELLULAR_RES_MAX,                   // End of analysis result processing
 
     CELLULAR_RES_PUT_CHAR,              // Received data storage process
@@ -138,5 +141,9 @@ typedef struct cellular_receive
     uint32_t                    recv_count;         // Received bytes
     uint32_t                    tmp_recvcnt;        // Processing start point
 } st_cellular_receive_t;
+
+#if CELLULAR_CFG_URC_CHARGET_ENABLED == 1
+extern void CELLULAR_CFG_URC_CHARGET_FUNCTION (void * p_args);
+#endif
 
 #endif /* CELLULAR_RECEIVE_TASK_H */

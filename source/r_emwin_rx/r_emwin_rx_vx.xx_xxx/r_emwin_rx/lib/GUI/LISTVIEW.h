@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.22 - Graphical user interface for embedded applications **
+** emWin V6.26 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -124,7 +124,7 @@ void             LISTVIEW_DeleteRowSorted      (LISTVIEW_Handle hObj, int Row);
 void             LISTVIEW_DisableRow           (LISTVIEW_Handle hObj, unsigned Row);
 void             LISTVIEW_DisableSort          (LISTVIEW_Handle hObj);
 void             LISTVIEW_EnableCellSelect     (LISTVIEW_Handle hObj, unsigned OnOff);  // Enables/disables cell selection
-void             LISTVIEW_EnableMotion         (LISTVIEW_Handle hObj, int OnOff);
+void             LISTVIEW_EnableMotion         (LISTVIEW_Handle hObj, int Flags);
 void             LISTVIEW_EnableRow            (LISTVIEW_Handle hObj, unsigned Row);
 void             LISTVIEW_EnableSort           (LISTVIEW_Handle hObj);
 GUI_COLOR        LISTVIEW_GetBkColor           (LISTVIEW_Handle hObj, unsigned Index);
@@ -168,9 +168,9 @@ void             LISTVIEW_SetFont              (LISTVIEW_Handle hObj, const GUI_
 void             LISTVIEW_SetGridColor         (LISTVIEW_Handle hObj, GUI_COLOR Color);
 int              LISTVIEW_SetGridVis           (LISTVIEW_Handle hObj, int Show);
 void             LISTVIEW_SetHeaderHeight      (LISTVIEW_Handle hObj, unsigned HeaderHeight);
-void             LISTVIEW_SetItemBkColor       (LISTVIEW_Handle hObj, unsigned Column, unsigned Row, unsigned int Index, GUI_COLOR Color);
+void             LISTVIEW_SetItemBkColor       (LISTVIEW_Handle hObj, unsigned Column, unsigned Row, unsigned Index, GUI_COLOR Color);
 void             LISTVIEW_SetItemText          (LISTVIEW_Handle hObj, unsigned Column, unsigned Row, const char * s);
-void             LISTVIEW_SetItemTextColor     (LISTVIEW_Handle hObj, unsigned Column, unsigned Row, unsigned int Index, GUI_COLOR Color);
+void             LISTVIEW_SetItemTextColor     (LISTVIEW_Handle hObj, unsigned Column, unsigned Row, unsigned Index, GUI_COLOR Color);
 void             LISTVIEW_SetItemTextSorted    (LISTVIEW_Handle hObj, unsigned Column, unsigned Row, const char * pText);
 void             LISTVIEW_SetLBorder           (LISTVIEW_Handle hObj, unsigned BorderSize);
 void             LISTVIEW_SetOwnerDraw         (LISTVIEW_Handle hObj, WIDGET_DRAW_ITEM_FUNC * pfDrawItem);

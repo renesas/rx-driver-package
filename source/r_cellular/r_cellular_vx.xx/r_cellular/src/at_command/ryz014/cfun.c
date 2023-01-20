@@ -50,7 +50,6 @@
 e_cellular_err_t atc_cfun(st_cellular_ctrl_t * const p_ctrl, const e_cellular_module_status_t mode)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
     uint8_t str[10] = {0};
 
     sprintf((char *)str, "%d", mode); // (uint8_t *)->(char *)
@@ -61,13 +60,7 @@ e_cellular_err_t atc_cfun(st_cellular_ctrl_t * const p_ctrl, const e_cellular_mo
         (const uint8_t *)&gp_at_command[ATC_FUNCTION_LEVEL][0], // (const uint8_t *const *)->(const uint8_t **)
             (const uint8_t **)&p_command_arg);                  // (const uint8_t *const *)->(const uint8_t **)
 
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout,
-                                            ATC_RETURN_OK, ATC_FUNCTION_LEVEL);
-
-    if (CELLULAR_ATC_OK != at_ret)
-    {
-        ret = CELLULAR_ERR_MODULE_COM;
-    }
+    ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_FUNCTION_LEVEL);
 
     cellular_delay_task(CELLULAR_CFUN_WAIT);
 
@@ -83,18 +76,12 @@ e_cellular_err_t atc_cfun(st_cellular_ctrl_t * const p_ctrl, const e_cellular_mo
 e_cellular_err_t atc_cfun_check(st_cellular_ctrl_t * const p_ctrl)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
 
     atc_generate(p_ctrl->sci_ctrl.atc_buff,
         (const uint8_t *)&gp_at_command[ATC_FUNCTION_LEVEL_CHECK][0], // (const uint8_t *const *)->(const uint8_t **)
             NULL);
 
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_FUNCTION_LEVEL_CHECK);
-
-    if (CELLULAR_ATC_OK != at_ret)
-    {
-        ret = CELLULAR_ERR_MODULE_COM;
-    }
+    ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_FUNCTION_LEVEL_CHECK);
 
     return ret;
 }

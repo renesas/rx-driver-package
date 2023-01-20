@@ -23,6 +23,7 @@
 /**********************************************************************************************************************
  * History      : DD.MM.YYYY Version  Description
  *              : 30.06.2021 1.00     First Release
+ *              : 21.12.2022 1.10     Fixed processing error of riichs_bps_calc
  **********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -4261,7 +4262,7 @@ static riichs_return_t riichs_bps_calc (riichs_info_t * p_riichs_info, uint16_t 
         H_time = (1 / (3 * bps));
         /* 1000kbps over */
         /* Check L width */
-        if (L_time < 160E-9)
+        if (L_time <= (160E-9 + scl_down_time))
         {
             /* Wnen L width less than 0.5us */
             /* Subtract Rise up and down time for SCL from H/L width */
@@ -4275,12 +4276,16 @@ static riichs_return_t riichs_bps_calc (riichs_info_t * p_riichs_info, uint16_t 
             L_time -= scl_down_time;
             H_time -= scl_up_time;
         }
+        if (H_time < 60E-9)
+        {
+            H_time = 60E-9;
+        }
     }
     else if (kbps > RIICHS_FAST_SPPED_MAX)
     {
         /* 400kbps over */
         /* Check L width */
-        if (L_time < 0.5E-6)
+        if (L_time <= (0.5E-6 + scl_down_time))
         {
             /* Wnen L width less than 0.5us */
             /* Subtract Rise up and down time for SCL from H/L width */
@@ -4294,12 +4299,16 @@ static riichs_return_t riichs_bps_calc (riichs_info_t * p_riichs_info, uint16_t 
             L_time -= scl_down_time;
             H_time -= scl_up_time;
         }
+        if (H_time < 0.26E-6)
+        {
+            H_time = 0.26E-6;
+        }
     }
     else if (kbps > RIICHS_STAD_SPPED_MAX)
     {
         /* 100kbps over */
         /* Check L width */
-        if (L_time < 1.3E-6)
+        if (L_time <= (1.3E-6 + scl_down_time))
         {
             /* Wnen L width less than 1.3us */
             /* Subtract Rise up and down time for SCL from H/L width */
@@ -4312,6 +4321,10 @@ static riichs_return_t riichs_bps_calc (riichs_info_t * p_riichs_info, uint16_t 
             /* Subtract Rise up and down time for SCL from H/L width */
             L_time -= scl_down_time;
             H_time -= scl_up_time;
+        }
+        if (H_time < 0.6E-6)
+        {
+            H_time = 0.6E-6;
         }
     }
     else

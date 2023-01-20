@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.22 - Graphical user interface for embedded applications **
+** emWin V6.26 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -90,7 +90,10 @@ typedef struct {
   U16                     ItemSpacing;
   U16                     ContentSizeX;
   U16                     FixedScrollPos;
-  U8                      MotionStarted;             // Internal flag to check if motion swiping has been started
+  int                     TotalRowHeight;            // Cached value
+  int                     yOffset;                   // Cached value
+  WM_HMEM                 hContext;                  // Motion context.
+  U8                      MotionStarted;
 } LISTBOX_Obj;
 
 /*********************************************************************
@@ -109,7 +112,7 @@ typedef struct {
   LISTBOX_Obj * LISTBOX_LockH(LISTBOX_Handle h);
   #define LISTBOX_LOCK_H(h)   LISTBOX_LockH(h)
 #else
-  #define LISTBOX_LOCK_H(h)   (LISTBOX_Obj *)GUI_LOCK_H(h)
+  #define LISTBOX_LOCK_H(h)   (LISTBOX_Obj *)WM_LOCK_H(h)
 #endif
 
 /*********************************************************************
@@ -141,8 +144,6 @@ void         LISTBOX__AddSize               (LISTBOX_Obj * pObj, int Index);
 
 #endif /* GUI_WINSUPPORT */
 
-#else                            /* Avoid problems with empty object modules */
-  void LISTBOX_C(void) {}
-#endif
+#endif /* LISTBOX_PRIVATE_H */
 
 /*************************** End of file ****************************/

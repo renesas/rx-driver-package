@@ -26,7 +26,7 @@
 #include "MS_systemtime_pl.h"
 #include "MS_monitor_pl.h"
 #include "MS_logger.h"
-#include "prov_pl.h"
+#include "MS_prov_pl.h"
 
 /* --------------------------------------------- Global Definitions */
 //#define BLE_LOG_TAG "mesh"

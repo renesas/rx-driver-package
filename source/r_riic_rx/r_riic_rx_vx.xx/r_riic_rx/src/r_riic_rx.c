@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer 
  *
- * Copyright (C) 2013(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_riic_rx.c
@@ -73,6 +73,7 @@
  *                                    Modified comment of API function to Doxygen style.
  *              : 30.06.2021 2.48     Modified "riic information" comment.
  *                                    Modified the problem of recursive call.
+ *              : 16.12.2022 2.60     Fixed processing error of riic_bsp_calc.
  **********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -3856,7 +3857,7 @@ static riic_return_t riic_bps_calc (riic_info_t * p_riic_info, uint16_t kbps)
     {
         /* 400kbps over */
         /* Check L width */
-        if (L_time < 0.5E-6)
+        if (L_time <= (0.5E-6 + scl_down_time))
         {
             /* Wnen L width less than 0.5us */
             /* Subtract Rise up and down time for SCL from H/L width */
@@ -3875,7 +3876,7 @@ static riic_return_t riic_bps_calc (riic_info_t * p_riic_info, uint16_t kbps)
     {
         /* 100kbps over */
         /* Check L width */
-        if (L_time < 1.3E-6)
+        if (L_time <= (1.3E-6 + scl_down_time))
         {
             /* Wnen L width less than 1.3us */
             /* Subtract Rise up and down time for SCL from H/L width */

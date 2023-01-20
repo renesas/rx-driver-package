@@ -32,6 +32,7 @@
  *         : 05.03.2021 2.02    Changed version to 2.02.
  *         : 31.07.2021 2.03    Changed version to 2.03.
  *         : 31.12.2021 2.04    Changed version to 2.04.
+ *         : 28.06.2022 2.10    Added new demo projects.
   ***********************************************************************************************************************/
 
 #ifndef R_LPC_RX_IF_H
@@ -56,7 +57,7 @@
 
 /* Version Number of API. */
     #define LPC_RX_VERSION_MAJOR           (2)
-    #define LPC_RX_VERSION_MINOR           (4)
+    #define LPC_RX_VERSION_MINOR           (10)
 
 /***********************************************************************************************************************
  Typedef definitions

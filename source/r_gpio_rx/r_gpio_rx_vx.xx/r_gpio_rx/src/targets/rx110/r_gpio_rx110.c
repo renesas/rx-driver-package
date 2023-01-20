@@ -23,6 +23,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 18.02.2014 1.10    First Release
+*         : 15.12.2022 2.00    Added PORTJ for open drain n, p, and pull-up support.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -77,6 +78,7 @@ const uint8_t g_gpio_open_drain_n_support[GPIO_INFO_NUM_PORTS] =
     0x00,     //PORTF
     0x00,     //PORTG
     0x00,     //PORTH   None
+    0x00,     //PORTJ   None
 };
 
 const uint8_t g_gpio_open_drain_p_support[GPIO_INFO_NUM_PORTS] =
@@ -99,6 +101,7 @@ const uint8_t g_gpio_open_drain_p_support[GPIO_INFO_NUM_PORTS] =
     0x00,     //PORTF
     0x00,     //PORTG
     0x00,     //PORTH   None
+    0x00,     //PORTJ   None
 };
 
 const uint8_t g_gpio_pull_up_support[GPIO_INFO_NUM_PORTS] =
@@ -121,6 +124,7 @@ const uint8_t g_gpio_pull_up_support[GPIO_INFO_NUM_PORTS] =
     0x00,     //PORTF
     0x00,     //PORTG
     0x0F,     //PORTH   PH0 to PH3
+    0x00,     //PORTJ   None
 };
 #endif
 

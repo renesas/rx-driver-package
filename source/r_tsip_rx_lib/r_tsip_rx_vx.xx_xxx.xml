@@ -50,11 +50,11 @@
     <package>
         <type>fitmodule</type>
         <name>r_tsip_rx</name>
-        <version>1.15.l</version>
+        <version>1.16.l</version>
         <zipsource>r_tsip_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.00</version>
+            <version>7.10</version>
         </dependency>
         <application>Generic</application>
         <desc>TSIP(Trusted Secure IP) driver.</desc>

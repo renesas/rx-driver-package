@@ -38,6 +38,7 @@
 *              : 28.11.2014 2.30     Revised functions of same as Ver.2.30 of other middleware.
 *              : 30.01.2015 2.31     Added RX71M.
 *              : 22.12.2018 3.00     Added RX72T.  Change eeprom drive interface to Memory Access Driver Interface
+*              : 30.06.2022 3.10     Fixed issues of wrong conditional expression in the if statement.
 *************************************************************************************************/
 
 
@@ -374,7 +375,7 @@ eeprom_status_t r_eeprom_spi_drvif_tx(uint8_t devno, uint32_t txcnt, uint8_t * p
 
     ret_drv = R_MEMDRV_Tx(devno,&memdrv_info);
 
-    if (MEMDRV_SUCCESS == MEMDRV_ERR_HARD)
+    if (MEMDRV_ERR_HARD == ret_drv)
     {
         return EEPROM_SPI_ERR_HARD;
     }
@@ -409,7 +410,7 @@ eeprom_status_t r_eeprom_spi_drvif_tx_data(uint8_t devno, uint32_t txcnt, uint8_
 
     ret_drv = R_MEMDRV_TxData(devno,&memdrv_info);
 
-    if (MEMDRV_SUCCESS == MEMDRV_ERR_HARD)
+    if (MEMDRV_ERR_HARD == ret_drv)
     {
         return EEPROM_SPI_ERR_HARD;
     }
@@ -444,7 +445,7 @@ eeprom_status_t r_eeprom_spi_drvif_rx(uint8_t devno, uint32_t rxcnt, uint8_t * p
 
     ret_drv = R_MEMDRV_Rx(devno,&memdrv_info);
 
-    if (MEMDRV_SUCCESS == MEMDRV_ERR_HARD)
+    if (MEMDRV_ERR_HARD == ret_drv)
     {
         return EEPROM_SPI_ERR_HARD;
     }
@@ -479,7 +480,7 @@ eeprom_status_t r_eeprom_spi_drvif_rx_data(uint8_t devno, uint32_t rxcnt, uint8_
 
     ret_drv = R_MEMDRV_RxData(devno,&memdrv_info);
 
-    if (MEMDRV_SUCCESS == MEMDRV_ERR_HARD)
+    if (MEMDRV_ERR_HARD == ret_drv)
     {
         return EEPROM_SPI_ERR_HARD;
     }

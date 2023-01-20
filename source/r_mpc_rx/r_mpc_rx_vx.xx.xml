@@ -47,6 +47,7 @@
         <version>8.03.00.202004</version>
         <version>8.03.00.202102</version>
         <version>8.03.00.202104</version>
+        <version>8.03.00.202204</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -132,6 +133,8 @@
             <version>4.30</version>
             <version>4.40</version>
             <version>4.50</version>
+            <version>4.60</version>
+            <version>4.70</version>
         </dependency>
         <application>MCU Setup</application>
         <desc>MPC Driver</desc>

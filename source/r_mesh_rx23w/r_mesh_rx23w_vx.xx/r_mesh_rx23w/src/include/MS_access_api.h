@@ -35,12 +35,23 @@
  */
 
 /**
- * \defgroup access_constants Constants
+ * \defgroup access_defines Defines
  * \{
- * Describes Constants defined by the module.
- * \brief This section describes the EtherMind Mesh Access Layer Constants.
+ * \brief This section describes the various Defines in EtherMind Mesh
+ * Access Layer.
  */
 
+/**
+ * \defgroup access_constants Constants
+ * \{
+ * \brief This section describes the various Constants in EtherMind Mesh
+ * Access Layer.
+ */
+
+/**
+ * \name Array Size Limits in Access
+ *  \{
+ */
 /**
  * Maximum Access Packet size.
  * 32 segments of 12 octets each.
@@ -48,9 +59,7 @@
 #define MS_ACCESS_MAX_PKT_SIZE                                                  384
 
 
-/** \name Array sizes for use in the Access layer
- *  \{
- */
+/** Array sizes for use in the Access layer */
 /** Size of Virtual Address (Label UUID) */
 #define MS_ACCESS_VADDR_LABEL_UUID_SIZE                                         16
 /** Size of NetKey */
@@ -59,6 +68,10 @@
 #define MS_ACCESS_APPKEY_SIZE                                                   16
 /** \} */
 
+/**
+ * \name Access Initializers
+ * \{
+ */
 /** Default Node Identifier */
 #define MS_ACCESS_DEFAULT_NODE_ID                                               0x00
 
@@ -77,8 +90,13 @@
 /** Maximum TTL value - used as initializer */
 #define ACCESS_MAX_TTL                                                          0x7F
 
-/** \name Model Specific Request Message Type
- *  \{
+/** Invalid Access Address */
+#define MS_ACCESS_ADDRESS_INVALID_HANDLE                                        0xFFFFFFFF
+/** \} */
+
+/**
+ * \name Mesh Model Request Message Type
+ * \{
  */
 /** Model Specific Request Message Type: Get */
 #define MS_ACCESS_MODEL_REQ_MSG_T_GET                                           0
@@ -88,29 +106,32 @@
 #define MS_ACCESS_MODEL_REQ_MSG_T_OTHERS                                        2
 /** \} */
 
-/** \name Key Refersh Phase states
- *  \{
+/**
+ * \name Key Refresh Phase states
+ * \{
  */
-/** Key Refersh Phase - Normal */
+/** Key Refresh Phase - Normal */
 #define MS_ACCESS_KEY_REFRESH_PHASE_NORMAL                                      0x00
-/** Key Refersh Phase - 1 */
+/** Key Refresh Phase - 1 */
 #define MS_ACCESS_KEY_REFRESH_PHASE_1                                           0x01
-/** Key Refersh Phase - 2 */
+/** Key Refresh Phase - 2 */
 #define MS_ACCESS_KEY_REFRESH_PHASE_2                                           0x02
-/** Key Refersh Phase - 3 */
+/** Key Refresh Phase - 3 */
 #define MS_ACCESS_KEY_REFRESH_PHASE_3                                           0x03
 /** \} */
-
-/** Invalid Access Address */
-#define MS_ACCESS_ADDRESS_INVALID_HANDLE                                        0xFFFFFFFF
 
 /** \} */
 
 /**
- *  \defgroup access_marcos Utility Macros
- *  \{
- *  \brief This section defines the utility macros for use by the application.
- *
+ * \defgroup access_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind Mesh
+ * Access Layer.
+ */
+
+/**
+ * \name Access Layer Macros
+ * \{
  */
 /** Populates the given element with the Model information */
 #define MS_ACCESS_ASSIGN_ELEMENT(pelement, loc) \
@@ -135,87 +156,33 @@
     (pmodel)->pub_cb = (pub_cb); \
     (pmodel)->num_opcodes = (num_op); \
     (pmodel)->opcodes = (op)
+/** \} */
 
 /** \} */
 
 /* --------------------------------------------- Data Types/ Structures */
 
 /**
- * \ingroup access_types_structures
- * \{
+ *  \defgroup access_structures Structures
+ *  \{
+ *  \brief This section describes the various Data-Types and Structures in
+ *  EtherMind Mesh Access Layer.
  */
 
 /** Access Model Handle */
-typedef UINT16          MS_ACCESS_MODEL_HANDLE;
-
-/** \} */
-
-/**
- *  \defgroup access_cb Application Callback
- *  \{
- *  \brief This section Describes the module Notification Callback interface offered
- *  to the application
- */
-/**
- * Access Layer Application Asynchronous Notification Callback.
- *
- * Access Layer calls the registered callback to indicate events occurred to the
- * application.
- *
- * \param handle        Model Handle.
- * \param saddr         16 bit Source Address.
- * \param daddr         16 bit Destination Address.
- * \param subnet_handle Subnet Handle.
- * \param appkey_handle AppKey Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
- */
-typedef API_RESULT (* MS_ACCESS_MODEL_CB)
-        (
-            MS_ACCESS_MODEL_HANDLE * handle,
-            MS_NET_ADDR              saddr,
-            MS_NET_ADDR              daddr,
-            MS_SUBNET_HANDLE         subnet_handle,
-            MS_APPKEY_HANDLE         appkey_handle,
-            UINT32                   opcode,
-            UCHAR                  * data_param,
-            UINT16                   data_len
-        ) DECL_REENTRANT;
-
-/**
- * Access Layer Model Publication Timeout Callback.
- *
- * Access Layer calls the registered callback to indicate Publication Timeout
- * for the associated model.
- *
- * \param handle        Model Handle.
- * \param blob          Blob if any or NULL.
- */
-typedef API_RESULT (* MS_ACCESS_MODEL_PUBLISH_TIMEOUT_CB)
-        (
-            MS_ACCESS_MODEL_HANDLE * handle,
-            void                   * data_param
-        ) DECL_REENTRANT;
-/** \} */
-
-/**
- *  \defgroup access_types_structures Types/Structures
- *  \{
- *  \brief This section describes the EtherMind Mesh Access Layer Types/Structures.
- */
+typedef UINT16 MS_ACCESS_MODEL_HANDLE;
 
 /** SIG Model ID */
-typedef UINT16    MS_ACCESS_MODEL_ID_SIG;
+typedef UINT16 MS_ACCESS_MODEL_ID_SIG;
 
 /** Vendor Model ID */
-typedef UINT32    MS_ACCESS_MODEL_ID_VENDOR;
+typedef UINT32 MS_ACCESS_MODEL_ID_VENDOR;
 
 /** Access Node ID */
-typedef UINT8 MS_ACCESS_NODE_ID;
+typedef UINT8  MS_ACCESS_NODE_ID;
 
 /** Access Element Handle */
-typedef UINT8 MS_ACCESS_ELEMENT_HANDLE;
+typedef UINT8  MS_ACCESS_ELEMENT_HANDLE;
 
 /** Access Address Handle */
 typedef UINT32 MS_ACCESS_ADDRESS_HANDLE;
@@ -236,40 +203,6 @@ typedef struct _MS_ACCESS_MODEL_ID
     UCHAR type;
 
 } MS_ACCESS_MODEL_ID;
-
-/**
- * Data structure for model.
- *
- * Models could be bluetooth SIG defined or vendor defined.
- */
-typedef struct _MS_ACCESS_MODEL
-{
-    /** Model ID */
-    MS_ACCESS_MODEL_ID                 model_id;
-
-    /** Associated Element Handle */
-    MS_ACCESS_ELEMENT_HANDLE           elem_handle;
-
-    /**
-     * Callback function pointer to receive packets from the underlying
-     * protocol layers
-     */
-    MS_ACCESS_MODEL_CB                 cb;
-
-    /**
-     * Callback function called when Publication Timer expires.
-     * Set to NULL if model does not support periodic publication.
-     */
-    MS_ACCESS_MODEL_PUBLISH_TIMEOUT_CB pub_cb;
-
-    /** Number of Opcodes */
-    UINT16                             num_opcodes;
-
-    /** List of Opcodes */
-    DECL_CONST UINT32                  * opcodes;
-
-} MS_ACCESS_MODEL;
-
 
 /**
  * Element description format.
@@ -390,7 +323,7 @@ typedef struct _MS_ACCESS_MODEL_STATE_PARAMS
 
 }MS_ACCESS_MODEL_STATE_PARAMS;
 
-/** Additional paramters in a Model specific request or response message */
+/** Additional parameters in a Model specific request or response message */
 typedef struct _MS_ACCESS_MODEL_EXT_PARAMS
 {
     /** State/Extended Type */
@@ -417,18 +350,124 @@ typedef struct _MS_PROV_DEV_ENTRY
 
 /** \} */
 
-
-/* --------------------------------------------- Function */
+/** \} */
 
 /**
- * \defgroup access_api_defs API Definitions
- * \{
- * \brief This section describes the EtherMind Mesh Access Layer APIs.
+ *  \defgroup access_cb Application Callback
+ *  \{
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Access Layer.
  */
+/**
+ * Access Layer Application Asynchronous Notification Callback.
+ *
+ * Access Layer calls the registered callback to indicate events occurred to the
+ * application.
+ *
+ * \param handle        Model Handle.
+ * \param saddr         16 bit Source Address.
+ * \param daddr         16 bit Destination Address.
+ * \param subnet_handle Subnet Handle.
+ * \param appkey_handle AppKey Handle.
+ * \param opcode        Opcode.
+ * \param data_param    Data associated with the event if any or NULL.
+ * \param data_len      Size of the event data. 0 if event data is NULL.
+ */
+typedef API_RESULT (* MS_ACCESS_MODEL_CB)
+        (
+            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_NET_ADDR              saddr,
+            MS_NET_ADDR              daddr,
+            MS_SUBNET_HANDLE         subnet_handle,
+            MS_APPKEY_HANDLE         appkey_handle,
+            UINT32                   opcode,
+            UCHAR                  * data_param,
+            UINT16                   data_len
+        ) DECL_REENTRANT;
+
+/**
+ * Access Layer Model Publication Timeout Callback.
+ *
+ * Access Layer calls the registered callback to indicate Publication Timeout
+ * for the associated model.
+ *
+ * \param handle        Model Handle.
+ * \param blob          Blob if any or NULL.
+ */
+typedef API_RESULT (* MS_ACCESS_MODEL_PUBLISH_TIMEOUT_CB)
+        (
+            MS_ACCESS_MODEL_HANDLE * handle,
+            void                   * data_param
+        ) DECL_REENTRANT;
+/** \} */
+
+
+/**
+ *  \addtogroup access_defines
+ *  \{
+ */
+
+/**
+ *  \addtogroup access_structures
+ *  \{
+ */
+
+/**
+ * Data structure for model.
+ *
+ * Models could be Bluetooth SIG defined or Vendor defined.
+ */
+typedef struct _MS_ACCESS_MODEL
+{
+    /** Model ID */
+    MS_ACCESS_MODEL_ID                 model_id;
+
+    /** Associated Element Handle */
+    MS_ACCESS_ELEMENT_HANDLE           elem_handle;
+
+    /**
+     * Callback function pointer to receive packets from the underlying
+     * protocol layers
+     */
+    MS_ACCESS_MODEL_CB                 cb;
+
+    /**
+     * Callback function called when Publication Timer expires.
+     * Set to NULL if model does not support periodic publication.
+     */
+    MS_ACCESS_MODEL_PUBLISH_TIMEOUT_CB pub_cb;
+
+    /** Number of Opcodes */
+    UINT16                             num_opcodes;
+
+    /** List of Opcodes */
+    DECL_CONST UINT32                  * opcodes;
+
+} MS_ACCESS_MODEL;
+
+/** \} */
+
+/** \} */
+
+/* --------------------------------------------- Function */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * \defgroup access_api_defs API Definitions
+ * \{
+ * \brief This section describes the various APIs exposed by
+ * EtherMind Mesh Access Layer to the Application and other upper
+ * layers of the stack.
+ */
+
+/* Access related interfaces */
+/**
+ * \name Access Layer Functions
+ * \{
+ */
 
 /**
  *  \brief Create a new node in the device.
@@ -451,11 +490,12 @@ API_RESULT MS_access_create_node (/* OUT */ MS_ACCESS_NODE_ID * node_id);
  *  This routine registers an element that can be populated with the models
  *  information to a specific node in the device identified by the node id.
  *
- *  \param [in] node_id Node to which the element needs to be registered. This
- *  value is always 0 for the default node.
+ *  \param [in] node_id Node to which the model needs to be registered.
+ *                      This value is always \ref MS_ACCESS_DEFAULT_NODE_ID
+ *                      for the default node.
  *
  *  \param [in] element Pointer to the element descriptor that needs to be
- *  registered to the node.
+ *                      registered to the node.
  *
  *  \param [out] element_handle Identifier to reference the newly registered element.
  *
@@ -463,9 +503,36 @@ API_RESULT MS_access_create_node (/* OUT */ MS_ACCESS_NODE_ID * node_id);
  */
 API_RESULT MS_access_register_element
            (
-               /* IN */  MS_ACCESS_NODE_ID            node_id,
-               /* IN */  MS_ACCESS_ELEMENT_DESC     * element,
-               /* OUT */ MS_ACCESS_ELEMENT_HANDLE   * element_handle
+               /* IN */  MS_ACCESS_NODE_ID          node_id,
+               /* IN */  MS_ACCESS_ELEMENT_DESC   * element,
+               /* OUT */ MS_ACCESS_ELEMENT_HANDLE * element_handle
+           );
+
+/**
+ *  \brief Register an element with the access layer.
+ *
+ *  \par Description
+ *  This routine registers an element that can be populated with the models
+ *  information to a specific node in the device identified by the node id and
+ *  registers the element at the provided Element Handle.
+ *
+ *  \param [in] node_id Node to which the model needs to be registered.
+ *                      This value is always \ref MS_ACCESS_DEFAULT_NODE_ID
+ *                      for the default node.
+ *
+ *  \param [in] element Pointer to the element descriptor that needs to be
+ *                      registered to the node.
+ *
+ *  \param [in] element_handle Identifier where this element is to be
+ *                             registered on the node.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_access_register_element_ext
+           (
+               /* IN */ MS_ACCESS_NODE_ID        node_id,
+               /* IN */ MS_ACCESS_ELEMENT_DESC   * element,
+               /* IN */ MS_ACCESS_ELEMENT_HANDLE element_handle
            );
 
 /**
@@ -475,23 +542,25 @@ API_RESULT MS_access_register_element
  *  This routine registers a model associated with an element with the access layer.
  *
  *  \param [in] node_id Node to which the model needs to be registered. This
- *  value is always 0 for the default node.
+ *  value is always \ref MS_ACCESS_DEFAULT_NODE_ID for the default node.
  *
  *  \param [in] model Pointer to the model descriptor that needs to be
  *  registered to the node.
  *
- *  \param [in, out] model_handle
- *                   Model identifier associated with the model instance on successful registration.
- *                   After power cycle of an already provisioned node, the model handle will have
- *                   valid value and the same will be reused for registration.
+ *  \param [out] model_handle
+ *               Model identifier associated with the model instance on successful registration,
+ *               or Model identifier associated with the existing model instance if
+ *               provided model is already registered \ref ACCESS_MODEL_ALREADY_REGISTERED
  *
- *  \return API_SUCCESS or an error code indicating reason for failure
+ *  \return API_SUCCESS when new Model is successfully registered,
+ *          \ref ACCESS_MODEL_ALREADY_REGISTERED when an existing model is registered
+ *          or an error code indicating reason for failure
  */
 API_RESULT MS_access_register_model
            (
-               /* IN */     MS_ACCESS_NODE_ID         node_id,
-               /* IN */     MS_ACCESS_MODEL         * model,
-               /* INOUT */  MS_ACCESS_MODEL_HANDLE  * model_handle
+               /* IN */  MS_ACCESS_NODE_ID         node_id,
+               /* IN */  MS_ACCESS_MODEL         * model,
+               /* OUT */ MS_ACCESS_MODEL_HANDLE  * model_handle
            );
 
 /**
@@ -546,6 +615,29 @@ API_RESULT MS_access_get_model_handle
                /* IN */   MS_ACCESS_ELEMENT_HANDLE      elem_handle,
                /* IN */   MS_ACCESS_MODEL_ID            model_id,
                /* OUT */  MS_ACCESS_MODEL_HANDLE      * handle
+           );
+
+/**
+ *  \brief Get model count.
+ *
+ *  \par Description
+ *  This routine return the count of model associated with a given Element.
+ *  It can also be used to fetch the total model count across all available
+ *  elements.
+ *
+ *  \param [in]  elem_handle Identifier associated to an element in the Node.
+ *                           If this value is set to Max Element Count that is
+ *                           currently configured, then count of models across
+ *                           all available elements will be fetched.
+ *  \param [out] model_count Pointer reference to return total count of model associated
+ *                           with a given element.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_access_get_model_count
+           (
+               /* IN */   MS_ACCESS_ELEMENT_HANDLE  elem_handle,
+               /* OUT */  UINT8                     * model_count
            );
 
 /**
@@ -657,7 +749,7 @@ API_RESULT MS_access_reply
  *  \param [in] ttl           Time to Live.
  *  \param [in] opcode        Access Opcode
  *  \param [in] data_param    Access parameter, based on the opcode
- *  \param [in] data_length   Access parameter length, based on the opcode
+ *  \param [in] data_len      Access parameter length, based on the opcode
  *  \param [in] to_publish    Flag to indicate if the message also to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
@@ -710,9 +802,129 @@ API_RESULT MS_access_send_pdu
 /** TBD: add function header */
 API_RESULT MS_access_get_composition_data(/* OUT */ MS_BUFFER * buffer);
 
+
+/**
+ *  \brief To check if valid element address to receive a packet
+ *
+ *  \par Description
+ *  This routine checks if destination address in a received packet matches
+ *  with any of the known element address of local or friend device.
+ *
+ *  \param [in] addr     Unicast Address to search
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_access_is_valid_element_address
+           (
+               /* IN */ MS_NET_ADDR    addr
+           );
+
+/**
+ *  \brief To check if Fixed Group Address in receive packet to be processed
+ *
+ *  \par Description
+ *  This routine checks if destination address in a received packet
+ *  as a Fixed Group Address to be processed.
+ *
+ *  \param [in] addr     A valid Fixed Group Address, to be checked
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_access_is_fixed_group_addr_to_be_processed
+           (
+               /* IN */ MS_NET_ADDR    addr
+           );
+
+/**
+ *  \brief To check if valid subscription address to receive a packet
+ *
+ *  \par Description
+ *  This routine checks if destination address in a received packet matches
+ *  with any of the known subscription address of local or friend device.
+ *
+ *  \param [in] addr     Address to search
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_access_is_valid_subscription_address
+           (
+               /* IN */ MS_NET_ADDR    addr
+           );
+
+#ifdef MS_STORAGE
+/**
+ *  \brief Get Core Modules storage handle and offset from persistent storage.
+ *
+ *  \par Description
+ *  This function returns the storage handle and offset for Core Modules.
+ *
+ *  \param [out] ps_handle  Persistent Storage Handle.
+ *  \param [out] offset     The memory to be filled with the storage offset information.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_access_ps_get_handle_and_offset
+           (
+               /* OUT */ NVSTO_HANDLE * ps_handle,
+               /* OUT */ UINT32       * offset
+           );
+#endif /* MS_STORAGE */
+
+#ifdef MS_ACCESS_IV_UPDT_TEST_MODE_SUPPORT
+/**
+ *  \brief To set the IV Update Test Mode feature
+ *
+ *  \par Description
+ *  This routine is used to set the IV Update Test Mode flag.
+ *
+ *  \param [in] test_mode This flag is used to either enable or disable the
+ *                        IV Update Test Mode feature.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_access_set_iv_update_test_mode(UCHAR test_mode);
+#endif /* MS_ACCESS_IV_UPDT_TEST_MODE_SUPPORT */
+
+/**
+ *  \brief To bind a model with an AppKey
+ *
+ *  \par Description
+ *  This routine binds a model with an AppKey.
+ *
+ *  \param [in] model_handle     Model handle identifying the model.
+ *  \param [in] appkey_index     Identifies global Index of AppKey. A 12-bit value.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_access_bind_model_app
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE    model_handle,
+               /* IN */ UINT16                    appkey_index
+           );
+
+/**
+ *  \brief To unbind a model with an AppKey
+ *
+ *  \par Description
+ *  This routine unbinds a model with an AppKey.
+ *
+ *  \param [in] model_handle     Model handle identifying the model.
+ *  \param [in] appkey_index     Identifies global Index of AppKey. A 12-bit value.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_access_unbind_model_app
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE    model_handle,
+               /* IN */ UINT16                    appkey_index
+           );
+
+/** \} */
+
 /* Configuration Manager related interfaces */
-/** \name Functions for Configuration Manager
- *  \{
+/**
+ * \name Access Configuration Manager Layer Functions
+ * \{
  */
 
 /**
@@ -901,47 +1113,7 @@ API_RESULT MS_access_cm_get_features
            (
                /* OUT */ UINT8   * features
            );
-/** \} */
 
-/** \name Macros for Optional Features
- *  \{
- */
-/** Enable Relay Feature */
-#define MS_ENABLE_RELAY_FEATURE() \
-        MS_access_cm_set_features_field(MS_ENABLE, MS_FEATURE_RELAY)
-
-/** Disable Relay Feature */
-#define MS_DISABLE_RELAY_FEATURE() \
-        MS_access_cm_set_features_field(MS_DISABLE, MS_FEATURE_RELAY)
-
-/** Enable Proxy Feature */
-#define MS_ENABLE_PROXY_FEATURE() \
-        MS_access_cm_set_features_field(MS_ENABLE, MS_FEATURE_PROXY)
-
-/** Disable Proxy Feature */
-#define MS_DISABLE_PROXY_FEATURE() \
-        MS_access_cm_set_features_field(MS_DISABLE, MS_FEATURE_PROXY)
-
-/** Enable Friend Feature */
-#define MS_ENABLE_FRIEND_FEATURE() \
-        MS_access_cm_set_features_field(MS_ENABLE, MS_FEATURE_FRIEND)
-
-/** Disable Friend Feature */
-#define MS_DISABLE_FRIEND_FEATURE() \
-        MS_access_cm_set_features_field(MS_DISABLE, MS_FEATURE_FRIEND)
-
-/** Enable Low Power Feature */
-#define MS_ENABLE_LPN_FEATURE() \
-        MS_access_cm_set_features_field(MS_ENABLE, MS_FEATURE_LPN)
-
-/** Disable Low Power Feature */
-#define MS_DISABLE_LPN_FEATURE() \
-        MS_access_cm_set_features_field(MS_DISABLE, MS_FEATURE_LPN)
-/** \} */
-
-/** \name Functions for Configuration Manager
- *  \{
- */
 /**
  *  \brief To get friendship role of the node
  *
@@ -956,7 +1128,6 @@ API_RESULT MS_access_cm_get_friendship_role
            (
                /* OUT */ UINT8  * frnd_role
            );
-
 
 /**
  *  \brief To set friendship role of the node
@@ -1028,7 +1199,7 @@ API_RESULT MS_access_cm_remove_all_device_keys(void);
  *  This routine returns list of Provisioned Devices from the Device Key Table.
  *
  *  \param [in]    prov_dev_list   Provisioned Device List.
- *  \param [inout] num_entries     Size of the Device Key List provided by the caller.
+ *  \param [in, out] num_entries   Size of the Device Key List provided by the caller.
  *                                 This routine will return the number of entries
  *                                 in the Device Key Table.
  *
@@ -1161,7 +1332,7 @@ API_RESULT MS_access_cm_find_subnet
  *  \par Description
  *  This routine finds the Master Subnet based on the friend security credential, identified by Friend Subnet Handle.
  *
- *  \param [out] friend_subnet_handle    Idetifies the Friend Subnet Handle, corresponding to Friend Subnet Handle.
+ *  \param [out] friend_subnet_handle    Identifies the Friend Subnet Handle, corresponding to Friend Subnet Handle.
  *  \param [in]  master_subnet_handle    Memory location to be filled with Master Subnet Handle, if search is successful.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
@@ -1194,7 +1365,7 @@ API_RESULT MS_access_cm_delete_netkey
  *  This routine fetches a NetKey entry. Each NetKey is associated with a subnet.
  *
  *  \param [in]  subnet_handle     Handle of the Subnet for which NetKey to be deleted.
- *  \param [out] net_key           Netkey associated with the Subnet.
+ *  \param [out] net_key           NetKey associated with the Subnet.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -1210,7 +1381,7 @@ API_RESULT MS_access_cm_get_netkey
  *  \par Description
  *  This routine returns a list of known NetKey Indices.
  *
- *  \param [inout] netkey_count   Caller fills with maximum number of NetKey Indices
+ *  \param [in, out] netkey_count Caller fills with maximum number of NetKey Indices
  *                                that can be stored in 'netkey_index_list'.
  *                                This function will update the value with how many NetKey
  *                                Indices has been filled. If the number of available
@@ -1234,8 +1405,8 @@ API_RESULT MS_access_cm_get_netkey_index_list
  *  \par Description
  *  This routine searches for matching NID in subnet table.
  *
- *  \param [in] nid    NID to be searched in all known subnets for match.
- *  \param [inout] subnet_handle Same NID can match with multiple subnets.
+ *  \param [in] nid  NID to be searched in all known subnets for match.
+ *  \param [in, out] subnet_handle Same NID can match with multiple subnets.
  *                               Caller will fill this value to indicate from which
  *                               subnet handle the search to be started. This function
  *                               will return the subnet handle, where the match is found
@@ -1246,7 +1417,7 @@ API_RESULT MS_access_cm_get_netkey_index_list
  *                               the caller need to use Invalid Subnet Handle
  *                               \ref MS_INVALID_SUBNET_HANDLE.
  *  \param [out] privacy_key    Privacy Key associated with the subnet.
- *  \param [out] encrypt_key    Encyption Key associated with the subnet.
+ *  \param [out] encrypt_key    Encryption Key associated with the subnet.
  *  \param [out] is_new_key      Flag to indicate if the network ID is associated with
  *                               the new Network Key being updated.
  *
@@ -1269,7 +1440,7 @@ API_RESULT MS_access_cm_lookup_nid
  *  This routine searches for matching Network ID in subnet table.
  *
  *  \param [in] network_id       Network ID to be searched in all known subnets for match.
- *  \param [inout] subnet_handle Same NID can match with multiple subnets.
+ *  \param [in, out] subnet_handle Same NID can match with multiple subnets.
  *                               Caller will fill this value to indicate from which
  *                               subnet handle the search to be started. This function
  *                               will return the subnet handle, where the match is found
@@ -1300,7 +1471,7 @@ API_RESULT MS_access_cm_lookup_network_id
  *  This routine searches for matching NID in subnet table.
  *
  *  \param [in] aid    AID to be searched in all known AppKeys for match.
- *  \param [inout] appkey_handle Same AID can match with multiple AppKeys.
+ *  \param [in, out] appkey_handle Same AID can match with multiple AppKeys.
  *                               Caller will fill this value to indicate from which
  *                               AppKey handle the search to be started. This function
  *                               will return the AppKey handle, where the match is found
@@ -1343,7 +1514,7 @@ API_RESULT MS_access_cm_set_prov_data
  *  \par Description
  *  This routine fetches the NID associated with a subnet.
  *
- *  \param [in]  handle         Handle identifing the subnet.
+ *  \param [in]  handle         Handle identifying the subnet.
  *  \param [out] nid            NID associated with the subnet.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
@@ -1360,7 +1531,7 @@ API_RESULT MS_access_cm_get_subnet_nid
  *  \par Description
  *  This routine fetches the Privacy Key associated with a subnet.
  *
- *  \param [in]  handle         Handle identifing the subnet.
+ *  \param [in]  handle         Handle identifying the subnet.
  *  \param [out] privacy_key    Privacy Key associated with the subnet.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
@@ -1375,9 +1546,9 @@ API_RESULT MS_access_cm_get_subnet_privacy_key
  *  \brief To get Network ID associated with a subnet
  *
  *  \par Description
- *  This routine fetches the Netowrk ID associated with a subnet.
+ *  This routine fetches the Network ID associated with a subnet.
  *
- *  \param [in]  handle         Handle identifing the subnet.
+ *  \param [in]  handle         Handle identifying the subnet.
  *  \param [out] network_id     Network ID associated with the subnet.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
@@ -1395,7 +1566,7 @@ API_RESULT MS_access_cm_get_subnet_network_id
  *  \par Description
  *  This routine fetches the Beacon Key associated with a subnet.
  *
- *  \param [in]  handle         Handle identifing the subnet.
+ *  \param [in]  handle         Handle identifying the subnet.
  *  \param [out] beacon_key     Beacon Key associated with the subnet.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
@@ -1412,7 +1583,7 @@ API_RESULT MS_access_cm_get_subnet_beacon_key
  *  \par Description
  *  This routine fetches the Identity Key associated with a subnet.
  *
- *  \param [in]  handle         Handle identifing the subnet.
+ *  \param [in]  handle         Handle identifying the subnet.
  *  \param [out] identity_key   Identity Key associated with the subnet.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
@@ -1429,8 +1600,8 @@ API_RESULT MS_access_cm_get_subnet_identity_key
  *  \par Description
  *  This routine fetches the Encryption Key associated with a subnet.
  *
- *  \param [in]  handle         Handle identifing the subnet.
- *  \param [out] encrypt_key    Encyption Key associated with the subnet.
+ *  \param [in]  handle         Handle identifying the subnet.
+ *  \param [out] encrypt_key    Encryption Key associated with the subnet.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -1446,7 +1617,7 @@ API_RESULT MS_access_cm_get_subnet_encryption_key
  *  \par Description
  *  This routine gets Node Identity State of a node
  *
- *  \param [in]  subnet_handle    Handle identifing the subnet.
+ *  \param [in]  subnet_handle    Handle identifying the subnet.
  *  \param [out] id_state         Memory location where Node Identity state to be filled.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
@@ -1463,7 +1634,7 @@ API_RESULT MS_access_cm_get_node_identity
  *  \par Description
  *  This routine sets Node Identity State of a node
  *
- *  \param [in] subnet_handle    Handle identifing the subnet.
+ *  \param [in] subnet_handle    Handle identifying the subnet.
  *  \param [in, out] id_state    Node Identity state to be set.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
@@ -1481,7 +1652,7 @@ API_RESULT MS_access_cm_set_node_identity
  *  \par Description
  *  This routine gets Key Refresh Phase State of a node
  *
- *  \param [in]  subnet_handle       Handle identifing the subnet.
+ *  \param [in]  subnet_handle       Handle identifying the subnet.
  *  \param [out] key_refresh_state   Memory location where Key Refresh Phase state to be filled.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
@@ -1498,7 +1669,7 @@ API_RESULT MS_access_cm_get_key_refresh_phase
  *  \par Description
  *  This routine sets Key Refresh Phase State of a node
  *
- *  \param [in] subnet_handle    Handle identifing the subnet.
+ *  \param [in] subnet_handle    Handle identifying the subnet.
  *  \param [in, out] key_refresh_state         Key Refresh Phase state to be set.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
@@ -1585,36 +1756,6 @@ API_RESULT MS_access_cm_update_delete_appkey
            );
 
 /**
- *  \brief To update AppKey
- *
- *  \par Description
- *  This routine/macro updates AppKey entry. Each AppKey is associated with a subnet.
- *
- *  \param [in] subnet_handle    Handle of the Subnet for which AppKey to be updated.
- *  \param [in] appkey_index     Identifies global Index of AppKey. A 12-bit value.
- *  \param [in] app_key          Associated AppKey to be updated.
- *
- *  \return API_SUCCESS or an error code indicating reason for failure
- */
-#define MS_access_cm_update_appkey(sn, aki, ak) \
-        MS_access_cm_update_delete_appkey((sn), (aki), MS_ACCESS_CONFIG_APPKEY_UPDATE_OPCODE, (ak))
-
-/**
- *  \brief To delete AppKey
- *
- *  \par Description
- *  This routine/macro deletes AppKey entry. Each AppKey is associated with a subnet.
- *
- *  \param [in] subnet_handle    Handle of the Subnet for which AppKey to be deleted.
- *  \param [in] appkey_index     Identifies global Index of AppKey. A 12-bit value.
- *  \param [in] app_key          Associated AppKey to be updated.
- *
- *  \return API_SUCCESS or an error code indicating reason for failure
- */
-#define MS_access_cm_delete_appkey(sn, aki, ak) \
-        MS_access_cm_update_delete_appkey((sn), (aki), MS_ACCESS_CONFIG_APPKEY_DELETE_OPCODE, (ak))
-
-/**
  *  \brief To get AppKey Handle for a given AppKey Index
  *
  *  \par Description
@@ -1642,7 +1783,7 @@ API_RESULT MS_access_cm_get_appkey_handle
  *  This routine returns a list of known AppKey Indices associated with a subnet.
  *
  *  \param [in] subnet_handle     Handle of the Subnet for which AppKey to be returned.
- *  \param [inout] appkey_count   Caller fills with maximum number of AppKey Indices
+ *  \param [in, out] appkey_count Caller fills with maximum number of AppKey Indices
  *                                that can be stored in 'apptkey_index_list'.
  *                                This function will update the value with how many AppKey
  *                                Indices has been filled. If the number of available
@@ -1660,45 +1801,7 @@ API_RESULT MS_access_cm_get_appkey_index_list
                /* INOUT */ UINT16             * appkey_count,
                /* OUT */   UINT16             * appkey_index_list
            );
-/** \} */
 
-/**
- *  \brief To bind a model with an AppKey
- *
- *  \par Description
- *  This routine binds a model with an AppKey.
- *
- *  \param [in] model_handle     Model handle identifing the model.
- *  \param [in] appkey_index     Identifies global Index of AppKey. A 12-bit value.
- *
- *  \return API_SUCCESS or an error code indicating reason for failure
- */
-API_RESULT MS_access_bind_model_app
-           (
-               /* IN */ MS_ACCESS_MODEL_HANDLE    model_handle,
-               /* IN */ UINT16                    appkey_index
-           );
-
-/**
- *  \brief To unbind a model with an AppKey
- *
- *  \par Description
- *  This routine unbinds a model with an AppKey.
- *
- *  \param [in] model_handle     Model handle identifing the model.
- *  \param [in] appkey_index     Identifies global Index of AppKey. A 12-bit value.
- *
- *  \return API_SUCCESS or an error code indicating reason for failure
- */
-API_RESULT MS_access_unbind_model_app
-           (
-               /* IN */ MS_ACCESS_MODEL_HANDLE    model_handle,
-               /* IN */ UINT16                    appkey_index
-           );
-
-/** \name Functions for Configuration Manager
- *  \{
- */
 /**
  *  \brief To get list of all AppKeys associated with a model
  *
@@ -1706,7 +1809,7 @@ API_RESULT MS_access_unbind_model_app
  *  This routine returns a list of known AppKey Indices associated with a model.
  *
  *  \param [in] model_handle      Handle of the Model for which AppKey to be returned.
- *  \param [inout] appkey_count   Caller fills with maximum number of AppKey Indices
+ *  \param [in, out] appkey_count Caller fills with maximum number of AppKey Indices
  *                                that can be stored in 'apptkey_index_list'.
  *                                This function will update the value with how many AppKey
  *                                Indices has been filled. If the number of available
@@ -1731,8 +1834,8 @@ API_RESULT MS_access_cm_get_model_app_list
  *  \par Description
  *  This routine sets Publication information associated with a model.
  *
- *  \param [in]    model_handle      Handle of the Model for which Publication info to be set.
- *  \param [inout] publish_info      Publication Information to be set.
+ *  \param [in]      model_handle    Handle of the Model for which Publication info to be set.
+ *  \param [in, out] publish_info    Publication Information to be set.
  *                                   If Label UUID is used, on success corresponding
  *                                   Virtual Address will be filled and returned.
  *
@@ -1804,7 +1907,7 @@ API_RESULT MS_access_cm_add_model_subscription
  *  \par Description
  *  This routine deletes an address to a subscription list of a model
  *
- *  \param [in] model_handle      Handle of the Model for which address to be deleteed in the subscription list.
+ *  \param [in] model_handle      Handle of the Model for which address to be deleted in the subscription list.
  *  \param [in] sub_addr          Address to be deleted from subscription list.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
@@ -1837,7 +1940,7 @@ API_RESULT MS_access_cm_delete_all_model_subscription
  *  This routine returns a list of subscription addresses of a model.
  *
  *  \param [in] model_handle        Handle of the Model for which the subscription addresses to be returned.
- *  \param [inout] sub_addr_count   Caller fills with maximum number of subscription addresses
+ *  \param [in, out] sub_addr_count Caller fills with maximum number of subscription addresses
  *                                  that can be stored in 'sub_addr_list'.
  *                                  This function will update the value with how many subscription addresses
  *                                  has been filled. If the number of available subscription addresses is more than that can be returned,
@@ -1860,7 +1963,7 @@ API_RESULT MS_access_cm_get_model_subscription_list
  *  \par Description
  *  This routine returns a consolidated list of subscription addresses of all the models.
  *
- *  \param [inout] sub_addr_count   Caller fills with maximum number of subscription addresses
+ *  \param [in, out] sub_addr_count Caller fills with maximum number of subscription addresses
  *                                  that can be stored in 'sub_addr_list'.
  *                                  This function will update the value with how many subscription addresses
  *                                  has been filled. If the number of available subscription addresses is more than that can be returned,
@@ -1877,91 +1980,122 @@ API_RESULT MS_access_cm_get_all_model_subscription_list
            );
 /** \} */
 
+/** \} */
+
+
 /**
- *  \brief To check if valid element address to receive a packet
+ * \addtogroup access_defines
+ * \{
+ */
+
+/**
+ * \addtogroup access_marcos
+ * \{
+ */
+
+/**
+ * \name Mesh Optional Features Related Macros
+ * \{
+ */
+/** Enable Relay Feature */
+#define MS_ENABLE_RELAY_FEATURE() \
+        MS_access_cm_set_features_field(MS_ENABLE, MS_FEATURE_RELAY)
+
+/** Disable Relay Feature */
+#define MS_DISABLE_RELAY_FEATURE() \
+        MS_access_cm_set_features_field(MS_DISABLE, MS_FEATURE_RELAY)
+
+/** Enable Proxy Feature */
+#define MS_ENABLE_PROXY_FEATURE() \
+        MS_access_cm_set_features_field(MS_ENABLE, MS_FEATURE_PROXY)
+
+/** Disable Proxy Feature */
+#define MS_DISABLE_PROXY_FEATURE() \
+        MS_access_cm_set_features_field(MS_DISABLE, MS_FEATURE_PROXY)
+
+/** Enable Friend Feature */
+#define MS_ENABLE_FRIEND_FEATURE() \
+        MS_access_cm_set_features_field(MS_ENABLE, MS_FEATURE_FRIEND)
+
+/** Disable Friend Feature */
+#define MS_DISABLE_FRIEND_FEATURE() \
+        MS_access_cm_set_features_field(MS_DISABLE, MS_FEATURE_FRIEND)
+
+/** Enable Low Power Feature */
+#define MS_ENABLE_LPN_FEATURE() \
+        MS_access_cm_set_features_field(MS_ENABLE, MS_FEATURE_LPN)
+
+/** Disable Low Power Feature */
+#define MS_DISABLE_LPN_FEATURE() \
+        MS_access_cm_set_features_field(MS_DISABLE, MS_FEATURE_LPN)
+/** \} */
+
+/**
+ * \name Access Layer Macros
+ * \{
+ */
+/**
+ *  \brief Get total model count in the Node.
  *
  *  \par Description
- *  This routine checks if destination address in a received packet matches
- *  with any of the known element address of local or friend device.
+ *  This routine returns the total model count across all available
+ *  elements.
  *
- *  \param [in] addr     Unicast Address to search
+ *  \param [out] cnt Pointer reference to return total count of model
+ *                   associated across all elements.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
-API_RESULT MS_access_is_valid_element_address
-           (
-               /* IN */ MS_NET_ADDR    addr
-           );
+#define MS_access_get_total_model_count(cnt) \
+        MS_access_get_model_count \
+        (\
+            (MS_ACCESS_ELEMENT_HANDLE)MS_CONFIG_LIMITS(MS_ACCESS_ELEMENT_COUNT),\
+            (cnt)\
+        )
+/** \} */
 
 /**
- *  \brief To check if Fixed Group Address in receive packet to be processed
+ * \name Access Configuration Manager Layer Macros
+ * \{
+ */
+/**
+ *  \brief To update AppKey
  *
  *  \par Description
- *  This routine checks if destination address in a received packet
- *  as a Fixed Group Address to be processed.
+ *  This routine/macro updates AppKey entry. Each AppKey is associated with a subnet.
  *
- *  \param [in] addr     A valid Fixed Group Address, to be checked
+ *  \param [in] sn  Handle of the Subnet for which AppKey to be updated.
+ *  \param [in] aki Identifies global Index of AppKey. A 12-bit value.
+ *  \param [in] ak  Associated AppKey to be updated.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
-API_RESULT MS_access_is_fixed_group_addr_to_be_processed
-           (
-               /* IN */ MS_NET_ADDR    addr
-           );
+#define MS_access_cm_update_appkey(sn, aki, ak) \
+        MS_access_cm_update_delete_appkey((sn), (aki), MS_ACCESS_CONFIG_APPKEY_UPDATE_OPCODE, (ak))
 
 /**
- *  \brief To check if valid subscription address to receive a packet
+ *  \brief To delete AppKey
  *
  *  \par Description
- *  This routine checks if destination address in a received packet matches
- *  with any of the known subscription address of local or friend device.
+ *  This routine/macro deletes AppKey entry. Each AppKey is associated with a subnet.
  *
- *  \param [in] addr     Address to search
+ *  \param [in] sn  Handle of the Subnet for which AppKey to be deleted.
+ *  \param [in] aki Identifies global Index of AppKey. A 12-bit value.
+ *  \param [in] ak  Associated AppKey to be updated.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
-API_RESULT MS_access_is_valid_subscription_address
-           (
-               /* IN */ MS_NET_ADDR    addr
-           );
+#define MS_access_cm_delete_appkey(sn, aki, ak) \
+        MS_access_cm_update_delete_appkey((sn), (aki), MS_ACCESS_CONFIG_APPKEY_DELETE_OPCODE, (ak))
+/** \} */
 
-#ifdef MS_STORAGE
-/**
- *  \brief Get Core Modules storage handle and offset from persistent storage.
- *
- *  \par Description
- *  This function returns the storage handle and offset for Core Modules.
- *
- *  \param [out] ps_handle  Persistent Storage Handle.
- *  \param [out] offset     The memory to be filled with the storage offset information.
- */
-API_RESULT MS_access_ps_get_handle_and_offset
-           (
-               /* OUT */ NVSTO_HANDLE * ps_handle,
-               /* OUT */ UINT32       * offset
-           );
-#endif /* MS_STORAGE */
+/** \} */
 
-#ifdef MS_ACCESS_IV_UPDT_TEST_MODE_SUPPORT
-/**
- *  \brief To set the IV Update Test Mode feature
- *
- *  \par Description
- *  This routine is used to set the IV Update Test Mode flag.
- *
- *  \param [in] test_mode This flag is used to either enable or disable the
- *                        IV Update Test Mode feature.
- *
- *  \return API_SUCCESS or an error code indicating reason for failure
- */
-API_RESULT MS_access_set_iv_update_test_mode(UCHAR test_mode);
-#endif /* MS_ACCESS_IV_UPDT_TEST_MODE_SUPPORT */
+/** \} */
 
 #ifdef __cplusplus
 };
 #endif
-
-/** \} */
 
 /** \} */
 

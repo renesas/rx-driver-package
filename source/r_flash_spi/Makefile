@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_flash_spi
-VERSION = 		3.03
+VERSION = 		3.10
 MDF = V2
 
 CONFIG_FOLDER = r_config

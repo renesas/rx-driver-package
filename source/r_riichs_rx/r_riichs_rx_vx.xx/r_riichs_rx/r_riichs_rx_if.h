@@ -23,6 +23,7 @@
 /***********************************************************************************************************************
  * History : DD.MM.YYYY Version  Description
  *         : 30.06.2021 1.00     First Release
+ *         : 21.12.2022 1.10     Fixed processing error of riichs_bps_calc
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIICHS_IF_H
@@ -45,7 +46,7 @@ R_BSP_PRAGMA_UNPACK
 
 /* Version Number of API. */
     #define RIICHS_VERSION_MAJOR      (1)
-    #define RIICHS_VERSION_MINOR      (00)
+    #define RIICHS_VERSION_MINOR      (10)
 
 /*----------------------------------------------------------------------------*/
 /*   Defines the argument of the R_RIICHS_Control function.                     */

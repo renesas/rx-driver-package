@@ -10,92 +10,163 @@
 #ifndef _H_MS_MODEL_STATES_
 #define _H_MS_MODEL_STATES_
 
+/* --------------------------------------------- Global Definitions */
 /**
- * \defgroup mesh_model_states Model States
- * \ingroup mesh_models_block
+ * \addtogroup ms_model_common_defines
  * \{
  */
 
-/* --------------------------------------------- Global Definitions */
-
 /* --------------------------------------------- Data Types/ Structures */
+/**
+ * \defgroup ms_model_common_constants Constants
+ * \{
+ * \brief This section describes the various Constants in EtherMind
+ * Mesh Model Common Layer.
+ */
+
 /**
  * \name Model State Type Defines
  * \{
  */
+/** Generic OnOff State Type */
 #define MS_STATE_GENERIC_ONOFF_T                      0
+/** Generic Level State Type */
 #define MS_STATE_GENERIC_LEVEL_T                      1
+/** Generic Default Transition Time State Type */
 #define MS_STATE_GENERIC_DEFAULT_TRANSITION_TIME_T    2
+/** Generic On PowerUp State Type */
 #define MS_STATE_GENERIC_ONPOWERUP_T                  3
+/** Generic Power Actual State Type */
 #define MS_STATE_GENERIC_POWER_ACTUAL_T               4
+/** Generic Power Last State Type */
 #define MS_STATE_GENERIC_POWER_LAST_T                 5
+/** Generic Power Default State Type */
 #define MS_STATE_GENERIC_POWER_DEFAULT_T              6
+/** Generic Power Range State Type */
 #define MS_STATE_GENERIC_POWER_RANGE_T                7
+/** Generic Power Level State Type */
 #define MS_STATE_GENERIC_POWER_LEVEL_T                8
+/** Generic Battery State Type */
 #define MS_STATE_GENERIC_BATTERY_T                    9
+/** Generic Location Global State Type */
 #define MS_STATE_GENERIC_LOCATION_GLOBAL_T            10
+/** Generic Location Local State Type */
 #define MS_STATE_GENERIC_LOCATION_LOCAL_T             11
+/** Generic Location State Type */
 #define MS_STATE_GENERIC_LOCATION_T                   12
+/** Generic User Property State Type */
 #define MS_STATE_GENERIC_USER_PROPERTY_T              13
+/** Generic Admin Property State Type */
 #define MS_STATE_GENERIC_ADMIN_PROPERTY_T             14
+/** Generic Manufacturer Property State Type */
 #define MS_STATE_GENERIC_MANUFACTURER_PROPERTY_T      15
+/** Generic Property Id State Type */
 #define MS_STATE_GENERIC_PROPERTY_ID_T                16
+/** Generic Property Ids State Type */
 #define MS_STATE_GENERIC_PROPERTY_IDS_T               17
+/** Sensor Property Id State Type */
 #define MS_STATE_SENSOR_PROPERTY_ID_T                 18
+/** Sensor Descriptor State Type */
 #define MS_STATE_SENSOR_DESCRIPTOR_T                  19
+/** Sensor Settings State Type */
 #define MS_STATE_SENSOR_SETTINGS_T                    20
+/** Sensor Setting State Type */
 #define MS_STATE_SENSOR_SETTING_T                     21
+/** Sensor Cadence State Type */
 #define MS_STATE_SENSOR_CADENCE_T                     22
+/** Sensor Data State Type */
 #define MS_STATE_SENSOR_DATA_T                        23
+/** Sensor Series Column State Type */
 #define MS_STATE_SENSOR_SERIES_COLUMN_T               24
+/** Time State Type */
 #define MS_STATE_TIME_T                               25
+/** Time Zone State Type */
 #define MS_STATE_TIME_ZONE_T                          26
+/** Time TAI UTC Delta State Type */
 #define MS_STATE_TIME_TAI_UTC_DELTA_T                 27
+/** Time Role State Type */
 #define MS_STATE_TIME_ROLE_T                          28
+/** Scene Number State Type */
 #define MS_STATE_SCENE_NUMBER_T                       29
+/** Scene Status State Type */
 #define MS_STATE_SCENE_STATUS_T                       30
+/** Scene Register Status State Type */
 #define MS_STATE_SCENE_REGISTER_STATUS_T              31
+/** Scheduler Schedules State Type */
 #define MS_STATE_SCHEDULER_SCHEDULES_T                32
+/** Scheduler Entry Index State Type */
 #define MS_STATE_SCHEDULER_ENTRY_INDEX_T              33
+/** Scheduler Entry State Type */
 #define MS_STATE_SCHEDULER_ENTRY_T                    34
+/** Light Lightness Liner State Type */
 #define MS_STATE_LIGHT_LIGHTNESS_LINEAR_T             35
+/** Light Lightness Actual State Type */
 #define MS_STATE_LIGHT_LIGHTNESS_ACTUAL_T             36
+/** Light Lightness Last State Type */
 #define MS_STATE_LIGHT_LIGHTNESS_LAST_T               37
+/** Light Lightness Default State Type */
 #define MS_STATE_LIGHT_LIGHTNESS_DEFAULT_T            38
+/** Light Lightness Range State Type */
 #define MS_STATE_LIGHT_LIGHTNESS_RANGE_T              39
+/** Light Lightness State Type */
 #define MS_STATE_LIGHT_LIGHTNESS_T                    40
+/** Light CTL State Type */
 #define MS_STATE_LIGHT_CTL_T                          41
+/** Light CTL Default State Type */
 #define MS_STATE_LIGHT_CTL_DEFAULT_T                  42
+/** Light CTL Temperature State Type */
 #define MS_STATE_LIGHT_CTL_TEMPERATURE_T              43
+/** Light CTL Temperature Range State Type */
 #define MS_STATE_LIGHT_CTL_TEMPERATURE_RANGE_T        44
+/** Light HSL State Type */
 #define MS_STATE_LIGHT_HSL_T                          45
+/** Light HSL Target State Type */
 #define MS_STATE_LIGHT_HSL_TARGET_T                   46
+/** Light HSL Default State Type */
 #define MS_STATE_LIGHT_HSL_DEFAULT_T                  47
+/** Light HSL Hue State Type */
 #define MS_STATE_LIGHT_HSL_HUE_T                      48
+/** Light HSL Saturation State Type */
 #define MS_STATE_LIGHT_HSL_SATURATION_T               49
+/** Light HSL Range State Type */
 #define MS_STATE_LIGHT_HSL_RANGE_T                    50
+/** Light xyL State Type */
 #define MS_STATE_LIGHT_XYL_T                          51
+/** Light xyL Target State Type */
 #define MS_STATE_LIGHT_XYL_TARGET_T                   52
+/** Light xyL Default State Type */
 #define MS_STATE_LIGHT_XYL_DEFAULT_T                  53
+/** Light xyL Range State Type */
 #define MS_STATE_LIGHT_XYL_RANGE_T                    54
+/** Light LC Mode State Type */
 #define MS_STATE_LIGHT_LC_MODE_T                      55
+/** Light LC OM State Type */
 #define MS_STATE_LIGHT_LC_OM_T                        56
+/** Light LC Light OnOff State Type */
 #define MS_STATE_LIGHT_LC_LIGHT_ONOFF_T               57
+/** Light LC Property Id State Type */
 #define MS_STATE_LIGHT_LC_PROPERTY_ID_T               58
+/** Light LC Property State Type */
 #define MS_STATE_LIGHT_LC_PROPERTY_T                  59
-
+/** Generic User Property Ids State Type */
 #define MS_STATE_GENERIC_USER_PROPERTY_IDS_T          60
+/** Generic Admin Property Ids State Type */
 #define MS_STATE_GENERIC_ADMIN_PROPERTY_IDS_T         61
+/** Generic Manufacturer Property Ids State Type */
 #define MS_STATE_GENERIC_MANUFACTURER_PROPERTY_IDS_T  62
+/** Generic Client Property Ids State Type */
 #define MS_STATE_GENERIC_CLIENT_PROPERTY_IDS_T        63
-
+/** Scene Store State Type */
 #define MS_STATE_SCENE_STORE_T                        64
+/** Scene Recall State Type */
 #define MS_STATE_SCENE_RECALL_T                       65
+/** Scene Delete State Type */
 #define MS_STATE_SCENE_DELETE_T                       66
-
+/** Delta Level State Type */
 #define MS_STATE_DELTA_LEVEL_T                        67
+/** Move Level State Type */
 #define MS_STATE_MOVE_LEVEL_T                         68
-
+/** Maximum Number of States */
 #define MS_MAX_NUM_OF_STATES                          (MS_STATE_MOVE_LEVEL_T + 1)
 
 /** \} */
@@ -104,14 +175,21 @@
  * \name Additional supporting structure type defines
  * \{
  */
+/** Extension TID and Transition Structure Type */
 #define MS_EXT_TID_AND_TRANSITION_STRUCT_T            128
+/** Extension Status Structure Type */
 #define MS_EXT_STATUS_STRUCT_T                        129
+/** Sensor Series State Type */
 #define MS_STATE_SENSOR_SERIES_T                      130
 /** \} */
 
+/** \} */
+
 /**
- * \name Mesh Model State Structures
- * \{
+ *  \defgroup ms_model_common_structures Structures
+ *  \{
+ *  \brief This section describes the various Data-Types and Structures in
+ *  EtherMind Mesh Model Common Layer.
  */
 
 /**
@@ -161,14 +239,13 @@ typedef struct MS_state_generic_level_struct
     /** Move Level */
     UINT16  move_level;
 
-    /* TID - Used in received path */
+    /** TID - Used in received path */
     UINT8   tid;
 
-    /* Optional */
-    /* Transition Time */
+    /** Transition Time - Optional Field */
     UINT8   transition_time;
 
-    /* Delay */
+    /** Delay - Optional Field */
     UINT8   delay;
 
     /** Target Level */
@@ -209,7 +286,7 @@ typedef struct MS_state_generic_power_actual_struct
     /** Generic Power Actual */
     UINT16 power_actual;
 
-    /* TID - Used only in request path */
+    /** TID - Used only in request path */
     UINT8  tid;
 
     /** Generic Power Target - Used only in response path */
@@ -221,7 +298,7 @@ typedef struct MS_state_generic_power_actual_struct
      */
     UINT8  transition_time;
 
-    /* Delay - Used only in request path */
+    /** Delay - Used only in request path */
     UINT8  delay;
 
     /** Transition Timer Handle */
@@ -237,6 +314,7 @@ typedef struct MS_state_generic_power_last_struct
 {
     /** Generic Power Last */
     UINT16 power_last;
+
 } MS_STATE_GENERIC_POWER_LAST_STRUCT;
 
 /** Generic Power Default state is a 16-bit value ranging from 0 through 65535 */
@@ -281,6 +359,7 @@ typedef struct MS_state_generic_power_level_struct
 
     /** Generic Power Range */
     MS_STATE_GENERIC_POWER_RANGE_STRUCT  generic_power_range;
+
 } MS_STATE_GENERIC_POWER_LEVEL_STRUCT;
 
 /**
@@ -379,13 +458,15 @@ typedef struct MS_state_generic_property_struct
     UINT8  property_type;
 
     /**
-    * User Access field is an enumeration indicating whether the device property
-    * can be read or written as a Generic Admin/User Property
-    */
+     * User Access field is an enumeration indicating whether the device property
+     * can be read or written as a Generic Admin/User Property
+     */
     UCHAR  access;
 
     /** User Property Value field is a conditional field */
     UCHAR * property_value;
+
+    /** User Property Value Length */
     UINT16 property_value_len;
 
 } MS_STATE_GENERIC_PROPERTY_STRUCT;
@@ -408,7 +489,10 @@ typedef struct MS_state_generic_user_property_struct
 
     /** User Property Value field is a conditional field */
     UCHAR * property_value;
+
+    /** User Property Value Length */
     UINT16 property_value_len;
+
 } MS_STATE_GENERIC_USER_PROPERTY_STRUCT;
 
 /**
@@ -431,7 +515,10 @@ typedef struct MS_state_generic_admin_property_struct
 
     /** Admin Property Value field is a conditional field */
     UCHAR * property_value;
+
+    /** Admin Property Value Length */
     UINT16  property_value_len;
+
 } MS_STATE_GENERIC_ADMIN_PROPERTY_STRUCT;
 
 /**
@@ -454,7 +541,10 @@ typedef struct MS_state_generic_manufacturer_property_struct
 
     /** Manufacturer Property Value field is a conditional field */
     UCHAR * property_value;
+
+    /** Manufacturer Property Value Length */
     UINT16  property_value_len;
+
 } MS_STATE_GENERIC_MANUFACTURER_PROPERTY_STRUCT;
 
 /**
@@ -481,7 +571,10 @@ typedef struct MS_state_generic_property_ids_struct
      * a set of device properties
      */
     UINT16 *property_ids;
+
+    /** Property IDs Count */
     UINT16 property_ids_count;
+
 } MS_STATE_GENERIC_PROPERTY_IDS_STRUCT;
 
 /**
@@ -552,6 +645,8 @@ typedef struct MS_state_sensor_settings_struct
 
     /** Property ID of a setting within a sensor */
     UINT16 *setting_property_ids;
+
+    /** Count of Property ID of a setting within a sensor */
     UINT16 setting_property_ids_count;
 
 } MS_STATE_SENSOR_SETTINGS_STRUCT;
@@ -570,9 +665,11 @@ typedef struct MS_state_sensor_setting_struct
 
     /** Raw value of a setting within a sensor */
     UCHAR *sensor_setting_raw;
+
+    /** Length of Raw value of a setting within a sensor */
     UINT16 sensor_setting_raw_len;
 
-    /* Status - used in response path */
+    /** Status - used in response path */
     UINT8  status;
 
 } MS_STATE_SENSOR_SETTING_STRUCT;
@@ -591,16 +688,21 @@ typedef struct MS_state_sensor_cadence_struct
 
     /** Delta down value that triggers a status message */
     UCHAR *status_trigger_delta_down;
+
+    /** Length of Delta down value that triggers a status message */
     UINT16 status_trigger_delta_down_len;
 
     /** Delta up value that triggers a status message */
     UCHAR *status_trigger_delta_up;
+
+    /**Length  Delta up value that triggers a status message */
     UINT16 status_trigger_delta_up_len;
 
     /** Minimum interval between two consecutive Status messages */
     /**
-     * APPLICATION NOTE:
-     * The Current Sensor Server Model implementation does not inherantly
+     * \note
+     * <b> APPLICATION NOTE: </b>
+     * The Current Sensor Server Model implementation does not inherently
      * check for the time interval between two consecutive status messages.
      * The application layer which manages the data for the Sensor Server
      * Model holds the responsibility for interleaving consecutive status
@@ -610,10 +712,14 @@ typedef struct MS_state_sensor_cadence_struct
 
     /** Low value for the fast cadence range */
     UCHAR *fast_cadence_low;
+
+    /** Length of Low value for the fast cadence range */
     UINT16 fast_cadence_low_len;
 
     /** High value for the fast cadence range */
     UCHAR *fast_cadence_high;
+
+    /** Length of High value for the fast cadence range */
     UINT16 fast_cadence_high_len;
 
     /** Status - used in response path */
@@ -631,31 +737,28 @@ typedef struct MS_state_sensor_data_struct
     /** ID of the 1st device property of the sensor */
     UINT16 property_id_1;
 
-    /**
-     * Raw Value field with a size and representation defined by the 1st device
-     * property
-     */
+    /** Raw Value field representation defined by the 1st device property */
     UCHAR *raw_value_1;
+
+    /** Length of Raw Value field defined by the 1st device property */
     UINT16 raw_value_1_len;
 
     /** ID of the 2nd device property of the sensor */
     UINT16 property_id_2;
 
-    /**
-     * Raw Value field with a size and representation defined by the 2nd device
-     * property
-     */
+    /** Raw Value field representation defined by the 2nd device property */
     UCHAR *raw_value_2;
+
+    /** Length of Raw Value field defined by the 2nd device property */
     UINT16 raw_value_2_len;
 
     /** ID of the nth device property of the sensor */
     UINT16 property_id_n;
 
-    /**
-     * Raw Value field with a size and representation defined by the nth device
-     * property
-     */
+    /** Raw Value field representation defined by the nth device property */
     UCHAR *raw_value_n;
+
+    /** Length of Raw Value field defined by the nth device property */
     UINT16 raw_value_n_len;
 
     /** Status - used in response path */
@@ -674,14 +777,23 @@ typedef struct MS_state_sensor_series_column_struct
 
     /** Raw value representing the left corner of a column on the X axis */
     UCHAR *sensor_raw_value_x;
+
+    /**
+     * Length of Raw value representing the left corner of a column on the
+     * X axis
+     */
     UINT16 sensor_raw_value_x_len;
 
     /** Raw value representing the width of the column */
     UCHAR *sensor_column_width;
+
+    /** Length of Raw value representing the width of the column */
     UINT16 sensor_column_width_len;
 
     /** Raw value representing the height of the column on the Y axis */
     UCHAR *sensor_raw_value_y;
+
+    /** Length of Raw value representing the height of the column on the Y axis */
     UINT16 sensor_raw_value_y_len;
 
     /** Status - used in response path */
@@ -781,7 +893,7 @@ typedef struct MS_state_scene_status_struct
     /** Scene Number of a target scene. */
     UINT16 target_scene;
 
-    /* Remaining Time */
+    /** Remaining Time */
     UINT8  remaining_time;
 
 } MS_STATE_SCENE_STATUS_STRUCT;
@@ -797,7 +909,10 @@ typedef struct MS_state_scene_register_status_struct
 
     /** A list of scenes stored within an element */
     UINT16 *scenes;
+
+    /** Count of scenes stored within element */
     UINT16 scenes_count;
+
 } MS_STATE_SCENE_REGISTER_STATUS_STRUCT;
 
 /** The current Schedule Register state of an element. */
@@ -1127,7 +1242,7 @@ typedef struct MS_state_light_hsl_struct
 
 /**
  * Light HSL Target state is a composite state that includes the Light HSL
- * Lighness, the Light HSL Hue and the Light HSL Saturation states
+ * Lightness, the Light HSL Hue and the Light HSL Saturation states
  */
 typedef struct MS_state_light_hsl_target_struct
 {
@@ -1143,7 +1258,7 @@ typedef struct MS_state_light_hsl_target_struct
 
 /**
  * Light HSL Default state is a composite state that includes the Light HSL
- * Lighness, the Light HSL Hue and the Light HSL Saturation states
+ * Lightness, the Light HSL Hue and the Light HSL Saturation states
  */
 typedef struct MS_state_light_hsl_default_struct
 {
@@ -1359,7 +1474,10 @@ typedef struct MS_state_light_lc_property_struct
 
     /** Raw value for the Light LC Property */
     UCHAR *property_value;
+
+    /** Light LC Property Value Length */
     UINT16 property_value_len;
+
 } MS_STATE_LIGHT_LC_PROPERTY_STRUCT;
 
 
@@ -1381,9 +1499,16 @@ typedef struct MS_state_light_lc_property_struct
  */
 typedef struct MS_ext_tid_and_transition_struct
 {
+    /** Transaction Identifier */
     UCHAR  tid;
+
+    /** Transition Time */
     UCHAR  transition_time;
+
+    /** Delay */
     UCHAR  delay;
+
+    /** Presence of Optional Fields */
     UCHAR  optional_fields_present;
 
 } MS_EXT_TID_AND_TRANSITION_STRUCT;
@@ -1393,32 +1518,35 @@ typedef struct MS_ext_tid_and_transition_struct
  */
 typedef struct MS_ext_status_struct
 {
+    /** Status */
     UCHAR  status;
 
 } MS_EXT_STATUS_STRUCT;
 
-/* State Transition data structure */
+/**
+ * State Transition data structure
+ */
 typedef struct _MS_ACCESS_STATE_TRANSITION_TYPE
 {
-    /* Transition Timer */
+    /** Transition Timer */
     EM_timer_handle  transition_timer_handle;
 
-    /* Transition State. Initial/delay/transition */
+    /** Transition State. Initial/delay/transition */
     UINT8 transition_state;
 
-    /* Delay */
+    /** Delay */
     UINT8 delay;
 
-    /* Transition Time */
+    /** Transition Time */
     UINT8 transition_time;
 
-    /* Transition Start Callback */
+    /** Transition Start Callback */
     void (* transition_start_cb)(void *);
 
-    /* Transition Complete Callback */
+    /** Transition Complete Callback */
     void (* transition_complete_cb)(void *);
 
-    /* Blob/Context */
+    /** Blob/Context */
     void * blob;
 
 }MS_ACCESS_STATE_TRANSITION_TYPE;

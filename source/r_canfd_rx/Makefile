@@ -1,5 +1,5 @@
-MODULE_NAME = 	r_canfd_rx
-VERSION = 		1.00
+MODULE_NAME =	r_canfd_rx
+VERSION =		1.20
 MDF = V1
 
 CONFIG_FOLDER = r_config
@@ -8,7 +8,7 @@ TARGET_FOLDER = ../../FITModules
 $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).zip: $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).xml $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).mdf
 	cd ./$(MODULE_NAME)_vx.xx; \
 	zip ../$(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).zip -r ./$(MODULE_NAME) -r ./$(CONFIG_FOLDER) ./$(MODULE_NAME).ftl; \
-	cd ../;	\
+	cd ../; \
 
 $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).xml:
 	cp ./$(MODULE_NAME)_vx.xx.xml tmp.xml

@@ -1,0 +1,82 @@
+{
+    "name": "Mesh Provisioning",
+    "uuid":     [
+        "0x27",
+        "0x18"
+    ],
+    "abbreviation": "mesh_prov",
+    "description": "",
+    "aux_properties": ["None"],
+    "error_codes": [],
+    "characteristics":     [
+                {
+            "name": "Mesh Provisioning Data In",
+            "abbreviation": "data_in",
+            "uuid":             [
+                "0xDB",
+                "0x2A"
+            ],
+            "description": "",
+            "properties": ["WriteWithoutResponse"],
+            "aux_properties": ["Variable Length"],
+            "value": ["0x00"],
+            "db_size": 66,
+            "fields": [            {
+                "name": "data_in",
+                "format": "st_ble_seq_data_t",
+                "length": "1",
+                "bits": [],
+                "fields": []
+            }],
+            "descriptors": []
+        },
+                {
+            "name": "Mesh Provisioning Data Out",
+            "abbreviation": "data_out",
+            "uuid":             [
+                "0xDC",
+                "0x2a"
+            ],
+            "description": "",
+            "properties": ["Notify"],
+            "aux_properties": ["Variable Length"],
+            "value": ["0x42"],
+            "db_size": 66,
+            "fields": [            {
+                "name": "data_out",
+                "format": "st_ble_seq_data_t",
+                "length": "1",
+                "bits": [],
+                "fields": []
+            }],
+            "descriptors": [            {
+                "name": "Client Characteristic Configuration",
+                "abbreviation": "cli cnfg",
+                "uuid":                 [
+                    "0x02",
+                    "0x29"
+                ],
+                "description": "Client Characteristic Configuration Descriptor",
+                "aux_properties": ["Peer Specific"],
+                "properties":                 [
+                    "Read",
+                    "Write"
+                ],
+                "value": "",
+                "db_size": 2,
+                "fields": [                {
+                    "name": "cli cnfg",
+                    "description": "Client Characteristic Configuration",
+                    "format": "uint16_t",
+                    "length": "1",
+                    "bits": [],
+                    "fields": []
+                }]
+            }]
+        }
+    ],
+    "qeServiceDataIsSigAdopted": false,
+    "qeServiceDefinitionJsonFileName": "mesh_provisioning.service.json",
+    "qeServiceDataIsOutputServerRole": true,
+    "qeServiceDataIsOutputClentRole": false
+}

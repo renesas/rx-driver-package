@@ -49,7 +49,6 @@
 e_cellular_err_t atc_cclk(st_cellular_ctrl_t * const p_ctrl, const st_cellular_datetime_t * const p_time)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
     uint8_t str[CELLULAR_MAX_ARG_COUNT][10] = {0};
 
     sprintf((char *)str[0], "%02d", p_time->year);      // (uint8_t *)->(char *)
@@ -67,11 +66,7 @@ e_cellular_err_t atc_cclk(st_cellular_ctrl_t * const p_ctrl, const st_cellular_d
         (const uint8_t *)&gp_at_command[ATC_SET_TIME][0],   // (const uint8_t *const *)->(const uint8_t **)
             (const uint8_t **)&p_command_arg);              // (const uint8_t *const *)->(const uint8_t **)
 
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_SET_TIME);
-    if (CELLULAR_ATC_OK != at_ret)
-    {
-        ret = CELLULAR_ERR_MODULE_COM;
-    }
+    ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_SET_TIME);
 
     return ret;
 }
@@ -85,18 +80,12 @@ e_cellular_err_t atc_cclk(st_cellular_ctrl_t * const p_ctrl, const st_cellular_d
 e_cellular_err_t atc_cclk_check(st_cellular_ctrl_t * const p_ctrl)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
 
     atc_generate(p_ctrl->sci_ctrl.atc_buff,
         (const uint8_t *)&gp_at_command[ATC_GET_TIME][0], // (const uint8_t *const *)->(const uint8_t **)
             NULL);
 
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_GET_TIME);
-
-    if (CELLULAR_ATC_OK != at_ret)
-    {
-        ret = CELLULAR_ERR_MODULE_COM;
-    }
+    ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_GET_TIME);
 
     return ret;
 }

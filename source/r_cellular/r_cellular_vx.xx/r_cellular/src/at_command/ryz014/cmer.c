@@ -46,10 +46,9 @@
 /*************************************************************************************************
  * Function Name  @fn            atc_cmer
  ************************************************************************************************/
-e_cellular_err_t atc_cmer(st_cellular_ctrl_t * const p_ctrl, e_cellular_psm_mode_t mode)
+e_cellular_err_t atc_cmer(st_cellular_ctrl_t * const p_ctrl, const uint8_t mode)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
     uint8_t str[2] = {0};
 
     sprintf((char *)str, "%d", mode); // (uint8_t *)->(char *)
@@ -60,12 +59,7 @@ e_cellular_err_t atc_cmer(st_cellular_ctrl_t * const p_ctrl, e_cellular_psm_mode
         (const uint8_t *)&gp_at_command[ATC_SET_IND_NOTIFY][0], // (const uint8_t * const *)->(const uint8_t **)
             (const uint8_t **)&p_command_arg);                  // (const uint8_t * const *)->(const uint8_t **)
 
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_SET_IND_NOTIFY);
-
-    if (CELLULAR_ATC_OK != at_ret)
-    {
-        ret = CELLULAR_ERR_MODULE_COM;
-    }
+    ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_SET_IND_NOTIFY);
 
     return ret;
 }

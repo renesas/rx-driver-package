@@ -185,7 +185,7 @@ div.divider-global:nth-of-type(even) {
           <!-- Modifiable information starts here                                 -->
           <!-- Don't forget to edit the title tag either                          -->
           <!-- ****************************************************************** -->
-          <h1>Release notes for emWin Version 6.22</h1>
+          <h1>Release notes for emWin Version 6.26c</h1>
         </div>
       </div>
     </div>
@@ -215,6 +215,69 @@ div.divider-global:nth-of-type(even) {
       <h2><a name="features">New Features</a></h2>
 
       <!-------------------------------------------------------------------------->
+      <h3>Version 6.26</h3>
+      <ol class="maintext">
+        <li>Window Manager:
+          <ul type=square>
+            <li>New function WM_IsUntouchable() added.</li>
+            <li>New function WM_GetContentRectEx() added.</li>
+            <li>New function WM_GetContentRect() added.</li>
+          </ul>
+        </li>
+        <li>Widgets:
+          <ul type=square>
+            <li>New SCROLLER widget added: Provides a smartphone-like scrolling indicator and scrolling control. Can be attached to widgets that have motion support and to custom widgets.</li>
+            <li>New WHEEL widget added: newer and more versatile version of LISTWHEEL displaying multiple arrays of text and bitmaps.</li>
+            <li>Parameters of SWIPELIST_GetOverlap(), SWIPELIST_SetOverlap(), SWIPELIST_GetDefaultOverlap() and SWIPELIST_SetDefaultOverlap)() changed.
+                Now a period for moving back and the desired positions of overlapping (top or bottom) can be specified.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.24</h3>
+      <ol class="maintext">
+        <li>Fonts (FreeType only):
+          <ul type=square>
+            <li>Update to FreeType 2.11.</li>
+          </ul>
+        </li>
+        <li>Anti Aliasing:
+          <ul type=square>
+            <li>New function GUI_AA_SetBufferSize() added.</li>
+          </ul>
+        </li>
+        <li>Core:
+          <ul type=square>
+            <li>New function GUI_DrawArcHREx() added.</li>
+            <li>New function GUI_DrawFrame() added.</li>
+            <li>New function GUI_DrawFrameEx() added.</li>
+            <li>New function GUI_SetOnLogFunc() added.</li>
+            <li>New function GUI_SetOnWarnFunc() added.</li>
+            <li>New color conversions GUICC_666_18 and GUICC_M666_18</li>
+          </ul>
+        </li>
+        <li>Display driver:
+          <ul type=square>
+            <li>GUIDRV_FlexColor_Func66709 now supports 9- and 18 bit interface and 18bpp.</li>
+          </ul>
+        </li>
+        <li>Widgets:
+          <ul type=square>
+            <li>New function DROPDOWN_Clear() added.</li>
+            <li>New function DROPDOWN_SetText() added.</li>
+            <li>New function HEADER_GetBorderH() added.</li>
+            <li>New function HEADER_GetBorderV() added.</li>
+            <li>New function HEADER_SetBorderH() added.</li>
+            <li>New function HEADER_SetBorderV() added.</li>
+            <li>New function LISTVIEW_Clear() added.</li>
+            <li>New function LISTVIEW_GetGridColor() added.</li>
+            <li>New function LISTVIEW_SetGridColor() added.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
       <h3>Version 6.22</h3>
       <ol class="maintext">
         <li>Fonts (FreeType only):
@@ -237,29 +300,42 @@ div.divider-global:nth-of-type(even) {
         </li>
         <li>Widgets:
           <ul type=square>
-            <li>New function DROPDOWN_EnableMotion() added.
-            <li>New function LISTVIEW_GetDefaultBkColor() added.
-            <li>New function LISTVIEW_GetDefaultFont() added.
-            <li>New function LISTVIEW_GetDefaultGridColor() added.
-            <li>New function LISTVIEW_GetDefaultScrollStepH() added.
-            <li>New function LISTVIEW_GetDefaultTextColor() added.
-            <li>New function LISTVIEW_SetDefaultScrollStepH() added.
-            <li>New function LISTVIEW_SetScrollStepH() added.
-            <li>New function LISTVIEW_GetScrollStepH() added.
-            <li>New function LISTVIEW_SetScrollPos() added.
-            <li>New function MULTIEDIT_GetDefaultAlign() added.
-            <li>New function MULTIEDIT_GetDefaultBkColor() added.
-            <li>New function MULTIEDIT_GetDefaultCursorColor() added.
-            <li>New function MULTIEDIT_GetDefaultFont() added.
-            <li>New function MULTIEDIT_GetDefaultHBorder() added.
-            <li>New function MULTIEDIT_GetDefaultTextColor() added.
-            <li>New function MULTIEDIT_SetDefaultAlign() added.
-            <li>New function MULTIEDIT_SetDefaultBkColor() added.
-            <li>New function MULTIEDIT_SetDefaultCursorColor() added.
-            <li>New function MULTIEDIT_SetDefaultFont() added.
-            <li>New function MULTIEDIT_SetDefaultHBorder() added.
-            <li>New function MULTIEDIT_SetDefaultTextColor() added.
-            <li>New function SWITCH_DisableAnimation() added.
+            <li>New function DROPDOWN_EnableMotion() added.</li>
+            <li>New function LISTVIEW_GetDefaultBkColor() added.</li>
+            <li>New function LISTVIEW_GetDefaultFont() added.</li>
+            <li>New function LISTVIEW_GetDefaultGridColor() added.</li>
+            <li>New function LISTVIEW_GetDefaultScrollStepH() added.</li>
+            <li>New function LISTVIEW_GetDefaultTextColor() added.</li>
+            <li>New function LISTVIEW_SetDefaultScrollStepH() added.</li>
+            <li>New function LISTVIEW_SetScrollStepH() added.</li>
+            <li>New function LISTVIEW_GetScrollStepH() added.</li>
+            <li>New function LISTVIEW_SetScrollPos() added.</li>
+            <li>New function MULTIEDIT_GetDefaultAlign() added.</li>
+            <li>New function MULTIEDIT_GetDefaultBkColor() added.</li>
+            <li>New function MULTIEDIT_GetDefaultCursorColor() added.</li>
+            <li>New function MULTIEDIT_GetDefaultFont() added.</li>
+            <li>New function MULTIEDIT_GetDefaultHBorder() added.</li>
+            <li>New function MULTIEDIT_GetDefaultTextColor() added.</li>
+            <li>New function MULTIEDIT_SetDefaultAlign() added.</li>
+            <li>New function MULTIEDIT_SetDefaultBkColor() added.</li>
+            <li>New function MULTIEDIT_SetDefaultCursorColor() added.</li>
+            <li>New function MULTIEDIT_SetDefaultFont() added.</li>
+            <li>New function MULTIEDIT_SetDefaultHBorder() added.</li>
+            <li>New function MULTIEDIT_SetDefaultTextColor() added.</li>
+            <li>New function SWITCH_DisableAnimation() added.</li>
+            <li>New DROPDOWN notifications: DROPDOWN_NOTIFICATION_EXPANDED and DROPDOWN_NOTIFICATION_COLLAPSED</li>
+            <li>SWIPELIST now sends notifications to its parent when overlap area has been reached or released.</li>
+          </ul>
+        </li>
+        <li>Tools:
+          <ul type=square>
+            <li>Font Converter:
+              <br>Font Converter now allows to configure the characters for measuring the height of lower and upper case letters as well as the baseline.
+            </li>
+            <li>emWinView:
+              <br>CTRL+C now copies the current layer image or selected area image to clipboard.
+              <br>Selection position and size can now be edited from a dialog.
+            </li>
           </ul>
         </li>
       </ol>
@@ -2916,11 +2992,160 @@ div.divider-global:nth-of-type(even) {
       <h2><a name="pcorr">Program corrections</a></h2>
 
       <!-------------------------------------------------------------------------->
-      <h3>Version 6.22</h3>
+      <h3>Version 6.26c</h3>
       <ol class="maintext">
+        <li>LISTVIEW widget:
+          <ul type=square>
+            <li>Deleting a LISTVIEW widget with active scrollbars caused a crash. Fixed.</li>
+          </ul>
+        </li>
+        <li>AppWizard:
+          <ul type=square>
+            <li>Some minor fixes in the editor when scaling is active. Details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+    </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.26b</h3>
+      <ol class="maintext">
+        <li>AppWizard:
+          <ul type=square>
+            <li>Details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+        <li>BitmapConverter:
+          <ul type=square>
+            <li>Converting PNGs with transparency to 8bpp with transparency did not work. Fixed.</li>
+          </ul>
+        </li>
+    </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.26a</h3>
+      <ol class="maintext">
+        <li>Widgets:
+          <ul type=square>
+            <li>SLIDER: When trying to move a SLIDER on a moveable screen the screen was moved instead of the SLIDER. Fixed.</li>
+          </ul>
+        </li>
+        <li>AppWizard:
+          <ul type=square>
+            <li>Details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+      </ol>
+      
+	  <!-------------------------------------------------------------------------->
+      <h3>Version 6.26</h3>
+      <ol class="maintext">
+        <li>Anti-aliasing:
+          <ul type=square>
+            <li>GUI_AA_FillRoundedRect() did not work with high-resolution anti-aliasing. Fixed.</li>
+          </ul>
+        </li>
+        <li>Language Support:
+          <ul type=square>
+            <li>GUI_LANG_Clear() would cause crash if during reading of a CSV file not enough memory was available. Fixed.</li>
+          </ul>
+        </li>
+        <li>Widgets:
+          <ul type=square>
+            <li>SWIPELIST would sometimes not move back when released in overlap area. Fixed.</li>
+            <li>LISTVIEW: Resizing columns would also sort the column when PID was released. Fixed.</li>
+            <li>Widgets SWITCH, LISTBOX, LISTVIEW, MULTIEDIT, SWIPELIST did not have their own motion context. Motion swiping two widgets of the same type at the same time was not possible. Fixed.</li>
+            <li>SWITCH did not always send notifications to its parent when the thumb was moved with motion. Fixed.</li>
+          </ul>
+        </li>
+        <li>Display Driver:
+          <ul type=square>
+            <li>GUIDRV_FlexColor_Func66709: GUIDRV_FLEXCOLOR_READ_FUNC_III read 7 cycles instead of 2. Fixed.</li>
+          </ul>
+        </li>
         <li>Tools:
           <ul type=square>
-            <li>FontCvt loads and saves monospaced BDF fonts as non-monospaced. Fixed.</li>
+            <li>Bitmap Converter:
+              <br>Reading of C files improved, it is now more tolerant of the file structure.
+            </li>
+            <li>emWinView:
+              <br>Semi-transparent colors were not always shown correctly. Fixed.
+              <br>Dialogs appeared in the center of the screen instead of above emWinView. Fixed.
+              <br>Opening a multi-layer application and then a single-layer application could crash the tool. Fixed.
+            </li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.24a</h3>
+      <ol class="maintext">
+        <li>Core:
+          <ul type=square>
+            <li>RLE-Alpha Bitmaps: Under very rare circumstances an endless loop could occur. Fixed.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.24</h3>
+      <ol class="maintext">
+        <li>Core:
+          <ul type=square>
+            <li>SJIS: Characters would sometimes be skipped and strings were displayed at wrong positions. Fixed.</li>
+            <li>Thai script had issues when used with TTF fonts. Fixed.</li>
+            <li>When GUI_ShowMissingCharacters() was enabled and a font did not contain carriage return and line feed characters, displayed strings were not positioned correctly. Fixed.</li>
+          </ul>
+        </li>
+        <li>Widgets:
+          <ul type=square>
+            <li>LISTVIEW_GetVisRowIndices() would sometimes return false index values. Fixed.</li>
+            <li>SWITCH would not display thumb bitmaps for disabled state. Fixed.</li>
+            <li>When HEADER was moved it would have parts that were not invalidated. Fixed.</li>
+            <li>SWITCH improved the widgets behavior and fixed minor issues.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.22</h3>
+      <ol class="maintext">
+        <li>Core:
+          <ul type=square>
+            <li>Fixed several minor issues (compiler warnings).</li>
+          </ul>
+        </li>
+        <li>Memory Devices:
+          <ul type=square>
+            <li>Semi-transparency would not work in GUI_MEMDEV_PunchOutDevice() with GUI_DM_TRANS and ARGB color mode. Fixed.</li>
+          </ul>
+        </li>
+        <li>Language Support:
+          <ul type=square>
+            <li>Thai: Tone marks were not displayed correctly. Fixed.</li>
+          </ul>
+        </li>
+        <li>Widgets:
+          <ul type=square>
+            <li>Calling TREEVIEW_GetItem(TREEVIEW_GET_FIRST_CHILD) on a node without children would cause a crash. Fixed.</li>
+          </ul>
+        </li>
+        <li>Anti-aliasing:
+          <ul type=square>
+            <li>GUI_AA_FillRoundedRect() was missing a GUI_UNLOCK() and caused problems when negative values were passed. Fixed.</li>
+          </ul>
+        </li>
+        <li>Tools:
+          <ul type=square>
+            <li>Font Converter:
+              <br>Monospaced BDF fonts would be loaded and saved as non-monospaced. Fixed.
+            </li>
+            <li>emWinView:
+              <br>Selection rectangle would not mark the upper/left edges of a layer. Fixed.
+              <br>ESC key would be sent to emWin when using selection/hand tools. Fixed.
+              <br>Window would not be shown in maximized state when simulation was closed and reopened. Fixed.
+              <br>Selection rectangle would not be restored when closing and reopening simulation. Fixed.
+              <br>Application scalability issues fixed.
+            </li>
           </ul>
         </li>
       </ol>
@@ -5718,15 +5943,22 @@ div.divider-global:nth-of-type(even) {
       <h2><a name="history">Release history</a></h2>
       <table width="100%" border="0" cellspacing="5">
         <tr> <td width=20%><b>Version</b></td> <td width=30%><b>Release date</b></td> <td><b>Availability</b></td> </tr>
+        <tr> <td>V6.26c</td> <td>2022-06-08</td> <td>Point release</td>   </tr>
+        <tr> <td>V6.26b</td> <td>2022-06-01</td> <td>Point release</td>   </tr>
+        <tr> <td>V6.26a</td> <td>2022-05-12</td> <td>Point release</td>   </tr>
+        <tr> <td>V6.26 </td> <td>2022-04-28</td> <td>General release</td> </tr>
+        <tr> <td>V6.24a</td> <td>2022-03-23</td> <td>Point release</td>   </tr>
+        <tr> <td>V6.24 </td> <td>2022-01-20</td> <td>General release</td> </tr>
+        <tr> <td>V6.22a</td> <td>2021-11-29</td> <td>Point release</td>   </tr>
         <tr> <td>V6.22 </td> <td>2021-11-17</td> <td>General release</td> </tr>
         <tr> <td>V6.20 </td> <td>2021-08-11</td> <td>General release</td> </tr>
         <tr> <td>V6.18c</td> <td>2021-07-02</td> <td>Point release</td>   </tr>
         <tr> <td>V6.18b</td> <td>2021-06-08</td> <td>Point release</td>   </tr>
-        <tr> <td>V6.18a</td> <td>2021-05-12</td> <td>General release</td> </tr>
-        <tr> <td>V6.18 </td> <td>2021-05-03</td> <td>Point release</td>   </tr>
+        <tr> <td>V6.18a</td> <td>2021-05-12</td> <td>Point release</td>   </tr>
+        <tr> <td>V6.18 </td> <td>2021-05-03</td> <td>General release</td> </tr>
         <tr> <td>V6.16e</td> <td>2021-04-01</td> <td>Point release</td>   </tr>
         <tr> <td>V6.16d</td> <td>2021-03-24</td> <td>Point release</td>   </tr>
-        <tr> <td>V6.16c</td> <td>2021-03-04</td> <td>General release</td> </tr>
+        <tr> <td>V6.16c</td> <td>2021-03-04</td> <td>Point release</td>   </tr>
         <tr> <td>V6.16b</td> <td>2021-01-07</td> <td>Point release</td>   </tr>
         <tr> <td>V6.16a</td> <td>2020-12-02</td> <td>Point release</td>   </tr>
         <tr> <td>V6.16 </td> <td>2020-11-13</td> <td>General release</td> </tr>
@@ -5992,7 +6224,7 @@ div.divider-global:nth-of-type(even) {
 <div class="footer">
   <div class="container">
     <div>
-      <p>Copyright 2001-2021 SEGGER Microcontroller GmbH. All rights reserved.<br>
+      <p>Copyright 2001-2022 SEGGER Microcontroller GmbH. All rights reserved.<br>
         For more information, please visit our website&nbsp;<a href="https://www.segger.com/" target="_blank">www.segger.com</a>&nbsp;or contact us at&nbsp;<a href="mailto:info@segger.com">info@segger.com</a>&nbsp;</p>
     </div>
   </div>

@@ -59,6 +59,11 @@
 *         : 11.11.2021 4.30    Added support for RX140-256KB.
 *         : 14.03.2022 4.40    Added support for RX66T 48pins.
 *         : 31.03.2022 4.50    Added support for RX660.
+*         : 28.06.2022 4.60    Updated demo projects
+*         : 15.12.2022 4.70    Added P50 and P51 for RX66T and RX72T.
+                               Added PORTJ for RX110.
+							   Added PH7 for RX110 and RX111.
+							   Removed 112pins, 80pins, and 64pins package for RX72T.
 ***********************************************************************************************************************/
 
 #ifndef GPIO_RX_INTERFACE_HEADER_FILE
@@ -133,7 +138,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define GPIO_RX_VERSION_MAJOR           (4)
-#define GPIO_RX_VERSION_MINOR           (50)
+#define GPIO_RX_VERSION_MINOR           (70)
 
 /***********************************************************************************************************************
 Typedef definitions

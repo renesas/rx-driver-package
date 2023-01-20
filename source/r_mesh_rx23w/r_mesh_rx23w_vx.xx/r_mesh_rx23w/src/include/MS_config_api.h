@@ -21,13 +21,12 @@
 
 
 /* --------------------------------------------- Global Definitions */
-
 /**
  * \defgroup config_module Configuration Model (CONFIG)
- * \ingroup mesh_models_block
+ * \ingroup foundation_models
  * \{
- *  \brief This section describes the interfaces & APIs offered by the EtherMind
- *  Mesh Configuration Model (CONFIG) module to the Application.
+ * \brief This section describes the interfaces & APIs offered by the EtherMind
+ * Mesh Configuration Model (CONFIG) module to the Application.
  */
 
 /* --------------------------------------------- Data Types/ Structures */
@@ -35,8 +34,8 @@
 /**
  *  \defgroup config_cb Application Callback
  *  \{
- *  \brief This section Describes the module Notification Callback interface offered
- *  to the application
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Configuration Model Layer.
  */
 /**
  * Configuration Client application Asynchronous Notification Callback.
@@ -59,15 +58,23 @@ typedef API_RESULT (* MS_CONFIG_MODEL_CB)
 /** \} */
 
 /**
- *  \defgroup config_structures Structures
- *  \{
- *  \brief This section describes the EtherMind Mesh Configuration Model Structures.
+ * \defgroup config_defines Defines
+ * \{
+ * \brief This section describes the various Defines in EtherMind
+ * Mesh Configuration Model Layer.
+ */
+
+/**
+ * \defgroup config_structures Structures
+ * \{
+ * \brief This section describes the various Data-Types and Structures in
+ * EtherMind Mesh Configuration Model Layer.
  */
 
 /**
  * \defgroup config_cli_structs Configuration Client Data Structures
  * \{
- * \brief This section describes the data structures for use in Configuration Client APIs.
+ * This section describes the data structures for use in Configuration Client APIs.
  */
 
 /**
@@ -418,10 +425,15 @@ typedef struct _ACCESS_CONFIG_APPKEY_ADD_PARAM
     UCHAR appkey[MS_ACCESS_APPKEY_SIZE];
 
     /**
-     * Index of the NetKey and index of the AppKey
+     * Index of the NetKey
      * - 24 bits valid
      */
     UINT16 netkey_index;
+
+    /**
+     * Index of the AppKey
+     * - 24 bits valid
+     */
     UINT16 appkey_index;
 
 } ACCESS_CONFIG_APPKEY_ADD_PARAM;
@@ -435,10 +447,15 @@ typedef struct _ACCESS_CONFIG_APPKEY_UPDATE_PARAM
     UCHAR appkey[MS_ACCESS_APPKEY_SIZE];
 
     /**
-     * Index of the NetKey and index of the AppKey
+     * Index of the NetKey
      * - 24 bits valid
      */
     UINT16 netkey_index;
+
+    /**
+     * Index of the AppKey
+     * - 24 bits valid
+     */
     UINT16 appkey_index;
 
 } ACCESS_CONFIG_APPKEY_UPDATE_PARAM;
@@ -449,10 +466,15 @@ typedef struct _ACCESS_CONFIG_APPKEY_UPDATE_PARAM
 typedef struct _ACCESS_CONFIG_APPKEY_DELETE_PARAM
 {
     /**
-     * Index of the NetKey and index of the AppKey
+     * Index of the NetKey
      * - 24 bits valid
-     * */
+     */
     UINT16 netkey_index;
+
+    /**
+     * Index of the AppKey
+     * - 24 bits valid
+     */
     UINT16 appkey_index;
 
 } ACCESS_CONFIG_APPKEY_DELETE_PARAM;
@@ -683,19 +705,28 @@ typedef struct _ACCESS_CONFIG_NETWORK_TRANSMIT_SET_PARAM
 
 /** \} */
 
+/** \} */
+
 
 /* --------------------------------------------- Function */
 
 /**
  * \defgroup config_api_defs API Definitions
  * \{
- * \brief This section describes the EtherMind Mesh Config Model APIs.
+ * \brief This section describes the various APIs exposed by
+ * EtherMind Mesh Configuration Model Layer to the Application.
  */
 
 /**
- * \defgroup config_cli_api_defs Configuration Client API
+ * \defgroup config_cli_api_defs Configuration Client API Definitions
  * \{
- * \brief This section describes the Configuration Client APIs.
+ * \brief This section describes the EtherMind Mesh Configuration Client
+ * Model APIs.
+ */
+
+/**
+ * \name Configuration Client Interfaces
+ * \{
  */
 
 /**
@@ -730,14 +761,12 @@ API_RESULT MS_config_client_init
  *  This is to sets the information about server which is to be configured.
  *
  *  \param [in] server_addr   Address of Configuration Server.
- *  \param [in] dev_key       Device Key of Configuration Server.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
 API_RESULT MS_config_client_set_server
            (
-               /* IN */ MS_NET_ADDR    server_addr,
-               /* IN */ UCHAR        * dev_key
+               /* IN */ MS_NET_ADDR    server_addr
            );
 
 /**
@@ -759,9 +788,29 @@ API_RESULT MS_config_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
-/** \name Messsage Send
- *  \{
+/** \} */
+
+/** \} */
+
+/** \} */
+
+/**
+ * \addtogroup config_defines
+ * \{
  */
+
+/**
+ * \defgroup config_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind
+ * Mesh Configuration Model Layer.
+ */
+
+/**
+ * \name Configuration Client Macros
+ * \{
+ */
+
 /**
  *  \brief API to get the secure network beacon state
  *
@@ -1695,12 +1744,24 @@ API_RESULT MS_config_client_send_reliable_pdu
 
 /** \} */
 
+/** \} */
+
 /**
- * \defgroup config_svr_api_defs Configuration Server API
+ * \addtogroup config_api_defs
  * \{
- * \brief This section describes the Configuration Server APIs.
  */
 
+/**
+ * \defgroup config_svr_api_defs Configuration Server API Definitions
+ * \{
+ * \brief This section describes the EtherMind Mesh Configuration Server
+ * Model APIs.
+ */
+
+/**
+ * \name Configuration Server Interfaces
+ * \{
+ */
 /**
  *  \brief API to initialize configuration server model
  *
@@ -1725,6 +1786,7 @@ API_RESULT MS_config_server_init
                /* INOUT */ MS_ACCESS_MODEL_HANDLE    * model_handle,
                /* IN */    MS_CONFIG_MODEL_CB          appl_cb
            );
+/** \} */
 
 /** \} */
 

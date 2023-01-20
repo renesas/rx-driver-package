@@ -22,7 +22,8 @@
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
-*              : 28.09.2018 2.40     First Release
+*              : 28.09.2018 1.00     First Release
+*              : 12.12.2022 1.10     Update default register value of voltage level
 ***********************************************************************************************************************/
 #ifndef LVD_RX66T_HEADER_FILE
 #define LVD_RX66T_HEADER_FILE
@@ -66,8 +67,8 @@ Macro definitions
 #define LVD_MAX_MI_PRIO                         (15)
 
 /* Default value: Default register value of voltage level */
-#define LVD_VOLTAGE_LEVEL_DEFAULT_VALUE_CH1     (11)
-#define LVD_VOLTAGE_LEVEL_DEFAULT_VALUE_CH2     (11)
+#define LVD_VOLTAGE_LEVEL_DEFAULT_VALUE_CH1     (6)
+#define LVD_VOLTAGE_LEVEL_DEFAULT_VALUE_CH2     (6)
 
 /* Convert: Voltage level: Setting value -> register value */
 #if (LVD_CFG_VOLTAGE_LEVEL_CHANNEL_1 == 457)

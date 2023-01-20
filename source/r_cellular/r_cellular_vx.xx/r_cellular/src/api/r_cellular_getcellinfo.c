@@ -48,14 +48,15 @@
 /************************************************************************
  * Function Name  @fn            R_CELLULAR_GetCellInfo
  ***********************************************************************/
-e_cellular_err_t R_CELLULAR_GetCellInfo(st_cellular_ctrl_t * const p_ctrl, const e_cellular_info_type_t type,
-                                            void(* const p_callback)(void * p_args))
+e_cellular_err_t R_CELLULAR_GetCellInfo(st_cellular_ctrl_t * const p_ctrl, const e_cellular_info_type_t type)
 {
+    uint32_t preemption = 0;
     e_cellular_err_t ret = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
     uint8_t count = 0;
 
-    if ((NULL == p_ctrl) || (NULL == p_callback) ||
+    preemption = cellular_interrupt_disable();
+    if ((NULL == p_ctrl) || (1 != CELLULAR_CFG_URC_CHARGET_ENABLED) ||
             ((CELLULAR_INFO_TYPE0 != type) && (CELLULAR_INFO_TYPE1 != type) &&
                     (CELLULAR_INFO_TYPE2 != type) && (CELLULAR_INFO_TYPE7 != type) && (CELLULAR_INFO_TYPE9 != type)))
     {
@@ -63,11 +64,20 @@ e_cellular_err_t R_CELLULAR_GetCellInfo(st_cellular_ctrl_t * const p_ctrl, const
     }
     else
     {
-        if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
+        if (0 != (p_ctrl->running_api_count % 2))
+        {
+            ret = CELLULAR_ERR_OTHER_API_RUNNING;
+        }
+        else if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
         {
             ret = CELLULAR_ERR_NOT_OPEN;
         }
+        else
+        {
+            p_ctrl->running_api_count += 2;
+        }
     }
+    cellular_interrupt_enable(preemption);
 
     if (CELLULAR_SUCCESS == ret)
     {
@@ -84,15 +94,11 @@ e_cellular_err_t R_CELLULAR_GetCellInfo(st_cellular_ctrl_t * const p_ctrl, const
                 }
                 if (CELLULAR_SUCCESS == ret)
                 {
-                    p_ctrl->recv_data = (void *) &type; //(&e_cellular_info_type_t) -> (void *)
-                    p_ctrl->callback.sqnmoni_callback = p_callback;
                     do
                     {
                         ret = atc_sqnmoni(p_ctrl, type);
                         count++;
                     } while ((count < CELLULAR_GET_INFO_LIMIT) && (CELLULAR_SUCCESS != ret));
-                    p_ctrl->recv_data = NULL;
-                    p_ctrl->callback.sqnmoni_callback = NULL;
                 }
             }
             cellular_give_semaphore(p_ctrl->at_semaphore);
@@ -101,6 +107,8 @@ e_cellular_err_t R_CELLULAR_GetCellInfo(st_cellular_ctrl_t * const p_ctrl, const
         {
             ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
         }
+
+        p_ctrl->running_api_count -= 2;
     }
 
     return ret;

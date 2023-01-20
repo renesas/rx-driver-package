@@ -48,7 +48,7 @@ static int32_t cellular_send_data (st_cellular_ctrl_t * const p_ctrl, const uint
 static uint32_t cellular_send_size_check (st_cellular_ctrl_t * const p_ctrl, const int32_t length,
                                             const int32_t complete_length);
 static e_cellular_timeout_check_t cellular_tx_flag_check (st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_no);
-static e_cellular_timeout_check_t cellular_atc_response_chek (st_cellular_ctrl_t * const p_ctrl,
+static e_cellular_timeout_check_t cellular_atc_response_check (st_cellular_ctrl_t * const p_ctrl,
                                                                     const uint8_t socket_no);
 
 /*************************************************************************************************
@@ -57,68 +57,70 @@ static e_cellular_timeout_check_t cellular_atc_response_chek (st_cellular_ctrl_t
 int32_t R_CELLULAR_SendSocket(st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_no,
                     const uint8_t * const p_data, const int32_t length, const uint32_t timeout_ms)
 {
+    uint32_t preemption = 0;
     int32_t complete_length = 0;
     e_cellular_err_t ret = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
 
+    preemption = cellular_interrupt_disable();
     if ((NULL == p_data) || (0 >= length) || (NULL == p_ctrl))
     {
         ret = CELLULAR_ERR_PARAMETER;
     }
     else
     {
-        if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
+        if (0 != (p_ctrl->running_api_count % 2))
+        {
+            ret = CELLULAR_ERR_OTHER_API_RUNNING;
+        }
+        else if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
         {
             ret = CELLULAR_ERR_NOT_OPEN;
         }
         else if (CELLULAR_SYSTEM_OPEN == p_ctrl->system_state)
         {
-            ret =  CELLULAR_ERR_NOT_CONNECT;
+            ret = CELLULAR_ERR_NOT_CONNECT;
         }
         else
         {
             R_BSP_NOP();
         }
-    }
 
-    if (CELLULAR_SUCCESS == ret)
-    {
-        if ((CELLULAR_START_SOCKET_NUMBER > socket_no) || (p_ctrl->creatable_socket < socket_no))
+        if (CELLULAR_SUCCESS == ret)
         {
-            ret = CELLULAR_ERR_PARAMETER;
+            if ((CELLULAR_START_SOCKET_NUMBER > socket_no) || (p_ctrl->creatable_socket < socket_no))
+            {
+                ret = CELLULAR_ERR_PARAMETER;
+            }
+            else if ((CELLULAR_SOCKET_STATUS_CONNECTED !=
+                    p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].socket_status))
+            {
+                ret = CELLULAR_ERR_SOCKET_NOT_READY;
+            }
+            else
+            {
+                p_ctrl->running_api_count += 2;
+            }
         }
     }
-
-    if (CELLULAR_SUCCESS == ret)
-    {
-        if ((CELLULAR_SOCKET_STATUS_CONNECTED !=
-                        p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].socket_status))
-        {
-            ret = CELLULAR_ERR_SOCKET_NOT_READY;
-        }
-    }
+    cellular_interrupt_enable(preemption);
 
     if (CELLULAR_SUCCESS == ret)
     {
         semaphore_ret = cellular_take_semaphore(p_ctrl->at_semaphore);
         if (CELLULAR_SEMAPHORE_SUCCESS != semaphore_ret)
         {
-            ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
+            complete_length = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
         }
-    }
-
-    if (CELLULAR_SUCCESS == ret)
-    {
-        complete_length = cellular_send_data(p_ctrl, socket_no, p_data, length, timeout_ms);
-        cellular_give_semaphore(p_ctrl->at_semaphore);
-        cellular_delay_task(1);
+        else
+        {
+            complete_length = cellular_send_data(p_ctrl, socket_no, p_data, length, timeout_ms);
+            cellular_give_semaphore(p_ctrl->at_semaphore);
+            cellular_delay_task(1);
+        }
+        p_ctrl->running_api_count -= 2;
     }
     else
-    {
-        complete_length = ret;
-    }
-
-    if (CELLULAR_SUCCESS != ret)
     {
         complete_length = ret;
     }
@@ -156,16 +158,38 @@ int32_t R_CELLULAR_SendSocket(st_cellular_ctrl_t * const p_ctrl, const uint8_t s
 static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_no,
                                     const uint8_t * const p_data, const int32_t length, const uint32_t timeout_ms)
 {
+#if CELLULAR_CFG_CTS_SW_CTRL == 1
+    uint16_t sci_send_size = 0;
+#endif
     int32_t complete_length = 0;
     uint32_t send_size = 0;
     sci_err_t sci_ret = SCI_SUCCESS;
     e_cellular_err_t ret = CELLULAR_SUCCESS;
     e_cellular_timeout_check_t timeout = CELLULAR_NOT_TIMEOUT;
+    e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_ERR_TAKE;
 
-    st_cellular_socket_time_ctrl_t * const p_cellular_timeout_ctrl =
+    st_cellular_time_ctrl_t * const p_cellular_timeout_ctrl =
             &p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].cellular_tx_timeout_ctrl;
 
     cellular_timeout_init(p_cellular_timeout_ctrl, timeout_ms);
+
+    if (CELLULAR_PSM_ACTIVE == p_ctrl->ring_ctrl.psm)
+    {
+        while (1)
+        {
+            semaphore_ret = cellular_take_semaphore(p_ctrl->ring_ctrl.rts_semaphore);
+            if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
+            {
+                break;
+            }
+            cellular_delay_task(1);
+        }
+#if CELLULAR_CFG_CTS_SW_CTRL == 1
+        cellular_rts_hw_flow_enable();
+#else
+        cellular_rts_ctrl(0);
+#endif
+    }
 
     while (complete_length < length)
     {
@@ -183,11 +207,10 @@ static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8
         {
             break;
         }
-
+#if CELLULAR_CFG_CTS_SW_CTRL == 0
         p_ctrl->sci_ctrl.tx_end_flg = CELLULAR_TX_END_FLAG_OFF;
 
-        sci_ret = R_SCI_Send(p_ctrl->sci_ctrl.sci_hdl,
-                                (uint8_t *)p_data + complete_length, send_size); // (const uint8_t *) -> (uint8_t *)
+        sci_ret = R_SCI_Send(p_ctrl->sci_ctrl.sci_hdl, (uint8_t *)p_data + complete_length, send_size);
         if (SCI_SUCCESS != sci_ret)
         {
             ret = CELLULAR_ERR_MODULE_COM;
@@ -199,15 +222,76 @@ static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8
         timeout = cellular_tx_flag_check(p_ctrl, socket_no);
         if (CELLULAR_TIMEOUT != timeout)
         {
-            timeout = cellular_atc_response_chek(p_ctrl, socket_no);
+            timeout = cellular_atc_response_check(p_ctrl, socket_no);
         }
 
         if (CELLULAR_TIMEOUT == timeout)
         {
+            ret = CELLULAR_ERR_MODULE_TIMEOUT;
             break;
         }
 
         complete_length += send_size;
+#else
+        sci_send_size = 0;
+
+        do
+        {
+            if (1 != CELLULAR_GET_PIDR(CELLULAR_CFG_CTS_PORT, CELLULAR_CFG_CTS_PIN))
+            {
+                p_ctrl->sci_ctrl.tx_end_flg = CELLULAR_TX_END_FLAG_OFF;
+
+                sci_ret = R_SCI_Send(p_ctrl->sci_ctrl.sci_hdl, (uint8_t *)p_data + complete_length + sci_send_size, 1);
+                if (SCI_SUCCESS != sci_ret)
+                {
+                    ret = CELLULAR_ERR_MODULE_COM;
+                    sci_send_size = send_size;
+                }
+                else
+                {
+                    timeout = cellular_tx_flag_check(p_ctrl, socket_no);
+                    if (CELLULAR_TIMEOUT == timeout)
+                    {
+                        ret = CELLULAR_ERR_MODULE_TIMEOUT;
+                        sci_send_size = send_size;
+                    }
+                    else
+                    {
+                        sci_send_size++;
+                    }
+                }
+            }
+            else
+            {
+                R_BSP_NOP();
+            }
+        } while (sci_send_size < send_size);
+
+        if (CELLULAR_SUCCESS != ret)
+        {
+            break;
+        }
+
+        cellular_set_atc_number(p_ctrl, ATC_SQNSSENDEXT_END);
+
+        timeout = cellular_atc_response_check(p_ctrl, socket_no);
+        if (CELLULAR_TIMEOUT == timeout)
+        {
+            ret = CELLULAR_ERR_MODULE_TIMEOUT;
+            break;
+        }
+
+        complete_length += sci_send_size;
+#endif  /* CELLULAR_CFG_CTS_SW_CTRL == 0 */
+    }
+
+    if (CELLULAR_PSM_ACTIVE == p_ctrl->ring_ctrl.psm)
+    {
+        cellular_give_semaphore(p_ctrl->ring_ctrl.rts_semaphore);
+#if CELLULAR_CFG_CTS_SW_CTRL == 1
+        cellular_rts_hw_flow_disable();
+#endif
+        cellular_rts_ctrl(1);
     }
 
     if (CELLULAR_SUCCESS != ret)
@@ -274,7 +358,7 @@ static e_cellular_timeout_check_t cellular_tx_flag_check(st_cellular_ctrl_t * co
 {
     e_cellular_timeout_check_t timeout = CELLULAR_NOT_TIMEOUT;
 
-    st_cellular_socket_time_ctrl_t * const p_cellular_timeout_ctrl =
+    st_cellular_time_ctrl_t * const p_cellular_timeout_ctrl =
             &p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].cellular_tx_timeout_ctrl;
 
     while (1)
@@ -283,13 +367,39 @@ static e_cellular_timeout_check_t cellular_tx_flag_check(st_cellular_ctrl_t * co
         {
             break;
         }
-
+#if CELLULAR_CFG_CTS_SW_CTRL == 0
         timeout = cellular_check_timeout(p_cellular_timeout_ctrl);
+
         if (CELLULAR_TIMEOUT == timeout)
         {
             break;
         }
+
         cellular_delay_task(1);
+#else
+        p_cellular_timeout_ctrl->this_time = cellular_get_tickcount();
+
+        if (CELLULAR_TIMEOUT_NOT_OVERFLOW == p_cellular_timeout_ctrl->timeout_overflow_flag)
+        {
+            if ((p_cellular_timeout_ctrl->this_time >= p_cellular_timeout_ctrl->end_time) ||
+                    (p_cellular_timeout_ctrl->this_time < p_cellular_timeout_ctrl->start_time))
+            {
+                timeout = CELLULAR_TIMEOUT;
+                break;
+            }
+        }
+        else
+        {
+            if ((p_cellular_timeout_ctrl->this_time < p_cellular_timeout_ctrl->start_time) &&
+                    (p_cellular_timeout_ctrl->this_time >= p_cellular_timeout_ctrl->end_time))
+            {
+                timeout = CELLULAR_TIMEOUT;
+                break;
+            }
+        }
+
+        R_BSP_NOP();
+#endif  /* CELLULAR_CFG_CTS_SW_CTRL == 0 */
     }
 
     return timeout;
@@ -299,7 +409,7 @@ static e_cellular_timeout_check_t cellular_tx_flag_check(st_cellular_ctrl_t * co
  *********************************************************************************************************************/
 
 /*************************************************************************************************
- * Function Name  @fn            cellular_atc_response_chek
+ * Function Name  @fn            cellular_atc_response_check
  * Description    @details       Wait for the AT command response.
  * Arguments      @param[in/out] p_ctrl -
  *                                  Pointer to managed structure.
@@ -310,13 +420,13 @@ static e_cellular_timeout_check_t cellular_tx_flag_check(st_cellular_ctrl_t * co
  *                @retval        CELLULAR_TIMEOUT -
  *                                  Time out.
  ************************************************************************************************/
-static e_cellular_timeout_check_t cellular_atc_response_chek(st_cellular_ctrl_t * const p_ctrl,
+static e_cellular_timeout_check_t cellular_atc_response_check(st_cellular_ctrl_t * const p_ctrl,
                                                                     const uint8_t socket_no)
 {
     e_cellular_atc_return_t     at_ret  = ATC_RETURN_NONE;
     e_cellular_timeout_check_t  timeout = CELLULAR_NOT_TIMEOUT;
 
-    st_cellular_socket_time_ctrl_t * const p_cellular_timeout_ctrl =
+    st_cellular_time_ctrl_t * const p_cellular_timeout_ctrl =
             &p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].cellular_tx_timeout_ctrl;
 
     while (1)
@@ -338,5 +448,5 @@ static e_cellular_timeout_check_t cellular_atc_response_chek(st_cellular_ctrl_t 
     return timeout;
 }
 /**********************************************************************************************************************
- * End of function cellular_atc_response_chek
+ * End of function cellular_atc_response_check
  *********************************************************************************************************************/

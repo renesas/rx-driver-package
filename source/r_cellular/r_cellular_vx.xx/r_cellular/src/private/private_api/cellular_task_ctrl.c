@@ -54,33 +54,40 @@ e_cellular_err_t cellular_start_recv_task(st_cellular_ctrl_t * const p_ctrl)
     p_ctrl->eventgroup = cellular_create_event_group("task_event");
     if (NULL == p_ctrl->eventgroup)
     {
-        ret =  CELLULAR_ERR_EVENT_GROUP_INIT;
+        ret = CELLULAR_ERR_EVENT_GROUP_INIT;
     }
     else
     {
-#if BSP_CFG_RTOS_USED == (1)
         ret = cellular_create_task(cellular_recv_task,
-                                    "cellular_recv_task",
-                                    2048,
+                                    CELLULAR_RECV_TASK_NAME,
+                                    CELLULAR_RECV_THREAD_SIZE,
                                     (void *)p_ctrl, //(st_cellular_ctrl_t *)->(void *)
                                     CELLULAR_IDLE_PRIORITY,
                                     &p_ctrl->recv_taskhandle);
-#elif BSP_CFG_RTOS_USED == (5)
-        p_ctrl->recv_taskhandle = cellular_create_task(cellular_recv_task,
-                                                        "cellular_recv_task",
-                                                        2048,
-                                                        (void *)p_ctrl, //(st_cellular_ctrl_t *)->(void *)
-                                                        CELLULAR_IDLE_PRIORITY,
-                                                        &p_ctrl->recv_taskhandle);
-        if (NULL == p_ctrl->recv_taskhandle)
-        {
-            ret = CELLULAR_ERR_CREATE_TASK;
-        }
-#endif
     }
 
     return ret;
 }
 /**********************************************************************************************************************
  End of function cellular_start_recv_task
+ *********************************************************************************************************************/
+
+/****************************************************************************
+ * Function Name  @fn            cellular_start_ring_task
+ ***************************************************************************/
+e_cellular_err_t cellular_start_ring_task(st_cellular_ctrl_t * const p_ctrl)
+{
+    e_cellular_err_t ret = CELLULAR_SUCCESS;
+
+    ret = cellular_create_task(cellular_ring_task,
+                                CELLULAR_RING_TASK_NAME,
+                                CELLULAR_RING_THREAD_SIZE,
+                                (void *)p_ctrl, //(st_cellular_ctrl_t *)->(void *)
+                                CELLULAR_IDLE_PRIORITY,
+                                &p_ctrl->ring_ctrl.ring_taskhandle);
+
+    return ret;
+}
+/**********************************************************************************************************************
+ End of function cellular_start_ring_task
  *********************************************************************************************************************/

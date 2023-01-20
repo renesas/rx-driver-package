@@ -34,6 +34,7 @@
 *         : 30.11.2020 1.82    Updated version to 1.82 for e2studio 2020-10 support.
 *         : 31.03.2021 1.90    Updated for queue protection.
 *         : 29.10.2021 2.00    Updated for critical section protection in R_BYTEQ_Put, R_BYTEQ_Get functions.
+*         : 30.11.2022 2.10    Updated and added new demo project.
 ***********************************************************************************************************************/
 
 #ifndef BYTEQ_IF_H
@@ -49,7 +50,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
 #define BYTEQ_VERSION_MAJOR (2)
-#define BYTEQ_VERSION_MINOR (00)
+#define BYTEQ_VERSION_MINOR (10)
 
 #if ((BYTEQ_CFG_CRITICAL_SECTION == 1)||(BYTEQ_CFG_PROTECT_QUEUE == 1))
 #if (BSP_CFG_RUN_IN_USER_MODE == 1)

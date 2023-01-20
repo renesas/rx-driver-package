@@ -5,12 +5,12 @@ r_eeprom_spi (SPI serial EEPROM control software)
 
 Document Number 
 ---------------
-R01AN2325EJ0302
-R01AN2325JJ0302
+R01AN2325EJ0310
+R01AN2325JJ0310
 
 Version
 -------
-v3.02
+v3.10
 
 Overview
 --------
@@ -46,7 +46,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp    v5.52
+* r_bsp    v7.20
 
 How to add to your project
 --------------------------
@@ -73,9 +73,9 @@ project. Refer to ÅgRX Smart Configurator UserÅfs Guide: IAREW (R20AN0535)Åh for
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.02 release 00
-* GCC for Renesas RX 8.3.0
-* IAR C/C++ Compiler for Renesas RX 4.14.1
+* Renesas RX
+* GCC for Renesas RX
+* IAR C/C++ Compiler for Renesas RX
 
 File Structure
 --------------
@@ -86,13 +86,9 @@ r_eeprom_spi
 +---doc
 |   |
 |   +---en
-|   |       r01an2325ej0302-rx-serial.pdf
+|   |       r01an2325ej{VERSION_NUMBER}-rx-serial.pdf
 |   +---ja
-|           r01an2325jj0302-rx-serial.pdf
-|
-+---ref
-|       r_eeprom_spi_config_reference.h
-|       r_eeprom_spi_pin_config_reference.h
+|           r01an2325jj{VERSION_NUMBER}-rx-serial.pdf
 |
 +---src
     |   r_eeprom_spi.c
@@ -114,4 +110,3 @@ r_eeprom_spi
 
 r_config
     r_eeprom_spi_config.h
-    r_eeprom_spi_pin_config.h

@@ -19,7 +19,7 @@
 /**********************************************************************************************************************
 * System Name  : MMC Driver
 * File Name    : r_mmcif_register.c
-* Version      : 1.07
+* Version      : 1.10
 * Device       : RX72N
 * Abstract     : API & Sub module
 * Tool-Chain   : For RX72N Group
@@ -32,6 +32,7 @@
 /**********************************************************************************************************************
 * History      : DD.MM.YYYY Version Description
 *              : 22.11.2019 1.07    First Release
+*              : 27.12.2022 1.10    Updated slash format of included header file paths for Linux compatibility.
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -41,7 +42,7 @@ Includes <System Includes> , "Project Includes"
 #if defined(BSP_MCU_RX72N)
 
 #include "r_mmcif_rx_if.h"
-#include ".\src\r_mmcif_rx_private.h"
+#include "./src/r_mmcif_rx_private.h"
 
 
 /**********************************************************************************************************************

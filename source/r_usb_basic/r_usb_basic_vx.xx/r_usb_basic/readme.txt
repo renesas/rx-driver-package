@@ -10,7 +10,7 @@ R01AN2025JJ
 
 Version
 -------
-v1.40
+v1.41
 
 Overview
 --------
@@ -78,9 +78,9 @@ r_usb_basic
 |
 +---doc
 |     \en
-|     |   r01an2025ej0140_usb.pdf
+|     |   r01an2025ej0141_usb.pdf
 |     \jp
-|         r01an2025jj0140_usb.pdf
+|         r01an2025jj0141_usb.pdf
 |
 +---ref
 |       r_usb_config_reference.h
@@ -122,7 +122,7 @@ r_usb_basic
      |      r_usb_pstdfunction.c
      |      r_usb_pstdrequest.c
      |      r_usb_usbif_api.c
-     |      r_usb_usbx_port.c
+     |      r_usb_usbx_port.c (Azure RTOS only)
      |            
      \---hw
            +---inc

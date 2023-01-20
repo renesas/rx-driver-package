@@ -72,7 +72,7 @@ e_cellular_err_t R_CELLULAR_ConfigSSLSocket(st_cellular_ctrl_t * const p_ctrl,
         }
         else if (CELLULAR_SYSTEM_OPEN == p_ctrl->system_state)
         {
-            ret =  CELLULAR_ERR_NOT_CONNECT;
+            ret = CELLULAR_ERR_NOT_CONNECT;
         }
         else
         {

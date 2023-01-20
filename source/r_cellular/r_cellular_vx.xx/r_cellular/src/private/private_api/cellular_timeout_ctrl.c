@@ -46,7 +46,7 @@
 /*******************************************************************************
  * Function Name  @fn            cellular_timeout_init
  ******************************************************************************/
-void cellular_timeout_init(st_cellular_socket_time_ctrl_t * const p_timeout_ctrl, const uint32_t timeout_ms)
+void cellular_timeout_init(st_cellular_time_ctrl_t * const p_timeout_ctrl, const uint32_t timeout_ms)
 {
     uint32_t timeout = timeout_ms;
 
@@ -57,7 +57,6 @@ void cellular_timeout_init(st_cellular_socket_time_ctrl_t * const p_timeout_ctrl
 
     p_timeout_ctrl->start_time = cellular_get_tickcount();
     p_timeout_ctrl->end_time = p_timeout_ctrl->start_time + timeout;
-    p_timeout_ctrl->remain_time = timeout;
 
     if (p_timeout_ctrl->end_time < p_timeout_ctrl->start_time)
     {
@@ -73,30 +72,9 @@ void cellular_timeout_init(st_cellular_socket_time_ctrl_t * const p_timeout_ctrl
  *********************************************************************************************************************/
 
 /*******************************************************************************
- * Function Name  @fn            cellular_bytetimeout_init
- ******************************************************************************/
-void cellular_bytetimeout_init(st_cellular_module_time_ctrl_t * const p_timeout_ctrl, const uint32_t timeout_ms)
-{
-    p_timeout_ctrl->start_time = cellular_get_tickcount();
-    p_timeout_ctrl->end_time = p_timeout_ctrl->start_time + timeout_ms;
-
-    if (p_timeout_ctrl->end_time < p_timeout_ctrl->start_time)
-    {
-        p_timeout_ctrl->timeout_overflow_flag = CELLULAR_TIMEOUT_OVERFLOW;
-    }
-    else
-    {
-        p_timeout_ctrl->timeout_overflow_flag = CELLULAR_TIMEOUT_NOT_OVERFLOW;
-    }
-}
-/**********************************************************************************************************************
- * End of function cellular_bytetimeout_init
- *********************************************************************************************************************/
-
-/*******************************************************************************
  * Function Name  @fn            cellular_check_timeout
  ******************************************************************************/
-e_cellular_timeout_check_t cellular_check_timeout(st_cellular_socket_time_ctrl_t * const p_timeout_ctrl)
+e_cellular_timeout_check_t cellular_check_timeout(st_cellular_time_ctrl_t * const p_timeout_ctrl)
 {
     p_timeout_ctrl->this_time = cellular_get_tickcount();
 
@@ -123,85 +101,4 @@ e_cellular_timeout_check_t cellular_check_timeout(st_cellular_socket_time_ctrl_t
 }
 /**********************************************************************************************************************
  * End of function cellular_check_timeout
- *********************************************************************************************************************/
-
-/*******************************************************************************
- * Function Name  @fn            cellular_check_bytetimeout
- ******************************************************************************/
-e_cellular_timeout_check_t cellular_check_bytetimeout(st_cellular_module_time_ctrl_t * const p_timeout_ctrl)
-{
-    p_timeout_ctrl->this_time = cellular_get_tickcount();
-
-    if (CELLULAR_TIMEOUT_NOT_OVERFLOW == p_timeout_ctrl->timeout_overflow_flag)
-    {
-        if ((p_timeout_ctrl->this_time >= p_timeout_ctrl->end_time) ||
-                (p_timeout_ctrl->this_time < p_timeout_ctrl->start_time))
-        {
-            return CELLULAR_TIMEOUT;
-        }
-    }
-    else
-    {
-        if ((p_timeout_ctrl->this_time < p_timeout_ctrl->start_time) &&
-                (p_timeout_ctrl->this_time >= p_timeout_ctrl->end_time))
-        {
-            return CELLULAR_TIMEOUT;
-        }
-    }
-
-    cellular_delay_task(1);
-
-    return CELLULAR_NOT_TIMEOUT;
-}
-/**********************************************************************************************************************
- * End of function cellular_check_bytetimeout
- *********************************************************************************************************************/
-
-/*******************************************************************************
- * Function Name  @fn            cellular_check_timeout_remain
- ******************************************************************************/
-e_cellular_timeout_check_t cellular_check_timeout_remain(st_cellular_socket_time_ctrl_t * p_timeout_ctrl,
-                                                            const uint32_t timeout_ms)
-{
-    p_timeout_ctrl->this_time = cellular_get_tickcount();
-
-    if (CELLULAR_TIMEOUT_NOT_OVERFLOW == p_timeout_ctrl->timeout_overflow_flag)
-    {
-        if ((p_timeout_ctrl->this_time >= p_timeout_ctrl->end_time) ||
-                (p_timeout_ctrl->this_time < p_timeout_ctrl->start_time))
-        {
-            return CELLULAR_TIMEOUT;
-        }
-        else
-        {
-            p_timeout_ctrl->remain_time = p_timeout_ctrl->end_time -
-                    p_timeout_ctrl->this_time;
-        }
-    }
-    else
-    {
-        if ((p_timeout_ctrl->this_time < p_timeout_ctrl->start_time) &&
-                (p_timeout_ctrl->this_time >= p_timeout_ctrl->end_time))
-        {
-            return CELLULAR_TIMEOUT;
-        }
-        else
-        {
-            if (p_timeout_ctrl->this_time < p_timeout_ctrl->start_time)
-            {
-                p_timeout_ctrl->remain_time = p_timeout_ctrl->end_time - p_timeout_ctrl->this_time;
-            }
-            else
-            {
-                p_timeout_ctrl->remain_time = timeout_ms - (p_timeout_ctrl->this_time - p_timeout_ctrl->start_time);
-            }
-        }
-    }
-
-    cellular_delay_task(1);
-
-    return CELLULAR_NOT_TIMEOUT;
-}
-/**********************************************************************************************************************
-  * End of function cellular_check_timeout_remain
  *********************************************************************************************************************/

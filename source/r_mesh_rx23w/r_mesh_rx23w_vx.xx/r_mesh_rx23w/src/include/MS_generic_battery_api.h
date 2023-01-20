@@ -21,20 +21,18 @@
 /* --------------------------------------------- Global Definitions */
 /**
  * \defgroup generic_battery_module Generic Battery Model (GENERIC_BATTERY)
- * \ingroup mesh_models_block
+ * \ingroup generics_models
  * \{
  *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Generic Battery Model (GENERIC_BATTERY) module to the Application.
  */
 
-
-
 /* --------------------------------------------- Data Types/ Structures */
 /**
  *  \defgroup generic_battery_cb Application Callback
  *  \{
- *  \brief This section Describes the module Notification Callback interface offered
- *  to the application
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Generic Battery Model Layer.
  */
 
 /**
@@ -80,9 +78,17 @@ typedef API_RESULT (* MS_GENERIC_BATTERY_CLIENT_CB)
 /** \} */
 
 /**
+ * \defgroup generic_battery_defines Defines
+ * \{
+ * \brief This section describes the various Defines in EtherMind
+ * Mseh Generic Battery Model Layer.
+ */
+
+/**
  *  \defgroup generic_battery_structures Structures
  *  \{
- *  \brief This section describes the EtherMind Mesh Generic Battery Model Structures.
+ *  \brief This section describes the various Data-Types and Structures in
+ *  EtherMind Mesh Generic Battery Model Layer.
  */
 
 /**
@@ -142,18 +148,26 @@ typedef struct MS_generic_battery_status_struct
 
 /** \} */
 
-
+/** \} */
 
 /* --------------------------------------------- Function */
 /**
  * \defgroup generic_battery_api_defs API Definitions
  * \{
- * \brief This section describes the EtherMind Mesh Generic Battery Model APIs.
+ * \brief This section describes the various APIs exposed by
+ * EtherMind Mesh Generic Battery Model Layer to the Application.
  */
+
 /**
- * \defgroup generic_battery_ser_api_defs Generic Battery Server API
+ * \defgroup generic_battery_ser_api_defs Generic Battery Server API Definitions
  * \{
- * \brief This section describes the Generic Battery Server APIs.
+ * \brief This section describes the EtherMind Mesh Generic Battery Server
+ * Model APIs.
+ */
+
+/**
+ * \name Generic Battery Server Interfaces
+ * \{
  */
 
 /**
@@ -209,10 +223,18 @@ API_RESULT MS_generic_battery_server_state_update
            );
 /** \} */
 
+/** \} */
+
 /**
- * \defgroup generic_battery_cli_api_defs Generic Battery Client API
+ * \defgroup generic_battery_cli_api_defs Generic Battery Client API Definitions
  * \{
- * \brief This section describes the Generic Battery Client APIs.
+ * \brief This section describes the EtherMind Mesh Generic Battery Client
+ * Model APIs.
+ */
+
+/**
+ * \name Generic Battery Client Interfaces
+ * \{
  */
 
 /**
@@ -289,9 +311,29 @@ API_RESULT MS_generic_battery_client_send_reliable_pdu
                /* IN */ UINT32    rsp_opcode
            );
 
-/** \name Macros for Message
- *  \{
+/** \} */
+
+/** \} */
+
+/** \} */
+
+/**
+ * \addtogroup generic_battery_defines
+ * \{
  */
+
+/**
+ * \defgroup generic_battery_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind
+ * MEsh Generic Battery Model Layer.
+ */
+
+/**
+ * \name Generic Battery Client Macros
+ * \{
+ */
+
 /**
  *  \brief API to get the Generic Battery state of an element.
  *
@@ -310,8 +352,11 @@ API_RESULT MS_generic_battery_client_send_reliable_pdu
             MS_ACCESS_GENERIC_BATTERY_STATUS_OPCODE\
         )
 /** \} */
+
 /** \} */
+
 /** \} */
+
 /** \} */
 
 #endif /*_H_MS_GENERIC_BATTERY_API_ */

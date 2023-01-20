@@ -35,6 +35,7 @@
 *         : 30.11.2020 1.82    Updated version to 1.82 for e2studio 2020-10 support.
 *         : 29.10.2021 1.90    Updated for queue protection.
 *                              Updated for critical section protection.
+*         : 30.11.2022 2.00    Updated and added new demo project.
 ***********************************************************************************************************************/
 
 #ifndef LONGQ_IF_H
@@ -50,8 +51,8 @@ Includes   <System Includes> , "Project Includes"
 Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
-#define LONGQ_VERSION_MAJOR (1)
-#define LONGQ_VERSION_MINOR (90)
+#define LONGQ_VERSION_MAJOR (2)
+#define LONGQ_VERSION_MINOR (00)
 
 #if ((LONGQ_CFG_CRITICAL_SECTION == 1)||(LONGQ_CFG_PROTECT_QUEUE == 1))
 #if (BSP_CFG_RUN_IN_USER_MODE == 1)

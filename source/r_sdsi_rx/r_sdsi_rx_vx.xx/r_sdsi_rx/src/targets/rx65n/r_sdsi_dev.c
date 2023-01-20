@@ -19,7 +19,7 @@
 /**********************************************************************************************************************
 * System Name  : SDSI Driver
 * File Name    : r_sdsi_dev.c
-* Version      : 2.02
+* Version      : 2.03
 * Device       : RX65N
 * Abstract     : API & Sub module
 * Tool-Chain   : -
@@ -35,6 +35,7 @@
 *              :                    Fixed to correspond to Renesas coding rule.
 *              : 04.04.2019 2.02    Added support for GNUC and ICCRX.
 *                                   Fixed coding style.
+*              : 27.12.2022 2.03    Updated slash format of included header file paths for Linux compatibility.
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -44,7 +45,7 @@ Includes <System Includes> , "Project Includes"
 #if defined(BSP_MCU_RX65N)
 
 #include "r_sdsi_rx_if.h"
-#include ".\src\r_sdsi_rx_private.h"
+#include "./src/r_sdsi_rx_private.h"
 
 #if (SDSI_CFG_CH0_INT_LEVEL < 1) || (SDSI_CFG_CH0_INT_LEVEL > 15)
     #error "ERROR !!! You must set (1) - (15) in SDSI_CFG_CH0_INT_LEVEL."

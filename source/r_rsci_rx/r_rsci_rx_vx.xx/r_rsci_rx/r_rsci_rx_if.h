@@ -27,6 +27,7 @@
 *           03.12.2021 2.00    Updated new features in Asynchronous mode
 *                              and added support for Manchester mode.
 *           31.03.2022 2.10    Supported for RX660.
+*           29.07.2022 2.20    Updated demo projects.
 ***********************************************************************************************************************/
 
 #ifndef RSCI_IF_H
@@ -48,7 +49,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define RSCI_VERSION_MAJOR  (2)
-#define RSCI_VERSION_MINOR  (10)
+#define RSCI_VERSION_MINOR  (20)
 
 #define RSCI_CLK_INT         (0x00U) /* use internal clock for baud generation */
 #define RSCI_CLK_EXT8X       (0x03U) /* use external clock 8x baud rate (ASYNC) */

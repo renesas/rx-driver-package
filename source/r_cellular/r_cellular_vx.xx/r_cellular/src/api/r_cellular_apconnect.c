@@ -31,6 +31,11 @@
 /**********************************************************************************************************************
  * Macro definitions
  *********************************************************************************************************************/
+#define CELLULAR_SYNC_RETRY     (60)
+#define CELLULAR_SYNC_DELAY     (1000)
+#define CELLULAR_INIT_YEAR      (70)
+#define CELLULAR_INIT_MONTH     (1)
+#define CELLULAR_INIT_DAY       (1)
 
 /**********************************************************************************************************************
  * Typedef definitions
@@ -45,34 +50,42 @@
  *********************************************************************************************************************/
 static e_cellular_err_t cellular_apconnect (st_cellular_ctrl_t * const p_ctrl,
                                                 const st_cellular_ap_cfg_t * const p_ap_cfg);
+static e_cellular_err_t cellular_sync_check (st_cellular_ctrl_t * const p_ctrl);
 
 /**************************************************************************
  * Function Name  @fn            R_CELLULAR_APConnect
  *************************************************************************/
 e_cellular_err_t R_CELLULAR_APConnect(st_cellular_ctrl_t * const p_ctrl, const st_cellular_ap_cfg_t * const p_ap_cfg)
 {
+    uint32_t preemption = 0;
     e_cellular_err_t ret = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semahore_ret = CELLULAR_SEMAPHORE_SUCCESS;
 
+    preemption = cellular_interrupt_disable();
     if (NULL == p_ctrl)
     {
         ret = CELLULAR_ERR_PARAMETER;
     }
     else
     {
-        if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
+        if (0 != (p_ctrl->running_api_count % 2))
+        {
+            ret = CELLULAR_ERR_OTHER_API_RUNNING;
+        }
+        else if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
         {
             ret = CELLULAR_ERR_NOT_OPEN;
         }
         else if (CELLULAR_SYSTEM_CONNECT == p_ctrl->system_state)
         {
-            ret =  CELLULAR_ERR_ALREADY_CONNECT;
+            ret = CELLULAR_ERR_ALREADY_CONNECT;
         }
         else
         {
-            R_BSP_NOP();
+            p_ctrl->running_api_count += 2;
         }
     }
+    cellular_interrupt_enable(preemption);
 
     if (CELLULAR_SUCCESS == ret)
     {
@@ -83,7 +96,6 @@ e_cellular_err_t R_CELLULAR_APConnect(st_cellular_ctrl_t * const p_ctrl, const s
             {
                 ret = atc_cfun_check(p_ctrl);
             }
-
             if (CELLULAR_SUCCESS == ret)
             {
                 if (CELLULAR_MODULE_OPERATING_LEVEL4 != p_ctrl->module_status)
@@ -91,18 +103,22 @@ e_cellular_err_t R_CELLULAR_APConnect(st_cellular_ctrl_t * const p_ctrl, const s
                     ret = atc_cfun(p_ctrl, CELLULAR_MODULE_OPERATING_LEVEL4);
                 }
             }
-
+            if (CELLULAR_SUCCESS == ret)
+            {
+                ret = atc_cgpiaf(p_ctrl);
+            }
             if (CELLULAR_SUCCESS == ret)
             {
                 ret = atc_cgdcont(p_ctrl, p_ap_cfg);
             }
 
-            /* A && (B || C) */
+            /* A && (B || C)*/
             if ((CELLULAR_SUCCESS == ret) &&
-                    (((NULL != p_ap_cfg) && strlen((char *)p_ap_cfg->ap_user_name) &&   //(uint8_t *) -> (char *)
-                            strlen((char *)p_ap_cfg->ap_pass)) ||                       //(uint8_t *) -> (char *)
-                    (strlen(CELLULAR_STRING_CONVERT(CELLULAR_CFG_AP_USERID)) &&
-                            strlen(CELLULAR_STRING_CONVERT(CELLULAR_CFG_AP_PASSWORD)))))
+                    (((NULL != p_ap_cfg) && (strlen((char *)p_ap_cfg->ap_user_name)) && //(uint8_t *) -> (char*)
+                    (strlen((char *)p_ap_cfg->ap_pass))) ||                             //(uint8_t *) -> (char*)
+                        ((NULL == p_ap_cfg) &&
+                        (strlen(CELLULAR_STRING_CONVERT(CELLULAR_CFG_AP_USERID))) &&
+                        (strlen(CELLULAR_STRING_CONVERT(CELLULAR_CFG_AP_PASSWORD))))))
             {
                 ret = atc_cgauth(p_ctrl, p_ap_cfg);
             }
@@ -122,6 +138,10 @@ e_cellular_err_t R_CELLULAR_APConnect(st_cellular_ctrl_t * const p_ctrl, const s
             if (CELLULAR_SUCCESS == ret)
             {
                 ret = cellular_apconnect(p_ctrl, p_ap_cfg);
+                if (CELLULAR_SUCCESS != ret)
+                {
+                    atc_cfun(p_ctrl, CELLULAR_MODULE_OPERATING_LEVEL4);
+                }
             }
             cellular_give_semaphore(p_ctrl->at_semaphore);
         }
@@ -129,6 +149,8 @@ e_cellular_err_t R_CELLULAR_APConnect(st_cellular_ctrl_t * const p_ctrl, const s
         {
             ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
         }
+
+        p_ctrl->running_api_count -= 2;
     }
 
     return ret;
@@ -157,15 +179,7 @@ static e_cellular_err_t cellular_apconnect(st_cellular_ctrl_t * const p_ctrl,
 
     while (1)
     {
-        ret = atc_cgatt_check(p_ctrl);
-        if (CELLULAR_SUCCESS != ret)
-        {
-            CELLULAR_LOG_INFO(("Remaining retry count [%d].", p_ctrl->ap_connect_retry - cgatt_cnt));
-            cgatt_cnt++;
-            atc_cgatt(p_ctrl, ATC_AP_CONNECT);
-            cellular_delay_task(CELLULAR_AP_CONNECT_RETRY_WAIT);
-        }
-
+        atc_cgatt_check(p_ctrl);
         if (CELLULAR_SYSTEM_CONNECT == p_ctrl->system_state)
         {
             if (NULL == p_ap_cfg)
@@ -176,8 +190,15 @@ static e_cellular_err_t cellular_apconnect(st_cellular_ctrl_t * const p_ctrl,
             {
                 CELLULAR_LOG_INFO(("Established connection to [%s].", p_ap_cfg->ap_name));
             }
-            ret = CELLULAR_SUCCESS;
+            ret = cellular_sync_check(p_ctrl);
+
             break;
+        }
+        else
+        {
+            CELLULAR_LOG_INFO(("Remaining retry count [%d].", p_ctrl->ap_connect_retry - cgatt_cnt));
+            cgatt_cnt++;
+            cellular_delay_task(CELLULAR_AP_CONNECT_RETRY_WAIT);
         }
 
         if (cgatt_cnt > p_ctrl->ap_connect_retry)
@@ -191,4 +212,53 @@ static e_cellular_err_t cellular_apconnect(st_cellular_ctrl_t * const p_ctrl,
 }
 /**********************************************************************************************************************
  * End of function cellular_apconnect
+ *********************************************************************************************************************/
+
+/**************************************************************************
+ * Function Name  @fn            cellular_sync_check
+ *************************************************************************/
+static e_cellular_err_t cellular_sync_check(st_cellular_ctrl_t * const p_ctrl)
+{
+    uint8_t count = 0;
+    uint8_t pdpaddr[70] = {0};
+    e_cellular_err_t ret = CELLULAR_ERR_MODULE_TIMEOUT;
+    st_cellular_datetime_t datetime = {0};
+
+    p_ctrl->recv_data = &datetime;
+
+    while (count < CELLULAR_SYNC_RETRY)
+    {
+        ret = atc_cclk_check(p_ctrl);
+
+        if ((CELLULAR_INIT_YEAR != datetime.year) ||
+                (CELLULAR_INIT_MONTH != datetime.month) || (CELLULAR_INIT_DAY != datetime.day))
+        {
+            ret = CELLULAR_SUCCESS;
+            break;
+        }
+        else
+        {
+            count++;
+            cellular_delay_task(CELLULAR_SYNC_DELAY);
+        }
+    }
+
+    p_ctrl->recv_data = NULL;
+
+
+    if (CELLULAR_SUCCESS == ret)
+    {
+        p_ctrl->recv_data = pdpaddr;
+        ret = atc_cgpaddr(p_ctrl);
+        if (CELLULAR_SUCCESS == ret)
+        {
+            cellular_getpdpaddr(p_ctrl, &p_ctrl->pdp_addr);
+        }
+        p_ctrl->recv_data = NULL;
+    }
+
+    return ret;
+}
+/**********************************************************************************************************************
+ * End of function cellular_sync_check
  *********************************************************************************************************************/

@@ -1,0 +1,82 @@
+{
+    "name": "Mesh Proxy",
+    "uuid":     [
+        "0x28",
+        "0x18"
+    ],
+    "abbreviation": "mesh_proxy",
+    "description": "",
+    "aux_properties": ["None"],
+    "error_codes": [],
+    "characteristics":     [
+                {
+            "name": "Mesh Proxy Data In",
+            "abbreviation": "data_in",
+            "uuid":             [
+                "0xDD",
+                "0x2A"
+            ],
+            "description": "",
+            "properties": ["WriteWithoutResponse"],
+            "aux_properties": ["Variable Length"],
+            "value": ["0x00"],
+            "db_size": 66,
+            "fields": [            {
+                "name": "data_in",
+                "format": "st_ble_seq_data_t",
+                "length": "1",
+                "bits": [],
+                "fields": []
+            }],
+            "descriptors": []
+        },
+                {
+            "name": "Mesh Proxy Data Out",
+            "abbreviation": "data_out",
+            "uuid":             [
+                "0xDE",
+                "0x2A"
+            ],
+            "description": "",
+            "properties": ["Notify"],
+            "aux_properties": ["Variable Length"],
+            "value": ["0x42"],
+            "db_size": 66,
+            "fields": [            {
+                "name": "data_out",
+                "format": "st_ble_seq_data_t",
+                "length": "1",
+                "bits": [],
+                "fields": []
+            }],
+            "descriptors": [            {
+                "name": "Client Characteristic Configuration",
+                "abbreviation": "cli cnfg",
+                "uuid":                 [
+                    "0x02",
+                    "0x29"
+                ],
+                "description": "Client Characteristic Configuration Descriptor",
+                "aux_properties": ["Peer Specific"],
+                "properties":                 [
+                    "Read",
+                    "Write"
+                ],
+                "value": "",
+                "db_size": 2,
+                "fields": [                {
+                    "name": "cli cnfg",
+                    "description": "Client Characteristic Configuration",
+                    "format": "uint16_t",
+                    "length": "1",
+                    "bits": [],
+                    "fields": []
+                }]
+            }]
+        }
+    ],
+    "qeServiceDataIsSigAdopted": false,
+    "qeServiceDefinitionJsonFileName": "mesh_proxy.service.json",
+    "qeServiceDataIsOutputServerRole": true,
+    "qeServiceDataIsOutputClentRole": false
+}

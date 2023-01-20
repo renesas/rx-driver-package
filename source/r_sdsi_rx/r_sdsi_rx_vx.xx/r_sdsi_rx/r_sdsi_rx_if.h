@@ -31,6 +31,7 @@
 *         : 01.02.2019 2.01    Changed Minor version to 2.01.
 *         : 04.04.2019 2.02    Added support for GNUC and ICCRX.
 *                              Fixed coding style.
+*         : 27.12.2022 2.03    Updated slash format of included header file paths for Linux compatibility.
 **********************************************************************************************************************/
 
 #ifndef SDSI_RX_IF_H_
@@ -47,7 +48,7 @@ Macro definitions
 **********************************************************************************************************************/
 /* Version Number of API. */
 #define RX_SDSI_VERSION_MAJOR       (2)
-#define RX_SDSI_VERSION_MINOR       (2)
+#define RX_SDSI_VERSION_MINOR       (3)
 
 #define SDSI_CH0                    (0)
 #define SDSI_CH1                    (1)

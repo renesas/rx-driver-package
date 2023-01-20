@@ -23,6 +23,7 @@
 /***********************************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 25.11.2019 1.00     First Release
+*              : 12.12.2022 1.10     Update default register value of voltage level
 ***********************************************************************************************************************/
 #ifndef LVD_RX13T_HEADER_FILE
 #define LVD_RX13T_HEADER_FILE
@@ -66,8 +67,8 @@ Macro definitions
 #define LVD_MAX_MI_PRIO                         (15)
 
 /* Default value: Default register value of voltage level */
-#define LVD_VOLTAGE_LEVEL_DEFAULT_VALUE_CH1     (4)
-#define LVD_VOLTAGE_LEVEL_DEFAULT_VALUE_CH2     (2)
+#define LVD_VOLTAGE_LEVEL_DEFAULT_VALUE_CH1     (7)
+#define LVD_VOLTAGE_LEVEL_DEFAULT_VALUE_CH2     (0)
 
 /* Convert: Voltage level: Setting value -> register value */
 #if (LVD_CFG_VOLTAGE_LEVEL_CHANNEL_1 == 429)

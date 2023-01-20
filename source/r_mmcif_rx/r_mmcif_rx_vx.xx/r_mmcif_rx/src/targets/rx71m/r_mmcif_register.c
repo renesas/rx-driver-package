@@ -19,7 +19,7 @@
 /**********************************************************************************************************************
 * System Name  : MMC Driver
 * File Name    : r_mmcif_register.c
-* Version      : 1.00.00
+* Version      : 1.10.00
 * Device       : RX71M (LQFP-176)
 * Abstract     : API & Sub module
 * Tool-Chain   : For RX71M Group
@@ -32,6 +32,7 @@
 /**********************************************************************************************************************
 * History      : DD.MM.YYYY Version Description
 *              : 03.09.2014 1.00    First Release
+*              : 27.12.2022 1.10    Updated slash format of included header file paths for Linux compatibility.
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -41,7 +42,7 @@ Includes <System Includes> , "Project Includes"
 #if defined(BSP_MCU_RX71M)
 
 #include "r_mmcif_rx_if.h"
-#include ".\src\r_mmcif_rx_private.h"
+#include "./src/r_mmcif_rx_private.h"
 
 
 /**********************************************************************************************************************

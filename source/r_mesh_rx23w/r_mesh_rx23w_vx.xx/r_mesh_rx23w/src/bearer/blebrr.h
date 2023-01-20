@@ -3,7 +3,7 @@
  */
 
 /*
- *  Copyright (C) 2013-2021. Mindtree Limited.
+ *  Copyright (C) 2013-2022. Mindtree Limited.
  *  All rights reserved.
  */
 
@@ -17,8 +17,8 @@
 #include "cli/r_ble_cli.h"
 
 /**
- * \defgroup ble_bearer Bluetooth Bearer Wrapper
- * \brief Bluetooth Bearer Wrapper (BLEBRR) provides Mesh Core block with the wrapper functions to utilize underlying BLE Protocol Stack as a Bluetooth Bearer.
+ * \defgroup ble_bearer Bluetooth Bearer
+ * \brief Bluetooth Bearer (BLEBRR) provides Mesh Core block with the wrapper functions to utilize underlying BLE Protocol Stack as a Bluetooth Bearer.
  * \{
  */
 
@@ -216,6 +216,14 @@ API_RESULT R_MS_BRR_Init(BLEBRR_INIT_CB init_cb);
  *  terminated.
  */
 void  R_MS_BRR_Setup(void);
+
+/**
+ *  \brief Unregister ADV Bearer and free the allocated resources.
+ *
+ *  \par Description
+ *  API to unregister ADV bearer with Mesh stack and free the allocated Timer and heap memory.
+ */
+void R_MS_BRR_Close(void);
 
 /**
  *  \brief Register callback function to receive GATT Interface Events.

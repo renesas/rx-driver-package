@@ -19,7 +19,7 @@
 /**********************************************************************************************************************
 * System Name  : MMC Driver
 * File Name    : r_mmcif_register.c
-* Version      : 1.01
+* Version      : 1.10
 * Device       : RX65N
 * Abstract     : API & Sub module
 * Tool-Chain   : For RX65N Group
@@ -33,6 +33,7 @@
 * History      : DD.MM.YYYY Version Description
 *              : 28.12.2016 1.01    First Release
 *              : 31.07.2017 1.02    Supported RX65N-2MB.
+*              : 27.12.2022 1.10    Updated slash format of included header file paths for Linux compatibility.
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -42,7 +43,7 @@ Includes <System Includes> , "Project Includes"
 #if defined(BSP_MCU_RX65N)
 
 #include "r_mmcif_rx_if.h"
-#include ".\src\r_mmcif_rx_private.h"
+#include "./src/r_mmcif_rx_private.h"
 
 
 /**********************************************************************************************************************

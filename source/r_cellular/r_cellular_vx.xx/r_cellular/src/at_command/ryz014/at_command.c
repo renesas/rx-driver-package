@@ -44,7 +44,6 @@ const uint8_t g_ryz014_function_level[]          = RYZ014_ATC_FUNCTION_LEVEL;
 const uint8_t g_ryz014_pin_lock_check[]          = RYZ014_ATC_PIN_LOCK_CHECK;
 const uint8_t g_ryz014_pin_lock_release[]        = RYZ014_ATC_PIN_LOCK_RELEASE;
 const uint8_t g_ryz014_connect_socket[]          = RYZ014_ATC_CONNECT_SOCKET;
-const uint8_t g_ryz014_connect_socket_tohost[]   = RYZ014_ATC_CONNECT_SOCKET_TOHOST;
 const uint8_t g_ryz014_close_socket[]            = RYZ014_ATC_CLOSE_SOCKET;
 const uint8_t g_ryz014_send_socket[]             = RYZ014_ATC_SEND_SCOKET;
 const uint8_t g_ryz014_recv_socket[]             = RYZ014_ATC_RECV_SCOKET;
@@ -82,13 +81,21 @@ const uint8_t g_ryz014_atc_get_module_name[]     = RYZ014_ATC_GET_MODULE_NAME;
 const uint8_t g_ryz014_atc_get_maker_name[]      = RYZ014_ATC_GET_MAKER_NAME;
 const uint8_t g_ryz014_atc_get_imsi[]            = RYZ014_ATC_GET_IMSI;
 const uint8_t g_ryz014_atc_send_command_sim[]    = RYZ014_ATC_SEND_COMMAND_TO_SIM;
-const uint8_t g_ryz014_atc_set_psm_config[]      = RYZ014_ATC_SET_PSM_CONFIG;
+const uint8_t g_ryz014_atc_set_inter_config[]    = RYZ014_ATC_SET_INTER_CONFIG;
 const uint8_t g_ryz014_atc_set_ring_config[]     = RYZ014_ATC_SET_RING_CONFIG;
+const uint8_t g_ryz014_atc_set_psm_config[]      = RYZ014_ATC_SET_PSM_CONFIG;
 const uint8_t g_ryz014_atc_set_ind_notify[]      = RYZ014_ATC_SET_IND_NOTIFY;
 const uint8_t g_ryz014_atc_get_phone_num[]       = RYZ014_ATC_GET_PHONE_NUM;
 const uint8_t g_ryz014_atc_get_iccid[]           = RYZ014_ATC_GET_ICCID;
 const uint8_t g_ryz014_atc_ping[]                = RYZ014_ATC_PING;
 const uint8_t g_ryz014_atc_get_cellinfo[]        = RYZ014_ATC_GET_CELLINFO;
+const uint8_t g_ryz014_atc_set_ctm[]             = RYZ014_ATC_SET_CTM;
+const uint8_t g_ryz014_atc_get_ctm[]             = RYZ014_ATC_GET_CTM;
+const uint8_t g_ryz014_atc_set_band[]            = RYZ014_ATC_SET_BAND;
+const uint8_t g_ryz014_atc_factoryreset[]        = RYZ014_ATC_FACTORYRESET;
+const uint8_t g_ryz014_atc_smcwrx[]              = RYZ014_ATC_SMCWRX;
+const uint8_t g_ryz014_atc_smcwtx[]              = RYZ014_ATC_SMCWTX;
+const uint8_t g_ryz014_atc_cgpiaf[]              = RYZ014_ATC_CGPIAF;
 const uint8_t g_ryz014_no_command[]              = RYZ014_NO_COMMAND;
 #if (CELLULAR_IMPLEMENT_TYPE == 'B')
 const uint8_t g_ryz014_write_certificate[]       = RYZ014_ATC_WRITE_CERTIFICATE;
@@ -99,63 +106,70 @@ const uint8_t g_ryz014_config_ssl_socket[]       = RYZ014_ATC_CONFIG_SSL_SOCKET;
 
 const uint8_t * const gp_at_command[ATC_LIST_MAX] =
 {
-    {g_ryz014_echo_off},
-    {g_ryz014_function_level_check},
-    {g_ryz014_function_level},
-    {g_ryz014_pin_lock_check},
-    {g_ryz014_pin_lock_release},
-    {g_ryz014_connect_socket},
-    {g_ryz014_connect_socket_tohost},
-    {g_ryz014_close_socket},
-    {g_ryz014_send_socket},
-    {g_ryz014_recv_socket},
-    {g_ryz014_dns_lookup},
-    {g_ryz014_ap_config},
-    {g_ryz014_user_config},
-    {g_ryz014_socket_config_1},
-    {g_ryz014_socket_config_2},
-    {g_ryz014_listening_socket},
-    {g_ryz014_connect_check},
-    {g_ryz014_set_connect_status},
-    {g_ryz014_shutdown},
-    {g_ryz014_get_time},
-    {g_ryz014_set_time},
-    {g_ryz014_reset},
-    {g_ryz014_set_notice_level},
-    {g_ryz014_get_notice_level},
-    {g_ryz014_auto_connect},
-    {g_ryz014_auto_connect_check},
-    {g_ryz014_sim_st_off},
-    {g_ryz014_get_service_status},
-    {g_ryz014_set_provider},
-    {g_ryz014_get_pdn_state},
-    {g_ryz014_activate_pdn},
-    {g_ryz014_atc_get_ipaddr},
-    {g_ryz014_atc_get_psm},
-    {g_ryz014_atc_set_psm},
-    {g_ryz014_atc_get_edrx},
-    {g_ryz014_atc_set_edrx},
-    {g_ryz014_atc_get_signal},
-    {g_ryz014_atc_get_sw_revision},
-    {g_ryz014_atc_get_serial_num},
-    {g_ryz014_atc_get_svn},
-    {g_ryz014_atc_get_module_name},
-    {g_ryz014_atc_get_maker_name},
-    {g_ryz014_atc_get_imsi},
-    {g_ryz014_atc_send_command_sim},
-    {g_ryz014_atc_set_psm_config},
-    {g_ryz014_atc_set_ring_config},
-    {g_ryz014_atc_set_ind_notify},
-    {g_ryz014_atc_get_phone_num},
-    {g_ryz014_atc_get_iccid},
-    {g_ryz014_atc_ping},
-    {g_ryz014_atc_get_cellinfo},
-    {g_ryz014_no_command},
+    g_ryz014_echo_off,
+    g_ryz014_function_level_check,
+    g_ryz014_function_level,
+    g_ryz014_pin_lock_check,
+    g_ryz014_pin_lock_release,
+    g_ryz014_connect_socket,
+    g_ryz014_close_socket,
+    g_ryz014_send_socket,
+    g_ryz014_recv_socket,
+    g_ryz014_dns_lookup,
+    g_ryz014_ap_config,
+    g_ryz014_user_config,
+    g_ryz014_socket_config_1,
+    g_ryz014_socket_config_2,
+    g_ryz014_listening_socket,
+    g_ryz014_connect_check,
+    g_ryz014_set_connect_status,
+    g_ryz014_shutdown,
+    g_ryz014_get_time,
+    g_ryz014_set_time,
+    g_ryz014_reset,
+    g_ryz014_set_notice_level,
+    g_ryz014_get_notice_level,
+    g_ryz014_auto_connect,
+    g_ryz014_auto_connect_check,
+    g_ryz014_sim_st_off,
+    g_ryz014_get_service_status,
+    g_ryz014_set_provider,
+    g_ryz014_get_pdn_state,
+    g_ryz014_activate_pdn,
+    g_ryz014_atc_get_ipaddr,
+    g_ryz014_atc_get_psm,
+    g_ryz014_atc_set_psm,
+    g_ryz014_atc_get_edrx,
+    g_ryz014_atc_set_edrx,
+    g_ryz014_atc_get_signal,
+    g_ryz014_atc_get_sw_revision,
+    g_ryz014_atc_get_serial_num,
+    g_ryz014_atc_get_svn,
+    g_ryz014_atc_get_module_name,
+    g_ryz014_atc_get_maker_name,
+    g_ryz014_atc_get_imsi,
+    g_ryz014_atc_send_command_sim,
+    g_ryz014_atc_set_inter_config,
+    g_ryz014_atc_set_ring_config,
+    g_ryz014_atc_set_psm_config,
+    g_ryz014_atc_set_ind_notify,
+    g_ryz014_atc_get_phone_num,
+    g_ryz014_atc_get_iccid,
+    g_ryz014_atc_ping,
+    g_ryz014_atc_get_cellinfo,
+    g_ryz014_atc_set_ctm,
+    g_ryz014_atc_get_ctm,
+    g_ryz014_atc_set_band,
+    g_ryz014_atc_factoryreset,
+    g_ryz014_atc_smcwrx,
+    g_ryz014_atc_smcwtx,
+    g_ryz014_atc_cgpiaf,
+    g_ryz014_no_command,
 #if (CELLULAR_IMPLEMENT_TYPE == 'B')
-    {g_ryz014_write_certificate},
-    {g_ryz014_erase_certificate},
-    {g_ryz014_config_ssl_profile},
-    {g_ryz014_config_ssl_socket},
+    g_ryz014_write_certificate,
+    g_ryz014_erase_certificate,
+    g_ryz014_config_ssl_profile,
+    g_ryz014_config_ssl_socket,
 #endif
 };
 

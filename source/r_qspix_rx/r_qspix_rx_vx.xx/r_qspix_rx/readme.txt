@@ -5,12 +5,12 @@ r_qspix_rx (QSPIX driver)
 
 Document Number 
 ---------------
-R01AN5685ES0120
-R01AN5685JS0120
+R01AN5685ES0130
+R01AN5685JS0130
      
 Version
 -------
-v1.20
+v1.30
 
 Overview
 --------
@@ -44,7 +44,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp    v6.20
+* r_bsp    v7.20
 
 How to add to your project
 --------------------------
@@ -82,9 +82,9 @@ r_qspix_rx
 +---doc
 |   |
 |   +---en
-|   |       r01an5685es0120-rx-qspix.pdf
+|   |       r01an5685es0130-rx-qspix.pdf
 |   +---ja
-|           r01an5685js0120-rx-qspix.pdf
+|           r01an5685js0130-rx-qspix.pdf
 |
 +---src
     |   r_qspix_rx_private.h

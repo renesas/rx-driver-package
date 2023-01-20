@@ -37,6 +37,8 @@
 *           13.09.2021 2.32    Changed Minor version to 2.32.
 *           11.11.2021 2.40    Added support for RX140 (products with 128-Kbyte or larger ROM).
 *           30.06.2022 2.41    Changed the default value of CAN clock source to PCLK.
+*           29.07.2022 2.50    Updated demo projects
+*                              Fixed RXMBX enum error
 ***********************************************************************************************************************/
 
 #ifndef CAN_INTERFACE_HEADER_FILE
@@ -58,7 +60,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define CAN_VERSION_MAJOR           (2)
-#define CAN_VERSION_MINOR           (41)
+#define CAN_VERSION_MINOR           (50)
 
 
 /* Channel numbers */
@@ -135,8 +137,8 @@ typedef enum e_can_box
 
     CAN_BOX_RXMBX_0           = (CAN_FLG_RXMBX | 0),
     CAN_BOX_RXMBX_1           = (CAN_FLG_RXMBX | 1),
-    CAN_BOX_RXMBX_2           = (CAN_FLG_RXMBX | 3),
-    CAN_BOX_RXMBX_4           = (CAN_FLG_RXMBX | 4),
+    CAN_BOX_RXMBX_2           = (CAN_FLG_RXMBX | 2),
+    CAN_BOX_RXMBX_3           = (CAN_FLG_RXMBX | 3),
 
     CAN_BOX_RXFIFO_0          = (CAN_FLG_FIFO | CAN_MASK_RXFIFO_0),
     CAN_BOX_RXFIFO_1          = (CAN_FLG_FIFO | CAN_MASK_RXFIFO_1),

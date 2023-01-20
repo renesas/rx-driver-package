@@ -89,6 +89,7 @@
 *         : 11.02.2022 3.01    Changed initial value of the following macro definitions.
 *                                - BSP_CFG_SWINT_UNIT1_ENABLE
 *                                - BSP_CFG_SWINT_UNIT2_ENABLE
+*         : 25.11.2022 3.02    Modified comment.
 ***********************************************************************************************************************/
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
 #define R_BSP_CONFIG_REF_HEADER_FILE
@@ -522,8 +523,11 @@ Configuration Options
 
 /* Both RX64M and RX71M MCU's have a 'Trusted Memory' feature. This feature protects against 
    illicit reading of blocks 8 and 9 in the code flash memory. This feature is disabled by default
-   but may be enabled by setting the below to (0).
-   Only 0 and 0xFFFFFFFF are valid settings.
+   TMEF - TM Enable Flag Register
+       b31:b27 Reserved (set to 1)
+       b26:b24 TMEF   - TM Enable - 000: TM function is enabled.
+                                  - 111: TM function is disabled.
+       b23:b0  Reserved (set to 1)
    Default value is 0xFFFFFFFF.
 */
 #define BSP_CFG_TRUSTED_MODE_FUNCTION  (0xFFFFFFFF)

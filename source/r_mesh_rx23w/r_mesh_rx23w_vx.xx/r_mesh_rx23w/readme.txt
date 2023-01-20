@@ -5,12 +5,12 @@ r_mesh_rx23w
 
 Document Number
 ---------------
-R01AN4930EJ0120
-R01AN4930JJ0120
+R01AN4930EJ0130
+R01AN4930JJ0130
 
 Version
 -------
-v1.20
+v1.30
 
 Overview
 --------
@@ -98,15 +98,18 @@ File Structure
 |   |   |   blemesh_api.chm
 |   |   |   
 |   |   +---en
-|   |   |       r01an4930ej0120-rx23w-blemesh.pdf
+|   |   |       r01an4930ej0130-rx23w-blemesh.pdf
 |   |   +---ja
-|   |           r01an4930jj0120-rx23w-blemesh.pdf
+|   |           r01an4930jj0130-rx23w-blemesh.pdf
 |   |           
+|   +---json
+|   |       mesh_provisioning.service.json
+|   |       mesh_proxy.service.json
+|   |       
 |   +---lib
 |   |       lib_ble_ms_ccrx.lib
 |   |       
 |   +---src
-|       |   
 |       +---bearer
 |       |       blebrr.c
 |       |       blebrr.h
@@ -169,11 +172,11 @@ File Structure
 |                   MS_logger.h
 |                   MS_mempool_pl.h
 |                   MS_monitor_pl.h
+|                   MS_prov_pl.h
 |                   MS_storage_pl.h
 |                   MS_systemtime_pl.h
 |                   nvs.h
 |                   nvsto.h
-|                   prov_pl.h
 |                   
 +---r_config
         r_mesh_rx23w_config.h

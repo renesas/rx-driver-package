@@ -7,7 +7,7 @@
  */
 
 /*
- *  Copyright (C) 2016-2021. Mindtree Ltd.
+ *  Copyright (C) 2016-2022. Mindtree Ltd.
  *  All rights reserved.
  */
 
@@ -110,7 +110,7 @@ typedef struct _BLEBRR_GAP_ADV_DATA
 * Global Variables and Private Functions declaration
 *******************************************************************************/
 static BRR_BEARER_INFO blebrr_adv;
-static BRR_HANDLE blebrr_advhandle;
+static BRR_HANDLE blebrr_advhandle = BRR_HANDLE_INVALID;
 
 static UCHAR blebrr_sleep;
 static UCHAR blebrr_adv_disabled;
@@ -118,7 +118,7 @@ static UCHAR blebrr_adv_disabled;
 static BLEBRR_Q blebrr_queue;
 
 MS_DEFINE_MUTEX_TYPE(static, blebrr_mutex)
-static UINT32 blebrr_timer_handle;
+static UINT32 blebrr_timer_handle = BLE_TIMER_INVALID_HDL;
 static UCHAR blebrr_state;
 static UCHAR blebrr_datacount = 0;
 static UCHAR blebrr_memcount = 0;
@@ -376,8 +376,10 @@ static blebrr_adv_setup(void)
 
     if (MS_TRUE == blebrr_is_queue_left())
     {
+        #if (0 != BLEBRR_ADVREPEAT_RAND_DELAY)
         /* Add Random Transmission Delay */
         delay_ms = MS_rand_u32_pl(BLEBRR_ADVREPEAT_RAND_DELAY);
+        #endif /* (0 != BLEBRR_ADVREPEAT_RAND_DELAY) */
     }
 
     if (0 != delay_ms)
@@ -586,14 +588,14 @@ static API_RESULT blebrr_bcon_send(BRR_HANDLE * handle, void * pdata, UINT16 dat
                     if ((BRR_BCON_TYPE_UNPROV_DEVICE == bcon) &&
                         (NULL != info->uri) &&
                         (NULL != info->uri->payload) &&
-                        (0 != info->uri->length))
+                        (0 != info->uri->length) && ((BLEBRR_GAP_ADVDATA_LEN - BLEBRR_NCON_ADVTYPE_OFFSET) >= info->uri->length))
                     {
                         elt = NULL;
 
                         /* Schedule to send */
                         retval = blebrr_send
                                  (
-                                     0,
+                                     0x24, /* AD Type: <<URI>> */
                                      info->uri->payload,
                                      info->uri->length,
                                      &elt
@@ -884,6 +886,10 @@ void R_MS_BRR_Setup(void)
 {
     /* Initialize locals */
     BLEBRR_MUTEX_INIT_VOID();
+    BLEBRR_SET_STATE_SCAN(BLEBRR_STATE_IDLE);
+    BLEBRR_SET_STATE_ADV(BLEBRR_STATE_IDLE);
+    blebrr_queue.start = 0;
+    blebrr_queue.end = 0;
 
     /* Initialize Timer */
     R_BLE_TIMER_Create(&blebrr_timer_handle, BLEBRR_ADV_TIMEOUT, BLE_TIMER_ONE_SHOT, blebrr_advscan_timeout_handler);
@@ -892,7 +898,7 @@ void R_MS_BRR_Setup(void)
     blebrr_sleep = MS_FALSE;
     blebrr_adv_disabled = MS_FALSE;
 
-    /* Add the Adv Bearer */
+    /* Add the ADV Bearer */
     blebrr_adv.bearer_send = blebrr_adv_send;
     blebrr_adv.bearer_sleep = blebrr_adv_sleep;
     blebrr_adv.bearer_wakeup = blebrr_adv_wakeup;
@@ -904,4 +910,32 @@ void R_MS_BRR_Setup(void)
 
     /* Update state */
     BLEBRR_SET_STATE_SCAN(BLEBRR_STATE_IN_SCAN_ENABLE);
+}
+
+/***************************************************************************//**
+* @brief Unregisters ADV Bearer and free the allocated resources
+*******************************************************************************/
+void R_MS_BRR_Close(void)
+{
+    BLEBRR_Q_ELEMENT * elt;
+
+    /* Remove the Adv Bearer */
+    MS_brr_remove_bearer(BRR_TYPE_ADV, &blebrr_advhandle);
+    blebrr_advhandle = BRR_HANDLE_INVALID;
+
+    /* Finalize Timer */
+    R_BLE_TIMER_Delete(&blebrr_timer_handle);
+
+    /* Free the TX Queues */
+    for (UINT16 idx = 0; idx < BLEBRR_QUEUE_SIZE; idx++)
+    {
+        elt = blebrr_dequeue();
+        if (NULL == elt)
+        {
+            break;
+        }
+        EM_free_mem(elt->pdata);
+        elt->pdatalen = 0;
+        blebrr_memcount--;
+    }
 }

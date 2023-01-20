@@ -45,6 +45,7 @@
 *                              Added support circular buffer in mode asynchronous.
 *           15.04.2021 3.90    Added support for RX140.
 *           31.03.2022 4.40    Added support for RX660.
+*           27.12.2022 4.60    Updated macro definition enable and disable nested interrupt for TXI, RXI, ERI, TEI.
 ***********************************************************************************************************************/
 #ifndef SCI_CONFIG_H
 #define SCI_CONFIG_H
@@ -117,6 +118,70 @@ Configuration Options
 #define SCI_CFG_CH10_INCLUDED   (0)
 #define SCI_CFG_CH11_INCLUDED   (0)
 #define SCI_CFG_CH12_INCLUDED   (0)
+
+/* SPECIFY WHETHER TO INCLUDE CODE FOR NESTED INTERRUPT TXI */
+/* 1=included, 0=not */
+#define SCI_CFG_CH0_EN_TXI_NESTED_INT    (0)
+#define SCI_CFG_CH1_EN_TXI_NESTED_INT    (0)
+#define SCI_CFG_CH2_EN_TXI_NESTED_INT    (0)
+#define SCI_CFG_CH3_EN_TXI_NESTED_INT    (0)
+#define SCI_CFG_CH4_EN_TXI_NESTED_INT    (0)
+#define SCI_CFG_CH5_EN_TXI_NESTED_INT    (0)
+#define SCI_CFG_CH6_EN_TXI_NESTED_INT    (0)
+#define SCI_CFG_CH7_EN_TXI_NESTED_INT    (0)
+#define SCI_CFG_CH8_EN_TXI_NESTED_INT    (0)
+#define SCI_CFG_CH9_EN_TXI_NESTED_INT    (0)
+#define SCI_CFG_CH10_EN_TXI_NESTED_INT   (0)
+#define SCI_CFG_CH11_EN_TXI_NESTED_INT   (0)
+#define SCI_CFG_CH12_EN_TXI_NESTED_INT   (0)
+
+/* SPECIFY WHETHER TO INCLUDE CODE FOR NESTED INTERRUPT RXI */
+/* 1=included, 0=not */
+#define SCI_CFG_CH0_EN_RXI_NESTED_INT    (0)
+#define SCI_CFG_CH1_EN_RXI_NESTED_INT    (0)
+#define SCI_CFG_CH2_EN_RXI_NESTED_INT    (0)
+#define SCI_CFG_CH3_EN_RXI_NESTED_INT    (0)
+#define SCI_CFG_CH4_EN_RXI_NESTED_INT    (0)
+#define SCI_CFG_CH5_EN_RXI_NESTED_INT    (0)
+#define SCI_CFG_CH6_EN_RXI_NESTED_INT    (0)
+#define SCI_CFG_CH7_EN_RXI_NESTED_INT    (0)
+#define SCI_CFG_CH8_EN_RXI_NESTED_INT    (0)
+#define SCI_CFG_CH9_EN_RXI_NESTED_INT    (0)
+#define SCI_CFG_CH10_EN_RXI_NESTED_INT   (0)
+#define SCI_CFG_CH11_EN_RXI_NESTED_INT   (0)
+#define SCI_CFG_CH12_EN_RXI_NESTED_INT   (0)
+
+/* SPECIFY WHETHER TO INCLUDE CODE FOR NESTED INTERRUPT TEI */
+/* 1=included, 0=not */
+#define SCI_CFG_CH0_EN_TEI_NESTED_INT    (0)
+#define SCI_CFG_CH1_EN_TEI_NESTED_INT    (0)
+#define SCI_CFG_CH2_EN_TEI_NESTED_INT    (0)
+#define SCI_CFG_CH3_EN_TEI_NESTED_INT    (0)
+#define SCI_CFG_CH4_EN_TEI_NESTED_INT    (0)
+#define SCI_CFG_CH5_EN_TEI_NESTED_INT    (0)
+#define SCI_CFG_CH6_EN_TEI_NESTED_INT    (0)
+#define SCI_CFG_CH7_EN_TEI_NESTED_INT    (0)
+#define SCI_CFG_CH8_EN_TEI_NESTED_INT    (0)
+#define SCI_CFG_CH9_EN_TEI_NESTED_INT    (0)
+#define SCI_CFG_CH10_EN_TEI_NESTED_INT   (0)
+#define SCI_CFG_CH11_EN_TEI_NESTED_INT   (0)
+#define SCI_CFG_CH12_EN_TEI_NESTED_INT   (0)
+
+/* SPECIFY WHETHER TO INCLUDE CODE FOR NESTED INTERRUPT ERI */
+/* 1=included, 0=not */
+#define SCI_CFG_CH0_EN_ERI_NESTED_INT    (0)
+#define SCI_CFG_CH1_EN_ERI_NESTED_INT    (0)
+#define SCI_CFG_CH2_EN_ERI_NESTED_INT    (0)
+#define SCI_CFG_CH3_EN_ERI_NESTED_INT    (0)
+#define SCI_CFG_CH4_EN_ERI_NESTED_INT    (0)
+#define SCI_CFG_CH5_EN_ERI_NESTED_INT    (0)
+#define SCI_CFG_CH6_EN_ERI_NESTED_INT    (0)
+#define SCI_CFG_CH7_EN_ERI_NESTED_INT    (0)
+#define SCI_CFG_CH8_EN_ERI_NESTED_INT    (0)
+#define SCI_CFG_CH9_EN_ERI_NESTED_INT    (0)
+#define SCI_CFG_CH10_EN_ERI_NESTED_INT   (0)
+#define SCI_CFG_CH11_EN_ERI_NESTED_INT   (0)
+#define SCI_CFG_CH12_EN_ERI_NESTED_INT   (0)
 
 /* SPECIFY ASYNC MODE TX QUEUE BUFFER SIZES (will not allocate if chan not enabled */
 #define SCI_CFG_CH0_TX_BUFSIZ   (80)

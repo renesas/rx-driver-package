@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 /*******************************************************************************
@@ -22,11 +22,14 @@
 *******************************************************************************/
 /*******************************************************************************
 * History : DD.MM.YYYY Version  Description
-*           30.09.2019 1.00     First Release.
-*           29.11.2019 1.01     Add random-delay to advertising transmission.
-*           30.09.2020 1.10     Refer to "Program Updates (MESH FIT Module)" in
-                                the application note of RX23W Group Bluetooth
-                                Mesh FIT Module (R01AN4930).
+*           30.09.2019  1.00    First Release.
+*           29.11.2019  1.01    Added random-delay to ADV-Bearer transmission control.
+*           30.09.2020  1.10    Updated Mesh API, Improved Network Layer operation, etc.
+*           30.09.2021  1.20    Improved Provisioniong/Network/Transport Layer operation, etc.
+*           23.12.2022  1.30    Improved Model Layer operation, etc.
+*
+* For details, refer to "Program Updates (MESH FIT Module)" in the application note of 
+* RX23W Group Bluetooth Mesh FIT Module (R01AN4930).
 *******************************************************************************/
 
 #ifndef R_MESH_RX23W_IF_H

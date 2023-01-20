@@ -19,7 +19,7 @@
 /**********************************************************************************************************************
 * System Name  : SDHI Driver
 * File Name    : r_sdhi_register.c
-* Version      : 2.06
+* Version      : 2.10
 * Device       : RX72N
 * Abstract     : API & Sub module
 * Tool-Chain   : For RX72N Group e2_studio
@@ -31,6 +31,7 @@
 /**********************************************************************************************************************
 * History      : DD.MM.YYYY Version Description
 *              : 22.11.2019 2.06    First Release
+*              : 27.12.2022 2.10    Updated slash format of included header file paths for Linux compatibility.
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -40,7 +41,7 @@ Includes <System Includes> , "Project Includes"
 #if defined(BSP_MCU_RX72N)
 
 #include "r_sdhi_rx_if.h"
-#include ".\src\r_sdhi_rx_private.h"
+#include "./src/r_sdhi_rx_private.h"
 
 /**********************************************************************************************************************
 Macro definitions

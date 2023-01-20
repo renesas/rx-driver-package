@@ -25,6 +25,7 @@
 ************************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 22.04.2022 1.00     First Release
+*         : 25.11.2022 1.01     Modified comment.
 ***********************************************************************************************************************/
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
 #define R_BSP_CONFIG_REF_HEADER_FILE
@@ -457,15 +458,13 @@ Configuration Options
 */
 #define BSP_CFG_OFS1_REG_VALUE  (0xFFFFFFFF)
 
-/* Trusted memory is facility to prevent the reading of blocks 8 and 9 and blocks 46 and 47 (in dual mode) in 
+/* Trusted memory is facility to prevent the reading of blocks 8 and 9 in 
    the code flash memory by third party software. This feature is disabled by default.
    TMEF - TM Enable Flag Register
        b31:b27 Reserved (set to 1)
        b26:b24 TMEF   - TM Enable - 000: TM function is enabled.
                                   - 111: TM function is disabled.
        b23:b0  Reserved (set to 1)
-       NOTE: If the dual bank function has not been incorporated in a device,
-             TMEFDB bits [b30:b26] are reserved area.
    Default value is 0xFFFFFFFF.
 */
 #define BSP_CFG_TRUSTED_MODE_FUNCTION  (0xFFFFFFFF)

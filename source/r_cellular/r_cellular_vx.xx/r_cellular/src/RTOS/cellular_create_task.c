@@ -25,6 +25,7 @@
  * Includes   <System Includes> , "Project Includes"
  *********************************************************************************************************************/
 #include "cellular_freertos.h"
+#include "cellular_private_api.h"
 
 /**********************************************************************************************************************
  * Macro definitions
@@ -37,9 +38,6 @@
 /**********************************************************************************************************************
  * Exported global variables
  *********************************************************************************************************************/
-#if BSP_CFG_RTOS_USED == (5)
-st_cellular_ctrl_t * gp_cellular_ctrl;
-#endif
 
 /**********************************************************************************************************************
  * Private (static) variables and functions
@@ -51,7 +49,7 @@ st_cellular_ctrl_t * gp_cellular_ctrl;
 #if BSP_CFG_RTOS_USED == (1)
 e_cellular_err_t cellular_create_task(void (*pxTaskCode)(void *),
 #elif BSP_CFG_RTOS_USED == (5)
-void * cellular_create_task(void (*pxTaskCode)(ULONG),
+e_cellular_err_t cellular_create_task(void (*pxTaskCode)(ULONG),
 #endif
                         const char * const pcName,
                         const uint16_t usStackDepth,
@@ -59,8 +57,8 @@ void * cellular_create_task(void (*pxTaskCode)(ULONG),
                         const uint32_t uxPriority,
                         void * const pxCreatedTask)
 {
-#if BSP_CFG_RTOS_USED == (1)
     e_cellular_err_t ret = CELLULAR_SUCCESS;
+#if BSP_CFG_RTOS_USED == (1)
     int32_t rtos_ret;
 
     rtos_ret = xTaskCreate((TaskFunction_t)pxTaskCode,
@@ -74,32 +72,53 @@ void * cellular_create_task(void (*pxTaskCode)(ULONG),
     {
         ret = CELLULAR_ERR_CREATE_TASK;
     }
-
-    return ret;
 #elif BSP_CFG_RTOS_USED == (5)
     UINT tx_ret = 0;
-    void * p_ret = NULL;
+    void ** p_ret = pxCreatedTask;
 
-    p_ret = cellular_malloc(sizeof(TX_THREAD));
-    if (NULL != p_ret)
+    *p_ret = cellular_malloc(sizeof(TX_THREAD));
+    if (NULL != pxCreatedTask)
     {
-        tx_ret = tx_thread_create((TX_THREAD *)p_ret, (CHAR *)pcName,
-                                    pxTaskCode, 0ul,
-                                    (void *)(usStackDepth  / sizeof(ULONG)), usStackDepth,
-                                    uxPriority, uxPriority,
-                                    TX_NO_TIME_SLICE, TX_AUTO_START);
-        if(tx_ret != TX_SUCCESS)
+        if (0 == strcmp(pcName, CELLULAR_RECV_TASK_NAME))
         {
-            cellular_free(p_ret);
+            tx_ret = tx_thread_create((TX_THREAD *) * p_ret,    //cast
+                                        (CHAR *)pcName,         //cast
+                                        pxTaskCode,
+                                        0ul,
+                                        (void *)g_recv_thread,  //cast
+                                        usStackDepth,
+                                        uxPriority,
+                                        uxPriority,
+                                        TX_NO_TIME_SLICE,
+                                        TX_AUTO_START);
+        }
+        else if (0 == strcmp(pcName, CELLULAR_RING_TASK_NAME))
+        {
+            tx_ret = tx_thread_create((TX_THREAD *) * p_ret,    //cast
+                                        (CHAR *)pcName,         //cast
+                                        pxTaskCode,
+                                        0ul,
+                                        (void *)g_ring_thread,  //cast
+                                        usStackDepth,
+                                        uxPriority,
+                                        uxPriority,
+                                        TX_NO_TIME_SLICE,
+                                        TX_AUTO_START);
         }
         else
         {
-            gp_cellular_ctrl = (st_cellular_ctrl_t *)pvParameters;
+            R_BSP_NOP();
+        }
+
+        if (TX_SUCCESS != tx_ret)
+        {
+            ret = CELLULAR_ERR_CREATE_TASK;
+            cellular_free(*p_ret);
         }
     }
+#endif  /* BSP_CFG_RTOS_USED == 1 */
 
-    return p_ret;
-#endif
+    return ret;
 }
 /**********************************************************************************************************************
  End of function cellular_create_task

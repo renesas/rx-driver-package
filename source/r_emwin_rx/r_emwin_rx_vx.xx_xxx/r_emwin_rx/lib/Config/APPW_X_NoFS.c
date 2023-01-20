@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : APPW_X_NoFS.c
@@ -30,6 +30,7 @@
  *         : 31.03.2021 6.14.g.1.30    Update to adjust the spec of Smart Configurator and QE for Display.
  *         : 29.12.2021 6.20.  1.00    Update emWin library to v6.22.
  *                                     Adjust configuration option with Smart Configurator.
+ *         : 31.08.2022 6.26.c.1.00    Update emWin library to v6.26c.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************

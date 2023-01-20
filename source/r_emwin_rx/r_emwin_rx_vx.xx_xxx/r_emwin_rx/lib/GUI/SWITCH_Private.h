@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.22 - Graphical user interface for embedded applications **
+** emWin V6.26 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -48,12 +48,13 @@ Purpose     : SWITCH private header file
 */
 /*********************************************************************
 *
-*       SWITCH Flags
+*       SWITCH Flags (first 2 bits are reserved for mode)
 */
 #define SWITCH_ANIM_ACTIVE      (1 << 2)
 #define SWITCH_MOTION_ACTIVE    (1 << 3)
 #define SWITCH_THUMB_TOUCHED    (1 << 4)
 #define SWITCH_DISABLE_ANIM     (1 << 5)
+#define SWITCH_POS_RIGHT        (1 << 6)
 
 /*********************************************************************
 *
@@ -109,7 +110,7 @@ typedef struct {
   SWITCH_Obj * SWITCH_LockH(SWITCH_Handle h);
   #define SWITCH_LOCK_H(h)   SWITCH_LockH(h)
 #else
-  #define SWITCH_LOCK_H(h)   (SWITCH_Obj *)GUI_LOCK_H(h)
+  #define SWITCH_LOCK_H(h)   (SWITCH_Obj *)WM_LOCK_H(h)
 #endif
 
 /*********************************************************************

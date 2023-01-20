@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2004(2005-2020) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2004(2005-2022) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_eeprom_spi_if.h
@@ -57,6 +57,7 @@
 *              : 04.04.2019 3.01     Added support for GNUC and ICCRX.
 *                                    Fixed coding style.
 *              : 10.12.2020 3.02     Change version to 3.02
+*              : 30.06.2022 3.10     Added #defines specify the ports used for SS#.
 *************************************************************************************************/
 #ifndef __EEPROM_SPI_IF_H__
 #define __EEPROM_SPI_IF_H__
@@ -80,7 +81,7 @@ Macro definitions
 
 /* Driver version */
 #define EEPROM_SPI_VERSION_MAJOR       (3)
-#define EEPROM_SPI_VERSION_MINOR       (02)
+#define EEPROM_SPI_VERSION_MINOR       (10)
 
 
 /*--------------- Define no. of slots ----------------*/

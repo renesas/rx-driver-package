@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.22 - Graphical user interface for embedded applications **
+** emWin V6.26 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -104,7 +104,7 @@ typedef struct {
   SPINBOX_OBJ * SPINBOX_LockH(SPINBOX_Handle h);
   #define SPINBOX_LOCK_H(h)   SPINBOX_LockH(h)
 #else
-  #define SPINBOX_LOCK_H(h)   (SPINBOX_OBJ *)GUI_LOCK_H(h)
+  #define SPINBOX_LOCK_H(h)   (SPINBOX_OBJ *)WM_LOCK_H(h)
 #endif
 
 #define SPINBOX_BUTTON_NONE     -1

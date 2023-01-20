@@ -18,7 +18,7 @@
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_power_down.c
- * Description  : Function to stop power supply to the module.
+ * Description  : Function to shut down the module.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -47,24 +47,24 @@
 /****************************************************************************
  * Function Name  @fn            cellular_power_down
  ***************************************************************************/
-void cellular_power_down(st_cellular_ctrl_t * const p_ctrl)
+e_cellular_err_t cellular_power_down(st_cellular_ctrl_t * const p_ctrl)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
+    e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_ERR_TAKE;
 
-    while (1)
+    semaphore_ret = cellular_take_semaphore(p_ctrl->at_semaphore);
+
+    if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
     {
         ret = atc_sqnsshdn(p_ctrl);
-        if (CELLULAR_SUCCESS == ret)
-        {
-            break;
-        }
-        else
-        {
-            cellular_delay_task(1000);
-        }
+        cellular_give_semaphore(p_ctrl->at_semaphore);
+    }
+    else
+    {
+        ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
     }
 
-    return;
+    return ret;
 }
 /**********************************************************************************************************************
  End of function cellular_power_down

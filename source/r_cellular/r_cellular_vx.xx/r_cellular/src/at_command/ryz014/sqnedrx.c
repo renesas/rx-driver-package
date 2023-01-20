@@ -46,23 +46,21 @@
 /*************************************************************************************************
  * Function Name  @fn            atc_sqnedrx
  ************************************************************************************************/
-e_cellular_err_t atc_sqnedrx(st_cellular_ctrl_t * const p_ctrl, const e_cellular_edrx_mode_t mode,
-                                const e_cellular_edrx_cycle_t edrx_value, const e_cellular_ptw_cycle_t ptw)
+e_cellular_err_t atc_sqnedrx(st_cellular_ctrl_t * const p_ctrl, const st_cellular_edrx_config_t * const p_config)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
     uint8_t str[3][5] = {0};
     uint8_t value;
 
-    str[0][0] = mode + 0x30;
+    str[0][0] = p_config->edrx_mode + 0x30;
 
-    value = edrx_value;
+    value = p_config->edrx_cycle;
     str[1][0] = ((value & 0x08) >> 3) + 0x30;
     str[1][1] = ((value & 0x04) >> 2) + 0x30;
     str[1][2] = ((value & 0x02) >> 1) + 0x30;
     str[1][3] = (value & 0x01) + 0x30;
 
-    value = ptw;
+    value = p_config->ptw_cycle;
     str[2][0] = ((value & 0x08) >> 3) + 0x30;
     str[2][1] = ((value & 0x04) >> 2) + 0x30;
     str[2][2] = ((value & 0x02) >> 1) + 0x30;
@@ -74,12 +72,7 @@ e_cellular_err_t atc_sqnedrx(st_cellular_ctrl_t * const p_ctrl, const e_cellular
         (const uint8_t *)&gp_at_command[ATC_SET_EDRXS][0],  // (const uint8_t *const *)->(const uint8_t **)
             (const uint8_t **)&p_command_arg);              // (const uint8_t *const *)->(const uint8_t **)
 
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_SET_EDRXS);
-
-    if (CELLULAR_ATC_OK != at_ret)
-    {
-        ret = CELLULAR_ERR_MODULE_COM;
-    }
+    ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_SET_EDRXS);
 
     return ret;
 }
@@ -93,19 +86,12 @@ e_cellular_err_t atc_sqnedrx(st_cellular_ctrl_t * const p_ctrl, const e_cellular
 e_cellular_err_t atc_sqnedrx_check(st_cellular_ctrl_t * const p_ctrl)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
 
     atc_generate(p_ctrl->sci_ctrl.atc_buff,
         (const uint8_t *)&gp_at_command[ATC_GET_EDRXS][0], // (const uint8_t *const *)->(const uint8_t **)
             NULL);
 
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout,
-                                            ATC_RETURN_OK, ATC_GET_EDRXS);
-
-    if (CELLULAR_ATC_OK != at_ret)
-    {
-        ret = CELLULAR_ERR_MODULE_COM;
-    }
+    ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_GET_EDRXS);
 
     return ret;
 }

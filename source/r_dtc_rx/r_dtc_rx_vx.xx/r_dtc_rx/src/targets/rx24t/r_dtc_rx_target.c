@@ -39,6 +39,7 @@
 *         : 31.03.2017 2.07    Added RX24T-512KB.
 *         : 31.07.2017 2.08    Fixed to correspond to Renesas coding rule.
 *         : 25.11.2019 3.30    Added support for atomic control.
+*         : 27.12.2022 4.21    Updated slash format of included header file paths for Linux compatibility.
 *******************************************************************************/
 
 /*****************************************************************************
@@ -46,7 +47,7 @@ Includes   <System Includes> , "Project Includes"
 ******************************************************************************/
 /* Defines for DTC support */
 #include "r_dtc_rx_if.h"
-#include ".\src\r_dtc_rx_private.h"
+#include "./src/r_dtc_rx_private.h"
 
 /* Check MCU Group */
 #if defined(BSP_MCU_RX24T)

@@ -24,6 +24,7 @@
 * History : DD.MM.YYYY Version Description
 *         : 28.09.2018 1.00    First Release
 *         : 14.03.2021 2.00    Added support for RX66T-48Pins
+*         : 15.12.2022 3.00    Added P50 and P51 for RX66T 100pins
 ***********************************************************************************************************************/
 #ifndef GPIO_RX66T
 #define GPIO_RX66T
@@ -430,7 +431,11 @@ typedef enum
     GPIO_PORT2_PIN_MASK = 0x9F,    /* Available pins: P20 to P24, P27      */
     GPIO_PORT3_PIN_MASK = 0xCF,    /* Available pins: P30 to P33, P36, P37 */
     GPIO_PORT4_PIN_MASK = 0xFF,    /* Available pins: P40 to P47           */
+#if (0xB == BSP_CFG_MCU_PART_FUNCTION) || (0xF == BSP_CFG_MCU_PART_FUNCTION)
+    GPIO_PORT5_PIN_MASK = 0x3F,    /* Available pins: P50 to P55           */
+#else
     GPIO_PORT5_PIN_MASK = 0x3C,    /* Available pins: P52 to P55           */
+#endif
     GPIO_PORT6_PIN_MASK = 0x3F,    /* Available pins: P60 to P65           */
     GPIO_PORT7_PIN_MASK = 0x7F,    /* Available pins: P70 to P76           */
     GPIO_PORT8_PIN_MASK = 0x07,    /* Available pins: P80 to P82           */
@@ -468,6 +473,10 @@ typedef enum
     GPIO_PORT_4_PIN_5 = 0x0405,
     GPIO_PORT_4_PIN_6 = 0x0406,
     GPIO_PORT_4_PIN_7 = 0x0407,
+#if (0xB == BSP_CFG_MCU_PART_FUNCTION) || (0xF == BSP_CFG_MCU_PART_FUNCTION)
+    GPIO_PORT_5_PIN_0 = 0x0500,
+    GPIO_PORT_5_PIN_1 = 0x0501,
+#endif	
     GPIO_PORT_5_PIN_2 = 0x0502,
     GPIO_PORT_5_PIN_3 = 0x0503,
     GPIO_PORT_5_PIN_4 = 0x0504,

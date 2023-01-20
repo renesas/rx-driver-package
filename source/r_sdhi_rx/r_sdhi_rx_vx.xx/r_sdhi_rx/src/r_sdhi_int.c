@@ -19,7 +19,7 @@
 /**********************************************************************************************************************
 * System Name  : SDHI Driver
 * File Name    : r_sdhi_int.c
-* Version      : 2.06
+* Version      : 2.10
 * Device       : RX
 * Abstract     : API & Sub module
 * Tool-Chain   : For RX e2_studio
@@ -34,13 +34,14 @@
 *              : 20.05.2019 2.04    Added support for GNUC and ICCRX.
 *                                   Fixed coding style. 
 *              : 22.11.2019 2.06    Modified comment of API function to Doxygen style.
+*              : 27.12.2022 2.10    Updated slash format of included header file paths for Linux compatibility.
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
 Includes <System Includes> , "Project Includes"
 **********************************************************************************************************************/
 #include "r_sdhi_rx_if.h"
-#include ".\src\r_sdhi_rx_private.h"
+#include "./src/r_sdhi_rx_private.h"
 
 /**********************************************************************************************************************
 Macro definitions

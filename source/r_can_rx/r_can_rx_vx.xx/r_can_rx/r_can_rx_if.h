@@ -48,6 +48,8 @@
 *                              - Added support RX671.
 *         : 13.09.2021 5.20    - Added the demo for RX671.
 *         : 21.02.2022 5.21    - Updated minor version.
+*         : 28.06.2022 5.30    - Updated demo projects.
+*         : 20.09.2022 5.40    - Updated demo projects.
 ***********************************************************************************************************************/
 #ifndef CAN_INTERFACE_HEADER_FILE
 #define CAN_INTERFACE_HEADER_FILE 
@@ -68,7 +70,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define RCAN_RX_VERSION_MAJOR           (5)
-#define RCAN_RX_VERSION_MINOR           (21)
+#define RCAN_RX_VERSION_MINOR           (40)
 /* The process of getting the version number is done through the macro below. The version number is encoded where the
    top 2 bytes are the major version number and the bottom 2 bytes are the minor version number. For example,
    Version 4.25 would be returned as 0x00040019. */

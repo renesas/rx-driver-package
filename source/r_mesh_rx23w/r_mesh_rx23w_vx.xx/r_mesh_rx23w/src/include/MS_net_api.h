@@ -32,15 +32,24 @@
  */
 
 /**
+ * \defgroup net_defines Defines
+ * \{
+ * \brief This section describes the various Defines in EtherMind Mesh
+ * Network Layer.
+ */
+
+/**
  * \defgroup net_constants Constants
  * \{
- * \brief This section describes the EtherMind Mesh Network Layer Constants.
+ * \brief This section describes the various Constants in EtherMind Mesh
+ * Network Layer.
  */
 
 /**
  * \defgroup net_addressing Addressing
  * \{
- * Describes five basic type of addresses, the Network Layer defines.
+ * \brief This section describes five basic type of addresses defined by the
+ * EtherMind Mesh Network Layer.
  */
 
 /**
@@ -149,9 +158,8 @@
 #define MS_NET_ADDR_ALL_NODES                   0xFFFF
 /** \} */
 
-
 /**
- * Address Validity
+ *  Address Validity
  *
  *  | Address Type | Valid in Source Address Field  | Valid in Destination Address Field |
  *  | :----------: | :----------------------------: | :--------------------------------: |
@@ -163,7 +171,8 @@
  */
 
 /**
- * \name Network Layer Feature Idenfiers
+ * \name Network Layer Feature Identifiers
+ * Describes Identifiers related to features exposed by Network Layer.
  * \{
  */
 /** Network Layer Feature - Proxy */
@@ -172,6 +181,11 @@
 #define MS_NET_FEATURE_RELAY      0x01
 /** \} */
 
+/**
+ * \name Network Layer Initializers
+ * Describes Initializer defines used for Network Layer related Data.
+ * \{
+ */
 /** Primary Subnet - NetKey Index is 0x000 */
 #define MS_PRIMARY_SUBNET         0x000
 
@@ -191,11 +205,15 @@
 
 /** \} */
 
+/** \} */
+
 /**
  * \defgroup net_proxy Proxy
  * \{
- * Describes Network Layer Proxy Feature related defines.
+ * \brief This section describes EtherMind Mesh Network Layer exposed
+ * Proxy Feature related defines.
  */
+
 /**
  * \name GATT Proxy Filter Types
  * \{
@@ -226,40 +244,13 @@
  */
 /** Network ID Type */
 #define MS_PROXY_NET_ID_ADV_MODE         0x01
-/** Node Idetity Type */
+/** Node Identity Type */
 #define MS_PROXY_NODE_ID_ADV_MODE        0x02
 /** \} */
 
-/** \} */
-
-/** \} */
-
-/**
- *  \defgroup net_events Events
- *  \{
- *  \brief This section lists the Asynchronous Events notified to Application by the
- *  Module.
- */
-
-/** GATT Proxy Events */
-/** GATT Proxy Event - Interface UP */
-#define MS_PROXY_UP_EVENT                0x00
-/** GATT Proxy Event - Interface Down */
-#define MS_PROXY_DOWN_EVENT              0x01
-/** GATT Proxy Event - Status */
-#define MS_PROXY_STATUS_EVENT            0x02
-
-/** \} */
-
-/**
- *  \defgroup net_proxy states
- *  \{
- *  \brief This section lists the various states of Proxy Module exposed by it to
- *  other Modules.
- */
-
 /**
  * \name GATT Proxy States.
+ *
  * | Proxy Callback   |  Proxy Iface |  Error Code
  * |------------------|--------------|-------------------
  * |  NULL            |  Down        | MS_PROXY_NULL
@@ -279,12 +270,58 @@
 
 /** \} */
 
+/**
+ * \defgroup net_snb SNB
+ * \{
+ * \brief This section describes Identifiers related to Secure Network Beacons
+ * exposed by EtherMind Mesh Network Layer.
+ */
+/**
+ * \name SNB Interval Ranges
+ * \{
+ */
+/**
+ * Recommended Secure Network Beacon Interval Ranges as captured in
+ * Mesh Profile 1.0.1, Section 3.9.3.1, Secure Network beacon behavior.
+ */
+/** Secure Network Beacon Interval Minimum Value in Seconds */
+#define MS_NET_SNB_INTERVAL_MIN         10
+/** Secure Network Beacon Interval Maximum Value in Seconds */
+#define MS_NET_SNB_INTERVAL_MAX         600
+/** \} */
+
+/** \} */
+
+/** \} */
+
+/**
+ *  \defgroup net_events Events
+ *  \{
+ *  \brief This section lists the Asynchronous Events notified to Application
+ *  by the EtherMind Mesh Network Layer.
+ */
+
+/**
+ * \name GATT Proxy Events
+ * \{
+ */
+/** GATT Proxy Event - Interface UP */
+#define MS_PROXY_UP_EVENT                0x00
+/** GATT Proxy Event - Interface Down */
+#define MS_PROXY_DOWN_EVENT              0x01
+/** GATT Proxy Event - Status */
+#define MS_PROXY_STATUS_EVENT            0x02
+/** \} */
+
+/** \} */
+
 /* --------------------------------------------- Data Types/ Structures */
 
 /**
- *  \addtogroup net__types_structures Types/Structures
+ *  \defgroup net_structures Structures
  *  \{
- *  \brief This section describes the EtherMind Mesh Network Layer Types/Structures.
+ *  \brief This section describes the various Data-Types and Structures in
+ *  EtherMind Mesh Network Layer.
  */
 
 /** Network Address Type */
@@ -307,13 +344,13 @@ typedef struct _MS_NET_HEADER
 
     /**
      * Value derived from the NetKey used to identify
-     * the Encrytion Key and Privacy Key used to secure
+     * the Encryption Key and Privacy Key used to secure
      * this PDU - 7 bits
      */
     UINT8 nid;
 
     /**
-     * Indicates use of a new Netkey to which the network
+     * Indicates use of a new NetKey to which the network
      * is being updated to
      */
     UINT8 new_key;
@@ -330,7 +367,7 @@ typedef struct _MS_NET_HEADER
     /** 16 Bit Destination Address */
     MS_NET_ADDR daddr;
 
-    /** 24 bit sequence number - currently filled only in recption path */
+    /** 24 bit sequence number - currently filled only in reception path */
     UINT32 seq_num;
 
 } MS_NET_HEADER;
@@ -358,79 +395,15 @@ typedef struct _NET_SEQ_NUMBER_STATE
 /** \} */
 
 /**
- *  \defgroup net_cb Application Callback
- *  \{
- *  \brief This section Describes the module Notification Callback interface offered
- *  to the application
- */
-/**
- * NETWORK Application Asynchronous Notification Callback.
- *
- * NETWORK calls the registered callback to indicate events occurred to the
- * application.
- *
- * \param brr_type          Bearer Type.
- * \param net_hdr           Network Header.
- * \param subnet_handle     Associated Subnet Handle.
- * \param data_param        Data associated with the event if any or NULL.
- * \param data_len          Size of the event data. 0 if event data is NULL.
- *
- * \return
- * - \ref NET_POST_PROCESS_RX_PKT: To inform Network Layer if the packet to be
- *        further processed, e.g. to be relayed or proxied etc.
- *
- * - Any Other Result/Error Code defined in MS_error.h: Ignored by Network Layer.
- */
-typedef API_RESULT (*NET_NTF_CB)
-        (
-            MS_NET_HEADER    * net_hdr,
-            MS_SUBNET_HANDLE   subnet_handle,
-            UCHAR            * data_param,
-            UINT16             data_len
-        ) DECL_REENTRANT;
-
-/**
- * Network Proxy Application Asynchronous Notification Callback.
- *
- * NETWORK PROXY calls the registered callback to indicate events occurred to the
- * application.
- *
- * \param handle            Network Interface Handle.
- * \param p_evt             Proxy Event.
- * \param data_param        Data associated with the event if any or NULL.
- * \param data_len          Size of the event data. 0 if event data is NULL.
- */
-typedef void (*PROXY_NTF_CB)
-        (
-            NETIF_HANDLE       * handle,
-            UCHAR                p_evt,
-            UCHAR              * data_param,
-            UINT16               data_len
-        ) DECL_REENTRANT;
-
-/**
- * Network Transmit State Application Asynchronous Notification Callback.
- *
- * NETWORK calls the registered callback to indicate the current transmit
- * state of the NETWORK layer to the application.
- *
- * \param status            status of the current NETWORK Transmit Queue
- *                          state
- */
-typedef API_RESULT (*NET_TX_STATE_ACCESS_CB)
-        (
-            UINT16            status
-        ) DECL_REENTRANT;
-/** \} */
-
-/**
- *  \defgroup net_marcos Utility Macros
- *  \{
- *  \brief Initialization and other Utility Macros offered by the module.
+ * \defgroup net_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind Mesh
+ * Network Layer.
  */
 
-/** \name Address Check Macros
- *  \{
+/**
+ * \name Address Check Macros
+ * \{
  */
 /**
  *  Macro to check if Unicast Address
@@ -470,12 +443,20 @@ typedef API_RESULT (*NET_TX_STATE_ACCESS_CB)
          ((0x01 != (ctl)) || (MS_FALSE == MS_IS_VIRTUAL_ADDR(addr)))) \
          ? MS_TRUE : MS_FALSE)
 
+/** \} */
 
+/**
+ * \name GATT Proxy Macros
+ * \{
+ */
+
+#ifdef MS_PROXY_CLIENT
 /**
  *  \brief Set Proxy WhiteList Filter.
  *
- *  \par Description This function is used by the Proxy Client
- *  to set the filter type on the Proxy Server to \ref MS_PROXY_WHITELIST_FILTER.
+ *  \par Description
+ *  This function is used by the Proxy Client to set
+ *  the filter type on the Proxy Server to \ref MS_PROXY_WHITELIST_FILTER.
  *
  *  \param [in] nh Network Interface Handle
  *  \param [in] sh Subnet Handle
@@ -495,8 +476,9 @@ typedef API_RESULT (*NET_TX_STATE_ACCESS_CB)
 /**
  *  \brief Set Proxy BlackList Filter.
  *
- *  \par Description This function is used by the Proxy Client
- *  to set the filter type on the Proxy Server to \ref MS_PROXY_BLACKLIST_FILTER.
+ *  \par Description
+ *  This function is used by the Proxy Client to set the
+ *  filter type on the Proxy Server to \ref MS_PROXY_BLACKLIST_FILTER.
  *
  *  \param [in] nh Network Interface Handle
  *  \param [in] sh Subnet Handle
@@ -514,15 +496,16 @@ typedef API_RESULT (*NET_TX_STATE_ACCESS_CB)
         );
 
 /**
- *  \brief Add addressess to Proxy Filter List.
+ *  \brief Add Addresses to Proxy Filter List.
  *
- *  \par Description This function is used by the Proxy Client
- *  to add Addressess to the Proxy Server's filter List.
+ *  \par Description
+ *  This function is used by the Proxy Client
+ *  to add Addresses to the Proxy Server's filter List.
  *
  *  \param [in] nh Network Interface Handle
  *  \param [in] sh Subnet Handle
  *  \param [in] a  Pointer to List of Address to be added
- *  \param [in] c  Count of Addressess present in the provided List
+ *  \param [in] c  Count of Addresses present in the provided List
  *
  *  \note This API will be used by the Proxy Client only.
  *
@@ -539,15 +522,16 @@ typedef API_RESULT (*NET_TX_STATE_ACCESS_CB)
         );
 
 /**
- *  \brief Delete addresses from Proxy Filter List.
+ *  \brief Delete Addresses from Proxy Filter List.
  *
- *  \par Description This function is used by the Proxy Client
+ *  \par Description
+ *  This function is used by the Proxy Client
  *  to delete/remove Addresses from the Proxy Server's filter List.
  *
  *  \param [in] nh Network Interface Handle
  *  \param [in] sh Subnet Handle
  *  \param [in] a  Pointer to List of Address to be deleted/removed
- *  \param [in] c  Count of Addressess present in the provided List
+ *  \param [in] c  Count of Addresses present in the provided List
  *
  *  \note This API will be used by the Proxy Client only.
  *
@@ -562,21 +546,22 @@ typedef API_RESULT (*NET_TX_STATE_ACCESS_CB)
             (a),                                \
             (c)                                 \
         );
+#endif /* MS_PROXY_CLIENT */
 
 /**
- *  \brief API to send NETWORK PDUs
+ *  \brief API to send Network PDUs
  *
  *  \par Description
- *  This routine sends NETWORK PDUs to peer device on all available Network
+ *  This routine sends Network PDUs to peer device on all available Network
  *  Interfaces.
  *
- *  \param [in] hdr
+ *  \param [in] hd
  *         Network Header
  *
- *  \param [in] subnet_handle
+ *  \param [in] sh
  *         Subnet Handle
  *
- *  \param [in] buffer
+ *  \param [in] buf
  *         Lower Transport Payload
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
@@ -584,6 +569,83 @@ typedef API_RESULT (*NET_TX_STATE_ACCESS_CB)
 #define MS_net_send_pdu(hd,sh,buf) \
         MS_net_send_pdu_on_netif((NULL), (hd), (sh), (buf))
 
+/** \} */
+
+/** \} */
+
+/** \} */
+
+/**
+ *  \defgroup net_cb Application Callback
+ *  \{
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Network Layer.
+ */
+
+/**
+ * Network Application Asynchronous Notification Callback.
+ *
+ * Network Layer calls the registered callback to indicate events occurred to
+ * the application.
+ *
+ * \param brr_type          Bearer Type.
+ * \param net_hdr           Network Header.
+ * \param subnet_handle     Associated Subnet Handle.
+ * \param data_param        Data associated with the event if any or NULL.
+ * \param data_len          Size of the event data. 0 if event data is NULL.
+ *
+ * \return API_SUCCESS or Error Code on failure. Apart from error codes,
+ *         informational codes such as \ref NET_POST_PROCESS_RX_PKT is used to
+ *         inform Network Layer if the packet to be further processed, e.g. to
+ *         be relayed or proxied etc.
+ *
+ * \{
+ */
+typedef API_RESULT (*NET_NTF_CB)
+        (
+            MS_NET_HEADER    * net_hdr,
+            MS_SUBNET_HANDLE   subnet_handle,
+            UCHAR            * data_param,
+            UINT16             data_len
+        ) DECL_REENTRANT;
+/** \} */
+
+/**
+ * Network Proxy Application Asynchronous Notification Callback.
+ *
+ * Network Proxy calls the registered callback to indicate events occurred to
+ * the application.
+ *
+ * \param handle            Network Interface Handle.
+ * \param p_evt             Proxy Event.
+ * \param data_param        Data associated with the event if any or NULL.
+ * \param data_len          Size of the event data. 0 if event data is NULL.
+ *
+ * \{
+ */
+typedef void (*PROXY_NTF_CB)
+        (
+            NETIF_HANDLE       * handle,
+            UCHAR                p_evt,
+            UCHAR              * data_param,
+            UINT16               data_len
+        ) DECL_REENTRANT;
+/** \} */
+
+/**
+ * Network Transmit State Application Asynchronous Notification Callback.
+ *
+ * Network calls the registered callback to indicate the current transmit
+ * state of the Network layer to the application.
+ *
+ * \param status            status of the current Network Transmit Queue
+ *                          state
+ * \{
+ */
+typedef API_RESULT (*NET_TX_STATE_ACCESS_CB)
+        (
+            UINT16            status
+        ) DECL_REENTRANT;
 /** \} */
 
 /** \} */
@@ -597,16 +659,22 @@ extern "C" {
 /**
  * \defgroup net_api_defs API Definitions
  * \{
- * \brief This section describes the EtherMind Mesh Network Layer APIs.
+ * \brief This section describes the various APIs exposed by
+ * EtherMind Mesh Network Layer to the Application and other upper
+ * layers of the stack.
  */
 
-/** \cond DOC_EXCLUDE */
 /**
- *  \brief Register Inerface with NETWORK Layer
+ * \name Network Interfaces
+ * \{
+ */
+
+/**
+ *  \brief Register Interface with Network Layer
  *
  *  \par Description
- *  This routine registers interface with the NETWORK Layer.
- *  NETWORK Layer supports only one upper layer, hence this routine shall be called once.
+ *  This routine registers interface with the Network Layer.
+ *  Network Layer supports only one upper layer, hence this routine shall be called once.
  *
  *  \param [in] net_cb
  *         Upper Layer Notification Callback
@@ -617,30 +685,11 @@ API_RESULT MS_net_register
            (
                 /* IN */ NET_NTF_CB    net_cb
            );
-/** \endcond */
-
 /**
- *  \brief API to send Secure Network Beacon
+ *  \brief Extension API to send Network PDUs on selected Network Interfaces
  *
  *  \par Description
- *  This routine sends Secure Network Beacon for the
- *  given subnet handle
- *
- *  \param [in] subnet_handle
- *         Subnet handle of the network to be broadcasted.
- *
- *  \return API_SUCCESS or an error code indicating reason for failure
- */
-API_RESULT MS_net_broadcast_secure_beacon
-           (
-                /* IN */ MS_SUBNET_HANDLE    subnet_handle
-           );
-
-/**
- *  \brief Extension API to send NETWORK PDUs on selected Network Interfaces
- *
- *  \par Description
- *  This routine sends NETWORK PDUs on all or selected Network Interfaces
+ *  This routine sends Network PDUs on all or selected Network Interfaces
  *
  *  \param [in] handle
  *         Network Interface Handle reference.
@@ -677,26 +726,177 @@ API_RESULT MS_net_send_pdu_on_netif
  *
  *  \param [in] addr            Input Network Address
  *
- *  \return One of the following address type
- *          \ref MS_NET_ADDR_TYPE_INVALID
- *          \ref MS_NET_ADDR_TYPE_UNICAST
- *          \ref MS_NET_ADDR_TYPE_VIRTUAL
-  *         \ref MS_NET_ADDR_TYPE_GROUP
+ *  \return One of the following address type \n
+ *          \ref MS_NET_ADDR_TYPE_INVALID \n
+ *          \ref MS_NET_ADDR_TYPE_UNICAST \n
+ *          \ref MS_NET_ADDR_TYPE_VIRTUAL \n
+  *         \ref MS_NET_ADDR_TYPE_GROUP   
 */
 MS_NET_ADDR_TYPE MS_net_get_address_type
                  (
                      /* IN */ MS_NET_ADDR addr
                  );
 
-/** \name GATT Proxy
- *  \{
- */
 /**
- *  \brief Register Interface with NETWORK PROXY Layer
+ *  \brief To allocate Sequence Number.
  *
  *  \par Description
- *  This routine registers interface with the NETWORK PROXY Layer.
- *  NETWORK PROXY Layer supports only one upper layer, hence this rouine shall be called once.
+ *  This function is used to allocate Sequence Number.
+ *
+ *  \param [out] seq_num   Location where SeqNum to be filled.
+ *
+ *  \return API_SUCCESS or Error Code on failure
+ */
+API_RESULT MS_net_alloc_seq_num(/* OUT */ UINT32   * seq_num);
+
+/**
+ *  \brief To get current Sequence Number state.
+ *
+ *  \par Description
+ *  This function is used to get current Sequence Number state.
+ *
+ *  \param [out] seq_num_state  Location where Seq Number state to be filled.
+ *
+ *  \return API_SUCCESS or Error Code on failure
+ */
+API_RESULT MS_net_get_seq_num_state(/* OUT */ NET_SEQ_NUMBER_STATE * seq_num_state);
+
+/**
+ * \cond ignore_this Ignore this block while generating doxygen document
+ */
+/**
+ *  \brief To get current Sequence Number state.
+ *
+ *  \par Description
+ *  This function is used to get current Sequence Number state,
+ *  without acquiring lock. Used from persistent storage.
+ *
+ *  \param [out] seq_num_state  Location where Seq Number state to be filled.
+ *
+ *  \return API_SUCCESS or Error Code on failure
+ */
+API_RESULT MS_net_get_seq_num_state_wl(/* OUT */ NET_SEQ_NUMBER_STATE * seq_num_state);
+/**
+ * \endcond
+ */
+
+/**
+ *  \brief To set current Sequence Number state.
+ *
+ *  \par Description
+ *  This function is used to set current Sequence Number state.
+ *
+ *  \param [in] seq_num_state  Location from where Seq Number state to be taken.
+ *
+ *  \return API_SUCCESS or Error Code on failure
+ */
+API_RESULT MS_net_set_seq_num_state(/* IN */ NET_SEQ_NUMBER_STATE * seq_num_state);
+
+/**
+ * \cond ignore_this Ignore this block while generating doxygen document
+ */
+/**
+ *  \brief To set current Sequence Number state.
+ *
+ *  \par Description
+ *  This function is used to set current Sequence Number state,
+ *  without acquiring lock. User from persistent storage module.
+ *
+ *  \param [in] seq_num_state  Location from where Seq Number state to be taken.
+ *
+ *  \return API_SUCCESS or Error Code on failure
+ */
+API_RESULT MS_net_set_seq_num_state_wl(/* IN */ NET_SEQ_NUMBER_STATE * seq_num_state);
+/**
+ * \endcond
+ */
+
+/**
+ * \cond ignore_this Ignore this function while generating Doxygen document
+ */
+/**
+ *  \brief Register Interface with Network Layer to fetch the current transmit state.
+ *
+ *  \par Description
+ *  This routine registers interface with the Network Layer to fetch the current transmit
+ *  state of the Network Layer.
+ *
+ *  \param [in] tx_state_cb
+ *         Upper Layer NET TX state Notification Callback
+ *
+ *  \return API_SUCCESS when tx_state_cb is not null and the NET TX state is engaged or,
+ *          API_SUCCESS when tx_state_cb parameter is NULL or
+ *          API_FAILURE when NET TX state is free.
+ */
+API_RESULT MS_net_register_tx_state_access
+           (
+                /* IN */ NET_TX_STATE_ACCESS_CB    tx_state_cb
+           );
+/** \endcond */
+
+#ifdef MS_NET_IGNORE_CACHE_WRAP
+/**
+ *  \brief Function to ignore net-cache wrapping.
+ *
+ *  \par Description
+ *  This routine enables/disables ignoring of net-cache wrapping.
+ *
+ *  \param [in] ignore
+ *         MS_TRUE: Ignores cache wrapping. Old packets will be processed.
+ *         MS_FALSE: Old packets will be dropped. Default behaviour.
+ *
+ *  \return None
+ */
+void MS_net_cache_wrap_ignore(UCHAR ignore);
+#endif /* MS_NET_IGNORE_CACHE_WRAP */
+
+/**
+ *  \brief To reinitialize all Network Layer Cache Entries
+ *
+ *  \par Description
+ *  This routine clears and reinitializes all Network Cache Entries.
+ *  This needs to be invoked by the upper layer when the Network moves to a
+ *  newer IV Index (Normal State) and the Sequence
+ *  numbers are reset.
+ *
+ *  \return None
+ */
+void MS_net_reinit_net_cache(void);
+
+/** \} */
+
+/**
+ * \name Secure Network Beacon Interface
+ * \{
+ */
+/**
+ *  \brief API to send Secure Network Beacon
+ *
+ *  \par Description
+ *  This routine sends Secure Network Beacon for the
+ *  given subnet handle
+ *
+ *  \param [in] subnet_handle
+ *         Subnet handle of the network to be broadcasted.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_net_broadcast_secure_beacon
+           (
+                /* IN */ MS_SUBNET_HANDLE    subnet_handle
+           );
+/** \} */
+
+/**
+ * \name GATT Proxy
+ * \{
+ */
+/**
+ *  \brief Register Interface with Network PROXY Layer
+ *
+ *  \par Description
+ *  This routine registers interface with the Network PROXY Layer.
+ *  Network PROXY Layer supports only one upper layer, hence this routine shall be called once.
  *
  *  \param [in] proxy_cb
  *         Upper Layer Notification Callback
@@ -727,8 +927,9 @@ API_RESULT MS_proxy_fetch_state (UCHAR * proxy_state);
 /** \} */
 
 #ifdef MS_PROXY_CLIENT
-/** \name GATT Proxy Client
- *  \{
+/**
+ * \name GATT Proxy Client
+ * \{
  */
 /**
  * \cond ignore_this Ignore this block while generating doxygen document
@@ -736,7 +937,8 @@ API_RESULT MS_proxy_fetch_state (UCHAR * proxy_state);
 /**
  *  \brief Set Proxy Server's Filter Type.
  *
- *  \par Description This function is used by the Proxy Client
+ *  \par Description
+ *  This function is used by the Proxy Client
  *  to set the filter type on the Proxy Server.
  *
  *  \param [in] handle Network Interface Handle
@@ -751,15 +953,16 @@ API_RESULT MS_proxy_fetch_state (UCHAR * proxy_state);
  */
 API_RESULT MS_proxy_set_filter
            (
-               /* IN */ NETIF_HANDLE       * handle,
-               /* IN */ MS_SUBNET_HANDLE   subnet_handle,
+               /* IN */ NETIF_HANDLE      * handle,
+               /* IN */ MS_SUBNET_HANDLE  subnet_handle,
                /* IN */ PROXY_FILTER_TYPE type
            );
 
 /**
  *  \brief Add or Delete/Remove addresses to/from Proxy Filter List.
  *
- *  \par Description This function is used by the Proxy Client
+ *  \par Description
+ *  This function is used by the Proxy Client
  *  to add/delete Addresses to/from the Proxy Server's filter List.
  *
  *  \param [in] handle Network Interface Handle
@@ -790,13 +993,15 @@ API_RESULT MS_proxy_filter_op
 
 /* Function to Start ADV using Proxy */
 #ifdef MS_PROXY_SERVER
-/** \name GATT Proxy Server
- *  \{
+/**
+ * \name GATT Proxy Server
+ * \{
  */
 /**
  *  \brief Start Connectable Advertisements for a Proxy Server.
  *
- *  \par Description This function is used by the Proxy Server
+ *  \par Description
+ *  This function is used by the Proxy Server
  *  to start Connectable Undirected Advertisements.
  *
  *  \param [in] subnet_handle  Subnet Handle which the Proxy Server is
@@ -806,10 +1011,14 @@ API_RESULT MS_proxy_filter_op
  *              \ref MS_PROXY_NET_ID_ADV_MODE or
  *              \ref MS_PROXY_NODE_ID_ADV_MODE
  *
- *  \note This API will be used by the Proxy Server only.
- *  \note If MESH_CFG_MAX_SUBNETS is set to subnet_handle and \ref MS_PROXY_NODE_ID_ADV_MODE
- *  is set to proxy_adv_mode, Proxy Advertisement with Node Identity is performed for all the
- *  known subnets.
+ *  \note
+ *  This API will be used by the Proxy Server only.
+ *
+ *  \note
+ *  If MESH_CFG_MAX_SUBNETS is set to subnet_handle and \ref MS_PROXY_NODE_ID_ADV_MODE
+ *  is set to proxy_adv_mode, Proxy
+ *  Advertisement with Node Identity is performed for <b>"all the
+ *  known subnets"</b>.
  *
  *  \return API_SUCCESS or Error Code on failure
  */
@@ -822,7 +1031,8 @@ API_RESULT MS_proxy_server_adv_start
 /**
  *  \brief Stop Connectable Advertisements for a Proxy Server.
  *
- *  \par Description This function is used by the Proxy Server
+ *  \par Description
+ *  This function is used by the Proxy Server
  *  to stop Connectable Undirected Advertisements.
  *
  *  \note This API will be used by the Proxy Server only.
@@ -833,135 +1043,11 @@ API_RESULT MS_proxy_server_adv_stop (void);
 /** \} */
 #endif /* MS_PROXY_SERVER */
 
-/**
- *  \brief To allocate Sequence Number.
- *
- *  \par Description This function is used to allocate
- *  Sequence Number.
- *
- *  \param [out] seq_num   Location where SeqNum to be filled.
- *
- *  \return API_SUCCESS or Error Code on failure
- */
-API_RESULT MS_net_alloc_seq_num(/* OUT */ UINT32   * seq_num);
-
-/**
- *  \brief To get current Sequence Number state.
- *
- *  \par Description This function is used to get current
- *  Sequence Number state.
- *
- *  \param [out] seq_num_state  Location where Seq Number state to be filled.
- *
- *  \return API_SUCCESS or Error Code on failure
- */
-API_RESULT MS_net_get_seq_num_state(/* OUT */ NET_SEQ_NUMBER_STATE * seq_num_state);
-
-/**
- * \cond ignore_this Ignore this block while generating doxygen document
- */
-/**
- *  \brief To get current Sequence Number state.
- *
- *  \par Description This function is used to get current
- *  Sequence Number state, which acquiring lock.
- *  Used from persistent storage.
- *
- *  \param [out] seq_num_state  Location where Seq Number state to be filled.
- *
- *  \return API_SUCCESS or Error Code on failure
- */
-API_RESULT MS_net_get_seq_num_state_wl(/* OUT */ NET_SEQ_NUMBER_STATE * seq_num_state);
-/**
- * \endcond
- */
-
-/**
- *  \brief To set current Sequence Number state.
- *
- *  \par Description This function is used to set current
- *  Sequence Number state.
- *
- *  \param [in] seq_num_state  Location from where Seq Number state to be taken.
- *
- *  \return API_SUCCESS or Error Code on failure
- */
-API_RESULT MS_net_set_seq_num_state(/* IN */ NET_SEQ_NUMBER_STATE * seq_num_state);
-
-/**
- * \cond ignore_this Ignore this block while generating doxygen document
- */
-/**
- *  \brief To set current Sequence Number state.
- *
- *  \par Description This function is used to set current
- *  Sequence Number state, without acquiring lock.
- *  User from persistent storage module.
- *
- *  \param [in] seq_num_state  Location from where Seq Number state to be taken.
- *
- *  \return API_SUCCESS or Error Code on failure
- */
-API_RESULT MS_net_set_seq_num_state_wl(/* IN */ NET_SEQ_NUMBER_STATE * seq_num_state);
-/**
- * \endcond
- */
-
-/** \cond DOC_EXCLUDE */
-/**
- *  \brief Register Inerface with NETWORK Layer to fetch the current transmit state.
- *
- *  \par Description
- *  This routine registers interface with the NETWORK Layer to fetch the current transmit
- *  state of the Network Layer.
- *
- *  \param [in] tx_state_cb
- *         Upper Layer NET TX state Notification Callback
- *
- *  \return API_SUCCESS when tx_state_cb is not null and the NET Tx state is engaged or,
- *          API_SUCCESS when tx_state_cb parameter is NULL or
- *          API_FAILURE when NET Tx state is free.
- */
-API_RESULT MS_net_register_tx_state_access
-           (
-                /* IN */ NET_TX_STATE_ACCESS_CB    tx_state_cb
-           );
-/** \endcond */
-
-#ifdef MS_NET_IGNORE_CACHE_WRAP
-/**
- *  \brief Function to ignore netcache wrapping.
- *
- *  \par Description
- *  This routine enables/disables ignoring of netcache wrapping.
- *
- *  \param [in] ignore
- *         MS_TRUE: Ignores cache wrapping. Old packets will be processed.
- *         MS_FALSE: Old packets will be dropped. Default behaviour.
- *
- *  \return None
- */
-void MS_net_cache_wrap_ignore(UCHAR ignore);
-#endif /* MS_NET_IGNORE_CACHE_WRAP */
-
-/**
- *  \brief To reinitialize all Network Layer Cache Entries
- *
- *  \par Description
- *  This routine clears and reinitializes all Network Cache Entries.
- *  This needs to be invoked by the upper layer when the Network moves to a
- *  newer IV Index (Normal State) and the Sequence
- *  numbers are reset.
- *
- *  \return None
- */
-void MS_net_reinit_net_cache(void);
+/** \} */
 
 #ifdef __cplusplus
 };
 #endif
-
-/** \} */
 
 /** \} */
 

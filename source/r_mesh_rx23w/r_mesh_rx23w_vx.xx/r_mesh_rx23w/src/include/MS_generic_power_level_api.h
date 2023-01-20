@@ -17,24 +17,21 @@
 /* --------------------------------------------- Header File Inclusion */
 #include "MS_access_api.h"
 
-
 /* --------------------------------------------- Global Definitions */
 /**
  * \defgroup generic_power_level_module Generic Power Level Model (GENERIC_POWER_LEVEL)
- * \ingroup mesh_models_block
+ * \ingroup generics_models
  * \{
  *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Generic Power Level Model (GENERIC_POWER_LEVEL) module to the Application.
  */
 
-
-
 /* --------------------------------------------- Data Types/ Structures */
 /**
  *  \defgroup generic_power_level_cb Application Callback
  *  \{
- *  \brief This section Describes the module Notification Callback interface offered
- *  to the application
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Generic Power Level Model Layer.
  */
 
 /**
@@ -102,9 +99,17 @@ typedef API_RESULT (* MS_GENERIC_POWER_LEVEL_SETUP_SERVER_CB)
 /** \} */
 
 /**
+ * \defgroup generic_power_level_defines Defines
+ * \{
+ * \brief This section describes the various Defines in EtherMind
+ * Mesh Generic Power Level Model Layer.
+ */
+
+/**
  *  \defgroup generic_power_level_structures Structures
  *  \{
- *  \brief This section describes the EtherMind Mesh Generic Power Level Model Structures.
+ *  \brief This section describes the various Data-Types and Structures in
+ *  EtherMind Mesh Generic Power Level Model Layer.
  */
 
 /**
@@ -228,22 +233,65 @@ typedef struct MS_generic_power_range_set_struct
 } MS_GENERIC_POWER_RANGE_SET_STRUCT;
 /** \} */
 
-
+/** \} */
 
 /* --------------------------------------------- Function */
 /**
  * \defgroup generic_power_level_api_defs API Definitions
  * \{
- * \brief This section describes the EtherMind Mesh Generic Power Level Model APIs.
+ * \brief This section describes the various APIs exposed by
+ * EtherMind Mesh Generic Power Level Model Layer to the Application.
  */
 /**
- * \defgroup generic_power_level_ser_api_defs Generic Power Level Server API
+ * \defgroup generic_power_level_ser_api_defs Generic Power Level Server API Definitions
  * \{
- * \brief This section describes the Generic Power Level Server APIs.
+ * \brief This section describes the EtherMind Mesh Generic Power Level Server
+ * Model APIs.
  */
 
 /**
+ * \name Generic Power Level Server Interfaces
+ * \{
+ */
+
+#ifdef MS_MODEL_SERVER_EXTENDED_INTERFACE
+/**
  *  \brief API to initialize Generic_Power_Level Server model
+ *
+ *  \par Description
+ *  This is to initialize Generic_Power_Level Server model and to register with Access layer.
+ *
+ *  \param [in] element_handle
+ *              Element identifier to be associated with the model instance.
+ *
+ *  \param [in, out] power_level_model_handle
+ *                   Model identifier associated with the Generic Power Level model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in, out] power_level_setup_model_handle
+ *                   Model identifier associated with the Generic Power Level Setup model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in] power_level_appl_cb    Application Callback to be used by the Generic_Power_Level Server.
+ *
+ *  \param [in] power_level_setup_appl_cb    Application Callback to be used by the Generic_Power_Level_Setup Server.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_generic_power_level_server_init_ext
+           (
+               /* IN */    MS_ACCESS_ELEMENT_HANDLE                element_handle,
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE                * power_level_model_handle,
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE                * power_level_setup_model_handle,
+               /* IN */    MS_GENERIC_POWER_LEVEL_SERVER_CB        power_level_appl_cb,
+               /* IN */    MS_GENERIC_POWER_LEVEL_SETUP_SERVER_CB  power_level_setup_appl_cb
+           );
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+
+/**
+ *  \brief API to initialize Generic_Power_Level Server model (deprecated)
  *
  *  \par Description
  *  This is to initialize Generic_Power_Level Server model and to register with Access layer.
@@ -295,7 +343,7 @@ API_RESULT MS_generic_power_level_server_state_update
            );
 
 /**
- *  \brief API to initialize Generic_Power_Level_Setup Server model
+ *  \brief API to initialize Generic_Power_Level_Setup Server model (deprecated)
  *
  *  \par Description
  *  This is to initialize Generic_Power_Level_Setup Server model and to register with Access layer.
@@ -347,10 +395,18 @@ API_RESULT MS_generic_power_level_setup_server_state_update
            );
 /** \} */
 
+/** \} */
+
 /**
- * \defgroup generic_power_level_cli_api_defs Generic Power Level Client API
+ * \defgroup generic_power_level_cli_api_defs Generic Power Level Client API Definitions
  * \{
- * \brief This section describes the Generic Power Level Client APIs.
+ * \brief This section describes the EtherMind Generic Power Level Client
+ * Model APIs.
+ */
+
+/**
+ * \name Generic Power Level Client Interfaces
+ * \{
  */
 
 /**
@@ -426,10 +482,30 @@ API_RESULT MS_generic_power_level_client_send_reliable_pdu
                /* IN */ void    * param,
                /* IN */ UINT32    rsp_opcode
            );
+/** \} */
 
-/** \name Message Send
- *  \{
+/** \} */
+
+/** \} */
+
+
+/**
+ * \addtogroup generic_power_level_defines
+ * \{
  */
+
+/**
+ * \defgroup generic_power_level_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind
+ * Mesh Generic Power Level Model Layer.
+ */
+
+/**
+ * \name Generic Power Level Client Macros
+ * \{
+ */
+
 /**
  *  \brief API to get the Generic Power Actual state of an element.
  *
@@ -455,7 +531,7 @@ API_RESULT MS_generic_power_level_client_send_reliable_pdu
  *  Generic Power Level Set is an acknowledged message used to set the Generic Power Actual state of an element.
  *  The response to the Generic Power Level Set message is a Generic Power Level Status message.
  *
- *  \param [in] param Generic Power Level Set message parameter @ref MS_GENERIC_POWER_LEVEL_SET_STRUCT
+ *  \param [in] param Generic Power Level Set message parameter \ref MS_GENERIC_POWER_LEVEL_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -474,7 +550,7 @@ API_RESULT MS_generic_power_level_client_send_reliable_pdu
  *  Generic Power Level Set Unacknowledged is an unacknowledged message used
  *  to set the Generic Power Actual state of an element.
  *
- *  \param [in] param Generic Power Level Set message parameter @ref MS_GENERIC_POWER_LEVEL_SET_STRUCT
+ *  \param [in] param Generic Power Level Set message parameter \ref MS_GENERIC_POWER_LEVEL_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -529,7 +605,7 @@ API_RESULT MS_generic_power_level_client_send_reliable_pdu
  *  Generic Power Default Set is an acknowledged message used to set the Generic Power Default state of an element.
  *  The response to the Generic Power Default Set message is a Generic Power Default Status message.
  *
- *  \param [in] param Generic Power Default Set message parameter @ref MS_GENERIC_POWER_DEFAULT_SET_STRUCT
+ *  \param [in] param Generic Power Default Set message parameter \ref MS_GENERIC_POWER_DEFAULT_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -548,7 +624,7 @@ API_RESULT MS_generic_power_level_client_send_reliable_pdu
  *  Generic Power Default Set Unacknowledged is an unacknowledged message used to set
  *  the Generic Power Default state of an element.
  *
- *  \param [in] param Generic Power Default Set message parameter @ref MS_GENERIC_POWER_DEFAULT_SET_STRUCT
+ *  \param [in] param Generic Power Default Set message parameter \ref MS_GENERIC_POWER_DEFAULT_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -585,7 +661,7 @@ API_RESULT MS_generic_power_level_client_send_reliable_pdu
  *  Generic Power Range Set is an acknowledged message used to set the Generic Power Range state of an element.
  *  The response to the Generic Power Range Set message is a Generic Power Range Status message.
  *
- *  \param [in] param Generic Power Range Set message parameter @ref MS_GENERIC_POWER_RANGE_SET_STRUCT
+ *  \param [in] param Generic Power Range Set message parameter \ref MS_GENERIC_POWER_RANGE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -604,7 +680,7 @@ API_RESULT MS_generic_power_level_client_send_reliable_pdu
  *  Generic Power Range Set Unacknowledged is an unacknowledged message used to set
  *  the Generic Power Range state of an element.
  *
- *  \param [in] param Generic Power Range Set message parameter @ref MS_GENERIC_POWER_RANGE_SET_STRUCT
+ *  \param [in] param Generic Power Range Set message parameter \ref MS_GENERIC_POWER_RANGE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -616,8 +692,48 @@ API_RESULT MS_generic_power_level_client_send_reliable_pdu
             0xFFFFFFFF\
         )
 /** \} */
+
+/**
+ * \name Generic Power Level Server and Generic Power Level Setup Server Macros
+ * \{
+ */
+#ifdef MS_MODEL_SERVER_EXTENDED_INTERFACE
+/**
+ *  \brief API to send reply or to update state change
+ *
+ *  \par Description
+ *  This is to send reply for a request or to inform change in state.
+ *
+ * \param [in] c   Context of the message.
+ * \param [in] cs  Model specific current state parameters.
+ * \param [in] ts  Model specific target state parameters (NULL: to be ignored).
+ * \param [in] rt  Time from current state to target state (0: to be ignored).
+ * \param [in] ex  Additional parameters (NULL: to be ignored).
+ * \param [in] r   If unicast response to be sent
+ * \param [in] p   If state to be published
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+#define MS_generic_power_level_server_state_update_ext(c,cs,ts,rt,ex,r,p) \
+        MS_generic_power_level_server_state_update \
+        (\
+            (c),\
+            (cs),\
+            (ts),\
+            (rt),\
+            (ex),\
+            (r),\
+            (p)\
+        )
+
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+
 /** \} */
+
 /** \} */
+
+/** \} */
+
 /** \} */
 
 #endif /* _H_MS_GENERIC_POWER_LEVEL_API_ */

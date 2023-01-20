@@ -24,47 +24,75 @@
 #define MESH_PROXY_SERVICE                   0x1828
 
 /** Characteristic UUIDs */
+/** Mesh Provisioning Data In Characteristic */
 #define MESH_CH_PROVISIONING_DATA_IN         0x2ADB
+/** Mesh Provisioning Data Out Characteristic */
 #define MESH_CH_PROVISIONING_DATA_OUT        0x2ADC
+/** Mesh Proxy Data In Characteristic */
 #define MESH_CH_PROXY_DATA_IN                0x2ADD
+/** Mesh Proxy Data Out Characteristic */
 #define MESH_CH_PROXY_DATA_OUT               0x2ADE
 
 /** Advertising Type */
+/** Mesh Advertisement related Provisioning Bearer AD Type */
 #define MESH_AD_TYPE_PB_ADV                  0x29
+/** Mesh Network Packet AD Type */
 #define MESH_AD_TYPE_PKT                     0x2A
+/** Mesh Beacon AD Type */
 #define MESH_AD_TYPE_BCON                    0x2B
 
 /** GATT PDU Types */
+/** Mesh GATT Proxy PDU Network Message Type */
 #define MESH_GATT_TYPE_NETWORK               0x00
+/** Mesh GATT Proxy PDU Beacon Message Type */
 #define MESH_GATT_TYPE_BEACON                0x01
+/** Mesh GATT Proxy PDU Proxy Configuration Message Type */
 #define MESH_GATT_TYPE_PROXY                 0x02
+/** Mesh GATT Proxy PDU Provisioning Message Type */
 #define MESH_GATT_TYPE_PROV                  0x03
 
 /** GATT Segmentation & Reassembly (SAR) constants */
+/** Mesh GATT Proxy PDU with complete message */
 #define MESH_GATT_SAR_COMPLETE               0x00
+/** Mesh GATT Proxy PDU with first segment of message */
 #define MESH_GATT_SAR_START                  0x01
+/** Mesh GATT Proxy PDU with continuation segment of message */
 #define MESH_GATT_SAR_CONTINUE               0x02
+/** Mesh GATT Proxy PDU with last segment of message */
 #define MESH_GATT_SAR_END                    0x03
 
 /** Model type definitions */
+/** Mesh Bluetooth SIG defined Model Type */
 #define MS_ACCESS_MODEL_TYPE_SIG                            0x00
+/** Mesh Vendor defined Model Type */
 #define MS_ACCESS_MODEL_TYPE_VENDOR                         0x01
 
 /** Mesh Nonce Types */
+/** Mesh Network Nonce Type */
 #define MS_NONCE_T_NETWORK                                  0x00
+/** Mesh Application Nonce Type */
 #define MS_NONCE_T_APPLICATION                              0x01
+/** Mesh Device Nonce Type */
 #define MS_NONCE_T_DEVICE                                   0x02
+/** Mesh Proxy Nonce Type */
 #define MS_NONCE_T_PROXY                                    0x03
 
 /** Opcode definitions for the Foundation Model */
 
 /** 8-bit Opcodes of Model specific messages */
+/** Config AppKey Add Opcode */
 #define MS_ACCESS_CONFIG_APPKEY_ADD_OPCODE                                      0x00
+/** Config AppKey Update Opcode */
 #define MS_ACCESS_CONFIG_APPKEY_UPDATE_OPCODE                                   0x01
+/** Config Composition Data Status Opcode */
 #define MS_ACCESS_CONFIG_COMPOSITION_DATA_STATUS_OPCODE                         0x02
+/** Config Model Publication Set Opcode */
 #define MS_ACCESS_CONFIG_MODEL_PUBLICATION_SET_OPCODE                           0x03
+/** Health Current Status Opcode */
 #define MS_ACCESS_HEALTH_CURRENT_STATUS_OPCODE                                  0x04
+/** Health Fault Status Opcode */
 #define MS_ACCESS_HEALTH_FAULT_STATUS_OPCODE                                    0x05
+/** Config Heartbeat Publication Status Opcode */
 #define MS_ACCESS_CONFIG_HEARTBEAT_PUBLICATION_STATUS_OPCODE                    0x06
 
 /** 16-bit Opcodes of Model specific messages */
@@ -92,11 +120,11 @@
 #define MS_ACCESS_CONFIG_BEACON_SET_OPCODE                                      0x800A
 /** Config Beacon Status Opcode */
 #define MS_ACCESS_CONFIG_BEACON_STATUS_OPCODE                                   0x800B
-/** Config Deafault TTL Get Opcode */
+/** Config Default TTL Get Opcode */
 #define MS_ACCESS_CONFIG_DEFAULT_TTL_GET_OPCODE                                 0x800C
-/** Config Deafault TTL Set Opcode */
+/** Config Default TTL Set Opcode */
 #define MS_ACCESS_CONFIG_DEFAULT_TTL_SET_OPCODE                                 0x800D
-/** Config Deafault TTL Status Opcode */
+/** Config Default TTL Status Opcode */
 #define MS_ACCESS_CONFIG_DEFAULT_TTL_STATUS_OPCODE                              0x800E
 /** Config Friend Get Opcode */
 #define MS_ACCESS_CONFIG_FRIEND_GET_OPCODE                                      0x800F
@@ -670,6 +698,8 @@
 #define MS_ACCESS_LIGHT_LC_LIGHT_ONOFF_SET_UNACKNOWLEDGED_OPCODE                0x829B
 /** Light LC Light OnOff Status Opcode */
 #define MS_ACCESS_LIGHT_LC_LIGHT_ONOFF_STATUS_OPCODE                            0x829C
+
+/** Light Control Setup */
 /** Light LC Property Get Opcode */
 #define MS_ACCESS_LIGHT_LC_PROPERTY_GET_OPCODE                                  0x829D
 /** Light LC Property Set Opcode */

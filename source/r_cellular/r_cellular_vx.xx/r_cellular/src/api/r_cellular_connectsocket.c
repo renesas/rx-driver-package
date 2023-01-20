@@ -48,69 +48,86 @@
  * Function Name  @fn            R_CELLULAR_ConnectSocket
  ***********************************************************************/
 e_cellular_err_t R_CELLULAR_ConnectSocket(st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_no,
-                                            const uint32_t ip_address, const uint16_t port)
+                                            const uint8_t * const p_ip_addr, const uint16_t port)
 {
+    uint32_t preemption = 0;
     e_cellular_err_t ret = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
 
-    if ((NULL == p_ctrl) || (0 == ip_address) || (0 == port))
+    preemption = cellular_interrupt_disable();
+    if ((NULL == p_ctrl) || (NULL == p_ip_addr) || (0 == port))
     {
         ret = CELLULAR_ERR_PARAMETER;
     }
     else
     {
-        if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
+        if (0 != (p_ctrl->running_api_count % 2))
+        {
+            ret = CELLULAR_ERR_OTHER_API_RUNNING;
+        }
+        else if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
         {
             ret = CELLULAR_ERR_NOT_OPEN;
         }
         else if (CELLULAR_SYSTEM_OPEN == p_ctrl->system_state)
         {
-            ret =  CELLULAR_ERR_NOT_CONNECT;
+            ret = CELLULAR_ERR_NOT_CONNECT;
         }
         else
         {
             R_BSP_NOP();
         }
-    }
 
-    if (CELLULAR_SUCCESS == ret)
-    {
-        if ((CELLULAR_START_SOCKET_NUMBER > socket_no) || (p_ctrl->creatable_socket < socket_no))
+        if (CELLULAR_SUCCESS == ret)
         {
-            ret = CELLULAR_ERR_PARAMETER;
+            if ((CELLULAR_START_SOCKET_NUMBER > socket_no) || (p_ctrl->creatable_socket < socket_no))
+            {
+                ret = CELLULAR_ERR_PARAMETER;
+            }
         }
-    }
 
-    if (CELLULAR_SUCCESS == ret)
-    {
-        if (CELLULAR_SOCKET_STATUS_CLOSED ==
-                p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].socket_status)
+        if (CELLULAR_SUCCESS == ret)
         {
-            ret = CELLULAR_ERR_SOCKET_NOT_READY;
-        }
-        else if (CELLULAR_SOCKET_STATUS_CONNECTED ==
-                p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].socket_status)
-        {
-            ret = CELLULAR_ERR_ALREADY_SOCKET_CONNECT;
-        }
-        else
-        {
-            R_BSP_NOP();
+            if (CELLULAR_SOCKET_STATUS_CLOSED ==
+                    p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].socket_status)
+            {
+                ret = CELLULAR_ERR_SOCKET_NOT_READY;
+            }
+            else if (CELLULAR_SOCKET_STATUS_CONNECTED ==
+                    p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].socket_status)
+            {
+                ret = CELLULAR_ERR_ALREADY_SOCKET_CONNECT;
+            }
+            else
+            {
+                p_ctrl->running_api_count += 2;
+            }
         }
     }
+    cellular_interrupt_enable(preemption);
 
     if (CELLULAR_SUCCESS == ret)
     {
         semaphore_ret = cellular_take_semaphore(p_ctrl->at_semaphore);
         if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
         {
-            ret = atc_sqnsd(p_ctrl, socket_no, ip_address, port);
+            ret = atc_sqnsd(p_ctrl, socket_no, p_ip_addr, port);
             if (CELLULAR_SUCCESS == ret)
             {
                 p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].socket_status
                     = CELLULAR_SOCKET_STATUS_CONNECTED;
-                p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].ipaddr = ip_address;
-                p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].port   = port;
+                if (CELLULAR_PROTOCOL_IPV4 ==
+                        p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].ipversion)
+                {
+                    strncpy((char *)p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].ip_addr.ipv4,
+                            (char *)p_ip_addr, CELLULAR_IPV4_ADDR_LENGTH); //(uint8_t *)->(char *)
+                }
+                else
+                {
+                    strncpy((char *)p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].ip_addr.ipv6,
+                            (char *)p_ip_addr, CELLULAR_IPV6_ADDR_LENGTH); //(uint8_t *)->(char *)
+                }
+                p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].port = port;
             }
             cellular_give_semaphore(p_ctrl->at_semaphore);
         }
@@ -118,6 +135,7 @@ e_cellular_err_t R_CELLULAR_ConnectSocket(st_cellular_ctrl_t * const p_ctrl, con
         {
             ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
         }
+        p_ctrl->running_api_count -= 2;
     }
 
     return ret;

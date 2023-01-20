@@ -30,6 +30,7 @@
 *         : 30.11.2021 1.04     Added the following macro definition and changed setting of SPCC register.
 *                               - BSP_PRV_SPCC_SPE
 *                               - BSP_PRV_SPCC_VALUE
+*         : 25.11.2022 1.05     Deleted the invalid function definition.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -49,7 +50,6 @@ Macro definitions
 Exported global functions (to be accessed by other files)
 ***********************************************************************************************************************/
 R_BSP_POR_FUNCTION(R_BSP_POWER_ON_RESET_FUNCTION);
-R_BSP_UB_POR_FUNCTION(R_BSP_UB_POWER_ON_RESET_FUNCTION);
 
 /***********************************************************************************************************************
 * The following array fills in the option function select registers, fixed vector table, and the ID code protection 

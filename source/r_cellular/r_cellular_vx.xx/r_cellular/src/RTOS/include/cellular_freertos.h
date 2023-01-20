@@ -81,7 +81,16 @@
 /**********************************************************************************************************************
  * Macro definitions
  *********************************************************************************************************************/
-#if BSP_CFG_RTOS_USED == (5)
+#define CELLULAR_RECV_TASK_NAME  "cellular_recv_task"
+#define CELLULAR_RING_TASK_NAME  "cellular_ring_task"
+
+#if BSP_CFG_RTOS_USED == (1)
+#define CELLULAR_RECV_THREAD_SIZE   (2048 / sizeof(configSTACK_DEPTH_TYPE)) //cast
+#define CELLULAR_RING_THREAD_SIZE   (512)
+#elif BSP_CFG_RTOS_USED == (5)
+#define CELLULAR_RECV_THREAD_SIZE   (2048)
+#define CELLULAR_RING_THREAD_SIZE   (512)
+
 /* Convert time to milliseconds */
 #define MS_TO_TICKS( time )    (( UINT )((( UINT)( time ) * ( UINT ) TX_TIMER_TICKS_PER_SECOND ) / ( UINT ) 1000U ))
 
@@ -95,20 +104,27 @@
 #define EVENT_BLOCK_SIZE              (sizeof(TX_EVENT_FLAGS_GROUP))
 
 /* Each memory block contains a pointer to the overhead represented by "sizeof(void *)" */
-#define TOTAL_EVENT_BLOCK_SIZE        (EVENT_BLOCK_SIZE + sizeof(void *))
+#define TOTAL_EVENT_BLOCK_SIZE        (2 * (EVENT_BLOCK_SIZE + sizeof(void *)))
 
 /* Get the memory size of the thread structure */
 #define THREAD_BLOCK_SIZE             (sizeof(TX_THREAD))
 
 /* Each memory block contains a pointer to the overhead represented by "sizeof(void *)" */
-#define TOTAL_THREAD_BLOCK_SIZE       (THREAD_BLOCK_SIZE + sizeof(void *))
+#define TOTAL_THREAD_BLOCK_SIZE       (2 * (THREAD_BLOCK_SIZE + sizeof(void *)))
 
 /* Get the memory size of the semaphore handle */
 #define SEMAPHORE_BLOCK_SIZE          (sizeof(TX_SEMAPHORE))
 
 /* Each memory block contains a pointer to the overhead represented by "sizeof(void *)" */
-#define TOTAL_SEMAPHORE_BLOCK_SIZE    ((CELLULAR_CREATABLE_SOCKETS + 1) * (SEMAPHORE_BLOCK_SIZE  + sizeof(void *)))
-#endif
+#define TOTAL_SEMAPHORE_BLOCK_SIZE    ((CELLULAR_CREATABLE_SOCKETS + 2) * (SEMAPHORE_BLOCK_SIZE  + sizeof(void *)))
+
+extern uint8_t g_recv_thread[CELLULAR_RECV_THREAD_SIZE];
+extern uint8_t g_ring_thread[CELLULAR_RING_THREAD_SIZE];
+extern TX_BLOCK_POOL g_cellular_socket_pool;
+extern TX_BLOCK_POOL g_cellular_event_pool;
+extern TX_BLOCK_POOL g_cellular_thread_pool;
+extern TX_BLOCK_POOL g_cellular_semaphore_pool;
+#endif /* BSP_CFG_RTOS_USED == 1 */
 
 /*****************************************************************************
  * Private Functions
@@ -182,12 +198,12 @@ e_cellular_err_t cellular_create_task (void (*pxTaskCode)(void *),
                                         const uint32_t uxPriority,
                                         void * const pxCreatedTask);
 #elif BSP_CFG_RTOS_USED == (5)
-void * cellular_create_task (void (*pxTaskCode)(ULONG),
-                                const char * const pcName,
-                                const uint16_t usStackDepth,
-                                void * const pvParameters,
-                                const uint32_t uxPriority,
-                                void * const pxCreatedTask);
+e_cellular_err_t cellular_create_task (void (*pxTaskCode)(ULONG),
+                                        const char * const pcName,
+                                        const uint16_t usStackDepth,
+                                        void * const pvParameters,
+                                        const uint32_t uxPriority,
+                                        void * const pxCreatedTask);
 #endif
 
 
@@ -256,6 +272,53 @@ e_cellular_err_semaphore_t cellular_give_semaphore (void * const xSemaphore);
  *                                  Semaphore acquisition failed.
  ****************************************************************************************/
 e_cellular_err_semaphore_t cellular_take_semaphore (void * const xSemaphore);
+
+/*****************************************************************************************
+ * Function Name  @fn            cellular_set_event_flg
+ * Description    @details       Set flg.
+ * Arguments      @param[in]     xEventGroup -
+ *                                  Pointer to get the event group.
+ * Arguments      @param[in]     uxBitsToSet -
+ *                                  Event bits to set.
+ * Arguments      @param[in]     pxHigherPriorityTaskWoken -
+ *                                  Task switch request.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully set the flag.
+ *                               CELLULAR_ERR_EVENT_GROUP_INIT -
+ *                                  Failed to set flag.
+ ****************************************************************************************/
+e_cellular_err_t cellular_set_event_flg (void * const xEventGroup, const uint32_t uxBitsToSet,
+                                            int32_t * pxHigherPriorityTaskWoken);
+
+/*****************************************************************************************
+ * Function Name  @fn            cellular_get_event_flg
+ * Description    @details       Get flg.
+ * Arguments      @param[in]     xEventGroup -
+ *                                  Pointer to get the event group.
+ * Arguments      @param[in]     uxBitsToGet -
+ *                                  Event bits to get.
+ * Arguments      @param[in]     xTicksToWait -
+ *                                  Waiting time.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully get the flag.
+ *                               CELLULAR_ERR_EVENT_GROUP_INIT -
+ *                                  Failed to get flag.
+ ****************************************************************************************/
+e_cellular_err_t cellular_get_event_flg (void * const xEventGroup, const uint32_t uxBitsToGet,
+                                            const uint32_t xTicksToWait);
+
+/*****************************************************************************************
+ * Function Name  @fn            cellular_interrupt_disable
+ * Description    @details       Disable Interrupt.
+ * Return Value   @retval        Preemption value of the calling task.
+ ****************************************************************************************/
+uint32_t cellular_interrupt_disable (void);
+
+/*****************************************************************************************
+ * Function Name  @fn            cellular_interrupt_enable
+ * Description    @details       Enable Interrupt.
+ ****************************************************************************************/
+void cellular_interrupt_enable (uint32_t preemption);
 
 #if BSP_CFG_RTOS_USED == (5)
 /*****************************************************************************************

@@ -31,6 +31,7 @@
 *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
 *         : 30.04.2021 1.31 RX671 is added.
 *         : 30.06.2022 1.40 USBX PCDC is supported
+*         : 30.10.2022 1.41 USBX HMSC is supported
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -75,6 +76,24 @@ Includes   <System Includes> , "Project Includes"
 #if defined(USB_CFG_PCDC_USE)
 #include "r_usb_pcdc_if.h"
 #endif /* defined(USB_CFG_PCDC_USE) */
+
+#else /* (BSP_CFG_RTOS_USED != 5) */
+ #include "ux_api.h"
+ #include "ux_system.h"
+ #if defined(USB_CFG_HCDC_USE)
+  #include "ux_host_class_cdc_acm.h"
+ #endif                                /* defined(USB_CFG_HCDC_USE) */
+ #if defined(USB_CFG_HMSC_USE)
+  #include "ux_host_class_storage.h"
+ #endif                                /* defined(USB_CFG_HMSC_USE) */
+ #if defined(USB_CFG_HHID_USE)
+  #include "ux_host_class_hid.h"
+  #include "ux_host_class_hid_keyboard.h"
+  #include "ux_host_class_hid_mouse.h"
+ #endif                                /* defined(USB_CFG_HHID_USE) */
+ #if defined(USB_CFG_HPRN_USE)
+  #include "ux_host_class_printer.h"
+ #endif                                /* defined(USB_CFG_HPRN_USE) */
 #endif /* (BSP_CFG_RTOS_USED != 5) */
 
 
@@ -136,6 +155,10 @@ static uint8_t  gs_usb_resume_ing[USB_NUM_USBIP] =
 };
 #endif /*(BSP_CFG_RTOS_USED != 0)*/
 
+#if (BSP_CFG_RTOS_USED == 5)
+extern UINT usb_host_usbx_initialize(UX_HCD * hcd);
+extern usb_err_t usb_host_usbx_uninitialize (uint32_t hcd_io);
+#endif /* (BSP_CFG_RTOS_USED == 5) */
 /***********************************************************************************************************************
 Renesas Abstracted Peripheral Driver API functions
 ***********************************************************************************************************************/
@@ -459,6 +482,87 @@ usb_err_t R_USB_Open( usb_ctrl_t *ctrl, usb_cfg_t *cfg )
             usb_hstd_vbus_control(&utr, (uint16_t)USB_VBOFF);
 
 #endif /*  USB_CFG_TYPEC == USB_CFG_DISABLE */
+
+ #if (BSP_CFG_RTOS_USED == 5)
+  #if defined(USB_CFG_HCDC_USE)
+            ux_host_stack_class_register(_ux_system_host_class_cdc_acm_name, ux_host_class_cdc_acm_entry);
+            if (USB_HS == cfg->usb_speed)
+            {
+                ux_host_stack_hcd_register((UCHAR *) "fsp_usbx_hcdc_hs", usb_host_usbx_initialize, R_USB_HS0_BASE, 0);
+            }
+            else
+            {
+                if (USB_IP0 == ctrl->module)
+                {
+                    ux_host_stack_hcd_register((UCHAR *) "fsp_usbx_hcdc_fs", usb_host_usbx_initialize, R_USB_FS0_BASE,
+                                               0);
+                }
+                else
+                {
+                    ux_host_stack_hcd_register((UCHAR *) "fsp_usbx_hcdc_hs", usb_host_usbx_initialize, R_USB_HS0_BASE,
+                                               0);
+                }
+            }
+  #endif                               /* defined(USB_CFG_HCDC_USE) */
+  #if defined(USB_CFG_HMSC_USE)
+            ux_host_stack_class_register(_ux_system_host_class_storage_name, ux_host_class_storage_entry);
+            if (USB_HS == cfg->usb_speed)
+            {
+                ux_host_stack_hcd_register((UCHAR *) "fsp_usbx_hmsc_hs", usb_host_usbx_initialize, R_USB_HS0_BASE, 0);
+            }
+            else
+            {
+                if (USB_IP0 == ctrl->module)
+                {
+                    ux_host_stack_hcd_register((UCHAR *) "fsp_usbx_hmsc_fs", usb_host_usbx_initialize, R_USB_FS0_BASE,
+                                               0);
+                }
+                else
+                {
+                    ux_host_stack_hcd_register((UCHAR *) "fsp_usbx_hmsc_hs", usb_host_usbx_initialize, R_USB_HS0_BASE,
+                                               0);
+                }
+            }
+  #endif                               /* defined(USB_CFG_HCDC_USE) */
+  #if defined(USB_CFG_HHID_USE)
+            ux_host_stack_class_register(_ux_system_host_class_hid_name, ux_host_class_hid_entry);
+
+            ux_host_class_hid_client_register(_ux_system_host_class_hid_client_keyboard_name,
+                                              ux_host_class_hid_keyboard_entry);
+            ux_host_class_hid_client_register(_ux_system_host_class_hid_client_mouse_name,
+                                              ux_host_class_hid_mouse_entry);
+
+            if (USB_IP1 == p_ctrl->module_number)
+            {
+                ux_host_stack_hcd_register((UCHAR *) "fsp_usbx_hhid_hs", usb_host_usbx_initialize, R_USB_HS0_BASE, 0);
+            }
+            else
+            {
+                ux_host_stack_hcd_register((UCHAR *) "fsp_usbx_hhid_fs", usb_host_usbx_initialize, R_USB_FS0_BASE, 0);
+            }
+  #endif                               /* defined(USB_CFG_HHID_USE) */
+  #if defined(USB_CFG_HPRN_USE)
+            ux_host_stack_class_register(_ux_system_host_class_printer_name, ux_host_class_printer_entry);
+            if (USB_HS == p_cfg->usb_speed)
+            {
+                ux_host_stack_hcd_register((UCHAR *) "fsp_usbx_hprn_hs", usb_host_usbx_initialize, R_USB_HS0_BASE, 0);
+            }
+            else
+            {
+                if (USB_IP0 == p_cfg->module_number)
+                {
+                    ux_host_stack_hcd_register((UCHAR *) "fsp_usbx_hprn_fs", usb_host_usbx_initialize, R_USB_FS0_BASE,
+                                               0);
+                }
+                else
+                {
+                    ux_host_stack_hcd_register((UCHAR *) "fsp_usbx_hprn_hs", usb_host_usbx_initialize, R_USB_HS0_BASE,
+                                               0);
+                }
+            }
+  #endif                               /* defined(USB_CFG_HPRN_USE) */
+ #endif                                /* #if (BSP_CFG_RTOS_USED == 5) */
+
         }
 
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
@@ -661,6 +765,45 @@ usb_err_t R_USB_Close(usb_ctrl_t *p_ctrl)
 
             usb_hstd_driver_release(&utr);
             usb_hstd_clr_pipe_table_ip(utr.ip);
+
+  #if (BSP_CFG_RTOS_USED == 5)
+            if (USB_IP1 == p_ctrl->module)
+            {
+   #if defined(USB_CFG_HCDC_USE)
+                ux_host_stack_hcd_unregister((UCHAR *) "fsp_usbx_hcdc_hs", R_USB_HS0_BASE, 0);
+   #endif                              /* #if defined(USB_CFG_HCDC_USE) */
+   #if defined(USB_CFG_HMSC_USE)
+                ux_host_stack_hcd_unregister((UCHAR *) "fsp_usbx_hmsc_hs", R_USB_HS0_BASE, 0);
+   #endif                              /* #if defined(USB_CFG_HMSC_USE) */
+   #if defined(USB_CFG_HHID_USE)
+                ux_host_stack_hcd_unregister((UCHAR *) "fsp_usbx_hhid_hs", R_USB_HS0_BASE, 0);
+   #endif                              /* #if defined(USB_CFG_HHID_USE) */
+                usb_host_usbx_uninitialize(R_USB_HS0_BASE);
+            }
+            else
+            {
+   #if defined(USB_CFG_HCDC_USE)
+                ux_host_stack_hcd_unregister((UCHAR *) "fsp_usbx_hcdc_fs", R_USB_FS0_BASE, 0);
+   #endif                              /* #if defined(USB_CFG_HCDC_USE) */
+   #if defined(USB_CFG_HMSC_USE)
+                ux_host_stack_hcd_unregister((UCHAR *) "fsp_usbx_hmsc_fs", R_USB_FS0_BASE, 0);
+   #endif                              /* #if defined(USB_CFG_HMSC_USE) */
+   #if defined(USB_CFG_HHID_USE)
+                ux_host_stack_hcd_unregister((UCHAR *) "fsp_usbx_hhid_fs", R_USB_FS0_BASE, 0);
+   #endif                              /* #if defined(USB_CFG_HHID_USE) */
+                usb_host_usbx_uninitialize(R_USB_FS0_BASE);
+            }
+
+   #if defined(USB_CFG_HCDC_USE)
+            ux_host_stack_class_unregister(ux_host_class_cdc_acm_entry);
+   #endif                              /* #if defined(USB_CFG_HCDC_USE) */
+   #if defined(USB_CFG_HMSC_USE)
+            ux_host_stack_class_unregister(ux_host_class_storage_entry);
+   #endif                              /* #if defined(USB_CFG_HMSC_USE) */
+   #if defined(USB_CFG_HHID_USE)
+            ux_host_stack_class_unregister(ux_host_class_hid_entry);
+   #endif                              /* #if defined(USB_CFG_HHID_USE) */
+  #endif                               /* #if (BSP_CFG_RTOS_USED == 5) */
 
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
         }

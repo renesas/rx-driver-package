@@ -49,15 +49,55 @@
 e_cellular_err_t R_CELLULAR_Close(st_cellular_ctrl_t * const p_ctrl)
 {
     uint8_t i;
+    uint32_t preemption = 0;
     e_cellular_err_t ret = CELLULAR_SUCCESS;
 
+    preemption = cellular_interrupt_disable();
     if (NULL == p_ctrl)
     {
         ret = CELLULAR_ERR_PARAMETER;
     }
+    else
+    {
+        if (0 < (p_ctrl->running_api_count))
+        {
+            ret = CELLULAR_ERR_OTHER_API_RUNNING;
+        }
+        else if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
+        {
+            ret = CELLULAR_ERR_NOT_OPEN;
+        }
+        else
+        {
+            p_ctrl->running_api_count++;
+        }
+    }
+    cellular_interrupt_enable(preemption);
 
     if (CELLULAR_SUCCESS == ret)
     {
+        p_ctrl->ring_ctrl.psm = CELLULAR_PSM_DEACTIVE;
+
+        cellular_irq_close(p_ctrl);
+
+        if (NULL != p_ctrl->ring_ctrl.ring_event)
+        {
+            cellular_delete_event_group(p_ctrl->ring_ctrl.ring_event);
+            p_ctrl->ring_ctrl.ring_event = NULL;
+        }
+        if (NULL != p_ctrl->ring_ctrl.rts_semaphore)
+        {
+            cellular_delete_semaphore(p_ctrl->ring_ctrl.rts_semaphore);
+            p_ctrl->ring_ctrl.rts_semaphore = NULL;
+        }
+        if (NULL != p_ctrl->ring_ctrl.ring_taskhandle)
+        {
+            cellular_delete_task(p_ctrl->ring_ctrl.ring_taskhandle);
+            p_ctrl->ring_ctrl.ring_taskhandle = NULL;
+        }
+
+        cellular_rts_ctrl(0);
+
         for (i = CELLULAR_START_SOCKET_NUMBER; i <= p_ctrl->creatable_socket; i++ )
         {
             cellular_closesocket(p_ctrl, i);
@@ -67,6 +107,8 @@ e_cellular_err_t R_CELLULAR_Close(st_cellular_ctrl_t * const p_ctrl)
         {
             cellular_disconnect(p_ctrl);
         }
+
+        cellular_power_down(p_ctrl);
 
         cellular_delete_event_group(p_ctrl->eventgroup);
         p_ctrl->eventgroup = NULL;
@@ -95,6 +137,10 @@ e_cellular_err_t R_CELLULAR_Close(st_cellular_ctrl_t * const p_ctrl)
         memset(p_ctrl, 0, sizeof(st_cellular_ctrl_t));
 
         ret = CELLULAR_SUCCESS;
+    }
+    else
+    {
+        cellular_delay_task(1);
     }
 
     return ret;

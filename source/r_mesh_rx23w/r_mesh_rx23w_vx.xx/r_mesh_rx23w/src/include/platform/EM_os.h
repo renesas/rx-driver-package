@@ -6,7 +6,7 @@
  *  In this file the platform specific data types are abstracted and
  *  mapped to data types used within the EtherMind Stack.
  *
- *  Version: Windows User Mode
+ *  Version: Mint_OS
  */
 
 /*
@@ -18,9 +18,11 @@
 #define _H_EM_OS_
 
 /* -------------------------------------------- Header File Inclusion */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* -------------------------------------------- Global Definitions */
-
 /*
  *  EM_HAVE_STATIC_DECL
  *
@@ -80,51 +82,125 @@
 #define DECL_REENTRANT
 #endif /* EM_HAVE_REENTRANT_DECL */
 
-typedef unsigned char        BOOLEAN;
-typedef unsigned char          UINT8;
-typedef unsigned char          UCHAR;
-typedef signed char             INT8;
-typedef signed char             CHAR;
-
-typedef unsigned short        UINT16;
-typedef signed short           INT16;
-typedef unsigned long int     UINT32;
-typedef signed long int        INT32;
-typedef signed long long       INT64;
-typedef unsigned long long    UINT64;
-
-
 /* -------------------------------------------- Structures/Data Types */
+/** Commonly used Data Types */
+/* 'unsigned' datatype of size '1 octet' */
+typedef unsigned char BOOLEAN;
+/* 'unsigned' datatype of size '1 octet' */
+typedef unsigned char UINT8;
+/* 'unsigned' datatype of size '1 octet' */
+typedef unsigned char UCHAR;
+/* 'signed' datatype of size '1 octet' */
+typedef signed char INT8;
+/* 'signed' datatype of size '1 octet' */
+typedef char CHAR;
+
+/* 'unsigned' datatype of size '2 octet' */
+typedef unsigned short int UINT16;
+/* 'signed' datatype of size '2 octet' */
+typedef signed short int INT16;
+/* 'unsigned' datatype of size '4 octet' */
+typedef unsigned long int  UINT32;
+/* 'signed' datatype of size '4 octet' */
+typedef signed long int INT32;
+/* 'unsigned' datatype of size '8 octet' */
+typedef unsigned long long UINT64;
+/* 'signed' datatype of size '8 octet' */
+typedef signed long long INT64;
+
 /* Function Return Value type */
-typedef UINT16    EM_RESULT;
+typedef UINT16 EM_RESULT;
 
-typedef INT32     EM_thread_type;
+/*
+ * Generic handle can used for the unknow
+ * datatypes (e.g. Mutex Type, Conditional Type etc.)
+ */
+typedef void * EM_GENERIC_HANDLE;
 
-typedef void * EM_THREAD_RETURN_TYPE;
-typedef void * EM_THREAD_ARGS;
+/* Datatype to represent File Handle */
+typedef EM_GENERIC_HANDLE EM_FILE_HANDLE;
+
+/* Datatype to represent Thread or Task Identifier */
+typedef EM_GENERIC_HANDLE EM_thread_type;
+
+/* Datatype to represent Thread or Task Attribute */
+typedef EM_GENERIC_HANDLE EM_thread_attr_type;
+
+/* Datatype to represent Mutex object */
+typedef EM_GENERIC_HANDLE EM_thread_mutex_type;
+
+/* Datatype to represent Attributes of a Mutex object */
+typedef EM_GENERIC_HANDLE EM_thread_mutex_attr_type;
+
+/* Datatype to represent Conditional Variable object */
+typedef EM_GENERIC_HANDLE EM_thread_cond_type;
+
+/* Datatype to represent Attributes of a Conditional Variable object */
+typedef EM_GENERIC_HANDLE EM_thread_cond_attr_type;
+
+/* Datatype to represent the OS time for the platform */
+typedef int EM_time_type;
+
+/* Data types for task parameters and retun types */
+typedef EM_GENERIC_HANDLE EM_THREAD_RETURN_TYPE;
+typedef EM_GENERIC_HANDLE EM_THREAD_ARGS;
 typedef EM_THREAD_RETURN_TYPE (*EM_THREAD_START_ROUTINE)(EM_THREAD_ARGS);
 
+/** Structure to have the local time */
+typedef struct _EM_LOCAL_TIME
+{
+    UINT16  dyear;
+    UINT16  dmonth;
+    UINT16  dday;
+    UINT16  dwday;
+
+    UINT16  thour;
+    UINT16  tmin;
+    UINT16  tsec;
+    UINT16  tmsec;
+
+} EM_LOCAL_TIME;
+
+/* --------------------------------------------------- Macros */
+/**
+ * Abstractions for a Thread's return values.
+ * Generally once a thread is started it is never killed.
+ * So, these defines are rarely used.
+ */
 #define EM_THREAD_RETURN_VAL_SUCCESS NULL
 #define EM_THREAD_RETURN_VAL_FAILURE NULL
-/* --------------------------------------------------- Macros */
+
 /* Abstractions for String library functions */
 #define EM_str_len(s)                 strlen((char *)(s))
+#define EM_str_n_len(s, sz)           strnlen((char *)(s), (sz))
 #define EM_str_copy(d, s)             strcpy((char *)(d), (char *)(s))
 #define EM_str_n_copy(d, s, n)        strncpy((char *)(d), (char *)(s), n)
 #define EM_str_cmp(s1, s2)            strcmp((char *)(s1), (char *)(s2))
 #define EM_str_n_cmp(s1, s2, n)       strncmp((char *)(s1), (char *)(s2), n)
 #define EM_str_cat(d, s)              strcat((char *)(d), (char *)(s))
+#define EM_str_n_cat(d, s, sz)        strncat((char *)(d), (char *)(s), (sz))
 #define EM_str_str(s, ss)             strstr((char *)(s), (char *)(ss))
 #define EM_str_n_casecmp(s1, s2, n)   _strnicmp ((char *)(s1), (char *)(s2), n)
 
 /* Abstractions for memory functions */
-#define EM_alloc_mem(s)               malloc((size_t)(s))
-#define EM_alloc_mem_ext(s)           em_mempool_alloc_pl((size_t)(s))
-#define EM_free_mem(p)                free(p)
 #define EM_mem_move(d, s, n)          memmove((d), (s), (n))
 #define EM_mem_cmp(p1, p2, n)         memcmp((p1), (p2), (n))
-#define EM_mem_set(p, v, n)           memset((p), (v), (n))
+#define EM_mem_set(p, v, n)           memset((p), (v),(size_t) (n))
 #define EM_mem_copy(p1, p2, n)        memcpy((p1), (p2), (n))
+
+/**
+ * NOTE:
+ * Currently this Extended Memory Allocation is used only for the Mesh
+ * Module Dynamic Configuration which is provided by the Upper Layer.
+ * The Upper Layer provides the configuration limits for various Mesh
+ * Layer entities and it also provides the Memory Block (abstracted by the
+ * platform) required for the dynamic allocation for these entities.
+ *
+ * 1. The Extended Memory Allocation is mapped to Platform Memory Allocation.
+ * 2. The Extended Memory Free is currently mapped to Empty
+ */
+#define EM_alloc_mem_ext(s)           ms_mempool_alloc_pl((size_t)(s))
+#define EM_free_mem_ext(ptr)          ms_mempool_free_pl((ptr))
 
 /* -------------------------------------------- Function Declarations */
 #ifdef __cplusplus
@@ -132,27 +208,70 @@ extern "C" {
 #endif
 
 /** Initialize the OS */
-#define EM_os_init(...)
+void EM_os_init(void);
 
 /* Task/Thread Creation Primitives */
-#define EM_thread_create            BT_thread_create
-#define EM_thread_attr_init         BT_thread_attr_init
+INT32 EM_thread_create
+      (
+          /* OUT */ EM_thread_type *         thread,
+          /* IN */  EM_thread_attr_type *    thread_attr,
+          /* IN */  EM_THREAD_START_ROUTINE  start_routine,
+          /* IN */  EM_THREAD_ARGS           thread_args
+      );
+
+INT32 EM_thread_attr_init
+      (
+          /* OUT */ EM_thread_attr_type *    thread_attr
+      );
 
 /* Task/Thread Synchronization Primitives */
-#define EM_thread_mutex_init        BT_thread_mutex_init
-#define EM_thread_mutex_lock        BT_thread_mutex_lock
-#define EM_thread_mutex_unlock      BT_thread_mutex_unlock
-#define EM_thread_cond_init         BT_thread_cond_init
-#define EM_thread_cond_wait         BT_thread_cond_wait
-#define EM_thread_cond_signal       BT_thread_cond_signal
+INT32 EM_thread_mutex_init
+      (
+          /* OUT */ EM_thread_mutex_type *         mutex,
+          /* IN */  EM_thread_mutex_attr_type *    mutex_attr
+      );
 
-#define EM_thread_mutex_type        BT_thread_mutex_type
+INT32 EM_thread_mutex_lock
+      (
+          /* INOUT */ EM_thread_mutex_type *    mutex
+      );
+
+INT32 EM_thread_mutex_unlock
+      (
+          /* INOUT */ EM_thread_mutex_type *    mutex
+      );
+
+INT32 EM_thread_cond_init
+      (
+          /* OUT */ EM_thread_cond_type *         cond,
+          /* IN */  EM_thread_cond_attr_type *    cond_attr
+      );
+
+INT32 EM_thread_cond_wait
+      (
+          /* INOUT */ EM_thread_cond_type *     cond,
+          /* INOUT */ EM_thread_mutex_type *    cond_mutex
+      );
+
+INT32 EM_thread_cond_signal
+      (
+          /* INOUT */ EM_thread_cond_type *    cond
+      );
+
+/* Memory Management Primitives */
+void * EM_alloc_mem (/* IN */ UINT32 size);
+void EM_free_mem (/* IN */ void * ptr);
+
 /* Task/Thread Delay Primitives */
-#define EM_sleep(...)
-#define EM_usleep(...)
-#define EM_get_current_time(ct)     (*(ct)) = em_systemtime_read_pl()
+void EM_sleep ( /* IN */ UINT32 tm );
+void EM_usleep ( /* IN */ UINT32 tm );
+void EM_get_current_time (/* OUT */ EM_time_type * curtime);
+void EM_get_local_time( /* OUT */ EM_LOCAL_TIME *local);
+INT32 EM_get_time_ms(void);
+UINT64 EM_get_us_timestamp(void);
 
-#define EM_process_term_notify(...)
+/* Process termination handling */
+void EM_process_term_notify(void(*handler)(void));
 
 #ifdef __cplusplus
 };

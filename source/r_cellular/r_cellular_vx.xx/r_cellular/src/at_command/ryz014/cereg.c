@@ -49,7 +49,6 @@
 e_cellular_err_t atc_cereg(st_cellular_ctrl_t * const p_ctrl, const e_cellular_network_result_t level)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
     uint8_t str[2] = {0};
 
     sprintf((char *)str, "%d", level); // (uint8_t *)->(char *)
@@ -60,12 +59,7 @@ e_cellular_err_t atc_cereg(st_cellular_ctrl_t * const p_ctrl, const e_cellular_n
         (const uint8_t *)&gp_at_command[ATC_SET_NOTICE_LEVEL][0],   // (const uint8_t *const *)->(const uint8_t **)
             (const uint8_t **)&p_command_arg);                      // (const uint8_t *const *)->(const uint8_t **)
 
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_SET_NOTICE_LEVEL);
-
-    if (CELLULAR_ATC_OK != at_ret)
-    {
-        ret = CELLULAR_ERR_MODULE_COM;
-    }
+    ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_SET_NOTICE_LEVEL);
 
     return ret;
 }
@@ -79,18 +73,12 @@ e_cellular_err_t atc_cereg(st_cellular_ctrl_t * const p_ctrl, const e_cellular_n
 e_cellular_err_t atc_cereg_check(st_cellular_ctrl_t * const p_ctrl)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
 
     atc_generate(p_ctrl->sci_ctrl.atc_buff,
         (const uint8_t *)&gp_at_command[ATC_GET_NOTICE_LEVEL][0],  // (const uint8_t *const *)->(const uint8_t **)
             NULL);
 
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_GET_NOTICE_LEVEL);
-
-    if (CELLULAR_ATC_OK != at_ret)
-    {
-        ret = CELLULAR_ERR_MODULE_COM;
-    }
+    ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_GET_NOTICE_LEVEL);
 
     return ret;
 }

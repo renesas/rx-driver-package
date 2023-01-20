@@ -37,12 +37,6 @@
 /**********************************************************************************************************************
  * Exported global variables
  *********************************************************************************************************************/
-#if BSP_CFG_RTOS_USED == (5)
-extern TX_BLOCK_POOL g_cellular_socket_pool;
-extern TX_BLOCK_POOL g_cellular_event_pool;
-extern TX_BLOCK_POOL g_cellular_thread_pool;
-extern TX_BLOCK_POOL g_cellular_semaphore_pool;
-#endif
 
 /**********************************************************************************************************************
  * Private (static) variables and functions
@@ -57,7 +51,7 @@ void * cellular_malloc(const size_t size)
 #if BSP_CFG_RTOS_USED == (1)
     p_ret = pvPortMalloc(size);
 #elif BSP_CFG_RTOS_USED == (5)
-    switch(size)
+    switch (size)
     {
         case EVENT_BLOCK_SIZE:
             tx_block_allocate(&g_cellular_event_pool, &p_ret, TX_NO_WAIT);

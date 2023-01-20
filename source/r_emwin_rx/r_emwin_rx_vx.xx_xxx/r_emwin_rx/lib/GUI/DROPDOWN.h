@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.22 - Graphical user interface for embedded applications **
+** emWin V6.26 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -152,7 +152,6 @@ const GUI_FONT * DROPDOWN_GetFont          (DROPDOWN_Handle hObj);
 unsigned         DROPDOWN_GetItemDisabled  (DROPDOWN_Handle hObj, unsigned Index);
 unsigned         DROPDOWN_GetItemSpacing   (DROPDOWN_Handle hObj);
 int              DROPDOWN_GetItemText      (DROPDOWN_Handle hObj, unsigned Index, char * pBuffer, int MaxSize);
-const char     * DROPDOWN_GetItemTextLocked(DROPDOWN_Handle hObj, unsigned Index);
 LISTBOX_Handle   DROPDOWN_GetListbox       (DROPDOWN_Handle hObj);
 int              DROPDOWN_GetNumItems      (DROPDOWN_Handle hObj);
 int              DROPDOWN_GetSel           (DROPDOWN_Handle hObj);
@@ -174,6 +173,7 @@ void             DROPDOWN_SetScrollbarColor(DROPDOWN_Handle hObj, unsigned Index
 void             DROPDOWN_SetScrollbarWidth(DROPDOWN_Handle hObj, unsigned Width);
 void             DROPDOWN_SetSel           (DROPDOWN_Handle hObj, int Sel);
 void             DROPDOWN_SetSelExp        (DROPDOWN_Handle hObj, int Sel);
+void             DROPDOWN_SetString        (DROPDOWN_Handle hObj, const char* s, unsigned int Index);
 void             DROPDOWN_SetText          (DROPDOWN_Handle hObj, const GUI_ConstString * ppText);
 void             DROPDOWN_SetTextAlign     (DROPDOWN_Handle hObj, int Align);
 void             DROPDOWN_SetTextColor     (DROPDOWN_Handle hObj, unsigned int Index, GUI_COLOR Color);

@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011(2012-2021) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2011(2012-2022) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_flash_spi_if.h
@@ -37,6 +37,7 @@
 *                                    Fixed coding style.
 *              : 10.12.2020 3.02     Changed version to 3.02.
 *              : 31.12.2021 3.03     Changed version to 3.03.
+*              : 30.06.2022 3.10     Added #defines specify the ports used for SS#.
 *************************************************************************************************/
 #ifndef __FLASH_SPI_IF_H__
 #define __FLASH_SPI_IF_H__
@@ -60,7 +61,7 @@ Macro definitions
 
 /* Driver version */
 #define FLASH_SPI_VERSION_MAJOR       (3)
-#define FLASH_SPI_VERSION_MINOR       (03)
+#define FLASH_SPI_VERSION_MINOR       (10)
 
 
 /*--------------- Define no. of slots ----------------*/

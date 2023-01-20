@@ -30,6 +30,8 @@
 /**********************************************************************************************************************
  * Macro definitions
  *********************************************************************************************************************/
+#define URC_CPIN_READY          "READY"
+#define URC_CPIN_SIM_LOCK       "SIM PIN"
 
 /**********************************************************************************************************************
  * Typedef definitions
@@ -49,7 +51,6 @@
 e_cellular_err_t atc_cpin(st_cellular_ctrl_t * const p_ctrl, const st_cellular_cfg_t * const p_cfg)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
     uint8_t str[8 + 1] = {0};
 
     if (NULL == p_cfg)
@@ -67,15 +68,10 @@ e_cellular_err_t atc_cpin(st_cellular_ctrl_t * const p_ctrl, const st_cellular_c
         (const uint8_t *)&gp_at_command[ATC_PIN_LOCK_RELEASE][0],   // (const uint8_t *const *)->(const uint8_t **)
             (const uint8_t **)&p_command_arg);                      // (const uint8_t *const *)->(const uint8_t **)
 
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_PIN_LOCK_RELEASE);
+    ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_PIN_LOCK_RELEASE);
 
     memset(p_ctrl->sci_ctrl.atc_buff, 0x00, CELLULAR_ATC_BUFF_SIZE);
     memset(str, 0x00, sizeof(str));
-
-    if (CELLULAR_ATC_OK != at_ret)
-    {
-        ret = CELLULAR_ERR_MODULE_COM;
-    }
 
     return ret;
 }
@@ -89,18 +85,22 @@ e_cellular_err_t atc_cpin(st_cellular_ctrl_t * const p_ctrl, const st_cellular_c
 e_cellular_err_t atc_cpin_check(st_cellular_ctrl_t * const p_ctrl)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_atc_t at_ret = CELLULAR_ATC_OK;
+    uint8_t lock_state[15] = {0};
 
     atc_generate(p_ctrl->sci_ctrl.atc_buff,
         (const uint8_t *)&gp_at_command[ATC_PIN_LOCK_CHECK][0], // (const uint8_t *const *)->(const uint8_t **)
             NULL);
 
-    at_ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout,
-                                            ATC_RETURN_CPIN_READY, ATC_PIN_LOCK_CHECK);
+    p_ctrl->recv_data = lock_state;
 
-    if (CELLULAR_ATC_OK != at_ret)
+    ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_PIN_LOCK_CHECK);
+
+    if (CELLULAR_SUCCESS == ret)
     {
-        ret = CELLULAR_ERR_MODULE_COM;
+        if (NULL == strstr((char *)&lock_state, URC_CPIN_READY))//(uint8_t *)->(char *)
+        {
+            ret = CELLULAR_ERR_MODULE_COM;
+        }
     }
 
     return ret;

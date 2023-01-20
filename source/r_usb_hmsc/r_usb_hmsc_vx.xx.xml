@@ -57,7 +57,7 @@
         </dependency>
         <dependency>
             <module>r_usb_basic</module>
-            <version>1.31</version>
+            <version>1.41</version>
         </dependency>
         <application>Connectivity</application>
         <desc>USB Host Mass Storage Class</desc>
@@ -65,7 +65,7 @@
         <function>USB_HMSC</function>
         <incdir>r_config</incdir>
         <incdir>r_usb_hmsc</incdir>
-        <incdir>r_usb_hmsc\src\inc</incdir>
+        <incdir>r_usb_hmsc/src/inc</incdir>
     </package>
 
     <sampleapplicationnote >

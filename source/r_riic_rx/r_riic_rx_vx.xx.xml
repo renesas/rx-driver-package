@@ -52,6 +52,7 @@
         <version>8.03.00.202004</version>
         <version>8.03.00.202102</version>
         <version>8.03.00.202104</version>
+        <version>8.03.00.202204</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>

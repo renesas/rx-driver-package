@@ -61,8 +61,8 @@
         <function>USB_BASIC</function>
         <incdir>r_config</incdir>
         <incdir>r_usb_basic</incdir>
-        <incdir>r_usb_basic\src\driver\inc</incdir>
-        <incdir>r_usb_basic\src\hw\inc</incdir>
+        <incdir>r_usb_basic/src/driver/inc</incdir>
+        <incdir>r_usb_basic/src/hw/inc</incdir>
     </package>
 
 </refinfo>

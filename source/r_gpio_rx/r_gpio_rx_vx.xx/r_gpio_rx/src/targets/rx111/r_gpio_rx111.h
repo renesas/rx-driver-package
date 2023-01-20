@@ -26,6 +26,7 @@
 *         : 18.02.2014 1.10    Fixed PortJ enum bug, Added GPIO_PORTn_PIN_MASKs. Added support for all package pin types.
 *         : 24.04.2015 1.11    Added the compiler directive: "#if defined(BSP_MCU_RX111)"
 *         : 15.01.2021 3.70    Removed PH7 for RX111.
+*         : 15.12.2022 4.00    Added PH7 for RX111 64Pins, 48Pins.
 ***********************************************************************************************************************/
 #ifndef GPIO_RX111
 #define GPIO_RX111
@@ -47,10 +48,10 @@ Macro definitions
 #define GPIO_INFO_NUM_PORTS                 (19) //Range from first to last port. Useful for arrays.
 
 #if   (BSP_PACKAGE_PINS == 64)
-    #define GPIO_INFO_NUM_PINS              (49)
+    #define GPIO_INFO_NUM_PINS              (48)
 #elif (BSP_PACKAGE_PINS == 48)
-    #define GPIO_INFO_NUM_PINS              (35)
-#elif (BSP_PACKAGE_PINS == 48)
+    #define GPIO_INFO_NUM_PINS              (32)
+#elif (BSP_PACKAGE_PINS == 40)
     #define GPIO_INFO_NUM_PINS              (25)
 #elif (BSP_PACKAGE_PINS == 36)
     #define GPIO_INFO_NUM_PINS              (21)
@@ -91,6 +92,10 @@ typedef enum
     GPIO_PORT_B = 0x0B00,
     GPIO_PORT_C = 0x0C00,
     GPIO_PORT_E = 0x0E00,
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 0)
+    /* Stop Oscillating the Sub Clock */
+    GPIO_PORT_H = 0x1100,
+#endif
     GPIO_PORT_J = 0x1200,
 } gpio_port_t;
 
@@ -107,6 +112,10 @@ typedef enum
     GPIO_PORTB_PIN_MASK = 0xEB,    /* Available pins: PB0, PB1, PB3, PB5 to PB7 */
     GPIO_PORTC_PIN_MASK = 0xFF,    /* Available pins: PC0 to PC7                */
     GPIO_PORTE_PIN_MASK = 0xFF,    /* Available pins: PE0 to PE7                */
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 0)
+    /* Stop Oscillating the Sub Clock */
+    GPIO_PORTH_PIN_MASK = 0x80,    /* Available pins: PH7                       */
+#endif
     GPIO_PORTJ_PIN_MASK = 0xC0,    /* Available pins: PJ6, PJ7                  */
 } gpio_pin_bit_mask_t;
 
@@ -160,6 +169,10 @@ typedef enum
     GPIO_PORT_E_PIN_5 = 0x0E05,
     GPIO_PORT_E_PIN_6 = 0x0E06,
     GPIO_PORT_E_PIN_7 = 0x0E07,
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 0)
+    /* Stop Oscillating the Sub Clock */
+    GPIO_PORT_H_PIN_7 = 0x1107,
+#endif
     GPIO_PORT_J_PIN_6 = 0x1206,
     GPIO_PORT_J_PIN_7 = 0x1207,
 } gpio_port_pin_t;
@@ -176,6 +189,10 @@ typedef enum
     GPIO_PORT_B = 0x0B00,
     GPIO_PORT_C = 0x0C00,
     GPIO_PORT_E = 0x0E00,
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 0)
+    /* Stop Oscillating the Sub Clock */
+    GPIO_PORT_H = 0x1100,
+#endif
     GPIO_PORT_J = 0x1200,
 } gpio_port_t;
 
@@ -192,6 +209,10 @@ typedef enum
     GPIO_PORTB_PIN_MASK = 0x2B,    /* Available pins: PB0, PB1, PB3, PB5 */
     GPIO_PORTC_PIN_MASK = 0xFF,    /* Available pins: PC0 to PC7         */
     GPIO_PORTE_PIN_MASK = 0x9F,    /* Available pins: PE0 to PE4, PE7    */
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 0)
+    /* Stop Oscillating the Sub Clock */
+    GPIO_PORTH_PIN_MASK = 0x80,    /* Available pins: PH7                */
+#endif
     GPIO_PORTJ_PIN_MASK = 0xC0,    /* Available pins: PJ6, PJ7           */
 } gpio_pin_bit_mask_t;
 
@@ -230,6 +251,10 @@ typedef enum
     GPIO_PORT_E_PIN_3 = 0x0E03,
     GPIO_PORT_E_PIN_4 = 0x0E04,
     GPIO_PORT_E_PIN_7 = 0x0E07,
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 0)
+    /* Stop Oscillating the Sub Clock */
+    GPIO_PORT_H_PIN_7 = 0x1107,
+#endif
     GPIO_PORT_J_PIN_6 = 0x1206,
     GPIO_PORT_J_PIN_7 = 0x1207,
 } gpio_port_pin_t;

@@ -53,6 +53,7 @@
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.04.2020 1.31 RX671 is added.
  *         : 30.06.2022 1.40 USBX PCDC is supported.
+ *         : 30.10.2022 1.41 USBX HMSC is supported.
  ***********************************************************************************************************************/
 
 #ifndef R_USB_EXTERN_H
@@ -144,7 +145,6 @@ extern uint16_t g_usb_peri_connected;                           /* Peri CDC appl
 #if (BSP_CFG_RTOS_USED == 5)   /* Azure RTOS */
 extern bool         g_usb_peri_usbx_is_detach[USB_MAX_PIPE_NO + 1];
 extern rtos_sem_id_t g_usb_peri_usbx_sem[USB_MAX_PIPE_NO + 1];
-extern UINT usb_host_usbx_initialize(UX_HCD * hcd);
 #endif  /* (BSP_CFG_RTOS_USED == 5) */
 
 #endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI */
@@ -383,7 +383,7 @@ uint8_t  *usb_hstd_con_descriptor (usb_utr_t *ptr);
 void      usb_hstd_device_resume (usb_utr_t *ptr, uint16_t devaddr);
 usb_er_t  usb_hstd_hcd_snd_mbx (usb_utr_t *ptr, uint16_t msginfo, uint16_t dat, uint16_t *adr, usb_cb_t callback);
 void      usb_hstd_mgr_snd_mbx (usb_utr_t *ptr, uint16_t msginfo, uint16_t dat, uint16_t res);
-void      usb_hstd_hcd_task (usb_vp_int_t stacd);
+void      usb_hstd_hcd_task (rtos_task_arg_t stacd);
 usb_er_t  usb_hstd_transfer_start (usb_utr_t *ptr);
 usb_er_t  usb_hstd_transfer_start_req (usb_utr_t *ptr);
 void      usb_hstd_hcd_rel_mpl (usb_utr_t *ptr, uint16_t n);
@@ -468,7 +468,7 @@ void      usb_hstd_enum_set_address (usb_utr_t *ptr, uint16_t addr, uint16_t set
 void      usb_hstd_enum_set_configuration (usb_utr_t *ptr, uint16_t addr, uint16_t confnum);
 void      usb_hstd_enum_dummy_request (usb_utr_t *ptr, uint16_t addr, uint16_t CntValue);
 void      usb_hstd_electrical_test_mode (usb_utr_t *ptr, uint16_t product_id);
-void      usb_hstd_mgr_task (usb_vp_int_t stacd);
+void      usb_hstd_mgr_task (rtos_task_arg_t stacd);
 extern void      (*g_usb_hstd_enumaration_process[]) (usb_utr_t *, uint16_t, uint16_t);
 
 #if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
@@ -498,7 +498,7 @@ void      usb_hhub_close (usb_utr_t *ptr, uint16_t hubaddr, uint16_t data2);
 void      usb_hhub_registration (usb_utr_t *ptr, usb_hcdreg_t *callback);
 uint16_t  usb_hhub_get_hub_information (usb_utr_t *ptr, uint16_t hubaddr, usb_cb_t complete);
 uint16_t  usb_hhub_get_port_information (usb_utr_t *ptr, uint16_t hubaddr, uint16_t port, usb_cb_t complete);
-void      usb_hstd_hub_task (usb_vp_int_t stacd);
+void      usb_hstd_hub_task (rtos_task_arg_t stacd);
 uint16_t  usb_hhub_get_string_descriptor1 (usb_utr_t *ptr, uint16_t devaddr, uint16_t index, usb_cb_t complete);
 uint16_t  usb_hhub_get_string_descriptor1check (uint16_t errcheck);
 uint16_t  usb_hhub_get_string_descriptor2 (usb_utr_t *ptr, uint16_t devaddr, uint16_t index, usb_cb_t complete);
@@ -543,13 +543,7 @@ usb_er_t  usb_cstd_isnd_msg (uint8_t id, usb_msg_t* mess);
 void      usb_pstd_usb_handler (void);
 
 /* r_usb_pdriver.c */
-#if (BSP_CFG_RTOS_USED == 4)    /* Renesas RI600V4 & RI600PX */
-void usb_pstd_pcd_task( VP_INT );
-#elif (BSP_CFG_RTOS_USED == 5)  /* Azure RTOS */
-void usb_pstd_pcd_task(ULONG entry_input);
-#else
-void      usb_pstd_pcd_task (void);
-#endif /* (BSP_CFG_RTOS_USED == 4 / 5) */
+void usb_pstd_pcd_task( rtos_task_arg_t );
 
 usb_er_t  usb_pstd_set_submitutr (usb_utr_t * utrmsg);
 void      usb_pstd_clr_alt (void);
@@ -652,7 +646,7 @@ extern void      usb_pmsc_task (void);
 extern void      usb_hcdc_read_complete (usb_utr_t *mess, uint16_t devadr, uint16_t data2);
 extern void      usb_hcdc_write_complete (usb_utr_t *mess, uint16_t devadr, uint16_t data2);
 extern void      usb_hcdc_registration (usb_utr_t *ptr);
-extern void      usb_hcdc_task (usb_vp_int_t stacd);
+extern void      usb_hcdc_task (rtos_task_arg_t stacd);
 extern void      usb_hcdc_driver_start (usb_utr_t *ptr);
 
 #endif /* defined(USB_CFG_HCDC_USE) */
@@ -661,7 +655,7 @@ extern void      usb_hcdc_driver_start (usb_utr_t *ptr);
 extern void      usb_hhid_read_complete(usb_utr_t *mess, uint16_t devadr, uint16_t data2);
 extern void      usb_hhid_write_complete(usb_utr_t *mess, uint16_t devadr, uint16_t data2);
 extern void      usb_hhid_registration (usb_utr_t *ptr);
-extern void      usb_hhid_task (usb_vp_int_t stacd);
+extern void      usb_hhid_task (rtos_task_arg_t stacd);
 extern void      usb_hhid_driver_start (usb_utr_t *ptr);
 
 #endif /* defined(USB_CFG_HHID_USE) */

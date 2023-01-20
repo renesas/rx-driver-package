@@ -58,6 +58,7 @@
 *         : 31.03.2021 4.80    Added support for RX671.
 *         : 15.04.2021 4.90    Added support for RX140.
 *                              Updated Doxygen comment.
+*         : 27.12.2022 5.40    Updated macro definition enable and disable nested interrupt for CMT.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -1714,6 +1715,10 @@ void cmt_isr_common (uint32_t channel)
 R_BSP_PRAGMA_STATIC_INTERRUPT (cmt0_isr,VECT(CMT0, CMI0))
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmt0_isr (void)
 {
+#if CMT_CFG_CH0_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
     cmt_isr_common(0);
 }
 #elif BSP_CFG_RTOS_USED == 1    /* FreeRTOS */
@@ -1721,6 +1726,10 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmt0_isr (void)
         R_BSP_PRAGMA_STATIC_INTERRUPT (cmt0_isr,VECT(CMT0, CMI0))
         R_BSP_ATTRIB_STATIC_INTERRUPT void cmt0_isr (void)
         {
+#if CMT_CFG_CH0_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
             cmt_isr_common(0);
         }
     #endif /* (BSP_CFG_RTOS_SYSTEM_TIMER != 0) */
@@ -1730,6 +1739,10 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmt0_isr (void)
     #if (BSP_CFG_RTOS_SYSTEM_TIMER != 0 && _RI_TRACE_TIMER != 0)
         void cmt0_isr (void)
         {
+#if CMT_CFG_CH0_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
             cmt_isr_common(0);
         }
     #endif /* (BSP_CFG_RTOS_SYSTEM_TIMER != 0 && _RI_TRACE_TIMER != 0) */
@@ -1737,6 +1750,10 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmt0_isr (void)
 R_BSP_PRAGMA_STATIC_INTERRUPT (cmt0_isr,VECT(CMT0, CMI0))
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmt0_isr (void)
 {
+#if CMT_CFG_CH0_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
     cmt_isr_common(0);
 }
 #endif/* BSP_CFG_RTOS_USED */
@@ -1752,6 +1769,10 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmt0_isr (void)
 R_BSP_PRAGMA_STATIC_INTERRUPT (cmt1_isr,VECT(CMT1, CMI1))
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmt1_isr (void)
 {
+#if CMT_CFG_CH1_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
     cmt_isr_common(1);
 }
 #elif BSP_CFG_RTOS_USED == 1    /* FreeRTOS */
@@ -1759,6 +1780,10 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmt1_isr (void)
         R_BSP_PRAGMA_STATIC_INTERRUPT (cmt1_isr,VECT(CMT1, CMI1))
         R_BSP_ATTRIB_STATIC_INTERRUPT void cmt1_isr (void)
         {
+#if CMT_CFG_CH1_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
             cmt_isr_common(1);
         }
     #endif /* (BSP_CFG_RTOS_SYSTEM_TIMER != 1) */
@@ -1768,6 +1793,10 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmt1_isr (void)
     #if (BSP_CFG_RTOS_SYSTEM_TIMER != 1 && _RI_TRACE_TIMER != 1)
         void cmt1_isr (void)
         {
+#if CMT_CFG_CH1_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
             cmt_isr_common(1);
         }
     #endif /* (BSP_CFG_RTOS_SYSTEM_TIMER != 1 && _RI_TRACE_TIMER != 1) */
@@ -1775,6 +1804,10 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmt1_isr (void)
 R_BSP_PRAGMA_STATIC_INTERRUPT (cmt1_isr,VECT(CMT1, CMI1))
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmt1_isr (void)
 {
+#if CMT_CFG_CH1_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
     cmt_isr_common(1);
 }
 #endif/* BSP_CFG_RTOS_USED */
@@ -1792,6 +1825,10 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmt1_isr (void)
 R_BSP_PRAGMA_STATIC_INTERRUPT(cmt2_isr,VECT(CMT2, CMI2))
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmt2_isr (void)
 {
+#if CMT_CFG_CH2_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
     cmt_isr_common(2);
 }
 #elif BSP_CFG_RTOS_USED == 1    /* FreeRTOS */
@@ -1799,6 +1836,10 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmt2_isr (void)
         R_BSP_PRAGMA_STATIC_INTERRUPT(cmt2_isr,VECT(CMT2, CMI2))
         R_BSP_ATTRIB_STATIC_INTERRUPT void cmt2_isr (void)
         {
+#if CMT_CFG_CH2_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
             cmt_isr_common(2);
         }
     #endif /* (BSP_CFG_RTOS_SYSTEM_TIMER != 2) */
@@ -1808,6 +1849,10 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmt2_isr (void)
     #if (BSP_CFG_RTOS_SYSTEM_TIMER != 2 && _RI_TRACE_TIMER != 2)
         void cmt2_isr (void)
         {
+#if CMT_CFG_CH2_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
             cmt_isr_common(2);
         }
     #endif /* (BSP_CFG_RTOS_SYSTEM_TIMER != 2 && _RI_TRACE_TIMER != 2) */
@@ -1815,6 +1860,10 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmt2_isr (void)
 R_BSP_PRAGMA_STATIC_INTERRUPT(cmt2_isr,VECT(CMT2, CMI2))
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmt2_isr (void)
 {
+#if CMT_CFG_CH2_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
     cmt_isr_common(2);
 }
 #endif/* BSP_CFG_RTOS_USED */
@@ -1830,6 +1879,10 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmt2_isr (void)
 R_BSP_PRAGMA_STATIC_INTERRUPT( cmt3_isr,VECT(CMT3, CMI3))
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmt3_isr (void)
 {
+#if CMT_CFG_CH3_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
     cmt_isr_common(3);
 }
 #elif BSP_CFG_RTOS_USED == 1    /* FreeRTOS */
@@ -1837,6 +1890,10 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmt3_isr (void)
         R_BSP_PRAGMA_STATIC_INTERRUPT (cmt3_isr,VECT(CMT3, CMI3))
         R_BSP_ATTRIB_STATIC_INTERRUPT void cmt3_isr (void)
         {
+#if CMT_CFG_CH3_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
             cmt_isr_common(3);
         }
     #endif /* (BSP_CFG_RTOS_SYSTEM_TIMER != 3) */
@@ -1846,6 +1903,10 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmt3_isr (void)
     #if (BSP_CFG_RTOS_SYSTEM_TIMER != 3 && _RI_TRACE_TIMER != 3)
         void cmt3_isr (void)
         {
+#if CMT_CFG_CH3_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
             cmt_isr_common(3);
         }
     #endif /* (BSP_CFG_RTOS_SYSTEM_TIMER != 3 && _RI_TRACE_TIMER != 3) */
@@ -1853,6 +1914,10 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmt3_isr (void)
 R_BSP_PRAGMA_STATIC_INTERRUPT( cmt3_isr,VECT(CMT3, CMI3))
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmt3_isr (void)
 {
+#if CMT_CFG_CH3_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
     cmt_isr_common(3);
 }
 #endif/* BSP_CFG_RTOS_USED */

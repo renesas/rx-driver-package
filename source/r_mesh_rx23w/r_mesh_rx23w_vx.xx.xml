@@ -29,7 +29,6 @@
         </dependency>
         <dependency>
             <module>r_ble_rx23w</module>
-            <version>2.11</version>
             <version>2.20</version>
         </dependency>
         <dependency>
@@ -41,7 +40,7 @@
             <version>4.70</version>
         </dependency>
         <application>Communications</application>
-        <desc>MESH stack</desc>
+        <desc>Bluetooth Mesh Stack</desc>
         <details>RX23W Bluetooth Mesh Stack package that provides applications with many-to-many wireless communication features which is compliant with the Bluetooth Mesh Networking specifications</details>
         <function>MESH</function>
         <incdir>r_config</incdir>

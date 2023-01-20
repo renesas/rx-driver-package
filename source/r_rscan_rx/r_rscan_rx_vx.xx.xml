@@ -20,6 +20,7 @@
         <version>8.03.00.202004</version>
         <version>8.03.00.202102</version>
         <version>8.03.00.202104</version>
+        <version>8.03.00.202202</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -54,7 +55,7 @@
         <version>x.xx</version>
         <dependency>
             <module>r_bsp</module>
-            <version>7.10</version>
+            <version>7.20</version>
         </dependency>
         <zipsource>r_rscan_rx_vx.xx.zip</zipsource>
         <application>Communications</application>

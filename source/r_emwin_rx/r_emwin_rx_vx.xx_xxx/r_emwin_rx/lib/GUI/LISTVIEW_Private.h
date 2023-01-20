@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.22 - Graphical user interface for embedded applications **
+** emWin V6.26 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -129,6 +129,7 @@ struct LISTVIEW_Obj {
   WM_SCROLL_STATE              ScrollStateV;
   WM_SCROLL_STATE              ScrollStateH;
   WM_HMEM                      hSort;
+  WM_HMEM                      hContext;                                          // Motion context.
   U8                           IsSorted;
   U8                           IsPresorted;
   U8                           ReverseSort;                                       // Set to 1 if reverse sorting is required
@@ -153,7 +154,7 @@ struct LISTVIEW_Obj {
   LISTVIEW_Obj * LISTVIEW_LockH(LISTVIEW_Handle h);
   #define LISTVIEW_LOCK_H(h)   LISTVIEW_LockH(h)
 #else
-  #define LISTVIEW_LOCK_H(h)   (LISTVIEW_Obj *)GUI_LOCK_H(h)
+  #define LISTVIEW_LOCK_H(h)   (LISTVIEW_Obj *)WM_LOCK_H(h)
 #endif
 
 /*********************************************************************

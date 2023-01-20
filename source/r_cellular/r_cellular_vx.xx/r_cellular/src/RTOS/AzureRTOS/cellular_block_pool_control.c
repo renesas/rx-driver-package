@@ -38,15 +38,18 @@
 /**********************************************************************************************************************
  * Exported global variables
  *********************************************************************************************************************/
+uint8_t g_recv_thread[CELLULAR_RECV_THREAD_SIZE];
+uint8_t g_ring_thread[CELLULAR_RING_THREAD_SIZE];
+
 TX_BLOCK_POOL g_cellular_socket_pool;
 TX_BLOCK_POOL g_cellular_event_pool;
 TX_BLOCK_POOL g_cellular_thread_pool;
 TX_BLOCK_POOL g_cellular_semaphore_pool;
 
-static uint8_t cellular_socket_pool[TOTAL_SOCKET_BLOCK_SIZE];
-static uint8_t cellular_event_pool[TOTAL_EVENT_BLOCK_SIZE];
-static uint8_t cellular_thread_pool[TOTAL_THREAD_BLOCK_SIZE];
-static uint8_t cellular_semaphore_pool[TOTAL_SEMAPHORE_BLOCK_SIZE];
+static uint8_t s_cellular_socket_pool[TOTAL_SOCKET_BLOCK_SIZE];
+static uint8_t s_cellular_event_pool[TOTAL_EVENT_BLOCK_SIZE];
+static uint8_t s_cellular_thread_pool[TOTAL_THREAD_BLOCK_SIZE];
+static uint8_t s_cellular_semaphore_pool[TOTAL_SEMAPHORE_BLOCK_SIZE];
 
 /**********************************************************************************************************************
  * Private (static) variables and functions
@@ -61,24 +64,24 @@ e_cellular_err_t cellular_block_pool_create(void)
     UINT rtos_ret;
 
     rtos_ret = tx_block_pool_create(&g_cellular_socket_pool, "socket pool",
-            sizeof(st_cellular_socket_ctrl_t), cellular_socket_pool, TOTAL_SOCKET_BLOCK_SIZE);
+            sizeof(st_cellular_socket_ctrl_t), s_cellular_socket_pool, TOTAL_SOCKET_BLOCK_SIZE);
 
     if (TX_SUCCESS == rtos_ret)
     {
         rtos_ret = tx_block_pool_create(&g_cellular_event_pool, "event pool",
-                sizeof(TX_EVENT_FLAGS_GROUP), cellular_event_pool, TOTAL_EVENT_BLOCK_SIZE);
+                sizeof(TX_EVENT_FLAGS_GROUP), s_cellular_event_pool, TOTAL_EVENT_BLOCK_SIZE);
     }
 
     if (TX_SUCCESS == rtos_ret)
     {
         rtos_ret = tx_block_pool_create(&g_cellular_thread_pool, "thread pool",
-                sizeof(TX_THREAD), cellular_thread_pool, TOTAL_THREAD_BLOCK_SIZE);
+                sizeof(TX_THREAD), s_cellular_thread_pool, TOTAL_THREAD_BLOCK_SIZE);
     }
 
     if (TX_SUCCESS == rtos_ret)
     {
         rtos_ret = tx_block_pool_create(&g_cellular_semaphore_pool, "semaphore pool",
-                sizeof(TX_SEMAPHORE), cellular_semaphore_pool, TOTAL_SEMAPHORE_BLOCK_SIZE);
+                sizeof(TX_SEMAPHORE), s_cellular_semaphore_pool, TOTAL_SEMAPHORE_BLOCK_SIZE);
     }
 
     if (TX_SUCCESS != rtos_ret)

@@ -142,6 +142,16 @@
 #if R_SCI_CFG_RX_BUFSIZE < (2048)
 #error "The SCI receive buffer size is too small."
 #endif
+#if BSP_CFG_RTOS_USED == (1)
+#if CELLULAR_CFG_SCI_PRIORITY > configMAX_SYSCALL_INTERRUPT_PRIORITY
+#error "SCI interrupt priority is outside the control of the FreeRTOS."
+#endif
+#endif
+
+/**********************************************************************************************************************
+ * Exported global variables
+ *********************************************************************************************************************/
+extern st_cellular_ctrl_t * gp_cellular_ctrl;
 
 /*****************************************************************************
  * Private Functions
@@ -151,8 +161,14 @@
  * Description    @details       Stop the power supply to the module.
  * Arguments      @param[in/out] p_ctrl -
  *                                  Pointer to managed structure.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully initialized the serial communication function.
+ *                @retval        CELLULAR_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ *                @retval        CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING -
+ *                                  Other AT commands are running.
  ***************************************************************************/
-void cellular_power_down (st_cellular_ctrl_t * const p_ctrl);
+e_cellular_err_t cellular_power_down (st_cellular_ctrl_t * const p_ctrl);
 
 /**********************************************************************************************
  * Function Name  @fn            cellular_serial_open
@@ -200,23 +216,13 @@ e_cellular_err_t cellular_socket_init (st_cellular_ctrl_t * const p_ctrl);
 
 /*******************************************************************************
  * Function Name  @fn            cellular_timeout_init
- * Description    @details       Configure the timeout settings.
- * Arguments      @param[in/out] p_timeout_ctrl -
- *                                  Pointer to the timeout management structure.
- *                @param[in]     timeout_ms -
- *                                  Timeout millisecond.
- ******************************************************************************/
-void cellular_timeout_init (st_cellular_socket_time_ctrl_t * const p_timeout_ctrl, const uint32_t timeout_ms);
-
-/*******************************************************************************
- * Function Name  @fn            cellular_bytetimeout_init
  * Description    @details       Set the communication timeout with the module.
  * Arguments      @param[in/out] p_timeout_ctrl -
  *                                  Pointer to the timeout management structure.
  *                @param[in]     timeout_ms -
  *                                  Timeout millisecond.
  ******************************************************************************/
-void cellular_bytetimeout_init (st_cellular_module_time_ctrl_t * const p_timeout_ctrl, const uint32_t timeout_ms);
+void cellular_timeout_init (st_cellular_time_ctrl_t * const p_timeout_ctrl, const uint32_t timeout_ms);
 
 /*******************************************************************************
  * Function Name  @fn            cellular_check_timeout
@@ -228,34 +234,7 @@ void cellular_bytetimeout_init (st_cellular_module_time_ctrl_t * const p_timeout
  *                @retval        CELLULAR_TIMEOUT; -
  *                                  Timeout occurs.
  ******************************************************************************/
-e_cellular_timeout_check_t cellular_check_timeout (st_cellular_socket_time_ctrl_t * const p_timeout_ctrl);
-
-/*******************************************************************************
- * Function Name  @fn            cellular_check_bytetimeout
- * Description    @details       Check communication timeout with the module.
- * Arguments      @param[in/out] p_timeout_ctrl -
- *                                  Pointer to the timeout management structure.
- * Return Value   @retval        CELLULAR_NOT_TIMEOUT -
- *                                  No timeout occurred.
- *                @retval        CELLULAR_TIMEOUT; -
- *                                  Timeout occurs.
- ******************************************************************************/
-e_cellular_timeout_check_t cellular_check_bytetimeout (st_cellular_module_time_ctrl_t * const p_timeout_ctrl);
-
-/*******************************************************************************
- * Function Name  @fn            cellular_check_timeout_remain
- * Description    @details       Check the time remaining until the set time.
- * Arguments      @param[in/out] p_timeout_ctrl -
- *                                  Pointer to the timeout management structure.
- *                @param[in/out] timeout_ms -
- *                                  Timeout millisecond.
- * Return Value   @retval        CELLULAR_NOT_TIMEOUT -
- *                                  No timeout occurred.
- *                @retval        CELLULAR_TIMEOUT; -
- *                                  Timeout occurs.
- ******************************************************************************/
-e_cellular_timeout_check_t cellular_check_timeout_remain (st_cellular_socket_time_ctrl_t * p_timeout_ctrl,
-                                                                const uint32_t timeout_ms);
+e_cellular_timeout_check_t cellular_check_timeout (st_cellular_time_ctrl_t * const p_timeout_ctrl);
 
 /************************************************************************
  * Function Name  @fn            cellular_shutdownsocket
@@ -303,6 +282,58 @@ e_cellular_err_t cellular_closesocket (st_cellular_ctrl_t * const p_ctrl, const 
  ******************************************************************************/
 e_cellular_err_t cellular_disconnect (st_cellular_ctrl_t * const p_ctrl);
 
+/*******************************************************************************
+ * Function Name  @fn            cellular_module_reset
+ * Description    @details       Reset the module.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully disconnected from access point.
+ *                @retval        CELLULAR_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ ******************************************************************************/
+e_cellular_err_t cellular_module_reset (st_cellular_ctrl_t * const p_ctrl);
+
+/**********************************************************************************************
+ * Function Name  @fn            cellular_irq_open
+ * Description    @details       Initializing the external terminal interrupt function.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully initialized the serial communication function.
+ *                @retval        CELLULAR_ERR_IRQ_OPEN -
+ *                                  IRQ initialization failed.
+ *********************************************************************************************/
+e_cellular_err_t cellular_irq_open (st_cellular_ctrl_t * const p_ctrl);
+
+/**********************************************************************************************
+ * Function Name  @fn            cellular_irq_close
+ * Description    @details       Terminate the external terminal interrupt function.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ *********************************************************************************************/
+void cellular_irq_close (st_cellular_ctrl_t * const p_ctrl);
+
+/*******************************************************************************
+ * Function Name  @fn            cellular_rts_ctrl
+ * Description    @details       Controls the RTS Pin.
+ * Arguments      @param[in]     lowhigh -
+ *                                  Control direction.
+ ******************************************************************************/
+void cellular_rts_ctrl (const uint8_t lowhigh);
+
+/*******************************************************************************
+ * Function Name  @fn            cellular_rts_hw_flow_enable
+ * Description    @details       Enable hardware flow.
+ ******************************************************************************/
+void cellular_rts_hw_flow_enable (void);
+
+/*******************************************************************************
+ * Function Name  @fn            cellular_rts_hw_flow_disable
+ * Description    @details       Disable hardware flow.
+ ******************************************************************************/
+void cellular_rts_hw_flow_disable (void);
+
 /***********************************************************************************************
  * Function Name  @fn            cellular_recv_task
  * Description    @details       Process incoming data from the module.
@@ -313,6 +344,18 @@ e_cellular_err_t cellular_disconnect (st_cellular_ctrl_t * const p_ctrl);
 void cellular_recv_task (void * p_pvParameters);
 #elif BSP_CFG_RTOS_USED == (5)
 void cellular_recv_task (ULONG p_pvParameters);
+#endif
+
+/**************************************************************************************************************
+ * Function Name  @fn            cellular_ring_task
+ * Description    @details       Control of the RTS terminal in accordance with the operation of the RING line.
+ * Arguments      @param[in/out] p_pvParameters -
+ *                                  Pointer to the parameter given at the time of task creation.
+ *************************************************************************************************************/
+#if BSP_CFG_RTOS_USED == (1)
+void cellular_ring_task (void * p_pvParameters);
+#elif BSP_CFG_RTOS_USED == (5)
+void cellular_ring_task (ULONG p_pvParameters);
 #endif
 
 /****************************************************************************
@@ -330,6 +373,20 @@ void cellular_recv_task (ULONG p_pvParameters);
 e_cellular_err_t cellular_start_recv_task (st_cellular_ctrl_t * const p_ctrl);
 
 /****************************************************************************
+ * Function Name  @fn            cellular_start_ring_task
+ * Description    @details       Start RING Line task.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully executed AT command.
+ *                @retval        CELLULAR_ERR_EVENT_GROUP_INIT -
+ *                                  Failed to initialize the event group.
+ *                @retval        CELLULAR_ERR_CREATE_TASK -
+ *                                  Failed to create task.
+ ***************************************************************************/
+e_cellular_err_t cellular_start_ring_task (st_cellular_ctrl_t * const p_ctrl);
+
+/****************************************************************************
  * Function Name  @fn            cellular_set_atc_number
  * Description    @details       Stores the AT command number being executed.
  * Arguments      @param[in/out] p_ctrl -
@@ -344,6 +401,8 @@ void cellular_set_atc_number (st_cellular_ctrl_t * const p_ctrl, const e_atc_lis
  * Description    @details       Get the response from the module.
  * Arguments      @param[in/out] p_ctrl -
  *                                  Pointer to managed structure.
+ * Arguments      @param[in]     command -
+ *                                  Running AT command number.
  * Return Value   @retval        ATC_RETURN_NONE -
  *                                  No response from the module.
  *                @retval        ATC_RETURN_OK -
@@ -354,18 +413,8 @@ void cellular_set_atc_number (st_cellular_ctrl_t * const p_ctrl, const e_atc_lis
  *                                  Module response is ">".
  *                @retval        ATC_RETURN_SEND_NO_CARRIER -
  *                                  Module response is "NO CARRIER".
- *                @retval        ATC_RETURN_CPIN_READY -
- *                                  Module response is "+CPIN: READY".
- *                @retval        ATC_RETURN_SIM_LOCK -
- *                                  Module response is "+CPIN: SIM PIN".
  *                @retval        ATC_RETURN_AP_CONNECTING -
  *                                  Module response is "CONNECT".
- *                @retval        ATC_RETURN_AP_NOT_CONNECT -
- *                                  Module is not connected to the access point.
- *                @retval        ATC_RETURN_CFUN1 -
- *                                  Module control level is 1
- *                @retval        ATC_RETURN_CFUN4 -
- *                                  Module control level is 4
  *************************************************************************/
 e_cellular_atc_return_t cellular_get_atc_response (st_cellular_ctrl_t * const p_ctrl);
 
@@ -391,8 +440,51 @@ e_cellular_atc_return_t cellular_get_atc_response (st_cellular_ctrl_t * const p_
  *                @retval        CELLULAR_ATC_ERR_TIMEOUT -
  *                                  Time out.
  ************************************************************************************/
-e_cellular_err_atc_t cellular_execute_at_command (st_cellular_ctrl_t * const p_ctrl, const uint32_t timeout_ms,
+e_cellular_err_t cellular_execute_at_command (st_cellular_ctrl_t * const p_ctrl, const uint32_t timeout_ms,
                                                         const e_cellular_atc_return_t expect_code,
                                                                 const e_atc_list_t command);
+
+/****************************************************************************************
+ * Function Name  @fn            cellular_smcwrx
+ * Description    @details       Starts a downlink continuous wave service.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ *                @param[in]     earfcn -
+ *                                  An E-UTRA Absolute Radio Frequency Channel Number.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully executed AT command.
+ *                @retval        CELLULAR_ATC_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ ***************************************************************************************/
+e_cellular_err_t cellular_smcwrx (st_cellular_ctrl_t * const p_ctrl, const uint16_t earfcn);
+
+/**************************************************************************************************************
+ * Function Name  @fn            cellular_smcwtx
+ * Description    @details       Starts an uplink continuous wave service.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ *                @param[in]     enable -
+ *                                  1 to start; 0 to stop.
+ *                @param[in]     earfcn -
+ *                                  An E-UTRA Absolute Radio Frequency Channel Number.
+ *                @param[in]     level -
+ *                                  RF output power level of the continuous wave signal, in hundredths of dBm.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully executed AT command.
+ *                @retval        CELLULAR_ATC_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ *************************************************************************************************************/
+e_cellular_err_t cellular_smcwtx (st_cellular_ctrl_t * const p_ctrl, const uint8_t enable,
+                                    const uint16_t earfcn, const int32_t level);
+
+/**************************************************************************************************************
+ * Function Name  @fn            cellular_getpdpaddr
+ * Description    @details       Stores the obtained PDP address in the structure.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ *                @param[in/out] p_addr -
+ *                                  Pointer to structure to store address.
+ *************************************************************************************************************/
+void cellular_getpdpaddr (st_cellular_ctrl_t * const p_ctrl, st_cellular_ipaddr_t * const p_addr);
 
 #endif /* CELLULAR_PRIVATE_API_H */

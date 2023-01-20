@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 #ifndef _MESH_MEMPOOL_
@@ -41,7 +41,7 @@
 #define SIZEOF_NET_CACHE_ELEMENT_EX                     (16)
 #define SIZEOF_NET_CACHE_ELEMENT_EX_CONFIGURABLE \
             (SIZEOF_UINT32 * (1 + BITARRAY_SIZE(MESH_CFG_NET_SEQNUM_CACHE_SIZE)))
-#define SIZEOF_NET_TX_Q_ELEMENT                         (12)
+#define SIZEOF_NET_TX_Q_ELEMENT                         (16)
 #define SIZEOF_PROXY_FILTER_LIST_FIXED                  (8)
 #define SIZEOF_PROXY_ADDR                               (2)
 #define SIZEOF_PROXY_FILTER_LIST_CONFIGURABLE \
@@ -49,15 +49,15 @@
 #define SIZEOF_BRR_HANDLE                               (1)
 #define SIZEOF_LTRN_REPLAY_CACHE_ELEMENT                (8)
 #define SIZEOF_LTRN_REASSEMBLED_FRAME_INFO              (12)
-#define SIZEOF_LTRN_SAR_CTX                             (48)
-#define SIZEOF_TRN_LPN_ELEMENT_FIXED                    (56)
+#define SIZEOF_LTRN_SAR_CTX                             (56)
+#define SIZEOF_TRN_LPN_ELEMENT_FIXED                    (60)
 #define SIZEOF_MS_NET_ADDR                              (2)
 #define SIZEOF_TRN_FRN_Q_ELEMENT                        (36)
 #define SIZEOF_TRN_LPN_ELEMENT_CONFIGURABLE \
             ((SIZEOF_MS_NET_ADDR * MESH_CFG_FRIEND_SUBSCRIPTION_LIST_SIZE) + \
             (2 * SIZEOF_TRN_FRN_Q_ELEMENT * MESH_CFG_FRIEND_MESSAGEQUEUE_SIZE))
 #define SIZEOF_MS_ACCESS_ELEMENT_TYPE                   (6)
-#define SIZEOF_MS_ACCESS_MODEL_TYPE_FIXED               (60)
+#define SIZEOF_MS_ACCESS_MODEL_TYPE_FIXED               (68)
 #define SIZEOF_MS_ACCESS_MODEL_TYPE_CONFIGURABLE \
             (SIZEOF_UINT32 * (BITARRAY_SIZE(MESH_CFG_MAX_APPS) + BITARRAY_SIZE(MESH_CFG_MAX_VIRTUAL_ADDRS + MESH_CFG_MAX_NON_VIRTUAL_ADDRS)))
 #define SIZEOF_MS_NETKEY_ENTRY_FIXED                    (120)
@@ -68,13 +68,11 @@
 #define SIZEOF_MS_ELEMENT_ADDR_ENTRY                    (4)
 #define SIZEOF_MS_NON_VIRTUAL_ADDR_ENTRY                (4)
 #define SIZEOF_MS_VIRTUAL_ADDR_ENTRY                    (20)
-#define SIZEOF_MS_ACCESS_PERIODIC_STEP_TIMER_TYPE       (16)
+#define SIZEOF_TIMER_AL_ELEMENT                         (32)
 #define SIZEOF_PROV_BRR_INFO                            (1)
-#define SIZEOF_MS_ACCESS_STATE_TRANSITION_TYPE          (16)
-#define SIZEOF_MS_HEALTH_SERVER_T                       (88)
-#define SIZEOF_LOCAL_APPKEY_INDEX_LIST                  (2)
-#define SIZEOF_LOCAL_ADDR_LIST                          (2)
-#define SIZEOF_LOCAL_NETKEY_INDEX_LIST                  (2)
+#define SIZEOF_MS_ACCESS_STATE_TRANSITION_TYPE          (20)
+#define SIZEOF_MS_HEALTH_SERVER_T                       (96)
+#define SIZEOF_MS_LIGHT_LC_SERVER_CONTEXT               (52)
 
 /* Array Size */
 #define SIZEOF_MEM_BRR_BEARER \
@@ -122,19 +120,15 @@
 #define SIZEOF_MEM_MS_VIRTUAL_ADDR_TABLE \
             (ALIGN_UINT32(SIZEOF_MS_VIRTUAL_ADDR_ENTRY) * MESH_CFG_MAX_VIRTUAL_ADDRS)
 #define SIZEOF_MEM_MS_PERIODIC_STEP_TIMERS \
-            (ALIGN_UINT32(SIZEOF_MS_ACCESS_PERIODIC_STEP_TIMER_TYPE) * MESH_CFG_MAX_NUM_PERIODIC_STEP_TIMERS)
+            (ALIGN_UINT32(SIZEOF_TIMER_AL_ELEMENT) * MESH_CFG_MAX_NUM_PERIODIC_STEP_TIMERS)
 #define SIZEOF_MEM_PROV_BRR \
             (ALIGN_UINT32(SIZEOF_PROV_BRR_INFO) * MESH_CFG_NUM_PROVISIONING_INTERFACES)
 #define SIZEOF_MEM_MS_TRANSITION_TIMERS \
             (ALIGN_UINT32(SIZEOF_MS_ACCESS_STATE_TRANSITION_TYPE) * MESH_CFG_MAX_NUM_TRANSITION_TIMERS)
 #define SIZEOF_MEM_HEALTH_SERVER \
             (ALIGN_UINT32(SIZEOF_MS_HEALTH_SERVER_T) * MESH_CFG_HEALTH_SERVER_MAX)
-#define SIZEOF_MEM_LOCAL_APPKEY_INDEX_LIST \
-            (ALIGN_UINT32(SIZEOF_LOCAL_APPKEY_INDEX_LIST) * MESH_CFG_MAX_APPS)
-#define SIZEOF_MEM_LOCAL_ADDR_LIST \
-            (ALIGN_UINT32(SIZEOF_LOCAL_ADDR_LIST) * (MESH_CFG_MAX_VIRTUAL_ADDRS + MESH_CFG_MAX_NON_VIRTUAL_ADDRS))
-#define SIZEOF_MEM_LOCAL_NETKEY_INDEX_LIST \
-            (ALIGN_UINT32(SIZEOF_LOCAL_NETKEY_INDEX_LIST) * MESH_CFG_MAX_SUBNETS)
+#define SIZEOF_MEM_LIGHT_LC_SERVER \
+            (ALIGN_UINT32(SIZEOF_MS_LIGHT_LC_SERVER_CONTEXT) * MESH_CFG_LIGHT_LC_SERVER_MAX)
 
 /* Memory Pool Size */
 #define MESH_MEMPOOL_SIZE \
@@ -165,15 +159,13 @@
             + SIZEOF_MEM_PROV_BRR \
             + SIZEOF_MEM_MS_TRANSITION_TIMERS \
             + SIZEOF_MEM_HEALTH_SERVER \
-            + SIZEOF_MEM_LOCAL_APPKEY_INDEX_LIST \
-            + SIZEOF_MEM_LOCAL_ADDR_LIST \
-            + SIZEOF_MEM_LOCAL_NETKEY_INDEX_LIST \
+            + SIZEOF_MEM_LIGHT_LC_SERVER \
             )
 
 /* Storage Record Composition Size */
 #define _SIZEOF_MS_ACCESS_ELEMENT_TYPE                  (6)
 #define _SIZEOF_MS_ACCESS_COMPOSITION_DATA_PAGE_0_HDR   (10)
-#define _SIZEOF_MS_ACCESS_MODEL_TYPE_FIXED              (52)
+#define _SIZEOF_MS_ACCESS_MODEL_TYPE_FIXED              (60)
 #define _SIZEOF_MS_ACCESS_MODEL_TYPE_CONFIGURABLE \
             ( \
                   (SIZEOF_UINT32 * (BITARRAY_SIZE(MESH_CFG_MAX_APPS))) \
@@ -223,8 +215,7 @@
 
 /* Storage Size */
 #define MESH_STORAGE_SIZE \
-            ( \
-              MESH_STORAGE_SIGNATURE_SIZE \
+            ( MESH_STORAGE_SIGNATURE_SIZE \
             + REC_ELEMENTS_SIZE \
             + REC_MODELS_SIZE \
             + REC_SUBNETS_SIZE \
@@ -234,8 +225,7 @@
             + REC_VIRTUAL_ADDRS_SIZE \
             + REC_NON_VIRTUAL_ADDRS_SIZE \
             + REC_SEQ_NUMBER_SIZE \
-            + REC_TX_STATES_FEATURES_SIZE \
-            )
+            + REC_TX_STATES_FEATURES_SIZE )
 
 /*******************************************************************************
 * Prototype declarations

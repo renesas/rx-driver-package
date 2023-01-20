@@ -560,7 +560,6 @@ API_RESULT blebrr_advertise_pl(UCHAR state)
         if (BLE_SUCCESS != ret)
         {
             BLEBRR_LOG("R_BLE_GAP_StartAdv is failed: 0x%04X\n", ret);
-            BLEBRR_LOG("Adv Operation failed with reason 0x%04X\n", ret);
         }
     }
     else

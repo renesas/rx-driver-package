@@ -77,6 +77,8 @@
 *                               - BSP_CFG_MCU_PART_SERIES
 *         : 11.02.2022 4.01    Changed initial value of the following macro definitions.
 *                               - BSP_CFG_SWINT_UNIT1_ENABLE
+*         : 25.11.2022 4.02    Added the following macro definition.
+*                               - BSP_CFG_EXPANSION_RAM_ENABLE
 ***********************************************************************************************************************/
 
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
@@ -534,6 +536,12 @@ Configuration Options
    1 = This project is a C++ project.
 */
 #define BSP_CFG_CPLUSPLUS             (0)
+
+/* Select whether to enable sections of the expansion RAM area.
+   0 = Sections of the expansion RAM area is disabled. (default)
+   1 = Sections of the expansion RAM area is enabled.
+*/
+#define BSP_CFG_EXPANSION_RAM_ENABLE  (0)
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

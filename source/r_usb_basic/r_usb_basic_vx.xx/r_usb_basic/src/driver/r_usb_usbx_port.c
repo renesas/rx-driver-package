@@ -22,7 +22,8 @@
  ***********************************************************************************************************************/
 /**********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
- *         : 30.06.2020 1.40 USBX PCDC is supported.
+ *         : 30.06.2022 1.40 USBX PCDC is supported.
+ *         : 30.10.2022 1.41 USBX HMSC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -35,6 +36,7 @@
 #include "r_usb_extern.h"
 #include "r_usb_bitdefine.h"
 #include "r_usb_reg_access.h"
+#include "r_rtos_abstract.h"
 
 #if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
  #include "ux_api.h"
@@ -59,6 +61,10 @@
  #if defined(USB_CFG_PHID_USE)
   #include "r_usb_phid_cfg.h"
  #endif                                /* defined(USB_CFG_HHID_USE) */
+
+ #if defined(USB_CFG_HPRN_USE)
+  #include "ux_host_class_printer.h"
+ #endif                                /* defined(USB_CFG_HPRN_USE) */
 
  #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
   #include "ux_host_stack.h"
@@ -144,7 +150,7 @@ static void         usb_host_usbx_class_check(usb_utr_t * p_utr, uint16_t ** tab
 static uint32_t     usb_host_usbx_get_speed(UX_HCD * hcd);
 static UINT         usb_host_usbx_to_basic(UX_HCD * hcd, UINT function, VOID * parameter);
 static void         usb_host_usbx_initialize_common_complete(UX_HCD * hcd);
-static usb_err_t    usb_host_usbx_initialize_common(UX_HCD * hcd);
+static UINT    		usb_host_usbx_initialize_common(UX_HCD * hcd);
 
 static uint16_t  g_usb_host_usbx_request[USB_NUM_USBIP][5];
 static usb_utr_t g_usb_host_usbx_req_msg[USB_NUM_USBIP];
@@ -182,11 +188,8 @@ volatile bool g_card_inserted = false;
  #endif                                /* #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI) */
 
  #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
-UINT     usb_host_usbx_initialize(UX_HCD * hcd);
-uint32_t usb_host_usbx_uninitialize(uint32_t hcd_io);
-
 UX_DEVICE  * g_p_usbx_device[USB_NUM_USBIP];
-TX_SEMAPHORE g_usb_host_usbx_sem[USB_NUM_USBIP][USB_MAX_PIPE_NO + 1];
+rtos_sem_id_t g_usb_host_usbx_sem[USB_NUM_USBIP][USB_MAX_PIPE_NO + 1];
 
   #if defined(USB_CFG_HMSC_USE)
 static uint16_t             g_usb_hmsc_in_pipectr[USB_NUM_USBIP][1];  /* Pipectr(SQTGL) */
@@ -1139,16 +1142,20 @@ void r_usb_pmsc_block_media_event_callback (rm_block_media_callback_args_t * p_a
  * Argument        : UX_HCD * hcd : Pointer to UX_HCD structure
  * Return          : USB_SUCCESS
  ******************************************************************************/
-usb_err_t usb_host_usbx_initialize (UX_HCD * hcd)
+UINT usb_host_usbx_initialize (UX_HCD * hcd)
 {
-    usb_err_t status;
+    UINT status;
 
     /* Initialize USB peripheral except interrupts. */
     status = usb_host_usbx_initialize_common(hcd);
-    if (UX_SUCCESS == status)
+    if (USB_SUCCESS == status)
     {
         /* Enable USB interrupts to activate USB port. */
         usb_host_usbx_initialize_common_complete(hcd);
+    }
+    else
+    {
+    	status = UX_ERROR;
     }
 
     return status;
@@ -1160,7 +1167,7 @@ usb_err_t usb_host_usbx_initialize (UX_HCD * hcd)
  * Argument        : UX_HCD * hcd : Pointer to UX_HCD structure
  * Return          : USB_SUCCESS
  ******************************************************************************/
-static usb_err_t usb_host_usbx_initialize_common (UX_HCD * hcd)
+static UINT usb_host_usbx_initialize_common (UX_HCD * hcd)
 {
     /* Set the state of the controller to HALTED first.  */
     hcd->ux_hcd_status = (uint32_t) UX_HCD_STATUS_HALTED;
@@ -1186,7 +1193,7 @@ static usb_err_t usb_host_usbx_initialize_common (UX_HCD * hcd)
   #endif                               /* defined(USB_CFG_OTG_USE) */
 
     /* Return successful completion.  */
-    return USB_SUCCESS;
+    return UX_SUCCESS;
 }                                      /* End of function usb_host_usbx_initialize_common() */
 
 /******************************************************************************
@@ -1351,6 +1358,10 @@ void usb_host_usbx_registration (usb_utr_t * p_utr)
     driver.ifclass = (uint16_t) USB_IFCLS_MAS; /* Interface class : HID */
   #endif /* defined(USB_CFG_HCDC_USE) */
 
+  #if defined(USB_CFG_HPRN_USE)
+    driver.ifclass = (uint16_t) USB_IFCLS_PRN; /* Interface class : Printer */
+  #endif /* defined(USB_CFG_HPRN_USE) */
+
   #if USB_CFG_COMPLIANCE == USB_CFG_ENABLE
     driver.p_tpl = (uint16_t *) USB_CFG_TPL_TABLE;
   #else                                                              /* #if USB_CFG_COMPLIANCE == USB_CFG_ENABLE */
@@ -1390,7 +1401,7 @@ void usb_host_usbx_registration (usb_utr_t * p_utr)
  ******************************************************************************/
 void usb_host_usbx_class_check (usb_utr_t * p_utr, uint16_t ** table)
 {
-  #if defined(USB_CFG_HCDC_USE) || defined(USB_CFG_HHID_USE) || defined(USB_CFG_HMSC_USE)
+  #if defined(USB_CFG_HCDC_USE) || defined(USB_CFG_HHID_USE) || defined(USB_CFG_HMSC_USE) || defined(USB_CFG_HPRN_USE)
     uint16_t  speed;
     uint16_t  length;
     uint16_t  offset;
@@ -1412,15 +1423,19 @@ void usb_host_usbx_class_check (usb_utr_t * p_utr, uint16_t ** table)
     length   = (uint16_t) (length + *(p_config + 2));
 
    #if defined(USB_CFG_HCDC_USE)
-    usb_class = USB_CLASS_INTERNAL_HCDC;
+    usb_class = USB_HCDC;
    #endif
 
    #if defined(USB_CFG_HHID_USE)
-    usb_class = USB_CLASS_INTERNAL_HHID;
+    usb_class = USB_HHID;
    #endif
 
    #if defined(USB_CFG_HMSC_USE)
-    usb_class = USB_CLASS_INTERNAL_HMSC;
+    usb_class = USB_HMSC;
+   #endif
+
+   #if defined(USB_CFG_HPRN_USE)
+    usb_class = USB_HPRN;
    #endif
 
     offset = 0;
@@ -1632,9 +1647,9 @@ static void usb_host_usbx_class_request_cb (usb_utr_t * p_utr, uint16_t data1, u
 
     pipe = (uint8_t) p_utr->keyword;
 
-  #if (defined(USB_CFG_HHID_USE) | defined(USB_CFG_OTG_USE))
+  #if (defined(USB_CFG_HHID_USE) | defined(USB_CFG_OTG_USE)) | defined(USB_CFG_HPRN_USE)
     *g_p_usb_host_actural_length[p_utr->ip][0] = p_utr->read_req_len - p_utr->tranlen;
-  #endif                               /* #if defined(USB_CFG_HHID_USE) */
+  #endif                               /* (defined(USB_CFG_HHID_USE) | defined(USB_CFG_OTG_USE)) | defined(USB_CFG_HPRN_USE) */
 
     tx_semaphore_put(&g_usb_host_usbx_sem[p_utr->ip][pipe]);
 }                                      /* End of function usb_pstd_transfer_complete_cb() */
@@ -1746,6 +1761,14 @@ static void usb_host_usbx_transfer_complete_cb (usb_utr_t * p_utr, uint16_t data
         transfer_request->ux_transfer_request_completion_function(transfer_request);
     }
   #endif                               /* defined(USB_CFG_HHID_USE) */
+
+  #if defined(USB_CFG_HPRN_USE)
+    transfer_request->ux_transfer_request_completion_code = UX_SUCCESS;
+    if (UX_NULL != transfer_request->ux_transfer_request_completion_function)
+    {
+        transfer_request->ux_transfer_request_completion_function(transfer_request);
+    }
+  #endif                               /* defined(USB_CFG_HPRN_USE) */
 
   #if defined(USB_CFG_HCDC_USE)
 

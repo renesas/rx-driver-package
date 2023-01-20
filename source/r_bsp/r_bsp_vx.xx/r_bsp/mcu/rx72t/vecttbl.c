@@ -39,6 +39,7 @@
 *                                - BSP_PRV_SPCC_WRPR
 *                                - BSP_PRV_SPCC_RDPR
 *                                - BSP_PRV_SPCC_SPE
+*         : 25.11.2022 3.05      Deleted the duplicate definition.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -110,12 +111,6 @@ R_BSP_ATTRIB_SECTION_CHANGE_END
     #define BSP_PRV_SPCC_IDE   (0xfeffffff)  /* ID code protection is enabled after a reset. */
 #else
     #define BSP_PRV_SPCC_IDE   (0xffffffff)  /* ID code protection is disabled after a reset. */
-#endif
-
-#if BSP_CFG_SERIAL_PROGRAMMER_CONECT_ENABLE == 0
-    #define BSP_PRV_SPCC_SPE   (0xf7ffffff)  /* Connection of a serial programmer after a reset is prohibited. */
-#else
-    #define BSP_PRV_SPCC_SPE   (0xffffffff)  /* Connection of a serial programmer after a reset is permitted. */
 #endif
 
 #if (BSP_CFG_BLOCK_ERASE_CMD_PROTECT_ENABLE == 1) || (BSP_CFG_ID_CODE_ENABLE == 1)

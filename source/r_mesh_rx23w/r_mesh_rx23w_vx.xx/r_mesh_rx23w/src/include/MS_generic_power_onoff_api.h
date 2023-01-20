@@ -1,7 +1,7 @@
 /**
  * \file MS_generic_power_onoff_api.h
  *
- * \brief This file defines the Mesh Generic Power Onoff Model Application Interface
+ * \brief This file defines the Mesh Generic Power OnOff Model Application Interface
  * - includes Data Structures and Methods for both Server and Client.
  */
 
@@ -21,26 +21,24 @@
 /* --------------------------------------------- Global Definitions */
 /**
  * \defgroup generic_power_onoff_module Generic Power OnOff Model (GENERIC_POWER_ONOFF)
- * \ingroup mesh_models_block
+ * \ingroup generics_models
  * \{
  *  \brief This section describes the interfaces & APIs offered by the EtherMind
- *  Mesh Generic Power Onoff Model (GENERIC_POWER_ONOFF) module to the Application.
+ *  Mesh Generic Power OfOff Model (GENERIC_POWER_ONOFF) module to the Application.
  */
-
-
 
 /* --------------------------------------------- Data Types/ Structures */
 /**
  *  \defgroup generic_power_onoff_cb Application Callback
  *  \{
- *  \brief This section Describes the module Notification Callback interface offered
- *  to the application
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Generic Power OfOff Model Layer.
  */
 
 /**
- * Generic Power Onoff Server application Asynchronous Notification Callback.
+ * Generic Power OnOff Server application Asynchronous Notification Callback.
  *
- * Generic Power Onoff Server calls the registered callback to indicate events occurred to the
+ * Generic Power OnOff Server calls the registered callback to indicate events occurred to the
  * application.
  *
  * \param [in] ctx           Context of the message received for a specific model instance.
@@ -60,9 +58,9 @@ typedef API_RESULT (* MS_GENERIC_POWER_ONOFF_SERVER_CB)
         ) DECL_REENTRANT;
 
 /**
- * Generic Power Onoff Client application Asynchronous Notification Callback.
+ * Generic Power OnOff Client application Asynchronous Notification Callback.
  *
- * Generic Power Onoff Client calls the registered callback to indicate events occurred to the
+ * Generic Power OnOff Client calls the registered callback to indicate events occurred to the
  * application.
  *
  * \param [in] ctx           Context of the message received for a specific model instance.
@@ -79,9 +77,9 @@ typedef API_RESULT (* MS_GENERIC_POWER_ONOFF_CLIENT_CB)
         ) DECL_REENTRANT;
 
 /**
- * Generic Power Onoff Setup Server application Asynchronous Notification Callback.
+ * Generic Power OnOff Setup Server application Asynchronous Notification Callback.
  *
- * Generic Power Onoff Setup Server calls the registered callback to indicate events occurred to the
+ * Generic Power OnOff Setup Server calls the registered callback to indicate events occurred to the
  * application.
  *
  * \param [in] ctx           Context of the message received for a specific model instance.
@@ -102,9 +100,17 @@ typedef API_RESULT (* MS_GENERIC_POWER_ONOFF_SETUP_SERVER_CB)
 /** \} */
 
 /**
+ * \defgroup generic_power_onoff_defines Defines
+ * \{
+ * \brief This section describes the various Defines in EtherMind
+ * Mesh Generic Power OnOff Model Layer.
+ */
+
+/**
  *  \defgroup generic_power_onoff_structures Structures
  *  \{
- *  \brief This section describes the EtherMind Mesh Generic Power OnOff Model Structures.
+ *  \brief This section describes the various Data-Types and Structures in
+ *  EtherMind Mesh Generic Power OnOff Model Layer.
  */
 
 /**
@@ -129,25 +135,69 @@ typedef struct MS_generic_onpowerup_struct
 
 /** \} */
 
-
+/** \} */
 
 /* --------------------------------------------- Function */
 /**
  * \defgroup generic_power_onoff_api_defs API Definitions
  * \{
- * \brief This section describes the EtherMind Mesh Generic Power Onoff Model APIs.
- */
-/**
- * \defgroup generic_power_onoff_ser_api_defs Generic Power Onoff Server API
- * \{
- * \brief This section describes the Generic Power Onoff Server APIs.
+ * \brief This section describes the various APIs exposed by
+ * EtherMind Mesh Generic Power OnOff Model Layer to the Application.
  */
 
 /**
- *  \brief API to initialize Generic_Power_Onoff Server model
+ * \defgroup generic_power_onoff_ser_api_defs Generic Power OnOff Server API Definitions
+ * \{
+ * \brief This section describes the EtherMind Mesh Generic Power OnOff Server
+ * Model APIs.
+ */
+
+/**
+ * \name Generic Power OnOff Server Interfaces
+ * \{
+ */
+
+#ifdef MS_MODEL_SERVER_EXTENDED_INTERFACE
+/**
+ *  \brief API to initialize Generic_Power_OnOff Server model
  *
  *  \par Description
  *  This is to initialize Generic_Power_Onoff Server model and to register with Access layer.
+ *
+ *  \param [in] element_handle
+ *              Element identifier to be associated with the model instance.
+ *
+ *  \param [in, out] power_onoff_model_handle
+ *                   Model identifier associated with the Generic Power OnOff model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in, out] power_onoff_setup_model_handle
+ *                   Model identifier associated with the Generic Power OnOff Setup model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in] power_onoff_appl_cb          Application Callback to be used by the Generic_Power_OnOff Server.
+ *
+ *  \param [in] power_onoff_setup_appl_cb    Application Callback to be used by the Generic_Power_OnOff_Setup Server.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_generic_power_onoff_server_init_ext
+           (
+               /* IN */    MS_ACCESS_ELEMENT_HANDLE                element_handle,
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE                * power_onoff_model_handle,
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE                * power_onoff_setup_model_handle,
+               /* IN */    MS_GENERIC_POWER_ONOFF_SERVER_CB        power_onoff_appl_cb,
+               /* IN */    MS_GENERIC_POWER_ONOFF_SETUP_SERVER_CB  power_onoff_setup_appl_cb
+           );
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+
+/**
+ *  \brief API to initialize Generic_Power_OnOff Server model (deprecated)
+ *
+ *  \par Description
+ *  This is to initialize Generic_Power_OnOff Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -157,7 +207,7 @@ typedef struct MS_generic_onpowerup_struct
  *                   After power cycle of an already provisioned node, the model handle will have
  *                   valid value and the same will be reused for registration.
  *
- *  \param [in] appl_cb    Application Callback to be used by the Generic_Power_Onoff Server.
+ *  \param [in] appl_cb    Application Callback to be used by the Generic_Power_OnOff Server.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -196,10 +246,10 @@ API_RESULT MS_generic_power_onoff_server_state_update
            );
 
 /**
- *  \brief API to initialize Generic_Power_Onoff_Setup Server model
+ *  \brief API to initialize Generic_Power_OnOff_Setup Server model (deprecated)
  *
  *  \par Description
- *  This is to initialize Generic_Power_Onoff_Setup Server model and to register with Access layer.
+ *  This is to initialize Generic_Power_OnOff_Setup Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -209,7 +259,7 @@ API_RESULT MS_generic_power_onoff_server_state_update
  *                   After power cycle of an already provisioned node, the model handle will have
  *                   valid value and the same will be reused for registration.
  *
- *  \param [in] appl_cb    Application Callback to be used by the Generic_Power_Onoff_Setup Server.
+ *  \param [in] appl_cb    Application Callback to be used by the Generic_Power_OnOff_Setup Server.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -248,17 +298,25 @@ API_RESULT MS_generic_power_onoff_setup_server_state_update
            );
 /** \} */
 
+/** \} */
+
 /**
- * \defgroup generic_power_onoff_cli_api_defs Generic Power Onoff Client API
+ * \defgroup generic_power_onoff_cli_api_defs Generic Power OnOff Client API Definitions
  * \{
- * \brief This section describes the Generic Power Onoff Client APIs.
+ * \brief This section describes the EtherMind Generic Power OnOff Client
+ * Model APIs.
  */
 
 /**
- *  \brief API to initialize Generic_Power_Onoff Client model
+ * \name Generic Power OnOff Client Interfaces
+ * \{
+ */
+
+/**
+ *  \brief API to initialize Generic_Power_OnOff Client model
  *
  *  \par Description
- *  This is to initialize Generic_Power_Onoff Client model and to register with Access layer.
+ *  This is to initialize Generic_Power_OnOff Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -268,7 +326,7 @@ API_RESULT MS_generic_power_onoff_setup_server_state_update
  *                   After power cycle of an already provisioned node, the model handle will have
  *                   valid value and the same will be reused for registration.
  *
- *  \param [in] appl_cb    Application Callback to be used by the Generic_Power_Onoff Client.
+ *  \param [in] appl_cb    Application Callback to be used by the Generic_Power_OnOff Client.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -280,10 +338,10 @@ API_RESULT MS_generic_power_onoff_client_init
            );
 
 /**
- *  \brief API to get Generic_Power_Onoff client model handle
+ *  \brief API to get Generic_Power_OnOff client model handle
  *
  *  \par Description
- *  This is to get the handle of Generic_Power_Onoff client model.
+ *  This is to get the handle of Generic_Power_OnOff client model.
  *
  *  \param [out] model_handle   Address of model handle to be filled/returned.
  *
@@ -295,10 +353,10 @@ API_RESULT MS_generic_power_onoff_client_get_model_handle
            );
 
 /**
- *  \brief API to set Generic_Power_Onoff client model handle
+ *  \brief API to set Generic_Power_OnOff client model handle
  *
  *  \par Description
- *  This is to set the handle of Generic_Power_Onoff client model.
+ *  This is to set the handle of Generic_Power_OnOff client model.
  *
  *  \param [in] model_handle   Model handle to be assigned.
  *
@@ -327,10 +385,29 @@ API_RESULT MS_generic_power_onoff_client_send_reliable_pdu
                /* IN */ void    * param,
                /* IN */ UINT32    rsp_opcode
            );
+/** \} */
 
-/** \name Message Send
- *  \{
+/** \} */
+
+/** \} */
+
+/**
+ * \addtogroup generic_power_onoff_defines
+ * \{
  */
+
+/**
+ * \defgroup gneric_power_onoff_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind
+ * Mesh Generic Power OnOff Model Layer.
+ */
+
+/**
+ * \name Generic Power OnOff Client Macros
+ * \{
+ */
+
 /**
  *  \brief API to get the Generic OnPowerUp state of an element.
  *
@@ -356,7 +433,7 @@ API_RESULT MS_generic_power_onoff_client_send_reliable_pdu
  *  Generic OnPowerUp Set is an acknowledged message used to set the Generic OnPowerUp state of an element.
  *  The response to the Generic OnPowerUp Set message is a Generic OnPowerUp Status message.
  *
- *  \param [in] param Generic OnPowerUp Set message parameter @ref MS_GENERIC_ONPOWERUP_STRUCT
+ *  \param [in] param Generic OnPowerUp Set message parameter \ref MS_GENERIC_ONPOWERUP_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -375,7 +452,7 @@ API_RESULT MS_generic_power_onoff_client_send_reliable_pdu
  *  Generic OnPowerUp Set Unacknowledged is an unacknowledged message used to set
  *  the Generic OnPowerUp state of an element.
  *
- *  \param [in] param Generic OnPowerUp Set message parameter @ref MS_GENERIC_ONPOWERUP_STRUCT
+ *  \param [in] param Generic OnPowerUp Set message parameter \ref MS_GENERIC_ONPOWERUP_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -387,8 +464,48 @@ API_RESULT MS_generic_power_onoff_client_send_reliable_pdu
             0xFFFFFFFF\
         )
 /** \} */
+
+/**
+ * \name Generic Power OnOff Server and Generic Power OnOff Setup Server Macros
+ * \{
+ */
+#ifdef MS_MODEL_SERVER_EXTENDED_INTERFACE
+/**
+ *  \brief API to send reply or to update state change
+ *
+ *  \par Description
+ *  This is to send reply for a request or to inform change in state.
+ *
+ * \param [in] c   Context of the message.
+ * \param [in] cs  Model specific current state parameters.
+ * \param [in] ts  Model specific target state parameters (NULL: to be ignored).
+ * \param [in] rt  Time from current state to target state (0: to be ignored).
+ * \param [in] ex  Additional parameters (NULL: to be ignored).
+ * \param [in] r   If unicast response to be sent
+ * \param [in] p   If state to be published
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+#define MS_generic_power_onoff_server_state_update_ext(c,cs,ts,rt,ex,r,p) \
+        MS_generic_power_onoff_server_state_update \
+        (\
+            (c),\
+            (cs),\
+            (ts),\
+            (rt),\
+            (ex),\
+            (r),\
+            (p)\
+        )
+
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+
 /** \} */
+
 /** \} */
+
+/** \} */
+
 /** \} */
 
 #endif /* _H_MS_GENERIC_POWER_ONOFF_API_ */

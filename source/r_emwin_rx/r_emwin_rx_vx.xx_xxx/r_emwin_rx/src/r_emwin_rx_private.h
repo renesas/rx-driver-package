@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_emwin_rx_private.h
@@ -30,6 +30,11 @@
  *         : 31.03.2021 6.14.g.1.30    Update to adjust the spec of Smart Configurator and QE for Display.
  *         : 29.12.2021 6.20.  1.00    Update emWin library to v6.22.
  *                                     Adjust configuration option with Smart Configurator.
+ *         : 31.08.2022 6.26.c.1.00    Update emWin library to v6.26c.
+ *                                     Moved EMWIN_DISPLAY_DRIVER from r_emwin_rx_config.h to this file. 
+ *                                     Since it can be determined by the interface whether it is LiN or FlexColor, 
+ *                                     it is changed to handle it internally.
+ *                                     Added touch driver IC settings.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -46,11 +51,27 @@
 #ifndef EMWIN_RX_PRIVATE_H
 #define EMWIN_RX_PRIVATE_H
 
+/* Display Driver */
+#define DISP_DRV_GUIDRV_LIN           (0)
+#define DISP_DRV_GUIDRV_FLEXCOLOR     (1)
+#define DISP_DRV_GUIDRV_OTHER         (99)
+
+#if (EMWIN_LCD_IF == LCD_IF_GLCDC)
+#define EMWIN_DISPLAY_DRIVER          (DISP_DRV_GUIDRV_LIN)
+#elif ((EMWIN_LCD_IF == LCD_IF_RSPI) || (EMWIN_LCD_IF == LCD_IF_SCI_SPI))
+#define EMWIN_DISPLAY_DRIVER          (DISP_DRV_GUIDRV_FLEXCOLOR)
+#elif (EMWIN_LCD_IF == LCD_IF_OTHER)
+#define EMWIN_DISPLAY_DRIVER          (DISP_DRV_GUIDRV_OTHER)
+#endif
+
+
 /* Buffer size and stride */
 #define BYTES_PER_LINE   ((EMWIN_BITS_PER_PIXEL * EMWIN_XSIZE_PHYS) / 8)
 #define LINE_OFFSET      (((BYTES_PER_LINE + 63) / 64) * 64)
 #define VXSIZE_PHYS      ((LINE_OFFSET * 8) / EMWIN_BITS_PER_PIXEL)
 #define BYTES_PER_BUFFER (LINE_OFFSET * EMWIN_YSIZE_PHYS)
+
+
 
 /* Color number */
 #if ((USE_DAVE2D == 0) && (EMWIN_BITS_PER_PIXEL < 16))
@@ -59,6 +80,18 @@
 #define NUM_COLORS  (256)
 #endif
 
+
+/* Touch driver */
+#define TOUCH_DRV_IC_FT5306    (0)
+#define TOUCH_DRV_IC_XPT2046   (1)
+#define TOUCH_DRV_IC_OTHER     (99)
+
+/* Touch Driver IC (SPI Interface) */
+/* Note:
+ * Preparations for adding touch drivers in the future version. */
+#define EMWIN_TOUCH_DRIVER_IC  (TOUCH_DRV_IC_XPT2046)
+
+/* Buffer for passing touch data to emWin */
 #define TOUCH_DATA_BUFFER_SIZE (GUI_PID_BUFFER_SIZE * 6 + 3)
 
 /**********************************************************************************************************************
@@ -103,38 +136,6 @@ typedef enum
 /**********************************************************************************************************************
  Exported global functions
  *********************************************************************************************************************/
-
-/**********************************************************************************************************************
- * Function Name: r_emwin_rx_lcd_open
- * Description  : .
- * Arguments    : .
- * Return Value : .
- *********************************************************************************************************************/
-e_emwin_rx_err_t r_emwin_rx_lcd_open (void);
-
-/**********************************************************************************************************************
- * Function Name: r_emwin_rx_lcd_switch_buffer
- * Description  : .
- * Arguments    : .
- * Return Value : .
- *********************************************************************************************************************/
-e_emwin_rx_err_t r_emwin_rx_lcd_switch_buffer (uint32_t * p_addr);
-
-/**********************************************************************************************************************
- * Function Name: r_emwin_rx_lcd_clut_update
- * Description  : .
- * Arguments    : .
- * Return Value : .
- *********************************************************************************************************************/
-e_emwin_rx_err_t r_emwin_rx_lcd_clut_update (uint32_t * p_clut);
-
-/**********************************************************************************************************************
- * Function Name: r_emwin_rx_lcd_switch
- * Description  : .
- * Arguments    : .
- * Return Value : .
- *********************************************************************************************************************/
-e_emwin_rx_err_t r_emwin_rx_lcd_switch (e_emwin_rx_lcd_switch_t lcd_switch);
 
 /**********************************************************************************************************************
  * Function Name: r_emwin_rx_pid_open

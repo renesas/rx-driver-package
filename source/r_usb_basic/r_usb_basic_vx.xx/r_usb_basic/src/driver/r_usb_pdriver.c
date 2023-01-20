@@ -31,6 +31,7 @@
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.04.2020 1.31 RX671 is added.
  *         : 30.06.2022 1.40 USBX PCDC is supported.
+ *         : 30.10.2022 1.41 USBX HMSC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -554,15 +555,10 @@ static void usb_pstd_interrupt (usb_utr_t *p_mess)
  Arguments       : none
  Return value    : none
  ******************************************************************************/
-#if (BSP_CFG_RTOS_USED == 4)        /* Renesas RI600V4 & RI600PX */
-void usb_pstd_pcd_task (VP_INT a)
-#elif (BSP_CFG_RTOS_USED == 5)      /* Azure RTOS */
-void usb_pstd_pcd_task (ULONG entry_input)
-#else /* (BSP_CFG_RTOS_USED == 4) */
-void usb_pstd_pcd_task (void)
-#endif /* (BSP_CFG_RTOS_USED == 4) */
+void usb_pstd_pcd_task (rtos_task_arg_t stacd)
 {
 #if (BSP_CFG_RTOS_USED == 0)        /* Non-OS */
+    (void)stacd;
     if (g_usb_pstd_usb_int.wp != g_usb_pstd_usb_int.rp)
     {
         /* Pop Interrupt info */
@@ -579,9 +575,7 @@ void usb_pstd_pcd_task (void)
     usb_utr_t   *p_mess;
     rtos_err_t ret;
 
-#if (BSP_CFG_RTOS_USED == 5)      /* Azure RTOS */
-    (void) entry_input;
-#endif  /* (BSP_CFG_RTOS_USED == 5) */
+    (void)stacd;
 
     /* WAIT_LOOP */
     while(1)

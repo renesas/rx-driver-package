@@ -19,7 +19,7 @@
 /**********************************************************************************************************************
 * System Name  : SDSI Driver
 * File Name    : r_sdsi_register.c
-* Version      : 1.00
+* Version      : 2.03
 * Device       : RX65N
 * Abstract     : API & Sub module
 * Tool-Chain   : -
@@ -33,6 +33,7 @@
 *              : 30.09.2016 1.00    First Release
 *              : 31.07.2017 2.00    Supported RX65N-2MB.
 *              :                    Fixed to correspond to Renesas coding rule.
+*              : 27.12.2022 2.03    Updated slash format of included header file paths for Linux compatibility.
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -42,7 +43,7 @@ Includes <System Includes> , "Project Includes"
 #if defined(BSP_MCU_RX65N)
 
 #include "r_sdsi_rx_if.h"
-#include ".\src\r_sdsi_rx_private.h"
+#include "./src/r_sdsi_rx_private.h"
 
 /**********************************************************************************************************************
 Macro definitions

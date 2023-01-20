@@ -25,6 +25,7 @@
 /** \cond definitions for internal module */
 void  ms_mempool_reset_pl(void);
 void* ms_mempool_alloc_pl(size_t size);
+void  ms_mempool_free_pl(void* ptr);
 /** \endcond */
 
 /*******************************************************************************

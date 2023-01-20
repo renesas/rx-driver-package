@@ -34,6 +34,7 @@
  *         : 30.07.2019 1.27 RX72M is added.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.04.2020 1.31 RX671 is added.
+ *         : 30.10.2022 1.41 USBX HMSC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -569,10 +570,10 @@ uint16_t usb_hhub_get_port_information (usb_utr_t *ptr, uint16_t hubaddr, uint16
 /******************************************************************************
  Function Name   : usb_hstd_hub_task
  Description     : HUB task
- Arguments       : usb_vp_int_t stacd          : Start Code of Hub Task
+ Arguments       : rtos_task_arg_t stacd          : Start Code of Hub Task
  Return value    : none
  ******************************************************************************/
-void usb_hstd_hub_task (usb_vp_int_t stacd)
+void usb_hstd_hub_task (rtos_task_arg_t stacd)
 {
 #if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
     usb_utr_t *mess;

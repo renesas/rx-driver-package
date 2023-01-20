@@ -567,6 +567,7 @@
 #define USB_FIFO2BUF                        (0x0000u)   /* FIFO --> buffer */
 #define USB_EPNUMFIELD                      (0x000Fu)   /* Endpoint number select */
 #define USB_MAX_EP_NO                       (15u)       /* EP0 EP1 ... EP15 */
+#define USB_ENDPOINT_DIRECTION              (0x0080U) /* EndPoint Address direction */
 
 #define USB_BUF_SIZE(x)                     ((uint16_t)(((x) / 64u) - 1u) << 10u)
 #define USB_BUF_NUMB(x)                     (x)

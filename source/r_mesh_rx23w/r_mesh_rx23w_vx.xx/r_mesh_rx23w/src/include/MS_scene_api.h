@@ -21,19 +21,30 @@
 /* --------------------------------------------- Global Definitions */
 /**
  * \defgroup scene_module Scene Model (SCENE)
- * \ingroup mesh_models_block
+ * \ingroup time_and_scenes_models
  * \{
  *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Scene Model (SCENE) module to the Application.
  */
 
 /**
- * \defgroup scene_constants Constants
+ * \defgroup scene_defines Defines
  * \{
- * Describes Constants defined by the module.
+ * \brief This section describes the various Defines in EtherMind
+ * Mesh Scene Model Layer.
  */
 
-/** Scene Event Types */
+/**
+ *  \defgroup scene_events Events
+ *  \{
+ *  \brief This section lists the Asynchronous Events notified to Application
+ *  by EtherMind Mesh Scene Model Layer.
+ */
+
+/**
+ * \name Scene Event Types
+ * \{
+ */
 /** Scene Event - Store */
 #define MS_SCENE_EVENT_STORE               0x01
 
@@ -48,6 +59,9 @@
 
 /** Scene Event - Recall Immediate */
 #define MS_SCENE_EVENT_RECALL_IMMEDIATE    0x05
+/** \} */
+
+/** \} */
 
 /** \} */
 
@@ -55,23 +69,24 @@
 /**
  *  \defgroup scene_cb Application Callback
  *  \{
- *  \brief This section Describes the module Notification Callback interface offered
- *  to the application
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Scene Model Layer.
  */
 
 /**
- * Scene Server application Asynchronous Notification Callback.
+ *  \brief Scene Server Application Asynchronous Notification Callback.
  *
- * Scene Server calls the registered callback to indicate events occurred to the
- * application.
+ *  \par Description
+ *  Scene Server calls the registered callback to indicate events occurred to the
+ *  application.
  *
- * \param [in] ctx           Context of the message received for a specific model instance.
- * \param [in] msg_raw       Uninterpreted/raw received message.
- * \param [in] req_type      Requested message type.
- * \param [in] state_params  Model specific state parameters.
- * \param [in] ext_params    Additional parameters.
+ *  \param [in] handle        Model Handle.
+ *  \param [in] event_type    Scene Server Scene Event Types.
+ *  \param [in] event_param   Parameter associated with the event if any or NULL.
+ *  \param [in] event_length  Size of the event parameter data. 0 if event param is NULL.
+ *  \param [in] context       Context associated with Scene if any or NULL.
  *
- * TODO: Update
+ *  \return Context associated with Scene if any or NULL.
  */
 typedef void * (* MS_SCENE_SERVER_CB)
         (
@@ -83,29 +98,38 @@ typedef void * (* MS_SCENE_SERVER_CB)
         ) DECL_REENTRANT;
 
 /**
- * Scene Client application Asynchronous Notification Callback.
+ *  \brief Scene Client Application Asynchronous Notification Callback.
  *
- * Scene Client calls the registered callback to indicate events occurred to the
- * application.
+ *  \par Description
+ *  Scene Client calls the registered callback to indicate events occurred to the
+ *  application.
  *
- * \param [in] ctx           Context of the message received for a specific model instance.
- * \param [in] opcode        Opcode.
- * \param [in] data_param    Data associated with the event if any or NULL.
- * \param [in] data_len      Size of the event data. 0 if event data is NULL.
+ *  \param [in] ctx           Context of the message received for a specific model instance.
+ *  \param [in] opcode        Opcode.
+ *  \param [in] data_param    Data associated with the event if any or NULL.
+ *  \param [in] data_len      Size of the event data. 0 if event data is NULL.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
  */
 typedef API_RESULT (* MS_SCENE_CLIENT_CB)
         (
             MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
-            UINT32                   opcode,
-            UCHAR                  * data_param,
-            UINT16                   data_len
+            UINT32                            opcode,
+            UCHAR                           * data_param,
+            UINT16                            data_len
         ) DECL_REENTRANT;
 /** \} */
 
 /**
+ * \addtogroup scene_defines
+ * \{
+ */
+
+/**
  *  \defgroup scene_structures Structures
  *  \{
- *  \brief This section describes the EtherMind Mesh Scene Model Structures.
+ *  \brief This section describes the various Data-Types and Structures in
+ *  EtherMind Mesh Scene Model Layer.
  */
 
 /**
@@ -203,18 +227,25 @@ typedef struct MS_scene_struct
 
 /** \} */
 
-
+/** \} */
 
 /* --------------------------------------------- Function */
 /**
  * \defgroup scene_api_defs API Definitions
  * \{
- * \brief This section describes the EtherMind Mesh Scene Model APIs.
+ * \brief This section describes the various APIs exposed by
+ * EtherMind Mesh Scene Model Layer to the Application.
  */
+
 /**
- * \defgroup scene_ser_api_defs Scene Server API
+ * \defgroup scene_ser_api_defs Scene Server API Definitions
  * \{
- * \brief This section describes the Scene Server APIs.
+ * \brief This section describes the EtherMind Mesh Scene Server Model APIs.
+ */
+
+/**
+ * \name Scene Server Interfaces
+ * \{
  */
 
 /**
@@ -242,10 +273,10 @@ typedef struct MS_scene_struct
  */
 API_RESULT MS_scene_server_init
            (
-               /* IN */    MS_ACCESS_ELEMENT_HANDLE    element_handle,
-               /* INOUT */ MS_ACCESS_MODEL_HANDLE    * scene_model_handle,
-               /* INOUT */ MS_ACCESS_MODEL_HANDLE    * scene_setup_model_handle,
-               /* IN */    MS_SCENE_SERVER_CB appl_cb
+               /* IN */    MS_ACCESS_ELEMENT_HANDLE   element_handle,
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE   * scene_model_handle,
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE   * scene_setup_model_handle,
+               /* IN */    MS_SCENE_SERVER_CB         appl_cb
            );
 
 /**
@@ -255,10 +286,16 @@ API_RESULT MS_scene_server_init
  *  This is to send reply for a request or to inform change in state.
  *
  * \param [in] ctx                     Context of the message.
- * \param [in] current_state_params    Model specific current state parameters.
+ * \param [in] current_state_params    Model specific current state parameters. The valid
+ *                                     'state_type' values for this \ref MS_ACCESS_MODEL_STATE_PARAMS
+ *                                     is "MS_STATE_SCENE_STATUS_T". And The locally updated Scene State
+ *                                     which is passed through this \ref MS_ACCESS_MODEL_STATE_PARAMS
+ *                                     shall always reflect the current state without any target/transitions.
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -268,14 +305,23 @@ API_RESULT MS_scene_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 /** \} */
 
+/** \} */
+
 /**
- * \defgroup scene_cli_api_defs Scene Client API
+ * \defgroup scene_cli_api_defs Scene Client API Definitions
  * \{
- * \brief This section describes the Scene Client APIs.
+ * \brief This section describes the EtherMind Mesh Scene Client Model APIs.
+ */
+
+/**
+ * \name Scene Client Interfaces
+ * \{
  */
 
 /**
@@ -298,9 +344,9 @@ API_RESULT MS_scene_server_state_update
  */
 API_RESULT MS_scene_client_init
            (
-               /* IN */    MS_ACCESS_ELEMENT_HANDLE    element_handle,
-               /* INOUT */ MS_ACCESS_MODEL_HANDLE    * model_handle,
-               /* IN */    MS_SCENE_CLIENT_CB appl_cb
+               /* IN */    MS_ACCESS_ELEMENT_HANDLE   element_handle,
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE   * model_handle,
+               /* IN */    MS_SCENE_CLIENT_CB         appl_cb
            );
 
 /**
@@ -351,10 +397,29 @@ API_RESULT MS_scene_client_send_reliable_pdu
                /* IN */ void    * param,
                /* IN */ UINT32    rsp_opcode
            );
+/** \} */
 
-/** \name Message Send
- *  \{
+/** \} */
+
+/** \} */
+
+/**
+ * \addtogroup scene_defines
+ * \{
  */
+
+/**
+ * \defgroup scene_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind
+ * Mesh Scene Model Layer.
+ */
+
+/**
+ * \name Scene Client Macros
+ * \{
+ */
+
 /**
  *  \brief API to get the current status of a currently active scene of an element.
  *
@@ -374,13 +439,13 @@ API_RESULT MS_scene_client_send_reliable_pdu
         )
 
 /**
- *  \brief API to ecall the current state of an element.
+ *  \brief API to recall the current state of an element.
  *
  *  \par Description
  *  Scene Recall is an acknowledged message that is used to recall the current state of an element from a previously stored scene.
  *  The response to the Scene Recall message is a Scene Status message.
  *
- *  \param [in] param Scene Recall message parameter @ref MS_SCENE_RECALL_STRUCT
+ *  \param [in] param Scene Recall message parameter \ref MS_SCENE_RECALL_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -393,12 +458,12 @@ API_RESULT MS_scene_client_send_reliable_pdu
         )
 
 /**
- *  \brief API to ecall the current state of an element.
+ *  \brief API to recall the current state of an element.
  *
  *  \par Description
  *  Scene Recall Unacknowledged is an unacknowledged message used to recall the current state of an element from a previously stored Scene.
  *
- *  \param [in] param Scene Recall message parameter @ref MS_SCENE_RECALL_STRUCT
+ *  \param [in] param Scene Recall message parameter \ref MS_SCENE_RECALL_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -435,7 +500,7 @@ API_RESULT MS_scene_client_send_reliable_pdu
  *  Scene Store is an acknowledged message used to store the current state of an element as a Scene, which can be recalled later.
  *  The response to the Scene Store message is a Scene Register Status message.
  *
- *  \param [in] param Scene Store message parameter @ref MS_SCENE_STRUCT
+ *  \param [in] param Scene Store message parameter \ref MS_SCENE_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -453,7 +518,7 @@ API_RESULT MS_scene_client_send_reliable_pdu
  *  \par Description
  *  Scene Store Unacknowledged is an unacknowledged message used to store the current state of an element as a Scene, which can be recalled later.
  *
- *  \param [in] param Scene Store message parameter @ref MS_SCENE_STRUCT
+ *  \param [in] param Scene Store message parameter \ref MS_SCENE_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -472,7 +537,7 @@ API_RESULT MS_scene_client_send_reliable_pdu
  *  Scene Delete is an acknowledged message used to delete a Scene from the Scene Register state of an element.
  *  The response to the Scene Delete message is a Scene Register Status message.
  *
- *  \param [in] param Scene Delete message parameter @ref MS_SCENE_STRUCT
+ *  \param [in] param Scene Delete message parameter \ref MS_SCENE_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -490,7 +555,7 @@ API_RESULT MS_scene_client_send_reliable_pdu
  *  \par Description
  *  Scene Delete Unacknowledged is an unacknowledged message used to delete a scene from the Scene Register state of an element.
  *
- *  \param [in] param Scene Delete message parameter @ref MS_SCENE_STRUCT
+ *  \param [in] param Scene Delete message parameter \ref MS_SCENE_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -502,8 +567,11 @@ API_RESULT MS_scene_client_send_reliable_pdu
             0xFFFFFFFF\
         )
 /** \} */
+
 /** \} */
+
 /** \} */
+
 /** \} */
 
 #endif /*_H_MS_SCENE_API_ */

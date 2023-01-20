@@ -64,8 +64,8 @@ How to add the driver to your project
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.03
-* GNURX 8.3.0.202004
+* Renesas RX v3.04
+* GNURX 8.3.0.202104
 * ICCRX 4.20.3
 
 File Structure

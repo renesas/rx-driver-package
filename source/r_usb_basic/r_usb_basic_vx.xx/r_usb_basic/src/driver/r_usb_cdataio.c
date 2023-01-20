@@ -44,6 +44,7 @@
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.04.2020 1.31 RX671 is added
  *         : 30.06.2022 1.40 USBX PCDC is supported
+ *         : 30.10.2022 1.41 USBX HMSC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -81,7 +82,9 @@
 #endif /* defined(USB_CFG_PHID_USE) */
 
 #if defined(USB_CFG_HMSC_USE)
+#if (BSP_CFG_RTOS_USED != 5)	/* Azure RTOS */
 #include "r_usb_hmsc.h"
+#endif /* BSP_CFG_RTOS_USED != 5 */
 #endif /* defined(USB_CFG_HMSC_USE) */
 
 #if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))

@@ -50,24 +50,35 @@
  ***********************************************************************/
 e_cellular_err_t R_CELLULAR_SoftwareReset(st_cellular_ctrl_t * const p_ctrl)
 {
+    uint32_t preemption = 0;
     e_cellular_err_t ret = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
-    e_cellular_auto_connect_t type = {CELLULAR_DISABLE_AUTO_CONNECT};
+    e_cellular_auto_connect_t type = CELLULAR_DISABLE_AUTO_CONNECT;
     uint8_t i = 0;
     uint8_t flg = CELLULAR_START_FLG_OFF;
     uint8_t count = 0;
 
+    preemption = cellular_interrupt_disable();
     if (NULL == p_ctrl)
     {
         ret = CELLULAR_ERR_PARAMETER;
     }
     else
     {
-        if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
+        if (0 < (p_ctrl->running_api_count))
+        {
+            ret = CELLULAR_ERR_OTHER_API_RUNNING;
+        }
+        else if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
         {
             ret = CELLULAR_ERR_NOT_OPEN;
         }
+        else
+        {
+            p_ctrl->running_api_count += 1;
+        }
     }
+    cellular_interrupt_enable(preemption);
 
     if (CELLULAR_SUCCESS == ret)
     {
@@ -83,7 +94,7 @@ e_cellular_err_t R_CELLULAR_SoftwareReset(st_cellular_ctrl_t * const p_ctrl)
             ret = atc_sqnautoconnect_check(p_ctrl);
             if (CELLULAR_SUCCESS == ret)
             {
-                ret = atc_cereg(p_ctrl, CELLULAR_ENABLE_NETWORK_RESULT_CODE_LEVEL1);
+                ret = atc_cereg(p_ctrl, CELLULAR_ENABLE_NETWORK_RESULT_CODE_LEVEL2);
             }
             if (CELLULAR_SUCCESS == ret)
             {
@@ -92,12 +103,6 @@ e_cellular_err_t R_CELLULAR_SoftwareReset(st_cellular_ctrl_t * const p_ctrl)
             }
             if (CELLULAR_SUCCESS == ret)
             {
-                p_ctrl->system_state = CELLULAR_SYSTEM_OPEN;
-                if (CELLULAR_ENABLE_AUTO_CONNECT != type)
-                {
-                    p_ctrl->module_status = CELLULAR_MODULE_OPERATING_LEVEL0;
-                }
-
                 ret = CELLULAR_ERR_MODULE_COM;
                 do
                 {
@@ -113,6 +118,10 @@ e_cellular_err_t R_CELLULAR_SoftwareReset(st_cellular_ctrl_t * const p_ctrl)
                     count++;
                 } while (count < CELLULAR_FLG_CHECK_LIMIT);
             }
+            if ((CELLULAR_SUCCESS == ret) && (CELLULAR_DISABLE_AUTO_CONNECT == type))
+            {
+                ret = atc_cfun(p_ctrl, CELLULAR_MODULE_OPERATING_LEVEL4);
+            }
             p_ctrl->recv_data = NULL;
             cellular_give_semaphore(p_ctrl->at_semaphore);
         }
@@ -120,6 +129,8 @@ e_cellular_err_t R_CELLULAR_SoftwareReset(st_cellular_ctrl_t * const p_ctrl)
         {
             ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
         }
+
+        p_ctrl->running_api_count -= 1;
     }
 
     return ret;

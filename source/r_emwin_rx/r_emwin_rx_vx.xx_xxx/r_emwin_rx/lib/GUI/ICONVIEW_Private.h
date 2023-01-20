@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.22 - Graphical user interface for embedded applications **
+** emWin V6.26 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -108,7 +108,7 @@ typedef struct {
   ICONVIEW_OBJ * ICONVIEW_LockH(ICONVIEW_Handle h);
   #define ICONVIEW_LOCK_H(h)   ICONVIEW_LockH(h)
 #else
-  #define ICONVIEW_LOCK_H(h)   (ICONVIEW_OBJ *)GUI_LOCK_H(h)
+  #define ICONVIEW_LOCK_H(h)   (ICONVIEW_OBJ *)WM_LOCK_H(h)
 #endif
 
 /*********************************************************************

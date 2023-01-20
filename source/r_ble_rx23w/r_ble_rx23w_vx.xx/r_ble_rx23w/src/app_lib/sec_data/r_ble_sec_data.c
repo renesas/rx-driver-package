@@ -67,13 +67,8 @@ static ble_status_t read_bond_info(uint8_t * p_out_bond_num, uint8_t ** pp_sec_d
                                    st_ble_gap_bond_info_t * p_bond_info);
 static void release_bond_info_buf(uint8_t * p_sec_data);
 
-#ifdef USE_EXTERNAL_CONTROLLER
-static uint8_t r_dflash_read(uint32_t addr, uint8_t *buff, uint16_t len);
-static uint8_t r_dflash_write(uint32_t addr, uint8_t *buff, uint16_t len);
-#else /* USE_EXTERNAL_CONTROLLER */
 extern uint8_t r_dflash_read(uint32_t addr, uint8_t *buff, uint16_t len);
 extern uint8_t r_dflash_write(uint32_t addr, uint8_t *buff, uint16_t len);
-#endif /* USE_EXTERNAL_CONTROLLER */
 
 
 /***********************************************************************************************************************
@@ -108,12 +103,16 @@ ble_status_t R_BLE_SECD_WriteLocInfo(st_ble_dev_addr_t * p_lc_id_addr, uint8_t *
         return BLE_ERR_INVALID_OPERATION;
     }
 
-    if(NULL != p_lc_irk)
+    if(NULL != p_lc_irk) 
     {
         memcpy((uint8_t *)local_tmp_data + BLE_SECD_MGN_DATA_SIZE, p_lc_irk, BLE_GAP_IRK_SIZE);
+    }
+
+    if(NULL != p_lc_id_addr)
+    {
         memcpy((uint8_t *)local_tmp_data + BLE_SECD_MGN_DATA_SIZE + BLE_GAP_IRK_SIZE + BLE_GAP_CSRK_SIZE, 
-               p_lc_id_addr,
-               BLE_SECD_BD_ADDR_SIZE);
+                p_lc_id_addr,
+                BLE_SECD_BD_ADDR_SIZE);
     }
 
     if(NULL != p_lc_csrk)
@@ -461,6 +460,11 @@ void R_BLE_SECD_DelRemKeys(st_ble_dev_addr_t * p_dev_addr)
     ble_status_t retval;
 
     p_sec_data = malloc(BLE_SECD_MAX_SIZE);
+    if(NULL == p_sec_data)
+    {
+        return;
+    }
+
     retval = r_dflash_read(BLE_SECD_BASE_ADDR, p_sec_data, BLE_SECD_MAX_SIZE);
     if(BLE_SUCCESS != retval)
     {
@@ -768,6 +772,7 @@ static ble_status_t read_bond_info(uint8_t * p_out_bond_num, uint8_t ** pp_sec_d
     uint32_t start_addr;
     uint8_t * p_bonds;
     uint32_t magic_num;
+    ble_status_t retval;
 
     * pp_sec_data = malloc(BLE_SECD_MAX_SIZE);
     p_bonds = * pp_sec_data;
@@ -776,7 +781,12 @@ static ble_status_t read_bond_info(uint8_t * p_out_bond_num, uint8_t ** pp_sec_d
         return BLE_ERR_MEM_ALLOC_FAILED;
     }
 
-    r_dflash_read((uint32_t)BLE_SECD_BASE_ADDR, p_bonds, BLE_SECD_MAX_SIZE);
+    retval = r_dflash_read((uint32_t)BLE_SECD_BASE_ADDR, p_bonds, BLE_SECD_MAX_SIZE);
+    if(BLE_SUCCESS != retval)
+    {
+        free(p_bonds);
+        return BLE_ERR_INVALID_OPERATION;
+    }
 
     /** check magic number and bond number */
     *p_out_bond_num = 0;

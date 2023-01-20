@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_longq
-VERSION = 		1.90
+VERSION = 		2.00
 MDF = V2
 
 CONFIG_FOLDER = r_config

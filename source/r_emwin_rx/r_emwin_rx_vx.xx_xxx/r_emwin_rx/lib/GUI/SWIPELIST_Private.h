@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2021  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.22 - Graphical user interface for embedded applications **
+** emWin V6.26 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -76,6 +76,7 @@ typedef struct {
   GUI_COLOR        aBkColor[4];
   int              BitmapSpace;
   int              aBorderSize[4];
+  int              Period;
   U8               Flags;
   int              Threshold;
   unsigned         Overlap;
@@ -92,7 +93,15 @@ typedef struct {
   int                     LastVisible;
   int                     Sel;
   int                     ReleasedItem;
+  GUI_TIMER_HANDLE        hTimer;
+  GUI_HMEM                hTimerContext;
+  WM_HMEM                 hContext;       // Motion context.
 } SWIPELIST_OBJ;
+
+typedef struct {
+  SWIPELIST_Handle hObj;
+  int              NewSel;
+} SWIPELIST_TIMER_CONTEXT;
 
 /*********************************************************************
 *
@@ -110,8 +119,20 @@ typedef struct {
   SWIPELIST_OBJ * SWIPELIST_LockH(SWIPELIST_Handle h);
   #define SWIPELIST_LOCK_H(h)   SWIPELIST_LockH(h)
 #else
-  #define SWIPELIST_LOCK_H(h)   (SWIPELIST_OBJ *)GUI_LOCK_H(h)
+  #define SWIPELIST_LOCK_H(h)   (SWIPELIST_OBJ *)WM_LOCK_H(h)
 #endif
+
+/*********************************************************************
+*
+*       Defines
+*
+**********************************************************************
+*/
+//
+// WM_MOTION_OVERLAP... flags are stored in the upper two bits of Props.Flags
+//
+#define OVERLAP_FLAG_SHIFT     6
+#define OVERLAP_FLAG_MASK      ((WM_MOTION_OVERLAP_TOP | WM_MOTION_OVERLAP_BOTTOM) << OVERLAP_FLAG_SHIFT)
 
 /*********************************************************************
 *

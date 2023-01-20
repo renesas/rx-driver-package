@@ -48,7 +48,8 @@
 *              :                     Fixed coding style. 
 *              : 30.07.2019 1.13     Added RX72M.
 *              : 22.11.2019 1.14     Added RX72N and RX66N.
-*              : 30.09.2021 1.15     Changed Minor version to 1.15.
+*              : 30.09.2021 1.15     Changed Minor version to 1.15
+*              : 30.09.2022 1.20     Added new demo projects.
 *******************************************************************************/
 #ifndef QSPI_SMSTR_IF_H_
 #define QSPI_SMSTR_IF_H_
@@ -68,7 +69,7 @@ Macro definitions
 #endif
 
 #define QSPI_SMSTR_VERSION_MAJOR      (1)
-#define QSPI_SMSTR_VERSION_MINOR      (15)
+#define QSPI_SMSTR_VERSION_MINOR      (20)
 
 
 /*******************************************************************************

@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer 
  *
- * Copyright (C) 2013(2021) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_riic_rx_if.h
@@ -64,6 +64,7 @@
  *         : 30.06.2021 2.48     Changed minor version to '48' for RX671 support.
  *         : 31.07.2021 2.49     Changed minor version to '49' for RX140 support.
  *         : 31.12.2021 2.50     Changed minor version to '50' for RX660 support.
+ *         : 16.12.2022 2.60     Fixed processing error of riic_bsp_calc.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIIC_IF_H
@@ -86,7 +87,7 @@ R_BSP_PRAGMA_UNPACK
 
 /* Version Number of API. */
     #define RIIC_VERSION_MAJOR      (2)
-    #define RIIC_VERSION_MINOR      (50)
+    #define RIIC_VERSION_MINOR      (60)
 
 /*----------------------------------------------------------------------------*/
 /*   Defines the argument of the R_RIIC_Control function.                     */

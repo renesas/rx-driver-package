@@ -22,9 +22,10 @@
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
-*              : 15.06.2016 2.00     First Release
-*              : 01.10.2016 2.10     Deleted Tool-Chain version.
-*              : 19.12.2016 2.20     Deleted unnecessary header information.
+*              : 15.06.2016 1.00     First Release
+*              : 01.10.2016 1.10     Deleted Tool-Chain version.
+*              : 19.12.2016 1.20     Deleted unnecessary header information.
+*              : 12.12.2022 1.30     Fixed condition of the voltage detection level for RX130 channel 2.
 ***********************************************************************************************************************/
 #ifndef LVD_RX130_HEADER_FILE
 #define LVD_RX130_HEADER_FILE
@@ -107,11 +108,7 @@ Macro definitions
 #endif
 
 #if (LVD_CFG_VOLTAGE_LEVEL_CHANNEL_2 == 429)
-#if (LVD_CFG_VDET_TARGET_CHANNEL_2 == LVD_VDET_TARGET_CMPA)
     #define LVD_VOLTAGE_LEVEL_VALUE_CH2         (0)
-#else
-    #define LVD_VOLTAGE_LEVEL_VALUE_CH2         (LVD_INVALID_VALUE)
-#endif
 #elif (LVD_CFG_VOLTAGE_LEVEL_CHANNEL_2 == 414)
     #define LVD_VOLTAGE_LEVEL_VALUE_CH2         (1)
 #elif (LVD_CFG_VOLTAGE_LEVEL_CHANNEL_2 == 402)
@@ -119,11 +116,7 @@ Macro definitions
 #elif (LVD_CFG_VOLTAGE_LEVEL_CHANNEL_2 == 384)
     #define LVD_VOLTAGE_LEVEL_VALUE_CH2         (3)
 #elif (LVD_CFG_VOLTAGE_LEVEL_CHANNEL_2 == LVD_DEFAULT_VALUE)
-#if (LVD_CFG_VDET_TARGET_CHANNEL_2 == LVD_VDET_TARGET_CMPA)
     #define LVD_VOLTAGE_LEVEL_VALUE_CH2         (LVD_VOLTAGE_LEVEL_DEFAULT_VALUE_CH2)
-#else
-    #define LVD_VOLTAGE_LEVEL_VALUE_CH2         (LVD_INVALID_VALUE)
-#endif
 #else
     #define LVD_VOLTAGE_LEVEL_VALUE_CH2         (LVD_INVALID_VALUE)
 #endif
