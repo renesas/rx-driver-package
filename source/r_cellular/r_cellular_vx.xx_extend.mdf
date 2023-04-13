@@ -53,11 +53,11 @@ Example: (empty), 0000, etc.</description>
 4: For a UE that wants to apply PSM, enable network registration and location information unsolicited result code.
 5: For a UE that wants to apply PSM, enable network registration, location information and EMM cause value information unsolicited result code.</description>
         </property>
-        <property id="CELLULAR_CFG_ATC_RETRY_GATT" display="Connection retry limit" default="100" type="textbox">
-            <constraint display="Value must be an integer" actionOnFail="disable">testInteger("${CELLULAR_CFG_ATC_RETRY_GATT}")</constraint>
-            <constraint display="Value must be in the range 0 ~ 100" actionOnFail="error">("${CELLULAR_CFG_ATC_RETRY_GATT}" &gt;= 0) &amp;&amp; ("${CELLULAR_CFG_ATC_RETRY_GATT}" &lt;= 100)</constraint>
+        <property id="CELLULAR_CFG_ATC_RETRY_CGATT" display="Connection retry limit" default="600" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="disable">testInteger("${CELLULAR_CFG_ATC_RETRY_CGATT}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 65535" actionOnFail="error">("${CELLULAR_CFG_ATC_RETRY_CGATT}" &gt;= 0) &amp;&amp; ("${CELLULAR_CFG_ATC_RETRY_CGATT}" &lt;= 65535)</constraint>
             <description>Connection retry limit to access point.
-Set between 0~100.</description>
+Set between 0~65535.</description>
         </property>
         <property id="CELLULAR_CFG_EX_TIMEOUT" display="TCP connection timeout" default="0" type="textbox">
             <constraint display="Value must be an integer" actionOnFail="disable">testInteger("${CELLULAR_CFG_EX_TIMEOUT}")</constraint>
@@ -94,6 +94,12 @@ Set between 0~10000.</description>
             <constraint display="Value must be in the range 1000 ~ 5000" actionOnFail="error">("${CELLULAR_CFG_RING_LINE_ACTIVE_TIME}" &gt;= 1000) &amp;&amp; ("${CELLULAR_CFG_RING_LINE_ACTIVE_TIME}" &lt;= 5000)</constraint>
             <description>RING line active duration.(msec)
 Set between 1000~5000.</description>
+        </property>
+        <property id="CELLULAR_CFG_UPGRADE_TIME" display="Maximum FW update latency" default="60" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="disable">testInteger("${CELLULAR_CFG_UPGRADE_TIME}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 600" actionOnFail="error">("${CELLULAR_CFG_UPGRADE_TIME}" &gt;= 1) &amp;&amp; ("${CELLULAR_CFG_UPGRADE_TIME}" &lt;= 600)</constraint>
+            <description>Maximum FW update latency.(min)
+Set between 1~600.</description>
         </property>
             <property id="CELLULAR_CFG_URC_CHARGET_ENABLED" display="Enable user-defined URC charget functions" default="0" type="combobox">
             <option id="CELLULAR_CFG_URC_CHARGET_ENABLED.0" display="Disable" value="0"/>

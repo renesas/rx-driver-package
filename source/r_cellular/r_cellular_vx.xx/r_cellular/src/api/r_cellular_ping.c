@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_ping.c
@@ -50,20 +50,28 @@
 e_cellular_err_t R_CELLULAR_Ping(st_cellular_ctrl_t * const p_ctrl, const uint8_t * const p_host,
                                     const st_cellular_ping_cfg_t * const p_cfg)
 {
-    uint32_t preemption = 0;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
+    uint32_t                   preemption    = 0;
+    e_cellular_err_t           ret           = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
 
     preemption = cellular_interrupt_disable();
-    if ((NULL == p_ctrl) || (NULL == p_host) ||
-            ((NULL != p_cfg) && ((p_cfg->count < CELLULAR_PING_REQ_MIN) || (p_cfg->count > CELLULAR_PING_REQ_MAX) ||
-            (p_cfg->len < CELLULAR_PING_MES_MIN) || (p_cfg->len > CELLULAR_PING_MES_MAX) ||
-            (p_cfg->interval < CELLULAR_PING_INTER_MIN) || (p_cfg->interval > CELLULAR_PING_INTER_MIN) ||
-            (p_cfg->timeout < CELLULAR_PING_TIMEOUT_MIN) || (p_cfg->timeout > CELLULAR_PING_TIMEOUT_MAX))))
+    if ((NULL == p_ctrl) || (NULL == p_host))
     {
         ret = CELLULAR_ERR_PARAMETER;
     }
-    else
+
+    if ((CELLULAR_SUCCESS == ret) && (NULL != p_cfg))
+    {
+        if (((p_cfg->count < CELLULAR_PING_REQ_MIN) || (p_cfg->count > CELLULAR_PING_REQ_MAX) ||
+            (p_cfg->len < CELLULAR_PING_MES_MIN) || (p_cfg->len > CELLULAR_PING_MES_MAX) ||
+            (p_cfg->interval < CELLULAR_PING_INTER_MIN) || (p_cfg->interval > CELLULAR_PING_INTER_MAX) ||
+            (p_cfg->timeout < CELLULAR_PING_TIMEOUT_MIN) || (p_cfg->timeout > CELLULAR_PING_TIMEOUT_MAX)))
+        {
+            ret = CELLULAR_ERR_PARAMETER;
+        }
+    }
+
+    if (CELLULAR_SUCCESS == ret)
     {
         if (0 != (p_ctrl->running_api_count % 2))
         {
@@ -96,7 +104,6 @@ e_cellular_err_t R_CELLULAR_Ping(st_cellular_ctrl_t * const p_ctrl, const uint8_
         {
             ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
         }
-
         p_ctrl->running_api_count -= 2;
     }
 

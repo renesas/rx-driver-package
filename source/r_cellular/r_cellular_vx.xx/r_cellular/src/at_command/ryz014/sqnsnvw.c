@@ -14,11 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
- * File Name    : sqnssendext.c
- * Description  : Function to execute the AT command (SQNSSENDEXT).
+ * File Name    : sqnsnvw.c
+ * Description  : Function to execute the AT command (SQNSNVW).
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -43,15 +43,15 @@
  * Private (static) variables and functions
  *********************************************************************************************************************/
 
-#if (CELLULAR_IMPLEMENT_TYPE == 'B')
 /*************************************************************************************************
  * Function Name  @fn            atc_sqnsnvw
  ************************************************************************************************/
 e_cellular_err_t atc_sqnsnvw(st_cellular_ctrl_t * const p_ctrl, const e_cellular_nvm_type_t data_type, 
                                     const uint8_t index, const uint32_t size)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    uint8_t str[3][12] = {0};
+    uint8_t          str[3][12]                            = {0};
+    const uint8_t *  p_command_arg[CELLULAR_MAX_ARG_COUNT] = {0};
+    e_cellular_err_t ret                                   = CELLULAR_SUCCESS;
 
     if (CELLULAR_NVM_TYPE_CERTIFICATE == data_type)
     {
@@ -61,14 +61,14 @@ e_cellular_err_t atc_sqnsnvw(st_cellular_ctrl_t * const p_ctrl, const e_cellular
     {
         strcpy((char *)&str[0][0], "privatekey"); //(uint8_t[])->(char *)
     }
-    sprintf((char *)str[1], "%d", index);   // (uint8_t *)->(char *)
-    sprintf((char *)str[2], "%d", size);      // (uint8_t *)->(char *)
+    sprintf((char *)str[1], "%d", index);       // (uint8_t *)->(char *)
+    sprintf((char *)str[2], "%d", size);        // (uint8_t *)->(char *)
 
-    const uint8_t * const p_command_arg[CELLULAR_MAX_ARG_COUNT] = {str[0], str[1], str[2]};
+    p_command_arg[0] = str[0];
+    p_command_arg[1] = str[1];
+    p_command_arg[2] = str[2];
 
-    atc_generate(p_ctrl->sci_ctrl.atc_buff,
-            (const uint8_t *)&gp_at_command[ATC_WRITE_CERTIFICATE][0], // (const uint8_t *const *)->(const uint8_t **)
-                (const uint8_t **)&p_command_arg);                // (const uint8_t *const *)->(const uint8_t **)
+    atc_generate(p_ctrl->sci_ctrl.atc_buff, gp_at_command[ATC_WRITE_CERTIFICATE], p_command_arg);
 
     ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout,
             ATC_RETURN_OK_GO_SEND, ATC_WRITE_CERTIFICATE);
@@ -85,24 +85,24 @@ e_cellular_err_t atc_sqnsnvw(st_cellular_ctrl_t * const p_ctrl, const e_cellular
 e_cellular_err_t atc_sqnsnvw_erase(st_cellular_ctrl_t * const p_ctrl, const e_cellular_nvm_type_t data_type,
                                     const uint8_t index)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    uint8_t str[2][12] = {0};
+    uint8_t          str[2][12]                            = {0};
+    const uint8_t *  p_command_arg[CELLULAR_MAX_ARG_COUNT] = {0};
+    e_cellular_err_t ret                                   = CELLULAR_SUCCESS;
 
     if (CELLULAR_NVM_TYPE_CERTIFICATE == data_type)
     {
-        strcpy((char *)&str[0][0], "certificate"); //(uint8_t[])->(char *)
+        strcpy((char *)&str[0][0], "certificate");  // (uint8_t[])->(char *)
     }
     else
     {
-        strcpy((char *)&str[0][0], "privatekey"); //(uint8_t[])->(char *)
+        strcpy((char *)&str[0][0], "privatekey");   // (uint8_t[])->(char *)
     }
-    sprintf((char *)str[1], "%d", index);   // (uint8_t *)->(char *)
+    sprintf((char *)str[1], "%d", index);           // (uint8_t *)->(char *)
 
-    const uint8_t * const p_command_arg[CELLULAR_MAX_ARG_COUNT] = {str[0], str[1]};
+    p_command_arg[0] = str[0];
+    p_command_arg[1] = str[1];
 
-    atc_generate(p_ctrl->sci_ctrl.atc_buff,
-            (const uint8_t *)&gp_at_command[ATC_ERASE_CERTIFICATE][0], // (const uint8_t *const *)->(const uint8_t **)
-                (const uint8_t **)&p_command_arg);                // (const uint8_t *const *)->(const uint8_t **)
+    atc_generate(p_ctrl->sci_ctrl.atc_buff, gp_at_command[ATC_ERASE_CERTIFICATE], p_command_arg);
 
     ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_ERASE_CERTIFICATE);
 
@@ -111,4 +111,3 @@ e_cellular_err_t atc_sqnsnvw_erase(st_cellular_ctrl_t * const p_ctrl, const e_ce
 /**********************************************************************************************************************
  * End of function atc_sqnsnvw_erase
  *********************************************************************************************************************/
-#endif /* (CELLULAR_IMPLEMENT_TYPE == 'B') */

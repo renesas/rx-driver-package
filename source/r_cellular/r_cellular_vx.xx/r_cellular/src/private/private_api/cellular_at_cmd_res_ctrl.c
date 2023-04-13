@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_at_cmd_res_ctrl.c
@@ -48,7 +48,7 @@
 void cellular_set_atc_number(st_cellular_ctrl_t * const p_ctrl, const e_atc_list_t command)
 {
     p_ctrl->sci_ctrl.at_command = command;
-    p_ctrl->sci_ctrl.atc_flg = CELLULAR_ATC_RESPONSE_UNCONFIRMED;
+    p_ctrl->sci_ctrl.atc_flg    = CELLULAR_ATC_RESPONSE_UNCONFIRMED;
     return;
 }
 /**********************************************************************************************************************

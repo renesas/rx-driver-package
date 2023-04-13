@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : sqnipscfg.c
@@ -48,16 +48,15 @@
  ************************************************************************************************/
 e_cellular_err_t atc_sqnpscfg(st_cellular_ctrl_t * const p_ctrl)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    uint8_t str[6] = {0};
+    uint8_t          str[6]                                = {0};
+    const uint8_t *  p_command_arg[CELLULAR_MAX_ARG_COUNT] = {0};
+    e_cellular_err_t ret                                   = CELLULAR_SUCCESS;
 
     sprintf((char *)str, "%d", CELLULAR_CFG_PSM_WAKEUP_LATENCY); // (uint8_t *)->(char *)
 
-    const uint8_t * const p_command_arg[CELLULAR_MAX_ARG_COUNT] = {str};
+    p_command_arg[0] = str;
 
-    atc_generate(p_ctrl->sci_ctrl.atc_buff,
-        (const uint8_t *)&gp_at_command[ATC_SET_PSM_CONFIG][0], // (const uint8_t * const *)->(const uint8_t **)
-            (const uint8_t **)&p_command_arg);                  // (const uint8_t * const *)->(const uint8_t **)
+    atc_generate(p_ctrl->sci_ctrl.atc_buff, gp_at_command[ATC_SET_PSM_CONFIG], p_command_arg);
 
     ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_SET_PSM_CONFIG);
 

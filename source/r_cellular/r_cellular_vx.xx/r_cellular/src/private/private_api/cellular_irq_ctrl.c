@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_irq_ctrl.c
@@ -54,8 +54,8 @@ static void cellular_ring_callback (void * const p_Args);
  *********************************************************************************************/
 e_cellular_err_t cellular_irq_open(st_cellular_ctrl_t * const p_ctrl)
 {
-    e_cellular_err_t    ret = CELLULAR_SUCCESS;
-    irq_err_t           irq_ret = IRQ_SUCCESS;
+    irq_err_t        irq_ret = IRQ_SUCCESS;
+    e_cellular_err_t ret     = CELLULAR_SUCCESS;
 
     irq_ret = R_IRQ_Open((irq_number_t)CELLULAR_CFG_IRQ_NUM,    //cast
                             IRQ_TRIG_FALLING,
@@ -96,9 +96,10 @@ void cellular_irq_close(st_cellular_ctrl_t * const p_ctrl)
  **********************************************************************************************/
 static void cellular_ring_callback(void * const p_Args)
 {
+    (void)p_Args;
 #if BSP_CFG_RTOS_USED == (1)
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    int32_t xHigherPriorityTaskWoken = 0;
+    int32_t          xHigherPriorityTaskWoken = 0;
+    e_cellular_err_t ret                      = CELLULAR_SUCCESS;
 
     ret = cellular_set_event_flg(gp_cellular_ctrl->ring_ctrl.ring_event,
                                     CELLULAR_RING_EVENT,
@@ -136,47 +137,54 @@ void cellular_ring_task(ULONG p_pvParameters)
     st_cellular_ctrl_t * const p_ctrl = gp_cellular_ctrl;
 #endif
     st_cellular_time_ctrl_t * const p_timeout_ctrl = &p_ctrl->ring_ctrl.timeout;
-    e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
-    e_cellular_timeout_check_t timeout = CELLULAR_NOT_TIMEOUT;
+    e_cellular_err_semaphore_t      semaphore_ret  = CELLULAR_SEMAPHORE_SUCCESS;
+    e_cellular_timeout_check_t      timeout        = CELLULAR_NOT_TIMEOUT;
 
     while (1)
     {
-        cellular_get_event_flg(p_ctrl->ring_ctrl.ring_event,
-                                CELLULAR_RING_EVENT,
-                                CELLULAR_TIME_OUT_MAX_DELAY);
+        if (NULL != p_ctrl->ring_ctrl.ring_event)
+        {
+            cellular_get_event_flg(p_ctrl->ring_ctrl.ring_event,
+                                    CELLULAR_RING_EVENT,
+                                    CELLULAR_TIME_OUT_MAX_DELAY);
 
-        cellular_timeout_init(p_timeout_ctrl, CELLULAR_CFG_RING_LINE_ACTIVE_TIME);
+            cellular_timeout_init(p_timeout_ctrl, CELLULAR_CFG_RING_LINE_ACTIVE_TIME);
 #if CELLULAR_CFG_CTS_SW_CTRL == 1
-        cellular_rts_hw_flow_enable();
+            cellular_rts_hw_flow_enable();
 #else
-        cellular_rts_ctrl(0);
+            cellular_rts_ctrl(0);
 #endif
 
-        while (1)
-        {
-            timeout = cellular_check_timeout(p_timeout_ctrl);
-            if (CELLULAR_TIMEOUT == timeout)
+            while (1)
             {
-                break;
+                timeout = cellular_check_timeout(p_timeout_ctrl);
+                if (CELLULAR_TIMEOUT == timeout)
+                {
+                    break;
+                }
+            }
+
+            while (1)
+            {
+                semaphore_ret = cellular_take_semaphore(p_ctrl->ring_ctrl.rts_semaphore);
+                if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
+                {
+#if CELLULAR_CFG_CTS_SW_CTRL == 1
+                    cellular_rts_hw_flow_disable();
+#endif
+                    cellular_rts_ctrl(1);
+                    cellular_give_semaphore(p_ctrl->ring_ctrl.rts_semaphore);
+                    break;
+                }
+                else
+                {
+                    cellular_delay_task(1);
+                }
             }
         }
-
-        while (1)
+        else
         {
-            semaphore_ret = cellular_take_semaphore(p_ctrl->ring_ctrl.rts_semaphore);
-            if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
-            {
-#if CELLULAR_CFG_CTS_SW_CTRL == 1
-                cellular_rts_hw_flow_disable();
-#endif
-                cellular_rts_ctrl(1);
-                cellular_give_semaphore(p_ctrl->ring_ctrl.rts_semaphore);
-                break;
-            }
-            else
-            {
-                cellular_delay_task(1);
-            }
+            cellular_delay_task(1);
         }
     }
 }

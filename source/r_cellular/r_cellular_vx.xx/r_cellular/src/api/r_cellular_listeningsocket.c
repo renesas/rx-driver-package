@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_listeningsocket.c
@@ -50,8 +50,8 @@
 e_cellular_err_t R_CELLULAR_ListeningSocket(st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_no,
                                                 const uint8_t ip_version, const uint16_t port)
 {
-    uint32_t preemption = 0;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
+    uint32_t                   preemption    = 0;
+    e_cellular_err_t           ret           = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
 
     preemption = cellular_interrupt_disable();
@@ -106,7 +106,6 @@ e_cellular_err_t R_CELLULAR_ListeningSocket(st_cellular_ctrl_t * const p_ctrl, c
         {
             ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
         }
-
         p_ctrl->running_api_count -= 2;
     }
 

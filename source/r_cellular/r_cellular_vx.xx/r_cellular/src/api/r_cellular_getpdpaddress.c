@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_getpdpaddress.c
@@ -49,10 +49,10 @@
  ***********************************************************************/
 e_cellular_err_t R_CELLULAR_GetPDPAddress(st_cellular_ctrl_t * const p_ctrl, st_cellular_ipaddr_t * const p_addr)
 {
-    uint8_t pdpaddr[70] = {0};
-    uint32_t preemption = 0;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
+    uint8_t                    pdpaddr[CELLULAR_PDP_ADDR_LENGTH+1] = {0};
+    uint32_t                   preemption                          = 0;
+    e_cellular_err_t           ret                                 = CELLULAR_SUCCESS;
+    e_cellular_err_semaphore_t semaphore_ret                       = CELLULAR_SEMAPHORE_SUCCESS;
 
     preemption = cellular_interrupt_disable();
     if ((NULL == p_ctrl) || (NULL == p_addr))
@@ -88,7 +88,7 @@ e_cellular_err_t R_CELLULAR_GetPDPAddress(st_cellular_ctrl_t * const p_ctrl, st_
         if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
         {
             p_ctrl->recv_data = pdpaddr;
-            ret = atc_cgpaddr(p_ctrl);
+            ret               = atc_cgpaddr(p_ctrl);
             if (CELLULAR_SUCCESS == ret)
             {
                 cellular_getpdpaddr(p_ctrl, p_addr);
@@ -100,7 +100,6 @@ e_cellular_err_t R_CELLULAR_GetPDPAddress(st_cellular_ctrl_t * const p_ctrl, st_
         {
             ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
         }
-
         p_ctrl->running_api_count -= 2;
     }
 

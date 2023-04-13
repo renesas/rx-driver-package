@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : sqnsscfg.c
@@ -42,7 +42,6 @@
 /**********************************************************************************************************************
  * Private (static) variables and functions
  *********************************************************************************************************************/
-
 #if (CELLULAR_IMPLEMENT_TYPE == 'B')
 /*************************************************************************************************
  * Function Name  @fn            atc_sqnsscfg
@@ -52,19 +51,19 @@ e_cellular_err_t atc_sqnsscfg(st_cellular_ctrl_t * const p_ctrl,
                                     const e_cellular_ssl_active_t active,
                                     const uint8_t security_profile_id)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    uint8_t str[3][3] = {0};
+    uint8_t          str[3][3]                             = {0};
+    const uint8_t *  p_command_arg[CELLULAR_MAX_ARG_COUNT] = {0};
+    e_cellular_err_t ret                                   = CELLULAR_SUCCESS;
 
     sprintf((char *)str[0], "%d", socket_no);    // (uint8_t *)->(char *)
     sprintf((char *)str[1], "%d", active);       // (uint8_t *)->(char *)
     sprintf((char *)str[2], "%d", security_profile_id);        // (uint8_t *)->(char *)
 
-    const uint8_t * const p_command_arg[CELLULAR_MAX_ARG_COUNT] =
-                            {str[0], str[1], str[2]};
+    p_command_arg[0] = str[0];
+    p_command_arg[1] = str[1];
+    p_command_arg[2] = str[2];
 
-    atc_generate(p_ctrl->sci_ctrl.atc_buff,
-        (const uint8_t *)&gp_at_command[ATC_CONFIG_SSL_SOCKET][0], // (const uint8_t *const *)->(const uint8_t **)
-            (const uint8_t **)&p_command_arg);                     // (const uint8_t *const *)->(const uint8_t **)
+    atc_generate(p_ctrl->sci_ctrl.atc_buff, gp_at_command[ATC_CONFIG_SSL_SOCKET], p_command_arg);
 
     ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_CONFIG_SSL_SOCKET);
 
@@ -73,4 +72,4 @@ e_cellular_err_t atc_sqnsscfg(st_cellular_ctrl_t * const p_ctrl,
 /**********************************************************************************************************************
  * End of function atc_sqnsscfg
  *********************************************************************************************************************/
-#endif /* (CELLULAR_IMPLEMENT_TYPE == 'B') */
+#endif /* CELLULAR_IMPLEMENT_TYPE == 'B' */

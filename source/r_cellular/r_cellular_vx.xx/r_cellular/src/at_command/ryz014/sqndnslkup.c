@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : sqndnslkup.c
@@ -49,23 +49,23 @@
 e_cellular_err_t atc_sqndnslkup(st_cellular_ctrl_t * const p_ctrl, const uint8_t * const p_domain_name,
                                     const uint8_t ip_version)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    uint8_t str[2] = {0};
+    uint8_t          str[2]                                = {0};
+    const uint8_t *  p_command_arg[CELLULAR_MAX_ARG_COUNT] = {0};
+    e_cellular_err_t ret                                   = CELLULAR_SUCCESS;
 
     if (CELLULAR_PROTOCOL_IPV4 == ip_version)
     {
-        sprintf((char *)str, "%d", 0);   // (&uint8_t[])->(char *)
+        sprintf((char *)str, "%d", 0);   // (uint8_t[])->(char *)
     }
     else
     {
-        sprintf((char *)str, "%d", 1);   // (&uint8_t[])->(char *)
+        sprintf((char *)str, "%d", 1);   // (uint8_t[])->(char *)
     }
 
-    const uint8_t * const p_command_arg[CELLULAR_MAX_ARG_COUNT] = {p_domain_name, str};
+    p_command_arg[0] = (uint8_t *)p_domain_name;    //(const uint8_t *)->(uint8_t *)
+    p_command_arg[1] = str;
 
-    atc_generate(p_ctrl->sci_ctrl.atc_buff,
-        (const uint8_t *)&gp_at_command[ATC_DNS_LOOKUP][0], // (const uint8_t *const *)->(const uint8_t **)
-            (const uint8_t **)&p_command_arg);              // (const uint8_t *const *)->(const uint8_t **)
+    atc_generate(p_ctrl->sci_ctrl.atc_buff, gp_at_command[ATC_DNS_LOOKUP], p_command_arg);
 
     ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_DNS_LOOKUP);
 

@@ -14,15 +14,12 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_private.h
  * Description  : Configures the driver.
  *********************************************************************************************************************/
-
-#ifndef CELLULAR_PRIVATE_H
-#define CELLULAR_PRIVATE_H
 
 /**********************************************************************************************************************
  * Includes   <System Includes> , "Project Includes"
@@ -38,6 +35,9 @@
 
 #include "r_cellular_config.h"
 
+#ifndef CELLULAR_PRIVATE_H
+#define CELLULAR_PRIVATE_H
+
 /**********************************************************************************************************************
  * Macro definitions
  *********************************************************************************************************************/
@@ -49,11 +49,11 @@
 #define CELLULAR_ATC_BUFF_SIZE              (300)
 #define CELLULAR_ATC_RESPONSE_BUFF_SIZE     (2048)
 
-#define CELLULAR_MAIN_TASK_BIT              (0x01 << 1)
-#define CELLULAR_RECV_TASK_BIT              (0x01 << 2)
+#define CELLULAR_MAIN_TASK_BIT              (0x01u << 1)
+#define CELLULAR_RECV_TASK_BIT              (0x01u << 2)
 
-#define CELLULAR_TIME_WAIT_TASK_START       (10000)
-#define CELLULAR_TIME_OUT_MAX_DELAY         (0xffffffff)
+#define CELLULAR_TIME_WAIT_TASK_START       (10000u)
+#define CELLULAR_TIME_OUT_MAX_DELAY         (0xffffffffu)
 
 #define CELLULAR_MAX_AP_NAME_LENGTH         (64)
 #define CELLULAR_MAX_AP_ID_LENGTH           (32)
@@ -74,13 +74,21 @@
 #define CELLULAR_SVN_USELESS_CHAR           (5)
 #define CELLULAR_MAX_REVISION_LENGTH        (9)
 #define CELLULAR_REVISION_USELESS_CHAR      (2)
+#define CELLULAR_MAX_LR_SVN_LENGTH          (15)
+#define CELLULAR_LR_SVN_USELESS_CHAR        (2)
 #define CELLULAR_MAX_CTM_LENGTH             (20)
 #define CELLULAR_CTM_USELESS_CHAR           (5)
 #define CELLULAR_IPV4_ADDR_LENGTH           (15)
 #define CELLULAR_IPV6_ADDR_LENGTH           (39)
+#define CELLULAR_UPDATE_STATE_LENGTH        (50)
+#define CELLULAR_DNS_LENGTH                 (49)
+#define CELLULAR_CPIN_STATUS_LENGTH         (14)
+#define CELLULAR_PDP_ADDR_LENGTH            (69)
+#define CELLULAR_GET_UPDATE_STATE           "GET"
 
-#define CELLULAR_START_FLG_OFF              (0)
-#define CELLULAR_START_FLG_ON               (1)
+#define CELLULAR_FLG_OFF                    (0u)
+#define CELLULAR_FLG_START                  (0x01u << 0)
+#define CELLULAR_FLG_SHUTDOWN               (0x01u << 1)
 
 /* Convert a macro value to a string */
 #define CELLULAR_STRING_MACRO(str)          #str
@@ -119,14 +127,17 @@
 #define CELLULAR_PIN_DIRECTION_MODE_OUTPUT     (1)
 
 #if SCI_CFG_TEI_INCLUDED == (0)
-#error "The r_cellular requires TEI to be enabled, i.e., SCI_CFG_TEI_INCLUDED is set to (1). Please confirm r_sci_rx settings, /smc_gen/r_config/r_sci_rx_config.h."
+#error "The r_cellular requires TEI to be enabled, i.e., SCI_CFG_TEI_INCLUDED is set to (1).\
+Please confirm r_sci_rx settings, /smc_gen/r_config/r_sci_rx_config.h."
 #endif
 
 #if BSP_CFG_RTOS_USED == (1)
-/* The r_cellular requires configTICK_RATE_HZ is 1000, RTOS tick interrupt cycle should be 1ms. Please configure the value. */
+/* The r_cellular requires configTICK_RATE_HZ is 1000,
+ * RTOS tick interrupt cycle should be 1ms. Please configure the value. */
 #elif BSP_CFG_RTOS_USED == (5)
 #if TX_TIMER_TICKS_PER_SECOND != (1000)
-#error "The r_cellular requires TX_TIMER_TICKS_PER_SECOND is 1000, RTOS tick interrupt cycle should be 1ms. Please configure the value."
+#error "The r_cellular requires TX_TIMER_TICKS_PER_SECOND is 1000,\
+RTOS tick interrupt cycle should be 1ms. Please configure the value."
 #endif
 #endif
 

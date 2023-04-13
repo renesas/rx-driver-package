@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cclk.c
@@ -48,8 +48,9 @@
  ************************************************************************************************/
 e_cellular_err_t atc_cclk(st_cellular_ctrl_t * const p_ctrl, const st_cellular_datetime_t * const p_time)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    uint8_t str[CELLULAR_MAX_ARG_COUNT][10] = {0};
+    uint8_t          str[CELLULAR_MAX_ARG_COUNT][10]       = {0};
+    const uint8_t *  p_command_arg[CELLULAR_MAX_ARG_COUNT] = {0};
+    e_cellular_err_t ret                                   = CELLULAR_SUCCESS;
 
     sprintf((char *)str[0], "%02d", p_time->year);      // (uint8_t *)->(char *)
     sprintf((char *)str[1], "%02d", p_time->month);     // (uint8_t *)->(char *)
@@ -59,12 +60,15 @@ e_cellular_err_t atc_cclk(st_cellular_ctrl_t * const p_ctrl, const st_cellular_d
     sprintf((char *)str[5], "%02d", p_time->sec);       // (uint8_t *)->(char *)
     sprintf((char *)str[6], "%+03d", p_time->timezone); // (uint8_t *)->(char *)
 
-    const uint8_t * const p_command_arg[CELLULAR_MAX_ARG_COUNT] =
-                            {str[0], str[1], str[2], str[3], str[4], str[5], str[6]};
+    p_command_arg[0] = str[0];
+    p_command_arg[1] = str[1];
+    p_command_arg[2] = str[2];
+    p_command_arg[3] = str[3];
+    p_command_arg[4] = str[4];
+    p_command_arg[5] = str[5];
+    p_command_arg[6] = str[6];
 
-    atc_generate(p_ctrl->sci_ctrl.atc_buff,
-        (const uint8_t *)&gp_at_command[ATC_SET_TIME][0],   // (const uint8_t *const *)->(const uint8_t **)
-            (const uint8_t **)&p_command_arg);              // (const uint8_t *const *)->(const uint8_t **)
+    atc_generate(p_ctrl->sci_ctrl.atc_buff, gp_at_command[ATC_SET_TIME], p_command_arg);
 
     ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_SET_TIME);
 
@@ -81,9 +85,7 @@ e_cellular_err_t atc_cclk_check(st_cellular_ctrl_t * const p_ctrl)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
 
-    atc_generate(p_ctrl->sci_ctrl.atc_buff,
-        (const uint8_t *)&gp_at_command[ATC_GET_TIME][0], // (const uint8_t *const *)->(const uint8_t **)
-            NULL);
+    atc_generate(p_ctrl->sci_ctrl.atc_buff, gp_at_command[ATC_GET_TIME], NULL);
 
     ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_GET_TIME);
 

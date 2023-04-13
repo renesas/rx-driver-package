@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_dnsquery.c
@@ -52,11 +52,11 @@ static void cellular_getip (st_cellular_ctrl_t * const p_ctrl, const uint8_t ip_
 e_cellular_err_t R_CELLULAR_DnsQuery(st_cellular_ctrl_t * const p_ctrl, const uint8_t * const p_domain_name,
                                         const uint8_t ip_version, st_cellular_ipaddr_t * const p_addr)
 {
-    uint32_t preemption = 0;
-    uint8_t count = 0;
-    uint8_t addr[50] = {0};
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
+    uint8_t                    cnt                         = 0;
+    uint8_t                    addr[CELLULAR_DNS_LENGTH+1] = {0};
+    uint32_t                   preemption                  = 0;
+    e_cellular_err_t           ret                         = CELLULAR_SUCCESS;
+    e_cellular_err_semaphore_t semaphore_ret               = CELLULAR_SEMAPHORE_SUCCESS;
 
     preemption = cellular_interrupt_disable();
     if ((NULL == p_ctrl) || (NULL == p_domain_name) || (NULL == p_addr) ||
@@ -83,29 +83,27 @@ e_cellular_err_t R_CELLULAR_DnsQuery(st_cellular_ctrl_t * const p_ctrl, const ui
         }
         else
         {
-            p_ctrl->running_api_count += 2;
+            R_BSP_NOP();
+        }
+
+        if (CELLULAR_SUCCESS == ret)
+        {
+            if (CELLULAR_MAX_HOSTNAME_LENGTH < strlen((const char *)p_domain_name)) //(const uint8_t *)->(const char *)
+            {
+                ret = CELLULAR_ERR_PARAMETER;
+            }
+            else if ((CELLULAR_PROTOCOL_IPV6 == ip_version) &&
+                    (CELLULAR_IPV6_ADDR_LENGTH > strlen((char *)p_ctrl->pdp_addr.ipv6))) //(uint8_t *)->(char *)
+            {
+                ret = CELLULAR_ERR_SIM_NOT_SUPPORT_IPV6;
+            }
+            else
+            {
+                p_ctrl->running_api_count += 2;
+            }
         }
     }
     cellular_interrupt_enable(preemption);
-
-    if (CELLULAR_SUCCESS == ret)
-    {
-        if (CELLULAR_MAX_HOSTNAME_LENGTH < strlen((const char *)p_domain_name)) //(const uint8_t *) ->(const char *)
-        {
-            ret = CELLULAR_ERR_PARAMETER;
-            p_ctrl->running_api_count -= 2;
-        }
-    }
-
-    if (CELLULAR_SUCCESS == ret)
-    {
-        if ((CELLULAR_PROTOCOL_IPV6 == ip_version) &&
-                (CELLULAR_IPV6_ADDR_LENGTH > strlen((char *)p_ctrl->pdp_addr.ipv6))) //(uint8_t *)->(char *)
-        {
-            ret = CELLULAR_ERR_SIM_NOT_SUPPORT_IPV6;
-            p_ctrl->running_api_count -= 2;
-        }
-    }
 
     if (CELLULAR_SUCCESS == ret)
     {
@@ -121,9 +119,9 @@ e_cellular_err_t R_CELLULAR_DnsQuery(st_cellular_ctrl_t * const p_ctrl, const ui
                 {
                     cellular_getip(p_ctrl, ip_version, p_addr);
                 }
-                count++;
+                cnt++;
                 cellular_delay_task(1000);
-            } while (((CELLULAR_PROTOCOL_IPV6 == ip_version) && (10 > count) &&
+            } while (((CELLULAR_PROTOCOL_IPV6 == ip_version) && (10 > cnt) &&
                         (CELLULAR_IPV6_ADDR_LENGTH > strlen((char *)p_addr->ipv6)))); //(uint8_t *)->(char *)
             p_ctrl->recv_data = NULL;
 

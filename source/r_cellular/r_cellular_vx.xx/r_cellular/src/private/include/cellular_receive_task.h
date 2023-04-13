@@ -14,20 +14,20 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_receive_task.h
  * Description  : Configures the driver.
  *********************************************************************************************************************/
 
-#ifndef CELLULAR_RECEIVE_TASK_H
-#define CELLULAR_RECEIVE_TASK_H
-
 /**********************************************************************************************************************
  * Includes   <System Includes> , "Project Includes"
  *********************************************************************************************************************/
 #include "r_cellular_if.h"
+
+#ifndef CELLULAR_RECEIVE_TASK_H
+#define CELLULAR_RECEIVE_TASK_H
 
 /**********************************************************************************************************************
  * Macro definitions
@@ -49,6 +49,7 @@
 #define ATC_RES_SOCKET_CLOSE        "+SQNSH:"
 #define ATC_RES_SYSTEM_START        "+SYSSTART\r\n"
 #define ATC_RES_ATTACH_STATUS       "+CGATT:"
+#define ATC_RES_AP_CONNECT_CONFIG   "+CGDCONT:"
 #define ATC_RES_FUNCTION_LEVEL      "+CFUN:"
 #define ATC_RES_TIMEZONE            "+CTZE:"
 #define ATC_RES_CREG_STATUS         "+CREG:"
@@ -73,6 +74,9 @@
 #define ATC_RES_GET_CTM             "+SQNCTM:"
 #define ATC_RES_SMCWRX              "+SMCWRX:"
 #define ATC_RES_SMCWTX              "+SMCWTX:"
+#define ATC_RES_SHUTDOWN            "+SHUTDOWN"
+#define ATC_RES_FIRMUPGRADE         "+SQNSUPGRADE:"
+#define ATC_RES_GET_CERTIFICATE     "+SQNSNVR:"
 
 /**********************************************************************************************************************
  * Typedef definitions
@@ -92,6 +96,7 @@ typedef enum
     CELLULAR_RES_SOCKET_CLOSE,          // Socket Disconnection Notification
     CELLULAR_RES_SYSTEM_START,          // Module activation notification
     CELLULAR_RES_ATTACH_STATUS,         // Connection status to access point
+    CELLULAR_GET_AP_CONNECT_CONFIG,     // Get AP connect config
     CELLULAR_RES_FUNCTION_LEVEL,        // Module control level
     CELLULAR_RES_TIMEZONE,              // Time zone notification
     CELLULAR_RES_CREG_STATUS,           // Connected base station information
@@ -110,12 +115,15 @@ typedef enum
     CELLULAR_GET_SVN,                   // Get software version number
     CELLULAR_GET_PHONE_NUMBER,          // Get phone number
     CELLULAR_GET_ICCID,                 // Get ICCID
-    CELLULAR_PING,                      // Perform PING.
+    CELLULAR_PING,                      // Perform PING
     CELLULAR_GET_CELLINFO,              // Get cell information
-    CELLULAR_GET_AUTOCONNECT,           // Get auto-connect settings.
-    CELLULAR_GET_CTM,                   // Get Conformance Test Mode.
-    CELLULAR_SMCWRX,                    // SMCWRX Command results.
-    CELLULAR_SMCWTX,                    // SMCWTX Command results.
+    CELLULAR_GET_AUTOCONNECT,           // Get auto-connect settings
+    CELLULAR_GET_CTM,                   // Get Conformance Test Mode
+    CELLULAR_SMCWRX,                    // SMCWRX Command results
+    CELLULAR_SMCWTX,                    // SMCWTX Command results
+    CELLULAR_SHUTDOWN,                  // Module shutdown notification
+    CELLULAR_FIRMUPGRADE,               // Firm Upgrade Status Notification
+    CELLULAR_GET_CERTIFICATE,           // Get Certificate
     CELLULAR_RES_MAX,                   // End of analysis result processing
 
     CELLULAR_RES_PUT_CHAR,              // Received data storage process
@@ -125,7 +133,7 @@ typedef enum
 
 typedef enum
 {
-    JOB_STATUS_NONE = 0,                // AT command response being analyzed
+    JOB_STATUS_NONE= 0,                 // AT command response being analyzed
     JOB_STATUS_FIRST_CHAR_CHECK,        // First character check
     JOB_STATUS_COLON_CHECK,             // Confirm receipt of colon
     JOB_STATUS_MAX,                     // End of enum
@@ -133,13 +141,13 @@ typedef enum
 
 typedef struct cellular_receive
 {
-    uint8_t                     data;               // Data received from module
-    uint8_t                     overflow_flag;      // Receive buffer overflow flag
-    e_atc_return_code_t         job_no;             // Execution process number
-    e_job_status_t              job_status;         // Execution process confirmation number
-    uint8_t                     socket_no;          // Socket number
-    uint32_t                    recv_count;         // Received bytes
-    uint32_t                    tmp_recvcnt;        // Processing start point
+    uint8_t             data;           // Data received from module
+    uint8_t             overflow_flag;  // Receive buffer overflow flag
+    e_atc_return_code_t job_no;         // Execution process number
+    e_job_status_t      job_status;     // Execution process confirmation number
+    uint8_t             socket_no;      // Socket number
+    uint32_t            recv_count;     // Received bytes
+    uint32_t            tmp_recvcnt;    // Processing start point
 } st_cellular_receive_t;
 
 #if CELLULAR_CFG_URC_CHARGET_ENABLED == 1

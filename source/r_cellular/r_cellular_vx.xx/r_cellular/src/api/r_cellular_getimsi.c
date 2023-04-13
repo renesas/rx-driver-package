@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_getimsi.c
@@ -50,10 +50,10 @@
  ***********************************************************************/
 e_cellular_err_t R_CELLULAR_GetIMSI(st_cellular_ctrl_t * const p_ctrl, st_cellular_imsi_t * const p_imsi)
 {
-    uint32_t preemption = 0;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
+    uint8_t                    cnt           = 0;
+    uint32_t                   preemption    = 0;
+    e_cellular_err_t           ret           = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
-    uint8_t count = 0;
 
     preemption = cellular_interrupt_disable();
     if ((NULL == p_ctrl) || (NULL == p_imsi))
@@ -86,11 +86,11 @@ e_cellular_err_t R_CELLULAR_GetIMSI(st_cellular_ctrl_t * const p_ctrl, st_cellul
             while (1)
             {
                 ret = atc_cimi(p_ctrl);
-                if ((count > CELLULAR_GET_IMSI_LIMIT) || (CELLULAR_SUCCESS == ret))
+                if ((cnt > CELLULAR_GET_IMSI_LIMIT) || (CELLULAR_ERR_MODULE_COM != ret))
                 {
                     break;
                 }
-                count++;
+                cnt++;
                 cellular_delay_task(1000);
             }
             p_ctrl->recv_data = NULL;
@@ -100,7 +100,6 @@ e_cellular_err_t R_CELLULAR_GetIMSI(st_cellular_ctrl_t * const p_ctrl, st_cellul
         {
             ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
         }
-
         p_ctrl->running_api_count -= 2;
     }
 

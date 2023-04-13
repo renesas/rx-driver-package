@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_getcellinfo.c
@@ -50,10 +50,11 @@
  ***********************************************************************/
 e_cellular_err_t R_CELLULAR_GetCellInfo(st_cellular_ctrl_t * const p_ctrl, const e_cellular_info_type_t type)
 {
-    uint32_t preemption = 0;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
+    uint8_t                    cnt           = 0;
+    uint32_t                   preemption    = 0;
+    e_cellular_err_t           ret           = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
-    uint8_t count = 0;
+
 
     preemption = cellular_interrupt_disable();
     if ((NULL == p_ctrl) || (1 != CELLULAR_CFG_URC_CHARGET_ENABLED) ||
@@ -97,8 +98,8 @@ e_cellular_err_t R_CELLULAR_GetCellInfo(st_cellular_ctrl_t * const p_ctrl, const
                     do
                     {
                         ret = atc_sqnmoni(p_ctrl, type);
-                        count++;
-                    } while ((count < CELLULAR_GET_INFO_LIMIT) && (CELLULAR_SUCCESS != ret));
+                        cnt++;
+                    } while ((cnt < CELLULAR_GET_INFO_LIMIT) && (CELLULAR_SUCCESS != ret));
                 }
             }
             cellular_give_semaphore(p_ctrl->at_semaphore);
@@ -107,7 +108,6 @@ e_cellular_err_t R_CELLULAR_GetCellInfo(st_cellular_ctrl_t * const p_ctrl, const
         {
             ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
         }
-
         p_ctrl->running_api_count -= 2;
     }
 

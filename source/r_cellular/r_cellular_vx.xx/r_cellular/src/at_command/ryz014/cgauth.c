@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cgauth.c
@@ -48,10 +48,11 @@
  ************************************************************************************************/
 e_cellular_err_t atc_cgauth(st_cellular_ctrl_t * const p_ctrl, const st_cellular_ap_cfg_t * const p_ap_cfg)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    uint8_t str_1[5] = {0};
-    uint8_t str_2[32 + 1] = {0};
-    uint8_t str_3[64 + 1] = {0};
+    uint8_t          str_1[2]                              = {0};
+    uint8_t          str_2[CELLULAR_MAX_AP_ID_LENGTH+1]    = {0};
+    uint8_t          str_3[CELLULAR_MAX_AP_PASS_LENGTH+1]  = {0};
+    const uint8_t *  p_command_arg[CELLULAR_MAX_ARG_COUNT] = {0};
+    e_cellular_err_t ret                                   = CELLULAR_SUCCESS;
 
     if (NULL == p_ap_cfg)
     {
@@ -66,9 +67,9 @@ e_cellular_err_t atc_cgauth(st_cellular_ctrl_t * const p_ctrl, const st_cellular
         if ((CELLULAR_AUTH_TYPE_MAX <= p_ap_cfg->auth_type) ||
                 (CELLULAR_AUTH_TYPE_NONE > p_ap_cfg->auth_type) ||
                 (CELLULAR_MAX_AP_ID_LENGTH < strlen((const char *)p_ap_cfg->ap_user_name)) ||   //(uint8_t *)->(char *)
-                (0 >= strlen((const char *)p_ap_cfg->ap_user_name)) ||                          //(uint8_t *)->(char *)
+                (0 == strlen((const char *)p_ap_cfg->ap_user_name)) ||                          //(uint8_t *)->(char *)
                 (CELLULAR_MAX_AP_PASS_LENGTH < strlen((const char *)p_ap_cfg->ap_pass)) ||      //(uint8_t *)->(char *)
-                (0 >= strlen((const char *)p_ap_cfg->ap_pass)))                                 //(uint8_t *)->(char *)
+                (0 == strlen((const char *)p_ap_cfg->ap_pass)))                                 //(uint8_t *)->(char *)
         {
             ret = CELLULAR_ERR_PARAMETER;
         }
@@ -82,11 +83,11 @@ e_cellular_err_t atc_cgauth(st_cellular_ctrl_t * const p_ctrl, const st_cellular
 
     if (CELLULAR_SUCCESS == ret)
     {
-        const uint8_t * const p_command_arg[CELLULAR_MAX_ARG_COUNT] = {str_1, str_2, str_3};
+        p_command_arg[0] = str_1;
+        p_command_arg[1] = str_2;
+        p_command_arg[2] = str_3;
 
-        atc_generate(p_ctrl->sci_ctrl.atc_buff,
-                (const uint8_t *)&gp_at_command[ATC_USER_CONFIG][0], // (const uint8_t *const *)->(const uint8_t **)
-                    (const uint8_t **)&p_command_arg);               // (const uint8_t *const *)->(const uint8_t **)
+        atc_generate(p_ctrl->sci_ctrl.atc_buff, gp_at_command[ATC_USER_CONFIG], p_command_arg);
 
         ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_USER_CONFIG);
 
@@ -100,4 +101,21 @@ e_cellular_err_t atc_cgauth(st_cellular_ctrl_t * const p_ctrl, const st_cellular
 }
 /**********************************************************************************************************************
  * End of function atc_cgauth
+ *********************************************************************************************************************/
+
+/*************************************************************************************************
+ * Function Name  @fn            atc_cgauth_reset
+ ************************************************************************************************/
+e_cellular_err_t atc_cgauth_reset(st_cellular_ctrl_t * const p_ctrl)
+{
+    e_cellular_err_t ret = CELLULAR_SUCCESS;
+
+    atc_generate(p_ctrl->sci_ctrl.atc_buff, gp_at_command[ATC_CLEAR_CONFIG], NULL);
+
+    ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_CLEAR_CONFIG);
+
+    return ret;
+}
+/**********************************************************************************************************************
+ * End of function atc_cgauth_reset
  *********************************************************************************************************************/

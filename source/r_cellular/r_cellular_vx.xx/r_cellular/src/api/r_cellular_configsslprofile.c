@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_configsslprofile.c
@@ -44,20 +44,21 @@
  * Private (static) variables and functions
  *********************************************************************************************************************/
 
-#if (CELLULAR_IMPLEMENT_TYPE == 'B')
 /************************************************************************
  * Function Name  @fn            R_CELLULAR_ConfigSSLProfile
  ***********************************************************************/
 e_cellular_err_t R_CELLULAR_ConfigSSLProfile(st_cellular_ctrl_t * const p_ctrl,
-                                    const uint8_t security_profile_id,
-                                    const e_cellular_cert_validate_level_t cert_valid_level,
-                                    const uint8_t ca_certificate_id, 
-                                    const uint8_t client_certificate_id, 
-                                    const uint8_t client_privatekey_id)
+                                                const uint8_t security_profile_id,
+                                                const e_cellular_cert_validate_level_t cert_valid_level,
+                                                const uint8_t ca_certificate_id,
+                                                const uint8_t client_certificate_id,
+                                                const uint8_t client_privatekey_id)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
+    uint32_t                   preemption    = 0;
+    e_cellular_err_t           ret           = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
 
+    preemption = cellular_interrupt_disable();
     if ((NULL == p_ctrl) ||
             (CELLULAR_SECURITY_PROFILE_ID_L > security_profile_id) ||
             (CELLULAR_SECURITY_PROFILE_ID_H < security_profile_id) ||
@@ -68,11 +69,20 @@ e_cellular_err_t R_CELLULAR_ConfigSSLProfile(st_cellular_ctrl_t * const p_ctrl,
     }
     else
     {
-        if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
+        if (0 != (p_ctrl->running_api_count % 2))
+        {
+            ret = CELLULAR_ERR_OTHER_API_RUNNING;
+        }
+        else if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
         {
             ret = CELLULAR_ERR_NOT_OPEN;
         }
+        else
+        {
+            p_ctrl->running_api_count += 2;
+        }
     }
+    cellular_interrupt_enable(preemption);
 
     if (CELLULAR_SUCCESS == ret)
     {
@@ -87,6 +97,7 @@ e_cellular_err_t R_CELLULAR_ConfigSSLProfile(st_cellular_ctrl_t * const p_ctrl,
         {
             ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
         }
+        p_ctrl->running_api_count -= 2;
     }
 
     return ret;
@@ -94,4 +105,3 @@ e_cellular_err_t R_CELLULAR_ConfigSSLProfile(st_cellular_ctrl_t * const p_ctrl,
 /**********************************************************************************************************************
  * End of function R_CELLULAR_ConfigSSLProfile
  *********************************************************************************************************************/
-#endif /* (CELLULAR_IMPLEMENT_TYPE == 'B') */

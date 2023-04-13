@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_rts_ctrl.c
@@ -66,9 +66,9 @@ void cellular_rts_hw_flow_enable(void)
 
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_MPC);
     CELLULAR_SET_PODR(CELLULAR_CFG_RTS_PORT, CELLULAR_CFG_RTS_PIN) = 0;
-    CELLULAR_SET_PDR(CELLULAR_CFG_RTS_PORT, CELLULAR_CFG_RTS_PIN) = 0;
-    CELLULAR_SET_PFS(CELLULAR_CFG_RTS_PORT, CELLULAR_CFG_RTS_PIN) = CELLULAR_CFG_PFS_SET_VALUE;
-    CELLULAR_SET_PMR(CELLULAR_CFG_RTS_PORT, CELLULAR_CFG_RTS_PIN) = 1;
+    CELLULAR_SET_PDR(CELLULAR_CFG_RTS_PORT, CELLULAR_CFG_RTS_PIN)  = 0;
+    CELLULAR_SET_PFS(CELLULAR_CFG_RTS_PORT, CELLULAR_CFG_RTS_PIN)  = CELLULAR_CFG_PFS_SET_VALUE;
+    CELLULAR_SET_PMR(CELLULAR_CFG_RTS_PORT, CELLULAR_CFG_RTS_PIN)  = 1;
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_MPC);
 }
 /**********************************************************************************************************************

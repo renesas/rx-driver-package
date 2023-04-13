@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_createsocket.c
@@ -52,16 +52,17 @@ static int32_t cellular_socket_cfg (st_cellular_ctrl_t * const p_ctrl, const uin
 int32_t R_CELLULAR_CreateSocket(st_cellular_ctrl_t * const p_ctrl, const uint8_t protocol_type,
                                     const uint8_t ip_version)
 {
-    uint32_t preemption = 0;
-    uint8_t socket_num = 0;
-    int32_t ret = CELLULAR_SUCCESS;
+    uint32_t                   preemption    = 0;
+    uint8_t                    socket_num    = 0;
+    int32_t                    api_ret       = 0;
+    e_cellular_err_t           ret           = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
 
     preemption = cellular_interrupt_disable();
-    if ((NULL == p_ctrl) || ((CELLULAR_PROTOCOL_TCP != protocol_type) &&
-            (CELLULAR_PROTOCOL_UDP != protocol_type)) ||
-                    ((CELLULAR_PROTOCOL_IPV4 != ip_version) &&
-                    (CELLULAR_PROTOCOL_IPV6 != ip_version)))
+    if ((NULL == p_ctrl) || ((CELLULAR_PROTOCOL_TCP  != protocol_type) &&
+                            (CELLULAR_PROTOCOL_UDP   != protocol_type)) ||
+                            ((CELLULAR_PROTOCOL_IPV4 != ip_version) &&
+                            (CELLULAR_PROTOCOL_IPV6  != ip_version)))
     {
         ret = CELLULAR_ERR_PARAMETER;
     }
@@ -81,20 +82,23 @@ int32_t R_CELLULAR_CreateSocket(st_cellular_ctrl_t * const p_ctrl, const uint8_t
         }
         else
         {
-            p_ctrl->running_api_count += 2;
+            R_BSP_NOP();
+        }
+
+        if (CELLULAR_SUCCESS == ret)
+        {
+            if ((CELLULAR_PROTOCOL_IPV6 == ip_version) &&
+                    (CELLULAR_IPV6_ADDR_LENGTH > strlen((char *)p_ctrl->pdp_addr.ipv6))) //(uint8_t *)->(char *)
+            {
+                ret = CELLULAR_ERR_SIM_NOT_SUPPORT_IPV6;
+            }
+            else
+            {
+                p_ctrl->running_api_count += 2;
+            }
         }
     }
     cellular_interrupt_enable(preemption);
-
-    if (CELLULAR_SUCCESS == ret)
-    {
-        if ((CELLULAR_PROTOCOL_IPV6 == ip_version) &&
-                (CELLULAR_IPV6_ADDR_LENGTH > strlen((char *)p_ctrl->pdp_addr.ipv6))) //(uint8_t *)->(char *)
-        {
-            ret = CELLULAR_ERR_SIM_NOT_SUPPORT_IPV6;
-            p_ctrl->running_api_count -= 2;
-        }
-    }
 
     if (CELLULAR_SUCCESS == ret)
     {
@@ -119,7 +123,7 @@ int32_t R_CELLULAR_CreateSocket(st_cellular_ctrl_t * const p_ctrl, const uint8_t
             }
             else
             {
-                ret = cellular_socket_cfg(p_ctrl, socket_num, protocol_type, ip_version);
+                api_ret = cellular_socket_cfg(p_ctrl, socket_num, protocol_type, ip_version);
             }
             cellular_give_semaphore(p_ctrl->at_semaphore);
         }
@@ -130,7 +134,12 @@ int32_t R_CELLULAR_CreateSocket(st_cellular_ctrl_t * const p_ctrl, const uint8_t
         p_ctrl->running_api_count -= 2;
     }
 
-    return ret;
+    if (CELLULAR_SUCCESS != ret)
+    {
+        api_ret = (int32_t)ret; //cast
+    }
+
+    return api_ret;
 }
 /**********************************************************************************************************************
  * End of function R_CELLULAR_CreateSocket
@@ -142,34 +151,40 @@ int32_t R_CELLULAR_CreateSocket(st_cellular_ctrl_t * const p_ctrl, const uint8_t
 static int32_t cellular_socket_cfg(st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_num,
                                     const uint8_t protocol_type, const uint8_t ip_version)
 {
-    int32_t ret;
+    uint8_t          start_num = CELLULAR_START_SOCKET_NUMBER;
+    int32_t          ret;
+    e_cellular_err_t atc_ret;
 
-    ret = atc_sqnscfg(p_ctrl, socket_num + CELLULAR_START_SOCKET_NUMBER);
-    if (CELLULAR_SUCCESS == ret)
+    atc_ret = atc_sqnscfg(p_ctrl, (uint8_t)(socket_num + start_num));           //cast
+    if (CELLULAR_SUCCESS == atc_ret)
     {
-        ret = atc_sqnscfgext(p_ctrl, socket_num + CELLULAR_START_SOCKET_NUMBER);
+        atc_ret = atc_sqnscfgext(p_ctrl, (uint8_t)(socket_num + start_num));    //cast
     }
 
 #if (CELLULAR_IMPLEMENT_TYPE == 'B')
-    if (CELLULAR_SUCCESS == ret)
+    if (CELLULAR_SUCCESS == atc_ret)
     {
-        ret = atc_sqnsscfg(p_ctrl, socket_num + CELLULAR_START_SOCKET_NUMBER,
-                CELLULAR_SSL_DEACTIVE, socket_num + CELLULAR_START_SOCKET_NUMBER);
+        atc_ret = atc_sqnsscfg(p_ctrl, (uint8_t)(socket_num + start_num),       //cast
+                    CELLULAR_SSL_DEACTIVE, (uint8_t)(socket_num + start_num));  //cast
     }
 #endif
-    if (CELLULAR_SUCCESS == ret)
+    if (CELLULAR_SUCCESS == atc_ret)
     {
-        p_ctrl->p_socket_ctrl[socket_num].ipversion = ip_version;
-        p_ctrl->p_socket_ctrl[socket_num].protocol = protocol_type;
-        p_ctrl->p_socket_ctrl[socket_num].socket_status = CELLULAR_SOCKET_STATUS_SOCKET;
-        p_ctrl->p_socket_ctrl[socket_num].receive_count = 0;
-        p_ctrl->p_socket_ctrl[socket_num].receive_num = 0;
-        p_ctrl->p_socket_ctrl[socket_num].port = 0;
-        memset(&p_ctrl->p_socket_ctrl[socket_num].ip_addr,
-                0x00, sizeof(st_cellular_ipaddr_t));
+        p_ctrl->p_socket_ctrl[socket_num].ipversion                = ip_version;
+        p_ctrl->p_socket_ctrl[socket_num].protocol                 = protocol_type;
+        p_ctrl->p_socket_ctrl[socket_num].socket_status            = CELLULAR_SOCKET_STATUS_SOCKET;
+        p_ctrl->p_socket_ctrl[socket_num].receive_count            = 0;
+        p_ctrl->p_socket_ctrl[socket_num].receive_num              = 0;
+        p_ctrl->p_socket_ctrl[socket_num].port                     = 0;
         p_ctrl->p_socket_ctrl[socket_num].receive_unprocessed_size = 0;
-        p_ctrl->p_socket_ctrl[socket_num].receive_flg = CELLULAR_RECEIVE_FLAG_OFF;
+        p_ctrl->p_socket_ctrl[socket_num].receive_flg              = CELLULAR_RECEIVE_FLAG_OFF;
+        memset(&p_ctrl->p_socket_ctrl[socket_num].ip_addr, 0x00, sizeof(st_cellular_ipaddr_t));
+
         ret = socket_num + CELLULAR_START_SOCKET_NUMBER;
+    }
+    else
+    {
+        ret = (int32_t)atc_ret; //cast
     }
 
     return ret;

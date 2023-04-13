@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_get_event_flg.c
@@ -50,7 +50,7 @@ e_cellular_err_t cellular_get_event_flg(void * const xEventGroup, const uint32_t
 {
     e_cellular_err_t ret = CELLULAR_ERR_EVENT_GROUP_INIT;
 #if BSP_CFG_RTOS_USED == (1)
-    BaseType_t rtos_ret;
+    EventBits_t rtos_ret;
 
     if (CELLULAR_TIME_OUT_MAX_DELAY == xTicksToWait)
     {

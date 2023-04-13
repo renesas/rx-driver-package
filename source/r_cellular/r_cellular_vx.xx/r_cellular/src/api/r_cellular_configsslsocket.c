@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_configssltsocket.c
@@ -53,7 +53,7 @@ e_cellular_err_t R_CELLULAR_ConfigSSLSocket(st_cellular_ctrl_t * const p_ctrl,
                                     const e_cellular_ssl_active_t active,
                                     const uint8_t security_profile_id)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
+    e_cellular_err_t           ret           = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
 
     if ((NULL == p_ctrl) ||
@@ -124,4 +124,4 @@ e_cellular_err_t R_CELLULAR_ConfigSSLSocket(st_cellular_ctrl_t * const p_ctrl,
 /**********************************************************************************************************************
  * End of function R_CELLULAR_ConfigSSLSocket
  *********************************************************************************************************************/
-#endif /* (CELLULAR_IMPLEMENT_TYPE == 'B') */
+#endif  /* CELLULAR_IMPLEMENT_TYPE == 'B' */

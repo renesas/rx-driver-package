@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_delete_task.c
@@ -50,6 +50,7 @@ void cellular_delete_task(void * taskhandle)
     if (NULL != taskhandle)
     {
 #if BSP_CFG_RTOS_USED == (1)
+        vTaskSuspend((TaskHandle_t)taskhandle);
         vTaskDelete((TaskHandle_t)taskhandle);
 #elif BSP_CFG_RTOS_USED == (5)
         tx_thread_terminate((TX_THREAD *)taskhandle);

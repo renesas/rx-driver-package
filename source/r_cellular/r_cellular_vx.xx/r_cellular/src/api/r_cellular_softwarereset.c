@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_softwarereset.c
@@ -44,19 +44,17 @@
 /**********************************************************************************************************************
  * Private (static) variables and functions
  *********************************************************************************************************************/
+static e_cellular_err_t cellular_softwarereset (st_cellular_ctrl_t * const p_ctrl);
 
 /************************************************************************
  * Function Name  @fn            R_CELLULAR_SoftwareReset
  ***********************************************************************/
 e_cellular_err_t R_CELLULAR_SoftwareReset(st_cellular_ctrl_t * const p_ctrl)
 {
-    uint32_t preemption = 0;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
+    uint8_t                    cnt           = 0;
+    uint32_t                   preemption    = 0;
+    e_cellular_err_t           ret           = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
-    e_cellular_auto_connect_t type = CELLULAR_DISABLE_AUTO_CONNECT;
-    uint8_t i = 0;
-    uint8_t flg = CELLULAR_START_FLG_OFF;
-    uint8_t count = 0;
 
     preemption = cellular_interrupt_disable();
     if (NULL == p_ctrl)
@@ -82,54 +80,36 @@ e_cellular_err_t R_CELLULAR_SoftwareReset(st_cellular_ctrl_t * const p_ctrl)
 
     if (CELLULAR_SUCCESS == ret)
     {
-        for (i = CELLULAR_START_SOCKET_NUMBER; i <= p_ctrl->creatable_socket; i++ )
+        for (cnt = CELLULAR_START_SOCKET_NUMBER; cnt <= p_ctrl->creatable_socket; cnt++)
         {
-            cellular_closesocket(p_ctrl, i);
+            ret = cellular_shutdownsocket(p_ctrl, cnt);
+            if (CELLULAR_SUCCESS != ret)
+            {
+                cnt = p_ctrl->creatable_socket;
+            }
         }
 
-        semaphore_ret = cellular_take_semaphore(p_ctrl->at_semaphore);
-        if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
+        if (CELLULAR_SUCCESS == ret)
         {
-            p_ctrl->recv_data = (void *) &type; //(&e_cellular_auto_connect_t)->(void *)
-            ret = atc_sqnautoconnect_check(p_ctrl);
-            if (CELLULAR_SUCCESS == ret)
+            for (cnt = CELLULAR_START_SOCKET_NUMBER; cnt <= p_ctrl->creatable_socket; cnt++)
             {
-                ret = atc_cereg(p_ctrl, CELLULAR_ENABLE_NETWORK_RESULT_CODE_LEVEL2);
+                ret = cellular_closesocket(p_ctrl, cnt);
             }
-            if (CELLULAR_SUCCESS == ret)
-            {
-                p_ctrl->recv_data = (void *) &flg; //(&uint8_t)->(void *)
-                ret = atc_reset(p_ctrl);
-            }
-            if (CELLULAR_SUCCESS == ret)
-            {
-                ret = CELLULAR_ERR_MODULE_COM;
-                do
-                {
-                    if (CELLULAR_START_FLG_ON == flg)
-                    {
-                        count = CELLULAR_FLG_CHECK_LIMIT;
-                        ret = CELLULAR_SUCCESS;
-                    }
-                    else
-                    {
-                        cellular_delay_task(1000);
-                    }
-                    count++;
-                } while (count < CELLULAR_FLG_CHECK_LIMIT);
-            }
-            if ((CELLULAR_SUCCESS == ret) && (CELLULAR_DISABLE_AUTO_CONNECT == type))
-            {
-                ret = atc_cfun(p_ctrl, CELLULAR_MODULE_OPERATING_LEVEL4);
-            }
-            p_ctrl->recv_data = NULL;
-            cellular_give_semaphore(p_ctrl->at_semaphore);
-        }
-        else
-        {
-            ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
         }
 
+        if (CELLULAR_SUCCESS == ret)
+        {
+            semaphore_ret = cellular_take_semaphore(p_ctrl->at_semaphore);
+            if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
+            {
+                ret = cellular_softwarereset(p_ctrl);
+                cellular_give_semaphore(p_ctrl->at_semaphore);
+            }
+            else
+            {
+                ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
+            }
+        }
         p_ctrl->running_api_count -= 1;
     }
 
@@ -137,4 +117,59 @@ e_cellular_err_t R_CELLULAR_SoftwareReset(st_cellular_ctrl_t * const p_ctrl)
 }
 /**********************************************************************************************************************
  * End of function R_CELLULAR_SoftwareReset
+ *********************************************************************************************************************/
+
+/************************************************************************
+ * Function Name  @fn            cellular_softwarereset
+ ***********************************************************************/
+static e_cellular_err_t cellular_softwarereset(st_cellular_ctrl_t * const p_ctrl)
+{
+    volatile uint8_t          flg  = CELLULAR_FLG_OFF;
+    uint8_t                   cnt  = 0;
+    e_cellular_err_t          ret  = CELLULAR_SUCCESS;
+    e_cellular_auto_connect_t type = CELLULAR_DISABLE_AUTO_CONNECT;
+
+    p_ctrl->recv_data = (void *) &type; //(&e_cellular_auto_connect_t)->(void *)
+    ret               = atc_sqnautoconnect_check(p_ctrl);
+    if (CELLULAR_SUCCESS == ret)
+    {
+        ret = atc_cereg(p_ctrl, CELLULAR_ENABLE_NETWORK_RESULT_CODE_LEVEL2);
+    }
+
+    if (CELLULAR_SUCCESS == ret)
+    {
+        p_ctrl->recv_data = (void *) &flg; //(&uint8_t)->(void *)
+        ret               = atc_reset(p_ctrl);
+    }
+
+    if (CELLULAR_SUCCESS == ret)
+    {
+        ret = CELLULAR_ERR_MODULE_COM;
+
+        do
+        {
+            if (CELLULAR_FLG_START == flg)
+            {
+                cnt = CELLULAR_FLG_CHECK_LIMIT;
+                ret = CELLULAR_SUCCESS;
+            }
+            else
+            {
+                cellular_delay_task(1000);
+            }
+            cnt++;
+        } while (cnt < CELLULAR_FLG_CHECK_LIMIT);
+    }
+
+    if ((CELLULAR_SUCCESS == ret) && (CELLULAR_DISABLE_AUTO_CONNECT == type))
+    {
+        ret = atc_cfun(p_ctrl, CELLULAR_MODULE_OPERATING_LEVEL4);
+    }
+
+    p_ctrl->recv_data = NULL;
+
+    return ret;
+}
+/**********************************************************************************************************************
+ * End of function cellular_softwarereset
  *********************************************************************************************************************/

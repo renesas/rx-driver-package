@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_setband.c
@@ -35,7 +35,6 @@
 /**********************************************************************************************************************
  * Typedef definitions
  *********************************************************************************************************************/
-#define CELLULAR_CTM_CHECK          "standard"
 #define CELLULAR_FLG_CHECK_LIMIT    (60)
 
 /**********************************************************************************************************************
@@ -45,17 +44,19 @@
 /**********************************************************************************************************************
  * Private (static) variables and functions
  *********************************************************************************************************************/
-static e_cellular_err_t cellular_ctm_config (st_cellular_ctrl_t * const p_ctrl);
 
 /************************************************************************
  * Function Name  @fn            R_CELLULAR_SetBand
  ***********************************************************************/
 e_cellular_err_t R_CELLULAR_SetBand(st_cellular_ctrl_t * const p_ctrl, const uint8_t * const p_band)
 {
-    uint32_t preemption = 0;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    uint8_t flg = CELLULAR_START_FLG_OFF;
-    uint8_t count = 0;
+    uint8_t                    ctm_name[CELLULAR_MAX_CTM_LENGTH+1] = {0};
+
+    volatile uint8_t           flg           = CELLULAR_FLG_OFF;
+    uint8_t                    cnt           = 0;
+    uint32_t                   preemption    = 0;
+    e_cellular_err_t           ret           = CELLULAR_SUCCESS;
+    e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
 
     preemption = cellular_interrupt_disable();
     if ((NULL == p_ctrl) || (NULL == p_band))
@@ -85,38 +86,63 @@ e_cellular_err_t R_CELLULAR_SetBand(st_cellular_ctrl_t * const p_ctrl, const uin
 
     if (CELLULAR_SUCCESS == ret)
     {
-        ret = cellular_ctm_config(p_ctrl);
-        if (CELLULAR_SUCCESS == ret)
+        semaphore_ret = cellular_take_semaphore(p_ctrl->at_semaphore);
+        if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
         {
-            ret = atc_sqnbandsel(p_ctrl, p_band);
-        }
-
-        if (CELLULAR_SUCCESS == ret)
-        {
-            p_ctrl->recv_data = (void *) &flg;  //(&uint8_t)->(void *)
-            ret = atc_reset(p_ctrl);
-        }
-
-        if (CELLULAR_SUCCESS == ret)
-        {
-            ret = CELLULAR_ERR_MODULE_COM;
-            do
+            p_ctrl->recv_data = (void *)ctm_name;   //(uint8_t[])->(void *)
+            ret               = atc_sqnctm_check(p_ctrl);
+            if (CELLULAR_SUCCESS == ret)
             {
-                if (CELLULAR_START_FLG_ON == flg)
-                {
-                    count = CELLULAR_FLG_CHECK_LIMIT;
-                    ret = CELLULAR_SUCCESS;
-                }
-                else
-                {
-                    cellular_delay_task(1000);
-                }
-                count++;
-            } while (count < CELLULAR_FLG_CHECK_LIMIT);
-        }
+                ret = atc_sqnbandsel(p_ctrl, ctm_name, p_band);
+            }
 
-        p_ctrl->recv_data = NULL;
-        cellular_give_semaphore(p_ctrl->at_semaphore);
+            if (CELLULAR_SUCCESS == ret)
+            {
+                p_ctrl->recv_data = (void *) &flg;  //(&uint8_t)->(void *)
+                ret               = atc_reset(p_ctrl);
+            }
+
+            if (CELLULAR_SUCCESS == ret)
+            {
+                for (cnt = CELLULAR_START_SOCKET_NUMBER; cnt <= p_ctrl->creatable_socket; cnt++)
+                {
+                    ret = cellular_closesocket(p_ctrl, cnt);
+                }
+
+                cnt = 0;
+                ret = CELLULAR_ERR_MODULE_COM;
+                do
+                {
+                    if (CELLULAR_FLG_START == flg)
+                    {
+                        cnt = CELLULAR_FLG_CHECK_LIMIT;
+                        ret = CELLULAR_SUCCESS;
+                    }
+                    else
+                    {
+                        cellular_delay_task(1000);
+                    }
+                    cnt++;
+                } while (cnt < CELLULAR_FLG_CHECK_LIMIT);
+            }
+
+            if (CELLULAR_SUCCESS == ret)
+            {
+                ret = atc_cfun_check(p_ctrl);
+                if ((CELLULAR_SUCCESS                 == ret) &&
+                    (CELLULAR_MODULE_OPERATING_LEVEL4 != p_ctrl->module_status) &&
+                    (CELLULAR_MODULE_OPERATING_LEVEL1 != p_ctrl->module_status))
+                {
+                    ret = atc_cfun(p_ctrl, CELLULAR_MODULE_OPERATING_LEVEL4);
+                }
+            }
+            p_ctrl->recv_data = NULL;
+            cellular_give_semaphore(p_ctrl->at_semaphore);
+        }
+        else
+        {
+            ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
+        }
         p_ctrl->running_api_count -= 2;
     }
 
@@ -124,68 +150,4 @@ e_cellular_err_t R_CELLULAR_SetBand(st_cellular_ctrl_t * const p_ctrl, const uin
 }
 /**********************************************************************************************************************
  * End of function R_CELLULAR_SetBand
- *********************************************************************************************************************/
-
-/************************************************************************
- * Function Name  @fn            cellular_ctm_config
- ***********************************************************************/
-static e_cellular_err_t cellular_ctm_config(st_cellular_ctrl_t * const p_ctrl)
-{
-    e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    uint8_t ctm_name[CELLULAR_MAX_CTM_LENGTH + 1] = {0};
-    uint8_t flg = CELLULAR_START_FLG_OFF;
-    uint8_t count = 0;
-
-    for (count = CELLULAR_START_SOCKET_NUMBER; count <= p_ctrl->creatable_socket; count++ )
-    {
-        cellular_closesocket(p_ctrl, count);
-    }
-
-    if (CELLULAR_SYSTEM_CONNECT == p_ctrl->system_state)
-    {
-        cellular_disconnect(p_ctrl);
-    }
-
-    semaphore_ret = cellular_take_semaphore(p_ctrl->at_semaphore);
-    if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
-    {
-        p_ctrl->recv_data = (void *)ctm_name;   //(uint8_t[])->(void *)
-        ret = atc_sqnctm_check(p_ctrl);
-
-        if ((CELLULAR_SUCCESS == ret) && (NULL == strstr(p_ctrl->recv_data, CELLULAR_CTM_CHECK)))
-        {
-            count = 0;
-            p_ctrl->recv_data = (void *) &flg;  //(&uint8_t)->(void *)
-            ret = atc_sqnctm(p_ctrl);
-
-            if (CELLULAR_SUCCESS == ret)
-            {
-                ret = CELLULAR_ERR_MODULE_COM;
-                do
-                {
-                    if (CELLULAR_START_FLG_ON == flg)
-                    {
-                        count = CELLULAR_FLG_CHECK_LIMIT;
-                        ret = CELLULAR_SUCCESS;
-                    }
-                    else
-                    {
-                        cellular_delay_task(1000);
-                    }
-                    count++;
-                } while (count < CELLULAR_FLG_CHECK_LIMIT);
-            }
-        }
-        p_ctrl->recv_data = NULL;
-    }
-    else
-    {
-        ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
-    }
-
-    return ret;
-}
-/**********************************************************************************************************************
- * End of function cellular_ctm_config
  *********************************************************************************************************************/

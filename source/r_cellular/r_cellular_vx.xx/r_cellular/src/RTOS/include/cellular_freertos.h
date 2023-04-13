@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_freertos.h
@@ -66,31 +66,28 @@
 #endif
 #else /* CELLULAR_CFG_DEBUGLOG != 0 */
 /* Don't show logs */
-#define CELLULAR_LOG_ERROR( message )   (NULL)
+#define CELLULAR_LOG_ERROR( message )
 
 /* Don't show logs */
-#define CELLULAR_LOG_WARN( message )    (NULL)
+#define CELLULAR_LOG_WARN( message )
 
 /* Don't show logs */
-#define CELLULAR_LOG_INFO( message )    (NULL)
+#define CELLULAR_LOG_INFO( message )
 
 /* Don't show logs */
-#define CELLULAR_LOG_DEBUG( message )   (NULL)
+#define CELLULAR_LOG_DEBUG( message )
 #endif /* CELLULAR_CFG_DEBUGLOG != 0 */
 
 /**********************************************************************************************************************
  * Macro definitions
  *********************************************************************************************************************/
-#define CELLULAR_RECV_TASK_NAME  "cellular_recv_task"
-#define CELLULAR_RING_TASK_NAME  "cellular_ring_task"
+#define CELLULAR_RECV_TASK_NAME     "cellular_recv_task"
+#define CELLULAR_RING_TASK_NAME     "cellular_ring_task"
 
-#if BSP_CFG_RTOS_USED == (1)
-#define CELLULAR_RECV_THREAD_SIZE   (2048 / sizeof(configSTACK_DEPTH_TYPE)) //cast
-#define CELLULAR_RING_THREAD_SIZE   (512)
-#elif BSP_CFG_RTOS_USED == (5)
-#define CELLULAR_RECV_THREAD_SIZE   (2048)
-#define CELLULAR_RING_THREAD_SIZE   (512)
+#define CELLULAR_RECV_THREAD_SIZE       (2048)
+#define CELLULAR_RING_THREAD_SIZE       (512)
 
+#if BSP_CFG_RTOS_USED == (5)
 /* Convert time to milliseconds */
 #define MS_TO_TICKS( time )    (( UINT )((( UINT)( time ) * ( UINT ) TX_TIMER_TICKS_PER_SECOND ) / ( UINT ) 1000U ))
 
@@ -118,13 +115,14 @@
 /* Each memory block contains a pointer to the overhead represented by "sizeof(void *)" */
 #define TOTAL_SEMAPHORE_BLOCK_SIZE    ((CELLULAR_CREATABLE_SOCKETS + 2) * (SEMAPHORE_BLOCK_SIZE  + sizeof(void *)))
 
-extern uint8_t g_recv_thread[CELLULAR_RECV_THREAD_SIZE];
-extern uint8_t g_ring_thread[CELLULAR_RING_THREAD_SIZE];
+extern uint8_t       g_recv_thread[CELLULAR_RECV_THREAD_SIZE];
+extern uint8_t       g_ring_thread[CELLULAR_RING_THREAD_SIZE];
+extern uint8_t       g_monitor_thread[CELLULAR_RING_THREAD_SIZE];
 extern TX_BLOCK_POOL g_cellular_socket_pool;
 extern TX_BLOCK_POOL g_cellular_event_pool;
 extern TX_BLOCK_POOL g_cellular_thread_pool;
 extern TX_BLOCK_POOL g_cellular_semaphore_pool;
-#endif /* BSP_CFG_RTOS_USED == 1 */
+#endif /* BSP_CFG_RTOS_USED == 5 */
 
 /*****************************************************************************
  * Private Functions

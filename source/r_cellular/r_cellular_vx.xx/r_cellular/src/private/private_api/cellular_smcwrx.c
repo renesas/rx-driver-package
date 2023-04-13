@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_smcwrx.c
@@ -49,7 +49,7 @@
  ***************************************************************************/
 e_cellular_err_t cellular_smcwrx(st_cellular_ctrl_t * const p_ctrl, const uint16_t earfcn)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
+    e_cellular_err_t           ret           = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_ERR_TAKE;
 
     semaphore_ret = cellular_take_semaphore(p_ctrl->at_semaphore);
