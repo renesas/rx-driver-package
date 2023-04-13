@@ -220,6 +220,15 @@
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/d6c3d16376f26de2f325efaff463822af7b80a25/FITModules/r_fwup_v1.06_extend.mdf</url>
     </urls>
   </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_cellular</name>
+    <version>1.10</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/19dd2b4897a0dfbf358cff4dac0b15800091a776/FITModules/r_cellular_v1.10.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/19dd2b4897a0dfbf358cff4dac0b15800091a776/FITModules/r_cellular_v1.10.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/19dd2b4897a0dfbf358cff4dac0b15800091a776/FITModules/r_cellular_v1.10_extend.mdf</url>
+    </urls>
+  </module>
   <module rdp_version="1.25">
     <name>r_ble_qe_utility</name>
     <version>1.00</version>
