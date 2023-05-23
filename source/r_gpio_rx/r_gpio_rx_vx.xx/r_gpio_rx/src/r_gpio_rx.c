@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_gpio_rx.c
@@ -42,6 +42,7 @@
 *         : 30.12.2019 3.40    Added support RX72N, RX66N.
 *         : 15.04.2021 4.10    Updated Doxygen comment.
 *         : 11.11.2021 4.30    Update according to GSCE Code Checker 6.00
+*         : 07.04.2023 4.90    Fixed to comply with GSCE Coding Standards Rev.6.5.0
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -72,9 +73,9 @@ typedef enum
 /***********************************************************************************************************************
 * Private global variables and functions
 ***********************************************************************************************************************/
-uint8_t volatile * gpio_port_addr_get(uint8_t volatile * base_addr, uint16_t index);
-bool               gpio_pin_function_check(uint8_t const * check_array, uint8_t port_number, uint8_t pin_number);
-void               gpio_set_output_type(gpio_port_pin_t pin, gpio_pin_output_t out_type);
+uint8_t volatile * gpio_port_addr_get (uint8_t volatile * base_addr, uint16_t index);
+bool               gpio_pin_function_check (uint8_t const * check_array, uint8_t port_number, uint8_t pin_number);
+void               gpio_set_output_type (gpio_port_pin_t pin, gpio_pin_output_t out_type);
 
 /***********************************************************************************************************************
 * Export global variables
@@ -104,7 +105,7 @@ void               gpio_set_output_type(gpio_port_pin_t pin, gpio_pin_output_t o
 * port-wide write function is called. It is up to the user’s application to insure that only valid pins are written to.
 *
 */
-void R_GPIO_PortWrite (gpio_port_t port, uint8_t value)
+void R_GPIO_PortWrite(gpio_port_t port, uint8_t value)
 {
     uint8_t volatile * podr;
 
@@ -127,13 +128,13 @@ void R_GPIO_PortWrite (gpio_port_t port, uint8_t value)
 * value corresponds to a pin on the port. For example, bit 7 of read value corresponds to pin 7, bit 6 corresponds to
 * pin 6, and so forth.
 */
-uint8_t R_GPIO_PortRead (gpio_port_t port)
+uint8_t R_GPIO_PortRead(gpio_port_t port)
 {
     /* PIDR register addresses are incremental in memory starting with PORT0.PIDR. Even if a port is not available
      * on this MCU, the address is reserved. */
 
     /* Read the selected port. */
-    return *gpio_port_addr_get(GPIO_PRV_BASE_ADDR_INPUT, (uint16_t)port);
+    return (*gpio_port_addr_get(GPIO_PRV_BASE_ADDR_INPUT, (uint16_t)port));
 } /* End of function R_GPIO_PortRead */
 
 /***********************************************************************************************************************
@@ -150,7 +151,7 @@ uint8_t R_GPIO_PortRead (gpio_port_t port)
 * @note This function does not allow the user to specify the use of special modes such as input pull-up resistors or
 * open-drain outputs. To enable these modes use the R_GPIO_PinControl() function.
 */
-void R_GPIO_PortDirectionSet (gpio_port_t port, gpio_dir_t dir, uint8_t mask)
+void R_GPIO_PortDirectionSet(gpio_port_t port, gpio_dir_t dir, uint8_t mask)
 {
     uint8_t volatile * pdr;
 
@@ -180,7 +181,7 @@ void R_GPIO_PortDirectionSet (gpio_port_t port, gpio_dir_t dir, uint8_t mask)
 * @param[in] level - What level to set the pin to.
 * @details Pins can either be set as high (‘1’) or low (‘0’).
 */
-void R_GPIO_PinWrite (gpio_port_pin_t pin, gpio_level_t level)
+void R_GPIO_PinWrite(gpio_port_pin_t pin, gpio_level_t level)
 {
     uint8_t volatile * podr;
 
@@ -210,7 +211,7 @@ void R_GPIO_PinWrite (gpio_port_pin_t pin, gpio_level_t level)
 * @return The level of the specified pin.
 * @details The specified pin will be read and the level returned.
 */
-gpio_level_t R_GPIO_PinRead (gpio_port_pin_t pin)
+gpio_level_t R_GPIO_PinRead(gpio_port_pin_t pin)
 {
     uint8_t volatile * pidr;
 
@@ -239,7 +240,7 @@ gpio_level_t R_GPIO_PinRead (gpio_port_pin_t pin)
 * @details This function sets pins as inputs or outputs. For enabling other settings such as open-drain outputs or
 * internal pull-ups see the R_GPIO_PinControl() function.
 */
-void R_GPIO_PinDirectionSet (gpio_port_pin_t pin, gpio_dir_t dir)
+void R_GPIO_PinDirectionSet(gpio_port_pin_t pin, gpio_dir_t dir)
 {
     uint8_t volatile * pdr;
 
@@ -278,7 +279,7 @@ void R_GPIO_PinDirectionSet (gpio_port_pin_t pin, gpio_dir_t dir)
 * @note User should not configure the DSCR bit corresponding to a pin whose drive capacity is fixed, otherwise
 * GPIO_ERR_INVALID_MODE would be returned.
 */
-gpio_err_t R_GPIO_PinControl (gpio_port_pin_t pin, gpio_cmd_t cmd)
+gpio_err_t R_GPIO_PinControl(gpio_port_pin_t pin, gpio_cmd_t cmd)
 {
     gpio_err_t         err;
     uint8_t volatile * addr;
@@ -313,8 +314,8 @@ gpio_err_t R_GPIO_PinControl (gpio_port_pin_t pin, gpio_cmd_t cmd)
             addr = gpio_port_addr_get(GPIO_PRV_BASE_ADDR_DSCR, (uint16_t)pin);
 
             /* Get value at pin's address */
-           *addr   = (uint8_t)((*addr) | (1 << pin_number));
-           break;
+            *addr = (uint8_t)((*addr) | (1 << pin_number));
+            break;
         }
         case GPIO_CMD_DSCR_DISABLE:
         {
@@ -476,7 +477,7 @@ gpio_err_t R_GPIO_PinControl (gpio_port_pin_t pin, gpio_cmd_t cmd)
 * the top 2 bytes are the major version number and the bottom 2 bytes are the minor version number. For example,
 * Version 4.25 would be returned as 0x00040019.
 */
-uint32_t R_GPIO_GetVersion (void)
+uint32_t R_GPIO_GetVersion(void)
 {
     /* These version macros are defined in r_gpio_rx_if.h. */
     return ((((uint32_t)GPIO_RX_VERSION_MAJOR) << 16) | (uint32_t)GPIO_RX_VERSION_MINOR);
@@ -548,7 +549,7 @@ void gpio_set_output_type (gpio_port_pin_t pin, gpio_pin_output_t out_type)
 
     /* 'pin' is multiplied by 2 because the ODR0 and ODR1 registers are staggered. This means that PORT0.ODR0
      * and PORT1.ODR0 are separated by 2 bytes instead of 1 as with the other port registers. */
-    addr   = gpio_port_addr_get(GPIO_PRV_BASE_ADDR_OUT_TYPE, (uint16_t)(((uint16_t)pin)*2));
+    addr   = gpio_port_addr_get(GPIO_PRV_BASE_ADDR_OUT_TYPE, (uint16_t)(((uint16_t)pin) *2));
 
     /* ODR bit fields are 2-bits a piece. This means bits 0-3 are in the 1st byte (ODR0) and bits 4-7 are in
      * the 2nd byte (ODR1).
@@ -561,12 +562,12 @@ void gpio_set_output_type (gpio_port_pin_t pin, gpio_pin_output_t out_type)
         /* Subtract 4 from pin number since pins 4-7 are stored in ODR1 which is an 8-bit register.
          * Multiple pin number by 2 since each pin is represented by 2 bits.
          */
-        bit_offset = (uint8_t)((pin_number - 4) * 2);
+        bit_offset = (uint8_t)((pin_number - 4) *2);
     }
     else
     {
         /* Multiple pin number by 2 since each pin is represented by 2 bits. */
-        bit_offset = (uint8_t)(pin_number * 2);
+        bit_offset = (uint8_t)(pin_number *2);
     }
 
     /* Clear the bits we intend to change. */

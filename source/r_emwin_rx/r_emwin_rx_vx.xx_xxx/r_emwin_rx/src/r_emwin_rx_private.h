@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_emwin_rx_private.h
@@ -35,6 +35,8 @@
  *                                     Since it can be determined by the interface whether it is LiN or FlexColor, 
  *                                     it is changed to handle it internally.
  *                                     Added touch driver IC settings.
+ *         : 31.03.2023 6.32.a.1.00    Update emWin library to v6.32a.
+ *                                     Fixed preprocessing with value of BSP_CFG_RTOS_USED.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -101,14 +103,6 @@
 typedef void * cb_timer_arg_t;
 #elif (BSP_CFG_RTOS_USED == 1) /* FreeRTOS */
 typedef TimerHandle_t cb_timer_arg_t;
-#elif (BSP_CFG_RTOS_USED == 2) /* SEGGER embOS */
-#warning "Warning!! It is necessary to implement callback functuon for timer."
-#elif (BSP_CFG_RTOS_USED == 3) /* Micrium MicroC/OS */
-#warning "Warning!! It is necessary to implement callback functuon for timer."
-#elif (BSP_CFG_RTOS_USED == 4) /* Renesas RI600V4 & RI600PX */
-#warning "Warning!! It is necessary to implement callback functuon for timer."
-#elif (BSP_CFG_RTOS_USED == 5) /* Azure RTOS */
-#warning "Warning!! It is necessary to implement callback functuon for timer."
 #else
 #warning "Warning!! It is necessary to implement callback functuon for timer."
 #endif
@@ -119,8 +113,8 @@ typedef void emwin_rx_cb_timer (cb_timer_arg_t arg);
 /** Return value */
 typedef enum e_emwin_rx_err
 {
-    EMWIN_RX_SUCCESS = 0u,  // Success.
-    EMWIN_RX_FAIL,          // Fail.
+    EMWIN_RX_SUCCESS = 0u,  /* Success. */
+    EMWIN_RX_FAIL,          /* Fail.    */
 } e_emwin_rx_err_t;
 
 typedef enum

@@ -44,6 +44,8 @@
 *         : 31.03.2020 2.40    Added support RX23E-A.
 *         : 31.03.2021 2.60    Added support RX671.
 *         : 31.03.2022 2.90    Added support RX660.
+*         : 15.08.2022 3.10    Added support RX26T
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *******************************************************************************/
 #ifndef DMACA_RX_PRIVATE_H
 #define DMACA_RX_PRIVATE_H
@@ -82,6 +84,8 @@ Includes   <System Includes>, "Project Includes"
     #include "./src/targets/rx23e-a/r_dmaca_rx_target.h"
 #elif defined(BSP_MCU_RX23W)
     #include "./src/targets/rx23w/r_dmaca_rx_target.h"
+#elif defined(BSP_MCU_RX26T)
+    #include "./src/targets/rx26t/r_dmaca_rx_target.h"
 #else
     #error "This MCU is not supported by the current DMACA driver."
 #endif
@@ -140,14 +144,14 @@ extern void *g_pdmaci_handlers[];
 extern volatile uint8_t R_BSP_EVENACCESS_SFR *g_icu_dmrsr[];
 extern uint8_t                       g_locking_sw[DMACA_NUM_CHANNELS];
 
-bool           r_dmaca_channel_valid_check(uint8_t channel);
-void           r_dmaca_module_enable(void);
-void           r_dmaca_module_disable(void);
-dmaca_return_t r_dmaca_int_enable(uint8_t channel, uint8_t priority);
-dmaca_return_t r_dmaca_int_disable(uint8_t channel);
+bool           r_dmaca_channel_valid_check (uint8_t channel);
+void           r_dmaca_module_enable (void);
+void           r_dmaca_module_disable (void);
+dmaca_return_t r_dmaca_int_enable (uint8_t channel, uint8_t priority);
+dmaca_return_t r_dmaca_int_disable (uint8_t channel);
 #if ((0 == BSP_CFG_USER_LOCKING_ENABLED) && (bsp_lock_t == BSP_CFG_USER_LOCKING_TYPE))
   #if (1 != DMACA_CFG_USE_DTC_FIT_MODULE)
-    dmaca_chk_locking_sw_t r_dmaca_check_dtc_locking_byuser(void);
+    dmaca_chk_locking_sw_t r_dmaca_check_dtc_locking_byuser (void);
   #endif
 #else
     dmaca_chk_locking_sw_t r_dmaca_check_DMACA_DTC_locking_byUSER(void);

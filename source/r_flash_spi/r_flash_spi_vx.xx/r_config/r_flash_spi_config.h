@@ -19,11 +19,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011(2012-2022) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2011(2012-2023) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_flash_spi_config.h
-* Version      : 3.00
+* Version      : 3.20
 * Description  : FLASH SPI driver configuration header file
 *************************************************************************************************/
 /************************************************************************************************
@@ -31,7 +31,8 @@
 *              : 23.07.2014 2.21     Created
 *              : 29.05.2015 2.32     Revised functions of same as Ver.2.32 of EEPROM SPI FIT module.
 *              : 21.12.2018 3.00     Change flash drive interface to Memory Access Driver Interface
-*              : 30.06.2022 3.10     Added #defines specify the ports used for SS#.
+*              : 30.06.2022 3.10     Added macros to specify the ports used for SS#.
+*              : 16.03.2023 3.20     Added support for AT25QF641B-SHB.
 *************************************************************************************************/
 #ifndef __FLASH_SPI_CONFIG_H__
 #define __FLASH_SPI_CONFIG_H__
@@ -90,10 +91,12 @@ SPECIFY DEVICES TO INCLUDE SOFTWARE SUPPORT
 #define FLASH_SPI_CFG_DEV0_MX25L    (1)             /* Device 0 Macronix MX25L                  */
 #define FLASH_SPI_CFG_DEV0_MX66L    (0)             /* Device 0 Macronix MX66L                  */
 #define FLASH_SPI_CFG_DEV0_MX25R    (0)             /* Device 0 Macronix MX25R                  */
+#define FLASH_SPI_CFG_DEV0_AT25QF   (0)             /* Device 0 Adesto AT25Q                    */
 
 #define FLASH_SPI_CFG_DEV1_MX25L    (0)             /* Device 1 Macronix MX25L                  */
 #define FLASH_SPI_CFG_DEV1_MX66L    (0)             /* Device 1 Macronix MX66L                  */
 #define FLASH_SPI_CFG_DEV1_MX25R    (0)             /* Device 1 Macronix MX25R                  */
+#define FLASH_SPI_CFG_DEV1_AT25QF   (0)             /* Device 1 Adesto AT25Q                    */
 
 /************************************************************************************************
  SELECT THE FLASH MEMORY SIZE
@@ -106,8 +109,8 @@ SPECIFY DEVICES TO INCLUDE SOFTWARE SUPPORT
 #define FLASH_SPI_CFG_DEV0_SIZE_2M        (0)       /* Device 0 2M-bit      (256K Bytes)        */
 #define FLASH_SPI_CFG_DEV0_SIZE_4M        (0)       /* Device 0 4M-bit      (512K Bytes)        */
 #define FLASH_SPI_CFG_DEV0_SIZE_16M       (0)       /* Device 0 16M-bit     (2M Bytes)          */
-#define FLASH_SPI_CFG_DEV0_SIZE_32M       (1)       /* Device 0 32M-bit     (4M Bytes)          */
-#define FLASH_SPI_CFG_DEV0_SIZE_64M       (0)       /* Device 0 64M-bit     (8M Bytes)          */
+#define FLASH_SPI_CFG_DEV0_SIZE_32M       (0)       /* Device 0 32M-bit     (4M Bytes)          */
+#define FLASH_SPI_CFG_DEV0_SIZE_64M       (1)       /* Device 0 64M-bit     (8M Bytes)          */
 #define FLASH_SPI_CFG_DEV0_SIZE_128M      (0)       /* Device 0 128M-bit    (16M Bytes)         */
 #define FLASH_SPI_CFG_DEV0_SIZE_256M      (0)       /* Device 0 256M-bit    (32M Bytes)         */
 #define FLASH_SPI_CFG_DEV0_SIZE_512M      (0)       /* Device 0 512M-bit    (64M Bytes)         */
@@ -128,10 +131,13 @@ SPECIFY DEVICES TO INCLUDE SOFTWARE SUPPORT
 /************************************************************************************************
 PIN ASSIGNMENT
 *************************************************************************************************/
-/* The #defines specify the ports used for SS#. */
-#define FLASH_SPI_CS_DEV0_CFG_PORTNO    ('C')         /* Device 0 Port Number : FLASH SS#    */
+/* The macros to specify the ports used for SS#. 
+   Default value 'X' is for reference only, If this default value is kept, then the code
+   support for device port will be temporarily disabled until user assigns a value of port
+   used for SS# according to a device. */
+#define FLASH_SPI_CS_DEV0_CFG_PORTNO    ('X')         /* Device 0 Port Number : FLASH SS#    */
 #define FLASH_SPI_CS_DEV0_CFG_BITNO     ('0')         /* Device 0 Bit Number  : FLASH SS#    */
-#define FLASH_SPI_CS_DEV1_CFG_PORTNO    ('C')         /* Device 1 Port Number : FLASH SS#    */
+#define FLASH_SPI_CS_DEV1_CFG_PORTNO    ('X')         /* Device 1 Port Number : FLASH SS#    */
 #define FLASH_SPI_CS_DEV1_CFG_BITNO     ('0')         /* Device 1 Bit Number  : FLASH SS#    */
 /************************************************************************************************
 Includes <System Includes> , "Project Includes"

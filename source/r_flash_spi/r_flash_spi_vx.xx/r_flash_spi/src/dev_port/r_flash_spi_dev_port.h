@@ -19,11 +19,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011(2012-2020) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2011(2012-2022) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_flash_spi_dev_port.h
-* Version      : 3.02
+* Version      : 3.10
 * Description  : FLASH SPI driver device port header file
 *************************************************************************************************/
 /************************************************************************************************
@@ -33,6 +33,7 @@
 *              : 20.05.2019 3.01     Added support for GNUC and ICCRX.
 *                                    Fixed coding style.
 *              : 10.12.2020 3.02     Remodeling the target device to the entire RX family.
+*              : 30.06.2022 3.10     Set PORTX as the default port assigned to SS#
 *************************************************************************************************/
 #ifndef __FLASH_SPI_DEV_PORT_H__
 #define __FLASH_SPI_DEV_PORT_H__
@@ -156,10 +157,6 @@ Macro definitions
         #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     W
     #elif (('X' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('x' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
         #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     X
-    #elif (('Y' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('y' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
-        #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     Y
-    #elif (('Z' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('z' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
-        #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     Z
     #endif
 
     #if   ('0' == FLASH_SPI_CS_DEV0_CFG_BITNO)
@@ -276,10 +273,6 @@ Macro definitions
         #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     W
     #elif (('X' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('x' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
         #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     X
-    #elif (('Y' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('y' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
-        #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     Y
-    #elif (('Z' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('z' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
-        #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     Z
     #endif
 
     #if   ('0' == FLASH_SPI_CS_DEV1_CFG_BITNO)
@@ -360,6 +353,11 @@ Macro definitions
  #define FLASH_SPI_PWPR_PFSWE     MPC.PWPR.BIT.PFSWE          /* PFS Register Write Enable (PWPR) */
 #endif  /* #if (FLASH_SPI_CFG_USE_GPIO_MPC_FIT == 0) */
 
+#if ((1 == FLASH_SPI_CFG_DEV0_INCLUDED) && ('X' == FLASH_SPI_CS_DEV0_CFG_PORTNO)) \
+    || ((1 == FLASH_SPI_CFG_DEV1_INCLUDED) && ('X' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
+#define FLASH_SPI_TEMPORARY_DISABLE_DEV_PORT
+#endif /* #if ((1 == FLASH_SPI_CFG_DEV0_INCLUDED) && ('X' == FLASH_SPI_CS_DEV0_CFG_PORTNO)) \
+              || ((1 == FLASH_SPI_CFG_DEV1_INCLUDED) && ('X' == FLASH_SPI_CS_DEV1_CFG_PORTNO)) */
 
 /************************************************************************************************
 Typedef definitions

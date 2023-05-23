@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2023  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.26 - Graphical user interface for embedded applications **
+** emWin V6.32 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -24,7 +24,7 @@ License model:            License and Service Agreement, signed December 16th, 2
 License valid for:        RX (based on RX-V1, RX-V2 or RX-V3)
 ----------------------------------------------------------------------
 Support and Update Agreement (SUA)
-SUA period:               2016-12-22 - 2022-12-31
+SUA period:               2016-12-22 - 2023-12-31
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
 File        : GAUGE.h
@@ -53,12 +53,13 @@ Purpose     : GAUGE public header file (API)
 *    With these flags the drawing of the widget's arc lines can be set to have
 *    round edges. The flags can be used upon creation of the GAUGE widget.
 */
-#define GAUGE_CURVED_VALUE (1 << 0)     // The arc that is drawn for the GAUGE's value will have a
-                                        // curved edge on the beginning and end of the line.
-#define GAUGE_CURVED_END   (1 << 1)     // The background arc will be drawn with a curved edge on the
-                                        // beginning and end of the line.
+#define GAUGE_CURVED_VALUE  (1 << 0)  // The arc that is drawn for the GAUGE's value will have a
+                                      // curved edge on the beginning and end of the line.
+#define GAUGE_CURVED_END    (1 << 1)  // The background arc will be drawn with a curved edge on the
+                                      // beginning and end of the line.
+#define GAUGE_DIRECTION_CCW (1 << 2)  // Widget works counterclockwise
 
-    /*********************************************************************
+/*********************************************************************
 *
 *       Types
 *
@@ -91,6 +92,7 @@ void GAUGE_Callback(WM_MESSAGE *pMsg);
 *
 **********************************************************************
 */
+void GAUGE_EnableCCW      (GAUGE_Handle hObj, int OnOff);
 I32  GAUGE_GetValue       (GAUGE_Handle hObj);
 void GAUGE_GetRange       (GAUGE_Handle hObj, I32 * pAng0, I32 * pAng1);
 void GAUGE_SetAlign       (GAUGE_Handle hObj, int Align);

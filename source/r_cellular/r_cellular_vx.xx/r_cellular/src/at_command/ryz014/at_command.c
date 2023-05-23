@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : at_command.c
@@ -49,7 +49,10 @@ const uint8_t g_ryz014_send_socket[]             = RYZ014_ATC_SEND_SCOKET;
 const uint8_t g_ryz014_recv_socket[]             = RYZ014_ATC_RECV_SCOKET;
 const uint8_t g_ryz014_dns_lookup[]              = RYZ014_ATC_DNS_LOOKUP;
 const uint8_t g_ryz014_ap_config[]               = RYZ014_ATC_AP_CONFIG;
+const uint8_t g_ryz014_private_ap_config[]       = RYZ014_ATC_PRIVATE_AP_CONFIG;
+const uint8_t g_ryz014_ap_config_check[]         = RYZ014_ATC_AP_CONFIG_CHECK;
 const uint8_t g_ryz014_user_config[]             = RYZ014_ATC_USER_CONFIG;
+const uint8_t g_ryz014_clear_config[]            = RYZ014_ATC_CLEAR_CONFIG;
 const uint8_t g_ryz014_socket_config_1[]         = RYZ014_ATC_SOCKET_CONFIG_1;
 const uint8_t g_ryz014_socket_config_2[]         = RYZ014_ATC_SOCKET_CONFIG_2;
 const uint8_t g_ryz014_listening_socket[]        = RYZ014_ATC_LISTENING_SOCKET;
@@ -96,13 +99,19 @@ const uint8_t g_ryz014_atc_factoryreset[]        = RYZ014_ATC_FACTORYRESET;
 const uint8_t g_ryz014_atc_smcwrx[]              = RYZ014_ATC_SMCWRX;
 const uint8_t g_ryz014_atc_smcwtx[]              = RYZ014_ATC_SMCWTX;
 const uint8_t g_ryz014_atc_cgpiaf[]              = RYZ014_ATC_CGPIAF;
-const uint8_t g_ryz014_no_command[]              = RYZ014_NO_COMMAND;
-#if (CELLULAR_IMPLEMENT_TYPE == 'B')
+const uint8_t g_ryz014_atc_ceer[]                = RYZ014_ATC_CEER;
+const uint8_t g_ryz014_atc_firmupgrade[]         = RYZ014_ATC_FIRMUPGRADE;
+const uint8_t g_ryz014_atc_firmupgrade_ssl[]     = RYZ014_ATC_FIRMUPGRADE_SSL;
+const uint8_t g_ryz014_atc_firmupgrade_check[]   = RYZ014_ATC_FIRMUPGRADE_CHECK;
+const uint8_t g_ryz014_atc_get_lr_svn[]          = RYZ014_ATC_GET_LR_SVN;
 const uint8_t g_ryz014_write_certificate[]       = RYZ014_ATC_WRITE_CERTIFICATE;
 const uint8_t g_ryz014_erase_certificate[]       = RYZ014_ATC_ERASE_CERTIFICATE;
+const uint8_t g_ryz014_get_certificate[]         = RYZ014_ATC_GET_CERTIFICATE;
 const uint8_t g_ryz014_config_ssl_profile[]      = RYZ014_ATC_CONFIG_SSL_PROFILE;
+#if (CELLULAR_IMPLEMENT_TYPE == 'B')
 const uint8_t g_ryz014_config_ssl_socket[]       = RYZ014_ATC_CONFIG_SSL_SOCKET;
 #endif
+const uint8_t g_ryz014_no_command[]              = RYZ014_NO_COMMAND;
 
 const uint8_t * const gp_at_command[ATC_LIST_MAX] =
 {
@@ -117,7 +126,10 @@ const uint8_t * const gp_at_command[ATC_LIST_MAX] =
     g_ryz014_recv_socket,
     g_ryz014_dns_lookup,
     g_ryz014_ap_config,
+    g_ryz014_private_ap_config,
+    g_ryz014_ap_config_check,
     g_ryz014_user_config,
+    g_ryz014_clear_config,
     g_ryz014_socket_config_1,
     g_ryz014_socket_config_2,
     g_ryz014_listening_socket,
@@ -164,13 +176,19 @@ const uint8_t * const gp_at_command[ATC_LIST_MAX] =
     g_ryz014_atc_smcwrx,
     g_ryz014_atc_smcwtx,
     g_ryz014_atc_cgpiaf,
-    g_ryz014_no_command,
-#if (CELLULAR_IMPLEMENT_TYPE == 'B')
+    g_ryz014_atc_ceer,
+    g_ryz014_atc_firmupgrade,
+    g_ryz014_atc_firmupgrade_ssl,
+    g_ryz014_atc_firmupgrade_check,
+    g_ryz014_atc_get_lr_svn,
     g_ryz014_write_certificate,
     g_ryz014_erase_certificate,
+    g_ryz014_get_certificate,
     g_ryz014_config_ssl_profile,
+#if (CELLULAR_IMPLEMENT_TYPE == 'B')
     g_ryz014_config_ssl_socket,
 #endif
+    g_ryz014_no_command,
 };
 
 /**********************************************************************************************************************

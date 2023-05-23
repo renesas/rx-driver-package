@@ -38,6 +38,20 @@
 *                               - R_BSP_SINCOSF
 *                               - R_BSP_ATAN2HYPOTF
 *         : 17.12.2019 1.13     Modified the comment of description.
+*         : 28.02.2023 1.14     Modified the comment.
+*                               Added the following function.
+*                               - R_BSP_SINCOSFX
+*                               - R_BSP_SINFX
+*                               - R_BSP_COSFX
+*                               - R_BSP_ATAN2HYPOTFX
+*                               - R_BSP_ATAN2FX
+*                               - R_BSP_HYPOTFX
+*                               - R_BSP_CalcSine_Cosine_Fpn
+*                               - R_BSP_CalcSine_Fpn
+*                               - R_BSP_CalcCosine_Fpn
+*                               - R_BSP_CalcAtan_SquareRoot_Fpn
+*                               - R_BSP_CalcAtan_Fpn
+*                               - R_BSP_CalcSquareRoot_Fpn
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -694,8 +708,9 @@ Macro definitions
 #endif /* __DPFPU */
 #endif /* BSP_MCU_DOUBLE_PRECISION_FLOATING_POINT */
 
-/* ---------- Initializing Arithmetic Unit for Trigonometric Functions ---------- */
+/* ---------- Initializes the trigonometric function unit. ---------- */
 #ifdef BSP_MCU_TRIGONOMETRIC
+#if BSP_MCU_TFU_VERSION == 1
 #if defined(__CCRX__)
 
 /* void __init_tfu(void) */
@@ -711,10 +726,11 @@ Macro definitions
 /* Invalid for ICCRX.
    Because the initilaze function of TFU is called automatically when the TFU function is called. */
 #define R_BSP_INIT_TFU()      
-
+#endif /* BSP_MCU_TFU_VERSION == 1 */
 #endif
 
-/* ---------- Calculating the Sine and Cosine of an angle at the same time(single precision) ---------- */
+/* ---------- Uses the trigonometric function unit to calculate the sine and cosine of an angle at the same time.
+   (single precision) ---------- */
 #if defined(__CCRX__)
 
 /* void __sincosf(float f, float *sin, float *cos) */
@@ -727,12 +743,13 @@ Macro definitions
 
 #elif defined(__ICCRX__)
 
-/* void R_BSP_CalcSine_Cosine(float f, float *sin, float *cos) (This macro uses API function of BSP.) */
+/* void  __sincosf(float _F, float *dstSin, float *dstCos) */
 #define R_BSP_SINCOSF(x, y, z)    __sincosf((float)(x), (float *)(y), (float *)(z))
 
 #endif
 
-/* ---------- Initializing Arithmetic Unit for Trigonometric Functions ---------- */
+/* ---------- Uses the trigonometric function unit to calculate the arc tangent of x and y and the square root of the 
+   sum of squares of these values at the same time. (single precision) ---------- */
 #if defined(__CCRX__)
 
 /* void __atan2hypotf(float y, float x, float *atan2, float *hypot) */
@@ -746,11 +763,153 @@ Macro definitions
 
 #elif defined(__ICCRX__)
 
-/* void R_BSP_CalcAtan_SquareRoot(float y, float x, float *atan2, float *hypot)
-   (This macro uses API function of BSP.) */
+/* void  __atan2hypotf(float _Y, float _X, float *dstAtan2, float *dstHypot) */
 #define R_BSP_ATAN2HYPOTF(w, x, y, z)    __atan2hypotf((float)(w), (float)(x), (float *)(y), (float *)(z))
 
 #endif
+
+#if BSP_MCU_TFU_VERSION == 2
+/* ---------- Uses the trigonometric function unit to calculate the sine and cosine of an angle.
+   (fixed-point numbers) ---------- */
+#if defined(__CCRX__)
+
+#if __RENESAS_VERSION__ >= 0x03050000
+/* void __sincosfx(signed long fx, signed long *sin, signed long *cos) */
+#define R_BSP_SINCOSFX(x, y, z)    __sincosfx((int32_t)(x), (int32_t *)(y), (int32_t *)(z))
+#else
+#define R_BSP_SINCOSFX(x, y, z)    
+#endif
+
+#elif defined(__GNUC__)
+
+/* void R_BSP_CalcSine_Cosine_Fpn(int32_t fx, int32_t *sin, int32_t *cos) (This macro uses API function of BSP.) */
+#define R_BSP_SINCOSFX(x, y, z)    R_BSP_CalcSine_Cosine_Fpn((int32_t)(x), (int32_t *)(y), (int32_t *)(z))
+
+#elif defined(__ICCRX__)
+
+/* void R_BSP_CalcSine_Cosine_Fpn(int32_t fx, int32_t *sin, int32_t *cos) (This macro uses API function of BSP.) */
+#define R_BSP_SINCOSFX(x, y, z)    R_BSP_CalcSine_Cosine_Fpn((int32_t)(x), (int32_t *)(y), (int32_t *)(z))
+
+#endif
+
+/* ---------- Uses the trigonometric function unit to calculate the sine of an angle. (fixed-point numbers)
+   ---------- */
+#if defined(__CCRX__)
+
+#if __RENESAS_VERSION__ >= 0x03050000
+/* signed long __sinfx(signed long fx) */
+#define R_BSP_SINFX(x)    __sinfx((int32_t)(x))
+#else
+#define R_BSP_SINFX(x)    
+#endif
+
+#elif defined(__GNUC__)
+
+/* int32_t R_BSP_CalcSine_Fpn(int32_t fx) (This macro uses API function of BSP.) */
+#define R_BSP_SINFX(x)    R_BSP_CalcSine_Fpn((int32_t)(x))
+
+#elif defined(__ICCRX__)
+
+/* int32_t R_BSP_CalcSine_Fpn(int32_t fx) (This macro uses API function of BSP.) */
+#define R_BSP_SINFX(x)    R_BSP_CalcSine_Fpn((int32_t)(x))
+
+#endif
+
+/* ---------- Uses the trigonometric function unit to calculate the cosine of an angle. (fixed-point numbers)
+   ---------- */
+#if defined(__CCRX__)
+
+#if __RENESAS_VERSION__ >= 0x03050000
+/* signed long __cosfx(signed long fx) */
+#define R_BSP_COSFX(x)    __cosfx((int32_t)(x))
+#else
+#define R_BSP_COSFX(x)    
+#endif
+
+#elif defined(__GNUC__)
+
+/* int32_t R_BSP_CalcCosine_Fpn(int32_t fx) (This macro uses API function of BSP.) */
+#define R_BSP_COSFX(x)    R_BSP_CalcCosine_Fpn((int32_t)(x))
+
+#elif defined(__ICCRX__)
+
+/* int32_t R_BSP_CalcCosine_Fpn(int32_t fx) (This macro uses API function of BSP.) */
+#define R_BSP_COSFX(x)    R_BSP_CalcCosine_Fpn((int32_t)(x))
+
+#endif
+
+/* ---------- Uses the trigonometric function unit to calculate the arc tangent of x and y and the square root of the 
+   sum of squares of these values. (fixed-point numbers) ---------- */
+#if defined(__CCRX__)
+
+#if __RENESAS_VERSION__ >= 0x03050000
+/* __atan2hypotfx(signed long y, signed long x, signed long *atan2, signed long *hypot) */
+#define R_BSP_ATAN2HYPOTFX(w, x, y, z)    __atan2hypotfx((int32_t)(w), (int32_t)(x), (int32_t *)(y), (int32_t *)(z))
+#else
+#define R_BSP_ATAN2HYPOTFX(w, x, y, z)    
+#endif
+
+#elif defined(__GNUC__)
+
+/* void R_BSP_CalcAtan_SquareRoot_Fpn(int32_t y, int32_t x, int32_t *atan2, int32_t *hypot)
+   (This macro uses API function of BSP.) */
+#define R_BSP_ATAN2HYPOTFX(w, x, y, z)    R_BSP_CalcAtan_SquareRoot_Fpn((int32_t)(w), (int32_t)(x), (int32_t *)(y), (int32_t *)(z))
+
+#elif defined(__ICCRX__)
+
+/* void R_BSP_CalcAtan_SquareRoot_Fpn(int32_t y, int32_t x, int32_t *atan2, int32_t *hypot)
+   (This macro uses API function of BSP.) */
+#define R_BSP_ATAN2HYPOTFX(w, x, y, z)    R_BSP_CalcAtan_SquareRoot_Fpn((int32_t)(w), (int32_t)(x), (int32_t *)(y), (int32_t *)(z))
+
+#endif
+
+/* ---------- Uses the trigonometric function unit to calculate the arc tangent of x and y. (fixed-point numbers)
+   ---------- */
+#if defined(__CCRX__)
+
+#if __RENESAS_VERSION__ >= 0x03050000
+/* signed long __atan2fx(signed long y, signed long x) */
+#define R_BSP_ATAN2FX(x, y)    __atan2fx((int32_t)(x), (int32_t)(y))
+#else
+#define R_BSP_ATAN2FX(x, y)    
+#endif
+
+#elif defined(__GNUC__)
+
+/* int32_t R_BSP_CalcAtan_Fpn(int32_t y, int32_t x) (This macro uses API function of BSP.) */
+#define R_BSP_ATAN2FX(x, y)    R_BSP_CalcAtan_Fpn((int32_t)(x), (int32_t)(y))
+
+#elif defined(__ICCRX__)
+
+/* int32_t R_BSP_CalcAtan_Fpn(int32_t y, int32_t x) (This macro uses API function of BSP.) */
+#define R_BSP_ATAN2FX(x, y)    R_BSP_CalcAtan_Fpn((int32_t)(x), (int32_t)(y))
+
+#endif
+
+/* ---------- Uses the trigonometric function unit to calculate the square root of the 
+   sum of squares of x and y. (fixed-point numbers) ---------- */
+#if defined(__CCRX__)
+
+#if __RENESAS_VERSION__ >= 0x03050000
+/* signed long __hypotfx(signed long x, signed long y) */
+#define R_BSP_HYPOTFX(x, y)    __hypotfx((int32_t)(x), (int32_t)(y))
+#else
+#define R_BSP_HYPOTFX(x, y)    
+#endif
+
+#elif defined(__GNUC__)
+
+/* int32_t R_BSP_CalcSquareRoot_Fpn(int32_t x, int32_t y) (This macro uses API function of BSP.) */
+#define R_BSP_HYPOTFX(x, y)    R_BSP_CalcSquareRoot_Fpn((int32_t)(x), (int32_t)(y))
+
+#elif defined(__ICCRX__)
+
+/* int32_t R_BSP_CalcSquareRoot_Fpn(int32_t x, int32_t y) (This macro uses API function of BSP.) */
+#define R_BSP_HYPOTFX(x, y)    R_BSP_CalcSquareRoot_Fpn((int32_t)(x), (int32_t)(y))
+
+#endif
+
+#endif /* BSP_MCU_TFU_VERSION == 2 */
 #endif /* BSP_MCU_TRIGONOMETRIC */
 
 /***********************************************************************************************************************
@@ -809,11 +968,21 @@ void *R_BSP_GetDEPC(void);
 #endif
 #ifdef BSP_MCU_TRIGONOMETRIC
 #ifdef __TFU
+#if BSP_MCU_TFU_VERSION == 1
 R_BSP_ATTRIB_INLINE_ASM void R_BSP_InitTFU(void);
+#endif /* BSP_MCU_TFU_VERSION == 1 */
 #ifdef __FPU
 R_BSP_ATTRIB_INLINE_ASM void R_BSP_CalcSine_Cosine(float f, float *sin, float *cos);
 R_BSP_ATTRIB_INLINE_ASM void R_BSP_CalcAtan_SquareRoot(float y, float x, float *atan2, float *hypot);
 #endif /* __FPU */
+#if BSP_MCU_TFU_VERSION == 2
+R_BSP_ATTRIB_INLINE_ASM void R_BSP_CalcSine_Cosine_Fpn(int32_t f, int32_t *sin, int32_t *cos);
+int32_t R_BSP_CalcSine_Fpn(int32_t fx);
+int32_t R_BSP_CalcCosine_Fpn(int32_t fx);
+R_BSP_ATTRIB_INLINE_ASM void R_BSP_CalcAtan_SquareRoot_Fpn(int32_t y, int32_t x, int32_t *atan2, int32_t *hypot);
+int32_t R_BSP_CalcAtan_Fpn(int32_t y, int32_t x);
+int32_t R_BSP_CalcSquareRoot_Fpn(int32_t y, int32_t x);
+#endif /* BSP_MCU_TFU_VERSION == 2 */
 #endif /* __TFU */
 #endif
 

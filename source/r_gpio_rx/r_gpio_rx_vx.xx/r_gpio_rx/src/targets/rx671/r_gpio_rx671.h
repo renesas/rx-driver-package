@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_gpio_rx671.h
@@ -23,6 +23,8 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 07.04.2021 1.00    First Release
+*         : 07.04.2023 2.00    Updated P05 for RX671 64-pin,
+*                              Updated P71 and P72 for RX671 145-pin and 144-pin.
 ***********************************************************************************************************************/
 #ifndef GPIO_RX671
 #define GPIO_RX671
@@ -44,11 +46,19 @@ Macro definitions
 #define GPIO_INFO_NUM_PORTS                 (19)
 
 #if ((BSP_PACKAGE_PINS == 145)||(BSP_PACKAGE_PINS == 144))
+#if (BSP_CFG_MCU_PART_PACKAGE == 0x0)
+    #define GPIO_INFO_NUM_PINS              (112)
+#else
     #define GPIO_INFO_NUM_PINS              (114)
+#endif
 #elif (BSP_PACKAGE_PINS == 100)
     #define GPIO_INFO_NUM_PINS              (81)
 #elif (BSP_PACKAGE_PINS == 64)
+#if (BSP_CFG_MCU_PART_PACKAGE != 0xC)
     #define GPIO_INFO_NUM_PINS              (45)
+#else
+    #define GPIO_INFO_NUM_PINS              (44)
+#endif
 #elif (BSP_PACKAGE_PINS == 48)
     #define GPIO_INFO_NUM_PINS              (34)
 #else
@@ -112,7 +122,11 @@ typedef enum
     GPIO_PORT4_PIN_MASK = 0xFF,    /* Available pins: P40 to P47            */
     GPIO_PORT5_PIN_MASK = 0x7F,    /* Available pins: P50 to P56            */
     GPIO_PORT6_PIN_MASK = 0xFF,    /* Available pins: P60 to P67            */
+#if BSP_CFG_MCU_PART_PACKAGE == 0x0
+    GPIO_PORT7_PIN_MASK = 0xF9,    /* Available pins: P70, P73 to P77       */
+#else
     GPIO_PORT7_PIN_MASK = 0xFF,    /* Available pins: P70 to P77            */
+#endif
     GPIO_PORT8_PIN_MASK = 0xCF,    /* Available pins: P80 to P83, P86, P87  */
     GPIO_PORT9_PIN_MASK = 0x0F,    /* Available pins: P90 to P93            */
     GPIO_PORTA_PIN_MASK = 0xFF,    /* Available pins: PA0 to PA7            */
@@ -180,8 +194,10 @@ typedef enum
     GPIO_PORT_6_PIN_6 = 0x0606,
     GPIO_PORT_6_PIN_7 = 0x0607,
     GPIO_PORT_7_PIN_0 = 0x0700,
+#if BSP_CFG_MCU_PART_PACKAGE != 0x0
     GPIO_PORT_7_PIN_1 = 0x0701,
     GPIO_PORT_7_PIN_2 = 0x0702,
+#endif
     GPIO_PORT_7_PIN_3 = 0x0703,
     GPIO_PORT_7_PIN_4 = 0x0704,
     GPIO_PORT_7_PIN_5 = 0x0705,
@@ -371,7 +387,9 @@ typedef enum
 /* This enumerator has each available GPIO port on this MCU. This list will change depending on the MCU chosen. */
 typedef enum
 {
+#if (BSP_CFG_MCU_PART_PACKAGE != 0xC)
     GPIO_PORT_0 = 0x0000,
+#endif
     GPIO_PORT_1 = 0x0100,
     GPIO_PORT_2 = 0x0200,
     GPIO_PORT_3 = 0x0300,
@@ -388,7 +406,9 @@ typedef enum
 /* This enumerator has a bit mask for each available GPIO pin for the given port on this MCU. */
 typedef enum
 {
+#if (BSP_CFG_MCU_PART_PACKAGE != 0xC)
     GPIO_PORT0_PIN_MASK = 0x20,    /* Available pins: P05                     */
+#endif
     GPIO_PORT1_PIN_MASK = 0xCC,    /* Available pins: P12, P13, P16, P17      */
     GPIO_PORT2_PIN_MASK = 0xC0,    /* Available pins: P26, P27                */
     GPIO_PORT3_PIN_MASK = 0xF3,    /* Available pins: P30, P31, P34 to P37    */
@@ -405,7 +425,9 @@ typedef enum
 /* This enumerator has each available GPIO pin on this MCU. This list will change depending on the MCU chosen. */
 typedef enum
 {
+#if (BSP_CFG_MCU_PART_PACKAGE != 0xC)
     GPIO_PORT_0_PIN_5 = 0x0005,
+#endif
     GPIO_PORT_1_PIN_2 = 0x0102,
     GPIO_PORT_1_PIN_3 = 0x0103,
     GPIO_PORT_1_PIN_6 = 0x0106,

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014-2022 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_rx_if.h
@@ -153,8 +153,10 @@
 *           23.04.2021 4.80    Added support for RX140.
 *           10.12.2021 4.81    Added support for Tool News R20TS0765, R20TS0772, and some minor updates.
 *           13.05.2022 4.90    Added support for RX660.
-*                              Added support for Tool News R20TS0818. 
+*                              Added support for Tool News R20TS0818, and Technical Update TN-RX*-A0261A. 
 *           23.12.2022 4.91    Fixed typos in app note. 
+*           24.01.2023 5.00    Added support for RX26T. Added Flash Type 5.
+*                              Added support for Tool News R20TS0872. 
 ***********************************************************************************************************************/
 
 #ifndef FLASH_INTERFACE_HEADER_FILE
@@ -171,8 +173,8 @@
 Macro definitions
 ***********************************************************************************************************************/
 /* Driver Version Number. */
-#define FLASH_RX_VERSION_MAJOR           (4)
-#define FLASH_RX_VERSION_MINOR           (91)
+#define FLASH_RX_VERSION_MAJOR           (5)
+#define FLASH_RX_VERSION_MINOR           (00)
 
 
 /***********************************************************************************************************************
@@ -184,6 +186,7 @@ Typedef definitions
 #define FLASH_TYPE_1    1
 #define FLASH_TYPE_3    3
 #define FLASH_TYPE_4    4
+#define FLASH_TYPE_5    5
 
 #if (defined(MCU_RX110) || defined(MCU_RX111) || defined(MCU_RX113) || \
      defined(MCU_RX130) || defined(MCU_RX231) || defined(MCU_RX23T) || \
@@ -199,6 +202,9 @@ Typedef definitions
 #elif (defined(MCU_RX651) || defined(MCU_RX65N) || defined(MCU_RX72M) || \
        defined(MCU_RX66N) || defined(MCU_RX72N) || defined(MCU_RX671))
 #define FLASH_TYPE              FLASH_TYPE_4
+
+#elif (defined(MCU_RX26T))
+#define FLASH_TYPE              FLASH_TYPE_5
 #endif
 
 #define FLASH_TYPE_VARIETY_A    (1)
@@ -243,19 +249,20 @@ Typedef definitions
 #endif
 
 #if (defined(MCU_RX64_ALL) || defined(MCU_RX65_ALL) || defined(MCU_RX66_ALL) || \
-     defined(MCU_RX71_ALL) || defined(MCU_RX72_ALL) || defined(MCU_RX67_ALL))
+     defined(MCU_RX71_ALL) || defined(MCU_RX72_ALL) || defined(MCU_RX67_ALL) || \
+     defined(MCU_RX26T))
 #define FLASH_HAS_DIFF_CF_BLOCK_SIZES   1
 #endif
 
-#if ((FLASH_TYPE == 1) || (FLASH_TYPE == 4))
+#if ((FLASH_TYPE == 1) || (FLASH_TYPE == 4) || (FLASH_TYPE == 5))
 #define FLASH_HAS_BOOT_SWAP     1
 #endif
 
-#if (((FLASH_TYPE == 4) && (MCU_ROM_SIZE_BYTES >= 1572864)) || defined(MCU_RX67_ALL))
+#if (((FLASH_TYPE == 4) && (MCU_ROM_SIZE_BYTES >= 1572864)) || defined(MCU_RX67_ALL) || (FLASH_TYPE == 5))
 #define FLASH_HAS_APP_SWAP      1
 #endif
 
-#if ((FLASH_TYPE == 1) || (FLASH_TYPE == 4))
+#if ((FLASH_TYPE == 1) || (FLASH_TYPE == 4) || (FLASH_TYPE == 5))
 #define FLASH_HAS_CF_ACCESS_WINDOW  1
 #endif
 
@@ -267,7 +274,7 @@ Typedef definitions
 #define FLASH_HAS_ERR_ISR           (1)
 #endif
 
-#if ((FLASH_TYPE == 3) || (FLASH_TYPE == 4))
+#if ((FLASH_TYPE == 3) || (FLASH_TYPE == 4) || (FLASH_TYPE == 5))
 #define FLASH_HAS_FCU               (1)
 #endif
 
@@ -275,7 +282,7 @@ Typedef definitions
 #define FLASH_HAS_FCU_RAM_ENABLE    (1)
 #endif
 
-#if ((FLASH_TYPE == 4) && (FLASH_HAS_APP_SWAP == 1) && (BSP_CFG_CODE_FLASH_BANK_MODE == 0) && (FLASH_CFG_CODE_FLASH_ENABLE == 1))
+#if (((FLASH_TYPE == 4) || (FLASH_TYPE == 5)) && (FLASH_HAS_APP_SWAP == 1) && (BSP_CFG_CODE_FLASH_BANK_MODE == 0) && (FLASH_CFG_CODE_FLASH_ENABLE == 1))
 #define FLASH_IN_DUAL_BANK_MODE     (1)
 #endif
 
@@ -523,6 +530,9 @@ typedef union _flash_control_arg
 
 #elif (FLASH_TYPE == FLASH_TYPE_4)
 #include "r_flash_type4_if.h"
+
+#elif (FLASH_TYPE == FLASH_TYPE_5)
+#include "r_flash_type5_if.h"
 #endif
 
 

@@ -92,6 +92,10 @@ r_riic_rx
         |      r_riic_rx24u.c
         |      r_riic_rx24u_private.h
         |
+        +---rx26t
+        |      r_riic_rx26t.c
+        |      r_riic_rx26t_private.h
+        |
         +---rx64m
         |      r_riic_rx64m.c
         |      r_riic_rx64m_private.h

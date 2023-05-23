@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_task_ctrl.c
@@ -49,7 +49,12 @@
  ***************************************************************************/
 e_cellular_err_t cellular_start_recv_task(st_cellular_ctrl_t * const p_ctrl)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
+    uint16_t         thread_size = CELLULAR_RECV_THREAD_SIZE;
+    e_cellular_err_t ret         = CELLULAR_SUCCESS;
+
+#if BSP_CFG_RTOS_USED == (1)
+    thread_size /= (uint16_t)sizeof(configSTACK_DEPTH_TYPE);    //cast
+#endif
 
     p_ctrl->eventgroup = cellular_create_event_group("task_event");
     if (NULL == p_ctrl->eventgroup)
@@ -60,7 +65,7 @@ e_cellular_err_t cellular_start_recv_task(st_cellular_ctrl_t * const p_ctrl)
     {
         ret = cellular_create_task(cellular_recv_task,
                                     CELLULAR_RECV_TASK_NAME,
-                                    CELLULAR_RECV_THREAD_SIZE,
+                                    thread_size,
                                     (void *)p_ctrl, //(st_cellular_ctrl_t *)->(void *)
                                     CELLULAR_IDLE_PRIORITY,
                                     &p_ctrl->recv_taskhandle);

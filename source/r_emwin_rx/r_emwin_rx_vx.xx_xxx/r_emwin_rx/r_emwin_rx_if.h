@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_emwin_rx_if.h
@@ -33,6 +33,7 @@
  *         : 31.08.2022 6.26.c.1.00    Update emWin library to v6.26c.
  *                                     Update FIT module version.
  *                                     Added preprocessor condition by LCD interface.
+ *         : 31.03.2023 6.32.a.1.00    Update emWin library to v6.32a.
  *********************************************************************************************************************/
 #ifndef EMWIN_RX_IF_H
 #define EMWIN_RX_IF_H
@@ -51,8 +52,8 @@
  *********************************************************************************************************************/
 /* Version number of emWin FIT module. */
 #define EMWIN_VERSION_EMWIN_MAJOR   (6)
-#define EMWIN_VERSION_EMWIN_MINOR   (26)
-#define EMWIN_VERSION_EMWIN_CHAR    ('c')
+#define EMWIN_VERSION_EMWIN_MINOR   (32)
+#define EMWIN_VERSION_EMWIN_CHAR    ('a')
 #define EMWIN_VERSION_FIT_MAJOR     (1)
 #define EMWIN_VERSION_FIT_MINOR     (0)
 

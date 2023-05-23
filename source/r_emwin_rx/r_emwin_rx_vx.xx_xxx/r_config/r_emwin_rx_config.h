@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_emwin_rx_config.h
@@ -31,6 +31,10 @@
 *                                     Adjust configuration option with Smart Configurator.
 *         : 31.08.2022 6.26.c.1.00    Update emWin library to v6.26c.
 *                                     Added support for SPI interface LCD.
+*         : 31.03.2023 6.32.a.1.00    Update emWin library to v6.32a.
+*                                     Added EMWIN_USE_RUNTIME_ORIENTATION definition for runtime orientation support.
+*                                     Added EMWIN_DMAC_NUMBER2 and EMWIN_SELECT_DMAC_DTC definition for
+*                                     DMAC/DTC support of SPI interface LCD.
 ***********************************************************************************************************************/
 #ifndef R_EMWIN_RX_CONFIG_H
 #define R_EMWIN_RX_CONFIG_H
@@ -134,12 +138,19 @@ Configuration Options
 
 #endif /* QE_EMWIN_CONFIGURATION */
 
+/* Basic - other */
+#define EMWIN_USE_RUNTIME_ORIENTATION (0)
 
 /* LCD Interface - GLCDC(RGB) - other */
 #define EMWIN_NUM_BUFFERS             (2)
 #define EMWIN_GUI_FRAME_BUFFER3       (0x00000000)
-#define EMWIN_DMAC_NUMBER             (0)
-#define EMWIN_INIT_DMAC               (1)
 
+/* LCD Interface - Commmon - other */
+#define EMWIN_INIT_DMAC               (1)
+#define EMWIN_DMAC_NUMBER             (0)
+
+/* LCD Interface - RSPI&SCI_SPI(SPI) - other */
+#define EMWIN_DMAC_NUMBER2            (1)
+#define EMWIN_SELECT_DMAC_DTC         (2)
 
 #endif /* R_EMWIN_RX_CONFIG_H */

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2022 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_sci_rx_if.h
@@ -73,6 +73,12 @@
 *           27.12.2022 4.60    Fixed the issue that rx_idle is not changed to true when reception is complete 
 *                              in DMAC mode.
 *                              Updated macro definition enable and disable nested interrupt for TXI, RXI, ERI, TEI.
+*           16.02.2023 4.70    Fixed a bug that return wrong value in sci_init_bit_rate() function.
+*                              Fixed a bug in sci_send_sync_data() function with DTC mode.
+*           31.03.2023 4.80    Added support for RX26T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*                              Removed byteq header include in SYNC mode and SSPI mode.
+*                              Moved the source code which checks for IRDA mode support to MDF file.
 ***********************************************************************************************************************/
 
 #ifndef SCI_IF_H
@@ -83,7 +89,9 @@ Includes   <System Includes> , "Project Includes"
 ***********************************************************************************************************************/
 #include "platform.h"
 #include "r_sci_rx_config.h"  /* SCI config definitions */
+#if (SCI_CFG_ASYNC_INCLUDED && SCI_CFG_USE_CIRCULAR_BUFFER)
 #include "r_byteq_config.h"
+#endif
 /***********************************************************************************************************************
 Macro definitions
 ***********************************************************************************************************************/
@@ -92,7 +100,7 @@ Macro definitions
     #error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
 #endif
 
-#if (SCI_CFG_USE_CIRCULAR_BUFFER == 1)
+#if (SCI_CFG_ASYNC_INCLUDED && SCI_CFG_USE_CIRCULAR_BUFFER)
 #if (BYTEQ_CFG_PROTECT_QUEUE == 0)
     #error "Circular buffer must be protected."
 #endif
@@ -100,7 +108,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define SCI_VERSION_MAJOR  (4)
-#define SCI_VERSION_MINOR  (60)
+#define SCI_VERSION_MINOR  (80)
 
 #define SCI_DTC_DMACA_DISABLE  (0x0)
 #define SCI_DTC_ENABLE         (0x1)
@@ -111,13 +119,15 @@ Macro definitions
                             SCI_CFG_CH1_TX_DTC_DMACA_ENABLE  | SCI_CFG_CH2_TX_DTC_DMACA_ENABLE | \
                             SCI_CFG_CH3_TX_DTC_DMACA_ENABLE  | SCI_CFG_CH4_TX_DTC_DMACA_ENABLE | \
                             SCI_CFG_CH5_TX_DTC_DMACA_ENABLE  | SCI_CFG_CH6_TX_DTC_DMACA_ENABLE | \
-                            SCI_CFG_CH7_TX_DTC_DMACA_ENABLE  | SCI_CFG_CH12_TX_DTC_DMACA_ENABLE | SCI_CFG_CH0_TX_DTC_DMACA_ENABLE)
+                            SCI_CFG_CH7_TX_DTC_DMACA_ENABLE  | SCI_CFG_CH12_TX_DTC_DMACA_ENABLE | \
+                            SCI_CFG_CH0_TX_DTC_DMACA_ENABLE)
 #define RX_DTC_DMACA_ENABLE (SCI_CFG_CH8_RX_DTC_DMACA_ENABLE | SCI_CFG_CH9_RX_DTC_DMACA_ENABLE | \
                             SCI_CFG_CH10_RX_DTC_DMACA_ENABLE | SCI_CFG_CH11_RX_DTC_DMACA_ENABLE | \
                             SCI_CFG_CH1_RX_DTC_DMACA_ENABLE  | SCI_CFG_CH2_RX_DTC_DMACA_ENABLE | \
                             SCI_CFG_CH3_RX_DTC_DMACA_ENABLE  | SCI_CFG_CH4_RX_DTC_DMACA_ENABLE | \
                             SCI_CFG_CH5_RX_DTC_DMACA_ENABLE  | SCI_CFG_CH6_RX_DTC_DMACA_ENABLE | \
-                            SCI_CFG_CH7_RX_DTC_DMACA_ENABLE  | SCI_CFG_CH12_RX_DTC_DMACA_ENABLE | SCI_CFG_CH0_RX_DTC_DMACA_ENABLE)
+                            SCI_CFG_CH7_RX_DTC_DMACA_ENABLE  | SCI_CFG_CH12_RX_DTC_DMACA_ENABLE | \
+                            SCI_CFG_CH0_RX_DTC_DMACA_ENABLE)
 
 #define SCI_CLK_INT         (0x00U) /* use internal clock for baud generation */
 #define SCI_CLK_EXT8X       (0x03U) /* use external clock 8x baud rate (ASYNC) */
@@ -311,7 +321,8 @@ typedef enum e_sci_cmd
 {
     /* All modes */
     SCI_CMD_CHANGE_BAUD,              /* change baud/bit rate */
-#if ((SCI_CFG_CH7_FIFO_INCLUDED) || (SCI_CFG_CH8_FIFO_INCLUDED) || (SCI_CFG_CH9_FIFO_INCLUDED)  || (SCI_CFG_CH10_FIFO_INCLUDED) || (SCI_CFG_CH11_FIFO_INCLUDED))
+#if ((SCI_CFG_CH7_FIFO_INCLUDED) || (SCI_CFG_CH8_FIFO_INCLUDED) || (SCI_CFG_CH9_FIFO_INCLUDED)  || \
+        (SCI_CFG_CH10_FIFO_INCLUDED) || (SCI_CFG_CH11_FIFO_INCLUDED))
     SCI_CMD_CHANGE_TX_FIFO_THRESH,    /* change TX FIFO threshold */
     SCI_CMD_CHANGE_RX_FIFO_THRESH,    /* change RX FIFO threshold */
 #endif
@@ -377,32 +388,32 @@ typedef struct st_sci_baud
 /*****************************************************************************
 Public Functions
 ******************************************************************************/
-sci_err_t R_SCI_Open(uint8_t const      chan,
-                     sci_mode_t const   mode,
-                     sci_cfg_t * const  p_cfg,
-                     void               (* const p_callback)(void *p_args),
-                     sci_hdl_t * const  p_hdl);
+sci_err_t R_SCI_Open (uint8_t const      chan,
+                    sci_mode_t const   mode,
+                    sci_cfg_t * const  p_cfg,
+                    void               (* const p_callback)(void *p_args),
+                    sci_hdl_t * const  p_hdl);
 
-sci_err_t R_SCI_Send(sci_hdl_t const    hdl,
-                     uint8_t            *p_src,
-                     uint16_t const     length);
+sci_err_t R_SCI_Send (sci_hdl_t const    hdl,
+                    uint8_t            *p_src,
+                    uint16_t const     length);
                     
-sci_err_t R_SCI_SendReceive(sci_hdl_t const hdl,        /* SSPI/SYNC only */
+sci_err_t R_SCI_SendReceive (sci_hdl_t const hdl,        /* SSPI/SYNC only */
                             uint8_t         *p_src,
                             uint8_t         *p_dst,
                             uint16_t const  length);
 
-sci_err_t R_SCI_Receive(sci_hdl_t const hdl,
+sci_err_t R_SCI_Receive (sci_hdl_t const hdl,
                         uint8_t         *p_dst,
                         uint16_t const  length);
 
-sci_err_t R_SCI_Control(sci_hdl_t const     hdl,
+sci_err_t R_SCI_Control (sci_hdl_t const     hdl,
                         sci_cmd_t const     cmd,
                         void                *p_args);
 
-sci_err_t R_SCI_Close(sci_hdl_t const hdl);
+sci_err_t R_SCI_Close (sci_hdl_t const hdl);
 
-uint32_t  R_SCI_GetVersion(void);
+uint32_t  R_SCI_GetVersion (void);
 
                                     
 #endif /* SCI_IF_H */

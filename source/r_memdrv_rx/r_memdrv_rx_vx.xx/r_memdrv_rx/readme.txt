@@ -5,12 +5,12 @@ r_memdrv_rx (Serial memory driver interface software)
 
 Document Number 
 ---------------
-R01AN4548EJ0104
-R01AN4548JJ0104
+R01AN4548EJ0105
+R01AN4548JJ0105
 
 Version
 -------
-v1.04
+v1.05
 
 Overview
 --------
@@ -45,7 +45,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp    v6.11
+* r_bsp    v7.21
 
 How to add to your project
 --------------------------
@@ -80,9 +80,9 @@ Refer to "RX Smart Configurator User's Guide: IAREW (R20AN0535)" for details.
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.03 release 00
+* Renesas RX v3.04 release 00
 * GCC for Renesas RX 8.3.0
-* IAR C/C++ Compiler for Renesas RX 4.20.1
+* IAR C/C++ Compiler for Renesas RX 4.20.3
 
 File Structure
 --------------
@@ -93,13 +93,14 @@ r_memdrv_rx
 +---doc
 |   |
 |   +---en
-|   |       r01an4548ej0104-rx-serial.pdf
+|   |       r01an4548ej{VERSION_NUMBER}-rx-serial.pdf
 |   +---ja
-|           r01an4548jj0104-rx-serial.pdf
+|           r01an4548jj{VERSION_NUMBER}-rx-serial.pdf
 |
 |
 +---src
     |   r_memdrv_rx.c
+    |   r_memdrv_rsci.c
     |   r_memdrv_rspi.c
     |   r_memdrv_qspi.c
     |   r_memdrv_qspix.c

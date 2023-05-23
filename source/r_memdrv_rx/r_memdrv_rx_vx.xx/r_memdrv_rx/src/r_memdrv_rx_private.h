@@ -19,11 +19,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018(2021) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018(2023) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_memdrv_private.h
-* Version      : 1.04
+* Version      : 1.05
 * Description  : MEMDRV driver private header file
 *************************************************************************************************/
 /************************************************************************************************
@@ -32,7 +32,8 @@
 *              : 04.04.2019 1.01     Added support for GNUC and ICCRX.
 *                                    Fixed coding style.
 *              : 22.11.2019 1.02     Modified check driver interface.
-*              : 30.10.2021 1.04     Add the QSPIX FIT Moudle.
+*              : 30.10.2021 1.04     Added the QSPIX FIT Module.
+*              : 16.03.2023 1.05     Added support for RSCI and QSPIX Memory Mapped Mode.
 *************************************************************************************************/
 
 /************************************************************************************************
@@ -51,9 +52,15 @@ Includes <System Includes> , "Project Includes"
     ((MEMDRV_CFG_DEV1_INCLUDED == 1) && (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_SCI_SPI))
 #include "r_sci_rx_if.h"
 #endif
-#if ((MEMDRV_CFG_DEV0_INCLUDED == 1) && (MEMDRV_CFG_DEV0_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_IAM)) || \
-    ((MEMDRV_CFG_DEV1_INCLUDED == 1) && (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_IAM))
+#if ((MEMDRV_CFG_DEV0_INCLUDED == 1) && ((MEMDRV_CFG_DEV0_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_IAM) || \
+     (MEMDRV_CFG_DEV0_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_MMM))) || \
+    ((MEMDRV_CFG_DEV1_INCLUDED == 1) && ((MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_IAM) || \
+     (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_MMM)))
 #include "r_qspix_rx_if.h"
+#endif
+#if ((MEMDRV_CFG_DEV0_INCLUDED == 1) && (MEMDRV_CFG_DEV0_MODE_DRVR == MEMDRV_DRVR_RX_FIT_RSCI_SPI)) || \
+    ((MEMDRV_CFG_DEV1_INCLUDED == 1) && (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_RSCI_SPI))
+#include "r_rsci_rx_if.h"
 #endif
 #if ((MEMDRV_CFG_DEV0_INCLUDED == 1) && (MEMDRV_CFG_DEV0_MODE_TRNS == MEMDRV_TRNS_DMAC)) || \
     ((MEMDRV_CFG_DEV1_INCLUDED == 1) && (MEMDRV_CFG_DEV1_MODE_TRNS == MEMDRV_TRNS_DMAC))
@@ -98,13 +105,14 @@ Macro definitions
 #define MEMDRV_DEV_NUM                    (2)
 
 #define MEMDRV_DRVR_MASK_CH               (0x0000000ful)
-#define MEMDRV_DRVR_MASK_TYPE             (0x00000f00ul)
+#define MEMDRV_DRVR_MASK_TYPE             (0x0000ff00ul)
 
 #define MEMDRV_INDX_RSPI                  (0)
 #define MEMDRV_INDX_QSPI_SMSTR            (1)
 #define MEMDRV_INDX_SCI_SPI               (2)
-#define MEMDRV_INDX_QSPIX_IAM             (3)
-#define MEMDRV_INDX_DRVR_NUM              (4)
+#define MEMDRV_INDX_QSPIX                 (3)
+#define MEMDRV_INDX_RSCI_SPI              (4)
+#define MEMDRV_INDX_DRVR_NUM              (5)
 
 #define MEMDRV_INDX_OPEN                  (0)
 #define MEMDRV_INDX_CLOSE                 (1)
@@ -296,6 +304,29 @@ memdrv_err_t r_memdrv_qspix_rx(uint8_t devno,
 memdrv_err_t r_memdrv_qspix_rx_data(uint8_t devno,
                                          st_memdrv_info_t * p_memdrv_info);
 void r_memdrv_qspix_1ms_interval(void);
+
+/* r_memdrv_rsci.c */
+memdrv_err_t r_memdrv_rsci_open(uint8_t devno, st_memdrv_info_t * p_memdrv_info);
+memdrv_err_t r_memdrv_rsci_close(uint8_t devno, st_memdrv_info_t * p_memdrv_info);
+memdrv_err_t r_memdrv_rsci_disable(uint8_t devno,
+                                  st_memdrv_info_t * p_memdrv_info);
+memdrv_err_t r_memdrv_rsci_disable_tx_data(uint8_t devno,
+                                          st_memdrv_info_t * p_memdrv_info);
+memdrv_err_t r_memdrv_rsci_disable_rx_data(uint8_t devno,
+                                          st_memdrv_info_t * p_memdrv_info);
+memdrv_err_t r_memdrv_rsci_enable(uint8_t devno, st_memdrv_info_t * p_memdrv_info);
+memdrv_err_t r_memdrv_rsci_enable_tx_data(uint8_t devno,
+                                         st_memdrv_info_t * p_memdrv_info);
+memdrv_err_t r_memdrv_rsci_enable_rx_data(uint8_t devno,
+                                         st_memdrv_info_t * p_memdrv_info);
+memdrv_err_t r_memdrv_rsci_tx(uint8_t devno, st_memdrv_info_t * p_memdrv_info);
+memdrv_err_t r_memdrv_rsci_tx_data(uint8_t devno,
+                                  st_memdrv_info_t * p_memdrv_info);
+memdrv_err_t r_memdrv_rsci_rx(uint8_t devno,
+                             st_memdrv_info_t * p_memdrv_info);
+memdrv_err_t r_memdrv_rsci_rx_data(uint8_t devno,
+                                  st_memdrv_info_t * p_memdrv_info);
+memdrv_err_t r_memdrv_rsci_1ms_interval(void);
 
 /* r_memdrv_dmac.c */
 #if (MEMDRV_CFG_DEV0_MODE_TRNS & MEMDRV_TRNS_DMAC)  | (MEMDRV_CFG_DEV1_MODE_TRNS & MEMDRV_TRNS_DMAC)

@@ -27,6 +27,7 @@
 *         : 24.04.2015 1.11    Added the compiler directive: "#if defined(BSP_MCU_RX111)"
 *         : 15.01.2021 3.70    Removed PH7 for RX111.
 *         : 15.12.2022 4.00    Added PH7 for RX111 64Pins, 48Pins.
+*         : 07.04.2023 5.00    Removed define PIN MASK is not provided.
 ***********************************************************************************************************************/
 #ifndef GPIO_RX111
 #define GPIO_RX111
@@ -199,12 +200,10 @@ typedef enum
 /* This enumerator has a bit mask for each available GPIO pin for the given port on this MCU. */
 typedef enum
 {
-    GPIO_PORT0_PIN_MASK = 0x00,    /* Available pins: None               */
     GPIO_PORT1_PIN_MASK = 0xF0,    /* Available pins: P14, P15, P16,P17  */
     GPIO_PORT2_PIN_MASK = 0xC0,    /* Available pins: P26,P27            */
     GPIO_PORT3_PIN_MASK = 0x20,    /* Available pins: P35                */
     GPIO_PORT4_PIN_MASK = 0x47,    /* Available pins: P40 to P42, P46    */
-    GPIO_PORT5_PIN_MASK = 0x00,    /* Available pins: None               */
     GPIO_PORTA_PIN_MASK = 0x5A,    /* Available pins: PA1, PA3, PA4, PA6 */
     GPIO_PORTB_PIN_MASK = 0x2B,    /* Available pins: PB0, PB1, PB3, PB5 */
     GPIO_PORTC_PIN_MASK = 0xFF,    /* Available pins: PC0 to PC7         */
@@ -277,17 +276,14 @@ typedef enum
 /* This enumerator has a bit mask for each available GPIO pin for the given port on this MCU. */
 typedef enum
 {
-    GPIO_PORT0_PIN_MASK = 0x00,    /* Available pins: None               */
     GPIO_PORT1_PIN_MASK = 0xF0,    /* Available pins: P14, P15, P16,P17  */
     GPIO_PORT2_PIN_MASK = 0xC0,    /* Available pins: P26,P27            */
     GPIO_PORT3_PIN_MASK = 0x24,    /* Available pins: P32, P35           */
     GPIO_PORT4_PIN_MASK = 0x56,    /* Available pins: P41, P42, P46      */
-    GPIO_PORT5_PIN_MASK = 0x00,    /* Available pins: None               */
     GPIO_PORTA_PIN_MASK = 0x5A,    /* Available pins: PA1, PA3, PA4, PA6 */
     GPIO_PORTB_PIN_MASK = 0x09,    /* Available pins: PB0, PB3           */
     GPIO_PORTC_PIN_MASK = 0x10,    /* Available pins: PC4                */
     GPIO_PORTE_PIN_MASK = 0x1F,    /* Available pins: PE0 to PE4         */
-    GPIO_PORTH_PIN_MASK = 0x00,    /* Available pins: None               */
     GPIO_PORTJ_PIN_MASK = 0xC0,    /* Available pins: PJ6, PJ7           */
 } gpio_pin_bit_mask_t;
 
@@ -338,17 +334,14 @@ typedef enum
 /* This enumerator has a bit mask for each available GPIO pin for the given port on this MCU. */
 typedef enum
 {
-    GPIO_PORT0_PIN_MASK = 0x00,    /* Available pins: None              */
     GPIO_PORT1_PIN_MASK = 0xF0,    /* Available pins: P14, P15, P16,P17 */
     GPIO_PORT2_PIN_MASK = 0x80,    /* Available pins: P27               */
     GPIO_PORT3_PIN_MASK = 0x20,    /* Available pins: P35               */
     GPIO_PORT4_PIN_MASK = 0x06,    /* Available pins: P41, P42          */
-    GPIO_PORT5_PIN_MASK = 0x00,    /* Available pins: None              */
     GPIO_PORTA_PIN_MASK = 0x58,    /* Available pins: PA3, PA4, PA6     */
     GPIO_PORTB_PIN_MASK = 0x09,    /* Available pins: PB0, PB3          */
     GPIO_PORTC_PIN_MASK = 0x10,    /* Available pins: PC4               */
     GPIO_PORTE_PIN_MASK = 0x1F,    /* Available pins: PE0 to PE4        */
-    GPIO_PORTH_PIN_MASK = 0x00,    /* Available pins: None              */
     GPIO_PORTJ_PIN_MASK = 0xC0,    /* Available pins: PJ6, PJ7          */
 } gpio_pin_bit_mask_t;
 

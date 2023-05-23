@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_getpdpaddr.c
@@ -49,8 +49,8 @@
  ***********************************************************************/
 void cellular_getpdpaddr(st_cellular_ctrl_t * const p_ctrl, st_cellular_ipaddr_t * const p_addr)
 {
-    uint32_t dns[4] = {0};
-    uint8_t * p_add = NULL;
+    uint8_t * p_add  = NULL;
+    uint32_t  dns[4] = {0};
 
     p_add = (uint8_t *)strstr((char *)p_ctrl->recv_data, "\"");  //(uint8_t *)<->(char *)
     if (NULL != p_add)

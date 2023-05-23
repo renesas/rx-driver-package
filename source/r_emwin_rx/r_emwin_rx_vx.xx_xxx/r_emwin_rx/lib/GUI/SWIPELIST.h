@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2023  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.26 - Graphical user interface for embedded applications **
+** emWin V6.32 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -24,7 +24,7 @@ License model:            License and Service Agreement, signed December 16th, 2
 License valid for:        RX (based on RX-V1, RX-V2 or RX-V3)
 ----------------------------------------------------------------------
 Support and Update Agreement (SUA)
-SUA period:               2016-12-22 - 2022-12-31
+SUA period:               2016-12-22 - 2023-12-31
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
 File        : SWIPELIST.h
@@ -123,17 +123,11 @@ Purpose     : SWIPELIST include
 
 /*********************************************************************
 *
-*       SWIPELIST notification codes
-*
-*  Description
-*    Notifications sent by SWIPELIST widget to its parent widget through
-*    a WM_NOTIFY_PARENT message.
-*
-*    For notifications relating overlap, see SWIPELIST_SetOverlap().
+*       Compatability macros
 */
-#define SWIPELIST_NOTIFICATION_OVERLAP_TOP_ENTERED       (WM_NOTIFICATION_WIDGET + 0)    // Sent when the overlap area was entered at the top of the SWIPELIST.
-#define SWIPELIST_NOTIFICATION_OVERLAP_BOTTOM_ENTERED    (WM_NOTIFICATION_WIDGET + 1)    // Sent when the overlap area was entered at the bottom of the SWIPELIST.
-#define SWIPELIST_NOTIFICATION_OVERLAP_RELEASED          (WM_NOTIFICATION_WIDGET + 2)    // Sent after a dragged overlap area has been released.
+#define SWIPELIST_NOTIFICATION_OVERLAP_TOP_ENTERED       WM_NOTIFICATION_OVERLAP_TOP_ENTERED
+#define SWIPELIST_NOTIFICATION_OVERLAP_BOTTOM_ENTERED    WM_NOTIFICATION_OVERLAP_BOTTOM_ENTERED
+#define SWIPELIST_NOTIFICATION_OVERLAP_RELEASED          WM_NOTIFICATION_OVERLAP_RELEASED
 
 /*********************************************************************
 *

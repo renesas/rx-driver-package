@@ -28,6 +28,7 @@ Features
 * (RX140) Simultaneous operation of up to 6 channels.
 * (RX24T) Simultaneous operation of up to 3 channels.
 * (RX24U) Simultaneous operation of up to 6 channels.
+* (RX26T) Simultaneous operation of up to 4 channels.
 * (RX66T) Simultaneous operation of up to 7 channels
 * (RX72T) Simultaneous operation of up to 7 channels
 * (RX72M) Simultaneous operation of up to 13 channels

@@ -24,7 +24,10 @@
 * History : DD.MM.YYYY Version Description
 *         : 01.10.2016 1.00    First Release
 *         : 21.07.2017 2.30    Updated for RX65N-2MB.
-*         : 01.02.2019 2.50    Updated for RX65N-64pin
+*         : 01.02.2019 2.50    Updated for RX65N-64pin.
+*         : 07.04.2023 3.00    Updated P05 for RX65N 64-pin,
+*                              Corrected the "Total of pins",
+*                              Removed define PIN MASK is not provided.
 ***********************************************************************************************************************/
 #ifndef GPIO_RX65N
 #define GPIO_RX65N
@@ -52,9 +55,13 @@ Macro definitions
 #elif (BSP_PACKAGE_PINS == 100)
     #define GPIO_INFO_NUM_PINS              (79)
 #elif (BSP_PACKAGE_PINS == 64)
+#if (BSP_CFG_MCU_PART_PACKAGE != 0xC)
     #define GPIO_INFO_NUM_PINS              (43)
 #else
-    #error "r_gpio_rx does not have information about this RX65N package. Please update r_gpio_rx65N.h"
+    #define GPIO_INFO_NUM_PINS              (42)
+#endif
+#else
+    #error "r_gpio_rx does not have information about this RX65N package. Please update r_gpio_rx65n.h"
 #endif
 
 /* For testing we will allocate virtual IO ports. */
@@ -459,16 +466,11 @@ typedef enum
     GPIO_PORT3_PIN_MASK = 0xFF,    /* Available pins: P30 to P37 */
     GPIO_PORT4_PIN_MASK = 0xFF,    /* Available pins: P40 to P47 */
     GPIO_PORT5_PIN_MASK = 0x3F,    /* Available pins: P50 to P55 */
-    GPIO_PORT6_PIN_MASK = 0x00,    /* None                       */
-    GPIO_PORT7_PIN_MASK = 0x00,    /* None                       */
-    GPIO_PORT8_PIN_MASK = 0x00,    /* None                       */
-    GPIO_PORT9_PIN_MASK = 0x00,    /* None                       */
     GPIO_PORTA_PIN_MASK = 0xFF,    /* Available pins: PA0 to PA7 */
     GPIO_PORTB_PIN_MASK = 0xFF,    /* Available pins: PB0 to PB7 */
     GPIO_PORTC_PIN_MASK = 0xFF,    /* Available pins: PC0 to PC7 */
     GPIO_PORTD_PIN_MASK = 0xFF,    /* Available pins: PD0 to PD7 */
     GPIO_PORTE_PIN_MASK = 0xFF,    /* Available pins: PE0 to PE7 */
-    GPIO_PORTF_PIN_MASK = 0x00,    /* None                       */
     GPIO_PORTJ_PIN_MASK = 0x08,    /* Available pins: PJ3        */
 } gpio_pin_bit_mask_t;
 
@@ -559,7 +561,9 @@ typedef enum
 /* This enumerator has each available GPIO port on this MCU. This list will change depending on the MCU chosen. */
 typedef enum
 {
+#if (BSP_CFG_MCU_PART_PACKAGE != 0xC)
     GPIO_PORT_0 = 0x0000,
+#endif
     GPIO_PORT_1 = 0x0100,
     GPIO_PORT_2 = 0x0200,
     GPIO_PORT_3 = 0x0300,
@@ -575,28 +579,26 @@ typedef enum
 /* This enumerator has a bit mask for each available GPIO pin for the given port on this MCU. */
 typedef enum
 {
+#if (BSP_CFG_MCU_PART_PACKAGE != 0xC)
     GPIO_PORT0_PIN_MASK = 0x20,    /* Available pins: P05	      			  */
+#endif
     GPIO_PORT1_PIN_MASK = 0xCC,    /* Available pins: P12, P13, P16, P17 	  */
     GPIO_PORT2_PIN_MASK = 0xC0,    /* Available pins: P26, P27 				  */
     GPIO_PORT3_PIN_MASK = 0xF3,    /* Available pins: P30, P31, P34 to P37 	  */
     GPIO_PORT4_PIN_MASK = 0x0F,    /* Available pins: P40 to P43 			  */
     GPIO_PORT5_PIN_MASK = 0x08,    /* Available pins: P53 					  */
-    GPIO_PORT6_PIN_MASK = 0x00,    /* None                 				      */
-    GPIO_PORT7_PIN_MASK = 0x00,    /* None                   	   		      */
-    GPIO_PORT8_PIN_MASK = 0x00,    /* None                   			      */
-    GPIO_PORT9_PIN_MASK = 0x00,    /* None                     				  */
     GPIO_PORTA_PIN_MASK = 0xD6,    /* Available pins: PA1, PA2, PA4, PA6, PA7 */
     GPIO_PORTB_PIN_MASK = 0xE0,    /* Available pins: PB5 to PB7 			  */
     GPIO_PORTC_PIN_MASK = 0xF3,    /* Available pins: PC0, PC1, PC4 to PC7 	  */
     GPIO_PORTD_PIN_MASK = 0xFC,    /* Available pins: PD2 to PD7 			  */
     GPIO_PORTE_PIN_MASK = 0xC7,    /* Available pins: PE0 to PE2, PE6, PE7 	  */
-    GPIO_PORTF_PIN_MASK = 0x00,    /* None                       			  */
-    GPIO_PORTJ_PIN_MASK = 0x00,    /* None				         			  */
 } gpio_pin_bit_mask_t;
 
 typedef enum
 {
+#if (BSP_CFG_MCU_PART_PACKAGE != 0xC)
     GPIO_PORT_0_PIN_5 = 0x0005,
+#endif
     GPIO_PORT_1_PIN_2 = 0x0102,
     GPIO_PORT_1_PIN_3 = 0x0103,
     GPIO_PORT_1_PIN_6 = 0x0106,

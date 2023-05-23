@@ -24,6 +24,8 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version   Description
 *         : 22.04.2022 1.00      First Release
+*         : 28.02.2023 1.01      Added the following macro definitions.
+*                                - BSP_MCU_TFU_VERSION
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -173,6 +175,8 @@ Macro definitions
 #define BSP_MCU_IPL_MAX             (0xF)
 #define BSP_MCU_IPL_MIN             (0)
 
+/* MCU TFU Version */
+#define BSP_MCU_TFU_VERSION    (1)
 
 /* MCU functions */
 #define BSP_MCU_REGISTER_WRITE_PROTECTION

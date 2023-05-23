@@ -28,6 +28,7 @@
 *           31.03.2021 3.80    Added support circular buffer in mode asynchronous.
 *                              Updated macro definition enable and disable TXI, RXI, ERI, TEI.
 *           27.12.2022 4.60    Updated macro definition enable and disable nested interrupt for TXI, RXI, ERI, TEI.
+*           16.02.2023 4.70    Fixed a bug that return wrong value in sci_init_bit_rate() function.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -278,15 +279,30 @@ int32_t sci_init_bit_rate(sci_hdl_t const  hdl,
 #endif
     }
 
-    /* FIND DIVISOR; table has associated ABCS, BGDM and CKS values */
+    /* FIND DIVISOR; table has associated ABCS, BGDM, ABCSE and CKS values */
     /* BRR must be 255 or less */
     /* the "- 1" is ignored in some steps for approximations */
     /* BRR = (PCLK/(divisor * baud)) - 1 */
     /* BRR = (ratio / divisor) - 1 */
     ratio = pclk/baud;
+
     /* WAIT_LOOP */
     for(i = 0; i < num_divisors; i++)
     {
+        if (SCI_MODE_ASYNC == hdl->mode)
+        {
+#if (SCI_CFG_ASYNC_INCLUDED)
+   /* ABCSE bit is not available on CH12 */
+   /* Skip divisor result have ABCSE bit*/
+            if (SCI_CH12 == hdl->rom->chan)   
+            {
+                if(1 == p_baud_info[i].abcse)
+                {
+                    continue;
+                }
+            }
+#endif
+        }
         /* Casting int16_t to uint32_t is valid. Because clock divisor is positive integer */
         if (ratio < (uint32_t)(p_baud_info[i].divisor * 256))
         {
@@ -334,6 +350,7 @@ int32_t sci_init_bit_rate(sci_hdl_t const  hdl,
     hdl->rom->regs->SEMR.BIT.ABCS = p_baud_info[i].abcs;
     hdl->rom->regs->SEMR.BIT.BGDM = p_baud_info[i].bgdm;
     hdl->rom->regs->SMR.BIT.CKS = p_baud_info[i].cks;
+    hdl->rom->regs->SEMR.BIT.ABCSE= p_baud_info[i].abcse;
 
     /* CALCULATE BIT RATE ERROR.
      * RETURN IF ERROR LESS THAN 1% OR IF IN SYNCHRONOUS/SSPI MODE.

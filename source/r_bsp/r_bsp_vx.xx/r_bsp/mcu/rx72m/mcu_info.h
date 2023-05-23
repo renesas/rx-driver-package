@@ -32,6 +32,8 @@
 *         : 25.11.2022 1.05     Added the following macro definition.
 *                               - BSP_EXPANSION_RAM
 *                               Added version check of smart configurator.
+*         : 28.02.2023 1.06     Added the following macro definition.
+*                               - BSP_MCU_TFU_VERSION
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -262,6 +264,9 @@ Macro definitions
 
 /* Frequency threshold of iclk. */
 #define BSP_MCU_ICLK_FREQ_THRESHOLD    (70000000)
+
+/* MCU TFU Version */
+#define BSP_MCU_TFU_VERSION    (1)
 
 /* MCU functions */
 #define BSP_MCU_REGISTER_WRITE_PROTECTION

@@ -1,15 +1,39 @@
-/********************************************************************************/
-/*                                                                              */
-/* Device     : RX/RX100/RX130                                                  */
-/* File Name  : iodefine.h                                                      */
-/* Abstract   : Definition of I/O Register.                                     */
-/* History    : V0.4   (2016-11-08)  [Hardware Manual Revision : 0.40]          */
-/* History    : V0.4A  (2017-01-18)  [Hardware Manual Revision : 0.40]          */
-/* History    : V2.0   (2017-04-17)  [Hardware Manual Revision : 2.00]          */
-/* Note       : This is a typical example.                                      */
-/*                                                                              */
-/*  Copyright(c) 2017 Renesas Electronics Corp. ,All Rights Reserved.           */
-/*                                                                              */
+/**********************************************************************************************************************
+ * DISCLAIMER
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
+ * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO
+ * THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
+ * following link:
+ * http://www.renesas.com/disclaimer
+ *
+ * Copyright (C) 2020 Renesas Electronics Corporation. All rights reserved.
+ *********************************************************************************************************************/
+/*********************************************************************************
+*
+* Device     : RX/RX100/RX130
+*
+* File Name  : iodefine.h
+*
+* Abstract   : Definition of I/O Register.
+*
+* History    : 0.5  (2015-06-30)  [Hardware Manual Revision : 0.50]
+*            : 1.0  (2015-10-05)  [Hardware Manual Revision : 1.00]
+*            : 2.0  (2017-04-17)  [Hardware Manual Revision : 2.00] 
+*            : 2.0A (2023-03-03)  [Hardware Manual Revision : 2.00] 
+*
+* NOTE       : THIS IS A TYPICAL EXAMPLE.
+*
+* Copyright (C) 2023 (2015 - 2017) Renesas Electronics Corporation.
+*
+*********************************************************************************/
 /********************************************************************************/
 /*                                                                              */
 /*  DESCRIPTION : Definition of ICU Register                                    */
@@ -528,7 +552,8 @@ struct st_ctsu {
 			unsigned short CTSUICOMP:1;
 			unsigned short :7;
 			unsigned short CTSUTSOC:1;
-			unsigned short :3;
+			unsigned short CTSUCLKSEL1:1;
+			unsigned short :2;
 			unsigned short CTSUDRV:1;
 			unsigned short CTSUTSOD:1;
 			unsigned short CTSUSPMD:2;

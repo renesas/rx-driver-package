@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_lvd_rx.c
@@ -34,6 +34,7 @@
 *              : 20.05.2019 3.00     Added support for GNUC and ICCRX.
 *              : 28.06.2019 3.10     Added support for RX23W.
 *              : 25.11.2019 3.30     Modified comment of API function to Doxygen style.
+*              : 31.03.2023 4.40     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -103,11 +104,11 @@ static bool b_lvd_open[LVD_CHANNEL_NUM] = {false, false};
 static bool b_lvd_open[LVD_CHANNEL_NUM] = {false};
 #endif
 
-static void lvd_init_lvd(void);
-static void lvd_start_lvd(lvd_channel_t ch, lvd_trigger_t trigger);
-static void lvd_stop_lvd(lvd_channel_t ch);
-static void lvd_start_int(lvd_channel_t ch, void (*p_callback)(void *));
-static void lvd_stop_int(lvd_channel_t ch);
+static void lvd_init_lvd (void);
+static void lvd_start_lvd (lvd_channel_t ch, lvd_trigger_t trigger);
+static void lvd_stop_lvd (lvd_channel_t ch);
+static void lvd_start_int (lvd_channel_t ch, void (*p_callback)(void *));
+static void lvd_stop_int (lvd_channel_t ch);
 
 
 /***********************************************************************************************************************
@@ -241,8 +242,8 @@ RETURN_R_LVD_CLOSE:
  * @note
  * None.
  */
-lvd_err_t R_LVD_GetStatus(lvd_channel_t channel, 
-                          lvd_status_position_t *p_status_position, 
+lvd_err_t R_LVD_GetStatus(lvd_channel_t channel,
+                          lvd_status_position_t *p_status_position,
                           lvd_status_cross_t *p_status_cross)
 {
     lvd_err_t result_code = LVD_SUCCESS;
@@ -302,8 +303,8 @@ RETURN_R_LVD_GETSTATUS:
  */
 lvd_err_t R_LVD_ClearStatus(lvd_channel_t channel)
 {
-    lvd_err_t result_code = LVD_SUCCESS;
-    bool b_enable_flag = false;
+    lvd_err_t result_code   = LVD_SUCCESS;
+    bool      b_enable_flag = false;
     
     /* **** Error check **** */
     result_code = lvd_hw_check_clearstatus();
@@ -383,8 +384,8 @@ static void lvd_init_lvd(void)
     
     if (true == b_init_flag)
     {
-         /* Initialize voltage detection level and target to monitored */
-         /* WAIT_LOOP */
+        /* Initialize voltage detection level and target to monitored */
+        /* WAIT_LOOP */
         for (i = 0; i < LVD_CHANNEL_NUM; i++)
         {
             /* Cast type uint32_t to type lvd_channel_t */
@@ -575,7 +576,7 @@ static void lvd_stop_lvd(lvd_channel_t ch)
 static void lvd_stop_lvd(lvd_channel_t ch)
 {
     uint32_t wait_loco_cycle = 0;
-    bool b_enable_flag = false;
+    bool     b_enable_flag   = false;
 
     lvd_hw_get_dfilter_enable(ch, &b_enable_flag);
     if (true == b_enable_flag)

@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2023  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.26 - Graphical user interface for embedded applications **
+** emWin V6.32 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -24,7 +24,7 @@ License model:            License and Service Agreement, signed December 16th, 2
 License valid for:        RX (based on RX-V1, RX-V2 or RX-V3)
 ----------------------------------------------------------------------
 Support and Update Agreement (SUA)
-SUA period:               2016-12-22 - 2022-12-31
+SUA period:               2016-12-22 - 2023-12-31
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
 File        : WIDGET.h
@@ -72,6 +72,52 @@ typedef struct {
 
 /*********************************************************************
 *
+*       WIDGET_SCROLLSTATE_API
+* 
+*  Description
+*    API for conversion between vertical motion and WM_SCROLL_STATE.
+* 
+*    Note: hParent is always the scrollable widget, it is the parent of
+*    a SCROLLER.
+*/
+typedef struct {
+  //
+  // Getters
+  //
+  int          (* pfGetScrollPosX)       (WM_HWIN hParent);
+  void         (* pfGetScrollPosY)       (WM_HWIN hParent, int * pScrollStateV, int * pMotionPosY);
+  unsigned     (* pfGetNumRows)          (WM_HWIN hParent);
+  int          (* pfGetRowHeight)        (WM_HWIN hParent);
+  int          (* pfGetYOffset)          (WM_HWIN hParent);
+  int          (* pfGetItemPosY)         (WM_HWIN hParent, unsigned Index);
+  int          (* pfGetIndexFromItemPosY)(WM_HWIN hParent, int ScrollStateV, int * pRemainder);
+  int          (* pfGetMaxMotionPosX)    (WM_HWIN hParent);
+  int          (* pfGetMaxMotionPosY)    (WM_HWIN hParent);
+  unsigned     (* pfGetOverlap)          (WM_HWIN hParent, int * pPeriod, U8 * pFlags);
+  //
+  // Setters
+  //
+  void         (* pfSetScrollPosX)       (WM_HWIN hParent, int ScrollStateH);
+  void         (* pfSetScrollPosY)       (WM_HWIN hParent, int ScrollStateV, int MotionPosY);
+  //
+  // Properties
+  //
+  U8              IndvRowHeight; // 1 if each row can have a different height, 0 if not
+  U8              NoConv;        // 1 if no conversion is necessary
+} WIDGET_SCROLLSTATE_API;
+
+typedef struct {
+  void    * pFlags;
+  U8        SizeOfFlags;
+  U32       FlagMotionH;
+  U32       FlagMotionV;
+  U32       FlagAutoScrollH;
+  U32       FlagAutoScrollV;
+  WM_HMEM * phContext;
+} WIDGET_ENABLE_MOTION_CONTEXT;
+
+/*********************************************************************
+*
 *       Important: WIDGET_DRAW_ITEM_FUNC needs to be defined
 *                  in SCROLLBAR.h!
 *
@@ -85,52 +131,23 @@ typedef struct {
 *
 **********************************************************************
 */
-/*********************************************************************
-*
-*       Unique widget id's
-*/
-#define BUTTON_ID    0x42555454UL /* BUTT */
-#define CHECKBOX_ID  0x43484543UL /* CHEC */
-#define DROPDOWN_ID  0x44524f50UL /* DROP */
-#define EDIT_ID      0x45444954UL /* EDIT */
-#define FRAMEWIN_ID  0x4652414dUL /* FRAM */
-#define FRAMECLNT_ID 0x46524143UL /* FRAC */
-#define GRAPH_ID     0x47524150UL /* GRAP */
-#define HEADER_ID    0x48454144UL /* HEAD */
-#define KEYBOARD_ID  0x4b455942UL /* KEYB */
-#define LISTBOX_ID   0x4C495342UL /* LISB */
-#define LISTVIEW_ID  0x4C495356UL /* LISV */
-#define LISTWHEEL_ID 0x4C495357UL /* LISW */
-#define MENU_ID      0x4d454e55UL /* MENU */
-#define MULTIEDIT_ID 0x4d554c45UL /* MULE */
-#define MULTIPAGE_ID 0x4d554c50UL /* MULP */
-#define MPAGECLNT_ID 0x4d50434CUL /* MPCL */
-#define PROGBAR_ID   0x50524f47UL /* PROG */
-#define RADIO_ID     0x52414449UL /* RADI */
-#define SCROLLBAR_ID 0x5343524fUL /* SCRO */
-#define SLIDER_ID    0x534c4944UL /* SLID */
-#define SWIPELIST_ID 0x53574950UL /* SWIP */
-#define TEXT_ID      0x54455854UL /* TEXT */
-#define TREEVIEW_ID  0x54524545UL /* TREE */
-#define ICONVIEW_ID  0x49434f4eUL /* ICON */
-#define IMAGE_ID     0x494d4147UL /* IMAG */
-#define SPINBOX_ID   0x5350494eUL /* SPIN */
-#define KNOB_ID      0x4b4e4f42UL /* KNOB */
-#define WINDOW_ID    0x57494e44UL /* WIND */
-#define ROTARY_ID    0x524f5441UL /* ROTA */
-#define SWITCH_ID    0x53574954UL /* SWIT */
-#define GAUGE_ID     0x47415547UL /* GAUG */
-#define QRCODE_ID    0x5152434fUL /* QRCO */
-#define SCROLLER_ID  0x5343523cUL /* SCRL */
-#define WHEEL_ID     0x5748454CUL /* WHEL */
-
 #define WIDGET_LOCK(hWin) ((WIDGET*)WM_LOCK_H(hWin))
 
 /*********************************************************************
 *
-*       Config switches
+*       Include WIDGET_TYPE_... IDs
+*
+**********************************************************************
 */
+#include "WIDGET_ID.h"
 
+/*********************************************************************
+*
+*       Configuration
+*/
+#ifndef   WIDGET_MIN_TIME_PER_FRAME
+  #define WIDGET_MIN_TIME_PER_FRAME 40
+#endif
 #ifndef   WIDGET_USE_PARENT_EFFECT
   #define WIDGET_USE_PARENT_EFFECT 0
 #endif
@@ -163,7 +180,6 @@ typedef struct {
 *
 *       States
 */
-
 #define WIDGET_STATE_FOCUS              (1 << 0)
 #define WIDGET_STATE_HORIZONTAL         (0 << 3)
 #define WIDGET_STATE_VERTICAL           (1 << 3)
@@ -233,6 +249,13 @@ typedef struct {
 
 /*********************************************************************
 *
+*       Flags for stopping motion of widgets on a given axis
+*/
+#define WIDGET_MOTION_STOP_X     (1 << 8)
+#define WIDGET_MOTION_STOP_Y     (1 << 9)
+
+/*********************************************************************
+*
 *        Widget object
 *
 * The widget object is the base class for most widgets
@@ -289,9 +312,12 @@ struct GUI_DRAW {
 };
 
 /* GUI_DRAW_ API */
-void GUI_DRAW__Draw    (GUI_DRAW_HANDLE hDrawObj, WM_HWIN hObj, int x, int y);
-int  GUI_DRAW__GetXSize(GUI_DRAW_HANDLE hDrawObj);
-int  GUI_DRAW__GetYSize(GUI_DRAW_HANDLE hDrawObj);
+void GUI_DRAW__Draw     (GUI_DRAW_HANDLE hDrawObj, WM_HWIN hObj, int x, int y);
+int  GUI_DRAW__GetXOff  (GUI_DRAW_HANDLE hDrawObj);
+int  GUI_DRAW__GetYOff  (GUI_DRAW_HANDLE hDrawObj);
+int  GUI_DRAW__GetXSize (GUI_DRAW_HANDLE hDrawObj);
+int  GUI_DRAW__GetYSize (GUI_DRAW_HANDLE hDrawObj);
+void GUI_DRAW__SetOffset(GUI_DRAW_HANDLE hDrawObj, int xOff, int yOff);
 
 void GUI_DrawStreamedEnableAuto(void);
 
@@ -312,7 +338,6 @@ WM_HMEM GUI_DRAW_BITMAP_HQHR_Create(const GUI_BITMAP * pBitmap, int x, int y);
 *
 **********************************************************************
 */
-
 extern const WIDGET_EFFECT WIDGET_Effect_3D;
 extern const WIDGET_EFFECT WIDGET_Effect_3D1L;
 extern const WIDGET_EFFECT WIDGET_Effect_3D2L;
@@ -325,26 +350,30 @@ extern const WIDGET_EFFECT WIDGET_Effect_Simple;
 *
 **********************************************************************
 */
-
-void      WIDGET__DrawFocusRect      (WIDGET * pWidget, const GUI_RECT * pRect, int Dist);
-void      WIDGET__DrawHLine          (WIDGET * pWidget, int y, int x0, int x1);
-void      WIDGET__DrawTriangle       (WIDGET * pWidget, int x, int y, int Size, int Inc);
-void      WIDGET__DrawVLine          (WIDGET * pWidget, int x, int y0, int y1);
-void      WIDGET__EFFECT_DrawDownRect(WIDGET * pWidget, GUI_RECT * pRect);
-void      WIDGET__EFFECT_DrawDown    (WIDGET * pWidget);
-void      WIDGET__EFFECT_DrawUpRect  (WIDGET * pWidget, GUI_RECT * pRect);
-void      WIDGET__FillRectEx         (WIDGET * pWidget, const GUI_RECT * pRect);
-int       WIDGET__GetWindowSizeX     (WM_HWIN hWin);
-GUI_COLOR WIDGET__GetBkColor         (WM_HWIN hObj);
-int       WIDGET__GetXSize           (const WIDGET * pWidget);
-int       WIDGET__GetYSize           (const WIDGET * pWidget);
-void      WIDGET__GetClientRect      (WIDGET * pWidget, GUI_RECT * pRect);
-void      WIDGET__GetInsideRect      (WIDGET * pWidget, GUI_RECT * pRect);
-void      WIDGET__Init               (WIDGET * pWidget, int Id, U16 State);
-void      WIDGET__RotateRect90       (WIDGET * pWidget, GUI_RECT * pDest, const GUI_RECT * pRect);
-void      WIDGET__SetScrollState     (WM_HWIN hWin, const WM_SCROLL_STATE * pVState, const WM_SCROLL_STATE * pHState);
-void      WIDGET__FillStringInRect   (const char * pText, const GUI_RECT * pFillRect, const GUI_RECT * pTextRectMax, const GUI_RECT * pTextRectAct);
-void      WIDGET__FillStringInRectEx (const char * pText, const GUI_RECT * pFillRect, const GUI_RECT * pTextRectMax, const GUI_RECT * pTextRectAct, int xOffset);
+void      WIDGET__ConvertScrollState_PixelToLine(WM_HWIN hObj, const WIDGET_SCROLLSTATE_API * pAPI, int StateVPixelwise, int * pStateVLinewise, int * pMotionOffsetY);
+int       WIDGET__ConvertScrollState_LineToPixel(WM_HWIN hObj, const WIDGET_SCROLLSTATE_API * pAPI, int StateVLinewise, int MotionOffsetY);
+void      WIDGET__DrawFocusRect                 (WIDGET * pWidget, const GUI_RECT * pRect, int Dist);
+void      WIDGET__DrawHLine                     (WIDGET * pWidget, int y, int x0, int x1);
+void      WIDGET__DrawTriangle                  (WIDGET * pWidget, int x, int y, int Size, int Inc);
+void      WIDGET__DrawVLine                     (WIDGET * pWidget, int x, int y0, int y1);
+void      WIDGET__EFFECT_DrawDownRect           (WIDGET * pWidget, GUI_RECT * pRect);
+void      WIDGET__EFFECT_DrawDown               (WIDGET * pWidget);
+void      WIDGET__EFFECT_DrawUpRect             (WIDGET * pWidget, GUI_RECT * pRect);
+void      WIDGET__EnableMotion                  (WM_HWIN hObj, int Flags, WIDGET_ENABLE_MOTION_CONTEXT * pContext);
+void      WIDGET__FillRectEx                    (WIDGET * pWidget, const GUI_RECT * pRect);
+int       WIDGET__GetWindowSizeX                (WM_HWIN hWin);
+GUI_COLOR WIDGET__GetBkColor                    (WM_HWIN hObj);
+int       WIDGET__GetXSize                      (const WIDGET * pWidget);
+int       WIDGET__GetYSize                      (const WIDGET * pWidget);
+void      WIDGET__GetClientRect                 (WIDGET * pWidget, GUI_RECT * pRect);
+void      WIDGET__GetInsideRect                 (WIDGET * pWidget, GUI_RECT * pRect);
+void      WIDGET__HandleMotionMove              (WM_HWIN hObj, WM_MOTION_INFO * pInfo, const WIDGET_SCROLLSTATE_API * pAPI);
+void      WIDGET__HandleMotionMoveBack          (WM_HWIN hObj, const WIDGET_SCROLLSTATE_API * pAPI);
+void      WIDGET__Init                          (WIDGET * pWidget, int Id, U16 State);
+void      WIDGET__RotateRect90                  (WIDGET * pWidget, GUI_RECT * pDest, const GUI_RECT * pRect);
+void      WIDGET__SetScrollState                (WM_HWIN hWin, const WM_SCROLL_STATE * pVState, const WM_SCROLL_STATE * pHState);
+void      WIDGET__FillStringInRect              (const char * pText, const GUI_RECT * pFillRect, const GUI_RECT * pTextRectMax, const GUI_RECT * pTextRectAct);
+void      WIDGET__FillStringInRectEx            (const char * pText, const GUI_RECT * pFillRect, const GUI_RECT * pTextRectMax, const GUI_RECT * pTextRectAct, int xOffset);
 
 //
 // Function pointers for drawing streamed bitmaps
@@ -358,13 +387,16 @@ extern int  (* GUI__pfDrawStreamedBitmapEx)(GUI_GET_DATA_FUNC * pfGetData, const
 *
 **********************************************************************
 */
-void  WIDGET_SetState     (WM_HWIN hObj, int State);
-void  WIDGET_AndState     (WM_HWIN hObj, int State);
-void  WIDGET_OrState      (WM_HWIN hObj, int State);
-int   WIDGET_HandleActive (WM_HWIN hObj, WM_MESSAGE* pMsg);
-int   WIDGET_GetState     (WM_HWIN hObj);
-int   WIDGET_SetWidth     (WM_HWIN hObj, int Width);
-void  WIDGET_SetFocusable (WM_HWIN hObj, int State);
+void  WIDGET_SetState          (WM_HWIN hObj, int State);
+void  WIDGET_AndState          (WM_HWIN hObj, int State);
+void  WIDGET_OrState           (WM_HWIN hObj, int State);
+int   WIDGET_HandleActive      (WM_HWIN hObj, WM_MESSAGE* pMsg);
+int   WIDGET_GetState          (WM_HWIN hObj);
+int   WIDGET_SetWidth          (WM_HWIN hObj, int Width);
+void  WIDGET_SetFocusable      (WM_HWIN hObj, int State);
+U32   WIDGET_GetType           (WM_HWIN hObj);
+U16   WIDGET_SetMinTimePerFrame(U16 MinTimePerFrame);
+U16   WIDGET_GetMinTimePerFrame(void);
 
 void  WIDGET_EFFECT_3D_DrawUp(void);
 

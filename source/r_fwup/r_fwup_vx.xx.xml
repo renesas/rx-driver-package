@@ -8,11 +8,14 @@
         <product>RXC</product>
         <version>3.02.00</version>
         <version>3.03.00</version>
+        <version>3.04.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
         <version>8.03.00.202004</version>
+        <version>8.03.00.202102</version>
+        <version>8.03.00.202202</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -37,6 +40,7 @@
         <group>RX65N</group>
         <group>RX66N</group>
         <group>RX66T</group>
+        <group>RX660</group>
         <group>RX671</group>
         <group>RX72M</group>
         <group>RX72N</group>
@@ -46,11 +50,13 @@
         <board>RSKRX231</board>
         <board>RSKRX65N</board>
         <board>RSKRX66T</board>
+        <board>RSKRX660</board>
         <board>RSKRX671</board>
         <board>RSKRX72M</board>
         <board>RSKRX72N</board>
         <board>RSSKRX23EA</board>
         <board>RSSKRX23W</board>
+        <board>CloudKitRX65N</board>
     </target>
 
     <!-- only one package entry allowed -->
@@ -62,19 +68,19 @@
         <zipsource>r_fwup_vx.xx.zip</zipsource>
         <dependency>
             <module>r_byteq</module>
-            <version>1.81</version>
+            <version>2.00</version>
 </dependency>
         <dependency>
             <module>r_cmt_rx</module>
-            <version>4.80</version>
+            <version>5.20</version>
 </dependency>
         <dependency>
             <module>r_flash_rx</module>
-            <version>4.70</version>
+            <version>4.90</version>
 </dependency>
         <dependency>
             <module>r_sci_rx</module>
-            <version>3.80</version>
+            <version>4.40</version>
 </dependency>
         <dependency>
             <module>r_sys_time_rx</module>

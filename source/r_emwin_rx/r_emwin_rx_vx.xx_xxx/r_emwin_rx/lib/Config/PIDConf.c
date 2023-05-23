@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : PIDConf.c
@@ -35,6 +35,8 @@
  *                                     Supports SPI interface.
  *                                     Fixed the problem that touch is falsely detected after initialization
  *                                     when using SCI-IIC interface.
+ *         : 31.03.2023 6.32.a.1.00    Update emWin library to v6.32a.
+ *                                     Fixed related to runtime orientation.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -93,7 +95,14 @@ typedef struct
 #if (EMWIN_USE_TOUCH == 1)
 
 static int32_t s_layer_index;
+
+#if (EMWIN_USE_RUNTIME_ORIENTATION == 0)
+/* Manually convert each orientation to a base point. */
 static volatile uint8_t s_touch_orientation = EMWIN_DISPLAY_ORIENTATION;
+#else
+/* Automatically converted in AppWizard and Window Manager based on ORIENTATION_0. */
+static volatile uint8_t s_touch_orientation = ORIENTATION_0;
+#endif
 
 #if (EMWIN_USE_MULTITOUCH == 0)
 

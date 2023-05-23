@@ -19,11 +19,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011(2012-2022) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2011(2012-2023) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_flash_spi_if.h
-* Version      : 3.03
+* Version      : 3.20
 * Description  : FLASH SPI driver interface header file
 *************************************************************************************************/
 /************************************************************************************************
@@ -37,10 +37,15 @@
 *                                    Fixed coding style.
 *              : 10.12.2020 3.02     Changed version to 3.02.
 *              : 31.12.2021 3.03     Changed version to 3.03.
-*              : 30.06.2022 3.10     Added #defines specify the ports used for SS#.
+*              : 30.06.2022 3.10     Added macros to specify the ports used for SS#.
+*              : 16.03.2023 3.20     Added support for AT25QF641B-SHB with Indirect Access Mode
+*                                    of QSPIX
+*                                    Added support for RSCI and QSPIX Memory Mapped Mode
+*                                    Removed the processing related to other unsupported flash 
+*                                    devices.
 *************************************************************************************************/
-#ifndef __FLASH_SPI_IF_H__
-#define __FLASH_SPI_IF_H__
+#ifndef FLASH_SPI_IF_H
+#define FLASH_SPI_IF_H
 
 /************************************************************************************************
 Includes <System Includes> , "Project Includes"
@@ -61,13 +66,16 @@ Macro definitions
 
 /* Driver version */
 #define FLASH_SPI_VERSION_MAJOR       (3)
-#define FLASH_SPI_VERSION_MINOR       (10)
+#define FLASH_SPI_VERSION_MINOR       (20)
 
 
 /*--------------- Define no. of slots ----------------*/
 #define FLASH_SPI_DEV0                (0)                   /* Device 0                             */
 #define FLASH_SPI_DEV1                (1)                   /* Device 1                             */
 
+/* Define address size */
+#define FLASH_SPI_ADDR_4BYTES         ((uint8_t)(4))
+#define FLASH_SPI_ADDR_3BYTES         ((uint8_t)(3))
 
 
 /************************************************************************************************
@@ -90,8 +98,10 @@ typedef enum e_flash_spi_erase_mode
     FLASH_SPI_MODE_C_ERASE = 1,
     FLASH_SPI_MODE_B_ERASE,
     FLASH_SPI_MODE_D_ERASE,
+    FLASH_SPI_MODE_B4K_ERASE,
     FLASH_SPI_MODE_B32K_ERASE,
     FLASH_SPI_MODE_B64K_ERASE,
+    FLASH_SPI_MODE_SCUR_ERASE,
     FLASH_SPI_MODE_S_ERASE,
     FLASH_SPI_MODE_SS_ERASE,
     FLASH_SPI_MODE_P_ERASE
@@ -118,7 +128,8 @@ typedef struct
     uint32_t        cnt;            /* Number of bytes to be read/written       */
     uint32_t        data_cnt;       /* Temporary counter or Number of bytes to be written in a page */
     uint8_t       * p_data;         /* Data storage buffer pointer              */
-    flash_spi_opmode_t op_mode;     /* SPI operating mode                       */
+    flash_spi_opmode_t op_mode;     /* SPI operating mode; ignore it when using write/read data
+                                       in a Security register page                */
 } flash_spi_info_t;                 /* 20 bytes                                 */
 
 /* Flash memory size information */
@@ -180,11 +191,17 @@ flash_spi_status_t R_FLASH_SPI_Quad_Enable(uint8_t devno);
 flash_spi_status_t R_FLASH_SPI_Quad_Disable(uint8_t devno);
 flash_spi_status_t R_FLASH_SPI_Read_Flag_Status(uint8_t devno, uint8_t * p_status);
 flash_spi_status_t R_FLASH_SPI_Clear_Status(uint8_t devno);
+flash_spi_status_t R_FLASH_SPI_Write_Status(uint8_t devno, uint8_t * p_reg);
+flash_spi_status_t R_FLASH_SPI_Write_Status2(uint8_t devno, uint8_t * p_reg);
+flash_spi_status_t R_FLASH_SPI_Write_Status3(uint8_t devno, uint8_t * p_reg);
 flash_spi_status_t R_FLASH_SPI_Read_Status2(uint8_t devno, uint8_t * p_status);
+flash_spi_status_t R_FLASH_SPI_Read_Status3(uint8_t devno, uint8_t * p_status);
+flash_spi_status_t R_FLASH_SPI_Read_Data_Security_Page(uint8_t devno, flash_spi_info_t * p_flash_spi_info);
+flash_spi_status_t R_FLASH_SPI_Write_Data_Security_Page(uint8_t devno, flash_spi_info_t * p_flash_spi_info);
 flash_spi_status_t R_FLASH_SPI_DeepPDown(uint8_t devno);
 flash_spi_status_t R_FLASH_SPI_ReleaseDeepPDown(uint8_t devno, uint8_t * p_data);
 
 
-#endif /* __FLASH_SPI_IF_H__ */
+#endif /* FLASH_SPI_IF_H */
 
 /* End of File */

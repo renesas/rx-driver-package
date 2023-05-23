@@ -26,6 +26,7 @@
 * History : DD.MM.YYYY Version  Description
 *         : 22.04.2022 1.00     First Release
 *         : 25.11.2022 1.01     Modified comment.
+*         : 28.02.2023 1.02     Modified comment.
 ***********************************************************************************************************************/
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
 #define R_BSP_CONFIG_REF_HEADER_FILE
@@ -486,7 +487,7 @@ Configuration Options
    2 = embOS is used.(This is not available.)
    3 = MicroC_OS is used.(This is not available.)
    4 = Renesas ITRON OS (RI600V4 or RI600PX) is used.
-   5 = Azure RTOS is used.(This is not available.)
+   5 = Azure RTOS is used.
 */
 #define BSP_CFG_RTOS_USED               (0)
 

@@ -23,6 +23,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 30.12.2019 1.00    Initial Release.
+*         : 07.04.2023 2.00    Corrected PIN MASK value of PORTF and PORTJ for RX66N 145-pin and 144-pin.
 ***********************************************************************************************************************/
 #ifndef GPIO_RX66N
 #define GPIO_RX66N
@@ -557,8 +558,8 @@ typedef enum
     GPIO_PORTC_PIN_MASK = 0xFF,    /* Available pins: PC0 to PC7            */
     GPIO_PORTD_PIN_MASK = 0xFF,    /* Available pins: PD0 to PD7            */
     GPIO_PORTE_PIN_MASK = 0xFF,    /* Available pins: PE0 to PE7            */
-    GPIO_PORTF_PIN_MASK = 0x32,    /* Available pins: PF5                   */
-    GPIO_PORTJ_PIN_MASK = 0x40,    /* Available pins: PJ3, PJ5    		    */
+    GPIO_PORTF_PIN_MASK = 0x20,    /* Available pins: PF5                   */
+    GPIO_PORTJ_PIN_MASK = 0x28,    /* Available pins: PJ3, PJ5    		    */
 } gpio_pin_bit_mask_t;
 
 typedef enum

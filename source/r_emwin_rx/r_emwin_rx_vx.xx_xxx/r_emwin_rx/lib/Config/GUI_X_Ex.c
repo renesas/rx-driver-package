@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : GUI_X_Ex.c
@@ -31,6 +31,9 @@
  *         : 29.12.2021 6.22.  1.00    Update emWin library to v6.22.
  *                                     Adjust configuration option with Smart Configurator.
  *         : 31.08.2022 6.26.c.1.00    Update emWin library to v6.26c.
+ *         : 31.03.2023 6.32.a.1.00    Update emWin library to v6.32a.
+ *                                     Fixed GUI_X_GetTaskId function processing.
+ *                                     Fixed preprocessing with value of BSP_CFG_RTOS_USED.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -60,14 +63,6 @@
 typedef void TIMER_CALLBACK (void * p_data);
 #elif (BSP_CFG_RTOS_USED == 1) /* FreeRTOS */
 typedef void TIMER_CALLBACK (TimerHandle_t x_timer);
-#elif (BSP_CFG_RTOS_USED == 2) /* SEGGER embOS */
-#warning "Warning!! It is necessary to implement callback functuon for timer."
-#elif (BSP_CFG_RTOS_USED == 3) /* Micrium MicroC/OS */
-#warning "Warning!! It is necessary to implement callback functuon for timer."
-#elif (BSP_CFG_RTOS_USED == 4) /* Renesas RI600V4 & RI600PX */
-#warning "Warning!! It is necessary to implement callback functuon for timer."
-#elif (BSP_CFG_RTOS_USED == 5) /* Azure RTOS */
-#warning "Warning!! It is necessary to implement callback functuon for timer."
 #else
 #warning "Warning!! It is necessary to implement callback functuon for timer."
 #endif
@@ -89,14 +84,6 @@ static char                 timer_name                      = '0';
 static TimerHandle_t        s_timer_hdl[EMWIN_RX_TIMER_NUM] = { 0 };
 static SemaphoreHandle_t    s_sem_hdl                       = NULL;
 static EventGroupHandle_t   s_event_hdl                     = NULL;
-#elif (BSP_CFG_RTOS_USED == 2) /* SEGGER embOS */
-#warning "Warning!! It is necessary to implement variables and functuons for the OS."
-#elif (BSP_CFG_RTOS_USED == 3) /* Micrium MicroC/OS */
-#warning "Warning!! It is necessary to implement variables and functuons for the OS."
-#elif (BSP_CFG_RTOS_USED == 4) /* Renesas RI600V4 & RI600PX */
-#warning "Warning!! It is necessary to implement variables and functuons for the OS."
-#elif (BSP_CFG_RTOS_USED == 5) /* Azure RTOS */
-#warning "Warning!! It is necessary to implement variables and functuons for the OS."
 #else
 #warning "Warning!! It is necessary to implement variables and functuons for the OS."
 #endif
@@ -143,14 +130,6 @@ void GUI_X_Delay(int ms)
     }
 #elif (BSP_CFG_RTOS_USED == 1) /* FreeRTOS */
     vTaskDelay(pdMS_TO_TICKS(ms));
-#elif (BSP_CFG_RTOS_USED == 2) /* SEGGER embOS */
-    #warning "Warning!! It is necessary to implement to delay process."
-#elif (BSP_CFG_RTOS_USED == 3) /* Micrium MicroC/OS */
-    #warning "Warning!! It is necessary to implement to delay process."
-#elif (BSP_CFG_RTOS_USED == 4) /* Renesas RI600V4 & RI600PX */
-    #warning "Warning!! It is necessary to implement to delay process."
-#elif (BSP_CFG_RTOS_USED == 5) /* Azure RTOS */
-    #warning "Warning!! It is necessary to implement to delay process."
 #else
     #warning "Warning!! It is necessary to implement to delay process."
 #endif
@@ -187,14 +166,6 @@ e_emwin_rx_err_t r_emwin_rx_guix_timer_create(uint32_t period_ms, emwin_rx_cb_ti
     uint32_t         frequency_hz;
 #elif (BSP_CFG_RTOS_USED == 1) /* FreeRTOS */
     BaseType_t       os_ret;
-#elif (BSP_CFG_RTOS_USED == 2) /* SEGGER embOS */
-    #warning "Warning!! It is necessary to implement to create timer."
-#elif (BSP_CFG_RTOS_USED == 3) /* Micrium MicroC/OS */
-    #warning "Warning!! It is necessary to implement to create timer."
-#elif (BSP_CFG_RTOS_USED == 4) /* Renesas RI600V4 & RI600PX */
-    #warning "Warning!! It is necessary to implement to create timer."
-#elif (BSP_CFG_RTOS_USED == 5) /* Azure RTOS */
-    #warning "Warning!! It is necessary to implement to create timer."
 #else
     #warning "Warning!! It is necessary to implement to create timer."
 #endif
@@ -230,14 +201,6 @@ e_emwin_rx_err_t r_emwin_rx_guix_timer_create(uint32_t period_ms, emwin_rx_cb_ti
                 ret = EMWIN_RX_SUCCESS;
             }
         }
-#elif (BSP_CFG_RTOS_USED == 2) /* SEGGER embOS */
-        #warning "Warning!! It is necessary to implement to create timer."
-#elif (BSP_CFG_RTOS_USED == 3) /* Micrium MicroC/OS */
-        #warning "Warning!! It is necessary to implement to create timer."
-#elif (BSP_CFG_RTOS_USED == 4) /* Renesas RI600V4 & RI600PX */
-        #warning "Warning!! It is necessary to implement to create timer."
-#elif (BSP_CFG_RTOS_USED == 5) /* Azure RTOS */
-        #warning "Warning!! It is necessary to implement to create timer."
 #else
         #warning "Warning!! It is necessary to implement to create timer."
 #endif
@@ -400,14 +363,6 @@ void GUI_X_InitOS(void)
             R_BSP_NOP();
         }
     }
-#elif (BSP_CFG_RTOS_USED == 2) /* SEGGER embOS */
-    #warning "Warning!! It is necessary to implement to create semaphore or mutex."
-#elif (BSP_CFG_RTOS_USED == 3) /* Micrium MicroC/OS */
-    #warning "Warning!! It is necessary to implement to create semaphore or mutex."
-#elif (BSP_CFG_RTOS_USED == 4) /* Renesas RI600V4 & RI600PX */
-    #warning "Warning!! It is necessary to implement to create semaphore or mutex."
-#elif (BSP_CFG_RTOS_USED == 5) /* Azure RTOS */
-    #warning "Warning!! It is necessary to implement to create semaphore or mutex."
 #else
     #warning "Warning!! It is necessary to implement to create semaphore or mutex."
 #endif
@@ -438,14 +393,6 @@ void GUI_X_Unlock(void)
             R_BSP_NOP();
         }
     }
-#elif (BSP_CFG_RTOS_USED == 2) /* SEGGER embOS */
-    #warning "Warning!! It is necessary to implement to unlock."
-#elif (BSP_CFG_RTOS_USED == 3) /* Micrium MicroC/OS */
-    #warning "Warning!! It is necessary to implement to unlock."
-#elif (BSP_CFG_RTOS_USED == 4) /* Renesas RI600V4 & RI600PX */
-    #warning "Warning!! It is necessary to implement to unlock."
-#elif (BSP_CFG_RTOS_USED == 5) /* Azure RTOS */
-    #warning "Warning!! It is necessary to implement to unlock."
 #else
     #warning "Warning!! It is necessary to implement to unlock."
 #endif
@@ -476,14 +423,6 @@ void GUI_X_Lock(void)
             R_BSP_NOP();
         }
     }
-#elif (BSP_CFG_RTOS_USED == 2) /* SEGGER embOS */
-    #warning "Warning!! It is necessary to implement to lock."
-#elif (BSP_CFG_RTOS_USED == 3) /* Micrium MicroC/OS */
-    #warning "Warning!! It is necessary to implement to lock."
-#elif (BSP_CFG_RTOS_USED == 4) /* Renesas RI600V4 & RI600PX */
-    #warning "Warning!! It is necessary to implement to lock."
-#elif (BSP_CFG_RTOS_USED == 5) /* Azure RTOS */
-    #warning "Warning!! It is necessary to implement to lock."
 #else
     #warning "Warning!! It is necessary to implement to lock."
 #endif
@@ -504,24 +443,10 @@ U32 GUI_X_GetTaskId(void)
     return 1;
 #elif (BSP_CFG_RTOS_USED == 1) /* FreeRTOS */
     TaskHandle_t handle;
-    TaskStatus_t status;
 
     handle = xTaskGetCurrentTaskHandle();
-    vTaskGetTaskInfo(handle, &status, pdTRUE, eInvalid);
 
-    return status.xTaskNumber;
-#elif (BSP_CFG_RTOS_USED == 2) /* SEGGER embOS */
-    #warning "Warning!! It is necessary to implement to get task ID."
-    return 1;
-#elif (BSP_CFG_RTOS_USED == 3) /* Micrium MicroC/OS */
-    #warning "Warning!! It is necessary to implement to get task ID."
-    return 1;
-#elif (BSP_CFG_RTOS_USED == 4) /* Renesas RI600V4 & RI600PX */
-    #warning "Warning!! It is necessary to implement to get task ID."
-    return 1;
-#elif (BSP_CFG_RTOS_USED == 5) /* Azure RTOS */
-    #warning "Warning!! It is necessary to implement to get task ID."
-    return 1;
+    return (U32)handle;
 #else
     #warning "Warning!! It is necessary to implement to get task ID."
     return 1;
@@ -552,14 +477,6 @@ void GUI_X_WaitEvent(void)
     R_BSP_NOP();
 #elif (BSP_CFG_RTOS_USED == 1) /* FreeRTOS */
     xEventGroupWaitBits(s_event_hdl, GUI_WAIT_EVENT_VALUE, pdTRUE, pdFALSE, GUI_MAXIMUM_WAIT);
-#elif (BSP_CFG_RTOS_USED == 2) /* SEGGER embOS */
-    #warning "Warning!! It is necessary to implement to wait for an event."
-#elif (BSP_CFG_RTOS_USED == 3) /* Micrium MicroC/OS */
-    #warning "Warning!! It is necessary to implement to wait for an event."
-#elif (BSP_CFG_RTOS_USED == 4) /* Renesas RI600V4 & RI600PX */
-    #warning "Warning!! It is necessary to implement to wait for an event."
-#elif (BSP_CFG_RTOS_USED == 5) /* Azure RTOS */
-    #warning "Warning!! It is necessary to implement to wait for an event."
 #else
     #warning "Warning!! It is necessary to implement to wait for an event."
 #endif
@@ -580,14 +497,6 @@ void GUI_X_SignalEvent(void)
     R_BSP_NOP();
 #elif (BSP_CFG_RTOS_USED == 1) /* FreeRTOS */
     xEventGroupSetBits(s_event_hdl, GUI_WAIT_EVENT_VALUE);
-#elif (BSP_CFG_RTOS_USED == 2) /* SEGGER embOS */
-    #warning "Warning!! It is necessary to implement to signal an event."
-#elif (BSP_CFG_RTOS_USED == 3) /* Micrium MicroC/OS */
-    #warning "Warning!! It is necessary to implement to signal an event."
-#elif (BSP_CFG_RTOS_USED == 4) /* Renesas RI600V4 & RI600PX */
-    #warning "Warning!! It is necessary to implement to signal an event."
-#elif (BSP_CFG_RTOS_USED == 5) /* Azure RTOS */
-    #warning "Warning!! It is necessary to implement to signal an event."
 #else
     #warning "Warning!! It is necessary to implement to signal an event."
 #endif
@@ -608,14 +517,6 @@ void GUI_X_WaitEventTimed(int period)
     R_BSP_NOP();
 #elif (BSP_CFG_RTOS_USED == 1) /* FreeRTOS */
     xEventGroupWaitBits(s_event_hdl, GUI_WAIT_EVENT_VALUE, pdTRUE, pdFALSE, period);
-#elif (BSP_CFG_RTOS_USED == 2) /* SEGGER embOS */
-    #warning "Warning!! It is necessary to implement to wait for an event for the given period."
-#elif (BSP_CFG_RTOS_USED == 3) /* Micrium MicroC/OS */
-    #warning "Warning!! It is necessary to implement to wait for an event for the given period."
-#elif (BSP_CFG_RTOS_USED == 4) /* Renesas RI600V4 & RI600PX */
-    #warning "Warning!! It is necessary to implement to wait for an event for the given period."
-#elif (BSP_CFG_RTOS_USED == 5) /* Azure RTOS */
-    #warning "Warning!! It is necessary to implement to wait for an event for the given period."
 #else
     #warning "Warning!! It is necessary to implement to wait for an event for the given period."
 #endif

@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2023  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.26 - Graphical user interface for embedded applications **
+** emWin V6.32 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -24,7 +24,7 @@ License model:            License and Service Agreement, signed December 16th, 2
 License valid for:        RX (based on RX-V1, RX-V2 or RX-V3)
 ----------------------------------------------------------------------
 Support and Update Agreement (SUA)
-SUA period:               2016-12-22 - 2022-12-31
+SUA period:               2016-12-22 - 2023-12-31
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
 File        : LISTVIEW.h
@@ -139,6 +139,7 @@ void             LISTVIEW_GetItemTextSorted    (LISTVIEW_Handle hObj, unsigned C
 unsigned         LISTVIEW_GetLBorder           (LISTVIEW_Handle hObj);
 unsigned         LISTVIEW_GetNumColumns        (LISTVIEW_Handle hObj);
 unsigned         LISTVIEW_GetNumRows           (LISTVIEW_Handle hObj);
+unsigned         LISTVIEW_GetOverlap           (LISTVIEW_Handle hObj, int * pPeriod, U8 * pFlags);
 unsigned         LISTVIEW_GetRBorder           (LISTVIEW_Handle hObj);
 int              LISTVIEW_GetRow               (LISTVIEW_Handle hObj, int yPos);
 int              LISTVIEW_GetScrollStepH       (LISTVIEW_Handle hObj);
@@ -173,6 +174,7 @@ void             LISTVIEW_SetItemText          (LISTVIEW_Handle hObj, unsigned C
 void             LISTVIEW_SetItemTextColor     (LISTVIEW_Handle hObj, unsigned Column, unsigned Row, unsigned Index, GUI_COLOR Color);
 void             LISTVIEW_SetItemTextSorted    (LISTVIEW_Handle hObj, unsigned Column, unsigned Row, const char * pText);
 void             LISTVIEW_SetLBorder           (LISTVIEW_Handle hObj, unsigned BorderSize);
+void             LISTVIEW_SetOverlap           (LISTVIEW_Handle hObj, unsigned Overlap, int Period, U8 Flags);
 void             LISTVIEW_SetOwnerDraw         (LISTVIEW_Handle hObj, WIDGET_DRAW_ITEM_FUNC * pfDrawItem);
 void             LISTVIEW_SetRBorder           (LISTVIEW_Handle hObj, unsigned BorderSize);
 unsigned         LISTVIEW_SetRowHeight         (LISTVIEW_Handle hObj, unsigned RowHeight);

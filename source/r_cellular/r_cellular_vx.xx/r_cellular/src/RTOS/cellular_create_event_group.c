@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_create_event_group.c
@@ -49,7 +49,7 @@ void * cellular_create_event_group(const char *str)
 {
     void * p_ret = NULL;
 #if BSP_CFG_RTOS_USED == (1)
-    (void *)str;
+    (void)str;
 
     p_ret = xEventGroupCreate();
 #elif BSP_CFG_RTOS_USED == (5)

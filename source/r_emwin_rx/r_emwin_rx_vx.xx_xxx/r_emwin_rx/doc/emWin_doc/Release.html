@@ -185,7 +185,7 @@ div.divider-global:nth-of-type(even) {
           <!-- Modifiable information starts here                                 -->
           <!-- Don't forget to edit the title tag either                          -->
           <!-- ****************************************************************** -->
-          <h1>Release notes for emWin Version 6.26c</h1>
+          <h1>Release notes for emWin Version 6.32a</h1>
         </div>
       </div>
     </div>
@@ -214,6 +214,151 @@ div.divider-global:nth-of-type(even) {
     <div class="container">
       <h2><a name="features">New Features</a></h2>
 
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.32</h3>
+      <ol class="maintext">
+        <li>AppWizard:
+          <ul type=square>
+            <li>Details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+        <li>Fonts (FreeType only):
+          <ul type=square>
+            <li>Update to FreeType 2.12.1.</li>
+          </ul>
+        </li>
+        <li>SCROLLER widget:
+          <ul type=square>
+            <li>New function SCROLLER_SetContentRect() added.</li>
+          </ul>
+        </li>
+        <li>Language support:
+          <ul type=square>
+            <li>Language support: TXT files now support line feed characters (\n) in text items.</li>
+          </ul>
+        </li>
+        <li>Colors:
+          <ul type=square>
+            <li>GUI_SetFuncMixColorsBulk() and GUI_SetFuncMixColors() can now be reset to default by passing NULL. Previously this would not work and would lead to a crash.</li>
+          </ul>
+        </li>
+        <li>Configuration/ Hardware acceleration:
+          <ul type=square>
+            <li>Support for NXP's Pixel Pipeline (PXP) added. The configuration files are part of the RT1050, RT1060 and RT1170 AppWizard BSPs.</li>
+            <li>New function GUI_MEMDEV_SetBlendFunc() added.</li>
+            <li>New function GUI_SetFuncDrawBitmapEx() added.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.30</h3>
+      <ol class="maintext">
+        <li>AppWizard:
+          <ul type=square>
+            <li>Details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+        <li>Widgets:
+          <ul type=square>
+            <li>New MOVIE widget added. Displays EMF and AVI movie files and offering touch controls.</li>
+            <li>New function SWITCH_SetThumbSize() added.</li>
+            <li>KEYBOARD: Added functions for managing default values.</li>
+            <li>New functions WIDGET_GetMinTimePerFrame() and WIDGET_SetMinTimePerFrame() added.</li>
+          </ul>
+        </li>
+        <li>Movies:
+          <ul type=square>
+            <li>New function GUI_MOVIE_IsPlaying() added.</li>
+            <li>New function GUI_MOVIE_SetSecondHandle() added.</li>
+          </ul>
+        </li>
+        <li>Window manager:
+          <ul type=square>
+            <li>New function WM_GetChild() added.</li>
+            <li>New functions WM_GetScrollerV() and WM_GetScrollerH() added.</li>
+            <li>New function WM_GetScrollPartner() added.</li>
+          </ul>
+        </li>
+        <li>Colors:
+          <ul type=square>
+            <li>New functions GUI_SetBlendColor(), GUI_SetBlendColorEx(), GUI_SetBlendBkColor(), GUI_SetBlendBkColorEx() added.</li>
+          </ul>
+        </li>
+        <li>Tools:
+          <ul type=square>
+            <li>New tool MakeMovie.exe for easy conversion of movie files. Replaces the old JPEG2Movie tool and negates the need of running scripts.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.28</h3>
+      <ol class="maintext">
+        <li>AppWizard:
+          <ul type=square>
+            <li>Details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+        <li>Widgets:
+          <ul type=square>
+            <li>New function WIDGET_GetType() added.</li>
+            <li>Return value added to function prototype set with EDIT_SetpfAddKeyEx().</li>
+            <li>New function EDIT_SetPasswordChar() added.</li>
+            <li>New function EDIT_SetPasswordMode() added.</li>
+            <li>Prototype of function pointer being set by EDIT_SetpfAddKeyEx(). The function returns a value now.</li>
+            <li>New function LISTBOX_Clear() added.</li>
+            <li>Bubble sort algorithm of LISTVIEW replaced with much faster (and simple) combsort algorithm.</li>
+            <li>New function LISTVIEW_GetOverlap() added.</li>
+            <li>New function LISTVIEW_SetOverlap() added.</li>
+            <li>New function LISTBOX_GetFixedScrollPos() added.</li>
+            <li>WIDGET_ITEM_DRAW_TEXT, WIDGET_ITEM_DRAW_BACKGROUND and WIDGET_ITEM_DRAW_FOCUS added to LISTBOX_OwnerDraw(). The old command WIDGET_ITEM_DRAW is still supported.</li>
+            <li>New function KEYBOARD_GetKeyRect() added.</li>
+          </ul>
+        </li>
+        <li>Common:
+          <ul type=square>
+            <li>New function GUI_BlendColors() added.</li>
+            <li>New function GUI_GCACHE_1_Create() added.</li>
+            <li>New function GUI_GCACHE_1_CreateEx() added.</li>
+          </ul>
+        </li>
+        <li>Window manager:
+          <ul type=square>
+            <li>New function WM_GetCapture() added.</li>
+          </ul>
+        </li>
+        <li>Memory devices:
+          <ul type=square>
+            <li>New function GUI_MEMDEV_CopyRect() added.</li>
+          </ul>
+        </li>
+        <li>Colors:
+          <ul type=square>
+            <li>New function GUI_BlendColors() added.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.26d</h3>
+      <ol class="maintext">
+        <li>AppWizard:
+          <ul type=square>
+            <li>Display rotation support added.</li>
+          </ul>
+        </li>
+        <li>Widgets:
+          <ul type=square>
+            <li>WIDGET_ITEM_DRAW_TEXT, WIDGET_ITEM_DRAW_BACKGROUND and WIDGET_ITEM_DRAW_FOCUS added to LISTBOX_OwnerDraw(). The old command WIDGET_ITEM_DRAW is still supported in most cases. LISTBOXES in fixed scroll mode with motion support enabled that use a custom owner draw function now have to react on the three new commands instead of WIDGET_ITEM_DRAW.</li>
+            <li>New function LISTBOX_GetFixedScrollPos() added.</li>
+            <li>New function WIDGET_GetType() added.</li>
+            <li>New function LISTVIEW_SetOverlap() and LISTVIEW_GetOverlap() added.</li>
+            <li>Password mode added to EDIT: new functions EDIT_SetPasswordMode() and EDIT_SetPasswordChar().</li>
+          </ul>
+        </li>
+      </ol>
+      
       <!-------------------------------------------------------------------------->
       <h3>Version 6.26</h3>
       <ol class="maintext">
@@ -2992,6 +3137,204 @@ div.divider-global:nth-of-type(even) {
       <h2><a name="pcorr">Program corrections</a></h2>
 
       <!-------------------------------------------------------------------------->
+      <h3>Version 6.32a</h3>
+      <ol class="maintext">
+        <li>AppWizard:
+          <ul type=square>
+            <li>Details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+        <li>SWITCH widget:
+          <ul type=square>
+            <li>Widget did not free its draw objects on WM_DELETE. Fixed.</li>
+          </ul>
+        </li>
+        <li>Core:
+          <ul type=square>
+            <li>Under certain circumstances corrupted string data could cause an endless loop. Fixed.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.32</h3>
+      <ol class="maintext">
+        <li>AppWizard:
+          <ul type=square>
+            <li>Details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+        <li>LISTBOX widget:
+          <ul type=square>
+            <li>Listbox items were not properly initialized when added with LISTBOX_SetText(). Fixed.</li>
+          </ul>
+        </li>
+        <li>LISTVIEW widget:
+          <ul type=square>
+            <li>In some cases LISTVIEW calculated wrong maximum horizontal motion position which would make scrolling to the end impossible. Fixed.</li>
+          </ul>
+        </li>
+        <li>SWITCH widget:
+          <ul type=square>
+            <li>When a custom hardware function was set with GUI_SetFuncMixColorsBulk() it is was not used for blending operations. Fixed.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.30a</h3>
+      <ol class="maintext">
+        <li>AppWizard:
+          <ul type=square>
+            <li>Details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+        <li>LISTVIEW widget:
+          <ul type=square>
+            <li>Crash when number of fixed columns exceeds number of columns. Fixed.</li>
+          </ul>
+        </li>
+        <li>BitmapConverter:
+          <ul type=square>
+            <li>Conversion from GIF into bitmap EMF did not work for formats above 8bpp. Fixed.</li>
+            <li>When creating EMFs from GIF animations the conversion dialog did not show any options for the bitmap formats M444_12, M444_12_1 and M444_16 which would lead to a crash. Fixed.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.30</h3>
+      <ol class="maintext">
+        <li>AppWizard:
+          <ul type=square>
+            <li>Details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+        <li>Memory Devices:
+          <ul type=square>
+            <li>GUI_MEMDEV_WriteAlpha() did not observe clipping rectangle. Fixed.</li>
+            <li>Usage of wrong conversion routine in GUI_MEMDEV_WriteAlpha(). Fixed.</li>
+            <li>GUI_MEMDEV_WriteAlpha() crashed if the image was bigger than the screen or was at a negative position. Fixed.</li>
+          </ul>
+        </li>
+        <li>Sprites/Cursors:
+          <ul type=square>
+            <li>A semi-transparent 32bpp cursor drawn above a 1bpp font would lead to artefacts on the screen. Fixed.</li>
+          </ul>
+        </li>
+        <li>Window Manager:
+          <ul type=square>
+            <li>When WM_MOTION_R was used and WM_MOTION_X or WM_MOTION_Y was used afterwards, wrong motion delta values were returned. Fixed.</li>
+          </ul>
+        </li>
+        <li>DROPDOWN widget:
+          <ul type=square>
+            <li>Click on DROPDOWN item would send a release event to any widget that is below the DROPDOWN list. Fixed.</li>
+            <li>DROPDOWN attached to a SWIPELIST would cause problems when it received motion input. Fixed.</li>
+            <li>DROPDOWN attached to a SWIPELIST could lead to wrong touch input coordinates if it was expanded and the touch was outside of the attached LISTBOX. Fixed.</li>
+            <li>DROPDOWN behavior changed: The list now closes on release of an item, not on click of an item, whether or not motion support is enabled for the DROPDOWN.</li>
+          </ul>
+        </li>
+        <li>LISTBOX widget:
+          <ul type=square>
+            <li>Hidden SCROLLERs attached to a LISTBOX received clicked events. Fixed.</li>
+          </ul>
+        </li>
+        <li>LISTVIEW widget:
+          <ul type=square>
+            <li>LISTVIEW with SCROLLERs attached to a SWIPELIST would have often its SCROLLERs hidden which was not intended. Fixed.</li>
+            <li>LISTVIEW_GetItemRect() did not factor in motion offset. Fixed.</li>
+          </ul>
+        </li>
+        <li>SLIDER widget:
+          <ul type=square>
+            <li>When motion was enabled, SLIDER widget would not swallow motion input by default but it could be moved around instead. Fixed.</li>
+          </ul>
+        </li>
+        <li>TREEVIEW widget:
+          <ul type=square>
+            <li>TREEVIEW_SetSel(0) would lead to a crash. Fixed.</li>
+          </ul>
+        </li>
+        <li>Fonts (FreeType only):
+          <ul type=square>
+            <li>TTF fonts with embedded bitmaps were not displayed correctly if the font was anti-aliased and in a certain size. For example: Calibri, 16px. Fixed.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.28</h3>
+      <ol class="maintext">
+        <li>AppWizard:
+          <ul type=square>
+            <li>Details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+        <li>SCROLLER widget:
+          <ul type=square>
+            <li>Fading did not work under certain circumstances. Fixed.</li>
+          </ul>
+        </li>
+        <li>MULTIEDIT widget:
+          <ul type=square>
+            <li>If the number of lines was reduced to a number that the text could not be motion scrolled, motion input moved the window instead of the text. Fixed.</li>
+            <li>With SCROLLERs activated and a text ySize smaller than the widget had invalidation and cursor position issues. Fixed.</li>
+          </ul>
+        </li>
+        <li>Antialiasing:
+          <ul type=square>
+            <li>GUI_AA_DrawPolyOutline() did not work in transparent windows. Fixed.</li>
+            <li>GUI_AA_DrawPolyOutlineEx() removed. Compatibility macro added which will call GUI_AA_DrawPolyOutline() instead.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.26d</h3>
+      <ol class="maintext">
+        <li>Fonts:
+          <ul type=square>
+            <li>SIF fonts did not work with GUI_SetFallbackFont(). Fixed.</li>
+          </ul>
+        </li>
+        <li>BitmapConverter:
+          <ul type=square>
+            <li>Conversion of an image without transparency into a perfect palette did not work. Fixed.</li>
+            <li>When an error occured while reading a C bitmap, the file was not closed afterwards. Fixed.</li>
+          </ul>
+        </li>
+        <li>emWinView:
+          <ul type=square>
+            <li>Selection rectangle was not restored for virtual layer views and composite views if simulation was closed and reopened while emWinView was running. Fixed.</li>
+            <li>Grid option does not get cleared anymore when zoom level is set below 300%. Fixed.</li>
+            <li>Mouse movements would be sent to emWin if selection or hand tool was active. Fixed.</li>
+          </ul>
+        </li>
+        <li>Memory devices:
+          <ul type=square>
+            <li>Under certain circumstances GUI_MEMDEV_WriteAlpha() used wrong color conversion. Fixed.</li>
+            <li>GUI_MEMDEV_WriteAlpha() did not observe clipping. Fixed.</li>
+          </ul>
+        </li>
+        <li>IMAGE widget:
+          <ul type=square>
+            <li>Problems with alpha blending in combination with use of GUI_MEMDEV_WriteAlpha(). Fixed.</li>
+          </ul>
+        </li>
+        <li>CALENDER widget:
+          <ul type=square>
+            <li>CALENDAR_GetDaysOfMonth() did not observe leap years. Fixed.</li>
+          </ul>
+        </li>
+        <li>SCROLLER widget:
+          <ul type=square>
+            <li>Some changes to ensure correct function of SCROLLER widget.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
       <h3>Version 6.26c</h3>
       <ol class="maintext">
         <li>LISTVIEW widget:
@@ -3004,7 +3347,7 @@ div.divider-global:nth-of-type(even) {
             <li>Some minor fixes in the editor when scaling is active. Details can be found in the release notes of AppWizard.</li>
           </ul>
         </li>
-    </ol>
+      </ol>
       
       <!-------------------------------------------------------------------------->
       <h3>Version 6.26b</h3>
@@ -3019,7 +3362,7 @@ div.divider-global:nth-of-type(even) {
             <li>Converting PNGs with transparency to 8bpp with transparency did not work. Fixed.</li>
           </ul>
         </li>
-    </ol>
+      </ol>
       
       <!-------------------------------------------------------------------------->
       <h3>Version 6.26a</h3>
@@ -3036,7 +3379,7 @@ div.divider-global:nth-of-type(even) {
         </li>
       </ol>
       
-	  <!-------------------------------------------------------------------------->
+      <!-------------------------------------------------------------------------->
       <h3>Version 6.26</h3>
       <ol class="maintext">
         <li>Anti-aliasing:
@@ -3146,6 +3489,16 @@ div.divider-global:nth-of-type(even) {
               <br>Selection rectangle would not be restored when closing and reopening simulation. Fixed.
               <br>Application scalability issues fixed.
             </li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.20c</h3>
+      <ol class="maintext">
+        <li>Tools:
+          <ul type=square>
+            <li>FontCvt would load and save monospaced BDF fonts as non-monospaced. Fixed.</li>
           </ul>
         </li>
       </ol>
@@ -5943,6 +6296,12 @@ div.divider-global:nth-of-type(even) {
       <h2><a name="history">Release history</a></h2>
       <table width="100%" border="0" cellspacing="5">
         <tr> <td width=20%><b>Version</b></td> <td width=30%><b>Release date</b></td> <td><b>Availability</b></td> </tr>
+        <tr> <td>V6.32a</td> <td>2023-03-01</td> <td>General release</td> </tr>
+        <tr> <td>V6.32 </td> <td>2023-02-17</td> <td>General release</td> </tr>
+        <tr> <td>V6.30a</td> <td>2022-12-05</td> <td>General release</td> </tr>
+        <tr> <td>V6.30 </td> <td>2022-11-21</td> <td>General release</td> </tr>
+        <tr> <td>V6.28 </td> <td>2022-09-09</td> <td>General release</td> </tr>
+        <tr> <td>V6.26d</td> <td>2022-08-05</td> <td>Point release</td>   </tr>
         <tr> <td>V6.26c</td> <td>2022-06-08</td> <td>Point release</td>   </tr>
         <tr> <td>V6.26b</td> <td>2022-06-01</td> <td>Point release</td>   </tr>
         <tr> <td>V6.26a</td> <td>2022-05-12</td> <td>Point release</td>   </tr>
@@ -5951,6 +6310,9 @@ div.divider-global:nth-of-type(even) {
         <tr> <td>V6.24 </td> <td>2022-01-20</td> <td>General release</td> </tr>
         <tr> <td>V6.22a</td> <td>2021-11-29</td> <td>Point release</td>   </tr>
         <tr> <td>V6.22 </td> <td>2021-11-17</td> <td>General release</td> </tr>
+        <tr> <td>V6.20c</td> <td>2021-10-05</td> <td>Point release</td>   </tr>
+        <tr> <td>V6.20b</td> <td>2021-09-30</td> <td>Point release</td>   </tr>
+        <tr> <td>V6.20a</td> <td>2021-08-31</td> <td>Point release</td>   </tr>
         <tr> <td>V6.20 </td> <td>2021-08-11</td> <td>General release</td> </tr>
         <tr> <td>V6.18c</td> <td>2021-07-02</td> <td>Point release</td>   </tr>
         <tr> <td>V6.18b</td> <td>2021-06-08</td> <td>Point release</td>   </tr>
@@ -6224,7 +6586,7 @@ div.divider-global:nth-of-type(even) {
 <div class="footer">
   <div class="container">
     <div>
-      <p>Copyright 2001-2022 SEGGER Microcontroller GmbH. All rights reserved.<br>
+      <p>Copyright <span>&copy;</span> 2001-2023 SEGGER Microcontroller GmbH. All rights reserved.<br>
         For more information, please visit our website&nbsp;<a href="https://www.segger.com/" target="_blank">www.segger.com</a>&nbsp;or contact us at&nbsp;<a href="mailto:info@segger.com">info@segger.com</a>&nbsp;</p>
     </div>
   </div>

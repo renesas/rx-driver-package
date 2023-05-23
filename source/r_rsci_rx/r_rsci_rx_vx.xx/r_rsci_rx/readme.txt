@@ -20,6 +20,7 @@ Features
 --------
 * (RX671) Simultaneous operation of up to 2 channels
 * (RX660) Simultaneous operation of up to 2 channels
+* (RX26T) Simultaneous operation of up to 3 channels
 * Simultaneous operation of Async, Sync, SSPI or Manc modes on different channels.
 * Queueing of incoming and outgoing data for Asynchronous or Manchester channels.
 * Interrupt driven.

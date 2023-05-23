@@ -41,7 +41,8 @@
 *                               - R_BSP_RegisterProtectDisable
 *         : 22.04.2022 3.14     Modified the following functions.
 *                               - R_BSP_VoltageLevelSetting
-***********************************************************************************************************************/
+*         : 28.02.2023 3.15     Modified comment.
+**********************************************************************************************************************/
 
 /***********************************************************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -484,9 +485,9 @@ void R_BSP_RegisterProtectDisable (bsp_reg_protect_t regs_to_unprotect)
 /**********************************************************************************************************************
  * Function Name: R_BSP_VoltageLevelSetting
  ******************************************************************************************************************//**
- * @brief This API function is used excessively with the RX66T and RX72T. It makes settings to the voltage level 
- * setting register (VOLSR) that are necessary in order to use the USB, AD, and RIIC peripheral modules. Call this 
- * function only when it is necessary to change the register settings.
+ * @brief This API function is used excessively with the RX26T, RX660, RX66T and RX72T. It makes settings to the 
+ * voltage level setting register (VOLSR) that are necessary in order to use the USB, AD, and RIIC peripheral modules. 
+ * Call this function only when it is necessary to change the register settings.
  * @param[in] ctrl_ptn Register Setting Patterns
  * The following setting patterns cannot be selected at the same time.
  * When specifying more than one pattern at the same time, use the "|" (OR) operator.

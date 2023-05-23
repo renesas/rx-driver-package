@@ -291,6 +291,6 @@ void r_flash_dm_set_dm(uint32_t handle)
     g_flash_dispatch_2_hndl = (st_flash_dispatch_2_hndl_t*)handle;
 }
 
-#endif /* (FLASH_TYPE == FLASH_TYPE_3) */
+#endif /* (FLASH_TYPE == FLASH_TYPE_4) */
 
 /* End of File */

@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer 
  *
- * Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_riic_rx_config_reference.h
@@ -65,6 +65,8 @@
  *         : 30.06.2021 2.48     Added RX671 support.
  *         : 31.07.2021 2.49     Added RX140 support.
  *         : 31.12.2021 2.50     Added RX660 support.
+ *         : 31.03.2023 2.70     Added RX26T support.
+ *                               Added new macros for SCL rise time and SCL fall time.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIIC_CONFIG_H
@@ -92,6 +94,7 @@
 /*  RX23W: ch0,    ,     */
 /*  RX24T: ch0,    ,     */
 /*  RX24U: ch0,    ,     */
+/*  RX26T: ch0,    ,     */
 /*  RX64M: ch0,    , ch2 */
 /*  RX65N: ch0, ch1, ch2 */
 /*  RX660: ch0,    , ch2 */
@@ -110,6 +113,14 @@
     #define RIIC_CFG_CH0_kBPS               (400)
     #define RIIC_CFG_CH1_kBPS               (400)
     #define RIIC_CFG_CH2_kBPS               (400)
+
+/* Set SCL rise time (s) and SCL fall time (s) */
+    #define RIIC_CFG_SCL100K_UP_TIME        (1000E-9)
+    #define RIIC_CFG_SCL100K_DOWN_TIME      (300E-9)
+    #define RIIC_CFG_SCL400K_UP_TIME        (300E-9)
+    #define RIIC_CFG_SCL400K_DOWN_TIME      (300E-9)
+    #define RIIC_CFG_SCL1M_UP_TIME          (120E-9)
+    #define RIIC_CFG_SCL1M_DOWN_TIME        (120E-9)    
 
 /* Set using digital filter(Selected IIC phi cycle is filtered out) */
 /* 0 = not, 1 = one IIC phi, 2 = two IIC phi, 3 = three IIC phi, 4 = four IIC phi */

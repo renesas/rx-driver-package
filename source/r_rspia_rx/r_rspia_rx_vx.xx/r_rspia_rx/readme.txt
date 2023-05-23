@@ -5,12 +5,12 @@ r_rspia_rx
 
 Document Number 
 ---------------
-R01AN5684ES0120
-R01AN5684JS0120
+R01AN5684ES0130
+R01AN5684JS0130
 
 Version
 -------
-v1.20
+v1.30
 
 Overview
 --------
@@ -66,10 +66,12 @@ Interrupt sources:
 Supported/Tested MCUs
 --------------
 * RX671
+* RX26T
 
 Boards Tested On
 ----------------
 * RSKRX671
+* MCB-RX26T
 
 Limitations
 -----------
@@ -81,7 +83,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp     v7.20
+* r_bsp     v7.30
 
 How to add to your project
 --------------------------
@@ -124,9 +126,9 @@ r_rspia_rx
 +---doc
 |   |
 |   +---en
-|   |       r01an5684es0120-rx-rspia.pdf
+|   |       r01an5684es0130-rx-rspia.pdf
 |   +---ja
-|           r01an5684js0120-rx-rspia.pdf
+|           r01an5684js0130-rx-rspia.pdf
 |
 +---src
         r_rspia_defaults.h

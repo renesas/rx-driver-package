@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_tsip_rx
-VERSION = 		1.16.l
+VERSION = 		1.18.l
 MDF = V2
 
 CONFIG_FOLDER = r_config
@@ -12,7 +12,7 @@ $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).zip: $(TARGET_FOLDER)/$(MODULE_NAME)
 
 $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).xml:
 	cp ./$(MODULE_NAME)_vx.xx_xxx.xml tmp.xml
-	sed s/x.xx/$(VERSION)/ tmp.xml > $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).xml
+	sed s/x.xx_xxx/$(VERSION)/ tmp.xml > $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).xml
 	rm -f tmp.xml
 
 $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION)_extend.mdf:

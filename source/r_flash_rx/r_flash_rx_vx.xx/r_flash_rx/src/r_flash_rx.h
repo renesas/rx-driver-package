@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_rx.h
@@ -49,6 +49,7 @@
 *           23.10.2020 4.70    Added RX671.
 *           23.04.2021 4.80    Added RX140.
 *           23.12.2021 4.90    Added RX660.
+*           24.01.2023 5.00    Added RX26T.
 ***********************************************************************************************************************/
 
 #ifndef FLASH_RX_HEADER_FILE
@@ -84,6 +85,8 @@
     #include "./src/targets/rx24t/r_flash_rx24t.h"
 #elif defined(MCU_RX24U)
     #include "./src/targets/rx24u/r_flash_rx24u.h"
+#elif defined(MCU_RX26T)
+    #include "./src/targets/rx26t/r_flash_rx26t.h"
 #elif defined(MCU_RX64M)
     #include "./src/targets/rx64m/r_flash_rx64m.h"
 #elif defined(MCU_RX651) || defined(MCU_RX65N)

@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_isconnected.c
@@ -48,8 +48,8 @@
  *****************************************************************************/
 e_cellular_err_t R_CELLULAR_IsConnected(st_cellular_ctrl_t * const p_ctrl)
 {
-    uint32_t preemption = 0;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
+    uint32_t         preemption = 0;
+    e_cellular_err_t ret        = CELLULAR_SUCCESS;
 
     preemption = cellular_interrupt_disable();
     if (NULL == p_ctrl)
@@ -79,7 +79,6 @@ e_cellular_err_t R_CELLULAR_IsConnected(st_cellular_ctrl_t * const p_ctrl)
         {
             ret = CELLULAR_ERR_NOT_CONNECT;
         }
-
         p_ctrl->running_api_count -= 2;
     }
 

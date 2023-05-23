@@ -12,6 +12,8 @@ DD.MM.YYYY Version Description
 28.06.2019 1.03    Folder name was changed.
 28.02.2020 1.10    Supported Smart Configurator.
 27.05.2021 1.11    Supported GNU-RX and IAR compiler.
+31.03.2023 1.12    Fixed XML file.
+                   Added the r_config folder and remove the ref folder.
 
 File Structure
 --------------
@@ -26,12 +28,13 @@ drw_2d
 |
 +---inc
 |    +-- tes (TES's driver version 3.17)
-+---ref 
-|    +-- r_drw2d_rx_config_reference.h
 +---src
      +-- rx (Source code depending on RX)
      |
      +-- tes (TES's driver source code)
+
+r_config 
+     +-- r_drw2d_rx_config.h
 
 Limitation
 ----------

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2022 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_gpio_rx_if.h
@@ -61,9 +61,35 @@
 *         : 31.03.2022 4.50    Added support for RX660.
 *         : 28.06.2022 4.60    Updated demo projects
 *         : 15.12.2022 4.70    Added P50 and P51 for RX66T and RX72T.
-                               Added PORTJ for RX110.
-							   Added PH7 for RX110 and RX111.
-							   Removed 112pins, 80pins, and 64pins package for RX72T.
+*                              Added PORTJ for RX110.
+*                              Added PH7 for RX110 and RX111.
+*                              Removed 112pins, 80pins, and 64pins package for RX72T.
+*         : 28.02.2023 4.80    Corrected PIN MASK value of PORTF and PORTJ for RX72N 145-pin and 144-pin.
+*         : 07.04.2023 4.90    Added support for RX26T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*                              Updated P05 for RX671 64-pin and RX65N 64-pin.
+*                              Updated P71 and P72 for RX671 145-pin and 144-pin.
+*                              Updated PORT2, PORTB, and PORTD for RX66T 100-pin and RX72T 100-pin.
+*                              Corrected PIN MASK value of PORT4 for RX110 40-pin.
+*                              Corrected PIN MASK value of PORT4 for RX24T 64-pin.
+*                              Corrected PIN MASK value of PORTF and PORTJ for RX66N 145-pin and 144-pin.
+*                              Corrected PIN MASK value of PORT5 for RX66T 64-pin.
+*                              Corrected the values of PORRT7, PORRT8, PORRT9, and PORRTJ 
+*                                 in the g_gpio_open_drain_n_support structure for RX231.
+*                              Corrected the values of PORRT5 in the g_gpio_pull_up_support and 
+*                                 g_gpio_dscr_support structures for RX231.
+*                              Corrected the value of PORRT3 in the g_gpio_open_drain_n_support, 
+*                                 g_gpio_pull_up_support, and g_gpio_dscr_support structures for RX23T.
+*                              Added P36 and P37 for RX23T 64-pin, 52-pin, and 48-pin.
+*                              Corrected the value of GPIO_PORT_H_PIN_3 for RX660 144-pin, 100-pin, 80-pin, 
+*                                 64-pin, and 48-pin.
+*                              Corrected the "Total of pins" for RX23T, RX24T, RX65N, and RX66T.
+*                              Updated for RX65N (with products with 1 Mbyte of code flash memory or less) 
+*                                 for the g_gpio_dscr_support and g_gpio_dscr2_support structures.
+*                              Removed define PIN MASK is not provided for RX110, RX111, RX113, 
+*                                 RX64M, RX65N, and RX71M.
+*                              Removed common "gpio_port_t" structure and added "gpio_port_t" structure for RX110 
+*                                 64-Pin, 48-Pin, 40-Pin, and 36-Pin.
 ***********************************************************************************************************************/
 
 #ifndef GPIO_RX_INTERFACE_HEADER_FILE
@@ -102,6 +128,8 @@ Includes   <System Includes> , "Project Includes"
     #include "./src/targets/rx23e-a/r_gpio_rx23e-a.h"
 #elif defined(BSP_MCU_RX24T)
     #include "./src/targets/rx24t/r_gpio_rx24t.h"
+#elif defined(BSP_MCU_RX26T)
+    #include "./src/targets/rx26t/r_gpio_rx26t.h"
 #elif defined(BSP_MCU_RX24U)
     #include "./src/targets/rx24u/r_gpio_rx24u.h"
 #elif defined(BSP_MCU_RX64M)
@@ -138,7 +166,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define GPIO_RX_VERSION_MAJOR           (4)
-#define GPIO_RX_VERSION_MINOR           (70)
+#define GPIO_RX_VERSION_MINOR           (90)
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -192,14 +220,14 @@ Exported global variables
 /***********************************************************************************************************************
 Exported global functions (to be accessed by other files)
 ***********************************************************************************************************************/
-void            R_GPIO_PortWrite(gpio_port_t port, uint8_t value);
-uint8_t         R_GPIO_PortRead(gpio_port_t port);
-void            R_GPIO_PortDirectionSet(gpio_port_t port, gpio_dir_t dir, uint8_t mask);
-void            R_GPIO_PinWrite(gpio_port_pin_t pin, gpio_level_t level);
-gpio_level_t    R_GPIO_PinRead(gpio_port_pin_t pin);
-void            R_GPIO_PinDirectionSet(gpio_port_pin_t pin, gpio_dir_t dir);
-gpio_err_t      R_GPIO_PinControl(gpio_port_pin_t pin, gpio_cmd_t cmd);
-uint32_t        R_GPIO_GetVersion(void);
+void            R_GPIO_PortWrite (gpio_port_t port, uint8_t value);
+uint8_t         R_GPIO_PortRead (gpio_port_t port);
+void            R_GPIO_PortDirectionSet (gpio_port_t port, gpio_dir_t dir, uint8_t mask);
+void            R_GPIO_PinWrite (gpio_port_pin_t pin, gpio_level_t level);
+gpio_level_t    R_GPIO_PinRead (gpio_port_pin_t pin);
+void            R_GPIO_PinDirectionSet (gpio_port_pin_t pin, gpio_dir_t dir);
+gpio_err_t      R_GPIO_PinControl (gpio_port_pin_t pin, gpio_cmd_t cmd);
+uint32_t        R_GPIO_GetVersion (void);
 
 #endif /* GPIO_RX_INTERFACE_HEADER_FILE */
 

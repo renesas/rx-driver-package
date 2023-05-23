@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_close.c
@@ -48,9 +48,9 @@
  **************************************************************************************/
 e_cellular_err_t R_CELLULAR_Close(st_cellular_ctrl_t * const p_ctrl)
 {
-    uint8_t i;
-    uint32_t preemption = 0;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
+    uint8_t          cnt        = 0;
+    uint32_t         preemption = 0;
+    e_cellular_err_t ret        = CELLULAR_SUCCESS;
 
     preemption = cellular_interrupt_disable();
     if (NULL == p_ctrl)
@@ -69,7 +69,7 @@ e_cellular_err_t R_CELLULAR_Close(st_cellular_ctrl_t * const p_ctrl)
         }
         else
         {
-            p_ctrl->running_api_count++;
+            p_ctrl->running_api_count += 1;
         }
     }
     cellular_interrupt_enable(preemption);
@@ -96,19 +96,21 @@ e_cellular_err_t R_CELLULAR_Close(st_cellular_ctrl_t * const p_ctrl)
             p_ctrl->ring_ctrl.ring_taskhandle = NULL;
         }
 
+#if CELLULAR_CFG_CTS_SW_CTRL == 1
+        cellular_rts_hw_flow_enable();
+#else
         cellular_rts_ctrl(0);
+#endif
+#ifdef CELLULAR_RTS_DELAY
+        cellular_delay_task(CELLULAR_RTS_DELAYTIME);
+#endif
 
-        for (i = CELLULAR_START_SOCKET_NUMBER; i <= p_ctrl->creatable_socket; i++ )
+        ret = cellular_module_reset(p_ctrl);
+
+        if (CELLULAR_SUCCESS == ret)
         {
-            cellular_closesocket(p_ctrl, i);
+            ret = cellular_power_down(p_ctrl);
         }
-
-        if (CELLULAR_SYSTEM_CONNECT == p_ctrl->system_state)
-        {
-            cellular_disconnect(p_ctrl);
-        }
-
-        cellular_power_down(p_ctrl);
 
         cellular_delete_event_group(p_ctrl->eventgroup);
         p_ctrl->eventgroup = NULL;
@@ -119,10 +121,10 @@ e_cellular_err_t R_CELLULAR_Close(st_cellular_ctrl_t * const p_ctrl)
         cellular_delete_semaphore(p_ctrl->at_semaphore);
         p_ctrl->at_semaphore = NULL;
 
-        for (i = 0; i < p_ctrl->creatable_socket; i++ )
+        for (cnt = 0; cnt < p_ctrl->creatable_socket; cnt++)
         {
-            cellular_delete_semaphore(p_ctrl->p_socket_ctrl[i].rx_semaphore);
-            p_ctrl->p_socket_ctrl[i].rx_semaphore = NULL;
+            cellular_delete_semaphore(p_ctrl->p_socket_ctrl[cnt].rx_semaphore);
+            p_ctrl->p_socket_ctrl[cnt].rx_semaphore = NULL;
         }
 
         cellular_free(p_ctrl->p_socket_ctrl);
@@ -134,9 +136,13 @@ e_cellular_err_t R_CELLULAR_Close(st_cellular_ctrl_t * const p_ctrl)
         cellular_block_pool_delete();
 #endif
 
+        preemption = cellular_interrupt_disable();
+
+        p_ctrl->running_api_count -= 1;
+        p_ctrl->system_state       = CELLULAR_SYSTEM_CLOSE;
         memset(p_ctrl, 0, sizeof(st_cellular_ctrl_t));
 
-        ret = CELLULAR_SUCCESS;
+        cellular_interrupt_enable(preemption);
     }
     else
     {

@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_byte_pool_control.c
@@ -60,8 +60,8 @@ static uint8_t s_cellular_semaphore_pool[TOTAL_SEMAPHORE_BLOCK_SIZE];
  ****************************************************************************************/
 e_cellular_err_t cellular_block_pool_create(void)
 {
+    UINT             rtos_ret;
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    UINT rtos_ret;
 
     rtos_ret = tx_block_pool_create(&g_cellular_socket_pool, "socket pool",
             sizeof(st_cellular_socket_ctrl_t), s_cellular_socket_pool, TOTAL_SOCKET_BLOCK_SIZE);
@@ -89,7 +89,6 @@ e_cellular_err_t cellular_block_pool_create(void)
         ret = CELLULAR_ERR_MEMORY_ALLOCATION;
     }
 
-
     return ret;
 }
 /**********************************************************************************************************************
@@ -101,8 +100,8 @@ e_cellular_err_t cellular_block_pool_create(void)
  ****************************************************************************************/
 e_cellular_err_t cellular_block_pool_delete(void)
 {
+    UINT             rtos_ret;
     e_cellular_err_t ret = CELLULAR_SUCCESS;
-    UINT rtos_ret;
 
     rtos_ret = tx_block_pool_delete(&g_cellular_socket_pool);
 

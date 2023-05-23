@@ -24,7 +24,7 @@
 /************************************************************************************************
 * System Name  : MEMDRV software
 * File Name    : r_memdrv_qspix.c
-* Version      : 1.00
+* Version      : 1.05
 * Device       : -
 * Abstract     : IO I/F module
 * Tool-Chain   : -
@@ -36,6 +36,7 @@
 /************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 30.10.2021 1.00     Initial Release
+*              : 16.03.2023 1.05     Added support for QSPIX Memory Mapped Mode.
 *************************************************************************************************/
 
 /************************************************************************************************
@@ -46,8 +47,10 @@ Includes <System Includes> , "Project Includes"
 #include "./src/r_memdrv_rx_private.h"           /* MEMDRV driver Private module definitions       */
 
 /* Check driver interface. */
-#if ((MEMDRV_CFG_DEV0_INCLUDED == 1) && (MEMDRV_CFG_DEV0_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_IAM)) || \
-    ((MEMDRV_CFG_DEV1_INCLUDED == 1) && (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_IAM))
+#if ((MEMDRV_CFG_DEV0_INCLUDED == 1) && ((MEMDRV_CFG_DEV0_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_IAM) || \
+     (MEMDRV_CFG_DEV0_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_MMM))) || \
+    ((MEMDRV_CFG_DEV1_INCLUDED == 1) && ((MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_IAM) || \
+     (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_MMM)))
 #include "r_pinset.h"
 
 /************************************************************************************************
@@ -57,7 +60,7 @@ Macro definitions
 #define QSPIX_TIMER_CH_COUNT        (1)
 #define QSPIX_TIMER_CH_MAX_COUNT    (2)
 
-#define QSPIX_MAX_CHANNELS                 (QSPIX_NUM_CH)
+#define QSPIX_MAX_CHANNELS              (QSPIX_NUM_CH)
 /************************************************************************************************
 Typedef definitions
 *************************************************************************************************/
@@ -73,6 +76,19 @@ static void qspix_init_ports(void);
 static void r_memdrv_qspix_callback(void *p_cbdat);
 static uint8_t qspix_div_cal(uint8_t devno);
 static uint8_t qspix_SPOCR_regset(uint8_t devno , qspix_cfg_t * cfg);
+static bool enable_mapped_mode[] =
+{
+#if (MEMDRV_CFG_DEV0_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_MMM)
+true,
+#else
+false,
+#endif
+#if (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_MMM)
+true
+#else
+false
+#endif
+};
 
 /************************************************************************************************
 * Function Name: r_memdrv_qspix_open
@@ -96,26 +112,37 @@ memdrv_err_t r_memdrv_qspix_open(uint8_t devno, st_memdrv_info_t * p_memdrv_info
 
     /* Set read mode */
     cfg.read_mode = QSPIX_READ_MODE_STANDARD;
+
     /* Set Slave Select Extension */
     cfg.slave_select_extension = QSPIX_DO_NOT_EXTEND_QSSL;
+
     /* Set Prefetch Function Enable */
     cfg.prefetch_function = QSPIX_PREFETCH_ENABLE;
+
     /* Set Clock Mode */
     cfg.clock_mode = QSPIX_SPI_MODE_3;
+
     /* Set Data Output Duration Extension */
     cfg.data_output_select = QSPIX_DO_NOT_EXTEND;
+
     /* Set Special Read Instruction Select */
     cfg.special_instruction_select = QSPIX_DEFAULT_INSTRUCTION_CODE;
+
     /* Set Slave Select High Width Setting */
     cfg.slave_select_high_width = QSPIX_1_CYCLE_QSPCLK;
+
     /* Set Slave Select Hold Time Setting */
     cfg.slave_select_hold_time = QSPIX_RELEASE_QSSL_0_5_QSPCLK;
+
     /* Set Slave Select Setup Time Setting */
     cfg.slave_select_setup_time = QSPIX_OUTPUT_QSSL_0_5_QSPCLK;
+
     /* Set Address Size */
     cfg.address_size = QSPIX_3_BYTES;
+
     /* Set Instruction with 4-Byte Address Enable */
     cfg.instruction_4_Byte_address = QSPIX_INSTRUCTION_4_BYTE_ADDRESS_DISABLE;
+
     /* Set Number of Dummy Cycle */
     cfg.dummy_clocks = QSPIX_DEFAULT_DUMMY_CYCLES;
 
@@ -190,7 +217,6 @@ memdrv_err_t r_memdrv_qspix_close(uint8_t devno, st_memdrv_info_t * p_memdrv_inf
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_OTHER                       ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
@@ -209,7 +235,6 @@ memdrv_err_t r_memdrv_qspix_disable(uint8_t devno, st_memdrv_info_t * p_memdrv_i
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_OTHER                       ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
@@ -229,7 +254,6 @@ memdrv_err_t r_memdrv_qspix_disable_tx_data(uint8_t devno,
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_OTHER                       ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
@@ -249,7 +273,6 @@ memdrv_err_t r_memdrv_qspix_disable_rx_data(uint8_t devno,
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_OTHER                       ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
@@ -267,8 +290,7 @@ memdrv_err_t r_memdrv_qspix_enable(uint8_t devno, st_memdrv_info_t * p_memdrv_in
 *              :    uint8_t   * p_data                  ;   Buffer pointer
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
-* Return Value : MEMDRV_SUCCESS                       ;   Successful operation
-*              : MEMDRV_ERR_OTHER                     ;   Other error
+* Return Value : MEMDRV_SUCCESS                         ;   Successful operation
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
@@ -287,13 +309,12 @@ memdrv_err_t r_memdrv_qspix_enable_tx_data(uint8_t devno,
 *              :    uint8_t   * p_data                  ;   Buffer pointer
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
-* Return Value : MEMDRV_SUCCESS                       ;   Successful operation
-*              : MEMDRV_ERR_OTHER                     ;   Other error
+* Return Value : MEMDRV_SUCCESS                         ;   Successful operation
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
 memdrv_err_t r_memdrv_qspix_enable_rx_data(uint8_t devno,
-                                                               st_memdrv_info_t * p_memdrv_info)
+                                        st_memdrv_info_t * p_memdrv_info)
 {
     return MEMDRV_SUCCESS;
 } /* End of function r_memdrv_qspix_enable_rx_data() */
@@ -318,23 +339,30 @@ memdrv_err_t r_memdrv_qspix_tx(uint8_t devno, st_memdrv_info_t * p_memdrv_info)
     qspix_err_t   ret_drv = QSPIX_SUCCESS;
     uint8_t channel = r_memdrv_get_drv_ch(devno);
 
-    ret_drv = R_QSPIX_Write_Indirect(channel,
-                                     p_memdrv_info->p_data,
-                                     p_memdrv_info->cnt,
-                                     p_memdrv_info->read_after_write);
-    if   (QSPIX_SUCCESS == ret_drv)
+    if((true == p_memdrv_info->read_in_memory_mapped) && (true == enable_mapped_mode[devno]))
     {
         return MEMDRV_SUCCESS;
     }
-    else if (QSPIX_ERR_HW == ret_drv)
-    {
-        R_MEMDRV_Log(MEMDRV_DEBUG_ERR_ID, (uint32_t)MEMDRV_ERR_SUB, __LINE__);
-        return MEMDRV_ERR_HARD;
-    }
     else
     {
-        R_MEMDRV_Log(MEMDRV_DEBUG_ERR_ID, (uint32_t)MEMDRV_ERR_SUB, __LINE__);
-        return MEMDRV_ERR_OTHER;
+        ret_drv = R_QSPIX_Write_Indirect(channel,
+                                         p_memdrv_info->p_data,
+                                         p_memdrv_info->cnt,
+                                         p_memdrv_info->read_after_write);
+        if   (QSPIX_SUCCESS == ret_drv)
+        {
+            return MEMDRV_SUCCESS;
+        }
+        else if (QSPIX_ERR_HW == ret_drv)
+        {
+            R_MEMDRV_Log(MEMDRV_DEBUG_ERR_ID, (uint32_t)MEMDRV_ERR_SUB, __LINE__);
+            return MEMDRV_ERR_HARD;
+        }
+        else
+        {
+            R_MEMDRV_Log(MEMDRV_DEBUG_ERR_ID, (uint32_t)MEMDRV_ERR_SUB, __LINE__);
+            return MEMDRV_ERR_OTHER;
+        }
     }
 } /* End of function r_memdrv_qspix_tx() */
 
@@ -435,24 +463,90 @@ memdrv_err_t r_memdrv_qspix_rx(uint8_t devno, st_memdrv_info_t * p_memdrv_info)
 memdrv_err_t r_memdrv_qspix_rx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_info)
 {
     qspix_err_t   ret_drv = QSPIX_SUCCESS;
+    qspix_protocol_t protocol_ext;
+    qspix_address_size_t addr_size;
     uint8_t channel = r_memdrv_get_drv_ch(devno);
 
-    ret_drv = R_QSPIX_Read_Indirect(channel,
+    if(true == enable_mapped_mode[devno])
+    {
+        ret_drv = R_QSPIX_BankSet(channel, (uint8_t)(p_memdrv_info->p_addr/QSPI_DEVICE_OFFSET_ADDRESS));
+        if(QSPIX_SUCCESS != ret_drv)
+        {
+            R_MEMDRV_Log(MEMDRV_DEBUG_ERR_ID, (uint32_t)MEMDRV_ERR_SUB, __LINE__);
+            return MEMDRV_ERR_OTHER;
+        }
+
+        /* Update start address at QSPI memory space */
+        p_memdrv_info->p_addr = p_memdrv_info->p_addr - ((p_memdrv_info->p_addr/QSPI_DEVICE_OFFSET_ADDRESS) * QSPI_DEVICE_OFFSET_ADDRESS);
+
+        switch(p_memdrv_info->io_mode)
+        {
+            case MEMDRV_MODE_SINGLE:
+                protocol_ext = QSPIX_EXTENDED_SPI_PROTOCOL;
+            break;
+            case MEMDRV_MODE_DUAL:
+                protocol_ext = QSPIX_DUAL_SPI_PROTOCOL;
+            break;
+            case MEMDRV_MODE_QUAD:
+                protocol_ext = QSPIX_QUAD_SPI_PROTOCOL;
+            break;
+            default:
+            break;
+        }
+
+        switch(p_memdrv_info->addr_size)
+        {
+            case MEMDRV_ADDR_4BYTES:
+                addr_size = QSPIX_4_BYTES;
+            break;
+            case MEMDRV_ADDR_3BYTES:
+                addr_size = QSPIX_3_BYTES;
+            break;
+            default:
+            break;
+        }
+
+        ret_drv = R_QSPIX_Read_Memory_Map(channel,
                                      p_memdrv_info->p_data,
+                                     p_memdrv_info->p_addr,
+                                     protocol_ext,
+                                     addr_size,
                                      p_memdrv_info->cnt);
-    if   (QSPIX_SUCCESS == ret_drv)
-    {
-        return MEMDRV_SUCCESS;
-    }
-    else if (QSPIX_ERR_HW == ret_drv)
-    {
-        R_MEMDRV_Log(MEMDRV_DEBUG_ERR_ID, (uint32_t)MEMDRV_ERR_SUB, __LINE__);
-        return MEMDRV_ERR_HARD;
+
+        if   (QSPIX_SUCCESS == ret_drv)
+        {
+            return MEMDRV_SUCCESS;
+        }
+        else if (QSPIX_ERR_HW == ret_drv)
+        {
+            R_MEMDRV_Log(MEMDRV_DEBUG_ERR_ID, (uint32_t)MEMDRV_ERR_SUB, __LINE__);
+            return MEMDRV_ERR_HARD;
+        }
+        else
+        {
+            R_MEMDRV_Log(MEMDRV_DEBUG_ERR_ID, (uint32_t)MEMDRV_ERR_SUB, __LINE__);
+            return MEMDRV_ERR_OTHER;
+        }
     }
     else
     {
-        R_MEMDRV_Log(MEMDRV_DEBUG_ERR_ID, (uint32_t)MEMDRV_ERR_SUB, __LINE__);
-        return MEMDRV_ERR_OTHER;
+        ret_drv = R_QSPIX_Read_Indirect(channel,
+                                         p_memdrv_info->p_data,
+                                         p_memdrv_info->cnt);
+        if   (QSPIX_SUCCESS == ret_drv)
+        {
+            return MEMDRV_SUCCESS;
+        }
+        else if (QSPIX_ERR_HW == ret_drv)
+        {
+            R_MEMDRV_Log(MEMDRV_DEBUG_ERR_ID, (uint32_t)MEMDRV_ERR_SUB, __LINE__);
+            return MEMDRV_ERR_HARD;
+        }
+        else
+        {
+            R_MEMDRV_Log(MEMDRV_DEBUG_ERR_ID, (uint32_t)MEMDRV_ERR_SUB, __LINE__);
+            return MEMDRV_ERR_OTHER;
+        }
     }
 }
 
@@ -484,19 +578,22 @@ void r_memdrv_qspix_1ms_interval(void)
 ******************************************************************************/
 static void qspix_init_ports(void)
 {
-#if (((MEMDRV_CFG_DEV0_INCLUDED == 1) && (MEMDRV_CFG_DEV0_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM) && \
-      (MEMDRV_CFG_DEV0_MODE_DRVR_CH == MEMDRV_DRVR_CH0)) || ((MEMDRV_CFG_DEV1_INCLUDED == 1) && \
-      (MEMDRV_CFG_DEV1_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM) && (MEMDRV_CFG_DEV1_MODE_DRVR_CH == MEMDRV_DRVR_CH0)))
+#if (((MEMDRV_CFG_DEV0_INCLUDED == 1) && ((MEMDRV_CFG_DEV0_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM) || \
+      (MEMDRV_CFG_DEV0_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_MMM)) && (MEMDRV_CFG_DEV0_MODE_DRVR_CH == MEMDRV_DRVR_CH0)) || \
+     ((MEMDRV_CFG_DEV1_INCLUDED == 1) && ((MEMDRV_CFG_DEV1_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM) || \
+      (MEMDRV_CFG_DEV1_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM)) && (MEMDRV_CFG_DEV1_MODE_DRVR_CH == MEMDRV_DRVR_CH0)))
     R_QSPIX_PinSet_QSPIX0();
 #endif
-#if (((MEMDRV_CFG_DEV0_INCLUDED == 1) && (MEMDRV_CFG_DEV0_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM) && \
-      (MEMDRV_CFG_DEV0_MODE_DRVR_CH == MEMDRV_DRVR_CH1)) || ((MEMDRV_CFG_DEV1_INCLUDED == 1) && \
-      (MEMDRV_CFG_DEV1_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM) && (MEMDRV_CFG_DEV1_MODE_DRVR_CH == MEMDRV_DRVR_CH1)))
+#if (((MEMDRV_CFG_DEV0_INCLUDED == 1) && ((MEMDRV_CFG_DEV0_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM) || \
+      (MEMDRV_CFG_DEV0_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_MMM)) && (MEMDRV_CFG_DEV0_MODE_DRVR_CH == MEMDRV_DRVR_CH1)) || \
+     ((MEMDRV_CFG_DEV1_INCLUDED == 1) && ((MEMDRV_CFG_DEV1_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM) || \
+      (MEMDRV_CFG_DEV1_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM)) && (MEMDRV_CFG_DEV1_MODE_DRVR_CH == MEMDRV_DRVR_CH1)))
     R_QSPIX_PinSet_QSPIX1();
 #endif
-#if (((MEMDRV_CFG_DEV0_INCLUDED == 1) && (MEMDRV_CFG_DEV0_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM) && \
-      (MEMDRV_CFG_DEV0_MODE_DRVR_CH == MEMDRV_DRVR_CH2)) || ((MEMDRV_CFG_DEV1_INCLUDED == 1) && \
-      (MEMDRV_CFG_DEV1_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM) && (MEMDRV_CFG_DEV1_MODE_DRVR_CH == MEMDRV_DRVR_CH2)))
+#if (((MEMDRV_CFG_DEV0_INCLUDED == 1) && ((MEMDRV_CFG_DEV0_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM) || \
+      (MEMDRV_CFG_DEV0_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_MMM)) && (MEMDRV_CFG_DEV0_MODE_DRVR_CH == MEMDRV_DRVR_CH2)) || \
+     ((MEMDRV_CFG_DEV1_INCLUDED == 1) && ((MEMDRV_CFG_DEV1_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM) || \
+      (MEMDRV_CFG_DEV1_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM)) && (MEMDRV_CFG_DEV1_MODE_DRVR_CH == MEMDRV_DRVR_CH2)))
     R_QSPIX_PinSet_QSPIX2();
 #endif
 } /* End of function qspix_init_ports() */
@@ -746,6 +843,8 @@ memdrv_err_t r_memdrv_qspix_rx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_i
     return MEMDRV_ERR_OTHER;
 } /* End of function r_memdrv_qspix_rx_data() */
 
-#endif  /* ((MEMDRV_CFG_DEV0_INCLUDED == 1) && (MEMDRV_CFG_DEV0_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_IAM)) || \
-           ((MEMDRV_CFG_DEV1_INCLUDED == 1) && (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_IAM))
+#endif  /* ((MEMDRV_CFG_DEV0_INCLUDED == 1) && ((MEMDRV_CFG_DEV0_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_IAM) || \
+            (MEMDRV_CFG_DEV0_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_MMM))) || \
+           ((MEMDRV_CFG_DEV1_INCLUDED == 1) && ((MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_IAM) || \
+            (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_MMM))) */
 /* End of File */

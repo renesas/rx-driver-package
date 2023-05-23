@@ -50,6 +50,8 @@
 *           14.03.2022 4.70    Added support for RX66T-48Pin.
 *           31.03.2022 4.80    Added support for RX660.
 *           29.07.2022 4.90    Updated demo projects.
+*           15.08.2022 5.00    Added support for RX26T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 #ifndef DAC_RX_IF_H
 #define DAC_RX_IF_H
@@ -69,8 +71,8 @@ Macro definitions
 #endif
 
 /* Version Number of API. */
-#define DAC_VERSION_MAJOR  (4)
-#define DAC_VERSION_MINOR  (90)
+#define DAC_VERSION_MAJOR  (5)
+#define DAC_VERSION_MINOR  (00)
 
 
 #if defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX13T)
@@ -115,14 +117,14 @@ typedef enum e_dac_out_sel_da      // DAC output select
     DAC_OUT_DA_OFF = 0,      // Turn off output of DA channels
     DAC_OUT_SEL_DA0 = 1,     // Output to DA0 channel pin
     DAC_OUT_SEL_DA1 = 2,     // Output to DA1 channel pin
-}dac_out_da;
+}dac_out_da_t;
 
 typedef enum e_dac_out_sel_ref
 {
     DAC_OUT_REF_OFF = 0,      // Turn off output of DA channels
     DAC_OUT_SEL_REF0 = 1,     // Output DA0 channel as Vref
     DAC_OUT_SEL_REF1 = 2,     // Output DA1 channel as Vref
-}dac_out_ref;
+}dac_out_ref_t;
 
 #if defined(BSP_MCU_RX111) || defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX13T)
 typedef struct st_dac_cfg
@@ -139,7 +141,7 @@ typedef struct st_dac_cfg
 } dac_cfg_t;
 
 #elif defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX72M) \
- || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
+|| defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
 typedef struct st_dac_cfg
 {
     bool        fmt_flush_right;
@@ -147,14 +149,14 @@ typedef struct st_dac_cfg
     uint8_t     sync_unit;                      // 0 or 1
     bool        ch_conv_off_when_output_off;    // applies to both channels
 } dac_cfg_t;
-#elif defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX72T)
+#elif defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX26T)
 typedef struct st_dac_cfg
 {
-    bool        fmt_flush_right;
-    bool        sync_with_adc;
-    bool        ch_conv_off_when_output_off;    // applies to both channels
-    dac_out_da  out_sel_da;                     // 1 for output to DA0 pin, 2 for output to DA1 pin
-    dac_out_ref out_sel_ref;                    // 1 for output channel 0 as Vref, 2 for output channel 1 as Vref
+    bool          fmt_flush_right;
+    bool          sync_with_adc;
+    bool          ch_conv_off_when_output_off;    // applies to both channels
+    dac_out_da_t  out_sel_da;                     // 1 for output to DA0 pin, 2 for output to DA1 pin
+    dac_out_ref_t out_sel_ref;                    // 1 for output channel 0 as Vref, 2 for output channel 1 as Vref
 } dac_cfg_t;
 
 #else //defined(BSP_MCU_RX130) || defined(BSP_MCU_RX24U) || defined(BSP_MCU_RX140)
@@ -172,7 +174,7 @@ typedef enum e_dac_cmd
     DAC_CMD_OUTPUT_ON,          // Analog output of channel is enabled.
     DAC_CMD_OUTPUT_OFF,         // Analog output of channel is disabled.
 #if defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72M) \
- || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
+|| defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
     DAC_CMD_AMP_ON,             // Gain of 1 amplifier. See Electrical
     DAC_CMD_AMP_OFF,            // Characteristics in HW User's Manual
 #if defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
@@ -204,15 +206,15 @@ typedef enum e_dac_err
 /*****************************************************************************
 Public Functions
 ******************************************************************************/
-dac_err_t R_DAC_Open(dac_cfg_t *p_config);
+dac_err_t R_DAC_Open (dac_cfg_t *p_config);
                     
-dac_err_t R_DAC_Write(uint8_t const chan, uint16_t data);
+dac_err_t R_DAC_Write (uint8_t const chan, uint16_t data);
 
-dac_err_t R_DAC_Control(uint8_t const chan, dac_cmd_t const cmd);
+dac_err_t R_DAC_Control (uint8_t const chan, dac_cmd_t const cmd);
 
-dac_err_t R_DAC_Close(void);
+dac_err_t R_DAC_Close (void);
 
-uint32_t  R_DAC_GetVersion(void);
+uint32_t  R_DAC_GetVersion (void);
 
                                     
 #endif /* DAC_RX_IF_H */

@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cgact.c
@@ -48,17 +48,17 @@
  ************************************************************************************************/
 e_cellular_err_t atc_cgact(st_cellular_ctrl_t * const p_ctrl, const uint8_t mode, const uint8_t context_id)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    uint8_t str[2][5] = {0};
+    uint8_t          str[2][3]                             = {0};
+    const uint8_t *  p_command_arg[CELLULAR_MAX_ARG_COUNT] = {0};
+    e_cellular_err_t ret                                   = CELLULAR_SUCCESS;
 
     sprintf((char *)str[0], "%d", mode);            // (uint8_t *)->(char *)
     sprintf((char *)str[1], "%d", context_id);      // (uint8_t *)->(char *)
 
-    const uint8_t * const p_command_arg[CELLULAR_MAX_ARG_COUNT] = {str[0], str[1]};
+    p_command_arg[0] = str[0];
+    p_command_arg[1] = str[1];
 
-    atc_generate(p_ctrl->sci_ctrl.atc_buff,
-        (const uint8_t *)&gp_at_command[ATC_ACTIVATE_PDN][0],   // (const uint8_t *const *)->(const uint8_t **)
-            (const uint8_t **)&p_command_arg);                  // (const uint8_t *const *)->(const uint8_t **)
+    atc_generate(p_ctrl->sci_ctrl.atc_buff, gp_at_command[ATC_ACTIVATE_PDN], p_command_arg);
 
     ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_ACTIVATE_PDN);
 
@@ -75,9 +75,7 @@ e_cellular_err_t atc_cgact_check(st_cellular_ctrl_t * const p_ctrl)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
 
-    atc_generate(p_ctrl->sci_ctrl.atc_buff,
-        (const uint8_t *)&gp_at_command[ATC_GET_PDN_STATE][0], // (const uint8_t *const *)->(const uint8_t **)
-            NULL);
+    atc_generate(p_ctrl->sci_ctrl.atc_buff, gp_at_command[ATC_GET_PDN_STATE], NULL);
 
     ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_GET_PDN_STATE);
 

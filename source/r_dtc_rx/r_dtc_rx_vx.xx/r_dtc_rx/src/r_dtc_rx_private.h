@@ -55,6 +55,7 @@
 *         : 15.04.2021 3.80    Added support for RX140.
 *         : 31.03.2022 4.10    Added support for RX660.
 *         : 27.12.2022 4.21    Updated include target mcu interface header file path format for Linux compatibility.
+*         : 31.03.2023 4.30    Added support for RX26T.
 *******************************************************************************/
 #ifndef DTC_RX_PRIVATE_H
 #define DTC_RX_PRIVATE_H
@@ -94,6 +95,11 @@ Includes   <System Includes> , "Project Includes"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
+#elif defined(BSP_MCU_RX26T)
+    #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE) && (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE)
+        #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
+    #include "./src/targets/rx26t/r_dtc_rx_target.h"
 #elif defined(BSP_MCU_RX130)
     #include "./src/targets/rx130/r_dtc_rx_target.h"
     #if (DTC_CFG_USE_DMAC_FIT_MODULE == DTC_ENABLE)

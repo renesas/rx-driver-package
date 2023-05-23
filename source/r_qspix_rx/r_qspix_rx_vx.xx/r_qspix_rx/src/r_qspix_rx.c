@@ -24,6 +24,7 @@
 /*******************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 31.03.2021 1.00     First Release
+*              : 16.03.2023 1.40     Added R_QSPIX_Read_Memory_Map() function
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_qspix_rx.c
@@ -55,18 +56,24 @@ Private global variables and functions
 /*******************************************************************************
  * Function Name: R_QSPIX_Open
  **************************************************************************/ /**
- * @brief Open the QSPIX driver module. After the driver is open, the QSPIX can be
- * accessed like internal flash memory starting at address 0x70000000.
+ * @brief This function applies power to the QSPIX channel, initializes the associated registers, enables interrupts, and
+ *        provides the channel handle for use with other API functions.
  * @param[in] channel
- *             Channel of QSPIX need to open.
+ *             Number of the QSPIX channel to be initialized
  * @param[in] p_cfg
- *             Pointer to a config structure.
+ *             Pointer to QSPIX channel configuration data structure
  * @retval    QSPIX_SUCCESS             Processing completed without problem
  * @retval    QSPIX_ERR_OPENED          QSPIX was initialized already
  * @retval    QSPIX_ERR_INVALID_ARG     Invalid argument
- * @retval    QSPIX_ERR_NULL_PTR        Argument pointers are NULL
+ * @retval    QSPIX_ERR_NULL_PTR        Argument pointer is NULL
  * @retval    QSPIX_ERR_BUSY            The QSPIX resources are locked by another process
- * @details   Initializes an QSPIX channel for a particular mode.
+ * @details   The Open function is responsible for preparing an QSPIX channel for operation. This function must be called
+ *            once prior to calling any other QSPIX API functions (except R_QSPIX_GetVersion). Once successfully
+ *            completed, the status of the selected channel QSPIX will be set to "open". After that, this function should not
+ *            be called again for the same QSPIX channel without first performing a "close" by calling R_QSPIX_Close().\n
+ *            Communication is not yet available upon completion of this processing.\n
+ *            After the driver is open, the QSPIX can be accessed like internal flash memory starting at address
+ *            0x70000000.
  * @note      None
  */
 qspix_err_t R_QSPIX_Open(uint8_t channel, qspix_cfg_t * p_cfg)
@@ -95,12 +102,13 @@ End of function R_QSPIX_Open
  **************************************************************************/ /**
  * @brief Close the QSPIX driver module.
  * @param[in] channel
- *             Channel of QSPIX need to close.
- *
+ *             Channel of QSPIX need to close
  * @retval    QSPIX_SUCCESS             Processing completed without problem
  * @retval    QSPIX_ERR_NOT_OPEN        QSPIX module is not initialized yet
  * @retval    QSPIX_ERR_INVALID_ARG     Invalid argument
- * @details   Disables the QSPIX channel and enters module-stop state.
+ * @details   Disables the QSPIX channel and enters module-stop state. The QSPIX channel cannot be used again until it
+ *            has been reopened with the R_QSPIX_Open function. If this function is called for an QSPIX that is not in the
+ *            open state then an error code is returned.
  * @note      None
  */
 qspix_err_t R_QSPIX_Close (uint8_t channel)
@@ -127,16 +135,17 @@ End of function R_QSPIX_Close
 /**********************************************************************************************************************
  * Function Name: R_QSPIX_Control
  *****************************************************************************************************************/ /**
- * @brief This function configures and controls the operating mode for the QSPIX channel.
+ * @brief This function is used to change settings.
  * @param[in] channel
- *             Channel of QSPIX need to change operating.
+ *             Number of the QSPIX channel to be control.
  * @param[in] p_cfg
- *             Pointer to a config structure.
+ *             Pointer to QSPIX channel configuration data structure.
  * @retval    QSPIX_SUCCESS             Processing completed without problem
  * @retval    QSPIX_ERR_NOT_OPEN        QSPIX module is not initialized yet
  * @retval    QSPIX_ERR_INVALID_ARG     Invalid argument
- * @retval    QSPIX_ERR_NULL_PTR        Argument pointers are NULL
- * @details   Modify operating of QSPIX channel for a particular mode.
+ * @retval    QSPIX_ERR_NULL_PTR        Argument pointer is NULL
+ * @details   This function modifies the operating of QSPIX channel for a particular mode. This function must be called
+ *            after R_QSPIX_Open.
  * @note      None
  */
 qspix_err_t R_QSPIX_Control(uint8_t channel, qspix_cfg_t * p_cfg)
@@ -163,18 +172,21 @@ End of function R_QSPIX_Control
 /******************************************************************************
  * Function Name: R_QSPIX_Read_Indirect
  *************************************************************************/ /**
- * @brief Reads raw data directly from the QSPIX. This API can only be called 
- * after R_QSPIX_DirectWrite with /n
- * read_after_write set to true.
+ * @brief Reads raw data directly from the QSPIX. This API can only be called after R_QSPIX_DirectWrite with
+ *        read_after_write set to true.
  * @param[in] channel       Channel of QSPIX use to read data.
  * @param[in] p_des_addr    Pointer to store data
  * @param[in] bytes         Number of bytes to read
  * @retval    QSPIX_SUCCESS             Processing completed without problem
  * @retval    QSPIX_ERR_NOT_OPEN        QSPIX module is not initialized yet
  * @retval    QSPIX_ERR_INVALID_ARG     Invalid argument
- * @retval    QSPIX_ERR_NULL_PTR        Argument pointers are NULL
- * @details   Uses the QSPIX of the channel number specified by the argument channel to read data.
- * @note      None
+ * @retval    QSPIX_ERR_NULL_PTR        Argument pointer is NULL
+ * @details   Uses the QSPIX of the channel number specified by the argument channel to read data.\n
+ *            Number of bytes is depended on the Flash is used.
+ * @note      Only Extended SPI protocol is allowed to use in Indirect access mode, the standard Read or Fast Read
+ *            instruction must be used to reference the contents of the serial flash. The QSPIX does not support Fast
+ *            Read Dual Output, Fast Read Dual I/O, Fast Read Quad Output, or Fast Read Quad I/O transfers in this
+ *            configuration. When these high-speed read operations are required, use ordinary flash access.
  */
 qspix_err_t R_QSPIX_Read_Indirect(uint8_t channel,
                                    uint8_t *p_des_addr,
@@ -190,20 +202,60 @@ qspix_err_t R_QSPIX_Read_Indirect(uint8_t channel,
 End of function R_QSPIX_Read_Indirect
 ******************************************************************************/
 
+/******************************************************************************
+ * Function Name: R_QSPIX_Read_Memory_Map
+ *************************************************************************/ /**
+ * @brief Reads data by accessing to QSPI memory space.
+ * @param[in] channel       Channel of QSPIX use to read data
+ * @param[in] p_des_addr    Pointer to store data
+ * @param[in] p_addr        Read start address
+ * @param[in] protocol_ext  Select SPI protocol mode
+ * @param[in] addr_size     Address size
+ * @param[in] bytes         Number of bytes to read
+ * @retval    QSPIX_SUCCESS             Processing completed without problem
+ * @retval    QSPIX_ERR_NOT_OPEN        QSPIX module is not initialized yet
+ * @retval    QSPIX_ERR_INVALID_ARG     Invalid argument
+ * @retval    QSPIX_ERR_NULL_PTR        Argument pointer is NULL
+ * @details   Uses the QSPIX of the channel number specified by the argument channel to read data.
+ * @note      Each time R_QSPIX_Read_Memory_Map() function is called, it can only read data from addresses
+ *            within a bank - the specified bank value was previously set by the R_QSPIX_BankSet() function.
+ */
+qspix_err_t R_QSPIX_Read_Memory_Map(uint8_t channel,
+                                   uint8_t *p_des_addr,
+                                   uint32_t p_addr,
+                                   qspix_protocol_t protocol_ext,
+                                   qspix_address_size_t addr_size,
+                                   uint32_t bytes)
+{
+    qspix_err_t ret = QSPIX_SUCCESS;
+
+    /* ==== CALLS THE API FUNCTION ==== */
+    ret = r_qspix_read_memory_map(channel, p_des_addr, p_addr, protocol_ext, addr_size, bytes);
+    return ret;
+}
+/******************************************************************************
+End of function R_QSPIX_Read_Memory_Map
+******************************************************************************/
+
 /*****************************************************************************
  * Function Name: R_QSPIX_Write_Indirect
  *************************************************************************/ /**
  * @brief Writes raw data directly to the QSPIX.
- * @param[in] channel       Channel of QSPIX use to write data.
- * @param[in] p_src_addr    Pointer to data to write
- * @param[in] bytes         Number of bytes to write
- * @param[in] read_after_write         Whether or not to close SPI bus cycle
+ * @param[in] channel           Channel of QSPIX use to write data
+ * @param[in] p_src_addr        Pointer to data to write
+ * @param[in] bytes             Number of bytes to write
+ * @param[in] read_after_write  Whether or not to close SPI bus cycle
  * @retval    QSPIX_SUCCESS             Processing completed without problem
  * @retval    QSPIX_ERR_NOT_OPEN        QSPIX module is not initialized yet
  * @retval    QSPIX_ERR_INVALID_ARG     Invalid argument
- * @retval    QSPIX_ERR_NULL_PTR        Argument pointers are NULL
- * @details   Uses the QSPIX of the channel number specified by the argument channel to write data.
- * @note      None
+ * @retval    QSPIX_ERR_NULL_PTR        Argument pointer is NULL
+ * @details   Uses the QSPIX of the channel number specified by the argument channel to write data.\n
+ *            Number of bytes is depend on the Flash(maximum size of 1 page) is used.\n
+ *            When writing a large volume of data, communication is divided into page units.
+ * @note      Only Extended SPI protocol is allowed to use in Indirect access mode, the standard Read or Fast Read
+ *            instruction must be used to reference the contents of the serial flash. The QSPIX does not support Fast
+ *            Read Dual Output, Fast Read Dual I/O, Fast Read Quad Output, or Fast Read Quad I/O transfers in this
+ *            configuration. When these high-speed read operations are required, use ordinary flash access.
  */
 qspix_err_t R_QSPIX_Write_Indirect(uint8_t channel,
                                    uint8_t *p_src_addr,
@@ -229,10 +281,12 @@ End of function R_QSPIX_Write_Indirect
  ************************************************************************/ /**
  * @brief Enters XIP (execute in place) mode.
  * @param[in] channel       Channel of QSPIX Enters XIP (execute in place) mode
- * @param[in] mode          XIP Mode
+ * @param[in] mode          Enter XIP Mode
  * @retval    QSPIX_SUCCESS             Processing completed without problem
  * @retval    QSPIX_ERR_NOT_OPEN        QSPIX module is not initialized yet
  * @retval    QSPIX_ERR_HW              Hardware error
+ * @details   To select the XIP mode, specify the XIP mode configuration for the serial flash device in the MODE [7:0] bits
+ *            in the SPDCR register.
  * @note      None
  */
 qspix_err_t R_QSPIX_Enter_XIP(uint8_t channel, uint8_t mode)
@@ -252,10 +306,12 @@ End of function R_QSPIX_Enter_XIP
  ************************************************************************/ /**
  * @brief Exit XIP (execute in place) mode.
  * @param[in] channel       Channel of QSPIX Exit XIP (execute in place) mode
- * @param[in] mode          XIP Mode
+ * @param[in] mode          Exit XIP Mode
  * @retval    QSPIX_SUCCESS             Processing completed without problem
  * @retval    QSPIX_ERR_NOT_OPEN        QSPIX module is not initialized yet
- * @retval    QSPIX_ERR_HW              HW error.
+ * @retval    QSPIX_ERR_HW              Hardware error
+ * @details   To select the XIP mode, specify the XIP mode configuration for the serial flash device in the MODE [7:0] bits
+ *            in the SPDCR register.
  * @note      None
  */
 qspix_err_t R_QSPIX_Exit_XIP(uint8_t channel, uint8_t mode)
@@ -273,17 +329,16 @@ End of function R_QSPIX_Exit_XIP
 /*****************************************************************************
  * Function Name: R_QSPIX_BankSet
  ************************************************************************/ /**
- * @brief Selects the bank to access. A bank is a 64MB sliding access window \n
- * into the QSPIX device flash memory space. To access chip address 0x4000000,\n
- * select bank 1, then read from internal flash address 0x70000000. To access\n
- * chip address 0x8001000, select bank 2, then read from internal flash\n
- * address 0x70001000. This function is not required for memory devices less\n
- *  than or equal to 512 Mb (64MB).
- * @param[in] channel       Channel for switch bank.
+ * @brief Selects the bank to access.
+ * @param[in] channel       Channel for switch bank
  * @param[in] bank          Bank need to set
  * @retval    QSPIX_SUCCESS             Processing completed without problem
- * @retval    QSPIX_ERR_INVALID_ARG     Arguments are invalid
+ * @retval    QSPIX_ERR_INVALID_ARG     Invalid argument
  * @retval    QSPIX_ERR_NOT_OPEN        QSPIX module is not initialized yet
+ * @details   A bank is a 64MB sliding access window into the QSPI device flash memory space. To access chip address
+ *            0x4000000, select bank 1, then read from internal flash address 0x70000000. To access chip address
+ *            0x8001000, select bank 2, then read from internal flash address 0x70001000.\n
+ *            This function is not required for memory devices less than or equal to 512 Mb (64MB).
  * @note      None
  */
 qspix_err_t R_QSPIX_BankSet (uint8_t channel, uint8_t bank)
@@ -301,11 +356,11 @@ End of function R_QSPIX_BankSet
 /*****************************************************************************
  * Function Name: R_QSPIX_Set_Spi_Protocol
  ************************************************************************/ /**
- * @brief Selects the protocol to access. 
- * @param[in] channel       Channel for set protocol. 
- * @param[in] protocol      Protocol need to set.
+ * @brief Selects the protocol to access.
+ * @param[in] channel       Channel for set protocol
+ * @param[in] protocol      Protocol type to set
  * @retval    QSPIX_SUCCESS             Processing completed without problem
- * @retval    QSPIX_ERR_INVALID_ARG     Arguments are invalid.
+ * @retval    QSPIX_ERR_INVALID_ARG     Invalid argument
  * @retval    QSPIX_ERR_NOT_OPEN        QSPIX module is not initialized yet
  * @note      None
  */
@@ -328,7 +383,9 @@ End of function R_QSPIX_Set_Spi_Protocol
  * @param[in] cmd           Command to get status
  * @param[in] return_status Pointer store status corresponding with command
  * @retval    QSPIX_SUCCESS             Processing completed without problem
- * @retval    QSPIX_ERR_INVALID_COMMAND Command parameters are invalid.
+ * @retval    QSPIX_ERR_INVALID_COMMAND Command parameter is invalid
+ * @details   This function return status corresponding with input cmd. See section R_QSPIX_Get_Status()
+ *            in the application note for details.
  * @note      None
  */
 qspix_err_t R_QSPIX_Get_Status(qspix_cmd_t cmd, uint8_t *return_status)
@@ -348,7 +405,8 @@ End of function R_QSPIX_Get_Status
  *************************************************************************/ /**
  * @brief This function returns the version number of the API.
  * @return    Version number
- * @details   This function returns the version number of this API.
+ * @details   The function returns the version of this module. The version number is encoded such that the top two bytes
+ *            are the major version number and the bottom two bytes are the minor version number.
  * @note      None
  */
 uint32_t  R_QSPIX_GetVersion(void)

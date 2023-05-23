@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_settime.c
@@ -49,9 +49,9 @@
  ************************************************************************************************/
 e_cellular_err_t R_CELLULAR_SetTime(st_cellular_ctrl_t * const p_ctrl, const st_cellular_datetime_t * const p_time)
 {
-    uint32_t preemption = 0;
+    uint32_t                   preemption    = 0;
+    e_cellular_err_t           ret           = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
 
     preemption = cellular_interrupt_disable();
     if ((NULL == p_ctrl) || (NULL == p_time))
@@ -94,7 +94,6 @@ e_cellular_err_t R_CELLULAR_SetTime(st_cellular_ctrl_t * const p_ctrl, const st_
         {
             ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
         }
-
         p_ctrl->running_api_count -= 2;
     }
 

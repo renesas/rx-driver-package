@@ -48,6 +48,7 @@
 *         : 30.12.2019 2.30    Modified comment of API function to Doxygen style.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.00.
 *         : 31.03.2021 2.60    Supported RX671.
+*         : 15.08.2022 3.10    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *******************************************************************************/
 
 /*******************************************************************************
@@ -76,8 +77,8 @@ Typedef definitions
 /*******************************************************************************
 Private variables and functions
 *******************************************************************************/
-static bool r_dmaca_set_transfer_data(uint8_t channel, dmaca_transfer_data_cfg_t *p_cfg);
-static dmaca_chk_locking_sw_t r_dmaca_check_locking_sw(void);
+static bool r_dmaca_set_transfer_data (uint8_t channel, dmaca_transfer_data_cfg_t *p_cfg);
+static dmaca_chk_locking_sw_t r_dmaca_check_locking_sw (void);
 
 /*******************************************************************************
 Exported global variables (to be accessed by other files)
@@ -829,14 +830,14 @@ static bool r_dmaca_set_transfer_data(uint8_t channel, dmaca_transfer_data_cfg_t
 
             /* Check source Address Extended Repeat setting. */
             if ((DMACA_REPEAT_BLOCK_SOURCE == p_cfg->repeat_block_side) &&
-               (DMACA_SRC_ADDR_EXT_REP_AREA_NONE != p_cfg->src_addr_repeat_area))
+                (DMACA_SRC_ADDR_EXT_REP_AREA_NONE != p_cfg->src_addr_repeat_area))
             {
                 return false;
             }
 
             /* Check destination Address Extended Repeat setting. */
             if ((DMACA_REPEAT_BLOCK_DESTINATION == p_cfg->repeat_block_side) &&
-               (DMACA_DES_ADDR_EXT_REP_AREA_NONE != p_cfg->des_addr_repeat_area))
+                (DMACA_DES_ADDR_EXT_REP_AREA_NONE != p_cfg->des_addr_repeat_area))
             {
                 return false;
             }
@@ -854,7 +855,7 @@ static bool r_dmaca_set_transfer_data(uint8_t channel, dmaca_transfer_data_cfg_t
     /* Clear DMREQ register. */
     DMACA_DMREQ(channel) = 0x00;
 
-   /* Disable DMA transfers. */
+    /* Disable DMA transfers. */
     DMACA_DMCNT(channel) = DMACA_TRANSFER_DISABLE;
 
     /* Set ICU.DMRSR register. */
@@ -959,7 +960,7 @@ static dmaca_chk_locking_sw_t r_dmaca_check_locking_sw(void)
     {
         if (0x00 != g_locking_sw[i])
         {
-            dmaca_lock_num ++;
+            dmaca_lock_num ++ ;
         }
     }
 

@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2021-2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_flash_nofcu.c
@@ -25,7 +25,8 @@
  *           23.04.2021 4.80    First Release. (Changed the structure of FLASH_TYPE_1 code with the addition of RX140.)
  *           12.12.2021 4.81    Modified some global variables problems.
  *           10.12.2021 4.81    Added support for Tool News R20TS0772, and removed unnecessary code in flash_write().
- *********************************************************************************************************************/
+ *           24.01.2023 5.00    Modified the condition of PFRAM section definition.
+*********************************************************************************************************************/
 
 /**********************************************************************************************************************
  Includes   <System Includes> , "Project Includes"
@@ -276,7 +277,7 @@ static void flash_df_write(const uint32_t src_addr,  const uint32_t dest_addr)
 }
 #endif /* #ifndef FLASH_NO_DATA_FLASH */
 
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
+#if (FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_RUN_FROM_ROM == 0)
 /* All the functions below need to be placed in RAM if Code Flash programming is to be supported */
 #define FLASH_PE_MODE_SECTION    R_BSP_ATTRIB_SECTION_CHANGE(P, FRAM)
 #define FLASH_SECTION_CHANGE_END R_BSP_ATTRIB_SECTION_CHANGE_END

@@ -23,12 +23,13 @@
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_memdrv_rx_config_reference.h
-* Version      : 1.00
+* Version      : 1.05
 * Description  : Memory driver configuration header file
 *************************************************************************************************/
 /************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 15.12.2018 1.00     Initial Release
+*              : 16.03.2023 1.05     Added support for RSCI and QSPIX Memory Mapped Mode.
 *************************************************************************************************/
 #ifndef MEMDRV_CONFIG_H
 #define MEMDRV_CONFIG_H
@@ -62,6 +63,8 @@ DEVICE DRIVER
 /*      MEMDRV_DRVR_RX_FIT_QSPI_SMSTR     : RX QSPI Single Master FIT module  */
 /*      MEMDRV_DRVR_RX_FIT_SCI_SPI        : RX SCI as SPI FIT module  */
 /*      MEMDRV_DRVR_RX_FIT_QSPIX_IAM      : RX QSPIX FIT module(Indirect access mode)  */
+/*      MEMDRV_DRVR_RX_FIT_QSPIX_MMM      : RX QSPIX FIT module(Memory mapped mode)  */
+/*      MEMDRV_DRVR_RX_FIT_RSCI_SPI       : RX RSCI as SPI FIT module  */
 #define MEMDRV_CFG_DEV0_MODE_DRVR         (MEMDRV_DRVR_RX_FIT_RSPI)
 #define MEMDRV_CFG_DEV1_MODE_DRVR         (MEMDRV_DRVR_RX_FIT_RSPI)
 

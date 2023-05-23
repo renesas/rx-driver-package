@@ -19,12 +19,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011(2012-2020) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2011(2012-2023) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * System Name  : FLASH SPI driver software
 * File Name    : r_flash_spi.c
-* Version      : 3.02
+* Version      : 3.20
 * Device       : -
 * Abstract     : User I/F file
 * Tool-Chain   : -
@@ -38,6 +38,8 @@
 *              : 23.07.2014 2.21     Created
 *              : 29.05.2015 2.32     Revised functions of same as Ver.2.32 of EEPROM SPI FIT module.
 *              : 10.12.2020 3.02     Modified comment of API function to Doxygen style.
+*              : 16.03.2023 3.20     Added support for AT25QF641B-SHB with Indirect Access Mode
+*                                    of QSPIX
 *************************************************************************************************/
 
 
@@ -137,8 +139,8 @@ flash_spi_status_t R_FLASH_SPI_Close(uint8_t devno)
  * @retval    FLASH_SPI_ERR_HARD   Hardware error
  * @retval    FLASH_SPI_ERR_OTHER  Other task has acquired clock synchronous single master control software resources,
  *                                 or other error
- * @details   Reads the status register and stores the contents in p_status. See section 3.3 in the application note
- *            for details.
+ * @details   Reads the status register and stores the contents in p_status. See section R_FLASH_SPI_Read_Status()
+ *            in the application note for details.
  * @note      The clock synchronous single master control software resources are acquired at the start of the
  *            processing, and the resources are released and the end of the processing.
  */
@@ -147,6 +149,64 @@ flash_spi_status_t R_FLASH_SPI_Read_Status(uint8_t devno, uint8_t * p_status)
     flash_spi_status_t ret = FLASH_SPI_SUCCESS;
 
     ret = r_flash_spi_read_status(devno, p_status);
+
+    return ret;
+}
+
+
+/**********************************************************************************************************************
+ * Function Name: R_FLASH_SPI_Read_Status2
+ *****************************************************************************************************************/ /**
+ * @brief This function is used to read the status register 2. It is a dedicated API function for AT25QF family
+ *        serial NOR flash memory of Dialog Semiconductor Plc.
+ * @param[in] devno
+ *             Device number (0, 1)
+ * @param[in,out] p_status
+ *             Status register 2 storage buffer (size: 1 byte)
+ * @retval    FLASH_SPI_SUCCESS    Successful operation
+ * @retval    FLASH_SPI_ERR_PARAM  Parameter error
+ * @retval    FLASH_SPI_ERR_HARD   Hardware error
+ * @retval    FLASH_SPI_ERR_OTHER  Other task has acquired clock synchronous single master control software resources,
+ *                                 or other error
+ * @details   Reads the status register and stores the contents in p_status. See section R_FLASH_SPI_Read_Status2()
+ *            in the application note for details.
+ * @note      The clock synchronous single master control software resources are acquired at the start of the
+ *            processing, and the resources are released and the end of the processing.
+ */
+flash_spi_status_t R_FLASH_SPI_Read_Status2(uint8_t devno, uint8_t * p_status)
+{
+    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
+
+    ret = r_flash_spi_read_status2(devno, p_status);
+
+    return ret;
+}
+
+
+/**********************************************************************************************************************
+ * Function Name: R_FLASH_SPI_Read_Status3
+ *****************************************************************************************************************/ /**
+ * @brief This function is used to read the status register 3. It is a dedicated API function for AT25QF family
+ *        serial NOR flash memory of Dialog Semiconductor Plc.
+ * @param[in] devno
+ *             Device number (0, 1)
+ * @param[in,out] p_status
+ *             Status register 3 storage buffer (size: 1 byte)
+ * @retval    FLASH_SPI_SUCCESS    Successful operation
+ * @retval    FLASH_SPI_ERR_PARAM  Parameter error
+ * @retval    FLASH_SPI_ERR_HARD   Hardware error
+ * @retval    FLASH_SPI_ERR_OTHER  Other task has acquired clock synchronous single master control software resources,
+ *                                 or other error
+ * @details   Reads the status register and stores the contents in p_status. See section R_FLASH_SPI_Read_Status3()
+ *            in the application note for details.
+ * @note      The clock synchronous single master control software resources are acquired at the start of the
+ *            processing, and the resources are released and the end of the processing.
+ */
+flash_spi_status_t R_FLASH_SPI_Read_Status3(uint8_t devno, uint8_t * p_status)
+{
+    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
+
+    ret = r_flash_spi_read_status3(devno, p_status);
 
     return ret;
 }
@@ -165,7 +225,8 @@ flash_spi_status_t R_FLASH_SPI_Read_Status(uint8_t devno, uint8_t * p_status)
  * @retval    FLASH_SPI_ERR_HARD   Hardware error
  * @retval    FLASH_SPI_ERR_OTHER  Other task has acquired clock synchronous single master control software resources,
  *                                 or other error
- * @details   Make write protect settings. SRWD is cleared to 0. See section 3.4 in the application note for details.
+ * @details   Make write protect settings. SRWD is cleared to 0. See section R_FLASH_SPI_Set_Write_Protect() in the
+ *            application note for details.
  * @note      The clock synchronous single master control software resources are acquired at the start of the
  *            processing, and the resources are released and the end of the processing.
  */
@@ -212,7 +273,7 @@ flash_spi_status_t R_FLASH_SPI_Write_Di(uint8_t devno)
  *             Device number (0, 1)
  * @param[in,out] p_flash_spi_info
  *             Serial flash memory information structure. Use a structure address aligned with a 4-byte boundary.
- *             See section 3.6 in the application note for details.
+ *             See section R_FLASH_SPI_Read_Data() in the application note for details.
  * @retval    FLASH_SPI_SUCCESS    Successful operation
  * @retval    FLASH_SPI_ERR_PARAM  Parameter error
  * @retval    FLASH_SPI_ERR_HARD   Hardware error
@@ -230,7 +291,11 @@ flash_spi_status_t R_FLASH_SPI_Write_Di(uint8_t devno)
  * @note      To speed up data transfers, align the start address with a 4-byte boundary when specifying data storage
  *            buffer pointers.\n
  *            The clock synchronous single master control software resources are acquired at the start of the
- *            processing, and the resources are released and the end of the processing.
+ *            processing, and the resources are released and the end of the processing.\n
+ *            When reading data in QSPIX memory-mapped mode, data can only be read from addresses in a specified 
+ *            bank. A bank is a 64MB sliding access window into the QSPI device flash memory space. If the requested
+ *            amount of data is read consecutively from the address area of two consecutive bank areas, this function will
+ *            return the error "FLASH_SPI_ERR_OTHER".
  */
 flash_spi_status_t R_FLASH_SPI_Read_Data(uint8_t devno, flash_spi_info_t * p_flash_spi_info)
 {
@@ -250,7 +315,7 @@ flash_spi_status_t R_FLASH_SPI_Read_Data(uint8_t devno, flash_spi_info_t * p_fla
  *             Device number (0, 1)
  * @param[in] p_flash_spi_info
  *             Serial flash memory information structure. Use a structure address aligned with a 4-byte boundary.
- *             See section 3.7 in the application note for details.
+ *             See section R_FLASH_SPI_Write_Data_Page() in the application note for details.
  * @retval    FLASH_SPI_SUCCESS    Successful operation
  * @retval    FLASH_SPI_ERR_PARAM  Parameter error
  * @retval    FLASH_SPI_ERR_HARD   Hardware error
@@ -269,7 +334,7 @@ flash_spi_status_t R_FLASH_SPI_Read_Data(uint8_t devno, flash_spi_info_t * p_fla
  *            DMAC transfer or DTC transfer occurs when the transfer size conditions of the clock synchronous single
  *            master control software are matched. Otherwise, operation switches to software transfer.\n
  *            When a byte count exceeding 1 page is specified, the remaining byte count and next address information
- *            remain in the serial flash memory information stricture (p_flash_info) after processing of a single page
+ *            remain in the serial flash memory information structure (p_flash_info) after processing of a single page
  *            write finishes. It is possible to write the remaining bytes by specifying p_flash_info unmodified in
  *            this API function again.\n
  *            After this user API function finishes successfully, the serial flash memory transitions to the write
@@ -278,7 +343,7 @@ flash_spi_status_t R_FLASH_SPI_Read_Data(uint8_t devno, flash_spi_info_t * p_fla
  *            flash memory will not accept that processing. \n
  *            R_FLASH_SPI_Polling() can be called at any time specified by the user. This makes it possible for the
  *            user application to perform other processing while a write cycle is in progress.\n
- *            See section 3.7 in the application note for details.
+ *            See section R_FLASH_SPI_Write_Data_Page() in the application note for details.
  * @note      To speed up data transfers, align the start address with a 4-byte boundary when specifying data storage
  *            buffer pointers.\n
  *            The clock synchronous single master control software resources are acquired at the start of the
@@ -304,7 +369,7 @@ flash_spi_status_t R_FLASH_SPI_Write_Data_Page(uint8_t devno, flash_spi_info_t *
  *             Device number (0, 1)
  * @param[in] p_flash_spi_erase_info
  *             Serial flash memory erase information structure. Use a structure address aligned with a 4-byte boundary.
- *             See section 3.8 in the application note for details.
+ *             See section R_FLASH_SPI_Erase() in the application note for details.
  * @retval    FLASH_SPI_SUCCESS    Successful operation
  * @retval    FLASH_SPI_ERR_PARAM  Parameter error
  * @retval    FLASH_SPI_ERR_HARD   Hardware error
@@ -312,6 +377,7 @@ flash_spi_status_t R_FLASH_SPI_Write_Data_Page(uint8_t devno, flash_spi_info_t *
  *                                 or other error
  * @details   For sector erase, specify the start address of the sector in addr.\n
  *            For block erase, specify the start address of the block in addr.\n
+ *            For security erase, specify the start address of the security register pages in addr.\n
  *            For chip erase, set addr to 0x00000000.\n
  *            Erasing data in serial flash memory is only possible when write protect has been canceled. \n
  *            It is not possible to erase data in a protected area. Attempting to do so returns the error
@@ -322,7 +388,7 @@ flash_spi_status_t R_FLASH_SPI_Write_Data_Page(uint8_t devno, flash_spi_info_t *
  *            the new processing. \n
  *            R_FLASH_SPI_Polling() can be called at any time specified by the user. This allows a user application
  *            to perform other processing while an erase cycle is in progress. \n
- *            See section 3.8 in the application note for details.
+ *            See section R_FLASH_SPI_Erase() in the application note for details.
  * @note      The clock synchronous single master control software resources are acquired at the start of the
  *            processing, and the resources are released and the end of the processing.
  */
@@ -343,7 +409,8 @@ flash_spi_status_t R_FLASH_SPI_Erase(uint8_t devno, flash_spi_erase_info_t * p_f
  * @param[in] devno
  *             Device number (0, 1)
  * @param[in] mode
- *             Completion wait processing setting. See section 3.9 in the application note for details.
+ *             Completion wait processing setting. See section R_FLASH_SPI_Polling() in the application note for
+ *             details.
  * @retval    FLASH_SPI_SUCCESS         Normal end, and write finished
  * @retval    FLASH_SPI_SUCCESS_BUSY    Normal end, and write in progress
  * @retval    FLASH_SPI_ERR_PARAM       Parameter error
@@ -374,7 +441,7 @@ flash_spi_status_t R_FLASH_SPI_Polling(uint8_t devno, flash_spi_poll_mode_t mode
  *             Device number (0, 1)
  * @param[in,out] p_data
  *             ID information storage buffer. The size differs depending on the serial flash memory product used.
- *             See section 3.10 in the application note for details.
+ *             See section R_FLASH_SPI_Read_ID() in the application note for details.
  * @retval    FLASH_SPI_SUCCESS    Successful operation
  * @retval    FLASH_SPI_ERR_PARAM  Parameter error
  * @retval    FLASH_SPI_ERR_HARD   Hardware error
@@ -402,7 +469,7 @@ flash_spi_status_t R_FLASH_SPI_Read_ID(uint8_t devno, uint8_t * p_data)
  *             Device number (0, 1)
  * @param[in,out] p_flash_spi_mem_info
  *             Serial flash memory size information structure. Use a structure address aligned with a 4-byte boundary.
- *             See section 3.11 in the application note for details.
+ *             See section R_FLASH_SPI_GetMemoryInfo() in the application note for details.
  * @retval    FLASH_SPI_SUCCESS    Successful operation
  * @retval    FLASH_SPI_ERR_PARAM  Parameter error
  * @details   Fetches serial flash memory size information for the device number specified by the argument devno.
@@ -427,14 +494,14 @@ flash_spi_status_t R_FLASH_SPI_GetMemoryInfo(uint8_t devno, flash_spi_mem_info_t
  *             Device number (0, 1)
  * @param[in,out] p_config
  *             Configuration register storage buffer. The size differs depending on the serial NOR flash memory
- *             product used. See section 3.12 in the application note for details.
+ *             product used. See section R_FLASH_SPI_Read_Configuration() in the application note for details.
  * @retval    FLASH_SPI_SUCCESS    Successful operation
  * @retval    FLASH_SPI_ERR_PARAM  Parameter error
  * @retval    FLASH_SPI_ERR_HARD   Hardware error
  * @retval    FLASH_SPI_ERR_OTHER  Other task has acquired clock synchronous single master control software resources,
  *            or other error
  * @details   Reads the configuration register(s) of the serial NOR Flash memory and stores the contents in p_config.
- *            See section 3.12 in the application note for details.
+ *            See section R_FLASH_SPI_Read_Configuration() in the application note for details.
  * @note      The clock synchronous single master control software resources are acquired at the start of the
  *            processing, and the resources are released and the end of the processing.
  */
@@ -457,14 +524,14 @@ flash_spi_status_t R_FLASH_SPI_Read_Configuration(uint8_t devno, uint8_t * p_con
  *             Device number (0, 1)
  * @param[in] p_reg
  *             Register information structure. Use a structure address aligned with a 4-byte boundary.
- *             See section 3.13 in the application note for details.
+ *             See section R_FLASH_SPI_Write_Configuration() in the application note for details.
  * @retval    FLASH_SPI_SUCCESS    Successful operation
  * @retval    FLASH_SPI_ERR_PARAM  Parameter error
  * @retval    FLASH_SPI_ERR_HARD   Hardware error
  * @retval    FLASH_SPI_ERR_OTHER  Other task has acquired clock synchronous single master control software resources,
  *            or other error
  * @details   The values set in p_reg->config1 and p_reg->config2 are written to the configuration register.
- *            See section 3.13 in the application note for details.
+ *            See section R_FLASH_SPI_Write_Configuration() in the application note for details.
  * @note      The clock synchronous single master control software resources are acquired at the start of the
  *            processing, and the resources are released and the end of the processing.
  */
@@ -473,6 +540,92 @@ flash_spi_status_t R_FLASH_SPI_Write_Configuration(uint8_t devno, flash_spi_reg_
     flash_spi_status_t ret = FLASH_SPI_SUCCESS;
 
     ret = r_flash_spi_write_configuration(devno, p_reg);
+
+    return ret;
+}
+
+
+/**********************************************************************************************************************
+ * Function Name: R_FLASH_SPI_Write_Status
+ *****************************************************************************************************************/ /**
+ * @brief This function is used to write the status register 1. It is a dedicated API function for AT25QF family
+ *        serial NOR flash memory of Dialog Semiconductor Plc.
+ * @param[in] devno
+ *             Device number (0, 1)
+ * @param[in] p_reg
+ *             Status register 1 setting data buffer
+ * @retval    FLASH_SPI_SUCCESS    Successful operation
+ * @retval    FLASH_SPI_ERR_PARAM  Parameter error
+ * @retval    FLASH_SPI_ERR_HARD   Hardware error
+ * @retval    FLASH_SPI_ERR_OTHER  Other task has acquired clock synchronous single master control software resources,
+ *            or other error
+ * @details   The values set in p_reg is written to the status register 1.
+ *            See section R_FLASH_SPI_Write_Status() in the application note for details.
+ * @note      The clock synchronous single master control software resources are acquired at the start of the
+ *            processing, and the resources are released and the end of the processing.
+ */
+flash_spi_status_t R_FLASH_SPI_Write_Status(uint8_t devno, uint8_t * p_reg)
+{
+    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
+
+    ret = r_flash_spi_write_status(devno, p_reg);
+
+    return ret;
+}
+
+
+/**********************************************************************************************************************
+ * Function Name: R_FLASH_SPI_Write_Status2
+ *****************************************************************************************************************/ /**
+ * @brief This function is used to write the status register 2. It is a dedicated API function for AT25QF family
+ *        serial NOR flash memory of Dialog Semiconductor Plc.
+ * @param[in] devno
+ *             Device number (0, 1)
+ * @param[in] p_reg
+ *             Status register 2 setting data buffer
+ * @retval    FLASH_SPI_SUCCESS    Successful operation
+ * @retval    FLASH_SPI_ERR_PARAM  Parameter error
+ * @retval    FLASH_SPI_ERR_HARD   Hardware error
+ * @retval    FLASH_SPI_ERR_OTHER  Other task has acquired clock synchronous single master control software resources,
+ *            or other error
+ * @details   The values set in p_reg is written to the status register 2.
+ *            See section R_FLASH_SPI_Write_Status2() in the application note for details.
+ * @note      The clock synchronous single master control software resources are acquired at the start of the
+ *            processing, and the resources are released and the end of the processing.
+ */
+flash_spi_status_t R_FLASH_SPI_Write_Status2(uint8_t devno, uint8_t * p_reg)
+{
+    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
+
+    ret = r_flash_spi_write_status2(devno, p_reg);
+
+    return ret;
+}
+
+/**********************************************************************************************************************
+ * Function Name: R_FLASH_SPI_Write_Status3
+ *****************************************************************************************************************/ /**
+ * @brief This function is used to write the status register 3. It is a dedicated API function for AT25QF family
+ *        serial NOR flash memory of Dialog Semiconductor Plc.
+ * @param[in] devno
+ *             Device number (0, 1)
+ * @param[in] p_reg
+ *             Status register 3 setting data buffer
+ * @retval    FLASH_SPI_SUCCESS    Successful operation
+ * @retval    FLASH_SPI_ERR_PARAM  Parameter error
+ * @retval    FLASH_SPI_ERR_HARD   Hardware error
+ * @retval    FLASH_SPI_ERR_OTHER  Other task has acquired clock synchronous single master control software resources,
+ *            or other error
+ * @details   The values set in p_reg is written to the status register 3.
+ *            See section R_FLASH_SPI_Write_Status3() in the application note for details.
+ * @note      The clock synchronous single master control software resources are acquired at the start of the
+ *            processing, and the resources are released and the end of the processing.
+ */
+flash_spi_status_t R_FLASH_SPI_Write_Status3(uint8_t devno, uint8_t * p_reg)
+{
+    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
+
+    ret = r_flash_spi_write_status3(devno, p_reg);
 
     return ret;
 }
@@ -490,7 +643,7 @@ flash_spi_status_t R_FLASH_SPI_Write_Configuration(uint8_t devno, flash_spi_reg_
  * @retval    FLASH_SPI_ERR_HARD   Hardware error
  * @retval    FLASH_SPI_ERR_OTHER  Other task has acquired clock synchronous single master control software resources,
  *            or other error
- * @details   See section 3.14 in the application note for details.
+ * @details   See section R_FLASH_SPI_Set_4byte_Address_Mode() in the application note for details.
  * @note      The clock synchronous single master control software resources are acquired at the start of the
  *            processing, and the resources are released and the end of the processing.
  */
@@ -519,7 +672,7 @@ flash_spi_status_t R_FLASH_SPI_Set_4byte_Address_Mode(uint8_t devno)
  * @retval    FLASH_SPI_ERR_OTHER  Other task has acquired clock synchronous single master control software resources,
  *            or other error
  * @details   Reads the security register and stores the contents in p_scur.
- *            See section 3.15 in the application note for details.
+ *            See section R_FLASH_SPI_Read_Security() in the application note for details.
  * @note      The clock synchronous single master control software resources are acquired at the start of the
  *            processing, and the resources are released and the end of the processing.
  */
@@ -534,10 +687,92 @@ flash_spi_status_t R_FLASH_SPI_Read_Security(uint8_t devno, uint8_t * p_scur)
 
 
 /**********************************************************************************************************************
+ * Function Name: R_FLASH_SPI_Read_Data_Security_Page
+ *****************************************************************************************************************/ /**
+ * @brief This function is used to read data from the security register. It is a dedicated API function for AT25QF
+ *        family serial NOR flash memory of Dialog Semiconductor Plc.
+ * @param[in] devno
+ *             Device number (0, 1)
+ * @param[in,out] p_flash_spi_info
+ *             Serial flash memory information structure. Use a structure address aligned with a 4-byte boundary.
+ *             See section R_FLASH_SPI_Read_Data_Security_Page() in the application note for details.
+ * @retval    FLASH_SPI_SUCCESS    Successful operation
+ * @retval    FLASH_SPI_ERR_PARAM  Parameter error
+ * @retval    FLASH_SPI_ERR_HARD   Hardware error
+ * @retval    FLASH_SPI_ERR_OTHER  Other task has acquired clock synchronous single master control software resources,
+ *                                 or other error
+ * @details   Reads the specified number of bytes of data from the specified address in the security register and
+ *            stores the data in p_data.\n
+ *            The maximum read address is the page size - 1.\n
+ *            Rollover read operations are not supported. After the end address is read, processing ends.
+ *            It is then necessary to reset the address and call this API function again.\n
+ *            FLASH_SPI_ERR_PARAM is returned if the total value of the read byte count, cnt, and specified address,
+ *            addr, exceeds the maximum read address.\n
+ *            DMAC transfer or DTC transfer occurs when the transfer size conditions of the clock synchronous single
+ *            master control software are matched. Otherwise, operation switches to software transfer.
+ * @note      To speed up data transfers, align the start address with a 4-byte boundary when specifying data storage
+ *            buffer pointers.\n
+ *            The clock synchronous single master control software resources are acquired at the start of the
+ *            processing, and the resources are released and the end of the processing.\n
+ *            This API function is omitted in QSPIX Memory Mapped Mode.
+ */
+flash_spi_status_t R_FLASH_SPI_Read_Data_Security_Page(uint8_t devno,  flash_spi_info_t * p_flash_spi_info)
+{
+    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
+
+    ret = r_flash_spi_read_data_security_page(devno, p_flash_spi_info);
+
+    return ret;
+}
+
+
+/**********************************************************************************************************************
+ * Function Name: R_FLASH_SPI_Write_Data_Security_Page
+ *****************************************************************************************************************/ /**
+ * @brief This function is used to write data to the security register page in single-page units. It is a dedicated
+ *        API function for AT25QF family serial NOR flash memory of Dialog Semiconductor Plc.
+ * @param[in] devno
+ *             Device number (0, 1)
+ * @param[in] p_flash_spi_info
+ *             Serial flash memory information structure. Use a structure address aligned with a 4-byte boundary.
+ *             See section R_FLASH_SPI_Write_Data_Security_Page() in the application note for details.
+ * @retval    FLASH_SPI_SUCCESS    Successful operation
+ * @retval    FLASH_SPI_ERR_PARAM  Parameter error
+ * @retval    FLASH_SPI_ERR_HARD   Hardware error
+ * @retval    FLASH_SPI_ERR_OTHER  Other task has acquired clock synchronous single master control software resources,
+ *                                 or other error
+ * @details   Writes the specified number of bytes of data (up to a maximum size of 1 page) in p_data to the security
+ *            register pages, starting from the specified address.\n
+ *            When writing a large volume of data, communication is divided into page units. This prevents a situation
+ *            in which other processing is not possible while communication is in progress. \n
+ *            Writing to the security register pages is only possible when they are not locked.\n
+ *            It is not possible to write to a locked page. Attempting to do so returns the error FLASH_SPI_ERR_WP.\n
+ *            The maximum write byte count (cnt) setting value is the capacity of the security register page size.\n
+ *            FLASH_SPI_ERR_PARAM is returned if the total value of the write byte count, cnt, and specified address,
+ *            addr, exceeds the maximum write address.\n
+ *            DMAC transfer or DTC transfer occurs when the transfer size conditions of the clock synchronous single
+ *            master control software are matched. Otherwise, operation switches to software transfer.\n
+ * @note      To speed up data transfers, align the start address with a 4-byte boundary when specifying data storage
+ *            buffer pointers.\n
+ *            The clock synchronous single master control software resources are acquired at the start of the
+ *            processing, and the resources are released and the end of the processing.
+ */
+flash_spi_status_t R_FLASH_SPI_Write_Data_Security_Page(uint8_t devno, flash_spi_info_t * p_flash_spi_info)
+{
+    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
+
+    ret = r_flash_spi_write_data_security_page(devno, p_flash_spi_info);
+
+    return ret;
+}
+
+
+/**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Quad_Enable
  *****************************************************************************************************************/ /**
  * @brief This function is used to enable quad mode. It is a dedicated API function for MX25L, MX66L, or MX25R family
- *        serial NOR flash memory of Macronix International Co., Ltd.
+ *        serial NOR flash memory of Macronix International Co., Ltd and AT25QF family serial NOR
+ *        flash memory of Dialog Semiconductor Plc.
  * @param[in] devno
  *             Device number (0, 1)
  * @retval    FLASH_SPI_SUCCESS    Successful operation
@@ -556,7 +791,7 @@ flash_spi_status_t R_FLASH_SPI_Read_Security(uint8_t devno, uint8_t * p_scur)
  *            the new processing. \n
  *            R_FLASH_SPI_Polling() can be called at any time specified by the user. This allows a user application
  *            to perform other processing while a write cycle is in progress. \n
- *            See section 3.16 in the application note for details.
+ *            See section R_FLASH_SPI_Quad_Enable() in the application note for details.
  * @note      The clock synchronous single master control software resources are acquired at the start of the
  *            processing, and the resources are released and the end of the processing.
  */
@@ -574,7 +809,8 @@ flash_spi_status_t R_FLASH_SPI_Quad_Enable(uint8_t devno)
  * Function Name: R_FLASH_SPI_Quad_Disable
  *****************************************************************************************************************/ /**
  * @brief This function is used to disable quad mode. It is a dedicated API function for MX25L, MX66L, or MX25R family
- *        serial NOR flash memory of Macronix International Co., Ltd.
+ *        serial NOR flash memory of Macronix International Co., Ltd.and AT25QF family serial NOR flash memory
+ *        of Dialog Semiconductor Plc.
  * @param[in] devno
  *             Device number (0, 1)
  * @retval    FLASH_SPI_SUCCESS    Successful operation
@@ -592,7 +828,7 @@ flash_spi_status_t R_FLASH_SPI_Quad_Enable(uint8_t devno)
  *            the new processing. \n
  *            R_FLASH_SPI_Polling() can be called at any time specified by the user. This allows a user application
  *            to perform other processing while a write cycle is in progress. \n
- *            See section 3.17 in the application note for details.
+ *            See section R_FLASH_SPI_Quad_Disable() in the application note for details.
  * @note      The clock synchronous single master control software resources are acquired at the start of the
  *            processing, and the resources are released and the end of the processing.
  */
@@ -651,8 +887,8 @@ void R_FLASH_SPI_1ms_Interval(void)
  *            This is preparatory processing to enable fetching of error logs using the LONGQ FIT module.
  *            Run this function before calling R_FLASH_SPI_Open().
  * @note      Add the LONGQ FIT module, which is available separately, to your project.\n
- *            Enable the option #define FLASH_SPI_CFG_LONGQ_ENABLE in r_flash_spi_config.h. Also, enable
- *            #define xxx_LONGQ_ENABLE in the clock synchronous single master control software used by the
+ *            Enable the macro FLASH_SPI_CFG_LONGQ_ENABLE in r_flash_spi_config.h. Also, enable
+ *            macro xxx_LONGQ_ENABLE in the clock synchronous single master control software used by the
  *            specified device.\n
  *            In the LONGQ FIT module, set the ignore_overflow argument of R_LONGQ_Open() to 1.
  *            This allows the error log buffer to be used as a ring buffer.
@@ -701,7 +937,7 @@ uint32_t r_flash_spi_log(uint32_t flg, uint32_t fid, uint32_t line)
     }
     return 0;
 }
-#else
+#else  /* (FLASH_SPI_CFG_LONGQ_ENABLE == 1) */
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Set_LogHdlAddress
  *****************************************************************************************************************/ /**
@@ -715,8 +951,8 @@ uint32_t r_flash_spi_log(uint32_t flg, uint32_t fid, uint32_t line)
  *            This is preparatory processing to enable fetching of error logs using the LONGQ FIT module.
  *            Run this function before calling R_FLASH_SPI_Open().
  * @note      Add the LONGQ FIT module, which is available separately, to your project.\n
- *            Enable the option #define FLASH_SPI_CFG_LONGQ_ENABLE in r_flash_spi_config.h. Also, enable
- *            #define xxx_LONGQ_ENABLE in the clock synchronous single master control software used by the
+ *            Enable the macro FLASH_SPI_CFG_LONGQ_ENABLE in r_flash_spi_config.h. Also, enable
+ *            macro xxx_LONGQ_ENABLE in the clock synchronous single master control software used by the
  *            specified device.\n
  *            In the LONGQ FIT module, set the ignore_overflow argument of R_LONGQ_Open() to 1.
  *            This allows the error log buffer to be used as a ring buffer.
@@ -744,8 +980,8 @@ flash_spi_status_t R_FLASH_SPI_Set_LogHdlAddress(uint32_t user_long_que)
  * @details   This function fetches the error log. When an error occurs, call this function immediately before user
  *            processing ends.
  * @note      Incorporate the LONGQ FIT module separately.\n
- *            Enable the option #define FLASH_SPI_CFG_LONGQ_ENABLE in r_flash_spi_config.h. Also, enable
- *            #define xxx_LONGQ_ENABLE in the clock synchronous single master control software used by the
+ *            Enable the macro FLASH_SPI_CFG_LONGQ_ENABLE in r_flash_spi_config.h. Also, enable
+ *            macro xxx_LONGQ_ENABLE in the clock synchronous single master control software used by the
  *            specified device.
  */
 uint32_t R_FLASH_SPI_Log(uint32_t flg, uint32_t fid, uint32_t line)

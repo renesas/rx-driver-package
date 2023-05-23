@@ -19,12 +19,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018(2021) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018(2023) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * System Name  : memdrv software
 * File Name    : r_memdrv_rx.c
-* Version      : 1.04
+* Version      : 1.05
 * Device       : -
 * Abstract     : IO I/F module
 * Tool-Chain   : -
@@ -41,6 +41,7 @@
 *              : 22.11.2019 1.02     Modified comment of API function to Doxygen style.
 *              : 10.09.2020 1.03     Modified the callback function processing during DMAC/DTC transfer.
 *              : 30.10.2021 1.04     Add the RX QSPIX FIT Module.
+*              : 16.03.2023 1.05     Added support for RSCI and QSPIX Memory Mapped Mode.
 *************************************************************************************************/
 
 /************************************************************************************************
@@ -141,6 +142,21 @@ static const st_memdrv_func_t r_memdrv_tbl[MEMDRV_INDX_DRVR_NUM][MEMDRV_INDX_FUN
         { r_memdrv_qspix_rx              },
         { r_memdrv_qspix_rx_data         },
     },
+    /* RX RSCI SPI FIT Module */
+    {
+        { r_memdrv_rsci_open            },
+        { r_memdrv_rsci_close           },
+        { r_memdrv_rsci_disable         },
+        { r_memdrv_rsci_disable_tx_data },
+        { r_memdrv_rsci_disable_rx_data },
+        { r_memdrv_rsci_enable          },
+        { r_memdrv_rsci_enable_tx_data  },
+        { r_memdrv_rsci_enable_rx_data  },
+        { r_memdrv_rsci_tx              },
+        { r_memdrv_rsci_tx_data         },
+        { r_memdrv_rsci_rx              },
+        { r_memdrv_rsci_rx_data         },
+    },
 };
 
 /***********************************************************************************************************************
@@ -215,8 +231,14 @@ void R_MEMDRV_1msInterval(void)
     r_memdrv_sci_1ms_interval();
 #endif
 #if (MEMDRV_CFG_DEV0_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM) | \
-    (MEMDRV_CFG_DEV1_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM)
+    (MEMDRV_CFG_DEV1_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM) | \
+    (MEMDRV_CFG_DEV0_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_MMM) | \
+    (MEMDRV_CFG_DEV1_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_MMM)
     r_memdrv_qspix_1ms_interval();
+#endif
+#if (MEMDRV_CFG_DEV0_MODE_DRVR & MEMDRV_DRVR_RX_FIT_RSCI_SPI) | \
+    (MEMDRV_CFG_DEV1_MODE_DRVR & MEMDRV_DRVR_RX_FIT_RSCI_SPI)
+    r_memdrv_rsci_1ms_interval();
 #endif
 } /* End of function R_MEMDRV_1msInterval() */
 
@@ -371,8 +393,14 @@ static uint32_t r_memdrv_get_drv_type(uint8_t devno)
             }
             break;
             case MEMDRV_DRVR_RX_FIT_QSPIX_IAM:
+            case MEMDRV_DRVR_RX_FIT_QSPIX_MMM:
             {
-                drv_type = MEMDRV_INDX_QSPIX_IAM;
+                drv_type = MEMDRV_INDX_QSPIX;
+            }
+            break;
+            case MEMDRV_DRVR_RX_FIT_RSCI_SPI:
+            {
+                drv_type = MEMDRV_INDX_RSCI_SPI;
             }
             break;
             default:
@@ -405,8 +433,14 @@ static uint32_t r_memdrv_get_drv_type(uint8_t devno)
             }
             break;
             case MEMDRV_DRVR_RX_FIT_QSPIX_IAM:
+            case MEMDRV_DRVR_RX_FIT_QSPIX_MMM:
             {
-                drv_type = MEMDRV_INDX_QSPIX_IAM;
+                drv_type = MEMDRV_INDX_QSPIX;
+            }
+            break;
+            case MEMDRV_DRVR_RX_FIT_RSCI_SPI:
+            {
+                drv_type = MEMDRV_INDX_RSCI_SPI;
             }
             break;
             default:

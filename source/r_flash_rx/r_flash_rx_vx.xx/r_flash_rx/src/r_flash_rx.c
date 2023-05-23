@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_rx.c
@@ -36,6 +36,7 @@
 *              : 18.11.2019 4.50    Modified comment of API function to Doxygen style.
 *              : 26.06.2020 4.60    Changed R_FlashCodeCopy() to static function.
 *                                   Modified to not use BSP API functions to enable/disable interrupt requests.
+*              : 24.01.2023 5.00    Modified the condition of PFRAM section definition.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -237,7 +238,7 @@ flash_err_t R_FLASH_Close(void)
 
 
 /* FUNCTIONS WHICH MUST BE RUN FROM RAM FOLLOW */
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
+#if (FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_RUN_FROM_ROM == 0)
 #define FLASH_PE_MODE_SECTION    R_BSP_ATTRIB_SECTION_CHANGE(P, FRAM)
 #define FLASH_SECTION_CHANGE_END R_BSP_ATTRIB_SECTION_CHANGE_END
 #else

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2022 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_lvd_rx_private.h
@@ -36,6 +36,9 @@
 *                                    Added define for LVD_GROUP_INT_ICUE.
 *              : 31.03.2022 4.10     Added support for RX660.
 *                                    Added define for LVD_GROUP_INT_ICUF.
+*              : 31.03.2023 4.40     Added support for RX26T.
+*                                    Added define for LVD_GROUP_INT_ICUG.
+*                                    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 #ifndef LVD_PRIVATE_HEADER_FILE
 #define LVD_PRIVATE_HEADER_FILE
@@ -100,6 +103,7 @@ Macro definitions
 #define LVD_GROUP_INT_ICUD                      (0x300)
 #define LVD_GROUP_INT_ICUE                      (0x400)
 #define LVD_GROUP_INT_ICUF                      (0x500)
+#define LVD_GROUP_INT_ICUG                      (0x600)
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -127,53 +131,53 @@ Exported global variables and functions (to be accessed by other files)
 ***********************************************************************************************************************/
 
 /* Error check functions */
-extern lvd_err_t lvd_hw_check_param_ch(lvd_channel_t ch, lvd_cfg_opt_t const *p_cfg_opt);
-extern lvd_err_t lvd_hw_check_ptr(void const *p_ptr);
-extern lvd_err_t lvd_hw_check_already_open(bool b_open_flag);
-extern lvd_err_t lvd_hw_check_not_opened(bool b_open_flag);
-extern lvd_err_t lvd_hw_check_getstatus(void);
-extern lvd_err_t lvd_hw_check_clearstatus(void);
-extern lvd_err_t lvd_hw_check_param_open(lvd_channel_t ch, 
-                                         lvd_config_t const *p_cfg, 
-                                         void (*p_cb)(void *), 
-                                         lvd_cfg_opt_t const *p_cfg_opt);
-extern lvd_err_t lvd_hw_check_loco_limitation(lvd_cfg_opt_t const *p_cfg_opt);
+extern lvd_err_t lvd_hw_check_param_ch (lvd_channel_t ch, lvd_cfg_opt_t const * p_cfg_opt);
+extern lvd_err_t lvd_hw_check_ptr (void const * p_ptr);
+extern lvd_err_t lvd_hw_check_already_open (bool b_open_flag);
+extern lvd_err_t lvd_hw_check_not_opened (bool b_open_flag);
+extern lvd_err_t lvd_hw_check_getstatus (void);
+extern lvd_err_t lvd_hw_check_clearstatus (void);
+extern lvd_err_t lvd_hw_check_param_open (lvd_channel_t ch,
+                                          lvd_config_t const * p_cfg,
+                                          void (*p_cb)(void *),
+                                          lvd_cfg_opt_t const * p_cfg_opt);
+extern lvd_err_t lvd_hw_check_loco_limitation (lvd_cfg_opt_t const * p_cfg_opt);
 
 /* Setup functions */
-extern void lvd_hw_clear_lvd_status(lvd_channel_t ch);
-extern void lvd_hw_get_lvd_status(lvd_channel_t ch, lvd_status_position_t *p_pos, lvd_status_cross_t *p_cross);
-extern void lvd_hw_set_level(lvd_channel_t ch, uint16_t level_value);
-extern void lvd_hw_set_trigger(lvd_channel_t ch, lvd_trigger_t trigger);
-extern void lvd_hw_set_target(lvd_channel_t ch, uint16_t target);
-extern void lvd_hw_select_reset(lvd_channel_t ch);
-extern void lvd_hw_setup_reset(lvd_channel_t ch, uint16_t lvd_reset_negate);
-extern void lvd_hw_select_int(lvd_channel_t ch);
-extern void lvd_hw_select_mi(lvd_channel_t ch);
-extern void lvd_hw_select_nmi(lvd_channel_t ch);
-extern void lvd_hw_setup_dfilter(lvd_channel_t ch, uint16_t clock_value);
-extern void lvd_hw_get_circuit_enable(lvd_channel_t ch, bool *b_penable_flag);
-extern void lvd_hw_get_reset_int_enable(lvd_channel_t ch, bool *b_penable_flag);
-extern void lvd_hw_get_dfilter_enable(lvd_channel_t ch, bool *b_penable_flag);
+extern void lvd_hw_clear_lvd_status (lvd_channel_t ch);
+extern void lvd_hw_get_lvd_status (lvd_channel_t ch, lvd_status_position_t * p_pos, lvd_status_cross_t * p_cross);
+extern void lvd_hw_set_level (lvd_channel_t ch, uint16_t level_value);
+extern void lvd_hw_set_trigger (lvd_channel_t ch, lvd_trigger_t trigger);
+extern void lvd_hw_set_target (lvd_channel_t ch, uint16_t target);
+extern void lvd_hw_select_reset (lvd_channel_t ch);
+extern void lvd_hw_setup_reset (lvd_channel_t ch, uint16_t lvd_reset_negate);
+extern void lvd_hw_select_int (lvd_channel_t ch);
+extern void lvd_hw_select_mi (lvd_channel_t ch);
+extern void lvd_hw_select_nmi (lvd_channel_t ch);
+extern void lvd_hw_setup_dfilter (lvd_channel_t ch, uint16_t clock_value);
+extern void lvd_hw_get_circuit_enable (lvd_channel_t ch, bool * b_penable_flag);
+extern void lvd_hw_get_reset_int_enable (lvd_channel_t ch, bool * b_penable_flag);
+extern void lvd_hw_get_dfilter_enable (lvd_channel_t ch, bool * b_penable_flag);
 
 /* Enable functions */
-extern void lvd_hw_enable_output(lvd_channel_t ch, bool b_enable_flag);
-extern void lvd_hw_enable_circuit(lvd_channel_t ch, bool b_enable_flag);
-extern void lvd_hw_enable_reset_int(lvd_channel_t ch, bool b_enable_flag);
-extern void lvd_hw_enable_dfilter(lvd_channel_t ch, bool enable_flag);
-extern void lvd_hw_enable_mi(lvd_channel_t ch, uint16_t prio, bool b_enable_flag);
-extern void lvd_hw_enable_nmi(lvd_channel_t ch, bool b_enable_flag);
+extern void lvd_hw_enable_output (lvd_channel_t ch, bool b_enable_flag);
+extern void lvd_hw_enable_circuit (lvd_channel_t ch, bool b_enable_flag);
+extern void lvd_hw_enable_reset_int (lvd_channel_t ch, bool b_enable_flag);
+extern void lvd_hw_enable_dfilter (lvd_channel_t ch, bool enable_flag);
+extern void lvd_hw_enable_mi (lvd_channel_t ch, uint16_t prio, bool b_enable_flag);
+extern void lvd_hw_enable_nmi (lvd_channel_t ch, bool b_enable_flag);
 
 /* Dummy read functions */
-extern void lvd_hw_dummy_read_dfilter(lvd_channel_t ch);
-extern void lvd_hw_dummy_read_circuit(lvd_channel_t ch);
-extern void lvd_hw_dummy_read_output(lvd_channel_t ch);
+extern void lvd_hw_dummy_read_dfilter (lvd_channel_t ch);
+extern void lvd_hw_dummy_read_circuit (lvd_channel_t ch);
+extern void lvd_hw_dummy_read_output (lvd_channel_t ch);
 
 /* Except LVD functions */
-extern void lvd_hw_set_mi_cb(lvd_channel_t ch, void (*p_cb)(void *));
-extern void lvd_hw_set_nmi_cb(lvd_channel_t ch, void (*p_cb)(void *));
-extern void lvd_hw_enable_reg_protect(bool b_enable_flag);
-extern void lvd_hw_wait_delay(uint32_t usec);
-extern void lvd_hw_wait_delay_loco(uint32_t loco_cycle);
+extern void lvd_hw_set_mi_cb (lvd_channel_t ch, void (*p_cb)(void *));
+extern void lvd_hw_set_nmi_cb (lvd_channel_t ch, void (*p_cb)(void *));
+extern void lvd_hw_enable_reg_protect (bool b_enable_flag);
+extern void lvd_hw_wait_delay (uint32_t usec);
+extern void lvd_hw_wait_delay_loco (uint32_t loco_cycle);
 
 #endif/* LVD_PRIVATE_HEADER_FILE */
 

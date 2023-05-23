@@ -63,6 +63,7 @@
 *                               - BSP_CFG_MCU_PART_SERIES
 *         : 11.02.2022 2.01    Changed initial value of the following macro definitions.
 *                               - BSP_CFG_SWINT_UNIT1_ENABLE
+*         : 28.02.2023 2.02    Modified comment.
 ***********************************************************************************************************************/
 
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
@@ -484,7 +485,7 @@ Configuration Options
    2 = embOS is used.(This is not available.)
    3 = MicroC_OS is used.(This is not available.)
    4 = Renesas ITRON OS (RI600V4 or RI600PX) is used.
-   5 = Azure RTOS is used.(This is not available.)
+   5 = Azure RTOS is used.
 */
 #define BSP_CFG_RTOS_USED               (0)
 

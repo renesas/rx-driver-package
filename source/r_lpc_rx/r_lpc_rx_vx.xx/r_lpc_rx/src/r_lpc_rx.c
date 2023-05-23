@@ -31,6 +31,7 @@
  *         : 05.03.2021 2.02    Added RX671 to Doxygen comment.
  *         : 31.07.2021 2.03    Added support for snooze mode in Low Power Consumption.
  *         : 31.12.2021 2.04    Removes the lower operating power consumption related functions of RX660.
+ *         : 15.08.2022 2.20    Fixed to comply with GSCE Coding Standards Rev.6.5.0.   
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
   Includes <System Includes> , "Project Includes"
@@ -98,9 +99,9 @@ lpc_err_t R_LPC_OperatingModeSet (lpc_operating_mode_t e_mode)
  *            can operate in these modes. For more details refer to the User's Manual: Hardware.
  * @note      None 
  */
-lpc_err_t R_LPC_LowPowerModeConfigure (lpc_low_power_mode_t e_mode)
+lpc_err_t R_LPC_LowPowerModeConfigure(lpc_low_power_mode_t e_mode)
 {
-    return lpc_low_power_mode_configure(e_mode);
+    return (lpc_low_power_mode_configure(e_mode));
 }
 /***********************************************************************************************************************
  End of function R_LPC_LowPowerModeConfigure
@@ -164,9 +165,9 @@ lpc_err_t R_LPC_SnoozeModeConfigure (lpc_snooze_mode_t * snooze_mode)
  *            Before entering Deep Sleep or Software Standby mode, ensure that DTC transactions are not pending and
  *            the DTC module is stopped.
  */
-lpc_err_t R_LPC_LowPowerModeActivate (lpc_callback_set_t pcallback)
+lpc_err_t R_LPC_LowPowerModeActivate(lpc_callback_set_t pcallback)
 {
-    return lpc_lowpower_activate(pcallback);
+    return (lpc_lowpower_activate(pcallback));
 
 }
 /***********************************************************************************************************************
@@ -206,9 +207,9 @@ lpc_err_t R_LPC_LowPowerModeActivate (lpc_callback_set_t pcallback)
  *
  * @note      None 
  */
-lpc_err_t R_LPC_ReturnClockSwitch (lpc_clock_switch_t e_clock_source, bool enable)
+lpc_err_t R_LPC_ReturnClockSwitch(lpc_clock_switch_t e_clock_source, bool enable)
 {
-    return lpc_return_clock_switch(e_clock_source, enable);
+    return (lpc_return_clock_switch(e_clock_source, enable));
 
 }
 /***********************************************************************************************************************
@@ -224,7 +225,7 @@ lpc_err_t R_LPC_ReturnClockSwitch (lpc_clock_switch_t e_clock_source, bool enabl
  *            version number and the bottom 2 bytes are the minor version number.
  * @note      None 
  */
-uint32_t R_LPC_GetVersion (void)
+uint32_t R_LPC_GetVersion(void)
 {
     uint32_t version;
 

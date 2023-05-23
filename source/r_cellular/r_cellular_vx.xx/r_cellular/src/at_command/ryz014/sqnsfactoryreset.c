@@ -14,11 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : sqnsfactoryreset.c
- * Description  : Function to execute the AT command (AT^RESET)
+ * Description  : Function to execute the AT command (SQNSFACTORYRESET)
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -51,9 +51,7 @@ e_cellular_err_t atc_sqnsfactoryreset(st_cellular_ctrl_t * const p_ctrl)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
 
-    atc_generate(p_ctrl->sci_ctrl.atc_buff,
-        (const uint8_t *)&gp_at_command[ATC_FACTORYRESET][0], // (const uint8_t *const *)->(const uint8_t **)
-            NULL);
+    atc_generate(p_ctrl->sci_ctrl.atc_buff, gp_at_command[ATC_FACTORYRESET], NULL);
 
     ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_ERROR, ATC_FACTORYRESET);
 

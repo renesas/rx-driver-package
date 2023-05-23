@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2022 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_mpc_rx_if.h
@@ -57,6 +57,10 @@
 *         : 31.03.2022 4.40    Added support for RX660.
 *         : 28.06.2022 4.50    Updated demo projects.
 *         : 15.12.2022 4.60    Updated dependency module version.
+*         : 28.02.2023 4.70    Updated dependency module version.
+*         : 07.04.2023 4.80    Added support for RX26T.
+*         :                    Fixed to comply with GSCE Coding Standards Rev.6.5.0
+*         :                    Updated dependency module version.
 ***********************************************************************************************************************/
 
 #ifndef MPC_RX_INTERFACE_HEADER_FILE
@@ -80,7 +84,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define MPC_RX_VERSION_MAJOR           (4)
-#define MPC_RX_VERSION_MINOR           (60)
+#define MPC_RX_VERSION_MINOR           (80)
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -106,9 +110,9 @@ typedef enum
 /***********************************************************************************************************************
 Exported global functions (to be accessed by other files)
 ***********************************************************************************************************************/
-mpc_err_t   R_MPC_Write(gpio_port_pin_t pin, mpc_config_t * pconfig);
-void        R_MPC_Read(gpio_port_pin_t  pin, mpc_config_t * pconfig);
-uint32_t    R_MPC_GetVersion(void);
+mpc_err_t   R_MPC_Write (gpio_port_pin_t pin, mpc_config_t * pconfig);
+void        R_MPC_Read (gpio_port_pin_t  pin, mpc_config_t * pconfig);
+uint32_t    R_MPC_GetVersion (void);
 
 #endif /* MPC_RX_INTERFACE_HEADER_FILE */
 

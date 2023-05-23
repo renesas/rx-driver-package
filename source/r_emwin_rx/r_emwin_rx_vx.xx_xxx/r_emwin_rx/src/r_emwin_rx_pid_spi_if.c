@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_emwin_rx_pid_spi_if.c
@@ -24,6 +24,8 @@
 /**********************************************************************************************************************
  * History : DD.MM.YYYY Version        Description
  *         : 31.08.2022 6.26.c.1.00    First Release
+ *         : 31.03.2023 6.32.a.1.00    Update emWin library to v6.32a.
+ *                                     Fixed TOUCH_ORIENTATION definition value.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -110,7 +112,11 @@
 #define X_COEF ((EMWIN_XSIZE_PHYS * 1000) / (X_AD_MAX - X_AD_MIN))
 #define Y_COEF ((EMWIN_YSIZE_PHYS * 1000) / (Y_AD_MAX - Y_AD_MIN))
 
-#define TOUCH_ORIENTATION (GUI_MIRROR_Y)  /* Y-mirror */
+#if (EMWIN_USE_RUNTIME_ORIENTATION == 1)
+#define TOUCH_ORIENTATION (GUI_MIRROR_X | GUI_MIRROR_Y)  /* X and Y-mirror */
+#else
+#define TOUCH_ORIENTATION (GUI_MIRROR_Y)                 /* Y-mirror */
+#endif
 
 #else /* (EMWIN_TOUCH_DRIVER_IC == TOUCH_DRV_IC_OTHER) */
 

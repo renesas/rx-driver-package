@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : GUIConf.h
@@ -31,6 +31,7 @@
  *         : 29.12.2021 6.20.  1.00    Update emWin library to v6.22.
  *                                     Adjust configuration option with Smart Configurator.
  *         : 31.08.2022 6.26.c.1.00    Update emWin library to v6.26c.
+ *         : 31.03.2023 6.32.a.1.00    Update emWin library to v6.32a.
  *********************************************************************************************************************/
 #ifndef GUICONF_H
 #define GUICONF_H
@@ -49,7 +50,7 @@
 #define GUI_WINSUPPORT            (1)  /* Enable window manager support */
 
 #define GUI_NUM_LAYERS            (16) /* Maximum of available layer */
-#define GUI_PID_BUFFER_SIZE       (10) /* Muximum number of PID events with the touch screen */
+#define GUI_PID_BUFFER_SIZE       (10) /* Maximum number of PID events with the touch screen */
 
 /**********************************************************************************************************************
  Global Typedef definitions

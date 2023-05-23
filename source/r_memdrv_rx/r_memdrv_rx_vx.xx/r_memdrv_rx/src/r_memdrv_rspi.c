@@ -19,12 +19,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018(2020) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018(2023) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * System Name  : MEMDRV  software
 * File Name    : r_memdrv_rspi.c
-* Version      : 1.03
+* Version      : 1.05
 * Device       : -
 * Abstract     : IO I/F module
 * Tool-Chain   : -
@@ -50,6 +50,7 @@
 *                                    transfer data by Software transfer. If you transfer 4 bytes or more of data
 *                                    with R_MEMDRV_TxData() and R_MEMDRV_RxData(), more data than the specified
 *                                    transfer size will be transferred.
+*              : 16.03.2023 1.05     Fixed coding style.
 *************************************************************************************************/
 
 /************************************************************************************************
@@ -253,7 +254,6 @@ memdrv_err_t r_memdrv_rspi_close(uint8_t devno, st_memdrv_info_t * p_memdrv_info
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_OTHER                       ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
@@ -1598,7 +1598,6 @@ static memdrv_err_t r_memdrv_rspi_enable_rx_data_dtc(uint8_t devno,
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_HARD                        ;   Hardware error
 *              : MEMDRV_ERR_OTHER                       ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
@@ -1663,7 +1662,6 @@ memdrv_err_t r_memdrv_rspi_tx(uint8_t devno, st_memdrv_info_t * p_memdrv_info)
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_HARD                        ;   Hardware error
 *              : MEMDRV_ERR_OTHER                       ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
@@ -1999,7 +1997,6 @@ memdrv_err_t r_memdrv_rspi_tx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_HARD                        ;   Hardware error
 *              : MEMDRV_ERR_OTHER                       ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
@@ -2065,7 +2062,6 @@ memdrv_err_t r_memdrv_rspi_rx(uint8_t devno, st_memdrv_info_t * p_memdrv_info)
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                       ;   Successful operation
-*              : MEMDRV_ERR_HARD                      ;   Hardware error
 *              : MEMDRV_ERR_OTHER                     ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
@@ -2759,7 +2755,7 @@ static memdrv_err_t r_memdrv_rspi_read_data(uint8_t channel,
 *                    Pointer of data
 *                size -
 *                    Size of data
-* Return Value : RSPI_SMSTR_SUCCESS -
+* Return Value : MEMDRV_SUCCESS -
 *                    Successful operation
 *******************************************************************************/
 static memdrv_err_t r_rspi_exchg(uint8_t * p_data, uint16_t size)
@@ -2850,6 +2846,6 @@ void r_memdrv_rspi_1ms_interval(void)
     R_MEMDRV_Log(MEMDRV_DEBUG_ERR_ID, (uint32_t)MEMDRV_ERR_SUB, __LINE__);
 } /* End of function r_memdrv_rspi_1ms_interval() */
 #endif  /* ((MEMDRV_CFG_DEV0_INCLUDED == 1) && (MEMDRV_CFG_DEV0_MODE_DRVR == MEMDRV_DRVR_RX_FIT_RSPI)) || \
-           ((MEMDRV_CFG_DEV1_INCLUDED == 1) && (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_RSPI))
+           ((MEMDRV_CFG_DEV1_INCLUDED == 1) && (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_RSPI)) */
 
 /* End of File */

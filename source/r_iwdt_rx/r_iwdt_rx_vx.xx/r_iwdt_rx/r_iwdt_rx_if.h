@@ -51,6 +51,9 @@
 *           13.09.2021 3.90    Added the demo for RX671.
 *           14.03.2022 4.00    Added support for RX66T-48Pin.
 *           31.03.2022 4.10    Added support for RX660.
+*           28.06.2022 4.20    Updated demo projects.
+*           15.08.2022 4.30    Added support for RX26T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0
 ***********************************************************************************************************************/
 
 #ifndef IWDT_RX_IF_H
@@ -71,7 +74,7 @@ Macro definitions
 #endif
 /* Version Number of API. */
 #define IWDT_RX_VERSION_MAJOR   (4)
-#define IWDT_RX_VERSION_MINOR   (10)
+#define IWDT_RX_VERSION_MINOR   (30)
 
 #define OFS0_IWDT_DISABLED      (0x00000002)
 
@@ -101,12 +104,13 @@ typedef enum e_iwdt_err       // IWDT API error codes
 
 typedef enum e_iwdt_timeout           // IWDT Time-Out Period
 {
-#if defined(BSP_MCU_RX11_ALL) || defined(BSP_MCU_RX130) || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX23_ALL) || defined(BSP_MCU_RX24U)|| defined(BSP_MCU_RX140)
+#if defined(BSP_MCU_RX11_ALL) || defined(BSP_MCU_RX130) || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX23_ALL) \
+    || defined(BSP_MCU_RX24U)|| defined(BSP_MCU_RX140)
     IWDT_TIMEOUT_128 =0x0000u,        // 128  (cycles) 
     IWDT_TIMEOUT_512 =0x0001u,        // 512  (cycles)
     IWDT_TIMEOUT_1024=0x0002u,        // 1024 (cycles)
     IWDT_TIMEOUT_2048=0x0003u,        // 2048 (cycles)
-#else /* RX64M, RX71M, RX65N, RX66T, RX66N, RX72T, RX72M, RX72N, RX671, RX660 */
+#else /* RX64M, RX71M, RX65N, RX66T, RX66N, RX72T, RX72M, RX72N, RX671, RX660, RX26T */
     IWDT_TIMEOUT_1024 =0x0000u,        // 1024 (cycles)
     IWDT_TIMEOUT_4096 =0x0001u,        // 4096 (cycles)
     IWDT_TIMEOUT_8192 =0x0002u,        // 8192 (cycles)
@@ -177,13 +181,13 @@ Public Functions
 ***********************************************************************************************************************/
 #if ((BSP_CFG_OFS0_REG_VALUE & OFS0_IWDT_DISABLED) == OFS0_IWDT_DISABLED) /* Register start mode */
 /* Initializes the IWDT counter options by initializing the associated registers */
-iwdt_err_t    R_IWDT_Open(void * const p_cfg);
+iwdt_err_t    R_IWDT_Open (void * const p_cfg);
 #endif
 
 /* Getting the IWDT status and refreshing the down-counter of IWDT */
-iwdt_err_t    R_IWDT_Control(iwdt_cmd_t const cmd, uint16_t * p_status);
+iwdt_err_t    R_IWDT_Control (iwdt_cmd_t const cmd, uint16_t * p_status);
 
 /* Returns the version number of the module. */
-uint32_t      R_IWDT_GetVersion(void);
+uint32_t      R_IWDT_GetVersion (void);
 
 #endif /* IWDT_RX_IF_H */

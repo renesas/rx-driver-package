@@ -90,6 +90,10 @@ r_sci_iic_rx
         |        r_sci_iic_rx24u.c
         |        r_sci_iic_rx24u_private.h
         |
+        +---rx26t
+        |        r_sci_iic_rx26t.c
+        |        r_sci_iic_rx26t_private.h
+        |
         +---rx64m
         |       r_sci_iic_rx64m.c
         |       r_sci_iic_rx64m_private.h

@@ -24,6 +24,7 @@
 *           31.03.2021 1.00    Initial Release.
 *                              Updated macro definition enable and disable TXI, RXI, ERI, TEI.
 *           31.03.2022 4.40    Added receive flag when using DTC/DMAC.
+*           16.02.2023 4.70    Updated the macro NUM_DIVISORS_ASYNC.
 ***********************************************************************************************************************/
 
 #ifndef SCI_RX671_H
@@ -88,7 +89,7 @@ Macro definitions
 #define ENABLE_TEI_INT      (R_BSP_BIT_SET((uint8_t*)(hdl->rom->icu_grp) + (hdl->rom->tei_bit_num >> 3), hdl->rom->tei_bit_num & 7))
 #define DISABLE_TEI_INT     (R_BSP_BIT_CLEAR((uint8_t*)(hdl->rom->icu_grp) + (hdl->rom->tei_bit_num >> 3), hdl->rom->tei_bit_num & 7))
 
-#define NUM_DIVISORS_ASYNC  (10)
+#define NUM_DIVISORS_ASYNC  (13)
 #define NUM_DIVISORS_SYNC   (4)
 
 /*****************************************************************************
@@ -364,5 +365,5 @@ extern void sci_initialize_ints(sci_hdl_t const hdl,
 
 extern void sci_disable_ints(sci_hdl_t const hdl);
 
-#endif /* SCI_RX65N_H */
+#endif /* SCI_RX671_H */
 

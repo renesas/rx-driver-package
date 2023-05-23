@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cpin.c
@@ -50,8 +50,9 @@
  ************************************************************************************************/
 e_cellular_err_t atc_cpin(st_cellular_ctrl_t * const p_ctrl, const st_cellular_cfg_t * const p_cfg)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    uint8_t str[8 + 1] = {0};
+    uint8_t          str[CELLULAR_MAX_SIM_PASS_LENGTH+1]   = {0};
+    const uint8_t *  p_command_arg[CELLULAR_MAX_ARG_COUNT] = {0};
+    e_cellular_err_t ret                                   = CELLULAR_SUCCESS;
 
     if (NULL == p_cfg)
     {
@@ -62,11 +63,9 @@ e_cellular_err_t atc_cpin(st_cellular_ctrl_t * const p_ctrl, const st_cellular_c
         strncpy((char *)str, (char *)p_cfg->sim_pin_code, sizeof(str));  // (uint8_t *)->(char *)
     }
 
-    const uint8_t * const p_command_arg[CELLULAR_MAX_ARG_COUNT] = {str}; // (&uint8_t[])->(uint8_t *)
+    p_command_arg[0] = str;
 
-    atc_generate(p_ctrl->sci_ctrl.atc_buff,
-        (const uint8_t *)&gp_at_command[ATC_PIN_LOCK_RELEASE][0],   // (const uint8_t *const *)->(const uint8_t **)
-            (const uint8_t **)&p_command_arg);                      // (const uint8_t *const *)->(const uint8_t **)
+    atc_generate(p_ctrl->sci_ctrl.atc_buff, gp_at_command[ATC_PIN_LOCK_RELEASE], p_command_arg);
 
     ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_PIN_LOCK_RELEASE);
 
@@ -84,12 +83,10 @@ e_cellular_err_t atc_cpin(st_cellular_ctrl_t * const p_ctrl, const st_cellular_c
  ************************************************************************************************/
 e_cellular_err_t atc_cpin_check(st_cellular_ctrl_t * const p_ctrl)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    uint8_t lock_state[15] = {0};
+    uint8_t          lock_state[CELLULAR_CPIN_STATUS_LENGTH+1] = {0};
+    e_cellular_err_t ret                                       = CELLULAR_SUCCESS;
 
-    atc_generate(p_ctrl->sci_ctrl.atc_buff,
-        (const uint8_t *)&gp_at_command[ATC_PIN_LOCK_CHECK][0], // (const uint8_t *const *)->(const uint8_t **)
-            NULL);
+    atc_generate(p_ctrl->sci_ctrl.atc_buff, gp_at_command[ATC_PIN_LOCK_CHECK], NULL);
 
     p_ctrl->recv_data = lock_state;
 
@@ -102,6 +99,8 @@ e_cellular_err_t atc_cpin_check(st_cellular_ctrl_t * const p_ctrl)
             ret = CELLULAR_ERR_MODULE_COM;
         }
     }
+
+    p_ctrl->recv_data = NULL;
 
     return ret;
 }

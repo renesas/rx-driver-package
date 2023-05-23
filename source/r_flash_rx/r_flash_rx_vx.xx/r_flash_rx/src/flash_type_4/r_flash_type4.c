@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2016-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
 ********************************************************************************************************************/
 /*******************************************************************************************************************
 * File Name : r_flash_type4.c
@@ -38,6 +38,7 @@
 *                              Fixed timeout processing of flash_toggle_banksel_reg() and flash_write_faw_reg().
 *         : 26.06.2020 4.60    Modified R_CF_SetAccessWindow() and R_CF_GetAccessWindow() of access window functions.
 *                              Modified the check order in get_cmdlk_err() and get_cmdlk_err_event().
+*         : 24.01.2023 5.00    Modified the condition of PFRAM section definition.
 ********************************************************************************************************************/
 
 /********************************************************************************************************************
@@ -65,403 +66,6 @@ Private global variables and functions
 #if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
 
 static flash_err_t flash_write_faw_reg(fawreg_t faw);
-
-
-#if (FLASH_IN_DUAL_BANK_MODE)
-/*******************************************************************************
-* Function Name: flash_toggle_banksel_reg
-* Description  : Read the current BANKSEL value and toggle the startup bank.
-* Arguments    : None
-* Return Value : FLASH_SUCCESS -
-*                    Switched successfully or Stop issued successfully.
-*                FLASH_ERR_FAILURE -
-*                    Unable to Switch to P/E Mode.
-*                FLASH_ERR_PARAM -
-*                    Illegal parameter passed
-*                FLASH_ERR_TIMEOUT
-*                    Operation timed out.
-*******************************************************************************/
-R_BSP_ATTRIB_SECTION_CHANGE(P, FRAM2)
-flash_err_t flash_toggle_banksel_reg()
-{
-    flash_err_t err = FLASH_SUCCESS;
-    uint32_t    banksel_val;
-
-
-    err = flash_pe_mode_enter(FLASH_TYPE_CODE_FLASH);
-    if (FLASH_SUCCESS != err)
-    {
-        return(err);
-    }
-
-    g_current_parameters.current_operation = FLASH_CUR_CF_TOGGLE_BANK;
-
-
-    /* Read and toggle bank select value */
-    banksel_val = *((uint32_t *)BANKSEL_ADDR);
-    banksel_val ^= BANKSWP_MASK;
-
-#ifdef __BIG    // Big endian - swap words
-    uint32_t    swapped;
-    swapped = (banksel_val << 16) | ((banksel_val >> 16) & 0x0000FFFF);
-    banksel_val = swapped;
-#endif
-
-    /* Write new value */
-    /* See table "Address Used by Configuration Set Command" in Flash Memory Manual */
-    FLASH.FSADDR.BIT.FSADDR = 0x00FF5D20;       // FSADDR reg specific addr for BANKSEL register
-    *g_pfcu_cmd_area = (uint8_t) 0x40;          // Control area command
-    *g_pfcu_cmd_area = (uint8_t) 0x08;          // 8 words
-
-    *(FCU_WORD_PTR) g_pfcu_cmd_area = (uint16_t) (banksel_val & 0x000FFFF);         // data for 0x00FF5D20
-    *(FCU_WORD_PTR) g_pfcu_cmd_area = (uint16_t) ((banksel_val >> 16) & 0x000FFFF); // data for 0x00FF5D22
-    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D24
-    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D26
-    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D28
-    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D2A
-    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D2C
-    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D2E
-    *g_pfcu_cmd_area = (uint8_t) 0xD0;          // end command
-
-    /* NOTE: Always poll for completion even when in BGO/interrupt mode. This is
-     * because the banksel register is "tied" to bank 0. We do not want to return
-     * from this function (which is executing in RAM) until the operation
-     * completes. Otherwise, if the app happens to be executing in bank 0, the
-     * illegal situation in effect arises of writing to the same bank that you
-     * are executing from.
-     */
-    g_current_parameters.wait_cnt = FLASH_FRDY_CMD_TIMEOUT;
-    while (1 != FLASH.FSTATR.BIT.FRDY)
-    {
-        /* Wait until FRDY is 1 unless timeout occurs. */
-        if (g_current_parameters.wait_cnt-- <= 0)
-        {
-            /* Issue stop command to flash command area */
-            *g_pfcu_cmd_area = (uint8_t) FLASH_FACI_CMD_FORCED_STOP;
-
-            /* Wait for current operation to complete.*/
-            while (1 != FLASH.FSTATR.BIT.FRDY)
-            {
-                ;
-            }
-
-            err = FLASH_ERR_TIMEOUT;
-        }
-    }
-
-    flash_pe_mode_exit();
-
-    return err;
-}
-#endif // FLASH_IN_DUAL_BANK_MODE
-
-
-/*******************************************************************************
-* Function Name: flash_write_faw_reg
-* Description  : Writes the contents of the argument to the FAW register.
-* Arguments    : start_addr : start address of Access Window Setting
-*              : end_addr   : end address of Access Window Setting. This should be one
-*                             beyond the actual last byte to allow write access for.
-*                             here as required by the spec.
-* Return Value : FLASH_SUCCESS -
-*                    Command executed successfully
-*                FLASH_ERR_FAILURE -
-*                   PE mode enter/exit failed
-*                FLASH_ERR_PARAM -
-*                    Illegal parameter passed
-*                FLASH_ERR_TIMEOUT
-*                    Operation timed out.
-*******************************************************************************/
-#if (FLASH_IN_DUAL_BANK_MODE)
-R_BSP_ATTRIB_SECTION_CHANGE(P, FRAM2)
-#else
-R_BSP_ATTRIB_SECTION_CHANGE(P, FRAM)
-#endif // #if (FLASH_IN_DUAL_BANK_MODE)
-flash_err_t flash_write_faw_reg (fawreg_t   faw)
-{
-    flash_err_t err = FLASH_SUCCESS;
-
-    err = flash_pe_mode_enter(FLASH_TYPE_CODE_FLASH);
-    if (FLASH_SUCCESS != err)
-    {
-        return(err);
-    }
-
-    faw.BIT.FSPR = 1;          // p/e enabled (allow rewrite of flash; 0 locks chip forever)
-
-#ifdef __BIG    // Big endian - swap words
-    uint32_t    swapped;
-    swapped = (faw.LONG << 16) | ((faw.LONG >> 16) & 0x0000FFFF);
-    faw.LONG = swapped;
-#endif
-
-    /* See table "Address Used by Configuration Set Command" in Flash Memory Manual */
-    FLASH.FSADDR.BIT.FSADDR = 0x00FF5D60;       // FSADDR reg specific addr for FAW register
-    *g_pfcu_cmd_area = (uint8_t) 0x40;          // Control area command
-    *g_pfcu_cmd_area = (uint8_t) 0x08;          // 8 words
-
-    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D60
-    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D62
-    *(FCU_WORD_PTR) g_pfcu_cmd_area = (uint16_t) (faw.LONG & 0x000FFFF);         // data for 0x00FF5D64
-    *(FCU_WORD_PTR) g_pfcu_cmd_area = (uint16_t) ((faw.LONG >> 16) & 0x000FFFF); // data for 0x00FF5D66
-    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D68
-    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D6A
-    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D6C
-    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D6E
-    *g_pfcu_cmd_area = (uint8_t) 0xD0;          // end command
-
-    /* NOTE: Always poll for completion even when in BGO/interrupt mode. This is
-     * because the faw register is "tied" to code flash. We do not want to return
-     * from this function (which is executing in RAM) until the operation
-     * completes. Otherwise, if the app happens to be executing in code flash
-     * (FLASH_CFG_CODE_FLASH_RUN_FROM_ROM = 1), the illegal situation in effect
-     * arises of writing to the same area that you are executing from.
-     */
-    g_current_parameters.wait_cnt = FLASH_FRDY_CMD_TIMEOUT;
-    while (1 != FLASH.FSTATR.BIT.FRDY)
-    {
-        /* Wait until FRDY is 1 unless timeout occurs. */
-        if (g_current_parameters.wait_cnt-- <= 0)
-        {
-            /* Issue stop command to flash command area */
-            *g_pfcu_cmd_area = (uint8_t) FLASH_FACI_CMD_FORCED_STOP;
-
-            /* Wait for current operation to complete.*/
-            while (1 != FLASH.FSTATR.BIT.FRDY)
-            {
-                ;
-            }
-
-            err = FLASH_ERR_TIMEOUT;
-        }
-    }
-
-    flash_pe_mode_exit();
-
-    return err;
-}
-
-
-#define FLASH_PE_MODE_SECTION    R_BSP_ATTRIB_SECTION_CHANGE(P, FRAM)
-#define FLASH_SECTION_CHANGE_END R_BSP_ATTRIB_SECTION_CHANGE_END
-#else
-#define FLASH_PE_MODE_SECTION
-#define FLASH_SECTION_CHANGE_END
-#endif // #if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
-/***********************************************************************************************************************
-* Function Name: get_cmdlk_err
-* Description  : This function identifies the error when FLASH.FASTAT.BIT.CMDLK is set.
-* Arguments    : None
-* Return Value : FLASH_ERR_SECURITY -
-*                    Operation failed due to access window protection
-*                FLASH_ERR_FAILURE -
-*                    Failure caused by something other than lockbit set
-*                FLASH_ERR_CMD_LOCKED -
-*                    Flash hardware locked
-***********************************************************************************************************************/
-FLASH_PE_MODE_SECTION
-flash_err_t get_cmdlk_err(void)
-{
-    flash_err_t err;
-
-
-    if (FLASH.FSTATR.BIT.SECERR)       // error due to access window locking
-    {
-        err = FLASH_ERR_SECURITY;
-    }
-    else if ((FLASH.FASTAT.BIT.CFAE) || (FLASH.FSTATR.BIT.ILGLERR))
-    {
-        err = FLASH_ERR_ADDRESS;            // tried to access invalid address
-    }
-    else if ((FLASH.FSTATR.BIT.PRGERR) || (FLASH.FSTATR.BIT.ERSERR))
-    {
-        err = FLASH_ERR_FAILURE;
-    }
-    else
-    {
-        err = FLASH_ERR_CMD_LOCKED;
-    }
-
-    /* Recovery procedure from CMDLK is to issue a forced stop */
-    flash_stop();
-    return err;
-}
-
-
-#if (FLASH_CFG_DATA_FLASH_BGO || FLASH_CFG_CODE_FLASH_BGO)
-/***********************************************************************************************************************
-* Function Name: get_cmdlk_err_event
-* Description  : This function identifies the error when FLASH.FASTAT.BIT.CMDLK is set and converts it to
-*                an interrupt event for the callback function.
-* Arguments    : None
-* Return Value : FLASH_INT_EVENT_ERR_DF_ACCESS -
-*                    Tried to access invalid data flash address
-*                FLASH_INT_EVENT_ERR_CF_ACCESS -
-*                    Tried to access invalid code falsh address
-*                FLASH_INT_EVENT_ERR_SECURITY -
-*                    Operation failed due to access window protection
-*                FLASH_INT_EVENT_ERR_FAILURE -
-*                    General write or erase failure.
-*                FLASH_INT_EVENT_ERR_CMD_LOCKED -
-*                    Flash peripheral hardware locked
-***********************************************************************************************************************/
-FLASH_PE_MODE_SECTION
-flash_interrupt_event_t get_cmdlk_err_event(void)
-{
-    flash_interrupt_event_t event;
-
-#ifndef FLASH_NO_DATA_FLASH
-    if (FLASH.FASTAT.BIT.DFAE)
-    {
-        event = FLASH_INT_EVENT_ERR_DF_ACCESS;  // tried to access invalid address
-    }
-#endif
-    if (FLASH.FSTATR.BIT.SECERR)           // access window protected
-    {
-        event = FLASH_INT_EVENT_ERR_SECURITY;
-    }
-    else if ((FLASH.FASTAT.BIT.CFAE) || (FLASH.FSTATR.BIT.ILGLERR))
-    {
-        event = FLASH_INT_EVENT_ERR_CF_ACCESS;  // tried to access invalid address
-    }
-    else if ((FLASH.FSTATR.BIT.PRGERR) || (FLASH.FSTATR.BIT.ERSERR))
-    {
-        event = FLASH_INT_EVENT_ERR_FAILURE;
-    }
-    else
-    {
-        event = FLASH_INT_EVENT_ERR_CMD_LOCKED;
-    }
-
-    /* Recovery procedure from CMDLK is to issue a forced stop */
-    flash_stop();
-    return event;
-}
-#endif // (FLASH_CFG_DATA_FLASH_BGO || FLASH_CFG_CODE_FLASH_BGO)
-
-
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
-/*******************************************************************************
-* Function Name: R_CF_GetCurrentStartupArea
-* Description  : Return which startup area (Default or Alternate) is active
-*                at reset.
-* Arguments    : None
-* Return Value : startup_area_flag - 0 ==> Alternate area
-*                                    1 ==> Default area
-*******************************************************************************/
-uint8_t R_CF_GetCurrentStartupArea(void)
-{
-    fawreg_t    faw;
-
-    faw.LONG = FLASH.FAWMON.LONG;
-
-    return(faw.BIT.BTFLG);
-}
-
-
-/*******************************************************************************
-* Function Name: R_CF_ToggleStartupArea
-* Description  : Flips rhe startup area effective at reset.
-* Arguments    : None
-* Return Value : FLASH_SUCCESS -
-*                   Switched successfully.
-*                FLASH_ERR_FAILURE -
-*                   PE mode enter/exit failed
-*******************************************************************************/
-flash_err_t R_CF_ToggleStartupArea (void)
-{
-    flash_err_t err;
-    fawreg_t    faw;
-
-    g_current_parameters.current_operation = FLASH_CUR_CF_TOGGLE_STARTUPAREA;
-
-    faw.LONG = FLASH.FAWMON.LONG;
-
-    faw.BIT.BTFLG ^= 1;
-
-    err = flash_write_faw_reg(faw);
-
-    return err;
-}
-
-
-#if (FLASH_IN_DUAL_BANK_MODE == 0)
-/*******************************************************************************
-* Function Name: R_CF_GetCurrentSwapState
-* Description  : Return which startup area active at the moment (not guaranteed
-*                through reset)
-* Arguments    : None
-* Return Value : FLASH_SAS_SWAPFLG -
-*                    The start-up area temporarily set according to the swap flag
-*                FLASH_SAS_DEFAULT -
-*                    The start-up area temporarily set to the default area
-*                FLASH_SAS_ALTERNATE -
-*                    The start-up area temporarily set to the alternate area
-*******************************************************************************/
-uint8_t R_CF_GetCurrentSwapState(void)
-{
-
-    return(FLASH.FSUACR.BIT.SAS);
-}
-
-
-/*******************************************************************************
-* Function Name: R_CF_SetCurrentSwapState
-* Description  : Temporarily set the start-up area (does not determine area at reset)
-* Arguments    : value -
-*                    FLASH_SAS_SWAPFLG (start-up area temporarily set according to the swap flag)
-*                    FLASH_SAS_DEFAULT (start-up area temporarily set to the default area)
-*                    FLASH_SAS_ALTERNATE (start-up area temporarily set to the alternate area)
-*                    FLASH_SAS_SWITCH_AREA (Command to temporarily switch to the other startup area)
-* Return Value : None
-*******************************************************************************/
-void R_CF_SetCurrentSwapState(uint8_t value)
-{
-    uint8_t     sas_flag;
-    uint16_t    reg_value;
-
-
-    if (FLASH_SAS_SWITCH_AREA == value)                     // switch startup areas
-    {
-        if (FLASH_SAS_SWAPFLG == FLASH.FSUACR.BIT.SAS)      // switch based upon FAWMON.BTFLG reset area
-        {
-            if (1 == FLASH.FAWMON.BIT.BTFLG)                // 1 = using default area
-            {
-                sas_flag = FLASH_SAS_ALTERNATE;
-            }
-            else
-            {
-                sas_flag = FLASH_SAS_DEFAULT;
-            }
-        }
-        else                                                // switch based upon current state
-        {
-            if (FLASH_SAS_ALTERNATE == FLASH.FSUACR.BIT.SAS)
-            {
-                sas_flag = FLASH_SAS_DEFAULT;
-            }
-            else
-            {
-                sas_flag = FLASH_SAS_ALTERNATE;
-            }
-        }
-    }
-    else
-    {
-        sas_flag = value;       /* to set SAS to desired area */
-    }
-
-    reg_value = 0x6600 | (uint16_t)sas_flag;
-    FLASH.FSUACR.WORD = reg_value;
-
-
-    while(sas_flag != FLASH.FSUACR.BIT.SAS)
-    {
-        /* Confirm that the written value can be read correctly. */
-    }
-
-}
-#endif // (FLASH_IN_DUAL_BANK_MODE == 0)
 
 
 /*******************************************************************************
@@ -544,8 +148,404 @@ flash_err_t R_CF_GetAccessWindow (flash_access_window_config_t  *pAccessInfo)
 }
 
 
-#endif // FLASH_CFG_CODE_FLASH_ENABLE
+#if (FLASH_IN_DUAL_BANK_MODE == 0)
+/*******************************************************************************
+* Function Name: R_CF_GetCurrentStartupArea
+* Description  : Return which startup area (Default or Alternate) is active
+*                at reset.
+* Arguments    : None
+* Return Value : startup_area_flag - 0 ==> Alternate area
+*                                    1 ==> Default area
+*******************************************************************************/
+uint8_t R_CF_GetCurrentStartupArea(void)
+{
+    fawreg_t    faw;
+
+    faw.LONG = FLASH.FAWMON.LONG;
+
+    return(faw.BIT.BTFLG);
+}
+
+
+/*******************************************************************************
+* Function Name: R_CF_ToggleStartupArea
+* Description  : Flips rhe startup area effective at reset.
+* Arguments    : None
+* Return Value : FLASH_SUCCESS -
+*                   Switched successfully.
+*                FLASH_ERR_FAILURE -
+*                   PE mode enter/exit failed
+*******************************************************************************/
+flash_err_t R_CF_ToggleStartupArea (void)
+{
+    flash_err_t err;
+    fawreg_t    faw;
+
+    g_current_parameters.current_operation = FLASH_CUR_CF_TOGGLE_STARTUPAREA;
+
+    faw.LONG = FLASH.FAWMON.LONG;
+
+    faw.BIT.BTFLG ^= 1;
+
+    err = flash_write_faw_reg(faw);
+
+    return err;
+}
+
+
+/*******************************************************************************
+* Function Name: R_CF_GetCurrentSwapState
+* Description  : Return which startup area active at the moment (not guaranteed
+*                through reset)
+* Arguments    : None
+* Return Value : FLASH_SAS_SWAPFLG -
+*                    The start-up area temporarily set according to the swap flag
+*                FLASH_SAS_DEFAULT -
+*                    The start-up area temporarily set to the default area
+*                FLASH_SAS_ALTERNATE -
+*                    The start-up area temporarily set to the alternate area
+*******************************************************************************/
+uint8_t R_CF_GetCurrentSwapState(void)
+{
+
+    return(FLASH.FSUACR.BIT.SAS);
+}
+
+
+/*******************************************************************************
+* Function Name: R_CF_SetCurrentSwapState
+* Description  : Temporarily set the start-up area (does not determine area at reset)
+* Arguments    : value -
+*                    FLASH_SAS_SWAPFLG (start-up area temporarily set according to the swap flag)
+*                    FLASH_SAS_DEFAULT (start-up area temporarily set to the default area)
+*                    FLASH_SAS_ALTERNATE (start-up area temporarily set to the alternate area)
+*                    FLASH_SAS_SWITCH_AREA (Command to temporarily switch to the other startup area)
+* Return Value : None
+*******************************************************************************/
+void R_CF_SetCurrentSwapState(uint8_t value)
+{
+    uint8_t     sas_flag;
+    uint16_t    reg_value;
+
+
+    if (FLASH_SAS_SWITCH_AREA == value)                     // switch startup areas
+    {
+        if (FLASH_SAS_SWAPFLG == FLASH.FSUACR.BIT.SAS)      // switch based upon FAWMON.BTFLG reset area
+        {
+            if (1 == FLASH.FAWMON.BIT.BTFLG)                // 1 = using default area
+            {
+                sas_flag = FLASH_SAS_ALTERNATE;
+            }
+            else
+            {
+                sas_flag = FLASH_SAS_DEFAULT;
+            }
+        }
+        else                                                // switch based upon current state
+        {
+            if (FLASH_SAS_ALTERNATE == FLASH.FSUACR.BIT.SAS)
+            {
+                sas_flag = FLASH_SAS_DEFAULT;
+            }
+            else
+            {
+                sas_flag = FLASH_SAS_ALTERNATE;
+            }
+        }
+    }
+    else
+    {
+        sas_flag = value;       /* to set SAS to desired area */
+    }
+
+    reg_value = 0x6600 | (uint16_t)sas_flag;
+    FLASH.FSUACR.WORD = reg_value;
+
+
+    while(sas_flag != FLASH.FSUACR.BIT.SAS)
+    {
+        /* Confirm that the written value can be read correctly. */
+    }
+
+}
+#endif // (FLASH_IN_DUAL_BANK_MODE == 0)
+#endif // (FLASH_CFG_CODE_FLASH_ENABLE == 1)
+
+
+#if (FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_RUN_FROM_ROM == 0)
+#define FLASH_PE_MODE_SECTION    R_BSP_ATTRIB_SECTION_CHANGE(P, FRAM)
+#define FLASH_SECTION_CHANGE_END R_BSP_ATTRIB_SECTION_CHANGE_END
+#else
+#define FLASH_PE_MODE_SECTION
+#define FLASH_SECTION_CHANGE_END
+#endif
+/***********************************************************************************************************************
+* Function Name: get_cmdlk_err
+* Description  : This function identifies the error when FLASH.FASTAT.BIT.CMDLK is set.
+* Arguments    : None
+* Return Value : FLASH_ERR_SECURITY -
+*                    Operation failed due to access window protection
+*                FLASH_ERR_FAILURE -
+*                    Failure caused by something other than lockbit set
+*                FLASH_ERR_CMD_LOCKED -
+*                    Flash hardware locked
+***********************************************************************************************************************/
+FLASH_PE_MODE_SECTION
+flash_err_t get_cmdlk_err(void)
+{
+    flash_err_t err;
+
+
+    if (FLASH.FSTATR.BIT.SECERR)       // error due to access window locking
+    {
+        err = FLASH_ERR_SECURITY;
+    }
+    else if ((FLASH.FASTAT.BIT.CFAE) || (FLASH.FSTATR.BIT.ILGLERR))
+    {
+        err = FLASH_ERR_ADDRESS;            // tried to access invalid address
+    }
+    else if ((FLASH.FSTATR.BIT.PRGERR) || (FLASH.FSTATR.BIT.ERSERR))
+    {
+        err = FLASH_ERR_FAILURE;
+    }
+    else
+    {
+        err = FLASH_ERR_CMD_LOCKED;
+    }
+
+    /* Recovery procedure from CMDLK is to issue a forced stop */
+    flash_stop();
+    return err;
+}
+
+
+#if (FLASH_CFG_DATA_FLASH_BGO || (FLASH_CFG_CODE_FLASH_ENABLE && FLASH_CFG_CODE_FLASH_BGO))
+/***********************************************************************************************************************
+* Function Name: get_cmdlk_err_event
+* Description  : This function identifies the error when FLASH.FASTAT.BIT.CMDLK is set and converts it to
+*                an interrupt event for the callback function.
+* Arguments    : None
+* Return Value : FLASH_INT_EVENT_ERR_DF_ACCESS -
+*                    Tried to access invalid data flash address
+*                FLASH_INT_EVENT_ERR_CF_ACCESS -
+*                    Tried to access invalid code falsh address
+*                FLASH_INT_EVENT_ERR_SECURITY -
+*                    Operation failed due to access window protection
+*                FLASH_INT_EVENT_ERR_FAILURE -
+*                    General write or erase failure.
+*                FLASH_INT_EVENT_ERR_CMD_LOCKED -
+*                    Flash peripheral hardware locked
+***********************************************************************************************************************/
+FLASH_PE_MODE_SECTION
+flash_interrupt_event_t get_cmdlk_err_event(void)
+{
+    flash_interrupt_event_t event;
+
+#ifndef FLASH_NO_DATA_FLASH
+    if (FLASH.FASTAT.BIT.DFAE)
+    {
+        event = FLASH_INT_EVENT_ERR_DF_ACCESS;  // tried to access invalid address
+    }
+#endif
+    if (FLASH.FSTATR.BIT.SECERR)           // access window protected
+    {
+        event = FLASH_INT_EVENT_ERR_SECURITY;
+    }
+    else if ((FLASH.FASTAT.BIT.CFAE) || (FLASH.FSTATR.BIT.ILGLERR))
+    {
+        event = FLASH_INT_EVENT_ERR_CF_ACCESS;  // tried to access invalid address
+    }
+    else if ((FLASH.FSTATR.BIT.PRGERR) || (FLASH.FSTATR.BIT.ERSERR))
+    {
+        event = FLASH_INT_EVENT_ERR_FAILURE;
+    }
+    else
+    {
+        event = FLASH_INT_EVENT_ERR_CMD_LOCKED;
+    }
+
+    /* Recovery procedure from CMDLK is to issue a forced stop */
+    flash_stop();
+    return event;
+}
+#endif // (FLASH_CFG_DATA_FLASH_BGO || FLASH_CFG_CODE_FLASH_BGO)
+
+
+#if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
+/*******************************************************************************
+* Function Name: flash_write_faw_reg
+* Description  : Writes the contents of the argument to the FAW register.
+* Arguments    : start_addr : start address of Access Window Setting
+*              : end_addr   : end address of Access Window Setting. This should be one
+*                             beyond the actual last byte to allow write access for.
+*                             here as required by the spec.
+* Return Value : FLASH_SUCCESS -
+*                    Command executed successfully
+*                FLASH_ERR_FAILURE -
+*                   PE mode enter/exit failed
+*                FLASH_ERR_PARAM -
+*                    Illegal parameter passed
+*                FLASH_ERR_TIMEOUT
+*                    Operation timed out.
+*******************************************************************************/
+#if (FLASH_CFG_CODE_FLASH_RUN_FROM_ROM == 0)
+R_BSP_ATTRIB_SECTION_CHANGE(P, FRAM)
+#elif (FLASH_IN_DUAL_BANK_MODE == 1)
+R_BSP_ATTRIB_SECTION_CHANGE(P, FRAM2)
+#endif
+static flash_err_t flash_write_faw_reg (fawreg_t faw)
+{
+    flash_err_t err = FLASH_SUCCESS;
+
+    err = flash_pe_mode_enter(FLASH_TYPE_CODE_FLASH);
+    if (FLASH_SUCCESS != err)
+    {
+        return(err);
+    }
+
+    faw.BIT.FSPR = 1;          // p/e enabled (allow rewrite of flash; 0 locks chip forever)
+
+#ifdef __BIG    // Big endian - swap words
+    uint32_t swapped;
+    swapped = (faw.LONG << 16) | ((faw.LONG >> 16) & 0x0000FFFF);
+    faw.LONG = swapped;
+#endif
+
+    /* See table "Address Used by Configuration Set Command" in Flash Memory Manual */
+    FLASH.FSADDR.BIT.FSADDR = 0x00FF5D60;       // FSADDR reg specific addr for FAW register
+    *g_pfcu_cmd_area = (uint8_t) 0x40;          // Control area command
+    *g_pfcu_cmd_area = (uint8_t) 0x08;          // 8 words
+
+    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D60
+    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D62
+    *(FCU_WORD_PTR) g_pfcu_cmd_area = (uint16_t) (faw.LONG & 0x000FFFF);         // data for 0x00FF5D64
+    *(FCU_WORD_PTR) g_pfcu_cmd_area = (uint16_t) ((faw.LONG >> 16) & 0x000FFFF); // data for 0x00FF5D66
+    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D68
+    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D6A
+    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D6C
+    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D6E
+    *g_pfcu_cmd_area = (uint8_t) 0xD0;          // end command
+
+    /* NOTE: Always poll for completion even when in BGO/interrupt mode. This is
+     * because the faw register is "tied" to code flash. We do not want to return
+     * from this function (which is executing in RAM) until the operation
+     * completes. Otherwise, if the app happens to be executing in code flash
+     * (FLASH_CFG_CODE_FLASH_RUN_FROM_ROM = 1), the illegal situation in effect
+     * arises of writing to the same area that you are executing from.
+     */
+    g_current_parameters.wait_cnt = FLASH_FRDY_CMD_TIMEOUT;
+    while (1 != FLASH.FSTATR.BIT.FRDY)
+    {
+        /* Wait until FRDY is 1 unless timeout occurs. */
+        if (g_current_parameters.wait_cnt-- <= 0)
+        {
+            /* Issue stop command to flash command area */
+            *g_pfcu_cmd_area = (uint8_t) FLASH_FACI_CMD_FORCED_STOP;
+
+            /* Wait for current operation to complete.*/
+            while (1 != FLASH.FSTATR.BIT.FRDY)
+            {
+                ;
+            }
+
+            err = FLASH_ERR_TIMEOUT;
+        }
+    }
+
+    flash_pe_mode_exit();
+
+    return err;
+}
+
+
+#if (FLASH_IN_DUAL_BANK_MODE)
+/*******************************************************************************
+* Function Name: flash_toggle_banksel_reg
+* Description  : Read the current BANKSEL value and toggle the startup bank.
+* Arguments    : None
+* Return Value : FLASH_SUCCESS -
+*                    Switched successfully or Stop issued successfully.
+*                FLASH_ERR_FAILURE -
+*                    Unable to Switch to P/E Mode.
+*                FLASH_ERR_PARAM -
+*                    Illegal parameter passed
+*                FLASH_ERR_TIMEOUT
+*                    Operation timed out.
+*******************************************************************************/
+R_BSP_ATTRIB_SECTION_CHANGE(P, FRAM2)
+flash_err_t flash_toggle_banksel_reg()
+{
+    flash_err_t err = FLASH_SUCCESS;
+    uint32_t banksel_val;
+
+    /* Read and toggle bank select value */
+    banksel_val = *((uint32_t *)BANKSEL_ADDR);
+    banksel_val ^= BANKSWP_MASK;
+
+#ifdef __BIG    // Big endian - swap words
+    uint32_t swapped;
+    swapped = (banksel_val << 16) | ((banksel_val >> 16) & 0x0000FFFF);
+    banksel_val = swapped;
+#endif
+
+    err = flash_pe_mode_enter(FLASH_TYPE_CODE_FLASH);
+    if (FLASH_SUCCESS != err)
+    {
+        return(err);
+    }
+
+    g_current_parameters.current_operation = FLASH_CUR_CF_TOGGLE_BANK;
+
+    /* Write new value */
+    /* See table "Address Used by Configuration Set Command" in Flash Memory Manual */
+    FLASH.FSADDR.BIT.FSADDR = 0x00FF5D20;       // FSADDR reg specific addr for BANKSEL register
+    *g_pfcu_cmd_area = (uint8_t) 0x40;          // Control area command
+    *g_pfcu_cmd_area = (uint8_t) 0x08;          // 8 words
+
+    *(FCU_WORD_PTR) g_pfcu_cmd_area = (uint16_t) (banksel_val & 0x000FFFF);         // data for 0x00FF5D20
+    *(FCU_WORD_PTR) g_pfcu_cmd_area = (uint16_t) ((banksel_val >> 16) & 0x000FFFF); // data for 0x00FF5D22
+    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D24
+    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D26
+    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D28
+    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D2A
+    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D2C
+    *(FCU_WORD_PTR) g_pfcu_cmd_area = 0xFFFF;    // data for 0x00FF5D2E
+    *g_pfcu_cmd_area = (uint8_t) 0xD0;          // end command
+
+    /* NOTE: Always poll for completion even when in BGO/interrupt mode. This is
+     * because the banksel register is "tied" to bank 0. We do not want to return
+     * from this function (which is executing in RAM) until the operation
+     * completes. Otherwise, if the app happens to be executing in bank 0, the
+     * illegal situation in effect arises of writing to the same bank that you
+     * are executing from.
+     */
+    g_current_parameters.wait_cnt = FLASH_FRDY_CMD_TIMEOUT;
+    while (1 != FLASH.FSTATR.BIT.FRDY)
+    {
+        /* Wait until FRDY is 1 unless timeout occurs. */
+        if (g_current_parameters.wait_cnt-- <= 0)
+        {
+            /* Issue stop command to flash command area */
+            *g_pfcu_cmd_area = (uint8_t) FLASH_FACI_CMD_FORCED_STOP;
+
+            /* Wait for current operation to complete.*/
+            while (1 != FLASH.FSTATR.BIT.FRDY)
+            {
+                ;
+            }
+
+            err = FLASH_ERR_TIMEOUT;
+        }
+    }
+
+    flash_pe_mode_exit();
+
+    return err;
+}
+#endif // FLASH_IN_DUAL_BANK_MODE
+#endif // (FLASH_CFG_CODE_FLASH_ENABLE == 1)
+
 
 FLASH_SECTION_CHANGE_END // end FRAM
 
-#endif // FLASH_TYPE == 4
+#endif // FLASH_TYPE == FLASH_TYPE_4

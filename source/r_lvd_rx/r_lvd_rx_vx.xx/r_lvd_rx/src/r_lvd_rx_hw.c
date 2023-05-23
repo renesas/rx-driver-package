@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2022 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_lvd_rx_hw.c
@@ -38,9 +38,12 @@
 *                                    Fixed Bit Operation on LVD1CR0, LVD2CR0.
 *                                    Added macro LVD_GROUP_INT_ICUD.
 *              : 31.03.2019 3.70     Added support RX671.
-*                                   Added macro LVD_GROUP_INT_ICUE.
+*                                    Added macro LVD_GROUP_INT_ICUE.
 *              : 31.03.2022 4.10     Added support RX660.
-*                                   Added macro LVD_GROUP_INT_ICUF.
+*                                    Added macro LVD_GROUP_INT_ICUF.
+*              : 31.03.2023 4.40     Added support RX26T.
+*                                    Added macro LVD_GROUP_INT_ICUG.
+*                                    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -313,7 +316,7 @@ lvd_err_t lvd_hw_check_param_open(lvd_channel_t ch,
                 result_code = LVD_ERR_INVALID_DATA;
                 goto RETURN_LVD_HW_CHECK_PARAM_OPEN;
             }
-        break;
+            break;
         }
         case LVD_ACTION_MI:
         {
@@ -333,7 +336,7 @@ lvd_err_t lvd_hw_check_param_open(lvd_channel_t ch,
                 result_code = LVD_ERR_INVALID_FUNC;
                 goto RETURN_LVD_HW_CHECK_PARAM_OPEN;
             }
-        break;
+            break;
         }
         case LVD_ACTION_NMI:
         {
@@ -348,13 +351,13 @@ lvd_err_t lvd_hw_check_param_open(lvd_channel_t ch,
                 result_code = LVD_ERR_INVALID_FUNC;
                 goto RETURN_LVD_HW_CHECK_PARAM_OPEN;
             }
-        break;
+            break;
         }
         default:
         {
             /* do nothing */
             ;
-        break;
+            break;
         }
     }
     
@@ -558,25 +561,25 @@ void lvd_hw_set_trigger(lvd_channel_t ch, lvd_trigger_t trigger)
                 /* Set LVD1IDTSEL */
                 SYSTEM.LVD1CR1.BIT.LVD1IDTSEL = 0;
 
-            break;
+                break;
             }
             case LVD_TRIGGER_FALL:
             {
                 /* Set LVD1IDTSEL */
                 SYSTEM.LVD1CR1.BIT.LVD1IDTSEL = 1;
-            break;
+                break;
             }
             case LVD_TRIGGER_BOTH:
             {
                 /* Set LVD1IDTSEL */
                 SYSTEM.LVD1CR1.BIT.LVD1IDTSEL = 2;
-            break;
+                break;
             }
             default:
             {
                 /* Set LVD1IDTSEL */
                 SYSTEM.LVD1CR1.BIT.LVD1IDTSEL = 1;
-            break;
+                break;
             }
         }
     }
@@ -589,25 +592,25 @@ void lvd_hw_set_trigger(lvd_channel_t ch, lvd_trigger_t trigger)
             {
                 /* Set LVD2IDTSEL */
                 SYSTEM.LVD2CR1.BIT.LVD2IDTSEL = 0;
-            break;
+                break;
             }
             case LVD_TRIGGER_FALL:
             {
                 /* Set LVD2IDTSEL */
                 SYSTEM.LVD2CR1.BIT.LVD2IDTSEL = 1;
-            break;
+                break;
             }
             case LVD_TRIGGER_BOTH:
             {
                 /* Set LVD2IDTSEL */
                 SYSTEM.LVD2CR1.BIT.LVD2IDTSEL = 2;
-            break;
+                break;
             }
             default:
             {
                 /* Set LVD2IDTSEL */
                 SYSTEM.LVD2CR1.BIT.LVD2IDTSEL = 1;
-            break;
+                break;
             }
         }
     }
@@ -629,16 +632,16 @@ void lvd_hw_set_target(lvd_channel_t ch, uint16_t target)
 #ifndef  BSP_MCU_RX23W
     if (LVD_CHANNEL_2 == ch)
     {
-     #if (LVD_ENABLE == LVD_SUPPORT_CMPA_CH2)
-        if (LVD_VDET_TARGET_CMPA == target)
-        {
-            SYSTEM.LVCMPCR.BIT.EXVCCINP2 = 1;
-        }
-        else
-        {
-            SYSTEM.LVCMPCR.BIT.EXVCCINP2 = 0;
-        }
-      #endif
+        #if (LVD_ENABLE == LVD_SUPPORT_CMPA_CH2)
+            if (LVD_VDET_TARGET_CMPA == target)
+            {
+                SYSTEM.LVCMPCR.BIT.EXVCCINP2 = 1;
+            }
+            else
+            {
+                SYSTEM.LVCMPCR.BIT.EXVCCINP2 = 0;
+            }
+        #endif
     }
 #endif
     
@@ -1152,7 +1155,8 @@ void lvd_hw_enable_dfilter(lvd_channel_t ch, bool b_enable_flag)
      (LVD_GROUP_INT_ICUB == LVD_GROUP_INT)||\
      (LVD_GROUP_INT_ICUD == LVD_GROUP_INT)||\
      (LVD_GROUP_INT_ICUE == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUF == LVD_GROUP_INT))
+     (LVD_GROUP_INT_ICUF == LVD_GROUP_INT)||\
+     (LVD_GROUP_INT_ICUG == LVD_GROUP_INT))
 void lvd_hw_enable_mi(lvd_channel_t ch, uint16_t prio, bool b_enable_flag)
 {
     if (LVD_CHANNEL_1 == ch)
@@ -1500,10 +1504,11 @@ void lvd_hw_wait_delay(uint32_t usec)
      (LVD_GROUP_INT_ICUB == LVD_GROUP_INT)||\
      (LVD_GROUP_INT_ICUD == LVD_GROUP_INT)||\
      (LVD_GROUP_INT_ICUE == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUF == LVD_GROUP_INT))
-R_BSP_PRAGMA_STATIC_INTERRUPT(lvd_ch1_isr,VECT(LVD1,LVD1))
+     (LVD_GROUP_INT_ICUF == LVD_GROUP_INT)||\
+     (LVD_GROUP_INT_ICUG == LVD_GROUP_INT))
+R_BSP_PRAGMA_STATIC_INTERRUPT (lvd_ch1_isr, VECT(LVD1, LVD1))
 #elif (LVD_GROUP_INT_ICUb == LVD_GROUP_INT)
-R_BSP_PRAGMA_STATIC_INTERRUPT(lvd_ch1_isr,VECT(LVD,LVD1))
+R_BSP_PRAGMA_STATIC_INTERRUPT (lvd_ch1_isr, VECT(LVD, LVD1))
 #else
     #error "Error! Invalid setting for LVD_GROUP_INT in targets file."
 #endif
@@ -1538,10 +1543,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void lvd_ch1_isr(void)
      (LVD_GROUP_INT_ICUB == LVD_GROUP_INT)||\
      (LVD_GROUP_INT_ICUD == LVD_GROUP_INT)||\
      (LVD_GROUP_INT_ICUE == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUF == LVD_GROUP_INT))
-R_BSP_PRAGMA_STATIC_INTERRUPT(lvd_ch2_isr,VECT(LVD2,LVD2))
-#elif (LVD_GROUP_INT_ICUb ==LVD_GROUP_INT)
-R_BSP_PRAGMA_STATIC_INTERRUPT(lvd_ch2_isr,VECT(LVD,LVD2))
+     (LVD_GROUP_INT_ICUF == LVD_GROUP_INT)||\
+     (LVD_GROUP_INT_ICUG == LVD_GROUP_INT))
+R_BSP_PRAGMA_STATIC_INTERRUPT (lvd_ch2_isr, VECT(LVD2, LVD2))
+#elif (LVD_GROUP_INT_ICUb == LVD_GROUP_INT)
+R_BSP_PRAGMA_STATIC_INTERRUPT (lvd_ch2_isr, VECT(LVD, LVD2))
 #else
     #error "Error! Invalid setting for LVD_GROUP_INT in targets file."
 #endif

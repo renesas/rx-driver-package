@@ -14,11 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2015-2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015-2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_tsip_rx_if.h
- * Version      : 1.16
+ * Version      : 1.18
  * Description  : Interface definition for the r_tsip_rx module.
  *                TSIP means the "Trusted Secure IP" that is Renesas original security IP.
  *                Strong point 1:
@@ -53,6 +53,8 @@
  *         : 22.10.2021 1.14     Added support for TLS1.3
  *         : 31.03.2022 1.15     Added support for TLS1.3(RX72M_RX72N_RX66N)
  *         : 15.09.2022 1.16     Added support for RSA 3k/4k and updated support for TLS1.3
+ *         : 20.01.2023 1.17     Added support for TLS1.3 server
+ *         : 24.05.2023 1.18     Added support for RX26T
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -72,6 +74,7 @@
 #error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
 #endif
 #if (defined BSP_MCU_RX231 || defined BSP_MCU_RX23W) && (BSP_CFG_MCU_PART_VERSION == 0xB)  /* B */
+#elif((defined BSP_MCU_RX26T ) && (BSP_CFG_MCU_PART_VERSION == 0x0))
 #elif defined BSP_MCU_RX23W && BSP_CFG_MCU_PART_VERSION == 0xD  /* D */
 #elif (defined BSP_MCU_RX66T || defined BSP_MCU_RX72T) && ((BSP_CFG_MCU_PART_FUNCTION == 0xE /* E */) || \
     (BSP_CFG_MCU_PART_FUNCTION == 0xF /* F */) || (BSP_CFG_MCU_PART_FUNCTION == 0x10 /* G */))
@@ -84,7 +87,7 @@
 
 /* Version Number of API. */
 #define TSIP_VERSION_MAJOR    (1u)
-#define TSIP_VERSION_MINOR    (16u)
+#define TSIP_VERSION_MINOR    (18u)
 
 /* Various information. */
 #define R_TSIP_SRAM_WORD_SIZE   (20u)
@@ -146,12 +149,10 @@
 #define R_TSIP_RSA_4096_KEY_E_LENGTH_BYTE_SIZE                  (4u)
 #define R_TSIP_RSA_1024_PUBLIC_KEY_MANAGEMENT_INFO1_WORD_SIZE   (4u)
 #define R_TSIP_RSA_1024_PUBLIC_KEY_MANAGEMENT_INFO2_WORD_SIZE   (36u)
-#define R_TSIP_RSA_1024_PRIVATE_KEY_MANAGEMENT_INFO1_WORD_SIZE  (4u)
-#define R_TSIP_RSA_1024_PRIVATE_KEY_MANAGEMENT_INFO2_WORD_SIZE  (68u)
+#define R_TSIP_RSA_1024_PRIVATE_KEY_MANAGEMENT_INFO_WORD_SIZE   (104u)
 #define R_TSIP_RSA_2048_PUBLIC_KEY_MANAGEMENT_INFO1_WORD_SIZE   (4u)
 #define R_TSIP_RSA_2048_PUBLIC_KEY_MANAGEMENT_INFO2_WORD_SIZE   (68u)
-#define R_TSIP_RSA_2048_PRIVATE_KEY_MANAGEMENT_INFO1_WORD_SIZE  (4u)
-#define R_TSIP_RSA_2048_PRIVATE_KEY_MANAGEMENT_INFO2_WORD_SIZE  (132u)
+#define R_TSIP_RSA_2048_PRIVATE_KEY_MANAGEMENT_INFO_WORD_SIZE   (200u)
 #define R_TSIP_RSA_3072_PUBLIC_KEY_MANAGEMENT_INFO1_WORD_SIZE   (4u)
 #define R_TSIP_RSA_3072_PUBLIC_KEY_MANAGEMENT_INFO2_WORD_SIZE   (4u)
 #define R_TSIP_RSA_4096_PUBLIC_KEY_MANAGEMENT_INFO1_WORD_SIZE   (4u)
@@ -230,7 +231,7 @@
 /* TLS1.3 */
 #define R_TSIP_TLS13_SHARED_SECRET_KEY_WORD_SIZE            (16u)
 #define R_TSIP_TLS13_HANDSHAKE_SECRET_KEY_WORD_SIZE         (16u)
-#define R_TSIP_TLS13_SERVER_FINISHED_KEY_WORD_SIZE          (16u)
+#define R_TSIP_TLS13_FINISHED_KEY_WORD_SIZE                 (16u)
 #define R_TSIP_TLS13_MASTER_SECRET_KEY_WORD_SIZE            (12u)
 #define R_TSIP_TLS13_APP_SECRET_KEY_WORD_SIZE               (12u)
 #define R_TSIP_TLS13_PRE_SHARED_KEY_WORD_SIZE               (12u)
@@ -245,11 +246,6 @@
 
 /* Firmware update. */
 #define R_TSIP_FIRMWARE_MAC_BYTE_SIZE           (16u)
-#if defined BSP_MCU_RX231 || defined BSP_MCU_RX23W
-#define R_TSIP_SECURE_BOOT_AREA_TOP             (0xFFFF8000)
-#else
-#define R_TSIP_SECURE_BOOT_AREA_TOP             (0xFFFF0000)
-#endif  /* defined BSP_MCU_RX231 || defined BSP_MCU_RX23W */
 
 /* Secure boot section. */
 #if TSIP_SECURE_BOOT != 0
@@ -377,24 +373,36 @@ typedef enum
     TSIP_KEY_INDEX_TYPE_AES128_FOR_ECDH,
     TSIP_KEY_INDEX_TYPE_AES256_FOR_ECDH,
     TSIP_KEY_INDEX_TYPE_HMAC_SHA256_FOR_ECDH,
-    TSIP_KEY_INDEX_TYPE_TLS13_SHARED_SECRET,
-    TSIP_KEY_INDEX_TYPE_TLS13_SERVER_WRITE,
-    TSIP_KEY_INDEX_TYPE_TLS13_SERVER_FINISHED,
-    TSIP_KEY_INDEX_TYPE_TLS13_CLIENT_WRITE,
-    TSIP_KEY_INDEX_TYPE_TLS13_CLIENT_FINISHED,
-    TSIP_KEY_INDEX_TYPE_TLS13_HANDSHAKE_SECRET,
-    TSIP_KEY_INDEX_TYPE_TLS13_MASTER_SECRET,
-    TSIP_KEY_INDEX_TYPE_TLS13_EARLY_SECRET,
-    TSIP_KEY_INDEX_TYPE_TLS13_APP_TRAFFIC_SECRET,
-    TSIP_KEY_INDEX_TYPE_TLS13_RESUMPTION_MASTER_SECRET,
-    TSIP_KEY_INDEX_TYPE_TLS13_PRE_SHARED_KEY,
-    TSIP_KEY_INDEX_TYPE_TLS13_PSK_BINDER_KEY
+    TSIP_KEY_INDEX_TYPE_TLS13_SHARED_SECRET_FOR_CLIENT,
+    TSIP_KEY_INDEX_TYPE_TLS13_SERVER_WRITE_FOR_CLIENT,
+    TSIP_KEY_INDEX_TYPE_TLS13_SERVER_FINISHED_FOR_CLIENT,
+    TSIP_KEY_INDEX_TYPE_TLS13_CLIENT_WRITE_FOR_CLIENT,
+    TSIP_KEY_INDEX_TYPE_TLS13_CLIENT_FINISHED_FOR_CLIENT,
+    TSIP_KEY_INDEX_TYPE_TLS13_HANDSHAKE_SECRET_FOR_CLIENT,
+    TSIP_KEY_INDEX_TYPE_TLS13_MASTER_SECRET_FOR_CLIENT,
+    TSIP_KEY_INDEX_TYPE_TLS13_EARLY_SECRET_FOR_CLIENT,
+    TSIP_KEY_INDEX_TYPE_TLS13_APP_TRAFFIC_SECRET_FOR_CLIENT,
+    TSIP_KEY_INDEX_TYPE_TLS13_RESUMPTION_MASTER_SECRET_FOR_CLIENT,
+    TSIP_KEY_INDEX_TYPE_TLS13_PRE_SHARED_KEY_FOR_CLIENT,
+    TSIP_KEY_INDEX_TYPE_TLS13_PSK_BINDER_KEY_FOR_CLIENT,
+    TSIP_KEY_INDEX_TYPE_TLS13_SHARED_SECRET_FOR_SERVER,
+    TSIP_KEY_INDEX_TYPE_TLS13_SERVER_WRITE_FOR_SERVER,
+    TSIP_KEY_INDEX_TYPE_TLS13_SERVER_FINISHED_FOR_SERVER,
+    TSIP_KEY_INDEX_TYPE_TLS13_CLIENT_WRITE_FOR_SERVER,
+    TSIP_KEY_INDEX_TYPE_TLS13_CLIENT_FINISHED_FOR_SERVER,
+    TSIP_KEY_INDEX_TYPE_TLS13_HANDSHAKE_SECRET_FOR_SERVER,
+    TSIP_KEY_INDEX_TYPE_TLS13_MASTER_SECRET_FOR_SERVER,
+    TSIP_KEY_INDEX_TYPE_TLS13_EARLY_SECRET_FOR_SERVER,
+    TSIP_KEY_INDEX_TYPE_TLS13_APP_TRAFFIC_SECRET_FOR_SERVER,
+    TSIP_KEY_INDEX_TYPE_TLS13_RESUMPTION_MASTER_SECRET_FOR_SERVER,
+    TSIP_KEY_INDEX_TYPE_TLS13_PRE_SHARED_KEY_FOR_SERVER,
+    TSIP_KEY_INDEX_TYPE_TLS13_PSK_BINDER_KEY_FOR_SERVER
 } TSIP_KEY_INDEX_TYPE;
 
 /* Byte data structure */
 typedef struct tsip_byte_data
 {
-    uint8_t     *pdata;
+    uint8_t    *pdata;
     uint32_t    data_length;
     uint32_t    data_type;
 } tsip_byte_data_t;
@@ -455,13 +463,7 @@ typedef struct tsip_rsa1024_public_key_index
 typedef struct tsip_rsa1024_private_key_index
 {
     uint32_t type;
-    struct
-    {
-        uint32_t    key_management_info1[R_TSIP_RSA_1024_PRIVATE_KEY_MANAGEMENT_INFO1_WORD_SIZE];
-        uint8_t     key_n[R_TSIP_RSA_1024_KEY_N_LENGTH_BYTE_SIZE];    /* plaintext */
-        uint32_t    key_management_info2[R_TSIP_RSA_1024_PRIVATE_KEY_MANAGEMENT_INFO2_WORD_SIZE];
-    }
-    value;
+    uint32_t value[R_TSIP_RSA_1024_PRIVATE_KEY_MANAGEMENT_INFO_WORD_SIZE];
 } tsip_rsa1024_private_key_index_t;
 
 /* RSA 2048bit public key index data structure */
@@ -483,13 +485,7 @@ typedef struct tsip_rsa2048_public_key_index
 typedef struct tsip_rsa2048_private_key_index
 {
     uint32_t type;
-    struct
-    {
-        uint32_t    key_management_info1[R_TSIP_RSA_2048_PRIVATE_KEY_MANAGEMENT_INFO1_WORD_SIZE];
-        uint8_t     key_n[R_TSIP_RSA_2048_KEY_N_LENGTH_BYTE_SIZE];    /* plaintext */
-        uint32_t    key_management_info2[R_TSIP_RSA_2048_PRIVATE_KEY_MANAGEMENT_INFO2_WORD_SIZE];
-    }
-    value;
+    uint32_t value[R_TSIP_RSA_2048_PRIVATE_KEY_MANAGEMENT_INFO_WORD_SIZE];
 } tsip_rsa2048_private_key_index_t;
 
 /* RSA 3072bit public key index data structure */
@@ -608,8 +604,15 @@ typedef struct tsip_tls13_ephemeral_handshake_secret_key_index
 typedef struct tsip_tls13_ephemeral_server_finished_key_index
 {
     uint32_t type;
-    uint32_t value[R_TSIP_TLS13_SERVER_FINISHED_KEY_WORD_SIZE];
+    uint32_t value[R_TSIP_TLS13_FINISHED_KEY_WORD_SIZE];
 } tsip_tls13_ephemeral_server_finished_key_index_t;
+
+/* Ephemeral client finished key index data structure */
+typedef struct tsip_tls13_ephemeral_client_finished_key_index
+{
+    uint32_t type;
+    uint32_t value[R_TSIP_TLS13_FINISHED_KEY_WORD_SIZE];
+} tsip_tls13_ephemeral_client_finished_key_index_t;
 
 /* Ephemeral master secret key index data structure */
 typedef struct tsip_tls13_ephemeral_master_secret_key_index
@@ -1063,6 +1066,14 @@ e_tsip_err_t R_TSIP_RsassaPkcs3072SignatureVerification(tsip_rsa_byte_data_t *si
         tsip_rsa_byte_data_t *message_hash, tsip_rsa3072_public_key_index_t *key_index, uint8_t hash_type);
 e_tsip_err_t R_TSIP_RsassaPkcs4096SignatureVerification(tsip_rsa_byte_data_t *signature,
         tsip_rsa_byte_data_t *message_hash, tsip_rsa4096_public_key_index_t *key_index, uint8_t hash_type);
+e_tsip_err_t R_TSIP_RsassaPss1024SignatureGenerate(tsip_rsa_byte_data_t *message, tsip_rsa_byte_data_t *signature,
+        tsip_rsa1024_private_key_index_t *key_index, uint8_t hash_type);
+e_tsip_err_t R_TSIP_RsassaPss1024SignatureVerification(tsip_rsa_byte_data_t *signature, tsip_rsa_byte_data_t *message,
+        tsip_rsa1024_public_key_index_t *key_index, uint8_t hash_type);
+e_tsip_err_t R_TSIP_RsassaPss2048SignatureGenerate(tsip_rsa_byte_data_t *message_hash,
+        tsip_rsa_byte_data_t *signature, tsip_rsa2048_private_key_index_t *key_index, uint8_t hash_type);
+e_tsip_err_t R_TSIP_RsassaPss2048SignatureVerification(tsip_rsa_byte_data_t *signature,
+        tsip_rsa_byte_data_t *message_hash, tsip_rsa2048_public_key_index_t *key_index, uint8_t hash_type);
 
 e_tsip_err_t R_TSIP_RsaesPkcs1024Encrypt(tsip_rsa_byte_data_t *plain, tsip_rsa_byte_data_t *cipher,
         tsip_rsa1024_public_key_index_t *key_index);
@@ -1111,6 +1122,8 @@ e_tsip_err_t R_TSIP_TlsGeneratePreMasterSecretWithEccP256Key(uint32_t *encrypted
 e_tsip_err_t R_TSIP_TlsServersEphemeralEcdhPublicKeyRetrieves(uint32_t public_key_type, uint8_t *client_random,
         uint8_t *server_random, uint8_t *server_ephemeral_ecdh_public_key, uint8_t *server_key_exchange_signature,
         uint32_t *encrypted_public_key, uint32_t *encrypted_ephemeral_ecdh_public_key);
+e_tsip_err_t R_TSIP_TlsGenerateExtendedMasterSecret(uint32_t select_cipher_suite, uint32_t *tsip_pre_master_secret,
+        uint8_t *digest, uint32_t *extended_master_secret);
 
 e_tsip_err_t R_TSIP_EcdsaP192SignatureGenerate(tsip_ecdsa_byte_data_t *message_hash, tsip_ecdsa_byte_data_t *signature,
         tsip_ecc_private_key_index_t *key_index);
@@ -1145,8 +1158,6 @@ e_tsip_err_t R_TSIP_EcdhP256KeyDerivation(tsip_ecdh_handle_t *handle, tsip_ecdh_
 e_tsip_err_t R_TSIP_EcdheP512KeyAgreement(tsip_aes_key_index_t *key_index, uint8_t *receiver_public_key,
         uint8_t *sender_public_key);
 
-#if (defined BSP_MCU_RX65N || defined BSP_MCU_RX651 || \
-    defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N)
 e_tsip_err_t R_TSIP_GenerateTls13P256EccKeyIndex(tsip_tls13_handle_t * handle, e_tsip_tls13_mode_t mode,
         tsip_tls_p256_ecc_key_index_t * key_index, uint8_t * ephemeral_ecdh_public_key);
 e_tsip_err_t R_TSIP_Tls13GenerateEcdheSharedSecret(e_tsip_tls13_mode_t mode, uint8_t * server_public_key,
@@ -1179,17 +1190,17 @@ e_tsip_err_t R_TSIP_Tls13UpdateApplicationTrafficKey(tsip_tls13_handle_t * handl
         tsip_tls13_ephemeral_app_secret_key_index_t * output_app_secret_key_index,
         tsip_aes_key_index_t * app_write_key_index);
 e_tsip_err_t R_TSIP_Tls13EncryptInit(tsip_tls13_handle_t *handle, e_tsip_tls13_phase_t phase, e_tsip_tls13_mode_t mode,
-        e_tsip_tls13_cipher_suite_t cipher_suite, tsip_aes_key_index_t *client_write_key_index,
-        uint32_t payload_length);
+        e_tsip_tls13_cipher_suite_t cipher_suite, tsip_aes_key_index_t *key_index, uint32_t payload_length);
 e_tsip_err_t R_TSIP_Tls13EncryptUpdate(tsip_tls13_handle_t *handle, uint8_t *plain, uint8_t *cipher,
         uint32_t plain_length);
 e_tsip_err_t R_TSIP_Tls13EncryptFinal(tsip_tls13_handle_t *handle, uint8_t *cipher, uint32_t *cipher_length);
 e_tsip_err_t R_TSIP_Tls13DecryptInit(tsip_tls13_handle_t *handle, e_tsip_tls13_phase_t phase, e_tsip_tls13_mode_t mode,
-        e_tsip_tls13_cipher_suite_t cipher_suite, tsip_aes_key_index_t *server_write_key_index,
-        uint32_t payload_length);
+        e_tsip_tls13_cipher_suite_t cipher_suite, tsip_aes_key_index_t *key_index, uint32_t payload_length);
 e_tsip_err_t R_TSIP_Tls13DecryptUpdate(tsip_tls13_handle_t *handle, uint8_t *cipher, uint8_t *plain,
         uint32_t cipher_length);
 e_tsip_err_t R_TSIP_Tls13DecryptFinal(tsip_tls13_handle_t *handle, uint8_t *plain, uint32_t *plain_length);
+#if (defined BSP_MCU_RX65N || defined BSP_MCU_RX651 || \
+    defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N)
 e_tsip_err_t R_TSIP_Tls13GenerateResumptionMasterSecret(tsip_tls13_handle_t *handle, e_tsip_tls13_mode_t mode,
         tsip_tls13_ephemeral_master_secret_key_index_t *master_secret_key_index, uint8_t *digest,
         tsip_tls13_ephemeral_res_master_secret_key_index_t *res_master_secret_key_index);
@@ -1206,11 +1217,69 @@ e_tsip_err_t R_TSIP_Tls13GenerateResumptionHandshakeSecret(tsip_tls13_handle_t *
         tsip_tls13_ephemeral_pre_shared_key_index_t * pre_shared_key_index,
         tsip_tls13_ephemeral_shared_secret_key_index_t *shared_secret_key_index,
         tsip_tls13_ephemeral_handshake_secret_key_index_t *handshake_secret_key_index);
+#endif /* (defined BSP_MCU_RX65N || defined BSP_MCU_RX651 || \
+    defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N) */
 e_tsip_err_t R_TSIP_Tls13CertificateVerifyGenerate(uint32_t * key_index,
         e_tsip_tls13_signature_scheme_type_t signature_scheme, uint8_t * digest, uint8_t * certificate_verify,
         uint32_t * certificate_verify_len);
 e_tsip_err_t R_TSIP_Tls13CertificateVerifyVerification(uint32_t * key_index,
         e_tsip_tls13_signature_scheme_type_t signature_scheme, uint8_t * digest, uint8_t * certificate_verify,
+        uint32_t certificate_verify_len);
+
+#if (defined BSP_MCU_RX65N || defined BSP_MCU_RX651 || \
+    defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N)
+e_tsip_err_t R_TSIP_GenerateTls13SVP256EccKeyIndex(tsip_tls13_handle_t *handle, e_tsip_tls13_mode_t mode,
+        tsip_tls_p256_ecc_key_index_t *key_index, uint8_t *ephemeral_ecdh_public_key);
+e_tsip_err_t R_TSIP_Tls13SVGenerateEcdheSharedSecret(e_tsip_tls13_mode_t mode, uint8_t *server_public_key,
+        tsip_tls_p256_ecc_key_index_t *key_index,
+        tsip_tls13_ephemeral_shared_secret_key_index_t *shared_secret_key_index);
+e_tsip_err_t R_TSIP_Tls13SVGenerateHandshakeSecret(
+        tsip_tls13_ephemeral_shared_secret_key_index_t *shared_secret_key_index,
+        tsip_tls13_ephemeral_handshake_secret_key_index_t *handshake_secret_key_index);
+e_tsip_err_t R_TSIP_Tls13SVGenerateServerHandshakeTrafficKey(tsip_tls13_handle_t *handle, e_tsip_tls13_mode_t mode,
+        tsip_tls13_ephemeral_handshake_secret_key_index_t *handshake_secret_key_index, uint8_t *digest,
+        tsip_aes_key_index_t *server_write_key_index, tsip_hmac_sha_key_index_t *server_finished_key_index);
+e_tsip_err_t R_TSIP_Tls13SVClientHandshakeVerification(e_tsip_tls13_mode_t mode,
+        tsip_tls13_ephemeral_client_finished_key_index_t *client_finished_key_index, uint8_t *digest,
+        uint8_t *client_finished);
+e_tsip_err_t R_TSIP_Tls13SVGenerateClientHandshakeTrafficKey(tsip_tls13_handle_t *handle, e_tsip_tls13_mode_t mode,
+        tsip_tls13_ephemeral_handshake_secret_key_index_t *handshake_secret_key_index, uint8_t *digest,
+        tsip_aes_key_index_t *client_write_key_index,
+        tsip_tls13_ephemeral_client_finished_key_index_t *client_finished_key_index);
+e_tsip_err_t R_TSIP_Tls13SVGenerateMasterSecret(tsip_tls13_handle_t *handle, e_tsip_tls13_mode_t mode,
+        tsip_tls13_ephemeral_handshake_secret_key_index_t *handshake_secret_key_index,
+        tsip_tls13_ephemeral_master_secret_key_index_t *master_secret_key_index);
+e_tsip_err_t R_TSIP_Tls13SVGenerateApplicationTrafficKey(tsip_tls13_handle_t *handle, e_tsip_tls13_mode_t mode,
+        tsip_tls13_ephemeral_master_secret_key_index_t *master_secret_key_index, uint8_t *digest,
+        tsip_tls13_ephemeral_app_secret_key_index_t *server_app_secret_key_index,
+        tsip_tls13_ephemeral_app_secret_key_index_t *client_app_secret_key_index,
+        tsip_aes_key_index_t *server_write_key_index, tsip_aes_key_index_t *client_write_key_index);
+e_tsip_err_t R_TSIP_Tls13SVUpdateApplicationTrafficKey(tsip_tls13_handle_t *handle, e_tsip_tls13_mode_t mode,
+        e_tsip_tls13_update_key_type_t key_type,
+        tsip_tls13_ephemeral_app_secret_key_index_t *input_app_secret_key_index,
+        tsip_tls13_ephemeral_app_secret_key_index_t *output_app_secret_key_index,
+        tsip_aes_key_index_t *app_write_key_index);
+e_tsip_err_t R_TSIP_Tls13SVGenerateResumptionMasterSecret(tsip_tls13_handle_t *handle, e_tsip_tls13_mode_t mode,
+        tsip_tls13_ephemeral_master_secret_key_index_t *master_secret_key_index, uint8_t *digest,
+        tsip_tls13_ephemeral_res_master_secret_key_index_t *res_master_secret_key_index);
+e_tsip_err_t R_TSIP_Tls13SVGeneratePreSharedKey(tsip_tls13_handle_t *handle, e_tsip_tls13_mode_t mode,
+        tsip_tls13_ephemeral_res_master_secret_key_index_t *res_master_secret_key_index, uint8_t *ticket_nonce,
+        uint32_t ticket_nonce_len, tsip_tls13_ephemeral_pre_shared_key_index_t * pre_shared_key_index);
+e_tsip_err_t R_TSIP_Tls13SVGeneratePskBinderKey(tsip_tls13_handle_t *handle,
+        tsip_tls13_ephemeral_pre_shared_key_index_t * pre_shared_key_index,
+        tsip_hmac_sha_key_index_t * psk_binder_key_index);
+e_tsip_err_t R_TSIP_Tls13SVGenerate0RttApplicationWriteKey(tsip_tls13_handle_t *handle,
+        tsip_tls13_ephemeral_pre_shared_key_index_t * pre_shared_key_index,
+        uint8_t *digest, tsip_aes_key_index_t *client_write_key_index);
+e_tsip_err_t R_TSIP_Tls13SVGenerateResumptionHandshakeSecret(tsip_tls13_handle_t *handle, e_tsip_tls13_mode_t mode,
+        tsip_tls13_ephemeral_pre_shared_key_index_t * pre_shared_key_index,
+        tsip_tls13_ephemeral_shared_secret_key_index_t *shared_secret_key_index,
+        tsip_tls13_ephemeral_handshake_secret_key_index_t *handshake_secret_key_index);
+e_tsip_err_t R_TSIP_Tls13SVCertificateVerifyGenerate(uint32_t *key_index,
+        e_tsip_tls13_signature_scheme_type_t signature_scheme, uint8_t *digest, uint8_t *certificate_verify,
+        uint32_t *certificate_verify_len);
+e_tsip_err_t R_TSIP_Tls13SVCertificateVerifyVerification(uint32_t *key_index,
+        e_tsip_tls13_signature_scheme_type_t signature_scheme, uint8_t *digest, uint8_t *certificate_verify,
         uint32_t certificate_verify_len);
 #endif /* (defined BSP_MCU_RX65N || defined BSP_MCU_RX651 || \
     defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N) */
@@ -1218,5 +1287,10 @@ e_tsip_err_t R_TSIP_Tls13CertificateVerifyVerification(uint32_t * key_index,
 #if TSIP_USER_SHA_384_ENABLED != 0
 uint32_t TSIP_USER_SHA_384_FUNCTION(uint8_t *message, uint8_t *digest, uint32_t message_length);
 #endif  /* TSIP_USER_SHA_384_ENABLED != 0 */
+
+#if TSIP_MULTI_THREADING != 0
+void TSIP_MULTI_THREADING_LOCK_FUNCTION(void);
+void TSIP_MULTI_THREADING_UNLOCK_FUNCTION(void);
+#endif  /* TSIP_MULTI_THREADING != 0 */
 
 #endif /* R_TSIP_RX_HEADER_FILE */

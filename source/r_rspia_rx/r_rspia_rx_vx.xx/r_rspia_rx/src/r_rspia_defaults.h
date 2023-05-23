@@ -24,6 +24,9 @@
 * History : DD.MM.YYYY Version  Description
 *         : 31.03.2021 1.00     First Release
 *                               Supported for RX671.
+*         : 15.08.2022 1.30     Added RX26T support.
+*                               Added macro for MRCKS bit default value: RSPIA_SPCR_MRCKS_DEF.
+*                               Fixed to comply GSCE coding standard revision 6.5.0.
 ***********************************************************************************************************************/
 
 #ifndef R_RSPIA_DEFS_H
@@ -35,7 +38,9 @@
 ***********************************************************************************************************************/
 /* RSPIA Control Register (SPCR) */
 #define RSPIA_SPCR_SPE_DEF     (0x00000000) /* 0: RSPIA operation disabled. */
-#define RSPIA_SPCR_RCKS_DEF    (0x00000000) /* 0: MRIOCLK (Adjust with Analog Delay (SPTAR.RTFA[2:0])). */
+#ifdef BSP_MCU_RX26T
+#define RSPIA_SPCR_MRCKS_DEF   (0x00000080) /* 0: Master Receive Clock Select. */
+#endif
 #define RSPIA_SPCR_SPPE_DEF    (0x00000000) /* 0: No parity */
 #define RSPIA_SPCR_SPOE_DEF    (0x00000000) /* 0: Even parity (ignored) */
 #define RSPIA_SPCR_PTE_DEF     (0x00000000) /* 0: Disable parity self diagnostic. */
@@ -53,43 +58,62 @@
 #define RSPIA_SPCR_CMMD_DEF    (0x00000000) /* CMMD[1:0] 00b = Transmit-receive Communications Mode. */
 #define RSPIA_SPCR_MSTR_DEF    (0x40000000) /* 1: Master mode. */
 #define RSPIA_SPCR_SYNDIS_DEF  (0x80000000) /* 1: Synchronizer disable set bit to 1. */
-#define RSPIA_SPCR_DEF         (RSPIA_SPCR_SPE_DEF | RSPIA_SPCR_RCKS_DEF | RSPIA_SPCR_SPPE_DEF | RSPIA_SPCR_SPOE_DEF | \
-                                RSPIA_SPCR_PTE_DEF | RSPIA_SPCR_SCKASE_DEF | RSPIA_SPCR_SCKDDIS_DEF | RSPIA_SPCR_MODFEN_DEF | \
-                                RSPIA_SPCR_SPEIE_DEF | RSPIA_SPCR_SPRIE_DEF | RSPIA_SPCR_SPIIE_DEF | RSPIA_SPCR_RDRIS_DEF | \
-                                RSPIA_SPCR_SPTIE_DEF | RSPIA_SPCR_SPCIE_DEF | RSPIA_SPCR_SPMS_DEF | RSPIA_SPCR_FRFS_DEF | \
-                                RSPIA_SPCR_CMMD_DEF | RSPIA_SPCR_MSTR_DEF | RSPIA_SPCR_SYNDIS_DEF)
+#ifdef BSP_MCU_RX26T
+#define RSPIA_SPCR_DEF     (RSPIA_SPCR_SPE_DEF     | RSPIA_SPCR_MRCKS_DEF  | RSPIA_SPCR_SPPE_DEF   | \
+                            RSPIA_SPCR_SPOE_DEF    | RSPIA_SPCR_PTE_DEF    | RSPIA_SPCR_SCKASE_DEF | \
+                            RSPIA_SPCR_SCKDDIS_DEF | RSPIA_SPCR_MODFEN_DEF | RSPIA_SPCR_SPEIE_DEF  | \
+                            RSPIA_SPCR_SPRIE_DEF   | RSPIA_SPCR_SPIIE_DEF  | RSPIA_SPCR_RDRIS_DEF  | \
+                            RSPIA_SPCR_SPTIE_DEF   | RSPIA_SPCR_SPCIE_DEF  | RSPIA_SPCR_SPMS_DEF   | \
+                            RSPIA_SPCR_FRFS_DEF    | RSPIA_SPCR_CMMD_DEF   | RSPIA_SPCR_MSTR_DEF   | \
+                            RSPIA_SPCR_SYNDIS_DEF)
+#else
+#define RSPIA_SPCR_DEF     (RSPIA_SPCR_SPE_DEF    | RSPIA_SPCR_SPPE_DEF   | RSPIA_SPCR_SPOE_DEF    | \
+                            RSPIA_SPCR_PTE_DEF    | RSPIA_SPCR_SCKASE_DEF | RSPIA_SPCR_SCKDDIS_DEF | \
+                            RSPIA_SPCR_MODFEN_DEF | RSPIA_SPCR_SPEIE_DEF  | RSPIA_SPCR_SPRIE_DEF   | \
+                            RSPIA_SPCR_SPIIE_DEF  | RSPIA_SPCR_RDRIS_DEF  | RSPIA_SPCR_SPTIE_DEF   | \
+                            RSPIA_SPCR_SPCIE_DEF  | RSPIA_SPCR_SPMS_DEF   | RSPIA_SPCR_FRFS_DEF    | \
+                            RSPIA_SPCR_CMMD_DEF   | RSPIA_SPCR_MSTR_DEF   | RSPIA_SPCR_SYNDIS_DEF)
+#endif
 
 /* RSPIA Receive-Only Mode Control Register (SPRMCR) */
 /* Only effective In Master Receive only mode */
-#define RSPIA_SPRMCR_RFC_DEF   (0x00)  /* b0 to b4 RFC[4:0] 00001b to 11111b = 1 to 31 frames, The number of received frames. */
+#define RSPIA_SPRMCR_RFC_DEF   (0x00)  /* b0 to b4 RFC[4:0] 00001b to 11111b = 1 to 31 frames,
+                                        * The number of received frames. */
 #define RSPIA_SPRMCR_TERM_DEF  (0x00)  /* 1: Receive End. Reading value is always 0. */
 #define RSPIA_SPRMCR_START_DEF (0x00)  /* 1: Receive Start. Reading value is always 0. */
 #define RSPIA_SPRMCR_DEF       (RSPIA_SPRMCR_RFC_DEF | RSPIA_SPRMCR_TERM_DEF | RSPIA_SPRMCR_START_DEF)
 
 /*RSPIA Slave Select Polarity Register (SSLP) */
-#define RSPIA_SSLP_SSL0P_DEF  (0x00) /* 0 = active low. 1 = active high [Motorola SPI]; 0 = active high. 1 = active low [TI SSP]. */
+#define RSPIA_SSLP_SSL0P_DEF  (0x00) /* 0 = active low. 1 = active high [Motorola SPI];
+                                      * 0 = active high. 1 = active low [TI SSP]. */
 #define RSPIA_SSLP_SSL1P_DEF  (0x00)
 #define RSPIA_SSLP_SSL2P_DEF  (0x00)
 #define RSPIA_SSLP_SSL3P_DEF  (0x00)
-#define RSPIA_SSLP_DEF        (RSPIA_SSLP_SSL0P_DEF | RSPIA_SSLP_SSL1P_DEF | RSPIA_SSLP_SSL2P_DEF | RSPIA_SSLP_SSL3P_DEF)
+
+#define RSPIA_SSLP_DEF     (RSPIA_SSLP_SSL0P_DEF | RSPIA_SSLP_SSL1P_DEF | \
+                            RSPIA_SSLP_SSL2P_DEF | RSPIA_SSLP_SSL3P_DEF)
 
 /* RSPIA Pin Control Register (SPPCR) */
-#define RSPIA_SPPCR_SPLP_DEF  (0x00) /* 0: Normal mode. 1: Loopback mode (reversed transmit data = receive data) */
-#define RSPIA_SPPCR_SPLP2_DEF (0x00) /* 0: Normal mode. 1: Loopback mode (transmit data = receive data) */
+#define RSPIA_SPPCR_SPLP_DEF  (0x00) /* 0: Normal mode. 1: Loop-back mode (reversed transmit data = receive data) */
+#define RSPIA_SPPCR_SPLP2_DEF (0x00) /* 0: Normal mode. 1: Loop-back mode (transmit data = receive data) */
 #define RSPIA_SPPCR_MOIFV_DEF (0x00) /* 0: MOSI pin idles low. 1: MOSI pin idles high. */
 #define RSPIA_SPPCR_MOIFE_DEF (0x00) /* 0: MOSI pin idles at final previous data. 1: MOSI pin idles at MOIFV. */
-#define RSPIA_SPPCR_DEF       (RSPIA_SPPCR_SPLP_DEF | RSPIA_SPPCR_SPLP2_DEF | RSPIA_SPPCR_MOIFV_DEF | RSPIA_SPPCR_MOIFE_DEF)
+
+#define RSPIA_SPPCR_DEF    (RSPIA_SPPCR_SPLP_DEF | RSPIA_SPPCR_SPLP2_DEF | \
+                            RSPIA_SPPCR_MOIFV_DEF | RSPIA_SPPCR_MOIFE_DEF)
 
 /* RSPIA Sequence Control Register (SPSCR) */
 #define RSPIA_SPSCR_DEF  (0x00) /* b0 to b2 SPSLN[2:0] 000b to 111b = SPCMD0 to SPCMD7.
-                                   However, the RSPIA in slave mode reference SPCMD0. */
+                                 * However, the RSPIA in slave mode reference SPCMD0. */
 
 /* RSPIA Data Control Register (SPDCR) */
 #define RSPIA_SPDCR_BYSW_DEF   (0x0000)  /* 0: Byte swapping of SPDR data disabled */
 #define RSPIA_SPDCR_SPRDTD_DEF (0x0000)  /* 0: read SPDR values from the RX buffer. */
 #define RSPIA_SPDCR_SPLW_DEF   (0x0000)  /* 0: Not invert serial data */
 #define RSPIA_SPDCR_SPFC_DEF   (0x0000)  /* b8 to b9 SPFC[1:0] 00b to 11 = 1 to 4 frames */
-#define RSPIA_SPDCR_DEF        (RSPIA_SPDCR_BYSW_DEF | RSPIA_SPDCR_SPRDTD_DEF | RSPIA_SPDCR_SPLW_DEF | RSPIA_SPDCR_SPFC_DEF)
+
+#define RSPIA_SPDCR_DEF    (RSPIA_SPDCR_BYSW_DEF | RSPIA_SPDCR_SPRDTD_DEF | \
+                            RSPIA_SPDCR_SPLW_DEF | RSPIA_SPDCR_SPFC_DEF)
 
 /* RSPIA Clock Delay Register (SPCKD) */
 #define RSPIA_SPCKD_DEF   (0x00)

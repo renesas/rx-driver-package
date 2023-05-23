@@ -27,6 +27,7 @@
 *           31.03.2021 3.80    Updated macro definition enable and disable TXI, RXI, ERI, TEI.
 *           31.03.2022 4.40    Added receive flag when using DTC/DMAC.
 *                              Updated channel variables in struct st_sci_ch_rom.
+*           16.02.2023 4.70    Updated ABCSE in "sync_baud" array.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -51,24 +52,29 @@ Private global variables and functions
 
 /* Asynchronous */
 /* BRR = (PCLK/(divisor * baud)) - 1 */
-/* when abcs=0 & bgdm=0, divisor = 64*pow(2,2n-1) */
-/* when abcs=1 & bgdm=0 OR abcs=0 & bgdm=1, divisor = 32*pow(2,2n-1) */
-/* when abcs=1 & bgdm=1, divisor = 16*pow(2,2n-1) */
+/* when abcs=0 & bgdm=0 & abcse =0, divisor = 64*pow(2,2n-1) */
+/* when abcs=1 & bgdm=0 & abcse =0 OR abcs=0 & bgdm=1 & abcse =0, divisor = 32*pow(2,2n-1) */
+/* when abcs=1 & bgdm=1 & abcse =0, divisor = 16*pow(2,2n-1) */
+/* when abcs=(1 or 0) & bgdm= (1 or 0) & abcse =1, divisor = 12*pow(2,2n-1). This case not available for SCI12 */
 
 #if (SCI_CFG_ASYNC_INCLUDED)
 /* NOTE: diff than SCI async baud table, but should provide same results */
 const baud_divisor_t async_baud[NUM_DIVISORS_ASYNC]=
 {
-    /* divisor result, abcs, bgdm, n */
-    {8,    1, 1, 0},
-    {16,   0, 1, 0},
-    {32,   0, 0, 0},
-    {64,   0, 1, 1},
-    {128,  0, 0, 1},
-    {256,  0, 1, 2},
-    {512,  0, 0, 2},
-    {1024, 0, 1, 3},
-    {2048, 0, 0, 3}
+    /* divisor result, abcs, bgdm, abcse, n */
+    {6,    1, 1, 1, 0},
+    {8,    1, 1, 0, 0},
+    {16,   0, 1, 0, 0},
+    {24,   1, 1, 1, 1},
+    {32,   0, 0, 0, 0},
+    {64,   0, 1, 0, 1},
+    {96,   1, 1, 1, 2},
+    {128,  0, 0, 0, 1},
+    {256,  0, 1, 0, 2},
+    {384,  1, 1, 1, 3},
+    {512,  0, 0, 0, 2},
+    {1024, 0, 1, 0, 3},
+    {2048, 0, 0, 0, 3}
 };
 #endif
 
@@ -80,11 +86,11 @@ const baud_divisor_t async_baud[NUM_DIVISORS_ASYNC]=
 /* NOTE: Identical to SCI sync baud table */
 const baud_divisor_t sync_baud[NUM_DIVISORS_SYNC]=
 {
-    /* divisor result, abcs, bgdm, n */
-    {4,   0, 0, 0},
-    {16,  0, 0, 1},
-    {64,  0, 0, 2},
-    {256, 0, 0, 3}
+    /* divisor result, abcs, bgdm, abcse, n */
+    {4,   0, 0, 0, 0},
+    {16,  0, 0, 0, 1},
+    {64,  0, 0, 0, 2},
+    {256, 0, 0, 0, 3}
 };
 #endif
 
@@ -125,9 +131,8 @@ const sci_ch_rom_t  ch1_rom = {(volatile struct st_sci11 R_BSP_EVENACCESS_SFR *)
                                 , (uint8_t)SCI_CFG_CH1_TX_DMACA_CH_NUM
                                 , (uint8_t)SCI_CFG_CH1_RX_DMACA_CH_NUM
                                 #endif
-                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                                /* Casting to uint8_t type is valid */
                                 , (uint8_t)SCI_CH1
-                                #endif
                                 };
 
 /* channel control block */
@@ -183,9 +188,8 @@ const sci_ch_rom_t  ch5_rom = {(volatile struct st_sci11 R_BSP_EVENACCESS_SFR *)
                                 , (uint8_t)SCI_CFG_CH5_TX_DMACA_CH_NUM
                                 , (uint8_t)SCI_CFG_CH5_RX_DMACA_CH_NUM
                                 #endif
-                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                                /* Casting to uint8_t type is valid */
                                 , (uint8_t)SCI_CH5
-                                #endif
                                 };
 
 /* channel control block */
@@ -242,9 +246,8 @@ const sci_ch_rom_t  ch6_rom = {(volatile struct st_sci11 R_BSP_EVENACCESS_SFR *)
                                 , (uint8_t)SCI_CFG_CH6_TX_DMACA_CH_NUM
                                 , (uint8_t)SCI_CFG_CH6_RX_DMACA_CH_NUM
                                 #endif
-                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                                /* Casting to uint8_t type is valid */
                                 , (uint8_t)SCI_CH6
-                                #endif
                                 };
 
 /* channel control block */
@@ -300,9 +303,8 @@ const sci_ch_rom_t  ch8_rom = {(volatile struct st_sci11 R_BSP_EVENACCESS_SFR *)
                                 , (uint8_t)SCI_CFG_CH8_TX_DMACA_CH_NUM
                                 , (uint8_t)SCI_CFG_CH8_RX_DMACA_CH_NUM
                                 #endif
-                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                                /* Casting to uint8_t type is valid */
                                 , (uint8_t)SCI_CH8
-                                #endif
                                 };
 
 /* channel control block */
@@ -359,9 +361,8 @@ const sci_ch_rom_t  ch9_rom = {(volatile struct st_sci11 R_BSP_EVENACCESS_SFR *)
                                 , (uint8_t)SCI_CFG_CH9_TX_DMACA_CH_NUM
                                 , (uint8_t)SCI_CFG_CH9_RX_DMACA_CH_NUM
                                 #endif
-                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                                /* Casting to uint8_t type is valid */
                                 , (uint8_t)SCI_CH9
-                                #endif
                                 };
 
 /* channel control block */
@@ -417,9 +418,8 @@ const sci_ch_rom_t  ch11_rom = {(volatile struct st_sci11 R_BSP_EVENACCESS_SFR *
                                 , (uint8_t)SCI_CFG_CH11_TX_DMACA_CH_NUM
                                 , (uint8_t)SCI_CFG_CH11_RX_DMACA_CH_NUM
                                 #endif
-                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                                /* Casting to uint8_t type is valid */
                                 , (uint8_t)SCI_CH11
-                                #endif
                                 };
 
 /* channel control block */
@@ -476,9 +476,8 @@ const sci_ch_rom_t  ch12_rom = {(volatile struct st_sci11 R_BSP_EVENACCESS_SFR *
                                 , (uint8_t)SCI_CFG_CH12_TX_DMACA_CH_NUM
                                 , (uint8_t)SCI_CFG_CH12_RX_DMACA_CH_NUM
                                 #endif
-                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                                /* Casting to uint8_t type is valid */
                                 , (uint8_t)SCI_CH12
-                                #endif
                                 };
 
 /* channel control block */

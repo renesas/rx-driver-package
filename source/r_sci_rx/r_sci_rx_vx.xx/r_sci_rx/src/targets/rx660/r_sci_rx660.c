@@ -23,6 +23,7 @@
 * History : DD.MM.YYYY Version Description
 *           31.03.2022 1.00    Initial Release.
 *           27.12.2022 4.60    Updated macro definition enable and disable nested interrupt for TXI, RXI, ERI, TEI.
+*           16.02.2023 4.70    Fixed a bug that return wrong value in sci_init_bit_rate() function.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -297,27 +298,27 @@ int32_t sci_init_bit_rate(sci_hdl_t const  hdl,
     ratio = pclk/baud;
 
     /* WAIT_LOOP */
-    if (SCI_CH12 != hdl->rom->chan)   /* ABCSE bit is not available on CH12 */
+    for(i = 0; i < num_divisors; i++)
     {
-         for(i = 0; i < num_divisors; i++)
+        if (SCI_MODE_ASYNC == hdl->mode)
+        {
+#if (SCI_CFG_ASYNC_INCLUDED)
+   /* ABCSE bit is not available on CH12 */
+   /* Skip divisor result have ABCSE bit*/
+            if (SCI_CH12 == hdl->rom->chan)   
             {
-                /* Casting int16_t to uint32_t is valid. Because clock divisor is positive integer */
-                if (ratio < (uint32_t)(p_baud_info[i].divisor * 256))
+                if(1 == p_baud_info[i].abcse)
                 {
-                    break;
+                    continue;
                 }
             }
-    }
-    else
-    {
-         for(i = 1; i < num_divisors; i++)
-            {
-                /* Casting int16_t to uint32_t is valid. Because clock divisor is positive integer */
-                if (ratio < (uint32_t)(p_baud_info[i].divisor * 256))
-                {
-                    break;
-                }
-            }
+#endif
+        }
+        /* Casting int16_t to uint32_t is valid. Because clock divisor is positive integer */
+        if (ratio < (uint32_t)(p_baud_info[i].divisor * 256))
+        {
+             break;
+        }
     }
 
     /* RETURN IF BRR WILL BE >255 OR LESS THAN 0 */

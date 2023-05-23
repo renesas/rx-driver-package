@@ -28,6 +28,7 @@
         <version>3.01.00</version>
         <version>3.02.00</version>
         <version>3.03.00</version>
+        <version>3.04.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -36,6 +37,8 @@
         <version>4.08.04.201902</version>
         <version>8.03.00.202002</version>
         <version>8.03.00.202102</version>
+        <version>8.03.00.202104</version>
+        <version>8.03.00.202202</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -45,6 +48,7 @@
         <version>4.12.01</version>
         <version>4.14.01</version>
         <version>4.20.01</version>
+        <version>4.20.03</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -62,11 +66,11 @@
         <zipsource>r_memdrv_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>6.11</version>
+            <version>7.21</version>
         </dependency>
         <application>Middle Ware</application>
         <desc>MEMDRV Driver</desc>
-        <details>The MEMDRV FIT module functions as an adapter between an upper layer consisting of serial NOR or NAND flash command control middleware and a lower layer consisting of an RSPI, QSPI, or SCI (SPI mode) device driver.</details>
+        <details>The MEMDRV FIT module functions as an adapter between an upper layer consisting of serial NOR or NAND flash command control middleware and a lower layer consisting of an RSPI, QSPI, SCI (SPI mode) or RSCI (SPI mode) device driver.</details>
         <function>MEMORY DRIVER</function>
         <incdir>r_config</incdir>
         <incdir>r_memdrv_rx</incdir>

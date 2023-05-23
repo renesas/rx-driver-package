@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_autoconnectconfig.c
@@ -47,10 +47,10 @@
 /************************************************************************
  * Function Name  @fn            R_CELLULAR_AutoConnectConfig
  ***********************************************************************/
-e_cellular_err_t R_CELLULAR_AutoConnectConfig(st_cellular_ctrl_t * const p_ctrl, e_cellular_auto_connect_t const type)
+e_cellular_err_t R_CELLULAR_AutoConnectConfig(st_cellular_ctrl_t * const p_ctrl, const e_cellular_auto_connect_t type)
 {
-    uint32_t preemption = 0;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
+    uint32_t                   preemption    = 0;
+    e_cellular_err_t           ret           = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
 
     preemption = cellular_interrupt_disable();

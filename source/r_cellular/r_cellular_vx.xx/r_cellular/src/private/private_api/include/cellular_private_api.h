@@ -14,20 +14,22 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_private_api.h
  * Description  : Configures the driver.
  *********************************************************************************************************************/
 
-#ifndef CELLULAR_PRIVATE_API_H
-#define CELLULAR_PRIVATE_API_H
-
 /**********************************************************************************************************************
  * Includes   <System Includes> , "Project Includes"
  *********************************************************************************************************************/
+#include <stdint.h>
+#include <stdbool.h>
 #include "r_cellular_if.h"
+
+#ifndef CELLULAR_PRIVATE_API_H
+#define CELLULAR_PRIVATE_API_H
 
 /**********************************************************************************************************************
  * Macro definitions
@@ -307,6 +309,20 @@ e_cellular_err_t cellular_module_reset (st_cellular_ctrl_t * const p_ctrl);
 e_cellular_err_t cellular_irq_open (st_cellular_ctrl_t * const p_ctrl);
 
 /**********************************************************************************************
+ * Function Name  @fn            cellular_psm_config
+ * Description    @details       Initializing the external terminal interrupt function.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ *                @param[in]     mode -
+ *                                  PSM mode setting.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully initialized the serial communication function.
+ *                @retval        CELLULAR_ERR_IRQ_OPEN -
+ *                                  IRQ initialization failed.
+ *********************************************************************************************/
+e_cellular_err_t cellular_psm_config (st_cellular_ctrl_t * const p_ctrl, const e_cellular_psm_mode_t mode);
+
+/**********************************************************************************************
  * Function Name  @fn            cellular_irq_close
  * Description    @details       Terminate the external terminal interrupt function.
  * Arguments      @param[in/out] p_ctrl -
@@ -385,6 +401,20 @@ e_cellular_err_t cellular_start_recv_task (st_cellular_ctrl_t * const p_ctrl);
  *                                  Failed to create task.
  ***************************************************************************/
 e_cellular_err_t cellular_start_ring_task (st_cellular_ctrl_t * const p_ctrl);
+
+/****************************************************************************
+ * Function Name  @fn            cellular_start_monitor_task
+ * Description    @details       Start monitor task.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully executed AT command.
+ *                @retval        CELLULAR_ERR_EVENT_GROUP_INIT -
+ *                                  Failed to initialize the event group.
+ *                @retval        CELLULAR_ERR_CREATE_TASK -
+ *                                  Failed to create task.
+ ***************************************************************************/
+e_cellular_err_t cellular_start_monitor_task (st_cellular_ctrl_t * const p_ctrl);
 
 /****************************************************************************
  * Function Name  @fn            cellular_set_atc_number

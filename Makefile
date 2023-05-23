@@ -1,5 +1,5 @@
 RELEASE_TAG_COMMIT_NUMBER_LATEST = 6348e160264907de69de8db3c5f590052022aa0e
-RELEASE_TAG_COMMIT_VERSION_LATEST = 1.37
+RELEASE_TAG_COMMIT_VERSION_LATEST = 1.38
 VERSIONS_FILE_NAME = versions.xml
 
 MODULE_NAME_LIST_LATEST = 	r_aeropoint_rx \
@@ -14,10 +14,9 @@ MODULE_NAME_LIST_LATEST = 	r_aeropoint_rx \
 					r_jpegd_rx r_jpege_rx \
 					r_lcdc_rx r_longq r_lpc_rx r_lpt_rx r_lvd_rx \
 					r_memdrv_rx r_mesh_rx23w r_mmcif_rx r_mpc_rx \
-					r_ob1203_rx \
-					r_pdc_rx r_ptp_light_rx r_ptp_rx \
+					r_ob1203_rx r_pdc_rx r_ptp_light_rx r_ptp_rx \
 					r_qspi_smstr_rx r_qspix_rx \
-					r_riic_rx r_riichs_rx r_rscan_rx r_rsci_rx r_rspi_rx r_rspia_rx r_rtc_rx r_ryz012_rx \
+					r_ri3c_rx r_riic_rx r_riichs_rx r_rscan_rx r_rsci_rx r_rspi_rx r_rspia_rx r_rtc_rx r_ryz012_rx \
 					r_s12ad_rx r_s2_rx r_sci_iic_rx r_sci_rx r_scif_rx r_sdc_sdmem_rx r_sdhi_rx r_sdsi_rx \
 					r_src_api_rx r_ssi_api_rx r_sys_time_rx \
 					r_t4_driver_rx r_t4_rx r_tfat_driver_rx r_tfat_rx r_tsip_rx_lib \

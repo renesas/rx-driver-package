@@ -40,6 +40,8 @@
 *         : 18.05.2021 3.13      Changed vbatt_voltage_stability_wait function.
 *         : 30.11.2021 3.14      Changed the compile switch of _CALL_INIT.
 *         : 28.04,2022 3.15      Added the section of ResetPRG only for CCRX.
+*         : 28.02.2023 3.16      Added the compile switch of R_BSP_INIT_TFU.
+*                                Added the bsp_tfu_init function.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -81,7 +83,7 @@ R_BSP_PRAGMA_STACKSIZE_SI(BSP_CFG_ISTACK_BYTES)
 Macro definitions
 ***********************************************************************************************************************/
 #if BSP_CFG_RTOS_USED == 4 /* Renesas RI600V4 & RI600PX */
-    #define BSP_PRV_PSW_INIT  (0x00000000)	/* Supervisor mode & Disable Interrupt */
+    #define BSP_PRV_PSW_INIT  (0x00000000)    /* Supervisor mode & Disable Interrupt */
 #else /* BSP_CFG_RTOS_USED!=4 */
 /* If the user chooses only 1 stack then the 'U' bit will not be set and the CPU will always use the interrupt stack. */
 #if BSP_CFG_USER_STACK_ENABLE == 1
@@ -242,9 +244,15 @@ R_BSP_POR_FUNCTION(R_BSP_STARTUP_FUNCTION)
     /* Initializes the trigonometric function unit. */
 #ifdef BSP_MCU_TRIGONOMETRIC
 #ifdef __TFU
+#if BSP_MCU_TFU_VERSION == 1
     R_BSP_INIT_TFU();
-#endif
-#endif
+#elif BSP_MCU_TFU_VERSION == 2
+#if BSP_CFG_TFU_INITIALIZE_ENABLE == 1
+    bsp_tfu_init();
+#endif /* BSP_CFG_TFU_INITIALIZE_ENABLE == 1 */
+#endif /* BSP_MCU_TFU_VERSION */
+#endif /* __TFU */
+#endif /* BSP_MCU_TRIGONOMETRIC */
 
 #endif /* defined(__CCRX__), defined(__GNUC__) */
 

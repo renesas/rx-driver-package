@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_power_down.c
@@ -31,6 +31,7 @@
 /**********************************************************************************************************************
  * Macro definitions
  *********************************************************************************************************************/
+#define CELLULAR_SHUTDOWN_LIMIT     (50)
 
 /**********************************************************************************************************************
  * Typedef definitions
@@ -49,14 +50,34 @@
  ***************************************************************************/
 e_cellular_err_t cellular_power_down(st_cellular_ctrl_t * const p_ctrl)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
+    volatile uint8_t           flg           = CELLULAR_FLG_OFF;
+    uint8_t                    cnt           = 0;
+    e_cellular_err_t           ret           = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_ERR_TAKE;
 
     semaphore_ret = cellular_take_semaphore(p_ctrl->at_semaphore);
-
     if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
     {
-        ret = atc_sqnsshdn(p_ctrl);
+        p_ctrl->recv_data = (void *) &flg; //(&uint8_t)->(void *)
+        ret               = atc_sqnsshdn(p_ctrl);
+        if (CELLULAR_SUCCESS == ret)
+        {
+            ret = CELLULAR_ERR_MODULE_COM;
+            do
+            {
+                if (CELLULAR_FLG_SHUTDOWN == flg)
+                {
+                    cnt = CELLULAR_SHUTDOWN_LIMIT;
+                    ret = CELLULAR_SUCCESS;
+                }
+                else
+                {
+                    cellular_delay_task(1000);
+                }
+                cnt++;
+            } while (cnt < CELLULAR_SHUTDOWN_LIMIT);
+        }
+        p_ctrl->recv_data = NULL;
         cellular_give_semaphore(p_ctrl->at_semaphore);
     }
     else

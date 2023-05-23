@@ -23,6 +23,8 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 31.03.2022 1.00    First Release
+*         : 07.04.2023 2.00    Corrected the value of GPIO_PORT_H_PIN_3 for RX660 144-pin, 
+*                                100-pin, 80-pin, 64-pin, and 48-pin.
 ***********************************************************************************************************************/
 #ifndef GPIO_RX660
 #define GPIO_RX660
@@ -260,7 +262,7 @@ typedef enum
     GPIO_PORT_H_PIN_0 = 0x1100,
     GPIO_PORT_H_PIN_1 = 0x1101,
     GPIO_PORT_H_PIN_2 = 0x1102,
-    GPIO_PORT_H_PIN_3 = 0x1102,
+    GPIO_PORT_H_PIN_3 = 0x1103,
 #if (BSP_SUB_CLOCK_OSCILLATOR == 0)
     GPIO_PORT_H_PIN_6 = 0x1106,/* Products with a sub-clock oscillator do not have the PH6 and PH7 pins.*/
     GPIO_PORT_H_PIN_7 = 0x1107,
@@ -421,7 +423,7 @@ typedef enum
     GPIO_PORT_H_PIN_0 = 0x1100,
     GPIO_PORT_H_PIN_1 = 0x1101,
     GPIO_PORT_H_PIN_2 = 0x1102,
-    GPIO_PORT_H_PIN_3 = 0x1102,
+    GPIO_PORT_H_PIN_3 = 0x1103,
 #if (BSP_SUB_CLOCK_OSCILLATOR == 0)
     GPIO_PORT_H_PIN_6 = 0x1106,/* Products with a sub-clock oscillator do not have the PH6 and PH7 pins.*/
     GPIO_PORT_H_PIN_7 = 0x1107,
@@ -545,7 +547,7 @@ typedef enum
     GPIO_PORT_H_PIN_0 = 0x1100,
     GPIO_PORT_H_PIN_1 = 0x1101,
     GPIO_PORT_H_PIN_2 = 0x1102,
-    GPIO_PORT_H_PIN_3 = 0x1102,
+    GPIO_PORT_H_PIN_3 = 0x1103,
 #if (BSP_SUB_CLOCK_OSCILLATOR == 0)
     GPIO_PORT_H_PIN_6 = 0x1106,/* Products with a sub-clock oscillator do not have the PH6 and PH7 pins.*/
     GPIO_PORT_H_PIN_7 = 0x1107,
@@ -651,7 +653,7 @@ typedef enum
     GPIO_PORT_H_PIN_0 = 0x1100,
     GPIO_PORT_H_PIN_1 = 0x1101,
     GPIO_PORT_H_PIN_2 = 0x1102,
-    GPIO_PORT_H_PIN_3 = 0x1102,
+    GPIO_PORT_H_PIN_3 = 0x1103,
 #if (BSP_SUB_CLOCK_OSCILLATOR == 0)
     GPIO_PORT_H_PIN_6 = 0x1106,/* Products with a sub-clock oscillator do not have the PH6 and PH7 pins.*/
     GPIO_PORT_H_PIN_7 = 0x1107,
@@ -733,7 +735,7 @@ typedef enum
     GPIO_PORT_H_PIN_0 = 0x1100,
     GPIO_PORT_H_PIN_1 = 0x1101,
     GPIO_PORT_H_PIN_2 = 0x1102,
-    GPIO_PORT_H_PIN_3 = 0x1102,
+    GPIO_PORT_H_PIN_3 = 0x1103,
     GPIO_PORT_J_PIN_6 = 0x1206,
     GPIO_PORT_J_PIN_7 = 0x1207,
     GPIO_PORT_N_PIN_6 = 0x1606,

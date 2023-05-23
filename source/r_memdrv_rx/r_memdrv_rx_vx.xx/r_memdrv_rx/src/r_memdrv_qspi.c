@@ -19,12 +19,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018(2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018(2023) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * System Name  : MEMDRV software
 * File Name    : r_memdrv_qspi.c
-* Version      : 1.02
+* Version      : 1.05
 * Device       : -
 * Abstract     : IO I/F module
 * Tool-Chain   : -
@@ -39,6 +39,7 @@
 *              : 04.04.2019 1.01     Added support for GNUC and ICCRX.
 *                                    Fixed coding style.
 *              : 22.11.2019 1.02     Modified check driver interface.
+*              : 16.03.2023 1.05     Fixed coding style.
 *************************************************************************************************/
 
 /************************************************************************************************
@@ -181,7 +182,6 @@ memdrv_err_t r_memdrv_qspi_close(uint8_t devno, st_memdrv_info_t * p_memdrv_info
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_OTHER                       ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
@@ -2293,5 +2293,5 @@ memdrv_err_t r_memdrv_qspi_rx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
 } /* End of function r_memdrv_qspi_rx_data() */
 
 #endif  /* ((MEMDRV_CFG_DEV0_INCLUDED == 1) && (MEMDRV_CFG_DEV0_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPI_SMSTR)) || \
-           ((MEMDRV_CFG_DEV1_INCLUDED == 1) && (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPI_SMSTR))
+           ((MEMDRV_CFG_DEV1_INCLUDED == 1) && (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPI_SMSTR)) */
 /* End of File */

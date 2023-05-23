@@ -38,6 +38,9 @@
 *         : 31.03.2021 2.40    Added support RX671.
 *         : 13.09.2021 2.50    Added the demo for RX671.
 *         : 22.11.2021 2.60    Added support for RX660.
+*         : 28.06.2022 2.70    Updated demo projects.
+*         : 15.08.2022 2.80    Added support for RX26T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 #ifndef CMTW_RX_IF_H
 #define CMTW_RX_IF_H
@@ -59,7 +62,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define CMTW_RX_VERSION_MAJOR       (02)
-#define CMTW_RX_VERSION_MINOR       (60)
+#define CMTW_RX_VERSION_MINOR       (80)
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -217,15 +220,15 @@ Exported global variables
 /***********************************************************************************************************************
 Exported global functions (to be accessed by other files)
 ***********************************************************************************************************************/
-cmtw_err_t  R_CMTW_Open(cmtw_channel_t          channel,
+cmtw_err_t  R_CMTW_Open (cmtw_channel_t          channel,
                         cmtw_channel_settings_t *pconfig,
                         void                    (* const pcallback)(void *pdata));
 
-cmtw_err_t  R_CMTW_Control(cmtw_channel_t   channel,
-                           cmtw_cmd_t       cmd);
+cmtw_err_t  R_CMTW_Control (cmtw_channel_t   channel,
+                            cmtw_cmd_t       cmd);
 
-cmtw_err_t  R_CMTW_Close(cmtw_channel_t channel);
+cmtw_err_t  R_CMTW_Close (cmtw_channel_t channel);
 
-uint32_t    R_CMTW_GetVersion(void);
+uint32_t    R_CMTW_GetVersion (void);
 
 #endif  /* CMTW_RX_IF_H */

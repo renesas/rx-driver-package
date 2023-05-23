@@ -14,11 +14,11 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_group.c
-* Description  : This module implements functions common to Flash Types 1, 3, and 4.
+* Description  : This module implements functions common to Flash Types 1, 3, 4, and 5.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * History      : DD.MM.YYYY Version Description
@@ -52,6 +52,8 @@
 *                                   Modified compile condition of the 256k boundary for erase and blank check.
 *                                   Modified minor problem.
 *              : 23.04.2021 4.80    Added support for RX140.
+*              : 24.01.2023 5.00    Added Flash Type 5.
+*                                   Modified the condition of PFRAM section definition.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -68,8 +70,10 @@ Macro definitions
 ***********************************************************************************************************************/
 #if (FLASH_TYPE == 1)
 #define ACCESS_BAD_ADDR_MASK    (0x000003FF)    // low order 10 bits ignored
-#else
+#elif (FLASH_TYPE == 3) || (FLASH_TYPE == 4)
 #define ACCESS_BAD_ADDR_MASK    (0x00001FFF)    // low order 13 bits ignored
+#elif (FLASH_TYPE == 5)
+#define ACCESS_BAD_ADDR_MASK    (0x00000FFF)    // low order 12 bits ignored
 #endif
 
 #if (FLASH_CFG_PARAM_CHECKING_ENABLE == 1)
@@ -422,7 +426,7 @@ static flash_err_t set_non_cached_regs(flash_non_cached_t *p_cfg, flash_non_cach
 
 
 /* FUNCTIONS WHICH MUST BE RUN FROM RAM FOLLOW */
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
+#if (FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_RUN_FROM_ROM == 0)
 #define FLASH_PE_MODE_SECTION    R_BSP_ATTRIB_SECTION_CHANGE(P, FRAM)
 #define FLASH_SECTION_CHANGE_END R_BSP_ATTRIB_SECTION_CHANGE_END
 #else
@@ -883,11 +887,19 @@ flash_err_t set_erase_params(flash_block_address_t block_start_address, uint32_t
 #if FLASH_ERASE_CF_ASCENDING_BLOCK_NUMS
         if (block_start_address >= FLASH_CF_BLOCK_7)
         {
+#if (FLASH_TYPE == FLASH_TYPE_5)
+            g_current_parameters.wait_cnt = WAIT_MAX_ERASE_CF_SMALL;
+#else
             g_current_parameters.wait_cnt = WAIT_MAX_ERASE_CF_8K;
+#endif
         }
         else
         {
+#if (FLASH_TYPE == FLASH_TYPE_5)
+            g_current_parameters.wait_cnt = WAIT_MAX_ERASE_CF_MEDIUM;
+#else
             g_current_parameters.wait_cnt = WAIT_MAX_ERASE_CF_32K;
+#endif
         }
 #endif
 #endif  // code flash enabled
@@ -1418,7 +1430,7 @@ FLASH_PE_MODE_SECTION
 flash_err_t r_flash_control(flash_cmd_t cmd, void *pcfg)
 {
 #if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
-#if (FLASH_HAS_BOOT_SWAP)
+#if (FLASH_HAS_BOOT_SWAP == 1) && (FLASH_IN_DUAL_BANK_MODE == 0)
     uint8_t *pSwapInfo = pcfg;
 #endif
 #if (FLASH_HAS_CF_ACCESS_WINDOW)
@@ -1552,8 +1564,7 @@ flash_err_t r_flash_control(flash_cmd_t cmd, void *pcfg)
     }
 #endif // (FLASH_HAS_NON_CACHED_RANGES == 1)
 
-#if (FLASH_HAS_BOOT_SWAP == 1)
-#if (FLASH_IN_DUAL_BANK_MODE == 0)
+#if (FLASH_HAS_BOOT_SWAP == 1) && (FLASH_IN_DUAL_BANK_MODE == 0)
     else if (FLASH_CMD_SWAPSTATE_GET == cmd)
     {
         /* GET CURRENT STARTUP AREA (NOT NECESSARILY PRESERVED THROUGH RESET */
@@ -1569,7 +1580,6 @@ flash_err_t r_flash_control(flash_cmd_t cmd, void *pcfg)
         FLASH_RETURN_IF_BAD_SAS;
         R_CF_SetCurrentSwapState(*pSwapInfo);
     }
-#endif // (FLASH_IN_DUAL_BANK_MODE == 0)
     else if (FLASH_CMD_SWAPFLAG_GET == cmd)
     {
         /* GET CURRENT STARTUP AREA EFFECTIVE AT RESET */
@@ -1592,7 +1602,7 @@ flash_err_t r_flash_control(flash_cmd_t cmd, void *pcfg)
         flash_release_state();              // Unlock driver
 #endif // (FLASH_CFG_CODE_FLASH_BGO == 0)
     }
-#endif // (FLASH_HAS_BOOT_SWAP == 1)
+#endif // (FLASH_HAS_BOOT_SWAP == 1) && (FLASH_IN_DUAL_BANK_MODE == 0)
 
 #if (FLASH_HAS_CF_ACCESS_WINDOW == 1)
     else if (FLASH_CMD_ACCESSWINDOW_GET == cmd)

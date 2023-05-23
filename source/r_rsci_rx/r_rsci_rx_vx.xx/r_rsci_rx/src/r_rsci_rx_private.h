@@ -25,6 +25,8 @@
 *                              Supported for RX671.
 *           03.12.2021 2.00    Updated new features in Asynchronous mode
 *                              and added support for Manchester mode.
+*           15.08.2022 2.30    Supported for RX26T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 #ifndef RSCI_RX_H
@@ -80,17 +82,22 @@ Macro definitions
     #define RSCI_CFG_FIFO_INCLUDED (1)
 #endif
 
-#if ((RSCI_CFG_CH10_DATA_MATCH_INCLUDED) || (RSCI_CFG_CH11_DATA_MATCH_INCLUDED))
+#if ((RSCI_CFG_CH8_DATA_MATCH_INCLUDED) || (RSCI_CFG_CH9_DATA_MATCH_INCLUDED) || \
+        (RSCI_CFG_CH10_DATA_MATCH_INCLUDED) || (RSCI_CFG_CH11_DATA_MATCH_INCLUDED))
     #define RSCI_CFG_DATA_MATCH_INCLUDED (1)
 #endif
 
-#if ((RSCI_CFG_CH10_RX_DATA_SAMPLING_TIMING_INCLUDED)  ||   \
-     (RSCI_CFG_CH11_RX_DATA_SAMPLING_TIMING_INCLUDED))
+#if ((RSCI_CFG_CH8_RX_DATA_SAMPLING_TIMING_INCLUDED)     ||   \
+        (RSCI_CFG_CH9_RX_DATA_SAMPLING_TIMING_INCLUDED)  ||   \
+        (RSCI_CFG_CH10_RX_DATA_SAMPLING_TIMING_INCLUDED) ||   \
+        (RSCI_CFG_CH11_RX_DATA_SAMPLING_TIMING_INCLUDED))
     #define RSCI_CFG_RX_DATA_SAMPLING_TIMING_INCLUDED (1)
 #endif
 
-#if ((RSCI_CFG_CH10_TX_SIGNAL_TRANSITION_TIMING_INCLUDED)  ||   \
-     (RSCI_CFG_CH11_TX_SIGNAL_TRANSITION_TIMING_INCLUDED))
+#if ((RSCI_CFG_CH8_TX_SIGNAL_TRANSITION_TIMING_INCLUDED)     ||   \
+        (RSCI_CFG_CH9_TX_SIGNAL_TRANSITION_TIMING_INCLUDED)  ||   \
+        (RSCI_CFG_CH10_TX_SIGNAL_TRANSITION_TIMING_INCLUDED) ||   \
+        (RSCI_CFG_CH11_TX_SIGNAL_TRANSITION_TIMING_INCLUDED))
     #define RSCI_CFG_TX_SIGNAL_TRANSITION_TIMING_INCLUDED (1)
 #endif
 
@@ -144,15 +151,15 @@ Typedef definitions
 Private global variables and functions
 ******************************************************************************/
 #if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
-extern void rsci_txi_handler(rsci_hdl_t const hdl);
+extern void rsci_txi_handler (rsci_hdl_t const hdl);
 #endif
 
 #if RSCI_CFG_TEI_INCLUDED
-extern void rsci_tei_handler(rsci_hdl_t const hdl);
+extern void rsci_tei_handler (rsci_hdl_t const hdl);
 #endif
 
-extern void rsci_rxi_handler(rsci_hdl_t const hdl);
+extern void rsci_rxi_handler (rsci_hdl_t const hdl);
 
-extern void rsci_eri_handler(rsci_hdl_t const hdl);
+extern void rsci_eri_handler (rsci_hdl_t const hdl);
 
 #endif /* RSCI_RX_H */

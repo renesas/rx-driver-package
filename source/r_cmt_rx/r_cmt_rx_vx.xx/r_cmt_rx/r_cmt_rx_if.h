@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2022 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_cmt_rx_if.h
@@ -57,6 +57,8 @@
 *         : 31.03.2022 5.20    Added support for RX660.
 *         : 28.06.2022 5.30    Updated demo projects.
 *         : 27.12.2022 5.40    Updated macro definition enable and disable nested interrupt for CMT.
+*         : 31.03.2023 5.50    Added support for RX26T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 #ifndef CMT_HEADER_FILE
 #define CMT_HEADER_FILE
@@ -75,7 +77,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define CMT_RX_VERSION_MAJOR            (5)
-#define CMT_RX_VERSION_MINOR            (40)
+#define CMT_RX_VERSION_MINOR            (50)
 
 /* This define is used with the R_CMT_Control() function if not channel needs to input. */
 #define CMT_RX_NO_CHANNEL               (0xFFFFFFFF)
@@ -119,13 +121,66 @@ typedef enum
 /***********************************************************************************************************************
 Exported global functions (to be accessed by other files)
 ***********************************************************************************************************************/
-bool R_CMT_CreatePeriodic(uint32_t frequency_hz, void (* callback)(void * pdata), uint32_t * channel);
-bool R_CMT_CreatePeriodicAssignChannelPriority(uint32_t frequency_hz, void (* callback)(void * pdata), uint32_t channel, cmt_priority_t priority);
-bool R_CMT_CreateOneShot(uint32_t period_us, void (* callback)(void * pdata), uint32_t * channel);
-bool R_CMT_CreateOneShotAssignChannelPriority(uint32_t period_us, void (* callback)(void * pdata), uint32_t channel, cmt_priority_t priority);
-bool R_CMT_Control(uint32_t channel, cmt_commands_t command, void * pdata);
-bool R_CMT_Stop(uint32_t channel);
-uint32_t R_CMT_GetVersion(void);
+/******************************************************************************
+ * Function Name: R_CMT_CreatePeriodic
+ * Description  : .
+ * Arguments    : frequency_hz
+ *              : pdata
+ *              : channel
+ * Return Value : .
+ *****************************************************************************/
+bool R_CMT_CreatePeriodic (uint32_t frequency_hz, void (* callback)(void * pdata), uint32_t * channel);
+/******************************************************************************
+ * Function Name: R_CMT_CreatePeriodicAssignChannelPriority
+ * Description  : .
+ * Arguments    : frequency_hz
+ *              : pdata
+ *              : channel
+ *              : priority
+ * Return Value : .
+ *****************************************************************************/
+bool R_CMT_CreatePeriodicAssignChannelPriority (uint32_t frequency_hz, void (* callback)(void * pdata), uint32_t channel, cmt_priority_t priority);
+/******************************************************************************
+ * Function Name: R_CMT_CreateOneShot
+ * Description  : .
+ * Arguments    : period_us
+ *              : pdata
+ *              : channel
+ * Return Value : .
+ *****************************************************************************/
+bool R_CMT_CreateOneShot (uint32_t period_us, void (* callback)(void * pdata), uint32_t * channel);
+/******************************************************************************
+ * Function Name: R_CMT_CreateOneShotAssignChannelPriority
+ * Description  : .
+ * Arguments    : period_us
+ *              : pdata
+ *              : channel
+ *              : priority
+ * Return Value : .
+ *****************************************************************************/
+bool R_CMT_CreateOneShotAssignChannelPriority (uint32_t period_us, void (* callback)(void * pdata), uint32_t channel, cmt_priority_t priority);
+/******************************************************************************
+ * Function Name: R_CMT_Control
+ * Description  : .
+ * Arguments    : channel
+ *              : command
+ *              : pdata
+ * Return Value : .
+ *****************************************************************************/
+bool R_CMT_Control (uint32_t channel, cmt_commands_t command, void * pdata);
+/******************************************************************************
+ * Function Name: R_CMT_Stop
+ * Description  : .
+ * Argument     : channel
+ * Return Value : .
+ *****************************************************************************/
+bool R_CMT_Stop (uint32_t channel);
+/******************************************************************************
+ * Function Name: R_CMT_GetVersion
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
+uint32_t R_CMT_GetVersion (void);
 
 #endif /* CMT_HEADER_FILE */
 

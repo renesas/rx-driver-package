@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_getphonenum.c
@@ -49,8 +49,8 @@
  ***********************************************************************/
 e_cellular_err_t R_CELLULAR_GetPhonenum(st_cellular_ctrl_t * const p_ctrl, st_cellular_phonenum_t * const p_phonenum)
 {
-    uint32_t preemption = 0;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
+    uint32_t                   preemption    = 0;
+    e_cellular_err_t           ret           = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
 
     preemption = cellular_interrupt_disable();
@@ -81,7 +81,7 @@ e_cellular_err_t R_CELLULAR_GetPhonenum(st_cellular_ctrl_t * const p_ctrl, st_ce
         if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
         {
             p_ctrl->recv_data = p_phonenum;
-            ret = atc_cnum(p_ctrl);
+            ret               = atc_cnum(p_ctrl);
             p_ctrl->recv_data = NULL;
             cellular_give_semaphore(p_ctrl->at_semaphore);
         }
@@ -89,7 +89,6 @@ e_cellular_err_t R_CELLULAR_GetPhonenum(st_cellular_ctrl_t * const p_ctrl, st_ce
         {
             ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
         }
-
         p_ctrl->running_api_count -= 2;
     }
 

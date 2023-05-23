@@ -53,6 +53,9 @@
 *         : 13.09.2021  3.90    Added RX671 Demo.
 *         : 14.03.2022  4.00    Added support RX66T-48Pin.
 *         : 31.03.2022  4.10    Added support RX660.
+*         : 28.06.2022  4.20    Updated demo projects.
+*         : 15.08.2022  4.30    Added support RX26T.
+*                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 #ifndef R_IRQ_PRIVATE_H_
 #define R_IRQ_PRIVATE_H_
@@ -65,7 +68,7 @@ Macro definitions
 ******************************************************************************/
 /* Version Number of API. */
 #define IRQ_RX_VERSION_MAJOR           (4)
-#define IRQ_RX_VERSION_MINOR           (10)
+#define IRQ_RX_VERSION_MINOR           (30)
 
 /* Bit position of interrupt enable bits in interrupt enable register. */
 #define IRQ_IEN_MASK_IRQ0   (0x01)
@@ -81,8 +84,8 @@ Macro definitions
 #endif
 
 #if defined(VECT_ICU_IRQ15)
-#define IRQ_IEN_MASK_IRQ8   (0x01)
-#define IRQ_IEN_MASK_IRQ9   (0x02)
+#define IRQ_IEN_MASK_IRQ8    (0x01)
+#define IRQ_IEN_MASK_IRQ9    (0x02)
 #define IRQ_IEN_MASK_IRQ10   (0x04)
 #define IRQ_IEN_MASK_IRQ11   (0x08)
 #define IRQ_IEN_MASK_IRQ12   (0x10)
@@ -117,8 +120,8 @@ typedef struct irq_init_block_s
     uint8_t const ier_reg_index;   /* An index to the Interrupt enable register location for this interrupt. */
     uint8_t const filt_clk_div;    /* PCLK divisor setting for the input pin digital filter. */
     uint8_t const filt_enable;     /* Filter enable setting (on or off) for the input pin digital filter. */
-    irq_callback *const pirq_callback; /* pointer to callback function pointer. */
-    uint8_t const *pirq_in_port;    /* Pointer to the I/O port input data register for this IRQ. */
+    irq_callback *const p_irq_callback; /* pointer to callback function pointer. */
+    uint8_t const *p_irq_in_port;    /* Pointer to the I/O port input data register for this IRQ. */
     irq_8bit_mask_t irq_port_bit;  /* I/O port input data bit mask for this IRQ. */
 } irq_init_block_t;
 

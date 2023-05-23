@@ -30,6 +30,7 @@
  *         : 05.03.2021 2.02    Added RX671.
  *         : 31.07.2021 2.03    Added RX140.
  *         : 31.12.2021 2.04    Added RX660.
+ *         : 15.08.2022 2.20    Added RX26T.
  ***********************************************************************************************************************/
 #ifndef R_LPC_RX_PLATFORM_H
     #define R_LPC_RX_PLATFORM_H
@@ -54,6 +55,8 @@
         #include "./targets/rx231/r_lpc_rx231_if.h"
     #elif defined(BSP_MCU_RX23W)
         #include "./targets/rx23w/r_lpc_rx23w_if.h"
+    #elif defined(BSP_MCU_RX26T)
+        #include "./targets/rx26t/r_lpc_rx26t_if.h"
     #elif defined(BSP_MCU_RX64M)
         #include "./targets/rx64m/r_lpc_rx64m_if.h"
     #elif defined(BSP_MCU_RX65N)

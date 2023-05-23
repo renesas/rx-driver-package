@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_apconnect.c
@@ -48,6 +48,8 @@
 /**********************************************************************************************************************
  * Private (static) variables and functions
  *********************************************************************************************************************/
+static e_cellular_err_t cellular_apconnect_config (st_cellular_ctrl_t * const p_ctrl,
+                                                    const st_cellular_ap_cfg_t * const p_ap_cfg);
 static e_cellular_err_t cellular_apconnect (st_cellular_ctrl_t * const p_ctrl,
                                                 const st_cellular_ap_cfg_t * const p_ap_cfg);
 static e_cellular_err_t cellular_sync_check (st_cellular_ctrl_t * const p_ctrl);
@@ -57,8 +59,8 @@ static e_cellular_err_t cellular_sync_check (st_cellular_ctrl_t * const p_ctrl);
  *************************************************************************/
 e_cellular_err_t R_CELLULAR_APConnect(st_cellular_ctrl_t * const p_ctrl, const st_cellular_ap_cfg_t * const p_ap_cfg)
 {
-    uint32_t preemption = 0;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
+    uint32_t                   preemption   = 0;
+    e_cellular_err_t           ret          = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semahore_ret = CELLULAR_SEMAPHORE_SUCCESS;
 
     preemption = cellular_interrupt_disable();
@@ -92,54 +94,13 @@ e_cellular_err_t R_CELLULAR_APConnect(st_cellular_ctrl_t * const p_ctrl, const s
         semahore_ret = cellular_take_semaphore(p_ctrl->at_semaphore);
         if (CELLULAR_SEMAPHORE_SUCCESS == semahore_ret)
         {
-            if (CELLULAR_SUCCESS == ret)
-            {
-                ret = atc_cfun_check(p_ctrl);
-            }
-            if (CELLULAR_SUCCESS == ret)
-            {
-                if (CELLULAR_MODULE_OPERATING_LEVEL4 != p_ctrl->module_status)
-                {
-                    ret = atc_cfun(p_ctrl, CELLULAR_MODULE_OPERATING_LEVEL4);
-                }
-            }
-            if (CELLULAR_SUCCESS == ret)
-            {
-                ret = atc_cgpiaf(p_ctrl);
-            }
-            if (CELLULAR_SUCCESS == ret)
-            {
-                ret = atc_cgdcont(p_ctrl, p_ap_cfg);
-            }
-
-            /* A && (B || C)*/
-            if ((CELLULAR_SUCCESS == ret) &&
-                    (((NULL != p_ap_cfg) && (strlen((char *)p_ap_cfg->ap_user_name)) && //(uint8_t *) -> (char*)
-                    (strlen((char *)p_ap_cfg->ap_pass))) ||                             //(uint8_t *) -> (char*)
-                        ((NULL == p_ap_cfg) &&
-                        (strlen(CELLULAR_STRING_CONVERT(CELLULAR_CFG_AP_USERID))) &&
-                        (strlen(CELLULAR_STRING_CONVERT(CELLULAR_CFG_AP_PASSWORD))))))
-            {
-                ret = atc_cgauth(p_ctrl, p_ap_cfg);
-            }
-
-            if (CELLULAR_SUCCESS == ret)
-            {
-                ret = atc_cfun_check(p_ctrl);
-            }
-
-            if (CELLULAR_SUCCESS == ret)
-            {
-                if (CELLULAR_MODULE_OPERATING_LEVEL1 != p_ctrl->module_status)
-                {
-                    ret = atc_cfun(p_ctrl, CELLULAR_MODULE_OPERATING_LEVEL1);
-                }
-            }
+            ret = cellular_apconnect_config(p_ctrl, p_ap_cfg);
             if (CELLULAR_SUCCESS == ret)
             {
                 ret = cellular_apconnect(p_ctrl, p_ap_cfg);
                 if (CELLULAR_SUCCESS != ret)
                 {
+                    atc_ceer(p_ctrl);
                     atc_cfun(p_ctrl, CELLULAR_MODULE_OPERATING_LEVEL4);
                 }
             }
@@ -149,7 +110,6 @@ e_cellular_err_t R_CELLULAR_APConnect(st_cellular_ctrl_t * const p_ctrl, const s
         {
             ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
         }
-
         p_ctrl->running_api_count -= 2;
     }
 
@@ -160,12 +120,88 @@ e_cellular_err_t R_CELLULAR_APConnect(st_cellular_ctrl_t * const p_ctrl, const s
  *********************************************************************************************************************/
 
 /**************************************************************************
+ * Function Name  @fn            cellular_apconnect_config
+ *************************************************************************/
+static e_cellular_err_t cellular_apconnect_config(st_cellular_ctrl_t * const p_ctrl,
+                                                    const st_cellular_ap_cfg_t * const p_ap_cfg)
+{
+    uint8_t          name_len     = 0;
+    uint8_t          pass_len     = 0;
+    uint8_t          cfg_name_len = 0;
+    uint8_t          cfg_pass_len = 0;
+    e_cellular_err_t ret          = CELLULAR_SUCCESS;
+
+    if (CELLULAR_SUCCESS == ret)
+    {
+        ret = atc_cfun_check(p_ctrl);
+    }
+
+    if (CELLULAR_SUCCESS == ret)
+    {
+        if (CELLULAR_MODULE_OPERATING_LEVEL4 != p_ctrl->module_status)
+        {
+            ret = atc_cfun(p_ctrl, CELLULAR_MODULE_OPERATING_LEVEL4);
+        }
+    }
+
+    if (CELLULAR_SUCCESS == ret)
+    {
+        ret = atc_cgpiaf(p_ctrl);
+    }
+
+    if (CELLULAR_SUCCESS == ret)
+    {
+        ret = atc_cgdcont(p_ctrl, p_ap_cfg);
+    }
+
+    /*(B || C)*/
+    if (CELLULAR_SUCCESS == ret)
+    {
+        if (NULL != p_ap_cfg)
+        {
+            name_len = (uint8_t)strlen((char *)p_ap_cfg->ap_user_name);  //(uint8_t *)->(char *)
+            pass_len = (uint8_t)strlen((char *)p_ap_cfg->ap_pass);       //(uint8_t *)->(char *)
+        }
+        cfg_name_len = (uint8_t)strlen(CELLULAR_STRING_CONVERT(CELLULAR_CFG_AP_USERID));    //cast
+        cfg_pass_len = (uint8_t)strlen(CELLULAR_STRING_CONVERT(CELLULAR_CFG_AP_PASSWORD));  //cast
+
+        if (((NULL != p_ap_cfg) && (0 != name_len) && (0 != pass_len)) ||
+            ((NULL == p_ap_cfg) && (0 != cfg_name_len) && (0 != cfg_pass_len)))
+        {
+            ret = atc_cgauth(p_ctrl, p_ap_cfg);
+        }
+        else
+        {
+            ret = atc_cgauth_reset(p_ctrl);
+        }
+    }
+
+    if (CELLULAR_SUCCESS == ret)
+    {
+        ret = atc_cfun_check(p_ctrl);
+    }
+
+    if (CELLULAR_SUCCESS == ret)
+    {
+        if (CELLULAR_MODULE_OPERATING_LEVEL1 != p_ctrl->module_status)
+        {
+            ret = atc_cfun(p_ctrl, CELLULAR_MODULE_OPERATING_LEVEL1);
+        }
+    }
+
+    return ret;
+}
+/**********************************************************************************************************************
+ * End of function cellular_apconnect_config
+ *********************************************************************************************************************/
+
+/**************************************************************************
  * Function Name  @fn            cellular_apconnect
  *************************************************************************/
 static e_cellular_err_t cellular_apconnect(st_cellular_ctrl_t * const p_ctrl,
                                                 const st_cellular_ap_cfg_t * const p_ap_cfg)
 {
-    uint16_t cgatt_cnt = 0;
+    uint16_t         cgatt_cnt = 0;
     e_cellular_err_t ret;
 
     if (NULL == p_ap_cfg)
@@ -203,7 +239,7 @@ static e_cellular_err_t cellular_apconnect(st_cellular_ctrl_t * const p_ctrl,
 
         if (cgatt_cnt > p_ctrl->ap_connect_retry)
         {
-            ret = CELLULAR_ERR_MODULE_COM;
+            ret = CELLULAR_ERR_AP_CONNECT_FAILED;
             break;
         }
     }
@@ -219,9 +255,10 @@ static e_cellular_err_t cellular_apconnect(st_cellular_ctrl_t * const p_ctrl,
  *************************************************************************/
 static e_cellular_err_t cellular_sync_check(st_cellular_ctrl_t * const p_ctrl)
 {
-    uint8_t count = 0;
-    uint8_t pdpaddr[70] = {0};
-    e_cellular_err_t ret = CELLULAR_ERR_MODULE_TIMEOUT;
+    uint8_t          count                               = 0;
+    uint8_t          pdpaddr[CELLULAR_PDP_ADDR_LENGTH+1] = {0};
+    e_cellular_err_t ret                                 = CELLULAR_ERR_MODULE_TIMEOUT;
+
     st_cellular_datetime_t datetime = {0};
 
     p_ctrl->recv_data = &datetime;
@@ -229,9 +266,8 @@ static e_cellular_err_t cellular_sync_check(st_cellular_ctrl_t * const p_ctrl)
     while (count < CELLULAR_SYNC_RETRY)
     {
         ret = atc_cclk_check(p_ctrl);
-
-        if ((CELLULAR_INIT_YEAR != datetime.year) ||
-                (CELLULAR_INIT_MONTH != datetime.month) || (CELLULAR_INIT_DAY != datetime.day))
+        if ((CELLULAR_INIT_YEAR  != datetime.year) ||
+            (CELLULAR_INIT_MONTH != datetime.month) || (CELLULAR_INIT_DAY != datetime.day))
         {
             ret = CELLULAR_SUCCESS;
             break;
@@ -243,19 +279,17 @@ static e_cellular_err_t cellular_sync_check(st_cellular_ctrl_t * const p_ctrl)
         }
     }
 
-    p_ctrl->recv_data = NULL;
-
-
     if (CELLULAR_SUCCESS == ret)
     {
         p_ctrl->recv_data = pdpaddr;
-        ret = atc_cgpaddr(p_ctrl);
+        ret               = atc_cgpaddr(p_ctrl);
         if (CELLULAR_SUCCESS == ret)
         {
             cellular_getpdpaddr(p_ctrl, &p_ctrl->pdp_addr);
         }
-        p_ctrl->recv_data = NULL;
     }
+
+    p_ctrl->recv_data = NULL;
 
     return ret;
 }

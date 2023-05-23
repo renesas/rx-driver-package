@@ -73,7 +73,10 @@
  *                                    Modified comment of API function to Doxygen style.
  *              : 30.06.2021 2.48     Modified "riic information" comment.
  *                                    Modified the problem of recursive call.
- *              : 16.12.2022 2.60     Fixed processing error of riic_bsp_calc.
+ *              : 16.12.2022 2.60     Fixed processing error of riic_bps_calc.
+ *              : 31.03.2023 2.70     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *                                    Apply a digital noise filter circuit to the riic_bps_calc function.
+ *                                    Added new macros for SCL rise time and SCL fall time.
  **********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -344,7 +347,7 @@ static const riic_mtx_t gc_riic_mtx_tbl[RIIC_STS_MAX][RIIC_EV_MAX] =
  *            \li Disabling the RIIC interrupts.
  * @note      None
  */
-riic_return_t R_RIIC_Open (riic_info_t * p_riic_info)
+riic_return_t R_RIIC_Open(riic_info_t * p_riic_info)
 {
     bool chk = RIIC_FALSE;
     riic_return_t ret;
@@ -373,7 +376,7 @@ riic_return_t R_RIIC_Open (riic_info_t * p_riic_info)
 
     /* ---- INITIALIZE RIIC INTERNAL STATUS INFORMATION ---- */
     g_riic_ChStatus[p_riic_info->ch_no] = RIIC_NO_INIT;
-    p_riic_info->dev_sts = RIIC_NO_INIT;
+    p_riic_info->dev_sts                = RIIC_NO_INIT;
 
     /* ---- INITIALIZE CHANNEL ---- */
     /* Calls the API function. */
@@ -389,7 +392,7 @@ riic_return_t R_RIIC_Open (riic_info_t * p_riic_info)
  * Return Value : RIIC_SUCCESS                   ; Successful operation
  *              : RIIC_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riic_return_t riic_open (riic_info_t * p_riic_info)
+static riic_return_t riic_open(riic_info_t * p_riic_info)
 {
     riic_return_t ret;
 
@@ -481,7 +484,7 @@ static riic_return_t riic_open (riic_info_t * p_riic_info)
  *               detecting either SCL or SDA line is as in low state.
  * @note      Available settings for each pattern see Section 3 in the application note for details.
  */
-riic_return_t R_RIIC_MasterSend (riic_info_t * p_riic_info)
+riic_return_t R_RIIC_MasterSend(riic_info_t * p_riic_info)
 {
     riic_return_t ret;
 
@@ -519,7 +522,7 @@ riic_return_t R_RIIC_MasterSend (riic_info_t * p_riic_info)
  *              : RIIC_ERR_TMO                   ; Time out error
  *              : RIIC_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riic_return_t riic_master_send (riic_info_t * p_riic_info)
+static riic_return_t riic_master_send(riic_info_t * p_riic_info)
 {
     riic_return_t ret;
     riic_callback callbackfunc = NULL;
@@ -542,7 +545,7 @@ static riic_return_t riic_master_send (riic_info_t * p_riic_info)
     priic_info_m[p_riic_info->ch_no] = p_riic_info;
 
     /* Sets the callback function. */
-    callbackfunc = p_riic_info->callbackfunc;
+    callbackfunc                              = p_riic_info->callbackfunc;
     g_riic_callbackfunc_m[p_riic_info->ch_no] = callbackfunc;
 
     /* Generates the start condition.  */
@@ -610,7 +613,7 @@ static riic_return_t riic_master_send (riic_info_t * p_riic_info)
  *               detecting either SCL or SDA line is as in low state.
  * @note      Available settings for each receive pattern see Section 3 in the application note for details.
  */
-riic_return_t R_RIIC_MasterReceive (riic_info_t * p_riic_info)
+riic_return_t R_RIIC_MasterReceive(riic_info_t * p_riic_info)
 {
     riic_return_t ret;
 
@@ -659,7 +662,7 @@ riic_return_t R_RIIC_MasterReceive (riic_info_t * p_riic_info)
  *              : RIIC_ERR_TMO                   ; Time out error
  *              : RIIC_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riic_return_t riic_master_receive (riic_info_t * p_riic_info)
+static riic_return_t riic_master_receive(riic_info_t * p_riic_info)
 {
     riic_return_t ret;
     riic_callback callbackfunc = NULL;
@@ -682,7 +685,7 @@ static riic_return_t riic_master_receive (riic_info_t * p_riic_info)
     priic_info_m[p_riic_info->ch_no] = p_riic_info;
 
     /* Sets the callback function. */
-    callbackfunc = p_riic_info->callbackfunc;
+    callbackfunc                              = p_riic_info->callbackfunc;
     g_riic_callbackfunc_m[p_riic_info->ch_no] = callbackfunc;
 
     /* Generates the start condition. */
@@ -719,7 +722,7 @@ static riic_return_t riic_master_receive (riic_info_t * p_riic_info)
  *              : RIIC_ERR_TMO                   ; Time out error
  *              : RIIC_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riic_return_t riic_master_send_receive (riic_info_t * p_riic_info)
+static riic_return_t riic_master_send_receive(riic_info_t * p_riic_info)
 {
     riic_return_t ret;
     riic_callback callbackfunc = NULL;
@@ -742,7 +745,7 @@ static riic_return_t riic_master_send_receive (riic_info_t * p_riic_info)
     priic_info_m[p_riic_info->ch_no] = p_riic_info;
 
     /* Sets the callback function. */
-    callbackfunc = p_riic_info->callbackfunc;
+    callbackfunc                              = p_riic_info->callbackfunc;
     g_riic_callbackfunc_m[p_riic_info->ch_no] = callbackfunc;
 
     /* Generates the start condition. */
@@ -810,7 +813,7 @@ static riic_return_t riic_master_send_receive (riic_info_t * p_riic_info)
  *            data receive completed.
  * @note      Available settings for each receive pattern see Section 3 in the application note for details.
  */
-riic_return_t R_RIIC_SlaveTransfer (riic_info_t * p_riic_info)
+riic_return_t R_RIIC_SlaveTransfer(riic_info_t * p_riic_info)
 {
     riic_return_t ret;
 
@@ -851,7 +854,7 @@ riic_return_t R_RIIC_SlaveTransfer (riic_info_t * p_riic_info)
  *              : RIIC_ERR_TMO                   ; Time out error
  *              : RIIC_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riic_return_t riic_slave_transfer (riic_info_t * p_riic_info)
+static riic_return_t riic_slave_transfer(riic_info_t * p_riic_info)
 {
     riic_return_t ret;
     riic_callback callbackfunc = NULL;
@@ -880,7 +883,7 @@ static riic_return_t riic_slave_transfer (riic_info_t * p_riic_info)
     priic_info_s[p_riic_info->ch_no] = p_riic_info;
 
     /* Sets the callback function. */
-    callbackfunc = p_riic_info->callbackfunc;
+    callbackfunc                              = p_riic_info->callbackfunc;
     g_riic_callbackfunc_s[p_riic_info->ch_no] = callbackfunc;
 
     /* ---- Enables IIC bus interrupt enable register. ---- */
@@ -925,7 +928,7 @@ static riic_return_t riic_slave_transfer (riic_info_t * p_riic_info)
  *            device state is "RIIC_ AL", the value is updated to "RIIC_FINISH". \n
  * @note      The state flag allocation see Section 3 in the application note for details.
  */
-riic_return_t R_RIIC_GetStatus (riic_info_t *p_riic_info, riic_mcu_status_t *p_riic_status)
+riic_return_t R_RIIC_GetStatus(riic_info_t *p_riic_info, riic_mcu_status_t *p_riic_status)
 {
     /* ---- CHECK ARGUMENTS ---- */
 #if (1U == RIIC_CFG_PARAM_CHECKING_ENABLE)
@@ -959,7 +962,7 @@ riic_return_t R_RIIC_GetStatus (riic_info_t *p_riic_info, riic_mcu_status_t *p_r
  *                riic_mcu_status_t * p_riic_status ; The address to store the I2C state flag.
  * Return Value : none
  **********************************************************************************************************************/
-static void riic_getstatus (riic_info_t *p_riic_info, riic_mcu_status_t *p_riic_status)
+static void riic_getstatus(riic_info_t *p_riic_info, riic_mcu_status_t *p_riic_status)
 {
     volatile uint8_t uctmp = 0x00;
     volatile riic_mcu_status_t sts_flag;
@@ -1214,7 +1217,7 @@ static void riic_getstatus (riic_info_t *p_riic_info, riic_mcu_status_t *p_riic_
     /* ---- clear flag ---- */
     (*picsr2_reg) &= RIIC_ICSR2_AL_CLR;
     (*picsr2_reg) &= RIIC_ICSR2_NACKF_CLR;
-    uctmp = *picsr2_reg;
+    uctmp          = *picsr2_reg;
 
     if (RIIC_AL == g_riic_ChStatus[p_riic_info->ch_no])
     {
@@ -1247,7 +1250,7 @@ static void riic_getstatus (riic_info_t *p_riic_info, riic_mcu_status_t *p_riic_
  *            In this module, one clock of the SCL can be output by setting the output pattern "RIIC_GEN_SCL_ONESHOT" 
  *            (one-shot output of the SCL clock) and calling R_RIIC_Control().
  */
-riic_return_t R_RIIC_Control (riic_info_t * p_riic_info, uint8_t ctrl_ptn)
+riic_return_t R_RIIC_Control(riic_info_t * p_riic_info, uint8_t ctrl_ptn)
 {
     riic_return_t ret;
 
@@ -1295,7 +1298,7 @@ riic_return_t R_RIIC_Control (riic_info_t * p_riic_info, uint8_t ctrl_ptn)
  *              : RIIC_ERR_AL                    ; Arbitration lost error
  *              : RIIC_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riic_return_t riic_control (riic_info_t * p_riic_info, uint8_t ctrl_ptn)
+static riic_return_t riic_control(riic_info_t * p_riic_info, uint8_t ctrl_ptn)
 {
     volatile riic_return_t ret = RIIC_SUCCESS;
     volatile uint8_t uctmp = 0x00;
@@ -1542,7 +1545,7 @@ static riic_return_t riic_control (riic_info_t * p_riic_info, uint8_t ctrl_ptn)
  *            communication is forcibly terminated, that communication is not guaranteed. \n
  * @note      None
  */
-riic_return_t R_RIIC_Close (riic_info_t * p_riic_info)
+riic_return_t R_RIIC_Close(riic_info_t * p_riic_info)
 {
     /* ---- CHECK ARGUMENTS ---- */
 #if (1U == RIIC_CFG_PARAM_CHECKING_ENABLE)
@@ -1579,7 +1582,7 @@ riic_return_t R_RIIC_Close (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ;   IIC Information
  * Return Value : none
  **********************************************************************************************************************/
-static void riic_close (riic_info_t * p_riic_info)
+static void riic_close(riic_info_t * p_riic_info)
 {
     /* Updates the channel status. */
     riic_set_ch_status(p_riic_info, RIIC_NO_INIT);
@@ -1606,7 +1609,7 @@ static void riic_close (riic_info_t * p_riic_info)
  *            number. For example, Version 4.25 would be returned as 0x00040019.
  * @note      None
  */
-uint32_t R_RIIC_GetVersion (void)
+uint32_t R_RIIC_GetVersion(void)
 {
     uint32_t const version = (RIIC_VERSION_MAJOR << 16) | RIIC_VERSION_MINOR;
 
@@ -1625,7 +1628,7 @@ uint32_t R_RIIC_GetVersion (void)
  *              : RIIC_ERR_TMO                   ; Time out error
  *              : RIIC_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riic_return_t r_riic_advance (riic_info_t * p_riic_info)
+static riic_return_t r_riic_advance(riic_info_t * p_riic_info)
 {
     riic_return_t ret;
 
@@ -1656,7 +1659,7 @@ static riic_return_t r_riic_advance (riic_info_t * p_riic_info)
  *              : RIIC_ERR_TMO                   ; Time out error
  *              : RIIC_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riic_return_t riic_advance (riic_info_t * p_riic_info)
+static riic_return_t riic_advance(riic_info_t * p_riic_info)
 {
     volatile uint8_t * const picsr2_reg = RIIC_ICSR2_ADR(p_riic_info->ch_no);
     volatile uint8_t * const picier_reg = RIIC_ICIER_ADR(p_riic_info->ch_no);
@@ -1808,13 +1811,13 @@ static riic_return_t riic_advance (riic_info_t * p_riic_info)
                         }
                     }
                 }
-            break;
+                break;
 
             default :
 
                 /* Updates the channel status. */
                 riic_set_ch_status(p_riic_info, RIIC_ERROR);
-            break;
+                break;
         }
     }
 
@@ -1835,7 +1838,7 @@ static riic_return_t riic_advance (riic_info_t * p_riic_info)
  *              : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : Refer to the each calling function.
  **********************************************************************************************************************/
-static riic_return_t riic_func_table (riic_api_event_t event, riic_info_t * p_riic_info)
+static riic_return_t riic_func_table(riic_api_event_t event, riic_info_t * p_riic_info)
 {
     riic_return_t ret;
     riic_return_t (*pFunc) (riic_info_t *);
@@ -1882,7 +1885,7 @@ static riic_return_t riic_func_table (riic_api_event_t event, riic_info_t * p_ri
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : RIIC_SUCCESS                   ; Successful operation, idle state
  **********************************************************************************************************************/
-static riic_return_t riic_init_driver (riic_info_t * p_riic_info)
+static riic_return_t riic_init_driver(riic_info_t * p_riic_info)
 {
     /* Initializes the IIC registers. */
     /* Sets the internal status. */
@@ -1901,7 +1904,7 @@ static riic_return_t riic_init_driver (riic_info_t * p_riic_info)
  * Return Value : RIIC_SUCCESS                   ; Successful operation, communication state
  *              : RIIC_ERR_BUS_BUSY              ; Bus busy error
  **********************************************************************************************************************/
-static riic_return_t riic_generate_start_cond (riic_info_t * p_riic_info)
+static riic_return_t riic_generate_start_cond(riic_info_t * p_riic_info)
 {
     riic_return_t ret;
     bool boolret;
@@ -1932,7 +1935,7 @@ static riic_return_t riic_generate_start_cond (riic_info_t * p_riic_info)
 
         /* Clears ALIE bit. */
         (*picier_reg) &= (~RIIC_ICIER_AL);
-        uctmp = *picier_reg; /* Reads ICIER. */
+        uctmp          = *picier_reg; /* Reads ICIER. */
 
         /* Enables IIC bus interrupt enable register. */
         if (RIIC_MODE_S_READY == riic_api_info[p_riic_info->ch_no].B_Mode)
@@ -1985,7 +1988,7 @@ static riic_return_t riic_generate_start_cond (riic_info_t * p_riic_info)
  * Return Value : RIIC_SUCCESS                   ; Successful operation, communication state
  *              : RIIC_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riic_return_t riic_after_gen_start_cond (riic_info_t * p_riic_info)
+static riic_return_t riic_after_gen_start_cond(riic_info_t * p_riic_info)
 {
     riic_return_t ret = RIIC_SUCCESS;
     uint8_t buf_send_data;
@@ -2071,7 +2074,7 @@ static riic_return_t riic_after_gen_start_cond (riic_info_t * p_riic_info)
                     else
                     {
                         /* Sets a write code. */
-                        buf_send_data = (uint8_t) ((*(p_riic_info->p_slv_adr)) << 1U);
+                        buf_send_data  = (uint8_t) ((*(p_riic_info->p_slv_adr)) << 1U);
                         buf_send_data &= W_CODE;
 
                         /* Sets the internal status. */
@@ -2115,13 +2118,13 @@ static riic_return_t riic_after_gen_start_cond (riic_info_t * p_riic_info)
                         /* Transmits the slave address. */
                         riic_set_sending_data(p_riic_info, &buf_send_data);
                     }
-                break;
+                    break;
 
                     /* Previous status is data transfer completion waiting status. */
                 case RIIC_STS_SEND_DATA_WAIT :
 
                     /* Sets a read code. */
-                    buf_send_data = (uint8_t) ((*(p_riic_info->p_slv_adr)) << 1U);
+                    buf_send_data  = (uint8_t) ((*(p_riic_info->p_slv_adr)) << 1U);
                     buf_send_data |= R_CODE;
 
                     /* Sets the internal status. */
@@ -2133,20 +2136,20 @@ static riic_return_t riic_after_gen_start_cond (riic_info_t * p_riic_info)
                     /* Transmits the slave address. */
                     riic_set_sending_data(p_riic_info, &buf_send_data);
 
-                break;
+                    break;
 
                 default :
 
                     /* None status. */
                     ret = RIIC_ERR_OTHER;
-                break;
+                    break;
             }
         break;
 
         case RIIC_MODE_M_RECEIVE :
 
             /* Sets a read code. */
-            buf_send_data = (uint8_t) ((*(p_riic_info->p_slv_adr)) << 1U);
+            buf_send_data  = (uint8_t) ((*(p_riic_info->p_slv_adr)) << 1U);
             buf_send_data |= R_CODE;
 
             /* Sets the internal status. */
@@ -2187,11 +2190,11 @@ static riic_return_t riic_after_gen_start_cond (riic_info_t * p_riic_info)
             /* Transmits the slave address. */
             riic_set_sending_data(p_riic_info, &buf_send_data);
 
-        break;
+            break;
 
         default :
             ret = RIIC_ERR_OTHER;
-        break;
+            break;
     }
     return ret;
 } /* End of function riic_after_gen_start_cond() */
@@ -2205,7 +2208,7 @@ static riic_return_t riic_after_gen_start_cond (riic_info_t * p_riic_info)
  * Return Value : RIIC_SUCCESS                   ; Successful operation, communication state
  *              : RIIC_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riic_return_t riic_after_send_slvadr (riic_info_t * p_riic_info)
+static riic_return_t riic_after_send_slvadr(riic_info_t * p_riic_info)
 {
     riic_return_t ret = RIIC_SUCCESS;
     volatile uint8_t uctmp = 0x00;
@@ -2289,7 +2292,7 @@ static riic_return_t riic_after_send_slvadr (riic_info_t * p_riic_info)
                 ret = RIIC_ERR_OTHER;
             }
 
-        break;
+            break;
 
         case RIIC_MODE_M_RECEIVE :
 
@@ -2314,7 +2317,7 @@ static riic_return_t riic_after_send_slvadr (riic_info_t * p_riic_info)
             /* Performs dummy read. */
             uctmp = riic_get_receiving_data(p_riic_info);
 
-        break;
+            break;
 
         case RIIC_MODE_M_SEND_RECEIVE :
 
@@ -2338,7 +2341,7 @@ static riic_return_t riic_after_send_slvadr (riic_info_t * p_riic_info)
                     /* Increases the 1st Data buffer pointer. */
                     p_riic_info->p_data1st++;
 
-                break;
+                    break;
 
                 case RIIC_STS_SEND_SLVADR_R_WAIT :
 
@@ -2363,17 +2366,17 @@ static riic_return_t riic_after_send_slvadr (riic_info_t * p_riic_info)
                     /* Performs dummy read. */
                     uctmp = riic_get_receiving_data(p_riic_info);
 
-                break;
+                    break;
 
                 default :
                     ret = RIIC_ERR_OTHER;
-                break;
+                    break;
             }
         break;
 
         default :
             ret = RIIC_ERR_OTHER;
-        break;
+            break;
 
     }
 
@@ -2390,11 +2393,11 @@ static riic_return_t riic_after_send_slvadr (riic_info_t * p_riic_info)
  * Return Value : RIIC_SUCCESS                   ; Successful operation, communication state
  *              : RIIC_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riic_return_t riic_after_receive_slvadr (riic_info_t * p_riic_info)
+static riic_return_t riic_after_receive_slvadr(riic_info_t * p_riic_info)
 {
     volatile uint8_t * const picsr2_reg = RIIC_ICSR2_ADR(p_riic_info->ch_no);
     volatile uint8_t * const piccr2_reg = RIIC_ICCR2_ADR(p_riic_info->ch_no);
-    volatile uint8_t uctmp = 0x00;
+    volatile uint8_t         uctmp      = 0x00;
     uint8_t blank_data[1] =
     { BLANK };
 
@@ -2494,7 +2497,7 @@ static riic_return_t riic_after_receive_slvadr (riic_info_t * p_riic_info)
  * Return Value : RIIC_SUCCESS                   ; Successful operation, communication state
  *              : RIIC_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riic_return_t riic_write_data_sending (riic_info_t * p_riic_info)
+static riic_return_t riic_write_data_sending(riic_info_t * p_riic_info)
 {
     riic_return_t ret = RIIC_SUCCESS;
     uint8_t blank_data[1] =
@@ -2552,7 +2555,7 @@ static riic_return_t riic_write_data_sending (riic_info_t * p_riic_info)
             /* Generates the stop condition. */
             riic_stop_cond_generate(p_riic_info);
 
-        break;
+            break;
 
         case RIIC_MODE_M_SEND_RECEIVE :
 
@@ -2580,7 +2583,7 @@ static riic_return_t riic_write_data_sending (riic_info_t * p_riic_info)
             /* Restarts the condition generation */
             riic_re_start_cond_generate(p_riic_info);
 
-        break;
+            break;
 
         case RIIC_MODE_S_SEND :
 
@@ -2611,11 +2614,11 @@ static riic_return_t riic_write_data_sending (riic_info_t * p_riic_info)
                 riic_set_sending_data(p_riic_info, blank_data);
             }
 
-        break;
+            break;
 
         default :
             ret = RIIC_ERR_OTHER;
-        break;
+            break;
     }
 
     return ret;
@@ -2629,7 +2632,7 @@ static riic_return_t riic_write_data_sending (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : RIIC_SUCCESS                   ; Successful operation, communication state
  **********************************************************************************************************************/
-static riic_return_t riic_read_data_receiving (riic_info_t * p_riic_info)
+static riic_return_t riic_read_data_receiving(riic_info_t * p_riic_info)
 {
     volatile uint8_t uctmp = 0x00;
 
@@ -2696,7 +2699,7 @@ static riic_return_t riic_read_data_receiving (riic_info_t * p_riic_info)
  *              : RIIC_ERR_AL                    ; Arbitration lost error
  *              : RIIC_ERR_TMO                  ; Time out error
  **********************************************************************************************************************/
-static riic_return_t riic_after_dtct_stop_cond (riic_info_t * p_riic_info)
+static riic_return_t riic_after_dtct_stop_cond(riic_info_t * p_riic_info)
 {
     riic_return_t ret = RIIC_SUCCESS;
     bool boolret = RIIC_FALSE;
@@ -2738,7 +2741,7 @@ static riic_return_t riic_after_dtct_stop_cond (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : RIIC_SUCCESS                    ; Arbitration lost error
  **********************************************************************************************************************/
-static riic_return_t riic_arbitration_lost (riic_info_t * p_riic_info)
+static riic_return_t riic_arbitration_lost(riic_info_t * p_riic_info)
 {
     /* Checks the internal mode. */
     /* slave transfer not enable in now */
@@ -2818,7 +2821,7 @@ static riic_return_t riic_arbitration_lost (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : RIIC_SUCCESS                   ; Arbitration lost error
  **********************************************************************************************************************/
-static riic_return_t riic_time_out (riic_info_t * p_riic_info)
+static riic_return_t riic_time_out(riic_info_t * p_riic_info)
 {
     /* Sets the internal status. */
     riic_api_status_set(p_riic_info, RIIC_STS_TMO);
@@ -2833,10 +2836,10 @@ static riic_return_t riic_time_out (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : RIIC_SUCCESS                   ; Successful operation
  **********************************************************************************************************************/
-static riic_return_t riic_nack (riic_info_t * p_riic_info)
+static riic_return_t riic_nack(riic_info_t * p_riic_info)
 {
     volatile uint8_t * const piccr2_reg = RIIC_ICCR2_ADR(p_riic_info->ch_no);
-    volatile uint8_t uctmp = 0x00;
+    volatile uint8_t         uctmp      = 0x00;
 
     /* Sets the internal status. */
     riic_api_status_set(p_riic_info, RIIC_STS_SP_COND_WAIT);
@@ -2876,7 +2879,7 @@ static riic_return_t riic_nack (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : RIIC_SUCCESS                   ; Successful operation, idle state on enable slave transfer
  **********************************************************************************************************************/
-static riic_return_t riic_enable_slave_transfer (riic_info_t * p_riic_info)
+static riic_return_t riic_enable_slave_transfer(riic_info_t * p_riic_info)
 {
     /* Setting the IIC registers. */
     /* Includes I/O register read operation at the end of the following function. */
@@ -2895,7 +2898,7 @@ static riic_return_t riic_enable_slave_transfer (riic_info_t * p_riic_info)
  *              : riic_api_mode_t new_mode  ; New mode
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_api_mode_event_init (riic_info_t * p_riic_info, riic_api_mode_t new_mode)
+static void riic_api_mode_event_init(riic_info_t * p_riic_info, riic_api_mode_t new_mode)
 {
     uint8_t ch_no = p_riic_info->ch_no;
     
@@ -2917,7 +2920,7 @@ static void riic_api_mode_event_init (riic_info_t * p_riic_info, riic_api_mode_t
  *              : riic_api_mode_t new_status    ; New status
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_api_mode_set (riic_info_t * p_riic_info, riic_api_mode_t new_mode)
+static void riic_api_mode_set(riic_info_t * p_riic_info, riic_api_mode_t new_mode)
 {
     uint8_t ch_no = p_riic_info->ch_no;
     
@@ -2936,7 +2939,7 @@ static void riic_api_mode_set (riic_info_t * p_riic_info, riic_api_mode_t new_mo
  *              : riic_api_status_t new_status  ; New status
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_api_status_set (riic_info_t * p_riic_info, riic_api_status_t new_status)
+static void riic_api_status_set(riic_info_t * p_riic_info, riic_api_status_t new_status)
 {
     uint8_t ch_no = p_riic_info->ch_no;
     
@@ -2954,7 +2957,7 @@ static void riic_api_status_set (riic_info_t * p_riic_info, riic_api_status_t ne
  *              : riic_ch_dev_status_t status               ; channel status, device status
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_set_ch_status (riic_info_t * p_riic_info, riic_ch_dev_status_t status)
+static void riic_set_ch_status(riic_info_t * p_riic_info, riic_ch_dev_status_t status)
 {
     /* Sets the channel status. */
     g_riic_ChStatus[p_riic_info->ch_no] = status;
@@ -2975,7 +2978,7 @@ static void riic_set_ch_status (riic_info_t * p_riic_info, riic_ch_dev_status_t 
  *              : RIIC_ERR_TMO                   ; Time out error
  *              : RIIC_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riic_return_t riic_check_chstatus_start (riic_info_t * p_riic_info)
+static riic_return_t riic_check_chstatus_start(riic_info_t * p_riic_info)
 {
     volatile uint8_t * const piccr2_reg = RIIC_ICCR2_ADR(p_riic_info->ch_no);
     riic_return_t ret;
@@ -2988,7 +2991,7 @@ static riic_return_t riic_check_chstatus_start (riic_info_t * p_riic_info)
             /* It is necessary to reinitialize. */
             /* Sets the return value to uninitialized state. */
             ret = RIIC_ERR_NO_INIT;
-        break;
+            break;
 
         case RIIC_IDLE :
         case RIIC_FINISH :
@@ -3025,32 +3028,32 @@ static riic_return_t riic_check_chstatus_start (riic_info_t * p_riic_info)
             {
                 ret = RIIC_ERR_OTHER;
             }
-        break;
+            break;
 
         case RIIC_COMMUNICATION :
 
             /* The device or another device is on communication. */
             /* Sets the return value to communication state. */
             ret = RIIC_ERR_BUS_BUSY;
-        break;
+            break;
 
         case RIIC_TMO :
 
             /* The channel is in error state. */
             /* Sets the return value to time out error state. */
             ret = RIIC_ERR_TMO;
-        break;
+            break;
 
         case RIIC_AL :
 
             /* The channel is in error state. */
             /* Sets the return value to error state. */
             ret = RIIC_ERR_AL;
-        break;
+            break;
 
         default :
             ret = RIIC_ERR_OTHER;
-        break;
+            break;
     }
 
     if (RIIC_MSK_BBSY == ((*piccr2_reg) & RIIC_MSK_BBSY))
@@ -3072,7 +3075,7 @@ static riic_return_t riic_check_chstatus_start (riic_info_t * p_riic_info)
  *              : RIIC_ERR_TMO                   ; Time out error
  *              : RIIC_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riic_return_t riic_check_chstatus_advance (riic_info_t * p_riic_info)
+static riic_return_t riic_check_chstatus_advance(riic_info_t * p_riic_info)
 {
     riic_return_t ret;
 
@@ -3084,7 +3087,7 @@ static riic_return_t riic_check_chstatus_advance (riic_info_t * p_riic_info)
             /* It is necessary to reinitialize. */
             /* Sets the return value to uninitialized state. */
             ret = RIIC_ERR_NO_INIT;
-        break;
+            break;
 
         case RIIC_IDLE :
         case RIIC_FINISH :
@@ -3092,7 +3095,7 @@ static riic_return_t riic_check_chstatus_advance (riic_info_t * p_riic_info)
 
             /* Sets the return value to error state. */
             ret = RIIC_ERR_OTHER;
-        break;
+            break;
 
         case RIIC_COMMUNICATION :
 
@@ -3125,25 +3128,25 @@ static riic_return_t riic_check_chstatus_advance (riic_info_t * p_riic_info)
             {
                 ret = RIIC_ERR_OTHER;
             }
-        break;
+            break;
 
         case RIIC_TMO :
 
             /* The channel is in time out error state. */
             /* Sets the return value to time out error state. */
             ret = RIIC_ERR_TMO;
-        break;
+            break;
 
         case RIIC_AL :
 
             /* The channel is in error state. */
             /* Sets the return value to error state. */
             ret = RIIC_ERR_AL;
-        break;
+            break;
 
         default :
             ret = RIIC_ERR_OTHER;
-        break;
+            break;
     }
 
     return ret;
@@ -3158,7 +3161,7 @@ static riic_return_t riic_check_chstatus_advance (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_enable (riic_info_t * p_riic_info)
+static void riic_enable(riic_info_t * p_riic_info)
 {
     /* Initializes the IIC registers. */
     /* Includes I/O register read operation at the end of the following function. */
@@ -3186,7 +3189,7 @@ static void riic_enable (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_disable (riic_info_t * p_riic_info)
+static void riic_disable(riic_info_t * p_riic_info)
 {
     /* Disables IIC. */
     /* Sets SCLn and SDAn to non-driven state. */
@@ -3213,7 +3216,7 @@ static void riic_disable (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_init_io_register (riic_info_t * p_riic_info)
+static void riic_init_io_register(riic_info_t * p_riic_info)
 {
     volatile uint8_t uctmp = 0x00;
 
@@ -3248,13 +3251,19 @@ static void riic_init_io_register (riic_info_t * p_riic_info)
 
     uctmp = *picser_reg; /* Reads ICSER. */
 
+    /* Initializes ICMR3 registers. */
+    *picmr3_reg = g_riic_icmr3_init[p_riic_info->ch_no];
+
+    /* Initializes ICFER register. */
+    *picfer_reg = g_riic_icfer_init[p_riic_info->ch_no];
+    uctmp = *picfer_reg; /* Reads ICFER. */
+
     /* Sets a transfer clock. */
     /* Includes I/O register read operation at the end of the following function. */
     riic_set_frequency(p_riic_info); /* Sets ICMR1.CKS[2:0] bit, ICBRL and ICBRH registers. */
 
-    /* Initializes ICMR2 and ICMR3 registers. */
+    /* Initializes ICMR2 registers. */
     *picmr2_reg = g_riic_icmr2_init[p_riic_info->ch_no];
-    *picmr3_reg = g_riic_icmr3_init[p_riic_info->ch_no];
 
     /* Disable interrupts each target MCU.  */
     riic_mcu_int_disable(p_riic_info->ch_no);
@@ -3263,9 +3272,6 @@ static void riic_init_io_register (riic_info_t * p_riic_info)
     riic_timeout_counter_clear(p_riic_info->ch_no);
 #endif
 
-    /* Initializes ICFER register. */
-    *picfer_reg = g_riic_icfer_init[p_riic_info->ch_no];
-    uctmp = *picfer_reg; /* Reads ICFER. */
 } /* End of function riic_init_io_register() */
 
 /***********************************************************************************************************************
@@ -3275,7 +3281,7 @@ static void riic_init_io_register (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_slv_addr_match_int_enable (riic_info_t * p_riic_info)
+static void riic_slv_addr_match_int_enable(riic_info_t * p_riic_info)
 {
     volatile uint8_t uctmp = 0x00;
 
@@ -3295,8 +3301,8 @@ static void riic_slv_addr_match_int_enable (riic_info_t * p_riic_info)
     if (1U == g_riic_slv_ad0_format[p_riic_info->ch_no])
     {
         /* 7bit address format setting */
-        *psarl0_reg = g_riic_slv_ad0_val[p_riic_info->ch_no] << 1;
-        *psaru0_reg = 0x00;
+        *psarl0_reg    = g_riic_slv_ad0_val[p_riic_info->ch_no] << 1;
+        *psaru0_reg    = 0x00;
         (*picser_reg) |= RIIC_ICSER_SAR0E_SET;
     }
     else if (2U == g_riic_slv_ad0_format[p_riic_info->ch_no])
@@ -3316,8 +3322,8 @@ static void riic_slv_addr_match_int_enable (riic_info_t * p_riic_info)
     if (1U == g_riic_slv_ad1_format[p_riic_info->ch_no])
     {
         /* 7bit address format setting */
-        *psarl1_reg = (uint8_t) (g_riic_slv_ad1_val[p_riic_info->ch_no] << 1);
-        *psaru1_reg = 0x00;
+        *psarl1_reg    = (uint8_t) (g_riic_slv_ad1_val[p_riic_info->ch_no] << 1);
+        *psaru1_reg    = 0x00;
         (*picser_reg) |= RIIC_ICSER_SAR1E_SET;
     }
     else if (2U == g_riic_slv_ad1_format[p_riic_info->ch_no])
@@ -3337,8 +3343,8 @@ static void riic_slv_addr_match_int_enable (riic_info_t * p_riic_info)
     if (1U == g_riic_slv_ad2_format[p_riic_info->ch_no])
     {
         /* 7bit address format setting */
-        *psarl2_reg = (uint8_t) (g_riic_slv_ad2_val[p_riic_info->ch_no] << 1);
-        *psaru2_reg = 0x00;
+        *psarl2_reg    = (uint8_t) (g_riic_slv_ad2_val[p_riic_info->ch_no] << 1);
+        *psaru2_reg    = 0x00;
         (*picser_reg) |= RIIC_ICSER_SAR2E_SET;
     }
     else if (2 == g_riic_slv_ad2_format[p_riic_info->ch_no])
@@ -3378,7 +3384,7 @@ static void riic_slv_addr_match_int_enable (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_int_enable (riic_info_t * p_riic_info)
+static void riic_int_enable(riic_info_t * p_riic_info)
 {
     /* Clears the interrupt request register. */
     riic_clear_ir_flag(p_riic_info);
@@ -3394,7 +3400,7 @@ static void riic_int_enable (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_int_disable (riic_info_t * p_riic_info)
+static void riic_int_disable(riic_info_t * p_riic_info)
 {
     /* Disable interrupts each target MCU.  */
     riic_mcu_int_disable(p_riic_info->ch_no);
@@ -3412,7 +3418,7 @@ static void riic_int_disable (riic_info_t * p_riic_info)
  : uint8_t        New_icier       ; New ICIER value
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_int_icier_setting (riic_info_t * p_riic_info, uint8_t New_icier)
+static void riic_int_icier_setting(riic_info_t * p_riic_info, uint8_t New_icier)
 {
     /* Setting TMOIE bit of interrupt enable register. */
     riic_mcu_int_icier_setting(p_riic_info->ch_no, New_icier);
@@ -3425,7 +3431,7 @@ static void riic_int_icier_setting (riic_info_t * p_riic_info, uint8_t New_icier
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_set_frequency (riic_info_t * p_riic_info)
+static void riic_set_frequency(riic_info_t * p_riic_info)
 {
     riic_bps_calc(p_riic_info, g_riic_bps[p_riic_info->ch_no]); /* Set BPS */
 } /* End of function riic_set_frequency() */
@@ -3441,7 +3447,7 @@ static void riic_set_frequency (riic_info_t * p_riic_info)
  * Return Value : RIIC_TRUE                      ; Bus ready
  *              : RIIC_FALSE                     ; Bus busy
  **********************************************************************************************************************/
-static bool riic_check_bus_busy (riic_info_t * p_riic_info)
+static bool riic_check_bus_busy(riic_info_t * p_riic_info)
 {
     volatile uint32_t cnt = 0x00000000;
 
@@ -3470,7 +3476,7 @@ static bool riic_check_bus_busy (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_start_cond_generate (riic_info_t * p_riic_info)
+static void riic_start_cond_generate(riic_info_t * p_riic_info)
 {
     volatile uint8_t uctmp = 0x00;
 
@@ -3486,7 +3492,7 @@ static void riic_start_cond_generate (riic_info_t * p_riic_info)
 
     /* Generates a start condition. */
     (*piccr2_reg) |= RIIC_ICCR2_ST; /* Sets ICCR2.ST bit. */
-    uctmp = *piccr2_reg; /* Reads ICCR2. */
+    uctmp          = *piccr2_reg; /* Reads ICCR2. */
 } /* End of function riic_start_cond_generate() */
 
 /***********************************************************************************************************************
@@ -3496,7 +3502,7 @@ static void riic_start_cond_generate (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_re_start_cond_generate (riic_info_t * p_riic_info)
+static void riic_re_start_cond_generate(riic_info_t * p_riic_info)
 {
     volatile uint8_t uctmp = 0x00;
 
@@ -3512,7 +3518,7 @@ static void riic_re_start_cond_generate (riic_info_t * p_riic_info)
 
     /* Generates a restart condition. */
     (*piccr2_reg) |= RIIC_ICCR2_RS; /* Sets ICCR2.RS bit. */
-    uctmp = *piccr2_reg; /* Reads ICCR2. */
+    uctmp          = *piccr2_reg; /* Reads ICCR2. */
 } /* End of function riic_re_start_cond_generate() */
 
 /***********************************************************************************************************************
@@ -3522,7 +3528,7 @@ static void riic_re_start_cond_generate (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_stop_cond_generate (riic_info_t * p_riic_info)
+static void riic_stop_cond_generate(riic_info_t * p_riic_info)
 {
     volatile uint8_t uctmp = 0x00;
 
@@ -3538,7 +3544,7 @@ static void riic_stop_cond_generate (riic_info_t * p_riic_info)
 
     /* Generates a stop condition. */
     (*piccr2_reg) |= RIIC_ICCR2_SP; /* Sets ICCR2.SP bit. */
-    uctmp = *piccr2_reg; /* Reads ICCR2. */
+    uctmp          = *piccr2_reg; /* Reads ICCR2. */
 } /* End of function riic_stop_cond_generate() */
 
 /***********************************************************************************************************************
@@ -3549,7 +3555,7 @@ static void riic_stop_cond_generate (riic_info_t * p_riic_info)
  *              : uint8_t *p_data                ; Transmitted data buffer pointer
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_set_sending_data (riic_info_t * p_riic_info, uint8_t *p_data)
+static void riic_set_sending_data(riic_info_t * p_riic_info, uint8_t *p_data)
 {
     volatile uint8_t uctmp = 0x00;
 
@@ -3570,7 +3576,7 @@ static void riic_set_sending_data (riic_info_t * p_riic_info, uint8_t *p_data)
 
     /* Sets the transmitting data. */
     *picdrt_reg = *p_data; /* Writes data to RIIC in order to transmit. */
-    uctmp = *picdrt_reg; /* Reads ICDRT. */
+    uctmp       = *picdrt_reg; /* Reads ICDRT. */
 } /* End of function riic_set_sending_data() */
 
 /***********************************************************************************************************************
@@ -3580,7 +3586,7 @@ static void riic_set_sending_data (riic_info_t * p_riic_info, uint8_t *p_data)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : Returns received data.
  **********************************************************************************************************************/
-static uint8_t riic_get_receiving_data (riic_info_t * p_riic_info)
+static uint8_t riic_get_receiving_data(riic_info_t * p_riic_info)
 {
     /* Creates the register pointer for the specified RIIC channel. */
     volatile uint8_t * const picdrr_reg = RIIC_ICDRR_ADR(p_riic_info->ch_no);
@@ -3596,7 +3602,7 @@ static uint8_t riic_get_receiving_data (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_receive_wait_setting (riic_info_t * p_riic_info)
+static void riic_receive_wait_setting(riic_info_t * p_riic_info)
 {
     volatile uint8_t uctmp = 0x00;
 
@@ -3605,7 +3611,7 @@ static void riic_receive_wait_setting (riic_info_t * p_riic_info)
 
     /* Sets ICMR3.WAIT bit. */
     (*picmr3_reg) |= RIIC_ICMR3_WAIT_SET;
-    uctmp = *picmr3_reg; /* Reads ICMR3. */
+    uctmp          = *picmr3_reg; /* Reads ICMR3. */
 } /* End of function riic_receive_wait_setting() */
 
 /***********************************************************************************************************************
@@ -3615,7 +3621,7 @@ static void riic_receive_wait_setting (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_receive_pre_end_setting (riic_info_t * p_riic_info)
+static void riic_receive_pre_end_setting(riic_info_t * p_riic_info)
 {
     volatile uint8_t uctmp = 0x00;
 
@@ -3629,7 +3635,7 @@ static void riic_receive_pre_end_setting (riic_info_t * p_riic_info)
     (*picmr3_reg) |= RIIC_ICMR3_ACKWP_SET; /* Modification of the ACKBT bit is enabled.                */
     (*picmr3_reg) |= RIIC_ICMR3_ACKBT_SET; /* A 1 is sent as the acknowledge bit (NACK transmission).  */
     (*picmr3_reg) &= RIIC_ICMR3_ACKWP_CLR; /* Modification of the ACKBT bit is disabled.               */
-    uctmp = *picmr3_reg; /* Reads ICMR3.                                             */
+    uctmp          = *picmr3_reg; /* Reads ICMR3.                                             */
 } /* End of function riic_receive_pre_end_setting() */
 
 /***********************************************************************************************************************
@@ -3639,7 +3645,7 @@ static void riic_receive_pre_end_setting (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_receive_end_setting (riic_info_t * p_riic_info)
+static void riic_receive_end_setting(riic_info_t * p_riic_info)
 {
     volatile uint8_t uctmp = 0x00;
 
@@ -3653,7 +3659,7 @@ static void riic_receive_end_setting (riic_info_t * p_riic_info)
 
     /* Clears ICMR3.WAIT bit. */
     (*picmr3_reg) &= RIIC_ICMR3_WAIT_CLR;
-    uctmp = *picmr3_reg; /* Reads ICMR3. */
+    uctmp          = *picmr3_reg; /* Reads ICMR3. */
 } /* End of function riic_receive_end_setting() */
 
 /***********************************************************************************************************************
@@ -3663,7 +3669,7 @@ static void riic_receive_end_setting (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info     ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_reset_clear (riic_info_t * p_riic_info)
+static void riic_reset_clear(riic_info_t * p_riic_info)
 {
     volatile uint8_t uctmp = 0x00;
 
@@ -3672,7 +3678,7 @@ static void riic_reset_clear (riic_info_t * p_riic_info)
 
     /* Enables RIIC. */
     (*piccr1_reg) &= RIIC_ICCR1_ENABLE; /* Clears ICCR1.IICRST bit. */
-    uctmp = *piccr1_reg; /* Reads ICCR1. */
+    uctmp          = *piccr1_reg; /* Reads ICCR1. */
 } /* End of function riic_reset_clear() */
 
 /***********************************************************************************************************************
@@ -3682,7 +3688,7 @@ static void riic_reset_clear (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_reset_set (riic_info_t * p_riic_info)
+static void riic_reset_set(riic_info_t * p_riic_info)
 {
     volatile uint8_t uctmp = 0x00;
 
@@ -3691,7 +3697,7 @@ static void riic_reset_set (riic_info_t * p_riic_info)
 
     /* Resets RIIC registers. */
     (*piccr1_reg) |= RIIC_ICCR1_RIIC_RESET; /* Sets ICCR1.IICRST bit. */
-    uctmp = *piccr1_reg; /* Reads ICCR1. */
+    uctmp          = *piccr1_reg; /* Reads ICCR1. */
 } /* End of function riic_reset_set() */
 
 /***********************************************************************************************************************
@@ -3701,7 +3707,7 @@ static void riic_reset_set (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_all_reset (riic_info_t * p_riic_info)
+static void riic_all_reset(riic_info_t * p_riic_info)
 {
     volatile uint8_t uctmp = 0x00;
 
@@ -3722,7 +3728,7 @@ static void riic_all_reset (riic_info_t * p_riic_info)
  * Arguments    : riic_info_t * p_riic_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riic_clear_ir_flag (riic_info_t * p_riic_info)
+static void riic_clear_ir_flag(riic_info_t * p_riic_info)
 {
     uint8_t internal_flag = 0x00; /* Determines whether reinitialization is necessary. */
     volatile uint8_t uctmp = 0x00;
@@ -3790,21 +3796,17 @@ static void riic_clear_ir_flag (riic_info_t * p_riic_info)
  * Return Value : RIIC_SUCCESS                   ; Successful operation, communication state
  *              : RIIC_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riic_return_t riic_bps_calc (riic_info_t * p_riic_info, uint16_t kbps)
+static riic_return_t riic_bps_calc(riic_info_t * p_riic_info, uint16_t kbps)
 {
     volatile uint8_t uctmp;
+
     volatile uint8_t * const picmr1_reg = RIIC_ICMR1_ADR(p_riic_info->ch_no);
+    volatile uint8_t * const picmr3_reg = RIIC_ICMR3_ADR(p_riic_info->ch_no);
     volatile uint8_t * const picbrl_reg = RIIC_ICBRL_ADR(p_riic_info->ch_no);
     volatile uint8_t * const picbrh_reg = RIIC_ICBRH_ADR(p_riic_info->ch_no);
+    volatile uint8_t * const picfer_reg = RIIC_ICFER_ADR(p_riic_info->ch_no);
     
     uint8_t uctmp_tmp;
-
-    const double scl100k_up_time = 1000E-9;
-    const double scl100k_down_time = 300E-9;
-    const double scl400k_up_time = 300E-9;
-    const double scl400k_down_time = 300E-9;
-    const double scl1m_up_time = 120E-9;
-    const double scl1m_down_time = 120E-9;
 
     const uint8_t d_cks[RIIC_MAX_DIV] =
     { 1, 2, 4, 8, 16, 32, 64, 128 }; /* divider array of RIIC clock  */
@@ -3822,7 +3824,9 @@ static riic_return_t riic_bps_calc (riic_info_t * p_riic_info, uint16_t kbps)
 
     double scl_up_time;
     double scl_down_time;
+
     volatile uint8_t cnt;
+    uint8_t          nf_replace;
 
     pclk_val = riic_mcu_check_freq(); /* Store pclk frequency */
 
@@ -3830,20 +3834,20 @@ static riic_return_t riic_bps_calc (riic_info_t * p_riic_info, uint16_t kbps)
     if (kbps > RIIC_FAST_SPPED_MAX)
     {
         /* When bps more than 400Kbps[Fast mode plus] */
-        scl_up_time = scl1m_up_time;
-        scl_down_time = scl1m_down_time;
+        scl_up_time   = RIIC_CFG_SCL1M_UP_TIME;
+        scl_down_time = RIIC_CFG_SCL1M_DOWN_TIME;
     }
     else if (kbps > RIIC_STAD_SPPED_MAX)
     {
         /* When bps more than 100Kbps[Fast mode] */
-        scl_up_time = scl400k_up_time;
-        scl_down_time = scl400k_down_time;
+        scl_up_time   = RIIC_CFG_SCL400K_UP_TIME;
+        scl_down_time = RIIC_CFG_SCL400K_DOWN_TIME;
     }
     else
     {
         /* When bps less than 100Kbps[Standard mode] */
-        scl_up_time = scl100k_up_time;
-        scl_down_time = scl100k_down_time;
+        scl_up_time   = RIIC_CFG_SCL100K_UP_TIME;
+        scl_down_time = RIIC_CFG_SCL100K_DOWN_TIME;
     }
 
     /* Calculation for ICBRH and ICBRL registers value */
@@ -3861,9 +3865,9 @@ static riic_return_t riic_bps_calc (riic_info_t * p_riic_info, uint16_t kbps)
         {
             /* Wnen L width less than 0.5us */
             /* Subtract Rise up and down time for SCL from H/L width */
-            L_time = 0.5E-6;
+            L_time  = 0.5E-6;
             bps_tmp = bps;
-            H_time = (((1 / bps_tmp) - L_time) - scl_up_time) - scl_down_time;
+            H_time  = (((1 / bps_tmp) - L_time) - scl_up_time) - scl_down_time;
         }
         else
         {
@@ -3880,9 +3884,9 @@ static riic_return_t riic_bps_calc (riic_info_t * p_riic_info, uint16_t kbps)
         {
             /* Wnen L width less than 1.3us */
             /* Subtract Rise up and down time for SCL from H/L width */
-            L_time = 1.3E-6;
+            L_time  = 1.3E-6;
             bps_tmp = bps;
-            H_time = (((1 / bps_tmp) - L_time) - scl_up_time) - scl_down_time;
+            H_time  = (((1 / bps_tmp) - L_time) - scl_up_time) - scl_down_time;
         }
         else
         {
@@ -3929,22 +3933,41 @@ static riic_return_t riic_bps_calc (riic_info_t * p_riic_info, uint16_t kbps)
         }
 
         calc_val_tmp = calc_val;
-        calc_val = (calc_val_tmp / (d_cks[cnt] / pclk_val));/* Calculattion ICBRL value */
-        calc_val = calc_val + 0.5; /* round off */
+        calc_val     = (calc_val_tmp / (d_cks[cnt] / pclk_val));/* Calculattion ICBRL value */
+        calc_val     = calc_val + 0.5; /* round off */
     }
 
-     /* store ICMR1 value to avoid CKS bit. */
-    uctmp = (uint8_t) ((uint8_t) (*picmr1_reg) & (((~BIT4) & (~BIT5)) & (~BIT6)));
+    /* store ICMR1 value to avoid CKS bit. */
+    uctmp     = (uint8_t) ((uint8_t) (*picmr1_reg) & (((~BIT4) & (~BIT5)) & (~BIT6)));
     uctmp_tmp = uctmp;
 
     *picmr1_reg = (uint8_t) ((uctmp_tmp) | ((cnt - 1) << 4)); /* Set ICMR1.CKS bits.*/
-    *picbrl_reg = (uint8_t) ((((uint8_t) (calc_val - 1) | BIT7) | BIT6) | BIT5); /* Set value to ICBRL register */
+
+    /* Apply noise filter stage  */
+    nf_replace = ((*picmr3_reg) & (0x03)) + 1;
+
+    /* Check if digital noise filter circuit is used */
+    if (((*picfer_reg) & BIT5) == BIT5)
+    {
+        if ((0 < nf_replace) && (((nf_replace + 1) * 2) > calc_val))
+        {
+            calc_val = (nf_replace + 1) * 2;
+        }
+
+        /* Set value to ICBRL register */
+        *picbrl_reg = (uint8_t) ((((uint8_t) (calc_val - 1 - nf_replace) | BIT7) | BIT6) | BIT5);
+    }
+    else
+    {
+        /* Set value to ICBRL register */
+        *picbrl_reg = (uint8_t) ((((uint8_t) (calc_val - 1) | BIT7) | BIT6) | BIT5);
+    }
 
     /*************** Calculation ICBRH value ***********************/
-    calc_val = H_time; /* Set H width */
+    calc_val     = H_time; /* Set H width */
     calc_val_tmp = calc_val;
-    calc_val = (calc_val_tmp / (d_cks[cnt - 1] / pclk_val)); /* Calculattion ICBRH value */
-    calc_val = (uint8_t) (calc_val + 0.5); /* round off */
+    calc_val     = (calc_val_tmp / (d_cks[cnt - 1] / pclk_val)); /* Calculattion ICBRH value */
+    calc_val     = (uint8_t) (calc_val + 0.5); /* round off */
 
     /* If the calculated value is less than 1, it rounded up to 1. */
     if (1 > calc_val)
@@ -3952,8 +3975,22 @@ static riic_return_t riic_bps_calc (riic_info_t * p_riic_info, uint16_t kbps)
         calc_val = 1;
     }
 
-    *picbrh_reg = (uint8_t) ((((uint8_t) (calc_val - 1) | BIT7) | BIT6) | BIT5); /* Set value to ICBRH register */
+    /* Check if digital noise filter circuit is used */
+    if (((*picfer_reg) & BIT5) == BIT5)
+    {
+        if ((0 < nf_replace) && (((nf_replace + 1) * 2) > calc_val))
+        {
+            calc_val = (nf_replace + 1) * 2;
+        }
 
+        /* Set value to ICBRH register */
+        *picbrh_reg = (uint8_t) ((((uint8_t) (calc_val - 1 - nf_replace) | BIT7) | BIT6) | BIT5);
+    }
+    else
+    {
+        /* Set value to ICBRH register */
+        *picbrh_reg = (uint8_t) ((((uint8_t) (calc_val - 1) | BIT7) | BIT6) | BIT5);
+    }
     uctmp = *picbrh_reg; /* dummy read */
 
     return RIIC_SUCCESS;
@@ -3970,7 +4007,7 @@ static riic_return_t riic_bps_calc (riic_info_t * p_riic_info, uint16_t kbps)
  * Arguments    : None
  * Return Value : None
  **********************************************************************************************************************/
-void riic0_eei_sub (void)
+void riic0_eei_sub(void)
 {
     riic_info_t * p_riic_info;
 
@@ -4051,8 +4088,8 @@ void riic0_eei_sub (void)
         /* Prohibits these interrupt. */
         /* After NACK interrupt, these interrupts will occur when they do not stop the following interrupts. */
         RIIC0.ICIER.BIT.TEIE = 0U;
-        RIIC0.ICIER.BIT.TIE = 0U;
-        RIIC0.ICIER.BIT.RIE = 0U;
+        RIIC0.ICIER.BIT.TIE  = 0U;
+        RIIC0.ICIER.BIT.RIE  = 0U;
         /* WAIT_LOOP */
         while (((0U != RIIC0.ICIER.BIT.TEIE) || (0U != RIIC0.ICIER.BIT.TIE)) || (0U != RIIC0.ICIER.BIT.RIE))
         {
@@ -4073,7 +4110,7 @@ void riic0_eei_sub (void)
     {
         /* Disable start condition detection interrupt. */
         /* Clears status flag. */
-        RIIC0.ICIER.BIT.STIE = 0U;
+        RIIC0.ICIER.BIT.STIE  = 0U;
         RIIC0.ICSR2.BIT.START = 0U;
         /* WAIT_LOOP */
         while ((0U != RIIC0.ICSR2.BIT.START) || (0U != RIIC0.ICIER.BIT.STIE))
@@ -4093,7 +4130,7 @@ void riic0_eei_sub (void)
 
             /* Master mode data */
             p_riic_info = priic_info_m[0];
-        break;
+            break;
 
         case RIIC_MODE_S_READY :
         case RIIC_MODE_S_SEND :
@@ -4101,13 +4138,13 @@ void riic0_eei_sub (void)
 
             /* Slave mode data */
             p_riic_info = priic_info_s[0];
-        break;
+            break;
 
         default :
 
             /* Internal error */
             return;
-        break;
+            break;
     }
 
     r_riic_advance(p_riic_info); /* Calls advance function */
@@ -4120,7 +4157,7 @@ void riic0_eei_sub (void)
  * Arguments    : None
  * Return Value : None
  **********************************************************************************************************************/
-void riic0_txi_sub (void)
+void riic0_txi_sub(void)
 {
     uint8_t tmp;
 
@@ -4169,19 +4206,19 @@ void riic0_txi_sub (void)
                 /* Sets interrupted address sending. */
                 riic_api_event[0] = RIIC_EV_INT_ADD;
 
-            break;
+                break;
 
             case RIIC_STS_SEND_DATA_WAIT :
 
                 /* Sets interrupted data sending. */
                 riic_api_event[0] = RIIC_EV_INT_SEND;
 
-            break;
+                break;
 
             default :
 
                 /* Does nothing. */
-            break;
+                break;
 
         }
 
@@ -4197,7 +4234,7 @@ void riic0_txi_sub (void)
  * Arguments    : None
  * Return Value : None
  **********************************************************************************************************************/
-void riic0_rxi_sub (void)
+void riic0_rxi_sub(void)
 {
     riic_info_t * p_riic_info;
 
@@ -4230,19 +4267,19 @@ void riic0_rxi_sub (void)
 
             /* Master mode data */
             p_riic_info = priic_info_m[0];
-        break;
+            break;
 
         case RIIC_MODE_S_RECEIVE :
 
             /* Slave mode data */
             p_riic_info = priic_info_s[0];
-        break;
+            break;
 
         default :
 
             /* Internal error */
             return;
-        break;
+            break;
     }
 
     /* Sets interrupted data receiving. */
@@ -4258,7 +4295,7 @@ void riic0_rxi_sub (void)
  * Arguments    : None
  * Return Value : None
  **********************************************************************************************************************/
-void riic0_tei_sub (void)
+void riic0_tei_sub(void)
 {
     #ifdef TN_RXA012A
     riic_timeout_counter_clear(0);
@@ -4281,19 +4318,19 @@ void riic0_tei_sub (void)
             /* Sets interrupted address sending. */
             riic_api_event[0] = RIIC_EV_INT_ADD;
 
-        break;
+            break;
 
         case RIIC_STS_SEND_DATA_WAIT :
 
             /* Sets interrupted data sending. */
             riic_api_event[0] = RIIC_EV_INT_SEND;
 
-        break;
+            break;
 
         default :
 
             /* Does nothing. */
-        break;
+            break;
 
     }
 

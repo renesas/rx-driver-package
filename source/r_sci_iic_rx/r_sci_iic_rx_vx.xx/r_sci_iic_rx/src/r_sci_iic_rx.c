@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer 
  *
- * Copyright (C) 2013(2021) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_sci_iic_rx.c
@@ -47,6 +47,8 @@
  *         : 10.03.2020 2.46     RX23E-A support added.
  *         : 30.06.2021 2.48     RX671 support added.
  *         : 31.07.2021 2.49     RX140 support added.
+ *         : 15.06.2022 2.60     RX26T support added.
+ *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  Includes   <System Includes> , "Project Includes"
@@ -77,9 +79,10 @@
 static sci_iic_return_t sci_iic_open (sci_iic_info_t * p_sci_iic_info);
 static sci_iic_return_t sci_iic_master_send_receive (sci_iic_info_t * p_sci_iic_info, sci_iic_api_mode_t api_mode);
 static sci_iic_return_t sci_iic_advance (sci_iic_info_t * p_sci_iic_info);
-static void sci_iic_close (sci_iic_info_t * p_sci_iic_info);
 static sci_iic_return_t sci_iic_control (sci_iic_info_t * p_sci_iic_info, sci_iic_ctrl_ptn_t ctrl_ptn);
 static sci_iic_return_t sci_iic_getstatus (sci_iic_info_t * p_sci_iic_info, sci_iic_mcu_status_t * p_sci_iic_status);
+
+static void sci_iic_close (sci_iic_info_t * p_sci_iic_info);
 
 /*----------------------------------------------------------------------------*/
 /*  Called from function table                                                */
@@ -100,23 +103,25 @@ static sci_iic_return_t sci_iic_nack (sci_iic_info_t * p_sci_iic_info);
 static void sci_iic_api_status_init (sci_iic_info_t * p_sci_iic_info);
 static void sci_iic_set_internal_status (sci_iic_info_t * p_sci_iic_info, sci_iic_api_status_t new_status);
 static void sci_iic_set_ch_status (sci_iic_info_t * p_sci_iic_info, sci_iic_ch_dev_status_t status);
-static sci_iic_return_t sci_iic_check_chstatus_start (sci_iic_info_t * p_sci_iic_info);
-static sci_iic_return_t sci_iic_check_chstatus_advance (sci_iic_info_t * p_sci_iic_info);
 static void sci_iic_disable (sci_iic_info_t * p_sci_iic_info);
 static void sci_iic_enable (sci_iic_info_t * p_sci_iic_info);
 static bool sci_iic_stop_cond_wait (sci_iic_info_t * p_sci_iic_info);
 static bool sci_iic_check_stop_event (sci_iic_info_t * p_sci_iic_info);
+
+static sci_iic_return_t sci_iic_check_chstatus_start (sci_iic_info_t * p_sci_iic_info);
+static sci_iic_return_t sci_iic_check_chstatus_advance (sci_iic_info_t * p_sci_iic_info);
 
 static void sci_iic_int_icier_setting (sci_iic_info_t * p_sci_iic_info, uint8_t New_icier);
 static void sci_iic_start_cond_generate (sci_iic_info_t * p_sci_iic_info);
 static void sci_iic_re_start_cond_generate (sci_iic_info_t * p_sci_iic_info);
 static void sci_iic_stop_cond_generate (sci_iic_info_t * p_sci_iic_info);
 static void sci_iic_set_sending_data (sci_iic_info_t * p_sci_iic_info, uint8_t * p_data);
-static uint8_t sci_iic_get_receiving_data (sci_iic_info_t * p_sci_iic_info);
 static void sci_iic_iic_disable (sci_iic_info_t * p_sci_iic_info);
 static void sci_iic_iic_enable (sci_iic_info_t * p_sci_iic_info);
 static void sci_iic_register_init_setting (sci_iic_info_t * p_sci_iic_info);
 static void sci_iic_reset_setting (sci_iic_info_t * p_sci_iic_info);
+
+static uint8_t sci_iic_get_receiving_data (sci_iic_info_t * p_sci_iic_info);
 
 /*----------------------------------------------------------------------------*/
 /*   Function table                                                           */
@@ -247,9 +252,10 @@ volatile sci_iic_ch_dev_status_t g_sci_iic_ChStatus[SCI_IIC_NUM_CH_MAX]; /* Chan
  *            the clock setting definition value specified by BSP FIT module.
  * @note      None
 */
-sci_iic_return_t R_SCI_IIC_Open (sci_iic_info_t * p_sci_iic_info)
+sci_iic_return_t R_SCI_IIC_Open(sci_iic_info_t * p_sci_iic_info)
 {
     bool chk;
+
     sci_iic_return_t ret;
 
 #if (1 == SCI_IIC_CFG_PARAM_CHECKING_ENABLE)
@@ -273,7 +279,7 @@ sci_iic_return_t R_SCI_IIC_Open (sci_iic_info_t * p_sci_iic_info)
 
     /* ---- INITIALIZE SCI_IIC INTERNAL STATUS INFORMATION ---- */
     g_sci_iic_ChStatus[p_sci_iic_info->ch_no] = SCI_IIC_NO_INIT;
-    p_sci_iic_info->dev_sts = SCI_IIC_NO_INIT;
+    p_sci_iic_info->dev_sts                   = SCI_IIC_NO_INIT;
 
     /* ---- INITIALIZE CHANNEL ---- */
     /* Calls the API function. */
@@ -288,11 +294,12 @@ sci_iic_return_t R_SCI_IIC_Open (sci_iic_info_t * p_sci_iic_info)
  *              : Initializes the I/O register for SCI_IIC control.
  * Arguments    : sci_iic_info_t * p_sci_iic_info    ; IIC Information
  **********************************************************************************************************************/
-static sci_iic_return_t sci_iic_open (sci_iic_info_t * p_sci_iic_info)
+static sci_iic_return_t sci_iic_open(sci_iic_info_t * p_sci_iic_info)
 {
     sci_iic_return_t ret;
 #if SCI_IIC_CFG_PORT_SETTING_PROCESSING
-    R_BSP_VOLATILE_EVENACCESS const sci_iic_ch_rom_t * prom = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom;
+    R_BSP_VOLATILE_EVENACCESS const sci_iic_ch_rom_t * p_rom = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom;
+
     uint8_t sscl_port_gr;
     uint8_t sscl_port_pin;
     uint8_t ssda_port_gr;
@@ -309,10 +316,10 @@ static sci_iic_return_t sci_iic_open (sci_iic_info_t * p_sci_iic_info)
     /* Disables SCI_IIC multi-function pin controller after setting SCL and SDA to Hi-z. */
     /* Includes I/O register read operation at the end of the following function. */
     /* Set Hi-z */
-    sscl_port_gr = prom->sscl_port_gr;
-    sscl_port_pin = prom->sscl_port_pin;
-    ssda_port_gr = prom->ssda_port_gr;
-    ssda_port_pin = prom->ssda_port_pin;
+    sscl_port_gr  = p_rom->sscl_port_gr;
+    sscl_port_pin = p_rom->sscl_port_pin;
+    ssda_port_gr  = p_rom->ssda_port_gr;
+    ssda_port_pin = p_rom->ssda_port_pin;
     r_sci_iic_io_open(sscl_port_gr, sscl_port_pin);
     r_sci_iic_mpc_setting(sscl_port_gr, sscl_port_pin, SCI_IIC_MPC_SSCL_INIT);
     r_sci_iic_io_open(ssda_port_gr, ssda_port_pin);
@@ -395,7 +402,7 @@ static sci_iic_return_t sci_iic_open (sci_iic_info_t * p_sci_iic_info)
  *            detecting either SCL or SDA line is as in low state.
  * @note      Available settings for each pattern see Section 3.2 in the application note for details.
 */ 
-sci_iic_return_t R_SCI_IIC_MasterSend (sci_iic_info_t * p_sci_iic_info)
+sci_iic_return_t R_SCI_IIC_MasterSend(sci_iic_info_t * p_sci_iic_info)
 {
     sci_iic_return_t ret;
 
@@ -461,7 +468,7 @@ sci_iic_return_t R_SCI_IIC_MasterSend (sci_iic_info_t * p_sci_iic_info)
  *            detecting either SCL or SDA line is as in low state.
  * @note      Available settings for each pattern see Section 3.3 in the application note for details.
 */
-sci_iic_return_t R_SCI_IIC_MasterReceive (sci_iic_info_t * p_sci_iic_info)
+sci_iic_return_t R_SCI_IIC_MasterReceive(sci_iic_info_t * p_sci_iic_info)
 {
     sci_iic_return_t ret;
 
@@ -499,7 +506,7 @@ sci_iic_return_t R_SCI_IIC_MasterReceive (sci_iic_info_t * p_sci_iic_info)
  * Arguments    : sci_iic_info_t * p_sci_iic_info    ; IIC Information
  *              ; sci_iic_api_mode_t api_mode        ; Internal Mode
  **********************************************************************************************************************/
-static sci_iic_return_t sci_iic_master_send_receive (sci_iic_info_t * p_sci_iic_info, sci_iic_api_mode_t api_mode)
+static sci_iic_return_t sci_iic_master_send_receive(sci_iic_info_t * p_sci_iic_info, sci_iic_api_mode_t api_mode)
 {
     sci_iic_return_t ret;
 
@@ -559,7 +566,7 @@ static sci_iic_return_t sci_iic_master_send_receive (sci_iic_info_t * p_sci_iic_
  *            specified by the parameter, and returns the obtained state as 32-bit structure. 
  * @note      See section "3.5 R_SCI_IIC_GetStatus()" in the application note for details.
 */
-sci_iic_return_t R_SCI_IIC_GetStatus (sci_iic_info_t *p_sci_iic_info, sci_iic_mcu_status_t *p_sci_iic_status)
+sci_iic_return_t R_SCI_IIC_GetStatus(sci_iic_info_t *p_sci_iic_info, sci_iic_mcu_status_t *p_sci_iic_status)
 {
     sci_iic_return_t ret;
 
@@ -588,14 +595,16 @@ sci_iic_return_t R_SCI_IIC_GetStatus (sci_iic_info_t *p_sci_iic_info, sci_iic_mc
  * Arguments    : sci_iic_info_t * p_sci_iic_info        ; IIC Information
  *                sci_iic_mcu_status_t * p_sci_iic_status; The address to store the I2C state flag.
  **********************************************************************************************************************/
-static sci_iic_return_t sci_iic_getstatus (sci_iic_info_t * p_sci_iic_info, sci_iic_mcu_status_t * p_sci_iic_status)
+static sci_iic_return_t sci_iic_getstatus(sci_iic_info_t * p_sci_iic_info, sci_iic_mcu_status_t * p_sci_iic_status)
 {
     sci_iic_mcu_status_t sts_flag;
     sts_flag.LONG = 0;
     sci_regs_t pregs = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom->regs;
-    R_BSP_VOLATILE_EVENACCESS uint8_t * const ppidr = SCI_IIC_PRV_PIDR_BASE_REG;
-    R_BSP_VOLATILE_EVENACCESS const sci_iic_ch_rom_t * prom = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom;
     
+    R_BSP_VOLATILE_EVENACCESS uint8_t * const p_pidr = SCI_IIC_PRV_PIDR_BASE_REG;
+
+    R_BSP_VOLATILE_EVENACCESS const sci_iic_ch_rom_t * p_rom = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom;
+
     uint8_t sscl_port_gr;
     uint8_t sscl_port_pin;
     uint8_t ssda_port_gr;
@@ -648,9 +657,9 @@ static sci_iic_return_t sci_iic_getstatus (sci_iic_info_t * p_sci_iic_info, sci_
     }
 
     /* Check SSCL Pin level */
-    sscl_port_gr = prom->sscl_port_gr;
-    sscl_port_pin = prom->sscl_port_pin;
-    if (SCI_IIC_LOW == ((*(ppidr + sscl_port_gr)) & (1U << sscl_port_pin)))
+    sscl_port_gr  = p_rom->sscl_port_gr;
+    sscl_port_pin = p_rom->sscl_port_pin;
+    if (SCI_IIC_LOW == ((*(p_pidr + sscl_port_gr)) & (1U << sscl_port_pin)))
     {
         sts_flag.BIT.SCLI = 0;
     }
@@ -660,9 +669,9 @@ static sci_iic_return_t sci_iic_getstatus (sci_iic_info_t * p_sci_iic_info, sci_
     }
 
     /* Check SSDA Pin level */
-    ssda_port_gr = prom->ssda_port_gr;
-    ssda_port_pin = prom->ssda_port_pin;
-    if (SCI_IIC_LOW == ((*(ppidr + ssda_port_gr)) & (1U << ssda_port_pin)))
+    ssda_port_gr  = p_rom->ssda_port_gr;
+    ssda_port_pin = p_rom->ssda_port_pin;
+    if (SCI_IIC_LOW == ((*(p_pidr + ssda_port_gr)) & (1U << ssda_port_pin)))
     {
         sts_flag.BIT.SDAI = 0;
     }
@@ -712,7 +721,7 @@ static sci_iic_return_t sci_iic_getstatus (sci_iic_info_t * p_sci_iic_info, sci_
  *            the SSDA pin, and one-shot of the SSCL clock. Also resets the simple I2C mode settings.
  * @note      None
 */
-sci_iic_return_t R_SCI_IIC_Control (sci_iic_info_t * p_sci_iic_info, sci_iic_ctrl_ptn_t ctrl_ptn)
+sci_iic_return_t R_SCI_IIC_Control(sci_iic_info_t * p_sci_iic_info, sci_iic_ctrl_ptn_t ctrl_ptn)
 {
     sci_iic_return_t ret;
 
@@ -747,14 +756,19 @@ sci_iic_return_t R_SCI_IIC_Control (sci_iic_info_t * p_sci_iic_info, sci_iic_ctr
  * Arguments    : sci_iic_info_t * p_sci_iic_info   ; IIC Information
  *                sci_iic_ctrl_ptn_t ctrl_ptn       ; Output Pattern
  **********************************************************************************************************************/
-static sci_iic_return_t sci_iic_control (sci_iic_info_t * p_sci_iic_info, sci_iic_ctrl_ptn_t ctrl_ptn)
+static sci_iic_return_t sci_iic_control(sci_iic_info_t * p_sci_iic_info, sci_iic_ctrl_ptn_t ctrl_ptn)
 {
     volatile uint32_t cnt;
+
     volatile uint32_t i;
-    sci_iic_return_t ret = SCI_IIC_SUCCESS;
+
+    sci_iic_return_t ret  = SCI_IIC_SUCCESS;
+
     sci_regs_t pregs = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom->regs;
-    R_BSP_VOLATILE_EVENACCESS uint8_t * const ppidr = SCI_IIC_PRV_PIDR_BASE_REG;
-    R_BSP_VOLATILE_EVENACCESS const sci_iic_ch_rom_t * prom = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom;
+
+    R_BSP_VOLATILE_EVENACCESS uint8_t * const p_pidr = SCI_IIC_PRV_PIDR_BASE_REG;
+
+    R_BSP_VOLATILE_EVENACCESS const sci_iic_ch_rom_t * p_rom = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom;
 
     uint8_t sscl_port_gr;
     uint8_t sscl_port_pin;
@@ -776,12 +790,12 @@ static sci_iic_return_t sci_iic_control (sci_iic_info_t * p_sci_iic_info, sci_ii
         if ((ctrl_ptn & SCI_IIC_GEN_START_CON) == SCI_IIC_GEN_START_CON)
         {
 
-            sscl_port_gr = prom->sscl_port_gr;
-            sscl_port_pin = prom->sscl_port_pin;
-            ssda_port_gr = prom->ssda_port_gr;
-            ssda_port_pin = prom->ssda_port_pin;
-            if ((SCI_IIC_LOW == ((*(ppidr + sscl_port_gr)) & (1U << sscl_port_pin)))
-                    || (SCI_IIC_LOW == ((*(ppidr + ssda_port_gr)) & (1U << ssda_port_pin))))
+            sscl_port_gr  = p_rom->sscl_port_gr;
+            sscl_port_pin = p_rom->sscl_port_pin;
+            ssda_port_gr  = p_rom->ssda_port_gr;
+            ssda_port_pin = p_rom->ssda_port_pin;
+            if ((SCI_IIC_LOW == ((*(p_pidr + sscl_port_gr)) & (1U << sscl_port_pin)))
+                    || (SCI_IIC_LOW == ((*(p_pidr + ssda_port_gr)) & (1U << ssda_port_pin))))
             {
                 /* When BBSY bit is "1"(Bus busy) */
                 ret = SCI_IIC_ERR_BUS_BUSY;
@@ -833,6 +847,7 @@ static sci_iic_return_t sci_iic_control (sci_iic_info_t * p_sci_iic_info, sci_ii
             while (SCI_IIC_IICSTIF_CLEAR != pregs->SIMR3.BIT.IICSTIF)
             {
                 /* nothing to do */
+                R_BSP_NOP();
             }
 
         }
@@ -876,6 +891,7 @@ static sci_iic_return_t sci_iic_control (sci_iic_info_t * p_sci_iic_info, sci_ii
             while (SCI_IIC_IICSTIF_CLEAR != pregs->SIMR3.BIT.IICSTIF)
             {
                 /* nothing to do */
+                R_BSP_NOP();
             }
 
         }
@@ -919,6 +935,7 @@ static sci_iic_return_t sci_iic_control (sci_iic_info_t * p_sci_iic_info, sci_ii
             while (SCI_IIC_IICSTIF_CLEAR != pregs->SIMR3.BIT.IICSTIF)
             {
                 /* nothing to do */
+                R_BSP_NOP();
             }
 
         }
@@ -951,6 +968,7 @@ static sci_iic_return_t sci_iic_control (sci_iic_info_t * p_sci_iic_info, sci_ii
             for (cnt = SCI_IIC_ONESHOT_WAIT; cnt > 0; cnt--)
             {
                 /* nothing to do */
+                R_BSP_NOP();
             }
 
             /* SIMR3 - I2C Mode Register 3
@@ -961,6 +979,7 @@ static sci_iic_return_t sci_iic_control (sci_iic_info_t * p_sci_iic_info, sci_ii
             for (cnt = SCI_IIC_ONESHOT_WAIT; cnt > 0; cnt--)
             {
                 /* nothing to do */
+                R_BSP_NOP();
             }
 
         }
@@ -1011,7 +1030,7 @@ static sci_iic_return_t sci_iic_control (sci_iic_info_t * p_sci_iic_info, sci_ii
  *            communication is forcibly terminated, that communication is not guaranteed.
  * @note      None
 */
-sci_iic_return_t R_SCI_IIC_Close (sci_iic_info_t * p_sci_iic_info)
+sci_iic_return_t R_SCI_IIC_Close(sci_iic_info_t * p_sci_iic_info)
 {
     bool chk;
 
@@ -1048,7 +1067,7 @@ sci_iic_return_t R_SCI_IIC_Close (sci_iic_info_t * p_sci_iic_info)
  *              : When starts the communication again, please call an initialization processing.
  * Arguments    : sci_iic_info_t * p_sci_iic_info    ; IIC Information
  **********************************************************************************************************************/
-static void sci_iic_close (sci_iic_info_t * p_sci_iic_info)
+static void sci_iic_close(sci_iic_info_t * p_sci_iic_info)
 {
     /* Disables IIC. */
     sci_iic_disable(p_sci_iic_info);
@@ -1072,7 +1091,7 @@ static void sci_iic_close (sci_iic_info_t * p_sci_iic_info)
  *            the minor version number. For example, Version 4.25 would be returned as 0x00040019.
  * @note      None
 */
-uint32_t R_SCI_IIC_GetVersion (void)
+uint32_t R_SCI_IIC_GetVersion(void)
 {
     uint32_t const version = (SCI_IIC_VERSION_MAJOR << 16) | SCI_IIC_VERSION_MINOR;
 
@@ -1090,7 +1109,7 @@ uint32_t R_SCI_IIC_GetVersion (void)
  *              : SCI_IIC_ERR_BUS_BUSY               ; Bus busy
  *              ; SCI_IIC_ERR_OTHER                  ; Other error
  **********************************************************************************************************************/
-sci_iic_return_t r_sci_iic_advance (sci_iic_info_t * p_sci_iic_info)
+sci_iic_return_t r_sci_iic_advance(sci_iic_info_t * p_sci_iic_info)
 {
     sci_iic_return_t ret;
 
@@ -1114,10 +1133,12 @@ sci_iic_return_t r_sci_iic_advance (sci_iic_info_t * p_sci_iic_info)
  *              : The return value shows the communication result. Refer to the return value.
  * Arguments    : sci_iic_info_t * p_sci_iic_info    ; IIC Information
  **********************************************************************************************************************/
-static sci_iic_return_t sci_iic_advance (sci_iic_info_t * p_sci_iic_info)
+static sci_iic_return_t sci_iic_advance(sci_iic_info_t * p_sci_iic_info)
 {
     sci_iic_return_t ret;
+
     bool boolret;
+
     sci_regs_t pregs = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom->regs;
 
     /* Checks the channel status. */
@@ -1144,7 +1165,7 @@ static sci_iic_return_t sci_iic_advance (sci_iic_info_t * p_sci_iic_info)
 
                     /* Do Nothing */
 
-                break;
+                    break;
 
                     /* Finished communication. */
                 case SCI_IIC_FINISH :
@@ -1166,6 +1187,7 @@ static sci_iic_return_t sci_iic_advance (sci_iic_info_t * p_sci_iic_info)
                     while (SCI_IIC_IICSTIF_CLEAR != pregs->SIMR3.BIT.IICSTIF)
                     {
                         /* nothing to do */
+                        R_BSP_NOP();
                     }
 
                     /* Checks the callback function. */
@@ -1179,7 +1201,7 @@ static sci_iic_return_t sci_iic_advance (sci_iic_info_t * p_sci_iic_info)
                         return SCI_IIC_ERR_INVALID_ARG;
                     }
 
-                break;
+                    break;
 
                     /* NACK is occurred. */
                 case SCI_IIC_NACK :
@@ -1204,6 +1226,7 @@ static sci_iic_return_t sci_iic_advance (sci_iic_info_t * p_sci_iic_info)
                     while (SCI_IIC_IICSTIF_CLEAR != pregs->SIMR3.BIT.IICSTIF)
                     {
                         /* nothing to do */
+                        R_BSP_NOP();
                     }
 
                     /* Check the stop condition generation. */
@@ -1230,7 +1253,7 @@ static sci_iic_return_t sci_iic_advance (sci_iic_info_t * p_sci_iic_info)
                         return SCI_IIC_ERR_INVALID_ARG;
                     }
 
-                break;
+                    break;
 
                 default :
 
@@ -1245,7 +1268,7 @@ static sci_iic_return_t sci_iic_advance (sci_iic_info_t * p_sci_iic_info)
                         return SCI_IIC_ERR_INVALID_ARG;
                     }
 
-                break;
+                    break;
             }
             return ret;
         }
@@ -1269,10 +1292,12 @@ static sci_iic_return_t sci_iic_advance (sci_iic_info_t * p_sci_iic_info)
  *              : sci_iic_info_t * p_sci_iic_info    ; IIC Information
  * Return Value : Refer to the each calling function.
  **********************************************************************************************************************/
-static sci_iic_return_t sci_iic_func_table (sci_iic_api_event_t event, sci_iic_info_t * p_sci_iic_info)
+static sci_iic_return_t sci_iic_func_table(sci_iic_api_event_t event, sci_iic_info_t * p_sci_iic_info)
 {
     sci_iic_return_t ret = SCI_IIC_ERR_OTHER;
-    sci_iic_return_t (*pFunc) (sci_iic_info_t *);
+
+    sci_iic_return_t (* pFunc)(sci_iic_info_t *);
+
     sci_iic_api_status_t n_status;
 
     /* Acquires a now state. */
@@ -1315,7 +1340,7 @@ static sci_iic_return_t sci_iic_func_table (sci_iic_api_event_t event, sci_iic_i
  * Arguments    : sci_iic_info_t * p_sci_iic_info    ; IIC Information
  * Return Value : SCI_IIC_SUCCESS                    ; Successful operation, idle state
  **********************************************************************************************************************/
-static sci_iic_return_t sci_iic_init_driver (sci_iic_info_t * p_sci_iic_info)
+static sci_iic_return_t sci_iic_init_driver(sci_iic_info_t * p_sci_iic_info)
 {
     /* Initializes the IIC registers. */
     /* Includes I/O register read operation at the end of the following function. */
@@ -1335,11 +1360,13 @@ static sci_iic_return_t sci_iic_init_driver (sci_iic_info_t * p_sci_iic_info)
  * Return Value : SCI_IIC_SUCCESS                    ; Successful operation, communication state
  *              : SCI_IIC_ERR_BUS_BUSY               ; None reply error
  **********************************************************************************************************************/
-static sci_iic_return_t sci_iic_generate_start_cond (sci_iic_info_t * p_sci_iic_info)
+static sci_iic_return_t sci_iic_generate_start_cond(sci_iic_info_t * p_sci_iic_info)
 {
     sci_iic_return_t ret = SCI_IIC_SUCCESS;
-    R_BSP_VOLATILE_EVENACCESS uint8_t * const ppidr = SCI_IIC_PRV_PIDR_BASE_REG;
-    R_BSP_VOLATILE_EVENACCESS const sci_iic_ch_rom_t * prom = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom;
+
+    R_BSP_VOLATILE_EVENACCESS uint8_t * const p_pidr = SCI_IIC_PRV_PIDR_BASE_REG;
+
+    R_BSP_VOLATILE_EVENACCESS const sci_iic_ch_rom_t * p_rom = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom;
 
     uint8_t sscl_port_gr;
     uint8_t sscl_port_pin;
@@ -1347,12 +1374,12 @@ static sci_iic_return_t sci_iic_generate_start_cond (sci_iic_info_t * p_sci_iic_
     uint8_t ssda_port_pin;
     
     /* Check Bus busy(SSDA,SSCL pin level) */
-    sscl_port_gr = prom->sscl_port_gr;
-    sscl_port_pin = prom->sscl_port_pin;
-    ssda_port_gr = prom->ssda_port_gr;
-    ssda_port_pin = prom->ssda_port_pin;
-    if ((SCI_IIC_LOW == ((*(ppidr + sscl_port_gr)) & (1U << sscl_port_pin)))
-            || (SCI_IIC_LOW == ((*(ppidr + ssda_port_gr)) & (1U << ssda_port_pin))))
+    sscl_port_gr  = p_rom->sscl_port_gr;
+    sscl_port_pin = p_rom->sscl_port_pin;
+    ssda_port_gr  = p_rom->ssda_port_gr;
+    ssda_port_pin = p_rom->ssda_port_pin;
+    if ((SCI_IIC_LOW == ((*(p_pidr + sscl_port_gr)) & (1U << sscl_port_pin)))
+            || (SCI_IIC_LOW == ((*(p_pidr + ssda_port_gr)) & (1U << ssda_port_pin))))
     {
         return SCI_IIC_ERR_BUS_BUSY;
     }
@@ -1377,10 +1404,11 @@ static sci_iic_return_t sci_iic_generate_start_cond (sci_iic_info_t * p_sci_iic_
  * Return Value : SCI_IIC_SUCCESS                    ; Successful operation, communication state
  *              : SCI_IIC_ERR_OTHER                  ; Other error
  **********************************************************************************************************************/
-static sci_iic_return_t sci_iic_after_gen_start_cond (sci_iic_info_t * p_sci_iic_info)
+static sci_iic_return_t sci_iic_after_gen_start_cond(sci_iic_info_t * p_sci_iic_info)
 {
     sci_iic_return_t ret = SCI_IIC_SUCCESS;
     uint8_t buf_send_data;
+
     sci_regs_t pregs = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom->regs;
 
     switch (g_sci_iic_handles[p_sci_iic_info->ch_no]->api_mode)
@@ -1395,7 +1423,7 @@ static sci_iic_return_t sci_iic_after_gen_start_cond (sci_iic_info_t * p_sci_iic
                 case SCI_IIC_STS_IDLE :
 
                     /* Is the slave address pointer set? */
-                    if ((uint8_t *) FIT_NO_PTR == p_sci_iic_info->p_slv_adr) /* Pattern 4 of Master Write  */
+                    if ((uint8_t *)FIT_NO_PTR == p_sci_iic_info->p_slv_adr) /* Pattern 4 of Master Write  */
                     {
                         /* Sets the internal status. */
                         sci_iic_set_internal_status(p_sci_iic_info, SCI_IIC_STS_SP_COND_WAIT);
@@ -1407,7 +1435,7 @@ static sci_iic_return_t sci_iic_after_gen_start_cond (sci_iic_info_t * p_sci_iic
                     }
 
                     /* Sets a write code. */
-                    buf_send_data = (uint8_t) ((*p_sci_iic_info->p_slv_adr) << 1);
+                    buf_send_data  = (uint8_t) ((*p_sci_iic_info->p_slv_adr) << 1);
                     buf_send_data &= SCI_IIC_W_CODE;
 
                     /* Sets the internal status. */
@@ -1427,17 +1455,18 @@ static sci_iic_return_t sci_iic_after_gen_start_cond (sci_iic_info_t * p_sci_iic
                     while (SCI_IIC_IICSTIF_CLEAR != pregs->SIMR3.BIT.IICSTIF)
                     {
                         /* nothing to do */
+                        R_BSP_NOP();
                     }
 
                     sci_iic_set_sending_data(p_sci_iic_info, &buf_send_data);
 
-                break;
+                    break;
 
                     /* Previous status is data transfer completion waiting status. */
                 case SCI_IIC_STS_SEND_DATA_WAIT :
 
                     /* Sets a read code. */
-                    buf_send_data = (uint8_t) ((*p_sci_iic_info->p_slv_adr) << 1);
+                    buf_send_data  = (uint8_t) ((*p_sci_iic_info->p_slv_adr) << 1);
                     buf_send_data |= SCI_IIC_R_CODE;
 
                     /* Sets the internal status. */
@@ -1457,25 +1486,26 @@ static sci_iic_return_t sci_iic_after_gen_start_cond (sci_iic_info_t * p_sci_iic
                     while (SCI_IIC_IICSTIF_CLEAR != pregs->SIMR3.BIT.IICSTIF)
                     {
                         /* nothing to do */
+                        R_BSP_NOP();
                     }
 
                     /* Transmits the slave address. */
                     sci_iic_set_sending_data(p_sci_iic_info, &buf_send_data);
-                break;
+                    break;
 
                 default :
 
                     /* None status. */
                     ret = SCI_IIC_ERR_OTHER;
 
-                break;
+                    break;
             }
             return ret;
 
         case SCI_IIC_MODE_RECEIVE :
 
             /* Sets a read code. */
-            buf_send_data = (uint8_t) ((*p_sci_iic_info->p_slv_adr) << 1);
+            buf_send_data  = (uint8_t) ((*p_sci_iic_info->p_slv_adr) << 1);
             buf_send_data |= SCI_IIC_R_CODE;
 
             /* Sets the internal status. */
@@ -1495,15 +1525,16 @@ static sci_iic_return_t sci_iic_after_gen_start_cond (sci_iic_info_t * p_sci_iic
             while (SCI_IIC_IICSTIF_CLEAR != pregs->SIMR3.BIT.IICSTIF)
             {
                 /* nothing to do */
+                R_BSP_NOP();
             }
 
             /* Transmits the slave address. */
             sci_iic_set_sending_data(p_sci_iic_info, &buf_send_data);
-        break;
+            break;
 
         default :
             ret = SCI_IIC_ERR_OTHER;
-        break;
+            break;
     }
     return ret;
 } /* End of function sci_iic_after_gen_start_cond() */
@@ -1517,10 +1548,12 @@ static sci_iic_return_t sci_iic_after_gen_start_cond (sci_iic_info_t * p_sci_iic
  * Return Value : SCI_IIC_SUCCESS                    ; Successful operation, communication state
  *              : SCI_IIC_ERR_OTHER                  ; Other error
  **********************************************************************************************************************/
-static sci_iic_return_t sci_iic_after_send_slvadr (sci_iic_info_t * p_sci_iic_info)
+static sci_iic_return_t sci_iic_after_send_slvadr(sci_iic_info_t * p_sci_iic_info)
 {
-    sci_iic_return_t ret = SCI_IIC_SUCCESS;
+    sci_iic_return_t ret   = SCI_IIC_SUCCESS;
+
     volatile uint8_t uctmp = 0U;
+
     sci_regs_t pregs = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom->regs;
 
     switch (g_sci_iic_handles[p_sci_iic_info->ch_no]->api_mode)
@@ -1528,9 +1561,9 @@ static sci_iic_return_t sci_iic_after_send_slvadr (sci_iic_info_t * p_sci_iic_in
         case SCI_IIC_MODE_SEND : /* MasterSend  */
 
             /* Are 1st data and 2nd data pointer set? */
-            /* Pattern 3 of Master Write    */
-            if (((uint8_t *) FIT_NO_PTR == p_sci_iic_info->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR == p_sci_iic_info->p_data2nd))
+            /* Pattern 3 of Master Write */
+            if (((uint8_t *)FIT_NO_PTR == p_sci_iic_info->p_data1st)
+                    && ((uint8_t *)FIT_NO_PTR == p_sci_iic_info->p_data2nd))
             {
                 /* Sets the internal status. */
                 sci_iic_set_internal_status(p_sci_iic_info, SCI_IIC_STS_SP_COND_WAIT);
@@ -1542,8 +1575,8 @@ static sci_iic_return_t sci_iic_after_send_slvadr (sci_iic_info_t * p_sci_iic_in
             }
 
             /* Is 1st data pointer set? */
-            if (((uint8_t *) FIT_NO_PTR != p_sci_iic_info->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR != p_sci_iic_info->p_data2nd))
+            if (((uint8_t *)FIT_NO_PTR != p_sci_iic_info->p_data1st)
+                    && ((uint8_t *)FIT_NO_PTR != p_sci_iic_info->p_data2nd))
             {
                 /* Pattern 1 of Master Write */
                 /* Sets the internal status. */
@@ -1566,8 +1599,8 @@ static sci_iic_return_t sci_iic_after_send_slvadr (sci_iic_info_t * p_sci_iic_in
                     return SCI_IIC_ERR_OTHER;
                 }
             }
-            else if (((uint8_t *) FIT_NO_PTR == p_sci_iic_info->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR != p_sci_iic_info->p_data2nd))
+            else if (((uint8_t *)FIT_NO_PTR == p_sci_iic_info->p_data1st)
+                    && ((uint8_t *)FIT_NO_PTR != p_sci_iic_info->p_data2nd))
             {
                 /* Pattern 2 of Master Write */
                 /* Sets the internal status. */
@@ -1596,7 +1629,7 @@ static sci_iic_return_t sci_iic_after_send_slvadr (sci_iic_info_t * p_sci_iic_in
                 return SCI_IIC_ERR_OTHER;
             }
 
-        break;
+            break;
 
         case SCI_IIC_MODE_RECEIVE :
 
@@ -1631,7 +1664,7 @@ static sci_iic_return_t sci_iic_after_send_slvadr (sci_iic_info_t * p_sci_iic_in
             /* TDR - Transmit Data Register */
             pregs->TDR = 0xff;
 
-        break;
+            break;
 
         case SCI_IIC_MODE_SEND_RECEIVE :
 
@@ -1653,7 +1686,7 @@ static sci_iic_return_t sci_iic_after_send_slvadr (sci_iic_info_t * p_sci_iic_in
                     /* Increases the 1st Data buffer pointer. */
                     p_sci_iic_info->p_data1st++;
 
-                break;
+                    break;
 
                 case SCI_IIC_STS_SEND_SLVADR_R_WAIT :
 
@@ -1688,22 +1721,22 @@ static sci_iic_return_t sci_iic_after_send_slvadr (sci_iic_info_t * p_sci_iic_in
                     /* TDR - Transmit Data Register */
                     pregs->TDR = 0xff;
 
-                break;
+                    break;
 
                 default :
 
                     ret = SCI_IIC_ERR_OTHER;
 
-                break;
+                    break;
             }
 
-        break;
+            break;
 
         default :
 
             ret = SCI_IIC_ERR_OTHER;
 
-        break;
+            break;
 
     }
 
@@ -1719,7 +1752,7 @@ static sci_iic_return_t sci_iic_after_send_slvadr (sci_iic_info_t * p_sci_iic_in
  * Return Value : SCI_IIC_SUCCESS                    ; Successful operation, communication state
  *              : SCI_IIC_ERR_OTHER                  ; Other error
  **********************************************************************************************************************/
-static sci_iic_return_t sci_iic_write_data_sending (sci_iic_info_t * p_sci_iic_info)
+static sci_iic_return_t sci_iic_write_data_sending(sci_iic_info_t * p_sci_iic_info)
 {
     sci_iic_return_t ret = SCI_IIC_SUCCESS;
 
@@ -1729,7 +1762,7 @@ static sci_iic_return_t sci_iic_write_data_sending (sci_iic_info_t * p_sci_iic_i
         case SCI_IIC_MODE_SEND :
 
             /* Is 1st data pointer set? */
-            if ((uint8_t *) FIT_NO_PTR != p_sci_iic_info->p_data1st)
+            if ((uint8_t *)FIT_NO_PTR != p_sci_iic_info->p_data1st)
             {
                 /* 1st data counter = 0?  */
                 if (0U != p_sci_iic_info->cnt1st) /* Pattern 1 of Master Write  */
@@ -1748,7 +1781,7 @@ static sci_iic_return_t sci_iic_write_data_sending (sci_iic_info_t * p_sci_iic_i
             }
 
             /* Is 2nd data pointer set? */
-            if ((uint8_t *) FIT_NO_PTR != p_sci_iic_info->p_data2nd)
+            if ((uint8_t *)FIT_NO_PTR != p_sci_iic_info->p_data2nd)
             {
                 /* 2nd data counter = 0? */
                 if (0U != p_sci_iic_info->cnt2nd) /* Pattern 2 of Master Write */
@@ -1774,7 +1807,7 @@ static sci_iic_return_t sci_iic_write_data_sending (sci_iic_info_t * p_sci_iic_i
 
             /* Generates the stop condition. */
             sci_iic_stop_cond_generate(p_sci_iic_info);
-        break;
+            break;
 
         case SCI_IIC_MODE_SEND_RECEIVE :
 
@@ -1799,11 +1832,11 @@ static sci_iic_return_t sci_iic_write_data_sending (sci_iic_info_t * p_sci_iic_i
             /* Restarts the condition generation */
             sci_iic_re_start_cond_generate(p_sci_iic_info);
 
-        break;
+            break;
 
         default :
             ret = SCI_IIC_ERR_OTHER;
-        break;
+            break;
     }
 
     return ret;
@@ -1817,9 +1850,10 @@ static sci_iic_return_t sci_iic_write_data_sending (sci_iic_info_t * p_sci_iic_i
  * Arguments    : sci_iic_info_t * p_sci_iic_info    ; IIC Information
  * Return Value : SCI_IIC_SUCCESS                    ; Successful operation, communication state
  **********************************************************************************************************************/
-static sci_iic_return_t sci_iic_read_data_receiving (sci_iic_info_t * p_sci_iic_info)
+static sci_iic_return_t sci_iic_read_data_receiving(sci_iic_info_t * p_sci_iic_info)
 {
     sci_iic_return_t ret = SCI_IIC_SUCCESS;
+
     sci_regs_t pregs = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom->regs;
 
     if (1U >= p_sci_iic_info->cnt2nd)
@@ -1863,7 +1897,7 @@ static sci_iic_return_t sci_iic_read_data_receiving (sci_iic_info_t * p_sci_iic_
  * Arguments    : sci_iic_info_t * p_sci_iic_info    ; IIC Information
  * Return Value : SCI_IIC_SUCCESS                    ; Successful operation, finished communication and idle state
  **********************************************************************************************************************/
-static sci_iic_return_t sci_iic_release (sci_iic_info_t * p_sci_iic_info)
+static sci_iic_return_t sci_iic_release(sci_iic_info_t * p_sci_iic_info)
 {
     sci_iic_return_t ret = SCI_IIC_SUCCESS;
 
@@ -1880,9 +1914,10 @@ static sci_iic_return_t sci_iic_release (sci_iic_info_t * p_sci_iic_info)
  * Arguments    : sci_iic_info_t * p_sci_iic_info    ; IIC Information
  * Return Value : SCI_IIC_SUCCESS                    ; Detected NACK, finished communication and idle state
  **********************************************************************************************************************/
-static sci_iic_return_t sci_iic_nack (sci_iic_info_t * p_sci_iic_info)
+static sci_iic_return_t sci_iic_nack(sci_iic_info_t * p_sci_iic_info)
 {
     sci_iic_return_t ret = SCI_IIC_SUCCESS;
+
     volatile uint8_t uctmp = 0U;
 
     /* Sets the internal status. */
@@ -1915,7 +1950,7 @@ static sci_iic_return_t sci_iic_nack (sci_iic_info_t * p_sci_iic_info)
  * Arguments    : sci_iic_info_t * p_sci_iic_info    ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void sci_iic_api_status_init (sci_iic_info_t * p_sci_iic_info)
+static void sci_iic_api_status_init(sci_iic_info_t * p_sci_iic_info)
 {
     /* Clears the event flag. */
     g_sci_iic_handles[p_sci_iic_info->ch_no]->api_event = SCI_IIC_EV_INIT;
@@ -1932,7 +1967,7 @@ static void sci_iic_api_status_init (sci_iic_info_t * p_sci_iic_info)
  *              : sci_iic_api_status_t new_status    ; New status
  * Return Value : None
  **********************************************************************************************************************/
-static void sci_iic_set_internal_status (sci_iic_info_t * p_sci_iic_info, sci_iic_api_status_t new_status)
+static void sci_iic_set_internal_status(sci_iic_info_t * p_sci_iic_info, sci_iic_api_status_t new_status)
 {
     /* Sets the previous status. */
     g_sci_iic_handles[p_sci_iic_info->ch_no]->api_b_status = g_sci_iic_handles[p_sci_iic_info->ch_no]->api_n_status;
@@ -1947,7 +1982,7 @@ static void sci_iic_set_internal_status (sci_iic_info_t * p_sci_iic_info, sci_ii
  * Arguments    : sci_iic_info_t * p_sci_iic_info    ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void sci_iic_set_ch_status (sci_iic_info_t * p_sci_iic_info, sci_iic_ch_dev_status_t status)
+static void sci_iic_set_ch_status(sci_iic_info_t * p_sci_iic_info, sci_iic_ch_dev_status_t status)
 {
     /* Sets the channel status. */
     g_sci_iic_ChStatus[p_sci_iic_info->ch_no] = status;
@@ -1966,7 +2001,7 @@ static void sci_iic_set_ch_status (sci_iic_info_t * p_sci_iic_info, sci_iic_ch_d
  *              : SCI_IIC_ERR_BUS_BUSY               ; Bus busy
  *              ; SCI_IIC_ERR_OTHER                  ; Other error
  **********************************************************************************************************************/
-static sci_iic_return_t sci_iic_check_chstatus_start (sci_iic_info_t * p_sci_iic_info)
+static sci_iic_return_t sci_iic_check_chstatus_start(sci_iic_info_t * p_sci_iic_info)
 {
     sci_iic_return_t ret = SCI_IIC_ERR_OTHER;
 
@@ -1979,7 +2014,7 @@ static sci_iic_return_t sci_iic_check_chstatus_start (sci_iic_info_t * p_sci_iic
             /* Sets the return value to uninitialized state. */
             ret = SCI_IIC_ERR_NO_INIT;
 
-        break;
+            break;
 
         case SCI_IIC_IDLE :
         case SCI_IIC_FINISH :
@@ -2006,7 +2041,7 @@ static sci_iic_return_t sci_iic_check_chstatus_start (sci_iic_info_t * p_sci_iic
                 ret = SCI_IIC_ERR_OTHER;
             }
 
-        break;
+            break;
 
         case SCI_IIC_COMMUNICATION :
 
@@ -2014,13 +2049,13 @@ static sci_iic_return_t sci_iic_check_chstatus_start (sci_iic_info_t * p_sci_iic
             /* Sets the return value to bus busy state. */
             ret = SCI_IIC_ERR_BUS_BUSY;
 
-        break;
+            break;
 
         default :
 
             ret = SCI_IIC_ERR_OTHER;
 
-        break;
+            break;
     }
 
     return ret;
@@ -2036,7 +2071,7 @@ static sci_iic_return_t sci_iic_check_chstatus_start (sci_iic_info_t * p_sci_iic
  *              : SCI_IIC_ERR_BUS_BUSY               ; Bus busy
  *              ; SCI_IIC_ERR_OTHER                  ; Other error
  **********************************************************************************************************************/
-static sci_iic_return_t sci_iic_check_chstatus_advance (sci_iic_info_t * p_sci_iic_info)
+static sci_iic_return_t sci_iic_check_chstatus_advance(sci_iic_info_t * p_sci_iic_info)
 {
     sci_iic_return_t ret = SCI_IIC_ERR_OTHER;
 
@@ -2049,7 +2084,7 @@ static sci_iic_return_t sci_iic_check_chstatus_advance (sci_iic_info_t * p_sci_i
             /* Sets the return value to uninitialized state. */
             ret = SCI_IIC_ERR_NO_INIT;
 
-        break;
+            break;
 
         case SCI_IIC_IDLE :
         case SCI_IIC_FINISH :
@@ -2058,7 +2093,7 @@ static sci_iic_return_t sci_iic_check_chstatus_advance (sci_iic_info_t * p_sci_i
             /* Sets the return value to error state. */
             ret = SCI_IIC_ERR_OTHER;
 
-        break;
+            break;
 
         case SCI_IIC_COMMUNICATION :
 
@@ -2081,13 +2116,13 @@ static sci_iic_return_t sci_iic_check_chstatus_advance (sci_iic_info_t * p_sci_i
                 ret = SCI_IIC_ERR_OTHER;
             }
 
-        break;
+            break;
 
         default :
 
             ret = SCI_IIC_ERR_OTHER;
 
-        break;
+            break;
     }
 
     return ret;
@@ -2100,7 +2135,7 @@ static sci_iic_return_t sci_iic_check_chstatus_advance (sci_iic_info_t * p_sci_i
  * Arguments    : sci_iic_info_t * p_sci_iic_info     ;   IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void sci_iic_disable (sci_iic_info_t * p_sci_iic_info)
+static void sci_iic_disable(sci_iic_info_t * p_sci_iic_info)
 {
     /* Initializes the IIC bus interrupt enable register. */
     sci_iic_int_icier_setting(p_sci_iic_info, SCI_IIC_SCR_INIT);
@@ -2122,7 +2157,7 @@ static void sci_iic_disable (sci_iic_info_t * p_sci_iic_info)
  * Arguments    : sci_iic_info_t * p_sci_iic_info     ;   IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void sci_iic_enable (sci_iic_info_t * p_sci_iic_info)
+static void sci_iic_enable(sci_iic_info_t * p_sci_iic_info)
 {
     /* Enables IIC.*/
     sci_iic_iic_enable(p_sci_iic_info);
@@ -2142,9 +2177,10 @@ static void sci_iic_enable (sci_iic_info_t * p_sci_iic_info)
  * Return Value : SCI_IIC_TRUE                        ;   Successful operation ,stop condition generation
  *              : SCI_IIC_FALSE                       ;   Failed operation ,stop condition generation
  **********************************************************************************************************************/
-static bool sci_iic_stop_cond_wait (sci_iic_info_t * p_sci_iic_info)
+static bool sci_iic_stop_cond_wait(sci_iic_info_t * p_sci_iic_info)
 {
     volatile uint16_t cnt;
+
     bool boolret = SCI_IIC_TRUE;
 
     cnt = SCI_IIC_STOP_COND_WAIT;
@@ -2175,9 +2211,10 @@ static bool sci_iic_stop_cond_wait (sci_iic_info_t * p_sci_iic_info)
  * Return Value : SCI_IIC_TRUE                        ;   Sets the event flag to SCI_IIC_EV_INT_STOP.
  *              : SCI_IIC_FALSE                       ;   Does not set the event flag to SCI_IIC_EV_INT_STOP.
  **********************************************************************************************************************/
-static bool sci_iic_check_stop_event (sci_iic_info_t * p_sci_iic_info)
+static bool sci_iic_check_stop_event(sci_iic_info_t * p_sci_iic_info)
 {
     bool boolret = SCI_IIC_TRUE;
+
     sci_regs_t pregs = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom->regs;
 
     if ((SCI_IIC_STPREQ == g_sci_iic_handles[p_sci_iic_info->ch_no]->mode) && (1 == pregs->SIMR3.BIT.IICSTIF))
@@ -2200,7 +2237,7 @@ static bool sci_iic_check_stop_event (sci_iic_info_t * p_sci_iic_info)
  *              : uint8_t new_status                      ;   New status
  * Return Value : None
  **********************************************************************************************************************/
-static void sci_iic_int_icier_setting (sci_iic_info_t * p_sci_iic_info, uint8_t New_icier)
+static void sci_iic_int_icier_setting(sci_iic_info_t * p_sci_iic_info, uint8_t New_icier)
 {
     sci_regs_t pregs = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom->regs;
 
@@ -2215,7 +2252,7 @@ static void sci_iic_int_icier_setting (sci_iic_info_t * p_sci_iic_info, uint8_t 
  * Arguments    : sci_iic_info_t * p_sci_iic_info     ;   IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void sci_iic_start_cond_generate (sci_iic_info_t * p_sci_iic_info)
+static void sci_iic_start_cond_generate(sci_iic_info_t * p_sci_iic_info)
 {
     sci_regs_t pregs = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom->regs;
 
@@ -2242,7 +2279,7 @@ static void sci_iic_start_cond_generate (sci_iic_info_t * p_sci_iic_info)
  * Arguments    : sci_iic_info_t * p_sci_iic_info     ;   IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void sci_iic_re_start_cond_generate (sci_iic_info_t * p_sci_iic_info)
+static void sci_iic_re_start_cond_generate(sci_iic_info_t * p_sci_iic_info)
 {
     sci_regs_t pregs = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom->regs;
 
@@ -2269,7 +2306,7 @@ static void sci_iic_re_start_cond_generate (sci_iic_info_t * p_sci_iic_info)
  * Arguments    : sci_iic_info_t * p_sci_iic_info     ;   IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void sci_iic_stop_cond_generate (sci_iic_info_t * p_sci_iic_info)
+static void sci_iic_stop_cond_generate(sci_iic_info_t * p_sci_iic_info)
 {
     sci_regs_t pregs = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom->regs;
 
@@ -2298,7 +2335,7 @@ static void sci_iic_stop_cond_generate (sci_iic_info_t * p_sci_iic_info)
  *              : uint8_t * p_data                   ;   Transmitted data buffer pointer
  * Return Value : None
  **********************************************************************************************************************/
-static void sci_iic_set_sending_data (sci_iic_info_t * p_sci_iic_info, uint8_t * p_data)
+static void sci_iic_set_sending_data(sci_iic_info_t * p_sci_iic_info, uint8_t * p_data)
 {
     sci_regs_t pregs = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom->regs;
 
@@ -2319,9 +2356,10 @@ static void sci_iic_set_sending_data (sci_iic_info_t * p_sci_iic_info, uint8_t *
  * Arguments    : sci_iic_info_t * p_sci_iic_info     ;   IIC Information
  * Return Value : Returns received data.
  **********************************************************************************************************************/
-static uint8_t sci_iic_get_receiving_data (sci_iic_info_t * p_sci_iic_info)
+static uint8_t sci_iic_get_receiving_data(sci_iic_info_t * p_sci_iic_info)
 {
     uint8_t ret;
+
     sci_regs_t pregs = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom->regs;
 
     ret = pregs->RDR;
@@ -2336,11 +2374,11 @@ static uint8_t sci_iic_get_receiving_data (sci_iic_info_t * p_sci_iic_info)
  * Arguments    : sci_iic_info_t * p_sci_iic_info     ;   IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void sci_iic_iic_disable (sci_iic_info_t * p_sci_iic_info)
+static void sci_iic_iic_disable(sci_iic_info_t * p_sci_iic_info)
 {
     sci_regs_t pregs = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom->regs;
 #if SCI_IIC_CFG_PORT_SETTING_PROCESSING
-    R_BSP_VOLATILE_EVENACCESS const sci_iic_ch_rom_t * prom = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom;
+    R_BSP_VOLATILE_EVENACCESS const sci_iic_ch_rom_t * p_rom = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom;
     
     uint8_t sscl_port_gr;
     uint8_t sscl_port_pin;
@@ -2351,16 +2389,16 @@ static void sci_iic_iic_disable (sci_iic_info_t * p_sci_iic_info)
 #if SCI_IIC_CFG_PORT_SETTING_PROCESSING
     /* Disables SCI_IIC multi-function pin controller after setting SCL and SDA to Hi-z by Reset. */
     /* Includes I/O register read operation at the end of the following function. */
-    sscl_port_gr = prom->sscl_port_gr;
-    sscl_port_pin = prom->sscl_port_pin;
+    sscl_port_gr  = p_rom->sscl_port_gr;
+    sscl_port_pin = p_rom->sscl_port_pin;
     r_sci_iic_mpc_setting(sscl_port_gr, sscl_port_pin, SCI_IIC_MPC_SSCL_INIT);
-    ssda_port_gr = prom->ssda_port_gr;
-    ssda_port_pin = prom->ssda_port_pin;
+    ssda_port_gr  = p_rom->ssda_port_gr;
+    ssda_port_pin = p_rom->ssda_port_pin;
     r_sci_iic_mpc_setting(ssda_port_gr, ssda_port_pin, SCI_IIC_MPC_SSDA_INIT);
 #endif
 
     /* Resets SCI_IIC registers. */
-    pregs->SCMR.BIT.SMIF = 0;
+    pregs->SCMR.BIT.SMIF  = 0;
     pregs->SIMR1.BIT.IICM = 0;
 
     /* dummy read */
@@ -2376,11 +2414,11 @@ static void sci_iic_iic_disable (sci_iic_info_t * p_sci_iic_info)
  * Arguments    : sci_iic_info_t * p_sci_iic_info     ;   IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void sci_iic_iic_enable (sci_iic_info_t * p_sci_iic_info)
+static void sci_iic_iic_enable(sci_iic_info_t * p_sci_iic_info)
 {
     sci_regs_t pregs = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom->regs;
 #if SCI_IIC_CFG_PORT_SETTING_PROCESSING
-    R_BSP_VOLATILE_EVENACCESS const sci_iic_ch_rom_t * prom = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom;
+    R_BSP_VOLATILE_EVENACCESS const sci_iic_ch_rom_t * p_rom = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom;
     
     uint8_t sscl_port_gr;
     uint8_t sscl_port_pin;
@@ -2391,19 +2429,19 @@ static void sci_iic_iic_enable (sci_iic_info_t * p_sci_iic_info)
 #endif
 
     /* Enables SCI_IIC.*/
-    pregs->SCMR.BIT.SMIF = 0;
+    pregs->SCMR.BIT.SMIF  = 0;
     pregs->SIMR1.BIT.IICM = 1;
 
 #if SCI_IIC_CFG_PORT_SETTING_PROCESSING
     /* Enables SCI_IIC multi-function pin controller.*/
     /* Includes I/O register read operation at the end of the following function. */
-    sscl_port_gr = prom->sscl_port_gr;
-    sscl_port_pin = prom->sscl_port_pin;
-    sscl_en_val = prom->sscl_en_val;
+    sscl_port_gr  = p_rom->sscl_port_gr;
+    sscl_port_pin = p_rom->sscl_port_pin;
+    sscl_en_val   = p_rom->sscl_en_val;
     r_sci_iic_mpc_setting(sscl_port_gr, sscl_port_pin, sscl_en_val);
-    ssda_port_gr = prom->ssda_port_gr;
-    ssda_port_pin = prom->ssda_port_pin;
-    ssda_en_val = prom->ssda_en_val;
+    ssda_port_gr  = p_rom->ssda_port_gr;
+    ssda_port_pin = p_rom->ssda_port_pin;
+    ssda_en_val   = p_rom->ssda_en_val;
     r_sci_iic_mpc_setting(ssda_port_gr, ssda_port_pin, ssda_en_val);
 #endif
 } /* End of function sci_iic_iic_enable() */
@@ -2414,7 +2452,7 @@ static void sci_iic_iic_enable (sci_iic_info_t * p_sci_iic_info)
  * Arguments    : sci_iic_info_t * p_sci_iic_info     ;   IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void sci_iic_register_init_setting (sci_iic_info_t * p_sci_iic_info)
+static void sci_iic_register_init_setting(sci_iic_info_t * p_sci_iic_info)
 {
     sci_regs_t pregs = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom->regs;
 
@@ -2458,9 +2496,10 @@ static void sci_iic_register_init_setting (sci_iic_info_t * p_sci_iic_info)
  * Arguments    : sci_iic_info_t * p_sci_iic_info     ;   IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void sci_iic_reset_setting (sci_iic_info_t * p_sci_iic_info)
+static void sci_iic_reset_setting(sci_iic_info_t * p_sci_iic_info)
 {
     sci_regs_t pregs = g_sci_iic_handles[p_sci_iic_info->ch_no]->prom->regs;
+
     volatile uint8_t dummy;
 
     /* Initializes the IIC bus interrupt enable register. */
@@ -2470,7 +2509,7 @@ static void sci_iic_reset_setting (sci_iic_info_t * p_sci_iic_info)
     /* Dummy read RDR for clear SSR.RDRF */
     dummy = pregs->RDR;
 
- } /* End of function sci_iic_reset_setting() */
+} /* End of function sci_iic_reset_setting() */
 
 /***********************************************************************************************************************
  * Function Name: r_sci_iic_txi_isr_processing
@@ -2478,7 +2517,7 @@ static void sci_iic_reset_setting (sci_iic_info_t * p_sci_iic_info)
  * Arguments    : uint8_t ch_no    ; number of channel
  * Return Value : None
  **********************************************************************************************************************/
-void r_sci_iic_txi_isr_processing (uint8_t ch_no)
+void r_sci_iic_txi_isr_processing(uint8_t ch_no)
 {
     sci_regs_t pregs = g_sci_iic_handles[ch_no]->prom->regs;
 
@@ -2507,20 +2546,20 @@ void r_sci_iic_txi_isr_processing (uint8_t ch_no)
                     /* Sets interrupted address sending. */
                     g_sci_iic_handles[ch_no]->api_event = SCI_IIC_EV_INT_ADD;
 
-                break;
+                    break;
 
                 case SCI_IIC_STS_SEND_DATA_WAIT :
 
                     /* Sets interrupted data sending. */
                     g_sci_iic_handles[ch_no]->api_event = SCI_IIC_EV_INT_SEND;
 
-                break;
+                    break;
 
                 default :
 
                     /* Does nothing. */
 
-                break;
+                    break;
             }
 
         }
@@ -2539,20 +2578,20 @@ void r_sci_iic_txi_isr_processing (uint8_t ch_no)
                 /* Sets interrupted address sending. */
                 g_sci_iic_handles[ch_no]->api_event = SCI_IIC_EV_INT_ADD;
 
-            break;
+                break;
 
             case SCI_IIC_STS_SEND_DATA_WAIT :
 
                 /* Sets interrupted data sending. */
                 g_sci_iic_handles[ch_no]->api_event = SCI_IIC_EV_INT_SEND;
 
-            break;
+                break;
 
             default :
 
                 /* Does nothing. */
 
-            break;
+                break;
         }
 
     }
@@ -2565,7 +2604,7 @@ void r_sci_iic_txi_isr_processing (uint8_t ch_no)
  * Arguments    : uint8_t ch_no    ; number of channel
  * Return Value : None
  **********************************************************************************************************************/
-void r_sci_iic_tei_isr_processing (uint8_t ch_no)
+void r_sci_iic_tei_isr_processing(uint8_t ch_no)
 {
     sci_regs_t pregs = g_sci_iic_handles[ch_no]->prom->regs;
 
@@ -2576,12 +2615,14 @@ void r_sci_iic_tei_isr_processing (uint8_t ch_no)
     while (SCI_IIC_IICSTIF_CLEAR != pregs->SIMR3.BIT.IICSTIF)
     {
         /* nothing to do */
+        R_BSP_NOP();
     }
 
     /* WAIT_LOOP */
     while (0 != ((*g_sci_iic_handles[ch_no]->prom->pir_tei) & (g_sci_iic_handles[ch_no]->prom->tei_ir_mask)))
     {
         /* nothing to do */
+        R_BSP_NOP();
     }
 
     /* ---- Checks NACK reception. ---- */

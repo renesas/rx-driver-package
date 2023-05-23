@@ -46,6 +46,9 @@
 *         : 13.09.2021 2.70    Added RX671 Demo.
 *         : 14.03.2022 2.80    Supported RX66T-48pin.
 *         : 31.03.2022 2.90    Supported RX660.
+*         : 28.06.2022 3.00    Updated demo projects.
+*         : 15.08.2022 3.10    Added support for RX26T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *******************************************************************************/
 #ifndef DMACA_RX_IF_H
 #define DMACA_RX_IF_H
@@ -68,8 +71,8 @@ Macro definitions
 #endif
 
 /* Version Number of API */
-#define DMACA_VERSION_MAJOR  (2)
-#define DMACA_VERSION_MINOR  (90)
+#define DMACA_VERSION_MAJOR  (3)
+#define DMACA_VERSION_MINOR  (10)
 
 /* DMAC activation is disabled. */
 #define DMACA_ACTIVE_DISABLE              (0x00u)
@@ -402,15 +405,15 @@ typedef struct st_dmaca_transfer_data_cfg
 /*******************************************************************************
 Exported global variables and functions (to be accessed by other files)
 *******************************************************************************/
-dmaca_return_t R_DMACA_Open(uint8_t channel);
-dmaca_return_t R_DMACA_Create(uint8_t channel, dmaca_transfer_data_cfg_t *p_data_cfg);
-dmaca_return_t R_DMACA_Close(uint8_t channel);
-dmaca_return_t R_DMACA_Control(uint8_t channel, dmaca_command_t  command, dmaca_stat_t *p_stat);
-dmaca_return_t R_DMACA_Int_Enable(uint8_t channel, uint8_t  priority);
-dmaca_return_t R_DMACA_Int_Disable(uint8_t channel);
-uint32_t       R_DMACA_GetVersion(void);
-void           R_DMACA_Init(void);
-dmaca_return_t R_DMACA_Int_Callback(uint8_t channel, void *callback);
+dmaca_return_t R_DMACA_Open (uint8_t channel);
+dmaca_return_t R_DMACA_Create (uint8_t channel, dmaca_transfer_data_cfg_t *p_data_cfg);
+dmaca_return_t R_DMACA_Close (uint8_t channel);
+dmaca_return_t R_DMACA_Control (uint8_t channel, dmaca_command_t  command, dmaca_stat_t *p_stat);
+dmaca_return_t R_DMACA_Int_Enable (uint8_t channel, uint8_t  priority);
+dmaca_return_t R_DMACA_Int_Disable (uint8_t channel);
+uint32_t       R_DMACA_GetVersion (void);
+void           R_DMACA_Init (void);
+dmaca_return_t R_DMACA_Int_Callback (uint8_t channel, void *callback);
 
 #endif /* DMACA_RX_IF_H */
 

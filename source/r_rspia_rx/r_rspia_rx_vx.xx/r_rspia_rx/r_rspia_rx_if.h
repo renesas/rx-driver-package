@@ -25,6 +25,8 @@
 *                               Supported for RX671.
 *         : 13.09.2021 1.10     Added the demo for RX671.
 *         : 29.07.2022 1.20     Updated demo projects.
+*         : 15.08.2022 1.30     Added RX26T support.
+*                               Fixed to comply GSCE coding standard revision 6.5.0.
 ***********************************************************************************************************************/
 
 #ifndef RSPIA_API_HEADER_FILE
@@ -46,13 +48,13 @@ Includes   <System Includes> , "Project Includes"
 Macro definitions
 ***********************************************************************************************************************/
 
-#if R_BSP_VERSION_MAJOR < 5
+#if ((R_BSP_VERSION_MAJOR == 6) && (R_BSP_VERSION_MINOR < 10) || (R_BSP_VERSION_MAJOR < 6))
     #error "This module must use BSP module of Rev.6.10 or higher. Please use the BSP module of Rev.6.10 or higher."
 #endif
 
 /* Version Number of API. */
 #define RSPIA_RX_VERSION_MAJOR           (1)
-#define RSPIA_RX_VERSION_MINOR           (20)
+#define RSPIA_RX_VERSION_MINOR           (30)
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -64,7 +66,7 @@ typedef enum e_rspia_ch       /* RSPIA channel numbers */
     RSPIA_NUM_CH
 } rspia_ch_t;
 
-typedef enum rspia_err_e       /* RSPIA API error codes */
+typedef enum rspia_err_e      /* RSPIA API error codes */
 {
     RSPIA_SUCCESS = 0,        /* Successful; channel initialized */
     RSPIA_ERR_BAD_CHAN,       /* Invalid channel number. */
@@ -79,7 +81,7 @@ typedef enum rspia_err_e       /* RSPIA API error codes */
     RSPIA_ERR_UNDEF,          /* Undefined/unknown error */
 } rspia_err_t;
 
-typedef enum
+typedef enum                      /* RSPIA API event codes */
 {
     RSPIA_EVT_TRANSFER_COMPLETE,  /* The data transfer completed. */
     RSPIA_EVT_TRANSFER_ABORTED,   /* The data transfer was aborted. */
@@ -114,20 +116,21 @@ typedef enum
 
 /* Abstraction of channel handle data structure.
  * User application will use this as a reference to an opened channel. */
-typedef struct rspia_cfg_block_s *rspia_hdl_t;
+typedef struct rspia_cfg_block_s * rspia_hdl_t;
 
 typedef struct rspia_callback_data_s
 {
-    rspia_hdl_t hdl;
-    rspia_evt_t event;
-}rspia_callback_data_t;
+    rspia_hdl_t  hdl;
+    rspia_evt_t  event;
+} rspia_callback_data_t;
 
 typedef struct rspia_chnl_settings_s
 {
-    rspia_interface_mode_t gpio_ssl;                /* RSPIA_IF_MODE_4WIRE: RSPIA slave selects, RSPIA_IF_MODE_3WIRE: GPIO slave selects. */
-    rspia_master_slave_mode_t master_slave_mode;    /* RSPIA_MS_MODE_MASTER or RSPIA_MS_MODE_SLAVE. */
-    rspia_frame_select_t frame_mode;                /*  RSPIA_IF_FRAME_TI_SSP or RSPIA_IF_FRAME_MOTOROLA_SPI. */
-    uint32_t    bps_target;                         /* The target bits per second setting value for the channel. */
+    rspia_interface_mode_t     gpio_ssl;         /* RSPIA_IF_MODE_4WIRE: RSPIA slave selects,
+                                                  * RSPIA_IF_MODE_3WIRE: GPIO slave selects. */
+    rspia_master_slave_mode_t  master_slave_mode;/* RSPIA_MS_MODE_MASTER or RSPIA_MS_MODE_SLAVE. */
+    rspia_frame_select_t       frame_mode;       /* RSPIA_IF_FRAME_TI_SSP or RSPIA_IF_FRAME_MOTOROLA_SPI. */
+    uint32_t                   bps_target;       /* The target bits per second setting value for the channel. */
 } rspia_chan_settings_t;
 
 /************ Type defines used with the R_RSPIA_Control function. ***************/
@@ -136,7 +139,7 @@ typedef enum rspia_cmd_e
 {
     RSPIA_CMD_SET_BAUD = 1,             /* Change the base bit rate */
     RSPIA_CMD_ABORT,                    /* Stop the current read or write operation immediately. */
-    RSPIA_CMD_SET_REGS,                 /* Set all supported RSPIA regs in one operation. Expert use only! */
+    RSPIA_CMD_SET_REGS,                 /* Set all supported RSPIA registers in one operation. Expert use only! */
     RSPIA_CMD_CHANGE_TX_FIFO_THRESH,    /* change TX FIFO threshold */
     RSPIA_CMD_CHANGE_RX_FIFO_THRESH,    /* change TX FIFO threshold */
     RSPIA_CMD_UNKNOWN                   /* Not a valid command. */
@@ -155,20 +158,21 @@ typedef struct rspia_cmd_baud_s
  * settings as required, and passes a pointer to it as an argument in the call to R_RSPIA_Control(). */
 typedef struct rspia_cmd_setregs_s
 {
-    uint16_t spdcr_val;     /* RSPIA Data Control Register (SPDCR) */
-    uint8_t sslp_val;       /* RSPIA Slave Select Polarity Register (SSLP) */
-    uint8_t sppcr_val;      /* RSPIA Pin Control Register (SPPCR) */
-    uint8_t spckd_val;      /* RSPIA Clock Delay Register (SPCKD) */
-    uint8_t sslnd_val;      /* RSPIA Slave Select Negation Delay Register (SSLND) */
-    uint8_t spnd_val;       /* RSPIA Next-Access Delay Register (SPND) */
+    uint16_t spdcr_val;      /* RSPIA Data Control Register (SPDCR) */
+    uint8_t  sslp_val;       /* RSPIA Slave Select Polarity Register (SSLP) */
+    uint8_t  sppcr_val;      /* RSPIA Pin Control Register (SPPCR) */
+    uint8_t  spckd_val;      /* RSPIA Clock Delay Register (SPCKD) */
+    uint8_t  sslnd_val;      /* RSPIA Slave Select Negation Delay Register (SSLND) */
+    uint8_t  spnd_val;       /* RSPIA Next-Access Delay Register (SPND) */
 } rspia_cmd_setregs_t;
 
-/*************************************************************************************************
+/**********************************************************************************************************************
  * Type defines used with the R_RSPIA_Write, R_RSPIA_Read, and R_RSPIA_WriteRead functions.
- * Enums are provided for each field of the command word for write and read operations.
+ * Enumerates are provided for each field of the command word for write and read operations.
  * A command word must be formed by complete initialization of a structure of these.
  * This word is passed as an argument to the R_RSPIA_Write, R_RSPIA_Read, and R_RSPIA_WriteRead functions
- * and will get copied to the SPCMD register with each call. */
+ * and will get copied to the SPCMD register with each call.
+***********************************************************************************************************************/
 
 /* Clock phase and polarity */
 typedef enum
@@ -299,35 +303,92 @@ typedef union rspia_command_word_s
 /***********************************************************************************************************************
 Public Functions
 ***********************************************************************************************************************/
-rspia_err_t   R_RSPIA_Open(uint8_t               chan,
-                          rspia_chan_settings_t *p_cfg,
-                          rspia_command_word_t  p_cmd,
-                          void                (*p_callback)(void *p_cbdat),
-                          rspia_hdl_t        *p_hdl);
+/**********************************************************************************************************************
+ * Function Name: R_RSPIA_Open
+ * Description  : This function initializes the associated registers.
+ * Arguments    : chan - Number of the RSPIA channel to be initialized.
+ *                *p_cfg - Pointer to RSPIA channel configuration data structure.
+ *                p_cmd - SPCMD command data structure.
+ *                (*p_callback)(void*p_cbdat) - Pointer to user defined function called from interrupt.
+ *                *p_hdl - Pointer to a handle for channel. Handle value will be set by this function.
+ * Return Value : rspia_err_t - RSPIA enumerated error codes.
+***********************************************************************************************************************/
+rspia_err_t   R_RSPIA_Open (uint8_t                 chan,
+                            rspia_chan_settings_t * p_cfg,
+                            rspia_command_word_t    p_cmd,
+                            void (*p_callback)(void * p_cbdat),
+                            rspia_hdl_t           * p_hdl);
 
-rspia_err_t  R_RSPIA_Control(rspia_hdl_t  hdl,
-                            rspia_cmd_t     cmd,
-                            void          *pcmd_data);
+/**********************************************************************************************************************
+ * Function Name: R_RSPIA_Control
+ * Description  : The Control function is responsible for handling special hardware or software operations for the RSPI
+ *                channel.
+ * Arguments    : hdl - Handle for the channel.
+ *                cmd -  Enumerated command code.
+ *                pcmd_data - Pointer to the required data structure, which is needed for operation completion.
+ * Return Value : rspia_err_t - RSPIA enumerated error codes.
+ *********************************************************************************************************************/
+rspia_err_t R_RSPIA_Control (rspia_hdl_t    hdl,
+                            rspia_cmd_t    cmd,
+                            void         * pcmd_data);
 
-rspia_err_t  R_RSPIA_Read(rspia_hdl_t        hdl,
-                         rspia_command_word_t  p_cmd,
-                         void                *p_dst,
-                         uint16_t             length);
+/**********************************************************************************************************************
+ * Function Name: R_RSPIA_Read
+ * Description  : The Read function receives data from the selected SPI device.
+ * Arguments    : hdl - Handle for the channel.
+ *                p_cmd - Bit field contains all the RSPIA command register settings for SPCMD for this operation.
+ *                p_dst - Void type pointer to a destination buffer.
+ *                length - The number of data frames to be transferred.
+ * Return Value : rspia_err_t - RSPIA enumerated error codes.
+ *********************************************************************************************************************/
+rspia_err_t  R_RSPIA_Read  (rspia_hdl_t           hdl,
+                            rspia_command_word_t  p_cmd,
+                            void                * p_dst,
+                            uint16_t              length);
 
-rspia_err_t  R_RSPIA_Write(rspia_hdl_t        hdl,
-                          rspia_command_word_t  p_cmd,
-                          void                *p_src,
-                          uint16_t             length);
+/**********************************************************************************************************************
+ * Function Name: R_RSPIA_Write
+ * Description  : The Write function transmits data to the selected SPIA device.
+ * Arguments    : hdl - Handle for the channel.
+ *                p_cmd - Bit field contains all the RSPIA command register settings for SPCMD for this operation.
+ *                p_src - Void type pointer to a source data buffer.
+ *                length - The number of data frames to be transferred.
+ * Return Value : rspia_err_t - RSPIA enumerated error codes.
+ *********************************************************************************************************************/
+rspia_err_t  R_RSPIA_Write (rspia_hdl_t          hdl,
+                            rspia_command_word_t p_cmd,
+                            void               * p_src,
+                            uint16_t             length);
 
-rspia_err_t  R_RSPIA_WriteRead(rspia_hdl_t        hdl,
-                              rspia_command_word_t  p_cmd,
-                              void                *p_src,
-                              void                *p_dst,
-                              uint16_t             length);
+/**********************************************************************************************************************
+ * Function Name: R_RSPIA_WriteRead
+ * Description  : Simultaneously transmits data to a SPI device while receiving data from a SPI device.
+ * Arguments    : hdl - Handle for the channel
+ *                p_cmd - Bit field contains all the RSPIA command register settings for SPCMD for this operation.
+ *                p_src - Void type pointer to a source data buffer.
+ *                p_dst - Void type pointer to a destination data buffer.
+ *                length - Length - The number of data frames to be transferred.
+ * Return Value : [rspia_err_t - RSPIA enumerated error codes.
+ *********************************************************************************************************************/
+rspia_err_t  R_RSPIA_WriteRead (rspia_hdl_t         hdl,
+                                rspia_command_word_t p_cmd,
+                                void               * p_src,
+                                void               * p_dst,
+                                uint16_t             length);
 
-rspia_err_t  R_RSPIA_Close(rspia_hdl_t hdl);
+/**********************************************************************************************************************
+ * Function Name: R_RSPIA_Close
+ * Description  : Fully disables the RSPIA channel designated by the handle.
+ * Argument     : hdl - RSPIA handle number
+ * Return Value : rspia_err_t - RSPIA enumerated error codes.
+ *********************************************************************************************************************/
+rspia_err_t  R_RSPIA_Close (rspia_hdl_t hdl);
 
-uint32_t  R_RSPIA_GetVersion(void);
-
+/**********************************************************************************************************************
+ * Function Name: R_RSPIA_GetVersion
+ * Description  : This function returns the driver version number at runtime.
+ * Return Value : uint32_t - Version number of current RSPIA driver.
+ *********************************************************************************************************************/
+uint32_t  R_RSPIA_GetVersion (void);
 
 #endif /* RSPIA_API_HEADER_FILE */

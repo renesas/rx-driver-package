@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_receivesocket.c
@@ -48,7 +48,7 @@ static int32_t cellular_receive_data (st_cellular_ctrl_t * const p_ctrl, const u
 static e_cellular_timeout_check_t cellular_receive_flag_check (st_cellular_ctrl_t * const p_ctrl,
                                         st_cellular_time_ctrl_t * const p_cellular_timeout_ctrl,
                                         const uint8_t socket_no);
-static uint32_t cellular_recv_size_check (st_cellular_ctrl_t * const p_ctrl,
+static int32_t cellular_recv_size_check (st_cellular_ctrl_t * const p_ctrl,
                                             const uint8_t socket_no, const int32_t length);
 
 /*************************************************************************************************
@@ -78,10 +78,10 @@ static uint32_t cellular_recv_size_check (st_cellular_ctrl_t * const p_ctrl,
 int32_t R_CELLULAR_ReceiveSocket(st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_no,
                         uint8_t * const p_data, const int32_t length, const uint32_t timeout_ms)
 {
-    uint32_t preemption = 0;
-    int32_t total_receive_length = 0;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
+    int32_t                    total_receive_length = 0;
+    uint32_t                   preemption           = 0;
+    e_cellular_err_t           ret                  = CELLULAR_SUCCESS;
+    e_cellular_err_semaphore_t semaphore_ret        = CELLULAR_SEMAPHORE_SUCCESS;
 
     preemption = cellular_interrupt_disable();
     if ((NULL == p_data) || (0 >= length) || (NULL == p_ctrl))
@@ -130,21 +130,21 @@ int32_t R_CELLULAR_ReceiveSocket(st_cellular_ctrl_t * const p_ctrl, const uint8_
     {
         semaphore_ret = cellular_take_semaphore(p_ctrl->p_socket_ctrl[socket_no
                                                     - CELLULAR_START_SOCKET_NUMBER].rx_semaphore);
-        if (CELLULAR_SEMAPHORE_SUCCESS != semaphore_ret)
-        {
-            total_receive_length = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
-        }
-        else
+        if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
         {
             total_receive_length = cellular_receive_data(p_ctrl, socket_no, p_data, length, timeout_ms);
             cellular_give_semaphore(p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].rx_semaphore);
         }
-
+        else
+        {
+            ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
+        }
         p_ctrl->running_api_count -= 2;
     }
-    else
+
+    if (CELLULAR_SUCCESS != ret)
     {
-        total_receive_length = ret;
+        total_receive_length = (int32_t)ret;    //cast
     }
 
     return total_receive_length;
@@ -180,17 +180,16 @@ int32_t R_CELLULAR_ReceiveSocket(st_cellular_ctrl_t * const p_ctrl, const uint8_
 static int32_t cellular_receive_data(st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_no,
                                         uint8_t * const p_data, const int32_t length, const uint32_t timeout_ms)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_ERR_TAKE;
-    e_cellular_timeout_check_t timeout = CELLULAR_NOT_TIMEOUT;
-    int32_t total_receive_length = 0;
-    uint32_t receive_size;
+    int32_t                    total_receive_length = 0;
+    int32_t                    receive_size;
+    e_cellular_err_t           ret                  = CELLULAR_SUCCESS;
+    e_cellular_err_semaphore_t semaphore_ret        = CELLULAR_SEMAPHORE_ERR_TAKE;
+    e_cellular_timeout_check_t timeout              = CELLULAR_NOT_TIMEOUT;
 
     st_cellular_time_ctrl_t * const p_cellular_timeout_ctrl
         = &p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].cellular_rx_timeout_ctrl;
 
     cellular_timeout_init(p_cellular_timeout_ctrl, timeout_ms);
-
     if (CELLULAR_PSM_ACTIVE == p_ctrl->ring_ctrl.psm)
     {
         while (1)
@@ -207,6 +206,9 @@ static int32_t cellular_receive_data(st_cellular_ctrl_t * const p_ctrl, const ui
 #else
         cellular_rts_ctrl(0);
 #endif
+#ifdef CELLULAR_RTS_DELAY
+        cellular_delay_task(CELLULAR_RTS_DELAYTIME);
+#endif
     }
 
     /* Data receive loop */
@@ -219,11 +221,7 @@ static int32_t cellular_receive_data(st_cellular_ctrl_t * const p_ctrl, const ui
         }
 
         semaphore_ret = cellular_take_semaphore(p_ctrl->at_semaphore);
-        if (CELLULAR_SEMAPHORE_SUCCESS != semaphore_ret)
-        {
-            break; /* Break of the data receive loop */
-        }
-        else
+        if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
         {
             receive_size = cellular_recv_size_check(p_ctrl, socket_no,
                         length - p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].total_recv_count);
@@ -231,54 +229,40 @@ static int32_t cellular_receive_data(st_cellular_ctrl_t * const p_ctrl, const ui
             p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].p_recv = p_data;
 
             ret = atc_sqnsrecv(p_ctrl, socket_no, receive_size);
+            cellular_give_semaphore(p_ctrl->at_semaphore);
+
             if (CELLULAR_SUCCESS == ret)
             {
                 total_receive_length = p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].total_recv_count;
-
-                timeout = cellular_check_timeout(p_cellular_timeout_ctrl);
+                timeout              = cellular_check_timeout(p_cellular_timeout_ctrl);
                 if (CELLULAR_TIMEOUT == timeout)
                 {
-                    goto cellular_receive_data_fail;
+                    break; /* Break of the data receive loop */
                 }
             }
             else
             {
-                goto cellular_receive_data_fail;
+                break; /* Break of the data receive loop */
             }
-            cellular_give_semaphore(p_ctrl->at_semaphore);
+        }
+        else
+        {
+            break; /* Break of the data receive loop */
         }
     } /* End of data receive loop */
 
     if (CELLULAR_PSM_ACTIVE == p_ctrl->ring_ctrl.psm)
     {
-        cellular_give_semaphore(p_ctrl->ring_ctrl.rts_semaphore);
 #if CELLULAR_CFG_CTS_SW_CTRL == 1
         cellular_rts_hw_flow_disable();
 #endif
         cellular_rts_ctrl(1);
+        cellular_give_semaphore(p_ctrl->ring_ctrl.rts_semaphore);
     }
-
     p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].total_recv_count = 0;
-    p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].p_recv = NULL;
+    p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].p_recv           = NULL;
 
     return total_receive_length;
-
-cellular_receive_data_fail:
-    {
-        if (CELLULAR_PSM_ACTIVE == p_ctrl->ring_ctrl.psm)
-        {
-            cellular_give_semaphore(p_ctrl->ring_ctrl.rts_semaphore);
-#if CELLULAR_CFG_CTS_SW_CTRL == 1
-            cellular_rts_hw_flow_disable();
-#endif
-            cellular_rts_ctrl(1);
-        }
-
-        cellular_give_semaphore(p_ctrl->at_semaphore);
-        p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].total_recv_count = 0;
-        p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].p_recv = NULL;
-        return total_receive_length;
-    }
 }
 /**********************************************************************************************************************
  * End of function  cellular_receive_data
@@ -331,23 +315,24 @@ static e_cellular_timeout_check_t cellular_receive_flag_check(st_cellular_ctrl_t
  *                                  Socket number for sending data.
  * Return Value   @retval        Number of bytes received from the module.
  ************************************************************************************************/
-static uint32_t cellular_recv_size_check(st_cellular_ctrl_t * const p_ctrl,
+static int32_t cellular_recv_size_check(st_cellular_ctrl_t * const p_ctrl,
                                             const uint8_t socket_no, const int32_t length)
 {
-    uint32_t receive_size = 0;
+    int32_t receive_size = 0;
 
     if (p_ctrl->sci_ctrl.rx_buff_size > p_ctrl->sci_ctrl.rx_process_size)
     {
-        receive_size = p_ctrl->sci_ctrl.rx_process_size;
+        receive_size = (int32_t)p_ctrl->sci_ctrl.rx_process_size;   //cast
     }
     else
     {
-        receive_size = p_ctrl->sci_ctrl.rx_buff_size;
+        receive_size = (int32_t)p_ctrl->sci_ctrl.rx_buff_size;      //cast
     }
 
     if (receive_size > p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].receive_unprocessed_size)
     {
-        receive_size = p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].receive_unprocessed_size;
+        receive_size =
+            (int32_t)p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].receive_unprocessed_size;  //cast
     }
 
     if (receive_size > length)

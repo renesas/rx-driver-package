@@ -18,6 +18,7 @@
         <version>8.03.00.202002</version>
         <version>8.03.00.202102</version>
         <version>8.03.00.202104</version>
+        <version>8.03.00.202202</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -42,11 +43,11 @@
         <zipsource>r_flash_spi_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.20</version>
+            <version>7.21</version>
         </dependency>
         <dependency>
             <module>r_memdrv_rx</module>
-            <version>1.04</version>
+            <version>1.05</version>
         </dependency>
         <application>Storage and Memory</application>
         <desc>Clock Synchronous Control Module for Serial Flash memory Access</desc>

@@ -19,17 +19,18 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018(2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018(2023) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_flash_dm_private.h
-* Version      : 2.01
+* Version      : 2.10
 * Description  : DATFRX interface header file
 *************************************************************************************************/
 /************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 28.09.2018 2.00     First Release
 *              : 25.01.2019 2.01     English PDF added, Fixed blank check processing and Busy check procedure
+*              : 21.04.2023 2.10     Added macro constant judgment of "FLASH_TYPE_5"
 *************************************************************************************************/
 
 /************************************************************************************************
@@ -46,7 +47,7 @@ Includes <System Includes> , "Project Includes"
 #elif (FLASH_CFG_CODE_FLASH_ENABLE == 0)
 #include "r_dispatch_1_df_1k.h"
 #endif/* FLASH_CFG_CODE_FLASH_ENABLE and FLASH_DM_CFG_CF_BLOCK_SIZE_2K settings */
-#elif(FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4)
+#elif(FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5)
 #include "r_dispatch_2_df.h"
 #endif/* FLASH_TYPE */
 

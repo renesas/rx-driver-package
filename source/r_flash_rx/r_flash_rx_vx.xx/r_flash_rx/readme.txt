@@ -5,12 +5,12 @@ r_flash_rx
 
 Document Number 
 ---------------
-r01an2184ej0491
-r01an2184jj0491
+r01an2184ej0500
+r01an2184jj0500
 
 Version
 -------
-v4.91
+v5.00
 
 Overview
 --------
@@ -46,6 +46,7 @@ Supported MCUs
 * RX23W Group
 * RX24T Group
 * RX24U Group
+* RX26T Group
 * RX64M Group
 * RX651, RX65N Group
 * RX660 Group
@@ -72,6 +73,7 @@ Boards Tested On
 * RSSKRX23W
 * RSKRX24T
 * RSKRX24U
+* MCK-RX26T
 * RSKRX64M
 * RSKRX65N
 * RSKRX65N-2MB
@@ -100,7 +102,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp      V7.20
+* r_bsp      V7.30
 
 How to add to your project
 --------------------------
@@ -131,8 +133,8 @@ How to add to your project
 
 Toolchain(s) Used
 -----------------
-* Renesas RXC 3.04.00
-* GNU GNURX 8.03.00.202104
+* Renesas RXC 3.05.00
+* GNU GNURX 8.03.00.202204
 * IAR ICCRX 4.20.03
 
 
@@ -144,9 +146,9 @@ r_flash_rx
 |
 +---doc
 |   +-- en
-|   |   +-- r01an2184ej0491-rx-flash.pdf
+|   |   +-- r01an2184ej0500-rx-flash.pdf
 |   +-- ja
-|       +-- r01an2184jj0491-rx-flash.pdf
+|       +-- r01an2184jj0500-rx-flash.pdf
 |
 +---ref
 |   +-- r_flash_rx_config_reference.h
@@ -176,6 +178,11 @@ r_flash_rx
         |
         +--r_flash_type4.c
         +--r_flash_type4_if.h
+    |
+    +-- flash_type_5
+        |
+        +--r_flash_type5.c
+        +--r_flash_type5_if.h
     |
     +-- targets
         |
@@ -214,6 +221,9 @@ r_flash_rx
         |
         +--rx24u
              +-- r_flash_rx24u.h
+        |
+        +--rx26t
+             +-- r_flash_rx26t.h
         |
         +--rx64m
              +-- r_flash_rx64m.h

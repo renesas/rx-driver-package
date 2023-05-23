@@ -10,6 +10,7 @@
         <version>3.02.00</version>
         <version>3.03.00</version>
         <version>3.04.00</version>
+        <version>3.05.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -22,6 +23,8 @@
         <version>8.03.00.202004</version>
         <version>8.03.00.202102</version>
         <version>8.03.00.202104</version>
+        <version>8.03.00.202202</version>
+        <version>8.03.00.202204</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -54,6 +57,7 @@
         <group omit_board="true">RX23W</group>
         <group omit_board="true">RX24T</group>
         <group omit_board="true">RX24U</group>
+        <group omit_board="true">RX26T</group>
         <group omit_board="true">RX64M</group>
         <group omit_board="true">RX651</group>
         <group omit_board="true">RX65N</group>
@@ -87,6 +91,7 @@
                 <version>7.00</version>
                 <version>7.10</version>
                 <version>7.20</version>
+                <version>7.30</version>
         </dependency>
         <zipsource>r_flash_rx_vx.xx.zip</zipsource>
         <application>Non-Volatile Storage</application>
@@ -100,6 +105,7 @@
         <incdir>r_flash_rx/src/flash_type_1</incdir>
         <incdir>r_flash_rx/src/flash_type_3</incdir>
         <incdir>r_flash_rx/src/flash_type_4</incdir>
+        <incdir>r_flash_rx/src/flash_type_5</incdir>
         <incdir>r_flash_rx/src/targets</incdir>
     </package>
 

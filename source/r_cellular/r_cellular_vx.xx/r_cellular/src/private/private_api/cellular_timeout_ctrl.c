@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_timeout_ctrl.c
@@ -56,7 +56,7 @@ void cellular_timeout_init(st_cellular_time_ctrl_t * const p_timeout_ctrl, const
     }
 
     p_timeout_ctrl->start_time = cellular_get_tickcount();
-    p_timeout_ctrl->end_time = p_timeout_ctrl->start_time + timeout;
+    p_timeout_ctrl->end_time   = p_timeout_ctrl->start_time + timeout;
 
     if (p_timeout_ctrl->end_time < p_timeout_ctrl->start_time)
     {

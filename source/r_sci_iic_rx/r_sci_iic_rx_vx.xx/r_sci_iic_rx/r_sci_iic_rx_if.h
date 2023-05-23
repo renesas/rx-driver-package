@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer 
  *
- * Copyright (C) 2013(2021) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_sci_iic_rx_if.h
@@ -48,6 +48,9 @@
  *         : 30.06.2021 2.48     Changed minor version to '48' for RX671 support.
  *         : 31.07.2021 2.49     Changed minor version to '49' for RX140 support.
  *         : 31.12.2021 2.50     Changed minor version to '50' for RX660 support.
+ *         : 15.06.2022 2.60     RX26T support added.
+ *                               Updated demo projects.
+ *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef SCI_IIC_IF_H
@@ -65,17 +68,17 @@ R_BSP_PRAGMA_UNPACK
 
  /* Version Number of API. */
     #define SCI_IIC_VERSION_MAJOR  (2)
-    #define SCI_IIC_VERSION_MINOR  (50)
+    #define SCI_IIC_VERSION_MINOR  (60)
 
 /*----------------------------------------------------------------------------*/
 /*   Define return values and values of channel state flag.                   */
 /*----------------------------------------------------------------------------*/
-    #define SCI_IIC_NO_INIT         ((sci_iic_ch_dev_status_t)(0))
-    #define SCI_IIC_IDLE            ((sci_iic_ch_dev_status_t)(1))
-    #define SCI_IIC_FINISH          ((sci_iic_ch_dev_status_t)(2))
-    #define SCI_IIC_NACK            ((sci_iic_ch_dev_status_t)(3))
-    #define SCI_IIC_COMMUNICATION   ((sci_iic_ch_dev_status_t)(4))
-    #define SCI_IIC_ERROR           ((sci_iic_ch_dev_status_t)(5))
+    #define SCI_IIC_NO_INIT         ((sci_iic_ch_dev_status_t)(0)) /* No initial state*/
+    #define SCI_IIC_IDLE            ((sci_iic_ch_dev_status_t)(1)) /* Idle state*/
+    #define SCI_IIC_FINISH          ((sci_iic_ch_dev_status_t)(2)) /* Finish state*/
+    #define SCI_IIC_NACK            ((sci_iic_ch_dev_status_t)(3)) /* Nack state*/
+    #define SCI_IIC_COMMUNICATION   ((sci_iic_ch_dev_status_t)(4)) /* Communication state*/
+    #define SCI_IIC_ERROR           ((sci_iic_ch_dev_status_t)(5)) /* Error state*/
 
 /*----------------------------------------------------------------------------*/
 /*   Defines the argument of the R_SCI_IIC_Control function.                  */
@@ -109,7 +112,7 @@ typedef enum /* SCI_IIC API error codes */
 /*   Define sci_iic information structure type.                               */
 /*----------------------------------------------------------------------------*/
 /*----- Callback function type. -----*/
-typedef void (*sci_iic_callback) (void); /* Callback function type */
+typedef void (* sci_iic_callback)(void); /* Callback function type */
 
 /*----- Structure type. -----*/
 /* SCI_IIC Information structure. */
@@ -156,7 +159,7 @@ extern volatile sci_iic_ch_dev_status_t g_sci_iic_ChStatus[]; /* Channel state f
 sci_iic_return_t R_SCI_IIC_Open (sci_iic_info_t * p_sci_iic_info);
 sci_iic_return_t R_SCI_IIC_MasterSend (sci_iic_info_t * p_sci_iic_info);
 sci_iic_return_t R_SCI_IIC_MasterReceive (sci_iic_info_t * p_sci_iic_info);
-sci_iic_return_t R_SCI_IIC_GetStatus (sci_iic_info_t *p_sci_iic_info, sci_iic_mcu_status_t *p_sci_iic_status);
+sci_iic_return_t R_SCI_IIC_GetStatus (sci_iic_info_t * p_sci_iic_info, sci_iic_mcu_status_t * p_sci_iic_status);
 sci_iic_return_t R_SCI_IIC_Control (sci_iic_info_t * p_sci_iic_info, sci_iic_ctrl_ptn_t ctrl_ptn);
 sci_iic_return_t R_SCI_IIC_Close (sci_iic_info_t * p_sci_iic_info);
 uint32_t R_SCI_IIC_GetVersion (void);

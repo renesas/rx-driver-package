@@ -38,6 +38,9 @@
 *           13.09.2021 2.60    Added RX671 demo.
 *           14.03.2022 2.70    Added support for RX66T-48Pin.
 *           31.03.2022 2.80    Added support for RX660.
+*           28.06.2022 2.90    Updated demo projects
+*           15.08.2022 3.00    Added support for RX26T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 #ifndef WDT_RX_IF_H
@@ -60,8 +63,8 @@ Macro definitions
 #endif
 
 /* Version Number of API. */
-#define WDT_RX_VERSION_MAJOR   (2)
-#define WDT_RX_VERSION_MINOR   (80)
+#define WDT_RX_VERSION_MAJOR   (3)
+#define WDT_RX_VERSION_MINOR   (00)
 
 #define OFS0_WDT_DISABLED              (0x00020000)
 
@@ -138,10 +141,10 @@ typedef struct st_wdt_config                  // WDT configuration options used 
     wdt_window_start_t     window_start;      // Window start position
     wdt_window_end_t       window_end;        // Window end position
     wdt_timeout_control_t  timeout_control;   // Reset or NMI output when time-out
- } wdt_config_t;
+}   wdt_config_t;
 
 
- /* Control() DEFINITIONS */
+/* Control() DEFINITIONS */
 
 typedef enum e_wdt_cmd                 // Command used in Control and GetStatus function
 {
@@ -154,9 +157,9 @@ typedef enum e_wdt_cmd                 // Command used in Control and GetStatus 
 Public Functions
 ***********************************************************************************************************************/
 #if ((BSP_CFG_OFS0_REG_VALUE & OFS0_WDT_DISABLED) == OFS0_WDT_DISABLED) /* Register start mode */
-wdt_err_t    R_WDT_Open(void * const p_cfg);
+wdt_err_t    R_WDT_Open (void * const p_cfg);
 #endif
-wdt_err_t    R_WDT_Control(wdt_cmd_t const cmd, uint16_t * p_status);
-uint32_t     R_WDT_GetVersion(void);
+wdt_err_t    R_WDT_Control (wdt_cmd_t const cmd, uint16_t * p_status);
+uint32_t     R_WDT_GetVersion (void);
 
 #endif /* WDT_RX_IF_H */

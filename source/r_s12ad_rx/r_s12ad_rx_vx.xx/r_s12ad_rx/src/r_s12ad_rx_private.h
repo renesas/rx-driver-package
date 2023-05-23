@@ -47,6 +47,7 @@
 *           30.07.2021 4.90    Added RX140 support.
 *           30.11.2021 4.93    Added RX66T 48pins support.
 *           29.12.2021 5.00    Added RX660 support.
+*           01.08.2022 5.10    Added RX26T support.
 *******************************************************************************/
 
 #ifndef S12AD_PRV_PRIVATE_H
@@ -68,7 +69,8 @@ Macro definitions
 
 /* Macro for accessing RX64M/RX65x/RX66T/RX71M/RX72T/RX24T/RX24U/RX671 data register pointers for 
  a given unit (0, 1 or 2) */
-#if (defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX24U))
+#if (defined(BSP_MCU_RX66T)   || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX24T)  \
+    || defined(BSP_MCU_RX24U) || defined(BSP_MCU_RX26T))
 #define ADC_PRV_GET_DATA_ARR(x)     (((x)==0) ? gp_dreg0_ptrs : \
                                     ((x)==1) ? gp_dreg1_ptrs : \
                                                 gp_dreg2_ptrs)
@@ -650,12 +652,12 @@ typedef struct st_adc_ctrl          // ADC Control Block
 #if (defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) \
     || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) \
     || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX671) \
-	|| defined(BSP_MCU_RX660))
+    || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T))
     uint32_t        cmpi_mask;      // for GRPBL1
 #endif    
 #if (defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) \
     || defined(BSP_MCU_RX72M)  || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) \
-    || defined(BSP_MCU_RX671)  || defined(BSP_MCU_RX660))
+    || defined(BSP_MCU_RX671)  || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T))
     uint32_t        cmpi_maskb;     // for GRPBL1 WINDOWB
 #endif
 } adc_ctrl_t;
@@ -690,7 +692,7 @@ extern adc_err_t adc_control(uint8_t const       unit,
     && !defined(BSP_MCU_RX71M) && !defined(BSP_MCU_RX72T) && !defined(BSP_MCU_RX72M) \
     && !defined(BSP_MCU_RX13T) && !defined(BSP_MCU_RX66N) && !defined(BSP_MCU_RX72N) \
     && !defined(BSP_MCU_RX23T) && !defined(BSP_MCU_RX24T) && !defined(BSP_MCU_RX24U) \
-    && !defined(BSP_MCU_RX671))
+    && !defined(BSP_MCU_RX671) && !defined(BSP_MCU_RX26T))
 /******************************************************************************
 * Function Name: adc_enable_s12adi0
 * Description  : This function clears the S12ADI0 interrupt flag and enables
@@ -705,7 +707,7 @@ void adc_enable_s12adi0(void);
     && !defined(BSP_MCU_RX71M) && !defined(BSP_MCU_RX72T) && !defined(BSP_MCU_RX72M) \
     && !defined(BSP_MCU_RX13T) && !defined(BSP_MCU_RX66N) && !defined(BSP_MCU_RX72N) \
     && !defined(BSP_MCU_RX23T) && !defined(BSP_MCU_RX24T) && !defined(BSP_MCU_RX24U) \
-    && !defined(BSP_MCU_RX671)) */
+    && !defined(BSP_MCU_RX671) && !defined(BSP_MCU_RX26T)) */
 
 
 #endif /* S12AD_PRV_PRIVATE_H */

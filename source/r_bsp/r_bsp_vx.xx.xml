@@ -42,6 +42,7 @@
         <version>3.02.00</version>
         <version>3.03.00</version>
         <version>3.04.00</version>
+        <version>3.05.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -87,6 +88,7 @@
         <group>RX23W</group>
         <group>RX24T</group>
         <group>RX24U</group>
+        <group>RX26T</group>
         <group>RX64M</group>
         <group>RX651</group>
         <group>RX65N</group>
@@ -111,6 +113,7 @@
         <board>GENERIC_RX23W</board>
         <board>GENERIC_RX24T</board>
         <board>GENERIC_RX24U</board>
+        <board>GENERIC_RX26T</board>
         <board>GENERIC_RX64M</board>
         <board>GENERIC_RX65N</board>
         <board device_compatibility="RX651,RX65N">GENERIC_RX65N</board>
@@ -144,11 +147,13 @@
             <product>RXC</product>
             <file>mcu/all/linker_script_rvectors.inc</file>
             <file>mcu/all/reset_program.S</file>
+            <file>mcu/all/iar_call_inits.s</file>
             <file>register_access/gnuc/iodefine.h</file>
             <file>register_access/iccrx/iodefine.h</file>
         </toolchainfile>
         <toolchainfile>
             <product>GNURX</product>
+            <file>mcu/all/iar_call_inits.s</file>
             <file>register_access/ccrx/iodefine.h</file>
             <file>register_access/iccrx/iodefine.h</file>
         </toolchainfile>

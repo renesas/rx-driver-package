@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_sci_ctrl.c
@@ -49,11 +49,11 @@ static void cellular_uart_callback (void * const p_Args);
  *********************************************************************************************/
 e_cellular_err_t cellular_serial_open(st_cellular_ctrl_t * const p_ctrl)
 {
-    e_cellular_err_t    ret = CELLULAR_SUCCESS;
-    sci_err_t           sci_ret = SCI_SUCCESS;
-    sci_cfg_t           sci_cfg = {0};
+    sci_err_t        sci_ret  = SCI_SUCCESS;
+    sci_cfg_t        sci_cfg  = {0};
+    e_cellular_err_t ret      = CELLULAR_SUCCESS;
 #if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
-    uint8_t             priority = CELLULAR_CFG_SCI_PRIORITY - 1;
+    uint8_t          priority = CELLULAR_CFG_SCI_PRIORITY - 1;
 #endif
 
     p_ctrl->sci_ctrl.tx_buff_size   = R_SCI_CFG_TX_BUFSIZE;
@@ -66,7 +66,7 @@ e_cellular_err_t cellular_serial_open(st_cellular_ctrl_t * const p_ctrl)
     sci_cfg.async.stop_bits         = SCI_STOPBITS_1;
     sci_cfg.async.int_priority      = CELLULAR_CFG_SCI_PRIORITY;    // 1=lowest, 15=highest
 
-    sci_ret = R_SCI_Open(R_SCI_CFG_CELLULAR_SERIAL_CH, SCI_MODE_ASYNC, &sci_cfg,
+    sci_ret = R_SCI_Open((uint8_t)R_SCI_CFG_CELLULAR_SERIAL_CH, SCI_MODE_ASYNC, &sci_cfg,   //cast
                             cellular_uart_callback, &p_ctrl->sci_ctrl.sci_hdl);
 
     if (SCI_SUCCESS != sci_ret)
@@ -84,7 +84,7 @@ e_cellular_err_t cellular_serial_open(st_cellular_ctrl_t * const p_ctrl)
         R_SCI_CFG_PINSET_CELLULAR_SERIAL();
 #if CELLULAR_CFG_CTS_SW_CTRL == 0
         CELLULAR_SET_PODR(CELLULAR_CFG_RTS_PORT, CELLULAR_CFG_RTS_PIN) = 0;
-        CELLULAR_SET_PDR(CELLULAR_CFG_RTS_PORT, CELLULAR_CFG_RTS_PIN) = CELLULAR_PIN_DIRECTION_MODE_OUTPUT;
+        CELLULAR_SET_PDR(CELLULAR_CFG_RTS_PORT, CELLULAR_CFG_RTS_PIN)  = CELLULAR_PIN_DIRECTION_MODE_OUTPUT;
 #endif
     }
 
@@ -157,10 +157,10 @@ static void cellular_uart_callback(void * const p_Args)
         {
             break;
         }
-        if (SCI_EVT_RXBUF_OVFL <= gp_cellular_ctrl->sci_ctrl.sci_err_flg)
-        {
-            CELLULAR_LOG_ERROR(("sci error event %d\n", gp_cellular_ctrl->sci_ctrl.sci_err_flg));
-        }
+    }
+    if (SCI_EVT_RXBUF_OVFL <= gp_cellular_ctrl->sci_ctrl.sci_err_flg)
+    {
+        CELLULAR_LOG_ERROR(("sci error event %d\n", gp_cellular_ctrl->sci_ctrl.sci_err_flg));
     }
 }
 /**********************************************************************************************************************

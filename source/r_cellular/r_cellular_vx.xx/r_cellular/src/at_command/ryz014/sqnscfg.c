@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : sqnscfg.c
@@ -48,8 +48,9 @@
  ************************************************************************************************/
 e_cellular_err_t atc_sqnscfg(st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_no)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    uint8_t str[5][10] = {0};
+    uint8_t          str[5][10]                            = {0};
+    const uint8_t *  p_command_arg[CELLULAR_MAX_ARG_COUNT] = {0};
+    e_cellular_err_t ret                                   = CELLULAR_SUCCESS;
 
     sprintf((char *)str[0], "%d", socket_no);   // (&uint8_t[])->(char *)
     sprintf((char *)str[1], "%d",               // (&uint8_t[])->(char *)
@@ -61,11 +62,13 @@ e_cellular_err_t atc_sqnscfg(st_cellular_ctrl_t * const p_ctrl, const uint8_t so
     sprintf((char *)str[4], "%d",               // (&uint8_t[])->(char *)
             p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].send_timeout);
 
-    const uint8_t * const p_command_arg[CELLULAR_MAX_ARG_COUNT] = {str[0], str[1], str[2], str[3], str[4]};
+    p_command_arg[0] = str[0];
+    p_command_arg[1] = str[1];
+    p_command_arg[2] = str[2];
+    p_command_arg[3] = str[3];
+    p_command_arg[4] = str[4];
 
-    atc_generate(p_ctrl->sci_ctrl.atc_buff,
-        (const uint8_t *)&gp_at_command[ATC_SOCKET_CONFIG_1][0],    // (const uint8_t *const *)->(const uint8_t **)
-            (const uint8_t **)&p_command_arg);                      // (const uint8_t *const *)->(const uint8_t **)
+    atc_generate(p_ctrl->sci_ctrl.atc_buff, gp_at_command[ATC_SOCKET_CONFIG_1], p_command_arg);
 
     ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_SOCKET_CONFIG_1);
 

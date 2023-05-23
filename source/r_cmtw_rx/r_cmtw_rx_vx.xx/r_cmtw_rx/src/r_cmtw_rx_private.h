@@ -28,6 +28,8 @@
 *         : 15.03.2016 1.20    Error in description of Comment amended
 *         : 21.07.2017 1.30    Corrected file name.
 *         : 20.05.2019 2.00    Added support for GNUC and ICCRX.
+*         : 15.08.2022 2.80    Added support for RX26T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 #ifndef CMTW_RX_PRIVATE_H
 #define CMTW_RX_PRIVATE_H
@@ -98,7 +100,7 @@ typedef enum
 
 typedef struct
 {
-    volatile  struct st_cmtw R_BSP_EVENACCESS_SFR   *regs;              /* Pointer to the registers */
+    volatile  struct st_cmtw R_BSP_EVENACCESS_SFR   * regs;     /* Pointer to the registers */
     cmtw_channel_t                          channel;            /* Channel number */
     uint32_t                                stop_mask;          /* MSTP mask bit */
     uint8_t                                 cm_priorty;         /* Compare match interrupt priority level */
@@ -106,32 +108,32 @@ typedef struct
     uint8_t                                 oc1_priorty;        /* Output Compare 1 interrupt priority level */
     uint8_t                                 ic0_priorty;        /* Input capture 0 interrupt priority level */
     uint8_t                                 ic1_priorty;        /* Input capture 1 interrupt priority level */
-    volatile uint8_t R_BSP_EVENACCESS_SFR           *ir_cm;             /* Pointer to compare match ICU IR register */
-    volatile uint8_t R_BSP_EVENACCESS_SFR           *ipr_cm;            /* Pointer to compare match ICU IPR register */
-    volatile uint8_t R_BSP_EVENACCESS_SFR           *ier_cm;            /* Pointer to compare match ICU IER register */
+    volatile uint8_t R_BSP_EVENACCESS_SFR           * ir_cm;    /* Pointer to compare match ICU IR register */
+    volatile uint8_t R_BSP_EVENACCESS_SFR           * ipr_cm;   /* Pointer to compare match ICU IPR register */
+    volatile uint8_t R_BSP_EVENACCESS_SFR           * ier_cm;   /* Pointer to compare match ICU IER register */
     uint8_t                                 cm_enable_mask;     /* Compare match IEN mask bit */
-    volatile uint8_t R_BSP_EVENACCESS_SFR           *ir_oc0;            /* Pointer to output compare 0 ICU IR register */
-    volatile uint8_t R_BSP_EVENACCESS_SFR           *ipr_oc0;           /* Pointer to output compare 0 ICU IPR register */
-    volatile uint8_t R_BSP_EVENACCESS_SFR           *ier_oc0;           /* Pointer to output compare 0 ICU IER register */
+    volatile uint8_t R_BSP_EVENACCESS_SFR           * ir_oc0;   /* Pointer to output compare 0 ICU IR register */
+    volatile uint8_t R_BSP_EVENACCESS_SFR           * ipr_oc0;  /* Pointer to output compare 0 ICU IPR register */
+    volatile uint8_t R_BSP_EVENACCESS_SFR           * ier_oc0;  /* Pointer to output compare 0 ICU IER register */
     uint8_t                                 oc0_enable_mask;    /* Output compare 0 IEN mask bit */
-    volatile uint8_t R_BSP_EVENACCESS_SFR           *ir_oc1;            /* Pointer to output compare 1 ICU IR register */
-    volatile uint8_t R_BSP_EVENACCESS_SFR           *ipr_oc1;           /* Pointer to output compare 1 ICU IPR register */
-    volatile uint8_t R_BSP_EVENACCESS_SFR           *ier_oc1;           /* Pointer to output compare 1 ICU IER register */
+    volatile uint8_t R_BSP_EVENACCESS_SFR           * ir_oc1;   /* Pointer to output compare 1 ICU IR register */
+    volatile uint8_t R_BSP_EVENACCESS_SFR           * ipr_oc1;  /* Pointer to output compare 1 ICU IPR register */
+    volatile uint8_t R_BSP_EVENACCESS_SFR           * ier_oc1;  /* Pointer to output compare 1 ICU IER register */
     uint8_t                                 oc1_enable_mask;    /* Output compare 1 IEN mask bit */
-    volatile uint8_t R_BSP_EVENACCESS_SFR           *ir_ic0;            /* Pointer to input capture 0 ICU IR register */
-    volatile uint8_t R_BSP_EVENACCESS_SFR           *ipr_ic0;           /* Pointer to input capture 0 ICU IPR register */
-    volatile uint8_t R_BSP_EVENACCESS_SFR           *ier_ic0;           /* Pointer to input capture 0 ICU IER register */
+    volatile uint8_t R_BSP_EVENACCESS_SFR           * ir_ic0;   /* Pointer to input capture 0 ICU IR register */
+    volatile uint8_t R_BSP_EVENACCESS_SFR           * ipr_ic0;  /* Pointer to input capture 0 ICU IPR register */
+    volatile uint8_t R_BSP_EVENACCESS_SFR           * ier_ic0;  /* Pointer to input capture 0 ICU IER register */
     uint8_t                                 ic0_enable_mask;    /* Input capture 0 IEN mask bit */
-    volatile uint8_t R_BSP_EVENACCESS_SFR           *ir_ic1;            /* Pointer to input capture 0 ICU IR register */
-    volatile uint8_t R_BSP_EVENACCESS_SFR           *ipr_ic1;           /* Pointer to input capture 0 ICU IPR register */
-    volatile uint8_t R_BSP_EVENACCESS_SFR           *ier_ic1;           /* Pointer to input capture 0 ICU IER register */
+    volatile uint8_t R_BSP_EVENACCESS_SFR           * ir_ic1;   /* Pointer to input capture 0 ICU IR register */
+    volatile uint8_t R_BSP_EVENACCESS_SFR           * ipr_ic1;  /* Pointer to input capture 0 ICU IPR register */
+    volatile uint8_t R_BSP_EVENACCESS_SFR           * ier_ic1;  /* Pointer to input capture 0 ICU IER register */
     uint8_t                                 ic1_enable_mask;    /* Input capture 1 IEN mask bit */
 } cmtw_prv_ch_rom_info_t;
 
 typedef struct
 {
-    const cmtw_prv_ch_rom_info_t    *rom;                       /* Pointer to ROM info */
-    void                            (*pcallback)(void *pata);   /* Pointer to callback */
+    const cmtw_prv_ch_rom_info_t    * rom;                      /* Pointer to ROM info */
+    void                            (*pcallback)(void * pata);  /* Pointer to callback */
     cmtw_prv_channel_state_t        state;                      /* Channel state */
     cmtw_actions_t                  cm_action;                  /* Compare match action */
     cmtw_actions_t                  oc0_action;                 /* Output compare 0 action */

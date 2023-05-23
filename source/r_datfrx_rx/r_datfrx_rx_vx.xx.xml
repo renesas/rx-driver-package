@@ -7,6 +7,7 @@
         <brand>Renesas</brand>
         <product>RXC</product>
         <version>3.00.00</version>
+        <version>3.05.00</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -24,10 +25,12 @@
         <dependency>
             <module>r_bsp</module>
             <version>3.91</version>
+            <version>7.30</version>
         </dependency>
         <dependency>
             <module>r_flash_rx</module>
             <version>3.41</version>
+            <version>5.00</version>
         </dependency>
         <application>Non-Volatile Storage</application>
         <desc>Flash memory Data Manager</desc>
@@ -39,7 +42,7 @@ It is possible to set the number and size of the data number individually.<br/><
         <incdir>r_datfrx_rx</incdir>
         <incdir>r_datfrx_rx/src</incdir>
         <incdir>r_datfrx_rx/src/flash_type_1</incdir>
-        <incdir>r_datfrx_rx/src/flash_type_2</incdir>
+        <incdir>r_datfrx_rx/src/flash_type_common</incdir>
         <incdir>r_datfrx_rx/src/flash_type_3</incdir>
         <incdir>r_datfrx_rx/src/flash_type_4</incdir>
     </package>

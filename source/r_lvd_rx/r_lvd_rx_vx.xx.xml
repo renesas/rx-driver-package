@@ -34,6 +34,7 @@
         <version>3.02.00</version>
         <version>3.03.00</version>
         <version>3.04.00</version>
+        <version>3.05.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -79,6 +80,7 @@
         <group omit_board="true">RX23E-A</group>
         <group omit_board="true">RX24T</group>
         <group omit_board="true">RX24U</group>
+        <group omit_board="true">RX26T</group>
         <group omit_board="true">RX64M</group>
         <group omit_board="true">RX65N</group>
         <group omit_board="true">RX66N</group>
@@ -100,7 +102,7 @@
         <zipsource>r_lvd_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.20</version>
+            <version>7.30</version>
         </dependency>
         <application>Low Voltage Detection</application>
         <desc>LVD Driver</desc>

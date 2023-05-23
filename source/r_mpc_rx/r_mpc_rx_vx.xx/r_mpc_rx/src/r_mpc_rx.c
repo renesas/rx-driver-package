@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_mpc_rx.c
@@ -39,6 +39,7 @@
 *                              Modified comment of API function to Doxygen style
 *         : 30.12.2019 3.40    Added support RX72N, RX66N
 *         : 15.04.2021 4.00    Updated Doxygen comment.
+*         : 07.04.2023 4.80    Fixed to comply with GSCE Coding Standards Rev.6.5.0
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -69,7 +70,7 @@ Includes   <System Includes> , "Project Includes"
 /***********************************************************************************************************************
 * Private global variables and functions
 ***********************************************************************************************************************/
-static uint8_t volatile * mpc_base_addr_get(uint8_t volatile * base_addr, uint16_t index);
+static uint8_t volatile * mpc_base_addr_get (uint8_t volatile * base_addr, uint16_t index);
 
 /***********************************************************************************************************************
 * Function Name: R_MPC_Read
@@ -82,7 +83,7 @@ static uint8_t volatile * mpc_base_addr_get(uint8_t volatile * base_addr, uint16
 * user.
 * @note None.
 */
-void R_MPC_Read (gpio_port_pin_t pin, mpc_config_t * pconfig)
+void R_MPC_Read(gpio_port_pin_t pin, mpc_config_t * pconfig)
 {
     uint8_t volatile * pfs_reg;
 
@@ -132,7 +133,7 @@ void R_MPC_Read (gpio_port_pin_t pin, mpc_config_t * pconfig)
 * Which pin is to be configured by this function is defined using the gpio_port_pin_t type from the r_gpio_rx module.
 * @note None.
 */
-mpc_err_t R_MPC_Write (gpio_port_pin_t pin, mpc_config_t * pconfig)
+mpc_err_t R_MPC_Write(gpio_port_pin_t pin, mpc_config_t * pconfig)
 {
     uint8_t volatile * pfs_reg;
     uint8_t            write_value;
@@ -189,7 +190,7 @@ mpc_err_t R_MPC_Write (gpio_port_pin_t pin, mpc_config_t * pconfig)
 * Version 4.25 would be returned as 0x00040019.
 * @note None.
 */
-uint32_t R_MPC_GetVersion (void)
+uint32_t R_MPC_GetVersion(void)
 {
     /* These version macros are defined in r_mpc_rx_if.h. */
     return ((((uint32_t)MPC_RX_VERSION_MAJOR) << 16) | (uint32_t)MPC_RX_VERSION_MINOR);
@@ -205,7 +206,7 @@ uint32_t R_MPC_GetVersion (void)
 * Return Value : Address of the register that was requested
 ***********************************************************************************************************************/
 R_BSP_PRAGMA_STATIC_INLINE(mpc_base_addr_get)
-uint8_t volatile * mpc_base_addr_get (uint8_t volatile * base_addr, uint16_t index)
+uint8_t volatile * mpc_base_addr_get(uint8_t volatile * base_addr, uint16_t index)
 {
     uint32_t port_offset;
     uint32_t pin_offset;

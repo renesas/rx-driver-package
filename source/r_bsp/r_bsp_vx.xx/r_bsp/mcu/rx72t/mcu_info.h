@@ -38,6 +38,8 @@
 *                                - BSP_MCU_VOLTAGE_LEVEL_SETTING_USB
 *                                - BSP_MCU_VOLTAGE_LEVEL_SETTING_AD
 *                                - BSP_MCU_VOLTAGE_LEVEL_SETTING_RIIC
+*         : 28.02.2023 2.03      Added the following macro definitions.
+*                                - BSP_MCU_TFU_VERSION
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -179,6 +181,9 @@ Macro definitions
 
 /* Frequency threshold of Memory wait cycle setting. */
 #define BSP_MCU_MEMWAIT_FREQ_THRESHOLD (120000000)        /* ICLK > 120MHz requires MEMWAIT register update */
+
+/* MCU TFU Version */
+#define BSP_MCU_TFU_VERSION    (1)
 
 /* MCU functions */
 #define BSP_MCU_REGISTER_WRITE_PROTECTION

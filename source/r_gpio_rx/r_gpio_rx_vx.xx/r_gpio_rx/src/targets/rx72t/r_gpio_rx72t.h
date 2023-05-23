@@ -24,7 +24,8 @@
 * History : DD.MM.YYYY Version Description
 *         : 01.02.2019 2.50    First Release
 *         : 15.12.2022 3.00    Added P50 and P51 for RX72T 100pins.
-                               Removed PIN package 112Pin, 80Pin and 64Pin.
+*                              Removed PIN package 112Pin, 80Pin and 64Pin.
+*         : 07.04.2023 4.00    Updated PORT2, PORTB, and PORTD for RX72T 100-pin.
 ***********************************************************************************************************************/
 #ifndef GPIO_RX72T
 #define GPIO_RX72T
@@ -48,9 +49,15 @@ Macro definitions
 #if   (BSP_PACKAGE_PINS == 144)
     #define GPIO_INFO_NUM_PINS              (119)
 #elif (BSP_PACKAGE_PINS == 100)
-    #define GPIO_INFO_NUM_PINS              (81)
+#if (0xC == BSP_CFG_MCU_PART_FUNCTION) || (0x10 == BSP_CFG_MCU_PART_FUNCTION)
+    #define GPIO_INFO_NUM_PINS              (78)
+#elif (0xB == BSP_CFG_MCU_PART_FUNCTION) || (0xF == BSP_CFG_MCU_PART_FUNCTION)
+    #define GPIO_INFO_NUM_PINS              (80)
 #else
-    #error "r_gpio_rx does not have information about this RX72T package. Please update r_gpio_rx72T.h"
+    #define GPIO_INFO_NUM_PINS              (81)
+#endif
+#else
+    #error "r_gpio_rx does not have information about this RX72T package. Please update r_gpio_rx72t.h"
 #endif
 
 /* For testing we will allocate virtual IO ports. */
@@ -278,7 +285,11 @@ typedef enum
 {
     GPIO_PORT0_PIN_MASK = 0x03,    /* Available pins: P00, P01             */
     GPIO_PORT1_PIN_MASK = 0x03,    /* Available pins: P10, P11             */
+#if (0xB == BSP_CFG_MCU_PART_FUNCTION) || (0xF == BSP_CFG_MCU_PART_FUNCTION)
+    GPIO_PORT2_PIN_MASK = 0x1F,    /* Available pins: P20 to P24           */
+#else
     GPIO_PORT2_PIN_MASK = 0x9F,    /* Available pins: P20 to P24, P27      */
+#endif
     GPIO_PORT3_PIN_MASK = 0xCF,    /* Available pins: P30 to P33, P36, P37 */
     GPIO_PORT4_PIN_MASK = 0xFF,    /* Available pins: P40 to P47           */
 #if (0xB == BSP_CFG_MCU_PART_FUNCTION) || (0xF == BSP_CFG_MCU_PART_FUNCTION)
@@ -291,8 +302,13 @@ typedef enum
     GPIO_PORT8_PIN_MASK = 0x07,    /* Available pins: P80 to P82           */
     GPIO_PORT9_PIN_MASK = 0x7F,    /* Available pins: P90 to P96           */
     GPIO_PORTA_PIN_MASK = 0x3F,    /* Available pins: PA0 to PA5           */
+#if (0xC == BSP_CFG_MCU_PART_FUNCTION) || (0x10 == BSP_CFG_MCU_PART_FUNCTION)
+    GPIO_PORTB_PIN_MASK = 0x7F,    /* Available pins: PB0 to PB6           */
+    GPIO_PORTD_PIN_MASK = 0xFC,    /* Available pins: PD2 to PD7           */
+#else
     GPIO_PORTB_PIN_MASK = 0xFF,    /* Available pins: PB0 to PB7           */
     GPIO_PORTD_PIN_MASK = 0xFF,    /* Available pins: PD0 to PD7           */
+#endif
     GPIO_PORTE_PIN_MASK = 0x3F,    /* Available pins: PE0 to PE5           */
     GPIO_PORTH_PIN_MASK = 0x11,    /* Available pins: PH0, PH4             */
 } gpio_pin_bit_mask_t;
@@ -308,7 +324,9 @@ typedef enum
     GPIO_PORT_2_PIN_2 = 0x0202,
     GPIO_PORT_2_PIN_3 = 0x0203,
     GPIO_PORT_2_PIN_4 = 0x0204,
+#if (0xB != BSP_CFG_MCU_PART_FUNCTION) && (0xF != BSP_CFG_MCU_PART_FUNCTION)
     GPIO_PORT_2_PIN_7 = 0x0207,
+#endif
     GPIO_PORT_3_PIN_0 = 0x0300,
     GPIO_PORT_3_PIN_1 = 0x0301,
     GPIO_PORT_3_PIN_2 = 0x0302,
@@ -367,9 +385,11 @@ typedef enum
     GPIO_PORT_B_PIN_4 = 0x0B04,
     GPIO_PORT_B_PIN_5 = 0x0B05,
     GPIO_PORT_B_PIN_6 = 0x0B06,
+#if (0xC != BSP_CFG_MCU_PART_FUNCTION) && (0x10 != BSP_CFG_MCU_PART_FUNCTION)
     GPIO_PORT_B_PIN_7 = 0x0B07,
     GPIO_PORT_D_PIN_0 = 0x0D00,
     GPIO_PORT_D_PIN_1 = 0x0D01,
+#endif
     GPIO_PORT_D_PIN_2 = 0x0D02,
     GPIO_PORT_D_PIN_3 = 0x0D03,
     GPIO_PORT_D_PIN_4 = 0x0D04,

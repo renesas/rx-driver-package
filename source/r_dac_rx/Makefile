@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_dac_rx
-VERSION = 		4.90
+VERSION = 		5.00
 MDF = V2
 
 CONFIG_FOLDER = r_config

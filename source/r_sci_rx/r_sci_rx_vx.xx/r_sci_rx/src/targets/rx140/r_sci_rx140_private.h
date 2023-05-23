@@ -23,6 +23,7 @@
 * History : DD.MM.YYYY Version Description
 *           15.04.2021 1.00    Initial Release.
 *           31.03.2022 4.40    Added receive flag when using DTC/DMAC.
+*           16.02.2023 4.70    Updated the macro NUM_DIVISORS_ASYNC.
 ***********************************************************************************************************************/
 
 #ifndef SCI_RX140_H
@@ -205,7 +206,7 @@ typedef struct st_baud_divisor
     uint8_t     cks;        // cks  value to get divisor (cks = n)
 } baud_divisor_t;
 
-#define NUM_DIVISORS_ASYNC  (10)
+#define NUM_DIVISORS_ASYNC  (13)
 #define NUM_DIVISORS_SYNC   (4)
 
 

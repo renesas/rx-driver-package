@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cgpiaf.c
@@ -51,9 +51,7 @@ e_cellular_err_t atc_cgpiaf(st_cellular_ctrl_t * const p_ctrl)
 {
     e_cellular_err_t ret = CELLULAR_SUCCESS;
 
-    atc_generate(p_ctrl->sci_ctrl.atc_buff,
-        (const uint8_t *)&gp_at_command[ATC_IPV6_CONFIG][0], // (const uint8_t * const *)->(const uint8_t **)
-            NULL);
+    atc_generate(p_ctrl->sci_ctrl.atc_buff, gp_at_command[ATC_IPV6_CONFIG], NULL);
 
     cellular_delay_task(5000);
 

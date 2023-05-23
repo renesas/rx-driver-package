@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_connectsocket.c
@@ -50,8 +50,8 @@
 e_cellular_err_t R_CELLULAR_ConnectSocket(st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_no,
                                             const uint8_t * const p_ip_addr, const uint16_t port)
 {
-    uint32_t preemption = 0;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
+    uint32_t                   preemption    = 0;
+    e_cellular_err_t           ret           = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
 
     preemption = cellular_interrupt_disable();

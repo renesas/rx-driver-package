@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : sqnbandsel.c
@@ -46,15 +46,16 @@
 /*************************************************************************************************
  * Function Name  @fn            atc_sqnbandsel
  ************************************************************************************************/
-e_cellular_err_t atc_sqnbandsel(st_cellular_ctrl_t * const p_ctrl, const uint8_t * const p_band)
+e_cellular_err_t atc_sqnbandsel(st_cellular_ctrl_t * const p_ctrl, const uint8_t * const p_operator,
+                                    const uint8_t * const p_band)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
+    const uint8_t *  p_command_arg[CELLULAR_MAX_ARG_COUNT] = {0};
+    e_cellular_err_t ret                                   = CELLULAR_SUCCESS;
 
-    const uint8_t * const p_command_arg[CELLULAR_MAX_ARG_COUNT] = {p_band};
+    p_command_arg[0] = (uint8_t *)p_operator;   //(const uint8_t *)->(uint8_t *)
+    p_command_arg[1] = (uint8_t *)p_band;       //(const uint8_t *)->(uint8_t *)
 
-    atc_generate(p_ctrl->sci_ctrl.atc_buff,
-        (const uint8_t*) &gp_at_command[ATC_SET_BAND][0],   // (const uint8_t *const *)->(const uint8_t **)
-            (const uint8_t **)&p_command_arg);              // (const uint8_t *const *)->(const uint8_t **)
+    atc_generate(p_ctrl->sci_ctrl.atc_buff, gp_at_command[ATC_SET_BAND], p_command_arg);
 
     ret = cellular_execute_at_command(p_ctrl, p_ctrl->sci_ctrl.atc_timeout, ATC_RETURN_OK, ATC_SET_BAND);
 

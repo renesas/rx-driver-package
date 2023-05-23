@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2023 Renesas Electronics Corporation. All rights reserved.
 ********************************************************************************************************************/
 /*******************************************************************************************************************
 * File Name : r_flash_type3.c
@@ -40,6 +40,7 @@
 *           19.04.2019 4.00    Added support for GNUC and ICCRX.
 *           24.06.2020 4.60    Modified to set the timeout value on global variable in flash_lockbit_write().
 *           10.12.2021 4.81    Modified the if statement for error judgment of flash type 3 in do_cmdlk_recovery().
+*           24.01.2023 5.00    Modified the condition of PFRAM section definition.
 ********************************************************************************************************************/
 
 /********************************************************************************************************************
@@ -68,7 +69,9 @@ lkbit_mode_t g_lkbit_mode = FLASH_LOCKBIT_MODE_NORMAL;
 
 #if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
 static flash_err_t flash_lockbit_write(flash_block_address_t block_address, uint32_t num_blocks);
+#endif
 
+#if (FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_RUN_FROM_ROM == 0)
 #define FLASH_PE_MODE_SECTION    R_BSP_ATTRIB_SECTION_CHANGE(P, FRAM)
 #define FLASH_SECTION_CHANGE_END R_BSP_ATTRIB_SECTION_CHANGE_END
 #else
@@ -383,7 +386,7 @@ flash_err_t flash_lockbit_read(flash_block_address_t block_address, flash_res_t 
  *                    Flash hardware locked (should never happen)
  ***********************************************************************************************************************/
 FLASH_PE_MODE_SECTION
-flash_err_t flash_lockbit_write(flash_block_address_t block_address, uint32_t num_blocks)
+static flash_err_t flash_lockbit_write(flash_block_address_t block_address, uint32_t num_blocks)
 {
     flash_err_t err = FLASH_SUCCESS;
 

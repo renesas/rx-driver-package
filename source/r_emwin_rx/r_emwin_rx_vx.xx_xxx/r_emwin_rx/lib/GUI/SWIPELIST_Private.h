@@ -3,13 +3,13 @@
 *        Solutions for real time microcontroller applications        *
 **********************************************************************
 *                                                                    *
-*        (c) 1996 - 2022  SEGGER Microcontroller GmbH                *
+*        (c) 1996 - 2023  SEGGER Microcontroller GmbH                *
 *                                                                    *
 *        Internet: www.segger.com    Support:  support@segger.com    *
 *                                                                    *
 **********************************************************************
 
-** emWin V6.26 - Graphical user interface for embedded applications **
+** emWin V6.32 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -24,7 +24,7 @@ License model:            License and Service Agreement, signed December 16th, 2
 License valid for:        RX (based on RX-V1, RX-V2 or RX-V3)
 ----------------------------------------------------------------------
 Support and Update Agreement (SUA)
-SUA period:               2016-12-22 - 2022-12-31
+SUA period:               2016-12-22 - 2023-12-31
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
 File        : SWIPELIST.h
@@ -93,15 +93,8 @@ typedef struct {
   int                     LastVisible;
   int                     Sel;
   int                     ReleasedItem;
-  GUI_TIMER_HANDLE        hTimer;
-  GUI_HMEM                hTimerContext;
   WM_HMEM                 hContext;       // Motion context.
 } SWIPELIST_OBJ;
-
-typedef struct {
-  SWIPELIST_Handle hObj;
-  int              NewSel;
-} SWIPELIST_TIMER_CONTEXT;
 
 /*********************************************************************
 *
@@ -110,7 +103,7 @@ typedef struct {
 **********************************************************************
 */
 #if GUI_DEBUG_LEVEL >= GUI_DEBUG_LEVEL_CHECK_ALL
-  #define SWIPELIST_INIT_ID(p) p->Widget.DebugId = SWIPELIST_ID
+  #define SWIPELIST_INIT_ID(p) p->Widget.DebugId = WIDGET_TYPE_SWIPELIST
 #else
   #define SWIPELIST_INIT_ID(p)
 #endif
@@ -131,7 +124,7 @@ typedef struct {
 //
 // WM_MOTION_OVERLAP... flags are stored in the upper two bits of Props.Flags
 //
-#define OVERLAP_FLAG_SHIFT     6
+#define OVERLAP_FLAG_SHIFT     2
 #define OVERLAP_FLAG_MASK      ((WM_MOTION_OVERLAP_TOP | WM_MOTION_OVERLAP_BOTTOM) << OVERLAP_FLAG_SHIFT)
 
 /*********************************************************************

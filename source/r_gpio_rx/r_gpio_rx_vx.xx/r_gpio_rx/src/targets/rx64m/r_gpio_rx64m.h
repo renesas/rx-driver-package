@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2015 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_gpio_rx64m.h
@@ -28,6 +28,7 @@
 *         :                    Added DSCR support
 *         : 03.06.2015 1.11    Fixed an error in the definition for GPIO_PRV_BASE_ADDR_DSCR.
 *         : 24.04.2015 1.12    Added the compiler directive: "#if defined(BSP_MCU_RX64M)"
+*         : 07.04.2023 2.00    Removed define PIN MASK is not provided.
 ***********************************************************************************************************************/
 #ifndef GPIO_RX64M
 #define GPIO_RX64M
@@ -302,7 +303,6 @@ typedef enum
     GPIO_PORTD_PIN_MASK = 0xFF,    /* Available pins: PD0 to PD7           */
     GPIO_PORTE_PIN_MASK = 0xFF,    /* Available pins: PE0 to PE7           */
     GPIO_PORTF_PIN_MASK = 0x20,    /* Available pins: PF5                  */
-    GPIO_PORTG_PIN_MASK = 0x00,    /* None                                 */
     GPIO_PORTJ_PIN_MASK = 0x28,    /* Available pins: PJ3, PJ5             */
 } gpio_pin_bit_mask_t;
 
@@ -449,17 +449,11 @@ typedef enum
     GPIO_PORT3_PIN_MASK = 0xFF,    /* Available pins: P30 to P37 */
     GPIO_PORT4_PIN_MASK = 0xFF,    /* Available pins: P40 to P47 */
     GPIO_PORT5_PIN_MASK = 0x3F,    /* Available pins: P50 to P55 */
-    GPIO_PORT6_PIN_MASK = 0x00,    /* None                       */
-    GPIO_PORT7_PIN_MASK = 0x00,    /* None                       */
-    GPIO_PORT8_PIN_MASK = 0x00,    /* None                       */
-    GPIO_PORT9_PIN_MASK = 0x00,    /* None                       */
     GPIO_PORTA_PIN_MASK = 0xFF,    /* Available pins: PA0 to PA7 */
     GPIO_PORTB_PIN_MASK = 0xFF,    /* Available pins: PB0 to PB7 */
     GPIO_PORTC_PIN_MASK = 0xFF,    /* Available pins: PC0 to PC7 */
     GPIO_PORTD_PIN_MASK = 0xFF,    /* Available pins: PD0 to PD7 */
     GPIO_PORTE_PIN_MASK = 0xFF,    /* Available pins: PE0 to PE7 */
-    GPIO_PORTF_PIN_MASK = 0x00,    /* None                       */
-    GPIO_PORTG_PIN_MASK = 0x00,    /* None                       */
     GPIO_PORTJ_PIN_MASK = 0x08,    /* Available pins: PJ3        */
 } gpio_pin_bit_mask_t;
 

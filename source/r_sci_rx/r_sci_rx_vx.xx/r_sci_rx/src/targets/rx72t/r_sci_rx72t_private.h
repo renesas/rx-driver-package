@@ -27,6 +27,7 @@
 *           31.03.2021 3.80    Updated macro definition enable and disable TXI, RXI, ERI, TEI.
 *           31.03.2022 4.40    Added receive flag when using DTC/DMAC.
 *                              Updated channel variables in struct st_sci_ch_rom.
+*           16.02.2023 4.70    Updated the macro NUM_DIVISORS_ASYNC.
 ***********************************************************************************************************************/
 
 #ifndef SCI_RX72T_H
@@ -85,7 +86,7 @@ Macro definitions
 #define ENABLE_TEI_INT      (R_BSP_BIT_SET((uint8_t*)(hdl->rom->icu_grp) + (hdl->rom->tei_bit_num >> 3), hdl->rom->tei_bit_num & 7))
 #define DISABLE_TEI_INT     (R_BSP_BIT_CLEAR((uint8_t*)(hdl->rom->icu_grp) + (hdl->rom->tei_bit_num >> 3), hdl->rom->tei_bit_num & 7))
 
-#define NUM_DIVISORS_ASYNC  (9)
+#define NUM_DIVISORS_ASYNC  (13)
 #define NUM_DIVISORS_SYNC   (4)
 
 /*****************************************************************************
@@ -157,9 +158,7 @@ typedef struct st_sci_ch_rom    /* SCI ROM info for channel control block */
     uint8_t                         dmaca_tx_channel;
     uint8_t                         dmaca_rx_channel;
 #endif
-#if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
-    uint8_t                         chan;
-#endif
+    uint8_t                         chan;           /* Channel SCI is used*/
 } sci_ch_rom_t;
 
 
@@ -222,6 +221,7 @@ typedef struct st_baud_divisor
     int16_t     divisor;    // clock divisor
     uint8_t     abcs;       // abcs value to get divisor
     uint8_t     bgdm;       // bdgm value to get divisor
+    uint8_t     abcse;      // abcse value to get divisor
     uint8_t     cks;        // cks  value to get divisor (cks = n)
 } baud_divisor_t;
 

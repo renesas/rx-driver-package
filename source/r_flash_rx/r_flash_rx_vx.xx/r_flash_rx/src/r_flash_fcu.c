@@ -14,11 +14,11 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2022 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_fcu.c
-* Description  : This module implements functions common to Flash Types 3 and 4.
+* Description  : This module implements functions common to Flash Types 3, 4 and 5.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * History      : DD.MM.YYYY Version Description
@@ -36,6 +36,11 @@
 *                                   Modified minor problem.
 *              : 10.12.2021 4.81    Added support for Tool News R20TS0765, R20TS0772.
 *                                   Modified to transition to Data Flash P/E Mode in flash_fcuram_codecopy().
+*              : 13.05.2022 4.90    Added support for Technical Update TN-RX*-A0261A. 
+*              : 24.01.2023 5.00    Added Flash Type 5.
+*                                   Added support for Tool News R20TS0872. 
+*                                   Modified the condition of PFRAM section definition.
+*                                   Modified to check that the value of FENTRYR is set even if it is not Flash Type 4.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -164,7 +169,7 @@ flash_err_t flash_fcuram_codecopy(void)
 #endif // FLASH_HAS_FCU_RAM_ENABLE
 
 
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
+#if (FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_RUN_FROM_ROM == 0)
 #define FLASH_PE_MODE_SECTION    R_BSP_ATTRIB_SECTION_CHANGE(P, FRAM)
 #define FLASH_SECTION_CHANGE_END R_BSP_ATTRIB_SECTION_CHANGE_END
 #else
@@ -216,6 +221,8 @@ flash_err_t flash_reset(void)
     FLASH.FENTRYR.WORD = 0xAA00;
     while (FLASH.FENTRYR.WORD != 0x0000)
         ;
+
+    FLASH.FWEPROR.BYTE = 0x00; /* FLWE bit is disabled */
 
     return FLASH_SUCCESS;
 }
@@ -275,10 +282,8 @@ flash_err_t flash_pe_mode_enter(flash_type_t flash_type)
     if (flash_type == FLASH_TYPE_DATA_FLASH)
     {
         FLASH.FENTRYR.WORD = 0xAA80;        //Transition to DF P/E mode
-#if (FLASH_TYPE == 4)
         while (FLASH.FENTRYR.WORD != 0x0080)
             ;
-#endif
 
         if (FLASH.FENTRYR.WORD == 0x0080)
         {
@@ -294,10 +299,8 @@ flash_err_t flash_pe_mode_enter(flash_type_t flash_type)
     else if (flash_type == FLASH_TYPE_CODE_FLASH)
     {
         FLASH.FENTRYR.WORD = 0xAA01;            //Transition to CF P/E mode
-#if (FLASH_TYPE == 4)
         while (FLASH.FENTRYR.WORD != 0x0001)
             ;
-#endif
 
         if (FLASH.FENTRYR.WORD == 0x0001)
         {
@@ -318,6 +321,8 @@ flash_err_t flash_pe_mode_enter(flash_type_t flash_type)
     {
         err = FLASH_ERR_PARAM;
     }
+
+    FLASH.FWEPROR.BYTE = 0x01; /* FLWE bit is enabled */
 
     return err;
 }
@@ -349,6 +354,7 @@ flash_err_t flash_pe_mode_exit(void)
     while (FLASH.FENTRYR.WORD != 0x0000)
         ;
 
+    FLASH.FWEPROR.BYTE = 0x00; /* FLWE bit is disabled */
 
     return err;
 }
@@ -498,12 +504,20 @@ flash_err_t flash_erase(uint32_t block_address, uint32_t num_blocks)
             if (g_current_parameters.dest_addr <= size_boundary)
             {
                 g_current_parameters.dest_addr -= FLASH_CF_MEDIUM_BLOCK_SIZE;
+#if (FLASH_TYPE == FLASH_TYPE_5)
+                g_current_parameters.wait_cnt = WAIT_MAX_ERASE_CF_MEDIUM;
+#else
                 g_current_parameters.wait_cnt = WAIT_MAX_ERASE_CF_32K;
+#endif
             }
             else
             {
                 g_current_parameters.dest_addr -= FLASH_CF_SMALL_BLOCK_SIZE;
+#if (FLASH_TYPE == FLASH_TYPE_5)
+                g_current_parameters.wait_cnt = WAIT_MAX_ERASE_CF_SMALL;
+#else
                 g_current_parameters.wait_cnt = WAIT_MAX_ERASE_CF_8K;
+#endif
             }
 #endif
         }

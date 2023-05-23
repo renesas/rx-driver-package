@@ -1,5 +1,5 @@
 MODULE_NAME =	r_rscan_rx
-VERSION =		2.50
+VERSION =		2.60
 MDF = V1,V2
 
 CONFIG_FOLDER = r_config

@@ -19,12 +19,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018(2019)  Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018(2023)  Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * System Name  : MEMDRV software
 * File Name    : r_memdrv_sci.c
-* Version      : 1.02
+* Version      : 1.05
 * Device       : -
 * Abstract     : IO I/F module
 * Tool-Chain   : -
@@ -39,6 +39,7 @@
 *              : 04.04.2019 1.01     Added support for GNUC and ICCRX.
 *                                    Fixed coding style.
 *              : 22.11.2019 1.02     Modified the interface type of transmit and receive data.
+*              : 16.03.2023 1.05     Fixed coding style.
 *************************************************************************************************/
 
 /************************************************************************************************
@@ -168,7 +169,6 @@ memdrv_err_t r_memdrv_sci_close(uint8_t devno, st_memdrv_info_t * p_memdrv_info)
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_OTHER                       ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
@@ -187,7 +187,6 @@ memdrv_err_t r_memdrv_sci_disable(uint8_t devno, st_memdrv_info_t * p_memdrv_inf
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_OTHER                       ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
@@ -207,7 +206,6 @@ memdrv_err_t r_memdrv_sci_disable_tx_data(uint8_t devno,
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_OTHER                       ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
@@ -315,7 +313,6 @@ memdrv_err_t r_memdrv_sci_enable_rx_data(uint8_t devno,
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_HARD                        ;   Hardware error
 *              : MEMDRV_ERR_OTHER                       ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
@@ -357,7 +354,6 @@ memdrv_err_t r_memdrv_sci_tx(uint8_t devno, st_memdrv_info_t * p_memdrv_info)
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_HARD                        ;   Hardware error
 *              : MEMDRV_ERR_OTHER                       ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
@@ -378,7 +374,7 @@ memdrv_err_t r_memdrv_sci_tx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_inf
         while(rem_txcnt)
         {
             ret_drv = R_SCI_Send(sci_handle, p_memdrv_info->p_data, SCI_EXCHG_MAX_COUNT);
-            if (MEMDRV_SUCCESS != ret_drv)
+            if (SCI_SUCCESS != ret_drv)
             {
                 return MEMDRV_ERR_OTHER;
             }
@@ -422,7 +418,6 @@ memdrv_err_t r_memdrv_sci_tx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_inf
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_HARD                        ;   Hardware error
 *              : MEMDRV_ERR_OTHER                       ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
@@ -464,7 +459,6 @@ memdrv_err_t r_memdrv_sci_rx(uint8_t devno, st_memdrv_info_t * p_memdrv_info)
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_HARD                        ;   Hardware error
 *              : MEMDRV_ERR_OTHER                       ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
@@ -485,7 +479,7 @@ memdrv_err_t r_memdrv_sci_rx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_inf
         while(rem_rxcnt)
         {
             ret_drv = R_SCI_Receive(sci_handle, p_memdrv_info->p_data, SCI_EXCHG_MAX_COUNT);
-            if (MEMDRV_SUCCESS != ret_drv)
+            if (SCI_SUCCESS != ret_drv)
             {
                 return MEMDRV_ERR_OTHER;
             }
@@ -522,7 +516,8 @@ memdrv_err_t r_memdrv_sci_rx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_inf
 * Function Name: r_memdrv_sci_1ms_interval
 * Description  : 1ms Interval Timer call function.
 * Arguments    : none
-* Return Value : none
+* Return Value : MEMDRV_SUCCESS -
+*                    Successful operation
 *******************************************************************************/
 memdrv_err_t r_memdrv_sci_1ms_interval(void)
 {
@@ -664,7 +659,7 @@ static void r_memdrv_sci_callback(void *p_data)
 /*****************************************************************************
 * Function Name: sci_init_ports
 * Description  : This function initializes the port pins associated with
-*                SCI channel 6 using the macros defined in iodefine.h.
+*                SCI channel using the macros defined in iodefine.h.
 * Arguments    : None
 * Return Value : None
 ******************************************************************************/
@@ -808,6 +803,6 @@ memdrv_err_t r_memdrv_sci_1ms_interval(void)
     return MEMDRV_ERR_OTHER;
 } /* End of function r_memdrv_sci_1ms_interval() */
 #endif  /* ((MEMDRV_CFG_DEV0_INCLUDED == 1) && (MEMDRV_CFG_DEV0_MODE_DRVR == MEMDRV_DRVR_RX_FIT_SCI_SPI)) || \
-           ((MEMDRV_CFG_DEV1_INCLUDED == 1) && (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_SCI_SPI))
+           ((MEMDRV_CFG_DEV1_INCLUDED == 1) && (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_SCI_SPI)) */
 
 /* End of File */

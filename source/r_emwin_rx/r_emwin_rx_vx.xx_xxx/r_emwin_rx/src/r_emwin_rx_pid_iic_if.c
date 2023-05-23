@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_emwin_rx_pid_iic_if.c
@@ -32,6 +32,7 @@
  *                                     Adjust configuration option with Smart Configurator.
  *         : 31.08.2022 6.26.c.1.00    Update emWin library to v6.26c.
  *                                     Added preprocessor code for code activation by selecting Touch interface.
+ *         : 31.03.2023 6.32.a.1.00    Update emWin library to v6.32a.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************

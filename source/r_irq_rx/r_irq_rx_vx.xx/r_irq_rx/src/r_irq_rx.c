@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_irq_rx.c
@@ -36,6 +36,7 @@
 *         : 15.08.2019  3.20    Fixed warnings in IAR.
 *         : 25.11.2019  3.30    Modified comment of API function to Doxygen style.
 *         : 15.04.2021  3.80    Added R_IRQ_IRClear() function to clear IR flag.
+*         : 15.08.2022  4.30    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -307,7 +308,7 @@ const irq_init_block_t g_irq15_handle =
 #endif
 #endif /* end defined(VECT_ICU_IRQ15) */
 
-static const irq_handle_t girq_handles[] =
+static const irq_handle_t s_irq_handles[] =
 {
     #if IRQ_CFG_USE_IRQ0 == 1
     /* irq handle */
@@ -412,7 +413,7 @@ static const irq_handle_t girq_handles[] =
 };
 
 #if IRQ_CFG_PARAM_CHECKING == 1
-static uint8_t girq_opened[IRQ_NUM_MAX] = {0};
+static uint8_t s_irq_opened[IRQ_NUM_MAX] = {0};
 #endif
 
 /***********************************************************************************************************************
@@ -448,21 +449,21 @@ irq_err_t   R_IRQ_Open (irq_number_t     irq_number,
                         irq_handle_t    *phandle,
                         void        (*const pcallback)(void *pargs))
 {
-    irq_err_t ret = IRQ_SUCCESS;
-    irq_handle_t  my_handle;
-    uint8_t ier_index;
-    uint8_t ien_mask;
+    irq_err_t    ret = IRQ_SUCCESS;
+    irq_handle_t my_handle;
+    uint8_t      ier_index;
+    uint8_t      ien_mask;
 
 #if IRQ_CFG_REQUIRE_LOCK == 1
     bool        lock_result = false;
 #endif
 
 #if IRQ_CFG_PARAM_CHECKING == 1
-    if ((IRQ_NUM_MAX <= irq_number) || (NULL == girq_handles[irq_number]))
+    if ((IRQ_NUM_MAX <= irq_number) || (NULL == s_irq_handles[irq_number]))
     {
         return IRQ_ERR_BAD_NUM;
     }
-    if (girq_opened[irq_number]) /* Check for IRQ already opened. */
+    if (s_irq_opened[irq_number]) /* Check for IRQ already opened. */
     {
         return  IRQ_ERR_NOT_CLOSED;
     }
@@ -482,15 +483,15 @@ irq_err_t   R_IRQ_Open (irq_number_t     irq_number,
     /* Attempt to acquire lock for this IRQ. Prevents reentrancy conflict. */
     lock_result = R_BSP_HardwareLock((mcu_lock_t)(BSP_LOCK_IRQ0 + (uint8_t)irq_number));
 
-    if(false == lock_result)
+    if (false == lock_result)
     {
         return IRQ_ERR_LOCK; /* The open function is currently locked. */
     }
 #endif
 
-    my_handle = girq_handles[irq_number];
+    my_handle = s_irq_handles[irq_number];
     ier_index = my_handle->ier_reg_index;
-    ien_mask = my_handle->ien_bit_mask;
+    ien_mask  = my_handle->ien_bit_mask;
 
     /* Disable interrupt request. */
     ICU.IER[ier_index].BYTE &= (~ien_mask);
@@ -503,19 +504,19 @@ irq_err_t   R_IRQ_Open (irq_number_t     irq_number,
         ICU.IRQFLTE0.BYTE &= (~ien_mask);
 
         /* Set up the digital filter sampling clock divisor IRQFLTC0.FCLKSELi[1:0] bits for the IRQ. */
-        ICU.IRQFLTC0.WORD &= (uint16_t)~(0x0003 << (irq_number * 2));                   /* First clear them. */
-        ICU.IRQFLTC0.WORD |= ((uint16_t)(my_handle->filt_clk_div) << (irq_number * 2)); /* Now set them. */
+        ICU.IRQFLTC0.WORD &= (uint16_t)~(0x0003 << (irq_number*2));                   /* First clear them. */
+        ICU.IRQFLTC0.WORD |= ((uint16_t)(my_handle->filt_clk_div) << (irq_number*2)); /* Now set them. */
 #if defined(VECT_ICU_IRQ15)
     }
 
     else  /* IRQs 8-15 share these registers. */
     {
-         /* Disable digital filter.  */
+        /* Disable digital filter. */
         ICU.IRQFLTE1.BYTE &= (~ien_mask);
 
         /* Set up the digital filter sampling clock divisor IRQFLTC0.FCLKSELi[1:0] bits for the IRQ. */
-        ICU.IRQFLTC1.WORD &= (uint16_t)~(0x0003 << ((irq_number - 8) * 2));             /* First clear them. */
-        ICU.IRQFLTC1.WORD |= ((uint16_t)(my_handle->filt_clk_div) << ((irq_number - 8) * 2)); /* Now set them. */
+        ICU.IRQFLTC1.WORD &= (uint16_t)~(0x0003 << ((irq_number - 8)*2));             /* First clear them. */
+        ICU.IRQFLTC1.WORD |= ((uint16_t)(my_handle->filt_clk_div) << ((irq_number - 8)*2)); /* Now set them. */
     }
 #endif
 
@@ -523,7 +524,7 @@ irq_err_t   R_IRQ_Open (irq_number_t     irq_number,
     ICU.IRQCR[irq_number].BYTE = (uint8_t)trigger;
 
 
-    if(IRQ_TRIG_LOWLEV != trigger)
+    if (IRQ_TRIG_LOWLEV != trigger)
     {
         /* Clear the corresponding IRn.IR flag to 0 (if edge detection is in use). */
         ICU.IR[IRQ_VECT_BASE + irq_number].BYTE = 0;
@@ -547,12 +548,12 @@ irq_err_t   R_IRQ_Open (irq_number_t     irq_number,
     /* Set the interrupt priority level. */
     ICU.IPR[IRQ_IPR_BASE + (uint8_t)irq_number].BYTE = (uint8_t)(priority & 0x0F);
 
-    *(my_handle->pirq_callback) = pcallback; /* Assign the callback function pointer. */
+    *(my_handle->p_irq_callback) = pcallback; /* Assign the callback function pointer. */
 
     *phandle = my_handle;   /* Return a pointer to a handle for the IRQ. */
 
 #if IRQ_CFG_PARAM_CHECKING == 1
-    girq_opened[irq_number] = 1;      /* Flag that IRQ has now been opened. */
+    s_irq_opened[irq_number] = 1;      /* Flag that IRQ has now been opened. */
 #endif
 
     /* Set the IERm.IENj bit to 1 (interrupt request enabled). */
@@ -597,12 +598,12 @@ irq_err_t   R_IRQ_Control(irq_handle_t  const handle,
                           irq_cmd_t     const cmd,
                           void               *pcmd_data)
 {
-    irq_err_t ret = IRQ_SUCCESS;
-    irq_prio_t    *prio_cmd_dat;
-    irq_trigger_t *ptrig_cmd_dat;
-    uint8_t irq_number = 0;         /* Place for dereferenced IRQ number. */
-    uint8_t ien_temp;               /* For saving interrupt enable state. */
-    uint8_t ier_index;              /* For holding decoded IER register number index.*/
+    irq_err_t      ret = IRQ_SUCCESS;
+    irq_prio_t    *p_rio_cmd_dat;
+    irq_trigger_t *p_trig_cmd_dat;
+    uint8_t        irq_number = 0;         /* Place for dereferenced IRQ number. */
+    uint8_t        ien_temp;               /* For saving interrupt enable state. */
+    uint8_t        ier_index;              /* For holding decoded IER register number index.*/
 
 #if IRQ_CFG_REQUIRE_LOCK == 1
     bool        lock_result = false;
@@ -620,7 +621,7 @@ irq_err_t   R_IRQ_Control(irq_handle_t  const handle,
         return IRQ_ERR_BAD_NUM;
     }
 
-    if (!(girq_opened[handle->irq_num])) /* Check for IRQ not opened. */
+    if (!(s_irq_opened[handle->irq_num])) /* Check for IRQ not opened. */
     {
         return  IRQ_ERR_NOT_OPENED;
     }
@@ -636,7 +637,7 @@ irq_err_t   R_IRQ_Control(irq_handle_t  const handle,
     /* Attempt to acquire lock for this IRQ. Prevents reentrancy conflict. */
     lock_result = R_BSP_HardwareLock((mcu_lock_t)(BSP_LOCK_IRQ0 + irq_number));
 
-    if(false == lock_result)
+    if (false == lock_result)
     {
         return IRQ_ERR_LOCK; /* The open function is currently locked. */
     }
@@ -648,13 +649,13 @@ irq_err_t   R_IRQ_Control(irq_handle_t  const handle,
     /* Disable interrupt request. */
     ICU.IER[ier_index].BYTE &= (~(handle->ien_bit_mask));
 
-    if(IRQ_CMD_SET_PRIO == cmd)
+    if (IRQ_CMD_SET_PRIO == cmd)
     {
         /* casting void * type to irq_prio_t* type is valid */
-        prio_cmd_dat = (irq_prio_t*)pcmd_data;
+        p_rio_cmd_dat = (irq_prio_t*)pcmd_data;
 
         #if IRQ_CFG_PARAM_CHECKING == 1
-        if ((*prio_cmd_dat) > BSP_MCU_IPL_MAX)
+        if ((*p_rio_cmd_dat) > BSP_MCU_IPL_MAX)
         {
             #if IRQ_CFG_REQUIRE_LOCK == 1
             /* Release lock for this IRQ. */
@@ -665,15 +666,15 @@ irq_err_t   R_IRQ_Control(irq_handle_t  const handle,
         #endif
 
         /* Set the interrupt priority level. */
-        ICU.IPR[IRQ_IPR_BASE + irq_number].BYTE = (uint8_t)((*prio_cmd_dat) & 0x0F);
+        ICU.IPR[IRQ_IPR_BASE + irq_number].BYTE = (uint8_t)((*p_rio_cmd_dat) & 0x0F);
     }
-    else if(IRQ_CMD_SET_TRIG == cmd)
+    else if (IRQ_CMD_SET_TRIG == cmd)
     {
         /* casting void * type to irq_trigger_t* type is valid */
-        ptrig_cmd_dat = (irq_trigger_t*)pcmd_data;
+        p_trig_cmd_dat = (irq_trigger_t*)pcmd_data;
 
         #if IRQ_CFG_PARAM_CHECKING == 1
-        if ((*ptrig_cmd_dat) & IRQ_TRIGGER_MASK)
+        if ((*p_trig_cmd_dat) & IRQ_TRIGGER_MASK)
         {
             #if IRQ_CFG_REQUIRE_LOCK == 1
             /* Release lock for this IRQ. */
@@ -684,10 +685,10 @@ irq_err_t   R_IRQ_Control(irq_handle_t  const handle,
         #endif
 
         /* Set the method of detection for the interrupt in the IRQCRi.IRQMD[1:0] bits. */
-        ICU.IRQCR[irq_number].BYTE = (uint8_t)(*ptrig_cmd_dat);
+        ICU.IRQCR[irq_number].BYTE = (uint8_t)(*p_trig_cmd_dat);
 
 
-        if(IRQ_TRIG_LOWLEV != (*ptrig_cmd_dat))
+        if (IRQ_TRIG_LOWLEV != (*p_trig_cmd_dat))
         {
             /* Clear the corresponding IRn.IR flag to 0 (if edge detection is in use). */
             ICU.IR[IRQ_VECT_BASE + irq_number].BYTE = 0;
@@ -695,7 +696,7 @@ irq_err_t   R_IRQ_Control(irq_handle_t  const handle,
     }
     else
     {
-     /* Nothing else. New commands would go here. */
+        /* Nothing else. New commands would go here. */
     }
 
     /* Restore original interrupt enable state. */
@@ -742,7 +743,7 @@ irq_err_t   R_IRQ_Close(irq_handle_t handle)
     {
         return IRQ_ERR_BAD_NUM;
     }
-    if (!(girq_opened[handle->irq_num])) /* Check for IRQ not opened. */
+    if (!(s_irq_opened[handle->irq_num])) /* Check for IRQ not opened. */
     {
         return  IRQ_ERR_NOT_OPENED;
     }
@@ -768,7 +769,7 @@ irq_err_t   R_IRQ_Close(irq_handle_t handle)
 #endif
 
 #if IRQ_CFG_PARAM_CHECKING == 1
-    girq_opened[handle->irq_num] = 0;      /* Flag that IRQ has now been closed. */
+    s_irq_opened[handle->irq_num] = 0;      /* Flag that IRQ has now been closed. */
 #endif
 
     return ret;
@@ -807,14 +808,14 @@ irq_err_t   R_IRQ_ReadInput(irq_handle_t const handle, uint8_t *plevel)
     {
         return IRQ_ERR_BAD_NUM;
     }
-    if (!(girq_opened[handle->irq_num])) /* Check for IRQ not opened. */
+    if (!(s_irq_opened[handle->irq_num])) /* Check for IRQ not opened. */
     {
         return  IRQ_ERR_NOT_OPENED;
     }
 #endif
 
     /* casting handle * type to uint8_t* type is valid */
-    *plevel = (uint8_t)((*handle->pirq_in_port) & handle->irq_port_bit);
+    *plevel = (uint8_t)((*handle->p_irq_in_port) & handle->irq_port_bit);
 
     return ret;
 }
@@ -838,7 +839,7 @@ End of function R_IRQ_ReadInput
  * @note
  * None.
  */
-irq_err_t   R_IRQ_InterruptEnable (irq_handle_t const handle, bool enable)
+irq_err_t   R_IRQ_InterruptEnable(irq_handle_t const handle, bool enable)
 {
     irq_err_t ret = IRQ_SUCCESS;
 
@@ -852,13 +853,13 @@ irq_err_t   R_IRQ_InterruptEnable (irq_handle_t const handle, bool enable)
     {
         return IRQ_ERR_BAD_NUM;
     }
-    if (!(girq_opened[handle->irq_num])) /* Check for IRQ not opened. */
+    if (!(s_irq_opened[handle->irq_num])) /* Check for IRQ not opened. */
     {
         return  IRQ_ERR_NOT_OPENED;
     }
 #endif
 
-    if(enable)
+    if (enable)
     {
         /* Enable interrupt request. */
         ICU.IER[handle->ier_reg_index].BYTE |= handle->ien_bit_mask;
@@ -870,7 +871,7 @@ irq_err_t   R_IRQ_InterruptEnable (irq_handle_t const handle, bool enable)
     }
 
     /* dummy read to complete pipelining. */
-    if(ICU.IER[handle->ier_reg_index].BYTE)
+    if (ICU.IER[handle->ier_reg_index].BYTE)
     {
         R_BSP_NOP();
     }
@@ -921,7 +922,7 @@ End of function R_IRQ_GetVersion
  * The IR flag is cleared only when edge detection is used. \n
  * When the interrupt request destination is the DTC or DMAC, do not write 0 to the IR flag.
  */
-irq_err_t   R_IRQ_IRClear (irq_handle_t  const handle)
+irq_err_t   R_IRQ_IRClear(irq_handle_t  const handle)
 {
     irq_err_t ret = IRQ_SUCCESS;
 
@@ -935,7 +936,7 @@ irq_err_t   R_IRQ_IRClear (irq_handle_t  const handle)
     {
         return IRQ_ERR_BAD_NUM;
     }
-    if (!(girq_opened[handle->irq_num])) /* Check for IRQ not opened. */
+    if (!(s_irq_opened[handle->irq_num])) /* Check for IRQ not opened. */
     {
         return  IRQ_ERR_NOT_OPENED;
     }
@@ -975,10 +976,10 @@ R_BSP_PRAGMA_INTERRUPT (irq0_isr,VECT(ICU, IRQ0))
 R_BSP_ATTRIB_INTERRUPT void irq0_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq0_handle.pirq_callback))) && (NULL != (*(g_irq0_handle.pirq_callback))))
+    if((FIT_NO_FUNC != (*(g_irq0_handle.p_irq_callback))) && (NULL != (*(g_irq0_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
-        (*(g_irq0_handle.pirq_callback))((void*)&(g_irq0_handle));
+        (*(g_irq0_handle.p_irq_callback))((void*)&(g_irq0_handle));
     }
 } /* End of function irq0_isr */
 #endif
@@ -994,10 +995,10 @@ R_BSP_PRAGMA_INTERRUPT (irq1_isr, VECT(ICU, IRQ1))
 R_BSP_ATTRIB_INTERRUPT void irq1_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq1_handle.pirq_callback))) && (NULL != (*(g_irq1_handle.pirq_callback))))
+    if((FIT_NO_FUNC != (*(g_irq1_handle.p_irq_callback))) && (NULL != (*(g_irq1_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
-        (*(g_irq1_handle.pirq_callback))((void*)&(g_irq1_handle.irq_num));
+        (*(g_irq1_handle.p_irq_callback))((void*)&(g_irq1_handle.irq_num));
     }
 } /* End of function irq1_isr */
 #endif
@@ -1013,10 +1014,10 @@ R_BSP_PRAGMA_INTERRUPT (irq2_isr,VECT(ICU, IRQ2))
 R_BSP_ATTRIB_INTERRUPT void irq2_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq2_handle.pirq_callback))) && (NULL != (*(g_irq2_handle.pirq_callback))))
+    if((FIT_NO_FUNC != (*(g_irq2_handle.p_irq_callback))) && (NULL != (*(g_irq2_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
-        (*(g_irq2_handle.pirq_callback))((void*)&(g_irq2_handle.irq_num));
+        (*(g_irq2_handle.p_irq_callback))((void*)&(g_irq2_handle.irq_num));
     }
 } /* End of function irq2_isr */
 #endif
@@ -1032,10 +1033,10 @@ R_BSP_PRAGMA_INTERRUPT (irq3_isr,VECT(ICU, IRQ3))
 R_BSP_ATTRIB_INTERRUPT void irq3_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq3_handle.pirq_callback))) && (NULL != (*(g_irq3_handle.pirq_callback))))
+    if((FIT_NO_FUNC != (*(g_irq3_handle.p_irq_callback))) && (NULL != (*(g_irq3_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
-        (*(g_irq3_handle.pirq_callback))((void*)&(g_irq3_handle.irq_num));
+        (*(g_irq3_handle.p_irq_callback))((void*)&(g_irq3_handle.irq_num));
     }
 } /* End of function irq3_isr */
 #endif
@@ -1051,10 +1052,10 @@ R_BSP_PRAGMA_INTERRUPT (irq4_isr, VECT(ICU, IRQ4))
 R_BSP_ATTRIB_INTERRUPT void irq4_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq4_handle.pirq_callback))) && (NULL != (*(g_irq4_handle.pirq_callback))))
+    if((FIT_NO_FUNC != (*(g_irq4_handle.p_irq_callback))) && (NULL != (*(g_irq4_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
-        (*(g_irq4_handle.pirq_callback))((void*)&(g_irq4_handle.irq_num));
+        (*(g_irq4_handle.p_irq_callback))((void*)&(g_irq4_handle.irq_num));
     }
 } /* End of function irq4_isr */
 #endif
@@ -1070,10 +1071,10 @@ R_BSP_PRAGMA_INTERRUPT (irq5_isr, VECT(ICU, IRQ5))
 R_BSP_ATTRIB_INTERRUPT void irq5_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq5_handle.pirq_callback))) && (NULL != (*(g_irq5_handle.pirq_callback))))
+    if((FIT_NO_FUNC != (*(g_irq5_handle.p_irq_callback))) && (NULL != (*(g_irq5_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
-        (*(g_irq5_handle.pirq_callback))((void*)&(g_irq5_handle.irq_num));
+        (*(g_irq5_handle.p_irq_callback))((void*)&(g_irq5_handle.irq_num));
     }
 } /* End of function irq5_isr */
 #endif
@@ -1090,10 +1091,10 @@ R_BSP_PRAGMA_INTERRUPT (irq6_isr,VECT(ICU, IRQ6))
 R_BSP_ATTRIB_INTERRUPT void irq6_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq6_handle.pirq_callback))) && (NULL != (*(g_irq6_handle.pirq_callback))))
+    if((FIT_NO_FUNC != (*(g_irq6_handle.p_irq_callback))) && (NULL != (*(g_irq6_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
-        (*(g_irq6_handle.pirq_callback))((void*)&(g_irq6_handle.irq_num));
+        (*(g_irq6_handle.p_irq_callback))((void*)&(g_irq6_handle.irq_num));
     }
 } /* End of function irq6_isr */
 #endif
@@ -1109,10 +1110,10 @@ R_BSP_PRAGMA_INTERRUPT (irq7_isr,VECT(ICU, IRQ7))
 R_BSP_ATTRIB_INTERRUPT void irq7_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq7_handle.pirq_callback))) && (NULL != (*(g_irq7_handle.pirq_callback))))
+    if((FIT_NO_FUNC != (*(g_irq7_handle.p_irq_callback))) && (NULL != (*(g_irq7_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
-        (*(g_irq7_handle.pirq_callback))((void*)&(g_irq7_handle.irq_num));
+        (*(g_irq7_handle.p_irq_callback))((void*)&(g_irq7_handle.irq_num));
     }
 } /* End of function irq7_isr */
 #endif
@@ -1130,10 +1131,10 @@ R_BSP_PRAGMA_INTERRUPT (irq8_isr,VECT(ICU, IRQ8))
 R_BSP_ATTRIB_INTERRUPT void irq8_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq8_handle.pirq_callback))) && (NULL != (*(g_irq8_handle.pirq_callback))))
+    if((FIT_NO_FUNC != (*(g_irq8_handle.p_irq_callback))) && (NULL != (*(g_irq8_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
-        (*(g_irq8_handle.pirq_callback))((void*)&(g_irq8_handle.irq_num));
+        (*(g_irq8_handle.p_irq_callback))((void*)&(g_irq8_handle.irq_num));
     }
 } /* End of function irq8_isr */
 #endif
@@ -1149,10 +1150,10 @@ R_BSP_PRAGMA_INTERRUPT (irq9_isr,VECT(ICU, IRQ9))
 R_BSP_ATTRIB_INTERRUPT void irq9_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq9_handle.pirq_callback))) && (NULL != (*(g_irq9_handle.pirq_callback))))
+    if((FIT_NO_FUNC != (*(g_irq9_handle.p_irq_callback))) && (NULL != (*(g_irq9_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
-        (*(g_irq9_handle.pirq_callback))((void*)&(g_irq9_handle.irq_num));
+        (*(g_irq9_handle.p_irq_callback))((void*)&(g_irq9_handle.irq_num));
     }
 } /* End of function irq9_isr */
 #endif
@@ -1168,10 +1169,10 @@ R_BSP_PRAGMA_INTERRUPT (irq10_isr,VECT(ICU, IRQ10))
 R_BSP_ATTRIB_INTERRUPT void irq10_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq10_handle.pirq_callback))) && (NULL != (*(g_irq10_handle.pirq_callback))))
+    if((FIT_NO_FUNC != (*(g_irq10_handle.p_irq_callback))) && (NULL != (*(g_irq10_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
-        (*(g_irq10_handle.pirq_callback))((void*)&(g_irq10_handle.irq_num));
+        (*(g_irq10_handle.p_irq_callback))((void*)&(g_irq10_handle.irq_num));
     }
 } /* End of function irq10_isr */
 #endif
@@ -1187,10 +1188,10 @@ R_BSP_PRAGMA_INTERRUPT (irq11_isr,VECT(ICU, IRQ11))
 R_BSP_ATTRIB_INTERRUPT void irq11_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq11_handle.pirq_callback))) && (NULL != (*(g_irq11_handle.pirq_callback))))
+    if((FIT_NO_FUNC != (*(g_irq11_handle.p_irq_callback))) && (NULL != (*(g_irq11_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
-        (*(g_irq11_handle.pirq_callback))((void*)&(g_irq11_handle.irq_num));
+        (*(g_irq11_handle.p_irq_callback))((void*)&(g_irq11_handle.irq_num));
     }
 } /* End of function irq11_isr */
 #endif
@@ -1206,10 +1207,10 @@ R_BSP_PRAGMA_INTERRUPT (irq12_isr, VECT(ICU, IRQ12))
 R_BSP_ATTRIB_INTERRUPT void irq12_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq12_handle.pirq_callback))) && (NULL != (*(g_irq12_handle.pirq_callback))))
+    if((FIT_NO_FUNC != (*(g_irq12_handle.p_irq_callback))) && (NULL != (*(g_irq12_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
-        (*(g_irq12_handle.pirq_callback))((void*)&(g_irq12_handle.irq_num));
+        (*(g_irq12_handle.p_irq_callback))((void*)&(g_irq12_handle.irq_num));
     }
 } /* End of function irq12_isr */
 #endif
@@ -1225,10 +1226,10 @@ R_BSP_PRAGMA_INTERRUPT (irq13_isr, VECT(ICU, IRQ13))
 R_BSP_ATTRIB_INTERRUPT void irq13_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq13_handle.pirq_callback))) && (NULL != (*(g_irq13_handle.pirq_callback))))
+    if((FIT_NO_FUNC != (*(g_irq13_handle.p_irq_callback))) && (NULL != (*(g_irq13_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
-        (*(g_irq13_handle.pirq_callback))((void*)&(g_irq13_handle.irq_num));
+        (*(g_irq13_handle.p_irq_callback))((void*)&(g_irq13_handle.irq_num));
     }
 } /* End of function irq13_isr */
 #endif
@@ -1244,10 +1245,10 @@ R_BSP_PRAGMA_INTERRUPT (irq14_isr, VECT(ICU, IRQ14))
 R_BSP_ATTRIB_INTERRUPT void irq14_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq14_handle.pirq_callback))) && (NULL != (*(g_irq14_handle.pirq_callback))))
+    if((FIT_NO_FUNC != (*(g_irq14_handle.p_irq_callback))) && (NULL != (*(g_irq14_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
-        (*(g_irq14_handle.pirq_callback))((void*)&(g_irq14_handle.irq_num));
+        (*(g_irq14_handle.p_irq_callback))((void*)&(g_irq14_handle.irq_num));
     }
 } /* End of function irq14_isr */
 #endif
@@ -1263,10 +1264,10 @@ R_BSP_PRAGMA_INTERRUPT (irq15_isr,VECT(ICU, IRQ15))
 R_BSP_ATTRIB_INTERRUPT void irq15_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq15_handle.pirq_callback))) && (NULL != (*(g_irq15_handle.pirq_callback))))
+    if((FIT_NO_FUNC != (*(g_irq15_handle.p_irq_callback))) && (NULL != (*(g_irq15_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
-        (*(g_irq15_handle.pirq_callback))((void*)&(g_irq15_handle.irq_num));
+        (*(g_irq15_handle.p_irq_callback))((void*)&(g_irq15_handle.irq_num));
     }
 }/* End of function irq15_isr */
 #endif

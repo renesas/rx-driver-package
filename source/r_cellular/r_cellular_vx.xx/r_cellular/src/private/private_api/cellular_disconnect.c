@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_disconnect.c
@@ -49,13 +49,13 @@
  ******************************************************************************/
 e_cellular_err_t cellular_disconnect(st_cellular_ctrl_t * const p_ctrl)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
+    e_cellular_err_t           ret           = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
 
     semaphore_ret = cellular_take_semaphore(p_ctrl->at_semaphore);
     if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
     {
-        ret = atc_cgatt(p_ctrl, ATC_AP_DISCONNECT);
+        ret = atc_cfun(p_ctrl, CELLULAR_MODULE_OPERATING_LEVEL4);
         if (CELLULAR_SUCCESS == ret)
         {
             p_ctrl->system_state = CELLULAR_SYSTEM_OPEN;

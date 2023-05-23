@@ -28,6 +28,8 @@
 *                              and added support for Manchester mode.
 *           31.03.2022 2.10    Supported for RX660.
 *           29.07.2022 2.20    Updated demo projects.
+*           15.08.2022 2.30    Supported for RX26T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 #ifndef RSCI_IF_H
@@ -43,13 +45,13 @@ Includes   <System Includes> , "Project Includes"
 Macro definitions
 ***********************************************************************************************************************/
 
-#if ((R_BSP_VERSION_MAJOR < 6) && (R_BSP_VERSION_MINOR < 10))
+#if ((R_BSP_VERSION_MAJOR == 6) && (R_BSP_VERSION_MINOR < 10) || (R_BSP_VERSION_MAJOR < 6))
     #error "This module must use BSP module of Rev.6.10 or higher. Please use the BSP module of Rev.6.10 or higher."
 #endif
 
 /* Version Number of API. */
 #define RSCI_VERSION_MAJOR  (2)
-#define RSCI_VERSION_MINOR  (20)
+#define RSCI_VERSION_MINOR  (30)
 
 #define RSCI_CLK_INT         (0x00U) /* use internal clock for baud generation */
 #define RSCI_CLK_EXT8X       (0x03U) /* use external clock 8x baud rate (ASYNC) */
@@ -69,7 +71,9 @@ Typedef definitions
 ******************************************************************************/
 typedef enum e_rsci_ch       // RSCI channel numbers
 {
-    RSCI_CH10=10,
+    RSCI_CH8=8,
+    RSCI_CH9,
+    RSCI_CH10,
     RSCI_CH11,
     RSCI_NUM_CH=12
 } rsci_ch_t;
@@ -284,32 +288,32 @@ typedef struct st_rsci_baud
 /*****************************************************************************
 Public Functions
 ******************************************************************************/
-rsci_err_t R_RSCI_Open(uint8_t const      chan,
-                     rsci_mode_t const   mode,
-                     rsci_cfg_t * const  p_cfg,
-                     void               (* const p_callback)(void *p_args),
-                     rsci_hdl_t * const  p_hdl);
+rsci_err_t R_RSCI_Open (uint8_t const      chan,
+                        rsci_mode_t const   mode,
+                        rsci_cfg_t * const  p_cfg,
+                        void               (* const p_callback)(void *p_args),
+                        rsci_hdl_t * const  p_hdl);
 
-rsci_err_t R_RSCI_Send(rsci_hdl_t const    hdl,
-                     uint8_t            *p_src,
-                     uint16_t const     length);
+rsci_err_t R_RSCI_Send (rsci_hdl_t const    hdl,
+                        uint8_t            *p_src,
+                        uint16_t const     length);
                     
-rsci_err_t R_RSCI_SendReceive(rsci_hdl_t const hdl,        /* SSPI/SYNC only */
+rsci_err_t R_RSCI_SendReceive (rsci_hdl_t const hdl,        /* SSPI/SYNC only */
                             uint8_t         *p_src,
                             uint8_t         *p_dst,
                             uint16_t const  length);
 
-rsci_err_t R_RSCI_Receive(rsci_hdl_t const hdl,
+rsci_err_t R_RSCI_Receive (rsci_hdl_t const hdl,
                         uint8_t         *p_dst,
                         uint16_t const  length);
 
-rsci_err_t R_RSCI_Control(rsci_hdl_t const     hdl,
+rsci_err_t R_RSCI_Control (rsci_hdl_t const     hdl,
                         rsci_cmd_t const     cmd,
                         void                *p_args);
 
-rsci_err_t R_RSCI_Close(rsci_hdl_t const hdl);
+rsci_err_t R_RSCI_Close (rsci_hdl_t const hdl);
 
-uint32_t  R_RSCI_GetVersion(void);
+uint32_t  R_RSCI_GetVersion (void);
 
                                     
 #endif /* RSCI_IF_H */

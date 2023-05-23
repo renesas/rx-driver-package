@@ -64,7 +64,12 @@
  *         : 30.06.2021 2.48     Changed minor version to '48' for RX671 support.
  *         : 31.07.2021 2.49     Changed minor version to '49' for RX140 support.
  *         : 31.12.2021 2.50     Changed minor version to '50' for RX660 support.
- *         : 16.12.2022 2.60     Fixed processing error of riic_bsp_calc.
+ *         : 16.12.2022 2.60     Fixed processing error of riic_bps_calc.
+ *         : 31.03.2023 2.70     Changed minor version to '70' for RX26T support.
+ *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *                               Added RX671 Demo, RX72N Demo.
+ *                               Apply a digital noise filter circuit to the riic_bps_calc function.
+ *                               Added new macros for SCL rise time and SCL fall time.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIIC_IF_H
@@ -87,7 +92,7 @@ R_BSP_PRAGMA_UNPACK
 
 /* Version Number of API. */
     #define RIIC_VERSION_MAJOR      (2)
-    #define RIIC_VERSION_MINOR      (60)
+    #define RIIC_VERSION_MINOR      (70)
 
 /*----------------------------------------------------------------------------*/
 /*   Defines the argument of the R_RIIC_Control function.                     */
@@ -202,7 +207,7 @@ riic_return_t R_RIIC_SlaveTransfer (riic_info_t *);
 riic_return_t R_RIIC_GetStatus (riic_info_t *, riic_mcu_status_t *);
 riic_return_t R_RIIC_Control (riic_info_t *, uint8_t ctrl_ptn);
 riic_return_t R_RIIC_Close (riic_info_t *);
-uint32_t R_RIIC_GetVersion (void);
+uint32_t      R_RIIC_GetVersion (void);
 
 R_BSP_PRAGMA_PACKOPTION
 #endif /* RIIC_IF_H */

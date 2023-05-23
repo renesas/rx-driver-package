@@ -27,6 +27,7 @@
 *              : 20.09.2021 1.10     Fixed r_qspix_write_indirect()
 *              : 29.11.2021 1.20     Supported to call R_QSPIX_Write_Indirect() 
 *                                    multiple times
+*              : 16.03.2023 1.40     Added r_qspix_read_memory_map() function
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_qspix_rx671.c
@@ -716,6 +717,126 @@ qspix_err_t r_qspix_read_indirect(uint8_t channel,
 }
 /******************************************************************************
 End of function r_qspix_read_indirect
+******************************************************************************/
+
+/************************************************************************************
+* Function Name: r_qspix_read_memory_map
+* Description  : Read raw data.
+* Arguments    : channel
+*                p_des_addr
+*                p_addr
+*                protocol_ext
+*                addr_size
+*                bytes
+* Return Value : QSPIX_SUCCESS              Processing completed without problem
+*              : QSPIX_ERR_NOT_OPEN         QSPIX module is not initialized yet
+*              : QSPIX_ERR_INVALID_ARG      Invalid argument
+*              : QSPIX_ERR_NULL_PTR         Argument pointers are NULL
+************************************************************************************/
+qspix_err_t r_qspix_read_memory_map(uint8_t channel,
+                                  uint8_t *p_des_addr,
+                                  uint32_t p_addr,
+                                  qspix_protocol_t protocol_ext,
+                                  qspix_address_size_t addr_size,
+                                  uint32_t bytes)
+{
+    qspix_err_t ret = QSPIX_SUCCESS;
+    volatile uint8_t *rom_addr = (volatile uint8_t*)(QSPI_DEVICE_START_ADDRESS + p_addr);
+
+#if QSPIX_CFG_PARAM_CHECKING_ENABLE
+    ret = r_qspix_parameter_channel_check(channel);
+
+    if(QSPIX_SUCCESS != ret)
+    {
+        return ret;
+    }
+
+    if(NULL == p_des_addr)
+    {
+       return QSPIX_ERR_NULL_PTR;
+    }
+
+    if(QSPIX_CLOSE == g_qspix_handles[channel].open)
+    {
+        return QSPIX_ERR_NOT_OPEN;
+    }
+
+    if((QSPIX_1_BYTE != addr_size) && (QSPIX_2_BYTES != addr_size) && \
+       (QSPIX_3_BYTES != addr_size) && (QSPIX_4_BYTES != addr_size))
+    {
+        return QSPIX_ERR_INVALID_ARG;
+    }
+
+    if(((uint32_t)QSPI_DEVICE_OFFSET_ADDRESS <= p_addr) || (bytes > ((uint32_t)QSPI_DEVICE_END_ADDRESS - (p_addr + (uint32_t)QSPI_DEVICE_START_ADDRESS))))
+    {
+        return QSPIX_ERR_INVALID_ARG;
+    }
+#endif
+
+    /* Check current access mode */
+    if (QSPIX_MEMORY_MAPPED_MODE != QSPIX.SPMR1.BIT.AMOD)
+    {
+        return QSPIX_ERR_INVALID_ARG;
+    }
+
+    /* Check Prefetch function enable*/
+    if (QSPIX_PREFETCH_ENABLE != QSPIX.SPMR0.BIT.PFE)
+    {
+        QSPIX.SPMR0.BIT.PFE = QSPIX_PREFETCH_ENABLE;
+    }
+
+    /* Update address size */
+    QSPIX.SPAMR.BIT.SIZE = addr_size;
+
+    /* Select Read Instruction. */
+    switch(protocol_ext)
+    {
+        case QSPIX_EXTENDED_SPI_PROTOCOL:
+        {
+            QSPIX.SPMR0.BIT.RISEL = QSPIX_READ_MODE_FAST_READ;
+        }
+        break;
+        case QSPIX_DUAL_SPI_PROTOCOL:
+        {
+            QSPIX.SPMR0.BIT.RISEL = QSPIX_READ_MODE_FAST_READ_DUAL_OUTPUT;
+        }
+        break;
+        case QSPIX_QUAD_SPI_PROTOCOL:
+        {
+            QSPIX.SPMR0.BIT.RISEL = QSPIX_READ_MODE_FAST_READ_QUAD_OUTPUT;
+        }
+        break;
+        default:
+            /* Do nothing. */
+        break;
+    }
+
+    /* Wait for bit release */
+    if(0 == QSPIX.SPMR0.BIT.RISEL)
+    {
+        R_BSP_NOP();
+    }
+
+    /* Make the TAG valid to start prefetch */
+    *rom_addr = 0;
+
+    /* Read access to QSPI memory space */
+    for (uint32_t i = 0; i < bytes; i++)
+    {
+        /* Wait for 1-byte data to be received */
+        while((QSPIX.SPPFSR.BIT.PBLVL & 0x1F) < 0x01);
+
+        /* Store data to p_des_addr */
+        p_des_addr[i] = *(rom_addr++);
+    }
+
+    /* Disable Prefetch function */
+    QSPIX.SPMR0.BIT.PFE = QSPIX_PREFETCH_DISABLE;
+
+    return ret;
+}
+/******************************************************************************
+End of function r_qspix_read_memory_map
 ******************************************************************************/
 
 /************************************************************************************

@@ -29,6 +29,10 @@
  *           25.03.2022 1.04    Change the supported FreeRTOS version
  *                              Select data area from DF/CF
  *                              Added support for RX140-256KB
+ *           31.05.2022 1.05    Added support for RX660
+ *           05.12.2022 1.06    Added support for Azure ADU
+ *                              Added support for excluding communication drivers
+ *                              Added support for unbuffered FW updates
  *********************************************************************************************************************/
 
 
@@ -46,8 +50,9 @@
 /* Set the implementation environment. */
 #define FWUP_IMPLEMENTATION_BOOTLOADER  (0)   /* Bootloader. (default) */
 #define FWUP_IMPLEMENTATION_NONEOS      (1)   /* Firmware update w/o OS. */
-#define FWUP_IMPLEMENTATION_AFRTOS      (2)   /* Firmware update with Amazon FreeRTOS(OTA). */
-#define FWUP_IMPLEMENTATION_OTHER_RTOS  (3)   /* Firmware update with other FreeRTOS. */
+#define FWUP_IMPLEMENTATION_NONEOSDRV   (2)   /* Firmware update w/o OS, communication driver-less. */
+#define FWUP_IMPLEMENTATION_AFRTOS      (3)   /* Firmware update with Amazon FreeRTOS(OTA). */
+#define FWUP_IMPLEMENTATION_AZURE       (4)   /* Firmware update with Azure ADU. */
 
 /* Set the communication function. */
 #define FWUP_COMMUNICATION_SCI          (0)   /* SCI connection. (default) */
@@ -65,10 +70,7 @@
 #define FWUP_COMM_ETHER_AFRTOS          (5)   /* Connect Eathernet with Amazon FreeRTOS.*/
 #define FWUP_COMM_USB_AFRTOS            (6)   /* Connect LTE modem to USB with Amazon FreeRTOS.*/
 #define FWUP_COMM_SDHI_AFRTOS           (7)   /* Connect wireless module to SDHI with Amazon FreeRTOS.*/
-#define FWUP_COMM_SCI_FS                (8)   /* External storage (SD card + file system) connected to SCI.*/
-#define FWUP_COMM_USB_FS                (9)   /* External storage (USB memory + file system) connected to USB.*/
-#define FWUP_COMM_SDHI_FS               (10)  /* External storage (SD card + file system) connected to SDHI.*/
-#define FWUP_COMM_QSPI_FS               (11)  /* External storage (Serial flash + file system) connected to QSPI.*/
+#define FWUP_COMM_ETHER_AZURE           (8)   /* Connect Eathernet (include Wi-Fi) with Azure ADU.*/
 
 /* Set the flash bank mode. */
 #ifdef BSP_CFG_CODE_FLASH_BANK_MODE
@@ -106,7 +108,7 @@
 #endif /* FWUP_CFG_COMMUNICATION_FUNCTION */
 
 /* Case of Firmware update w/o OS. */
-#elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
+#elif ((FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS) || (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOSDRV))
 #if (FWUP_CFG_COMMUNICATION_FUNCTION == FWUP_COMMUNICATION_SCI)  /* Case of SCI */
 #define FWUP_ENV_COMMUNICATION_FUNCTION     (FWUP_COMM_SCI_PRIMITIVE)
 #elif (FWUP_CFG_COMMUNICATION_FUNCTION == FWUP_COMMUNICATION_USB)  /* Case of USB. */
@@ -131,31 +133,25 @@
 #error "Illegal combination. Check the CFG value of r_fwup_config.h"
 #endif /* FWUP_CFG_COMMUNICATION_FUNCTION */
 
-/* Case of Firmware update with other FreeRTOS. */
-#elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_OTHER_RTOS)
-#if (FWUP_CFG_COMMUNICATION_FUNCTION == FWUP_COMMUNICATION_SCI)  /* Case of SCI */
-#define FWUP_ENV_COMMUNICATION_FUNCTION     (FWUP_COMM_SCI_FS)
-#elif (FWUP_CFG_COMMUNICATION_FUNCTION == FWUP_COMMUNICATION_USB)  /* Case of USB. */
-#define FWUP_ENV_COMMUNICATION_FUNCTION     (FWUP_COMM_USB_FS)
-#elif (FWUP_CFG_COMMUNICATION_FUNCTION == FWUP_COMMUNICATION_SDHI)  /* Case of SDHI. */
-#define FWUP_ENV_COMMUNICATION_FUNCTION     (FWUP_COMM_SDHI_FS)
-#elif (FWUP_CFG_COMMUNICATION_FUNCTION == FWUP_COMMUNICATION_QSPI)  /* Case of QSPI. */
-#define FWUP_ENV_COMMUNICATION_FUNCTION     (FWUP_COMM_QSPI_FS)
+/* Case of Firmware update with Azure ADU. */
+#elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AZURE)
+#if (FWUP_CFG_COMMUNICATION_FUNCTION == FWUP_COMMUNICATION_ETHERNET)  /* Case of Ethernet. */
+#define FWUP_ENV_COMMUNICATION_FUNCTION     (FWUP_COMM_ETHER_AZURE)
 #else
 #error "Illegal combination. Check the CFG value of r_fwup_config.h"
-#endif  /* FWUP_ENV_COMMUNICATION_FUNCTION */
+#endif /* FWUP_CFG_COMMUNICATION_FUNCTION */
 #endif  /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT */
 
 /*------------------------------------------ firmware update configuration (start) -----------------------------------*/
 /* Common definition ------------------------------------------------------------------------------------------------ */
-#define BOOT_LOADER_PGM_SIZE (65536)
+#define BOOT_LOADER_PGM_SIZE                        (65536)
 #define BOOT_LOADER_USER_FIRMWARE_HEADER_LENGTH     (0x200)
 #define BOOT_LOADER_USER_FIRMWARE_DESCRIPTOR_LENGTH (0x100)
-#define INITIAL_FIRMWARE_FILE_NAME "userprog.rsu"
+#define INITIAL_FIRMWARE_FILE_NAME                  "userprog.rsu"
 
 #define FLASH_INTERRUPT_PRIORITY (14)    /* 0(low) - 15(high) */
 
-#define BOOT_LOADER_LOW_ADDRESS (FLASH_CF_BLOCK_END - BOOT_LOADER_PGM_SIZE + 1)
+#define BOOT_LOADER_LOW_ADDRESS   (FLASH_CF_BLOCK_END - BOOT_LOADER_PGM_SIZE + 1)
 #define USER_RESET_VECTOR_ADDRESS (BOOT_LOADER_LOW_ADDRESS - 4)
 #if (FWUP_CFG_OTA_DATA_STORAGE == 0)
 #define BOOT_LOADER_USER_CONST_DATA_LOW_ADDRESS           (FLASH_DF_BLOCK_0)
@@ -167,11 +163,11 @@
 #define BOOT_LOADER_CF_DF_BLOCK_SIZE            (FLASH_CF_MEDIUM_BLOCK_SIZE)
 
 /* Definition for each MCU ------------------------------------------------------------------------------------------ */
-#if (FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_3)
+#if ((FLASH_TYPE == FLASH_TYPE_4) || (FLASH_TYPE == FLASH_TYPE_3))
 #define BOOT_LOADER_FLASH_CF_BLOCK_SIZE                 (FLASH_CF_MEDIUM_BLOCK_SIZE)
 
 #if (FWUP_FLASH_BANK_MODE == 0) /* Dual mode */
-#if (FWUP_CFG_OTA_DATA_STORAGE == 0)
+#if (FWUP_CFG_OTA_DATA_STORAGE == 0) /* (Use Dataflash) */
 #define BOOT_LOADER_TOTAL_UPDATE_SIZE                   ((BSP_ROM_SIZE_BYTES - (BOOT_LOADER_PGM_SIZE * 2)) >> 1) /* Size of User program */
 #define BOOT_LOADER_UPDATE_EXECUTE_AREA_HIGH_ADDRESS    (BOOT_LOADER_LOW_ADDRESS - BOOT_LOADER_FLASH_CF_BLOCK_SIZE)
 #define BOOT_LOADER_UPDATE_EXECUTE_AREA_LOW_ADDRESS     (BOOT_LOADER_LOW_ADDRESS - BOOT_LOADER_TOTAL_UPDATE_SIZE)
@@ -181,7 +177,8 @@
 #define BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS   (BOOT_LOADER_MIRROR_LOW_ADDRESS - BOOT_LOADER_TOTAL_UPDATE_SIZE)
 #define BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER          ((BOOT_LOADER_TOTAL_UPDATE_SIZE) / (FLASH_CF_MEDIUM_BLOCK_SIZE))
 #define BOOT_LOADER_MIRROR_BLOCK_NUMBER                 ((BOOT_LOADER_PGM_SIZE) / (FLASH_CF_SMALL_BLOCK_SIZE))
-#else /* FWUP_CFG_OTA_DATA_STORAGE = 1 */
+
+#else /* FWUP_CFG_OTA_DATA_STORAGE == 1 (Use Codeflash) */
 #define BOOT_LOADER_TOTAL_UPDATE_SIZE                   ((BSP_ROM_SIZE_BYTES - ((BOOT_LOADER_PGM_SIZE + BOOT_LOADER_CF_DF_BLOCK_SIZE) * 2)) >> 1) /* Size of User program */
 #define BOOT_LOADER_UPDATE_EXECUTE_AREA_HIGH_ADDRESS    (BOOT_LOADER_LOW_ADDRESS - BOOT_LOADER_FLASH_CF_BLOCK_SIZE)
 #define BOOT_LOADER_UPDATE_EXECUTE_AREA_LOW_ADDRESS     (BOOT_LOADER_LOW_ADDRESS - BOOT_LOADER_TOTAL_UPDATE_SIZE)
@@ -194,20 +191,33 @@
 #define BOOT_LOADER_UPDATE_EXECUTE_DATA_LOW_ADDRESS     (BOOT_LOADER_LOW_ADDRESS - BOOT_LOADER_TOTAL_UPDATE_SIZE - BOOT_LOADER_CF_DF_BLOCK_SIZE)
 #define BOOT_LOADER_UPDATE_TEMPORARY_DATA_LOW_ADDRESS   (FLASH_CF_LO_BANK_LO_ADDR)
 #endif /* FWUP_CFG_OTA_DATA_STORAGE */
+
+#if (FLASH_TYPE == FLASH_TYPE_3) /* Flash Type 3 w/ Dual mode */
+#error "Illegal definition. Check the CFG value of r_bsp_config.h, r_flash_config.h"
+#endif /* (FLASH_TYPE == FLASH_TYPE_3) */
+#if( FWUP_CFG_NO_USE_BUFFER == 1 )
+#error "Illegal definition. Check the CFG value of r_bsp_config.h, r_flash_config.h"
+#endif /* ( FWUP_CFG_NO_USE_BUFFER == 1 ) */
+
 #else /* Linear mode */
+#if( FWUP_CFG_NO_USE_BUFFER == 1 )
+#define BOOT_LOADER_TOTAL_UPDATE_SIZE                   (BSP_ROM_SIZE_BYTES - BOOT_LOADER_PGM_SIZE) /* Size of User program */
+#define BOOT_LOADER_UPDATE_EXECUTE_AREA_HIGH_ADDRESS    (BOOT_LOADER_LOW_ADDRESS - BOOT_LOADER_FLASH_CF_BLOCK_SIZE)
+#define BOOT_LOADER_UPDATE_EXECUTE_AREA_LOW_ADDRESS     (BOOT_LOADER_LOW_ADDRESS - BOOT_LOADER_TOTAL_UPDATE_SIZE)
+#define BOOT_LOADER_UPDATE_TEMPORARY_AREA_HIGH_ADDRESS  BOOT_LOADER_UPDATE_EXECUTE_AREA_HIGH_ADDRESS
+#define BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS   BOOT_LOADER_UPDATE_EXECUTE_AREA_LOW_ADDRESS
+#else
 #define BOOT_LOADER_TOTAL_UPDATE_SIZE                   (BSP_ROM_SIZE_BYTES - BOOT_LOADER_PGM_SIZE >> 1) /* Size of User program */
 #define BOOT_LOADER_UPDATE_EXECUTE_AREA_HIGH_ADDRESS    (BOOT_LOADER_LOW_ADDRESS - BOOT_LOADER_FLASH_CF_BLOCK_SIZE)
 #define BOOT_LOADER_UPDATE_EXECUTE_AREA_LOW_ADDRESS     (BOOT_LOADER_LOW_ADDRESS - BOOT_LOADER_TOTAL_UPDATE_SIZE)
 #define BOOT_LOADER_UPDATE_TEMPORARY_AREA_HIGH_ADDRESS  (BOOT_LOADER_UPDATE_EXECUTE_AREA_LOW_ADDRESS - BOOT_LOADER_FLASH_CF_BLOCK_SIZE)
 #define BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS   (BOOT_LOADER_UPDATE_EXECUTE_AREA_LOW_ADDRESS - BOOT_LOADER_TOTAL_UPDATE_SIZE)
+#endif /* ( FWUP_CFG_NO_USE_BUFFER == 1 ) */
 #define BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER          ((BOOT_LOADER_TOTAL_UPDATE_SIZE) / (FLASH_CF_MEDIUM_BLOCK_SIZE))
 #define BOOT_LOADER_MIRROR_BLOCK_NUMBER                 ((BOOT_LOADER_PGM_SIZE) / (FLASH_CF_SMALL_BLOCK_SIZE))
 #endif /* (FWUP_FLASH_BANK_MODE) */
 
 #elif (FLASH_TYPE == FLASH_TYPE_1)
-#if (FWUP_FLASH_BANK_MODE == 0) // Dual mode
-#error "Illegal definition. Check the CFG value of r_bsp_config.h, r_flash_config.h"
-#else /* Linear mode */
 #define BOOT_LOADER_FLASH_CF_BLOCK_SIZE                 (FLASH_CF_BLOCK_SIZE)
 #define BOOT_LOADER_TOTAL_UPDATE_SIZE                   (BSP_ROM_SIZE_BYTES - BOOT_LOADER_PGM_SIZE >> 1) /* Size of User program */
 #define BOOT_LOADER_UPDATE_EXECUTE_AREA_HIGH_ADDRESS    (BOOT_LOADER_LOW_ADDRESS - BOOT_LOADER_FLASH_CF_BLOCK_SIZE)
@@ -216,7 +226,14 @@
 #define BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS   (BOOT_LOADER_UPDATE_EXECUTE_AREA_LOW_ADDRESS - BOOT_LOADER_TOTAL_UPDATE_SIZE)
 #define BOOT_LOADER_UPDATE_TARGET_BLOCK_NUMBER          ((BOOT_LOADER_TOTAL_UPDATE_SIZE) / (FLASH_CF_BLOCK_SIZE))
 #define BOOT_LOADER_MIRROR_BLOCK_NUMBER                 ((BOOT_LOADER_PGM_SIZE) / (FLASH_CF_BLOCK_SIZE))
+
+#if (FWUP_FLASH_BANK_MODE == 0) /* Flash type 1 w/ Dual mode */
+#error "Illegal definition. Check the CFG value of r_bsp_config.h, r_flash_config.h"
 #endif /* (FWUP_FLASH_BANK_MODE) */
+#if( FWUP_CFG_NO_USE_BUFFER == 1 )
+#error "Illegal definition. Check the CFG value of r_bsp_config.h, r_flash_config.h"
+#endif /* ( FWUP_CFG_NO_USE_BUFFER == 1 ) */
+
 #endif /* (FLASH_TYPE) */
 
 /* Start address for FLASH erase */
@@ -237,6 +254,8 @@
 #define LIFECYCLE_STATE_VALID       (0xf8)
 #define LIFECYCLE_STATE_INVALID     (0xf0)
 #define LIFECYCLE_STATE_EOL         (0xe0)
+
+#define DIRECT_UPDATE_ON            (0x01)
 
 #define R_OTA_ERR_NONE              (0)
 #define R_OTA_ERR_INVALID_CONTEXT   (-1)
@@ -265,6 +284,23 @@
 #define MONITORING_STATUS_INTERVAL    (1)
 #define MONITORING_STATUS_COUNT       (6000)
 
+#define FRAGMENTED_PACKET_TYPE_HEAD (0)
+#define FRAGMENTED_PACKET_TYPE_TAIL (1)
+
+#define FRAGMENTED_FLASH_BLOCK_TYPE_HEAD (0)
+#define FRAGMENTED_FLASH_BLOCK_TYPE_TAIL (1)
+
+#define FWUP_BYTE_POOL_SIZE     (0x2000)
+#define FWUP_TASK_STACK_SIZE    (2048)
+#define FWUP_TASK_PRI           (10)
+#define FWUP_QUEUE_SIZE         (1)
+
+#if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AFRTOS)
+#define FWUP_WRITE_BASE_ADDR (BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS + BOOT_LOADER_USER_FIRMWARE_HEADER_LENGTH)
+#elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AZURE)
+#define FWUP_WRITE_BASE_ADDR (BOOT_LOADER_UPDATE_TEMPORARY_AREA_LOW_ADDRESS)
+#endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT */
+
 #if (FWUP_CFG_OTA_DATA_STORAGE == 1)
 #define FWUP_COPY_FLAG_ON          (0x00)
 #define FWUP_COPY_FLAG_OFF         (0xff)
@@ -274,10 +310,14 @@
 #define FWUP_WRITE_BLOCK_SIZE       (1024)
 /* For reduce the ROM size by control printf */
 #if (FWUP_CFG_BOOTLOADER_LOG_DISABLE == 1)
+/* Log output w/o variable output */
 # define DEBUG_LOG(str)
+/* Log output w/ variable output */
 # define DEBUG_LOG2(fmt, ...)
 #else
+/* Log output w/o variable output */
 #define DEBUG_LOG(fmt)           printf(fmt)
+/* Log output w/ variable output */
 #define DEBUG_LOG2(fmt, ...)     printf(fmt, __VA_ARGS__)
 #endif /* FWUP_CFG_BOOTLOADER_LOG_DISABLE */
 #else
@@ -286,81 +326,98 @@
 
 #define FLASH_DF_TOTAL_BLOCK_SIZE (FLASH_DF_BLOCK_INVALID - FLASH_DF_BLOCK_0)
 
-#define INTEGRITY_CHECK_SCHEME_HASH_SHA256_STANDALONE "hash-sha256"
+#define INTEGRITY_CHECK_SCHEME_HASH_SHA256_STANDALONE      "hash-sha256"
 #define INTEGRITY_CHECK_SCHEME_SIG_SHA256_ECDSA_STANDALONE "sig-sha256-ecdsa"
 
 #if (FWUP_CFG_COMMUNICATION_FUNCTION == FWUP_COMMUNICATION_SCI)  /* Case of SCI */
 #if !defined(FWUP_CFG_SERIAL_TERM_SCI)
 #error "Error! Need to define FWUP_CFG_SERIAL_TERM_SCI in r_fwup_config.h"
 #elif FWUP_CFG_SERIAL_TERM_SCI == (0)
-#define R_SCI_PinSet_serial_term()  (R_SCI_PinSet_SCI0())
-#define SCI_CH_serial_term          (SCI_CH0)
+#define R_SCI_PinSet_serial_term()   (R_SCI_PinSet_SCI0())
+#define SCI_CH_serial_term           (SCI_CH0)
+#define SCI_CH_TX_BUFSIZ_serial_term (SCI_CFG_CH0_TX_BUFSIZ)
 #elif FWUP_CFG_SERIAL_TERM_SCI == (1)
-#define R_SCI_PinSet_serial_term()  (R_SCI_PinSet_SCI1())
-#define SCI_CH_serial_term          (SCI_CH1)
+#define R_SCI_PinSet_serial_term()   (R_SCI_PinSet_SCI1())
+#define SCI_CH_serial_term           (SCI_CH1)
+#define SCI_CH_TX_BUFSIZ_serial_term (SCI_CFG_CH1_TX_BUFSIZ)
 #elif FWUP_CFG_SERIAL_TERM_SCI == (2)
-#define R_SCI_PinSet_serial_term()  (R_SCI_PinSet_SCI2())
-#define SCI_CH_serial_term          (SCI_CH2)
+#define R_SCI_PinSet_serial_term()   (R_SCI_PinSet_SCI2())
+#define SCI_CH_serial_term           (SCI_CH2)
+#define SCI_CH_TX_BUFSIZ_serial_term (SCI_CFG_CH2_TX_BUFSIZ)
 #elif FWUP_CFG_SERIAL_TERM_SCI == (3)
-#define R_SCI_PinSet_serial_term()  (R_SCI_PinSet_SCI3())
-#define SCI_CH_serial_term          (SCI_CH3)
+#define R_SCI_PinSet_serial_term()   (R_SCI_PinSet_SCI3())
+#define SCI_CH_serial_term           (SCI_CH3)
+#define SCI_CH_TX_BUFSIZ_serial_term (SCI_CFG_CH3_TX_BUFSIZ)
 #elif FWUP_CFG_SERIAL_TERM_SCI == (4)
-#define R_SCI_PinSet_serial_term()  (R_SCI_PinSet_SCI4())
-#define SCI_CH_serial_term          (SCI_CH4)
+#define R_SCI_PinSet_serial_term()   (R_SCI_PinSet_SCI4())
+#define SCI_CH_serial_term           (SCI_CH4)
+#define SCI_CH_TX_BUFSIZ_serial_term (SCI_CFG_CH4_TX_BUFSIZ)
 #elif FWUP_CFG_SERIAL_TERM_SCI == (5)
-#define R_SCI_PinSet_serial_term()  (R_SCI_PinSet_SCI5())
-#define SCI_CH_serial_term          (SCI_CH5)
+#define R_SCI_PinSet_serial_term()   (R_SCI_PinSet_SCI5())
+#define SCI_CH_serial_term           (SCI_CH5)
+#define SCI_CH_TX_BUFSIZ_serial_term (SCI_CFG_CH5_TX_BUFSIZ)
 #elif FWUP_CFG_SERIAL_TERM_SCI == (6)
-#define R_SCI_PinSet_serial_term()  (R_SCI_PinSet_SCI6())
-#define SCI_CH_serial_term          (SCI_CH6)
+#define R_SCI_PinSet_serial_term()   (R_SCI_PinSet_SCI6())
+#define SCI_CH_serial_term           (SCI_CH6)
+#define SCI_CH_TX_BUFSIZ_serial_term (SCI_CFG_CH6_TX_BUFSIZ)
 #elif FWUP_CFG_SERIAL_TERM_SCI == (7)
-#define R_SCI_PinSet_serial_term()  (R_SCI_PinSet_SCI7())
-#define SCI_CH_serial_term          (SCI_CH7)
+#define R_SCI_PinSet_serial_term()   (R_SCI_PinSet_SCI7())
+#define SCI_CH_serial_term           (SCI_CH7)
+#define SCI_CH_TX_BUFSIZ_serial_term (SCI_CFG_CH7_TX_BUFSIZ)
 #elif FWUP_CFG_SERIAL_TERM_SCI == (8)
-#define R_SCI_PinSet_serial_term()  (R_SCI_PinSet_SCI8())
-#define SCI_CH_serial_term          (SCI_CH8)
+#define R_SCI_PinSet_serial_term()   (R_SCI_PinSet_SCI8())
+#define SCI_CH_serial_term           (SCI_CH8)
+#define SCI_CH_TX_BUFSIZ_serial_term (SCI_CFG_CH8_TX_BUFSIZ)
 #elif FWUP_CFG_SERIAL_TERM_SCI == (9)
-#define R_SCI_PinSet_serial_term()  (R_SCI_PinSet_SCI9())
-#define SCI_CH_serial_term          (SCI_CH9)
+#define R_SCI_PinSet_serial_term()   (R_SCI_PinSet_SCI9())
+#define SCI_CH_serial_term           (SCI_CH9)
+#define SCI_CH_TX_BUFSIZ_serial_term (SCI_CFG_CH9_TX_BUFSIZ)
 #elif FWUP_CFG_SERIAL_TERM_SCI == (10)
-#define R_SCI_PinSet_serial_term()  (R_SCI_PinSet_SCI10())
-#define SCI_CH_serial_term          (SCI_CH10)
+#define R_SCI_PinSet_serial_term()   (R_SCI_PinSet_SCI10())
+#define SCI_CH_serial_term           (SCI_CH10)
+#define SCI_CH_TX_BUFSIZ_serial_term (SCI_CFG_CH10_TX_BUFSIZ)
 #elif FWUP_CFG_SERIAL_TERM_SCI == (11)
-#define R_SCI_PinSet_serial_term()  (R_SCI_PinSet_SCI11())
-#define SCI_CH_serial_term          (SCI_CH11)
+#define R_SCI_PinSet_serial_term()   (R_SCI_PinSet_SCI11())
+#define SCI_CH_serial_term           (SCI_CH11)
+#define SCI_CH_TX_BUFSIZ_serial_term (SCI_CFG_CH11_TX_BUFSIZ)
 #elif FWUP_CFG_SERIAL_TERM_SCI == (12)
-#define R_SCI_PinSet_serial_term()  (R_SCI_PinSet_SCI12())
-#define SCI_CH_serial_term          (SCI_CH12)
+#define R_SCI_PinSet_serial_term()   (R_SCI_PinSet_SCI12())
+#define SCI_CH_serial_term           (SCI_CH12)
+#define SCI_CH_TX_BUFSIZ_serial_term (SCI_CFG_CH12_TX_BUFSIZ)
 #else /* FWUP_CFG_SERIAL_TERM_SCI */
 #error "Error! Invalid setting for FWUP_CFG_SERIAL_TERM_SCI in r_fwup_config.h"
 #endif /*  containing !definedFWUP_CFG_SERIAL_TERM_SCI */
 #endif  /* (FWUP_CFG_COMMUNICATION_FUNCTION == FWUP_COMMUNICATION_SCI) */
 
-#define BOOT_LOADER_MAGIC_CODE "Renesas"
+#define BOOT_LOADER_MAGIC_CODE        "Renesas"
 #define BOOT_LOADER_MAGIC_CODE_LENGTH (7)
 
 /* The OTA signature algorithm string is specified by the PAL. */
 #define OTA_FILE_SIG_KEY_STR_MAX_LENGTH    (32)
 
-#if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
+#if ((FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS) || (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOSDRV) || (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AZURE))
 /**
  * @brief No log messages.
  *
  * When @ref FWUP_CFG_LOG_LEVEL is #LOG_NONE, logging is disabled and no
  * logging messages are printed.
  */
-#define LOG_NONE            0
-#define LOG_ERROR           1
-#define LOG_WARN            2
-#define LOG_INFO            3
-#define LOG_DEBUG           4
-#define LOG_INFO_NOLF       5
-#define LOG_INFO_CONTINUE   6
+#define LOG_NONE            (0)
+#define LOG_ERROR           (1)
+#define LOG_WARN            (2)
+#define LOG_INFO            (3)
+#define LOG_DEBUG           (4)
+#define LOG_INFO_NOLF       (5)
+#define LOG_INFO_CONTINUE   (6)
+
+#if FWUP_CFG_LOG_LEVEL > LOG_DEBUG
+#error "Illegal setting of FWUP_CFG_LOG_LEVEL. Check the CFG value of r_fwup_config.h"
+#endif /* FWUP_CFG_LOG_LEVEL > LOG_DEBUG */
 
 #if FWUP_CFG_LOG_LEVEL == LOG_DEBUG
 /* All log level messages will logged. */
 #define LogError( message )          s_log_printf_error message
-#define LogWarn( message )           s_log_printf_warn message
+#define LogWarn( message )
 #define LogInfo( message )           s_log_printf_info message
 #define LogInfoNoLF( message )       s_log_printf_info_nolf message
 #define LogInfoContinue( message )   s_log_printf_info_continue message
@@ -369,7 +426,7 @@
 #elif FWUP_CFG_LOG_LEVEL == LOG_INFO
 /* Only INFO, WARNING and ERROR messages will be logged. */
 #define LogError( message )          s_log_printf_error message
-#define LogWarn( message )           s_log_printf_warn message
+#define LogWarn( message )
 #define LogInfo( message )           s_log_printf_info message
 #define LogInfoNoLF( message )       s_log_printf_info_nolf message
 #define LogInfoContinue( message )   s_log_printf_info_continue message
@@ -378,7 +435,7 @@
 #elif FWUP_CFG_LOG_LEVEL == LOG_WARN
 /* Only WARNING and ERROR messages will be logged.*/
 #define LogError( message )          s_log_printf_error message
-#define LogWarn( message )           s_log_printf_warn message
+#define LogWarn( message )
 #define LogInfo( message )
 #define LogInfoNoLF( message )
 #define LogInfoContinue( message )
@@ -402,7 +459,7 @@
 #define LogDebug( message )
 #endif /* FWUP_CFG_LOG_LEVEL == LOG_DEBUG */
 
-#define configLOGGING_MAX_MESSAGE_LENGTH 200
+#define configLOGGING_MAX_MESSAGE_LENGTH (200)
 
 /**
  * @constantspage{ota,OTA library}
@@ -463,8 +520,8 @@
 /* @[define_ota_err_codes] */
 
 /* @[define_ota_err_code_helpers] */
-#define OTA_PAL_ERR_MASK    0xffffffUL                                                                                                        /*!< The PAL layer uses the signed low 24 bits of the OTA error code. */
-#define OTA_PAL_SUB_BITS    24U                                                                                                               /*!< The OTA Agent error code is the highest 8 bits of the word. */
+#define OTA_PAL_ERR_MASK                    (0xffffffUL)                                                                                      /*!< The PAL layer uses the signed low 24 bits of the OTA error code. */
+#define OTA_PAL_SUB_BITS                    (24U)                                                                                             /*!< The OTA Agent error code is the highest 8 bits of the word. */
 #define OTA_PAL_MAIN_ERR( err )             ( ( OtaPalMainStatus_t ) ( uint32_t ) ( ( uint32_t ) ( err ) >> ( uint32_t ) OTA_PAL_SUB_BITS ) ) /*!< Helper to get the OTA PAL main error code. */
 #define OTA_PAL_SUB_ERR( err )              ( ( uint32_t ) ( err ) & ( uint32_t ) OTA_PAL_ERR_MASK )                                          /*!< Helper to get the OTA PAL sub error code. */
 #define OTA_PAL_COMBINE_ERR( main, sub )    ( ( ( uint32_t ) ( main ) << ( uint32_t ) OTA_PAL_SUB_BITS ) | ( uint32_t ) ( sub ) )             /*!< Helper to combine the OTA PAL main and sub error code. */
@@ -485,7 +542,7 @@
 /*****************************************************************************
  Typedef definitions
  ******************************************************************************/
-#if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS)
+#if ((FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOS) || (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_NONEOSDRV) || (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_AZURE))
 /**
  * @ingroup ota_enum_types
  * @brief OTA Image states.
@@ -633,7 +690,6 @@ typedef struct OtaFileContext
  */
 typedef uint32_t                 OTA_Err_t;
 
-#elif (FWUP_ENV_COMMUNICATION_FUNCTION == FWUP_COMM_ETHER_AFRTOS)
 #endif /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT */
 
 typedef enum e_fwup_state
@@ -709,10 +765,10 @@ typedef enum e_state_monitoring_flag
 
 typedef struct st_state_monitoring
 {
-    uint32_t                check_status_counter;       // Counter for monitoring state.
+    uint32_t                  check_status_counter;       // Counter for monitoring state.
     e_state_monitoring_flag_t state_transit_error_flag;   // State transition error flag.
     e_fwup_state_t            last_secure_boot_state;     // Keep last state.
-    bool                    state_transit_flag;         // State transition execution flag.
+    bool                      state_transit_flag;         // State transition execution flag.
 } st_state_monitoring_t;
 
 typedef struct st_sci_buffer_control
@@ -724,9 +780,9 @@ typedef struct st_sci_buffer_control
 
 typedef struct st_sci_receive_control_block
 {
-    st_sci_buffer_control_t *p_sci_buffer_control;
-    uint32_t           total_byte_size;
-    uint32_t           current_state;
+    st_sci_buffer_control_t * p_sci_buffer_control;
+    uint32_t                total_byte_size;
+    uint32_t                current_state;
 } st_sci_receive_control_block_t;
 
 typedef struct st_firmware_update_control_block
@@ -750,7 +806,8 @@ typedef struct st_firmware_update_control_block
     uint32_t end_address;
     uint32_t execution_address;
     uint32_t hardware_id;
-    uint8_t  reserved2[236];
+    uint8_t  direct_update_flag;
+    uint8_t  reserved2[235];
 } st_fwup_control_block_t;
 
 #if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == FWUP_IMPLEMENTATION_BOOTLOADER)
@@ -762,35 +819,56 @@ typedef struct st_load_fw_control_block
 } st_load_fw_control_block_t;
 #else
 typedef struct st_load_fw_control_block {
-    uint32_t status;
-    uint32_t processed_byte;
-    uint32_t total_image_length;
-    OtaImageState_t eSavedAgentState;
+    uint32_t         status;
+    uint32_t         processed_byte;
+    uint32_t         total_image_length;
+    OtaImageState_t  eSavedAgentState;
     OtaFileContext_t * OtaFileContext;
 } st_load_fw_control_block_t;
 #endif  /* FWUP_CFG_IMPLEMENTATION_ENVIRONMENT */
 
+typedef struct st_fragmented_packet
+{
+    uint32_t offset;
+    uint8_t  type;  /* 0: head, 1: tail */
+    uint8_t  * p_binary;
+    uint32_t length;
+} st_fragmented_packet_t;
+
+typedef struct st_fragmented_packet_list
+{
+    st_fragmented_packet_t           content;
+    struct st_fragmented_packet_list * prev;
+    struct st_fragmented_packet_list * next;
+} st_fragmented_packet_list_t;
+
+typedef struct st_fragmented_search_list
+{
+    struct st_fragmented_packet_list * list;
+    uint32_t                         count;
+} st_fragmented_search_list_t;
+
 typedef struct st_flash_block
 {
     uint32_t offset;
-    uint8_t  *p_binary;
+    uint8_t  * p_binary;
     uint32_t length;
 } st_flash_block_t;
 
 typedef struct st_fragmented_block_list
 {
-    st_flash_block_t                 content;
-    struct st_fragmented_block_list *next;
+    st_flash_block_t                content;
+    struct st_fragmented_block_list * next;
 } st_fragmented_block_list_t;
 
 typedef struct st_packet_block_for_queue
 {
     uint32_t ulOffset;
     uint32_t length;
-    uint8_t  *p_packet;
+    uint8_t  p_packet[FLASH_CF_MIN_PGM_SIZE];
 } st_packet_block_for_queue_t;
 
-extern const char cOTA_JSON_FileSignatureKey[OTA_FILE_SIG_KEY_STR_MAX_LENGTH];
+/* extern const char cOTA_JSON_FileSignatureKey[OTA_FILE_SIG_KEY_STR_MAX_LENGTH]; */   /* FIX ME. */
 extern bool g_is_opened;
 
 /* Function Name: fwup_flash_open */
@@ -800,11 +878,11 @@ flash_err_t fwup_flash_open (void);
 flash_err_t fwup_flash_close (void);
 
 /* Function Name: fwup_flash_set_callback */
-flash_err_t fwup_flash_set_callback (flash_interrupt_config_t *cb_func_info);
+flash_err_t fwup_flash_set_callback (flash_interrupt_config_t * cb_func_info);
 
 #if (FWUP_FLASH_BANK_MODE == 0)
 /* Function Name: fwup_flash_get_bank_info */
-flash_err_t fwup_flash_get_bank_info(flash_bank_t *);
+flash_err_t fwup_flash_get_bank_info (flash_bank_t * bank_info);
 #endif /* FWUP_FLASH_BANK_MODE == 0 */
 
 /* Function Name: fwup_flash_set_bank_toggle */
@@ -861,7 +939,7 @@ flash_err_t fwup_set_boot_protect (void);
 /* Function Name: my_sw_charput_function */
 /* void my_sw_charput_function (uint8_t data); */
 
-#if (FWUP_UNIT_TEST == 1)
+#if defined(FWUP_UNIT_TEST) && (FWUP_UNIT_TEST == 1)
 /* Function Name: g_setting_unit_test_s_fwup_state */
 void g_setting_unit_test_s_fwup_state (e_fwup_state_t stat);
 #endif /* FWUP_UNIT_TEST == 1 */
@@ -875,7 +953,7 @@ int32_t fwup_verification_sha256_ecdsa (const uint8_t * pucData, uint32_t ulSize
 
 extern void my_sci_callback (void * pArgs);
 
-#if (FWUP_UNIT_TEST == 1)
+#if defined(FWUP_UNIT_TEST) && (FWUP_UNIT_TEST == 1)
 void g_setting_unit_test_s_flash_error_code (uint32_t val);
 void g_setting_unit_test_s_sci_buffer_control (void);
 void g_setting_unit_test_s_load_fw_control_block (uint32_t addr);

@@ -39,6 +39,7 @@
 *           30.06.2022 2.41    Changed the default value of CAN clock source to PCLK.
 *           29.07.2022 2.50    Updated demo projects
 *                              Fixed RXMBX enum error
+*           21.03.2023 2.60    Added new demo project
 ***********************************************************************************************************************/
 
 #ifndef CAN_INTERFACE_HEADER_FILE
@@ -60,7 +61,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define CAN_VERSION_MAJOR           (2)
-#define CAN_VERSION_MINOR           (50)
+#define CAN_VERSION_MINOR           (60)
 
 
 /* Channel numbers */

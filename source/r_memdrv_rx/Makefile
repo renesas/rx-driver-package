@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_memdrv_rx
-VERSION = 		1.04
+VERSION = 		1.05
 MDF = V2
 
 CONFIG_FOLDER = r_config

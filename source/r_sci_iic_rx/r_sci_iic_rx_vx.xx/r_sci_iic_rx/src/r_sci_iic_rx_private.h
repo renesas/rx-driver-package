@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer 
  *
- * Copyright (C) 2013(2021) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_sci_iic_private.h
@@ -48,6 +48,8 @@
  *         : 10.03.2020 2.46     RX23E-A support added.
  *         : 30.06.2021 2.48     RX671 support added.
  *         : 31.07.2021 2.49     RX140 support added.
+ *         : 15.06.2022 2.60     RX26T support added.
+ *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef SCI_IIC_PRIVATE_H
@@ -953,9 +955,9 @@
 /*----------------------------------------------------------------------------*/
 /*  Condition bit.                                                            */
 /*----------------------------------------------------------------------------*/
-    #define SCI_IIC_STAREQ              ((uint8_t)(1))
-    #define SCI_IIC_RSTAREQ             ((uint8_t)(2))
-    #define SCI_IIC_STPREQ              ((uint8_t)(4))
+    #define SCI_IIC_STAREQ              ((uint8_t)(1)) /* A start condition is generated */
+    #define SCI_IIC_RSTAREQ             ((uint8_t)(2)) /* A restart condition is generated */
+    #define SCI_IIC_STPREQ              ((uint8_t)(4)) /* A stop condition is generated */
 
 /*----------------------------------------------------------------------------*/
 /*  I2C Interrupt Mode Select (IICINTM bit).                                  */
@@ -971,8 +973,8 @@
 /*----------------------------------------------------------------------------*/
 /*  ACK Transmission Data bit (IICACKT bit).                                  */
 /*----------------------------------------------------------------------------*/
-    #define SCI_IIC_ACK_TRANS           ((uint8_t)(0))
-    #define SCI_IIC_NACK_TRANS          ((uint8_t)(1))
+    #define SCI_IIC_ACK_TRANS           ((uint8_t)(0)) /* ACK Transmission */
+    #define SCI_IIC_NACK_TRANS          ((uint8_t)(1)) /* NACK transmission and reception of ACK/NACK */
 
 /*----------------------------------------------------------------------------*/
 /*  ACK Reception Data Flag (IICACKR bit).                                    */
@@ -982,27 +984,28 @@
 /*----------------------------------------------------------------------------*/
 /*  SSDA/SSCL Output Select (IICSDAS bit/ IICSCLS bit).                       */
 /*----------------------------------------------------------------------------*/
-    #define SCI_IIC_CLOCK_OUTPUT        ((uint8_t)(0))
-    #define SCI_IIC_CON_OUTPUT          ((uint8_t)(1))
-    #define SCI_IIC_LOW_OUTPUT          ((uint8_t)(2))
-    #define SCI_IIC_HI_Z_OUTPUT         ((uint8_t)(3))
+    #define SCI_IIC_CLOCK_OUTPUT        ((uint8_t)(0)) /* Serial data/clock output */
+    #define SCI_IIC_CON_OUTPUT          ((uint8_t)(1)) /* Generate a start, restart, or stop condition */
+    #define SCI_IIC_LOW_OUTPUT          ((uint8_t)(2)) /* Output the low level on the SSDA/SSCL pin */
+    #define SCI_IIC_HI_Z_OUTPUT         ((uint8_t)(3)) /* Place the SSDA/SSCL pin in the high-impedance state */
 
 /*----------------------------------------------------------------------------*/
 /*  Transimitted/Received Data Transfer Direction bit (SDIR bit).             */
 /*----------------------------------------------------------------------------*/
-    #define SCI_IIC_LSB_FIRST           ((uint8_t)(0))
-    #define SCI_IIC_MSB_FIRST           ((uint8_t)(1))
+    #define SCI_IIC_LSB_FIRST           ((uint8_t)(0)) /* Transfer with LSB first */
+
+    #define SCI_IIC_MSB_FIRST           ((uint8_t)(1)) /* Transfer with MSB first */
 
 /*----------------------------------------------------------------------------*/
 /*  Define register setting.                                                  */
 /*----------------------------------------------------------------------------*/
 /* Common registers setting */
     #define SCI_IIC_IICSTIF_CLEAR       ((uint8_t)(0))
-    #define SCI_IIC_ST_CON_GENERATED    ((uint8_t)(0x51))
-    #define SCI_IIC_RST_CON_GENERATED   ((uint8_t)(0x52))
-    #define SCI_IIC_SP_CON_GENERATED    ((uint8_t)(0x54))
+    #define SCI_IIC_ST_CON_GENERATED    ((uint8_t)(0x51)) /* ST setting */
+    #define SCI_IIC_RST_CON_GENERATED   ((uint8_t)(0x52)) /* RST setting */
+    #define SCI_IIC_SP_CON_GENERATED    ((uint8_t)(0x54)) /* SP setting */
 
-    #define SCI_IIC_ONESHOT_WAIT        ((uint8_t)(40))
+    #define SCI_IIC_ONESHOT_WAIT        ((uint8_t)(40)) /* OneShot wait */
 
 /* Base register of PCR used to calculate all PCR register addresses. This is constant for all supported MCUs. */
     #define SCI_IIC_PRV_PCR_BASE_REG ((uint8_t volatile *)(&MPC.PWPR.BYTE-95))
@@ -1022,7 +1025,7 @@
 /*----------------------------------------------------------------------------*/
 /*  Define int zero.                                                          */
 /*----------------------------------------------------------------------------*/
-    #define INT_ZERO 0
+    #define INT_ZERO (0)
 
 /***********************************************************************************************************************
  Typedef definitions
@@ -1094,7 +1097,7 @@ typedef enum
 typedef struct
 {
     sci_iic_api_event_t event_type; /* Event */
-    sci_iic_return_t    (*proc) (sci_iic_info_t *); /* handler */
+    sci_iic_return_t   (* proc)(sci_iic_info_t *); /* handler */
 } sci_iic_mtx_t;
 
 /***********************************************************************************************************************

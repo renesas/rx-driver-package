@@ -14,11 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2015-2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015-2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_tsip_rx_config.h
- * Version      : 1.16
+ * Version      : 1.18
  * Description  : Configuration options for the r_tsip_rx module.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
@@ -41,6 +41,8 @@
  *         : 22.10.2021 1.14     Added support for TLS1.3
  *         : 31.03.2022 1.15     Added support for TLS1.3(RX72M_RX72N_RX66N)
  *         : 15.09.2022 1.16     Added support for RSA 3k/4k and updated support for TLS1.3
+ *         : 20.01.2023 1.17     Added support for TLS1.3 server
+ *         : 24.05.2023 1.18     Added support for RX26T
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -106,13 +108,13 @@
 #define TSIP_RSA_RETRY_COUNT_FOR_RSA_KEY_GENERATION (5120*2)
 
 /* For ECC operation. */
-#define TSIP_ECDSA_P192 (1)
-#define TSIP_ECDSA_P224 (1)
-#define TSIP_ECDSA_P256 (1)
-#define TSIP_ECDSA_P384 (1)
-#define TSIP_ECDH_P256  (1)
+#define TSIP_ECDSA_P192            (1)
+#define TSIP_ECDSA_P224            (1)
+#define TSIP_ECDSA_P256            (1)
+#define TSIP_ECDSA_P384            (1)
+#define TSIP_ECDH_P256             (1)
 #define TSIP_USER_SHA_384_ENABLED  (0)
-#define TSIP_USER_SHA_384_FUNCTION user_sha384_function
+#define TSIP_USER_SHA_384_FUNCTION (user_sha384_function)
 
 /* For TLS. */
 #define TSIP_TLS    (1)
@@ -121,8 +123,13 @@
 #define TSIP_SECURE_BOOT        (0)
 #define TSIP_FIRMWARE_UPDATE    (1)
 
+/* For multi threading */
+#define TSIP_MULTI_THREADING                    (0)
+#define TSIP_MULTI_THREADING_LOCK_FUNCTION      (user_lock_function)
+#define TSIP_MULTI_THREADING_UNLOCK_FUNCTION    (user_unlock_function)
+
 /* Key update. */
-#if defined BSP_MCU_RX231 || defined BSP_MCU_RX23W || defined BSP_MCU_RX66T || defined BSP_MCU_RX72T
+#if defined BSP_MCU_RX231 || defined BSP_MCU_RX23W || defined BSP_MCU_RX26T || defined BSP_MCU_RX66T || defined BSP_MCU_RX72T
 #define TSIP_INSTALL_KEY_RING_INDEX (0) /* 0-15 */
 #else
 #define TSIP_INSTALL_KEY_RING_INDEX (1) /* 0-15 */

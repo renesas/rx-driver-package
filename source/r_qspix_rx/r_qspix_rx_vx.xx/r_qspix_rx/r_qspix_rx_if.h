@@ -29,6 +29,7 @@
 *              : 29.11.2021 1.20     Supported to call R_QSPIX_Write_Indirect() 
 *                                    multiple times
 *              : 29.07.2022 1.30     Updated demo projects
+*              : 16.03.2023 1.40     Added R_QSPIX_Read_Memory_Map() function
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_qspix_rx_if.h
@@ -49,7 +50,7 @@ Macro definitions
 *******************************************************************************/
 /* Version Number of API. */
 #define QSPIX_VERSION_MAJOR           (1)
-#define QSPIX_VERSION_MINOR           (30)
+#define QSPIX_VERSION_MINOR           (40)
 
 /* Definition of QSPIX channel */
 #define QSPIX_CH0                         (0)
@@ -57,6 +58,8 @@ Macro definitions
 
 /* Definition address of QSPIX ROM window */
 #define QSPI_DEVICE_START_ADDRESS   (0x70000000)
+#define QSPI_DEVICE_END_ADDRESS     (0x74000000)
+#define QSPI_DEVICE_OFFSET_ADDRESS  (0x4000000)
 #define QSPIX_BANK_MASK             (26)
 /*******************************************************************************
 Typedef definitions
@@ -359,6 +362,12 @@ qspix_err_t     R_QSPIX_Close (uint8_t channel);
 qspix_err_t     R_QSPIX_Control(uint8_t channel, qspix_cfg_t *p_cfg);
 qspix_err_t     R_QSPIX_Read_Indirect(uint8_t channel,
                                       uint8_t *p_src_addr,
+                                      uint32_t bytes);
+qspix_err_t     R_QSPIX_Read_Memory_Map(uint8_t channel,
+                                      uint8_t *p_des_addr,
+                                      uint32_t p_addr,
+                                      qspix_protocol_t protocol_ext,
+                                      qspix_address_size_t addr_size,
                                       uint32_t bytes);
 qspix_err_t     R_QSPIX_Write_Indirect(uint8_t channel,
                                        uint8_t *p_src_addr,

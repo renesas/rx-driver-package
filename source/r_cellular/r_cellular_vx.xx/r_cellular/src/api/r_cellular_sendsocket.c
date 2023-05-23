@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_sendsocket.c
@@ -45,7 +45,7 @@
  *********************************************************************************************************************/
 static int32_t cellular_send_data (st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_no,
                                         const uint8_t * const p_data, const int32_t length, const uint32_t timeout_ms);
-static uint32_t cellular_send_size_check (st_cellular_ctrl_t * const p_ctrl, const int32_t length,
+static uint16_t cellular_send_size_check (st_cellular_ctrl_t * const p_ctrl, const int32_t length,
                                             const int32_t complete_length);
 static e_cellular_timeout_check_t cellular_tx_flag_check (st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_no);
 static e_cellular_timeout_check_t cellular_atc_response_check (st_cellular_ctrl_t * const p_ctrl,
@@ -57,10 +57,10 @@ static e_cellular_timeout_check_t cellular_atc_response_check (st_cellular_ctrl_
 int32_t R_CELLULAR_SendSocket(st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_no,
                     const uint8_t * const p_data, const int32_t length, const uint32_t timeout_ms)
 {
-    uint32_t preemption = 0;
-    int32_t complete_length = 0;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
+    int32_t                    complete_length = 0;
+    uint32_t                   preemption      = 0;
+    e_cellular_err_t           ret             = CELLULAR_SUCCESS;
+    e_cellular_err_semaphore_t semaphore_ret   = CELLULAR_SEMAPHORE_SUCCESS;
 
     preemption = cellular_interrupt_disable();
     if ((NULL == p_data) || (0 >= length) || (NULL == p_ctrl))
@@ -108,21 +108,22 @@ int32_t R_CELLULAR_SendSocket(st_cellular_ctrl_t * const p_ctrl, const uint8_t s
     if (CELLULAR_SUCCESS == ret)
     {
         semaphore_ret = cellular_take_semaphore(p_ctrl->at_semaphore);
-        if (CELLULAR_SEMAPHORE_SUCCESS != semaphore_ret)
-        {
-            complete_length = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
-        }
-        else
+        if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
         {
             complete_length = cellular_send_data(p_ctrl, socket_no, p_data, length, timeout_ms);
             cellular_give_semaphore(p_ctrl->at_semaphore);
             cellular_delay_task(1);
         }
+        else
+        {
+            ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
+        }
         p_ctrl->running_api_count -= 2;
     }
-    else
+
+    if (CELLULAR_SUCCESS != ret)
     {
-        complete_length = ret;
+        complete_length = (int32_t)ret; //cast
     }
 
     return complete_length;
@@ -161,12 +162,12 @@ static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8
 #if CELLULAR_CFG_CTS_SW_CTRL == 1
     uint16_t sci_send_size = 0;
 #endif
-    int32_t complete_length = 0;
-    uint32_t send_size = 0;
-    sci_err_t sci_ret = SCI_SUCCESS;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    e_cellular_timeout_check_t timeout = CELLULAR_NOT_TIMEOUT;
-    e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_ERR_TAKE;
+    int32_t                    complete_length = 0;
+    uint16_t                   send_size       = 0;
+    sci_err_t                  sci_ret         = SCI_SUCCESS;
+    e_cellular_err_t           ret             = CELLULAR_SUCCESS;
+    e_cellular_timeout_check_t timeout         = CELLULAR_NOT_TIMEOUT;
+    e_cellular_err_semaphore_t semaphore_ret   = CELLULAR_SEMAPHORE_ERR_TAKE;
 
     st_cellular_time_ctrl_t * const p_cellular_timeout_ctrl =
             &p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].cellular_tx_timeout_ctrl;
@@ -189,6 +190,9 @@ static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8
 #else
         cellular_rts_ctrl(0);
 #endif
+#ifdef CELLULAR_RTS_DELAY
+        cellular_delay_task(CELLULAR_RTS_DELAYTIME);
+#endif
     }
 
     while (complete_length < length)
@@ -210,7 +214,7 @@ static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8
 #if CELLULAR_CFG_CTS_SW_CTRL == 0
         p_ctrl->sci_ctrl.tx_end_flg = CELLULAR_TX_END_FLAG_OFF;
 
-        sci_ret = R_SCI_Send(p_ctrl->sci_ctrl.sci_hdl, (uint8_t *)p_data + complete_length, send_size);
+        sci_ret = R_SCI_Send(p_ctrl->sci_ctrl.sci_hdl, (uint8_t *)p_data + complete_length, send_size); //cast
         if (SCI_SUCCESS != sci_ret)
         {
             ret = CELLULAR_ERR_MODULE_COM;
@@ -241,10 +245,11 @@ static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8
             {
                 p_ctrl->sci_ctrl.tx_end_flg = CELLULAR_TX_END_FLAG_OFF;
 
-                sci_ret = R_SCI_Send(p_ctrl->sci_ctrl.sci_hdl, (uint8_t *)p_data + complete_length + sci_send_size, 1);
+                sci_ret = R_SCI_Send(p_ctrl->sci_ctrl.sci_hdl,
+                                        (uint8_t *)p_data + complete_length + sci_send_size, 1);    //cast
                 if (SCI_SUCCESS != sci_ret)
                 {
-                    ret = CELLULAR_ERR_MODULE_COM;
+                    ret           = CELLULAR_ERR_MODULE_COM;
                     sci_send_size = send_size;
                 }
                 else
@@ -252,7 +257,7 @@ static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8
                     timeout = cellular_tx_flag_check(p_ctrl, socket_no);
                     if (CELLULAR_TIMEOUT == timeout)
                     {
-                        ret = CELLULAR_ERR_MODULE_TIMEOUT;
+                        ret           = CELLULAR_ERR_MODULE_TIMEOUT;
                         sci_send_size = send_size;
                     }
                     else
@@ -260,10 +265,6 @@ static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8
                         sci_send_size++;
                     }
                 }
-            }
-            else
-            {
-                R_BSP_NOP();
             }
         } while (sci_send_size < send_size);
 
@@ -287,16 +288,16 @@ static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8
 
     if (CELLULAR_PSM_ACTIVE == p_ctrl->ring_ctrl.psm)
     {
-        cellular_give_semaphore(p_ctrl->ring_ctrl.rts_semaphore);
 #if CELLULAR_CFG_CTS_SW_CTRL == 1
         cellular_rts_hw_flow_disable();
 #endif
         cellular_rts_ctrl(1);
+        cellular_give_semaphore(p_ctrl->ring_ctrl.rts_semaphore);
     }
 
     if (CELLULAR_SUCCESS != ret)
     {
-        complete_length = ret;
+        complete_length = (int32_t)ret; //cast
     }
 
     return complete_length;
@@ -317,26 +318,31 @@ static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8
  * Return Value   @retval        More than 1 -
  *                                  Successfully size check.
  ************************************************************************************************/
-static uint32_t cellular_send_size_check(st_cellular_ctrl_t * const p_ctrl, const int32_t length,
+static uint16_t cellular_send_size_check(st_cellular_ctrl_t * const p_ctrl, const int32_t length,
                                             const int32_t complete_length)
 {
-    uint32_t send_size = 0;
+    int32_t  send_size = 0;
+    uint16_t ret       = 0;
 
     if ((length - complete_length) > p_ctrl->sci_ctrl.tx_buff_size)
     {
-        send_size = p_ctrl->sci_ctrl.tx_buff_size;
+        send_size = (int32_t)p_ctrl->sci_ctrl.tx_buff_size; //cast
     }
     else
     {
         send_size = (length - complete_length);
     }
 
-    if (send_size > p_ctrl->sci_ctrl.tx_process_size)
+    if (send_size > p_ctrl->sci_ctrl.tx_process_size) //tx_process_size is max 1500
     {
-        send_size = p_ctrl->sci_ctrl.tx_process_size;
+        ret = p_ctrl->sci_ctrl.tx_process_size;
+    }
+    else
+    {
+        ret = (uint16_t)send_size; // send_size is less than 1500
     }
 
-    return send_size;
+    return ret;
 }
 /**********************************************************************************************************************
  * End of function cellular_send_size_check
@@ -423,8 +429,8 @@ static e_cellular_timeout_check_t cellular_tx_flag_check(st_cellular_ctrl_t * co
 static e_cellular_timeout_check_t cellular_atc_response_check(st_cellular_ctrl_t * const p_ctrl,
                                                                     const uint8_t socket_no)
 {
-    e_cellular_atc_return_t     at_ret  = ATC_RETURN_NONE;
-    e_cellular_timeout_check_t  timeout = CELLULAR_NOT_TIMEOUT;
+    e_cellular_atc_return_t    at_ret  = ATC_RETURN_NONE;
+    e_cellular_timeout_check_t timeout = CELLULAR_NOT_TIMEOUT;
 
     st_cellular_time_ctrl_t * const p_cellular_timeout_ctrl =
             &p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].cellular_tx_timeout_ctrl;
@@ -445,6 +451,7 @@ static e_cellular_timeout_check_t cellular_atc_response_check(st_cellular_ctrl_t
 
         cellular_delay_task(1);
     }
+
     return timeout;
 }
 /**********************************************************************************************************************

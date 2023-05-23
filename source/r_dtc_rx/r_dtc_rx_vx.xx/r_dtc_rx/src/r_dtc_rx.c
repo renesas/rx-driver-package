@@ -66,6 +66,7 @@
 *         : 31.03.2021 3.70    Added support for RX671.
 *         : 15.04.2021 3.80    Added support for RX140.
 *         : 27.12.2022 4.21    Updated slash format of included header file paths for Linux compatibility.
+*         : 31.03.2023 4.30    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *******************************************************************************/
 
 /*******************************************************************************
@@ -95,7 +96,7 @@ Typedef definitions
 Exported global variables (to be accessed by other files)
 *******************************************************************************/
 extern const dtc_activation_source_t g_source_array[];
-uint32_t    * gp_dtc_table_work[2];
+uint32_t                           * gp_dtc_table_work[2];
 
 
 /*******************************************************************************
@@ -103,14 +104,14 @@ Private variables and functions
 *******************************************************************************/
 static bool s_is_opened = false; /* Indicate whether DTC is opened. */
 
-static dtc_err_t r_dtc_set_transfer_data(dtc_transfer_data_t *p_transfer_data,
-                                         dtc_transfer_data_cfg_t *p_cfg);
-static void r_dtc_clear_all_dtce_bits(void);
-static bool r_dtc_abort_chain_transfer(uint32_t chain_transfer_nr);
-static bool r_dtc_acquire_hw_lock(void);
-static void r_dtc_release_hw_lock(void);
-static bool r_dtc_check_dmac_locking_sw(void);
-static dtc_err_t r_dtc_check_create_param(dtc_transfer_data_t *p_transfer_data, dtc_transfer_data_cfg_t *p_data_cfg);
+static dtc_err_t r_dtc_set_transfer_data (dtc_transfer_data_t * p_transfer_data,
+                                          dtc_transfer_data_cfg_t * p_cfg);
+static void      r_dtc_clear_all_dtce_bits (void);
+static bool      r_dtc_abort_chain_transfer (uint32_t chain_transfer_nr);
+static bool      r_dtc_acquire_hw_lock (void);
+static void      r_dtc_release_hw_lock (void);
+static bool      r_dtc_check_dmac_locking_sw (void);
+static dtc_err_t r_dtc_check_create_param (dtc_transfer_data_t * p_transfer_data, dtc_transfer_data_cfg_t * p_data_cfg);
 
 
 
@@ -236,12 +237,12 @@ dtc_err_t R_DTC_Open(void)
 dtc_err_t R_DTC_Create(dtc_activation_source_t act_source, dtc_transfer_data_t *p_transfer_data,
                        dtc_transfer_data_cfg_t *p_data_cfg, uint32_t chain_transfer_nr)
 {
-    uint32_t  count                             = chain_transfer_nr + 1;
-    uint32_t *p_ptr                             = NULL;
-    uint8_t   dtce_backup                       = 0;
-    uint8_t   rrs_backup                        = 0;
-    dtc_err_t ret                               = DTC_SUCCESS;
-    dtc_transfer_data_t *p_transfer_data_backup = NULL;
+    uint32_t              count                  = chain_transfer_nr + 1;
+    uint32_t            * p_ptr                  = NULL;
+    uint8_t               dtce_backup            = 0;
+    uint8_t               rrs_backup             = 0;
+    dtc_err_t             ret                    = DTC_SUCCESS;
+    dtc_transfer_data_t * p_transfer_data_backup = NULL;
 
     ret = r_dtc_check_create_param(p_transfer_data, p_data_cfg);
     if (DTC_SUCCESS != ret)
@@ -524,11 +525,11 @@ dtc_err_t R_DTC_Close(void)
 */
 dtc_err_t R_DTC_Control(dtc_command_t command, dtc_stat_t *p_stat, dtc_cmd_arg_t *p_args)
 {
-    uint32_t             count                   = 0;
-    uint32_t            *p_ptr                   = NULL;
-    uint8_t              dtce_backup             = 0;
-    uint8_t              rrs_backup              = 0;
-    dtc_transfer_data_t  *p_transfer_data_backup = NULL;
+    uint32_t              count                   = 0;
+    uint32_t            * p_ptr                   = NULL;
+    uint8_t               dtce_backup             = 0;
+    uint8_t               rrs_backup              = 0;
+    dtc_transfer_data_t * p_transfer_data_backup  = NULL;
 
 #if (1 == DTC_CFG_PARAM_CHECKING_ENABLE)
 
@@ -778,7 +779,7 @@ static dtc_err_t r_dtc_set_transfer_data(dtc_transfer_data_t *p_transfer_data,
     dtc_crb_t                          t_crb;
 
     /* Cast type of "p_transfer_data" to match type of "p_td_ptr" */
-    volatile dtc_internal_registers_t *p_td_ptr = (volatile dtc_internal_registers_t *)p_transfer_data;
+    volatile dtc_internal_registers_t * p_td_ptr = (volatile dtc_internal_registers_t *)p_transfer_data;
 
     /* Set for MRA - . */
 #if (DTC_IP_VER_DTCb <= DTC_IP)
@@ -962,13 +963,13 @@ static void r_dtc_clear_all_dtce_bits(void)
 *******************************************************************************/
 static bool r_dtc_abort_chain_transfer(uint32_t chain_transfer_nr)
 {
-    volatile uint32_t cnt = 0;
-    uint16_t          status_reg = 0;
+    volatile uint32_t cnt          = 0;
+    uint16_t          status_reg   = 0;
 
     /* Set status register*/
     status_reg = DTC.DTCSTS.WORD;
 
-    volatile dtc_internal_registers_t *p_td_ptr = NULL;
+    volatile dtc_internal_registers_t * p_td_ptr = NULL;
 
     if (0 == (status_reg & 0x8000)) /* DTC is not active. */
     {
@@ -976,7 +977,7 @@ static bool r_dtc_abort_chain_transfer(uint32_t chain_transfer_nr)
     }
 
     status_reg &= 0xFF; /* Get the vector number. */
-    p_td_ptr = (((volatile dtc_internal_registers_t *)*((uint32_t *)DTC.DTCVBR + status_reg)) + chain_transfer_nr) - 1;
+    p_td_ptr    = (((volatile dtc_internal_registers_t *)*((uint32_t *)DTC.DTCVBR + status_reg)) + chain_transfer_nr) - 1;
 
     /* Clear all CHNE bit */
     /* WAIT_LOOP */

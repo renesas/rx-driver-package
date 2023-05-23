@@ -5,12 +5,12 @@ r_rspi_rx
 
 Document Number 
 ---------------
-R01AN1827EJ0304
-R01AN1827JJ0304
+R01AN1827EJ{VERSION_NUMBER}
+R01AN1827JJ{VERSION_NUMBER}
 
 Version
 -------
-v3.04
+v3.10
 
 Overview
 --------
@@ -87,6 +87,7 @@ Supported/Tested MCUs
 * RX671
 * RX140
 * RX660
+* RX26T
 
 Boards Tested On
 ----------------
@@ -113,6 +114,7 @@ Boards Tested On
 * RSKRX671
 * RSKRX140
 * RSKRX660
+* RSKRX26T
 
 Limitations
 -----------
@@ -124,7 +126,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp     v7.20
+* r_bsp     v7.30
 
 How to add to your project
 --------------------------
@@ -159,9 +161,9 @@ Refer to "RX Smart Configurator User's Guide: IAREW (R20AN0535)" for details.
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.03.00
-* GCC for Renesas RX 8.3.0.202102
-* IAR C/C++ Compiler for Renesas RX 4.20.1
+* Renesas RX v3.05.00
+* GCC for Renesas RX 8.3.0.202204
+* IAR C/C++ Compiler for Renesas RX 4.20.3
 
 File Structure
 --------------
@@ -172,9 +174,9 @@ r_rspi_rx
 +---doc
 |   |
 |   +---en
-|   |       r01an1827ej0304-rx-serial.pdf
+|   |       r01an1827ej{VERSION_NUMBER}-rx-serial.pdf
 |   +---ja
-|           r01an1827jj0304-rx-serial.pdf
+|           r01an1827jj{VERSION_NUMBER}-rx-serial.pdf
 |
 +---src
         r_rspi_defaults.h

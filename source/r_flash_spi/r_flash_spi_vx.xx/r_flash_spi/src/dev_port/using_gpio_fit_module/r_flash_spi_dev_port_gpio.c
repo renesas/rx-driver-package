@@ -19,12 +19,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011(2012-2020) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2011(2012-2022) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * System Name  : FLASH SPI driver software
 * File Name    : r_flash_spi_dev_port_gpio.c
-* Version      : 3.02
+* Version      : 3.10
 * Device       : -
 * Abstract     : Device port file
 * Tool-Chain   : -
@@ -42,6 +42,7 @@
 *              : 10.12.2020 3.02     Fixed a bug that build warning and link error occur
 *                                    when GPIO module Firmware Integration Technology and
 *                                    MPC module Firmware Integration Technology are used together.
+*              : 30.06.2022 3.10     Set PORTX as the default port assigned to SS#
 *************************************************************************************************/
 
 
@@ -55,6 +56,8 @@ Includes <System Includes> , "Project Includes"
 /* Check MCU Group. */
 #if (defined(FLASH_SPI_CFG_USE_FIT) && (FLASH_SPI_CFG_USE_GPIO_MPC_FIT == 1))
 
+/* Check the value of the port is usable or not */
+#if !defined(FLASH_SPI_TEMPORARY_DISABLE_DEV_PORT)
 
 /************************************************************************************************
 Macro definitions
@@ -283,7 +286,32 @@ flash_spi_status_t r_flash_spi_wait_lp(uint8_t unit)
     }
     return FLASH_SPI_SUCCESS;
 }
+#else
+    #warning "Please select a port number assigned to SS# to enable code support for device port. Check in file r_flash_spi_config.h"
+void r_flash_spi_cs_init(uint8_t devno)
+{
+   /* This is dummy function. */
+    R_BSP_NOP();
+} /* End of function r_flash_spi_cs_init() */
 
+void r_flash_spi_set_cs(uint8_t devno, uint8_t lv)
+{
+    /* This is dummy function. */
+    R_BSP_NOP();
+} /* End of function r_flash_spi_set_cs() */
+
+void r_flash_spi_cs_reset(uint8_t devno)
+{
+    /* This is dummy function. */
+    R_BSP_NOP();
+}  /* End of function r_flash_spi_cs_reset() */
+
+flash_spi_status_t r_flash_spi_wait_lp(uint8_t unit)
+{
+    /* This is dummy function. */
+    return FLASH_SPI_SUCCESS;
+}  /* End of function r_flash_spi_wait_lp() */
+#endif /* #if !defined(FLASH_SPI_TEMPORARY_DISABLE_DEV_PORT) */
 
 #endif  /*#if (defined(FLASH_SPI_CFG_USE_FIT) && (FLASH_SPI_CFG_USE_GPIO_MPC_FIT == 1)) */
 

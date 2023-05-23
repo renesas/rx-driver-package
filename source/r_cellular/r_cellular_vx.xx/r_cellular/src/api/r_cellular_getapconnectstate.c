@@ -14,10 +14,10 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
- * File Name    : r_cellular_noticeconfig.c
+ * File Name    : r_cellular_getapconnectstate.c
  * Description  : Function to set network information notification.
  *********************************************************************************************************************/
 
@@ -51,8 +51,8 @@ e_cellular_err_t R_CELLULAR_GetAPConnectState(st_cellular_ctrl_t * const p_ctrl,
                                                 const e_cellular_network_result_t level,
                                                 st_cellular_notice_t * const p_result)
 {
-    uint32_t preemption = 0;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
+    uint32_t                   preemption    = 0;
+    e_cellular_err_t           ret           = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
 
     preemption = cellular_interrupt_disable();
@@ -84,17 +84,19 @@ e_cellular_err_t R_CELLULAR_GetAPConnectState(st_cellular_ctrl_t * const p_ctrl,
         if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
         {
             ret = atc_cereg(p_ctrl, level);
-            memset(p_result, 0, sizeof(st_cellular_notice_t));
-            p_ctrl->recv_data = p_result;
-            ret = atc_cereg_check(p_ctrl);
-            p_ctrl->recv_data = NULL;
+            if (CELLULAR_SUCCESS == ret)
+            {
+                memset(p_result, 0, sizeof(st_cellular_notice_t));
+                p_ctrl->recv_data = p_result;
+                ret               = atc_cereg_check(p_ctrl);
+                p_ctrl->recv_data = NULL;
+            }
             cellular_give_semaphore(p_ctrl->at_semaphore);
         }
         else
         {
             ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
         }
-
         p_ctrl->running_api_count -= 2;
     }
 

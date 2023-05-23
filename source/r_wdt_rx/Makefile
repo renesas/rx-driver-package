@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_wdt_rx
-VERSION = 		2.80
+VERSION = 		3.00
 MDF = V2
 
 CONFIG_FOLDER = r_config

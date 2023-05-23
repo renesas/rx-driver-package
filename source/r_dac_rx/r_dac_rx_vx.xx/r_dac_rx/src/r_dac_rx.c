@@ -48,6 +48,8 @@
 *                              Added support for RX65N, RX72M Amplifier Stabilization Wait Control.
 *           14.04.2021 4.60    Added support for RX140.
 *           31.03.2022 4.80    Added support for RX660.
+*           15.08.2022 5.00    Added support for RX26T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ******************************************************************************/
 /*****************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -72,9 +74,9 @@ Macro definitions
 /*****************************************************************************
 Private global variables and functions
 ******************************************************************************/
-static void power_on(void);
-static void power_off(void);
-static dac_err_t dac_set_options(dac_cfg_t *p_cfg);
+static void      power_on (void);
+static void      power_off (void);
+static dac_err_t dac_set_options (dac_cfg_t *p_cfg);
 
 
 /***********************************************************************************************************************
@@ -120,15 +122,15 @@ dac_err_t err;
     power_on();
 
     /* Select output for DA Module*/
-#if defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX660)
+#if defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T)
 
     /* Turn off all output select*/
     DA.DADSELR.BYTE = 0;
 
     /* Select output to DA*/
-    switch(p_cfg->out_sel_da)
+    switch (p_cfg->out_sel_da)
     {
-    case DAC_OUT_DA_OFF:
+        case DAC_OUT_DA_OFF:
         {
             /* Not select output to DA0 */
             DA.DADSELR.BIT.OUTDA0 = 0;
@@ -137,28 +139,28 @@ dac_err_t err;
             DA.DADSELR.BIT.OUTDA1 = 0;
             break;
         }
-    case DAC_OUT_SEL_DA0:
+        case DAC_OUT_SEL_DA0:
         {
             /* Select output to DA0 */
             DA.DADSELR.BIT.OUTDA0 = 1;
             break;
         }
-    case DAC_OUT_SEL_DA1:
+        case DAC_OUT_SEL_DA1:
         {
             /* Select output to DA1 */
             DA.DADSELR.BIT.OUTDA1 = 1;
             break;
         }
-    default:
+        default:
         {
             break;
         }
     }
 
     /* Select output to reference voltage */
-    switch(p_cfg->out_sel_ref)
+    switch (p_cfg->out_sel_ref)
     {
-    case DAC_OUT_REF_OFF:
+        case DAC_OUT_REF_OFF:
         {
             /* Not select output to VREF0 */
             DA.DADSELR.BIT.OUTREF0 = 0;
@@ -167,19 +169,19 @@ dac_err_t err;
             DA.DADSELR.BIT.OUTREF1 = 0;
             break;
         }
-    case DAC_OUT_SEL_REF0:
+        case DAC_OUT_SEL_REF0:
         {
             /* Select output to VREF0 */
             DA.DADSELR.BIT.OUTREF0 = 1;
             break;
         }
-    case DAC_OUT_SEL_REF1:
+        case DAC_OUT_SEL_REF1:
         {
             /* Select output to VREF1 */
             DA.DADSELR.BIT.OUTREF1 = 1;
             break;
         }
-    default:
+        default:
         {
             break;
         }
@@ -252,7 +254,7 @@ static dac_err_t dac_set_options(dac_cfg_t *p_cfg)
 #endif
 
     /* OPTION: FORMAT */
-    DA.DADPR.BIT.DPSEL = (uint8_t)((true == p_cfg->fmt_flush_right ) ? 0 : 1);
+    DA.DADPR.BIT.DPSEL = (uint8_t)((true == p_cfg->fmt_flush_right) ? 0 : 1);
 
 
     /* OPTION: SYNCHRONIZE WITH ADC */
@@ -276,8 +278,8 @@ static dac_err_t dac_set_options(dac_cfg_t *p_cfg)
         DA.DAADSCR.BIT.DAADST = 1;      // set sync with ADC
     }
 #elif defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) \
- || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
-    if (false == p_cfg->sync_with_adc )
+ || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX26T)
+    if (false == p_cfg->sync_with_adc)
     {
         /* Not sync with ADC */
         DA.DAADSCR.BIT.DAADST = 0;
@@ -313,7 +315,7 @@ static dac_err_t dac_set_options(dac_cfg_t *p_cfg)
         {
             err = DAC_ERR_ADC_NOT_POWERED;
         }
-#elif defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T)
+#elif defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX26T)
 
         /* Checking value of MSTPA23 bit & ADST bit */
         if ((0 == SYSTEM.MSTPCRA.BIT.MSTPA23) && (1 == S12AD2.ADCSR.BIT.ADST))
@@ -335,7 +337,7 @@ static dac_err_t dac_set_options(dac_cfg_t *p_cfg)
 
         if (DAC_SUCCESS == err)
         {
-#if !(defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T))
+#if !(defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX26T))
             DA.DAADUSR.BIT.AMADSEL1 = p_cfg->sync_unit;
 #endif
             /* Set sync with ADC */
@@ -364,9 +366,9 @@ static dac_err_t dac_set_options(dac_cfg_t *p_cfg)
     /* OPTION: TURN CHANNEL CONVERTER OFF WHEN CHANNEL OUTPUT IS DISABLED */
 #if defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) \
  || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) \
- || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX660)
+ || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T)
 
-    DA.DACR.BIT.DAE = (uint8_t)((true == p_cfg->ch_conv_off_when_output_off ) ? 0 : 1);
+    DA.DACR.BIT.DAE = ((true == p_cfg->ch_conv_off_when_output_off) ? 0 : 1);
 #endif
 
     return err;
@@ -526,97 +528,93 @@ dac_err_t   err=DAC_SUCCESS;
 
     switch (cmd)
     {
-    case (DAC_CMD_OUTPUT_ON):
+        case (DAC_CMD_OUTPUT_ON):
 #if (DAC_CFG_NUM_CH == 1)
-        DA.DACR.BIT.DAOE0 = 1;
-#else
-    {
-        if (DAC_CH0 == chan)
-        {
-            /* Enable D/A conversion, analog output of channel 0 */
             DA.DACR.BIT.DAOE0 = 1;
-        }
-        else
-        {
-            /* Enable D/A conversion, analog output of channel 1 */
-            DA.DACR.BIT.DAOE1 = 1;
-        }
-    }
-#endif
-    break;
-
-    case (DAC_CMD_OUTPUT_OFF):
-#if (DAC_CFG_NUM_CH == 1)
-        DA.DACR.BIT.DAOE0 = 0;
 #else
-    {
-        if (DAC_CH0 == chan)
-        {
-            /* Disable analog output of channel 0 */
-            DA.DACR.BIT.DAOE0 = 0;
-        }
-        else
-        {
-            /* Disable analog output of channel 1 */
-            DA.DACR.BIT.DAOE1 = 0;
-        }
-    }
+            if (DAC_CH0 == chan)
+            {
+                /* Enable D/A conversion, analog output of channel 0 */
+                DA.DACR.BIT.DAOE0 = 1;
+            }
+            else
+            {
+                /* Enable D/A conversion, analog output of channel 1 */
+                DA.DACR.BIT.DAOE1 = 1;
+            }
 #endif
-    break;
+            break;
+
+        case (DAC_CMD_OUTPUT_OFF):
+#if (DAC_CFG_NUM_CH == 1)
+            DA.DACR.BIT.DAOE0 = 0;
+#else
+            if (DAC_CH0 == chan)
+            {
+                /* Disable analog output of channel 0 */
+                DA.DACR.BIT.DAOE0 = 0;
+            }
+            else
+            {
+                /* Disable analog output of channel 1 */
+                DA.DACR.BIT.DAOE1 = 0;
+            }
+#endif
+            break;
 
 #if defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72M) \
- || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
-    case (DAC_CMD_AMP_ON):
-        if (chan == DAC_CH0)
-        {
-            DA.DAAMPCR.BIT.DAAMP0 = 1;
-        }
-        else
-        {
-            DA.DAAMPCR.BIT.DAAMP1 = 1;
-        }
-    break;
+|| defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
+        case (DAC_CMD_AMP_ON):
+            if (chan == DAC_CH0)
+            {
+                DA.DAAMPCR.BIT.DAAMP0 = 1;
+            }
+            else
+            {
+                DA.DAAMPCR.BIT.DAAMP1 = 1;
+            }
+            break;
 
-    case (DAC_CMD_AMP_OFF):
-        if (chan == DAC_CH0)
-        {
-            DA.DAAMPCR.BIT.DAAMP0 = 0;
-        }
-        else
-        {
-            DA.DAAMPCR.BIT.DAAMP1 = 0;
-        }
-    break;
+        case (DAC_CMD_AMP_OFF):
+            if (chan == DAC_CH0)
+            {
+                DA.DAAMPCR.BIT.DAAMP0 = 0;
+            }
+            else
+            {
+                DA.DAAMPCR.BIT.DAAMP1 = 0;
+            }
+            break;
 #endif
 
 #if defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
-    case (DAC_CMD_ASW_ON):
-        if (chan == DAC_CH0)
-        {
-            DA.DAASWCR.BIT.DAASW0 = 1;
-        }
-        else
-        {
-            DA.DAASWCR.BIT.DAASW1 = 1;
-        }
-    break;
+        case (DAC_CMD_ASW_ON):
+            if (chan == DAC_CH0)
+            {
+                DA.DAASWCR.BIT.DAASW0 = 1;
+            }
+            else
+            {
+                DA.DAASWCR.BIT.DAASW1 = 1;
+            }
+            break;
 
-    case (DAC_CMD_ASW_OFF):
-        if (chan == DAC_CH0)
-        {
-            DA.DAASWCR.BIT.DAASW0 = 0;
-        }
-        else
-        {
-            DA.DAASWCR.BIT.DAASW1 = 0;
-        }
-    break;
+        case (DAC_CMD_ASW_OFF):
+            if (chan == DAC_CH0)
+            {
+                DA.DAASWCR.BIT.DAASW0 = 0;
+            }
+            else
+            {
+                DA.DAASWCR.BIT.DAASW1 = 0;
+            }
+            break;
 #endif
-    default:
-    {
-        err = DAC_ERR_INVALID_CMD;
-    break;
-    }
+        default:
+        {
+            err = DAC_ERR_INVALID_CMD;
+            break;
+        }
     }
 
     return err;
@@ -654,7 +652,7 @@ dac_err_t R_DAC_Close(void)
  || defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) \
  || defined(BSP_MCU_RX24U) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) \
  || defined(BSP_MCU_RX23W) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX140)\
- || defined(BSP_MCU_RX660)
+ || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T)
     /* Not sync with ADC */
     DA.DAADSCR.BIT.DAADST = 0;
 #endif
@@ -675,7 +673,7 @@ dac_err_t R_DAC_Close(void)
     DA.DAADUSR.BIT.AMADSEL1 = 0;        // not sync unit1
 #endif
 
-#if defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX660)
+#if defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T)
     /* Turn DAC output select off */
     DA.DADSELR.BYTE = 0;
 #endif
@@ -700,7 +698,7 @@ dac_err_t R_DAC_Close(void)
 */
 uint32_t  R_DAC_GetVersion(void)
 {
-    uint32_t const version = (DAC_VERSION_MAJOR << 16) | DAC_VERSION_MINOR;
+    uint32_t version = (DAC_VERSION_MAJOR << 16) | DAC_VERSION_MINOR;
 
     return version;
 }

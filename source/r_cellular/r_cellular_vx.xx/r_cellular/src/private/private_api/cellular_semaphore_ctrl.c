@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_semaphore_ctrl.c
@@ -48,9 +48,9 @@
  ***************************************************************************/
 e_cellular_err_t cellular_semaphore_init(st_cellular_ctrl_t * const p_ctrl)
 {
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
-    uint8_t semaphore_name[20] = {0};
-    uint8_t count = 0;
+    uint8_t          semaphore_name[20] = {0};
+    uint8_t          cnt                = 0;
+    e_cellular_err_t ret                = CELLULAR_SUCCESS;
 
     p_ctrl->at_semaphore = cellular_create_semaphore("atc_semaphore");
     if (NULL == p_ctrl->at_semaphore)
@@ -59,18 +59,17 @@ e_cellular_err_t cellular_semaphore_init(st_cellular_ctrl_t * const p_ctrl)
     }
     else
     {
-        for (count = 0; count < p_ctrl->creatable_socket; count++ )
+        for (cnt = 0; cnt < p_ctrl->creatable_socket; cnt++)
         {
             sprintf((char *)semaphore_name,                                 //(uint8_t * ) -> (char *)
-                    "socket-%d_semaphore", count + CELLULAR_START_SOCKET_NUMBER);
-            p_ctrl->p_socket_ctrl[count].rx_semaphore
+                    "socket-%d_semaphore", cnt + CELLULAR_START_SOCKET_NUMBER);
+            p_ctrl->p_socket_ctrl[cnt].rx_semaphore
                 = cellular_create_semaphore((const char *)semaphore_name);  //(uint8_t * ) -> (const char *)
-            if (NULL == p_ctrl->p_socket_ctrl[count].rx_semaphore)
+            if (NULL == p_ctrl->p_socket_ctrl[cnt].rx_semaphore)
             {
                 ret = CELLULAR_ERR_SEMAPHORE_INIT;
             }
         }
-
     }
 
     return ret;

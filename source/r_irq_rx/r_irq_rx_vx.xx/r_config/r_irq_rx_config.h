@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013-2018 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_irq_rx_config.h
@@ -29,6 +29,7 @@
 *         : 04.04.2014  1.20    Using the definition of VECT_ICU_IRQ15 to check the number of IRQs.
 *         : 30.09.2015  1.70    Using the definition of VECT_ICU_IRQ7  to check the number of IRQs.
 *         : 28.09.2018  2.30    Updated the coding rules of Renesas.
+*         : 15.08.2022  4.30    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 #ifndef IRQ_CONFIG_H
 #define IRQ_CONFIG_H
@@ -202,5 +203,5 @@ Digital Filtering
 Typedef definitions
 ***********************************************************************************************************************/
 
-      
+
 #endif /* IRQ_CONFIG_H */

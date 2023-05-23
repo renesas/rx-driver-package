@@ -5,12 +5,12 @@ r_flash_spi (Serial Flash memory control software)
 
 Document Number 
 ---------------
-R01AN2662EJ0310
-R01AN2662JJ0310
+R01AN2662EJ0320
+R01AN2662JJ0320
 
 Version
 -------
-v3.10
+v3.20
 
 Overview
 --------
@@ -45,7 +45,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp    v7.20
+* r_bsp    v7.21
 
 How to add to your project
 --------------------------
@@ -107,8 +107,11 @@ r_flash_spi
     +---flash_types
     |   |   r_flash_spi_type.c
     |   |
+    |   +---flash_at
+    |   |       r_flash_spi_at_type_sub.c
+    |   |       r_flash_spi_type_sub.h
     |   +---flash_mx
-    |           r_flash_spi_type_sub.c
+    |           r_flash_spi_mx_type_sub.c
     |           r_flash_spi_type_sub.h
     |
     +---dev_port

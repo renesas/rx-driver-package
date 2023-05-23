@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : ryz014_private.h
@@ -32,6 +32,8 @@
 #ifndef RYZ014_PRIVATE_H
 #define RYZ014_PRIVATE_H
 
+#define CELLULAR_RTS_DELAYTIME          (600)       /* Delay time after RTS (millisecond) */
+
 #define CELLULAR_MAX_ARG_COUNT          (8)         /* Maximum number of arguments to an AT command */
 
 #define CELLULAR_START_SOCKET_NUMBER    (1)         /* Start socket number */
@@ -43,21 +45,21 @@
 #define CELLULAR_MAX_TX_SIZE            (1500)      /* Data processing size per transmission (1~1500) */
 #define CELLULAR_MAX_RX_SIZE            (1500)      /* Data processing size per reception (1~1500) */
 
-#define CELLULAR_PACKET_DATA_SIZE_LIMIT (1500)      /* Packet data size limit */
-#define CELLULAR_CONNECT_TIMEOUT_LIMIT_L    (10)    /* Minimum connection time */
-#define CELLULAR_CONNECT_TIMEOUT_LIMIT_H    (1200)  /* Connection time limit  */
-#define CELLULAR_TX_SIZE_LIMIT_L        (1)         /* Minimum Sending size */
-#define CELLULAR_TX_SIZE_LIMIT_H        (1500)      /* Sending size limit */
-#define CELLULAR_RX_SIZE_LIMIT_L        (1)         /* Minimum Receive size */
-#define CELLULAR_RX_SIZE_LIMIT_H        (1500)      /* Receive size limit */
-#define CELLULAR_YEAR_LIMIT             (99)        /* Year limit */
-#define CELLULAR_MONTH_LIMIT            (12)        /* Month limit */
-#define CELLULAR_DAY_LIMIT              (31)        /* Day limit */
-#define CELLULAR_HOUR_LIMIT             (23)        /* Hour limit */
-#define CELLULAR_MIN_LIMIT              (59)        /* Minite limit */
-#define CELLULAR_SEC_LIMIT              (59)        /* Second limit */
-#define CELLULAR_TIMEZONE_LIMIT_H       (96)        /* Time Zone limit */
-#define CELLULAR_TIMEZONE_LIMIT_L       (-96)       /* Minimum Time Zone */
+#define CELLULAR_PACKET_DATA_SIZE_LIMIT     (1500)      /* Packet data size limit */
+#define CELLULAR_CONNECT_TIMEOUT_LIMIT_L    (10)        /* Minimum connection time */
+#define CELLULAR_CONNECT_TIMEOUT_LIMIT_H    (1200)      /* Connection time limit  */
+#define CELLULAR_TX_SIZE_LIMIT_L            (1)         /* Minimum Sending size */
+#define CELLULAR_TX_SIZE_LIMIT_H            (1500)      /* Sending size limit */
+#define CELLULAR_RX_SIZE_LIMIT_L            (1)         /* Minimum Receive size */
+#define CELLULAR_RX_SIZE_LIMIT_H            (1500)      /* Receive size limit */
+#define CELLULAR_YEAR_LIMIT                 (99)        /* Year limit */
+#define CELLULAR_MONTH_LIMIT                (12)        /* Month limit */
+#define CELLULAR_DAY_LIMIT                  (31)        /* Day limit */
+#define CELLULAR_HOUR_LIMIT                 (23)        /* Hour limit */
+#define CELLULAR_MIN_LIMIT                  (59)        /* Minute limit */
+#define CELLULAR_SEC_LIMIT                  (59)        /* Second limit */
+#define CELLULAR_TIMEZONE_LIMIT_H           (96)        /* Time Zone limit */
+#define CELLULAR_TIMEZONE_LIMIT_L           (-96)       /* Minimum Time Zone */
 
 #define CELLULAR_AP_CONNECT_RETRY_WAIT  (1000)      /* Retry interval when connecting to AP */
 #define CELLULAR_CFUN_WAIT              (2000)      /* Wait time when executing CFUN command */
@@ -65,7 +67,7 @@
 #define CELLULAR_COMMAND_TIMEOUT        (60000)     /* AT command response wait time */
 #define CELLULAR_MAX_HOSTNAME_LENGTH    (253)       /* Maximum Host name length */
 #define CELLULAR_SOCKETCONNECT_DELAY    (5000)      /* Socket Connect Response delay time (millisecond) */
-#define CELLULAR_SQNRICFG_MODE          (2)         /* All URCs are indicated by activated RING0 line of theÅ@UART0 interface, whatever URC AT channel origin */
+#define CELLULAR_SQNRICFG_MODE          (2)         /* All URCs are indicated by activated RING0 line of the UART0 interface, whatever URC AT channel origin */
 #define CELLULAR_SQNIPSCFG_MODE         (1)         /* Power saving is activated. Module power state is controlled by RTS0 line*/
 #define CELLULAR_PING_REQ_MIN           (1)         /* Minimum number of ping echo requests to send */
 #define CELLULAR_PING_REQ_DEFAULT       (4)         /* Default number of ping echo requests to send */
@@ -77,13 +79,12 @@
 #define CELLULAR_PING_TIMEOUT_MIN       (1)         /* Minimum time to wait for Echo reply (second) */
 #define CELLULAR_PING_TIMEOUT_DEFAULT   (10)        /* Default time to wait for Echo reply (second) */
 #define CELLULAR_PING_TIMEOUT_MAX       (60)        /* Maximum time to wait for Echo reply (second) */
-#if (CELLULAR_IMPLEMENT_TYPE == 'B')
-#define CELLULAR_SECURITY_PROFILE_ID_H  (6)         /* Maximum Security Profile ID Number  */
-#define CELLULAR_SECURITY_PROFILE_ID_L  (1)         /* Minimum Security Profile ID Number  */
+
 #define CELLULAR_MAX_NVM_CERTIFICATE_INDEX  (19)    /* Maximum Certificate Index Number  */
-#define CELLULAR_NVM_CERTIFICATE_SIZE_H (16384)     /* Maximum Certificate File Size */
-#define CELLULAR_NVM_CERTIFICATE_SIZE_L (1)         /* Minimum Certificate File Size */
-#endif
+#define CELLULAR_SECURITY_PROFILE_ID_H      (6)     /* Maximum Security Profile ID Number  */
+#define CELLULAR_SECURITY_PROFILE_ID_L      (1)     /* Minimum Security Profile ID Number  */
+#define CELLULAR_NVM_CERTIFICATE_SIZE_H     (16384) /* Maximum Certificate File Size */
+#define CELLULAR_NVM_CERTIFICATE_SIZE_L     (1)     /* Minimum Certificate File Size */
 
 #define RYZ014_ATC_ECHO_OFF                 "ATE0\r"
 #define RYZ014_ATC_FUNCTION_LEVEL_CHECK     "AT+CFUN?\r"
@@ -96,7 +97,10 @@
 #define RYZ014_ATC_RECV_SCOKET              "AT+SQNSRECV=%s,%s\r"
 #define RYZ014_ATC_DNS_LOOKUP               "AT+SQNDNSLKUP=\"%s\",%s\r"
 #define RYZ014_ATC_AP_CONFIG                "AT+CGDCONT=1,\"IPV4V6\",\"%s\",,,,0,0,0,0,0,0,1,,0\r"
+#define RYZ014_ATC_PRIVATE_AP_CONFIG        "AT+CGDCONT=%s,\"IPV4V6\",\"%s\"\r"
+#define RYZ014_ATC_AP_CONFIG_CHECK          "AT+CGDCONT?\r"
 #define RYZ014_ATC_USER_CONFIG              "AT+CGAUTH=1,%s,\"%s\",\"%s\"\r"
+#define RYZ014_ATC_CLEAR_CONFIG             "AT+CGAUTH=1,0\r"
 #define RYZ014_ATC_SOCKET_CONFIG_1          "AT+SQNSCFG=%s,1,%s,%s,%s,%s\r"
 #define RYZ014_ATC_SOCKET_CONFIG_2          "AT+SQNSCFGEXT=%s,1,0,0\r"
 #define RYZ014_ATC_LISTENING_SOCKET         "AT+SQNSL=%s,%s,%s,0\r"
@@ -136,20 +140,26 @@
 #define RYZ014_ATC_GET_ICCID                "AT+SQNCCID?\r"
 #define RYZ014_ATC_PING                     "AT+PING=\"%s\",%s,%s,%s,%s\r"
 #define RYZ014_ATC_GET_CELLINFO             "AT+SQNMONI=%s\r"
-#define RYZ014_ATC_SET_CTM                  "AT+SQNCTM=\"standard\"\r"
+#define RYZ014_ATC_SET_CTM                  "AT+SQNCTM=\"%s\"\r"
 #define RYZ014_ATC_GET_CTM                  "AT+SQNCTM?\r"
-#define RYZ014_ATC_SET_BAND                 "AT+SQNBANDSEL=0,\"standard\",\"%s\"\r"
+#define RYZ014_ATC_SET_BAND                 "AT+SQNBANDSEL=0,\"%s\",\"%s\"\r"
 #define RYZ014_ATC_FACTORYRESET             "AT+SQNSFACTORYRESET\r"
 #define RYZ014_ATC_SMCWRX                   "AT+SMCWRX=%s\r"
 #define RYZ014_ATC_SMCWTX                   "AT+SMCWTX=%s,%s,%s\r"
-#define RYZ014_ATC_CGPIAF                   "AT+CGPIAF=1,0,1,0\n"
-#define RYZ014_NO_COMMAND                   "\r"
-#if (CELLULAR_IMPLEMENT_TYPE == 'B')
+#define RYZ014_ATC_CGPIAF                   "AT+CGPIAF=1,0,1,0\r"
+#define RYZ014_ATC_CEER                     "AT+CEER\r"
+#define RYZ014_ATC_FIRMUPGRADE              "AT+SQNSUPGRADE=\"%s\",%s,5,%s\r"
+#define RYZ014_ATC_FIRMUPGRADE_SSL          "AT+SQNSUPGRADE=\"%s\",%s,5,%s,%s\r"
+#define RYZ014_ATC_FIRMUPGRADE_CHECK        "AT+SQNSUPGRADE?\r"
+#define RYZ014_ATC_GET_LR_SVN               "ATI1\r"
 #define RYZ014_ATC_WRITE_CERTIFICATE        "AT+SQNSNVW=\"%s\",%s,%s\r"
 #define RYZ014_ATC_ERASE_CERTIFICATE        "AT+SQNSNVW=\"%s\",%s,0\r"
+#define RYZ014_ATC_GET_CERTIFICATE          "AT+SQNSNVR=\"%s\",%s\r"
 #define RYZ014_ATC_CONFIG_SSL_PROFILE       "AT+SQNSPCFG=%s,2,,%s,%s,%s,%s,\"\"\r"
+#if (CELLULAR_IMPLEMENT_TYPE == 'B')
 #define RYZ014_ATC_CONFIG_SSL_SOCKET        "AT+SQNSSCFG=%s,%s,%s\r"
 #endif
+#define RYZ014_NO_COMMAND                   "\r"
 
 /**********************************************************************************************************************
  * Typedef definitions
@@ -167,7 +177,10 @@ typedef enum
     ATC_RECV_SOCKET,
     ATC_DNS_LOOKUP,
     ATC_AP_CONFIG,
+    ATC_PRIVATE_AP_CONFIG,
+    ATC_AP_CONFIG_CHECK,
     ATC_USER_CONFIG,
+    ATC_CLEAR_CONFIG,
     ATC_SOCKET_CONFIG_1,
     ATC_SOCKET_CONFIG_2,
     ATC_LISTENING_SOCKET,
@@ -214,13 +227,19 @@ typedef enum
     ATC_SMCWRX,
     ATC_SMCWTX,
     ATC_IPV6_CONFIG,
-    ATC_SQNSSENDEXT_END,
-#if (CELLULAR_IMPLEMENT_TYPE == 'B')
+    ATC_CONNECT_LOSS_INFO,
+    ATC_FIRMUPGRADE,
+    ATC_FIRMUPGRADE_SSL,
+    ATC_FIRMUPGRADE_CHECK,
+    ATC_GET_LR_SVN,
     ATC_WRITE_CERTIFICATE,
     ATC_ERASE_CERTIFICATE,
+    ATC_GET_CERTIFICATE,
     ATC_CONFIG_SSL_PROFILE,
+#if (CELLULAR_IMPLEMENT_TYPE == 'B')
     ATC_CONFIG_SSL_SOCKET,
 #endif
+    ATC_SQNSSENDEXT_END,
     ATC_LIST_MAX
 } e_atc_list_t;
 

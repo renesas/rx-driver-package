@@ -14,11 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
- * File Name    : cellular_free.c
- * Description  : Function to free memory.
+ * File Name    : cellular_interrupt_ctrl.c
+ * Description  : Functions to enter/exit critical sections.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************

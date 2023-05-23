@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2022 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_iwdt_rx.c
@@ -37,6 +37,7 @@
 *           25.11.2019 3.30    Added support for RX13T.
 *                              Modified comment of API function to Doxygen style.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.00.
+*           15.08.2022 4.30    Fixed to comply with GSCE Coding Standards Rev.6.5.0
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -63,14 +64,14 @@ Private global variables and functions
 static bool s_already_opened = false;
 
 /* Internal functions. */
-static iwdt_err_t iwdt_init_register_start_mode(iwdt_config_t *p_cfg);
+static iwdt_err_t iwdt_init_register_start_mode (iwdt_config_t * p_cfg);
 #if (1 == IWDT_CFG_PARAM_CHECKING_ENABLE)
-static bool iwdt_parameter_check(iwdt_config_t *p_cfg);
+static bool iwdt_parameter_check (iwdt_config_t * p_cfg);
 #endif /* IWDT_CFG_PARAM_CHECKING_ENABLE */
 #endif /* BSP_CFG_OFS0_REG_VALUE */
 
-static inline bool acquire_hw_lock(void);
-static inline void release_hw_lock(void);
+static inline bool acquire_hw_lock (void);
+static inline void release_hw_lock (void);
 
 /***********************************************************************************************************************
 * Function Name: R_IWDT_Open
@@ -90,7 +91,7 @@ static inline void release_hw_lock(void);
 * See Section 3 in the application note for details.
 */
 #if ((BSP_CFG_OFS0_REG_VALUE & OFS0_IWDT_DISABLED) == OFS0_IWDT_DISABLED) /* Register start mode */
-iwdt_err_t R_IWDT_Open (void * const p_cfg)
+iwdt_err_t R_IWDT_Open(void * const p_cfg)
 {
     iwdt_err_t   err;
     bool         ret;
@@ -336,7 +337,7 @@ End of function R_IWDT_Control
 * version number and the bottom 2 bytes are the minor version number.
 * @note None.
 */
-uint32_t  R_IWDT_GetVersion (void)
+uint32_t  R_IWDT_GetVersion(void)
 {
     uint32_t  version = (IWDT_RX_VERSION_MAJOR << 16) | IWDT_RX_VERSION_MINOR;
 

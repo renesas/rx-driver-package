@@ -6,17 +6,17 @@
     <toolchain>
         <brand>Renesas</brand>
         <product>RXC</product>
-        <version>3.04.00</version>
+        <version>3.05.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
-        <version>8.03.00.202202</version>
+        <version>8.03.00.202204</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
         <product>ICCRX</product>
-        <version>4.20.01</version>
+        <version>4.20.03</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -29,21 +29,21 @@
     <package>
         <type>fitmodule</type>
         <name>r_emwin_rx</name>
-        <version>6.26.c.1.00</version>
+        <version>6.32.a.1.00</version>
         <zipsource>r_emwin_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_cmt_rx</module>
-            <version>5.20</version>
+            <version>5.40</version>
         </dependency>
         <dependency>
             <module>r_gpio_rx</module>
-            <version>4.50</version>
+            <version>4.70</version>
         </dependency>
         <application>Graphic</application>
         <desc>Graphic Library with Graphical User Interface</desc>
         <details>emWin is designed to provide an efficient, processor- and display controller-independent graphical user interface for any application that operates with a graphical display. It is compatible with single-task and multitask environments, with a proprietary operating system or with any commercial RTOS. emWin is shipped as C source code. It may be adapted to any size physical and virtual display with any display controller and CPU.
-The version number 6.26c means the version of emWin library, and 1.00 means that of FIT module.
-This FIT module includes an installer of AppWizard v1.28c.</details>
+The version number 6.32a means the version of emWin library, and 1.00 means that of FIT module.
+This FIT module includes an installer of AppWizard v1.36a.</details>
         <function>-</function>
         <incdir>r_config</incdir>
         <incdir>r_emwin_rx</incdir>
@@ -104,7 +104,6 @@ This FIT module includes an installer of AppWizard v1.28c.</details>
             <libdir toolchain="ICCRX" endian="little" path="rel">r_emwin_rx/lib/GUI/emWinLib_RXv3_IAR.a</libdir>
         </library>
         <stdlibs>math.h</stdlibs>
-        <heap>0x4000</heap>
         <buildOption optionId="ccrx.compiler.option.nostuffC" value="true"/>
     </package>
 

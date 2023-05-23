@@ -32,10 +32,11 @@
 *            : V0.50D (2020-10-16)  [Hardware Manual Revision : 0.30]
 *            : V0.50E (2021-01-29)  [Hardware Manual Revision : 0.30]
 *            : V1.00  (2021-03-05)  [Hardware Manual Revision : 1.00]
+*            : V1.00A (2023-03-03)  [Hardware Manual Revision : 1.00]
 *
 * NOTE       : THIS IS A TYPICAL EXAMPLE.
 *
-*  Copyright(c) 2021 Renesas Electronics Corporation.
+*  Copyright(c) 2023 (2020 - 2021) Renesas Electronics Corporation.
 *
 *********************************************************************************/
 /********************************************************************************/
@@ -2895,7 +2896,8 @@ typedef struct st_ctsu {
 			unsigned short CTSUICOMP:1;
 			unsigned short :7;
 			unsigned short CTSUTSOC:1;
-			unsigned short :3;
+			unsigned short CTSUCLKSEL1:1;
+			unsigned short :2;
 			unsigned short CTSUDRV:1;
 			unsigned short CTSUTSOD:1;
 			unsigned short CTSUSPMD:2;

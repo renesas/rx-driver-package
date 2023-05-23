@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate>r_pinset_type2</fileTemplate>
+    <function>
+    function calculatePeriod(pclka, t_high, desired_frequency, t_cr, t_cf, register_max, dsbrpo, mode) {
+        var divider = dsbrpo + 1;
+        var pp_t_low = 104;
+        var pp_t_dig_l = 112;
+        var pp_t_high = 148;
+        var pp_t_dig_h = 156;
+
+        if (64000000 == pclka) {
+          pp_t_low = 80;
+          pp_t_dig_l = 88;
+          pp_t_high = 112;
+          pp_t_dig_h = 120;
+        }
+
+        var t_low;
+        var high_setting;
+        var low_setting;
+        var actual_t_high;
+        var actual_t_low;
+        var actual_frequency;
+        var valid;
+
+        high_setting = Math.max(1, Math.min(511, Math.floor(pclka * t_high / (1000000000 * divider))));
+        actual_t_high = (high_setting * divider / pclka * 1000000000);
+        t_low = (1e9 / desired_frequency - (t_cr + t_cf + actual_t_high)) / 1e9;
+        low_setting = Math.max(1, Math.min(511, Math.ceil(t_low * pclka / divider)));
+        
+        if ((high_setting &gt;= 256 || low_setting &gt;= 256) &amp;&amp; mode == 0)
+        {
+          high_setting = Math.max(1, Math.min(255, Math.floor(pclka * t_high / (1000000000 * divider))));
+          low_setting = Math.max(1, Math.min(255, Math.ceil(t_low * pclka / divider)));
+          divider = divider + 1;
+        }
+
+        actual_frequency = Math.round((1 / ((high_setting + low_setting) * divider / pclka + (t_cr + t_cf) / 1000000000)) * 10) / 10;
+        actual_t_low = Math.round(low_setting / pclka * 1000000000 * 10) / 10;
+        actual_t_high = Math.round(actual_t_high * 10) / 10;
+        valid = true;
+        
+        if (!(Math.abs(t_high - actual_t_high) / t_high &lt;= 0.1)) {
+            valid = false;
+        }
+
+        if (!(Math.abs(desired_frequency - actual_frequency) / desired_frequency &lt;= 0.1)) {
+            valid = false;
+        }
+
+        if (mode % 2 == 0 &amp;&amp; actual_t_low &lt; 200) {          
+            valid = false;
+        }
+        else if (mode % 2 != 0) {
+            if (actual_t_low &lt; pp_t_low) {
+                valid = false;
+            }
+            else if (actual_t_low + t_cr &lt; pp_t_dig_l) {
+                valid = false;
+            }
+            if (t_cf &gt; Math.min(60, 150000000 / actual_frequency)) {
+                valid = false;
+            }
+            if (t_cr &gt; Math.min(60, 150000000 / actual_frequency)) {
+                valid = false;
+            }
+        }
+
+        if (actual_t_high &lt; pp_t_high) {
+            valid = false;
+        }
+        else if (actual_t_high + t_cf &lt; pp_t_dig_h) {
+            valid = false;
+        }
+
+        return valid;
+    }
+    </function>
+    <resourceInfo>
+      <peripheral name="RI3C">
+        <channel number="RI3C0" group="RX26T">
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SCL00">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SDA00">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+        </channel>
+      </peripheral>
+    </resourceInfo>
+    <configuration>
+        <property id="RI3C_CFG_PARAM_CHECKING_ENABLE" display="Set parameter checking enable" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+            <option id="RI3C_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="System Default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <option id="RI3C_CFG_PARAM_CHECKING_ENABLE.0" display="Not" value="0"/>
+            <option id="RI3C_CFG_PARAM_CHECKING_ENABLE.1" display="Include" value="1"/>
+            <description>Selects whether to include parameter checking in the code.
+BSP_CFG_PARAM_CHECKING_ENABLE = System default.
+0 = compile out parameter checking.
+1 = includes parameter checking.</description>
+        </property>
+        <property id="RI3C_CFG_UNALIGNED_BUFFER_SUPPORT" display="Unaligned Buffer Support" default="1" type="combobox">
+            <option id="RI3C_CFG_UNALIGNED_BUFFER_SUPPORT.1" display="Enabled (System Default)" value="1"/>
+            <option id="RI3C_CFG_UNALIGNED_BUFFER_SUPPORT.0" display="Disabled" value="0"/>
+            <description>Selects whether to support Unaligned Buffer in this device.
+1 = Enabled (System default)
+0 = Disabled
+Unaligned buffer support may be optionally disabled for improved performance.</description>
+        </property>
+        <property id="RI3C_CFG_DEVICE_TYPE" display="RI3C Device Type" default="RI3C_DEVICE_TYPE_TARGET" type="combobox">
+            <option id="RI3C_CFG_DEVICE_TYPE.RI3C_DEVICE_TYPE_TARGET" display="Target (System default)" value="RI3C_DEVICE_TYPE_TARGET"/>
+            <option id="RI3C_CFG_DEVICE_TYPE.RI3C_DEVICE_TYPE_PRIMARY_CONTROLLER" display="Primary Controller" value="RI3C_DEVICE_TYPE_PRIMARY_CONTROLLER"/>
+            <description>Device operation mode.
+1 = Target (System default)
+0 = Primary Controller</description>
+        </property>
+        <property id="RI3C_CFG_CONTROLLER_SUPPORT" display="RI3C Controller Support" default="1" type="combobox">
+            <option id="RI3C_CFG_CONTROLLER_SUPPORT.0" display="Disabled" value="0"/>
+            <option id="RI3C_CFG_CONTROLLER_SUPPORT.1" display="Enabled (System default)" value="1"/>
+            <description>Select enable/disable Controller mode of this device.
+0 = Disabled
+1 = Enabled (System default)
+If only Controller mode is required, disable Target support to decrease code size.</description>
+        </property>
+        <property id="RI3C_CFG_TARGET_SUPPORT" display="RI3C Target Support" default="1" type="combobox">
+            <option id="RI3C_CFG_TARGET_SUPPORT.0" display="Disabled" value="0"/>
+            <option id="RI3C_CFG_TARGET_SUPPORT.1" display="Enabled (System default)" value="1"/>
+            <description>Select enable/disable Target mode of this device.
+0 = Disabled
+1 = Enabled (System default)
+If only Target mode is required, disable Controller support to decrease code size.</description>
+        </property>
+        <property id="RI3C_CFG_PCLKA_REF_VALUE" display="RI3C PCLKA reference value" default="48000000" type="combobox">
+            <option id="RI3C_CFG_PCLKA_REF_VALUE.48000000" display="48 MHz" value="48000000"/>
+            <option id="RI3C_CFG_PCLKA_REF_VALUE.64000000" display="64 MHz" value="64000000"/>
+            <description>Select reference value for PCLKA.
+48 MHz (System default).
+64 MHz.
+Note: RI3C is optimized to works on 48 MHz or 64 MHz and this is reference value only.</description>
+        </property>
+        <property id="RI3C_CFG_OPEN_DRAIN_RISING_TIME" display="Bit Rate > Bus Timing > Open Drain Rising Time (ns)" default="0" type="textbox">
+            <constraint display="Rising time must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_OPEN_DRAIN_RISING_TIME}")</constraint>
+            <constraint display="Rising time must be greater than or equal to 0 nanoseconds." actionOnFail="error">("${RI3C_CFG_OPEN_DRAIN_RISING_TIME}" &gt;= 0)</constraint>
+            <constraint display="Rising time must be less than or equal to 300 nanoseconds." actionOnFail="error">("${RI3C_CFG_OPEN_DRAIN_RISING_TIME}" &lt;= 300)</constraint>
+            <description>The Open Drain rising time in nanoseconds.</description>
+        </property>
+        <property id="RI3C_CFG_OPEN_DRAIN_FALLING_TIME" display="Bit Rate > Bus Timing > Open Drain Falling Time (ns)" default="0" type="textbox">
+            <constraint display="Falling time must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_OPEN_DRAIN_FALLING_TIME}")</constraint>
+            <constraint display="Falling time must be greater than or equal to 0 nanoseconds." actionOnFail="error">("${RI3C_CFG_OPEN_DRAIN_FALLING_TIME}" &gt;= 0)</constraint>
+            <constraint display="Falling time must be less than or equal to 300 nanoseconds." actionOnFail="error">("${RI3C_CFG_OPEN_DRAIN_FALLING_TIME}" &lt;= 300)</constraint>
+            <description>The Open Drain falling time in nanoseconds.</description>
+        </property>
+        <property id="RI3C_CFG_PUSH_PULL_RISING_TIME" display="Bit Rate > Bus Timing > Push Pull Rising Time (ns)" default="0" type="textbox">
+            <constraint display="Rising time must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_PUSH_PULL_RISING_TIME}")</constraint>
+            <constraint display="Rising time must be greater than or equal to 0 nanoseconds." actionOnFail="error">("${RI3C_CFG_PUSH_PULL_RISING_TIME}" &gt;= 0)</constraint>
+            <description>The Push Pull rising time in nanoseconds.</description>
+        </property>
+        <property id="RI3C_CFG_PUSH_PULL_FALLING_TIME" display="Bit Rate > Bus Timing > Push Pull Falling Time (ns)" default="0" type="textbox">
+            <constraint display="Falling time must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_PUSH_PULL_FALLING_TIME}")</constraint>
+            <constraint display="Falling time must be greater than or equal to 0 nanoseconds." actionOnFail="error">("${RI3C_CFG_PUSH_PULL_FALLING_TIME}" &gt;= 0)</constraint>
+            <description>The Push Pull falling time in nanoseconds.</description>
+        </property>
+        <property id="RI3C_CFG_STANDARD_OPEN_DRAIN_LOGIC_HIGH_PERIOD" display="Bit Rate > Standard Mode > Open Drain > Logic High Period (ns)" default="167" type="textbox">
+            <constraint display="Value must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_STANDARD_OPEN_DRAIN_LOGIC_HIGH_PERIOD}")</constraint>
+            <constraint display="Value must be greater than 0." actionOnFail="error">("${RI3C_CFG_STANDARD_OPEN_DRAIN_LOGIC_HIGH_PERIOD}" &gt; 0)</constraint>
+            <description>The Logic High period of SCL during Standard Mode Open Drain transfers.</description>
+        </property>
+        <property id="RI3C_CFG_STANDARD_OPEN_DRAIN_FREQUENCY" display="Bit Rate > Standard Mode > Open Drain > Frequency" default="1000000" type="textbox">
+            <constraint display="Value must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_STANDARD_OPEN_DRAIN_FREQUENCY}")</constraint>
+            <constraint display="Value must be greater than 0." actionOnFail="error">("${RI3C_CFG_STANDARD_OPEN_DRAIN_FREQUENCY}" &gt; 0)</constraint>
+            <constraint display="The Standard Open Drain bitrate setting is invalid.">
+            calculatePeriod("${RI3C_CFG_PCLKA_REF_VALUE}",
+                            "${RI3C_CFG_STANDARD_OPEN_DRAIN_LOGIC_HIGH_PERIOD}",
+                            "${RI3C_CFG_STANDARD_OPEN_DRAIN_FREQUENCY}",
+                            "${RI3C_CFG_OPEN_DRAIN_RISING_TIME}",
+                            "${RI3C_CFG_OPEN_DRAIN_FALLING_TIME}",
+                            511,
+                            0,
+                            0)
+            </constraint>
+            <description>The Frequency of SCL during Standard Mode Open Drain transfers.</description>
+        </property>
+        <property id="RI3C_CFG_STANDARD_PUSH_PULL_LOGIC_HIGH_PERIOD" display="Bit Rate > Standard Mode > Push Pull > Logic High Period (ns)" default="167" type="textbox">
+            <constraint display="Value must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_STANDARD_PUSH_PULL_LOGIC_HIGH_PERIOD}")</constraint>
+            <constraint display="Value must be greater than 0." actionOnFail="error">("${RI3C_CFG_STANDARD_PUSH_PULL_LOGIC_HIGH_PERIOD}" &gt; 0)</constraint>
+            <description>The Logic High period of SCL during Standard Mode Push Pull transfers.</description>
+        </property>
+        <property id="RI3C_CFG_STANDARD_PUSH_PULL_FREQUENCY" display="Bit Rate > Standard Mode > Push Pull > Frequency" default="3400000" type="textbox">
+            <constraint display="Value must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_STANDARD_PUSH_PULL_FREQUENCY}")</constraint>
+            <constraint display="Value must be greater than or equal to 10000 Hz." actionOnFail="error">("${RI3C_CFG_STANDARD_PUSH_PULL_FREQUENCY}" &gt;= 10000)</constraint>
+            <constraint display="When PCLKA is 48 Mhz, the maximum SCL Frequency is 3.4 Mhz. When PCLKA is 64 Mhz, the maximum SCL Frequency is 4.6 Mhz." actionOnFail="error">(("${RI3C_CFG_STANDARD_PUSH_PULL_FREQUENCY}" &lt;= 3400000 &amp;&amp; "${RI3C_CFG_PCLKA_REF_VALUE}" == 48000000) || ("${RI3C_CFG_STANDARD_PUSH_PULL_FREQUENCY}" &lt;= 4600000 &amp;&amp; "${RI3C_CFG_PCLKA_REF_VALUE}" == 64000000))</constraint>
+            <constraint display="The Standard Push Pull bitrate setting is invalid.">
+            calculatePeriod("${RI3C_CFG_PCLKA_REF_VALUE}",
+                            "${RI3C_CFG_STANDARD_PUSH_PULL_LOGIC_HIGH_PERIOD}",
+                            "${RI3C_CFG_STANDARD_PUSH_PULL_FREQUENCY}",
+                            "${RI3C_CFG_PUSH_PULL_RISING_TIME}",
+                            "${RI3C_CFG_PUSH_PULL_FALLING_TIME}",
+                            63,
+                            0,
+                            1)
+            </constraint>
+            <description>The Frequency of SCL during Standard Mode Push Pull transfers.</description>
+        </property>
+        <property id="RI3C_CFG_EXTENDED_OPEN_DRAIN_LOGIC_HIGH_PERIOD" display="Bit Rate > Extended Mode > Open Drain > Logic High Period (ns)" default="167" type="textbox">
+            <constraint display="Value must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_EXTENDED_OPEN_DRAIN_LOGIC_HIGH_PERIOD}")</constraint>
+            <constraint display="Value must be greater than 0." actionOnFail="error">("${RI3C_CFG_EXTENDED_OPEN_DRAIN_LOGIC_HIGH_PERIOD}" &gt; 0)</constraint>
+            <description>The Logic High period of SCL during Extended Mode Open Drain transfers.</description>
+        </property>
+        <property id="RI3C_CFG_EXTENDED_OPEN_DRAIN_FREQUENCY" display="Bit Rate > Extended Mode > Open Drain > Frequency" default="1000000" type="textbox">
+            <constraint display="Value must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_EXTENDED_OPEN_DRAIN_FREQUENCY}")</constraint>
+            <constraint display="Value must be greater than 0." actionOnFail="error">("${RI3C_CFG_EXTENDED_OPEN_DRAIN_FREQUENCY}" &gt; 0)</constraint>
+            <constraint display="The Extended Open Drain bitrate setting is invalid.">
+            calculatePeriod("${RI3C_CFG_PCLKA_REF_VALUE}",
+                            "${RI3C_CFG_EXTENDED_OPEN_DRAIN_LOGIC_HIGH_PERIOD}",
+                            "${RI3C_CFG_EXTENDED_OPEN_DRAIN_FREQUENCY}",
+                            "${RI3C_CFG_OPEN_DRAIN_RISING_TIME}",
+                            "${RI3C_CFG_OPEN_DRAIN_FALLING_TIME}",
+                            255,
+                            0,
+                            2)
+            </constraint>
+            <description>The Frequency of SCL during Extended Mode Open Drain transfers.</description>
+        </property>
+        <property id="RI3C_CFG_EXTENDED_PUSH_PULL_LOGIC_HIGH_PERIOD" display="Bit Rate > Extended Mode > Push Pull > Logic High Period (ns)" default="167" type="textbox">
+            <constraint display="Value must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_EXTENDED_PUSH_PULL_LOGIC_HIGH_PERIOD}")</constraint>
+            <constraint display="Value must be greater than 0." actionOnFail="error">("${RI3C_CFG_EXTENDED_PUSH_PULL_LOGIC_HIGH_PERIOD}" &gt; 0)</constraint>
+            <description>The Logic High period of SCL during Extended Mode Push Pull transfers.</description>
+        </property>
+        <property id="RI3C_CFG_EXTENDED_PUSH_PULL_FREQUENCY" display="Bit Rate > Extended Mode > Push Pull > Frequency" default="3400000" type="textbox">
+            <constraint display="Value must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_EXTENDED_PUSH_PULL_FREQUENCY}")</constraint>
+            <constraint display="Value must be greater than or equal to 10000 Hz." actionOnFail="error">("${RI3C_CFG_EXTENDED_PUSH_PULL_FREQUENCY}" &gt;= 10000)</constraint>
+            <constraint display="When PCLKA is 48 Mhz, the maximum SCL Frequency is 3.4 Mhz. When PCLKA is 64 Mhz, the maximum SCL Frequency is 4.6 Mhz." actionOnFail="error">(("${RI3C_CFG_EXTENDED_PUSH_PULL_FREQUENCY}" &lt;= 3400000 &amp;&amp; "${RI3C_CFG_PCLKA_REF_VALUE}" == 48000000) || ("${RI3C_CFG_EXTENDED_PUSH_PULL_FREQUENCY}" &lt;= 4600000 &amp;&amp; "${RI3C_CFG_PCLKA_REF_VALUE}" == 64000000))</constraint>
+            <constraint display="The Extended Push Pull bitrate setting is invalid.">
+            calculatePeriod("${RI3C_CFG_PCLKA_REF_VALUE}",
+                            "${RI3C_CFG_EXTENDED_PUSH_PULL_LOGIC_HIGH_PERIOD}",
+                            "${RI3C_CFG_EXTENDED_PUSH_PULL_FREQUENCY}",
+                            "${RI3C_CFG_OPEN_DRAIN_RISING_TIME}",
+                            "${RI3C_CFG_OPEN_DRAIN_FALLING_TIME}",
+                            63,
+                            0,
+                            3)
+            </constraint>
+            <description>The Frequency of SCL during Extended Mode Push Pull transfers.</description>
+        </property>
+        <property id="RI3C_CFG_CLOCK_STALLKING_ADDRESS_ASSIGNMENT_PHASE" display="Bit Rate > Clock Stalling > Address Assignment Phase Setting" default="0" type="combobox">
+            <option id="RI3C_CFG_CLOCK_STALLKING_ADDRESS_ASSIGNMENT_PHASE.0" display="Disabled (System default)" value="0"/>
+            <option id="RI3C_CFG_CLOCK_STALLKING_ADDRESS_ASSIGNMENT_PHASE.1" display="Enabled" value="1"/>
+            <description>Enable clock stalling during the Address Assignment Phase of ENTDAA.
+0 = Disable (System default)
+1 = Enable</description>
+        </property>
+        <property id="RI3C_CFG_CLOCK_STALLKING_TRANSITION_PHASE" display="Bit Rate > Clock Stalling > Transition Phase Setting" default="0" type="combobox">
+            <option id="RI3C_CFG_CLOCK_STALLKING_TRANSITION_PHASE.0" display="Disabled (System default)" value="0"/>
+            <option id="RI3C_CFG_CLOCK_STALLKING_TRANSITION_PHASE.1" display="Enabled" value="1"/>
+            <description>Enable clock stalling during the Transition Bit of a read transfer.
+0 = Disable (System default)
+1 = Enable</description>
+        </property>
+        <property id="RI3C_CFG_CLOCK_STALLKING_PARITY_PHASE" display="Bit Rate > Clock Stalling > Parity Phase Setting" default="0" type="combobox">
+            <option id="RI3C_CFG_CLOCK_STALLKING_PARITY_PHASE.0" display="Disabled (System default)" value="0"/>
+            <option id="RI3C_CFG_CLOCK_STALLKING_PARITY_PHASE.1" display="Enabled" value="1"/>
+            <description>Enable clock stalling during the Parity Bit of a write transfer.
+0 = Disable (System default)
+1 = Enable</description>
+        </property>
+        <property id="RI3C_CFG_CLOCK_STALLKING_ACK_PHASE" display="Bit Rate > Clock Stalling > Ack Phase Setting" default="0" type="combobox">
+            <option id="RI3C_CFG_CLOCK_STALLKING_ACK_PHASE.0" display="Disabled (System default)" value="0"/>
+            <option id="RI3C_CFG_CLOCK_STALLKING_ACK_PHASE.1" display="Enabled" value="1"/>
+            <description>Enable clock stalling during the ACK phase of a transfer.
+0 = Disable (System default)
+1 = Enable</description>
+        </property>
+        <property id="RI3C_CFG_CLOCK_STALLING_TIME" display="Bit Rate > Clock Stalling > Time (us)" default="0" type="textbox">
+            <constraint display="Value must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_CLOCK_STALLING_TIME}")</constraint>
+            <constraint display="Value must be greater than or equal to 0." actionOnFail="error">("${RI3C_CFG_CLOCK_STALLING_TIME}" &gt;= 0)</constraint>
+            <constraint display="Value is too large." actionOnFail="error">(( 65535 / "${RI3C_CFG_PCLKA_REF_VALUE}") &gt; ("${RI3C_CFG_CLOCK_STALLING_TIME}" / 1000000))</constraint>
+            <description>The amount of time to stall the clock during the Address Assignment Phase, Transition Phase, Parity Phase, and ACK Phase.</description>
+        </property>
+        <property id="RI3C_CFG_CONTROLLER_ACK_HOTJOIN_REQ" display="Interrupt > Controller Mode > ACK Hot-Join Requests" default="0" type="combobox">
+            <option id="RI3C_CFG_CONTROLLER_ACK_HOTJOIN_REQ.0" display="Disabled (System default)" value="0"/>
+            <option id="RI3C_CFG_CONTROLLER_ACK_HOTJOIN_REQ.1" display="Enabled" value="1"/>
+            <description>If enabled, the I3C instance will ACK Hot-Join Requests and notify the application.
+0 = Disable (System default)
+1 = Enable</description>
+        </property>
+        <property id="RI3C_CFG_CONTROLLER_NOTIFY_REJECTED_HOTJOIN_REQ" display="Interrupt > Controller Mode > Notify Rejected Hot-Join Requests" default="0" type="combobox">
+            <option id="RI3C_CFG_CONTROLLER_NOTIFY_REJECTED_HOTJOIN_REQ.0" display="Disabled (System default)" value="0"/>
+            <option id="RI3C_CFG_CONTROLLER_NOTIFY_REJECTED_HOTJOIN_REQ.1" display="Enabled" value="1"/>
+            <description>If enabled, the application will get a callback when an IBI Hot-Join Request is rejected.
+0 = Disable (System default)
+1 = Enable</description>
+        </property>
+        <property id="RI3C_CFG_CONTROLLER_NOTIFY_REJECTED_CONTROLLERROLE_REQ" display="Interrupt > Controller Mode > Notify Rejected Controller Role Requests" default="0" type="combobox">
+            <option id="RI3C_CFG_CONTROLLER_NOTIFY_REJECTED_CONTROLLERROLE_REQ.0" display="Disabled (System default)" value="0"/>
+            <option id="RI3C_CFG_CONTROLLER_NOTIFY_REJECTED_CONTROLLERROLE_REQ.1" display="Enabled" value="1"/>
+            <description>If enabled, the application will get a callback when an IBI Controller Role Request is rejected.
+0 = Disable (System default)
+1 = Enable</description>
+        </property>
+        <property id="RI3C_CFG_CONTROLLER_NOTIFY_REJECTED_INTERRUPT_REQ" display="Interrupt > Controller Mode > Notify Rejected Interrupt Requests" default="0" type="combobox">
+            <option id="RI3C_CFG_CONTROLLER_NOTIFY_REJECTED_INTERRUPT_REQ.0" display="Disabled (System default)" value="0"/>
+            <option id="RI3C_CFG_CONTROLLER_NOTIFY_REJECTED_INTERRUPT_REQ.1" display="Enabled" value="1"/>
+            <description>If enabled, the application will get a callback when an IBI Interrupt Request is rejected.
+0 = Disable (System default)
+1 = Enable</description>
+        </property>
+        <property id="RI3C_CFG_TARGET_IBI_REQ" display="Interrupt > Target Mode > In-Band Interrupts" default="0" type="combobox">
+            <option id="RI3C_CFG_TARGET_IBI_REQ.0" display="Disabled (System default)" value="0"/>
+            <option id="RI3C_CFG_TARGET_IBI_REQ.1" display="Enabled" value="1"/>
+            <description>Configure whether the Target can issue IBI requests.
+0 = Disable (System default)
+1 = Enable</description>
+        </property>
+        <property id="RI3C_CFG_TARGET_HOTJOIN_REQ" display="Interrupt > Target Mode > Hot-Join Requests" default="0" type="combobox">
+            <option id="RI3C_CFG_TARGET_HOTJOIN_REQ.0" display="Disabled (System default)" value="0"/>
+            <option id="RI3C_CFG_TARGET_HOTJOIN_REQ.1" display="Enabled" value="1"/>
+            <description>Configure whether the Target can issue Hot-Join requests.
+0 = Disable (System default)
+1 = Enable</description>
+        </property>
+        <property id="RI3C_CFG_TARGET_CONTROLLERROLE_REQ" display="Interrupt > Target Mode > Controller Role Requests" default="0" type="combobox">
+            <option id="RI3C_CFG_TARGET_CONTROLLERROLE_REQ.0" display="Disabled (System default)" value="0"/>
+            <option id="RI3C_CFG_TARGET_CONTROLLERROLE_REQ.1" display="Enabled" value="1"/>
+            <description>Configure whether the Target can issue Controller Role requests.
+0 = Disable (System default)
+1 = Enable</description>
+        </property>
+        <property id="RI3C_CFG_TARGET_ENTER_ACTIVITY_STATE" display="Target Mode > Command Response
+Info >  Enter Activity State" default="RI3C_ACTIVITY_STATE_ENTAS0" type="combobox">
+            <option id="RI3C_CFG_TARGET_ENTER_ACTIVITY_STATE.RI3C_ACTIVITY_STATE_ENTAS0" display="1 microsecond" value="RI3C_ACTIVITY_STATE_ENTAS0"/>
+            <option id="RI3C_CFG_TARGET_ENTER_ACTIVITY_STATE.RI3C_ACTIVITY_STATE_ENTAS1" display="100 microseconds" value="RI3C_ACTIVITY_STATE_ENTAS1"/>
+            <option id="RI3C_CFG_TARGET_ENTER_ACTIVITY_STATE.RI3C_ACTIVITY_STATE_ENTAS2" display="2 milliseconds" value="RI3C_ACTIVITY_STATE_ENTAS2"/>
+            <option id="RI3C_CFG_TARGET_ENTER_ACTIVITY_STATE.RI3C_ACTIVITY_STATE_ENTAS3" display="50 milliseconds" value="RI3C_ACTIVITY_STATE_ENTAS3"/>
+            <description>Configure the starting activity state of the Target.
+RI3C_ACTIVITY_STATE_ENTAS0 = 1 microsecond - Latency-free operation (Default value)
+RI3C_ACTIVITY_STATE_ENTAS1 = 100 microseconds
+RI3C_ACTIVITY_STATE_ENTAS2 = 2 milliseconds
+RI3C_ACTIVITY_STATE_ENTAS3 = 50 milliseconds - Lowest-activity operation</description>
+        </property>
+        <property id="RI3C_CFG_TARGET_MAX_WRITE_LENGTH" display="Target Mode > Command Response
+Info > Max Write Length" default="65535" type="textbox">
+            <constraint display="Value must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_TARGET_MAX_WRITE_LENGTH}")</constraint>
+            <constraint display="Write length must be in range of [8, 65535]" actionOnFail="error">("${RI3C_CFG_TARGET_MAX_WRITE_LENGTH}" &gt;= 8 &amp;&amp; "${RI3C_CFG_TARGET_MAX_WRITE_LENGTH}" &lt;= 65535)</constraint>
+            <description>Set the max write length in Target Mode.
+Write length must be in range of [8, 65535]</description>
+        </property>
+        <property id="RI3C_CFG_TARGET_MAX_READ_LENGTH" display="Target Mode > Command Response
+Info > Max Read Length" default="65535" type="textbox">
+            <constraint display="Value must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_TARGET_MAX_READ_LENGTH}")</constraint>
+            <constraint display="Read length must be in range of [16, 65535]" actionOnFail="error">("${RI3C_CFG_TARGET_MAX_READ_LENGTH}" &gt;= 16 &amp;&amp; "${RI3C_CFG_TARGET_MAX_READ_LENGTH}" &lt;= 65535)</constraint>
+            <description>Set the max write length in Target Mode.
+Read length must be in range of [16, 65535]</description>
+        </property>
+        <property id="RI3C_CFG_TARGET_MAX_IBI_PAYLOAD_LENGTH" display="Target Mode > Command Response
+Info > Max IBI Payload Length" default="0" type="textbox">
+            <constraint display="Value must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_TARGET_MAX_IBI_PAYLOAD_LENGTH}")</constraint>
+            <constraint display="Read length must be in range of [0, 255]" actionOnFail="error">("${RI3C_CFG_TARGET_MAX_IBI_PAYLOAD_LENGTH}" &gt;= 0 &amp;&amp; "${RI3C_CFG_TARGET_MAX_IBI_PAYLOAD_LENGTH}" &lt;= 255)</constraint>
+            <description>Set the max IBI payload length, or set it to 0 for unlimited.
+Read length must be in the range of [0, 255]</description>
+        </property>
+        <property id="RI3C_CFG_TARGET_WRITE_DATA_RATE" display="Target Mode > Command Respond > Write Data Rate" default="RI3C_DATA_RATE_SETTING_2MHZ" type="combobox">
+            <option id="RI3C_CFG_TARGET_WRITE_DATA_RATE.RI3C_DATA_RATE_SETTING_FSCL_MAX" display="fSCL MAX" value="RI3C_DATA_RATE_SETTING_FSCL_MAX"/>
+            <option id="RI3C_CFG_TARGET_WRITE_DATA_RATE.RI3C_DATA_RATE_SETTING_8MHZ" display="8 MHz" value="RI3C_DATA_RATE_SETTING_8MHZ"/>
+            <option id="RI3C_CFG_TARGET_WRITE_DATA_RATE.RI3C_DATA_RATE_SETTING_6MHZ" display="6 MHz" value="RI3C_DATA_RATE_SETTING_6MHZ"/>
+            <option id="RI3C_CFG_TARGET_WRITE_DATA_RATE.RI3C_DATA_RATE_SETTING_4MHZ" display="4 MHz" value="RI3C_DATA_RATE_SETTING_4MHZ"/>
+            <option id="RI3C_CFG_TARGET_WRITE_DATA_RATE.RI3C_DATA_RATE_SETTING_2MHZ" display="2 MHz (Default)" value="RI3C_DATA_RATE_SETTING_2MHZ"/>
+            <description>Set the max write data rate in Target Mode.
+0 = fSCL_MAX 
+1 = 8 MHz
+2 = 6 MHz
+3 = 4 MHz
+4 = 2 MHz (Default)</description>
+        </property>
+        <property id="RI3C_CFG_TARGET_READ_DATA_RATE" display="Target Mode > Command Respond > Read Data Rate" default="RI3C_DATA_RATE_SETTING_2MHZ" type="combobox">
+            <option id="RI3C_CFG_TARGET_READ_DATA_RATE.RI3C_DATA_RATE_SETTING_FSCL_MAX" display="fSCL MAX" value="RI3C_DATA_RATE_SETTING_FSCL_MAX"/>
+            <option id="RI3C_CFG_TARGET_READ_DATA_RATE.RI3C_DATA_RATE_SETTING_8MHZ" display="8 MHz" value="RI3C_DATA_RATE_SETTING_8MHZ"/>
+            <option id="RI3C_CFG_TARGET_READ_DATA_RATE.RI3C_DATA_RATE_SETTING_6MHZ" display="6 MHz" value="RI3C_DATA_RATE_SETTING_6MHZ"/>
+            <option id="RI3C_CFG_TARGET_READ_DATA_RATE.RI3C_DATA_RATE_SETTING_4MHZ" display="4 MHz" value="RI3C_DATA_RATE_SETTING_4MHZ"/>
+            <option id="RI3C_CFG_TARGET_READ_DATA_RATE.RI3C_DATA_RATE_SETTING_2MHZ" display="2 MHz (Default)" value="RI3C_DATA_RATE_SETTING_2MHZ"/>
+            <description>Set the max read data rate in Target Mode.
+0 = fSCL_MAX
+1 = 8 MHz
+2 = 6 MHz
+3 = 4 MHz
+4 = 2 MHz (Default)</description>
+        </property>
+        <property id="RI3C_CFG_TARGET_CLK_TURNAROUND_RATE" display="Target Mode > Command Respond > Clock to Data Turnaround Time" default="RI3C_CLOCK_DATA_TURNAROUND_8NS" type="combobox">
+            <option id="RI3C_CFG_TARGET_CLK_TURNAROUND_RATE.RI3C_CLOCK_DATA_TURNAROUND_8NS" display="8 nanoseconds (Default)" value="RI3C_CLOCK_DATA_TURNAROUND_8NS"/>
+            <option id="RI3C_CFG_TARGET_CLK_TURNAROUND_RATE.RI3C_CLOCK_DATA_TURNAROUND_9NS" display="9 nanoseconds" value="RI3C_CLOCK_DATA_TURNAROUND_9NS"/>
+            <option id="RI3C_CFG_TARGET_CLK_TURNAROUND_RATE.RI3C_CLOCK_DATA_TURNAROUND_10NS" display="10 nanoseconds" value="RI3C_CLOCK_DATA_TURNAROUND_10NS"/>
+            <option id="RI3C_CFG_TARGET_CLK_TURNAROUND_RATE.RI3C_CLOCK_DATA_TURNAROUND_11NS" display="11 nanoseconds" value="RI3C_CLOCK_DATA_TURNAROUND_11NS"/>
+            <option id="RI3C_CFG_TARGET_CLK_TURNAROUND_RATE.RI3C_CLOCK_DATA_TURNAROUND_12NS" display="12 nanoseconds" value="RI3C_CLOCK_DATA_TURNAROUND_12NS"/>
+            <option id="RI3C_CFG_TARGET_CLK_TURNAROUND_RATE.RI3C_CLOCK_DATA_TURNAROUND_EXTENDED" display="Greater than 12 nanoseconds" value="RI3C_CLOCK_DATA_TURNAROUND_EXTENDED"/>
+            <description>Set the max clock to data turnaround time in Target Mode.
+0 = 8 nanoseconds (Default)
+1 = 9 nanoseconds
+2 = 10 nanoseconds
+3 = 11 nanoseconds
+4 = 12 nanoseconds
+7 = Greater than 12 nanoseconds</description>
+        </property>
+        <property id="RI3C_CFG_TARGET_INCLUDE_MAX_READ_TURNAROUND_TIME" display="Target Mode > Command Respond > Include Max Read Turnaround Time" default="0" type="combobox">
+            <option id="RI3C_CFG_TARGET_INCLUDE_MAX_READ_TURNAROUND_TIME.0" display="Disable (System default)" value="0"/>
+            <option id="RI3C_CFG_TARGET_INCLUDE_MAX_READ_TURNAROUND_TIME.1" display="Enable" value="1"/>
+            <description>Configure whether the Max Read Turnaround time will be transmitted in Target Mode.
+0 = Disable (System default)
+1 = Enable</description>
+        </property>
+        <property id="RI3C_CFG_TARGET_MAX_READ_TURNAROUND_TIME" display="Target Mode > Command Respond > Max Read Turnaround Time" default="0" type="textbox">
+            <constraint display="Max Read Turnaround Time must be enabled." actionOnFail="disable">${RI3C_CFG_TARGET_INCLUDE_MAX_READ_TURNAROUND_TIME} == ${RI3C_CFG_TARGET_INCLUDE_MAX_READ_TURNAROUND_TIME.1}</constraint>
+            <constraint display="Value must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_TARGET_MAX_READ_TURNAROUND_TIME}")</constraint>
+            <constraint display="Read length must be in range of [0, 255]" actionOnFail="error">("${RI3C_CFG_TARGET_MAX_READ_TURNAROUND_TIME}" &gt;= 0 &amp;&amp; "${RI3C_CFG_TARGET_MAX_READ_TURNAROUND_TIME}" &lt;= 255)</constraint>
+            <description>Set max read turnaround time in Target Mode.
+Value must be in the range of [0, 255]</description>
+        </property>
+        <property id="RI3C_CFG_TARGET_FREQUENCY_BYTE" display="Target Mode > Command Respond > Frequency Byte" default="0" type="textbox">
+            <constraint display="Value must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_TARGET_FREQUENCY_BYTE}")</constraint>
+            <constraint display="Value must be in the range of [0, 255]" actionOnFail="error">("${RI3C_CFG_TARGET_FREQUENCY_BYTE}" &gt;= 0 &amp;&amp; "${RI3C_CFG_TARGET_FREQUENCY_BYTE}" &lt;= 255)</constraint>
+            <description>Set the internal oscillator frequency in increments of 1 Mhz in Target Mode.
+Value must be in the range of [0, 255]</description>
+        </property>
+        <property id="RI3C_CFG_TARGET_INACCURACY_BYTE" display="Target Mode > Command Respond > Inaccuracy Byte" default="0" type="textbox">
+            <constraint display="Value must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_TARGET_INACCURACY_BYTE}")</constraint>
+            <constraint display="Value must be in the range of [0, 255]" actionOnFail="error">("${RI3C_CFG_TARGET_INACCURACY_BYTE}" &gt;= 0 &amp;&amp; "${RI3C_CFG_TARGET_INACCURACY_BYTE}" &lt;= 255)</constraint>
+            <description>Set the oscillator inaccuracy byte in increments of 0.5% in Target Mode.
+Value must be in the range of [0, 255]</description>
+        </property>
+        <property id="RI3C_CFG_BUS_FREE_DETECT_TIME" display="Bus Free Condition Detection Time (ns)" default="38.4" type="textbox">
+            <constraint display="Value must be greater or equal to 38.4" actionOnFail="error">("${RI3C_CFG_BUS_FREE_DETECT_TIME}" &gt;= 38.4)</constraint>
+            <constraint display="The bus free detection time is too large." actionOnFail="error">(511 / "${RI3C_CFG_PCLKA_REF_VALUE}" &gt;= "${RI3C_CFG_BUS_FREE_DETECT_TIME}" / 1000000000)</constraint>
+            <description>The minimum period occurring after a STOP and before a START.
+Must be greater than or equal to 38.4 nanoseconds.</description>
+        </property>
+        <property id="RI3C_CFG_BUS_AVAILABLE_CONDITION_DETECT_TIME" display="Bus Available Condition Detection Time (us)" default="1" type="textbox">
+            <constraint display="Value must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_BUS_AVAILABLE_CONDITION_DETECT_TIME}")</constraint>
+            <constraint display="Value must be greater than or equal to 1 microsecond." actionOnFail="error">("${RI3C_CFG_BUS_AVAILABLE_CONDITION_DETECT_TIME}" &gt;= 1)</constraint>
+            <constraint display="The bus available detection time is too large." actionOnFail="error">(511 / ${RI3C_CFG_PCLKA_REF_VALUE}) &gt;= (${RI3C_CFG_BUS_AVAILABLE_CONDITION_DETECT_TIME} / 1000000)</constraint>
+            <constraint display="The bus available detection time must be greater than or equal to the bus free detection time." actionOnFail="error">(${RI3C_CFG_BUS_FREE_DETECT_TIME} / 1000000000) &lt;= (${RI3C_CFG_BUS_AVAILABLE_CONDITION_DETECT_TIME} / 1000000)</constraint>
+            <description>The minimum period occurring after the Bus Free Condition when Targets can initiate IBI requests.
+Must be greater than or equal to 1 microsecond.</description>
+        </property>
+        <property id="RI3C_CFG_BUS_IDLE_CONDITION_DETECT_TIME" display="Bus Idle Condition Detection Time (us)" default="1000" type="textbox">
+            <constraint display="Value must be an integer." actionOnFail="error">testInteger("${RI3C_CFG_BUS_IDLE_CONDITION_DETECT_TIME}")</constraint>
+            <constraint display="Value must be greater than or equal to 1000 microsecond." actionOnFail="error">("${RI3C_CFG_BUS_IDLE_CONDITION_DETECT_TIME}" &gt;= 1000)</constraint>
+            <constraint display="The bus idle detection time is too large." actionOnFail="error">(262143 / ${RI3C_CFG_PCLKA_REF_VALUE}) &gt;= (${RI3C_CFG_BUS_IDLE_CONDITION_DETECT_TIME} / 1000000)</constraint>
+            <constraint display="The bus idle detection time must be greater than or equal to the bus available detection time." actionOnFail="error">(${RI3C_CFG_BUS_AVAILABLE_CONDITION_DETECT_TIME}) &lt;= (${RI3C_CFG_BUS_IDLE_CONDITION_DETECT_TIME})</constraint>
+            <description>The minimum period occurring after the Bus Available Condition when Targets can initiate Hot-Join requests.
+Must be greater than or equal to 1000 microsecond.</description>
+        </property>
+        <property id="RI3C_CFG_TIMEOUT_DETECTION" display="RI3C Timeout Detection" default="0" type="combobox">
+            <option id="RI3C_CFG_TIMEOUT_DETECTION.0" display="Disable (System default)" value="0"/>
+            <option id="RI3C_CFG_TIMEOUT_DETECTION.1" display="Enable" value="1"/>
+            <description>If enabled, the application will get a callback if SCL is stuck at a logic high or logic low level for more than 65535 cycles of the I3C source clock.
+0 = Disable (System default)
+1 = Enable</description>
+        </property>
+        <property id="RI3C_CFG_INTERRUPT_PRIORITY_LEVEL" display="RI3C Interrupt Priority" default="2" type="combobox">
+            <option id="RI3C_CFG_INTERRUPT_PRIORITY_LEVEL.0" display="Level 0 (Disable)" value="0"/>
+            <option id="RI3C_CFG_INTERRUPT_PRIORITY_LEVEL.1" display="Level 1" value="1"/>
+            <option id="RI3C_CFG_INTERRUPT_PRIORITY_LEVEL.2" display="Level 2 (System default)" value="2"/>
+            <option id="RI3C_CFG_INTERRUPT_PRIORITY_LEVEL.3" display="Level 3" value="3"/>
+            <option id="RI3C_CFG_INTERRUPT_PRIORITY_LEVEL.4" display="Level 4" value="4"/>
+            <option id="RI3C_CFG_INTERRUPT_PRIORITY_LEVEL.5" display="Level 5" value="5"/>
+            <option id="RI3C_CFG_INTERRUPT_PRIORITY_LEVEL.6" display="Level 6" value="6"/>
+            <option id="RI3C_CFG_INTERRUPT_PRIORITY_LEVEL.7" display="Level 7" value="7"/>
+            <option id="RI3C_CFG_INTERRUPT_PRIORITY_LEVEL.8" display="Level 8" value="8"/>
+            <option id="RI3C_CFG_INTERRUPT_PRIORITY_LEVEL.9" display="Level 9" value="9"/>
+            <option id="RI3C_CFG_INTERRUPT_PRIORITY_LEVEL.10" display="Level 10" value="10"/>
+            <option id="RI3C_CFG_INTERRUPT_PRIORITY_LEVEL.11" display="Level 11" value="11"/>
+            <option id="RI3C_CFG_INTERRUPT_PRIORITY_LEVEL.12" display="Level 12" value="12"/>
+            <option id="RI3C_CFG_INTERRUPT_PRIORITY_LEVEL.13" display="Level 13" value="13"/>
+            <option id="RI3C_CFG_INTERRUPT_PRIORITY_LEVEL.14" display="Level 14" value="14"/>
+            <option id="RI3C_CFG_INTERRUPT_PRIORITY_LEVEL.15" display="Level 15 (Highest)" value="15"/>
+            <description>Set the interrupt priority level of the RI3C Module.</description>
+        </property>
+    </configuration>
+</module>

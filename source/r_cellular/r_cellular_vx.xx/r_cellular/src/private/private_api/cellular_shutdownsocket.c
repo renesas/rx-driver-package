@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_shutdownsocket.c
@@ -64,24 +64,28 @@
  ***********************************************************************/
 e_cellular_err_t cellular_shutdownsocket(st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_no)
 {
+    e_cellular_err_t           ret           = CELLULAR_SUCCESS;
     e_cellular_err_semaphore_t semaphore_ret = CELLULAR_SEMAPHORE_SUCCESS;
-    e_cellular_err_t ret = CELLULAR_SUCCESS;
 
-    semaphore_ret = cellular_take_semaphore(p_ctrl->at_semaphore);
-    if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
+    if (CELLULAR_SOCKET_STATUS_CONNECTED ==
+            p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].socket_status)
     {
-        ret = atc_sqnsh(p_ctrl, socket_no);
-        if (CELLULAR_SUCCESS == ret)
+        semaphore_ret = cellular_take_semaphore(p_ctrl->at_semaphore);
+        if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
         {
-            p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].socket_status
-                = CELLULAR_SOCKET_STATUS_SOCKET;
-        }
+            ret = atc_sqnsh(p_ctrl, socket_no);
+            if (CELLULAR_SUCCESS == ret)
+            {
+                p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].socket_status
+                    = CELLULAR_SOCKET_STATUS_SOCKET;
+            }
 
-        cellular_give_semaphore(p_ctrl->at_semaphore);
-    }
-    else
-    {
-        ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
+            cellular_give_semaphore(p_ctrl->at_semaphore);
+        }
+        else
+        {
+            ret = CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING;
+        }
     }
 
     return ret;

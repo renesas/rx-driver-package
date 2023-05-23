@@ -19,11 +19,13 @@ Features
 Supported MCUs
 --------------
 * RX660 Group
+* RX26T Group
 
 
 Boards Tested On
 ----------------
 * RSKRX660
+* RSKRX26T
 
 Peripherals Used Directly
 -------------------------

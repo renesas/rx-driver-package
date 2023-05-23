@@ -24,6 +24,7 @@
 /*******************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 31.03.2021 1.00     First Release
+*              : 16.03.2023 1.40     Added r_qspix_read_memory_map() function
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_qspix_rx671_private.h
@@ -68,6 +69,12 @@ extern qspix_err_t r_qspix_get_status(qspix_cmd_t cmd, uint8_t *return_status);
 extern qspix_err_t r_qspix_read_indirect(uint8_t channel,
                                   uint8_t *p_des_addr,
                                   uint32_t bytes);
+extern qspix_err_t r_qspix_read_memory_map(uint8_t channel,
+                                    uint8_t *p_des_addr,
+                                    uint32_t p_addr,
+                                    qspix_protocol_t protocol_ext,
+                                    qspix_address_size_t addr_size,
+                                    uint32_t bytes);
 extern qspix_err_t r_qspix_write_indirect(uint8_t channel,
                                    uint8_t *p_src_addr,
                                    uint32_t bytes,

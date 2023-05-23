@@ -25,6 +25,7 @@
 *         : 18.02.2014 1.00    First Release
 *         : 24.04.2015 1.01    Added the compiler directive: "#if defined(BSP_MCU_RX113)"
 *         : 15.01.2021 3.70    Removed PH7 for RX113.
+*         : 07.04.2023 4.00    Removed define PIN MASK is not provided.
 ***********************************************************************************************************************/
 
 
@@ -221,19 +222,16 @@ typedef enum
 /* This enumerator has a bit mask for each available GPIO pin for the given port on this MCU. */
 typedef enum
 {
-    GPIO_PORT0_PIN_MASK = 0x00,    /* Available pins: None                      */
     GPIO_PORT1_PIN_MASK = 0xF0,    /* Available pins: P14 to P17                */
     GPIO_PORT2_PIN_MASK = 0xC0,    /* Available pins: P26, P27                  */
     GPIO_PORT3_PIN_MASK = 0x27,    /* Available pins: P30 to P32, P35           */
     GPIO_PORT4_PIN_MASK = 0x07,    /* Available pins: P40 to P42                */
     GPIO_PORT5_PIN_MASK = 0x30,    /* Available pins: P54, P55                  */
-    GPIO_PORT9_PIN_MASK = 0x00,    /* Available pins: None                      */
     GPIO_PORTA_PIN_MASK = 0x5B,    /* Available pins: PA0, PA1, PA3, PA4, PA6   */
     GPIO_PORTB_PIN_MASK = 0xEB,    /* Available pins: PB0, PB1, PB3, PB5 to PB7 */
     GPIO_PORTC_PIN_MASK = 0xFF,    /* Available pins: PC0 to PC7                */
     GPIO_PORTD_PIN_MASK = 0x07,    /* Available pins: PD0 to PD2                */
     GPIO_PORTE_PIN_MASK = 0xFF,    /* Available pins: PE0 to PE7                */
-    GPIO_PORTF_PIN_MASK = 0x00,    /* Available pins: None                      */
     GPIO_PORTJ_PIN_MASK = 0xC5,    /* Available pins: PJ0, PJ2, PJ6, PJ7        */
 } gpio_pin_bit_mask_t;
 

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2022 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_lvd_rx_private_targets.h
@@ -48,6 +48,7 @@
 *              : 28.06.2022 4.20     Updated demo projects.
 *              : 12.12.2022 4.30     Fixed default register value of voltage level for RX13T/RX23E-A/RX660/RX72T/RX66T.
 *                                    Fixed condition of the voltage detection level for RX130 channel 2.
+*              : 31.03.2023 4.40     Added support for RX26T.
 ***********************************************************************************************************************/
 #ifndef LVD_PRIVATE_TARGETS_HEADER_FILE
 #define LVD_PRIVATE_TARGETS_HEADER_FILE
@@ -84,6 +85,8 @@ Includes <System Includes> , "Project Includes"
     #include "./targets/rx24t/r_lvd_rx24t.h"
 #elif defined(BSP_MCU_RX24U)
     #include "./targets/rx24u/r_lvd_rx24u.h"
+#elif defined(BSP_MCU_RX26T)
+    #include "./targets/rx26t/r_lvd_rx26t.h"
 #elif defined(BSP_MCU_RX64M)
     #include "./targets/rx64m/r_lvd_rx64m.h"
 #elif defined(BSP_MCU_RX65N)
@@ -113,7 +116,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
 #define LVD_RX_VERSION_MAJOR                    (4)
-#define LVD_RX_VERSION_MINOR                    (30)
+#define LVD_RX_VERSION_MINOR                    (40)
 
 /***********************************************************************************************************************
 Typedef definitions

@@ -14,15 +14,12 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_if.h
  * Description  : Configures the driver.
  *********************************************************************************************************************/
-
-#ifndef CELLULAR_IF_H
-#define CELLULAR_IF_H
 
 /**********************************************************************************************************************
  * Includes   <System Includes> , "Project Includes"
@@ -57,6 +54,9 @@
 #include "r_cellular_private.h"
 #include "ryz014_private.h"
 
+#ifndef CELLULAR_IF_H
+#define CELLULAR_IF_H
+
 /**********************************************************************************************************************
  * Macro definitions
  *********************************************************************************************************************/
@@ -82,27 +82,29 @@
  *********************************************************************************************************************/
 typedef enum
 {
-    CELLULAR_SUCCESS            = 0,            // Successful
-    CELLULAR_ERR_PARAMETER      = -1,           // Argument is abnormal
-    CELLULAR_ERR_ALREADY_OPEN   = -2,           // Already initialized
-    CELLULAR_ERR_NOT_OPEN       = -3,           // Not initialized
-    CELLULAR_ERR_SERIAL_OPEN    = -4,           // Serial initialization failed
-    CELLULAR_ERR_MODULE_COM     = -5,           // Communication with module failed
-    CELLULAR_ERR_MODULE_TIMEOUT = -6,           // Communication with module timed out
-    CELLULAR_ERR_NOT_CONNECT    = -7,           // Not connected to access point
-    CELLULAR_ERR_ALREADY_CONNECT = -8,          // Already connect to access point
-    CELLULAR_ERR_ALREADY_SOCKET_CONNECT = -9,   // Already socket connect
-    CELLULAR_ERR_SOCKET_NOT_READY   = -10,      // Socket is not ready for use
-    CELLULAR_ERR_SOCKET_CREATE_LIMIT = -11,     // Socket creation limit exceeded
-    CELLULAR_ERR_BYTEQ_OPEN         = -12,      // Failed to initialize the byte queue
-    CELLULAR_ERR_SEMAPHORE_INIT     = -13,      // Failed to initialize the semaphore
-    CELLULAR_ERR_EVENT_GROUP_INIT   = -14,      // Failed to initialize the event group
-    CELLULAR_ERR_CREATE_TASK        = -15,      // Failed to create task
+    CELLULAR_SUCCESS                     = 0,   // Successful
+    CELLULAR_ERR_PARAMETER               = -1,  // Argument is abnormal
+    CELLULAR_ERR_ALREADY_OPEN            = -2,  // Already initialized
+    CELLULAR_ERR_NOT_OPEN                = -3,  // Not initialized
+    CELLULAR_ERR_SERIAL_OPEN             = -4,  // Serial initialization failed
+    CELLULAR_ERR_MODULE_COM              = -5,  // Communication with module failed
+    CELLULAR_ERR_MODULE_TIMEOUT          = -6,  // Communication with module timed out
+    CELLULAR_ERR_NOT_CONNECT             = -7,  // Not connected to access point
+    CELLULAR_ERR_ALREADY_CONNECT         = -8,  // Already connect to access point
+    CELLULAR_ERR_ALREADY_SOCKET_CONNECT  = -9,  // Already socket connect
+    CELLULAR_ERR_SOCKET_NOT_READY        = -10, // Socket is not ready for use
+    CELLULAR_ERR_SOCKET_CREATE_LIMIT     = -11, // Socket creation limit exceeded
+    CELLULAR_ERR_BYTEQ_OPEN              = -12, // Failed to initialize the byte queue
+    CELLULAR_ERR_SEMAPHORE_INIT          = -13, // Failed to initialize the semaphore
+    CELLULAR_ERR_EVENT_GROUP_INIT        = -14, // Failed to initialize the event group
+    CELLULAR_ERR_CREATE_TASK             = -15, // Failed to create task
     CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING = -16, // Other AT commands are running
-    CELLULAR_ERR_OTHER_API_RUNNING  = -17,      // Other API are running
-    CELLULAR_ERR_MEMORY_ALLOCATION  = -18,      // Failed to allocate memory
-    CELLULAR_ERR_IRQ_OPEN           = -19,      // IRQ initialization failed
-    CELLULAR_ERR_SIM_NOT_SUPPORT_IPV6   = -20,  // The SIM card does not support IPv6
+    CELLULAR_ERR_OTHER_API_RUNNING       = -17, // Other API are running
+    CELLULAR_ERR_MEMORY_ALLOCATION       = -18, // Failed to allocate memory
+    CELLULAR_ERR_IRQ_OPEN                = -19, // IRQ initialization failed
+    CELLULAR_ERR_SIM_NOT_SUPPORT_IPV6    = -20, // The SIM card does not support IPv6
+    CELLULAR_ERR_AP_CONNECT_FAILED       = -21, // AP connection failed.
+    CELLULAR_ERR_RECV_TASK               = -22, // Receiving task operation error
 } e_cellular_err_t;
 
 typedef enum
@@ -295,16 +297,16 @@ typedef enum
 
 typedef enum
 {
-    CELLULAR_CYCLE_MULTIPLIER_0 = 0,    // Multiplier 0
-    CELLULAR_CYCLE_MULTIPLIER_1 = 1,    // Multiplier 1
-    CELLULAR_CYCLE_MULTIPLIER_2 = 2,    // Multiplier 2
-    CELLULAR_CYCLE_MULTIPLIER_3 = 3,    // Multiplier 3
-    CELLULAR_CYCLE_MULTIPLIER_4 = 4,    // Multiplier 4
-    CELLULAR_CYCLE_MULTIPLIER_5 = 5,    // Multiplier 5
-    CELLULAR_CYCLE_MULTIPLIER_6 = 6,    // Multiplier 6
-    CELLULAR_CYCLE_MULTIPLIER_7 = 7,    // Multiplier 7
-    CELLULAR_CYCLE_MULTIPLIER_8 = 8,    // Multiplier 8
-    CELLULAR_CYCLE_MULTIPLIER_9 = 9,    // Multiplier 9
+    CELLULAR_CYCLE_MULTIPLIER_0  = 0,   // Multiplier 0
+    CELLULAR_CYCLE_MULTIPLIER_1  = 1,   // Multiplier 1
+    CELLULAR_CYCLE_MULTIPLIER_2  = 2,   // Multiplier 2
+    CELLULAR_CYCLE_MULTIPLIER_3  = 3,   // Multiplier 3
+    CELLULAR_CYCLE_MULTIPLIER_4  = 4,   // Multiplier 4
+    CELLULAR_CYCLE_MULTIPLIER_5  = 5,   // Multiplier 5
+    CELLULAR_CYCLE_MULTIPLIER_6  = 6,   // Multiplier 6
+    CELLULAR_CYCLE_MULTIPLIER_7  = 7,   // Multiplier 7
+    CELLULAR_CYCLE_MULTIPLIER_8  = 8,   // Multiplier 8
+    CELLULAR_CYCLE_MULTIPLIER_9  = 9,   // Multiplier 9
     CELLULAR_CYCLE_MULTIPLIER_10 = 10,  // Multiplier 10
     CELLULAR_CYCLE_MULTIPLIER_11 = 11,  // Multiplier 11
     CELLULAR_CYCLE_MULTIPLIER_12 = 12,  // Multiplier 12
@@ -345,37 +347,44 @@ typedef enum
 
 typedef enum
 {
-    CELLULAR_PSM_DEACTIVE = 0,  //Deactivate PSM
-    CELLULAR_PSM_ACTIVE = 1,    //Activate PSM
+    CELLULAR_PSM_DEACTIVE = 0,  // Deactivate PSM
+    CELLULAR_PSM_ACTIVE = 1,    // Activate PSM
 } e_cellular_psm_active_t;
 
-#if (CELLULAR_IMPLEMENT_TYPE == 'B')
 typedef enum
 {
-    CELLULAR_NVM_TYPE_CERTIFICATE = 0,  //Certificate
-    CELLULAR_NVM_TYPE_PRIVATEKEY        //PrivateKey
+    CELLULAR_FIRM_UPGRADE_BLOCKING    = 0,  // Perform firmware upgrade in blocking mode
+    CELLULAR_FIRM_UPGRADE_NONBLOCKING = 1,  // Perform firmware upgrade in non-blocking mode
+    CELLULAR_FIRM_UPGRADE_CANCEL      = 2,  // Cancel firmware upgrade
+} e_cellular_firmupgrade_t;
+
+typedef enum
+{
+    CELLULAR_NVM_TYPE_CERTIFICATE = 0,  // Certificate
+    CELLULAR_NVM_TYPE_PRIVATEKEY        // PrivateKey
 } e_cellular_nvm_type_t;
 
 typedef enum
 {
-    CELLULAR_NO_CERT_VALIDATE = 0,          //certificate not validated
-    CELLULAR_VALIDATE_CERT_EXPDATE = 1,     //Validate certificate chain, validity period
-    CELLULAR_VALIDATE_CERT_EXPDATE_CN = 5,  //Validate certificate chain, validity period, common name
+    CELLULAR_NO_CERT_VALIDATE         = 0,  // Certificate not validated
+    CELLULAR_VALIDATE_CERT_EXPDATE    = 1,  // Validate certificate chain, validity period
+    CELLULAR_VALIDATE_CERT_EXPDATE_CN = 5,  // Validate certificate chain, validity period, common name
 } e_cellular_cert_validate_level_t;
 
+#if (CELLULAR_IMPLEMENT_TYPE == 'B')
 typedef enum
 {
-    CELLULAR_SSL_DEACTIVE= 0,   //Deactivate secure socket
-    CELLULAR_SSL_ACTIVE = 1,    //Activate SSL/TLS on the socket
+    CELLULAR_SSL_DEACTIVE = 0,  // Deactivate secure socket
+    CELLULAR_SSL_ACTIVE   = 1,  // Activate SSL/TLS on the socket
 } e_cellular_ssl_active_t;
 #endif
 
 typedef struct cellular_time_ctrl
 {
     e_cellular_timeout_ovf_check_t timeout_overflow_flag;
-    uint32_t start_time;    // Start time
-    uint32_t this_time;     // Now Time
-    uint32_t end_time;      // End time
+    uint32_t                       start_time;  // Start time
+    uint32_t                       this_time;   // Now Time
+    uint32_t                       end_time;    // End time
 } st_cellular_time_ctrl_t;
 
 typedef struct cellular_datetime
@@ -407,34 +416,35 @@ typedef struct cellular_psm_config
 
 typedef struct cellular_iccid
 {
-    uint8_t iccid[CELLULAR_MAX_ICCID_LENGTH + 1];   // Card identification number
+    uint8_t iccid[CELLULAR_MAX_ICCID_LENGTH+1];   // Card identification number
 } st_cellular_iccid_t;
 
 typedef struct cellular_imei
 {
-    uint8_t imei[CELLULAR_MAX_IMEI_LENGTH + 1]; // International Mobile station Equipment Identity number
+    uint8_t imei[CELLULAR_MAX_IMEI_LENGTH+1]; // International Mobile station Equipment Identity number
 } st_cellular_imei_t;
 
 typedef struct cellular_imsi
 {
-    uint8_t imsi[CELLULAR_MAX_IMSI_LENGTH + 1]; // International Mobile Subscriber Identity
+    uint8_t imsi[CELLULAR_MAX_IMSI_LENGTH+1]; // International Mobile Subscriber Identity
 } st_cellular_imsi_t;
 
 typedef struct cellular_phonenum
 {
-    uint8_t phonenum[CELLULAR_MAX_PHONENUM_LENGTH + 1]; // Phone Number
+    uint8_t phonenum[CELLULAR_MAX_PHONENUM_LENGTH+1]; // Phone Number
 } st_cellular_phonenum_t;
 
 typedef struct cellular_rssi
 {
-    uint8_t rssi[CELLULAR_MAX_RSSI_LENGTH + 1]; // Received signal strength indication
-    uint8_t ber[CELLULAR_MAX_BER_LENGTH + 1];   // Channel bit error rate (in percent)
+    uint8_t rssi[CELLULAR_MAX_RSSI_LENGTH+1]; // Received signal strength indication
+    uint8_t ber[CELLULAR_MAX_BER_LENGTH+1];   // Channel bit error rate (in percent)
 } st_cellular_rssi_t;
 
 typedef struct cellular_svn
 {
-    uint8_t svn[CELLULAR_MAX_SVN_LENGTH + 1];           // Software Version Number
-    uint8_t revision[CELLULAR_MAX_REVISION_LENGTH + 1]; // Software Revision Number
+    uint8_t svn[CELLULAR_MAX_SVN_LENGTH+1];           // Software Version Number
+    uint8_t revision[CELLULAR_MAX_REVISION_LENGTH+1]; // Software Revision Number
+    uint8_t lr_svn[CELLULAR_MAX_LR_SVN_LENGTH+1];     // LR Software Version Number
 } st_cellular_svn_t;
 
 typedef struct cellular_notice
@@ -450,81 +460,91 @@ typedef struct cellular_notice
 
 typedef struct cellular_ipaddr
 {
-    uint8_t     ipv4[CELLULAR_IPV4_ADDR_LENGTH + 1];    // IPv4 address
-    uint8_t     ipv6[CELLULAR_IPV6_ADDR_LENGTH + 1];    // IPv6 address
+    uint8_t     ipv4[CELLULAR_IPV4_ADDR_LENGTH+1];    // IPv4 address
+    uint8_t     ipv6[CELLULAR_IPV6_ADDR_LENGTH+1];    // IPv6 address
 } st_cellular_ipaddr_t;
+
+typedef struct cellular_updatestate
+{
+    uint8_t     state[CELLULAR_UPDATE_STATE_LENGTH+1];  // Firmware Upgrade Status
+} st_cellular_updatestate_t;
+
+typedef struct cellular_certificate
+{
+    uint8_t     certificate[CELLULAR_ATC_RESPONSE_BUFF_SIZE];   // Certificates or other data
+} st_cellular_certificate_t;
 
 typedef struct cellular_ping_cfg
 {
-    uint8_t     count;      // Number of Ping Echo Request to send (default: 4, 1-64)
+    uint32_t    count;      // Number of Ping Echo Request to send (default: 4, 1-64)
     uint16_t    len;        // Length of Ping Echo Request message (default: 32, 32-1400).
     uint16_t    interval;   // Wait interval seconds between sending each Ping Echo Request (in seconds)(default: 1, 1-600)
-    uint8_t     timeout;    // Time to wait for an Echo Reply (in seconds)(default: 10, 1-60).
+    uint32_t    timeout;    // Time to wait for an Echo Reply (in seconds)(default: 10, 1-60).
 } st_cellular_ping_cfg_t;
 
 typedef struct cellular_sci_ctrl
 {
-    uint32_t                baud_rate;                              // Baudrate
-    uint32_t                tx_buff_size;                           // Command send buffer size
-    uint8_t                 atc_buff[CELLULAR_ATC_BUFF_SIZE];       // AT command buffer
-    uint32_t                rx_buff_size;                           // Command receive buffer size
-    uint8_t                 receive_buff[CELLULAR_ATC_RESPONSE_BUFF_SIZE]; // receive buffer
-    uint16_t                tx_process_size;                        // Size per send
-    uint16_t                rx_process_size;                        // Size per receive
-    uint32_t                atc_timeout;                            // AT command response timeout
-    volatile e_cellular_tx_end_flg_t tx_end_flg;                    // Transmission completion flag
-    sci_cb_evt_t            sci_err_flg;                            // sci error flg
-    st_cellular_time_ctrl_t timeout_ctrl;                           // Timeout management structure
-    e_atc_list_t            at_command;                             // Running AT command
-    e_cellular_atc_return_t atc_res;                                // AT command response
-    e_cellular_atc_res_check_t  atc_flg;                            // Response status of AT command
-    sci_hdl_t               sci_hdl;                                // SCI control block handle
+    uint32_t                         baud_rate;                                     // Baudrate
+    uint32_t                         tx_buff_size;                                  // Command send buffer size
+    uint8_t                          atc_buff[CELLULAR_ATC_BUFF_SIZE];              // AT command buffer
+    uint32_t                         rx_buff_size;                                  // Command receive buffer size
+    uint8_t                          receive_buff[CELLULAR_ATC_RESPONSE_BUFF_SIZE]; // receive buffer
+    uint16_t                         tx_process_size;                               // Size per send
+    uint16_t                         rx_process_size;                               // Size per receive
+    uint32_t                         atc_timeout;                                   // AT command response timeout
+    volatile e_cellular_tx_end_flg_t tx_end_flg;                                    // Transmission completion flag
+    sci_cb_evt_t                     sci_err_flg;                                   // sci error flg
+    st_cellular_time_ctrl_t          timeout_ctrl;                                  // Timeout management structure
+    e_atc_list_t                     at_command;                                    // Running AT command
+    e_cellular_atc_return_t          atc_res;                                       // AT command response
+    e_cellular_atc_res_check_t       atc_flg;                                       // Response status of AT command
+    sci_hdl_t                        sci_hdl;                                       // SCI control block handle
 } st_cellular_sci_ctrl_t;
 
 typedef struct cellular_socket_ctrl
 {
-    uint32_t                        receive_num;                // Size received from the module
-    int16_t                         receive_unprocessed_size;   // Data size possessed by the module
+    uint32_t                          receive_num;              // Size received from the module
+    int16_t                           receive_unprocessed_size; // Data size possessed by the module
     volatile e_cellular_receive_flg_t receive_flg;              // Receivable Flag
-    uint8_t *                       p_recv;                     // Pointer to the receive buffer
-    uint32_t                        total_recv_count;           // Total received data size
-    uint16_t                        packet_data_size;           // Data size per packet
-    uint16_t                        exchange_timeout;           // Exchange timeout
-    uint16_t                        connect_timeout;            // Socket connection timeout
-    uint8_t                         send_timeout;               // Packet transmission timeout
-    uint32_t                        receive_count;              // Receive byte count
-    e_cellular_socket_status_t      socket_status;              // Socket Status
-    uint8_t                         ipversion;                  // IP Version
-    uint8_t                         protocol;                   // Protocol Type
-    st_cellular_ipaddr_t            ip_addr;                    // Destination address
-    uint32_t                        port;                       // Destination port number
-    void *                          rx_semaphore;               // Semaphore handle (for receiving)
-    st_cellular_time_ctrl_t         cellular_tx_timeout_ctrl;   // Transmission timeout management structure
-    st_cellular_time_ctrl_t         cellular_rx_timeout_ctrl;   // Receive timeout management structure
+    uint8_t *                         p_recv;                   // Pointer to the receive buffer
+    int32_t                           total_recv_count;         // Total received data size
+    uint16_t                          packet_data_size;         // Data size per packet
+    uint16_t                          exchange_timeout;         // Exchange timeout
+    uint16_t                          connect_timeout;          // Socket connection timeout
+    uint8_t                           send_timeout;             // Packet transmission timeout
+    uint32_t                          receive_count;            // Receive byte count
+    e_cellular_socket_status_t        socket_status;            // Socket Status
+    uint8_t                           ipversion;                // IP Version
+    uint8_t                           protocol;                 // Protocol Type
+    st_cellular_ipaddr_t              ip_addr;                  // Destination address
+    uint32_t                          port;                     // Destination port number
+    void *                            rx_semaphore;             // Semaphore handle (for receiving)
+    st_cellular_time_ctrl_t           cellular_tx_timeout_ctrl; // Transmission timeout management structure
+    st_cellular_time_ctrl_t           cellular_rx_timeout_ctrl; // Receive timeout management structure
 } st_cellular_socket_ctrl_t;
 
 typedef struct cellular_ap_cfg
 {
-    uint8_t                     ap_name[CELLULAR_MAX_AP_NAME_LENGTH + 1];       // AP name
-    uint8_t                     ap_user_name[CELLULAR_MAX_AP_ID_LENGTH + 1];    // AP user name
-    uint8_t                     ap_pass[CELLULAR_MAX_AP_PASS_LENGTH + 1];       // AP Password
-    e_cellular_auth_type_t      auth_type;  // Authentication protocol type
+    uint8_t                ap_name[CELLULAR_MAX_AP_NAME_LENGTH+1];       // AP name
+    uint8_t                ap_user_name[CELLULAR_MAX_AP_ID_LENGTH+1];    // AP user name
+    uint8_t                ap_pass[CELLULAR_MAX_AP_PASS_LENGTH+1];       // AP Password
+    e_cellular_auth_type_t auth_type;                                    // Authentication protocol type
 } st_cellular_ap_cfg_t;
 
 typedef struct cellular_ring_ctrl
 {
-    e_cellular_psm_active_t         psm;                // PSM status
-    void *                          rts_semaphore;      // Semaphore handle
-    void *                          ring_event;         // Event Group Handles
-    void *                          ring_taskhandle;    // Task handle
-    irq_handle_t                    ring_irqhandle;     // IRQ control block handle
-    st_cellular_time_ctrl_t         timeout;            // Timeout management structure
+    e_cellular_psm_active_t psm;                // PSM status
+    void *                  rts_semaphore;      // Semaphore handle
+    void *                  ring_event;         // Event Group Handles
+    void *                  ring_taskhandle;    // Task handle
+    irq_handle_t            ring_irqhandle;     // IRQ control block handle
+    st_cellular_time_ctrl_t timeout;            // Timeout management structure
 } st_cellular_ring_ctrl_t;
 
 typedef struct cellular_ctrl
 {
     uint8_t                     running_api_count;  // Number of running APIs
-    uint8_t                     ap_connect_retry;   // AP connection retry limit
+    uint16_t                    ap_connect_retry;   // AP connection retry limit
     e_cellular_system_status_t  system_state;       // AP connection status
     e_cellular_module_status_t  module_status;      // Module Status
     st_cellular_ipaddr_t        pdp_addr;           // PDP Address
@@ -540,16 +560,16 @@ typedef struct cellular_ctrl
 
 typedef struct cellular_cfg
 {
-    uint8_t     sim_pin_code[CELLULAR_MAX_SIM_PASS_LENGTH + 1]; // SIM Pin Code
+    uint8_t     sim_pin_code[CELLULAR_MAX_SIM_PASS_LENGTH+1]; // SIM Pin Code
     uint32_t    baud_rate;              // Baudrate
-    uint8_t     ap_gatt_retry_count;    // AP connection retry limit
+    uint16_t    ap_cgatt_retry_count;   // AP connection retry limit
     uint32_t    sci_timeout;            // Communication timeout with module
-    uint16_t    tx_process_size;        // Size per send(1~1500)
-    uint16_t    rx_process_size;        // Size per receive(1~1500)
-    uint16_t    packet_data_size;       // Data size per packet(0~1500)
-    uint16_t    exchange_timeout;       // Exchange timeout(0~65535)
-    uint16_t    connect_timeout;        // Socket connection timeout(0,10~1200)
-    uint8_t     send_timeout;           // Packet transmission timeout(0~255). Set fixed value(10).
+    uint16_t    tx_process_size;        // Size per send(in bytes)(1~1500)
+    uint16_t    rx_process_size;        // Size per receive(in bytes)(1~1500)
+    uint16_t    packet_data_size;       // Data size per packet(in bytes)(0~1500)
+    uint16_t    exchange_timeout;       // Exchange timeout(in seconds)(0~65535)
+    uint16_t    connect_timeout;        // Socket connection timeout(in hundreds of milliseconds)(0,10~1200)
+    uint8_t     send_timeout;           // Packet transmission timeout(in hundreds of milliseconds)(0~255). Set fixed value(10).
     uint8_t     creatable_socket;       // Number of sockets to create(1~6)
 } st_cellular_cfg_t;
 
@@ -1265,7 +1285,7 @@ e_cellular_err_t R_CELLULAR_GetCellInfo (st_cellular_ctrl_t * const p_ctrl, cons
  *                @retval        CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING -
  *                                  Other AT commands are running.
  ************************************************************************************************/
-e_cellular_err_t R_CELLULAR_AutoConnectConfig (st_cellular_ctrl_t * const p_ctrl, e_cellular_auto_connect_t const type);
+e_cellular_err_t R_CELLULAR_AutoConnectConfig (st_cellular_ctrl_t * const p_ctrl, const e_cellular_auto_connect_t type);
 
 /*************************************************************************************************
  * Function Name  @fn            R_CELLULAR_SetBand
@@ -1389,8 +1409,174 @@ e_cellular_err_t R_CELLULAR_FactoryReset (st_cellular_ctrl_t * const p_ctrl);
  ************************************************************************************************/
 e_cellular_err_t R_CELLULAR_RTS_Ctrl (st_cellular_ctrl_t * const p_ctrl, const uint8_t lowhigh);
 
-#if (CELLULAR_IMPLEMENT_TYPE == 'B')
-/************************************************************************
+/***************************************************************************************
+ * Function Name  @fn            R_CELLULAR_GetEDRX
+ * Description    @details       Get edrx setting value
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ *                @param[in/out] p_result -
+ *                                  Pointer to the result structure.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successful acquisition of edrx configuration values.
+ *                @retval        CELLULAR_ERR_PARAMETER -
+ *                                  Argument is abnormal.
+ *                @retval        CELLULAR_ERR_NOT_OPEN -
+ *                                  R_CELLULAR_Open function is not executed.
+ *                @retval        CELLULAR_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ *                @retval        CELLULAR_ERR_MODULE_TIMEOUT
+ *                                      Communication with module timed out.
+ *                @retval        CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING -
+ *                                  Other AT commands are running.
+ **************************************************************************************/
+e_cellular_err_t R_CELLULAR_GetEDRX (st_cellular_ctrl_t * const p_ctrl, st_cellular_edrx_config_t * const p_result);
+
+/***************************************************************************************
+ * Function Name  @fn            R_CELLULAR_GetPSM
+ * Description    @details       Get PSM setting value
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ *                @param[in/out] p_result -
+ *                                  Pointer to the result structure.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successful acquisition of PSM configuration values.
+ *                @retval        CELLULAR_ERR_PARAMETER -
+ *                                  Argument is abnormal.
+ *                @retval        CELLULAR_ERR_NOT_OPEN -
+ *                                  R_CELLULAR_Open function is not executed.
+ *                @retval        CELLULAR_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ *                @retval        CELLULAR_ERR_MODULE_TIMEOUT
+ *                                      Communication with module timed out.
+ *                @retval        CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING -
+ *                                  Other AT commands are running.
+ **************************************************************************************/
+e_cellular_err_t R_CELLULAR_GetPSM (st_cellular_ctrl_t * const p_ctrl, st_cellular_psm_config_t * const p_result);
+
+/*************************************************************************************************
+ * Function Name  @fn            R_CELLULAR_SetOperator
+ * Description    @details       Set the band settings.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ *                @param[in]     p_operator -
+ *                                  Operator to be set.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully obtained time.
+ *                @retval        CELLULAR_ERR_PARAMETER -
+ *                                  Argument is abnormal.
+ *                @retval        CELLULAR_ERR_NOT_OPEN -
+ *                                  R_CELLULAR_Open function is not executed.
+ *                @retval        CELLULAR_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ *                @retval        CELLULAR_ERR_MODULE_TIMEOUT
+ *                                      Communication with module timed out.
+ *                @retval        CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING -
+ *                                  Other AT commands are running.
+ ************************************************************************************************/
+e_cellular_err_t R_CELLULAR_SetOperator (st_cellular_ctrl_t * const p_ctrl, const uint8_t * const p_operator);
+
+/*************************************************************************************************
+ * Function Name  @fn            R_CELLULAR_FirmUpgrade
+ * Description    @details       Perform firmware upgrade.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ *                @param[in]     p_url -
+ *                                  URL of the firmware.
+ *                @param[in]     command -
+ *                                  Firmware upgrade command.
+ *                @param[in]     spid -
+ *                                  Security Profile ID.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully obtained time.
+ *                @retval        CELLULAR_ERR_PARAMETER -
+ *                                  Argument is abnormal.
+ *                @retval        CELLULAR_ERR_NOT_OPEN -
+ *                                  R_CELLULAR_Open function is not executed.
+ *                @retval        CELLULAR_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ *                @retval        CELLULAR_ERR_MODULE_TIMEOUT
+ *                                      Communication with module timed out.
+ *                @retval        CELLULAR_ERR_NOT_CONNECT -
+ *                                  Not connected to access point.
+ *                @retval        CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING -
+ *                                  Other AT commands are running.
+ ************************************************************************************************/
+e_cellular_err_t R_CELLULAR_FirmUpgrade (st_cellular_ctrl_t * const p_ctrl, const uint8_t * const p_url,
+                                            const e_cellular_firmupgrade_t command, const uint8_t spid);
+
+/*************************************************************************************************
+ * Function Name  @fn            R_CELLULAR_FirmUpgradeBlocking
+ * Description    @details       Perform firmware upgrade.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ *                @param[in]     p_url -
+ *                                  URL of the firmware.
+ *                @param[in]     spid -
+ *                                  Security Profile ID.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully obtained time.
+ *                @retval        CELLULAR_ERR_PARAMETER -
+ *                                  Argument is abnormal.
+ *                @retval        CELLULAR_ERR_NOT_OPEN -
+ *                                  R_CELLULAR_Open function is not executed.
+ *                @retval        CELLULAR_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ *                @retval        CELLULAR_ERR_MODULE_TIMEOUT
+ *                                      Communication with module timed out.
+ *                @retval        CELLULAR_ERR_NOT_CONNECT -
+ *                                  Not connected to access point.
+ *                @retval        CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING -
+ *                                  Other AT commands are running.
+ ************************************************************************************************/
+e_cellular_err_t R_CELLULAR_FirmUpgradeBlocking (st_cellular_ctrl_t * const p_ctrl, const uint8_t * const p_url,
+                                                    const uint8_t spid);
+
+/*************************************************************************************************
+ * Function Name  @fn            R_CELLULAR_GetUpgradeState
+ * Description    @details       Get firm upgrade status.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ *                @param[in]     p_state -
+ *                                  Pointer to structure to store state.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully obtained time.
+ *                @retval        CELLULAR_ERR_PARAMETER -
+ *                                  Argument is abnormal.
+ *                @retval        CELLULAR_ERR_NOT_OPEN -
+ *                                  R_CELLULAR_Open function is not executed.
+ *                @retval        CELLULAR_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ *                @retval        CELLULAR_ERR_MODULE_TIMEOUT
+ *                                      Communication with module timed out.
+ *                @retval        CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING -
+ *                                  Other AT commands are running.
+ ************************************************************************************************/
+e_cellular_err_t R_CELLULAR_GetUpgradeState (st_cellular_ctrl_t * const p_ctrl,
+                                                st_cellular_updatestate_t * const p_state);
+
+/****************************************************************************
+ * Function Name  @fn            R_CELLULAR_UnlockSIM
+ * Description    @details       Unlock the SIM.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ *                @param[in]     p_pass -
+ *                                  Pointer to password.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully obtained time.
+ *                @retval        CELLULAR_ERR_PARAMETER -
+ *                                  Argument is abnormal.
+ *                @retval        CELLULAR_ERR_NOT_OPEN -
+ *                                  R_CELLULAR_Open function is not executed.
+ *                @retval        CELLULAR_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ *                @retval        CELLULAR_ERR_MODULE_TIMEOUT
+ *                                      Communication with module timed out.
+ *                @retval        CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING -
+ *                                  Other AT commands are running.
+ ***************************************************************************/
+e_cellular_err_t R_CELLULAR_UnlockSIM (st_cellular_ctrl_t * const p_ctrl, const uint8_t * const p_pass);
+
+/******************************************************************************************************
  * Function Name  @fn            R_CELLULAR_WriteCertificate
  * Description    @details       Write certificate or private key to non-volatile memory of the module.
  * Arguments      @param[in/out] p_ctrl -
@@ -1415,12 +1601,14 @@ e_cellular_err_t R_CELLULAR_RTS_Ctrl (st_cellular_ctrl_t * const p_ctrl, const u
  *                                      Communication with module timed out.
  *                @retval        CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING -
  *                                  Other AT commands are running.
- ***********************************************************************/
-e_cellular_err_t R_CELLULAR_WriteCertificate (st_cellular_ctrl_t * const p_ctrl, const e_cellular_nvm_type_t data_type,
-                                                    const uint8_t index, const uint8_t * p_data,
+ *****************************************************************************************************/
+e_cellular_err_t R_CELLULAR_WriteCertificate (st_cellular_ctrl_t * const p_ctrl,
+                                                    const e_cellular_nvm_type_t data_type,
+                                                    const uint8_t index,
+                                                    const uint8_t * p_data,
                                                     const uint32_t size);
 
-/************************************************************************
+/******************************************************************************************************
  * Function Name  @fn            R_CELLULAR_EraseCertificate
  * Description    @details       Erase certificate or private key to non-volatile memory of the module.
  * Arguments      @param[in/out] p_ctrl -
@@ -1441,11 +1629,41 @@ e_cellular_err_t R_CELLULAR_WriteCertificate (st_cellular_ctrl_t * const p_ctrl,
  *                                      Communication with module timed out.
  *                @retval        CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING -
  *                                  Other AT commands are running.
- ***********************************************************************/
-e_cellular_err_t R_CELLULAR_EraseCertificate (st_cellular_ctrl_t * const p_ctrl, const e_cellular_nvm_type_t data_type,
+ *****************************************************************************************************/
+e_cellular_err_t R_CELLULAR_EraseCertificate (st_cellular_ctrl_t * const p_ctrl,
+                                                    const e_cellular_nvm_type_t data_type,
                                                     const uint8_t index);
 
-/************************************************************************
+/***************************************************************************************************************
+ * Function Name  @fn            R_CELLULAR_GetCertificate
+ * Description    @details       Obtain a certificate or private key stored in the module's non-volatile memory.
+ * Arguments      @param[in/out] p_ctrl -
+ *                                  Pointer to managed structure.
+ *                @param[in]     data_type -
+ *                                  Information to write.
+ *                @param[in]     index -
+ *                                  Destination index.
+ *                @param[in/out] p_cert -
+ *                                  Pointer to data writing destination.
+ * Return Value   @retval        CELLULAR_SUCCESS -
+ *                                  Successfully obtained time.
+ *                @retval        CELLULAR_ERR_PARAMETER -
+ *                                  Argument is abnormal.
+ *                @retval        CELLULAR_ERR_NOT_OPEN -
+ *                                  R_CELLULAR_Open function is not executed.
+ *                @retval        CELLULAR_ERR_MODULE_COM -
+ *                                  Communication with module failed.
+ *                @retval        CELLULAR_ERR_MODULE_TIMEOUT
+ *                                      Communication with module timed out.
+ *                @retval        CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING -
+ *                                  Other AT commands are running.
+ **************************************************************************************************************/
+e_cellular_err_t R_CELLULAR_GetCertificate (st_cellular_ctrl_t * const p_ctrl,
+                                                const e_cellular_nvm_type_t data_type,
+                                                const uint8_t index,
+                                                st_cellular_certificate_t * const p_cert);
+
+/*******************************************************************************************
  * Function Name  @fn            R_CELLULAR_ConfigSSLProfile
  * Description    @details       Configurate security profile.
  * Arguments      @param[in/out] p_ctrl -
@@ -1473,14 +1691,14 @@ e_cellular_err_t R_CELLULAR_EraseCertificate (st_cellular_ctrl_t * const p_ctrl,
  *                                      Communication with module timed out.
  *                @retval        CELLULAR_ERR_OTHER_ATCOMMAND_RUNNING -
  *                                  Other AT commands are running.
- ***********************************************************************/
+ ******************************************************************************************/
 e_cellular_err_t R_CELLULAR_ConfigSSLProfile (st_cellular_ctrl_t * const p_ctrl,
-                                    const uint8_t security_profile_id,
-                                    const e_cellular_cert_validate_level_t cert_valid_level,
-                                    const uint8_t ca_certificate_id,
-                                    const uint8_t client_certificate_id,
-                                    const uint8_t client_privatekey_id);
-
+                                                const uint8_t security_profile_id,
+                                                const e_cellular_cert_validate_level_t cert_valid_level,
+                                                const uint8_t ca_certificate_id,
+                                                const uint8_t client_certificate_id,
+                                                const uint8_t client_privatekey_id);
+#if (CELLULAR_IMPLEMENT_TYPE == 'B')
 /************************************************************************
  * Function Name  @fn            R_CELLULAR_ConfigSSLSocket
  * Description    @details       Execute DNS query.
@@ -1510,9 +1728,8 @@ e_cellular_err_t R_CELLULAR_ConfigSSLProfile (st_cellular_ctrl_t * const p_ctrl,
  *                                  Other AT commands are running.
  ***********************************************************************/
 e_cellular_err_t R_CELLULAR_ConfigSSLSocket (st_cellular_ctrl_t * const p_ctrl,
-                                    const uint8_t socket_no,
-                                    const e_cellular_ssl_active_t active,
-                                    const uint8_t security_profile_id);
-#endif /* (CELLULAR_IMPLEMENT_TYPE == 'B') */
-
+                                                const uint8_t socket_no,
+                                                const e_cellular_ssl_active_t active,
+                                                const uint8_t security_profile_id);
+#endif /* CELLULAR_IMPLEMENT_TYPE == 'B' */
 #endif /* CELLULAR_IF_H */

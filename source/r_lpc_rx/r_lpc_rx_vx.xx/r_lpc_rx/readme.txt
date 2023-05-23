@@ -22,11 +22,11 @@ r_lpc_rx
 |    |
 |    +---en
 |    |    |
-|    |    +---r01an2769ej0210-rx-lpc.pdf
+|    |    +---r01an2769ej0220-rx-lpc.pdf
 |    |
 |    +---ja
 |         |
-|         +---r01an2769jj0210-rx-lpc.pdf
+|         +---r01an2769jj0220-rx-lpc.pdf
 |
 +---src
      |    r_lpc_rx.c
@@ -74,6 +74,11 @@ r_lpc_rx
           |    r_lpc_rx23w.c
           |    r_lpc_rx23w_if.h
           |    r_lpc_rx23w_private.h
+          |
+          +---rx26t
+          |    r_lpc_rx26t.c
+          |    r_lpc_rx26t_if.h
+          |    r_lpc_rx26t_private.h
           |
           +---rx64m
           |    r_lpc_rx64m.c
