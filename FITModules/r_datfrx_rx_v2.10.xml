@@ -45,6 +45,7 @@ It is possible to set the number and size of the data number individually.<br/><
         <incdir>r_datfrx_rx/src/flash_type_common</incdir>
         <incdir>r_datfrx_rx/src/flash_type_3</incdir>
         <incdir>r_datfrx_rx/src/flash_type_4</incdir>
+        <incdir>r_datfrx_rx/src/flash_type_5</incdir>
     </package>
 
 </refinfo>
