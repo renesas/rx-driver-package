@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>3.01.00</version>
+        <version>3.02.00</version>
+        <version>3.03.00</version>
+        <version>3.04.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>8.03.00.202004</version>
+        <version>8.03.00.202104</version>
+        <version>8.03.00.202202</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.20.3</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX600</series>
+        <series>RX700</series>
+        <group omit_board="true">RX65N</group>
+        <group omit_board="true">RX66N</group>
+        <group omit_board="true">RX72M</group>
+        <group omit_board="true">RX72N</group>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_cellular</name>
+        <version>1.11</version>
+        <zipsource>r_cellular_v1.11.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>7.10</version>
+        </dependency>
+        <dependency>
+            <module>r_sci_rx</module>
+            <version>4.30</version>
+        </dependency>
+        <dependency>
+            <module>r_irq_rx</module>
+            <version>4.00</version>
+        </dependency>
+        <application>Wireless</application>
+        <desc>Cellular Module control functions for Renesas MCUs.</desc>
+        <details>Use UART to control RYZ014A and connect to the Internet.</details>
+        <function>connectivity</function>
+        <incdir>r_cellular</incdir>
+        <incdir>r_cellular/src/at_command/ryz014/include</incdir>
+        <incdir>r_cellular/src/include</incdir>
+        <incdir>r_cellular/src/include/ryz014</incdir>
+        <incdir>r_cellular/src/private/include</incdir>
+        <incdir>r_cellular/src/private/private_api/include</incdir>
+        <incdir>r_cellular/src/RTOS/include</incdir>
+    </package>
+
+</refinfo>

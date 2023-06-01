@@ -6,7 +6,7 @@
 ***********************************************************************************************************************/
 -->
 <module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
-    <fileVersion>x.xx</fileVersion>
+    <fileVersion>1.11</fileVersion>
     <formatVersion>2.00</formatVersion>
 
     <fileTemplate></fileTemplate>
