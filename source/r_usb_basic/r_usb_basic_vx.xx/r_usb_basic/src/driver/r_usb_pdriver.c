@@ -1181,7 +1181,7 @@ usb_er_t usb_pstd_transfer_start(usb_utr_t * ptr)
 
     rtos_get_fixed_memory(&g_rtos_usb_mpf_id, (void **)&p_tran_data, RTOS_ZERO);
 
-    if (NULL == ptr)
+    if (NULL == ptr || NULL == p_tran_data)
     {
         return USB_ERROR;
     }
