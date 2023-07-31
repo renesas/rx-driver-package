@@ -48,6 +48,7 @@
 *           27.12.2022 4.60    Updated macro definition enable and disable nested interrupt for TXI, RXI, ERI, TEI.
 *           31.03.2023 4.80    Added support for RX26T.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           29.05.2023 4.90    Added support for RX23E-B.
 ***********************************************************************************************************************/
 #ifndef SCI_CONFIG_H
 #define SCI_CONFIG_H
@@ -90,21 +91,21 @@ Configuration Options
  * i = this channel is available in IrDA interface.
  * RX MCU supported channels
  *
- * CH#  110 111 113 130 140 230  231  23T 24T 24U 64M 71M 65N 66T 72T 23W 72M 13T 72N 66N 23E-A 671 660 26T
- * ---  --- --- --- --- --- --- ----- --- --- --- --- --- --- --- --- --- --- --- --- --- ----- --- --- ---
- * CH0           X   Xa      X    X                X   X   Xn              X       X   X          X   X    
- * CH1   X   X*  X*  Xu   X  X    X    Xu  Xu  Xu  X   X   Xs  X   X   X   X   X   X   X    Xu    X   X  X 
- * CH2           X                                 X   X   Xu              X       X   X          X   X    
- * CH3                                             X   X   Xs              X       X   X          X   X    
- * CH4                                             X   X   Xn              X       X   X          X   X    
- * CH5   X   X   Xi  X    X  Xi   Xu,i X   X   X   X   X   X   X   X   Xi  X   X   X   X    X     X   X  X 
- * CH6           X   X    X  X    X        X   X   X   X   Xn  X   X       Xu      X   X    X     X   X  X 
- * CH7                                             Xu  Xu  Xn              X       X   X          X   X    
- * CH8           X   Xa   X  X    X            X           X   X   X   Xu  X       X   X          X   X    
- * CH9           X   Xa   X  X    X            X           Xs  X   X       X       X   X          X   X    
- * CH10                                                    X               X       X   X          X   X    
- * CH11                                        X           Xs  X   X       X       X   X          X   X    
- * CH12  X   X   X   X    X  X    X                X   X   Xs  X   X   X   X   X   X   X    X     X   X  X 
+ * CH#  110 111 113 130 140 230  231  23T 24T 24U 64M 71M 65N 66T 72T 23W 72M 13T 72N 66N 23E-A 671 660 26T 23E-B
+ * ---  --- --- --- --- --- --- ----- --- --- --- --- --- --- --- --- --- --- --- --- --- ----- --- --- --- -----
+ * CH0           X   Xa      X    X                X   X   Xn              X       X   X          X   X       X  
+ * CH1   X   X*  X*  Xu   X  X    X    Xu  Xu  Xu  X   X   Xs  X   X   X   X   X   X   X    Xu    X   X  X    X  
+ * CH2           X                                 X   X   Xu              X       X   X          X   X          
+ * CH3                                             X   X   Xs              X       X   X          X   X          
+ * CH4                                             X   X   Xn              X       X   X          X   X          
+ * CH5   X   X   Xi  X    X  Xi   Xu,i X   X   X   X   X   X   X   X   Xi  X   X   X   X    X     X   X  X    X  
+ * CH6           X   X    X  X    X        X   X   X   X   Xn  X   X       Xu      X   X    X     X   X  X    X  
+ * CH7                                             Xu  Xu  Xn              X       X   X          X   X          
+ * CH8           X   Xa   X  X    X            X           X   X   X   Xu  X       X   X          X   X       X  
+ * CH9           X   Xa   X  X    X            X           Xs  X   X       X       X   X          X   X       X  
+ * CH10                                                    X               X       X   X          X   X          
+ * CH11                                        X           Xs  X   X       X       X   X          X   X          
+ * CH12  X   X   X   X    X  X    X                X   X   Xs  X   X   X   X   X   X   X    X     X   X  X    X  
 */
 
 #define SCI_CFG_CH0_INCLUDED    (0)

@@ -11,7 +11,7 @@
 
     <fileTemplate></fileTemplate>
     <configuration>
-        <property id="CELLULAR_CFG_AP_NAME" display="Access point name" default="globaldata.iot" type="textbox">
+        <property id="CELLULAR_CFG_AP_NAME" display="Access point name" default="iot.truphone.com" type="textbox">
             <constraint display="Character limit over(64 or less)" actionOnFail="error">/^([a-zA-Z0-9_.]{1,64})$/.test("${CELLULAR_CFG_AP_NAME}")</constraint>
             <description>Enter the access point name.
 Example: globaldata.iot, plus.4g, etc</description>

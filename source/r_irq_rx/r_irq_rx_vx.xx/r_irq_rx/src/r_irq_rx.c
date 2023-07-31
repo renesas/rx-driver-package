@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013-2022 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_irq_rx.c
@@ -37,6 +37,7 @@
 *         : 25.11.2019  3.30    Modified comment of API function to Doxygen style.
 *         : 15.04.2021  3.80    Added R_IRQ_IRClear() function to clear IR flag.
 *         : 15.08.2022  4.30    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 29.05.2023  4.40    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -306,7 +307,7 @@ const irq_init_block_t g_irq15_handle =
     IRQ_PORT_BIT_IRQ15,                   /* I/O port input data bit mask for this IRQ. */
 };
 #endif
-#endif /* end defined(VECT_ICU_IRQ15) */
+#endif /* definedVECT_ICU_IRQ15 */
 
 static const irq_handle_t s_irq_handles[] =
 {
@@ -409,7 +410,7 @@ static const irq_handle_t s_irq_handles[] =
     #else
     NULL,
     #endif
-#endif /* end defined(VECT_ICU_IRQ15) */
+#endif /* definedVECT_ICU_IRQ15 */
 };
 
 #if IRQ_CFG_PARAM_CHECKING == 1
@@ -966,7 +967,8 @@ End of function R_IRQ_IRClear
 * Description  : IRQ interrupt handler routines.
 ***********************************************************************************************************************/
 #if IRQ_CFG_USE_IRQ0 == 1
-R_BSP_PRAGMA_INTERRUPT (irq0_isr,VECT(ICU, IRQ0))
+R_BSP_PRAGMA_INTERRUPT (irq0_isr, VECT(ICU, IRQ0))
+
 /***********************************************************************************************************************
 * Function Name: irq0_isr
 * Description  : IRQ0 callback function
@@ -976,7 +978,7 @@ R_BSP_PRAGMA_INTERRUPT (irq0_isr,VECT(ICU, IRQ0))
 R_BSP_ATTRIB_INTERRUPT void irq0_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq0_handle.p_irq_callback))) && (NULL != (*(g_irq0_handle.p_irq_callback))))
+    if ((FIT_NO_FUNC != (*(g_irq0_handle.p_irq_callback))) && (NULL != (*(g_irq0_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
         (*(g_irq0_handle.p_irq_callback))((void*)&(g_irq0_handle));
@@ -986,6 +988,7 @@ R_BSP_ATTRIB_INTERRUPT void irq0_isr(void)
 
 #if IRQ_CFG_USE_IRQ1 == 1
 R_BSP_PRAGMA_INTERRUPT (irq1_isr, VECT(ICU, IRQ1))
+
 /***********************************************************************************************************************
 * Function Name: irq1_isr
 * Description  : IRQ1 callback function
@@ -995,7 +998,7 @@ R_BSP_PRAGMA_INTERRUPT (irq1_isr, VECT(ICU, IRQ1))
 R_BSP_ATTRIB_INTERRUPT void irq1_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq1_handle.p_irq_callback))) && (NULL != (*(g_irq1_handle.p_irq_callback))))
+    if ((FIT_NO_FUNC != (*(g_irq1_handle.p_irq_callback))) && (NULL != (*(g_irq1_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
         (*(g_irq1_handle.p_irq_callback))((void*)&(g_irq1_handle.irq_num));
@@ -1004,7 +1007,8 @@ R_BSP_ATTRIB_INTERRUPT void irq1_isr(void)
 #endif
 
 #if IRQ_CFG_USE_IRQ2 == 1
-R_BSP_PRAGMA_INTERRUPT (irq2_isr,VECT(ICU, IRQ2))
+R_BSP_PRAGMA_INTERRUPT (irq2_isr, VECT(ICU, IRQ2))
+
 /***********************************************************************************************************************
 * Function Name: irq2_isr
 * Description  : IRQ2 callback function
@@ -1014,7 +1018,7 @@ R_BSP_PRAGMA_INTERRUPT (irq2_isr,VECT(ICU, IRQ2))
 R_BSP_ATTRIB_INTERRUPT void irq2_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq2_handle.p_irq_callback))) && (NULL != (*(g_irq2_handle.p_irq_callback))))
+    if ((FIT_NO_FUNC != (*(g_irq2_handle.p_irq_callback))) && (NULL != (*(g_irq2_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
         (*(g_irq2_handle.p_irq_callback))((void*)&(g_irq2_handle.irq_num));
@@ -1023,7 +1027,8 @@ R_BSP_ATTRIB_INTERRUPT void irq2_isr(void)
 #endif
 
 #if IRQ_CFG_USE_IRQ3 == 1
-R_BSP_PRAGMA_INTERRUPT (irq3_isr,VECT(ICU, IRQ3))
+R_BSP_PRAGMA_INTERRUPT (irq3_isr, VECT(ICU, IRQ3))
+
 /***********************************************************************************************************************
 * Function Name: irq3_isr
 * Description  : IRQ3 callback function
@@ -1033,7 +1038,7 @@ R_BSP_PRAGMA_INTERRUPT (irq3_isr,VECT(ICU, IRQ3))
 R_BSP_ATTRIB_INTERRUPT void irq3_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq3_handle.p_irq_callback))) && (NULL != (*(g_irq3_handle.p_irq_callback))))
+    if ((FIT_NO_FUNC != (*(g_irq3_handle.p_irq_callback))) && (NULL != (*(g_irq3_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
         (*(g_irq3_handle.p_irq_callback))((void*)&(g_irq3_handle.irq_num));
@@ -1043,6 +1048,7 @@ R_BSP_ATTRIB_INTERRUPT void irq3_isr(void)
 
 #if IRQ_CFG_USE_IRQ4 == 1
 R_BSP_PRAGMA_INTERRUPT (irq4_isr, VECT(ICU, IRQ4))
+
 /***********************************************************************************************************************
 * Function Name: irq4_isr
 * Description  : IRQ4 callback function
@@ -1052,7 +1058,7 @@ R_BSP_PRAGMA_INTERRUPT (irq4_isr, VECT(ICU, IRQ4))
 R_BSP_ATTRIB_INTERRUPT void irq4_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq4_handle.p_irq_callback))) && (NULL != (*(g_irq4_handle.p_irq_callback))))
+    if ((FIT_NO_FUNC != (*(g_irq4_handle.p_irq_callback))) && (NULL != (*(g_irq4_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
         (*(g_irq4_handle.p_irq_callback))((void*)&(g_irq4_handle.irq_num));
@@ -1062,6 +1068,7 @@ R_BSP_ATTRIB_INTERRUPT void irq4_isr(void)
 
 #if IRQ_CFG_USE_IRQ5 == 1
 R_BSP_PRAGMA_INTERRUPT (irq5_isr, VECT(ICU, IRQ5))
+
 /***********************************************************************************************************************
 * Function Name: irq5_isr
 * Description  : IRQ5 callback function
@@ -1071,7 +1078,7 @@ R_BSP_PRAGMA_INTERRUPT (irq5_isr, VECT(ICU, IRQ5))
 R_BSP_ATTRIB_INTERRUPT void irq5_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq5_handle.p_irq_callback))) && (NULL != (*(g_irq5_handle.p_irq_callback))))
+    if ((FIT_NO_FUNC != (*(g_irq5_handle.p_irq_callback))) && (NULL != (*(g_irq5_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
         (*(g_irq5_handle.p_irq_callback))((void*)&(g_irq5_handle.irq_num));
@@ -1081,7 +1088,8 @@ R_BSP_ATTRIB_INTERRUPT void irq5_isr(void)
 
 #if defined(VECT_ICU_IRQ7)
 #if IRQ_CFG_USE_IRQ6 == 1
-R_BSP_PRAGMA_INTERRUPT (irq6_isr,VECT(ICU, IRQ6))
+R_BSP_PRAGMA_INTERRUPT (irq6_isr, VECT(ICU, IRQ6))
+
 /***********************************************************************************************************************
 * Function Name: irq6_isr
 * Description  : IRQ6 callback function
@@ -1091,7 +1099,7 @@ R_BSP_PRAGMA_INTERRUPT (irq6_isr,VECT(ICU, IRQ6))
 R_BSP_ATTRIB_INTERRUPT void irq6_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq6_handle.p_irq_callback))) && (NULL != (*(g_irq6_handle.p_irq_callback))))
+    if ((FIT_NO_FUNC != (*(g_irq6_handle.p_irq_callback))) && (NULL != (*(g_irq6_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
         (*(g_irq6_handle.p_irq_callback))((void*)&(g_irq6_handle.irq_num));
@@ -1100,7 +1108,8 @@ R_BSP_ATTRIB_INTERRUPT void irq6_isr(void)
 #endif
 
 #if IRQ_CFG_USE_IRQ7 == 1
-R_BSP_PRAGMA_INTERRUPT (irq7_isr,VECT(ICU, IRQ7))
+R_BSP_PRAGMA_INTERRUPT (irq7_isr, VECT(ICU, IRQ7))
+
 /***********************************************************************************************************************
 * Function Name: irq7_isr
 * Description  : IRQ7 callback function
@@ -1110,14 +1119,14 @@ R_BSP_PRAGMA_INTERRUPT (irq7_isr,VECT(ICU, IRQ7))
 R_BSP_ATTRIB_INTERRUPT void irq7_isr(void)
 {
     /* check callback address */
-    if((FIT_NO_FUNC != (*(g_irq7_handle.p_irq_callback))) && (NULL != (*(g_irq7_handle.p_irq_callback))))
+    if ((FIT_NO_FUNC != (*(g_irq7_handle.p_irq_callback))) && (NULL != (*(g_irq7_handle.p_irq_callback))))
     {
         /* casting void * type to callback* type is valid */
         (*(g_irq7_handle.p_irq_callback))((void*)&(g_irq7_handle.irq_num));
     }
 } /* End of function irq7_isr */
 #endif
-#endif /* End of #if defined(VECT_ICU_IRQ7) */
+#endif /* definedVECT_ICU_IRQ7 */
 
 #if defined(VECT_ICU_IRQ15)
 #if IRQ_CFG_USE_IRQ8 == 1
@@ -1271,7 +1280,7 @@ R_BSP_ATTRIB_INTERRUPT void irq15_isr(void)
     }
 }/* End of function irq15_isr */
 #endif
-#endif /*end defined(VECT_ICU_IRQ15) */
+#endif /* definedVECT_ICU_IRQ15 */
 
 /***********************************************************************************************************************
 end  r_irq_rx.c

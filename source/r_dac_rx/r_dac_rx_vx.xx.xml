@@ -75,6 +75,7 @@
         <group omit_board="true">RX140</group>
         <group omit_board="true">RX230</group>
         <group omit_board="true">RX231</group>
+        <group omit_board="true">RX23E-B</group>
         <group omit_board="true">RX23T</group>
         <group omit_board="true">RX23W</group>
         <group omit_board="true">RX24T</group>
@@ -100,11 +101,11 @@
         <zipsource>r_dac_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.30</version>
+            <version>7.40</version>
         </dependency>
         <application>D/A Converter</application>
         <desc>DAC Driver</desc>
-        <details>The API is identical for the 8-, 10-, and 12-bit converters. Channels are operated individually and all hardware features are supported.</details>
+        <details>The API is identical for the 8-, 10-, 12-,and 16-bit converters. Channels are operated individually and all hardware features are supported.</details>
         <function>DAC</function>
         <incdir>r_config</incdir>
         <incdir>r_dac_rx</incdir>

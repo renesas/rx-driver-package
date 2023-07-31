@@ -14,11 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_elc_rx_platform.h
- * Version      : 2.01
+ * Version      : 3.00
  * Description  : Functions for using Event Link Controller module
  ************************************************************************************************************************
  * History : DD.MM.YYYY Version Description
@@ -27,6 +27,7 @@
  *           16.06.2017 1.20    Added support for RX65N(2MB), RX130(512KB)
  *           10.06.2020 2.00    Added support for RX23W
  *           10.12.2020 2.01    Added support for RX140
+ *           31.05.2023 3.00    Added support for RX23E-B
  ***********************************************************************************************************************/
 #ifndef ELC_RX_PLATFORM_H
     #define ELC_RX_PLATFORM_H
@@ -52,6 +53,9 @@
     #endif
     #if defined(BSP_MCU_RX23W)
         #include "./targets/rx23w/r_elc_rx23w_private.h"  /* RX23W */
+    #endif
+    #if defined(BSP_MCU_RX23E_B)
+        #include "./targets/rx23e-b/r_elc_rx23e-b_private.h"  /* RX23E-B */
     #endif
     #if defined(BSP_MCU_RX65N)
         #include "./targets/rx65n/r_elc_rx65n_private.h"  /* RX65N */

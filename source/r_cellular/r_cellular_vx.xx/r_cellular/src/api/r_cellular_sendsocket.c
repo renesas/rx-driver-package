@@ -200,7 +200,6 @@ static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8
         if (CELLULAR_SOCKET_STATUS_CONNECTED !=
                 p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].socket_status)
         {
-            ret = CELLULAR_ERR_SOCKET_NOT_READY;
             break;
         }
 
@@ -209,8 +208,13 @@ static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8
         ret = atc_sqnssendext(p_ctrl, socket_no, send_size);
         if (CELLULAR_SUCCESS != ret)
         {
+            if ((ATC_RETURN_ERROR == p_ctrl->sci_ctrl.atc_res) && (CELLULAR_ERR_MODULE_COM == ret))
+            {
+                ret = CELLULAR_SUCCESS;
+            }
             break;
         }
+
 #if CELLULAR_CFG_CTS_SW_CTRL == 0
         p_ctrl->sci_ctrl.tx_end_flg = CELLULAR_TX_END_FLAG_OFF;
 
@@ -232,6 +236,11 @@ static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8
         if (CELLULAR_TIMEOUT == timeout)
         {
             ret = CELLULAR_ERR_MODULE_TIMEOUT;
+            break;
+        }
+
+        if (ATC_RETURN_ERROR == p_ctrl->sci_ctrl.atc_res)
+        {
             break;
         }
 
@@ -282,6 +291,11 @@ static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8
             break;
         }
 
+        if (ATC_RETURN_ERROR == p_ctrl->sci_ctrl.atc_res)
+        {
+            break;
+        }
+
         complete_length += sci_send_size;
 #endif  /* CELLULAR_CFG_CTS_SW_CTRL == 0 */
     }
@@ -295,7 +309,7 @@ static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8
         cellular_give_semaphore(p_ctrl->ring_ctrl.rts_semaphore);
     }
 
-    if (CELLULAR_SUCCESS != ret)
+    if ((CELLULAR_ERR_MODULE_TIMEOUT == ret) || (CELLULAR_ERR_MODULE_COM == ret))
     {
         complete_length = (int32_t)ret; //cast
     }
@@ -438,7 +452,7 @@ static e_cellular_timeout_check_t cellular_atc_response_check(st_cellular_ctrl_t
     while (1)
     {
         at_ret = cellular_get_atc_response(p_ctrl);
-        if (ATC_RETURN_OK == at_ret)
+        if ((ATC_RETURN_OK == at_ret) || (ATC_RETURN_ERROR == at_ret))
         {
             break;
         }

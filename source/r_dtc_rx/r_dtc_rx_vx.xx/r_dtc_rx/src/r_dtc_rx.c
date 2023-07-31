@@ -67,6 +67,8 @@
 *         : 15.04.2021 3.80    Added support for RX140.
 *         : 27.12.2022 4.21    Updated slash format of included header file paths for Linux compatibility.
 *         : 31.03.2023 4.30    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 29.05.2023 4.40    Fixed warnings in IAR.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *******************************************************************************/
 
 /*******************************************************************************
@@ -105,7 +107,7 @@ Private variables and functions
 static bool s_is_opened = false; /* Indicate whether DTC is opened. */
 
 static dtc_err_t r_dtc_set_transfer_data (dtc_transfer_data_t * p_transfer_data,
-                                          dtc_transfer_data_cfg_t * p_cfg);
+                                            dtc_transfer_data_cfg_t * p_cfg);
 static void      r_dtc_clear_all_dtce_bits (void);
 static bool      r_dtc_abort_chain_transfer (uint32_t chain_transfer_nr);
 static bool      r_dtc_acquire_hw_lock (void);
@@ -235,7 +237,7 @@ dtc_err_t R_DTC_Open(void)
 * interrupt source is described in Interrupt Vector Table, chapter Interrupt Controller (ICU) of User's Manual: Hardware.
 */
 dtc_err_t R_DTC_Create(dtc_activation_source_t act_source, dtc_transfer_data_t *p_transfer_data,
-                       dtc_transfer_data_cfg_t *p_data_cfg, uint32_t chain_transfer_nr)
+                        dtc_transfer_data_cfg_t *p_data_cfg, uint32_t chain_transfer_nr)
 {
     uint32_t              count                  = chain_transfer_nr + 1;
     uint32_t            * p_ptr                  = NULL;
@@ -349,8 +351,8 @@ dtc_err_t R_DTC_Create(dtc_activation_source_t act_source, dtc_transfer_data_t *
 * Hardware.
 */
 dtc_err_t R_DTC_CreateSeq(dtc_activation_source_t act_source, dtc_transfer_data_t *p_transfer_data,
-                          dtc_transfer_data_cfg_t *p_data_cfg, uint32_t sequence_transfer_nr,
-                          uint8_t sequence_no)
+                            dtc_transfer_data_cfg_t *p_data_cfg, uint32_t sequence_transfer_nr,
+                            uint8_t sequence_no)
 {
 #if (DTC_DISABLE == DTC_CFG_USE_SEQUENCE_TRANSFER)
     return DTC_ERR_INVALID_ARG;
@@ -538,7 +540,7 @@ dtc_err_t R_DTC_Control(dtc_command_t command, dtc_stat_t *p_stat, dtc_cmd_arg_t
         return DTC_ERR_NULL_PTR;
     }
     else if ((((DTC_CMD_ACT_SRC_ENABLE == command) || (DTC_CMD_ACT_SRC_DISABLE == command)) ||
-             (DTC_CMD_CHAIN_TRANSFER_ABORT == command)) || (DTC_CMD_SEQUENCE_TRANSFER_ENABLE == command))
+            (DTC_CMD_CHAIN_TRANSFER_ABORT == command)) || (DTC_CMD_SEQUENCE_TRANSFER_ENABLE == command))
     {
         if (NULL == p_args) /* Require argument */
         {
@@ -771,7 +773,7 @@ uint32_t R_DTC_GetVersion(void)
 *                    Fail to apply configurations for Transfer data.
 *******************************************************************************/
 static dtc_err_t r_dtc_set_transfer_data(dtc_transfer_data_t *p_transfer_data,
-                                   dtc_transfer_data_cfg_t *p_cfg)
+                                        dtc_transfer_data_cfg_t *p_cfg)
 {
     dtc_mra_t                          t_mra;
     dtc_mrb_t                          t_mrb;
@@ -794,15 +796,15 @@ static dtc_err_t r_dtc_set_transfer_data(dtc_transfer_data_t *p_transfer_data,
 
     /* Casting to match type of "t_mrb.BYTE" */
     t_mrb.BYTE = (((((((uint8_t)p_cfg->sequence_end |(uint8_t)p_cfg->refer_index_table_enable) | (uint8_t)p_cfg->dest_addr_mode) |
-                           (uint8_t)p_cfg->repeat_block_side) | (uint8_t)p_cfg->response_interrupt) |
-                           (uint8_t)p_cfg->chain_transfer_enable) | (uint8_t)p_cfg->chain_transfer_mode);
+                        (uint8_t)p_cfg->repeat_block_side) | (uint8_t)p_cfg->response_interrupt) |
+                        (uint8_t)p_cfg->chain_transfer_enable) | (uint8_t)p_cfg->chain_transfer_mode);
 #else
     /* Casting to match type of "t_mra.BYTE" */
-    t_mra.BYTE = (uint8_t)(p_cfg->src_addr_mode | p_cfg->data_size | p_cfg->transfer_mode);
+    t_mra.BYTE = (((uint8_t)p_cfg->src_addr_mode | (uint8_t)p_cfg->data_size) | (uint8_t)p_cfg->transfer_mode);
 
     /* Casting to match type of "t_mrb.BYTE" */
-    t_mrb.BYTE = (uint8_t)(p_cfg->dest_addr_mode | p_cfg->repeat_block_side | p_cfg->response_interrupt |
-                           p_cfg->chain_transfer_enable | p_cfg->chain_transfer_mode);
+    t_mrb.BYTE = (((((uint8_t)p_cfg->dest_addr_mode | (uint8_t)p_cfg->repeat_block_side) | (uint8_t)p_cfg->response_interrupt) |
+                    (uint8_t)p_cfg->chain_transfer_enable) | (uint8_t)p_cfg->chain_transfer_mode);
 #endif /* (DTC_IP_VER_DTCb <= DTC_IP) */
 
     switch (t_mra.BIT.MD) /* DTC transfer mode */
@@ -1007,7 +1009,7 @@ static bool r_dtc_abort_chain_transfer(uint32_t chain_transfer_nr)
 *******************************************************************************/
 static bool r_dtc_acquire_hw_lock(void)
 {
-    return R_BSP_HardwareLock(BSP_LOCK_DTC);
+    return (R_BSP_HardwareLock(BSP_LOCK_DTC));
 }
 /* End of function r_dtc_acquire_hw_lock */
 
@@ -1039,7 +1041,7 @@ static bool r_dtc_check_dmac_locking_sw(void)
     bool ret = true;
 
 #if ((0 != BSP_CFG_USER_LOCKING_ENABLED) || (bsp_lock_t != BSP_CFG_USER_LOCKING_TYPE) \
-      || (DTC_ENABLE != DTC_CFG_USE_DMAC_FIT_MODULE))
+    || (DTC_ENABLE != DTC_CFG_USE_DMAC_FIT_MODULE))
         /* defined(0 != BSP_CFG_USER_LOCKING_ENABLED) */
         /*  or defined(DTC_ENABLE !=DTC_CFG_USE_DMAC_FIT_MODULE) */
         /*  or defined(bsp_lock_t != BSP_CFG_USER_LOCKING_TYPE) */
@@ -1091,7 +1093,7 @@ static bool r_dtc_check_dmac_locking_sw(void)
 *                    The pointers are NULL.
 *******************************************************************************/
 static dtc_err_t r_dtc_check_create_param(dtc_transfer_data_t *p_transfer_data,
-                                          dtc_transfer_data_cfg_t *p_data_cfg)
+                                            dtc_transfer_data_cfg_t *p_data_cfg)
 {
 #if (1 == DTC_CFG_PARAM_CHECKING_ENABLE)
 

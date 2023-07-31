@@ -5,12 +5,12 @@ r_lcdc_rx
 
 Document Number
 ---------------
-R01AN1980JJ0102
-R01AN1980EJ0102
+R01AN1980JJ0200
+R01AN1980EJ0200
 
 Version
 -------
-v1.02
+v2.00
 
 Overview
 --------
@@ -32,10 +32,12 @@ switched.
 Supported MCUs
 --------------
 * RX113 Group
+* RX23E-B Grop
 
 Boards Tested On
 ----------------
 * RSKRX113
+* RSSKRX23E-B
 
 Limitations
 -----------
@@ -47,7 +49,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp     v5.50
+* r_bsp     v7.40
 
 How to add to your project
 --------------------------
@@ -92,9 +94,9 @@ For example, to run the demo on a RSKRX111 board, the user would uncomment the #
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.02.00
-* GCC for Renesas RX 8.03.00.201904
-* IAR C/C++ Compiler for Renesas RX version 4.13.1
+* Renesas RX v3.04.00
+* GCC for Renesas RX 8.03.00.202202
+* IAR C/C++ Compiler for Renesas RX version 4.20.3
 
 
 File Structure
@@ -105,22 +107,14 @@ r_lcdc_rx
 |
 +---doc
 |   +---en
-|   |   r01an1980ej0102-rx113-lcdc.pdf
+|   |   r01an1980ejVERSION_NUMBER}-rx-lcdc.pdf
 |   |
 |   +---ja
-|       r01an1980jj0102-rx113-lcdc.pdf
-|
-+---ref
-|       r_lcdc_config_reference.h
+|       r01an1980jjVERSION_NUMBER}-rx-lcdc.pdf
 |
 +---src
-    |
-    +---targets
-        |
-        |
-        +---rx113
-              r_lcdc_rx.c
-              r_lcdc_rx_private.h
+      r_lcdc_rx.c
+      r_lcdc_rx_private.h
 
 r_config
     r_lcdc_rx_config.h

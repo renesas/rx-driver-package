@@ -36,11 +36,11 @@
 #define RM_FS2012_MASK_DATA_UPPER_0X0F      (0x0F)
 
 /* Definitions for Calculation */
-#define RM_FS2012_CALC_DECIMAL_VALUE_100    (100.0)
+#define RM_FS2012_CALC_DECIMAL_VALUE_100    (100)
 #if RM_FS2012_CFG_DEVICE_TYPE
- #define RM_FS2012_CALC_DEVISOR             (10.0F)   // FS2012-xxxx-LQ
+ #define RM_FS2012_CALC_DEVISOR             (10)   // FS2012-xxxx-LQ
 #else
- #define RM_FS2012_CALC_DEVISOR             (1000.0F) // FS2012-xxxx-NG
+ #define RM_FS2012_CALC_DEVISOR             (1000) // FS2012-xxxx-NG
 #endif
 
 /***********************************************************************************************************************
@@ -186,7 +186,7 @@ fsp_err_t RM_FS2012_DataCalculate (rm_fsxxxx_ctrl_t * const     p_api_ctrl,
                                    rm_fsxxxx_data_t * const     p_fs2012_data)
 {
     rm_fs2012_instance_ctrl_t * p_ctrl = (rm_fs2012_instance_ctrl_t *) p_api_ctrl;
-    float flow;
+    int32_t  tmp_32;
 
 #if RM_FS2012_CFG_PARAM_CHECKING_ENABLE
     FSP_ASSERT(NULL != p_ctrl);
@@ -198,12 +198,12 @@ fsp_err_t RM_FS2012_DataCalculate (rm_fsxxxx_ctrl_t * const     p_api_ctrl,
     FSP_PARAMETER_NOT_USED(p_ctrl);
 
     /* Calculate flow (Gas : [SLPM], Liquid : [SCCM]) */
-    flow = (float) ((p_raw_data->adc_data[0] << 8) + p_raw_data->adc_data[1]) / RM_FS2012_CALC_DEVISOR;
+    tmp_32 = (uint32_t) (((((int32_t)p_raw_data->adc_data[0] << 8) + p_raw_data->adc_data[1]) * RM_FS2012_CALC_DECIMAL_VALUE_100) /
+                        RM_FS2012_CALC_DEVISOR);
 
     /* Set flow data */
-    p_fs2012_data->flow.integer_part = (int16_t) flow;
-    p_fs2012_data->flow.decimal_part =
-        (int16_t) ((flow - (float) p_fs2012_data->flow.integer_part) * RM_FS2012_CALC_DECIMAL_VALUE_100);
+    p_fs2012_data->flow.integer_part = (int16_t) (tmp_32 / RM_FS2012_CALC_DECIMAL_VALUE_100);
+    p_fs2012_data->flow.decimal_part = (int16_t) (tmp_32 % RM_FS2012_CALC_DECIMAL_VALUE_100);
 
     return FSP_SUCCESS;
 }

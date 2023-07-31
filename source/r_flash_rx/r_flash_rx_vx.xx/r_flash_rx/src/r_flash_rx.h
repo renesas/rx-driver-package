@@ -50,6 +50,7 @@
 *           23.04.2021 4.80    Added RX140.
 *           23.12.2021 4.90    Added RX660.
 *           24.01.2023 5.00    Added RX26T.
+*           28.02.2023 5.10    Added RX23E-B.
 ***********************************************************************************************************************/
 
 #ifndef FLASH_RX_HEADER_FILE
@@ -77,6 +78,8 @@
     #include "./src/targets/rx231/r_flash_rx231.h"
 #elif defined(MCU_RX23E_A)
     #include "./src/targets/rx23e-a/r_flash_rx23e-a.h"
+#elif defined(MCU_RX23E_B)
+    #include "./src/targets/rx23e-b/r_flash_rx23e-b.h"
 #elif defined(MCU_RX23T)
     #include "./src/targets/rx23t/r_flash_rx23t.h"
 #elif defined(MCU_RX23W)

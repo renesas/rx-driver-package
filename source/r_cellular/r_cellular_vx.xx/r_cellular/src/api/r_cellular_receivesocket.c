@@ -31,10 +31,17 @@
 /**********************************************************************************************************************
  * Macro definitions
  *********************************************************************************************************************/
+#define CELLULAR_RECONNECT_TIMEOUT    (120000)
 
 /**********************************************************************************************************************
  * Typedef definitions
  *********************************************************************************************************************/
+typedef enum
+{
+    CELLULAR_AP_RECONNECTED = 0,
+    CELLULAR_SOCKET_DISCONNECTED,
+    CELLULAR_AP_RECONNECT_TIMEOUT,
+} e_cellular_reconnect_status_t;
 
 /**********************************************************************************************************************
  * Exported global variables
@@ -45,11 +52,12 @@
  *********************************************************************************************************************/
 static int32_t cellular_receive_data (st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_no,
                                         uint8_t * const p_data, const int32_t length, const uint32_t timeout_ms);
-static e_cellular_timeout_check_t cellular_receive_flag_check (st_cellular_ctrl_t * const p_ctrl,
-                                        st_cellular_time_ctrl_t * const p_cellular_timeout_ctrl,
-                                        const uint8_t socket_no);
 static int32_t cellular_recv_size_check (st_cellular_ctrl_t * const p_ctrl,
                                             const uint8_t socket_no, const int32_t length);
+static e_cellular_timeout_check_t cellular_receive_flag_check (st_cellular_ctrl_t * const p_ctrl,
+                                        st_cellular_time_ctrl_t * const p_cellular_timeout_ctrl,
+                                        const uint8_t socket_no, const uint32_t timeout_ms);
+static e_cellular_reconnect_status_t cellular_connect_check (st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_no);
 
 /*************************************************************************************************
  * Function Name  @fn            R_CELLULAR_ReceiveSocket
@@ -97,10 +105,6 @@ int32_t R_CELLULAR_ReceiveSocket(st_cellular_ctrl_t * const p_ctrl, const uint8_
         else if (CELLULAR_SYSTEM_CLOSE == p_ctrl->system_state)
         {
             ret = CELLULAR_ERR_NOT_OPEN;
-        }
-        else if (CELLULAR_SYSTEM_OPEN == p_ctrl->system_state)
-        {
-            ret = CELLULAR_ERR_NOT_CONNECT;
         }
         else
         {
@@ -214,7 +218,7 @@ static int32_t cellular_receive_data(st_cellular_ctrl_t * const p_ctrl, const ui
     /* Data receive loop */
     while (length > total_receive_length)
     {
-        timeout = cellular_receive_flag_check(p_ctrl, p_cellular_timeout_ctrl, socket_no);
+        timeout = cellular_receive_flag_check(p_ctrl, p_cellular_timeout_ctrl, socket_no, timeout_ms);
         if (CELLULAR_TIMEOUT == timeout)
         {
             break; /* Break of the data receive loop */
@@ -282,9 +286,10 @@ static int32_t cellular_receive_data(st_cellular_ctrl_t * const p_ctrl, const ui
  ************************************************************************************************/
 static e_cellular_timeout_check_t cellular_receive_flag_check(st_cellular_ctrl_t * const p_ctrl,
                                         st_cellular_time_ctrl_t * const p_cellular_timeout_ctrl,
-                                        const uint8_t socket_no)
+                                        const uint8_t socket_no, const uint32_t timeout_ms)
 {
-    e_cellular_timeout_check_t  timeout = CELLULAR_NOT_TIMEOUT;
+    e_cellular_timeout_check_t    timeout = CELLULAR_NOT_TIMEOUT;
+    e_cellular_reconnect_status_t status  = CELLULAR_AP_RECONNECTED;
 
     while (1)
     {
@@ -298,6 +303,24 @@ static e_cellular_timeout_check_t cellular_receive_flag_check(st_cellular_ctrl_t
         {
             break;
         }
+
+        if ((0 == timeout_ms) && (CELLULAR_SOCKET_STATUS_CONNECTED
+                != p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].socket_status))
+        {
+            timeout = CELLULAR_TIMEOUT;
+            break;
+        }
+
+        if ((0 == timeout_ms) && (CELLULAR_SYSTEM_CONNECT != p_ctrl->system_state))
+        {
+            status = cellular_connect_check(p_ctrl, socket_no);
+            if (CELLULAR_AP_RECONNECTED != status)
+            {
+                /* Treat DISCONNECT as timeout */
+                timeout = CELLULAR_TIMEOUT;
+                break;
+            }
+        }
     }
 
     return timeout;
@@ -305,6 +328,69 @@ static e_cellular_timeout_check_t cellular_receive_flag_check(st_cellular_ctrl_t
 /**********************************************************************************************************************
  * End of function cellular_receive_flag_check
  *********************************************************************************************************************/
+
+/*************************************************************************************************
+ * Function Name  @fn            cellular_connect_check
+ ************************************************************************************************/
+static e_cellular_reconnect_status_t cellular_connect_check(st_cellular_ctrl_t * const p_ctrl, const uint8_t socket_no)
+{
+    volatile uint8_t           over_flg   = 0;
+    uint32_t                   start_time = 0;
+    uint32_t                   now_time   = 0;
+    uint32_t                   end_time   = 0;
+
+    e_cellular_reconnect_status_t status  = CELLULAR_AP_RECONNECTED;
+
+
+    start_time = cellular_get_tickcount();
+    if ((uint32_t)(start_time + CELLULAR_RECONNECT_TIMEOUT) < start_time) //cast
+    {
+        over_flg = 1;
+    }
+    end_time = start_time + CELLULAR_RECONNECT_TIMEOUT;
+
+    while (1)
+    {
+        if (CELLULAR_SYSTEM_CONNECT == p_ctrl->system_state)
+        {
+            status = CELLULAR_AP_RECONNECTED;
+            break;  //Reconnect to AP
+        }
+
+        if (CELLULAR_SOCKET_STATUS_CONNECTED !=
+                p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].socket_status)
+        {
+            status = CELLULAR_SOCKET_DISCONNECTED;
+            break;  //Socket connection disconnected
+        }
+
+        now_time = cellular_get_tickcount();
+        if (1 == over_flg)
+        {
+            if ((now_time >= end_time) && (now_time < start_time))
+            {
+                status = CELLULAR_AP_RECONNECT_TIMEOUT;
+                break;    //Timeout
+            }
+        }
+        else
+        {
+            if ((now_time >= end_time) || (now_time < start_time))
+            {
+                status = CELLULAR_AP_RECONNECT_TIMEOUT;
+                break;    //Timeout
+            }
+        }
+
+        cellular_delay_task(1);
+    }
+
+    return status;
+}
+/**********************************************************************************************************************
+ * End of function cellular_connect_check
+ *********************************************************************************************************************/
+
 
 /*************************************************************************************************
  * Function Name  @fn            cellular_recv_size_check

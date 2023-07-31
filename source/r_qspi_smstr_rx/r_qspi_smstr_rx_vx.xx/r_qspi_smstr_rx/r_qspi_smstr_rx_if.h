@@ -19,15 +19,15 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014(2015-2021) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
 * System Name  : QSPI single master driver
 * File Name    : r_qspi_smstr_rx_if.h
-* Version      : 1.15
+* Version      : 1.21
 * Device       : RX
 * Abstract     : Interface file for QSPI single master driver
-* Tool-Chain   : Renesas RXC Toolchain v3.03.00
+* Tool-Chain   : Renesas RXC Toolchain v3.05.00
 * OS           : not use
 * H/W Platform : not use
 * Description  : Functions, typedefs and macros for QSPI single master driver
@@ -50,6 +50,7 @@
 *              : 22.11.2019 1.14     Added RX72N and RX66N.
 *              : 30.09.2021 1.15     Changed Minor version to 1.15
 *              : 30.09.2022 1.20     Added new demo projects.
+*              : 15.06.2023 1.21     Fixed typo in the file r_qspi_smstr_target_dev_port.c for all devices
 *******************************************************************************/
 #ifndef QSPI_SMSTR_IF_H_
 #define QSPI_SMSTR_IF_H_
@@ -69,7 +70,7 @@ Macro definitions
 #endif
 
 #define QSPI_SMSTR_VERSION_MAJOR      (1)
-#define QSPI_SMSTR_VERSION_MINOR      (20)
+#define QSPI_SMSTR_VERSION_MINOR      (21)
 
 
 /*******************************************************************************

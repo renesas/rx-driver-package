@@ -78,6 +78,7 @@
         <group omit_board="true">RX23T</group>
         <group omit_board="true">RX23W</group>
         <group omit_board="true">RX23E-A</group>
+        <group omit_board="true">RX23E-B</group>
         <group omit_board="true">RX24T</group>
         <group omit_board="true">RX24U</group>
         <group omit_board="true">RX26T</group>
@@ -102,7 +103,7 @@
         <zipsource>r_lvd_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.30</version>
+            <version>7.40</version>
         </dependency>
         <application>Low Voltage Detection</application>
         <desc>LVD Driver</desc>

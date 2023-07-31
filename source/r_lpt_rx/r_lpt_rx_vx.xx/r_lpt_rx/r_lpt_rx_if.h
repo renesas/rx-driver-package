@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer 
  *
- * Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.    
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.    
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_lpt_rx_if.h
@@ -31,9 +31,10 @@
  *           01.04.2019 1.23    Changed Minor version to 1.23.
  *           10.06.2020 2.00    Added support for RX23W
  *           25.09.2020 2.01    Added support for RX140
- *         : 31.03.2021 3.00    Added function R_LPT_InitChan, R_LPT_SetCMT, R_LPT_FinalChan, R_LPT_InitPWM
+ *           31.03.2021 3.00    Added function R_LPT_InitChan, R_LPT_SetCMT, R_LPT_FinalChan, R_LPT_InitPWM
  *                              Added command LPT_CMD_PWM_START and LPT_CMD_PWM_STOP to R_LPT_Control()
-  ********************************************************************************************************************/
+ *           31.05.2023 4.00    Added support for RX23E-B
+ *********************************************************************************************************************/
 
 /*******************************************************************************
   Includes   <System Includes> , "Project Includes"
@@ -47,8 +48,8 @@
 #define LPT_IF_H
 
 /* Version Number of API. */
-#define LPT_VERSION_MAJOR  (3)
-#define LPT_VERSION_MINOR  (01)
+#define LPT_VERSION_MAJOR  (4)
+#define LPT_VERSION_MINOR  (00)
 
 /* Wait time for Call R_LPT_Close after Called R_LPT_Open immediately */
 #define LPT_RSTWAIT_USEC   (LPT_LPTSRCCLK_CYC)

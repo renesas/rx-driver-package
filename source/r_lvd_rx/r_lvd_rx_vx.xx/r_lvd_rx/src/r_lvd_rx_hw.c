@@ -44,6 +44,7 @@
 *              : 31.03.2023 4.40     Added support RX26T.
 *                                    Added macro LVD_GROUP_INT_ICUG.
 *                                    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*              : 29.05.2023 4.50     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -330,6 +331,7 @@ lvd_err_t lvd_hw_check_param_open(lvd_channel_t ch,
                 result_code = LVD_ERR_INVALID_DATA;
                 goto RETURN_LVD_HW_CHECK_PARAM_OPEN;
             }
+
             /* Check data pointer */
             if ((NULL == p_cb) || (FIT_NO_FUNC == p_cb))
             {
@@ -345,6 +347,7 @@ lvd_err_t lvd_hw_check_param_open(lvd_channel_t ch,
                 result_code = LVD_ERR_UNSUPPORTED;
                 goto RETURN_LVD_HW_CHECK_PARAM_OPEN;
             }
+
             /* Check data pointer */
             if ((NULL == p_cb) || (FIT_NO_FUNC == p_cb))
             {
@@ -367,7 +370,7 @@ lvd_err_t lvd_hw_check_param_open(lvd_channel_t ch,
         goto RETURN_LVD_HW_CHECK_PARAM_OPEN;
     }
 
-#endif /* LVD_CFG_PARAM_CHECKING_ENABLE */
+#endif /* LVD_ENABLE == LVD_CFG_PARAM_CHECKING_ENABLE */
     
 RETURN_LVD_HW_CHECK_PARAM_OPEN:
 {
@@ -475,6 +478,7 @@ void lvd_hw_get_lvd_status(lvd_channel_t ch, lvd_status_position_t *p_pos, lvd_s
         {
             *p_cross = LVD_STATUS_CROSS_OVER;
         }
+
         /* Check LVD1MON = 0 */
         if (0 == SYSTEM.LVD1SR.BIT.LVD1MON)
         {
@@ -498,6 +502,7 @@ void lvd_hw_get_lvd_status(lvd_channel_t ch, lvd_status_position_t *p_pos, lvd_s
     {
         *p_cross = LVD_STATUS_CROSS_OVER;
     }
+
     /* Check LVD2MON = 0 */
     if (0 == SYSTEM.LVD2SR.BIT.LVD2MON)
     {
@@ -1266,6 +1271,7 @@ void lvd_hw_enable_nmi(lvd_channel_t ch, bool b_enable_flag)
         {
             /* Set LVD1CLR = 1 */
             ICU.NMICLR.BIT.LVD1CLR = 1;
+
             /* Set LVD1EN = 1 */
             ICU.NMIER.BIT.LVD1EN   = 1;
         }
@@ -1279,6 +1285,7 @@ void lvd_hw_enable_nmi(lvd_channel_t ch, bool b_enable_flag)
         {
             /* Set LVD2CLR = 1 */
             ICU.NMICLR.BIT.LVD2CLR = 1;
+
             /* Set LVD2EN = 1 */
             ICU.NMIER.BIT.LVD2EN   = 1;
         }
@@ -1521,6 +1528,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void lvd_ch1_isr(void)
     if ((NULL != p_lvd_cb_ch1) && (FIT_NO_FUNC != p_lvd_cb_ch1))
     {
         event_arg.vector = BSP_INT_SRC_LVD1;
+
         /* Cast type lvd_int_cb_args_t to type void * */
         p_lvd_cb_ch1((void *)&event_arg);
     }

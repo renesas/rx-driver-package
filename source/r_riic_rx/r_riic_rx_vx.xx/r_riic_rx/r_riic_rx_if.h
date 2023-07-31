@@ -70,6 +70,8 @@
  *                               Added RX671 Demo, RX72N Demo.
  *                               Apply a digital noise filter circuit to the riic_bps_calc function.
  *                               Added new macros for SCL rise time and SCL fall time.
+ *         : 29.05.2023 2.80     Changed minor version to '80' for RX23E-B support.
+ *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIIC_IF_H
@@ -92,7 +94,7 @@ R_BSP_PRAGMA_UNPACK
 
 /* Version Number of API. */
     #define RIIC_VERSION_MAJOR      (2)
-    #define RIIC_VERSION_MINOR      (70)
+    #define RIIC_VERSION_MINOR      (80)
 
 /*----------------------------------------------------------------------------*/
 /*   Defines the argument of the R_RIIC_Control function.                     */
@@ -141,6 +143,11 @@ typedef enum
 /*   Define iic information structure type.                                   */
 /*----------------------------------------------------------------------------*/
 /* ---- Callback function type. ---- */
+/******************************************************************************
+ * Function Name: riic_callback
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
 typedef void (*riic_callback) (void); /* Callback function type */
 
 /* ---- IIC Information structure type. ---- */
@@ -200,13 +207,69 @@ extern riic_ch_dev_status_t g_riic_ChStatus[];
  Exported global functions (to be accessed by other files)
  **********************************************************************************************************************/
 /* ---- RIIC Driver API functions ---- */
+/******************************************************************************
+ * Function Name: R_RIIC_Open
+ * Description  : .
+ * Argument     : riic_return_t
+ * Return Value : .
+ *****************************************************************************/
 riic_return_t R_RIIC_Open (riic_info_t *);
+
+/******************************************************************************
+ * Function Name: R_RIIC_MasterSend
+ * Description  : .
+ * Argument     : riic_info_t
+ * Return Value : .
+ *****************************************************************************/
 riic_return_t R_RIIC_MasterSend (riic_info_t *);
+
+/******************************************************************************
+ * Function Name: R_RIIC_MasterReceive
+ * Description  : .
+ * Argument     : riic_info_t
+ * Return Value : .
+ *****************************************************************************/
 riic_return_t R_RIIC_MasterReceive (riic_info_t *);
+
+/******************************************************************************
+ * Function Name: R_RIIC_SlaveTransfer
+ * Description  : .
+ * Argument     : riic_info_t
+ * Return Value : .
+ *****************************************************************************/
 riic_return_t R_RIIC_SlaveTransfer (riic_info_t *);
+
+/******************************************************************************
+ * Function Name: R_RIIC_GetStatus
+ * Description  : .
+ * Arguments    : riic_info_t
+ *              : riic_mcu_status_t
+ * Return Value : .
+ *****************************************************************************/
 riic_return_t R_RIIC_GetStatus (riic_info_t *, riic_mcu_status_t *);
+
+/******************************************************************************
+ * Function Name: R_RIIC_Control
+ * Description  : .
+ * Arguments    : riic_info_t
+ *              : ctrl_ptn
+ * Return Value : .
+ *****************************************************************************/
 riic_return_t R_RIIC_Control (riic_info_t *, uint8_t ctrl_ptn);
+
+/******************************************************************************
+ * Function Name: R_RIIC_Close
+ * Description  : .
+ * Argument     : riic_return_t
+ * Return Value : .
+ *****************************************************************************/
 riic_return_t R_RIIC_Close (riic_info_t *);
+
+/******************************************************************************
+ * Function Name: R_RIIC_GetVersion
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
 uint32_t      R_RIIC_GetVersion (void);
 
 R_BSP_PRAGMA_PACKOPTION

@@ -36,6 +36,7 @@
 *           23.04.2021 4.80    Added RX140.
 *           23.12.2021 4.90    Added RX660.
 *           24.01.2023 5.00    Added RX26T.
+*           28.02.2023 5.10    Added RX23E-B.
 ***********************************************************************************************************************/
 
 #ifndef FLASH_TARGETS_HEADER_FILE
@@ -81,6 +82,9 @@ Macro definitions
     #define MCU_RX23_ALL
 #elif defined(BSP_MCU_RX23E_A)
     #define MCU_RX23E_A
+    #define MCU_RX23_ALL
+#elif defined(BSP_MCU_RX23E_B)
+    #define MCU_RX23E_B
     #define MCU_RX23_ALL
 #elif defined(BSP_MCU_RX23T)
     #define MCU_RX23T

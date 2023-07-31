@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rtc_rx_private.h
@@ -61,6 +61,8 @@
 *                              - RTC_CAPTURE_TAMPICR1_CH2EN
 *           31.07.2021 2.82    Added support for RX140.
 *           31.12.2021 2.83    Added support for RX660.
+*           29.05.2023 2.90    Added support for RX23E-B.
+*                              Updated according to GSCE Code Checker 6.50.
 ***********************************************************************************************************************/
 
 #ifndef R_RTC_PRIVATE_H
@@ -93,7 +95,10 @@ Macro definitions
 
 
 #if !defined(BSP_MCU_RX140) || !defined(BSP_MCU_RX660)
-#if !defined(RTC_CFG_DRIVE_CAPACITY_LO) && !defined(RTC_CFG_DRIVE_CAPACITY_MD) && !defined(RTC_CFG_DRIVE_CAPACITY_HI) && !defined(RTC_CFG_DRIVE_CAPACITY_STD)
+#if !defined(RTC_CFG_DRIVE_CAPACITY_LO) && \
+    !defined(RTC_CFG_DRIVE_CAPACITY_MD) && \
+    !defined(RTC_CFG_DRIVE_CAPACITY_HI) && \
+    !defined(RTC_CFG_DRIVE_CAPACITY_STD)
     #error "ERROR - A drive capacity #define must be uncommented in r_rtc_rx_config.h"
 #endif
 
@@ -126,7 +131,7 @@ Macro definitions
     #elif defined(RTC_CFG_DRIVE_CAPACITY_STD)
         #define RTC_DRIVE_CAPACITY      (4)
     #endif
-#else /* RX130, RX230, RX231, RX23W, RX64M, RX65N, RX671, RX71M, RX72M, RX66N, RX72N */
+#else /* RX130, RX230, RX231, RX23W, RX23E-B, RX64M, RX65N, RX671, RX71M, RX72M, RX66N, RX72N */
     #if defined(RTC_CFG_DRIVE_CAPACITY_LO)
         #define RTC_DRIVE_CAPACITY      (1)
     #elif defined(RTC_CFG_DRIVE_CAPACITY_STD)
@@ -137,7 +142,7 @@ Macro definitions
         #error "ERROR - RTC_CFG_DRIVE_CAPACITY_HI in r_rtc_rx_config.h is invalid selection for MCU."
     #endif
 #endif
-#endif
+#endif /* !definedBSP_MCU_RX140 || !definedBSP_MCU_RX660 */
 
 
 /***********************************************************************************************************************
@@ -174,7 +179,7 @@ typedef struct  /* maps to portion of st_rtc in iodefine.h */
 Exported global functions (to be accessed by other files)
 ***********************************************************************************************************************/
 
-#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130) && !defined(BSP_MCU_RX140)
+#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130) && !defined(BSP_MCU_RX140) && !defined(BSP_MCU_RX23E_B)
 extern volatile rtc_cap_ctrl_t  *g_pcap_ctrl;
 extern volatile rtc_cap_time_t  *g_pcap_time;
 void            rtc_config_capture(rtc_capture_cfg_t *p_capture);
@@ -182,20 +187,118 @@ rtc_err_t       rtc_check_capture(rtc_pin_t pin, tm_t *p_time);
 void            rtc_disable_capture(rtc_pin_t pin);
 #endif
 
-void     rtc_init(void);
-void     rtc_set_output(rtc_output_t output_freq);
-void     rtc_set_periodic(rtc_periodic_t freq, uint8_t priority);
+/******************************************************************************
+ * Function Name: rtc_init
+ * Description  : .
+ * Arguments    : .
+ * Return Value : .
+ *****************************************************************************/
+void     rtc_init (void);
+
+/******************************************************************************
+ * Function Name: rtc_set_output
+ * Description  : .
+ * Arguments    : output_freq
+ * Return Value : .
+ *****************************************************************************/
+void     rtc_set_output (rtc_output_t output_freq);
+
+/******************************************************************************
+ * Function Name: rtc_set_periodic
+ * Description  : .
+ * Arguments    : freq
+ *              : priority
+ * Return Value : .
+ *****************************************************************************/
+void     rtc_set_periodic (rtc_periodic_t freq, uint8_t priority);
+
+/******************************************************************************
+ * Function Name: rtc_set_current_time
+ * Description  : .
+ * Arguments    : p_current
+ * Return Value : .
+ *****************************************************************************/
 void     rtc_set_current_time (tm_t * p_current);
-void     rtc_set_alarm_time(tm_t * p_alarm);
+
+/******************************************************************************
+ * Function Name: rtc_set_alarm_time
+ * Description  : .
+ * Arguments    : p_alarm
+ * Return Value : .
+ *****************************************************************************/
+void     rtc_set_alarm_time (tm_t * p_alarm);
+
+/******************************************************************************
+ * Function Name: rtc_read_current
+ * Description  : .
+ * Arguments    : p_current
+ * Return Value : .
+ *****************************************************************************/
 void     rtc_read_current (tm_t * p_current);
-void     rtc_enable_alarms(rtc_alarm_ctrl_t *p_alm_ctrl);
-void     rtc_read_alarm(tm_t * p_alarm);
-void     rtc_reset(void);
-void     rtc_counter_run(const uint8_t bit_value);
-void     rtc_disable_ints(void);
-void     rtc_enable_ints(void);
-int  rtc_bcd_to_dec(uint8_t to_convert);
-uint8_t  rtc_dec_to_bcd(uint8_t to_convert);
+
+/******************************************************************************
+ * Function Name: rtc_enable_alarms
+ * Description  : .
+ * Arguments    : p_alm_ctrl
+ * Return Value : .
+ *****************************************************************************/
+void     rtc_enable_alarms (rtc_alarm_ctrl_t * p_alm_ctrl);
+
+/******************************************************************************
+ * Function Name: rtc_read_alarm
+ * Description  : .
+ * Arguments    : p_alarm
+ * Return Value : .
+ *****************************************************************************/
+void     rtc_read_alarm (tm_t * p_alarm);
+
+/******************************************************************************
+ * Function Name: rtc_reset
+ * Description  : .
+ * Arguments    : .
+ * Return Value : .
+ *****************************************************************************/
+void     rtc_reset (void);
+
+/******************************************************************************
+ * Function Name: rtc_counter_run
+ * Description  : .
+ * Arguments    : bit_value
+ * Return Value : .
+ *****************************************************************************/
+void     rtc_counter_run (const uint8_t bit_value);
+
+/******************************************************************************
+ * Function Name: rtc_disable_ints
+ * Description  : .
+ * Arguments    : .
+ * Return Value : .
+ *****************************************************************************/
+void     rtc_disable_ints (void);
+
+/******************************************************************************
+ * Function Name: rtc_enable_ints
+ * Description  : .
+ * Arguments    : .
+ * Return Value : .
+ *****************************************************************************/
+void     rtc_enable_ints (void);
+
+/******************************************************************************
+ * Function Name: rtc_bcd_to_dec
+ * Description  : .
+ * Arguments    : to_convert
+ * Return Value : .
+ *****************************************************************************/
+int  rtc_bcd_to_dec (uint8_t to_convert);
+
+/******************************************************************************
+ * Function Name: rtc_dec_to_bcd
+ * Description  : .
+ * Arguments    : to_convert
+ * Return Value : .
+ *****************************************************************************/
+uint8_t  rtc_dec_to_bcd (uint8_t to_convert);
 
 
 #endif /* R_RTC_PRIVATE_H */

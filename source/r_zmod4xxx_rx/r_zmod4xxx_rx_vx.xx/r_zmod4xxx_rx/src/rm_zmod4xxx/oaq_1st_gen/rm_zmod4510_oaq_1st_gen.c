@@ -1,21 +1,22 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer
-*
-* Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ *
+ * This software and documentation are supplied by Renesas Electronics America Inc. and may only be used with products
+ * of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.  Renesas products are
+ * sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for the selection and use
+ * of Renesas products and Renesas assumes no liability.  No license, express or implied, to any intellectual property
+ * right is granted by Renesas. This software is protected under all applicable laws, including copyright laws. Renesas
+ * reserves the right to change or discontinue this software and/or this documentation. THE SOFTWARE AND DOCUMENTATION
+ * IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND TO THE FULLEST EXTENT
+ * PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY, INCLUDING WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE SOFTWARE OR
+ * DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.  TO THE MAXIMUM
+ * EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR DOCUMENTATION
+ * (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER, INCLUDING,
+ * WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY LOST PROFITS,
+ * OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE POSSIBILITY
+ * OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
+ **********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Includes   <System Includes> , "Project Includes"
@@ -77,6 +78,15 @@ static fsp_err_t rm_zmod4510_oaq_1st_gen_data_calculate(rm_zmod4xxx_ctrl_t * con
 static fsp_err_t rm_zmod4510_oaq_1st_gen_oaq_2nd_gen_data_calculate(rm_zmod4xxx_ctrl_t * const         p_api_ctrl,
                                                                     rm_zmod4xxx_raw_data_t * const     p_raw_data,
                                                                     rm_zmod4xxx_oaq_2nd_data_t * const p_zmod4xxx_data);
+static fsp_err_t rm_zmod4510_oaq_1st_gen_raq_data_calculate(rm_zmod4xxx_ctrl_t * const     p_api_ctrl,
+                                                            rm_zmod4xxx_raw_data_t * const p_raw_data,
+                                                            rm_zmod4xxx_raq_data_t * const p_zmod4xxx_data);
+static fsp_err_t rm_zmod4510_oaq_1st_gen_rel_iaq_data_calculate(rm_zmod4xxx_ctrl_t * const         p_api_ctrl,
+                                                                rm_zmod4xxx_raw_data_t * const     p_raw_data,
+                                                                rm_zmod4xxx_rel_iaq_data_t * const p_zmod4xxx_data);
+static fsp_err_t rm_zmod4510_oaq_1st_gen_pbaq_data_calculate(rm_zmod4xxx_ctrl_t * const      p_api_ctrl,
+                                                             rm_zmod4xxx_raw_data_t * const  p_raw_data,
+                                                             rm_zmod4xxx_pbaq_data_t * const p_zmod4xxx_data);
 static fsp_err_t rm_zmod4510_oaq_1st_gen_close(rm_zmod4xxx_ctrl_t * const p_api_ctrl);
 static fsp_err_t rm_zmod4510_oaq_1st_gen_device_error_check(rm_zmod4xxx_ctrl_t * const p_api_ctrl);
 static fsp_err_t rm_zmod4510_oaq_1st_gen_calc_rmox(rm_zmod4xxx_instance_ctrl_t * const p_ctrl,
@@ -100,6 +110,9 @@ rm_zmod4xxx_api_t const g_zmod4xxx_on_zmod4510_oaq_1st_gen =
     .sulfurOdorDataCalculate   = rm_zmod4510_oaq_1st_gen_sulfur_odor_data_calculate,
     .oaq1stGenDataCalculate    = rm_zmod4510_oaq_1st_gen_data_calculate,
     .oaq2ndGenDataCalculate    = rm_zmod4510_oaq_1st_gen_oaq_2nd_gen_data_calculate,
+    .raqDataCalculate          = rm_zmod4510_oaq_1st_gen_raq_data_calculate,
+    .relIaqDataCalculate       = rm_zmod4510_oaq_1st_gen_rel_iaq_data_calculate,
+    .pbaqDataCalculate         = rm_zmod4510_oaq_1st_gen_pbaq_data_calculate,
     .temperatureAndHumiditySet = rm_zmod4510_oaq_1st_gen_temperature_and_humidity_set,
     .deviceErrorCheck          = rm_zmod4510_oaq_1st_gen_device_error_check,
 };
@@ -313,6 +326,54 @@ static fsp_err_t rm_zmod4510_oaq_1st_gen_sulfur_odor_data_calculate (rm_zmod4xxx
 static fsp_err_t rm_zmod4510_oaq_1st_gen_oaq_2nd_gen_data_calculate (rm_zmod4xxx_ctrl_t * const         p_api_ctrl,
                                                                      rm_zmod4xxx_raw_data_t * const     p_raw_data,
                                                                      rm_zmod4xxx_oaq_2nd_data_t * const p_zmod4xxx_data)
+{
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_raw_data);
+    FSP_PARAMETER_NOT_USED(p_zmod4xxx_data);
+
+    return FSP_ERR_UNSUPPORTED;
+}
+
+/*******************************************************************************************************************//**
+ * @brief  Unsupported API.
+ *
+ * @retval FSP_ERR_UNSUPPORTED                    Operation mode is not supported.
+ **********************************************************************************************************************/
+static fsp_err_t rm_zmod4510_oaq_1st_gen_raq_data_calculate (rm_zmod4xxx_ctrl_t * const     p_api_ctrl,
+                                                             rm_zmod4xxx_raw_data_t * const p_raw_data,
+                                                             rm_zmod4xxx_raq_data_t * const p_zmod4xxx_data)
+{
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_raw_data);
+    FSP_PARAMETER_NOT_USED(p_zmod4xxx_data);
+
+    return FSP_ERR_UNSUPPORTED;
+}
+
+/*******************************************************************************************************************//**
+ * @brief  Unsupported API.
+ *
+ * @retval FSP_ERR_UNSUPPORTED                    Operation mode is not supported.
+ **********************************************************************************************************************/
+static fsp_err_t rm_zmod4510_oaq_1st_gen_rel_iaq_data_calculate (rm_zmod4xxx_ctrl_t * const         p_api_ctrl,
+                                                                 rm_zmod4xxx_raw_data_t * const     p_raw_data,
+                                                                 rm_zmod4xxx_rel_iaq_data_t * const p_zmod4xxx_data)
+{
+    FSP_PARAMETER_NOT_USED(p_api_ctrl);
+    FSP_PARAMETER_NOT_USED(p_raw_data);
+    FSP_PARAMETER_NOT_USED(p_zmod4xxx_data);
+
+    return FSP_ERR_UNSUPPORTED;
+}
+
+/*******************************************************************************************************************//**
+ * @brief  Unsupported API.
+ *
+ * @retval FSP_ERR_UNSUPPORTED                    Operation mode is not supported.
+ **********************************************************************************************************************/
+static fsp_err_t rm_zmod4510_oaq_1st_gen_pbaq_data_calculate (rm_zmod4xxx_ctrl_t * const      p_api_ctrl,
+                                                              rm_zmod4xxx_raw_data_t * const  p_raw_data,
+                                                              rm_zmod4xxx_pbaq_data_t * const p_zmod4xxx_data)
 {
     FSP_PARAMETER_NOT_USED(p_api_ctrl);
     FSP_PARAMETER_NOT_USED(p_raw_data);

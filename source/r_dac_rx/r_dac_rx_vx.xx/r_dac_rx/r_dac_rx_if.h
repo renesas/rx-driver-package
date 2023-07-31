@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014-2022 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_dac_rx_if.h
@@ -52,6 +52,8 @@
 *           29.07.2022 4.90    Updated demo projects.
 *           15.08.2022 5.00    Added support for RX26T.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           29.05.2023 5.10    Added support for RX23E-B.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 #ifndef DAC_RX_IF_H
 #define DAC_RX_IF_H
@@ -72,10 +74,10 @@ Macro definitions
 
 /* Version Number of API. */
 #define DAC_VERSION_MAJOR  (5)
-#define DAC_VERSION_MINOR  (00)
+#define DAC_VERSION_MINOR  (10)
 
 
-#if defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX13T)
+#if defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX23E_B)
 #define DAC_CFG_NUM_CH  (1)
 #else
 #define DAC_CFG_NUM_CH  (2)
@@ -85,7 +87,7 @@ Macro definitions
 Typedef definitions
 ******************************************************************************/
 
-#if defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX13T)
+#if defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX23E_B)
 typedef enum e_dac_ch           // DAC channel numbers
 {
     DAC_CH0    = 0,
@@ -159,13 +161,19 @@ typedef struct st_dac_cfg
     dac_out_ref_t out_sel_ref;                    // 1 for output channel 0 as Vref, 2 for output channel 1 as Vref
 } dac_cfg_t;
 
+#elif defined(BSP_MCU_RX23E_B)
+typedef struct st_dac_cfg
+{
+    bool        sync_with_adc;
+} dac_cfg_t;
+
 #else //defined(BSP_MCU_RX130) || defined(BSP_MCU_RX24U) || defined(BSP_MCU_RX140)
 typedef struct st_dac_cfg
 {
     bool        fmt_flush_right;
     bool        sync_with_adc;
 } dac_cfg_t;
-#endif
+#endif /* definedBSP_MCU_RX111 || definedBSP_MCU_RX23T || definedBSP_MCU_RX24T || definedBSP_MCU_RX13T */
 
 
 /* DAC CONTROL() COMMANDS */
@@ -180,9 +188,15 @@ typedef enum e_dac_cmd
 #if defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
     DAC_CMD_ASW_ON,             // Wait for the channel 0 output buffer amplifier to become stable
                                 //(the pin is Hi-Z).
-    DAC_CMD_ASW_OFF,             // A wait for stabilization of the channel 0 output buffer amplifier is
+    DAC_CMD_ASW_OFF,            // A wait for stabilization of the channel 0 output buffer amplifier is
                                 //released (output is enabled).
 #endif
+#endif
+#if defined(BSP_MCU_RX23E_B)
+    DAC_CMD_BUF_ON,             // The output of the buffer amplifier is pulled down.
+    DAC_CMD_BUF_OFF,            // The output of the buffer amplifier is not pulled down.
+    DAC_CMD_STB_ON,             // The analog output pin is pulled down by a 1-kΩ resistor while D/A conversion is disabled.
+    DAC_CMD_STB_OFF,            // The analog output pin is placed in the Hi-Z state while D/A conversion is disabled.
 #endif
     DAC_CMD_END_ENUM
 } dac_cmd_t;
@@ -199,21 +213,52 @@ typedef enum e_dac_err
     DAC_ERR_LOCK_FAILED,        // failed to lock DAC module
     DAC_ERR_UNLOCK_FAILED,      // failed to unlock DAC module
     DAC_ERR_ADC_NOT_POWERED,    // cannot sync because ADC is not powered
-    DAC_ERR_ADC_CONVERTING      // cannot sync because ADC is converting
+    DAC_ERR_ADC_CONVERTING,     // cannot sync because ADC is converting
+    DAC_ERR_BIAS_CURRENT_SOURCE // bias current source (IREF) is not enabled
 } dac_err_t;
 
 
 /*****************************************************************************
 Public Functions
 ******************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: R_DAC_Open
+ * Description  : .
+ * Argument     : p_config
+ * Return Value : .
+ *********************************************************************************************************************/
 dac_err_t R_DAC_Open (dac_cfg_t *p_config);
                     
+/**********************************************************************************************************************
+ * Function Name: R_DAC_Write
+ * Description  : .
+ * Arguments    : chan
+ *              : data
+ * Return Value : .
+ *********************************************************************************************************************/
 dac_err_t R_DAC_Write (uint8_t const chan, uint16_t data);
 
+/**********************************************************************************************************************
+ * Function Name: R_DAC_Control
+ * Description  : .
+ * Arguments    : chan
+ *              : cmd
+ * Return Value : .
+ *********************************************************************************************************************/
 dac_err_t R_DAC_Control (uint8_t const chan, dac_cmd_t const cmd);
 
+/**********************************************************************************************************************
+ * Function Name: R_DAC_Close
+ * Description  : .
+ * Return Value : .
+ *********************************************************************************************************************/
 dac_err_t R_DAC_Close (void);
 
+/**********************************************************************************************************************
+ * Function Name: R_DAC_GetVersion
+ * Description  : .
+ * Return Value : .
+ *********************************************************************************************************************/
 uint32_t  R_DAC_GetVersion (void);
 
                                     

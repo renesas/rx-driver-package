@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013-2022 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_iwdt_rx.c
@@ -38,6 +38,7 @@
 *                              Modified comment of API function to Doxygen style.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.00.
 *           15.08.2022 4.30    Fixed to comply with GSCE Coding Standards Rev.6.5.0
+*           29.05.2023 4.40    Fixed to comply with GSCE Coding Standards Rev.6.5.0
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -194,27 +195,27 @@ static bool iwdt_parameter_check(iwdt_config_t *p_cfg)
     }
 
     if (((IWDT_CLOCK_DIV_1   != p_cfg->iwdtclk_div)  && \
-         (IWDT_CLOCK_DIV_16  != p_cfg->iwdtclk_div)) && \
-       (((IWDT_CLOCK_DIV_32  != p_cfg->iwdtclk_div)  && \
-         (IWDT_CLOCK_DIV_64  != p_cfg->iwdtclk_div)) && \
+        (IWDT_CLOCK_DIV_16  != p_cfg->iwdtclk_div)) && \
+        (((IWDT_CLOCK_DIV_32  != p_cfg->iwdtclk_div)  && \
+        (IWDT_CLOCK_DIV_64  != p_cfg->iwdtclk_div)) && \
         ((IWDT_CLOCK_DIV_128 != p_cfg->iwdtclk_div)  && \
-         (IWDT_CLOCK_DIV_256 != p_cfg->iwdtclk_div))))
+        (IWDT_CLOCK_DIV_256 != p_cfg->iwdtclk_div))))
     {
         ret = false;
     }
 
     if (((IWDT_WINDOW_END_75 != p_cfg->window_end)  && \
-         (IWDT_WINDOW_END_50 != p_cfg->window_end)) && \
+        (IWDT_WINDOW_END_50 != p_cfg->window_end)) && \
         ((IWDT_WINDOW_END_25 != p_cfg->window_end)  && \
-         (IWDT_WINDOW_END_0  != p_cfg->window_end)))
+        (IWDT_WINDOW_END_0  != p_cfg->window_end)))
     {
         ret = false;
     }
 
     if (((IWDT_WINDOW_START_25  != p_cfg->window_start)  && \
-         (IWDT_WINDOW_START_50  != p_cfg->window_start)) && \
+        (IWDT_WINDOW_START_50  != p_cfg->window_start)) && \
         ((IWDT_WINDOW_START_75  != p_cfg->window_start)  && \
-         (IWDT_WINDOW_START_100 != p_cfg->window_start)))
+        (IWDT_WINDOW_START_100 != p_cfg->window_start)))
     {
         ret = false;
     }
@@ -236,8 +237,8 @@ static bool iwdt_parameter_check(iwdt_config_t *p_cfg)
 /******************************************************************************
 End of function iwdt_parameter_check
 ******************************************************************************/
-#endif /* IWDT_CFG_PARAM_CHECKING_ENABLE */
-#endif /* BSP_CFG_OFS0_REG_VALUE */
+#endif /* 1 == IWDT_CFG_PARAM_CHECKING_ENABLE */
+#endif /* BSP_CFG_OFS0_REG_VALUE & OFS0_IWDT_DISABLED == OFS0_IWDT_DISABLED */
 
 
 /***********************************************************************************************************************

@@ -64,6 +64,9 @@
 *         : 27.12.2022 4.21    Updated slash format of included header file paths for Linux compatibility.
 *         : 31.03.2023 4.30    Added support for RX26T.
                                Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 29.05.2023 4.40    Added support for RX23E-B.
+                               Fixed warnings in IAR.
+                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *******************************************************************************/
 #ifndef DTC_RX_IF_H
 #define DTC_RX_IF_H
@@ -86,7 +89,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define DTC_VERSION_MAJOR  (4)
-#define DTC_VERSION_MINOR  (30)
+#define DTC_VERSION_MINOR  (40)
 
 /*******************************************************************************
 Typedef definitions
@@ -261,6 +264,8 @@ typedef struct st_transfer_data { /* 4 long-words */
     #include "./src/targets/rx231/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX23E_A)
     #include "./src/targets/rx23e-a/r_dtc_rx_target_if.h"
+#elif defined(BSP_MCU_RX23E_B)
+    #include "./src/targets/rx23e-b/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX230)
     #include "./src/targets/rx230/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX65N)
@@ -300,14 +305,61 @@ typedef struct st_dtc_cmd_arg {
 /*******************************************************************************
 Exported global variables and functions (to be accessed by other files)
 *******************************************************************************/
+/******************************************************************************
+ * Function Name: R_DTC_Open
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
 dtc_err_t R_DTC_Open (void);
+
+/******************************************************************************
+ * Function Name: R_DTC_Create
+ * Description  : .
+ * Arguments    : act_source
+ *              : p_transfer_data
+ *              : p_data_cfg
+ *              : chain_transfer_nr
+ * Return Value : .
+ *****************************************************************************/
 dtc_err_t R_DTC_Create (dtc_activation_source_t act_source, dtc_transfer_data_t * p_transfer_data,
                         dtc_transfer_data_cfg_t * p_data_cfg, uint32_t chain_transfer_nr);
+
+/******************************************************************************
+ * Function Name: R_DTC_CreateSeq
+ * Description  : .
+ * Arguments    : act_source
+ *              : p_transfer_data
+ *              : p_data_cfg
+ *              : sequence_transfer_nr
+ *              : sequence_no
+ * Return Value : .
+ *****************************************************************************/
 dtc_err_t R_DTC_CreateSeq (dtc_activation_source_t act_source, dtc_transfer_data_t * p_transfer_data,
-                           dtc_transfer_data_cfg_t * p_data_cfg, uint32_t sequence_transfer_nr,
-                           uint8_t sequence_no);
+                            dtc_transfer_data_cfg_t * p_data_cfg, uint32_t sequence_transfer_nr,
+                            uint8_t sequence_no);
+
+/******************************************************************************
+ * Function Name: R_DTC_Close
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
 dtc_err_t R_DTC_Close (void);
+
+/******************************************************************************
+ * Function Name: R_DTC_Control
+ * Description  : .
+ * Arguments    : command
+ *              : p_stat
+ *              : p_args
+ * Return Value : .
+ *****************************************************************************/
 dtc_err_t R_DTC_Control (dtc_command_t command, dtc_stat_t * p_stat, dtc_cmd_arg_t * p_args);
+
+/******************************************************************************
+ * Function Name: R_DTC_GetVersion
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
 uint32_t  R_DTC_GetVersion (void);
 
 #endif /* DTC_RX_IF_H */

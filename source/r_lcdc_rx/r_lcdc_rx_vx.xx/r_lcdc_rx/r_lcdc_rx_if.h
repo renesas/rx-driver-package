@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
 * History      : DD.MM.YYYY Version  Description
@@ -27,6 +27,8 @@
 *              : 20.05.2019 1.01     Updated version to 1.01
 *                                    Deleted the packoption.
 *              : 10.06.2020 1.02     Updated version to 1.02
+*              : 31.05.2023 2.00     Updated version to 2.00
+*                                    Add LCDC API error code (LCDC_ERR_ADJUST_PARAM)
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_lcdc_rx_if.h
@@ -49,8 +51,8 @@ Includes   <System Includes> , "Project Includes"
 Macro definitions
 *******************************************************************************/
 /* Version Number of API. */
-#define LCDC_VERSION_MAJOR  (1)
-#define LCDC_VERSION_MINOR  (02)
+#define LCDC_VERSION_MAJOR  (2)
+#define LCDC_VERSION_MINOR  (00)
 
 
 /*******************************************************************************
@@ -58,6 +60,7 @@ Typedef definitions
 *******************************************************************************/
 typedef enum /* LCDC API error codes */
 {
+    LCDC_ERR_ADJUST_PARAM = -2, /* R_LCDC_AdjustContrast function parameter error */
     LCDC_ERR_OUTSIDE_VOLTAGE = -1, /* */
     LCDC_SUCCESS,             /* Processing completed successfully */
     LCDC_ERR_NOT_CLOSED,      /* Already locked */
@@ -83,7 +86,7 @@ Macro definitions
 
 /* Select what is changed in R_LCDC_Control function. (multiple choice)*/
 typedef uint8_t lcdc_ctrl_ptn_t;
-#define LCDC_GEN_ERR_CON           (lcdc_ctrl_ptn_t)(0x00)  /* Error output. */
+#define LCDC_GEN_ERR_CON           (lcdc_ctrl_ptn_t)(0x03)  /* Error output. */
 #define LCDC_FIX_DRV_GENERETOR     (lcdc_ctrl_ptn_t)(0x01)  /* The drive voltage method is changed. */
 #define LCDC_FIX_DISPLAY_AREA      (lcdc_ctrl_ptn_t)(0x02)  /* The display data area is changed. */
  

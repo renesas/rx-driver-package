@@ -84,6 +84,7 @@
         <group omit_board="true">RX230</group>
         <group omit_board="true">RX231</group>
         <group omit_board="true">RX23E-A</group>
+        <group omit_board="true">RX23E-B</group>
         <group omit_board="true">RX23T</group>
         <group omit_board="true">RX23W</group>
         <group omit_board="true">RX24T</group>
@@ -110,7 +111,7 @@
         <zipsource>r_riic_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.30</version>
+            <version>7.40</version>
         </dependency>
         <application>Communications</application>
         <application>External Memory</application>

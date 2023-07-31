@@ -32,6 +32,7 @@
  *         : 31.07.2021 2.03    Added support for snooze mode in Low Power Consumption.
  *         : 31.12.2021 2.04    Removes the lower operating power consumption related functions of RX660.
  *         : 15.08.2022 2.20    Fixed to comply with GSCE Coding Standards Rev.6.5.0.   
+ *         : 29.05.2023 2.30    Fixed to comply with GSCE Coding Standards Rev.6.5.0.   
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
   Includes <System Includes> , "Project Includes"
@@ -75,14 +76,14 @@
  */
 lpc_err_t R_LPC_OperatingModeSet (lpc_operating_mode_t e_mode)
 {
-    return lpc_operating_mode_set(e_mode);
+    return (lpc_operating_mode_set(e_mode));
 
 }
 
 /***********************************************************************************************************************
  End of function R_LPC_OperatingModeSet
  ***********************************************************************************************************************/
-#endif
+#endif /* LPC_INVALID_OPERATING_MODE */
 
 /***********************************************************************************************************************
  * Function Name: R_LPC_LowPowerModeConfigure

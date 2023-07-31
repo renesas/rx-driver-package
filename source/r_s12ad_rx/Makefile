@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_s12ad_rx
-VERSION = 		5.10
+VERSION = 		5.20
 MDF = V1,V2
 
 CONFIG_FOLDER = r_config

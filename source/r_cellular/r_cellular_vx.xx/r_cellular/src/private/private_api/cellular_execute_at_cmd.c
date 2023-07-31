@@ -75,15 +75,15 @@ e_cellular_err_t cellular_execute_at_command(st_cellular_ctrl_t * const p_ctrl, 
                 }
                 cellular_delay_task(1);
             }
-        }
 #if CELLULAR_CFG_CTS_SW_CTRL == 1
-        cellular_rts_hw_flow_enable();
+            cellular_rts_hw_flow_enable();
 #else
-        cellular_rts_ctrl(0);
+            cellular_rts_ctrl(0);
 #endif
 #ifdef CELLULAR_RTS_DELAY
-        cellular_delay_task(CELLULAR_RTS_DELAYTIME);
+            cellular_delay_task(CELLULAR_RTS_DELAYTIME);
 #endif
+        }
 
         cellular_timeout_init(&p_ctrl->sci_ctrl.timeout_ctrl, timeout_ms);
         cellular_set_atc_number(p_ctrl, command);

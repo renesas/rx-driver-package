@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer 
  *
- * Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.    
+ * Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.    
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_elc_rx_if.h
@@ -29,6 +29,7 @@
  *                              Added support for GNUC and ICCRX.
  *                              Fixed coding style.
  *           10.12.2020 2.01    Updated version to 2.01 for RX140 release
+ *           31.05.2023 3.00    Added support for RX23E-B
 ***********************************************************************************************************************/
 #ifndef R_ELC_RX_IF_H
     #define R_ELC_RX_IF_H
@@ -47,8 +48,8 @@
 #endif
 
 /* Version Number of API. */
-    #define ELC_RX_VERSION_MAJOR            (2)
-    #define ELC_RX_VERSION_MINOR            (01)
+    #define ELC_RX_VERSION_MAJOR            (3)
+    #define ELC_RX_VERSION_MINOR            (00)
 
 /***********************************************************************************************************************
  Typedef definitions

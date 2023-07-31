@@ -17,7 +17,7 @@
 * Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
-* File Name     : r_rspi_rx_config.c
+* File Name     : r_rspi_rx_config.h
 * Description   : Configures the RSPI drivers
 ************************************************************************************************************************
 * History : DD.MM.YYYY Version Description
@@ -25,7 +25,7 @@
 *         : 31.07.2017 1.70     Supported RX65N-2MB and RX130N-512KB.
 *         : 20.09.2018 1.80     Supported RX66T.
 *         : 20.12.2018 2.00     Added double buffer and dmadtc transfer mode.
-*         : 15.06.2022 3.10     Supported RX26T.
+*         : 31.03.2023 3.10     Supported RX26T.
 *                               Update copyright year follow new rule.
 ***********************************************************************************************************************/
 #ifndef RSPI_CONFIG_HEADER_FILE

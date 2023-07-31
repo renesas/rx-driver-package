@@ -25,6 +25,7 @@
 *           31.03.2022 4.40    Fixed the issue with DTC mode which incorrectly uses the same transfer information 
 *                              for all channels.
 *           31.03.2023 4.80    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           29.05.2023 4.90    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 #ifndef SCI_RX_DTC_H
 #define SCI_RX_DTC_H
@@ -57,10 +58,52 @@ typedef struct st_sci_dtc_info_transfer
 /**********************************************************************************************************************
  Exported global functions
  *********************************************************************************************************************/
+/******************************************************************************
+ * Function Name: sci_txfifo_dtc_create
+ * Description  : .
+ * Arguments    : hdl
+ *              : p_src
+ *              : length
+ * Return Value : .
+ *****************************************************************************/
 sci_err_t sci_txfifo_dtc_create (sci_hdl_t const hdl, uint8_t *p_src, uint16_t const length);
+
+/******************************************************************************
+ * Function Name: sci_rxfifo_dtc_create
+ * Description  : .
+ * Arguments    : hdl
+ *              : p_dst
+ *              : length
+ * Return Value : .
+ *****************************************************************************/
 sci_err_t sci_rxfifo_dtc_create (sci_hdl_t const hdl, uint8_t *p_dst, uint16_t const length);
+
+/******************************************************************************
+ * Function Name: sci_tx_dtc_create
+ * Description  : .
+ * Arguments    : hdl
+ *              : p_src
+ *              : length
+ * Return Value : .
+ *****************************************************************************/
 sci_err_t sci_tx_dtc_create (sci_hdl_t const hdl, uint8_t *p_src, uint16_t const length);
+
+/******************************************************************************
+ * Function Name: sci_rx_dtc_create
+ * Description  : .
+ * Arguments    : hdl
+ *              : p_dst
+ *              : length
+ * Return Value : .
+ *****************************************************************************/
 sci_err_t sci_rx_dtc_create (sci_hdl_t const hdl, uint8_t *p_dst, uint16_t const length);
+
+/******************************************************************************
+ * Function Name: sci_dtc_info_transfer_delete
+ * Description  : .
+ * Argument     : hdl
+ * Return Value : .
+ *****************************************************************************/
 void sci_dtc_info_transfer_delete (sci_hdl_t const hdl);
 
 #endif /* SCI_RX_DTC_H */

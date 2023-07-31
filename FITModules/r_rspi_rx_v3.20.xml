@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>2.01.00</version>
+        <version>2.02.00</version>
+        <version>2.03.00</version>
+        <version>2.05.00</version>
+        <version>2.06.00</version>
+        <version>2.07.00</version>
+        <version>2.08.00</version>
+        <version>3.00.00</version>
+        <version>3.01.00</version>
+        <version>3.02.00</version>
+        <version>3.03.00</version>
+        <version>3.04.00</version>
+        <version>3.05.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>4.08.04.201803</version>
+        <version>4.08.04.201902</version>
+        <version>8.03.00.201904</version>
+        <version>8.03.00.202002</version>
+        <version>8.03.00.202004</version>
+        <version>8.03.00.202102</version>
+        <version>8.03.00.202104</version>
+        <version>8.03.00.202202</version>
+        <version>8.03.00.202204</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.10.01</version>
+        <version>4.11.01</version>
+        <version>4.12.01</version>
+        <version>4.13.01</version>
+        <version>4.14.01</version>
+        <version>4.20.01</version>
+        <version>4.20.03</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX100</series>
+        <series>RX200</series>
+        <series>RX600</series>
+        <series>RX700</series>
+        <group omit_board="true">RX110</group>
+        <group omit_board="true">RX111</group>
+        <group omit_board="true">RX113</group>
+        <group omit_board="true">RX130</group>
+        <group omit_board="true">RX140</group>
+        <group omit_board="true">RX230</group>
+        <group omit_board="true">RX231</group>
+        <group omit_board="true">RX23E-A</group>
+        <group omit_board="true">RX23E-B</group>
+        <group omit_board="true">RX23T</group>
+        <group omit_board="true">RX23W</group>
+        <group omit_board="true">RX24T</group>
+        <group omit_board="true">RX24U</group>
+        <group omit_board="true">RX26T</group>
+        <group omit_board="true">RX64M</group>
+        <group omit_board="true">RX65N</group>
+        <group omit_board="true">RX660</group>
+        <group omit_board="true">RX66N</group>
+        <group omit_board="true">RX66T</group>
+        <group omit_board="true">RX671</group>
+        <group omit_board="true">RX71M</group>
+        <group omit_board="true">RX72M</group>
+        <group omit_board="true">RX72N</group>
+        <group omit_board="true">RX72T</group>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_rspi_rx</name>
+        <version>3.20</version>
+        <zipsource>r_rspi_rx_v3.20.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>7.40</version>
+        </dependency>
+        <application>Serial Communications</application>
+        <desc>RSPI Driver</desc>
+        <details>This software provides an applications programing interface (API) to prepare the RSPI peripheral for operation and for performing data transfers over the SPI bus.</details>
+        <function>RSPI</function>
+        <incdir>r_config</incdir>
+        <incdir>r_rspi_rx</incdir>
+        <incdir>r_rspi_rx/src</incdir>
+    </package>
+    <sampleapplicationnote>
+        <documentno>R01AN1827</documentno>
+    </sampleapplicationnote>
+
+</refinfo>

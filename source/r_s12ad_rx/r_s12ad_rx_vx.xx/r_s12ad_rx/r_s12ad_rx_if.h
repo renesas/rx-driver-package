@@ -55,6 +55,7 @@
 *           30.11.2021 4.93    Added RX66T 48pins support.
 *           29.12.2021 5.00    Added RX660 support.
 *           01.08.2022 5.10    Added RX26T support.
+*           14.10.2022 5.20    Added RX23E-B support.
 ***********************************************************************************************************************/
 
 #ifndef S12AD_PRV_IF_H
@@ -85,6 +86,8 @@ Includes   <System Includes> , "Project Includes"
 #include "./src/targets/rx231/r_s12ad_rx231_if.h"
 #elif defined(BSP_MCU_RX23E_A)
 #include "./src/targets/rx23e-a/r_s12ad_rx23e-a_if.h"
+#elif defined(BSP_MCU_RX23E_B)
+#include "./src/targets/rx23e-b/r_s12ad_rx23e-b_if.h"
 #elif defined(BSP_MCU_RX23W)
 #include "./src/targets/rx23w/r_s12ad_rx23w_if.h"
 #elif defined(BSP_MCU_RX64M)
@@ -122,7 +125,7 @@ Macro definitions
 *******************************************************************************/
 /* Version Number of API. */
 #define ADC_VERSION_MAJOR       (5)
-#define ADC_VERSION_MINOR       (10)
+#define ADC_VERSION_MINOR       (20)
 
 /*****************************************************************************
 Typedef definitions

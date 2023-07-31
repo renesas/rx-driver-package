@@ -84,6 +84,7 @@
         <group>RX230</group>
         <group>RX231</group>
         <group>RX23E-A</group>
+        <group>RX23E-B</group>
         <group>RX23T</group>
         <group>RX23W</group>
         <group>RX24T</group>
@@ -109,6 +110,7 @@
         <board>GENERIC_RX230</board>
         <board>GENERIC_RX231</board>
         <board>GENERIC_RX23E-A</board>
+        <board>GENERIC_RX23E-B</board>
         <board>GENERIC_RX23T</board>
         <board>GENERIC_RX23W</board>
         <board>GENERIC_RX24T</board>

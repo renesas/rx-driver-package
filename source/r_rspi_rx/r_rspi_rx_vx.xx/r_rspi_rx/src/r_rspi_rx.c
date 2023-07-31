@@ -57,6 +57,8 @@
 *           31.03.2023 3.10     Added support for RX26T.
 *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *                               Added idle interrupt for RX671.
+*           29.05.2023 3.20     Supported RX23E-B.
+*                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -452,7 +454,7 @@ rspi_err_t  R_RSPI_Open(uint8_t                 channel, // @suppress("6.6a Sour
     (*g_rspi_channels[channel]).SPCMD0.BIT.CPOL = spcmd_command_word.cpol;
 
 #if defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || defined BSP_MCU_RX72T || defined BSP_MCU_RX72M \
-||  defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || defined BSP_MCU_RX140
+||  defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || defined BSP_MCU_RX140 || defined BSP_MCU_RX23E_B
     /* Set RSPI data control register 2 (SPDCR2) */
     (*g_rspi_channels[channel]).SPDCR2.BYTE = (uint8_t)(p_my_settings->spdcr2_val & RSPI_SPDCR2_MASK);
 #elif defined BSP_MCU_RX671 || defined BSP_MCU_RX660 || defined BSP_MCU_RX26T
@@ -546,6 +548,14 @@ rspi_err_t  R_RSPI_Open(uint8_t                 channel, // @suppress("6.6a Sour
  *            the particular command using the appropriate type provided in "r_rspi_rx_if.h".
  * @note      See Section 3.2 in the application note for details.
  */
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_Control
+ * Description  : .
+ * Arguments    : handle
+ *              : cmd
+ *              : pcmd_data
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t   R_RSPI_Control(rspi_handle_t  handle,
                             rspi_cmd_t     cmd,
                             void         * pcmd_data)
@@ -579,14 +589,14 @@ rspi_err_t   R_RSPI_Control(rspi_handle_t  handle,
     /* Attempt to acquire lock for this RSPI channel. Prevents reentrancy conflict. */
     lock_result = R_BSP_HardwareLock((mcu_lock_t)(BSP_LOCK_RSPI0 + channel));
 
-    if ((false == lock_result)&&(RSPI_CMD_ABORT != cmd)) // Only abort cmd is allowed while transfer in progress.
+    if ((false == lock_result) && (RSPI_CMD_ABORT != cmd)) // Only abort cmd is allowed while transfer in progress.
     {
         R_RSPI_LOG_FUNC(RSPI_DEBUG_ERR_ID, (uint32_t)RSPI_STR, __LINE__);
         return RSPI_ERR_LOCK; // The control function is currently locked.
     }
 #endif
 
-    switch(cmd)
+    switch (cmd)
     {
         case RSPI_CMD_SET_BAUD:
         {
@@ -637,7 +647,7 @@ rspi_err_t   R_RSPI_Control(rspi_handle_t  handle,
             /* Transfer aborted. Call the user callback function passing pointer to the result structure. */
             if ((FIT_NO_FUNC != g_rspi_handles[channel].pcallback) && (NULL != g_rspi_handles[channel].pcallback))
             {
-                g_rspi_cb_data[channel].handle = &(g_rspi_handles[channel]);
+                g_rspi_cb_data[channel].handle     = &(g_rspi_handles[channel]);
                 g_rspi_cb_data[channel].event_code = RSPI_EVT_TRANSFER_ABORTED;
                 g_rspi_handles[channel].pcallback((void*)&(g_rspi_cb_data[channel])); // Casting to void* is valid.
             }
@@ -670,7 +680,7 @@ rspi_err_t   R_RSPI_Control(rspi_handle_t  handle,
             (*g_rspi_channels[channel]).SSLP.BYTE = (uint8_t)(p_setregs_struct->sslp_val & RSPI_SSLP_MASK);
 
 #if defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || defined BSP_MCU_RX72T || defined BSP_MCU_RX72M \
-||  defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || defined BSP_MCU_RX140
+||  defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || defined BSP_MCU_RX140 || defined BSP_MCU_RX23E_B
             /* Set RSPI data control register 2 (SPDCR2) */
             (*g_rspi_channels[channel]).SPDCR2.BYTE = (uint8_t)(p_setregs_struct->spdcr2_val & RSPI_SPDCR2_MASK);
 #elif defined BSP_MCU_RX671 || defined BSP_MCU_RX660 || defined BSP_MCU_RX26T
@@ -757,6 +767,15 @@ rspi_err_t   R_RSPI_Control(rspi_handle_t  handle,
  *            \li For the callback function that occurs when communication ends, see 1.6 in application note.\n
  *            \li Make the necessary settings to make the DMAC or DTC ready to start before calling this function.
  */
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_Read
+ * Description  : .
+ * Arguments    : handle
+ *              : spcmd_command_word
+ *              : pdest
+ *              : length
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t  R_RSPI_Read(rspi_handle_t        handle,
                         rspi_command_word_t  spcmd_command_word,
                         void               * pdest,
@@ -821,6 +840,15 @@ rspi_err_t  R_RSPI_Read(rspi_handle_t        handle,
  *            \li For the callback function that occurs when communication ends, see 1.6 in application note.\n
  *            \li Make the necessary settings to make the DMAC or DTC ready to start before calling this function.
  */
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_Write
+ * Description  : .
+ * Arguments    : handle
+ *              : spcmd_command_word
+ *              : psrc
+ *              : length
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_Write(rspi_handle_t        handle,
                         rspi_command_word_t  spcmd_command_word,
                         void               * psrc,
@@ -897,6 +925,16 @@ rspi_err_t R_RSPI_Write(rspi_handle_t        handle,
  *            \li For the callback function that occurs when communication ends, see 1.6 in application note.\n
  *            \li Make the necessary settings to make the DMAC or DTC ready to start before calling this function.
  */
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_WriteRead
+ * Description  : .
+ * Arguments    : handle
+ *              : spcmd_command_word
+ *              : psrc
+ *              : pdest
+ *              : length
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_WriteRead(rspi_handle_t        handle,
                             rspi_command_word_t  spcmd_command_word,
                             void                *psrc,
@@ -981,7 +1019,7 @@ static rspi_err_t rspi_write_read_common(rspi_handle_t handle,
 
 #if defined BSP_MCU_RX65N || defined BSP_MCU_RX66T || defined BSP_MCU_RX72T || defined BSP_MCU_RX72M \
 ||  defined BSP_MCU_RX72N || defined BSP_MCU_RX66N || defined BSP_MCU_RX671 || defined BSP_MCU_RX140 \
-||  defined BSP_MCU_RX660 || defined BSP_MCU_RX26T
+||  defined BSP_MCU_RX660 || defined BSP_MCU_RX26T || defined BSP_MCU_RX23E_B
     if ((RSPI_TRANS_MODE_DMAC == g_rspi_tcb[channel].data_tran_mode)
     ||  (RSPI_TRANS_MODE_DTC  == g_rspi_tcb[channel].data_tran_mode))
     {
@@ -1126,6 +1164,12 @@ static rspi_err_t rspi_write_read_common(rspi_handle_t handle,
  *            Please call this function after calling R_RSPI_DisableSpti().
  * @note      Do not use this function for software transfers or DTC transfers. Doing so could disrupt the transfer.
  */
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_IntSptiIerClear
+ * Description  : .
+ * Argument     : handle
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_IntSptiIerClear(rspi_handle_t handle)
 {
     uint8_t channel = handle->channel;
@@ -1198,6 +1242,12 @@ rspi_err_t R_RSPI_IntSptiIerClear(rspi_handle_t handle)
  *            Please call this function before calling R_RSPI_DisableRSPI().
  * @note      Do not use this function for software transfers or DTC transfers. Doing so could disrupt the transfer.
  */
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_IntSpriIerClear
+ * Description  : .
+ * Argument     : handle
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_IntSpriIerClear(rspi_handle_t handle)
 {
     uint8_t channel = handle->channel;
@@ -1270,6 +1320,12 @@ rspi_err_t R_RSPI_IntSpriIerClear(rspi_handle_t handle)
  *            Please call this function before calling R_RSPI_IntSptiIerClear().
  * @note      Do not use this function for software transfers or DTC transfers. Doing so could disrupt the transfer.
  */
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_DisableSpti
+ * Description  : .
+ * Argument     : handle
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_DisableSpti(rspi_handle_t handle)
 {
     uint8_t channel = handle->channel;
@@ -1303,6 +1359,12 @@ rspi_err_t R_RSPI_DisableSpti(rspi_handle_t handle)
  *            Please call this function after calling R_RSPI_IntSpriIerClear().
  * @note      Do not use this function for software transfers or DTC transfers. Doing so could disrupt the transfer.
  */
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_DisableRSPI
+ * Description  : .
+ * Argument     : handle
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_DisableRSPI(rspi_handle_t handle)
 {
     uint8_t channel = handle->channel;
@@ -1385,6 +1447,7 @@ static rspi_err_t r_rspi_ch_check(uint8_t channel)
             break;
 
         default:
+
             /* The channel number is invalid. */
             ret = RSPI_ERR_INVALID_ARG;
             break;
@@ -1410,6 +1473,13 @@ static rspi_err_t r_rspi_ch_check(uint8_t channel)
  * @details   Use this function when setting the DMAC/DTC transfer destination/transfer source address, etc.
  * @note      None.
  */
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_GetBuffRegAddress
+ * Description  : .
+ * Arguments    : handle
+ *              : p_spdr_adr
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_GetBuffRegAddress(rspi_handle_t handle, uint32_t *p_spdr_adr)
 {
     rspi_err_t ret     = RSPI_SUCCESS;
@@ -1460,6 +1530,12 @@ rspi_err_t R_RSPI_GetBuffRegAddress(rspi_handle_t handle, uint32_t *p_spdr_adr)
  *            error code is returned.
  * @note      None.
  */
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_Close
+ * Description  : .
+ * Argument     : handle
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t  R_RSPI_Close(rspi_handle_t handle)
 {
     uint8_t channel;
@@ -1842,8 +1918,10 @@ static void rspi_interrupts_clear(uint8_t channel)
     {
 #if RSPI_CFG_USE_CHAN0 == 1
         case 0:
+
             /* Clear any pending receive buffer full interrupts */
             IR(RSPI0, SPRI0) = 0;
+
             /* Clear any pending transmit buffer empty interrupts */
             IR(RSPI0, SPTI0) = 0;
             #if defined BSP_MCU_RX671 || defined BSP_MCU_RX26T
@@ -1939,6 +2017,7 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
     {
 #if RSPI_CFG_USE_CHAN0 == 1
         case 0:
+
             /* Disable or enable receive buffer full interrupt */
             if (enabled)
             {
@@ -1963,20 +2042,22 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
             /* Disable or enable error interrupt and idle interrupt */
             if (enabled)
             {
-                R_BSP_InterruptRequestEnable(VECT(RSPI0,SPEI0));
+                R_BSP_InterruptRequestEnable(VECT(RSPI0, SPEI0));
+
                 /* if RSPI mode is master,enable SPII interrupt. */
                 if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
                 {
-                    R_BSP_InterruptRequestEnable(VECT(RSPI0,SPII0));
+                    R_BSP_InterruptRequestEnable(VECT(RSPI0, SPII0));
                 }
             }
             else
             {
-                R_BSP_InterruptRequestDisable(VECT(RSPI0,SPEI0));
+                R_BSP_InterruptRequestDisable(VECT(RSPI0, SPEI0));
+
                 /* if RSPI mode is master,enable SPII interrupt. */
                 if (1 == ((*g_rspi_channels[channel]).SPCR.BIT.MSTR))
                 {
-                    R_BSP_InterruptRequestDisable(VECT(RSPI0,SPII0));
+                    R_BSP_InterruptRequestDisable(VECT(RSPI0, SPII0));
                 }
             }
             #endif
@@ -2348,6 +2429,11 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
  *            are the major version number and the bottom two bytes are the minor version number.
  * @note      None.
  */
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_GetVersion
+ * Description  : .
+ * Return Value : .
+ *********************************************************************************************************************/
 uint32_t R_RSPI_GetVersion(void)
 {
     uint32_t version_number = 0;
@@ -2376,6 +2462,12 @@ uint32_t R_RSPI_GetVersion(void)
  *            r_rspi_rx_config.h.\n
  *            If RSPI_CFG_LONGQ_ENABLE == 0 and this function is called, this function does nothing.
  */
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_SetLogHdlAddress
+ * Description  : .
+ * Argument     : user_long_que
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_SetLogHdlAddress(uint32_t user_long_que)
 {
 #if RSPI_CFG_LONGQ_ENABLE == 1
@@ -2552,7 +2644,7 @@ static void rspi_rx_common(uint8_t channel)
             /* Transfer complete. Call the user callback function passing pointer to the result structure. */
             if ((FIT_NO_FUNC != g_rspi_handles[channel].pcallback) && (NULL != g_rspi_handles[channel].pcallback))
             {
-                g_rspi_cb_data[channel].handle = &(g_rspi_handles[channel]);
+                g_rspi_cb_data[channel].handle     = &(g_rspi_handles[channel]);
                 g_rspi_cb_data[channel].event_code = RSPI_EVT_TRANSFER_COMPLETE;
                 g_rspi_handles[channel].pcallback((void*)&(g_rspi_cb_data[channel]));
             }
@@ -2561,7 +2653,8 @@ static void rspi_rx_common(uint8_t channel)
 } /* End of function rspi_rx_common */
 
 #if RSPI_CFG_USE_CHAN0 == 1
-R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spri0_isr, VECT(RSPI0, SPRI0))
+R_BSP_PRAGMA_STATIC_INTERRUPT (rspi_spri0_isr, VECT(RSPI0, SPRI0))
+
 /******************************************************************************
 * Function Name:    rspi_spri0_isr
 * Description  :    RSPI SPRI receive buffer full ISR.
@@ -2584,11 +2677,13 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spri0_isr(void)
     {
         R_RSPI_IntSpriIerClear(&g_rspi_handles[0]);
         R_RSPI_DisableRSPI(&g_rspi_handles[0]);
+
         /* Transfer complete. Call the user callback function passing pointer to the result structure. */
         if ((FIT_NO_FUNC != g_rspi_handles[0].pcallback) && (NULL != g_rspi_handles[0].pcallback))
         {
-            g_rspi_cb_data[0].handle = &(g_rspi_handles[0]);
+            g_rspi_cb_data[0].handle     = &(g_rspi_handles[0]);
             g_rspi_cb_data[0].event_code = RSPI_EVT_TRANSFER_COMPLETE;
+
             /* Casting to void* is valid */
             g_rspi_handles[0].pcallback((void*)&(g_rspi_cb_data[0]));
         }
@@ -2667,7 +2762,8 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spri2_isr(void)
 #endif /* RSPI_CFG_USE_CHAN2 == 1 */
 
 #if RSPI_CFG_USE_CHAN0 == 1
-R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spti0_isr, VECT(RSPI0, SPTI0))
+R_BSP_PRAGMA_STATIC_INTERRUPT (rspi_spti0_isr, VECT(RSPI0, SPTI0))
+
 /******************************************************************************
 * Function Name:    rspi_spti0_isr
 * Description  :    RSPI SPTI transmit buffer empty ISR.
@@ -2917,8 +3013,14 @@ static void rspi_spei_isr_common(uint8_t channel)
 ||  defined(BSP_MCU_RX671) || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T))
 
     #if RSPI_CFG_USE_CHAN0 == 1
-    R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spei0_isr, VECT(RSPI0, SPEI0))
-    R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spei0_isr(void)
+    R_BSP_PRAGMA_STATIC_INTERRUPT (rspi_spei0_isr, VECT(RSPI0, SPEI0))
+
+/**********************************************************************************************************************
+ * Function Name: rspi_spei0_isr
+ * Description  : .
+ * Return Value : .
+ *********************************************************************************************************************/
+R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spei0_isr(void)
     {
         rspi_spei_isr_common(0);
     } /* End of function rspi_spei0_isr */
@@ -3076,7 +3178,7 @@ static void rspi_spii_isr_common(uint8_t channel)
     rspi_evt_t event = RSPI_EVT_ERR_UNDEF;
 
     g_rspi_cb_data[channel].event_code = event;
-    if( (status_flags & RSPI_SPSR_IDLNF) == 0x00 )
+    if ((status_flags & RSPI_SPSR_IDLNF) == 0x00)
     {
         /* Disable idle interrupt requests of the RSPI. */
         (*g_rspi_channels[channel]).SPCR2.BIT.SPIIE = 0;
@@ -3096,7 +3198,7 @@ static void rspi_spii_isr_common(uint8_t channel)
         /* Transfer complete. Call the user callback function passing pointer to the result structure. */
         if ((FIT_NO_FUNC != g_rspi_handles[channel].pcallback) && (NULL != g_rspi_handles[channel].pcallback))
         {
-            g_rspi_cb_data[channel].handle = &(g_rspi_handles[channel]);
+            g_rspi_cb_data[channel].handle     = &(g_rspi_handles[channel]);
             g_rspi_cb_data[channel].event_code = RSPI_EVT_TRANSFER_COMPLETE;
             g_rspi_handles[channel].pcallback((void*)&(g_rspi_cb_data[channel])); // Casting to void* is valid.
         }
@@ -3116,8 +3218,14 @@ static void rspi_spii_isr_common(uint8_t channel)
 * Return Value :    N/A
 ******************************************************************************/
     #if RSPI_CFG_USE_CHAN0 == 1
-    R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spii0_isr, VECT(RSPI0, SPII0))
-    R_BSP_ATTRIB_INTERRUPT void rspi_spii0_isr(void)
+    R_BSP_PRAGMA_STATIC_INTERRUPT (rspi_spii0_isr, VECT(RSPI0, SPII0))
+
+/**********************************************************************************************************************
+ * Function Name: rspi_spii0_isr
+ * Description  : .
+ * Return Value : .
+ *********************************************************************************************************************/
+R_BSP_ATTRIB_INTERRUPT void rspi_spii0_isr(void)
     {
         rspi_spii_isr_common(0);
     } /* End of function rspi_spii0_isr */

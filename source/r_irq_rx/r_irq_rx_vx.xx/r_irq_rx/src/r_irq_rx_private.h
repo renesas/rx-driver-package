@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013-2022 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_irq_rx_private.h
@@ -56,6 +56,8 @@
 *         : 28.06.2022  4.20    Updated demo projects.
 *         : 15.08.2022  4.30    Added support RX26T.
 *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 29.05.2023  4.40    Added support RX23E-B.
+*                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 #ifndef R_IRQ_PRIVATE_H_
 #define R_IRQ_PRIVATE_H_
@@ -68,7 +70,7 @@ Macro definitions
 ******************************************************************************/
 /* Version Number of API. */
 #define IRQ_RX_VERSION_MAJOR           (4)
-#define IRQ_RX_VERSION_MINOR           (30)
+#define IRQ_RX_VERSION_MINOR           (40)
 
 /* Bit position of interrupt enable bits in interrupt enable register. */
 #define IRQ_IEN_MASK_IRQ0   (0x01)
@@ -98,7 +100,13 @@ Macro definitions
 /******************************************************************************
 Typedef definitions
 ******************************************************************************/
-typedef void(*irq_callback)(void *pargs);
+/**********************************************************************************************************************
+ * Function Name: irq_callback
+ * Description  : .
+ * Argument     : pargs
+ * Return Value : .
+ *********************************************************************************************************************/
+typedef void (*irq_callback)(void *pargs);
 
 typedef enum
 {

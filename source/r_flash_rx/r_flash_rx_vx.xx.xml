@@ -53,6 +53,7 @@
         <group omit_board="true">RX230</group>
         <group omit_board="true">RX231</group>
         <group omit_board="true">RX23E-A</group>
+        <group omit_board="true">RX23E-B</group>
         <group omit_board="true">RX23T</group>
         <group omit_board="true">RX23W</group>
         <group omit_board="true">RX24T</group>
@@ -92,6 +93,7 @@
                 <version>7.10</version>
                 <version>7.20</version>
                 <version>7.30</version>
+                <version>7.40</version>
         </dependency>
         <zipsource>r_flash_rx_vx.xx.zip</zipsource>
         <application>Non-Volatile Storage</application>

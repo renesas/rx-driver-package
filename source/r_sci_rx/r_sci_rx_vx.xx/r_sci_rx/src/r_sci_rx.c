@@ -72,6 +72,8 @@
 *           31.03.2023 4.80    Added support for RX26T.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *                              Moved the source code which checks for IRDA mode support to MDF file.
+*           29.05.2023 4.90    Added support for RX23E-B.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -978,8 +980,8 @@ static sci_err_t sci_init_sync (sci_hdl_t const         hdl,
 * @note None
 */
 sci_err_t R_SCI_Send(sci_hdl_t const    hdl,
-                     uint8_t            *p_src,
-                     uint16_t const     length)
+    uint8_t            *p_src,
+    uint16_t const     length)
 {
     sci_err_t   err=SCI_SUCCESS;
 
@@ -1040,8 +1042,8 @@ sci_err_t R_SCI_Send(sci_hdl_t const    hdl,
 *                    not enough space in tx queue to store data (Async)
 ******************************************************************************/
 static sci_err_t sci_send_async_data(sci_hdl_t const hdl,
-                                     uint8_t         *p_src,
-                                     uint16_t const  length)
+    uint8_t         *p_src,
+    uint16_t const  length)
 {
     sci_err_t   err = SCI_SUCCESS;
     uint16_t    cnt;
@@ -1099,8 +1101,8 @@ static sci_err_t sci_send_async_data(sci_hdl_t const hdl,
         p_tctrl->total_length = length;       /* used for dtc in txi_handler */
 
 #if (TX_DTC_DMACA_ENABLE)
-       p_tctrl->p_tx_fraction_buf = p_src;
-       p_tctrl->tx_fraction = length;
+    p_tctrl->p_tx_fraction_buf = p_src;
+    p_tctrl->tx_fraction = length;
 #endif
 #endif
 
@@ -1771,7 +1773,7 @@ static sci_err_t sci_receive_async_data(sci_hdl_t const hdl,
 #if SCI_CFG_FIFO_INCLUDED
             if (true == hdl->fifo_ctrl)
             {
-                 err = sci_rxfifo_dtc_create(hdl, p_dst, length);
+                err = sci_rxfifo_dtc_create(hdl, p_dst, length);
             }
             else
 #endif
@@ -1870,8 +1872,8 @@ static sci_err_t sci_receive_async_data(sci_hdl_t const hdl,
 *                    channel currently busy
 ******************************************************************************/
 static sci_err_t sci_receive_sync_data(sci_hdl_t const hdl,
-                                       uint8_t         *p_dst,
-                                       uint16_t const  length)
+    uint8_t         *p_dst,
+    uint16_t const  length)
 {
 #if SCI_CFG_FIFO_INCLUDED
     uint8_t cnt;
@@ -3423,7 +3425,7 @@ static void sci_fifo_transfer_dtc(sci_hdl_t const hdl)
 #endif
                     if (1 == hdl->rom->regs->SSRFIFO.BIT.TDFE)
                     {
-                         hdl->rom->regs->SSRFIFO.BYTE = (unsigned char)~SCI_SSRFIFO_TDFE_MASK;
+                        hdl->rom->regs->SSRFIFO.BYTE = (unsigned char)~SCI_SSRFIFO_TDFE_MASK;
                     }
                 }
             }
@@ -3466,7 +3468,7 @@ static void sci_fifo_transfer_dtc(sci_hdl_t const hdl)
 #if (SCI_CFG_ASYNC_INCLUDED)
                 if (SCI_MODE_ASYNC == hdl->mode)
                 {
-                     hdl->tx_idle = true;
+                    hdl->tx_idle = true;
                 }
 #endif
                         DISABLE_TXI_INT;

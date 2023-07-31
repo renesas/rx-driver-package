@@ -31,6 +31,8 @@
  *         : 31.07.2021 2.03    Added RX140.
  *         : 31.12.2021 2.04    Added RX660.
  *         : 15.08.2022 2.20    Added RX26T.
+ *         : 29.05.2023 2.30    Added RX23E-B.
+ *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
  ***********************************************************************************************************************/
 #ifndef R_LPC_RX_PLATFORM_H
     #define R_LPC_RX_PLATFORM_H
@@ -53,6 +55,8 @@
         #include "./targets/rx230/r_lpc_rx230_if.h"
     #elif defined(BSP_MCU_RX231)
         #include "./targets/rx231/r_lpc_rx231_if.h"
+    #elif defined(BSP_MCU_RX23E_B)
+        #include "./targets/rx23e-b/r_lpc_rx23e-b_if.h"
     #elif defined(BSP_MCU_RX23W)
         #include "./targets/rx23w/r_lpc_rx23w_if.h"
     #elif defined(BSP_MCU_RX26T)
@@ -75,7 +79,7 @@
         #include "./targets/rx72n/r_lpc_rx72n_if.h"
     #else
         #error "This MCU is not supported by the current r_lpc_rx module."
-    #endif
+    #endif /* definedBSP_MCU_RX110 */
 
 #endif /* R_LPC_RX_PLATFORM_H */
 /***********************************************************************************************************************

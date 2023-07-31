@@ -90,6 +90,7 @@
 *                                 RX64M, RX65N, and RX71M.
 *                              Removed common "gpio_port_t" structure and added "gpio_port_t" structure for RX110 
 *                                 64-Pin, 48-Pin, 40-Pin, and 36-Pin.
+*         : 29.05.2023 5.00    Added support for RX23E-B.
 ***********************************************************************************************************************/
 
 #ifndef GPIO_RX_INTERFACE_HEADER_FILE
@@ -126,6 +127,8 @@ Includes   <System Includes> , "Project Includes"
     #include "./src/targets/rx23w/r_gpio_rx23w.h"
 #elif defined(BSP_MCU_RX23E_A)
     #include "./src/targets/rx23e-a/r_gpio_rx23e-a.h"
+#elif defined(BSP_MCU_RX23E_B)
+    #include "./src/targets/rx23e-b/r_gpio_rx23e-b.h"
 #elif defined(BSP_MCU_RX24T)
     #include "./src/targets/rx24t/r_gpio_rx24t.h"
 #elif defined(BSP_MCU_RX26T)
@@ -165,8 +168,8 @@ Macro definitions
 #endif
 
 /* Version Number of API. */
-#define GPIO_RX_VERSION_MAJOR           (4)
-#define GPIO_RX_VERSION_MINOR           (90)
+#define GPIO_RX_VERSION_MAJOR           (5)
+#define GPIO_RX_VERSION_MINOR           (00)
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -220,13 +223,73 @@ Exported global variables
 /***********************************************************************************************************************
 Exported global functions (to be accessed by other files)
 ***********************************************************************************************************************/
+/******************************************************************************
+ * Function Name: R_GPIO_PortWrite
+ * Description  : .
+ * Arguments    : port
+ *              : value
+ * Return Value : .
+ *****************************************************************************/
 void            R_GPIO_PortWrite (gpio_port_t port, uint8_t value);
+
+/******************************************************************************
+ * Function Name: R_GPIO_PortRead
+ * Description  : .
+ * Argument     : port
+ * Return Value : .
+ *****************************************************************************/
 uint8_t         R_GPIO_PortRead (gpio_port_t port);
+
+/******************************************************************************
+ * Function Name: R_GPIO_PortDirectionSet
+ * Description  : .
+ * Arguments    : port
+ *              : dir
+ *              : mask
+ * Return Value : .
+ *****************************************************************************/
 void            R_GPIO_PortDirectionSet (gpio_port_t port, gpio_dir_t dir, uint8_t mask);
+
+/******************************************************************************
+ * Function Name: R_GPIO_PinWrite
+ * Description  : .
+ * Arguments    : pin
+ *              : level
+ * Return Value : .
+ *****************************************************************************/
 void            R_GPIO_PinWrite (gpio_port_pin_t pin, gpio_level_t level);
+
+/******************************************************************************
+ * Function Name: R_GPIO_PinRead
+ * Description  : .
+ * Argument     : pin
+ * Return Value : .
+ *****************************************************************************/
 gpio_level_t    R_GPIO_PinRead (gpio_port_pin_t pin);
+
+/******************************************************************************
+ * Function Name: R_GPIO_PinDirectionSet
+ * Description  : .
+ * Arguments    : pin
+ *              : dir
+ * Return Value : .
+ *****************************************************************************/
 void            R_GPIO_PinDirectionSet (gpio_port_pin_t pin, gpio_dir_t dir);
+
+/******************************************************************************
+ * Function Name: R_GPIO_PinControl
+ * Description  : .
+ * Arguments    : pin
+ *              : cmd
+ * Return Value : .
+ *****************************************************************************/
 gpio_err_t      R_GPIO_PinControl (gpio_port_pin_t pin, gpio_cmd_t cmd);
+
+/******************************************************************************
+ * Function Name: R_GPIO_GetVersion
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
 uint32_t        R_GPIO_GetVersion (void);
 
 #endif /* GPIO_RX_INTERFACE_HEADER_FILE */

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2022 Renesas Electronics Corporation. All rights reserved.    
+* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.    
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_iwdt_rx_if.h
@@ -54,6 +54,8 @@
 *           28.06.2022 4.20    Updated demo projects.
 *           15.08.2022 4.30    Added support for RX26T.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0
+*           29.05.2023 4.40    Added support for RX23E-B.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0
 ***********************************************************************************************************************/
 
 #ifndef IWDT_RX_IF_H
@@ -74,7 +76,7 @@ Macro definitions
 #endif
 /* Version Number of API. */
 #define IWDT_RX_VERSION_MAJOR   (4)
-#define IWDT_RX_VERSION_MINOR   (30)
+#define IWDT_RX_VERSION_MINOR   (40)
 
 #define OFS0_IWDT_DISABLED      (0x00000002)
 
@@ -165,10 +167,10 @@ typedef struct st_iwdt_config                 // IWDT configuration options used
     iwdt_window_end_t       window_end;       // Window end position
     iwdt_timeout_control_t  timeout_control;  // Reset or NMI output when time-out  
     iwdt_count_stop_t       count_stop_enable;// Sleep mode count stop function 
- } iwdt_config_t;
+} iwdt_config_t;
 
 
- /* Control() DEFINITIONS */
+/* Control() DEFINITIONS */
 
 typedef enum e_iwdt_cmd                 // Command used in Control and GetStatus function
 {
@@ -180,14 +182,28 @@ typedef enum e_iwdt_cmd                 // Command used in Control and GetStatus
 Public Functions
 ***********************************************************************************************************************/
 #if ((BSP_CFG_OFS0_REG_VALUE & OFS0_IWDT_DISABLED) == OFS0_IWDT_DISABLED) /* Register start mode */
-/* Initializes the IWDT counter options by initializing the associated registers */
+/******************************************************************************
+ * Function Name: R_IWDT_Open
+ * Description  : Initializes the IWDT counter options by initializing the associated registers
+ * Argument     : p_cfg
+ * Return Value : .
+ *****************************************************************************/
 iwdt_err_t    R_IWDT_Open (void * const p_cfg);
 #endif
-
-/* Getting the IWDT status and refreshing the down-counter of IWDT */
+/******************************************************************************
+ * Function Name: R_IWDT_Control
+ * Description  : Getting the IWDT status and refreshing the down-counter of IWDT
+ * Arguments    : cmd
+ *              : p_status
+ * Return Value : .
+ *****************************************************************************/
 iwdt_err_t    R_IWDT_Control (iwdt_cmd_t const cmd, uint16_t * p_status);
 
-/* Returns the version number of the module. */
+/******************************************************************************
+ * Function Name: R_IWDT_GetVersion
+ * Description  : Returns the version number of the module
+ * Return Value : .
+ *****************************************************************************/
 uint32_t      R_IWDT_GetVersion (void);
 
 #endif /* IWDT_RX_IF_H */

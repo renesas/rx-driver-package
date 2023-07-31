@@ -6,7 +6,7 @@ r_dac_rx
 Overview
 --------
 This driver supports both channels of the Digital-to-Analog Converter (DAC). 
-Precision is 8-, 10-, or 12-bit depending upon the MCU. All available hardware
+Precision is 8-, 10-, 12-, or 16-bit depending upon the MCU. All available hardware
 features of the MCUs are supported. 
 
 Features

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013-2022 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_irq_rx_config.h
@@ -30,6 +30,7 @@
 *         : 30.09.2015  1.70    Using the definition of VECT_ICU_IRQ7  to check the number of IRQs.
 *         : 28.09.2018  2.30    Updated the coding rules of Renesas.
 *         : 15.08.2022  4.30    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 29.05.2023  4.40    Deleted the description of FIT configurator.
 ***********************************************************************************************************************/
 #ifndef IRQ_CONFIG_H
 #define IRQ_CONFIG_H
@@ -68,7 +69,7 @@ Macro definitions
  *
  * If you are using Smart Configurator for pin assignment, use the following:
  *   #include "r_irq_rx_pinset.h"
- *   #ifndef R_IRQ_RX_PINSET_H
+ *   #ifndef R_IRQ_RX_H
  *   #error "Please check IRQ port assignments in Smart Configurator"
  *   #endif
  * and comment out the following:
@@ -78,17 +79,6 @@ Macro definitions
  *   #define IRQ_PORT_IRQ15_PORT     ('m') 
  *   #define IRQ_PORT_IRQ15_BIT      ('n')
  * --------------------------------------------------------------------------------------------
- * Conversely, if you are using FIT Configurator for pin assignment, comment out the following:
- *   #include "r_irq_rx_pinset.h"
- *   #ifndef R_IRQ_RX_PINSET_H
- *   #error "Please check IRQ port assignments in Smart Configurator"
- *   #endif
- * and use the following:
- *   #define IRQ_PORT_IRQ0_PORT     ('m') 
- *   #define IRQ_PORT_IRQ0_BIT      ('n')
- *          ...
- *   #define IRQ_PORT_IRQ15_PORT     ('m') 
- *   #define IRQ_PORT_IRQ15_BIT      ('n')
  * Use these defines to select IRQs that are to be used in your system.
  * This will eliminate the generation of code for unused IRQs.
  *
@@ -101,61 +91,8 @@ Macro definitions
 ***********************************************************************************************************************/
 #include "r_irq_rx_pinset.h"
 #ifndef R_IRQ_RX_H
-#error "Please add IRQ Pin setting in Smart Configurator, or if you are using FIT Configurator remove the comment of following macros"
+#error "Please check IRQ port assignments in Smart Configurator"
 #endif
-/*
-#define IRQ_PORT_IRQ0_PORT      ('m')
-#define IRQ_PORT_IRQ0_BIT       ('n')
-
-#define IRQ_PORT_IRQ1_PORT      ('m')
-#define IRQ_PORT_IRQ1_BIT       ('n')
-
-#define IRQ_PORT_IRQ2_PORT      ('m')
-#define IRQ_PORT_IRQ2_BIT       ('n')
-
-#define IRQ_PORT_IRQ3_PORT      ('m')
-#define IRQ_PORT_IRQ3_BIT       ('n')
-
-#define IRQ_PORT_IRQ4_PORT      ('m')
-#define IRQ_PORT_IRQ4_BIT       ('n')
-
-#define IRQ_PORT_IRQ5_PORT      ('m')
-#define IRQ_PORT_IRQ5_BIT       ('n')
-
-#if defined(VECT_ICU_IRQ7)               // For MCUs with 8 IRQs
-#define IRQ_PORT_IRQ6_PORT      ('m')
-#define IRQ_PORT_IRQ6_BIT       ('n')
-
-#define IRQ_PORT_IRQ7_PORT      ('m')
-#define IRQ_PORT_IRQ7_BIT       ('n')
-#endif // #if defined(VECT_ICU_IRQ7)
-
-#if defined(VECT_ICU_IRQ15)              // For MCUs with 16 IRQs
-#define IRQ_PORT_IRQ8_PORT      ('m')
-#define IRQ_PORT_IRQ8_BIT       ('n')
-
-#define IRQ_PORT_IRQ9_PORT      ('m')
-#define IRQ_PORT_IRQ9_BIT       ('n')
-
-#define IRQ_PORT_IRQ10_PORT     ('m')
-#define IRQ_PORT_IRQ10_BIT      ('n')
-
-#define IRQ_PORT_IRQ11_PORT     ('m')
-#define IRQ_PORT_IRQ11_BIT      ('n')
-
-#define IRQ_PORT_IRQ12_PORT     ('m')
-#define IRQ_PORT_IRQ12_BIT      ('n')
-
-#define IRQ_PORT_IRQ13_PORT     ('m')
-#define IRQ_PORT_IRQ13_BIT      ('n')
-
-#define IRQ_PORT_IRQ14_PORT     ('m')
-#define IRQ_PORT_IRQ14_BIT      ('n')
-
-#define IRQ_PORT_IRQ15_PORT     ('m')
-#define IRQ_PORT_IRQ15_BIT      ('n')
-#endif // #if defined(VECT_ICU_IRQ15)
-*/
 
 /***********************************************************************************************************************
 Digital Filtering

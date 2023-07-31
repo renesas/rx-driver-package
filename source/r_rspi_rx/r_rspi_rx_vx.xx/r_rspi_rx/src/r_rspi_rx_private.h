@@ -46,6 +46,7 @@
 *         : 31.12.2021 3.04     Supported RX660.
 *         : 31.03.2023 3.10     Added support for RX26T.
 *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 29.05.2023 3.20     Supported RX23E-B.
 ***********************************************************************************************************************/
 #ifndef R_RSPI_PRIVATE_H
 #define R_RSPI_PRIVATE_H
@@ -66,7 +67,7 @@ Macro definitions
     || defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX24U) \
     || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX23W) \
     || defined(BSP_MCU_RX23E_A) || defined(BSP_MCU_RX140) || defined(BSP_MCU_RX660) \
-    || defined(BSP_MCU_RX26T)
+    || defined(BSP_MCU_RX26T) || defined(BSP_MCU_RX23E_B)
 
 #define RSPI_MAX_CHANNELS   (1)
 #else
@@ -221,8 +222,6 @@ typedef enum e_rspi_log
 } rspi_logid_t;
 #endif /* RSPI_CFG_LONGQ_ENABLE */
 
-
-
 #if RSPI_CFG_LONGQ_ENABLE == 1                        /* Uses LONGQ driver.   */
 /* It is a function for debugging. When invalidate definition "RSPI_CFG_LONGQ_ENABLE",
    the code is not generated. */
@@ -232,6 +231,7 @@ uint32_t r_rspi_log(uint32_t flg, uint32_t fid, uint32_t line);
 #else
 #define R_RSPI_LOG_FUNC(x, y, z)   /* Just a definition */
 #endif /* RSPI_CFG_LONGQ_ENABLE */
+
 /***********************************************************************************************************************
 Typedef definitions
 ***********************************************************************************************************************/

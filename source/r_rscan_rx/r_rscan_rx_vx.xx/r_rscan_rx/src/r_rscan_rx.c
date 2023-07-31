@@ -30,6 +30,7 @@
 *           13.09.2021 2.32    Updated Doxygen comment.
 *           11.11.2021 2.40    Added support for RX140 (products with 128-Kbyte or larger ROM).
 *           30.06.2022 2.41    Updated Doxygen comment.
+*           29.05.2023 2.70    Updated according to GSCE Code Checker 6.50.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -120,8 +121,8 @@ bsp_int_ctrl_t int_ctrl;
 
 #if CAN_CFG_PARAM_CHECKING_ENABLE
     if ((NULL == p_cfg)
-     || (p_cfg->timestamp_src >= CAN_TIMESTAMP_SRC_END_ENUM)
-     || (p_cfg->timestamp_div >= CAN_TIMESTAMP_DIV_END_ENUM))
+    || (p_cfg->timestamp_src >= CAN_TIMESTAMP_SRC_END_ENUM)
+    || (p_cfg->timestamp_div >= CAN_TIMESTAMP_DIV_END_ENUM))
     {
         return CAN_ERR_INVALID_ARG;
     }
@@ -256,10 +257,10 @@ can_err_t   err         = CAN_SUCCESS;
     }
 
     if ((NULL == p_baud)
-     || (p_baud->prescaler < 1) || (p_baud->prescaler > 1024)
-     || (p_baud->tseg1 < 4) || (p_baud->tseg1 > 16)
-     || (p_baud->tseg2 < 2) || (p_baud->tseg2 > 8)
-     || (p_baud->sjw < 1) || (p_baud->sjw > 4))
+    || (p_baud->prescaler < 1) || (p_baud->prescaler > 1024)
+    || (p_baud->tseg1 < 4) || (p_baud->tseg1 > 16)
+    || (p_baud->tseg2 < 2) || (p_baud->tseg2 > 8)
+    || (p_baud->sjw < 1) || (p_baud->sjw > 4))
     {
         return CAN_ERR_INVALID_ARG;
     }
@@ -526,22 +527,22 @@ void can_enable_ints(void)
     }
 
     if ((CAN_CFG_INT_BUS_ERROR
-     ||  CAN_CFG_INT_ERR_WARNING
-     ||  CAN_CFG_INT_ERR_PASSIVE
-     ||  CAN_CFG_INT_BUS_OFF_ENTRY
-     ||  CAN_CFG_INT_BUS_OFF_RECOVERY
-     ||  CAN_CFG_INT_OVERLOAD_FRAME_TX
-     ||  CAN_CFG_INT_BUS_LOCK
-     ||  CAN_CFG_INT_ARB_LOST) != 0)
+    ||  CAN_CFG_INT_ERR_WARNING
+    ||  CAN_CFG_INT_ERR_PASSIVE
+    ||  CAN_CFG_INT_BUS_OFF_ENTRY
+    ||  CAN_CFG_INT_BUS_OFF_RECOVERY
+    ||  CAN_CFG_INT_OVERLOAD_FRAME_TX
+    ||  CAN_CFG_INT_BUS_LOCK
+    ||  CAN_CFG_INT_ARB_LOST) != 0)
     {
         IR(RSCAN,CHERRINT) = 0;
         R_BSP_InterruptRequestEnable(VECT(RSCAN,CHERRINT));
     }
 
     if ((CAN_CFG_INT_MBX_TX_COMPLETE
-     ||  CAN_CFG_INT_MBX_TX_ABORTED
-     ||  CAN_CFG_INT_TXFIFO_THRESHOLD
-     ||  CAN_CFG_INT_HIST_FIFO_THRESHOLD) != 0)
+    ||  CAN_CFG_INT_MBX_TX_ABORTED
+    ||  CAN_CFG_INT_TXFIFO_THRESHOLD
+    ||  CAN_CFG_INT_HIST_FIFO_THRESHOLD) != 0)
     {
         IR(RSCAN,TXINT) = 0;
         R_BSP_InterruptRequestEnable(VECT(RSCAN,TXINT));
@@ -583,7 +584,7 @@ can_err_t R_CAN_AddRxRule(uint8_t       chan,
 {
 uint32_t        i;
 can_err_t       err = CAN_SUCCESS;
-can_rxrule_t    *rule_arr = (can_rxrule_t *)&RSCAN.GAFLIDL0.WORD;
+can_rxrule_t    *p_rule_arr = (can_rxrule_t *)&RSCAN.GAFLIDL0.WORD;
 
 
     /* Must clear here. Not documented as such. */
@@ -597,31 +598,31 @@ can_rxrule_t    *rule_arr = (can_rxrule_t *)&RSCAN.GAFLIDL0.WORD;
 
 #if (CAN_CFG_PARAM_CHECKING_ENABLE == 1)
     if ((0 != RSCAN.GCTRL.BIT.GSLPR)
-     || (CAN_GLOBAL_MODE_RESET != RSCAN.GCTRL.BIT.GMDC))
+    || (CAN_GLOBAL_MODE_RESET != RSCAN.GCTRL.BIT.GMDC))
     {
         return CAN_ERR_ILLEGAL_MODE;
     }
 
     if ((NULL == p_filter)
-     || (p_filter->check_ide > 1)
-     || (p_filter->ide > 1)
-     || (p_filter->check_rtr > 1)
-     || (p_filter->rtr > 1)
-     || (p_filter->min_dlc > 8))
+    || (p_filter->check_ide > 1)
+    || (p_filter->ide > 1)
+    || (p_filter->check_rtr > 1)
+    || (p_filter->rtr > 1)
+    || (p_filter->min_dlc > 8))
     {
         return CAN_ERR_INVALID_ARG;
     }
 
     /* verify RXMBX or RXFIFO for dst_box */
     if (((dst_box & CAN_FLG_RXMBX) == 0)
-      && (((dst_box & CAN_FLG_FIFO) == 0) || ((dst_box & CAN_BOX_RXFIFO_MASK) == 0)))
+    && (((dst_box & CAN_FLG_FIFO) == 0) || ((dst_box & CAN_BOX_RXFIFO_MASK) == 0)))
     {
         return CAN_ERR_INVALID_ARG;
     }
 
     /* if RXIFO, verify configured */
     if ((dst_box & CAN_FLG_FIFO)
-     && ((g_dcb.fifo_mask & dst_box) != dst_box))
+    && ((g_dcb.fifo_mask & dst_box) != dst_box))
     {
         return CAN_ERR_INVALID_ARG;
     }
@@ -640,32 +641,32 @@ can_rxrule_t    *rule_arr = (can_rxrule_t *)&RSCAN.GAFLIDL0.WORD;
     /* load rule info */
     i = RSCAN.GAFLCFG.BIT.RNC0;
 
-    rule_arr[i].GAFLIDL.BIT.GAFLID = p_filter->id & 0xFFFF;
+    p_rule_arr[i].GAFLIDL.BIT.GAFLID = p_filter->id & 0xFFFF;
 
-    rule_arr[i].GAFLIDH.BIT.GAFLIDE = p_filter->ide;
-    rule_arr[i].GAFLIDH.BIT.GAFLRTR = p_filter->rtr;
-    rule_arr[i].GAFLIDH.BIT.GAFLID = (p_filter->id >> 16) & 0x1FFF;
-    rule_arr[i].GAFLIDH.BIT.GAFLLB = 0;         // no mirrored messages
+    p_rule_arr[i].GAFLIDH.BIT.GAFLIDE = p_filter->ide;
+    p_rule_arr[i].GAFLIDH.BIT.GAFLRTR = p_filter->rtr;
+    p_rule_arr[i].GAFLIDH.BIT.GAFLID = (p_filter->id >> 16) & 0x1FFF;
+    p_rule_arr[i].GAFLIDH.BIT.GAFLLB = 0;         // no mirrored messages
 
-    rule_arr[i].GAFLML.BIT.GAFLIDM = p_filter->id_mask & 0xFFFF;
+    p_rule_arr[i].GAFLML.BIT.GAFLIDM = p_filter->id_mask & 0xFFFF;
 
-    rule_arr[i].GAFLMH.BIT.GAFLIDEM = p_filter->check_ide;
-    rule_arr[i].GAFLMH.BIT.GAFLRTRM = p_filter->check_rtr;
-    rule_arr[i].GAFLMH.BIT.GAFLIDM = (p_filter->id_mask >> 16) & 0x1FFF;
+    p_rule_arr[i].GAFLMH.BIT.GAFLIDEM = p_filter->check_ide;
+    p_rule_arr[i].GAFLMH.BIT.GAFLRTRM = p_filter->check_rtr;
+    p_rule_arr[i].GAFLMH.BIT.GAFLIDM = (p_filter->id_mask >> 16) & 0x1FFF;
 
-    rule_arr[i].GAFLPH.BIT.GAFLDLC = p_filter->min_dlc;
-    rule_arr[i].GAFLPH.BIT.GAFLPTR = p_filter->label;
+    p_rule_arr[i].GAFLPH.BIT.GAFLDLC = p_filter->min_dlc;
+    p_rule_arr[i].GAFLPH.BIT.GAFLPTR = p_filter->label;
 
     if ((dst_box & CAN_FLG_RXMBX) != 0)
     {
-        rule_arr[i].GAFLPL.BIT.GAFLRMV = 1;     // RXMBX
-        rule_arr[i].GAFLPL.BIT.GAFLRMDP = dst_box & CAN_BOX_BUFNUM_MASK;
+        p_rule_arr[i].GAFLPL.BIT.GAFLRMV = 1;     // RXMBX
+        p_rule_arr[i].GAFLPL.BIT.GAFLRMDP = dst_box & CAN_BOX_BUFNUM_MASK;
     }
     else /* RXFIFO*/
     {
-        rule_arr[i].GAFLPL.BIT.GAFLRMV = 0;     // RXFIFO
-        rule_arr[i].GAFLPL.BIT.GAFLFDP0 = (CAN_BOX_RXFIFO_0 == dst_box) ? 1 : 0;
-        rule_arr[i].GAFLPL.BIT.GAFLFDP1 = (CAN_BOX_RXFIFO_1 == dst_box) ? 1 : 0;
+        p_rule_arr[i].GAFLPL.BIT.GAFLRMV = 0;     // RXFIFO
+        p_rule_arr[i].GAFLPL.BIT.GAFLFDP0 = (CAN_BOX_RXFIFO_0 == dst_box) ? 1 : 0;
+        p_rule_arr[i].GAFLPL.BIT.GAFLFDP1 = (CAN_BOX_RXFIFO_1 == dst_box) ? 1 : 0;
     }
 
     /* increment the number of rules in use */
@@ -718,7 +719,7 @@ can_err_t R_CAN_Control(can_cmd_t   cmd,
                         uint32_t    arg1)
 {
 can_err_t   err = CAN_SUCCESS;
-can_tmcp_t  *tmcp_regs = (can_tmcp_t *)&RSCAN0.TMC0;
+can_tmcp_t  *p_tmcp_regs = (can_tmcp_t *)&RSCAN0.TMC0;
 
 
 #if (CAN_CFG_PARAM_CHECKING_ENABLE == 1)
@@ -741,121 +742,121 @@ can_tmcp_t  *tmcp_regs = (can_tmcp_t *)&RSCAN0.TMC0;
 
     switch (cmd)
     {
-    case CAN_CMD_ABORT_TX:
-    {
-        /* get the transmit buffer number (in communications mode) */
-        arg1 &= CAN_BOX_BUFNUM_MASK;
-
-        /* request abort */
-        tmcp_regs[arg1].BIT.TMTAR = 1;
-        break;
-    }
-    case CAN_CMD_RESET_TIMESTAMP:
-    {
-        RSCAN.GCTRH.BIT.TSRST = 1;
-        break;
-    }
-    case CAN_CMD_SET_MODE_COMM:
-    {
-        /* set global operating mode */
-        RSCAN.GCTRL.BIT.GMDC = CAN_GLOBAL_MODE_OPERATING;
-        while ((RSCAN.GSTS.WORD & 0x07) != 0)
+        case CAN_CMD_ABORT_TX:
         {
-            R_BSP_NOP();
+            /* get the transmit buffer number (in communications mode) */
+            arg1 &= CAN_BOX_BUFNUM_MASK;
+
+            /* request abort */
+            p_tmcp_regs[arg1].BIT.TMTAR = 1;
+            break;
         }
-
-        /* enable configured RXFIFOs */
-        can_enable_rxfifos();
-
-        /* enable interrupts */
-        can_enable_ints();
-
-        /* put initialized channels into communications mode */
-        if (TRUE == g_ccb.initialized)
+        case CAN_CMD_RESET_TIMESTAMP:
         {
+            RSCAN.GCTRH.BIT.TSRST = 1;
+            break;
+        }
+        case CAN_CMD_SET_MODE_COMM:
+        {
+            /* set global operating mode */
+            RSCAN.GCTRL.BIT.GMDC = CAN_GLOBAL_MODE_OPERATING;
+            while ((RSCAN.GSTS.WORD & 0x07) != 0)
+            {
+                R_BSP_NOP();
+            }
+
+            /* enable configured RXFIFOs */
+            can_enable_rxfifos();
+
+            /* enable interrupts */
+            can_enable_ints();
+
+            /* put initialized channels into communications mode */
+            if (TRUE == g_ccb.initialized)
+            {
+                RSCAN0.CTRL.BIT.CHMDC = CAN_CHMODE_COMM;
+                while ((RSCAN0.STSL.WORD & 0x07) != 0)
+                {
+                    R_BSP_NOP();
+                }
+
+                /* enable channel FIFOs */
+                can_enable_chan_fifos();
+
+                while (0 == RSCAN0.STSL.BIT.COMSTS)
+                {
+                    R_BSP_NOP();
+                }
+            }
+            break;
+        }
+        default:
+        {
+            /* set global test mode */
+            RSCAN.GCTRL.BIT.GMDC = CAN_GLOBAL_MODE_TEST;
+            while (1 != RSCAN.GSTS.BIT.GHLTSTS)
+            {
+                R_BSP_NOP();
+            }
+
+            /* enable configured RXFIFOs */
+            can_enable_rxfifos();
+
+            /* enable interrupts */
+            can_enable_ints();
+
+            /* put channel into appropriate test mode */
+
+            /* set to channel halt mode */
+            RSCAN0.CTRL.BIT.CHMDC = CAN_CHMODE_HALT;
+            while ( 1 != RSCAN0.STSL.BIT.CHLTSTS)
+                ;
+
+            /* enable channel FIFOs */
+            can_enable_chan_fifos();
+
+            /* enable test mode */
+            RSCAN0.CTRH.BIT.CTME = 1;
+
+            /* set test mode type */
+            if (CAN_CMD_SET_MODE_TST_STANDARD == cmd)
+            {
+                RSCAN0.CTRH.BIT.CTMS = CAN_TEST_MODE_STD;
+            }
+            else if (CAN_CMD_SET_MODE_TST_LISTEN == cmd)
+            {
+                RSCAN0.CTRH.BIT.CTMS = CAN_TEST_MODE_LISTEN;
+            }
+            else if (CAN_CMD_SET_MODE_TST_INT_LOOPBACK == cmd)
+            {
+                RSCAN0.CTRH.BIT.CTMS = CAN_TEST_MODE_INT_LOOPBACK;
+            }
+            else /* (cmd == CAN_CMD_SET_MODE_TST_EXT_LOOPBACK) */
+            {
+                RSCAN0.CTRH.BIT.CTMS = CAN_TEST_MODE_EXT_LOOPBACK;
+            }
+
+            /* set global operating mode */
+            RSCAN.GCTRL.BIT.GMDC = CAN_GLOBAL_MODE_OPERATING;
+            while (0 != RSCAN.GSTS.WORD)
+            {
+                R_BSP_NOP();
+            }
+
+            /* go into channel communication mode */
             RSCAN0.CTRL.BIT.CHMDC = CAN_CHMODE_COMM;
             while ((RSCAN0.STSL.WORD & 0x07) != 0)
             {
                 R_BSP_NOP();
             }
 
-            /* enable channel FIFOs */
-            can_enable_chan_fifos();
-
             while (0 == RSCAN0.STSL.BIT.COMSTS)
             {
                 R_BSP_NOP();
             }
+
+            break;
         }
-        break;
-    }
-    default:
-    {
-        /* set global test mode */
-        RSCAN.GCTRL.BIT.GMDC = CAN_GLOBAL_MODE_TEST;
-        while (1 != RSCAN.GSTS.BIT.GHLTSTS)
-        {
-            R_BSP_NOP();
-        }
-
-        /* enable configured RXFIFOs */
-        can_enable_rxfifos();
-
-        /* enable interrupts */
-        can_enable_ints();
-
-        /* put channel into appropriate test mode */
-
-        /* set to channel halt mode */
-        RSCAN0.CTRL.BIT.CHMDC = CAN_CHMODE_HALT;
-        while ( 1 != RSCAN0.STSL.BIT.CHLTSTS)
-            ;
-
-        /* enable channel FIFOs */
-        can_enable_chan_fifos();
-
-        /* enable test mode */
-        RSCAN0.CTRH.BIT.CTME = 1;
-
-        /* set test mode type */
-        if (CAN_CMD_SET_MODE_TST_STANDARD == cmd)
-        {
-            RSCAN0.CTRH.BIT.CTMS = CAN_TEST_MODE_STD;
-        }
-        else if (CAN_CMD_SET_MODE_TST_LISTEN == cmd)
-        {
-            RSCAN0.CTRH.BIT.CTMS = CAN_TEST_MODE_LISTEN;
-        }
-        else if (CAN_CMD_SET_MODE_TST_INT_LOOPBACK == cmd)
-        {
-            RSCAN0.CTRH.BIT.CTMS = CAN_TEST_MODE_INT_LOOPBACK;
-        }
-        else /* (cmd == CAN_CMD_SET_MODE_TST_EXT_LOOPBACK) */
-        {
-            RSCAN0.CTRH.BIT.CTMS = CAN_TEST_MODE_EXT_LOOPBACK;
-        }
-
-        /* set global operating mode */
-        RSCAN.GCTRL.BIT.GMDC = CAN_GLOBAL_MODE_OPERATING;
-        while (0 != RSCAN.GSTS.WORD)
-        {
-            R_BSP_NOP();
-        }
-
-        /* go into channel communication mode */
-        RSCAN0.CTRL.BIT.CHMDC = CAN_CHMODE_COMM;
-        while ((RSCAN0.STSL.WORD & 0x07) != 0)
-        {
-            R_BSP_NOP();
-        }
-
-        while (0 == RSCAN0.STSL.BIT.COMSTS)
-        {
-            R_BSP_NOP();
-        }
-
-        break;
-    }
     }
 
     return err;
@@ -942,21 +943,22 @@ can_err_t R_CAN_SendMsg(can_box_t   box_id,
 {
 uint32_t        i;
 can_err_t       err = CAN_SUCCESS;
-can_tmstsp_t    *tmstsp_regs = (can_tmstsp_t *)&RSCAN0.TMSTS0;
-can_tmcp_t      *tmcp_regs = (can_tmcp_t *)&RSCAN0.TMC0;
-can_msg_t       *msg_regs;
+can_tmstsp_t    *p_tmstsp_regs = (can_tmstsp_t *)&RSCAN0.TMSTS0;
+can_tmcp_t      *p_tmcp_regs = (can_tmcp_t *)&RSCAN0.TMC0;
+can_msg_t       *p_msg_regs;
 
 
     if (box_id & CAN_FLG_TXMBX)
     {
         /* get pointer to base of message registers and index for this TXMBX */
-        msg_regs = (can_msg_t *)&RSCAN0.TMIDL0;
+        p_msg_regs = (can_msg_t *)&RSCAN0.TMIDL0;
         i = box_id & CAN_BOX_BUFNUM_MASK;       // buffer number
     }
     else if (CAN_BOX_TXFIFO == box_id)
     {
         /* get pointer to base of message registers and index for this TXFIFO */
-        msg_regs = (can_msg_t *)&RSCAN0.CFIDL0;
+        p_msg_regs = (can_msg_t *)&RSCAN0.CFIDL0;
+
         i = 0;
     }
 #if (CAN_CFG_PARAM_CHECKING_ENABLE == 1)
@@ -981,7 +983,7 @@ can_msg_t       *msg_regs;
     if (box_id & CAN_FLG_TXMBX)
     {
         /* return if transmit or abort request already outstanding */
-        if ((tmcp_regs[i].BYTE & CAN_TMCP_REQ_PRESENT) != 0)
+        if ((p_tmcp_regs[i].BYTE & CAN_TMCP_REQ_PRESENT) != 0)
         {
             return CAN_ERR_BOX_FULL;
         }
@@ -998,34 +1000,43 @@ can_msg_t       *msg_regs;
 
     /* load message into registers */
 
-    msg_regs[i].IDL.BIT.ID = p_txmsg->id & 0xFFFF;
-    msg_regs[i].IDH.BIT.IDE = p_txmsg->ide;
-    msg_regs[i].IDH.BIT.RTR = p_txmsg->rtr;
-    msg_regs[i].IDH.BIT.ID = (p_txmsg->id >> 16) & 0x1FFF;
-    msg_regs[i].IDH.BIT.THLEN = (uint16_t) p_txmsg->log_history;
-    msg_regs[i].PTR.BIT.PTR = (uint8_t) p_txmsg->label;
-    msg_regs[i].PTR.BIT.DLC = p_txmsg->dlc;
-    msg_regs[i].DF0.BIT.DB0 = p_txmsg->data[0];
-    msg_regs[i].DF0.BIT.DB1 = p_txmsg->data[1];
-    msg_regs[i].DF1.BIT.DB2 = p_txmsg->data[2];
-    msg_regs[i].DF1.BIT.DB3 = p_txmsg->data[3];
-    msg_regs[i].DF2.BIT.DB4 = p_txmsg->data[4];
-    msg_regs[i].DF2.BIT.DB5 = p_txmsg->data[5];
-    msg_regs[i].DF3.BIT.DB6 = p_txmsg->data[6];
-    msg_regs[i].DF3.BIT.DB7 = p_txmsg->data[7];
+    p_msg_regs[i].IDL.BIT.ID = p_txmsg->id & 0xFFFF;
+
+    p_msg_regs[i].IDH.BIT.IDE = p_txmsg->ide;
+
+    p_msg_regs[i].IDH.BIT.RTR = p_txmsg->rtr;
+
+    p_msg_regs[i].IDH.BIT.ID = (p_txmsg->id >> 16) & 0x1FFF;
+
+    /* casting p_txmsg->log_history to uint16_t */
+    p_msg_regs[i].IDH.BIT.THLEN = (uint16_t) p_txmsg->log_history;
+
+    /* casting p_txmsg->label to uint8_t */
+    p_msg_regs[i].PTR.BIT.PTR = (uint8_t) p_txmsg->label;
+    p_msg_regs[i].PTR.BIT.DLC = p_txmsg->dlc;
+    p_msg_regs[i].DF0.BIT.DB0 = p_txmsg->data[0];
+    p_msg_regs[i].DF0.BIT.DB1 = p_txmsg->data[1];
+    p_msg_regs[i].DF1.BIT.DB2 = p_txmsg->data[2];
+    p_msg_regs[i].DF1.BIT.DB3 = p_txmsg->data[3];
+    p_msg_regs[i].DF2.BIT.DB4 = p_txmsg->data[4];
+    p_msg_regs[i].DF2.BIT.DB5 = p_txmsg->data[5];
+    p_msg_regs[i].DF3.BIT.DB6 = p_txmsg->data[6];
+    p_msg_regs[i].DF3.BIT.DB7 = p_txmsg->data[7];
 
     /* initiate transmit request */
 
     if (box_id & CAN_FLG_TXMBX)
     {
-        tmstsp_regs[i].BIT.TMTRF = 0;               // clear last result
-        tmcp_regs[i].BIT.TMOM = p_txmsg->one_shot;  // set one-shot option
-        tmcp_regs[i].BIT.TMTR = 1;                  // request transmit
+        p_tmstsp_regs[i].BIT.TMTRF = 0;               // clear last result
+
+        p_tmcp_regs[i].BIT.TMOM = p_txmsg->one_shot;  // set one-shot option
+
+        p_tmcp_regs[i].BIT.TMTR = 1;                  // request transmit
 
         /* wait for transmit complete if not using interrupts */
         if (CAN_CFG_INT_MBX_TX_COMPLETE == 0)
         {
-            while (0 == tmstsp_regs[i].BIT.TMTRF)
+            while (0 == p_tmstsp_regs[i].BIT.TMTRF)
             {
                 R_BSP_NOP();
             }
@@ -1065,22 +1076,22 @@ can_err_t R_CAN_GetMsg(can_box_t   box_id,
 {
 uint32_t            i;
 can_err_t           err = CAN_SUCCESS;
-can_fifo_stat_t     *rfstsx_regs = (can_fifo_stat_t *)&RSCAN.RFSTS0;
-volatile uint16_t   *rfpctrx_regs = (uint16_t *)&RSCAN.RFPCTR0;
-can_msg_t           *msg_regs;
+can_fifo_stat_t     *p_rfstsx_regs = (can_fifo_stat_t *)&RSCAN.RFSTS0;
+volatile uint16_t   *p_rfpctrx_regs = (uint16_t *)&RSCAN.RFPCTR0;
+can_msg_t           *p_msg_regs;
 uint16_t            tmp;
 
 
     if (box_id & CAN_FLG_RXMBX)
     {
         /* get pointer to base of message registers and index for this RXMBX */
-        msg_regs = (can_msg_t *)&RSCAN.RMIDL0;
+        p_msg_regs = (can_msg_t *)&RSCAN.RMIDL0;
         i = box_id & CAN_BOX_BUFNUM_MASK;           // buffer number
     }
     else if (((box_id & CAN_FLG_FIFO) != 0) && ((box_id & CAN_BOX_RXFIFO_MASK) != 0))
     {
         /* get pointer to base of message registers and index for this RXFIFO */
-        msg_regs = (can_msg_t *)&RSCAN.RFIDL0;
+        p_msg_regs = (can_msg_t *)&RSCAN.RFIDL0;
         i = (CAN_BOX_RXFIFO_0 == box_id) ? 0 : 1;     // RXFIFO number
     }
 #if (CAN_CFG_PARAM_CHECKING_ENABLE == 1)
@@ -1106,7 +1117,7 @@ uint16_t            tmp;
     else /* RXFIFO*/
     {
         /* return if FIFO is empty */
-        if (1 == rfstsx_regs[i].BIT.EMP)
+        if (1 == p_rfstsx_regs[i].BIT.EMP)
         {
             return CAN_ERR_BOX_EMPTY;
         }
@@ -1114,21 +1125,21 @@ uint16_t            tmp;
 
 
     /* load message from registers */
-    p_rxmsg->ide = msg_regs[i].IDH.BIT.IDE;
-    p_rxmsg->rtr = msg_regs[i].IDH.BIT.RTR;
-    tmp = msg_regs[i].IDL.BIT.ID;
-    p_rxmsg->id = (msg_regs[i].IDH.BIT.ID << 16) | tmp;
-    p_rxmsg->label = msg_regs[i].PTR.BIT.PTR;
-    p_rxmsg->dlc = msg_regs[i].PTR.BIT.DLC;
-    p_rxmsg->timestamp = msg_regs[i].TS.BIT.TS;
-    p_rxmsg->data[0] = msg_regs[i].DF0.BIT.DB0;
-    p_rxmsg->data[1] = msg_regs[i].DF0.BIT.DB1;
-    p_rxmsg->data[2] = msg_regs[i].DF1.BIT.DB2;
-    p_rxmsg->data[3] = msg_regs[i].DF1.BIT.DB3;
-    p_rxmsg->data[4] = msg_regs[i].DF2.BIT.DB4;
-    p_rxmsg->data[5] = msg_regs[i].DF2.BIT.DB5;
-    p_rxmsg->data[6] = msg_regs[i].DF3.BIT.DB6;
-    p_rxmsg->data[7] = msg_regs[i].DF3.BIT.DB7;
+    p_rxmsg->ide = p_msg_regs[i].IDH.BIT.IDE;
+    p_rxmsg->rtr = p_msg_regs[i].IDH.BIT.RTR;
+    tmp = p_msg_regs[i].IDL.BIT.ID;
+    p_rxmsg->id = (p_msg_regs[i].IDH.BIT.ID << 16) | tmp;
+    p_rxmsg->label = p_msg_regs[i].PTR.BIT.PTR;
+    p_rxmsg->dlc = p_msg_regs[i].PTR.BIT.DLC;
+    p_rxmsg->timestamp = p_msg_regs[i].TS.BIT.TS;
+    p_rxmsg->data[0] = p_msg_regs[i].DF0.BIT.DB0;
+    p_rxmsg->data[1] = p_msg_regs[i].DF0.BIT.DB1;
+    p_rxmsg->data[2] = p_msg_regs[i].DF1.BIT.DB2;
+    p_rxmsg->data[3] = p_msg_regs[i].DF1.BIT.DB3;
+    p_rxmsg->data[4] = p_msg_regs[i].DF2.BIT.DB4;
+    p_rxmsg->data[5] = p_msg_regs[i].DF2.BIT.DB5;
+    p_rxmsg->data[6] = p_msg_regs[i].DF3.BIT.DB6;
+    p_rxmsg->data[7] = p_msg_regs[i].DF3.BIT.DB7;
 
     /* clear message ready */
 
@@ -1138,7 +1149,7 @@ uint16_t            tmp;
     }
     else /* RXFIFO */
     {
-        rfpctrx_regs[i] = 0xFF;         // increment RXFIFO index
+        p_rfpctrx_regs[i] = 0xFF;         // increment RXFIFO index
     }
 
     return err;
@@ -1197,6 +1208,7 @@ can_err_t   err = CAN_SUCCESS;
     /* get box associated with tx buffer and create box_id */
     if (HIST_SRC_TX_BUF == RSCAN0.THLACC0.BIT.BT)
     {
+        /* casting CAN_FLG_TXMBX | txbuf_num to can_box_t */
         p_entry->box_id = (can_box_t)(CAN_FLG_TXMBX | txbuf_num);
     }
     else /* HIST_SRC_TXRX_FIFO */
@@ -1250,84 +1262,89 @@ can_fifo_mask_t stat;
 
     switch (type)
     {
-    case CAN_STAT_FIFO_EMPTY:
-    {
-        stat.uint32 = 0;
-        stat.bit.rxfifo_0 = RSCAN.RFSTS0.BIT.RFEMP;
-        stat.bit.rxfifo_1 = RSCAN.RFSTS1.BIT.RFEMP;
-        stat.bit.ch0_txfifo_0 = RSCAN0.CFSTS0.BIT.CFEMP;
-        stat.bit.ch0_hist = RSCAN0.THLSTS0.BIT.THLEMP;
-        break;
-    }
-    case CAN_STAT_FIFO_THRESHOLD:
-    {
-        stat.uint32 = 0;
-        stat.bit.rxfifo_0 = RSCAN.RFSTS0.BIT.RFIF;
-        stat.bit.rxfifo_1 = RSCAN.RFSTS1.BIT.RFIF;
-        stat.bit.ch0_txfifo_0 = RSCAN0.CFSTS0.BIT.CFTXIF;
-        stat.bit.ch0_hist = RSCAN0.THLSTS0.BIT.THLIF;
+        case CAN_STAT_FIFO_EMPTY:
+        {
+            stat.uint32 = 0;
+            stat.bit.rxfifo_0 = RSCAN.RFSTS0.BIT.RFEMP;
+            stat.bit.rxfifo_1 = RSCAN.RFSTS1.BIT.RFEMP;
+            stat.bit.ch0_txfifo_0 = RSCAN0.CFSTS0.BIT.CFEMP;
+            stat.bit.ch0_hist = RSCAN0.THLSTS0.BIT.THLEMP;
+            break;
+        }
+        case CAN_STAT_FIFO_THRESHOLD:
+        {
+            stat.uint32 = 0;
+            stat.bit.rxfifo_0 = RSCAN.RFSTS0.BIT.RFIF;
+            stat.bit.rxfifo_1 = RSCAN.RFSTS1.BIT.RFIF;
+            stat.bit.ch0_txfifo_0 = RSCAN0.CFSTS0.BIT.CFTXIF;
+            stat.bit.ch0_hist = RSCAN0.THLSTS0.BIT.THLIF;
 
-        /* clear threshold interrupt flags */
-        RSCAN.RFSTS0.BIT.RFIF = 0;
-        RSCAN.RFSTS1.BIT.RFIF = 0;
-        RSCAN0.CFSTS0.BIT.CFTXIF = 0;
-        RSCAN0.THLSTS0.BIT.THLIF = 0;
-        break;
-    }
-    case CAN_STAT_FIFO_OVFL:
-    {
-        stat.uint32 = 0;
-        stat.bit.rxfifo_0 = RSCAN.RFSTS0.BIT.RFMLT;
-        stat.bit.rxfifo_1 = RSCAN.RFSTS1.BIT.RFMLT;
-        stat.bit.ch0_hist = RSCAN0.THLSTS0.BIT.THLELT;
+            /* clear threshold interrupt flags */
+            RSCAN.RFSTS0.BIT.RFIF = 0;
+            RSCAN.RFSTS1.BIT.RFIF = 0;
+            RSCAN0.CFSTS0.BIT.CFTXIF = 0;
+            RSCAN0.THLSTS0.BIT.THLIF = 0;
+            break;
+        }
+        case CAN_STAT_FIFO_OVFL:
+        {
+            stat.uint32 = 0;
+            stat.bit.rxfifo_0 = RSCAN.RFSTS0.BIT.RFMLT;
+            stat.bit.rxfifo_1 = RSCAN.RFSTS1.BIT.RFMLT;
+            stat.bit.ch0_hist = RSCAN0.THLSTS0.BIT.THLELT;
 
-        /* clear overflow interrupt flags */
-        RSCAN.RFSTS0.BIT.RFMLT = 0;
-        RSCAN.RFSTS1.BIT.RFMLT = 0;
-        RSCAN0.THLSTS0.BIT.THLELT = 0;
-        break;
-    }
-    case CAN_STAT_RXMBX_FULL:
-    {
-        stat.uint32 = (uint32_t) RSCAN.RMND0.WORD;
-        break;
-    }
-    case CAN_STAT_GLOBAL_ERR:
-    {
-        stat.uint32 = (uint32_t) RSCAN.GERFLL.BYTE;
-        RSCAN.GERFLL.BIT.DEF = 0;       // reset DLC error flag
-        break;
-    }
-    case CAN_STAT_CH_TXMBX_SENT:
-    {
-        stat.uint32 = (uint32_t) RSCAN0.TMTCSTS.WORD;
+            /* clear overflow interrupt flags */
+            RSCAN.RFSTS0.BIT.RFMLT = 0;
+            RSCAN.RFSTS1.BIT.RFMLT = 0;
+            RSCAN0.THLSTS0.BIT.THLELT = 0;
+            break;
+        }
+        case CAN_STAT_RXMBX_FULL:
+        {
+            /* cast RSCAN.RMND0.WORD to uint32_t */
+            stat.uint32 = (uint32_t) RSCAN.RMND0.WORD;
+            break;
+        }
+        case CAN_STAT_GLOBAL_ERR:
+        {
+            /* cast RSCAN.GERFLL.BYTE to uint32_t */
+            stat.uint32 = (uint32_t) RSCAN.GERFLL.BYTE;
+            RSCAN.GERFLL.BIT.DEF = 0;       // reset DLC error flag
+            break;
+        }
+        case CAN_STAT_CH_TXMBX_SENT:
+        {
+            /* cast RSCAN0.TMTCSTS.WORD to uint32_t */
+            stat.uint32 = (uint32_t) RSCAN0.TMTCSTS.WORD;
 
-        /* reset bits */
-        RSCAN0.TMSTS0.BIT.TMTRF = 0;
-        RSCAN0.TMSTS1.BIT.TMTRF = 0;
-        RSCAN0.TMSTS2.BIT.TMTRF = 0;
-        RSCAN0.TMSTS3.BIT.TMTRF = 0;
-        break;
-    }
-    case CAN_STAT_CH_TXMBX_ABORTED:
-    {
-        stat.uint32 = (uint32_t) RSCAN0.TMTASTS.WORD;
+            /* reset bits */
+            RSCAN0.TMSTS0.BIT.TMTRF = 0;
+            RSCAN0.TMSTS1.BIT.TMTRF = 0;
+            RSCAN0.TMSTS2.BIT.TMTRF = 0;
+            RSCAN0.TMSTS3.BIT.TMTRF = 0;
+            break;
+        }
+        case CAN_STAT_CH_TXMBX_ABORTED:
+        {
+            /* cast RSCAN0.TMTASTS.WORD to uint32_t */
+            stat.uint32 = (uint32_t) RSCAN0.TMTASTS.WORD;
 
-        /* reset bits */
-        RSCAN0.TMSTS0.BIT.TMTRF = 0;
-        RSCAN0.TMSTS1.BIT.TMTRF = 0;
-        RSCAN0.TMSTS2.BIT.TMTRF = 0;
-        RSCAN0.TMSTS3.BIT.TMTRF = 0;
-        break;
-    }
-    case CAN_STAT_CH_ERROR:
-    {
-        stat.uint32 = (uint32_t) RSCAN0.ERFLL.WORD;
+            /* reset bits */
+            RSCAN0.TMSTS0.BIT.TMTRF = 0;
+            RSCAN0.TMSTS1.BIT.TMTRF = 0;
+            RSCAN0.TMSTS2.BIT.TMTRF = 0;
+            RSCAN0.TMSTS3.BIT.TMTRF = 0;
+            break;
+        }
+        case CAN_STAT_CH_ERROR:
+        {
+            /* cast RSCAN0.ERFLL.WORD to uint32_t */
+            stat.uint32 = (uint32_t) RSCAN0.ERFLL.WORD;
 
-        /* reset bits */
-        RSCAN0.ERFLL.WORD = 0;
-        break;
-    }
+            /* reset bits */
+            RSCAN0.ERFLL.WORD = 0;
+            break;
+        }
     }
 
     *p_err = CAN_SUCCESS;

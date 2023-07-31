@@ -36,6 +36,7 @@
 *           31.03.2022 4.40    Added support for RX660.
 *           31.03.2023 4.80    Added support for RX26T.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           29.05.2023 4.90    Added support for RX23E-B.
 ***********************************************************************************************************************/
 
 #ifndef SCI_RX_PLATFORM_H
@@ -64,6 +65,8 @@ Includes   <System Includes> , "Project Includes"
 #include "./targets/rx231/r_sci_rx231_private.h"  /* RX231 */
 #elif defined(BSP_MCU_RX23E_A)
 #include "./targets/rx23e-a/r_sci_rx23e-a_private.h"  /* RX23E-A */
+#elif defined(BSP_MCU_RX23E_B)
+#include "./targets/rx23e-b/r_sci_rx23e-b_private.h"  /* RX23E-B */
 #elif defined(BSP_MCU_RX23T)
 #include "./targets/rx23t/r_sci_rx23t_private.h"  /* RX23T */
 #elif defined(BSP_MCU_RX23W)

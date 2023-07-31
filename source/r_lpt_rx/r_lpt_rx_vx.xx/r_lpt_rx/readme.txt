@@ -10,7 +10,6 @@ This driver initializes the LPT module, starts and stops the timer, and disables
 To change the period, disable the LPT module once, and initialize the LPT module with the new period. 
 The code size can be reduced by removing code for parameter checking. 
 These configuration options can be found in "r_config\r_lpt_rx_config.h". 
-An original copy of the configuration file is stored in "r_lpt_rx\ref\r_lpt_rx_config_reference.h".
 
 Features
 --------
@@ -30,9 +29,6 @@ r_lpt_rx
 |    +---ja
 |         |
 |         +---r01an2571jj{VERSION_NUMBER}-rx-timer.pdf
-|
-+---ref
-|       r_lpt_rx_config_reference.h
 |
 +---src
     |   r_lpt_rx.c
@@ -62,8 +58,12 @@ r_lpt_rx
         |      r_lpt_rx231_private.h
         |
         +---rx23w
-               r_lpt_rx23w.c
-               r_lpt_rx23w_private.h
+        |      r_lpt_rx23w.c
+        |      r_lpt_rx23w_private.h
+        |
+        +---rx23e-b
+               r_lpt_rx23e-b.c
+               r_lpt_rx23e-b_private.h
 
 r_config
     r_lpt_rx_config.h

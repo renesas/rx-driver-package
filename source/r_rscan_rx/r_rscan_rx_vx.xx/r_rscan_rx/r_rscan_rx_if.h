@@ -40,6 +40,9 @@
 *           29.07.2022 2.50    Updated demo projects
 *                              Fixed RXMBX enum error
 *           21.03.2023 2.60    Added new demo project
+*           29.05.2023 2.70    Added support for RX23E-B.
+*                              Fixed fifo threshold enum error.
+*                              Updated according to GSCE Code Checker 6.50.
 ***********************************************************************************************************************/
 
 #ifndef CAN_INTERFACE_HEADER_FILE
@@ -61,7 +64,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define CAN_VERSION_MAJOR           (2)
-#define CAN_VERSION_MINOR           (60)
+#define CAN_VERSION_MINOR           (70)
 
 
 /* Channel numbers */
@@ -256,11 +259,11 @@ typedef struct st_can_bitrate
 
 typedef enum e_can_fifo_threshold       /* NOTE: History FIFO (8 deep) can only have a threshold of 1 or 6 */
 {
+    CAN_FIFO_THRESHOLD_1    = 1,        // every message
     CAN_FIFO_THRESHOLD_2    = 3,        // 4/8 of 4
     CAN_FIFO_THRESHOLD_3    = 5,        // 6/8 of 4
     CAN_FIFO_THRESHOLD_6    = 6,        // History FIFO Only!
     CAN_FIFO_THRESHOLD_FULL = 7,        // 8/8 of 4
-    CAN_FIFO_THRESHOLD_1    = 8,        // every message
     CAN_FIFO_THRESHOLD_END_ENUM
 } can_fifo_threshold_t;
 
@@ -363,46 +366,86 @@ typedef enum e_can_cmd
 /*****************************************************************************
 Public functions
 ******************************************************************************/
+/******************************************************************************
+* Function Name: R_CAN_Open
+*******************************************************************************/
 can_err_t R_CAN_Open(can_cfg_t  *p_cfg,
                      void       (* const p_callback)(can_cb_evt_t   event,
                                                      void           *p_args));
+/******************************************************************************
+* Function Name: R_CAN_InitChan
+*******************************************************************************/
 can_err_t R_CAN_InitChan(uint8_t        chan,
                          can_bitrate_t  *p_baud,
                          void           (* const p_chcallback)(uint8_t      chan,
                                                                can_cb_evt_t event,
                                                                void         *p_args));
+/******************************************************************************
+* Function Name: R_CAN_ConfigFIFO
+*******************************************************************************/
 can_err_t R_CAN_ConfigFIFO(can_box_t            fifo_id,
                            can_fifo_threshold_t threshold,
                            can_box_t            txmbx_id);
 
+/******************************************************************************
+* Function Name: R_CAN_AddRxRule
+*******************************************************************************/
 can_err_t R_CAN_AddRxRule(uint8_t       chan,
                           can_filter_t  *p_filter,
                           can_box_t     dst_box);
 
+/******************************************************************************
+* Function Name: R_CAN_Control
+*******************************************************************************/
 can_err_t R_CAN_Control(can_cmd_t   cmd,
                         uint32_t    arg1);
 
+/******************************************************************************
+* Function Name: R_CAN_SendMsg
+*******************************************************************************/
 can_err_t R_CAN_SendMsg(can_box_t   box_id,
                         can_txmsg_t *p_txmsg);
 
+/******************************************************************************
+* Function Name: R_CAN_GetMsg
+*******************************************************************************/
 can_err_t R_CAN_GetMsg(can_box_t    box_id,
                        can_rxmsg_t  *p_rxmsg);
 
+/******************************************************************************
+* Function Name: R_CAN_GetHistoryEntry
+*******************************************************************************/
 can_err_t R_CAN_GetHistoryEntry(can_box_t       box_id,
                                 can_history_t   *p_entry);
 
+/******************************************************************************
+* Function Name: R_CAN_GetStatusMask
+*******************************************************************************/
 uint32_t  R_CAN_GetStatusMask(can_stat_t    stat_type,
                               uint8_t       chan,
                               can_err_t     *p_err);
 
+/******************************************************************************
+* Function Name: R_CAN_GetCountFIFO
+*******************************************************************************/
 uint32_t  R_CAN_GetCountFIFO(can_box_t  box_id,
                              can_err_t  *p_err);
 
+/******************************************************************************
+* Function Name: R_CAN_GetCountErr
+*******************************************************************************/
 uint32_t  R_CAN_GetCountErr(can_count_t  count_type,
                             uint8_t      chan,
                             can_err_t    *p_err);
 
+/******************************************************************************
+* Function Name: R_CAN_Close
+*******************************************************************************/
 void      R_CAN_Close(void);
+
+/******************************************************************************
+* Function Name: R_CAN_GetVersion
+*******************************************************************************/
 uint32_t  R_CAN_GetVersion(void);
 
 

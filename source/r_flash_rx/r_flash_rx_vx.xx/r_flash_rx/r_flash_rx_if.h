@@ -157,6 +157,7 @@
 *           23.12.2022 4.91    Fixed typos in app note. 
 *           24.01.2023 5.00    Added support for RX26T. Added Flash Type 5.
 *                              Added support for Tool News R20TS0872. 
+*           28.02.2023 5.10    Added support for RX23E-B.
 ***********************************************************************************************************************/
 
 #ifndef FLASH_INTERFACE_HEADER_FILE
@@ -174,7 +175,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Driver Version Number. */
 #define FLASH_RX_VERSION_MAJOR           (5)
-#define FLASH_RX_VERSION_MINOR           (00)
+#define FLASH_RX_VERSION_MINOR           (10)
 
 
 /***********************************************************************************************************************
@@ -192,7 +193,7 @@ Typedef definitions
      defined(MCU_RX130) || defined(MCU_RX231) || defined(MCU_RX23T) || \
      defined(MCU_RX24T) || defined(MCU_RX24U) || defined(MCU_RX230) || \
      defined(MCU_RX23W) || defined(MCU_RX13T) || defined(MCU_RX23E_A) || \
-     defined(MCU_RX140))
+     defined(MCU_RX140) || defined(MCU_RX23E_B))
 #define FLASH_TYPE              FLASH_TYPE_1
 
 #elif (defined(MCU_RX64M) || defined(MCU_RX66T) || defined(MCU_RX71M) || \

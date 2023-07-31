@@ -51,6 +51,8 @@
  *         : 15.06.2022 2.60     RX26T support added.
  *                               Updated demo projects.
  *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *         : 29.05.2023 2.70     RX23E-B support added.
+ *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef SCI_IIC_IF_H
@@ -66,9 +68,9 @@ R_BSP_PRAGMA_UNPACK
     #error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
 #endif
 
- /* Version Number of API. */
+/* Version Number of API. */
     #define SCI_IIC_VERSION_MAJOR  (2)
-    #define SCI_IIC_VERSION_MINOR  (60)
+    #define SCI_IIC_VERSION_MINOR  (70)
 
 /*----------------------------------------------------------------------------*/
 /*   Define return values and values of channel state flag.                   */

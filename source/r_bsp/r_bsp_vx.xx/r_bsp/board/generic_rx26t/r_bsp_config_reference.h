@@ -25,6 +25,7 @@
 ************************************************************************************************************************
 * History : DD.MM.YYYY Version   Description
 *         : 28.02.2023 1.00      First Release
+*         : 26.04.2023 1.01      Modified comment.
 ***********************************************************************************************************************/
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
 #define R_BSP_CONFIG_REF_HEADER_FILE
@@ -641,7 +642,7 @@ Configuration Options
 #define BSP_CFG_TFU_INITIALIZE_ENABLE            (0)
 
 /* Select the unit and format setting of the input values in fixed-point sincos operations.
-   0 = Unit of radians/2 Pi, Q1.31 format (default)
+   0 = Unit of turn, Q1.31 format (default)
    1 = Unit of radians, Q3.29 format
 */
 #define BSP_CFG_TFU_SINCOS_INPUT_UNIT_FORMAT     (0)
@@ -654,7 +655,7 @@ Configuration Options
 #define BSP_CFG_TFU_SINCOS_OUTPUT_FORMAT         (0)
 
 /* Select the output format setting of output values of atan calculations in fixed-point atanhypot_k operations.
-   0 = Unit of radians/2 Pi, Q1.31 format (default)
+   0 = Unit of turn, Q1.31 format (default)
    1 = Unit of radians, Q3.29 format
 */
 #define BSP_CFG_TFU_ATAN_OUTPUT_UNIT_FORMAT      (0)

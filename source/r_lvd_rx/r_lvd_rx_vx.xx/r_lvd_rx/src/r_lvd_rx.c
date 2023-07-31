@@ -35,6 +35,7 @@
 *              : 28.06.2019 3.10     Added support for RX23W.
 *              : 25.11.2019 3.30     Modified comment of API function to Doxygen style.
 *              : 31.03.2023 4.40     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*              : 29.05.2023 4.50     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -152,6 +153,7 @@ lvd_err_t R_LVD_Open(lvd_channel_t channel, lvd_config_t const *p_cfg, void (*p_
     {
         goto RETURN_R_LVD_OPEN;
     }
+
     /* **** Error check **** */
     result_code = lvd_hw_check_ptr((void *)p_cfg);
     if (LVD_SUCCESS != result_code)
@@ -264,12 +266,14 @@ lvd_err_t R_LVD_GetStatus(lvd_channel_t channel,
     {
         goto RETURN_R_LVD_GETSTATUS;
     }
+
     /* **** Error check **** */
     result_code = lvd_hw_check_ptr((void *)p_status_position);
     if (LVD_SUCCESS != result_code)
     {
         goto RETURN_R_LVD_GETSTATUS;
     }
+
     /* **** Error check **** */
     result_code = lvd_hw_check_ptr((void *)p_status_cross);
     if (LVD_SUCCESS != result_code)
@@ -390,6 +394,7 @@ static void lvd_init_lvd(void)
         {
             /* Cast type uint32_t to type lvd_channel_t */
             lvd_hw_set_level((lvd_channel_t)i, lvd_cfg_opt[i].lvd_voltage_level_value);
+
             /* Cast type uint32_t to type lvd_channel_t */
             lvd_hw_set_target((lvd_channel_t)i, lvd_cfg_opt[i].lvd_target);
         }
@@ -551,7 +556,7 @@ static void lvd_start_lvd(lvd_channel_t ch, lvd_trigger_t trigger)
 
 #else /* Error */
     #error "Error! Invalid setting for LVD_GROUP_SETUP in targets file."
-#endif
+#endif /* LVD_GROUP_SETUP_LVDA_1 == LVD_GROUP_SETUP */
 /***********************************************************************************************************************
 * Outline      : Stops the LVD.
 * Function Name: lvd_stop_lvd
@@ -616,7 +621,7 @@ static void lvd_stop_lvd(lvd_channel_t ch)
 
 #else
     #error "Error! Invalid setting for LVD_GROUP_SETUP in targets file."
-#endif
+#endif /* LVD_GROUP_SETUP_LVDA_1 == LVD_GROUP_SETUP */
 /***********************************************************************************************************************
 * Outline      : Starts the LVD interrupt.
 * Function Name: lvd_start_int

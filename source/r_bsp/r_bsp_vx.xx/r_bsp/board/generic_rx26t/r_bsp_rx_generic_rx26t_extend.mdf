@@ -346,11 +346,11 @@ NOTE: This setting is common to all units. It can not be set individually. Pleas
 1 = Initialize function for TFU is enabled.</description>
         </property>
         <property id="BSP_CFG_TFU_SINCOS_INPUT_UNIT_FORMAT" display="Unit and Format Setting of the input values in fixed-point sincos operations." default="0" type="combobox">
-            <option id="BSP_CFG_TFU_SINCOS_INPUT_UNIT_FORMAT.0" display="Unit of radians/2Pi, Q1.31 format" value="0"/>
+            <option id="BSP_CFG_TFU_SINCOS_INPUT_UNIT_FORMAT.0" display="Unit of turn, Q1.31 format" value="0"/>
             <option id="BSP_CFG_TFU_SINCOS_INPUT_UNIT_FORMAT.1" display="Unit of radians, Q3.29 format" value="1"/>
             <constraint display="when Initialize function for TFU is enabled only" actionOnFail="disable">${BSP_CFG_TFU_INITIALIZE_ENABLE} == ${BSP_CFG_TFU_INITIALIZE_ENABLE.1}</constraint>
             <description>Select the unit and format setting of the input values in fixed-point sincos operations.
-0 = Unit of radians/2Pi, Q1.31 format
+0 = Unit of turn, Q1.31 format
 1 = Unit of radians, Q3.29 format</description>
         </property>
         <property id="BSP_CFG_TFU_SINCOS_OUTPUT_FORMAT" display="Format Setting of the output values in fixed-point sincos operations." default="0" type="combobox">
@@ -364,11 +364,11 @@ NOTE: This setting is common to all units. It can not be set individually. Pleas
 2 = Q3.29</description>
         </property>
         <property id="BSP_CFG_TFU_ATAN_OUTPUT_UNIT_FORMAT" display="Output Format Setting of output values of atan calculations in fixed-point atanhypot_k operations." default="0" type="combobox">
-            <option id="BSP_CFG_TFU_ATAN_OUTPUT_UNIT_FORMAT.0" display="Unit of radians/2Pi, Q1.31 format" value="0"/>
+            <option id="BSP_CFG_TFU_ATAN_OUTPUT_UNIT_FORMAT.0" display="Unit of turn, Q1.31 format" value="0"/>
             <option id="BSP_CFG_TFU_ATAN_OUTPUT_UNIT_FORMAT.1" display="Unit of radians, Q3.29 format" value="1"/>
             <constraint display="when Initialize function for TFU is enabled only" actionOnFail="disable">${BSP_CFG_TFU_INITIALIZE_ENABLE} == ${BSP_CFG_TFU_INITIALIZE_ENABLE.1}</constraint>
             <description>Select the output format setting of output values of atan calculations in fixed-point atanhypot_k operations.
-0 = Unit of radians/2Pi, Q1.31 format
+0 = Unit of turn, Q1.31 format
 1 = Unit of radians, Q3.29 format</description>
         </property>
     </configuration>

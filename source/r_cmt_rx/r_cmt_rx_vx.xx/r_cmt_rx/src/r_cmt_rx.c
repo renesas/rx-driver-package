@@ -61,6 +61,8 @@
 *         : 27.12.2022 5.40    Updated macro definition enable and disable nested interrupt for CMT.
 *         : 31.03.2023 5.50    Added support for RX26T.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 29.05.2023 5.60    Added support for RX23E-B.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -81,7 +83,7 @@ Macro definitions
 
     #define CMT_RX_NUM_CHANNELS        (4)
 #elif defined(BSP_MCU_RX111)  || defined(BSP_MCU_RX110)    || defined(BSP_MCU_RX130)  || defined(BSP_MCU_RX13T) || \
-    defined(BSP_MCU_RX23E_A) || defined(BSP_MCU_RX140)
+    defined(BSP_MCU_RX23E_A) || defined(BSP_MCU_RX140) || defined(BSP_MCU_RX23E_B)
     #define CMT_RX_NUM_CHANNELS        (2)
 #else
     #error "Error! Number of channels for this MCU is not defined in r_cmt_rx.c"
@@ -297,7 +299,7 @@ static bool cmt_create_priority (uint32_t frequency_hz, void (* callback)(void *
 */
 bool R_CMT_CreatePeriodic(uint32_t frequency_hz, void(* callback)(void * pdata), uint32_t * channel)
 {
-    return cmt_create(frequency_hz, callback, CMT_RX_MODE_PERIODIC, channel);
+    return cmt_create (frequency_hz, callback, CMT_RX_MODE_PERIODIC, channel);
 } 
 /* End of function R_CMT_CreatePeriodic */
 
@@ -742,7 +744,7 @@ bool R_CMT_Control(uint32_t channel, cmt_commands_t command, void * pdata)
             if (true == ret)
             {
                 /*Casting to match type of "int8_t" */
-                if ((CMT_PRIORITY_0 > (int8_t) priority)
+                if ((CMT_PRIORITY_0 > (int8_t)priority)
                     || (CMT_PRIORITY_MAX < priority)
                     || (CMT_RX_NUM_CHANNELS <= channel))
                 {
@@ -982,7 +984,7 @@ static bool cmt_create_priority(uint32_t frequency_hz, void(* callback)(void * p
     bool     ret = false;
 
     /* Check if interrupt priority and channel are correct or not. */
-    if ((CMT_PRIORITY_0 > (int8_t) priority) || (CMT_PRIORITY_MAX < priority) || (CMT_RX_NUM_CHANNELS <= channel))
+    if ((CMT_PRIORITY_0 > (int8_t)priority) || (CMT_PRIORITY_MAX < priority) || (CMT_RX_NUM_CHANNELS <= channel))
     {
         return false;
     }
@@ -1576,7 +1578,7 @@ static bool cmt_setup_channel(uint32_t channel, uint32_t frequency_hz)
                 power_on(channel);
 
                 /* We can use this divider. Figure out counter ticks needed for this frequency. */
-                (*g_cmt_channels[channel]).CMCOR = (uint16_t)((((uint32_t)CMT_PCLK_HZ /g_cmt_clock_dividers[i])/frequency_hz) -1 );
+                (*g_cmt_channels[channel]).CMCOR = (uint16_t)((((uint32_t)CMT_PCLK_HZ /g_cmt_clock_dividers[i])/frequency_hz) -1);
 
 
                 /* Set clock divider to be used. */

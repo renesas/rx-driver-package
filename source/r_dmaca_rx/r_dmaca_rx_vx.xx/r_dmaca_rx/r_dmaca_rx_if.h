@@ -49,6 +49,8 @@
 *         : 28.06.2022 3.00    Updated demo projects.
 *         : 15.08.2022 3.10    Added support for RX26T.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 29.05.2023 3.20    Added support for RX23E-B.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *******************************************************************************/
 #ifndef DMACA_RX_IF_H
 #define DMACA_RX_IF_H
@@ -72,7 +74,7 @@ Macro definitions
 
 /* Version Number of API */
 #define DMACA_VERSION_MAJOR  (3)
-#define DMACA_VERSION_MINOR  (10)
+#define DMACA_VERSION_MINOR  (20)
 
 /* DMAC activation is disabled. */
 #define DMACA_ACTIVE_DISABLE              (0x00u)
@@ -361,15 +363,15 @@ typedef enum e_dmaca_return
                                                             /*  generated already, so that cannot execute command. */
     DMACA_ERR_SOFTWARE_REQUEST_DISABLED,                    /* Transfer Request Source is not Software. */
     DMACA_ERR_INTERNAL                                      /* DMACA Driver internal error */
- } dmaca_return_t;
+} dmaca_return_t;
 
 typedef struct st_dmaca_stat
 {
-   bool  soft_req_stat;                                     /* Software Request Status */
-   bool  esif_stat;                                         /* Transfer Escape End Interrupt Status */
-   bool  dtif_stat;                                         /* Transfer End Interrupt Status */
-   bool  act_stat;                                          /* Active Flag of DMAC */
-   uint32_t transfer_count;                                 /* Transfer Count */
+    bool  soft_req_stat;                                     /* Software Request Status */
+    bool  esif_stat;                                         /* Transfer Escape End Interrupt Status */
+    bool  dtif_stat;                                         /* Transfer End Interrupt Status */
+    bool  act_stat;                                          /* Active Flag of DMAC */
+    uint32_t transfer_count;                                 /* Transfer Count */
 } dmaca_stat_t;
 
 /* Transfer data configuration */
@@ -405,14 +407,78 @@ typedef struct st_dmaca_transfer_data_cfg
 /*******************************************************************************
 Exported global variables and functions (to be accessed by other files)
 *******************************************************************************/
+/******************************************************************************
+ * Function Name: R_DMACA_Open
+ * Description  : .
+ * Argument     : dmaca_return_t
+ * Return Value : .
+ *****************************************************************************/
 dmaca_return_t R_DMACA_Open (uint8_t channel);
+
+/******************************************************************************
+ * Function Name: R_DMACA_Create
+ * Description  : .
+ * Argument     : dmaca_return_t
+ * Return Value : .
+ *****************************************************************************/
 dmaca_return_t R_DMACA_Create (uint8_t channel, dmaca_transfer_data_cfg_t *p_data_cfg);
+
+/******************************************************************************
+ * Function Name: R_DMACA_Close
+ * Description  : .
+ * Argument     : dmaca_return_t
+ * Return Value : .
+ *****************************************************************************/
 dmaca_return_t R_DMACA_Close (uint8_t channel);
+
+/******************************************************************************
+ * Function Name: R_DMACA_Control
+ * Description  : .
+ * Arguments    : channel
+ *              : command
+ *              : p_stat
+ * Return Value : .
+ *****************************************************************************/
 dmaca_return_t R_DMACA_Control (uint8_t channel, dmaca_command_t  command, dmaca_stat_t *p_stat);
+
+/******************************************************************************
+ * Function Name: R_DMACA_Int_Enable
+ * Description  : .
+ * Arguments    : channel
+ *              : priority
+ * Return Value : .
+ *****************************************************************************/
 dmaca_return_t R_DMACA_Int_Enable (uint8_t channel, uint8_t  priority);
+
+/******************************************************************************
+ * Function Name: R_DMACA_Int_Disable
+ * Description  : .
+ * Argument     : channel
+ * Return Value : .
+ *****************************************************************************/
 dmaca_return_t R_DMACA_Int_Disable (uint8_t channel);
+
+/******************************************************************************
+ * Function Name: R_DMACA_GetVersion
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
 uint32_t       R_DMACA_GetVersion (void);
+
+/******************************************************************************
+ * Function Name: R_DMACA_Init
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
 void           R_DMACA_Init (void);
+
+/******************************************************************************
+ * Function Name: R_DMACA_Int_Callback
+ * Description  : .
+ * Arguments    : channel
+ *              : callback
+ * Return Value : .
+ *****************************************************************************/
 dmaca_return_t R_DMACA_Int_Callback (uint8_t channel, void *callback);
 
 #endif /* DMACA_RX_IF_H */

@@ -56,6 +56,8 @@
 *         : 31.03.2022 4.10    Added support for RX660.
 *         : 27.12.2022 4.21    Updated include target mcu interface header file path format for Linux compatibility.
 *         : 31.03.2023 4.30    Added support for RX26T.
+*         : 29.05.2023 4.40    Added support for RX23E-B.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *******************************************************************************/
 #ifndef DTC_RX_PRIVATE_H
 #define DTC_RX_PRIVATE_H
@@ -174,6 +176,11 @@ Includes   <System Includes> , "Project Includes"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
+#elif defined(BSP_MCU_RX23E_B)
+    #include "./src/targets/rx23e-b/r_dtc_rx_target.h"
+    #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
+        #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
 #elif defined(BSP_MCU_RX23W)
     #include "./src/targets/rx23w/r_dtc_rx_target.h"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
@@ -226,7 +233,7 @@ Includes   <System Includes> , "Project Includes"
     #include "./src/targets/rx72n/r_dtc_rx_target.h"
 #else
     #error "This MCU is not supported by the current r_dtc_rx module."
-#endif
+#endif /* definedBSP_MCU_RX23T */
 
 /*****************************************************************************
 Macro definitions
@@ -253,7 +260,7 @@ typedef union dtc_mra {
         uint8_t SZ:2, /* DTC Data Transfer Size */
         uint8_t SM:2, /* Transfer Source Address Addressing Mode */
         uint8_t rs:2 /* reserved */
-    ) BIT;
+) BIT;
 
 } dtc_mra_t;
 
@@ -267,7 +274,7 @@ typedef union dtc_mrb {
         uint8_t DTS  :1,  /* DTC Transfer Mode Select */
         uint8_t DM   :2,  /* Transfer Destination Address Addressing Mode */
         uint8_t rs   :2  /* reserved */
-    ) BIT;
+) BIT;
 
 } dtc_mrb_t;
 #else
@@ -371,7 +378,7 @@ typedef struct st_dtc_short_transfer_data {
     } THIRD_LWORD;
 } dtc_internal_registers_t;
 
-#else /* Transfer data in full-address mode */
+#else /* DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE */
 typedef struct st_dtc_full_transfer_data {
     union {
         uint32_t LWORD;
@@ -418,17 +425,28 @@ typedef struct st_dtc_full_transfer_data {
     } FOURTH_LWORD;
 } dtc_internal_registers_t;
 
-#endif /* DTC_CFG_SHORT_ADDRESS_MODE */
+#endif /* DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE */
 
 R_BSP_PRAGMA_PACKOPTION;
 
 /*******************************************************************************
 Exported global variables and functions (to be accessed by other files)
 *******************************************************************************/
-void r_dtc_module_enable(void);
-void r_dtc_module_disable(void);
+/******************************************************************************
+ * Function Name: r_dtc_module_enable
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
+void r_dtc_module_enable (void);
+
+/******************************************************************************
+ * Function Name: r_dtc_module_disable
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
+void r_dtc_module_disable (void);
 #if ((0 != BSP_CFG_USER_LOCKING_ENABLED) || (bsp_lock_t != BSP_CFG_USER_LOCKING_TYPE) \
-      || (DTC_ENABLE != DTC_CFG_USE_DMAC_FIT_MODULE))
+    || (DTC_ENABLE != DTC_CFG_USE_DMAC_FIT_MODULE))
 bool r_dtc_check_DMAC_locking_byUSER(void);
 #endif
 

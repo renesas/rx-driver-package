@@ -35,6 +35,8 @@
  *         : 28.06.2022 2.10    Added new demo projects.
  *         : 15.08.2022 2.20    Changed version to 2.20.
  *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.     
+ *         : 29.05.2023 2.30    Added support for RX23E-B.
+ *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.     
   ***********************************************************************************************************************/
 
 #ifndef R_LPC_RX_IF_H
@@ -59,7 +61,7 @@
 
 /* Version Number of API. */
     #define LPC_RX_VERSION_MAJOR           (2)
-    #define LPC_RX_VERSION_MINOR           (20)
+    #define LPC_RX_VERSION_MINOR           (30)
 
 /***********************************************************************************************************************
  Typedef definitions
@@ -78,8 +80,14 @@ typedef enum lpc_err
     LPC_ERR_ILLEGAL               // Illegal setting
 } lpc_err_t;
 
+/**********************************************************************************************************************
+ * Function Name: lpc_callback_set_t
+ * Description  : .
+ * Argument     : pdata
+ * Return Value : .
+ *********************************************************************************************************************/
 typedef void (*lpc_callback_set_t)(void *pdata); /* Callback function type */
- 
+
 /***********************************************************************************************************************
  Exported global variables
  ***********************************************************************************************************************/
@@ -87,12 +95,44 @@ typedef void (*lpc_callback_set_t)(void *pdata); /* Callback function type */
 /***********************************************************************************************************************
  Exported global functions (to be accessed by other files)
  ***********************************************************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: R_LPC_GetVersion
+ * Description  : .
+ * Return Value : .
+ *********************************************************************************************************************/
 uint32_t R_LPC_GetVersion (void);
 #ifndef LPC_INVALID_OPERATING_MODE
+/**********************************************************************************************************************
+ * Function Name: R_LPC_OperatingModeSet
+ * Description  : .
+ * Argument     : e_mode
+ * Return Value : .
+ *********************************************************************************************************************/
 lpc_err_t R_LPC_OperatingModeSet (lpc_operating_mode_t e_mode);
 #endif
+/**********************************************************************************************************************
+ * Function Name: R_LPC_LowPowerModeConfigure
+ * Description  : .
+ * Argument     : e_mode
+ * Return Value : .
+ *********************************************************************************************************************/
 lpc_err_t R_LPC_LowPowerModeConfigure (lpc_low_power_mode_t e_mode);
+
+/**********************************************************************************************************************
+ * Function Name: R_LPC_LowPowerModeActivate
+ * Description  : .
+ * Argument     : pdata
+ * Return Value : .
+ *********************************************************************************************************************/
 lpc_err_t R_LPC_LowPowerModeActivate (void (*pcallback)(void* pdata));
+
+/**********************************************************************************************************************
+ * Function Name: R_LPC_ReturnClockSwitch
+ * Description  : .
+ * Arguments    : e_clock_source
+ *              : enable
+ * Return Value : .
+ *********************************************************************************************************************/
 lpc_err_t R_LPC_ReturnClockSwitch (lpc_clock_switch_t e_clock_source, bool enable);
 #ifdef LPC_VALID_SNOOZE_MODE
 lpc_err_t R_LPC_SnoozeModeConfigure (lpc_snooze_mode_t * snooze_mode);

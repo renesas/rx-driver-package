@@ -5,13 +5,13 @@ r_rscan_rx
 
 Document Number 
 ---------------
-R01AN2805EU0260
-R01AN2805JU0260
+R01AN2805EU0270
+R01AN2805JU0270
 
 
 Version
 -------
-v2.60
+v2.70
 
 
 Overview
@@ -54,6 +54,7 @@ Supported MCUs
 * RX24T-512 Group
 * RX24U Group
 * RX23E-A Group
+* RX23E-B Group
 
 
 Boards Tested On
@@ -63,6 +64,7 @@ Boards Tested On
 * RSKRX24T
 * RSKRX24U
 * RSSKRX23E-A
+* RSSKRX23E-B
 
 
 Limitations
@@ -117,4 +119,5 @@ r_rscan_rx
    
 r_config
     r_rscan_rx_config.h
-
+    
+r_rscan_rx.ftl

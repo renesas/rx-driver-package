@@ -59,8 +59,10 @@
 *         : 15.12.2022 4.60    Updated dependency module version.
 *         : 28.02.2023 4.70    Updated dependency module version.
 *         : 07.04.2023 4.80    Added support for RX26T.
-*         :                    Fixed to comply with GSCE Coding Standards Rev.6.5.0
-*         :                    Updated dependency module version.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0
+*                              Updated dependency module version.
+*         : 29.05.2023 4.90    Added support for RX23E-B.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0
 ***********************************************************************************************************************/
 
 #ifndef MPC_RX_INTERFACE_HEADER_FILE
@@ -84,7 +86,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define MPC_RX_VERSION_MAJOR           (4)
-#define MPC_RX_VERSION_MINOR           (80)
+#define MPC_RX_VERSION_MINOR           (90)
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -110,8 +112,29 @@ typedef enum
 /***********************************************************************************************************************
 Exported global functions (to be accessed by other files)
 ***********************************************************************************************************************/
+/******************************************************************************
+ * Function Name: R_MPC_Write
+ * Description  : .
+ * Arguments    : pin
+ *              : pconfig
+ * Return Value : .
+ *****************************************************************************/
 mpc_err_t   R_MPC_Write (gpio_port_pin_t pin, mpc_config_t * pconfig);
+
+/******************************************************************************
+ * Function Name: R_MPC_Read
+ * Description  : .
+ * Arguments    : pin
+ *              : pconfig
+ * Return Value : .
+ *****************************************************************************/
 void        R_MPC_Read (gpio_port_pin_t  pin, mpc_config_t * pconfig);
+
+/******************************************************************************
+ * Function Name: R_MPC_GetVersion
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
 uint32_t    R_MPC_GetVersion (void);
 
 #endif /* MPC_RX_INTERFACE_HEADER_FILE */

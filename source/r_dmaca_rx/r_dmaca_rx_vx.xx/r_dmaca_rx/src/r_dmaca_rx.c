@@ -49,6 +49,7 @@
 *                              Fixed to comply with GSCE Coding Standards Rev.6.00.
 *         : 31.03.2021 2.60    Supported RX671.
 *         : 15.08.2022 3.10    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 29.05.2023 3.20    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *******************************************************************************/
 
 /*******************************************************************************
@@ -873,11 +874,11 @@ static bool r_dmaca_set_transfer_data(uint8_t channel, dmaca_transfer_data_cfg_t
 
     /* Set DMAMD register. */
     DMACA_DMAMD(channel) = ((((uint16_t)p_cfg->src_addr_mode | (uint16_t)p_cfg->src_addr_repeat_area) | (uint16_t)p_cfg->des_addr_mode) |
-                                     (uint16_t)p_cfg->des_addr_repeat_area);
+        (uint16_t)p_cfg->des_addr_repeat_area);
 
     /* Set DMTMD register. */
     DMACA_DMTMD(channel) = ((((uint16_t)p_cfg->transfer_mode | (uint16_t)p_cfg->repeat_block_side) | (uint16_t)p_cfg->data_size) |
-                                     (uint16_t)p_cfg->request_source);
+        (uint16_t)p_cfg->request_source);
 
     /* Set DMSAR register. */
     DMACA_DMSAR(channel) = (volatile void R_BSP_EVENACCESS_SFR *)p_cfg->p_src_addr;
@@ -920,7 +921,7 @@ static bool r_dmaca_set_transfer_data(uint8_t channel, dmaca_transfer_data_cfg_t
     
     /* Set DMINT register */
     DMACA_DMINT(channel) = (((((uint8_t)p_cfg->dtie_request | (uint8_t)p_cfg->esie_request) | (uint8_t)p_cfg->rptie_request) |
-                                     (uint8_t)p_cfg->sarie_request) | (uint8_t)p_cfg->darie_request);
+        (uint8_t)p_cfg->sarie_request) | (uint8_t)p_cfg->darie_request);
 
     /* Get DMAC interrupt setting */
     if ((uint8_t)p_cfg->dtie_request == DMACA_DMINT(channel))

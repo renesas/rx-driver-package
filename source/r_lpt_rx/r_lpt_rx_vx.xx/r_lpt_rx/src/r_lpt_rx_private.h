@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_lpt_rx_private.h
@@ -28,6 +28,7 @@
  *         : 10.06.2020 2.00    Added support for RX23W
  *         : 31.03.2021 3.00    Added function R_LPT_InitChan, R_LPT_SetCMT, R_LPT_FinalChan, R_LPT_InitPWM
  *                              Added command LPT_CMD_PWM_START and LPT_CMD_PWM_STOP to R_LPT_Control()
+ *         : 31.05.2023 4.00    Change parameter check definition.
  *********************************************************************************************************************/
 
 /*******************************************************************************
@@ -41,9 +42,6 @@
 *******************************************************************************/
 #ifndef LPT_PRIVATE_H
 #define LPT_PRIVATE_H
-
-/* Constants to determine whether the parameter checking is enabled or disabled  */
-#define LPT_CFG_PARAM_CHECKING_ENABLE   (BSP_CFG_PARAM_CHECKING_ENABLE & LPT_CFG_PARAM_CHECKING)
 
 /*******************************************************************************
 Private global variables and functions

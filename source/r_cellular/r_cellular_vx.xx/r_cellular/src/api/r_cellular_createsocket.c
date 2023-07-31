@@ -76,10 +76,6 @@ int32_t R_CELLULAR_CreateSocket(st_cellular_ctrl_t * const p_ctrl, const uint8_t
         {
             ret = CELLULAR_ERR_NOT_OPEN;
         }
-        else if (CELLULAR_SYSTEM_OPEN == p_ctrl->system_state)
-        {
-            ret = CELLULAR_ERR_NOT_CONNECT;
-        }
         else
         {
             R_BSP_NOP();

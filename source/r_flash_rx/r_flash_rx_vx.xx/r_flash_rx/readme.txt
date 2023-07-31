@@ -5,12 +5,12 @@ r_flash_rx
 
 Document Number 
 ---------------
-r01an2184ej0500
-r01an2184jj0500
+r01an2184ej0510
+r01an2184jj0510
 
 Version
 -------
-v5.00
+v5.10
 
 Overview
 --------
@@ -42,6 +42,7 @@ Supported MCUs
 * RX230 Group
 * RX231 Group
 * RX23E-A Group
+* RX23E-B Group
 * RX23T Group
 * RX23W Group
 * RX24T Group
@@ -69,6 +70,7 @@ Boards Tested On
 * RX140 Target Board
 * RSKRX231
 * RSSKRX23E-A
+* RSSKRX23E-B
 * RSKRX23T
 * RSSKRX23W
 * RSKRX24T
@@ -102,7 +104,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp      V7.30
+* r_bsp      V7.40
 
 How to add to your project
 --------------------------
@@ -146,9 +148,9 @@ r_flash_rx
 |
 +---doc
 |   +-- en
-|   |   +-- r01an2184ej0500-rx-flash.pdf
+|   |   +-- r01an2184ej0510-rx-flash.pdf
 |   +-- ja
-|       +-- r01an2184jj0500-rx-flash.pdf
+|       +-- r01an2184jj0510-rx-flash.pdf
 |
 +---ref
 |   +-- r_flash_rx_config_reference.h
@@ -209,6 +211,9 @@ r_flash_rx
         |
         +--rx23e-a
              +-- r_flash_rx23e-a.h
+        |
+        +--rx23e-b
+             +-- r_flash_rx23e-b.h
         |
         +--rx23t
              +-- r_flash_rx23t.h

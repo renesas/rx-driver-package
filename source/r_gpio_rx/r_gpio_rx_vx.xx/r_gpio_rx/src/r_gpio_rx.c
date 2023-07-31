@@ -43,6 +43,7 @@
 *         : 15.04.2021 4.10    Updated Doxygen comment.
 *         : 11.11.2021 4.30    Update according to GSCE Code Checker 6.00
 *         : 07.04.2023 4.90    Fixed to comply with GSCE Coding Standards Rev.6.5.0
+*         : 29.05.2023 5.00    Fixed to comply with GSCE Coding Standards Rev.6.5.0
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -333,7 +334,7 @@ gpio_err_t R_GPIO_PinControl(gpio_port_pin_t pin, gpio_cmd_t cmd)
             *addr   = (uint8_t)((*addr) & (~(1 << pin_number)));
             break;
         }
-#endif  /* GPIO_DSCR_IS_SUPPORTED */
+#endif /* defined GPIO_DSCR_IS_SUPPORTED */
 #if defined (GPIO_DSCR2_IS_SUPPORTED)
         case GPIO_CMD_DSCR2_ENABLE:
         {
@@ -368,7 +369,7 @@ gpio_err_t R_GPIO_PinControl(gpio_port_pin_t pin, gpio_cmd_t cmd)
             *addr   = (uint8_t)((*addr) & (~(1 << pin_number)));
             break;
         }
-#endif  /* GPIO_DSCR2_IS_SUPPORTED */
+#endif /* defined GPIO_DSCR2_IS_SUPPORTED */
         case GPIO_CMD_ASSIGN_TO_GPIO:
         {
             /* Get pin's address */
@@ -494,7 +495,7 @@ uint32_t R_GPIO_GetVersion(void)
 ***********************************************************************************************************************/
 
 R_BSP_PRAGMA_INLINE (gpio_port_addr_get)
-uint8_t volatile * gpio_port_addr_get (uint8_t volatile * base_addr, uint16_t index)
+uint8_t volatile * gpio_port_addr_get(uint8_t volatile * base_addr, uint16_t index)
 {
     /* Add port number to 'index' to correct register. */
     return (uint8_t volatile *)((((uint32_t)index >> 8) & 0x000000FFuL) + (uint32_t)base_addr);
@@ -516,7 +517,7 @@ uint8_t volatile * gpio_port_addr_get (uint8_t volatile * base_addr, uint16_t in
 *                    Functionality is not supported on this pin.
 ***********************************************************************************************************************/
 R_BSP_PRAGMA_INLINE (gpio_pin_function_check)
-bool gpio_pin_function_check (uint8_t const * check_array, uint8_t port_number, uint8_t pin_number)
+bool gpio_pin_function_check(uint8_t const * check_array, uint8_t port_number, uint8_t pin_number)
 {
     if ((check_array[port_number] & (1 << pin_number)) != 0)
     {
@@ -538,7 +539,7 @@ bool gpio_pin_function_check (uint8_t const * check_array, uint8_t port_number, 
 *                    What output type to use for this pin
 * Return Value : None
 ***********************************************************************************************************************/
-void gpio_set_output_type (gpio_port_pin_t pin, gpio_pin_output_t out_type)
+void gpio_set_output_type(gpio_port_pin_t pin, gpio_pin_output_t out_type)
 {
     uint8_t volatile * addr;
     uint8_t            pin_number;

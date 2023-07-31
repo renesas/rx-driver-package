@@ -48,6 +48,7 @@
 *           30.11.2021 4.93    Added RX66T 48pins support.
 *           29.12.2021 5.00    Added RX660 support.
 *           01.08.2022 5.10    Added RX26T support.
+*           14.10.2022 5.20    Added RX23E-B support.
 *******************************************************************************/
 
 #ifndef S12AD_PRV_PRIVATE_H
@@ -69,7 +70,7 @@ Macro definitions
 
 /* Macro for accessing RX64M/RX65x/RX66T/RX71M/RX72T/RX24T/RX24U/RX671 data register pointers for 
  a given unit (0, 1 or 2) */
-#if (defined(BSP_MCU_RX66T)   || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX24T)  \
+#if (defined(BSP_MCU_RX66T)   || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX24T) \
     || defined(BSP_MCU_RX24U) || defined(BSP_MCU_RX26T))
 #define ADC_PRV_GET_DATA_ARR(x)     (((x)==0) ? gp_dreg0_ptrs : \
                                     ((x)==1) ? gp_dreg1_ptrs : \

@@ -24,10 +24,10 @@
 /*******************************************************************************
 * System Name  : QSPI single master driver
 * File Name    : r_qspi_smstr_target_dev_port.c
-* Version      : 1.14
+* Version      : 1.21
 * Device       : RX
 * Abstract     : Source file dedicated to RX66N for QSPI single master driver
-* Tool-Chain   : Renesas RXC Toolchain v3.01.00
+* Tool-Chain   : Renesas RXC Toolchain v3.05.00
 * OS           : not use
 * H/W Platform : not use
 * Description  : Functions for QSPI single master driver
@@ -36,6 +36,9 @@
 /*******************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 22.11.2019 1.14     First Release
+*              : 15.06.2023 1.21     Fixed typo in the comment of the r_qspi_smstr_check_timer()
+*              :                     Fixed typo in the comment of the r_qspi_smstr_tx_dmacdtc_wait()
+*              :                     Fixed typo in the comment of the r_qspi_smstr_rx_dmacdtc_wait()
 *******************************************************************************/
 
 /*******************************************************************************
@@ -738,8 +741,6 @@ void r_qspi_smstr_module_disable(uint8_t channel)
 *                    Size of data
 * Return Value : QSPI_SMSTR_SUCCESS -
 *                    Successful operation
-*                QSPI_SMSTR_ERR_PARAM -
-*                    Parameter error
 *                QSPI_SMSTR_ERR_HARD -
 *                    Hardware error
 *******************************************************************************/
@@ -797,8 +798,6 @@ qspi_smstr_status_t r_qspi_smstr_tx_dmacdtc_wait(uint8_t channel, uint32_t size)
 *                    Size of data
 * Return Value : QSPI_SMSTR_SUCCESS -
 *                    Successful operation
-*                QSPI_SMSTR_ERR_PARAM -
-*                    Parameter error
 *                QSPI_SMSTR_ERR_HARD -
 *                    Hardware error
 *******************************************************************************/
@@ -1205,7 +1204,7 @@ static void r_qspi_smstr_start_timer(uint8_t channel, uint32_t msec)
 /*******************************************************************************
 * Function Name: r_qspi_smstr_check_timer
 * Description  : Checks timeout to set r_qspi_smstr_start_timer function.
-*              : If timeout,return QSPI_SMSTR_ERR_OTHER. 
+*              : If timeout,return QSPI_SMSTR_ERR_HARD.
 *              : In the case of others, return QSPI_SMSTR_SUCCESS.
 * Arguments    : channel -
 *                    Which channel to use

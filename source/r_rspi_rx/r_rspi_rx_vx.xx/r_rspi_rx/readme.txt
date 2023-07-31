@@ -10,7 +10,7 @@ R01AN1827JJ{VERSION_NUMBER}
 
 Version
 -------
-v3.10
+v3.20
 
 Overview
 --------
@@ -88,6 +88,7 @@ Supported/Tested MCUs
 * RX140
 * RX660
 * RX26T
+* RX23E-B
 
 Boards Tested On
 ----------------
@@ -115,6 +116,7 @@ Boards Tested On
 * RSKRX140
 * RSKRX660
 * RSKRX26T
+* RSSKRX23E-B
 
 Limitations
 -----------
@@ -126,35 +128,30 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp     v7.30
+* r_bsp     v7.40
 
 How to add to your project
 --------------------------
 This module must be added to each project in which it is used.
-Renesas recommends using "Smart Configurator" described in (1) or (3) or (5).
+Renesas recommends using "Smart Configurator" described in (1) or (2) or (4).
 However, "Smart Configurator" only supports some RX devices.
-Please use the methods of (2) or (4) for unsupported RX devices.
+Please use the methods of (3) for unsupported RX devices.
 
 (1) Adding the FIT module to your project using "Smart Configurator" in e2 studio
 By using the "Smart Configurator" in e2 studio, 
 the FIT module is automatically added to your project.
 Refer to "RX Smart Configurator User's Guide: e2 studio (R20AN0451)" for details.
 
-(2) Adding the FIT module to your project using "FIT Configurator" in e2 studio
-By using the "FIT Configurator" in e2 studio,
-the FIT module is automatically added to your project.
-Refer to "Adding Firmware Integration Technology Modules to Projects (R01AN1723)" for details.
-
-(3) Adding the FIT module to your project using "Smart Configurator" on CS+
+(2) Adding the FIT module to your project using "Smart Configurator" on CS+
 By using the "Smart Configurator Standalone version" in CS+,
 the FIT module is automatically added to your project.
 Refer to "RX Smart Configurator User's Guide: CS+ (R20AN0470)" for details.
 
-(4) Adding the FIT module to your project in CS+
+(3) Adding the FIT module to your project in CS+
 In CS+, please manually add the FIT module to your project.
 Refer to "Adding Firmware Integration Technology Modules to CS+ Projects (R01AN1826)" for details.
 
-(5)Adding the FIT module to your project using the Smart Configurator in IAREW
+(4)Adding the FIT module to your project using the Smart Configurator in IAREW
 By using the Smart Configurator Standalone version,
 the FIT module is automatically added to your project.
 Refer to "RX Smart Configurator User's Guide: IAREW (R20AN0535)" for details.

@@ -1,21 +1,22 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer
-*
-* Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+ * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
+ *
+ * This software and documentation are supplied by Renesas Electronics America Inc. and may only be used with products
+ * of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.  Renesas products are
+ * sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for the selection and use
+ * of Renesas products and Renesas assumes no liability.  No license, express or implied, to any intellectual property
+ * right is granted by Renesas. This software is protected under all applicable laws, including copyright laws. Renesas
+ * reserves the right to change or discontinue this software and/or this documentation. THE SOFTWARE AND DOCUMENTATION
+ * IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND TO THE FULLEST EXTENT
+ * PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY, INCLUDING WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE SOFTWARE OR
+ * DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.  TO THE MAXIMUM
+ * EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR DOCUMENTATION
+ * (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER, INCLUDING,
+ * WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY LOST PROFITS,
+ * OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE POSSIBILITY
+ * OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
+ **********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Includes   <System Includes> , "Project Includes"
@@ -99,6 +100,9 @@ rm_zmod4xxx_api_t const g_zmod4xxx_on_zmod4xxx =
     .sulfurOdorDataCalculate   = RM_ZMOD4XXX_SulfurOdorDataCalculate,
     .oaq1stGenDataCalculate    = RM_ZMOD4XXX_Oaq1stGenDataCalculate,
     .oaq2ndGenDataCalculate    = RM_ZMOD4XXX_Oaq2ndGenDataCalculate,
+    .raqDataCalculate          = RM_ZMOD4XXX_RaqDataCalculate,
+    .relIaqDataCalculate       = RM_ZMOD4XXX_RelIaqDataCalculate,
+    .pbaqDataCalculate         = RM_ZMOD4XXX_PbaqDataCalculate,
     .temperatureAndHumiditySet = RM_ZMOD4XXX_TemperatureAndHumiditySet,
     .deviceErrorCheck          = RM_ZMOD4XXX_DeviceErrorCheck,
 };
@@ -581,6 +585,108 @@ fsp_err_t RM_ZMOD4XXX_Oaq2ndGenDataCalculate (rm_zmod4xxx_ctrl_t * const        
 }
 
 /*******************************************************************************************************************//**
+ * @brief  This function should be called when measurement finishes. To check measurement status either polling or
+ * busy/interrupt pin can be used.
+ * Implements @ref rm_zmod4xxx_api_t::raqDataCalculate
+ *
+ * @retval FSP_SUCCESS                            Successfully results are read.
+ * @retval FSP_ERR_ASSERTION                      Null pointer passed as a parameter.
+ * @retval FSP_ERR_NOT_OPEN                       Module is not opened configured.
+ **********************************************************************************************************************/
+fsp_err_t RM_ZMOD4XXX_RaqDataCalculate (rm_zmod4xxx_ctrl_t * const     p_api_ctrl,
+                                        rm_zmod4xxx_raw_data_t * const p_raw_data,
+                                        rm_zmod4xxx_raq_data_t * const p_zmod4xxx_data)
+{
+    fsp_err_t err = FSP_SUCCESS;
+    rm_zmod4xxx_instance_ctrl_t    * p_ctrl = (rm_zmod4xxx_instance_ctrl_t *) p_api_ctrl;
+    rm_zmod4xxx_lib_extended_cfg_t * p_lib;
+
+#if RM_ZMOD4XXX_CFG_PARAM_CHECKING_ENABLE
+    FSP_ASSERT(NULL != p_ctrl);
+    FSP_ASSERT(NULL != p_raw_data);
+    FSP_ASSERT(NULL != p_zmod4xxx_data);
+    FSP_ERROR_RETURN(RM_ZMOD4XXX_OPEN == p_ctrl->open, FSP_ERR_NOT_OPEN);
+#endif
+
+    /* Set ZMOD4XXX library specific */
+    p_lib = p_ctrl->p_zmod4xxx_lib;
+
+    /* Calculate RAQ data */
+    err = p_lib->p_api->raqDataCalculate(p_ctrl, p_raw_data, p_zmod4xxx_data);
+    FSP_ERROR_RETURN(FSP_SUCCESS == err, err);
+
+    return FSP_SUCCESS;
+}
+
+/*******************************************************************************************************************//**
+ * @brief  This function should be called when measurement finishes. To check measurement status either polling or
+ * busy/interrupt pin can be used.
+ * Implements @ref rm_zmod4xxx_api_t::relIaqDataCalculate
+ *
+ * @retval FSP_SUCCESS                            Successfully results are read.
+ * @retval FSP_ERR_ASSERTION                      Null pointer passed as a parameter.
+ * @retval FSP_ERR_NOT_OPEN                       Module is not opened configured.
+ **********************************************************************************************************************/
+fsp_err_t RM_ZMOD4XXX_RelIaqDataCalculate (rm_zmod4xxx_ctrl_t * const         p_api_ctrl,
+                                           rm_zmod4xxx_raw_data_t * const     p_raw_data,
+                                           rm_zmod4xxx_rel_iaq_data_t * const p_zmod4xxx_data)
+{
+    fsp_err_t err = FSP_SUCCESS;
+    rm_zmod4xxx_instance_ctrl_t    * p_ctrl = (rm_zmod4xxx_instance_ctrl_t *) p_api_ctrl;
+    rm_zmod4xxx_lib_extended_cfg_t * p_lib;
+
+#if RM_ZMOD4XXX_CFG_PARAM_CHECKING_ENABLE
+    FSP_ASSERT(NULL != p_ctrl);
+    FSP_ASSERT(NULL != p_raw_data);
+    FSP_ASSERT(NULL != p_zmod4xxx_data);
+    FSP_ERROR_RETURN(RM_ZMOD4XXX_OPEN == p_ctrl->open, FSP_ERR_NOT_OPEN);
+#endif
+
+    /* Set ZMOD4XXX library specific */
+    p_lib = p_ctrl->p_zmod4xxx_lib;
+
+    /* Calculate Relative IAQ data */
+    err = p_lib->p_api->relIaqDataCalculate(p_ctrl, p_raw_data, p_zmod4xxx_data);
+    FSP_ERROR_RETURN(FSP_SUCCESS == err, err);
+
+    return FSP_SUCCESS;
+}
+
+/*******************************************************************************************************************//**
+ * @brief  This function should be called when measurement finishes. To check measurement status either polling or
+ * busy/interrupt pin can be used.
+ * Implements @ref rm_zmod4xxx_api_t::pbaqDataCalculate
+ *
+ * @retval FSP_SUCCESS                            Successfully results are read.
+ * @retval FSP_ERR_ASSERTION                      Null pointer passed as a parameter.
+ * @retval FSP_ERR_NOT_OPEN                       Module is not opened configured.
+ **********************************************************************************************************************/
+fsp_err_t RM_ZMOD4XXX_PbaqDataCalculate (rm_zmod4xxx_ctrl_t * const      p_api_ctrl,
+                                         rm_zmod4xxx_raw_data_t * const  p_raw_data,
+                                         rm_zmod4xxx_pbaq_data_t * const p_zmod4xxx_data)
+{
+    fsp_err_t err = FSP_SUCCESS;
+    rm_zmod4xxx_instance_ctrl_t    * p_ctrl = (rm_zmod4xxx_instance_ctrl_t *) p_api_ctrl;
+    rm_zmod4xxx_lib_extended_cfg_t * p_lib;
+
+#if RM_ZMOD4XXX_CFG_PARAM_CHECKING_ENABLE
+    FSP_ASSERT(NULL != p_ctrl);
+    FSP_ASSERT(NULL != p_raw_data);
+    FSP_ASSERT(NULL != p_zmod4xxx_data);
+    FSP_ERROR_RETURN(RM_ZMOD4XXX_OPEN == p_ctrl->open, FSP_ERR_NOT_OPEN);
+#endif
+
+    /* Set ZMOD4XXX library specific */
+    p_lib = p_ctrl->p_zmod4xxx_lib;
+
+    /* Calculate PBAQ data */
+    err = p_lib->p_api->pbaqDataCalculate(p_ctrl, p_raw_data, p_zmod4xxx_data);
+    FSP_ERROR_RETURN(FSP_SUCCESS == err, err);
+
+    return FSP_SUCCESS;
+}
+
+/*******************************************************************************************************************//**
  * @brief  This function is valid only for OAQ_2nd_Gen and IAQ_2nd_Gen_ULP. This function should be called before DataCalculate.
  * Humidity and temperature measurements are needed for ambient compensation.
  * Implements @ref rm_zmod4xxx_api_t::temperatureAndHumiditySet
@@ -618,8 +724,8 @@ fsp_err_t RM_ZMOD4XXX_TemperatureAndHumiditySet (rm_zmod4xxx_ctrl_t * const p_ap
  * @retval FSP_SUCCESS                            Successfully results are read.
  * @retval FSP_ERR_ASSERTION                      Null pointer passed as a parameter.
  * @retval FSP_ERR_NOT_OPEN                       Module is not opened configured.
- * @retval FSP_ERR_TIMEOUT                        Communication is timeout.
- * @retval FSP_ERR_ABORTED                        Communication is aborted.
+ * @retval FSP_ERR_TIMEOUT          communication is timeout.
+ * @retval FSP_ERR_ABORTED          communication is aborted.
  **********************************************************************************************************************/
 fsp_err_t RM_ZMOD4XXX_DeviceErrorCheck (rm_zmod4xxx_ctrl_t * const p_api_ctrl)
 {
@@ -689,7 +795,8 @@ void rm_zmod4xxx_comms_i2c_callback (rm_comms_callback_args_t * p_args)
         if ((true == p_ctrl->status.flag) && (RM_ZMOD4XXX_EVENT_SUCCESS == zmod4xxx_callback_args.event))
         {
             if ((RM_ZMOD4410_LIB_TYPE_IAQ_1ST_GEN_CONTINUOUS == p_lib->lib_type) ||
-                (RM_ZMOD4410_LIB_TYPE_ODOR == p_lib->lib_type))
+                (RM_ZMOD4410_LIB_TYPE_ODOR == p_lib->lib_type) ||
+                (RM_ZMOD4450_LIB_TYPE_RAQ == p_lib->lib_type))
             {
                 status = (p_ctrl->status.value & RM_ZMOD4XXX_STATUS_LAST_SEQ_STEP_MASK);
                 if (((p_zmod4xxx_device->meas_conf->s.len / 2) - 1) != status)

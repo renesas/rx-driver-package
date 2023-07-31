@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rtc_rx_if.h
@@ -52,6 +52,9 @@
 *           30.06.2021 2.81    Added support for RX671.
 *           31.07.2021 2.82    Added support for RX140.
 *           31.12.2021 2.83    Added support for RX660.
+*           29.05.2023 2.90    Added support for RX23E-B.
+*                              Updated demo projects.
+*                              Updated according to GSCE Code Checker 6.50.
 ***********************************************************************************************************************/
 
 #ifndef RTC_RX_INTERFACE_HEADER_FILE
@@ -68,7 +71,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
 #define RTC_RX_VERSION_MAJOR        (2)
-#define RTC_RX_VERSION_MINOR        (83)
+#define RTC_RX_VERSION_MINOR        (90)
 
 /***********************************************************************************************************************
 BSP version detection
@@ -106,6 +109,12 @@ typedef enum e_rtc_periodic
     RTC_PERIODIC_2_SEC  = 15,
 } rtc_periodic_t;
 
+/******************************************************************************
+ * Function Name: rtc_cb_func_t
+ * Description  : .
+ * Arguments    : p_args
+ * Return Value : .
+ *****************************************************************************/
 typedef void (*rtc_cb_func_t)(void *p_args);
 
 typedef struct
@@ -156,7 +165,7 @@ typedef enum
     RTC_CMD_START_COUNTERS,
     RTC_CMD_STOP_COUNTERS,
     RTC_CMD_PARTIAL_RESET,          // primarily output clock, alarms and capture registers
-#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130) && !defined(BSP_MCU_RX140)
+#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130) && !defined(BSP_MCU_RX140) && !defined(BSP_MCU_RX23E_B)
     RTC_CMD_CONFIG_CAPTURE,         // configure capture pin; RX230, RX231, RX64M, RX65N, RX671, RX71M, RX72M, RX660, RX66N, RX72N
     RTC_CMD_CHECK_PIN0_CAPTURE,     // see if capture event occurred; load time if yes
     RTC_CMD_CHECK_PIN1_CAPTURE,
@@ -238,10 +247,47 @@ typedef enum
 /***********************************************************************************************************************
 Exported global functions (to be accessed by other files)
 ***********************************************************************************************************************/
-rtc_err_t R_RTC_Open (rtc_init_t * p_init, tm_t *p_current_time);
-rtc_err_t R_RTC_Control (rtc_cmd_t cmd, void *p_args);
-rtc_err_t R_RTC_Read (tm_t *p_current_time, tm_t *p_alarm_time);
+/******************************************************************************
+ * Function Name: R_RTC_Open
+ * Description  : .
+ * Arguments    : p_init
+ *              : p_current_time
+ * Return Value : .
+ *****************************************************************************/
+rtc_err_t R_RTC_Open (rtc_init_t * p_init, tm_t * p_current_time);
+
+/******************************************************************************
+ * Function Name: R_RTC_Control
+ * Description  : .
+ * Arguments    : cmd
+ *              : p_args
+ * Return Value : .
+ *****************************************************************************/
+rtc_err_t R_RTC_Control (rtc_cmd_t cmd, void * p_args);
+
+/******************************************************************************
+ * Function Name: R_RTC_Read
+ * Description  : .
+ * Arguments    : p_current_time
+ *              : p_alarm_time
+ * Return Value : .
+ *****************************************************************************/
+rtc_err_t R_RTC_Read (tm_t * p_current_time, tm_t * p_alarm_time);
+
+/******************************************************************************
+ * Function Name: R_RTC_Close
+ * Description  : .
+ * Arguments    : .
+ * Return Value : .
+ *****************************************************************************/
 void      R_RTC_Close (void);
+
+/******************************************************************************
+ * Function Name: R_RTC_GetVersion
+ * Description  : .
+ * Arguments    : .
+ * Return Value : .
+ *****************************************************************************/
 uint32_t  R_RTC_GetVersion (void);
 
 #endif /* RTC_RX_INTERFACE_HEADER_FILE */

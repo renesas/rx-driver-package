@@ -50,6 +50,8 @@
  *         : 31.07.2021 2.49     RX140 support added.
  *         : 15.06.2022 2.60     RX26T support added.
  *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *         : 29.05.2023 2.70     RX23E-B support added.
+ *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef SCI_IIC_PRIVATE_H
@@ -844,10 +846,10 @@
 
 /* Channel select not changed. */
     #if ( (0 == SCI_IIC_CFG_CH0_INCLUDED) && (0 == SCI_IIC_CFG_CH1_INCLUDED) && (0 == SCI_IIC_CFG_CH2_INCLUDED) \
-       && (0 == SCI_IIC_CFG_CH3_INCLUDED) && (0 == SCI_IIC_CFG_CH4_INCLUDED) && (0 == SCI_IIC_CFG_CH5_INCLUDED) \
-       && (0 == SCI_IIC_CFG_CH6_INCLUDED) && (0 == SCI_IIC_CFG_CH7_INCLUDED) && (0 == SCI_IIC_CFG_CH8_INCLUDED) \
-       && (0 == SCI_IIC_CFG_CH9_INCLUDED) && (0 == SCI_IIC_CFG_CH10_INCLUDED) && (0 == SCI_IIC_CFG_CH11_INCLUDED) \
-       && (0 == SCI_IIC_CFG_CH12_INCLUDED) )
+        && (0 == SCI_IIC_CFG_CH3_INCLUDED) && (0 == SCI_IIC_CFG_CH4_INCLUDED) && (0 == SCI_IIC_CFG_CH5_INCLUDED) \
+        && (0 == SCI_IIC_CFG_CH6_INCLUDED) && (0 == SCI_IIC_CFG_CH7_INCLUDED) && (0 == SCI_IIC_CFG_CH8_INCLUDED) \
+        && (0 == SCI_IIC_CFG_CH9_INCLUDED) && (0 == SCI_IIC_CFG_CH10_INCLUDED) && (0 == SCI_IIC_CFG_CH11_INCLUDED) \
+        && (0 == SCI_IIC_CFG_CH12_INCLUDED) )
         #error "ERROR - SCI_IIC_CFG_CHx_INCLUDED (x is 0 to 12) is all 0.- Parameter error in r_sci_iic_rx_config.h."
     #endif
 

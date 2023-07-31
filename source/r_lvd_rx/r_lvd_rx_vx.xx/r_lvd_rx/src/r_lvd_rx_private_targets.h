@@ -49,6 +49,8 @@
 *              : 12.12.2022 4.30     Fixed default register value of voltage level for RX13T/RX23E-A/RX660/RX72T/RX66T.
 *                                    Fixed condition of the voltage detection level for RX130 channel 2.
 *              : 31.03.2023 4.40     Added support for RX26T.
+*              : 29.05.2023 4.50     Added support for RX23E-B.
+*                                    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 #ifndef LVD_PRIVATE_TARGETS_HEADER_FILE
 #define LVD_PRIVATE_TARGETS_HEADER_FILE
@@ -79,6 +81,8 @@ Includes <System Includes> , "Project Includes"
     #include "./targets/rx231/r_lvd_rx231.h"
 #elif defined(BSP_MCU_RX23E_A)
     #include "./targets/rx23e-a/r_lvd_rx23e-a.h"
+#elif defined(BSP_MCU_RX23E_B)
+    #include "./targets/rx23e-b/r_lvd_rx23e-b.h"
 #elif defined(BSP_MCU_RX23W)
     #include "./targets/rx23w/r_lvd_rx23w.h"
 #elif defined(BSP_MCU_RX24T)
@@ -109,14 +113,14 @@ Includes <System Includes> , "Project Includes"
     #include "./targets/rx72n/r_lvd_rx72n.h"
 #else
     #error "This MCU is not supported by the current r_lvd_rx module."
-#endif
+#endif /* definedBSP_MCU_RX110 */
 
 /***********************************************************************************************************************
 Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
 #define LVD_RX_VERSION_MAJOR                    (4)
-#define LVD_RX_VERSION_MINOR                    (40)
+#define LVD_RX_VERSION_MINOR                    (50)
 
 /***********************************************************************************************************************
 Typedef definitions

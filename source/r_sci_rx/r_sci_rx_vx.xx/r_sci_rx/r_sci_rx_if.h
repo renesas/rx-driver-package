@@ -79,6 +79,8 @@
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *                              Removed byteq header include in SYNC mode and SSPI mode.
 *                              Moved the source code which checks for IRDA mode support to MDF file.
+*           29.05.2023 4.90    Added support for RX23E-B.
+                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 #ifndef SCI_IF_H
@@ -108,7 +110,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define SCI_VERSION_MAJOR  (4)
-#define SCI_VERSION_MINOR  (80)
+#define SCI_VERSION_MINOR  (90)
 
 #define SCI_DTC_DMACA_DISABLE  (0x0)
 #define SCI_DTC_ENABLE         (0x1)
@@ -388,31 +390,85 @@ typedef struct st_sci_baud
 /*****************************************************************************
 Public Functions
 ******************************************************************************/
+/******************************************************************************
+ * Function Name: R_SCI_Open
+ * Description  : .
+ * Arguments    : chan
+ *              : mode
+ *              : p_cfg
+ *              : p_args
+ *              : p_hdl
+ * Return Value : .
+ *****************************************************************************/
 sci_err_t R_SCI_Open (uint8_t const      chan,
                     sci_mode_t const   mode,
                     sci_cfg_t * const  p_cfg,
                     void               (* const p_callback)(void *p_args),
                     sci_hdl_t * const  p_hdl);
 
+/******************************************************************************
+ * Function Name: R_SCI_Send
+ * Description  : .
+ * Arguments    : hdl
+ *              : p_src
+ *              : length
+ * Return Value : .
+ *****************************************************************************/
 sci_err_t R_SCI_Send (sci_hdl_t const    hdl,
                     uint8_t            *p_src,
                     uint16_t const     length);
                     
+/******************************************************************************
+ * Function Name: R_SCI_SendReceive
+ * Description  : .
+ * Arguments    : hdl
+ *              : p_src
+ *              : p_dst
+ *              : length
+ * Return Value : .
+ *****************************************************************************/
 sci_err_t R_SCI_SendReceive (sci_hdl_t const hdl,        /* SSPI/SYNC only */
                             uint8_t         *p_src,
                             uint8_t         *p_dst,
                             uint16_t const  length);
 
+/******************************************************************************
+ * Function Name: R_SCI_Receive
+ * Description  : .
+ * Arguments    : hdl
+ *              : p_dst
+ *              : length
+ * Return Value : .
+ *****************************************************************************/
 sci_err_t R_SCI_Receive (sci_hdl_t const hdl,
                         uint8_t         *p_dst,
                         uint16_t const  length);
 
+/******************************************************************************
+ * Function Name: R_SCI_Control
+ * Description  : .
+ * Arguments    : hdl
+ *              : cmd
+ *              : p_args
+ * Return Value : .
+ *****************************************************************************/
 sci_err_t R_SCI_Control (sci_hdl_t const     hdl,
                         sci_cmd_t const     cmd,
                         void                *p_args);
 
+/******************************************************************************
+ * Function Name: R_SCI_Close
+ * Description  : .
+ * Argument     : hdl
+ * Return Value : .
+ *****************************************************************************/
 sci_err_t R_SCI_Close (sci_hdl_t const hdl);
 
+/******************************************************************************
+ * Function Name: R_SCI_GetVersion
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
 uint32_t  R_SCI_GetVersion (void);
 
                                     

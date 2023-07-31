@@ -46,6 +46,7 @@
         <group omit_board="true">RX24U</group>
         <group omit_board="true">RX23W</group>
         <group omit_board="true">RX23E-A</group>
+        <group omit_board="true">RX23E-B</group>
     </target>
 
     <!-- only one package entry allowed -->
@@ -57,7 +58,7 @@
         <version>x.xx</version>
         <dependency>
             <module>r_bsp</module>
-            <version>7.21</version>
+            <version>7.40</version>
         </dependency>
         <zipsource>r_rscan_rx_vx.xx.zip</zipsource>
         <application>Communications</application>

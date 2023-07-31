@@ -48,6 +48,8 @@
 *         : 31.03.2023 3.10     Added support for RX26T.
 *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *                               Added new demo projects.
+*         : 29.05.2023 3.20     Supported RX23E-B.
+*                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 #ifndef RSPI_API_HEADER_FILE
 #define RSPI_API_HEADER_FILE
@@ -73,7 +75,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define RSPI_RX_VERSION_MAJOR           (3)
-#define RSPI_RX_VERSION_MINOR           (10)
+#define RSPI_RX_VERSION_MINOR           (20)
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -294,49 +296,148 @@ typedef union rspi_command_word_s
         rspi_spcmd_slnden_t       ssl_neg_delay :1,
         rspi_spcmd_sckden_t       clock_delay   :1,
         rspi_spcmd_dummy_t        dummy         :16
-    );
+);
     uint16_t word[2];
 } rspi_command_word_t;
 
 /***********************************************************************************************************************
  Public Functions
 ***********************************************************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_Open
+ * Description  : .
+ * Arguments    : channel
+ *              : pconfig
+ *              : spcmd_command_word
+ *              : pcbdat
+ *              : phandle
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_Open (uint8_t                 channel,
                         rspi_chnl_settings_t  * pconfig,
                         rspi_command_word_t     spcmd_command_word,
                         void (*pcallback)(void* pcbdat),
                         rspi_handle_t         * phandle);
 
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_Control
+ * Description  : .
+ * Arguments    : handle
+ *              : cmd
+ *              : pcmd_data
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_Control  (rspi_handle_t  handle,
                             rspi_cmd_t     cmd,
                             void         * pcmd_data);
 
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_Read
+ * Description  : .
+ * Arguments    : handle
+ *              : spcmd_command_word
+ *              : pdest
+ *              : length
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_Read (rspi_handle_t        handle,
                         rspi_command_word_t  spcmd_command_word,
                         void               * pdest,
                         uint16_t             length);
 
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_Write
+ * Description  : .
+ * Arguments    : handle
+ *              : spcmd_command_word
+ *              : psrc
+ *              : length
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_Write (rspi_handle_t      handle,
                         rspi_command_word_t spcmd_command_word,
                         void              * psrc,
                         uint16_t            length);
 
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_WriteRead
+ * Description  : .
+ * Arguments    : handle
+ *              : spcmd_command_word
+ *              : psrc
+ *              : pdest
+ *              : length
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_WriteRead (rspi_handle_t       handle,
                             rspi_command_word_t  spcmd_command_word,
                             void               * psrc,
                             void               * pdest,
                             uint16_t             length);
 
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_Close
+ * Description  : .
+ * Argument     : handle
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_Close (rspi_handle_t handle);
+
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_GetVersion
+ * Description  : .
+ * Return Value : .
+ *********************************************************************************************************************/
 uint32_t   R_RSPI_GetVersion (void);
 
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_GetBuffRegAddress
+ * Description  : .
+ * Arguments    : handle
+ *              : p_spdr_adr
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_GetBuffRegAddress (rspi_handle_t handle,
                                     uint32_t *    p_spdr_adr);
 
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_IntSptiIerClear
+ * Description  : .
+ * Argument     : handle
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_IntSptiIerClear (rspi_handle_t handle);
+
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_IntSpriIerClear
+ * Description  : .
+ * Argument     : handle
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_IntSpriIerClear (rspi_handle_t handle);
+
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_DisableSpti
+ * Description  : .
+ * Argument     : handle
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_DisableSpti (rspi_handle_t handle);
+
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_DisableRSPI
+ * Description  : .
+ * Argument     : handle
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_DisableRSPI (rspi_handle_t handle);
+
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_SetLogHdlAddress
+ * Description  : .
+ * Argument     : user_long_que
+ * Return Value : .
+ *********************************************************************************************************************/
 rspi_err_t R_RSPI_SetLogHdlAddress (uint32_t user_long_que);
 
 #endif /* RSPI_API_HEADER_FILE */

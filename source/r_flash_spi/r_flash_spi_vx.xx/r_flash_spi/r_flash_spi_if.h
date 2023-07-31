@@ -19,11 +19,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011(2012-2023) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_flash_spi_if.h
-* Version      : 3.20
+* Version      : 3.30
 * Description  : FLASH SPI driver interface header file
 *************************************************************************************************/
 /************************************************************************************************
@@ -43,6 +43,7 @@
 *                                    Added support for RSCI and QSPIX Memory Mapped Mode
 *                                    Removed the processing related to other unsupported flash 
 *                                    devices.
+*              : 15.06.2023 3.30     Updated and added new demo project.
 *************************************************************************************************/
 #ifndef FLASH_SPI_IF_H
 #define FLASH_SPI_IF_H
@@ -66,7 +67,7 @@ Macro definitions
 
 /* Driver version */
 #define FLASH_SPI_VERSION_MAJOR       (3)
-#define FLASH_SPI_VERSION_MINOR       (20)
+#define FLASH_SPI_VERSION_MINOR       (30)
 
 
 /*--------------- Define no. of slots ----------------*/

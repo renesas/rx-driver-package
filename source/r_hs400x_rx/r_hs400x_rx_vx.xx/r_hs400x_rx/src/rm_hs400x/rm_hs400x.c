@@ -64,11 +64,11 @@
 #define RM_HS400X_MASK_HUMI_LOW_ALERT                    (0x01)
 
 /* Definitions for Calculation */
-#define RM_HS400X_CALC_STATIC_VALUE                      (16383.0F)
-#define RM_HS400X_CALC_HUMD_VALUE_100                    (100.0F)
-#define RM_HS400X_CALC_TEMP_C_VALUE_165                  (165.0F)
-#define RM_HS400X_CALC_TEMP_C_VALUE_40                   (40.0F)
-#define RM_HS400X_CALC_DECIMAL_VALUE_100                 (100.0F)
+#define RM_HS400X_CALC_STATIC_VALUE                      (16383)
+#define RM_HS400X_CALC_HUMD_VALUE_100                    (100)
+#define RM_HS400X_CALC_TEMP_C_VALUE_165                  (165)
+#define RM_HS400X_CALC_TEMP_C_VALUE_40                   (40)
+#define RM_HS400X_CALC_DECIMAL_VALUE_100                 (100)
 #define RM_HS400X_CALC_CRC_ADC_DATA_LENGTH               (4)
 #define RM_HS400X_CALC_CRC_8BITS_LENGTH                  (8)
 #define RM_HS400X_CALC_CRC_POLYNOMIAL                    (0x1D)
@@ -421,7 +421,7 @@ fsp_err_t RM_HS400X_DataCalculate (rm_hs400x_ctrl_t * const     p_api_ctrl,
 {
     fsp_err_t err = FSP_SUCCESS;
     rm_hs400x_instance_ctrl_t * p_ctrl = (rm_hs400x_instance_ctrl_t *) p_api_ctrl;
-    float    tmp_f   = 0.0;
+    int32_t  tmp_32  = 0;
     uint16_t tmp_u16 = 0x0000U;
 
 #if RM_HS400X_CFG_PARAM_CHECKING_ENABLE
@@ -442,22 +442,22 @@ fsp_err_t RM_HS400X_DataCalculate (rm_hs400x_ctrl_t * const     p_api_ctrl,
     /* Relative Humidity [%RH] */
     tmp_u16 =
         (uint16_t) ((uint16_t) (p_raw_data->humidity[0] & RM_HS400X_MASK_DATA_0X3F) << 8);
-    tmp_f = (float) (tmp_u16 | (uint16_t) (p_raw_data->humidity[1]));
-    tmp_f = (tmp_f * RM_HS400X_CALC_HUMD_VALUE_100) / RM_HS400X_CALC_STATIC_VALUE;
-    p_hs400x_data->humidity.integer_part = (int16_t) tmp_f;
-    p_hs400x_data->humidity.decimal_part =
-        (int16_t) ((tmp_f - (float) p_hs400x_data->humidity.integer_part) * RM_HS400X_CALC_DECIMAL_VALUE_100);
+    tmp_u16 = (uint16_t) (tmp_u16 | (uint16_t) (p_raw_data->humidity[1]));
+    tmp_32 = (int32_t) (((int32_t)tmp_u16 * RM_HS400X_CALC_HUMD_VALUE_100 * RM_HS400X_CALC_HUMD_VALUE_100) /
+                        RM_HS400X_CALC_STATIC_VALUE);
+    p_hs400x_data->humidity.integer_part = (int16_t) (tmp_32 / RM_HS400X_CALC_HUMD_VALUE_100);
+    p_hs400x_data->humidity.decimal_part = (int16_t) (tmp_32 % RM_HS400X_CALC_HUMD_VALUE_100);
 #endif
 
     /* Temperature [Celsius] */
     tmp_u16 =
         (uint16_t) ((uint16_t) (p_raw_data->temperature[0] & RM_HS400X_MASK_DATA_0X3F) << 8);
-    tmp_f = (float) (tmp_u16 | (uint16_t) (p_raw_data->temperature[1]));
-    tmp_f = ((tmp_f * RM_HS400X_CALC_TEMP_C_VALUE_165) / RM_HS400X_CALC_STATIC_VALUE) -
-            RM_HS400X_CALC_TEMP_C_VALUE_40;
-    p_hs400x_data->temperature.integer_part = (int16_t) tmp_f;
-    p_hs400x_data->temperature.decimal_part =
-        (int16_t) ((tmp_f - (float) p_hs400x_data->temperature.integer_part) * RM_HS400X_CALC_DECIMAL_VALUE_100);
+    tmp_u16 = (uint16_t) (tmp_u16 | (uint16_t) (p_raw_data->temperature[1]));
+    tmp_32 = (int32_t)((((int32_t)tmp_u16 * RM_HS400X_CALC_TEMP_C_VALUE_165 * RM_HS400X_CALC_HUMD_VALUE_100) /
+                        RM_HS400X_CALC_STATIC_VALUE) -
+                        (RM_HS400X_CALC_TEMP_C_VALUE_40 * RM_HS400X_CALC_HUMD_VALUE_100));
+    p_hs400x_data->temperature.integer_part = (int16_t) (tmp_32 / RM_HS400X_CALC_HUMD_VALUE_100);
+    p_hs400x_data->temperature.decimal_part = (int16_t) (tmp_32 % RM_HS400X_CALC_HUMD_VALUE_100);
 
     return FSP_SUCCESS;
 }

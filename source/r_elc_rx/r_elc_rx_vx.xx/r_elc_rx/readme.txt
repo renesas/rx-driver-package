@@ -12,8 +12,6 @@ peripheral modules to different modules. Event linking allows direct cooperation
 between the modules without CPU intervention.
 
 A configuration option for this exists in "r_config\r_elc_rx_config.h".
-An original copy of the configuration file is stored in 
-"r_elc_rx\ref\r_elc_rx_config_reference.h".
 
 
 Features
@@ -29,13 +27,10 @@ r_elc_rx
 +---doc
 |   |
 |   +-- ja
-|   |   +-- r01an3066jj0201-rx-elc.pdf
+|   |   +-- r01an3066jj{VERSION_NUMBER}-rx-elc.pdf
 |   |
 |   +-- en
-|       +-- r01an3066ej0201-rx-elc.pdf
-|
-+---ref
-|       r_elc_rx_config_reference.h
+|       +-- r01an3066ej{VERSION_NUMBER}-rx-elc.pdf
 |
 +---src
     +-- r_elc_rx.c
@@ -67,6 +62,10 @@ r_elc_rx
         +-- rx23w
         |   +-- r_elc_rx23w.c
         |   +-- r_elc_rx23w_private.h
+        |
+        +-- rx23e-b
+        |   +-- r_elc_rx23e-b.c
+        |   +-- r_elc_rx23e-b_private.h
         |
         +-- rx65n
             +-- r_elc_rx65n.c

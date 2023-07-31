@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rtc_rx_hw.c
@@ -64,6 +64,8 @@
 *                              rtc_enable_ints function after rtc_set_output function.
 *           31.07.2021 2.82    Added support for RX140.
 *           31.12.2021 2.83    Added support for RX660.
+*           29.05.2023 2.90    Added support for RX23E-B.
+*                              Updated according to GSCE Code Checker 6.50
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -82,7 +84,7 @@ Macro definitions
 /***********************************************************************************************************************
 Private global variables and functions
 ***********************************************************************************************************************/
-#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130) && !defined(BSP_MCU_RX140)
+#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130) && !defined(BSP_MCU_RX140) && !defined(BSP_MCU_RX23E_B)
 volatile rtc_cap_ctrl_t *g_pcap_ctrl = (rtc_cap_ctrl_t *) &RTC.RTCCR0.BYTE;
 volatile rtc_cap_time_t *g_pcap_time = (rtc_cap_time_t *) &RTC.RSECCP0.BYTE;
 #endif
@@ -95,13 +97,14 @@ volatile rtc_cap_time_t *g_pcap_time = (rtc_cap_time_t *) &RTC.RSECCP0.BYTE;
 * Arguments    : None
 * Return Value : None
 ***********************************************************************************************************************/
-void rtc_init (void)
+void rtc_init(void)
 {
 #if (!defined(BSP_MCU_RX140))
 
     #if (!defined(BSP_MCU_RX660))
     /* Set sub-clock drive capacity */
     RTC.RCR3.BIT.RTCDV = RTC_DRIVE_CAPACITY;
+
     /* WAIT_LOOP */
     while (RTC_DRIVE_CAPACITY != RTC.RCR3.BIT.RTCDV)
     {
@@ -111,13 +114,17 @@ void rtc_init (void)
     #endif
 
     /* Enable the sub-clock for RTC */
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX671) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) ||\
-    defined(BSP_MCU_RX660)
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) \
+    || defined(BSP_MCU_RX671) || defined(BSP_MCU_RX71M) \
+    || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX66N) \
+    || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX660)
+
     RTC.RCR4.BIT.RCKSEL = 0;            // do not use main clock
 #endif
 
     #if (!defined(BSP_MCU_RX660))
     RTC.RCR3.BIT.RTCEN = 1;             // enable sub-clock
+
     /* WAIT_LOOP */
     while (1 != RTC.RCR3.BIT.RTCEN)
     {
@@ -125,10 +132,11 @@ void rtc_init (void)
         R_BSP_NOP();
     }
     #endif
-#endif
+#endif /* !definedBSP_MCU_RX140 */
 
     /* Wait for six the sub-clock cycles */
-    R_BSP_SoftwareDelay((uint32_t) 184, (bsp_delay_units_t) BSP_DELAY_MICROSECS); //Approx.184us (32768Hz * 6cycles = 183.10...us)
+    /* Approx.184us (32768Hz * 6cycles = 183.10...us) */
+    R_BSP_SoftwareDelay((uint32_t)184, (bsp_delay_units_t)BSP_DELAY_MICROSECS);
 
     /* Confirm that it has changed */
     /* WAIT_LOOP */
@@ -175,7 +183,7 @@ End of function rtc_init
 *                   - interrupt priority; 0 to 15
 * Return Value : None
 ***********************************************************************************************************************/
-void rtc_set_periodic (rtc_periodic_t freq, uint8_t priority)
+void rtc_set_periodic(rtc_periodic_t freq, uint8_t priority)
 {
     uint8_t tmp;
 
@@ -187,6 +195,7 @@ void rtc_set_periodic (rtc_periodic_t freq, uint8_t priority)
     if (RTC.RCR1.BIT.PES != freq)           // if setting needs to change
     {
         RTC.RCR1.BIT.PES = freq;            // write the setting
+
         /* WAIT_LOOP */
         while (RTC.RCR1.BIT.PES == tmp)     // loop while setting has not changed
         {
@@ -223,7 +232,7 @@ End of function rtc_set_periodic
 *                   - output frequency; from enum
 * Return Value : None
 ***********************************************************************************************************************/
-void rtc_set_output (rtc_output_t output_freq)
+void rtc_set_output(rtc_output_t output_freq)
 {
     uint8_t counter_state;
 
@@ -237,7 +246,8 @@ void rtc_set_output (rtc_output_t output_freq)
 
     if (RTC_OUTPUT_OFF != output_freq)
     {
-        RTC.RCR1.BIT.RTCOS = (uint8_t) ((RTC_OUTPUT_64_HZ == output_freq) ? 1 : 0); // set bit for 64Hz or 1 Hz operation
+        /* Set bit for 64Hz or 1 Hz operation */
+        RTC.RCR1.BIT.RTCOS = (uint8_t) ((RTC_OUTPUT_64_HZ == output_freq) ? 1 : 0);
         RTC.RCR2.BIT.RTCOE = 1;                 // enable output
     }
 
@@ -257,7 +267,7 @@ End of function rtc_set_output
 *                   - structure pointer to current date/time
 * Return Value : None
 ***********************************************************************************************************************/
-void rtc_set_current_time (tm_t * p_current)
+void rtc_set_current_time(tm_t * p_current)
 {
     uint8_t clock_state;
     volatile uint8_t dummy_byte;
@@ -275,7 +285,8 @@ void rtc_set_current_time (tm_t * p_current)
 
     /* Set time */
     /* Set seconds. (0-59) */
-    RTC.RSECCNT.BYTE = rtc_dec_to_bcd((uint8_t) p_current->tm_sec);
+    RTC.RSECCNT.BYTE = rtc_dec_to_bcd((uint8_t) (p_current->tm_sec));
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
@@ -283,7 +294,8 @@ void rtc_set_current_time (tm_t * p_current)
     }
 
     /* Set minutes (0-59) */
-    RTC.RMINCNT.BYTE = rtc_dec_to_bcd((uint8_t) p_current->tm_min);
+    RTC.RMINCNT.BYTE = rtc_dec_to_bcd((uint8_t) (p_current->tm_min));
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
@@ -291,7 +303,8 @@ void rtc_set_current_time (tm_t * p_current)
     }
 
     /* Set hours. (0-23) */
-    RTC.RHRCNT.BYTE = rtc_dec_to_bcd((uint8_t) p_current->tm_hour);
+    RTC.RHRCNT.BYTE = rtc_dec_to_bcd((uint8_t) (p_current->tm_hour));
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
@@ -300,7 +313,8 @@ void rtc_set_current_time (tm_t * p_current)
 
     /* Set the date */
     /* Day of the week (0-6, 0=Sunday) */
-    RTC.RWKCNT.BYTE = rtc_dec_to_bcd((uint8_t) p_current->tm_wday);
+    RTC.RWKCNT.BYTE = rtc_dec_to_bcd((uint8_t) (p_current->tm_wday));
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
@@ -308,7 +322,8 @@ void rtc_set_current_time (tm_t * p_current)
     }
 
     /* Day of the month (1-31) */
-    RTC.RDAYCNT.BYTE = rtc_dec_to_bcd((uint8_t) p_current->tm_mday);
+    RTC.RDAYCNT.BYTE = rtc_dec_to_bcd((uint8_t) (p_current->tm_mday));
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
@@ -317,6 +332,7 @@ void rtc_set_current_time (tm_t * p_current)
 
     /* Month. (1-12, 1=January) */
     RTC.RMONCNT.BYTE = rtc_dec_to_bcd((uint8_t) (p_current->tm_mon + 1));
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
@@ -325,6 +341,7 @@ void rtc_set_current_time (tm_t * p_current)
 
     /* Year. (00-99) */
     RTC.RYRCNT.WORD = (uint16_t) (rtc_dec_to_bcd((uint8_t) ((p_current->tm_year + 1900) % 100)));
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
@@ -349,7 +366,7 @@ End of function rtc_set_current_time
 *                   - structure pointer to alarm date/time
 * Return Value :
 ***********************************************************************************************************************/
-void rtc_set_alarm_time (tm_t *p_alarm)
+void rtc_set_alarm_time(tm_t *p_alarm)
 {
     uint8_t state;
     volatile uint8_t dummy_byte;
@@ -362,13 +379,15 @@ void rtc_set_alarm_time (tm_t *p_alarm)
     /* Set time */
     /* Set seconds. (0-59) */
     RTC.RSECAR.BYTE &= 0x80u;
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
         dummy_byte = RTC.RSECAR.BYTE;
     }
 
-    RTC.RSECAR.BYTE |= rtc_dec_to_bcd((uint8_t) p_alarm->tm_sec);
+    RTC.RSECAR.BYTE |= rtc_dec_to_bcd((uint8_t) (p_alarm->tm_sec));
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
@@ -377,13 +396,15 @@ void rtc_set_alarm_time (tm_t *p_alarm)
 
     /* Set minutes (0-59) */
     RTC.RMINAR.BYTE &= 0x80u;
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
         dummy_byte = RTC.RMINAR.BYTE;
     }
 
-    RTC.RMINAR.BYTE |= rtc_dec_to_bcd((uint8_t) p_alarm->tm_min);
+    RTC.RMINAR.BYTE |= rtc_dec_to_bcd((uint8_t) (p_alarm->tm_min));
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
@@ -392,13 +413,15 @@ void rtc_set_alarm_time (tm_t *p_alarm)
 
     /* Set hours. (0-23) */
     RTC.RHRAR.BYTE &= 0x80u;
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
         dummy_byte = RTC.RHRAR.BYTE;
     }
 
-    RTC.RHRAR.BYTE |= rtc_dec_to_bcd((uint8_t) p_alarm->tm_hour);
+    RTC.RHRAR.BYTE |= rtc_dec_to_bcd((uint8_t) (p_alarm->tm_hour));
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
@@ -408,13 +431,15 @@ void rtc_set_alarm_time (tm_t *p_alarm)
     /* Set the date */
     /* Day of the week (0-6, 0=Sunday) */
     RTC.RWKAR.BYTE &= 0x80u;
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
         dummy_byte = RTC.RWKAR.BYTE;
     }
 
-    RTC.RWKAR.BYTE |= rtc_dec_to_bcd((uint8_t) p_alarm->tm_wday);
+    RTC.RWKAR.BYTE |= rtc_dec_to_bcd((uint8_t) (p_alarm->tm_wday));
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
@@ -423,13 +448,15 @@ void rtc_set_alarm_time (tm_t *p_alarm)
 
     /* Day of the month (1-31) */
     RTC.RDAYAR.BYTE &= 0x80u;
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
         dummy_byte = RTC.RDAYAR.BYTE;
     }
 
-    RTC.RDAYAR.BYTE |= rtc_dec_to_bcd((uint8_t) p_alarm->tm_mday);
+    RTC.RDAYAR.BYTE |= rtc_dec_to_bcd((uint8_t) (p_alarm->tm_mday));
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
@@ -438,6 +465,7 @@ void rtc_set_alarm_time (tm_t *p_alarm)
 
     /* Month. (1-12, 1=January) */
     RTC.RMONAR.BYTE &= 0x80u;
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
@@ -445,6 +473,7 @@ void rtc_set_alarm_time (tm_t *p_alarm)
     }
 
     RTC.RMONAR.BYTE |= rtc_dec_to_bcd((uint8_t) (p_alarm->tm_mon + 1));
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
@@ -453,6 +482,7 @@ void rtc_set_alarm_time (tm_t *p_alarm)
 
     /* Year. (00-99) */
     RTC.RYRAR.WORD = (uint16_t) (rtc_dec_to_bcd((uint8_t) ((p_alarm->tm_year + 1900) % 100)));
+
     /* WAIT_LOOP */
     for (i = 0; i < RTC_DUMMY_READ; i++)
     {
@@ -482,7 +512,7 @@ End of function rtc_set_alarm_time
 *                   - pointer to alarm control structure
 * Return Value : None
 ***********************************************************************************************************************/
-void rtc_enable_alarms (rtc_alarm_ctrl_t *p_alm_ctrl)
+void rtc_enable_alarms(rtc_alarm_ctrl_t *p_alm_ctrl)
 {
     R_BSP_InterruptRequestDisable(VECT(RTC, ALM));
 
@@ -514,7 +544,7 @@ End of function rtc_enable_alarms
 ***********************************************************************************************************************/
 
 
-#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130) && !defined(BSP_MCU_RX140)
+#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130) && !defined(BSP_MCU_RX140) && !defined(BSP_MCU_RX23E_B)
 /***********************************************************************************************************************
 * Function Name: rtc_config_capture
 * Description  : This function configures the capture facility for the specified pin.
@@ -706,7 +736,7 @@ void rtc_disable_capture (rtc_pin_t pin)
 End of function rtc_disable_capture
 ***********************************************************************************************************************/
 
-#endif /* not RX11x, RX130, RX140 */
+#endif /* !definedBSP_MCU_RX11_ALL && !definedBSP_MCU_RX130 && !definedBSP_MCU_RX140 && !definedBSP_MCU_RX23E_B */
 
 
 /***********************************************************************************************************************
@@ -717,7 +747,7 @@ End of function rtc_disable_capture
 *                   - pointer to time structure for loading current date/time
 * Return Value : None
 ***********************************************************************************************************************/
-void rtc_read_current (tm_t *p_current)
+void rtc_read_current(tm_t *p_current)
 {
 
     uint16_t bcd_years; // Used for converting year.
@@ -768,7 +798,7 @@ End of function rtc_read_current
 *                   - time structure pointer for loading alarm date/time
 * Return Value : None
 ***********************************************************************************************************************/
-void rtc_read_alarm (tm_t *p_alarm)
+void rtc_read_alarm(tm_t *p_alarm)
 {
     /* Used for converting year. */
     uint16_t bcd_years;
@@ -815,7 +845,7 @@ End of function rtc_read_alarm
 *                   - 0 to stop, 1 to start
 * Return Value : None
 ***********************************************************************************************************************/
-void rtc_counter_run (const uint8_t action)
+void rtc_counter_run(const uint8_t action)
 {
 
     /* START bit is updated in synchronization with the next count source. */
@@ -839,7 +869,7 @@ End of function rtc_counter_run
 * Arguments    : None
 * Return Value : None
 ***********************************************************************************************************************/
-void rtc_reset (void)
+void rtc_reset(void)
 {
 
     RTC.RCR2.BIT.RESET = 1;
@@ -864,7 +894,7 @@ End of function rtc_reset
 * Arguments    : None
 * Return Value : None
 ***********************************************************************************************************************/
-void rtc_disable_ints (void)
+void rtc_disable_ints(void)
 {
 
     /* Disable ICU interrupts */
@@ -897,11 +927,12 @@ End of function rtc_disable_ints
 * Arguments    : None
 * Return Value : None
 ***********************************************************************************************************************/
-void rtc_enable_ints (void)
+void rtc_enable_ints(void)
 {
 
     /* Enable RTC interrupts (PIE, CIE and AIE), not ICU yet */
     RTC.RCR1.BYTE |= RTC_INT_ENABLE;
+
     /* WAIT_LOOP */
     while (RTC_INT_ENABLE != (RTC.RCR1.BYTE & RTC_INT_ENABLE))
     {

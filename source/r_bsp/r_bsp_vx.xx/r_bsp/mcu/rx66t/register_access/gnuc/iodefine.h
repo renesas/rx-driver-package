@@ -28,6 +28,7 @@
 /* History    : V1.00 (2018-07-23)  [Hardware Manual Revision : 1.00]           */
 /* History    : V1.21 (2023-02-15)  [Hardware Manual Revision : 1.21]           */
 /* History    : V1.21a(2023-03-08)  [Hardware Manual Revision : 1.21]           */
+/* History    : V1.21b(2023-03-17)  [Hardware Manual Revision : 1.21]           */
 /* Note       : This is a typical example.                                      */
 /*                                                                              */
 /*  Copyright(c) 2023 Renesas Electronics Corp.                                 */
@@ -3604,11 +3605,19 @@ typedef struct st_elc {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char WI:1;
-			unsigned char WE:1;
-			unsigned char :5;
-			unsigned char SEG:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char SEG : 1;
+			unsigned char  : 5;
+			unsigned char WE : 1;
+			unsigned char WI : 1;
+#else
+			unsigned char WI : 1;
+			unsigned char WE : 1;
+			unsigned char  : 5;
+			unsigned char SEG : 1;
+#endif
+	} BIT;
 #endif
 	} ELSEGR;
 	union {
@@ -6542,285 +6551,513 @@ typedef struct st_icu {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char PIR7:1;
-			unsigned char PIR6:1;
-			unsigned char PIR5:1;
-			unsigned char PIR4:1;
-			unsigned char PIR3:1;
-			unsigned char PIR2:1;
-			unsigned char PIR1:1;
-			unsigned char PIR0:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PIR0 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR7 : 1;
+#else
+			unsigned char PIR7 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR0 : 1;
+#endif
+	} BIT;
 #endif
 	} PIAR0;
 	union {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char PIR7:1;
-			unsigned char PIR6:1;
-			unsigned char PIR5:1;
-			unsigned char PIR4:1;
-			unsigned char PIR3:1;
-			unsigned char PIR2:1;
-			unsigned char PIR1:1;
-			unsigned char PIR0:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PIR0 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR7 : 1;
+#else
+			unsigned char PIR7 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR0 : 1;
+#endif
+	} BIT;
 #endif
 	} PIAR1;
 	union {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char PIR7:1;
-			unsigned char PIR6:1;
-			unsigned char PIR5:1;
-			unsigned char PIR4:1;
-			unsigned char PIR3:1;
-			unsigned char PIR2:1;
-			unsigned char PIR1:1;
-			unsigned char PIR0:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PIR0 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR7 : 1;
+#else
+			unsigned char PIR7 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR0 : 1;
+#endif
+	} BIT;
 #endif
 	} PIAR2;
 	union {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char PIR7:1;
-			unsigned char PIR6:1;
-			unsigned char PIR5:1;
-			unsigned char PIR4:1;
-			unsigned char PIR3:1;
-			unsigned char PIR2:1;
-			unsigned char PIR1:1;
-			unsigned char PIR0:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PIR0 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR7 : 1;
+#else
+			unsigned char PIR7 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR0 : 1;
+#endif
+	} BIT;
 #endif
 	} PIAR3;
 	union {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char PIR7:1;
-			unsigned char PIR6:1;
-			unsigned char PIR5:1;
-			unsigned char PIR4:1;
-			unsigned char PIR3:1;
-			unsigned char PIR2:1;
-			unsigned char PIR1:1;
-			unsigned char PIR0:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PIR0 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR7 : 1;
+#else
+			unsigned char PIR7 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR0 : 1;
+#endif
+	} BIT;
 #endif
 	} PIAR4;
 	union {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char PIR7:1;
-			unsigned char PIR6:1;
-			unsigned char PIR5:1;
-			unsigned char PIR4:1;
-			unsigned char PIR3:1;
-			unsigned char PIR2:1;
-			unsigned char PIR1:1;
-			unsigned char PIR0:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PIR0 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR7 : 1;
+#else
+			unsigned char PIR7 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR0 : 1;
+#endif
+	} BIT;
 #endif
 	} PIAR5;
 	union {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char PIR7:1;
-			unsigned char PIR6:1;
-			unsigned char PIR5:1;
-			unsigned char PIR4:1;
-			unsigned char PIR3:1;
-			unsigned char PIR2:1;
-			unsigned char PIR1:1;
-			unsigned char PIR0:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PIR0 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR7 : 1;
+#else
+			unsigned char PIR7 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR0 : 1;
+#endif
+	} BIT;
 #endif
 	} PIAR6;
 	union {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char PIR7:1;
-			unsigned char PIR6:1;
-			unsigned char PIR5:1;
-			unsigned char PIR4:1;
-			unsigned char PIR3:1;
-			unsigned char PIR2:1;
-			unsigned char PIR1:1;
-			unsigned char PIR0:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PIR0 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR7 : 1;
+#else
+			unsigned char PIR7 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR0 : 1;
+#endif
+	} BIT;
 #endif
 	} PIAR7;
 	union {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char PIR7:1;
-			unsigned char PIR6:1;
-			unsigned char PIR5:1;
-			unsigned char PIR4:1;
-			unsigned char PIR3:1;
-			unsigned char PIR2:1;
-			unsigned char PIR1:1;
-			unsigned char PIR0:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PIR0 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR7 : 1;
+#else
+			unsigned char PIR7 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR0 : 1;
+#endif
+	} BIT;
 #endif
 	} PIAR8;
 	union {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char PIR7:1;
-			unsigned char PIR6:1;
-			unsigned char PIR5:1;
-			unsigned char PIR4:1;
-			unsigned char PIR3:1;
-			unsigned char PIR2:1;
-			unsigned char PIR1:1;
-			unsigned char PIR0:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PIR0 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR7 : 1;
+#else
+			unsigned char PIR7 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR0 : 1;
+#endif
+	} BIT;
 #endif
 	} PIAR9;
 	union {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char PIR7:1;
-			unsigned char PIR6:1;
-			unsigned char PIR5:1;
-			unsigned char PIR4:1;
-			unsigned char PIR3:1;
-			unsigned char PIR2:1;
-			unsigned char PIR1:1;
-			unsigned char PIR0:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PIR0 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR7 : 1;
+#else
+			unsigned char PIR7 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR0 : 1;
+#endif
+	} BIT;
 #endif
 	} PIARA;
 	union {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char PIR7:1;
-			unsigned char PIR6:1;
-			unsigned char PIR5:1;
-			unsigned char PIR4:1;
-			unsigned char PIR3:1;
-			unsigned char PIR2:1;
-			unsigned char PIR1:1;
-			unsigned char PIR0:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PIR0 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR7 : 1;
+#else
+			unsigned char PIR7 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR0 : 1;
+#endif
+	} BIT;
 #endif
 	} PIARB;
 	union {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char PIR7:1;
-			unsigned char PIR6:1;
-			unsigned char PIR5:1;
-			unsigned char PIR4:1;
-			unsigned char PIR3:1;
-			unsigned char PIR2:1;
-			unsigned char PIR1:1;
-			unsigned char PIR0:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PIR0 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR7 : 1;
+#else
+			unsigned char PIR7 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR0 : 1;
+#endif
+	} BIT;
 #endif
 	} PIARC;
 	union {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char PIR7:1;
-			unsigned char PIR6:1;
-			unsigned char PIR5:1;
-			unsigned char PIR4:1;
-			unsigned char PIR3:1;
-			unsigned char PIR2:1;
-			unsigned char PIR1:1;
-			unsigned char PIR0:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PIR0 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR7 : 1;
+#else
+			unsigned char PIR7 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR0 : 1;
+#endif
+	} BIT;
 #endif
 	} PIARD;
 	union {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char PIR7:1;
-			unsigned char PIR6:1;
-			unsigned char PIR5:1;
-			unsigned char PIR4:1;
-			unsigned char PIR3:1;
-			unsigned char PIR2:1;
-			unsigned char PIR1:1;
-			unsigned char PIR0:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PIR0 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR7 : 1;
+#else
+			unsigned char PIR7 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR0 : 1;
+#endif
+	} BIT;
 #endif
 	} PIARE;
 	union {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char PIR7:1;
-			unsigned char PIR6:1;
-			unsigned char PIR5:1;
-			unsigned char PIR4:1;
-			unsigned char PIR3:1;
-			unsigned char PIR2:1;
-			unsigned char PIR1:1;
-			unsigned char PIR0:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PIR0 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR7 : 1;
+#else
+			unsigned char PIR7 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR0 : 1;
+#endif
+	} BIT;
 #endif
 	} PIARF;
 	union {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char PIR7:1;
-			unsigned char PIR6:1;
-			unsigned char PIR5:1;
-			unsigned char PIR4:1;
-			unsigned char PIR3:1;
-			unsigned char PIR2:1;
-			unsigned char PIR1:1;
-			unsigned char PIR0:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PIR0 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR7 : 1;
+#else
+			unsigned char PIR7 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR0 : 1;
+#endif
+	} BIT;
 #endif
 	} PIAR10;
 	union {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char PIR7:1;
-			unsigned char PIR6:1;
-			unsigned char PIR5:1;
-			unsigned char PIR4:1;
-			unsigned char PIR3:1;
-			unsigned char PIR2:1;
-			unsigned char PIR1:1;
-			unsigned char PIR0:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PIR0 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR7 : 1;
+#else
+			unsigned char PIR7 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR0 : 1;
+#endif
+	} BIT;
 #endif
 	} PIAR11;
 	union {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char PIR7:1;
-			unsigned char PIR6:1;
-			unsigned char PIR5:1;
-			unsigned char PIR4:1;
-			unsigned char PIR3:1;
-			unsigned char PIR2:1;
-			unsigned char PIR1:1;
-			unsigned char PIR0:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char PIR0 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR7 : 1;
+#else
+			unsigned char PIR7 : 1;
+			unsigned char PIR6 : 1;
+			unsigned char PIR5 : 1;
+			unsigned char PIR4 : 1;
+			unsigned char PIR3 : 1;
+			unsigned char PIR2 : 1;
+			unsigned char PIR1 : 1;
+			unsigned char PIR0 : 1;
+#endif
+	} BIT;
 #endif
 	} PIAR12;
 	char           wk24[189];
@@ -22717,15 +22954,27 @@ typedef struct st_usb {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :5;
-			unsigned short SCKE:1;
-			unsigned short :3;
-			unsigned short DCFM:1;
-			unsigned short DRPD:1;
-			unsigned short DPRPU:1;
-			unsigned short :3;
-			unsigned short USBE:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short USBE : 1;
+			unsigned short  : 3;
+			unsigned short DPRPU : 1;
+			unsigned short DRPD : 1;
+			unsigned short DCFM : 1;
+			unsigned short  : 3;
+			unsigned short SCKE : 1;
+			unsigned short  : 5;
+#else
+			unsigned short  : 5;
+			unsigned short SCKE : 1;
+			unsigned short  : 3;
+			unsigned short DCFM : 1;
+			unsigned short DRPD : 1;
+			unsigned short DPRPU : 1;
+			unsigned short  : 3;
+			unsigned short USBE : 1;
+#endif
+	} BIT;
 #endif
 	} SYSCFG;
 	char           wk0[2];
@@ -22755,18 +23004,33 @@ typedef struct st_usb {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :4;
-			unsigned short HNPBTOA:1;
-			unsigned short EXICEN:1;
-			unsigned short VBUSEN:1;
-			unsigned short WKUP:1;
-			unsigned short RWUPE:1;
-			unsigned short USBRST:1;
-			unsigned short RESUME:1;
-			unsigned short UACT:1;
-			unsigned short :1;
-			unsigned short RHST:3;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short RHST : 3;
+			unsigned short  : 1;
+			unsigned short UACT : 1;
+			unsigned short RESUME : 1;
+			unsigned short USBRST : 1;
+			unsigned short RWUPE : 1;
+			unsigned short WKUP : 1;
+			unsigned short VBUSEN : 1;
+			unsigned short EXICEN : 1;
+			unsigned short HNPBTOA : 1;
+			unsigned short  : 4;
+#else
+			unsigned short  : 4;
+			unsigned short HNPBTOA : 1;
+			unsigned short EXICEN : 1;
+			unsigned short VBUSEN : 1;
+			unsigned short WKUP : 1;
+			unsigned short RWUPE : 1;
+			unsigned short USBRST : 1;
+			unsigned short RESUME : 1;
+			unsigned short UACT : 1;
+			unsigned short  : 1;
+			unsigned short RHST : 3;
+#endif
+	} BIT;
 #endif
 	} DVSTCTR0;
 	char           wk2[10];
@@ -22798,29 +23062,52 @@ typedef struct st_usb {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short RCNT:1;
-			unsigned short REW:1;
-			unsigned short :3;
-			unsigned short MBW:1;
-			unsigned short :1;
-			unsigned short BIGEND:1;
-			unsigned short :2;
-			unsigned short ISEL:1;
-			unsigned short :1;
-			unsigned short CURPIPE:4;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short CURPIPE : 4;
+			unsigned short  : 1;
+			unsigned short ISEL : 1;
+			unsigned short  : 2;
+			unsigned short BIGEND : 1;
+			unsigned short  : 1;
+			unsigned short MBW : 1;
+			unsigned short  : 3;
+			unsigned short REW : 1;
+			unsigned short RCNT : 1;
+#else
+			unsigned short RCNT : 1;
+			unsigned short REW : 1;
+			unsigned short  : 3;
+			unsigned short MBW : 1;
+			unsigned short  : 1;
+			unsigned short BIGEND : 1;
+			unsigned short  : 2;
+			unsigned short ISEL : 1;
+			unsigned short  : 1;
+			unsigned short CURPIPE : 4;
+#endif
+	} BIT;
 #endif
 	} CFIFOSEL;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short BVAL:1;
-			unsigned short BCLR:1;
-			unsigned short FRDY:1;
-			unsigned short :4;
-			unsigned short DTLN:9;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short DTLN : 9;
+			unsigned short  : 4;
+			unsigned short FRDY : 1;
+			unsigned short BCLR : 1;
+			unsigned short BVAL : 1;
+#else
+			unsigned short BVAL : 1;
+			unsigned short BCLR : 1;
+			unsigned short FRDY : 1;
+			unsigned short  : 4;
+			unsigned short DTLN : 9;
+#endif
+	} BIT;
 #endif
 	} CFIFOCTR;
 	char           wk6[4];
@@ -22828,91 +23115,164 @@ typedef struct st_usb {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short RCNT:1;
-			unsigned short REW:1;
-			unsigned short DCLRM:1;
-			unsigned short DREQE:1;
-			unsigned short :1;
-			unsigned short MBW:1;
-			unsigned short :1;
-			unsigned short BIGEND:1;
-			unsigned short :4;
-			unsigned short CURPIPE:4;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short CURPIPE : 4;
+			unsigned short  : 4;
+			unsigned short BIGEND : 1;
+			unsigned short  : 1;
+			unsigned short MBW : 1;
+			unsigned short  : 1;
+			unsigned short DREQE : 1;
+			unsigned short DCLRM : 1;
+			unsigned short REW : 1;
+			unsigned short RCNT : 1;
+#else
+			unsigned short RCNT : 1;
+			unsigned short REW : 1;
+			unsigned short DCLRM : 1;
+			unsigned short DREQE : 1;
+			unsigned short  : 1;
+			unsigned short MBW : 1;
+			unsigned short  : 1;
+			unsigned short BIGEND : 1;
+			unsigned short  : 4;
+			unsigned short CURPIPE : 4;
+#endif
+	} BIT;
 #endif
 	} D0FIFOSEL;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short BVAL:1;
-			unsigned short BCLR:1;
-			unsigned short FRDY:1;
-			unsigned short :4;
-			unsigned short DTLN:9;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short DTLN : 9;
+			unsigned short  : 4;
+			unsigned short FRDY : 1;
+			unsigned short BCLR : 1;
+			unsigned short BVAL : 1;
+#else
+			unsigned short BVAL : 1;
+			unsigned short BCLR : 1;
+			unsigned short FRDY : 1;
+			unsigned short  : 4;
+			unsigned short DTLN : 9;
+#endif
+	} BIT;
 #endif
 	} D0FIFOCTR;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short RCNT:1;
-			unsigned short REW:1;
-			unsigned short DCLRM:1;
-			unsigned short DREQE:1;
-			unsigned short :1;
-			unsigned short MBW:1;
-			unsigned short :1;
-			unsigned short BIGEND:1;
-			unsigned short :4;
-			unsigned short CURPIPE:4;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short CURPIPE : 4;
+			unsigned short  : 4;
+			unsigned short BIGEND : 1;
+			unsigned short  : 1;
+			unsigned short MBW : 1;
+			unsigned short  : 1;
+			unsigned short DREQE : 1;
+			unsigned short DCLRM : 1;
+			unsigned short REW : 1;
+			unsigned short RCNT : 1;
+#else
+			unsigned short RCNT : 1;
+			unsigned short REW : 1;
+			unsigned short DCLRM : 1;
+			unsigned short DREQE : 1;
+			unsigned short  : 1;
+			unsigned short MBW : 1;
+			unsigned short  : 1;
+			unsigned short BIGEND : 1;
+			unsigned short  : 4;
+			unsigned short CURPIPE : 4;
+#endif
+	} BIT;
 #endif
 	} D1FIFOSEL;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short BVAL:1;
-			unsigned short BCLR:1;
-			unsigned short FRDY:1;
-			unsigned short :4;
-			unsigned short DTLN:9;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short DTLN : 9;
+			unsigned short  : 4;
+			unsigned short FRDY : 1;
+			unsigned short BCLR : 1;
+			unsigned short BVAL : 1;
+#else
+			unsigned short BVAL : 1;
+			unsigned short BCLR : 1;
+			unsigned short FRDY : 1;
+			unsigned short  : 4;
+			unsigned short DTLN : 9;
+#endif
+	} BIT;
 #endif
 	} D1FIFOCTR;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short VBSE:1;
-			unsigned short RSME:1;
-			unsigned short SOFE:1;
-			unsigned short DVSE:1;
-			unsigned short CTRE:1;
-			unsigned short BEMPE:1;
-			unsigned short NRDYE:1;
-			unsigned short BRDYE:1;
-			unsigned short :8;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short  : 8;
+			unsigned short BRDYE : 1;
+			unsigned short NRDYE : 1;
+			unsigned short BEMPE : 1;
+			unsigned short CTRE : 1;
+			unsigned short DVSE : 1;
+			unsigned short SOFE : 1;
+			unsigned short RSME : 1;
+			unsigned short VBSE : 1;
+#else
+			unsigned short VBSE : 1;
+			unsigned short RSME : 1;
+			unsigned short SOFE : 1;
+			unsigned short DVSE : 1;
+			unsigned short CTRE : 1;
+			unsigned short BEMPE : 1;
+			unsigned short NRDYE : 1;
+			unsigned short BRDYE : 1;
+			unsigned short  : 8;
+#endif
+	} BIT;
 #endif
 	} INTENB0;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short OVRCRE:1;
-			unsigned short BCHGE:1;
-			unsigned short :1;
-			unsigned short DTCHE:1;
-			unsigned short ATTCHE:1;
-			unsigned short :4;
-			unsigned short EOFERRE:1;
-			unsigned short SIGNE:1;
-			unsigned short SACKE:1;
-			unsigned short :4;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short  : 4;
+			unsigned short SACKE : 1;
+			unsigned short SIGNE : 1;
+			unsigned short EOFERRE : 1;
+			unsigned short  : 4;
+			unsigned short ATTCHE : 1;
+			unsigned short DTCHE : 1;
+			unsigned short  : 1;
+			unsigned short BCHGE : 1;
+			unsigned short OVRCRE : 1;
+#else
+			unsigned short OVRCRE : 1;
+			unsigned short BCHGE : 1;
+			unsigned short  : 1;
+			unsigned short DTCHE : 1;
+			unsigned short ATTCHE : 1;
+			unsigned short  : 4;
+			unsigned short EOFERRE : 1;
+			unsigned short SIGNE : 1;
+			unsigned short SACKE : 1;
+			unsigned short  : 4;
+#endif
+	} BIT;
 #endif
 	} INTENB1;
 	char           wk7[2];
@@ -23013,14 +23373,25 @@ typedef struct st_usb {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :7;
-			unsigned short TRNENSEL:1;
-			unsigned short :1;
-			unsigned short BRDYM:1;
-			unsigned short :1;
-			unsigned short EDGESTS:1;
-			unsigned short :4;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short  : 4;
+			unsigned short EDGESTS : 1;
+			unsigned short  : 1;
+			unsigned short BRDYM : 1;
+			unsigned short  : 1;
+			unsigned short TRNENSEL : 1;
+			unsigned short  : 7;
+#else
+			unsigned short  : 7;
+			unsigned short TRNENSEL : 1;
+			unsigned short  : 1;
+			unsigned short BRDYM : 1;
+			unsigned short  : 1;
+			unsigned short EDGESTS : 1;
+			unsigned short  : 4;
+#endif
+	} BIT;
 #endif
 	} SOFCFG;
 	char           wk8[2];
@@ -23028,36 +23399,66 @@ typedef struct st_usb {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short VBINT:1;
-			unsigned short RESM:1;
-			unsigned short SOFR:1;
-			unsigned short DVST:1;
-			unsigned short CTRT:1;
-			unsigned short BEMP:1;
-			unsigned short NRDY:1;
-			unsigned short BRDY:1;
-			unsigned short VBSTS:1;
-			unsigned short DVSQ:3;
-			unsigned short VALID:1;
-			unsigned short CTSQ:3;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short CTSQ : 3;
+			unsigned short VALID : 1;
+			unsigned short DVSQ : 3;
+			unsigned short VBSTS : 1;
+			unsigned short BRDY : 1;
+			unsigned short NRDY : 1;
+			unsigned short BEMP : 1;
+			unsigned short CTRT : 1;
+			unsigned short DVST : 1;
+			unsigned short SOFR : 1;
+			unsigned short RESM : 1;
+			unsigned short VBINT : 1;
+#else
+			unsigned short VBINT : 1;
+			unsigned short RESM : 1;
+			unsigned short SOFR : 1;
+			unsigned short DVST : 1;
+			unsigned short CTRT : 1;
+			unsigned short BEMP : 1;
+			unsigned short NRDY : 1;
+			unsigned short BRDY : 1;
+			unsigned short VBSTS : 1;
+			unsigned short DVSQ : 3;
+			unsigned short VALID : 1;
+			unsigned short CTSQ : 3;
+#endif
+	} BIT;
 #endif
 	} INTSTS0;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short OVRCR:1;
-			unsigned short BCHG:1;
-			unsigned short :1;
-			unsigned short DTCH:1;
-			unsigned short ATTCH:1;
-			unsigned short :4;
-			unsigned short EOFERR:1;
-			unsigned short SIGN:1;
-			unsigned short SACK:1;
-			unsigned short :4;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short  : 4;
+			unsigned short SACK : 1;
+			unsigned short SIGN : 1;
+			unsigned short EOFERR : 1;
+			unsigned short  : 4;
+			unsigned short ATTCH : 1;
+			unsigned short DTCH : 1;
+			unsigned short  : 1;
+			unsigned short BCHG : 1;
+			unsigned short OVRCR : 1;
+#else
+			unsigned short OVRCR : 1;
+			unsigned short BCHG : 1;
+			unsigned short  : 1;
+			unsigned short DTCH : 1;
+			unsigned short ATTCH : 1;
+			unsigned short  : 4;
+			unsigned short EOFERR : 1;
+			unsigned short SIGN : 1;
+			unsigned short SACK : 1;
+			unsigned short  : 4;
+#endif
+	} BIT;
 #endif
 	} INTSTS1;
 	char           wk9[2];
@@ -23065,65 +23466,118 @@ typedef struct st_usb {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :6;
-			unsigned short PIPE9BRDY:1;
-			unsigned short PIPE8BRDY:1;
-			unsigned short PIPE7BRDY:1;
-			unsigned short PIPE6BRDY:1;
-			unsigned short PIPE5BRDY:1;
-			unsigned short PIPE4BRDY:1;
-			unsigned short PIPE3BRDY:1;
-			unsigned short PIPE2BRDY:1;
-			unsigned short PIPE1BRDY:1;
-			unsigned short PIPE0BRDY:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short PIPE0BRDY : 1;
+			unsigned short PIPE1BRDY : 1;
+			unsigned short PIPE2BRDY : 1;
+			unsigned short PIPE3BRDY : 1;
+			unsigned short PIPE4BRDY : 1;
+			unsigned short PIPE5BRDY : 1;
+			unsigned short PIPE6BRDY : 1;
+			unsigned short PIPE7BRDY : 1;
+			unsigned short PIPE8BRDY : 1;
+			unsigned short PIPE9BRDY : 1;
+			unsigned short  : 6;
+#else
+			unsigned short  : 6;
+			unsigned short PIPE9BRDY : 1;
+			unsigned short PIPE8BRDY : 1;
+			unsigned short PIPE7BRDY : 1;
+			unsigned short PIPE6BRDY : 1;
+			unsigned short PIPE5BRDY : 1;
+			unsigned short PIPE4BRDY : 1;
+			unsigned short PIPE3BRDY : 1;
+			unsigned short PIPE2BRDY : 1;
+			unsigned short PIPE1BRDY : 1;
+			unsigned short PIPE0BRDY : 1;
+#endif
+	} BIT;
 #endif
 	} BRDYSTS;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :6;
-			unsigned short PIPE9NRDY:1;
-			unsigned short PIPE8NRDY:1;
-			unsigned short PIPE7NRDY:1;
-			unsigned short PIPE6NRDY:1;
-			unsigned short PIPE5NRDY:1;
-			unsigned short PIPE4NRDY:1;
-			unsigned short PIPE3NRDY:1;
-			unsigned short PIPE2NRDY:1;
-			unsigned short PIPE1NRDY:1;
-			unsigned short PIPE0NRDY:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short PIPE0NRDY : 1;
+			unsigned short PIPE1NRDY : 1;
+			unsigned short PIPE2NRDY : 1;
+			unsigned short PIPE3NRDY : 1;
+			unsigned short PIPE4NRDY : 1;
+			unsigned short PIPE5NRDY : 1;
+			unsigned short PIPE6NRDY : 1;
+			unsigned short PIPE7NRDY : 1;
+			unsigned short PIPE8NRDY : 1;
+			unsigned short PIPE9NRDY : 1;
+			unsigned short  : 6;
+#else
+			unsigned short  : 6;
+			unsigned short PIPE9NRDY : 1;
+			unsigned short PIPE8NRDY : 1;
+			unsigned short PIPE7NRDY : 1;
+			unsigned short PIPE6NRDY : 1;
+			unsigned short PIPE5NRDY : 1;
+			unsigned short PIPE4NRDY : 1;
+			unsigned short PIPE3NRDY : 1;
+			unsigned short PIPE2NRDY : 1;
+			unsigned short PIPE1NRDY : 1;
+			unsigned short PIPE0NRDY : 1;
+#endif
+	} BIT;
 #endif
 	} NRDYSTS;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :6;
-			unsigned short PIPE9BEMP:1;
-			unsigned short PIPE8BEMP:1;
-			unsigned short PIPE7BEMP:1;
-			unsigned short PIPE6BEMP:1;
-			unsigned short PIPE5BEMP:1;
-			unsigned short PIPE4BEMP:1;
-			unsigned short PIPE3BEMP:1;
-			unsigned short PIPE2BEMP:1;
-			unsigned short PIPE1BEMP:1;
-			unsigned short PIPE0BEMP:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short PIPE0BEMP : 1;
+			unsigned short PIPE1BEMP : 1;
+			unsigned short PIPE2BEMP : 1;
+			unsigned short PIPE3BEMP : 1;
+			unsigned short PIPE4BEMP : 1;
+			unsigned short PIPE5BEMP : 1;
+			unsigned short PIPE6BEMP : 1;
+			unsigned short PIPE7BEMP : 1;
+			unsigned short PIPE8BEMP : 1;
+			unsigned short PIPE9BEMP : 1;
+			unsigned short  : 6;
+#else
+			unsigned short  : 6;
+			unsigned short PIPE9BEMP : 1;
+			unsigned short PIPE8BEMP : 1;
+			unsigned short PIPE7BEMP : 1;
+			unsigned short PIPE6BEMP : 1;
+			unsigned short PIPE5BEMP : 1;
+			unsigned short PIPE4BEMP : 1;
+			unsigned short PIPE3BEMP : 1;
+			unsigned short PIPE2BEMP : 1;
+			unsigned short PIPE1BEMP : 1;
+			unsigned short PIPE0BEMP : 1;
+#endif
+	} BIT;
 #endif
 	} BEMPSTS;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short OVRN:1;
-			unsigned short CRCE:1;
-			unsigned short :3;
-			unsigned short FRNM:11;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short FRNM : 11;
+			unsigned short  : 3;
+			unsigned short CRCE : 1;
+			unsigned short OVRN : 1;
+#else
+			unsigned short OVRN : 1;
+			unsigned short CRCE : 1;
+			unsigned short  : 3;
+			unsigned short FRNM : 11;
+#endif
+	} BIT;
 #endif
 	} FRMNUM;
 	char           wk10[6];
@@ -23147,41 +23601,73 @@ typedef struct st_usb {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :8;
-			unsigned short SHTNAK:1;
-			unsigned short :2;
-			unsigned short DIR:1;
-			unsigned short :4;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short  : 4;
+			unsigned short DIR : 1;
+			unsigned short  : 2;
+			unsigned short SHTNAK : 1;
+			unsigned short  : 8;
+#else
+			unsigned short  : 8;
+			unsigned short SHTNAK : 1;
+			unsigned short  : 2;
+			unsigned short DIR : 1;
+			unsigned short  : 4;
+#endif
+	} BIT;
 #endif
 	} DCPCFG;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short DEVSEL:4;
-			unsigned short :5;
-			unsigned short MXPS:7;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short MXPS : 7;
+			unsigned short  : 5;
+			unsigned short DEVSEL : 4;
+#else
+			unsigned short DEVSEL : 4;
+			unsigned short  : 5;
+			unsigned short MXPS : 7;
+#endif
+	} BIT;
 #endif
 	} DCPMAXP;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short BSTS:1;
-			unsigned short SUREQ:1;
-			unsigned short :2;
-			unsigned short SUREQCLR:1;
-			unsigned short :2;
-			unsigned short SQCLR:1;
-			unsigned short SQSET:1;
-			unsigned short SQMON:1;
-			unsigned short PBUSY:1;
-			unsigned short :2;
-			unsigned short CCPL:1;
-			unsigned short PID:2;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short PID : 2;
+			unsigned short CCPL : 1;
+			unsigned short  : 2;
+			unsigned short PBUSY : 1;
+			unsigned short SQMON : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQCLR : 1;
+			unsigned short  : 2;
+			unsigned short SUREQCLR : 1;
+			unsigned short  : 2;
+			unsigned short SUREQ : 1;
+			unsigned short BSTS : 1;
+#else
+			unsigned short BSTS : 1;
+			unsigned short SUREQ : 1;
+			unsigned short  : 2;
+			unsigned short SUREQCLR : 1;
+			unsigned short  : 2;
+			unsigned short SQCLR : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQMON : 1;
+			unsigned short PBUSY : 1;
+			unsigned short  : 2;
+			unsigned short CCPL : 1;
+			unsigned short PID : 2;
+#endif
+	} BIT;
 #endif
 	} DCPCTR;
 	char           wk11[2];
@@ -23189,9 +23675,15 @@ typedef struct st_usb {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :12;
-			unsigned short PIPESEL:4;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short PIPESEL : 4;
+			unsigned short  : 12;
+#else
+			unsigned short  : 12;
+			unsigned short PIPESEL : 4;
+#endif
+	} BIT;
 #endif
 	} PIPESEL;
 	char           wk12[2];
@@ -23199,16 +23691,29 @@ typedef struct st_usb {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short TYPE:2;
-			unsigned short :3;
-			unsigned short BFRE:1;
-			unsigned short DBLB:1;
-			unsigned short :1;
-			unsigned short SHTNAK:1;
-			unsigned short :2;
-			unsigned short DIR:1;
-			unsigned short EPNUM:4;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short EPNUM : 4;
+			unsigned short DIR : 1;
+			unsigned short  : 2;
+			unsigned short SHTNAK : 1;
+			unsigned short  : 1;
+			unsigned short DBLB : 1;
+			unsigned short BFRE : 1;
+			unsigned short  : 3;
+			unsigned short TYPE : 2;
+#else
+			unsigned short TYPE : 2;
+			unsigned short  : 3;
+			unsigned short BFRE : 1;
+			unsigned short DBLB : 1;
+			unsigned short  : 1;
+			unsigned short SHTNAK : 1;
+			unsigned short  : 2;
+			unsigned short DIR : 1;
+			unsigned short EPNUM : 4;
+#endif
+	} BIT;
 #endif
 	} PIPECFG;
 	char           wk13[2];
@@ -23216,175 +23721,317 @@ typedef struct st_usb {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short DEVSEL:4;
-			unsigned short :3;
-			unsigned short MXPS:9;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short MXPS : 9;
+			unsigned short  : 3;
+			unsigned short DEVSEL : 4;
+#else
+			unsigned short DEVSEL : 4;
+			unsigned short  : 3;
+			unsigned short MXPS : 9;
+#endif
+	} BIT;
 #endif
 	} PIPEMAXP;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :3;
-			unsigned short IFIS:1;
-			unsigned short :9;
-			unsigned short IITV:3;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short IITV : 3;
+			unsigned short  : 9;
+			unsigned short IFIS : 1;
+			unsigned short  : 3;
+#else
+			unsigned short  : 3;
+			unsigned short IFIS : 1;
+			unsigned short  : 9;
+			unsigned short IITV : 3;
+#endif
+	} BIT;
 #endif
 	} PIPEPERI;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short BSTS:1;
-			unsigned short INBUFM:1;
-			unsigned short :3;
-			unsigned short ATREPM:1;
-			unsigned short ACLRM:1;
-			unsigned short SQCLR:1;
-			unsigned short SQSET:1;
-			unsigned short SQMON:1;
-			unsigned short PBUSY:1;
-			unsigned short :3;
-			unsigned short PID:2;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short PID : 2;
+			unsigned short  : 3;
+			unsigned short PBUSY : 1;
+			unsigned short SQMON : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQCLR : 1;
+			unsigned short ACLRM : 1;
+			unsigned short ATREPM : 1;
+			unsigned short  : 3;
+			unsigned short INBUFM : 1;
+			unsigned short BSTS : 1;
+#else
+			unsigned short BSTS : 1;
+			unsigned short INBUFM : 1;
+			unsigned short  : 3;
+			unsigned short ATREPM : 1;
+			unsigned short ACLRM : 1;
+			unsigned short SQCLR : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQMON : 1;
+			unsigned short PBUSY : 1;
+			unsigned short  : 3;
+			unsigned short PID : 2;
+#endif
+	} BIT;
 #endif
 	} PIPE1CTR;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short BSTS:1;
-			unsigned short INBUFM:1;
-			unsigned short :3;
-			unsigned short ATREPM:1;
-			unsigned short ACLRM:1;
-			unsigned short SQCLR:1;
-			unsigned short SQSET:1;
-			unsigned short SQMON:1;
-			unsigned short PBUSY:1;
-			unsigned short :3;
-			unsigned short PID:2;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short PID : 2;
+			unsigned short  : 3;
+			unsigned short PBUSY : 1;
+			unsigned short SQMON : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQCLR : 1;
+			unsigned short ACLRM : 1;
+			unsigned short ATREPM : 1;
+			unsigned short  : 3;
+			unsigned short INBUFM : 1;
+			unsigned short BSTS : 1;
+#else
+			unsigned short BSTS : 1;
+			unsigned short INBUFM : 1;
+			unsigned short  : 3;
+			unsigned short ATREPM : 1;
+			unsigned short ACLRM : 1;
+			unsigned short SQCLR : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQMON : 1;
+			unsigned short PBUSY : 1;
+			unsigned short  : 3;
+			unsigned short PID : 2;
+#endif
+	} BIT;
 #endif
 	} PIPE2CTR;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short BSTS:1;
-			unsigned short INBUFM:1;
-			unsigned short :3;
-			unsigned short ATREPM:1;
-			unsigned short ACLRM:1;
-			unsigned short SQCLR:1;
-			unsigned short SQSET:1;
-			unsigned short SQMON:1;
-			unsigned short PBUSY:1;
-			unsigned short :3;
-			unsigned short PID:2;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short PID : 2;
+			unsigned short  : 3;
+			unsigned short PBUSY : 1;
+			unsigned short SQMON : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQCLR : 1;
+			unsigned short ACLRM : 1;
+			unsigned short ATREPM : 1;
+			unsigned short  : 3;
+			unsigned short INBUFM : 1;
+			unsigned short BSTS : 1;
+#else
+			unsigned short BSTS : 1;
+			unsigned short INBUFM : 1;
+			unsigned short  : 3;
+			unsigned short ATREPM : 1;
+			unsigned short ACLRM : 1;
+			unsigned short SQCLR : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQMON : 1;
+			unsigned short PBUSY : 1;
+			unsigned short  : 3;
+			unsigned short PID : 2;
+#endif
+	} BIT;
 #endif
 	} PIPE3CTR;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short BSTS:1;
-			unsigned short INBUFM:1;
-			unsigned short :3;
-			unsigned short ATREPM:1;
-			unsigned short ACLRM:1;
-			unsigned short SQCLR:1;
-			unsigned short SQSET:1;
-			unsigned short SQMON:1;
-			unsigned short PBUSY:1;
-			unsigned short :3;
-			unsigned short PID:2;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short PID : 2;
+			unsigned short  : 3;
+			unsigned short PBUSY : 1;
+			unsigned short SQMON : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQCLR : 1;
+			unsigned short ACLRM : 1;
+			unsigned short ATREPM : 1;
+			unsigned short  : 3;
+			unsigned short INBUFM : 1;
+			unsigned short BSTS : 1;
+#else
+			unsigned short BSTS : 1;
+			unsigned short INBUFM : 1;
+			unsigned short  : 3;
+			unsigned short ATREPM : 1;
+			unsigned short ACLRM : 1;
+			unsigned short SQCLR : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQMON : 1;
+			unsigned short PBUSY : 1;
+			unsigned short  : 3;
+			unsigned short PID : 2;
+#endif
+	} BIT;
 #endif
 	} PIPE4CTR;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short BSTS:1;
-			unsigned short INBUFM:1;
-			unsigned short :3;
-			unsigned short ATREPM:1;
-			unsigned short ACLRM:1;
-			unsigned short SQCLR:1;
-			unsigned short SQSET:1;
-			unsigned short SQMON:1;
-			unsigned short PBUSY:1;
-			unsigned short :3;
-			unsigned short PID:2;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short PID : 2;
+			unsigned short  : 3;
+			unsigned short PBUSY : 1;
+			unsigned short SQMON : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQCLR : 1;
+			unsigned short ACLRM : 1;
+			unsigned short ATREPM : 1;
+			unsigned short  : 3;
+			unsigned short INBUFM : 1;
+			unsigned short BSTS : 1;
+#else
+			unsigned short BSTS : 1;
+			unsigned short INBUFM : 1;
+			unsigned short  : 3;
+			unsigned short ATREPM : 1;
+			unsigned short ACLRM : 1;
+			unsigned short SQCLR : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQMON : 1;
+			unsigned short PBUSY : 1;
+			unsigned short  : 3;
+			unsigned short PID : 2;
+#endif
+	} BIT;
 #endif
 	} PIPE5CTR;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short BSTS:1;
-			unsigned short :5;
-			unsigned short ACLRM:1;
-			unsigned short SQCLR:1;
-			unsigned short SQSET:1;
-			unsigned short SQMON:1;
-			unsigned short PBUSY:1;
-			unsigned short :3;
-			unsigned short PID:2;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short PID : 2;
+			unsigned short  : 3;
+			unsigned short PBUSY : 1;
+			unsigned short SQMON : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQCLR : 1;
+			unsigned short ACLRM : 1;
+			unsigned short  : 5;
+			unsigned short BSTS : 1;
+#else
+			unsigned short BSTS : 1;
+			unsigned short  : 5;
+			unsigned short ACLRM : 1;
+			unsigned short SQCLR : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQMON : 1;
+			unsigned short PBUSY : 1;
+			unsigned short  : 3;
+			unsigned short PID : 2;
+#endif
+	} BIT;
 #endif
 	} PIPE6CTR;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short BSTS:1;
-			unsigned short :5;
-			unsigned short ACLRM:1;
-			unsigned short SQCLR:1;
-			unsigned short SQSET:1;
-			unsigned short SQMON:1;
-			unsigned short PBUSY:1;
-			unsigned short :3;
-			unsigned short PID:2;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short PID : 2;
+			unsigned short  : 3;
+			unsigned short PBUSY : 1;
+			unsigned short SQMON : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQCLR : 1;
+			unsigned short ACLRM : 1;
+			unsigned short  : 5;
+			unsigned short BSTS : 1;
+#else
+			unsigned short BSTS : 1;
+			unsigned short  : 5;
+			unsigned short ACLRM : 1;
+			unsigned short SQCLR : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQMON : 1;
+			unsigned short PBUSY : 1;
+			unsigned short  : 3;
+			unsigned short PID : 2;
+#endif
+	} BIT;
 #endif
 	} PIPE7CTR;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short BSTS:1;
-			unsigned short :5;
-			unsigned short ACLRM:1;
-			unsigned short SQCLR:1;
-			unsigned short SQSET:1;
-			unsigned short SQMON:1;
-			unsigned short PBUSY:1;
-			unsigned short :3;
-			unsigned short PID:2;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short PID : 2;
+			unsigned short  : 3;
+			unsigned short PBUSY : 1;
+			unsigned short SQMON : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQCLR : 1;
+			unsigned short ACLRM : 1;
+			unsigned short  : 5;
+			unsigned short BSTS : 1;
+#else
+			unsigned short BSTS : 1;
+			unsigned short  : 5;
+			unsigned short ACLRM : 1;
+			unsigned short SQCLR : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQMON : 1;
+			unsigned short PBUSY : 1;
+			unsigned short  : 3;
+			unsigned short PID : 2;
+#endif
+	} BIT;
 #endif
 	} PIPE8CTR;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short BSTS:1;
-			unsigned short :5;
-			unsigned short ACLRM:1;
-			unsigned short SQCLR:1;
-			unsigned short SQSET:1;
-			unsigned short SQMON:1;
-			unsigned short PBUSY:1;
-			unsigned short :3;
-			unsigned short PID:2;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short PID : 2;
+			unsigned short  : 3;
+			unsigned short PBUSY : 1;
+			unsigned short SQMON : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQCLR : 1;
+			unsigned short ACLRM : 1;
+			unsigned short  : 5;
+			unsigned short BSTS : 1;
+#else
+			unsigned short BSTS : 1;
+			unsigned short  : 5;
+			unsigned short ACLRM : 1;
+			unsigned short SQCLR : 1;
+			unsigned short SQSET : 1;
+			unsigned short SQMON : 1;
+			unsigned short PBUSY : 1;
+			unsigned short  : 3;
+			unsigned short PID : 2;
+#endif
+	} BIT;
 #endif
 	} PIPE9CTR;
 	char           wk14[14];
@@ -23392,11 +24039,19 @@ typedef struct st_usb {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :6;
-			unsigned short TRENB:1;
-			unsigned short TRCLR:1;
-			unsigned short :8;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short  : 8;
+			unsigned short TRCLR : 1;
+			unsigned short TRENB : 1;
+			unsigned short  : 6;
+#else
+			unsigned short  : 6;
+			unsigned short TRENB : 1;
+			unsigned short TRCLR : 1;
+			unsigned short  : 8;
+#endif
+	} BIT;
 #endif
 	} PIPE1TRE;
 	unsigned short PIPE1TRN;
@@ -23404,11 +24059,19 @@ typedef struct st_usb {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :6;
-			unsigned short TRENB:1;
-			unsigned short TRCLR:1;
-			unsigned short :8;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short  : 8;
+			unsigned short TRCLR : 1;
+			unsigned short TRENB : 1;
+			unsigned short  : 6;
+#else
+			unsigned short  : 6;
+			unsigned short TRENB : 1;
+			unsigned short TRCLR : 1;
+			unsigned short  : 8;
+#endif
+	} BIT;
 #endif
 	} PIPE2TRE;
 	unsigned short PIPE2TRN;
@@ -23416,11 +24079,19 @@ typedef struct st_usb {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :6;
-			unsigned short TRENB:1;
-			unsigned short TRCLR:1;
-			unsigned short :8;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short  : 8;
+			unsigned short TRCLR : 1;
+			unsigned short TRENB : 1;
+			unsigned short  : 6;
+#else
+			unsigned short  : 6;
+			unsigned short TRENB : 1;
+			unsigned short TRCLR : 1;
+			unsigned short  : 8;
+#endif
+	} BIT;
 #endif
 	} PIPE3TRE;
 	unsigned short PIPE3TRN;
@@ -23428,11 +24099,19 @@ typedef struct st_usb {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :6;
-			unsigned short TRENB:1;
-			unsigned short TRCLR:1;
-			unsigned short :8;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short  : 8;
+			unsigned short TRCLR : 1;
+			unsigned short TRENB : 1;
+			unsigned short  : 6;
+#else
+			unsigned short  : 6;
+			unsigned short TRENB : 1;
+			unsigned short TRCLR : 1;
+			unsigned short  : 8;
+#endif
+	} BIT;
 #endif
 	} PIPE4TRE;
 	unsigned short PIPE4TRN;
@@ -23440,11 +24119,19 @@ typedef struct st_usb {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :6;
-			unsigned short TRENB:1;
-			unsigned short TRCLR:1;
-			unsigned short :8;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short  : 8;
+			unsigned short TRCLR : 1;
+			unsigned short TRENB : 1;
+			unsigned short  : 6;
+#else
+			unsigned short  : 6;
+			unsigned short TRENB : 1;
+			unsigned short TRCLR : 1;
+			unsigned short  : 8;
+#endif
+	} BIT;
 #endif
 	} PIPE5TRE;
 	unsigned short PIPE5TRN;
@@ -23453,60 +24140,102 @@ typedef struct st_usb {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :8;
-			unsigned short USBSPD:2;
-			unsigned short :6;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short  : 6;
+			unsigned short USBSPD : 2;
+			unsigned short  : 8;
+#else
+			unsigned short  : 8;
+			unsigned short USBSPD : 2;
+			unsigned short  : 6;
+#endif
+	} BIT;
 #endif
 	} DEVADD0;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :8;
-			unsigned short USBSPD:2;
-			unsigned short :6;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short  : 6;
+			unsigned short USBSPD : 2;
+			unsigned short  : 8;
+#else
+			unsigned short  : 8;
+			unsigned short USBSPD : 2;
+			unsigned short  : 6;
+#endif
+	} BIT;
 #endif
 	} DEVADD1;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :8;
-			unsigned short USBSPD:2;
-			unsigned short :6;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short  : 6;
+			unsigned short USBSPD : 2;
+			unsigned short  : 8;
+#else
+			unsigned short  : 8;
+			unsigned short USBSPD : 2;
+			unsigned short  : 6;
+#endif
+	} BIT;
 #endif
 	} DEVADD2;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :8;
-			unsigned short USBSPD:2;
-			unsigned short :6;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short  : 6;
+			unsigned short USBSPD : 2;
+			unsigned short  : 8;
+#else
+			unsigned short  : 8;
+			unsigned short USBSPD : 2;
+			unsigned short  : 6;
+#endif
+	} BIT;
 #endif
 	} DEVADD3;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :8;
-			unsigned short USBSPD:2;
-			unsigned short :6;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short  : 6;
+			unsigned short USBSPD : 2;
+			unsigned short  : 8;
+#else
+			unsigned short  : 8;
+			unsigned short USBSPD : 2;
+			unsigned short  : 6;
+#endif
+	} BIT;
 #endif
 	} DEVADD4;
 	union {
 		unsigned short WORD;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned short :8;
-			unsigned short USBSPD:2;
-			unsigned short :6;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned short  : 6;
+			unsigned short USBSPD : 2;
+			unsigned short  : 8;
+#else
+			unsigned short  : 8;
+			unsigned short USBSPD : 2;
+			unsigned short  : 6;
+#endif
+	} BIT;
 #endif
 	} DEVADD5;
 	char           wk16[20];

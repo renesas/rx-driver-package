@@ -46,6 +46,8 @@
 *         : 31.03.2022 2.90    Added support RX660.
 *         : 15.08.2022 3.10    Added support RX26T
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 29.05.2023 3.20    Added support RX23E-B
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *******************************************************************************/
 #ifndef DMACA_RX_PRIVATE_H
 #define DMACA_RX_PRIVATE_H
@@ -82,6 +84,8 @@ Includes   <System Includes>, "Project Includes"
     #include "./src/targets/rx231/r_dmaca_rx_target.h"
 #elif defined(BSP_MCU_RX23E_A)
     #include "./src/targets/rx23e-a/r_dmaca_rx_target.h"
+#elif defined(BSP_MCU_RX23E_B)
+    #include "./src/targets/rx23e-b/r_dmaca_rx_target.h"
 #elif defined(BSP_MCU_RX23W)
     #include "./src/targets/rx23w/r_dmaca_rx_target.h"
 #elif defined(BSP_MCU_RX26T)
@@ -103,7 +107,7 @@ typedef enum e_dmaca_chk_locking_sw
     DMACA_ALL_CH_UNLOCKED_AND_DTC_UNLOCKED = 0,             /* All DMAC channels and DTC are unlocked. */
     DMACA_ALL_CH_UNLOCKED_BUT_DTC_LOCKED,                   /* All DMAC channels are unlocked, but DTC is locked. */
     DMACA_LOCKED_CH_EXIST                                   /* Other DMAC channels are locked. */
- } dmaca_chk_locking_sw_t;
+} dmaca_chk_locking_sw_t;
 
 /* DMCNT.DTE(b0) : Configurable options for DMA Transfer Enable control for corresponding channel */
 typedef enum e_dmaca_transfer_enable
@@ -150,9 +154,9 @@ void           r_dmaca_module_disable (void);
 dmaca_return_t r_dmaca_int_enable (uint8_t channel, uint8_t priority);
 dmaca_return_t r_dmaca_int_disable (uint8_t channel);
 #if ((0 == BSP_CFG_USER_LOCKING_ENABLED) && (bsp_lock_t == BSP_CFG_USER_LOCKING_TYPE))
-  #if (1 != DMACA_CFG_USE_DTC_FIT_MODULE)
+    #if (1 != DMACA_CFG_USE_DTC_FIT_MODULE)
     dmaca_chk_locking_sw_t r_dmaca_check_dtc_locking_byuser (void);
-  #endif
+    #endif
 #else
     dmaca_chk_locking_sw_t r_dmaca_check_DMACA_DTC_locking_byUSER(void);
 #endif

@@ -67,6 +67,7 @@
  *         : 31.12.2021 2.50     Added RX660 support.
  *         : 31.03.2023 2.70     Added RX26T support.
  *                               Added new macros for SCL rise time and SCL fall time.
+ *         : 29.05.2023 2.80     Added RX23E-B support.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIIC_CONFIG_H
@@ -90,6 +91,7 @@
 /*  RX230: ch0,    ,     */
 /*  RX231: ch0,    ,     */
 /*  RX23E-A: ch0,    ,   */
+/*  RX23E-B: ch0,    ,   */
 /*  RX23T: ch0,    ,     */
 /*  RX23W: ch0,    ,     */
 /*  RX24T: ch0,    ,     */
