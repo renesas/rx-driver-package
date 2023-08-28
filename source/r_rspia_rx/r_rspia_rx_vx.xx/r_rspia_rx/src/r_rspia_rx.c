@@ -31,6 +31,7 @@
 *                               Supported for RX671.
 *         : 15.08.2022 1.30     Added RX26T support.
 *                               Fixed to comply GSCE coding standard revision 6.5.0.
+*         : 30.06.2023 1.40     Fixed to comply GSCE coding standard revision 6.5.0.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -413,7 +414,7 @@ static  rspia_err_t  rspia_regs_set(uint8_t                  chan,
 
     #if RSPIA_CFG_PARAM_CHECKING_ENABLE
     if (((RSPIA_MS_MODE_MASTER != p_cfg->master_slave_mode) && (RSPIA_MS_MODE_SLAVE != p_cfg->master_slave_mode))
-          || ((RSPIA_IF_MODE_4WIRE != p_cfg->gpio_ssl) && (RSPIA_IF_MODE_3WIRE != p_cfg->gpio_ssl)))
+        || ((RSPIA_IF_MODE_4WIRE != p_cfg->gpio_ssl) && (RSPIA_IF_MODE_3WIRE != p_cfg->gpio_ssl)))
     {
         return RSPIA_ERR_ARG_RANGE;
     }
@@ -750,8 +751,8 @@ rspia_err_t R_RSPIA_Control(rspia_hdl_t     hdl,
     /* Command function data structure definitions. One for each command in rspia_cmd_t. */
     rspia_cmd_baud_t      * p_baud_struct;
     rspia_cmd_setregs_t   * p_setregs_struct;
-    uint32_t    reg_temp = 0;
-    uint8_t     chan     = hdl->chan;
+    uint32_t                reg_temp = 0;
+    uint8_t                 chan     = hdl->chan;
 
 #if RSPIA_CFG_REQUIRE_LOCK
     bool        lock_result = false;
@@ -836,7 +837,7 @@ rspia_err_t R_RSPIA_Control(rspia_hdl_t     hdl,
             /* Transfer aborted. Call the user callback function passing pointer to the result structure. */
             if ((FIT_NO_FUNC != g_rspia_handles[chan].p_callback) && (NULL != g_rspia_handles[chan].p_callback))
             {
-                g_rspia_cb_data[chan].hdl = &(g_rspia_handles[chan]);
+                g_rspia_cb_data[chan].hdl   = &(g_rspia_handles[chan]);
                 g_rspia_cb_data[chan].event = RSPIA_EVT_TRANSFER_ABORTED;
 
                 /* Casting to void* type is valid */
@@ -1283,7 +1284,7 @@ static rspia_err_t  rspia_write_read_common(rspia_hdl_t            hdl,
     if ((RSPIA_DO_TX != tx_rx_mode) && (length <= g_rspia_tcb[chan].rx_curr_thresh))
     {
         (*g_rspia_channels[chan]).SPFCR.BIT.RTRG = (uint8_t)(length - 1);
-        g_rspia_tcb[chan].rx_curr_thresh          = (uint8_t)(length - 1);
+        g_rspia_tcb[chan].rx_curr_thresh         = (uint8_t)(length - 1);
     }
 
     /* Wait for channel to be idle before making changes to registers. */
@@ -1965,6 +1966,7 @@ void rspia_rx_common(uint8_t chan)
 
 #if RSPIA_CFG_USE_CH0
 R_BSP_PRAGMA_STATIC_INTERRUPT (rspia0_spri_isr, VECT(RSPIA0, SPRI))
+
 /******************************************************************************
 * Function Name:    rspia0_spri_isr
 * Description  :    RSPIA SPRI receive buffer full ISR.
@@ -1984,6 +1986,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rspia0_spri_isr(void)
 
 #if RSPIA_CFG_USE_CH0
 R_BSP_PRAGMA_STATIC_INTERRUPT (rspia0_spti_isr, VECT(RSPIA0, SPTI))
+
 /******************************************************************************
 * Function Name:    rspia0_spti_isr
 * Description  :    RSPIA SPTI transmit buffer empty ISR.

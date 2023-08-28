@@ -22,6 +22,7 @@
 ************************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *           15.08.2022 1.00    Initial Release
+*           30.06.2023 2.40    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 #ifndef RSCI_RX26T_H
@@ -108,9 +109,9 @@ typedef struct st_rsci_fifo_ctrl
 {
     uint8_t     *p_tx_buf;          /* user's buffer */
     uint8_t     *p_rx_buf;          /* user's buffer */
-    uint16_t    tx_cnt;             /* bytes remaining to add to FIFO */
-    uint16_t    rx_cnt;             /* bytes waiting to receive from FIFO */
-    uint16_t    total_length;       /* used for DTC in rsci_txi_handler */
+    uint16_t     tx_cnt;             /* bytes remaining to add to FIFO */
+    uint16_t     rx_cnt;             /* bytes waiting to receive from FIFO */
+    uint16_t     total_length;       /* used for DTC in rsci_txi_handler */
 } rsci_fifo_ctrl_t;
 
 /* CHANNEL CONTROL BLOCK */

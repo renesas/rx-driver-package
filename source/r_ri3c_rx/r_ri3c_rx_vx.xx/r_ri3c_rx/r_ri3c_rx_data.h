@@ -25,7 +25,7 @@
 /***********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *         : 15.08.2022 1.00    First release
- *                              Support RX26T.
+ *                              Supported for RX26T.
  **********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -45,10 +45,16 @@ extern "C" {
 extern ri3c_instance_t g_ri3c0;
 
 extern ri3c_instance_ctrl_t g_ri3c0_ctrl;
-extern ri3c_cfg_t g_ri3c0_cfg;
+extern ri3c_cfg_t           g_ri3c0_cfg;
 
 #ifndef g_ri3c0_callback
-void g_ri3c0_callback(ri3c_callback_args_t const *const p_args);
+/**********************************************************************************************************************
+ * Function Name: g_ri3c0_callback
+ * Description  : Callback function of RI3C FIT Module
+ * Arguments    : ri3c_callback_args_t const *const p_args
+ * Return Value : None
+ *********************************************************************************************************************/
+void g_ri3c0_callback (ri3c_callback_args_t const * const p_args);
 #endif
 #endif /* (BSP_MCU_RX26T) */
 #ifdef __cplusplus

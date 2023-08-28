@@ -51,12 +51,12 @@
     <package>
         <type>fitmodule</type>
         <name>r_ri3c_rx</name>
-        <version>1.00</version>
+        <version>1.10</version>
         <dependency>
             <module>r_bsp</module>
-            <version>7.30</version>
+            <version>7.41</version>
         </dependency>
-        <zipsource>r_ri3c_rx_v1.00.zip</zipsource>
+        <zipsource>r_ri3c_rx_v1.10.zip</zipsource>
         <application>Improved Inter-Integrated Circuit bus interface</application>
         <desc>RI3C Driver</desc>
         <details>The RI3C FIT module provides a method to transmit and receive data between the controller (master) and target (slave) devices using the I3C-bus interface (RI3C). The RI3C is in compliance with the MIPI I3C-bus (Improved-Inter-IC-Bus).</details>

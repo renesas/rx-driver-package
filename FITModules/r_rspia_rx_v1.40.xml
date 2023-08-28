@@ -61,11 +61,11 @@
     <package>
         <type>fitmodule</type>
         <name>r_rspia_rx</name>
-        <version>1.30</version>
-        <zipsource>r_rspia_rx_v1.30.zip</zipsource>
+        <version>1.40</version>
+        <zipsource>r_rspia_rx_v1.40.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.30</version>
+            <version>7.41</version>
         </dependency>
         <application>Serial Communications</application>
         <desc>RSPIA Driver</desc>

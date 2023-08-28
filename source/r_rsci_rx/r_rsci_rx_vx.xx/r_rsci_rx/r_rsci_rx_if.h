@@ -30,6 +30,8 @@
 *           29.07.2022 2.20    Updated demo projects.
 *           15.08.2022 2.30    Supported for RX26T.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           30.06.2023 2.40    Supported for RX26T-256KB.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 #ifndef RSCI_IF_H
@@ -51,7 +53,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define RSCI_VERSION_MAJOR  (2)
-#define RSCI_VERSION_MINOR  (30)
+#define RSCI_VERSION_MINOR  (40)
 
 #define RSCI_CLK_INT         (0x00U) /* use internal clock for baud generation */
 #define RSCI_CLK_EXT8X       (0x03U) /* use external clock 8x baud rate (ASYNC) */
@@ -288,31 +290,85 @@ typedef struct st_rsci_baud
 /*****************************************************************************
 Public Functions
 ******************************************************************************/
+/******************************************************************************
+ * Function Name: R_RSCI_Open
+ * Description  : .
+ * Arguments    : chan
+ *              : mode
+ *              : p_cfg
+ *              : p_args
+ *              : p_hdl
+ * Return Value : .
+ *****************************************************************************/
 rsci_err_t R_RSCI_Open (uint8_t const      chan,
                         rsci_mode_t const   mode,
                         rsci_cfg_t * const  p_cfg,
                         void               (* const p_callback)(void *p_args),
                         rsci_hdl_t * const  p_hdl);
 
+/******************************************************************************
+ * Function Name: R_RSCI_Send
+ * Description  : .
+ * Arguments    : hdl
+ *              : p_src
+ *              : length
+ * Return Value : .
+ *****************************************************************************/
 rsci_err_t R_RSCI_Send (rsci_hdl_t const    hdl,
                         uint8_t            *p_src,
                         uint16_t const     length);
                     
+/******************************************************************************
+ * Function Name: R_RSCI_SendReceive
+ * Description  : .
+ * Arguments    : hdl
+ *              : p_src
+ *              : p_dst
+ *              : length
+ * Return Value : .
+ *****************************************************************************/
 rsci_err_t R_RSCI_SendReceive (rsci_hdl_t const hdl,        /* SSPI/SYNC only */
                             uint8_t         *p_src,
                             uint8_t         *p_dst,
                             uint16_t const  length);
 
+/******************************************************************************
+ * Function Name: R_RSCI_Receive
+ * Description  : .
+ * Arguments    : hdl
+ *              : p_dst
+ *              : length
+ * Return Value : .
+ *****************************************************************************/
 rsci_err_t R_RSCI_Receive (rsci_hdl_t const hdl,
                         uint8_t         *p_dst,
                         uint16_t const  length);
 
+/******************************************************************************
+ * Function Name: R_RSCI_Control
+ * Description  : .
+ * Arguments    : hdl
+ *              : cmd
+ *              : p_args
+ * Return Value : .
+ *****************************************************************************/
 rsci_err_t R_RSCI_Control (rsci_hdl_t const     hdl,
                         rsci_cmd_t const     cmd,
                         void                *p_args);
 
+/******************************************************************************
+ * Function Name: R_RSCI_Close
+ * Description  : .
+ * Argument     : hdl
+ * Return Value : .
+ *****************************************************************************/
 rsci_err_t R_RSCI_Close (rsci_hdl_t const hdl);
 
+/******************************************************************************
+ * Function Name: R_RSCI_GetVersion
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
 uint32_t  R_RSCI_GetVersion (void);
 
                                     

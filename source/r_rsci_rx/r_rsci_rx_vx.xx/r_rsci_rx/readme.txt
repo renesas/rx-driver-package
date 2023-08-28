@@ -53,6 +53,10 @@ r_rsci_rx
         |       r_rsci_rx660.c
         |       r_rsci_rx660_data.c
         |       r_rsci_rx660_private.h
+        +---rx26t
+        |       r_rsci_rx26t.c
+        |       r_rsci_rx26t_data.c
+        |       r_rsci_rx26t_private.h
         :
 
 r_config

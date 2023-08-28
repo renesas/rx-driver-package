@@ -22,6 +22,7 @@
 ***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *           15.08.2022 1.00    Initial Release
+*           30.06.2023 2.40    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -160,7 +161,7 @@ void rsci_init_register(rsci_hdl_t const hdl)
 
     /* SCR1 & SCR3 register initialize: */
     hdl->rom->regs->SCR1.BIT.CTSE = 0;
-    hdl->rom->regs->SCR3.LONG &= 0xFFFFFF00;
+    hdl->rom->regs->SCR3.LONG    &= 0xFFFFFF00;
 
     /* MMCR register initialize */
     hdl->rom->regs->MMCR.LONG = 0x00000000;
@@ -256,7 +257,7 @@ int32_t rsci_init_bit_rate(rsci_hdl_t const  hdl,
     if ((RSCI_MODE_ASYNC == hdl->mode) || (RSCI_MODE_MANC == hdl->mode))
     {
 #if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
-        p_baud_info = rsci_async_baud;
+        p_baud_info  = rsci_async_baud;
         num_divisors = NUM_DIVISORS_ASYNC;
 #endif
     }
@@ -302,7 +303,7 @@ int32_t rsci_init_bit_rate(rsci_hdl_t const  hdl,
 
     /* Casting int16_t to uint32_t is valid. Because clock divisor is a positive integer */
     divisor = (uint32_t)p_baud_info[i].divisor;
-    tmp = ratio / (divisor);      // tmp = PCLK/(baud * divisor) = BRR+1 = N+1
+    tmp     = ratio / (divisor);      // tmp = PCLK/(baud * divisor) = BRR+1 = N+1
     if (0 == tmp)
     {
         return (1000);            // illegal value; return 100% error
@@ -345,7 +346,7 @@ int32_t rsci_init_bit_rate(rsci_hdl_t const  hdl,
     tmp = ratio / (divisor);      // tmp = PCLK/(baud * divisor) = BRR+1 = N+1
 
     /* Casting uint32_t to float is valid */
-    error = (((float) pclk / ((baud * divisor) * tmp)) - 1) * 100;
+    error     = (((float) pclk / ((baud * divisor) * tmp)) - 1) * 100;
     abs_error = (error < 0) ? (-error) : error;
 
     /* Do not use Modulation Duty Setting in clock synchronous mode, simple SPI mode,
@@ -362,7 +363,7 @@ int32_t rsci_init_bit_rate(rsci_hdl_t const  hdl,
     hdl->rom->regs->SCR2.BIT.BRR = (uint8_t) (tmp - 1);
 
     /* Casting uint32_t to float is valid  */
-    float_M = ((float) ((baud * divisor) * 256) * tmp) / pclk;
+    float_M  = ((float) ((baud * divisor) * 256) * tmp) / pclk;
     float_M *= 2;
 
     /* Casting float to uint32_t */
@@ -433,8 +434,8 @@ void rsci_initialize_ints(rsci_hdl_t const hdl,
     DISABLE_TEI_INT;
 
     /* CLEAR INTERRUPT FLAGS */
-    *hdl->rom->ir_rxi = 0;
-    *hdl->rom->ir_txi = 0;
+    *hdl->rom->ir_rxi     = 0;
+    *hdl->rom->ir_txi     = 0;
     (*hdl->rom->icu_grp) &= (~hdl->rom->tei_ch_mask);
     (*hdl->rom->icu_grp) &= (~hdl->rom->eri_ch_mask);
 
@@ -1103,7 +1104,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rsci9_txi_isr(void)
  * Function Name: rsci11_txi_isr
  * Description  : TXI interrupt routines for RSCI11 channel
  ******************************************************************************/
-R_BSP_PRAGMA_STATIC_INTERRUPT(rsci11_txi_isr, VECT(RSCI11,TXI))
+R_BSP_PRAGMA_STATIC_INTERRUPT(rsci11_txi_isr, VECT(RSCI11, TXI))
 R_BSP_ATTRIB_STATIC_INTERRUPT void rsci11_txi_isr(void)
 {
     rsci_txi_handler(&g_rsci_ch11_ctrl);
@@ -1192,7 +1193,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rsci9_rxi_isr(void)
  * Function Name: rsci11_rxi_isr
  * Description  : RXI interrupt routines for RSCI11 channel
  ******************************************************************************/
-R_BSP_PRAGMA_STATIC_INTERRUPT(rsci11_rxi_isr, VECT(RSCI11,RXI))
+R_BSP_PRAGMA_STATIC_INTERRUPT(rsci11_rxi_isr, VECT(RSCI11, RXI))
 R_BSP_ATTRIB_STATIC_INTERRUPT void rsci11_rxi_isr(void)
 {
     rsci_rxi_handler(&g_rsci_ch11_ctrl);

@@ -27,6 +27,8 @@
 *         : 29.07.2022 1.20     Updated demo projects.
 *         : 15.08.2022 1.30     Added RX26T support.
 *                               Fixed to comply GSCE coding standard revision 6.5.0.
+*         : 30.06.2023 1.40     Added RX26T-256K support.
+*                               Fixed to comply GSCE coding standard revision 6.5.0.
 ***********************************************************************************************************************/
 
 #ifndef RSPIA_API_HEADER_FILE
@@ -54,7 +56,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define RSPIA_RX_VERSION_MAJOR           (1)
-#define RSPIA_RX_VERSION_MINOR           (30)
+#define RSPIA_RX_VERSION_MINOR           (40)
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -296,7 +298,7 @@ typedef union rspia_command_word_s
         rspia_spcmd_reserve_bit_t  rs2           :3,    /* reserved */
         rspia_spcmd_ssl_assert_t   ssl_assert    :3,
         rspia_spcmd_reserve_bit_t  rs3           :5     /* reserved */
-    );
+);
     uint32_t word[1];
 } rspia_command_word_t;
 

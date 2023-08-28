@@ -25,7 +25,7 @@
 /**********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *         : 15.08.2022 1.00    First release
- *                              Support RX26T.
+ *                              Supported for RX26T.
  *********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -41,14 +41,26 @@
  * Function Prototypes
  **********************************************************************************************************************/
 /* Initiate Extended configuration for RI3C instance prototype */
-ri3c_extended_cfg_t ri3c_extended_cfg_init();
+static ri3c_extended_cfg_t ri3c_extended_cfg_init ();
 
 /* Bitrate calculation prototypes */
-static double ri3c_calculateHighSetting(double pclka_frequency, double t_high, double desired_frequency, uint16_t register_max, uint8_t dsbrpo);
-static double ri3c_calculateLowSetting(double pclka_frequency, double high_setting, double desired_frequency, double t_cr, double t_cf, uint16_t register_max, uint8_t dsbrpo);
-static void ri3c_calculateBitRate(void);
-static long ceil_function(long a, long b);
-static uint8_t ri3c_address_parity(uint8_t address);
+static double ri3c_calculateHighSetting (double pclka_frequency, 
+    double t_high, 
+    double desired_freq, 
+    uint16_t register_max, 
+    uint8_t dsbrpo);
+
+static double ri3c_calculateLowSetting (double pclka_frequency, 
+    double high_setting, 
+    double desired_freq, 
+    double t_cr, 
+    double t_cf, 
+    uint16_t register_max, 
+    uint8_t dsbrpo);
+
+static void    ri3c_calculateBitRate (void);
+static long    ceil_function (long a, long b);
+static uint8_t ri3c_address_parity (uint8_t address);
 
 /* ISR function prototypes. */
 static void ri3c_eei_isr(void);
@@ -82,8 +94,7 @@ static void ri3c_target_error_recovery(ri3c_instance_ctrl_t *p_ctrl, ri3c_target
  * Global Variables
  **********************************************************************************************************************/
 ri3c_instance_ctrl_t g_ri3c0_ctrl;
-/** Filled in Interface API structure for this Instance. */
-ri3c_api_t g_ri3c0_on_ri3c;
+ri3c_api_t           g_ri3c0_on_ri3c; // Filled in Interface API structure for this Instance.
 
 /* Extended configuration for this instance of RI3C. */
 ri3c_extended_cfg_t g_ri3c0_cfg_extend;
@@ -123,9 +134,9 @@ static uint32_t ext_pp_low_setting;
  * Functions
  **********************************************************************************************************************/
 
-/***********************************************************************************************************************
+/**********************************************************************************************************************
  * Function Name: R_RI3C_Open
- *******************************************************************************************************************//** 
+ ******************************************************************************************************************//**
  * @brief Configure an RI3C instance.
  * @param[in] p_api_ctrl Pointer to RI3C control block.
  * @param[in] p_cfg Pointer to User configuration structure.
@@ -139,7 +150,7 @@ static uint32_t ext_pp_low_setting;
 fsp_err_t R_RI3C_Open(ri3c_ctrl_t *const p_api_ctrl, ri3c_cfg_t const *const p_cfg)
 {
     g_ri3c0_cfg_extend = ri3c_extended_cfg_init();   
-    ri3c_instance_ctrl_t *p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl;
+    ri3c_instance_ctrl_t * p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl; // Cast to functional data type
 
 #if RI3C_CFG_PARAM_CHECKING_ENABLE
     FSP_ASSERT(NULL != p_api_ctrl);
@@ -158,21 +169,24 @@ fsp_err_t R_RI3C_Open(ri3c_ctrl_t *const p_api_ctrl, ri3c_cfg_t const *const p_c
     /* Initialize the internal state of the driver. */
     memset(p_ctrl, 0, sizeof(ri3c_instance_ctrl_t));
 
-    p_ctrl->open = RI3C_OPEN;
+    p_ctrl->open  = RI3C_OPEN;
     p_ctrl->p_cfg = p_cfg;
-    
+
     bsp_int_ctrl_t int_ctrl;
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);
+
     /* Set IPL to the maximum value to disable all interrupts,
      * so the scheduler can not be scheduled in critical region.
      */
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
+
     /* Clear the RI3C Module Stop bit.
      * MSPTD5 bit of Module Stop Register D (MSTPCRD) is RI3C Bus Interface 0 Module Stop
      * 0: Release from module-stop state
      * 1: Transition to the module-stop state is made
      */
     MSTP(RI3C0) = 0;
+
     /* Restore the IPL. */
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR);
@@ -181,10 +195,10 @@ fsp_err_t R_RI3C_Open(ri3c_ctrl_t *const p_api_ctrl, ri3c_cfg_t const *const p_c
     p_ctrl->p_reg = &RI3C0;
 
     /*
-     * Reset the RI3C Peripheral so that it is in a known state during initialization (See Figure 35.70 I3C Communication Flow
-     * in the RX26T manual).
+     * Reset the RI3C Peripheral so that it is in a known state during initialization 
+     * (See Figure 35.70 I3C Communication Flow in the RX26T manual).
      */
-    p_ctrl->p_reg->ICCR.BIT.ICE = 0;
+    p_ctrl->p_reg->ICCR.BIT.ICE   = 0;
     p_ctrl->p_reg->ICRCR.BIT.MRST = 1U;
 
     /* The field will be cleared automatically upon reset completion (See section 35.2.4 in the Rx26T manual). */
@@ -198,6 +212,9 @@ fsp_err_t R_RI3C_Open(ri3c_ctrl_t *const p_api_ctrl, ri3c_cfg_t const *const p_c
 
     return FSP_SUCCESS;
 }
+/**********************************************************************************************************************
+ * End of function R_RI3C_Open
+ *********************************************************************************************************************/
 
 /***********************************************************************************************************************
  * Function Name: R_RI3C_Enable
@@ -213,8 +230,8 @@ fsp_err_t R_RI3C_Open(ri3c_ctrl_t *const p_api_ctrl, ri3c_cfg_t const *const p_c
  */
 fsp_err_t R_RI3C_Enable(ri3c_ctrl_t *const p_api_ctrl)
 {
-    ri3c_instance_ctrl_t *p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl;
-    bsp_int_ctrl_t int_ctrl;
+    ri3c_instance_ctrl_t * p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl; // Cast to functional data type
+    bsp_int_ctrl_t         int_ctrl;
 
 #if RI3C_CFG_PARAM_CHECKING_ENABLE
     FSP_ASSERT(NULL != p_api_ctrl);
@@ -222,7 +239,7 @@ fsp_err_t R_RI3C_Enable(ri3c_ctrl_t *const p_api_ctrl)
     FSP_ERROR_RETURN(RI3C_INTERNAL_STATE_DISABLED == p_ctrl->internal_state, FSP_ERR_INVALID_MODE);
 #endif
 
-    ri3c_extended_cfg_t *p_extend = (ri3c_extended_cfg_t *)p_ctrl->p_cfg->p_extend;
+    ri3c_extended_cfg_t * p_extend = (ri3c_extended_cfg_t *)p_ctrl->p_cfg->p_extend; // Cast to functional data type
 
 #if RI3C_CFG_CONTROLLER_SUPPORT
     /* Write the standard and extended bitrate settings. */
@@ -261,8 +278,8 @@ fsp_err_t R_RI3C_Enable(ri3c_ctrl_t *const p_api_ctrl)
         p_ctrl->internal_state = RI3C_INTERNAL_STATE_TARGET_IDLE;
 
         /*
-         * Configure IBI queue threshold so that an IBI IRQ is generated when there is one empty entry in the
-         * IBI transmit FIFO.
+         * Configure IBI queue threshold so that an IBI IRQ is generated when
+         * there is one empty entry in the IBI transmit FIFO.
          */
         icqbtcr |= 1U << R_RI3C0_ICQBTCR_IQTH_Pos;
 #endif
@@ -315,18 +332,31 @@ fsp_err_t R_RI3C_Enable(ri3c_ctrl_t *const p_api_ctrl)
     p_ctrl->p_reg->ICCR.BIT.HJC = !p_extend->ibi_control.hot_join_acknowledge;
 
     /* Calculate the value of the IBI Notify Control Register. */
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     uint32_t icincr =
         (uint32_t)(p_extend->ibi_control.notify_rejected_hot_join_requests << R_RI3C0_ICINCR_RHJRN_Pos);
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     icincr |= (uint32_t)(p_extend->ibi_control.notify_rejected_controllerrole_requests << R_RI3C0_ICINCR_RCRRN_Pos);
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     icincr |= (uint32_t)(p_extend->ibi_control.notify_rejected_interrupt_requests << R_RI3C0_ICINCR_RTIRN_Pos);
 
     /* Write settings to the IBI Notify Control Register. */
     p_ctrl->p_reg->ICINCR.LONG = icincr;
 
     /* Calculate the value of the SCL Clock Stalling Control Register. */
-    uint32_t icstcr = (uint32_t)(p_extend->bitrate_settings.clock_stalling.assigned_address_phase_enable << R_RI3C0_ICSTCR_AASE_Pos);
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
+    uint32_t icstcr = 
+        (uint32_t)(p_extend->bitrate_settings.clock_stalling.assigned_address_phase_enable << R_RI3C0_ICSTCR_AASE_Pos);
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     icstcr |= (uint32_t)(p_extend->bitrate_settings.clock_stalling.parity_phase_enable << R_RI3C0_ICSTCR_PBSE_Pos);
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     icstcr |= (uint32_t)(p_extend->bitrate_settings.clock_stalling.ack_phase_enable << R_RI3C0_ICSTCR_APSE_Pos);
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     icstcr |=
         (uint32_t)(p_extend->bitrate_settings.clock_stalling.clock_stalling_time << R_RI3C0_ICSTCR_STT_Pos);
 
@@ -347,40 +377,64 @@ fsp_err_t R_RI3C_Enable(ri3c_ctrl_t *const p_api_ctrl)
 #if RI3C_CFG_TARGET_SUPPORT
 
     /* Calculate the value of the CCC Target Events Command Register. */
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     uint32_t ictevr =
         (uint32_t)(p_extend->target_command_response_info.inband_interrupt_enable << R_RI3C0_ICTEVR_ENINT_Pos);
-    ictevr |= (uint32_t)(p_extend->target_command_response_info.controllerrole_request_enable << R_RI3C0_ICTEVR_ENCR_Pos);
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
+    ictevr |= 
+        (uint32_t)(p_extend->target_command_response_info.controllerrole_request_enable << R_RI3C0_ICTEVR_ENCR_Pos);
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     ictevr |= (uint32_t)(p_extend->target_command_response_info.hotjoin_request_enable << R_RI3C0_ICTEVR_ENHJ_Pos);
 
     /* Calculate the value of the CCC Max Data Speed Read Register. */
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     uint32_t icmrsr = (uint32_t)p_extend->target_command_response_info.read_data_rate << R_RI3C0_ICMRSR_MSRDR_Pos;
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     icmrsr |= (uint32_t)p_extend->target_command_response_info.clock_data_turnaround << R_RI3C0_ICMRSR_TSCO_Pos;
 
     /* Calculate the value of the CCC Max Data Speed Rurnaround Register. */
     uint32_t icmttr = p_extend->target_command_response_info.read_turnaround_time << R_RI3C0_ICMTTR_MRTT_Pos;
-    icmttr |= (uint32_t)p_extend->target_command_response_info.read_turnaround_time_enable << R_RI3C0_ICMTTR_MRTTE_Pos;
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
+    icmttr |= ((uint32_t)p_extend->target_command_response_info.read_turnaround_time_enable) <<
+            R_RI3C0_ICMTTR_MRTTE_Pos;
 
     /* Calculate the value of the CCC Exchange Timing Support Information Register. */
-    uint32_t ictsir = (uint32_t)(p_extend->target_command_response_info.oscillator_frequency << R_RI3C0_ICTSIR_FREQ_Pos) &
-                      R_RI3C0_ICTSIR_FREQ_Msk;
-    ictsir |= (uint32_t)(p_extend->target_command_response_info.oscillator_inaccuracy << R_RI3C0_ICTSIR_INAC_Pos) &
-              R_RI3C0_ICTSIR_INAC_Msk;
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
+    uint32_t ictsir = (uint32_t)(p_extend->target_command_response_info.oscillator_frequency <<
+        R_RI3C0_ICTSIR_FREQ_Pos) & R_RI3C0_ICTSIR_FREQ_Msk;
 
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
+    ictsir |= (uint32_t)(p_extend->target_command_response_info.oscillator_inaccuracy <<
+            R_RI3C0_ICTSIR_INAC_Pos) & R_RI3C0_ICTSIR_INAC_Msk;
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     uint32_t icmrlr = (uint32_t)p_extend->target_command_response_info.read_length;
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     icmrlr |= (uint32_t)p_extend->target_command_response_info.ibi_payload_length << R_RI3C0_ICMRLR_IBIPL_Pos;
 
     /* Write Target Command Response Info. */
     p_ctrl->p_reg->ICTEVR.LONG = ictevr;
-    p_ctrl->p_reg->ICASR.LONG = (1U << p_extend->target_command_response_info.activity_state);
+    p_ctrl->p_reg->ICASR.LONG  = (1U << p_extend->target_command_response_info.activity_state);
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     p_ctrl->p_reg->ICMWLR.LONG = (uint32_t)p_extend->target_command_response_info.write_length;
     p_ctrl->p_reg->ICMRLR.LONG = icmrlr;
-    p_ctrl->p_reg->ICDSR.LONG =
-        (uint32_t)(p_extend->target_command_response_info.activity_state << R_RI3C0_ICDSR_CAS_Pos);
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
+    p_ctrl->p_reg->ICDSR.LONG  = (uint32_t)(p_extend->target_command_response_info.activity_state << \
+                                R_RI3C0_ICDSR_CAS_Pos);
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     p_ctrl->p_reg->ICMWSR.LONG = (uint32_t)p_extend->target_command_response_info.write_data_rate;
     p_ctrl->p_reg->ICMRSR.LONG = icmrsr;
     p_ctrl->p_reg->ICMTTR.LONG = icmttr;
     p_ctrl->p_reg->ICTSIR.LONG = ictsir;
-#endif
+#endif /* RI3C_CFG_TARGET_SUPPORT */
 
     /* Enable the RI3C Bus. */
     p_ctrl->p_reg->ICCR.LONG |= R_RI3C0_ICCR_ICE_Msk;
@@ -389,37 +443,31 @@ fsp_err_t R_RI3C_Enable(ri3c_ctrl_t *const p_api_ctrl)
     R_BSP_InterruptRequestEnable(VECT(RI3C0, RESPI));
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 
-    IEN(RI3C0, RESPI) = 1;
-    // resolve to ICU.IER[IER_RI3C0_RESPI].BIT.IEN0 = 1;
+    IEN(RI3C0, RESPI) = 1; // ICU.IER[IER_RI3C0_RESPI].BIT.IEN0 = 1;
 
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 
-    IPR(RI3C0, RESPI) = p_extend->ipl;
-    // resolve to ICU.IPR[IPR_RI3C0_RESPI].BIT.IPR = p_extend->ipl;
+    IPR(RI3C0, RESPI) = p_extend->ipl; // ICU.IPR[IPR_RI3C0_RESPI].BIT.IPR = p_extend->ipl;
 
     /* Enable the receive data buffer full IRQ. */
     R_BSP_InterruptRequestEnable(VECT(RI3C0, RXI));
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 
-    IEN(RI3C0, RXI) = 1;
-    // resolve to ICU.IER[IER_RI3C0_RXI].BIT.IEN6 = 1;
+    IEN(RI3C0, RXI) = 1; // ICU.IER[IER_RI3C0_RXI].BIT.IEN6 = 1;
 
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 
-    IPR(RI3C0, RXI) = p_extend->ipl;
-    // resolve to ICU.IPR[IPR_RI3C0_RXI].BIT.IPR = p_extend->ipl;
+    IPR(RI3C0, RXI) = p_extend->ipl; // ICU.IPR[IPR_RI3C0_RXI].BIT.IPR = p_extend->ipl;
 
     /* Enable the transmit data buffer empty IRQ. */
     R_BSP_InterruptRequestEnable(VECT(RI3C0, TXI));
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 
-    IEN(RI3C0, TXI) = 1;
-    // resolve to ICU.IER[IER_RI3C0_TXI].BIT.IEN7 = 1;
+    IEN(RI3C0, TXI) = 1; // ICU.IER[IER_RI3C0_TXI].BIT.IEN7 = 1;
 
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 
-    IPR(RI3C0, TXI) = p_extend->ipl;
-    // resolve to ICU.IPR[IPR_RI3C0_TXI].BIT.IPR = p_extend->ipl;
+    IPR(RI3C0, TXI) = p_extend->ipl; // ICU.IPR[IPR_RI3C0_TXI].BIT.IPR = p_extend->ipl;
 
 #if RI3C_CFG_TARGET_SUPPORT
 
@@ -427,13 +475,11 @@ fsp_err_t R_RI3C_Enable(ri3c_ctrl_t *const p_api_ctrl)
     R_BSP_InterruptRequestEnable(VECT(RI3C0, RCVI));
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 
-    IEN(RI3C0, RCVI) = 1;
-    // resolve to ICU.IER[IER_RI3C0_RCVI].BIT.IEN3 = 1;
+    IEN(RI3C0, RCVI) = 1; // ICU.IER[IER_RI3C0_RCVI].BIT.IEN3 = 1;
 
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 
-    IPR(RI3C0, RCVI) = p_extend->ipl;
-    // resolve to ICU.IPR[IPR_RI3C0_RCVI].BIT.IPR = p_extend->ipl;
+    IPR(RI3C0, RCVI) = p_extend->ipl; // ICU.IPR[IPR_RI3C0_RCVI].BIT.IPR = p_extend->ipl;
 
 #endif
 
@@ -441,31 +487,30 @@ fsp_err_t R_RI3C_Enable(ri3c_ctrl_t *const p_api_ctrl)
     R_BSP_InterruptRequestEnable(VECT(RI3C0, IBII));
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 
-    IEN(RI3C0, IBII) = 1;
-    // resolve to ICU.IER[IER_RI3C0_IBII].BIT.IEN2 = 1;
+    IEN(RI3C0, IBII) = 1; // ICU.IER[IER_RI3C0_IBII].BIT.IEN2 = 1;
 
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 
-    IPR(RI3C0, IBII) = p_extend->ipl;
-    // resolve to ICU.IPR[IPR_RI3C0_IBII].BIT.IPR = p_extend->ipl;
+    IPR(RI3C0, IBII) = p_extend->ipl; // ICU.IPR[IPR_RI3C0_IBII].BIT.IPR = p_extend->ipl;
 
     /* Enable the Error and Event IRQ. */
     R_BSP_InterruptRequestEnable(VECT(ICU, GROUPAL1));
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 
-    EN(RI3C0, EEI) = 1;
-    // resolve to ICU.GEN[GEN_RI3C0_EEI].BIT.EN13 = 1;
+    EN(RI3C0, EEI) = 1; // ICU.GEN[GEN_RI3C0_EEI].BIT.EN13 = 1;
 
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 
-    IPR(ICU, GROUPAL1) = p_extend->eei_ipl;
-    // EEI belongs to Group Interrupts GROUPAL1 - refer Table 14.6 Group Interrupt Requests
-    // resolve to ICU.IPR[IPR_ICU_GROUPAL1] = p_extend->ipl;
-    /* EEI category */
+    IPR(ICU, GROUPAL1) = p_extend->eei_ipl; // ICU.IPR[IPR_ICU_GROUPAL1] = p_extend->ipl;
+
+    /** EEI belongs to Group Interrupts GROUPAL1 - refer Table 14.6 Group Interrupt Requests */
     R_BSP_InterruptWrite(BSP_INT_SRC_AL1_RI3C0_EEI, (bsp_int_cb_t)ri3c_eei_isr);
 
     return FSP_SUCCESS;
 }
+/**********************************************************************************************************************
+ * End of function R_RI3C_Enable
+ *********************************************************************************************************************/
 
 /***********************************************************************************************************************
  * Function Name: R_RI3C_DeviceCfgSet
@@ -482,7 +527,7 @@ fsp_err_t R_RI3C_Enable(ri3c_ctrl_t *const p_api_ctrl)
  */
 fsp_err_t R_RI3C_DeviceCfgSet(ri3c_ctrl_t *const p_api_ctrl, ri3c_device_cfg_t const *const p_device_cfg)
 {
-    ri3c_instance_ctrl_t *p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl;
+    ri3c_instance_ctrl_t * p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl; // Cast to functional data type
 
 #if RI3C_CFG_PARAM_CHECKING_ENABLE
     FSP_ASSERT(NULL != p_api_ctrl);
@@ -497,8 +542,8 @@ fsp_err_t R_RI3C_DeviceCfgSet(ri3c_ctrl_t *const p_api_ctrl, ri3c_device_cfg_t c
          * Configure the controller dynamic address and set it to valid (See Figure 35.70 RI3C Communication Flow
          * in the RX26T manual).
          */
-        uint32_t iccar = (uint32_t)p_device_cfg->dynamic_address << R_RI3C0_ICCAR_DADR_Pos;
-        iccar |= R_RI3C0_ICCAR_DAV_Msk;
+        uint32_t iccar            = (uint32_t)p_device_cfg->dynamic_address << R_RI3C0_ICCAR_DADR_Pos;
+        iccar                    |= R_RI3C0_ICCAR_DAV_Msk;
         p_ctrl->p_reg->ICCAR.LONG = iccar;
     }
     else
@@ -514,30 +559,42 @@ fsp_err_t R_RI3C_DeviceCfgSet(ri3c_ctrl_t *const p_api_ctrl, ri3c_device_cfg_t c
          * Provisional ID (See Figure 35.70 RI3C Communication Flow in the RX26T manual).
          *
          * Configure the device static address. */
+        /* Cast to 32 bit unsigned integer to match 32 bit register. */
         uint32_t icdar0 = (uint32_t)p_device_cfg->static_address & R_RI3C0_ICDAR0_SADR_Msk;
 
-        /* Configure the device dynamic address. */
-        icdar0 |= (uint32_t)(ri3c_address_parity(p_device_cfg->dynamic_address) << R_RI3C0_ICDAR0_DADR_Pos) &
-                  R_RI3C0_ICDAR0_DADR_Msk;
+        /** Configure the device dynamic address. */
+        /* Cast to 32 bit unsigned integer to match 32 bit register. */
+        icdar0 |= (uint32_t)(ri3c_address_parity(p_device_cfg->dynamic_address) << R_RI3C0_ICDAR0_DADR_Pos) & \
+            R_RI3C0_ICDAR0_DADR_Msk;
 
-        /* Configure the IBI payload setting based on the BCR register. */
-        icdar0 |= (uint32_t)(p_device_cfg->target_info.bcr_b.ibi_payload << R_RI3C0_ICDAR0_IBIPL_Pos) &
-                  R_RI3C0_ICDAR0_IBIPL_Msk;
+        /** Configure the IBI payload setting based on the BCR register. */
+        /* Cast to 32 bit unsigned integer to match 32 bit register. */
+        icdar0 |= (uint32_t)((p_device_cfg->target_info.bcr_b.ibi_payload) << R_RI3C0_ICDAR0_IBIPL_Pos) & \
+            R_RI3C0_ICDAR0_IBIPL_Msk;
 
-        /* Write settings to the Target Device Address Table Register. */
+        /** Write settings to the Target Device Address Table Register. */
+        /* Cast to 32 bit unsigned integer to match 32 bit register. */
         p_ctrl->p_reg->ICDAR0.LONG = icdar0;
 
-        /* Write the BCR and DCR settings to the Target Device Characteristic Table Register. */
+        /** Write the BCR and DCR settings to the Target Device Characteristic Table Register. */
+        /* Cast to 32 bit unsigned integer to match 32 bit register. */
         uint32_t icdctr = (uint32_t)p_device_cfg->target_info.dcr;
-        icdctr |= (uint32_t)p_device_cfg->target_info.bcr << R_RI3C0_ICDCTR_LIMIT_Pos;
+
+        /* Cast to 32 bit unsigned integer to match 32 bit register. */
+        icdctr                    |= (uint32_t)p_device_cfg->target_info.bcr << R_RI3C0_ICDCTR_LIMIT_Pos;
         p_ctrl->p_reg->ICDCTR.LONG = icdctr;
 
-        /* Write the PID setting to the Target Device Characteristic Table PID Register. */
-        uint8_t *pid = (uint8_t *)p_device_cfg->target_info.pid;
+        /** Write the PID setting to the Target Device Characteristic Table PID Register. */
+        /* Cast to 8 bit unsigned integer to match 8 bit longs PID . */
+        uint8_t * pid = (uint8_t *)p_device_cfg->target_info.pid;
+
+        /* Cast to 32 bit unsigned integer to match 32 bit register. */
         p_ctrl->p_reg->ICPIDLR = (uint32_t)((pid[4] << 8U) | (pid[5]));
+
+        /* Cast to 32 bit unsigned integer to match 32 bit register. */
         p_ctrl->p_reg->ICPIDHR = (uint32_t)((pid[0] << 24U) |
                                             (pid[1] << 16U) |
-                                            (pid[2] << 8U) |
+                                            (pid[2] << 8U)  |
                                             (pid[3] << 0U));
 
         /* Set the target address to valid. */
@@ -547,10 +604,13 @@ fsp_err_t R_RI3C_DeviceCfgSet(ri3c_ctrl_t *const p_api_ctrl, ri3c_device_cfg_t c
 
     return FSP_SUCCESS;
 }
+/**********************************************************************************************************************
+ * End of function R_RI3C_DeviceCfgSet
+ *********************************************************************************************************************/
 
-/***********************************************************************************************************************
+/**********************************************************************************************************************
  * Function Name: R_RI3C_ControllerDeviceTableSet
- *******************************************************************************************************************//** 
+ ******************************************************************************************************************//**
  * @brief Configure an entry in the controller device table.
  * @param[in] p_api_ctrl Pointer to RI3C control block.
  * @param[in] device_index Index into the device table.
@@ -568,12 +628,12 @@ fsp_err_t R_RI3C_ControllerDeviceTableSet(ri3c_ctrl_t *const p_api_ctrl,
                                           ri3c_device_table_cfg_t const *const p_device_table_cfg)
 {
 #if RI3C_CFG_CONTROLLER_SUPPORT
-    ri3c_instance_ctrl_t *p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl;
+    ri3c_instance_ctrl_t * p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl; // Cast to functional data type
 
 #if RI3C_CFG_PARAM_CHECKING_ENABLE
-    FSP_ASSERT(NULL != p_api_ctrl);
-    FSP_ERROR_RETURN(RI3C_OPEN == p_ctrl->open, FSP_ERR_NOT_OPEN);
-    FSP_ASSERT(NULL != p_device_table_cfg);
+    FSP_ASSERT (NULL != p_api_ctrl);
+    FSP_ERROR_RETURN (RI3C_OPEN == p_ctrl->open, FSP_ERR_NOT_OPEN);
+    FSP_ASSERT (NULL != p_device_table_cfg);
 #endif
 
     /* The driver does not support accepting controller role requests. */
@@ -600,23 +660,32 @@ fsp_err_t R_RI3C_ControllerDeviceTableSet(ri3c_ctrl_t *const p_api_ctrl,
         /* Compute the address of the ICTDATRn register. */
         uint32_t address_offset = (uint32_t)(&p_ctrl->p_reg->ICTDATR1.LONG - &p_ctrl->p_reg->ICTDATR0.LONG);
 #if(__CCRX__) || (__GNUC__)
+        /* Pointer to address of ICTDATRN in CCRX and GGC compilers. */
         p_ictdatrn_reg = (uint32_t *)(&p_ctrl->p_reg->ICTDATR0 + device_index * address_offset);
 #elif(__ICCRX__)
+        /* Pointer to address of ICTDATRN in IAR compiler. */
         p_ictdatrn_reg = (uint32_t R_BSP_VOLATILE_SFR *)(&p_ctrl->p_reg->ICTDATR0.LONG + device_index * address_offset);
 #endif
         /* Configure the IBI settings for this device. */
+        /* Cast to 32 bit unsigned integer to match 32 bit register. */
         ictdatrn |= (uint32_t)(p_device_table_cfg->ibi_payload << R_RI3C0_ICTDATR0_IBIPL_Pos) &
                     R_RI3C0_ICTDATR0_IBIPL_Msk;
+
+        /* Cast to 32 bit unsigned integer to match 32 bit register. */
         ictdatrn |= (uint32_t)(!p_device_table_cfg->ibi_accept << R_RI3C0_ICTDATR0_TIRRJ_Pos) &
                     R_RI3C0_ICTDATR0_TIRRJ_Msk;
+
+        /* Cast to 32 bit unsigned integer to match 32 bit register. */
         ictdatrn |= (uint32_t)(!p_device_table_cfg->controllerrole_request_accept << R_RI3C0_ICTDATR0_CRRRJ_Pos) &
                     R_RI3C0_ICTDATR0_CRRRJ_Msk;
     }
 
-    /* Configure the device static address. */
+    /** Configure the device static address. */
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     ictdatrn |= (uint32_t)(p_device_table_cfg->static_address << R_RI3C0_ICTDATR0_SADR_Pos) & R_RI3C0_ICTDATR0_SADR_Msk;
 
-    /* Configure the device dynamic address. */
+    /** Configure the device dynamic address. */
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     ictdatrn |= (uint32_t)(ri3c_address_parity(p_device_table_cfg->dynamic_address) << R_RI3C0_ICTDATR0_DADR_Pos) &
                 R_RI3C0_ICTDATR0_DADR_Msk;
 
@@ -626,7 +695,7 @@ fsp_err_t R_RI3C_ControllerDeviceTableSet(ri3c_ctrl_t *const p_api_ctrl,
         ictdatrn |= R_RI3C0_ICTDATR0_TYPE_Msk;
     }
 
-    /* Write to the ICTDATRn register. */
+    /** Write to the ICTDATRn register. */
     *p_ictdatrn_reg = ictdatrn;
 
     return FSP_SUCCESS;
@@ -638,6 +707,9 @@ fsp_err_t R_RI3C_ControllerDeviceTableSet(ri3c_ctrl_t *const p_api_ctrl,
     return FSP_ERR_UNSUPPORTED;
 #endif
 }
+/**********************************************************************************************************************
+ * End of function R_RI3C_ControllerDeviceTableSet
+ *********************************************************************************************************************/
 
 /***********************************************************************************************************************
  * Function Name: R_RI3C_TargetStatusSet
@@ -656,24 +728,28 @@ fsp_err_t R_RI3C_ControllerDeviceTableSet(ri3c_ctrl_t *const p_api_ctrl,
 fsp_err_t R_RI3C_TargetStatusSet(ri3c_ctrl_t *const p_api_ctrl, ri3c_device_status_t status)
 {
 #if RI3C_CFG_TARGET_SUPPORT
-    ri3c_instance_ctrl_t *p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl;
+    ri3c_instance_ctrl_t * p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl; // Cast to functional data type
 
 #if RI3C_CFG_PARAM_CHECKING_ENABLE
     FSP_ASSERT(NULL != p_api_ctrl);
     FSP_ERROR_RETURN(RI3C_OPEN == p_ctrl->open, FSP_ERR_NOT_OPEN);
 
-    /* This function is only called in target mode. */
+    /** This function is only called in target mode. */
     FSP_ERROR_RETURN(
-        RI3C_INTERNAL_STATE_TARGET_IDLE == p_ctrl->internal_state || RI3C_INTERNAL_STATE_TARGET_IBI == p_ctrl->internal_state,
+        RI3C_INTERNAL_STATE_TARGET_IDLE == p_ctrl->internal_state ||
+        RI3C_INTERNAL_STATE_TARGET_IBI == p_ctrl->internal_state,
         FSP_ERR_INVALID_MODE);
 #endif
 
-    /* Clear the Pending Interrupt and Vendor Reserved fields. */
+    /** Clear the Pending Interrupt and Vendor Reserved fields. */
     uint32_t icdsr = p_ctrl->p_reg->ICDSR.LONG;
     icdsr &= ~(R_RI3C0_ICDSR_PNDINT_Msk | R_RI3C0_ICDSR_VRSV_Msk);
 
-    /* Write the new Pending Interrupt and Vendor Reserved fields. */
+    /** Write the new Pending Interrupt and Vendor Reserved fields. */
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     icdsr |= (uint32_t)status.pending_interrupt & R_RI3C0_ICDSR_PNDINT_Msk;
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     icdsr |= (uint32_t)(status.vendor_status << R_RI3C0_ICDSR_VRSV_Pos) & R_RI3C0_ICDSR_VRSV_Msk;
 
     p_ctrl->p_reg->ICDSR.LONG = icdsr;
@@ -686,6 +762,9 @@ fsp_err_t R_RI3C_TargetStatusSet(ri3c_ctrl_t *const p_api_ctrl, ri3c_device_stat
     return FSP_ERR_UNSUPPORTED;
 #endif
 }
+/**********************************************************************************************************************
+ * End of function R_RI3C_TargetStatusSet
+ *********************************************************************************************************************/
 
 /***********************************************************************************************************************
  * Function Name: R_RI3C_DeviceSelect
@@ -705,7 +784,7 @@ fsp_err_t R_RI3C_TargetStatusSet(ri3c_ctrl_t *const p_api_ctrl, ri3c_device_stat
 fsp_err_t R_RI3C_DeviceSelect(ri3c_ctrl_t *const p_api_ctrl, uint32_t device_index, uint32_t bitrate_mode)
 {
 #if RI3C_CFG_CONTROLLER_SUPPORT
-    ri3c_instance_ctrl_t *p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl;
+    ri3c_instance_ctrl_t * p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl; // Cast to functional data type
 
 #if RI3C_CFG_PARAM_CHECKING_ENABLE
     FSP_ASSERT(NULL != p_api_ctrl);
@@ -718,8 +797,8 @@ fsp_err_t R_RI3C_DeviceSelect(ri3c_ctrl_t *const p_api_ctrl, uint32_t device_ind
                RI3C_DEVICE_INDEX_EXTENDED_DEVICE == device_index);
 #endif
 
-    p_ctrl->device_index = device_index;
-    p_ctrl->device_bitrate_mode = (ri3c_bitrate_mode_t)bitrate_mode;
+    p_ctrl->device_index        = device_index;
+    p_ctrl->device_bitrate_mode = (ri3c_bitrate_mode_t)bitrate_mode; // Cast to bit rate data type
 
     return FSP_SUCCESS;
 #else
@@ -730,6 +809,9 @@ fsp_err_t R_RI3C_DeviceSelect(ri3c_ctrl_t *const p_api_ctrl, uint32_t device_ind
     return FSP_ERR_UNSUPPORTED;
 #endif
 }
+/**********************************************************************************************************************
+ * End of function R_RI3C_DeviceSelect
+ *********************************************************************************************************************/
 
 /***********************************************************************************************************************
  * Function Name: R_RI3C_DynamicAddressAssignmentStart
@@ -737,7 +819,8 @@ fsp_err_t R_RI3C_DeviceSelect(ri3c_ctrl_t *const p_api_ctrl, uint32_t device_ind
  * @brief Start the Dynamic Address Assignment Process.
  * @param[in] p_api_ctrl Pointer to RI3C control block.
  * @param[in] address_assignment_mode The command to use for Dynamic Address Assignment.
- * @param[in] starting_device_index The device index that will be used to assign the first device during Dynamic Address Assignment.
+ * @param[in] starting_device_index The device index that will be used to assign the first device during
+ *            Dynamic Address Assignment.
  * @param[in] device_count The number of devices to assign (Only used with I3C_ADDRESS_ASSIGNMENT_MODE_ENTDAA).
  * @retval FSP_SUCCESS                    Open successful.
  * @retval FSP_ERR_ASSERTION              An argument was NULL or invalid.
@@ -754,13 +837,14 @@ fsp_err_t R_RI3C_DynamicAddressAssignmentStart(ri3c_ctrl_t *const p_api_ctrl,
                                                uint32_t device_count)
 {
 #if RI3C_CFG_CONTROLLER_SUPPORT
-    ri3c_instance_ctrl_t *p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl;
+    ri3c_instance_ctrl_t * p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl; // Cast to functional data type
 
 #if RI3C_CFG_PARAM_CHECKING_ENABLE
     FSP_ASSERT(NULL != p_api_ctrl);
     FSP_ERROR_RETURN(RI3C_OPEN == p_ctrl->open, FSP_ERR_NOT_OPEN);
     FSP_ERROR_RETURN(
-        RI3C_INTERNAL_STATE_TARGET_IDLE != p_ctrl->internal_state && RI3C_INTERNAL_STATE_DISABLED != p_ctrl->internal_state,
+        RI3C_INTERNAL_STATE_TARGET_IDLE != p_ctrl->internal_state && \
+        RI3C_INTERNAL_STATE_DISABLED != p_ctrl->internal_state,
         FSP_ERR_INVALID_MODE);
 
     FSP_ASSERT(BSP_FEATURE_RI3C_MAX_DEV_COUNT > starting_device_index ||
@@ -770,37 +854,42 @@ fsp_err_t R_RI3C_DynamicAddressAssignmentStart(ri3c_ctrl_t *const p_api_ctrl,
     {
         if (RI3C_DEVICE_INDEX_EXTENDED_DEVICE == starting_device_index)
         {
-            /* When the extended device index is selected, the device count must be 1. */
+            /** When the extended device index is selected, the device count must be 1. */
             FSP_ASSERT(1U == device_count);
         }
         else
         {
-            /* The device count must be less than the remaining devices in the device table. */
+            /** The device count must be less than the remaining devices in the device table. */
             FSP_ASSERT(BSP_FEATURE_RI3C_MAX_DEV_COUNT > device_count + starting_device_index);
         }
     }
     else
     {
-        /* If the dynamic address is configured with SETDASA then the device count is not used and should be set to 0. */
+        /** If the dynamic address is configured with SETDASA then the device count is not used and should be set to 0. */
         FSP_ASSERT(0U == device_count);
     }
 #endif
 
-    /* Ensure that driver is in the idle state. */
+    /** Ensure that driver is in the idle state. */
     FSP_ERROR_RETURN(RI3C_INTERNAL_STATE_CONTROLLER_IDLE == p_ctrl->internal_state, FSP_ERR_IN_USE);
 
     p_ctrl->internal_state = RI3C_INTERNAL_STATE_CONTROLLER_ENTDAA;
 
-    /* Set the transfer_data pointer to read the PID, DCR, and BCR registers for each device. */
-    p_ctrl->read_buffer_descriptor.p_buffer = (uint8_t *)&p_ctrl->current_target_info;
-    p_ctrl->read_buffer_descriptor.count = 0;
+    /** Set the transfer_data pointer to read the PID, DCR, and BCR registers for each device. */
+    p_ctrl->read_buffer_descriptor.p_buffer    = (uint8_t *)&p_ctrl->current_target_info;
+    p_ctrl->read_buffer_descriptor.count       = 0;
     p_ctrl->read_buffer_descriptor.buffer_size = sizeof(ri3c_target_info_t);
 
-    /* Setup the command descriptor to start the ENTDAA command starting at the selected device index. */
+    /** Setup the command descriptor to start the ENTDAA command starting at the selected device index. */
     uint32_t command_descriptor = 0;
     command_descriptor |= (RI3C_CMD_DESC_CMD_ATTR_ADDR_ASSGN_CMD << RI3C_CMD_DESC_CMD_ATTR_Pos);
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     command_descriptor |= (uint32_t)(RI3C_EVENT_ADDRESS_ASSIGNMENT_COMPLETE << RI3C_CMD_DESC_TID_Pos);
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     command_descriptor |= (uint32_t)(address_assignment_mode << RI3C_CMD_DESC_CMD_Pos);
+
     command_descriptor |= (starting_device_index << RI3C_CMD_DESC_DEV_INDEX_Pos);
     command_descriptor |= (device_count << RI3C_CMD_DESC_ADDR_ASSGN_DEV_COUNT_Pos);
     command_descriptor |= RI3C_CMD_DESC_ROC_Msk;
@@ -827,6 +916,9 @@ fsp_err_t R_RI3C_DynamicAddressAssignmentStart(ri3c_ctrl_t *const p_api_ctrl,
     return FSP_ERR_UNSUPPORTED;
 #endif
 }
+/**********************************************************************************************************************
+ * End of function R_RI3C_DynamicAddressAssignmentStart
+ *********************************************************************************************************************/
 
 /***********************************************************************************************************************
  * Function Name: R_RI3C_CommandSend
@@ -841,15 +933,15 @@ fsp_err_t R_RI3C_DynamicAddressAssignmentStart(ri3c_ctrl_t *const p_api_ctrl,
  * @retval FSP_ERR_INVALID_MODE           This driver is not in controller mode.
  * @retval FSP_ERR_INVALID_ALIGNMENT      The buffer must be aligned to 4 bytes. If it is a read operation, the length
  *                                        also be a multiple of 4 bytes.
- * @retval FSP_ERR_UNSUPPORTED            Controller support must be enabled to call this function. Target support must be
- *                                        enabled when sending the GETACCMST command.
+ * @retval FSP_ERR_UNSUPPORTED            Controller support must be enabled to call this function.
+ *                                        Target support must be enabled when sending the GETACCMST command.
  * @details Send a broadcast or direct command to target devices on the bus.
  * @note None.
  */
 fsp_err_t R_RI3C_CommandSend(ri3c_ctrl_t *const p_api_ctrl, ri3c_command_descriptor_t *p_command_descriptor)
 {
 #if RI3C_CFG_CONTROLLER_SUPPORT
-    ri3c_instance_ctrl_t *p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl;
+    ri3c_instance_ctrl_t * p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl; // Cast to functional data type
 
 #if RI3C_CFG_PARAM_CHECKING_ENABLE
     FSP_ASSERT(NULL != p_api_ctrl);
@@ -861,23 +953,24 @@ fsp_err_t R_RI3C_CommandSend(ri3c_ctrl_t *const p_api_ctrl, ri3c_command_descrip
     }
 
     FSP_ERROR_RETURN(
-        RI3C_INTERNAL_STATE_TARGET_IDLE != p_ctrl->internal_state && RI3C_INTERNAL_STATE_DISABLED != p_ctrl->internal_state,
+        RI3C_INTERNAL_STATE_TARGET_IDLE != p_ctrl->internal_state && \
+        RI3C_INTERNAL_STATE_DISABLED != p_ctrl->internal_state,
         FSP_ERR_INVALID_MODE);
 
 #if !RI3C_CFG_UNALIGNED_BUFFER_SUPPORT
 
-    /* Verify that the buffer is aligned to 4 bytes. */
+    /** Verify that the buffer is aligned to 4 bytes. */
     FSP_ERROR_RETURN(0U == ((uint32_t)p_command_descriptor->p_buffer & 0x03U), FSP_ERR_INVALID_ALIGNMENT);
 #endif
 #endif
 
-    /* The driver does not currently support relinquishing controller role request to secondary controllers. */
+    /** The driver does not currently support relinquishing controller role request to secondary controllers. */
     FSP_ERROR_RETURN(I3C_CCC_DIRECT_GETACCMST != p_command_descriptor->command_code, FSP_ERR_UNSUPPORTED);
 
-    /* Ensure that driver is in the idle state. */
+    /** Ensure that driver is in the idle state. */
     FSP_ERROR_RETURN(RI3C_INTERNAL_STATE_CONTROLLER_IDLE == p_ctrl->internal_state, FSP_ERR_IN_USE);
 
-    /* Save the current command code. */
+    /** Save the current command code. */
     p_ctrl->current_command_code = p_command_descriptor->command_code;
 
     ri3c_read_buffer_descriptor_t *p_transfer_descriptor;
@@ -885,41 +978,49 @@ fsp_err_t R_RI3C_CommandSend(ri3c_ctrl_t *const p_api_ctrl, ri3c_command_descrip
 #if RI3C_CFG_TARGET_SUPPORT
     if (I3C_CCC_DIRECT_GETACCMST == p_command_descriptor->command_code)
     {
-        /* Disable the IBI Write Buffer Empty/Full IRQ in case the driver transisitons to target mode. */
+        /** Disable the IBI Write Buffer Empty/Full IRQ in case the driver transisitons to target mode. */
         p_ctrl->p_reg->ICCSIER.BIT.IQEFIE = 0;
     }
 #endif
 
     if (p_command_descriptor->rnw)
     {
-        /* If this is a read transfer, update the read buffer descriptor. */
-        p_transfer_descriptor = &p_ctrl->read_buffer_descriptor;
+        /*z* If this is a read transfer, update the read buffer descriptor. */
+        p_transfer_descriptor                      = &p_ctrl->read_buffer_descriptor;
         p_transfer_descriptor->read_request_issued = false;
 
         p_ctrl->internal_state = RI3C_INTERNAL_STATE_CONTROLLER_COMMAND_READ;
     }
     else
     {
-        /* If this is a write transfer, update the write buffer descriptor. */
+        /** If this is a write transfer, update the write buffer descriptor. */
         p_transfer_descriptor = (ri3c_read_buffer_descriptor_t *)&p_ctrl->write_buffer_descriptor;
 
         p_ctrl->internal_state = RI3C_INTERNAL_STATE_CONTROLLER_COMMAND_WRITE;
     }
 
-    /* Update the buffer descriptor with the buffer provided in the command descriptor. */
-    p_transfer_descriptor->p_buffer = p_command_descriptor->p_buffer;
-    p_transfer_descriptor->count = 0;
+    /** Update the buffer descriptor with the buffer provided in the command descriptor. */
+    p_transfer_descriptor->p_buffer    = p_command_descriptor->p_buffer;
+    p_transfer_descriptor->count       = 0;
     p_transfer_descriptor->buffer_size = p_command_descriptor->length;
 
-    /* Calculate the command descriptor. */
+    /** Calculate the command descriptor. */
     uint32_t command_descriptor = 0;
     command_descriptor |= (p_ctrl->device_index << RI3C_CMD_DESC_DEV_INDEX_Pos) & RI3C_CMD_DESC_DEV_INDEX_Msk;
     command_descriptor |= (0 << RI3C_CMD_DESC_XFER_MODE_Pos) & RI3C_CMD_DESC_XFER_MODE_Msk;
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     command_descriptor |= (uint32_t)(p_command_descriptor->rnw << RI3C_CMD_DESC_XFER_RNW_Pos);
     command_descriptor |= RI3C_CMD_DESC_ROC_Msk;
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     command_descriptor |= (uint32_t)(!p_command_descriptor->restart << RI3C_CMD_DESC_TOC_Pos) & RI3C_CMD_DESC_TOC_Msk;
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     command_descriptor |= (uint32_t)(p_command_descriptor->command_code << RI3C_CMD_DESC_CMD_Pos);
     command_descriptor |= (1U << 15U);
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     command_descriptor |= (uint32_t)(RI3C_EVENT_COMMAND_COMPLETE << RI3C_CMD_DESC_TID_Pos);
 
     /*
@@ -931,21 +1032,21 @@ fsp_err_t R_RI3C_CommandSend(ri3c_ctrl_t *const p_api_ctrl, ri3c_command_descrip
     p_ctrl->p_reg->ICCQR = (p_command_descriptor->length << RI3C_CMD_DESC_XFER_LENGTH_Pos) &
                            RI3C_CMD_DESC_XFER_LENGTH_Msk;
 
-    /* Clear the command queue empty flag. */
+    /** Clear the command queue empty flag. */
     p_ctrl->p_reg->ICCSR.BIT.CQEF = 0;
 
     if (!p_command_descriptor->rnw && (0 < p_command_descriptor->length))
     {
-        /* Calculate the next data word that will be written to the FIFO. */
+        /** Calculate the next data word that will be written to the FIFO. */
         p_ctrl->next_word = ri3c_next_data_word_calculate(&p_ctrl->write_buffer_descriptor);
 
-        /* Write data to the FIFO. */
+        /** Write data to the FIFO. */
         ri3c_fifo_write(p_ctrl);
 
-        /* If there is still data remaining in the transfer then it will be written in the Write Buffer Empty IRQ. */
+        /** If there is still data remaining in the transfer then it will be written in the Write Buffer Empty IRQ. */
         if ((BSP_FEATURE_RI3C_ICDR_DEPTH * sizeof(uint32_t)) < p_command_descriptor->length)
         {
-            /* Enable the Write Buffer Empty IRQ. */
+            /** Enable the Write Buffer Empty IRQ. */
             p_ctrl->p_reg->ICCSIER.BIT.TIE = 1;
         }
     }
@@ -958,12 +1059,15 @@ fsp_err_t R_RI3C_CommandSend(ri3c_ctrl_t *const p_api_ctrl, ri3c_command_descrip
     return FSP_ERR_UNSUPPORTED;
 #endif
 }
+/**********************************************************************************************************************
+ * End of function R_RI3C_CommandSend
+ *********************************************************************************************************************/
 
 /***********************************************************************************************************************
  * Function Name: R_RI3C_Write
  *******************************************************************************************************************//**
- * @brief Set the write buffer for the transfer. In controller mode, start the transfer. When the transfer is completed send a
- *  stop condition or a repeated-start.
+ * @brief Set the write buffer for the transfer. In controller mode, start the transfer.
+ *  When the transfer is completed send a stop condition or a repeated-start.
  * @param[in] p_api_ctrl Pointer to RI3C control block.
  * @param[in] p_data Pointer to a buffer to write.
  * @param[in] length Number of bytes to transfer.
@@ -974,13 +1078,13 @@ fsp_err_t R_RI3C_CommandSend(ri3c_ctrl_t *const p_api_ctrl, ri3c_command_descrip
  * @retval FSP_ERR_IN_USE                 The operation could not be completed because the driver is busy.
  * @retval FSP_ERR_INVALID_MODE           This driver is disabled.
  * @retval FSP_ERR_INVALID_ALIGNMENT      The buffer must be aligned to 4 bytes.
- * @details Set the write buffer for the transfer. In controller mode, start the transfer. When the transfer is completed send a
- *  stop condition or a repeated-start.
+ * @details Set the write buffer for the transfer. In controller mode, start the transfer.
+ *  When the transfer is completed send a stop condition or a repeated-start.
  * @note None.
  */
 fsp_err_t R_RI3C_Write(ri3c_ctrl_t *const p_api_ctrl, uint8_t const *const p_data, uint32_t length, bool restart)
 {
-    ri3c_instance_ctrl_t *p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl;
+    ri3c_instance_ctrl_t * p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl; // Cast to functional data type
 
 #if 0U == RI3C_CFG_CONTROLLER_SUPPORT
     FSP_PARAMETER_NOT_USED(restart);
@@ -1004,9 +1108,9 @@ fsp_err_t R_RI3C_Write(ri3c_ctrl_t *const p_api_ctrl, uint8_t const *const p_dat
 #endif
 
     /* Set the internal transfer state for a write transfer. */
-    p_ctrl->write_buffer_descriptor.count = 0;
+    p_ctrl->write_buffer_descriptor.count       = 0;
     p_ctrl->write_buffer_descriptor.buffer_size = length;
-    p_ctrl->write_buffer_descriptor.p_buffer = (uint8_t *)p_data;
+    p_ctrl->write_buffer_descriptor.p_buffer    = (uint8_t *)p_data;
 
     /* Calculate the next data word that will be written to the FIFO. */
     p_ctrl->next_word = ri3c_next_data_word_calculate(&p_ctrl->write_buffer_descriptor);
@@ -1022,7 +1126,7 @@ fsp_err_t R_RI3C_Write(ri3c_ctrl_t *const p_api_ctrl, uint8_t const *const p_dat
              */
             p_ctrl->p_reg->ICRCR.LONG = R_RI3C0_ICRCR_TBRST_Msk;
 
-            /* The field will be cleared automatically upon reset completion (See section 35.2.4 in the RX26T manual). */
+            /* The field will be cleared automatically upon reset completion. */
             while (p_ctrl->p_reg->ICRCR.BIT.MRST != 0U)
             {
                 /* Wait. */
@@ -1054,7 +1158,11 @@ fsp_err_t R_RI3C_Write(ri3c_ctrl_t *const p_api_ctrl, uint8_t const *const p_dat
          * Note that the command descriptor is two words. The least significant word must be written first followed by
          * the most significant word (See Section 35.3.1.1 in the RX26T manual).
          */
-        p_ctrl->p_reg->ICCQR = ri3c_xfer_command_calculate(p_ctrl->device_index, false, p_ctrl->device_bitrate_mode, restart);
+        p_ctrl->p_reg->ICCQR = ri3c_xfer_command_calculate(
+            p_ctrl->device_index, 
+            false, 
+            p_ctrl->device_bitrate_mode, 
+            restart);
         p_ctrl->p_reg->ICCQR = (length << RI3C_CMD_DESC_XFER_LENGTH_Pos) & RI3C_CMD_DESC_XFER_LENGTH_Msk;
 
         /* Clear the command queue empty flag. */
@@ -1064,6 +1172,9 @@ fsp_err_t R_RI3C_Write(ri3c_ctrl_t *const p_api_ctrl, uint8_t const *const p_dat
 
     return FSP_SUCCESS;
 }
+/**********************************************************************************************************************
+ * End of function R_RI3C_Write
+ *********************************************************************************************************************/
 
 /***********************************************************************************************************************
  * Function Name: R_RI3C_Read
@@ -1087,7 +1198,7 @@ fsp_err_t R_RI3C_Write(ri3c_ctrl_t *const p_api_ctrl, uint8_t const *const p_dat
  */
 fsp_err_t R_RI3C_Read(ri3c_ctrl_t *const p_api_ctrl, uint8_t *const p_data, uint32_t length, bool restart)
 {
-    ri3c_instance_ctrl_t *p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl;
+    ri3c_instance_ctrl_t * p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl; // Cast to functional data type
 
 #if 0U == RI3C_CFG_CONTROLLER_SUPPORT
     FSP_PARAMETER_NOT_USED(restart);
@@ -1112,31 +1223,31 @@ fsp_err_t R_RI3C_Read(ri3c_ctrl_t *const p_api_ctrl, uint8_t *const p_data, uint
 #endif
 
     /* In Controller mode, ensure that driver is in the idle state. */
-    FSP_ERROR_RETURN(RI3C_INTERNAL_STATE_TARGET_IDLE == p_ctrl->internal_state || RI3C_INTERNAL_STATE_CONTROLLER_IDLE == p_ctrl->internal_state, FSP_ERR_IN_USE);
+    FSP_ERROR_RETURN(RI3C_INTERNAL_STATE_TARGET_IDLE == p_ctrl->internal_state || 
+        RI3C_INTERNAL_STATE_CONTROLLER_IDLE == p_ctrl->internal_state, FSP_ERR_IN_USE);
 
     bsp_int_ctrl_t int_ctrl;
+
     /* Disable the Receive Buffer Full IRQ in order to ensure that updating the read buffer state is not interrupted. */
     /** Disable the Interrupt request source */
     R_BSP_InterruptRequestDisable(VECT(RI3C0, RXI));
     
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 
-    IEN(RI3C0, RXI) = 0;
-    // resolve to ICU.IER[IER_RI3C0_RXI].BIT.IEN6 = 0;
+    IEN(RI3C0, RXI) = 0; // ICU.IER[IER_RI3C0_RXI].BIT.IEN6 = 0;
 
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 
     /* Set the internal transfer state for a read transfer. */
-    p_ctrl->read_buffer_descriptor.count = 0;
-    p_ctrl->read_buffer_descriptor.buffer_size = length;
-    p_ctrl->read_buffer_descriptor.p_buffer = p_data;
+    p_ctrl->read_buffer_descriptor.count               = 0;
+    p_ctrl->read_buffer_descriptor.buffer_size         = length;
+    p_ctrl->read_buffer_descriptor.p_buffer            = p_data;
     p_ctrl->read_buffer_descriptor.read_request_issued = false;
 
     R_BSP_InterruptRequestEnable(VECT(RI3C0, RXI));
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 
-    IEN(RI3C0, RXI) = 1;
-    // resolve to ICU.IER[IER_RI3C0_RXI].BIT.IEN6 = 1;
+    IEN(RI3C0, RXI) = 1; // ICU.IER[IER_RI3C0_RXI].BIT.IEN6 = 1;
 
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 
@@ -1163,6 +1274,9 @@ fsp_err_t R_RI3C_Read(ri3c_ctrl_t *const p_api_ctrl, uint8_t *const p_data, uint
 
     return FSP_SUCCESS;
 }
+/**********************************************************************************************************************
+ * End of function R_RI3C_Read
+ *********************************************************************************************************************/
 
 /***********************************************************************************************************************
  * Function Name: R_RI3C_IbiWrite
@@ -1188,7 +1302,7 @@ fsp_err_t R_RI3C_IbiWrite(ri3c_ctrl_t *const p_api_ctrl,
                           uint32_t length)
 {
 #if RI3C_CFG_TARGET_SUPPORT
-    ri3c_instance_ctrl_t *p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl;
+    ri3c_instance_ctrl_t * p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl; // Cast to functional data type
 #if RI3C_CFG_PARAM_CHECKING_ENABLE
     FSP_ASSERT(NULL != p_api_ctrl);
     FSP_ERROR_RETURN(RI3C_OPEN == p_ctrl->open, FSP_ERR_NOT_OPEN);
@@ -1216,8 +1330,8 @@ fsp_err_t R_RI3C_IbiWrite(ri3c_ctrl_t *const p_api_ctrl,
     p_ctrl->internal_state = RI3C_INTERNAL_STATE_TARGET_IBI;
 
     /* Setup the buffer for writing the data portion of the IBI. */
-    p_ctrl->ibi_buffer_descriptor.p_buffer = (uint8_t *)p_data;
-    p_ctrl->ibi_buffer_descriptor.count = 0;
+    p_ctrl->ibi_buffer_descriptor.p_buffer    = (uint8_t *)p_data;
+    p_ctrl->ibi_buffer_descriptor.count       = 0;
     p_ctrl->ibi_buffer_descriptor.buffer_size = length;
 
     /* Calculate the command descriptor for starting an IBI. */
@@ -1279,6 +1393,9 @@ fsp_err_t R_RI3C_IbiWrite(ri3c_ctrl_t *const p_api_ctrl,
     return FSP_ERR_UNSUPPORTED;
 #endif
 }
+/**********************************************************************************************************************
+ * End of function R_RI3C_IbiWrite
+ *********************************************************************************************************************/
 
 /***********************************************************************************************************************
  * Function Name: R_RI3C_IbiRead
@@ -1300,7 +1417,7 @@ fsp_err_t R_RI3C_IbiWrite(ri3c_ctrl_t *const p_api_ctrl,
 fsp_err_t R_RI3C_IbiRead(ri3c_ctrl_t *const p_api_ctrl, uint8_t *const p_data, uint32_t length)
 {
 #if RI3C_CFG_CONTROLLER_SUPPORT
-    ri3c_instance_ctrl_t *p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl;
+    ri3c_instance_ctrl_t * p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl; // Cast to functional data type
 
 #if RI3C_CFG_PARAM_CHECKING_ENABLE
     FSP_ASSERT(NULL != p_api_ctrl);
@@ -1324,37 +1441,33 @@ fsp_err_t R_RI3C_IbiRead(ri3c_ctrl_t *const p_api_ctrl, uint8_t *const p_data, u
 #endif
 #endif
     
-    ri3c_extended_cfg_t *p_extend = (ri3c_extended_cfg_t *)p_ctrl->p_cfg->p_extend;
+    ri3c_extended_cfg_t * p_extend = (ri3c_extended_cfg_t *)p_ctrl->p_cfg->p_extend; // Cast to functional data type
     
     bsp_int_ctrl_t int_ctrl;
+
     /* Disable the IBI Buffer Full IRQ in order to ensure that updating the IBI buffer state is not interrupted. */
     /** Disable the Interrupt request source */
     R_BSP_InterruptRequestDisable(VECT(RI3C0, IBII));
 
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 
-    IEN(RI3C0, IBII) = 0;
-    // resolve to ICU.IER[IER_RI3C0_IBII].BIT.IEN2 = 0;
+    IEN(RI3C0, IBII) = 0; // ICU.IER[IER_RI3C0_IBII].BIT.IEN2 = 0;
 
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 
-
-    p_ctrl->ibi_buffer_descriptor.p_buffer = p_data;
-    p_ctrl->ibi_buffer_descriptor.count = 0;
-    p_ctrl->ibi_buffer_descriptor.buffer_size = length;
+    p_ctrl->ibi_buffer_descriptor.p_buffer            = p_data;
+    p_ctrl->ibi_buffer_descriptor.count               = 0;
+    p_ctrl->ibi_buffer_descriptor.buffer_size         = length;
     p_ctrl->ibi_buffer_descriptor.read_request_issued = false;
 
     R_BSP_InterruptRequestEnable(VECT(RI3C0, IBII));
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 
-    IEN(RI3C0, IBII) = 1;
-    // resolve to ICU.IER[IER_RI3C0_IBII].BIT.IEN2 = 1;
+    IEN(RI3C0, IBII) = 1; // ICU.IER[IER_RI3C0_IBII].BIT.IEN2 = 1;
 
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 
-    IPR(RI3C0, IBII) = p_extend->ipl;
-    // resolve to ICU.IPR[IPR_RI3C0_IBII].BIT.IPR = p_extend->ipl;
-
+    IPR(RI3C0, IBII) = p_extend->ipl; // ICU.IPR[IPR_RI3C0_IBII].BIT.IPR = p_extend->ipl;
 
     return FSP_SUCCESS;
 #else
@@ -1365,6 +1478,9 @@ fsp_err_t R_RI3C_IbiRead(ri3c_ctrl_t *const p_api_ctrl, uint8_t *const p_data, u
     return FSP_ERR_UNSUPPORTED;
 #endif
 }
+/**********************************************************************************************************************
+ * End of function R_RI3C_IbiRead
+ *********************************************************************************************************************/
 
 /***********************************************************************************************************************
  * Function Name: R_RI3C_Close
@@ -1379,7 +1495,7 @@ fsp_err_t R_RI3C_IbiRead(ri3c_ctrl_t *const p_api_ctrl, uint8_t *const p_data, u
  */
 fsp_err_t R_RI3C_Close(ri3c_ctrl_t *const p_api_ctrl)
 {
-    ri3c_instance_ctrl_t *p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl;
+    ri3c_instance_ctrl_t * p_ctrl = (ri3c_instance_ctrl_t *)p_api_ctrl; // Cast to functional data type
 
 #if RI3C_CFG_PARAM_CHECKING_ENABLE
     FSP_ASSERT(NULL != p_api_ctrl);
@@ -1387,64 +1503,73 @@ fsp_err_t R_RI3C_Close(ri3c_ctrl_t *const p_api_ctrl)
 #endif
 
     bsp_int_ctrl_t int_ctrl;
+
     /* Disable RI3C IRQs. */
     /** Disable RI3C RESPI */
     R_BSP_InterruptRequestDisable(VECT(RI3C0, RESPI));
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
-    IEN(RI3C0, RESPI) = 0;
-    // resolve to ICU.IER[IER_RI3C0_RESPI].BIT.IEN0 = 0;
+
+    IEN(RI3C0, RESPI) = 0; // ICU.IER[IER_RI3C0_RESPI].BIT.IEN0 = 0;
+
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
     
     /** Disable RI3C RXI */
     R_BSP_InterruptRequestDisable(VECT(RI3C0, RXI));
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
-    IEN(RI3C0, RXI) = 0;
-    // resolve to ICU.IER[IER_RI3C0_RXI].BIT.IEN6 = 0;
+
+    IEN(RI3C0, RXI) = 0; // ICU.IER[IER_RI3C0_RXI].BIT.IEN6 = 0;
+
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
     
     /** Disable RI3C TXI */
     R_BSP_InterruptRequestDisable(VECT(RI3C0, TXI));
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
-    IEN(RI3C0, TXI) = 0;
-    // resolve to ICU.IER[IER_RI3C0_TXI].BIT.IEN7 = 0;
+
+    IEN(RI3C0, TXI) = 0; // ICU.IER[IER_RI3C0_TXI].BIT.IEN7 = 0;
+
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
     
     /** Disable RI3C RCVI */
     R_BSP_InterruptRequestDisable(VECT(RI3C0, RCVI));
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
-    IEN(RI3C0, RCVI) = 0;
-    // resolve to ICU.IER[IER_RI3C0_RCVI].BIT.IEN3 = 0;
+
+    IEN(RI3C0, RCVI) = 0; // ICU.IER[IER_RI3C0_RCVI].BIT.IEN3 = 0;
+
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
     
     /** Disable RI3C IBII */
     R_BSP_InterruptRequestDisable(VECT(RI3C0, IBII));
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
-    IEN(RI3C0, IBII) = 0;
-    // resolve to ICU.IER[IER_RI3C0_IBII].BIT.IEN2 = 0;
+
+    IEN(RI3C0, IBII) = 0; // ICU.IER[IER_RI3C0_IBII].BIT.IEN2 = 0;
+
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 
     /* Reset the RI3C Peripheral so that it is in a known state. */
     p_ctrl->p_reg->ICCR.BIT.ICE = 0;
-    p_ctrl->p_reg->ICRCR.LONG = 1U;
+    p_ctrl->p_reg->ICRCR.LONG   = 1U;
 
     /* The field will be cleared automatically upon reset completion (See section 35.2.4 in the RX26T manual). */
-    while (p_ctrl->p_reg->ICRCR.BIT.MRST != 0U)
+    while (0U != p_ctrl->p_reg->ICRCR.BIT.MRST)
     {
         /* Wait. */
     }
 
     /* Set the RI3C Module Stop bit. */
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);
+
     /* Set IPL to the maximum value to disable all interrupts,
      * so the scheduler can not be scheduled in critical region.
      */
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
+
     /* Clear the RI3C Module Stop bit.
      * MSPTD5 bit of Module Stop Register D (MSTPCRD) is RI3C Bus Interface 0 Module Stop
      * 0: Release from module-stop state
      * 1: Transition to the module-stop state is made
      */
     MSTP(RI3C0) = 1;
+
     /* Restore the IPL. */
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR);
@@ -1453,68 +1578,72 @@ fsp_err_t R_RI3C_Close(ri3c_ctrl_t *const p_api_ctrl)
 
     return FSP_SUCCESS;
 }
+/**********************************************************************************************************************
+ * End of function R_RI3C_Close
+ *********************************************************************************************************************/
 
 /***********************************************************************************************************************
  * @brief Initiate Extended configuration for RI3C instance prototype
  **********************************************************************************************************************/
-ri3c_extended_cfg_t ri3c_extended_cfg_init(void)
+static ri3c_extended_cfg_t ri3c_extended_cfg_init(void)
 {
     /* Calculate bitrate variables for g_ri3c0_cfg_extend */
     ri3c_calculateBitRate();
 
     /* Extended configuration for this instance of RI3C. */
     ri3c_extended_cfg_t ri3c0_cfg_extend =
+    {
+        .bitrate_settings =
         {
-            .bitrate_settings =
+            /* Standard Bitrate */
+            .icsbr = ((std_od_high_setting << R_RI3C0_ICSBR_ODHW_Pos) | (std_od_low_setting << R_RI3C0_ICSBR_ODLW_Pos))
+                | ((std_pp_high_setting << R_RI3C0_ICSBR_PPHW_Pos) | (std_pp_low_setting << R_RI3C0_ICSBR_PPLW_Pos)),
+            /* Extended Bitrate */
+            .icebr = ((ext_od_high_setting << R_RI3C0_ICEBR_ODHW_Pos) | (ext_od_low_setting << R_RI3C0_ICEBR_ODLW_Pos))
+                | ((ext_pp_high_setting << R_RI3C0_ICEBR_PPHW_Pos) | (ext_pp_low_setting << R_RI3C0_ICEBR_PPLW_Pos)),
+
+            .clock_stalling =
             {
-                /* Standard Bitrate */
-                .icsbr = ((std_od_high_setting << R_RI3C0_ICSBR_ODHW_Pos) | (std_od_low_setting << R_RI3C0_ICSBR_ODLW_Pos)) \
-                       | ((std_pp_high_setting << R_RI3C0_ICSBR_PPHW_Pos) | (std_pp_low_setting << R_RI3C0_ICSBR_PPLW_Pos)),
-                /* Extended Bitrate */
-                .icebr = ((ext_od_high_setting << R_RI3C0_ICEBR_ODHW_Pos) | (ext_od_low_setting << R_RI3C0_ICEBR_ODLW_Pos)) \
-                       | ((ext_pp_high_setting << R_RI3C0_ICEBR_PPHW_Pos) | (ext_pp_low_setting << R_RI3C0_ICEBR_PPLW_Pos)),
-
-                .clock_stalling =
-                {
-                    .assigned_address_phase_enable = RI3C_CFG_ADDRESS_ASSIGNMENT_PHASE,
-                    .transition_phase_enable = RI3C_CFG_TRANSITION_PHASE,
-                    .parity_phase_enable = RI3C_CFG_PARITY_PHASE,
-                    .ack_phase_enable = RI3C_CFG_ACK_PHASE,
-                    .clock_stalling_time = RI3C_CFG_CLOCK_STALLING_TIME,
-                },
+                .assigned_address_phase_enable = RI3C_CFG_ADDRESS_ASSIGNMENT_PHASE,
+                .transition_phase_enable = RI3C_CFG_TRANSITION_PHASE,
+                .parity_phase_enable = RI3C_CFG_PARITY_PHASE,
+                .ack_phase_enable = RI3C_CFG_ACK_PHASE,
+                .clock_stalling_time = RI3C_CFG_CLOCK_STALLING_TIME,
             },
+        },
 
-            .ibi_control.hot_join_acknowledge = RI3C_CFG_CONTROLLER_ACK_HOTJOIN_REQ,
-            .ibi_control.notify_rejected_hot_join_requests = RI3C_CFG_CONTROLLER_NOTIFY_REJECTED_HOTJOIN_REQ,
-            .ibi_control.notify_rejected_controllerrole_requests = RI3C_CFG_CONTROLLER_NOTIFY_REJECTED_CONTROLLERROLE_REQ,
-            .ibi_control.notify_rejected_interrupt_requests = RI3C_CFG_CONTROLLER_NOTIFY_REJECTED_INTERRUPT_REQ,
+        .ibi_control.hot_join_acknowledge = RI3C_CFG_CONTROLLER_ACK_HOTJOIN_REQ,
+        .ibi_control.notify_rejected_hot_join_requests = RI3C_CFG_CONTROLLER_NOTIFY_REJECTED_HOTJOIN_REQ,
+        .ibi_control.notify_rejected_controllerrole_requests = RI3C_CFG_CONTROLLER_NOTIFY_REJECTED_CONTROLLERROLE_REQ,
+        .ibi_control.notify_rejected_interrupt_requests = RI3C_CFG_CONTROLLER_NOTIFY_REJECTED_INTERRUPT_REQ,
 
-            .bus_free_detection_time = (uint32_t)RI3C_CFG_BUS_FREE_DETECT_TIME,
-            .bus_available_detection_time = RI3C_CFG_BUS_AVAILABLE_CONDITION_DETECT_TIME,
-            .bus_idle_detection_time = RI3C_CFG_BUS_IDLE_CONDITION_DETECT_TIME,
+        /* Cast to 32 bit unsigned integer to match 32 bit register. */
+        .bus_free_detection_time = (uint32_t)RI3C_CFG_BUS_FREE_DETECT_TIME,
+        .bus_available_detection_time = RI3C_CFG_BUS_AVAILABLE_CONDITION_DETECT_TIME,
+        .bus_idle_detection_time = RI3C_CFG_BUS_IDLE_CONDITION_DETECT_TIME,
 
-            .timeout_detection_enable = RI3C_CFG_TIMEOUT_DETECTION,
+        .timeout_detection_enable = RI3C_CFG_TIMEOUT_DETECTION,
             
-            .target_command_response_info =
-            {
-                .inband_interrupt_enable = RI3C_CFG_TARGET_IBI_REQ,
-                .controllerrole_request_enable = RI3C_CFG_TARGET_CONTROLLERROLE_REQ,
-                .hotjoin_request_enable = RI3C_CFG_TARGET_HOTJOIN_REQ,
-                .activity_state = RI3C_CFG_TARGET_ENTER_ACTIVITY_STATE,
-                .write_length = RI3C_CFG_TARGET_MAX_WRITE_LENGTH,
-                .read_length = RI3C_CFG_TARGET_MAX_READ_LENGTH,
-                .ibi_payload_length = RI3C_CFG_TARGET_MAX_IBI_PAYLOAD_LENGTH,
-                .write_data_rate = RI3C_CFG_TARGET_WRITE_DATA_RATE,
-                .read_data_rate = RI3C_CFG_TARGET_READ_DATA_RATE,
-                .read_turnaround_time_enable = RI3C_CFG_TARGET_INCLUDE_MAX_READ_TURNAROUND_TIME,
-                .read_turnaround_time = RI3C_CFG_TARGET_MAX_READ_TURNAROUND_TIME,
-                .oscillator_frequency = RI3C_CFG_TARGET_FREQUENCY_BYTE,
-                .oscillator_inaccuracy = RI3C_CFG_TARGET_INACCURACY_BYTE, 
-            },
+        .target_command_response_info =
+        {
+            .inband_interrupt_enable = RI3C_CFG_TARGET_IBI_REQ,
+            .controllerrole_request_enable = RI3C_CFG_TARGET_CONTROLLERROLE_REQ,
+            .hotjoin_request_enable = RI3C_CFG_TARGET_HOTJOIN_REQ,
+            .activity_state = RI3C_CFG_TARGET_ENTER_ACTIVITY_STATE,
+            .write_length = RI3C_CFG_TARGET_MAX_WRITE_LENGTH,
+            .read_length = RI3C_CFG_TARGET_MAX_READ_LENGTH,
+            .ibi_payload_length = RI3C_CFG_TARGET_MAX_IBI_PAYLOAD_LENGTH,
+            .write_data_rate = RI3C_CFG_TARGET_WRITE_DATA_RATE,
+            .read_data_rate = RI3C_CFG_TARGET_READ_DATA_RATE,
+            .read_turnaround_time_enable = RI3C_CFG_TARGET_INCLUDE_MAX_READ_TURNAROUND_TIME,
+            .read_turnaround_time = RI3C_CFG_TARGET_MAX_READ_TURNAROUND_TIME,
+            .oscillator_frequency = RI3C_CFG_TARGET_FREQUENCY_BYTE,
+            .oscillator_inaccuracy = RI3C_CFG_TARGET_INACCURACY_BYTE, 
+        },
 
-            .ipl = (RI3C_CFG_INTERRUPT_PRIORITY_LEVEL),
-            .eei_ipl = (RI3C_CFG_INTERRUPT_PRIORITY_LEVEL),
-        };
+        .ipl = (RI3C_CFG_INTERRUPT_PRIORITY_LEVEL),
+        .eei_ipl = (RI3C_CFG_INTERRUPT_PRIORITY_LEVEL),
+    };
     return ri3c0_cfg_extend;
 }
 
@@ -1543,6 +1672,7 @@ static uint8_t ri3c_address_parity(uint8_t address)
     /* The ODD parity will be the inverse of the even parity. */
     parity = !parity;
 
+    /* Cast to match 8 bit longs address */
     return (uint8_t)(address | (parity << 7));
 }
 
@@ -1570,8 +1700,12 @@ static uint32_t ri3c_xfer_command_calculate(uint32_t dev_index, bool rnw, uint32
 
     command_descriptor |= (dev_index << RI3C_CMD_DESC_DEV_INDEX_Pos) & RI3C_CMD_DESC_DEV_INDEX_Msk;
     command_descriptor |= (bitrate_setting << RI3C_CMD_DESC_XFER_MODE_Pos) & RI3C_CMD_DESC_XFER_MODE_Msk;
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     command_descriptor |= (uint32_t)(rnw << RI3C_CMD_DESC_XFER_RNW_Pos);
     command_descriptor |= RI3C_CMD_DESC_ROC_Msk;
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
     command_descriptor |= (uint32_t)(!restart << RI3C_CMD_DESC_TOC_Pos) & RI3C_CMD_DESC_TOC_Msk;
 
     return command_descriptor;
@@ -1586,6 +1720,7 @@ static uint32_t ri3c_xfer_command_calculate(uint32_t dev_index, bool rnw, uint32
  **********************************************************************************************************************/
 static inline void ri3c_fifo_read(ri3c_instance_ctrl_t *p_ctrl, uint32_t bytes)
 {
+    /* Cast is acceptable because it is the cast from uint32_t and stdint.h library is included and used */
     int bytes_remaining = (int)bytes;
     while (bytes_remaining > 0)
     {
@@ -1600,7 +1735,7 @@ static inline void ri3c_fifo_read(ri3c_instance_ctrl_t *p_ctrl, uint32_t bytes)
          * event will be called to notify the application that a new read buffer is required.
          */
         ri3c_read_buffer_store(p_ctrl,
-                               &p_ctrl->read_buffer_descriptor,
+                              &p_ctrl->read_buffer_descriptor,
                                rx_data,
                                (uint32_t)bytes_remaining,
                                RI3C_EVENT_READ_BUFFER_FULL);
@@ -1719,8 +1854,8 @@ static inline void ri3c_fifo_write(ri3c_instance_ctrl_t *p_ctrl)
         if (p_ctrl->write_buffer_descriptor.count >= p_ctrl->write_buffer_descriptor.buffer_size)
         {
             p_ctrl->p_reg->ICCSIER.BIT.TIE = 0;
-            IR(RI3C0, TXI) = 0;
-            transfer_complete = true;
+            IR(RI3C0, TXI)                 = 0;
+            transfer_complete              = true;
         }
         else
         {
@@ -1745,7 +1880,7 @@ static inline uint32_t ri3c_next_data_word_calculate(ri3c_write_buffer_descripto
     uint32_t data_word = 0;
 
     /* Read the current transfer count. */
-    uint32_t count = p_buffer_descriptor->count;
+    uint32_t count                 = p_buffer_descriptor->count;
     uint8_t const *p_transfer_data = p_buffer_descriptor->p_buffer;
 
 #if RI3C_CFG_UNALIGNED_BUFFER_SUPPORT
@@ -1799,109 +1934,109 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void ri3c_resp_isr(void)
     uint32_t internal_state = p_ctrl->internal_state;
 
     ri3c_callback_args_t callback_args;
-    callback_args.event = (ri3c_event_t)(internal_state & RI3C_INTERNAL_EVENT_MASK);
+    callback_args.event        = (ri3c_event_t)(internal_state & RI3C_INTERNAL_EVENT_MASK); // Cast to event data type
     callback_args.event_status = err_status;
-    callback_args.p_context = p_ctrl->p_cfg->p_context;
+    callback_args.p_context    = p_ctrl->p_cfg->p_context;
 
     p_ctrl->internal_state = RI3C_INTERNAL_STATE_CONTROLLER_IDLE;
 
     switch (internal_state)
     {
 #if RI3C_CFG_CONTROLLER_SUPPORT
-    case RI3C_INTERNAL_STATE_CONTROLLER_ENTDAA:
-    {
-        /* Reset the read buffer descriptor that was used to read the target info. */
-        p_ctrl->read_buffer_descriptor = (ri3c_read_buffer_descriptor_t){0};
-
-        break;
-    }
-
-    case RI3C_INTERNAL_STATE_CONTROLLER_WRITE:
-    case RI3C_INTERNAL_STATE_CONTROLLER_COMMAND_WRITE:
-    {
-        /* Calculate the total transfer length. Note that for a write transfer, the DATA_LENGTH field in the response
-         * descriptor provides the number of bytes remaining. */
-        callback_args.transfer_size = p_ctrl->write_buffer_descriptor.buffer_size - data_length;
-
-        /* Reset the write buffer descriptor that was used for the transfer. */
-        p_ctrl->write_buffer_descriptor = (ri3c_write_buffer_descriptor_t){0};
-
-        /* Disable the transmit IRQ if it hasn't been disabled already. */
-        p_ctrl->p_reg->ICCSIER.BIT.TIE = 0;
-        IR(RI3C0, TXI) = 0;
-        break;
-    }
-
-    case RI3C_INTERNAL_STATE_CONTROLLER_READ:
-    case RI3C_INTERNAL_STATE_CONTROLLER_COMMAND_READ:
-    {
-        uint32_t bytes_remaining = ri3c_read_bytes_remaining_calculate(p_ctrl, data_length);
-
-        /* Read the remaining byte stored in the FIFO. */
-        ri3c_fifo_read(p_ctrl, bytes_remaining);
-
-        /* If the transfer length is less than expected, the driver must perform error recovery defined in
-         * Figure 35.66 in the RX26T manual. */
-        if (data_length != p_ctrl->read_buffer_descriptor.buffer_size)
+        case RI3C_INTERNAL_STATE_CONTROLLER_ENTDAA:
         {
-            error_recovery_case_2 = true;
+            /* Reset the read buffer descriptor that was used to read the target info. */
+            p_ctrl->read_buffer_descriptor = (ri3c_read_buffer_descriptor_t){0};
+
+            break;
         }
 
-        /*
+        case RI3C_INTERNAL_STATE_CONTROLLER_WRITE:
+        case RI3C_INTERNAL_STATE_CONTROLLER_COMMAND_WRITE:
+        {
+            /* Calculate the total transfer length. Note that for a write transfer, the DATA_LENGTH field in the response
+             * descriptor provides the number of bytes remaining. */
+            callback_args.transfer_size = p_ctrl->write_buffer_descriptor.buffer_size - data_length;
+
+            /* Reset the write buffer descriptor that was used for the transfer. */
+            p_ctrl->write_buffer_descriptor = (ri3c_write_buffer_descriptor_t){0};
+
+            /* Disable the transmit IRQ if it hasn't been disabled already. */
+            p_ctrl->p_reg->ICCSIER.BIT.TIE = 0;
+            IR(RI3C0, TXI)                 = 0;
+            break;
+        }
+
+        case RI3C_INTERNAL_STATE_CONTROLLER_READ:
+        case RI3C_INTERNAL_STATE_CONTROLLER_COMMAND_READ:
+        {
+            uint32_t bytes_remaining = ri3c_read_bytes_remaining_calculate(p_ctrl, data_length);
+
+            /* Read the remaining byte stored in the FIFO. */
+            ri3c_fifo_read(p_ctrl, bytes_remaining);
+
+            /* If the transfer length is less than expected, the driver must perform error recovery defined in
+             * Figure 35.66 in the RX26T manual. */
+            if (data_length != p_ctrl->read_buffer_descriptor.buffer_size)
+            {
+                error_recovery_case_2 = true;
+            }
+
+            /*
              * For a read transfer, the DATA_LENGTH field in the response descriptor provides the total number of bytes
              * read.
              */
-        callback_args.transfer_size = data_length;
+            callback_args.transfer_size = data_length;
 
-        /* Reset the read buffer descriptor that was used for the read transfer. */
-        p_ctrl->read_buffer_descriptor = (ri3c_read_buffer_descriptor_t){
+            /* Reset the read buffer descriptor that was used for the read transfer. */
+            p_ctrl->read_buffer_descriptor = (ri3c_read_buffer_descriptor_t){
             0};
 #if RI3C_CFG_TARGET_SUPPORT
-        if (I3C_CCC_DIRECT_GETACCMST == p_ctrl->current_command_code)
-        {
-            if (0U == (p_ctrl->p_reg->ICMMR.LONG & R_RI3C0_ICMMR_ACF_Msk))
+            if (I3C_CCC_DIRECT_GETACCMST == p_ctrl->current_command_code)
             {
-                /* If the GETACCMST command was successful, transition the driver to target mode. */
-                p_ctrl->internal_state = RI3C_INTERNAL_STATE_TARGET_IDLE;
+                if (0U == (p_ctrl->p_reg->ICMMR.LONG & R_RI3C0_ICMMR_ACF_Msk))
+                {
+                    /* If the GETACCMST command was successful, transition the driver to target mode. */
+                    p_ctrl->internal_state = RI3C_INTERNAL_STATE_TARGET_IDLE;
 
-                /*
-                     * Configure IBI queue threshold so that an IBI IRQ is generated when there is one empty entry in the
-                     * IBI transmit FIFO.
+                    /*
+                     * Configure IBI queue threshold so that an IBI IRQ is generated 
+                     * when there is one empty entry in the IBI transmit FIFO.
                      */
-                p_ctrl->p_reg->ICQBTCR.BIT.IQTH = 1;
+                    p_ctrl->p_reg->ICQBTCR.BIT.IQTH = 1;
+                }
+                else
+                {
+                    /* If the command was not successfull, re-enable the IBI Write Buffer Empty/Full IRQ. */
+                    p_ctrl->p_reg->ICCSIER.BIT.IQEFIE = 1;
+                }
             }
-            else
-            {
-                /* If the command was not successfull, re-enable the IBI Write Buffer Empty/Full IRQ. */
-                p_ctrl->p_reg->ICCSIER.BIT.IQEFIE = 1;
-            }
-        }
 #endif /* RI3C_CFG_TARGET_SUPPORT */
 
-        p_ctrl->current_command_code = 0;
-        break;
-    }
+            p_ctrl->current_command_code = 0;
+            break;
+        }
 #endif /* RI3C_CFG_CONTROLLER_SUPPORT */
 
 #if RI3C_CFG_TARGET_SUPPORT
-    case RI3C_INTERNAL_STATE_TARGET_IBI:
-    {
-        /* Calculate the total transfer length. Note that for an IBI transfer, the DATA_LENGTH field in the response
+        case RI3C_INTERNAL_STATE_TARGET_IBI:
+        {
+            /* Calculate the total transfer length. Note that for an IBI transfer, the DATA_LENGTH field in the response
              * descriptor provides the number of bytes remaining. */
-        callback_args.transfer_size = p_ctrl->ibi_buffer_descriptor.buffer_size - data_length;
+            callback_args.transfer_size = p_ctrl->ibi_buffer_descriptor.buffer_size - data_length;
 
-        /* Reset the buffer descriptor that was used for the IBI transfer. */
-        p_ctrl->ibi_buffer_descriptor = (ri3c_read_buffer_descriptor_t){
+            /* Reset the buffer descriptor that was used for the IBI transfer. */
+            p_ctrl->ibi_buffer_descriptor = (ri3c_read_buffer_descriptor_t){
             0};
 
-        p_ctrl->internal_state = RI3C_INTERNAL_STATE_TARGET_IDLE;
-        break;
-    }
+            p_ctrl->internal_state = RI3C_INTERNAL_STATE_TARGET_IDLE;
+            break;
+        }
 #endif
-    default:
-    {
-        break;
-    }
+        default:
+        {
+            break;
+        }
     }
 
     /* Reset the total bytes read. */
@@ -1918,7 +2053,8 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void ri3c_resp_isr(void)
         p_ctrl->p_reg->ICCR.BIT.ABORT = 0;
     }
 
-    /* If a transfer error occurs, follow the error recovery operation defined in Figure 35.66 and 35.67 in the RX26T manual. */
+    /* If a transfer error occurs, follow the error recovery operation defined in
+     * Figure 35.66 and 35.67 in the RX26T manual. */
     if ((0 != (iccsr & R_RI3C0_ICCSR_DTEF_Msk)) || error_recovery_case_2)
     {
 #if RI3C_CFG_TARGET_SUPPORT
@@ -1975,9 +2111,9 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void ri3c_rx_isr(void)
 
             /* Notify the applciation that the ENTDAA Address Phase has started. */
             ri3c_callback_args_t callback_args;
-            callback_args.event = RI3C_EVENT_ENTDAA_ADDRESS_PHASE;
+            callback_args.event         = RI3C_EVENT_ENTDAA_ADDRESS_PHASE;
             callback_args.p_target_info = &p_ctrl->current_target_info;
-            callback_args.p_context = p_ctrl->p_cfg->p_context;
+            callback_args.p_context     = p_ctrl->p_cfg->p_context;
 
             p_ctrl->p_cfg->p_callback(&callback_args);
         }
@@ -1993,7 +2129,7 @@ R_BSP_PRAGMA_STATIC_INTERRUPT (ri3c_tx_isr, VECT_RI3C0_TXI)
 R_BSP_ATTRIB_STATIC_INTERRUPT void ri3c_tx_isr(void)
 {
     ri3c_instance_ctrl_t *p_ctrl = &g_ri3c0_ctrl;
-    IR(RI3C0, TXI) = 0;
+    IR(RI3C0, TXI)               = 0;
 
     /* Write data to the FIFO. */
     ri3c_fifo_write(p_ctrl);
@@ -2024,7 +2160,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void ri3c_rcv_isr(void)
                           RI3C_RECV_STATUS_DESC_ERR_STATUS_Pos;
 
     ri3c_callback_args_t callback_args;
-    callback_args.p_context = p_ctrl->p_cfg->p_context;
+    callback_args.p_context    = p_ctrl->p_cfg->p_context;
     callback_args.event_status = err_status;
 
     ri3c_target_error_recovery_type_t error_recovery_type = RI3C_TARGET_ERROR_RECOVERY_TYPE_OTHER;
@@ -2046,7 +2182,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void ri3c_rcv_isr(void)
              * the receive status descriptor.
              */
             callback_args.transfer_size = data_length;
-            callback_args.event = RI3C_EVENT_READ_COMPLETE;
+            callback_args.event         = RI3C_EVENT_READ_COMPLETE;
 
             /* Reset ther state for read transfers. */
             p_ctrl->read_buffer_descriptor = (ri3c_read_buffer_descriptor_t){
@@ -2060,7 +2196,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void ri3c_rcv_isr(void)
             /* Calculate the total transfer length. Note that for a write transfer, the DATA_LENGTH field in the receive
              * descriptor provides the number of bytes remaining. */
             callback_args.transfer_size = data_length;
-            callback_args.event = RI3C_EVENT_WRITE_COMPLETE;
+            callback_args.event         = RI3C_EVENT_WRITE_COMPLETE;
 
             /* Reset the state for write transfers. */
             p_ctrl->write_buffer_descriptor = (ri3c_write_buffer_descriptor_t){
@@ -2071,7 +2207,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void ri3c_rcv_isr(void)
 
             /* Disable the transmit IRQ if it hasn't been disabled already. */
             p_ctrl->p_reg->ICCSIER.BIT.TIE = 0;
-            IR(RI3C0, TXI) = 0;
+            IR(RI3C0, TXI)                 = 0;
         }
     }
     else
@@ -2088,6 +2224,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void ri3c_rcv_isr(void)
             (I3C_CCC_DIRECT_SETDASA == command_code))
         {
             uint32_t data_length_w = (data_length + sizeof(uint32_t) - 1) / sizeof(uint32_t);
+
             for (uint32_t i = 0; i < data_length_w; i++)
             {
                 /*
@@ -2109,6 +2246,8 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void ri3c_rcv_isr(void)
             {
                 /* Provide the assigned dynamic address in the callback. */
                 uint32_t dynamic_address_w = (p_ctrl->p_reg->ICDAMR0.LONG & R_RI3C0_ICDAMR0_TADR_Msk);
+
+                /* Cast to 8 bit to match 8 bit longs address */
                 callback_args.dynamic_address = (uint8_t)(dynamic_address_w >> R_RI3C0_ICDAMR0_TADR_Pos) & UINT8_MAX;
             }
         }
@@ -2128,14 +2267,16 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void ri3c_rcv_isr(void)
                     p_ctrl->internal_state = RI3C_INTERNAL_STATE_CONTROLLER_IDLE;
 
                     /*
-                     * Configure IBI queue threshold so that an IBI IRQ is generated when there is 1 IBI status descriptor in the FIFO.
+                     * Configure IBI queue threshold so that an IBI IRQ is generated when there is
+                     *  1 IBI status descriptor in the FIFO.
                      */
                     p_ctrl->p_reg->ICQBTCR.BIT.IQTH = 0;
 
                     /*
-                     * In target mode the IBI Queue Empty/Full flag indicates that the queue is empty. After transitioning to
-                     * controller mode, this bit indicates if there is status information in the queue. If the IBI queue was empty
-                     * before tranistioning to controller mode, then it will be set and the status should be cleared.
+                     * In target mode the IBI Queue Empty/Full flag indicates that the queue is empty.
+                     * After transitioning to controller mode, this bit indicates if there is status information
+                     * in the queue. If the IBI queue was empty before tranistioning to controller mode,
+                     * then it will be set and the status should be cleared.
                      */
                     p_ctrl->p_reg->ICCSR.BIT.IQEFF = 0;
                 }
@@ -2151,8 +2292,8 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void ri3c_rcv_isr(void)
                     0};
             }
 
-            callback_args.event = RI3C_EVENT_COMMAND_COMPLETE;
-            callback_args.command_code = command_code;
+            callback_args.event         = RI3C_EVENT_COMMAND_COMPLETE;
+            callback_args.command_code  = command_code;
             callback_args.transfer_size = data_length;
         }
     }
@@ -2162,7 +2303,9 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void ri3c_rcv_isr(void)
 
     uint32_t iccsr = p_ctrl->p_reg->ICCSR.LONG;
 
-    /* If an error occurred during the transfer, perform the error recovery operation defined in Figure 35.67 in the RX26T manual. */
+    /* If an error occurred during the transfer, perform the error recovery operation defined in
+     * Figure 35.67 in the RX26T manual.
+     */
     if ((0 != (iccsr & (R_RI3C0_ICCSR_DTEF_Msk | R_RI3C0_ICCSR_DTAF_Msk))) && (0U == p_ctrl->p_reg->ICSQSR.BIT.SQFL))
     {
         if (RI3C_INTERNAL_STATE_TARGET_IDLE == p_ctrl->internal_state)
@@ -2186,7 +2329,7 @@ R_BSP_PRAGMA_STATIC_INTERRUPT (ri3c_ibi_isr, VECT_RI3C0_IBII)
 R_BSP_ATTRIB_STATIC_INTERRUPT void ri3c_ibi_isr(void)
 {
     ri3c_instance_ctrl_t *p_ctrl = &g_ri3c0_ctrl;
-    IR(RI3C0, IBII) = 0;
+    IR(RI3C0, IBII)              = 0;
 
 #if RI3C_CFG_TARGET_SUPPORT
     if (RI3C_INTERNAL_STATE_TARGET_IBI == p_ctrl->internal_state)
@@ -2201,7 +2344,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void ri3c_ibi_isr(void)
         {
             /* If there is no more data to write, then disable the IBI IRQ. */
             p_ctrl->p_reg->ICCSIER.BIT.IQEFIE = 0;
-            IR(RI3C0, IBII) = 0;
+            IR(RI3C0, IBII)                   = 0;
         }
         else
         {
@@ -2233,8 +2376,9 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void ri3c_ibi_isr(void)
             uint32_t read_data = p_ctrl->p_reg->ICIQR;
 
             /*
-             * Store the next word of data into the read buffer. If there is not enough space, a RI3C_EVENT_IBI_READ_BUFFER_FULL
-             * event will be called to notify the application that a new read buffer is required.
+             * Store the next word of data into the read buffer. If there is not enough space,
+             * a RI3C_EVENT_IBI_READ_BUFFER_FULL event will be called to notify the application
+             * that a new read buffer is required.
              */
             ri3c_read_buffer_store(p_ctrl,
                                    &p_ctrl->ibi_buffer_descriptor,
@@ -2309,11 +2453,11 @@ void ri3c_eei_isr(void)
     callback_args.p_context = p_ctrl->p_cfg->p_context;
 
     /* Read the Internal Status Register. */
-    uint32_t icisr = p_ctrl->p_reg->ICISR.LONG;
+    uint32_t icisr            = p_ctrl->p_reg->ICISR.LONG;
     uint32_t icisr_clear_mask = 0;
 
     /* Read the Bus Status Register. */
-    uint32_t icsr2 = p_ctrl->p_reg->ICSR2.LONG;
+    uint32_t icsr2            = p_ctrl->p_reg->ICSR2.LONG;
     uint32_t icsr2_clear_mask = 0;
 
     if (0U != (icisr & R_RI3C0_ICISR_BERF_Msk))
@@ -2370,6 +2514,7 @@ void ri3c_controller_error_recovery(ri3c_instance_ctrl_t *p_ctrl, bool error_rec
     {
         /* Wait. */
     }
+
     /* Wait for the bus available condition. */
     while (1)
     {
@@ -2399,8 +2544,10 @@ void ri3c_controller_error_recovery(ri3c_instance_ctrl_t *p_ctrl, bool error_rec
         /* Restore the current controller setting. */
         p_ctrl->p_reg->ICMMR.LONG = (uint32_t)(R_RI3C0_ICMMR_ACF_Msk | R_RI3C0_ICMMR_WP_Msk);
 
-        /* After an internal reset, the ACF bit is cleared which causes the IBI Queue Empty/Full Flag to be set indicating the queue is empty.
-         * Since the driver is in controller mode, this status should be discarded and the flag should be cleared. */
+        /* After an internal reset, the ACF bit is cleared which causes the IBI Queue Empty/Full Flag to be set
+         * indicating the queue is empty. Since the driver is in controller mode,
+         * this status should be discarded and the flag should be cleared.
+         */
         p_ctrl->p_reg->ICCSR.BIT.IQEFF = 0;
 
         /* Enable the IBI Status Buffer Full IRQ. */
@@ -2412,26 +2559,31 @@ void ri3c_controller_error_recovery(ri3c_instance_ctrl_t *p_ctrl, bool error_rec
         p_ctrl->p_reg->ICCR.BIT.RESUME = 1;
     }
 
-    /* If a target device started an IBI during error recovery, then it must be NACK'd or SDA will be held low indefinitely. */
+    /* If a target device started an IBI during error recovery,
+     * then it must be NACK'd or SDA will be held low indefinitely.
+     */
     if (0U == p_ctrl->p_reg->ICIMR.BIT.SCLI)
     {
         /* Calculate the frequency of PCLKA. */
         uint32_t pclka_frequency = BSP_PCLKA_HZ;
 
-        ri3c_extended_cfg_t *p_extend = (ri3c_extended_cfg_t *)p_ctrl->p_cfg->p_extend;
+        ri3c_extended_cfg_t * p_extend = (ri3c_extended_cfg_t *)p_ctrl->p_cfg->p_extend; // Cast to functional data type
 
-        /* Get the low and high period in PCLKD ticks. */
-        uint32_t pclka_low_period = (p_extend->bitrate_settings.icsbr & R_RI3C0_ICSBR_ODLW_Msk) >> R_RI3C0_ICSBR_ODLW_Pos;
-        uint32_t pclka_high_period = (p_extend->bitrate_settings.icsbr & R_RI3C0_ICSBR_ODHW_Msk) >> R_RI3C0_ICSBR_ODHW_Pos;
+        /* Get the low and high period in PCLKA ticks. */
+        uint32_t pclka_low_period = (p_extend->bitrate_settings.icsbr & R_RI3C0_ICSBR_ODLW_Msk)
+            >> R_RI3C0_ICSBR_ODLW_Pos;
+        uint32_t pclka_high_period = (p_extend->bitrate_settings.icsbr & R_RI3C0_ICSBR_ODHW_Msk)
+            >> R_RI3C0_ICSBR_ODHW_Pos;
 
         /* Calculate the high and low period for SCL. */
         uint32_t high_frequency = pclka_frequency / pclka_high_period;
-        uint32_t low_frequency = pclka_frequency / pclka_low_period;
-        uint32_t high_delay_us = (1000000U + high_frequency - 1) / high_frequency; // NOLINT(readability-magic-numbers)
-        uint32_t low_delay_us = (1000000U + low_frequency - 1) / low_frequency;    // NOLINT(readability-magic-numbers)
+        uint32_t low_frequency  = pclka_frequency / pclka_low_period;
+        uint32_t high_delay_us  = (1000000U + high_frequency - 1) / high_frequency; // NOLINT(readability-magic-numbers)
+        uint32_t low_delay_us   = (1000000U + low_frequency - 1) / low_frequency;   // NOLINT(readability-magic-numbers)
 
         /* Check if ICBCR is working correctly. */
         bool icbcr_zero = true;
+
         for (uint32_t i = 0; i < 4; i++)
         {
             R_BSP_SoftwareDelay(high_delay_us + low_delay_us, BSP_DELAY_MICROSECS);
@@ -2547,7 +2699,8 @@ void ri3c_target_error_recovery(ri3c_instance_ctrl_t *p_ctrl, ri3c_target_error_
     uint32_t pclka_frequency = BSP_PCLKA_HZ;
 
     /* Wait for the expected amount of time for the Bus Available Condition. */
-    uint32_t expected_bus_available_time = (1000000U * p_ctrl->p_reg->ICBATR + pclka_frequency - 1) / pclka_frequency; // NOLINT(readability-magic-numbers)
+    uint32_t expected_bus_available_time = 
+        (1000000U * p_ctrl->p_reg->ICBATR + pclka_frequency - 1) / pclka_frequency; // NOLINT(readability-magic-numbers)
     R_BSP_SoftwareDelay(expected_bus_available_time, BSP_DELAY_MICROSECS);
 
     /* If the Bus is already available then error recovery is complete. */
@@ -2579,95 +2732,188 @@ void ri3c_target_error_recovery(ri3c_instance_ctrl_t *p_ctrl, ri3c_target_error_
  **********************************************************************************************************************/
 static void ri3c_calculateBitRate(void)
 {
-    double t_high;
-    double desired_frequency;
-    double t_cr;
-    double t_cf;
+    double   t_high;
+    double   desired_freq;
+    double   t_cr;
+    double   t_cf;
     uint16_t register_max;
-    uint8_t dsbrpo;
+    uint8_t  dsbrpo;
 
     uint32_t pclka_frequency = BSP_PCLKA_HZ;
     
-    /* Calculate Standard Open Drain Bit Rate */
-    t_high  = (double)RI3C_CFG_STANDARD_OPEN_DRAIN_LOGIC_HIGH_PERIOD;
-    desired_frequency = (double)RI3C_CFG_STANDARD_OPEN_DRAIN_FREQUENCY;
-    t_cr = (double)RI3C_CFG_OPEN_DRAIN_RISING_TIME;
-    t_cf = (double)RI3C_CFG_OPEN_DRAIN_FALLING_TIME;
+    /** Calculate Standard Open Drain Bit Rate */
+    t_high       = (double)RI3C_CFG_STANDARD_OPEN_DRAIN_LOGIC_HIGH_PERIOD; // Cast to double to avoid incorrect rounding
+    desired_freq = (double)RI3C_CFG_STANDARD_OPEN_DRAIN_FREQUENCY; // Cast to double to avoid incorrect rounding
+    t_cr         = (double)RI3C_CFG_OPEN_DRAIN_RISING_TIME; // Cast to double to avoid incorrect rounding
+    t_cf         = (double)RI3C_CFG_OPEN_DRAIN_FALLING_TIME; // Cast to double to avoid incorrect rounding
     register_max = 511;
-    dsbrpo = 0;
+    dsbrpo       = 0;
 
-    std_od_high_setting = (uint32_t)ri3c_calculateHighSetting(pclka_frequency, t_high, desired_frequency, register_max, dsbrpo);
-    std_od_low_setting = (uint32_t)ri3c_calculateLowSetting(pclka_frequency, std_od_high_setting, desired_frequency, t_cr, t_cf, register_max, dsbrpo);
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
+    std_od_high_setting = (uint32_t)ri3c_calculateHighSetting(pclka_frequency,
+            t_high,
+            desired_freq,
+            register_max, 
+            dsbrpo);
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
+    std_od_low_setting = (uint32_t)ri3c_calculateLowSetting(pclka_frequency, 
+            std_od_high_setting, 
+            desired_freq, 
+            t_cr, 
+            t_cf, 
+            register_max, 
+            dsbrpo);
+    
     if ((std_od_high_setting >= 256) || (std_od_low_setting >= 256))
     {
-        register_max = 255;
-        dsbrpo = 1;
-        std_od_high_setting = (uint32_t)ri3c_calculateHighSetting(pclka_frequency, t_high, desired_frequency, register_max, dsbrpo);
-        std_od_low_setting = (uint32_t)ri3c_calculateLowSetting(pclka_frequency, std_od_high_setting, desired_frequency, t_cr, t_cf, register_max, dsbrpo);
+        register_max        = 255;
+        dsbrpo              = 1;
+
+        /* Cast to 32 bit unsigned integer to match 32 bit register. */
+        std_od_high_setting = (uint32_t)ri3c_calculateHighSetting(pclka_frequency,
+                t_high,
+                desired_freq,
+                register_max,
+                dsbrpo);
+
+        /* Cast to 32 bit unsigned integer to match 32 bit register. */
+        std_od_low_setting  = (uint32_t)ri3c_calculateLowSetting(pclka_frequency,
+                std_od_high_setting,
+                desired_freq,
+                t_cr,
+                t_cf,
+                register_max,
+                dsbrpo);
     }
 
-    /* Calculate Standard Push Pull Bit Rate */
-    t_high = (double)RI3C_CFG_STANDARD_PUSH_PULL_LOGIC_HIGH_PERIOD;
-    desired_frequency = (double)RI3C_CFG_STANDARD_PUSH_PULL_FREQUENCY;
-    t_cr = (double)RI3C_CFG_PUSH_PULL_RISING_TIME;
-    t_cf = (double)RI3C_CFG_PUSH_PULL_FALLING_TIME;
+    /** Calculate Standard Push Pull Bit Rate */
+    t_high       = (double)RI3C_CFG_STANDARD_PUSH_PULL_LOGIC_HIGH_PERIOD; // Cast to double to avoid incorrect rounding
+    desired_freq = (double)RI3C_CFG_STANDARD_PUSH_PULL_FREQUENCY; // Cast to double to avoid incorrect rounding
+    t_cr         = (double)RI3C_CFG_PUSH_PULL_RISING_TIME; // Cast to double to avoid incorrect rounding
+    t_cf         = (double)RI3C_CFG_PUSH_PULL_FALLING_TIME; // Cast to double to avoid incorrect rounding
     register_max = 63;
-    dsbrpo = 0;
-    std_pp_high_setting = (uint32_t)ri3c_calculateHighSetting(pclka_frequency, t_high, desired_frequency,  register_max, dsbrpo);
-    std_pp_low_setting = (uint32_t)ri3c_calculateLowSetting(pclka_frequency, std_pp_high_setting, desired_frequency, t_cr, t_cf, register_max, dsbrpo);
+    dsbrpo       = 0;
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
+    std_pp_high_setting = (uint32_t)ri3c_calculateHighSetting(pclka_frequency, 
+            t_high, 
+            desired_freq, 
+            register_max, 
+            dsbrpo);
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
+    std_pp_low_setting  = (uint32_t)ri3c_calculateLowSetting(pclka_frequency,
+            std_pp_high_setting,
+            desired_freq,
+            t_cr,
+            t_cf,
+            register_max,
+            dsbrpo);
 
     /* Calculate Extended Open Drain Bit Rate */
-    t_high = (double)RI3C_CFG_EXTENDED_OPEN_DRAIN_LOGIC_HIGH_PERIOD;
-    desired_frequency = (double)RI3C_CFG_EXTENDED_OPEN_DRAIN_FREQUENCY;
-    t_cr = (double)RI3C_CFG_OPEN_DRAIN_RISING_TIME;
-    t_cf = (double)RI3C_CFG_OPEN_DRAIN_FALLING_TIME;
+    t_high       = (double)RI3C_CFG_EXTENDED_OPEN_DRAIN_LOGIC_HIGH_PERIOD; // Cast to double to avoid incorrect rounding
+    desired_freq = (double)RI3C_CFG_EXTENDED_OPEN_DRAIN_FREQUENCY; // Cast to double to avoid incorrect rounding
+    t_cr         = (double)RI3C_CFG_OPEN_DRAIN_RISING_TIME; // Cast to double to avoid incorrect rounding
+    t_cf         = (double)RI3C_CFG_OPEN_DRAIN_FALLING_TIME; // Cast to double to avoid incorrect rounding
     register_max = 511;
-    dsbrpo = 0;
-    ext_od_high_setting = (uint32_t)ri3c_calculateHighSetting(pclka_frequency, t_high, desired_frequency, register_max, dsbrpo);
-    ext_od_low_setting = (uint32_t)ri3c_calculateLowSetting(pclka_frequency, ext_od_high_setting, desired_frequency, t_cr, t_cf, register_max, dsbrpo);
+    dsbrpo       = 0;
 
-    /* Calculate Extended Push Pull Bit Rate */
-    t_high = (double)RI3C_CFG_EXTENDED_PUSH_PULL_LOGIC_HIGH_PERIOD;
-    desired_frequency = (double)RI3C_CFG_EXTENDED_PUSH_PULL_FREQUENCY;
-    t_cr = (double)RI3C_CFG_PUSH_PULL_RISING_TIME;
-    t_cf = (double)RI3C_CFG_PUSH_PULL_FALLING_TIME;
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
+    ext_od_high_setting = (uint32_t)ri3c_calculateHighSetting(pclka_frequency,
+            t_high,
+            desired_freq,
+            register_max,
+            dsbrpo);
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
+    ext_od_low_setting = (uint32_t)ri3c_calculateLowSetting(pclka_frequency, 
+            ext_od_high_setting,
+            desired_freq,
+            t_cr,
+            t_cf,
+            register_max,
+            dsbrpo);
+
+    /** Calculate Extended Push Pull Bit Rate */
+    t_high       = (double)RI3C_CFG_EXTENDED_PUSH_PULL_LOGIC_HIGH_PERIOD; // Cast to double to avoid incorrect rounding
+    desired_freq = (double)RI3C_CFG_EXTENDED_PUSH_PULL_FREQUENCY; // Cast to double to avoid incorrect rounding
+    t_cr         = (double)RI3C_CFG_PUSH_PULL_RISING_TIME; // Cast to double to avoid incorrect rounding
+    t_cf         = (double)RI3C_CFG_PUSH_PULL_FALLING_TIME; // Cast to double to avoid incorrect rounding
     register_max = 511;
-    dsbrpo = 0;
-    ext_od_high_setting = (uint32_t)ri3c_calculateHighSetting(pclka_frequency, t_high, desired_frequency, register_max, dsbrpo);
-    ext_od_low_setting = (uint32_t)ri3c_calculateLowSetting(pclka_frequency, ext_od_high_setting, desired_frequency, t_cr, t_cf, register_max, dsbrpo);
+    dsbrpo       = 0;
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
+    ext_od_high_setting = (uint32_t)ri3c_calculateHighSetting(pclka_frequency,
+            t_high,
+            desired_freq,
+            register_max,
+            dsbrpo);
+
+    /* Cast to 32 bit unsigned integer to match 32 bit register. */
+    ext_od_low_setting = (uint32_t)ri3c_calculateLowSetting(pclka_frequency,
+            ext_od_high_setting,
+            desired_freq, t_cr,
+            t_cf,
+            register_max,
+            dsbrpo);
 }
+/**********************************************************************************************************************
+ * End of function ri3c_calculateBitRate
+ *********************************************************************************************************************/
 
 /***********************************************************************************************************************
  * @brief Calculate High Setting
  **********************************************************************************************************************/
-static inline double ri3c_calculateHighSetting(double pclka_frequency, double t_high, double desired_frequency, uint16_t register_max, uint8_t dsbrpo)
+static inline double ri3c_calculateHighSetting(double pclka_frequency, 
+    double t_high,
+    double desired_freq,
+    uint16_t register_max,
+    uint8_t dsbrpo)
 {
     uint8_t divider;
-    double high_setting;
+    double  high_setting;
 
     divider = dsbrpo + 1;
-    high_setting = R_BSP_MAX(1, R_BSP_MIN(register_max, (pclka_frequency * t_high /(1000000000 * divider))));
+
+    /* Utilize the MIN, MAX API functions of BSP Module */
+    high_setting = R_BSP_MAX(1, R_BSP_MIN(register_max, (pclka_frequency * t_high / (1000000000 * divider))));
 
     return high_setting;
 }
+/**********************************************************************************************************************
+ * End of function ri3c_calculateHighSetting
+ *********************************************************************************************************************/
 
 /***********************************************************************************************************************
  * @brief Calculate Low Setting
  **********************************************************************************************************************/
-static inline double ri3c_calculateLowSetting(double pclka_frequency, double high_setting, double desired_frequency, double t_cr, double t_cf, uint16_t register_max, uint8_t dsbrpo)
+static inline double ri3c_calculateLowSetting(double pclka_frequency,
+    double high_setting,
+    double desired_freq,
+    double t_cr,
+    double t_cf,
+    uint16_t register_max,
+    uint8_t dsbrpo)
 {
-    double actual_t_high;
-    double t_low;
-    double low_setting;
+    double  actual_t_high;
+    double  t_low;
+    double  low_setting;
     uint8_t divider;
 
-    divider = dsbrpo + 1;
+    divider       = dsbrpo + 1;
     actual_t_high = high_setting * divider / pclka_frequency * 1000000000;
-    t_low = (1000000000 / desired_frequency - (t_cr + t_cf + actual_t_high));
-    low_setting = R_BSP_MAX(1, R_BSP_MIN(register_max, ceil_function((long)(t_low * pclka_frequency / 1000000000), divider)));
+    t_low         = ((1000000000 / desired_freq) - (t_cr + t_cf + actual_t_high));
+
+    /* Utilize the MIN, MAX API functions of BSP Module */
+    low_setting = R_BSP_MAX(1, R_BSP_MIN(register_max, 
+        ceil_function((long)(t_low * pclka_frequency / 1000000000), divider)));
 
     return low_setting;
 }
+/**********************************************************************************************************************
+ * End of function ri3c_calculateLowSetting
+ *********************************************************************************************************************/
 
 /***********************************************************************************************************************
  * @brief Ceil function
@@ -2679,6 +2925,9 @@ static long ceil_function(long a, long b)
 
     return ceil_value;
 }
+/**********************************************************************************************************************
+ * End of function ceil_function
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: g_ri3c0_callback
@@ -2690,5 +2939,8 @@ static long ceil_function(long a, long b)
  *********************************************************************************************************************/
 void g_ri3c0_callback(ri3c_callback_args_t const *const p_args)
 {
-	/* User code here */
+    /* User code here */
 }
+/**********************************************************************************************************************
+ * End of function g_ri3c0_callback
+ *********************************************************************************************************************/

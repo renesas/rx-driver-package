@@ -28,6 +28,7 @@
 *           31.03.2022 2.10    Supported for RX660.
 *           15.08.2022 2.30    Supported for RX26T.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           30.06.2023 2.40    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -589,11 +590,11 @@ static rsci_err_t rsci_init_async(rsci_hdl_t const      hdl,
     else
     {
         hdl->rom->regs->SCR1.BIT.PE = 1;
-		hdl->rom->regs->SCR1.BIT.PM = (uint8_t)((p_cfg->parity_type)); 
+		hdl->rom->regs->SCR1.BIT.PM = (uint8_t)((p_cfg->parity_type));
     }
 
     /* Configure Character Length, Stop Bit Length */
-    hdl->rom->regs->SCR3.BIT.CHR = (uint8_t)((p_cfg->data_size));
+    hdl->rom->regs->SCR3.BIT.CHR  = (uint8_t)((p_cfg->data_size));
     hdl->rom->regs->SCR3.BIT.STOP = (uint8_t)((p_cfg->stop_bits));
 
     /* Configure data inversion */
@@ -801,7 +802,7 @@ static rsci_err_t rsci_init_manc(rsci_hdl_t const      hdl,
     else
     {
         hdl->rom->regs->SCR1.BIT.PE = 1;
-		hdl->rom->regs->SCR1.BIT.PM = (uint8_t)((p_cfg->parity_type)); 
+		hdl->rom->regs->SCR1.BIT.PM = (uint8_t)((p_cfg->parity_type));
     }
 
     /* Configure Character Length, Stop Bit Length, Start bit Length */
@@ -1600,7 +1601,7 @@ static void rsci_receive(rsci_hdl_t const hdl)
         /* Do callback if available */
         if ((NULL != hdl->callback) && (FIT_NO_FUNC != hdl->callback))
         {
-            args.hdl = hdl;
+            args.hdl  = hdl;
             args.byte = byte;
 
             /* Casting to void type is valid */
@@ -1994,7 +1995,7 @@ static void rsci_error(rsci_hdl_t const hdl)
         {
             RSCI_RDR(byte);
 
-            RSCI_SSCR |= RSCI_SSCR_ERR_CLEAR_MASK;      /* APER, AFER, ORER clear */
+            RSCI_SSCR  |= RSCI_SSCR_ERR_CLEAR_MASK;      /* APER, AFER, ORER clear */
             RSCI_MMSCR |= RSCI_MMSCR_ERR_CLEAR_MASK;    /* PFER, SYER, SBER, MCER clear */
 
             if ((0 != (RSCI_SSR & RSCI_RCVR_ERR_MASK)) || (0 != (RSCI_MMSR & RSCI_MMSR_ERR_MASK)))
@@ -2006,7 +2007,7 @@ static void rsci_error(rsci_hdl_t const hdl)
         /* Do callback for error */
         if ((NULL != hdl->callback) && (FIT_NO_FUNC != hdl->callback))
         {
-            args.hdl = hdl;
+            args.hdl  = hdl;
             args.byte = byte;
 
             /* Casting to void* type is valid */

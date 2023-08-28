@@ -62,11 +62,11 @@
     <package>
         <type>fitmodule</type>
         <name>r_rsci_rx</name>
-        <version>2.30</version>
-        <zipsource>r_rsci_rx_v2.30.zip</zipsource>
+        <version>2.40</version>
+        <zipsource>r_rsci_rx_v2.40.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.30</version>
+            <version>7.41</version>
         </dependency>
         <dependency>
             <module>r_byteq</module>

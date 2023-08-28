@@ -11,6 +11,7 @@
         <version>3.02.00</version>
         <version>3.03.00</version>
         <version>3.04.00</version>
+        <version>3.05.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -22,6 +23,7 @@
         <version>8.03.00.202102</version>
         <version>8.03.00.202104</version>
         <version>8.03.00.202202</version>
+        <version>8.03.00.202305</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -56,8 +58,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_sdhi_rx</name>
-        <version>2.10</version>
-        <zipsource>r_sdhi_rx_v2.10.zip</zipsource>
+        <version>2.11</version>
+        <zipsource>r_sdhi_rx_v2.11.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>7.20</version>

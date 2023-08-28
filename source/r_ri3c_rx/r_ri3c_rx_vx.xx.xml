@@ -54,7 +54,7 @@
         <version>x.xx</version>
         <dependency>
             <module>r_bsp</module>
-            <version>7.30</version>
+            <version>7.41</version>
         </dependency>
         <zipsource>r_ri3c_rx_vx.xx.zip</zipsource>
         <application>Improved Inter-Integrated Circuit bus interface</application>

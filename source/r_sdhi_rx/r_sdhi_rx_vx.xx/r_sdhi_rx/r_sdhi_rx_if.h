@@ -36,7 +36,8 @@
 *         : 22.11.2019 2.06    Changed Minor version to 2.06.
 *         : 30.06.2021 2.07    Changed Minor version to 2.07.
 *         : 27.12.2022 2.10    Added new demo projects
-                               Updated slash format of included header file paths for Linux compatibility.
+*                              Updated slash format of included header file paths for Linux compatibility.
+*         : 20.07.2023 2.11    Updated demo projects.
 **********************************************************************************************************************/
 
 #ifndef SDHI_RX_H
@@ -59,7 +60,7 @@ Macro definitions
 /* #### SD Memory and common definitions #### */
 /* Version Number of API. */
 #define RX_SDHI_VERSION_MAJOR       (2)
-#define RX_SDHI_VERSION_MINOR       (10)
+#define RX_SDHI_VERSION_MINOR       (11)
 
 /* ==== Select use CBSY bit ==== */
 /*  #define     USE_INFO2_CBSY      */ /* Use SDHI_SDIMSK2_SCLKDIVEN   */

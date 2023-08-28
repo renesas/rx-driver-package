@@ -101,8 +101,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_s12ad_rx</name>
-        <version>5.20</version>
-        <zipsource>r_s12ad_rx_v5.20.zip</zipsource>
+        <version>5.30</version>
+        <zipsource>r_s12ad_rx_v5.30.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>7.40</version>

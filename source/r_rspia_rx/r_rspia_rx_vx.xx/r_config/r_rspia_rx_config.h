@@ -23,9 +23,14 @@
 * History : DD.MM.YYYY Version Description
 *         : 31.03.2021 1.00     First Release
 *                               Supported for RX671.
+*         : 30.06.2023 1.40     Supported for RX26T-256K.
 ***********************************************************************************************************************/
 #ifndef RSPIA_CONFIG_HEADER_FILE
 #define RSPIA_CONFIG_HEADER_FILE
+
+#if ((BSP_MCU_RX26T == 1) && ((BSP_CFG_MCU_PART_MEMORY_SIZE == 0x8) || (BSP_CFG_MCU_PART_MEMORY_SIZE == 0xA)))
+#error  "Error - RX26T Product with 48 Kbytes RAM not support RSPIA Module!"
+#endif
 
 /***********************************************************************************************************************
 Configuration Options

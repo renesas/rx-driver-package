@@ -27,11 +27,16 @@
 *                              and added support for Manchester mode.
 *           31.03.2022 2.10    Added comments for RX660 support
 *           15.08.2022 2.30    Supported for RX26T.
+*           30.06.2023 2.40    Supported for RX26T-256KB.
 ***********************************************************************************************************************/
 #ifndef RSCI_CONFIG_H
 #define RSCI_CONFIG_H
 
 #include "platform.h"
+
+#if ((BSP_MCU_RX26T == 1) && ((BSP_CFG_MCU_PART_MEMORY_SIZE == 0x8) || (BSP_CFG_MCU_PART_MEMORY_SIZE == 0xA)))
+#error  "Error - RX26T Product with 48 Kbytes RAM not support RSCI Module!"
+#endif
 
 /***********************************************************************************************************************
 Configuration Options
