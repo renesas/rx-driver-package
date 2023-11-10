@@ -5,12 +5,12 @@ r_flash_rx
 
 Document Number 
 ---------------
-r01an2184ej0480
-r01an2184jj0480
+r01an2184ej0511
+r01an2184jj0511
 
 Version
 -------
-v4.80
+v5.11
 
 Overview
 --------
@@ -42,12 +42,15 @@ Supported MCUs
 * RX230 Group
 * RX231 Group
 * RX23E-A Group
+* RX23E-B Group
 * RX23T Group
 * RX23W Group
 * RX24T Group
 * RX24U Group
+* RX26T Group
 * RX64M Group
 * RX651, RX65N Group
+* RX660 Group
 * RX66N Group
 * RX66T Group
 * RX671 Group
@@ -67,13 +70,16 @@ Boards Tested On
 * RX140 Target Board
 * RSKRX231
 * RSSKRX23E-A
+* RSSKRX23E-B
 * RSKRX23T
 * RSSKRX23W
 * RSKRX24T
 * RSKRX24U
+* MCK-RX26T
 * RSKRX64M
 * RSKRX65N
 * RSKRX65N-2MB
+* RSKRX660
 * RSKRX66T
 * RSKRX671
 * RSKRX71M
@@ -98,7 +104,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp      V6.20
+* r_bsp      V7.40
 
 How to add to your project
 --------------------------
@@ -129,8 +135,8 @@ How to add to your project
 
 Toolchain(s) Used
 -----------------
-* Renesas RXC 3.03.00
-* GNU GNURX 8.03.00.202102
+* Renesas RXC 3.05.00
+* GNU GNURX 8.03.00.202204
 * IAR ICCRX 4.20.03
 
 
@@ -142,9 +148,9 @@ r_flash_rx
 |
 +---doc
 |   +-- en
-|   |   +-- r01an2184ej0480-rx-flash.pdf
+|   |   +-- r01an2184ej0511-rx-flash.pdf
 |   +-- ja
-|       +-- r01an2184jj0480-rx-flash.pdf
+|       +-- r01an2184jj0511-rx-flash.pdf
 |
 +---ref
 |   +-- r_flash_rx_config_reference.h
@@ -175,6 +181,11 @@ r_flash_rx
         +--r_flash_type4.c
         +--r_flash_type4_if.h
     |
+    +-- flash_type_5
+        |
+        +--r_flash_type5.c
+        +--r_flash_type5_if.h
+    |
     +-- targets
         |
         +--rx110
@@ -201,6 +212,9 @@ r_flash_rx
         +--rx23e-a
              +-- r_flash_rx23e-a.h
         |
+        +--rx23e-b
+             +-- r_flash_rx23e-b.h
+        |
         +--rx23t
              +-- r_flash_rx23t.h
         |
@@ -213,11 +227,17 @@ r_flash_rx
         +--rx24u
              +-- r_flash_rx24u.h
         |
+        +--rx26t
+             +-- r_flash_rx26t.h
+        |
         +--rx64m
              +-- r_flash_rx64m.h
         |
         +--rx65n
              +-- r_flash_rx65n.h
+        |
+        +--rx660
+             +-- r_flash_rx660.h
         |
         +--rx66n
              +-- r_flash_rx66n.h

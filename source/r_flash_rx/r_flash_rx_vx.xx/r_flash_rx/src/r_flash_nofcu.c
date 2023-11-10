@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2021-2023 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_flash_nofcu.c
@@ -23,7 +23,11 @@
 /**********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *           23.04.2021 4.80    First Release. (Changed the structure of FLASH_TYPE_1 code with the addition of RX140.)
- *********************************************************************************************************************/
+ *           12.12.2021 4.81    Modified some global variables problems.
+ *           10.12.2021 4.81    Added support for Tool News R20TS0772, and removed unnecessary code in flash_write().
+ *           24.01.2023 5.00    Modified the condition of PFRAM section definition.
+ *           01.10.2023 5.11    Added support for Tool News R20TS0963.
+*********************************************************************************************************************/
 
 /**********************************************************************************************************************
  Includes   <System Includes> , "Project Includes"
@@ -274,7 +278,7 @@ static void flash_df_write(const uint32_t src_addr,  const uint32_t dest_addr)
 }
 #endif /* #ifndef FLASH_NO_DATA_FLASH */
 
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
+#if (FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_RUN_FROM_ROM == 0)
 /* All the functions below need to be placed in RAM if Code Flash programming is to be supported */
 #define FLASH_PE_MODE_SECTION    R_BSP_ATTRIB_SECTION_CHANGE(P, FRAM)
 #define FLASH_SECTION_CHANGE_END R_BSP_ATTRIB_SECTION_CHANGE_END
@@ -333,13 +337,36 @@ void flash_reset()
 FLASH_PE_MODE_SECTION
 void flash_stop(void)
 {
-    FLASH.FCR.BIT.STOP = 1;
-    while (FLASH.FSTATR1.BIT.FRDY == 0)     // wait for FRDY
-        ;
+    if ((g_current_parameters.bgo_enabled_cf == true)
+     || (g_current_parameters.bgo_enabled_df == true))
+    {
+        /* Disable FRDYI interrupt request */
+        flash_InterruptRequestDisable(VECT(FCU,FRDYI));
+    }
 
-    FLASH.FCR.BYTE = 0;
-    while (FLASH.FSTATR1.BIT.FRDY == 1)     // wait for FRDY
-        ;
+    if ((FLASH.FENTRYR.WORD == 0x0080) || (FLASH.FENTRYR.WORD == 0x0001))
+    {
+        FLASH.FCR.BIT.STOP = 1;
+        while (FLASH.FSTATR1.BIT.FRDY == 0)     // wait for FRDY
+            ;
+
+        FLASH.FCR.BYTE = 0;
+        while (FLASH.FSTATR1.BIT.FRDY == 1)     // wait for FRDY
+            ;
+    }
+
+    if ((g_current_parameters.bgo_enabled_cf == true)
+     || (g_current_parameters.bgo_enabled_df == true))
+    {
+        /* Clear FRDYI interrupt request */
+        IR(FCU,FRDYI) = 0;
+
+        /* Exit program/erase mode */
+        flash_pe_mode_exit();
+
+        /* Release lock and Set current state to Idle */
+        flash_release_state();
+    }
 }
 
 /**********************************************************************************************************************
@@ -503,8 +530,8 @@ flash_err_t flash_erase(const uint32_t block_address, const uint32_t num_blocks)
     }
 
     /* Return if in BGO mode. Processing will finish in FRDYI interrupt */
-    if ((g_current_parameters.current_operation == FLASH_CUR_CF_BGO_ERASE)
-     || (g_current_parameters.current_operation == FLASH_CUR_DF_BGO_ERASE))
+    if ((g_current_parameters.bgo_enabled_cf == true)
+     || (g_current_parameters.bgo_enabled_df == true))
     {
         return err;
     }
@@ -559,8 +586,8 @@ flash_err_t flash_blankcheck(const uint32_t start_address, const uint32_t num_by
     }
 
     /* Return if in BGO mode. Processing will finish in FRDYI interrupt */
-    if ((g_current_parameters.current_operation == FLASH_CUR_CF_BGO_BLANKCHECK)
-     || (g_current_parameters.current_operation == FLASH_CUR_DF_BGO_BLANKCHECK))
+    if ((g_current_parameters.bgo_enabled_cf == true)
+     || (g_current_parameters.bgo_enabled_df == true))
     {
         return err;
     }
@@ -625,6 +652,8 @@ flash_err_t flash_write(const uint32_t src_address, const uint32_t dest_address,
 
     while(g_current_parameters.total_count > 0)
     {
+        g_current_parameters.total_count--;
+
         /* Conversion to the P/E address from the read address */
         if (FLASH.FENTRYR.WORD == 0x0080)
         {
@@ -639,17 +668,9 @@ flash_err_t flash_write(const uint32_t src_address, const uint32_t dest_address,
         }
 #endif
 
-        g_current_parameters.total_count--;
-
-        if (g_current_parameters.current_operation == FLASH_CUR_STOP)   // err occurred; addr known good; protection err
-        {
-            err = FLASH_ERR_ACCESSW;
-            break;
-        }
-
         /* Return if in BGO mode. Processing will finish in FRDYI interrupt */
-        if ((g_current_parameters.current_operation == FLASH_CUR_CF_BGO_WRITE)
-         || (g_current_parameters.current_operation == FLASH_CUR_DF_BGO_WRITE))
+        if ((g_current_parameters.bgo_enabled_cf == true)
+         || (g_current_parameters.bgo_enabled_df == true))
         {
             break;
         }

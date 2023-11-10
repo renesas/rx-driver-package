@@ -8,6 +8,9 @@
         <product>RXC</product>
         <version>3.01.00</version>
         <version>3.02.00</version>
+        <version>3.03.00</version>
+        <version>3.04.00</version>
+        <version>3.05.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -18,6 +21,10 @@
         <version>8.03.00.201904</version>
         <version>8.03.00.202002</version>
         <version>8.03.00.202004</version>
+        <version>8.03.00.202102</version>
+        <version>8.03.00.202104</version>
+        <version>8.03.00.202202</version>
+        <version>8.03.00.202204</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -27,6 +34,7 @@
         <version>4.12.01</version>
         <version>4.14.01</version>
         <version>4.20.01</version>
+        <version>4.20.03</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -45,13 +53,16 @@
         <group omit_board="true">RX230</group>
         <group omit_board="true">RX231</group>
         <group omit_board="true">RX23E-A</group>
+        <group omit_board="true">RX23E-B</group>
         <group omit_board="true">RX23T</group>
         <group omit_board="true">RX23W</group>
         <group omit_board="true">RX24T</group>
         <group omit_board="true">RX24U</group>
+        <group omit_board="true">RX26T</group>
         <group omit_board="true">RX64M</group>
         <group omit_board="true">RX651</group>
         <group omit_board="true">RX65N</group>
+        <group omit_board="true">RX660</group>
         <group omit_board="true">RX66N</group>
         <group omit_board="true">RX66T</group>
         <group omit_board="true">RX671</group>
@@ -77,6 +88,12 @@
                 <version>5.52</version>
                 <version>6.10</version>
                 <version>6.20</version>
+                <version>6.21</version>
+                <version>7.00</version>
+                <version>7.10</version>
+                <version>7.20</version>
+                <version>7.30</version>
+                <version>7.40</version>
         </dependency>
         <zipsource>r_flash_rx_vx.xx.zip</zipsource>
         <application>Non-Volatile Storage</application>
@@ -90,6 +107,7 @@
         <incdir>r_flash_rx/src/flash_type_1</incdir>
         <incdir>r_flash_rx/src/flash_type_3</incdir>
         <incdir>r_flash_rx/src/flash_type_4</incdir>
+        <incdir>r_flash_rx/src/flash_type_5</incdir>
         <incdir>r_flash_rx/src/targets</incdir>
     </package>
 

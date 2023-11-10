@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_rx.h
@@ -48,6 +48,10 @@
 *           26.06.2020 4.60    Added prototypes for flash_InterruptRequestEnable() and flash_InterruptRequestDisable().
 *           23.10.2020 4.70    Added RX671.
 *           23.04.2021 4.80    Added RX140.
+*           23.12.2021 4.90    Added RX660.
+*           24.01.2023 5.00    Added RX26T.
+*           28.02.2023 5.10    Added RX23E-B.
+*           01.10.2023 5.11    Added support for Tool News R20TS0963.
 ***********************************************************************************************************************/
 
 #ifndef FLASH_RX_HEADER_FILE
@@ -75,6 +79,8 @@
     #include "./src/targets/rx231/r_flash_rx231.h"
 #elif defined(MCU_RX23E_A)
     #include "./src/targets/rx23e-a/r_flash_rx23e-a.h"
+#elif defined(MCU_RX23E_B)
+    #include "./src/targets/rx23e-b/r_flash_rx23e-b.h"
 #elif defined(MCU_RX23T)
     #include "./src/targets/rx23t/r_flash_rx23t.h"
 #elif defined(MCU_RX23W)
@@ -83,10 +89,14 @@
     #include "./src/targets/rx24t/r_flash_rx24t.h"
 #elif defined(MCU_RX24U)
     #include "./src/targets/rx24u/r_flash_rx24u.h"
+#elif defined(MCU_RX26T)
+    #include "./src/targets/rx26t/r_flash_rx26t.h"
 #elif defined(MCU_RX64M)
     #include "./src/targets/rx64m/r_flash_rx64m.h"
 #elif defined(MCU_RX651) || defined(MCU_RX65N)
     #include "./src/targets/rx65n/r_flash_rx65n.h"
+#elif defined(MCU_RX660)
+    #include "./src/targets/rx660/r_flash_rx660.h"
 #elif defined(MCU_RX66T)
     #include "./src/targets/rx66t/r_flash_rx66t.h"
 #elif defined(MCU_RX66N)
@@ -188,7 +198,7 @@ typedef enum
 Exported global variables
 ***********************************************************************************************************************/
 extern int32_t g_flash_lock;
-extern flash_states_t g_flash_state;
+extern volatile flash_states_t g_flash_state;
 extern FCU_BYTE_PTR g_pfcu_cmd_area;
 
 

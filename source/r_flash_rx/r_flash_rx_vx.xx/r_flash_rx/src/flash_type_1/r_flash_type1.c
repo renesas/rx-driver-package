@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2023 Renesas Electronics Corporation. All rights reserved.
 ********************************************************************************************************************/
 /*******************************************************************************************************************
 * File Name : r_flash_type1.c
@@ -40,6 +40,8 @@
 *           02.08.2017 3.10    Removed #include "r_mcu_config.h". Now in targets.h (r_flash_rx_if.h includes)
 *           19.04.2019 4.00    Added support for GNUC and ICCRX.
 *           23.04.2021 4.80    Added RX140.
+*           24.01.2023 5.00    Modified the condition of PFRAM section definition.
+*                              Removed code to set registers FWB2 and FWB3 to FFFFh in flash_cf_set_access_window().
 ********************************************************************************************************************/
 
 /********************************************************************************************************************
@@ -56,7 +58,7 @@ Includes   <System Includes> , "Project Includes"
 /**********************************************************************************************************************
  Private global variables and functions
  *********************************************************************************************************************/
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
+#if (FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_RUN_FROM_ROM == 0)
 
 static void flash_cf_set_startup_area(uint32_t value);
 static void flash_cf_set_access_window(const uint32_t start_addr_startup_value, const uint32_t end_addr);
@@ -227,8 +229,6 @@ static void flash_cf_set_startup_area (uint32_t value)
     FLASH.FASR.BIT.EXS = 1;
 
 #if defined(MCU_RX23_ALL) || defined(MCU_RX24_ALL) || (FLASH_TYPE_VARIETY == FLASH_TYPE_VARIETY_A)
-    FLASH.FWB3 = (uint16_t)(0xFFFF);
-    FLASH.FWB2 = (uint16_t)(0xFFFF);
     FLASH.FWB1 = (uint16_t)(0xFFFF);
     FLASH.FWB0 = (uint16_t)(value);
 #else

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2017-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2017-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_targets.h
@@ -34,6 +34,9 @@
 *           18.11.2019 4.50    Added RX66N, and RX72N.
 *           23.10.2020 4.70    Added RX671.
 *           23.04.2021 4.80    Added RX140.
+*           23.12.2021 4.90    Added RX660.
+*           24.01.2023 5.00    Added RX26T.
+*           28.02.2023 5.10    Added RX23E-B.
 ***********************************************************************************************************************/
 
 #ifndef FLASH_TARGETS_HEADER_FILE
@@ -80,6 +83,9 @@ Macro definitions
 #elif defined(BSP_MCU_RX23E_A)
     #define MCU_RX23E_A
     #define MCU_RX23_ALL
+#elif defined(BSP_MCU_RX23E_B)
+    #define MCU_RX23E_B
+    #define MCU_RX23_ALL
 #elif defined(BSP_MCU_RX23T)
     #define MCU_RX23T
     #define MCU_RX23_ALL
@@ -92,6 +98,8 @@ Macro definitions
 #elif defined(BSP_MCU_RX24U)
     #define MCU_RX24U
     #define MCU_RX24_ALL
+#elif defined(BSP_MCU_RX26T)
+    #define MCU_RX26T
 #elif defined(BSP_MCU_RX64M)
     #define MCU_RX64M
     #define MCU_RX64_ALL
@@ -99,6 +107,9 @@ Macro definitions
     #define MCU_RX651
     #define MCU_RX65N
     #define MCU_RX65_ALL
+#elif defined(BSP_MCU_RX660)
+    #define MCU_RX660
+    #define MCU_RX66_ALL
 #elif defined(BSP_MCU_RX66T)
     #define MCU_RX66T
     #define MCU_RX66_ALL

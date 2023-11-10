@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_fcu.h
@@ -26,6 +26,7 @@
 *           05.10.2016 1.00    First Release
 *           07.03.2017 1.10    Set value for FLASH_FRDY_CMD_TIMEOUT for flash type 4 (was not in early flash manual).
 *           09.09.2019 4.30    Removed unnecessary comment line.
+*           24.01.2023 5.00    Added Flash Type 5.
 ***********************************************************************************************************************/
 
 #ifndef RX_FLASH_FCU_HEADER_FILE
@@ -68,6 +69,10 @@ Macro definitions
 #elif (FLASH_TYPE == FLASH_TYPE_4)
 /* The maximum timeout for commands is...185ms (Fig 6.17 flash mem manual Config Set Cmd Timeout) */
 #define FLASH_FRDY_CMD_TIMEOUT  ((int32_t)(185000 * (60.0/(MCU_CFG_FCLK_HZ/1000000)))*(MCU_CFG_ICLK_HZ/1000000))
+
+#elif (FLASH_TYPE == FLASH_TYPE_5)
+/* The maximum timeout for commands is...140ms (Config Set Cmd Timeout) */
+#define FLASH_FRDY_CMD_TIMEOUT  ((int32_t)(140000 * (4.0/(MCU_CFG_FCLK_HZ/1000000)))*(MCU_CFG_ICLK_HZ/1000000))
 #endif
 
 

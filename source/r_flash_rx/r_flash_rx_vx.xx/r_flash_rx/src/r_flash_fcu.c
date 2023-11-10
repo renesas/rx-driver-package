@@ -14,11 +14,11 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_fcu.c
-* Description  : This module implements functions common to Flash Types 3 and 4.
+* Description  : This module implements functions common to Flash Types 3, 4 and 5.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * History      : DD.MM.YYYY Version Description
@@ -34,6 +34,14 @@
 *                                   Removed include of r_flash_type3_if.h.
 *              : 26.06.2020 4.60    Changed to call internal function.
 *                                   Modified minor problem.
+*              : 10.12.2021 4.81    Added support for Tool News R20TS0765, R20TS0772.
+*                                   Modified to transition to Data Flash P/E Mode in flash_fcuram_codecopy().
+*              : 13.05.2022 4.90    Added support for Technical Update TN-RX*-A0261A. 
+*              : 24.01.2023 5.00    Added Flash Type 5.
+*                                   Added support for Tool News R20TS0872. 
+*                                   Modified the condition of PFRAM section definition.
+*                                   Modified to check that the value of FENTRYR is set even if it is not Flash Type 4.
+*              : 01.10.2023 5.11    Added support for Tool News R20TS0963.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -150,7 +158,7 @@ flash_err_t flash_fcuram_codecopy(void)
 
 
     /* Clear the ECC error flag in FCURAM */
-    err = flash_pe_mode_enter(FLASH_TYPE_CODE_FLASH);
+    err = flash_pe_mode_enter(FLASH_TYPE_DATA_FLASH);
     if (err == FLASH_SUCCESS)
     {
         flash_stop();
@@ -162,7 +170,7 @@ flash_err_t flash_fcuram_codecopy(void)
 #endif // FLASH_HAS_FCU_RAM_ENABLE
 
 
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
+#if (FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_RUN_FROM_ROM == 0)
 #define FLASH_PE_MODE_SECTION    R_BSP_ATTRIB_SECTION_CHANGE(P, FRAM)
 #define FLASH_SECTION_CHANGE_END R_BSP_ATTRIB_SECTION_CHANGE_END
 #else
@@ -183,6 +191,13 @@ flash_err_t flash_fcuram_codecopy(void)
 FLASH_PE_MODE_SECTION
 flash_err_t flash_reset(void)
 {
+    if ((g_current_parameters.bgo_enabled_cf == true)
+     || (g_current_parameters.bgo_enabled_df == true))
+    {
+        /* Disable FRDYI & FIFERR interrupt request */
+        flash_InterruptRequestDisable(VECT(FCU,FRDYI));
+        flash_InterruptRequestDisable(VECT(FCU,FIFERR));
+    }
 
     /* Cannot release sequencer from the command-locked state with status clear
      * or forced-stop commands if CFAE or DFAE is set. Must read those bits
@@ -210,10 +225,23 @@ flash_err_t flash_reset(void)
     /*Issue a forced stop */
     flash_stop();
 
+    if ((g_current_parameters.bgo_enabled_cf == true)
+     || (g_current_parameters.bgo_enabled_df == true))
+    {
+        /* Clear FRDYI & FIFERR interrupt request */
+        IR(FCU,FRDYI) = 0;
+
+        /* Enable FRDYI & FIFERR interrupt request */
+        flash_InterruptRequestEnable(VECT(FCU,FRDYI));
+        flash_InterruptRequestEnable(VECT(FCU,FIFERR));
+    }
+
     /*Transition to Read mode*/
     FLASH.FENTRYR.WORD = 0xAA00;
     while (FLASH.FENTRYR.WORD != 0x0000)
         ;
+
+    FLASH.FWEPROR.BYTE = 0x00; /* FLWE bit is disabled */
 
     return FLASH_SUCCESS;
 }
@@ -273,10 +301,8 @@ flash_err_t flash_pe_mode_enter(flash_type_t flash_type)
     if (flash_type == FLASH_TYPE_DATA_FLASH)
     {
         FLASH.FENTRYR.WORD = 0xAA80;        //Transition to DF P/E mode
-#if (FLASH_TYPE == 4)
         while (FLASH.FENTRYR.WORD != 0x0080)
             ;
-#endif
 
         if (FLASH.FENTRYR.WORD == 0x0080)
         {
@@ -292,10 +318,8 @@ flash_err_t flash_pe_mode_enter(flash_type_t flash_type)
     else if (flash_type == FLASH_TYPE_CODE_FLASH)
     {
         FLASH.FENTRYR.WORD = 0xAA01;            //Transition to CF P/E mode
-#if (FLASH_TYPE == 4)
         while (FLASH.FENTRYR.WORD != 0x0001)
             ;
-#endif
 
         if (FLASH.FENTRYR.WORD == 0x0001)
         {
@@ -316,6 +340,8 @@ flash_err_t flash_pe_mode_enter(flash_type_t flash_type)
     {
         err = FLASH_ERR_PARAM;
     }
+
+    FLASH.FWEPROR.BYTE = 0x01; /* FLWE bit is enabled */
 
     return err;
 }
@@ -347,6 +373,7 @@ flash_err_t flash_pe_mode_exit(void)
     while (FLASH.FENTRYR.WORD != 0x0000)
         ;
 
+    FLASH.FWEPROR.BYTE = 0x00; /* FLWE bit is disabled */
 
     return err;
 }
@@ -459,8 +486,8 @@ flash_err_t flash_erase(uint32_t block_address, uint32_t num_blocks)
         *g_pfcu_cmd_area = (uint8_t) FLASH_FACI_CMD_FINAL;
 
         /* Return if in BGO mode. Processing will finish in FRDYI interrupt */
-        if ((g_current_parameters.current_operation == FLASH_CUR_CF_BGO_ERASE)
-         || (g_current_parameters.current_operation == FLASH_CUR_DF_BGO_ERASE))
+        if ((g_current_parameters.bgo_enabled_cf == true)
+         || (g_current_parameters.bgo_enabled_df == true))
         {
             break;
         }
@@ -496,12 +523,20 @@ flash_err_t flash_erase(uint32_t block_address, uint32_t num_blocks)
             if (g_current_parameters.dest_addr <= size_boundary)
             {
                 g_current_parameters.dest_addr -= FLASH_CF_MEDIUM_BLOCK_SIZE;
+#if (FLASH_TYPE == FLASH_TYPE_5)
+                g_current_parameters.wait_cnt = WAIT_MAX_ERASE_CF_MEDIUM;
+#else
                 g_current_parameters.wait_cnt = WAIT_MAX_ERASE_CF_32K;
+#endif
             }
             else
             {
                 g_current_parameters.dest_addr -= FLASH_CF_SMALL_BLOCK_SIZE;
+#if (FLASH_TYPE == FLASH_TYPE_5)
+                g_current_parameters.wait_cnt = WAIT_MAX_ERASE_CF_SMALL;
+#else
                 g_current_parameters.wait_cnt = WAIT_MAX_ERASE_CF_8K;
+#endif
             }
 #endif
         }
@@ -623,6 +658,15 @@ flash_err_t flash_write(uint32_t src_start_address,
     /* TOTAL NUMBER OF BYTES TO WRITE LOOP */
     while (g_current_parameters.total_count > 0)
     {
+#if (FLASH_TYPE == FLASH_TYPE_4)
+        if ((g_current_parameters.bgo_enabled_cf == true)
+         || (g_current_parameters.bgo_enabled_df == true))
+        {
+            /* Disable FRDYI interrupt request */
+            flash_InterruptRequestDisable(VECT(FCU,FRDYI));
+        }
+#endif
+
         /* Setup fcu command */
         FLASH.FSADDR.LONG = g_current_parameters.dest_addr;
         *g_pfcu_cmd_area = (uint8_t) FLASH_FACI_CMD_PROGRAM;
@@ -648,17 +692,20 @@ flash_err_t flash_write(uint32_t src_start_address,
             g_current_parameters.total_count--;
         }
 
-        /* Issue write end command */
-        *g_pfcu_cmd_area = (uint8_t) FLASH_FACI_CMD_FINAL;
-
         /* Reset fcu write count */
         g_current_parameters.current_count = 0;
 
+        /* Issue write end command */
+        *g_pfcu_cmd_area = (uint8_t) FLASH_FACI_CMD_FINAL;
+
         /* Return if in BGO mode. Processing will finish in FRDYI interrupt */
-        if ((g_current_parameters.current_operation == FLASH_CUR_CF_BGO_WRITE)
-         || (g_current_parameters.current_operation == FLASH_CUR_DF_BGO_WRITE)
-         || (g_current_parameters.current_operation == FLASH_CUR_STOP))
+        if ((g_current_parameters.bgo_enabled_cf == true)
+         || (g_current_parameters.bgo_enabled_df == true))
         {
+#if (FLASH_TYPE == FLASH_TYPE_4)
+            /* Enable FRDYI interrupt request */
+            flash_InterruptRequestEnable(VECT(FCU,FRDYI));
+#endif
             break;
         }
 
@@ -716,11 +763,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void Excep_FCU_FRDYI(void)
                 g_current_parameters.total_count--;
             }
 
-            /* Issue write end command */
-            *g_pfcu_cmd_area = (uint8_t) FLASH_FACI_CMD_FINAL;
-
             /* Reset fcu write count */
             g_current_parameters.current_count = 0;
+
+            /* Issue write end command */
+            *g_pfcu_cmd_area = (uint8_t) FLASH_FACI_CMD_FINAL;
 
             /* Exit ISR until next FRDY interrupt to continue operation (write next min size) */
             return;

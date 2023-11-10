@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014-2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_rx.c
@@ -36,6 +36,8 @@
 *              : 18.11.2019 4.50    Modified comment of API function to Doxygen style.
 *              : 26.06.2020 4.60    Changed R_FlashCodeCopy() to static function.
 *                                   Modified to not use BSP API functions to enable/disable interrupt requests.
+*              : 24.01.2023 5.00    Modified the condition of PFRAM section definition.
+*              : 01.10.2023 5.11    Added support for Tool News R20TS0963.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -61,9 +63,9 @@ External functions
 /***********************************************************************************************************************
 Private global variables and functions
 ***********************************************************************************************************************/
-int32_t g_flash_lock;                                       // for locking the driver
-flash_states_t g_flash_state = FLASH_UNINITIALIZED;         // for state in when driver locked
-FCU_BYTE_PTR g_pfcu_cmd_area = (uint8_t*) FCU_COMMAND_AREA; // sequencer command pointer
+int32_t g_flash_lock;                                        // for locking the driver
+volatile flash_states_t g_flash_state = FLASH_UNINITIALIZED; // for state in when driver locked
+FCU_BYTE_PTR g_pfcu_cmd_area = (uint8_t*) FCU_COMMAND_AREA;  // sequencer command pointer
 
 #if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
 static void R_FlashCodeCopy(void);
@@ -237,7 +239,7 @@ flash_err_t R_FLASH_Close(void)
 
 
 /* FUNCTIONS WHICH MUST BE RUN FROM RAM FOLLOW */
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
+#if (FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_RUN_FROM_ROM == 0)
 #define FLASH_PE_MODE_SECTION    R_BSP_ATTRIB_SECTION_CHANGE(P, FRAM)
 #define FLASH_SECTION_CHANGE_END R_BSP_ATTRIB_SECTION_CHANGE_END
 #else

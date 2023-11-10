@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2023 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_rx64m.h
@@ -31,6 +31,7 @@
 *         : 02.08.2017 2.20    Replaced #include "r_mcu_config.h" with "r_flash_targets.h"
 *         : 19.07.2019 4.20    Deleted FLASH_RAM_END_ADDRESS, NUM_BLOCK_TABLE_ENTRIES,
 *                              g_flash_RomBlockSizes, rom_block_sizes_t, rom_block_info_t.
+*         : 24.01.2023 5.00    Added FLASH_CFG_CODE_FLASH_ENABLE to compile conditions.
 ***********************************************************************************************************************/
 
 #ifndef RX_71M_FLASH_API_PRIVATE_HEADER_FILE
@@ -42,7 +43,7 @@
 Macro definitions
 ***********************************************************************************************************************/
 
-#if ((FLASH_CFG_CODE_FLASH_RUN_FROM_ROM == 1) && (MCU_CFG_PART_MEMORY_SIZE == 0xF))
+#if (((FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_RUN_FROM_ROM == 1)) && (MCU_CFG_PART_MEMORY_SIZE == 0xF))
     #error "Code Flash write when run-from-rom is only supported for MCUs with over 2 MB of Code Flash Memory"
 #endif
 
