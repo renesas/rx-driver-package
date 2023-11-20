@@ -256,6 +256,15 @@
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/54f7c5f16ae0e5ddec74c3848dc9d5416f756eff/FITModules/r_flash_rx_v5.11_extend.mdf</url>
     </urls>
   </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_fwup</name>
+    <version>2.01</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/112f0f11681038d36ffc22e08c054052483f51b5/FITModules/r_fwup_v2.01.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/112f0f11681038d36ffc22e08c054052483f51b5/FITModules/r_fwup_v2.01.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/112f0f11681038d36ffc22e08c054052483f51b5/FITModules/r_fwup_v2.01_extend.mdf</url>
+    </urls>
+  </module>
   <module rdp_version="1.25">
     <name>r_ble_qe_utility</name>
     <version>1.00</version>
