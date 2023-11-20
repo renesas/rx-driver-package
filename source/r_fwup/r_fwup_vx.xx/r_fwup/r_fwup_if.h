@@ -1,125 +1,163 @@
-/***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
- **********************************************************************************************************************/
-/***********************************************************************************************************************
- * File Name    : r_fwup_if.h
- * Description  : Functions for using Firmware update.
- ***********************************************************************************************************************
- * History : DD.MM.YYYY Version Description
- *           16.02.2021 1.00    First Release
- *           19.05.2021 1.01    Added support for RX72N,RX66T,RX130
- *           08.07.2021 1.02    Added support for RX671 and GCC
- *           10.08.2021 1.03    Added support for IAR
- *           25.03.2022 1.04    Change the supported FreeRTOS version
- *                              Select data area from DF/CF
- *                              Added support for RX140-256KB
- *           31.05.2022 1.05    Added support for RX660
- *           05.12.2022 1.06    Added support for Azure ADU
- *                              Added support for excluding communication drivers
- *                              Added support for unbuffered FW updates
- **********************************************************************************************************************/
+/**********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+* this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+**********************************************************************************************************************/
+/**********************************************************************************************************************
+* File Name    : r_fwup_if.h
+* Description  : Functions for using Firmware update.
+***********************************************************************************************************************
+* History : DD.MM.YYYY Version Description
+*         : 20.07.2023 2.00    First Release
+*         : 29.09.2023 2.01    Fixed log messages.
+*                              Add parameter checking.
+*                              Added arguments to R_FWUP_WriteImageProgram API.
+**********************************************************************************************************************/
 
-/***********************************************************************************************************************
- Includes   <System Includes> , "Project Includes"
- **********************************************************************************************************************/
+/**********************************************************************************************************************
+Includes   <System Includes> , "Project Includes"
+**********************************************************************************************************************/
+#include <stdio.h>
+#include <string.h>
 #include "platform.h"
-#include "r_fwup_config.h"  /* Firmware update config definitions */
+#include "r_fwup_config.h"
 
+#ifndef R_FWUP_IF_H
+#define R_FWUP_IF_H
 
-#ifndef FWUP_IF_H
-#define FWUP_IF_H
-
-/***********************************************************************************************************************
- Macro definitions
- **********************************************************************************************************************/
+/**********************************************************************************************************************
+Macro definitions
+**********************************************************************************************************************/
 /* Version Number of API. */
-#define FWUP_VERSION_MAJOR  (1)
-#define FWUP_VERSION_MINOR  (06)
+#define FWUP_VERSION_MAJOR                  (2)
+#define FWUP_VERSION_MINOR                  (01)
 
-#define FWUP_WRITE_BLOCK_SIZE           (1024)
-#define FWUP_BOOT_LOADER_PGM_SIZE       (65536)
+/* for FWUP_CFG_FUNCTION_MODE */
+#define FWUP_FUNC_BOOTLOADER                (0)
+#define FWUP_FUNC_USER_PGM                  (1)
 
-/*****************************************************************************
- Typedef definitions
- ******************************************************************************/
-typedef enum e_fwup_err
+/* for FWUP_CFG_UPDATE_MODE */
+#define FWUP_DUAL_BANK                      (0)
+#define FWUP_SINGLE_BANK_W_BUFFER           (1)
+#define FWUP_SINGLE_BANK_WO_BUFFER          (2)
+#define FWUP_SINGLE_BANK_W_BUFFER_EXT       (3)
+
+/* __far */
+#if defined(__RX)
+  #define FWUP_FAR
+  #define FWUP_FAR_FUNC
+#else
+  #if (__ICCRL78__)
+    #define FWUP_FAR                __far
+    #define FWUP_FAR_FUNC           __far_func
+  #else
+    #define FWUP_FAR                __far
+    #define FWUP_FAR_FUNC           __far
+  #endif /* defined(__ICCRL78__) */
+#endif /* defined(__RX) */
+
+#define CH_FAR                      char FWUP_FAR
+#define C_CH_FAR                    const char FWUP_FAR
+#define C_U8_FAR                    const uint8_t FWUP_FAR
+#define S_C_CH_FAR                  static C_CH_FAR
+#define S_C_U8_FAR                  static C_U8_FAR
+
+/* Stdlib*/
+#if defined(__RX)
+  #define STRCMP(s1, s2)                  ( strcmp((s1), (s2)) )
+  #if !defined(STRSTR)
+    #define STRSTR(s1, s2)                ( strstr((s1), (s2)) )
+  #endif
+  #define STRLEN(s)                       ( strlen((s)) )
+  #define MEMCMP(s1, s2, n)               ( memcmp((s1), (s2), (n)) )
+  #define MEMCPY(s1, s2, n)               ( memcpy((s1), (s2), (n)) )
+#else
+  #if defined(__ICCRL78__)
+    #define STRCMP(s1, s2)                ( strcmp((s1), (s2)) )
+    #if !defined(STRSTR)
+      #define STRSTR(s1, s2)              ( strstr((s1), (s2)) )
+    #endif
+    #define STRLEN(s)                     ( strlen((s)) )
+    #define MEMCMP(s1, s2, n)             ( memcmp((s1), (s2), (n)) )
+    #define MEMCPY(s1, s2, n)             ( memcpy((s1), (s2), (n)) )
+  #elif defined (__CCRL__)
+    #define STRCMP(s1, s2)                ( _COM_strcmp_ff((s1), (s2)) )
+    #if !defined(STRSTR)
+      #define STRSTR(s1, s2)              ( _COM_strstr_ff((s1), (s2)) )
+    #endif
+    #define STRLEN(s)                     ( _COM_strlen_f((s)) )
+    #define MEMCMP(s1, s2, n)             ( _COM_memcmp_ff((s1), (s2), (n)) )
+    #define MEMCPY(s1, s2, n)             ( _COM_memcpy_ff((s1), (s2), (n)) )
+  #elif defined (__llvm__)
+    #define STRCMP(s1, s2)                ( _COM_strcmp_ff((s1), (s2)) )
+    #if !defined(STRSTR)
+      #define STRSTR(s1, s2)              ( _COM_strstr_ff((s1), (s2)) )
+    #endif
+    #define STRLEN(s)                     ( _COM_strlen_f((s)) )
+    #define MEMCMP(s1, s2, n)             ( _COM_memcmp_ff((s1), (s2), (n)) )
+    #define MEMCPY(s1, s2, n)             ( _COM_memcpy_ff((s1), (s2), (n)) )
+  #endif /* defined(__ICCRL78__) */
+#endif /* defined(__RX) */
+
+/**********************************************************************************************************************
+Typedef definitions
+**********************************************************************************************************************/
+typedef enum fwup_err
 {
-    FWUP_SUCCESS = 0,               // Normally terminated.
-    FWUP_FAIL,                      // Illegal terminated.
-    FWUP_IN_PROGRESS,               // Firmware update is in progress.
-    FWUP_END_OF_LIFE,               // End Of Life process finised.
-    FWUP_ERR_ALREADY_OPEN, // Firmware Update module is in use by another process.
-    FWUP_ERR_NOT_OPEN,              // R_FWUP_Open function is not executed yet.
-    FWUP_ERR_IMAGE_STATE, // Platform image status not suitable for firmware update.
-    FWUP_ERR_LESS_MEMORY,           // Out of memory.
-    FWUP_ERR_FLASH,                 // Detect error of r_flash module.
-    FWUP_ERR_COMM,                  // Detect error of communication module.
-    FWUP_ERR_STATE_MONITORING,      // Detect error of state monitoring module.
-} fwup_err_t;
+    FWUP_SUCCESS = 0,           // Normally terminated.
+    FWUP_PROGRESS,              // Illegal terminated.
+    FWUP_ERR_FLASH,             // Detect error of r_flash module.
+    FWUP_ERR_VERIFY,            // Detect error of r_flash module.
+    FWUP_ERR_FAILURE            // Illegal terminated.
+} e_fwup_err_t;
 
-/*****************************************************************************
- Public Functions
- ******************************************************************************/
-#if (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == 0)  /* Bootloader */
-fwup_err_t R_FWUP_Open (void);
-fwup_err_t R_FWUP_Close (void);
-int32_t R_FWUP_SecureBoot (void);
-void R_FWUP_ExecuteFirmware (void);
-#elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == 1)  /* Firmware update w/o OS */
-fwup_err_t R_FWUP_Open (void);
-fwup_err_t R_FWUP_Close (void);
-fwup_err_t R_FWUP_CheckFileSignature(void);
-fwup_err_t R_FWUP_Operation (void);
-fwup_err_t R_FWUP_SetEndOfLife (void);
-void R_FWUP_SoftwareReset (void);
-fwup_err_t R_FWUP_DirectUpdate (void);
-#elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == 2)  /* Firmware update w/o OS and Driver */
-fwup_err_t R_FWUP_Open(void);
-fwup_err_t R_FWUP_Close(void);
-fwup_err_t R_FWUP_Initialize (void);
-fwup_err_t R_FWUP_PutFirmwareChunk(uint32_t ulOffset, uint8_t * const pData, uint32_t ulBlockSize);
-fwup_err_t R_FWUP_CheckFileSignature(void);
-fwup_err_t R_FWUP_SetEndOfLife(void);
-void       R_FWUP_SoftwareReset(void);
-#elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == 3)  /* Firmware update with Amazon FreeRTOS(OTA) */
-OtaPalStatus_t R_FWUP_CreateFileForRx( OtaFileContext_t * const pFileContext );
-OtaPalStatus_t R_FWUP_Abort( OtaFileContext_t * const pFileContext );
-int16_t R_FWUP_WriteBlock( OtaFileContext_t * const pFileContext,
-                            uint32_t ulOffset,
-                            uint8_t * const pData,
-                            uint32_t ulBlockSize );
-OtaPalStatus_t R_FWUP_CloseFile( OtaFileContext_t * const pFileContext );
-OtaPalStatus_t R_FWUP_CheckFileSignature( OtaFileContext_t * const pFileContext );
-uint8_t * R_FWUP_ReadAndAssumeCertificate( const uint8_t * const pucCertName, uint32_t * const ulSignerCertSize );
-OtaPalStatus_t R_FWUP_ResetDevice( OtaFileContext_t * const pFileContext );
-OtaPalStatus_t R_FWUP_ActivateNewImage( OtaFileContext_t * const pFileContext );
-OtaPalStatus_t R_FWUP_SetPlatformImageState( OtaFileContext_t * const pFileContext,
-                                            OtaImageState_t eState );
-OtaPalImageState_t R_FWUP_GetPlatformImageState( OtaFileContext_t * const pFileContext );
-#elif (FWUP_CFG_IMPLEMENTATION_ENVIRONMENT == 4)  /* Firmware update with Azure ADU */
-fwup_err_t R_FWUP_Open (void);
-fwup_err_t R_FWUP_Close (void);
-fwup_err_t R_FWUP_Initialize (void);
-fwup_err_t R_FWUP_PutFirmwareChunk (uint32_t ulOffset, uint8_t * const pData, uint32_t ulBlockSize);
-void R_FWUP_SoftwareReset (void);
-fwup_err_t R_FWUP_SetEndOfLife(void);
-#endif
-uint32_t R_FWUP_GetVersion (void);
+typedef enum fwup_area
+{
+    FWUP_AREA_MAIN = 0,
+    FWUP_AREA_BUFFER,
+    FWUP_AREA_DATA_FLASH
+} e_fwup_area_t;
 
-#endif /* FWUP_IF_H */
+typedef enum e_fwup_delay_units
+{
+    FWUP_DELAY_MICROSECS = 0,
+    FWUP_DELAY_MILLISECS,
+    FWUP_DELAY_SECS
+} e_fwup_delay_units_t;
+
+/**********************************************************************************************************************
+Public Functions
+**********************************************************************************************************************/
+e_fwup_err_t R_FWUP_Open (void);
+void         R_FWUP_Close (void);
+bool         R_FWUP_IsExistImage (e_fwup_area_t area);
+e_fwup_err_t R_FWUP_EraseArea (e_fwup_area_t area);
+uint32_t     R_FWUP_GetImageSize (void);
+e_fwup_err_t R_FWUP_WriteImageHeader (e_fwup_area_t area,
+                                      uint8_t FWUP_FAR *p_sig_type,
+                                      uint8_t FWUP_FAR *p_sig,
+                                      uint32_t sig_size);
+e_fwup_err_t R_FWUP_WriteImageProgram (e_fwup_area_t area, uint8_t *p_buf, uint32_t offset, uint32_t buf_size);
+e_fwup_err_t R_FWUP_WriteImage (e_fwup_area_t area, uint8_t *p_buf, uint32_t buf_size);
+e_fwup_err_t R_FWUP_VerifyImage (e_fwup_area_t area);
+e_fwup_err_t R_FWUP_ActivateImage (void);
+void         R_FWUP_ExecImage (void);
+void         R_FWUP_SoftwareReset (void);
+uint32_t     R_FWUP_SoftwareDelay (uint32_t delay, e_fwup_delay_units_t units);
+uint32_t     R_FWUP_GetVersion (void);
+
+#endif /* R_FWUP_IF_H */
 

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>3.02.00</version>
+        <version>3.03.00</version>
+        <version>3.04.00</version>
+        <version>3.05.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>8.03.00.202004</version>
+        <version>8.03.00.202102</version>
+        <version>8.03.00.202202</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.20.01</version>
+        <version>4.20.03</version>
+        <version>5.10.01</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX100</series>
+        <series>RX200</series>
+        <series>RX600</series>
+        <series>RX700</series>
+        <group>RX130</group>
+        <group>RX140</group>
+        <group>RX230</group>
+        <group>RX231</group>
+        <group>RX23E-A</group>
+        <group>RX23W</group>
+        <group>RX24T</group>
+        <group>RX26T</group>
+        <group>RX65N</group>
+        <group>RX66N</group>
+        <group>RX66T</group>
+        <group>RX660</group>
+        <group>RX671</group>
+        <group>RX72M</group>
+        <group>RX72N</group>
+        <board>RSKRX130</board>
+        <board>RSKRX140</board>
+        <board>RSKRX230</board>
+        <board>RSKRX231</board>
+        <board>RSKRX24T</board>
+        <board>RSKRX65N</board>
+        <board>RSKRX66T</board>
+        <board>RSKRX660</board>
+        <board>RSKRX671</board>
+        <board>RSKRX72M</board>
+        <board>RSKRX72N</board>
+        <board>RSSKRX23EA</board>
+        <board>RSSKRX23W</board>
+        <board>CloudKitRX65N</board>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_fwup</name>
+        <version>2.01</version>
+        <zipsource>r_fwup_v2.01.zip</zipsource>
+        <dependency>
+            <module>r_flash_rx</module>
+            <version>4.80</version>
+            <version>4.91</version>
+        </dependency>
+        <application>Generic</application>
+        <desc>FWUP Library</desc>
+        <details>This module is a software library for implementing the firmware update function in user applications.</details>
+        <function>Firmware Update</function>
+        <incdir>r_config</incdir>
+        <incdir>r_fwup</incdir>
+        <incdir>r_fwup/src</incdir>
+    </package>
+    <sampleapplicationnote>
+        <documentno>R01AN5824</documentno>
+    </sampleapplicationnote>
+
+</refinfo>
+
