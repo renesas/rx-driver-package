@@ -27,7 +27,7 @@
 *         : 3.3.2016   2.10    65N added.
 *         : 1.30.2017  2.11    Tested with 65N 2MB. (Only comments change.)
 *         : 8.14.2017  2.12    Release version for 65N 2MB. Bug fix in r_can_rx.c.
-*         : 27.04.2018 2.13WS  - Added RX66T
+*         : 27.04.2018 2.13    - Added RX66T
 *         : 26.09.2018 2.13    Revised r_can_rx_config.h for use with Smart Configurator
 *         : 08.01.2019 2.15    - Added RX72T
 *         : 30.04.2019 3.10    - Added RX72M
@@ -37,6 +37,7 @@
 *         :                    - Removed macros related to Pin-setting.
 *         :                    - Removed wrong parentheses at value of macros for STB/EN Port/pin.
 *         : 01.04.2021 5.00    - Added support for setting different bitrate for different channels.
+*         : 08.09.2023 5.50    - Added descriptions for each value of FRAME_ID_MODE.
 ***********************************************************************************************************************/
 #ifndef CAN_CONFIG_HEADER_FILE
 #define CAN_CONFIG_HEADER_FILE
@@ -70,11 +71,13 @@ mailboxes for messages sent and received. */
  * Select CAN ID-type for the driver, that is, usage of 11-bit or 29-bit IDs. The FRAME_ID_MODE can be set to
  * STD_ID_MODE, EXT_ID_MODE, or MIXED_ID_MODE. The first two settings enable only those API functions belonging
  * to that ID mode. If it is set to mixed mode, the whole API becomes available.
- *
- * MIXED_ID_MODE *must* be used in a network with both types of frames. Otherwise messages can be misinterprted
+ *    STD_ID_MODE      All mailboxes (including FIFO mailboxes) handle only standard IDs.
+ *    EXT_ID_MODE      All mailboxes (including FIFO mailboxes) handle only extended IDs.
+ *    MIXED_ID_MODE    All mailboxes (including FIFO mailboxes) handle both standard IDs and extended IDs.
+ * MIXED_ID_MODE *must* be used in a network with both types of frames. Otherwise messages can be misinterpreted
  * by the CAN hardware. Choose ONLY ONE. Again; use MIXED_ID_MODE if there will be Standard AND Extended CAN frames
  * on the bus, else, unexpected data may result. 
- * #define FRAME_ID_MODE   (STD_ID_MODE)       11-bit CAN ID. default
+ * #define FRAME_ID_MODE   STD_ID_MODE       11-bit CAN ID. default
  * #define FRAME_ID_MODE   EXT_ID_MODE         29-bit CAN ID. 
  * #define FRAME_ID_MODE   MIXED_ID_MODE
  ***********************************************************************************************************************/
@@ -143,7 +146,7 @@ mailboxes for messages sent and received. */
 
 /* Max loops to poll a CAN register bit for expected value. If you are using 
  * polled mode, and If you wish to wait a certain time to check that a mailbox
- * has recieved a frame, increase this value. This can be set to a very low value,
+ * has received a frame, increase this value. This can be set to a very low value,
  * but do not set to zero or the mailbox may not be checked at all!
  */
 #define MAX_CANREG_POLLCYCLES   (5)

@@ -18,7 +18,7 @@
 * you agree to the additional terms and conditions found by accessing the 
 * following link:
 * http://www.renesas.com/disclaimer
-* Copyright (C) 2020(2022) Renesas Electronics Corporation. All rights reserved.    
+* Copyright (C) 2020(2023) Renesas Electronics Corporation. All rights reserved.    
  *********************************************************************************************************************/
 /**********************************************************************************************************************
 * File Name    : r_rtos_abstract.c
@@ -30,6 +30,7 @@
 *         : 01.03.2020 1.00     First Release
 *         : 30.06.2022 1.40     USBX PCDC is supported.
 *         : 30.10.2022 1.41     USBX HMSC is supported.
+*         : 30.09.2023 1.42 USBX HCDC is supported.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -361,6 +362,12 @@ rtos_err_t  rtos_terminate_task (rtos_task_id_t *p_id)
 #elif   BSP_CFG_RTOS_USED == 2      /* SEGGER embOS */
 #elif   BSP_CFG_RTOS_USED == 3      /* Micrium MicroC/OS */
 #elif   BSP_CFG_RTOS_USED == 4      /* Renesas RI600V4 & RI600PX */
+    ER  err;
+    err = ter_tsk (*p_id);
+    if (E_OK != err)
+    {
+        return RTOS_ERROR;
+    }
 #elif   BSP_CFG_RTOS_USED == 5      /* Azure RTOS */
     UINT  err;
     err = tx_thread_terminate(p_id);

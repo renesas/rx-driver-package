@@ -29,6 +29,8 @@
 *         : 28.02.2019 2.00     Added bsp_ram_initialize function.
 *                               Fixed coding style.
 *         : 26.07.2019 2.01     Added R_BSP_SoftwareReset function.
+*         : 21.11.2023 2.02     Added bsp_bus_priority_initialize function.
+*                               Modified comment.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -56,7 +58,7 @@ typedef enum
        DPSIEGR0, DPSIEGR1, DPSIEGR2, DPSIEGR3, MOSCWTCR, SOSCETCR, MOFCR, HOCOPCR, SWRR. */
     BSP_REG_PROTECT_LPC_CGC_SWR,
 
-    /* PRC2
+    /* PRC3
        Enables writing to the registers related to the LVD:LVCMPCR, LVDLVLR, LVD1CR0, LVD1CR1, LVD1SR, LVD2CR0,
        LVD2CR1, LVD2SR. */
     BSP_REG_PROTECT_LVD,
@@ -86,6 +88,9 @@ void     R_BSP_SoftwareReset(void);
 
 void     bsp_register_protect_open(void); //r_bsp internal function. DO NOT CALL.
 void     bsp_ram_initialize(void);
+#if BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE == 1
+void     bsp_bus_priority_initialize(void);
+#endif
 
 #endif /* CPU_H */
 

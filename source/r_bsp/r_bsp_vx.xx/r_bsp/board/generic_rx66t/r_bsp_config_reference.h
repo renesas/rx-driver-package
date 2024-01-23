@@ -70,6 +70,16 @@
 *                                 - BSP_CFG_SWINT_UNIT2_ENABLE
 *         : 25.11.2022 3.02      Modified comment.
 *         : 28.02.2023 3.03      Modified comment.
+*         : 21.11.2023 3.04      Added the following macro definitions.
+*                                 - BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE
+*                                 - BSP_CFG_MEMORY_BUS1_3_PRIORITY
+*                                 - BSP_CFG_MEMORY_BUS2_PRIORITY
+*                                 - BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY
+*                                 - BSP_CFG_INTERNAL_PERIPHERAL_BUS2_3_PRIORITY
+*                                 - BSP_CFG_INTERNAL_PERIPHERAL_BUS4_PRIORITY
+*                                 - BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY
+*                                 - BSP_CFG_EXTERNAL_BUS_PRIORITY
+*                                 - BSP_CFG_BOOTLOADER_PROJECT
 ***********************************************************************************************************************/
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
 #define R_BSP_CONFIG_REF_HEADER_FILE
@@ -781,6 +791,61 @@ Configuration Options
    1 = This project is a C++ project.
 */
 #define BSP_CFG_CPLUSPLUS             (0)
+
+/* Select whether to enable bus priority initialization.
+   0 = Bus priority initialization is disabled.
+   1 = Bus priority initialization is enabled.
+*/
+#define BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE      (0)
+
+/* Select the priority order for memory bus 1 (RAM) and memory bus 3 (ECCRAM).
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_MEMORY_BUS1_3_PRIORITY              (0)
+
+/* Select the priority order for memory bus 2 (code flash memory).
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_MEMORY_BUS2_PRIORITY                (0)
+
+/* Select the priority order for internal peripheral bus 1.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY   (0)
+
+/* Select the priority order for internal peripheral buses 2 and 3.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS2_3_PRIORITY (0)
+
+/* Select the priority order for internal peripheral bus 4.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS4_PRIORITY   (0)
+
+/* Select the priority order for internal peripheral bus 6.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY   (0)
+
+/* Select the priority order for the external bus.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_EXTERNAL_BUS_PRIORITY               (0)
+
+/* Select whether it is bootloader project.
+   0 = This project isn't a bootloader project.
+   1 = This project is a bootloader project.
+   NOTE: Not normally used. Set this to "1" only in the bootloader project.
+*/
+#define BSP_CFG_BOOTLOADER_PROJECT    (0)
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

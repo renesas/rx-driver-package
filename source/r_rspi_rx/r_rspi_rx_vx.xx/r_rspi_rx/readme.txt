@@ -10,7 +10,7 @@ R01AN1827JJ{VERSION_NUMBER}
 
 Version
 -------
-v3.20
+v3.40
 
 Overview
 --------
@@ -128,7 +128,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp     v7.40
+* r_bsp     v7.41
 
 How to add to your project
 --------------------------
@@ -158,9 +158,9 @@ Refer to "RX Smart Configurator User's Guide: IAREW (R20AN0535)" for details.
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.05.00
-* GCC for Renesas RX 8.3.0.202204
-* IAR C/C++ Compiler for Renesas RX 4.20.3
+* Renesas RX
+* GCC for Renesas RX
+* IAR C/C++ Compiler for Renesas RX
 
 File Structure
 --------------

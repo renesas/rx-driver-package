@@ -51,6 +51,9 @@
 *              : 31.03.2023 4.40     Added support for RX26T.
 *              : 29.05.2023 4.50     Added support for RX23E-B.
 *                                    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*              : 28.09.2023 4.60     Changed version for update of APN.
+*                                    Fixed bug in MDF file which causes abnormal behavior in Smart Configurator when
+*                                    setting the “voltage detection level” for RX23E-B.
 ***********************************************************************************************************************/
 #ifndef LVD_PRIVATE_TARGETS_HEADER_FILE
 #define LVD_PRIVATE_TARGETS_HEADER_FILE
@@ -120,7 +123,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
 #define LVD_RX_VERSION_MAJOR                    (4)
-#define LVD_RX_VERSION_MINOR                    (50)
+#define LVD_RX_VERSION_MINOR                    (60)
 
 /***********************************************************************************************************************
 Typedef definitions

@@ -51,6 +51,7 @@
 *           23.12.2021 4.90    Added RX660.
 *           24.01.2023 5.00    Added RX26T.
 *           28.02.2023 5.10    Added RX23E-B.
+*           01.10.2023 5.11    Added support for Tool News R20TS0963.
 ***********************************************************************************************************************/
 
 #ifndef FLASH_RX_HEADER_FILE
@@ -197,7 +198,7 @@ typedef enum
 Exported global variables
 ***********************************************************************************************************************/
 extern int32_t g_flash_lock;
-extern flash_states_t g_flash_state;
+extern volatile flash_states_t g_flash_state;
 extern FCU_BYTE_PTR g_pfcu_cmd_area;
 
 

@@ -10,6 +10,7 @@
     <version>3.01.00</version>
     <version>3.02.00</version>
     <version>3.03.00</version>
+    <version>3.05.00</version>
   </toolchain>
   <toolchain>
     <brand>GNU</brand>
@@ -19,6 +20,7 @@
     <version>4.08.04.201902</version>
     <version>8.03.00.201904</version>
     <version>8.03.00.202004</version>
+    <version>8.03.00.202305</version>
   </toolchain>
   <toolchain>
     <brand>IAR</brand>
@@ -55,7 +57,7 @@
     <version>x.xx</version>
     <dependency>
       <module>r_bsp</module>
-      <version>7.20</version>
+      <version>7.41</version>
     </dependency>
     <zipsource>r_can_rx_vx.xx.zip</zipsource>
     <application>Communications</application>

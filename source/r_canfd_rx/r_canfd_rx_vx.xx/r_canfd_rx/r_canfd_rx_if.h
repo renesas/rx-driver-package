@@ -27,6 +27,7 @@
 *         : 06.01.2023 1.20    Changed Minor version to 20.
 *         : 31.03.2023 1.30    Changed Minor version to 30.
 *                              Supported for RX26T.
+*         : 13.12.2023 1.31    Added WAIT_LOOP comments.
 ***********************************************************************************************************************/
 #ifndef CAN_INTERFACE_HEADER_FILE
 #define CAN_INTERFACE_HEADER_FILE 
@@ -49,7 +50,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define CANFD_RX_VERSION_MAJOR           (1)
-#define CANFD_RX_VERSION_MINOR           (30)
+#define CANFD_RX_VERSION_MINOR           (31)
 /* The process of getting the version number is done through the macro below. The version number is encoded where the
    top 2 bytes are the major version number and the bottom 2 bytes are the minor version number. For example,
    Version 4.25 would be returned as 0x00040019. */

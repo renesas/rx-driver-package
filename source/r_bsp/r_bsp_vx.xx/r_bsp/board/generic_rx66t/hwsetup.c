@@ -31,6 +31,7 @@
 *                                - rom_cache_function_set
 *                                - rom_cache_noncacheable_area0_set
 *                                - rom_cache_noncacheable_area1_set
+*         : 21.11.2023 2.02      Added compile switch of BSP_CFG_BOOTLOADER_PROJECT.
 ***********************************************************************************************************************/
 
 
@@ -60,11 +61,14 @@ static void rom_cache_noncacheable_area1_set(void);
 #endif /* BSP_CFG_ROM_CACHE_ENABLE == 1 */
 #endif /* BSP_CFG_STARTUP_DISABLE == 0 */
 
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+/* Disable the following functions in the bootloader project. */
 /* MCU I/O port configuration function declaration */
 static void output_ports_configure(void);
 
 /* Interrupt configuration function declaration */
 static void interrupts_configure(void);
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
 
 /* MCU peripheral module configuration function declaration */
 static void peripheral_modules_enable(void);
@@ -89,8 +93,11 @@ void hardware_setup(void)
 #endif /* BSP_CFG_ROM_CACHE_ENABLE == 1 */
 #endif /* BSP_CFG_STARTUP_DISABLE == 0 */
 
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+    /* Disable the following functions in the bootloader project. */
     output_ports_configure();
     interrupts_configure();
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
     bsp_volsr_initial_configure();
     peripheral_modules_enable();
     bsp_non_existent_port_init();
@@ -288,6 +295,8 @@ static void rom_cache_noncacheable_area1_set (void)
 #endif /* BSP_CFG_ROM_CACHE_ENABLE == 1 */
 #endif /* BSP_CFG_STARTUP_DISABLE == 0 */
 
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+/* Disable the following functions in the bootloader project. */
 /***********************************************************************************************************************
 * Function name: output_ports_configure
 * Description  : Configures the port and pin direction settings, and sets the pin outputs to a safe level.
@@ -311,6 +320,7 @@ static void interrupts_configure(void)
     /* Add code here to setup additional interrupts */
     R_BSP_NOP();
 } /* End of function interrupts_configure() */
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
 
 /***********************************************************************************************************************
 * Function name: peripheral_modules_enable

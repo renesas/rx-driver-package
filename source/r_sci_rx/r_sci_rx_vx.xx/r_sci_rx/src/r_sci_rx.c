@@ -74,6 +74,8 @@
 *                              Moved the source code which checks for IRDA mode support to MDF file.
 *           29.05.2023 4.90    Added support for RX23E-B.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           12.06.2023 5.00    Fixed a bug in sci_send_sync_data(), sci_receive_sync_data() and 
+*                              sci_receive_async_data() function in using DTC/DMAC.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -950,7 +952,8 @@ static sci_err_t sci_init_sync (sci_hdl_t const         hdl,
 /***********************************************************************************************************************
 * Function Name: R_SCI_Send
 ********************************************************************************************************************//**
-* @brief  Initiates transmit if transmitter is not in use. Queues data for later transmit when in Asynchronous mode.
+* @brief  When Asynchronous Mode and DTC/DMAC are not used, queues data for later transmit. In other modes initiates
+* transmit if transmitter is not in use.
 *
 * @param[in]    hdl  Handle for channel. Set hdl when R_SCI_Open() is successfully processed.
 *
@@ -958,20 +961,24 @@ static sci_err_t sci_init_sync (sci_hdl_t const         hdl,
 *
 * @param[in]    length  Number of bytes to send
 *
-* @retval   SCI_SUCCESS  Transmit initiated or loaded into queue (Asynchronous)
+* @retval   SCI_SUCCESS  Transmit initiated or loaded into queue (When Asynchronous Mode and DTC/DMAC are not used)
 *
 * @retval   SCI_ERR_NULL_PTR  hdl value is NULL
 *
 * @retval   SCI_ERR_BAD_MODE  Mode specified not currently supported
 *
-* @retval   SCI_ERR_INSUFFICIENT_SPACE  Insufficient space in queue to load all data (Asynchronous)
+* @retval   SCI_ERR_INSUFFICIENT_SPACE  Insufficient space in queue to load all data (When Asynchronous Mode and 
+* DTC/DMAC are not used)
 *
-* @retval   SCI_ERR_XCVR_BUSY  Channel currently busy (SSPI/Synchronous/Asynchronous)
+* @retval   SCI_ERR_XCVR_BUSY  Channel currently busy (SSPI/Synchronous/When Asynchronous Mode and circular buffer is
+* not used/When Asynchronous Mode and DTC/DMAC are used)
 *
 *
-* @details  In asynchronous mode, this function places data into a transmit queue if the transmitter for the SCI channel
-* referenced by the handle is not in use. When circular buffer (SCI_CFG_USE_CIRCULAR_BUFFER (1)) is
-* used, the function allows data to be put on a transmit queue during transmission.
+* @details  When Asynchronous Mode and DTC/DMAC are not used, this function places data into a transmit queue if the
+* transmitter for the SCI channel referenced by the handle is not in use. When circular buffer
+* (SCI_CFG_USE_CIRCULAR_BUFFER (1)) is used, the function allows data to be put on a transmit queue during transmission.
+* When Asynchronous Mode and DTC/DMAC are used, this function registers DTC/DMAC setting and specifies to the TXI and
+* transmission begins immediately if the transmitter is not already in use.
 * In SSPI and Synchronous modes, no data is queued and transmission begins immediately if the transceiver
 * is not already in use.\n
 * Note that the toggling of Slave Select lines when in SSPI mode is not handled by this driver. The Slave Select line
@@ -1299,7 +1306,6 @@ static sci_err_t sci_send_sync_data(sci_hdl_t const hdl,
         hdl->u_tx_data.buf = p_src;
         hdl->tx_cnt        = length;
         hdl->rx_cnt        = length;
-        hdl->tx_idle       = false;
         hdl->tx_dummy      = false;
 
 #if SCI_CFG_FIFO_INCLUDED
@@ -1319,6 +1325,9 @@ static sci_err_t sci_send_sync_data(sci_hdl_t const hdl,
             else
 #endif 
             {
+                /* Transmitter is in use */
+                hdl->tx_idle = false;
+
                 /* If length is lower than SCI_CFG_CHXX_RX_FIFO_THRESH, FCR.BIT.RTRG register is set to length */
                 if (length < hdl->rx_curr_thresh)
                 {
@@ -1377,6 +1386,9 @@ static sci_err_t sci_send_sync_data(sci_hdl_t const hdl,
                 else
 #endif
                 {
+                    /* Transmitter is in use */
+                    hdl->tx_idle = false;
+
                     hdl->tx_cnt--;
                     SCI_TDR(*hdl->u_tx_data.buf);    /* start transmit */
                 }
@@ -1660,8 +1672,8 @@ void tei_handler(sci_hdl_t const hdl)
 /***********************************************************************************************************************
 * Function Name: R_SCI_Receive
 ********************************************************************************************************************//**
-* @brief In Asynchronous mode, fetches data from a queue which is filled by RXI interrupts. In other modes, initiates
-* reception if transceiver is not in use.
+* @brief When Asynchronous Mode and DTC/DMAC are not used, fetches data from a queue which is filled by RXI interrupts.
+* In other modes, initiates reception if transceiver is not in use.
 * @param[in]    hdl Handle for channel. Set hdl when R_SCI_Open() is successfully processed.
 *
 * @param[in]    p_dst  Pointer to buffer to load data into
@@ -1675,13 +1687,17 @@ void tei_handler(sci_hdl_t const hdl)
 *
 * @retval SCI_ERR_BAD_MODE  Mode specified not currently supported
 *
-* @retval SCI_ERR_INSUFFICIENT_DATA  Insufficient data in receive queue to fetch all data (Asynchronous)
+* @retval SCI_ERR_INSUFFICIENT_DATA  Insufficient data in receive queue to fetch all data (When Asynchronous Mode and
+* DTC/DMAC are not used)
 *
-* @retval SCI_ERR_XCVR_BUSY  Channel currently busy (SSPI/Synchronous)
+* @retval SCI_ERR_XCVR_BUSY  Channel currently busy (SSPI/Synchronous/When Asynchronous Mode and DTC/DMAC are used)
 *
-* @details In Asynchronous mode, this function gets data received on an SCI channel referenced by the handle from its
-* receive queue. This function will not block if the requested number of bytes is not available. In
-* SSPI/Synchronous modes, the clocking in of data begins immediately if the transceiver is not already in use.
+* @details When Asynchronous Mode and DTC/DMAC are not used, this function gets data received on an SCI channel
+* referenced by the handle from its receive queue. This function will not block if the requested number of bytes is not
+* available. 
+* When Asynchronous Mode and DTC/DMAC are used, this function registers DTC/DMAC setting and specifies to the RXI and
+* data is passed to *p_dst by DTC/DMAC each time the RXI interrupt occurs.
+* In SSPI/Synchronous modes, the clocking in of data begins immediately if the transceiver is not already in use.
 * The value assigned to SCI_CFG_DUMMY_TX_BYTE in r_sci_config.h is clocked out while the receive data is being clocked in.\n
 * If any errors occurred during reception, the callback function specified in R_SCI_Open() is executed. Check
 * an event passed with the argument of the callback function to see if the reception has been successfully
@@ -1763,7 +1779,6 @@ static sci_err_t sci_receive_async_data(sci_hdl_t const hdl,
     {
         if(true == hdl->rx_idle)
         {
-            hdl->rx_idle = false;
             sci_fifo_ctrl_t *p_ctrl;
             p_ctrl = &hdl->queue[hdl->qindex_app_rx];
             p_ctrl->p_rx_buf = p_dst;
@@ -1780,6 +1795,11 @@ static sci_err_t sci_receive_async_data(sci_hdl_t const hdl,
             {
                 err = sci_rx_dtc_create(hdl, p_dst, length);
             }
+
+            if(SCI_SUCCESS == err)
+            {
+                hdl->rx_idle = false;
+            }
         }
         else
         {
@@ -1794,7 +1814,6 @@ static sci_err_t sci_receive_async_data(sci_hdl_t const hdl,
         {
             if(true == hdl->rx_idle)
             {
-                hdl->rx_idle = false;
                 sci_fifo_ctrl_t *p_ctrl;
                 p_ctrl = &hdl->queue[hdl->qindex_app_rx];
                 p_ctrl->p_rx_buf = p_dst;
@@ -1810,6 +1829,11 @@ static sci_err_t sci_receive_async_data(sci_hdl_t const hdl,
 #endif
                 {
                     err = sci_rx_dmaca_create(hdl, p_dst, length);
+                }
+
+                if(SCI_SUCCESS == err)
+                {
+                    hdl->rx_idle = false;
                 }
             }
             else
@@ -1885,7 +1909,6 @@ static sci_err_t sci_receive_sync_data(sci_hdl_t const hdl,
     {
         hdl->u_rx_data.buf = p_dst;
         hdl->save_rx_data  = true;               /* save the data clocked in */
-        hdl->tx_idle       = false;
         hdl->tx_cnt        = length;
         hdl->rx_cnt        = length;
         hdl->tx_dummy      = true;
@@ -1912,6 +1935,9 @@ static sci_err_t sci_receive_sync_data(sci_hdl_t const hdl,
             else
 #endif
             {
+                /* Transmitter is in use */
+                hdl->tx_idle = false;
+
                 if (length > SCI_FIFO_FRAME_SIZE)
                 {
                     thresh_cnt = SCI_FIFO_FRAME_SIZE;
@@ -1941,11 +1967,14 @@ static sci_err_t sci_receive_sync_data(sci_hdl_t const hdl,
 #if (SCI_DTC_DMACA_DISABLE != RX_DTC_DMACA_ENABLE)
             if((SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable) || (SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
             {
-                sci_send_sync_data_dma_dtc(hdl, NULL, p_dst, length);
+                return sci_send_sync_data_dma_dtc(hdl, NULL, p_dst, length);
             }
             else
 #endif
             {
+                /* Transmitter is in use */
+                hdl->tx_idle = false;
+
                 hdl->tx_cnt--;
                 SCI_TDR(SCI_CFG_DUMMY_TX_BYTE);    /* start transfer */
             }

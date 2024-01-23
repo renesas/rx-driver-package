@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>2.08.00</version>
+        <version>3.00.00</version>
+        <version>3.01.00</version>
+        <version>3.02.00</version>
+        <version>3.05.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>4.08.04.201801</version>
+        <version>4.08.04.201803</version>
+        <version>4.08.04.201902</version>
+        <version>8.03.00.201904</version>
+        <version>8.03.00.202002</version>
+        <version>8.03.00.202305</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>4.10.01</version>
+        <version>4.11.01</version>
+        <version>4.12.01</version>
+        <version>4.13.01</version>
+        <version>4.14.01</version>
+        <version>4.20.03</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family omit_series="true">RX</family>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_tfat_driver_rx</name>
+        <version>2.30</version>
+        <zipsource>r_tfat_driver_rx_v2.30.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>7.41</version>
+        </dependency>
+        <dependency>
+            <module>r_cmt_rx</module>
+            <version>5.50</version>
+        </dependency>
+        <dependency>
+            <module>r_sys_time_rx</module>
+            <version>1.01</version>
+        </dependency>
+        <dependency>
+            <module>r_tfat_rx</module>
+            <version>4.10</version>
+        </dependency>
+        <application>Storage &#38; Memory</application>
+        <desc>Memory Driver Interface for Open Source FAT File System.</desc>
+        <details>This memory driver interface connects TFAT and Device Drivers(USB etc).
+TFAT is a FAT file system which just requires small memory.
+TFAT is based on FatFs.
+
+Please refer to the
+ https://www.renesas.com/mw/tfat-rx</details>
+        <function>storage</function>
+        <incdir>r_tfat_driver_rx</incdir>
+        <incdir>r_tfat_driver_rx/src</incdir>
+    </package>
+
+</refinfo>

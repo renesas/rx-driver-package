@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_usb_phid
-VERSION = 		1.31
+VERSION = 		1.42
 MDF = V2
 
 CONFIG_FOLDER = r_config

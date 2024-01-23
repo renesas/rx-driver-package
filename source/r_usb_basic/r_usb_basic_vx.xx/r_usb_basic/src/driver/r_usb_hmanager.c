@@ -1154,6 +1154,7 @@ void usb_hstd_mgr_resume (usb_utr_t *ptr, uint16_t info)
 
     devaddr = p_usb_shstd_mgr_msg[ptr->ip]->keyword;
     devsel = (uint16_t) (devaddr << USB_DEVADDRBIT);
+    rootport = 0;
 
     /* Get root port number from device addr */
     if (USB_NOCONNECT != usb_hstd_chk_dev_addr(ptr, devsel))

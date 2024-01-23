@@ -72,6 +72,12 @@
  *                               Added new macros for SCL rise time and SCL fall time.
  *         : 29.05.2023 2.80     Changed minor version to '80' for RX23E-B support.
  *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0
+ *         : 10.10.2023 2.90     Changed EEI and TEI default interrupt priority levels
+ *                                for devices with EEI and TEI assigned to group interrupts,
+ *                                to be higher than TXI and RXI priority levels in MDF file.
+ *                               Modified source code comments of RIIC_CFG_CHi_RXI_INT_PRIORITY,
+ *                                RIIC_CFG_CHi_TXI_INT_PRIORITY, RIIC_CFG_CHi_EEI_INT_PRIORITY,
+ *                                RIIC_CFG_CHi_TEI_INT_PRIORITY (i = 0 to 2) in r_riic_rx_config.h.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIIC_IF_H
@@ -94,7 +100,7 @@ R_BSP_PRAGMA_UNPACK
 
 /* Version Number of API. */
     #define RIIC_VERSION_MAJOR      (2)
-    #define RIIC_VERSION_MINOR      (80)
+    #define RIIC_VERSION_MINOR      (90)
 
 /*----------------------------------------------------------------------------*/
 /*   Defines the argument of the R_RIIC_Control function.                     */

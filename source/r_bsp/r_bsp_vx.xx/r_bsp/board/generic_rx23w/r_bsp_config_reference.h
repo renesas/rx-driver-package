@@ -64,6 +64,23 @@
 *         : 11.02.2022 2.01    Changed initial value of the following macro definitions.
 *                               - BSP_CFG_SWINT_UNIT1_ENABLE
 *         : 28.02.2023 2.02    Modified comment.
+*         : 21.11.2023 2.03    Added the following macro definitions.
+*                               - BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE
+*                               - BSP_CFG_MEMORY_BUS1_PRIORITY
+*                               - BSP_CFG_MEMORY_BUS2_PRIORITY
+*                               - BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY
+*                               - BSP_CFG_INTERNAL_PERIPHERAL_BUS2_3_PRIORITY
+*                               - BSP_CFG_INTERNAL_PERIPHERAL_BUS4_PRIORITY
+*                               - BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY
+*                               - BSP_CFG_BOOTLOADER_PROJECT
+*                              Modified comment.
+*                              Changed initial value of the following macro definitions.
+*                               - BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE
+*                               - BSP_CFG_HOCO_OSCILLATE_ENABLE
+*                               - BSP_CFG_CLOCK_SOURCE
+*                               - BSP_CFG_CLKOUT_SOURCE
+*                               - BSP_CFG_CLKOUT_DIV
+*                               - BSP_CFG_HOCO_FREQUENCY
 ***********************************************************************************************************************/
 
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
@@ -74,7 +91,7 @@ Configuration Options
 ***********************************************************************************************************************/
 
 /* NOTE:
- The default settings are the same as when using RSKRX23W.
+ The default settings are the same as when using RSSKRX23W.
  Change to the settings for the user board.
 */
 
@@ -222,10 +239,10 @@ Configuration Options
 #define BSP_CFG_ID_CODE_LONG_4          (0xFFFFFFFF)
 
 /* Select whether to oscillate the Main Clock Oscillator.
-   0 = Stop Oscillating the Main Clock.
-   1 = Enable oscillating the Main Clock. (default)
+   0 = Stop Oscillating the Main Clock. (default)
+   1 = Enable oscillating the Main Clock.
 */
-#define BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE    (1)
+#define BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE    (0)
 
 /* Select whether to oscillate the Sub Clock Oscillator.
    0 = Stop Oscillating the Sub Clock. (default)
@@ -234,10 +251,10 @@ Configuration Options
 #define BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE     (0)
 
 /* Select whether to oscillate the High Speed On-Chip Oscillator (HOCO).
-   0 = Stop Oscillating the HOCO. (default)
-   1 = Enable Oscillating the HOCO.
+   0 = Stop Oscillating the HOCO.
+   1 = Enable Oscillating the HOCO. (default)
 */
-#define BSP_CFG_HOCO_OSCILLATE_ENABLE          (0)
+#define BSP_CFG_HOCO_OSCILLATE_ENABLE          (1)
 
 /* Select whether to oscillate the Low Speed On-Chip Oscillator (LOCO).
    0 = Stop Oscillating the LOCO. (default)
@@ -258,7 +275,7 @@ Configuration Options
    3 = Sub-Clock Oscillator
    4 = PLL Circuit
 */
-#define BSP_CFG_CLOCK_SOURCE            (4)
+#define BSP_CFG_CLOCK_SOURCE            (1)
 
 /* USB Clock source select (UPLLCR.UCKUPLLSEL).
    0 = System Clock (PLL Circuit/No division)
@@ -282,12 +299,12 @@ Configuration Options
 /* Configure clock source of clock output(CLKOUT) pin (CKOSEL).
    Available clock sources:
    0 = LOCO
-   1 = HOCO
-   2 = Main clock oscillator (default)
+   1 = HOCO (default)
+   2 = Main clock oscillator
    3 = Sub-clock oscillator
    4 = PLL circuit
  */
-#define BSP_CFG_CLKOUT_SOURCE           (2)
+#define BSP_CFG_CLKOUT_SOURCE           (1)
 
 /* The sub-clock oscillation control for using the RTC.
    When '1' is selected, the registers related to RTC are initialized and the sub-clock oscillator is operated.
@@ -373,13 +390,13 @@ Configuration Options
 
 /* CLKOUT Output Frequency Division Ratio Select. (CKODIV)
    Values
-   0 = x1/1 (default)
+   0 = x1/1
    1 = x1/2
    2 = x1/4
-   3 = x1/8
+   3 = x1/8 (default)
    4 = x1/16
  */
-#define BSP_CFG_CLKOUT_DIV              (0)
+#define BSP_CFG_CLKOUT_DIV              (3)
 
 /* Configure clock output(CLKOUT) pin (CKOSTP).
    Values
@@ -429,10 +446,10 @@ Configuration Options
 
 /* The HOCO can operate at several different frequencies. Choose which one using the macro below.
    Available frequency settings:
-   0 = 32MHz     (default)
-   3 = 54MHz
+   0 = 32MHz
+   3 = 54MHz (default)
 */
-#define BSP_CFG_HOCO_FREQUENCY          (0)
+#define BSP_CFG_HOCO_FREQUENCY          (3)
 
 /* Configure WDT and IWDT settings.
    OFS0 - Option Function Select Register 0
@@ -658,6 +675,55 @@ Configuration Options
    1 = This project is a C++ project.
 */
 #define BSP_CFG_CPLUSPLUS             (0)
+
+/* Select whether to enable bus priority initialization.
+   0 = Bus priority initialization is disabled.
+   1 = Bus priority initialization is enabled.
+*/
+#define BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE      (0)
+
+/* Select the priority order for memory bus 1 (RAM).
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_MEMORY_BUS1_PRIORITY                (0)
+
+/* Select the priority order for memory bus 2 (ROM).
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_MEMORY_BUS2_PRIORITY                (0)
+
+/* Select the priority order for internal peripheral bus 1.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY   (0)
+
+/* Select the priority order for internal peripheral buses 2 and 3.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS2_3_PRIORITY (0)
+
+/* Select the priority order for internal peripheral bus 4.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS4_PRIORITY   (0)
+
+/* Select the priority order for internal peripheral bus 6.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY   (0)
+
+/* Select whether it is bootloader project.
+   0 = This project isn't a bootloader project.
+   1 = This project is a bootloader project.
+   NOTE: Not normally used. Set this to "1" only in the bootloader project.
+*/
+#define BSP_CFG_BOOTLOADER_PROJECT    (0)
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

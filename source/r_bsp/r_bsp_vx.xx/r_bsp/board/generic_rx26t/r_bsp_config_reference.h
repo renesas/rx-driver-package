@@ -26,6 +26,17 @@
 * History : DD.MM.YYYY Version   Description
 *         : 28.02.2023 1.00      First Release
 *         : 26.04.2023 1.01      Modified comment.
+*         : 21.11.2023 1.02      Added the following macro definitions.
+*                                - BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE
+*                                - BSP_CFG_MEMORY_BUS1_PRIORITY
+*                                - BSP_CFG_MEMORY_BUS2_PRIORITY
+*                                - BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY
+*                                - BSP_CFG_INTERNAL_PERIPHERAL_BUS2_3_PRIORITY
+*                                - BSP_CFG_INTERNAL_PERIPHERAL_BUS4_5_PRIORITY
+*                                - BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY
+*                                - BSP_CFG_BOOTLOADER_PROJECT
+*                                Modified comment.
+*                                Deleted the BSP_CFG_ROMCODE_REG_VALUE.
 ***********************************************************************************************************************/
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
 #define R_BSP_CONFIG_REF_HEADER_FILE
@@ -52,8 +63,8 @@ Configuration Options
    | | | |  |  | | | |  Macro Name                             Description
    | | | |  |  | | | |__BSP_CFG_MCU_PART_PACKAGE             = Package type, number of pins, and pin pitch
    | | | |  |  | | |____not used                             = Products with wide temperature range
-   | | | |  |  | |______BSP_CFG_MCU_PART_FUNCTION            = PGA differential input,
-   | | | |  |  |                                               Encryption module and USB module included/not included
+   | | | |  |  | |______BSP_CFG_MCU_PART_FUNCTION            = CAN 2.0/CAN FD protocol supported,
+   | | | |  |  |                                               TSIP-Lite included/not included
    | | | |  |  |________BSP_CFG_MCU_PART_MEMORY_SIZE         = ROM, RAM, and Data Flash Capacity
    | | | |  |___________BSP_CFG_MCU_PART_GROUP               = Group name
    | | | |______________BSP_CFG_MCU_PART_SERIES              = Series name
@@ -73,7 +84,7 @@ Configuration Options
 */
 #define BSP_CFG_MCU_PART_PACKAGE        (0x0)
 
-/* Whether PGA differential input, Encryption and USB are included or not.
+/* CAN 2.0/CAN FD protocol supported, TSIP-Lite included/not included
    Character(s) = Value for macro = Description
    A            = 0xA             = Only CAN 2.0 protocol supported, without TSIP-Lite
    B            = 0xB             = Only CAN 2.0 protocol supported, with TSIP-Lite
@@ -434,17 +445,6 @@ Configuration Options
 */
 #define BSP_CFG_FAW_REG_VALUE  (0xFFFFFFFF)
 
-/* The ROM code protection register is a function to prohibit reading from or programming to the flash memory
-   when the flash programmer is used during off-board programming.
-   ROMCODE - ROM Code Protection Register
-       b31:b0  ROM Code - 0000 0000h: ROM code protection enabled (ROM code protection 1).
-                          0000 0001h: ROM code protection enabled (ROM code protection 2).
-                          Other than above: ROM code protection disabled.
-       Note: The ROMCODE register should be set in 32-bit units.
-   Default value is 0xFFFFFFFF.
-*/
-#define BSP_CFG_ROMCODE_REG_VALUE  (0xFFFFFFFF)
-
 /* Select the bank mode of dual-bank function of the code flash memory.
    0 = Dual mode.
    1 = Linear mode. (default)
@@ -659,6 +659,55 @@ Configuration Options
    1 = Unit of radians, Q3.29 format
 */
 #define BSP_CFG_TFU_ATAN_OUTPUT_UNIT_FORMAT      (0)
+
+/* Select whether to enable bus priority initialization.
+   0 = Bus priority initialization is disabled.
+   1 = Bus priority initialization is enabled.
+*/
+#define BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE      (0)
+
+/* Select the priority order for memory bus 1 (RAM).
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_MEMORY_BUS1_PRIORITY                (0)
+
+/* Select the priority order for memory bus 2 (code flash memory).
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_MEMORY_BUS2_PRIORITY                (0)
+
+/* Select the priority order for internal peripheral bus 1.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY   (0)
+
+/* Select the priority order for internal peripheral buses 2 and 3.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS2_3_PRIORITY (0)
+
+/* Select the priority order for internal peripheral buses 4 and 5.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS4_5_PRIORITY (0)
+
+/* Select the priority order for internal peripheral bus 6.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY   (0)
+
+/* Select whether it is bootloader project.
+   0 = This project isn't a bootloader project.
+   1 = This project is a bootloader project.
+   NOTE: Not normally used. Set this to "1" only in the bootloader project.
+*/
+#define BSP_CFG_BOOTLOADER_PROJECT    (0)
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

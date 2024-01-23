@@ -47,9 +47,17 @@
 *         : 31.03.2023 3.10     Added support for RX26T.
 *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *         : 29.05.2023 3.20     Supported RX23E-B.
+*         : 05.10.2023 3.40     Added include header to fix missing #include platform.h issue.
 ***********************************************************************************************************************/
 #ifndef R_RSPI_PRIVATE_H
 #define R_RSPI_PRIVATE_H
+
+/***********************************************************************************************************************
+Includes   <System Includes> , "Project Includes"
+***********************************************************************************************************************/
+/* Fixed width integer support. */
+/* Access to peripherals and board defines. */
+#include "platform.h"
 
 /***********************************************************************************************************************
 Macro definitions

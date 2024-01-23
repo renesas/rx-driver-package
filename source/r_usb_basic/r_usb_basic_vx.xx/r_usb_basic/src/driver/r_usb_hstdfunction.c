@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2014(2022) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2023) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_hstdfunction.c
@@ -31,6 +31,7 @@
  *         : 16.11.2018 1.24 Supporting RTOS Thread safe
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.10.2022 1.41 USBX HMSC is supported.
+ *         : 30.09.2023 1.42 USBX HCDC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -159,7 +160,7 @@ void usb_hstd_ls_connect_function (usb_utr_t *ptr)
 void usb_hstd_attach_function (void)
 {
     /* 100ms wait */
-    usb_cpu_delay_xms((uint16_t) 100);
+    usb_cpu_delay_xms((uint16_t) 100);  /* Don't remove. USB Spec: 7.1.7.3 */
 }
 /******************************************************************************
  End of function usb_hstd_attach_function

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
+* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
+* applicable laws, including copyright laws. 
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
+* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
+* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
+* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
+* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
+* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+  <fileVersion>1.00</fileVersion>
+  <formatVersion>2.00</formatVersion>
+  <fileTemplate>
+  </fileTemplate>
+  <configuration>
+    <property id="RM_COMMS_UART_CFG_PARAM_CHECKING_ENABLE" display="Parameter Checking" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+      <option id="RM_COMMS_UART_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="System Default" value="BSP_CFG_PARAM_CHECKING_ENABLE" />
+      <option id="RM_COMMS_UART_CFG_PARAM_CHECKING_ENABLE.0" display="Disabled" value="0" />
+      <option id="RM_COMMS_UART_CFG_PARAM_CHECKING_ENABLE.1" display="Enabled" value="1" />
+      <description>Select whether to include parameter checking in the code.
+"Disabled": Compiles out parameter checking.
+"Enabled": Includes parameter checking.
+"System Default": Sets this to "BSP_CFG_PARAM_CHECKING_ENABLE"</description>
+    </property>
+    <property id="COMMS_UART_CFG_BUS_NUM_MAX" display="Number of UART Shared Buses" default="1" type="combobox">
+      <option id="COMMS_UART_CFG_BUS_NUM_MAX.0" display="Unused" value="0" />
+      <option id="COMMS_UART_CFG_BUS_NUM_MAX.1" display="1" value="1" />
+      <description>Set the number of UART Shared Buses.
+[Note]: Up to 1 UART Shared Buses can be controlled.</description>
+    </property>
+    <property id="COMMS_UART_CFG_DEVICE_NUM_MAX" display="Number of UART Communication Devices" default="1" type="combobox">
+      <option id="COMMS_UART_CFG_DEVICE_NUM_MAX.0" display="Unused" value="0" />
+      <option id="COMMS_UART_CFG_DEVICE_NUM_MAX.1" display="1" value="1" />
+      <description>Set the number of UART devices.
+[Note]: Up to 1 UART devices can be controlled.</description>
+    </property>
+    <property id="COMMS_UART_CFG_RTOS_TX_BLOCKING_SUPPORT_ENABLE" display="[TX] Blocking Operation Supporting with RTOS" default="1" type="combobox">
+      <option id="COMMS_UART_CFG_RTOS_TX_BLOCKING_SUPPORT_ENABLE.DISABLED" display="Disabled" value="0" />
+      <option id="COMMS_UART_CFG_RTOS_TX_BLOCKING_SUPPORT_ENABLE.ENABLED" display="Enabled" value="1" />
+      <description>Select whether to supporting the blocking operation.
+The blocking operation is effective available when using RTOS.
+"Disabled": Perform with non-blobking opeartion.
+"Enabled": Perform with blocking operation.</description>
+    </property>
+    <property id="COMMS_UART_CFG_RTOS_TX_BUS_LOCK_SUPPORT_ENABLE" display="[TX] Bus Lock Operation Supporting with RTOS" default="1" type="combobox">
+      <option id="COMMS_UART_CFG_RTOS_TX_BUS_LOCK_SUPPORT_ENABLE.DISABLED" display="Disabled" value="0" />
+      <option id="COMMS_UART_CFG_RTOS_TX_BUS_LOCK_SUPPORT_ENABLE.ENABLED" display="Enabled" value="1" />
+      <constraint display="When blocking operaten is supported" actionOnFail="disable">"${COMMS_UART_CFG_RTOS_TX_BLOCKING_SUPPORT_ENABLE}" == "${COMMS_UART_CFG_RTOS_TX_BLOCKING_SUPPORT_ENABLE.ENABLED}"</constraint>
+      <description>Select whether to supporting the bus lock operation.
+The bus lock operation is effective available when using RTOS and enabled a blocking operation.
+"Disabled": Disbled a bus lock operation.
+"Enabled": Enabled a bus lock operation.</description>
+    </property>
+    <property id="COMMS_UART_CFG_RTOS_RX_BLOCKING_SUPPORT_ENABLE" display="[RX] Blocking Operation Supporting with RTOS" default="1" type="combobox">
+      <option id="COMMS_UART_CFG_RTOS_RX_BLOCKING_SUPPORT_ENABLE.DISABLED" display="Disabled" value="0" />
+      <option id="COMMS_UART_CFG_RTOS_RX_BLOCKING_SUPPORT_ENABLE.ENABLED" display="Enabled" value="1" />
+      <description>Select whether to supporting the blocking operation.
+The blocking operation is effective available when using RTOS.
+"Disabled": Perform with non-blobking opeartion.
+"Enabled": Perform with blocking operation.</description>
+    </property>
+    <property id="COMMS_UART_CFG_RTOS_RX_BUS_LOCK_SUPPORT_ENABLE" display="[RX] Bus Lock operation Supporting with RTOS" default="1" type="combobox">
+      <option id="COMMS_UART_CFG_RTOS_RX_BUS_LOCK_SUPPORT_ENABLE.DISABLED" display="Disabled" value="0" />
+      <option id="COMMS_UART_CFG_RTOS_RX_BUS_LOCK_SUPPORT_ENABLE.ENABLED" display="Enabled" value="1" />
+      <constraint display="When blocking operaten is supported" actionOnFail="disable">"${COMMS_UART_CFG_RTOS_RX_BLOCKING_SUPPORT_ENABLE}" == "${COMMS_UART_CFG_RTOS_RX_BLOCKING_SUPPORT_ENABLE.ENABLED}"</constraint>
+      <description>Select whether to supporting the bus lock operation.
+The bus lock operation is effective available when using RTOS and enabled a blocking operation.
+"Disabled": Disbled a bus lock operation.
+"Enabled": Enabled a bus lock operation.</description>
+    </property>
+    <!-- COMMS UART Shared Bus -->
+    <property id="COMMS_UART_CFG_BUS0_SCI_UART_COMPONENT" display="Component Name of UART" default="Config_SCI0" type="textbox">
+      <constraint display="Must not be empty">"" != "${COMMS_UART_CFG_BUS0_SCI_UART_COMPONENT}"</constraint>
+      <description>Specify the component name of SCI UART.
+For example, when using a component of SCI0, specify the component name "Config_SCI0".</description>
+    </property>
+    <property id="COMMS_UART_CFG_BUS0_SCI_UART_CH" display="Channel No. of SCI UART" default="0" type="textbox">
+      <constraint display="Must not be empty">"" != "${COMMS_UART_CFG_BUS0_SCI_UART_CH}"</constraint>
+      <constraint display="Must be integer value">(0x00 &lt;= ${COMMS_UART_CFG_BUS0_SCI_UART_CH})</constraint>
+      <description>Specify the channel number of SCI UART.</description>
+    </property>
+    <property id="COMMS_UART_CFG_BUS0_CLK_SRC" display="[UART Shared Bus0] Clock Source" default="SCI_CLK_INT" type="combobox">
+      <option id="COMMS_UART_CFG_BUS0_CLK_SRC.SCI_CLK_INT" display="CLK_INT" value="SCI_CLK_INT" />
+      <option id="COMMS_UART_CFG_BUS0_CLK_SRC.SCI_CLK_EXT_8X" display="CLK_EXT_8X" value="SCI_CLK_EXT8X" />
+      <option id="COMMS_UART_CFG_BUS0_CLK_SRC.SCI_CLK_EXT_16X" display="CLK_EXT_16X" value="SCI_CLK_EXT16X" />
+      <description>Specify the SCI clock source for UART Shared Bus0.</description>
+    </property>
+    <property id="COMMS_UART_CFG_BUS0_DATA_SIZE" display="[UART Shared Bus0] Data Size" default="SCI_DATA_8BIT" type="combobox">
+      <option id="COMMS_UART_CFG_BUS0_DATA_SIZE.SCI_DATA_7BIT" display="7-bit" value="SCI_DATA_7BIT" />
+      <option id="COMMS_UART_CFG_BUS0_DATA_SIZE.SCI_DATA_8BIT" display="8-bit" value="SCI_DATA_8BIT" />
+      <description>Specify the UART data size for UART Shared Bus0.</description>
+    </property>
+    <property id="COMMS_UART_CFG_BUS0_PARITY_EN" display="[UART Shared Bus0] Parity On/Off" default="SCI_PARITY_OFF" type="combobox">
+      <option id="COMMS_UART_CFG_BUS0_PARITY_EN.SCI_PARITY_OFF" display="Disabled" value="SCI_PARITY_OFF" />
+      <option id="COMMS_UART_CFG_BUS0_PARITY_EN.SCI_PARITY_ON" display="Enabled" value="SCI_PARITY_ON" />
+      <description>Specify the UART parity on/off for UART Shared Bus0.</description>
+    </property>
+    <property id="COMMS_UART_CFG_BUS0_PARITY_TYPE" display="[UART Shared Bus0] Parity Type" default="SCI_EVEN_PARITY" type="combobox">
+      <option id="COMMS_UART_CFG_BUS0_PARITY_TYPE.SCI_ODD_PARITY" display="ODD parity" value="SCI_ODD_PARITY" />
+      <option id="COMMS_UART_CFG_BUS0_PARITY_TYPE.SCI_EVEN_PARITY" display="EVEN parity" value="SCI_EVEN_PARITY" />
+      <description>Specify the UART parity type for UART Shared Bus0.</description>
+    </property>
+    <property id="COMMS_UART_CFG_BUS0_STOP_BITS" display="[UART Shared Bus0] Stop bits" default="SCI_STOPBITS_1" type="combobox">
+      <option id="COMMS_UART_CFG_BUS0_STOP_BITS.SCI_STOPNITS_2" display="2-bit" value="SCI_STOPBITS_2" />
+      <option id="COMMS_UART_CFG_BUS0_STOP_BITS.SCI_STOPNITS_1" display="1-bit" value="SCI_STOPBITS_1" />
+      <description>Specify the UART stop bits for UART Shared Bus0.</description>
+    </property>
+    <property id="COMMS_UART_CFG_BUS0_PCLK" display="[UART Shared Bus0] PCLK Frequency [MHz]" default="60" type="textbox">
+      <description>Specify the PCLK frequency [MHz] for UART Shared Bus0.</description>
+    </property>
+    <property id="COMMS_UART_CFG_BUS0_RATE" display="[UART Shared Bus0] Bit Rate [bps]" default="115200" type="textbox">
+      <description>Specify the bit rate [bps] for UART Shared Bus0.</description>
+    </property>
+    <property id="COMMS_UART_CFG_BUS0_TIMEOUT" display="[UART Shared Bus0] Timeout for Bus Lock of RTOS Project" default="0xFFFFFFFF" type="textbox">
+      <constraint display="When number of UART buses is 1 or more" actionOnFail="disable">
+        "${COMMS_UART_CFG_BUS_NUM_MAX}" == "${COMMS_UART_CFG_BUS_NUM_MAX.1}" 
+        || "${COMMS_UART_CFG_BUS_NUM_MAX}" == "${COMMS_UART_CFG_BUS_NUM_MAX.2}"
+        || "${COMMS_UART_CFG_BUS_NUM_MAX}" == "${COMMS_UART_CFG_BUS_NUM_MAX.3}"
+        || "${COMMS_UART_CFG_BUS_NUM_MAX}" == "${COMMS_UART_CFG_BUS_NUM_MAX.4}"
+      </constraint>
+      <constraint display="When RTOS Blocking Support is enabled only" actionOnFail="disable">${COMMS_UART_CFG_RTOS_BLOCKING_SUPPORT_ENABLE} == ${COMMS_UART_CFG_RTOS_BLOCKING_SUPPORT_ENABLE.ENABLED}</constraint>
+      <constraint display="When RTOS Bus Lock Support is enabled only" actionOnFail="disable">${COMMS_UART_CFG_RTOS_BUS_LOCK_SUPPORT_ENABLE} == ${COMMS_UART_CFG_RTOS_BUS_LOCK_SUPPORT_ENABLE.ENABLED}</constraint>
+      <constraint display="Must be integer value (0x00 - 0xFFFFFFFF)">((0x00 &lt;= ${COMMS_UART_CFG_BUS0_TIMEOUT}) &amp;&amp; (0xFFFFFFFF &gt;= ${COMMS_UART_CFG_BUS0_TIMEOUT}))</constraint>
+      <description>Specify the timeout for the bus lock for UART Shared Bus0.</description>
+    </property>
+    <!-- COMMS UART Device -->
+    <property id="COMMS_UART_CFG_DEVICE0_BUS_CH" display="[UART Communication Device0] UART Shared Bus No." default="g_comms_uart_bus0_extended_cfg" type="combobox">
+      <option id="COMMS_UART_CFG_DEVICE0_BUS_CH.0" display="UART Shared Bus0" value="g_comms_uart_bus0_extended_cfg" />
+      <constraint display="When the number of UART devices is 1 or more" actionOnFail="disable">
+        "${COMMS_UART_CFG_DEVICE_NUM_MAX}" == "${COMMS_UART_CFG_DEVICE_NUM_MAX.1}" 
+        || "${COMMS_UART_CFG_DEVICE_NUM_MAX}" == "${COMMS_UART_CFG_DEVICE_NUM_MAX.2}"
+        || "${COMMS_UART_CFG_DEVICE_NUM_MAX}" == "${COMMS_UART_CFG_DEVICE_NUM_MAX.3}"
+        || "${COMMS_UART_CFG_DEVICE_NUM_MAX}" == "${COMMS_UART_CFG_DEVICE_NUM_MAX.4}"
+      </constraint>
+      <description>Specify the UART Communication Device0.</description>
+    </property>
+    <property id="COMMS_UART_CFG_DEVICE0_CALLBACK" display="[UART Communication Device0] Callback Function" default="comms_uart_user_callback0" type="textbox">
+      <constraint display="When the number of UART devices is 1 or more" actionOnFail="disable">
+        "${COMMS_UART_CFG_DEVICE_NUM_MAX}" == "${COMMS_UART_CFG_DEVICE_NUM_MAX.1}" 
+        || "${COMMS_UART_CFG_DEVICE_NUM_MAX}" == "${COMMS_UART_CFG_DEVICE_NUM_MAX.2}"
+        || "${COMMS_UART_CFG_DEVICE_NUM_MAX}" == "${COMMS_UART_CFG_DEVICE_NUM_MAX.3}"
+        || "${COMMS_UART_CFG_DEVICE_NUM_MAX}" == "${COMMS_UART_CFG_DEVICE_NUM_MAX.4}"
+      </constraint>
+      <constraint display="Must not be empty">"" != "${COMMS_UART_CFG_DEVICE0_CALLBACK}"</constraint>
+      <description>Specify the callback function name of the UART Communication Device0.</description>
+    </property>
+    <property id="COMMS_UART_CFG_DEVICE0_BLOCKING_TIMEOUT" display="[UART Communication Device0] Timeout for Blocking Bus" default="0xFFFFFFFF" type="textbox">
+      <constraint display="When the number of UART devices is 1 or more" actionOnFail="disable">
+        "${COMMS_UART_CFG_DEVICE_NUM_MAX}" == "${COMMS_UART_CFG_DEVICE_NUM_MAX.1}" 
+        || "${COMMS_UART_CFG_DEVICE_NUM_MAX}" == "${COMMS_UART_CFG_DEVICE_NUM_MAX.2}"
+        || "${COMMS_UART_CFG_DEVICE_NUM_MAX}" == "${COMMS_UART_CFG_DEVICE_NUM_MAX.3}"
+        || "${COMMS_UART_CFG_DEVICE_NUM_MAX}" == "${COMMS_UART_CFG_DEVICE_NUM_MAX.4}"
+      </constraint>
+      <constraint display="when RTOS Blocking Support is enabled only" actionOnFail="disable">${COMMS_UART_CFG_RTOS_BLOCKING_SUPPORT_ENABLE} == ${COMMS_UART_CFG_RTOS_BLOCKING_SUPPORT_ENABLE.ENABLED}</constraint>
+      <constraint display="Must be integer value (0x00 - 0xFFFFFFFF)">((0x00 &lt;= ${COMMS_UART_CFG_DEVICE0_BLOCKING_TIMEOUT}) &amp;&amp; (0xFFFFFFFF &gt;= ${COMMS_UART_CFG_DEVICE0_BLOCKING_TIMEOUT}))</constraint>
+      <description>Specify the timeout for the blocking bus of the UART Communication Device0.</description>
+    </property>
+  </configuration>
+</module>

@@ -41,6 +41,7 @@
 *                                   Added support for Tool News R20TS0872. 
 *                                   Modified the condition of PFRAM section definition.
 *                                   Modified to check that the value of FENTRYR is set even if it is not Flash Type 4.
+*              : 01.10.2023 5.11    Added support for Tool News R20TS0963.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -190,6 +191,13 @@ flash_err_t flash_fcuram_codecopy(void)
 FLASH_PE_MODE_SECTION
 flash_err_t flash_reset(void)
 {
+    if ((g_current_parameters.bgo_enabled_cf == true)
+     || (g_current_parameters.bgo_enabled_df == true))
+    {
+        /* Disable FRDYI & FIFERR interrupt request */
+        flash_InterruptRequestDisable(VECT(FCU,FRDYI));
+        flash_InterruptRequestDisable(VECT(FCU,FIFERR));
+    }
 
     /* Cannot release sequencer from the command-locked state with status clear
      * or forced-stop commands if CFAE or DFAE is set. Must read those bits
@@ -216,6 +224,17 @@ flash_err_t flash_reset(void)
 
     /*Issue a forced stop */
     flash_stop();
+
+    if ((g_current_parameters.bgo_enabled_cf == true)
+     || (g_current_parameters.bgo_enabled_df == true))
+    {
+        /* Clear FRDYI & FIFERR interrupt request */
+        IR(FCU,FRDYI) = 0;
+
+        /* Enable FRDYI & FIFERR interrupt request */
+        flash_InterruptRequestEnable(VECT(FCU,FRDYI));
+        flash_InterruptRequestEnable(VECT(FCU,FIFERR));
+    }
 
     /*Transition to Read mode*/
     FLASH.FENTRYR.WORD = 0xAA00;

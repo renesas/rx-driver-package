@@ -22,6 +22,7 @@
 ************************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *           22.11.2021 1.00    Initial Release
+*           13.12.2023 1.31    Added WAIT_LOOP comments.
 ***********************************************************************************************************************/
 #ifndef R_CANFD_H
 #define R_CANFD_H
@@ -324,7 +325,7 @@ FSP_HEADER
 /* Function-like macro used to wait for a condition to be met, most often used to wait for hardware register updates.
  * This macro can be redefined to add a timeout if necessary. */
 #ifndef FSP_HARDWARE_REGISTER_WAIT
- #define FSP_HARDWARE_REGISTER_WAIT(reg, required_value)    while ((reg) != (required_value)) { /* Wait. */}
+ #define FSP_HARDWARE_REGISTER_WAIT(reg, required_value)    while ((reg) != (required_value)) { /* Wait. */} /* WAIT_LOOP */
 #endif
 
 

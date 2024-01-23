@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2023) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_hhid.h
@@ -40,6 +40,7 @@
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 16.11.2018 1.24 Supporting RTOS
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.09.2023 1.42 USBX HCDC is supported.
  ***********************************************************************************************************************/
 #ifndef R_USB_HHID_H
 #define R_USB_HHID_H
@@ -126,7 +127,7 @@ extern uint8_t *g_p_usb_hhid_config_table[];                                /* C
  Public Functions
  ******************************************************************************/
 /* Functions */
-void        usb_hhid_task (usb_vp_int_t stacd);
+void        usb_hhid_task (rtos_task_arg_t stacd);
 uint16_t    usb_hhid_pipe_info (usb_utr_t *ptr, uint8_t *table, uint16_t speed, uint16_t length);
 uint16_t    usb_hhid_get_string_desc (usb_utr_t *ptr, uint16_t addr, uint16_t string, usb_cb_t complete);
 void        usb_hid_suspended (usb_utr_t *ptr, uint16_t devadr);

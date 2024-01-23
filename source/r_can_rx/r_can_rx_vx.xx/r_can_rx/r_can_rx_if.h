@@ -24,8 +24,10 @@
 *         : 02.20.2015 2.01    For 64M, 71M. Originates from RX63N.
 *         : 30.10.2015 2.02    FIT update, new R_CAN_Create interface.
 *         : 3.3.2016   2.10    65N added. No significant changes.
-*         : 1.30.2017  2.11    - const was added to CAN_port_map_t so that there is no need to add const to instantiations.
-*                              - Replaced 0 with NULL for unused pointers to port config. registers. (p_CAN0_RX_PIN_MPC etc.)
+*         : 1.30.2017  2.11    - const was added to CAN_port_map_t so that there is no need to add const
+*                                to instantiations.
+*                              - Replaced 0 with NULL for unused pointers to
+*                                port config. registers. (p_CAN0_RX_PIN_MPC etc.)
 *                              - Test ran with 65N 2MB.
 *                              - Some GSCE coding guidelines implemented. Mulitple lines changed. (Plugin was used.)
 *         : 8.14.2017  2.12    - RX65N 2MB MP release.
@@ -34,14 +36,15 @@
 *         : 08.01.2019 2.15    - Added RX72T
 *         : 05.04.2019 3.00    - Added support for GCC and IAR compilers
 *         : 30.04.2019 3.10    - Added RX72M
-*         : 16.09.2019 3.11    - Added message to warn issue of CAN0, CAN1 and CAN2 interrupt sources are not assigned any
-*                                interrupt vector number
+*         : 16.09.2019 3.11    - Added message to warn issue of CAN0, CAN1 and CAN2 interrupt sources
+*                                are not assigned any interrupt vector number
 *         : 30.12.2019 3.20    - Added support RX66N, RX72N.
 *         : 13.06.2020 4.00    - Added support CAN FIFO.
 *         :                    - Added support Pin-setting.
 *         :                    - Removed definitions port pin.
 *         :                    - Removed define registers and information to fill the CAN pin map.
-*         : 04.01.2021 4.10    - Changed can_tx_callback to can_txf_callback in case txf_cb_func is NULL in R_CAN_Create().
+*         : 04.01.2021 4.10    - Changed can_tx_callback to can_txf_callback in case txf_cb_func
+*                                is NULL in R_CAN_Create().
 *                              - Added support demo for CAN v4.10.
 *         : 01.04.2021 5.00    - Added support for setting different bitrate for different channels.
 *         : 07.04.2021 5.10    - Changed sid to id in R_CAN_RxSet().
@@ -50,6 +53,10 @@
 *         : 21.02.2022 5.21    - Updated minor version.
 *         : 28.06.2022 5.30    - Updated demo projects.
 *         : 20.09.2022 5.40    - Updated demo projects.
+*         : 08.09.2023 5.50    - Updated according to GSCE Code Checker 6.50.
+*                              - Updated demo projects to support FIFO callback.
+*                              - Added demo for RX72N.
+*                              - Added WAIT_LOOP comments.
 ***********************************************************************************************************************/
 #ifndef CAN_INTERFACE_HEADER_FILE
 #define CAN_INTERFACE_HEADER_FILE 
@@ -70,7 +77,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define RCAN_RX_VERSION_MAJOR           (5)
-#define RCAN_RX_VERSION_MINOR           (40)
+#define RCAN_RX_VERSION_MINOR           (50)
 /* The process of getting the version number is done through the macro below. The version number is encoded where the
    top 2 bytes are the major version number and the bottom 2 bytes are the minor version number. For example,
    Version 4.25 would be returned as 0x00040019. */
@@ -235,8 +242,8 @@ Typedef definitions
 typedef struct
 {
     uint32_t id;
-    uint8_t dlc;
-    uint8_t data[8];
+    uint8_t  dlc;
+    uint8_t  data[8];
 } can_frame_t;
 
 /* BITRATE configuration object */
@@ -261,28 +268,226 @@ Exported global functions (to be accessed by other files)
                 R X   C A N   A P I 
 ******************************************************************/
 /* INITIALIZATION */
-uint32_t    R_CAN_Create(const uint32_t  ch_nr, const uint32_t mb_mode, const can_bitrate_config_t p_cfg, void (*tx_cb_func)(void), void (*txf_cb_func)(void), void (*rx_cb_func)(void), void (*rxf_cb_func)(void), void (*err_cb_func)(void));
-uint32_t    R_CAN_PortSet(const uint32_t ch_nr, const uint32_t action_type);
-uint32_t    R_CAN_Control(const uint32_t ch_nr, const uint32_t action_type);
-void        R_CAN_SetBitrate(const uint32_t ch_nr, const can_bitrate_config_t p_cfg);
+/******************************************************************************
+ * Function Name: R_CAN_Create
+ * Description  : .
+ * Arguments    : ch_nr
+ *              : mb_mode
+ *              : p_cfg
+ *              : (*tx_cb_func)(void)
+ *              : (*txf_cb_func)(void)
+ *              : (*rx_cb_func)(void)
+ *              : (*rxf_cb_func)(void)
+ *              : (*err_cb_func)(void)
+ * Return Value : .
+ *****************************************************************************/
+uint32_t    R_CAN_Create (const uint32_t  ch_nr,
+                        const uint32_t mb_mode,
+                        const can_bitrate_config_t p_cfg,
+                        void (*tx_cb_func)(void),
+                        void (*txf_cb_func)(void),
+                        void (*rx_cb_func)(void),
+                        void (*rxf_cb_func)(void),
+                        void (*err_cb_func)(void));
+
+/******************************************************************************
+ * Function Name: R_CAN_PortSet
+ * Description  : .
+ * Arguments    : ch_nr
+ *              : action_type
+ * Return Value : .
+ *****************************************************************************/
+uint32_t    R_CAN_PortSet (const uint32_t ch_nr, const uint32_t action_type);
+
+/******************************************************************************
+ * Function Name: R_CAN_Control
+ * Description  : .
+ * Arguments    : ch_nr
+ *              : action_type
+ * Return Value : .
+ *****************************************************************************/
+uint32_t    R_CAN_Control (const uint32_t ch_nr, const uint32_t action_type);
+
+/******************************************************************************
+ * Function Name: R_CAN_SetBitrate
+ * Description  : .
+ * Arguments    : ch_nr
+ *              : p_cfg
+ * Return Value : .
+ *****************************************************************************/
+void        R_CAN_SetBitrate (const uint32_t ch_nr, const can_bitrate_config_t p_cfg);
 
 /* TRANSMIT */
-uint32_t    R_CAN_TxSet(const uint32_t ch_nr, const uint32_t mb_mode, const uint32_t mbox_nr, const can_frame_t* frame_p, const uint32_t frame_type);
-uint32_t    R_CAN_TxSetXid(const uint32_t ch_nr, const uint32_t mb_mode, const uint32_t mbox_nr, can_frame_t* frame_p, const uint32_t frame_type);
-uint32_t    R_CAN_Tx(const uint32_t ch_nr, const uint32_t mb_mode, const uint32_t mbox_nr);
-uint32_t    R_CAN_TxCheck(const uint32_t ch_nr, const uint32_t mbox_nr);
-uint32_t    R_CAN_TxStopMsg(const uint32_t ch_nr, const uint32_t  mb_mode, const uint32_t mbox_nr);
+/******************************************************************************
+ * Function Name: R_CAN_TxSet
+ * Description  : .
+ * Arguments    : ch_nr
+ *              : mb_mode
+ *              : mbox_nr
+ *              : *frame_p
+ *              : frame_type
+ * Return Value : .
+ *****************************************************************************/
+uint32_t    R_CAN_TxSet (const uint32_t ch_nr,
+                        const uint32_t mb_mode,
+                        const uint32_t mbox_nr,
+                        const can_frame_t * frame_p,
+                        const uint32_t frame_type);
+
+/******************************************************************************
+ * Function Name: R_CAN_TxSetXid
+ * Description  : .
+ * Arguments    : ch_nr
+ *              : mb_mode
+ *              : mbox_nr
+ *              : *frame_p
+ *              : frame_type
+ * Return Value : .
+ *****************************************************************************/
+uint32_t    R_CAN_TxSetXid (const uint32_t ch_nr,
+                        const uint32_t mb_mode,
+                        const uint32_t mbox_nr,
+                        can_frame_t * frame_p,
+                        const uint32_t frame_type);
+
+/******************************************************************************
+ * Function Name: R_CAN_Tx
+ * Description  : .
+ * Arguments    : ch_nr
+ *              : mb_mode
+ *              : mbox_nr
+ * Return Value : .
+ *****************************************************************************/
+uint32_t    R_CAN_Tx (const uint32_t ch_nr, const uint32_t mb_mode, const uint32_t mbox_nr);
+
+/******************************************************************************
+ * Function Name: R_CAN_TxCheck
+ * Description  : .
+ * Arguments    : ch_nr
+ *              : mbox_nr
+ * Return Value : .
+ *****************************************************************************/
+uint32_t    R_CAN_TxCheck (const uint32_t ch_nr, const uint32_t mbox_nr);
+
+/******************************************************************************
+ * Function Name: R_CAN_TxStopMsg
+ * Description  : .
+ * Arguments    : ch_nr
+ *              : mb_mode
+ *              : mbox_nr
+ * Return Value : .
+ *****************************************************************************/
+uint32_t    R_CAN_TxStopMsg (const uint32_t ch_nr, const uint32_t  mb_mode, const uint32_t mbox_nr);
 
 /* RECEIVE */
-uint32_t    R_CAN_RxSet(const uint32_t ch_nr, const uint32_t mbox_nr, const uint32_t id, const uint32_t frame_type);
-uint32_t    R_CAN_RxSetXid(const uint32_t ch_nr, const uint32_t mbox_nr, uint32_t xid, const uint32_t frame_type);
-uint32_t    R_CAN_RxPoll(const uint32_t ch_nr, const uint32_t mbox_nr);
-uint32_t    R_CAN_RxRead(const uint32_t ch_nr, const uint32_t mb_mode, const uint32_t mbox_nr, can_frame_t * const frame_p);
-void        R_CAN_RxSetMask(const uint32_t ch_nr, const uint32_t mbox_nr, const uint32_t mask_value);
-uint32_t    R_CAN_RxSetFIFO(const uint32_t  ch_nr, const uint32_t mb_mode, const uint32_t  mbox_nr, const uint32_t  fidcr0_value, const uint32_t  fidcr1_value, const uint32_t  frame_type, const uint32_t  mkr6_value, const uint32_t  mkr7_value);
-uint32_t    R_CAN_RxSetFIFOXid(const uint32_t  ch_nr, const uint32_t mb_mode, const uint32_t  mbox_nr, const uint32_t  xfidcr0_value, const uint32_t  xfidcr1_value, const uint32_t  frame_type, const uint32_t  mkr6_value, const uint32_t  mkr7_value);
-/* ERRORS */
-uint32_t    R_CAN_CheckErr(const uint32_t ch_nr);
+/******************************************************************************
+ * Function Name: R_CAN_RxSet
+ * Description  : .
+ * Arguments    : ch_nr
+ *              : mb_mode
+ *              : id
+ *              : frame_type
+ * Return Value : .
+ *****************************************************************************/
+uint32_t    R_CAN_RxSet (const uint32_t ch_nr, const uint32_t mbox_nr, const uint32_t id, const uint32_t frame_type);
 
-#endif    /* R_CAN_API.H */
+/******************************************************************************
+ * Function Name: R_CAN_RxSetXid
+ * Description  : .
+ * Arguments    : ch_nr
+ *              : mbox_nr
+ *              : xid
+ *              : frame_type
+ * Return Value : .
+ *****************************************************************************/
+uint32_t    R_CAN_RxSetXid (const uint32_t ch_nr, const uint32_t mbox_nr, uint32_t xid, const uint32_t frame_type);
+
+/******************************************************************************
+ * Function Name: R_CAN_RxPoll
+ * Description  : .
+ * Arguments    : ch_nr
+ *              : mbox_nr
+ * Return Value : .
+ *****************************************************************************/
+uint32_t    R_CAN_RxPoll (const uint32_t ch_nr, const uint32_t mbox_nr);
+
+/******************************************************************************
+ * Function Name: R_CAN_RxRead
+ * Description  : .
+ * Arguments    : ch_nr
+ *              : mb_mode
+ *              : mbox_nr
+ *              : *frame_p
+ * Return Value : .
+ *****************************************************************************/
+uint32_t    R_CAN_RxRead (const uint32_t ch_nr,
+                        const uint32_t mb_mode,
+                        const uint32_t mbox_nr,
+                        can_frame_t * const frame_p);
+
+/******************************************************************************
+ * Function Name: R_CAN_RxSetMask
+ * Description  : .
+ * Arguments    : ch_nr
+ *              : mbox_nr
+ *              : mask_value
+ * Return Value : .
+ *****************************************************************************/
+void        R_CAN_RxSetMask (const uint32_t ch_nr, const uint32_t mbox_nr, const uint32_t mask_value);
+
+/******************************************************************************
+ * Function Name: R_CAN_RxSetFIFO
+ * Description  : .
+ * Arguments    : ch_nr
+ *              : mb_mode
+ *              : mbox_nr
+ *              : fidcr0_value
+ *              : fidcr1_value
+ *              : frame_type
+ *              : mkr6_value
+ *              : mkr7_value
+ * Return Value : .
+ *****************************************************************************/
+uint32_t    R_CAN_RxSetFIFO (const uint32_t  ch_nr,
+                            const uint32_t mb_mode,
+                            const uint32_t  mbox_nr,
+                            const uint32_t  fidcr0_value,
+                            const uint32_t  fidcr1_value,
+                            const uint32_t  frame_type,
+                            const uint32_t  mkr6_value,
+                            const uint32_t  mkr7_value);
+
+/******************************************************************************
+ * Function Name: R_CAN_RxSetFIFOXid
+ * Description  : .
+ * Arguments    : ch_nr
+ *              : mb_mode
+ *              : mbox_nr
+ *              : xfidcr0_value
+ *              : xfidcr1_value
+ *              : frame_type
+ *              : mkr6_value
+ *              : mkr7_value
+ * Return Value : .
+ *****************************************************************************/
+uint32_t    R_CAN_RxSetFIFOXid (const uint32_t  ch_nr,
+                                const uint32_t mb_mode,
+                                const uint32_t  mbox_nr,
+                                const uint32_t  xfidcr0_value,
+                                const uint32_t  xfidcr1_value,
+                                const uint32_t  frame_type,
+                                const uint32_t  mkr6_value,
+                                const uint32_t  mkr7_value);
+
+/* ERRORS */
+/******************************************************************************
+ * Function Name: R_CAN_CheckErr
+ * Description  : .
+ * Arguments    : ch_nr
+ * Return Value : .
+ *****************************************************************************/
+uint32_t    R_CAN_CheckErr (const uint32_t ch_nr);
+
+#endif  /* CAN_INTERFACE_HEADER_FILE */
+
 /* file end */

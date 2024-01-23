@@ -52,6 +52,7 @@
 *                                - BSP_MAPPED_INT_CFG_A_VECT_MTU8_TGIU8
 *         : 28.02.2019 1.11     Fixed coding style.
 *         : 25.11.2022 1.12     Modified comment.
+*         : 21.11.2023 1.13     Added processing to clear the IR flag.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -866,6 +867,13 @@ void bsp_mapped_interrupt_open (void)
     /* Casting is valid because it matches the type to the right side or argument. */
     BSP_PRV_INT_SELECT(BSP_PRV_A, BSP_MAPPED_INT_CFG_A_VECT_AES_AESEND) = BSP_PRV_INT_A_NUM_AES_AESEND;
 #endif
+
+    /* Write 0 to the IRn.IR flag. */
+    /* WAIT_LOOP */
+    for(uint16_t i = IR_PERIB_INTB128;i <= IR_PERIA_INTA255; i++)
+    {
+        ICU.IR[i].BIT.IR = 0;
+    }
 
 } /* End of function bsp_mapped_interrupt_open() */
 

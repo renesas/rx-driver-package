@@ -50,6 +50,14 @@
 *                               Added new demo projects.
 *         : 29.05.2023 3.20     Supported RX23E-B.
 *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 18.08.2023 3.30     Modified comments of the following API functions: R_RSPI_IntSptiIerClear, 
+*                               R_RSPI_IntSpriIerClear, R_RSPI_DisableSpti, R_RSPI_DisableRSPI.
+*         : 05.10.2023 3.40     Implemented code to clear the SPRF flag at the start of SPI communication.
+*                               Modified the order of disabling the error interrupt and canceling the error 
+*                               handler registration when disabling interrupts.
+*                               Modified the order of disabling interrupts between SPTI and SPRI
+*                               when disabling interrupts.
+*                               Added include header to fix missing #include platform.h issue in "r_rspi_rx_private.h".
 ***********************************************************************************************************************/
 #ifndef RSPI_API_HEADER_FILE
 #define RSPI_API_HEADER_FILE
@@ -75,7 +83,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define RSPI_RX_VERSION_MAJOR           (3)
-#define RSPI_RX_VERSION_MINOR           (20)
+#define RSPI_RX_VERSION_MINOR           (40)
 
 /***********************************************************************************************************************
 Typedef definitions

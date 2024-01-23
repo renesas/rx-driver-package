@@ -28,6 +28,7 @@
 *              : 29.11.2021 1.20     Supported to call R_QSPIX_Write_Indirect() 
 *                                    multiple times
 *              : 16.03.2023 1.40     Added r_qspix_read_memory_map() function
+*              : 13.12.2023 1.41     Added WAIT_LOOP comments.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_qspix_rx671.c
@@ -699,6 +700,7 @@ qspix_err_t r_qspix_read_indirect(uint8_t channel,
     }
 #endif
     /* Read data from QSPI. */
+    /* WAIT_LOOP */
     for (uint32_t i = 0; i < bytes; i++)
     {
         /* Store data to p_des_addr */
@@ -821,9 +823,11 @@ qspix_err_t r_qspix_read_memory_map(uint8_t channel,
     *rom_addr = 0;
 
     /* Read access to QSPI memory space */
+    /* WAIT_LOOP */
     for (uint32_t i = 0; i < bytes; i++)
     {
         /* Wait for 1-byte data to be received */
+        /* WAIT_LOOP */
         while((QSPIX.SPPFSR.BIT.PBLVL & 0x1F) < 0x01);
 
         /* Store data to p_des_addr */
@@ -885,6 +889,7 @@ qspix_err_t r_qspix_write_indirect(uint8_t channel,
     }
 
     /* Write data to QSPI. */
+    /* WAIT_LOOP */
     for (uint32_t i = 0; i < bytes; i++)
     {
         /* write data from p_src_addr to spi bus */

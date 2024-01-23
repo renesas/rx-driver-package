@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2023) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name     : r_usb_hcdc.h
@@ -31,6 +31,7 @@
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 16.11.2018 1.24 Supporting BSP_CFG_RTOS_USED
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.09.2023 1.42 USBX HCDC is supported.
  ***********************************************************************************************************************/
 #ifndef R_USB_HCDC_H
 #define R_USB_HCDC_H
@@ -68,7 +69,7 @@ extern int16_t g_usb_hcdc_smpl_class_seq[];
 extern uint16_t *g_p_usb_hcdc_pipe_table[];
 
 
-extern void usb_hcdc_task (usb_vp_int_t stacd);
+extern void usb_hcdc_task (rtos_task_arg_t stacd);
 extern void usb_hcdc_configured (usb_utr_t *ptr, uint16_t devadr, uint16_t data2);
 extern void usb_hcdc_detach (usb_utr_t *ptr, uint16_t devadr, uint16_t data2);
 

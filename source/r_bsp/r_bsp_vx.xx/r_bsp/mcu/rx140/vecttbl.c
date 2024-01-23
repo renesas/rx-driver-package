@@ -19,11 +19,13 @@
 /***********************************************************************************************************************
 * File Name    : vecttbl.c
 * Device(s)    : RX140
-* Description  : Definition of the fixed vector table and option setting memory.
+* Description  : Definition of the exception vector table and option setting memory.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 30.06.2021 1.00     First Release
+*         : 21.11.2023 1.01     Deleted the BSP_CFG_ROM_CODE_PROTECT_VALUE.
+*                               Modified comment.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -45,7 +47,7 @@ Exported global functions (to be accessed by other files)
 R_BSP_POR_FUNCTION(R_BSP_POWER_ON_RESET_FUNCTION);
 
 /***********************************************************************************************************************
-* The following array fills in the endian and option function select registers, and the fixed vector table
+* The following array fills in the endian and option function select registers, and the exception vector table
 * bytes.
 ***********************************************************************************************************************/
 #ifdef __BIG
@@ -59,7 +61,6 @@ R_BSP_POR_FUNCTION(R_BSP_POWER_ON_RESET_FUNCTION);
 #pragma public_equ = "__MDE", BSP_PRV_MDE_VALUE
 #pragma public_equ = "__OFS1", BSP_CFG_OFS1_REG_VALUE
 #pragma public_equ = "__OFS0", BSP_CFG_OFS0_REG_VALUE
-#pragma public_equ = "__ROM_CODE", BSP_CFG_ROM_CODE_PROTECT_VALUE
 #pragma public_equ = "__OSIS_1", BSP_CFG_ID_CODE_LONG_1
 #pragma public_equ = "__OSIS_2", BSP_CFG_ID_CODE_LONG_2
 #pragma public_equ = "__OSIS_3", BSP_CFG_ID_CODE_LONG_3
@@ -83,12 +84,7 @@ R_BSP_ATTRIB_SECTION_CHANGE_EXCEPTVECT void * const Except_Vectors[] =
     (void *)0xFFFFFFFF,             /* 0xffffff90 - Reserved */
     (void *)0xFFFFFFFF,             /* 0xffffff94 - Reserved */
     (void *)0xFFFFFFFF,             /* 0xffffff98 - Reserved */
-
-    /* The 32-bit area immediately below (0xffffff9c through 0xffffff9f) is a special area that allows the ROM to be 
-       protected from reading or writing by a parallel programmer. Please refer to the HW manual for appropriate 
-       settings. The default (all 0xff) places no restrictions and therefore allows reads and writes by a parallel 
-       programmer. */
-    (void *)BSP_CFG_ROM_CODE_PROTECT_VALUE,   /* 0xffffff9c - ROM Code Protection */
+    (void *)0xFFFFFFFF,             /* 0xffffff9C - Reserved */
 
     /* The memory are immediately below (0xffffffa0 through 0xffffffaf) is a special area that allows the on-chip 
        firmware to be protected. See the section "ID Code Protection" in the HW manual for details on how to enable 

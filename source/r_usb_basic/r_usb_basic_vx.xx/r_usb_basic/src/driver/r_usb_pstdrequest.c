@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2015(2022) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015(2023) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_pstdrequest.c
@@ -32,6 +32,7 @@
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.04.2020 1.31 RX671 is added.
  *         : 30.06.2022 1.40 USBX PCDC is supported.
+ *         : 30.09.2023 1.42 USBX HCDC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -1377,7 +1378,6 @@ static void usb_pstd_set_interface3 (void)
                 /* Search endpoint setting */
                 usb_pstd_set_eptbl_index(g_usb_pstd_req_index,
                         g_usb_pstd_alt_num[g_usb_pstd_req_index]);
-                usb_pstd_set_pipe_reg();
             }
             else
             {
@@ -1509,7 +1509,7 @@ static void usb_peri_class_reqeust_usbx_get_data (usb_setup_t * p_req)
     }
 
     g_usb_pstd_std_request = USB_YES;
-    usb_pstd_ctrl_write(transfer_request->ux_slave_transfer_request_requested_length,
+    usb_pstd_ctrl_write(p_req->request_length,
                         transfer_request->ux_slave_transfer_request_data_pointer
                         );
 }                                      /* End of function usb_peri_class_reqeust_usbx_get_data */

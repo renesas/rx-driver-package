@@ -114,6 +114,7 @@
 /* Class Request Buffer Size */
 #define USB_HMSC_CLSDATASIZE                (256)
 #define USB_HMSC_STRG_SECTSIZE              (512) /* 512 bytes per sector */
+#define USB_HMSC_REQUEST_SENSE_SIZE         (64)
 
 #define R_usb_hmsc_ref_drv_no  usb_hmsc_ref_drvno
 #define R_USB_HmscGetDevSts    usb_hmsc_get_dev_sts

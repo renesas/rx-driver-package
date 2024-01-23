@@ -56,6 +56,8 @@
         <version>8.03.00.202102</version>
         <version>8.03.00.202104</version>
         <version>8.03.00.202202</version>
+        <version>8.03.00.202204</version>
+        <version>8.03.00.202305</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -66,6 +68,8 @@
         <version>4.13.01</version>
         <version>4.14.01</version>
         <version>4.20.01</version>
+        <version>4.20.03</version>
+        <version>5.10.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->

@@ -26,6 +26,7 @@
  * History : DD.MM.YYYY Version Description
  *         : 15.08.2022 1.00    First release
  *                              Supported for RX26T.
+ *         : 13.12.2023 1.11    Added WAIT_LOOP comments.
  *********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -202,6 +203,7 @@ fsp_err_t R_RI3C_Open(ri3c_ctrl_t *const p_api_ctrl, ri3c_cfg_t const *const p_c
     p_ctrl->p_reg->ICRCR.BIT.MRST = 1U;
 
     /* The field will be cleared automatically upon reset completion (See section 35.2.4 in the Rx26T manual). */
+    /* WAIT_LOOP */
     while (p_ctrl->p_reg->ICRCR.BIT.MRST != 0U)
     {
         /* Wait. */
@@ -1127,6 +1129,7 @@ fsp_err_t R_RI3C_Write(ri3c_ctrl_t *const p_api_ctrl, uint8_t const *const p_dat
             p_ctrl->p_reg->ICRCR.LONG = R_RI3C0_ICRCR_TBRST_Msk;
 
             /* The field will be cleared automatically upon reset completion. */
+            /* WAIT_LOOP */
             while (p_ctrl->p_reg->ICRCR.BIT.MRST != 0U)
             {
                 /* Wait. */
@@ -1550,6 +1553,7 @@ fsp_err_t R_RI3C_Close(ri3c_ctrl_t *const p_api_ctrl)
     p_ctrl->p_reg->ICRCR.LONG   = 1U;
 
     /* The field will be cleared automatically upon reset completion (See section 35.2.4 in the RX26T manual). */
+    /* WAIT_LOOP */
     while (0U != p_ctrl->p_reg->ICRCR.BIT.MRST)
     {
         /* Wait. */
@@ -1722,6 +1726,8 @@ static inline void ri3c_fifo_read(ri3c_instance_ctrl_t *p_ctrl, uint32_t bytes)
 {
     /* Cast is acceptable because it is the cast from uint32_t and stdint.h library is included and used */
     int bytes_remaining = (int)bytes;
+
+    /* WAIT_LOOP */
     while (bytes_remaining > 0)
     {
         /* Each entry in the FIFO is 4 bytes. */
@@ -1769,6 +1775,7 @@ static inline void ri3c_read_buffer_store(ri3c_instance_ctrl_t *const p_ctrl,
 #if RI3C_CFG_UNALIGNED_BUFFER_SUPPORT
 
     /* If unaligned buffers are supported, the word must be written one byte at a time. */
+    /* WAIT_LOOP */
     for (uint32_t i = 0; i < sizeof(uint32_t) && i < num_bytes; i++)
     {
 #endif
@@ -1864,7 +1871,7 @@ static inline void ri3c_fifo_write(ri3c_instance_ctrl_t *p_ctrl)
         }
 
         /* Continue writing data until the transmit FIFO is full. */
-    } while ((p_ctrl->p_reg->ICDBSR.LONG & UINT8_MAX) && !transfer_complete);
+    } while ((p_ctrl->p_reg->ICDBSR.LONG & UINT8_MAX) && !transfer_complete); /* WAIT_LOOP */
 
     /* Clear the Transmit Buffer Empty status flag. */
     p_ctrl->p_reg->ICCSR.BIT.TDRE = 0;
@@ -1886,6 +1893,7 @@ static inline uint32_t ri3c_next_data_word_calculate(ri3c_write_buffer_descripto
 #if RI3C_CFG_UNALIGNED_BUFFER_SUPPORT
 
     /* Compute the value of the next data word that will be written. */
+    /* WAIT_LOOP */
     for (uint32_t i = 0; i < sizeof(uint32_t) && count < p_buffer_descriptor->buffer_size; i++)
     {
         /* If there is no more data to write, then exit. */
@@ -2225,6 +2233,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void ri3c_rcv_isr(void)
         {
             uint32_t data_length_w = (data_length + sizeof(uint32_t) - 1) / sizeof(uint32_t);
 
+            /* WAIT_LOOP */
             for (uint32_t i = 0; i < data_length_w; i++)
             {
                 /*
@@ -2370,6 +2379,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void ri3c_ibi_isr(void)
         /* Calculate the number of words that need to be read from the IBI Queue. */
         uint32_t ibi_data_length_w = (ibi_data_length + sizeof(uint32_t) - 1) / sizeof(uint32_t);
 
+        /* WAIT_LOOP */
         for (uint32_t i = 0; i < ibi_data_length_w; i++)
         {
             /* Get the next word of data from the IBI Queue. */
@@ -2510,12 +2520,14 @@ void ri3c_controller_error_recovery(ri3c_instance_ctrl_t *p_ctrl, bool error_rec
     p_ctrl->p_reg->ICRCR.LONG = RI3C_ICRCR_FIFO_FLUSH_Msk;
 
     /* The field will be cleared automatically upon reset completion (See section 35.2.4 in the RX26T manual). */
+    /* WAIT_LOOP */
     while (p_ctrl->p_reg->ICRCR.LONG & RI3C_ICRCR_FIFO_FLUSH_Msk != 0U)
     {
         /* Wait. */
     }
 
     /* Wait for the bus available condition. */
+    /* WAIT_LOOP */
     while (1)
     {
         /* If SDA is pulled low, then a target device started an IBI during error recovery. */
@@ -2584,6 +2596,7 @@ void ri3c_controller_error_recovery(ri3c_instance_ctrl_t *p_ctrl, bool error_rec
         /* Check if ICBCR is working correctly. */
         bool icbcr_zero = true;
 
+        /* WAIT_LOOP */
         for (uint32_t i = 0; i < 4; i++)
         {
             R_BSP_SoftwareDelay(high_delay_us + low_delay_us, BSP_DELAY_MICROSECS);
@@ -2602,6 +2615,7 @@ void ri3c_controller_error_recovery(ri3c_instance_ctrl_t *p_ctrl, bool error_rec
             R_BSP_SoftwareDelay(low_delay_us, BSP_DELAY_MICROSECS);
 
             /* Complete 9 SCL clock cycles while holding SDA high in order to NACK the IBI. */
+            /* WAIT_LOOP */
             for (uint32_t i = 0; i < 9; i++)
             {
                 /* Write SCL high. */
@@ -2671,18 +2685,21 @@ void ri3c_target_error_recovery(ri3c_instance_ctrl_t *p_ctrl, ri3c_target_error_
     }
 
     /* The field will be cleared automatically upon reset completion (See section 35.2.4 in the RX26T manual). */
+    /* WAIT_LOOP */
     while (p_ctrl->p_reg->ICRCR.BIT.MRST != 0)
     {
         /* Wait. */
     }
 
     /* Wait for Bus Available Condition (See Figure 35.67 in the RX26T manual). */
+    /* WAIT_LOOP */
     while (p_ctrl->p_reg->ICBSR.LONG & R_RI3C0_ICBSR_BAVL_Msk != R_RI3C0_ICBSR_BAVL_Msk)
     {
         /* Wait. */
     }
 
     /* Wait for start condition to be cleared (See Figure 35.67 in the RX26T manual). */
+    /* WAIT_LOOP */
     while (p_ctrl->p_reg->ICSR2.LONG & R_RI3C0_ICSR2_START_Msk != 0U)
     {
         /* Wait. */
@@ -2706,12 +2723,15 @@ void ri3c_target_error_recovery(ri3c_instance_ctrl_t *p_ctrl, ri3c_target_error_
     /* If the Bus is already available then error recovery is complete. */
     if (0 == (p_ctrl->p_reg->ICBSR.LONG & R_RI3C0_ICBSR_BAVL_Msk))
     {
+
+        /* WAIT_LOOP */
         while (0 == (p_ctrl->p_reg->ICSR2.LONG & R_RI3C0_ICSR2_START_Msk))
         {
             /* Perform internal software reset. */
             p_ctrl->p_reg->ICRCR.LONG = R_RI3C0_ICRCR_ISRST_Msk;
 
             /* Wait for Bus Available Condition (See Figure 35.67 in the RX26T manual). */
+            /* WAIT_LOOP */
             while (p_ctrl->p_reg->ICBSR.LONG & R_RI3C0_ICBSR_BAVL_Msk != R_RI3C0_ICBSR_BAVL_Msk)
             {
                 /* Wait. */

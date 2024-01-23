@@ -782,6 +782,7 @@ static uint16_t usb_hmsc_data_act (usb_utr_t *mess)
     uint16_t result;
     uint8_t *pbuff;
     uint32_t size;
+    static uint8_t hmsc_rs_data[USB_HMSC_REQUEST_SENSE_SIZE]; /* Request Sense Data Buffer */
 
     pbuff = pusb_hmsc_buff[mess->ip];
     size = usb_hmsc_trans_size[mess->ip];
@@ -909,7 +910,7 @@ static uint16_t usb_hmsc_data_act (usb_utr_t *mess)
                     if (USB_MSG_HMSC_STRG_USER_COMMAND != g_usb_hmsc_strg_process[mess->ip])
                     {
                         usb_hmsc_csw_err_loop[mess->ip] = USB_ON;
-                        usb_hmsc_request_sense(mess, side, pbuff);
+                        usb_hmsc_request_sense(mess, side, hmsc_rs_data);
                     }
                     else
                     {
@@ -3431,10 +3432,10 @@ uint16_t usb_hmsc_ref_drvno (uint16_t devadr)
 /******************************************************************************
  Function Name   : usb_hhub_task
  Description     : HUB task
- Arguments       : usb_vp_int_t stacd          : Start Code of Hub Task
+ Arguments       : rtos_task_arg_t stacd          : Start Code of Hub Task
  Return value    : none
  ******************************************************************************/
-void usb_hhub_task (usb_vp_int_t stacd)
+void usb_hhub_task (rtos_task_arg_t stacd)
 {
     /* None */
 }

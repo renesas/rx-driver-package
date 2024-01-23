@@ -24,7 +24,7 @@
 /************************************************************************************************
 * System Name  : MEMDRV  software
 * File Name    : r_memdrv_rspi.c
-* Version      : 1.05
+* Version      : 1.10
 * Device       : -
 * Abstract     : IO I/F module
 * Tool-Chain   : -
@@ -51,6 +51,8 @@
 *                                    with R_MEMDRV_TxData() and R_MEMDRV_RxData(), more data than the specified
 *                                    transfer size will be transferred.
 *              : 16.03.2023 1.05     Fixed coding style.
+*              : 07.06.2023 1.10     Fixed issue that software lock was not released when RSPI communication timeout 
+*                                    occurs, when MEMDRV FIT, RSPI FIT and DMAC/DTC FIT are used together.
 *************************************************************************************************/
 
 /************************************************************************************************
@@ -1663,6 +1665,7 @@ memdrv_err_t r_memdrv_rspi_tx(uint8_t devno, st_memdrv_info_t * p_memdrv_info)
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
 *              : MEMDRV_ERR_OTHER                       ;   Other error
+*              : MEMDRV_ERR_HARD                        ;   Hardware error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
@@ -1897,7 +1900,55 @@ memdrv_err_t r_memdrv_rspi_tx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
         if (MEMDRV_SUCCESS != ret_memdrv)
         {
             r_rspi_exchg(pdsrc, txcnt);
-            return MEMDRV_ERR_OTHER;
+            if (MEMDRV_DEV0 == devno)
+            {
+                if (MEMDRV_CFG_DEV0_MODE_TRNS & MEMDRV_TRNS_DMAC)
+                {
+                    if (r_memdrv_rspi_disable_tx_data_dmac(devno,
+                                                           p_memdrv_info) != MEMDRV_SUCCESS)
+                    {
+                        return MEMDRV_ERR_OTHER;
+                    }
+                }
+                else if (MEMDRV_CFG_DEV0_MODE_TRNS & MEMDRV_TRNS_DTC)
+                {
+                    if (r_memdrv_rspi_disable_tx_data_dtc(devno,
+                                                          p_memdrv_info) != MEMDRV_SUCCESS)
+                    {
+                        return MEMDRV_ERR_OTHER;
+                    }
+                }
+                else
+                {
+                    /* CPU transfer */
+                    R_BSP_NOP();
+                }
+            }
+            else
+            {
+                if (MEMDRV_CFG_DEV1_MODE_TRNS & MEMDRV_TRNS_DMAC)
+                {
+                    if (r_memdrv_rspi_disable_tx_data_dmac(devno,
+                                                           p_memdrv_info) != MEMDRV_SUCCESS)
+                    {
+                        return MEMDRV_ERR_OTHER;
+                    }
+                }
+                else if (MEMDRV_CFG_DEV1_MODE_TRNS & MEMDRV_TRNS_DTC)
+                {
+                    if (r_memdrv_rspi_disable_tx_data_dtc(devno,
+                                                          p_memdrv_info) != MEMDRV_SUCCESS)
+                    {
+                        return MEMDRV_ERR_OTHER;
+                    }
+                }
+                else
+                {
+                    /* CPU transfer */
+                    R_BSP_NOP();
+                }
+            }
+            return ret_memdrv;
         }
         r_rspi_exchg(pdsrc, txcnt);
         if (MEMDRV_DEV0 == devno)
@@ -2061,8 +2112,9 @@ memdrv_err_t r_memdrv_rspi_rx(uint8_t devno, st_memdrv_info_t * p_memdrv_info)
 *              :    uint8_t   * p_data                  ;   Buffer pointer
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
-* Return Value : MEMDRV_SUCCESS                       ;   Successful operation
-*              : MEMDRV_ERR_OTHER                     ;   Other error
+* Return Value : MEMDRV_SUCCESS                         ;   Successful operation
+*              : MEMDRV_ERR_OTHER                       ;   Other error
+*              : MEMDRV_ERR_HARD                        ;   Hardware error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
@@ -2298,7 +2350,55 @@ memdrv_err_t r_memdrv_rspi_rx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
         if (MEMDRV_SUCCESS != ret_memdrv)
         {
             r_rspi_exchg(pdest, rxcnt);
-            return MEMDRV_ERR_OTHER;
+            if (MEMDRV_DEV0 == devno)
+            {
+                if (MEMDRV_CFG_DEV0_MODE_TRNS & MEMDRV_TRNS_DMAC)
+                {
+                    if (r_memdrv_rspi_disable_rx_data_dmac(devno,
+                                                           p_memdrv_info) != MEMDRV_SUCCESS)
+                    {
+                        return MEMDRV_ERR_OTHER;
+                    }
+                }
+                else if (MEMDRV_CFG_DEV0_MODE_TRNS & MEMDRV_TRNS_DTC)
+                {
+                    if (r_memdrv_rspi_disable_rx_data_dtc(devno,
+                                                          p_memdrv_info) != MEMDRV_SUCCESS)
+                    {
+                        return MEMDRV_ERR_OTHER;
+                    }
+                }
+                else
+                {
+                    /* CPU transfer */
+                    R_BSP_NOP();
+                }
+            }
+            else
+            {
+                if (MEMDRV_CFG_DEV1_MODE_TRNS & MEMDRV_TRNS_DMAC)
+                {
+                    if (r_memdrv_rspi_disable_rx_data_dmac(devno,
+                                                           p_memdrv_info) != MEMDRV_SUCCESS)
+                    {
+                        return MEMDRV_ERR_OTHER;
+                    }
+                }
+                else if (MEMDRV_CFG_DEV1_MODE_TRNS & MEMDRV_TRNS_DTC)
+                {
+                    if (r_memdrv_rspi_disable_rx_data_dtc(devno,
+                                                          p_memdrv_info) != MEMDRV_SUCCESS)
+                    {
+                        return MEMDRV_ERR_OTHER;
+                    }
+                }
+                else
+                {
+                    /* CPU transfer */
+                    R_BSP_NOP();
+                }
+            }
+            return ret_memdrv;
         }
         r_rspi_exchg(pdest, rxcnt);
 
@@ -2617,6 +2717,7 @@ static void rspi_init_ports(void)
 *              : rspi_command_word_t  cmd               ;   Consisting of all the RSPI command register settings.
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
 *              : MEMDRV_ERR_OTHER                       ;   Other error
+*              : MEMDRV_ERR_HARD                        ;   Hardware error
 ******************************************************************************/
 static memdrv_err_t r_memdrv_rspi_write_data(uint8_t channel,
                                              uint16_t count,
@@ -2663,12 +2764,8 @@ static memdrv_err_t r_memdrv_rspi_write_data(uint8_t channel,
         /* ---- Disable RSPI transmission. ---- */
         R_RSPI_IntSptiIerClear(g_rspi_handle);
         R_RSPI_IntSpriIerClear(g_rspi_handle);
-        g_rspi_handle->channel = channel;
-        if (RSPI_SUCCESS != R_RSPI_Close(g_rspi_handle))
-        {
-            return MEMDRV_ERR_OTHER;
-        }
-        return MEMDRV_ERR_OTHER;
+        R_RSPI_DisableRSPI(g_rspi_handle);
+        return MEMDRV_ERR_HARD;
     }
 
     if (RSPI_EVT_TRANSFER_COMPLETE != callback_event)
@@ -2687,6 +2784,7 @@ static memdrv_err_t r_memdrv_rspi_write_data(uint8_t channel,
 *              : rspi_command_word_t  cmd               ;   Consisting of all the RSPI command register settings.
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
 *              : MEMDRV_ERR_OTHER                       ;   Other error
+*              : MEMDRV_ERR_HARD                        ;   Hardware error
 ******************************************************************************/
 static memdrv_err_t r_memdrv_rspi_read_data(uint8_t channel,
                                             uint16_t count,
@@ -2733,12 +2831,8 @@ static memdrv_err_t r_memdrv_rspi_read_data(uint8_t channel,
         /* ---- Disable RSPI transmission. ---- */
         R_RSPI_IntSptiIerClear(g_rspi_handle);
         R_RSPI_IntSpriIerClear(g_rspi_handle);
-        g_rspi_handle->channel = channel;
-        if (RSPI_SUCCESS != R_RSPI_Close(g_rspi_handle))
-        {
-            return MEMDRV_ERR_OTHER;
-        }
-        return MEMDRV_ERR_OTHER;
+        R_RSPI_DisableRSPI(g_rspi_handle);
+        return MEMDRV_ERR_HARD;
     }
 
     if (RSPI_EVT_TRANSFER_COMPLETE != callback_event)

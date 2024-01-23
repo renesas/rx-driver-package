@@ -43,6 +43,9 @@
 *           29.05.2023 2.70    Added support for RX23E-B.
 *                              Fixed fifo threshold enum error.
 *                              Updated according to GSCE Code Checker 6.50.
+*           17.11.2023 2.80    Added CAN_ERR_TIME_OUT return to while loop in R_CAN_Open, R_CAN_Control, and
+*                              R_CAN_SendMsg function.
+*                              Added WAIT_LOOP comments.
 ***********************************************************************************************************************/
 
 #ifndef CAN_INTERFACE_HEADER_FILE
@@ -64,7 +67,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define CAN_VERSION_MAJOR           (2)
-#define CAN_VERSION_MINOR           (70)
+#define CAN_VERSION_MINOR           (80)
 
 
 /* Channel numbers */
@@ -180,7 +183,8 @@ typedef enum e_can_err          // CAN API error codes
     CAN_ERR_MAX_RULES,          // 16 rules already present
     CAN_ERR_BOX_FULL,           // Transmit mailbox or FIFO is full
     CAN_ERR_BOX_EMPTY,          // Receive mailbox or FIFO is full
-    CAN_ERR_ILLEGAL_MODE        // Not in proper mode for request
+    CAN_ERR_ILLEGAL_MODE,       // Not in proper mode for request
+    CAN_ERR_TIME_OUT            // Time Out error
 } can_err_t;
 
 

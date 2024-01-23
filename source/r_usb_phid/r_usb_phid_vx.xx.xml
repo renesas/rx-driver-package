@@ -6,7 +6,7 @@
     <toolchain>
         <brand>Renesas</brand>
         <product>RXC</product>
-        <version>3.03.00</version>
+        <version>3.05.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -53,11 +53,11 @@
         <zipsource>r_usb_phid_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>6.10</version>
+            <version>7.41</version>
         </dependency>
         <dependency>
             <module>r_usb_basic</module>
-            <version>1.31</version>7
+            <version>1.42</version>7
         </dependency>
         <application>Connectivity</application>
         <desc>USB Peripheral Human I/F Device Class</desc>
@@ -65,7 +65,7 @@
         <function>USB_PHID</function>
         <incdir>r_config</incdir>
         <incdir>r_usb_phid</incdir>
-        <incdir>r_usb_phid\src\inc</incdir>
+        <incdir>r_usb_phid/src/inc</incdir>
     </package>
 
     <sampleapplicationnote >

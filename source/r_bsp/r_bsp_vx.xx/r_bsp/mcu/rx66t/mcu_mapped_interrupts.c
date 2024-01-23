@@ -25,6 +25,7 @@
 * History : DD.MM.YYYY Version   Description
 *         : 27.07.2018 1.00      First Release
 *         : 28.02.2019 1.01      Fixed coding style.
+*         : 21.11.2023 1.02      Added processing to clear the IR flag.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -734,6 +735,13 @@ void bsp_mapped_interrupt_open (void)
     /* Casting is valid because it matches the type to the right side or argument. */
     BSP_PRV_INT_SELECT(BSP_PRV_A, BSP_MAPPED_INT_CFG_A_VECT_GPTW9_GTCIU9) = BSP_PRV_INT_A_NUM_GPTW9_GTCIU9;
 #endif
+
+    /* Write 0 to the IRn.IR flag. */
+    /* WAIT_LOOP */
+    for(uint16_t i = IR_PERIA_INTA208;i <= IR_PERIA_INTA255; i++)
+    {
+        ICU.IR[i].BIT.IR = 0;
+    }
 
 } /* End of function bsp_mapped_interrupt_open() */
 

@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2014(2022) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2023) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_plibusbip.c
@@ -32,6 +32,7 @@
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.04.2020 1.31 RX671 is added.
  *         : 30.06.2022 1.40 USBX PCDC is supported.
+ *         : 30.09.2023 1.42 USBX HCDC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -70,6 +71,39 @@
 #if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
 rtos_sem_id_t g_usb_peri_usbx_sem[USB_MAXPIPE_NUM + 1];
 #endif /* (BSP_CFG_RTOS_USED == 5) */
+
+/******************************************************************************
+ * Macro definitions
+ ******************************************************************************/
+ #if defined(USB_CFG_PCDC_USE)
+  #if defined(USB_CFG_PMSC_USE) || defined(USB_CFG_PVND_USE) || defined(USB_CFG_PPRN_USE) || defined(USB_CFG_PAUD_USE)
+   #define USB_COMPOSITE_DEVICE
+  #else
+   #if ((USB_NULL != USB_CFG_PCDC_BULK_IN2) || (USB_NULL != USB_CFG_PCDC_BULK_OUT2))
+    #define USB_COMPOSITE_DEVICE
+   #else
+    #define USB_NO_COMPOSITE_DEVICE
+   #endif
+  #endif
+ #elif defined(USB_CFG_PMSC_USE)
+  #if defined(USB_CFG_PVND_USE) || defined(USB_CFG_PPRN_USE) || defined(USB_CFG_PAUD_USE)
+   #define USB_COMPOSITE_DEVICE
+  #else
+   #define USB_NO_COMPOSITE_DEVICE
+  #endif
+ #elif defined(USB_CFG_PPRN_USE)
+  #if defined(USB_CFG_PAUD_USE) || defined(USB_CFG_PVND_USE)
+   #define USB_COMPOSITE_DEVICE
+  #else
+   #define USB_NO_COMPOSITE_DEVICE
+  #endif
+ #elif defined(USB_CFG_PAUD_USE)
+  #if defined(USB_CFG_PVND_USE)
+   #define USB_COMPOSITE_DEVICE
+  #else
+   #define USB_NO_COMPOSITE_DEVICE
+  #endif
+ #endif
 
 /******************************************************************************
  Renesas Abstracted Host Lib IP functions
@@ -1338,6 +1372,138 @@ uint8_t         usb_pstd_get_pipe_no (uint8_t type, uint8_t dir, uint8_t class)
 
     return pipe_no;
 }
+
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M)
+/******************************************************************************
+ * Function Name   : usb_pstd_get_pipe_buf_value
+ * Description     : Get Value for USBA Module PIPE BUF REG.
+ * Arguments       : Pipe no.
+ * Return value    : PIPE BUF set value.
+ ******************************************************************************/
+uint16_t usb_pstd_get_pipe_buf_value (uint16_t pipe_no)
+{
+    uint16_t pipe_buf = 0;
+
+    switch (pipe_no)
+    {
+  #if defined(USB_NO_COMPOSITE_DEVICE)
+   #if defined(USB_CFG_PCDC_USE)
+        case USB_CFG_PCDC_BULK_IN:
+        {
+    #if USB_CFG_DTC == USB_CFG_ENABLE
+            pipe_buf = (USB_BUF_SIZE(1024U) | USB_BUF_NUMB(8U));
+    #else                              /* USB_CFG_DTC == USB_CFG_ENABLE */
+            pipe_buf = (USB_BUF_SIZE(2048U) | USB_BUF_NUMB(8U));
+    #endif                             /* USB_CFG_DTC == USB_CFG_ENABLE */
+            break;
+        }
+
+        case USB_CFG_PCDC_BULK_OUT:
+        {
+    #if USB_CFG_DTC == USB_CFG_ENABLE
+            pipe_buf = (USB_BUF_SIZE(1024U) | USB_BUF_NUMB(40U));
+    #else                              /* USB_CFG_DTC == USB_CFG_ENABLE */
+            pipe_buf = (USB_BUF_SIZE(2048U) | USB_BUF_NUMB(72U));
+    #endif                             /* USB_CFG_DTC == USB_CFG_ENABLE */
+            break;
+        }
+   #endif /* defined(USB_CFG_PCDC_USE) */
+
+   #if defined(USB_CFG_PMSC_USE)
+        case USB_CFG_PMSC_BULK_IN:
+        {
+    #if USB_CFG_DTC == USB_CFG_ENABLE
+            pipe_buf = (USB_BUF_SIZE(1024U) | USB_BUF_NUMB(8U));
+    #else                              /* USB_CFG_DTC == USB_CFG_ENABLE */
+            pipe_buf = (USB_BUF_SIZE(2048U) | USB_BUF_NUMB(8U));
+    #endif                             /* USB_CFG_DTC == USB_CFG_ENABLE */
+            break;
+        }
+
+        case USB_CFG_PMSC_BULK_OUT:
+        {
+    #if USB_CFG_DTC == USB_CFG_ENABLE
+            pipe_buf = (USB_BUF_SIZE(1024U) | USB_BUF_NUMB(40U));
+    #else                              /* USB_CFG_DTC == USB_CFG_ENABLE */
+            pipe_buf = (USB_BUF_SIZE(2048U) | USB_BUF_NUMB(72U));
+    #endif                             /* USB_CFG_DTC == USB_CFG_ENABLE */
+            break;
+        }
+   #endif /* defined(USB_CFG_PMSC_USE) */
+
+   #if defined(USB_CFG_PVND_USE)
+        case USB_PIPE1:
+        {
+            pipe_buf = (USB_BUF_SIZE(512U) | USB_BUF_NUMB(8U));
+            break;
+        }
+
+        case USB_PIPE2:
+        {
+            pipe_buf = (USB_BUF_SIZE(512U) | USB_BUF_NUMB(24U));
+            break;
+        }
+
+        case USB_PIPE3:
+        {
+            pipe_buf = (USB_BUF_SIZE(512U) | USB_BUF_NUMB(40U));
+            break;
+        }
+
+        case USB_PIPE4:
+        {
+            pipe_buf = (USB_BUF_SIZE(512U) | USB_BUF_NUMB(56U));
+            break;
+        }
+
+        case USB_PIPE5:
+        {
+            pipe_buf = (USB_BUF_SIZE(512U) | USB_BUF_NUMB(72U));
+            break;
+        }
+   #endif                              /* defined(USB_CFG_PVND_USE) */
+
+  #else /* defined(USB_NO_COMPOSITE_DEVICE) */
+        case USB_PIPE1:
+        {
+            pipe_buf = (USB_BUF_SIZE(512U) | USB_BUF_NUMB(8U));
+            break;
+        }
+
+        case USB_PIPE2:
+        {
+            pipe_buf = (USB_BUF_SIZE(512U) | USB_BUF_NUMB(24U));
+            break;
+        }
+
+        case USB_PIPE3:
+        {
+            pipe_buf = (USB_BUF_SIZE(512U) | USB_BUF_NUMB(40U));
+            break;
+        }
+
+        case USB_PIPE4:
+        {
+            pipe_buf = (USB_BUF_SIZE(512U) | USB_BUF_NUMB(56U));
+            break;
+        }
+
+        case USB_PIPE5:
+        {
+            pipe_buf = (USB_BUF_SIZE(512U) | USB_BUF_NUMB(72U));
+            break;
+        }
+  #endif                               /* defined(USB_NO_COMPOSITE_DEVICE) */
+        default:
+        {
+            /* Error */
+            break;
+        }
+    }
+
+    return pipe_buf;
+}                                      /* End of function usb_pstd_get_pipe_buf_value() */
+#endif /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
 
 #endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI */
 

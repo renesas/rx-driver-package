@@ -29,6 +29,8 @@
 *                               Fixed to comply GSCE coding standard revision 6.5.0.
 *         : 30.06.2023 1.40     Added RX26T-256K support.
 *                               Fixed to comply GSCE coding standard revision 6.5.0.
+*         : 13.11.2023 1.41     Added WAIT_LOOP comments.
+*         : 15.12.2023 1.50     Added support RSPIA with DMAC/DTC.
 ***********************************************************************************************************************/
 
 #ifndef RSPIA_API_HEADER_FILE
@@ -56,7 +58,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define RSPIA_RX_VERSION_MAJOR           (1)
-#define RSPIA_RX_VERSION_MINOR           (40)
+#define RSPIA_RX_VERSION_MINOR           (50)
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -116,6 +118,14 @@ typedef enum
     RSPIA_MS_MODE_SLAVE  = ~RSPIA_SPCR_MSTR,    /* Channel operates as SPI slave */
 } rspia_master_slave_mode_t;
 
+/* Define for data transfer mode */
+typedef enum e_rspia_str_tranmode
+{
+    RSPIA_TRANS_MODE_SW         = 0,   /* Data transfer mode is software. */
+    RSPIA_TRANS_MODE_DMAC,             /* Data transfer mode is DMAC. */
+    RSPIA_TRANS_MODE_DTC               /* Data transfer mode is DTC. */
+} rspia_str_tranmode_t;
+
 /* Abstraction of channel handle data structure.
  * User application will use this as a reference to an opened channel. */
 typedef struct rspia_cfg_block_s * rspia_hdl_t;
@@ -133,6 +143,7 @@ typedef struct rspia_chnl_settings_s
     rspia_master_slave_mode_t  master_slave_mode;/* RSPIA_MS_MODE_MASTER or RSPIA_MS_MODE_SLAVE. */
     rspia_frame_select_t       frame_mode;       /* RSPIA_IF_FRAME_TI_SSP or RSPIA_IF_FRAME_MOTOROLA_SPI. */
     uint32_t                   bps_target;       /* The target bits per second setting value for the channel. */
+    rspia_str_tranmode_t       tran_mode;        /* Data transfer mode. */
 } rspia_chan_settings_t;
 
 /************ Type defines used with the R_RSPIA_Control function. ***************/
@@ -144,6 +155,7 @@ typedef enum rspia_cmd_e
     RSPIA_CMD_SET_REGS,                 /* Set all supported RSPIA registers in one operation. Expert use only! */
     RSPIA_CMD_CHANGE_TX_FIFO_THRESH,    /* change TX FIFO threshold */
     RSPIA_CMD_CHANGE_RX_FIFO_THRESH,    /* change TX FIFO threshold */
+    RSPIA_CMD_SET_TRANS_MODE,           /* Set the data transfer mode */
     RSPIA_CMD_UNKNOWN                   /* Not a valid command. */
 } rspia_cmd_t;
 
@@ -167,6 +179,12 @@ typedef struct rspia_cmd_setregs_s
     uint8_t  sslnd_val;      /* RSPIA Slave Select Negation Delay Register (SSLND) */
     uint8_t  spnd_val;       /* RSPIA Next-Access Delay Register (SPND) */
 } rspia_cmd_setregs_t;
+
+/* Data structure for the Set Transfer mode command. */
+typedef struct rspia_cmd_trans_mode_s
+{
+    rspia_str_tranmode_t    transfer_mode;    /* The transfer mode setting value for the channel. */
+} rspia_cmd_trans_mode_t;
 
 /**********************************************************************************************************************
  * Type defines used with the R_RSPIA_Write, R_RSPIA_Read, and R_RSPIA_WriteRead functions.
@@ -392,5 +410,47 @@ rspia_err_t  R_RSPIA_Close (rspia_hdl_t hdl);
  * Return Value : uint32_t - Version number of current RSPIA driver.
  *********************************************************************************************************************/
 uint32_t  R_RSPIA_GetVersion (void);
+
+/**********************************************************************************************************************
+ * Function Name: R_RSPIA_IntSptiIerClear
+ * Description  : This function is used to clear the ICU.IERm.IENj bit of the transmit buffer-empty interrupt (SPTI).
+ * Argument     : hdl - RSPIA handle number
+ * Return Value : rspia_err_t - RSPIA enumerated error codes.
+ *********************************************************************************************************************/
+rspia_err_t  R_RSPIA_IntSptiIerClear (rspia_hdl_t hdl);
+
+/**********************************************************************************************************************
+ * Function Name: R_RSPIA_IntSpriIerClear
+ * Description  : This function is used to clear the ICU.IERm.IENj bit of the receive buffer-full interrupt (SPRI).
+ * Argument     : hdl - RSPIA handle number
+ * Return Value : rspia_err_t - RSPIA enumerated error codes.
+ *********************************************************************************************************************/
+rspia_err_t  R_RSPIA_IntSpriIerClear (rspia_hdl_t hdl);
+
+/**********************************************************************************************************************
+ * Function Name: R_RSPIA_DisableSpti
+ * Description  : This function disables the generation of transmit buffer empty interrupt request.
+ * Argument     : hdl - RSPIA handle number
+ * Return Value : rspia_err_t - RSPIA enumerated error codes.
+ *********************************************************************************************************************/
+rspia_err_t  R_RSPIA_DisableSpti (rspia_hdl_t hdl);
+
+/**********************************************************************************************************************
+ * Function Name: R_RSPIA_DisableRSPI
+ * Description  : This function is set to disable the RSPI function.
+ * Argument     : hdl - RSPIA handle number
+ * Return Value : rspia_err_t - RSPIA enumerated error codes.
+ *********************************************************************************************************************/
+rspia_err_t  R_RSPIA_DisableRSPI (rspia_hdl_t hdl);
+
+/**********************************************************************************************************************
+ * Function Name: R_RSPIA_GetBuffRegAddress
+ * Description  : This function is used to fetch the address of the RSPIA data register (SPDR).
+ * Argument     : hdl - RSPIA handle number
+ *                p_spdr_addr - The pointer for storing the address of SPDR. Set this to the address of the
+ *                storage destination.
+ * Return Value : rspia_err_t - RSPIA enumerated error codes.
+ *********************************************************************************************************************/
+rspia_err_t  R_RSPIA_GetBuffRegAddress (rspia_hdl_t hdl, uint32_t *p_spdr_addr);
 
 #endif /* RSPIA_API_HEADER_FILE */

@@ -21,20 +21,17 @@ r_tfat_rx
 |
 +---doc
 |   +---en
-|       r20an0038ej0402-rx-tfat.pdf
+|       r20an0038ej0410-rx-tfat.pdf
 |   +---ja
-|       r20an0038jj0402-rx-tfat.pdf
+|       r20an0038jj0410-rx-tfat.pdf
 |
 +---src
-|         diskio.h
-|         ff.c
-|         ff.h
-|         ffconf.h
-|         ffsystem.c
-|         ffunicode.c
-|
-+---ref
-          r_tfat_rx_config_reference.h
+        diskio.h
+        ff.c
+        ff.h
+        ffconf.h
+        ffsystem.c
+        ffunicode.c
 
 r_config
     r_tfat_rx_config.h

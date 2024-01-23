@@ -14,16 +14,17 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2022(2023) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
- * File Name    : r_usb_pstdrequest.c
+ * File Name    : r_usb_usbx_port.c
  * Description  : USB Peripheral standard request code
  ***********************************************************************************************************************/
 /**********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *         : 30.06.2022 1.40 USBX PCDC is supported.
  *         : 30.10.2022 1.41 USBX HMSC is supported.
+ *         : 30.09.2023 1.42 USBX HCDC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -56,6 +57,7 @@
 
  #if defined(USB_CFG_HCDC_USE)
   #include "ux_host_class_cdc_acm.h"
+  #define USB_MAX_CONNECT_DEVICE_NUM    2
  #endif                                /* defined(USB_CFG_HCDC_USE) */
 
  #if defined(USB_CFG_PHID_USE)
@@ -1352,11 +1354,11 @@ void usb_host_usbx_registration (usb_utr_t * p_utr)
 
   #if defined(USB_CFG_HHID_USE)
     driver.ifclass = (uint16_t) USB_IFCLS_HID; /* Interface class : HID */
-  #endif /* defined(USB_CFG_HCDC_USE) */
+  #endif /* defined(USB_CFG_HHID_USE) */
 
   #if defined(USB_CFG_HMSC_USE)
     driver.ifclass = (uint16_t) USB_IFCLS_MAS; /* Interface class : HID */
-  #endif /* defined(USB_CFG_HCDC_USE) */
+  #endif /* defined(USB_CFG_HMSC_USE) */
 
   #if defined(USB_CFG_HPRN_USE)
     driver.ifclass = (uint16_t) USB_IFCLS_PRN; /* Interface class : Printer */
@@ -1647,9 +1649,9 @@ static void usb_host_usbx_class_request_cb (usb_utr_t * p_utr, uint16_t data1, u
 
     pipe = (uint8_t) p_utr->keyword;
 
-  #if (defined(USB_CFG_HHID_USE) | defined(USB_CFG_OTG_USE)) | defined(USB_CFG_HPRN_USE)
+  #if (defined(USB_CFG_HHID_USE) | defined(USB_CFG_HPRN_USE) | defined(USB_CFG_HCDC_USE))
     *g_p_usb_host_actural_length[p_utr->ip][0] = p_utr->read_req_len - p_utr->tranlen;
-  #endif                               /* (defined(USB_CFG_HHID_USE) | defined(USB_CFG_OTG_USE)) | defined(USB_CFG_HPRN_USE) */
+  #endif                               /* (defined(USB_CFG_HHID_USE) | defined(USB_CFG_HPRN_USE) | defined(USB_CFG_HCDC_USE) */
 
     tx_semaphore_put(&g_usb_host_usbx_sem[p_utr->ip][pipe]);
 }                                      /* End of function usb_pstd_transfer_complete_cb() */
@@ -1668,7 +1670,8 @@ static void usb_host_usbx_transfer_complete_cb (usb_utr_t * p_utr, uint16_t data
     UX_TRANSFER * transfer_request;
     uint16_t      pipe_reg;
   #if defined(USB_CFG_HCDC_USE)
-    UX_HOST_CLASS_CDC_ACM * cdc_acm;
+    UX_HOST_CLASS_CDC_ACM * cdc_acm = NULL;
+    ULONG class;
   #endif                               /* defined(USB_CFG_HCDC_USE) */
 
   #if defined(USB_CFG_OTG_USE)
@@ -1692,9 +1695,14 @@ static void usb_host_usbx_transfer_complete_cb (usb_utr_t * p_utr, uint16_t data
     transfer_request = g_p_usb_host_usbx_transfer_request[p_utr->ip][pipe];
 
   #if defined(USB_CFG_HCDC_USE)
+    class =
+        transfer_request->ux_transfer_request_endpoint->ux_endpoint_interface->ux_interface_descriptor.bInterfaceClass;
 
-    /* Get the class instance for this transfer request.  */
-    cdc_acm = (UX_HOST_CLASS_CDC_ACM *) transfer_request->ux_transfer_request_class_instance;
+    if (USB_IFCLS_CDCD == class)
+    {
+        /* Get the class instance for this transfer request.  */
+        cdc_acm = (UX_HOST_CLASS_CDC_ACM *) transfer_request->ux_transfer_request_class_instance;
+    }
   #endif                               /* defined(USB_CFG_HCDC_USE) */
 
     if (USB_PIPE0 == pipe)
@@ -1784,6 +1792,14 @@ static void usb_host_usbx_transfer_complete_cb (usb_utr_t * p_utr, uint16_t data
 
         /* Invoke the transfer completion callback function */
         transfer_request->ux_transfer_request_completion_function(transfer_request);
+    }
+    else
+    {
+        transfer_request->ux_transfer_request_completion_code = UX_SUCCESS;
+        if (UX_NULL != transfer_request->ux_transfer_request_completion_function)
+        {
+            transfer_request->ux_transfer_request_completion_function(transfer_request);
+        }
     }
   #endif                               /* defined(USB_CFG_HCDC_USE) */
 
@@ -2040,10 +2056,6 @@ static UINT usb_host_usbx_to_basic (UX_HCD * hcd, UINT function, VOID * paramete
                     g_usb_host_usbx_req_msg[module_number].segment = USB_TRAN_END;
                     g_usb_host_usbx_req_msg[module_number].ip      = module_number;
                     g_usb_host_usbx_req_msg[module_number].ipp     = usb_hstd_get_usb_ip_adr(module_number);
-  #if (USB_CFG_DMA == USB_CFG_ENABLE)
-                    g_usb_host_usbx_req_msg[module_number].p_transfer_tx = g_p_usbx_transfer_tx;
-                    g_usb_host_usbx_req_msg[module_number].p_transfer_rx = g_p_usbx_transfer_rx;
-  #endif                               /* #if (USB_CFG_DMA == USB_CFG_ENABLE) */
                     g_p_usb_host_actural_length[module_number][pipe_number] =
                         (uint32_t *) &(transfer_request->ux_transfer_request_actual_length);
 

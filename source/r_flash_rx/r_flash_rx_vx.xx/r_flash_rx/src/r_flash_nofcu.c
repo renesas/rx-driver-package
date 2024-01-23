@@ -26,6 +26,7 @@
  *           12.12.2021 4.81    Modified some global variables problems.
  *           10.12.2021 4.81    Added support for Tool News R20TS0772, and removed unnecessary code in flash_write().
  *           24.01.2023 5.00    Modified the condition of PFRAM section definition.
+ *           01.10.2023 5.11    Added support for Tool News R20TS0963.
 *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -336,13 +337,36 @@ void flash_reset()
 FLASH_PE_MODE_SECTION
 void flash_stop(void)
 {
-    FLASH.FCR.BIT.STOP = 1;
-    while (FLASH.FSTATR1.BIT.FRDY == 0)     // wait for FRDY
-        ;
+    if ((g_current_parameters.bgo_enabled_cf == true)
+     || (g_current_parameters.bgo_enabled_df == true))
+    {
+        /* Disable FRDYI interrupt request */
+        flash_InterruptRequestDisable(VECT(FCU,FRDYI));
+    }
 
-    FLASH.FCR.BYTE = 0;
-    while (FLASH.FSTATR1.BIT.FRDY == 1)     // wait for FRDY
-        ;
+    if ((FLASH.FENTRYR.WORD == 0x0080) || (FLASH.FENTRYR.WORD == 0x0001))
+    {
+        FLASH.FCR.BIT.STOP = 1;
+        while (FLASH.FSTATR1.BIT.FRDY == 0)     // wait for FRDY
+            ;
+
+        FLASH.FCR.BYTE = 0;
+        while (FLASH.FSTATR1.BIT.FRDY == 1)     // wait for FRDY
+            ;
+    }
+
+    if ((g_current_parameters.bgo_enabled_cf == true)
+     || (g_current_parameters.bgo_enabled_df == true))
+    {
+        /* Clear FRDYI interrupt request */
+        IR(FCU,FRDYI) = 0;
+
+        /* Exit program/erase mode */
+        flash_pe_mode_exit();
+
+        /* Release lock and Set current state to Idle */
+        flash_release_state();
+    }
 }
 
 /**********************************************************************************************************************

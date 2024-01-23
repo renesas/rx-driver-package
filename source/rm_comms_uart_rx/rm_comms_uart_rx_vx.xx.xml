@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refinfo>
+  <toolchain>
+    <brand>Renesas</brand>
+    <product>RXC</product>
+    <version>3.00.00</version>
+    <version>3.01.00</version>
+    <version>3.02.00</version>
+    <version>3.03.00</version>
+    <version>3.04.00</version>
+    <version>3.05.00</version>
+  </toolchain>
+  <target>
+    <family omit_series="true">RX</family>
+  </target>
+  <package>
+    <type>fitmodule</type>
+    <name>rm_comms_uart_rx</name>
+    <version>x.xx</version>
+    <zipsource>rm_comms_uart_rx_vx.xx.zip</zipsource>
+    <dependency>
+      <module>r_bsp</module>
+      <version>7.41</version>
+    </dependency>
+    <application>Middleware</application>
+    <application>UART communication driver interface middleware</application>
+    <desc>UART Communication Driver Interface Middleware</desc>
+    <details>The UART communication module controls the Renesas Electronics Multi-device MCU (RX, RL78).</details>
+    <function>UART</function>
+    <incdir>r_config</incdir>
+    <incdir>rm_comms_uart_rx</incdir>
+    <incdir>rm_comms_uart_rx/inc/api</incdir>
+    <incdir>rm_comms_uart_rx/inc/instances</incdir>
+  </package>
+</refinfo>

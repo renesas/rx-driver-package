@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_rspia_rx
-VERSION = 		1.40
+VERSION = 		1.50
 MDF = V2
 
 CONFIG_FOLDER = r_config

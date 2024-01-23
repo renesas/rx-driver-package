@@ -49,6 +49,10 @@
 *                                Added support Group BE0 interrupts.
 *                                Modified the bsp_interrupt_group_enable_disable function.
 *                                Added the group_be0_handler_isr function.
+*         : 21.11.2023 3.01      Added timeout detection processing to bus error processing.
+*                                Added processing to control only illegal address access detection to bus error 
+*                                processing.
+*                                Added processing to control only timeout detection to bus error processing.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -132,6 +136,74 @@ bsp_int_err_t bsp_interrupt_enable_disable (bsp_int_src_t vector, bool enable)
 
                 /* Disable timeout detection enable. */
                 BSC.BEREN.BIT.TOEN = 0;
+            }
+            break;
+
+        case (BSP_INT_SRC_BUS_ERROR_ILLEGAL_ACCESS):
+            if (true == enable)
+            {
+                /* Check the bus error monitoring status. */
+                if (0 == BSC.BEREN.BYTE)
+                {
+                    /* Enable the bus error interrupt to catch accesses to illegal/reserved areas of memory */
+                    /* Clear any pending interrupts */
+                    IR(BSC,BUSERR) = 0;
+
+                    /* Make this the highest priority interrupt (adjust as necessary for your application */
+                    IPR(BSC,BUSERR) = 0x0F;
+
+                    /* Enable the interrupt in the ICU. */
+                    R_BSP_InterruptRequestEnable(VECT(BSC,BUSERR));
+                }
+
+                /* Enable illegal address interrupt in the BSC */
+                BSC.BEREN.BIT.IGAEN = 1;
+            }
+            else
+            {
+                /* Disable illegal address interrupt in the BSC */
+                BSC.BEREN.BIT.IGAEN = 0;
+
+                /* Check the bus error monitoring status. */
+                if (0 == BSC.BEREN.BYTE)
+                {
+                    /* Disable the bus error interrupt in the ICU. */
+                    R_BSP_InterruptRequestDisable(VECT(BSC,BUSERR));
+                }
+            }
+            break;
+
+        case (BSP_INT_SRC_BUS_ERROR_TIMEOUT):
+            if (true == enable)
+            {
+                /* Check the bus error monitoring status. */
+                if (0 == BSC.BEREN.BYTE)
+                {
+                    /* Enable the bus error interrupt to catch accesses to illegal/reserved areas of memory */
+                    /* Clear any pending interrupts */
+                    IR(BSC,BUSERR) = 0;
+
+                    /* Make this the highest priority interrupt (adjust as necessary for your application */
+                    IPR(BSC,BUSERR) = 0x0F;
+
+                    /* Enable the interrupt in the ICU. */
+                    R_BSP_InterruptRequestEnable(VECT(BSC,BUSERR));
+                }
+
+                /* Enable timeout detection enable. */
+                BSC.BEREN.BIT.TOEN = 1;
+            }
+            else
+            {
+                /* Disable timeout detection enable. */
+                BSC.BEREN.BIT.TOEN = 0;
+
+                /* Check the bus error monitoring status. */
+                if (0 == BSC.BEREN.BYTE)
+                {
+                    /* Disable the bus error interrupt in the ICU. */
+                    R_BSP_InterruptRequestDisable(VECT(BSC,BUSERR));
+                }
             }
             break;
 

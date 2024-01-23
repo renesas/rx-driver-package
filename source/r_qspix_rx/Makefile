@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_qspix_rx
-VERSION = 		1.40
+VERSION = 		1.41
 MDF = V2
 
 CONFIG_FOLDER = r_config

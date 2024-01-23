@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2023) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_hhid_driver.c
@@ -39,6 +39,7 @@
  *         : 16.11.2018 1.24 Supporting BSP_CFG_RTOS_USED
  *         : 31.05.2019 1.26 Added support for GNUC and ICCRX.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.09.2023 1.42 USBX HCDC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -59,6 +60,9 @@
  Exported global variables
  ******************************************************************************/
 
+
+#if defined(USB_CFG_HHID_USE)
+  #if (BSP_CFG_RTOS_USED != 5)    /* !Azure RTOS */
 
 /******************************************************************************
  Private global variables and functions
@@ -302,10 +306,10 @@ static void usb_hhid_enumeration (usb_utr_t *mess)
 /******************************************************************************
  Function Name   : usb_hhid_task
  Description     : Host HIT Task
- Argument        : usb_vp_int_t stacd   : Start code
+ Argument        : rtos_task_arg_t stacd   : Start code
  Return value    : none
  ******************************************************************************/
-void usb_hhid_task (usb_vp_int_t stacd)
+void usb_hhid_task (rtos_task_arg_t stacd)
 {
     usb_utr_t *p_mess;
     usb_er_t err = 0l;
@@ -1124,6 +1128,8 @@ uint16_t usb_hhid_req_trans_wait_tmo(uint16_t tmo)
 #endif /* (BSP_CFG_RTOS_USED) */
 
 
+  #endif /* BSP_CFG_RTOS_USED != 5 !Azure RTOS */
+#endif /* defined(USB_CFG_HHID_USE) */
 /******************************************************************************
  End  Of File
  ******************************************************************************/

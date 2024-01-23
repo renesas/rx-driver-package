@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014(2015-2020) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_tfat_drv_if.c
@@ -38,6 +38,7 @@
 *                                    Added support for GNUC and ICCRX.
 *              : 10.06.2020 2.10     Added Support MMC Firmware and 
 *                                    FLASH Firmware.
+*              : 31.08.2023 2.30     Updated FatFs ff15.
 *******************************************************************************/
 
 /******************************************************************************
@@ -570,7 +571,9 @@ static uint8_t chk_use_flash(uint8_t drive)
 * Arguments     : BYTE pdrv        : Physical drive number for FIT module
 * Return value  : Status of the memory medium
 ******************************************************************************/
-DSTATUS disk_initialize(BYTE pdrv)
+DSTATUS disk_initialize (
+    BYTE pdrv    /* Physical drive nmuber to identify the drive */
+)
 {
     DSTATUS ret = RES_PARERR;
 
@@ -618,15 +621,15 @@ DSTATUS disk_initialize(BYTE pdrv)
 *               :    of the memory medium
 * Arguments     : BYTE pdrv    : Physical drive number
 *               : BYTE* buff   : Pointer to the read data buffer
-*               : DWORD sector : uint32_t SectorNumber
+*               : LBA_t sector : uint32_t SectorNumber
 *               : UINT count   : Number of sectors to read
 * Return value  : Result of function execution
 ******************************************************************************/
 DRESULT disk_read (
-    BYTE pdrv,          /* Physical drive number             */
-    BYTE* buff,         /* Pointer to the read data buffer   */
-    DWORD sector,       /* Start sector number               */
-    UINT count          /* Number of sectors to read         */
+    BYTE pdrv,        /* Physical drive nmuber to identify the drive */
+    BYTE *buff,       /* Data buffer to store read data */
+    LBA_t sector,     /* Start sector in LBA */
+    UINT count        /* Number of sectors to read */
 )
 {
     DRESULT ret = RES_PARERR;
@@ -675,15 +678,15 @@ DRESULT disk_read (
 *               :    of the memory medium
 * Arguments     : BYTE pdrv        : Physical drive number
 *               : const BYTE* buff : Pointer to the write data
-*               : DWORD sector     : Sector number to write
+*               : LBA_t sector     : Sector number to write
 *               : UINT count       : Number of sectors to write
 * Return value  : Result of function execution
 ******************************************************************************/
 DRESULT disk_write (
-    BYTE pdrv,              /* Physical drive number           */
-    const BYTE* buff,       /* Pointer to the write data       */
-    DWORD sector,           /* Sector number to write          */
-    UINT count              /* Number of sectors to write      */
+    BYTE pdrv,            /* Physical drive nmuber to identify the drive */
+    const BYTE *buff,     /* Data to be written */
+    LBA_t sector,         /* Start sector in LBA */
+    UINT count            /* Number of sectors to write */
 )
 {
     DRESULT ret = RES_PARERR;
@@ -736,9 +739,9 @@ DRESULT disk_write (
 * Return value  : Result of function execution
 ******************************************************************************/
 DRESULT disk_ioctl (
-    BYTE pdrv,          /* Drive number             */
-    BYTE cmd,           /* Control command code     */
-    void* buff          /* Data transfer buffer     */
+    BYTE pdrv,        /* Physical drive nmuber (0..) */
+    BYTE cmd,         /* Control code */
+    void *buff        /* Buffer to send/receive control data */
 )
 {
     DRESULT ret = RES_PARERR;
@@ -789,7 +792,7 @@ DRESULT disk_ioctl (
 * Return value  : Status of the disk
 ******************************************************************************/
 DSTATUS disk_status (
-    BYTE pdrv             /* Physical drive number    */
+    BYTE pdrv        /* Physical drive nmuber to identify the drive */
 )
 {
     DSTATUS ret = RES_PARERR;

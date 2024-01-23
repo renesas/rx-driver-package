@@ -29,6 +29,7 @@
 *         : 27.07.2018 2.02     Added the comment to while statement.
 *         : 28.02.2019 3.00     Added support for GNUC and ICCRX.
 *                               Fixed coding style.
+*         : 21.11.2023 3.01     Added compile switch of BSP_CFG_BOOTLOADER_PROJECT.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -43,11 +44,14 @@ Includes   <System Includes> , "Project Includes"
 /***********************************************************************************************************************
 Private global variables and functions
 ***********************************************************************************************************************/
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+/* Disable the following functions in the bootloader project. */
 /* MCU I/O port configuration function declaration */
 static void output_ports_configure(void);
 
 /* Interrupt configuration function declaration */
 static void interrupts_configure(void);
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
 
 /* MCU peripheral module configuration function declaration */
 static void peripheral_modules_enable(void);
@@ -64,12 +68,17 @@ static void bsp_security_initial_configure(void);
 void hardware_setup(void)
 {
     bsp_security_initial_configure();
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+    /* Disable the following functions in the bootloader project. */
     output_ports_configure();
     interrupts_configure();
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
     peripheral_modules_enable();
     bsp_non_existent_port_init();
 } /* End of function hardware_setup() */
 
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+/* Disable the following functions in the bootloader project. */
 /***********************************************************************************************************************
 * Function name: output_ports_configure
 * Description  : Configures the port and pin direction settings, and sets the pin outputs to a safe level.
@@ -93,6 +102,7 @@ static void interrupts_configure(void)
     /* Add code here to setup additional interrupts */
     R_BSP_NOP();
 } /* End of function interrupts_configure() */
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
 
 /***********************************************************************************************************************
 * Function name: peripheral_modules_enable

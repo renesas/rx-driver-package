@@ -37,6 +37,7 @@
 *              : 26.06.2020 4.60    Changed R_FlashCodeCopy() to static function.
 *                                   Modified to not use BSP API functions to enable/disable interrupt requests.
 *              : 24.01.2023 5.00    Modified the condition of PFRAM section definition.
+*              : 01.10.2023 5.11    Added support for Tool News R20TS0963.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -62,9 +63,9 @@ External functions
 /***********************************************************************************************************************
 Private global variables and functions
 ***********************************************************************************************************************/
-int32_t g_flash_lock;                                       // for locking the driver
-flash_states_t g_flash_state = FLASH_UNINITIALIZED;         // for state in when driver locked
-FCU_BYTE_PTR g_pfcu_cmd_area = (uint8_t*) FCU_COMMAND_AREA; // sequencer command pointer
+int32_t g_flash_lock;                                        // for locking the driver
+volatile flash_states_t g_flash_state = FLASH_UNINITIALIZED; // for state in when driver locked
+FCU_BYTE_PTR g_pfcu_cmd_area = (uint8_t*) FCU_COMMAND_AREA;  // sequencer command pointer
 
 #if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
 static void R_FlashCodeCopy(void);

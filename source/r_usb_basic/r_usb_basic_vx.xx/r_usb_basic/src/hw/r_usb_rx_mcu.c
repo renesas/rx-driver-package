@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2015(2022) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015(2023) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_rx_mcu.c
@@ -34,6 +34,7 @@
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.04.2021 1.31 RX671 is added.
  *         : 30.06.2022 1.40 USBX PCDC is supported.
+ *         : 30.09.2023 1.42 USBX HCDC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -418,13 +419,14 @@ bsp_int_ctrl_t int_ctrl;
         USBA.BEMPENB.WORD = 0;
         USBA.INTENB0.WORD = 0;
         USBA.INTENB1.WORD = 0;
-        USBA.SYSCFG.WORD &= (~USB_DPRPU);
-        USBA.SYSCFG.WORD &= (~USB_DRPD);
-        USBA.SYSCFG.WORD &= (~USB_USBE);
-        USBA.SYSCFG.WORD &= (~USB_DCFM);
         USBA.BRDYSTS.WORD = 0;
         USBA.NRDYSTS.WORD = 0;
         USBA.BEMPSTS.WORD = 0;
+        USBA.SYSCFG.WORD &= (~USB_DPRPU);
+        USBA.SYSCFG.WORD &= (~USB_DRPD);
+        USBA.SYSCFG.WORD &= (~USB_DCFM);
+        USBA.SYSCFG.WORD &= (~USB_USBE);
+        USBA.LPSTS.WORD   = 0;
 
         /* Enable writing to MSTP registers */
         R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);

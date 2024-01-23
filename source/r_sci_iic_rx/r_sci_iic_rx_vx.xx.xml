@@ -56,6 +56,7 @@
         <version>8.03.00.202104</version>
         <version>8.03.00.202202</version>
         <version>8.03.00.202204</version>
+        <version>8.03.00.202305</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -112,7 +113,7 @@
         <zipsource>r_sci_iic_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.40</version>
+            <version>7.41</version>
         </dependency>
         <application>Communications</application>
         <application>External Memory</application>

@@ -32,6 +32,9 @@
 *                               - BSP_INT_SRC_EMPTY
 *         : 30.06.2021 1.11     Added the following enumeration constant.
 *                               - BSP_INT_SRC_EXC_ADDRESS
+*         : 21.11.2023 1.12     Added the following enumeration constant.
+*                               - BSP_INT_SRC_BUS_ERROR_ILLEGAL_ACCESS
+*                               - BSP_INT_SRC_BUS_ERROR_TIMEOUT
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -72,6 +75,8 @@ typedef enum
     BSP_INT_SRC_EXC_ADDRESS,              /* Address exception */
     BSP_INT_SRC_UNDEFINED_INTERRUPT,      /* Interrupt has triggered for a vector that user did not write a handler. */
     BSP_INT_SRC_BUS_ERROR,                /* Bus error: illegal address access or timeout */
+    BSP_INT_SRC_BUS_ERROR_ILLEGAL_ACCESS, /* Bus error: illegal address access. Use this when you want to set only Illegal address access detection. */
+    BSP_INT_SRC_BUS_ERROR_TIMEOUT,        /* Bus error: timeout. Use this when you want to set only Bus timeout detection. */
     BSP_INT_SRC_RAM,                      /* RAM error interrupt */
     BSP_INT_SRC_EXRAM,                    /* EXRAM error interrupt */
     BSP_INT_SRC_ECCRAM_1BIT,              /* ECCRAM 1-bit error interrupt */

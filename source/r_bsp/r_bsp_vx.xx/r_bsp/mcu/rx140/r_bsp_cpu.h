@@ -24,6 +24,7 @@
 * History : DD.MM.YYYY Version  Description
 *         : 30.06.2021 1.00     First Release
 *         : 20.08.2021 1.01     Modified comment.
+*         : 21.11.2023 1.02     Added bsp_bus_priority_initialize function.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -85,6 +86,9 @@ void     R_BSP_SoftwareReset(void);
 
 void     bsp_register_protect_open(void); //r_bsp internal function. DO NOT CALL.
 void     bsp_ram_initialize(void);
+#if BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE == 1
+void     bsp_bus_priority_initialize(void);
+#endif
 
 #endif /* CPU_H */
 

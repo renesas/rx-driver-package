@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2015(2022) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015(2023) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_preg_abs.c
@@ -33,6 +33,7 @@
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 31.05.2021 1.31 RX671 USB1 is added.
  *         : 30.06.2022 1.40 USBX PCDC is supported.
+ *         : 30.09.2023 1.42 USBX HCDC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -741,7 +742,6 @@ void usb_pstd_interrupt_clock(void)
     if (g_usb_cstd_suspend_mode != USB_NORMAL_MODE)
     {
         hw_usb_set_suspendm(); /* UTMI Normal Mode (Not Suspend Mode) */
-        usb_cpu_delay_1us(100);
         g_usb_cstd_suspend_mode = USB_NORMAL_MODE;
     }
 }

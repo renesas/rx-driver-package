@@ -5,12 +5,12 @@ r_rspia_rx
 
 Document Number 
 ---------------
-R01AN5684ES0140
-R01AN5684JS0140
+R01AN5684ES0150
+R01AN5684JS0150
 
 Version
 -------
-v1.40
+v1.50
 
 Overview
 --------
@@ -83,7 +83,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp     v7.30
+* r_bsp     v7.41
 
 How to add to your project
 --------------------------
@@ -106,6 +106,11 @@ Refer to "Renesas e2 studio Smart Configurator User Guide (R20AN0451)" for detai
 In CS+, please manually add the FIT module to your project.
 Refer to "Adding Firmware Integration Technology Modules to CS+ Projects (R01AN1826)" for details.
 
+(4)Adding the FIT module to your project using the Smart Configurator in IAREW
+By using the Smart Configurator Standalone version,
+the FIT module is automatically added to your project.
+Refer to "RX Smart Configurator User's Guide: IAREW (R20AN0535)" for details.
+
 Toolchain(s) Used
 -----------------
 * Renesas RX
@@ -121,9 +126,9 @@ r_rspia_rx
 +---doc
 |   |
 |   +---en
-|   |       r01an5684es0140-rx-rspia.pdf
+|   |       r01an5684es{VERSION_NUMBER}-rx-rspia.pdf
 |   +---ja
-|           r01an5684js0140-rx-rspia.pdf
+|           r01an5684js{VERSION_NUMBER}-rx-rspia.pdf
 |
 +---src
         r_rspia_defaults.h

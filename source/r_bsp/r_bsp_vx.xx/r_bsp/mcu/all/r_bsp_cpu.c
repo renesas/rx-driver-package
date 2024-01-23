@@ -42,6 +42,16 @@
 *         : 22.04.2022 3.14     Modified the following functions.
 *                               - R_BSP_VoltageLevelSetting
 *         : 28.02.2023 3.15     Modified comment.
+*         : 21.11.2023 3.16     Added the following macro definitions.
+*                               - BSP_PRV_BUSPRI_BPRA_TOGGLE
+*                               - BSP_PRV_BUSPRI_BPRO_TOGGLE
+*                               - BSP_PRV_BUSPRI_BPIB_TOGGLE
+*                               - BSP_PRV_BUSPRI_BPGB_TOGGLE
+*                               - BSP_PRV_BUSPRI_BPHB_TOGGLE
+*                               - BSP_PRV_BUSPRI_BPFB_TOGGLE
+*                               - BSP_PRV_BUSPRI_BPEB_TOGGLE
+*                               - BSP_PRV_BUSPRI_BPXB_TOGGLE
+*                               Added bsp_bus_priority_initialize function.
 **********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -82,6 +92,17 @@ Macro definitions
 #define BSP_PRV_VOLSR_RICVLS_BIT_NUM  (7)
 #endif /* BSP_MCU_VOLTAGE_LEVEL_SETTING_RIIC */
 #endif /* BSP_MCU_VOLTAGE_LEVEL_SETTING */
+
+#if BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE == 1
+#define BSP_PRV_BUSPRI_BPRA_TOGGLE    (0x0001)
+#define BSP_PRV_BUSPRI_BPRO_TOGGLE    (0x0004)
+#define BSP_PRV_BUSPRI_BPIB_TOGGLE    (0x0010)
+#define BSP_PRV_BUSPRI_BPGB_TOGGLE    (0x0040)
+#define BSP_PRV_BUSPRI_BPHB_TOGGLE    (0x0100)
+#define BSP_PRV_BUSPRI_BPFB_TOGGLE    (0x0400)
+#define BSP_PRV_BUSPRI_BPEB_TOGGLE    (0x1000)
+#define BSP_PRV_BUSPRI_BPXB_TOGGLE    (0x4000)
+#endif /* BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE == 1 */
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -711,4 +732,63 @@ void bsp_ram_initialize (void)
         g_bsp_Locks[i].lock = 0;
     }
 } /* End of function bsp_ram_initialize() */
+
+#if BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE == 1
+/***********************************************************************************************************************
+* Function Name: bsp_bus_priority_initialize
+* Description  : Initialize bus priority.
+* Arguments    : none
+* Return Value : none
+***********************************************************************************************************************/
+void bsp_bus_priority_initialize (void)
+{
+    uint16_t tmp_priority = 0;
+
+#if (defined(BSP_CFG_MEMORY_BUS1_PRIORITY) && (BSP_CFG_MEMORY_BUS1_PRIORITY == 1)) || \
+    (defined(BSP_CFG_MEMORY_BUS1_3_PRIORITY) && (BSP_CFG_MEMORY_BUS1_3_PRIORITY == 1))
+    /* Specify the value to be set to the BPRA bit. */
+    tmp_priority |= BSP_PRV_BUSPRI_BPRA_TOGGLE;
+#endif
+
+#if (defined(BSP_CFG_MEMORY_BUS2_PRIORITY) && (BSP_CFG_MEMORY_BUS2_PRIORITY == 1))
+    /* Specify the value to be set to the BPRO bit. */
+    tmp_priority |= BSP_PRV_BUSPRI_BPRO_TOGGLE;
+#endif
+
+#if (defined(BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY) && (BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY == 1))
+    /* Specify the value to be set to the BPIB bit. */
+    tmp_priority |= BSP_PRV_BUSPRI_BPIB_TOGGLE;
+#endif
+
+#if (defined(BSP_CFG_INTERNAL_PERIPHERAL_BUS2_PRIORITY) && (BSP_CFG_INTERNAL_PERIPHERAL_BUS2_PRIORITY == 1)) || \
+    (defined(BSP_CFG_INTERNAL_PERIPHERAL_BUS2_3_PRIORITY) && (BSP_CFG_INTERNAL_PERIPHERAL_BUS2_3_PRIORITY == 1))
+    /* Specify the value to be set to the BPGB bit. */
+    tmp_priority |= BSP_PRV_BUSPRI_BPGB_TOGGLE;
+#endif
+
+#if (defined(BSP_CFG_INTERNAL_PERIPHERAL_BUS4_PRIORITY) && (BSP_CFG_INTERNAL_PERIPHERAL_BUS4_PRIORITY == 1)) || \
+    (defined(BSP_CFG_INTERNAL_PERIPHERAL_BUS4_5_PRIORITY) && (BSP_CFG_INTERNAL_PERIPHERAL_BUS4_5_PRIORITY == 1))
+    /* Specify the value to be set to the BPHB bit. */
+    tmp_priority |= BSP_PRV_BUSPRI_BPHB_TOGGLE;
+#endif
+
+#if (defined(BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY) && (BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY == 1))
+    /* Specify the value to be set to the BPFB bit. */
+    tmp_priority |= BSP_PRV_BUSPRI_BPFB_TOGGLE;
+#endif
+
+#if (defined(BSP_CFG_EXTERNAL_BUS_PRIORITY) && (BSP_CFG_EXTERNAL_BUS_PRIORITY == 1))
+    /* Specify the value to be set to the BPEB bit. */
+    tmp_priority |= BSP_PRV_BUSPRI_BPEB_TOGGLE;
+#endif
+
+#if (defined(BSP_CFG_INTERNAL_EXPANSION_BUS_PRIORITY) && (BSP_CFG_INTERNAL_EXPANSION_BUS_PRIORITY == 1))
+    /* Specify the value to be set to the BPEB bit. */
+    tmp_priority |= BSP_PRV_BUSPRI_BPXB_TOGGLE;
+#endif
+
+    /* Set the bus priority. */
+    BSC.BUSPRI.WORD = tmp_priority;
+} /* End of function bsp_bus_priority_initialize() */
+#endif /* BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE == 1 */
 

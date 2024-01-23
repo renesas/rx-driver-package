@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015(2023) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_reg_access.c
@@ -32,6 +32,7 @@
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 31.05.2021 1.31 RX671 USB1 is added.
+ *         : 30.09.2023 1.42 USBX HCDC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -3361,6 +3362,7 @@ void hw_usb_set_suspendm(void)
 #else
 #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M)
     USB_M1.LPSTS.WORD |= USB_SUSPENDM;
+    while (USB_PLLLOCK != (USB_M1.PLLSTA.WORD & USB_PLLLOCK ));
 #endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
 #endif
 }

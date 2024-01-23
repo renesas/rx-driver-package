@@ -22,7 +22,7 @@
 * Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
-* File Name    : r_memdrv_rx_config_reference.h
+* File Name    : r_memdrv_rx_config.h
 * Version      : 1.05
 * Description  : Memory driver configuration header file
 *************************************************************************************************/

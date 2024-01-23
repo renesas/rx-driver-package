@@ -31,6 +31,9 @@
 *           11.11.2021 2.40    Added support for RX140 (products with 128-Kbyte or larger ROM).
 *           30.06.2022 2.41    Updated Doxygen comment.
 *           29.05.2023 2.70    Updated according to GSCE Code Checker 6.50.
+*           17.11.2023 2.80    Added CAN_ERR_TIME_OUT return to while loop in R_CAN_Open, R_CAN_Control, and
+*                              R_CAN_SendMsg function.
+*                              Added WAIT_LOOP comments.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -56,6 +59,7 @@ Macro definitions
 #define CAN_NUM_RXFIFOS             (2)
 #define CAN_MAX_CH_RULES            (16)
 
+#define CAN_MAX_CHECK_COUNTER       (0x2000)
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -105,6 +109,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void can_ch0_tx_isr(void);
  * @retval CAN_ERR_INVALID_ARG: An element of the p_cfg structure contains an invalid value.
  * @retval CAN_ERR_MISSING_CALLBACK: A callback function was not provided and
  * a main callback interrupt is enabled in config.h
+ * @retval CAN_ERR_TIME_OUT: Time Out error
  * @details This function initializes the driver's internal structures, applies clock to the peripheral, and sets the Global
  * and Channel Modes to Reset. The timestamp is configured as per the p_cfg argument, and all receive mailboxes are initialized.\n
  * If interrupts are enabled in r_rscan_rx_config.h for receive FIFO thresholds, or DLC or FIFO overflow errors, a callback function
@@ -115,6 +120,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void can_ch0_tx_isr(void);
 can_err_t R_CAN_Open(can_cfg_t  *p_cfg, void(* const p_callback)(can_cb_evt_t   event,void *p_args))
 {
 can_err_t   err = CAN_SUCCESS;
+uint32_t    rscan_tmo_cnt;
 #if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
 bsp_int_ctrl_t int_ctrl;
 #endif
@@ -153,12 +159,21 @@ bsp_int_ctrl_t int_ctrl;
 #endif
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR);
 
-
-
     /* Wait for CAN RAM initialization to completed */
+    rscan_tmo_cnt = CAN_MAX_CHECK_COUNTER;
+
+    /* WAIT_LOOP */
     while (0 != RSCAN.GSTS.BIT.GRAMINIT)
     {
-        R_BSP_NOP();
+        if (0U < rscan_tmo_cnt)
+        {
+            rscan_tmo_cnt--;
+        }
+        else
+        {
+            err = CAN_ERR_TIME_OUT;
+            return err;
+        }
     }
 
     /* Apply clock to RSCAN */
@@ -695,6 +710,7 @@ can_rxrule_t    *p_rule_arr = (can_rxrule_t *)&RSCAN.GAFLIDL0.WORD;
  * @retval CAN_SUCCESS:             Successful
  * @retval CAN_ERR_INVALID_ARG:     An invalid argument was provided
  * @retval CAN_ERR_ILLEGAL_MODE:    Changing to requested mode is illegal from current mode.
+ * @retval CAN_ERR_TIME_OUT:        Time Out error
  * @details This function is used for resetting the timestamp counter, aborting transmission of mailbox messages,
  * and changing the CAN mode.\n
  * The following sequence of function calls is used to setup the CAN:\n
@@ -720,7 +736,7 @@ can_err_t R_CAN_Control(can_cmd_t   cmd,
 {
 can_err_t   err = CAN_SUCCESS;
 can_tmcp_t  *p_tmcp_regs = (can_tmcp_t *)&RSCAN0.TMC0;
-
+uint32_t    rscan_tmo_cnt;
 
 #if (CAN_CFG_PARAM_CHECKING_ENABLE == 1)
     if (FALSE == g_dcb.opened)
@@ -760,9 +776,22 @@ can_tmcp_t  *p_tmcp_regs = (can_tmcp_t *)&RSCAN0.TMC0;
         {
             /* set global operating mode */
             RSCAN.GCTRL.BIT.GMDC = CAN_GLOBAL_MODE_OPERATING;
+
+            /* Wait until into global operating mode */
+            rscan_tmo_cnt = CAN_MAX_CHECK_COUNTER;
+
+            /* WAIT_LOOP */
             while ((RSCAN.GSTS.WORD & 0x07) != 0)
             {
-                R_BSP_NOP();
+                if (0U < rscan_tmo_cnt)
+                {
+                    rscan_tmo_cnt--;
+                }
+                else
+                {
+                    err = CAN_ERR_TIME_OUT;
+                    return err;
+                }
             }
 
             /* enable configured RXFIFOs */
@@ -774,18 +803,44 @@ can_tmcp_t  *p_tmcp_regs = (can_tmcp_t *)&RSCAN0.TMC0;
             /* put initialized channels into communications mode */
             if (TRUE == g_ccb.initialized)
             {
+                /* go into channel communication mode */
                 RSCAN0.CTRL.BIT.CHMDC = CAN_CHMODE_COMM;
+
+                /* Wait until into channel communication mode */
+                rscan_tmo_cnt = CAN_MAX_CHECK_COUNTER;
+
+                /* WAIT_LOOP */
                 while ((RSCAN0.STSL.WORD & 0x07) != 0)
                 {
-                    R_BSP_NOP();
+                    if (0U < rscan_tmo_cnt)
+                    {
+                        rscan_tmo_cnt--;
+                    }
+                    else
+                    {
+                        err = CAN_ERR_TIME_OUT;
+                        return err;
+                    }
                 }
 
                 /* enable channel FIFOs */
                 can_enable_chan_fifos();
 
+                /* Wait until into channel communication mode */
+                rscan_tmo_cnt = CAN_MAX_CHECK_COUNTER;
+
+                /* WAIT_LOOP */
                 while (0 == RSCAN0.STSL.BIT.COMSTS)
                 {
-                    R_BSP_NOP();
+                    if (0U < rscan_tmo_cnt)
+                    {
+                        rscan_tmo_cnt--;
+                    }
+                    else
+                    {
+                        err = CAN_ERR_TIME_OUT;
+                        return err;
+                    }
                 }
             }
             break;
@@ -794,9 +849,22 @@ can_tmcp_t  *p_tmcp_regs = (can_tmcp_t *)&RSCAN0.TMC0;
         {
             /* set global test mode */
             RSCAN.GCTRL.BIT.GMDC = CAN_GLOBAL_MODE_TEST;
+
+            /* Wait until into global test mode */
+            rscan_tmo_cnt = CAN_MAX_CHECK_COUNTER;
+
+            /* WAIT_LOOP */
             while (1 != RSCAN.GSTS.BIT.GHLTSTS)
             {
-                R_BSP_NOP();
+                if (0U < rscan_tmo_cnt)
+                {
+                    rscan_tmo_cnt--;
+                }
+                else
+                {
+                    err = CAN_ERR_TIME_OUT;
+                    return err;
+                }
             }
 
             /* enable configured RXFIFOs */
@@ -809,8 +877,23 @@ can_tmcp_t  *p_tmcp_regs = (can_tmcp_t *)&RSCAN0.TMC0;
 
             /* set to channel halt mode */
             RSCAN0.CTRL.BIT.CHMDC = CAN_CHMODE_HALT;
-            while ( 1 != RSCAN0.STSL.BIT.CHLTSTS)
-                ;
+
+            /* Wait until into channel halt mode */
+            rscan_tmo_cnt = CAN_MAX_CHECK_COUNTER;
+
+            /* WAIT_LOOP */
+            while (1 != RSCAN0.STSL.BIT.CHLTSTS)
+            {
+                if (0U < rscan_tmo_cnt)
+                {
+                    rscan_tmo_cnt--;
+                }
+                else
+                {
+                    err = CAN_ERR_TIME_OUT;
+                    return err;
+                }
+            }
 
             /* enable channel FIFOs */
             can_enable_chan_fifos();
@@ -838,21 +921,59 @@ can_tmcp_t  *p_tmcp_regs = (can_tmcp_t *)&RSCAN0.TMC0;
 
             /* set global operating mode */
             RSCAN.GCTRL.BIT.GMDC = CAN_GLOBAL_MODE_OPERATING;
+
+            /* Wait until into global operating mode */
+            rscan_tmo_cnt = CAN_MAX_CHECK_COUNTER;
+
+            /* WAIT_LOOP */
             while (0 != RSCAN.GSTS.WORD)
             {
-                R_BSP_NOP();
+                if (0U < rscan_tmo_cnt)
+                {
+                    rscan_tmo_cnt--;
+                }
+                else
+                {
+                    err = CAN_ERR_TIME_OUT;
+                    return err;
+                }
             }
 
             /* go into channel communication mode */
             RSCAN0.CTRL.BIT.CHMDC = CAN_CHMODE_COMM;
+
+            /* Wait until into channel communication mode */
+            rscan_tmo_cnt = CAN_MAX_CHECK_COUNTER;
+
+            /* WAIT_LOOP */
             while ((RSCAN0.STSL.WORD & 0x07) != 0)
             {
-                R_BSP_NOP();
+                if (0U < rscan_tmo_cnt)
+                {
+                    rscan_tmo_cnt--;
+                }
+                else
+                {
+                    err = CAN_ERR_TIME_OUT;
+                    return err;
+                }
             }
 
+            /* Wait until into channel communication mode */
+            rscan_tmo_cnt = CAN_MAX_CHECK_COUNTER;
+
+            /* WAIT_LOOP */
             while (0 == RSCAN0.STSL.BIT.COMSTS)
             {
-                R_BSP_NOP();
+                if (0U < rscan_tmo_cnt)
+                {
+                    rscan_tmo_cnt--;
+                }
+                else
+                {
+                    err = CAN_ERR_TIME_OUT;
+                    return err;
+                }
             }
 
             break;
@@ -929,6 +1050,7 @@ static void can_enable_chan_fifos()
  * @retval CAN_ERR_INVALID_ARG:     An invalid argument was provided
  * @retval CAN_ERR_BOX_FULL:        Transmit mailbox or FIFO is full
  * @retval CAN_ERR_ILLEGAL_MODE:    Cannot send message in current mode.
+ * @retval CAN_ERR_TIME_OUT:        Time Out error
  * @details This function places a message into a 1-message deep transmit mailbox or 4-message deep transmit FIFO.
  * If there is already a message waiting to send in the mailbox, or 4 messages already exist in the FIFO,
  * CAN_ERR_BOX_FULL is returned immediately. If the box_id is for a transmit mailbox and interrupts are not
@@ -946,7 +1068,7 @@ can_err_t       err = CAN_SUCCESS;
 can_tmstsp_t    *p_tmstsp_regs = (can_tmstsp_t *)&RSCAN0.TMSTS0;
 can_tmcp_t      *p_tmcp_regs = (can_tmcp_t *)&RSCAN0.TMC0;
 can_msg_t       *p_msg_regs;
-
+uint32_t        rscan_tmo_cnt;
 
     if (box_id & CAN_FLG_TXMBX)
     {
@@ -1036,9 +1158,21 @@ can_msg_t       *p_msg_regs;
         /* wait for transmit complete if not using interrupts */
         if (CAN_CFG_INT_MBX_TX_COMPLETE == 0)
         {
+            /* Wait for transmit complete */
+            rscan_tmo_cnt = CAN_MAX_CHECK_COUNTER;
+
+            /* WAIT_LOOP */
             while (0 == p_tmstsp_regs[i].BIT.TMTRF)
             {
-                R_BSP_NOP();
+                if (0U < rscan_tmo_cnt)
+                {
+                    rscan_tmo_cnt--;
+                }
+                else
+                {
+                    err = CAN_ERR_TIME_OUT;
+                    return err;
+                }
             }
         }
     }
@@ -1483,8 +1617,12 @@ bsp_int_ctrl_t int_ctrl;
 
         /* global stop mode */
         RSCAN.GCTRL.BIT.GSLPR = 1;
+
+        /* WAIT_LOOP */
         while (1 != RSCAN.GCTRL.BIT.GSLPR)
-            ;
+        {
+            R_BSP_NOP();
+        }
 
         /* clear internal structures*/
         memset((void*)&g_dcb, 0, sizeof(g_dcb));

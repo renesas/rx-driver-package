@@ -81,6 +81,8 @@
 *                              Moved the source code which checks for IRDA mode support to MDF file.
 *           29.05.2023 4.90    Added support for RX23E-B.
                                Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           12.06.2023 5.00    Fixed bugs in sci_send_sync_data(), sci_receive_sync_data() and 
+*                              sci_receive_async_data() function in using DTC/DMAC.
 ***********************************************************************************************************************/
 
 #ifndef SCI_IF_H
@@ -109,8 +111,8 @@ Macro definitions
 #endif
 
 /* Version Number of API. */
-#define SCI_VERSION_MAJOR  (4)
-#define SCI_VERSION_MINOR  (90)
+#define SCI_VERSION_MAJOR  (5)
+#define SCI_VERSION_MINOR  (00)
 
 #define SCI_DTC_DMACA_DISABLE  (0x0)
 #define SCI_DTC_ENABLE         (0x1)

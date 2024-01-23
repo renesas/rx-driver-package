@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2015(2022) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015(2023) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_pdriver.c
@@ -32,6 +32,7 @@
  *         : 30.04.2020 1.31 RX671 is added.
  *         : 30.06.2022 1.40 USBX PCDC is supported.
  *         : 30.10.2022 1.41 USBX HMSC is supported.
+ *         : 30.09.2023 1.42 USBX HCDC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -1181,7 +1182,7 @@ usb_er_t usb_pstd_transfer_start(usb_utr_t * ptr)
 
     rtos_get_fixed_memory(&g_rtos_usb_mpf_id, (void **)&p_tran_data, RTOS_ZERO);
 
-    if (NULL == ptr)
+    if (NULL == ptr || NULL == p_tran_data)
     {
         return USB_ERROR;
     }

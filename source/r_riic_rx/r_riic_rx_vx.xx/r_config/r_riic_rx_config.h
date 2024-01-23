@@ -17,7 +17,7 @@
  * Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
- * File Name    : r_riic_rx_config_reference.h
+ * File Name    : r_riic_rx_config.h
  * Description  : Configures the RIIC drivers
  **********************************************************************************************************************/
 /***********************************************************************************************************************
@@ -68,6 +68,9 @@
  *         : 31.03.2023 2.70     Added RX26T support.
  *                               Added new macros for SCL rise time and SCL fall time.
  *         : 29.05.2023 2.80     Added RX23E-B support.
+ *         : 10.10.2023 2.90     Modified source code comments of RIIC_CFG_CHi_RXI_INT_PRIORITY,
+ *                                RIIC_CFG_CHi_TXI_INT_PRIORITY, RIIC_CFG_CHi_EEI_INT_PRIORITY,
+ *                                RIIC_CFG_CHi_TEI_INT_PRIORITY (i = 0 to 2).
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIIC_CONFIG_H
@@ -176,26 +179,33 @@
 /* This #define sets the priority level for the riic interrupt */
 /* 1 lowest, 15 highest */
 /* The following devices can not individually specify the interrupt priority level for EEI0, TEI0, EEI2, TEI2. */
-/* EEI and TEI interrupts are grouped as the BL1 interrupt in the RX64M and RX71M group. */
+/* EEI and TEI interrupts are grouped as the BL1 interrupt in the RX26T, RX64M, RX65N, RX660, RX66N, RX66T, RX671,
+   RX71M, RX72M, RX72N, and RX72T group. */
     #define RIIC_CFG_CH0_RXI_INT_PRIORITY   (1)
     #define RIIC_CFG_CH0_TXI_INT_PRIORITY   (1)
-/* The priority level of the EEI, please do not lower than the priority level of TXI and RXI */
+/* The priority level of the EEI, please do not lower than the priority level of TXI and RXI.
+   For devices with EEI assigned to group interrupts, set the priority level of the EEI higher than the priority level of TXI and RXI. */
     #define RIIC_CFG_CH0_EEI_INT_PRIORITY   (1)
-/* The priority level of the TEI, please do not lower than the priority level of TXI and RXI */
+/* The priority level of the TEI, please do not lower than the priority level of TXI and RXI.
+   For devices with TEI assigned to group interrupts, set the priority level of the TEI higher than the priority level of TXI and RXI. */
     #define RIIC_CFG_CH0_TEI_INT_PRIORITY   (1)
 
     #define RIIC_CFG_CH1_RXI_INT_PRIORITY   (1)
     #define RIIC_CFG_CH1_TXI_INT_PRIORITY   (1)
-/* The priority level of the EEI, please do not lower than the priority level of TXI and RXI */
+/* The priority level of the EEI, please do not lower than the priority level of TXI and RXI.
+   For devices with EEI assigned to group interrupts, set the priority level of the EEI higher than the priority level of TXI and RXI. */
     #define RIIC_CFG_CH1_EEI_INT_PRIORITY   (1)
-/* The priority level of the TEI, please do not lower than the priority level of TXI and RXI */
+/* The priority level of the TEI, please do not lower than the priority level of TXI and RXI.
+   For devices with TEI assigned to group interrupts, set the priority level of the TEI higher than the priority level of TXI and RXI. */
     #define RIIC_CFG_CH1_TEI_INT_PRIORITY   (1)
 
     #define RIIC_CFG_CH2_RXI_INT_PRIORITY   (1)
     #define RIIC_CFG_CH2_TXI_INT_PRIORITY   (1)
-/* The priority level of the EEI, please do not lower than the priority level of TXI and RXI */
+/* The priority level of the EEI, please do not lower than the priority level of TXI and RXI.
+   For devices with EEI assigned to group interrupts, set the priority level of the EEI higher than the priority level of TXI and RXI. */
     #define RIIC_CFG_CH2_EEI_INT_PRIORITY   (1)
-/* The priority level of the TEI, please do not lower than the priority level of TXI and RXI */
+/* The priority level of the TEI, please do not lower than the priority level of TXI and RXI.
+   For devices with TEI assigned to group interrupts, set the priority level of the TEI higher than the priority level of TXI and RXI. */
     #define RIIC_CFG_CH2_TEI_INT_PRIORITY   (1)
 
 /* Select Timeout function enable or disable */

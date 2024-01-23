@@ -27,6 +27,9 @@
 *                               Added the Waiting for the IWDT clock oscillation stabilization in 
 *                               operating_frequency_set function.
 *         : 30.11.2021 1.02     Added comments for when use simulator.
+*         : 21.11.2023 1.03     Added compile switch of BSP_CFG_BOOTLOADER_PROJECT.
+*                               Added the bsp_mcu_clock_reset_bootloader function.
+*                               Renamed local variable for subclock in the clock_source_select function.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -57,6 +60,20 @@ Macro definitions
     #define BSP_PRV_PLL_CLK_OPERATING    (0)    /* PLL circuit is stopped. */
 #endif
 
+#if BSP_CFG_BOOTLOADER_PROJECT == 1
+/* Enable the following macro definitions in the bootloader project. */
+#define BSP_PRV_SCKCR_RESET_VALUE        (0x33000303)
+#define BSP_PRV_SCKCR3_RESET_VALUE       (0x0000)
+#define BSP_PRV_MEMWAITR_RESET_VALUE     (0x0000)
+#define BSP_PRV_MEMWAITR_RESETTING_VALUE (0xAA00)
+#define BSP_PRV_PLLCR_RESET_VALUE        (0x0f00)
+#define BSP_PRV_PLLCR2_RESET_VALUE       (0x01)
+#define BSP_PRV_MOSCCR_RESET_VALUE       (0x01)
+#define BSP_PRV_MOSCWTCR_RESET_VALUE     (0x04)
+#define BSP_PRV_MOFCR_RESET_VALUE        (0x00)
+#define BSP_PRV_OPCCR_RESET_VALUE        (0x02)
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 1 */
+
 /***********************************************************************************************************************
 Typedef definitions
 ***********************************************************************************************************************/
@@ -72,11 +89,14 @@ Private global variables and functions
 #if BSP_CFG_STARTUP_DISABLE == 0
 static void operating_frequency_set(void);
 static void clock_source_select(void);
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+/* Disable the following functions in the bootloader project. */
 static void lpt_clock_source_select(void);
 #if BSP_CFG_CLKOUT_OUTPUT != 0
 /* CLKOUT initial configuration function declaration */
 static void bsp_clkout_initial_configure(void);
 #endif /* BSP_CFG_CLKOUT_OUTPUT != 0 */
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
 #endif /* BSP_CFG_STARTUP_DISABLE == 0 */
 
 /***********************************************************************************************************************
@@ -148,11 +168,14 @@ void mcu_clock_setup(void)
 {
     /* Switch to high-speed operation */
     operating_frequency_set();
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+/* Disable the following functions in the bootloader project. */
     lpt_clock_source_select();
 
 #if BSP_CFG_CLKOUT_OUTPUT != 0
     bsp_clkout_initial_configure();
 #endif /* BSP_CFG_CLKOUT_OUTPUT != 0 */
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
 } /* End of function mcu_clock_setup() */
 
 /***********************************************************************************************************************
@@ -275,6 +298,8 @@ static void operating_frequency_set (void)
         R_BSP_NOP();
     }
 
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+/* Disable the following functions in the bootloader project. */
 #if BSP_CFG_IWDT_CLOCK_OSCILLATE_ENABLE == 1
     /* IWDT clock is stopped after reset. Oscillate the IWDT. */
     SYSTEM.ILOCOCR.BIT.ILCSTP = 0;
@@ -292,6 +317,7 @@ static void operating_frequency_set (void)
        1.45 + 2 = 3.45us ("+2" is overhead cycle) */
     R_BSP_SoftwareDelay((uint32_t)4, BSP_DELAY_MICROSECS);
 #endif
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
 
     /* Protect on. */
     SYSTEM.PRCR.WORD = 0xA500;
@@ -307,9 +333,12 @@ static void operating_frequency_set (void)
 ***********************************************************************************************************************/
 static void clock_source_select (void)
 {
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+    /* Disable the following valiable in the bootloader project. */
 #if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) || (BSP_CFG_RTC_ENABLE == 1)
-    uint8_t tmp;
-#endif
+    uint8_t tmp_sodrv;
+#endif /* (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) || (BSP_CFG_RTC_ENABLE == 1) */
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
 
     /* Set to High-speed operating mode if ICLK is > 24MHz. */
     if (BSP_ICLK_HZ > BSP_MIDDLE_SPEED_MAX_FREQUENCY)
@@ -405,6 +434,8 @@ static void clock_source_select (void)
     /* Main clock is stopped after reset. */
 #endif /* BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE == 1 */
 
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+/* Disable the following functions in the bootloader project. */
     /* Sub-clock setting. */
 
     /* Cold start setting */
@@ -429,22 +460,22 @@ static void clock_source_select (void)
 
         /* Set the drive capacity of the sub-clock oscillator */
         #if   (BSP_CFG_SOSC_DRV_CAP == 0) /* Standard CL */
-            tmp = 0x00;
+            tmp_sodrv = 0x00;
         #elif (BSP_CFG_SOSC_DRV_CAP == 2) /* High-drive output for the low CL */
-            tmp = 0x01;
+            tmp_sodrv = 0x01;
         #elif (BSP_CFG_SOSC_DRV_CAP == 3) /* Middle-drive output for the low CL */
-            tmp = 0x02;
+            tmp_sodrv = 0x02;
         #elif (BSP_CFG_SOSC_DRV_CAP == 4) /* Low-drive output for the low CL */
-            tmp = 0x03;
+            tmp_sodrv = 0x03;
         #else
             #error "Error! Invalid setting for BSP_CFG_SOSC_DRV_CAP in r_bsp_config.h"
         #endif
 
         /* Set the Sub-Clock Oscillator Drive Capacity Control. */
-        SYSTEM.SOMCR.BIT.SODRV = tmp;
+        SYSTEM.SOMCR.BIT.SODRV = tmp_sodrv;
 
         /* WAIT_LOOP */
-        while (tmp != SYSTEM.SOMCR.BIT.SODRV)
+        while (tmp_sodrv != SYSTEM.SOMCR.BIT.SODRV)
         {
             /* wait for bits to change */
             R_BSP_NOP();
@@ -552,6 +583,7 @@ static void clock_source_select (void)
         }
 #endif
     }
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
 
 #if BSP_PRV_PLL_CLK_OPERATING == 1
     /* PLL is chosen. Start it operating if it is not already. Must start main clock as well since PLL uses it. */
@@ -597,6 +629,8 @@ static void clock_source_select (void)
     }
 } /* End of function clock_source_select() */
 
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+    /* Disable the following functions in the bootloader project. */
 /***********************************************************************************************************************
 * Function name: lpt_clock_source_select
 * Description  : Enables clock sources for the lpt (if not already done) as chosen by the user.
@@ -665,6 +699,176 @@ static void bsp_clkout_initial_configure(void)
     SYSTEM.PRCR.WORD = 0xA500;
 } /* End of function bsp_clkout_initial_configure() */
 #endif /* BSP_CFG_CLKOUT_OUTPUT != 0 */
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
+
+#if BSP_CFG_BOOTLOADER_PROJECT == 1
+/***********************************************************************************************************************
+* Function name: bsp_mcu_clock_reset_bootloader
+* Description  : Returns the MCU clock settings to the reset state. The system clock returns to LOCO. PLL circuit will 
+*                stop. Main clock will stop.
+* Arguments    : none
+* Return value : none
+* Note         : Enable this functions in the bootloader project. This function for bootloader only. 
+***********************************************************************************************************************/
+void bsp_mcu_clock_reset_bootloader (void)
+{
+    /* Protect off. */
+    SYSTEM.PRCR.WORD = 0xA503;
+
+    /* Is not Clock source LOCO? */
+    if(BSP_PRV_SCKCR3_RESET_VALUE != SYSTEM.SCKCR3.WORD)
+    {
+        /* Reset clock source. Change to LOCO. */
+        SYSTEM.SCKCR3.WORD = BSP_PRV_SCKCR3_RESET_VALUE;
+
+        /* Dummy read and compare. cf."5. I/O Registers", "(2) Notes on writing to I/O registers" in User's manual.
+           This is done to ensure that the register has been written before the next register access. The RX has a
+           pipeline architecture so the next instruction could be executed before the previous write had finished.
+        */
+        if(BSP_PRV_SCKCR3_RESET_VALUE == SYSTEM.SCKCR3.WORD)
+        {
+            R_BSP_NOP();
+        }
+    }
+
+    /* Is not SCKCR reset value? */
+    if(BSP_PRV_SCKCR_RESET_VALUE != SYSTEM.SCKCR.LONG)
+    {
+        /* Reset SCKCR register. */
+        SYSTEM.SCKCR.LONG = BSP_PRV_SCKCR_RESET_VALUE;
+
+        /* Dummy read and compare. cf."5. I/O Registers", "(2) Notes on writing to I/O registers" in User's manual.
+           This is done to ensure that the register has been written before the next register access. The RX has a
+           pipeline architecture so the next instruction could be executed before the previous write had finished.
+        */
+        if(BSP_PRV_SCKCR_RESET_VALUE == SYSTEM.SCKCR.LONG)
+        {
+            R_BSP_NOP();
+        }
+    }
+
+    /* Is not MEMWAITR reset value? */
+    if(BSP_PRV_MEMWAITR_RESET_VALUE != FLASH.MEMWAITR.WORD)
+    {
+        /* Reset Memory Wait Cycle */
+        FLASH.MEMWAITR.WORD = BSP_PRV_MEMWAITR_RESETTING_VALUE;
+
+        /* WAIT_LOOP */
+        while (BSP_PRV_MEMWAITR_RESET_VALUE != FLASH.MEMWAITR.WORD)
+        {
+            /* wait for bit to set */
+            R_BSP_NOP();
+        }
+    }
+
+#if BSP_PRV_PLL_CLK_OPERATING == 1
+    /* PLL operating? */
+    if(BSP_PRV_PLLCR2_RESET_VALUE != SYSTEM.PLLCR2.BYTE)
+    {
+        /* Stop PLL. */
+        SYSTEM.PLLCR2.BYTE = BSP_PRV_PLLCR2_RESET_VALUE;
+
+        /* WAIT_LOOP */
+        while(1 == SYSTEM.OSCOVFSR.BIT.PLOVF)
+        {
+            /* The delay period needed is to make sure that the PLL has stabilized.
+               If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
+            R_BSP_NOP();
+        }
+    }
+
+    /* Is not PLLCR reset value? */
+    if(BSP_PRV_PLLCR_RESET_VALUE != SYSTEM.PLLCR.WORD)
+    {
+        /* Reset PLL. */
+        SYSTEM.PLLCR.WORD = BSP_PRV_PLLCR_RESET_VALUE;
+    }
+#endif /* BSP_PRV_PLL_CLK_OPERATING == 1 */
+
+#if BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE == 1
+    /* main clock operating? */
+    if(BSP_PRV_MOSCCR_RESET_VALUE != SYSTEM.MOSCCR.BYTE)
+    {
+        /* Stop the main clock. */
+        SYSTEM.MOSCCR.BYTE = BSP_PRV_MOSCCR_RESET_VALUE;
+
+        /* Dummy read and compare. cf."5. I/O Registers", "(2) Notes on writing to I/O registers" in User's manual.
+           This is done to ensure that the register has been written before the next register access. The RX has a
+           pipeline architecture so the next instruction could be executed before the previous write had finished.
+        */
+        if(BSP_PRV_MOSCCR_RESET_VALUE == SYSTEM.MOSCCR.BYTE)
+        {
+            R_BSP_NOP();
+        }
+
+        /* WAIT_LOOP */
+        while(1 == SYSTEM.OSCOVFSR.BIT.MOOVF)
+        {
+            /* The delay period needed is to make sure that the Main clock has stabilized.
+               If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
+            R_BSP_NOP();
+        }
+    }
+
+    /* Is not MOSCWTCR reset value? */
+    if(BSP_PRV_MOSCWTCR_RESET_VALUE != SYSTEM.MOSCWTCR.BYTE)
+    {
+        /* Reset MOSCWTCR */
+        SYSTEM.MOSCWTCR.BYTE = BSP_PRV_MOSCWTCR_RESET_VALUE;
+
+        /* Dummy read and compare. cf."5. I/O Registers", "(2) Notes on writing to I/O registers" in User's manual.
+           This is done to ensure that the register has been written before the next register access. The RX has a
+           pipeline architecture so the next instruction could be executed before the previous write had finished.
+        */
+        if(BSP_PRV_MOSCWTCR_RESET_VALUE == SYSTEM.MOSCWTCR.BYTE)
+        {
+            R_BSP_NOP();
+        }
+    }
+
+    /* Is not MOFCR reset value? */
+    if(BSP_PRV_MOFCR_RESET_VALUE != SYSTEM.MOFCR.BYTE)
+    {
+        /* Reset MOFCR */
+        SYSTEM.MOFCR.BYTE = BSP_PRV_MOFCR_RESET_VALUE;
+
+        /* Dummy read and compare. cf."5. I/O Registers", "(2) Notes on writing to I/O registers" in User's manual.
+           This is done to ensure that the register has been written before the next register access. The RX has a
+           pipeline architecture so the next instruction could be executed before the previous write had finished.
+        */
+        if(BSP_PRV_MOFCR_RESET_VALUE == SYSTEM.MOFCR.BYTE)
+        {
+            R_BSP_NOP();
+        }
+    }
+#endif /* BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE == 1 */
+
+    /* Initialization of other clock-related registers. */
+    /* Is not OPCCR reset value? */
+    if(BSP_PRV_OPCCR_RESET_VALUE != SYSTEM.OPCCR.BYTE)
+    {
+        /* WAIT_LOOP */
+        while(1 == SYSTEM.OPCCR.BIT.OPCMTSF)
+        {
+            /* Wait for transition to finish. */
+            R_BSP_NOP();
+        }
+
+        /* Reset OPCCR register. */
+        SYSTEM.OPCCR.BYTE = BSP_PRV_OPCCR_RESET_VALUE;
+
+        /* WAIT_LOOP */
+        while(1 == SYSTEM.OPCCR.BIT.OPCMTSF)
+        {
+            /* Wait for transition to finish. */
+            R_BSP_NOP();
+        }
+     }
+
+    /* Protect on. */
+    SYSTEM.PRCR.WORD = 0xA500;
+} /* End of function bsp_mcu_clock_reset_bootloader() */
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 1 */
 
 #endif /* BSP_CFG_STARTUP_DISABLE == 0 */
 

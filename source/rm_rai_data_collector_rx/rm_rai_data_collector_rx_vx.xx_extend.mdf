@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>2.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_PARAM_CHECKING_ENABLE" display="Parameter check" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_PARAM_CHECKING_ENABLE.0" display="Disabled" value="0"/>
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_PARAM_CHECKING_ENABLE.1" display="Enabled"  value="1"/>
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="Use system default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+      <description>Select whether to include parameter checking in the code.
+"Disabled": Compiles out parameter checking.
+"Enabled": Includes parameter checking.
+"System Default": Sets this to "BSP_CFG_PARAM_CHECKING_ENABLE"</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_MAX_CHANNELS" display="Max Number of Channels" default="16" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_MAX_CHANNELS.1"  display="1"  value="1"/>
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_MAX_CHANNELS.2"  display="2"  value="2"/>
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_MAX_CHANNELS.3"  display="3"  value="3"/>
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_MAX_CHANNELS.4"  display="4"  value="4"/>
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_MAX_CHANNELS.5"  display="5"  value="5"/>
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_MAX_CHANNELS.6"  display="6"  value="6"/>
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_MAX_CHANNELS.7"  display="7"  value="7"/>
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_MAX_CHANNELS.8"  display="8"  value="8"/>
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_MAX_CHANNELS.9"  display="9"  value="9"/>
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_MAX_CHANNELS.10" display="10" value="10"/>
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_MAX_CHANNELS.11" display="11" value="11"/>
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_MAX_CHANNELS.12" display="12" value="12"/>
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_MAX_CHANNELS.13" display="13" value="13"/>
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_MAX_CHANNELS.14" display="14" value="14"/>
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_MAX_CHANNELS.15" display="15" value="15"/>
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_MAX_CHANNELS.16" display="16" value="16"/>
+
+            <constraint display="Value must be Max Number of Channels >= (Data Feed Mode Channels + Snapshot Mode Channels)">${RM_RAI_DATA_COLLECTOR_CFG_MAX_CHANNELS} >= (${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNELS} + ${RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNELS})</constraint>
+
+            <description>
+Max number of channels.
+Value must be Max Number of Channels >= (Data Feed Mode Channels + Snapshot Mode Channels)
+            </description>
+        </property>
+
+<!--
+/***********************************************************************************************************************
+  DEVICE_0 ************************************************************************************************************
+***********************************************************************************************************************/
+-->
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_ID" display="ID" default="0" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${RM_RAI_DATA_COLLECTOR_CFG_DC0_ID}")</constraint>
+            <constraint display="Value must be 0 ~ 255">("${RM_RAI_DATA_COLLECTOR_CFG_DC0_ID}" &gt;= 0) &amp;&amp; ("${RM_RAI_DATA_COLLECTOR_CFG_DC0_ID}" &lt;= 255)</constraint>
+            <description>Instance ID.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_FRAME_BUF_LEN" display="Frame Buffer Length" default="50" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${RM_RAI_DATA_COLLECTOR_CFG_DC0_FRAME_BUF_LEN}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 4096">("${RM_RAI_DATA_COLLECTOR_CFG_DC0_FRAME_BUF_LEN}" &gt;= 1) &amp;&amp; ("${RM_RAI_DATA_COLLECTOR_CFG_DC0_FRAME_BUF_LEN}" &lt;= 4096)</constraint>
+            <description>Frame buffer length in data samples.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_READY_CALLBACK" display="Data Ready Callback" default="rai_data_collector0_callback" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_READY_CALLBACK}"</constraint>
+            <description>Callback function for data ready.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_ERROR_CALLBACK" display="Error Callback" default="rai_data_collector0_error_callback" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_ERROR_CALLBACK}"</constraint>
+            <description>Callback function for error events.</description>
+        </property>
+
+<!--
+/***********************************************************************************************************************
+  DEVICE_0 DATA FEED MODE CHANNEL0-7
+***********************************************************************************************************************/
+-->
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL0_NAME" display="Data Feed Mode Channel 0 Name" default="dc0_data_feed_ch0" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL0_NAME}"</constraint>
+            <description>Channel name.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL0_DATA_TYPE" display="Data Feed Mode Channel 0 Data Type" default="1" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL0_DATA_TYPE.1" display="8-bit Signed"    value="1" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL0_DATA_TYPE.2" display="8-bit Unsigned"  value="2" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL0_DATA_TYPE.3" display="16-bit Signed"   value="3" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL0_DATA_TYPE.4" display="16-bit Unsigned" value="4" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL0_DATA_TYPE.5" display="32-bit Signed"   value="5" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL0_DATA_TYPE.6" display="32-bit Unsigned" value="6" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL0_DATA_TYPE.7" display="Single Float"    value="7" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL0_DATA_TYPE.8" display="Double"          value="8" />
+            <description>Channel data type.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL1_NAME" display="Data Feed Mode Channel 1 Name" default="dc0_data_feed_ch1" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL1_NAME}"</constraint>
+            <description>Channel name.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL1_DATA_TYPE" display="Data Feed Mode Channel 1 Data Type" default="1" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL1_DATA_TYPE.1" display="8-bit Signed"    value="1" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL1_DATA_TYPE.2" display="8-bit Unsigned"  value="2" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL1_DATA_TYPE.3" display="16-bit Signed"   value="3" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL1_DATA_TYPE.4" display="16-bit Unsigned" value="4" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL1_DATA_TYPE.5" display="32-bit Signed"   value="5" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL1_DATA_TYPE.6" display="32-bit Unsigned" value="6" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL1_DATA_TYPE.7" display="Single Float"    value="7" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL1_DATA_TYPE.8" display="Double"          value="8" />
+            <description>Channel data type.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL2_NAME" display="Data Feed Mode Channel 2 Name" default="dc0_data_feed_ch2" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL2_NAME}"</constraint>
+            <description>Channel name.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL2_DATA_TYPE" display="Data Feed Mode Channel 2 Data Type" default="1" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL2_DATA_TYPE.1" display="8-bit Signed"    value="1" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL2_DATA_TYPE.2" display="8-bit Unsigned"  value="2" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL2_DATA_TYPE.3" display="16-bit Signed"   value="3" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL2_DATA_TYPE.4" display="16-bit Unsigned" value="4" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL2_DATA_TYPE.5" display="32-bit Signed"   value="5" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL2_DATA_TYPE.6" display="32-bit Unsigned" value="6" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL2_DATA_TYPE.7" display="Single Float"    value="7" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL2_DATA_TYPE.8" display="Double"          value="8" />
+            <description>Channel data type.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL3_NAME" display="Data Feed Mode Channel 3 Name" default="dc0_data_feed_ch3" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL3_NAME}"</constraint>
+            <description>Channel name.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL3_DATA_TYPE" display="Data Feed Mode Channel 3 Data Type" default="1" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL3_DATA_TYPE.1" display="8-bit Signed"    value="1" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL3_DATA_TYPE.2" display="8-bit Unsigned"  value="2" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL3_DATA_TYPE.3" display="16-bit Signed"   value="3" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL3_DATA_TYPE.4" display="16-bit Unsigned" value="4" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL3_DATA_TYPE.5" display="32-bit Signed"   value="5" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL3_DATA_TYPE.6" display="32-bit Unsigned" value="6" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL3_DATA_TYPE.7" display="Single Float"    value="7" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL3_DATA_TYPE.8" display="Double"          value="8" />
+            <description>Channel data type.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL4_NAME" display="Data Feed Mode Channel 4 Name" default="dc0_data_feed_ch4" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL4_NAME}"</constraint>
+            <description>Channel name.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL4_DATA_TYPE" display="Data Feed Mode Channel 4 Data Type" default="1" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL4_DATA_TYPE.1" display="8-bit Signed"    value="1" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL4_DATA_TYPE.2" display="8-bit Unsigned"  value="2" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL4_DATA_TYPE.3" display="16-bit Signed"   value="3" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL4_DATA_TYPE.4" display="16-bit Unsigned" value="4" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL4_DATA_TYPE.5" display="32-bit Signed"   value="5" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL4_DATA_TYPE.6" display="32-bit Unsigned" value="6" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL4_DATA_TYPE.7" display="Single Float"    value="7" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL4_DATA_TYPE.8" display="Double"          value="8" />
+            <description>Channel data type.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL5_NAME" display="Data Feed Mode Channel 5 Name" default="dc0_data_feed_ch5" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL5_NAME}"</constraint>
+            <description>Channel name.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL5_DATA_TYPE" display="Data Feed Mode Channel 5 Data Type" default="1" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL5_DATA_TYPE.1" display="8-bit Signed"    value="1" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL5_DATA_TYPE.2" display="8-bit Unsigned"  value="2" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL5_DATA_TYPE.3" display="16-bit Signed"   value="3" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL5_DATA_TYPE.4" display="16-bit Unsigned" value="4" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL5_DATA_TYPE.5" display="32-bit Signed"   value="5" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL5_DATA_TYPE.6" display="32-bit Unsigned" value="6" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL5_DATA_TYPE.7" display="Single Float"    value="7" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL5_DATA_TYPE.8" display="Double"          value="8" />
+            <description>Channel data type.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL6_NAME" display="Data Feed Mode Channel 6 Name" default="dc0_data_feed_ch6" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL6_NAME}"</constraint>
+            <description>Channel name.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL6_DATA_TYPE" display="Data Feed Mode Channel 6 Data Type" default="1" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL6_DATA_TYPE.1" display="8-bit Signed"    value="1" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL6_DATA_TYPE.2" display="8-bit Unsigned"  value="2" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL6_DATA_TYPE.3" display="16-bit Signed"   value="3" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL6_DATA_TYPE.4" display="16-bit Unsigned" value="4" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL6_DATA_TYPE.5" display="32-bit Signed"   value="5" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL6_DATA_TYPE.6" display="32-bit Unsigned" value="6" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL6_DATA_TYPE.7" display="Single Float"    value="7" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL6_DATA_TYPE.8" display="Double"          value="8" />
+            <description>Channel data type.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL7_NAME" display="Data Feed Mode Channel 7 Name" default="dc0_data_feed_ch7" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL7_NAME}"</constraint>
+            <description>Channel name.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL7_DATA_TYPE" display="Data Feed Mode Channel 7 Data Type" default="1" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL7_DATA_TYPE.1" display="8-bit Signed"    value="1" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL7_DATA_TYPE.2" display="8-bit Unsigned"  value="2" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL7_DATA_TYPE.3" display="16-bit Signed"   value="3" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL7_DATA_TYPE.4" display="16-bit Unsigned" value="4" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL7_DATA_TYPE.5" display="32-bit Signed"   value="5" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL7_DATA_TYPE.6" display="32-bit Unsigned" value="6" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL7_DATA_TYPE.7" display="Single Float"    value="7" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNEL7_DATA_TYPE.8" display="Double"          value="8" />
+            <description>Channel data type.</description>
+        </property>
+
+<!--
+/***********************************************************************************************************************
+  DEVICE_0 DATA FEED MODE CHANNELS
+***********************************************************************************************************************/
+-->
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNELS" display="Data Feed Mode Channels" default="0" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNELS.0" display="0"  value="0" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNELS.1" display="1"  value="1" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNELS.2" display="2"  value="2" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNELS.3" display="3"  value="3" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNELS.4" display="4"  value="4" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNELS.5" display="5"  value="5" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNELS.6" display="6"  value="6" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNELS.7" display="7"  value="7" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_DATA_FEED_CHANNELS.8" display="8"  value="8" />
+            <description>Number of Data Feed Mode channels.</description>
+        </property>
+
+<!--
+/***********************************************************************************************************************
+  DEVICE_0 SNAPSHOT MODE  CHANNEL0-7
+***********************************************************************************************************************/
+-->
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL0_NAME" display="Snapshot Mode Channel 0 Name" default="dc0_snapshot_ch0" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL0_NAME}"</constraint>
+            <description>Channel name.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL0_DATA_TYPE" display="Snapshot Mode Channel 0 Data Type" default="1" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL0_DATA_TYPE.1" display="8-bit Signed"    value="1" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL0_DATA_TYPE.2" display="8-bit Unsigned"  value="2" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL0_DATA_TYPE.3" display="16-bit Signed"   value="3" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL0_DATA_TYPE.4" display="16-bit Unsigned" value="4" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL0_DATA_TYPE.5" display="32-bit Signed"   value="5" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL0_DATA_TYPE.6" display="32-bit Unsigned" value="6" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL0_DATA_TYPE.7" display="Single Float"    value="7" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL0_DATA_TYPE.8" display="Double"          value="8" />
+            <description>Set the Type of Data.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL1_NAME" display="Snapshot Mode Channel 1 Name" default="dc0_snapshot_ch1" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL1_NAME}"</constraint>
+            <description>Channel name.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL1_DATA_TYPE" display="Snapshot Mode Channel 1 Data Type" default="1" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL1_DATA_TYPE.1" display="8-bit Signed"    value="1" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL1_DATA_TYPE.2" display="8-bit Unsigned"  value="2" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL1_DATA_TYPE.3" display="16-bit Signed"   value="3" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL1_DATA_TYPE.4" display="16-bit Unsigned" value="4" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL1_DATA_TYPE.5" display="32-bit Signed"   value="5" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL1_DATA_TYPE.6" display="32-bit Unsigned" value="6" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL1_DATA_TYPE.7" display="Single Float"    value="7" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL1_DATA_TYPE.8" display="Double"          value="8" />
+            <description>Set the Type of Data.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL2_NAME" display="Snapshot Mode Channel 2 Name" default="dc0_snapshot_ch2" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL2_NAME}"</constraint>
+            <description>Channel name.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL2_DATA_TYPE" display="Snapshot Mode Channel 2 Data Type" default="1" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL2_DATA_TYPE.1" display="8-bit Signed"    value="1" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL2_DATA_TYPE.2" display="8-bit Unsigned"  value="2" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL2_DATA_TYPE.3" display="16-bit Signed"   value="3" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL2_DATA_TYPE.4" display="16-bit Unsigned" value="4" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL2_DATA_TYPE.5" display="32-bit Signed"   value="5" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL2_DATA_TYPE.6" display="32-bit Unsigned" value="6" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL2_DATA_TYPE.7" display="Single Float"    value="7" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL2_DATA_TYPE.8" display="Double"          value="8" />
+            <description>Set the Type of Data.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL3_NAME" display="Snapshot Mode Channel 3 Name" default="dc0_snapshot_ch3" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL3_NAME}"</constraint>
+            <description>Channel name.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL3_DATA_TYPE" display="Snapshot Mode Channel 3 Data Type" default="1" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL3_DATA_TYPE.1" display="8-bit Signed"    value="1" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL3_DATA_TYPE.2" display="8-bit Unsigned"  value="2" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL3_DATA_TYPE.3" display="16-bit Signed"   value="3" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL3_DATA_TYPE.4" display="16-bit Unsigned" value="4" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL3_DATA_TYPE.5" display="32-bit Signed"   value="5" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL3_DATA_TYPE.6" display="32-bit Unsigned" value="6" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL3_DATA_TYPE.7" display="Single Float"    value="7" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL3_DATA_TYPE.8" display="Double"          value="8" />
+            <description>Set the Type of Data.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL4_NAME" display="Snapshot Mode Channel 4 Name" default="dc0_snapshot_ch4" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL4_NAME}"</constraint>
+            <description>Channel name.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL4_DATA_TYPE" display="Snapshot Mode Channel 4 Data Type" default="1" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL4_DATA_TYPE.1" display="8-bit Signed"    value="1" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL4_DATA_TYPE.2" display="8-bit Unsigned"  value="2" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL4_DATA_TYPE.3" display="16-bit Signed"   value="3" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL4_DATA_TYPE.4" display="16-bit Unsigned" value="4" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL4_DATA_TYPE.5" display="32-bit Signed"   value="5" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL4_DATA_TYPE.6" display="32-bit Unsigned" value="6" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL4_DATA_TYPE.7" display="Single Float"    value="7" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL4_DATA_TYPE.8" display="Double"          value="8" />
+            <description>Set the Type of Data.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL5_NAME" display="Snapshot Mode Channel 5 Name" default="dc0_snapshot_ch5" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL5_NAME}"</constraint>
+            <description>Channel name.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL5_DATA_TYPE" display="Snapshot Mode Channel 5 Data Type" default="1" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL5_DATA_TYPE.1" display="8-bit Signed"    value="1" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL5_DATA_TYPE.2" display="8-bit Unsigned"  value="2" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL5_DATA_TYPE.3" display="16-bit Signed"   value="3" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL5_DATA_TYPE.4" display="16-bit Unsigned" value="4" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL5_DATA_TYPE.5" display="32-bit Signed"   value="5" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL5_DATA_TYPE.6" display="32-bit Unsigned" value="6" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL5_DATA_TYPE.7" display="Single Float"    value="7" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL5_DATA_TYPE.8" display="Double"          value="8" />
+            <description>Set the Type of Data.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL6_NAME" display="Snapshot Mode Channel 6 Name" default="dc0_snapshot_ch6" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL6_NAME}"</constraint>
+            <description>Channel name.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL6_DATA_TYPE" display="Snapshot Mode Channel 6 Data Type" default="1" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL6_DATA_TYPE.1" display="8-bit Signed"    value="1" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL6_DATA_TYPE.2" display="8-bit Unsigned"  value="2" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL6_DATA_TYPE.3" display="16-bit Signed"   value="3" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL6_DATA_TYPE.4" display="16-bit Unsigned" value="4" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL6_DATA_TYPE.5" display="32-bit Signed"   value="5" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL6_DATA_TYPE.6" display="32-bit Unsigned" value="6" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL6_DATA_TYPE.7" display="Single Float"    value="7" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL6_DATA_TYPE.8" display="Double"          value="8" />
+            <description>Set the Type of Data.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL7_NAME" display="Snapshot Mode Channel 7 Name" default="dc0_snapshot_ch7" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL7_NAME}"</constraint>
+            <description>Channel name.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL7_DATA_TYPE" display="Snapshot Mode Channel 7 Data Type" default="1" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL7_DATA_TYPE.1" display="8-bit Signed"    value="1" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL7_DATA_TYPE.2" display="8-bit Unsigned"  value="2" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL7_DATA_TYPE.3" display="16-bit Signed"   value="3" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL7_DATA_TYPE.4" display="16-bit Unsigned" value="4" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL7_DATA_TYPE.5" display="32-bit Signed"   value="5" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL7_DATA_TYPE.6" display="32-bit Unsigned" value="6" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL7_DATA_TYPE.7" display="Single Float"    value="7" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNEL7_DATA_TYPE.8" display="Double"          value="8" />
+            <description>Set the Type of Data.</description>
+        </property>
+
+<!--
+/***********************************************************************************************************************
+  DEVICE_0 SNAPSHOT MODE
+***********************************************************************************************************************/
+-->
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNELS" display="Snapshot Mode Channels" default="7" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNELS.0" display="0"  value="0" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNELS.1" display="1"  value="1" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNELS.2" display="2"  value="2" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNELS.3" display="3"  value="3" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNELS.4" display="4"  value="4" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNELS.5" display="5"  value="5" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNELS.6" display="6"  value="6" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNELS.7" display="7"  value="7" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNELS.8" display="8"  value="8" />
+            <description>Number of Snapshot Mode channels.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_COUNT" display="Snapshot Mode Count" default="1" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_COUNT}"</constraint>
+            <constraint display="Value must be an integer">testInteger("${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_COUNT}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 256">("${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_COUNT}" &gt;= 1) &amp;&amp; ("${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_COUNT}" &lt;= 256)</constraint>
+            <constraint actionOnFail="disable">"${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNELS}" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNELS.0}"</constraint>
+            <description>DTC transfer count.</description>
+        </property>
+
+
+<!--
+/***********************************************************************************************************************
+  DEVICE_0 TIMER
+***********************************************************************************************************************/
+-->
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_CHANNEL" display="Timer Channel" default="0" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_CHANNEL.0"  display="0" value="0" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_CHANNEL.1"  display="1" value="1" />
+            <constraint actionOnFail="disable">"${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNELS}" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNELS.0}"</constraint>
+            <description>Specify the timer channel.</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_FREQUENCY" display="Timer Frequency Hz" default="100" type="textbox">
+            <constraint display="Must not be empty">"" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_FREQUENCY}"</constraint>
+            <constraint display="Value must be an integer">testInteger("${RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_FREQUENCY}")</constraint>
+            <constraint actionOnFail="disable">"${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNELS}" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNELS.0}"</constraint>
+            <description>Specify the timer frequency (Hz).</description>
+        </property>
+
+        <property id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_PRIORITY" display="Timer Priority Level" default="CMT_PRIORITY_14" type="combobox">
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_PRIORITY.0"  display="0 (Disabled)" value="CMT_PRIORITY_0" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_PRIORITY.1"  display="1           " value="CMT_PRIORITY_1" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_PRIORITY.2"  display="2           " value="CMT_PRIORITY_2" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_PRIORITY.3"  display="3           " value="CMT_PRIORITY_3" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_PRIORITY.4"  display="4           " value="CMT_PRIORITY_4" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_PRIORITY.5"  display="5           " value="CMT_PRIORITY_5" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_PRIORITY.6"  display="6           " value="CMT_PRIORITY_6" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_PRIORITY.7"  display="7           " value="CMT_PRIORITY_7" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_PRIORITY.8"  display="8           " value="CMT_PRIORITY_8" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_PRIORITY.9"  display="9           " value="CMT_PRIORITY_9" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_PRIORITY.10" display="10          " value="CMT_PRIORITY_10" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_PRIORITY.11" display="11          " value="CMT_PRIORITY_11" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_PRIORITY.12" display="12          " value="CMT_PRIORITY_12" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_PRIORITY.13" display="13          " value="CMT_PRIORITY_13" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_PRIORITY.14" display="14          " value="CMT_PRIORITY_14" />
+            <option id="RM_RAI_DATA_COLLECTOR_CFG_DC0_TIMER_PRIORITY.15" display="15 (Highest)" value="CMT_PRIORITY_MAX" />
+            <constraint actionOnFail="disable">"${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNELS}" != "${RM_RAI_DATA_COLLECTOR_CFG_DC0_SNAPSHOT_CHANNELS.0}"</constraint>
+            <description>Set the timer priority level.</description>
+        </property>
+
+
+    </configuration>
+</module>

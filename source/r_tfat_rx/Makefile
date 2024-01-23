@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_tfat_rx
-VERSION = 		4.02
+VERSION = 		4.10
 MDF = NOT_SUPPORTED
 
 CONFIG_FOLDER = r_config

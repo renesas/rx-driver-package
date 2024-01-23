@@ -23,6 +23,7 @@
 * History : DD.MM.YYYY Version Description
 *         : 22.11.2021 1.00    Initial Release
 *         : 06.01.2023 1.20    Fixed TXRF flag not cleared in the function canfd_channel_tx_isr()
+*         : 13.12.2023 1.31    Added WAIT_LOOP comments.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * Includes
@@ -278,6 +279,7 @@ bsp_int_ctrl_t int_ctrl;
     if (canfd_block_p->GSR.LONG & R_CANFD_GSR_RSTST_Msk)
     {
         /* Wait for RAM initialization (see RX6T2 User's Manual (R01UH0937EJ0050) section 33.3.3.1 Note 2) */
+        /* WAIT_LOOP */
         FSP_HARDWARE_REGISTER_WAIT((canfd_block_p->GSR.LONG & R_CANFD_GSR_RAMST_Msk), 0);
 
         /* Cancel Global Sleep and wait for transition to Global Reset */
@@ -297,6 +299,7 @@ bsp_int_ctrl_t int_ctrl;
         canfd_block_p->RMCR.LONG = p_global_cfg->rx_mb_config;
 
         /* Configure RX FIFOs and interrupt */
+        /* WAIT_LOOP */
         for (uint32_t i = 0; i < CANFD_PRV_RX_FIFO_MAX; i++)
         {
             canfd_block_p->RFCR[i].LONG = p_global_cfg->rx_fifo_config[i];
@@ -349,6 +352,7 @@ bsp_int_ctrl_t int_ctrl;
     /* Write all configured AFL entries */
     canfd_afl_t * p_afl = (canfd_afl_t*)p_extend->p_afl;
 
+    /* WAIT_LOOP */
     for ( ; afl_entry < afl_max; afl_entry++)
     {
         /* AFL register access is performed through a page window comprised of 16 entries. See Section 33.5.7 "Entering
@@ -610,6 +614,8 @@ fsp_err_t R_CANFD_Write (can_ctrl_t * const p_api_ctrl, uint32_t buffer, can_fra
     /* Copy data to register buffer */
     uint8_t * p_dest = (uint8_t *) canfd_block_p->TMB[txmb].DF;
     uint8_t * p_src  = p_frame->data;
+
+    /* WAIT_LOOP */
     while (len--)
     {
         *p_dest++ = *p_src++;
@@ -940,6 +946,8 @@ static void r_canfd_mb_read (uint32_t buffer, can_frame_t * const frame)
     uint32_t  len    = frame->data_length_code;
     uint8_t * p_dest = frame->data;
     uint8_t * p_src  = (uint8_t *) (mb_regs->DATA);
+
+    /* WAIT_LOOP */
     while (len--)
     {
         *p_dest++ = *p_src++;
@@ -1093,6 +1101,7 @@ void canfd_rx_fifo_isr (void)
         args.buffer  = fifo + CANFD_PRV_RXMB_MAX;
 
         /* Read from the FIFO until it is empty */
+        /* WAIT_LOOP */
         while (!(canfd_block_p->FESR.LONG & (1U << fifo)))
         {
             /* Get channel associated with the AFL entry */
@@ -1141,6 +1150,8 @@ void canfd_channel_tx_isr (void)
 
     /* Check the byte of tisr that corresponds to the interrupting channel */
     uint32_t tisr = *((uint8_t *)(&canfd_block_p->TISR.LONG) + channel);
+
+    /* WAIT_LOOP */
     while (tisr)
     {
         uint32_t  txmb;
@@ -1218,6 +1229,7 @@ static void r_canfd_mode_transition (canfd_instance_ctrl_t * p_ctrl, can_operati
                 ((canfd_extended_cfg_t *) p_ctrl->p_cfg->p_extend)->p_global_cfg;
 
             /* Enable RX FIFOs */
+            /* WAIT_LOOP */
             for (uint32_t i = 0; i < CANFD_PRV_RX_FIFO_MAX; i++)
             {
                 canfd_block_p->RFCR[i].LONG = p_global_cfg->rx_fifo_config[i];
@@ -1253,6 +1265,8 @@ static void r_canfd_mode_ctr_set (volatile uint32_t * p_ctr_reg, can_operation_m
 
     /* See definitions for CFDCnCTR, CFDCnSTS, CFDGCTR and CFDGSTS in the RX660 User's Manual (R01UH0937EJ) */
     *p_ctr_reg = (*p_ctr_reg & ~CANFD_PRV_CTR_MODE_MASK) | operation_mode;
+
+    /* WAIT_LOOP */
     FSP_HARDWARE_REGISTER_WAIT((*p_sts_reg & CANFD_PRV_CTR_MODE_MASK), operation_mode);
 }
 
@@ -1287,6 +1301,7 @@ static uint32_t trailing_zeros(uint32_t n) {
      if the rightmost digit of n is 1, ( n & 1 ) outputs 1
      if the rightmost digit of n is 0, ( n & 1 ) outputs 0
 */
+    /* WAIT_LOOP */
     while (n > 0 && (n & 1) == 0) {
 
         count = count + 1;  /* increment count */

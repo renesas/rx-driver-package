@@ -1,9 +1,9 @@
 RELEASE_TAG_COMMIT_NUMBER_LATEST = 5f0e0a99f012eb772eff92e65f43faaabeb3d75f
-RELEASE_TAG_COMMIT_VERSION_LATEST = 1.41
+RELEASE_TAG_COMMIT_VERSION_LATEST = 1.42
 VERSIONS_FILE_NAME = versions.xml
 
 MODULE_NAME_LIST_LATEST = 	r_aeropoint_rx \
-					r_ble_qe_utility r_ble_rx23w r_bsp r_byteq \
+					r_ble_qe_utility r_ble_rx23w r_ble_da14531_rx r_bsp r_byteq \
 					r_can_rx r_canfd_rx r_cellular r_cmt_rx r_cmtw_rx r_comms_i2c_rx r_ctsu_qe \
 					r_dac_rx r_datfrx_rx r_dmaca_rx r_drw2d_rx r_dsmif_rx r_dtc_rx \
 					r_eeprom_spi r_elc_rx r_emwin_rx r_ether_rx \
@@ -24,8 +24,9 @@ MODULE_NAME_LIST_LATEST = 	r_aeropoint_rx \
 					r_usb_hcdc r_usb_hcdc_mini r_usb_hhid r_usb_hhid_mini r_usb_hmsc r_usb_hmsc_mini \
 					r_usb_pcdc r_usb_pcdc_mini r_usb_phid r_usb_phid_mini r_usb_pmsc r_usb_pmsc_mini \
 					r_vbatt_rx \
-					r_wdt_rx r_wifi_sx_ulpgn \
+					r_wdt_rx r_wifi_sx_ulpgn r_wifi_da16xxx \
 					r_zmod4xxx_rx \
+					rm_comms_uart_rx rm_rai_data_collector_rx rm_rai_data_shipper_rx \
 					rm_touch_qe \
 
 all:

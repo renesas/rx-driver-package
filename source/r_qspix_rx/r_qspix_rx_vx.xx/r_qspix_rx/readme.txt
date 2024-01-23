@@ -5,12 +5,12 @@ r_qspix_rx (QSPIX driver)
 
 Document Number 
 ---------------
-R01AN5685ES0140
-R01AN5685JS0140
+R01AN5685ES0141
+R01AN5685JS0141
      
 Version
 -------
-v1.40
+v1.41
 
 Overview
 --------
@@ -44,31 +44,26 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp    v7.21
+* r_bsp    v7.41
 
 How to add to your project
 --------------------------
 This module must be added to each project in which it is used.
-Renesas recommends using "Smart Configurator" described in (1) or (3).
+Renesas recommends using "Smart Configurator" described in (1) or (2).
 However, "Smart Configurator" only supports some RX devices.
-Please use the methods of (2) or (4) for unsupported RX devices.
+Please use the methods of (3) for unsupported RX devices.
 
 (1) Adding the FIT module to your project using "Smart Configurator" in e2 studio
 By using the "Smart Configurator" in e2 studio, 
 the FIT module is automatically added to your project.
 Refer to "Renesas e2 studio Smart Configurator User Guide (R20AN0451)" for details.
 
-(2) Adding the FIT module to your project using "FIT Configurator" in e2 studio
-By using the "FIT Configurator" in e2 studio,
-the FIT module is automatically added to your project.
-Refer to "Adding Firmware Integration Technology Modules to Projects (R01AN1723)" for details.
-
-(3) Adding the FIT module to your project using "Smart Configurator" on CS+
+(2) Adding the FIT module to your project using "Smart Configurator" on CS+
 By using the "Smart Configurator Standalone version" in CS+,
 the FIT module is automatically added to your project.
 Refer to "Renesas e2 studio Smart Configurator User Guide (R20AN0451)" for details.
 
-(4) Adding the FIT module to your project in CS+
+(3) Adding the FIT module to your project in CS+
 In CS+, please manually add the FIT module to your project.
 Refer to "Adding Firmware Integration Technology Modules to CS+ Projects (R01AN1826)" for details.
 

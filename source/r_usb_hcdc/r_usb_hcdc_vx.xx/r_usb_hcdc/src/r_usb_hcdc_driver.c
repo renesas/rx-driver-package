@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2023) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_hcdc_driver.c
@@ -33,6 +33,7 @@
  *         : 16.11.2018 1.24 Supporting BSP_CFG_RTOS_USED
  *         : 31.05.2019 1.26 Added support for GNUC and ICCRX.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.09.2023 1.42 USBX HCDC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -46,6 +47,9 @@
 #include "r_usb_bitdefine.h"
 #include "r_usb_hcdc_if.h"
 #include "r_usb_hcdc.h"
+
+#if defined(USB_CFG_HCDC_USE)
+  #if (BSP_CFG_RTOS_USED != 5)    /* !Azure RTOS */
 
 /******************************************************************************
  Private global variables and functions
@@ -255,7 +259,7 @@ static void usb_hcdc_check_result (usb_utr_t *mess)
  Argument        : stacd    : Task Start Code
  Return          : none
  ******************************************************************************/
-void usb_hcdc_task (usb_vp_int_t stacd)
+void usb_hcdc_task (rtos_task_arg_t stacd)
 {
     usb_utr_t *p_mess;
     usb_er_t err = 0l;
@@ -304,7 +308,6 @@ uint16_t usb_hcdc_pipe_info (usb_utr_t *ptr, uint8_t *table, uint16_t speed, uin
     uint16_t pipe_no;
     uint16_t in_pipe;
     uint16_t out_pipe;
-    uint16_t status_pipe;
 
     usb_pipe_table_reg_t    ep_tbl;
 
@@ -314,7 +317,6 @@ uint16_t usb_hcdc_pipe_info (usb_utr_t *ptr, uint8_t *table, uint16_t speed, uin
     /* Pipe initial */
     in_pipe = USB_NOPIPE;
     out_pipe = USB_NOPIPE;
-    status_pipe = USB_NOPIPE;
 
     /* WAIT_LOOP */
     while (ofdsc < length)
@@ -337,7 +339,7 @@ uint16_t usb_hcdc_pipe_info (usb_utr_t *ptr, uint8_t *table, uint16_t speed, uin
             }
             else if ( USB_EP_INT == (table[ofdsc + USB_EP_B_ATTRIBUTES] & USB_EP_TRNSMASK))
             {
-                status_pipe = USB_TRUE;
+                /* None */
             }
             else
             {
@@ -355,7 +357,7 @@ uint16_t usb_hcdc_pipe_info (usb_utr_t *ptr, uint8_t *table, uint16_t speed, uin
                 usb_hstd_set_pipe_info (ptr->ip, pipe_no, &ep_tbl);
             }
 
-            if (((USB_NOPIPE != in_pipe) && (USB_NOPIPE != out_pipe)) && (USB_NOPIPE != status_pipe))
+            if (((USB_NOPIPE != in_pipe) && (USB_NOPIPE != out_pipe)))
             {
                 return USB_OK;
             }
@@ -814,6 +816,8 @@ uint16_t usb_hcdc_get_string_info(usb_utr_t *mess, uint16_t addr, uint16_t strin
 
 #endif /* (BSP_CFG_RTOS_USED) */
 
+  #endif /* BSP_CFG_RTOS_USED != 5 !Azure RTOS */
+#endif /* defined(USB_CFG_HCDC_USE) */
 /******************************************************************************
  End  Of File
  ******************************************************************************/

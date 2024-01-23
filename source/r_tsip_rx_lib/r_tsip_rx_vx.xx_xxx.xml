@@ -11,7 +11,7 @@
     <toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
-        <version>8.03.00.202202</version>
+        <version>8.03.00.202305</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -38,6 +38,7 @@
         <group>RX72T</group>
         <board>RSKRX231</board>
         <board>RSSKRX23W</board>
+        <board>MCB-RX26T</board>
         <board>RSKRX65N_2MB</board>
         <board>RSKRX66T</board>
         <board>RSKRX671</board>

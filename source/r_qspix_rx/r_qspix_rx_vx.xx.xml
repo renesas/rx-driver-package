@@ -28,6 +28,7 @@
         <version>3.02.00</version>
         <version>3.03.00</version>
         <version>3.04.00</version>
+        <version>3.05.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -37,6 +38,7 @@
         <version>8.03.00.202102</version>
         <version>8.03.00.202104</version>
         <version>8.03.00.202202</version>
+        <version>8.03.00.202305</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -62,7 +64,7 @@
         <zipsource>r_qspix_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.21</version>
+            <version>7.41</version>
         </dependency>
         <application>Communications</application>
         <desc>QSPIX Driver</desc>

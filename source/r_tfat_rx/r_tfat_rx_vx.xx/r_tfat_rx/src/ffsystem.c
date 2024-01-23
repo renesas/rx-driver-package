@@ -1,6 +1,5 @@
 /*------------------------------------------------------------------------*/
-/* Sample Code of OS Dependent Functions for FatFs                        */
-/* (C)ChaN, 2018                                                          */
+/* A Sample Code of User Provided OS Dependent Functions for FatFs        */
 /*------------------------------------------------------------------------*/
 
 /*******************************************************************************
@@ -9,6 +8,7 @@
 *                                    Added support for FreeRTOS and 
 *                                    Renesas uITRON (RI600V4).
 *                                    Added support for GNUC and ICCRX.
+*              : 31.08.2023 4.10     Updated FatFs ff15.
 *******************************************************************************/
 
 #include "ff.h"
@@ -174,194 +174,225 @@ static ID MUTEX_ID_TABLE[10] = {
 #endif    /* End of BSP_CFG_RTOS_USED == 4 && BSP_CFG_RENESAS_RTOS_USED == 1 */
 /* End of Renesas modify */
 
-#if FF_USE_LFN == 3	/* Dynamic memory allocation */
+#if FF_USE_LFN == 3	/* Use dynamic memory allocation */
 
 /*------------------------------------------------------------------------*/
-/* Allocate a memory block                                                */
+/* Allocate/Free a Memory Block                                           */
 /*------------------------------------------------------------------------*/
 
 void* ff_memalloc (	/* Returns pointer to the allocated memory block (null if not enough core) */
 	UINT msize		/* Number of bytes to allocate */
 )
 {
-	return malloc(msize);	/* Allocate a new memory block with POSIX API */
+	return malloc((size_t)msize);	/* Allocate a new memory block */
 }
 
 
-/*------------------------------------------------------------------------*/
-/* Free a memory block                                                    */
-/*------------------------------------------------------------------------*/
-
 void ff_memfree (
-	void* mblock	/* Pointer to the memory block to free (nothing to do if null) */
+	void* mblock	/* Pointer to the memory block to free (no effect if null) */
 )
 {
-	free(mblock);	/* Free the memory block with POSIX API */
+	free(mblock);	/* Free the memory block */
 }
 
 #endif
+
+
+
 
 #if FF_FS_REENTRANT	/* Mutal exclusion */
 
 /* Renesas modify */
 #if BSP_CFG_RTOS_USED >= 1
+/*------------------------------------------------------------------------*/
+/* Definitions of Mutex                                                   */
+/*------------------------------------------------------------------------*/
+
+	/* Win32 */
+//	#include <windows.h>
+//	static HANDLE Mutex[FF_VOLUMES + 1];	/* Table of mutex handle */
+
+#if BSP_CFG_RTOS_USED == 1               /* FreeRTOS */
+#include "FreeRTOS.h"
+#include "semphr.h"
+static SemaphoreHandle_t Mutex[FF_VOLUMES + 1];	/* Table of mutex handle */
+
+#elif BSP_CFG_RTOS_USED == 2             /* embOS */
+#error "Not Support: SEGGER embOS with TFAT"
+#elif BSP_CFG_RTOS_USED == 3             /* MicroC_OS */
+#error "Not Support: Micrium MicroC/OS with TFAT"
+	/* uC/OS-II */
+//	#include "includes.h"
+//	static OS_EVENT *Mutex[FF_VOLUMES + 1];	/* Table of mutex pinter */
+#elif BSP_CFG_RTOS_USED == 4          /* Renesas ITRON OS (RI600PX) */
+#if BSP_CFG_RENESAS_RTOS_USED == 1    /* RI600PX */
+    ER_ID MUTEX_ID_TABLE[FF_VOLUMES + 1]
+#endif
+#else                                    /* Other RTOS */
+#error "Not Support: Other RTOS with TFAT"
+	/* CMSIS-RTOS */
+//	osMutexDef(cmsis_os_mutex);
+
+//	Mutex[vol] = osMutexCreate(osMutex(cmsis_os_mutex));
+//	return (int)(Mutex[vol] != NULL);
+#endif
 
 /*------------------------------------------------------------------------*/
-/* Create a Synchronization Object                                        */
+/* Create a Mutex                                                         */
 /*------------------------------------------------------------------------*/
-/* This function is called in f_mount() function to create a new
-/  synchronization object for the volume, such as semaphore and mutex.
-/  When a 0 is returned, the f_mount() function fails with FR_INT_ERR.
+/* This function is called in f_mount function to create a new mutex
+/  or semaphore for the volume. When a 0 is returned, the f_mount function
+/  fails with FR_INT_ERR.
 */
 
-//const osMutexDef_t Mutex[FF_VOLUMES];	/* Table of CMSIS-RTOS mutex */
-
-int ff_cre_syncobj (	/* 1:Function succeeded, 0:Could not create the sync object */
-	BYTE vol,			/* Corresponding volume (logical drive number) */
-	FF_SYNC_t* sobj		/* Pointer to return the created sync object */
+int ff_mutex_create (	/* Returns 1:Function succeeded or 0:Could not create the mutex */
+	int vol				/* Mutex ID: Volume mutex (0 to FF_VOLUMES - 1) or system mutex (FF_VOLUMES) */
 )
 {
 	/* Win32 */
-//	*sobj = CreateMutex(NULL, FALSE, NULL);
-//	return (int)(*sobj != INVALID_HANDLE_VALUE);
+	//Mutex[vol] = CreateMutex(NULL, FALSE, NULL);
+	//return (int)(Mutex[vol] != INVALID_HANDLE_VALUE);
 
 #if BSP_CFG_RTOS_USED == 1               /* FreeRTOS */
     /* FreeRTOS */
-    *sobj = xSemaphoreCreateMutex();
-    return (int)(*sobj != NULL);
+    Mutex[vol] = xSemaphoreCreateMutex();
+    return (int)(Mutex[vol] != NULL);
 #elif BSP_CFG_RTOS_USED == 2             /* embOS */
 #error "Not Support: SEGGER embOS with TFAT"
 #elif BSP_CFG_RTOS_USED == 3             /* MicroC_OS */
 #error "Not Support: Micrium MicroC/OS with TFAT"
 	/* uC/OS-II */
 //	OS_ERR err;
-//	*sobj = OSMutexCreate(0, &err);
+
+//	Mutex[vol] = OSMutexCreate(0, &err);
 //	return (int)(err == OS_NO_ERR);
 #elif BSP_CFG_RTOS_USED == 4          /* Renesas ITRON OS (RI600V4 or RI600PX) */
 #if BSP_CFG_RENESAS_RTOS_USED == 0    /* RI600V4 */
 /* When the RI600V4, the method of creating a mutex is limited to “static creation”.
    Create semphores by using static API “mutex[]” in the system configuration file. */
-    *sobj = MUTEX_ID_TABLE[vol];
-    return (int)(*sobj > 0);
+    return (int)(MUTEX_ID_TABLE[vol] > 0);
 #else                                 /* RI600PX */
     T_CMTX cmtx = {TA_CEILING, RI600PX_LOCKED_MUTEX_TASK_PRIORITY};
-    *sobj = acre_mtx(&cmtx);
-    return (int)(*sobj > 0);
+    MUTEX_ID_TABLE[vol] = acre_mtx(&cmtx);
+    return (int)(MUTEX_ID_TABLE[vol] > 0);
 #endif
 #else                                    /* Other RTOS */
 #error "Not Support: Other RTOS with TFAT"
 	/* CMSIS-RTOS */
-//	*sobj = osMutexCreate(&Mutex[vol]);
-//	return (int)(*sobj != NULL);
+//	osMutexDef(cmsis_os_mutex);
+
+//	Mutex[vol] = osMutexCreate(osMutex(cmsis_os_mutex));
+//	return (int)(Mutex[vol] != NULL);
+
 #endif
 }
 
 /*------------------------------------------------------------------------*/
-/* Delete a Synchronization Object                                        */
+/* Delete a Mutex                                                         */
 /*------------------------------------------------------------------------*/
-/* This function is called in f_mount() function to delete a synchronization
-/  object that created with ff_cre_syncobj() function. When a 0 is returned,
-/  the f_mount() function fails with FR_INT_ERR.
+/* This function is called in f_mount function to delete a mutex or
+/  semaphore of the volume created with ff_mutex_create function.
 */
 
-int ff_del_syncobj (	/* 1:Function succeeded, 0:Could not delete due to an error */
-	FF_SYNC_t sobj		/* Sync object tied to the logical drive to be deleted */
+void ff_mutex_delete (	/* Returns 1:Function succeeded or 0:Could not delete due to an error */
+	int vol				/* Mutex ID: Volume mutex (0 to FF_VOLUMES - 1) or system mutex (FF_VOLUMES) */
 )
 {
 	/* Win32 */
-//	return (int)CloseHandle(sobj);
+//	CloseHandle(Mutex[vol]);
 
 #if BSP_CFG_RTOS_USED == 1               /* FreeRTOS */
-    vSemaphoreDelete(sobj);
-    return 1;
+    vSemaphoreDelete(Mutex[vol]);
 #elif BSP_CFG_RTOS_USED == 2             /* embOS */
 #error "Not Support: SEGGER embOS with TFAT"
 #elif BSP_CFG_RTOS_USED == 3             /* MicroC_OS */
 #error "Not Support: Micrium MicroC/OS with TFAT"
 	/* uC/OS-II */
 //	OS_ERR err;
-//	OSMutexDel(sobj, OS_DEL_ALWAYS, &err);
-//	return (int)(err == OS_NO_ERR);
+
+//	OSMutexDel(Mutex[vol], OS_DEL_ALWAYS, &err);
+
 #elif BSP_CFG_RTOS_USED == 4          /* Renesas ITRON OS (RI600V4 or RI600PX) */
 #if BSP_CFG_RENESAS_RTOS_USED == 0    /* RI600V4 */
 /* RI600V4 can not delete mutexes. Therfore, force unl_mtx(). */
-    unl_mtx(sobj);
-    return (int)(1);
+    unl_mtx(MUTEX_ID_TABLE[vol]);
 #else                                 /* RI600PX */
-    return (int)(del_mtx(sobj) == E_OK);
+    del_mtx(MUTEX_ID_TABLE[vol]);
 #endif
 #else                                    /* Other RTOS */
 #error "Not Support: Other RTOS with TFAT"
 	/* CMSIS-RTOS */
-//	return (int)(osMutexDelete(sobj) == osOK);
+//	osMutexDelete(Mutex[vol]);
 #endif 
 }
 
 /*------------------------------------------------------------------------*/
-/* Request Grant to Access the Volume                                     */
+/* Request a Grant to Access the Volume                                   */
 /*------------------------------------------------------------------------*/
-/* This function is called on entering file functions to lock the volume.
+/* This function is called on enter file functions to lock the volume.
 /  When a 0 is returned, the file function fails with FR_TIMEOUT.
 */
 
-int ff_req_grant (	/* 1:Got a grant to access the volume, 0:Could not get a grant */
-	FF_SYNC_t sobj	/* Sync object to wait */
+int ff_mutex_take (	/* Returns 1:Succeeded or 0:Timeout */
+	int vol			/* Mutex ID: Volume mutex (0 to FF_VOLUMES - 1) or system mutex (FF_VOLUMES) */
 )
 {
 	/* Win32 */
-//	return (int)(WaitForSingleObject(sobj, FF_FS_TIMEOUT) == WAIT_OBJECT_0);
+//	return (int)(WaitForSingleObject(Mutex[vol], FF_FS_TIMEOUT) == WAIT_OBJECT_0);
 
 #if BSP_CFG_RTOS_USED == 1               /* FreeRTOS */
-    return (int)(xSemaphoreTake(sobj, pdMS_TO_TICKS(FF_FS_TIMEOUT)) == pdTRUE);
+    return (int)(xSemaphoreTake(Mutex[vol], pdMS_TO_TICKS(FF_FS_TIMEOUT)) == pdTRUE);
 #elif BSP_CFG_RTOS_USED == 2             /* embOS */
 #error "Not Support: SEGGER embOS with TFAT"
 #elif BSP_CFG_RTOS_USED == 3             /* MicroC_OS */
 #error "Not Support: Micrium MicroC/OS with TFAT"
 	/* uC/OS-II */
 //	OS_ERR err;
-//	OSMutexPend(sobj, FF_FS_TIMEOUT, &err));
+
+//	OSMutexPend(Mutex[vol], FF_FS_TIMEOUT, &err));
 //	return (int)(err == OS_NO_ERR);
 #elif BSP_CFG_RTOS_USED == 4             /* Renesas ITRON OS (RI600V4 or RI600PX) */
-    return (int)(tloc_mtx(sobj, (TMO)FF_FS_TIMEOUT) == E_OK);
+    return (int)(tloc_mtx(MUTEX_ID_TABLE[vol], (TMO)FF_FS_TIMEOUT) == E_OK);
 #else                                    /* Other RTOS */
 #error "Not Support: Other RTOS with TFAT"
 	/* CMSIS-RTOS */
-//	return (int)(osMutexWait(sobj, FF_FS_TIMEOUT) == osOK);
+//	return (int)(osMutexWait(Mutex[vol], FF_FS_TIMEOUT) == osOK);
 #endif
 }
 
+
 /*------------------------------------------------------------------------*/
-/* Release Grant to Access the Volume                                     */
+/* Release a Grant to Access the Volume                                   */
 /*------------------------------------------------------------------------*/
-/* This function is called on leaving file functions to unlock the volume.
+/* This function is called on leave file functions to unlock the volume.
 */
 
-void ff_rel_grant (
-	FF_SYNC_t sobj	/* Sync object to be signaled */
+void ff_mutex_give (
+	int vol			/* Mutex ID: Volume mutex (0 to FF_VOLUMES - 1) or system mutex (FF_VOLUMES) */
 )
 {
 	/* Win32 */
-//	ReleaseMutex(sobj);
+//	ReleaseMutex(Mutex[vol]);
 
 #if BSP_CFG_RTOS_USED == 1               /* FreeRTOS */
-    xSemaphoreGive(sobj);
+    xSemaphoreGive(Mutex[vol]);
 #elif BSP_CFG_RTOS_USED == 2             /* embOS */
 #error "Not Support: SEGGER embOS with TFAT"
 #elif BSP_CFG_RTOS_USED == 3             /* MicroC_OS */
 #error "Not Support: Micrium MicroC/OS with TFAT"
 	/* uC/OS-II */
-//	OSMutexPost(sobj);
+//	OSMutexPost(Mutex[vol]);
 #elif BSP_CFG_RTOS_USED == 4             /* Renesas ITRON OS (RI600V4 or RI600PX) */
-    unl_mtx(sobj);
+    unl_mtx(MUTEX_ID_TABLE[vol]);
 #else                                    /* Other RTOS */
 #error "Not Support: Other RTOS with TFAT"
 	/* CMSIS-RTOS */
-//	osMutexRelease(sobj);
+//	osMutexRelease(Mutex[vol]);
 #endif
 }
 
 #endif    /* End of BSP_CFG_RTOS_USED >= 1 */
 /* End of Renesas modify */
 
-#endif
+#endif	/* FF_FS_REENTRANT */
 

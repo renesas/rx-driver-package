@@ -370,7 +370,7 @@ void usb_hmsc_strg_drive_task (void)
 static uint16_t hmsc_error_process (usb_utr_t *ptr, uint16_t side, uint16_t err_code)
 {
     uint16_t    retval;
-    static uint8_t g_usb_hmsc_rs_data[512]; /* Request Sense Data Buffer */
+    static uint8_t g_usb_hmsc_rs_data[USB_HMSC_REQUEST_SENSE_SIZE]; /* Request Sense Data Buffer */
 
     retval = err_code;
 

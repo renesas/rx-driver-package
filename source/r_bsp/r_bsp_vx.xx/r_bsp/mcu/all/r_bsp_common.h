@@ -76,6 +76,8 @@
 *         : 28.02.2023 1.51     Changed Minor version to 7.30.
 *         : 10.03.2023 1.52     Changed Minor version to 7.40.
 *         : 26.04.2023 1.53     Changed Minor version to 7.41.
+*         : 21.11.2023 1.54     Changed Minor version to 7.42.
+*                               Added definition of R_BSP_ClockReset_Bootloader function.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -121,7 +123,7 @@ Macro definitions
 
 /* Version Number of r_bsp. */
 #define R_BSP_VERSION_MAJOR           (7)
-#define R_BSP_VERSION_MINOR           (41)
+#define R_BSP_VERSION_MINOR           (42)
 
 /* This macro is used to suppress compiler messages about not only a parameter but also a auto variable not being used
  * in a function. The nice thing about using this implementation is that it does not take any extra RAM or ROM.
@@ -158,6 +160,13 @@ Exported global functions (to be accessed by other files)
 uint32_t R_BSP_GetVersion(void);
 bool R_BSP_SoftwareDelay(uint32_t delay, bsp_delay_units_t units);
 uint32_t R_BSP_GetIClkFreqHz(void);
+
+#if defined(BSP_CFG_BOOTLOADER_PROJECT)
+  #if BSP_CFG_BOOTLOADER_PROJECT == 1
+/* Enable the following functions in the bootloader project. */
+void R_BSP_ClockReset_Bootloader(void);
+  #endif /* BSP_CFG_BOOTLOADER_PROJECT == 1 */
+#endif /* defined(BSP_CFG_BOOTLOADER_PROJECT) */
 
 /* End of multiple inclusion prevention macro */
 #endif  /* R_BSP_COMMON_H */

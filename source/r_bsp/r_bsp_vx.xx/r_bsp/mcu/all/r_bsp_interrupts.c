@@ -37,6 +37,10 @@
 *         : 08.10.2019 1.11     Added process for software interrupt.
 *         : 10.12.2019 1.12     Modified comment.
 *         : 18.05.2021 1.13     Added function for Address exceptions.
+*         : 21.11.2023 1.14     Added error handling when BSP_INT_SRC_BUS_ERROR_ILLEGAL_ACCESS and 
+*                               BSP_INT_SRC_BUS_ERROR_TIMEOUT are specified as vector in the R_BSP_InterruptWrite 
+*                               function.
+*                               Modified comment.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -169,7 +173,7 @@ void bsp_interrupt_open (void)
  * @param[in] vector Which interrupt to register a callback for.
  * @param[in] callback Pointer to function to call when interrupt occurs.
  * @retval BSP_INT_SUCCESS Successful, callback has been registered.
- * @retval BSP_INT_ERR_INVALID_ARG Invalid function address input, any previous function has been unregistered.
+ * @retval BSP_INT_ERR_INVALID_ARG An invalid interrupt source was specified for vector.
  * @details This function registers a callback function for an interrupt. If FIT_NO_FUNC, NULL, or any other invalid 
  * function address is passed for the callback argument then any previously registered callbacks are unregistered.
  * If one of the interrupts that is handled by this code is triggered then the interrupt handler will query this code 
@@ -194,7 +198,16 @@ bsp_int_err_t R_BSP_InterruptWrite (bsp_int_src_t vector,  bsp_int_cb_t callback
     }
     else
     {
-        g_bsp_vectors[vector] = callback;
+        if((BSP_INT_SRC_BUS_ERROR_ILLEGAL_ACCESS == vector) || (BSP_INT_SRC_BUS_ERROR_TIMEOUT == vector) ||
+           (BSP_INT_SRC_EMPTY <= vector))
+        {
+            /* When registering a bus error callback function, specify BSP_INT_SRC_BUS_ERROR in the vector. */
+            err = BSP_INT_ERR_INVALID_ARG;
+        }
+        else
+        {
+            g_bsp_vectors[vector] = callback;
+        }
     }
 
     return err;
@@ -1074,7 +1087,7 @@ R_BSP_ATTRIB_INTERRUPT void undefined_interrupt_source_isr(void)
 #ifdef BSP_MCU_BUS_ERROR_ISR
 /***********************************************************************************************************************
 * Function name: bus_error_isr
-* Description  : By default, this demo code enables the Bus Error Interrupt. This interrupt will fire if the user tries 
+* Description  : This interrupt will fire if the user tries 
 *                to access code or data from one of the reserved areas in the memory map, including the areas covered 
 *                by disabled chip selects. A nop() statement is included here as a convenient place to set a breakpoint 
 *                during debugging and development, and further handling should be added by the user for their 

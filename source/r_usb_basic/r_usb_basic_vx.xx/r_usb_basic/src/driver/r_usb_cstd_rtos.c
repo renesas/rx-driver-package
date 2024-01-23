@@ -18,7 +18,7 @@
 * you agree to the additional terms and conditions found by accessing the 
 * following link:
 * http://www.renesas.com/disclaimer
-* Copyright (C) 2016(2022) Renesas Electronics Corporation. All rights reserved.    
+* Copyright (C) 2016(2023) Renesas Electronics Corporation. All rights reserved.    
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_usb_cstd_rtos.c
@@ -32,6 +32,7 @@
 *         : 01.03.2020 1.30     RX72N/RX66N is added and uITRON is supported.
 *         : 30.06.2022 1.40     USBX PCDC is supported.
 *         : 30.10.2022 1.41     USBX HMSC is supported.
+*         : 30.09.2023 1.42     USBX HCDC is supported.
 ******************************************************************************/
 
 /******************************************************************************
@@ -68,7 +69,7 @@ static  rtos_task_id_t  g_rtos_usb_mgr_task_id;
 #if (USB_CFG_HUB == USB_CFG_ENABLE)
 static  rtos_task_id_t  g_rtos_usb_hub_task_id;
 rtos_mbx_id_t       g_rtos_usb_hub_mbx_id;
-#endif	/* USB_CFG_HUB == USB_CFG_ENABLE */
+#endif  /* USB_CFG_HUB == USB_CFG_ENABLE */
 
 rtos_mbx_id_t       g_rtos_usb_hcd_mbx_id;
 rtos_mbx_id_t       g_rtos_usb_hcd_sub_mbx_id;
@@ -158,7 +159,9 @@ rtos_err_t usb_rtos_configuration(void)
     rtos_create_mailbox(&g_rtos_usb_hcd_sub_mbx_id, &mbx_info);         /* For HCD Sub */
     rtos_create_mailbox(&g_rtos_usb_hcd_sub_addr_mbx_id, &mbx_info);    /* For HCD Sub ADDR */
     rtos_create_mailbox(&g_rtos_usb_mgr_mbx_id, &mbx_info);             /* For MGR */
+   #if (USB_CFG_HUB == USB_CFG_ENABLE)
     rtos_create_mailbox(&g_rtos_usb_hub_mbx_id, &mbx_info);             /* For HUB */
+   #endif  /* USB_CFG_HUB == USB_CFG_ENABLE */
     rtos_create_mailbox(&g_rtos_usb_cls_mbx_id, &mbx_info);             /* For CLS */
    #if defined(USB_CFG_HMSC_USE)
     rtos_create_mailbox(&g_rtos_usb_hmsc_mbx_id, &mbx_info);            /* For HMSC Mailbox */
@@ -187,6 +190,7 @@ rtos_err_t usb_rtos_configuration(void)
     task_info.priority      = MGR_TSK_PRI;
     rtos_create_task(&g_rtos_usb_mgr_task_id, &task_info);
 
+   #if (USB_CFG_HUB == USB_CFG_ENABLE)
     /** For Hub **/
     task_info.task_code     = (TaskFunction_t)usb_hstd_hub_task;
     task_info.p_name        = "HUB_TSK";
@@ -194,6 +198,7 @@ rtos_err_t usb_rtos_configuration(void)
     task_info.p_parameter     = (void *)NULL;
     task_info.priority      = HUB_TSK_PRI;
     rtos_create_task(&g_rtos_usb_hub_task_id, &task_info);
+   #endif  /* USB_CFG_HUB == USB_CFG_ENABLE */
   #endif /* ( (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST ) */
 
   #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
@@ -244,7 +249,7 @@ rtos_err_t usb_rtos_configuration(void)
 
    #if defined(USB_CFG_HHID_USE)
     g_rtos_usb_hhid_mbx_id          = ID_USB_RTOS_HID_MBX;
-   #endif /* defined(USB_CFG_HCDC_USE) */
+   #endif /* defined(USB_CFG_HHID_USE) */
 
    #if USB_CFG_HUB == USB_CFG_ENABLE
     g_rtos_usb_hub_mbx_id           = ID_USB_RTOS_HUB_MBX;
@@ -252,7 +257,9 @@ rtos_err_t usb_rtos_configuration(void)
 
     g_rtos_usb_hcd_task_id           = ID_USB_RTOS_HCD_TSK;
     g_rtos_usb_mgr_task_id           = ID_USB_RTOS_MGR_TSK;
+   #if (USB_CFG_HUB == USB_CFG_ENABLE)
     g_rtos_usb_hub_task_id           = ID_USB_RTOS_HUB_TSK;
+   #endif  /* USB_CFG_HUB == USB_CFG_ENABLE */
   #endif  /* ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST) */
 
   #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
@@ -271,7 +278,9 @@ rtos_err_t usb_rtos_configuration(void)
   #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
     rtos_start_task (&g_rtos_usb_hcd_task_id);
     rtos_start_task (&g_rtos_usb_mgr_task_id);
+   #if (USB_CFG_HUB == USB_CFG_ENABLE)
     rtos_start_task (&g_rtos_usb_hub_task_id);
+   #endif  /* USB_CFG_HUB == USB_CFG_ENABLE */
   #endif /* ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST) */
 
   #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
@@ -315,8 +324,6 @@ rtos_err_t usb_rtos_configuration(void)
     mbx_info.p_queue_start  = (VOID *)&g_rtos_usb_mgr_mbx[0];
     mbx_info.queue_size     = (sizeof(ULONG) * (TX_1_ULONG) * (QUEUE_SIZE));
     rtos_create_mailbox(&g_rtos_usb_mgr_mbx_id, &mbx_info);             /* For MGR */
-
-//  rtos_create_mailbox(&g_rtos_usb_hub_mbx_id, &mbx_info);             /* For HUB */
 
     mbx_info.p_name         = "USB_CLS_MBX";
     mbx_info.message_size   = TX_1_ULONG;
@@ -400,12 +407,16 @@ rtos_err_t usb_rtos_unconfiguration(void)
     /* Terminate Task */
     rtos_terminate_task(&g_rtos_usb_hcd_task_id);           /* For HCD */
     rtos_terminate_task(&g_rtos_usb_mgr_task_id);           /* For MGR */
+   #if (USB_CFG_HUB == USB_CFG_ENABLE)
     rtos_terminate_task(&g_rtos_usb_hub_task_id);           /* For Hub */
+   #endif   /* USB_CFG_HUB == USB_CFG_ENABLE */
 
     /* Delete Task */
     rtos_delete_task(&g_rtos_usb_hcd_task_id);              /* For HCD */
     rtos_delete_task(&g_rtos_usb_mgr_task_id);              /* For MGR */
+   #if (USB_CFG_HUB == USB_CFG_ENABLE)
     rtos_delete_task(&g_rtos_usb_hub_task_id);              /* For HUB */
+   #endif   /* USB_CFG_HUB == USB_CFG_ENABLE */
    #if defined(USB_CFG_HHID_USE)
     rtos_delete_mailbox(&g_rtos_usb_hhid_mbx_id);            /* For HHID */
    #endif /* defined(USB_CFG_HMSC_USE) */
@@ -424,7 +435,9 @@ rtos_err_t usb_rtos_unconfiguration(void)
     rtos_delete_mailbox(&g_rtos_usb_hcd_sub_mbx_id);        /* For HCD Sub */
     rtos_delete_mailbox(&g_rtos_usb_hcd_sub_addr_mbx_id);   /* For HCD Sub ADDR */
     rtos_delete_mailbox(&g_rtos_usb_mgr_mbx_id);            /* For MGR */
+   #if (USB_CFG_HUB == USB_CFG_ENABLE)
     rtos_delete_mailbox(&g_rtos_usb_hub_mbx_id);            /* For HUB */
+   #endif   /* USB_CFG_HUB == USB_CFG_ENABLE */
     rtos_delete_mailbox(&g_rtos_usb_cls_mbx_id);            /* For CLS */
 
   #endif /* ( (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST ) */
@@ -459,6 +472,13 @@ rtos_err_t usb_rtos_unconfiguration(void)
     g_rtos_usb_mpf_id               = USB_NULL;
 
   #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
+    /* Terminate Task */
+    rtos_terminate_task(&g_rtos_usb_hcd_task_id);           /* For HCD */
+    rtos_terminate_task(&g_rtos_usb_mgr_task_id);           /* For MGR */
+   #if (USB_CFG_HUB == USB_CFG_ENABLE)
+    rtos_terminate_task(&g_rtos_usb_hub_task_id);           /* For Hub */
+   #endif   /* USB_CFG_HUB == USB_CFG_ENABLE */
+
     g_rtos_usb_hcd_mbx_id           = USB_NULL;
     g_rtos_usb_hcd_sub_mbx_id       = USB_NULL;
     g_rtos_usb_hcd_sub_addr_mbx_id  = USB_NULL;
@@ -472,11 +492,14 @@ rtos_err_t usb_rtos_unconfiguration(void)
 
    #if defined(USB_CFG_HHID_USE)
     g_rtos_usb_hhid_mbx_id          = USB_NULL;
-   #endif /* defined(USB_CFG_HCDC_USE) */
+   #endif /* defined(USB_CFG_HHID_USE) */
 
   #endif  /* ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST) */
 
   #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
+    /* Terminate Task */
+    rtos_terminate_task(&g_rtos_usb_pcd_task_id);           /* For PCD */
+
     g_rtos_usb_pcd_mbx_id           = USB_NULL;
     g_rtos_usb_pcd_sub_mbx_id       = USB_NULL;
 

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2016(2022) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016(2023) Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_usb_usbif_api.c
@@ -32,6 +32,7 @@
 *         : 30.04.2021 1.31 RX671 is added.
 *         : 30.06.2022 1.40 USBX PCDC is supported
 *         : 30.10.2022 1.41 USBX HMSC is supported
+*         : 30.09.2023 1.42 USBX HCDC is supported.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -115,6 +116,13 @@ usb_utr_t       g_usb_hdata[USB_NUM_USBIP][USB_MAXPIPE_NUM + 1];
 
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
 usb_utr_t       g_usb_pdata[USB_MAXPIPE_NUM + 1];
+
+ #if (BSP_CFG_RTOS_USED == 5)
+  #if defined(USB_CFG_PMSC_USE)
+extern fsp_err_t usb_peri_usbx_pmsc_media_initialize(void const * p_context);
+extern fsp_err_t usb_peri_usbx_media_close(void);
+  #endif                               /* defined(USB_CFG_PMSC_USE) */
+ #endif /* (BSP_CFG_RTOS_USED == 5) */
 
 #endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI */
 
@@ -263,9 +271,9 @@ usb_err_t R_USB_Open( usb_ctrl_t *ctrl, usb_cfg_t *cfg )
     usb_utr_t   utr;
 
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
-#if (BSP_CFG_RTOS_USED > 1)
+#if (BSP_CFG_RTOS_USED != 0)
     usb_rtos_configuration();
-#endif /* (BSP_CFG_RTOS_USED > 1) */
+#endif /* (BSP_CFG_RTOS_USED != 0) */
 #if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
     if (USB_NULL == ctrl)
     {
@@ -440,6 +448,29 @@ usb_err_t R_USB_Open( usb_ctrl_t *ctrl, usb_cfg_t *cfg )
     }
 #endif  /* USB_CFG_NOUSE != USB_CFG_USB0_DMA_RX */
 
+#if USB_CFG_NOUSE != USB_CFG_USB1_DMA_TX
+    ret = R_DMACA_Open(USB_CFG_USB1_DMA_TX);
+    if (DMACA_SUCCESS != ret)
+    {
+#if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
+        return USB_ERR_PARA;
+#else /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
+        return USB_ERR_NG;
+#endif/* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
+    }
+#endif  /* USB_CFG_NOUSE != USB_CFG_USB1_DMA_TX */
+
+#if USB_CFG_NOUSE != USB_CFG_USB1_DMA_RX
+    ret = R_DMACA_Open(USB_CFG_USB1_DMA_RX);
+    if (DMACA_SUCCESS != ret)
+    {
+#if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
+        return USB_ERR_PARA;
+#else /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
+        return USB_ERR_NG;
+#endif/* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
+    }
+#endif  /* USB_CFG_NOUSE != USB_CFG_USB1_DMA_RX */
 #endif  /* USB_CFG_DMA == USB_CFG_ENABLE */
 
     if (USB_HOST == cfg->usb_mode)
@@ -572,6 +603,15 @@ usb_err_t R_USB_Open( usb_ctrl_t *ctrl, usb_cfg_t *cfg )
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
         g_usb_usbmode = USB_PERI;
         ctrl->module = USB_CFG_USE_USBIP;
+ #if defined(USB_CFG_PMSC_USE)
+  #if (BSP_CFG_RTOS_USED == 5)
+        err = usb_peri_usbx_pmsc_media_initialize(p_cfg->p_context);
+        if (USB_SUCCESS != err)
+        {
+            return err;
+        }
+  #endif /* (BSP_CFG_RTOS_USED == 5) */
+ #endif                                /* defined(USB_CFG_PMSC_USE) */
 
         /* USB module start setting */
         err = usb_module_start(USB_CFG_USE_USBIP);
@@ -684,6 +724,11 @@ usb_err_t R_USB_Close(usb_ctrl_t *p_ctrl)
 
 #endif /* BSP_CFG_RTOS_USED == 0 nonOS */
 
+#if USB_CFG_DTC == USB_CFG_ENABLE
+    dtc_err_t   ret;
+
+#endif  /* USB_CFG_DTC == USB_CFG_ENABLE */
+
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
     usb_utr_t   utr;
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
@@ -751,6 +796,39 @@ usb_err_t R_USB_Close(usb_ctrl_t *p_ctrl)
         usb_cstd_usb_task();
     }
   #endif /* BSP_CFG_RTOS_USED == 0   nonOS */
+
+#if USB_CFG_DTC == USB_CFG_ENABLE
+    ret = R_DTC_Close();
+    if (DTC_SUCCESS != ret)
+    {
+#if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
+        return USB_ERR_PARA;
+#else /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
+        return USB_ERR_NG;
+#endif/* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
+    }
+
+#endif  /* USB_CFG_DTC == USB_CFG_ENABLE */
+
+#if USB_CFG_DMA == USB_CFG_ENABLE
+
+#if USB_CFG_NOUSE != USB_CFG_USB0_DMA_TX
+    R_DMACA_Close(USB_CFG_USB0_DMA_TX);
+#endif  /* USB_CFG_NOUSE != USB_CFG_USB0_DMA_TX */
+
+#if USB_CFG_NOUSE != USB_CFG_USB0_DMA_RX
+    R_DMACA_Close(USB_CFG_USB0_DMA_RX);
+#endif  /* USB_CFG_NOUSE != USB_CFG_USB0_DMA_RX */
+
+#if USB_CFG_NOUSE != USB_CFG_USB1_DMA_TX
+    R_DMACA_Close(USB_CFG_USB1_DMA_TX);
+#endif  /* USB_CFG_NOUSE != USB_CFG_USB1_DMA_TX */
+
+#if USB_CFG_NOUSE != USB_CFG_USB1_DMA_RX
+    R_DMACA_Close(USB_CFG_USB1_DMA_RX);
+#endif  /* USB_CFG_NOUSE != USB_CFG_USB1_DMA_RX */
+
+#endif  /* USB_CFG_DMA == USB_CFG_ENABLE */
 
     ret_code = usb_module_stop(p_ctrl->module);
     if (USB_SUCCESS == ret_code)
@@ -1885,11 +1963,6 @@ usb_err_t  R_USB_PipeRead(usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint32_t size)
 #endif /* #if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX630) || defined(BSP_MCU_RX63T)\
     || defined(BSP_MCU_RX72T) || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) */
 
-    if (USB_NULL == (g_usb_open_class[p_ctrl->module] & (1 << p_ctrl->type)))      /* Check USB Open device class */
-    {
-        return USB_ERR_PARA;
-    }
-
 #if defined(BSP_MCU_RX63N)
     if (USB_IP1 == p_ctrl->module && ( USB_HOST == g_usb_usbmode))
     {
@@ -1922,7 +1995,6 @@ usb_err_t  R_USB_PipeRead(usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint32_t size)
             p_tran_data->p_setup     = 0;
             p_tran_data->complete    = usb_hvnd_read_complete;   /* Callback function */
             p_tran_data->segment     = USB_TRAN_END;
-            *(uint32_t *)p_tran_data->p_usr_data = p_ctrl->address;
             p_tran_data->read_req_len= size;                     /* Data Size */
 
             err = usb_hstd_transfer_start(p_tran_data);        /* USB Transfer Start */
@@ -2032,11 +2104,6 @@ usb_err_t  R_USB_PipeWrite(usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint32_t size)
     || defined(BSP_MCU_RX72T) || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) */
 
     if (((USB_NULL == p_ctrl) || (USB_NULL == p_buf) || (USB_PIPE0 == p_ctrl->pipe)) || (USB_MAXPIPE_NUM < p_ctrl->pipe))
-    {
-        return USB_ERR_PARA;
-    }
-
-    if (USB_NULL == (g_usb_open_class[p_ctrl->module] & (1 << p_ctrl->type)))      /* Check USB Open device class */
     {
         return USB_ERR_PARA;
     }

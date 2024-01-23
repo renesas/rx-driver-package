@@ -270,5 +270,46 @@ NOTE: This setting is common to all units. It can not be set individually. Pleas
             <constraint display="when SCI UART Terminal is enabled only" actionOnFail="disable">${BSP_CFG_SCI_UART_TERMINAL_ENABLE} == ${BSP_CFG_SCI_UART_TERMINAL_ENABLE.1}</constraint>
             <description>For serial terminal, this value is interrupt priority. Range is 0 - 15.</description>
         </property>
+        <property id="BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE" display="Select whether to enable bus priority initialization." default="0" type="combobox">
+            <option id="BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE.0" display="Disabled" value="0"/>
+            <option id="BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE.1" display="Enabled" value="1"/>
+            <description>0 = Bus priority initialization is disabled.
+1 = Bus priority initialization is enabled.</description>
+        </property>
+        <property id="BSP_CFG_MEMORY_BUS1_PRIORITY" display="Select the priority order for memory bus 1 (RAM)." default="0" type="combobox">
+            <option id="BSP_CFG_MEMORY_BUS1_PRIORITY.0" display="Fixed" value="0"/>
+            <option id="BSP_CFG_MEMORY_BUS1_PRIORITY.1" display="Toggled" value="1"/>
+            <constraint display="when Bus priority initialization is enabled only" actionOnFail="disable">${BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE} == ${BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE.1}</constraint>
+            <description>0 = The order of priority is fixed.
+1 = The order of priority is toggled.</description>
+        </property>
+        <property id="BSP_CFG_MEMORY_BUS2_PRIORITY" display="Select the priority order for memory bus 2 (ROM)." default="0" type="combobox">
+            <option id="BSP_CFG_MEMORY_BUS2_PRIORITY.0" display="Fixed" value="0"/>
+            <option id="BSP_CFG_MEMORY_BUS2_PRIORITY.1" display="Toggled" value="1"/>
+            <constraint display="when Bus priority initialization is enabled only" actionOnFail="disable">${BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE} == ${BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE.1}</constraint>
+            <description>0 = The order of priority is fixed.
+1 = The order of priority is toggled.</description>
+        </property>
+        <property id="BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY" display="Select the priority order for internal peripheral bus 1." default="0" type="combobox">
+            <option id="BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY.0" display="Fixed" value="0"/>
+            <option id="BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY.1" display="Toggled" value="1"/>
+            <constraint display="when Bus priority initialization is enabled only" actionOnFail="disable">${BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE} == ${BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE.1}</constraint>
+            <description>0 = The order of priority is fixed.
+1 = The order of priority is toggled.</description>
+        </property>
+        <property id="BSP_CFG_INTERNAL_PERIPHERAL_BUS2_PRIORITY" display="Select the priority order for internal peripheral bus 2." default="0" type="combobox">
+            <option id="BSP_CFG_INTERNAL_PERIPHERAL_BUS2_PRIORITY.0" display="Fixed" value="0"/>
+            <option id="BSP_CFG_INTERNAL_PERIPHERAL_BUS2_PRIORITY.1" display="Toggled" value="1"/>
+            <constraint display="when Bus priority initialization is enabled only" actionOnFail="disable">${BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE} == ${BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE.1}</constraint>
+            <description>0 = The order of priority is fixed.
+1 = The order of priority is toggled.</description>
+        </property>
+        <property id="BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY" display="Select the priority order for internal peripheral bus 6." default="0" type="combobox">
+            <option id="BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY.0" display="Fixed" value="0"/>
+            <option id="BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY.1" display="Toggled" value="1"/>
+            <constraint display="when Bus priority initialization is enabled only" actionOnFail="disable">${BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE} == ${BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE.1}</constraint>
+            <description>0 = The order of priority is fixed.
+1 = The order of priority is toggled.</description>
+        </property>
     </configuration>
 </module>

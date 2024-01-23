@@ -53,6 +53,7 @@
  *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
  *         : 29.05.2023 2.70     RX23E-B support added.
  *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *         : 09.10.2023 2.71     Changed version for update of APN.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef SCI_IIC_IF_H
@@ -70,7 +71,7 @@ R_BSP_PRAGMA_UNPACK
 
 /* Version Number of API. */
     #define SCI_IIC_VERSION_MAJOR  (2)
-    #define SCI_IIC_VERSION_MINOR  (70)
+    #define SCI_IIC_VERSION_MINOR  (71)
 
 /*----------------------------------------------------------------------------*/
 /*   Define return values and values of channel state flag.                   */

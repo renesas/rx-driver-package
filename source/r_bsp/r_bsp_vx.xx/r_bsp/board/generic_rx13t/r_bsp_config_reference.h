@@ -55,6 +55,13 @@
 *         : 11.02.2022 2.01     Changed initial value of the following macro definitions.
 *                                - BSP_CFG_SWINT_UNIT1_ENABLE
 *         : 28.02.2023 2.02     Modified comment.
+*         : 21.11.2023 2.03     Added the following macro definitions.
+*                                - BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE
+*                                - BSP_CFG_MEMORY_BUS1_PRIORITY
+*                                - BSP_CFG_MEMORY_BUS2_PRIORITY
+*                                - BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY
+*                                - BSP_CFG_INTERNAL_PERIPHERAL_BUS2_3_PRIORITY
+*                                - BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY
 ***********************************************************************************************************************/
 
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
@@ -523,6 +530,42 @@ Configuration Options
    1 = This project is a C++ project.
 */
 #define BSP_CFG_CPLUSPLUS             (0)
+
+/* Select whether to enable bus priority initialization.
+   0 = Bus priority initialization is disabled.
+   1 = Bus priority initialization is enabled.
+*/
+#define BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE      (0)
+
+/* Select the priority order for memory bus 1 (RAM).
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_MEMORY_BUS1_PRIORITY                (0)
+
+/* Select the priority order for memory bus 2 (ROM).
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_MEMORY_BUS2_PRIORITY                (0)
+
+/* Select the priority order for internal peripheral bus 1.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY   (0)
+
+/* Select the priority order for internal peripheral buses 2 and 3.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS2_3_PRIORITY (0)
+
+/* Select the priority order for internal peripheral bus 6.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY   (0)
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

@@ -32,6 +32,8 @@
 *         : 15.08.2022 1.30     Added RX26T support.
 *                               Fixed to comply GSCE coding standard revision 6.5.0.
 *         : 30.06.2023 1.40     Fixed to comply GSCE coding standard revision 6.5.0.
+*         : 13.11.2023 1.41     Added WAIT_LOOP comments.
+*         : 15.12.2023 1.50     Added support RSPIA with DMAC/DTC.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -64,19 +66,20 @@ typedef enum
 
 typedef struct rspia_tcb_s
 {
-    void            * p_src;
-    void            * p_dst;
-    uint16_t          tx_count;
-    uint16_t          rx_count;
-    uint16_t          xfr_length;
-    uint8_t           bytes_per_transfer;      /* Source buffer bytes per transfer: 1, 2, or 4. */
-    uint8_t           tx_dflt_thresh;          /* TX FIFO threshold(default) */
-    uint8_t           rx_dflt_thresh;          /* RX FIFO threshold(default) */
-    uint8_t           tx_curr_thresh;          /* TX FIFO threshold(current) */
-    uint8_t           rx_curr_thresh;          /* RX FIFO threshold(current) */
-    bool              tx_dummy;                /* State flag for using dummy data in receive only. */
-    bool              idle;                    /* State flag for transmit data empty. */
-    rspia_operation_t transfer_mode; /* Transmit only, receive only, or transmit-receive. */
+    void               * p_src;
+    void               * p_dst;
+    uint16_t             tx_count;
+    uint16_t             rx_count;
+    uint16_t             xfr_length;
+    uint8_t              bytes_per_transfer;      /* Source buffer bytes per transfer: 1, 2, or 4. */
+    uint8_t              tx_dflt_thresh;          /* TX FIFO threshold(default) */
+    uint8_t              rx_dflt_thresh;          /* RX FIFO threshold(default) */
+    uint8_t              tx_curr_thresh;          /* TX FIFO threshold(current) */
+    uint8_t              rx_curr_thresh;          /* RX FIFO threshold(current) */
+    bool                 tx_dummy;                /* State flag for using dummy data in receive only. */
+    bool                 idle;                    /* State flag for transmit data empty. */
+    rspia_operation_t    communication_mode;      /* Transmit only, receive only, or transmit-receive. */
+    rspia_str_tranmode_t data_tran_mode;          /* Data transfer mode */
 } rspia_tcb_t;
 
 /* Driver internal shadow copy of register settings. */
@@ -183,6 +186,9 @@ static void rspia_transmit (uint8_t chan);
 /* RSPIA receive data from RX FIFO buffer. */
 static void rspia_receive (uint8_t chan);
 
+/* Get address of RSPIA data register */
+static void r_rspia_get_buffregaddress(uint8_t chan, uint32_t * p_spdr_adr);
+
 /* Error interrupt handler function. */
 void rspia_spei_grp_isr (void * pdata);
 
@@ -203,20 +209,20 @@ void rspia_tx_common (uint8_t chan);
  *            Pointer to RSPIA channel configuration data structure.
  * @param[in] p_cmd
  *            SPCMD command data structure.
- * @param[in] (*p_callback)(void*p_cbdat)
+ * @param[in] p_callback
  *            Pointer to user defined function called from interrupt.
  * @param[in] *p_hdl
  *            Pointer to a handle for channel. Handle value will be set by this function.
  * @retval    RSPIA_SUCCESS
- *             Successful; channel initialized
+ *             Successful: channel initialized.
  * @retval    RSPIA_ERR_BAD_CHAN
- *             Channel number is not available
+ *             Channel number is not available.
  * @retval    RSPIA_ERR_OMITTED_CHAN
- *             RSPIA_USE_CHx is 0 in config.h
+ *             RSPIA_USE_CHx is 0 in config.h.
  * @retval    RSPIA_ERR_CH_NOT_CLOSED
- *             Channel currently in operation; Perform R_RSPIA_Close() first
+ *             Channel currently in operation; Perform R_RSPIA_Close() first.
  * @retval    RSPIA_ERR_NULL_PTR
- *             *p_cfg pointer or *p_hdl pointer is NULL
+ *             *p_cfg pointer or *p_hdl pointer is NULL.
  * @retval    RSPIA_ERR_ARG_RANGE
  *             An element of the *p_cfg structure contains an invalid value.
  * @retval    RSPIA_ERR_INVALID_ARG
@@ -227,7 +233,8 @@ void rspia_tx_common (uint8_t chan);
  *            once prior to calling any other RSPIA API functions (except R_RSPIA_GetVersion). Once successfully completed,
  *            the status of the selected RSPIA will be set to "open". After that, this function should not be called
  *            again for the same RSPIA channel without first performing a "close" by calling R_RSPIA_Close().
- * @note      None.
+ * @note      Take note of the following points when specifying DMAC transfer or DTC transfer.\n
+ *            \li The DMAC FIT module, and DTC FIT module must be obtained separately.
  */
 rspia_err_t    R_RSPIA_Open(uint8_t                     chan,
                             rspia_chan_settings_t     * p_cfg,
@@ -325,6 +332,8 @@ rspia_err_t    R_RSPIA_Open(uint8_t                     chan,
     g_rspia_handles[chan].chan              = chan;
 
     *p_hdl = &(g_rspia_handles[chan]);     /* Return a pointer to the channel handle structure. */
+
+    g_rspia_tcb[chan].data_tran_mode = p_cfg->tran_mode;    /* Store transfer mode for the current channel */
 
     #if RSPIA_CFG_REQUIRE_LOCK
     /* Release lock for this channel. */
@@ -619,6 +628,7 @@ static uint32_t rspia_baud_set(uint8_t chan, uint32_t bps_target)
      *   N = 2; div = [8,16,32,..,2048]
      *   N = 3; div = [16,32,64,..,4096]
      */
+    /* WAIT_LOOP */
     for (br_dv = 0; br_dv < 4; br_dv++)
     {
         /* Select the smallest value for N possible.
@@ -709,26 +719,27 @@ static void rspia_get_thresh_vals(uint8_t chan)
 /**********************************************************************************************************************
  * Function Name: R_RSPIA_Control()
  *****************************************************************************************************************/ /**
- * @brief     The Control function is responsible for handling special hardware or software operations for the RSPI
+ * @brief     The Control function is responsible for handling special hardware or software operations for the RSPIA
  *            channel.
  * @param[in] hdl
- *            Handle for the channel
+ *            Handle for the channel.
  * @param[in] cmd
  *            Enumerated command code.\n
  *            Available command codes:\n
- *             RSPIA_CMD_SET_BAUD : Change the base bit rate setting without reinitializing the RSPIA channel.\n
- *             RSPIA_CMD_ABORT : Stop the current read or write operation immediately.\n
- *             RSPIA_CMD_SET_REGS : Set all supported RSPIA regs in one operation. (Expert use only)\n
- *             RSPIA_CMD_CHANGE_TX_FIFO_THRESH : Change Frame TX FIFO threshold
- *             RSPIA_CMD_CHANGE_RX_FIFO_THRESH : Change Frame RX FIFO threshold
+ *             RSPIA_CMD_SET_BAUD: Change the base bit rate setting without reinitializing the RSPIA channel.\n
+ *             RSPIA_CMD_ABORT: Stop the current read or write operation immediately.\n
+ *             RSPIA_CMD_SET_REGS: Set all supported RSPIA registers in one operation. (Expert use only)\n
+ *             RSPIA_CMD_CHANGE_TX_FIFO_THRESH: Change Frame TX FIFO threshold.\n
+ *             RSPIA_CMD_CHANGE_RX_FIFO_THRESH: Change Frame RX FIFO threshold.\n
+ *             RSPIA_CMD_SET_TRANS_MODE: Set the data transfer mode.
  * @param[in] *pcmd_data
  *            Pointer to the command-data structure parameter of type void that is used to reference the location of
  *            any data specific to the command needed for its completion. Commands that do not require supporting
- *            data must use the FIT_NO_PTR.
+ *            data must use the FIT_NO_PTR. See R_RSPIA_Control() section in the application note for details.
  * @retval    RSPIA_SUCCESS
  *             Command successfully completed.
  * @retval    RSPIA_ERR_CH_NOT_OPENED
- *             The channel has not been opened. Perform R_RSPIA_Open() first
+ *             The channel has not been opened. Perform R_RSPIA_Open() first.
  * @retval    RSPIA_ERR_UNKNOWN_CMD
  *             Control command is not recognized.
  * @retval    RSPIA_ERR_NULL_PTR
@@ -749,10 +760,11 @@ rspia_err_t R_RSPIA_Control(rspia_hdl_t     hdl,
                             void          * pcmd_data)
 {
     /* Command function data structure definitions. One for each command in rspia_cmd_t. */
-    rspia_cmd_baud_t      * p_baud_struct;
-    rspia_cmd_setregs_t   * p_setregs_struct;
-    uint32_t                reg_temp = 0;
-    uint8_t                 chan     = hdl->chan;
+    rspia_cmd_baud_t       * p_baud_struct;
+    rspia_cmd_setregs_t    * p_setregs_struct;
+    uint32_t                 reg_temp = 0;
+    uint8_t                  chan     = hdl->chan;
+    rspia_cmd_trans_mode_t * p_trans_mode_struct;
 
 #if RSPIA_CFG_REQUIRE_LOCK
     bool        lock_result = false;
@@ -935,6 +947,15 @@ rspia_err_t R_RSPIA_Control(rspia_hdl_t     hdl,
             break;
         }
 
+        case RSPIA_CMD_SET_TRANS_MODE:
+        {
+            /* Cast to rspia_cmd_trans_mode_t* is valid */
+            p_trans_mode_struct                = (rspia_cmd_trans_mode_t*)pcmd_data;
+            g_rspia_tcb[chan].data_tran_mode = p_trans_mode_struct->transfer_mode;
+
+            break;
+        }
+
         default:
         {
 #if RSPIA_CFG_REQUIRE_LOCK
@@ -964,10 +985,10 @@ rspia_err_t R_RSPIA_Control(rspia_hdl_t     hdl,
  *****************************************************************************************************************/ /**
  * @brief     The Read function receives data from the selected SPI device.
  * @param[in] hdl
- *            Handle for the channel
+ *            Handle for the channel.
  * @param[in] p_cmd
  *            Bit field data consisting of all the RSPIA command register settings for SPCMD for this operation.\n
- *            See 2.14  in application note.
+ *            See 2.10  in application note.
  * @param[out] *p_dst
  *            Void type pointer to a destination buffer into which data will be copied that has been received from a SPI
  *            device. It is the responsibility of the caller to ensure that adequate space is available to hold the
@@ -1000,7 +1021,9 @@ rspia_err_t R_RSPIA_Control(rspia_hdl_t     hdl,
  *            configured as slave, then data will only transfer when clocks are received from the Master. While
  *            receiving data, the RSPIA will also transmit the user definable Dummy data pattern defined in the
  *            configuration file.
- * @note      None.
+ * @note      Add the following processing when specifying DMAC transfer or DTC transfer.\n
+ *            \li For the callback function that occurs when communication ends, see 1.7 in application note.\n
+ *            \li Make the necessary settings to make the DMAC or DTC ready to start before calling this function.
  */
 rspia_err_t    R_RSPIA_Read(rspia_hdl_t           hdl,
                             rspia_command_word_t  p_cmd,
@@ -1037,7 +1060,7 @@ rspia_err_t    R_RSPIA_Read(rspia_hdl_t           hdl,
  *            Handle for the channel
  * @param[in] p_cmd
  *            Bit field data consisting of all the RSPIA command register settings for SPCMD for this operation.\n
- *            See 2.14 in application note.
+ *            See 2.10 in application note.
  * @param[in] *p_src
  *            Void type pointer to a source data buffer from which data will be transmitted to a SPI device. Based on
  *            the data frame bit-length specified in the p_cmd.bit_length, the *p_src pointer will be type
@@ -1069,7 +1092,9 @@ rspia_err_t    R_RSPIA_Read(rspia_hdl_t           hdl,
  *            Operation differs slightly depending on whether the RSPIA is operating as Master or Slave. If the RSPIA is
  *            configured as slave, then data will only transfer when clocks are received from the Master. Data received
  *            by the RSPIA peripheral will be discarded.
- * @note      None.
+ * @note      Add the following processing when specifying DMAC transfer or DTC transfer.\n
+ *            \li For the callback function that occurs when communication ends, see 1.7 in application note.\n
+ *            \li Make the necessary settings to make the DMAC or DTC ready to start before calling this function.
  */
 rspia_err_t   R_RSPIA_Write(rspia_hdl_t           hdl,
                             rspia_command_word_t  p_cmd,
@@ -1107,7 +1132,7 @@ rspia_err_t   R_RSPIA_Write(rspia_hdl_t           hdl,
  *            Handle for the channel
  * @param[in] p_cmd
  *            Bit field data consisting of all the RSPIA settings for the command register (SPCMD) for this operation.\n
- *            See 2.14 in application note.
+ *            See 2.10 in application note.
  * @param[in] *p_src
  *            Void type pointer to a source data buffer from which data will be transmitted to a SPI device. Based on
  *            the data frame bit-length specified in the spcmd_command_word.bit_length, the *psrc pointer will be type
@@ -1148,7 +1173,9 @@ rspia_err_t   R_RSPIA_Write(rspia_hdl_t           hdl,
  *            Operation differs slightly depending on whether the RSPIA is operating as Master or Slave. If the RSPIA is
  *            configured as slave, then data will only transfer when clocks are received from the Master. Data to be
  *            transmitted is obtained from the source buffer, while received data is stored in the destination buffer.
- * @note      none.
+ * @note      Add the following processing when specifying DMAC transfer or DTC transfer.\n
+ *            \li For the callback function that occurs when communication ends, see 1.7 in application note.\n
+ *            \li Make the necessary settings to make the DMAC or DTC ready to start before calling this function.
  */
 rspia_err_t   R_RSPIA_WriteRead(rspia_hdl_t           hdl,
                                 rspia_command_word_t  p_cmd,
@@ -1193,6 +1220,7 @@ rspia_err_t   R_RSPIA_WriteRead(rspia_hdl_t           hdl,
 *                length-
 *                   The number of data words to be transferred.
 * Return Value : RSPIA_SUCCESS
+*                   Successful operation.
 *                RSPIA_ERR_CH_NOT_OPENED-
 *                   The channel has not been opened.  Perform R_RSPIA_Open() first
 *                RSPIA_ERR_INVALID_ARG
@@ -1232,14 +1260,14 @@ static rspia_err_t  rspia_write_read_common(rspia_hdl_t            hdl,
     /* Disable interrupts in ICU.*/
     rspia_interrupts_set(chan, false);
 
-    g_rspia_tcb[chan].xfr_length    = length;
-    g_rspia_tcb[chan].tx_count      = 0;
-    g_rspia_tcb[chan].rx_count      = 0;
-    g_rspia_tcb[chan].p_src         = p_src;
-    g_rspia_tcb[chan].p_dst         = p_dst;
-    g_rspia_tcb[chan].transfer_mode = tx_rx_mode;
-    g_rspia_tcb[chan].idle          = false;
-    g_rspia_tcb[chan].tx_dummy      = false;
+    g_rspia_tcb[chan].xfr_length         = length;
+    g_rspia_tcb[chan].tx_count           = 0;
+    g_rspia_tcb[chan].rx_count           = 0;
+    g_rspia_tcb[chan].p_src              = p_src;
+    g_rspia_tcb[chan].p_dst              = p_dst;
+    g_rspia_tcb[chan].communication_mode = tx_rx_mode;
+    g_rspia_tcb[chan].idle               = false;
+    g_rspia_tcb[chan].tx_dummy           = false;
 
     /* Get data type of frame length */
     if (0 == rspia_get_data_type(p_cmd))
@@ -1256,45 +1284,32 @@ static rspia_err_t  rspia_write_read_common(rspia_hdl_t            hdl,
         g_rspia_tcb[chan].bytes_per_transfer = rspia_get_data_type(p_cmd);
     }
 
-    /* Check and Clear SPE bit to set communication */
-    if ((*g_rspia_channels[chan]).SPCR.LONG & RSPIA_SPCR_SPE)
-    {
-        (*g_rspia_channels[chan]).SPCR.LONG &= (~RSPIA_SPCR_SPE);
-    }
-
     /* Simultaneously Clear Communication Mode Select Bit and Set default communication mode  */
     /* Bit CMMD[1:0] is set to 00b: Transmit-Receive. */
     (*g_rspia_channels[chan]).SPCR.LONG &= (~RSPIA_SPCR_CMMD_TX_RX_MASK);
 
-    if (tx_rx_mode & RSPIA_DO_TX)
-    {
-        if (RSPIA_DO_TX == tx_rx_mode)
-        {
-            /* Bit CMMD[1:0] is set to 01b: Transmit only */
-            (*g_rspia_channels[chan]).SPCR.LONG |= RSPIA_SPCR_CMMD_TX_MASK;
-        }
-    }
-    else
+    if (RSPIA_DO_RX == tx_rx_mode)
     {
         /* Allowed transmit dummy data when only receive operation */
         g_rspia_tcb[chan].tx_dummy = true;
     }
 
     /* Reassigns the value of RX FIFO threshold */
-    if ((RSPIA_DO_TX != tx_rx_mode) && (length <= g_rspia_tcb[chan].rx_curr_thresh))
+    if (length <= g_rspia_tcb[chan].rx_curr_thresh)
     {
         (*g_rspia_channels[chan]).SPFCR.BIT.RTRG = (uint8_t)(length - 1);
         g_rspia_tcb[chan].rx_curr_thresh         = (uint8_t)(length - 1);
     }
 
     /* Wait for channel to be idle before making changes to registers. */
+    /* WAIT_LOOP */
     while ((*g_rspia_channels[chan]).SPSR.WORD & RSPIA_SPSR_IDLNF)
     {
         R_BSP_NOP();
     }
 
-    /* WAIT_LOOP */
     /* Clear error sources: the SPSR.MODF, OVRF, PERF and UDRF flags. */
+    /* WAIT_LOOP */
     while ((*g_rspia_channels[chan]).SPSR.WORD  &  ((((RSPIA_SPSR_OVRF  | RSPIA_SPSR_MODF) | RSPIA_SPSR_PERF) | RSPIA_SPSR_UDRF) | RSPIA_SPSR_RRDYF))
     {
         (*g_rspia_channels[chan]).SPSCLR.WORD |= RSPIA_SPSCLR_MASK;
@@ -1407,20 +1422,269 @@ static uint8_t rspia_get_data_type(rspia_command_word_t p_cmd_frame)
 
 
 /**********************************************************************************************************************
+ * Function Name: R_RSPIA_IntSptiIerClear()
+ *****************************************************************************************************************/ /**
+ * @brief     This function is used to clear the ICU.IERm.IENj bit of the transmit buffer-empty interrupt (SPTI).
+ * @param[in] hdl
+ *            RSPIA handle number.
+ * @retval    RSPIA_SUCCESS
+ *             Successful operation.
+ * @retval    RSPIA_ERR_NULL_PTR
+ *             A required pointer argument is NULL.
+ * @details   Use this function when disabling interrupts from within the callback function generated at DMAC
+ *            transfer-end or an intentional cancellation of transmission.\n
+ *            Please call this function after calling R_RSPIA_DisableSpti().
+ * @note      Do not use this function during transmission other than an intentional cancellation of transmission.\n
+ *            Doing so could disrupt the transfer.
+ */
+rspia_err_t R_RSPIA_IntSptiIerClear(rspia_hdl_t hdl)
+{
+    uint8_t chan = hdl->chan;
+
+#if RSPIA_CFG_PARAM_CHECKING_ENABLE
+    if (NULL == hdl)
+    {
+        return RSPIA_ERR_NULL_PTR;
+    }
+#endif
+
+    switch (chan)
+    {
+        case 0:
+#if RSPIA_CFG_USE_CH0
+            R_BSP_InterruptRequestDisable(VECT(RSPIA0, SPTI));  /* Disable RSPIA0.SPTI interrupt request. */
+            IR(RSPIA0,SPTI)     = 0;                            /* Clear RSPIA0.SPTI interrupt status flag. */
+            if (0 == IR(RSPIA0, SPTI))
+            {
+                /* Wait for the write completion. */
+                R_BSP_NOP();
+            }
+#endif
+            break;
+        default:
+            break; // Should never get here. Valid channel number is checked above.
+    }
+
+    return RSPIA_SUCCESS;
+}
+/******************************************************************************
+ End of function R_RSPIA_IntSptiIerClear
+ *****************************************************************************/
+
+
+/**********************************************************************************************************************
+ * Function Name: R_RSPIA_IntSpriIerClear()
+ *****************************************************************************************************************/ /**
+ * @brief     This function is used to clear the ICU.IERm.IENj bit of the receive buffer-full interrupt (SPRI).
+ * @param[in] hdl
+ *            RSPIA handle number.
+ * @retval    RSPIA_SUCCESS
+ *             Successful operation.
+ * @retval    RSPIA_ERR_NULL_PTR
+ *             A required pointer argument is NULL.
+ * @details   Use this function when disabling interrupts from within the callback function generated at DMAC
+ *            transfer-end or an intentional cancellation of transmission.\n
+ *            Please call this function before calling R_RSPIA_DisableRSPI().
+ * @note      Do not use this function during transmission other than an intentional cancellation of transmission.\n
+ *            Doing so could disrupt the transfer.
+ */
+rspia_err_t R_RSPIA_IntSpriIerClear(rspia_hdl_t hdl)
+{
+    uint8_t chan = hdl->chan;
+
+#if RSPIA_CFG_PARAM_CHECKING_ENABLE
+    if (NULL == hdl)
+    {
+        return RSPIA_ERR_NULL_PTR;
+    }
+#endif
+
+    switch (chan)
+    {
+        case 0:
+#if RSPIA_CFG_USE_CH0
+            R_BSP_InterruptRequestDisable(VECT(RSPIA0, SPRI));  /* Disable RSPIA0.SPRI interrupt request. */
+            IR(RSPIA0,SPRI)     = 0;                            /* Clear RSPIA0.SPRI interrupt status flag. */
+            if (0 == IR(RSPIA0, SPRI))
+            {
+                /* Wait for the write completion. */
+                R_BSP_NOP();
+            }
+#endif
+            break;
+        default:
+            break; // Should never get here. Valid channel number is checked above.
+    }
+
+    return RSPIA_SUCCESS;
+}
+/******************************************************************************
+ End of function R_RSPIA_IntSpriIerClear
+ *****************************************************************************/
+
+/**********************************************************************************************************************
+ * Function Name: R_RSPIA_DisableSpti()
+ *****************************************************************************************************************/ /**
+ * @brief     This function disables the generation of transmit buffer empty interrupt request.
+ * @param[in] hdl
+ *            RSPIA handle number.
+ * @retval    RSPIA_SUCCESS
+ *             Successful operation.
+ * @retval    RSPIA_ERR_NULL_PTR
+ *             A required pointer argument is NULL.
+ * @details   Use this function when disabling interrupts from within the callback function generated at DMAC
+ *            transfer-end or an intentional cancellation of transmission.\n
+ *            Please call this function before calling R_RSPIA_IntSptiIerClear().
+ * @note      Do not use this function during transmission other than an intentional cancellation of transmission.\n
+ *            Doing so could disrupt the transfer.
+ */
+rspia_err_t R_RSPIA_DisableSpti(rspia_hdl_t hdl)
+{
+    uint8_t chan = hdl->chan;
+
+#if RSPIA_CFG_PARAM_CHECKING_ENABLE
+    if (NULL == hdl)
+    {
+        return RSPIA_ERR_NULL_PTR;
+    }
+#endif
+
+    /* Write SPTIE bit to 0. Casting to uint8_t is valid */
+    (*g_rspia_channels[chan]).SPCR.LONG &= (uint32_t)(~RSPIA_SPCR_SPTIE);
+
+    return RSPIA_SUCCESS;
+}
+/******************************************************************************
+ End of function R_RSPIA_DisableSpti
+ *****************************************************************************/
+
+
+/**********************************************************************************************************************
+ * Function Name: R_RSPIA_DisableRSPI()
+ *****************************************************************************************************************/ /**
+ * @brief     This function is set to disable the RSPI function.
+ * @param[in] hdl
+ *            RSPIA handle number.
+ * @retval    RSPIA_SUCCESS
+ *             Successful operation.
+ * @retval    RSPIA_ERR_NULL_PTR
+ *             A required pointer argument is NULL.
+ * @details   Use this function when disabling interrupts from within the callback function generated at DMAC
+ *            transfer-end or an intentional cancellation of transmission.\n
+ *            Please call this function after calling R_RSPIA_IntSpriIerClear().
+ * @note      Do not use this function during transmission other than an intentional cancellation of transmission.\n
+ *            Doing so could disrupt the transfer.
+ */
+rspia_err_t R_RSPIA_DisableRSPI(rspia_hdl_t hdl)
+{
+    uint8_t chan = hdl->chan;
+
+#if RSPIA_CFG_PARAM_CHECKING_ENABLE
+    if (NULL == hdl)
+    {
+        return RSPIA_ERR_NULL_PTR;
+    }
+#endif
+
+    /* Write SPE bit to 0. Casting to uint8_t is valid */
+    (*g_rspia_channels[chan]).SPCR.LONG &= (uint32_t)(~RSPIA_SPCR_SPE);
+
+#if RSPIA_CFG_REQUIRE_LOCK
+    /* Release lock for this channel. */
+    R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_RSPIA0 + chan));
+#endif
+
+    return RSPIA_SUCCESS;
+}
+/******************************************************************************
+ End of function R_RSPIA_DisableRSPI
+ *****************************************************************************/
+
+
+/*******************************************************************************
+* Function Name: r_rspia_get_buffregaddress
+* Description  : Gets address of RSPIA data register (SPDR).
+* Arguments    : chan -
+*                    Which channel to use.
+*                p_spdr_addr -
+*                    The address of RSPIA data register (SPDR).
+* Return Value : none
+*******************************************************************************/
+static void r_rspia_get_buffregaddress(uint8_t chan, uint32_t * p_spdr_addr)
+{
+    /* Casting to uint32_t is valid */
+    *p_spdr_addr = (uint32_t)(&(*g_rspia_channels[chan]).SPDR.LONG);
+}
+/******************************************************************************
+ End of function r_rspia_get_buffregaddress
+ *****************************************************************************/
+
+
+/**********************************************************************************************************************
+ * Function Name: R_RSPIA_GetBuffRegAddress()
+ *****************************************************************************************************************/ /**
+ * @brief     This function is used to fetch the address of the RSPIA data register (SPDR).
+ * @param[in] hdl
+ *            RSPIA handle number.
+ * @param[out] *p_spdr_addr
+ *            The pointer for storing the address of SPDR. Set this to the address of the storage destination.
+ * @retval    RSPIA_SUCCESS
+ *             Successful operation.
+ * @retval    RSPIA_ERR_INVALID_ARG
+ *             Argument is not valid for parameter.
+ * @retval    RSPIA_ERR_NULL_PTR
+ *             A required pointer argument is NULL.
+ * @details   Use this function when setting the DMAC/DTC transfer destination/transfer source address, etc.
+ * @note      None.
+ */
+rspia_err_t R_RSPIA_GetBuffRegAddress(rspia_hdl_t hdl, uint32_t *p_spdr_addr)
+{
+    rspia_err_t ret  = RSPIA_SUCCESS;
+    uint8_t    chan = hdl->chan;
+
+#if RSPIA_CFG_PARAM_CHECKING_ENABLE
+    /* Check argument */
+    if (NULL == hdl)
+    {
+        return RSPIA_ERR_NULL_PTR;
+    }
+
+    ret = rspia_chan_check(chan);
+    if (RSPIA_SUCCESS != ret)
+    {
+        return RSPIA_ERR_INVALID_ARG;
+    }
+
+    if (NULL == p_spdr_addr)
+    {
+        return RSPIA_ERR_INVALID_ARG;
+    }
+#endif
+
+    r_rspia_get_buffregaddress(chan, p_spdr_addr);
+
+    return ret;
+}
+/******************************************************************************
+ End of function R_RSPIA_GetBuffRegAddress
+ *****************************************************************************/
+
+
+/**********************************************************************************************************************
  * Function Name: R_RSPIA_Close()
  *****************************************************************************************************************/ /**
  * @brief     Fully disables the RSPIA channel designated by the handle.
  * @param[in] hdl
- *            RSPIA handle number
+ *             RSPIA handle number.
  * @retval    RSPIA_SUCCESS
- *             Successful : channel closed
+ *             Successful: channel closed.
  * @retval    RSPIA_ERR_CH_NOT_OPENED
  *             The channel has not been opened so closing has no effect.
  * @retval    RSPIA_ERR_NULL_PTR
- *             A required pointer argument is NULL
+ *             A required pointer argument is NULL.
  * @details   This disables the RSPIA channel designated by the handle. The RSPIA handle is modified to indicate that it
  *            is no longer in the 'open' state. The RSPIA channel cannot be used again until it has been reopened with
- *            the R_RSPIA_Open function. If this function is called for an RSPI that is not in the open state then an
+ *            the R_RSPIA_Open function. If this function is called for an RSPI that is not in the open state, then an
  *            error code is returned.
  * @note      None.
  */
@@ -1474,7 +1738,7 @@ rspia_err_t  R_RSPIA_Close(rspia_hdl_t hdl)
 *                   Which channel to use.
 *             on_or_off -
 *                   What it says.
-* Return Value : none
+* Return Value : None.
 ***********************************************************************************************************************/
 static void power_on_off(uint8_t chan, uint8_t on_or_off)
 {
@@ -1657,26 +1921,18 @@ static void rspia_interrupts_set(uint8_t chan, bool enabled)
 #if RSPIA_CFG_USE_CH0
         case RSPIA_CH0:
         {
-            /* Disable or enable receive buffer full interrupt */
+            /* Disable  or enable transmit buffer empty interrupt and receive buffer full interrupt */
             if (enabled)
             {
                 R_BSP_InterruptRequestEnable(VECT(RSPIA0, SPRI));
-            }
-            else
-            {
-                R_BSP_InterruptRequestDisable(VECT(RSPIA0, SPRI));
-            }
-
-            /* Disable  or enable transmit buffer empty interrupt */
-            if (enabled)
-            {
                 R_BSP_InterruptRequestEnable(VECT(RSPIA0, SPTI));
             }
             else
             {
                 R_BSP_InterruptRequestDisable(VECT(RSPIA0, SPTI));
+                R_BSP_InterruptRequestDisable(VECT(RSPIA0, SPRI));
             }
-            
+
             /* Waiting bit setting release */
             if (0 == IEN(RSPIA0, SPTI))
             {
@@ -1706,9 +1962,6 @@ static void rspia_interrupts_set(uint8_t chan, bool enabled)
             }
             else
             {
-                /* De-register the error callback function with the BSP group interrupt handler. */
-                R_BSP_InterruptWrite(BSP_INT_SRC_AL0_RSPIA0_SPEI, FIT_NO_FUNC);
-
                 /* Disable error interrupt source bit */
                 #if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6)
                 R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
@@ -1725,6 +1978,9 @@ static void rspia_interrupts_set(uint8_t chan, bool enabled)
                 {
                     R_BSP_NOP();
                 }
+
+                /* De-register the error callback function with the BSP group interrupt handler. */
+                R_BSP_InterruptWrite(BSP_INT_SRC_AL0_RSPIA0_SPEI, FIT_NO_FUNC);
             }
             break;
         }
@@ -1759,6 +2015,7 @@ static void rspia_transmit(uint8_t chan)
 
     /* Service the hardware first to keep it busy. */
     /* Feed the TX. */
+    /* WAIT_LOOP */
     for (cnt = 0; cnt < fifo_frame_tx; cnt++)
     {
         /* Don't write transmit buffer more than length. */
@@ -1796,27 +2053,8 @@ static void rspia_transmit(uint8_t chan)
             /* Last data was transmitted. */
             g_rspia_tcb[chan].idle = true; // There is no data to continues transmit.
 
-            /* Disable SPTI interrupt. */
+            /* Disable the generation for SPTI interrupt. */
             (*g_rspia_channels[chan]).SPCR.LONG &= (uint32_t)(~RSPIA_SPCR_SPTIE);
-
-            /* Check if transmit only */
-            if (RSPIA_DO_TX == g_rspia_tcb[chan].transfer_mode)
-            {
-#if RSPIA_CFG_REQUIRE_LOCK
-                /* Release lock for this channel. */
-                R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_RSPIA0 + chan));
-#endif
-
-                /* Transfer complete. Call the user callback function passing pointer to the result structure. */
-                if ((FIT_NO_FUNC != g_rspia_handles[chan].p_callback) && (NULL != g_rspia_handles[chan].p_callback))
-                {
-                    g_rspia_cb_data[chan].hdl   = &(g_rspia_handles[chan]);
-                    g_rspia_cb_data[chan].event = RSPIA_EVT_TRANSFER_COMPLETE;
-
-                    /* Casting pointer to void* type is valid */
-                    g_rspia_handles[chan].p_callback((void*)&(g_rspia_cb_data[chan]));
-                }
-            }
         }
 
         /* If the data transfer empty, exit from FIFO transfer loop */
@@ -1845,7 +2083,16 @@ static void rspia_transmit(uint8_t chan)
 void rspia_tx_common(uint8_t chan)
 {
     /* RSPIA transmit */
-    rspia_transmit(chan);
+    if (RSPIA_TRANS_MODE_SW == g_rspia_tcb[chan].data_tran_mode)
+    {
+        rspia_transmit(chan);
+    }
+    else
+    {
+        /* Disable SPTI and Clear IR flag*/
+        R_RSPIA_DisableSpti(&g_rspia_handles[chan]);
+        R_RSPIA_IntSptiIerClear(&g_rspia_handles[chan]);
+    }
 }
 /******************************************************************************
  End of function rspia_tx_common
@@ -1873,30 +2120,40 @@ static void rspia_receive(uint8_t chan)
     if (g_rspia_tcb[chan].rx_count < g_rspia_tcb[chan].xfr_length)
     {
         /* Get data from transmit FIFO buffer */
+        /* WAIT_LOOP */
         for (cnt = 0; cnt < fifo_frame_rx; cnt++)
         {
             g_rxdata[cnt] = (*g_rspia_channels[chan]).SPDR.LONG;
         }
 
-        /* Get data to destination */
-        for (cnt = 0; cnt < fifo_frame_rx; cnt++)
+        if (RSPIA_DO_TX != g_rspia_tcb[chan].communication_mode)
         {
-            if (RSPIA_BYTE_DATA == data_size)
+            /* Get data to destination */
+            /* WAIT_LOOP */
+            for (cnt = 0; cnt < fifo_frame_rx; cnt++)
             {
-                /* Casting void type to uint8_t type is valid */
-                ((uint8_t *)p_dst)[g_rspia_tcb[chan].rx_count] = (uint8_t)g_rxdata[cnt];
+                if (RSPIA_BYTE_DATA == data_size)
+                {
+                    /* Casting void type to uint8_t type is valid */
+                    ((uint8_t *)p_dst)[g_rspia_tcb[chan].rx_count] = (uint8_t)g_rxdata[cnt];
+                }
+                else if (RSPIA_WORD_DATA == data_size)
+                {
+                    /* Casting void type to uint16_t type is valid */
+                    ((uint16_t *)p_dst)[g_rspia_tcb[chan].rx_count] = (uint16_t)g_rxdata[cnt];
+                }
+                else  // Must be long data. if (RSPIA_LONG_DATA == data_size)
+                {
+                    /* Casting void type to uint32_t type is valid */
+                    ((uint32_t *)p_dst)[g_rspia_tcb[chan].rx_count] = g_rxdata[cnt];
+                }
+                g_rspia_tcb[chan].rx_count++;
             }
-            else if (RSPIA_WORD_DATA == data_size)
-            {
-                /* Casting void type to uint16_t type is valid */
-                ((uint16_t *)p_dst)[g_rspia_tcb[chan].rx_count] = (uint16_t)g_rxdata[cnt];
-            }
-            else  // Must be long data. if (RSPIA_LONG_DATA == data_size)
-            {
-                /* Casting void type to uint32_t type is valid */
-                ((uint32_t *)p_dst)[g_rspia_tcb[chan].rx_count] = g_rxdata[cnt];
-            }
-            g_rspia_tcb[chan].rx_count++;
+        }
+        else
+        {
+            /* Only read dummy, don't get data to destination */
+            g_rspia_tcb[chan].rx_count += fifo_frame_rx;
         }
 
         /* Check the next amount of data to be received and adjust the RX threshold */
@@ -1916,11 +2173,11 @@ static void rspia_receive(uint8_t chan)
         }
     }
 
-    /* Check for last data. */
+    /* Check for last data is received. */
     if (g_rspia_tcb[chan].rx_count == g_rspia_tcb[chan].xfr_length)
     {
         /* Last data was transferred. */
-        /* Disable SPRI interrupt and RSPIA operation. */
+        /* Disable the generation of SPRI interrupt and RSPI function. */
         (*g_rspia_channels[chan]).SPCR.LONG &= (uint32_t)(~(RSPIA_SPCR_SPRIE | RSPIA_SPCR_SPE));
 
 #if RSPIA_CFG_REQUIRE_LOCK
@@ -1958,7 +2215,26 @@ static void rspia_receive(uint8_t chan)
 void rspia_rx_common(uint8_t chan)
 {
     /* RSPIA receive */
-    rspia_receive(chan);
+    if (RSPIA_TRANS_MODE_SW == g_rspia_tcb[chan].data_tran_mode)
+    {
+        rspia_receive(chan);
+    }
+    else
+    {
+        /* Clear SPRI IR flag and disable RSPI function */
+        R_RSPIA_IntSpriIerClear(&g_rspia_handles[chan]);
+        R_RSPIA_DisableRSPI(&g_rspia_handles[chan]);
+
+        /* Transfer complete. Call the user callback function passing pointer to the result structure. */
+        if ((FIT_NO_FUNC != g_rspia_handles[chan].p_callback) && (NULL != g_rspia_handles[chan].p_callback))
+        {
+            g_rspia_cb_data[chan].hdl   = &(g_rspia_handles[chan]);
+            g_rspia_cb_data[chan].event = RSPIA_EVT_TRANSFER_COMPLETE;
+
+            /* Casting pointer to void* type is valid */
+            g_rspia_handles[chan].p_callback((void*)&(g_rspia_cb_data[chan]));
+        }
+    }
 }
 /******************************************************************************
  End of function rspia_rx_common

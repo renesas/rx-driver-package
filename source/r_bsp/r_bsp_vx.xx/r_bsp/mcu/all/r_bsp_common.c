@@ -49,6 +49,7 @@
 *                               Renamed following function.
 *                               - delay_wait
 *         : 26.07.2019 2.01     Modified comment of API function to Doxygen style.
+*         : 21.11.2023 2.02     Added the R_BSP_ClockReset_Bootloader function.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -222,4 +223,23 @@ bool R_BSP_SoftwareDelay(uint32_t delay, bsp_delay_units_t units)
 
     return(true);
 } /* End of function R_BSP_SoftwareDelay() */
+
+#if defined(BSP_CFG_BOOTLOADER_PROJECT)
+  #if BSP_CFG_BOOTLOADER_PROJECT == 1
+/**********************************************************************************************************************
+ * Function Name: R_BSP_ClockReset_Bootloader
+ ******************************************************************************************************************//**
+ * @brief Returns the MCU clock settings to the reset state.
+ * @return none.
+ * @details This function returns the MCU clock settings to the reset state. The system clock returns to LOCO.
+ * @note This function for bootloader only. This function is valid only in the bootloader project.
+ * Assume the default clock settings in r_bsp_config.h. If the clock settings in r_bsp_config.h are not in the 
+ * default state, some clock types will not return to the reset state.
+ */
+void R_BSP_ClockReset_Bootloader(void)
+{
+    bsp_mcu_clock_reset_bootloader();
+} /* End of function R_BSP_ClockReset_Bootloader() */
+  #endif /* BSP_CFG_BOOTLOADER_PROJECT == 1 */
+#endif /* defined(BSP_CFG_BOOTLOADER_PROJECT) */
 

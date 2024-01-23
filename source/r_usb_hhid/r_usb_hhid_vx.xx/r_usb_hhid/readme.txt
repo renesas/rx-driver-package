@@ -10,7 +10,7 @@ R01AN2028JJ
 
 Version
 -------
-v1.31
+v1.42
 
 Overview
 --------
@@ -64,7 +64,7 @@ How to add to your project
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v.3.03.00
+* Renesas RX v.3.05.00
 * GCC for Renesas RX 4.08.04.201902
 * IAR C/C++ Compiler for Renesas version 4.12.01
 
@@ -76,9 +76,9 @@ r_usb_hhid
 |
 +---doc
 |     \en
-|     |   r01an2028ej0131_usb.pdf
+|     |   r01an2028ej0142_usb.pdf
 |     \jp
-|         r01an2028jj0131_usb.pdf
+|         r01an2028jj0142_usb.pdf
 |
 +---ref
 |       r_usb_hhid_config_reference.h

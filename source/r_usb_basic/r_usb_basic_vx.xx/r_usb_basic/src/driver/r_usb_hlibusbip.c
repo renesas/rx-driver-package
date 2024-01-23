@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2014(2022) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2023) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_hlibusbip.c
@@ -32,6 +32,7 @@
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.04.2020 1.31 RX671 is added.
  *         : 30.10.2022 1.41 USBX HMSC is supported.
+ *         : 30.09.2023 1.42 USBX HCDC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -1692,6 +1693,164 @@ uint16_t usb_hstd_get_pipe_peri_value (uint16_t speed, uint8_t binterval)
 
     return pipe_peri;
 } /* eof usb_hstd_get_pipe_peri_value() */
+
+
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M)
+/******************************************************************************
+ Function Name   : usb_hstd_get_pipe_buf_value
+ Description     : Get Value for USBA Module PIPE BUF REG.
+ Arguments       : Pipe no.
+ Return value    : PIPE BUF set value.
+ ******************************************************************************/
+uint16_t usb_hstd_get_pipe_buf_value (uint16_t usb_class, uint16_t pipe_no)
+{
+    uint16_t pipe_buf;
+
+    if (USB_PIPE6 > pipe_no)
+    {
+        switch (usb_class)
+        {
+            case USB_HCDC:
+                switch (pipe_no)
+                {
+        #if defined(USB_CFG_HCDC_USE)
+                    case USB_CFG_HCDC_BULK_IN:
+        #if (USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_HCDC_MULTI == USB_CFG_ENABLE)
+                        pipe_buf = (USB_BUF_SIZE(1024u) | USB_BUF_NUMB(8u));
+        #else     /* (USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_HCDC_MULTI == USB_CFG_ENABLE) */
+                        pipe_buf = (USB_BUF_SIZE(2048u) | USB_BUF_NUMB(8u));
+        #endif    /* (USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_HCDC_MULTI == USB_CFG_ENABLE) */
+                    break;
+
+                    case USB_CFG_HCDC_BULK_OUT:
+        #if (USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_HCDC_MULTI == USB_CFG_ENABLE)
+                        pipe_buf = (USB_BUF_SIZE(1024u) | USB_BUF_NUMB(40u));
+        #else     /* (USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_HCDC_MULTI == USB_CFG_ENABLE) */
+                        pipe_buf = (USB_BUF_SIZE(2048u) | USB_BUF_NUMB(72u));
+        #endif    /* (USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_HCDC_MULTI == USB_CFG_ENABLE) */
+                    break;
+
+                    case USB_CFG_HCDC_BULK_IN2:
+                        pipe_buf = (USB_BUF_SIZE(1024u) | USB_BUF_NUMB(72u));
+                    break;
+
+                    case USB_CFG_HCDC_BULK_OUT2:
+                        pipe_buf = (USB_BUF_SIZE(1024u) | USB_BUF_NUMB(104u));
+                    break;
+        #endif /* defined(USB_CFG_HCDC_USE) */
+
+                    default:
+                        /* Error */
+                    break;
+                }
+            break;
+
+            case USB_HMSC:
+            switch (pipe_no)
+            {
+        #if defined(USB_CFG_HMSC_USE)
+                case USB_PIPE1:
+                case USB_PIPE2:
+                case USB_PIPE3:
+                case USB_PIPE4:
+                case USB_PIPE5:
+          #if USB_CFG_DTC == USB_CFG_ENABLE
+                    pipe_buf = (USB_BUF_SIZE(1024u) | USB_BUF_NUMB(8u));
+          #else     /* USB_CFG_DTC == USB_CFG_ENABLE */
+                    pipe_buf = (USB_BUF_SIZE(2048u) | USB_BUF_NUMB(8u));
+          #endif    /* USB_CFG_DTC == USB_CFG_ENABLE */
+                break;
+        #endif /* defined(USB_CFG_HMSC_USE) */
+
+                default:
+                    /* Error */
+                break;
+            }
+            break;
+
+            case USB_HVND:
+            switch (pipe_no)
+            {
+        #if defined(USB_CFG_HVND_USE)
+                case USB_PIPE1:
+                    pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(8u));
+                break;
+                case USB_PIPE2:
+                    pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(24u));
+                break;
+                case USB_PIPE3:
+                    pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(40u));
+                break;
+                case USB_PIPE4:
+                    pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(56u));
+                break;
+                case USB_PIPE5:
+                    pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(72u));
+                break;
+        #endif  /* defined(USB_CFG_HVND_USE) */
+
+                default:
+                    /* Error */
+                break;
+            }
+            break;
+
+            default:
+                switch (pipe_no)
+                {
+                    case USB_PIPE1:
+                        pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(8u));
+                    break;
+                    case USB_PIPE2:
+                        pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(24u));
+                    break;
+                    case USB_PIPE3:
+                        pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(40u));
+                    break;
+                    case USB_PIPE4:
+                        pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(56u));
+                    break;
+                    case USB_PIPE5:
+                        pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(72u));
+                    break;
+
+                    default:
+                        /* Error */
+                    break;
+                }
+            break;
+        }
+    }
+    else
+    {
+        switch (pipe_no)
+        {
+            case USB_PIPE6:
+                pipe_buf = (USB_BUF_SIZE(64u) | USB_BUF_NUMB(4u));
+            break;
+
+            case USB_PIPE7:
+                pipe_buf = (USB_BUF_SIZE(64u) | USB_BUF_NUMB(5u));
+            break;
+
+            case USB_PIPE8:
+                pipe_buf = (USB_BUF_SIZE(64u) | USB_BUF_NUMB(6u));
+            break;
+
+            case USB_PIPE9:
+                pipe_buf = (USB_BUF_SIZE(64u) | USB_BUF_NUMB(7u));
+            break;
+
+            default:
+                /* Error */
+            break;
+        }
+    }
+
+
+    return pipe_buf;
+} /* End of function usb_hstd_get_pipe_buf_value() */
+#endif /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
 
 #if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
 /******************************************************************************

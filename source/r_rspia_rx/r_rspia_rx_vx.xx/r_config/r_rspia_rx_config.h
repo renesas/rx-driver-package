@@ -24,6 +24,7 @@
 *         : 31.03.2021 1.00     First Release
 *                               Supported for RX671.
 *         : 30.06.2023 1.40     Supported for RX26T-256K.
+*         : 15.12.2023 1.50     Changed the default value of TX/RX FIFO Threshold.
 ***********************************************************************************************************************/
 #ifndef RSPIA_CONFIG_HEADER_FILE
 #define RSPIA_CONFIG_HEADER_FILE
@@ -59,10 +60,10 @@ Configuration Options
 
 /* SET TX FIFO THRESHOLD; (RSPIA supported MCU ONLY) 0 lowest, 3 highest */
 /* Set the same value for TX FIFO THRESHOLD and RX FIFO THRESHOLD. */
-#define RSPIA_CFG_CH0_TX_FIFO_THRESH (2)
+#define RSPIA_CFG_CH0_TX_FIFO_THRESH (1)
 
 /* SET RX FIFO THRESHOLD; (RSPIA supported MCU ONLY) 0 lowest, 3 highest */
-#define RSPIA_CFG_CH0_RX_FIFO_THRESH (2)
+#define RSPIA_CFG_CH0_RX_FIFO_THRESH (1)
 
 /**********************************************************************************************************************/
 #endif /* RSPIA_CONFIG_HEADER_FILE */

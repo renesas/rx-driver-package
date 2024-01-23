@@ -23,6 +23,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 28.02.2019 1.00     First Release
+*         : 21.11.2023 1.01     Added definition of bsp_mcu_clock_reset_bootloader function.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -45,6 +46,11 @@ Exported global functions (to be accessed by other files)
 ***********************************************************************************************************************/
 uint32_t get_iclk_freq_hz(void);
 void mcu_clock_setup(void);
+
+#if BSP_CFG_BOOTLOADER_PROJECT == 1
+/* Enable the following functions in the bootloader project. */
+void bsp_mcu_clock_reset_bootloader(void);
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 1 */
 
 /* End of multiple inclusion prevention macro */
 #endif

@@ -54,6 +54,7 @@
 *         : 31.07.2019 1.20     Added the following macro definition.
 *                                - BSP_MAPPED_INT_CFG_B_VECT_SHA_SHARDY
 *         : 25.11.2022 1.21     Modified comment.
+*         : 21.11.2023 1.22     Added processing to clear the IR flag.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -874,6 +875,12 @@ void bsp_mapped_interrupt_open (void)
     BSP_PRV_INT_SELECT(BSP_PRV_A, BSP_MAPPED_INT_CFG_A_VECT_AES_AESEND) = BSP_PRV_INT_A_NUM_AES_AESEND;
 #endif
 
+    /* Write 0 to the IRn.IR flag. */
+    /* WAIT_LOOP */
+    for(uint16_t i = IR_PERIB_INTB128;i <= IR_PERIA_INTA255; i++)
+    {
+        ICU.IR[i].BIT.IR = 0;
+    }
 
 } /* End of function bsp_mapped_interrupt_open() */
 

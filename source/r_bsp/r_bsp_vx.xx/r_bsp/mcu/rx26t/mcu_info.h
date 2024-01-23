@@ -24,6 +24,9 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version   Description
 *         : 28.02.2023 1.00      First Release
+*         : 21.11.2023 1.01      Deleted the macro definition of BSP_BCLK_HZ and BSP_UCLK_HZ.
+*                                Added the macro definition of BSP_CFDCLK_HZ.
+*                                Modified comment.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -156,7 +159,7 @@ Macro definitions
 
 /* System clock speed in Hz. */
 #define BSP_ICLK_HZ                 (BSP_SELECTED_CLOCK_HZ / BSP_CFG_ICK_DIV)
-/* Peripheral Module Clock A speed in Hz. Used for ETHERC and EDMAC. */
+/* Peripheral Module Clock A speed in Hz. */
 #define BSP_PCLKA_HZ                (BSP_SELECTED_CLOCK_HZ / BSP_CFG_PCKA_DIV)
 /* Peripheral Module Clock B speed in Hz. */
 #define BSP_PCLKB_HZ                (BSP_SELECTED_CLOCK_HZ / BSP_CFG_PCKB_DIV)
@@ -164,12 +167,10 @@ Macro definitions
 #define BSP_PCLKC_HZ                (BSP_SELECTED_CLOCK_HZ / BSP_CFG_PCKC_DIV)
 /* Peripheral Module Clock D speed in Hz. */
 #define BSP_PCLKD_HZ                (BSP_SELECTED_CLOCK_HZ / BSP_CFG_PCKD_DIV)
-/* External bus clock speed in Hz. */
-#define BSP_BCLK_HZ                 (BSP_SELECTED_CLOCK_HZ / BSP_CFG_BCK_DIV)
 /* FlashIF clock speed in Hz. */
 #define BSP_FCLK_HZ                 (BSP_SELECTED_CLOCK_HZ / BSP_CFG_FCK_DIV)
-/* USB clock speed in Hz. */
-#define BSP_UCLK_HZ                 (BSP_SELECTED_CLOCK_HZ / BSP_CFG_UCK_DIV)
+/* CANFD clock speed in Hz. */
+#define BSP_CFDCLK_HZ               (BSP_SELECTED_CLOCK_HZ / BSP_CFG_CFDCK_DIV)
 
 /* Null argument definitions. */
 #define FIT_NO_FUNC                 ((void (*)(void *))0x10000000)  /* Reserved space on RX */

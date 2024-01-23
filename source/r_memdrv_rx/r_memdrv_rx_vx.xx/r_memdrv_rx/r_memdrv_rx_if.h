@@ -19,11 +19,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018(2023) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_memdrv_rx_if.h
-* Version      : 1.05
+* Version      : 1.20
 * Description  : Memory driver header file
 *************************************************************************************************/
 /************************************************************************************************
@@ -35,6 +35,9 @@
 *              : 10.09.2020 1.03     Changed version to 1.03.
 *              : 30.10.2021 1.04     Add the definition of QSPIX.
 *              : 16.03.2023 1.05     Added support for RSCI and QSPIX Memory Mapped Mode.
+*              : 07.06.2023 1.10     Fixed issue that software lock was not released when RSPI communication timeout 
+*                                    occurs, when MEMDRV FIT, RSPI FIT and DMAC/DTC FIT are used together.
+*              : 29.08.2023 1.20     Updated demo projects.
 *************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -54,7 +57,7 @@ Macro definitions
 #define MEMDRV_IF_H
 /* Version Number of API. */
 #define MEMDRV_VERSION_MAJOR                 (1)
-#define MEMDRV_VERSION_MINOR                 (05)
+#define MEMDRV_VERSION_MINOR                 (20)
 
 /* Define device no. */
 #define MEMDRV_DEV0                          (0)

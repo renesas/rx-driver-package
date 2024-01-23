@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2015(2022) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015(2023) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_psignal.c
@@ -29,6 +29,7 @@
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
  *         : 30.06.2022 1.40 USBX PCDC is supported.
+ *         : 30.09.2023 1.42 USBX HCDC is supported.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -195,7 +196,6 @@ void usb_pstd_detach_process (void)
     {
         (*g_usb_pstd_driver.devdetach)(USB_NULL, USB_POWERED, USB_NULL);
     }
-    usb_pstd_stop_clock();
 }
 /******************************************************************************
  End of function usb_pstd_detach_process

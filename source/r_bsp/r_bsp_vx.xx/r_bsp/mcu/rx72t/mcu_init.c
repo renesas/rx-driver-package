@@ -25,6 +25,7 @@
 *         : 31.10.2018 1.00     First Release
 *         : 28.02.2019 1.01     Modified comment.
 *                               Fixed coding style.
+*         : 21.11.2023 1.02     Modified comment.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -41,9 +42,9 @@ Macro definitions
  * Each bit of PDR corresponding to port m that does not exist is reserved.
  * Also, each bit of PDR corresponding to P40 to P42, P44 to P46, PH0, PH4, and PE2 pins is reserved, because such pins
  * are input only.
- * Make settings of the reserved bit according to the description in section 20.4, Initialization of the Port Direction
- * Register (PDR). These values are then ORed into the direction registers to set non-existent pins as outputs or 
- * inputs, which can help save power.
+ * Make settings of the reserved bit according to the description in section 20.4.1, Initialization of the Port 
+ * Direction Register (PDR). These values are then ORed into the direction registers to set non-existent pins as 
+ * outputs or inputs, which can help save power.
  */
 #if BSP_PACKAGE_PINS == 144
     /* Refer User's Manual: Hardware Table 20.7. */

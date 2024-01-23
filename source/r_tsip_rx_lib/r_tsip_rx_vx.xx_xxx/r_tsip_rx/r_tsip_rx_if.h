@@ -18,7 +18,7 @@
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_tsip_rx_if.h
- * Version      : 1.18
+ * Version      : 1.19
  * Description  : Interface definition for the r_tsip_rx module.
  *                TSIP means the "Trusted Secure IP" that is Renesas original security IP.
  *                Strong point 1:
@@ -55,6 +55,7 @@
  *         : 15.09.2022 1.16     Added support for RSA 3k/4k and updated support for TLS1.3
  *         : 20.01.2023 1.17     Added support for TLS1.3 server
  *         : 24.05.2023 1.18     Added support for RX26T
+ *         : 30.11.2023 1.19     Update example of Secure Bootloader / Firmware Update
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -74,8 +75,9 @@
 #error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
 #endif
 #if (defined BSP_MCU_RX231 || defined BSP_MCU_RX23W) && (BSP_CFG_MCU_PART_VERSION == 0xB)  /* B */
-#elif((defined BSP_MCU_RX26T ) && (BSP_CFG_MCU_PART_VERSION == 0x0))
 #elif defined BSP_MCU_RX23W && BSP_CFG_MCU_PART_VERSION == 0xD  /* D */
+#elif defined BSP_MCU_RX26T && \
+    ((BSP_CFG_MCU_PART_FUNCTION == 0xB /* B */) || (BSP_CFG_MCU_PART_FUNCTION == 0xD /* D */))
 #elif (defined BSP_MCU_RX66T || defined BSP_MCU_RX72T) && ((BSP_CFG_MCU_PART_FUNCTION == 0xE /* E */) || \
     (BSP_CFG_MCU_PART_FUNCTION == 0xF /* F */) || (BSP_CFG_MCU_PART_FUNCTION == 0x10 /* G */))
 #elif (defined BSP_MCU_RX65N || defined BSP_MCU_RX651) && (BSP_CFG_MCU_PART_ENCRYPTION_INCLUDED == true)
@@ -87,7 +89,7 @@
 
 /* Version Number of API. */
 #define TSIP_VERSION_MAJOR    (1u)
-#define TSIP_VERSION_MINOR    (18u)
+#define TSIP_VERSION_MINOR    (19u)
 
 /* Various information. */
 #define R_TSIP_SRAM_WORD_SIZE   (20u)
@@ -250,15 +252,17 @@
 /* Secure boot section. */
 #if TSIP_SECURE_BOOT != 0
 /* Required for each variable definition with no initial value to be placed in the SECURE_BOOT section. */
-#define TSIP_SEC_B_SECURE_BOOT  R_BSP_ATTRIB_SECTION_CHANGE(B, SECURE_BOOT, 4)
+#define TSIP_SEC_B_SECURE_BOOT          R_BSP_ATTRIB_SECTION_CHANGE(B, SECURE_BOOT, 4)
 /* Required for each constant definition to be placed in the SECURE_BOOT section. */
-#define TSIP_SEC_C_SECURE_BOOT  R_BSP_ATTRIB_SECTION_CHANGE(C, SECURE_BOOT, 4)
+#define TSIP_SEC_C_SECURE_BOOT          R_BSP_ATTRIB_SECTION_CHANGE(C, SECURE_BOOT, 4)
 /* Required for each variable definition with initial value to be placed in the SECURE_BOOT section. */
-#define TSIP_SEC_D_SECURE_BOOT  R_BSP_ATTRIB_SECTION_CHANGE(D, SECURE_BOOT, 4)
+#define TSIP_SEC_D_SECURE_BOOT          R_BSP_ATTRIB_SECTION_CHANGE(D, SECURE_BOOT, 4)
 /* Required for each function definition to be placed in the SECURE_BOOT section. */
-#define TSIP_SEC_P_SECURE_BOOT  R_BSP_ATTRIB_SECTION_CHANGE(P, SECURE_BOOT)
+#define TSIP_SEC_P_SECURE_BOOT          R_BSP_ATTRIB_SECTION_CHANGE(P, SECURE_BOOT)
+/* Required for each function definition to be placed in the SECURE_BOOT_ERASE section. */
+#define TSIP_SEC_P_SECURE_BOOT_ERASE    R_BSP_ATTRIB_SECTION_CHANGE(P, SECURE_BOOT_ERASE)
 /* Revert to default section. */
-#define TSIP_SEC_DEFAULT        R_BSP_ATTRIB_SECTION_CHANGE_END
+#define TSIP_SEC_DEFAULT                R_BSP_ATTRIB_SECTION_CHANGE_END
 #else
 /* Required for each variable definition with no initial value to be placed in the SECURE_BOOT section.(dummy) */
 #define TSIP_SEC_B_SECURE_BOOT
@@ -268,6 +272,8 @@
 #define TSIP_SEC_D_SECURE_BOOT
 /* Required for each function definition to be placed in the SECURE_BOOT section.(dummy) */
 #define TSIP_SEC_P_SECURE_BOOT
+/* Required for each function definition to be placed in the SECURE_BOOT_ERASE section.(dummy) */
+#define TSIP_SEC_P_SECURE_BOOT_ERASE
 /* Revert to default section.(dummy) */
 #define TSIP_SEC_DEFAULT
 #endif  /* TSIP_SECURE_BOOT != 0 */
