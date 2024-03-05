@@ -3,7 +3,7 @@ RELEASE_TAG_COMMIT_VERSION_LATEST = 1.32
 VERSIONS_FILE_NAME = versions.xml
 
 MODULE_NAME_LIST_LATEST = 	r_aeropoint_rx \
-					r_ble_qe_utility r_ble_rx23w r_bsp r_byteq \
+					r_ble_da14531_rx r_ble_qe_utility r_ble_rx23w r_bsp r_byteq \
 					r_can_rx r_cmt_rx r_cmtw_rx r_comms_i2c_rx r_ctsu_qe \
 					r_dac_rx r_datfrx_rx r_dmaca_rx r_drw2d_rx r_dsmif_rx r_dtc_rx \
 					r_eeprom_spi r_elc_rx r_emwin_rx r_ether_rx \
