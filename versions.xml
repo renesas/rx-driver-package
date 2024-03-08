@@ -274,6 +274,15 @@
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/11de7f09fbe460c78ed22b7a482d3dfc02585069/FITModules/r_ble_da14531_rx_v1.20_extend.mdf</url>
     </urls>
   </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_flash_rx</name>
+    <version>5.12</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/a731601f68c946c70a60ca4716c03e363f058b26/FITModules/r_flash_rx_v5.12.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/a731601f68c946c70a60ca4716c03e363f058b26/FITModules/r_flash_rx_v5.12.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/a731601f68c946c70a60ca4716c03e363f058b26/FITModules/r_flash_rx_v5.12_extend.mdf</url>
+    </urls>
+  </module>
   <module rdp_version="1.25">
     <name>r_ble_qe_utility</name>
     <version>1.00</version>
