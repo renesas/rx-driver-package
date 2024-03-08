@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_rx_if.h
@@ -159,6 +159,7 @@
 *                              Added support for Tool News R20TS0872. 
 *           28.02.2023 5.10    Added support for RX23E-B.
 *           01.10.2023 5.11    Added support for Tool News R20TS0963.
+*           17.01.2024 5.12    Modified the dual mode definition of RX671 code flash memory 1 Mbyte.
 ***********************************************************************************************************************/
 
 #ifndef FLASH_INTERFACE_HEADER_FILE
@@ -176,7 +177,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Driver Version Number. */
 #define FLASH_RX_VERSION_MAJOR           (5)
-#define FLASH_RX_VERSION_MINOR           (11)
+#define FLASH_RX_VERSION_MINOR           (12)
 
 
 /***********************************************************************************************************************

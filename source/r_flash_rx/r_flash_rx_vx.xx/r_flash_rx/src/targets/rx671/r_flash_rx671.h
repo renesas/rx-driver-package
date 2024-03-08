@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2020 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2020-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_rx671.h
@@ -24,6 +24,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 23.10.2020 4.70    First Release
+*         : 17.01.2024 5.12    Modified the dual mode definition of RX671 code flash memory 1 Mbyte.
 ***********************************************************************************************************************/
 
 #ifndef R_FLASH_RX671_H
@@ -229,7 +230,8 @@ typedef enum _flash_block_address
     FLASH_CF_BLOCK_58      = 0xFFE88000,    /*  32KB: 0xFFE88000 - 0xFFE8FFFF */
     FLASH_CF_BLOCK_59      = 0xFFE80000,    /*  32KB: 0xFFE80000 - 0xFFE87FFF */
 #if   MCU_CFG_PART_MEMORY_SIZE == 0x09  /*   bank end for '9' parts (1 Mb/bank) */
-    FLASH_CF_HI_BANK_LO_ADDR = FLASH_CF_BLOCK_59,
+    FLASH_CF_LO_BANK_LO_ADDR = FLASH_CF_BLOCK_59,
+    FLASH_CF_BLOCK_INVALID = (FLASH_CF_BLOCK_59 - 1),
 #else
     FLASH_CF_BLOCK_60      = 0xFFE78000,    /*  32KB: 0xFFE78000 - 0xFFE7FFFF */
     FLASH_CF_BLOCK_61      = 0xFFE70000,    /*  32KB: 0xFFE70000 - 0xFFE77FFF */
