@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
+* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
+* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
+* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
+* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
+* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
+* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2017 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 0.2)
+           This is a description of a sample FIT module for demonstration purposes only.
+***********************************************************************************************************************/
+-->
+
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="1.0" xs:noNamespaceSchemaLocation="mdf_schema.xsd">
+  <fileVersion>1.00</fileVersion>
+  <formatVersion>1.00</formatVersion>
+  <fileTemplate>r_pinset_type2</fileTemplate>
+  <resourceInfo>
+    <peripheral name="GLCDC">
+        <channelConfiguration>
+          <config>API</config>
+        </channelConfiguration>
+        <pin name="LCD_CLK">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_TCON0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_TCON1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_TCON2">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_TCON3">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA1">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA2">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA3">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA4">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA5">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA6">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA7">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA8">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA9">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA10">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA11">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA12">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA13">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA14">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA15">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA16">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA17">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA18">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA19">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA20">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA21">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA22">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_DATA23">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+        <pin name="LCD_EXTCLK">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+    </peripheral>
+  </resourceInfo>
+</module>

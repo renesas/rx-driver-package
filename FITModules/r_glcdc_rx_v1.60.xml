@@ -45,8 +45,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_glcdc_rx</name>
-        <version>x.xx</version>
-        <zipsource>r_glcdc_rx_vx.xx.zip</zipsource>
+        <version>1.60</version>
+        <zipsource>r_glcdc_rx_v1.60.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>5.20</version>

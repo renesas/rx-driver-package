@@ -14,11 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2019-2024 Renesas Electronics Corporation. All rights reserved.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_glcdc_private.c
- * Version      : 1.40
+ * Version      : 1.60
  * Description  : Internal function program using in GLCDC API functions.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
@@ -26,6 +26,7 @@
  *         : 01.10.2017 1.00      First Release
  *         : 04.04.2019 1.10      Added the comment to loop statement.
  *                                Added support for GNUC and ICCRX.
+ *         : 09.04.2019 1.20      Deleted r_glcdc_param_check_contrast.
  *         : 20.09.2019 1.30      Modified r_glcdc_background_screen_set and r_glcdc_param_check_sync_signal
  *                                to extend the range of front porch.
  *                                Modified r_glcdc_hsync_set, r_glcdc_vsync_set and r_glcdc_data_enable_set
@@ -38,6 +39,7 @@
  *                                Added r_glcdc_qe_parameters_setting function to set the result adjusted
  *                                by configuration options and QE for Display[RX].
  *                                Fixed preprocessor condition of BSP version.
+ *         : 30.01.2024 1.60      Added r_glcdc_framebuffer_setting and r_glcdc_config_mode_setting function.
  *********************************************************************************************************************/
 /***********************************************************************************************************************
  Includes <System Includes> , "Project Includes"
@@ -1068,8 +1070,26 @@ void r_glcdc_qe_parameters_setting(glcdc_cfg_t * const p_glcdc_qe_cfg)
     p_glcdc_qe_cfg->p_callback = GLCDC_PRV_PCALLBACK;
 
 } /* End of function r_glcdc_qe_parameters_setting() */
-#endif /* (GLCDC_CFG_CONFIGURATION_MODE) || defined(QE_DISPLAY_CONFIGURATION) */
 
+/*******************************************************************************
+ * Outline      : Enabling/disabling configuration settings
+ * Function Name: r_glcdc_config_mode_setting
+ * Description  : Sets the value specified by the argument to g_ctrl_blk.config_mode.
+ *                The value of g_ctrl_blk.config_mode allows you to control
+ *                the call to the r_glcdc_qe_parameters_setting function that is executed
+ *                from the R_GLCDC_Open function.
+ * Arguments    : value -
+ *                  true  - called r_glcdc_qe_parameters_setting function in R_GLCDC_Open function.
+ *                  false - Not called r_glcdc_qe_parameters_setting function in R_GLCDC_Open function.
+ * Return Value : none
+ * Note         : This function is assumed to be called only from the QE for Display FIT module.
+ *******************************************************************************/
+void r_glcdc_config_mode_setting(bool value)
+{
+    g_ctrl_blk.config_mode = value;
+} /* End of function r_glcdc_config_mode_setting() */
+
+#endif /* (GLCDC_CFG_CONFIGURATION_MODE) || defined(QE_DISPLAY_CONFIGURATION) */
 
 /*******************************************************************************
  * Outline      : Panel clock setting
@@ -1742,6 +1762,29 @@ void r_glcdc_graphics_layer_set(glcdc_input_cfg_t const * const p_input, glcdc_f
     }
 
 } /* End of function r_glcdc_graphics_layer_set() */
+
+
+/*******************************************************************************
+ * Outline      : Frame buffer address setting
+ * Function Name: r_glcdc_framebuffer_setting
+ * Description  : Frame buffer address setting
+ * Arguments    : p_base
+ *                Pointer of input setting parameter.
+ *                frame -
+ *                Graphic plane select.
+ *
+ * Return Value :none
+ * Note         :none
+ *******************************************************************************/
+void r_glcdc_framebuffer_setting(uint32_t const * const p_base, glcdc_frame_layer_t frame)
+{
+
+    /* ---- Set the base address of graphics plane ---- */
+    /* GRnFLM2 - Graphic n Frame Buffer Control Register 2 */
+    gp_gr[frame]->grxflm2 = (uint32_t) p_base;
+
+} /* End of function r_glcdc_framebuffer_setting() */
+
 
 /*******************************************************************************
  * Outline      : Chroma key setting

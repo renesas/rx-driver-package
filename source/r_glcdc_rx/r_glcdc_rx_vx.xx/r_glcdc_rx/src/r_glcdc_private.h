@@ -14,11 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2019-2024 Renesas Electronics Corporation. All rights reserved.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_glcdc_private.h
- * Version      : 1.40
+ * Version      : 1.60
  * Description  : Header file of GLCDC internal functions.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
@@ -26,6 +26,7 @@
  *         : 01.10.2017 1.00      First Release
  *         : 04.04.2019 1.10      Added support for GNUC and ICCRX.
  *         : 09.04.2019 1.20      Added support for RX72M.
+ *                                Deleted prototype declaration of r_glcdc_param_check_contrast.
  *         : 20.09.2019 1.30      Added support for RX72N and RX66N.
  *                                Deleted BG_PLANE_H_FRONT_PORCH_MAX and BG_PLANE_V_FRONT_PORCH_MAX.
  *                                Added BG_BGSYNC_HP_MAX and BG_BGSYNC_VP_MAX to extend the range of front porch.
@@ -33,6 +34,8 @@
  *                                Added prototype declaration of r_glcdc_qe_parameters_setting function
  *                                and callback function.
  *                                Added definition of GLCDC_PRV_PCALLBACK and extern declaration of CLUT table.
+ *         : 30.01.2024 1.60      Added prototype declaration of r_glcdc_framebuffer_setting function.
+ *                                Added element config_mode to struct glcdc_ctrl_t.
  **********************************************************************************************************************/
 
 #ifndef R_GLCDC_PRIVATE_H
@@ -476,6 +479,7 @@ typedef struct st_glcdc_ctrl
     void (*p_callback)(void *);                                    // Pointer to callback function.
     bool first_vpos_interrupt_flag;                                // First vpos interrupt after release software reset.
     glcdc_interrupt_cfg_t interrupt;                               // Interrupt setting values.
+    bool config_mode;                                              // Configuration mode value.
 } glcdc_ctrl_t;
 
 /***********************************************************************************************************************
@@ -521,6 +525,7 @@ void r_glcdc_background_screen_set(glcdc_cfg_t const * const p_cfg);
 void r_glcdc_blend_condition_set(glcdc_blend_t const * const p_blend, glcdc_frame_layer_t frame);
 
 void r_glcdc_graphics_layer_set(glcdc_input_cfg_t const * const p_input, glcdc_frame_layer_t frame);
+void r_glcdc_framebuffer_setting(uint32_t const * const p_base, glcdc_frame_layer_t frame);
 void r_glcdc_graphics_chromakey_set(glcdc_chromakey_t const * const p_chromakey, glcdc_frame_layer_t frame);
 void r_glcdc_output_block_set(glcdc_cfg_t const * const p_cfg);
 void r_glcdc_brightness_correction(glcdc_brightness_t const * const p_brightness);
