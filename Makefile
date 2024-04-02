@@ -17,7 +17,7 @@ MODULE_NAME_LIST_LATEST = 	r_aeropoint_rx \
 					r_pdc_rx r_ptp_light_rx r_ptp_rx \
 					r_qspi_smstr_rx r_qspix_rx \
 					r_riic_rx r_riichs_rx r_rscan_rx r_rsci_rx r_rspi_rx r_rspia_rx r_rtc_rx \
-					r_s2_rx r_s12ad_rx r_sci_iic_rx r_sci_rx r_scif_rx r_sdc_sdmem_rx r_sdhi_rx r_sdsi_rx \
+					r_s2_rx r_s12ad_rx r_sci_iic_rx r_sci_rx r_scif_rx r_sdc_sdmem_rx r_sdc_spi_rx r_sdhi_rx r_sdsi_rx \
 					r_src_api_rx r_ssi_api_rx r_sys_time_rx \
 					r_t4_driver_rx r_t4_rx r_tfat_driver_rx r_tfat_rx r_tsip_rx_lib \
 					r_uid_rx r_usb_basic r_usb_basic_mini \

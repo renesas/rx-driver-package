@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <fileTemplate></fileTemplate>
+    <configuration>
+
+        <property id="SDC_SPI_CFG_PARAM_CHECKING_ENABLE" display="Parameter check" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+            <option id="SDC_SPI_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="Use system default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <option id="SDC_SPI_CFG_PARAM_CHECKING_ENABLE.0" display="Disable parameter checks" value="0"/>
+            <option id="SDC_SPI_CFG_PARAM_CHECKING_ENABLE.1" display="Enable parameter checks" value="1"/>
+            <description>Selects whether to include parameter checking in the code.
+Use system default= Use the system default setting.
+Disable parameter checks = Omit parameter checking from the build.
+Enable parameter checks = Include parameter checking in the build.</description>
+        </property>
+
+        <property id="SDC_SPI_CFG_ERROR_LOG_ACQUISITION" display="Enable an  error log acquisition function" default="0" type="combobox">
+            <option id="SDC_SPI_CFG_ERROR_LOG_ACQUISITION.0" display="Disable" value="0"/>
+            <option id="SDC_SPI_CFG_ERROR_LOG_ACQUISITION.1" display="Enable" value="1"/>
+            <constraint display="-"></constraint>
+            <description>0=Disable
+1=Enable
+This must be set when an error log acquisition function using the LONGQ FIT module is used.
+When this function is used, the LONGQ FIT module must be included.</description>
+        </property>
+
+        <property id="SDC_SPI_CFG_CH0_CD_ENABLE" display="CH0 CD pin enable" default="1" type="combobox">
+            <option id="SDC_SPI_CFG_CH0_CD_ENABLE.0" display="Disable" value="0"/>
+            <option id="SDC_SPI_CFG_CH0_CD_ENABLE.1" display="Enable" value="1"/>
+            <description>0=Disable
+1=Enable
+Define whether to use the CD pin with ch0.</description>
+        </property>
+
+        <property id="SDC_SPI_CFG_CH0_CD_PORT" display="CH0 CD pin use port" default="0" type="combobox">
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.0" display="0" value="0x00"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.1" display="1" value="0x01"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.2" display="2" value="0x02"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.3" display="3" value="0x03"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.4" display="4" value="0x04"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.5" display="5" value="0x05"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.6" display="6" value="0x06"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.7" display="7" value="0x07"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.8" display="8" value="0x08"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.9" display="9" value="0x09"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.A" display="A" value="0x0A"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.B" display="B" value="0x0B"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.C" display="C" value="0x0C"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.D" display="D" value="0x0D"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.E" display="E" value="0x0E"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.F" display="F" value="0x0F"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.G" display="G" value="0x10"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.H" display="H" value="0x11"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.J" display="J" value="0x12"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.K" display="K" value="0x13"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.L" display="L" value="0x14"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.M" display="M" value="0x15"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.N" display="N" value="0x16"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.O" display="O" value="0x17"/>
+            <option id="SDC_SPI_CFG_CH0_CD_PORT.P" display="P" value="0x18"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SDC_SPI_CFG_CH0_CD_ENABLE} == ${SDC_SPI_CFG_CH0_CD_ENABLE.1}</constraint>
+            <description>Define port to be used with CD pin of ch0.</description>
+        </property>
+
+        <property id="SDC_SPI_CFG_CH0_CD_BIT" display="CH0 CD pin use bit" default="0" type="combobox">
+            <option id="SDC_SPI_CFG_CH0_CD_BIT.0" display="0" value="0"/>
+            <option id="SDC_SPI_CFG_CH0_CD_BIT.1" display="1" value="1"/>
+            <option id="SDC_SPI_CFG_CH0_CD_BIT.2" display="2" value="2"/>
+            <option id="SDC_SPI_CFG_CH0_CD_BIT.3" display="3" value="3"/>
+            <option id="SDC_SPI_CFG_CH0_CD_BIT.4" display="4" value="4"/>
+            <option id="SDC_SPI_CFG_CH0_CD_BIT.5" display="5" value="5"/>
+            <option id="SDC_SPI_CFG_CH0_CD_BIT.6" display="6" value="6"/>
+            <option id="SDC_SPI_CFG_CH0_CD_BIT.7" display="7" value="7"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SDC_SPI_CFG_CH0_CD_ENABLE} == ${SDC_SPI_CFG_CH0_CD_ENABLE.1}</constraint>
+            <description>Define bit to be used with CD pin of ch0.</description>
+        </property>
+
+        <property id="SDC_SPI_CFG_CH0_CS_ENABLE" display="CH0 CS pin enable" default="1" type="combobox">
+            <option id="SDC_SPI_CFG_CH0_CS_ENABLE.0" display="Disable" value="0"/>
+            <option id="SDC_SPI_CFG_CH0_CS_ENABLE.1" display="Enable" value="1"/>
+            <description>0=Disable
+1=Enable
+Define whether to use the CS pin with ch0.</description>
+        </property>
+
+        <property id="SDC_SPI_CFG_CH0_CS_PORT" display="CH0 CS pin use port" default="0" type="combobox">
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.0" display="0" value="0x00"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.1" display="1" value="0x01"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.2" display="2" value="0x02"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.3" display="3" value="0x03"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.4" display="4" value="0x04"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.5" display="5" value="0x05"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.6" display="6" value="0x06"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.7" display="7" value="0x07"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.8" display="8" value="0x08"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.9" display="9" value="0x09"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.A" display="A" value="0x0A"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.B" display="B" value="0x0B"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.C" display="C" value="0x0C"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.D" display="D" value="0x0D"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.E" display="E" value="0x0E"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.F" display="F" value="0x0F"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.G" display="G" value="0x10"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.H" display="H" value="0x11"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.J" display="J" value="0x12"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.K" display="K" value="0x13"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.L" display="L" value="0x14"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.M" display="M" value="0x15"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.N" display="N" value="0x16"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.O" display="O" value="0x17"/>
+            <option id="SDC_SPI_CFG_CH0_CS_PORT.P" display="P" value="0x18"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SDC_SPI_CFG_CH0_CS_ENABLE} == ${SDC_SPI_CFG_CH0_CS_ENABLE.1}</constraint>
+            <description>Define port to be used with CS pin of ch0.</description>
+        </property>
+
+        <property id="SDC_SPI_CFG_CH0_CS_BIT" display="CH0 CS pin use bit" default="0" type="combobox">
+            <option id="SDC_SPI_CFG_CH0_CS_BIT.0" display="0" value="0"/>
+            <option id="SDC_SPI_CFG_CH0_CS_BIT.1" display="1" value="1"/>
+            <option id="SDC_SPI_CFG_CH0_CS_BIT.2" display="2" value="2"/>
+            <option id="SDC_SPI_CFG_CH0_CS_BIT.3" display="3" value="3"/>
+            <option id="SDC_SPI_CFG_CH0_CS_BIT.4" display="4" value="4"/>
+            <option id="SDC_SPI_CFG_CH0_CS_BIT.5" display="5" value="5"/>
+            <option id="SDC_SPI_CFG_CH0_CS_BIT.6" display="6" value="6"/>
+            <option id="SDC_SPI_CFG_CH0_CS_BIT.7" display="7" value="7"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SDC_SPI_CFG_CH0_CS_ENABLE} == ${SDC_SPI_CFG_CH0_CS_ENABLE.1}</constraint>
+            <description>Define bit to be used with CS pin of ch0.</description>
+        </property>
+
+        <property id="SDC_SPI_CFG_CH0_WP_ENABLE" display="CH0 WP pin enable" default="1" type="combobox">
+            <option id="SDC_SPI_CFG_CH0_WP_ENABLE.0" display="Disable" value="0"/>
+            <option id="SDC_SPI_CFG_CH0_WP_ENABLE.1" display="Enable" value="1"/>
+            <description>0=Disable
+1=Enable
+Define whether to use the WP pin with ch0.</description>
+        </property>
+
+        <property id="SDC_SPI_CFG_CH0_WP_PORT" display="CH0 WP pin use port" default="0" type="combobox">
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.0" display="0" value="0x00"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.1" display="1" value="0x01"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.2" display="2" value="0x02"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.3" display="3" value="0x03"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.4" display="4" value="0x04"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.5" display="5" value="0x05"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.6" display="6" value="0x06"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.7" display="7" value="0x07"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.8" display="8" value="0x08"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.9" display="9" value="0x09"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.A" display="A" value="0x0A"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.B" display="B" value="0x0B"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.C" display="C" value="0x0C"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.D" display="D" value="0x0D"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.E" display="E" value="0x0E"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.F" display="F" value="0x0F"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.G" display="G" value="0x10"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.H" display="H" value="0x11"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.J" display="J" value="0x12"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.K" display="K" value="0x13"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.L" display="L" value="0x14"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.M" display="M" value="0x15"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.N" display="N" value="0x16"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.O" display="O" value="0x17"/>
+            <option id="SDC_SPI_CFG_CH0_WP_PORT.P" display="P" value="0x18"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SDC_SPI_CFG_CH0_WP_ENABLE} == ${SDC_SPI_CFG_CH0_WP_ENABLE.1}</constraint>
+            <description>Define port to be used with WP pin of ch0.</description>
+        </property>
+
+        <property id="SDC_SPI_CFG_CH0_WP_BIT" display="CH0 WP pin use bit" default="0" type="combobox">
+            <option id="SDC_SPI_CFG_CH0_WP_BIT.0" display="0" value="0"/>
+            <option id="SDC_SPI_CFG_CH0_WP_BIT.1" display="1" value="1"/>
+            <option id="SDC_SPI_CFG_CH0_WP_BIT.2" display="2" value="2"/>
+            <option id="SDC_SPI_CFG_CH0_WP_BIT.3" display="3" value="3"/>
+            <option id="SDC_SPI_CFG_CH0_WP_BIT.4" display="4" value="4"/>
+            <option id="SDC_SPI_CFG_CH0_WP_BIT.5" display="5" value="5"/>
+            <option id="SDC_SPI_CFG_CH0_WP_BIT.6" display="6" value="6"/>
+            <option id="SDC_SPI_CFG_CH0_WP_BIT.7" display="7" value="7"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SDC_SPI_CFG_CH0_WP_ENABLE} == ${SDC_SPI_CFG_CH0_WP_ENABLE.1}</constraint>
+            <description>Define bit to be used with WP pin of ch0.</description>
+        </property>
+
+        <property id="SDC_SPI_CFG_CH1_CD_ENABLE" display="CH1 CD pin enable" default="1" type="combobox">
+            <option id="SDC_SPI_CFG_CH1_CD_ENABLE.0" display="Disable" value="0"/>
+            <option id="SDC_SPI_CFG_CH1_CD_ENABLE.1" display="Enable" value="1"/>
+            <description>0=Disable
+1=Enable
+Define whether to use the CD pin with ch1.</description>
+        </property>
+
+        <property id="SDC_SPI_CFG_CH1_CD_PORT" display="CH1 CD pin use port" default="0" type="combobox">
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.0" display="0" value="0x00"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.1" display="1" value="0x01"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.2" display="2" value="0x02"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.3" display="3" value="0x03"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.4" display="4" value="0x04"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.5" display="5" value="0x05"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.6" display="6" value="0x06"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.7" display="7" value="0x07"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.8" display="8" value="0x08"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.9" display="9" value="0x09"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.A" display="A" value="0x0A"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.B" display="B" value="0x0B"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.C" display="C" value="0x0C"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.D" display="D" value="0x0D"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.E" display="E" value="0x0E"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.F" display="F" value="0x0F"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.G" display="G" value="0x10"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.H" display="H" value="0x11"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.J" display="J" value="0x12"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.K" display="K" value="0x13"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.L" display="L" value="0x14"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.M" display="M" value="0x15"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.N" display="N" value="0x16"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.O" display="O" value="0x17"/>
+            <option id="SDC_SPI_CFG_CH1_CD_PORT.P" display="P" value="0x18"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SDC_SPI_CFG_CH1_CD_ENABLE} == ${SDC_SPI_CFG_CH1_CD_ENABLE.1}</constraint>
+            <description>Define port to be used with CD pin of ch1.</description>
+        </property>
+
+        <property id="SDC_SPI_CFG_CH1_CD_BIT" display="CH1 CD pin use bit" default="0" type="combobox">
+            <option id="SDC_SPI_CFG_CH1_CD_BIT.0" display="0" value="0"/>
+            <option id="SDC_SPI_CFG_CH1_CD_BIT.1" display="1" value="1"/>
+            <option id="SDC_SPI_CFG_CH1_CD_BIT.2" display="2" value="2"/>
+            <option id="SDC_SPI_CFG_CH1_CD_BIT.3" display="3" value="3"/>
+            <option id="SDC_SPI_CFG_CH1_CD_BIT.4" display="4" value="4"/>
+            <option id="SDC_SPI_CFG_CH1_CD_BIT.5" display="5" value="5"/>
+            <option id="SDC_SPI_CFG_CH1_CD_BIT.6" display="6" value="6"/>
+            <option id="SDC_SPI_CFG_CH1_CD_BIT.7" display="7" value="7"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SDC_SPI_CFG_CH1_CD_ENABLE} == ${SDC_SPI_CFG_CH1_CD_ENABLE.1}</constraint>
+            <description>Define bit to be used with CD pin of ch1.</description>
+        </property>
+
+
+
+        <property id="SDC_SPI_CFG_CH1_CS_ENABLE" display="CH1 CS pin enable" default="1" type="combobox">
+            <option id="SDC_SPI_CFG_CH1_CS_ENABLE.0" display="Disable" value="0"/>
+            <option id="SDC_SPI_CFG_CH1_CS_ENABLE.1" display="Enable" value="1"/>
+            <description>0=Disable
+1=Enable
+Define whether to use the CS pin with ch1.</description>
+        </property>
+
+        <property id="SDC_SPI_CFG_CH1_CS_PORT" display="CH1 CS pin use port" default="0" type="combobox">
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.0" display="0" value="0x00"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.1" display="1" value="0x01"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.2" display="2" value="0x02"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.3" display="3" value="0x03"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.4" display="4" value="0x04"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.5" display="5" value="0x05"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.6" display="6" value="0x06"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.7" display="7" value="0x07"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.8" display="8" value="0x08"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.9" display="9" value="0x09"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.A" display="A" value="0x0A"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.B" display="B" value="0x0B"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.C" display="C" value="0x0C"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.D" display="D" value="0x0D"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.E" display="E" value="0x0E"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.F" display="F" value="0x0F"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.G" display="G" value="0x10"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.H" display="H" value="0x11"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.J" display="J" value="0x12"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.K" display="K" value="0x13"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.L" display="L" value="0x14"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.M" display="M" value="0x15"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.N" display="N" value="0x16"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.O" display="O" value="0x17"/>
+            <option id="SDC_SPI_CFG_CH1_CS_PORT.P" display="P" value="0x18"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SDC_SPI_CFG_CH1_CS_ENABLE} == ${SDC_SPI_CFG_CH1_CS_ENABLE.1}</constraint>
+            <description>Define port to be used with CS pin of ch1.</description>
+        </property>
+
+        <property id="SDC_SPI_CFG_CH1_CS_BIT" display="CH1 CS pin use bit" default="0" type="combobox">
+            <option id="SDC_SPI_CFG_CH1_CS_BIT.0" display="0" value="0"/>
+            <option id="SDC_SPI_CFG_CH1_CS_BIT.1" display="1" value="1"/>
+            <option id="SDC_SPI_CFG_CH1_CS_BIT.2" display="2" value="2"/>
+            <option id="SDC_SPI_CFG_CH1_CS_BIT.3" display="3" value="3"/>
+            <option id="SDC_SPI_CFG_CH1_CS_BIT.4" display="4" value="4"/>
+            <option id="SDC_SPI_CFG_CH1_CS_BIT.5" display="5" value="5"/>
+            <option id="SDC_SPI_CFG_CH1_CS_BIT.6" display="6" value="6"/>
+            <option id="SDC_SPI_CFG_CH1_CS_BIT.7" display="7" value="7"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SDC_SPI_CFG_CH1_CS_ENABLE} == ${SDC_SPI_CFG_CH1_CS_ENABLE.1}</constraint>
+            <description>Define bit to be used with CS pin of ch1.</description>
+        </property>
+
+        <property id="SDC_SPI_CFG_CH1_WP_ENABLE" display="CH1 WP pin enable" default="1" type="combobox">
+            <option id="SDC_SPI_CFG_CH1_WP_ENABLE.0" display="Disable" value="0"/>
+            <option id="SDC_SPI_CFG_CH1_WP_ENABLE.1" display="Enable" value="1"/>
+            <description>0=Disable
+1=Enable
+Define whether to use the WP pin with ch1.</description>
+        </property>
+
+        <property id="SDC_SPI_CFG_CH1_WP_PORT" display="CH1 WP pin use port" default="0" type="combobox">
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.0" display="0" value="0x00"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.1" display="1" value="0x01"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.2" display="2" value="0x02"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.3" display="3" value="0x03"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.4" display="4" value="0x04"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.5" display="5" value="0x05"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.6" display="6" value="0x06"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.7" display="7" value="0x07"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.8" display="8" value="0x08"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.9" display="9" value="0x09"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.A" display="A" value="0x0A"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.B" display="B" value="0x0B"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.C" display="C" value="0x0C"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.D" display="D" value="0x0D"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.E" display="E" value="0x0E"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.F" display="F" value="0x0F"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.G" display="G" value="0x10"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.H" display="H" value="0x11"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.J" display="J" value="0x12"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.K" display="K" value="0x13"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.L" display="L" value="0x14"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.M" display="M" value="0x15"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.N" display="N" value="0x16"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.O" display="O" value="0x17"/>
+            <option id="SDC_SPI_CFG_CH1_WP_PORT.P" display="P" value="0x18"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SDC_SPI_CFG_CH1_WP_ENABLE} == ${SDC_SPI_CFG_CH1_WP_ENABLE.1}</constraint>
+            <description>Define port to be used with WP pin of ch1.</description>
+        </property>
+
+        <property id="SDC_SPI_CFG_CH1_WP_BIT" display="CH1 WP pin use bit" default="0" type="combobox">
+            <option id="SDC_SPI_CFG_CH1_WP_BIT.0" display="0" value="0"/>
+            <option id="SDC_SPI_CFG_CH1_WP_BIT.1" display="1" value="1"/>
+            <option id="SDC_SPI_CFG_CH1_WP_BIT.2" display="2" value="2"/>
+            <option id="SDC_SPI_CFG_CH1_WP_BIT.3" display="3" value="3"/>
+            <option id="SDC_SPI_CFG_CH1_WP_BIT.4" display="4" value="4"/>
+            <option id="SDC_SPI_CFG_CH1_WP_BIT.5" display="5" value="5"/>
+            <option id="SDC_SPI_CFG_CH1_WP_BIT.6" display="6" value="6"/>
+            <option id="SDC_SPI_CFG_CH1_WP_BIT.7" display="7" value="7"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${SDC_SPI_CFG_CH1_WP_ENABLE} == ${SDC_SPI_CFG_CH1_WP_ENABLE.1}</constraint>
+            <description>Define bit to be used with WP pin of ch1.</description>
+        </property>
+
+        <property id="SDC_SPI_CFG_SBLK_NUM" display="Max blocks to access with single block commands" default="1" type="textbox">
+            <constraint display="Value must be in the range 0 ~ 255" actionOnFail="error">("${SDC_SPI_CFG_SBLK_NUM}" &gt;= 0) &amp;&amp; ("${SDC_SPI_CFG_SBLK_NUM}" &lt;= 255)</constraint>
+            <description>Please define the number of the max blocks to access with single block commands.(0-255) When 0 is set, this does not use single block commands.</description>
+        </property>
+        
+        <property id="SDC_SPI_CFG_USE_SC_CRC" display="Use CRC smart configration " default="0" type="combobox">
+            <option id="SDC_SPI_CFG_USE_SC_CRC.0" display="Disable" value="0"/>
+            <option id="SDC_SPI_CFG_USE_SC_CRC.1" display="Enable" value="1"/>
+            <constraint display="-"></constraint>
+            <description>0=Disable
+1=Enable
+Use CRC smart configration.</description>
+        </property>
+        
+    </configuration>
+</module>
