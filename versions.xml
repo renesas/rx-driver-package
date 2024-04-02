@@ -293,6 +293,15 @@
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/2d717bf58e1e46beceaea563ae66190b535dd5b9/FITModules/r_glcdc_rx_v1.60_extend.mdf</url>
     </urls>
   </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_sdc_spi_rx</name>
+    <version>1.00</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/6325190daa3dd8afc0e6899f6b9273f450143d82/FITModules/r_sdc_spi_rx_v1.00.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/6325190daa3dd8afc0e6899f6b9273f450143d82/FITModules/r_sdc_spi_rx_v1.00.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/6325190daa3dd8afc0e6899f6b9273f450143d82/FITModules/r_sdc_spi_rx_v1.00_extend.mdf</url>
+    </urls>
+  </module>
   <module rdp_version="1.25">
     <name>r_ble_qe_utility</name>
     <version>1.00</version>
