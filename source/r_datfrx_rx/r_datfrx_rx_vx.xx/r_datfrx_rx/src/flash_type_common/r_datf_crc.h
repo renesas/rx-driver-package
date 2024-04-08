@@ -19,16 +19,18 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018(2023) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_datf_crc.h
-* Version      : 2.00
+* Version      : 2.10
 * Description  : DATFRX interface header file
 *************************************************************************************************/
 /************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 28.09.2018 2.00     First Release
+*              : 21.04.2023 2.10     Added macro definition "FLASH_DM_CFG_CRC_HARDWARE (0)"
+*              :                     Added macro constant judgment of "FLASH_TYPE_5"
 *************************************************************************************************/
 
 /************************************************************************************************
@@ -44,6 +46,11 @@ Macro definitions
 #ifndef R_DATF_CRC_H
 #define R_DATF_CRC_H
 
+#ifdef FLASH_DM_CFG_CRC_HARDWARE
+#undef FLASH_DM_CFG_CRC_HARDWARE
+#endif
+#define FLASH_DM_CFG_CRC_HARDWARE   (0)
+
 #if(FLASH_TYPE == FLASH_TYPE_2)
 
 /* ==== CRC register definitions ==== */
@@ -56,7 +63,7 @@ Macro definitions
 
 #endif /* (FLASH_TYPE == FLASH_TYPE_2) */
 
-#if(FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4)
+#if(FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5)
 
 /* ==== CRC register definitions ==== */
 #if(FLASH_DM_CFG_CRC_HARDWARE == 1)
@@ -66,10 +73,10 @@ Macro definitions
 #define DATF_MSTPCR_CRC             SYSTEM.MSTPCRB.BIT.MSTPB23 /* CRC Module stop setting              */
 #endif    /* FLASH_DM_CFG_CRC_HARDWARE */
 
-#endif /* (FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4) */
+#endif /* (FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5) */
 
 
-#if(FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4)
+#if(FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5)
 
 /* ==== CRC macro for calculation ==== */
 #if(FLASH_DM_CFG_CRC_HARDWARE == 1)
@@ -110,7 +117,7 @@ Exported global functions (to be accessed by other files)
 *************************************************************************************************/
 uint16_t r_datf_crc16(uint8_t *pData, uint16_t CrcCnt);
 
-#endif /* (FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4) */
+#endif /* (FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5) */
 
 #endif    /* R_DATF_CRC_H   */
 

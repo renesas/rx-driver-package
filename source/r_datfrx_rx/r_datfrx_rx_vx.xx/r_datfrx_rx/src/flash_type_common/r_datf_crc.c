@@ -19,17 +19,18 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018(2023) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 
 /************************************************************************************************
 * File Name    : r_datf_crc.c
-* Version      : 2.00
+* Version      : 2.10
 * Description  : DATFRX interface source file
 *************************************************************************************************/
 /************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 28.09.2018 2.00     First Release
+*              : 21.04.2023 2.10     Added macro constant judgment of "FLASH_TYPE_5"
 *************************************************************************************************/
 
 /***********************************************************************************************
@@ -38,7 +39,7 @@ Includes   <System Includes> , "Project Includes"
 
 #include "r_flash_rx_if.h"
 
-#if(FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4)
+#if(FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5)
 
 #include "r_datf_crc.h"
 
@@ -111,6 +112,6 @@ uint16_t r_datf_crc16(uint8_t *pData, uint16_t CrcCnt)
     return DATF_CRC16_GET();
 }
 
-#endif /* (FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4) */
+#endif /* (FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5) */
 
 /* End of File */

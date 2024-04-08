@@ -19,16 +19,16 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018(2023) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
-* File Name    : r_dm_2.h
-* Version      : 2.00
+* File Name    : r_dm_5.h
+* Version      : 1.00
 * Description  : DATFRX interface header file
 *************************************************************************************************/
 /************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
-*              : 28.09.2018 2.00     First Release
+*              : 21.04.2023 1.00     First Release
 *************************************************************************************************/
 
 /************************************************************************************************
@@ -42,10 +42,10 @@ Includes <System Includes> , "Project Includes"
 /************************************************************************************************
 Macro definitions
 *************************************************************************************************/
-#ifndef R_DM_2_H
-#define R_DM_2_H
+#ifndef R_DM_5_H
+#define R_DM_5_H
 
-#if(FLASH_TYPE == FLASH_TYPE_2)
+#if(FLASH_TYPE == FLASH_TYPE_5)
 
 #include "r_dispatch_2.h"
 #include "r_datf_crc.h"
@@ -61,12 +61,9 @@ Exported global variables
 /************************************************************************************************
 Exported global functions (to be accessed by other files)
 *************************************************************************************************/
-extern e_flash_dm_status_t R_FLASH_DM_Control(e_flash_dm_cmd_t cmd, uint32_t* pcfg);
-void r_flash_dm_disable_rw(void);
-void r_flash_dm_enable_rw(void);
 
-#endif /* (FLASH_TYPE == FLASH_TYPE_2) */
+#endif /* (FLASH_TYPE == FLASH_TYPE_5) */
 
-#endif /* R_DM_2_H */
+#endif /* R_DM_5_H */
 
 /* End of File */

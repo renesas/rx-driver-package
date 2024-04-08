@@ -19,17 +19,21 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018(2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018(2024) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_flash_dm_rx_if.c
-* Version      : 2.01
+* Version      : 2.30
 * Description  : DATFRX interface source file
 *************************************************************************************************/
 /************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 28.09.2018 2.00     First Release
 *              : 25.01.2019 2.01     English PDF added, Fixed blank check processing and Busy check procedure
+*              : 21.04.2023 2.10     Added macro constant judgment of "FLASH_TYPE_5"
+*              : 14.03.2024 2.30     Delete the following macro judgments.
+*                                    "FLASH_CFG_CODE_FLASH_ENABLE"
+*                                    "FLASH_CFG_CODE_FLASH_BGO"
 *************************************************************************************************/
 
 /************************************************************************************************
@@ -69,15 +73,9 @@ static e_flash_dm_status_t r_flash_dm_d1_control(e_flash_dm_cmd_t cmd, uint32_t*
 static e_flash_dm_status_t r_flash_dm_d1_format(void);
 static e_flash_dm_status_t r_flash_dm_1_get_writable_size(uint32_t* pcfg);
 
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
-static e_flash_dm_status_t r_flash_dm_cfprotect(uint32_t protect);
-static e_flash_dm_status_t r_flash_dm_cfromcache(uint8_t rom_cache);
-
-#endif /* FLASH_CFG_CODE_FLASH_ENABLE */
-
 static st_flash_dispatch_1_hndl_t* (g_flash_dm_handle);
 
-#else /* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 */
+#else /* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5 */
 static e_flash_dm_status_t r_flash_dm_d2_init(void);
 static e_flash_dm_status_t r_flash_dm_d2_read(st_flash_dm_info_t * p_flash_dm_info);
 static e_flash_dm_status_t r_flash_dm_d2_write(st_flash_dm_info_t * p_flash_dm_info);
@@ -182,9 +180,6 @@ e_flash_dm_status_t R_FLASH_DM_Open(uint32_t* p_flash_dm_work, p_flash_dm_callba
     return ret;
 } /* End of function R_FLASH_DM_Open() */
 
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_BGO == 1)
-#pragma section FRAM
-#endif /* (FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_BGO == 1) */
 
 /************************************************************************************************
 * Function Name: R_FLASH_DM_Close
@@ -260,7 +255,7 @@ e_flash_dm_status_t R_FLASH_DM_Init(void)
     e_flash_dm_status_t ret = FLASH_DM_SUCCESS;
 #if(FLASH_TYPE == FLASH_TYPE_1)
     ret = r_flash_dm_d1_init();
-#else /* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 */
+#else /* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5 */
     ret = r_flash_dm_d2_init();
 #endif /* FLASH_TYPE */
     return ret;
@@ -279,7 +274,7 @@ e_flash_dm_status_t R_FLASH_DM_Init(void)
 *------------------------------------------------------------------------------------------------
 * Notes        : Always, Place the source code to the ROM.
 *************************************************************************************************/
-#if((FLASH_TYPE == FLASH_TYPE_2) || (FLASH_TYPE == FLASH_TYPE_3) || (FLASH_TYPE == FLASH_TYPE_4))
+#if(FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5)
 e_flash_dm_status_t R_FLASH_DM_InitAdvance(void)
 {
     e_flash_dm_status_t ret = FLASH_DM_SUCCESS;
@@ -312,7 +307,7 @@ e_flash_dm_status_t R_FLASH_DM_InitAdvance(void)
     g_flash_dm_handle->api_call = tmp;
     return ret;
 }/* End of function R_FLASH_DM_InitAdvance() */
-#endif/* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 */
+#endif/* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5 */
 
 /************************************************************************************************
 * Function Name: R_FLASH_DM_Format
@@ -328,7 +323,7 @@ e_flash_dm_status_t R_FLASH_DM_Format(void)
     e_flash_dm_status_t ret = FLASH_DM_SUCCESS;
 #if(FLASH_TYPE == FLASH_TYPE_1)
     ret = r_flash_dm_d1_format();
-#else /* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 */
+#else /* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5 */
     ret = r_flash_dm_d2_format();
 #endif /* FLASH_TYPE */
     return ret;
@@ -353,7 +348,7 @@ e_flash_dm_status_t R_FLASH_DM_Read(st_flash_dm_info_t * p_flash_dm_info)
     e_flash_dm_status_t ret = FLASH_DM_SUCCESS;
 #if(FLASH_TYPE == FLASH_TYPE_1)
     ret = r_flash_dm_d1_read(p_flash_dm_info);
-#else /* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 */
+#else /* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5 */
     ret = r_flash_dm_d2_read(p_flash_dm_info);
 #endif /* FLASH_TYPE */
     return ret;
@@ -379,7 +374,7 @@ e_flash_dm_status_t R_FLASH_DM_Write(st_flash_dm_info_t * p_flash_dm_info)
     e_flash_dm_status_t ret = FLASH_DM_SUCCESS;
 #if(FLASH_TYPE == FLASH_TYPE_1)
     ret = r_flash_dm_d1_write(p_flash_dm_info);
-#else /* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 */
+#else /* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5 */
     ret = r_flash_dm_d2_write(p_flash_dm_info);
 #endif /* FLASH_TYPE */
     return ret;
@@ -402,7 +397,7 @@ e_flash_dm_status_t R_FLASH_DM_Erase(void)
     e_flash_dm_status_t ret = FLASH_DM_SUCCESS;
 #if(FLASH_TYPE == FLASH_TYPE_1)
     ret = r_flash_dm_d1_erase();
-#else /* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 */
+#else /* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5 */
     ret = r_flash_dm_d2_erase();
 #endif /* FLASH_TYPE */
     return ret;
@@ -426,7 +421,7 @@ e_flash_dm_status_t R_FLASH_DM_Control(e_flash_dm_cmd_t cmd, uint32_t* pcfg)
     e_flash_dm_status_t ret = FLASH_DM_SUCCESS;
 #if(FLASH_TYPE == FLASH_TYPE_1)
     ret = r_flash_dm_d1_control(cmd, pcfg);
-#else /* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 */
+#else /* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5 */
     ret = r_flash_dm_d2_control(cmd, pcfg);
 #endif /* FLASH_TYPE */
     return ret;
@@ -449,7 +444,7 @@ static e_flash_dm_status_t r_flash_dm_get_writable_size(uint32_t* pcfg)
     e_flash_dm_status_t ret = FLASH_DM_SUCCESS;
 #if(FLASH_TYPE == FLASH_TYPE_1)
     ret = r_flash_dm_1_get_writable_size(pcfg);
-#else /* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 */
+#else /* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5 */
     ret = r_flash_dm_2_get_writable_size(pcfg);
 #endif /* FLASH_TYPE */
     return ret;
@@ -1173,19 +1168,6 @@ static e_flash_dm_status_t r_flash_dm_d1_control(e_flash_dm_cmd_t cmd, uint32_t*
             }
             break;
 
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
-            case FLASH_DM_CF_PROTECT:
-            {
-                ret = r_flash_dm_cfprotect(pcfg);
-            }
-            break;
-
-            case FLASH_DM_ROM_CACHE:
-            {
-                ret = r_flash_dm_cfromcache(pcfg);
-            }
-            break;
-#endif
             default:
             {
                 ret = FLASH_DM_ERR_ARGUMENT;
@@ -1768,9 +1750,5 @@ static e_flash_dm_status_t r_flash_dm_getactivity(uint32_t* pcfg)
     return ret;
 
 } /* End of function r_flash_dm_getactivity() */
-
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_BGO == 1)
-#pragma section
-#endif /* (FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_BGO == 1) */
 
 /* End of File */

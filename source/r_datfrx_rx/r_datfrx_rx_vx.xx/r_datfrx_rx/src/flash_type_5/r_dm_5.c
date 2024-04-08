@@ -19,25 +19,24 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018(2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018(2023) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
-* File Name    : r_dm_2.c
-* Version      : 2.00
+* File Name    : r_dm_5.c
+* Version      : 1.00
 * Description  : DATFRX interface source file
 *************************************************************************************************/
 /************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
-*              : 28.09.2018 2.00     First Release
-*              : 25.01.2019 2.01     English PDF added, Fixed blank check processing and Busy check procedure
+*              : 21.04.2023 1.00     First Release
 *************************************************************************************************/
 
 /************************************************************************************************
 Includes <System Includes> , "Project Includes"
 *************************************************************************************************/
-#include "r_dm_2.h"
+#include "r_dm_5.h"
 
-#if(FLASH_TYPE == FLASH_TYPE_2)
+#if(FLASH_TYPE == FLASH_TYPE_5)
 /************************************************************************************************
 Macro definitions
 *************************************************************************************************/
@@ -139,8 +138,7 @@ e_flash_dm_status_t r_flash_dm_command(e_dm_cmd_t command_id, flash_res_t *resul
     flash_err_t flash_err = FLASH_SUCCESS;
     volatile e_flash_dm_status_t ret = FLASH_DM_ACCEPT;
 
-    /* cast from uint32_t to uint16_t */
-    g_flash_dispatch_2_hndl->flash_state = (uint16_t)DATF_FLASH_CALL;
+    g_flash_dispatch_2_hndl->flash_state = DATF_FLASH_CALL;
 
     if(command_id == DATF_PROGRAM_CMD)
     {
@@ -156,23 +154,13 @@ e_flash_dm_status_t r_flash_dm_command(e_dm_cmd_t command_id, flash_res_t *resul
     }
     else if(command_id == DATF_BLANK_CHECK_CMD)
     {
-        if((g_flash_dispatch_2_hndl->activity == FLASH_DM_ACT_FORMATTING)
-        ||(g_flash_dispatch_2_hndl->activity == FLASH_DM_ACT_ERASING))
+        /* cast from uint32_t to uint32_t */
+        flash_err = R_FLASH_BlankCheck((uint32_t)g_flash_dispatch_2_hndl->command_addr \
+                                       , (uint32_t)FLASH_DF_MIN_PGM_SIZE , result);
+        /* WAIT_LOOP */
+        if(g_flash_dispatch_2_hndl->activity == FLASH_DM_ACT_INITIALIZING)
         {
-            /* Multiple interrupt avoidance processing */
-            FlashBlankCheckDone(FLASH_RES_NOT_BLANK);
-        }
-        else
-        {
-            /* cast from uint32_t to uint32_t */
-            flash_err = R_FLASH_BlankCheck((uint32_t)g_flash_dispatch_2_hndl->command_addr \
-                                           , (uint32_t)BLANK_CHECK_SMALLEST \
-                                           , result);
-            /* WAIT_LOOP */
-            if(g_flash_dispatch_2_hndl->activity == FLASH_DM_ACT_INITIALIZING)
-            {
-                while(r_flash_dm_drvif_flash_busy() != 0);
-            }
+            while(r_flash_dm_drvif_flash_busy() != 0);
         }
     }
     else
@@ -193,115 +181,57 @@ e_flash_dm_status_t r_flash_dm_command(e_dm_cmd_t command_id, flash_res_t *resul
 }
 
 /************************************************************************************************
- * Outline          : Enable to issue command to dataflash.
- *-----------------------------------------------------------------------------------------------
- * Declaration      : void r_flash_dm_enable_rw(void)
- *-----------------------------------------------------------------------------------------------
- * Functions        : Change mode to dataflash P/E mode
- *                  : Set register to P/E enable
- *                  : Read permission.
- *                  : Write permission.
- *-----------------------------------------------------------------------------------------------
- * Arguments        : void
- *-----------------------------------------------------------------------------------------------
- * Return values    : void
- ************************************************************************************************/
-void r_flash_dm_enable_rw(void)
+* Function Name: flash_cb_function
+* Description  : Flash callback function.
+* Arguments    : void* event                    ; Flush operation result is stored.
+* Return values: void
+*------------------------------------------------------------------------------------------------
+* Notes        : None.
+*************************************************************************************************/
+void flash_cb_function(void* event)
 {
-    flash_access_window_config_t df_access;
+    flash_int_cb_args_t *ready_event = event;
 
-    df_access.read_en_mask = 0x2D0F;
-    df_access.write_en_mask = 0x1E0F;
-
-    R_FLASH_Control(FLASH_CMD_ACCESSWINDOW_SET, (void *)&df_access);
-}
-
-/************************************************************************************************
- * Outline          : Disable to issue command to dataflash.
- *-----------------------------------------------------------------------------------------------
- * Declaration      : void r_flash_dm_disable_rw(void)
- *-----------------------------------------------------------------------------------------------
- * Functions        : Change mode to dataflash read mode
- *                  : Set register to read enable
- *                  : Read permission.
- *                  : Write permission.
- *-----------------------------------------------------------------------------------------------
- * Arguments        : void
- *-----------------------------------------------------------------------------------------------
- * Return values    : void
- ************************************************************************************************/
-void r_flash_dm_disable_rw(void)
-{
-    flash_access_window_config_t df_access;
-
-    df_access.read_en_mask = 0x2D00;
-    df_access.write_en_mask = 0x1E00;
-
-    R_FLASH_Control(FLASH_CMD_ACCESSWINDOW_SET, (void *)&df_access);
-}
-
-/************************************************************************************************
- * Outline          : These functions are only used when BGO (non-blocking) mode is enabled
- *-----------------------------------------------------------------------------------------------
- * Declaration      : void FlashEraseDone(void)
- *-----------------------------------------------------------------------------------------------
- * Functions        : Callback function to call when flash DATF_STATUS_ERASE is finished
- *-----------------------------------------------------------------------------------------------
- * Arguments        : void
- *-----------------------------------------------------------------------------------------------
- * Return values    : void
- ************************************************************************************************/
-void FlashEraseDone(void)
-{
     g_flash_dispatch_2_hndl->flash_state = DATF_FLASH_IDLE;
-    g_flash_dispatch_2_hndl->error_code = (e_flash_dm_status_t)r_flash_dm_advance();
 
-    if (0 != r_flash_dm_callbackfunc)
+    switch (ready_event->event)
     {
-        if(g_flash_dispatch_2_hndl->error_code == FLASH_DM_ERR_REQUEST_INIT)
+        case FLASH_INT_EVENT_ERASE_COMPLETE:
+        case FLASH_INT_EVENT_WRITE_COMPLETE:
         {
-            switch(g_flash_dispatch_2_hndl->activity)
+            /* cast from uint32_t to uint16_t */
+            g_flash_dispatch_2_hndl->error_code = (e_flash_dm_status_t)r_flash_dm_advance();
+        }
+        break;
+
+        case FLASH_INT_EVENT_BLANK:
+        {
+            /* cast from uint32_t to uint16_t */
+            g_flash_dispatch_2_hndl->blankcheck_result = (uint16_t)DATF_BLANKCHECK_BLANK;
+            if(g_flash_dispatch_2_hndl->activity != FLASH_DM_ACT_INITIALIZING)
             {
-                case    FLASH_DM_ACT_FORMATTING:
-                {
-                    /* cast from e_flash_dm_status_t to void* */
-                    r_flash_dm_callbackfunc((void*)FLASH_DM_ERR_FORMAT);
-                }
-                break;
-
-                case    FLASH_DM_ACT_ERASING:
-                {
-                    /* cast from e_flash_dm_status_t to void* */
-                    r_flash_dm_callbackfunc((void*)FLASH_DM_ERR_ERASE);
-                }
-                break;
-
-                default :
-                {
-                    r_flash_dm_callbackfunc((void*)FLASH_DM_ERR_FORMAT);
-                }
+                g_flash_dispatch_2_hndl->error_code = (e_flash_dm_status_t)r_flash_dm_advance();
             }
         }
+        break;
+
+        case FLASH_INT_EVENT_NOT_BLANK:
+        {
+            /* cast from uint32_t to uint16_t */
+            g_flash_dispatch_2_hndl->blankcheck_result = (uint16_t)DATF_BLANKCHECK_NONBLANK;
+            if(g_flash_dispatch_2_hndl->activity != FLASH_DM_ACT_INITIALIZING)
+            {
+                g_flash_dispatch_2_hndl->error_code = (e_flash_dm_status_t)r_flash_dm_advance();
+            }
+        }
+        break;
+
+        default:
+        {
+            /* Do Nothing */
+        }
+        break;
     }
-
-}
-/* Callback function to call when flash IDLE is finished */
-
-/************************************************************************************************
- * Outline          : These functions are only used when BGO (non-blocking) mode is enabled
- *-----------------------------------------------------------------------------------------------
- * Declaration      : void FlashWriteDone(void)
- *-----------------------------------------------------------------------------------------------
- * Functions        : Callback function to call when flash IDLE is finished
- *-----------------------------------------------------------------------------------------------
- * Arguments        : void
- *-----------------------------------------------------------------------------------------------
- * Return values    : void
- ************************************************************************************************/
-void FlashWriteDone(void)
-{
-    g_flash_dispatch_2_hndl->flash_state = DATF_FLASH_IDLE;
-    g_flash_dispatch_2_hndl->error_code = (e_flash_dm_status_t)r_flash_dm_advance();
 
     if (0 != r_flash_dm_callbackfunc)
     {
@@ -323,68 +253,26 @@ void FlashWriteDone(void)
                 }
                 break;
 
+                case    FLASH_DM_ACT_ERASING:
+                {
+                    /* cast from e_flash_dm_status_t to void* */
+                    r_flash_dm_callbackfunc((void*)FLASH_DM_ERR_ERASE);
+                }
+                break;
+
+                case    FLASH_DM_ACT_RECLAIMING:
+                {
+                    /* cast from e_flash_dm_status_t to void* */
+                    r_flash_dm_callbackfunc((void*)FLASH_DM_ERR_RECLAIM);
+                }
+                break;
+
                 default :
                 {
-                    r_flash_dm_callbackfunc((void*)FLASH_DM_ERR_FORMAT);
+                    r_flash_dm_callbackfunc((void*)FLASH_DM_ERR);
                 }
             }
         }
-    }
-
-}
-/* Function to take care of flash errors */
-
-/************************************************************************************************
- * Outline          : These functions are only used when BGO (non-blocking) mode is enabled
- *-----------------------------------------------------------------------------------------------
- * Declaration      : void FlashError(void)
- *-----------------------------------------------------------------------------------------------
- * Functions        : Function to take care of flash errors
- *-----------------------------------------------------------------------------------------------
- * Arguments        : void
- *-----------------------------------------------------------------------------------------------
- * Return values    : void
- ************************************************************************************************/
-void FlashError(void)
-{
-    g_flash_dispatch_2_hndl->flash_state = DATF_FLASH_IDLE;
-}
-/* Callback function to call when flash blank check is finished. 'result'
-   argument is 0 if block was blank and 1 if it was not */
-
-/************************************************************************************************
- * Outline          : These functions are only used when BGO (non-blocking) mode is enabled
- *-----------------------------------------------------------------------------------------------
- * Declaration      : void FlashBlankCheckDone(uint8_t result)
- *-----------------------------------------------------------------------------------------------
- * Functions        : Callback function to call when flash blank check is finished.
- *                    'result' argument is 0 if block was blank and 1 if it was not
- *-----------------------------------------------------------------------------------------------
- * Arguments        : void
- *-----------------------------------------------------------------------------------------------
- * Return values    : void
- ************************************************************************************************/
-void FlashBlankCheckDone(uint8_t result)
-{
-
-    g_flash_dispatch_2_hndl->flash_state = DATF_FLASH_IDLE;
-
-    if(result == FLASH_RES_BLANK)
-    {
-        g_flash_dispatch_2_hndl->blankcheck_result = DATF_BLANKCHECK_BLANK;
-    }
-    else if(result == FLASH_RES_NOT_BLANK)
-    {
-        g_flash_dispatch_2_hndl->blankcheck_result = DATF_BLANKCHECK_NONBLANK;
-    }
-    else
-    {
-        /* Do Nothing */
-    }
-
-    if(g_flash_dispatch_2_hndl->activity != FLASH_DM_ACT_INITIALIZING)
-    {
-        g_flash_dispatch_2_hndl->error_code = (e_flash_dm_status_t)r_flash_dm_advance();
     }
 }
 
@@ -402,6 +290,6 @@ void r_flash_dm_set_dm(uint32_t handle)
     g_flash_dispatch_2_hndl = (st_flash_dispatch_2_hndl_t*)handle;
 }
 
-#endif /* (FLASH_TYPE == FLASH_TYPE_2) */
+#endif /* (FLASH_TYPE == FLASH_TYPE_5) */
 
 /* End of File */

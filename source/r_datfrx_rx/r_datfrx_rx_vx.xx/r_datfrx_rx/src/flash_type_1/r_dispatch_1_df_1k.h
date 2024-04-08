@@ -19,16 +19,18 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018(2024) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_dispatch_1_df_1k.h
-* Version      : 2.00
+* Version      : 2.30
 * Description  : DATFRX interface header file
 *************************************************************************************************/
 /************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 28.09.2018 2.00     First Release
+*              : 31.08.2023 2.20     Correction of comments
+*              : 14.03.2024 2.30     Delete macro "FLASH_CFG_CODE_FLASH_ENABLE" judgment
 *************************************************************************************************/
 
 /************************************************************************************************
@@ -45,8 +47,6 @@ Macro definitions
 #define R_DISPATCH_1_DF_1K_H
 
 #if (FLASH_TYPE == FLASH_TYPE_1)
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 0)
-
 /* Block header */
 #if !defined(FLASH_DM_DEBUG)
 #define FLASH_DM_BH_FLAG_FF         ((flash_dm_t)(0xff))
@@ -76,14 +76,12 @@ Macro definitions
 #define FLASH_DM_ADDR_MASK          ((uint32_t)(0x00100000))
 #define FLASH_DM_PRG_BUF_INDEX      (1)
 
-#endif /* (FLASH_CFG_CODE_FLASH_ENABLE == 0) */
 #endif /* (FLASH_TYPE == FLASH_TYPE_1) */
 
 /************************************************************************************************
 Global Typedef definitions
 *************************************************************************************************/
 #if (FLASH_TYPE == FLASH_TYPE_1)
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 0)
 
 typedef uint8_t   * flash_dm_ptr_t;
 typedef uint8_t     flash_dm_t;
@@ -129,7 +127,7 @@ typedef union
         /* cast from uint32_t to st_flash_dm_dh_t */
         st_flash_dm_dh_t   d[FLASH_DM_HEADER_MAX];
     } h;
-} u_flash_dm_block_format_t;      /* 12 bytes */
+} u_flash_dm_block_format_t;      /* 1024 bytes */
 
 typedef u_flash_dm_block_format_t  * flash_dm_block_format_ptr_t;
 
@@ -149,7 +147,7 @@ typedef st_flash_dm_block_t  * flash_dm_block_ptr_t;
 /* Driver information */
 typedef struct
 {
-    e_flash_dm_status_t   error_code;     /* Error_code of the last operation */
+    e_flash_dm_status_t   error_code;     /* Error code of the last operation */
     st_flash_dm_block_t  * p_reclaim;      /* Reclaim source/garbage/error block*/
     st_flash_dm_block_t  * p_full;         /* Post active block */
     st_flash_dm_block_t  * p_active;       /* Write destination, reclaim destination block */
@@ -158,7 +156,7 @@ typedef struct
     flash_dm_bh_ptr_t   p_bh;           /* Active block header */
     flash_dm_dh_ptr_t   p_dh;           /* For keeping data to be written */
     uint16_t            flash_state;    /* added by datfrx */
-    const uint8_t     * p_user_data;    /* user_erase_block */
+    const uint8_t     * p_user_data;    /* user erase block */
     st_flash_dm_dh_t       dh;             /* For keeping data to write */
     uint8_t             rsv1[1];
     int32_t             api_call;       /* API call flag */
@@ -177,14 +175,12 @@ typedef struct
     e_flash_dm_driver_status_t stack[FLASH_DM_STACKSIZE]; /* Execution stack */
 } st_flash_dispatch_1_hndl_t;      /* 140 bytes */
 
-#endif /* (FLASH_CFG_CODE_FLASH_ENABLE == 0) */
 #endif /* (FLASH_TYPE == FLASH_TYPE_1) */
 
 /************************************************************************************************
 Exported global variables
 *************************************************************************************************/
 #if (FLASH_TYPE == FLASH_TYPE_1)
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 0)
 
 #if defined(FLASH_DM_DEBUG)
 extern flash_dm_t FLASH_DM_BH_FLAG_FF;
@@ -195,7 +191,6 @@ extern flash_dm_t FLASH_DM_BH_FLAG_AA;
 /* user callback */
 extern p_flash_dm_callback r_flash_dm_callbackfunc;
 
-#endif /* (FLASH_CFG_CODE_FLASH_ENABLE == 0) */
 #endif /* (FLASH_TYPE == FLASH_TYPE_1) */
 
 /************************************************************************************************

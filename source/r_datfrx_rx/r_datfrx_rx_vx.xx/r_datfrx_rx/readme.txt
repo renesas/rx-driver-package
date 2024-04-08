@@ -5,12 +5,12 @@ r_datfrx_rx
 
 Document Number
 ---------------
-R20AN0507JJ0201-RX-DATFRX
-R20AN0507EJ0201-RX-DATFRX
+R20AN0507JJ0230-RX-DATFRX
+R20AN0507EJ0230-RX-DATFRX
 
 Version
 -------
-v2.01
+v2.30
 
 Overview
 --------
@@ -48,8 +48,8 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp      V3.91
-* r_flash_rx V3.41
+* r_bsp      V7.42
+* r_flash_rx V5.11
 
 How to add to your project
 --------------------------
@@ -79,7 +79,7 @@ Refer to "Adding Firmware Integration Technology Modules to CS+ Projects (R01AN1
 
 Toolchain(s) Used
 -----------------
-* Renesas RX Compiler V.3.00.00
+* Renesas RX Compiler V.3.06.00
 
 File Structure
 --------------
@@ -89,12 +89,11 @@ r_datfrx_rx
 |
 +---doc
 |   +---en
-|   |       r20an0507ej0201-rx-datfrx.pdf
+|   |       r20an0507ej0230-rx-datfrx.pdf
+|   |       DATFRX_BlockNumberCalculation_e_Rev110.xlsx
 |   \---ja
-|           r20an0507jj0201-rx-datfrx.pdf
-|
-+---ref
-|       r_datfrx_rx_config_reference.h
+|           r20an0507jj0230-rx-datfrx.pdf
+|           DATFRX_BlockNumberCalculation_j_Rev110.xlsx
 |
 \---src
     |   r_flash_dm_private.h
@@ -103,29 +102,30 @@ r_datfrx_rx
     +---flash_type_1
     |       r_dispatch_1.c
     |       r_dispatch_1.h
-    |       r_dispatch_1_cf_1k.h
-    |       r_dispatch_1_cf_2k.h
     |       r_dispatch_1_df_1k.h
+    |       r_dispatch_1_df_256b.h
     |       r_dm_1.c
     |       r_dm_1.h
-    |
-    +---flash_type_2
-    |       r_datf_crc.c
-    |       r_datf_crc.h
-    |       r_dispatch_2.c
-    |       r_dispatch_2.h
-    |       r_dispatch_2_df.h
-    |       r_dm_2.c
-    |       r_dm_2.h
     |
     +---flash_type_3
     |       r_dm_3.c
     |       r_dm_3.h
     |
-    \---flash_type_4
-            r_dm_4.c
-            r_dm_4.h
-
+    +---flash_type_4
+    |       r_dm_4.c
+    |       r_dm_4.h
+    |
+    +---flash_type_5
+    |       r_dm_5.c
+    |       r_dm_5.h
+    |
+    \---flash_type_common
+            r_datf_crc.c
+            r_datf_crc.h
+            r_dispatch_2.c
+            r_dispatch_2.h
+            r_dispatch_2_df.h
+	
 r_config
     r_datfrx_rx_config.h
 

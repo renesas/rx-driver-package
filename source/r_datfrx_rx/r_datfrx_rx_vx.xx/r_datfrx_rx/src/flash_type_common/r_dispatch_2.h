@@ -19,17 +19,18 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018(2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018(2023) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_dispatch_2.h
-* Version      : 2.01
+* Version      : 2.10
 * Description  : DATFRX interface header file
 *************************************************************************************************/
 /************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 28.09.2018 2.00     First Release
 *              : 25.01.2019 2.01     English PDF added, Fixed blank check processing and Busy check procedure
+*              : 21.04.2023 2.10     Added macro constant judgment of "FLASH_TYPE_5"
 *************************************************************************************************/
 
 /***********************************************************************************************
@@ -48,7 +49,7 @@ Macro definitions
 #ifndef R_DISPATCH_2_H
 #define R_DISPATCH_2_H
 
-#if(FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4)
+#if(FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5)
 
 #include "r_datf_crc.h"
 
@@ -82,7 +83,7 @@ e_flash_dm_status_t r_flash_dm_init_set2(void);
 uint8_t r_flash_dm_drvif_open(void);
 uint8_t r_flash_dm_drvif_api_flag(void);
 
-#endif /* (FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4) */
+#endif /* (FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5) */
 #endif /* R_DISPATCH_2_H */
 
 /* End of File */

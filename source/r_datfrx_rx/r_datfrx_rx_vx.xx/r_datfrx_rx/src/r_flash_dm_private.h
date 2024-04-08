@@ -19,17 +19,23 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018(2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018(2024) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_flash_dm_private.h
-* Version      : 2.01
+* Version      : 2.30
 * Description  : DATFRX interface header file
 *************************************************************************************************/
 /************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 28.09.2018 2.00     First Release
 *              : 25.01.2019 2.01     English PDF added, Fixed blank check processing and Busy check procedure
+*              : 21.04.2023 2.10     Added macro constant judgment of "FLASH_TYPE_5"
+*              : 31.08.2023 2.20     Compatible with RX140
+*              : 14.03.2024 2.30     Removed unnecessary function prototype declarations.
+*                                    Delete the following macro judgments.
+*                                    "FLASH_CFG_CODE_FLASH_ENABLE"
+*                                    "FLASH_CF_BLOCK_SIZE"
 *************************************************************************************************/
 
 /************************************************************************************************
@@ -39,14 +45,12 @@ Includes <System Includes> , "Project Includes"
 #include "r_datfrx_rx_config.h"
 
 #if(FLASH_TYPE == FLASH_TYPE_1)
-#if   (FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CF_BLOCK_SIZE == 1024)
-#include "r_dispatch_1_cf_1k.h"
-#elif (FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CF_BLOCK_SIZE == 2048)
-#include "r_dispatch_1_cf_2k.h"
-#elif (FLASH_CFG_CODE_FLASH_ENABLE == 0)
+#if (FLASH_DF_BLOCK_SIZE == 1024)
 #include "r_dispatch_1_df_1k.h"
-#endif/* FLASH_CFG_CODE_FLASH_ENABLE and FLASH_DM_CFG_CF_BLOCK_SIZE_2K settings */
-#elif(FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4)
+#elif (FLASH_DF_BLOCK_SIZE == 256)
+#include "r_dispatch_1_df_256b.h"
+#endif/* FLASH_DF_BLOCK_SIZE settings */
+#elif(FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5)
 #include "r_dispatch_2_df.h"
 #endif/* FLASH_TYPE */
 
@@ -133,9 +137,7 @@ uint8_t          r_flash_dm_drvif_overwrite_block_flag(flash_dm_ptr_t p_addr);
 uint8_t          r_flash_dm_drvif_api_flag(st_flash_dispatch_1_hndl_t * p_hndl);
 e_flash_dm_status_t          r_flash_dm_drvif_erase(flash_dm_ptr_t p_addr);
 e_flash_dm_status_t          r_flash_dm_drvif_write(flash_dm_ptr_t p_addr, flash_dm_ptr_t p_value);
-uint8_t          r_flash_dm_drvif_protect(uint8_t protect);
-uint8_t          r_flash_dm_drvif_set_romcache(uint8_t romcache);
-uint8_t          r_flash_dm_drvif_get_romcache(uint8_t * p_status);
+
 uint8_t          r_flash_dm_drvif_get_block_num(void);
 flash_dm_block_ptr_t  r_flash_dm_drvif_get_block_info(uint8_t index);
 flash_dm_ptr_t   r_flash_dm_drvif_get_block_addr(uint8_t index);

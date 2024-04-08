@@ -19,17 +19,18 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018(2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018(2023) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_dispatch_2.c
-* Version      : 2.01
+* Version      : 2.10
 * Description  : DATFRX interface source file
 *************************************************************************************************/
 /************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 28.09.2018 2.00     First Release
 *              : 25.01.2019 2.01     English PDF added, Fixed blank check processing and Busy check procedure
+*              : 21.04.2023 2.10     Added macro constant judgment of "FLASH_TYPE_5"
 *************************************************************************************************/
 
 /***********************************************************************************************
@@ -37,7 +38,7 @@ Includes   <System Includes> , "Project Includes"
 ************************************************************************************************/
 #include "r_dispatch_2.h"
 
-#if(FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4)
+#if(FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5)
 /***********************************************************************************************
 Macro definitions
 ************************************************************************************************/
@@ -51,7 +52,6 @@ Macro definitions
 #define DATF_TRY(CODE)          DATF_LINK(CODE); DATF_LINK(DATF_CATCH_ERROR)
 #define    DATF_EXIT_DISPATCH() return ret
 #define    DATF_EXIT(X)         return X
-#define assert(TEST)
 
 /************************************************************************************************
 Local Typedef definitions
@@ -1392,7 +1392,7 @@ uint8_t r_flash_dm_drvif_open(void)
         return 0;
     }
 
-#if(FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4)
+#if(FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5)
 
     flash_interrupt_config_t cb_func_info;
     /* Set callback function and interrupt priority
@@ -1404,7 +1404,7 @@ uint8_t r_flash_dm_drvif_open(void)
     {
         return 0;
     }
-#endif /* (FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4) */
+#endif /* (FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5) */
 
     return 1;
 } /* End of function r_flash_dm_drvif_open() */
@@ -1647,6 +1647,6 @@ void r_flash_dm_set_dispatch(uint32_t handle)
     g_flash_dispatch_2_hndl = (st_flash_dispatch_2_hndl_t*)handle;
 }
 
-#endif /* (FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4) */
+#endif /* (FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5) */
 
 /* End of File */

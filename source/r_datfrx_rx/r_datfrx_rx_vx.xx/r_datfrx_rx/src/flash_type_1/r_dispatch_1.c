@@ -19,17 +19,21 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2018(2019) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2018(2024) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_dispatch_1.c
-* Version      : 2.01
+* Version      : 2.30
 * Description  : DATFRX interface source file
 *************************************************************************************************/
 /************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 28.09.2018 2.00     First Release
 *              : 25.01.2019 2.01     English PDF added, Fixed blank check processing and Busy check procedure
+*              : 14.03.2024 2.30     Delete the following macro judgments.
+*                                    "FLASH_CFG_CODE_FLASH_ENABLE"
+*                                    "FLASH_CFG_CODE_FLASH_BGO"
+*                                    "FLASH_CFG_DATA_FLASH_BGO" 
 *************************************************************************************************/
 
 /************************************************************************************************
@@ -74,15 +78,7 @@ static void              r_flash_dm_reject_block(uint8_t block_num);
 
 /* common variables */
 /* Physical addresses of data */
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 0)
 flash_dm_ptr_t gs_flash_dm_data_addr[FLASH_DM_CFG_DF_DATA_NUM];
-#elif
-flash_dm_ptr_t gs_flash_dm_data_addr[FLASH_DM_CFG_CF_DATA_NUM];
-#endif
-
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_BGO == 1)
-#pragma section FRAM
-#endif
 
 /************************************************************************************************
 * Function Name: r_flash_dm_advance
@@ -1600,8 +1596,6 @@ static void r_flash_dm_reject_block(uint8_t block_num)
 *************************************************************************************************/
 uint8_t r_flash_dm_drvif_flash_busy(void)
 {
-#if ((FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_BGO == 1)) || \
-    ((FLASH_CFG_CODE_FLASH_ENABLE == 0) && (FLASH_CFG_DATA_FLASH_BGO == 1))
     flash_err_t ret = FLASH_SUCCESS;
 
     ret = R_FLASH_Control(FLASH_CMD_STATUS_GET, NULL);
@@ -1619,10 +1613,6 @@ uint8_t r_flash_dm_drvif_flash_busy(void)
         /* Busy */
     }
     return 1;   /* Busy */
-#else
-    return 0;   /* Ready */
-#endif /* ((FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_BGO == 1)) || \
-          ((FLASH_CFG_CODE_FLASH_ENABLE == 0) && (FLASH_CFG_DATA_FLASH_BGO == 1)) */
 } /* End of function r_flash_dm_drvif_flash_busy() */
 
 /************************************************************************************************
@@ -1638,10 +1628,6 @@ void r_flash_dm_set_dispatch(uint32_t hndl)
     /* cast from uint32_t to st_flash_dispatch_1_hndl_t* */
     g_flash_dispatch_1_hndl = (st_flash_dispatch_1_hndl_t*)hndl;
 }
-
-#if (FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_BGO == 1)
-#pragma section
-#endif
 
 #endif /* (FLASH_TYPE == FLASH_TYPE_1) */
 
