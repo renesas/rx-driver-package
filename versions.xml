@@ -311,6 +311,15 @@
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/45ccf34eeb8f016061a1e615b7fb082f0fb09079/FITModules/r_datfrx_rx_v2.30_extend.mdf</url>
     </urls>
   </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_emwin_rx</name>
+    <version>6.34g_100</version>
+    <urls>
+      <url>https://github.com/renesas/rx-driver-package/releases/download/V1.42/r_emwin_rx_v6.34g_100.zip</url>
+      <url>https://github.com/renesas/rx-driver-package/releases/download/V1.42/r_emwin_rx_v6.34g_100.xml</url>
+      <url>https://github.com/renesas/rx-driver-package/releases/download/V1.42/r_emwin_rx_v6.34g_100.mdf</url>
+    </urls>
+  </module>
   <module rdp_version="1.25">
     <name>r_ble_qe_utility</name>
     <version>1.00</version>
