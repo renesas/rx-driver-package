@@ -2688,7 +2688,7 @@
   </module>
   <module rdp_version="1.32">
     <name>r_emwin_rx</name>
-    <version>6.14g_130</version>
+    <version>6.14.g.1.30</version>
     <urls>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/9da59d3e5b1000120855c25cae36411d4e0827bf/FITModules/r_emwin_rx_v6.14g_130.zip</url>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/9da59d3e5b1000120855c25cae36411d4e0827bf/FITModules/r_emwin_rx_v6.14g_130.xml</url>
@@ -3489,7 +3489,7 @@
   </module>
   <module rdp_version="1.33">
     <name>r_emwin_rx</name>
-    <version>6.22_100</version>
+    <version>6.22.1.00</version>
     <urls>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/79a0428c6c941dd02ebea7404197b51fa4bc8aa8/FITModules/r_emwin_rx_v6.22_100.zip</url>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/79a0428c6c941dd02ebea7404197b51fa4bc8aa8/FITModules/r_emwin_rx_v6.22_100.xml</url>
@@ -4298,7 +4298,7 @@
   </module>
   <module rdp_version="1.34">
     <name>r_emwin_rx</name>
-    <version>6.22_100</version>
+    <version>6.22.1.00</version>
     <urls>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/29c2bfdfeb90c892461817cc4cfbdfc8d8b021c3/FITModules/r_emwin_rx_v6.22_100.zip</url>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/29c2bfdfeb90c892461817cc4cfbdfc8d8b021c3/FITModules/r_emwin_rx_v6.22_100.xml</url>
@@ -5134,7 +5134,7 @@
   </module>
   <module rdp_version="1.36">
     <name>r_emwin_rx</name>
-    <version>6.22_100</version>
+    <version>6.22.1.00</version>
     <urls>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1bcfbcec0be3aec60f20a129c4199d35533cb67e/FITModules/r_emwin_rx_v6.22_100.zip</url>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1bcfbcec0be3aec60f20a129c4199d35533cb67e/FITModules/r_emwin_rx_v6.22_100.xml</url>
@@ -5997,7 +5997,7 @@
   </module>
   <module rdp_version="1.37">
     <name>r_emwin_rx</name>
-    <version>6.26c_100</version>
+    <version>6.26.c.1.00</version>
     <urls>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/6348e160264907de69de8db3c5f590052022aa0e/FITModules/r_emwin_rx_v6.26c_100.zip</url>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/6348e160264907de69de8db3c5f590052022aa0e/FITModules/r_emwin_rx_v6.26c_100.xml</url>
@@ -6860,7 +6860,7 @@
   </module>
   <module rdp_version="1.39">
     <name>r_emwin_rx</name>
-    <version>6.32a_100</version>
+    <version>6.32.a.1.00</version>
     <urls>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/02a3aa774781c4b43e5220a65e3e7304c2c5961f/FITModules/r_emwin_rx_v6.32a_100.zip</url>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/02a3aa774781c4b43e5220a65e3e7304c2c5961f/FITModules/r_emwin_rx_v6.32a_100.xml</url>
@@ -7731,7 +7731,7 @@
   </module>
   <module rdp_version="1.40">
     <name>r_emwin_rx</name>
-    <version>6.32a_100</version>
+    <version>6.32.a.1.00</version>
     <urls>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/5fcb5e73518a21ffa708037a4a28ee216d240007/FITModules/r_emwin_rx_v6.32a_100.zip</url>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/5fcb5e73518a21ffa708037a4a28ee216d240007/FITModules/r_emwin_rx_v6.32a_100.xml</url>
@@ -8602,7 +8602,7 @@
   </module>
   <module rdp_version="1.41">
     <name>r_emwin_rx</name>
-    <version>6.32a_100</version>
+    <version>6.32.a.1.00</version>
     <urls>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/5f0e0a99f012eb772eff92e65f43faaabeb3d75f/FITModules/r_emwin_rx_v6.32a_100.zip</url>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/5f0e0a99f012eb772eff92e65f43faaabeb3d75f/FITModules/r_emwin_rx_v6.32a_100.xml</url>
@@ -9483,7 +9483,7 @@
   </module>
   <module rdp_version="1.42">
     <name>r_emwin_rx</name>
-    <version>6.32a_100</version>
+    <version>6.32.a.1.00</version>
     <urls>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/5c921fc40bd76f7c34968b1a7e2fa2e113ca0a2e/FITModules/r_emwin_rx_v6.32a_100.zip</url>
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/5c921fc40bd76f7c34968b1a7e2fa2e113ca0a2e/FITModules/r_emwin_rx_v6.32a_100.xml</url>
