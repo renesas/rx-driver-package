@@ -313,7 +313,7 @@
   </module>
   <module rdp_version="exceptional_modules">
     <name>r_emwin_rx</name>
-    <version>6.34g_100</version>
+    <version>6.34.g.1.00</version>
     <urls>
       <url>https://github.com/renesas/rx-driver-package/releases/download/V1.42/r_emwin_rx_v6.34g_100.zip</url>
       <url>https://github.com/renesas/rx-driver-package/releases/download/V1.42/r_emwin_rx_v6.34g_100.xml</url>
