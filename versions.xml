@@ -320,6 +320,15 @@
       <url>https://github.com/renesas/rx-driver-package/releases/download/V1.42/r_emwin_rx_v6.34g_100.mdf</url>
     </urls>
   </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_emwin_rx</name>
+    <version>6.34.g.1.10</version>
+    <urls>
+      <url>https://github.com/renesas/rx-driver-package/releases/download/V1.42/r_emwin_rx_v6.34g_110.zip</url>
+      <url>https://github.com/renesas/rx-driver-package/releases/download/V1.42/r_emwin_rx_v6.34g_110.xml</url>
+      <url>https://github.com/renesas/rx-driver-package/releases/download/V1.42/r_emwin_rx_v6.34g_110.mdf</url>
+    </urls>
+  </module>
   <module rdp_version="1.25">
     <name>r_ble_qe_utility</name>
     <version>1.00</version>
