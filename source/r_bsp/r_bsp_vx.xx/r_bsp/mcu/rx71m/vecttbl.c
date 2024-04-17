@@ -38,6 +38,12 @@
 *         : 20.11.2020 3.03     Added the setting of ID code protection for BSP_CFG_ID_CODE_ENABLE.
 *         : 29.01.2021 3.04     Added the macro definition of BSP_PRV_SPCC_VALUE and modified the setting of 
 *                               ID code protection for BSP_CFG_ID_CODE_ENABLE.
+*         : 30.11.2021 3.05     Added the following macro definitions and changed the value of BSP_PRV_SPCC_VALUE.
+*                               - BSP_PRV_SPCC_IDE
+*                               - BSP_PRV_SPCC_SEPR
+*                               - BSP_PRV_SPCC_WRPR
+*                               - BSP_PRV_SPCC_RDPR
+*                               - BSP_PRV_SPCC_SPE
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -63,17 +69,6 @@ R_BSP_UB_POR_FUNCTION(R_BSP_UB_POWER_ON_RESET_FUNCTION);
 * The following array fills in the UB codes to get into User Boot Mode, the MDEB register, and the User Boot reset
 * vector.
 ***********************************************************************************************************************/
-#ifdef __BIG
-    #define BSP_PRV_MDE_VALUE (0xfffffff8)    /* big */
-#else
-    #define BSP_PRV_MDE_VALUE (0xffffffff)    /* little */
-#endif
-
-#if BSP_CFG_ID_CODE_ENABLE == 1
-    #define BSP_PRV_SPCC_VALUE (0x1effffff)    /* ID code protection is enabled after a reset. */
-#else
-    #define BSP_PRV_SPCC_VALUE (0xffffffff)    /* ID code protection is disabled after a reset. */
-#endif
 
 /* The UB Code A, UB Code B, and Endian select register B (MDEB) are located in the User Boot space. Immediately
    following the MDEB register is the User Boot Reset Vector so it is defined below as well. These settings will only
@@ -107,6 +102,48 @@ R_BSP_ATTRIB_SECTION_CHANGE_UBSETTINGS const uint32_t user_boot_settings[6] =
 R_BSP_ATTRIB_SECTION_CHANGE_END
 
 #endif /* BSP_CFG_USER_BOOT_ENABLE == 1 */
+
+/***********************************************************************************************************************
+* The following array fills in the option function select registers and the ID code protection bytes.
+***********************************************************************************************************************/
+
+#ifdef __BIG
+    #define BSP_PRV_MDE_VALUE (0xfffffff8)    /* big */
+#else
+    #define BSP_PRV_MDE_VALUE (0xffffffff)    /* little */
+#endif
+
+#if BSP_CFG_ID_CODE_ENABLE == 1
+    #define BSP_PRV_SPCC_IDE   (0xfeffffff)  /* ID code protection is enabled after a reset. */
+#else
+    #define BSP_PRV_SPCC_IDE   (0xffffffff)  /* ID code protection is disabled after a reset. */
+#endif
+
+#if (BSP_CFG_BLOCK_ERASE_CMD_PROTECT_ENABLE == 1) || (BSP_CFG_ID_CODE_ENABLE == 1)
+    #define BSP_PRV_SPCC_SEPR  (0xdfffffff)  /* Block erasure command protection after a reset is enabled. */
+#else
+    #define BSP_PRV_SPCC_SEPR  (0xffffffff)  /* Block erasure command protection after a reset is disabled. */
+#endif
+
+#if (BSP_CFG_PROGRAM_CMD_PROTECT_ENABLE == 1) || (BSP_CFG_ID_CODE_ENABLE == 1)
+    #define BSP_PRV_SPCC_WRPR  (0xbfffffff)  /* Programming command protection after a reset is enabled. */
+#else
+    #define BSP_PRV_SPCC_WRPR  (0xffffffff)  /* Programming command protection after a reset is disabled. */
+#endif
+
+#if (BSP_CFG_READ_CMD_PROTECT_ENABLE == 1) || (BSP_CFG_ID_CODE_ENABLE == 1)
+    #define BSP_PRV_SPCC_RDPR  (0x7fffffff)  /* Read command protection after a reset is enabled. */
+#else
+    #define BSP_PRV_SPCC_RDPR  (0xffffffff)  /* Read command protection after a reset is disabled. */
+#endif
+
+#if BSP_CFG_SERIAL_PROGRAMMER_CONECT_ENABLE == 0
+    #define BSP_PRV_SPCC_SPE   (0xf7ffffff)  /* Connection of a serial programmer after a reset is prohibited. */
+#else
+    #define BSP_PRV_SPCC_SPE   (0xffffffff)  /* Connection of a serial programmer after a reset is permitted. */
+#endif
+
+#define BSP_PRV_SPCC_VALUE ((((BSP_PRV_SPCC_IDE & BSP_PRV_SPCC_SEPR) & BSP_PRV_SPCC_WRPR) & BSP_PRV_SPCC_RDPR) & BSP_PRV_SPCC_SPE)
 
 #if defined(__CCRX__)
 

@@ -41,6 +41,8 @@
         <version>3.01.00</version>
         <version>3.02.00</version>
         <version>3.03.00</version>
+        <version>3.04.00</version>
+        <version>3.05.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -51,6 +53,9 @@
         <version>8.03.00.201904</version>
         <version>8.03.00.202002</version>
         <version>8.03.00.202004</version>
+        <version>8.03.00.202102</version>
+        <version>8.03.00.202104</version>
+        <version>8.03.00.202202</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -79,13 +84,16 @@
         <group>RX230</group>
         <group>RX231</group>
         <group>RX23E-A</group>
+        <group>RX23E-B</group>
         <group>RX23T</group>
         <group>RX23W</group>
         <group>RX24T</group>
         <group>RX24U</group>
+        <group>RX26T</group>
         <group>RX64M</group>
         <group>RX651</group>
         <group>RX65N</group>
+        <group>RX660</group>
         <group>RX66N</group>
         <group>RX66T</group>
         <group>RX671</group>
@@ -102,13 +110,16 @@
         <board>GENERIC_RX230</board>
         <board>GENERIC_RX231</board>
         <board>GENERIC_RX23E-A</board>
+        <board>GENERIC_RX23E-B</board>
         <board>GENERIC_RX23T</board>
         <board>GENERIC_RX23W</board>
         <board>GENERIC_RX24T</board>
         <board>GENERIC_RX24U</board>
+        <board>GENERIC_RX26T</board>
         <board>GENERIC_RX64M</board>
         <board>GENERIC_RX65N</board>
         <board device_compatibility="RX651,RX65N">GENERIC_RX65N</board>
+        <board>GENERIC_RX660</board>
         <board>GENERIC_RX66N</board>
         <board>GENERIC_RX66T</board>
         <board>GENERIC_RX671</board>
@@ -138,11 +149,13 @@
             <product>RXC</product>
             <file>mcu/all/linker_script_rvectors.inc</file>
             <file>mcu/all/reset_program.S</file>
+            <file>mcu/all/iar_call_inits.s</file>
             <file>register_access/gnuc/iodefine.h</file>
             <file>register_access/iccrx/iodefine.h</file>
         </toolchainfile>
         <toolchainfile>
             <product>GNURX</product>
+            <file>mcu/all/iar_call_inits.s</file>
             <file>register_access/ccrx/iodefine.h</file>
             <file>register_access/iccrx/iodefine.h</file>
         </toolchainfile>

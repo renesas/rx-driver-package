@@ -23,6 +23,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 31.07.2019 1.00     First Release
+*         : 22.04.2022 1.01     Modified comment.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -40,14 +41,12 @@ typedef enum
 {
     /* PRC0
        Enables writing to the Flash MEMWAIT register and the clock generation registers: SCKCR, SCKCR3, PLLCR, PLLCR2,
-       MOSCCR, SOSCCR, LOCOCR, ILOCOCR, HOCOCR, OSTDCR, OSTDSR, CKOCR, UPLLCR, UPLLCR2, BCKCR, HOCOCR2 LOCOTRR,
-       ILOCOTRR, HOCOTRR0, HOCOTRR3 */
+       MOSCCR, LOCOCR, ILOCOCR, HOCOCR, OSTDCR, OSTDSR, CKOCR, LOCOTRR, ILOCOTRR, HOCOTRR0 */
     BSP_REG_PROTECT_CGC = 0,
 
     /* PRC1
        Enables writing to the registers related to operating modes, low power consumption, the clock generation circuit,
-       and software reset: SYSCR0, SYSCR1, SBYCR, MSTPCRA, MSTPCRB, MSTPCRC, MSTPCRD, OPCCR, RSTCKCR, SOPCCR,
-       MOFCR, MOSCWTCR, SWRR */
+       and software reset: SYSCR1, SBYCR, MSTPCRA, MSTPCRB, MSTPCRC, OPCCR, MOFCR, MOSCWTCR, SWRR */
     BSP_REG_PROTECT_LPC_CGC_SWR,
 
     /* PRC2
@@ -57,7 +56,7 @@ typedef enum
 
     /* PRC3
        Enables writing to the registers related to the LVD: LVCMPCR, LVDLVLR, LVD1CR0, LVD1CR1, LVD1SR, LVD2CR0,
-       LVD2CR1, LVD2SR, VBATTCR, VBATTSR, VBTLVDICR */
+       LVD2CR1, LVD2SR */
     BSP_REG_PROTECT_LVD,
 
     /* MPC.PWPR

@@ -17,7 +17,7 @@
 * Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
-* File Name	   : mcu_mapped_interrupts.c
+* File Name    : mcu_mapped_interrupts.c
 * Description  : This module maps Interrupt A & B interrupts. Which interrupts are mapped depends on the macros in
 *                r_bsp_interrupt_config.h.
 ***********************************************************************************************************************/
@@ -51,6 +51,7 @@
 *                               Removed the following macro definition.
 *                                - BSP_MAPPED_INT_CFG_A_VECT_MTU8_TGIU8
 *         : 28.02.2019 1.11     Fixed coding style.
+*         : 25.11.2022 1.12     Modified comment.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************

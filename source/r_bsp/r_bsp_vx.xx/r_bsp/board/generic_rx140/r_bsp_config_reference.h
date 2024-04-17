@@ -25,6 +25,22 @@
 ************************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 30.06.2021 1.00     First release
+*         : 30.11.2021 1.01     Added the following macro definitions.
+*                               - BSP_CFG_CONFIGURATOR_VERSION
+*                               - BSP_CFG_CPLUSPLUS
+*                               Changed initial value of the following macro definitions.
+*                               - BSP_CFG_MCU_PART_GROUP
+*                               - BSP_CFG_MCU_PART_SERIES
+*         : 11.02.2022 1.02     Changed initial value of the following macro definitions.
+*                               - BSP_CFG_MCU_PART_PACKAGE
+*                               - BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE
+*                               - BSP_CFG_HOCO_OSCILLATE_ENABLE
+*                               - BSP_CFG_CLOCK_SOURCE
+*                               - BSP_CFG_CLKOUT_SOURCE
+*                               - BSP_CFG_SWINT_UNIT1_ENABLE
+*                               Modified comment.
+*         : 22.04.2022 1.03     Modified comment.
+*         : 28.02.2023 1.04     Modified comment.
 ***********************************************************************************************************************/
 
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
@@ -35,7 +51,7 @@ Configuration Options
 ***********************************************************************************************************************/
 
 /* NOTE:
-   The default settings are the same as when using RX140 Target Board.
+   The default settings are the same as when using RSKRX140.
    Change to the settings for the user board.
 */
 
@@ -73,7 +89,7 @@ Configuration Options
    FJ           = 0x2             = LFQFP/32/0.80
    NH           = 0x5             = HWQFN/32/0.50
 */
-#define BSP_CFG_MCU_PART_PACKAGE        (0x0)
+#define BSP_CFG_MCU_PART_PACKAGE        (0xB)
 
 /* Whether Encryption and CAN included or not.
    Character(s) = Value for macro = Description
@@ -91,16 +107,16 @@ Configuration Options
 #define BSP_CFG_MCU_PART_MEMORY_SIZE    (0x6)
 
 /* Group name.
-   Character(s) = Value for macro = Description
-   40           = 0x0             = RX140 Group
+   Character(s) = Description
+   40           = RX140 Group
 */
-#define BSP_CFG_MCU_PART_GROUP          (0x0)
+#define BSP_CFG_MCU_PART_GROUP          "RX140"
 
 /* Series name.
-   Character(s) = Value for macro = Description
-   51           = 0x0             = RX100 Series
+   Character(s) = Description
+   51           = RX100 Series
 */
-#define BSP_CFG_MCU_PART_SERIES         (0x0)
+#define BSP_CFG_MCU_PART_SERIES         "RX100"
 
 /* Memory type.
    Character(s) = Value for macro = Description
@@ -186,7 +202,7 @@ Configuration Options
    0 = Stop Oscillating the Main Clock. (default)
    1 = Enable oscillating the Main Clock.
 */
-#define BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE    (0)
+#define BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE    (1)
 
 /* Select whether to oscillate the Sub Clock Oscillator.
    0 = Stop Oscillating the Sub Clock. (default)
@@ -198,7 +214,7 @@ Configuration Options
    0 = Stop Oscillating the HOCO.
    1 = Enable Oscillating the HOCO. (default)
 */
-#define BSP_CFG_HOCO_OSCILLATE_ENABLE          (1)
+#define BSP_CFG_HOCO_OSCILLATE_ENABLE          (0)
 
 /* Select whether to oscillate the Low Speed On-Chip Oscillator (LOCO).
    0 = Stop Oscillating the LOCO. (default)
@@ -219,7 +235,7 @@ Configuration Options
    3 = Sub-Clock Oscillator
    4 = PLL Circuit
 */
-#define BSP_CFG_CLOCK_SOURCE            (1)
+#define BSP_CFG_CLOCK_SOURCE            (4)
 
 /* LPT (Low Power Timer) Clock source select (LPTCR1.LPCNTCKSEL)
    0 = Sub-clock
@@ -238,12 +254,13 @@ Configuration Options
 /* Configure clock source of clock output(CLKOUT) pin (CKOSEL).
    Available clock sources:
    0 = LOCO
-   1 = HOCO (default)
-   2 = Main clock oscillator
+   1 = HOCO
+   2 = Main clock oscillator (default)
    3 = Sub-clock oscillator
    4 = PLL circuit
+   8 = CTSU internal clock
  */
-#define BSP_CFG_CLKOUT_SOURCE           (1)
+#define BSP_CFG_CLKOUT_SOURCE           (2)
 
 /* The sub-clock oscillation control for using the RTC.
    When '1' is selected, the registers related to RTC are initialized and the sub-clock oscillator is operated.
@@ -426,7 +443,7 @@ Configuration Options
    2 = embOS is used.(This is not available.)
    3 = MicroC_OS is used.(This is not available.)
    4 = Renesas ITRON OS (RI600V4 or RI600PX) is used.
-   5 = Azure RTOS is used.(This is not available.)
+   5 = Azure RTOS is used.
 */
 #define BSP_CFG_RTOS_USED               (0)
 
@@ -524,6 +541,11 @@ Configuration Options
 */
 #define BSP_CFG_CONFIGURATOR_SELECT                 (0)
 
+/* Version number of Smart Configurator.
+   This macro definition is updated by Smart Configurator.
+*/
+#define BSP_CFG_CONFIGURATOR_VERSION                (100)
+
 /* For some BSP functions, it is necessary to ensure that, while these functions are executing, interrupts from other 
    FIT modules do not occur. By controlling the IPL, these functions disable interrupts that are at or below the 
    specified interrupt priority level.
@@ -539,7 +561,7 @@ Configuration Options
    1 = Software interrupt is used.
    NOTE: When this macro is set to 1, the software interrupt is initialized in bsp startup routine. 
 */
-#define BSP_CFG_SWINT_UNIT1_ENABLE    (1)
+#define BSP_CFG_SWINT_UNIT1_ENABLE    (0)
 
 /* Software Interrupt Task Buffer Number.
    For software interrupt, this value is number of buffering user tasks.
@@ -576,6 +598,12 @@ Configuration Options
    0(low) - 15(high)
 */
 #define BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY   (15)
+
+/* This macro is used for C++ project and updated by Smart Configurator.
+   0 = This project is a C project.(Not a C++ project).
+   1 = This project is a C++ project.
+*/
+#define BSP_CFG_CPLUSPLUS             (0)
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

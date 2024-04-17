@@ -45,7 +45,7 @@ NOTE: This setting is available only when using CCRX and GNUC.</description>
         <property id="BSP_CFG_ISTACK_BYTES" display="Interrupt stack size" default="0x100" type="textbox">
             <constraint display="Value must be hexadecimal">testHexInteger("${BSP_CFG_ISTACK_BYTES}")</constraint>
             <constraint display="Value must be in the range (0x1~RAM capacity)">("${BSP_CFG_ISTACK_BYTES}" &gt;= 1) &amp;&amp; ("${BSP_CFG_ISTACK_BYTES}" &lt;= (${Device.ramSize} * 1024))</constraint>
-            <description>Interrupt stack  size
+            <description>Interrupt stack size
 NOTE: This setting is available only when using CCRX and GNUC.</description>
         </property>
         <property id="BSP_CFG_HEAP_BYTES" display="Heap size" default="0x400" type="textbox">
@@ -196,7 +196,7 @@ If you set this value and then forget it then you can clear the ID code by conne
             <description>For some BSP functions, it is necessary to ensure that, while these functions are executing, interrupts from other FIT modules do not occur. By controlling the IPL, these functions disable interrupts that are at or below the specified interrupt priority level.
 Please set this value more than IPR for other FIT module interrupts. Don't change if there is no special processing with higher priority than all fit modules.</description>
         </property>
-        <property id="BSP_CFG_SWINT_UNIT1_ENABLE" display="Software Interrupt Unit1 (SWINT1)" default="1" type="combobox">
+        <property id="BSP_CFG_SWINT_UNIT1_ENABLE" display="Software Interrupt Unit1 (SWINT1)" default="0" type="combobox">
             <option id="BSP_CFG_SWINT_UNIT1_ENABLE.0" display="Unused" value="0"/>
             <option id="BSP_CFG_SWINT_UNIT1_ENABLE.1" display="Used" value="1"/>
             <description>0 = Software interrupt is not used.
@@ -269,6 +269,18 @@ NOTE: This setting is common to all units. It can not be set individually. Pleas
             <option id="BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY.15" display="Priority level 15 (highest)" value="15"/>
             <constraint display="when SCI UART Terminal is enabled only" actionOnFail="disable">${BSP_CFG_SCI_UART_TERMINAL_ENABLE} == ${BSP_CFG_SCI_UART_TERMINAL_ENABLE.1}</constraint>
             <description>For serial terminal, this value is interrupt priority. Range is 0 - 15.</description>
+        </property>
+        <property id="BSP_CFG_HOCO_TRIMMING_ENABLE" display="HOCO Trimming select" default="0" type="combobox">
+            <option id="BSP_CFG_HOCO_TRIMMING_ENABLE.0" display="Disabled" value="0"/>
+            <option id="BSP_CFG_HOCO_TRIMMING_ENABLE.1" display="Enabled" value="1"/>
+            <description>0 = Disable reset the HOCO trimming register in the initial setting process.
+1 = Enable reset the HOCO trimming register in the initial setting process.</description>
+        </property>
+        <property id="BSP_CFG_HOCO_TRIMMING_REG_VALUE" display="Set the frequency trimming value for the HOCO." default="0" type="textbox">
+            <constraint display="when HOCO Trimming select is Enabled only" actionOnFail="disable">${BSP_CFG_HOCO_TRIMMING_ENABLE} == ${BSP_CFG_HOCO_TRIMMING_ENABLE.1}</constraint>
+            <constraint display="Value must be an decimal value" actionOnFail="error">testInteger("${BSP_CFG_HOCO_TRIMMING_REG_VALUE}")</constraint>
+            <constraint display="Value must be in the range 0~63" actionOnFail="error">(("${BSP_CFG_HOCO_TRIMMING_REG_VALUE}" &gt;= 0) &amp;&amp; ("${BSP_CFG_HOCO_TRIMMING_REG_VALUE}" &lt;= 63))</constraint>
+            <description>0(Frequency: Low) - 63(Frequency: High).</description>
         </property>
     </configuration>
 </module>

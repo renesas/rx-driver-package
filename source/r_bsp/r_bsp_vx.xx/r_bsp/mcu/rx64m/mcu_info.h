@@ -42,6 +42,8 @@
 *                               Added the error check of BSP_CFG_CLOCK_SOURCE.
 *                               Added the following enumeration constant.
 *                               - BSP_MCU_GROUP_INTERRUPT_BE0
+*         : 30.11.2021 2.01     Deleted the compile switch for BSP_CFG_MCU_PART_SERIES and BSP_CFG_MCU_PART_GROUP.
+*         : 22.04.2022 2.02     Added version check of smart configurator.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -57,6 +59,20 @@ Macro definitions
 #ifndef MCU_INFO
 #define MCU_INFO
 
+#if BSP_CFG_CONFIGURATOR_VERSION < 2120
+    /* The following macros are updated to invalid value by Smart configurator if you are using Smart Configurator for 
+       RX V2.11.0 (equivalent to e2 studio 2021-10) or earlier version.
+       - BSP_CFG_MCU_PART_GROUP, BSP_CFG_MCU_PART_SERIES
+       The following macros are not updated by Smart configurator if you are using Smart Configurator for RX V2.11.0 
+       (equivalent to e2 studio 2021-10) or earlier version.
+       - BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE, BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE, BSP_CFG_HOCO_OSCILLATE_ENABLE, 
+         BSP_CFG_LOCO_OSCILLATE_ENABLE, BSP_CFG_IWDT_CLOCK_OSCILLATE_ENABLE, BSP_CFG_CPLUSPLUS
+       Please update Smart configurator to Smart Configurator for RX V2.12.0 (equivalent to e2 studio 2022-01) or 
+       later version.
+     */
+    #error "To use this version of BSP, you need to upgrade Smart configurator. Please upgrade Smart configurator. If you don't use Smart Configurator, please change value of BSP_CFG_CONFIGURATOR_VERSION in r_bsp_config.h."
+#endif
+
 /* MCU CPU Version */
 #define BSP_MCU_CPU_VERSION    (2)
 
@@ -64,21 +80,13 @@ Macro definitions
 #define CPU_CYCLES_PER_LOOP    (4)
 
 /* MCU Series. */
-#if BSP_CFG_MCU_PART_SERIES == 0x0
-    #define BSP_MCU_SERIES_RX600    (1)
-#else
-    #error "ERROR - BSP_CFG_MCU_PART_SERIES - Unknown MCU Series chosen in r_bsp_config.h"
-#endif
+#define BSP_MCU_SERIES_RX600   (1)
 
 /* This macro means that this MCU is part of the RX64x collection of MCUs (i.e. RX64M). */
-#define BSP_MCU_RX64_ALL            (1)
+#define BSP_MCU_RX64_ALL       (1)
 
 /* MCU Group name. */
-#if BSP_CFG_MCU_PART_GROUP == 0x0
-    #define BSP_MCU_RX64M           (1)
-#else
-    #error "ERROR - BSP_CFG_MCU_PART_GROUP - Unknown MCU Group chosen in r_bsp_config.h"
-#endif
+#define BSP_MCU_RX64M          (1)
 
 /* Package. */
 #if   BSP_CFG_MCU_PART_PACKAGE == 0x0

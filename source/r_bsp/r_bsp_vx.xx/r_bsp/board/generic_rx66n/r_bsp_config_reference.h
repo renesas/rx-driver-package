@@ -32,6 +32,25 @@
 *                                - BSP_CFG_SCI_UART_TERMINAL_BITRATE
 *                                - BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY
 *         : 26.02.2021 1.03     Added a comment for Azure RTOS to BSP_CFG_RTOS_USED.
+*         : 30.11.2021 2.00     Added the following macro definitions.
+*                                - BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE
+*                                - BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE
+*                                - BSP_CFG_HOCO_OSCILLATE_ENABLE
+*                                - BSP_CFG_LOCO_OSCILLATE_ENABLE
+*                                - BSP_CFG_IWDT_CLOCK_OSCILLATE_ENABLE
+*                                - BSP_CFG_CONFIGURATOR_VERSION
+*                                - BSP_CFG_CPLUSPLUS
+*                                - BSP_CFG_SERIAL_PROGRAMMER_CONECT_ENABLE
+*                               Changed initial value of the following macro definitions.
+*                                - BSP_CFG_MCU_PART_GROUP
+*                                - BSP_CFG_MCU_PART_SERIES
+*         : 11.02.2022 2.01     Changed initial value of the following macro definitions.
+*                                - BSP_CFG_SWINT_UNIT1_ENABLE
+*                                - BSP_CFG_SWINT_UNIT2_ENABLE
+*         : 25.11.2022 2.02     Modified comment.
+*                               Added the following macro definition.
+*                                - BSP_CFG_EXPANSION_RAM_ENABLE
+*         : 28.02.2023 2.03     Modified comment.
 ***********************************************************************************************************************/
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
 #define R_BSP_CONFIG_REF_HEADER_FILE
@@ -94,16 +113,16 @@ NOTE: The RAM areas are not contiguous.It is separated by 512 KB each.
 #define BSP_CFG_MCU_PART_MEMORY_SIZE    (0x17)
 
 /* Group name.
-   Character(s) = Value for macro = Description
-   6N           = 0x0             = RX66N Group
+   Character(s) = Description
+   6N           = RX66N Group
 */
-#define BSP_CFG_MCU_PART_GROUP          (0x0)
+#define BSP_CFG_MCU_PART_GROUP          "RX66N"
 
 /* Series name.
-   Character(s) = Value for macro = Description
-   56           = 0x0             = RX600 Series
+   Character(s) = Description
+   56           = RX600 Series
 */
-#define BSP_CFG_MCU_PART_SERIES         (0x0)
+#define BSP_CFG_MCU_PART_SERIES         "RX600"
 
 /* Memory type.
    Character(s) = Value for macro = Description
@@ -185,6 +204,42 @@ NOTE: The RAM areas are not contiguous.It is separated by 512 KB each.
 #define BSP_CFG_ID_CODE_LONG_3          (0xFFFFFFFF)
 /* 4th ID Code section, address 0xFE7F5D5C. From MSB to LSB: ID code 16, ID code 15, ID code 14, ID code 13. */
 #define BSP_CFG_ID_CODE_LONG_4          (0xFFFFFFFF)
+
+/* Select whether to enables or disables the connection of serial programmer.
+   0 = Connection of a serial programmer is prohibited after a reset.
+   1 = Connection of a serial programmer is permitted after a reset. (default)
+*/
+#define BSP_CFG_SERIAL_PROGRAMMER_CONECT_ENABLE   (1)
+
+/* Select whether to oscillate the Main Clock Oscillator.
+   0 = Stop Oscillating the Main Clock.
+   1 = Enable oscillating the Main Clock. (default)
+*/
+#define BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE    (1)
+
+/* Select whether to oscillate the Sub Clock Oscillator.
+   0 = Stop Oscillating the Sub Clock. (default)
+   1 = Enable Oscillating the Sub Clock.
+*/
+#define BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE     (0)
+
+/* Select whether to oscillate the High Speed On-Chip Oscillator (HOCO).
+   0 = Stop Oscillating the HOCO. (default)
+   1 = Enable Oscillating the HOCO.
+*/
+#define BSP_CFG_HOCO_OSCILLATE_ENABLE          (0)
+
+/* Select whether to oscillate the Low Speed On-Chip Oscillator (LOCO).
+   0 = Stop Oscillating the LOCO. (default)
+   1 = Enable Oscillating the LOCO.
+*/
+#define BSP_CFG_LOCO_OSCILLATE_ENABLE          (0)
+
+/* Select whether to oscillate the IWDT-Dedicated On-Chip Oscillator (IWDT).
+   0 = Stop Oscillating the IWDT Clock. (default)
+   1 = Enable Oscillating the IWDT Clock.
+*/
+#define BSP_CFG_IWDT_CLOCK_OSCILLATE_ENABLE    (0)
 
 /* Clock source select (CKSEL).
    0 = Low Speed On-Chip Oscillator  (LOCO)
@@ -553,8 +608,6 @@ NOTE: The RAM areas are not contiguous.It is separated by 512 KB each.
        b26:b24 TMEF   - TM Enable - 000: TM function is enabled.
                                   - 111: TM function is disabled.
        b23:b0  Reserved (set to 1)
-       NOTE: If the dual bank function has not been incorporated in a device,
-             TMEFDB bits [b30:b26] are reserved area.
    Default value is 0xFFFFFFFF.
 */
 #define BSP_CFG_TRUSTED_MODE_FUNCTION  (0xFFFFFFFF)
@@ -613,7 +666,7 @@ NOTE: The RAM areas are not contiguous.It is separated by 512 KB each.
    2 = embOS is used.(This is not available.)
    3 = MicroC_OS is used.(This is not available.)
    4 = Renesas ITRON OS (RI600V4 or RI600PX) is used.
-   5 = Azure RTOS is used.(This is not available.)
+   5 = Azure RTOS is used.
 */
 #define BSP_CFG_RTOS_USED               (0)
 
@@ -734,6 +787,11 @@ NOTE: The RAM areas are not contiguous.It is separated by 512 KB each.
 */
 #define BSP_CFG_CONFIGURATOR_SELECT                 (0)
 
+/* Version number of Smart Configurator.
+   This macro definition is updated by Smart Configurator.
+*/
+#define BSP_CFG_CONFIGURATOR_VERSION                (100)
+
 /* For some BSP functions, it is necessary to ensure that, while these functions are executing, interrupts from other 
    FIT modules do not occur. By controlling the IPL, these functions disable interrupts that are at or below the 
    specified interrupt priority level.
@@ -749,8 +807,8 @@ NOTE: The RAM areas are not contiguous.It is separated by 512 KB each.
    1 = Software interrupt is used.
    NOTE: When this macro is set to 1, the software interrupt is initialized in bsp startup routine. 
 */
-#define BSP_CFG_SWINT_UNIT1_ENABLE    (1)
-#define BSP_CFG_SWINT_UNIT2_ENABLE    (1)
+#define BSP_CFG_SWINT_UNIT1_ENABLE    (0)
+#define BSP_CFG_SWINT_UNIT2_ENABLE    (0)
 
 /* Software Interrupt Task Buffer Number.
    For software interrupt, this value is number of buffering user tasks.
@@ -787,6 +845,18 @@ NOTE: The RAM areas are not contiguous.It is separated by 512 KB each.
    0(low) - 15(high)
 */
 #define BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY   (15)
+
+/* This macro is used for C++ project and updated by Smart Configurator.
+   0 = This project is a C project.(Not a C++ project).
+   1 = This project is a C++ project.
+*/
+#define BSP_CFG_CPLUSPLUS             (0)
+
+/* Select whether to enable sections of the expansion RAM area.
+   0 = Sections of the expansion RAM area is disabled. (default)
+   1 = Sections of the expansion RAM area is enabled.
+*/
+#define BSP_CFG_EXPANSION_RAM_ENABLE  (0)
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

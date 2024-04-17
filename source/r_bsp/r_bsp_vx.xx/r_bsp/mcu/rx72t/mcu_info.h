@@ -32,6 +32,14 @@
 *                                Fixed coding style.
 *                                Added the following enumeration constant.
 *                                - BSP_MCU_GROUP_INTERRUPT_BE0
+*         : 30.11.2021 2.01      Deleted the compile switch for BSP_CFG_MCU_PART_SERIES and BSP_CFG_MCU_PART_GROUP.
+*         : 22.04.2022 2.02      Added version check of smart configurator.
+*                                Added the following macro definitions.
+*                                - BSP_MCU_VOLTAGE_LEVEL_SETTING_USB
+*                                - BSP_MCU_VOLTAGE_LEVEL_SETTING_AD
+*                                - BSP_MCU_VOLTAGE_LEVEL_SETTING_RIIC
+*         : 28.02.2023 2.03      Added the following macro definitions.
+*                                - BSP_MCU_TFU_VERSION
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -47,6 +55,20 @@ Macro definitions
 #ifndef MCU_INFO
 #define MCU_INFO
 
+#if BSP_CFG_CONFIGURATOR_VERSION < 2120
+    /* The following macros are updated to invalid value by Smart configurator if you are using Smart Configurator for 
+       RX V2.11.0 (equivalent to e2 studio 2021-10) or earlier version.
+       - BSP_CFG_MCU_PART_GROUP, BSP_CFG_MCU_PART_SERIES
+       The following macros are not updated by Smart configurator if you are using Smart Configurator for RX V2.11.0 
+       (equivalent to e2 studio 2021-10) or earlier version.
+       - BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE, BSP_CFG_HOCO_OSCILLATE_ENABLE, BSP_CFG_LOCO_OSCILLATE_ENABLE, 
+         BSP_CFG_IWDT_CLOCK_OSCILLATE_ENABLE, BSP_CFG_CPLUSPLUS
+       Please update Smart configurator to Smart Configurator for RX V2.14.0 (equivalent to e2 studio 2022-07) or 
+       later version.
+     */
+    #error "To use this version of BSP, you need to upgrade Smart configurator. Please upgrade Smart configurator. If you don't use Smart Configurator, please change value of BSP_CFG_CONFIGURATOR_VERSION in r_bsp_config.h."
+#endif
+
 /* MCU CPU Version */
 #define BSP_MCU_CPU_VERSION    (3)
 
@@ -54,21 +76,13 @@ Macro definitions
 #define CPU_CYCLES_PER_LOOP    (3)
 
 /* MCU Series. */
-#if BSP_CFG_MCU_PART_SERIES == 0x0
-    #define BSP_MCU_SERIES_RX700    (1)
-#else
-    #error "ERROR - BSP_CFG_MCU_PART_SERIES - Unknown MCU Series chosen in r_bsp_config.h"
-#endif
+#define BSP_MCU_SERIES_RX700   (1)
 
 /* This macro means that this MCU is part of the RX72x collection of MCUs (i.e. RX72T). */
-#define BSP_MCU_RX72_ALL            (1)
+#define BSP_MCU_RX72_ALL       (1)
 
 /* MCU Group name. */
-#if BSP_CFG_MCU_PART_GROUP == 0x0
-    #define BSP_MCU_RX72T           (1)
-#else
-    #error "ERROR - BSP_CFG_MCU_PART_GROUP - Unknown MCU Group chosen in r_bsp_config.h"
-#endif
+#define BSP_MCU_RX72T          (1)
 
 /* Package. */
 #if   BSP_CFG_MCU_PART_PACKAGE == 0x3
@@ -168,6 +182,9 @@ Macro definitions
 /* Frequency threshold of Memory wait cycle setting. */
 #define BSP_MCU_MEMWAIT_FREQ_THRESHOLD (120000000)        /* ICLK > 120MHz requires MEMWAIT register update */
 
+/* MCU TFU Version */
+#define BSP_MCU_TFU_VERSION    (1)
+
 /* MCU functions */
 #define BSP_MCU_REGISTER_WRITE_PROTECTION
 #define BSP_MCU_RCPC_PRC0
@@ -182,6 +199,9 @@ Macro definitions
 #define BSP_MCU_GROUP_INTERRUPT_AL0
 #define BSP_MCU_SOFTWARE_CONFIGURABLE_INTERRUPT
 #define BSP_MCU_VOLTAGE_LEVEL_SETTING
+#define BSP_MCU_VOLTAGE_LEVEL_SETTING_USB
+#define BSP_MCU_VOLTAGE_LEVEL_SETTING_AD
+#define BSP_MCU_VOLTAGE_LEVEL_SETTING_RIIC
 #define BSP_MCU_EXCEP_SUPERVISOR_INST_ISR
 #define BSP_MCU_EXCEP_ACCESS_ISR
 #define BSP_MCU_EXCEP_UNDEFINED_INST_ISR

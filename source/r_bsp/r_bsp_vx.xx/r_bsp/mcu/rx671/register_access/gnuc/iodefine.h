@@ -32,10 +32,11 @@
 *            : V0.50D (2020-10-16)  [Hardware Manual Revision : 0.30]
 *            : V0.50E (2021-01-29)  [Hardware Manual Revision : 0.30]
 *            : V1.00  (2021-03-05)  [Hardware Manual Revision : 1.00]
+*            : V1.00A (2023-03-03)  [Hardware Manual Revision : 1.00]
 *
 * NOTE       : THIS IS A TYPICAL EXAMPLE.
 *
-*  Copyright(c) 2021 Renesas Electronics Corporation.
+*  Copyright(c) 2023 (2020 - 2021) Renesas Electronics Corporation.
 *
 *********************************************************************************/
 /********************************************************************************/
@@ -4071,7 +4072,8 @@ typedef struct st_ctsu {
 			unsigned short CTSUSPMD : 2;
 			unsigned short CTSUTSOD : 1;
 			unsigned short CTSUDRV : 1;
-			unsigned short  : 3;
+			unsigned short  : 2;
+			unsigned short CTSUCLKSEL1 : 1;
 			unsigned short CTSUTSOC : 1;
 			unsigned short  : 7;
 			unsigned short CTSUICOMP : 1;
@@ -4079,7 +4081,8 @@ typedef struct st_ctsu {
 			unsigned short CTSUICOMP : 1;
 			unsigned short  : 7;
 			unsigned short CTSUTSOC : 1;
-			unsigned short  : 3;
+			unsigned short CTSUCLKSEL1 : 1;
+			unsigned short  : 2;
 			unsigned short CTSUDRV : 1;
 			unsigned short CTSUTSOD : 1;
 			unsigned short CTSUSPMD : 2;
@@ -5097,10 +5100,18 @@ typedef struct st_elc {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char WI:1;
-			unsigned char WE:1;
-			unsigned char :5;
-			unsigned char SEG:1;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char SEG : 1;
+			unsigned char  : 5;
+			unsigned char WE : 1;
+			unsigned char WI : 1;
+#else
+			unsigned char WI : 1;
+			unsigned char WE : 1;
+			unsigned char  : 5;
+			unsigned char SEG : 1;
+#endif
 		} BIT;
 #endif
 	} ELSEGR;
@@ -25109,14 +25120,26 @@ typedef struct st_sdhi {
 		unsigned long LONG;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned long :16;
-			unsigned long CMD12AT:2;
-			unsigned long TRSTP:1;
-			unsigned long CMDRW:1;
-			unsigned long CMDTP:1;
-			unsigned long RSPTP:3;
-			unsigned long ACMD:2;
-			unsigned long CMDIDX:6;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned long CMDIDX : 6;
+			unsigned long ACMD : 2;
+			unsigned long RSPTP : 3;
+			unsigned long CMDTP : 1;
+			unsigned long CMDRW : 1;
+			unsigned long TRSTP : 1;
+			unsigned long CMD12AT : 2;
+			unsigned long  : 16;
+#else
+			unsigned long  : 16;
+			unsigned long CMD12AT : 2;
+			unsigned long TRSTP : 1;
+			unsigned long CMDRW : 1;
+			unsigned long CMDTP : 1;
+			unsigned long RSPTP : 3;
+			unsigned long ACMD : 2;
+			unsigned long CMDIDX : 6;
+#endif
 		} BIT;
 #endif
 	} SDCMD;

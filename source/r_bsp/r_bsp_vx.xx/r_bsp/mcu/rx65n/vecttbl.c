@@ -37,7 +37,10 @@
 *                                Added support for GNUC and ICCRX.
 *                                Fixed coding style.
 *         : 31.07.2019 3.01      Fixed initialization for option-setting memory.
-*         : 08.10.2019 3.01      Changed for added support of Renesas RTOS (RI600V4 or RI600PX).
+*         : 08.10.2019 3.02      Changed for added support of Renesas RTOS (RI600V4 or RI600PX).
+*         : 30.11.2021 3.03      Added the following macro definition and changed setting of SPCC register.
+*                                - BSP_PRV_SPCC_SPE
+*                                - BSP_PRV_SPCC_VALUE
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -67,6 +70,14 @@ R_BSP_POR_FUNCTION(R_BSP_POWER_ON_RESET_FUNCTION);
 #else
     #define BSP_PRV_MDE_VALUE (0xffffffff)    /* little */
 #endif
+
+#if BSP_CFG_SERIAL_PROGRAMMER_CONECT_ENABLE == 0
+    #define BSP_PRV_SPCC_SPE   (0xf7ffffff)  /* Connection of a serial programmer after a reset is prohibited. */
+#else
+    #define BSP_PRV_SPCC_SPE   (0xffffffff)  /* Connection of a serial programmer after a reset is permitted. */
+#endif
+
+#define BSP_PRV_SPCC_VALUE    BSP_PRV_SPCC_SPE
 
 #if defined(BSP_MCU_RX65N_2MB) /* In the case of 1.5 or 2Mbyte ROM capacity. */
     #if BSP_CFG_CODE_FLASH_BANK_MODE == 0
@@ -113,7 +124,7 @@ const uint32_t __TMINFreg   = 0xffffffff;
 #if defined(BSP_MCU_RX65N_2MB)
 const uint32_t __BANKSELreg = BSP_PRV_START_BANK_VALUE;
 #endif
-const uint32_t __SPCCreg    = 0xffffffff;
+const uint32_t __SPCCreg    = BSP_PRV_SPCC_VALUE;
 const uint32_t __TMEFreg    = BSP_CFG_TRUSTED_MODE_FUNCTION;
 const uint32_t __OSIS1reg   = BSP_CFG_ID_CODE_LONG_1;
 const uint32_t __OSIS2reg   = BSP_CFG_ID_CODE_LONG_2;
@@ -133,7 +144,7 @@ const uint32_t __TMINFreg   __attribute__ ((section(".ofs2"))) = 0xffffffff;
 #if defined(BSP_MCU_RX65N_2MB)
 const uint32_t __BANKSELreg __attribute__ ((section(".ofs3"))) = BSP_PRV_START_BANK_VALUE;
 #endif
-const uint32_t __SPCCreg    __attribute__ ((section(".ofs4"))) = 0xffffffff;
+const uint32_t __SPCCreg    __attribute__ ((section(".ofs4"))) = BSP_PRV_SPCC_VALUE;
 const uint32_t __TMEFreg    __attribute__ ((section(".ofs5"))) = BSP_CFG_TRUSTED_MODE_FUNCTION;
 const st_ofsm_sec_ofs6_t __ofsm_sec_ofs6   __attribute__ ((section(".ofs6"))) = {
     BSP_CFG_ID_CODE_LONG_1, /* __OSIS1reg */
@@ -153,7 +164,7 @@ const uint32_t __ROMCODEreg __attribute__ ((section(".ofs8"))) = BSP_CFG_ROMCODE
 #if defined(BSP_MCU_RX65N_2MB)
 #pragma public_equ = "__BANKSEL", BSP_PRV_START_BANK_VALUE
 #endif
-#pragma public_equ = "__SPCC", 0xffffffff
+#pragma public_equ = "__SPCC", BSP_PRV_SPCC_VALUE
 #pragma public_equ = "__TMEF", BSP_CFG_TRUSTED_MODE_FUNCTION
 #pragma public_equ = "__OSIS_1", BSP_CFG_ID_CODE_LONG_1
 #pragma public_equ = "__OSIS_2", BSP_CFG_ID_CODE_LONG_2

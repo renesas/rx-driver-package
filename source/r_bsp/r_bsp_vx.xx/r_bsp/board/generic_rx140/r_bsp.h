@@ -24,6 +24,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 30.06.2021 1.00     First release
+*         : 30.11.2021 1.01     Modified the include file.
 ***********************************************************************************************************************/
 
 /* Make sure that no other platforms have already been defined. Do not touch this! */
@@ -40,8 +41,8 @@ extern "C" {
 /***********************************************************************************************************************
 INCLUDE APPROPRIATE MCU AND BOARD FILES
 ***********************************************************************************************************************/
-#include    "mcu/all/r_bsp_common.h"
 #include    "r_bsp_config.h"
+#include    "mcu/all/r_bsp_common.h"
 #include    "mcu/all/r_rx_compiler.h"
 
 #include    "mcu/all/lowlvl.h"

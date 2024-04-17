@@ -24,6 +24,7 @@
 * History : DD.MM.YYYY Version  Description
 *         : 28.02.2019 3.00     Merged processing of all devices.
 *                               Fixed coding style.
+*         : 25.11.2022 3.01     Modiffied comment.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -38,7 +39,7 @@ Includes   <System Includes> , "Project Includes"
 Macro definitions
 ***********************************************************************************************************************/
 #define BSP_PRV_E1_DBG_PORT (*(volatile st_dbg_t     R_BSP_EVENACCESS_SFR *)0x84080)
-#define BSP_PRV_TXFL0EN     (0x00000100)          /* debug tx flow control bit */
+#define BSP_PRV_TXFL0EN     (0x00000100)          /* debug TX flow control bit */
 #define BSP_PRV_RXFL0EN     (0x00001000)          /* debug RX flow control bit */
 
 /***********************************************************************************************************************
@@ -108,7 +109,7 @@ char charget (void)
 #if BSP_CFG_USER_CHARGET_ENABLED == 1
     return BSP_CFG_USER_CHARGET_FUNCTION();
 #else
-    /* Wait for rx buffer buffer to be ready */
+    /* Wait for recieve buffer to be ready */
     /* WAIT_LOOP */
     while(0 == (BSP_PRV_E1_DBG_PORT.dbgstat & BSP_PRV_RXFL0EN))
     {

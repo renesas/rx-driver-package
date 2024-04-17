@@ -25,6 +25,7 @@
 *         : 27.07.2018 1.00     First Release
 *         : 28.02.2019 1.01     Modified comment.
 *                               Fixed coding style.
+*         : 11.02.2022 1.02     Added support for RX66T with 48 pin package.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -161,6 +162,27 @@ Macro definitions
     #define BSP_PRV_PORTB_NE_PIN_MASK     (0x80)
     #define BSP_PRV_PORTC_NE_PIN_MASK     (0x7F)
     #define BSP_PRV_PORTD_NE_PIN_MASK     (0x07)
+    #define BSP_PRV_PORTE_NE_PIN_MASK     (0x7B)
+    #define BSP_PRV_PORTF_NE_PIN_MASK     (0x0F)
+    #define BSP_PRV_PORTG_NE_PIN_MASK     (0x07)
+    #define BSP_PRV_PORTH_NE_PIN_MASK     (0xEE)
+    #define BSP_PRV_PORTK_NE_PIN_MASK     (0x07)
+#elif BSP_PACKAGE_PINS == 48
+    /* Refer User's Manual: Hardware Table 20.14. */
+    #define BSP_PRV_PORT0_NE_PIN_MASK     (0x02)
+    #define BSP_PRV_PORT1_NE_PIN_MASK     (0xFC)
+    #define BSP_PRV_PORT2_NE_PIN_MASK     (0xFF)
+    #define BSP_PRV_PORT3_NE_PIN_MASK     (0x3F)
+    #define BSP_PRV_PORT4_NE_PIN_MASK     (0x80)
+    #define BSP_PRV_PORT5_NE_PIN_MASK     (0x3F)
+    #define BSP_PRV_PORT6_NE_PIN_MASK     (0x0B)
+    #define BSP_PRV_PORT7_NE_PIN_MASK     (0x01)
+    #define BSP_PRV_PORT8_NE_PIN_MASK     (0x07)
+    #define BSP_PRV_PORT9_NE_PIN_MASK     (0x6F)
+    #define BSP_PRV_PORTA_NE_PIN_MASK     (0xD7)
+    #define BSP_PRV_PORTB_NE_PIN_MASK     (0x80)
+    #define BSP_PRV_PORTC_NE_PIN_MASK     (0x7F)
+    #define BSP_PRV_PORTD_NE_PIN_MASK     (0x57)
     #define BSP_PRV_PORTE_NE_PIN_MASK     (0x7B)
     #define BSP_PRV_PORTF_NE_PIN_MASK     (0x0F)
     #define BSP_PRV_PORTG_NE_PIN_MASK     (0x07)

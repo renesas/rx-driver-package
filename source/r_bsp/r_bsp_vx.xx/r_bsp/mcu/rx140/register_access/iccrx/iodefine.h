@@ -33,6 +33,12 @@
 *            : V0.50A (2020-12-16)  [Hardware Manual Revision : 0.50]
 *            : V1.00  (2021-03-26)  [Hardware Manual Revision : 1.00]
 *            : V1.00A (2021-05-27)  [Hardware Manual Revision : 1.00]
+*            : V1.00B (2021-09-03)  [Hardware Manual Revision : 1.00]
+*            : V1.00C (2021-10-12)  [Hardware Manual Revision : 1.00]
+*            : V1.10  (2021-11-10)  [Hardware Manual Revision : 1.10]
+*            : V1.10A (2021-12-16)  [Hardware Manual Revision : 1.10, modified by REL]
+*            : V1.10B (2022-03-10)  [Hardware Manual Revision : 1.10, modified by REL]
+*            : V1.10C (2022-03-29)  [Hardware Manual Revision : 1.10, modified by REL]
 *
 * NOTE       : THIS IS A TYPICAL EXAMPLE.
 *
@@ -149,7 +155,7 @@
 #define	IEN_ELC_ELSR18I		IEN2
 #define	IEN_AES_AESWRI		IEN7
 #define	IEN_AES_AESRDI		IEN0
-#define	IEN_TRNG_TRNGRDI	IEN1
+#define	IEN_RNG_RNGRDI		IEN1
 #define	IEN_MTU0_TGIA0		IEN2
 #define	IEN_MTU0_TGIB0		IEN3
 #define	IEN_MTU0_TGIC0		IEN4
@@ -269,7 +275,7 @@
 #define	VECT_ELC_ELSR18I	106
 #define	VECT_AES_AESWRI		111
 #define	VECT_AES_AESRDI		112
-#define	VECT_TRNG_TRNGRDI	113
+#define	VECT_RNG_RNGRDI		113
 #define	VECT_MTU0_TGIA0		114
 #define	VECT_MTU0_TGIB0		115
 #define	VECT_MTU0_TGIC0		116
@@ -410,74 +416,74 @@
 #define	 _MSTP( x )		__MSTP( x )
 #define	  MSTP( x )		_MSTP( _ ## x )
 
-#define	BSC		(*(volatile struct st_bsc    __sfr __evenaccess *)0x81300)
-#define	CAC		(*(volatile struct st_cac    __sfr __evenaccess *)0x8B000)
-#define	CMPB	(*(volatile struct st_cmpb   __sfr __evenaccess *)0x8C580)
-#define	CMT		(*(volatile struct st_cmt    __sfr __evenaccess *)0x88000)
-#define	CMT0	(*(volatile struct st_cmt0   __sfr __evenaccess *)0x88002)
-#define	CMT1	(*(volatile struct st_cmt0   __sfr __evenaccess *)0x88008)
-#define	CRC		(*(volatile struct st_crc    __sfr __evenaccess *)0x88280)
-#define	CTSU	(*(volatile struct st_ctsu   __sfr __evenaccess *)0xA0700)
-#define	DA		(*(volatile struct st_da     __sfr __evenaccess *)0x880C0)
-#define	DOC		(*(volatile struct st_doc    __sfr __evenaccess *)0x8B080)
-#define	DTC		(*(volatile struct st_dtc    __sfr __evenaccess *)0x82400)
-#define	ELC		(*(volatile struct st_elc    __sfr __evenaccess *)0x8B100)
-#define	FLASH	(*(volatile struct st_flash  __sfr __evenaccess *)0x7FC090)
-#define	ICU		(*(volatile struct st_icu    __sfr __evenaccess *)0x87000)
-#define	IWDT	(*(volatile struct st_iwdt   __sfr __evenaccess *)0x88030)
-#define	LPT		(*(volatile struct st_lpt    __sfr __evenaccess *)0x800B0)
-#define	MPC		(*(volatile struct st_mpc    __sfr __evenaccess *)0x8C11F)
-#define	MTU		(*(volatile struct st_mtu    __sfr __evenaccess *)0x8860A)
-#define	MTU0	(*(volatile struct st_mtu0   __sfr __evenaccess *)0x88690)
-#define	MTU1	(*(volatile struct st_mtu1   __sfr __evenaccess *)0x88690)
-#define	MTU2	(*(volatile struct st_mtu2   __sfr __evenaccess *)0x88692)
-#define	MTU3	(*(volatile struct st_mtu3   __sfr __evenaccess *)0x88600)
-#define	MTU4	(*(volatile struct st_mtu4   __sfr __evenaccess *)0x88600)
-#define	MTU5	(*(volatile struct st_mtu5   __sfr __evenaccess *)0x88694)
-#define	OFSM	(*(volatile struct st_ofsm   __sfr __evenaccess *)0xFFFFFF80)
-#define	POE		(*(volatile struct st_poe    __sfr __evenaccess *)0x88900)
-#define	PORT	(*(volatile struct st_port   __sfr __evenaccess *)0x8C120)
-#define	PORT0	(*(volatile struct st_port0  __sfr __evenaccess *)0x8C000)
-#define	PORT1	(*(volatile struct st_port1  __sfr __evenaccess *)0x8C001)
-#define	PORT2	(*(volatile struct st_port2  __sfr __evenaccess *)0x8C002)
-#define	PORT3	(*(volatile struct st_port3  __sfr __evenaccess *)0x8C003)
-#define	PORT4	(*(volatile struct st_port4  __sfr __evenaccess *)0x8C004)
-#define	PORT5	(*(volatile struct st_port5  __sfr __evenaccess *)0x8C005)
-#define	PORTA	(*(volatile struct st_porta  __sfr __evenaccess *)0x8C00A)
-#define	PORTB	(*(volatile struct st_portb  __sfr __evenaccess *)0x8C00B)
-#define	PORTC	(*(volatile struct st_portc  __sfr __evenaccess *)0x8C00C)
-#define	PORTD	(*(volatile struct st_portd  __sfr __evenaccess *)0x8C00D)
-#define	PORTE	(*(volatile struct st_porte  __sfr __evenaccess *)0x8C00E)
-#define	PORTG	(*(volatile struct st_portg  __sfr __evenaccess *)0x8C010)
-#define	PORTH	(*(volatile struct st_porth  __sfr __evenaccess *)0x8C011)
-#define	PORTJ	(*(volatile struct st_portj  __sfr __evenaccess *)0x8C012)
-#define	RIIC0	(*(volatile struct st_riic   __sfr __evenaccess *)0x88300)
-#define	RSCAN	(*(volatile struct st_rscan  __sfr __evenaccess *)0xA8322)
-#define	RSCAN0	(*(volatile struct st_rscan0 __sfr __evenaccess *)0xA8300)
-#define	RSPI0	(*(volatile struct st_rspi   __sfr __evenaccess *)0x88380)
-#define	RTC		(*(volatile struct st_rtc    __sfr __evenaccess *)0x8C400)
-#define	RTCB	(*(volatile struct st_rtcb   __sfr __evenaccess *)0x8C402)
-#define	S12AD	(*(volatile struct st_s12ad  __sfr __evenaccess *)0x89000)
-#define	SCI1	(*(volatile struct st_sci1   __sfr __evenaccess *)0x8A020)
-#define	SCI5	(*(volatile struct st_sci1   __sfr __evenaccess *)0x8A0A0)
-#define	SCI6	(*(volatile struct st_sci6   __sfr __evenaccess *)0x8A0C0)
-#define	SCI8	(*(volatile struct st_sci6   __sfr __evenaccess *)0x8A100)
-#define	SCI9	(*(volatile struct st_sci6   __sfr __evenaccess *)0x8A120)
-#define	SCI12	(*(volatile struct st_sci12  __sfr __evenaccess *)0x8B300)
-#define	SMCI1	(*(volatile struct st_smci   __sfr __evenaccess *)0x8A020)
-#define	SMCI5	(*(volatile struct st_smci   __sfr __evenaccess *)0x8A0A0)
-#define	SMCI6	(*(volatile struct st_smci   __sfr __evenaccess *)0x8A0C0)
-#define	SMCI8	(*(volatile struct st_smci   __sfr __evenaccess *)0x8A100)
-#define	SMCI9	(*(volatile struct st_smci   __sfr __evenaccess *)0x8A120)
-#define	SMCI12	(*(volatile struct st_smci   __sfr __evenaccess *)0x8B300)
-#define	SYSTEM	(*(volatile struct st_system __sfr __evenaccess *)0x80000)
-#define	TEMPS	(*(volatile struct st_temps  __sfr __evenaccess *)0x7FC228)
-#define	TMR0	(*(volatile struct st_tmr0   __sfr __evenaccess *)0x88200)
-#define	TMR1	(*(volatile struct st_tmr1   __sfr __evenaccess *)0x88201)
-#define	TMR2	(*(volatile struct st_tmr0   __sfr __evenaccess *)0x88210)
-#define	TMR3	(*(volatile struct st_tmr1   __sfr __evenaccess *)0x88211)
-#define	TMR01	(*(volatile struct st_tmr01  __sfr __evenaccess *)0x88204)
-#define	TMR23	(*(volatile struct st_tmr01  __sfr __evenaccess *)0x88214)
+#define	BSC		(*(volatile struct st_bsc    __sfr *)0x81300)
+#define	CAC		(*(volatile struct st_cac    __sfr *)0x8B000)
+#define	CMPB	(*(volatile struct st_cmpb   __sfr *)0x8C580)
+#define	CMT		(*(volatile struct st_cmt    __sfr *)0x88000)
+#define	CMT0	(*(volatile struct st_cmt0   __sfr *)0x88002)
+#define	CMT1	(*(volatile struct st_cmt0   __sfr *)0x88008)
+#define	CRC		(*(volatile struct st_crc    __sfr *)0x88280)
+#define	CTSU	(*(volatile struct st_ctsu   __sfr *)0xA0700)
+#define	DA		(*(volatile struct st_da     __sfr *)0x880C0)
+#define	DOC		(*(volatile struct st_doc    __sfr *)0x8B080)
+#define	DTC		(*(volatile struct st_dtc    __sfr *)0x82400)
+#define	ELC		(*(volatile struct st_elc    __sfr *)0x8B100)
+#define	FLASH	(*(volatile struct st_flash  __sfr *)0x7FC090)
+#define	ICU		(*(volatile struct st_icu    __sfr *)0x87000)
+#define	IWDT	(*(volatile struct st_iwdt   __sfr *)0x88030)
+#define	LPT		(*(volatile struct st_lpt    __sfr *)0x800B0)
+#define	MPC		(*(volatile struct st_mpc    __sfr *)0x8C11F)
+#define	MTU		(*(volatile struct st_mtu    __sfr *)0x8860A)
+#define	MTU0	(*(volatile struct st_mtu0   __sfr *)0x88690)
+#define	MTU1	(*(volatile struct st_mtu1   __sfr *)0x88690)
+#define	MTU2	(*(volatile struct st_mtu2   __sfr *)0x88692)
+#define	MTU3	(*(volatile struct st_mtu3   __sfr *)0x88600)
+#define	MTU4	(*(volatile struct st_mtu4   __sfr *)0x88600)
+#define	MTU5	(*(volatile struct st_mtu5   __sfr *)0x88694)
+#define	OFSM	(*(volatile struct st_ofsm   __sfr *)0xFFFFFF80)
+#define	POE		(*(volatile struct st_poe    __sfr *)0x88900)
+#define	PORT	(*(volatile struct st_port   __sfr *)0x8C120)
+#define	PORT0	(*(volatile struct st_port0  __sfr *)0x8C000)
+#define	PORT1	(*(volatile struct st_port1  __sfr *)0x8C001)
+#define	PORT2	(*(volatile struct st_port2  __sfr *)0x8C002)
+#define	PORT3	(*(volatile struct st_port3  __sfr *)0x8C003)
+#define	PORT4	(*(volatile struct st_port4  __sfr *)0x8C004)
+#define	PORT5	(*(volatile struct st_port5  __sfr *)0x8C005)
+#define	PORTA	(*(volatile struct st_porta  __sfr *)0x8C00A)
+#define	PORTB	(*(volatile struct st_portb  __sfr *)0x8C00B)
+#define	PORTC	(*(volatile struct st_portc  __sfr *)0x8C00C)
+#define	PORTD	(*(volatile struct st_portd  __sfr *)0x8C00D)
+#define	PORTE	(*(volatile struct st_porte  __sfr *)0x8C00E)
+#define	PORTG	(*(volatile struct st_portg  __sfr *)0x8C010)
+#define	PORTH	(*(volatile struct st_porth  __sfr *)0x8C011)
+#define	PORTJ	(*(volatile struct st_portj  __sfr *)0x8C012)
+#define	RIIC0	(*(volatile struct st_riic   __sfr *)0x88300)
+#define	RSCAN	(*(volatile struct st_rscan  __sfr *)0xA8322)
+#define	RSCAN0	(*(volatile struct st_rscan0 __sfr *)0xA8300)
+#define	RSPI0	(*(volatile struct st_rspi   __sfr *)0x88380)
+#define	RTC		(*(volatile struct st_rtc    __sfr *)0x8C400)
+#define	RTCB	(*(volatile struct st_rtcb   __sfr *)0x8C402)
+#define	S12AD	(*(volatile struct st_s12ad  __sfr *)0x89000)
+#define	SCI1	(*(volatile struct st_sci1   __sfr *)0x8A020)
+#define	SCI5	(*(volatile struct st_sci1   __sfr *)0x8A0A0)
+#define	SCI6	(*(volatile struct st_sci6   __sfr *)0x8A0C0)
+#define	SCI8	(*(volatile struct st_sci6   __sfr *)0x8A100)
+#define	SCI9	(*(volatile struct st_sci6   __sfr *)0x8A120)
+#define	SCI12	(*(volatile struct st_sci12  __sfr *)0x8B300)
+#define	SMCI1	(*(volatile struct st_smci   __sfr *)0x8A020)
+#define	SMCI5	(*(volatile struct st_smci   __sfr *)0x8A0A0)
+#define	SMCI6	(*(volatile struct st_smci   __sfr *)0x8A0C0)
+#define	SMCI8	(*(volatile struct st_smci   __sfr *)0x8A100)
+#define	SMCI9	(*(volatile struct st_smci   __sfr *)0x8A120)
+#define	SMCI12	(*(volatile struct st_smci   __sfr *)0x8B300)
+#define	SYSTEM	(*(volatile struct st_system __sfr *)0x80000)
+#define	TEMPS	(*(volatile struct st_temps  __sfr *)0x7FC228)
+#define	TMR0	(*(volatile struct st_tmr0   __sfr *)0x88200)
+#define	TMR1	(*(volatile struct st_tmr1   __sfr *)0x88201)
+#define	TMR2	(*(volatile struct st_tmr0   __sfr *)0x88210)
+#define	TMR3	(*(volatile struct st_tmr1   __sfr *)0x88211)
+#define	TMR01	(*(volatile struct st_tmr01  __sfr *)0x88204)
+#define	TMR23	(*(volatile struct st_tmr01  __sfr *)0x88214)
 
 typedef enum enum_ir {
 IR_BSC_BUSERR=16,IR_FCU_FRDYI=23,
@@ -499,7 +505,7 @@ IR_RTC_ALM=92,IR_RTC_PRD,
 IR_S12AD_S12ADI0=102,IR_S12AD_GBADI,
 IR_ELC_ELSR18I=106,
 IR_AES_AESWRI=111,IR_AES_AESRDI,
-IR_TRNG_TRNGRDI,
+IR_RNG_RNGRDI,
 IR_MTU0_TGIA0,IR_MTU0_TGIB0,IR_MTU0_TGIC0,IR_MTU0_TGID0,IR_MTU0_TCIV0,IR_MTU0_TGIE0,IR_MTU0_TGIF0,
 IR_MTU1_TGIA1,IR_MTU1_TGIB1,IR_MTU1_TCIV1,IR_MTU1_TCIU1,
 IR_MTU2_TGIA2,IR_MTU2_TGIB2,IR_MTU2_TCIV2,IR_MTU2_TCIU2,
@@ -533,7 +539,7 @@ DTCE_ICU_IRQ0=64,DTCE_ICU_IRQ1,DTCE_ICU_IRQ2,DTCE_ICU_IRQ3,DTCE_ICU_IRQ4,DTCE_IC
 DTCE_S12AD_S12ADI0=102,DTCE_S12AD_GBADI,
 DTCE_ELC_ELSR18I=106,
 DTCE_AES_AESWRI=111,DTCE_AES_AESRDI,
-DTCE_TRNG_TRNGRDI,
+DTCE_RNG_RNGRDI,
 DTCE_MTU0_TGIA0,DTCE_MTU0_TGIB0,DTCE_MTU0_TGIC0,DTCE_MTU0_TGID0,
 DTCE_MTU1_TGIA1=121,DTCE_MTU1_TGIB1,
 DTCE_MTU2_TGIA2=125,DTCE_MTU2_TGIB2,
@@ -575,7 +581,7 @@ IER_RTC_ALM=0x0B,IER_RTC_PRD=0x0B,
 IER_S12AD_S12ADI0=0x0C,IER_S12AD_GBADI=0x0C,
 IER_ELC_ELSR18I=0x0D,
 IER_AES_AESWRI=0x0D,IER_AES_AESRDI=0x0E,
-IER_TRNG_TRNGRDI=0x0E,
+IER_RNG_RNGRDI=0x0E,
 IER_MTU0_TGIA0=0x0E,IER_MTU0_TGIB0=0x0E,IER_MTU0_TGIC0=0x0E,IER_MTU0_TGID0=0x0E,IER_MTU0_TCIV0=0x0E,IER_MTU0_TGIE0=0x0E,IER_MTU0_TGIF0=0x0F,
 IER_MTU1_TGIA1=0x0F,IER_MTU1_TGIB1=0x0F,IER_MTU1_TCIV1=0x0F,IER_MTU1_TCIU1=0x0F,
 IER_MTU2_TGIA2=0x0F,IER_MTU2_TGIB2=0x0F,IER_MTU2_TCIV2=0x0F,IER_MTU2_TCIU2=0x10,
@@ -618,7 +624,7 @@ IPR_RTC_ALM=92,IPR_RTC_PRD=93,
 IPR_S12AD_S12ADI0=102,IPR_S12AD_GBADI=103,
 IPR_ELC_ELSR18I=106,
 IPR_AES_AESWRI=111,IPR_AES_AESRDI=111,
-IPR_TRNG_TRNGRDI=113,
+IPR_RNG_RNGRDI=113,
 IPR_MTU0_TGIA0=114,IPR_MTU0_TGIB0=114,IPR_MTU0_TGIC0=114,IPR_MTU0_TGID0=114,IPR_MTU0_TCIV0=118,IPR_MTU0_TGIE0=118,IPR_MTU0_TGIF0=118,
 IPR_MTU1_TGIA1=121,IPR_MTU1_TGIB1=121,IPR_MTU1_TCIV1=123,IPR_MTU1_TCIU1=123,
 IPR_MTU2_TGIA2=125,IPR_MTU2_TGIB2=125,IPR_MTU2_TCIV2=127,IPR_MTU2_TCIU2=127,
@@ -647,7 +653,7 @@ IPR_DOC_=57,
 IPR_CTSU_=60,
 IPR_SYSTEM_=81,
 IPR_AES_=111,
-IPR_TRNG_=113,
+IPR_RNG_=113,
 IPR_MTU1_TGI=121,
 IPR_MTU1_TCI=123,
 IPR_MTU2_TGI=125,
@@ -908,20 +914,20 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			unsigned long :31;
-			unsigned long TSADCS:1;
+			unsigned long CTADCS:1;
 		} BIT;
 	} CTSUADCC;
 	char           wk0[508];
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			unsigned long DCBACK:1;
@@ -952,8 +958,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			unsigned long :2;
@@ -971,8 +977,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			unsigned long :12;
@@ -989,8 +995,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			unsigned long CHAC31:1;
@@ -1030,38 +1036,11 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
-			unsigned long CHAC63:1;
-			unsigned long CHAC62:1;
-			unsigned long CHAC61:1;
-			unsigned long CHAC60:1;
-			unsigned long CHAC59:1;
-			unsigned long CHAC58:1;
-			unsigned long CHAC57:1;
-			unsigned long CHAC56:1;
-			unsigned long CHAC55:1;
-			unsigned long CHAC54:1;
-			unsigned long CHAC53:1;
-			unsigned long CHAC52:1;
-			unsigned long CHAC51:1;
-			unsigned long CHAC50:1;
-			unsigned long CHAC49:1;
-			unsigned long CHAC48:1;
-			unsigned long CHAC47:1;
-			unsigned long CHAC46:1;
-			unsigned long CHAC45:1;
-			unsigned long CHAC44:1;
-			unsigned long CHAC43:1;
-			unsigned long CHAC42:1;
-			unsigned long CHAC41:1;
-			unsigned long CHAC40:1;
-			unsigned long CHAC39:1;
-			unsigned long CHAC38:1;
-			unsigned long CHAC37:1;
-			unsigned long CHAC36:1;
+			unsigned long :28;
 			unsigned long CHAC35:1;
 			unsigned long CHAC34:1;
 			unsigned long CHAC33:1;
@@ -1071,8 +1050,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			unsigned long CHTRC31:1;
@@ -1112,38 +1091,11 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
-			unsigned long CHTRC63:1;
-			unsigned long CHTRC62:1;
-			unsigned long CHTRC61:1;
-			unsigned long CHTRC60:1;
-			unsigned long CHTRC59:1;
-			unsigned long CHTRC58:1;
-			unsigned long CHTRC57:1;
-			unsigned long CHTRC56:1;
-			unsigned long CHTRC55:1;
-			unsigned long CHTRC54:1;
-			unsigned long CHTRC53:1;
-			unsigned long CHTRC52:1;
-			unsigned long CHTRC51:1;
-			unsigned long CHTRC50:1;
-			unsigned long CHTRC49:1;
-			unsigned long CHTRC48:1;
-			unsigned long CHTRC47:1;
-			unsigned long CHTRC46:1;
-			unsigned long CHTRC45:1;
-			unsigned long CHTRC44:1;
-			unsigned long CHTRC43:1;
-			unsigned long CHTRC42:1;
-			unsigned long CHTRC41:1;
-			unsigned long CHTRC40:1;
-			unsigned long CHTRC39:1;
-			unsigned long CHTRC38:1;
-			unsigned long CHTRC37:1;
-			unsigned long CHTRC36:1;
+			unsigned long :28;
 			unsigned long CHTRC35:1;
 			unsigned long CHTRC34:1;
 			unsigned long CHTRC33:1;
@@ -1153,8 +1105,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			unsigned long :16;
@@ -1174,8 +1126,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			unsigned long SDPA:8;
@@ -1188,8 +1140,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			unsigned long UC:16;
@@ -1199,8 +1151,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			unsigned long TXREV:1;
@@ -1228,8 +1180,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			unsigned long SUMULTI1:8;
@@ -1241,8 +1193,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			unsigned long SUMULTI3:8;
@@ -1255,8 +1207,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			unsigned long :12;
@@ -1266,65 +1218,27 @@ typedef struct st_ctsu {
 			unsigned long :2;
 			unsigned long MTUCFEN:1;
 			unsigned long DTCLESS:1;
-			unsigned long :1;
-			unsigned long MAJIRIMD:1;
-			unsigned long MCACFEN:1;
+			unsigned long :3;
 			unsigned long CCOCFEN:1;
 		} BIT;
 	} CTSUOPT;
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
-			unsigned long SCNTACCOUNTn:16;
-			unsigned long SCNTACCOEFFn:16;
+			unsigned long SCNTACCOUNT:16;
+			unsigned long SCNTACCOEFF:16;
 		} BIT;
-	} CTSUSCNTACTn;
-	char           wk2[4];
+	} CTSUSCNTACT;
+	char           wk2[16];
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
-		} WORD;
-		struct {
-			unsigned long OFFSETCOEFF1:16;
-			unsigned long :6;
-			unsigned long SO1:10;
-		} BIT;
-	} CTSUMACT1;
-	union {
-		unsigned long LONG;
-		struct {
 			unsigned short H;
-			unsigned short L;
-		} WORD;
-		struct {
-			unsigned long OFFSETCOEFF2:16;
-			unsigned long :6;
-			unsigned long SO2:10;
-		} BIT;
-	} CTSUMACT2;
-	union {
-		unsigned long LONG;
-		struct {
-			unsigned short H;
-			unsigned short L;
-		} WORD;
-		struct {
-			unsigned long OFFSETCOEFF3:16;
-			unsigned long :6;
-			unsigned long SO3:10;
-		} BIT;
-	} CTSUMACT3;
-	union {
-		unsigned long LONG;
-		struct {
-			unsigned short H;
-			unsigned short L;
 		} WORD;
 		struct {
 			unsigned long AJBMAT:4;
@@ -1340,8 +1254,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			unsigned long AJTHH:16;
@@ -1351,10 +1265,6 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
-			unsigned short L;
-		} WORD;
-		struct {
 			unsigned long AJMMAR:27;
 			unsigned long :1;
 			unsigned long AJMMATI:4;
@@ -1363,18 +1273,14 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
-			unsigned short L;
-		} WORD;
-		struct {
 			unsigned long AJBLACT:32;
 		} BIT;
 	} CTSUAJBLACT;
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			unsigned long AJBLAR:16;
@@ -1384,8 +1290,8 @@ typedef struct st_ctsu {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
 			unsigned short L;
+			unsigned short H;
 		} WORD;
 		struct {
 			unsigned long :16;
@@ -2699,7 +2605,26 @@ typedef struct st_mpc {
 			unsigned char PSEL:5;
 		} BIT;
 	} PH3PFS;
-	char           wk13[5];
+	char           wk13[2];
+	union {
+		unsigned char BYTE;
+		struct {
+			unsigned char :1;
+			unsigned char ISEL:1;
+			unsigned char :1;
+			unsigned char PSEL:5;
+		} BIT;
+	} PH6PFS;
+	union {
+		unsigned char BYTE;
+		struct {
+			unsigned char :1;
+			unsigned char ISEL:1;
+			unsigned char :1;
+			unsigned char PSEL:5;
+		} BIT;
+	} PH7PFS;
+	char           wk14[1];
 	union {
 		unsigned char BYTE;
 		struct {
@@ -2708,7 +2633,7 @@ typedef struct st_mpc {
 			unsigned char PSEL:5;
 		} BIT;
 	} PJ1PFS;
-	char           wk14[4];
+	char           wk15[4];
 	union {
 		unsigned char BYTE;
 		struct {
@@ -4501,7 +4426,9 @@ typedef struct st_porth {
 	union {
 		unsigned char BYTE;
 		struct {
-			unsigned char :4;
+			unsigned char B7:1;
+			unsigned char B6:1;
+			unsigned char :2;
 			unsigned char B3:1;
 			unsigned char B2:1;
 			unsigned char B1:1;
@@ -10357,14 +10284,7 @@ typedef struct st_system {
 			unsigned char SODRV:2;
 		} BIT;
 	} SOMCR;
-	char           wk12[27];
-	union {
-		unsigned char BYTE;
-		struct {
-			unsigned char :6;
-			unsigned char PSMC:2;
-		} BIT;
-	} PSMCR;
+	char           wk12[28];
 	union {
 		unsigned char BYTE;
 		struct {

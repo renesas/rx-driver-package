@@ -45,7 +45,7 @@ NOTE: This setting is available only when using CCRX and GNUC.</description>
         <property id="BSP_CFG_ISTACK_BYTES" display="Interrupt stack size" default="0x400" type="textbox">
             <constraint display="Value must be hexadecimal">testHexInteger("${BSP_CFG_ISTACK_BYTES}")</constraint>
             <constraint display="Value must be in the range (0x1~RAM capacity)">("${BSP_CFG_ISTACK_BYTES}" &gt;= 1) &amp;&amp; ("${BSP_CFG_ISTACK_BYTES}" &lt;= (${Device.ramSize} * 1024))</constraint>
-            <description>Interrupt stack  size
+            <description>Interrupt stack size
 NOTE: This setting is available only when using CCRX and GNUC.</description>
         </property>
         <property id="BSP_CFG_HEAP_BYTES" display="Heap size" default="0x400" type="textbox">
@@ -123,11 +123,41 @@ If you set this value and then forget it then you can clear the ID code by conne
             <description>Set your desired ID code. NOTE, leave at the default (all 0xFF's) if you do not wish to use an ID code. If you set this value and program it into the MCU then you will need to remember the ID code because the debugger will ask for it when trying to connect. Note that the E1/E20 will ignore the ID code when programming the MCU during debugging.
 If you set this value and then forget it then you can clear the ID code by connecting up in serial boot mode using FDT. The ID Code is 16 bytes long. The macro below define the ID Code in 4-byte sections.</description>
         </property>
-        <property id="BSP_CFG_ID_CODE_ENABLE" display="ID code select" default="0" type="combobox">
+        <property id="BSP_CFG_ID_CODE_ENABLE" display="ID code protection select" default="0" type="combobox">
             <option id="BSP_CFG_ID_CODE_ENABLE.0" display="Disabled" value="0"/>
             <option id="BSP_CFG_ID_CODE_ENABLE.1" display="Enabled" value="1"/>
-            <description>0 = ID code is disabled.
-1 = ID code is enabled.</description>
+            <description>0 = ID code protection is disabled.
+1 = ID code protection is enabled.</description>
+        </property>
+        <property id="BSP_CFG_BLOCK_ERASE_CMD_PROTECT_ENABLE" display="Block erasure command protection select" default="0" type="combobox">
+            <option id="BSP_CFG_BLOCK_ERASE_CMD_PROTECT_ENABLE.0" display="Disabled" value="0"/>
+            <option id="BSP_CFG_BLOCK_ERASE_CMD_PROTECT_ENABLE.1" display="Enabled" value="1"/>
+            <constraint display="when ID code protection select is disabled only" actionOnFail="disable">${BSP_CFG_ID_CODE_ENABLE} == ${BSP_CFG_ID_CODE_ENABLE.0}</constraint>
+            <description>0 = Block erasure command protection after a reset is disabled. Execution of block erasure commands is permitted after a reset.
+1 = Block erasure command protection after a reset is enabled. Execution of block erasure commands is prohibited after a reset.
+NOTE: This is invalid when ID code protection is enabled.</description>
+        </property>
+        <property id="BSP_CFG_PROGRAM_CMD_PROTECT_ENABLE" display="Programming command protection select" default="0" type="combobox">
+            <option id="BSP_CFG_PROGRAM_CMD_PROTECT_ENABLE.0" display="Disabled" value="0"/>
+            <option id="BSP_CFG_PROGRAM_CMD_PROTECT_ENABLE.1" display="Enabled" value="1"/>
+            <constraint display="when ID code protection select is disabled only" actionOnFail="disable">${BSP_CFG_ID_CODE_ENABLE} == ${BSP_CFG_ID_CODE_ENABLE.0}</constraint>
+            <description>0 = Programming command protection after a reset is disabled. Execution of programming commands is permitted after a reset.
+1 = Programming command protection after a reset is enabled. Execution of programming commands is prohibited after a reset.
+NOTE: This is invalid when ID code protection is enabled.</description>
+        </property>
+        <property id="BSP_CFG_READ_CMD_PROTECT_ENABLE" display="Read command protection select" default="0" type="combobox">
+            <option id="BSP_CFG_READ_CMD_PROTECT_ENABLE.0" display="Disabled" value="0"/>
+            <option id="BSP_CFG_READ_CMD_PROTECT_ENABLE.1" display="Enabled" value="1"/>
+            <constraint display="when ID code protection select is disabled only" actionOnFail="disable">${BSP_CFG_ID_CODE_ENABLE} == ${BSP_CFG_ID_CODE_ENABLE.0}</constraint>
+            <description>0 = Read command protection after a reset is disabled. Execution of read commands is permitted after a reset.
+1 = Read command protection after a reset is enabled. Execution of read commands is prohibited after a reset.
+NOTE: This is invalid when ID code protection is enabled.</description>
+        </property>
+        <property id="BSP_CFG_SERIAL_PROGRAMMER_CONECT_ENABLE" display="Serial programmer conection select" default="1" type="combobox">
+            <option id="BSP_CFG_SERIAL_PROGRAMMER_CONECT_ENABLE.0" display="Disabled" value="0"/>
+            <option id="BSP_CFG_SERIAL_PROGRAMMER_CONECT_ENABLE.1" display="Enabled" value="1"/>
+            <description>0 = Connection of a serial programmer is prohibited after a reset.
+1 = Connection of a serial programmer is permitted after a reset.</description>
         </property>
         <property id="BSP_CFG_ROM_CACHE_ENABLE" display="ROM Cache Enable Register" default="1" type="combobox">
             <option id="BSP_CFG_ROM_CACHE_ENABLE.0" display="Disabled" value="0"/>
@@ -137,7 +167,7 @@ If you set this value and then forget it then you can clear the ID code by conne
         </property>
         <property id="BSP_CFG_TRUSTED_MODE_FUNCTION" display="TMEF - TM Enable Flag Register" default="0xFFFFFFFF" type="textbox">
             <constraint display="Value must be hexadecimal">testHexInteger("${BSP_CFG_TRUSTED_MODE_FUNCTION}")</constraint>
-            <constraint display="Value must be in the range 0x00000000~0xFFFFFFFF">("${BSP_CFG_TRUSTED_MODE_FUNCTION}" &gt;= 0) &amp;&amp; ("${BSP_CFG_TRUSTED_MODE_FUNCTION}" &lt;= 0xFFFFFFFF)</constraint>
+            <constraint display="Value must be 0xF8FFFFFF or 0xFFFFFFFF">("${BSP_CFG_TRUSTED_MODE_FUNCTION}" == 0xF8FFFFFF) || ("${BSP_CFG_TRUSTED_MODE_FUNCTION}" == 0xFFFFFFFF)</constraint>
             <description>TMEF register value.</description>
         </property>
         <property id="BSP_CFG_ROMCODE_REG_VALUE" display="ROMCODE - ROM Code Protection Register" default="0xFFFFFFFF" type="textbox">
@@ -354,14 +384,14 @@ The upper 10 bits are fixed at 1. The lower 4 bits are fixed at 0.</description>
             <description>For some BSP functions, it is necessary to ensure that, while these functions are executing, interrupts from other FIT modules do not occur. By controlling the IPL, these functions disable interrupts that are at or below the specified interrupt priority level.
 Please set this value more than IPR for other FIT module interrupts. Don't change if there is no special processing with higher priority than all fit modules.</description>
         </property>
-        <property id="BSP_CFG_SWINT_UNIT1_ENABLE" display="Software Interrupt Unit1 (SWINT1)" default="1" type="combobox">
+        <property id="BSP_CFG_SWINT_UNIT1_ENABLE" display="Software Interrupt Unit1 (SWINT1)" default="0" type="combobox">
             <option id="BSP_CFG_SWINT_UNIT1_ENABLE.0" display="Unused" value="0"/>
             <option id="BSP_CFG_SWINT_UNIT1_ENABLE.1" display="Used" value="1"/>
             <description>0 = Software interrupt is not used.
 1 = Software interrupt is used.
 NOTE: When this macro is set to 1, the software interrupt is initialized in bsp startup routine. </description>
         </property>
-        <property id="BSP_CFG_SWINT_UNIT2_ENABLE" display="Software Interrupt Unit2 (SWINT2)" default="1" type="combobox">
+        <property id="BSP_CFG_SWINT_UNIT2_ENABLE" display="Software Interrupt Unit2 (SWINT2)" default="0" type="combobox">
             <option id="BSP_CFG_SWINT_UNIT2_ENABLE.0" display="Unused" value="0"/>
             <option id="BSP_CFG_SWINT_UNIT2_ENABLE.1" display="Used" value="1"/>
             <description>0 = Software interrupt is not used.

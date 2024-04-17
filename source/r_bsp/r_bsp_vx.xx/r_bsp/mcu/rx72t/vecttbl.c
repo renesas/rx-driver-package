@@ -33,6 +33,13 @@
 *         : 20.11.2020 3.02      Added the setting of ID code protection for BSP_CFG_ID_CODE_ENABLE.
 *         : 29.01.2021 3.03      Added the macro definition of BSP_PRV_SPCC_VALUE and modified the setting of 
 *                                ID code protection for BSP_CFG_ID_CODE_ENABLE.
+*         : 30.11.2021 3.04      Added the following macro definitions and changed the value of BSP_PRV_SPCC_VALUE.
+*                                - BSP_PRV_SPCC_IDE
+*                                - BSP_PRV_SPCC_SEPR
+*                                - BSP_PRV_SPCC_WRPR
+*                                - BSP_PRV_SPCC_RDPR
+*                                - BSP_PRV_SPCC_SPE
+*         : 25.11.2022 3.05      Deleted the duplicate definition.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -101,10 +108,36 @@ R_BSP_ATTRIB_SECTION_CHANGE_END
 #endif
 
 #if BSP_CFG_ID_CODE_ENABLE == 1
-    #define BSP_PRV_SPCC_VALUE (0x1effffff)    /* ID code protection is enabled after a reset. */
+    #define BSP_PRV_SPCC_IDE   (0xfeffffff)  /* ID code protection is enabled after a reset. */
 #else
-    #define BSP_PRV_SPCC_VALUE (0xffffffff)    /* ID code protection is disabled after a reset. */
+    #define BSP_PRV_SPCC_IDE   (0xffffffff)  /* ID code protection is disabled after a reset. */
 #endif
+
+#if (BSP_CFG_BLOCK_ERASE_CMD_PROTECT_ENABLE == 1) || (BSP_CFG_ID_CODE_ENABLE == 1)
+    #define BSP_PRV_SPCC_SEPR  (0xdfffffff)  /* Block erasure command protection after a reset is enabled. */
+#else
+    #define BSP_PRV_SPCC_SEPR  (0xffffffff)  /* Block erasure command protection after a reset is disabled. */
+#endif
+
+#if (BSP_CFG_PROGRAM_CMD_PROTECT_ENABLE == 1) || (BSP_CFG_ID_CODE_ENABLE == 1)
+    #define BSP_PRV_SPCC_WRPR  (0xbfffffff)  /* Programming command protection after a reset is enabled. */
+#else
+    #define BSP_PRV_SPCC_WRPR  (0xffffffff)  /* Programming command protection after a reset is disabled. */
+#endif
+
+#if (BSP_CFG_READ_CMD_PROTECT_ENABLE == 1) || (BSP_CFG_ID_CODE_ENABLE == 1)
+    #define BSP_PRV_SPCC_RDPR  (0x7fffffff)  /* Read command protection after a reset is enabled. */
+#else
+    #define BSP_PRV_SPCC_RDPR  (0xffffffff)  /* Read command protection after a reset is disabled. */
+#endif
+
+#if BSP_CFG_SERIAL_PROGRAMMER_CONECT_ENABLE == 0
+    #define BSP_PRV_SPCC_SPE   (0xf7ffffff)  /* Connection of a serial programmer after a reset is prohibited. */
+#else
+    #define BSP_PRV_SPCC_SPE   (0xffffffff)  /* Connection of a serial programmer after a reset is permitted. */
+#endif
+
+#define BSP_PRV_SPCC_VALUE ((((BSP_PRV_SPCC_IDE & BSP_PRV_SPCC_SEPR) & BSP_PRV_SPCC_WRPR) & BSP_PRV_SPCC_RDPR) & BSP_PRV_SPCC_SPE)
 
 #if defined(__CCRX__)
 

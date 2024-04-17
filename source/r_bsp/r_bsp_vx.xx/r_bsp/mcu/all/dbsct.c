@@ -28,6 +28,8 @@
 *                               Added definition for section of D_8, B_8, and C_8.
 *         : 08.10.2019 3.01     Added section for Renesas RTOS (RI600V4 or RI600PX).
 *         : 14.02.2020 3.02     Corrected pragma declaration of unpack.
+*         : 25.11.2022 3.03     Added definition for section of DEXRAM, DEXRAM_2, DEXRAM_1, DEXRAM_8, REXRAM, REXRAM_2,
+*                               REXRAM_1, REXRAM_8, BEXRAM, BEXRAM_2, BEXRAM_1 and BEXRAM_8.
 ***********************************************************************************************************************/
 
 #if defined(__CCRX__)
@@ -78,6 +80,16 @@ extern st_dtbl_t const _DTBL[] = {
     { __sectop("D"), __secend("D"), __sectop("R") },
     { __sectop("D_2"), __secend("D_2"), __sectop("R_2") },
     { __sectop("D_1"), __secend("D_1"), __sectop("R_1") }
+#if (defined(BSP_CFG_EXPANSION_RAM_ENABLE) && (BSP_CFG_EXPANSION_RAM_ENABLE == 1))
+#ifdef BSP_EXPANSION_RAM
+#ifdef BSP_MCU_DOUBLE_PRECISION_FLOATING_POINT
+   ,{ __sectop("DEXRAM_8"), __secend("DEXRAM_8"), __sectop("REXRAM_8") }
+#endif
+   ,{ __sectop("DEXRAM"), __secend("DEXRAM"), __sectop("REXRAM") },
+    { __sectop("DEXRAM_2"), __secend("DEXRAM_2"), __sectop("REXRAM_2") },
+    { __sectop("DEXRAM_1"), __secend("DEXRAM_1"), __sectop("REXRAM_1") }
+#endif
+#endif
 #if (BSP_CFG_RTOS_USED == 4) && (BSP_CFG_RENESAS_RTOS_USED == RENESAS_RI600PX)
    ,{ __sectop("DRI_ROM"), __secend("DRI_ROM"), __sectop("RRI_RAM") }
 #endif /* Renesas RI600PX */
@@ -93,6 +105,16 @@ extern st_btbl_t const _BTBL[] = {
     { __sectop("B"), __secend("B") },
     { __sectop("B_2"), __secend("B_2") },
     { __sectop("B_1"), __secend("B_1") }
+#if (defined(BSP_CFG_EXPANSION_RAM_ENABLE) && (BSP_CFG_EXPANSION_RAM_ENABLE == 1))
+#ifdef BSP_EXPANSION_RAM
+#ifdef BSP_MCU_DOUBLE_PRECISION_FLOATING_POINT
+   ,{ __sectop("BEXRAM_8"), __secend("BEXRAM_8") }
+#endif
+   ,{ __sectop("BEXRAM"), __secend("BEXRAM") },
+    { __sectop("BEXRAM_2"), __secend("BEXRAM_2") },
+    { __sectop("BEXRAM_1"), __secend("BEXRAM_1") }
+#endif
+#endif
 #if (BSP_CFG_RTOS_USED == 4) && (BSP_CFG_RENESAS_RTOS_USED == RENESAS_RI600V4)
    ,{ __sectop("BRI_RAM"), __secend("BRI_RAM") }
 #endif /* Renesas RI600V4 */

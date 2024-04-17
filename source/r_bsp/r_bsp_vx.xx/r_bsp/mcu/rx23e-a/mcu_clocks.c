@@ -25,6 +25,23 @@
 *         : 31.07.2019 1.00     First Release
 *         : 17.12.2019 1.01     Deleted the unused variables of clock_source_select function and 
 *                               lpc_clock_source_select function.
+*         : 30.11.2021 2.00     Added the following macro definition.
+*                               - BSP_PRV_PLL_CLK_OPERATING
+*                               Changed compile switch of clock settings by the following new macro definitions.
+*                               - BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE
+*                               - BSP_CFG_HOCO_OSCILLATE_ENABLE
+*                               - BSP_CFG_LOCO_OSCILLATE_ENABLE
+*                               - BSP_PRV_PLL_CLK_OPERATING
+*                               Added the setting of the IWDT-Dedicated On-Chip Oscillator in operating_frequency_set 
+*                               function.
+*                               Deleted the process of oscillating the IWDT-Dedicated On-Chip Oscillator from 
+*                               lpt_clock_source_select function.
+*                               Added the bsp_clkout_initial_configure function.
+*                               Added the setting of the HOCO trimming register.
+*                               Added comments for when use simulator.
+*                               Added version check of smart configurator.
+*         : 22.04.2022 2.01     Deleted version check of smart configurator.
+*                               Modified comment.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -42,6 +59,18 @@ Macro definitions
 
 #define BSP_PRV_NORMALIZE_X10  (10)   /* used to avoid floating point arithmetic */
 
+/* This macro runs or stops the PLL circuit.
+   If the following conditions are satisfied, PLL circuit will operate.
+   1. System clock source is PLL circuit.
+   2. Clock output enable and clock output source is PLL circuit.
+ */
+#if (BSP_CFG_CLOCK_SOURCE == 4) \
+     || ((BSP_CFG_CLKOUT_OUTPUT == 1) && (BSP_CFG_CLKOUT_SOURCE == 4))
+    #define BSP_PRV_PLL_CLK_OPERATING    (1)    /* PLL circuit is operating. */
+#else /* PLL is not used as clock source. */
+    #define BSP_PRV_PLL_CLK_OPERATING    (0)    /* PLL circuit is stopped. */
+#endif
+
 /***********************************************************************************************************************
 Typedef definitions
 ***********************************************************************************************************************/
@@ -58,11 +87,15 @@ Private global variables and functions
 static void operating_frequency_set(void);
 static void clock_source_select(void);
 static void lpt_clock_source_select(void);
+#if BSP_CFG_CLKOUT_OUTPUT != 0
+/* CLKOUT initial configuration function declaration */
+static void bsp_clkout_initial_configure(void);
+#endif /* BSP_CFG_CLKOUT_OUTPUT != 0 */
 #endif /* BSP_CFG_STARTUP_DISABLE == 0 */
 
 /***********************************************************************************************************************
 * Function Name: get_iclk_freq_hz
-* Description  : Return the current ICLK frequency in Hz.  Called by R_BSP_GetIClkFreqHz().
+* Description  : Return the current ICLK frequency in Hz. Called by R_BSP_GetIClkFreqHz().
 *                The system clock source can be changed at any time via SYSTEM.SCKCR3.BIT.CKSEL, so in order to
 *                determine the ICLK frequency we need to first find the current system clock source and then,
 *                in some cases where the clock source can be configured for multiple frequencies, calculate the
@@ -128,6 +161,10 @@ void mcu_clock_setup(void)
     /* Switch to high-speed operation */
     operating_frequency_set();
     lpt_clock_source_select();
+
+#if BSP_CFG_CLKOUT_OUTPUT != 0
+    bsp_clkout_initial_configure();
+#endif /* BSP_CFG_CLKOUT_OUTPUT != 0 */
 } /* End of function mcu_clock_setup() */
 
 /***********************************************************************************************************************
@@ -252,7 +289,7 @@ static void operating_frequency_set (void)
        This is done to ensure that the register has been written before the next register access. The RX has a 
        pipeline architecture so the next instruction could be executed before the previous write had finished.
     */
-    if(tmp_clock ==  SYSTEM.SCKCR.LONG)
+    if(tmp_clock == SYSTEM.SCKCR.LONG)
     {
         R_BSP_NOP();
     }
@@ -267,12 +304,20 @@ static void operating_frequency_set (void)
        This is done to ensure that the register has been written before the next register access. The RX has a 
        pipeline architecture so the next instruction could be executed before the previous write had finished.
     */
-    if((uint16_t)tmp_clock ==  SYSTEM.SCKCR3.WORD)
+    if((uint16_t)tmp_clock == SYSTEM.SCKCR3.WORD)
     {
         R_BSP_NOP();
     }
 
-#if BSP_CFG_CLOCK_SOURCE != 0
+#if BSP_CFG_IWDT_CLOCK_OSCILLATE_ENABLE == 1
+    /* IWDT clock is stopped after reset. Oscillate the IWDT. */
+    SYSTEM.ILOCOCR.BIT.ILCSTP = 0;
+
+    /* Wait processing for the IWDT clock oscillation stabilization (50us) */
+    R_BSP_SoftwareDelay((uint32_t)50, BSP_DELAY_MICROSECS);
+#endif
+
+#if BSP_CFG_LOCO_OSCILLATE_ENABLE == 0
     /* We can now turn LOCO off since it is not going to be used. */
     SYSTEM.LOCOCR.BYTE = 0x01;
 
@@ -315,7 +360,7 @@ static void clock_source_select (void)
 
     /* At this time the MCU is still running on the 4MHz LOCO. */
 
-#if BSP_CFG_CLOCK_SOURCE == 1
+#if BSP_CFG_HOCO_OSCILLATE_ENABLE == 1
     /* HOCO is chosen. Start it operating if it is not already operating. */
     if (1 == SYSTEM.HOCOCR.BIT.HCSTP)
     {
@@ -326,6 +371,11 @@ static void clock_source_select (void)
             R_BSP_NOP();
         }
 
+        #if BSP_CFG_HOCO_TRIMMING_ENABLE == 1
+        /* Set the frequency trimming value for the HOCO. */
+        SYSTEM.HOCOTRR0.BYTE = (0x3F & BSP_CFG_HOCO_TRIMMING_REG_VALUE);
+        #endif
+
         /* HOCO is chosen. Start it operating. */
         SYSTEM.HOCOCR.BYTE = 0x00;
 
@@ -333,7 +383,7 @@ static void clock_source_select (void)
            This is done to ensure that the register has been written before the next register access. The RX has a 
            pipeline architecture so the next instruction could be executed before the previous write had finished.
          */
-        if(0x00 ==  SYSTEM.HOCOCR.BYTE)
+        if(0x00 == SYSTEM.HOCOCR.BYTE)
         {
             R_BSP_NOP();
         }
@@ -341,13 +391,14 @@ static void clock_source_select (void)
         /* WAIT_LOOP */
         while(0 == SYSTEM.OSCOVFSR.BIT.HCOVF)
         {
-            /* The delay period needed is to make sure that the HOCO has stabilized. */
+            /* The delay period needed is to make sure that the HOCO has stabilized.
+               If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
             R_BSP_NOP();
         }
     }
-#endif /* BSP_CFG_CLOCK_SOURCE == 1 */
+#endif /* BSP_CFG_HOCO_OSCILLATE_ENABLE == 1 */
 
-#if (BSP_CFG_CLOCK_SOURCE == 2) || (BSP_CFG_CLOCK_SOURCE == 4)
+#if BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE == 1
 
     /* Set the oscillation source of the main clock oscillator. */
     SYSTEM.MOFCR.BIT.MOSEL = BSP_CFG_MAIN_CLOCK_SOURCE;
@@ -380,13 +431,14 @@ static void clock_source_select (void)
     /* WAIT_LOOP */
     while(0 == SYSTEM.OSCOVFSR.BIT.MOOVF)
     {
-        /* The delay period needed is to make sure that the Main clock has stabilized. */
+        /* The delay period needed is to make sure that the Main clock has stabilized.
+           If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
         R_BSP_NOP();
     }
 
-#endif /* (BSP_CFG_CLOCK_SOURCE == 2) || (BSP_CFG_CLOCK_SOURCE == 4) */
+#endif /* BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE == 1 */
 
-#if BSP_CFG_CLOCK_SOURCE == 4
+#if BSP_PRV_PLL_CLK_OPERATING == 1
 
     /* Set PLL Input Divisor. */
     SYSTEM.PLLCR.BIT.PLIDIV = BSP_CFG_PLL_DIV >> 1;
@@ -400,14 +452,15 @@ static void clock_source_select (void)
     /* WAIT_LOOP */
     while (1 != SYSTEM.OSCOVFSR.BIT.PLOVF)
     {
-        /* wait for stabilization */
+        /* wait for stabilization.
+           If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
         R_BSP_NOP();
     }
 #endif
 
     /* LOCO is saved for last since it is what is running by default out of reset. This means you do not want to turn
        it off until another clock has been enabled and is ready to use. */
-#if BSP_CFG_CLOCK_SOURCE == 0
+#if BSP_CFG_LOCO_OSCILLATE_ENABLE == 1
     /* LOCO is chosen. This is the default out of reset. */
 #else
     /* LOCO is not chosen but it cannot be turned off yet since it is still being used. */
@@ -430,13 +483,6 @@ static void lpt_clock_source_select (void)
     /* INITIALIZE AND SELECT LPT CLOCK SOURCE */
 
 #if (BSP_CFG_LPT_CLOCK_SOURCE == 1)
-
-    /* IWDTCLK is chosen. Start it operating. */
-    SYSTEM.ILOCOCR.BYTE = 0x00;
-
-    /* Wait processing for the IWDT clock oscillation stabilization (50us) */
-    R_BSP_SoftwareDelay((uint32_t)50, BSP_DELAY_MICROSECS);
-
     /* Controls whether to stop the IWDT counter in a low power consumption state.
     IWDTCSTPR - IWDT Count Stop Control Register
     b7     SLCSTP   - Sleep Mode Count Stop Control - Count stop is disabled.
@@ -449,7 +495,38 @@ static void lpt_clock_source_select (void)
     /* Enable protect bit */
     SYSTEM.PRCR.WORD = 0xA500;
     return;
-} /* End of function usb_lpc_clock_source_select() */
+} /* End of function lpt_clock_source_select() */
+
+#if BSP_CFG_CLKOUT_OUTPUT != 0
+/***********************************************************************************************************************
+* Function name: bsp_clkout_initial_configure
+* Description  : Configures the CLKOUT initial settings
+* Arguments    : none
+* Return value : none
+***********************************************************************************************************************/
+static void bsp_clkout_initial_configure(void)
+{
+    /* Protect off. */
+    SYSTEM.PRCR.WORD = 0xA50B;
+
+    /* Set the CLKOUT Output Divisor Select. */
+    SYSTEM.CKOCR.BIT.CKODIV = BSP_CFG_CLKOUT_DIV;
+
+    /* Set the CLKOUT Output Source Select. */
+    SYSTEM.CKOCR.BIT.CKOSEL = BSP_CFG_CLKOUT_SOURCE;
+#if BSP_CFG_CLKOUT_OUTPUT == 1
+
+    /* Set the CLKOUT Output Stop Control. */
+    SYSTEM.CKOCR.BIT.CKOSTP = 0;
+#elif BSP_CFG_CLKOUT_OUTPUT == 0
+    /* do nothing */
+#else
+    #error "Error! Invalid setting for BSP_CFG_CLKOUT_OUTPUT in r_bsp_config.h"
+#endif
+    /* Protect on. */
+    SYSTEM.PRCR.WORD = 0xA500;
+} /* End of function bsp_clkout_initial_configure() */
+#endif /* BSP_CFG_CLKOUT_OUTPUT != 0 */
 
 #endif /* BSP_CFG_STARTUP_DISABLE == 0 */
 
