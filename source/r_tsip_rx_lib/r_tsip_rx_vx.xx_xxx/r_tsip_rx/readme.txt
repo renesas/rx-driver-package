@@ -5,12 +5,12 @@ r_tsip_rx
 
 Document Number
 ---------------
-R20AN0548JJ0117-RX-TSIP-SECURITY
-R20AN0548EJ0117-RX-TSIP-SECURITY
+R20AN0548JJ0120-RX-TSIP-SECURITY
+R20AN0548EJ0120-RX-TSIP-SECURITY
 
 Version
 -------
-v1.17.l
+v1.20.l
 
 Overview
 --------
@@ -31,6 +31,7 @@ Supported MCUs
 --------------
 * RX231 Group
 * RX23W Group
+* RX26T Group
 * RX65N, RX651 Group
 * RX66N Group
 * RX66T Group
@@ -43,11 +44,13 @@ Boards Tested On
 ----------------
 * RSKRX231
 * RSSKRX23W
+* MCB-RX26T
 * RSKRX65N_2MB
 * RSKRX66T
 * RSKRX671
 * RSKRX72M
 * RSKRX72N
+* EnvisionKitRX72N
 * RSKRX72T
 
 Limitations
@@ -60,7 +63,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp      V7.10
+* r_bsp      V7.30
 
 How to add to your project
 --------------------------
@@ -90,8 +93,8 @@ Refer to "Adding Firmware Integration Technology Modules to CS+ Projects (R01AN1
 
 Toolchain(s) Used
 -----------------
-* Renesas RXC 3.04.00
-* GNU GNURX 8.03.00.202202
+* Renesas RXC 3.05.00
+* GNU GNURX 8.03.00.202311
 * IAR ICCRX 4.20.01
 
 File Structure
@@ -102,9 +105,9 @@ r_tsip_rx
 |
 +---doc
 |   +---ja
-|   |    r20an0548jj0117-rx-tsip-security.pdf
+|   |    r20an0548jj0120-rx-tsip-security.pdf
 |   +---en
-|        r20an0548ej0117-rx-tsip-security.pdf
+|        r20an0548ej0120-rx-tsip-security.pdf
 |
 +---lib
     |
@@ -117,6 +120,8 @@ r_tsip_rx
     |    r_tsip_rx72m_rx72n_rx66n_little.lib
     |    r_tsip_rx231_rx23w_big.lib
     |    r_tsip_rx231_rx23w_little.lib
+    |    r_tsip_rx26t_big.lib
+    |    r_tsip_rx26t_little.lib
     |    r_tsip_rx671_big.lib
     |    r_tsip_rx671_little.lib
     +---gcc
@@ -128,6 +133,8 @@ r_tsip_rx
     |    libr_tsip_rx72m_rx72n_rx66n_little.a
     |    libr_tsip_rx231_rx23w_big.a
     |    libr_tsip_rx231_rx23w_little.a
+    |    libr_tsip_rx26t_big.a
+    |    libr_tsip_rx26t_little.a
     |    libr_tsip_rx671_big.a
     |    libr_tsip_rx671_little.a
     +---iar
@@ -139,6 +146,8 @@ r_tsip_rx
     |    r_tsip_rx72m_rx72n_rx66n_little.a
     |    r_tsip_rx231_rx23w_big.a
     |    r_tsip_rx231_rx23w_little.a
+    |    r_tsip_rx26t_big.a
+    |    r_tsip_rx26t_little.a
     |    r_tsip_rx671_big.a
     |    r_tsip_rx671_little.a
 r_config

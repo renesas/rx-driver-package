@@ -6,12 +6,12 @@
     <toolchain>
         <brand>Renesas</brand>
         <product>RXC</product>
-        <version>3.04.00</version>
+        <version>3.05.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
-        <version>8.03.00.202202</version>
+        <version>8.03.00.202311</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -27,6 +27,7 @@
         <series>RX700</series>
         <group>RX231</group>
         <group>RX23W</group>
+        <group>RX26T</group>
         <group>RX651</group>
         <group>RX65N</group>
         <group>RX66N</group>
@@ -37,6 +38,7 @@
         <group>RX72T</group>
         <board>RSKRX231</board>
         <board>RSSKRX23W</board>
+        <board>MCB-RX26T</board>
         <board>RSKRX65N_2MB</board>
         <board>RSKRX66T</board>
         <board>RSKRX671</board>
@@ -54,7 +56,7 @@
         <zipsource>r_tsip_rx_vx.xx_xxx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.10</version>
+            <version>7.30</version>
         </dependency>
         <application>Generic</application>
         <desc>TSIP(Trusted Secure IP) driver.</desc>
@@ -78,6 +80,13 @@ The ".l" in version number means library version.</details>
             <groups>RX23W</groups>
             <libdir toolchain="RXC" endian="big" path="rel">r_tsip_rx/lib/ccrx/r_tsip_rx231_rx23w_big.lib</libdir>
             <libdir toolchain="RXC" endian="little" path="rel">r_tsip_rx/lib/ccrx/r_tsip_rx231_rx23w_little.lib</libdir>
+        </library>
+        <library>
+            <family>RX</family>
+            <series>RX200</series>
+            <groups>RX26T</groups>
+            <libdir toolchain="RXC" endian="big" path="rel">r_tsip_rx/lib/ccrx/r_tsip_rx26t_big.lib</libdir>
+            <libdir toolchain="RXC" endian="little" path="rel">r_tsip_rx/lib/ccrx/r_tsip_rx26t_little.lib</libdir>
         </library>
         <library>
             <family>RX</family>
@@ -120,6 +129,13 @@ The ".l" in version number means library version.</details>
             <groups>RX23W</groups>
             <libdir toolchain="GNURX" endian="big" path="rel">r_tsip_rx/lib/gcc/r_tsip_rx231_rx23w_big.a</libdir>
             <libdir toolchain="GNURX" endian="little" path="rel">r_tsip_rx/lib/gcc/r_tsip_rx231_rx23w_little.a</libdir>
+        </library>
+        <library>
+            <family>RX</family>
+            <series>RX200</series>
+            <groups>RX26T</groups>
+            <libdir toolchain="GNURX" endian="big" path="rel">r_tsip_rx/lib/gcc/r_tsip_rx26t_big.a</libdir>
+            <libdir toolchain="GNURX" endian="little" path="rel">r_tsip_rx/lib/gcc/r_tsip_rx26t_little.a</libdir>
         </library>
         <library>
             <family>RX</family>

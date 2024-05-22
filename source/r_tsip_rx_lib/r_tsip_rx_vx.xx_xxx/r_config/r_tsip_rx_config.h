@@ -14,11 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2015-2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015-2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_tsip_rx_config.h
- * Version      : 1.17
+ * Version      : 1.20
  * Description  : Configuration options for the r_tsip_rx module.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
@@ -42,6 +42,9 @@
  *         : 31.03.2022 1.15     Added support for TLS1.3(RX72M_RX72N_RX66N)
  *         : 15.09.2022 1.16     Added support for RSA 3k/4k and updated support for TLS1.3
  *         : 20.01.2023 1.17     Added support for TLS1.3 server
+ *         : 24.05.2023 1.18     Added support for RX26T
+ *         : 30.11.2023 1.19     Update example of Secure Bootloader / Firmware Update
+ *         : 28.02.2024 1.20     Applied software workaround of AES-CCM decryption
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -128,10 +131,11 @@
 #define TSIP_MULTI_THREADING_UNLOCK_FUNCTION    (user_unlock_function)
 
 /* Key update. */
-#if defined BSP_MCU_RX231 || defined BSP_MCU_RX23W || defined BSP_MCU_RX66T || defined BSP_MCU_RX72T
+#if defined BSP_MCU_RX231 || defined BSP_MCU_RX23W || defined BSP_MCU_RX26T || \
+    defined BSP_MCU_RX66T || defined BSP_MCU_RX72T
 #define TSIP_INSTALL_KEY_RING_INDEX (0) /* 0-15 */
 #else
 #define TSIP_INSTALL_KEY_RING_INDEX (1) /* 0-15 */
-#endif  /* defined BSP_MCU_RX231 || defined BSP_MCU_RX23W || defined BSP_MCU_RX66T || defined BSP_MCU_RX72T */
+#endif
 
 #endif /* R_TSIP_RX_CONFIG_HEADER_FILE */
