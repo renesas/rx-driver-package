@@ -337,6 +337,15 @@
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/bdf154ed06b4f26915ddb1f0d6cd5dcba4aeb20e/FITModules/r_bsp_v7.40.xml</url>
     </urls>
   </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_tsip_rx</name>
+    <version>1.20.l</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/012b3d020667f5b594f9af32bb96f9824ee5d8f0/FITModules/r_tsip_rx_v1.20.l.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/012b3d020667f5b594f9af32bb96f9824ee5d8f0/FITModules/r_tsip_rx_v1.20.l.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/012b3d020667f5b594f9af32bb96f9824ee5d8f0/FITModules/r_tsip_rx_v1.20.l_extend.mdf</url>
+    </urls>
+  </module>
   <module rdp_version="1.25">
     <name>r_ble_qe_utility</name>
     <version>1.00</version>
