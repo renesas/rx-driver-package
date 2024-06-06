@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_fwup
-VERSION = 		2.01
+VERSION = 		2.03
 MDF = V2
 
 CONFIG_FOLDER = r_config

@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023-2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_fwup_wrap_com.c
@@ -25,38 +25,33 @@
  *         : 29.09.2023 2.01    Fixed log messages.
  *                              Add parameter checking.
  *                              Added arguments to R_FWUP_WriteImageProgram API.
+ *         : 28.03.2024 2.02    Update wrapper functions.
+ *         : 09.04.2024 2.03    Fixed wrapper function.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  Includes   <System Includes> , "Project Includes"
  *********************************************************************************************************************/
 #include "r_fwup_wrap_com.h"
-/**** Start user code ****/
-/**** End user code   ****/
-
-/**********************************************************************************************************************
- Macro definitions
- *********************************************************************************************************************/
-/**** Start user code ****/
-/**** End user code   ****/
-
-/**********************************************************************************************************************
- Local Typedef definitions
- *********************************************************************************************************************/
-/**** Start user code ****/
-/**** End user code   ****/
 
 /**********************************************************************************************************************
  Exported global variables
  *********************************************************************************************************************/
-/**** Start user code ****/
-/**** End user code   ****/
+#if (FWUP_CFG_USER_DISABLE_INTERRUPT_ENABLED != 0)
+void FWUP_CFG_USER_DISABLE_INTERRUPT_FUNCTION(void);
+#endif /* (FWUP_CFG_USER_DISABLE_INTERRUPT_ENABLED != 0) */
 
-/**********************************************************************************************************************
- Private (static) variables and functions
- *********************************************************************************************************************/
-/**** Start user code ****/
-/**** End user code   ****/
+#if (FWUP_CFG_USER_ENABLE_INTERRUPT_ENABLED != 0)
+void FWUP_CFG_USER_ENABLE_INTERRUPT_FUNCTION(void);
+#endif /* (FWUP_CFG_USER_ENABLE_INTERRUPT_ENABLED != 0) */
+
+#if (FWUP_CFG_USER_SOFTWARE_RESET_ENABLED != 0)
+void FWUP_CFG_USER_SOFTWARE_RESET_FUNCTION(void);
+#endif /* (FWUP_CFG_USER_SOFTWARE_RESET_ENABLED != 0) */
+
+#if (FWUP_CFG_USER_SOFTWARE_DELAY_ENABLED != 0)
+uint32_t FWUP_CFG_USER_SOFTWARE_DELAY_FUNCTION(uint32_t delay, e_fwup_delay_units_t units);
+#endif /* (FWUP_CFG_USER_SOFTWARE_DELAY_ENABLED != 0) */
 
 /*
  * Common functions
@@ -69,9 +64,11 @@
  *********************************************************************************************************************/
 void r_fwup_wrap_disable_interrupt(void)
 {
-    /**** Start user code ****/
+#if (FWUP_CFG_USER_DISABLE_INTERRUPT_ENABLED == 1)
+    FWUP_CFG_USER_DISABLE_INTERRUPT_FUNCTION();
+#else
     R_BSP_InterruptsDisable();
-    /**** End user code   ****/
+#endif /* (FWUP_CFG_USER_DISABLE_INTERRUPT_ENABLED == 1) */
 }
 /**********************************************************************************************************************
  End of function r_fwup_wrap_disable_interrupt
@@ -85,9 +82,11 @@ void r_fwup_wrap_disable_interrupt(void)
  *********************************************************************************************************************/
 void r_fwup_wrap_enable_interrupt(void)
 {
-    /**** Start user code ****/
+#if (FWUP_CFG_USER_ENABLE_INTERRUPT_ENABLED == 1)
+    FWUP_CFG_USER_ENABLE_INTERRUPT_FUNCTION();
+#else /* (FWUP_CFG_USER_ENABLE_INTERRUPT_ENABLED == 1) */
     R_BSP_InterruptsEnable();
-    /**** End user code   ****/
+#endif /* (FWUP_CFG_USER_ENABLE_INTERRUPT_ENABLED == 1) */
 }
 /**********************************************************************************************************************
  End of function r_fwup_wrap_enable_interrupt
@@ -101,15 +100,15 @@ void r_fwup_wrap_enable_interrupt(void)
  *********************************************************************************************************************/
 void r_fwup_wrap_software_reset(void)
 {
-    /**** Start user code ****/
-
+#if (FWUP_CFG_USER_SOFTWARE_RESET_ENABLED == 1)
+    FWUP_CFG_USER_SOFTWARE_RESET_FUNCTION();
+#else
     r_fwup_wrap_disable_interrupt();
     r_fwup_wrap_software_delay(1000, FWUP_DELAY_MILLISECS);
 
     /* SW Reset */
     R_BSP_SoftwareReset();
-
-    /**** End user code   ****/
+#endif /* (FWUP_CFG_USER_SOFTWARE_RESET_ENABLED == 1) */
 }
 /**********************************************************************************************************************
  End of function r_fwup_wrap_software_reset
@@ -125,7 +124,9 @@ void r_fwup_wrap_software_reset(void)
  *********************************************************************************************************************/
 uint32_t r_fwup_wrap_software_delay(uint32_t delay, e_fwup_delay_units_t units)
 {
-    /**** Start user code ****/
+#if (FWUP_CFG_USER_SOFTWARE_DELAY_ENABLED == 1)
+    return FWUP_CFG_USER_SOFTWARE_DELAY_FUNCTION(delay, units);
+#else
     uint32_t  time_units;
 
     if (FWUP_DELAY_MICROSECS == units)
@@ -141,7 +142,7 @@ uint32_t r_fwup_wrap_software_delay(uint32_t delay, e_fwup_delay_units_t units)
         time_units = BSP_DELAY_SECS;
     }
     return ((uint32_t)R_BSP_SoftwareDelay(delay, (bsp_delay_units_t)time_units));
-    /**** End user code   ****/
+#endif /* (FWUP_CFG_USER_SOFTWARE_DELAY_ENABLED == 1) */
 }
 /**********************************************************************************************************************
  End of function r_fwup_wrap_software_delay

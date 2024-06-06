@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023-2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_fwup_private.h
@@ -25,6 +25,8 @@
  *         : 29.09.2023 2.01    Fixed log messages.
  *                              Add parameter checking.
  *                              Added arguments to R_FWUP_WriteImageProgram API.
+ *         : 28.03.2024 2.02    Update wrapper functions.
+ *         : 09.04.2024 2.03    Fixed wrapper function.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************

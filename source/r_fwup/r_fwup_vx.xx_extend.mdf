@@ -89,12 +89,12 @@
 1: Enable
             </description>
         </property>
-        <property id="FWUP_CFG_SIGNATURE_VERIFICATION" display="Select the algorithm of signature verification" default="0" type="combobox">
-            <option id="FWUP_CFG_SIGNATURE_VERIFICATION.0" display="ECDSA + SHA256 (default)" value="0"/>
-            <option id="FWUP_CFG_SIGNATURE_VERIFICATION.1" display="SHA256" value="1"/>
+        <property id="FWUP_CFG_SIGNATURE_VERIFICATION" display="Select the algorithm of signature verification" default="1" type="combobox">
+            <option id="FWUP_CFG_SIGNATURE_VERIFICATION.0" display="ECDSA + SHA256" value="0"/>
+            <option id="FWUP_CFG_SIGNATURE_VERIFICATION.1" display="SHA256 (default)" value="1"/>
             <description>Switch boot protection settings.
-0: ECDSA + SHA256 (default)
-1: SHA256
+0: ECDSA + SHA256
+1: SHA256 (default)
             </description>
         </property>
         <property id="FWUP_CFG_PRINTF_DISABLE" display="Disable Printf Output Setting" default="0" type="combobox">
@@ -104,6 +104,175 @@
 0: Enable (default)
 1: Disable
             </description>
+        </property>
+
+        <property id="FWUP_CFG_USER_DISABLE_INTERRUPT_ENABLED" display="Enable user disable interrupt function" default="0" type="combobox">
+            <option id="FWUP_CFG_USER_DISABLE_INTERRUPT_ENABLED.0" display="Use FWUP r_fwup_wrap_disable_interrupt() function" value="0"/>
+            <option id="FWUP_CFG_USER_DISABLE_INTERRUPT_ENABLED.1" display="Use user r_fwup_wrap_disable_interrupt() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_disable_interrupt() function.
+1 = Use user r_fwup_wrap_disable_interrupt() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_DISABLE_INTERRUPT_FUNCTION" display="User disable interrupt function name" default="my_disable_interrupt_function" type="textbox">
+            <constraint display="when Enable user disable interrupt function is Use user disable_interrupt() function only" actionOnFail="disable">${FWUP_CFG_USER_DISABLE_INTERRUPT_ENABLED} == ${FWUP_CFG_USER_DISABLE_INTERRUPT_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_DISABLE_INTERRUPT_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_disable_interrupt() function name.</description>
+        </property>
+        <property id="FWUP_CFG_USER_ENABLE_INTERRUPT_ENABLED" display="Enable user enable interrupt function" default="0" type="combobox">
+            <option id="FWUP_CFG_USER_ENABLE_INTERRUPT_ENABLED.0" display="Use FWUP r_fwup_wrap_enable_interrupt() function" value="0"/>
+            <option id="FWUP_CFG_USER_ENABLE_INTERRUPT_ENABLED.1" display="Use user r_fwup_wrap_enable_interrupt() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_enable_interrupt() function.
+1 = Use user r_fwup_wrap_enable_interrupt() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_ENABLE_INTERRUPT_FUNCTION" display="User enable interrupt function name" default="my_enable_interrupt_function" type="textbox">
+            <constraint display="when Enable user enable interrupt function is Use user enable_interrupt() function only" actionOnFail="disable">${FWUP_CFG_USER_ENABLE_INTERRUPT_ENABLED} == ${FWUP_CFG_USER_ENABLE_INTERRUPT_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_ENABLE_INTERRUPT_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_enable_interrupt() function name.</description>
+        </property>
+        <property id="FWUP_CFG_USER_SOFTWARE_DELAY_ENABLED" display="Enable user software delay function" default="0" type="combobox">
+            <option id="FWUP_CFG_USER_SOFTWARE_DELAY_ENABLED.0" display="Use FWUP r_fwup_wrap_software_delay() function" value="0"/>
+            <option id="FWUP_CFG_USER_SOFTWARE_DELAY_ENABLED.1" display="Use user r_fwup_wrap_software_delay() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_software_delay() function.
+1 = Use user r_fwup_wrap_software_delay() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_SOFTWARE_DELAY_FUNCTION" display="User software delay function name" default="my_software_delay_function" type="textbox">
+            <constraint display="when Enable user software delay function is Use user software_delay() function only" actionOnFail="disable">${FWUP_CFG_USER_SOFTWARE_DELAY_ENABLED} == ${FWUP_CFG_USER_SOFTWARE_DELAY_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_SOFTWARE_DELAY_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_software_delay() function name.</description>
+        </property>
+        <property id="FWUP_CFG_USER_SOFTWARE_RESET_ENABLED" display="Enable user software reset function" default="0" type="combobox">
+            <option id="FWUP_CFG_USER_SOFTWARE_RESET_ENABLED.0" display="Use FWUP r_fwup_wrap_software_reset() function" value="0"/>
+            <option id="FWUP_CFG_USER_SOFTWARE_RESET_ENABLED.1" display="Use user r_fwup_wrap_software_reset() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_software_reset() function.
+1 = Use user r_fwup_wrap_software_reset() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_SOFTWARE_RESET_FUNCTION" display="User software reset function name" default="my_software_reset_function" type="textbox">
+            <constraint display="when Enable user disable interrupt function is Use user software_reset() function only" actionOnFail="disable">${FWUP_CFG_USER_SOFTWARE_RESET_ENABLED} == ${FWUP_CFG_USER_SOFTWARE_RESET_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_SOFTWARE_RESET_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_software_reset() function name.</description>
+        </property>
+
+        <property id="FWUP_CFG_USER_SHA256_INIT_ENABLED" display="Enable user sha256 init function" default="0" type="combobox">
+            <option id="FWUP_CFG_USER_SHA256_INIT_ENABLED.0" display="Use FWUP r_fwup_wrap_sha256_init() function" value="0"/>
+            <option id="FWUP_CFG_USER_SHA256_INIT_ENABLED.1" display="Use user r_fwup_wrap_sha256_init() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_sha256_init() function.
+1 = Use user r_fwup_wrap_sha256_init() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_SHA256_INIT_FUNCTION" display="User sha256 init function name" default="my_sha256_init_function" type="textbox">
+            <constraint display="when Enable user sha256 init function is Use user sha256_init() function only" actionOnFail="disable">${FWUP_CFG_USER_SHA256_INIT_ENABLED} == ${FWUP_CFG_USER_SHA256_INIT_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_SHA256_INIT_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_sha256_INIT() function name.</description>
+        </property>
+        <property id="FWUP_CFG_USER_SHA256_UPDATE_ENABLED" display="Enable user sha256 update function" default="0" type="combobox">
+            <option id="FWUP_CFG_USER_SHA256_UPDATE_ENABLED.0" display="Use FWUP r_fwup_wrap_sha256_update() function" value="0"/>
+            <option id="FWUP_CFG_USER_SHA256_UPDATE_ENABLED.1" display="Use user r_fwup_wrap_sha256_update() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_sha256_update() function.
+1 = Use user r_fwup_wrap_sha256_update() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_SHA256_UPDATE_FUNCTION" display="User sha256 update function name" default="my_sha256_update_function" type="textbox">
+            <constraint display="when Enable user sha256 update function is Use user sha256_update() function only" actionOnFail="disable">${FWUP_CFG_USER_SHA256_UPDATE_ENABLED} == ${FWUP_CFG_USER_SHA256_UPDATE_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_SHA256_UPDATE_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_sha256_update() function name.</description>
+        </property>
+        <property id="FWUP_CFG_USER_SHA256_FINAL_ENABLED" display="Enable user sha256 final function" default="0" type="combobox">
+            <option id="FWUP_CFG_USER_SHA256_FINAL_ENABLED.0" display="Use FWUP r_fwup_wrap_sha256_final() function" value="0"/>
+            <option id="FWUP_CFG_USER_SHA256_FINAL_ENABLED.1" display="Use user r_fwup_wrap_sha256_final() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_sha256_final() function.
+1 = Use user r_fwup_wrap_sha256_final() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_SHA256_FINAL_FUNCTION" display="User sha256 final function name" default="my_sha256_final_function" type="textbox">
+            <constraint display="when Enable user sha256 final function is Use user sha256_final() function only" actionOnFail="disable">${FWUP_CFG_USER_SHA256_FINAL_ENABLED} == ${FWUP_CFG_USER_SHA256_FINAL_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_SHA256_FINAL_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_sha256_final() function name.</description>
+        </property>
+        <property id="FWUP_CFG_USER_VERIFY_ECDSA_ENABLED" display="Enable user verify ecdsa function" default="0" type="combobox">
+            <option id="FWUP_CFG_USER_VERIFY_ECDSA_ENABLED.0" display="Use FWUP r_fwup_wrap_verify_ecdsa() function" value="0"/>
+            <option id="FWUP_CFG_USER_VERIFY_ECDSA_ENABLED.1" display="Use user r_fwup_wrap_verify_ecdsa() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_verify_ecdsa() function.
+1 = Use user r_fwup_wrap_verify_ecdsa() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_VERIFY_ECDSA_FUNCTION" display="User verify ecdsa function name" default="my_verify_ecdsa_function" type="textbox">
+            <constraint display="when Enable user verify ecdsa function is Use user verify_ecdsa() function only" actionOnFail="disable">${FWUP_CFG_USER_VERIFY_ECDSA_ENABLED} == ${FWUP_CFG_USER_VERIFY_ECDSA_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_VERIFY_ECDSA_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_verify_ecdsa() function name.</description>
+        </property>
+        <property id="FWUP_CFG_USER_GET_CRYPT_CONTEXT_ENABLED" display="Enable user get crypt context function" default="0" type="combobox">
+            <option id="FWUP_CFG_USER_GET_CRYPT_CONTEXT_ENABLED.0" display="Use FWUP r_fwup_wrap_get_crypt_context() function" value="0"/>
+            <option id="FWUP_CFG_USER_GET_CRYPT_CONTEXT_ENABLED.1" display="Use user r_fwup_wrap_get_crypt_context() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_get_crypt_context() function.
+1 = Use user r_fwup_wrap_get_crypt_context() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_GET_CRYPT_CONTEXT_FUNCTION" display="User get crypt context function name" default="my_get_crypt_context_function" type="textbox">
+            <constraint display="when Enable user get crypt context function is Use user get_crypt_context() function only" actionOnFail="disable">${FWUP_CFG_USER_GET_CRYPT_CONTEXT_ENABLED} == ${FWUP_CFG_USER_GET_CRYPT_CONTEXT_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_GET_CRYPT_CONTEXT_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_get_crypt_context() function name.</description>
+        </property>
+
+        <property id="FWUP_CFG_USER_FLASH_OPEN_ENABLED" display="Enable user flash open function" default="0" type="combobox">
+            <option id="FWUP_CFG_USER_FLASH_OPEN_ENABLED.0" display="Use FWUP r_fwup_wrap_flash_open() function" value="0"/>
+            <option id="FWUP_CFG_USER_FLASH_OPEN_ENABLED.1" display="Use user r_fwup_wrap_flash_open() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_flash_open() function.
+1 = Use user r_fwup_wrap_flash_open() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_FLASH_OPEN_FUNCTION" display="User flash open function name" default="my_flash_open_function" type="textbox">
+            <constraint display="when Enable user flash open function is Use user flash_open() function only" actionOnFail="disable">${FWUP_CFG_USER_FLASH_OPEN_ENABLED} == ${FWUP_CFG_USER_FLASH_OPEN_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_FLASH_OPEN_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_flash_open() function name.</description>
+        </property>
+        <property id="FWUP_CFG_USER_FLASH_CLOSE_ENABLED" display="Enable user flash close function" default="0" type="combobox">
+            <option id="FWUP_CFG_USER_FLASH_CLOSE_ENABLED.0" display="Use FWUP r_fwup_wrap_flash_close() function" value="0"/>
+            <option id="FWUP_CFG_USER_FLASH_CLOSE_ENABLED.1" display="Use user r_fwup_wrap_flash_close() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_flash_close() function.
+1 = Use user r_fwup_wrap_flash_close() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_FLASH_CLOSE_FUNCTION" display="User flash close function name" default="my_flash_close_function" type="textbox">
+            <constraint display="when Enable user flash close function is Use user flash_close() function only" actionOnFail="disable">${FWUP_CFG_USER_FLASH_CLOSE_ENABLED} == ${FWUP_CFG_USER_FLASH_CLOSE_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_FLASH_CLOSE_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_flash_close() function name.</description>
+        </property>
+        <property id="FWUP_CFG_USER_FLASH_ERASE_ENABLED" display="Enable user flash erase function" default="0" type="combobox">
+            <option id="FWUP_CFG_USER_FLASH_ERASE_ENABLED.0" display="Use FWUP r_fwup_wrap_flash_erase() function" value="0"/>
+            <option id="FWUP_CFG_USER_FLASH_ERASE_ENABLED.1" display="Use user r_fwup_wrap_flash_erase() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_flash_erase() function.
+1 = Use user r_fwup_wrap_flash_erase() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_FLASH_ERASE_FUNCTION" display="User flash erase function name" default="my_flash_erase_function" type="textbox">
+            <constraint display="when Enable user flash erase function is Use user flash_erase() function only" actionOnFail="disable">${FWUP_CFG_USER_FLASH_ERASE_ENABLED} == ${FWUP_CFG_USER_FLASH_ERASE_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_FLASH_ERASE_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_flash_erase() function name.</description>
+        </property>
+        <property id="FWUP_CFG_USER_FLASH_WRITE_ENABLED" display="Enable user flash write function" default="0" type="combobox">
+            <option id="FWUP_CFG_USER_FLASH_WRITE_ENABLED.0" display="Use FWUP r_fwup_wrap_flash_write() function" value="0"/>
+            <option id="FWUP_CFG_USER_FLASH_WRITE_ENABLED.1" display="Use user r_fwup_wrap_flash_write() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_flash_write() function.
+1 = Use user r_fwup_wrap_flash_write() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_FLASH_WRITE_FUNCTION" display="User flash write function name" default="my_flash_write_function" type="textbox">
+            <constraint display="when Enable user flash write function is Use user flash_write() function only" actionOnFail="disable">${FWUP_CFG_USER_FLASH_WRITE_ENABLED} == ${FWUP_CFG_USER_FLASH_WRITE_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_FLASH_WRITE_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_flash_write() function name.</description>
+        </property>
+        <property id="FWUP_CFG_USER_FLASH_READ_ENABLED" display="Enable user flash read function" default="0" type="combobox">
+            <option id="FWUP_CFG_USER_FLASH_READ_ENABLED.0" display="Use FWUP r_fwup_wrap_flash_read() function" value="0"/>
+            <option id="FWUP_CFG_USER_FLASH_READ_ENABLED.1" display="Use user r_fwup_wrap_flash_read() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_flash_read() function.
+1 = Use user r_fwup_wrap_flash_read() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_FLASH_READ_FUNCTION" display="User flash read function name" default="my_flash_read_function" type="textbox">
+            <constraint display="when Enable user flash read function is Use user flash_read() function only" actionOnFail="disable">${FWUP_CFG_USER_FLASH_READ_ENABLED} == ${FWUP_CFG_USER_FLASH_READ_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_FLASH_READ_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_flash_read() function name.</description>
+        </property>
+        <property id="FWUP_CFG_USER_BANK_SWAP_ENABLED" display="Enable user bank swap function" default="0" type="combobox">
+            <constraint display="when update mode is Dual bank mode only" actionOnFail="disable">${FWUP_CFG_UPDATE_MODE} == ${FWUP_CFG_UPDATE_MODE.0}</constraint>
+            <option id="FWUP_CFG_USER_BANK_SWAP_ENABLED.0" display="Use FWUP r_fwup_wrap_bank_swap() function" value="0"/>
+            <option id="FWUP_CFG_USER_BANK_SWAP_ENABLED.1" display="Use user r_fwup_wrap_bank_swap() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_bank_swap() function.
+1 = Use user r_fwup_wrap_bank_swap() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_BANK_SWAP_FUNCTION" display="User bank swap function name" default="my_bank_swap_function" type="textbox">
+            <constraint display="when Enable user bank swap function is Use user bank_swap() function only" actionOnFail="disable">${FWUP_CFG_USER_BANK_SWAP_ENABLED} == ${FWUP_CFG_USER_BANK_SWAP_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_BANK_SWAP_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_bank_swap() function name.</description>
         </property>
     </configuration>
 </module>

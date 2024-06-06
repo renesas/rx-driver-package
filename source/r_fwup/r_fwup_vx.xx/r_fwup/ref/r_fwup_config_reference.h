@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2023-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name     : r_fwup_config.h
@@ -25,6 +25,8 @@
 *         : 29.09.2023 2.01    Fixed log messages.
 *                              Add parameter checking.
 *                              Added arguments to R_FWUP_WriteImageProgram API.
+*         : 28.03.2024 2.02    Update wrapper functions.
+*         : 09.04.2024 2.03    Fixed wrapper function.
 ***********************************************************************************************************************/
 #include "platform.h"
 
@@ -70,10 +72,10 @@ Configuration Options
 #define FWUP_CFG_FWUPV1_COMPATIBLE                  (0)                /* 0:Disable, 1:Enable */
 
 /* Select the algorithm of signature verification.
-    0 = ECDSA. (default)
-    1 = SHA256
+    0 = ECDSA.
+    1 = SHA256. (default)
 */
-#define FWUP_CFG_SIGNATURE_VERIFICATION             (0)
+#define FWUP_CFG_SIGNATURE_VERIFICATION             (1)
 
 /* Disable Printf Output Setting.
     Disables the character output by printf to the terminal software.
@@ -81,5 +83,67 @@ Configuration Options
     1 = Disable.
  */
 #define FWUP_CFG_PRINTF_DISABLE                     (0)
+
+/* If desired the user may redirect to their own respective functions by enabling below and 
+ * providing and replacing the my_.. function names with the names of their own functions. */
+#define FWUP_CFG_USER_DISABLE_INTERRUPT_ENABLED    (0)
+#define FWUP_CFG_USER_DISABLE_INTERRUPT_FUNCTION     my_disable_interrupt_function
+
+#define FWUP_CFG_USER_ENABLE_INTERRUPT_ENABLED    (0)
+#define FWUP_CFG_USER_ENABLE_INTERRUPT_FUNCTION     my_enable_interrupt_function
+
+#define FWUP_CFG_USER_SOFTWARE_DELAY_ENABLED    (0)
+#define FWUP_CFG_USER_SOFTWARE_DELAY_FUNCTION     my_software_delay_function
+
+#define FWUP_CFG_USER_SOFTWARE_RESET_ENABLED    (0)
+#define FWUP_CFG_USER_SOFTWARE_RESET_FUNCTION     my_software_reset_function
+
+#define FWUP_CFG_USER_SHA256_INIT_ENABLED    (0)
+#define FWUP_CFG_USER_SHA256_INIT_FUNCTION     my_sha256_init_function
+
+#define FWUP_CFG_USER_SHA256_UPDATE_ENABLED    (0)
+#define FWUP_CFG_USER_SHA256_UPDATE_FUNCTION     my_sha256_update_function
+
+#define FWUP_CFG_USER_SHA256_FINAL_ENABLED    (0)
+#define FWUP_CFG_USER_SHA256_FINAL_FUNCTION     my_sha256_final_function
+
+#define FWUP_CFG_USER_VERIFY_ECDSA_ENABLED    (0)
+#define FWUP_CFG_USER_VERIFY_ECDSA_FUNCTION     my_verify_ecdsa_function
+
+#define FWUP_CFG_USER_GET_CRYPT_CONTEXT_ENABLED    (0)
+#define FWUP_CFG_USER_GET_CRYPT_CONTEXT_FUNCTION     my_get_crypt_context_function
+
+#define FWUP_CFG_USER_FLASH_OPEN_ENABLED    (0)
+#define FWUP_CFG_USER_FLASH_OPEN_FUNCTION     my_flash_open_function
+
+#define FWUP_CFG_USER_FLASH_CLOSE_ENABLED    (0)
+#define FWUP_CFG_USER_FLASH_CLOSE_FUNCTION     my_flash_close_function
+
+#define FWUP_CFG_USER_FLASH_ERASE_ENABLED    (0)
+#define FWUP_CFG_USER_FLASH_ERASE_FUNCTION     my_flash_erase_function
+
+#define FWUP_CFG_USER_FLASH_WRITE_ENABLED    (0)
+#define FWUP_CFG_USER_FLASH_WRITE_FUNCTION     my_flash_write_function
+
+#define FWUP_CFG_USER_FLASH_READ_ENABLED    (0)
+#define FWUP_CFG_USER_FLASH_READ_FUNCTION     my_flash_read_function
+
+#define FWUP_CFG_USER_BANK_SWAP_ENABLED    (0)
+#define FWUP_CFG_USER_BANK_SWAP_FUNCTION     my_bank_swap_function
+
+#define FWUP_CFG_USER_EXT_FLASH_OPEN_ENABLED    (0)
+#define FWUP_CFG_USER_EXT_FLASH_OPEN_FUNCTION     my_ext_flash_open_function
+
+#define FWUP_CFG_USER_EXT_FLASH_CLOSE_ENABLED    (0)
+#define FWUP_CFG_USER_EXT_FLASH_CLOSE_FUNCTION     my_ext_flash_close_function
+
+#define FWUP_CFG_USER_EXT_FLASH_ERASE_ENABLED    (0)
+#define FWUP_CFG_USER_EXT_FLASH_ERASE_FUNCTION     my_ext_flash_erase_function
+
+#define FWUP_CFG_USER_EXT_FLASH_WRITE_ENABLED    (0)
+#define FWUP_CFG_USER_EXT_FLASH_WRITE_FUNCTION     my_ext_flash_write_function
+
+#define FWUP_CFG_USER_EXT_FLASH_READ_ENABLED    (0)
+#define FWUP_CFG_USER_EXT_FLASH_READ_FUNCTION     my_ext_flash_read_function
 
 #endif /* R_FWUP_CONFIG_H */

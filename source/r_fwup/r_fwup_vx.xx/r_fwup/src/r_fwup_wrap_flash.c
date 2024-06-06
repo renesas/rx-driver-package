@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023-2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_fwup_wrap_flash.c
@@ -25,6 +25,8 @@
  *         : 29.09.2023 2.01    Fixed log messages.
  *                              Add parameter checking.
  *                              Added arguments to R_FWUP_WriteImageProgram API.
+ *         : 28.03.2024 2.02    Update wrapper functions.
+ *         : 09.04.2024 2.03    Fixed wrapper function.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -34,33 +36,70 @@
 #include "r_fwup_wrap_com.h"
 #include "r_fwup_wrap_flash.h"
 
-/**** Start user code ****/
 #include "r_flash_rx_if.h"
-/**** End user code   ****/
 
 /**********************************************************************************************************************
  Macro definitions
  *********************************************************************************************************************/
-/**** Start user code ****/
-/**** End user code   ****/
 
 /**********************************************************************************************************************
  Local Typedef definitions
  *********************************************************************************************************************/
-/**** Start user code ****/
-/**** End user code   ****/
 
 /**********************************************************************************************************************
  Exported global variables
  *********************************************************************************************************************/
-/**** Start user code ****/
-/**** End user code   ****/
+#if (FWUP_CFG_USER_FLASH_OPEN_ENABLED != 0)
+e_fwup_err_t FWUP_CFG_USER_FLASH_OPEN_FUNCTION(void);
+#endif /* (FWUP_CFG_USER_FLASH_OPEN_ENABLED != 0) */
+
+#if (FWUP_CFG_USER_FLASH_CLOSE_ENABLED != 0)
+void FWUP_CFG_USER_FLASH_CLOSE_FUNCTION(void);
+#endif /* (FWUP_CFG_USER_FLASH_CLOSE_ENABLED != 0) */
+
+#if (FWUP_CFG_USER_FLASH_ERASE_ENABLED != 0)
+e_fwup_err_t FWUP_CFG_USER_FLASH_ERASE_FUNCTION(uint32_t addr, uint32_t num_blocks);
+#endif /* (FWUP_CFG_USER_FLASH_ERASE_ENABLED != 0) */
+
+#if (FWUP_CFG_USER_FLASH_WRITE_ENABLED != 0)
+e_fwup_err_t FWUP_CFG_USER_FLASH_WRITE_FUNCTION(uint32_t src_addr, uint32_t dest_addr, uint32_t num_bytes);
+#endif /* (FWUP_CFG_USER_FLASH_WRITE_ENABLED != 0) */
+
+#if (FWUP_CFG_USER_FLASH_READ_ENABLED != 0)
+e_fwup_err_t FWUP_CFG_USER_FLASH_READ_FUNCTION(uint32_t buf_addr, uint32_t src_addr, uint32_t size);
+#endif /* (FWUP_CFG_USER_FLASH_READ_ENABLED != 0) */
+
+#if (FWUP_CFG_UPDATE_MODE == FWUP_DUAL_BANK)
+#if (FWUP_CFG_USER_BANK_SWAP_ENABLED != 0)
+e_fwup_err_t FWUP_CFG_USER_BANK_SWAP_FUNCTION(void);
+#endif /* (FWUP_CFG_USER_BANK_SWAP_ENABLED != 0) */
+#endif /* (FWUP_CFG_UPDATE_MODE == FWUP_DUAL_BANK) */
+
+#if (FWUP_CFG_UPDATE_MODE == FWUP_SINGLE_BANK_W_BUFFER_EXT)
+#if (FWUP_CFG_USER_EXT_FLASH_OPEN_ENABLED != 0)
+e_fwup_err_t FWUP_CFG_USER_EXT_FLASH_OPEN_FUNCTION(void);
+#endif /* (FWUP_CFG_USER_EXT_FLASH_OPEN_ENABLED != 0) */
+
+#if (FWUP_CFG_USER_EXT_FLASH_CLOSE_ENABLED != 0)
+void FWUP_CFG_USER_EXT_FLASH_CLOSE_FUNCTION(void);
+#endif /* (FWUP_CFG_USER_EXT_FLASH_CLOSE_ENABLED != 0) */
+
+#if (FWUP_CFG_USER_EXT_FLASH_ERASE_ENABLED != 0)
+e_fwup_err_t FWUP_CFG_USER_EXT_FLASH_ERASE_FUNCTION(uint32_t offsetadd, uint32_t num_sectors);
+#endif /* (FWUP_CFG_USER_EXT_FLASH_ERASE_ENABLED != 0) */
+
+#if (FWUP_CFG_USER_EXT_FLASH_WRITE_ENABLED != 0)
+e_fwup_err_t FWUP_CFG_USER_EXT_FLASH_WRITE_FUNCTION(uint32_t src_addr, uint32_t dest_addr, uint32_t num_bytes);
+#endif /* (FWUP_CFG_USER_EXT_FLASH_WRITE_ENABLED != 0) */
+
+#if (FWUP_CFG_USER_EXT_FLASH_READ_ENABLED != 0)
+e_fwup_err_t FWUP_CFG_USER_EXT_FLASH_READ_FUNCTION(uint32_t buf_addr, uint32_t src_addr, uint32_t size);
+#endif /* (FWUP_CFG_USER_EXT_FLASH_READ_ENABLED != 0) */
+#endif /* (FWUP_CFG_UPDATE_MODE == FWUP_SINGLE_BANK_W_BUFFER_EXT) */
 
 /**********************************************************************************************************************
  Private (static) variables and functions
  *********************************************************************************************************************/
-/**** Start user code ****/
-/**** End user code   ****/
 
 /*
  * Internal flash
@@ -74,13 +113,15 @@
  *********************************************************************************************************************/
 e_fwup_err_t r_fwup_wrap_flash_open(void)
 {
-    /**** Start user code ****/
+#if (FWUP_CFG_USER_FLASH_OPEN_ENABLED == 1)
+    return FWUP_CFG_USER_FLASH_OPEN_FUNCTION();
+#else
     if (FLASH_SUCCESS != R_FLASH_Open())
     {
         return (FWUP_ERR_FLASH);
     }
     return (FWUP_SUCCESS);
-    /**** End user code   ****/
+#endif /* (FWUP_CFG_USER_FLASH_OPEN_ENABLED == 1) */
 }
 /**********************************************************************************************************************
  End of function r_fwup_wrap_flash_open
@@ -94,9 +135,11 @@ e_fwup_err_t r_fwup_wrap_flash_open(void)
  *********************************************************************************************************************/
 void r_fwup_wrap_flash_close(void)
 {
-    /**** Start user code ****/
+#if (FWUP_CFG_USER_FLASH_CLOSE_ENABLED == 1)
+    FWUP_CFG_USER_FLASH_CLOSE_FUNCTION();
+#else
     R_FLASH_Close();
-    /**** End user code   ****/
+#endif /* (FWUP_CFG_USER_FLASH_CLOSE_ENABLED == 1) */
 }
 /**********************************************************************************************************************
  End of function r_fwup_wrap_flash_close
@@ -112,8 +155,13 @@ void r_fwup_wrap_flash_close(void)
  *********************************************************************************************************************/
 e_fwup_err_t r_fwup_wrap_flash_erase(uint32_t addr, uint32_t num_blocks)
 {
-    /**** Start user code ****/
+#if (FWUP_CFG_USER_FLASH_ERASE_ENABLED == 1)
+    return FWUP_CFG_USER_FLASH_ERASE_FUNCTION(addr, num_blocks);
+#else
+
     uint32_t blk_addr;
+    flash_err_t ret;
+
 #if (FLASH_TYPE == FLASH_TYPE_1)
     blk_addr = addr;
 #else
@@ -125,16 +173,36 @@ e_fwup_err_t r_fwup_wrap_flash_erase(uint32_t addr, uint32_t num_blocks)
     {
         blk_addr = addr + (FWUP_CFG_CF_BLK_SIZE * (num_blocks - 1));
     }
-#endif
+#endif /* (FLASH_TYPE == FLASH_TYPE_1) */
+
+#if (defined(MCU_RX130) && (MCU_ROM_SIZE_BYTES > 0x40000L))
+    /* For parts with CF > 256K, erase and blankcheck cannot cross 256k boundary */
+    if ((blk_addr > (uint32_t)FLASH_CF_BLOCK_INVALID) && 
+        (blk_addr < (uint32_t)FLASH_CF_256KBOUNDARY) &&
+        ((blk_addr + (num_blocks * FLASH_CF_BLOCK_SIZE) - 1) > (uint32_t)FLASH_CF_256KBOUNDARY))
+    {
+        uint32_t tmp_num_blocks = ((uint32_t)FLASH_CF_256KBOUNDARY - addr) / FLASH_CF_BLOCK_SIZE;
+        r_fwup_wrap_disable_interrupt();
+        ret = R_FLASH_Erase((flash_block_address_t )blk_addr, tmp_num_blocks);
+        r_fwup_wrap_enable_interrupt();
+        if (FLASH_SUCCESS != ret)
+        {
+            return (FWUP_ERR_FLASH);
+        }
+        blk_addr = (uint32_t)FLASH_CF_256KBOUNDARY;
+        num_blocks -= tmp_num_blocks;
+    }
+#endif /* (defined(MCU_RX130) && (MCU_ROM_SIZE_BYTES > 0x40000L)) */
+
     r_fwup_wrap_disable_interrupt();
-    flash_err_t ret = R_FLASH_Erase((flash_block_address_t )blk_addr, num_blocks);
+    ret = R_FLASH_Erase((flash_block_address_t )blk_addr, num_blocks);
     r_fwup_wrap_enable_interrupt();
     if (FLASH_SUCCESS != ret)
     {
         return (FWUP_ERR_FLASH);
     }
     return (FWUP_SUCCESS);
-    /**** End user code   ****/
+#endif /* (FWUP_CFG_USER_FLASH_ERASE_ENABLED == 1) */
 }
 /**********************************************************************************************************************
  End of function r_fwup_wrap_flash_erase
@@ -151,7 +219,9 @@ e_fwup_err_t r_fwup_wrap_flash_erase(uint32_t addr, uint32_t num_blocks)
  *********************************************************************************************************************/
 e_fwup_err_t r_fwup_wrap_flash_write(uint32_t src_addr, uint32_t dest_addr, uint32_t num_bytes)
 {
-    /**** Start user code ****/
+#if (FWUP_CFG_USER_FLASH_WRITE_ENABLED == 1)
+    return FWUP_CFG_USER_FLASH_WRITE_FUNCTION(src_addr, dest_addr, num_bytes);
+#else
     r_fwup_wrap_disable_interrupt();
     flash_err_t ret = R_FLASH_Write(src_addr, dest_addr, num_bytes);
     r_fwup_wrap_enable_interrupt();
@@ -160,7 +230,7 @@ e_fwup_err_t r_fwup_wrap_flash_write(uint32_t src_addr, uint32_t dest_addr, uint
         return (FWUP_ERR_FLASH);
     }
     return (FWUP_SUCCESS);
-    /**** End user code   ****/
+#endif /* (FWUP_CFG_USER_FLASH_WRITE_ENABLED == 1) */
 }
 /**********************************************************************************************************************
  End of function r_fwup_wrap_flash_write
@@ -176,12 +246,14 @@ e_fwup_err_t r_fwup_wrap_flash_write(uint32_t src_addr, uint32_t dest_addr, uint
  *********************************************************************************************************************/
 e_fwup_err_t r_fwup_wrap_flash_read(uint32_t buf_addr, uint32_t src_addr, uint32_t size)
 {
-    /**** Start user code ****/
+#if (FWUP_CFG_USER_FLASH_READ_ENABLED == 1)
+    return FWUP_CFG_USER_FLASH_READ_FUNCTION(buf_addr, src_addr, size);
+#else
 
     MEMCPY((void FWUP_FAR *)buf_addr, (void FWUP_FAR *)src_addr, size);
     return (FWUP_SUCCESS);
 
-    /**** End user code   ****/
+#endif /* (FWUP_CFG_USER_FLASH_READ_ENABLED == 1) */
 }
 /**********************************************************************************************************************
  End of function r_fwup_wrap_flash_read
@@ -197,8 +269,9 @@ e_fwup_err_t r_fwup_wrap_flash_read(uint32_t buf_addr, uint32_t src_addr, uint32
  *********************************************************************************************************************/
 e_fwup_err_t r_fwup_wrap_bank_swap(void)
 {
-    /**** Start user code ****/
-
+#if (FWUP_CFG_USER_BANK_SWAP_ENABLED == 1)
+    return FWUP_CFG_USER_BANK_SWAP_FUNCTION();
+#else
     flash_err_t err;
 
     r_fwup_wrap_disable_interrupt();
@@ -210,8 +283,7 @@ e_fwup_err_t r_fwup_wrap_bank_swap(void)
         return (FWUP_ERR_FLASH);
     }
     return (FWUP_SUCCESS);
-
-    /**** End user code   ****/
+#endif /* (FWUP_CFG_USER_BANK_SWAP_ENABLED == 1) */
 }
 /**********************************************************************************************************************
  End of function r_fwup_wrap_bank_swap
@@ -231,9 +303,12 @@ e_fwup_err_t r_fwup_wrap_bank_swap(void)
  *********************************************************************************************************************/
 e_fwup_err_t r_fwup_wrap_ext_flash_open(void)
 {
-    /**** Start user code ****/
+#if (FWUP_CFG_USER_EXT_FLASH_OPEN_ENABLED == 1)
+    return FWUP_CFG_USER_EXT_FLASH_OPEN_FUNCTION();
+#else
+#warning "r_fwup_wrap_get_crypt_context is not implemented yet, so user needs to implement it."
     return (FWUP_SUCCESS);
-    /**** End user code   ****/
+#endif /* (FWUP_CFG_USER_EXT_FLASH_OPEN_ENABLED == 1) */
 }
 /**********************************************************************************************************************
  End of function r_fwup_wrap_ext_flash_open
@@ -247,8 +322,11 @@ e_fwup_err_t r_fwup_wrap_ext_flash_open(void)
  *********************************************************************************************************************/
 void r_fwup_wrap_ext_flash_close(void)
 {
-    /**** Start user code ****/
-    /**** End user code   ****/
+#if (FWUP_CFG_USER_EXT_FLASH_CLOSE_ENABLED == 1)
+    return FWUP_CFG_USER_EXT_FLASH_CLOSE_FUNCTION();
+#else
+#warning "r_fwup_wrap_get_crypt_context is not implemented yet, so user needs to implement it."
+#endif /* (FWUP_CFG_USER_EXT_FLASH_CLOSE_ENABLED == 1) */
 }
 /**********************************************************************************************************************
  End of function r_fwup_wrap_ext_flash_close
@@ -264,9 +342,12 @@ void r_fwup_wrap_ext_flash_close(void)
  *********************************************************************************************************************/
 e_fwup_err_t r_fwup_wrap_ext_flash_erase(uint32_t addr, uint32_t num_sectors)
 {
-    /**** Start user code ****/
+#if (FWUP_CFG_USER_EXT_FLASH_ERASE_ENABLED == 1)
+    return FWUP_CFG_USER_EXT_FLASH_ERASE_FUNCTION(addr, num_sectors);
+#else
+#warning "r_fwup_wrap_get_crypt_context is not implemented yet, so user needs to implement it."
     return (FWUP_SUCCESS);
-    /**** End user code   ****/
+#endif /* (FWUP_CFG_USER_EXT_FLASH_ERASE_ENABLED == 1) */
 }
 /**********************************************************************************************************************
  End of function r_fwup_wrap_ext_flash_erase
@@ -283,9 +364,12 @@ e_fwup_err_t r_fwup_wrap_ext_flash_erase(uint32_t addr, uint32_t num_sectors)
  *********************************************************************************************************************/
 e_fwup_err_t r_fwup_wrap_ext_flash_write(uint32_t src_addr, uint32_t dest_addr, uint32_t num_bytes)
 {
-    /**** Start user code ****/
+#if (FWUP_CFG_USER_EXT_FLASH_WRITE_ENABLED == 1)
+    return FWUP_CFG_USER_EXT_FLASH_WRITE_FUNCTION(src_addr, dest_addr, num_bytes);
+#else
+#warning "r_fwup_wrap_get_crypt_context is not implemented yet, so user needs to implement it."
     return (FWUP_SUCCESS);
-    /**** End user code   ****/
+#endif /* (FWUP_CFG_USER_EXT_FLASH_WRITE_ENABLED == 1) */
 }
 /**********************************************************************************************************************
  End of function r_fwup_wrap_ext_flash_write
@@ -302,18 +386,14 @@ e_fwup_err_t r_fwup_wrap_ext_flash_write(uint32_t src_addr, uint32_t dest_addr, 
  *********************************************************************************************************************/
 e_fwup_err_t r_fwup_wrap_ext_flash_read(uint32_t buf_addr, uint32_t src_addr, uint32_t size)
 {
-    /**** Start user code ****/
+#if (FWUP_CFG_USER_EXT_FLASH_READ_ENABLED == 1)
+    return FWUP_CFG_USER_EXT_FLASH_READ_FUNCTION(buf_addr, src_addr, size);
+#else
+#warning "r_fwup_wrap_get_crypt_context is not implemented yet, so user needs to implement it."
     return (FWUP_SUCCESS);
-    /**** End user code   ****/
+#endif /* (FWUP_CFG_USER_EXT_FLASH_READ_ENABLED == 1) */
 }
 /**********************************************************************************************************************
  End of function r_fwup_wrap_ext_flash_read
  *********************************************************************************************************************/
 #endif /* (FWUP_CFG_UPDATE_MODE == FWUP_SINGLE_BANK_W_BUFFER_EXT) */
-
-/*
- * static functions
- */
-/**** Start user code ****/
-/**** End user code   ****/
-

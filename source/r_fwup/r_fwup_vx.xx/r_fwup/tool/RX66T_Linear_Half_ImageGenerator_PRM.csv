@@ -1,0 +1,13 @@
+device Type,Linear Mode
+Code Flash Size(Dual Mode Only),0x00080000
+Bootloader Start Address,0xFFFF0000
+Bootloader End Address,0xFFFFFFFF
+User Program Start Address,0xFFF80000
+User Program End Address,0xFFFB7FFF
+OFS Data Start Address,0x00120040
+OFS Data End Address,0x0012007F
+Data Flash Start Address,0x00100000
+Data Flash End Address,0x00107FFF
+Near Data Start Address(RL78 Only),No Used.
+Near Data End Address(RL78 Only),No Used.
+Flash Write Size,256

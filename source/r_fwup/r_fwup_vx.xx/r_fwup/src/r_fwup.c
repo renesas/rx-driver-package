@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2023-2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_fwup.c
@@ -25,6 +25,8 @@
  *         : 29.09.2023 2.01    Fixed log messages.
  *                              Add parameter checking.
  *                              Added arguments to R_FWUP_WriteImageProgram API.
+ *         : 28.03.2024 2.02    Update wrapper functions.
+ *         : 09.04.2024 2.03    Fixed wrapper function.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  Includes   <System Includes> , "Project Includes"
@@ -706,6 +708,7 @@ static e_fwup_err_t write_image_prog(e_fwup_area_t area, uint8_t *p_buf, uint32_
 
         /* get Image size */
         read_area(area_tmp, (uint32_t *)&dc, area_offset, sizeof(st_fw_desc_t));
+        /* WAIT_LOOP */
         for (uint32_t i = 0; i < dc.n; i++)
         {
             /* write address in range? */
@@ -730,6 +733,7 @@ static e_fwup_err_t write_image_prog(e_fwup_area_t area, uint8_t *p_buf, uint32_
     /* write user program */
     if (0 == s_img_prog_write_flg)
     {
+        /* WAIT_LOOP */
         while(1)
         {
             /* Get N, addr, size */
@@ -853,6 +857,7 @@ static e_fwup_err_t write_image_offset_prog(e_fwup_area_t area, uint8_t *p_buf, 
 
         /* get Image size */
         read_area(area_tmp, (uint32_t *)&dc, area_offset, sizeof(st_fw_desc_t));
+        /* WAIT_LOOP */
         for (uint32_t i = 0; i < dc.n; i++)
         {
             /* write address in range? */
@@ -958,6 +963,7 @@ static e_fwup_err_t write_image_offset_prog(e_fwup_area_t area, uint8_t *p_buf, 
             return (FWUP_ERR_FAILURE);
         }
 
+        /* WAIT_LOOP */
         while(1)
         {
             /* Get N, addr, size */
@@ -1196,6 +1202,7 @@ static e_fwup_err_t copy_to_main_area(void)
 
     /* Copy to main area */
     max_cnt = (FWUP_CFG_AREA_SIZE / FWUP_COPY_BUF_SIZE);
+    /* WAIT_LOOP */
     for (block_cnt = 0; max_cnt > block_cnt; block_cnt++)
     {
         /* Read firmware from buffer area */
@@ -1237,6 +1244,7 @@ static int32_t sha256_update(e_fwup_area_t area, void * vp_ctx, uint32_t area_of
     uint32_t rbuf_size = FWUP_READ_BUF_SIZE;
     uint32_t area_offset_tmp = area_offset;
 
+    /* WAIT_LOOP */
     while (datalen > 0)
     {
         if (datalen < rbuf_size)
@@ -1280,6 +1288,7 @@ static uint8_t * hash_sha256(e_fwup_area_t area)
     sha256_update(area, vp_ctx, area_offset, sizeof(st_fw_desc_t));
 
     /* program code */
+    /* WAIT_LOOP */
     for (uint8_t cnt = 0; cnt < dc.n; cnt++)
     {
         if ((FWUP_CFG_DF_ADDR_L <= dc.fw[cnt].addr) && (dc.fw[cnt].addr < (FWUP_CFG_DF_ADDR_L + FWUP_DF_NUM_BYTES)))
@@ -1323,6 +1332,7 @@ static uint32_t get_flash_write_addr(e_fwup_area_t area, uint32_t buf_sz_tmp, ui
 
     /* Get N, addr, size */
     read_area(area, (uint32_t *)&dc, sizeof(st_fw_header_t), sizeof(st_fw_desc_t));
+    /* WAIT_LOOP */
     for (uint32_t cnt = 0; cnt < dc.n; cnt++)
     {
         if ((rsu_index + dc.fw[cnt].size) >= rsu_offset)

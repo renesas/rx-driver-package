@@ -17,6 +17,7 @@
         <version>8.03.00.202004</version>
         <version>8.03.00.202102</version>
         <version>8.03.00.202202</version>
+        <version>8.03.00.202305</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -38,6 +39,7 @@
         <group>RX230</group>
         <group>RX231</group>
         <group>RX23E-A</group>
+        <group>RX23E-B</group>
         <group>RX23W</group>
         <group>RX24T</group>
         <group>RX26T</group>
@@ -60,6 +62,7 @@
         <board>RSKRX72M</board>
         <board>RSKRX72N</board>
         <board>RSSKRX23EA</board>
+        <board>RSSKRX23EB</board>
         <board>RSSKRX23W</board>
         <board>CloudKitRX65N</board>
     </target>
@@ -75,6 +78,7 @@
             <module>r_flash_rx</module>
             <version>4.80</version>
             <version>4.91</version>
+            <version>5.10</version>
         </dependency>
         <application>Generic</application>
         <desc>FWUP Library</desc>
@@ -83,6 +87,9 @@
         <incdir>r_config</incdir>
         <incdir>r_fwup</incdir>
         <incdir>r_fwup/src</incdir>
+        <incdir>r_fwup/src/base64</incdir>
+        <incdir>r_fwup/src/tinycrypt/source</incdir>
+        <incdir>r_fwup/src/tinycrypt/include</incdir>
     </package>
     <sampleapplicationnote>
         <documentno>R01AN5824</documentno>
