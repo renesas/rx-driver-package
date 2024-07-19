@@ -13,12 +13,24 @@ BEGIN {
 	#     -> v1.25時のコミット番号
 	#       https://github.com/renesas/rx-driver-package/releases/tag/V1.25
 	#
+	# 改訂履歴
+	#   2024/4/11
+	#     emWin FITモジュールのzipファイルがプッシュ上限サイズの上限100MBを越えたため、
+	#     超えたモジュールはリリースタグのアセットへモジュールを置く方針とした
+	#     越えたモジュールのURLリンクはアセットを指すようコードを追加
+	#
 	# 実行例
 	#   sh ../../tools/version_xml_generator.sh Makefile release_tag_commit_number=8dadb91c0486eaa03af224c935eedb9bb2df69a3
 	
 	# 定数データ
 	rdp_repo_url = "https://raw.githubusercontent.com/renesas/rx-driver-package"
-	
+	rdp_release_url = "https://github.com/renesas/rx-driver-package/releases/download"
+
+	# LFS超過モジュール(100MB以上のモジュール)
+	# 現状emWin FITのみ、他に100MBを超えるモジュールが増えた場合はスペースで繋いで記述する
+	# 例 "r_emwin_rx r_xxxx_rx"
+	split( "r_emwin_rx" , lfs_excess_modules, " " );
+
 	while(1)
 	{
 		if(ARGC != 4)
@@ -46,8 +58,17 @@ BEGIN {
 		if($1 == "VERSION")
 		{
 			module_version = $3;
+			module_version_str = module_version;
 #			printf("module_version found: %s\n", module_version);
 		}
+
+		#モジュールバージョンとファイル名のバージョン表記が異なる場合、module_version_strを設定
+		if($1 == "VERSION_STR")
+		{
+			module_version_str = $3;
+#			printf("module_version string found: %s\n", module_version_str);
+		}
+
 		
 		if($1 == "MDF")
 		{
@@ -85,24 +106,24 @@ BEGIN {
 		input_release_tag_commit_version_depth = split(input_release_tag_commit_version_string, input_release_tag_commit_version_string_array, /=/);
 		release_tag_commit_version = input_release_tag_commit_version_string_array[input_release_tag_commit_version_depth];
 
-		zip_file_name = sprintf("%s_v%s.zip", module_name, module_version);
+		zip_file_name = sprintf("%s_v%s.zip", module_name, module_version_str);
 	#	printf("%s\n", zip_file_name);
 
-		xml_file_name = sprintf("%s_v%s.xml", module_name, module_version);
+		xml_file_name = sprintf("%s_v%s.xml", module_name, module_version_str);
 	#	printf("%s\n", xml_file_name);
 
 		if(mdf_support_flag == 1)
 		{
-			mdf_file_name = sprintf("%s_v%s.mdf", module_name, module_version);
+			mdf_file_name = sprintf("%s_v%s.mdf", module_name, module_version_str);
 		}
 		else if(mdf_support_flag == 2)
 		{
-			mdf_file_name = sprintf("%s_v%s_extend.mdf", module_name, module_version);
+			mdf_file_name = sprintf("%s_v%s_extend.mdf", module_name, module_version_str);
 		}
 		else if(mdf_support_flag == 3)
 		{
-			mdf_file_name_v1 = sprintf("%s_v%s.mdf", module_name, module_version);
-			mdf_file_name_v2 = sprintf("%s_v%s_extend.mdf", module_name, module_version);
+			mdf_file_name_v1 = sprintf("%s_v%s.mdf", module_name, module_version_str);
+			mdf_file_name_v2 = sprintf("%s_v%s_extend.mdf", module_name, module_version_str);
 		}
 		else
 		{
@@ -132,24 +153,52 @@ BEGIN {
 		depth++;
 
 		print_indent(depth);
-		printf("<url>%s/%s/FITModules/%s</url>\r\n", rdp_repo_url, release_tag_commit_number, zip_file_name);
-		print_indent(depth);
-		printf("<url>%s/%s/FITModules/%s</url>\r\n", rdp_repo_url, release_tag_commit_number, xml_file_name);
-		if(mdf_support_flag != 0)
+
+		if(1 == check_excess_module(module_name))
 		{
-			if(mdf_support_flag == 3)
+			#通常モジュールの場合
+			printf("<url>%s/%s/FITModules/%s</url>\r\n", rdp_repo_url, release_tag_commit_number, zip_file_name);
+			print_indent(depth);
+			printf("<url>%s/%s/FITModules/%s</url>\r\n", rdp_repo_url, release_tag_commit_number, xml_file_name);
+			if(mdf_support_flag != 0)
 			{
-				print_indent(depth);
-				printf("<url>%s/%s/FITModules/%s</url>\r\n", rdp_repo_url, release_tag_commit_number, mdf_file_name_v1);
-				print_indent(depth);
-				printf("<url>%s/%s/FITModules/%s</url>\r\n", rdp_repo_url, release_tag_commit_number, mdf_file_name_v2);
-			}
-			else
-			{
-				print_indent(depth);
-				printf("<url>%s/%s/FITModules/%s</url>\r\n", rdp_repo_url, release_tag_commit_number, mdf_file_name);
+				if(mdf_support_flag == 3)
+				{
+					print_indent(depth);
+					printf("<url>%s/%s/FITModules/%s</url>\r\n", rdp_repo_url, release_tag_commit_number, mdf_file_name_v1);
+					print_indent(depth);
+					printf("<url>%s/%s/FITModules/%s</url>\r\n", rdp_repo_url, release_tag_commit_number, mdf_file_name_v2);
+				}
+				else
+				{
+					print_indent(depth);
+					printf("<url>%s/%s/FITModules/%s</url>\r\n", rdp_repo_url, release_tag_commit_number, mdf_file_name);
+				}
 			}
 		}
+		else
+		{
+			#LFS超過モジュールの場合
+			printf("<url>%s/V%s/%s</url>\r\n", rdp_release_url, release_tag_commit_version, zip_file_name);
+			print_indent(depth);
+			printf("<url>%s/V%s/%s</url>\r\n", rdp_release_url, release_tag_commit_version, xml_file_name);
+			if(mdf_support_flag != 0)
+			{
+				if(mdf_support_flag == 3)
+				{
+					print_indent(depth);
+					printf("<url>%s/V%s/%s</url>\r\n", rdp_release_url, release_tag_commit_version, mdf_file_name_v1);
+					print_indent(depth);
+					printf("<url>%s/V%s/%s</url>\r\n", rdp_release_url, release_tag_commit_version, mdf_file_name_v2);
+				}
+				else
+				{
+					print_indent(depth);
+					printf("<url>%s/V%s/%s</url>\r\n", rdp_release_url, release_tag_commit_version, mdf_file_name);
+				}
+			}
+		}
+
 		depth--;
 		
 		print_indent(depth);
@@ -168,4 +217,14 @@ function print_indent(depth)
         printf("  ");
     }
 }
+function check_excess_module(module)
+{
+	for(i in lfs_excess_modules) {
+		if(lfs_excess_modules[i] == module) {
+			return 0;
+		}
+	}
+	return 1;
+}
+
 ' $*
