@@ -9,7 +9,7 @@
 *                                                                    *
 **********************************************************************
 
-** emWin V6.32 - Graphical user interface for embedded applications **
+** emWin V6.34 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -455,6 +455,8 @@ void             GUI__RegisterInit         (GUI_REGISTER_INIT * pRegisterInit);
 int              GUI__SetText              (GUI_HMEM * phText, const char * s);
 I32              GUI__SinHQ                (I32 Ang1000);
 I32              GUI__sqrt32               (I32 Square);
+char           * GUI__itoa                 (int Value, char * s, int Base);
+
 
 /*********************************************************************
 *
@@ -688,14 +690,34 @@ typedef struct {
   int Progessive;  // Indicates if JPEG is progressive or not
 } GUI_JPEG_INFO;
 
-int GUI_JPEG_Draw        (const void * pFileData, int DataSize,    int x0, int y0);
-int GUI_JPEG_DrawEx      (GUI_GET_DATA_FUNC * pfGetData, void * p, int x0, int y0);
-int GUI_JPEG_DrawScaled  (const void * pFileData, int DataSize,    int x0, int y0, int Num, int Denom);
-int GUI_JPEG_DrawScaledEx(GUI_GET_DATA_FUNC * pfGetData, void * p, int x0, int y0, int Num, int Denom);
-int GUI_JPEG_GetInfo     (const void * pFileData, int DataSize,    GUI_JPEG_INFO * pInfo);
-int GUI_JPEG_GetInfoEx   (GUI_GET_DATA_FUNC * pfGetData, void * p, GUI_JPEG_INFO * pInfo);
+typedef struct GUI_JPEG_DCONTEXT GUI_JPEG_DCONTEXT;
+/*********************************************************************
+*
+*       GUI_JPEG_WRITECLIPPEDPIXELS_FUNC
+*
+*   Description
+*     Function that retrieves the decoded result of a JPEG and writes
+*     the pixels to the display.
+* 
+*   Parameters
+*     x0:            X drawing position of the JPEG.
+*     y0:            Y drawing position of the JPEG.
+*     xSize:         Width of one line.
+*     pColor:        [IN] Pointer to decoded JPEG data.
+*     pContext:      [IN] Pointer to JPEG context.
+*     pColorConvAPI: [IN] Pointer to selected color conversion API.
+* 
+*/
+typedef void (GUI_JPEG_WRITECLIPPEDPIXELS_FUNC)(int x0, int y0, int xSize, LCD_COLOR * pColor, GUI_JPEG_DCONTEXT * pContext, const LCD_API_COLOR_CONV * pColorConvAPI);
 
-void GUI_JPEG_SetpfDrawEx(int (* pfDrawEx)(GUI_GET_DATA_FUNC * pfGetData, void * p, int x0, int y0));
+int                                GUI_JPEG_Draw            (const void * pFileData, int DataSize,    int x0, int y0);
+int                                GUI_JPEG_DrawEx          (GUI_GET_DATA_FUNC * pfGetData, void * p, int x0, int y0);
+int                                GUI_JPEG_DrawScaled      (const void * pFileData, int DataSize,    int x0, int y0, int Num, int Denom);
+int                                GUI_JPEG_DrawScaledEx    (GUI_GET_DATA_FUNC * pfGetData, void * p, int x0, int y0, int Num, int Denom);
+int                                GUI_JPEG_GetInfo         (const void * pFileData, int DataSize,    GUI_JPEG_INFO * pInfo);
+int                                GUI_JPEG_GetInfoEx       (GUI_GET_DATA_FUNC * pfGetData, void * p, GUI_JPEG_INFO * pInfo);
+void                               GUI_JPEG_SetpfDrawEx     (int (* pfDrawEx)(GUI_GET_DATA_FUNC * pfGetData, void * p, int x0, int y0));
+GUI_JPEG_WRITECLIPPEDPIXELS_FUNC * GUI_JPEG_SetpfWritePixels(GUI_JPEG_WRITECLIPPEDPIXELS_FUNC * pFunc);
 
 /*********************************************************************
 *
@@ -1013,6 +1035,9 @@ void GUI_SIF_DeleteFont(GUI_FONT * pFont);
 int  GUI_XBF_CreateFont(GUI_FONT * pFont, GUI_XBF_DATA * pXBF, const GUI_XBF_TYPE * pFontType, GUI_XBF_GET_DATA_FUNC * pfGetData, void * pVoid);
 void GUI_XBF_DeleteFont(GUI_FONT * pFont);
 
+#define GUI_XBF_HEADER_SIZE    18
+#define GUI_XBF_TABLEITEM_SIZE (sizeof(U32) + sizeof(U16))
+
 /*********************************************************************
 *
 *       FreeType engine
@@ -1290,11 +1315,12 @@ int                        GUI_MEMDEV_MULTIBUF_Enable     (int OnOff);
 
 /* Private functions */
 void                       GUI_MEMDEV__ClearCanvas        (void);
+void                       GUI_MEMDEV__ClearCanvasEx      (U8 SetActive);
 void                       GUI_MEMDEV__FadeDevice         (GUI_MEMDEV_Handle hMemWin, GUI_MEMDEV_Handle hMemBk, GUI_MEMDEV_Handle hMemDst, U8 Intens);
 void                       GUI_MEMDEV__FadeDeviceEx       (GUI_MEMDEV_Handle hMemWin, GUI_MEMDEV_Handle hMemBk, GUI_MEMDEV_Handle hMemDst, U8 Intens, int xPosWin, int yPosWin);
 void                       GUI_MEMDEV__Rotate             (GUI_MEMDEV_Handle hSrc, GUI_MEMDEV_Handle hDst, int dx, int dy, int a, int Mag, U32 Mask);
 void                       GUI_MEMDEV__RotateHR           (GUI_MEMDEV_Handle hSrc, GUI_MEMDEV_Handle hDst, I32 dx, I32 dy, int a, int Mag, U32 Mask);
-void                       GUI_MEMDEV__SetCanvas          (GUI_MEMDEV_Handle hMem);
+U8                         GUI_MEMDEV__SetCanvas          (GUI_MEMDEV_Handle hMem);
 
 void  GUI_SelectLCD(void);
 
@@ -1562,9 +1588,10 @@ extern const GUI_ORIENTATION_API GUI_OrientationAPI_C32;
 #define GUI_ORIENTATION_C16 &GUI_OrientationAPI_C16
 #define GUI_ORIENTATION_C32 &GUI_OrientationAPI_C32
 
-int GUI_SetOrientation        (int Orientation);
-int GUI_SetOrientationEx      (int Orientation, int LayerIndex);
-int GUI_SetOrientationExCached(int Orientation, int LayerIndex, const GUI_ORIENTATION_API * pAPI);
+int  GUI_SetOrientation        (int Orientation);
+int  GUI_SetOrientationEx      (int Orientation, int LayerIndex);
+int  GUI_SetOrientationExCached(int Orientation, int LayerIndex, const GUI_ORIENTATION_API * pAPI);
+void GUI_OrientationEnableTouch(void);
 
 /*********************************************************************
 *
@@ -1759,6 +1786,7 @@ int  GUI_GetKey(void);
 int  GUI_WaitKey(void);
 void GUI_StoreKey(int c);
 void GUI_ClearKeyBuffer(void);
+int  GUI_GetKeyPressed(void);
 
 /*********************************************************************
 *
@@ -1783,6 +1811,7 @@ int  GUI_PID_IsPressed       (void);
 void GUI_PID_RegisterPreHook (GUI_REGISTER_HOOK * pRegisterHook);
 void GUI_PID_SetHook         (void (* pfHook)(      GUI_PID_STATE *));  // Public
 void GUI_PID__SetHook        (void (* pfHook)(const GUI_PID_STATE *));  // Private
+void GUI_PID__OrientationHook(GUI_PID_STATE * pState);                  // Private
 void GUI_PID_RegisterReadHook(GUI_REGISTER_HOOK * pRegisterReadHook);
 
 /*********************************************************************
@@ -2490,6 +2519,8 @@ extern const tGUI_XBF_APIList GUI_XBF_APIList_Prop_AA4_Ext;
 #define GUI_BLACK         GUI_MAKE_COLOR(0x00000000)
 #define GUI_BROWN         GUI_MAKE_COLOR(0x002A2AA5)
 #define GUI_ORANGE        GUI_MAKE_COLOR(0x0000A5FF)
+#define GUI_PINK          GUI_MAKE_COLOR(0x00C00FFC)
+
 #define GUI_TRANSPARENT   GUI_MAKE_COLOR(0xFF000000)
 
 #define GUI_GRAY_3F       GUI_MAKE_COLOR(0x003F3F3F)
@@ -2503,6 +2534,7 @@ extern const tGUI_XBF_APIList GUI_XBF_APIList_Prop_AA4_Ext;
 #define GUI_GRAY_C8       GUI_MAKE_COLOR(0x00C8C8C8)
 #define GUI_GRAY_D0       GUI_MAKE_COLOR(0x00D0D0D0)
 #define GUI_GRAY_E7       GUI_MAKE_COLOR(0x00E7E7E7)
+
 #define GUI_BLUE_98       GUI_MAKE_COLOR(0x00980000)
 
 /*********************************************************************

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2024 Renesas Electronics Corporation. All rights reserved.
 ******************************************************************************/
 /*****************************************************************************
 * File Name    : r_dac_rx.c
@@ -52,6 +52,10 @@
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *           29.05.2023 5.10    Added support for RX23E-B.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           14.06.2024 5.20    Added DAC_OUT_SEL_DA0_DA1 to dac_out_da_t enum for simultaneous output to 
+*                              DA0 and DA1 for RX66T, RX72T, RX660, RX26T.
+*                              Added DAC_OUT_SEL_REF0_REF1 to dac_out_ref_t enum for simultaneous Vref output 
+*                              from DA0 and DA1 for RX66T, RX72T, RX660, RX26T.
 ******************************************************************************/
 /*****************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -168,6 +172,15 @@ dac_err_t err;
             DA.DADSELR.BIT.OUTDA1 = 1;
             break;
         }
+        case DAC_OUT_SEL_DA0_DA1:
+        {
+            /* Select output to DA0 */
+            DA.DADSELR.BIT.OUTDA0 = 1;
+
+            /* Select output to DA1 */
+            DA.DADSELR.BIT.OUTDA1 = 1;
+            break;
+        }
         default:
         {
             break;
@@ -194,6 +207,15 @@ dac_err_t err;
         }
         case DAC_OUT_SEL_REF1:
         {
+            /* Select output to VREF1 */
+            DA.DADSELR.BIT.OUTREF1 = 1;
+            break;
+        }
+        case DAC_OUT_SEL_REF0_REF1:
+        {
+            /* Select output to VREF0 */
+            DA.DADSELR.BIT.OUTREF0 = 1;
+
             /* Select output to VREF1 */
             DA.DADSELR.BIT.OUTREF1 = 1;
             break;

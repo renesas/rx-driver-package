@@ -54,6 +54,7 @@ static void irq_cb(void *pargs)
 {
     irq_handle_t hld = (irq_handle_t)pargs;
 
+    /* WAIT_LOOP */
     for( uint16_t i = 0; i < (uint16_t)BLE_BOARD_SW_MAX; i++ )
     {
         if ((hld == gs_irq_hdl[i]) && (gs_sw_cb[i] != NULL))

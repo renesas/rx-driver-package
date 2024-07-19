@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_setband.c
@@ -104,6 +104,7 @@ e_cellular_err_t R_CELLULAR_SetBand(st_cellular_ctrl_t * const p_ctrl, const uin
 
             if (CELLULAR_SUCCESS == ret)
             {
+                /* WAIT_LOOP */
                 for (cnt = CELLULAR_START_SOCKET_NUMBER; cnt <= p_ctrl->creatable_socket; cnt++)
                 {
                     ret = cellular_closesocket(p_ctrl, cnt);
@@ -111,6 +112,8 @@ e_cellular_err_t R_CELLULAR_SetBand(st_cellular_ctrl_t * const p_ctrl, const uin
 
                 cnt = 0;
                 ret = CELLULAR_ERR_MODULE_COM;
+
+                /* WAIT_LOOP */
                 do
                 {
                     if (CELLULAR_FLG_START == flg)

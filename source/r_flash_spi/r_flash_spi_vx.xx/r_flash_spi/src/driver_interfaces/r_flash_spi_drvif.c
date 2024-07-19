@@ -19,12 +19,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011(2012-2023) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * System Name  : FLASH SPI driver software
 * File Name    : r_flash_spi_drvif.c
-* Version      : 3.20
+* Version      : 3.40
 * Device       : -
 * Abstract     : IO I/F module
 * Tool-Chain   : -
@@ -42,6 +42,7 @@
 *                                    "read_after_write_data" for controlling SPI bus.
 *              : 30.06.2022 3.10     Fixed issues of wrong conditional expression in the if statement.
 *              : 16.03.2023 3.20     Added the QSPIX Memory Mapped Mode.
+*              : 15.11.2023 3.40     Updated according to GSCE Code Checker 6.50.
 *************************************************************************************************/
 
 
@@ -85,14 +86,14 @@ Private global variables and functions
 *************************************************************************************************/
 flash_spi_status_t r_flash_spi_drvif_open(uint8_t devno)
 {
-    memdrv_err_t ret_drv = MEMDRV_SUCCESS;
-    st_memdrv_info_t  memdrv_info;
+    memdrv_err_t     ret_drv = MEMDRV_SUCCESS;
+    st_memdrv_info_t memdrv_info;
 
-    memdrv_info.cnt = 0;
-    memdrv_info.p_data = NULL;
+    memdrv_info.cnt     = 0;
+    memdrv_info.p_data  = NULL;
     memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
 
-    ret_drv = R_MEMDRV_Open(devno,&memdrv_info);
+    ret_drv = R_MEMDRV_Open(devno, &memdrv_info);
 
     if (MEMDRV_SUCCESS > ret_drv)
     {
@@ -100,6 +101,9 @@ flash_spi_status_t r_flash_spi_drvif_open(uint8_t devno)
     }
     return FLASH_SPI_SUCCESS;
 }
+/******************************************************************************
+ End of function r_flash_spi_drvif_open
+ *****************************************************************************/
 
 
 /************************************************************************************************
@@ -113,14 +117,14 @@ flash_spi_status_t r_flash_spi_drvif_open(uint8_t devno)
 *************************************************************************************************/
 flash_spi_status_t r_flash_spi_drvif_open_tx_data(uint8_t devno)
 {
-    memdrv_err_t ret_drv = MEMDRV_SUCCESS;
-    st_memdrv_info_t  memdrv_info;
+    memdrv_err_t     ret_drv = MEMDRV_SUCCESS;
+    st_memdrv_info_t memdrv_info;
 
-    memdrv_info.cnt = 0;
-    memdrv_info.p_data = NULL;
+    memdrv_info.cnt     = 0;
+    memdrv_info.p_data  = NULL;
     memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
 
-    ret_drv = R_MEMDRV_Open(devno,&memdrv_info);
+    ret_drv = R_MEMDRV_Open(devno, &memdrv_info);
 
      if (MEMDRV_SUCCESS > ret_drv)
     {
@@ -128,6 +132,9 @@ flash_spi_status_t r_flash_spi_drvif_open_tx_data(uint8_t devno)
     }
     return FLASH_SPI_SUCCESS;
 }
+/******************************************************************************
+ End of function r_flash_spi_drvif_open_tx_data
+ *****************************************************************************/
 
 
 /************************************************************************************************
@@ -141,21 +148,24 @@ flash_spi_status_t r_flash_spi_drvif_open_tx_data(uint8_t devno)
 *************************************************************************************************/
 flash_spi_status_t r_flash_spi_drvif_open_rx_data(uint8_t devno)
 {
-    memdrv_err_t ret_drv = MEMDRV_SUCCESS;
-    st_memdrv_info_t  memdrv_info;
+    memdrv_err_t     ret_drv = MEMDRV_SUCCESS;
+    st_memdrv_info_t memdrv_info;
 
-    memdrv_info.cnt = 0;
-    memdrv_info.p_data = NULL;
+    memdrv_info.cnt     = 0;
+    memdrv_info.p_data  = NULL;
     memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
 
-    ret_drv = R_MEMDRV_Open(devno,&memdrv_info);
+    ret_drv = R_MEMDRV_Open(devno, &memdrv_info);
 
-     if (MEMDRV_SUCCESS > ret_drv)
+    if (MEMDRV_SUCCESS > ret_drv)
     {
         return FLASH_SPI_ERR_OTHER;
     }
     return FLASH_SPI_SUCCESS;
 }
+/******************************************************************************
+ End of function r_flash_spi_drvif_open_rx_data
+ *****************************************************************************/
 
 
 /************************************************************************************************
@@ -169,14 +179,14 @@ flash_spi_status_t r_flash_spi_drvif_open_rx_data(uint8_t devno)
 *************************************************************************************************/
 flash_spi_status_t r_flash_spi_drvif_close(uint8_t devno)
 {
-    memdrv_err_t ret_drv = MEMDRV_SUCCESS;
+    memdrv_err_t      ret_drv = MEMDRV_SUCCESS;
     st_memdrv_info_t  memdrv_info;
 
-    memdrv_info.cnt = 0;
-    memdrv_info.p_data = NULL;
-    memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
+    memdrv_info.cnt      = 0;
+    memdrv_info.p_data   = NULL;
+    memdrv_info.io_mode  = MEMDRV_MODE_SINGLE;
 
-    ret_drv = R_MEMDRV_Close(devno,&memdrv_info);
+    ret_drv = R_MEMDRV_Close(devno, &memdrv_info);
 
      if (MEMDRV_SUCCESS > ret_drv)
     {
@@ -184,6 +194,9 @@ flash_spi_status_t r_flash_spi_drvif_close(uint8_t devno)
     }
     return FLASH_SPI_SUCCESS;
 }
+/******************************************************************************
+ End of function r_flash_spi_drvif_close
+ *****************************************************************************/
 
 
 /************************************************************************************************
@@ -197,14 +210,14 @@ flash_spi_status_t r_flash_spi_drvif_close(uint8_t devno)
 *************************************************************************************************/
 flash_spi_status_t r_flash_spi_drvif_close_tx_data(uint8_t devno)
 {
-    memdrv_err_t ret_drv = MEMDRV_SUCCESS;
-    st_memdrv_info_t  memdrv_info;
+    memdrv_err_t     ret_drv = MEMDRV_SUCCESS;
+    st_memdrv_info_t memdrv_info;
 
-    memdrv_info.cnt = 0;
-    memdrv_info.p_data = NULL;
+    memdrv_info.cnt     = 0;
+    memdrv_info.p_data  = NULL;
     memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
 
-    ret_drv = R_MEMDRV_Close(devno,&memdrv_info);
+    ret_drv = R_MEMDRV_Close(devno, &memdrv_info);
 
      if (MEMDRV_SUCCESS > ret_drv)
     {
@@ -212,6 +225,9 @@ flash_spi_status_t r_flash_spi_drvif_close_tx_data(uint8_t devno)
     }
     return FLASH_SPI_SUCCESS;
 }
+/******************************************************************************
+ End of function r_flash_spi_drvif_close_tx_data
+ *****************************************************************************/
 
 
 /************************************************************************************************
@@ -225,14 +241,14 @@ flash_spi_status_t r_flash_spi_drvif_close_tx_data(uint8_t devno)
 *************************************************************************************************/
 flash_spi_status_t r_flash_spi_drvif_close_rx_data(uint8_t devno)
 {
-    memdrv_err_t ret_drv = MEMDRV_SUCCESS;
-    st_memdrv_info_t  memdrv_info;
+    memdrv_err_t     ret_drv = MEMDRV_SUCCESS;
+    st_memdrv_info_t memdrv_info;
 
-    memdrv_info.cnt = 0;
-    memdrv_info.p_data = NULL;
+    memdrv_info.cnt     = 0;
+    memdrv_info.p_data  = NULL;
     memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
 
-    ret_drv = R_MEMDRV_Close(devno,&memdrv_info);
+    ret_drv = R_MEMDRV_Close(devno, &memdrv_info);
 
      if (MEMDRV_SUCCESS > ret_drv)
     {
@@ -240,6 +256,9 @@ flash_spi_status_t r_flash_spi_drvif_close_rx_data(uint8_t devno)
     }
     return FLASH_SPI_SUCCESS;
 }
+/******************************************************************************
+ End of function r_flash_spi_drvif_close_rx_data
+ *****************************************************************************/
 
 
 /************************************************************************************************
@@ -253,14 +272,14 @@ flash_spi_status_t r_flash_spi_drvif_close_rx_data(uint8_t devno)
 *************************************************************************************************/
 flash_spi_status_t r_flash_spi_drvif_disable(uint8_t devno)
 {
-    memdrv_err_t ret_drv = MEMDRV_SUCCESS;
-    st_memdrv_info_t  memdrv_info;
+    memdrv_err_t     ret_drv = MEMDRV_SUCCESS;
+    st_memdrv_info_t memdrv_info;
 
-    memdrv_info.cnt = 0;
-    memdrv_info.p_data = NULL;
+    memdrv_info.cnt     = 0;
+    memdrv_info.p_data  = NULL;
     memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
 
-    ret_drv = R_MEMDRV_Disable(devno,&memdrv_info);
+    ret_drv = R_MEMDRV_Disable(devno, &memdrv_info);
 
      if (MEMDRV_SUCCESS > ret_drv)
     {
@@ -268,6 +287,9 @@ flash_spi_status_t r_flash_spi_drvif_disable(uint8_t devno)
     }
     return FLASH_SPI_SUCCESS;
 }
+/******************************************************************************
+ End of function r_flash_spi_drvif_disable
+ *****************************************************************************/
 
 
 /************************************************************************************************
@@ -281,14 +303,14 @@ flash_spi_status_t r_flash_spi_drvif_disable(uint8_t devno)
 *************************************************************************************************/
 flash_spi_status_t r_flash_spi_drvif_enable(uint8_t devno)
 {
-    memdrv_err_t ret_drv = MEMDRV_SUCCESS;
-    st_memdrv_info_t  memdrv_info;
+    memdrv_err_t     ret_drv = MEMDRV_SUCCESS;
+    st_memdrv_info_t memdrv_info;
 
-    memdrv_info.cnt = 0;
-    memdrv_info.p_data = NULL;
+    memdrv_info.cnt     = 0;
+    memdrv_info.p_data  = NULL;
     memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
 
-    ret_drv = R_MEMDRV_Enable(devno,&memdrv_info);
+    ret_drv = R_MEMDRV_Enable(devno, &memdrv_info);
 
      if (MEMDRV_SUCCESS > ret_drv)
     {
@@ -296,6 +318,9 @@ flash_spi_status_t r_flash_spi_drvif_enable(uint8_t devno)
     }
     return FLASH_SPI_SUCCESS;
 }
+/******************************************************************************
+ End of function r_flash_spi_drvif_enable
+ *****************************************************************************/
 
 
 /************************************************************************************************
@@ -316,7 +341,7 @@ flash_spi_status_t r_flash_spi_drvif_enable_tx_data(uint8_t devno)
     memdrv_info.p_data = NULL;
     memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
 
-    ret_drv = R_MEMDRV_EnableTxData(devno,&memdrv_info);
+    ret_drv = R_MEMDRV_EnableTxData(devno, &memdrv_info);
 
      if (MEMDRV_SUCCESS > ret_drv)
     {
@@ -324,6 +349,9 @@ flash_spi_status_t r_flash_spi_drvif_enable_tx_data(uint8_t devno)
     }
     return FLASH_SPI_SUCCESS;
 }
+/******************************************************************************
+ End of function r_flash_spi_drvif_enable_tx_data
+ *****************************************************************************/
 
 
 /************************************************************************************************
@@ -344,7 +372,7 @@ flash_spi_status_t r_flash_spi_drvif_enable_rx_data(uint8_t devno)
     memdrv_info.p_data  = NULL;
     memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
 
-    ret_drv = R_MEMDRV_EnableRxData(devno,&memdrv_info);
+    ret_drv = R_MEMDRV_EnableRxData(devno, &memdrv_info);
 
      if (MEMDRV_SUCCESS > ret_drv)
     {
@@ -352,6 +380,9 @@ flash_spi_status_t r_flash_spi_drvif_enable_rx_data(uint8_t devno)
     }
     return FLASH_SPI_SUCCESS;
 }
+/******************************************************************************
+ End of function r_flash_spi_drvif_enable_rx_data
+ *****************************************************************************/
 
 
 /************************************************************************************************
@@ -379,7 +410,7 @@ flash_spi_status_t r_flash_spi_drvif_tx(uint8_t devno, uint32_t txcnt, uint8_t *
     memdrv_info.read_after_write = read_after_write;
     memdrv_info.read_in_memory_mapped = read_in_memory_mapped;
 
-    ret_drv = R_MEMDRV_Tx(devno,&memdrv_info);
+    ret_drv = R_MEMDRV_Tx(devno, &memdrv_info);
 
     if (MEMDRV_ERR_HARD == ret_drv)
     {
@@ -389,8 +420,15 @@ flash_spi_status_t r_flash_spi_drvif_tx(uint8_t devno, uint32_t txcnt, uint8_t *
     {
         return FLASH_SPI_ERR_OTHER;
     }
+    else
+    {
+        /* Do nothing */
+    }
     return FLASH_SPI_SUCCESS;
 }
+/******************************************************************************
+ End of function r_flash_spi_drvif_tx
+ *****************************************************************************/
 
 
 /************************************************************************************************
@@ -420,19 +458,19 @@ flash_spi_status_t r_flash_spi_drvif_tx_add(uint8_t devno, uint32_t txcnt, uint8
     {
         case FLASH_SPI_SINGLE:
             memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
-        break;
+            break;
         case FLASH_SPI_DUAL:
             memdrv_info.io_mode = MEMDRV_MODE_DUAL;
-        break;
+            break;
         case FLASH_SPI_QUAD:
             memdrv_info.io_mode = MEMDRV_MODE_QUAD;
-        break;
+            break;
         default:
             memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
-        break;
+            break;
     } 
 
-    ret_drv = R_MEMDRV_TxData(devno,&memdrv_info);
+    ret_drv = R_MEMDRV_TxData(devno, &memdrv_info);
 
     if (MEMDRV_ERR_HARD == ret_drv)
     {
@@ -442,8 +480,15 @@ flash_spi_status_t r_flash_spi_drvif_tx_add(uint8_t devno, uint32_t txcnt, uint8
     {
         return FLASH_SPI_ERR_OTHER;
     }
+    else
+    {
+        /* Do nothing */
+    }
     return FLASH_SPI_SUCCESS;
 }
+/******************************************************************************
+ End of function r_flash_spi_drvif_tx_add
+ *****************************************************************************/
 
 
 /************************************************************************************************
@@ -473,19 +518,19 @@ flash_spi_status_t r_flash_spi_drvif_tx_data(uint8_t devno, uint32_t txcnt, uint
     {
         case FLASH_SPI_SINGLE:
             memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
-        break;
+            break;
         case FLASH_SPI_DUAL:
             memdrv_info.io_mode = MEMDRV_MODE_DUAL;
-        break;
+            break;
         case FLASH_SPI_QUAD:
             memdrv_info.io_mode = MEMDRV_MODE_QUAD;
-        break;
+            break;
         default:
             memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
-        break;
+            break;
     }
 
-    ret_drv = R_MEMDRV_TxData(devno,&memdrv_info);
+    ret_drv = R_MEMDRV_TxData(devno, &memdrv_info);
 
     if (MEMDRV_ERR_HARD == ret_drv)
     {
@@ -495,8 +540,15 @@ flash_spi_status_t r_flash_spi_drvif_tx_data(uint8_t devno, uint32_t txcnt, uint
     {
         return FLASH_SPI_ERR_OTHER;
     }
+    else
+    {
+        /* Do nothing */
+    }
     return FLASH_SPI_SUCCESS;
 }
+/******************************************************************************
+ End of function r_flash_spi_drvif_tx_data
+ *****************************************************************************/
 
 
 /************************************************************************************************
@@ -520,7 +572,7 @@ flash_spi_status_t r_flash_spi_drvif_rx(uint8_t devno, uint32_t rxcnt, uint8_t *
     memdrv_info.p_data  = p_data;
     memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
 
-    ret_drv = R_MEMDRV_Rx(devno,&memdrv_info);
+    ret_drv = R_MEMDRV_Rx(devno, &memdrv_info);
 
     if (MEMDRV_ERR_HARD == ret_drv)
     {
@@ -530,8 +582,15 @@ flash_spi_status_t r_flash_spi_drvif_rx(uint8_t devno, uint32_t rxcnt, uint8_t *
     {
         return FLASH_SPI_ERR_OTHER;
     }
+    else
+    {
+        /* Do nothing */
+    }
     return FLASH_SPI_SUCCESS;
 }
+/******************************************************************************
+ End of function r_flash_spi_drvif_rx
+ *****************************************************************************/
 
 
 /************************************************************************************************
@@ -559,19 +618,19 @@ flash_spi_status_t r_flash_spi_drvif_rx_add(uint8_t devno, uint32_t rxcnt, uint8
     {
         case FLASH_SPI_SINGLE:
             memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
-        break;
+            break;
         case FLASH_SPI_DUAL:
             memdrv_info.io_mode = MEMDRV_MODE_DUAL;
-        break;
+            break;
         case FLASH_SPI_QUAD:
             memdrv_info.io_mode = MEMDRV_MODE_QUAD;
-        break;
+            break;
         default:
             memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
-        break;
+            break;
     }
 
-    ret_drv = R_MEMDRV_RxData(devno,&memdrv_info);
+    ret_drv = R_MEMDRV_RxData(devno, &memdrv_info);
 
     if (MEMDRV_ERR_HARD == ret_drv)
     {
@@ -581,8 +640,15 @@ flash_spi_status_t r_flash_spi_drvif_rx_add(uint8_t devno, uint32_t rxcnt, uint8
     {
         return FLASH_SPI_ERR_OTHER;
     }
+    else
+    {
+        /* Do nothing */
+    }
     return FLASH_SPI_SUCCESS;
 }
+/******************************************************************************
+ End of function r_flash_spi_drvif_rx_add
+ *****************************************************************************/
 
 
 /************************************************************************************************
@@ -602,8 +668,8 @@ flash_spi_status_t r_flash_spi_drvif_rx_add(uint8_t devno, uint32_t rxcnt, uint8
 *************************************************************************************************/
 flash_spi_status_t r_flash_spi_drvif_rx_data(uint8_t devno, uint32_t rxcnt, uint8_t * p_data, uint32_t p_addr, uint8_t addr_size, flash_spi_opmode_t op_mode)
 {
-    memdrv_err_t ret_drv = MEMDRV_SUCCESS;
-    st_memdrv_info_t  memdrv_info;
+    memdrv_err_t     ret_drv = MEMDRV_SUCCESS;
+    st_memdrv_info_t memdrv_info;
 
     memdrv_info.cnt     = rxcnt;
     memdrv_info.p_data  = p_data;
@@ -613,32 +679,32 @@ flash_spi_status_t r_flash_spi_drvif_rx_data(uint8_t devno, uint32_t rxcnt, uint
     {
         case FLASH_SPI_SINGLE:
             memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
-        break;
+            break;
         case FLASH_SPI_DUAL:
             memdrv_info.io_mode = MEMDRV_MODE_DUAL;
-        break;
+            break;
         case FLASH_SPI_QUAD:
             memdrv_info.io_mode = MEMDRV_MODE_QUAD;
-        break;
+            break;
         default:
             memdrv_info.io_mode = MEMDRV_MODE_SINGLE;
-        break;
+            break;
     }
 
     switch (addr_size)
     {
         case FLASH_SPI_ADDR_4BYTES:
             memdrv_info.addr_size = MEMDRV_ADDR_4BYTES;
-        break;
+            break;
         case FLASH_SPI_ADDR_3BYTES:
             memdrv_info.addr_size = MEMDRV_ADDR_3BYTES;
-        break;
+            break;
         default:
             memdrv_info.addr_size = MEMDRV_ADDR_3BYTES;
-        break;
+            break;
     }
 
-    ret_drv = R_MEMDRV_RxData(devno,&memdrv_info);
+    ret_drv = R_MEMDRV_RxData(devno, &memdrv_info);
 
     if (MEMDRV_ERR_HARD == ret_drv)
     {
@@ -648,8 +714,15 @@ flash_spi_status_t r_flash_spi_drvif_rx_data(uint8_t devno, uint32_t rxcnt, uint
     {
         return FLASH_SPI_ERR_OTHER;
     }
+    else
+    {
+        /* Do nothing */
+    }
     return FLASH_SPI_SUCCESS;
 }
+/******************************************************************************
+ End of function r_flash_spi_drvif_rx_data
+ *****************************************************************************/
 
 
 /************************************************************************************************
@@ -664,6 +737,9 @@ void r_flash_spi_drvif_1ms_interval(void)
 {
     R_MEMDRV_1msInterval();
 }
+/******************************************************************************
+ End of function r_flash_spi_drvif_1ms_interval
+ *****************************************************************************/
 
 
 /************************************************************************************************
@@ -679,6 +755,9 @@ flash_spi_status_t r_flash_spi_drvif_set_loghdladdress(uint32_t user_long_que)
     R_MEMDRV_SetLogHdlAddress(user_long_que);
     return FLASH_SPI_SUCCESS;
 }
+/******************************************************************************
+ End of function r_flash_spi_drvif_set_loghdladdress
+ *****************************************************************************/
 
 
 /* End of File */

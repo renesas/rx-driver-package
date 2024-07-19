@@ -9,7 +9,7 @@
 *                                                                    *
 **********************************************************************
 
-** emWin V6.32 - Graphical user interface for embedded applications **
+** emWin V6.34 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -64,7 +64,6 @@ Purpose     : Private LISTBOX include
 *
 **********************************************************************
 */
-
 typedef struct {
   U16  xSize, ySize;
   I32  ItemPosY;
@@ -75,10 +74,10 @@ typedef struct {
 typedef struct {
   const GUI_FONT * pFont;
   U16              ScrollStepH;
-  GUI_COLOR aBackColor[4];
-  GUI_COLOR aTextColor[4];
-  GUI_COLOR aScrollbarColor[3];
-  I16 Align;
+  GUI_COLOR        aBackColor[4];
+  GUI_COLOR        aTextColor[4];
+  GUI_COLOR        aScrollbarColor[3];
+  I16              Align;
 } LISTBOX_PROPS;
 
 typedef struct {
@@ -88,19 +87,20 @@ typedef struct {
   WM_SCROLL_STATE         ScrollStateV;
   WM_SCROLL_STATE         ScrollStateH;
   LISTBOX_PROPS           Props;
+  WIDGET_COPY             Copy;
   WM_HWIN                 hOwner;
   int                     MotionPosY;
   int                     TotalRowHeight;            // Cached value
   int                     yOffset;                   // Cached value
-  WM_HMEM                 hContext;                  // Motion context.
-  GUI_TIMER_HANDLE        hTimer;                    // Timer for motion snapping.
-  I16                     Sel;                       /* current selection */
+  WM_HMEM                 hContext;                  // Motion context
+  GUI_TIMER_HANDLE        hTimer;                    // Timer for motion snapping
+  I16                     Sel;                       // current selection
   U16                     ItemSpacing;
   U16                     ContentSizeX;
   U16                     FixedScrollPos;
   U8                      Flags;
   U8                      ScrollbarWidth;
-  U8                      FlagsIntern;               // Internal flags, see above.
+  U8                      FlagsIntern;               // Internal flags, see above
 } LISTBOX_Obj;
 
 /*********************************************************************

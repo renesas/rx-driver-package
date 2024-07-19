@@ -9,7 +9,7 @@
 *                                                                    *
 **********************************************************************
 
-** emWin V6.32 - Graphical user interface for embedded applications **
+** emWin V6.34 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -256,14 +256,13 @@ struct SCROLLER_Obj {
   int                      PageSize;          // In pixels for H and V!
   int                      Overlap;           // Overlapping distance in px (cached from parent widget)
   GUI_TIMER_HANDLE         hTimerInactive;
-  GUI_TIMER_MESSAGE      * pTimerMsg;
+  GUI_HMEM                 hTimerMsg;         // Copy of GUI_TIMER_MESSAGE if inactive timer needs to be rescheduled.
   SCROLLER_ANIM_DATA       AnimFade;          // Animation handles and data for fading animation
   SCROLLER_ANIM_DATA       AnimScroll;        // Animation handles and data for scrolling animation (when scroller is moved by touching)
   GUI_POINT                TouchPos;
   SCROLLER_WIDGET_API      WidgetAPI;
-  GUI_RECT               * pCustomRect;
+  GUI_HMEM                 hCustomRect;       // Copy of rectangle set with SCROLLER_SetContentRect()
   I16                      ClientRectOffset;  // Offset in px that is subtracted from the client rectangle during thumb rectangle calculation.
-  U16                      Mul;               // Multiplicator to be used for scroll state calculations.
   U16                      Flags;
 };
 

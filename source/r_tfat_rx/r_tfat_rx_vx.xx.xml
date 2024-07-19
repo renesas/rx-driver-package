@@ -54,11 +54,11 @@
         </dependency>
         <dependency>
             <module>r_tfat_driver_rx</module>
-            <version>2.30</version>
+            <version>2.40</version>
         </dependency>
         <dependency>
             <module>r_cmt_rx</module>
-            <version>5.50</version>
+            <version>5.60</version>
         </dependency>
         <dependency>
             <module>r_sys_time_rx</module>

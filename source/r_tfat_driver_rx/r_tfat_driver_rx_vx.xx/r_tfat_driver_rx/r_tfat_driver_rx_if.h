@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014(2015-2020) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_tfat_driver_rx_if.h
@@ -37,6 +37,7 @@
 *                                    Added support for GNUC and ICCRX.
 *              : 10.06.2020 2.10     Added support MMC Firmware and 
 *                                    FLASH Firmware.
+*              : 15.12.2023 2.40     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *******************************************************************************/
 #ifndef _R_TFAT_DRIVER_RX_IF_H_
 #define _R_TFAT_DRIVER_RX_IF_H_
@@ -82,7 +83,9 @@ typedef enum
 /*******************************************************************************
 Exported global functions (to be accessed by other files)
 *******************************************************************************/
-extern DRESULT drv_change_alloc(TFAT_DRV_NUM tfat_drv, uint8_t dev_type, uint8_t dev_drv_num );
+extern DRESULT drv_change_alloc(TFAT_DRV_NUM tfat_drv,
+                                uint8_t dev_type,
+                                uint8_t dev_drv_num);
 void disk_1ms_interval (void);
 #endif    /* _R_TFAT_DRIVER_RX_IF_H_ */
 

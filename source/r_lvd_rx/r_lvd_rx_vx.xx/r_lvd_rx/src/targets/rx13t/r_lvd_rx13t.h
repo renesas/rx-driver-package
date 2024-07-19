@@ -24,6 +24,7 @@
 * History      : DD.MM.YYYY Version  Description
 *              : 25.11.2019 1.00     First Release
 *              : 12.12.2022 1.10     Update default register value of voltage level
+*              : 30.01.2024 1.20     Changed LVD circuit enable wait value
 ***********************************************************************************************************************/
 #ifndef LVD_RX13T_HEADER_FILE
 #define LVD_RX13T_HEADER_FILE
@@ -120,7 +121,7 @@ Macro definitions
 #define LVD_DELAY_DFILTER_ENABLE_LOCO_CH2   (0)
 
 /* Value: Wait for enable LVD circuit. (micro sec) */
-#define LVD_DELAY_CIRCUIT_ENABLE_USEC           (10)
+#define LVD_DELAY_CIRCUIT_ENABLE_USEC           (300)
 
 /* Value: Wait for clear LVD status. (micro sec) */
 #define LVD_DELAY_CLEAR_STATUS_USEC             (2)

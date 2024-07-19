@@ -14,12 +14,12 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016(2017) Renesas Electronics Corporation. All rights reserved.    
+* Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.    
 **********************************************************************************************************************/
 /**********************************************************************************************************************
 * System Name  : SDSI Driver
 * File Name    : r_sdsi_rx.c
-* Version      : 2.03
+* Version      : 2.04
 * Device       : RX
 * Abstract     : API & Sub module
 * Tool-Chain   : -
@@ -34,6 +34,7 @@
 *              : 31.07.2017 2.00    Supported RX65N-2MB.
 *              :                    Fixed to correspond to Renesas coding rule.
 *              : 27.12.2022 2.03    Updated slash format of included header file paths for Linux compatibility.
+*              : 13.12.2023 2.04    Added WAIT_LOOP comments.
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -132,6 +133,8 @@ sdsi_status_t R_SDSI_Open(uint32_t channel, void * p_sdsi_workarea)
 
     /* Clear the work memory to '0'. */
     p_ptr = (uint32_t *)p_hndl;
+
+    /* WAIT_LOOP */
     for (i = (sizeof(sdsi_hndl_t) / sizeof(uint32_t)); i > 0; i--)
     {
         *p_ptr++ = 0;

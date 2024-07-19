@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_dnsquery.c
@@ -111,6 +111,8 @@ e_cellular_err_t R_CELLULAR_DnsQuery(st_cellular_ctrl_t * const p_ctrl, const ui
         if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
         {
             p_ctrl->recv_data = addr;
+
+            /* WAIT_LOOP */
             do
             {
                 ret = atc_sqndnslkup(p_ctrl, p_domain_name, ip_version);

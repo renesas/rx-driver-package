@@ -9,7 +9,7 @@
 *                                                                    *
 **********************************************************************
 
-** emWin V6.32 - Graphical user interface for embedded applications **
+** emWin V6.34 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -61,6 +61,7 @@ Purpose     : MULTIEDIT include
 #define MULTIEDIT_CF_SHOWCURSOR         (1 << 6)     // Shows the cursor.
 #define MULTIEDIT_CF_MOTION_H           (1 << 7)     // Enables motion support on X-axis.
 #define MULTIEDIT_CF_MOTION_V           (1 << 8)     // Enables motion support on Y-axis.
+#define MULTIEDIT_CF_USE_COPY           (1 << 9)     // Enables copyrect optimization
 /* status flags */
 #define MULTIEDIT_SF_READONLY           MULTIEDIT_CF_READONLY
 #define MULTIEDIT_SF_INSERT             MULTIEDIT_CF_INSERT
@@ -129,6 +130,7 @@ void MULTIEDIT_Callback(WM_MESSAGE * pMsg);
 int              MULTIEDIT_AddKey               (MULTIEDIT_HANDLE hObj, U16 Key);
 int              MULTIEDIT_AddText              (MULTIEDIT_HANDLE hObj, const char * s);
 void             MULTIEDIT_EnableBlink          (MULTIEDIT_HANDLE hObj, int Period, int OnOff);
+void             MULTIEDIT_EnableCopy           (MULTIEDIT_HANDLE hObj, unsigned OnOff);
 void             MULTIEDIT_EnableMotion         (MULTIEDIT_HANDLE hObj, int Flags);
 GUI_COLOR        MULTIEDIT_GetBkColor           (MULTIEDIT_HANDLE hObj, unsigned Index);
 int              MULTIEDIT_GetCursorCharPos     (MULTIEDIT_HANDLE hObj);

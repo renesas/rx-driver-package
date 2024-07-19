@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_module_reset.c
@@ -57,6 +57,7 @@ e_cellular_err_t cellular_module_reset(st_cellular_ctrl_t * const p_ctrl)
     e_cellular_err_semaphore_t         semaphore_ret = CELLULAR_SEMAPHORE_ERR_TAKE;
     volatile e_cellular_auto_connect_t type          = CELLULAR_DISABLE_AUTO_CONNECT;
 
+    /* WAIT_LOOP */
     for (cnt = CELLULAR_START_SOCKET_NUMBER; cnt <= p_ctrl->creatable_socket; cnt++)
     {
         ret = cellular_shutdownsocket(p_ctrl, (uint8_t)cnt);    //cast
@@ -66,6 +67,7 @@ e_cellular_err_t cellular_module_reset(st_cellular_ctrl_t * const p_ctrl)
         }
     }
 
+    /* WAIT_LOOP */
     for (cnt = CELLULAR_START_SOCKET_NUMBER; cnt <= p_ctrl->creatable_socket; cnt++)
     {
         ret = cellular_closesocket(p_ctrl, (uint8_t)cnt);       //cast
@@ -73,6 +75,7 @@ e_cellular_err_t cellular_module_reset(st_cellular_ctrl_t * const p_ctrl)
 
     if (CELLULAR_PSM_ACTIVE == p_ctrl->ring_ctrl.psm)
     {
+        /* WAIT_LOOP */
         while (1)
         {
             semaphore_ret = cellular_take_semaphore(p_ctrl->ring_ctrl.rts_semaphore);
@@ -153,6 +156,7 @@ static e_cellular_err_t cellular_pin_reset(st_cellular_ctrl_t * const p_ctrl)
 
     cnt = 0;
 
+    /* WAIT_LOOP */
     do
     {
         cellular_delay_task(1); /* hold reset signal time for cellular module */
@@ -165,6 +169,7 @@ static e_cellular_err_t cellular_pin_reset(st_cellular_ctrl_t * const p_ctrl)
     {
         cnt = 0;
 
+        /* WAIT_LOOP */
         do
         {
             if (CELLULAR_FLG_START == flg)

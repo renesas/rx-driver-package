@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_sci_ctrl.c
@@ -157,10 +157,6 @@ static void cellular_uart_callback(void * const p_Args)
         {
             break;
         }
-    }
-    if (SCI_EVT_RXBUF_OVFL <= gp_cellular_ctrl->sci_ctrl.sci_err_flg)
-    {
-        CELLULAR_LOG_ERROR(("sci error event %d\n", gp_cellular_ctrl->sci_ctrl.sci_err_flg));
     }
 }
 /**********************************************************************************************************************

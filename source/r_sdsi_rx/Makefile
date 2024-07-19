@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_sdsi_rx
-VERSION = 		2.03
+VERSION = 		2.04
 MDF = V1,V2
 
 CONFIG_FOLDER = r_config

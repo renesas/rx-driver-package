@@ -124,12 +124,13 @@ BLE_SECTION_P uint8_t r_dflash_read(uint32_t addr, uint8_t *buff, uint16_t len)
         if (err != FLASH_SUCCESS) break;
 
         /* Directly read data */
+        /* WAIT_LOOP */
         while( len-- )
         {
             *buff++ = *paddr++;
         }
 
-    } while(0);
+    } while(0); /* WAIT_LOOP */
 
     flash_close();
 
@@ -160,6 +161,7 @@ BLE_SECTION_P uint8_t r_dflash_write(uint32_t addr, uint8_t *buff, uint16_t len)
         if (err != FLASH_SUCCESS) break;
 
         /* set write data */
+        /* WAIT_LOOP */
         for( ii = 0; ii < DF_DATA_SIZE_MAX; ii++ )
         {
             if( (ii >= offset) && (ii < (offset + len)) )
@@ -180,7 +182,7 @@ BLE_SECTION_P uint8_t r_dflash_write(uint32_t addr, uint8_t *buff, uint16_t len)
         err = R_FLASH_Write((uint32_t)g_df_block, (uint32_t)block_addr, DF_DATA_SIZE_MAX);
         if (err != FLASH_SUCCESS) break;
 
-    }while(0);
+    }while(0); /* WAIT_LOOP */
 
     flash_close();
 

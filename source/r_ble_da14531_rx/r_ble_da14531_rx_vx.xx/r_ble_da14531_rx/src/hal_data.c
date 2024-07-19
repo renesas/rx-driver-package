@@ -28,12 +28,14 @@
 ble_abs_instance_ctrl_t g_ble_abs0_ctrl;
 
 ble_abs_cfg_t g_ble_abs0_cfg =
-{ .gap_callback = gap_cb,
-  .vendor_specific_callback = vs_cb,
-  .p_gatt_server_callback_list = gs_abs_gatts_cb_param,
-  .gatt_server_callback_list_number = 2,
-  .p_gatt_client_callback_list = gs_abs_gattc_cb_param,
-  .gatt_client_callback_list_number = 2,
-  .p_callback = NULL,
-  .p_context = NULL,
-  .p_extend = NULL };
+{
+    .gap_callback = gap_cb,
+    .vendor_specific_callback = vs_cb,
+    .p_gatt_server_callback_list = gs_abs_gatts_cb_param,
+    .gatt_server_callback_list_number = 2,
+    .p_gatt_client_callback_list = gs_abs_gattc_cb_param,
+    .gatt_client_callback_list_number = 2,
+    .p_callback = NULL,
+    .p_context = NULL,
+    .p_extend = NULL
+};

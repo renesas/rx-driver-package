@@ -9,7 +9,7 @@
 *                                                                    *
 **********************************************************************
 
-** emWin V6.32 - Graphical user interface for embedded applications **
+** emWin V6.34 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -269,6 +269,7 @@ int  KEYBOARD_SetLayout        (KEYBOARD_Handle hObj, const KEYDEF_KEYBOARD * pK
 void KEYBOARD_SetPeriod        (KEYBOARD_Handle hObj, unsigned Index, unsigned Period);
 void KEYBOARD_SetRadius        (KEYBOARD_Handle hObj, unsigned Radius);
 void KEYBOARD_SetSpace         (KEYBOARD_Handle hObj, unsigned Axis, unsigned Space);
+void KEYBOARD_SetSensy         (KEYBOARD_Handle hObj, unsigned Sensy);
 int  KEYBOARD_SetStreamedLayout(KEYBOARD_Handle hObj, const void * pVoid, U32 Size);
 
 /*********************************************************************
@@ -282,11 +283,13 @@ int       KEYBOARD_GetDefaultFrameSize(void);
 unsigned  KEYBOARD_GetDefaultPeriod   (unsigned Index);
 int       KEYBOARD_GetDefaultRadius   (void);
 int       KEYBOARD_GetDefaultSpace    (unsigned Axis);
+unsigned  KEYBOARD_GetDefaultSensy    (void);
 void      KEYBOARD_SetDefaultColor    (unsigned Index, GUI_COLOR Color);
 void      KEYBOARD_SetDefaultFrameSize(int FrameSize);
 void      KEYBOARD_SetDefaultPeriod   (unsigned Index, unsigned Period);
 void      KEYBOARD_SetDefaultRadius   (int Radius);
 void      KEYBOARD_SetDefaultSpace    (unsigned Axis, int Space);
+void      KEYBOARD_SetDefaultSensy    (unsigned Sensy);
 
 /*********************************************************************
 *

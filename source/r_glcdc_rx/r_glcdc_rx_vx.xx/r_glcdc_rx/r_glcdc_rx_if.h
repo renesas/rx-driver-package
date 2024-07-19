@@ -14,11 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2019-2024 Renesas Electronics Corporation. All rights reserved.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_glcdc_rx_if.h
- * Version      : 1.50
+ * Version      : 1.60
  * Description  : GLCDC interface header file
  **********************************************************************************************************************/
 /***********************************************************************************************************************
@@ -37,6 +37,9 @@
  *                               4.Changed Minor version to 1.40.
  *         : 06.11.2020 1.50     Added the prototype definition of R_GLCDC_ClutUpdate_NoReflect function.
  *                               Changed Minor version to 1.50.
+ *         : 30.01.2024 1.60     Added the prototype definition of R_GLCDC_BufferChange function.
+ *                               Changed Minor version to 1.60.
+ *                               Changed from include"stdbool.h to include"platform.h"
  **********************************************************************************************************************/
 
 #ifndef R_GLCDC_RX_IF_H
@@ -45,7 +48,7 @@
 /***********************************************************************************************************************
  Includes <System Includes> , "Project Includes"
  **********************************************************************************************************************/
-#include <stdbool.h>
+#include <platform.h>
 #include "r_glcdc_rx_config.h"
 
 /**********************************************************************************************************************
@@ -53,7 +56,7 @@
  **********************************************************************************************************************/
 /* Version Number of API. */
 #define GLCDC_RX_VERSION_MAJOR         (1)
-#define GLCDC_RX_VERSION_MINOR         (50)
+#define GLCDC_RX_VERSION_MINOR         (60)
 
 /* Number of Gamma correction setting items  */
 #define GLCDC_GAMMA_CURVE_GAIN_ELEMENT_NUM      (16)
@@ -531,6 +534,7 @@ glcdc_err_t R_GLCDC_Open(glcdc_cfg_t * const p_cfg);
 glcdc_err_t R_GLCDC_Close(void);
 glcdc_err_t R_GLCDC_Control(glcdc_control_cmd_t cmd, void const * const p_args);
 glcdc_err_t R_GLCDC_LayerChange(glcdc_frame_layer_t frame, glcdc_runtime_cfg_t const * const p_args);
+glcdc_err_t R_GLCDC_BufferChange(glcdc_frame_layer_t frame, uint32_t const * const p_base);
 glcdc_err_t R_GLCDC_ColorCorrection(glcdc_correction_cmd_t cmd, void const * const p_args);
 glcdc_err_t R_GLCDC_ClutUpdate(glcdc_frame_layer_t frame, glcdc_clut_cfg_t const * const p_clut_cfg);
 glcdc_err_t R_GLCDC_ClutUpdate_NoReflect(glcdc_frame_layer_t frame, glcdc_clut_cfg_t const * const p_clut_cfg);

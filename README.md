@@ -29,3 +29,8 @@
         - Add latest package to versions.xml. 
     - make {GItHub Tags} (e.g. make V1.32)
         - Get the old version of package. 
+
+# Note
+- The r_emwin_rx module is not stored in the "FITModules" folder.
+- It is stored in the assets of the [Release page](https://github.com/renesas/rx-driver-package/releases).
+- Get it from the assets on the Release page, or use the Makefile command to generate the package.

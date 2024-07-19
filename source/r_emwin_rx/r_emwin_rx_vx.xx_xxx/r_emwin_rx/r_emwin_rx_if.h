@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_emwin_rx_if.h
@@ -34,6 +34,8 @@
  *                                     Update FIT module version.
  *                                     Added preprocessor condition by LCD interface.
  *         : 31.03.2023 6.32.a.1.00    Update emWin library to v6.32a.
+ *         : 31.01.2024 6.34.g.1.00    Update emWin library to v6.34g.
+ *         : 12.04.2024 6.34.g.1.10    Update FIT module version.
  *********************************************************************************************************************/
 #ifndef EMWIN_RX_IF_H
 #define EMWIN_RX_IF_H
@@ -52,10 +54,10 @@
  *********************************************************************************************************************/
 /* Version number of emWin FIT module. */
 #define EMWIN_VERSION_EMWIN_MAJOR   (6)
-#define EMWIN_VERSION_EMWIN_MINOR   (32)
-#define EMWIN_VERSION_EMWIN_CHAR    ('a')
+#define EMWIN_VERSION_EMWIN_MINOR   (34)
+#define EMWIN_VERSION_EMWIN_CHAR    ('g')
 #define EMWIN_VERSION_FIT_MAJOR     (1)
-#define EMWIN_VERSION_FIT_MINOR     (0)
+#define EMWIN_VERSION_FIT_MINOR     (10)
 
 /**********************************************************************************************************************
  Global Typedef definitions

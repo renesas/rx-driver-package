@@ -594,6 +594,7 @@ void R_BLE_CMD_VsCb(uint16_t type, ble_status_t result, st_ble_vs_evt_data_t *da
                 pf(" !! MCU software reset !!\n");
 
                 volatile uint32_t loop_wait = 0xffff;
+                /* WAIT_LOOP */
                 while( loop_wait--)
                 {
                     BLE_NOP();
@@ -622,6 +623,7 @@ void R_BLE_CMD_VsCb(uint16_t type, ble_status_t result, st_ble_vs_evt_data_t *da
             st_ble_vs_get_rand_comp_evt_t *param =
                     (st_ble_vs_get_rand_comp_evt_t*)data->p_param;
             pf(" rand_val: ");
+            /* WAIT_LOOP */
             for( int ii = 0; ii < param->rand_size; ii++ )
             {
                 pf("%02X", param->p_rand[ii]);

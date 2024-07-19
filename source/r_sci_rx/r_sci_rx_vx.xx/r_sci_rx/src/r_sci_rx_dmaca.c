@@ -28,6 +28,8 @@
 *                              in DMAC mode.
 *           31.03.2023 4.80    Added support for RX26T.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           13.03.2024 5.20    Fixed the issue that repeat_block_side had an unexpected value
+*                               in the sci_tx_dmaca_create() and sci_rx_dmaca_create() functions.
 ***********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -473,12 +475,13 @@ sci_err_t sci_tx_dmaca_create(sci_hdl_t const hdl, uint8_t *p_src, uint16_t cons
 
         if (NULL == p_src)
         {
+            tx_cfg_dmaca.repeat_block_side = DMACA_REPEAT_BLOCK_DESTINATION;
             tx_cfg_dmaca.src_addr_mode     = DMACA_SRC_ADDR_FIXED;
             tx_cfg_dmaca.p_src_addr        = (void *)&tx_dummy_buf;
         }
         else
         {
-            tx_cfg_dmaca.repeat_block_side = DMACA_REPEAT_BLOCK_DISABLE;
+            tx_cfg_dmaca.repeat_block_side = DMACA_REPEAT_BLOCK_DESTINATION;
             tx_cfg_dmaca.src_addr_mode     = DMACA_SRC_ADDR_INCR;
             tx_cfg_dmaca.p_src_addr        = (void *)p_src;
         }
@@ -643,7 +646,7 @@ sci_err_t sci_rx_dmaca_create(sci_hdl_t const hdl, uint8_t *p_dst, uint16_t cons
         }
         else
         {
-            rx_cfg_dmaca.repeat_block_side = DMACA_REPEAT_BLOCK_DISABLE;
+            rx_cfg_dmaca.repeat_block_side = DMACA_REPEAT_BLOCK_DESTINATION;
             rx_cfg_dmaca.des_addr_mode     = DMACA_DES_ADDR_INCR;
             rx_cfg_dmaca.p_des_addr        = (void *)p_dst;
         }

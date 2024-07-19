@@ -44,7 +44,7 @@ typedef struct r_ble_gtl_transport_api
 /**********************************************************************************************************************
  * Public Function Prototypes
  **********************************************************************************************************************/
-#if defined(RM_BLE_ABS_GTL_TRANSPORT_INTERFACE_UART)
+#if defined(BLE_CFG_TRANSPORT_INTERFACE_UART)
 void R_BLE_GTL_UartCallback (void * pArgs);
 #endif
 
@@ -65,7 +65,8 @@ ble_status_t R_BLE_GTL_GAP_SetAdvParam(st_ble_gap_adv_param_t * p_adv_param);
 ble_status_t R_BLE_GTL_GAP_SetAdvSresData(st_ble_gap_adv_data_t * p_adv_srsp_data);
 ble_status_t R_BLE_GTL_GAP_StartAdv(uint8_t adv_hdl, uint16_t duration);
 ble_status_t R_BLE_GTL_GAP_StopAdv(uint8_t adv_hdl);
-ble_status_t R_BLE_GTL_GAP_GetRemainAdvBufSize(uint16_t * p_remain_adv_data_size, uint16_t * p_remain_perd_adv_data_size);
+ble_status_t R_BLE_GTL_GAP_GetRemainAdvBufSize(uint16_t * p_remain_adv_data_size, 
+                                               uint16_t * p_remain_perd_adv_data_size);
 ble_status_t R_BLE_GTL_GAP_GetRemDevInfo(uint16_t conn_hdl);
 ble_status_t R_BLE_GTL_GATT_GetMtu(uint16_t conn_hdl, uint16_t * p_mtu);
 ble_status_t R_BLE_GTL_GATTS_RegisterCb(ble_gatts_app_cb_t cb, uint8_t priority);
@@ -97,7 +98,9 @@ ble_status_t R_BLE_GTL_GATTC_ReadMultiChar(uint16_t conn_hdl, st_ble_gattc_rd_mu
 ble_status_t R_BLE_GTL_GATTC_WriteCharWithoutRsp(uint16_t conn_hdl, st_ble_gatt_hdl_value_pair_t * p_write_data);
 ble_status_t R_BLE_GTL_GATTC_SignedWriteChar(uint16_t conn_hdl, st_ble_gatt_hdl_value_pair_t * p_write_data);
 ble_status_t R_BLE_GTL_GATTC_WriteChar(uint16_t conn_hdl, st_ble_gatt_hdl_value_pair_t * p_write_data);
-ble_status_t R_BLE_GTL_GATTC_WriteLongChar(uint16_t conn_hdl, st_ble_gatt_hdl_value_pair_t * p_write_data, uint16_t offset);
+ble_status_t R_BLE_GTL_GATTC_WriteLongChar(uint16_t conn_hdl, 
+                                           st_ble_gatt_hdl_value_pair_t * p_write_data, 
+                                           uint16_t offset);
 ble_status_t R_BLE_GTL_GATTC_ReliableWrites (uint16_t                                   conn_hdl,
                                              st_ble_gattc_reliable_writes_char_pair_t * p_char_pair,
                                              uint8_t                                    pair_num,

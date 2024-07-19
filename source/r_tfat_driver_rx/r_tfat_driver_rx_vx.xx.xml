@@ -51,7 +51,7 @@
         </dependency>
         <dependency>
             <module>r_cmt_rx</module>
-            <version>5.50</version>
+            <version>5.60</version>
         </dependency>
         <dependency>
             <module>r_sys_time_rx</module>
@@ -59,7 +59,7 @@
         </dependency>
         <dependency>
             <module>r_tfat_rx</module>
-            <version>4.10</version>
+            <version>4.11</version>
         </dependency>
         <application>Storage &#38; Memory</application>
         <desc>Memory Driver Interface for Open Source FAT File System.</desc>

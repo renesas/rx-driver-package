@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_semaphore_ctrl.c
@@ -59,6 +59,7 @@ e_cellular_err_t cellular_semaphore_init(st_cellular_ctrl_t * const p_ctrl)
     }
     else
     {
+        /* WAIT_LOOP */
         for (cnt = 0; cnt < p_ctrl->creatable_socket; cnt++)
         {
             sprintf((char *)semaphore_name,                                 //(uint8_t * ) -> (char *)

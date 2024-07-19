@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_createsocket.c
@@ -101,6 +101,7 @@ int32_t R_CELLULAR_CreateSocket(st_cellular_ctrl_t * const p_ctrl, const uint8_t
         semaphore_ret = cellular_take_semaphore(p_ctrl->at_semaphore);
         if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
         {
+            /* WAIT_LOOP */
             while (socket_num < p_ctrl->creatable_socket)
             {
                 if (CELLULAR_SOCKET_STATUS_CLOSED == p_ctrl->p_socket_ctrl[socket_num].socket_status)

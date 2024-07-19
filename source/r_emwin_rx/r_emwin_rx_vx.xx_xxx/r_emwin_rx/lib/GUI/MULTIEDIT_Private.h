@@ -9,7 +9,7 @@
 *                                                                    *
 **********************************************************************
 
-** emWin V6.32 - Graphical user interface for embedded applications **
+** emWin V6.34 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -87,20 +87,21 @@ typedef struct {
 typedef struct {
   WIDGET           Widget;
   MULTIEDIT_PROPS  Props;
+  WIDGET_COPY      Copy;
   WM_HMEM          hText;
-  U16              MaxNumChars;         /* Maximum number of characters including the prompt */
-  U16              NumChars;            /* Number of characters (text and prompt) in object */
-  U16              NumCharsPrompt;      /* Number of prompt characters */
-  U16              NumLines;            /* Number of text lines needed to show all data */
-  U16              TextSizeX;           /* Size in X of text depending of wrapping mode */
+  U16              MaxNumChars;         // Maximum number of characters including the prompt
+  U16              NumChars;            // Number of characters (text and prompt) in object
+  U16              NumCharsPrompt;      // Number of prompt characters
+  U16              NumLines;            // Number of text lines needed to show all data
+  U16              TextSizeX;           // Size in X of text depending of wrapping mode
   U16              BufferSize;
-  U16              CursorLine;          /* Number of current cursor line */
-  U16              CursorPosChar;       /* Character offset number of cursor */
-  U16              CursorPosByte;       /* Byte offset number of cursor */
-  I16              CursorPosX;          /* Cursor position in X */
-  U16              CursorPosY;          /* Cursor position in Y */
-  U16              CacheLinePosByte;    /*  */
-  U16              CacheLineNumber;     /*  */
+  U16              CursorLine;          // Number of current cursor line
+  U16              CursorPosChar;       // Character offset number of cursor
+  U16              CursorPosByte;       // Byte offset number of cursor
+  I16              CursorPosX;          // Cursor position in X
+  U16              CursorPosY;          // Cursor position in Y
+  U16              CacheLinePosByte;
+  U16              CacheLineNumber;
   U16              CacheFirstVisibleLine;
   U16              CacheFirstVisibleByte;
   WM_SCROLL_STATE  ScrollStateV;
@@ -109,13 +110,19 @@ typedef struct {
   WM_HTIMER        hTimer;
   GUI_WRAPMODE     WrapMode;
   int              MotionPosY;
+  int              MotionPosOld;
   WM_HMEM          hContext;             // Motion context.
-  U8               CursorVis;            /* Indicates whether cursor is visible or not*/
+  U8               CursorVis;            // Indicates whether cursor is visible or not
   U8               InvertCursor;
-  U8               InvalidFlags;         /* Flags to save validation status */
+  U8               InvalidFlags;         // Flags to save validation status
   U8               EditMode;
-  U8               Radius;               // Currently only used by AppWizard
   U8               MotionActive;
+  U8               Radius;               // Currently only used by AppWizard
+  U8               Frame;
+  U8               Up;
+#if GUI_SUPPORT_MEMDEV
+  GUI_MEMDEV_Handle ahMemCursor[2];
+#endif
 } MULTIEDIT_OBJ;
 
 /*********************************************************************

@@ -34,6 +34,7 @@
 *              : 16.04.2020 2.10     Added support for FreeRTOS and 
 *                                    Renesas uITRON (RI600V4).
 *              : 10.09.2020 2.20     Added support for the format function.
+*              : 15.12.2023 2.40     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *******************************************************************************/
 
 /******************************************************************************
@@ -207,7 +208,7 @@ DRESULT usb_mini_disk_write (
 
     /* write function */
     err = R_USB_HmscStrgWriteSector((uint16_t)drive, (uint8_t *)buffer
-                                     , sector_number, (uint16_t)sector_count, tran_byte);
+                    , sector_number, (uint16_t)sector_count, tran_byte);
     if ( USB_HMSC_OK == err )
     {
         do  /* Wait for complete R_USB_HmscStrgWriteSector() */
@@ -438,7 +439,7 @@ void R_usb_mini_hmsc_WaitLoop(void)
 }
 #endif /* BSP_CFG_RTOS_USED == 0 */
 
-#endif // (TFAT_USB_MINI_DRIVE_NUM > 0)
+#endif /* (TFAT_USB_MINI_DRIVE_NUM > 0) */
 /******************************************************************************
 End  of file
 ******************************************************************************/

@@ -1,150 +1,149 @@
 /***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
- **********************************************************************************************************************/
-/**********************************************************************************************************************
- * File Name     : r_fwup_config.h
- * Description   : Configures the Firmware update module.
- *********************************************************************************************************************/
-/**********************************************************************************************************************
- * History : DD.MM.YYYY Version Description
- *           16.02.2021 1.00    First Release
- *           19.05.2021 1.01    Added support for RX72N,RX66T,RX130
- *           08.07.2021 1.02    Added support for RX671 and GCC
- *           10.08.2021 1.03    Added support for IAR
- *           25.03.2022 1.04    Change the supported FreeRTOS version
- *                              Select data area from DF/CF
- *                              Added support for RX140-256KB
- *           31.05.2022 1.05    Added support for RX660
- *           05.12.2022 1.06    Added support for Azure ADU
- *                              Added support for excluding communication drivers
- *                              Added support for unbuffered FW updates
- *********************************************************************************************************************/
-#ifndef FWUP_CONFIG_H
-#define FWUP_CONFIG_H
-
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+* this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2023-2024 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+* File Name     : r_fwup_config.h
+* Description   : Configures the Firmware update module.
+************************************************************************************************************************
+* History : DD.MM.YYYY Version Description
+*         : 20.07.2023 2.00    First Release
+*         : 29.09.2023 2.01    Fixed log messages.
+*                              Add parameter checking.
+*                              Added arguments to R_FWUP_WriteImageProgram API.
+*         : 28.03.2024 2.02    Update wrapper functions.
+*         : 09.04.2024 2.03    Fixed wrapper function.
+***********************************************************************************************************************/
 #include "platform.h"
+
+#ifndef R_FWUP_CONFIG_H
+#define R_FWUP_CONFIG_H
 
 /***********************************************************************************************************************
 Configuration Options
 ***********************************************************************************************************************/
-/* Select the implementation environment.
-    0 = Bootloader. (default)
-    1 = Firmware update w/o OS.
-    2 = Firmware update w/o OS and Driver.
-    3 = Firmware update with Amazon FreeRTOS(OTA).
-    4 = Firmware update with Azure ADU.
+/* Select the update mode.
+    0 = Dual bank
+    1 = Single bank with buffer. (default)
+    2 = Single bank without buffer.
+    3 = Single bank with ext-buffer.
 */
-#define FWUP_CFG_IMPLEMENTATION_ENVIRONMENT     (0)
+#define FWUP_CFG_UPDATE_MODE                        (1)
 
-/* Select the communication function.
-    0 = SCI connection. (default)
-    1 = Ethernet connection.
-    2 = USB connection.
-    3 = SDHI connection.
-    4 = QSPI connection.
+/* Select the function mode.
+    0 = use for Boot loader
+    1 = use for User program
 */
-#define FWUP_CFG_COMMUNICATION_FUNCTION        (0)
+#define FWUP_CFG_FUNCTION_MODE                      (0)
 
-/* Enable Boot Protect Setting.
-    0 = Disable.(Prohibit) (default)
-    1 = Enable.(Allow)     [Note]
+/* Area configuration */
+#define FWUP_CFG_MAIN_AREA_ADDR_L                   (0xFFE00000U)      /* Main area start address     */
+#define FWUP_CFG_BUF_AREA_ADDR_L                    (0xFFEF8000U)      /* Buffer area start address   */
+#define FWUP_CFG_AREA_SIZE                          (0xF8000U)         /* Install area size           */
 
-   [Note]
-   If this setting is enabled (1) in the case of flash type 4 MCU,
-   FAW.FSPR bit = 0 is set. After this setting, the area other than the area
-   specified in FAW can never be rewritten.
-   Be careful when setting this variable.
+/* Internal flash */
+#define FWUP_CFG_CF_BLK_SIZE                        (0x8000U)          /* Code flash block size       */
+#define FWUP_CFG_CF_W_UNIT_SIZE                     (128U)             /* Code flash write unit size  */
 
-   [Note]
-   This setting is valid only when the implementation environment is a Bootloader.
- */
-#define FWUP_CFG_BOOT_PROTECT_ENABLE     (0)
+/* External flash */
+#define FWUP_CFG_EXT_BUF_AREA_ADDR_L                (0x00000U)         /* External Buffer area Start address */
+#define FWUP_CFG_EXT_BUF_AREA_BLK_SIZE              (4096U)            /* Block(Sector) size  */
 
-/* Set the save destination for non-volatile data of OTA.
-    0 = Data Flash. (default)
-    1 = Code Flash.
+/* Data flash */
+#define FWUP_CFG_DF_ADDR_L                          (0x00100000)       /* DF Start address    */
+#define FWUP_CFG_DF_BLK_SIZE                        (64U)              /* DF Block size       */
+#define FWUP_CFG_DF_NUM_BLKS                        (512U)             /* DF number of blocks */
 
-   [Note]
-   This setting is valid only when the implementation environment is a Amazon FreeRTOS(OTA).
- */
-#define FWUP_CFG_OTA_DATA_STORAGE      (0)
+/* FWUP v1 compatible */
+#define FWUP_CFG_FWUPV1_COMPATIBLE                  (0)                /* 0:Disable, 1:Enable */
 
-/* Set direct firmware update mode that does not use the buffer area.
-    0 = Use buffer area.     (default)
-    1 = Not use buffer area.
- */
-#define FWUP_CFG_NO_USE_BUFFER      (0)
+/* Select the algorithm of signature verification.
+    0 = ECDSA.
+    1 = SHA256. (default)
+*/
+#define FWUP_CFG_SIGNATURE_VERIFICATION             (1)
 
-/* Disable Log Output Setting of Bootloader.
-   Disables the log output of bootloader to the terminal software.
-    0 = Enable. (default)
+/* Disable Printf Output Setting.
+    Disables the character output by printf to the terminal software.
+    0 = Enable (default)
     1 = Disable.
-
-   [Note]
-   This setting is valid only when the implementation environment is a Bootloader.
  */
-#define FWUP_CFG_BOOTLOADER_LOG_DISABLE     (0)
+#define FWUP_CFG_PRINTF_DISABLE                     (0)
 
-/* Log Level Setting.
-   Set the level of log output.
-    0 = No logged.
-    1 = Only ERROR messages will be logged.
-    2 = Only WARNING and ERROR messages will be logged.
-    3 = Only INFO, WARNING and ERROR messages will be logged. (default)
-    4 = All log level messages will logged.
+/* If desired the user may redirect to their own respective functions by enabling below and 
+ * providing and replacing the my_.. function names with the names of their own functions. */
+#define FWUP_CFG_USER_DISABLE_INTERRUPT_ENABLED    (0)
+#define FWUP_CFG_USER_DISABLE_INTERRUPT_FUNCTION     my_disable_interrupt_function
 
-   [Note]
-   This setting is valid only when the implementation environment is a without OS.
- */
-#define FWUP_CFG_LOG_LEVEL     (3)
+#define FWUP_CFG_USER_ENABLE_INTERRUPT_ENABLED    (0)
+#define FWUP_CFG_USER_ENABLE_INTERRUPT_FUNCTION     my_enable_interrupt_function
 
-/* This macro is used to select which SCI channel used for debug serial terminal.
- */
-#define FWUP_CFG_SERIAL_TERM_SCI                  (8)
+#define FWUP_CFG_USER_SOFTWARE_DELAY_ENABLED    (0)
+#define FWUP_CFG_USER_SOFTWARE_DELAY_FUNCTION     my_software_delay_function
 
-/* This macro is used to select which SCI bit-rate.
- */
-#define FWUP_CFG_SERIAL_TERM_SCI_BITRATE          (115200)
+#define FWUP_CFG_USER_SOFTWARE_RESET_ENABLED    (0)
+#define FWUP_CFG_USER_SOFTWARE_RESET_FUNCTION     my_software_reset_function
 
-/* This macro is used to select which SCI interrupt priority.
-   0(low) - 15(high)
- */
-#define FWUP_CFG_SERIAL_TERM_SCI_INTERRUPT_PRIORITY   (15)
+#define FWUP_CFG_USER_SHA256_INIT_ENABLED    (0)
+#define FWUP_CFG_USER_SHA256_INIT_FUNCTION     my_sha256_init_function
 
+#define FWUP_CFG_USER_SHA256_UPDATE_ENABLED    (0)
+#define FWUP_CFG_USER_SHA256_UPDATE_FUNCTION     my_sha256_update_function
 
-/* Specifies the UART receive wait time after the transmission is
-   stopped (with RTS set to HIGH). 
-   Set in microseconds.
- */
-#define FWUP_CFG_SCI_RECEIVE_WAIT     (300) 
+#define FWUP_CFG_USER_SHA256_FINAL_ENABLED    (0)
+#define FWUP_CFG_USER_SHA256_FINAL_FUNCTION     my_sha256_final_function
 
-/* Set the port symbol of the I / O port used for RTS, which is the receive
-   request terminal of UART.
-   The default value is "PORTC" for RSK-RX231.
- */
-#define FWUP_CFG_PORT_SYMBOL          PORTC
+#define FWUP_CFG_USER_VERIFY_ECDSA_ENABLED    (0)
+#define FWUP_CFG_USER_VERIFY_ECDSA_FUNCTION     my_verify_ecdsa_function
 
-/* Set the bit symbol of the I / O port used for RTS, which is the receive
-   request terminal of UART.
-   The default value is "B4" for RSK-RX231.
- */
-#define FWUP_CFG_BIT_SYMBOL           B4
+#define FWUP_CFG_USER_GET_CRYPT_CONTEXT_ENABLED    (0)
+#define FWUP_CFG_USER_GET_CRYPT_CONTEXT_FUNCTION     my_get_crypt_context_function
 
+#define FWUP_CFG_USER_FLASH_OPEN_ENABLED    (0)
+#define FWUP_CFG_USER_FLASH_OPEN_FUNCTION     my_flash_open_function
 
+#define FWUP_CFG_USER_FLASH_CLOSE_ENABLED    (0)
+#define FWUP_CFG_USER_FLASH_CLOSE_FUNCTION     my_flash_close_function
 
-#endif /* FWUP_CONFIG_H */
+#define FWUP_CFG_USER_FLASH_ERASE_ENABLED    (0)
+#define FWUP_CFG_USER_FLASH_ERASE_FUNCTION     my_flash_erase_function
+
+#define FWUP_CFG_USER_FLASH_WRITE_ENABLED    (0)
+#define FWUP_CFG_USER_FLASH_WRITE_FUNCTION     my_flash_write_function
+
+#define FWUP_CFG_USER_FLASH_READ_ENABLED    (0)
+#define FWUP_CFG_USER_FLASH_READ_FUNCTION     my_flash_read_function
+
+#define FWUP_CFG_USER_BANK_SWAP_ENABLED    (0)
+#define FWUP_CFG_USER_BANK_SWAP_FUNCTION     my_bank_swap_function
+
+#define FWUP_CFG_USER_EXT_FLASH_OPEN_ENABLED    (0)
+#define FWUP_CFG_USER_EXT_FLASH_OPEN_FUNCTION     my_ext_flash_open_function
+
+#define FWUP_CFG_USER_EXT_FLASH_CLOSE_ENABLED    (0)
+#define FWUP_CFG_USER_EXT_FLASH_CLOSE_FUNCTION     my_ext_flash_close_function
+
+#define FWUP_CFG_USER_EXT_FLASH_ERASE_ENABLED    (0)
+#define FWUP_CFG_USER_EXT_FLASH_ERASE_FUNCTION     my_ext_flash_erase_function
+
+#define FWUP_CFG_USER_EXT_FLASH_WRITE_ENABLED    (0)
+#define FWUP_CFG_USER_EXT_FLASH_WRITE_FUNCTION     my_ext_flash_write_function
+
+#define FWUP_CFG_USER_EXT_FLASH_READ_ENABLED    (0)
+#define FWUP_CFG_USER_EXT_FLASH_READ_FUNCTION     my_ext_flash_read_function
+
+#endif /* R_FWUP_CONFIG_H */

@@ -9,7 +9,7 @@
 *                                                                    *
 **********************************************************************
 
-** emWin V6.32 - Graphical user interface for embedded applications **
+** emWin V6.34 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -72,6 +72,17 @@ typedef struct {
 
 /*********************************************************************
 *
+*       WIDGET_COPY
+* 
+*  Description
+*    To be used for copy-optimizations when swiping data.
+*/
+typedef struct {
+  I16 x0, y0, x1, y1, xSize, ySize;
+} WIDGET_COPY;
+
+/*********************************************************************
+*
 *       WIDGET_SCROLLSTATE_API
 * 
 *  Description
@@ -106,14 +117,23 @@ typedef struct {
   U8              NoConv;        // 1 if no conversion is necessary
 } WIDGET_SCROLLSTATE_API;
 
+/*********************************************************************
+*
+*       WIDGET_ENABLE_MOTION_CONTEXT
+* 
+*  Description
+*    Context for WIDGET__EnableMotion().
+*    With the context the routine knows which exact flags should be set
+*    or removed.
+*/
 typedef struct {
-  void    * pFlags;
-  U8        SizeOfFlags;
-  U32       FlagMotionH;
-  U32       FlagMotionV;
-  U32       FlagAutoScrollH;
-  U32       FlagAutoScrollV;
-  WM_HMEM * phContext;
+  void    * pFlags;           // Pointer to Flags of the widget's object struct.
+  U8        SizeOfFlags;      // Size of pFlags (pFlags can be U8, U16, U32).
+  U32       FlagMotionH;      // Copy of <WIDGET>_CF_MOTION_H (e.g. LISTVIEW_CF_MOTION_H)
+  U32       FlagMotionV;      // Copy of <WIDGET>_CF_MOTION_V
+  U32       FlagAutoScrollH;  // Copy of <WIDGET>_CF_AUTOSCROLL_H
+  U32       FlagAutoScrollV;  // Copy of <WIDGET>_CF_AUTOSCROLL_V
+  WM_HMEM * phContext;        // Pointer to widget's motion context for (de)allocation.
 } WIDGET_ENABLE_MOTION_CONTEXT;
 
 /*********************************************************************
@@ -367,7 +387,7 @@ int       WIDGET__GetXSize                      (const WIDGET * pWidget);
 int       WIDGET__GetYSize                      (const WIDGET * pWidget);
 void      WIDGET__GetClientRect                 (WIDGET * pWidget, GUI_RECT * pRect);
 void      WIDGET__GetInsideRect                 (WIDGET * pWidget, GUI_RECT * pRect);
-void      WIDGET__HandleMotionMove              (WM_HWIN hObj, WM_MOTION_INFO * pInfo, const WIDGET_SCROLLSTATE_API * pAPI);
+U32       WIDGET__HandleMotionMove              (WM_HWIN hObj, WM_MOTION_INFO * pInfo, const WIDGET_SCROLLSTATE_API * pAPI);
 void      WIDGET__HandleMotionMoveBack          (WM_HWIN hObj, const WIDGET_SCROLLSTATE_API * pAPI);
 void      WIDGET__Init                          (WIDGET * pWidget, int Id, U16 State);
 void      WIDGET__RotateRect90                  (WIDGET * pWidget, GUI_RECT * pDest, const GUI_RECT * pRect);

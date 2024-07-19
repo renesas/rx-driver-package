@@ -291,6 +291,7 @@ int32_t sci_init_bit_rate(sci_hdl_t const  hdl,
     /* BRR = (PCLK/(divisor * baud)) - 1 */
     /* BRR = (ratio / divisor) - 1 */
     ratio = pclk/baud;
+
     /* WAIT_LOOP */
     for(i = 0; i < num_divisors; i++)
     {

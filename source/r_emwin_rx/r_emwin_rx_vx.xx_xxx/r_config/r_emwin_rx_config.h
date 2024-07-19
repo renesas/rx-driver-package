@@ -1,41 +1,42 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
-*
-* Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
-/***********************************************************************************************************************
-* File Name    : r_emwin_rx_config.h
-* Description  : Configures the emWin module.
-***********************************************************************************************************************/
-/***********************************************************************************************************************
-* History : DD.MM.YYYY Version        Description
-*         : 31.07.2020 6.14.a.1.00    First Release
-*         : 04.09.2020 6.14.a.1.10    Update to adjust r_emwin_rx_config.h file.
-*         : 11.12.2020 6.14.g.1.20    Update to adjust emWin v6.14g. Modify multi-touch and timer function.
-*                                     Adjust GCC and IAR compilers.
-*         : 31.03.2021 6.14.g.1.30    Update to adjust the spec of Smart Configurator and QE for Display.
-*         : 29.12.2021 6.20.  1.00    Update emWin library to v6.22.
-*                                     Adjust configuration option with Smart Configurator.
-*         : 31.08.2022 6.26.c.1.00    Update emWin library to v6.26c.
-*                                     Added support for SPI interface LCD.
-*         : 31.03.2023 6.32.a.1.00    Update emWin library to v6.32a.
-*                                     Added EMWIN_USE_RUNTIME_ORIENTATION definition for runtime orientation support.
-*                                     Added EMWIN_DMAC_NUMBER2 and EMWIN_SELECT_DMAC_DTC definition for
-*                                     DMAC/DTC support of SPI interface LCD.
-***********************************************************************************************************************/
+/**********************************************************************************************************************
+ * DISCLAIMER
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
+ * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO
+ * THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
+ * following link:
+ * http://www.renesas.com/disclaimer
+ *
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
+ *********************************************************************************************************************/
+/**********************************************************************************************************************
+ * File Name    : r_emwin_rx_config.h
+ * Description  : Configures the emWin module.
+ *********************************************************************************************************************/
+/**********************************************************************************************************************
+ * History : DD.MM.YYYY Version        Description
+ *         : 31.07.2020 6.14.a.1.00    First Release
+ *         : 04.09.2020 6.14.a.1.10    Update to adjust r_emwin_rx_config.h file.
+ *         : 11.12.2020 6.14.g.1.20    Update to adjust emWin v6.14g. Modify multi-touch and timer function.
+ *                                     Adjust GCC and IAR compilers.
+ *         : 31.03.2021 6.14.g.1.30    Update to adjust the spec of Smart Configurator and QE for Display.
+ *         : 29.12.2021 6.20.  1.00    Update emWin library to v6.22.
+ *                                     Adjust configuration option with Smart Configurator.
+ *         : 31.08.2022 6.26.c.1.00    Update emWin library to v6.26c.
+ *                                     Added support for SPI interface LCD.
+ *         : 31.03.2023 6.32.a.1.00    Update emWin library to v6.32a.
+ *                                     Added EMWIN_USE_RUNTIME_ORIENTATION definition for runtime orientation support.
+ *                                     Added EMWIN_DMAC_NUMBER2 and EMWIN_SELECT_DMAC_DTC definition for
+ *                                     DMAC/DTC support of SPI interface LCD.
+ *         : 31.01.2024 6.34.g.1.00    Update emWin library to v6.34g.
+**********************************************************************************************************************/
 #ifndef R_EMWIN_RX_CONFIG_H
 #define R_EMWIN_RX_CONFIG_H
 
@@ -75,6 +76,7 @@
 #define ORIENTATION_CW                (1)
 #define ORIENTATION_180               (2)
 #define ORIENTATION_CCW               (3)
+
 /***********************************************************************************************************************
 Configuration Options
 ***********************************************************************************************************************/

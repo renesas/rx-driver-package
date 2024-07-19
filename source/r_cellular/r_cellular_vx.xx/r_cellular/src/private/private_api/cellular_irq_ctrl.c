@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_irq_ctrl.c
@@ -140,6 +140,7 @@ void cellular_ring_task(ULONG p_pvParameters)
     e_cellular_err_semaphore_t      semaphore_ret  = CELLULAR_SEMAPHORE_SUCCESS;
     e_cellular_timeout_check_t      timeout        = CELLULAR_NOT_TIMEOUT;
 
+    /* WAIT_LOOP */
     while (1)
     {
         if (NULL != p_ctrl->ring_ctrl.ring_event)
@@ -155,6 +156,7 @@ void cellular_ring_task(ULONG p_pvParameters)
             cellular_rts_ctrl(0);
 #endif
 
+            /* WAIT_LOOP */
             while (1)
             {
                 timeout = cellular_check_timeout(p_timeout_ctrl);
@@ -164,6 +166,7 @@ void cellular_ring_task(ULONG p_pvParameters)
                 }
             }
 
+            /* WAIT_LOOP */
             while (1)
             {
                 semaphore_ret = cellular_take_semaphore(p_ctrl->ring_ctrl.rts_semaphore);

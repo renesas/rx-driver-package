@@ -1,8 +1,8 @@
 /* ${REA_DISCLAIMER_PLACEHOLDER} */
 
-/***********************************************************************************************************************
+/**********************************************************************************************************************
  * Includes
- ***********************************************************************************************************************/
+ **********************************************************************************************************************/
 #include <stdint.h>
 #include <stdlib.h>
 #include <rm_ble_abs.h>
@@ -15,6 +15,8 @@
 #include "semphr.h"
 #include "event_groups.h"
 #include "timers.h"
+#elif BSP_CFG_RTOS_USED == 5
+#include "tx_api.h"
 #endif
 
 /***********************************************************************************************************************
@@ -22,7 +24,12 @@
  **********************************************************************************************************************/
 #if BSP_CFG_RTOS_USED == 1 /* FreeRTOS */
  #define BLE_EVENT_PATTERN                      0x0A0A
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+ #define R_BLE_GTL_BYTE_POOL_LEN                0x800
 #endif
+
+/* Internal event bit definitions*/
+#define R_BLE_GTL_ADV_TIMER_EXPIRED_EVENT       0x00000001UL
 
 /* Maximum length of device name in bytes (as defined by Bluetooth Core v4.2 / GAP) */
 #define R_BLE_GTL_GAP_DEV_NAME_LEN_MAX          0xF8
@@ -136,8 +143,8 @@
 /* Attribute permissions defined in QE profile */
 #define R_BLE_GTL_QE_ATT_PERM_READ              0x01
 #define R_BLE_GTL_QE_ATT_PERM_WRITE             0x02
-#define R_BLE_GTL_QE_ATT_PERM_NOTIFY            0x08
-#define R_BLE_GTL_QE_ATT_PERM_INDICATE          0x10
+#define R_BLE_GTL_QE_ATT_PERM_NOTIFY            0x10
+#define R_BLE_GTL_QE_ATT_PERM_INDICATE          0x20
 
 /* Attribute permissions defined in GTL message(s) */
 #define R_BLE_GTL_ATT_PERM_READ_ENABLE          0x00000001UL
@@ -151,6 +158,7 @@
 #define R_BLE_GTL_SVC_GATT_UUID                 0x1801
 #define R_BLE_GTL_ATT_PRIMARY_SVC_DECL          0x2800
 #define R_BLE_GTL_ATT_SECONDARY_SVC_DECL        0x2801
+#define R_BLE_GTL_CHAR_DECLARATION              0x2803
 #define R_BLE_GTL_CHAR_USER_DESC                0x2901
 #define R_BLE_GTL_CHAR_DEVICE_NAME              0x2A00
 #define R_BLE_GTL_CHAR_APPEARANCE               0x2A01
@@ -160,13 +168,25 @@
 #define R_BLE_GTL_SVC_PERM_UUID_LEN_128         0x40
 #define R_BLE_GTL_SVC_PERM_PRIMARY              0x80
 
+/* The first two bits of a non-public (random) address must be binary ones */
+#define R_BLE_GTL_PUBLIC_BD_ADDR_MASK           0xC0
+
+#define R_BLE_GTL_MS_PER_SECOND                 1000UL
+#define R_BLE_GTL_ADV_TIMER_TICKS_PER_SECOND    100UL
+
 /* "RBLE" in ASCII. Used to determine if the control block is open. */
 #define R_BLE_GTL_OPEN                          0x52424C45U
 
 /* Mutex give/take defines */
-#define R_BLE_GTL_MUTEX_TX                      (1 << 0)
-#define R_BLE_GTL_MUTEX_RX                      (1 << 1)
-#define R_BLE_GTL_MUTEX_TEI                     (1 << 2)
+#define R_BLE_GTL_MUTEX_TX                      (1UL << 0)
+#define R_BLE_GTL_MUTEX_RX                      (1UL << 1)
+#define R_BLE_GTL_MUTEX_TEI                     (1UL << 2)
+
+/* UART boot protocol message types */
+#define R_BLE_GTL_BOOT_STX                      0x02
+#define R_BLE_GTL_BOOT_SOH                      0x01
+#define R_BLE_GTL_BOOT_ACK                      0x06
+#define R_BLE_GTL_BOOT_NACK                     0x15
 
 /***********************************************************************************************************************
  * Enumerations
@@ -281,11 +301,11 @@ typedef enum e_r_ble_gtl_gattc_operation
 
 typedef enum e_r_ble_gtl_host_error_code
 {
-  R_BLE_GTL_GAP_ERR_NO_ERROR = 0x00,
-  R_BLE_GTL_ATT_ERR_INVALID_HANDLE,
-  R_BLE_GTL_ATT_ERR_READ_NOT_PERMITTED,
-  R_BLE_GTL_ATT_ERR_REQUEST_NOT_SUPPORTED = 0x06,
-  R_BLE_GTL_GAP_ERR_CANCELED = 0x44
+    R_BLE_GTL_GAP_ERR_NO_ERROR = 0x00,
+    R_BLE_GTL_ATT_ERR_INVALID_HANDLE,
+    R_BLE_GTL_ATT_ERR_READ_NOT_PERMITTED,
+    R_BLE_GTL_ATT_ERR_REQUEST_NOT_SUPPORTED = 0x06,
+    R_BLE_GTL_GAP_ERR_CANCELED = 0x44
 } r_ble_gtl_host_error_code_t;
 
 typedef enum e_r_ble_gtl_gapc_device_info
@@ -305,6 +325,7 @@ typedef enum e_r_ble_gtl_device_state
 } r_ble_gtl_device_state_t;
 
 /* Common GTL message parameters */
+#pragma pack
 typedef struct r_ble_gtl_bd_addr
 {
     uint8_t                         addr[BLE_BD_ADDR_LEN];
@@ -869,6 +890,8 @@ typedef struct r_ble_gtl_gattm_add_svc_rsp
     uint8_t                         padding;
 } r_ble_gtl_gattm_add_svc_rsp_t;
 
+#pragma unpack
+
 /* Device data */
 typedef struct r_ble_gtl_adv_data
 {
@@ -932,10 +955,32 @@ typedef struct r_ble_gtl_disc_events
     uint16_t                        evt_comp;
 } r_ble_gtl_disc_events_t;
 
+#if BSP_CFG_RTOS_USED == 0 /* Baremetal */
+typedef struct r_ble_gtl_fifo
+{
+    uint8_t                      ** p_buffer;
+    uint32_t                        size;
+    uint32_t                        items;
+    uint32_t                        head;
+    uint32_t                        tail;
+} r_ble_gtl_fifo_t;
+#endif
+
+#if (BLE_CFG_HOST_BOOT_MODE == 1)
+#pragma pack
+typedef struct r_ble_gtl_boot_header
+{
+    uint8_t                         soh;
+    uint16_t                        length;
+} r_ble_gtl_boot_header_t;
+#pragma unpack
+#endif
+
 /***********************************************************************************************************************
  * Extern variables
  **********************************************************************************************************************/
 extern ble_abs_instance_ctrl_t * gp_instance_ctrl;
+extern st_sci_conf_t * s_port_cfg;
 
 #if BSP_CFG_RTOS_USED == 1 /* FreeRTOS */
  extern EventGroupHandle_t       g_ble_event_group_handle;
@@ -954,8 +999,19 @@ static ble_vs_app_cb_t                  g_vs_cb    = NULL;
 static ble_gatts_app_cb_t               g_gatts_cb = NULL;
 static ble_gattc_app_cb_t               g_gattc_cb = NULL;
 static ble_l2cap_cf_app_cb_t            g_l2cap_cb = NULL;
-/* Buffers must be aligned to 32-bit boundary as messages contain 16 and 32-bit data types which can be dereferenced via pointers */
+/* Buffers must be aligned to 32-bit boundary as messages contain 16 and 32-bit data types which can be 
+   dereferenced via pointers */
+#pragma pack
 static uint8_t                          g_gtl_msg_buf_pool[R_BLE_GTL_MSG_QUEUE_LEN][R_BLE_GTL_MSG_LEN_MAX];
+#pragma unpack
+#if (BLE_CFG_HOST_BOOT_MODE == 1)
+/* Set this flag when booting DA1453x from host. It informs UART receive interrupt handler that incoming bytes are not
+   GTL messages and should instead be handled by boot loader function. */
+static volatile bool                    g_booting = false;
+/* When booting DA1453x from host MCU received bytes are stored in this variable and are processed by 
+   the boot loader function */
+static volatile uint8_t                 g_rx_boot_byte = 0;
+#endif
 
 #if BSP_CFG_RTOS_USED == 1 /* FreeRTOS */
 static QueueHandle_t                    g_cb_evt_queue;
@@ -966,6 +1022,35 @@ static SemaphoreHandle_t                g_uart_tei_sem;
 static SemaphoreHandle_t                g_tx_sem;
 static SemaphoreHandle_t                g_rx_sem;
 static TimerHandle_t                    g_adv_timer;
+static EventGroupHandle_t               g_events;
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+static uint8_t                          g_cb_evt_queue_buff[sizeof(ULONG)*(TX_1_ULONG)*(R_BLE_GTL_CB_EVT_QUEUE_LEN)];
+static TX_QUEUE                         g_cb_evt_queue;
+static uint8_t                          g_pend_gtl_msg_queue_buff[sizeof(ULONG)*(TX_1_ULONG)*(R_BLE_GTL_MSG_QUEUE_LEN)];
+static uint8_t                          g_used_gtl_msg_queue_buff[sizeof(ULONG)*(TX_1_ULONG)*(R_BLE_GTL_MSG_QUEUE_LEN)];
+static uint8_t                          g_free_gtl_msg_queue_buff[sizeof(ULONG)*(TX_1_ULONG)*(R_BLE_GTL_MSG_QUEUE_LEN)];
+static TX_QUEUE                         g_pend_gtl_msg_queue;
+static TX_QUEUE                         g_used_gtl_msg_queue;
+static TX_QUEUE                         g_free_gtl_msg_queue;
+static TX_BYTE_POOL                     g_byte_pool;
+#pragma pack
+static uint8_t                          g_byte_pool_buff[R_BLE_GTL_BYTE_POOL_LEN];
+#pragma unpack
+static TX_SEMAPHORE                     g_uart_tei_sem;
+static TX_SEMAPHORE                     g_tx_sem;
+static TX_SEMAPHORE                     g_rx_sem;
+static TX_TIMER                         g_adv_timer;
+static TX_EVENT_FLAGS_GROUP             g_events;
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+static r_ble_gtl_cb_evt_t             * g_cb_evt_queue_buff[R_BLE_GTL_CB_EVT_QUEUE_LEN];
+static r_ble_gtl_fifo_t                 g_cb_evt_queue;
+static uint8_t                        * g_free_gtl_msg_buf[R_BLE_GTL_MSG_QUEUE_LEN];
+static volatile r_ble_gtl_fifo_t        g_free_gtl_msg_queue;
+static uint8_t                        * g_used_gtl_msg_buf[R_BLE_GTL_MSG_QUEUE_LEN];
+static volatile r_ble_gtl_fifo_t        g_used_gtl_msg_queue;
+static uint8_t                        * g_pend_gtl_msg_buf[R_BLE_GTL_MSG_QUEUE_LEN];
+static r_ble_gtl_fifo_t                 g_pend_gtl_msg_queue;
+static volatile bool                    g_uart_tei_sem;
 #endif
 
 /***********************************************************************************************************************
@@ -985,8 +1070,14 @@ static uint8_t            * r_ble_gtl_msg_buffer_allocate_from_isr(uint16_t len)
 static void                 r_ble_gtl_msg_buffer_free(uint8_t * p_msg);
 static void                 r_ble_gtl_msg_buffer_free_from_isr(uint8_t * p_msg);
 static uint8_t            * r_ble_gtl_msg_parse_rx_char(uint8_t rxd_byte);
-static ble_status_t         r_ble_gtl_msg_wait_for_response(uint16_t rsp_msg_id, uint8_t * p_rsp_param, uint32_t rsp_param_len, uint32_t timeout_ms);
-static ble_status_t         r_ble_gtl_msg_wait_for_cmd_complete(uint16_t cmp_evt, uint8_t operation, uint8_t cmd_status, uint32_t timeout_ms);
+static ble_status_t         r_ble_gtl_msg_wait_for_response(uint16_t rsp_msg_id, 
+                                                            uint8_t * p_rsp_param, 
+                                                            uint32_t rsp_param_len, 
+                                                            uint32_t timeout_ms);
+static ble_status_t         r_ble_gtl_msg_wait_for_cmd_complete(uint16_t cmp_evt, 
+                                                                uint8_t operation, 
+                                                                uint8_t cmd_status, 
+                                                                uint32_t timeout_ms);
 static ble_status_t         r_ble_gtl_gapm_send_start_adv_cmd(void);
 static ble_status_t         r_ble_gtl_gapm_send_reset_cmd(void);
 static ble_status_t         r_ble_gtl_gapm_send_cancel_cmd(uint8_t operation);
@@ -998,65 +1089,110 @@ static ble_status_t         r_ble_gtl_gapm_get_bd_addr(r_ble_gtl_gapm_dev_bdaddr
 static ble_status_t         r_ble_gtl_gapm_gen_rand_nb(r_ble_gtl_gapm_gen_rand_nb_ind_t * p_rand_nb);
 static ble_status_t         r_ble_gtl_gapm_reset(void);
 static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_handler(uint8_t * p_gtl_msg);
-static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_connection_req_handler(uint16_t conn_hdl, r_ble_gtl_gapc_connection_req_ind_t * p_param);
-static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_disconnect_ind_handler(uint16_t conn_hdl, r_ble_gtl_gapc_disconnect_ind_t * p_param);
-static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_le_pkt_size_ind_handler(uint16_t conn_hdl, r_ble_gtl_gapc_le_pkt_size_ind_t * p_param);
-static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_param_update_ind_handler(uint16_t conn_hdl, r_ble_gtl_gapc_param_update_ind_t * p_param);
-static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_get_dev_info_req_ind_handler(uint16_t conn_hdl, r_ble_gtl_gapc_get_dev_info_req_ind_t * p_param);
-static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_parm_update_req_ind_handler(uint16_t conn_hdl, r_ble_gtl_gapc_param_update_req_ind_t * p_param);
-static ble_status_t         r_ble_gtl_gapc_send_param_update_cmd(uint16_t conn_hdl, st_ble_gap_conn_param_t * p_conn_updt_param);
-static ble_status_t         r_ble_gtl_gapc_send_le_pkt_size_cmd(uint16_t conn_hdl, uint16_t tx_octets, uint16_t tx_time);
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_connection_req_handler(uint16_t conn_hdl, 
+                                                                  r_ble_gtl_gapc_connection_req_ind_t * p_param);
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_disconnect_ind_handler(uint16_t conn_hdl, 
+                                                                  r_ble_gtl_gapc_disconnect_ind_t * p_param);
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_le_pkt_size_ind_handler(uint16_t conn_hdl, 
+                                                                   r_ble_gtl_gapc_le_pkt_size_ind_t * p_param);
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_param_update_ind_handler(uint16_t conn_hdl, 
+                                                                    r_ble_gtl_gapc_param_update_ind_t * p_param);
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_get_dev_info_req_ind_handler(uint16_t conn_hdl, 
+                                                                    r_ble_gtl_gapc_get_dev_info_req_ind_t * p_param);
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_parm_update_req_ind_handler(uint16_t conn_hdl, 
+                                                                    r_ble_gtl_gapc_param_update_req_ind_t * p_param);
+static ble_status_t         r_ble_gtl_gapc_send_param_update_cmd(uint16_t conn_hdl, 
+                                                                 st_ble_gap_conn_param_t * p_conn_updt_param);
+static ble_status_t         r_ble_gtl_gapc_send_le_pkt_size_cmd(uint16_t conn_hdl, 
+                                                                uint16_t tx_octets, 
+                                                                uint16_t tx_time);
 static ble_status_t         r_ble_gtl_gapc_send_get_info_cmd(uint16_t conn_hdl, uint8_t operation);
 static ble_status_t         r_ble_gtl_gapc_send_param_update_cfm(uint16_t conn_hdl, uint8_t accept);
 static ble_status_t         r_ble_gtl_gapc_send_lecb_connect_cmd(uint16_t conn_hdl, uint8_t operation, uint8_t pkt_id,
                                                                  uint16_t le_psm, uint16_t cid, uint16_t credit);
-static ble_status_t         r_ble_gtl_gapc_send_lecb_discon_cmd(uint16_t conn_hdl, uint8_t operation, uint8_t pkt_id, uint16_t le_psm);
-static ble_status_t         r_ble_gtl_gapc_send_lecb_add_cmd(uint16_t conn_hdl, uint8_t operation, uint8_t pkt_id, uint16_t le_psm, uint16_t credit);
-static ble_status_t         r_ble_gtl_gapc_send_lecb_send_data_cmd(uint16_t conn_hdl, uint8_t operation, uint16_t lcid, uint16_t data_len, uint8_t * p_sdu);
+static ble_status_t         r_ble_gtl_gapc_send_lecb_discon_cmd(uint16_t conn_hdl, 
+                                                                uint8_t operation, 
+                                                                uint8_t pkt_id, 
+                                                                uint16_t le_psm);
+static ble_status_t         r_ble_gtl_gapc_send_lecb_add_cmd(uint16_t conn_hdl, 
+                                                             uint8_t operation, 
+                                                             uint8_t pkt_id, 
+                                                             uint16_t le_psm, 
+                                                             uint16_t credit);
+static ble_status_t         r_ble_gtl_gapc_send_lecb_send_data_cmd(uint16_t conn_hdl, 
+                                                                uint8_t operation, 
+                                                                uint8_t lcid, 
+                                                                uint16_t data_len, 
+                                                                uint8_t * p_sdu);
 static ble_status_t         r_ble_gtl_gapc_lecb_connect(uint16_t conn_hdl, st_ble_l2cap_conn_req_param_t * p_param);
 static ble_status_t         r_ble_gtl_gapc_lecb_disconnect(uint16_t conn_hdl, uint16_t le_psm);
 static ble_status_t         r_ble_gtl_gapc_set_le_pkt_size(uint16_t conn_hdl, uint16_t tx_octets, uint16_t tx_time);
-static ble_status_t         r_ble_gtl_gapc_get_peer_version(uint16_t conn_hdl, r_ble_gtl_gapc_peer_version_ind_t * p_version);
-static ble_status_t         r_ble_gtl_gapc_get_peer_features(uint16_t conn_hdl, r_ble_gtl_gapc_peer_features_ind_t * p_features);
+static ble_status_t         r_ble_gtl_gapc_get_peer_version(uint16_t conn_hdl, 
+                                                            r_ble_gtl_gapc_peer_version_ind_t * p_version);
+static ble_status_t         r_ble_gtl_gapc_get_peer_features(uint16_t conn_hdl, 
+                                                            r_ble_gtl_gapc_peer_features_ind_t * p_features);
 static ble_status_t         r_ble_gtl_gapc_get_con_rssi(uint16_t conn_hdl, r_ble_gtl_gapc_con_rssi_ind_t * p_param);
-static ble_status_t         r_ble_gtl_gapc_get_channel_map(uint16_t conn_hdl, r_ble_gtl_gapc_con_channel_map_ind_t * p_param);
+static ble_status_t         r_ble_gtl_gapc_get_channel_map(uint16_t conn_hdl, 
+                                                           r_ble_gtl_gapc_con_channel_map_ind_t * p_param);
 static ble_status_t         r_ble_gtl_gapc_disconnect(uint16_t conn_hdl, uint8_t reason);
-static ble_status_t         r_ble_gtl_gapc_param_update(uint16_t conn_hdl, st_ble_gap_conn_param_t * p_conn_update_param,
+static ble_status_t         r_ble_gtl_gapc_param_update(uint16_t conn_hdl, 
+                                                        st_ble_gap_conn_param_t * p_conn_update_param,
                                                         r_ble_gtl_gapc_param_update_ind_t * p_param_update_ind);
 static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_handler(uint8_t * p_gtl_msg);
-static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_write_req_ind_handler(uint16_t conn_hdl, r_ble_gtl_gattc_write_req_ind_t * p_param);
-static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_read_req_ind_handler(uint16_t conn_hdl, r_ble_gtl_gattc_read_req_ind_t * p_param);
-static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_mtu_changed_ind_handler(uint16_t conn_hdl, r_ble_gtl_gattc_mtu_changed_ind_t * p_param);
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_write_req_ind_handler(uint16_t conn_hdl, 
+                                                                  r_ble_gtl_gattc_write_req_ind_t * p_param);
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_read_req_ind_handler(uint16_t conn_hdl, 
+                                                                 r_ble_gtl_gattc_read_req_ind_t * p_param);
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_mtu_changed_ind_handler(uint16_t conn_hdl, 
+                                                                    r_ble_gtl_gattc_mtu_changed_ind_t * p_param);
 static ble_status_t         r_ble_gtl_gattc_send_write_cfm(uint16_t conn_hdl, uint8_t wr_status, uint16_t att_handle);
-static ble_status_t         r_ble_gtl_gattc_send_disc_cmd(uint16_t conn_hdl, uint8_t operation, uint16_t seq_num, uint16_t start_hdl,
+static ble_status_t         r_ble_gtl_gattc_send_disc_cmd(uint16_t conn_hdl, uint8_t operation, 
+                                                          uint16_t seq_num, uint16_t start_hdl,
                                                           uint16_t end_hdl, r_ble_gtl_uuid_t * p_uuid);
-static ble_status_t         r_ble_gtl_gattc_write(uint8_t operation, uint8_t auto_exec, uint16_t conn_hdl, uint16_t att_hdl,
-                                                  uint8_t * p_value, uint16_t length, uint16_t offset);
-static ble_status_t         r_ble_gtl_gattc_send_write_cmd(uint8_t operation, uint8_t auto_exec, uint16_t conn_hdl, uint16_t att_hdl,
+static ble_status_t         r_ble_gtl_gattc_write(uint8_t operation, uint8_t auto_exec, uint16_t conn_hdl, 
+                                                  uint16_t att_hdl, uint8_t * p_value, 
+                                                  uint16_t length, uint16_t offset);
+static ble_status_t         r_ble_gtl_gattc_send_write_cmd(uint8_t operation, uint8_t auto_exec, 
+                                                           uint16_t conn_hdl, uint16_t att_hdl,
                                                            uint8_t * p_value, uint16_t length, uint16_t offset);
-static ble_status_t         r_ble_gtl_gattc_send_read_cfm(uint16_t conn_hdl, uint8_t rd_status, uint16_t att_hdl, uint16_t value_len, uint8_t * p_value);
+static ble_status_t         r_ble_gtl_gattc_send_read_cfm(uint16_t conn_hdl, uint8_t rd_status, uint16_t att_hdl, 
+                                                                uint16_t value_len, uint8_t * p_value);
 static ble_status_t         r_ble_gtl_gattc_send_write_execute_cmd(uint16_t conn_hdl, uint8_t execute);
-static ble_status_t         r_ble_gtl_gattc_send_read_cmd(uint16_t conn_hdl, uint8_t operation, uint16_t att_hdl, uint16_t offset, uint16_t length);
-static ble_status_t         r_ble_gtl_gattc_send_read_by_uuid_cmd(uint16_t conn_hdl, uint16_t start_hdl, uint16_t end_hdl, r_ble_gtl_uuid_t * p_uuid);
-static ble_status_t         r_ble_gtl_gattc_send_read_multiple_cmd(uint16_t conn_hdl, uint8_t number, uint16_t * p_hdl_list, uint16_t length);
+static ble_status_t         r_ble_gtl_gattc_send_read_cmd(uint16_t conn_hdl, uint8_t operation, uint16_t att_hdl, 
+                                                                uint16_t offset, uint16_t length);
+static ble_status_t         r_ble_gtl_gattc_send_read_by_uuid_cmd(uint16_t conn_hdl, uint16_t start_hdl, 
+                                                                  uint16_t end_hdl, r_ble_gtl_uuid_t * p_uuid);
+static ble_status_t         r_ble_gtl_gattc_send_read_multiple_cmd(uint16_t conn_hdl, uint8_t number, 
+                                                                uint16_t * p_hdl_list, uint16_t length);
 static ble_status_t         r_ble_gtl_gattc_send_write_execute(uint16_t conn_hdl, uint8_t execute);
 static ble_status_t         r_ble_gtl_gattc_exch_mtu(uint16_t conn_hdl, uint16_t * p_mtu_rsp);
 static ble_status_t         r_ble_gtl_gattc_send_exch_mtu_cmd(uint16_t conn_hdl);
-static ble_status_t         r_ble_gtl_gattc_notify(uint16_t conn_hdl, uint16_t attr_hdl, uint8_t * p_value, uint16_t length);
-static ble_status_t         r_ble_gtl_gattc_indicate(uint16_t conn_hdl, uint16_t attr_hdl, uint8_t * p_value, uint16_t length);
-static ble_status_t         r_ble_gtl_gattc_discover(uint16_t conn_hdl, uint8_t operation, uint16_t start_hdl, uint16_t end_hdl,
+static ble_status_t         r_ble_gtl_gattc_notify(uint16_t conn_hdl, uint16_t attr_hdl, 
+                                                   uint8_t * p_value, uint16_t length);
+static ble_status_t         r_ble_gtl_gattc_indicate(uint16_t conn_hdl, uint16_t attr_hdl, 
+                                                     uint8_t * p_value, uint16_t length);
+static ble_status_t         r_ble_gtl_gattc_discover(uint16_t conn_hdl, uint8_t operation, 
+                                                     uint16_t start_hdl, uint16_t end_hdl,
                                                      r_ble_gtl_uuid_t * p_uuid, r_ble_gtl_disc_events_t * p_disc_evts);
-static ble_status_t         r_ble_gtl_gattc_send_evt_cmd(uint8_t operation, uint16_t conn_hdl, uint16_t attr_hdl, uint8_t * p_value, uint16_t length);
-static ble_status_t         r_ble_gtl_gattc_handle_discovered_svc(r_ble_gtl_gattc_disc_svc_ind_t * p_disc_svc_ind, r_ble_gtl_disc_events_t * p_disc_evts);
-static ble_status_t         r_ble_gtl_gattc_handle_discovered_char(r_ble_gtl_gattc_disc_char_ind_t * p_disc_char_ind, r_ble_gtl_disc_events_t * p_disc_evts);
+static ble_status_t         r_ble_gtl_gattc_send_evt_cmd(uint8_t operation, uint16_t conn_hdl, 
+                                                         uint16_t attr_hdl, uint8_t * p_value, uint16_t length);
+static ble_status_t         r_ble_gtl_gattc_handle_discovered_svc(r_ble_gtl_gattc_disc_svc_ind_t * p_disc_svc_ind, 
+                                                                  r_ble_gtl_disc_events_t * p_disc_evts);
+static ble_status_t         r_ble_gtl_gattc_handle_discovered_char(r_ble_gtl_gattc_disc_char_ind_t * p_disc_char_ind, 
+                                                                   r_ble_gtl_disc_events_t * p_disc_evts);
 static ble_status_t         r_ble_gtl_gattm_add_service(uint8_t perm, uint8_t nbr_att, r_ble_gtl_uuid_t * p_uuid,
-                                                        r_ble_gtl_gattm_att_desc_t * p_att_descs, uint16_t * p_start_hdl);
-static ble_status_t         r_ble_gtl_gattm_set_att_value(uint16_t conn_hdl, uint16_t attr_hdl, st_ble_gatt_value_t * p_value);
-static ble_status_t         r_ble_gtl_gattm_set_att_value_int(uint16_t conn_hdl, uint16_t attr_hdl, st_ble_gatt_value_t * p_value);
-static ble_status_t         r_ble_gtl_gattm_get_att_value(uint16_t conn_hdl, uint16_t attr_hdl, st_ble_gatt_value_t * p_value);
-static ble_status_t         r_ble_gtl_att_build_descriptor(r_ble_gtl_gattm_att_desc_t * p_att_desc, attribute_t * p_att);
+                                                    r_ble_gtl_gattm_att_desc_t * p_att_descs, uint16_t * p_start_hdl);
+static ble_status_t         r_ble_gtl_gattm_set_att_value(uint16_t conn_hdl, uint16_t attr_hdl, 
+                                                          st_ble_gatt_value_t * p_value);
+static ble_status_t         r_ble_gtl_gattm_set_att_value_int(uint16_t conn_hdl, uint16_t attr_hdl, 
+                                                              st_ble_gatt_value_t * p_value);
+static ble_status_t         r_ble_gtl_gattm_get_att_value(uint16_t conn_hdl, uint16_t attr_hdl, 
+                                                          st_ble_gatt_value_t * p_value);
+static ble_status_t         r_ble_gtl_att_build_descriptor(r_ble_gtl_gattm_att_desc_t * p_att_desc, 
+                                                           attribute_t * p_att, uint16_t nbr_atts);
 static ble_status_t         r_ble_gtl_gap_get_char_value_by_uuid(uint16_t uuid, uint8_t * p_value, uint8_t len);
-static ble_status_t         r_ble_gtl_gap_get_char_value_by_handle(uint16_t handle, uint8_t ** p_value, uint16_t * p_len);
+static ble_status_t         r_ble_gtl_gap_get_char_value_by_handle(uint16_t handle, uint8_t ** p_value, 
+                                                                   uint16_t * p_len);
 static ble_status_t         r_ble_gtl_gap_stop_adv(uint8_t adv_hdl, uint8_t reason);
 static void                 r_ble_gtl_cleanup_open(void);
 static bool                 r_ble_gtl_cb_evt_queue_init(void);
@@ -1072,9 +1208,31 @@ static void                 r_ble_gtl_delay(uint32_t ms);
 static bool                 r_ble_gtl_mutex_init(void);
 static bool                 r_ble_gtl_mutex_take(uint32_t mutex);
 static bool                 r_ble_gtl_mutex_give(uint32_t mutex);
+static void                 r_ble_gtl_hw_reset(void);
+static ble_status_t         r_ble_gtl_transmit(uint8_t * p_data, uint32_t len);
+#if BSP_CFG_RTOS_USED == 1 || BSP_CFG_RTOS_USED == 5 /* ThreadX or FreeRTOS */
+static ble_status_t         r_ble_gtl_adv_timer_start(uint16_t duration);
+static ble_status_t         r_ble_gtl_adv_timer_stop(void);
+static bool                 r_ble_gtl_adv_timer_expired(void);
+static bool                 r_ble_gtl_event_init(void);
+#endif
+#if (BLE_CFG_HOST_BOOT_MODE == 1)
+static ble_status_t         r_ble_gtl_transmit_image(uint8_t * p_data, uint32_t len);
+static ble_status_t         r_ble_gtl_boot_load_image(void);
+#endif
+
+#if BSP_CFG_RTOS_USED == 0 /* Baremetal */
+static bool                 r_ble_gtl_fifo_empty(r_ble_gtl_fifo_t * p_fifo);
+static bool                 r_ble_gtl_fifo_full(r_ble_gtl_fifo_t * p_fifo);
+static bool                 r_ble_gtl_fifo_put(r_ble_gtl_fifo_t * p_fifo, uint8_t ** p_data);
+static bool                 r_ble_gtl_fifo_get(r_ble_gtl_fifo_t * p_fifo, uint8_t ** p_data, uint32_t timeout_ms);
+static void                 r_ble_gtl_fifo_init(r_ble_gtl_fifo_t * p_fifo, uint8_t ** p_buf, uint32_t size);
+#endif
 
 #if BSP_CFG_RTOS_USED == 1 /* FreeRTOS */
 static void                 r_ble_gtl_adv_timer_cb(TimerHandle_t xTimer);
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+static void                 r_ble_gtl_adv_timer_cb(ULONG context);
 #endif
 
 /***********************************************************************************************************************
@@ -1082,14 +1240,25 @@ static void                 r_ble_gtl_adv_timer_cb(TimerHandle_t xTimer);
  **********************************************************************************************************************/
 ble_status_t R_BLE_GTL_Open (r_ble_gtl_transport_api_t * p_api)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl->p_cfg, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_api, BLE_ERR_INVALID_ARG);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_ALREADY_INITIALIZED);
 #endif
 
-    int ret;
+    int          ret;
+    ble_status_t status;
+
+    /* Initialize transport layer */
+    g_transport_api = *(p_api);
+    ret = g_transport_api.open(g_transport_api.p_context);
+    if (0 != ret)
+    {
+        r_ble_gtl_cleanup_open();
+    }
+
+    FSP_ERROR_RETURN(0 == ret, BLE_ERR_UNSPECIFIED);
 
     /* Initialize GTL message receive buffer */
     bool rx_msgq_init = r_ble_gtl_msg_queue_init();
@@ -1118,15 +1287,16 @@ ble_status_t R_BLE_GTL_Open (r_ble_gtl_transport_api_t * p_api)
 
     FSP_ERROR_RETURN(true == mutex_init, BLE_ERR_MEM_ALLOC_FAILED);
 
-    /* Initialize transport layer */
-    g_transport_api = *(p_api);
-    ret = g_transport_api.open(g_transport_api.p_context);
-    if (0 != ret)
+#if (BSP_CFG_RTOS_USED == 1) || (BSP_CFG_RTOS_USED == 5) /* ThreadX or FreeRTOS */
+    /* Initialize event signalling mechanism */
+    bool event_init = r_ble_gtl_event_init();
+    if (false == event_init)
     {
         r_ble_gtl_cleanup_open();
     }
 
-    FSP_ERROR_RETURN(0 == ret, BLE_ERR_UNSPECIFIED);
+    FSP_ERROR_RETURN(true == event_init, BLE_ERR_MEM_ALLOC_FAILED);
+#endif
 
     /* Reset GTL message parser state machine */
     rx_gtl_msg_parser_state = R_BLE_GTL_RX_MSG_PARSER_STATE_IDLE;
@@ -1135,14 +1305,34 @@ ble_status_t R_BLE_GTL_Open (r_ble_gtl_transport_api_t * p_api)
     g_dev_params.dev_addr.type = BLE_GAP_ADDR_PUBLIC;
     g_dev_params.mtu_size      = BLE_GATT_DEFAULT_MTU;
     g_dev_params.state         = R_BLE_GTL_DEV_STATE_IDLE;
-    gp_instance_ctrl->open     = R_BLE_GTL_OPEN;
+
+#if (BLE_CFG_HOST_BOOT_MODE == 1)
+    /* Load an image directly into the DA1453x device, once loaded the DA1453x will automatically start
+       executing the image. NOTE: This does not re-program any flash connected to the DA1453x, it simply
+       loads the image into the DA1453x internal RAM. If successful device will send the ready indication */
+    status = r_ble_gtl_boot_load_image();
+    FSP_ERROR_RETURN(BLE_SUCCESS == status, status);
+#else
+    /* Assume DA1453x has a flash memory connected that contains an image that we want to use.
+       Perform hardware reset of DA1453x - this causes it to send the device ready indication */
+    r_ble_gtl_hw_reset();
+#endif
+
+    /* Wait for device ready indication */
+    status = r_ble_gtl_msg_wait_for_response(R_BLE_GTL_GAPM_DEVICE_READY_IND,
+                                             NULL,
+                                             0,
+                                             R_BLE_GTL_MSG_RSP_TIMEOUT_MS);
+    FSP_ERROR_RETURN(BLE_SUCCESS == status, status);
+
+    gp_instance_ctrl->open = R_BLE_GTL_OPEN;
 
     return BLE_SUCCESS;
 }
 
 ble_status_t R_BLE_GTL_Close (r_ble_gtl_transport_api_t * p_api)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -1175,7 +1365,7 @@ ble_status_t R_BLE_GTL_Close (r_ble_gtl_transport_api_t * p_api)
 
 ble_status_t R_BLE_GTL_Execute(void)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -1223,6 +1413,15 @@ ble_status_t R_BLE_GTL_Execute(void)
         r_ble_gtl_cb_evt_free(p_cb_evt);
     }
 
+#if (BSP_CFG_RTOS_USED == 1) || (BSP_CFG_RTOS_USED == 5) /* ThreadX or FreeRTOS */
+    /* Check if advertising timer has expired */
+    if (true == r_ble_gtl_adv_timer_expired())
+    {
+        /* Reason of 0x02 means stopped via timer */
+        (void)r_ble_gtl_gap_stop_adv(0, 0x02);
+    }
+#endif
+
     /* Check for any events generated as a result of an API call, rather than an incoming GTL message */
     if (true == r_ble_gtl_cb_evt_queue_get(&p_cb_evt))
     {
@@ -1235,7 +1434,7 @@ ble_status_t R_BLE_GTL_Execute(void)
 
 uint32_t R_BLE_GTL_IsTaskFree(void)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -1265,7 +1464,7 @@ uint32_t R_BLE_GTL_IsTaskFree(void)
 
 ble_status_t R_BLE_GTL_GAP_Init(ble_gap_app_cb_t gap_cb)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != gap_cb, BLE_ERR_INVALID_ARG);
 #endif
@@ -1276,46 +1475,37 @@ ble_status_t R_BLE_GTL_GAP_Init(ble_gap_app_cb_t gap_cb)
     /* Callback used to pass GAP events to next higher layer */
     g_gap_cb = gap_cb;
 
-    /* Perform hardware reset of DA1453x - this causes it to send the device ready indication */
-    BLE_SCK_DDR(BLE_CFG_SCK_PORT, BLE_CFG_SCK_PIN) = 1;
-    BLE_SCK_DR(BLE_CFG_SCK_PORT, BLE_CFG_SCK_PIN) = 0;
-    BLE_RESET_DDR(BLE_CFG_RESET_PORT, BLE_CFG_RESET_PIN) = 1;
-    BLE_RESET_DR(BLE_CFG_RESET_PORT, BLE_CFG_RESET_PIN) = 0;
-    r_ble_gtl_delay(1);
-    BLE_RESET_DR(BLE_CFG_RESET_PORT, BLE_CFG_RESET_PIN) = 1;
+    /* Perform a software reset */
+    status = r_ble_gtl_gapm_send_reset_cmd();
+    FSP_ERROR_RETURN(BLE_SUCCESS == status, status);
 
-    /* Wait for device ready indication */
-    status = r_ble_gtl_msg_wait_for_response(R_BLE_GTL_GAPM_DEVICE_READY_IND, NULL, 0, R_BLE_GTL_MSG_RSP_TIMEOUT_MS);
-    if (BLE_SUCCESS == status)
+    /* Wait for reset complete indication */
+    status = r_ble_gtl_msg_wait_for_cmd_complete(R_BLE_GTL_GAPM_CMP_EVT,
+                                                 R_BLE_GTL_GAPM_OP_RESET,
+                                                 0,
+                                                 R_BLE_GTL_MSG_RSP_TIMEOUT_MS);
+    FSP_ERROR_RETURN(BLE_SUCCESS == status, status);
+
+    /* Configure DA1453x device */
+    status = r_ble_gtl_gapm_send_dev_config_cmd();
+    FSP_ERROR_RETURN(BLE_SUCCESS == status, status);
+
+    /* Wait for set configuration complete indication */
+    status = r_ble_gtl_msg_wait_for_cmd_complete(R_BLE_GTL_GAPM_CMP_EVT,
+                                                 R_BLE_GTL_GAPM_OP_SET_DEV_CONFIG,
+                                                 0,
+                                                 R_BLE_GTL_MSG_RSP_TIMEOUT_MS);
+    FSP_ERROR_RETURN(BLE_SUCCESS == status, status);
+
+    /* No parameters are passed with this event type */
+    p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GAP_EVENT_STACK_ON, status, 0);
+    if (NULL != p_cb_evt)
     {
-        status = r_ble_gtl_gapm_send_reset_cmd();
-        if (BLE_SUCCESS == status)
-        {
-            /* Wait for reset complete indication */
-            status = r_ble_gtl_msg_wait_for_cmd_complete(R_BLE_GTL_GAPM_CMP_EVT, R_BLE_GTL_GAPM_OP_RESET, 0, R_BLE_GTL_MSG_RSP_TIMEOUT_MS);
-            if (BLE_SUCCESS == status)
-            {
-                status = r_ble_gtl_gapm_send_dev_config_cmd();
-                if (BLE_SUCCESS == status)
-                {
-                    /* Wait for set configuration complete indication */
-                    status = r_ble_gtl_msg_wait_for_cmd_complete(R_BLE_GTL_GAPM_CMP_EVT, R_BLE_GTL_GAPM_OP_SET_DEV_CONFIG, 0, R_BLE_GTL_MSG_RSP_TIMEOUT_MS);
-                    if (BLE_SUCCESS == status)
-                    {
-                        /* No parameters are passed with this event type */
-                        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GAP_EVENT_STACK_ON, status, 0);
-                        if (NULL != p_cb_evt)
-                        {
-                            status = r_ble_gtl_cb_evt_queue_add(p_cb_evt);
-                        }
-                        else
-                        {
-                            status = BLE_ERR_MEM_ALLOC_FAILED;
-                        }
-                    }
-                }
-            }
-        }
+        status = r_ble_gtl_cb_evt_queue_add(p_cb_evt);
+    }
+    else
+    {
+        status = BLE_ERR_MEM_ALLOC_FAILED;
     }
 
     return status;
@@ -1323,7 +1513,7 @@ ble_status_t R_BLE_GTL_GAP_Init(ble_gap_app_cb_t gap_cb)
 
 ble_status_t R_BLE_GTL_GAP_Terminate(void)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -1359,7 +1549,7 @@ ble_status_t R_BLE_GTL_GAP_ConnParamUpdateCfm(uint16_t conn_hdl, uint16_t accept
 
 ble_status_t R_BLE_GTL_GAP_ConnParamUpdateReq(uint16_t conn_hdl, st_ble_gap_conn_param_t * p_conn_updt_param)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_conn_updt_param, BLE_ERR_INVALID_ARG);
@@ -1397,7 +1587,7 @@ ble_status_t R_BLE_GTL_GAP_ConnParamUpdateReq(uint16_t conn_hdl, st_ble_gap_conn
 
 ble_status_t R_BLE_GTL_GAP_SetDataLen(uint16_t conn_hdl, uint16_t tx_octets, uint16_t tx_time)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -1430,7 +1620,7 @@ ble_status_t R_BLE_GTL_GAP_SetDataLen(uint16_t conn_hdl, uint16_t tx_octets, uin
 
 ble_status_t R_BLE_GTL_GAP_Disconnect(uint16_t conn_hdl, uint8_t reason)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -1459,7 +1649,7 @@ ble_status_t R_BLE_GTL_GAP_Disconnect(uint16_t conn_hdl, uint8_t reason)
 
 ble_status_t R_BLE_GTL_GAP_GetVerInfo(void)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -1476,7 +1666,8 @@ ble_status_t R_BLE_GTL_GAP_GetVerInfo(void)
         status = r_ble_gtl_gapm_get_bd_addr(&bd_addr);
         if (BLE_SUCCESS == status)
         {
-            p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GAP_EVENT_LOC_VER_INFO, BLE_SUCCESS, sizeof(st_ble_gap_loc_dev_info_evt_t));
+            p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GAP_EVENT_LOC_VER_INFO, BLE_SUCCESS, 
+                                                 sizeof(st_ble_gap_loc_dev_info_evt_t));
 
             if (NULL != p_cb_evt)
             {
@@ -1484,8 +1675,8 @@ ble_status_t R_BLE_GTL_GAP_GetVerInfo(void)
 
                 memcpy(p_dev_info->l_dev_addr.addr, bd_addr.addr.addr.addr, BLE_BD_ADDR_LEN);
                 p_dev_info->l_dev_addr.type       = bd_addr.addr.type;
-                p_dev_info->l_ver_num.subminor    = (uint8_t)((version.host_subver >> 8) & 0xFF);
-                p_dev_info->l_ver_num.minor       = (uint8_t)(version.host_subver & 0xFF);
+                p_dev_info->l_ver_num.subminor    = (uint8_t)((version.host_subver >> 8) & UINT8_MAX);
+                p_dev_info->l_ver_num.minor       = (uint8_t)(version.host_subver & UINT8_MAX);
                 p_dev_info->l_ver_num.major       = version.host_ver;
                 p_dev_info->l_bt_info.hci_ver     = version.hci_ver;
                 p_dev_info->l_bt_info.hci_rev     = version.hci_subver;
@@ -1507,7 +1698,7 @@ ble_status_t R_BLE_GTL_GAP_GetVerInfo(void)
 
 ble_status_t R_BLE_GTL_GAP_ReadRssi(uint16_t conn_hdl)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -1520,7 +1711,8 @@ ble_status_t R_BLE_GTL_GAP_ReadRssi(uint16_t conn_hdl)
     status = r_ble_gtl_gapc_get_con_rssi(conn_hdl, &rssi_ind);
     if (BLE_SUCCESS == status)
     {
-        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GAP_EVENT_RSSI_RD_COMP, BLE_SUCCESS, sizeof(st_ble_gap_rd_rssi_evt_t));
+        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GAP_EVENT_RSSI_RD_COMP, BLE_SUCCESS, 
+                                             sizeof(st_ble_gap_rd_rssi_evt_t));
 
         if (NULL != p_cb_evt)
         {
@@ -1541,7 +1733,7 @@ ble_status_t R_BLE_GTL_GAP_ReadRssi(uint16_t conn_hdl)
 
 ble_status_t R_BLE_GTL_GAP_ReadChMap(uint16_t conn_hdl)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -1554,7 +1746,8 @@ ble_status_t R_BLE_GTL_GAP_ReadChMap(uint16_t conn_hdl)
     status = r_ble_gtl_gapc_get_channel_map(conn_hdl, &chan_map_ind);
     if (BLE_SUCCESS == status)
     {
-        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GAP_EVENT_CH_MAP_RD_COMP, BLE_SUCCESS, sizeof(st_ble_gap_rd_ch_map_evt_t));
+        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GAP_EVENT_CH_MAP_RD_COMP, BLE_SUCCESS, 
+                                             sizeof(st_ble_gap_rd_ch_map_evt_t));
 
         if (NULL != p_cb_evt)
         {
@@ -1576,7 +1769,7 @@ ble_status_t R_BLE_GTL_GAP_ReadChMap(uint16_t conn_hdl)
 
 ble_status_t R_BLE_GTL_GAP_SetAdvParam(st_ble_gap_adv_param_t * p_adv_param)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_adv_param, BLE_ERR_INVALID_ARG);
@@ -1598,7 +1791,7 @@ ble_status_t R_BLE_GTL_GAP_SetAdvParam(st_ble_gap_adv_param_t * p_adv_param)
 
 ble_status_t R_BLE_GTL_GAP_SetAdvSresData(st_ble_gap_adv_data_t * p_adv_srsp_data)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_adv_srsp_data, BLE_ERR_INVALID_ARG);
@@ -1650,7 +1843,7 @@ ble_status_t R_BLE_GTL_GAP_SetAdvSresData(st_ble_gap_adv_data_t * p_adv_srsp_dat
 
 ble_status_t R_BLE_GTL_GAP_StartAdv(uint8_t adv_hdl, uint16_t duration)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -1664,48 +1857,56 @@ ble_status_t R_BLE_GTL_GAP_StartAdv(uint8_t adv_hdl, uint16_t duration)
     {
         if (true == g_dev_params.adv_param.valid)
         {
-            status = r_ble_gtl_gapm_send_start_adv_cmd();
+            status = BLE_SUCCESS;
+
+            #if BSP_CFG_RTOS_USED == 0 /* Baremetal */
+                if (0 < duration)
+                {
+                    /* Advertising duration not supported by baremetal, user can implement this
+                       functionality in their application */
+                    status = BLE_ERR_UNSUPPORTED;
+                }
+            #else /* FreeRTOS or ThreadX */
+                if (0 < duration)
+                {
+                    status = r_ble_gtl_adv_timer_start(duration);
+                }
+            #endif
+
             if (BLE_SUCCESS == status)
             {
-                g_dev_params.state = R_BLE_GTL_DEV_STATE_ADVERTISING;
-
-                /* No GTL message received in response to start advertising command */
-                p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GAP_EVENT_ADV_ON, BLE_SUCCESS, sizeof(st_ble_gap_adv_set_evt_t));
-
-                if (NULL != p_cb_evt)
+                status = r_ble_gtl_gapm_send_start_adv_cmd();
+                if (BLE_SUCCESS == status)
                 {
-                    p_evt_param = p_cb_evt->data.gap.p_param;
+                    g_dev_params.state = R_BLE_GTL_DEV_STATE_ADVERTISING;
 
-                    p_cb_evt->data.gap.param_len = sizeof(st_ble_gap_adv_set_evt_t);
-                    p_evt_param->adv_hdl = adv_hdl;
+                    /* No GTL message received in response to start advertising command */
+                    p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GAP_EVENT_ADV_ON, BLE_SUCCESS, 
+                                                         sizeof(st_ble_gap_adv_set_evt_t));
 
-                    status = r_ble_gtl_cb_evt_queue_add(p_cb_evt);
-
-                    if (BLE_SUCCESS == status)
+                    if (NULL != p_cb_evt)
                     {
-#if BSP_CFG_RTOS_USED == 1 /* FreeRTOS */
-                        if (0 < duration)
-                        {
-                            g_adv_timer = xTimerCreate("AdvTimer", (TickType_t)duration, pdFALSE, (void *)0, r_ble_gtl_adv_timer_cb);
-                            if (NULL != g_adv_timer)
-                            {
-                                if (pdFALSE == xTimerStart(g_adv_timer, 0))
-                                {
-                                    status = BLE_ERR_UNSPECIFIED;
-                                }
-                            }
-                            else
-                            {
-                                status = BLE_ERR_MEM_ALLOC_FAILED;
-                            }
-                        }
-#endif
+                        p_evt_param = p_cb_evt->data.gap.p_param;
+
+                        p_cb_evt->data.gap.param_len = sizeof(st_ble_gap_adv_set_evt_t);
+                        p_evt_param->adv_hdl = adv_hdl;
+
+                        status = r_ble_gtl_cb_evt_queue_add(p_cb_evt);
+                    }
+                    else
+                    {
+                        status = BLE_ERR_MEM_ALLOC_FAILED;
                     }
                 }
+#if (BSP_CFG_RTOS_USED == 1) || (BSP_CFG_RTOS_USED == 5) /* ThreadX or FreeRTOS */
                 else
                 {
-                    status = BLE_ERR_MEM_ALLOC_FAILED;
+                    if (0 < duration)
+                    {
+                        r_ble_gtl_adv_timer_stop();
+                    }
                 }
+#endif
             }
         }
         else
@@ -1719,12 +1920,12 @@ ble_status_t R_BLE_GTL_GAP_StartAdv(uint8_t adv_hdl, uint16_t duration)
 
 ble_status_t R_BLE_GTL_GAP_StopAdv(uint8_t adv_hdl)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
 
-    ble_status_t               status = BLE_ERR_INVALID_MODE;
+    ble_status_t status = BLE_ERR_INVALID_MODE;
 
     if (R_BLE_GTL_DEV_STATE_ADVERTISING == g_dev_params.state)
     {
@@ -1734,14 +1935,9 @@ ble_status_t R_BLE_GTL_GAP_StopAdv(uint8_t adv_hdl)
             /* Reason of 0x01 means stopped via call to stop function */
             status = r_ble_gtl_gap_stop_adv(adv_hdl, 0x01);
 
-#if BSP_CFG_RTOS_USED == 1 /* FreeRTOS */
-            if (NULL != g_adv_timer)
-            {
-                if (pdTRUE == xTimerIsTimerActive(g_adv_timer))
-                {
-                    xTimerStop(g_adv_timer, 0);
-                }
-            }
+            /* Advertising timer might be running... */
+#if (BSP_CFG_RTOS_USED == 1) || (BSP_CFG_RTOS_USED == 5) /* ThreadX or FreeRTOS */
+            r_ble_gtl_adv_timer_stop();
 #endif
         }
         else
@@ -1753,9 +1949,10 @@ ble_status_t R_BLE_GTL_GAP_StopAdv(uint8_t adv_hdl)
     return status;
 }
 
-ble_status_t R_BLE_GTL_GAP_GetRemainAdvBufSize(uint16_t * p_remain_adv_data_size, uint16_t * p_remain_perd_adv_data_size)
+ble_status_t R_BLE_GTL_GAP_GetRemainAdvBufSize(uint16_t * p_remain_adv_data_size, 
+                                                    uint16_t * p_remain_perd_adv_data_size)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_remain_adv_data_size, BLE_ERR_INVALID_ARG);
@@ -1772,7 +1969,7 @@ ble_status_t R_BLE_GTL_GAP_GetRemainAdvBufSize(uint16_t * p_remain_adv_data_size
 
 ble_status_t R_BLE_GTL_GAP_GetRemDevInfo(uint16_t conn_hdl)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -1789,7 +1986,8 @@ ble_status_t R_BLE_GTL_GAP_GetRemDevInfo(uint16_t conn_hdl)
         status = r_ble_gtl_gapc_get_peer_features(conn_hdl, &peer_features);
         if (BLE_SUCCESS == status)
         {
-            p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GAP_EVENT_GET_REM_DEV_INFO, BLE_SUCCESS, sizeof(st_ble_gap_dev_info_evt_t));
+            p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GAP_EVENT_GET_REM_DEV_INFO, BLE_SUCCESS, 
+                                                        sizeof(st_ble_gap_dev_info_evt_t));
 
             if (NULL != p_cb_evt)
             {
@@ -1820,7 +2018,7 @@ ble_status_t R_BLE_GTL_GAP_GetRemDevInfo(uint16_t conn_hdl)
 
 ble_status_t R_BLE_GTL_GATTS_SetDbInst(st_ble_gatts_db_cfg_t * p_db_inst)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -1836,16 +2034,22 @@ ble_status_t R_BLE_GTL_GATTS_SetDbInst(st_ble_gatts_db_cfg_t * p_db_inst)
     r_ble_gtl_uuid_t             uuid;
     r_ble_gtl_gattm_att_desc_t * p_att_desc   = NULL;
 
-    /* Store GAP service characteristic values so we can respond with them if requested via R_BLE_GTL_GAPC_GET_DEV_INFO_REQ_IND command */
-    r_ble_gtl_gap_get_char_value_by_uuid(R_BLE_GTL_CHAR_DEVICE_NAME, &g_dev_params.dev_name[0], R_BLE_GTL_GAP_DEV_NAME_LEN_MAX);
-    r_ble_gtl_gap_get_char_value_by_uuid(R_BLE_GTL_CHAR_APPEARANCE, (uint8_t *)&g_dev_params.appearance, sizeof(g_dev_params.appearance));
+    /* Store GAP service characteristic values so we can respond with them if requested 
+       via R_BLE_GTL_GAPC_GET_DEV_INFO_REQ_IND command */
+    r_ble_gtl_gap_get_char_value_by_uuid(R_BLE_GTL_CHAR_DEVICE_NAME,
+                                         &g_dev_params.dev_name[0], 
+                                         R_BLE_GTL_GAP_DEV_NAME_LEN_MAX);
+    r_ble_gtl_gap_get_char_value_by_uuid(R_BLE_GTL_CHAR_APPEARANCE,
+                                         (uint8_t *)&g_dev_params.appearance, 
+                                         sizeof(g_dev_params.appearance));
 
     /* When a service is registered with the DA1453x it selects the starting handle, this may be different from
        the handle in the QE profile database. The offset between the two is captured in  when the
        first service is registered. */
     g_dev_params.att_hndl_offset = 0;
 
-    /* First element in database contains profile description, all we need from this is the total number of attributes in the database  */
+    /* First element in database contains profile description, all we need from this is the total number of 
+    attributes in the database  */
     nbr_db_atts = qe_ble_profile[db_ix++].encapsulated_attributes;
 
     /* Add services/characteristics from the database created by the QE Tool */
@@ -1911,17 +2115,14 @@ ble_status_t R_BLE_GTL_GATTS_SetDbInst(st_ble_gatts_db_cfg_t * p_db_inst)
 
                     if (NULL != p_att_desc)
                     {
-                        status = BLE_SUCCESS;
-                        /* Build table of service attribute descriptors based on information in database */
-                        for (att_ix = 0; ((att_ix < nbr_svc_atts) && (BLE_SUCCESS == status)); att_ix++)
-                        {
-                            status = r_ble_gtl_att_build_descriptor(&p_att_desc[att_ix], &p_qe_att[att_ix + 1]);
-                        }
+                        /* Build service attribute descriptor based on information in database */
+                        status = r_ble_gtl_att_build_descriptor(&p_att_desc[0], &p_qe_att[1], nbr_svc_atts);
 
                         if (BLE_SUCCESS == status)
                         {
-                            uint16_t start_handle;
-                            status = r_ble_gtl_gattm_add_service(svc_perms, (uint8_t)nbr_svc_atts, &uuid, p_att_desc, &start_handle);
+                            uint16_t start_handle = 0;
+                            status = r_ble_gtl_gattm_add_service(svc_perms, (uint8_t)nbr_svc_atts,
+                                                                 &uuid, p_att_desc, &start_handle);
 
                             /* Capture the starting handle of the first service registered */
                             if (0 == g_dev_params.att_hndl_offset)
@@ -1967,6 +2168,16 @@ ble_status_t R_BLE_GTL_GATTS_SetDbInst(st_ble_gatts_db_cfg_t * p_db_inst)
                     }
                 }
             }
+            else
+            {
+                status = BLE_ERR_INVALID_DATA;
+                break;
+            }
+        }
+        else
+        {
+            status = BLE_ERR_INVALID_DATA;
+            break;
         }
     }
 
@@ -1975,7 +2186,7 @@ ble_status_t R_BLE_GTL_GATTS_SetDbInst(st_ble_gatts_db_cfg_t * p_db_inst)
 
 ble_status_t R_BLE_GTL_GATT_GetMtu(uint16_t conn_hdl, uint16_t * p_mtu)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_mtu, BLE_ERR_INVALID_ARG);
@@ -1991,7 +2202,7 @@ ble_status_t R_BLE_GTL_GATT_GetMtu(uint16_t conn_hdl, uint16_t * p_mtu)
 
 ble_status_t R_BLE_GTL_GATTS_RegisterCb(ble_gatts_app_cb_t cb, uint8_t priority)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != cb, BLE_ERR_INVALID_ARG);
 #endif
 
@@ -2015,21 +2226,44 @@ ble_status_t R_BLE_GTL_GATTS_DeregisterCb(ble_gatts_app_cb_t cb)
 
 ble_status_t R_BLE_GTL_GATTS_Notification(uint16_t conn_hdl, st_ble_gatt_hdl_value_pair_t * p_ntf_data)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_ntf_data, BLE_ERR_INVALID_ARG);
 #endif
 
-    return r_ble_gtl_gattc_notify(conn_hdl,
-                                 (uint16_t)(p_ntf_data->attr_hdl + g_dev_params.att_hndl_offset),
-                                 p_ntf_data->value.p_value,
-                                 p_ntf_data->value.value_len);
+    ble_status_t             status;
+    r_ble_gtl_cb_evt_t     * p_cb_evt;
+    st_ble_gatts_cfm_evt_t * p_cfm;
+
+    status = r_ble_gtl_gattc_notify(conn_hdl,
+                                    (uint16_t)(p_ntf_data->attr_hdl + g_dev_params.att_hndl_offset),
+                                    p_ntf_data->value.p_value,
+                                    p_ntf_data->value.value_len);
+
+    if (BLE_SUCCESS == status)
+    {
+        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTS_EVENT_HDL_VAL_CNF, BLE_SUCCESS, sizeof(st_ble_gatts_cfm_evt_t));
+
+        if (NULL != p_cb_evt)
+        {
+            p_cfm = p_cb_evt->data.gatts.p_param;
+            p_cfm->attr_hdl = p_ntf_data->attr_hdl;
+
+            status = r_ble_gtl_cb_evt_queue_add(p_cb_evt);
+        }
+        else
+        {
+            status = BLE_ERR_MEM_ALLOC_FAILED;
+        }
+    }
+
+    return status;
 }
 
 ble_status_t R_BLE_GTL_GATTS_Indication(uint16_t conn_hdl, st_ble_gatt_hdl_value_pair_t * p_ind_data)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_ind_data, BLE_ERR_INVALID_ARG);
@@ -2065,22 +2299,27 @@ ble_status_t R_BLE_GTL_GATTS_Indication(uint16_t conn_hdl, st_ble_gatt_hdl_value
 
 ble_status_t R_BLE_GTL_GATTS_GetAttr(uint16_t conn_hdl, uint16_t attr_hdl, st_ble_gatt_value_t * p_value)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_value, BLE_ERR_INVALID_ARG);
 #endif
 
-    ble_status_t status;
+    ble_status_t status = BLE_ERR_INVALID_ARG;
 
-    status = r_ble_gtl_gattm_get_att_value(conn_hdl, attr_hdl + g_dev_params.att_hndl_offset, p_value);
+    if (0 <= ((int32_t)attr_hdl + g_dev_params.att_hndl_offset))
+    {
+        status = r_ble_gtl_gattm_get_att_value(conn_hdl, 
+                                               (uint16_t)((int32_t)attr_hdl + g_dev_params.att_hndl_offset), 
+                                               p_value);
+    }
 
     return status;
 }
 
 ble_status_t R_BLE_GTL_GATTS_SetAttr(uint16_t conn_hdl, uint16_t attr_hdl, st_ble_gatt_value_t * p_value)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_value, BLE_ERR_INVALID_ARG);
@@ -2095,7 +2334,7 @@ ble_status_t R_BLE_GTL_GATTS_SetAttr(uint16_t conn_hdl, uint16_t attr_hdl, st_bl
 
 ble_status_t R_BLE_GTL_GATTC_RegisterCb(ble_gattc_app_cb_t cb, uint8_t priority)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != cb, BLE_ERR_INVALID_ARG);
 #endif
 
@@ -2119,7 +2358,7 @@ ble_status_t R_BLE_GTL_GATTC_DeregisterCb(ble_gattc_app_cb_t cb)
 
 ble_status_t R_BLE_GTL_GATTC_ReqExMtu(uint16_t conn_hdl, uint16_t mtu)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -2134,7 +2373,8 @@ ble_status_t R_BLE_GTL_GATTC_ReqExMtu(uint16_t conn_hdl, uint16_t mtu)
     status = r_ble_gtl_gattc_exch_mtu(conn_hdl, &rsp_mtu);
     if (BLE_SUCCESS == status)
     {
-        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTC_EVENT_EX_MTU_RSP, BLE_SUCCESS, sizeof(st_ble_gattc_ex_mtu_rsp_evt_t));
+        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTC_EVENT_EX_MTU_RSP, BLE_SUCCESS, 
+                                             sizeof(st_ble_gattc_ex_mtu_rsp_evt_t));
         if (NULL != p_cb_evt)
         {
             p_ex_mtu_rsp = p_cb_evt->data.gattc.p_param;
@@ -2153,7 +2393,7 @@ ble_status_t R_BLE_GTL_GATTC_ReqExMtu(uint16_t conn_hdl, uint16_t mtu)
 
 ble_status_t R_BLE_GTL_GATTC_DiscAllPrimServ(uint16_t conn_hdl)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -2165,20 +2405,21 @@ ble_status_t R_BLE_GTL_GATTC_DiscAllPrimServ(uint16_t conn_hdl)
     disc_serv_events.evt_128  = BLE_GATTC_EVENT_PRIM_SERV_128_DISC_IND;
     disc_serv_events.evt_comp = BLE_GATTC_EVENT_ALL_PRIM_SERV_DISC_COMP;
 
-    status = r_ble_gtl_gattc_discover(conn_hdl, R_BLE_GTL_GATTC_OP_DISC_ALL_SVC, 0x0001, 0xFFFF, NULL, &disc_serv_events);
+    status = r_ble_gtl_gattc_discover(conn_hdl, R_BLE_GTL_GATTC_OP_DISC_ALL_SVC, 0x0001, 
+                                                UINT16_MAX, NULL, &disc_serv_events);
 
     return status;
 }
 
 ble_status_t R_BLE_GTL_GATTC_DiscPrimServ(uint16_t conn_hdl, uint8_t * p_uuid, uint8_t uuid_type)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_uuid, BLE_ERR_INVALID_ARG);
 #endif
 
-    ble_status_t            status;
+    ble_status_t            status = BLE_SUCCESS;
     r_ble_gtl_disc_events_t disc_serv_events;
     r_ble_gtl_uuid_t        uuid;
 
@@ -2203,7 +2444,8 @@ ble_status_t R_BLE_GTL_GATTC_DiscPrimServ(uint16_t conn_hdl, uint8_t * p_uuid, u
         disc_serv_events.evt_128  = BLE_GATTC_EVENT_PRIM_SERV_128_DISC_IND;
         disc_serv_events.evt_comp = BLE_GATTC_EVENT_ALL_PRIM_SERV_DISC_COMP;
 
-        status = r_ble_gtl_gattc_discover(conn_hdl, R_BLE_GTL_GATTC_OP_DISC_BY_UUID_SVC, 0x0001, 0xFFFF, &uuid, &disc_serv_events);
+        status = r_ble_gtl_gattc_discover(conn_hdl, R_BLE_GTL_GATTC_OP_DISC_BY_UUID_SVC, 0x0001, 
+                                                    UINT16_MAX, &uuid, &disc_serv_events);
     }
 
     return status;
@@ -2211,7 +2453,7 @@ ble_status_t R_BLE_GTL_GATTC_DiscPrimServ(uint16_t conn_hdl, uint8_t * p_uuid, u
 
 ble_status_t R_BLE_GTL_GATTC_DiscIncServ(uint16_t conn_hdl, st_ble_gatt_hdl_range_t * p_range)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_range, BLE_ERR_INVALID_ARG);
@@ -2224,14 +2466,15 @@ ble_status_t R_BLE_GTL_GATTC_DiscIncServ(uint16_t conn_hdl, st_ble_gatt_hdl_rang
     disc_serv_events.evt_128  = BLE_GATTC_EVENT_INC_SERV_128_DISC_IND;
     disc_serv_events.evt_comp = BLE_GATTC_EVENT_INC_SERV_DISC_COMP;
 
-    status = r_ble_gtl_gattc_discover(conn_hdl, R_BLE_GTL_GATTC_OP_DISC_INCLUDED_SVC, p_range->start_hdl, p_range->end_hdl, NULL, &disc_serv_events);
+    status = r_ble_gtl_gattc_discover(conn_hdl, R_BLE_GTL_GATTC_OP_DISC_INCLUDED_SVC, p_range->start_hdl, 
+                                                        p_range->end_hdl, NULL, &disc_serv_events);
 
     return status;
 }
 
 ble_status_t R_BLE_GTL_GATTC_DiscAllChar(uint16_t conn_hdl, st_ble_gatt_hdl_range_t * p_range)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_range, BLE_ERR_INVALID_ARG);
@@ -2244,7 +2487,8 @@ ble_status_t R_BLE_GTL_GATTC_DiscAllChar(uint16_t conn_hdl, st_ble_gatt_hdl_rang
     disc_serv_events.evt_128  = BLE_GATTC_EVENT_CHAR_128_DISC_IND;
     disc_serv_events.evt_comp = BLE_GATTC_EVENT_ALL_CHAR_DISC_COMP;
 
-    status = r_ble_gtl_gattc_discover(conn_hdl, R_BLE_GTL_GATTC_OP_DISC_ALL_CHAR, 0x0001, 0xFFFF, NULL, &disc_serv_events);
+    status = r_ble_gtl_gattc_discover(conn_hdl, R_BLE_GTL_GATTC_OP_DISC_ALL_CHAR, 0x0001, 
+                                                    UINT16_MAX, NULL, &disc_serv_events);
 
     return status;
 }
@@ -2254,14 +2498,14 @@ ble_status_t R_BLE_GTL_GATTC_DiscCharByUuid(uint16_t                  conn_hdl,
                                             uint8_t                   uuid_type,
                                             st_ble_gatt_hdl_range_t * p_range)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_uuid, BLE_ERR_INVALID_ARG);
     FSP_ERROR_RETURN(NULL != p_range, BLE_ERR_INVALID_ARG);
 #endif
 
-    ble_status_t            status;
+    ble_status_t            status = BLE_SUCCESS;
     r_ble_gtl_disc_events_t disc_serv_events;
     r_ble_gtl_uuid_t        uuid;
 
@@ -2286,7 +2530,8 @@ ble_status_t R_BLE_GTL_GATTC_DiscCharByUuid(uint16_t                  conn_hdl,
         disc_serv_events.evt_128  = BLE_GATTC_EVENT_CHAR_128_DISC_IND;
         disc_serv_events.evt_comp = BLE_GATTC_EVENT_CHAR_DISC_COMP;
 
-        status = r_ble_gtl_gattc_discover(conn_hdl, R_BLE_GTL_GATTC_OP_DISC_BY_UUID_CHAR, 0x0001, 0xFFFF, &uuid, &disc_serv_events);
+        status = r_ble_gtl_gattc_discover(conn_hdl, R_BLE_GTL_GATTC_OP_DISC_BY_UUID_CHAR, 0x0001, 
+                                                        UINT16_MAX, &uuid, &disc_serv_events);
     }
 
     return status;
@@ -2294,7 +2539,7 @@ ble_status_t R_BLE_GTL_GATTC_DiscCharByUuid(uint16_t                  conn_hdl,
 
 ble_status_t R_BLE_GTL_GATTC_DiscAllCharDesc (uint16_t conn_hdl, st_ble_gatt_hdl_range_t * p_range)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_range, BLE_ERR_INVALID_ARG);
@@ -2307,19 +2552,21 @@ ble_status_t R_BLE_GTL_GATTC_DiscAllCharDesc (uint16_t conn_hdl, st_ble_gatt_hdl
     disc_serv_events.evt_128  = BLE_GATTC_EVENT_CHAR_DESC_128_DISC_IND;
     disc_serv_events.evt_comp = BLE_GATTC_EVENT_ALL_CHAR_DESC_DISC_COMP;
 
-    status = r_ble_gtl_gattc_discover(conn_hdl, R_BLE_GTL_GATTC_OP_DISC_DESC_CHAR, p_range->start_hdl, p_range->end_hdl, NULL, &disc_serv_events);
+    status = r_ble_gtl_gattc_discover(conn_hdl, R_BLE_GTL_GATTC_OP_DISC_DESC_CHAR, p_range->start_hdl, 
+                                                        p_range->end_hdl, NULL, &disc_serv_events);
 
     return status;
 }
 
 ble_status_t R_BLE_GTL_GATTC_ReadChar(uint16_t conn_hdl, uint16_t value_hdl)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
 
     ble_status_t                 status = BLE_ERR_ALREADY_IN_PROGRESS;
+    bool                         complete = false;
     uint8_t                    * p_msg;
     r_ble_gtl_cb_evt_t         * p_cb_evt;
     st_ble_gattc_rd_char_evt_t * p_rd_char;
@@ -2330,7 +2577,7 @@ ble_status_t R_BLE_GTL_GATTC_ReadChar(uint16_t conn_hdl, uint16_t value_hdl)
         /* Length of 0 means read all */
         status = r_ble_gtl_gattc_send_read_cmd(conn_hdl, R_BLE_GTL_GATTC_OP_READ, value_hdl, 0, 0);
 
-        while (BLE_SUCCESS == status)
+        while ((BLE_SUCCESS == status) && (false == complete))
         {
             status = r_ble_gtl_msg_receive(&p_msg, R_BLE_GTL_MSG_RSP_TIMEOUT_MS);
             if (BLE_SUCCESS == status)
@@ -2339,24 +2586,28 @@ ble_status_t R_BLE_GTL_GATTC_ReadChar(uint16_t conn_hdl, uint16_t value_hdl)
                 {
                     p_read_ind = (r_ble_gtl_gattc_read_ind_t *)&p_msg[sizeof(r_ble_gtl_msg_hdr_t)];
 
-                    p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTC_EVENT_CHAR_READ_RSP, BLE_SUCCESS, p_read_ind->length);
+                    p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTC_EVENT_CHAR_READ_RSP, BLE_SUCCESS, 
+                                                                        p_read_ind->length);
                     if (NULL != p_cb_evt)
                     {
-                        p_rd_char = p_cb_evt->data.gattc.p_param;
-                        p_rd_char->read_data.attr_hdl        = value_hdl;
-                        p_rd_char->read_data.value.value_len = p_read_ind->length;
-                        memcpy(p_rd_char->read_data.value.p_value, p_read_ind->value, p_read_ind->length);
-
+                        if (0 < p_read_ind->length)
+                        {
+                            p_rd_char = p_cb_evt->data.gattc.p_param;
+                            p_rd_char->read_data.attr_hdl        = value_hdl;
+                            p_rd_char->read_data.value.value_len = p_read_ind->length;
+                            memcpy(p_rd_char->read_data.value.p_value, p_read_ind->value, p_read_ind->length);
+                        }
                         status = r_ble_gtl_cb_evt_queue_add(p_cb_evt);
                     }
 
                     r_ble_gtl_msg_buffer_free(p_msg);
-                    break;
+                    complete = true;
                 }
                 else
                 {
-                    /* Message received but not what we expected, queue for processing next time BLE execute is called */
-                    r_ble_gtl_msg_pend_queue_add((uint8_t **)&p_msg);
+                    /* Message received but not what we expected, queue for processing next time 
+                       BLE execute is called */
+                    r_ble_gtl_msg_pend_queue_add(&p_msg);
                 }
             }
         }
@@ -2372,14 +2623,15 @@ ble_status_t R_BLE_GTL_GATTC_ReadCharUsingUuid(uint16_t                  conn_hd
                                                uint8_t                   uuid_type,
                                                st_ble_gatt_hdl_range_t * p_range)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_uuid, BLE_ERR_INVALID_ARG);
     FSP_ERROR_RETURN(NULL != p_range, BLE_ERR_INVALID_ARG);
 #endif
 
-    ble_status_t                 status = BLE_ERR_ALREADY_IN_PROGRESS;
+    ble_status_t                 status = BLE_SUCCESS;
+    bool                         complete = false;
     uint8_t                    * p_msg;
     r_ble_gtl_cb_evt_t         * p_cb_evt;
     st_ble_gattc_rd_char_evt_t * p_rd_char;
@@ -2407,7 +2659,7 @@ ble_status_t R_BLE_GTL_GATTC_ReadCharUsingUuid(uint16_t                  conn_hd
         {
             status = r_ble_gtl_gattc_send_read_by_uuid_cmd(conn_hdl, p_range->start_hdl, p_range->end_hdl, &uuid);
 
-            while (BLE_SUCCESS == status)
+            while ((BLE_SUCCESS == status) && (false == complete))
             {
                 status = r_ble_gtl_msg_receive(&p_msg, R_BLE_GTL_MSG_RSP_TIMEOUT_MS);
                 if (BLE_SUCCESS == status)
@@ -2416,7 +2668,8 @@ ble_status_t R_BLE_GTL_GATTC_ReadCharUsingUuid(uint16_t                  conn_hd
                     {
                         p_read_ind = (r_ble_gtl_gattc_read_ind_t *)&p_msg[sizeof(r_ble_gtl_msg_hdr_t)];
 
-                        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTC_EVENT_CHAR_READ_BY_UUID_RSP, BLE_SUCCESS, p_read_ind->length);
+                        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTC_EVENT_CHAR_READ_BY_UUID_RSP, BLE_SUCCESS, 
+                                                                            p_read_ind->length);
                         if (NULL != p_cb_evt)
                         {
                             p_rd_char = p_cb_evt->data.gattc.p_param;
@@ -2428,12 +2681,13 @@ ble_status_t R_BLE_GTL_GATTC_ReadCharUsingUuid(uint16_t                  conn_hd
                         }
 
                         r_ble_gtl_msg_buffer_free(p_msg);
-                        break;
+                        complete = true;
                     }
                     else
                     {
-                        /* Message received but not what we expected, queue for processing next time BLE execute is called */
-                        r_ble_gtl_msg_pend_queue_add((uint8_t **)&p_msg);
+                        /* Message received but not what we expected, queue for processing next time 
+                           BLE execute is called */
+                        r_ble_gtl_msg_pend_queue_add(&p_msg);
                     }
                 }
             }
@@ -2451,12 +2705,13 @@ ble_status_t R_BLE_GTL_GATTC_ReadCharUsingUuid(uint16_t                  conn_hd
 
 ble_status_t R_BLE_GTL_GATTC_ReadLongChar(uint16_t conn_hdl, uint16_t value_hdl, uint16_t offset)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
 
     ble_status_t                 status = BLE_ERR_ALREADY_IN_PROGRESS;
+    bool                         complete = false;
     uint8_t                    * p_msg;
     r_ble_gtl_cb_evt_t         * p_cb_evt;
     st_ble_gattc_rd_char_evt_t * p_rd_char;
@@ -2465,9 +2720,9 @@ ble_status_t R_BLE_GTL_GATTC_ReadLongChar(uint16_t conn_hdl, uint16_t value_hdl,
     if (true == r_ble_gtl_mutex_take(R_BLE_GTL_MUTEX_RX))
     {
         /* Length of 0 means read all */
-        status = r_ble_gtl_gattc_send_read_cmd(conn_hdl, R_BLE_GTL_GATTC_OP_READ_LONG, value_hdl, 0, 0);
+        status = r_ble_gtl_gattc_send_read_cmd(conn_hdl, R_BLE_GTL_GATTC_OP_READ_LONG, value_hdl, offset, 0);
 
-        while (BLE_SUCCESS == status)
+        while ((BLE_SUCCESS == status) && (false == complete))
         {
             status = r_ble_gtl_msg_receive(&p_msg, R_BLE_GTL_MSG_RSP_TIMEOUT_MS);
             if (BLE_SUCCESS == status)
@@ -2476,24 +2731,28 @@ ble_status_t R_BLE_GTL_GATTC_ReadLongChar(uint16_t conn_hdl, uint16_t value_hdl,
                 {
                     p_read_ind = (r_ble_gtl_gattc_read_ind_t *)&p_msg[sizeof(r_ble_gtl_msg_hdr_t)];
 
-                    p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTC_EVENT_CHAR_READ_RSP, BLE_SUCCESS, p_read_ind->length);
+                    p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTC_EVENT_CHAR_READ_RSP, BLE_SUCCESS, 
+                                                                        p_read_ind->length);
                     if (NULL != p_cb_evt)
                     {
-                        p_rd_char = p_cb_evt->data.gattc.p_param;
-                        p_rd_char->read_data.attr_hdl        = value_hdl;
-                        p_rd_char->read_data.value.value_len = p_read_ind->length;
-                        memcpy(p_rd_char->read_data.value.p_value, p_read_ind->value, p_read_ind->length);
-
+                        if (0 < p_read_ind->length)
+                        {
+                            p_rd_char = p_cb_evt->data.gattc.p_param;
+                            p_rd_char->read_data.attr_hdl        = value_hdl;
+                            p_rd_char->read_data.value.value_len = p_read_ind->length;
+                            memcpy(p_rd_char->read_data.value.p_value, p_read_ind->value, p_read_ind->length);
+                        }
                         status = r_ble_gtl_cb_evt_queue_add(p_cb_evt);
                     }
 
                     r_ble_gtl_msg_buffer_free(p_msg);
-                    break;
+                    complete = true;
                 }
                 else
                 {
-                    /* Message received but not what we expected, queue for processing next time BLE execute is called */
-                    r_ble_gtl_msg_pend_queue_add((uint8_t **)&p_msg);
+                    /* Message received but not what we expected, queue for processing next time 
+                       BLE execute is called */
+                    r_ble_gtl_msg_pend_queue_add(&p_msg);
                 }
             }
         }
@@ -2506,13 +2765,14 @@ ble_status_t R_BLE_GTL_GATTC_ReadLongChar(uint16_t conn_hdl, uint16_t value_hdl,
 ble_status_t R_BLE_GTL_GATTC_ReadMultiChar(uint16_t conn_hdl, st_ble_gattc_rd_multi_req_param_t * p_list)
 {
 
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_list, BLE_ERR_INVALID_ARG);
 #endif
 
     ble_status_t                 status = BLE_ERR_ALREADY_IN_PROGRESS;
+    bool                         complete = false;
     uint8_t                    * p_msg;
     r_ble_gtl_cb_evt_t         * p_cb_evt;
     st_ble_gattc_rd_char_evt_t * p_rd_char;
@@ -2521,9 +2781,9 @@ ble_status_t R_BLE_GTL_GATTC_ReadMultiChar(uint16_t conn_hdl, st_ble_gattc_rd_mu
     if (true == r_ble_gtl_mutex_take(R_BLE_GTL_MUTEX_RX))
     {
         /* Length of 0 means read all */
-        status = r_ble_gtl_gattc_send_read_multiple_cmd(conn_hdl, p_list->list_count, p_list->p_hdl_list, 0);
+        status = r_ble_gtl_gattc_send_read_multiple_cmd(conn_hdl, (uint8_t)p_list->list_count, p_list->p_hdl_list, 0);
 
-        while (BLE_SUCCESS == status)
+        while ((BLE_SUCCESS == status) && (false == complete))
         {
             status = r_ble_gtl_msg_receive(&p_msg, R_BLE_GTL_MSG_RSP_TIMEOUT_MS);
             if (BLE_SUCCESS == status)
@@ -2532,24 +2792,28 @@ ble_status_t R_BLE_GTL_GATTC_ReadMultiChar(uint16_t conn_hdl, st_ble_gattc_rd_mu
                 {
                     p_read_ind = (r_ble_gtl_gattc_read_ind_t *)&p_msg[sizeof(r_ble_gtl_msg_hdr_t)];
 
-                    p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTC_EVENT_MULTI_CHAR_READ_RSP, BLE_SUCCESS, p_read_ind->length);
+                    p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTC_EVENT_MULTI_CHAR_READ_RSP, BLE_SUCCESS, 
+                                                                        p_read_ind->length);
                     if (NULL != p_cb_evt)
                     {
-                        p_rd_char = p_cb_evt->data.gattc.p_param;
-                        p_rd_char->read_data.attr_hdl        = p_read_ind->handle;
-                        p_rd_char->read_data.value.value_len = p_read_ind->length;
-                        memcpy(p_rd_char->read_data.value.p_value, p_read_ind->value, p_read_ind->length);
-
+                        if (0 < p_read_ind->length)
+                        {
+                            p_rd_char = p_cb_evt->data.gattc.p_param;
+                            p_rd_char->read_data.attr_hdl        = p_read_ind->handle;
+                            p_rd_char->read_data.value.value_len = p_read_ind->length;
+                            memcpy(p_rd_char->read_data.value.p_value, p_read_ind->value, p_read_ind->length);
+                        }
                         status = r_ble_gtl_cb_evt_queue_add(p_cb_evt);
                     }
 
                     r_ble_gtl_msg_buffer_free(p_msg);
-                    break;
+                    complete = true;
                 }
                 else
                 {
-                    /* Message received but not what we expected, queue for processing next time BLE execute is called */
-                    r_ble_gtl_msg_pend_queue_add((uint8_t **)&p_msg);
+                    /* Message received but not what we expected, queue for processing next time 
+                       BLE execute is called */
+                    r_ble_gtl_msg_pend_queue_add(&p_msg);
                 }
             }
         }
@@ -2561,7 +2825,7 @@ ble_status_t R_BLE_GTL_GATTC_ReadMultiChar(uint16_t conn_hdl, st_ble_gattc_rd_mu
 
 ble_status_t R_BLE_GTL_GATTC_WriteCharWithoutRsp(uint16_t conn_hdl, st_ble_gatt_hdl_value_pair_t * p_write_data)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_write_data, BLE_ERR_INVALID_ARG);
@@ -2581,7 +2845,7 @@ ble_status_t R_BLE_GTL_GATTC_WriteCharWithoutRsp(uint16_t conn_hdl, st_ble_gatt_
 
 ble_status_t R_BLE_GTL_GATTC_SignedWriteChar(uint16_t conn_hdl, st_ble_gatt_hdl_value_pair_t * p_write_data)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_write_data, BLE_ERR_INVALID_ARG);
@@ -2602,7 +2866,7 @@ ble_status_t R_BLE_GTL_GATTC_SignedWriteChar(uint16_t conn_hdl, st_ble_gatt_hdl_
 
 ble_status_t R_BLE_GTL_GATTC_WriteChar(uint16_t conn_hdl, st_ble_gatt_hdl_value_pair_t * p_write_data)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_write_data, BLE_ERR_INVALID_ARG);
@@ -2621,7 +2885,8 @@ ble_status_t R_BLE_GTL_GATTC_WriteChar(uint16_t conn_hdl, st_ble_gatt_hdl_value_
                                    0);
     if (BLE_SUCCESS == status)
     {
-        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTC_EVENT_CHAR_WRITE_RSP, BLE_SUCCESS, sizeof(st_ble_gattc_wr_char_evt_t));
+        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTC_EVENT_CHAR_WRITE_RSP, BLE_SUCCESS, 
+                                                    sizeof(st_ble_gattc_wr_char_evt_t));
 
         if (NULL != p_cb_evt)
         {
@@ -2639,9 +2904,10 @@ ble_status_t R_BLE_GTL_GATTC_WriteChar(uint16_t conn_hdl, st_ble_gatt_hdl_value_
     return status;
 }
 
-ble_status_t R_BLE_GTL_GATTC_WriteLongChar(uint16_t conn_hdl, st_ble_gatt_hdl_value_pair_t * p_write_data, uint16_t offset)
+ble_status_t R_BLE_GTL_GATTC_WriteLongChar(uint16_t conn_hdl, st_ble_gatt_hdl_value_pair_t * p_write_data, 
+                                                                        uint16_t offset)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_write_data, BLE_ERR_INVALID_ARG);
@@ -2660,7 +2926,8 @@ ble_status_t R_BLE_GTL_GATTC_WriteLongChar(uint16_t conn_hdl, st_ble_gatt_hdl_va
                                    offset);
     if (BLE_SUCCESS == status)
     {
-        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTC_EVENT_LONG_CHAR_WRITE_COMP, BLE_SUCCESS, sizeof(st_ble_gattc_char_part_wr_evt_t));
+        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTC_EVENT_LONG_CHAR_WRITE_COMP, BLE_SUCCESS, 
+                                                    sizeof(st_ble_gattc_char_part_wr_evt_t));
 
         if (NULL != p_cb_evt)
         {
@@ -2685,7 +2952,7 @@ ble_status_t R_BLE_GTL_GATTC_ReliableWrites (uint16_t                           
                                              uint8_t                                    pair_num,
                                              uint8_t                                    auto_flag)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_char_pair, BLE_ERR_INVALID_ARG);
@@ -2730,7 +2997,7 @@ ble_status_t R_BLE_GTL_GATTC_ReliableWrites (uint16_t                           
 
 ble_status_t R_BLE_GTL_GATTC_ExecWrite(uint16_t conn_hdl, uint8_t exe_flag)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -2742,7 +3009,8 @@ ble_status_t R_BLE_GTL_GATTC_ExecWrite(uint16_t conn_hdl, uint8_t exe_flag)
     status = r_ble_gtl_gattc_send_write_execute(conn_hdl, exe_flag);
     if (BLE_SUCCESS == status)
     {
-        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTC_EVENT_RELIABLE_WRITES_COMP, BLE_SUCCESS, sizeof(st_ble_gattc_reliable_writes_comp_evt_t));
+        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTC_EVENT_RELIABLE_WRITES_COMP, BLE_SUCCESS, 
+                                                sizeof(st_ble_gattc_reliable_writes_comp_evt_t));
 
         if (NULL != p_cb_evt)
         {
@@ -2762,7 +3030,7 @@ ble_status_t R_BLE_GTL_GATTC_ExecWrite(uint16_t conn_hdl, uint8_t exe_flag)
 
 ble_status_t R_BLE_GTL_L2CAP_RegisterCfPsm (ble_l2cap_cf_app_cb_t cb, uint16_t psm, uint16_t lwm)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != cb, BLE_ERR_INVALID_ARG);
@@ -2779,7 +3047,7 @@ ble_status_t R_BLE_GTL_L2CAP_RegisterCfPsm (ble_l2cap_cf_app_cb_t cb, uint16_t p
 
 ble_status_t R_BLE_GTL_L2CAP_DeregisterCfPsm (uint16_t psm)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -2794,7 +3062,7 @@ ble_status_t R_BLE_GTL_L2CAP_DeregisterCfPsm (uint16_t psm)
 
 ble_status_t R_BLE_GTL_L2CAP_ReqCfConn(uint16_t conn_hdl, st_ble_l2cap_conn_req_param_t * p_conn_req_param)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(NULL != p_conn_req_param, BLE_ERR_INVALID_ARG);
@@ -2807,7 +3075,8 @@ ble_status_t R_BLE_GTL_L2CAP_ReqCfConn(uint16_t conn_hdl, st_ble_l2cap_conn_req_
     status = r_ble_gtl_gapc_lecb_connect(conn_hdl, p_conn_req_param);
     if (BLE_SUCCESS == status)
     {
-        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_L2CAP_EVENT_CF_CONN_CNF, BLE_SUCCESS, sizeof(st_ble_l2cap_cf_conn_evt_t));
+        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_L2CAP_EVENT_CF_CONN_CNF, BLE_SUCCESS, 
+                                                    sizeof(st_ble_l2cap_cf_conn_evt_t));
 
         if (NULL != p_cb_evt)
         {
@@ -2827,7 +3096,7 @@ ble_status_t R_BLE_GTL_L2CAP_ReqCfConn(uint16_t conn_hdl, st_ble_l2cap_conn_req_
 
 ble_status_t R_BLE_GTL_L2CAP_DisconnectCf(uint16_t lcid)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -2839,7 +3108,8 @@ ble_status_t R_BLE_GTL_L2CAP_DisconnectCf(uint16_t lcid)
     status = r_ble_gtl_gapc_lecb_disconnect(g_dev_params.l2cap_conn_hdl, lcid);
     if (BLE_SUCCESS == status)
     {
-        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_L2CAP_EVENT_CF_DISCONN_CNF, BLE_SUCCESS, sizeof(st_ble_l2cap_cf_disconn_evt_t));
+        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_L2CAP_EVENT_CF_DISCONN_CNF, BLE_SUCCESS, 
+                                                sizeof(st_ble_l2cap_cf_disconn_evt_t));
 
         if (NULL != p_cb_evt)
         {
@@ -2859,7 +3129,7 @@ ble_status_t R_BLE_GTL_L2CAP_DisconnectCf(uint16_t lcid)
 
 ble_status_t R_BLE_GTL_L2CAP_SendCfCredit(uint16_t lcid, uint16_t credit)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -2868,7 +3138,8 @@ ble_status_t R_BLE_GTL_L2CAP_SendCfCredit(uint16_t lcid, uint16_t credit)
 
     if (true == r_ble_gtl_mutex_take(R_BLE_GTL_MUTEX_RX))
     {
-        status = r_ble_gtl_gapc_send_lecb_add_cmd(g_dev_params.l2cap_conn_hdl, R_BLE_GTL_GAPC_OP_LE_CB_ADDITION, 0, lcid, credit);
+        status = r_ble_gtl_gapc_send_lecb_add_cmd(g_dev_params.l2cap_conn_hdl, R_BLE_GTL_GAPC_OP_LE_CB_ADDITION, 
+                                                                            0, lcid, credit);
         if (BLE_SUCCESS == status)
         {
             status = r_ble_gtl_msg_wait_for_cmd_complete(R_BLE_GTL_GAPC_CMP_EVT,
@@ -2885,16 +3156,19 @@ ble_status_t R_BLE_GTL_L2CAP_SendCfCredit(uint16_t lcid, uint16_t credit)
 
 ble_status_t R_BLE_GTL_L2CAP_SendCfData(uint16_t conn_hdl, uint16_t lcid, uint16_t data_len, uint8_t * p_sdu)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
+
+    FSP_PARAMETER_NOT_USED(conn_hdl);
 
     ble_status_t status = BLE_ERR_ALREADY_IN_PROGRESS;
 
     if (true == r_ble_gtl_mutex_take(R_BLE_GTL_MUTEX_RX))
     {
-        status = r_ble_gtl_gapc_send_lecb_send_data_cmd(g_dev_params.l2cap_conn_hdl, R_BLE_GTL_GAPC_OP_LE_CB_SEND, lcid, data_len, p_sdu);
+        status = r_ble_gtl_gapc_send_lecb_send_data_cmd(g_dev_params.l2cap_conn_hdl, R_BLE_GTL_GAPC_OP_LE_CB_SEND, 
+                                                                            (uint8_t)lcid, data_len, p_sdu);
         if (BLE_SUCCESS == status)
         {
             status = r_ble_gtl_msg_wait_for_cmd_complete(R_BLE_GTL_GAPC_CMP_EVT,
@@ -2911,7 +3185,7 @@ ble_status_t R_BLE_GTL_L2CAP_SendCfData(uint16_t conn_hdl, uint16_t lcid, uint16
 
 ble_status_t R_BLE_GTL_VS_Init(ble_vs_app_cb_t vs_cb)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != vs_cb, BLE_ERR_INVALID_ARG);
 #endif
 
@@ -2922,7 +3196,7 @@ ble_status_t R_BLE_GTL_VS_Init(ble_vs_app_cb_t vs_cb)
 
 ble_status_t R_BLE_GTL_VS_GetBdAddr(uint8_t addr_type)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -2938,7 +3212,8 @@ ble_status_t R_BLE_GTL_VS_GetBdAddr(uint8_t addr_type)
     status = r_ble_gtl_gapm_get_bd_addr(&bd_addr);
     if (BLE_SUCCESS == status)
     {
-        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_VS_EVENT_GET_ADDR_COMP, BLE_SUCCESS, sizeof(st_ble_vs_get_bd_addr_comp_evt_t));
+        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_VS_EVENT_GET_ADDR_COMP, BLE_SUCCESS, 
+                                                sizeof(st_ble_vs_get_bd_addr_comp_evt_t));
         if (NULL != p_cb_evt)
         {
             p_bd_addr_evt = p_cb_evt->data.vs.p_param;
@@ -2960,7 +3235,7 @@ ble_status_t R_BLE_GTL_VS_GetBdAddr(uint8_t addr_type)
 
 ble_status_t R_BLE_GTL_VS_SetBdAddr(st_ble_dev_addr_t * p_addr)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != p_addr, BLE_ERR_INVALID_ARG);
 #endif
 
@@ -2980,7 +3255,7 @@ ble_status_t R_BLE_GTL_VS_SetBdAddr(st_ble_dev_addr_t * p_addr)
 
 ble_status_t R_BLE_GTL_VS_GetRand(uint8_t rand_size)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
     FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
 #endif
@@ -3022,7 +3297,7 @@ ble_status_t R_BLE_GTL_VS_GetRand(uint8_t rand_size)
  * @param[in]  p_args    Pointer to callabck arguments which includes received data etc.
  *
  **********************************************************************************************************************/
-#if defined (RM_BLE_ABS_GTL_TRANSPORT_INTERFACE_UART)
+#if defined (BLE_CFG_TRANSPORT_INTERFACE_UART)
 void R_BLE_GTL_UartCallback (void * pArgs)
 {
     uint8_t * p_rx_msg  = NULL;
@@ -3034,16 +3309,30 @@ void R_BLE_GTL_UartCallback (void * pArgs)
         case SCI_EVT_RX_CHAR:
         {
             g_transport_api.read(g_transport_api.p_context, &data_byte, 1);
-            p_rx_msg = r_ble_gtl_msg_parse_rx_char(data_byte);
-            if (NULL != p_rx_msg)
+#if (BLE_CFG_HOST_BOOT_MODE == 1)
+            if (false == g_booting)
             {
-                /* Message received, queue for processing by R_BLE_Execute */
-                if (BLE_SUCCESS != r_ble_gtl_msg_queue_add((uint8_t **)&p_rx_msg))
+#endif
+                p_rx_msg = r_ble_gtl_msg_parse_rx_char(data_byte);
+                if (NULL != p_rx_msg)
                 {
-                    /* Unable to queue message, just discard */
-                    r_ble_gtl_msg_buffer_free_from_isr(p_rx_msg);
+                    /* Message received, queue for processing by R_BLE_Execute */
+                    if (BLE_SUCCESS != r_ble_gtl_msg_queue_add(&p_rx_msg))
+                    {
+                        /* Unable to queue message, just discard */
+                        r_ble_gtl_msg_buffer_free_from_isr(p_rx_msg);
+                    }
                 }
+#if (BLE_CFG_HOST_BOOT_MODE == 1)
             }
+            else
+            {
+                /* In process of booting DA1453x so store received byte for processing
+                by image loading function. OK to overwrite previously received data,
+                we are only interested in the last received byte. */
+                g_rx_boot_byte = data_byte;
+            }
+#endif
             break;
         }
 
@@ -3121,49 +3410,56 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_handler(uint8_t * p_gtl_msg)
     r_ble_gtl_cb_evt_t  * p_cb_evt      = NULL;
     r_ble_gtl_msg_hdr_t * p_gtl_msg_hdr = (r_ble_gtl_msg_hdr_t *)p_gtl_msg;
 
-    /* Connection handle is part of the source ID - it only has 8-bit range but is stored as uint16_t to be consistent with the R_BLE API */
+    /* Connection handle is part of the source ID - it only has 8-bit range but is stored as uint16_t to be 
+    consistent with the R_BLE API */
     conn_hdl = p_gtl_msg_hdr->src_id >> 8;
 
     switch (p_gtl_msg_hdr->msg_id)
     {
         case R_BLE_GTL_GAPC_CONNECTION_REQ_IND:
         {
-            r_ble_gtl_gapc_connection_req_ind_t * p_param = (r_ble_gtl_gapc_connection_req_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
+            r_ble_gtl_gapc_connection_req_ind_t * p_param = 
+                                    (r_ble_gtl_gapc_connection_req_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
             p_cb_evt = r_ble_gtl_gapc_connection_req_handler(conn_hdl, p_param);
             break;
         }
 
         case R_BLE_GTL_GAPC_DISCONNECT_IND:
         {
-            r_ble_gtl_gapc_disconnect_ind_t * p_param = (r_ble_gtl_gapc_disconnect_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
+            r_ble_gtl_gapc_disconnect_ind_t * p_param = 
+                                    (r_ble_gtl_gapc_disconnect_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
             p_cb_evt = r_ble_gtl_gapc_disconnect_ind_handler(conn_hdl, p_param);
             break;
         }
 
         case R_BLE_GTL_GAPC_LE_PKT_SIZE_IND:
         {
-            r_ble_gtl_gapc_le_pkt_size_ind_t * p_param = (r_ble_gtl_gapc_le_pkt_size_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
+            r_ble_gtl_gapc_le_pkt_size_ind_t * p_param = 
+                                    (r_ble_gtl_gapc_le_pkt_size_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
             p_cb_evt = r_ble_gtl_gapc_le_pkt_size_ind_handler(conn_hdl, p_param);
             break;
         }
 
         case R_BLE_GTL_GAPC_PARAM_UPDATED_IND:
         {
-            r_ble_gtl_gapc_param_update_ind_t * p_param = (r_ble_gtl_gapc_param_update_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
+            r_ble_gtl_gapc_param_update_ind_t * p_param = 
+                                    (r_ble_gtl_gapc_param_update_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
             p_cb_evt = r_ble_gtl_gapc_param_update_ind_handler(conn_hdl, p_param);
             break;
         }
 
         case R_BLE_GTL_GAPC_GET_DEV_INFO_REQ_IND:
         {
-            r_ble_gtl_gapc_get_dev_info_req_ind_t * p_param = (r_ble_gtl_gapc_get_dev_info_req_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
+            r_ble_gtl_gapc_get_dev_info_req_ind_t * p_param = 
+                                    (r_ble_gtl_gapc_get_dev_info_req_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
             p_cb_evt = r_ble_gtl_gapc_get_dev_info_req_ind_handler(conn_hdl, p_param);
             break;
         }
 
         case R_BLE_GTL_GAPC_PARAM_UPDATE_REQ_IND:
         {
-            r_ble_gtl_gapc_param_update_req_ind_t * p_param = (r_ble_gtl_gapc_param_update_req_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
+            r_ble_gtl_gapc_param_update_req_ind_t * p_param = 
+                                    (r_ble_gtl_gapc_param_update_req_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
             p_cb_evt = r_ble_gtl_gapc_parm_update_req_ind_handler(conn_hdl, p_param);
             break;
         }
@@ -3192,28 +3488,32 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_handler(uint8_t * p_gtl_msg)
     r_ble_gtl_cb_evt_t  * p_cb_evt      = NULL;
     r_ble_gtl_msg_hdr_t * p_gtl_msg_hdr = (r_ble_gtl_msg_hdr_t *)p_gtl_msg;
 
-    /* Connection handle is part of the source ID - it only has 8-bit range but is stored as uint16_t to be consistent with the R_BLE API */
+    /* Connection handle is part of the source ID - it only has 8-bit range but is stored as uint16_t to be 
+    consistent with the R_BLE API */
     conn_hdl = p_gtl_msg_hdr->src_id >> 8;
 
     switch (p_gtl_msg_hdr->msg_id)
     {
         case R_BLE_GTL_GATTC_WRITE_REQ_IND:
         {
-            r_ble_gtl_gattc_write_req_ind_t * p_param = (r_ble_gtl_gattc_write_req_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
+            r_ble_gtl_gattc_write_req_ind_t * p_param = 
+                                    (r_ble_gtl_gattc_write_req_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
             p_cb_evt = r_ble_gtl_gattc_write_req_ind_handler(conn_hdl, p_param);
             break;
         }
 
         case R_BLE_GTL_GATTC_READ_REQ_IND:
         {
-            r_ble_gtl_gattc_read_req_ind_t * p_param = (r_ble_gtl_gattc_read_req_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
+            r_ble_gtl_gattc_read_req_ind_t * p_param = 
+                                    (r_ble_gtl_gattc_read_req_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
             p_cb_evt = r_ble_gtl_gattc_read_req_ind_handler(conn_hdl, p_param);
             break;
         }
 
         case R_BLE_GTL_GATTC_MTU_CHANGED_IND:
         {
-            r_ble_gtl_gattc_mtu_changed_ind_t * p_param = (r_ble_gtl_gattc_mtu_changed_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
+            r_ble_gtl_gattc_mtu_changed_ind_t * p_param = 
+                                    (r_ble_gtl_gattc_mtu_changed_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
             p_cb_evt = r_ble_gtl_gattc_mtu_changed_ind_handler(conn_hdl, p_param);
             break;
         }
@@ -3237,7 +3537,8 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_handler(uint8_t * p_gtl_msg)
  * @retval NULL                 No callback event generated by message processing
  * @retval r_ble_gtl_cb_evt_t * Pointer to callback event generated as a result of processing the message.
  **********************************************************************************************************************/
-static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_connection_req_handler(uint16_t conn_hdl, r_ble_gtl_gapc_connection_req_ind_t * p_param)
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_connection_req_handler(uint16_t conn_hdl, 
+                                                r_ble_gtl_gapc_connection_req_ind_t * p_param)
 {
     FSP_PARAMETER_NOT_USED(conn_hdl);
 
@@ -3260,9 +3561,9 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_connection_req_handler(uint16_t conn_
         g_dev_params.state = R_BLE_GTL_DEV_STATE_CONNECTED;
 
         p_cfm = (r_ble_gtl_gapc_connection_cfm_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GAPC_CONNECTION_CFM,
-                                                                          R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(p_param->conhdl << 8),
-                                                                          R_BLE_GTL_TASK_ID_GTL,
-                                                                          sizeof(r_ble_gtl_gapc_connection_cfm_t));
+                                                            R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(p_param->conhdl << 8),
+                                                            R_BLE_GTL_TASK_ID_GTL,
+                                                            sizeof(r_ble_gtl_gapc_connection_cfm_t));
         if (NULL != p_cfm)
         {
             p_cfm->auth = 0; /* Security not supported at present */
@@ -3271,7 +3572,8 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_connection_req_handler(uint16_t conn_
 
             if (BLE_SUCCESS == status)
             {
-                p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GAP_EVENT_CONN_IND, BLE_SUCCESS, sizeof(st_ble_gap_conn_evt_t));
+                p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GAP_EVENT_CONN_IND, BLE_SUCCESS, 
+                                                        sizeof(st_ble_gap_conn_evt_t));
 
                 if (NULL != p_cb_evt)
                 {
@@ -3301,7 +3603,8 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_connection_req_handler(uint16_t conn_
  * @retval NULL                 No callback event generated by message processing
  * @retval r_ble_gtl_cb_evt_t * Pointer to callback event generated as a result of processing the message.
  **********************************************************************************************************************/
-static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_disconnect_ind_handler(uint16_t conn_hdl, r_ble_gtl_gapc_disconnect_ind_t * p_param)
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_disconnect_ind_handler(uint16_t conn_hdl, 
+                                                                r_ble_gtl_gapc_disconnect_ind_t * p_param)
 {
     FSP_PARAMETER_NOT_USED(conn_hdl);
 
@@ -3329,11 +3632,13 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_disconnect_ind_handler(uint16_t conn_
  * @retval NULL                 No callback event generated by message processing
  * @retval r_ble_gtl_cb_evt_t * Pointer to callback event generated as a result of processing the message.
  **********************************************************************************************************************/
-static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_le_pkt_size_ind_handler(uint16_t conn_hdl, r_ble_gtl_gapc_le_pkt_size_ind_t * p_param)
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_le_pkt_size_ind_handler(uint16_t conn_hdl, 
+                                                                r_ble_gtl_gapc_le_pkt_size_ind_t * p_param)
 {
     r_ble_gtl_cb_evt_t * p_cb_evt = NULL;
 
-    p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GAP_EVENT_DATA_LEN_CHG, BLE_SUCCESS, sizeof(st_ble_gap_data_len_chg_evt_t));
+    p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GAP_EVENT_DATA_LEN_CHG, BLE_SUCCESS, 
+                                        sizeof(st_ble_gap_data_len_chg_evt_t));
 
     if (NULL != p_cb_evt)
     {
@@ -3358,11 +3663,13 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_le_pkt_size_ind_handler(uint16_t conn
  * @retval NULL                 No callback event generated by message processing
  * @retval r_ble_gtl_cb_evt_t * Pointer to callback event generated as a result of processing the message.
  **********************************************************************************************************************/
-static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_param_update_ind_handler(uint16_t conn_hdl, r_ble_gtl_gapc_param_update_ind_t * p_param)
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_param_update_ind_handler(uint16_t conn_hdl, 
+                                                                r_ble_gtl_gapc_param_update_ind_t * p_param)
 {
     r_ble_gtl_cb_evt_t * p_cb_evt = NULL;
 
-    p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GAP_EVENT_CONN_PARAM_UPD_COMP, BLE_SUCCESS, sizeof(st_ble_gap_conn_upd_evt_t));
+    p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GAP_EVENT_CONN_PARAM_UPD_COMP, BLE_SUCCESS, 
+                                                    sizeof(st_ble_gap_conn_upd_evt_t));
 
     if (NULL != p_cb_evt)
     {
@@ -3386,7 +3693,8 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_param_update_ind_handler(uint16_t con
  * @retval NULL                 No callback event generated by message processing
  * @retval r_ble_gtl_cb_evt_t * Pointer to callback event generated as a result of processing the message.
  **********************************************************************************************************************/
-static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_get_dev_info_req_ind_handler(uint16_t conn_hdl, r_ble_gtl_gapc_get_dev_info_req_ind_t * p_param)
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_get_dev_info_req_ind_handler(uint16_t conn_hdl, 
+                                                                        r_ble_gtl_gapc_get_dev_info_req_ind_t * p_param)
 {
     switch (p_param->operation)
     {
@@ -3395,15 +3703,16 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_get_dev_info_req_ind_handler(uint16_t
             r_ble_gtl_gapc_get_dev_info_cfm_t * p_cmd;
 
             p_cmd = (r_ble_gtl_gapc_get_dev_info_cfm_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GAPC_GET_DEV_INFO_CFM,
-                                                                                R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
-                                                                                R_BLE_GTL_TASK_ID_GTL,
-                                                                                sizeof (r_ble_gtl_gapc_get_dev_info_cfm_t));
+                                                                R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
+                                                                R_BLE_GTL_TASK_ID_GTL,
+                                                                sizeof (r_ble_gtl_gapc_get_dev_info_cfm_t));
             if (NULL != p_cmd)
             {
                 p_cmd->req = p_param->operation;
                 p_cmd->info.name.length = (uint16_t)strlen((const char *)g_dev_params.dev_name);
                 memcpy(p_cmd->info.name.value, g_dev_params.dev_name, p_cmd->info.name.length);
-                p_cmd->hdr.param_length = sizeof(p_cmd->req) + sizeof(p_cmd->padding) + sizeof(p_cmd->info.name.length) + p_cmd->info.name.length;
+                p_cmd->hdr.param_length = sizeof(p_cmd->req) + sizeof(p_cmd->padding) 
+                                            + sizeof(p_cmd->info.name.length) + p_cmd->info.name.length;
 
                 (void)r_ble_gtl_msg_transmit((uint8_t *)p_cmd);
             }
@@ -3416,9 +3725,9 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_get_dev_info_req_ind_handler(uint16_t
             r_ble_gtl_gapc_get_dev_info_cfm_t * p_cmd;
 
             p_cmd = (r_ble_gtl_gapc_get_dev_info_cfm_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GAPC_GET_DEV_INFO_CFM,
-                                                                                R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
-                                                                                R_BLE_GTL_TASK_ID_GTL,
-                                                                                sizeof (r_ble_gtl_gapc_get_dev_info_cfm_t));
+                                                                    R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
+                                                                    R_BLE_GTL_TASK_ID_GTL,
+                                                                    sizeof (r_ble_gtl_gapc_get_dev_info_cfm_t));
             if (NULL != p_cmd)
             {
                 p_cmd->req = p_param->operation;
@@ -3468,8 +3777,11 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_get_dev_info_req_ind_handler(uint16_t
  * @retval NULL                 No callback event generated by message processing
  * @retval r_ble_gtl_cb_evt_t * Pointer to callback event generated as a result of processing the message.
  **********************************************************************************************************************/
-static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_parm_update_req_ind_handler(uint16_t conn_hdl, r_ble_gtl_gapc_param_update_req_ind_t * p_param)
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_parm_update_req_ind_handler(uint16_t conn_hdl, 
+                                                                    r_ble_gtl_gapc_param_update_req_ind_t * p_param)
 {
+    FSP_PARAMETER_NOT_USED(p_param);
+
     /* Accept parameters */
     (void)r_ble_gtl_gapc_send_param_update_cfm(conn_hdl, 0x01);
 
@@ -3485,7 +3797,8 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_parm_update_req_ind_handler(uint16_t 
  * @retval NULL                 No callback event generated by message processing
  * @retval r_ble_gtl_cb_evt_t * Pointer to callback event generated as a result of processing the message.
  **********************************************************************************************************************/
-static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_write_req_ind_handler(uint16_t conn_hdl, r_ble_gtl_gattc_write_req_ind_t * p_param)
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_write_req_ind_handler(uint16_t conn_hdl, 
+                                                                r_ble_gtl_gattc_write_req_ind_t * p_param)
 {
     ble_status_t                   status;
     r_ble_gtl_cb_evt_t           * p_cb_evt = NULL;
@@ -3534,14 +3847,17 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_write_req_ind_handler(uint16_t conn_
  * @retval NULL                 No callback event generated by message processing
  * @retval r_ble_gtl_cb_evt_t * Pointer to callback event generated as a result of processing the message.
  **********************************************************************************************************************/
-static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_read_req_ind_handler(uint16_t conn_hdl, r_ble_gtl_gattc_read_req_ind_t * p_param)
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_read_req_ind_handler(uint16_t conn_hdl, 
+                                                                r_ble_gtl_gattc_read_req_ind_t * p_param)
 {
     uint8_t   status    = R_BLE_GTL_ATT_ERR_REQUEST_NOT_SUPPORTED;
     uint8_t * p_value   = NULL;
     uint16_t  value_len = 0;
 
     /* All characteristic values are stored in the DA1453x, except for client configuration characteristics */
-    if (BLE_SUCCESS == r_ble_gtl_gap_get_char_value_by_handle(p_param->handle - g_dev_params.att_hndl_offset, &p_value, &value_len))
+    if (BLE_SUCCESS == r_ble_gtl_gap_get_char_value_by_handle((uint16_t)((int32_t)p_param->handle 
+                                                                                - g_dev_params.att_hndl_offset),
+                                                              &p_value, &value_len))
     {
         status = R_BLE_GTL_GAP_ERR_NO_ERROR;
     }
@@ -3560,7 +3876,8 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_read_req_ind_handler(uint16_t conn_h
  * @retval NULL                 No callback event generated by message processing
  * @retval r_ble_gtl_cb_evt_t * Pointer to callback event generated as a result of processing the message.
  **********************************************************************************************************************/
-static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_mtu_changed_ind_handler(uint16_t conn_hdl, r_ble_gtl_gattc_mtu_changed_ind_t * p_param)
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_mtu_changed_ind_handler(uint16_t conn_hdl, 
+                                                                    r_ble_gtl_gattc_mtu_changed_ind_t * p_param)
 {
     FSP_PARAMETER_NOT_USED(conn_hdl);
 
@@ -3691,7 +4008,8 @@ static ble_status_t r_ble_gtl_gapm_reset(void)
         if (BLE_SUCCESS == status)
         {
             /* Wait for reset complete indication */
-            status = r_ble_gtl_msg_wait_for_cmd_complete(R_BLE_GTL_GAPM_CMP_EVT, R_BLE_GTL_GAPM_OP_RESET, 0, R_BLE_GTL_MSG_RSP_TIMEOUT_MS);
+            status = r_ble_gtl_msg_wait_for_cmd_complete(R_BLE_GTL_GAPM_CMP_EVT, R_BLE_GTL_GAPM_OP_RESET, 
+                                                                    0, R_BLE_GTL_MSG_RSP_TIMEOUT_MS);
         }
         r_ble_gtl_mutex_give(R_BLE_GTL_MUTEX_RX);
     }
@@ -3713,9 +4031,9 @@ static ble_status_t r_ble_gtl_gapm_send_start_adv_cmd(void)
     r_ble_gtl_gapm_start_advertise_cmd_t * p_cmd;
 
     p_cmd = (r_ble_gtl_gapm_start_advertise_cmd_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GAPM_START_ADVERTISE_CMD,
-                                                                           R_BLE_GTL_TASK_ID_GAPM,
-                                                                           R_BLE_GTL_TASK_ID_GTL,
-                                                                           sizeof (r_ble_gtl_gapm_start_advertise_cmd_t));
+                                                                    R_BLE_GTL_TASK_ID_GAPM,
+                                                                    R_BLE_GTL_TASK_ID_GTL,
+                                                                    sizeof (r_ble_gtl_gapm_start_advertise_cmd_t));
     if (NULL != p_cmd)
     {
         status = BLE_SUCCESS;
@@ -3766,7 +4084,8 @@ static ble_status_t r_ble_gtl_gapm_send_start_adv_cmd(void)
             /* Add scan response data */
             if (0 < g_dev_params.scan_rsp_data.length)
             {
-                memcpy(&p_cmd->info.host.scan_rsp_data[0], &g_dev_params.scan_rsp_data.data[0], g_dev_params.scan_rsp_data.length);
+                memcpy(&p_cmd->info.host.scan_rsp_data[0], &g_dev_params.scan_rsp_data.data[0], 
+                                                                g_dev_params.scan_rsp_data.length);
             }
 
             status = r_ble_gtl_msg_transmit((uint8_t *)p_cmd);
@@ -3929,7 +4248,7 @@ static ble_status_t r_ble_gtl_gapm_send_dev_config_cmd(void)
         p_cmd->gap_start_hdl  = 0x0000; /* Let DA14531 selects its own handles */
         p_cmd->gatt_start_hdl = 0x0000;
         p_cmd->att_cfg_       = 0x0000; /* Not used, must be set to zero */
-        p_cmd->max_mtu        = BLE_ABS_CFG_GATT_MTU_SIZE;
+        p_cmd->max_mtu        = BLE_CFG_ABS_GATT_MTU_SIZE;
         p_cmd->max_mps        = 0;
         p_cmd->role           = R_BLE_GTL_PERIPHERAL_ROLE;
         p_cmd->att_cfg        = 0x00; /* Don't allow writes to device name or appearance */
@@ -3944,7 +4263,7 @@ static ble_status_t r_ble_gtl_gapm_send_dev_config_cmd(void)
         {
             memcpy(&p_cmd->addr.addr[0], &g_dev_params.dev_addr.addr[0], BLE_BD_ADDR_LEN);
             /* The first two bits of a non-public (random) address must be binary ones */
-            p_cmd->addr.addr[5] |= 0xC0;
+            p_cmd->addr.addr[5] |= R_BLE_GTL_PUBLIC_BD_ADDR_MASK;
 
         }
         else if (BLE_GAP_ADDR_PUBLIC == p_cmd->addr_type)
@@ -4110,7 +4429,7 @@ static ble_status_t r_ble_gtl_gapc_get_channel_map(uint16_t conn_hdl, r_ble_gtl_
         r_ble_gtl_mutex_give(R_BLE_GTL_MUTEX_RX);
     }
 
-    return BLE_SUCCESS;
+    return status;
 }
 
 /*******************************************************************************************************************//**
@@ -4148,7 +4467,8 @@ static ble_status_t r_ble_gtl_gapc_set_le_pkt_size(uint16_t conn_hdl, uint16_t t
                     }
                     else if (R_BLE_GTL_GAPC_CMP_EVT == msg_id)
                     {
-                        r_ble_gtl_gapm_cmp_evt_t * p_cmp_param = (r_ble_gtl_gapm_cmp_evt_t *)&p_msg[sizeof(r_ble_gtl_msg_hdr_t)];
+                        r_ble_gtl_gapm_cmp_evt_t * p_cmp_param = 
+                                                (r_ble_gtl_gapm_cmp_evt_t *)&p_msg[sizeof(r_ble_gtl_msg_hdr_t)];
                         if ((R_BLE_GTL_GAPC_OP_SET_LE_PKT_SIZE != p_cmp_param->operation) ||
                             (R_BLE_GTL_GAP_ERR_NO_ERROR != p_cmp_param->status))
                         {
@@ -4159,8 +4479,9 @@ static ble_status_t r_ble_gtl_gapc_set_le_pkt_size(uint16_t conn_hdl, uint16_t t
                     }
                     else
                     {
-                        /* Message received but not what we expected, queue for processing next time BLE execute is called */
-                        r_ble_gtl_msg_pend_queue_add((uint8_t **)&p_msg);
+                        /* Message received but not what we expected, queue for processing 
+                        next time BLE execute is called */
+                        r_ble_gtl_msg_pend_queue_add(&p_msg);
                     }
                 }
             }
@@ -4182,7 +4503,8 @@ static ble_status_t r_ble_gtl_gapc_set_le_pkt_size(uint16_t conn_hdl, uint16_t t
  * @retval BLE_SUCCESS                  Packet size set successfully
  * @retval BLE_ERR_ALREADY_IN_PROGRESS  Unable to obtain mutex as command already in progress
  **********************************************************************************************************************/
-static ble_status_t r_ble_gtl_gapc_param_update(uint16_t conn_hdl, st_ble_gap_conn_param_t * p_conn_update_param, r_ble_gtl_gapc_param_update_ind_t * p_param_update_ind)
+static ble_status_t r_ble_gtl_gapc_param_update(uint16_t conn_hdl, st_ble_gap_conn_param_t * p_conn_update_param, 
+                                                r_ble_gtl_gapc_param_update_ind_t * p_param_update_ind)
 {
     ble_status_t                        status   = BLE_ERR_MEM_ALLOC_FAILED;
     uint8_t                           * p_msg    = NULL;
@@ -4224,8 +4546,9 @@ static ble_status_t r_ble_gtl_gapc_param_update(uint16_t conn_hdl, st_ble_gap_co
                     }
                     else
                     {
-                        /* Message received but not what we expected, queue for processing next time BLE execute is called */
-                        r_ble_gtl_msg_pend_queue_add((uint8_t **)&p_msg);
+                        /* Message received but not what we expected, queue for processing next time 
+                        BLE execute is called */
+                        r_ble_gtl_msg_pend_queue_add(&p_msg);
                     }
                 }
             }
@@ -4256,9 +4579,9 @@ static ble_status_t r_ble_gtl_gapc_disconnect(uint16_t conn_hdl, uint8_t reason)
     if (true == r_ble_gtl_mutex_take(R_BLE_GTL_MUTEX_RX))
     {
         p_cmd = (r_ble_gtl_gapc_disconnect_cmd_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GAPC_DISCONNECT_CMD,
-                                                                          R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
-                                                                          R_BLE_GTL_TASK_ID_GTL,
-                                                                          sizeof (r_ble_gtl_gapc_disconnect_cmd_t));
+                                                                R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
+                                                                R_BLE_GTL_TASK_ID_GTL,
+                                                                sizeof (r_ble_gtl_gapc_disconnect_cmd_t));
         if (NULL != p_cmd)
         {
             p_cmd->op     = R_BLE_GTL_GAPC_OP_DISCONNECT;
@@ -4297,9 +4620,9 @@ static ble_status_t r_ble_gtl_gapc_send_param_update_cmd(uint16_t conn_hdl, st_b
     r_ble_gtl_gapc_param_update_cmd_t * p_cmd = NULL;
 
     p_cmd = (r_ble_gtl_gapc_param_update_cmd_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GAPC_PARAM_UPDATE_CMD,
-                                                                        R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
-                                                                        R_BLE_GTL_TASK_ID_GTL,
-                                                                        sizeof (r_ble_gtl_gapc_param_update_cmd_t));
+                                                                R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
+                                                                R_BLE_GTL_TASK_ID_GTL,
+                                                                sizeof (r_ble_gtl_gapc_param_update_cmd_t));
     if (NULL != p_cmd)
     {
         p_cmd->op         = R_BLE_GTL_GAPC_OP_UPDATE_PARAMS;
@@ -4367,8 +4690,8 @@ static ble_status_t r_ble_gtl_gapc_lecb_connect(uint16_t conn_hdl, st_ble_l2cap_
 
     if (true == r_ble_gtl_mutex_take(R_BLE_GTL_MUTEX_RX))
     {
-        status = r_ble_gtl_gapc_send_lecb_connect_cmd(conn_hdl, R_BLE_GTL_GAPC_OP_LE_CB_CONNECTION, 0, p_param->local_psm,
-                                                      p_param->remote_psm, p_param->credit);
+        status = r_ble_gtl_gapc_send_lecb_connect_cmd(conn_hdl, R_BLE_GTL_GAPC_OP_LE_CB_CONNECTION, 0, 
+                                                      p_param->local_psm, p_param->remote_psm, p_param->credit);
         if (BLE_SUCCESS == status)
         {
             status = r_ble_gtl_msg_wait_for_cmd_complete(R_BLE_GTL_GAPC_CMP_EVT,
@@ -4398,14 +4721,14 @@ static ble_status_t r_ble_gtl_gapc_send_param_update_cfm(uint16_t conn_hdl, uint
     r_ble_gtl_gapc_param_update_cfm_t * p_cmd;
 
     p_cmd = (r_ble_gtl_gapc_param_update_cfm_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GAPC_PARAM_UPDATE_CFM,
-                                                                        R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
-                                                                        R_BLE_GTL_TASK_ID_GTL,
-                                                                        sizeof (r_ble_gtl_gapc_param_update_cfm_t));
+                                                                R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
+                                                                R_BLE_GTL_TASK_ID_GTL,
+                                                                sizeof (r_ble_gtl_gapc_param_update_cfm_t));
     if (NULL != p_cmd)
     {
         p_cmd->accept     = accept;
         p_cmd->ce_len_min = 0x0000;
-        p_cmd->ce_len_min = 0xFFFF;
+        p_cmd->ce_len_min = UINT16_MAX;
         status = r_ble_gtl_msg_transmit((uint8_t *)p_cmd);
     }
     else
@@ -4432,9 +4755,9 @@ static ble_status_t r_ble_gtl_gapc_send_le_pkt_size_cmd(uint16_t conn_hdl, uint1
     r_ble_gtl_gapc_set_le_pkt_size_cmd_t * p_cmd;
 
     p_cmd = (r_ble_gtl_gapc_set_le_pkt_size_cmd_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GAPC_SET_LE_PKT_SIZE_CMD,
-                                                                           R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
-                                                                           R_BLE_GTL_TASK_ID_GTL,
-                                                                           sizeof (r_ble_gtl_gapc_set_le_pkt_size_cmd_t));
+                                                                R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
+                                                                R_BLE_GTL_TASK_ID_GTL,
+                                                                sizeof (r_ble_gtl_gapc_set_le_pkt_size_cmd_t));
     if (NULL != p_cmd)
     {
         p_cmd->op = R_BLE_GTL_GAPC_OP_SET_LE_PKT_SIZE;
@@ -4466,9 +4789,9 @@ static ble_status_t r_ble_gtl_gapc_send_get_info_cmd(uint16_t conn_hdl, uint8_t 
     r_ble_gtl_gapc_get_info_cmd_t * p_cmd;
 
     p_cmd = (r_ble_gtl_gapc_get_info_cmd_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GAPC_GET_INFO_CMD,
-                                                                    R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
-                                                                    R_BLE_GTL_TASK_ID_GTL,
-                                                                    sizeof (r_ble_gtl_gapc_get_info_cmd_t));
+                                                                R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
+                                                                R_BLE_GTL_TASK_ID_GTL,
+                                                                sizeof (r_ble_gtl_gapc_get_info_cmd_t));
     if (NULL != p_cmd)
     {
         p_cmd->op = operation;
@@ -4503,9 +4826,9 @@ static ble_status_t r_ble_gtl_gapc_send_lecb_connect_cmd(uint16_t conn_hdl, uint
     r_ble_gtl_gapc_lecb_connect_cmd_t * p_cmd;
 
     p_cmd = (r_ble_gtl_gapc_lecb_connect_cmd_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GAPC_LECB_CONNECT_CMD,
-                                                                        R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
-                                                                        R_BLE_GTL_TASK_ID_GTL,
-                                                                        sizeof (r_ble_gtl_gapc_lecb_connect_cmd_t));
+                                                                R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
+                                                                R_BLE_GTL_TASK_ID_GTL,
+                                                                sizeof (r_ble_gtl_gapc_lecb_connect_cmd_t));
     if (NULL != p_cmd)
     {
         p_cmd->operation = operation;
@@ -4535,15 +4858,16 @@ static ble_status_t r_ble_gtl_gapc_send_lecb_connect_cmd(uint16_t conn_hdl, uint
  * @retval BLE_SUCCESS                  Command transmitted successfully
  * @retval BLE_ERR_MEM_ALLOC_FAILED     Insufficient memory to create command message
  **********************************************************************************************************************/
-static ble_status_t r_ble_gtl_gapc_send_lecb_discon_cmd(uint16_t conn_hdl, uint8_t operation, uint8_t pkt_id, uint16_t le_psm)
+static ble_status_t r_ble_gtl_gapc_send_lecb_discon_cmd(uint16_t conn_hdl, uint8_t operation, 
+                                                        uint8_t pkt_id, uint16_t le_psm)
 {
     ble_status_t                           status;
     r_ble_gtl_gapc_lecb_disconnect_cmd_t * p_cmd;
 
     p_cmd = (r_ble_gtl_gapc_lecb_disconnect_cmd_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GAPC_LECB_DISCONNECT_CMD,
-                                                                           R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
-                                                                           R_BLE_GTL_TASK_ID_GTL,
-                                                                           sizeof (r_ble_gtl_gapc_lecb_disconnect_cmd_t));
+                                                                R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
+                                                                R_BLE_GTL_TASK_ID_GTL,
+                                                                sizeof (r_ble_gtl_gapc_lecb_disconnect_cmd_t));
     if (NULL != p_cmd)
     {
         p_cmd->operation = operation;
@@ -4573,7 +4897,8 @@ static ble_status_t r_ble_gtl_gapc_send_lecb_discon_cmd(uint16_t conn_hdl, uint8
  * @retval BLE_SUCCESS                  Command transmitted successfully
  * @retval BLE_ERR_MEM_ALLOC_FAILED     Insufficient memory to create command message
  **********************************************************************************************************************/
-static ble_status_t r_ble_gtl_gapc_send_lecb_add_cmd(uint16_t conn_hdl, uint8_t operation, uint8_t pkt_id, uint16_t le_psm, uint16_t credit)
+static ble_status_t r_ble_gtl_gapc_send_lecb_add_cmd(uint16_t conn_hdl, uint8_t operation, 
+                                                     uint8_t pkt_id, uint16_t le_psm, uint16_t credit)
 {
     ble_status_t                    status;
     r_ble_gtl_gapc_lecb_add_cmd_t * p_cmd;
@@ -4581,7 +4906,7 @@ static ble_status_t r_ble_gtl_gapc_send_lecb_add_cmd(uint16_t conn_hdl, uint8_t 
     p_cmd = (r_ble_gtl_gapc_lecb_add_cmd_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GAPC_LECB_ADD_CMD,
                                                                     R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
                                                                     R_BLE_GTL_TASK_ID_GTL,
-                                                                   sizeof (r_ble_gtl_gapc_lecb_add_cmd_t));
+                                                                    sizeof (r_ble_gtl_gapc_lecb_add_cmd_t));
     if (NULL != p_cmd)
     {
         p_cmd->operation = operation;
@@ -4611,15 +4936,16 @@ static ble_status_t r_ble_gtl_gapc_send_lecb_add_cmd(uint16_t conn_hdl, uint8_t 
  * @retval BLE_SUCCESS                  Command transmitted successfully
  * @retval BLE_ERR_MEM_ALLOC_FAILED     Insufficient memory to create command message
  **********************************************************************************************************************/
-static ble_status_t r_ble_gtl_gapc_send_lecb_send_data_cmd(uint16_t conn_hdl, uint8_t operation, uint16_t lcid, uint16_t data_len, uint8_t * p_sdu)
+static ble_status_t r_ble_gtl_gapc_send_lecb_send_data_cmd(uint16_t conn_hdl, uint8_t operation, 
+                                                           uint8_t lcid, uint16_t data_len, uint8_t * p_sdu)
 {
     ble_status_t                          status;
     r_ble_gtl_gapc_lecb_send_data_cmd_t * p_cmd;
 
     p_cmd = (r_ble_gtl_gapc_lecb_send_data_cmd_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GAPC_LECB_SEND_CMD,
-                                                                          R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
-                                                                          R_BLE_GTL_TASK_ID_GTL,
-                                                                          sizeof (r_ble_gtl_gapc_lecb_send_data_cmd_t) + data_len);
+                                                            R_BLE_GTL_TASK_ID_GAPC + (uint16_t)(conn_hdl << 8),
+                                                            R_BLE_GTL_TASK_ID_GTL,
+                                                            sizeof (r_ble_gtl_gapc_lecb_send_data_cmd_t) + data_len);
     if (NULL != p_cmd)
     {
         p_cmd->operation = operation;
@@ -4649,7 +4975,8 @@ static ble_status_t r_ble_gtl_gapc_send_lecb_send_data_cmd(uint16_t conn_hdl, ui
  * @retval BLE_SUCCESS                  Service added successfully
  * @retval BLE_ERR_ALREADY_IN_PROGRESS  Unable to obtain mutex as command already in progress
  **********************************************************************************************************************/
-ble_status_t r_ble_gtl_gattm_add_service(uint8_t perm, uint8_t nbr_att, r_ble_gtl_uuid_t * p_uuid, r_ble_gtl_gattm_att_desc_t * p_att_descs, uint16_t * p_start_hdl)
+ble_status_t r_ble_gtl_gattm_add_service(uint8_t perm, uint8_t nbr_att, r_ble_gtl_uuid_t * p_uuid, 
+                                         r_ble_gtl_gattm_att_desc_t * p_att_descs, uint16_t * p_start_hdl)
 {
     ble_status_t                    status = BLE_ERR_ALREADY_IN_PROGRESS;
     r_ble_gtl_gattm_add_svc_cmd_t * p_cmd;
@@ -4658,9 +4985,9 @@ ble_status_t r_ble_gtl_gattm_add_service(uint8_t perm, uint8_t nbr_att, r_ble_gt
     if (true == r_ble_gtl_mutex_take(R_BLE_GTL_MUTEX_RX))
     {
         p_cmd = (r_ble_gtl_gattm_add_svc_cmd_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GATTM_ADD_SVC_REQ,
-                                                                        R_BLE_GTL_TASK_ID_GATTM,
-                                                                        R_BLE_GTL_TASK_ID_GTL,
-                                                                        (uint16_t)(sizeof(r_ble_gtl_gattm_add_svc_cmd_t) + (nbr_att * sizeof(r_ble_gtl_gattm_att_desc_t))));
+                R_BLE_GTL_TASK_ID_GATTM,
+                R_BLE_GTL_TASK_ID_GTL,
+                (uint16_t)(sizeof(r_ble_gtl_gattm_add_svc_cmd_t) + (nbr_att * sizeof(r_ble_gtl_gattm_att_desc_t))));
         if (NULL != p_cmd)
         {
             p_cmd->start_hdl = 0x0000; /* Let the DA1453x automatically assign start handle */
@@ -4719,9 +5046,9 @@ static ble_status_t r_ble_gtl_gattm_get_att_value(uint16_t conn_hdl, uint16_t at
     if (true == r_ble_gtl_mutex_take(R_BLE_GTL_MUTEX_RX))
     {
         p_cmd = (r_ble_gtl_gattm_att_get_value_req_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GATTM_ATT_GET_VALUE_REQ,
-                                                                              R_BLE_GTL_TASK_ID_GATTM,
-                                                                              R_BLE_GTL_TASK_ID_GTL,
-                                                                              sizeof (r_ble_gtl_gattm_att_get_value_req_t));
+                                                                    R_BLE_GTL_TASK_ID_GATTM,
+                                                                    R_BLE_GTL_TASK_ID_GTL,
+                                                                    sizeof (r_ble_gtl_gattm_att_get_value_req_t));
         if (NULL != p_cmd)
         {
             p_cmd->handle = attr_hdl;
@@ -4732,9 +5059,9 @@ static ble_status_t r_ble_gtl_gattm_get_att_value(uint16_t conn_hdl, uint16_t at
                 p_rsp = r_ble_gtl_malloc(sizeof(r_ble_gtl_gattm_att_get_value_rsp_t) + p_value->value_len);
 
                 status = r_ble_gtl_msg_wait_for_response(R_BLE_GTL_GATTM_ATT_GET_VALUE_RSP,
-                                                         (uint8_t *)p_rsp,
-                                                         sizeof(r_ble_gtl_gattm_att_get_value_rsp_t) + p_value->value_len,
-                                                         R_BLE_GTL_MSG_RSP_TIMEOUT_MS);
+                                                    (uint8_t *)p_rsp,
+                                                    sizeof(r_ble_gtl_gattm_att_get_value_rsp_t) + p_value->value_len,
+                                                    R_BLE_GTL_MSG_RSP_TIMEOUT_MS);
                 if (BLE_SUCCESS == status)
                 {
                     if (R_BLE_GTL_GAP_ERR_NO_ERROR == p_rsp->status)
@@ -4790,7 +5117,8 @@ static ble_status_t r_ble_gtl_gattm_set_att_value(uint16_t conn_hdl, uint16_t at
  * @retval BLE_SUCCESS                  Value written successfully
  * @retval BLE_ERR_ALREADY_IN_PROGRESS  Unable to obtain mutex as command already in progress
  **********************************************************************************************************************/
-static ble_status_t r_ble_gtl_gattm_set_att_value_int(uint16_t conn_hdl, uint16_t attr_hdl, st_ble_gatt_value_t * p_value)
+static ble_status_t r_ble_gtl_gattm_set_att_value_int(uint16_t conn_hdl, uint16_t attr_hdl, 
+                                                      st_ble_gatt_value_t * p_value)
 {
     FSP_PARAMETER_NOT_USED(conn_hdl);
 
@@ -4799,9 +5127,9 @@ static ble_status_t r_ble_gtl_gattm_set_att_value_int(uint16_t conn_hdl, uint16_
     r_ble_gtl_gattm_att_set_value_rsp_t   rsp;
 
     p_cmd = (r_ble_gtl_gattm_att_set_value_req_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GATTM_ATT_SET_VALUE_REQ,
-                                                                          R_BLE_GTL_TASK_ID_GATTM,
-                                                                          R_BLE_GTL_TASK_ID_GTL,
-                                                                          sizeof (r_ble_gtl_gattm_att_set_value_req_t) + p_value->value_len);
+                                                R_BLE_GTL_TASK_ID_GATTM,
+                                                R_BLE_GTL_TASK_ID_GTL,
+                                                sizeof (r_ble_gtl_gattm_att_set_value_req_t) + p_value->value_len);
     if (NULL != p_cmd)
     {
         p_cmd->handle = attr_hdl;
@@ -5032,7 +5360,7 @@ static ble_status_t r_ble_gtl_gattc_discover(uint16_t conn_hdl, uint8_t operatio
 
                     if (R_BLE_GTL_GATTC_DISC_SVC_IND == msg_id)
                     {
-                        p_disc_svc_ind = (r_ble_gtl_gattc_disc_svc_ind_t * )p_msg[sizeof(r_ble_gtl_msg_hdr_t)];
+                        p_disc_svc_ind = (r_ble_gtl_gattc_disc_svc_ind_t * )&p_msg[sizeof(r_ble_gtl_msg_hdr_t)];
 
                         status = r_ble_gtl_gattc_handle_discovered_svc(p_disc_svc_ind, p_disc_evts);
 
@@ -5040,7 +5368,7 @@ static ble_status_t r_ble_gtl_gattc_discover(uint16_t conn_hdl, uint8_t operatio
                     }
                     else if (R_BLE_GTL_GATTC_DISC_CHAR_IND == msg_id)
                     {
-                        p_disc_char_ind = (r_ble_gtl_gattc_disc_char_ind_t * )p_msg[sizeof(r_ble_gtl_msg_hdr_t)];
+                        p_disc_char_ind = (r_ble_gtl_gattc_disc_char_ind_t * )&p_msg[sizeof(r_ble_gtl_msg_hdr_t)];
 
                         status = r_ble_gtl_gattc_handle_discovered_char(p_disc_char_ind, p_disc_evts);
 
@@ -5048,7 +5376,8 @@ static ble_status_t r_ble_gtl_gattc_discover(uint16_t conn_hdl, uint8_t operatio
                     }
                     else if (R_BLE_GTL_GATTC_CMP_EVT == msg_id)
                     {
-                        p_cb_evt = r_ble_gtl_cb_evt_allocate(p_disc_evts->evt_comp, BLE_SUCCESS, sizeof(st_ble_gattc_evt_data_t));
+                        p_cb_evt = r_ble_gtl_cb_evt_allocate(p_disc_evts->evt_comp, BLE_SUCCESS, 
+                                                                sizeof(st_ble_gattc_evt_data_t));
                         if (NULL != p_cb_evt)
                         {
                             status = r_ble_gtl_cb_evt_queue_add(p_cb_evt);
@@ -5063,8 +5392,9 @@ static ble_status_t r_ble_gtl_gattc_discover(uint16_t conn_hdl, uint8_t operatio
                     }
                     else
                     {
-                        /* Message received but not what we expected, queue for processing next time BLE execute is called */
-                        r_ble_gtl_msg_pend_queue_add((uint8_t **)&p_msg);
+                        /* Message received but not what we expected, queue for processing next time 
+                        BLE execute is called */
+                        r_ble_gtl_msg_pend_queue_add(&p_msg);
                     }
                 }
             }
@@ -5086,7 +5416,8 @@ static ble_status_t r_ble_gtl_gattc_discover(uint16_t conn_hdl, uint8_t operatio
  * @retval BLE_SUCCESS                  Service discovered and queued.
  * @retval BLE_ERR_MEM_ALLOC_FAILED     Unable to queue discovered service.
  **********************************************************************************************************************/
-static ble_status_t r_ble_gtl_gattc_handle_discovered_svc(r_ble_gtl_gattc_disc_svc_ind_t * p_disc_svc_ind, r_ble_gtl_disc_events_t * p_disc_evts)
+static ble_status_t r_ble_gtl_gattc_handle_discovered_svc(r_ble_gtl_gattc_disc_svc_ind_t * p_disc_svc_ind, 
+                                                          r_ble_gtl_disc_events_t * p_disc_evts)
 {
     ble_status_t                  status;
     st_ble_gattc_serv_16_evt_t  * p_serv_16;
@@ -5142,7 +5473,8 @@ static ble_status_t r_ble_gtl_gattc_handle_discovered_svc(r_ble_gtl_gattc_disc_s
  * @retval BLE_SUCCESS                  Characteristic discovered and queued.
  * @retval BLE_ERR_MEM_ALLOC_FAILED     Unable to queue discovered characteristic.
  **********************************************************************************************************************/
-static ble_status_t r_ble_gtl_gattc_handle_discovered_char(r_ble_gtl_gattc_disc_char_ind_t * p_disc_char_ind, r_ble_gtl_disc_events_t * p_disc_evts)
+static ble_status_t r_ble_gtl_gattc_handle_discovered_char(r_ble_gtl_gattc_disc_char_ind_t * p_disc_char_ind, 
+                                                           r_ble_gtl_disc_events_t * p_disc_evts)
 {
     ble_status_t                  status;
     st_ble_gattc_char_16_evt_t  * p_char_16;
@@ -5200,8 +5532,8 @@ static ble_status_t r_ble_gtl_gattc_handle_discovered_char(r_ble_gtl_gattc_disc_
  * @retval BLE_SUCCESS                  Command transmitted successfully
  * @retval BLE_ERR_MEM_ALLOC_FAILED     Insufficient memory to create command message
  **********************************************************************************************************************/
-static ble_status_t r_ble_gtl_gattc_send_write_cmd(uint8_t operation, uint8_t auto_exec, uint16_t conn_hdl, uint16_t att_hdl,
-                                                   uint8_t * p_value, uint16_t length, uint16_t offset)
+static ble_status_t r_ble_gtl_gattc_send_write_cmd(uint8_t operation, uint8_t auto_exec, uint16_t conn_hdl, 
+                                                uint16_t att_hdl, uint8_t * p_value, uint16_t length, uint16_t offset)
 {
     ble_status_t                  status;
     r_ble_gtl_gattc_write_cmd_t * p_cmd;
@@ -5241,7 +5573,8 @@ static ble_status_t r_ble_gtl_gattc_send_write_cmd(uint8_t operation, uint8_t au
  * @retval BLE_SUCCESS                  Command transmitted successfully
  * @retval BLE_ERR_MEM_ALLOC_FAILED     Insufficient memory to create command message
  **********************************************************************************************************************/
-static ble_status_t r_ble_gtl_gattc_send_read_cmd(uint16_t conn_hdl, uint8_t operation, uint16_t att_hdl, uint16_t offset, uint16_t length)
+static ble_status_t r_ble_gtl_gattc_send_read_cmd(uint16_t conn_hdl, uint8_t operation, uint16_t att_hdl, 
+                                                  uint16_t offset, uint16_t length)
 {
     ble_status_t                 status;
     r_ble_gtl_gattc_read_cmd_t * p_cmd;
@@ -5279,7 +5612,8 @@ static ble_status_t r_ble_gtl_gattc_send_read_cmd(uint16_t conn_hdl, uint8_t ope
  * @retval BLE_SUCCESS                  Command transmitted successfully
  * @retval BLE_ERR_MEM_ALLOC_FAILED     Insufficient memory to create command message
  **********************************************************************************************************************/
-static ble_status_t r_ble_gtl_gattc_send_read_by_uuid_cmd(uint16_t conn_hdl, uint16_t start_hdl, uint16_t end_hdl, r_ble_gtl_uuid_t * p_uuid)
+static ble_status_t r_ble_gtl_gattc_send_read_by_uuid_cmd(uint16_t conn_hdl, uint16_t start_hdl, 
+                                                          uint16_t end_hdl, r_ble_gtl_uuid_t * p_uuid)
 {
     ble_status_t                 status;
     r_ble_gtl_gattc_read_cmd_t * p_cmd;
@@ -5319,17 +5653,18 @@ static ble_status_t r_ble_gtl_gattc_send_read_by_uuid_cmd(uint16_t conn_hdl, uin
  * @retval BLE_SUCCESS                  Command transmitted successfully
  * @retval BLE_ERR_MEM_ALLOC_FAILED     Insufficient memory to create command message
  **********************************************************************************************************************/
-static ble_status_t r_ble_gtl_gattc_send_read_multiple_cmd(uint16_t conn_hdl, uint8_t number, uint16_t * p_hdl_list, uint16_t length)
+static ble_status_t r_ble_gtl_gattc_send_read_multiple_cmd(uint16_t conn_hdl, uint8_t number, 
+                                                           uint16_t * p_hdl_list, uint16_t length)
 {
     ble_status_t                       status;
     r_ble_gtl_gattc_read_multi_cmd_t * p_cmd;
     uint16_t                           hdl;
 
     p_cmd = (r_ble_gtl_gattc_read_multi_cmd_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GATTC_READ_CMD,
-                                                                       R_BLE_GTL_TASK_ID_GATTC + (uint16_t)(conn_hdl << 8),
-                                                                       R_BLE_GTL_TASK_ID_GTL,
-                                                                       sizeof (r_ble_gtl_gattc_read_multi_cmd_t) +
-                                                                       (sizeof(r_ble_gtl_read_multi_att_t) * length));
+                                                                R_BLE_GTL_TASK_ID_GATTC + (uint16_t)(conn_hdl << 8),
+                                                                R_BLE_GTL_TASK_ID_GTL,
+                                                                (uint16_t)(sizeof(r_ble_gtl_gattc_read_multi_cmd_t) +
+                                                                    (sizeof (r_ble_gtl_read_multi_att_t) * length)));
     if (NULL != p_cmd)
     {
         p_cmd->operation = R_BLE_GTL_GATTC_OP_READ_MULTIPLE;
@@ -5365,9 +5700,9 @@ static ble_status_t r_ble_gtl_gattc_send_exch_mtu_cmd(uint16_t conn_hdl)
     r_ble_gtl_gattc_exc_mtu_cmd_t * p_cmd;
 
     p_cmd = (r_ble_gtl_gattc_exc_mtu_cmd_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GATTC_EXC_MTU_CMD,
-                                                                    R_BLE_GTL_TASK_ID_GATTC + (uint16_t)(conn_hdl << 8),
-                                                                    R_BLE_GTL_TASK_ID_GTL,
-                                                                    sizeof (r_ble_gtl_gattc_exc_mtu_cmd_t));
+                                                            R_BLE_GTL_TASK_ID_GATTC + (uint16_t)(conn_hdl << 8),
+                                                            R_BLE_GTL_TASK_ID_GTL,
+                                                            sizeof (r_ble_gtl_gattc_exc_mtu_cmd_t));
     if (NULL != p_cmd)
     {
         p_cmd->operation = R_BLE_GTL_GATTC_OP_MTU_EXCH;
@@ -5395,16 +5730,17 @@ static ble_status_t r_ble_gtl_gattc_send_exch_mtu_cmd(uint16_t conn_hdl)
  * @retval BLE_SUCCESS                  Command transmitted successfully
  * @retval BLE_ERR_MEM_ALLOC_FAILED     Insufficient memory to create command message
  **********************************************************************************************************************/
-static ble_status_t r_ble_gtl_gattc_send_read_cfm(uint16_t conn_hdl, uint8_t rd_status, uint16_t att_hdl, uint16_t value_len, uint8_t * p_value)
+static ble_status_t r_ble_gtl_gattc_send_read_cfm(uint16_t conn_hdl, uint8_t rd_status, uint16_t att_hdl, 
+                                                  uint16_t value_len, uint8_t * p_value)
 {
     ble_status_t                 status;
     r_ble_gtl_gattc_read_cfm_t * p_cmd;
 
     p_cmd = (r_ble_gtl_gattc_read_cfm_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GATTC_READ_CFM,
-                                                                 R_BLE_GTL_TASK_ID_GATTC + (uint16_t)(conn_hdl << 8),
-                                                                 R_BLE_GTL_TASK_ID_GTL,
-                                                                 /* Command ends with a single padding byte (of any value) */
-                                                                 sizeof (r_ble_gtl_gattc_read_cfm_t) + value_len + 1);
+                                                        R_BLE_GTL_TASK_ID_GATTC + (uint16_t)(conn_hdl << 8),
+                                                        R_BLE_GTL_TASK_ID_GTL,
+                                                        /* Command ends with a single padding byte (of any value) */
+                                                        sizeof (r_ble_gtl_gattc_read_cfm_t) + value_len + 1);
     if (NULL != p_cmd)
     {
         p_cmd->handle = att_hdl;
@@ -5441,9 +5777,9 @@ static ble_status_t r_ble_gtl_gattc_send_write_cfm(uint16_t conn_hdl, uint8_t wr
     r_ble_gtl_gattc_write_req_cfm_t * p_cmd;
 
     p_cmd = (r_ble_gtl_gattc_write_req_cfm_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GATTC_WRITE_CFM,
-                                                                      R_BLE_GTL_TASK_ID_GATTC + (uint16_t)(conn_hdl << 8),
-                                                                      R_BLE_GTL_TASK_ID_GTL,
-                                                                      sizeof (r_ble_gtl_gattc_write_req_cfm_t));
+                                                            R_BLE_GTL_TASK_ID_GATTC + (uint16_t)(conn_hdl << 8),
+                                                            R_BLE_GTL_TASK_ID_GTL,
+                                                            sizeof (r_ble_gtl_gattc_write_req_cfm_t));
     if (NULL != p_cmd)
     {
         p_cmd->status = wr_status;
@@ -5472,8 +5808,8 @@ static ble_status_t r_ble_gtl_gattc_send_write_cfm(uint16_t conn_hdl, uint8_t wr
  * @retval BLE_SUCCESS                  Command transmitted successfully
  * @retval BLE_ERR_MEM_ALLOC_FAILED     Insufficient memory to create command message
  **********************************************************************************************************************/
-static ble_status_t r_ble_gtl_gattc_send_disc_cmd(uint16_t conn_hdl, uint8_t operation, uint16_t seq_num, uint16_t start_hdl,
-                                                  uint16_t end_hdl, r_ble_gtl_uuid_t * p_uuid)
+static ble_status_t r_ble_gtl_gattc_send_disc_cmd(uint16_t conn_hdl, uint8_t operation, uint16_t seq_num, 
+                                                  uint16_t start_hdl, uint16_t end_hdl, r_ble_gtl_uuid_t * p_uuid)
 {
     ble_status_t                 status;
     r_ble_gtl_gattc_disc_cmd_t * p_cmd;
@@ -5488,9 +5824,9 @@ static ble_status_t r_ble_gtl_gattc_send_disc_cmd(uint16_t conn_hdl, uint8_t ope
         p_cmd->seq_num   = seq_num;
         p_cmd->start_hdl = start_hdl;
         p_cmd->end_hdl   = end_hdl;
-        p_cmd->uuid_len  = p_uuid->length;
         if (NULL != p_uuid)
         {
+            p_cmd->uuid_len = p_uuid->length;
             memcpy(&p_cmd->uuid, &p_uuid->value, p_cmd->uuid_len);
         }
 
@@ -5516,15 +5852,16 @@ static ble_status_t r_ble_gtl_gattc_send_disc_cmd(uint16_t conn_hdl, uint8_t ope
  * @retval BLE_SUCCESS                  Command transmitted successfully
  * @retval BLE_ERR_MEM_ALLOC_FAILED     Insufficient memory to create command message
  **********************************************************************************************************************/
-static ble_status_t r_ble_gtl_gattc_send_evt_cmd(uint8_t operation, uint16_t conn_hdl, uint16_t attr_hdl, uint8_t * p_value, uint16_t length)
+static ble_status_t r_ble_gtl_gattc_send_evt_cmd(uint8_t operation, uint16_t conn_hdl, uint16_t attr_hdl, 
+                                                 uint8_t * p_value, uint16_t length)
 {
     ble_status_t                     status;
     r_ble_gtl_gattc_send_evt_cmd_t * p_cmd;
 
     p_cmd = (r_ble_gtl_gattc_send_evt_cmd_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GATTC_SEND_EVT_CMD,
-                                                                     R_BLE_GTL_TASK_ID_GATTC + (uint16_t)(conn_hdl << 8),
-                                                                     R_BLE_GTL_TASK_ID_GTL,
-                                                                     sizeof (r_ble_gtl_gattc_send_evt_cmd_t) + length);
+                                                            R_BLE_GTL_TASK_ID_GATTC + (uint16_t)(conn_hdl << 8),
+                                                            R_BLE_GTL_TASK_ID_GTL,
+                                                            sizeof (r_ble_gtl_gattc_send_evt_cmd_t) + length);
     if (NULL != p_cmd)
     {
         p_cmd->operation = operation;
@@ -5558,9 +5895,9 @@ static ble_status_t r_ble_gtl_gattc_send_write_execute_cmd(uint16_t conn_hdl, ui
     r_ble_gtl_gattc_write_execute_cmd_t * p_cmd;
 
     p_cmd = (r_ble_gtl_gattc_write_execute_cmd_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_GATTC_WRITE_EXECUTE_CMD,
-                                                                          R_BLE_GTL_TASK_ID_GATTC + (uint16_t)(conn_hdl << 8),
-                                                                          R_BLE_GTL_TASK_ID_GTL,
-                                                                          sizeof (r_ble_gtl_gattc_write_execute_cmd_t));
+                                                                R_BLE_GTL_TASK_ID_GATTC + (uint16_t)(conn_hdl << 8),
+                                                                R_BLE_GTL_TASK_ID_GTL,
+                                                                sizeof (r_ble_gtl_gattc_write_execute_cmd_t));
     if (NULL != p_cmd)
     {
         p_cmd->operation = R_BLE_GTL_GATTC_OP_EXEC_WRITE;
@@ -5813,9 +6150,11 @@ static uint8_t * r_ble_gtl_msg_parse_rx_char(uint8_t rxd_byte)
  * @retval BLE_SUCCESS          Expected response recevied
  * @retval BLE_ERR_NOT_FOUND    Expected response not recevied
  **********************************************************************************************************************/
-ble_status_t r_ble_gtl_msg_wait_for_response(uint16_t rsp_msg_id, uint8_t * p_rsp_param, uint32_t rsp_param_len, uint32_t timeout_ms)
+ble_status_t r_ble_gtl_msg_wait_for_response(uint16_t rsp_msg_id, uint8_t * p_rsp_param, 
+                                                uint32_t rsp_param_len, uint32_t timeout_ms)
 {
     ble_status_t   status = BLE_ERR_NOT_FOUND;
+    bool           received = false;
     uint8_t      * p_msg = NULL;
 
     do
@@ -5830,16 +6169,16 @@ ble_status_t r_ble_gtl_msg_wait_for_response(uint16_t rsp_msg_id, uint8_t * p_rs
                     memcpy(p_rsp_param, &p_msg[sizeof(r_ble_gtl_msg_hdr_t)], rsp_param_len);
                 }
                 r_ble_gtl_msg_buffer_free(p_msg);
-                break;
+                received = true;
             }
             else
             {
                 /* Message received but not what we expected, queue for processing next time BLE execute is called */
-                r_ble_gtl_msg_pend_queue_add((uint8_t **)&p_msg);
+                r_ble_gtl_msg_pend_queue_add(&p_msg);
             }
         }
     }
-    while (BLE_ERR_NOT_FOUND != status);
+    while ((BLE_ERR_NOT_FOUND != status) && (false == received));
 
     return status;
 }
@@ -5855,9 +6194,11 @@ ble_status_t r_ble_gtl_msg_wait_for_response(uint16_t rsp_msg_id, uint8_t * p_rs
  * @retval BLE_SUCCESS          Expected response recevied
  * @retval BLE_ERR_NOT_FOUND    Expected response not recevied
  **********************************************************************************************************************/
-ble_status_t r_ble_gtl_msg_wait_for_cmd_complete(uint16_t cmp_evt, uint8_t operation, uint8_t cmd_status, uint32_t timeout_ms)
+ble_status_t r_ble_gtl_msg_wait_for_cmd_complete(uint16_t cmp_evt, uint8_t operation, 
+                                                uint8_t cmd_status, uint32_t timeout_ms)
 {
     ble_status_t               status;
+    bool                       received = false;
     uint8_t                  * p_msg = NULL;
     r_ble_gtl_gapm_cmp_evt_t * p_param;
 
@@ -5878,16 +6219,16 @@ ble_status_t r_ble_gtl_msg_wait_for_cmd_complete(uint16_t cmp_evt, uint8_t opera
                     status = BLE_ERR_NOT_FOUND;
                 }
                 r_ble_gtl_msg_buffer_free(p_msg);
-                break;
+                received = true;
             }
             else
             {
                 /* Message received but not what we expected, queue for processing next time BLE execute is called */
-                r_ble_gtl_msg_pend_queue_add((uint8_t **)&p_msg);
+                r_ble_gtl_msg_pend_queue_add(&p_msg);
             }
         }
     }
-    while (BLE_ERR_NOT_FOUND != status);
+    while ((BLE_ERR_NOT_FOUND != status) && (false == received));
 
     return status;
 }
@@ -5903,7 +6244,7 @@ ble_status_t r_ble_gtl_msg_wait_for_cmd_complete(uint16_t cmp_evt, uint8_t opera
  **********************************************************************************************************************/
 static ble_status_t r_ble_gtl_msg_transmit(uint8_t * p_msg)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ERROR_RETURN(NULL != p_msg, BLE_ERR_INVALID_ARG);
 #endif
 
@@ -5914,22 +6255,10 @@ static ble_status_t r_ble_gtl_msg_transmit(uint8_t * p_msg)
     if (true == r_ble_gtl_mutex_take(R_BLE_GTL_MUTEX_TX))
     {
         /* First transmit the initiator byte, then the message */
-        if (0 == g_transport_api.write(g_transport_api.p_context, &initiator, sizeof(initiator)))
+        status = r_ble_gtl_transmit(&initiator, sizeof(initiator));
+        if (BLE_SUCCESS == status)
         {
-            /* Wait for transmit to complete */
-            if (true == r_ble_gtl_mutex_take(R_BLE_GTL_MUTEX_TEI))
-            {
-                if (0 == g_transport_api.write(g_transport_api.p_context,
-                                               p_msg,
-                                               p_gtl_msg_hdr->param_length + sizeof(r_ble_gtl_msg_hdr_t)))
-                {
-                    /* Wait for transmit to complete */
-                    if (true == r_ble_gtl_mutex_take(R_BLE_GTL_MUTEX_TEI))
-                    {
-                        status = BLE_SUCCESS;
-                    }
-                }
-            }
+            status = r_ble_gtl_transmit(p_msg, p_gtl_msg_hdr->param_length + sizeof(r_ble_gtl_msg_hdr_t));
         }
         r_ble_gtl_mutex_give(R_BLE_GTL_MUTEX_TX);
     }
@@ -6062,7 +6391,7 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_cb_evt_allocate(uint16_t type, ble_status_
     if (NULL != p_evt_cb)
     {
         /* Allocate memory for event parameters */
-        switch(type & R_BLE_GTL_CB_EVT_TYPE_MASK)
+        switch (type & R_BLE_GTL_CB_EVT_TYPE_MASK)
         {
             case R_BLE_GTL_CB_EVT_TYPE_GAP:
             {
@@ -6111,7 +6440,7 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_cb_evt_allocate(uint16_t type, ble_status_
                             p_db_access_param->p_params = r_ble_gtl_malloc(sizeof(st_ble_gatts_db_params_t));
                             if (NULL != p_db_access_param->p_params)
                             {
-                                p_db_access_param->p_params->value.p_value = r_ble_gtl_malloc(sizeof(param_len));
+                                p_db_access_param->p_params->value.p_value = r_ble_gtl_malloc(param_len);
                                 if (NULL != p_db_access_param->p_params->value.p_value)
                                 {
                                     allocated = true;
@@ -6127,10 +6456,18 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_cb_evt_allocate(uint16_t type, ble_status_
                     }
                     else
                     {
-                        r_ble_gtl_free(p_db_access_param->p_params->value.p_value);
-                        r_ble_gtl_free(p_db_access_param->p_handle);
-                        r_ble_gtl_free(p_db_access_param->p_params);
-                        r_ble_gtl_free(p_evt_cb->data.gatts.p_param);
+                        if (NULL != p_evt_cb->data.gatts.p_param)
+                        {
+                            if (NULL != p_db_access_param->p_handle)
+                            {
+                                r_ble_gtl_free(p_db_access_param->p_handle);
+                            }
+                            if (NULL != p_db_access_param->p_params)
+                            {
+                                r_ble_gtl_free(p_db_access_param->p_params);
+                            }
+                            r_ble_gtl_free(p_evt_cb->data.gatts.p_param);
+                        }
                         r_ble_gtl_free(p_evt_cb);
                         p_evt_cb = NULL;
                     }
@@ -6249,8 +6586,11 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_cb_evt_allocate(uint16_t type, ble_status_
                     }
                     else
                     {
-                        r_ble_gtl_free(p_rand_comp->p_rand);
-                        r_ble_gtl_free(p_evt_cb->data.vs.p_param);
+                        if (NULL != p_evt_cb->data.vs.p_param)
+                        {
+                            r_ble_gtl_free(p_evt_cb->data.vs.p_param);
+                        }
+
                         r_ble_gtl_free(p_evt_cb);
                         p_evt_cb = NULL;
                     }
@@ -6359,45 +6699,74 @@ static void r_ble_gtl_cb_evt_free(r_ble_gtl_cb_evt_t * p_evt)
  *
  * @param[in]  p_att_desc   Pointer to GTL descriptor being built
  * @param[in]  p_att        Pointer to QE descriptor used as source
+ * @param[in]  nbr_atts     Number of attributes
  *
  * @retval BLE_SUCCESS      Descriptor built successfully
  **********************************************************************************************************************/
-static ble_status_t r_ble_gtl_att_build_descriptor(r_ble_gtl_gattm_att_desc_t * p_att_desc, attribute_t * p_att)
+static ble_status_t r_ble_gtl_att_build_descriptor(r_ble_gtl_gattm_att_desc_t * p_att_desc, 
+                                                   attribute_t * p_att, uint16_t nbr_atts)
 {
-    /* Convert permissions from QE Tool generated type to GTL type */
-    p_att_desc->perm = 0;
+    uint16_t att_ix   = 0;
+    uint32_t att_perm = 0;
 
-    if (p_att->permissions & R_BLE_GTL_QE_ATT_PERM_READ)
+    for (att_ix = 0; att_ix < nbr_atts; att_ix++)
     {
-        p_att_desc->perm |= R_BLE_GTL_ATT_PERM_READ_ENABLE;
+        /* First add the UUID */
+        memset(&p_att_desc->uuid[0], 0, BLE_GATT_128_BIT_UUID_SIZE);
+        memcpy(&p_att_desc->uuid[0], p_att->uuid, p_att->uuid_length);
+
+        /* Convert permissions from QE Tool generated type to GTL type */
+        p_att_desc->perm = 0;
+
+        if (p_att->permissions & R_BLE_GTL_QE_ATT_PERM_READ)
+        {
+            att_perm |= R_BLE_GTL_ATT_PERM_READ_ENABLE;
+        }
+
+        if (p_att->permissions & R_BLE_GTL_QE_ATT_PERM_WRITE)
+        {
+            att_perm |= R_BLE_GTL_ATT_PERM_WRITE_ENABLE;
+            att_perm |= R_BLE_GTL_ATT_PERM_WRITE_REQ_ACCEPTED;
+        }
+
+        if (BLE_GATT_128_BIT_UUID_SIZE == p_att->uuid_length)
+        {
+            att_perm |= R_BLE_GTL_ATT_PERM_UUID_LEN_128;
+        }
+
+        p_att_desc->perm = att_perm;
+
+        /* Not setting the RI flag (bit 15) as DA1453x will store attribute values */
+        p_att_desc->max_len = p_att->value_length;
+
+        /* If this is was a characteristic declaration then additional permissions such as
+           notify etc. are stored in value field. Extract these and then apply them to the
+           value which is always next in the list */
+        att_perm = 0;
+        if (BLE_GATT_16_BIT_UUID_SIZE == p_att->uuid_length)
+        {
+            uint16_t uuid;
+            memcpy(&uuid, p_att->uuid, BLE_GATT_16_BIT_UUID_SIZE);
+
+            if (R_BLE_GTL_CHAR_DECLARATION == uuid)
+            {
+                if (0 < p_att->value_length)
+                {
+                    if (p_att->value[0] & R_BLE_GTL_QE_ATT_PERM_INDICATE)
+                    {
+                        att_perm |= R_BLE_GTL_ATT_PERM_INDICATE_ENABLE;
+                    }
+
+                    if (p_att->value[0] & R_BLE_GTL_QE_ATT_PERM_NOTIFY)
+                    {
+                        att_perm |= R_BLE_GTL_ATT_PERM_NOIFY_ENABLE;
+                    }
+                }
+            }
+        }
+        p_att_desc++;
+        p_att++;
     }
-
-    if (p_att->permissions & R_BLE_GTL_QE_ATT_PERM_WRITE)
-    {
-        p_att_desc->perm |= R_BLE_GTL_ATT_PERM_WRITE_ENABLE;
-        p_att_desc->perm |= R_BLE_GTL_ATT_PERM_WRITE_REQ_ACCEPTED;
-    }
-
-    if (p_att->permissions & R_BLE_GTL_QE_ATT_PERM_INDICATE)
-    {
-        p_att_desc->perm |= R_BLE_GTL_ATT_PERM_INDICATE_ENABLE;
-    }
-
-    if (p_att->permissions & R_BLE_GTL_QE_ATT_PERM_NOTIFY)
-    {
-        p_att_desc->perm |= R_BLE_GTL_ATT_PERM_NOIFY_ENABLE;
-    }
-
-    if (BLE_GATT_128_BIT_UUID_SIZE == p_att->uuid_length)
-    {
-        p_att_desc->perm |= R_BLE_GTL_ATT_PERM_UUID_LEN_128;
-    }
-
-    /* Not setting the RI flag (bit 15) as DA1453x will store attribute values */
-    p_att_desc->max_len = p_att->value_length;
-
-    memset(&p_att_desc->uuid[0], 0, BLE_GATT_128_BIT_UUID_SIZE);
-    memcpy(&p_att_desc->uuid[0], p_att->uuid, p_att->uuid_length);
 
     return BLE_SUCCESS;
 }
@@ -6452,9 +6821,28 @@ static void r_ble_gtl_cleanup_open(void)
 
     if (NULL != g_adv_timer)
     {
-        xTimerDelete(g_adv_timer, 0);
-        g_adv_timer = NULL;
+        r_ble_gtl_adv_timer_stop();
     }
+
+    if (NULL != g_events)
+    {
+        vEventGroupDelete(g_events);
+    }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    tx_semaphore_delete(&g_tx_sem);
+    tx_semaphore_delete(&g_rx_sem);
+    tx_semaphore_delete(&g_uart_tei_sem);
+
+    tx_queue_delete(&g_cb_evt_queue);
+    tx_queue_delete(&g_used_gtl_msg_queue);
+    tx_queue_delete(&g_free_gtl_msg_queue);
+    tx_queue_delete(&g_pend_gtl_msg_queue);
+
+    r_ble_gtl_adv_timer_stop();
+
+    tx_byte_pool_delete(&g_byte_pool);
+
+    tx_event_flags_delete(&g_events);
 #endif
 }
 
@@ -6474,6 +6862,17 @@ static uint8_t * r_ble_gtl_msg_buffer_allocate_from_isr(uint16_t len)
     {
         p_buff = NULL;
     }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    FSP_PARAMETER_NOT_USED(len);
+    if (TX_SUCCESS != tx_queue_receive(&g_free_gtl_msg_queue, &p_buff, TX_NO_WAIT))
+    {
+        p_buff = NULL;
+    }
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    FSP_PARAMETER_NOT_USED(len);
+    /* Statically allocated buffers are all the same length. Deliberately
+     * ignoring return value, caller should check for NULL pointer. */
+    (void)r_ble_gtl_fifo_get((r_ble_gtl_fifo_t *)&g_free_gtl_msg_queue, &p_buff, 0);
 #endif
 
     return p_buff;
@@ -6489,6 +6888,10 @@ static void r_ble_gtl_msg_buffer_free(uint8_t * p_msg)
 {
 #if BSP_CFG_RTOS_USED == 1 /* FreeRTOS */
     xQueueSend(g_free_gtl_msg_queue, &p_msg, 0);
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    tx_queue_send(&g_free_gtl_msg_queue, &p_msg, TX_NO_WAIT);
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    (void)r_ble_gtl_fifo_put((r_ble_gtl_fifo_t *)&g_free_gtl_msg_queue, &p_msg);
 #endif
 }
 
@@ -6504,6 +6907,10 @@ static void r_ble_gtl_msg_buffer_free_from_isr(uint8_t * p_msg)
     BaseType_t xHigherPriorityTaskWoken;
     xQueueSendFromISR(g_free_gtl_msg_queue, &p_msg, &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    tx_queue_send(&g_free_gtl_msg_queue, &p_msg, TX_NO_WAIT);
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    (void)r_ble_gtl_fifo_put((r_ble_gtl_fifo_t *)&g_free_gtl_msg_queue, &p_msg);
 #endif
 }
 
@@ -6522,6 +6929,17 @@ static ble_status_t r_ble_gtl_msg_receive(uint8_t ** p_msg, uint32_t timeout_ms)
 
 #if BSP_CFG_RTOS_USED == 1 /* FreeRTOS */
     if (pdTRUE == xQueueReceive(g_used_gtl_msg_queue, p_msg, timeout_ms * portTICK_PERIOD_MS))
+    {
+        status = BLE_SUCCESS;
+    }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    if (TX_SUCCESS == tx_queue_receive(&g_used_gtl_msg_queue, p_msg, 
+                                        (timeout_ms * TX_TIMER_TICKS_PER_SECOND) / R_BLE_GTL_MS_PER_SECOND))
+    {
+        status = BLE_SUCCESS;
+    }
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    if (true == r_ble_gtl_fifo_get((r_ble_gtl_fifo_t *)&g_used_gtl_msg_queue, p_msg, timeout_ms))
     {
         status = BLE_SUCCESS;
     }
@@ -6545,6 +6963,17 @@ static ble_status_t r_ble_gtl_msg_pend_receive(uint8_t ** p_msg, uint32_t timeou
 
 #if BSP_CFG_RTOS_USED == 1 /* FreeRTOS */
     if (pdTRUE == xQueueReceive(g_pend_gtl_msg_queue, p_msg, timeout_ms * portTICK_PERIOD_MS))
+    {
+        status = BLE_SUCCESS;
+    }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    if (TX_SUCCESS == tx_queue_receive(&g_pend_gtl_msg_queue, p_msg, 
+                                        (timeout_ms * TX_TIMER_TICKS_PER_SECOND) / R_BLE_GTL_MS_PER_SECOND))
+    {
+        status = BLE_SUCCESS;
+    }
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    if (true == r_ble_gtl_fifo_get(&g_pend_gtl_msg_queue, p_msg, timeout_ms))
     {
         status = BLE_SUCCESS;
     }
@@ -6578,12 +7007,62 @@ static bool r_ble_gtl_msg_queue_init(void)
                 /* Fill free queue with (pointers to) buffers */
                 for (i = 0; i < R_BLE_GTL_MSG_QUEUE_LEN; i++)
                 {
-                    uint8_t * p_buf = (uint8_t *)&g_gtl_msg_buf_pool[i][0];
+                    uint8_t * p_buf = &g_gtl_msg_buf_pool[i][0];
                     (void)xQueueSend(g_free_gtl_msg_queue, &p_buf, 0);
                 }
+
                 init = true;
             }
         }
+    }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    uint8_t i;
+    UINT    status;
+
+    /* Initialize queues containing (pointers to) buffers used to store incoming GTL messages */
+    status = tx_queue_create(&g_used_gtl_msg_queue, "GTL_USED", TX_1_ULONG, &g_used_gtl_msg_queue_buff[0], 
+                                        sizeof(ULONG) * (TX_1_ULONG) * (R_BLE_GTL_MSG_QUEUE_LEN));
+    if (TX_SUCCESS == status)
+    {
+        status = tx_queue_create(&g_pend_gtl_msg_queue, "GTL_USED", TX_1_ULONG, &g_pend_gtl_msg_queue_buff[0], 
+                                        sizeof(ULONG) * (TX_1_ULONG) * (R_BLE_GTL_MSG_QUEUE_LEN));
+        if (TX_SUCCESS == status)
+        {
+            status = tx_queue_create(&g_free_gtl_msg_queue, "GTL_USED", TX_1_ULONG, &g_free_gtl_msg_queue_buff[0], 
+                                        sizeof(ULONG) * (TX_1_ULONG) * (R_BLE_GTL_MSG_QUEUE_LEN));
+            if (TX_SUCCESS == status)
+            {
+                /* Fill free queue with (pointers to) buffers */
+                for (i = 0; i < R_BLE_GTL_MSG_QUEUE_LEN; i++)
+                {
+                    uint8_t * p_buf = &g_gtl_msg_buf_pool[i][0];
+                    (void)tx_queue_send(&g_free_gtl_msg_queue, &p_buf, TX_NO_WAIT);
+                }
+
+                /* Create byte pool (heap) used when building messages for transmission */
+                status = tx_byte_pool_create(&g_byte_pool, "GTL_HEAP", &g_byte_pool_buff[0], R_BLE_GTL_BYTE_POOL_LEN);
+                if (TX_SUCCESS == status)
+                {
+                    init = true;
+                }
+            }
+        }
+    }
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    uint8_t i;
+
+    /* Initialize queues containing (pointers to) buffers used to store incoming GTL messages */
+    r_ble_gtl_fifo_init((r_ble_gtl_fifo_t *)&g_used_gtl_msg_queue, g_used_gtl_msg_buf, R_BLE_GTL_MSG_QUEUE_LEN);
+    r_ble_gtl_fifo_init((r_ble_gtl_fifo_t *)&g_free_gtl_msg_queue, g_free_gtl_msg_buf, R_BLE_GTL_MSG_QUEUE_LEN);
+    r_ble_gtl_fifo_init(&g_pend_gtl_msg_queue, g_pend_gtl_msg_buf, R_BLE_GTL_MSG_QUEUE_LEN);
+
+
+    /* Fill free queue with (pointers to) buffers */
+    init = true;
+    for (i = 0; (i < R_BLE_GTL_MSG_QUEUE_LEN) && (true == init); i++)
+    {
+        uint8_t * p_buf = &g_gtl_msg_buf_pool[i][0];
+        init = r_ble_gtl_fifo_put((r_ble_gtl_fifo_t *)&g_free_gtl_msg_queue, &p_buf);
     }
 #endif
 
@@ -6609,6 +7088,16 @@ static ble_status_t r_ble_gtl_msg_queue_add(uint8_t ** p_rx_msg)
         portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
         status = BLE_SUCCESS;
     }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    if (TX_SUCCESS == tx_queue_send(&g_used_gtl_msg_queue, p_rx_msg, TX_NO_WAIT))
+    {
+        status = BLE_SUCCESS;
+    }
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    if (true == r_ble_gtl_fifo_put((r_ble_gtl_fifo_t *)&g_used_gtl_msg_queue, p_rx_msg))
+    {
+        status = BLE_SUCCESS;
+    }
 #endif
 
     return status;
@@ -6629,6 +7118,32 @@ static bool r_ble_gtl_msg_queue_empty(void)
     {
         result = true;
     }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    CHAR      * p_name;
+    ULONG       enqueued;
+    ULONG       available_storage;
+    TX_THREAD * p_first_suspended;
+    ULONG       suspended_count;
+    TX_QUEUE  * p_next_queue;
+    UINT        status;
+
+    status = tx_queue_info_get(&g_used_gtl_msg_queue,
+                               &p_name,
+                               &enqueued,
+                               &available_storage,
+                               &p_first_suspended,
+                               &suspended_count,
+                               &p_next_queue);
+
+    if (TX_SUCCESS == status)
+    {
+        if (0 == enqueued)
+        {
+            result = true;
+        }
+    }
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    result = r_ble_gtl_fifo_empty((r_ble_gtl_fifo_t *)&g_used_gtl_msg_queue);
 #endif
 
     return result;
@@ -6648,6 +7163,14 @@ static void r_ble_gtl_msg_pend_queue_add(uint8_t ** p_rx_msg)
         /* Unable to queue message, just discard */
         r_ble_gtl_msg_buffer_free(*p_rx_msg);
     }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    if (TX_SUCCESS != tx_queue_send(&g_pend_gtl_msg_queue, p_rx_msg, TX_NO_WAIT))
+    {
+        /* Unable to queue message, just discard */
+        r_ble_gtl_msg_buffer_free(*p_rx_msg);
+    }
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    r_ble_gtl_fifo_put(&g_pend_gtl_msg_queue, (uint8_t **)&p_rx_msg);
 #endif
 }
 
@@ -6666,6 +7189,32 @@ static bool r_ble_gtl_msg_pend_queue_empty(void)
     {
         result = true;
     }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    CHAR      * p_name;
+    ULONG       enqueued;
+    ULONG       available_storage;
+    TX_THREAD * p_first_suspended;
+    ULONG       suspended_count;
+    TX_QUEUE  * p_next_queue;
+    UINT        status;
+
+    status = tx_queue_info_get(&g_pend_gtl_msg_queue,
+                               &p_name,
+                               &enqueued,
+                               &available_storage,
+                               &p_first_suspended,
+                               &suspended_count,
+                               &p_next_queue);
+
+    if (TX_SUCCESS == status)
+    {
+        if (0 == enqueued)
+        {
+            result = true;
+        }
+    }
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    result = r_ble_gtl_fifo_empty(&g_pend_gtl_msg_queue);
 #endif
 
     return result;
@@ -6687,6 +7236,17 @@ static bool r_ble_gtl_cb_evt_queue_init(void)
     {
         init = false;
     }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    UINT    status;
+    status = tx_queue_create(&g_cb_evt_queue, "GTL_CB_EVT", TX_1_ULONG, &g_cb_evt_queue_buff[0], 
+                                    sizeof(ULONG) * (TX_1_ULONG) * (R_BLE_GTL_CB_EVT_QUEUE_LEN));
+    if (TX_SUCCESS != status)
+    {
+        init = false;
+    }
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    /* Initialize queue containing (pointers to) buffers used to store callback events */
+    r_ble_gtl_fifo_init(&g_cb_evt_queue, (uint8_t **)g_cb_evt_queue_buff, R_BLE_GTL_CB_EVT_QUEUE_LEN);
 #endif
 
     return init;
@@ -6711,6 +7271,13 @@ static bool r_ble_gtl_cb_evt_queue_get(r_ble_gtl_cb_evt_t ** p_cb_evt)
             result = true;
         }
     }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    if (TX_SUCCESS == tx_queue_receive(&g_cb_evt_queue, p_cb_evt, TX_NO_WAIT))
+    {
+        result = true;
+    }
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    result = r_ble_gtl_fifo_get(&g_cb_evt_queue, (uint8_t **)p_cb_evt, 0);
 #endif
 
     return result;
@@ -6740,6 +7307,28 @@ static ble_status_t r_ble_gtl_cb_evt_queue_add(r_ble_gtl_cb_evt_t * p_evt)
         r_ble_gtl_cb_evt_free(p_evt);
         status = BLE_ERR_MEM_ALLOC_FAILED;
     }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    if (TX_SUCCESS == tx_queue_send(&g_cb_evt_queue, &p_evt, TX_NO_WAIT))
+    {
+        status = BLE_SUCCESS;
+    }
+    else
+    {
+        /* Failed to add event to queue, free memory storing event data */
+        r_ble_gtl_cb_evt_free(p_evt);
+        status = BLE_ERR_MEM_ALLOC_FAILED;
+    }
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    if (true == r_ble_gtl_fifo_put(&g_cb_evt_queue, (uint8_t **)&p_evt))
+    {
+        status = BLE_SUCCESS;
+    }
+    else
+    {
+        /* Failed to add event to queue, free memory storing event data */
+        r_ble_gtl_cb_evt_free(p_evt);
+        status = BLE_ERR_MEM_ALLOC_FAILED;
+    }
 #endif
 
     return status;
@@ -6760,6 +7349,32 @@ static bool r_ble_gtl_cb_evt_queue_empty(void)
     {
         result = true;
     }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    CHAR      * p_name;
+    ULONG       enqueued;
+    ULONG       available_storage;
+    TX_THREAD * p_first_suspended;
+    ULONG       suspended_count;
+    TX_QUEUE  * p_next_queue;
+    UINT        status;
+
+    status = tx_queue_info_get(&g_cb_evt_queue,
+                               &p_name,
+                               &enqueued,
+                               &available_storage,
+                               &p_first_suspended,
+                               &suspended_count,
+                               &p_next_queue);
+
+    if (TX_SUCCESS == status)
+    {
+        if (0 == enqueued)
+        {
+            result = true;
+        }
+    }
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    result = r_ble_gtl_fifo_empty(&g_cb_evt_queue);
 #endif
 
     return result;
@@ -6774,6 +7389,10 @@ static void r_ble_gtl_delay(uint32_t ms)
 {
 #if BSP_CFG_RTOS_USED == 1 /* FreeRTOS */
     vTaskDelay(pdMS_TO_TICKS(ms));
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    tx_thread_sleep((ms * TX_TIMER_TICKS_PER_SECOND) / R_BLE_GTL_MS_PER_SECOND);
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    R_BSP_SoftwareDelay(ms, BSP_DELAY_MILLISECS);
 #endif
 }
 
@@ -6788,6 +7407,19 @@ static void * r_ble_gtl_malloc(uint32_t size)
 {
 #if BSP_CFG_RTOS_USED == 1 /* FreeRTOS */
     return pvPortMalloc(size);
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    UINT    status;
+    UCHAR * p_mem;
+
+    status = tx_byte_allocate(&g_byte_pool, (VOID **)&p_mem, size, TX_NO_WAIT);
+    if (TX_SUCCESS != status)
+    {
+        p_mem = NULL;
+    }
+
+    return p_mem;
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    return malloc(size);
 #endif
 }
 
@@ -6800,6 +7432,10 @@ static void r_ble_gtl_free(void * p_mem)
 {
 #if BSP_CFG_RTOS_USED == 1 /* FreeRTOS */
     vPortFree(p_mem);
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    tx_byte_release(p_mem);
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    free(p_mem);
 #endif
 }
 
@@ -6837,6 +7473,29 @@ static bool r_ble_gtl_mutex_init(void)
             }
         }
     }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    UINT result;
+
+    result = tx_semaphore_create(&g_tx_sem, "GTL_TX_SEM", 1);
+    if (TX_SUCCESS == result)
+    {
+        result = tx_semaphore_create(&g_rx_sem, "GTL_RX_SEM", 1);
+        if (TX_SUCCESS == result)
+        {
+            result = tx_semaphore_create(&g_uart_tei_sem, "GTL_TEI_SEM", 1);
+            if (TX_SUCCESS == result)
+            {
+                result = tx_semaphore_get(&g_uart_tei_sem, TX_NO_WAIT);
+                if (TX_SUCCESS == result)
+                {
+                    status = true;
+                }
+            }
+        }
+    }
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    g_uart_tei_sem = false;
+    status = true;
 #endif
 
     return status;
@@ -6877,6 +7536,61 @@ static bool r_ble_gtl_mutex_take(uint32_t mutex)
         {
             mutex &= ~R_BLE_GTL_MUTEX_TEI;
         }
+    }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    if (0 != (mutex & R_BLE_GTL_MUTEX_TX))
+    {
+        if (TX_SUCCESS == tx_semaphore_get(&g_tx_sem, 
+                            (R_BLE_GTL_MSG_TX_BLOCK_TIMEOUT_MS * TX_TIMER_TICKS_PER_SECOND) / R_BLE_GTL_MS_PER_SECOND))
+        {
+            mutex &= ~R_BLE_GTL_MUTEX_TX;
+        }
+    }
+
+    if (0 != (mutex & R_BLE_GTL_MUTEX_RX))
+    {
+        if (TX_SUCCESS == tx_semaphore_get(&g_rx_sem, 
+                            (R_BLE_GTL_MSG_TX_BLOCK_TIMEOUT_MS * TX_TIMER_TICKS_PER_SECOND) / R_BLE_GTL_MS_PER_SECOND))
+        {
+            mutex &= ~R_BLE_GTL_MUTEX_RX;
+        }
+    }
+
+    if (0 != (mutex & R_BLE_GTL_MUTEX_TEI))
+    {
+        if (TX_SUCCESS == tx_semaphore_get(&g_uart_tei_sem, 
+                            (R_BLE_GTL_MSG_TX_TIMEOUT_MS * TX_TIMER_TICKS_PER_SECOND) / R_BLE_GTL_MS_PER_SECOND))
+        {
+            mutex &= ~R_BLE_GTL_MUTEX_TEI;
+        }
+    }
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    if (0 != (mutex & R_BLE_GTL_MUTEX_TEI))
+    {
+        uint32_t timeout_ms = R_BLE_GTL_MSG_TX_TIMEOUT_MS;
+
+        do
+        {
+            if (false == g_uart_tei_sem)
+            {
+                if (0 < timeout_ms)
+                {
+                    r_ble_gtl_delay(1);
+                    timeout_ms--;
+                }
+            }
+            else
+            {
+                mutex = 0;
+                g_uart_tei_sem = false;
+                break;
+            }
+        }
+        while (0 < timeout_ms);
+    }
+    else
+    {
+        mutex = 0;
     }
 #endif
 
@@ -6927,6 +7641,36 @@ static bool r_ble_gtl_mutex_give(uint32_t mutex)
             mutex &= ~R_BLE_GTL_MUTEX_TEI;
         }
     }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    if (0 != (mutex & R_BLE_GTL_MUTEX_TX))
+    {
+        if (TX_SUCCESS == tx_semaphore_put(&g_tx_sem))
+        {
+            mutex &= ~R_BLE_GTL_MUTEX_TX;
+        }
+    }
+
+    if (0 != (mutex & R_BLE_GTL_MUTEX_RX))
+    {
+        if (TX_SUCCESS == tx_semaphore_put(&g_rx_sem))
+        {
+            mutex &= ~R_BLE_GTL_MUTEX_RX;
+        }
+    }
+
+    if (0 != (mutex & R_BLE_GTL_MUTEX_TEI))
+    {
+        if (TX_SUCCESS == tx_semaphore_put(&g_uart_tei_sem))
+        {
+            mutex &= ~R_BLE_GTL_MUTEX_TEI;
+        }
+    }
+#elif BSP_CFG_RTOS_USED == 0 /* Baremetal */
+    if (0 != (mutex & R_BLE_GTL_MUTEX_TEI))
+    {
+        g_uart_tei_sem = true;
+    }
+    mutex = 0;
 #endif
 
     if (0 == mutex)
@@ -6937,6 +7681,57 @@ static bool r_ble_gtl_mutex_give(uint32_t mutex)
     return status;
 }
 
+/*******************************************************************************************************************//**
+ *  Perform hardware reset of DA1453x device
+ *
+ * @param[in]  reset_pin    GPIO to be used to reset external DA1453x device
+ *
+ **********************************************************************************************************************/
+static void r_ble_gtl_hw_reset(void)
+{
+#if (0 == BLE_CFG_RESET_POLARITY)
+    BLE_SCK_DDR(BLE_CFG_SCK_PORT, BLE_CFG_SCK_PIN) = 1;
+    BLE_SCK_DR(BLE_CFG_SCK_PORT, BLE_CFG_SCK_PIN) = 0;
+    BLE_RESET_DDR(BLE_CFG_RESET_PORT, BLE_CFG_RESET_PIN) = 1;
+    BLE_RESET_DR(BLE_CFG_RESET_PORT, BLE_CFG_RESET_PIN) = 0;
+    r_ble_gtl_delay(1);
+    BLE_RESET_DR(BLE_CFG_RESET_PORT, BLE_CFG_RESET_PIN) = 1;
+#else
+    BLE_SCK_DDR(BLE_CFG_SCK_PORT, BLE_CFG_SCK_PIN) = 1;
+    BLE_SCK_DR(BLE_CFG_SCK_PORT, BLE_CFG_SCK_PIN) = 0;
+    BLE_RESET_DDR(BLE_CFG_RESET_PORT, BLE_CFG_RESET_PIN) = 0;
+    BLE_RESET_DR(BLE_CFG_RESET_PORT, BLE_CFG_RESET_PIN) = 1;
+    r_ble_gtl_delay(1);
+    BLE_RESET_DR(BLE_CFG_RESET_PORT, BLE_CFG_RESET_PIN) = 0;
+#endif
+}
+
+/*******************************************************************************************************************//**
+ *  Transmit a sequence of bytes via the appropriate transport layer.
+ *
+ * @param[in]  p_data                   Pointer to data to be transmitted
+ * @param[in]  len                      Number of bytes to be transmitted
+ *
+ * @retval BLE_SUCCESS                  Message transmitted successfully
+ * @retval BLE_ERR_UNSPECIFIED          Transport layer failed to transmit message
+ **********************************************************************************************************************/
+static ble_status_t r_ble_gtl_transmit(uint8_t * p_data, uint32_t len)
+{
+    ble_status_t status = BLE_ERR_UNSPECIFIED;
+
+    if (0 == g_transport_api.write(g_transport_api.p_context, p_data, len))
+    {
+        /* Wait for transmit to complete */
+        if (true == r_ble_gtl_mutex_take(R_BLE_GTL_MUTEX_TEI))
+        {
+            status = BLE_SUCCESS;
+        }
+    }
+
+    return status;
+}
+
+#if (BSP_CFG_RTOS_USED == 5) || (BSP_CFG_RTOS_USED == 1) /* ThreadX or FreeRTOS */
 #if BSP_CFG_RTOS_USED == 1 /* FreeRTOS */
 /*******************************************************************************************************************//**
  *  Callback that is called when advertising timer expires
@@ -6946,7 +7741,417 @@ static bool r_ble_gtl_mutex_give(uint32_t mutex)
  **********************************************************************************************************************/
 static void r_ble_gtl_adv_timer_cb(TimerHandle_t xTimer)
 {
-    /* Reason of 0x02 means stopped via timer */
-    (void)r_ble_gtl_gap_stop_adv(0, 0x02);
+    FSP_PARAMETER_NOT_USED(xTimer);
+
+    /* We poll for this event when R_BLE_GTL_Execute is called */
+    xEventGroupSetBits(g_events, R_BLE_GTL_ADV_TIMER_EXPIRED_EVENT);
+
+    /* Setting this event causes app_main to call R_BLE_GTL_Execute */
+    xEventGroupSetBits(g_ble_event_group_handle, BLE_EVENT_PATTERN);
+}
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+/*******************************************************************************************************************//**
+ *  Callback that is called when advertising timer expires
+ *
+ * @param[in]  context      Input to passed to function when timer expires.
+ *
+ **********************************************************************************************************************/
+static void r_ble_gtl_adv_timer_cb(ULONG context)
+{
+    FSP_PARAMETER_NOT_USED(context);
+
+    tx_event_flags_set(&g_events, R_BLE_GTL_ADV_TIMER_EXPIRED_EVENT, TX_OR);
+}
+#endif
+
+/*******************************************************************************************************************//**
+ *  Start advertising timer, upon expiring advertising will be stopped
+ *
+ * @param[in]  duration                 Timer duration in milliseconds
+ *
+ * @retval BLE_SUCCESS                  Timer successfully started
+ * @retval BLE_ERR_MEM_ALLOC_FAILED     Insufficent memory to add item to queue
+ * @retval BLE_ERR_UNSPECIFIED          Unable to start timer
+ **********************************************************************************************************************/
+static ble_status_t r_ble_gtl_adv_timer_start(uint16_t duration)
+{
+    ble_status_t status;
+
+#if BSP_CFG_RTOS_USED == 1 /* FreeRTOS */
+    /* Duration parameter has units of 10ms, timer uses units of ticks */
+    TickType_t ticks = ((TickType_t)duration * (TickType_t)10) * portTICK_PERIOD_MS;
+    g_adv_timer = xTimerCreate("AdvTimer", ticks, pdFALSE, (void *)0, r_ble_gtl_adv_timer_cb);
+    if (NULL != g_adv_timer)
+    {
+        if (pdPASS == xTimerStart(g_adv_timer, 0))
+        {
+            /* Timer started! */
+            status = BLE_SUCCESS;
+        }
+        else
+        {
+            /* Unable to start timer */
+            xTimerDelete(g_adv_timer, 0);
+            g_adv_timer = NULL;
+            status = BLE_ERR_UNSPECIFIED;
+        }
+    }
+    else
+    {
+        /* Unable to create timer */
+        status = BLE_ERR_MEM_ALLOC_FAILED;
+    }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    /* Duration parameter has units of 10ms, timer uses units of ticks */
+    ULONG ticks = ((ULONG)duration * TX_TIMER_TICKS_PER_SECOND) / R_BLE_GTL_ADV_TIMER_TICKS_PER_SECOND;
+
+    if (TX_SUCCESS == tx_timer_create(&g_adv_timer, "GTL_ADV_TMR", r_ble_gtl_adv_timer_cb, 0, ticks, 
+                                        0, TX_AUTO_ACTIVATE))
+    {
+        /* Timer started! */
+        status = BLE_SUCCESS;
+    }
+    else
+    {
+        /* Unable to start timer */
+        status = BLE_ERR_UNSPECIFIED;
+    }
+#endif
+
+    return status;
+}
+
+/*******************************************************************************************************************//**
+ *  Stop advertising timer
+ *
+ * @retval BLE_SUCCESS                  Timer successfully stopped
+ * @retval BLE_ERR_INVALID_STATE        Timer invalid (not created or started)
+ * @retval BLE_ERR_UNSPECIFIED          Unable to stop timer
+ **********************************************************************************************************************/
+static ble_status_t r_ble_gtl_adv_timer_stop(void)
+{
+    ble_status_t status;
+
+#if BSP_CFG_RTOS_USED == 1 /* FreeRTOS */
+    if (NULL != g_adv_timer)
+    {
+        if (pdTRUE == xTimerIsTimerActive(g_adv_timer))
+        {
+            if (pdTRUE == xTimerStop(g_adv_timer, 0))
+            {
+                /* Timer stopped! */
+                status = BLE_SUCCESS;
+            }
+            else
+            {
+                /* Unable to stop timer */
+                status = BLE_ERR_UNSPECIFIED;
+            }
+        }
+        else
+        {
+            /* Timer not running */
+            status = BLE_ERR_INVALID_STATE;
+        }
+        xTimerDelete(g_adv_timer, 0);
+        g_adv_timer = NULL;
+    }
+    else
+    {
+        /* Timer not created */
+        status = BLE_ERR_INVALID_STATE;
+    }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    if (TX_SUCCESS == tx_timer_deactivate(&g_adv_timer))
+    {
+        /* Timer stopped! */
+        status = BLE_SUCCESS;
+    }
+    else
+    {
+        /* Unable to stop timer */
+        status = BLE_ERR_UNSPECIFIED;
+    }
+    tx_timer_delete(&g_adv_timer);
+#endif
+
+    return status;
+}
+
+/*******************************************************************************************************************//**
+ *  Check if advertising timer has expired
+ *
+ * @retval true             Expired.
+ * @retval false            Not expired.
+ **********************************************************************************************************************/
+static bool r_ble_gtl_adv_timer_expired(void)
+{
+    bool expired = false;
+
+#if BSP_CFG_RTOS_USED == 1 /* FreeRTOS */
+     EventBits_t events_bits = xEventGroupGetBits(g_events);
+
+     if (R_BLE_GTL_ADV_TIMER_EXPIRED_EVENT & events_bits)
+     {
+         xEventGroupClearBits(g_events, R_BLE_GTL_ADV_TIMER_EXPIRED_EVENT);
+         expired = true;
+     }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    ULONG actual_events;
+    if (TX_SUCCESS == tx_event_flags_get(&g_events, R_BLE_GTL_ADV_TIMER_EXPIRED_EVENT, TX_OR_CLEAR, 
+                                                    &actual_events, TX_NO_WAIT))
+    {
+        expired = true;
+    }
+#endif
+
+    return expired;
+}
+
+/*******************************************************************************************************************//**
+ *  Initialize event signalling mechanism
+ *
+ * @retval true             Initialization successful.
+ * @retval false            Initialization failed.
+ **********************************************************************************************************************/
+static bool r_ble_gtl_event_init(void)
+{
+    bool init = false;
+
+#if BSP_CFG_RTOS_USED == 1 /* FreeRTOS */
+    g_events = xEventGroupCreate();
+    if (NULL != g_events)
+    {
+        init = true;
+    }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    if (TX_SUCCESS == tx_event_flags_create(&g_events, "EVENTS"))
+    {
+        init = true;
+    }
+#endif
+
+    return init;
+}
+#endif
+
+#if (BLE_CFG_HOST_BOOT_MODE == 1)
+/*******************************************************************************************************************//**
+ *  Transmit image to DA1453x.
+ *
+ * @retval BLE_SUCCESS            Image transmitted successfully.
+ * @retval BLE_ERR_INVALID_CHAN   The handle does not indicate a SCI channel
+ * @retval BLE_ERR_UNSPECIFIED    Transport layer failed to transmit image
+ **********************************************************************************************************************/
+static ble_status_t r_ble_gtl_transmit_image(uint8_t * p_data, uint32_t len)
+{
+	ble_status_t status = BLE_SUCCESS;
+	uint32_t index = 0;
+	uint32_t send_length = 0;
+
+	while ((index < len) && (status == BLE_SUCCESS))
+	{
+		if ((len - index) > s_port_cfg->tx_size)
+		{
+			send_length = s_port_cfg->tx_size;
+		}
+		else
+		{
+			send_length = len - index;
+		}
+
+		if (BLE_SUCCESS != r_ble_gtl_transmit(&p_data[index], send_length))
+		{
+			status = BLE_ERR_UNSPECIFIED;
+			break;
+		}
+		index += send_length;
+	}
+
+    return status;
+}
+
+/*******************************************************************************************************************//**
+ *  Load an image into the DA1453x. DA1453x will automatically start executing the image once loading is complete.
+ *
+ * @retval BLE_SUCCESS           Image loading successful.
+ * @retval BLE_ERR_UNSPECIFIED   Image loading failed.
+ **********************************************************************************************************************/
+static ble_status_t r_ble_gtl_boot_load_image(void)
+{
+    ble_status_t      status  = BLE_ERR_UNSPECIFIED;
+    uint8_t           rx_crc  = 0;
+    volatile uint32_t timeout = 20;
+
+    /* Inform UART ISR how to handle received data */
+    g_booting = true;
+
+    /* Reset DA1453x */
+    r_ble_gtl_hw_reset();
+
+    /* Wait for DA1453x bootloader to transmit STX */
+    while ((R_BLE_GTL_BOOT_STX != g_rx_boot_byte) && timeout)
+    {
+        r_ble_gtl_delay(10);
+        timeout -= 10;
+    }
+
+    if (R_BLE_GTL_BOOT_STX == g_rx_boot_byte)
+    {
+        r_ble_gtl_boot_header_t header;
+
+        header.soh    = R_BLE_GTL_BOOT_SOH;
+        header.length = r_ble_gtl_image_get_len();
+
+        /* Send header information (SOH and image length in bytes) */
+        if (BLE_SUCCESS == r_ble_gtl_transmit((uint8_t *)&header, sizeof(r_ble_gtl_boot_header_t)))
+        {
+            /* Give DA1453x time to transmit response */
+            r_ble_gtl_delay(10);
+            if (R_BLE_GTL_BOOT_ACK == g_rx_boot_byte)
+            {
+                /* Transmit image to DA1453x */
+                if (BLE_SUCCESS == r_ble_gtl_transmit_image((uint8_t *)r_ble_gtl_image_get(), 
+                                                    r_ble_gtl_image_get_len()))
+                {
+                    /* Wait for CRC from DA1453x */
+                    r_ble_gtl_delay(10);
+
+                    /* Check CRC */
+                    rx_crc = g_rx_boot_byte;
+                    if (rx_crc == r_ble_gtl_image_get_crc())
+                    {
+                        uint8_t ack = R_BLE_GTL_BOOT_ACK;
+                        if (BLE_SUCCESS == r_ble_gtl_transmit(&ack, sizeof(ack)))
+                        {
+                            status = BLE_SUCCESS;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    g_booting = false;
+
+    return status;
+}
+#endif
+
+#if BSP_CFG_RTOS_USED == 0 /* Baremetal */
+/*******************************************************************************************************************//**
+ *  Initialize FIFO
+ *
+ * @param[in]  p_fifo   Pointer to FIFO to be initialized
+ * @param[in]  p_buf    Pointer to buffer that FIFO can use as storage
+ * @param[in]  size     Length of buffer storage
+ *
+ **********************************************************************************************************************/
+static void r_ble_gtl_fifo_init(r_ble_gtl_fifo_t * p_fifo, uint8_t ** p_buf, uint32_t size)
+{
+    p_fifo->p_buffer = p_buf;
+    p_fifo->size     = size;
+    p_fifo->head     = 0;
+    p_fifo->tail     = 0;
+    p_fifo->items    = 0;
+}
+
+/*******************************************************************************************************************//**
+ *  Check if FIFO is empty
+ *
+ * @param[in]  p_fifo   Pointer to FIFO to be checked
+ *
+ * @retval true         FIFO empty
+ * @retval false        FIFO not empty
+ **********************************************************************************************************************/
+static bool r_ble_gtl_fifo_empty(r_ble_gtl_fifo_t * p_fifo)
+{
+    return (p_fifo->items == 0);
+}
+
+/*******************************************************************************************************************//**
+ *  Check if FIFO is full
+ *
+ * @param[in]  p_fifo   Pointer to FIFO to be checked
+ *
+ * @retval true         FIFO full
+ * @retval false        FIFO not full
+ **********************************************************************************************************************/
+static bool r_ble_gtl_fifo_full(r_ble_gtl_fifo_t * p_fifo)
+{
+    return (p_fifo->items == p_fifo->size);
+}
+
+/*******************************************************************************************************************//**
+ *  Add item to the FIFO
+ *
+ * @param[in]  p_fifo   Pointer to FIFO
+ * @param[in]  p_data   Pointer to buffer pointer that is to be added
+ *
+ * @retval true         Added
+ * @retval false        Not added
+ **********************************************************************************************************************/
+static bool r_ble_gtl_fifo_put(r_ble_gtl_fifo_t * p_fifo, uint8_t ** p_data)
+{
+    bool added = false;
+
+    /* FIFO put function is called from within interrupt and main loop, therefore critical section required */
+    if (r_ble_gtl_fifo_full(p_fifo) == 0)
+    {
+        p_fifo->p_buffer[p_fifo->head] = *p_data;
+
+        if (++p_fifo->head >= p_fifo->size)
+        {
+            p_fifo->head = 0;
+        }
+        p_fifo->items++;
+
+        added = true;
+    }
+
+    return added;
+}
+
+/*******************************************************************************************************************//**
+ *  Remove item from the FIFO
+ *
+ * @param[in]  p_fifo   Pointer to FIFO
+ * @param[in]  p_data   Pointer to buffer pointer that is to be used by the removed item
+ *
+ * @retval true         Removed
+ * @retval false        Not removed
+ **********************************************************************************************************************/
+static bool r_ble_gtl_fifo_get(r_ble_gtl_fifo_t * p_fifo, uint8_t ** p_data, uint32_t timeout_ms)
+{
+    bool removed = false;
+
+    do
+    {
+        if (false == r_ble_gtl_fifo_empty(p_fifo))
+        {
+            /* FIFO get function is called from within uart receive interrupt and main loop, therefore critical
+               section required */
+            *p_data = p_fifo->p_buffer[p_fifo->tail];
+
+            if (++p_fifo->tail >= p_fifo->size)
+            {
+                p_fifo->tail = 0;
+            }
+            p_fifo->items--;
+
+            removed = true;
+        }
+        else
+        {
+            if (0 < timeout_ms)
+            {
+                r_ble_gtl_delay(1);
+                timeout_ms--;
+            }
+        }
+    }
+    while ((0 < timeout_ms) && (false == removed));
+
+    return removed;
 }
 #endif

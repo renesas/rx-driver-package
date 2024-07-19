@@ -31,7 +31,8 @@
 *              : 21.01.2015 1.01     Added Support USB Mini Firmware.
 *              : 22.06.2015 1.02     Added support MCU RX231.
 *              : 01.04.2016 1.03     Updated the xml file.
-*              : 29.06.2018 1.04     Modified get_fattime() and SD memory device.
+*              : 29.06.2018 1.04     Modified get_fattime() and
+*                                    SD memory device.
 *              : 14.12.2018 1.05     Supporting USB dirver for RTOS.
 *              : 08.08.2019 2.00     Added support for FreeRTOS and 
 *                                    Renesas uITRON (RI600V4).
@@ -39,6 +40,7 @@
 *              : 10.06.2020 2.10     Added Support MMC Firmware and 
 *                                    FLASH Firmware.
 *              : 31.08.2023 2.30     Updated FatFs ff15.
+*              : 15.12.2023 2.40     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *******************************************************************************/
 
 /******************************************************************************
@@ -129,7 +131,7 @@ static uint32_t TFAT_DRIVE_USB_ALLOC = (USB_NUM_9 | USB_NUM_8 | USB_NUM_7 | USB_
 #error "Error! Invalid setting for TFAT_USB_DRIVE_NUM or TFAT_DRIVE_ALLOC_NUM_x in r_tfat_driver_rx_config.h"
 #endif
 
-#endif // (TFAT_USB_DRIVE_NUM > 0)
+#endif /* (TFAT_USB_DRIVE_NUM > 0) */
 
 
 /* for SD memory card */
@@ -207,7 +209,7 @@ static uint32_t TFAT_DRIVE_SDMEM_ALLOC = (SDMEM_NUM_9 | SDMEM_NUM_8 | SDMEM_NUM_
 #error "Error! Invalid setting for TFAT_SDMEM_DRIVE_NUM or TFAT_DRIVE_ALLOC_NUM_x in r_tfat_driver_rx_config.h"
 #endif
 
-#endif // (TFAT_SDMEM_DRIVE_NUM > 0)
+#endif /* (TFAT_SDMEM_DRIVE_NUM > 0) */
 
 
 /* for MMC */
@@ -285,7 +287,7 @@ static uint32_t TFAT_DRIVE_MMC_ALLOC = (MMC_NUM_9 | MMC_NUM_8 | MMC_NUM_7 | MMC_
 #error "Error! Invalid setting for TFAT_MMC_DRIVE_NUM or TFAT_DRIVE_ALLOC_NUM_x in r_tfat_driver_rx_config.h"
 #endif
 
-#endif // (TFAT_MMC_DRIVE_NUM > 0)
+#endif /* (TFAT_MMC_DRIVE_NUM > 0) */
 
 /* for USB mini */
 #if (TFAT_USB_MINI_DRIVE_NUM > 0)
@@ -366,7 +368,7 @@ static uint32_t TFAT_DRIVE_USB_MINI_ALLOC = (USB_MINI_NUM_9 | USB_MINI_NUM_8 | U
 #error "Error! Invalid setting for TFAT_USB_MINI_DRIVE_NUM or TFAT_DRIVE_ALLOC_NUM_x in r_tfat_driver_rx_config.h"
 #endif
 
-#endif // (TFAT_USB_MINI_DRIVE_NUM > 0)
+#endif /* (TFAT_USB_MINI_DRIVE_NUM > 0) */
 
 /* for FLASH */
 #if (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
@@ -443,7 +445,7 @@ static uint32_t TFAT_DRIVE_FLASH_ALLOC = (SERIAL_FLASH_NUM_9 | SERIAL_FLASH_NUM_
 #error "Error! Invalid setting for TFAT_SERIAL_FLASH_DRIVE_NUM or TFAT_DRIVE_ALLOC_NUM_x in r_tfat_driver_rx_config.h"
 #endif
 
-#endif // (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
+#endif /* (TFAT_SERIAL_FLASH_DRIVE_NUM > 0) */
 
 #ifndef DRV0_DEV_CH
 #define DRV0_DEV_CH  (0)
@@ -510,7 +512,7 @@ static uint8_t chk_use_usb(uint8_t drive)
 {
     return ( ( (TFAT_DRIVE_USB_ALLOC & (0x01 << drive) ) != 0) ?  0x01 : 0x00);
 }
-#endif // USE_USB
+#endif /* USE_USB */
 
 /******************************************************************************
 * Function Name : chk_use_sdmem
@@ -523,7 +525,7 @@ static uint8_t chk_use_sdmem(uint8_t drive)
 {
     return ( ( (TFAT_DRIVE_SDMEM_ALLOC & (0x01 << drive) ) != 0) ?  0x01 : 0x00);
 }
-#endif // USE_SDMEM
+#endif /* USE_SDMEM */
 
 /******************************************************************************
 * Function Name : chk_use_mmc
@@ -536,7 +538,7 @@ static uint8_t chk_use_mmc(uint8_t drive)
 {
     return ( ( (TFAT_DRIVE_MMC_ALLOC & (0x01 << drive) ) != 0) ?  0x01 : 0x00);
 }
-#endif // USE_MMC
+#endif /* USE_MMC */
 
 /******************************************************************************
 * Function Name : chk_use_usb_mini
@@ -549,7 +551,7 @@ static uint8_t chk_use_usb_mini(uint8_t drive)
 {
     return ( ( (TFAT_DRIVE_USB_MINI_ALLOC & (0x01 << drive) ) != 0) ?  0x01 : 0x00);
 }
-#endif // USE_USB
+#endif /* USE_USB */
 
 /******************************************************************************
 * Function Name : chk_use_flash
@@ -562,7 +564,7 @@ static uint8_t chk_use_flash(uint8_t drive)
 {
     return ( ( (TFAT_DRIVE_FLASH_ALLOC & (0x01 << drive) ) != 0) ?  0x01 : 0x00);
 }
-#endif // USE_FLASH
+#endif /* USE_FLASH */
 
 /******************************************************************************
 * Function Name : disk_initialize
@@ -572,7 +574,7 @@ static uint8_t chk_use_flash(uint8_t drive)
 * Return value  : Status of the memory medium
 ******************************************************************************/
 DSTATUS disk_initialize (
-    BYTE pdrv    /* Physical drive nmuber to identify the drive */
+    BYTE pdrv    /* Physical drive number to identify the drive */
 )
 {
     DSTATUS ret = RES_PARERR;
@@ -580,40 +582,49 @@ DSTATUS disk_initialize (
 #if (TFAT_USB_DRIVE_NUM > 0)
     if ( chk_use_usb(pdrv) )
     {
-        ret = usb_disk_initialize( drive_alloc_tbl[pdrv][1] ); /* function for USB */
+        /* function for USB */
+        ret = usb_disk_initialize( drive_alloc_tbl[pdrv][1] );
     }
 #endif
 
 #if (TFAT_SDMEM_DRIVE_NUM > 0)
     if ( chk_use_sdmem(pdrv) )
     {
-        ret = sdmem_disk_initialize( drive_alloc_tbl[pdrv][1] ); /* function for SDMEM */
+        /* function for SDMEM */
+        ret = sdmem_disk_initialize( drive_alloc_tbl[pdrv][1] );
     }
 #endif
 
 #if (TFAT_MMC_DRIVE_NUM > 0)
     if ( chk_use_mmc(pdrv) )
     {
-        ret = mmcif_disk_initialize( drive_alloc_tbl[pdrv][1] ); /* function for mmc */
+        /* function for mmc */
+        ret = mmcif_disk_initialize( drive_alloc_tbl[pdrv][1] );
     }
 #endif
 
 #if (TFAT_USB_MINI_DRIVE_NUM > 0)
     if ( chk_use_usb_mini(pdrv) )
     {
-        ret = usb_mini_disk_initialize( drive_alloc_tbl[pdrv][1] ); /* function for USB Mini */
+        /* function for USB Mini */
+        ret = usb_mini_disk_initialize( drive_alloc_tbl[pdrv][1] );
     }
 #endif
 
 #if (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
     if ( chk_use_flash(pdrv) )
     {
-        ret = flash_spi_disk_initialize( drive_alloc_tbl[pdrv][1] ); /* function for FLASH */
+        /* function for FLASH */
+        ret = flash_spi_disk_initialize( drive_alloc_tbl[pdrv][1] );
     }
 #endif
 
     return  ret;
 }
+/******************************************************************************
+ End of function disk_initialize
+ *****************************************************************************/
+
 
 /******************************************************************************
 * Function Name : disk_read
@@ -626,7 +637,7 @@ DSTATUS disk_initialize (
 * Return value  : Result of function execution
 ******************************************************************************/
 DRESULT disk_read (
-    BYTE pdrv,        /* Physical drive nmuber to identify the drive */
+    BYTE pdrv,        /* Physical drive number to identify the drive */
     BYTE *buff,       /* Data buffer to store read data */
     LBA_t sector,     /* Start sector in LBA */
     UINT count        /* Number of sectors to read */
@@ -637,40 +648,51 @@ DRESULT disk_read (
 #if (TFAT_USB_DRIVE_NUM > 0)
     if ( chk_use_usb(pdrv) )
     {
-        ret = usb_disk_read( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for USB */
+        /* function for USB */
+        ret = usb_disk_read( drive_alloc_tbl[pdrv][1], buff, sector, count );
     }
 #endif
 
 #if (TFAT_SDMEM_DRIVE_NUM > 0)
     if ( chk_use_sdmem(pdrv) )
     {
-        ret = sdmem_disk_read( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for SDMEM */
+        /* function for SDMEM */
+        ret = sdmem_disk_read( drive_alloc_tbl[pdrv][1], buff, sector, count );
     }
 #endif
 
 #if (TFAT_MMC_DRIVE_NUM > 0)
     if ( chk_use_mmc(pdrv) )
     {
-        ret = mmcif_disk_read( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for MMC */
+        /* function for MMC */
+        ret = mmcif_disk_read( drive_alloc_tbl[pdrv][1], buff, sector, count );
     }
 #endif
 
 #if (TFAT_USB_MINI_DRIVE_NUM > 0)
     if ( chk_use_usb_mini(pdrv) )
     {
-        ret = usb_mini_disk_read( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for USB Mini */
+        /* function for USB Mini */
+        ret = usb_mini_disk_read( drive_alloc_tbl[pdrv][1], buff,
+                                    sector, count );
     }
 #endif
 
 #if (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
     if ( chk_use_flash(pdrv) )
     {
-        ret = flash_spi_disk_read( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for FLASH */
+        /* function for FLASH */
+        ret = flash_spi_disk_read( drive_alloc_tbl[pdrv][1], buff,
+                                    sector, count );
     }
 #endif
 
     return ret;
 }
+/******************************************************************************
+ End of function disk_read
+ *****************************************************************************/
+
 
 /******************************************************************************
 * Function Name : disk_write
@@ -694,40 +716,51 @@ DRESULT disk_write (
 #if (TFAT_USB_DRIVE_NUM > 0)
     if ( chk_use_usb(pdrv) )
     {
-        ret = usb_disk_write( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for USB */
+        /* function for USB */
+        ret = usb_disk_write( drive_alloc_tbl[pdrv][1], buff, sector, count );
     }
 #endif
 
 #if (TFAT_SDMEM_DRIVE_NUM > 0)
     if ( chk_use_sdmem(pdrv) )
     {
-        ret = sdmem_disk_write( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for SDMEM */
+        /* function for SDMEM */
+        ret = sdmem_disk_write( drive_alloc_tbl[pdrv][1], buff, sector, count );
     }
 #endif
 
 #if (TFAT_MMC_DRIVE_NUM > 0)
     if ( chk_use_mmc(pdrv) )
     {
-        ret = mmcif_disk_write( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for MMC */
+        /* function for MMC */
+        ret = mmcif_disk_write( drive_alloc_tbl[pdrv][1], buff, sector, count );
     }
 #endif
 
 #if (TFAT_USB_MINI_DRIVE_NUM > 0)
     if ( chk_use_usb_mini(pdrv) )
     {
-        ret = usb_mini_disk_write( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for USB Mini */
+        /* function for USB Mini */
+        ret = usb_mini_disk_write( drive_alloc_tbl[pdrv][1], buff,
+                                    sector, count );
     }
 #endif
 
 #if (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
     if ( chk_use_flash(pdrv) )
     {
-        ret = flash_spi_disk_write( drive_alloc_tbl[pdrv][1], buff, sector, count ); /* function for FLASH */
+        /* function for FLASH */
+        ret = flash_spi_disk_write( drive_alloc_tbl[pdrv][1], buff,
+                                    sector, count );
     }
 #endif
 
     return ret;
 }
+/******************************************************************************
+ End of function disk_write
+ *****************************************************************************/
+
 
 /******************************************************************************
 * Function Name : disk_ioctl
@@ -749,40 +782,49 @@ DRESULT disk_ioctl (
 #if (TFAT_USB_DRIVE_NUM > 0)
     if ( chk_use_usb(pdrv) )
     {
-        ret = usb_disk_ioctl( drive_alloc_tbl[pdrv][1], cmd, buff ); /* function for USB */
+        /* function for USB */
+        ret = usb_disk_ioctl( drive_alloc_tbl[pdrv][1], cmd, buff );
     }
 #endif
 
 #if (TFAT_SDMEM_DRIVE_NUM > 0)
     if ( chk_use_sdmem(pdrv) )
     {
-        ret = sdmem_disk_ioctl ( drive_alloc_tbl[pdrv][1], cmd, buff ); /* function for SDMEM */
+        /* function for SDMEM */
+        ret = sdmem_disk_ioctl ( drive_alloc_tbl[pdrv][1], cmd, buff );
     }
 #endif
 
 #if (TFAT_MMC_DRIVE_NUM > 0)
     if ( chk_use_mmc(pdrv) )
     {
-        ret = mmcif_disk_ioctl ( drive_alloc_tbl[pdrv][1], cmd, buff ); /* function for MMC */
+        /* function for MMC */
+        ret = mmcif_disk_ioctl ( drive_alloc_tbl[pdrv][1], cmd, buff );
     }
 #endif
 
 #if (TFAT_USB_MINI_DRIVE_NUM > 0)
     if ( chk_use_usb_mini(pdrv) )
     {
-        ret = usb_mini_disk_ioctl( drive_alloc_tbl[pdrv][1], cmd, buff ); /* function for USB Mini */
+        /* function for USB Mini */
+        ret = usb_mini_disk_ioctl( drive_alloc_tbl[pdrv][1], cmd, buff );
     }
 #endif
 
 #if (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
     if ( chk_use_flash(pdrv) )
     {
-        ret = flash_spi_disk_ioctl ( drive_alloc_tbl[pdrv][1], cmd, buff ); /* function for FLASH */
+        /* function for FLASH */
+        ret = flash_spi_disk_ioctl ( drive_alloc_tbl[pdrv][1], cmd, buff );
     }
 #endif
 
     return ret;
 }
+/******************************************************************************
+ End of function disk_ioctl
+ *****************************************************************************/
+
 
 /******************************************************************************
 * Function Name : disk_status
@@ -800,40 +842,49 @@ DSTATUS disk_status (
 #if (TFAT_USB_DRIVE_NUM > 0)
     if ( chk_use_usb(pdrv) )
     {
-        ret = usb_disk_status ( drive_alloc_tbl[pdrv][1] ); /* function for USB */
+        /* function for USB */
+        ret = usb_disk_status ( drive_alloc_tbl[pdrv][1] );
     }
 #endif
 
 #if (TFAT_SDMEM_DRIVE_NUM > 0)
     if ( chk_use_sdmem(pdrv) )
     {
-        ret = sdmem_disk_status ( drive_alloc_tbl[pdrv][1] ); /* function for SDMEM */
+        /* function for SDMEM */
+        ret = sdmem_disk_status ( drive_alloc_tbl[pdrv][1] );
     }
 #endif
 
 #if (TFAT_MMC_DRIVE_NUM > 0)
     if ( chk_use_mmc(pdrv) )
     {
-        ret = mmcif_disk_status ( drive_alloc_tbl[pdrv][1] ); /* function for MMC */
+        /* function for MMC */
+        ret = mmcif_disk_status ( drive_alloc_tbl[pdrv][1] );
     }
 #endif
 
 #if (TFAT_USB_MINI_DRIVE_NUM > 0)
     if ( chk_use_usb_mini(pdrv) )
     {
-        ret = usb_mini_disk_status ( drive_alloc_tbl[pdrv][1] ); /* function for USB Mini */
+        /* function for USB Mini */
+        ret = usb_mini_disk_status ( drive_alloc_tbl[pdrv][1] );
     }
 #endif
 
 #if (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
     if ( chk_use_flash(pdrv) )
     {
-        ret = flash_spi_disk_status ( drive_alloc_tbl[pdrv][1] ); /* function for FLASH */
+        /* function for FLASH */
+        ret = flash_spi_disk_status ( drive_alloc_tbl[pdrv][1] );
     }
 #endif
 
     return ret;
 }
+/******************************************************************************
+ End of function disk_status
+ *****************************************************************************/
+
 
 /******************************************************************************
 * Function Name : disk_1ms_interval
@@ -849,6 +900,10 @@ void disk_1ms_interval (
     flash_spi_1ms_interval (); /* function for FLASH */
 #endif
 }
+/******************************************************************************
+ End of function disk_1ms_interval
+ *****************************************************************************/
+
 
 #if !FF_FS_READONLY && !FF_FS_NORTC
 /******************************************************************************
@@ -866,7 +921,7 @@ DWORD get_fattime (void)
     uint32_t tmr;
     SYS_TIME time;
 
-    /* Disable interrupts   */
+    /* Disable interrupts */
     R_BSP_InterruptsDisable();
 
     R_SYS_TIME_GetCurrentTime(&time);
@@ -884,6 +939,10 @@ DWORD get_fattime (void)
 
     return (DWORD)tmr;
 }
+/******************************************************************************
+ End of function get_fattime
+ *****************************************************************************/
+
 #endif
 
 /******************************************************************************
@@ -895,7 +954,8 @@ DWORD get_fattime (void)
 *               : uint8_t dev_drv_num        : drive number/device channnel( in device driver)
 * Return value  : Result of function execution
 ******************************************************************************/
-DRESULT drv_change_alloc(TFAT_DRV_NUM tfat_drv, uint8_t dev_type, uint8_t dev_drv_num )
+DRESULT drv_change_alloc(TFAT_DRV_NUM tfat_drv, uint8_t dev_type,
+                                            uint8_t dev_drv_num )
 {
     if ( TFAT_DRIVE_ALLOC_NUM_MAX <= tfat_drv )
     {
@@ -958,6 +1018,10 @@ DRESULT drv_change_alloc(TFAT_DRV_NUM tfat_drv, uint8_t dev_type, uint8_t dev_dr
 
     return RES_OK;
 }
+/******************************************************************************
+ End of function drv_change_alloc
+ *****************************************************************************/
+
 
 /*******************************************************************************
 End  of file

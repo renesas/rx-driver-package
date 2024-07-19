@@ -19,12 +19,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011(2012-2023) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * System Name  : FLASH SPI driver software
 * File Name    : r_flash_spi.c
-* Version      : 3.20
+* Version      : 3.40
 * Device       : -
 * Abstract     : User I/F file
 * Tool-Chain   : -
@@ -40,6 +40,12 @@
 *              : 10.12.2020 3.02     Modified comment of API function to Doxygen style.
 *              : 16.03.2023 3.20     Added support for AT25QF641B-SHB with Indirect Access Mode
 *                                    of QSPIX
+*              : 15.11.2023 3.40     Removed note for QSPIX Memory Mapped Mode in R_FLASH_SPI_Read_Data()
+*                                    function.
+*                                    Updated according to GSCE Code Checker 6.50.
+*                                    Added support for MX25U6432F.
+*                                    Added features Advanced sector protection supporting
+*                                    for MX66L1G45 and MX25U6432F.
 *************************************************************************************************/
 
 
@@ -95,7 +101,9 @@ flash_spi_status_t R_FLASH_SPI_Open(uint8_t devno)
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Open
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Close
@@ -124,7 +132,9 @@ flash_spi_status_t R_FLASH_SPI_Close(uint8_t devno)
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Close
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Read_Status
@@ -152,7 +162,9 @@ flash_spi_status_t R_FLASH_SPI_Read_Status(uint8_t devno, uint8_t * p_status)
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Read_Status
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Read_Status2
@@ -181,7 +193,9 @@ flash_spi_status_t R_FLASH_SPI_Read_Status2(uint8_t devno, uint8_t * p_status)
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Read_Status2
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Read_Status3
@@ -210,7 +224,9 @@ flash_spi_status_t R_FLASH_SPI_Read_Status3(uint8_t devno, uint8_t * p_status)
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Read_Status3
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Set_Write_Protect
@@ -223,6 +239,7 @@ flash_spi_status_t R_FLASH_SPI_Read_Status3(uint8_t devno, uint8_t * p_status)
  * @retval    FLASH_SPI_SUCCESS    Successful operation
  * @retval    FLASH_SPI_ERR_PARAM  Parameter error
  * @retval    FLASH_SPI_ERR_HARD   Hardware error
+ * @retval    FLASH_SPI_ERR_WP     Write-protection error
  * @retval    FLASH_SPI_ERR_OTHER  Other task has acquired clock synchronous single master control software resources,
  *                                 or other error
  * @details   Make write protect settings. SRWD is cleared to 0. See section R_FLASH_SPI_Set_Write_Protect() in the
@@ -238,7 +255,9 @@ flash_spi_status_t R_FLASH_SPI_Set_Write_Protect(uint8_t devno, uint8_t wpsts)
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Set_Write_Protect
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Write_Di
@@ -263,7 +282,9 @@ flash_spi_status_t R_FLASH_SPI_Write_Di(uint8_t devno)
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Write_Di
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Read_Data
@@ -291,11 +312,7 @@ flash_spi_status_t R_FLASH_SPI_Write_Di(uint8_t devno)
  * @note      To speed up data transfers, align the start address with a 4-byte boundary when specifying data storage
  *            buffer pointers.\n
  *            The clock synchronous single master control software resources are acquired at the start of the
- *            processing, and the resources are released and the end of the processing.\n
- *            When reading data in QSPIX memory-mapped mode, data can only be read from addresses in a specified 
- *            bank. A bank is a 64MB sliding access window into the QSPI device flash memory space. If the requested
- *            amount of data is read consecutively from the address area of two consecutive bank areas, this function will
- *            return the error "FLASH_SPI_ERR_OTHER".
+ *            processing, and the resources are released and the end of the processing.
  */
 flash_spi_status_t R_FLASH_SPI_Read_Data(uint8_t devno, flash_spi_info_t * p_flash_spi_info)
 {
@@ -305,7 +322,9 @@ flash_spi_status_t R_FLASH_SPI_Read_Data(uint8_t devno, flash_spi_info_t * p_fla
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Read_Data
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Write_Data_Page
@@ -357,7 +376,9 @@ flash_spi_status_t R_FLASH_SPI_Write_Data_Page(uint8_t devno, flash_spi_info_t *
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Write_Data_Page
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Erase
@@ -400,7 +421,9 @@ flash_spi_status_t R_FLASH_SPI_Erase(uint8_t devno, flash_spi_erase_info_t * p_f
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Erase
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Polling
@@ -431,7 +454,9 @@ flash_spi_status_t R_FLASH_SPI_Polling(uint8_t devno, flash_spi_poll_mode_t mode
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Polling
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Read_ID
@@ -459,7 +484,9 @@ flash_spi_status_t R_FLASH_SPI_Read_ID(uint8_t devno, uint8_t * p_data)
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Read_ID
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_GetMemoryInfo
@@ -483,13 +510,15 @@ flash_spi_status_t R_FLASH_SPI_GetMemoryInfo(uint8_t devno, flash_spi_mem_info_t
     
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_GetMemoryInfo
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Read_Configuration
  *****************************************************************************************************************/ /**
  * @brief This function is used to read the configuration register(s). It is a dedicated API function for MX25L,
- *        MX66L, or MX25R family serial NOR flash memory of Macronix International Co., Ltd.
+ *        MX66L, MX25R, or MX25U family serial NOR flash memory of Macronix International Co., Ltd.
  * @param[in] devno
  *             Device number (0, 1)
  * @param[in,out] p_config
@@ -513,13 +542,15 @@ flash_spi_status_t R_FLASH_SPI_Read_Configuration(uint8_t devno, uint8_t * p_con
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Read_Configuration
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Write_Configuration
  *****************************************************************************************************************/ /**
  * @brief This function is used to write the configuration register(s). It is a dedicated API function for MX25L,
- *        MX66L, or MX25R family serial NOR flash memory of Macronix International Co., Ltd.
+ *        MX66L, MX25R, or MX25U family serial NOR flash memory of Macronix International Co., Ltd.
  * @param[in] devno
  *             Device number (0, 1)
  * @param[in] p_reg
@@ -543,7 +574,9 @@ flash_spi_status_t R_FLASH_SPI_Write_Configuration(uint8_t devno, flash_spi_reg_
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Write_Configuration
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Write_Status
@@ -572,7 +605,9 @@ flash_spi_status_t R_FLASH_SPI_Write_Status(uint8_t devno, uint8_t * p_reg)
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Write_Status
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Write_Status2
@@ -601,6 +636,9 @@ flash_spi_status_t R_FLASH_SPI_Write_Status2(uint8_t devno, uint8_t * p_reg)
 
     return ret;
 }
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Write_Status2
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Write_Status3
@@ -629,7 +667,9 @@ flash_spi_status_t R_FLASH_SPI_Write_Status3(uint8_t devno, uint8_t * p_reg)
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Write_Status3
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Set_4byte_Address_Mode
@@ -655,13 +695,15 @@ flash_spi_status_t R_FLASH_SPI_Set_4byte_Address_Mode(uint8_t devno)
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Set_4byte_Address_Mode
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Read_Security
  *****************************************************************************************************************/ /**
- * @brief This function is used to read the security register. It is a dedicated API function for MX25L, MX66L, or
- *        MX25R family serial NOR flash memory of Macronix International Co., Ltd.
+ * @brief This function is used to read the security register. It is a dedicated API function for MX25L, MX66L,
+ *        MX25R, or MX25U family serial NOR flash memory of Macronix International Co., Ltd.
  * @param[in] devno
  *             Device number (0, 1)
  * @param[in,out] p_scur
@@ -684,7 +726,9 @@ flash_spi_status_t R_FLASH_SPI_Read_Security(uint8_t devno, uint8_t * p_scur)
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Read_Security
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Read_Data_Security_Page
@@ -724,7 +768,9 @@ flash_spi_status_t R_FLASH_SPI_Read_Data_Security_Page(uint8_t devno,  flash_spi
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Read_Data_Security_Page
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Write_Data_Security_Page
@@ -765,13 +811,15 @@ flash_spi_status_t R_FLASH_SPI_Write_Data_Security_Page(uint8_t devno, flash_spi
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Write_Data_Security_Page
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Quad_Enable
  *****************************************************************************************************************/ /**
- * @brief This function is used to enable quad mode. It is a dedicated API function for MX25L, MX66L, or MX25R family
- *        serial NOR flash memory of Macronix International Co., Ltd and AT25QF family serial NOR
+ * @brief This function is used to enable quad mode. It is a dedicated API function for MX25L, MX66L, MX25R,
+ *        or MX25U family serial NOR flash memory of Macronix International Co., Ltd and AT25QF family serial NOR
  *        flash memory of Dialog Semiconductor Plc.
  * @param[in] devno
  *             Device number (0, 1)
@@ -803,14 +851,16 @@ flash_spi_status_t R_FLASH_SPI_Quad_Enable(uint8_t devno)
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Quad_Enable
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_Quad_Disable
  *****************************************************************************************************************/ /**
- * @brief This function is used to disable quad mode. It is a dedicated API function for MX25L, MX66L, or MX25R family
- *        serial NOR flash memory of Macronix International Co., Ltd.and AT25QF family serial NOR flash memory
- *        of Dialog Semiconductor Plc.
+ * @brief This function is used to disable quad mode. It is a dedicated API function for MX25L, MX66L, MX25R,
+ *        or MX25U family serial NOR flash memory of Macronix International Co., Ltd.and AT25QF family serial NOR
+ *        flash memory of Dialog Semiconductor Plc.
  * @param[in] devno
  *             Device number (0, 1)
  * @retval    FLASH_SPI_SUCCESS    Successful operation
@@ -840,7 +890,9 @@ flash_spi_status_t R_FLASH_SPI_Quad_Disable(uint8_t devno)
 
     return ret;
 }
-
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Quad_Disable
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  * Function Name: R_FLASH_SPI_GetVersion
@@ -856,6 +908,9 @@ uint32_t R_FLASH_SPI_GetVersion(void)
     
     return version;
 }
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_GetVersion
+ *********************************************************************************************************************/
 
 
 /**********************************************************************************************************************
@@ -871,6 +926,9 @@ void R_FLASH_SPI_1ms_Interval(void)
 {
     r_flash_spi_drvif_1ms_interval();
 }
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_1ms_Interval
+ *********************************************************************************************************************/
 
 
 #if (FLASH_SPI_CFG_LONGQ_ENABLE == 1)
@@ -961,6 +1019,9 @@ flash_spi_status_t R_FLASH_SPI_Set_LogHdlAddress(uint32_t user_long_que)
 {
     return FLASH_SPI_SUCCESS;
 }
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Set_LogHdlAddress
+ *********************************************************************************************************************/
 #endif  /* (FLASH_SPI_CFG_LONGQ_ENABLE == 1) */
 
 
@@ -989,6 +1050,73 @@ uint32_t R_FLASH_SPI_Log(uint32_t flg, uint32_t fid, uint32_t line)
     R_FLASH_SPI_Log_Func(flg, fid, line);
     return 0;
 }
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Log
+ *********************************************************************************************************************/
+
+/**********************************************************************************************************************
+ * Function Name: R_FLASH_SPI_Set_Write_Protect_Advanced_Sector
+ *****************************************************************************************************************/ /**
+ * @brief This function is used to make advanced write-protect settings. It is a dedicated API function for MX66L, 
+ *        or MX25U family serial NOR flash memory of Macronix International Co., Ltd.
+ * @param[in] devno
+ *             Device number (0, 1)
+ * @param[in] flash_spi_protect_sector_info
+ *             Flash memory advanced sector protection information structure. Use a structure address aligned with
+ *             a 4-byte boundary.
+ *             See section R_FLASH_SPI_Set_Write_Protect_Advanced_Sector() in the application note for details.
+ * @retval    FLASH_SPI_SUCCESS         Successful operation
+ * @retval    FLASH_SPI_ERR_PARAM       Parameter error
+ * @retval    FLASH_SPI_ERR_HARD        Hardware error
+ * @retval    FLASH_SPI_ERR_OTHER       Other task has acquired clock synchronous single master control software resources,
+ *                                      or other error
+ * @retval    FLASH_SPI_ERR_WP_ADVANCED Advanced write-protection error
+ * @details   Make advanced write-protect settings.
+ *            See section R_FLASH_SPI_Set_Write_Protect_Advanced_Sector() in the application note for details.
+ * @note      The clock synchronous single master control software resources are acquired at the start of the
+ *            processing, and the resources are released and the end of the processing.
+ */
+flash_spi_status_t R_FLASH_SPI_Set_Write_Protect_Advanced_Sector(uint8_t devno, flash_spi_protect_sector_info_t * flash_spi_protect_sector_info)
+{
+    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
+
+    ret = r_flash_spi_set_write_protect_advanced_sector(devno, flash_spi_protect_sector_info);
+
+    return ret;
+}
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Set_Write_Protect_Advanced_Sector
+ *********************************************************************************************************************/
+
+/**********************************************************************************************************************
+ * Function Name: R_FLASH_SPI_Erase_Write_Protect_Advanced_Sector
+ *****************************************************************************************************************/ /**
+ * @brief This function is used to erase all advanced write-protect settings. It is a dedicated API function for MX66L, 
+ *        or MX25U family serial NOR flash memory of Macronix International Co., Ltd.
+ * @param[in] devno
+ *             Device number (0, 1)
+ * @retval    FLASH_SPI_SUCCESS         Successful operation
+ * @retval    FLASH_SPI_ERR_PARAM       Parameter error
+ * @retval    FLASH_SPI_ERR_HARD        Hardware error
+ * @retval    FLASH_SPI_ERR_OTHER       Other task has acquired clock synchronous single master control software resources,
+ *                                      or other error
+ * @retval    FLASH_SPI_ERR_WP_ADVANCED Advanced write-protection error
+ * @details   Erase all advanced write-protect settings.
+ *            See section R_FLASH_SPI_Erase_Write_Protect_Advanced_Sector() in the application note for details.
+ * @note      The clock synchronous single master control software resources are acquired at the start of the
+ *            processing, and the resources are released and the end of the processing.
+ */
+flash_spi_status_t R_FLASH_SPI_Erase_Write_Protect_Advanced_Sector(uint8_t devno)
+{
+    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
+
+    ret = r_flash_spi_erase_write_protect_advanced_sector(devno);
+
+    return ret;
+}
+/**********************************************************************************************************************
+ End of function R_FLASH_SPI_Erase_Write_Protect_Advanced_Sector
+ *********************************************************************************************************************/
 
 
 /* End of File */

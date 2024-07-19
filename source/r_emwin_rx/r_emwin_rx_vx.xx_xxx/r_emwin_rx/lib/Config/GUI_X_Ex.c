@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : GUI_X_Ex.c
@@ -34,6 +34,7 @@
  *         : 31.03.2023 6.32.a.1.00    Update emWin library to v6.32a.
  *                                     Fixed GUI_X_GetTaskId function processing.
  *                                     Fixed preprocessing with value of BSP_CFG_RTOS_USED.
+ *         : 31.01.2024 6.34.g.1.00    Update emWin library to v6.34g.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************

@@ -48,6 +48,7 @@
         <version>8.03.00.202104</version>
         <version>8.03.00.202202</version>
         <version>8.03.00.202204</version>
+        <version>8.03.00.202305</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -59,6 +60,7 @@
         <version>4.14.01</version>
         <version>4.20.01</version>
         <version>4.20.03</version>
+        <version>5.10.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -101,7 +103,7 @@
         <zipsource>r_dac_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.40</version>
+            <version>7.42</version>
         </dependency>
         <application>D/A Converter</application>
         <desc>DAC Driver</desc>

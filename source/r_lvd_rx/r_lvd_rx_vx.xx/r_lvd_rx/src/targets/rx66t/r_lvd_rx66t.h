@@ -24,6 +24,8 @@
 * History      : DD.MM.YYYY Version  Description
 *              : 28.09.2018 1.00     First Release
 *              : 12.12.2022 1.10     Update default register value of voltage level
+*              : 30.01.2024 1.20     Changed LVD circuit enable wait value
+*                                    Changed ICU group from LVD_GROUP_INT_ICUB to LVD_GROUP_INT_ICUC
 ***********************************************************************************************************************/
 #ifndef LVD_RX66T_HEADER_FILE
 #define LVD_RX66T_HEADER_FILE
@@ -45,7 +47,7 @@ Macro definitions
 #define LVD_GROUP_SETUP                         (LVD_GROUP_SETUP_LVDA_2)
 
 /* Group: ICU group */
-#define LVD_GROUP_INT                           (LVD_GROUP_INT_ICUB)
+#define LVD_GROUP_INT                           (LVD_GROUP_INT_ICUC)
 
 /* Support: Maskable interrupt */
 #define LVD_SUPPORT_MI_CH1                      (LVD_ENABLE)
@@ -160,7 +162,7 @@ Macro definitions
 
 
 /* Value: Wait for enable LVD circuit. (micro sec) */
-#define LVD_DELAY_CIRCUIT_ENABLE_USEC           (10)
+#define LVD_DELAY_CIRCUIT_ENABLE_USEC           (20)
 
 /***********************************************************************************************************************
 Typedef definitions

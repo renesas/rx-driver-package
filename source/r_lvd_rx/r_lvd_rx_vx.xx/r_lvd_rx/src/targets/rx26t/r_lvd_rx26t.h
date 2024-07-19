@@ -23,6 +23,7 @@
 /***********************************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 31.03.2023 1.00     First Release
+*              : 30.01.2024 1.10     Changed LVD circuit enable wait value
 ***********************************************************************************************************************/
 #ifndef LVD_RX26T_HEADER_FILE
 #define LVD_RX26T_HEADER_FILE
@@ -159,7 +160,7 @@ Macro definitions
 
 
 /* Value: Wait for enable LVD circuit. (micro sec) */
-#define LVD_DELAY_CIRCUIT_ENABLE_USEC           (10)
+#define LVD_DELAY_CIRCUIT_ENABLE_USEC           (20)
 
 /***********************************************************************************************************************
 Typedef definitions

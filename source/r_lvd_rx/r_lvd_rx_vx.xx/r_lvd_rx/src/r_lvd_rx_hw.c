@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_lvd_rx_hw.c
@@ -45,6 +45,7 @@
 *                                    Added macro LVD_GROUP_INT_ICUG.
 *                                    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *              : 29.05.2023 4.50     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*              : 30.01.2024 4.70     Added macro LVD_GROUP_INT_ICUC.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -1157,11 +1158,12 @@ void lvd_hw_enable_dfilter(lvd_channel_t ch, bool b_enable_flag)
 * Return Value : none
 ***********************************************************************************************************************/
 #if ((LVD_GROUP_INT_ICUA == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUB == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUD == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUE == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUF == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUG == LVD_GROUP_INT))
+    (LVD_GROUP_INT_ICUB == LVD_GROUP_INT) ||\
+    (LVD_GROUP_INT_ICUC == LVD_GROUP_INT) ||\
+    (LVD_GROUP_INT_ICUD == LVD_GROUP_INT) ||\
+    (LVD_GROUP_INT_ICUE == LVD_GROUP_INT) ||\
+    (LVD_GROUP_INT_ICUF == LVD_GROUP_INT) ||\
+    (LVD_GROUP_INT_ICUG == LVD_GROUP_INT))
 void lvd_hw_enable_mi(lvd_channel_t ch, uint16_t prio, bool b_enable_flag)
 {
     if (LVD_CHANNEL_1 == ch)
@@ -1508,11 +1510,12 @@ void lvd_hw_wait_delay(uint32_t usec)
 ***********************************************************************************************************************/
 #if (LVD_ENABLE == LVD_SUPPORT_MI_CH1)
 #if ((LVD_GROUP_INT_ICUA == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUB == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUD == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUE == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUF == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUG == LVD_GROUP_INT))
+    (LVD_GROUP_INT_ICUB == LVD_GROUP_INT) ||\
+    (LVD_GROUP_INT_ICUC == LVD_GROUP_INT) ||\
+    (LVD_GROUP_INT_ICUD == LVD_GROUP_INT) ||\
+    (LVD_GROUP_INT_ICUE == LVD_GROUP_INT) ||\
+    (LVD_GROUP_INT_ICUF == LVD_GROUP_INT) ||\
+    (LVD_GROUP_INT_ICUG == LVD_GROUP_INT))
 R_BSP_PRAGMA_STATIC_INTERRUPT (lvd_ch1_isr, VECT(LVD1, LVD1))
 #elif (LVD_GROUP_INT_ICUb == LVD_GROUP_INT)
 R_BSP_PRAGMA_STATIC_INTERRUPT (lvd_ch1_isr, VECT(LVD, LVD1))
@@ -1548,11 +1551,12 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void lvd_ch1_isr(void)
 #ifndef  BSP_MCU_RX23W
 #if (LVD_ENABLE == LVD_SUPPORT_MI_CH2)
 #if ((LVD_GROUP_INT_ICUA == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUB == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUD == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUE == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUF == LVD_GROUP_INT)||\
-     (LVD_GROUP_INT_ICUG == LVD_GROUP_INT))
+    (LVD_GROUP_INT_ICUB == LVD_GROUP_INT) ||\
+    (LVD_GROUP_INT_ICUC == LVD_GROUP_INT) ||\
+    (LVD_GROUP_INT_ICUD == LVD_GROUP_INT) ||\
+    (LVD_GROUP_INT_ICUE == LVD_GROUP_INT) ||\
+    (LVD_GROUP_INT_ICUF == LVD_GROUP_INT) ||\
+    (LVD_GROUP_INT_ICUG == LVD_GROUP_INT))
 R_BSP_PRAGMA_STATIC_INTERRUPT (lvd_ch2_isr, VECT(LVD2, LVD2))
 #elif (LVD_GROUP_INT_ICUb == LVD_GROUP_INT)
 R_BSP_PRAGMA_STATIC_INTERRUPT (lvd_ch2_isr, VECT(LVD, LVD2))

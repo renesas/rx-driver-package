@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_wifi_da16xxx_private.h
@@ -28,12 +28,17 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdarg.h>
+#include <stdlib.h>
 
 #include "r_wifi_da16xxx_if.h"
 #include "r_wifi_da16xxx_os_wrap.h"
+#if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
 #include "r_sci_rx_if.h"
-#include "r_byteq_if.h"
 #include "r_sci_rx_pinset.h"
+#elif defined(__CCRL__) || defined(__ICCRL78__) || defined(__RL)
+#include "r_sci_rl_if.h"
+#endif
+#include "r_byteq_if.h"
 
 /**********************************************************************************************************************
  Macro definitions
@@ -50,76 +55,63 @@
 #endif
 
 /* Configuration */
-#define SOCK_TBL_MAX                   (WIFI_CFG_CREATABLE_SOCKETS)            // Socket table (default:4)
-#define SOCK_BUF_MAX                   (WIFI_CFG_SOCKETS_RECEIVE_BUFFER_SIZE)  // Socket buffer
-#define TEMP_BUf_MAX                   (256)                                   // RX temp buffer
-
+#define TEMP_BUF_MAX                   (256)                                   // RX temp buffer
 #define ATCMD_RESP_TIMEOUT             (1000)   // Timeout threshold for AT command response (msec)
 #define DA16XXX_AT_SOCK_TX_MAX         (4096)   // DA16XXX socket transmit max length
 #define DA16XXX_AT_CMD_BUF_MAX         (WIFI_CFG_AT_CMD_TX_BUFFER_SIZE)
 #define DA16XXX_AT_RESP_BUF_MAX        (WIFI_CFG_AT_CMD_RX_BUFFER_SIZE)
 
+/* Minimum string size for getting local time string */
+#define DA16XXX_LOCAL_TIME_STR_SIZE             (25)
+#define DA16XXX_HOURS_IN_SECONDS                (3600)
+
 #if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
-/* Reset port pin macros.  */
-#define WIFI_RESET_DDR(x, y)            (WIFI_RESET_DDR_PREPROC(x, y))
-#define WIFI_RESET_DDR_PREPROC(x, y)    ((PORT ## x .PDR.BIT.B ## y))
-#define WIFI_RESET_DR(x, y)             (WIFI_RESET_DR_PREPROC(x, y))
 #define WIFI_RESET_DR_PREPROC(x, y)     ((PORT ## x .PODR.BIT.B ## y))
+#define WIFI_RESET_DDR_PREPROC(x, y)    ((PORT ## x .PDR.BIT.B ## y))
+
+#define WIFI_RTS_PDR_PREPROC(x, y)      ((PORT ## x .PDR.BIT.B ## y))
+#define WIFI_RTS_PODR_PREPROC(x, y)     ((PORT ## x .PODR.BIT.B ## y))
+#define WIFI_CTS_PIDR_PREPROC(x, y)     ((PORT ## x .PIDR.BIT.B ## y))
+#define WIFI_SET_PMR_PREPROC(x, y)      ((PORT ## x .PMR.BIT.B ## y))
+#define WIFI_SET_PFS_PREPROC(x, y)      ((MPC.P ## x ## y ##PFS.BYTE))
+
+#elif defined(__CCRL__) || defined(__ICCRL78__) || defined(__RL)
+#define WIFI_RESET_DR_PREPROC(x, y)     ( P ## x ## _bit.no ## y )
+#define WIFI_RESET_DDR_PREPROC(x, y)
+
+#define WIFI_RTS_PDR_PREPROC(x, y)
+#define WIFI_RTS_PODR_PREPROC(x, y)
+#define WIFI_CTS_PIDR_PREPROC(x, y)
+#define WIFI_SET_PMR_PREPROC(x, y)
+#define WIFI_SET_PFS_PREPROC(x, y)
+#endif
+
+/* Reset port pin macros.  */
+#define WIFI_RESET_DR(x, y)             (WIFI_RESET_DR_PREPROC(x, y))
+#define WIFI_RESET_DDR(x, y)            (WIFI_RESET_DDR_PREPROC(x, y))
 
 /* RTS port pin macros.  */
 #define WIFI_RTS_PDR(x, y)              (WIFI_RTS_PDR_PREPROC(x, y))
-#define WIFI_RTS_PDR_PREPROC(x, y)      ((PORT ## x .PDR.BIT.B ## y))
 #define WIFI_RTS_PODR(x, y)             (WIFI_RTS_PODR_PREPROC(x, y))
-#define WIFI_RTS_PODR_PREPROC(x, y)     ((PORT ## x .PODR.BIT.B ## y))
 
 /* CTS port pin macros. */
 #define WIFI_CTS_PIDR(x, y)             (WIFI_CTS_PIDR_PREPROC(x, y))
-#define WIFI_CTS_PIDR_PREPROC(x, y)     ((PORT ## x .PIDR.BIT.B ## y))
 
 /* PMR port macros. */
 #define WIFI_SET_PMR(x, y)              (WIFI_SET_PMR_PREPROC(x, y))
-#define WIFI_SET_PMR_PREPROC(x, y)      ((PORT ## x .PMR.BIT.B ## y))
 
 /* PFS port macros. */
 #define WIFI_SET_PFS(x, y)              (WIFI_SET_PFS_PREPROC(x, y))
-#define WIFI_SET_PFS_PREPROC(x, y)      ((MPC.P ## x ## y ##PFS.BYTE))
-#endif
 
 /* Debug mode */
-#if WIFI_CFG_USE_FREERTOS_LOGGING == 0
+#if WIFI_CFG_LOGGING_OPTION == 0
 
-#if WIFI_CFG_DEBUG_LOG == 4
-/* All log level messages will logged */
-#define WIFI_LOG_ERROR(message) printf_log_error message
-#define WIFI_LOG_WARN(message)  printf_log_warn message
-#define WIFI_LOG_INFO(message)  printf_log_info message
-#define WIFI_LOG_DEBUG(message) printf_log_debug message
-#elif WIFI_CFG_DEBUG_LOG == 3
-/* Only INFO, WARNING and ERROR messages will be logged */
-#define WIFI_LOG_ERROR(message) printf_log_error message
-#define WIFI_LOG_WARN(message)  printf_log_warn message
-#define WIFI_LOG_INFO(message)  printf_log_info message
-#define WIFI_LOG_DEBUG(message)
-#elif WIFI_CFG_DEBUG_LOG == 2
-/* Only WARNING and ERROR messages will be logged */
-#define WIFI_LOG_ERROR(message) printf_log_error message
-#define WIFI_LOG_WARN(message)  printf_log_warn message
-#define WIFI_LOG_INFO(message)
-#define WIFI_LOG_DEBUG(message)
-#elif WIFI_CFG_DEBUG_LOG == 1
-/* Only ERROR messages will be logged */
-#define WIFI_LOG_ERROR(message) printf_log_error message
-#define WIFI_LOG_WARN(message)
-#define WIFI_LOG_INFO(message)
-#define WIFI_LOG_DEBUG(message)
-#elif WIFI_CFG_DEBUG_LOG == 0
 #define WIFI_LOG_ERROR(message)
 #define WIFI_LOG_WARN(message)
 #define WIFI_LOG_INFO(message)
 #define WIFI_LOG_DEBUG(message)
-#endif /* WIFI_CFG_DEBUG_LOG */
 
-#else
+#elif WIFI_CFG_LOGGING_OPTION == 1
 
 #if BSP_CFG_RTOS_USED != 1
 #error "Error - BSP_CFG_RTOS_USED is not 1(FreeRTOS)!"
@@ -129,45 +121,95 @@
 #define WIFI_LOG_WARN(message)  LogWarn(message)
 #define WIFI_LOG_INFO(message)  LogInfo(message)
 #define WIFI_LOG_DEBUG(message) LogDebug(message)
-#endif /* WIFI_CFG_USE_FREERTOS_LOGGING */
+
+#elif WIFI_CFG_LOGGING_OPTION == 2 || WIFI_CFG_LOGGING_OPTION == 3
+
+/*
+ * When WIFI_CFG_DEBUG_LOG is #LOG_NONE, logging is disabled and no
+ * logging messages are printed.
+ */
+#define LOG_NONE            0
+#define LOG_ERROR           1
+#define LOG_WARN            2
+#define LOG_INFO            3
+#define LOG_DEBUG           4
+
+#if WIFI_CFG_DEBUG_LOG == LOG_DEBUG
+/* All log level messages will logged. */
+#define WIFI_LOG_ERROR( message )          printf_log_error message
+#define WIFI_LOG_WARN( message )           printf_log_warn message
+#define WIFI_LOG_INFO( message )           printf_log_info message
+#define WIFI_LOG_DEBUG( message )          printf_log_debug message
+
+#elif WIFI_CFG_DEBUG_LOG == LOG_INFO
+/* Only INFO, WARNING and ERROR messages will be logged. */
+#define WIFI_LOG_ERROR( message )          printf_log_error message
+#define WIFI_LOG_WARN( message )           printf_log_warn message
+#define WIFI_LOG_INFO( message )           printf_log_info message
+#define WIFI_LOG_DEBUG( message )
+
+#elif WIFI_CFG_DEBUG_LOG == LOG_WARN
+/* Only WARNING and ERROR messages will be logged.*/
+#define WIFI_LOG_ERROR( message )          printf_log_error message
+#define WIFI_LOG_WARN( message )           printf_log_warn message
+#define WIFI_LOG_INFO( message )
+#define WIFI_LOG_DEBUG( message )
+
+#elif WIFI_CFG_DEBUG_LOG == LOG_ERROR
+/* Only ERROR messages will be logged. */
+#define WIFI_LOG_ERROR( message )          printf_log_error message
+#define WIFI_LOG_WARN( message )
+#define WIFI_LOG_INFO( message )
+#define WIFI_LOG_DEBUG( message )
+
+#elif WIFI_CFG_DEBUG_LOG == LOG_NONE
+#define WIFI_LOG_ERROR( message )
+#define WIFI_LOG_WARN( message )
+#define WIFI_LOG_INFO( message )
+#define WIFI_LOG_DEBUG( message )
+#endif /* WIFI_CFG_DEBUG_LOG */
+
+#define WIFI_LOGGING_MAX_MESSAGE_LENGTH 256
+
+#else
+#error "Error! Invalid value for WIFI_CFG_LOGGING_OPTION. Please verify this macro in r_wifi_da16xxx_config.h"
+#endif /* WIFI_CFG_LOGGING_OPTION */
+
+/* Convert a macro value to a string */
+#define WIFI_STRING_MACRO(str)          #str
+/* Call WIFI_STRING_MACRO */
+#define WIFI_STRING_CONVERT(arg)        (WIFI_STRING_MACRO(arg))
+
+#define DA16XXX_MAX_CERT_SIZE               (2048) // Maximum length of certificate supported by DA16XXX.
+#define DA16XXX_MAX_ALPN                    (3)    // Maximum number of ALPNs supported by DA16XXX.
+#define DA16XXX_MAX_SNI_LEN                 (64)   // Maximum length of SNI supported by DA16XXX.
+#define DA16XXX_CERT_START                  "\x1B"
+#define DA16XXX_CERT_END                    "\x03"
+
+#define DA16XXX_MQTT_TLS_CIPHER_SUITE_MAX   (17)   // Maximum number of TLS cipher suites supported by DA16XXX.
+#define DA16XXX_MQTT_MAX_TOPIC_LEN          (64)   // Maximum total length for topics supported by DA16XXX.
+#define DA16XXX_MQTT_MAX_PUBMSG_LEN         (2048) // Maximum total length for message supported by DA16XXX.
+#define DA16XXX_MQTT_MAX_PUBTOPICMSG_LEN    (2063) // Maximum total length for message + topic supported by DA16XXX.
+#define DA16XXX_MQTT_SUBTOPIC_MAX_CNT       (4)    // Maximum number of subscription topics allowed.
 
 /**********************************************************************************************************************
  Global Typedef definitions
  *********************************************************************************************************************/
-/* UART table information */
-typedef struct
-{
-    sci_hdl_t               sci_hdl;
-    sci_cfg_t               sci_config;
-    byteq_hdl_t             byteq_hdl;
-    uint8_t                 recv_buf[DA16XXX_AT_RESP_BUF_MAX];
-    da16xxx_resp_type_t     at_resp_type;
-    da16xxx_recv_state_t    socket_recv_state;
-    volatile uint8_t        tx_end_flag;
-} st_uart_tbl_t;
-
-/* Socket Timer */
+/* Common Timer */
 typedef struct
 {
     OS_TICK   threshold;        /* Timeout threshold */
     OS_TICK   tick_sta;         /* Tick of Timer start  */
-} st_sock_timer_t;
+} st_wifi_timer;
 
-/* Socket table information */
-typedef struct
+/* MQTT module status */
+typedef enum
 {
-    uint8_t                 ipaddr[4];
-    uint32_t                port;
-    da16xxx_socket_status_t status;
-    uint8_t                 ipver;
-    da16xxx_socket_type_t   type;
-    byteq_hdl_t             byteq_hdl;
-    uint32_t                put_err_cnt;
-    uint8_t                 recv_buf[SOCK_BUF_MAX];
-    int32_t                 recv_len;
-    st_sock_timer_t         timer_tx;
-    st_sock_timer_t         timer_rx;
-} st_sock_tbl_t;
+    DA16XXX_MQTT_CLOSE = 0,           /* Close MQTT Client service */
+    DA16XXX_MQTT_OPEN,                /* Open MQTT Client service  */
+    DA16XXX_MQTT_CONNECTED,           /* Connected MQTT broker     */
+    DA16XXX_MQTT_DISCONNECTED,        /* Disconnected MQTT broker  */
+} e_mqtt_module_status_t;
 
 /* WIFI FIT module status */
 typedef enum
@@ -210,7 +252,7 @@ typedef enum
     AT_RETEN_MEM_WR_FAIL = -12,  /* Retention memory write failure */
     AT_INTERNAL_TIMEOUT  = -97,  /* Internal timeout               */
     AT_INTERNAL_ERROR    = -98,  /* Internal error                 */
-    AT_MAX               = -99   /* Stopper                        */
+    AT_UNKNOWN           = -999  /* Undefined error                */
 } e_rslt_code_t;
 
 typedef enum
@@ -219,23 +261,19 @@ typedef enum
     DATA_FOUND,
 } e_atcmd_read_t;
 
+typedef enum
+{
+    DA16XXX_HTTP_CLOSE = 0,
+    DA16XXX_HTTP_OPEN,
+} da16xxx_http_status_t;
+
 /**********************************************************************************************************************
  External global variables
  *********************************************************************************************************************/
-extern st_uart_tbl_t g_uart_tbl;
 
 /**********************************************************************************************************************
  Exported global functions
  *********************************************************************************************************************/
-
-/**********************************************************************************************************************
- * Function Name: at_resp_byteq_open
- * Description  : open BYTEQ for AT command response.
- * Arguments    : none
- * Return Value : WIFI_SUCCESS
- *                WIFI_ERR_BYTEQ_OPEN
- *********************************************************************************************************************/
-wifi_err_t at_resp_byteq_open (void);
 
 /**********************************************************************************************************************
  * Function Name: at_send_raw
@@ -246,7 +284,7 @@ wifi_err_t at_resp_byteq_open (void);
  *                ATCMD_ERR_MODULE_COM
  *                ATCMD_ERR_TIMEOUT
  *********************************************************************************************************************/
-e_atcmd_err_t at_send_raw (uint8_t *data, uint16_t const length);
+e_atcmd_err_t at_send_raw (uint8_t WIFI_FAR *data, uint16_t const length);
 
 /**********************************************************************************************************************
  * Function Name: at_send
@@ -305,7 +343,7 @@ e_rslt_code_t at_exec_wo_mutex (const char *cmd, ...);
  * Return Value : 0     : data not found
  *                other : data found
  *********************************************************************************************************************/
-uint32_t at_read (const char *response_fmt, ...);
+e_atcmd_read_t at_read (const char *response_fmt, ...);
 
 /**********************************************************************************************************************
  * Function Name: at_read_wo_prefix
@@ -314,7 +352,7 @@ uint32_t at_read (const char *response_fmt, ...);
  * Return Value : 0     : data not found
  *                other : data found
  *********************************************************************************************************************/
-uint32_t at_read_wo_prefix (const char *response_fmt, ...);
+e_atcmd_read_t at_read_wo_prefix (const char *response_fmt, ...);
 
 /**********************************************************************************************************************
  * Function Name: at_move_to_next_line
@@ -357,6 +395,7 @@ void at_set_timeout (uint32_t timeout_ms);
  *********************************************************************************************************************/
 void post_err_event (wifi_err_event_enum_t err_event, uint32_t sock_idx);
 
+#if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
 /**********************************************************************************************************************
  * Function Name: flow_ctrl_init
  * Description  : Initialise hardware flow.
@@ -372,15 +411,16 @@ void flow_ctrl_init (void);
  * Return Value : None
  *********************************************************************************************************************/
 void flow_ctrl_set (e_flow_ctrl_t flow);
+#endif
 
 /**********************************************************************************************************************
  * Function Name: uart_port_open
  * Description  : Open serial port.
- * Arguments    : p_cb  - Callback function of SCI interrupts
+ * Arguments    : None
  * Return Value : ATCMD_OK
  *                ATCMD_ERR_MODULE_COM
  *********************************************************************************************************************/
-e_atcmd_err_t uart_port_open(void (* const p_cb)(void *p_args));
+e_atcmd_err_t uart_port_open(void);
 
 /**********************************************************************************************************************
  * Function Name: uart_port_close
@@ -390,13 +430,14 @@ e_atcmd_err_t uart_port_open(void (* const p_cb)(void *p_args));
  *********************************************************************************************************************/
 void uart_port_close(void);
 
+#if WIFI_CFG_LOGGING_OPTION >= 2
 /**********************************************************************************************************************
  * Function Name: printf_log_error
  * Description  : Print error log without freeRTOS logging module.
  * Arguments    : format - format message
  * Return Value : None
  *********************************************************************************************************************/
-void printf_log_error (const char * format, ...);
+void printf_log_error (const char WIFI_FAR * format, ...);
 
 /**********************************************************************************************************************
  * Function Name: printf_log_warn
@@ -404,7 +445,7 @@ void printf_log_error (const char * format, ...);
  * Arguments    : format - format message
  * Return Value : None
  *********************************************************************************************************************/
-void printf_log_warn (const char * format, ...);
+void printf_log_warn (const char WIFI_FAR * format, ...);
 
 /**********************************************************************************************************************
  * Function Name: printf_log_info
@@ -412,7 +453,7 @@ void printf_log_warn (const char * format, ...);
  * Arguments    : format - format message
  * Return Value : None
  *********************************************************************************************************************/
-void printf_log_info (const char * format, ...);
+void printf_log_info (const char WIFI_FAR * format, ...);
 
 /**********************************************************************************************************************
  * Function Name: printf_log_debug
@@ -420,6 +461,73 @@ void printf_log_info (const char * format, ...);
  * Arguments    : format - format message
  * Return Value : None
  *********************************************************************************************************************/
-void printf_log_debug (const char * format, ...);
+void printf_log_debug (const char WIFI_FAR * format, ...);
+#endif /* WIFI_CFG_LOGGING_ENABLE */
+
+/**********************************************************************************************************************
+ * Function Name: da16xxx_handle_incoming_common_data
+ * Description  : Handles incoming common data.
+ * Arguments    : type
+ *                state
+ *                data
+ * Return Value : none
+ *********************************************************************************************************************/
+void da16xxx_handle_incoming_common_data(wifi_resp_type_t *type, wifi_recv_state_t *state, uint8_t data);
+
+#if WIFI_CFG_TCP_SUPPORT == 1
+/**********************************************************************************************************************
+ * Function Name: da16xxx_handle_incoming_socket_data
+ * Description  : Handles incoming socket data.
+ * Arguments    : type
+ *                state
+ *                data
+ * Return Value : none
+ *********************************************************************************************************************/
+void da16xxx_handle_incoming_socket_data(wifi_resp_type_t *type, wifi_recv_state_t *state, uint8_t data);
+#endif /* WIFI_CFG_TCP_SUPPORT */
+
+#if WIFI_CFG_TLS_SUPPORT == 1
+/**********************************************************************************************************************
+ * Function Name: da16xxx_handle_incoming_secure_socket_data
+ * Description  : Handles incoming TLS socket data.
+ * Arguments    : type
+ *                state
+ *                data
+ * Return Value : none
+ *********************************************************************************************************************/
+void da16xxx_handle_incoming_secure_socket_data(wifi_resp_type_t *type, wifi_recv_state_t *state, uint8_t data);
+#endif /* WIFI_CFG_TLS_SUPPORT */
+
+#if WIFI_CFG_MQTT_SUPPORT == 1
+/**********************************************************************************************************************
+ * Function Name: da16xxx_handle_incoming_mqtt_data
+ * Description  : Handles incoming MQTT data.
+ * Arguments    : type
+ *                state
+ *                data
+ * Return Value : none
+ *********************************************************************************************************************/
+void da16xxx_handle_incoming_mqtt_data(wifi_resp_type_t *type, wifi_recv_state_t *state, uint8_t data);
+#endif /* WIFI_CFG_MQTT_SUPPORT */
+
+#if WIFI_CFG_HTTP_SUPPORT == 1
+/**********************************************************************************************************************
+ * Function Name: da16xxx_handle_incoming_http_data
+ * Description  : Handles incoming HTTP data.
+ * Arguments    : type
+ *                state
+ *                data
+ * Return Value : none
+ *********************************************************************************************************************/
+void da16xxx_handle_incoming_http_data(wifi_resp_type_t *type, wifi_recv_state_t *state, uint8_t data);
+#endif /* WIFI_CFG_HTTP_SUPPORT */
+
+/**********************************************************************************************************************
+ * Function Name: uart_port_set_baudrate
+ * Description  : Set baud rate for serial port.
+ * Arguments    : rate_num
+ * Return Value : none
+ *********************************************************************************************************************/
+void uart_port_set_baudrate (uint32_t rate_num);
 
 #endif /* R_WIFI_DA16XXX_PRIVATE_H */

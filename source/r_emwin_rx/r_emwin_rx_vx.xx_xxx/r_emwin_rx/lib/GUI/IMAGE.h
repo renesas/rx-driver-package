@@ -9,7 +9,7 @@
 *                                                                    *
 **********************************************************************
 
-** emWin V6.32 - Graphical user interface for embedded applications **
+** emWin V6.34 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -117,6 +117,7 @@ void IMAGE_SetTiled    (IMAGE_Handle hObj, int OnOff);
 int  IMAGE_SetUserData (IMAGE_Handle hObj, const void * pSrc, int NumBytes);
 void IMAGE_SetAlign    (IMAGE_Handle hObj, int Align);
 void IMAGE_SetOffset   (IMAGE_Handle hObj, int xOff, int yOff);
+void IMAGE_SetBkColor  (IMAGE_Handle hObj, GUI_COLOR BkColor);
 
 #if GUI_SUPPORT_MEMDEV
 U8   IMAGE_SetAlpha    (IMAGE_Handle hObj, U8 Alpha);

@@ -9,7 +9,7 @@
 *                                                                    *
 **********************************************************************
 
-** emWin V6.32 - Graphical user interface for embedded applications **
+** emWin V6.34 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -730,6 +730,8 @@ GUI_EXTERN   int  (* GUI_pfUpdateSoftLayer)(void);
 #endif
 
 GUI_EXTERN void (* GUI_pfHookMTOUCH)(const GUI_MTOUCH_STATE * pState);
+
+GUI_EXTERN void (* GUI_pfManageCursor)(int Layer, int OnOff);
 
 GUI_EXTERN tGUI_GetGlyph * GUI_UC_pfGetGlyph;
 

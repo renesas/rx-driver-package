@@ -23,6 +23,7 @@
 * History : DD.MM.YYYY Version Description
 *           29.05.2023 1.00    First Release.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           31.01.2024 5.10    Added WAIT_LOOP comments.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -165,6 +166,7 @@ sci_err_t sci_mcu_param_check(uint8_t const chan)
 void sci_init_register(sci_hdl_t const hdl)
 {
     /* SCI transmit enable bit and receive enable bit check & disable */
+    /* WAIT_LOOP */
     while ((0 != hdl->rom->regs->SCR.BIT.TE) || (0 != hdl->rom->regs->SCR.BIT.RE))
     {
         if (0 != hdl->rom->regs->SCR.BIT.TE)
@@ -295,6 +297,8 @@ int32_t sci_init_bit_rate(sci_hdl_t const hdl,
     /* BRR = (PCLK/(divisor * baud)) - 1 */
     /* BRR = (ratio / divisor) - 1 */
     ratio = pclk / baud;
+
+    /* WAIT_LOOP */
     for (i = 0; i < num_divisors; i++)
     {
         if (ratio < (uint32_t)(p_baud_info[i].divisor * 256))
@@ -1016,6 +1020,8 @@ sci_err_t sci_async_cmds(sci_hdl_t const hdl,
             {
                 /* transmit "0" and wait for completion */
                 SCI_TDR(0);
+
+                /* WAIT_LOOP */
                 while (0 == hdl->rom->regs->SSR.BIT.TEND)
                 {
                     R_BSP_NOP();

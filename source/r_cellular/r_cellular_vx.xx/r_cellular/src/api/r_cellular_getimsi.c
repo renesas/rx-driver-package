@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_getimsi.c
@@ -83,6 +83,8 @@ e_cellular_err_t R_CELLULAR_GetIMSI(st_cellular_ctrl_t * const p_ctrl, st_cellul
         if (CELLULAR_SEMAPHORE_SUCCESS == semaphore_ret)
         {
             p_ctrl->recv_data = p_imsi;
+
+            /* WAIT_LOOP */
             while (1)
             {
                 ret = atc_cimi(p_ctrl);

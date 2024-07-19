@@ -32,6 +32,7 @@
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *           30.06.2023 2.40    Supported for RX26T-256KB.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           29.03.2024 2.50    Fixed RSCI (CH8, CH9) hardware bug for RX26T.
 ***********************************************************************************************************************/
 
 #ifndef RSCI_IF_H
@@ -53,7 +54,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define RSCI_VERSION_MAJOR  (2)
-#define RSCI_VERSION_MINOR  (40)
+#define RSCI_VERSION_MINOR  (50)
 
 #define RSCI_CLK_INT         (0x00U) /* use internal clock for baud generation */
 #define RSCI_CLK_EXT8X       (0x03U) /* use external clock 8x baud rate (ASYNC) */

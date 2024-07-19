@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_open.c
@@ -199,6 +199,7 @@ static e_cellular_err_t cellular_config_init(st_cellular_ctrl_t * const p_ctrl, 
             p_ctrl->sci_ctrl.baud_rate   = CELLULAR_BAUDRATE;
             p_ctrl->sci_ctrl.atc_timeout = CELLULAR_COMMAND_TIMEOUT;
 
+            /* WAIT_LOOP */
             for (cnt = 0; cnt < p_ctrl->creatable_socket; cnt++)
             {
                 p_ctrl->p_socket_ctrl[cnt].send_timeout     = CELLULAR_TX_TIMEOUT;
@@ -243,6 +244,7 @@ static e_cellular_err_t cellular_config_init(st_cellular_ctrl_t * const p_ctrl, 
                 p_ctrl->sci_ctrl.baud_rate   = p_cfg->baud_rate;
                 p_ctrl->sci_ctrl.atc_timeout = p_cfg->sci_timeout;
 
+                /* WAIT_LOOP */
                 for (cnt = 0; cnt < p_ctrl->creatable_socket; cnt++)
                 {
                     p_ctrl->p_socket_ctrl[cnt].send_timeout     = p_cfg->send_timeout;
@@ -357,6 +359,7 @@ static void cellular_open_fail(st_cellular_ctrl_t * const p_ctrl, const uint8_t 
         cellular_delete_semaphore(p_ctrl->at_semaphore);
         p_ctrl->at_semaphore = NULL;
 
+        /* WAIT_LOOP */
         for (cnt = 0; cnt < p_ctrl->creatable_socket; cnt++)
         {
             cellular_delete_semaphore(p_ctrl->p_socket_ctrl[cnt].rx_semaphore);

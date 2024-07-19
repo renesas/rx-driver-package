@@ -426,6 +426,7 @@ ble_status_t R_BLE_SECD_GetIdInfo(st_ble_dev_addr_t * p_idaddr,
         return BLE_SUCCESS;
     }
 
+    /* WAIT_LOOP */
     for(i=0; i<in_bond_num; i++)
     {
         key_info = bond_info[i].p_keys->p_keys_info;
@@ -539,6 +540,7 @@ static ble_status_t find_entry(st_ble_dev_addr_t * p_dev_addr, int32_t * p_entry
 
     p_addr = (NULL == p_dev_addr) ? (st_ble_dev_addr_t *)&invalid_rem_addr : p_dev_addr;
 
+    /* WAIT_LOOP */
     for(i=0; i<BLE_CFG_NUM_BOND; i++)
     {
         if((0 == memcmp(&p_sec_data[BLE_SECD_SEC_REM_OFFSET + i * BLE_SECD_REM_BOND_SIZE], 
@@ -571,6 +573,7 @@ static void find_oldest_entry(int32_t * p_entry, uint8_t * p_sec_data)
     out_bond = 0xFF;
     tmp_order = BLE_CFG_NUM_BOND + 1;
 
+    /* WAIT_LOOP */
     for(i=0; i<BLE_CFG_NUM_BOND; i++)
     {
         uint8_t order;
@@ -696,6 +699,7 @@ static void update_bond_order(int32_t entry, uint8_t * p_sec_data, uint8_t bond_
     ble_status_t retval = BLE_ERR_INVALID_OPERATION;
     int32_t i;
 
+    /* WAIT_LOOP */
     for(i=0; i<BLE_CFG_NUM_BOND; i++)
     {
         if(entry != i)
@@ -805,6 +809,7 @@ static ble_status_t read_bond_info(uint8_t * p_out_bond_num, uint8_t ** pp_sec_d
     }
 
     uint8_t bond_index;
+    /* WAIT_LOOP */
     for(i=0; i<p_bonds[BLE_SECD_BOND_NUM_OFFSET]; i++)
     {
         /* i : DataFlash index */

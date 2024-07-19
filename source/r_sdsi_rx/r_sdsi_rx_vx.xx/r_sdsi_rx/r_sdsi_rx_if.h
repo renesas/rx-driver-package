@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016(2019) Renesas Electronics Corporation. All rights reserved.    
+* Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.    
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -32,6 +32,7 @@
 *         : 04.04.2019 2.02    Added support for GNUC and ICCRX.
 *                              Fixed coding style.
 *         : 27.12.2022 2.03    Updated slash format of included header file paths for Linux compatibility.
+*         : 13.12.2023 2.04    Added WAIT_LOOP comments.
 **********************************************************************************************************************/
 
 #ifndef SDSI_RX_IF_H_
@@ -48,7 +49,7 @@ Macro definitions
 **********************************************************************************************************************/
 /* Version Number of API. */
 #define RX_SDSI_VERSION_MAJOR       (2)
-#define RX_SDSI_VERSION_MINOR       (3)
+#define RX_SDSI_VERSION_MINOR       (4)
 
 #define SDSI_CH0                    (0)
 #define SDSI_CH1                    (1)

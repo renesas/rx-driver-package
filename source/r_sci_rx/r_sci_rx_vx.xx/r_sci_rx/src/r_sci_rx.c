@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /**********************************************************************************************************************
 * File Name    : r_sci_rx.c
@@ -76,6 +76,7 @@
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *           12.06.2023 5.00    Fixed a bug in sci_send_sync_data(), sci_receive_sync_data() and 
 *                              sci_receive_async_data() function in using DTC/DMAC.
+*           31.01.2024 5.10    Added WAIT_LOOP comments.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -3425,6 +3426,8 @@ static void sci_fifo_transfer_dtc(sci_hdl_t const hdl)
                     {
                         p_tctrl->tx_cnt = p_tctrl->tx_fraction;
                     }
+
+                    /* WAIT_LOOP */
                     while ((0 != p_tctrl->tx_cnt) && (SCI_FIFO_FRAME_SIZE != hdl->rom->regs->FDR.BIT.T))
                     {
                         if (NULL == p_tctrl->p_tx_buf)   /* Sync only */

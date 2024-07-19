@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : PIDConf.c
@@ -37,6 +37,11 @@
  *                                     when using SCI-IIC interface.
  *         : 31.03.2023 6.32.a.1.00    Update emWin library to v6.32a.
  *                                     Fixed related to runtime orientation.
+ *         : 31.01.2024 6.34.g.1.00    Update emWin library to v6.34g.
+ *                                     Fixed handling of unused arguments in the following functions.
+ *                                     - pidconf_cb_single
+ *                                     - pidconf_cb_multi
+ *                                     - PID_X_SetLayerIndex
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -180,6 +185,7 @@ static e_emwin_rx_err_t pidconf_cb_single(uint8_t * p_addr, uint32_t size)
     e_emwin_rx_err_t     emwin_ret = EMWIN_RX_SUCCESS;
     int temp;
 
+    GUI_USE_PARA(size);
 
     /* Handle just one touch info. */
     s_state_pid.Layer  = s_layer_index;          /* Set layer who should handle touch */
@@ -291,6 +297,8 @@ static e_emwin_rx_err_t pidconf_cb_single(uint8_t * p_addr, uint32_t size)
     uint16_t             ypos;
     uint8_t              press;
     int                  temp;
+
+    GUI_USE_PARA(size);
 
     /* Handle just one touch info. */
     s_state_pid.Layer  = s_layer_index;          /* Set layer who should handle touch */
@@ -637,6 +645,8 @@ static e_emwin_rx_err_t pidconf_cb_multi(uint8_t * p_addr, uint32_t size)
     e_emwin_rx_err_t      emwin_ret = EMWIN_RX_SUCCESS;
     int32_t             temp;
 
+    GUI_USE_PARA(size);
+
     p_buffer           =  p_addr;
     report.device_mode = *p_buffer++;            /* Get device mode, 000b - Work Mode, 001b - Factory Mode */
     report.gesture_id  = *p_buffer++;            /* GestureID:  0x10 Move UP
@@ -788,6 +798,8 @@ void PID_X_SetLayerIndex(int layer_index)
 {
 #if (EMWIN_USE_TOUCH == 1)
     s_layer_index = layer_index;
+#else
+    GUI_USE_PARA(layer_index);
 #endif
 }
 /**********************************************************************************************************************
@@ -841,7 +853,7 @@ void PID_X_Init(void)
  *********************************************************************************************************************/
 void GUI_TOUCH_X_ActivateX(void)
 {
-    /* This routine is called from guI_TOUCH_Exec() to activate the measurement of the X-axis. GUI_TOUCH_X_ActivateX()
+    /* This routine is called from GUI_TOUCH_Exec() to activate the measurement of the X-axis. GUI_TOUCH_X_ActivateX()
      * swithces on the measurement voltage to the X-axis. Switching on the voltage in X means the value for the Y-axis
      * can be measured. */
     R_BSP_NOP();
@@ -858,7 +870,7 @@ void GUI_TOUCH_X_ActivateX(void)
  *********************************************************************************************************************/
 void GUI_TOUCH_X_ActivateY(void)
 {
-    /* This routine is called from guI_TOUCH_Exec() to activate the measurement of the Y-axis. GUI_TOUCH_X_ActivateY()
+    /* This routine is called from GUI_TOUCH_Exec() to activate the measurement of the Y-axis. GUI_TOUCH_X_ActivateY()
      * swithces on the measurement voltage to the Y-axis. Switching on the voltage in Y means the value for the X-axis
      * can be measured. */
     R_BSP_NOP();

@@ -9,7 +9,7 @@
 *                                                                    *
 **********************************************************************
 
-** emWin V6.32 - Graphical user interface for embedded applications **
+** emWin V6.34 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -183,14 +183,21 @@ Attention : Do not modify this file ! If you do, you will not
   #define GUI_MEMCPY memcpy
 #endif
 
+#ifndef GUI_CEIL
+  #define GUI_CEIL ceilf
+#endif
+
+#ifndef GUI_FLOOR
+  #define GUI_FLOOR floorf
+#endif
+
+#ifndef GUI_SQRT
+  #define GUI_SQRT sqrtf
+#endif
+
 /* Optional custom drawing of memory devices */
 #ifndef   GUI_MEMDEV_SUPPORT_CUSTOMDRAW
   #define GUI_MEMDEV_SUPPORT_CUSTOMDRAW 0
-#endif
-
-/* Clip static memory devices to parent borders */
-#ifndef   GUI_MEMDEV_CLIP_AT_PARENT
-  #define GUI_MEMDEV_CLIP_AT_PARENT 0
 #endif
 
 #endif   /* ifdef GUI_CONFDEFAULTS_H */

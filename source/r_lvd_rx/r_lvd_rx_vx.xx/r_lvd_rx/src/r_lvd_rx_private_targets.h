@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_lvd_rx_private_targets.h
@@ -54,6 +54,8 @@
 *              : 28.09.2023 4.60     Changed version for update of APN.
 *                                    Fixed bug in MDF file which causes abnormal behavior in Smart Configurator when
 *                                    setting the “voltage detection level” for RX23E-B.
+*              : 30.01.2024 4.70     Changed LVD circuit enable wait value for RX13T/RX23E-A/RX26T/RX66T/RX72T.
+*                                    Changed ICU group from LVD_GROUP_INT_ICUB to LVD_GROUP_INT_ICUC for RX66T/RX72T.
 ***********************************************************************************************************************/
 #ifndef LVD_PRIVATE_TARGETS_HEADER_FILE
 #define LVD_PRIVATE_TARGETS_HEADER_FILE
@@ -123,7 +125,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
 #define LVD_RX_VERSION_MAJOR                    (4)
-#define LVD_RX_VERSION_MINOR                    (60)
+#define LVD_RX_VERSION_MINOR                    (70)
 
 /***********************************************************************************************************************
 Typedef definitions

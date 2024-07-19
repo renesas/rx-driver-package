@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_dac_rx_if.h
@@ -54,6 +54,10 @@
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *           29.05.2023 5.10    Added support for RX23E-B.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           14.06.2024 5.20    Added DAC_OUT_SEL_DA0_DA1 to dac_out_da_t enum for simultaneous output to 
+*                              DA0 and DA1 for RX66T, RX72T, RX660, RX26T.
+*                              Added DAC_OUT_SEL_REF0_REF1 to dac_out_ref_t enum for simultaneous Vref output 
+*                              from DA0 and DA1 for RX66T, RX72T, RX660, RX26T.
 ***********************************************************************************************************************/
 #ifndef DAC_RX_IF_H
 #define DAC_RX_IF_H
@@ -74,7 +78,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define DAC_VERSION_MAJOR  (5)
-#define DAC_VERSION_MINOR  (10)
+#define DAC_VERSION_MINOR  (20)
 
 
 #if defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX23E_B)
@@ -119,6 +123,7 @@ typedef enum e_dac_out_sel_da      // DAC output select
     DAC_OUT_DA_OFF = 0,      // Turn off output of DA channels
     DAC_OUT_SEL_DA0 = 1,     // Output to DA0 channel pin
     DAC_OUT_SEL_DA1 = 2,     // Output to DA1 channel pin
+    DAC_OUT_SEL_DA0_DA1 = 3, // Output to DA0 and DA1 channel pin
 }dac_out_da_t;
 
 typedef enum e_dac_out_sel_ref
@@ -126,6 +131,7 @@ typedef enum e_dac_out_sel_ref
     DAC_OUT_REF_OFF = 0,      // Turn off output of DA channels
     DAC_OUT_SEL_REF0 = 1,     // Output DA0 channel as Vref
     DAC_OUT_SEL_REF1 = 2,     // Output DA1 channel as Vref
+    DAC_OUT_SEL_REF0_REF1 = 3,// Output DA0 and DA1 channel as Vref
 }dac_out_ref_t;
 
 #if defined(BSP_MCU_RX111) || defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX13T)

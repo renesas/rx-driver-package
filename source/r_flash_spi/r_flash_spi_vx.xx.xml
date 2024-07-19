@@ -45,11 +45,11 @@
         <zipsource>r_flash_spi_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.40</version>
+            <version>7.41</version>
         </dependency>
         <dependency>
             <module>r_memdrv_rx</module>
-            <version>1.05</version>
+            <version>1.20</version>
         </dependency>
         <application>Storage and Memory</application>
         <desc>Clock Synchronous Control Module for Serial Flash memory Access</desc>

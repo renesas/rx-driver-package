@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_wifi_da16xxx_os_wrap.c
@@ -37,6 +37,9 @@
 /**********************************************************************************************************************
  Exported global variables
  *********************************************************************************************************************/
+#if BSP_CFG_RTOS_USED == 0        /* Bare metal is used.   */
+OS_TICK g_tick_count;
+#endif /* BSP_CFG_RTOS_USED */
 
 /**********************************************************************************************************************
  Private (static) variables and functions
@@ -47,10 +50,12 @@ static OS_TICK s_tick_begin = 0;
 static OS_TICK s_tick_timeout = 0;
 static void(*sp_callback)(void);
 
+#if BSP_CFG_RTOS_USED != 0        /* Bare metal is not used.   */
 /* OS parameters */
 static OS_MUTEX s_binary_sem_tx;
 static OS_MUTEX s_binary_sem_rx;
 static const OS_TICK s_sem_block_time = OS_WRAP_MS_TO_TICKS(10000UL);
+#endif /* BSP_CFG_RTOS_USED */
 
 /*
  * Mutex
@@ -86,6 +91,8 @@ e_os_return_code_t os_wrap_mutex_create(void)
     {
         return OS_WRAP_OTHER_ERR;
     }
+#else                             /* Bare metal is used. */
+    /* Do nothing */
 #endif
     return OS_WRAP_SUCCESS;
 }
@@ -123,6 +130,8 @@ void os_wrap_mutex_delete(void)
     {
         tx_mutex_delete(s_binary_sem_rx);
     }
+#else                             /* Bare metal is used. */
+    /* Do nothing */
 #endif /* BSP_CFG_RTOS_USED */
 }
 /**********************************************************************************************************************
@@ -170,6 +179,8 @@ e_os_return_code_t os_wrap_mutex_take(uint8_t mutex_flag)
             return OS_WRAP_OTHER_ERR;
         }
     }
+#else                             /* Bare metal is used. */
+    /* Do nothing */
 #endif /* BSP_CFG_RTOS_USED */
     return OS_WRAP_SUCCESS;
 }
@@ -202,6 +213,7 @@ e_os_return_code_t os_wrap_mutex_give(uint8_t mutex_flag)
             return OS_WRAP_OTHER_ERR;
         }
     }
+    os_wrap_sleep(10, UNIT_TICK);
 #elif BSP_CFG_RTOS_USED == 5      /* Azure RTOS is used. */
     if (0 != (mutex_flag & MUTEX_TX))
     {
@@ -218,8 +230,10 @@ e_os_return_code_t os_wrap_mutex_give(uint8_t mutex_flag)
             return OS_WRAP_OTHER_ERR;
         }
     }
-#endif /* BSP_CFG_RTOS_USED */
     os_wrap_sleep(10, UNIT_TICK);
+#else                             /* Bare metal is used. */
+    /* Do nothing */
+#endif /* BSP_CFG_RTOS_USED */
     return OS_WRAP_SUCCESS;
 }
 /**********************************************************************************************************************
@@ -252,6 +266,9 @@ void os_wrap_sleep(uint32_t val, e_timer_unit_t unit)
     vTaskDelay(tick);
 #elif BSP_CFG_RTOS_USED == 5      /* Azure RTOS is used. */
     tx_thread_sleep(tick);
+#else                             /* Bare metal is used. */
+    g_tick_count += tick;
+    os_wrap_swdelay(val, unit);
 #endif /* BSP_CFG_RTOS_USED */
 }
 /**********************************************************************************************************************
@@ -273,6 +290,8 @@ OS_TICK os_wrap_tickcount_get(void)
     return xTaskGetTickCount();
 #elif BSP_CFG_RTOS_USED == 5      /* Azure RTOS is used. */
     return tx_time_get();
+#else                             /* Bare metal is used. */
+    return g_tick_count;
 #endif /* BSP_CFG_RTOS_USED */
 }
 /**********************************************************************************************************************
@@ -348,4 +367,63 @@ uint32_t tick_count_check(void)
 }
 /**********************************************************************************************************************
  * End of function tick_count_check
+ *********************************************************************************************************************/
+
+/**********************************************************************************************************************
+ * Function name: os_wrap_swdelay
+ * Description  : software delay
+ * Arguments    : delay - delay value
+ *                unit  - delay unit
+ * Return Value : None
+ *********************************************************************************************************************/
+void os_wrap_swdelay (uint32_t delay, e_timer_unit_t unit)
+{
+#if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
+    bsp_delay_units_t time_unit;
+
+    if (UNIT_TICK == unit)
+    {
+        time_unit = BSP_DELAY_MICROSECS;
+    }
+    else if (UNIT_MSEC == unit)
+    {
+        time_unit = BSP_DELAY_MILLISECS;
+    }
+
+    R_BSP_SoftwareDelay(delay, time_unit);
+
+#elif defined(__CCRL__) || defined(__ICCRL78__) || defined(__RL)
+    uint32_t time;
+    uint32_t fclk;
+
+    /* FIX ME: add defined clock from setting*/
+    fclk = 32;
+
+    switch (unit)
+    {
+        case UNIT_TICK:
+            time = delay;
+            fclk = fclk / 20;
+            break;
+        case UNIT_MSEC:
+            time = delay * 100;
+            break;
+        default:
+            break;
+    }
+
+    while(0 < time)
+    {
+        /* Delay 1us */
+        for(uint16_t cnt = fclk; 0 < cnt; cnt--)
+        {
+            BSP_NOP();
+            BSP_NOP();
+        }
+        time--;
+    }
+#endif
+}
+/**********************************************************************************************************************
+ * End of function os_wrap_swdelay
  *********************************************************************************************************************/

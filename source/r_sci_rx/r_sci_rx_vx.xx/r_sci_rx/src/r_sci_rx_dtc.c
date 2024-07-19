@@ -25,6 +25,7 @@
 *           31.03.2022 4.40    Fixed the issue with DTC mode which incorrectly uses the same transfer information 
 *                              for all channels.
 *           31.03.2023 4.80    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           31.01.2024 5.10    Added WAIT_LOOP comments.
 ***********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -491,7 +492,8 @@ sci_err_t sci_dtc_info_transfer_create(sci_hdl_t const hdl, sci_dtc_info_transfe
     else /* Allocated memory */
     {
         /* Check allocated memory for current channel */
-        while(NULL != *p_current_info)
+        /* WAIT_LOOP */
+        while (NULL != *p_current_info)
         {
             if(chan == (*p_current_info)->chan)
             {
@@ -533,7 +535,8 @@ void sci_dtc_info_transfer_delete(sci_hdl_t const hdl)
     uint8_t chan = hdl->rom->chan;
 
     /* Check allocated memory for current channel */
-    while(NULL != *p_current_info)
+    /* WAIT_LOOP */
+    while (NULL != *p_current_info)
     {
         if(chan == (*p_current_info)->chan)
         {

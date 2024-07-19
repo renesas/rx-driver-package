@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_close.c
@@ -121,6 +121,7 @@ e_cellular_err_t R_CELLULAR_Close(st_cellular_ctrl_t * const p_ctrl)
         cellular_delete_semaphore(p_ctrl->at_semaphore);
         p_ctrl->at_semaphore = NULL;
 
+        /* WAIT_LOOP */
         for (cnt = 0; cnt < p_ctrl->creatable_socket; cnt++)
         {
             cellular_delete_semaphore(p_ctrl->p_socket_ctrl[cnt].rx_semaphore);

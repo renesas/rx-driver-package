@@ -9,7 +9,7 @@
 *                                                                    *
 **********************************************************************
 
-** emWin V6.32 - Graphical user interface for embedded applications **
+** emWin V6.34 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -605,7 +605,7 @@ typedef void WM_tfForEach(WM_HWIN hWin, void * pData);
 
 typedef void (* WM_tfInvalidateParent)  (const GUI_RECT * pInvalidRect, WM_HWIN hParent, WM_HWIN hStop);
 typedef void (* WM_tfInvalidateDrawFunc)(WM_HWIN hWin);
-typedef void (* WM_tfPaint1Func)        (WM_HWIN hWin);
+typedef int  (* WM_tfPaint1Func)        (WM_HWIN hWin);
 
 typedef struct {
   WM_HMEM  hTimer;
@@ -696,7 +696,6 @@ WM_HMEM WM_MOTION__CreateContext(void);
 void    WM_MOTION__DeleteContext(WM_HMEM hContext);
 WM_HMEM WM_MOTION__GetContext   (WM_HWIN hWin);
 void    WM_MOTION__SetContext   (WM_HWIN hWin, WM_HMEM hContext);
-void    WM_MOTION__Stop         (WM_HWIN hWin);
 
 /* Motion support, private function(s) */
 void     WM__SetMotionCallback (void(* cbMotion) (GUI_PID_STATE * pState, void * p));
@@ -719,7 +718,7 @@ void     WM__SetMotionCallback (void(* cbMotion) (GUI_PID_STATE * pState, void *
   GUI_MEMDEV_Handle GUI_MEMDEV_GetWindowDevice  (WM_HWIN hWin);
   int               GUI_MEMDEV_MoveInWindow     (WM_HWIN hWin, int x, int y, int a180, int Period);
   int               GUI_MEMDEV_MoveOutWindow    (WM_HWIN hWin, int x, int y, int a180, int Period);
-  void              GUI_MEMDEV_Paint1Static     (WM_HWIN hWin);                                     /* not to be documented */
+  int               GUI_MEMDEV_Paint1Static     (WM_HWIN hWin);                                     /* not to be documented */
   int               GUI_MEMDEV_ShiftInWindow    (WM_HWIN hWin, int Period, int Direction);
   int               GUI_MEMDEV_ShiftOutWindow   (WM_HWIN hWin, int Period, int Direction);
   int               GUI_MEMDEV_SwapWindow       (WM_HWIN hWin, int Period, int Edge);
@@ -964,38 +963,15 @@ void WM_DIAG_EnableInvalidationColoring(int OnOff);
 *       Macros for compatibility with older versions
 */
 #if WM_COMPATIBLE_MODE
-  #define HBWIN             WM_HWIN
-  #define HBWIN_NULL        WM_HWIN_NULL
-
   #define WM_HideWin        WM_HideWindow
   #define WM_ShowWin        WM_ShowWindow
-  #define WM_GetKey         GUI_GetKey
-  #define WM_WaitKey        GUI_WaitKey
-
   #define WM_ExecIdle       WM_Exec
   #define WM_ExecIdle1      WM_Exec1
-
   #define WM_Invalidate     WM_InvalidateWindow
-  #define WM_GetWinRect     WM_GetWindowRect
-  #define WM_GetWinOrgX     WM_GetWindowOrgX
-  #define WM_GetWinOrgY     WM_GetWindowOrgY
-  #define WM_GetWinSizeX    WM_GetWindowSizeX
-  #define WM_GetWinSizeY    WM_GetWindowSizeY
   #define WM_GetXSize       WM_GetWindowSizeX
   #define WM_GetYSize       WM_GetWindowSizeY
-  #define WM_SelWin         WM_SelectWindow
-  #define WM_GetBackgroundWindow  WM_GetDesktopWindow
-  #define WM_GetForegroundWindow    0
-  #define WM_SetForegroundWindow    WM_BringToTop
   #define WM_SetUserClipArea WM_SetUserClipRect
-
-
-  #define WM_Start()
-  #define WM_Stop()
-  #define WM_SetBkWindowColor(Color)  WM_SetDesktopColor(Color)
-
 #endif
-
 
 #endif   /* GUI_WINSUPPORT */
 

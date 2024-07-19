@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="TSIP_AES_128_ECB_ENCRYPT" display="AES128 ECB Encrypt" default="1" type="combobox">
+            <option id="TSIP_AES_128_ECB_ENCRYPT.0" display="No using AES128 ECB Encrypt" value="0"/>
+            <option id="TSIP_AES_128_ECB_ENCRYPT.1" display="Using AES128 ECB Encrypt" value="1"/>
+            <description>0 = No using AES128 ECB Encrypt
+1 = Using AES128 ECB Encrypt</description>
+        </property>
+        <property id="TSIP_AES_256_ECB_ENCRYPT" display="AES256 ECB Encrypt" default="1" type="combobox">
+            <option id="TSIP_AES_256_ECB_ENCRYPT.0" display="No using AES256 ECB Encrypt" value="0"/>
+            <option id="TSIP_AES_256_ECB_ENCRYPT.1" display="Using AES256 ECB Encrypt" value="1"/>
+            <description>0 = No using AES256 ECB Encrypt
+1 = Using AES256 ECB Encrypt</description>
+        </property>
+        <property id="TSIP_AES_128_ECB_DECRYPT" display="AES128 ECB Decrypt" default="1" type="combobox">
+            <option id="TSIP_AES_128_ECB_DECRYPT.0" display="No using AES128 ECB Decrypt" value="0"/>
+            <option id="TSIP_AES_128_ECB_DECRYPT.1" display="Using AES128 ECB Decrypt" value="1"/>
+            <description>0 = No using AES128 ECB Decrypt
+1 = Using AES128 ECB Decrypt</description>
+        </property>
+        <property id="TSIP_AES_256_ECB_DECRYPT" display="AES256 ECB Decrypt" default="1" type="combobox">
+            <option id="TSIP_AES_256_ECB_DECRYPT.0" display="No using AES256 ECB Decrypt" value="0"/>
+            <option id="TSIP_AES_256_ECB_DECRYPT.1" display="Using AES256 ECB Decrypt" value="1"/>
+            <description>0 = No using AES256 ECB Decrypt
+1 = Using AES256 ECB Decrypt</description>
+        </property>
+        <property id="TSIP_AES_128_CBC_ENCRYPT" display="AES128 CBC Encrypt" default="1" type="combobox">
+            <option id="TSIP_AES_128_CBC_ENCRYPT.0" display="No using AES128 CBC Encrypt" value="0"/>
+            <option id="TSIP_AES_128_CBC_ENCRYPT.1" display="Using AES128 CBC Encrypt" value="1"/>
+            <description>0 = No using AES128 CBC Encrypt
+1 = Using AES128 CBC Encrypt</description>
+        </property>
+        <property id="TSIP_AES_256_CBC_ENCRYPT" display="AES256 CBC Encrypt" default="1" type="combobox">
+            <option id="TSIP_AES_256_CBC_ENCRYPT.0" display="No using AES256 CBC Encrypt" value="0"/>
+            <option id="TSIP_AES_256_CBC_ENCRYPT.1" display="Using AES256 CBC Encrypt" value="1"/>
+            <description>0 = No using AES256 CBC Encrypt
+1 = Using AES256 CBC Encrypt</description>
+        </property>
+        <property id="TSIP_AES_128_CBC_DECRYPT" display="AES128 CBC Decrypt" default="1" type="combobox">
+            <option id="TSIP_AES_128_CBC_DECRYPT.0" display="No using AES128 CBC Decrypt" value="0"/>
+            <option id="TSIP_AES_128_CBC_DECRYPT.1" display="Using AES128 CBC Decrypt" value="1"/>
+            <description>0 = No using AES128 CBC Decrypt
+1 = Using AES128 CBC Decrypt</description>
+        </property>
+        <property id="TSIP_AES_256_CBC_DECRYPT" display="AES256 CBC Decrypt" default="1" type="combobox">
+            <option id="TSIP_AES_256_CBC_DECRYPT.0" display="No using AES256 CBC Decrypt" value="0"/>
+            <option id="TSIP_AES_256_CBC_DECRYPT.1" display="Using AES256 CBC Decrypt" value="1"/>
+            <description>0 = No using AES256 CBC Decrypt
+1 = Using AES256 CBC Decrypt</description>
+        </property>
+        <property id="TSIP_AES_128_CTR" display="AES128 CTR" default="1" type="combobox">
+            <option id="TSIP_AES_128_CTR.0" display="No using AES128 CTR" value="0"/>
+            <option id="TSIP_AES_128_CTR.1" display="Using AES128 CTR" value="1"/>
+            <description>0 = No using AES128 CTR
+1 = Using AES128 CTR</description>
+        </property>
+        <property id="TSIP_AES_256_CTR" display="AES256 CTR" default="1" type="combobox">
+            <option id="TSIP_AES_256_CTR.0" display="No using AES256 CTR" value="0"/>
+            <option id="TSIP_AES_256_CTR.1" display="Using AES256 CTR" value="1"/>
+            <description>0 = No using AES256 CTR
+1 = Using AES256 CTR</description>
+        </property>
+        <property id="TSIP_AES_128_GCM_ENCRYPT" display="AES128 GCM Encrypt" default="1" type="combobox">
+            <option id="TSIP_AES_128_GCM_ENCRYPT.0" display="No using AES128 GCM Encrypt" value="0"/>
+            <option id="TSIP_AES_128_GCM_ENCRYPT.1" display="Using AES128 GCM Encrypt" value="1"/>
+            <description>0 = No using AES128 GCM Encrypt
+1 = Using AES128 GCM Encrypt</description>
+        </property>
+        <property id="TSIP_AES_256_GCM_ENCRYPT" display="AES256 GCM Encrypt" default="1" type="combobox">
+            <option id="TSIP_AES_256_GCM_ENCRYPT.0" display="No using AES256 GCM Encrypt" value="0"/>
+            <option id="TSIP_AES_256_GCM_ENCRYPT.1" display="Using AES256 GCM Encrypt" value="1"/>
+            <description>0 = No using AES256 GCM Encrypt
+1 = Using AES256 GCM Encrypt</description>
+        </property>
+        <property id="TSIP_AES_128_GCM_DECRYPT" display="AES128 GCM Decrypt" default="1" type="combobox">
+            <option id="TSIP_AES_128_GCM_DECRYPT.0" display="No using AES128 GCM Decrypt" value="0"/>
+            <option id="TSIP_AES_128_GCM_DECRYPT.1" display="Using AES128 GCM Decrypt" value="1"/>
+            <description>0 = No using AES128 GCM Decrypt
+1 = Using AES128 GCM Decrypt</description>
+        </property>
+        <property id="TSIP_AES_256_GCM_DECRYPT" display="AES256 GCM Decrypt" default="1" type="combobox">
+            <option id="TSIP_AES_256_GCM_DECRYPT.0" display="No using AES256 GCM Decrypt" value="0"/>
+            <option id="TSIP_AES_256_GCM_DECRYPT.1" display="Using AES256 GCM Decrypt" value="1"/>
+            <description>0 = No using AES256 GCM Decrypt
+1 = Using AES256 GCM Decrypt</description>
+        </property>
+        <property id="TSIP_AES_128_CMAC" display="AES128 CMAC" default="1" type="combobox">
+            <option id="TSIP_AES_128_CMAC.0" display="No using AES128 CMAC" value="0"/>
+            <option id="TSIP_AES_128_CMAC.1" display="Using AES128 CMAC" value="1"/>
+            <description>0 = No using AES128 CMAC
+1 = Using AES128 CMAC</description>
+        </property>
+        <property id="TSIP_AES_256_CMAC" display="AES256 CMAC" default="1" type="combobox">
+            <option id="TSIP_AES_256_CMAC.0" display="No using AES256 CMAC" value="0"/>
+            <option id="TSIP_AES_256_CMAC.1" display="Using AES256 CMAC" value="1"/>
+            <description>0 = No using AES256 CMAC
+1 = Using AES256 CMAC</description>
+        </property>
+        <property id="TSIP_AES_128_CCM_ENCRYPT" display="AES128 CCM Encrypt" default="1" type="combobox">
+            <option id="TSIP_AES_128_CCM_ENCRYPT.0" display="No using AES128 CCM Encrypt" value="0"/>
+            <option id="TSIP_AES_128_CCM_ENCRYPT.1" display="Using AES128 CCM Encrypt" value="1"/>
+            <description>0 = No using AES128 CCM Encrypt
+1 = Using AES128 CCM Encrypt</description>
+        </property>
+        <property id="TSIP_AES_256_CCM_ENCRYPT" display="AES256 CCM Encrypt" default="1" type="combobox">
+            <option id="TSIP_AES_256_CCM_ENCRYPT.0" display="No using AES256 CCM Encrypt" value="0"/>
+            <option id="TSIP_AES_256_CCM_ENCRYPT.1" display="Using AES256 CCM Encrypt" value="1"/>
+            <description>0 = No using AES256 CCM Encrypt
+1 = Using AES256 CCM Encrypt</description>
+        </property>
+        <property id="TSIP_AES_128_CCM_DECRYPT" display="AES128 CCM Decrypt" default="1" type="combobox">
+            <option id="TSIP_AES_128_CCM_DECRYPT.0" display="No using AES128 CCM Decrypt" value="0"/>
+            <option id="TSIP_AES_128_CCM_DECRYPT.1" display="Using AES128 CCM Decrypt" value="1"/>
+            <description>0 = No using AES128 CCM Decrypt
+1 = Using AES128 CCM Decrypt</description>
+        </property>
+        <property id="TSIP_AES_256_CCM_DECRYPT" display="AES256 CCM Decrypt" default="1" type="combobox">
+            <option id="TSIP_AES_256_CCM_DECRYPT.0" display="No using AES256 CCM Decrypt" value="0"/>
+            <option id="TSIP_AES_256_CCM_DECRYPT.1" display="Using AES256 CCM Decrypt" value="1"/>
+            <description>0 = No using AES256 CCM Decrypt
+1 = Using AES256 CCM Decrypt</description>
+        </property>
+        <property id="TSIP_AES_128_KEY_WRAP" display="AES128 Key Wrap" default="1" type="combobox">
+            <option id="TSIP_AES_128_KEY_WRAP.0" display="No using AES128 Key Wrap" value="0"/>
+            <option id="TSIP_AES_128_KEY_WRAP.1" display="Using AES128 Key Wrap" value="1"/>
+            <description>0 = No using AES128 Key Wrap
+1 = Using AES128 Key Wrap</description>
+        </property>
+        <property id="TSIP_AES_256_KEY_WRAP" display="AES256 Key Wrap" default="1" type="combobox">
+            <option id="TSIP_AES_256_KEY_WRAP.0" display="No using AES256 Key Wrap" value="0"/>
+            <option id="TSIP_AES_256_KEY_WRAP.1" display="Using AES256 Key Wrap" value="1"/>
+            <description>0 = No using AES256 Key Wrap
+1 = Using AES256 Key Wrap</description>
+        </property>
+        <property id="TSIP_TDES_ECB_ENCRYPT" display="Triple-DES ECB Encrypt" default="1" type="combobox">
+            <option id="TSIP_TDES_ECB_ENCRYPT.0" display="No using Triple-DES ECB Encrypt" value="0"/>
+            <option id="TSIP_TDES_ECB_ENCRYPT.1" display="Using Triple-DES ECB Encrypt" value="1"/>
+            <description>0 = No using Triple-DES ECB Encrypt
+1 = Using Triple-DES ECB Encrypt</description>
+        </property>
+        <property id="TSIP_TDES_ECB_DECRYPT" display="Triple-DES ECB Decrypt" default="1" type="combobox">
+            <option id="TSIP_TDES_ECB_DECRYPT.0" display="No using Triple-DES ECB Decrypt" value="0"/>
+            <option id="TSIP_TDES_ECB_DECRYPT.1" display="Using Triple-DES ECB Decrypt" value="1"/>
+            <description>0 = No using Triple-DES ECB Decrypt
+1 = Using Triple-DES ECB Decrypt</description>
+        </property>
+        <property id="TSIP_TDES_CBC_ENCRYPT" display="Triple-DES CBC Encrypt" default="1" type="combobox">
+            <option id="TSIP_TDES_CBC_ENCRYPT.0" display="No using Triple-DES CBC Encrypt" value="0"/>
+            <option id="TSIP_TDES_CBC_ENCRYPT.1" display="Using Triple-DES CBC Encrypt" value="1"/>
+            <description>0 = No using Triple-DES CBC Encrypt
+1 = Using Triple-DES CBC Encrypt</description>
+        </property>
+        <property id="TSIP_TDES_CBC_DECRYPT" display="Triple-DES CBC Decrypt" default="1" type="combobox">
+            <option id="TSIP_TDES_CBC_DECRYPT.0" display="No using Triple-DES CBC Decrypt" value="0"/>
+            <option id="TSIP_TDES_CBC_DECRYPT.1" display="Using Triple-DES CBC Decrypt" value="1"/>
+            <description>0 = No using Triple-DES CBC Decrypt
+1 = Using Triple-DES CBC Decrypt</description>
+        </property>
+        <property id="TSIP_ARC4_ENCRYPT" display="ARC4 Encrypt" default="1" type="combobox">
+            <option id="TSIP_ARC4_ENCRYPT.0" display="No using ARC4 Encrypt" value="0"/>
+            <option id="TSIP_ARC4_ENCRYPT.1" display="Using ARC4 Encrypt" value="1"/>
+            <description>0 = No using ARC4 Encrypt
+1 = Using ARC4 Encrypt</description>
+        </property>
+        <property id="TSIP_ARC4_DECRYPT" display="ARC4 Decrypt" default="1" type="combobox">
+            <option id="TSIP_ARC4_DECRYPT.0" display="No using ARC4 Decrypt" value="0"/>
+            <option id="TSIP_ARC4_DECRYPT.1" display="Using ARC4 Decrypt" value="1"/>
+            <description>0 = No using ARC4 Decrypt
+1 = Using ARC4 Decrypt</description>
+        </property>
+        <property id="TSIP_SHA_1" display="SHA1" default="1" type="combobox">
+            <option id="TSIP_SHA_1.0" display="No using SHA1" value="0"/>
+            <option id="TSIP_SHA_1.1" display="Using SHA1" value="1"/>
+            <description>0 = No using SHA1
+1 = Using SHA1</description>
+        </property>
+        <property id="TSIP_SHA_256" display="SHA256" default="1" type="combobox">
+            <option id="TSIP_SHA_256.0" display="No using SHA256" value="0"/>
+            <option id="TSIP_SHA_256.1" display="Using SHA256" value="1"/>
+            <description>0 = No using SHA256
+1 = Using SHA256</description>
+        </property>
+        <property id="TSIP_MD5" display="MD5" default="1" type="combobox">
+            <option id="TSIP_MD5.0" display="No using MD5" value="0"/>
+            <option id="TSIP_MD5.1" display="Using MD5" value="1"/>
+            <description>0 = No using MD5
+1 = Using MD5</description>
+        </property>
+        <property id="TSIP_SHA_1_HMAC" display="SHA1 HMAC" default="1" type="combobox">
+            <option id="TSIP_SHA_1_HMAC.0" display="No using SHA1 HMAC" value="0"/>
+            <option id="TSIP_SHA_1_HMAC.1" display="Using SHA1 HMAC" value="1"/>
+            <description>0 = No using SHA1 HMAC
+1 = Using SHA1 HMAC</description>
+        </property>
+        <property id="TSIP_SHA_256_HMAC" display="SHA256 HMAC" default="1" type="combobox">
+            <option id="TSIP_SHA_256_HMAC.0" display="No using SHA256 HMAC" value="0"/>
+            <option id="TSIP_SHA_256_HMAC.1" display="Using SHA256 HMAC" value="1"/>
+            <description>0 = No using SHA256 HMAC
+1 = Using SHA256 HMAC</description>
+        </property>
+        <property id="TSIP_RSAES_1024" display="RSAES-PKCS1 1024" default="1" type="combobox">
+            <option id="TSIP_RSAES_1024.0" display="No using RSAES-PKCS1 1024" value="0"/>
+            <option id="TSIP_RSAES_1024.1" display="Using RSAES-PKCS1 1024" value="1"/>
+            <description>0 = No using RSAES-PKCS1 1024
+1 = Using RSAES-PKCS1 1024</description>
+        </property>
+        <property id="TSIP_RSAES_2048" display="RSAES-PKCS1 2048" default="1" type="combobox">
+            <option id="TSIP_RSAES_2048.0" display="No using RSAES-PKCS1 2048" value="0"/>
+            <option id="TSIP_RSAES_2048.1" display="Using RSAES-PKCS1 2048" value="1"/>
+            <description>0 = No using RSAES-PKCS1 2048
+1 = Using RSAES-PKCS1 2048</description>
+        </property>
+        <property id="TSIP_RSAES_3072" display="RSAES-PKCS1 3072" default="1" type="combobox">
+            <option id="TSIP_RSAES_3072.0" display="No using RSAES-PKCS1 3072" value="0"/>
+            <option id="TSIP_RSAES_3072.1" display="Using RSAES-PKCS1 3072" value="1"/>
+            <description>0 = No using RSAES-PKCS1 3072
+1 = Using RSAES-PKCS1 3072</description>
+        </property>
+        <property id="TSIP_RSAES_4096" display="RSAES-PKCS1 4096" default="1" type="combobox">
+            <option id="TSIP_RSAES_4096.0" display="No using RSAES-PKCS1 4096" value="0"/>
+            <option id="TSIP_RSAES_4096.1" display="Using RSAES-PKCS1 4096" value="1"/>
+            <description>0 = No using RSAES-PKCS1 4096
+1 = Using RSAES-PKCS1 4096</description>
+        </property>
+        <property id="TSIP_RSASSA_1024" display="RSASSA-PKCS1 1024" default="1" type="combobox">
+            <option id="TSIP_RSASSA_1024.0" display="No using RSASSA-PKCS1 1024" value="0"/>
+            <option id="TSIP_RSASSA_1024.1" display="Using RSASSA-PKCS1 1024" value="1"/>
+            <description>0 = No using RSASSA-PKCS1 1024
+1 = Using RSASSA-PKCS1 1024</description>
+        </property>
+        <property id="TSIP_RSASSA_2048" display="RSASSA-PKCS1 2048" default="1" type="combobox">
+            <option id="TSIP_RSASSA_2048.0" display="No using RSASSA-PKCS1 2048" value="0"/>
+            <option id="TSIP_RSASSA_2048.1" display="Using RSASSA-PKCS1 2048" value="1"/>
+            <description>0 = No using RSASSA-PKCS1 2048
+1 = Using RSASSA-PKCS1 2048</description>
+        </property>
+        <property id="TSIP_RSASSA_3072" display="RSASSA-PKCS1 3072" default="1" type="combobox">
+            <option id="TSIP_RSASSA_3072.0" display="No using RSASSA-PKCS1 3072" value="0"/>
+            <option id="TSIP_RSASSA_3072.1" display="Using RSASSA-PKCS1 3072" value="1"/>
+            <description>0 = No using RSASSA-PKCS1 3072
+1 = Using RSASSA-PKCS1 3072</description>
+        </property>
+        <property id="TSIP_RSASSA_4096" display="RSASSA-PKCS1 4096" default="1" type="combobox">
+            <option id="TSIP_RSASSA_4096.0" display="No using RSASSA-PKCS1 4096" value="0"/>
+            <option id="TSIP_RSASSA_4096.1" display="Using RSASSA-PKCS1 4096" value="1"/>
+            <description>0 = No using RSASSA-PKCS1 4096
+1 = Using RSASSA-PKCS1 4096</description>
+        </property>
+        <property id="TSIP_RSA_RETRY_COUNT_FOR_RSA_KEY_GENERATION" display="Retry count for RSA key generation" default="5120*2" type="textbox">
+            <constraint display="Value must be an integer"></constraint>
+            <description>5*(key_length/2) is recommended by NIST FIPS186-4, 5120 is for key_length = 2048. *2 means the margin.</description>
+        </property>
+        <property id="TSIP_ECDSA_P192" display="ECDSA P-192" default="1" type="combobox">
+            <option id="TSIP_ECDSA_P192.0" display="No using ECDSA P-192" value="0"/>
+            <option id="TSIP_ECDSA_P192.1" display="Using ECDSA P-192" value="1"/>
+            <description>0 = No using ECDSA P-192
+1 = Using ECDSA P-192</description>
+        </property>
+        <property id="TSIP_ECDSA_P224" display="ECDSA P-224" default="1" type="combobox">
+            <option id="TSIP_ECDSA_P224.0" display="No using ECDSA P-224" value="0"/>
+            <option id="TSIP_ECDSA_P224.1" display="Using ECDSA P-224" value="1"/>
+            <description>0 = No using ECDSA P-224
+1 = Using ECDSA P-224</description>
+        </property>
+        <property id="TSIP_ECDSA_P256" display="ECDSA P-256" default="1" type="combobox">
+            <option id="TSIP_ECDSA_P256.0" display="No using ECDSA P-256" value="0"/>
+            <option id="TSIP_ECDSA_P256.1" display="Using ECDSA P-256" value="1"/>
+            <description>0 = No using ECDSA P-256
+1 = Using ECDSA P-256</description>
+        </property>
+        <property id="TSIP_ECDSA_P384" display="ECDSA P-384" default="1" type="combobox">
+            <option id="TSIP_ECDSA_P384.0" display="No using ECDSA P-384" value="0"/>
+            <option id="TSIP_ECDSA_P384.1" display="Using ECDSA P-384" value="1"/>
+            <description>0 = No using ECDSA P-384
+1 = Using ECDSA P-384</description>
+        </property>
+        <property id="TSIP_ECDH_P256" display="ECDH P-256" default="1" type="combobox">
+            <option id="TSIP_ECDH_P256.0" display="No using ECDH P-256" value="0"/>
+            <option id="TSIP_ECDH_P256.1" display="Using ECDH P-256" value="1"/>
+            <description>0 = No using ECDH P-256
+1 = Using ECDH P-256</description>
+        </property>
+        <property id="TSIP_USER_SHA_384_ENABLED" display="Enable user SHA-384 function" default="0" type="combobox">
+            <option id="TSIP_USER_SHA_384_ENABLED.0" display="No using user SHA-384 function" value="0"/>
+            <option id="TSIP_USER_SHA_384_ENABLED.1" display="Using user SHA-384 function" value="1"/>
+            <description>0 = No using user SHA-384 function
+1 = Using user SHA-384 function</description>
+        </property>
+        <property id="TSIP_USER_SHA_384_FUNCTION" display="User SHA-384 function name" default="user_sha384_function" type="textbox">
+            <constraint display="Please enter a valid function name without spaces or funny characters">testSymbol("${TSIP_USER_SHA_384_FUNCTION}")</constraint>
+            <description>User SHA-384 function name.</description>
+        </property>
+        <property id="TSIP_TLS" display="TLS" default="1" type="combobox">
+            <option id="TSIP_TLS.0" display="No using TLS" value="0"/>
+            <option id="TSIP_TLS.1" display="Using TLS" value="1"/>
+            <description>0 = No using TLS
+1 = Using TLS</description>
+        </property>
+        <property id="TSIP_SECURE_BOOT" display="Secure boot" default="0" type="combobox">
+            <option id="TSIP_SECURE_BOOT.0" display="No using Secure boot" value="0"/>
+            <option id="TSIP_SECURE_BOOT.1" display="Using Secure boot" value="1"/>
+            <description>0 = No using Secure boot
+1 = Using Secure boot</description>
+        </property>
+        <property id="TSIP_FIRMWARE_UPDATE" display="Firmware update" default="1" type="combobox">
+            <option id="TSIP_FIRMWARE_UPDATE.0" display="No using Firmware update" value="0"/>
+            <option id="TSIP_FIRMWARE_UPDATE.1" display="Using Firmware update" value="1"/>
+            <description>0 = No using Firmware update
+1 = Using Firmware update</description>
+        </property>
+        <property id="TSIP_MULTI_THREADING" display="Multi threading" default="0" type="combobox">
+            <option id="TSIP_MULTI_THREADING.0" display="No using Multi threading" value="0"/>
+            <option id="TSIP_MULTI_THREADING.1" display="Using Multi threading" value="1"/>
+            <description>0 = No using Multi threading
+1 = Using Multi threading</description>
+        </property>
+        <property id="TSIP_MULTI_THREADING_LOCK_FUNCTION" display="User function name to lock the resource" default="user_lock_function" type="textbox">
+            <constraint display="Please enter a valid function name without spaces or funny characters">testSymbol("${TSIP_MULTI_THREADING_LOCK_FUNCTION}")</constraint>
+            <description>User function name to lock the resource.</description>
+        </property>
+        <property id="TSIP_MULTI_THREADING_UNLOCK_FUNCTION" display="User function name to unlock the resource" default="user_unlock_function" type="textbox">
+            <constraint display="Please enter a valid function name without spaces or funny characters">testSymbol("${TSIP_MULTI_THREADING_UNLOCK_FUNCTION}")</constraint>
+            <description>User function name to unlock the resource.</description>
+        </property>
+    </configuration>
+</module>

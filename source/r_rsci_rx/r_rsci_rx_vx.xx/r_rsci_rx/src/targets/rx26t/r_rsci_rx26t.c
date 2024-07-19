@@ -23,6 +23,7 @@
 * History : DD.MM.YYYY Version Description
 *           15.08.2022 1.00    Initial Release
 *           30.06.2023 2.40    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           29.03.2024 2.50    Fixed RSCI (CH8, CH9) hardware bug for RX26T.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -294,6 +295,14 @@ int32_t rsci_init_bit_rate(rsci_hdl_t const  hdl,
             }
         }
     }
+
+    /* CKS value greater than 0 is prohibited in RSCI8 and RSCI9 */
+#if (RSCI_CFG_CH8_INCLUDED || RSCI_CFG_CH9_INCLUDED)
+    if (((RSCI_CH8 == hdl->rom->chan) || (RSCI_CH9 == hdl->rom->chan)) && (0 != p_baud_info[i].cks))
+    {
+        return (1000);           // impossible baud rate requested; return 100% error
+    }
+#endif
 
     /* RETURN IF BRR WILL BE >255 OR LESS THAN 0 */
     if (i == num_divisors)

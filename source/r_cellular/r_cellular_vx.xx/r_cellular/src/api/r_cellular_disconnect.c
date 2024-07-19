@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_disconnect.c
@@ -77,6 +77,7 @@ e_cellular_err_t R_CELLULAR_Disconnect(st_cellular_ctrl_t * const p_ctrl)
 
     if (CELLULAR_SUCCESS == ret)
     {
+        /* WAIT_LOOP */
         for (cnt = CELLULAR_START_SOCKET_NUMBER; cnt <= p_ctrl->creatable_socket; cnt++)
         {
             ret = cellular_shutdownsocket(p_ctrl, cnt);
@@ -88,6 +89,7 @@ e_cellular_err_t R_CELLULAR_Disconnect(st_cellular_ctrl_t * const p_ctrl)
 
         if (CELLULAR_SUCCESS == ret)
         {
+            /* WAIT_LOOP */
             for (cnt = CELLULAR_START_SOCKET_NUMBER; cnt <= p_ctrl->creatable_socket; cnt++)
             {
                 ret = cellular_closesocket(p_ctrl, cnt);

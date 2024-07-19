@@ -10,7 +10,7 @@ R01AN4860JJ
 
 Version
 -------
-v2.50
+v2.60
 
 Overview
 --------
@@ -115,9 +115,9 @@ File Structure
  |  |    |  r_ble_api_spec.chm
  |  |    |
  |  |    +---en
- |  |    |      r01an4860ej0250-rx23w-ble.pdf
+ |  |    |      r01an4860ej0260-rx23w-ble.pdf
  |  |    +---ja
- |  |           r01an4860jj0250-rx23w-ble.pdf
+ |  |           r01an4860jj0260-rx23w-ble.pdf
  |  |
  |  +---lib
  |  |      ble_fit_lib_selector.bat

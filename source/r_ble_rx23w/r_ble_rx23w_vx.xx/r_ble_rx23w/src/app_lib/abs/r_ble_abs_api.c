@@ -334,6 +334,7 @@ ble_status_t R_BLE_ABS_Init(st_ble_abs_init_param_t * p_init_param)
         return retval;
     }
 
+    /* WAIT_LOOP */
     for(i=0; i<BLE_MAX_NO_OF_ADV_SETS_SUPPORTED; i++)
     {
         gs_adv_sets[i].status = 0;
@@ -364,6 +365,7 @@ ble_status_t R_BLE_ABS_Init(st_ble_abs_init_param_t * p_init_param)
 
         if(NULL != p_init_param->p_gatts_cbs->p_cb_param)
         {
+            /* WAIT_LOOP */
             for(i=0; i<p_init_param->p_gatts_cbs->cb_num; i++)
             {
                 if(NULL != p_init_param->p_gatts_cbs->p_cb_param[i].cb)
@@ -396,6 +398,7 @@ ble_status_t R_BLE_ABS_Init(st_ble_abs_init_param_t * p_init_param)
 
         if(NULL != p_init_param->p_gattc_cbs->p_cb_param)
         {
+            /* WAIT_LOOP */
             for(i=0; i<p_init_param->p_gattc_cbs->cb_num; i++)
             {
                 if(NULL != p_init_param->p_gattc_cbs->p_cb_param[i].cb)
@@ -1720,6 +1723,7 @@ static ble_status_t abs_adv_rept_hdlr(st_ble_evt_data_t * p_event_data)
         uint16_t pos;
         pos = 0;
 
+        /* WAIT_LOOP */
         while (pos < len)
         {
             /* Each advertising structure have following constructs.
@@ -1752,6 +1756,7 @@ static ble_status_t abs_adv_rept_hdlr(st_ble_evt_data_t * p_event_data)
             else if ((type == gs_abs_scan.param.filter_ad_type))
             {
                 /* Memory compare only AD data : Partial match */
+                /* WAIT_LOOP */
                 for(i=0; (i<ad_len) && ((i+gs_abs_scan.param.filter_data_length)<=ad_len); i++)
                 {
                     if(0 == memcmp(&p_buf[pos+2+i], 

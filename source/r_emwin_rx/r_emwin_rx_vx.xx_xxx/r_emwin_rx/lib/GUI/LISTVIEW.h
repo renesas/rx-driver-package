@@ -9,7 +9,7 @@
 *                                                                    *
 **********************************************************************
 
-** emWin V6.32 - Graphical user interface for embedded applications **
+** emWin V6.34 - Graphical user interface for embedded applications **
 emWin is protected by international copyright laws.   Knowledge of the
 source code may not be used to write a similar product.  This file may
 only  be used  in accordance  with  a license  and should  not be  re-
@@ -73,6 +73,7 @@ Purpose     : LISTVIEW include
 #define LISTVIEW_CF_CELL_SELECT       (1 << 2)                     // Create Flag used to enable cell selection
 #define LISTVIEW_CF_MOTION_H          (1 << 3)
 #define LISTVIEW_CF_MOTION_V          (1 << 4)
+#define LISTVIEW_CF_USE_COPY          (1 << 5)
 #define LISTVIEW_SF_AUTOSCROLLBAR_H   LISTVIEW_CF_AUTOSCROLLBAR_H
 #define LISTVIEW_SF_AUTOSCROLLBAR_V   LISTVIEW_CF_AUTOSCROLLBAR_V
 
@@ -124,6 +125,7 @@ void             LISTVIEW_DeleteRowSorted      (LISTVIEW_Handle hObj, int Row);
 void             LISTVIEW_DisableRow           (LISTVIEW_Handle hObj, unsigned Row);
 void             LISTVIEW_DisableSort          (LISTVIEW_Handle hObj);
 void             LISTVIEW_EnableCellSelect     (LISTVIEW_Handle hObj, unsigned OnOff);  // Enables/disables cell selection
+void             LISTVIEW_EnableCopy           (LISTVIEW_Handle hObj, unsigned OnOff);
 void             LISTVIEW_EnableMotion         (LISTVIEW_Handle hObj, int Flags);
 void             LISTVIEW_EnableRow            (LISTVIEW_Handle hObj, unsigned Row);
 void             LISTVIEW_EnableSort           (LISTVIEW_Handle hObj);

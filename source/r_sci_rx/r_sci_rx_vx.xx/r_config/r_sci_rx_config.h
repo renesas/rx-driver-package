@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name     : r_sci_rx_config.h
@@ -49,6 +49,7 @@
 *           31.03.2023 4.80    Added support for RX26T.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *           29.05.2023 4.90    Added support for RX23E-B.
+*           31.01.2024 5.10    Modified comments in Data Match parameters.
 ***********************************************************************************************************************/
 #ifndef SCI_CONFIG_H
 #define SCI_CONFIG_H
@@ -263,8 +264,10 @@ Configuration Options
 #define SCI_CFG_CH10_RX_FIFO_THRESH (8)
 #define SCI_CFG_CH11_RX_FIFO_THRESH (8)
 
-/* ENABLE Received Data match function (SCIj and SCIi supported MCU RX65N/RX66T/RX72T/RX72M/RX72N/RX66N ONLY) 1=included, 0=not */
-/*((SCIk and SCIm supported MCU RX671/RX660/RX26T ONLY) 1=included, 0=not */
+/* ENABLE Received Data match function (SCIj supported MCU RX66T/RX72T/RX72M/RX72N/RX66N ONLY) 1=included, 0=not */
+/*(SCIi supported MCU RX65N/RX66T/RX72T/RX72M/RX72N/RX66N ONLY) 1=included, 0=not */
+/*(SCIk supported MCU RX671/RX660/RX140/RX26T ONLY) 1=included, 0=not */
+/*(SCIm supported MCU RX671/RX660 ONLY) 1=included, 0=not */
 #define SCI_CFG_CH0_DATA_MATCH_INCLUDED  (0)
 #define SCI_CFG_CH1_DATA_MATCH_INCLUDED  (0)
 #define SCI_CFG_CH2_DATA_MATCH_INCLUDED  (0)

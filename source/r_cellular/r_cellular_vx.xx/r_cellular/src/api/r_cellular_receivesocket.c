@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_receivesocket.c
@@ -196,6 +196,7 @@ static int32_t cellular_receive_data(st_cellular_ctrl_t * const p_ctrl, const ui
     cellular_timeout_init(p_cellular_timeout_ctrl, timeout_ms);
     if (CELLULAR_PSM_ACTIVE == p_ctrl->ring_ctrl.psm)
     {
+        /* WAIT_LOOP */
         while (1)
         {
             semaphore_ret = cellular_take_semaphore(p_ctrl->ring_ctrl.rts_semaphore);
@@ -215,6 +216,7 @@ static int32_t cellular_receive_data(st_cellular_ctrl_t * const p_ctrl, const ui
 #endif
     }
 
+    /* WAIT_LOOP */
     /* Data receive loop */
     while (length > total_receive_length)
     {
@@ -291,6 +293,7 @@ static e_cellular_timeout_check_t cellular_receive_flag_check(st_cellular_ctrl_t
     e_cellular_timeout_check_t    timeout = CELLULAR_NOT_TIMEOUT;
     e_cellular_reconnect_status_t status  = CELLULAR_AP_RECONNECTED;
 
+    /* WAIT_LOOP */
     while (1)
     {
         if (CELLULAR_RECEIVE_FLAG_ON == p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].receive_flg)
@@ -349,6 +352,7 @@ static e_cellular_reconnect_status_t cellular_connect_check(st_cellular_ctrl_t *
     }
     end_time = start_time + CELLULAR_RECONNECT_TIMEOUT;
 
+    /* WAIT_LOOP */
     while (1)
     {
         if (CELLULAR_SYSTEM_CONNECT == p_ctrl->system_state)

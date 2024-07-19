@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2019-2022 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2019-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -35,6 +35,7 @@
 *         : 15.04.2022 2.31    Update to BLE FIT module v2.31.
 *         : 30.06.2022 2.40    Update to BLE FIT module v2.40.
 *         : 27.12.2022 2.50    Update to BLE FIT module v2.50.
+*         : 17.05.2024 2.60    Update to BLE FIT module v2.60.
 ***********************************************************************************************************************/
 
 /*******************************************************************************************************************//**
@@ -96,7 +97,7 @@
  * @def BLE_VERSION_MINOR
  * BLE Module Minor Version.
  */
-#define BLE_VERSION_MINOR                                               (50)
+#define BLE_VERSION_MINOR                                               (60)
 
 /** 
  * @def BLE_LIB_ALL_FEATS
@@ -3000,8 +3001,8 @@ typedef struct
     uint8_t o_addr_type;
 
     /**
-     *  @brief Random address set to the advertising set, when the o_addr_type field is BLE_GAP_ADDR_RAND.
-     *  @details When the o_addr_type field is other than BLE_GAP_ADDR_RAND, this field is ignored.
+     *  @brief Random address set to the advertising set, when the o_addr_type field is BLE_GAP_ADDR_RAND or BLE_GAP_ADDR_RPA_ID_RANDOM.
+     *  @details When the o_addr_type field is other than BLE_GAP_ADDR_RAND or BLE_GAP_ADDR_RPA_ID_RANDOM, this field is ignored.
      *  @note   The BD address setting format is little endian. \n
      *          If the address is "AA:BB:CC:DD:EE:FF", set the byte array in the order 
      *          {0xFF, 0xEE, 0xDD, 0xCC, 0xBB, 0xAA}.

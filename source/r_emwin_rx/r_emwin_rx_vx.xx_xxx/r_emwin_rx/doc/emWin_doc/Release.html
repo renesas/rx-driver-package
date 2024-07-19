@@ -185,7 +185,7 @@ div.divider-global:nth-of-type(even) {
           <!-- Modifiable information starts here                                 -->
           <!-- Don't forget to edit the title tag either                          -->
           <!-- ****************************************************************** -->
-          <h1>Release notes for emWin Version 6.32a</h1>
+          <h1>Release notes for emWin Version 6.34g</h1>
         </div>
       </div>
     </div>
@@ -213,6 +213,68 @@ div.divider-global:nth-of-type(even) {
   <div id="features" class="divider-global">
     <div class="container">
       <h2><a name="features">New Features</a></h2>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.34f</h3>
+        <li>AppWizard:
+          <ul type=square>
+            <li>Details about new features can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.34c</h3>
+      <ol class="maintext">
+        <li>Orientation device:
+          <ul type=square>
+            <li>New function GUI_OrientationEnableTouch() added which adapts the PID coordinates automatically according to the current orientation.</li>
+          </ul>
+        </li>
+        <li>IMAGE widget:
+          <ul type=square>
+            <li>New function IMAGE_SetBkColor() added to be able to manage background areas which are not covered by the used image file.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.34a</h3>
+      <ol class="maintext">
+        <li>LISTVIEW widget:
+          <ul type=square>
+            <li>New function LISTVIEW_EnableCopy() added in order to reduce CPU load significantly under certain circumstances.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.34</h3>
+      <ol class="maintext">
+        <li>JPEG:
+          <ul type=square>
+            <li>New optimized code for IDCT conversion added to be able to make use of the ARM Neon extensions and the ARM Helium technology of ARM Cortex-M85.</li>
+          </ul>
+        </li>
+        <li>Display drivers:
+          <ul type=square>
+            <li>New driver GUIDRV_S1D13C00 with support for 1bpp and 6bpp colordepth added.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.32c</h3>
+      <ol class="maintext">
+        <li>KEYBOARD widget:
+          <ul type=square>
+            <li>Long press of <SPACE> now opens a cursor management window.</li>
+            <li>New function KEYBOARD_SetSensy() added.</li>
+            <li>New function KEYBOARD_GetDefaultSensy() added.</li>
+            <li>New function KEYBOARD_SetDefaultSensy() added.</li>
+          </ul>
+        </li>
+      </ol>
 
       <!-------------------------------------------------------------------------->
       <h3>Version 6.32</h3>
@@ -3135,6 +3197,269 @@ div.divider-global:nth-of-type(even) {
     <div class="container">
     
       <h2><a name="pcorr">Program corrections</a></h2>
+      <ol class="maintext">
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.34g</h3>
+      <ol class="maintext">
+        <li>Core:
+          <ul type=square>
+            <li>The function GUI_DispStringAt() changed the test alignment without restoring the previous value. Fixed.</li>
+          </ul>
+          <ul type=square>
+            <li>GUI_CopyRect() did not observe cursor. Fixed.</li>
+          </ul>
+        </li>
+        <li>LISTVIEW widget:
+          <ul type=square>
+            <li>Under certain circumstances a LISTVIEW with SCROLLBARs enabled could cause an exception when deleting the widget. Fixed.</li>
+          </ul>
+        </li>
+        <li>MULTIEDIT, LISTVIEW & LISTBOX widget:
+          <ul type=square>
+            <li>Hardware acceleration function for CopyRect operation must not be used if output in memory device is required. Fixed.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.34f</h3>
+      <ol class="maintext">
+        <li>AppWizard:
+          <ul type=square>
+            <li>Bugs in examples fixed.</li>
+            <li>More details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.34e</h3>
+      <ol class="maintext">
+        <li>Streamed bitmaps:
+          <ul type=square>
+            <li>Under certain circumstances GUI_DrawStreamedBitmapExAuto() did not unlock the GUI. Fixed.</li>
+          </ul>
+        </li>
+        <li>Bitmaps:
+          <ul type=square>
+            <li>Drawing bitmaps of format 'True color with alpha, compressed' did not work in case of using a hardware acceleration function with GUI_SetFuncAlphaBlending(). Fixed.</li>
+          </ul>
+        </li>
+        <li>Memory devices:
+          <ul type=square>
+            <li>GUI_MEMDEV_WriteAlpha() and GUI_MEMDEV_WriteAlphaEx() did not observe the clipping rectangle. Fixed.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.34d</h3>
+      <ol class="maintext">
+        <li>Window Manager:
+          <ul type=square>
+            <li>When sending a PID related message from WM_HandlePID() the element hWinSrc of WM_MESSAGE was not initialized under certain circumstances. Changed.</li>
+          </ul>
+          <ul type=square>
+            <li>WM_AttachWindow() crashed in case of passing a NULL handle. Fixed.</li>
+          </ul>
+        </li>
+        <li>XBF fonts:
+          <ul type=square>
+            <li>Under certain circumstances GUI_XBF__GetOff() calculated a wrong offset. Fixed.</li>
+          </ul>
+        </li>
+        <li>ROTARY widget:
+          <ul type=square>
+            <li>In case of painting into a memory device the widget did not observe the state of the WM. Fixed.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.34c</h3>
+      <ol class="maintext">
+        <li>Orientation device:
+          <ul type=square>
+            <li>Device did not work when using LISTBOX, LISTVIEW or MULTIEDIT widget. Fixed.</li>
+          </ul>
+        </li>
+        <li>MULTIEDIT widget:
+          <ul type=square>
+            <li>Large content with bidirectional text did not work. Fixed.</li>
+            <li>A blinking cursor caused very high CPU load. Fixed.</li>
+          </ul>
+        </li>
+        <li>LISTBOX, MULTIEDIT and LISTVIEW widget:
+          <ul type=square>
+            <li>Swiping content optimized significantly if a hardware function for copying rectangular areas exist.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.34b</h3>
+      <ol class="maintext">
+        <li>Core:
+          <ul type=square>
+            <li>16-bit BMP files were not displayed correctly for GUICC_M565 color conversion. Fixed.</li>
+            <li>16-bit BMP files (BitField-encoded) were not displayed correctly. Fixed.</li>
+          </ul>
+        </li>
+        <li>Widget:
+          <ul type=square>
+            <li>WHEEL_CreateIndirect() did not process widget flags to set the widget state to vertical. Fixed.</li>
+          </ul>
+        </li>
+        <li>Tools:
+          <ul type=square>
+            <li>emWinView: Visible layer used wrong stride value when using virtual screens that had a virtual xSize bigger than the LCD xSize. Fixed.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.34a</h3>
+      <ol class="maintext">
+        <li>AppWizard:
+          <ul type=square>
+            <li>BSP's reworked and CPU usage significantly reduced by using semaphores if an OS is available.</li>
+            <li>More details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+        <li>General:
+          <ul type=square>
+            <li>Replaced ceil(), floor() and sqrt() by their float counterparts ceilf(), floorf() and sqrtf() in order to avoid warnings.</li>
+          </ul>
+        </li>
+        <li>VNC:
+          <ul type=square>
+            <li>If the real driver had no ReadRect function the VNC server used get-pixel-index which return wrong indices with 16bpp (16 bit indices in 32 bit wide values). Fixed.</li>
+          </ul>
+        </li>
+        <li>Memory Devices:
+          <ul type=square>
+            <li>GUI_MEMDEV_WriteAlpha() did not work completely right under certain circumstances. Fixed.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.34</h3>
+      <ol class="maintext">
+        <li>AppWizard:
+          <ul type=square>
+            <li>Details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+        <li>LISTBOX widget:
+          <ul type=square>
+            <li>LISTBOX_SetText() did not clear items and did not update SCROLLERs or SCROLLBARs. Fixed.</li>
+          </ul>
+        </li>
+        <li>SCROLLER widget:
+          <ul type=square>
+            <li>Under certain circumstances SCROLLER did not calculate correct positions and stayed invisible. Fixed.</li>
+          </ul>
+        </li>
+        <li>RADIO widget:
+          <ul type=square>
+            <li>RADIO widget did not react on PID state changes. Fixed.</li>
+          </ul>
+        </li>
+      </ol>
+      
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.32d</h3>
+      <ol class="maintext">
+        <li>AppWizard:
+          <ul type=square>
+            <li>Details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+        <li>Tools:
+          <ul type=square>
+            <li>FontConverter: Baseline calculation under certain circumstances wrong. Problem solved.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.32c</h3>
+      <ol class="maintext">
+        <li>AppWizard:
+          <ul type=square>
+            <li>Details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+        <li>MULTIEDIT widget:
+          <ul type=square>
+            <li>MULTIEDIT did not show last line when using vertical motion. Fixed.</li>
+          </ul>
+        </li>
+        <li>EDIT widget:
+          <ul type=square>
+            <li>EDIT did not swallow motion messages. It now does so that the cursor can be dragged around without any screens being moved.</li>
+          </ul>
+        </li>
+      </ol>
+
+      <!-------------------------------------------------------------------------->
+      <h3>Version 6.32b</h3>
+      <ol class="maintext">
+        <li>AppWizard:
+          <ul type=square>
+            <li>Details can be found in the release notes of AppWizard.</li>
+          </ul>
+        </li>
+        <li>Language Support:
+          <ul type=square>
+            <li>GUI_LANG_LoadTextEx() did not work with empty strings. Fixed.</li>
+            <li>GUI_LANG_GetTextBuffered(): If the requested string has a length of 0 the given buffer remained untouched without zero delimiter at the begin. Fixed.</li>
+          </ul>
+        </li>
+        <li>Fonts:
+          <ul type=square>
+            <li>When using (old) monospaced fonts non existing characters were not shown after calling GUI_ShowMissingCharacters(1). Fixed.</li>
+          </ul>
+        </li>
+        <li>MOVIE widget:
+          <ul type=square>
+            <li>ADDVALUE on movie object that is stopped did increase frame position but the widget is not redrawn. Fixed.</li>
+          </ul>
+        </li>
+        <li>KEYBOARD widget:
+          <ul type=square>
+            <li>KEYBOARD layout export wrote strings without zero-termination characters. ENG_LP layout dollar sign removed (same change like with ENG layout). Fixed.</li>
+            <li>Changed longpress characters in ENG layout. Dollar sign shifted the other chars in the row. Now the longpress chars are at the same positions with or without shift.</li>
+          </ul>
+        </li>
+        <li>LISTBOX widget:
+          <ul type=square>
+            <li>Adding new LISTBOX items did not invalidate the cached sizes of the object. As a consequence the SCROLLER had an incorrect scroll state. Fixed.</li>
+          </ul>
+        </li>
+        <li>LISTVIEW widget:
+          <ul type=square>
+            <li>LISTVIEW set the capture on MOTION_INIT which was not necessary. When widgets were attached to the LISTVIEW they would not receive touch events. Fixed.</li>
+          </ul>
+        </li>
+        <li>MULTIEDIT widget:
+          <ul type=square>
+            <li>Under certain circumstances the MULTIEDIT callback function did not unlock all pointers. Fixed.</li>
+          </ul>
+        </li>
+        <li>DROPDOWN widget:
+          <ul type=square>
+            <li>The LISTBOX of a DROPDOWN was not drawn properly if background changed. Fixed.</li>
+          </ul>
+        </li>
+        <li>emWinSPY:
+          <ul type=square>
+            <li>emWinSPY now comes as installer.</li>
+          </ul>
+        </li>
+      </ol>
 
       <!-------------------------------------------------------------------------->
       <h3>Version 6.32a</h3>
@@ -6296,6 +6621,17 @@ div.divider-global:nth-of-type(even) {
       <h2><a name="history">Release history</a></h2>
       <table width="100%" border="0" cellspacing="5">
         <tr> <td width=20%><b>Version</b></td> <td width=30%><b>Release date</b></td> <td><b>Availability</b></td> </tr>
+        <tr> <td>V6.34g</td> <td>2023-11-02</td> <td>General release</td> </tr>
+        <tr> <td>V6.34f</td> <td>2023-10-30</td> <td>Point release</td> </tr>
+        <tr> <td>V6.34e</td> <td>2023-10-25</td> <td>General release</td> </tr>
+        <tr> <td>V6.34d</td> <td>2023-10-16</td> <td>General release</td> </tr>
+        <tr> <td>V6.34c</td> <td>2023-10-04</td> <td>General release</td> </tr>
+        <tr> <td>V6.34b</td> <td>2023-09-20</td> <td>Point release</td>   </tr>
+        <tr> <td>V6.34a</td> <td>2023-08-08</td> <td>General release</td> </tr>
+        <tr> <td>V6.34 </td> <td>2023-07-05</td> <td>General release</td> </tr>
+        <tr> <td>V6.32d</td> <td>2023-05-12</td> <td>General release</td> </tr>
+        <tr> <td>V6.32c</td> <td>2023-04-14</td> <td>General release</td> </tr>
+        <tr> <td>V6.32b</td> <td>2023-03-20</td> <td>General release</td> </tr>
         <tr> <td>V6.32a</td> <td>2023-03-01</td> <td>General release</td> </tr>
         <tr> <td>V6.32 </td> <td>2023-02-17</td> <td>General release</td> </tr>
         <tr> <td>V6.30a</td> <td>2022-12-05</td> <td>General release</td> </tr>

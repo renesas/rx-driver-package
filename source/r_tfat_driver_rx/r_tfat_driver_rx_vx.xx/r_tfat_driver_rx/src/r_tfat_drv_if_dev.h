@@ -19,7 +19,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014(2015-2020) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
 *******************************************************************************/
 /*******************************************************************************
 * History      : DD.MM.YYYY Version  Description
@@ -34,6 +34,7 @@
 *              : 10.06.2020 2.10     Added API function "flash_1ms_interval".
 *                                    Added support FLASH SPI Firmware
 *                                    Added support MMCIF Firmware
+*              : 15.12.2023 2.40     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_tfat_driver_rx_if_dev.h
@@ -63,44 +64,54 @@ Exported global functions (to be accessed by other files)
 *******************************************************************************/
 #if (TFAT_USB_DRIVE_NUM > 0)
 DSTATUS usb_disk_initialize(uint8_t pdrv);
-DRESULT usb_disk_read(uint8_t pdrv, uint8_t* buff, uint32_t sector, uint32_t count);
-DRESULT usb_disk_write(uint8_t pdrv, const uint8_t* buff, uint32_t sector, uint32_t count);
+DRESULT usb_disk_read(uint8_t pdrv, uint8_t* buff,
+                        uint32_t sector, uint32_t count);
+DRESULT usb_disk_write(uint8_t pdrv, const uint8_t* buff,
+                        uint32_t sector, uint32_t count);
 DRESULT usb_disk_ioctl(uint8_t pdrv, uint8_t cmd, void* buff);
 DSTATUS usb_disk_status(uint8_t pdrv);
-#endif // (TFAT_USB_DRIVE_NUM > 0)
+#endif /* (TFAT_USB_DRIVE_NUM > 0) */
 
 #if (TFAT_USB_MINI_DRIVE_NUM > 0)
 DSTATUS usb_mini_disk_initialize(uint8_t drive);
-DRESULT usb_mini_disk_read(uint8_t drive, uint8_t* buffer, uint32_t sector_number, uint32_t sector_count);
-DRESULT usb_mini_disk_write(uint8_t drive, const uint8_t* buffer, uint32_t sector_number, uint32_t sector_count);
+DRESULT usb_mini_disk_read(uint8_t drive, uint8_t* buffer,
+                        uint32_t sector_number, uint32_t sector_count);
+DRESULT usb_mini_disk_write(uint8_t drive, const uint8_t* buffer,
+                        uint32_t sector_number, uint32_t sector_count);
 DRESULT usb_mini_disk_ioctl(uint8_t drive, uint8_t command, void* buffer);
 DSTATUS usb_mini_disk_status(uint8_t drive);
-#endif // (TFAT_USB_MINI_DRIVE_NUM > 0)
+#endif /* (TFAT_USB_MINI_DRIVE_NUM > 0) */
 
 #if (TFAT_SDMEM_DRIVE_NUM > 0)
 DSTATUS sdmem_disk_initialize(uint8_t drive);
-DRESULT sdmem_disk_read(uint8_t drive, uint8_t* buffer, uint32_t sector_number, uint32_t sector_count);
-DRESULT sdmem_disk_write(uint8_t drive, const uint8_t* buffer, uint32_t sector_number, uint32_t sector_count);
+DRESULT sdmem_disk_read(uint8_t drive, uint8_t* buffer,
+                        uint32_t sector_number, uint32_t sector_count);
+DRESULT sdmem_disk_write(uint8_t drive, const uint8_t* buffer,
+                        uint32_t sector_number, uint32_t sector_count);
 DRESULT sdmem_disk_ioctl(uint8_t drive, uint8_t command, void* buffer);
 DSTATUS sdmem_disk_status(uint8_t drive);
-#endif // (TFAT_SDMEM_DRIVE_NUM > 0)
+#endif /* (TFAT_SDMEM_DRIVE_NUM > 0) */
 
 #if (TFAT_MMC_DRIVE_NUM > 0)
 DSTATUS mmcif_disk_initialize(uint8_t drive);
-DRESULT mmcif_disk_read(uint8_t drive, uint8_t* buffer, uint32_t sector_number, uint32_t sector_count);
-DRESULT mmcif_disk_write(uint8_t drive, const uint8_t* buffer, uint32_t sector_number, uint32_t sector_count);
+DRESULT mmcif_disk_read(uint8_t drive, uint8_t* buffer,
+                        uint32_t sector_number, uint32_t sector_count);
+DRESULT mmcif_disk_write(uint8_t drive, const uint8_t* buffer,
+                        uint32_t sector_number, uint32_t sector_count);
 DRESULT mmcif_disk_ioctl(uint8_t drive, uint8_t command, void* buffer);
 DSTATUS mmcif_disk_status(uint8_t drive);
-#endif // (TFAT_MMC_DRIVE_NUM > 0)
+#endif /* (TFAT_MMC_DRIVE_NUM > 0) */
 
 #if (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
 DSTATUS flash_spi_disk_initialize(uint8_t drive);
-DRESULT flash_spi_disk_read(uint8_t drive, uint8_t* buffer, uint32_t sector_number, uint32_t sector_count);
-DRESULT flash_spi_disk_write(uint8_t drive, const uint8_t* buffer, uint32_t sector_number, uint32_t sector_count);
+DRESULT flash_spi_disk_read(uint8_t drive, uint8_t* buffer,
+                        uint32_t sector_number, uint32_t sector_count);
+DRESULT flash_spi_disk_write(uint8_t drive, const uint8_t* buffer,
+                        uint32_t sector_number, uint32_t sector_count);
 DRESULT flash_spi_disk_ioctl(uint8_t drive, uint8_t command, void* buffer);
 DSTATUS flash_spi_disk_status(uint8_t drive);
 void flash_spi_1ms_interval(void);
-#endif // (TFAT_SERIAL_FLASH_DRIVE_NUM > 0)
+#endif /* (TFAT_SERIAL_FLASH_DRIVE_NUM > 0) */
 
 #endif    /* _R_TFAT_DRIVER_RX_IF_DEV_H_ */
 

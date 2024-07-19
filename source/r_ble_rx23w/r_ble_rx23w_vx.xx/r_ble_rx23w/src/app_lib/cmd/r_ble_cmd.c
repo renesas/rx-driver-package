@@ -27,6 +27,7 @@ void R_BLE_CMD_ParseValues(char *p_str, uint8_t *p_buffer, uint16_t *p_length)
 
     char *p_tp = strtok(p_str, ",");
 
+    /* WAIT_LOOP */
     while ((p_tp != NULL) && (*p_length < 50))
     {
         if (p_tp != NULL)
@@ -48,6 +49,7 @@ void R_BLE_CMD_ParseValues(char *p_str, uint8_t *p_buffer, uint16_t *p_length)
 
 void R_BLE_CMD_PrintValues(uint8_t *p_buffer, uint16_t length)
 {
+    /* WAIT_LOOP */
     for (int i = 0; i < length; i++)
     {
         R_BLE_CLI_Printf("0x%02x", p_buffer[i]);
@@ -64,6 +66,7 @@ void R_BLE_CMD_ParseAddr(char *p_str, uint8_t *p_addr)
     int p = 5;
     char *p_tp = strtok(p_str, ":");
 
+    /* WAIT_LOOP */
     while ((p_tp != NULL) && (p >= 0))
     {
         if (p_tp != NULL)
@@ -78,6 +81,7 @@ void R_BLE_CMD_ParseAddr(char *p_str, uint8_t *p_addr)
 
 void R_BLE_CMD_PrintAddr(uint8_t *p_addr)
 {
+    /* WAIT_LOOP */
     for (uint16_t i = 0; i < 6; i++)
     {
         R_BLE_CLI_Printf("%02x", p_addr[5-i]);

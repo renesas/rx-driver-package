@@ -19,12 +19,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011(2012-2023) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * System Name  : FLASH SPI driver software
 * File Name    : r_flash_spi_mx_type_sub.c
-* Version      : 3.20
+* Version      : 3.40
 * Device       : -
 * Abstract     : Sub module
 * Tool-Chain   : -
@@ -40,6 +40,12 @@
 *              : 31.12.2021 3.03     Added variable "read_after_write" "read_after_write_add" and
 *                                    "read_after_write_data" for controlling SPI bus.
 *              : 16.03.2023 3.20     Added support for QSPIX Memory Mapped Mode.
+*              : 15.11.2023 3.40     Added support for reading across multiple banks in QSPIX
+*                                    Memory Mapped Mode.
+*                                    Updated according to GSCE Code Checker 6.50.
+*                                    Added support for MX25U6432F.
+*                                    Added features Advanced sector protection supporting
+*                                    for MX66L1G45 and MX25U6432F.
 *************************************************************************************************/
 
 
@@ -52,75 +58,104 @@ Includes <System Includes> , "Project Includes"
 
 
 /* Check flash memory types. */
-#if (FLASH_SPI_CFG_DEV0_MX25L == 1) || (FLASH_SPI_CFG_DEV0_MX66L == 1) || (FLASH_SPI_CFG_DEV0_MX25R == 1) || \
-    (FLASH_SPI_CFG_DEV1_MX25L == 1) || (FLASH_SPI_CFG_DEV1_MX66L == 1) || (FLASH_SPI_CFG_DEV1_MX25R == 1)
+#if (FLASH_SPI_CFG_DEV0_MX25L == 1) || (FLASH_SPI_CFG_DEV0_MX66L == 1) || (FLASH_SPI_CFG_DEV0_MX25R == 1) || (FLASH_SPI_CFG_DEV0_MX25U == 1) ||\
+    (FLASH_SPI_CFG_DEV1_MX25L == 1) || (FLASH_SPI_CFG_DEV1_MX66L == 1) || (FLASH_SPI_CFG_DEV1_MX25R == 1) || (FLASH_SPI_CFG_DEV1_MX25U == 1)
 
 
 /************************************************************************************************
 Macro definitions
 *************************************************************************************************/
 /*---------- Definitions of FLASH command -----------*/
-#define FLASH_SPI_MX_CMD_WREN   (uint8_t)(0x06) /* Write Enable                                 */
-#define FLASH_SPI_MX_CMD_WRDI   (uint8_t)(0x04) /* Write Disable                                */
-#define FLASH_SPI_MX_CMD_RDSR   (uint8_t)(0x05) /* Read Status Register                         */
-#define FLASH_SPI_MX_CMD_WRSR   (uint8_t)(0x01) /* Write Status Register                        */
-#define FLASH_SPI_MX_CMD_RDCR   (uint8_t)(0x15) /* Read Configuration Register                  */
-#define FLASH_SPI_MX_CMD_RDSCUR (uint8_t)(0x2b) /* Read Security Register                       */
-#define FLASH_SPI_MX_CMD_FREAD  (uint8_t)(0x0b) /* Read Data at Higher Speed                    */
-#define FLASH_SPI_MX_CMD_DREAD  (uint8_t)(0x3b) /* Dual Read (Single -> Dual Out)               */
-#define FLASH_SPI_MX_CMD_QREAD  (uint8_t)(0x6b) /* Quad Read (Single -> Quad Out)               */
-#define FLASH_SPI_MX_CMD_PP     (uint8_t)(0x02) /* Page Program (Single -> Single Input         */
-#define FLASH_SPI_MX_CMD_4PP    (uint8_t)(0x38) /* Quad Page Program (Single -> Quad Input)     */
-#define FLASH_SPI_MX_CMD_SE     (uint8_t)(0x20) /* Sector Erase (4KB)                           */
-#define FLASH_SPI_MX_CMD_BE32K  (uint8_t)(0x52) /* Block Erase (32KB)                           */
-#define FLASH_SPI_MX_CMD_BE64K  (uint8_t)(0xd8) /* Block Erase (64KB)                           */
-#define FLASH_SPI_MX_CMD_CE     (uint8_t)(0x60) /* Chip Erase                                   */
-#define FLASH_SPI_MX_CMD_RDID   (uint8_t)(0x9f) /* Read Identification                          */
-#define FLASH_SPI_MX_CMD_EN4B   (uint8_t)(0xb7) /* Enter 4-byte Address Mode                    */
-#define FLASH_SPI_MX_CMD_EX4B   (uint8_t)(0xe9) /* Exit 4-byte Address Mode                     */
+#define FLASH_SPI_MX_CMD_WREN       ((uint8_t)(0x06)) /* Write Enable                                 */
+#define FLASH_SPI_MX_CMD_WRDI       ((uint8_t)(0x04)) /* Write Disable                                */
+#define FLASH_SPI_MX_CMD_RDSR       ((uint8_t)(0x05)) /* Read Status Register                         */
+#define FLASH_SPI_MX_CMD_WRSR       ((uint8_t)(0x01)) /* Write Status Register                        */
+#define FLASH_SPI_MX_CMD_RDCR       ((uint8_t)(0x15)) /* Read Configuration Register                  */
+#define FLASH_SPI_MX_CMD_RDSCUR     ((uint8_t)(0x2b)) /* Read Security Register                       */
+#define FLASH_SPI_MX_CMD_FREAD      ((uint8_t)(0x0b)) /* Read Data at Higher Speed                    */
+#define FLASH_SPI_MX_CMD_DREAD      ((uint8_t)(0x3b)) /* Dual Read (Single -> Dual Out)               */
+#define FLASH_SPI_MX_CMD_QREAD      ((uint8_t)(0x6b)) /* Quad Read (Single -> Quad Out)               */
+#define FLASH_SPI_MX_CMD_PP         ((uint8_t)(0x02)) /* Page Program (Single -> Single Input         */
+#define FLASH_SPI_MX_CMD_4PP        ((uint8_t)(0x38)) /* Quad Page Program (Single -> Quad Input)     */
+#define FLASH_SPI_MX_CMD_SE         ((uint8_t)(0x20)) /* Sector Erase (4KB)                           */
+#define FLASH_SPI_MX_CMD_BE32K      ((uint8_t)(0x52)) /* Block Erase (32KB)                           */
+#define FLASH_SPI_MX_CMD_BE64K      ((uint8_t)(0xd8)) /* Block Erase (64KB)                           */
+#define FLASH_SPI_MX_CMD_CE         ((uint8_t)(0x60)) /* Chip Erase                                   */
+#define FLASH_SPI_MX_CMD_RDID       ((uint8_t)(0x9f)) /* Read Identification                          */
+#define FLASH_SPI_MX_CMD_EN4B       ((uint8_t)(0xb7)) /* Enter 4-byte Address Mode                    */
+#define FLASH_SPI_MX_CMD_EX4B       ((uint8_t)(0xe9)) /* Exit 4-byte Address Mode                     */
+#define FLASH_SPI_MX_CMD_WPSEL      ((uint8_t)(0x68)) /* Write Protect Selection                      */
+#define FLASH_SPI_MX_CMD_WRLR       ((uint8_t)(0x2c)) /* Write Lock Register                          */
+#define FLASH_SPI_MX_CMD_RDLR       ((uint8_t)(0x2d)) /* Read Lock Register                           */
+#define FLASH_SPI_MX_CMD_SPBLK      ((uint8_t)(0xa6)) /* Set SPB Lock Bit                             */
+#define FLASH_SPI_MX_CMD_RDSPBLK    ((uint8_t)(0xa7)) /* Read SPB Lock Register                       */
+#define FLASH_SPI_MX_CMD_RDSPB      ((uint8_t)(0xe2)) /* Read SPB Status                              */
+#define FLASH_SPI_MX_CMD_WRSPB      ((uint8_t)(0xe3)) /* SPB Program                                  */
+#define FLASH_SPI_MX_CMD_ESSPB      ((uint8_t)(0xe4)) /* SPB Erase                                    */
+#define FLASH_SPI_MX_CMD_GBULK      ((uint8_t)(0x98)) /* Gang Block Unlock                            */
+#define FLASH_SPI_MX_CMD_GBLK       ((uint8_t)(0x7e)) /* Gang Block Lock                              */
 
 
 /*--------- Command transmission processing ----------*/
-#define R_FLASH_SPI_MX_CMD_WREN(devno, read_after_write)      r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_WREN,   (uint32_t)0, \
-                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE)
-#define R_FLASH_SPI_MX_CMD_WRDI(devno, read_after_write)      r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_WRDI,   (uint32_t)0, \
-                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE)
-#define R_FLASH_SPI_MX_CMD_RDSR(devno, read_after_write)      r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_RDSR,   (uint32_t)0, \
-                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE)
-#define R_FLASH_SPI_MX_CMD_WRSR(devno, read_after_write)      r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_WRSR,   (uint32_t)0, \
-                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE)
-#define R_FLASH_SPI_MX_CMD_RDCR(devno, read_after_write)      r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_RDCR,   (uint32_t)0, \
-                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE)
-#define R_FLASH_SPI_MX_CMD_RDSCUR(devno, read_after_write)    r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_RDSCUR, (uint32_t)0, \
-                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE)
-#define R_FLASH_SPI_MX_CMD_SE(devno, addr, addr_size, read_after_write)    r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_SE, \
-                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size, read_after_write, FALSE)
-#define R_FLASH_SPI_MX_CMD_BE32K(devno, addr, addr_size, read_after_write) r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_BE32K, \
-                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size, read_after_write, FALSE)
-#define R_FLASH_SPI_MX_CMD_BE64K(devno, addr, addr_size, read_after_write) r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_BE64K, \
-                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size, read_after_write, FALSE)
-#define R_FLASH_SPI_MX_CMD_CE(devno, addr, read_after_write)  r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_CE,   (uint32_t)addr, \
-                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE)
-#define R_FLASH_SPI_MX_CMD_RDID(devno, read_after_write)      r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_RDID,   (uint32_t)0, \
-                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE)
-#define R_FLASH_SPI_MX_CMD_ENTER4(devno, read_after_write)    r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_EN4B,   (uint32_t)0, \
-                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE)
-#define R_FLASH_SPI_MX_CMD_EXIT4(devno, read_after_write)     r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_EX4B,   (uint32_t)0, \
-                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE)
+#define R_FLASH_SPI_MX_CMD_WREN(devno, read_after_write)      (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_WREN,   (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_WRDI(devno, read_after_write)      (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_WRDI,   (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_RDSR(devno, read_after_write)      (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_RDSR,   (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_WRSR(devno, read_after_write)      (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_WRSR,   (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_RDCR(devno, read_after_write)      (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_RDCR,   (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_RDSCUR(devno, read_after_write)    (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_RDSCUR, (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_SE(devno, addr, addr_size, read_after_write)    (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_SE, \
+                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_BE32K(devno, addr, addr_size, read_after_write) (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_BE32K, \
+                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_BE64K(devno, addr, addr_size, read_after_write) (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_BE64K, \
+                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_CE(devno, addr, read_after_write)  (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_CE,   (uint32_t)addr, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_RDID(devno, read_after_write)      (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_RDID,   (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_ENTER4(devno, read_after_write)    (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_EN4B,   (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_EXIT4(devno, read_after_write)     (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_EX4B,   (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE))
 /* READ Command */
 /* 1 Dummy cycle is indicated as "1". */
-#define R_FLASH_SPI_MX_CMD_FREAD(devno, addr, addr_size, read_after_write) r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_FREAD, \
-                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size+1, read_after_write, TRUE)
-#define R_FLASH_SPI_MX_CMD_DREAD(devno, addr, addr_size, read_after_write) r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_DREAD, \
-                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size+1, read_after_write, TRUE)
-#define R_FLASH_SPI_MX_CMD_QREAD(devno, addr, addr_size, read_after_write) r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_QREAD, \
-                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size+1, read_after_write, TRUE)
+#define R_FLASH_SPI_MX_CMD_FREAD(devno, addr, addr_size, read_after_write) (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_FREAD, \
+                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size+1, read_after_write, TRUE))
+#define R_FLASH_SPI_MX_CMD_DREAD(devno, addr, addr_size, read_after_write) (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_DREAD, \
+                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size+1, read_after_write, TRUE))
+#define R_FLASH_SPI_MX_CMD_QREAD(devno, addr, addr_size, read_after_write) (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_QREAD, \
+                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size+1, read_after_write, TRUE))
 /* Page Program Command */
-#define R_FLASH_SPI_MX_CMD_PP(devno, addr, addr_size, read_after_write)   r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_PP,  \
-                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE)
-#define R_FLASH_SPI_MX_CMD_4PP(devno, addr, addr_size, read_after_write)  r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_4PP, \
-                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE)
+#define R_FLASH_SPI_MX_CMD_PP(devno, addr, addr_size, read_after_write)   (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_PP,  \
+                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_4PP(devno, addr, addr_size, read_after_write)  (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_4PP, \
+                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE))
 
+/* Advanced Sector Protection Command */
+#define R_FLASH_SPI_MX_CMD_WPSEL(devno, read_after_write)     (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_WPSEL, (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_RDLR(devno, read_after_write)      (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_RDLR,  (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_SPBLK(devno, read_after_write)     (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_SPBLK, (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_RDSPBLK(devno, read_after_write)   (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_RDSPBLK, (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_WRSPB(devno, addr, addr_size, read_after_write)     (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_WRSPB, \
+                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_RDSPB(devno, addr, addr_size, read_after_write)     (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_RDSPB, \
+                                                            (uint32_t)addr, FLASH_SPI_MX_CMD_SIZE+addr_size, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_ESSPB(devno, read_after_write)     (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_ESSPB, (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_GBULK(devno, read_after_write)     (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_GBULK, (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE))
+#define R_FLASH_SPI_MX_CMD_GBLK(devno, read_after_write)      (r_flash_spi_mx_send_cmd(devno, FLASH_SPI_MX_CMD_GBLK,  (uint32_t)0, \
+                                                            FLASH_SPI_MX_CMD_SIZE, read_after_write, FALSE))
 
 /************************************************************************************************
 Typedef definitions
@@ -141,17 +176,80 @@ Exported global variables (to be accessed by other files)
 /************************************************************************************************
 Private global variables and functions
 *************************************************************************************************/
-static uint32_t gs_flash_mx_cmdbuf[FLASH_SPI_DEV_NUM][8/sizeof(uint32_t)];
-                                                        /* Command transmission buffer          */
-static flash_spi_status_t r_flash_spi_mx_send_cmd(uint8_t devno, uint8_t cmd, uint32_t addr, uint8_t cmdsize,
-                                                bool read_after_write, bool read_in_memory_mapped);
-                                                        /* Command transmission                 */
-static flash_spi_status_t r_flash_spi_mx_write_en(uint8_t devno);
-                                                        /* Writing enable                       */
-static flash_spi_status_t r_flash_spi_mx_write_stsreg(uint8_t devno, flash_spi_reg_info_t * p_reg, bool read_after_write);
-static flash_spi_status_t r_flash_spi_mx_poll_prog_erase(uint8_t devno, flash_spi_poll_mode_t mode);
-static flash_spi_status_t r_flash_spi_mx_poll_reg_write(uint8_t devno);
-static void               r_flash_spi_mx_cmd_set(uint8_t devno, uint8_t cmd, uint32_t addr, uint8_t cmdsize);
+static bool s_flash_mx_read_memory_mapped[FLASH_SPI_DEV_NUM] =
+{
+#if (FLASH_SPI_CFG_DEV1_INCLUDED == 1)
+#if (MEMDRV_DRVR_RX_FIT_QSPIX_MMM == MEMDRV_CFG_DEV0_MODE_DRVR)
+    true,
+#else
+    false,
+#endif
+#if (MEMDRV_DRVR_RX_FIT_QSPIX_MMM == MEMDRV_CFG_DEV1_MODE_DRVR)
+    true
+#else
+    false
+#endif
+#elif (FLASH_SPI_CFG_DEV0_INCLUDED == 1)
+#if (MEMDRV_CFG_DEV0_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPIX_MMM)
+    true
+#else
+    false
+#endif
+#else
+#endif
+};
+
+/* Transmission buffer */
+static uint32_t s_flash_mx_cmdbuf[FLASH_SPI_DEV_NUM][8/sizeof(uint32_t)];
+
+/* Command transmission */
+static flash_spi_status_t r_flash_spi_mx_send_cmd (uint8_t devno, uint8_t cmd, uint32_t addr, uint8_t cmdsize,
+                                                   bool read_after_write, bool read_in_memory_mapped);
+
+/* Writing enable */
+static flash_spi_status_t r_flash_spi_mx_write_en (uint8_t devno);
+
+/* Writing status register */
+static flash_spi_status_t r_flash_spi_mx_write_stsreg (uint8_t devno, flash_spi_reg_info_t * p_reg, bool read_after_write);
+
+/* Wait for ready after busy by program or erase operation */
+static flash_spi_status_t r_flash_spi_mx_poll_prog_erase (uint8_t devno, flash_spi_poll_mode_t mode);
+
+/* Wait for ready after register write operation */
+static flash_spi_status_t r_flash_spi_mx_poll_reg_write (uint8_t devno);
+
+/* Set command */
+static void               r_flash_spi_mx_cmd_set (uint8_t devno, uint8_t cmd, uint32_t addr, uint8_t cmdsize);
+
+/* Gang Block Unlock */
+static flash_spi_status_t r_flash_spi_mx_gang_block_unlock (uint8_t devno);
+
+/* Gang Block Lock */
+static flash_spi_status_t r_flash_spi_mx_gang_block_lock (uint8_t devno);
+
+/* Writing write protect selection */
+static flash_spi_status_t r_flash_spi_mx_set_write_protect_selection (uint8_t devno);
+
+/* Reading lock register */
+static flash_spi_status_t r_flash_spi_mx_read_lkreg (uint8_t devno, uint8_t * p_lkreg);
+
+/* Writing lock register */
+static flash_spi_status_t r_flash_spi_mx_write_lkreg (uint8_t devno);
+
+/* Reading SPB lock register */
+static flash_spi_status_t r_flash_spi_mx_read_spblkreg (uint8_t devno, uint8_t * p_spblkreg);
+
+/* Writing SPB lock register */
+static flash_spi_status_t r_flash_spi_mx_write_spblkreg (uint8_t devno);
+
+/* Erasing SPB register */
+static flash_spi_status_t r_flash_spi_mx_erase_spbreg (uint8_t devno);
+
+/* Reading SPB register */
+static flash_spi_status_t r_flash_spi_mx_read_spbreg (uint8_t devno, uint32_t addr, uint8_t * p_spbreg);
+
+/* Writing SPB register */
+static flash_spi_status_t r_flash_spi_mx_write_spbreg (uint8_t devno, uint32_t addr);
 
 
 /************************************************************************************************
@@ -166,7 +264,9 @@ void r_flash_spi_mx_init_port(uint8_t devno)
 {
     r_flash_spi_cs_init(devno);                         /* SS# "H"                              */
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_init_port
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_reset_port
@@ -180,7 +280,9 @@ void r_flash_spi_mx_reset_port(uint8_t devno)
 {
     r_flash_spi_cs_reset(devno);                        /* SS# "H"                              */
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_reset_port
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_send_cmd
@@ -205,7 +307,7 @@ static flash_spi_status_t r_flash_spi_mx_send_cmd(uint8_t devno, uint8_t cmd, ui
     /* The upper layer software should set to the single mode. */
     /* Send a command using the single mode. */
     /* Cast from 8-bit data to 32-bit data. */
-    ret = r_flash_spi_drvif_tx(devno, (uint32_t)cmdsize, (uint8_t *)&gs_flash_mx_cmdbuf[devno][0], read_after_write, read_in_memory_mapped);
+    ret = r_flash_spi_drvif_tx(devno, (uint32_t)cmdsize, (uint8_t *)&s_flash_mx_cmdbuf[devno][0], read_after_write, read_in_memory_mapped);
     if (FLASH_SPI_SUCCESS > ret)
     {
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
@@ -214,7 +316,9 @@ static flash_spi_status_t r_flash_spi_mx_send_cmd(uint8_t devno, uint8_t cmd, ui
 
     return ret;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_send_cmd
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_write_en
@@ -250,7 +354,9 @@ static flash_spi_status_t r_flash_spi_mx_write_en(uint8_t devno)
 
     return ret;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_write_en
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_write_di
@@ -286,7 +392,9 @@ flash_spi_status_t r_flash_spi_mx_write_di(uint8_t devno)
 
     return ret;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_write_di
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_read_stsreg
@@ -350,7 +458,9 @@ flash_spi_status_t r_flash_spi_mx_read_stsreg(uint8_t devno, uint8_t * p_status)
 
     return ret;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_read_stsreg
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_read_configreg
@@ -358,7 +468,7 @@ flash_spi_status_t r_flash_spi_mx_read_stsreg(uint8_t devno, uint8_t * p_status)
 *              : the configuration storage buffer (p_config).
 *              :
 *              :      <config1>
-*              :    Configuration Register - 1 (For MX25L, MX66L and MX25R)
+*              :    Configuration Register - 1 (For MX25L, MX66L, MX25R and MX25U)
 *              :        Bits 7 to 6: DC1-DC0 (Dummy cycle)
 *              :                  See the specification of the Flash memory.
 *              :        Bit 5: 4 BYTE (4BYTE Indicator)
@@ -382,8 +492,8 @@ flash_spi_status_t r_flash_spi_mx_read_stsreg(uint8_t devno, uint8_t * p_status)
 *              :        Bit 0: Reserved
 *              :
 * Arguments    : uint8_t            devno               ;   Device No. (FLASH_DEVn)
-*              : uint8_t          * p_config            ;   MX25L/MX66L : Read configuration storage buffer (1 byte)
-*              :                                        ;   MX25R       : Read configuration storage buffer (2 bytes)
+*              : uint8_t          * p_config            ;   MX25L/MX66L/MX25U : Read configuration storage buffer (1 byte)
+*              :                                        ;   MX25R             : Read configuration storage buffer (2 bytes)
 * Return Value : FLASH_SPI_SUCCESS                      ;   Successful operation
 *              : FLASH_SPI_ERR_HARD                     ;   Hardware error
 *              : FLASH_SPI_ERR_OTHER                    ;   Other error
@@ -425,7 +535,9 @@ flash_spi_status_t r_flash_spi_mx_read_configreg(uint8_t devno, uint8_t * p_conf
 
     return ret;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_read_configreg
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_read_scurreg
@@ -498,7 +610,9 @@ flash_spi_status_t r_flash_spi_mx_read_scurreg(uint8_t devno, uint8_t * p_scur)
 
     return ret;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_read_scurreg
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_set_write_protect
@@ -534,6 +648,7 @@ flash_spi_status_t r_flash_spi_mx_read_scurreg(uint8_t devno, uint8_t * p_scur)
 * Return Value : FLASH_SPI_SUCCESS                      ;   Successful operation
 *              : FLASH_SPI_ERR_PARAM                    ;   Parameter error
 *              : FLASH_SPI_ERR_HARD                     ;   Hardware error
+*              : FLASH_SPI_ERR_WP                       ;   Write-protection error
 *              : FLASH_SPI_ERR_OTHER                    ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : A SRWD bit is fixed to 0.
@@ -544,8 +659,10 @@ flash_spi_status_t r_flash_spi_mx_set_write_protect(uint8_t devno, uint8_t wpsts
     flash_spi_status_t      ret = FLASH_SPI_SUCCESS;
     flash_spi_reg_info_t    reg;
     uint8_t                 stsreg = 0;
+    uint8_t                 p_scur = 0;
 #if   (FLASH_SPI_CFG_DEV0_MX25L == 1) || (FLASH_SPI_CFG_DEV1_MX25L == 1) || \
-      (FLASH_SPI_CFG_DEV0_MX66L == 1) || (FLASH_SPI_CFG_DEV1_MX66L == 1)
+      (FLASH_SPI_CFG_DEV0_MX66L == 1) || (FLASH_SPI_CFG_DEV1_MX66L == 1) || \
+      (FLASH_SPI_CFG_DEV0_MX25U == 1) || (FLASH_SPI_CFG_DEV1_MX25U == 1)
     uint8_t                 cfgreg[1] = { 0 };
 #elif (FLASH_SPI_CFG_DEV0_MX25R == 1) || (FLASH_SPI_CFG_DEV1_MX25R == 1)
     uint8_t                 cfgreg[2] = { 0, 0 };
@@ -572,6 +689,46 @@ flash_spi_status_t r_flash_spi_mx_set_write_protect(uint8_t devno, uint8_t wpsts
 #endif  /* #if (FLASH_SPI_CFG_DEV1_INCLUDED == 1) */
     }
 
+    /* The upper layer software should set to the single mode. */
+    /* Execute the Write Enable (WREN) command operation using the single mode. */
+    ret = r_flash_spi_mx_write_en(devno);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+
+#if (FLASH_SPI_CFG_WEL_CHK == 1)
+    /* Execute the Read Status Register (RDSR) command operation using the single mode. */
+    ret = r_flash_spi_mx_read_stsreg(devno, &stsreg);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+    if (0x00 == (stsreg & FLASH_SPI_MX_REG_WEL))        /* WEL bit =0 : In Write Disable State  */
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return FLASH_SPI_ERR_OTHER;
+    }
+#endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
+
+    /* Execute the Read Security Register (RDSCUR) command operation using the single mode. */
+    ret = r_flash_spi_mx_read_scurreg(devno, &p_scur);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+
+    /* WPSEL bit = 1: Advanced Sector Protection mode  */
+    /* The WPSEL bit is an OTP bit. Once WPSEL is set to 1, it cannot be programmed back to 0. */
+    /* Can't use the Block Protection (BP) mode as the write protection. */
+    if (FLASH_SPI_MX_SCUR_WPSEL == (p_scur & FLASH_SPI_MX_SCUR_WPSEL))
+    {
+        return FLASH_SPI_ERR_WP;
+    }
+
     /* Execute the Read Status Register (RDSR) command operation using the single mode. */
     ret = r_flash_spi_mx_read_stsreg(devno, &stsreg);
     if (FLASH_SPI_SUCCESS > ret)
@@ -589,7 +746,7 @@ flash_spi_status_t r_flash_spi_mx_set_write_protect(uint8_t devno, uint8_t wpsts
     }
 
     /* Store the write-protection information. */
-    reg.status  = ((stsreg & (uint8_t)(~(FLASH_SPI_MX_REG_BPMASK | FLASH_SPI_MX_REG_SRWD))) | (wpsts << 2));
+    reg.status  = ((stsreg & ((uint8_t)(~(FLASH_SPI_MX_REG_BPMASK | FLASH_SPI_MX_REG_SRWD)))) | (wpsts << 2));
     reg.config1 = cfgreg[0];
 #if (FLASH_SPI_CFG_DEV0_MX25R == 1) || (FLASH_SPI_CFG_DEV1_MX25R == 1)
     reg.config2 = cfgreg[1];
@@ -609,7 +766,9 @@ flash_spi_status_t r_flash_spi_mx_set_write_protect(uint8_t devno, uint8_t wpsts
     
     return ret;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_set_write_protect
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_write_configuration
@@ -617,7 +776,7 @@ flash_spi_status_t r_flash_spi_mx_set_write_protect(uint8_t devno, uint8_t wpsts
 *              : to the configuration register.
 *              :
 *              :      <config1>
-*              :    Configuration Register - 1 (For MX25L, MX66L and MX25R)
+*              :    Configuration Register - 1 (For MX25L, MX66L, RX25R and MX25U)
 *              :        Bits 7 to 6: DC1-DC0 (Dummy cycle)
 *              :                  See the specification of the Flash memory.
 *              :        Bit 5: 4 BYTE (4BYTE Indicator)
@@ -679,7 +838,9 @@ flash_spi_status_t r_flash_spi_mx_write_configuration(uint8_t devno, flash_spi_r
     
     return ret;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_write_configuration
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_quad_enable
@@ -700,7 +861,8 @@ flash_spi_status_t r_flash_spi_mx_quad_enable(uint8_t devno, bool read_after_wri
     flash_spi_reg_info_t    reg;
     uint8_t                 stsreg = 0;
 #if   (FLASH_SPI_CFG_DEV0_MX25L == 1) || (FLASH_SPI_CFG_DEV1_MX25L == 1) || \
-      (FLASH_SPI_CFG_DEV0_MX66L == 1) || (FLASH_SPI_CFG_DEV1_MX66L == 1)
+      (FLASH_SPI_CFG_DEV0_MX66L == 1) || (FLASH_SPI_CFG_DEV1_MX66L == 1) || \
+      (FLASH_SPI_CFG_DEV0_MX25U == 1) || (FLASH_SPI_CFG_DEV1_MX25U == 1)
     uint8_t                 cfgreg[1] = { 0 };
 #elif (FLASH_SPI_CFG_DEV0_MX25R == 1) || (FLASH_SPI_CFG_DEV1_MX25R == 1)
     uint8_t                 cfgreg[2] = { 0, 0 };
@@ -743,7 +905,9 @@ flash_spi_status_t r_flash_spi_mx_quad_enable(uint8_t devno, bool read_after_wri
     
     return ret;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_quad_enable
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_quad_disable
@@ -764,7 +928,8 @@ flash_spi_status_t r_flash_spi_mx_quad_disable(uint8_t devno, bool read_after_wr
     flash_spi_reg_info_t    reg;
     uint8_t                 stsreg = 0;
 #if   (FLASH_SPI_CFG_DEV0_MX25L == 1) || (FLASH_SPI_CFG_DEV1_MX25L == 1) || \
-      (FLASH_SPI_CFG_DEV0_MX66L == 1) || (FLASH_SPI_CFG_DEV1_MX66L == 1)
+      (FLASH_SPI_CFG_DEV0_MX66L == 1) || (FLASH_SPI_CFG_DEV1_MX66L == 1) || \
+      (FLASH_SPI_CFG_DEV0_MX25U == 1) || (FLASH_SPI_CFG_DEV1_MX25U == 1)
     uint8_t                 cfgreg[1] = { 0 };
 #elif (FLASH_SPI_CFG_DEV0_MX25R == 1) || (FLASH_SPI_CFG_DEV1_MX25R == 1)
     uint8_t                 cfgreg[2] = { 0, 0 };
@@ -807,7 +972,9 @@ flash_spi_status_t r_flash_spi_mx_quad_disable(uint8_t devno, bool read_after_wr
     
     return ret;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_quad_disable
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_write_stsreg
@@ -831,7 +998,7 @@ flash_spi_status_t r_flash_spi_mx_quad_disable(uint8_t devno, bool read_after_wr
 *              :                  0: No Program or Erase cycle is in progress.
 *              :
 *              :      <config1>
-*              :    Configuration Register - 1 (For MX25L, MX66L and MX25R)
+*              :    Configuration Register - 1 (For MX25L, MX66L, MX25R and MX25U)
 *              :        Bits 7 to 6: DC1-DC0 (Dummy cycle)
 *              :                  See the specification of the Flash memory.
 *              :        Bit 5: 4 BYTE (4BYTE Indicator)
@@ -931,7 +1098,9 @@ static flash_spi_status_t r_flash_spi_mx_write_stsreg(uint8_t devno, flash_spi_r
 
     return FLASH_SPI_SUCCESS;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_write_stsreg
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_read
@@ -952,6 +1121,7 @@ static flash_spi_status_t r_flash_spi_mx_write_stsreg(uint8_t devno, flash_spi_r
 flash_spi_status_t r_flash_spi_mx_read(uint8_t devno, flash_spi_info_t * p_flash_spi_info)
 {
     flash_spi_status_t        ret = FLASH_SPI_SUCCESS;
+    uint32_t    tmpcnt    = 0;
     uint8_t     addr_size = 0;
 
     r_flash_spi_set_cs(devno, FLASH_SPI_LOW);           /* SS# "L"                              */
@@ -999,65 +1169,95 @@ flash_spi_status_t r_flash_spi_mx_read(uint8_t devno, flash_spi_info_t * p_flash
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
         r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
         r_flash_spi_set_cs(devno, FLASH_SPI_HI);        /* SS# "H"                              */
-/*      r_flash_spi_drvif_disable(devno); */  /* Remove because the upper layer software executes. */
         return ret;
     }
 
     r_flash_spi_wait_lp(FLASH_SPI_T_R_ACCESS);
 
     /* Set SPI mode to mode N and bit rate for Data. */
-    ret =r_flash_spi_drvif_enable_rx_data(devno);
+    ret = r_flash_spi_drvif_enable_rx_data(devno);
     if (FLASH_SPI_SUCCESS > ret)
     {
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
         r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
         r_flash_spi_set_cs(devno, FLASH_SPI_HI);        /* SS# "H"                              */
-/*      r_flash_spi_drvif_disable(devno); */  /* Remove because the upper layer software executes. */
         return ret;
     }
 
     do
     {
-        /* Set data size to receive. */
-        /* The data size is (4G - 1) bytes or less when using Firmware Integration Technology (FIT). */
-        /* The data size is 32K bytes or less when not using Firmware Integration Technology (FIT). */
-        if (FLASH_SPI_R_DATA_SIZE <= p_flash_spi_info->cnt)
+        if (true == s_flash_mx_read_memory_mapped[devno])
         {
-            p_flash_spi_info->data_cnt = FLASH_SPI_R_DATA_SIZE;
+            /* Calculates the writable bytes from the start address to the bank boundary */
+            tmpcnt = ((p_flash_spi_info->addr + FLASH_SPI_R_DATA_QSPIX_BANK_SIZE) / FLASH_SPI_R_DATA_QSPIX_BANK_SIZE)
+                     * FLASH_SPI_R_DATA_QSPIX_BANK_SIZE - p_flash_spi_info->addr;
+
+            /* Set data size to receive. */
+            /* The data size is 64 Mbytes or less when using a read memory map in the QSPI area. */
+            if (tmpcnt >= p_flash_spi_info->cnt)
+            {
+                p_flash_spi_info->data_cnt = p_flash_spi_info->cnt;
+            }
+            else
+            {
+                p_flash_spi_info->data_cnt = tmpcnt;
+            }
         }
         else
         {
-            p_flash_spi_info->data_cnt = p_flash_spi_info->cnt;
+            /* Set data size to receive. */
+            /* The data size is (4G - 1) bytes or less when using Firmware Integration Technology (FIT). */
+            /* The data size is 32K bytes or less when not using Firmware Integration Technology (FIT). */
+            if (FLASH_SPI_R_DATA_SIZE <= p_flash_spi_info->cnt)
+            {
+                p_flash_spi_info->data_cnt = FLASH_SPI_R_DATA_SIZE;
+            }
+            else
+            {
+                p_flash_spi_info->data_cnt = p_flash_spi_info->cnt;
+            }
         }
 
         /* Receive data from memory array. */
         /* The lower layer software should use the data_cnt as receiving counter. */
         ret = r_flash_spi_drvif_rx_data(devno, p_flash_spi_info->data_cnt, p_flash_spi_info->p_data,
-                                     p_flash_spi_info->addr, addr_size, p_flash_spi_info->op_mode);
+                                         p_flash_spi_info->addr, addr_size, p_flash_spi_info->op_mode);
         if (FLASH_SPI_SUCCESS > ret)
         {
             R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
             r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
             r_flash_spi_set_cs(devno, FLASH_SPI_HI);    /* SS# "H"                              */
-/*          r_flash_spi_drvif_disable(devno); */  /* Remove because the upper layer software executes. */
             return ret;
+        }
+
+        if (true == s_flash_mx_read_memory_mapped[devno])
+        {
+            r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+            r_flash_spi_set_cs(devno, FLASH_SPI_HI);            /* SS# "H"                              */
         }
 
         p_flash_spi_info->cnt    -= p_flash_spi_info->data_cnt;     /* Updates the cnt.         */
         p_flash_spi_info->p_data += p_flash_spi_info->data_cnt;
         p_flash_spi_info->addr   += p_flash_spi_info->data_cnt;
+
+        if ((true == s_flash_mx_read_memory_mapped[devno]) && (0 != p_flash_spi_info->cnt))
+        {
+            r_flash_spi_set_cs(devno, FLASH_SPI_LOW);           /* SS# "L"                              */
+            r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+        }
     }
     while(0 != p_flash_spi_info->cnt); /* WAIT_LOOP */
 
-
-    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
-    r_flash_spi_set_cs(devno, FLASH_SPI_HI);            /* SS# "H"                              */
+    if (true != s_flash_mx_read_memory_mapped[devno])
+    {
+        r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+        r_flash_spi_set_cs(devno, FLASH_SPI_HI);            /* SS# "H"                              */
+    }
 
     ret = r_flash_spi_drvif_disable(devno);
     if (FLASH_SPI_SUCCESS > ret)
     {
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
-/*      r_flash_spi_drvif_disable(devno); */  /* Remove because the upper layer software executes. */
         return ret;
     }
 
@@ -1066,13 +1266,14 @@ flash_spi_status_t r_flash_spi_mx_read(uint8_t devno, flash_spi_info_t * p_flash
     if (FLASH_SPI_SUCCESS > ret)
     {
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
-/*      r_flash_spi_drvif_disable(devno); */  /* Remove because the upper layer software executes. */
         return ret;
     }
 
     return ret;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_read
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_write_page
@@ -1100,7 +1301,7 @@ flash_spi_status_t r_flash_spi_mx_write_page(uint8_t devno, flash_spi_info_t * p
 #endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
     flash_spi_status_t  ret = FLASH_SPI_SUCCESS;
     uint8_t             addr_size = 0;
-    uint8_t           * p_cmdbuf = (uint8_t *)&gs_flash_mx_cmdbuf[devno][0];
+    uint8_t           * p_cmdbuf = (uint8_t *)&s_flash_mx_cmdbuf[devno][0];
 
 #if (BSP_CFG_PARAM_CHECKING_ENABLE)
     if (FLASH_SPI_DUAL == p_flash_spi_info->op_mode)
@@ -1193,7 +1394,6 @@ flash_spi_status_t r_flash_spi_mx_write_page(uint8_t devno, flash_spi_info_t * p
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
         r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
         r_flash_spi_set_cs(devno, FLASH_SPI_HI);        /* SS# "H"                              */
-/*      r_flash_spi_drvif_disable(devno); */  /* Remove because the upper layer software executes. */
         return ret;
     }
 
@@ -1204,7 +1404,6 @@ flash_spi_status_t r_flash_spi_mx_write_page(uint8_t devno, flash_spi_info_t * p
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
         r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
         r_flash_spi_set_cs(devno, FLASH_SPI_HI);        /* SS# "H"                              */
-/*      r_flash_spi_drvif_disable(devno); */  /* Remove because the upper layer software executes. */
         return ret;
     }
 
@@ -1216,7 +1415,6 @@ flash_spi_status_t r_flash_spi_mx_write_page(uint8_t devno, flash_spi_info_t * p
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
         r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
         r_flash_spi_set_cs(devno, FLASH_SPI_HI);        /* SS# "H"                              */
-/*      r_flash_spi_drvif_disable(devno); */  /* Remove because the upper layer software executes. */
         return ret;
     }
 
@@ -1227,7 +1425,6 @@ flash_spi_status_t r_flash_spi_mx_write_page(uint8_t devno, flash_spi_info_t * p
     if (FLASH_SPI_SUCCESS > ret)
     {
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
-/*      r_flash_spi_drvif_disable(devno); */  /* Remove because the upper layer software executes. */
         return ret;
     }
 
@@ -1236,13 +1433,14 @@ flash_spi_status_t r_flash_spi_mx_write_page(uint8_t devno, flash_spi_info_t * p
     if (FLASH_SPI_SUCCESS > ret)
     {
         R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
-/*      r_flash_spi_drvif_disable(devno); */  /* Remove because the upper layer software executes. */
         return ret;
     }
 
     return ret;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_write_page
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_flash_erase
@@ -1411,7 +1609,9 @@ flash_spi_status_t r_flash_spi_mx_erase(uint8_t devno, flash_spi_erase_info_t * 
 
     return ret;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_erase
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_rdid
@@ -1462,7 +1662,9 @@ flash_spi_status_t r_flash_spi_mx_rdid(uint8_t devno, uint8_t * p_data)
 
     return ret;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_rdid
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_polling
@@ -1509,7 +1711,9 @@ flash_spi_status_t r_flash_spi_mx_polling(uint8_t devno, flash_spi_poll_mode_t m
 
     return ret;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_polling
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_poll_prog_erase
@@ -1574,7 +1778,9 @@ static flash_spi_status_t r_flash_spi_mx_poll_prog_erase(uint8_t devno, flash_sp
 
     return ret;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_poll_prog_erase
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_poll_reg_write
@@ -1615,7 +1821,9 @@ static flash_spi_status_t r_flash_spi_mx_poll_reg_write(uint8_t devno)
 
     return ret;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_poll_reg_write
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_cmd_set
@@ -1632,7 +1840,7 @@ static flash_spi_status_t r_flash_spi_mx_poll_reg_write(uint8_t devno)
 static void r_flash_spi_mx_cmd_set(uint8_t devno, uint8_t cmd, uint32_t addr, uint8_t cmdsize)
 {
     flash_spi_mx_exchg_long_t     tmp;
-    uint8_t     * p_cmdbuf = (uint8_t *)&gs_flash_mx_cmdbuf[devno][0];
+    uint8_t     * p_cmdbuf = (uint8_t *)&s_flash_mx_cmdbuf[devno][0];
     uint8_t     addr_size = 0;
 
     if (FLASH_SPI_DEV0 == devno)
@@ -1673,11 +1881,22 @@ static void r_flash_spi_mx_cmd_set(uint8_t devno, uint8_t cmd, uint32_t addr, ui
 #if (FLASH_SPI_LITTLE_ENDIAN)
         if (3 == addr_size)
         {
-            *p_cmdbuf++ = cmd;
-            *p_cmdbuf++ = tmp.uc[2];
-            *p_cmdbuf++ = tmp.uc[1];
-            *p_cmdbuf++ = tmp.uc[0];
-            *p_cmdbuf   = 0xFF;
+            if ((FLASH_SPI_MX_CMD_RDSPB == cmd) || (FLASH_SPI_MX_CMD_WRSPB == cmd))
+            {
+                *p_cmdbuf++ = cmd;
+                *p_cmdbuf++ = 0xFF;
+                *p_cmdbuf++ = tmp.uc[2];
+                *p_cmdbuf++ = tmp.uc[1];
+                *p_cmdbuf   = tmp.uc[0];
+            }
+            else
+            {
+                *p_cmdbuf++ = cmd;
+                *p_cmdbuf++ = tmp.uc[2];
+                *p_cmdbuf++ = tmp.uc[1];
+                *p_cmdbuf++ = tmp.uc[0];
+                *p_cmdbuf   = 0xFF;
+            }
         }
         else
         {
@@ -1690,11 +1909,23 @@ static void r_flash_spi_mx_cmd_set(uint8_t devno, uint8_t cmd, uint32_t addr, ui
 #else
         if (3 == addr_size)
         {
-            *p_cmdbuf++ = cmd;
-            *p_cmdbuf++ = tmp.uc[1];
-            *p_cmdbuf++ = tmp.uc[2];
-            *p_cmdbuf++ = tmp.uc[3];
-            *p_cmdbuf   = 0xFF;
+            if ((FLASH_SPI_MX_CMD_RDSPB == cmd) || (FLASH_SPI_MX_CMD_WRSPB == cmd))
+            {
+                *p_cmdbuf++ = cmd;
+                *p_cmdbuf++ = 0xFF;
+                *p_cmdbuf++ = tmp.uc[1];
+                *p_cmdbuf++ = tmp.uc[2];
+                *p_cmdbuf   = tmp.uc[3];
+            }
+            else
+            {
+                *p_cmdbuf++ = cmd;
+                *p_cmdbuf++ = tmp.uc[1];
+                *p_cmdbuf++ = tmp.uc[2];
+                *p_cmdbuf++ = tmp.uc[3];
+                *p_cmdbuf   = 0xFF;
+            }
+
         }
         else
         {
@@ -1725,7 +1956,9 @@ static void r_flash_spi_mx_cmd_set(uint8_t devno, uint8_t cmd, uint32_t addr, ui
 #endif  /* #if (FLASH_SPI_LITTLE_ENDIAN) */
     }
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_cmd_set
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_enter_4addr
@@ -1767,7 +2000,9 @@ flash_spi_status_t r_flash_spi_mx_enter_4addr(uint8_t devno)
 
     return ret;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_enter_4addr
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_get_memory_info
@@ -1793,21 +2028,24 @@ flash_spi_status_t r_flash_spi_mx_get_memory_info(uint8_t devno, flash_spi_mem_i
             p_flash_spi_mem_info->mem_size  = FLASH_SPI_MX_DEV0_MEM_SIZE;
             p_flash_spi_mem_info->wpag_size = FLASH_SPI_MX_DEV0_PAGE_SIZE;
 #endif  /* #if (FLASH_SPI_CFG_DEV0_INCLUDED == 1) */
-        break;
+            break;
         case FLASH_SPI_DEV1:
 #if (FLASH_SPI_CFG_DEV1_INCLUDED == 1)
             p_flash_spi_mem_info->mem_size  = FLASH_SPI_MX_DEV1_MEM_SIZE;
             p_flash_spi_mem_info->wpag_size = FLASH_SPI_MX_DEV1_PAGE_SIZE;
 #endif  /* #if (FLASH_SPI_CFG_DEV1_INCLUDED == 1) */
-        break;
+            break;
         default:
+
             /* Do nothing. */
-        break;
+            break;
     }
     
     return ret;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_get_memory_info
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_check_cnt
@@ -1836,7 +2074,7 @@ flash_spi_status_t r_flash_spi_mx_check_cnt(uint8_t devno, flash_spi_info_t * p_
                 return FLASH_SPI_ERR_PARAM;
             }
 #endif  /* #if (FLASH_SPI_CFG_DEV0_INCLUDED == 1) */
-        break;
+            break;
         case FLASH_SPI_DEV1:
 #if (FLASH_SPI_CFG_DEV1_INCLUDED == 1)
             if ((0 == p_flash_spi_info->cnt) || (FLASH_SPI_MX_DEV1_MEM_SIZE < p_flash_spi_info->cnt) ||
@@ -1846,15 +2084,17 @@ flash_spi_status_t r_flash_spi_mx_check_cnt(uint8_t devno, flash_spi_info_t * p_
                 return FLASH_SPI_ERR_PARAM;
             }
 #endif  /* #if (FLASH_SPI_CFG_DEV1_INCLUDED == 1) */
-        break;
+            break;
         default:
             R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
             return FLASH_SPI_ERR_PARAM;
-        break;
+            break;
     }
     return FLASH_SPI_SUCCESS;
 }
-
+/******************************************************************************
+ End of function r_flash_spi_mx_check_cnt
+ *****************************************************************************/
 
 /************************************************************************************************
 * Function Name: r_flash_spi_mx_page_calc
@@ -1880,22 +2120,1112 @@ uint32_t r_flash_spi_mx_page_calc(uint8_t devno, flash_spi_info_t   * p_flash_sp
             tmpcnt = ((p_flash_spi_info->addr + FLASH_SPI_MX_DEV0_PAGE_SIZE) / FLASH_SPI_MX_DEV0_PAGE_SIZE)
                      * FLASH_SPI_MX_DEV0_PAGE_SIZE - p_flash_spi_info->addr;
 #endif  /* #if (FLASH_SPI_CFG_DEV0_INCLUDED == 1) */
-        break;
+            break;
         case FLASH_SPI_DEV1:
 #if (FLASH_SPI_CFG_DEV1_INCLUDED == 1)
             tmpcnt = ((p_flash_spi_info->addr + FLASH_SPI_MX_DEV1_PAGE_SIZE) / FLASH_SPI_MX_DEV1_PAGE_SIZE)
                      * FLASH_SPI_MX_DEV1_PAGE_SIZE - p_flash_spi_info->addr;
 #endif  /* #if (FLASH_SPI_CFG_DEV1_INCLUDED == 1) */
-        break;
+            break;
         default:
+
             /* Do nothing. */
-        break;
+            break;
     }
     return tmpcnt;
 }
+/******************************************************************************
+ End of function r_flash_spi_mx_page_calc
+ *****************************************************************************/
 
+/************************************************************************************************
+* Function Name: r_flash_spi_mx_set_write_protect_advanced_sector
+* Description  : Makes a write-protection setting using Advanced sector protection mode.
+* Arguments    : uint8_t            devno               ;   Device No. (FLASH_SPI_DEVn)
+* Return Value : FLASH_SPI_SUCCESS                      ;   Successful operation
+*              : FLASH_SPI_ERR_PARAM                    ;   Parameter error
+*              : FLASH_SPI_ERR_HARD                     ;   Hardware error
+*              : FLASH_SPI_ERR_OTHER                    ;   Other error
+*              : FLASH_SPI_ERR_WP_ADVANCED              ;   Advanced write-protection error
+*------------------------------------------------------------------------------------------------
+* Notes        : None
+*************************************************************************************************/
+flash_spi_status_t r_flash_spi_mx_set_write_protect_advanced_sector(uint8_t devno, flash_spi_protect_sector_info_t * flash_spi_protect_sector_info)
+{
+#if (FLASH_SPI_CFG_WEL_CHK == 1)
+    uint8_t            stsreg = 0;                     /* Status buffer                        */
+#endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
+    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
+    uint32_t           flash_type = 0;
+    uint8_t            p_spblkreg = 0;
+    uint8_t            p_lkreg[2] = { 0, 0 };
+    uint8_t            p_spbreg = 0;
+    uint8_t            p_scur = 0;
 
-#endif  /* (FLASH_SPI_CFG_DEV0_MX25L == 1) || (FLASH_SPI_CFG_DEV0_MX66L == 1) || (FLASH_SPI_CFG_DEV0_MX25R == 1) || \
-           (FLASH_SPI_CFG_DEV1_MX25L == 1) || (FLASH_SPI_CFG_DEV1_MX66L == 1) || (FLASH_SPI_CFG_DEV1_MX25R == 1) */
+    if (FLASH_SPI_DEV0 == devno)
+    {
+#if (FLASH_SPI_CFG_DEV0_INCLUDED == 1)
+        flash_type = FLASH_SPI_DEV0_TYPE;
+#endif /* (FLASH_SPI_CFG_DEV0_INCLUDED == 1) */
+    }
+    else
+    {
+#if (FLASH_SPI_CFG_DEV1_INCLUDED == 1)
+        flash_type = FLASH_SPI_DEV1_TYPE;
+#endif /* (FLASH_SPI_CFG_DEV1_INCLUDED == 1) */
+    }
+
+    /* The upper layer software should set to the single mode. */
+    /* Execute the Write Enable (WREN) command operation using the single mode. */
+    ret = r_flash_spi_mx_write_en(devno);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+
+#if (FLASH_SPI_CFG_WEL_CHK == 1)
+    /* Execute the Read Status Register (RDSR) command operation using the single mode. */
+    ret = r_flash_spi_mx_read_stsreg(devno, &stsreg);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+    if (0x00 == (stsreg & FLASH_SPI_MX_REG_WEL))        /* WEL bit =0 : In Write Disable State  */
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return FLASH_SPI_ERR_OTHER;
+    }
+#endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
+
+    /* Execute the Read Security Register (RDSCUR) command operation using the single mode. */
+    ret = r_flash_spi_mx_read_scurreg(devno, &p_scur);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+
+    /* Set WPSEL bit = 1: Advanced Sector Protection mode  */
+    /* The WPSEL bit is an OTP bit. Once WPSEL is set to 1, it cannot be programmed back to 0. */
+    if (FLASH_SPI_MX_SCUR_WPSEL != (p_scur & FLASH_SPI_MX_SCUR_WPSEL))
+    {
+        /* Execute the Write Protect Selection (WPSEL) command operation using the single mode. */
+        ret = r_flash_spi_mx_set_write_protect_selection(devno);
+        if (FLASH_SPI_SUCCESS > ret)
+        {
+            R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+            return ret;
+        }
+
+        /* Execute the Gang Block Unlock (GBULK) command operation using the single mode. */
+        ret = r_flash_spi_mx_gang_block_unlock(devno);
+        if (FLASH_SPI_SUCCESS > ret)
+        {
+            R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+            return ret;
+        }
+    }
+
+    /* Individual protect */
+    if (FLASH_SPI_MODE_INDIVIDUAL_PROTECT == flash_spi_protect_sector_info->protect_mode)
+    {
+        if (FLASH_SPI_TYPE_MX66L == flash_type)
+        {
+            /* Execute the Read Lock Register (RDLR) command operation using the single mode. */
+            ret = r_flash_spi_mx_read_lkreg(devno, &p_lkreg[0]);
+            if (FLASH_SPI_SUCCESS > ret)
+            {
+                R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+                return ret;
+            }
+
+            /* Solid Protection Mode Not Enable */
+            /* Solid Protection Mode Lock Bit = 1 */
+            if (FLASH_SPI_MX_LKR_SPBE != p_lkreg[0])
+            {
+                /* Enable Solid Protection Mode */
+                /* Set Solid Protection Mode Lock Bit = 0 */
+                /* Execute the Write Lock Register (WRLR) command operation using the single mode. */
+                ret = r_flash_spi_mx_write_lkreg(devno);
+                if (FLASH_SPI_SUCCESS > ret)
+                {
+                    R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+                    return ret;
+                }
+            }
+        }
+
+        /* Execute the Read SPB Register (RDSPB) command operation using the single mode. */
+        ret = r_flash_spi_mx_read_spbreg(devno, flash_spi_protect_sector_info->addr, &p_spbreg);
+        if (FLASH_SPI_SUCCESS > ret)
+        {
+            R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+            return ret;
+        }
+
+        /* SPB = FFh: Protect Sector/Block  */
+        if (0xFF == p_spbreg)
+        {
+            return FLASH_SPI_SUCCESS;
+        }
+
+        if (FLASH_SPI_TYPE_MX66L == flash_type)
+        {
+            /* Execute the Read SPB Lock Register (RDSPBLK) command operation using the single mode. */
+            ret = r_flash_spi_mx_read_spblkreg(devno, &p_spblkreg);
+            if (FLASH_SPI_SUCCESS > ret)
+            {
+                R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+                return ret;
+            }
+
+            /* SPBLK bit = 0: SPBs protected  */
+            /* Protect failed, need to manual reset flash chip */
+            if (FLASH_SPI_MX_SPBLKR_SPBLK == p_spblkreg)
+            {
+                R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+                return FLASH_SPI_ERR_WP_ADVANCED;
+            }
+        }
+        else
+        {
+            /* Execute the Read Lock Register (RDLR) command operation using the single mode. */
+            ret = r_flash_spi_mx_read_lkreg(devno, &p_lkreg[0]);
+            if (FLASH_SPI_SUCCESS > ret)
+            {
+                R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+                return ret;
+            }
+
+            /* SPBLKDN bit = 0: SPBs protected */
+            /* Protect failed, need to manual reset flash chip */
+            if (FLASH_SPI_MX_LKR_SPBLKDN == p_lkreg[0])
+            {
+                R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+                return FLASH_SPI_ERR_WP_ADVANCED;
+            }
+        }
+
+        /* Set Protect Sector/Block */
+        /* Set Solid Protection Bit = 0xFF */
+        /* Execute the Write SPB Register (WRSPB) command operation using the single mode. */
+        ret = r_flash_spi_mx_write_spbreg(devno, flash_spi_protect_sector_info->addr);
+        if (FLASH_SPI_SUCCESS > ret)
+        {
+            R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+            return ret;
+        }
+
+        if (true == flash_spi_protect_sector_info->lock_protect_enable)
+        {
+            if (FLASH_SPI_TYPE_MX66L == flash_type)
+            {
+                /* Execute the Write SPB Lock Register (SPBLK) command operation using the single mode. */
+                ret = r_flash_spi_mx_write_spblkreg(devno);
+                if (FLASH_SPI_SUCCESS > ret)
+                {
+                    R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+                    return ret;
+                }
+            }
+            else
+            {
+                /* Execute the Write Lock Register (WRLR) command operation using the single mode. */
+                ret = r_flash_spi_mx_write_lkreg(devno);
+                if (FLASH_SPI_SUCCESS > ret)
+                {
+                    R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+                    return ret;
+                }
+            }
+        }
+    }
+    else if (FLASH_SPI_MODE_ALL_PROTECT == flash_spi_protect_sector_info->protect_mode) /* All protect */
+    {
+        /* Execute the Gang Block Lock (GBLK) command operation using the single mode. */
+        ret = r_flash_spi_mx_gang_block_lock(devno);
+        if (FLASH_SPI_SUCCESS > ret)
+        {
+            R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+            return ret;
+        }
+    }
+
+    return ret;
+}
+/******************************************************************************
+ End of function r_flash_spi_mx_set_write_protect_advanced_sector
+ *****************************************************************************/
+
+/************************************************************************************************
+* Function Name: r_flash_spi_mx_erase_write_protect_advanced_sector
+* Description  : Makes erase advanced write-protection setting.
+* Arguments    : uint8_t            devno               ;   Device No. (FLASH_SPI_DEVn)
+* Return Value : FLASH_SPI_SUCCESS                      ;   Successful operation
+*              : FLASH_SPI_ERR_HARD                     ;   Hardware error
+*              : FLASH_SPI_ERR_OTHER                    ;   Other error
+*              : FLASH_SPI_ERR_WP_ADVANCED              ;   Advanced write-protection error
+*------------------------------------------------------------------------------------------------
+* Notes        : None
+*************************************************************************************************/
+flash_spi_status_t r_flash_spi_mx_erase_write_protect_advanced_sector(uint8_t devno)
+{
+#if (FLASH_SPI_CFG_WEL_CHK == 1)
+    uint8_t            stsreg = 0;                     /* Status buffer                        */
+#endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
+    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
+    uint32_t           flash_type = 0;
+    uint8_t            p_spblkreg = 0;
+    uint8_t            p_lkreg[2] = { 0, 0 };
+    uint8_t            p_scur = 0;
+
+    if (FLASH_SPI_DEV0 == devno)
+    {
+#if (FLASH_SPI_CFG_DEV0_INCLUDED == 1)
+        flash_type = FLASH_SPI_DEV0_TYPE;
+#endif /* (FLASH_SPI_CFG_DEV0_INCLUDED == 1) */
+    }
+    else
+    {
+#if (FLASH_SPI_CFG_DEV1_INCLUDED == 1)
+        flash_type = FLASH_SPI_DEV1_TYPE;
+#endif /* (FLASH_SPI_CFG_DEV1_INCLUDED == 1) */
+    }
+
+    /* The upper layer software should set to the single mode. */
+    /* Execute the Write Enable (WREN) command operation using the single mode. */
+    ret = r_flash_spi_mx_write_en(devno);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+
+#if (FLASH_SPI_CFG_WEL_CHK == 1)
+    /* Execute the Read Status Register (RDSR) command operation using the single mode. */
+    ret = r_flash_spi_mx_read_stsreg(devno, &stsreg);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+    if (0x00 == (stsreg & FLASH_SPI_MX_REG_WEL))        /* WEL bit =0 : In Write Disable State  */
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return FLASH_SPI_ERR_OTHER;
+    }
+#endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
+
+    /* Execute the Read Security Register (RDSCUR) command operation using the single mode. */
+    ret = r_flash_spi_mx_read_scurreg(devno, &p_scur);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+
+    /* Set WPSEL bit = 1: Advanced Sector Protection mode  */
+    /* The WPSEL bit is an OTP bit. Once WPSEL is set to 1, it cannot be programmed back to 0. */
+    if (FLASH_SPI_MX_SCUR_WPSEL != (p_scur & FLASH_SPI_MX_SCUR_WPSEL))
+    {
+        /* Execute the Write Protect Selection (WPSEL) command operation using the single mode. */
+        ret = r_flash_spi_mx_set_write_protect_selection(devno);
+        if (FLASH_SPI_SUCCESS > ret)
+        {
+            R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+            return ret;
+        }
+    }
+
+    if (FLASH_SPI_TYPE_MX66L == flash_type)
+    {
+        /* Execute the Read SPB Lock Register (RDSPBLK) command operation using the single mode. */
+        ret = r_flash_spi_mx_read_spblkreg(devno, &p_spblkreg);
+        if (FLASH_SPI_SUCCESS > ret)
+        {
+            R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+            return ret;
+        }
+
+        /* SPBLK bit = 0: SPBs protected  */
+        /* Protect failed, need to manual reset flash chip */
+        if (FLASH_SPI_MX_SPBLKR_SPBLK == p_spblkreg)
+        {
+            R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+            return FLASH_SPI_ERR_WP_ADVANCED;
+        }
+    }
+    else
+    {
+        /* Execute the Read Lock Register (RDLR) command operation using the single mode. */
+        ret = r_flash_spi_mx_read_lkreg(devno, &p_lkreg[0]);
+        if (FLASH_SPI_SUCCESS > ret)
+        {
+            R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+            return ret;
+        }
+
+        /* SPBLKDN bit = 0: SPBs protected */
+        /* Protect failed, need to manual reset flash chip */
+        if (FLASH_SPI_MX_LKR_SPBLKDN == p_lkreg[0])
+        {
+            R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+            return FLASH_SPI_ERR_WP_ADVANCED;
+        }
+    }
+
+    /* Execute the Gang Block Unlock (GBULK) command operation using the single mode. */
+    ret = r_flash_spi_mx_gang_block_unlock(devno);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+
+    /* Execute the Erase SPB Register (ESSPB) command operation using the single mode. */
+    ret = r_flash_spi_mx_erase_spbreg(devno);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+
+    return ret;
+}
+/******************************************************************************
+ End of function r_flash_spi_mx_erase_write_protect_advanced_sector
+ *****************************************************************************/
+
+/************************************************************************************************
+* Function Name: r_flash_spi_mx_gang_block_unlock
+* Description  : Executes clear all DPB bits at once.
+* Arguments    : uint8_t            devno               ;   Device No. (FLASH_SPI_DEVn)
+* Return Value : FLASH_SPI_SUCCESS                      ;   Successful operation
+*              : FLASH_SPI_ERR_HARD                     ;   Hardware error
+*              : FLASH_SPI_ERR_OTHER                    ;   Other error
+*------------------------------------------------------------------------------------------------
+* Notes        : None
+*************************************************************************************************/
+static flash_spi_status_t r_flash_spi_mx_gang_block_unlock(uint8_t devno)
+{
+#if (FLASH_SPI_CFG_WEL_CHK == 1)
+    uint8_t             stsreg = 0;                     /* Status buffer                        */
+#endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
+    flash_spi_status_t        ret = FLASH_SPI_SUCCESS;
+
+    /* The upper layer software should set to the single mode. */
+    /* Execute the Write Enable (WREN) command operation using the single mode. */
+    ret = r_flash_spi_mx_write_en(devno);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+
+#if (FLASH_SPI_CFG_WEL_CHK == 1)
+    /* Execute the Read Status Register (RDSR) command operation using the single mode. */
+    ret = r_flash_spi_mx_read_stsreg(devno, &stsreg);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+    if (0x00 == (stsreg & FLASH_SPI_MX_REG_WEL))        /* WEL bit =0 : In Write Disable State  */
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return FLASH_SPI_ERR_OTHER;
+    }
+#endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
+
+    r_flash_spi_set_cs(devno, FLASH_SPI_LOW);           /* SS# "L"                              */
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+
+    /* The upper layer software should set to the single mode. */
+    /* Issue the Gang Block Unlock (GBULK) command using the single mode. */
+    ret = R_FLASH_SPI_MX_CMD_GBULK(devno, FALSE);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+        r_flash_spi_set_cs(devno, FLASH_SPI_HI);        /* SS# "H"                              */
+        return ret;
+    }
+
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+    r_flash_spi_set_cs(devno, FLASH_SPI_HI);            /* SS# "H"                              */
+
+    return ret;
+}
+/******************************************************************************
+ End of function r_flash_spi_mx_gang_block_unlock
+ *****************************************************************************/
+
+/************************************************************************************************
+* Function Name: r_flash_spi_mx_gang_block_lock
+* Description  : Executes set all DPB bits at once.
+* Arguments    : uint8_t            devno               ;   Device No. (FLASH_SPI_DEVn)
+* Return Value : FLASH_SPI_SUCCESS                      ;   Successful operation
+*              : FLASH_SPI_ERR_HARD                     ;   Hardware error
+*              : FLASH_SPI_ERR_OTHER                    ;   Other error
+*------------------------------------------------------------------------------------------------
+* Notes        : None
+*************************************************************************************************/
+static flash_spi_status_t r_flash_spi_mx_gang_block_lock(uint8_t devno)
+{
+#if (FLASH_SPI_CFG_WEL_CHK == 1)
+    uint8_t             stsreg = 0;                     /* Status buffer                        */
+#endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
+    flash_spi_status_t        ret = FLASH_SPI_SUCCESS;
+
+    /* The upper layer software should set to the single mode. */
+    /* Execute the Write Enable (WREN) command operation using the single mode. */
+    ret = r_flash_spi_mx_write_en(devno);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+
+#if (FLASH_SPI_CFG_WEL_CHK == 1)
+    /* Execute the Read Status Register (RDSR) command operation using the single mode. */
+    ret = r_flash_spi_mx_read_stsreg(devno, &stsreg);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+    if (0x00 == (stsreg & FLASH_SPI_MX_REG_WEL))        /* WEL bit =0 : In Write Disable State  */
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return FLASH_SPI_ERR_OTHER;
+    }
+#endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
+
+    r_flash_spi_set_cs(devno, FLASH_SPI_LOW);           /* SS# "L"                              */
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+
+    /* The upper layer software should set to the single mode. */
+    /* Issue the Gang Block Lock (GBLK) command using the single mode. */
+    ret = R_FLASH_SPI_MX_CMD_GBLK(devno, FALSE);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+        r_flash_spi_set_cs(devno, FLASH_SPI_HI);        /* SS# "H"                              */
+        return ret;
+    }
+
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+    r_flash_spi_set_cs(devno, FLASH_SPI_HI);            /* SS# "H"                              */
+
+    return ret;
+}
+/******************************************************************************
+ End of function r_flash_spi_mx_gang_block_lock
+ *****************************************************************************/
+
+/************************************************************************************************
+* Function Name: r_flash_spi_mx_set_write_protect_selection
+* Description  : The WPSEL command is used to set WPSEL = 1.
+*              : Advanced Sector Protection mode is enabled and BP mode is disabled.
+* Arguments    : uint8_t            devno               ;   Device No. (FLASH_SPI_DEVn)
+* Return Value : FLASH_SPI_SUCCESS                      ;   Successful operation
+*              : FLASH_SPI_ERR_PARAM                    ;   Parameter error
+*              : FLASH_SPI_ERR_HARD                     ;   Hardware error
+*              : FLASH_SPI_ERR_OTHER                    ;   Other error
+*------------------------------------------------------------------------------------------------
+* Notes        : The WPSEL bit is an OTP bit. Once WPSEL is set to 1, it cannot be programmed back to 0.
+*************************************************************************************************/
+static flash_spi_status_t r_flash_spi_mx_set_write_protect_selection(uint8_t devno)
+{
+#if (FLASH_SPI_CFG_WEL_CHK == 1)
+    uint8_t             stsreg = 0;                     /* Status buffer                        */
+#endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
+    flash_spi_status_t  ret = FLASH_SPI_SUCCESS;
+
+    /* The upper layer software should set to the single mode. */
+    /* Execute the Write Enable (WREN) command operation using the single mode. */
+    ret = r_flash_spi_mx_write_en(devno);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+
+#if (FLASH_SPI_CFG_WEL_CHK == 1)
+    /* Execute the Read Status Register (RDSR) command operation using the single mode. */
+    ret = r_flash_spi_mx_read_stsreg(devno, &stsreg);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+    if (0x00 == (stsreg & FLASH_SPI_MX_REG_WEL))        /* WEL bit =0 : In Write Disable State  */
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return FLASH_SPI_ERR_OTHER;
+    }
+#endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
+
+    r_flash_spi_set_cs(devno, FLASH_SPI_LOW);           /* SS# "L"                              */
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+
+    /* The upper layer software should set to the single mode. */
+    /* Issue the Write Protect Selection (WPSEL) command using the single mode. */
+    ret = R_FLASH_SPI_MX_CMD_WPSEL(devno, FALSE);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+        r_flash_spi_set_cs(devno, FLASH_SPI_HI);        /* SS# "H"                              */
+        return ret;
+    }
+
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+    r_flash_spi_set_cs(devno, FLASH_SPI_HI);            /* SS# "H"                              */
+
+    return ret;
+}
+/******************************************************************************
+ End of function r_flash_spi_mx_set_write_protect_selection
+ *****************************************************************************/
+
+/************************************************************************************************
+* Function Name: r_flash_spi_mx_read_lkreg
+* Description  : Reads status from the lock register and stores to the lock register storage buffer (p_lkreg).
+*              :
+*              :    Lock Register (For MX66L)
+*              :        Bits 15 to 3: Reserved
+*              :        Bit 2: Password Protection Mode Lock Bit (Default = 1)
+*              :                  1: Password Protection Mode not enable
+*              :                  0: Password Protection Mode Enable
+*              :        Bit 1: Solid Protection Mode Lock Bit (Default = 1)
+*              :                  1: Solid Protection Mode not enable
+*              :                  0: Solid Protection Mode Enable
+*              :        Bit 0: Reserved
+*              :
+*              :    Lock Register (For MX25U)
+*              :        Bits 15 to 7: Reserved
+*              :        Bit 6: SPB Lock Down (Default = 1)
+*              :                  1: SPB changeable
+*              :                  0: freeze SPB
+*              :        Bits 5 to 0: Reserved
+*              :
+* Arguments    : uint8_t            devno               ;   Device No. (FLASH_DEVn)
+*              : uint8_t          * p_lkreg             ;   Lock register storage buffer
+* Return Value : FLASH_SPI_SUCCESS                      ;   Successful operation
+*              : FLASH_SPI_ERR_HARD                     ;   Hardware error
+*              : FLASH_SPI_ERR_OTHER                    ;   Other error
+*------------------------------------------------------------------------------------------------
+* Notes        : None
+*************************************************************************************************/
+static flash_spi_status_t r_flash_spi_mx_read_lkreg (uint8_t devno, uint8_t * p_lkreg)
+{
+    flash_spi_status_t        ret = FLASH_SPI_SUCCESS;
+
+    r_flash_spi_set_cs(devno, FLASH_SPI_LOW);           /* SS# "L"                              */
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+
+    /* The upper layer software should set to the single mode. */
+    /* Issue the Read Lock Register (RDLR) command using the single mode. */
+    ret = R_FLASH_SPI_MX_CMD_RDLR(devno, TRUE);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+        r_flash_spi_set_cs(devno, FLASH_SPI_HI);        /* SS# "H"                              */
+        return ret;
+    }
+
+    r_flash_spi_wait_lp(FLASH_SPI_T_R_ACCESS);
+
+    /* Receive data from the status register using the single mode. */
+    ret = r_flash_spi_drvif_rx(devno, FLASH_SPI_MX_LKREG_SIZE, p_lkreg);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+        r_flash_spi_set_cs(devno, FLASH_SPI_HI);        /* SS# "H"                              */
+        return ret;
+    }
+
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+    r_flash_spi_set_cs(devno, FLASH_SPI_HI);            /* SS# "H"                              */
+
+    return ret;
+}
+/******************************************************************************
+ End of function r_flash_spi_mx_read_lkreg
+ *****************************************************************************/
+
+/************************************************************************************************
+* Function Name: r_flash_spi_mx_write_lkreg
+* Description  : Executes a Write Lock Register operation (for MX66L and MX25U).
+*              : Issues the WRLR command and sets the Lock Register.
+*              :
+*              :    Lock Register (For MX66L)
+*              :        Bits 15 to 3: Reserved
+*              :        Bit 2: Password Protection Mode Lock Bit (Default = 1)
+*              :                  1: Password Protection Mode not enable
+*              :                  0: Password Protection Mode Enable
+*              :        Bit 1: Solid Protection Mode Lock Bit (Default = 1)
+*              :                  1: Solid Protection Mode not enable
+*              :                  0: Solid Protection Mode Enable
+*              :        Bit 0: Reserved
+*              :
+*              :    Lock Register (For MX25U)
+*              :        Bits 15 to 7: Reserved
+*              :        Bit 6: SPB Lock Down (Default = 1)
+*              :                  1: SPB changeable
+*              :                  0: freeze SPB
+*              :        Bits 5 to 0: Reserved
+*              :
+* Arguments    : uint8_t            devno               ;   Device No. (FLASH_DEVn)
+* Return Value : FLASH_SPI_SUCCESS                      ;   Successful operation
+*              : FLASH_SPI_ERR_HARD                     ;   Hardware error
+*              : FLASH_SPI_ERR_OTHER                    ;   Other error
+*------------------------------------------------------------------------------------------------
+* Notes        : None
+*************************************************************************************************/
+static flash_spi_status_t r_flash_spi_mx_write_lkreg(uint8_t devno)
+{
+#if (FLASH_SPI_CFG_WEL_CHK == 1)
+    uint8_t             stsreg = 0;                     /* Status buffer                        */
+#endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
+    flash_spi_status_t  ret = FLASH_SPI_SUCCESS;
+    uint32_t            flash_type = 0;
+    uint8_t             data_size = 0;
+    uint8_t             data_buff[3];
+
+    data_buff[0] = 0;
+    data_buff[1] = 0;
+    data_buff[2] = 0;
+
+    if (FLASH_SPI_DEV0 == devno)
+    {
+#if (FLASH_SPI_CFG_DEV0_INCLUDED == 1)
+        flash_type = FLASH_SPI_DEV0_TYPE;
+#endif /* (FLASH_SPI_CFG_DEV0_INCLUDED == 1) */
+    }
+    else
+    {
+#if (FLASH_SPI_CFG_DEV1_INCLUDED == 1)
+        flash_type = FLASH_SPI_DEV1_TYPE;
+#endif /* (FLASH_SPI_CFG_DEV1_INCLUDED == 1) */
+    }
+
+    /* The upper layer software should set to the single mode. */
+    /* Execute the Write Enable (WREN) command operation using the single mode. */
+    ret = r_flash_spi_mx_write_en(devno);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+
+#if (FLASH_SPI_CFG_WEL_CHK == 1)
+    /* Execute the Read Status Register (RDSR) command operation using the single mode. */
+    ret = r_flash_spi_mx_read_stsreg(devno, &stsreg);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+    if (0x00 == (stsreg & FLASH_SPI_MX_REG_WEL))        /* WEL bit =0 : In Write Disable State  */
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return FLASH_SPI_ERR_OTHER;
+    }
+#endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
+
+    r_flash_spi_set_cs(devno, FLASH_SPI_LOW);           /* SS# "L"                              */
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+
+    /* Sets configuration fixed data for writing. */
+    data_buff[0] = FLASH_SPI_MX_CMD_WRLR;
+
+    if (FLASH_SPI_TYPE_MX66L == flash_type)
+    {
+        /* Solid Protection Mode Enable */
+        data_buff[1] = FLASH_SPI_MX_LKR_SPBE;
+        data_buff[2] = 0xff;
+    }
+    else
+    {
+        /* SPB Lock Down */
+        data_buff[1] = FLASH_SPI_MX_LKR_SPBLKDN;
+        data_buff[2] = 0xff;
+    }
+
+    data_size    = FLASH_SPI_MX_CMD_SIZE + FLASH_SPI_MX_LKREG_SIZE;
+    /* Transmit data to the lock register using the single mode. */
+    ret = r_flash_spi_drvif_tx(devno, data_size, &data_buff[0], FALSE, FALSE);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+        r_flash_spi_set_cs(devno, FLASH_SPI_HI);        /* SS# "H"                              */
+        return ret;
+    }
+
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+    r_flash_spi_set_cs(devno, FLASH_SPI_HI);            /* SS# "H"                              */
+
+    return ret;
+}
+/******************************************************************************
+ End of function r_flash_spi_mx_write_lkreg
+ *****************************************************************************/
+
+/************************************************************************************************
+* Function Name: r_flash_spi_mx_read_spblkreg
+* Description  : Reads status from the spb lock register and stores to the spb lock register storage buffer (p_spblkreg).
+* Arguments    : uint8_t            devno               ;   Device No. (FLASH_DEVn)
+* Return Value : FLASH_SPI_SUCCESS                      ;   Successful operation
+*              : FLASH_SPI_ERR_HARD                     ;   Hardware error
+*              : FLASH_SPI_ERR_OTHER                    ;   Other error
+*------------------------------------------------------------------------------------------------
+* Notes        : None
+*************************************************************************************************/
+static flash_spi_status_t r_flash_spi_mx_read_spblkreg(uint8_t devno, uint8_t * p_spblkreg)
+{
+    flash_spi_status_t  ret = FLASH_SPI_SUCCESS;
+
+    r_flash_spi_set_cs(devno, FLASH_SPI_LOW);           /* SS# "L"                              */
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+
+    /* The upper layer software should set to the single mode. */
+    /* Issue the Read SPB Lock Register (RDSPBLK) command using the single mode. */
+    ret = R_FLASH_SPI_MX_CMD_RDSPBLK(devno, TRUE);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+        r_flash_spi_set_cs(devno, FLASH_SPI_HI);        /* SS# "H"                              */
+        return ret;
+    }
+
+    r_flash_spi_wait_lp(FLASH_SPI_T_R_ACCESS);
+
+    /* Receive data from the status register using the single mode. */
+    ret = r_flash_spi_drvif_rx(devno, FLASH_SPI_MX_SPBLKREG_SIZE, p_spblkreg);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+        r_flash_spi_set_cs(devno, FLASH_SPI_HI);        /* SS# "H"                              */
+        return ret;
+    }
+
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+    r_flash_spi_set_cs(devno, FLASH_SPI_HI);            /* SS# "H"                              */
+
+    return ret;
+}
+/******************************************************************************
+ End of function r_flash_spi_mx_read_spb_lock_bit
+ *****************************************************************************/
+
+/************************************************************************************************
+* Function Name: r_flash_spi_mx_write_spblkreg
+* Description  : Set SPB Lock Register (for MX66L) operation.
+* Arguments    : uint8_t            devno               ;   Device No. (FLASH_DEVn)
+* Return Value : FLASH_SPI_SUCCESS                      ;   Successful operation
+*              : FLASH_SPI_ERR_HARD                     ;   Hardware error
+*              : FLASH_SPI_ERR_OTHER                    ;   Other error
+*------------------------------------------------------------------------------------------------
+* Notes        : None
+*************************************************************************************************/
+static flash_spi_status_t r_flash_spi_mx_write_spblkreg(uint8_t devno)
+{
+#if (FLASH_SPI_CFG_WEL_CHK == 1)
+    uint8_t             stsreg = 0;                     /* Status buffer                        */
+#endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
+    flash_spi_status_t  ret = FLASH_SPI_SUCCESS;
+
+    /* The upper layer software should set to the single mode. */
+    /* Execute the Write Enable (WREN) command operation using the single mode. */
+    ret = r_flash_spi_mx_write_en(devno);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+
+#if (FLASH_SPI_CFG_WEL_CHK == 1)
+    /* Execute the Read Status Register (RDSR) command operation using the single mode. */
+    ret = r_flash_spi_mx_read_stsreg(devno, &stsreg);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+    if (0x00 == (stsreg & FLASH_SPI_MX_REG_WEL))        /* WEL bit =0 : In Write Disable State  */
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return FLASH_SPI_ERR_OTHER;
+    }
+#endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
+
+    r_flash_spi_set_cs(devno, FLASH_SPI_LOW);           /* SS# "L"                              */
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+
+    /* The upper layer software should set to the single mode. */
+    /* Issue the SPB Lock Bit Set (SPBLK) command using the single mode. */
+    ret = R_FLASH_SPI_MX_CMD_SPBLK(devno, FALSE);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+        r_flash_spi_set_cs(devno, FLASH_SPI_HI);        /* SS# "H"                              */
+        return ret;
+    }
+
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+    r_flash_spi_set_cs(devno, FLASH_SPI_HI);            /* SS# "H"                              */
+
+    return ret;
+}
+/******************************************************************************
+ End of function r_flash_spi_mx_write_spblkreg
+ *****************************************************************************/
+
+/************************************************************************************************
+* Function Name: r_flash_spi_mx_erase_spbreg
+* Description  : Executes clear all SPB bits at once.
+* Arguments    : uint8_t            devno               ;   Device No. (FLASH_SPI_DEVn)
+* Return Value : FLASH_SPI_SUCCESS                      ;   Successful operation
+*              : FLASH_SPI_ERR_HARD                     ;   Hardware error
+*              : FLASH_SPI_ERR_OTHER                    ;   Other error
+*------------------------------------------------------------------------------------------------
+* Notes        : None
+*************************************************************************************************/
+static flash_spi_status_t r_flash_spi_mx_erase_spbreg(uint8_t devno)
+{
+#if (FLASH_SPI_CFG_WEL_CHK == 1)
+    uint8_t             stsreg = 0;                     /* Status buffer                        */
+#endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
+    flash_spi_status_t        ret = FLASH_SPI_SUCCESS;
+
+    /* The upper layer software should set to the single mode. */
+    /* Execute the Write Enable (WREN) command operation using the single mode. */
+    ret = r_flash_spi_mx_write_en(devno);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+
+#if (FLASH_SPI_CFG_WEL_CHK == 1)
+    /* Execute the Read Status Register (RDSR) command operation using the single mode. */
+    ret = r_flash_spi_mx_read_stsreg(devno, &stsreg);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+    if (0x00 == (stsreg & FLASH_SPI_MX_REG_WEL))        /* WEL bit =0 : In Write Disable State  */
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return FLASH_SPI_ERR_OTHER;
+    }
+#endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
+
+    r_flash_spi_set_cs(devno, FLASH_SPI_LOW);           /* SS# "L"                              */
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+
+    /* The upper layer software should set to the single mode. */
+    /* Issue the Erase SPB Register (ESSPB) command using the single mode. */
+    ret = R_FLASH_SPI_MX_CMD_ESSPB(devno, FALSE);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+        r_flash_spi_set_cs(devno, FLASH_SPI_HI);        /* SS# "H"                              */
+        return ret;
+    }
+
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+    r_flash_spi_set_cs(devno, FLASH_SPI_HI);            /* SS# "H"                              */
+
+    return ret;
+}
+/******************************************************************************
+ End of function r_flash_spi_mx_erase_spbreg
+ *****************************************************************************/
+
+/************************************************************************************************
+* Function Name: r_flash_spi_mx_read_spbreg
+* Description  : Reads status from the spb register at address setting and stores to the spb register storage buffer (p_spbreg).
+*              :
+*              :        Bits 7 to 0: SPB (Solid Protection Bit)
+*              :                00h = Unprotect Sector / Block
+*              :                FFh = Protect Sector / Block
+*              :
+* Arguments    : uint8_t            devno               ;   Device No. (FLASH_SPI_DEVn)
+*              : uint8_t            addr                ;   Address to issue a command
+*              : uint8_t            p_spbreg            ;   SPB register storage buffer
+* Return Value : FLASH_SPI_SUCCESS                      ;   Successful operation
+*              : FLASH_SPI_ERR_HARD                     ;   Hardware error
+*              : FLASH_SPI_ERR_OTHER                    ;   Other error
+*------------------------------------------------------------------------------------------------
+* Notes        : None
+*************************************************************************************************/
+static flash_spi_status_t r_flash_spi_mx_read_spbreg(uint8_t devno, uint32_t addr, uint8_t * p_spbreg)
+{
+    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
+    uint32_t           flash_type = 0;
+    uint8_t            addr_size = 0;
+
+    r_flash_spi_set_cs(devno, FLASH_SPI_LOW);           /* SS# "L"                              */
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+
+    if (FLASH_SPI_DEV0 == devno)
+    {
+#if (FLASH_SPI_CFG_DEV0_INCLUDED == 1)
+        flash_type = FLASH_SPI_DEV0_TYPE;
+#endif /* (FLASH_SPI_CFG_DEV0_INCLUDED == 1) */
+    }
+    else
+    {
+#if (FLASH_SPI_CFG_DEV1_INCLUDED == 1)
+        flash_type = FLASH_SPI_DEV1_TYPE;
+#endif /* (FLASH_SPI_CFG_DEV1_INCLUDED == 1) */
+    }
+
+    if (FLASH_SPI_TYPE_MX66L == flash_type)
+    {
+        addr_size = FLASH_SPI_MX_DEV0_ADDR_SIZE;
+    }
+    else
+    {
+        addr_size = FLASH_SPI_MX_DEV0_ADDR_SIZE + 1;
+    }
+
+    /* The upper layer software should set to the single mode. */
+    /* Issue the Read Lock Register (RDSPB) command using the single mode. */
+    ret = R_FLASH_SPI_MX_CMD_RDSPB(devno, addr, addr_size, TRUE);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+        r_flash_spi_set_cs(devno, FLASH_SPI_HI);        /* SS# "H"                              */
+        return ret;
+    }
+
+    r_flash_spi_wait_lp(FLASH_SPI_T_R_ACCESS);
+
+    /* Receive data from the status register using the single mode. */
+    ret = r_flash_spi_drvif_rx(devno, FLASH_SPI_MX_SPBREG_SIZE, p_spbreg);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+        r_flash_spi_set_cs(devno, FLASH_SPI_HI);        /* SS# "H"                              */
+        return ret;
+    }
+
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+    r_flash_spi_set_cs(devno, FLASH_SPI_HI);            /* SS# "H"                              */
+
+    return ret;
+}
+/******************************************************************************
+ End of function r_flash_spi_mx_read_spbreg
+ *****************************************************************************/
+
+/************************************************************************************************
+* Function Name: r_flash_spi_mx_write_spbreg
+* Description  : Executes a Write SPB Register operation.
+* Arguments    : uint8_t            devno               ;   Device No. (FLASH_SPI_DEVn)
+*              : uint8_t            addr                ;   Address to issue a command
+* Return Value : FLASH_SPI_SUCCESS                      ;   Successful operation
+*              : FLASH_SPI_ERR_HARD                     ;   Hardware error
+*              : FLASH_SPI_ERR_OTHER                    ;   Other error
+*------------------------------------------------------------------------------------------------
+* Notes        : None
+*************************************************************************************************/
+static flash_spi_status_t r_flash_spi_mx_write_spbreg(uint8_t devno, uint32_t addr)
+{
+#if (FLASH_SPI_CFG_WEL_CHK == 1)
+    uint8_t            stsreg = 0;                     /* Status buffer                        */
+#endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
+    flash_spi_status_t ret = FLASH_SPI_SUCCESS;
+    uint32_t           flash_type = 0;
+    uint8_t            addr_size = 0;
+
+    /* The upper layer software should set to the single mode. */
+    /* Execute the Write Enable (WREN) command operation using the single mode. */
+    ret = r_flash_spi_mx_write_en(devno);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+
+#if (FLASH_SPI_CFG_WEL_CHK == 1)
+    /* Execute the Read Status Register (RDSR) command operation using the single mode. */
+    ret = r_flash_spi_mx_read_stsreg(devno, &stsreg);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return ret;
+    }
+    if (0x00 == (stsreg & FLASH_SPI_MX_REG_WEL))        /* WEL bit =0 : In Write Disable State  */
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        return FLASH_SPI_ERR_OTHER;
+    }
+#endif  /* #if (FLASH_SPI_CFG_WEL_CHK == 1) */
+
+    r_flash_spi_set_cs(devno, FLASH_SPI_LOW);           /* SS# "L"                              */
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+
+    if (FLASH_SPI_DEV0 == devno)
+    {
+#if (FLASH_SPI_CFG_DEV0_INCLUDED == 1)
+        flash_type = FLASH_SPI_DEV0_TYPE;
+#endif /* (FLASH_SPI_CFG_DEV0_INCLUDED == 1) */
+    }
+    else
+    {
+#if (FLASH_SPI_CFG_DEV1_INCLUDED == 1)
+        flash_type = FLASH_SPI_DEV1_TYPE;
+#endif /* (FLASH_SPI_CFG_DEV1_INCLUDED == 1) */
+    }
+
+    if (FLASH_SPI_TYPE_MX66L == flash_type)
+    {
+        addr_size = FLASH_SPI_MX_DEV0_ADDR_SIZE;
+    }
+    else
+    {
+        addr_size = FLASH_SPI_MX_DEV0_ADDR_SIZE + 1;
+    }
+
+    /* The upper layer software should set to the single mode. */
+    /* Issue the Write SPB Register (WRSPB) command using the single mode. */
+    ret = R_FLASH_SPI_MX_CMD_WRSPB(devno, addr, addr_size, FALSE);
+    if (FLASH_SPI_SUCCESS > ret)
+    {
+        R_FLASH_SPI_Log_Func(FLASH_SPI_DEBUG_ERR_ID, (uint32_t)FLASH_SPI_TYPE_SUB, __LINE__);
+        r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+        r_flash_spi_set_cs(devno, FLASH_SPI_HI);        /* SS# "H"                              */
+        return ret;
+    }
+
+    r_flash_spi_wait_lp(FLASH_SPI_T_CS_HOLD);
+    r_flash_spi_set_cs(devno, FLASH_SPI_HI);            /* SS# "H"                              */
+
+    return ret;
+}
+/******************************************************************************
+ End of function r_flash_spi_mx_write_spbreg
+ *****************************************************************************/
+
+#endif /* FLASH_SPI_CFG_DEV0_MX25L == 1 || FLASH_SPI_CFG_DEV0_MX66L == 1 || FLASH_SPI_CFG_DEV0_MX25R == 1 || FLASH_SPI_CFG_DEV0_MX25U == 1 || \
+    FLASH_SPI_CFG_DEV1_MX25L == 1 || FLASH_SPI_CFG_DEV1_MX66L == 1 || FLASH_SPI_CFG_DEV1_MX25R == 1 || FLASH_SPI_CFG_DEV1_MX25U == 1 */
 
 /* End of File */

@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : cellular_power_down.c
@@ -63,6 +63,8 @@ e_cellular_err_t cellular_power_down(st_cellular_ctrl_t * const p_ctrl)
         if (CELLULAR_SUCCESS == ret)
         {
             ret = CELLULAR_ERR_MODULE_COM;
+
+            /* WAIT_LOOP */
             do
             {
                 if (CELLULAR_FLG_SHUTDOWN == flg)

@@ -14,11 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2019-2020 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2019-2024 Renesas Electronics Corporation. All rights reserved.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_glcdc_rx.c
- * Version      : 1.50
+ * Version      : 1.60
  * Description  : GLCDC API functions.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
@@ -31,6 +31,12 @@
  *         : 30.06.2020 1.40      Removed "const" from the argument type of R_GLCDC_Open function.
  *                                Added a process to call r_glcdc_qe_parameters_setting function to GLCDC_Open function.
  *         : 06.11.2020 1.50      Added R_GLCDC_ClutUpdate_NoReflect function.
+ *         : 30.01.2024 1.60      Added R_GLCDC_BufferChange
+ *                                Changed the specifications R_GLCDC_LayerChange, R_GLCDC_ColorCorrection,
+ *                                R_GLCDC_ClutUpdate, R_GLCDC_ClutUpdate_NoReflect can be executed
+ *                                when GLCDC_STATE_NOT_DISPLAYING
+ *                                Changed the specification to call the r_glcdc_qe_parameters_setting function
+ *                                in the R_GLCDC_Open function.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  Includes <System Includes> , "Project Includes"
@@ -49,7 +55,9 @@ glcdc_ctrl_t g_ctrl_blk =
     { false, false },
     NULL,
     false,
-    { false, false, false } };
+    { false, false, false },
+    true
+};
 
 
 /***********************************************************************************************************************
@@ -116,7 +124,10 @@ glcdc_err_t R_GLCDC_Open(glcdc_cfg_t * const p_cfg)
 
 #if ((GLCDC_CFG_CONFIGURATION_MODE) || defined(QE_DISPLAY_CONFIGURATION))
     /* Parameter setting by configuration options */
-    r_glcdc_qe_parameters_setting(p_cfg);
+    if(true == g_ctrl_blk.config_mode)
+    {
+        r_glcdc_qe_parameters_setting(p_cfg);
+    }
 #endif
 
     /* Store position information to the control block (it is necessary to set the layer and blending section later) */
@@ -458,14 +469,13 @@ glcdc_err_t R_GLCDC_Control(glcdc_control_cmd_t cmd, void const * const p_args)
  *@retval GLCDC_SUCCESS                    Processing has been completed successfully.
  *@retval GLCDC_ERR_INVALID_PTR            The p_args parameter is NULL pointer.
  *@retval GLCDC_ERR_INVALID_ARG            The argument set is invalid.
- *@retval GLCDC_ERR_INVALID_MODE           Function cannot be executed in this mode.
  *@retval GLCDC_ERR_NOT_OPEN               R_GLCDC_Open has not been executed.
  *@retval GLCDC_ERR_INVALID_UPDATE_TIMING  Update timing of the register is invalid.
  *@retval GLCDC_ERR_INVALID_LAYER_SETTING Graphics screen setting is invalid.
  *@retval GLCDC_ERR_INVALID_ALIGNMENT     Start address of the frame buffer is invalid.
  *@retval GLCDC_ERR_INVALID_BLEND_SETTING Setting for blending is invalid.
- *@details This function changes operation of graphics 1 and 2.This function can be executed when the mode is
- *'GLCDC_STATE_DISPLAYING'. The mode remains unchanged after processing in this function is complete.
+ *@details This function changes operation of graphics 1 and 2.
+ *The mode remains unchanged after processing in this function is complete.
  *@note None.
  **********************************************************************************************************************/
 glcdc_err_t R_GLCDC_LayerChange(glcdc_frame_layer_t frame, glcdc_runtime_cfg_t const * const p_args)
@@ -478,10 +488,6 @@ glcdc_err_t R_GLCDC_LayerChange(glcdc_frame_layer_t frame, glcdc_runtime_cfg_t c
     if (GLCDC_STATE_CLOSED == g_ctrl_blk.state)
     {
         return GLCDC_ERR_NOT_OPEN;
-    }
-    if (GLCDC_STATE_NOT_DISPLAYING == g_ctrl_blk.state)
-    {
-        return GLCDC_ERR_INVALID_MODE;
     }
 
 #if (GLCDC_CFG_PARAM_CHECKING_ENABLE)
@@ -530,12 +536,82 @@ glcdc_err_t R_GLCDC_LayerChange(glcdc_frame_layer_t frame, glcdc_runtime_cfg_t c
     /* Configure the chroma key */
     r_glcdc_graphics_chromakey_set (&p_args->chromakey, frame);
 
-    /* Reflect the graphics module register value to the GLCD internal operations
-     *  (at the timing of the next Vsync assertion) */
-    r_glcdc_gr_plane_update (frame);
+    if (GLCDC_STATE_DISPLAYING == g_ctrl_blk.state)
+    {
+        /* Reflect the graphics module register value to the GLCD internal operations
+         *  (at the timing of the next Vsync assertion) */
+        r_glcdc_gr_plane_update (frame);
+    }
 
     return GLCDC_SUCCESS;
 } /* End of function R_GLCDC_LayerChange() */
+
+/***********************************************************************************************************************
+ *Function Name: R_GLCDC_BufferChange
+ *******************************************************************************************************************//**
+ *@brief This function changes frame buffer address of graphics 1 and graphics 2.
+ *@param[in] frame Graphics screen to change operation.
+ *@param[in] p_base Pointer to the new frame buffer address.
+ *@retval GLCDC_SUCCESS                    Processing has been completed successfully.
+ *@retval GLCDC_ERR_INVALID_PTR            The p_args parameter is NULL pointer.
+ *@retval GLCDC_ERR_INVALID_ARG            The argument set is invalid.
+ *@retval GLCDC_ERR_NOT_OPEN               R_GLCDC_Open has not been executed.
+ *@retval GLCDC_ERR_INVALID_UPDATE_TIMING  Update timing of the register is invalid.
+ *@retval GLCDC_ERR_INVALID_ALIGNMENT     Start address of the frame buffer is invalid.
+ *@details This function changes frame buffer address of graphics 1 and 2.
+ *@note None.
+ **********************************************************************************************************************/
+glcdc_err_t R_GLCDC_BufferChange(glcdc_frame_layer_t frame, uint32_t const * const p_base)
+{
+    if (GLCDC_STATE_CLOSED == g_ctrl_blk.state)
+    {
+        return GLCDC_ERR_NOT_OPEN;
+    }
+
+#if (GLCDC_CFG_PARAM_CHECKING_ENABLE)
+    if (NULL == p_base)
+    {
+        return GLCDC_ERR_INVALID_PTR;
+    }
+    if ((GLCDC_FRAME_LAYER_1 != frame) && (GLCDC_FRAME_LAYER_2 != frame))
+    {
+        return GLCDC_ERR_INVALID_ARG;
+    }
+    /* Base address and memory stride have to be aligned to 64-byte boundary */
+    if (0 != ((uint32_t) (p_base) & GLCDC_ADDRESS_ALIGNMENT_64B))
+    {
+        return GLCDC_ERR_INVALID_ALIGNMENT;
+    }
+#endif
+
+    if (false == g_ctrl_blk.graphics_read_enable[frame])
+    {
+        return GLCDC_ERR_INVALID_ARG;
+    }
+
+    /* Return immediately if the register updating is in progress. */
+    if (true == r_glcdc_is_gr_plane_updating (frame))
+    {
+        return GLCDC_ERR_INVALID_UPDATE_TIMING;
+    }
+    if (true == r_glcdc_is_register_reflecting ())
+    {
+        return GLCDC_ERR_INVALID_UPDATE_TIMING;
+    }
+
+    r_glcdc_framebuffer_setting(p_base, frame);
+
+    if (GLCDC_STATE_DISPLAYING == g_ctrl_blk.state)
+    {
+
+        /* Reflect the graphics module register value to the GLCD internal operations
+         *  (at the timing of the next Vsync assertion) */
+        r_glcdc_gr_plane_update(frame);
+
+    }
+
+    return GLCDC_SUCCESS;
+} /* End of function R_GLCDC_BufferChange() */
 
 /***********************************************************************************************************************
  *Function Name: R_GLCDC_ColorCorrection
@@ -546,13 +622,12 @@ glcdc_err_t R_GLCDC_LayerChange(glcdc_frame_layer_t frame, glcdc_runtime_cfg_t c
  *@retval GLCDC_SUCCESS                    Processing has been completed successfully.
  *@retval GLCDC_ERR_INVALID_PTR            The p_args parameter is NULL pointer.
  *@retval GLCDC_ERR_INVALID_ARG            The argument set is invalid.
- *@retval GLCDC_ERR_INVALID_MODE           Function cannot be executed in this mode.
  *@retval GLCDC_ERR_NOT_OPEN               R_GLCDC_Open has not been executed.
  *@retval GLCDC_ERR_INVALID_UPDATE_TIMING  Update timing of the register is invalid.
  *@retval GLCDC_ERR_INVALID_GAMMA_SETTING  Gamma correction setting is invalid.
  *@details This function changes settings for brightness, contrast, and gamma correction of the GLCDC. The setting to be
- *changed is determined according to the first argument of this function. This function can be executed when the mode
- *is 'GLCDC_STATE_DISPLAYING'. The mode remains unchanged after processing for this command is complete.
+ *changed is determined according to the first argument of this function.
+ *The mode remains unchanged after processing for this command is complete.
  *@note None.
  **********************************************************************************************************************/
 glcdc_err_t R_GLCDC_ColorCorrection(glcdc_correction_cmd_t cmd, void const * const p_args)
@@ -566,10 +641,6 @@ glcdc_err_t R_GLCDC_ColorCorrection(glcdc_correction_cmd_t cmd, void const * con
     if (GLCDC_STATE_CLOSED == g_ctrl_blk.state)
     {
         return GLCDC_ERR_NOT_OPEN;
-    }
-    if (GLCDC_STATE_NOT_DISPLAYING == g_ctrl_blk.state)
-    {
-        return GLCDC_ERR_INVALID_MODE;
     }
 
 #if (GLCDC_CFG_PARAM_CHECKING_ENABLE)
@@ -619,9 +690,11 @@ glcdc_err_t R_GLCDC_ColorCorrection(glcdc_correction_cmd_t cmd, void const * con
             r_glcdc_gamma_correction (&p_correction->gamma);
 
             /* Reflect the output block section and gamma register setting. */
-            r_glcdc_output_ctrl_update ();
-            r_glcdc_gamma_update ();
-
+            if (GLCDC_STATE_DISPLAYING == g_ctrl_blk.state)
+            {
+                r_glcdc_output_ctrl_update ();
+                r_glcdc_gamma_update ();
+            }
             break;
 
         case GLCDC_CORRECTION_CMD_BRIGHTNESS:
@@ -637,8 +710,10 @@ glcdc_err_t R_GLCDC_ColorCorrection(glcdc_correction_cmd_t cmd, void const * con
             r_glcdc_brightness_correction ((glcdc_brightness_t *) p_args);
 
             /* Reflect the output block section register setting. */
-            r_glcdc_output_ctrl_update ();
-
+            if (GLCDC_STATE_DISPLAYING == g_ctrl_blk.state)
+            {
+                r_glcdc_output_ctrl_update ();
+            }
             break;
 
         case GLCDC_CORRECTION_CMD_CONTRAST:
@@ -647,7 +722,10 @@ glcdc_err_t R_GLCDC_ColorCorrection(glcdc_correction_cmd_t cmd, void const * con
             r_glcdc_contrast_correction ((glcdc_contrast_t *) p_args);
 
             /* Reflect the output block section register setting. */
-            r_glcdc_output_ctrl_update ();
+            if (GLCDC_STATE_DISPLAYING == g_ctrl_blk.state)
+            {
+                r_glcdc_output_ctrl_update ();
+            }
 
             break;
 
@@ -664,8 +742,10 @@ glcdc_err_t R_GLCDC_ColorCorrection(glcdc_correction_cmd_t cmd, void const * con
             r_glcdc_gamma_correction ((glcdc_gamma_correction_t *) p_args);
 
             /* Reflect the gamma register setting. */
-            r_glcdc_gamma_update ();
-
+            if (GLCDC_STATE_DISPLAYING == g_ctrl_blk.state)
+            {
+                r_glcdc_gamma_update ();
+            }
             break;
 
         default:
@@ -684,12 +764,11 @@ glcdc_err_t R_GLCDC_ColorCorrection(glcdc_correction_cmd_t cmd, void const * con
  *@retval GLCDC_SUCCESS                    Processing has been completed successfully.
  *@retval GLCDC_ERR_INVALID_PTR            The p_clut_cfg parameter is NULL pointer.
  *@retval GLCDC_ERR_INVALID_ARG            The argument set is invalid.
- *@retval GLCDC_ERR_INVALID_MODE           Function cannot be executed in this mode.
  *@retval GLCDC_ERR_NOT_OPEN               R_GLCDC_Open has not been executed.
  *@retval GLCDC_ERR_INVALID_UPDATE_TIMING  Update timing of the register is invalid.
  *@retval GLCDC_ERR_INVALID_CLUT_ACCESS    CLUT memory setting is invalid.
- *@details This function updates the CLUT memory of the GLCDC. This function can be executed when the mode is
- *'GLCDC_STATE_DISPLAYING'. The mode remains unchanged after processing in this function is complete.
+ *@details This function updates the CLUT memory of the GLCDC.
+ *The mode remains unchanged after processing in this function is complete.
  *@note None.
  **********************************************************************************************************************/
 glcdc_err_t R_GLCDC_ClutUpdate(glcdc_frame_layer_t frame, glcdc_clut_cfg_t const * const p_clut_cfg)
@@ -704,10 +783,7 @@ glcdc_err_t R_GLCDC_ClutUpdate(glcdc_frame_layer_t frame, glcdc_clut_cfg_t const
     {
         return GLCDC_ERR_NOT_OPEN;
     }
-    if (GLCDC_STATE_NOT_DISPLAYING == g_ctrl_blk.state)
-    {
-        return GLCDC_ERR_INVALID_MODE;
-    }
+
 
 #if (GLCDC_CFG_PARAM_CHECKING_ENABLE)
     if (NULL == p_clut_cfg)
@@ -748,8 +824,10 @@ glcdc_err_t R_GLCDC_ClutUpdate(glcdc_frame_layer_t frame, glcdc_clut_cfg_t const
     r_glcdc_clut_update (p_clut_cfg, frame);
 
     /* Reflect the graphics module register value */
-    r_glcdc_gr_plane_update (frame);
-
+    if (GLCDC_STATE_DISPLAYING == g_ctrl_blk.state)
+    {
+        r_glcdc_gr_plane_update (frame);
+    }
     return GLCDC_SUCCESS;
 } /* End of function R_GLCDC_ClutUpdate() */
 
@@ -762,12 +840,11 @@ glcdc_err_t R_GLCDC_ClutUpdate(glcdc_frame_layer_t frame, glcdc_clut_cfg_t const
  *@retval GLCDC_SUCCESS                    Processing has been completed successfully.
  *@retval GLCDC_ERR_INVALID_PTR            The p_clut_cfg parameter is NULL pointer.
  *@retval GLCDC_ERR_INVALID_ARG            The argument set is invalid.
- *@retval GLCDC_ERR_INVALID_MODE           Function cannot be executed in this mode.
  *@retval GLCDC_ERR_NOT_OPEN               R_GLCDC_Open has not been executed.
  *@retval GLCDC_ERR_INVALID_UPDATE_TIMING  Update timing of the register is invalid.
  *@retval GLCDC_ERR_INVALID_CLUT_ACCESS    CLUT memory setting is invalid.
- *@details This function updates the CLUT memory of the GLCDC. This function can be executed when the mode is
- *'GLCDC_STATE_DISPLAYING'. The mode remains unchanged after processing in this function is complete.
+ *@details This function updates the CLUT memory of the GLCDC.
+ *The mode remains unchanged after processing in this function is complete.
  *@note None.
  **********************************************************************************************************************/
 glcdc_err_t R_GLCDC_ClutUpdate_NoReflect(glcdc_frame_layer_t frame, glcdc_clut_cfg_t const * const p_clut_cfg)
@@ -781,10 +858,6 @@ glcdc_err_t R_GLCDC_ClutUpdate_NoReflect(glcdc_frame_layer_t frame, glcdc_clut_c
     if (GLCDC_STATE_CLOSED == g_ctrl_blk.state)
     {
         return GLCDC_ERR_NOT_OPEN;
-    }
-    if (GLCDC_STATE_NOT_DISPLAYING == g_ctrl_blk.state)
-    {
-        return GLCDC_ERR_INVALID_MODE;
     }
 
 #if (GLCDC_CFG_PARAM_CHECKING_ENABLE)

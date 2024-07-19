@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_factoryreset.c
@@ -112,6 +112,7 @@ static e_cellular_err_t cellular_factoryreset(st_cellular_ctrl_t * const p_ctrl)
         ret = atc_cgdcont_check(p_ctrl);
         if (CELLULAR_SUCCESS == ret)
         {
+            /* WAIT_LOOP */
             for (cnt = MAX_CID_NUM; cnt > 0; cnt--)
             {
                 if (0 == flg[cnt - 1][0])
@@ -131,6 +132,7 @@ static e_cellular_err_t cellular_factoryreset(st_cellular_ctrl_t * const p_ctrl)
 
     if (CELLULAR_SUCCESS == ret)
     {
+        /* WAIT_LOOP */
         while (1)
         {
             semaphore_ret = cellular_take_semaphore(p_ctrl->at_semaphore);

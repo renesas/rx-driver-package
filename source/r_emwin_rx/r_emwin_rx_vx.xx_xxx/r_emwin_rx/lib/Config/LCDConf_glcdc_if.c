@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : LCDConf_glcdc_if.c
@@ -47,6 +47,16 @@
  *         : 31.03.2023 6.32.a.1.00    Update emWin library to v6.32a.
  *                                     Added support for runtime orientation.
  *                                     Remove restrictions on the a draw_bitmap_alpha function.
+ *         : 31.01.2024 6.34.g.1.00    Update emWin library to v6.34g.
+ *                                     Fixed DRW2D framebuffer settings and position conversion operation.
+ *                                     Fixed framebuffer setting by display orientation setting.
+ *                                     Fixed due to changes in the function specifications of the GLCDC FIT module.
+ *                                     Delete EBMAPCR register setting.
+ *                                     Fixed orientation settings for color depths of 1bpp and 4bpp.
+ *                                     Disable the following process to draw a polygon by DRW2D (Usage restriction)
+ *                                      - draw_poly_outline_aa
+ *                                      - fill_polygon_aa
+ *                                     Other fixed.
   *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -151,48 +161,36 @@
 #elif (EMWIN_BITS_PER_PIXEL == 4)
 #if (EMWIN_DISPLAY_ORIENTATION == ORIENTATION_0)
 #define DISPLAY_DRIVER_0    (GUIDRV_LIN_4)
-#define DISPLAY_DRIVER_1    (GUIDRV_LIN_OSX_4)
-#define DISPLAY_DRIVER_2    (GUIDRV_LIN_OXY_4)
-#define DISPLAY_DRIVER_3    (GUIDRV_LIN_OSY_4)
-#elif (EMWIN_DISPLAY_ORIENTATION == ORIENTATION_CW)
-#define DISPLAY_DRIVER_0    (GUIDRV_LIN_OSX_4)
-#define DISPLAY_DRIVER_1    (GUIDRV_LIN_OXY_4)
-#define DISPLAY_DRIVER_2    (GUIDRV_LIN_OSY_4)
-#define DISPLAY_DRIVER_3    (GUIDRV_LIN_4)
-#elif (EMWIN_DISPLAY_ORIENTATION == ORIENTATION_CCW)
-#define DISPLAY_DRIVER_0    (GUIDRV_LIN_OSY_4)
 #define DISPLAY_DRIVER_1    (GUIDRV_LIN_4)
-#define DISPLAY_DRIVER_2    (GUIDRV_LIN_OSX_4)
-#define DISPLAY_DRIVER_3    (GUIDRV_LIN_OXY_4)
-#else
-#define DISPLAY_DRIVER_0    (GUIDRV_LIN_OXY_4)
-#define DISPLAY_DRIVER_1    (GUIDRV_LIN_OSY_4)
 #define DISPLAY_DRIVER_2    (GUIDRV_LIN_4)
-#define DISPLAY_DRIVER_3    (GUIDRV_LIN_OSX_4)
+#define DISPLAY_DRIVER_3    (GUIDRV_LIN_4)
+#else
+#error "Error!! For 4bpp, settings other than ORIENTATION_0 are not allowed."
+#endif
+
+#if (EMWIN_USE_RUNTIME_ORIENTATION == 1)
+#error "Error!! For 4bpp, runtime orientation functionality is not available."
 #endif
 
 #elif (EMWIN_BITS_PER_PIXEL == 1)
 #if (EMWIN_DISPLAY_ORIENTATION == ORIENTATION_0)
 #define DISPLAY_DRIVER_0    (GUIDRV_LIN_1)
-#define DISPLAY_DRIVER_1    (GUIDRV_LIN_OSX_1)
-#define DISPLAY_DRIVER_2    (GUIDRV_LIN_OXY_1)
-#define DISPLAY_DRIVER_3    (GUIDRV_LIN_OSY_1)
-#elif (EMWIN_DISPLAY_ORIENTATION == ORIENTATION_CW)
-#define DISPLAY_DRIVER_0    (GUIDRV_LIN_OSX_1)
-#define DISPLAY_DRIVER_1    (GUIDRV_LIN_OXY_1)
-#define DISPLAY_DRIVER_2    (GUIDRV_LIN_OSY_1)
-#define DISPLAY_DRIVER_3    (GUIDRV_LIN_1)
-#elif (EMWIN_DISPLAY_ORIENTATION == ORIENTATION_CCW)
-#define DISPLAY_DRIVER_0    (GUIDRV_LIN_OSY_1)
 #define DISPLAY_DRIVER_1    (GUIDRV_LIN_1)
-#define DISPLAY_DRIVER_2    (GUIDRV_LIN_OSX_1)
+#define DISPLAY_DRIVER_2    (GUIDRV_LIN_OXY_1)
 #define DISPLAY_DRIVER_3    (GUIDRV_LIN_OXY_1)
+#elif (EMWIN_DISPLAY_ORIENTATION == ORIENTATION_CW || EMWIN_DISPLAY_ORIENTATION == ORIENTATION_CCW)
+#error "Error!! For 1bpp, settings other than ORIENTATION_0 and ORIENTATION_180 are not allowed."
 #else
 #define DISPLAY_DRIVER_0    (GUIDRV_LIN_OXY_1)
-#define DISPLAY_DRIVER_1    (GUIDRV_LIN_OSY_1)
+#define DISPLAY_DRIVER_1    (GUIDRV_LIN_OXY_1)
 #define DISPLAY_DRIVER_2    (GUIDRV_LIN_1)
-#define DISPLAY_DRIVER_3    (GUIDRV_LIN_OSX_1)
+#define DISPLAY_DRIVER_3    (GUIDRV_LIN_1)
 #endif
+
+#if (EMWIN_USE_RUNTIME_ORIENTATION == 1)
+#warning "Warning!! For 1bpp, runtime orientation has limited functionality."
+#endif
+
 #endif
 
 /* Color Conversion Routine */
@@ -245,6 +243,10 @@ typedef int DRAW_LINE (int x0, int y0, int x1, int y1);
 #endif
 
 
+/* GLCDC FIT module version check */
+#if ((GLCDC_RX_VERSION_MAJOR == 1) && (GLCDC_RX_VERSION_MINOR < 60))
+#error "Error!! Please use GLCDC FIT module Rev1.60 or higher."
+#endif
 
 /* GLCDC FIT module setting check */
 #if ((GLCDC_CFG_CONFIGURATION_MODE == 1) || defined(QE_DISPLAY_CONFIGURATION))
@@ -291,7 +293,10 @@ typedef int DRAW_LINE (int x0, int y0, int x1, int y1);
 /**********************************************************************************************************************
  Private (static) variables and functions
  *********************************************************************************************************************/
-static const uint32_t s_a_buffer_ptr[] =
+static uint32_t s_a_buffer_ptr[EMWIN_NUM_BUFFERS];
+static uint32_t s_a_glcdc_buffer_ptr[EMWIN_NUM_BUFFERS];
+
+static const uint32_t s_buffer_base_ptr[] =
 {
     EMWIN_GUI_FRAME_BUFFER1,
 #if (EMWIN_NUM_BUFFERS > 1)
@@ -305,6 +310,7 @@ static const uint32_t s_a_buffer_ptr[] =
 #endif
 };
 
+
 static uint32_t s_write_buffer_index;
 
 #if (EMWIN_BITS_PER_PIXEL < 16)
@@ -314,7 +320,6 @@ static uint32_t s_a_clut[NUM_COLORS];
 
 static volatile int32_t s_pending_buffer = -1;
 
-static glcdc_runtime_cfg_t s_runtime_cfg;
 static volatile bool s_first_interrupt_flag; /* It is used for interrupt control of GLCDC module */
 
 /* Dave2D */
@@ -349,7 +354,7 @@ static void switch_buffers_on_vsync(int32_t index)
     e_emwin_rx_err_t ret;
     uint32_t *       p_addr;
 
-    p_addr = (uint32_t *)s_a_buffer_ptr[index];
+    p_addr = (uint32_t *)s_a_glcdc_buffer_ptr[index];
     ret    = r_emwin_rx_lcd_switch_buffer(p_addr);
 
     if (EMWIN_RX_SUCCESS == ret)
@@ -409,13 +414,6 @@ static void init_controller(void)
     /* Init DMA */
     R_DMACA_Init();
 #endif
-
-    /* Extended Bus Master Priority Control Register */
-    BSC.EBMAPCR.BIT.PR1SEL = 3;
-    BSC.EBMAPCR.BIT.PR2SEL = 1;
-    BSC.EBMAPCR.BIT.PR3SEL = 2;
-    BSC.EBMAPCR.BIT.PR4SEL = 0;
-    BSC.EBMAPCR.BIT.PR5SEL = 4;
 }
 /**********************************************************************************************************************
  * End of function init_controller
@@ -500,20 +498,37 @@ static void display_on_off(int32_t on_off)
  * Arguments    : .
  * Return Value : .
  *********************************************************************************************************************/
-static uint32_t get_d2_mode(void)
+static uint32_t get_d2_mode(int bits_per_pixel)
 {
     uint32_t r;
-#if   (EMWIN_BITS_PER_PIXEL == 32)
-    r = d2_mode_argb8888;
-#elif (EMWIN_BITS_PER_PIXEL == 16)
-    r = d2_mode_rgb565;
-#elif (EMWIN_BITS_PER_PIXEL == 8)
-    r = d2_mode_i8;
-#elif (EMWIN_BITS_PER_PIXEL == 4)
-    r = d2_mode_i4;
-#elif (EMWIN_BITS_PER_PIXEL == 1)
-    r = d2_mode_i1;
-#endif
+
+    switch (bits_per_pixel)
+    {
+        case 32:
+            r = d2_mode_argb8888;
+            break;
+
+        case 16:
+            r = d2_mode_rgb565;
+            break;
+
+        case 8:
+            r = d2_mode_i8;
+            break;
+
+        case 4:
+            r = d2_mode_i4;
+            break;
+
+        case 1:
+            r = d2_mode_i1;
+            break;
+
+        default:
+            r = 0;
+            break;
+    }
+
     return r;
 }
 /**********************************************************************************************************************
@@ -534,19 +549,19 @@ static void modify_coord(int32_t * p_x, int32_t * p_y)
     if (ORIENTATION_CW == s_lcd_current_orientation)
     {
         x_temp = *p_x;
-        *p_x = EMWIN_XSIZE_PHYS - 1 - *p_y;
-        *p_y = x_temp;
+        *p_x   = (VXSIZE_PHYS - 1) - (*p_y);
+        *p_y   = x_temp;
     }
     else if (ORIENTATION_180 == s_lcd_current_orientation)
     {
-        *p_x = EMWIN_XSIZE_PHYS - 1 - *p_x;
-        *p_y = EMWIN_YSIZE_PHYS - 1 - *p_y;
+        *p_x   = (VXSIZE_PHYS - 1) - (*p_x);
+        *p_y   = (EMWIN_YSIZE_PHYS - 1) - (*p_y);
     }
     else if (ORIENTATION_CCW == s_lcd_current_orientation)
     {
         y_temp = *p_y;
-        *p_y = EMWIN_YSIZE_PHYS - 1 - *p_x;
-        *p_x = y_temp;
+        *p_y   = (EMWIN_YSIZE_PHYS - 1) - (*p_x);
+        *p_x   = y_temp;
     }
     else
     {
@@ -570,33 +585,35 @@ static void modify_rect(const GUI_RECT * p_rect_org, GUI_RECT * p_rect)
 
     if (ORIENTATION_CW == s_lcd_current_orientation)
     {
-        p_rect->x0 = EMWIN_XSIZE_PHYS - 1 - p_rect_org->y0;
+        p_rect->x0 = (VXSIZE_PHYS - 1) - p_rect_org->y0;
         p_rect->y0 = p_rect_org->x0;
-        p_rect->x1 = EMWIN_XSIZE_PHYS - 1 - p_rect_org->y1;
+        p_rect->x1 = (VXSIZE_PHYS - 1) - p_rect_org->y1;
         p_rect->y1 = p_rect_org->x1;
+
         if (p_rect->x0 > p_rect->x1)
         {
-            temp = p_rect->x0;
+            temp       = p_rect->x0;
+            p_rect->x0 = p_rect->x1;
+            p_rect->x1 = temp;
+        }
+    }
+    else if (ORIENTATION_180 == s_lcd_current_orientation)
+    {
+        p_rect->x0 = (VXSIZE_PHYS - 1) - p_rect_org->x0;
+        p_rect->y0 = (EMWIN_YSIZE_PHYS - 1) - p_rect_org->y0;
+        p_rect->x1 = (VXSIZE_PHYS - 1) - p_rect_org->x1;
+        p_rect->y1 = (EMWIN_YSIZE_PHYS - 1) - p_rect_org->y1;
+
+        if (p_rect->x0 > p_rect->x1)
+        {
+            temp       = p_rect->x0;
             p_rect->x0 = p_rect->x1;
             p_rect->x1 = temp;
         }
 
-    }
-    else if (ORIENTATION_180 == s_lcd_current_orientation)
-    {
-        p_rect->x0 = EMWIN_XSIZE_PHYS - 1 - p_rect_org->x0;
-        p_rect->y0 = EMWIN_YSIZE_PHYS - 1 - p_rect_org->y0;
-        p_rect->x1 = EMWIN_XSIZE_PHYS - 1 - p_rect_org->x1;
-        p_rect->y1 = EMWIN_YSIZE_PHYS - 1 - p_rect_org->y1;
-        if (p_rect->x0 > p_rect->x1)
-        {
-            temp = p_rect->x0;
-            p_rect->x0 = p_rect->x1;
-            p_rect->x1 = temp;
-        }
         if (p_rect->y0 > p_rect->y1)
         {
-            temp = p_rect->y0;
+            temp       = p_rect->y0;
             p_rect->y0 = p_rect->y1;
             p_rect->y1 = temp;
         }
@@ -604,12 +621,13 @@ static void modify_rect(const GUI_RECT * p_rect_org, GUI_RECT * p_rect)
     else if (ORIENTATION_CCW == s_lcd_current_orientation)
     {
         p_rect->x0 = p_rect_org->y0;
-        p_rect->y0 = EMWIN_YSIZE_PHYS - 1 - p_rect_org->x0;
+        p_rect->y0 = (EMWIN_YSIZE_PHYS - 1) - p_rect_org->x0;
         p_rect->x1 = p_rect_org->y1;
-        p_rect->y1 = EMWIN_YSIZE_PHYS - 1 - p_rect_org->x1;
+        p_rect->y1 = (EMWIN_YSIZE_PHYS - 1) - p_rect_org->x1;
+
         if (p_rect->y0 > p_rect->y1)
         {
-            temp = p_rect->y0;
+            temp       = p_rect->y0;
             p_rect->y0 = p_rect->y1;
             p_rect->y1 = temp;
         }
@@ -641,43 +659,46 @@ static void lcd_fill_rect_xor(int32_t layer_index, int32_t x0, int32_t y0, int32
     if (ORIENTATION_CW == s_lcd_current_orientation)
     {
         temp = x0;
-        x0 = EMWIN_XSIZE_PHYS - 1 - x1;
-        x1 = EMWIN_XSIZE_PHYS - 1 - temp;
+        x0   = (VXSIZE_PHYS - 1) - x1;
+        x1   = (VXSIZE_PHYS - 1) - temp;
         temp = y0;
-        y0 = x0;
-        x0 = temp;
+        y0   = x0;
+        x0   = temp;
         temp = y1;
-        y1 = x1;
-        x1 = temp;
-        LCD_FillRect(x0, y0, x1, y1);
+        y1   = x1;
+        x1   = temp;
 
+        LCD_FillRect(x0, y0, x1, y1);
     }
     else if (ORIENTATION_180 == s_lcd_current_orientation)
     {
-        x0 = EMWIN_XSIZE_PHYS - 1 - x0;
-        x1 = EMWIN_XSIZE_PHYS - 1 - x1;
-        y0 = EMWIN_YSIZE_PHYS - 1 - y0;
-        y1 = EMWIN_YSIZE_PHYS - 1 - y1;
+        x0 = (VXSIZE_PHYS - 1) - x0;
+        x1 = (VXSIZE_PHYS - 1) - x1;
+        y0 = (EMWIN_YSIZE_PHYS - 1) - y0;
+        y1 = (EMWIN_YSIZE_PHYS - 1) - y1;
+
         if (x0 > x1)
         {
             temp = x0;
-            x0 = x1;
-            x1 = temp;
+            x0   = x1;
+            x1   = temp;
         }
+
         if (y0 > y1)
         {
             temp = y0;
-            y0 = y1;
-            y1 = temp;
+            y0   = y1;
+            y1   = temp;
         }
-        LCD_FillRect(x0, y0, x1, y1);
 
+        LCD_FillRect(x0, y0, x1, y1);
     }
     else if (ORIENTATION_CCW == s_lcd_current_orientation)
     {
         temp = y1;
-        y1 = (EMWIN_YSIZE_PHYS - 1 - y0);
-        y0 = (EMWIN_YSIZE_PHYS - 1 - temp);
+        y1   = (EMWIN_YSIZE_PHYS - 1) - y0;
+        y0   = (EMWIN_YSIZE_PHYS - 1) - temp;
+
         LCD_FillRect(y0, x0, y1, x1);
 
     }
@@ -709,6 +730,7 @@ static void lcd_fill_rect(int32_t layer_index, int32_t x0, int32_t y0, int32_t x
     GUI_DRAWMODE draw_mode;
 
     draw_mode = GUI_GetDrawMode();
+
     if (GUI_DM_XOR == draw_mode)
     {
         lcd_fill_rect_xor(layer_index, x0, y0, x1, y1);
@@ -716,11 +738,12 @@ static void lcd_fill_rect(int32_t layer_index, int32_t x0, int32_t y0, int32_t x
     else
     {
         GUI_USE_PARA(layer_index);
-        mode = get_d2_mode();
+
+        mode = get_d2_mode(EMWIN_BITS_PER_PIXEL);
 
         /* Generate render operations */
         d2_framebuffer(sp_d2_handle, (void *)s_a_buffer_ptr[s_write_buffer_index],
-                        EMWIN_XSIZE_PHYS, EMWIN_XSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
+                        VXSIZE_PHYS, VXSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
         d2_selectrenderbuffer(sp_d2_handle, sp_renderbuffer);
         color = GUI_Index2Color(pixel_index);
         d2_setcolor(sp_d2_handle, 0, color);
@@ -743,7 +766,100 @@ static void lcd_fill_rect(int32_t layer_index, int32_t x0, int32_t y0, int32_t x
  * End of function lcd_fill_rect
  *********************************************************************************************************************/
 
-#if 0 /* Usage restriction */
+/**********************************************************************************************************************
+ * Function Name: prepare_drawing
+ * Description  : .
+ * Arguments    : .
+ * Return Value : .
+ *********************************************************************************************************************/
+static int prepare_drawing(int32_t * px0, int32_t * py0, int32_t * px1, int32_t * py1)
+{
+    uint32_t          mode;
+    GUI_RECT          rect;
+    GUI_COLOR         color;
+    GUI_MEMDEV_Handle h_mem;
+    int               x_size;
+    int               y_size;
+    int               x_pos;
+    int               y_pos;
+    int               bpp;
+    void *            p_data;
+
+    /* Generate render operations */
+    h_mem = GUI_MEMDEV_GetSelMemdev();
+
+    if (h_mem)
+    {
+        /* Setting to draw into memory device */
+        p_data  = GUI_MEMDEV_GetDataPtr(h_mem);      /* Get memory device buffer to be used as framebuffer */
+        x_size  = GUI_MEMDEV_GetXSize(h_mem);        /* x- and y-size for the new framebuffer nd clipping rectangle */
+        y_size  = GUI_MEMDEV_GetYSize(h_mem);
+        bpp     = GUI_MEMDEV_GetBitsPerPixel(h_mem); /* Bpp of memory device to choose the correct mode */
+        rect.x0 = 0;                                 /* Set up clipping rectangle */
+        rect.y0 = 0;
+        rect.x1 = x_size - 1;
+        rect.y1 = y_size - 1;
+        mode    = get_d2_mode(bpp);                  /* Select mode according to bpp */
+        x_pos   = GUI_MEMDEV_GetXPos(h_mem);
+        y_pos   = GUI_MEMDEV_GetYPos(h_mem);
+
+        if (px0)
+        {
+            (*px0) -= x_pos;
+        }
+
+        if (py0)
+        {
+            (*py0) -= y_pos;
+        }
+
+        if (px1)
+        {
+            (*px1) -= x_pos;
+        }
+
+        if (py1)
+        {
+            (*py1) -= y_pos;
+        }
+
+        if (0 == mode)
+        {
+            return 1;
+        }
+    }
+    else
+    {
+        /* Setting to draw into framebuffer */
+        p_data = (void*) s_a_buffer_ptr[s_write_buffer_index];
+        x_size = VXSIZE_PHYS;
+        y_size = EMWIN_YSIZE_PHYS;
+        modify_rect(GUI__GetClipRect(), &rect);
+        mode = get_d2_mode(EMWIN_BITS_PER_PIXEL);
+
+        if (px0)
+        {
+            modify_coord(px0, py0);
+        }
+
+        if (px1)
+        {
+            modify_coord(px1, py1);
+        }
+    }
+
+    d2_framebuffer(sp_d2_handle, p_data, x_size, x_size, y_size, mode);
+    d2_selectrenderbuffer(sp_d2_handle, sp_renderbuffer);
+    color = GUI_Index2Color(GUI_GetColorIndex());
+    d2_setcolor(sp_d2_handle, 0, color);
+    d2_cliprect(sp_d2_handle, rect.x0, rect.y0, rect.x1, rect.y1);
+
+    return 0;
+}
+/**********************************************************************************************************************
+ * End of function prepare_drawing
+ *********************************************************************************************************************/
+
 /**********************************************************************************************************************
  * Function Name: circle_aa
  * Description  : .
@@ -752,24 +868,15 @@ static void lcd_fill_rect(int32_t layer_index, int32_t x0, int32_t y0, int32_t x
  *********************************************************************************************************************/
 static int32_t circle_aa(int32_t x0, int32_t y0, int32_t r, int32_t w)
 {
-    uint32_t mode;
-    int32_t  ret;
-    GUI_RECT rect;
-    uint32_t color;
+    int32_t ret;
 
-    mode = get_d2_mode();
+    if (prepare_drawing(&x0, &y0, NULL, NULL))
+    {
+        return 1;
+    }
 
-    /* Generate render operations */
-    d2_framebuffer(sp_d2_handle, (void *)s_a_buffer_ptr[s_write_buffer_index],
-                    EMWIN_XSIZE_PHYS, EMWIN_XSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
-    d2_selectrenderbuffer(sp_d2_handle, sp_renderbuffer);
-    color = GUI_Index2Color(GUI_GetColorIndex());
-    d2_setcolor(sp_d2_handle, 0, color);
-    modify_rect(GUI__GetClipRect(), &rect);
-    d2_cliprect(sp_d2_handle, rect.x0, rect.y0, rect.x1, rect.y1);
     ret = d2_rendercircle(sp_d2_handle, x0 * 16, y0 * 16, r * 16, w * 16);
 
-    /* Execute render operations */
     d2_executerenderbuffer(sp_d2_handle, sp_renderbuffer, 0);
     d2_flushframe(sp_d2_handle);
 
@@ -787,7 +894,6 @@ static int32_t circle_aa(int32_t x0, int32_t y0, int32_t r, int32_t w)
  *********************************************************************************************************************/
 static int32_t fill_circle_aa(int32_t x0, int32_t y0, int32_t r)
 {
-    modify_coord(&x0, &y0);
     return (circle_aa(x0, y0, r, 0));
 }
 /**********************************************************************************************************************
@@ -802,13 +908,11 @@ static int32_t fill_circle_aa(int32_t x0, int32_t y0, int32_t r)
  *********************************************************************************************************************/
 static int32_t draw_circle_aa(int32_t x0, int32_t y0, int32_t r)
 {
-    modify_coord(&x0, &y0);
     return (circle_aa(x0, y0, r, GUI_GetPenSize()));
 }
 /**********************************************************************************************************************
  * End of function draw_circle_aa
  *********************************************************************************************************************/
-#endif
 
 /**********************************************************************************************************************
  * Function Name: draw_line_aa
@@ -818,23 +922,14 @@ static int32_t draw_circle_aa(int32_t x0, int32_t y0, int32_t r)
  *********************************************************************************************************************/
 static int32_t draw_line_aa(int32_t x0, int32_t y0, int32_t x1, int32_t y1)
 {
-    uint32_t mode;
     int32_t  ret;
-    uint32_t color;
-    GUI_RECT rect;
-
-    mode = get_d2_mode();
-    modify_coord(&x0, &y0);
-    modify_coord(&x1, &y1);
 
     /* Generate render operations */
-    d2_framebuffer(sp_d2_handle, (void *)s_a_buffer_ptr[s_write_buffer_index],
-                    EMWIN_XSIZE_PHYS, EMWIN_XSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
-    d2_selectrenderbuffer(sp_d2_handle, sp_renderbuffer);
-    color = GUI_Index2Color(GUI_GetColorIndex());
-    d2_setcolor(sp_d2_handle, 0, color);
-    modify_rect(GUI__GetClipRect(), &rect);
-    d2_cliprect(sp_d2_handle, rect.x0, rect.y0, rect.x1, rect.y1);
+    if (prepare_drawing(&x0, &y0, &x1, &y1))
+    {
+        return 1;
+    }
+
     ret = d2_renderline(sp_d2_handle, x0 * 16, y0 * 16, x1 * 16, y1 * 16, GUI_GetPenSize() * 16, d2_le_exclude_none);
 
     /* Execute render operations */
@@ -863,7 +958,7 @@ static void draw_memdev_alpha(void * p_dst, const void * p_src, int32_t x_size, 
 
     pitch_dst = bytes_per_line_dst / 4;
     pitch_src = bytes_per_line_src / 4;
-    mode      = get_d2_mode();
+    mode      = get_d2_mode(EMWIN_BITS_PER_PIXEL);
 
     /* Set address of destination memory device as frame buffer to be used */
     d2_framebuffer(sp_d2_handle, p_dst, pitch_dst, pitch_dst, y_size, d2_mode_argb8888);
@@ -878,7 +973,7 @@ static void draw_memdev_alpha(void * p_dst, const void * p_src, int32_t x_size, 
     d2_flushframe(sp_d2_handle);
 
     /* Restore frame buffer */
-    d2_framebuffer(sp_d2_handle, (void *)s_a_buffer_ptr[s_write_buffer_index], EMWIN_XSIZE_PHYS, EMWIN_XSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
+    d2_framebuffer(sp_d2_handle, (void *)s_a_buffer_ptr[s_write_buffer_index], VXSIZE_PHYS, VXSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
 }
 /**********************************************************************************************************************
  * End of function draw_memdev_alpha
@@ -896,12 +991,14 @@ static void draw_bitmap_alpha(int32_t layer_index, int32_t x, int32_t y, const v
     uint32_t pitch;
     uint32_t mode;
 
+    GUI_USE_PARA(layer_index);
+
     pitch = bytes_per_line / 4;
-    mode  = get_d2_mode();
+    mode  = get_d2_mode(EMWIN_BITS_PER_PIXEL);
 
     /* Generate render operations */
     d2_framebuffer(sp_d2_handle, (void *)s_a_buffer_ptr[s_write_buffer_index],
-                    EMWIN_XSIZE_PHYS, EMWIN_XSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
+                    VXSIZE_PHYS, VXSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
     d2_selectrenderbuffer(sp_d2_handle, sp_renderbuffer);
     d2_setblitsrc(sp_d2_handle, (void *)p, pitch, x_size, y_size, d2_mode_argb8888);
     d2_blitcopy(sp_d2_handle, x_size, y_size, 0, 0, x_size * 16, y_size * 16, x * 16, y * 16, d2_bf_usealpha);
@@ -924,18 +1021,16 @@ static void draw_bitmap_16bpp(int32_t layer_index, int32_t x, int32_t y, const v
                                 int32_t bytes_per_line)
 {
     uint32_t mode;
-    uint32_t mode_src;
 
     GUI_USE_PARA(layer_index);
-    GUI_USE_PARA(bytes_per_line);
-    mode     = get_d2_mode();
-    mode_src = d2_mode_rgb565;
+
+    mode     = get_d2_mode(EMWIN_BITS_PER_PIXEL);
 
     /* Generate render operations */
     d2_framebuffer(sp_d2_handle, (void *)s_a_buffer_ptr[s_write_buffer_index],
-                    EMWIN_XSIZE_PHYS, EMWIN_XSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
+                    VXSIZE_PHYS, VXSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
     d2_selectrenderbuffer(sp_d2_handle, sp_renderbuffer);
-    d2_setblitsrc(sp_d2_handle, (void *)p, bytes_per_line / 2, x_size, y_size, mode_src);
+    d2_setblitsrc(sp_d2_handle, (void *)p, bytes_per_line / 2, x_size, y_size, d2_mode_rgb565);
     d2_blitcopy(sp_d2_handle, x_size, y_size, 0, 0, x_size * 16, y_size * 16, x * 16, y * 16, 0);
 
     /* Execute render operations */
@@ -945,7 +1040,7 @@ static void draw_bitmap_16bpp(int32_t layer_index, int32_t x, int32_t y, const v
 /**********************************************************************************************************************
  * End of function draw_bitmap_16bpp
  *********************************************************************************************************************/
-
+#if 0 /* Usage restriction */
 /**********************************************************************************************************************
  * Function Name: fill_polygon_aa
  * Description  : .
@@ -954,39 +1049,33 @@ static void draw_bitmap_16bpp(int32_t layer_index, int32_t x, int32_t y, const v
  *********************************************************************************************************************/
 static int32_t fill_polygon_aa(const GUI_POINT * p_points, int32_t num_points, int32_t x0, int32_t y0)
 {
-    uint32_t   mode;
     d2_point * p_data;
     d2_point * p_data_i;
     int32_t    i;
     int32_t    ret;
-    GUI_RECT   rect;
-    uint32_t   color;
 
-    mode   = get_d2_mode();
     p_data = malloc(sizeof(d2_point) * num_points * 2);
     ret    = 1;
-    modify_coord(&x0, &y0);
+
     if (p_data)
     {
+        /* Generate render operations */
+        if (prepare_drawing(&x0, &y0, NULL, NULL))
+        {
+            return 1;
+        }
+
         p_data_i = p_data;
 
         /* WAIT_LOOP */
-        for (i = 0; i < num_points; i++ )
+        for (i = 0; i < num_points; i++)
         {
-            modify_coord((int32_t *)&p_points->x, (int32_t *)&p_points->y);
-            *p_data_i++ = (d2_point)(p_points->x + x0) * 16;
-            *p_data_i++ = (d2_point)(p_points->y + y0) * 16;
+            modify_coord((int32_t*) &p_points->x, (int32_t*) &p_points->y);
+            *p_data_i++ = (d2_point) (p_points->x + x0) * 16;
+            *p_data_i++ = (d2_point) (p_points->y + y0) * 16;
             p_points++;
         }
 
-        /* Generate render operations */
-        d2_framebuffer(sp_d2_handle, (void *)s_a_buffer_ptr[s_write_buffer_index],
-                        EMWIN_XSIZE_PHYS, EMWIN_XSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
-        d2_selectrenderbuffer(sp_d2_handle, sp_renderbuffer);
-        color = GUI_Index2Color(GUI_GetColorIndex());
-        d2_setcolor(sp_d2_handle, 0, color);
-        modify_rect(GUI__GetClipRect(), &rect);
-        d2_cliprect(sp_d2_handle, rect.x0, rect.y0, rect.x1, rect.y1);
         ret = d2_renderpolygon(sp_d2_handle, p_data, num_points, d2_le_closed);
 
         /* Execute render operations */
@@ -1007,27 +1096,29 @@ static int32_t fill_polygon_aa(const GUI_POINT * p_points, int32_t num_points, i
  * Arguments    : .
  * Return Value : .
  *********************************************************************************************************************/
-static int32_t draw_poly_outline_aa(const GUI_POINT * p_points, int32_t num_points, int32_t Thickness,
+static int32_t draw_poly_outline_aa(const GUI_POINT * p_points, int32_t num_points, int32_t thickness,
                                     int32_t x, int32_t y)
 {
-    uint32_t   mode;
     d2_point * p_data;
     d2_point * p_data_i;
     int32_t    i;
     int32_t    ret;
-    GUI_RECT   rect;
-    uint32_t   color;
 
-    mode   = get_d2_mode();
     p_data = malloc(sizeof(d2_point) * num_points * 2);
     ret    = 1;
-    modify_coord(&x, &y);
+
     if (p_data)
     {
+        /* Generate render operations */
+        if (prepare_drawing(&x, &y, NULL, NULL))
+        {
+            return 1;
+        }
+
         p_data_i = p_data;
 
         /* WAIT_LOOP */
-        for (i = 0; i < num_points; i++ )
+        for (i = 0; i < num_points; i++)
         {
             modify_coord((int32_t *)&p_points->x, (int32_t *)&p_points->y);
             *p_data_i++ = (d2_point)(p_points->x + x) * 16;
@@ -1035,16 +1126,8 @@ static int32_t draw_poly_outline_aa(const GUI_POINT * p_points, int32_t num_poin
             p_points++;
         }
 
-        /* Generate render operations */
-        d2_framebuffer(sp_d2_handle, (void *)s_a_buffer_ptr[s_write_buffer_index],
-                        EMWIN_XSIZE_PHYS, EMWIN_XSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
-        d2_selectrenderbuffer(sp_d2_handle, sp_renderbuffer);
-        color = GUI_Index2Color(GUI_GetColorIndex());
-        d2_setcolor(sp_d2_handle, 0, color);
-        modify_rect(GUI__GetClipRect(), &rect);
-        d2_cliprect(sp_d2_handle, rect.x0, rect.y0, rect.x1, rect.y1);
         d2_selectrendermode(sp_d2_handle, d2_rm_outline);
-        ret = d2_renderpolyline(sp_d2_handle, p_data, num_points, Thickness * 16, d2_le_closed);
+        ret = d2_renderpolyline(sp_d2_handle, p_data, num_points, thickness * 16, d2_le_closed);
         d2_selectrendermode(sp_d2_handle, d2_rm_solid);
 
         /* Execute render operations */
@@ -1058,8 +1141,7 @@ static int32_t draw_poly_outline_aa(const GUI_POINT * p_points, int32_t num_poin
 /**********************************************************************************************************************
  * End of function draw_poly_outline_aa
  *********************************************************************************************************************/
-
-#if 0 /* Usage restriction */
+#endif
 /**********************************************************************************************************************
  * Function Name: draw_arc_aa
  * Description  : .
@@ -1068,15 +1150,12 @@ static int32_t draw_poly_outline_aa(const GUI_POINT * p_points, int32_t num_poin
  *********************************************************************************************************************/
 static int32_t draw_arc_aa(int32_t x0, int32_t y0, int32_t rx, int32_t ry, int32_t a0, int32_t a1)
 {
-    uint32_t mode;
     int32_t  ret;
+    uint32_t flag;
     int32_t  nx0;
     int32_t  ny0;
     int32_t  nx1;
     int32_t  ny1;
-    GUI_RECT rect;
-    uint32_t color;
-    uint32_t flag;
 
     GUI_USE_PARA(ry);
 
@@ -1105,12 +1184,10 @@ static int32_t draw_arc_aa(int32_t x0, int32_t y0, int32_t rx, int32_t ry, int32
         return ret;
     }
 
-    mode = get_d2_mode();
-    modify_coord(&x0, &y0);
-    nx0  = -GUI__SinHQ(a0);
-    ny0  = -GUI__CosHQ(a0);
-    nx1  = GUI__SinHQ(a1);
-    ny1  = GUI__CosHQ(a1);
+    nx0 = -GUI__SinHQ(a0);
+    ny0 = -GUI__CosHQ(a0);
+    nx1 = GUI__SinHQ(a1);
+    ny1 = GUI__CosHQ(a1);
 
     /* If the difference between both is larger than 180 degrees we must use the concave flag */
     if (((a1 - a0) % 360000) <= 180000)
@@ -1123,13 +1200,11 @@ static int32_t draw_arc_aa(int32_t x0, int32_t y0, int32_t rx, int32_t ry, int32
     }
 
     /* Generate render operations */
-    d2_framebuffer(sp_d2_handle, (void *)s_a_buffer_ptr[s_write_buffer_index],
-                    EMWIN_XSIZE_PHYS, EMWIN_XSIZE_PHYS, EMWIN_YSIZE_PHYS, mode);
-    d2_selectrenderbuffer(sp_d2_handle, sp_renderbuffer);
-    color = GUI_Index2Color(GUI_GetColorIndex());
-    d2_setcolor(sp_d2_handle, 0, color);
-    modify_rect(GUI__GetClipRect(), &rect);
-    d2_cliprect(sp_d2_handle, rect.x0, rect.y0, rect.x1, rect.y1);
+    if (prepare_drawing(&x0, &y0, NULL, NULL))
+    {
+        return 1;
+    }
+
     ret = d2_renderwedge(sp_d2_handle, x0 * 16, y0 * 16, rx * 16, GUI_GetPenSize() * 16, nx0, ny0, nx1, ny1, flag);
 
     /* Execute render operations */
@@ -1141,7 +1216,6 @@ static int32_t draw_arc_aa(int32_t x0, int32_t y0, int32_t rx, int32_t ry, int32
 /**********************************************************************************************************************
  * End of function draw_arc_aa
  *********************************************************************************************************************/
-#endif
 
 /**********************************************************************************************************************
  * Function Name: R_EMWIN_GetD2
@@ -1171,9 +1245,9 @@ void R_EMWIN_EnableDave2D(void)
         GUI_SetFuncDrawAlpha         ((GUI_DRAWMEMDEV_FUNC*) draw_memdev_alpha, (GUI_DRAWBITMAP_FUNC*) draw_bitmap_alpha);
         GUI_SetFuncDrawM565          ((GUI_DRAWMEMDEV_FUNC*) draw_memdev_alpha, (GUI_DRAWBITMAP_FUNC*) draw_bitmap_alpha);
         LCD_SetDevFunc               (0, LCD_DEVFUNC_DRAWBMP_16BPP, (void (*)(void)) draw_bitmap_16bpp);
-        GUI_AA_SetFuncDrawPolyOutline((DRAW_POLY_OUTLOINE*) draw_poly_outline_aa);
-/*      GUI_AA_SetFuncDrawArc    ((DRAW_ARC *)draw_arc_aa); *//* Usage restriction */
-        GUI_AA_SetFuncFillPolygon    ((FILL_POLYGON*) fill_polygon_aa);
+/*      GUI_AA_SetFuncDrawPolyOutline((DRAW_POLY_OUTLOINE*) draw_poly_outline_aa); *//* Usage restriction */
+        GUI_AA_SetFuncDrawArc        ((DRAW_ARC *)draw_arc_aa);
+/*      GUI_AA_SetFuncFillPolygon    ((FILL_POLYGON*) fill_polygon_aa); *//* Usage restriction */
     }
     else
     {
@@ -1186,8 +1260,8 @@ void R_EMWIN_EnableDave2D(void)
     }
 
     /* Usable in any orientation */
-/*  GUI_AA_SetFuncFillCircle     ((FILL_CIRCLE *)fill_circle_aa); *//* Usage restriction */
-/*  GUI_AA_SetFuncDrawCircle     ((DRAW_CIRCLE *)draw_circle_aa); *//* Usage restriction */
+    GUI_AA_SetFuncFillCircle     ((FILL_CIRCLE *)fill_circle_aa);
+    GUI_AA_SetFuncDrawCircle     ((DRAW_CIRCLE *)draw_circle_aa);
     GUI_AA_SetFuncDrawLine       ((DRAW_LINE *)draw_line_aa);
     LCD_SetDevFunc               (0, LCD_DEVFUNC_FILLRECT, (void(*)(void))lcd_fill_rect);
     GUI_AlphaEnableFillRectHW    (1);
@@ -1253,6 +1327,7 @@ static void copy_buffer(int32_t layer_index, int32_t index_src, int32_t index_ds
     dmaca_stat_t              dmac_status;
 
     GUI_USE_PARA(layer_index);
+
     ret = R_DMACA_Open(EMWIN_DMAC_NUMBER);
     if (DMACA_SUCCESS != ret)
     {
@@ -1367,8 +1442,8 @@ static e_emwin_rx_err_t r_emwin_rx_lcd_open(void)
 {
     e_emwin_rx_err_t emwin_ret = EMWIN_RX_FAIL;
 
-    glcdc_cfg_t     glcdc_cfg;
-    glcdc_err_t     glcdc_ret;
+    static glcdc_cfg_t glcdc_cfg;
+    glcdc_err_t        glcdc_ret;
 
 #if (!defined(QE_DISPLAY_CONFIGURATION) && (GLCDC_CFG_CONFIGURATION_MODE == 0))
     /* Configuration example for RX72N envision kit. */
@@ -1402,10 +1477,10 @@ static e_emwin_rx_err_t r_emwin_rx_lcd_open(void)
     glcdc_cfg.input[GLCDC_FRAME_LAYER_2].vsize              = EMWIN_YSIZE_PHYS;
     glcdc_cfg.input[GLCDC_FRAME_LAYER_2].coordinate.x       = 0;
     glcdc_cfg.input[GLCDC_FRAME_LAYER_2].hsize              = EMWIN_XSIZE_PHYS;
-    glcdc_cfg.blend[GLCDC_FRAME_LAYER_2].start_coordinate.x = 0;
-    glcdc_cfg.blend[GLCDC_FRAME_LAYER_2].end_coordinate.x   = EMWIN_YSIZE_PHYS;
     glcdc_cfg.blend[GLCDC_FRAME_LAYER_2].start_coordinate.y = 0;
-    glcdc_cfg.blend[GLCDC_FRAME_LAYER_2].end_coordinate.y   = EMWIN_XSIZE_PHYS;
+    glcdc_cfg.blend[GLCDC_FRAME_LAYER_2].end_coordinate.y   = EMWIN_YSIZE_PHYS;
+    glcdc_cfg.blend[GLCDC_FRAME_LAYER_2].start_coordinate.x = 0;
+    glcdc_cfg.blend[GLCDC_FRAME_LAYER_2].end_coordinate.x   = EMWIN_XSIZE_PHYS;
 
     /* Timing configuration */
     glcdc_cfg.output.tcon_vsync           = GLCDC_TCON_PIN_0;
@@ -1468,9 +1543,7 @@ static e_emwin_rx_err_t r_emwin_rx_lcd_open(void)
 
     if (GLCDC_SUCCESS == glcdc_ret)
     {
-        s_runtime_cfg.blend     = glcdc_cfg.blend[GLCDC_FRAME_LAYER_2];
-        s_runtime_cfg.input     = glcdc_cfg.input[GLCDC_FRAME_LAYER_2];
-        s_runtime_cfg.chromakey = glcdc_cfg.chromakey[GLCDC_FRAME_LAYER_2];
+        R_GLCDC_BufferChange(GLCDC_FRAME_LAYER_2, (uint32_t *)s_a_glcdc_buffer_ptr[0]);
 
         /* Function select of multiplex pins (Display B) */
         R_GLCDC_PinSet();
@@ -1508,10 +1581,9 @@ static e_emwin_rx_err_t r_emwin_rx_lcd_switch_buffer(uint32_t * p_addr)
         /* Wait until s_pending_buffer is cleared by ISR */
         R_BSP_NOP();
     }
-    s_runtime_cfg.input.p_base = p_addr; /* Specify the start address of the frame buffer */
 
-    /* Graphic 2 Register Value Reflection Enable */
-    glcdc_ret = R_GLCDC_LayerChange(GLCDC_FRAME_LAYER_2, &s_runtime_cfg);
+    /* Graphic 2 Frame buffer address change */
+    glcdc_ret = R_GLCDC_BufferChange(GLCDC_FRAME_LAYER_2, p_addr);
 
     if (GLCDC_SUCCESS == glcdc_ret)
     {
@@ -1546,16 +1618,8 @@ static e_emwin_rx_err_t r_emwin_rx_lcd_clut_update(uint32_t * p_clut)
     p_clut_cfg.p_base = p_clut;
     p_clut_cfg.size   = NUM_COLORS;
     p_clut_cfg.start  = 0;
-#ifdef __ICCRX__
-    glcdc_ret = R_GLCDC_Control(GLCDC_CMD_START_DISPLAY, (void *)FIT_NO_FUNC);
-#else
-    glcdc_ret = R_GLCDC_Control(GLCDC_CMD_START_DISPLAY, FIT_NO_FUNC);
-#endif
-    GUI_Delay(100);
-    if (GLCDC_SUCCESS == glcdc_ret)
-    {
-        glcdc_ret = R_GLCDC_ClutUpdate(GLCDC_FRAME_LAYER_2, &p_clut_cfg);
-    }
+
+    glcdc_ret = R_GLCDC_ClutUpdate(GLCDC_FRAME_LAYER_2, &p_clut_cfg);
 
     if (GLCDC_SUCCESS == glcdc_ret)
     {
@@ -1666,22 +1730,56 @@ void _VSYNC_ISR(void * p)
 void lcd_driver_setting(GUI_DEVICE * p_device, int rotateindex, int layerindex)
 {
     int32_t swap_xy_ex;
+    uint32_t buff_ptr;
+    volatile uint8_t i;
+    int orientation;
 
     GUI_USE_PARA(p_device);
     GUI_USE_PARA(layerindex);
 
     /* Display driver configuration */
     swap_xy_ex = LCD_GetSwapXYEx(0);
+
     if (swap_xy_ex)
     {
         LCD_SetSizeEx(0, EMWIN_YSIZE_PHYS, EMWIN_XSIZE_PHYS);
-        LCD_SetVSizeEx(0, EMWIN_YSIZE_PHYS, EMWIN_XSIZE_PHYS);
+        LCD_SetVSizeEx(0, EMWIN_YSIZE_PHYS, VXSIZE_PHYS);
     }
     else
     {
         LCD_SetSizeEx(0, EMWIN_XSIZE_PHYS, EMWIN_YSIZE_PHYS);
         LCD_SetVSizeEx(0, VXSIZE_PHYS, EMWIN_YSIZE_PHYS);
     }
+
+    orientation = (rotateindex + EMWIN_DISPLAY_ORIENTATION) % 4;
+
+    if ((ORIENTATION_CW == orientation) || (ORIENTATION_180 == orientation))
+    {
+        for (i = 0; i < GUI_COUNTOF(s_a_buffer_ptr); i++)
+        {
+            if (0 == (VXSIZE_PHYS - EMWIN_XSIZE_PHYS))
+            {
+                buff_ptr = s_buffer_base_ptr[i];
+            }
+            else
+            {
+                buff_ptr = s_buffer_base_ptr[i] + BUFFER_ADJUST_OFFSET;
+            }
+
+            s_a_glcdc_buffer_ptr[i] = buff_ptr;
+            s_a_buffer_ptr[i]       = buff_ptr - (((VXSIZE_PHYS - EMWIN_XSIZE_PHYS) * EMWIN_BITS_PER_PIXEL) >> 3);
+        }
+    }
+    else
+    {
+        for (i = 0; i < GUI_COUNTOF(s_a_buffer_ptr); i++)
+        {
+            buff_ptr                = s_buffer_base_ptr[i];
+            s_a_glcdc_buffer_ptr[i] = buff_ptr;
+            s_a_buffer_ptr[i]       = buff_ptr;
+        }
+    }
+
     LCD_SetBufferPtrEx(0, (void**) s_a_buffer_ptr);
 
     /* Set function pointers */
@@ -1753,7 +1851,7 @@ void LCD_X_Config(void)
 #endif
 
     /* Display size and frame buffer setting */
-    lcd_driver_setting(p_device,0,0);
+    lcd_driver_setting(p_device, 0, 0);
 
 #if (EMWIN_USE_RUNTIME_ORIENTATION == 1)
     /* Create additional drivers and add them to the display rotation module */
@@ -1790,6 +1888,7 @@ int LCD_X_DisplayDriver(unsigned layer_index, unsigned cmd, void * p_data)
     static bool init_f = false;
 
     GUI_USE_PARA(layer_index);
+
     switch (cmd)
     {
         /* Required */
@@ -1799,7 +1898,7 @@ int LCD_X_DisplayDriver(unsigned layer_index, unsigned cmd, void * p_data)
              * display controller and put it into operation. If the display
              * controller is not initialized by any external routine this needs
              * to be adapted by the customer... */
-            if(false == init_f)
+            if (false == init_f)
             {
                 init_controller();
                 init_f = true;

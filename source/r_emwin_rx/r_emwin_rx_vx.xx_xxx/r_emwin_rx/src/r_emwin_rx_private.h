@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_emwin_rx_private.h
@@ -37,7 +37,12 @@
  *                                     Added touch driver IC settings.
  *         : 31.03.2023 6.32.a.1.00    Update emWin library to v6.32a.
  *                                     Fixed preprocessing with value of BSP_CFG_RTOS_USED.
+ *         : 31.01.2024 6.34.g.1.00    Update emWin library to v6.34g.
+ *                                     Added BUFFER_ADJUST_OFFSET definition.
+ *                                     Fixed NUM_COLORS definition.
  *********************************************************************************************************************/
+#ifndef EMWIN_RX_PRIVATE_H
+#define EMWIN_RX_PRIVATE_H
 
 /**********************************************************************************************************************
  Includes   <System Includes> , "Project Includes"
@@ -50,8 +55,6 @@
 /**********************************************************************************************************************
  Macro definitions
  *********************************************************************************************************************/
-#ifndef EMWIN_RX_PRIVATE_H
-#define EMWIN_RX_PRIVATE_H
 
 /* Display Driver */
 #define DISP_DRV_GUIDRV_LIN           (0)
@@ -68,18 +71,16 @@
 
 
 /* Buffer size and stride */
-#define BYTES_PER_LINE   ((EMWIN_BITS_PER_PIXEL * EMWIN_XSIZE_PHYS) / 8)
-#define LINE_OFFSET      (((BYTES_PER_LINE + 63) / 64) * 64)
-#define VXSIZE_PHYS      ((LINE_OFFSET * 8) / EMWIN_BITS_PER_PIXEL)
-#define BYTES_PER_BUFFER (LINE_OFFSET * EMWIN_YSIZE_PHYS)
-
+#define BYTES_PER_LINE       ((EMWIN_BITS_PER_PIXEL * EMWIN_XSIZE_PHYS) / 8)
+#define LINE_OFFSET          (((BYTES_PER_LINE + 63) / 64) * 64)
+#define VXSIZE_PHYS          ((LINE_OFFSET * 8) / EMWIN_BITS_PER_PIXEL)
+#define BYTES_PER_BUFFER     (LINE_OFFSET * EMWIN_YSIZE_PHYS)
+#define BUFFER_ADJUST_OFFSET (0x40)
 
 
 /* Color number */
-#if ((USE_DAVE2D == 0) && (EMWIN_BITS_PER_PIXEL < 16))
+#if (EMWIN_BITS_PER_PIXEL < 16)
 #define NUM_COLORS (1 << EMWIN_BITS_PER_PIXEL)
-#else
-#define NUM_COLORS  (256)
 #endif
 
 

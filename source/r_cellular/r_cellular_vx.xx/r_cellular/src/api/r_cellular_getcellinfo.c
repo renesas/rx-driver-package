@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_getcellinfo.c
@@ -95,6 +95,7 @@ e_cellular_err_t R_CELLULAR_GetCellInfo(st_cellular_ctrl_t * const p_ctrl, const
                 }
                 if (CELLULAR_SUCCESS == ret)
                 {
+                    /* WAIT_LOOP */
                     do
                     {
                         ret = atc_sqnmoni(p_ctrl, type);

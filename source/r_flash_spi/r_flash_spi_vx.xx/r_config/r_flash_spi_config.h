@@ -19,11 +19,11 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2011(2012-2023) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_flash_spi_config.h
-* Version      : 3.20
+* Version      : 3.40
 * Description  : FLASH SPI driver configuration header file
 *************************************************************************************************/
 /************************************************************************************************
@@ -33,6 +33,7 @@
 *              : 21.12.2018 3.00     Change flash drive interface to Memory Access Driver Interface
 *              : 30.06.2022 3.10     Added macros to specify the ports used for SS#.
 *              : 16.03.2023 3.20     Added support for AT25QF641B-SHB.
+*              : 15.11.2023 3.40     Added support for MX25U6432F.
 *************************************************************************************************/
 #ifndef __FLASH_SPI_CONFIG_H__
 #define __FLASH_SPI_CONFIG_H__
@@ -92,11 +93,13 @@ SPECIFY DEVICES TO INCLUDE SOFTWARE SUPPORT
 #define FLASH_SPI_CFG_DEV0_MX66L    (0)             /* Device 0 Macronix MX66L                  */
 #define FLASH_SPI_CFG_DEV0_MX25R    (0)             /* Device 0 Macronix MX25R                  */
 #define FLASH_SPI_CFG_DEV0_AT25QF   (0)             /* Device 0 Adesto AT25Q                    */
+#define FLASH_SPI_CFG_DEV0_MX25U    (0)             /* Device 0 Macronix MX25U                  */
 
 #define FLASH_SPI_CFG_DEV1_MX25L    (0)             /* Device 1 Macronix MX25L                  */
 #define FLASH_SPI_CFG_DEV1_MX66L    (0)             /* Device 1 Macronix MX66L                  */
 #define FLASH_SPI_CFG_DEV1_MX25R    (0)             /* Device 1 Macronix MX25R                  */
 #define FLASH_SPI_CFG_DEV1_AT25QF   (0)             /* Device 1 Adesto AT25Q                    */
+#define FLASH_SPI_CFG_DEV1_MX25U    (0)             /* Device 1 Macronix MX25U                  */
 
 /************************************************************************************************
  SELECT THE FLASH MEMORY SIZE

@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_writecertificate.c
@@ -159,6 +159,7 @@ static e_cellular_err_t cellular_write_certificate(st_cellular_ctrl_t * const p_
 
     if (CELLULAR_PSM_ACTIVE == p_ctrl->ring_ctrl.psm)
     {
+        /* WAIT_LOOP */
         while (1)
         {
             semaphore_ret = cellular_take_semaphore(p_ctrl->ring_ctrl.rts_semaphore);
@@ -186,6 +187,7 @@ static e_cellular_err_t cellular_write_certificate(st_cellular_ctrl_t * const p_
 
     cellular_set_atc_number(p_ctrl, ATC_SQNSSENDEXT_END);
 
+    /* WAIT_LOOP */
     while (complete_length < size)
     {
         send_size = cellular_send_size_check(p_ctrl, size, complete_length);
@@ -196,6 +198,7 @@ static e_cellular_err_t cellular_write_certificate(st_cellular_ctrl_t * const p_
 
         if (SCI_SUCCESS == sci_ret)
         {
+            /* WAIT_LOOP */
             /* tx_end_flg check loop */
             while (1)
             {
@@ -221,6 +224,7 @@ static e_cellular_err_t cellular_write_certificate(st_cellular_ctrl_t * const p_
 #else
         sci_send_size = 0;
 
+        /* WAIT_LOOP */
         do
         {
             if (1 != CELLULAR_GET_PIDR(CELLULAR_CFG_CTS_PORT, CELLULAR_CFG_CTS_PIN))
@@ -254,6 +258,7 @@ static e_cellular_err_t cellular_write_certificate(st_cellular_ctrl_t * const p_
 #endif  /* CELLULAR_CFG_CTS_SW_CTRL == 0 */
     }
 
+    /* WAIT_LOOP */
     while (1)
     {
         atc_res = cellular_get_atc_response(p_ctrl);
@@ -356,6 +361,7 @@ static e_cellular_timeout_check_t cellular_tx_flag_check(st_cellular_ctrl_t * co
 
     st_cellular_time_ctrl_t * const p_cellular_timeout_ctrl = &p_ctrl->sci_ctrl.timeout_ctrl;
 
+    /* WAIT_LOOP */
     while (1)
     {
         if (CELLULAR_TX_END_FLAG_ON == p_ctrl->sci_ctrl.tx_end_flg)

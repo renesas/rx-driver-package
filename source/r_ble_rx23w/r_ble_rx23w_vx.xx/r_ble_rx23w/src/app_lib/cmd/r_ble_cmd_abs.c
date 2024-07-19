@@ -998,6 +998,7 @@ static void exec_abs_set_priv(int argc, char *argv[])
                 return;
             }
 
+            /* WAIT_LOOP */
             for(i=0; i<BLE_GAP_IRK_SIZE; i++)
             {
                 memcpy(tmp, argv[2] + i * 2, 2);
@@ -1381,6 +1382,7 @@ static void exec_abs_disconn(int argc, char *argv[])
 ----------------------------------------------------------------------------------------------------------------------*/
 static void exec_abs_device(int argc, char *argv[])
 {
+    /* WAIT_LOOP */
     for (int i = 0; i < BLE_CFG_RF_CONN_MAX; i++)
     {
         if (connected_device_info[i].conn_hdl != BLE_GAP_INVALID_CONN_HDL)
@@ -1641,6 +1643,7 @@ void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t * 
 
                 int32_t i;
 
+                /* WAIT_LOOP */
                 for (i = 0; i < BLE_CFG_RF_CONN_MAX; i++)
                 {
                     if (connected_device_info[i].conn_hdl == BLE_GAP_INVALID_CONN_HDL)
@@ -1685,6 +1688,7 @@ void R_BLE_CMD_AbsGapCb(uint16_t type, ble_status_t result, st_ble_evt_data_t * 
                 (st_ble_gap_disconn_evt_t *)p_data->p_param;
             pf("receive BLE_GAP_EVENT_DISCONN_IND result : 0x%04x\n", result);
 
+            /* WAIT_LOOP */
             for (int32_t i = 0; i < BLE_CFG_RF_CONN_MAX; i++)
             {
                 if (connected_device_info[i].conn_hdl == disc_evt_param->conn_hdl)

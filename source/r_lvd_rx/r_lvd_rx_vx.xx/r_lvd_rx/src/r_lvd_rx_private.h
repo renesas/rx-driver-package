@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_lvd_rx_private.h
@@ -39,6 +39,7 @@
 *              : 31.03.2023 4.40     Added support for RX26T.
 *                                    Added define for LVD_GROUP_INT_ICUG.
 *                                    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*              : 30.01.2024 4.70     Added define LVD_GROUP_INT_ICUC.
 ***********************************************************************************************************************/
 #ifndef LVD_PRIVATE_HEADER_FILE
 #define LVD_PRIVATE_HEADER_FILE
@@ -100,10 +101,11 @@ Macro definitions
 #define LVD_GROUP_INT_ICUb                      (0x020)
 #define LVD_GROUP_INT_ICUA                      (0x100)
 #define LVD_GROUP_INT_ICUB                      (0x200)
-#define LVD_GROUP_INT_ICUD                      (0x300)
-#define LVD_GROUP_INT_ICUE                      (0x400)
-#define LVD_GROUP_INT_ICUF                      (0x500)
-#define LVD_GROUP_INT_ICUG                      (0x600)
+#define LVD_GROUP_INT_ICUC                      (0x300)
+#define LVD_GROUP_INT_ICUD                      (0x400)
+#define LVD_GROUP_INT_ICUE                      (0x500)
+#define LVD_GROUP_INT_ICUF                      (0x600)
+#define LVD_GROUP_INT_ICUG                      (0x700)
 
 /***********************************************************************************************************************
 Typedef definitions

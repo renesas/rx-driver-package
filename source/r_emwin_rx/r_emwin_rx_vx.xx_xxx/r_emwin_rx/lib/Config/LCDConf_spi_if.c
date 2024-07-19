@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : LCDConf_spi_if.c
@@ -27,7 +27,13 @@
  *         : 31.03.2023 6.32.a.1.00    Update emWin library to v6.32a.
  *                                     Added support for runtime orientation.
  *                                     Added support for DTC and DMAC in SPI interface.
-  *********************************************************************************************************************/
+ *         : 31.01.2024 6.34.g.1.00    Update emWin library to v6.34g.
+ *                                     Removed interrupt control processing when using SCI and DTC.
+ *                                     (Fixed by improving bugs in SCI FIT Rev4.60 and below)
+ *                                     Moved SCI and RSPI pin setting process after the Open function.
+ *                                     Fixed display On/Off processing of LCD_X_DisplayDriver function.
+ *                                     Remove return operation from the dma_callback_w and dma_callback_r functions.
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  Includes   <System Includes> , "Project Includes"
@@ -94,6 +100,11 @@
 #define SCI_PIN_SET     R_SCI_PinSet_SCI11
 #elif (EMWIN_LCD_IF_NUMBER == 12)
 #define SCI_PIN_SET     R_SCI_PinSet_SCI12
+#endif
+
+/* SCI FIT module version check */
+#if ((SCI_VERSION_MAJOR == 4) && (SCI_VERSION_MINOR < 90)) || (SCI_VERSION_MAJOR < 4)
+#error "Error!! Please use SCI FIT module Rev4.90 or higher."
 #endif
 
 #else /* (EMWIN_LCD_IF == LCD_IF_RSPI) */
@@ -329,8 +340,6 @@
 #endif /* EMWIN_LCD_DRIVER_IC */
 
 
-
-
 /**********************************************************************************************************************
  Private (static) variables and functions
  *********************************************************************************************************************/
@@ -494,8 +503,6 @@ void dma_callback_w(void)
     /* SPI transmit end process */
     R_RSPI_DisableSpti(s_lcd_rspi_handle);
     R_RSPI_IntSptiIerClear(s_lcd_rspi_handle);
-
-    return;
 }
 /**********************************************************************************************************************
  * End of function dma_callback_w
@@ -521,8 +528,6 @@ void dma_callback_r(void)
 
     /* Set transfer completion flag */
     s_transfer_busy = false;
-
-    return;
 }
 /**********************************************************************************************************************
  * End of function dma_callback_r
@@ -615,15 +620,7 @@ void write_command(uint8_t * p_cmd, int num_bytes)
 
 #if (EMWIN_LCD_IF == LCD_IF_SCI_SPI)
 
-#if (EMWIN_SELECT_DMAC_DTC == 1)
-    R_BSP_InterruptsDisable();
-#endif
-
     s_lcd_sci_spi_err = R_SCI_Send(s_lcd_sci_spi_handle, p_cmd, num_bytes);
-
-#if (EMWIN_SELECT_DMAC_DTC == 1)
-    R_BSP_InterruptsEnable();
-#endif
 
     if (SCI_SUCCESS != s_lcd_sci_spi_err)
     {
@@ -734,15 +731,7 @@ void write_data(uint8_t * p_data, int num_bytes)
 
 #if (EMWIN_LCD_IF == LCD_IF_SCI_SPI)
 
-#if (EMWIN_SELECT_DMAC_DTC == 1)
-    R_BSP_InterruptsDisable();
-#endif
-
     s_lcd_sci_spi_err = R_SCI_Send(s_lcd_sci_spi_handle, p_data, num_bytes);
-
-#if (EMWIN_SELECT_DMAC_DTC == 1)
-    R_BSP_InterruptsEnable();
-#endif
 
     if (SCI_SUCCESS != s_lcd_sci_spi_err)
     {
@@ -1143,9 +1132,6 @@ static void init_controller(void)
 
 #if (EMWIN_LCD_IF == LCD_IF_SCI_SPI)
 
-    /* Initialize SCI pins */
-    SCI_PIN_SET();
-
     /* Open the SSPI module */
     s_lcd_sci_spi_setting.sspi.bit_rate     = EMWIN_LCD_BAUDRATE;
     s_lcd_sci_spi_setting.sspi.int_priority = 5;
@@ -1170,10 +1156,10 @@ static void init_controller(void)
         }
     }
 
-#else /* (EMWIN_LCD_IF == LCD_IF_RSPI) */
+    /* Initialize SCI pins */
+    SCI_PIN_SET();
 
-    /* Initialize RSPI pins */
-    RSPI_PIN_SET();
+#else /* (EMWIN_LCD_IF == LCD_IF_RSPI) */
 
     /* Open the RSPI module */
     s_lcd_rspi_command.cpha          = RSPI_SPCMD_CPHA_SAMPLE_ODD;
@@ -1216,6 +1202,9 @@ static void init_controller(void)
             R_BSP_NOP(); /* no operation */
         }
     }
+
+    /* Initialize RSPI pins */
+    RSPI_PIN_SET();
 
 #if (EMWIN_SELECT_DMAC_DTC == 1)
 
@@ -1501,6 +1490,7 @@ int LCD_X_DisplayDriver(unsigned layer_index, unsigned cmd, void * p_data)
 
     GUI_USE_PARA(layer_index);
     GUI_USE_PARA(p_data);
+
     switch (cmd)
     {
         /* Required */
@@ -1510,31 +1500,43 @@ int LCD_X_DisplayDriver(unsigned layer_index, unsigned cmd, void * p_data)
              * display controller and put it into operation. If the display
              * controller is not initialized by any external routine this needs
              * to be adapted by the customer... */
-		    if (false == init_f)
-		    {
-			    init_controller();
+            if (false == init_f)
+            {
+                init_controller();
                 init_f = true;
             }
-            return 0;
+
+            break;
         }
+
+        /* Required if the display controller should support switching on and off. */
         case LCD_X_ON:
         {
-
+#if (EMWIN_USE_BACKLIGHT_PIN == 1)
             /* Turn on back light */
             R_GPIO_PinDirectionSet(EMWIN_BACKLIGHT_PIN, GPIO_DIRECTION_OUTPUT);
             R_GPIO_PinWrite(EMWIN_BACKLIGHT_PIN, GPIO_LEVEL_HIGH);
+#endif
             break;
         }
+
+        /* Required if the display controller should support switching on and off. */
         case LCD_X_OFF:
         {
+#if (EMWIN_USE_BACKLIGHT_PIN == 1)
             /* Turn off back light */
             R_GPIO_PinDirectionSet(EMWIN_BACKLIGHT_PIN, GPIO_DIRECTION_OUTPUT);
             R_GPIO_PinWrite(EMWIN_BACKLIGHT_PIN, GPIO_LEVEL_LOW);
+#endif
             break;
         }
+
         default:
+        {
             r = -1;
+        }
     }
+
     return r;
 }
 /**********************************************************************************************************************

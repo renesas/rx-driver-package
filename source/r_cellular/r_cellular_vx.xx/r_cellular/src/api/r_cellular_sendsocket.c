@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_sendsocket.c
@@ -176,6 +176,7 @@ static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8
 
     if (CELLULAR_PSM_ACTIVE == p_ctrl->ring_ctrl.psm)
     {
+        /* WAIT_LOOP */
         while (1)
         {
             semaphore_ret = cellular_take_semaphore(p_ctrl->ring_ctrl.rts_semaphore);
@@ -195,6 +196,7 @@ static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8
 #endif
     }
 
+    /* WAIT_LOOP */
     while (complete_length < length)
     {
         if (CELLULAR_SOCKET_STATUS_CONNECTED !=
@@ -248,6 +250,7 @@ static int32_t cellular_send_data(st_cellular_ctrl_t * const p_ctrl, const uint8
 #else
         sci_send_size = 0;
 
+        /* WAIT_LOOP */
         do
         {
             if (1 != CELLULAR_GET_PIDR(CELLULAR_CFG_CTS_PORT, CELLULAR_CFG_CTS_PIN))
@@ -381,6 +384,7 @@ static e_cellular_timeout_check_t cellular_tx_flag_check(st_cellular_ctrl_t * co
     st_cellular_time_ctrl_t * const p_cellular_timeout_ctrl =
             &p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].cellular_tx_timeout_ctrl;
 
+    /* WAIT_LOOP */
     while (1)
     {
         if (CELLULAR_TX_END_FLAG_ON == p_ctrl->sci_ctrl.tx_end_flg)
@@ -449,6 +453,7 @@ static e_cellular_timeout_check_t cellular_atc_response_check(st_cellular_ctrl_t
     st_cellular_time_ctrl_t * const p_cellular_timeout_ctrl =
             &p_ctrl->p_socket_ctrl[socket_no - CELLULAR_START_SOCKET_NUMBER].cellular_tx_timeout_ctrl;
 
+    /* WAIT_LOOP */
     while (1)
     {
         at_ret = cellular_get_atc_response(p_ctrl);

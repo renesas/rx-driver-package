@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_sci_rx_if.h
@@ -80,9 +80,15 @@
 *                              Removed byteq header include in SYNC mode and SSPI mode.
 *                              Moved the source code which checks for IRDA mode support to MDF file.
 *           29.05.2023 4.90    Added support for RX23E-B.
-                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *           12.06.2023 5.00    Fixed bugs in sci_send_sync_data(), sci_receive_sync_data() and 
 *                              sci_receive_async_data() function in using DTC/DMAC.
+*           31.01.2024 5.10    Modified misleading description in "r_sci_rx_config.h" and MDF files.
+*                              Removed the attribute constraint at Channel 1 and 5 of the DATA MATCH parameters
+*                               in the MDF file.
+*                              Added WAIT_LOOP comments.
+*           13.03.2024 5.20    Fixed the issue that repeat_block_side had an unexpected value
+*                               in the sci_tx_dmaca_create() and sci_rx_dmaca_create() functions.
 ***********************************************************************************************************************/
 
 #ifndef SCI_IF_H
@@ -112,7 +118,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define SCI_VERSION_MAJOR  (5)
-#define SCI_VERSION_MINOR  (00)
+#define SCI_VERSION_MINOR  (20)
 
 #define SCI_DTC_DMACA_DISABLE  (0x0)
 #define SCI_DTC_ENABLE         (0x1)
@@ -333,6 +339,7 @@ typedef enum e_sci_cmd
     SCI_CMD_SET_RXI_PRIORITY,         /* change RXI priority level */
     SCI_CMD_SET_TXI_PRIORITY,         /* change TXI priority level */
     SCI_CMD_SET_TXI_RXI_PRIORITY,     /* change TXI and RXI priority level simultaneously */
+
     /* Async commands */
     SCI_CMD_EN_NOISE_CANCEL,          /* enable noise cancellation */
     SCI_CMD_EN_TEI,                   /* SCI_CMD_EN_TEI is obsolete command,

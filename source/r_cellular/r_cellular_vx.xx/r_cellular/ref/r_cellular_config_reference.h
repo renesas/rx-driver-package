@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_config.h
@@ -36,7 +36,7 @@
 #define CELLULAR_CFG_AP_USERID      ap_userid    /* Login ID */
 #define CELLULAR_CFG_AP_PASSWORD    ap_password  /* Access point password */
 #define CELLULAR_CFG_PIN_CODE       0000         /* SIM card PIN code */
-#define CELLULAR_CFG_AUTH_TYPE      (1)          /* Authentication protocol type (0=None,1=PAP,2=CHAP)*/
+#define CELLULAR_CFG_AUTH_TYPE      (0)          /* Authentication protocol type (0=None,1=PAP,2=CHAP)*/
 
 #define CELLULAR_CFG_NETWORK_NOTIFY_LEVEL   (2)         /* Network status notification level */
 #define CELLULAR_CFG_ATC_RETRY_CGATT        (600)       /* Connection retry limit */
@@ -64,20 +64,20 @@
 #endif
 
 /* These default value is for using RX65N Cloud Kit PMOD to control PMOD-RYZ014A */
-#define CELLULAR_CFG_UART_SCI_CH            (0)
+#define CELLULAR_CFG_UART_SCI_CH            (6)
 
 #define CELLULAR_CFG_CTS_SW_CTRL            (0)
-#define CELLULAR_CFG_CTS_PORT               2
-#define CELLULAR_CFG_CTS_PIN                2
+#define CELLULAR_CFG_CTS_PORT               J
+#define CELLULAR_CFG_CTS_PIN                3
 #define CELLULAR_CFG_PFS_SET_VALUE          0x0BU
 
-#define CELLULAR_CFG_RTS_PORT               2
+#define CELLULAR_CFG_RTS_PORT               0
 #define CELLULAR_CFG_RTS_PIN                2
 
-#define CELLULAR_CFG_RESET_PORT             D
-#define CELLULAR_CFG_RESET_PIN              0
+#define CELLULAR_CFG_RESET_PORT             5
+#define CELLULAR_CFG_RESET_PIN              5
 
-#define CELLULAR_CFG_IRQ_NUM                (4)
+#define CELLULAR_CFG_IRQ_NUM                (5)
 
 /* Board dependent settings; please use the value for each setting listed below depending on the board you use.
 

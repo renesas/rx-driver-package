@@ -9,6 +9,7 @@
         <version>3.02.00</version>
         <version>3.03.00</version>
         <version>3.04.00</version>
+        <version>3.05.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -16,12 +17,14 @@
         <version>8.03.00.202004</version>
         <version>8.03.00.202102</version>
         <version>8.03.00.202202</version>
+        <version>8.03.00.202305</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
         <product>ICCRX</product>
         <version>4.20.01</version>
         <version>4.20.03</version>
+        <version>5.10.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -36,7 +39,10 @@
         <group>RX230</group>
         <group>RX231</group>
         <group>RX23E-A</group>
+        <group>RX23E-B</group>
         <group>RX23W</group>
+        <group>RX24T</group>
+        <group>RX26T</group>
         <group>RX65N</group>
         <group>RX66N</group>
         <group>RX66T</group>
@@ -48,6 +54,7 @@
         <board>RSKRX140</board>
         <board>RSKRX230</board>
         <board>RSKRX231</board>
+        <board>RSKRX24T</board>
         <board>RSKRX65N</board>
         <board>RSKRX66T</board>
         <board>RSKRX660</board>
@@ -55,6 +62,7 @@
         <board>RSKRX72M</board>
         <board>RSKRX72N</board>
         <board>RSSKRX23EA</board>
+        <board>RSSKRX23EB</board>
         <board>RSSKRX23W</board>
         <board>CloudKitRX65N</board>
     </target>
@@ -67,25 +75,11 @@
         <version>x.xx</version>
         <zipsource>r_fwup_vx.xx.zip</zipsource>
         <dependency>
-            <module>r_byteq</module>
-            <version>2.00</version>
-</dependency>
-        <dependency>
-            <module>r_cmt_rx</module>
-            <version>5.20</version>
-</dependency>
-        <dependency>
             <module>r_flash_rx</module>
-            <version>4.90</version>
-</dependency>
-        <dependency>
-            <module>r_sci_rx</module>
-            <version>4.40</version>
-</dependency>
-        <dependency>
-            <module>r_sys_time_rx</module>
-            <version>1.01</version>
-</dependency>
+            <version>4.80</version>
+            <version>4.91</version>
+            <version>5.10</version>
+        </dependency>
         <application>Generic</application>
         <desc>FWUP Library</desc>
         <details>This module is a software library for implementing the firmware update function in user applications.</details>
@@ -93,6 +87,9 @@
         <incdir>r_config</incdir>
         <incdir>r_fwup</incdir>
         <incdir>r_fwup/src</incdir>
+        <incdir>r_fwup/src/base64</incdir>
+        <incdir>r_fwup/src/tinycrypt/source</incdir>
+        <incdir>r_fwup/src/tinycrypt/include</incdir>
     </package>
     <sampleapplicationnote>
         <documentno>R01AN5824</documentno>

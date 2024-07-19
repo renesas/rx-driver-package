@@ -57,6 +57,7 @@ static void update_remaining_time_ms(bool expired)
     uint8_t set_event = false;
     uint32_t elapsed_time_ms = pl_get_elapsed_time_ms(expired);
 
+    /* WAIT_LOOP */
     for (uint32_t i = 0; i < BLE_TIMER_NUM_OF_SLOT; i++)
     {
         if (BLE_TIMER_STATUS_STARTED == gs_timer[i].status)
@@ -84,6 +85,7 @@ static void update_remaining_time_ms(bool expired)
 
 static uint32_t alloc_timer(void)
 {
+    /* WAIT_LOOP */
     for (uint32_t i = 0; i < BLE_TIMER_NUM_OF_SLOT; i++)
     {
         if (gs_timer[i].status == BLE_TIMER_STATUS_FREE)
@@ -110,6 +112,7 @@ static void start_timer(void)
     uint32_t next_hdl = BLE_TIMER_INVALID_HDL;
     uint32_t shortest = 0xFFFFFFFF;
 
+    /* WAIT_LOOP */
     for (uint32_t i = 0; i < BLE_TIMER_NUM_OF_SLOT; i++)
     {
         if ((BLE_TIMER_STATUS_STARTED == gs_timer[i].status) &&
@@ -144,6 +147,7 @@ static void remove_timer(uint32_t timer_hdl)
 
 static void event_cb(void)
 {
+    /* WAIT_LOOP */
     for (uint32_t i = 0; i < BLE_TIMER_NUM_OF_SLOT; i++)
     {
         if (BLE_TIMER_STATUS_EXPIRED == gs_timer[i].status)
@@ -173,6 +177,7 @@ void process_timer_expire(void)
 
 void R_BLE_TIMER_Init(void)
 {
+    /* WAIT_LOOP */
     for (uint32_t i = 0; i < BLE_TIMER_NUM_OF_SLOT; i++)
     {
         free_timer(i);
@@ -183,6 +188,7 @@ void R_BLE_TIMER_Init(void)
 
 void R_BLE_TIMER_Terminate(void)
 {
+    /* WAIT_LOOP */
     for (uint32_t i = 0; i < BLE_TIMER_NUM_OF_SLOT; i++)
     {
         free_timer(i);
@@ -323,6 +329,7 @@ static st_ble_timer_t gs_timer[BLE_TIMER_NUM_OF_SLOT];
 
 static uint32_t get_timer_index(TimerHandle_t xTimer)
 {
+    /* WAIT_LOOP */
     for (uint32_t i = 0; i < BLE_TIMER_NUM_OF_SLOT; i++)
     {
         if (gs_timer[i].timer_hdl == (uint32_t)xTimer)
@@ -336,6 +343,7 @@ static uint32_t get_timer_index(TimerHandle_t xTimer)
 
 static void sf_timer_cb(void)
 {
+    /* WAIT_LOOP */
     for (uint32_t i = 0; i < BLE_TIMER_NUM_OF_SLOT; i++)
     {
         if (BLE_TIMER_STATUS_EXPIRED == gs_timer[i].status)
@@ -365,6 +373,7 @@ static void event_cb(TimerHandle_t xTimer)
 
 static uint32_t alloc_timer(void)
 {
+    /* WAIT_LOOP */
     for (uint32_t i = 0; i < BLE_TIMER_NUM_OF_SLOT; i++)
     {
         if (gs_timer[i].status == BLE_TIMER_STATUS_FREE)
@@ -389,6 +398,7 @@ static void free_timer(uint32_t timer_idx)
 
 void R_BLE_TIMER_Init(void)
 {
+    /* WAIT_LOOP */
     for (uint32_t i = 0; i < BLE_TIMER_NUM_OF_SLOT; i++)
     {
         free_timer(i);
@@ -397,6 +407,7 @@ void R_BLE_TIMER_Init(void)
 
 void R_BLE_TIMER_Terminate(void)
 {
+    /* WAIT_LOOP */
     for (uint32_t i = 0; i < BLE_TIMER_NUM_OF_SLOT; i++)
     {
         if (gs_timer[i].status == BLE_TIMER_STATUS_IDLE)

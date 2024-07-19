@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_wifi_da16xxx
-VERSION = 		1.10
+VERSION     =   1.30
 MDF = V2
 
 CONFIG_FOLDER = r_config
@@ -19,4 +19,4 @@ $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION)_extend.mdf:
 	cp ./$(MODULE_NAME)_vx.xx_extend.mdf $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION)_extend.mdf
 
 clean:
-	rm -rf $(TARGET_FOLDER)/$(MODULE_NAME)*.*
+	rm -rf $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION)*

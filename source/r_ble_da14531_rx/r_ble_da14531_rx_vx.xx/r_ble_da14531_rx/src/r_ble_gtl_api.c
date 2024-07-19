@@ -20,7 +20,7 @@
 
 /***********************************************************************************************************************
  * Includes
- ***********************************************************************************************************************/
+ **********************************************************************************************************************/
 #include <rm_ble_abs.h>
 
 #include "qe_ble_profile.h"
@@ -92,9 +92,10 @@ static r_ble_gtl_transport_api_t g_transport_api;
 /***********************************************************************************************************************
  * Local function prototypes
  **********************************************************************************************************************/
-#if defined(RM_BLE_ABS_GTL_TRANSPORT_INTERFACE_UART)
+#if defined(BLE_CFG_TRANSPORT_INTERFACE_UART)
 /* Port configurations */
 static st_sci_conf_t * get_port_config (void);
+st_sci_conf_t * s_port_cfg = NULL;
 static sci_err_t uart_port_open (st_sci_tbl_t * p_uart, void (* const p_cb)(void *p_args));
 sci_err_t wrap_sci_close(st_sci_tbl_t * p_uart);
 #endif
@@ -109,7 +110,7 @@ static int r_ble_gtl_api_transport_close(void * p_context);
  **********************************************************************************************************************/
 ble_status_t R_BLE_Open (void)
 {
-#if BLE_ABS_CFG_PARAM_CHECKING_ENABLE
+#if BLE_CFG_PARAM_CHECKING_ENABLE
     FSP_ASSERT(gp_instance_ctrl);
     FSP_ASSERT(gp_instance_ctrl->p_cfg);
 #endif
@@ -152,9 +153,9 @@ ble_status_t R_BLE_SetEvent (ble_event_cb_t cb)
 
 uint32_t R_BLE_GetVersion (void)
 {
+    uint32_t version = (BLE_VERSION_MAJOR << 16) | BLE_VERSION_MINOR;
 
-    /* Not supported by GTL middleware */
-    return BLE_ERR_UNSUPPORTED;
+    return version;
 }
 
 uint32_t R_BLE_GetLibType (void)
@@ -985,7 +986,7 @@ ble_status_t R_BLE_VS_GetScanChMap (void)
     return BLE_ERR_UNSUPPORTED;
 }
 
-#if defined(RM_BLE_ABS_GTL_TRANSPORT_INTERFACE_UART)
+#if defined(BLE_CFG_TRANSPORT_INTERFACE_UART)
 /**********************************************************************************************************************
  * Function Name: get_port_config
  * Description  : get port configuration table pointer.
@@ -1036,6 +1037,7 @@ static sci_err_t uart_port_open(st_sci_tbl_t * p_uart, void (* const p_cb)(void 
 
     /* Port settings */
     p_cfg->func();
+    s_port_cfg = p_cfg;
 
     memset(&p_uart->sci_hdl , 0, sizeof(sci_hdl_t));
     p_uart->sci_config.async.baud_rate    = 115200;
@@ -1088,7 +1090,7 @@ static int r_ble_gtl_api_transport_open (void * p_context)
     fsp_err_t       err = FSP_ERR_UNSUPPORTED;
     ble_abs_cfg_t * bkup_context = (ble_abs_cfg_t *) p_context;
 
-#if defined(RM_BLE_ABS_GTL_TRANSPORT_INTERFACE_UART)
+#if defined(BLE_CFG_TRANSPORT_INTERFACE_UART)
     err = (fsp_err_t) uart_port_open(&bkup_context->p_sci_instance, R_BLE_GTL_UartCallback);
 #elif defined(RM_BLE_ABS_GTL_TRANSPORT_INTERFACE_SPI)
 
@@ -1111,7 +1113,7 @@ static int r_ble_gtl_api_transport_write (void * p_context, uint8_t * p_data, ui
     fsp_err_t       err = FSP_ERR_UNSUPPORTED;
     ble_abs_cfg_t * bkup_context = (ble_abs_cfg_t *) p_context;
 
-#if defined(RM_BLE_ABS_GTL_TRANSPORT_INTERFACE_UART)
+#if defined(BLE_CFG_TRANSPORT_INTERFACE_UART)
     err = (fsp_err_t) R_SCI_Send(bkup_context->p_sci_instance.sci_hdl, p_data, (uint16_t) len);
 #elif defined(RM_BLE_ABS_GTL_TRANSPORT_INTERFACE_SPI)
 
@@ -1134,7 +1136,7 @@ static int r_ble_gtl_api_transport_read (void * p_context, uint8_t * p_data, uin
     fsp_err_t       err = FSP_ERR_UNSUPPORTED;
     ble_abs_cfg_t * bkup_context = (ble_abs_cfg_t *) p_context;
 
-#if defined(RM_BLE_ABS_GTL_TRANSPORT_INTERFACE_UART)
+#if defined(BLE_CFG_TRANSPORT_INTERFACE_UART)
     err = (fsp_err_t) R_SCI_Receive(bkup_context->p_sci_instance.sci_hdl, p_data, (uint16_t) len);
 #elif defined(RM_BLE_ABS_GTL_TRANSPORT_INTERFACE_SPI)
 
@@ -1155,7 +1157,7 @@ static int r_ble_gtl_api_transport_close (void * p_context)
     fsp_err_t       err          = FSP_SUCCESS;
     ble_abs_cfg_t * bkup_context = (ble_abs_cfg_t *) p_context;
 
-#if defined(RM_BLE_ABS_GTL_TRANSPORT_INTERFACE_UART)
+#if defined(BLE_CFG_TRANSPORT_INTERFACE_UART)
     err = (fsp_err_t) wrap_sci_close(&bkup_context->p_sci_instance);
 #elif defined(RM_BLE_ABS_GTL_TRANSPORT_INTERFACE_SPI)
 

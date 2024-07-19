@@ -31,7 +31,7 @@ Example: (empty), 4g, etc.</description>
             <description>Enter the PIN lock code of your SIM card.
 Example: (empty), 0000, etc.</description>
         </property>
-        <property id="CELLULAR_CFG_AUTH_TYPE" display="Authentication protocol type." default="1" type="combobox">
+        <property id="CELLULAR_CFG_AUTH_TYPE" display="Authentication protocol type." default="0" type="combobox">
             <option id="CELLULAR_CFG_AUTH_TYPE.0" display="0" value="0"/>
             <option id="CELLULAR_CFG_AUTH_TYPE.1" display="1" value="1"/>
             <option id="CELLULAR_CFG_AUTH_TYPE.2" display="2" value="2"/>
@@ -54,49 +54,49 @@ Example: (empty), 0000, etc.</description>
 5: For a UE that wants to apply PSM, enable network registration, location information and EMM cause value information unsolicited result code.</description>
         </property>
         <property id="CELLULAR_CFG_ATC_RETRY_CGATT" display="Connection retry limit" default="600" type="textbox">
-            <constraint display="Value must be an integer" actionOnFail="disable">testInteger("${CELLULAR_CFG_ATC_RETRY_CGATT}")</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CELLULAR_CFG_ATC_RETRY_CGATT}")</constraint>
             <constraint display="Value must be in the range 0 ~ 65535" actionOnFail="error">("${CELLULAR_CFG_ATC_RETRY_CGATT}" &gt;= 0) &amp;&amp; ("${CELLULAR_CFG_ATC_RETRY_CGATT}" &lt;= 65535)</constraint>
             <description>Connection retry limit to access point.
 Set between 0~65535.</description>
         </property>
         <property id="CELLULAR_CFG_EX_TIMEOUT" display="TCP connection timeout" default="0" type="textbox">
-            <constraint display="Value must be an integer" actionOnFail="disable">testInteger("${CELLULAR_CFG_EX_TIMEOUT}")</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CELLULAR_CFG_EX_TIMEOUT}")</constraint>
             <constraint display="Value must be in the range 0 ~ 65535" actionOnFail="error">("${CELLULAR_CFG_EX_TIMEOUT}" &gt;= 0) &amp;&amp; ("${CELLULAR_CFG_EX_TIMEOUT}" &lt;= 65535)</constraint>
             <description>TCP connection timeout to peer.
 Set between 0~65535.</description>
         </property>
         <property id="CELLULAR_CFG_SCI_PRIORITY" display="SCI interrupt priority" default="4" type="textbox">
-            <constraint display="Value must be an integer" actionOnFail="disable">testInteger("${CELLULAR_CFG_SCI_PRIORITY}")</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CELLULAR_CFG_SCI_PRIORITY}")</constraint>
             <constraint display="Value must be in the range 2 ~ 15" actionOnFail="error">("${CELLULAR_CFG_SCI_PRIORITY}" &gt;= 2) &amp;&amp; ("${CELLULAR_CFG_SCI_PRIORITY}" &lt;= 15)</constraint>
             <description>SCI interrupt priority.
 Set between 2~15.</description>
         </property>
         <property id="CELLULAR_CFG_SEMAPHORE_BLOCK_TIME" display="Maximum semaphore acquisition latency(msec)" default="15000" type="textbox">
-            <constraint display="Value must be an integer" actionOnFail="disable">testInteger("${CELLULAR_CFG_SEMAPHORE_BLOCK_TIME}")</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CELLULAR_CFG_SEMAPHORE_BLOCK_TIME}")</constraint>
             <constraint display="Value must be in the range 1 ~ 15000" actionOnFail="error">("${CELLULAR_CFG_SEMAPHORE_BLOCK_TIME}" &gt;= 1) &amp;&amp; ("${CELLULAR_CFG_SEMAPHORE_BLOCK_TIME}" &lt;= 15000)</constraint>
             <description>Maximum time to wait until a semaphore can be acquired.(msec)
 Set between 1~15000.</description>
         </property>
         <property id="CELLULAR_CFG_PSM_PREPARATION_TIME" display="Reception guard time before the module transitions to PSM" default="100" type="textbox">
-            <constraint display="Value must be an integer" actionOnFail="disable">testInteger("${CELLULAR_CFG_PSM_PREPARATION_TIME}")</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CELLULAR_CFG_PSM_PREPARATION_TIME}")</constraint>
             <constraint display="Value must be in the range 100 ~ 10000" actionOnFail="error">("${CELLULAR_CFG_PSM_PREPARATION_TIME}" &gt;= 100) &amp;&amp; ("${CELLULAR_CFG_PSM_PREPARATION_TIME}" &lt;= 10000)</constraint>
             <description>Reception guard time before the module transitions to PSM.(msec)
 Set between 100~10000.</description>
         </property>
         <property id="CELLULAR_CFG_PSM_WAKEUP_LATENCY" display="Maximum allowable wake-up delay from PSM" default="5000" type="textbox">
-            <constraint display="Value must be an integer" actionOnFail="disable">testInteger("${CELLULAR_CFG_PSM_WAKEUP_LATENCY}")</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CELLULAR_CFG_PSM_WAKEUP_LATENCY}")</constraint>
             <constraint display="Value must be in the range 0 ~ 10000" actionOnFail="error">("${CELLULAR_CFG_PSM_WAKEUP_LATENCY}" &gt;= 0) &amp;&amp; ("${CELLULAR_CFG_PSM_WAKEUP_LATENCY}" &lt;= 10000)</constraint>
             <description>Maximum allowable wake-up delay from PSM.(msec)
 Set between 0~10000.</description>
         </property>
         <property id="CELLULAR_CFG_RING_LINE_ACTIVE_TIME" display="RING line active duration" default="1000" type="textbox">
-            <constraint display="Value must be an integer" actionOnFail="disable">testInteger("${CELLULAR_CFG_RING_LINE_ACTIVE_TIME}")</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CELLULAR_CFG_RING_LINE_ACTIVE_TIME}")</constraint>
             <constraint display="Value must be in the range 1000 ~ 5000" actionOnFail="error">("${CELLULAR_CFG_RING_LINE_ACTIVE_TIME}" &gt;= 1000) &amp;&amp; ("${CELLULAR_CFG_RING_LINE_ACTIVE_TIME}" &lt;= 5000)</constraint>
             <description>RING line active duration.(msec)
 Set between 1000~5000.</description>
         </property>
         <property id="CELLULAR_CFG_UPGRADE_TIME" display="Maximum FW update latency" default="60" type="textbox">
-            <constraint display="Value must be an integer" actionOnFail="disable">testInteger("${CELLULAR_CFG_UPGRADE_TIME}")</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CELLULAR_CFG_UPGRADE_TIME}")</constraint>
             <constraint display="Value must be in the range 1 ~ 600" actionOnFail="error">("${CELLULAR_CFG_UPGRADE_TIME}" &gt;= 1) &amp;&amp; ("${CELLULAR_CFG_UPGRADE_TIME}" &lt;= 600)</constraint>
             <description>Maximum FW update latency.(min)
 Set between 1~600.</description>
@@ -129,7 +129,7 @@ The function prototype is "void (function name)(void *);".</description>
             <option id="CELLULAR_CFG_RESET_SIGNAL_LOGIC.1" display="1" value="1"/>
             <description>Reset signal logic. Active High=1, Active Low=0. If you use PMOD-RYZ014A, reset circuit is active high for reset.</description>
         </property>
-        <property id="CELLULAR_CFG_UART_SCI_CH" display="SCI Channel" default="0" type="combobox">
+        <property id="CELLULAR_CFG_UART_SCI_CH" display="SCI Channel" default="6" type="combobox">
             <option id="CELLULAR_CFG_UART_SCI_CH.0" display="0" value="0"/>
             <option id="CELLULAR_CFG_UART_SCI_CH.1" display="1" value="1"/>
             <option id="CELLULAR_CFG_UART_SCI_CH.2" display="2" value="2"/>
@@ -152,7 +152,7 @@ The function prototype is "void (function name)(void *);".</description>
 RTS(Hardware), CTS(Software): RTS hardware flow control is enabled. CTS flow control is performed by the FIT module using GPIO.
 </description>
         </property>
-        <property id="CELLULAR_CFG_CTS_PORT" display="CTS port number" default="2" type="combobox">
+        <property id="CELLULAR_CFG_CTS_PORT" display="CTS port number" default="J" type="combobox">
             <constraint display="when Enable user-defined CELLULAR_CFG_CTS_SW_CTRL is Enable only" actionOnFail="disable">${CELLULAR_CFG_CTS_SW_CTRL} == ${CELLULAR_CFG_CTS_SW_CTRL.1}</constraint>
             <option id="CELLULAR_CFG_CTS_PORT.0" display="PORT0" value="0"/>
             <option id="CELLULAR_CFG_CTS_PORT.1" display="PORT1" value="1"/>
@@ -180,7 +180,7 @@ RTS(Hardware), CTS(Software): RTS hardware flow control is enabled. CTS flow con
             <option id="CELLULAR_CFG_CTS_PORT.Q" display="PORTQ" value="Q"/>
             <description>CTS port setting.</description>
         </property>
-        <property id="CELLULAR_CFG_CTS_PIN" display="CTS pin number" default="2" type="combobox">
+        <property id="CELLULAR_CFG_CTS_PIN" display="CTS pin number" default="3" type="combobox">
             <constraint display="when Enable user-defined CELLULAR_CFG_CTS_SW_CTRL is Enable only" actionOnFail="disable">${CELLULAR_CFG_CTS_SW_CTRL} == ${CELLULAR_CFG_CTS_SW_CTRL.1}</constraint>
             <option id="CELLULAR_CFG_CTS_PIN.0" display="BIT0" value="0"/>
             <option id="CELLULAR_CFG_CTS_PIN.1" display="BIT1" value="1"/>
@@ -199,7 +199,7 @@ RTS(Hardware), CTS(Software): RTS hardware flow control is enabled. CTS flow con
 Example: 0x0BU.
 Please check the user's manual.</description>
         </property>
-        <property id="CELLULAR_CFG_RTS_PORT" display="RTS port number" default="2" type="combobox">
+        <property id="CELLULAR_CFG_RTS_PORT" display="RTS port number" default="0" type="combobox">
             <option id="CELLULAR_CFG_RTS_PORT.0" display="PORT0" value="0"/>
             <option id="CELLULAR_CFG_RTS_PORT.1" display="PORT1" value="1"/>
             <option id="CELLULAR_CFG_RTS_PORT.2" display="PORT2" value="2"/>
@@ -237,7 +237,7 @@ Please check the user's manual.</description>
             <option id="CELLULAR_CFG_RTS_PIN.7" display="BIT7" value="7"/>
             <description>RTS pin setting</description>
         </property>
-        <property id="CELLULAR_CFG_RESET_PORT" display="Reset port number" default="D" type="combobox">
+        <property id="CELLULAR_CFG_RESET_PORT" display="Reset port number" default="5" type="combobox">
             <option id="CELLULAR_CFG_RESET_PORT.0" display="PORT0" value="0"/>
             <option id="CELLULAR_CFG_RESET_PORT.1" display="PORT1" value="1"/>
             <option id="CELLULAR_CFG_RESET_PORT.2" display="PORT2" value="2"/>
@@ -264,7 +264,7 @@ Please check the user's manual.</description>
             <option id="CELLULAR_CFG_RESET_PORT.Q" display="PORTQ" value="Q"/>
             <description>RESET port setting.</description>
         </property>
-        <property id="CELLULAR_CFG_RESET_PIN" display="Reset pin number" default="0" type="combobox">
+        <property id="CELLULAR_CFG_RESET_PIN" display="Reset pin number" default="5" type="combobox">
             <option id="CELLULAR_CFG_RESET_PIN.0" display="BIT0" value="0"/>
             <option id="CELLULAR_CFG_RESET_PIN.1" display="BIT1" value="1"/>
             <option id="CELLULAR_CFG_RESET_PIN.2" display="BIT2" value="2"/>
@@ -275,7 +275,7 @@ Please check the user's manual.</description>
             <option id="CELLULAR_CFG_RESET_PIN.7" display="BIT7" value="7"/>
             <description>RESET pin setting.</description>
         </property>
-        <property id="CELLULAR_CFG_IRQ_NUM" display="IRQ Number" default="4" type="combobox">
+        <property id="CELLULAR_CFG_IRQ_NUM" display="IRQ Number" default="5" type="combobox">
             <option id="CELLULAR_CFG_IRQ_NUM.0" display="0" value="0"/>
             <option id="CELLULAR_CFG_IRQ_NUM.1" display="1" value="1"/>
             <option id="CELLULAR_CFG_IRQ_NUM.2" display="2" value="2"/>

@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_receive_task.c
@@ -270,6 +270,7 @@ void cellular_recv_task(ULONG p_pvParameters)
     cellular_synchro_event_group(p_ctrl->eventgroup, CELLULAR_RECV_TASK_BIT,
                                 (CELLULAR_MAIN_TASK_BIT | CELLULAR_RECV_TASK_BIT), CELLULAR_TIME_WAIT_TASK_START);
 
+    /* WAIT_LOOP */
     while (1)
     {
         sci_ret = R_SCI_Receive(p_ctrl->sci_ctrl.sci_hdl, &cellular_receive.data, 1);
@@ -398,6 +399,7 @@ static e_atc_return_code_t cellular_response_string_check(uint8_t * p_string)
     uint8_t             cnt = 0;
     e_atc_return_code_t res = CELLULAR_RES_MAX;
 
+    /* WAIT_LOOP */
     while (cnt < CELLULAR_RES_MAX)
     {
         if (NULL != strstr((const char *)p_string,                          //(uint8_t *)->(char *)
@@ -772,6 +774,7 @@ static void cellular_get_ap_connect_config(st_cellular_ctrl_t * p_ctrl, st_cellu
 
         cellular_cleardata(p_ctrl, p_cellular_receive);
 
+        /* WAIT_LOOP */
         do
         {
             sci_ret = R_SCI_Receive(p_ctrl->sci_ctrl.sci_hdl, &p_cellular_receive->data, 1);
@@ -1612,6 +1615,7 @@ static void cellular_ping(st_cellular_ctrl_t * p_ctrl, st_cellular_receive_t * c
     {
         cellular_cleardata(p_ctrl, p_cellular_receive);
 
+        /* WAIT_LOOP */
         do
         {
             sci_ret = R_SCI_Receive(p_ctrl->sci_ctrl.sci_hdl, &p_cellular_receive->data, 1);
@@ -1650,6 +1654,7 @@ static void cellular_get_cellinfo(st_cellular_ctrl_t * p_ctrl, st_cellular_recei
     {
         cellular_cleardata(p_ctrl, p_cellular_receive);
 
+        /* WAIT_LOOP */
         do
         {
             sci_ret = R_SCI_Receive(p_ctrl->sci_ctrl.sci_hdl, &p_cellular_receive->data, 1);
@@ -1841,8 +1846,10 @@ static void cellular_firmupgrade_info(st_cellular_ctrl_t * p_ctrl, st_cellular_r
         }
         cellular_cleardata(p_ctrl, p_cellular_receive);
 
+        /* WAIT_LOOP */
         while (1)
         {
+            /* WAIT_LOOP */
             do
             {
                 sci_ret = R_SCI_Receive(p_ctrl->sci_ctrl.sci_hdl, &p_cellular_receive->data, 1);
@@ -1854,6 +1861,7 @@ static void cellular_firmupgrade_info(st_cellular_ctrl_t * p_ctrl, st_cellular_r
 
             if (CHAR_CHECK_4 == p_cellular_receive->data)
             {
+                /* WAIT_LOOP */
                 do
                 {
                     sci_ret = R_SCI_Receive(p_ctrl->sci_ctrl.sci_hdl, &p_cellular_receive->data, 1);
@@ -1902,8 +1910,10 @@ static void cellular_get_certificate(st_cellular_ctrl_t * p_ctrl, st_cellular_re
         }
         cellular_cleardata(p_ctrl, p_cellular_receive);
 
+        /* WAIT_LOOP */
         while (1)
         {
+            /* WAIT_LOOP */
             do
             {
                 sci_ret = R_SCI_Receive(p_ctrl->sci_ctrl.sci_hdl, &p_cellular_receive->data, 1);
@@ -1918,6 +1928,7 @@ static void cellular_get_certificate(st_cellular_ctrl_t * p_ctrl, st_cellular_re
                     len++;
                 }
 
+                /* WAIT_LOOP */
                 do
                 {
                     sci_ret = R_SCI_Receive(p_ctrl->sci_ctrl.sci_hdl, &p_cellular_receive->data, 1);
@@ -2113,6 +2124,7 @@ static void cellular_cleardata(st_cellular_ctrl_t * p_ctrl, st_cellular_receive_
     CELLULAR_CFG_URC_CHARGET_FUNCTION(p_ctrl->sci_ctrl.receive_buff);
 #endif
 
+    /* WAIT_LOOP */
     for (cnt = 0; cnt < CELLULAR_ATC_RESPONSE_BUFF_SIZE; cnt++)
     {
         if ((p_ctrl->sci_ctrl.receive_buff[cnt] < 0x20) || (p_ctrl->sci_ctrl.receive_buff[cnt] > 0x7e))
@@ -2193,6 +2205,7 @@ static int32_t binary_conversion(int32_t binary)
     int32_t decimal = 0;
     int32_t base    = 1;
 
+    /* WAIT_LOOP */
     while (binary > 0)
     {
         decimal = decimal + ((binary % 10) * base);

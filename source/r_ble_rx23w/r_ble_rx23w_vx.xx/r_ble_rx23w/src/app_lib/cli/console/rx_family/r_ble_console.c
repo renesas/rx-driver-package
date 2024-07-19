@@ -312,6 +312,7 @@ bool console_getc(uint8_t *p_c, bool *p_escape)
 
     *p_c = 0x00;
 
+    /* WAIT_LOOP */
     while (R_SCI_Receive(serial_hdl, &ch, 1) == SCI_SUCCESS)
     {
         switch (state)
@@ -359,6 +360,7 @@ void console_putsf(const char *p_format, ...)
     va_list va;
     sci_err_t ret;
 
+    /* WAIT_LOOP */
     while(1)
     {
         if(false == g_cli_tx_flg)
@@ -376,7 +378,7 @@ void console_putsf(const char *p_format, ...)
     do
     {
         ret = R_SCI_Send(serial_hdl, gs_cli_buff, (uint16_t)strlen((const char *)gs_cli_buff));
-    } while ((ret == SCI_ERR_XCVR_BUSY) || (ret == SCI_ERR_INSUFFICIENT_SPACE));
+    } while ((ret == SCI_ERR_XCVR_BUSY) || (ret == SCI_ERR_INSUFFICIENT_SPACE)); /* WAIT_LOOP */
 
     if( ret == SCI_SUCCESS )
     {

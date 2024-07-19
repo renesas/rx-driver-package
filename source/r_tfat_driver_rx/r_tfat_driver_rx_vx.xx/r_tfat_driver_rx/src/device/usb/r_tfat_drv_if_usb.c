@@ -36,6 +36,7 @@
 *                                    Renesas uITRON (RI600V4).
 *                                    Added support for GNUC and ICCRX.
 *              : 10.09.2020 2.20     Added support for the format function.
+*              : 15.12.2023 2.40     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *******************************************************************************/
 
 /******************************************************************************
@@ -66,7 +67,7 @@ Includes   <System Includes> , "Project Includes"
 #if (RX_USB_HMSC_API_VERSION_MAJOR == 1) && (RX_USB_HMSC_API_VERSION_MINOR == 00)
 #define TFAT_DRV_USB_API_TYPE1
 #elif (USB_VERSION_MAJOR == 1) && (USB_VERSION_MINOR <= 19) && (RX_USB_HMSC_API_VERSION_MAJOR == 1) && \
-      (RX_USB_HMSC_API_VERSION_MINOR <= 10)
+    (RX_USB_HMSC_API_VERSION_MINOR <= 10)
 #define TFAT_DRV_USB_API_TYPE2
 #else
 #define TFAT_DRV_USB_API_TYPE3
@@ -501,7 +502,7 @@ DRESULT usb_disk_ioctl (
 * Return value  : Status of the disk
 ******************************************************************************/
 DSTATUS usb_disk_status (uint8_t pdrv /* Physical drive number    */
-                               )
+                        )
 {
     /*  Please put the code for disk_status driver interface
      function over here.  */
@@ -529,7 +530,7 @@ void R_usb_hmsc_WaitLoop (void)
 }
 #endif /* (BSP_CFG_RTOS_USED == 0) */
 
-#endif // (TFAT_USB_DRIVE_NUM > 0)
+#endif /* (TFAT_USB_DRIVE_NUM > 0) */
 /******************************************************************************
 End  of file
 ******************************************************************************/

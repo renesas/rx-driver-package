@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_emwin_rx_pid_spi_if.c
@@ -26,6 +26,8 @@
  *         : 31.08.2022 6.26.c.1.00    First Release
  *         : 31.03.2023 6.32.a.1.00    Update emWin library to v6.32a.
  *                                     Fixed TOUCH_ORIENTATION definition value.
+ *         : 31.01.2024 6.34.g.1.00    Update emWin library to v6.34g.
+ *                                     Moved SCI and RSPI pin setting process after the Open function.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -471,9 +473,6 @@ e_emwin_rx_err_t r_emwin_rx_pid_open(void)
 
 #if (EMWIN_TOUCH_IF == TOUCH_IF_SCI_SPI)
 
-    /* Initialize SCI pins */
-    SCI_PIN_SET();
-
     /* Open the SSPI module */
     s_touch_sci_spi_setting.sspi.bit_rate     = EMWIN_TOUCH_BAUDRATE;
     s_touch_sci_spi_setting.sspi.int_priority = 5;
@@ -491,6 +490,9 @@ e_emwin_rx_err_t r_emwin_rx_pid_open(void)
     /* If there were an error this would demonstrate error detection of API calls. */
     if (SCI_SUCCESS == s_touch_sci_spi_err)
     {
+        /* Initialize SCI pins */
+        SCI_PIN_SET();
+
         /* Casting emwin_rx_cb_timer pointer is used for callback function. */
         timer_ret = r_emwin_rx_guix_timer_create(20, (emwin_rx_cb_timer *)cb_timer_touch_event);
 
@@ -509,9 +511,6 @@ e_emwin_rx_err_t r_emwin_rx_pid_open(void)
     }
 
 #else /* (EMWIN_TOUCH_IF == TOUCH_IF_RSPI) */
-
-    /* Initialize RSPI pins */
-    RSPI_PIN_SET();
 
     /* Open the RSPI module */
     s_touch_rspi_command.cpha          = RSPI_SPCMD_CPHA_SAMPLE_ODD;
@@ -541,6 +540,9 @@ e_emwin_rx_err_t r_emwin_rx_pid_open(void)
     /* If there were an error this would demonstrate error detection of API calls. */
     if (RSPI_SUCCESS == s_touch_rspi_err)
     {
+        /* Initialize RSPI pins */
+        RSPI_PIN_SET();
+
         /* Casting emwin_rx_cb_timer pointer is used for callback function. */
         timer_ret = r_emwin_rx_guix_timer_create(20, (emwin_rx_cb_timer *)cb_timer_touch_event);
 

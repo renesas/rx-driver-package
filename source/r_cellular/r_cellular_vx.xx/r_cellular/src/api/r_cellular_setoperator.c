@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_setoperator.c
@@ -134,6 +134,7 @@ static e_cellular_err_t cellular_set_operator(st_cellular_ctrl_t * const p_ctrl,
 
         if (CELLULAR_SUCCESS == ret)
         {
+            /* WAIT_LOOP */
             for (cnt = CELLULAR_START_SOCKET_NUMBER; cnt <= p_ctrl->creatable_socket; cnt++)
             {
                 ret = cellular_closesocket(p_ctrl, cnt);
@@ -142,6 +143,7 @@ static e_cellular_err_t cellular_set_operator(st_cellular_ctrl_t * const p_ctrl,
             cnt = 0;
             ret = CELLULAR_ERR_MODULE_COM;
 
+            /* WAIT_LOOP */
             do
             {
                 if (CELLULAR_FLG_START == flg)

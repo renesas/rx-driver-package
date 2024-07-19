@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_cellular_apconnect.c
@@ -213,6 +213,7 @@ static e_cellular_err_t cellular_apconnect(st_cellular_ctrl_t * const p_ctrl,
         CELLULAR_LOG_INFO(("Trying access point [%s] connecting.", p_ap_cfg->ap_name));
     }
 
+    /* WAIT_LOOP */
     while (1)
     {
         atc_cgatt_check(p_ctrl);
@@ -263,6 +264,7 @@ static e_cellular_err_t cellular_sync_check(st_cellular_ctrl_t * const p_ctrl)
 
     p_ctrl->recv_data = &datetime;
 
+    /* WAIT_LOOP */
     while (count < CELLULAR_SYNC_RETRY)
     {
         ret = atc_cclk_check(p_ctrl);
