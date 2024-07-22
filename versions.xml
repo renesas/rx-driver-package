@@ -355,6 +355,15 @@
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/d145ae897599377fa792a49df527d3f5e463dadb/FITModules/r_fwup_v2.03_extend.mdf</url>
     </urls>
   </module>
+  <module rdp_version="exceptional_modules">
+    <name>r_wifi_da16xxx</name>
+    <version>1.20</version>
+    <urls>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1f6d750d7a2035e76be85f4c3482fe088aa80053/FITModules/r_wifi_da16xxx_v1.20.zip</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1f6d750d7a2035e76be85f4c3482fe088aa80053/FITModules/r_wifi_da16xxx_v1.20.xml</url>
+      <url>https://raw.githubusercontent.com/renesas/rx-driver-package/1f6d750d7a2035e76be85f4c3482fe088aa80053/FITModules/r_wifi_da16xxx_v1.20_extend.mdf</url>
+    </urls>
+  </module>
   <module rdp_version="1.25">
     <name>r_ble_qe_utility</name>
     <version>1.00</version>
