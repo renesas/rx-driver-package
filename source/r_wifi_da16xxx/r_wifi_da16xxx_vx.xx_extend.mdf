@@ -1,0 +1,760 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
+* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+* applicable laws, including copyright laws.
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
+* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
+* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
+* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
+* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
+* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <fileTemplate></fileTemplate>
+    <configuration>
+
+        <category id="COMMON" display="Common Setting">
+            <description>Setting for Wi-Fi module generation.</description>
+        </category>
+
+        <property id="WIFI_CFG_DA16600_SUPPORT" display="Enable DA16600 support" default="0" type="checkbox" category="COMMON">
+            <option id="WIFI_CFG_DA16600_SUPPORT.0" display="Disable" value="0"/>
+            <option id="WIFI_CFG_DA16600_SUPPORT.1" display="Enable" value="1"/>
+            <description>Enable: Use DA16600 module.
+Disable: Not use DA16600 module.</description>
+        </property>
+        <property id="WIFI_CFG_SCI_CHANNEL" display="SCI Channel for AT command communication" default="6" type="combobox" category="COMMON">
+            <option id="WIFI_CFG_SCI_CHANNEL.0" display="0" value="0"/>
+            <option id="WIFI_CFG_SCI_CHANNEL.1" display="1" value="1"/>
+            <option id="WIFI_CFG_SCI_CHANNEL.2" display="2" value="2"/>
+            <option id="WIFI_CFG_SCI_CHANNEL.3" display="3" value="3"/>
+            <option id="WIFI_CFG_SCI_CHANNEL.4" display="4" value="4"/>
+            <option id="WIFI_CFG_SCI_CHANNEL.5" display="5" value="5"/>
+            <option id="WIFI_CFG_SCI_CHANNEL.6" display="6" value="6"/>
+            <option id="WIFI_CFG_SCI_CHANNEL.7" display="7" value="7"/>
+            <option id="WIFI_CFG_SCI_CHANNEL.8" display="8" value="8"/>
+            <option id="WIFI_CFG_SCI_CHANNEL.9" display="9" value="9"/>
+            <option id="WIFI_CFG_SCI_CHANNEL.10" display="10" value="10"/>
+            <option id="WIFI_CFG_SCI_CHANNEL.11" display="11" value="11"/>
+            <option id="WIFI_CFG_SCI_CHANNEL.12" display="12" value="12"/>
+            <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_SCI_CHANNEL}")</constraint>
+            <constraint display="Value must be in the range 0~12">("${WIFI_CFG_SCI_CHANNEL}" &gt;= 0) &amp;&amp; ("${WIFI_CFG_SCI_CHANNEL}" &lt;= 12)</constraint>
+            <description>SCI channel for DA16XXX AT command communication.
+Board dependent settings; please use the value for each setting listed below depending on the board you use.
+1: RX65N Cloud Kit (PMOD)    - SCI Channel 0
+2: RX65N Envision Kit (PMOD) - SCI Channel 2
+3: RX65N RSK (2MB) (PMOD1)   - SCI Channel 6
+4: RX65N RSK (2MB) (PMOD2)   - SCI Channel 1
+5: CK-RX65N v1 (PMOD1)       - SCI Channel 6
+6: CK-RX65N v1 (PMOD2)       - SCI Channel 0
+7: CK-RX65N v2 (PMOD1)       - SCI Channel 6
+8: CK-RX65N v2 (PMOD2)       - SCI Channel 2
+9: RX671 Target Board (PMOD) - SCI Channel 5
+10: RX66N Target Board (PMOD) - SCI Channel 5</description>
+        </property>
+        <property id="WIFI_CFG_SCI_INTERRUPT_LEVEL" display="Interrupt Level for WIFI_CFG_SCI_CHANNEL" default="4" type="textbox" category="COMMON">
+            <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_SCI_INTERRUPT_LEVEL}")</constraint>
+            <constraint display="Value must be in the range 1~15">("${WIFI_CFG_SCI_INTERRUPT_LEVEL}" &gt;= 1) &amp;&amp; ("${WIFI_CFG_SCI_INTERRUPT_LEVEL}" &lt;= 15)</constraint>
+            <description>Interrupt Level for WIFI_CFG_SCI_CHANNEL</description>
+        </property>
+        <property id="WIFI_CFG_SCI_PCLK_HZ" display="Peripheral clock speed for WIFI_CFG_SCI_CHANNEL" default="60000000" type="textbox" category="COMMON">
+            <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_SCI_PCLK_HZ}")</constraint>
+            <constraint display="Value must be in the range 60000000~120000000">("${WIFI_CFG_SCI_PCLK_HZ}" &gt;= 60000000) &amp;&amp; ("${WIFI_CFG_SCI_PCLK_HZ}" &lt;= 120000000)</constraint>
+            <description>Peripheral clock speed for WIFI_CFG_SCI_CHANNEL.
+Check Peripheral clock speed in Clocks tab.
+For Peripheral module clock, check board group hardware manual, Serial Communications Interface section at below.
+e.g. if PCLKB speed is 60MHz then WIFI_CFG_SCI_PCLK_HZ is 60000000.
+List of board group hardware manual:
+1: RX65N group: https://www.renesas.com/us/en/document/mah/rx65n-group-rx651-group-users-manualhardware-rev230
+2: RX671 group: https://www.renesas.com/tw/en/document/mah/rx671-group-users-manual-hardware-rev100
+3: RX66N group: https://www.renesas.com/us/en/document/mah/rx66n-group-users-manual-hardware-rev111</description>
+        </property>
+        <property id="WIFI_CFG_SCI_BAUDRATE" display="Communication baud rate for WIFI_CFG_SCI_CHANNEL" default="115200" type="textbox" category="COMMON">
+            <constraint display="Value must be an decimal value" actionOnFail="disable">testInteger("${WIFI_CFG_SCI_BAUDRATE}")</constraint>
+            <constraint display="Value must be in the range 115200~921600">("${WIFI_CFG_SCI_BAUDRATE}" &gt;= 115200) &amp;&amp; ("${WIFI_CFG_SCI_BAUDRATE}" &lt;= 921600)</constraint>
+            <description>Communication baud rate for WIFI_CFG_SCI_CHANNEL.</description>
+        </property>
+        <property id="WIFI_CFG_CTS_SW_CTRL" display="UART hardware flow control" default="1" type="combobox" category="COMMON">
+            <option id="WIFI_CFG_CTS_SW_CTRL.0" display="CTS(Hardware), RTS(Software)" value="0"/>
+            <option id="WIFI_CFG_CTS_SW_CTRL.1" display="RTS(Hardware), CTS(Software)" value="1"/>
+            <description>CTS(Hardware), RTS(Software): CTS hardware flow control is enabled. RTS flow control is performed by the FIT module using GPIO.
+RTS(Hardware), CTS(Software): RTS hardware flow control is enabled. CTS flow control is performed by the FIT module using GPIO.</description>
+        </property>
+        <property id="WIFI_CFG_CTS_PORT" display="CTS port number" default="J" type="combobox" category="COMMON">
+            <option id="WIFI_CFG_CTS_PORT.0" display="PORT0" value="0"/>
+            <option id="WIFI_CFG_CTS_PORT.1" display="PORT1" value="1"/>
+            <option id="WIFI_CFG_CTS_PORT.2" display="PORT2" value="2"/>
+            <option id="WIFI_CFG_CTS_PORT.3" display="PORT3" value="3"/>
+            <option id="WIFI_CFG_CTS_PORT.4" display="PORT4" value="4"/>
+            <option id="WIFI_CFG_CTS_PORT.5" display="PORT5" value="5"/>
+            <option id="WIFI_CFG_CTS_PORT.6" display="PORT6" value="6"/>
+            <option id="WIFI_CFG_CTS_PORT.7" display="PORT7" value="7"/>
+            <option id="WIFI_CFG_CTS_PORT.8" display="PORT8" value="8"/>
+            <option id="WIFI_CFG_CTS_PORT.9" display="PORT9" value="9"/>
+            <option id="WIFI_CFG_CTS_PORT.A" display="PORTA" value="A"/>
+            <option id="WIFI_CFG_CTS_PORT.B" display="PORTB" value="B"/>
+            <option id="WIFI_CFG_CTS_PORT.C" display="PORTC" value="C"/>
+            <option id="WIFI_CFG_CTS_PORT.D" display="PORTD" value="D"/>
+            <option id="WIFI_CFG_CTS_PORT.E" display="PORTE" value="E"/>
+            <option id="WIFI_CFG_CTS_PORT.F" display="PORTF" value="F"/>
+            <option id="WIFI_CFG_CTS_PORT.G" display="PORTG" value="G"/>
+            <option id="WIFI_CFG_CTS_PORT.H" display="PORTH" value="H"/>
+            <option id="WIFI_CFG_CTS_PORT.J" display="PORTJ" value="J"/>
+            <option id="WIFI_CFG_CTS_PORT.K" display="PORTK" value="K"/>
+            <option id="WIFI_CFG_CTS_PORT.L" display="PORTL" value="L"/>
+            <option id="WIFI_CFG_CTS_PORT.M" display="PORTM" value="M"/>
+            <option id="WIFI_CFG_CTS_PORT.N" display="PORTN" value="N"/>
+            <option id="WIFI_CFG_CTS_PORT.Q" display="PORTQ" value="Q"/>
+            <description>Configure CTS port.
+Board dependent settings; please use the value for each setting listed below depending on the board you use.
+1: RX65N Cloud Kit (PMOD)    - P23 (Port 2)
+2: RX65N Envision Kit (PMOD) - PJ5 (Port J)
+3: RX65N RSK (2MB) (PMOD1)   - PJ3 (Port J)
+4: RX65N RSK (2MB) (PMOD2)   - P31 (Port 3)
+5: CK-RX65N v1 (PMOD1)       - PJ3 (Port J)
+6: CK-RX65N v1 (PMOD2)       - P23 (Port 2)
+7: CK-RX65N v2 (PMOD1)       - PJ3 (Port J)
+8: CK-RX65N v2 (PMOD2)       - PJ5 (Port J)
+9: RX671 Target Board (PMOD) - PC0 (Port C)
+10: RX66N Target Board (PMOD) - PC0 (Port C)</description>
+        </property>
+        <property id="WIFI_CFG_CTS_PIN" display="CTS pin number" default="3" type="textbox" category="COMMON">
+            <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_CTS_PIN}")</constraint>
+            <constraint display="Value must be in the range 0~7">("${WIFI_CFG_CTS_PIN}" &gt;= 0) &amp;&amp; ("${WIFI_CFG_CTS_PIN}" &lt;= 7)</constraint>
+            <description>Configure CTS pin.
+Board dependent settings; please use the value for each setting listed below depending on the board you use.
+1: RX65N Cloud Kit (PMOD)    - P23 (Pin 3)
+2: RX65N Envision Kit (PMOD) - PJ5 (Pin 5)
+3: RX65N RSK (2MB) (PMOD1)   - PJ3 (Pin 3)
+4: RX65N RSK (2MB) (PMOD2)   - P31 (Pin 1)
+5: CK-RX65N v1 (PMOD1)       - PJ3 (Pin 3)
+6: CK-RX65N v1 (PMOD2)       - P23 (Pin 3)
+7: CK-RX65N v2 (PMOD1)       - PJ3 (Pin 3)
+8: CK-RX65N v2 (PMOD2)       - PJ5 (Pin 5)
+9: RX671 Target Board (PMOD) - PC0 (Pin 0)
+10: RX66N Target Board (PMOD) - PC0 (Pin 0)</description>
+        </property>
+        <property id="WIFI_CFG_RTS_PORT" display="RTS port number" default="J" type="combobox" category="COMMON">
+            <option id="WIFI_CFG_RTS_PORT.0" display="PORT0" value="0"/>
+            <option id="WIFI_CFG_RTS_PORT.1" display="PORT1" value="1"/>
+            <option id="WIFI_CFG_RTS_PORT.2" display="PORT2" value="2"/>
+            <option id="WIFI_CFG_RTS_PORT.3" display="PORT3" value="3"/>
+            <option id="WIFI_CFG_RTS_PORT.4" display="PORT4" value="4"/>
+            <option id="WIFI_CFG_RTS_PORT.5" display="PORT5" value="5"/>
+            <option id="WIFI_CFG_RTS_PORT.6" display="PORT6" value="6"/>
+            <option id="WIFI_CFG_RTS_PORT.7" display="PORT7" value="7"/>
+            <option id="WIFI_CFG_RTS_PORT.8" display="PORT8" value="8"/>
+            <option id="WIFI_CFG_RTS_PORT.9" display="PORT9" value="9"/>
+            <option id="WIFI_CFG_RTS_PORT.A" display="PORTA" value="A"/>
+            <option id="WIFI_CFG_RTS_PORT.B" display="PORTB" value="B"/>
+            <option id="WIFI_CFG_RTS_PORT.C" display="PORTC" value="C"/>
+            <option id="WIFI_CFG_RTS_PORT.D" display="PORTD" value="D"/>
+            <option id="WIFI_CFG_RTS_PORT.E" display="PORTE" value="E"/>
+            <option id="WIFI_CFG_RTS_PORT.F" display="PORTF" value="F"/>
+            <option id="WIFI_CFG_RTS_PORT.G" display="PORTG" value="G"/>
+            <option id="WIFI_CFG_RTS_PORT.H" display="PORTH" value="H"/>
+            <option id="WIFI_CFG_RTS_PORT.J" display="PORTJ" value="J"/>
+            <option id="WIFI_CFG_RTS_PORT.K" display="PORTK" value="K"/>
+            <option id="WIFI_CFG_RTS_PORT.L" display="PORTL" value="L"/>
+            <option id="WIFI_CFG_RTS_PORT.M" display="PORTM" value="M"/>
+            <option id="WIFI_CFG_RTS_PORT.N" display="PORTN" value="N"/>
+            <option id="WIFI_CFG_RTS_PORT.Q" display="PORTQ" value="Q"/>
+            <description>Configure RTS port.
+Board dependent settings; please use the value for each setting listed below depending on the board you use.
+1: RX65N Cloud Kit (PMOD)    - P23 (Port 2)
+2: RX65N Envision Kit (PMOD) - PJ5 (Port J)
+3: RX65N RSK (2MB) (PMOD1)   - PJ3 (Port J)
+4: RX65N RSK (2MB) (PMOD2)   - P31 (Port 3)
+5: CK-RX65N v1 (PMOD1)       - PJ3 (Port J)
+6: CK-RX65N v1 (PMOD2)       - P23 (Port 2)
+7: CK-RX65N v2 (PMOD1)       - PJ3 (Port J)
+8: CK-RX65N v2 (PMOD2)       - PJ5 (Port J)
+9: RX671 Target Board (PMOD) - PC0 (Port C)
+10: RX66N Target Board (PMOD) - PC0 (Port C)</description>
+        </property>
+        <property id="WIFI_CFG_RTS_PIN" display="RTS pin number" default="3" type="textbox" category="COMMON">
+            <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_RTS_PIN}")</constraint>
+            <constraint display="Value must be in the range 0~7">("${WIFI_CFG_RTS_PIN}" &gt;= 0) &amp;&amp; ("${WIFI_CFG_RTS_PIN}" &lt;= 7)</constraint>
+            <description>Configure RTS pin.
+Board dependent settings; please use the value for each setting listed below depending on the board you use.
+1: RX65N Cloud Kit (PMOD)    - P23 (Pin 3)
+2: RX65N Envision Kit (PMOD) - PJ5 (Pin 5)
+3: RX65N RSK (2MB) (PMOD1)   - PJ3 (Pin 3)
+4: RX65N RSK (2MB) (PMOD2)   - P31 (Pin 1)
+5: CK-RX65N v1 (PMOD1)       - PJ3 (Pin 3)
+6: CK-RX65N v1 (PMOD2)       - P23 (Pin 3)
+7: CK-RX65N v2 (PMOD1)       - PJ3 (Pin 3)
+8: CK-RX65N v2 (PMOD2)       - PJ5 (Pin 5)
+9: RX671 Target Board (PMOD) - PC0 (Pin 0)
+10: RX66N Target Board (PMOD) - PC0 (Pin 0)</description>
+        </property>
+        <property id="WIFI_CFG_PFS_SET_VALUE" display="RTS pin function set value" default="0x0AU" type="textbox" category="COMMON">
+            <constraint display="when Enable user-defined WIFI_CFG_CTS_SW_CTRL is Enable only" actionOnFail="disable">${WIFI_CFG_CTS_SW_CTRL} == ${WIFI_CFG_CTS_SW_CTRL.1}</constraint>
+            <constraint display="Character error. Example: 0x0BU." actionOnFail="error">/^(0x[A-F0-9].[U]{1,5})$/.test("${WIFI_CFG_PFS_SET_VALUE}")</constraint>
+            <description>RTS pin function set value.
+Board dependent settings; please use the value for each setting listed below depending on the board you use.
+1: RX65N Cloud Kit (PMOD)    - 0x0BU
+2: RX65N Envision Kit (PMOD) - 0x0BU
+3: RX65N RSK (2MB) (PMOD1)   - 0x0AU
+4: RX65N RSK (2MB) (PMOD2)   - 0x0BU
+5: CK-RX65N v1 (PMOD1)       - 0x0AU
+6: CK-RX65N v1 (PMOD2)       - 0x0BU
+7: CK-RX65N v2 (PMOD1)       - 0x0AU
+8: CK-RX65N v2 (PMOD2)       - 0x0BU
+9: RX671 Target Board (PMOD) - 0x0BU
+10: RX66N Target Board (PMOD) - 0x0BU
+Check Pin Function Select (PSEL) of Pin Function Control Register (PxyPFS)
+in Multi-Function Pin Controller (MPC) section of board group hardware manual.
+Below is list of board group hardware manual:
+    1: RX65N group: https://www.renesas.com/us/en/document/mah/rx65n-group-rx651-group-users-manualhardware-rev230
+    2: RX671 group: https://www.renesas.com/tw/en/document/mah/rx671-group-users-manual-hardware-rev100
+    3: RX66N group: https://www.renesas.com/us/en/document/mah/rx66n-group-users-manual-hardware-rev111</description>
+        </property>
+        <property id="WIFI_CFG_RESET_PORT" display="Reset port number" default="5" type="combobox" category="COMMON">
+            <option id="WIFI_CFG_RESET_PORT.0" display="PORT0" value="0"/>
+            <option id="WIFI_CFG_RESET_PORT.1" display="PORT1" value="1"/>
+            <option id="WIFI_CFG_RESET_PORT.2" display="PORT2" value="2"/>
+            <option id="WIFI_CFG_RESET_PORT.3" display="PORT3" value="3"/>
+            <option id="WIFI_CFG_RESET_PORT.4" display="PORT4" value="4"/>
+            <option id="WIFI_CFG_RESET_PORT.5" display="PORT5" value="5"/>
+            <option id="WIFI_CFG_RESET_PORT.6" display="PORT6" value="6"/>
+            <option id="WIFI_CFG_RESET_PORT.7" display="PORT7" value="7"/>
+            <option id="WIFI_CFG_RESET_PORT.8" display="PORT8" value="8"/>
+            <option id="WIFI_CFG_RESET_PORT.9" display="PORT9" value="9"/>
+            <option id="WIFI_CFG_RESET_PORT.A" display="PORTA" value="A"/>
+            <option id="WIFI_CFG_RESET_PORT.B" display="PORTB" value="B"/>
+            <option id="WIFI_CFG_RESET_PORT.C" display="PORTC" value="C"/>
+            <option id="WIFI_CFG_RESET_PORT.D" display="PORTD" value="D"/>
+            <option id="WIFI_CFG_RESET_PORT.E" display="PORTE" value="E"/>
+            <option id="WIFI_CFG_RESET_PORT.F" display="PORTF" value="F"/>
+            <option id="WIFI_CFG_RESET_PORT.G" display="PORTG" value="G"/>
+            <option id="WIFI_CFG_RESET_PORT.H" display="PORTH" value="H"/>
+            <option id="WIFI_CFG_RESET_PORT.J" display="PORTJ" value="J"/>
+            <option id="WIFI_CFG_RESET_PORT.K" display="PORTK" value="K"/>
+            <option id="WIFI_CFG_RESET_PORT.L" display="PORTL" value="L"/>
+            <option id="WIFI_CFG_RESET_PORT.M" display="PORTM" value="M"/>
+            <option id="WIFI_CFG_RESET_PORT.N" display="PORTN" value="N"/>
+            <option id="WIFI_CFG_RESET_PORT.Q" display="PORTQ" value="Q"/>
+            <description>Configure RESET port.
+Board dependent settings; please use the value for each setting listed below depending on the board you use.
+1: RX65N Cloud Kit (PMOD)    - PD0 (Port D)
+2: RX65N Envision Kit (PMOD) - P55 (Port 5)
+3: RX65N RSK (2MB) (PMOD1)   - PF5 (Port F)
+4: RX65N RSK (2MB) (PMOD2)   - P20 (Port 2)
+5: CK-RX65N v1 (PMOD1)       - P55 (Port 5)
+6: CK-RX65N v1 (PMOD2)       - PA1 (Port A)
+7: CK-RX65N v2 (PMOD1)       - P55 (Port 5)
+8: CK-RX65N v2 (PMOD2)       - PA1 (Port A)
+9: RX671 Target Board (PMOD) - PB1 (Port B)
+10: RX66N Target Board (PMOD) - PB1 (Port B)</description>
+        </property>
+        <property id="WIFI_CFG_RESET_PIN" display="Reset pin number" default="5" type="textbox" category="COMMON">
+            <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_RESET_PIN}")</constraint>
+            <constraint display="Value must be in the range 0~7">("${WIFI_CFG_RESET_PIN}" &gt;= 0) &amp;&amp; ("${WIFI_CFG_RESET_PIN}" &lt;= 7)</constraint>
+            <description>Configure RESET pin.
+Board dependent settings; please use the value for each setting listed below depending on the board you use.
+1: RX65N Cloud Kit (PMOD)    - PD0 (Pin 0)
+2: RX65N Envision Kit (PMOD) - P55 (Pin 5)
+3: RX65N RSK (2MB) (PMOD1)   - PF5 (Pin 5)
+4: RX65N RSK (2MB) (PMOD2)   - P20 (Pin 0)
+5: CK-RX65N v1 (PMOD1)       - P55 (Pin 5)
+6: CK-RX65N v1 (PMOD2)       - PA1 (Pin 1)
+7: CK-RX65N v2 (PMOD1)       - P55 (Pin 5)
+8: CK-RX65N v2 (PMOD2)       - PA1 (Pin 1)
+9: RX671 Target Board (PMOD) - PB1 (Pin 1)
+10: RX66N Target Board (PMOD) - PB1 (Pin 1)</description>
+        </property>
+        <property id="WIFI_CFG_USE_CALLBACK_FUNCTION" display="Wi-Fi callback function use" default="0" type="combobox" category="COMMON">
+            <option id="WIFI_CFG_USE_CALLBACK_FUNCTION.0" display="0" value="0"/>
+            <option id="WIFI_CFG_USE_CALLBACK_FUNCTION.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="WIFI_CFG_CALLBACK_FUNCTION_NAME" display="Wi-Fi callback function name" default="NULL" type="textbox" category="COMMON">
+            <constraint display="Used for Wi-Fi callback function." actionOnFail="disable">"${WIFI_CFG_USE_CALLBACK_FUNCTION}" == "${WIFI_CFG_USE_CALLBACK_FUNCTION.1}"</constraint>
+            <constraint display="Illegal input.">/^[a-zA-Z_0-9]*$/.test("${WIFI_CFG_CALLBACK_FUNCTION_NAME}")</constraint>
+            <description>Please input the Wi-Fi callback function name. </description>
+        </property>
+        <property id="WIFI_CFG_AT_CMD_TX_BUFFER_SIZE" display="AT command transfer buffer size" default="512" type="textbox" category="COMMON">
+            <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_AT_CMD_TX_BUFFER_SIZE}")</constraint>
+            <constraint display="Value must be in the range 1~8192">("${WIFI_CFG_AT_CMD_TX_BUFFER_SIZE}" &gt;= 1) &amp;&amp; ("${WIFI_CFG_AT_CMD_TX_BUFFER_SIZE}" &lt;= 8192)</constraint>
+            <description>AT command transfer buffer size
+Value must be in the range 1-8192</description>
+        </property>
+        <property id="WIFI_CFG_AT_CMD_RX_BUFFER_SIZE" display="AT command receive buffer size" default="3000" type="textbox" category="COMMON">
+            <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_AT_CMD_RX_BUFFER_SIZE}")</constraint>
+            <constraint display="Value must be in the range 1~8192">("${WIFI_CFG_AT_CMD_RX_BUFFER_SIZE}" &gt;= 1) &amp;&amp; ("${WIFI_CFG_AT_CMD_RX_BUFFER_SIZE}" &lt;= 8192)</constraint>
+            <description>AT command receive buffer size
+Value must be in the range 1-8192</description>
+        </property>
+        <property id="WIFI_CFG_MAX_SSID_LEN" display="Max SSID Length" default="32" type="textbox" category="COMMON">
+            <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_MAX_SSID_LEN}")</constraint>
+            <description>Max AP's SSID length. </description>
+        </property>
+        <property id="WIFI_CFG_MAX_BSSID_LEN" display="Max BSSID Length" default="6" type="textbox" category="COMMON">
+            <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_MAX_BSSID_LEN}")</constraint>
+            <description>Max AP's BSSID length. </description>
+        </property>
+        <property id="WIFI_CFG_SNTP_ENABLE" display="Use SNTP client service" default="0" type="checkbox" category="COMMON">
+            <option id="WIFI_CFG_SNTP_ENABLE.0" display="Disable" value="0"/>
+            <option id="WIFI_CFG_SNTP_ENABLE.1" display="Enable" value="1"/>
+            <description>Enable: Enable SNTP client service.
+Disable: Disable SNTP client service.</description>
+        </property>
+        <property id="WIFI_CFG_SNTP_SERVER_IP" display="The SNTP server IP address string" default='"0.0.0.0"' type="textbox" category="COMMON">
+            <constraint display="Used for SNTP client." actionOnFail="disable">"${WIFI_CFG_SNTP_ENABLE}" == "${WIFI_CFG_SNTP_ENABLE.1}"</constraint>
+            <constraint display="Illegal input. Value must contain 0-9 and double quotes (&quot;)">/^"((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}"$/.test('${WIFI_CFG_SNTP_SERVER_IP}')</constraint>
+            <description>Please input the SNTP server IP address in string. </description>
+        </property>
+        <property id="WIFI_CFG_SNTP_UTC_OFFSET" display="Timezone offset in hours (-12 ~ 12)" default="7" type="textbox" category="COMMON">
+            <constraint display="Used for SNTP client." actionOnFail="disable">"${WIFI_CFG_SNTP_ENABLE}" == "${WIFI_CFG_SNTP_ENABLE.1}"</constraint>
+            <constraint display="Illegal input. Value must be in range: -12 ~ 12.">("${WIFI_CFG_SNTP_UTC_OFFSET}" &gt;= -12) &amp;&amp; ("${WIFI_CFG_SNTP_UTC_OFFSET}" &lt;= 12)</constraint>
+            <description>Please input the value from -12 to 12. </description>
+        </property>
+        <property id="WIFI_CFG_COUNTRY_CODE" display="Country code" default="&quot;&quot;" type="textbox" category="COMMON">
+            <constraint display="Illegal input. Value must be contain a-z or A-Z and double quotes (e.g. &quot;VN&quot;)">/^"[a-zA-Z]*"$/.test('${WIFI_CFG_COUNTRY_CODE}')</constraint>
+            <description>Please input the country code. Country code defined in ISO3166-1 alpha-2 standard. </description>
+        </property>
+        <property id="WIFI_CFG_USE_FREERTOS_LOGGING" display="Use FreeRTOS logging functionality" default="0" type="checkbox" category="COMMON">
+            <option id="WIFI_CFG_USE_FREERTOS_LOGGING.0" display="Disable" value="0"/>
+            <option id="WIFI_CFG_USE_FREERTOS_LOGGING.1" display="Enable" value="1"/>
+            <description>Enable: Use FreeRTOS logging functionality.
+Disable: Not use FreeRTOS logging functionality.</description>
+        </property>
+        <property id="WIFI_CFG_DEBUG_LOG" display="Debug log output level." default="0" type="combobox" category="COMMON">
+            <option id="WIFI_CFG_DEBUG_LOG.0" display="0: OFF" value="0"/>
+            <option id="WIFI_CFG_DEBUG_LOG.1" display="1: ERROR" value="1"/>
+            <option id="WIFI_CFG_DEBUG_LOG.2" display="2: +WARN" value="2"/>
+            <option id="WIFI_CFG_DEBUG_LOG.3" display="3: +INFO" value="3"/>
+            <option id="WIFI_CFG_DEBUG_LOG.4" display="4: +DEBUG" value="4"/>
+            <description>Debug log output level
+0: OFF, 1: ERROR, 2: +WARN, 3: +INFO, 4: +DEBUG(AT command data)</description>
+        </property>
+
+        <category id="WIFI_PROTOCOL" display="Select Wi-Fi protocol">
+            <description>Setting for Wi-Fi module generation.</description>
+        </category>
+
+        <property id="WIFI_CFG_TCP_SUPPORT" display="TCP protocol support" default="1" type="checkbox" category="WIFI_PROTOCOL">
+            <option id="WIFI_CFG_TCP_SUPPORT.0" display="Disable" value="0"/>
+            <option id="WIFI_CFG_TCP_SUPPORT.1" display="Enable" value="1"/>
+            <description>Enable: Use TCP protocol.
+Disable: Not use TCP protocol.</description>
+        </property>
+
+        <category parentID="WIFI_CFG_TCP_SUPPORT" id="WIFI_TCP_PROTOCOL" display="Wi-Fi TCP protocol setting">
+            <description>Setting for Wi-Fi TCP Protocol generation.</description>
+        </category>
+
+        <property id="WIFI_CFG_TCP_CREATABLE_SOCKETS" display="Creatable TCP Sockets number" default="1" type="textbox" category="WIFI_TCP_PROTOCOL">
+            <constraint display="This configuration is used when enabled TCP protocol support." actionOnFail="disable">"${WIFI_CFG_TCP_SUPPORT}" == "${WIFI_CFG_TCP_SUPPORT.1}"</constraint>
+            <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_TCP_CREATABLE_SOCKETS}")</constraint>
+            <constraint display="Value must be in the range 1~4">("${WIFI_CFG_TCP_CREATABLE_SOCKETS}" &gt;= 1) &amp;&amp; ("${WIFI_CFG_TCP_CREATABLE_SOCKETS}" &lt;= 4)</constraint>
+            <description>Creatable Sockets number.
+Value must be in the range 1-4.</description>
+        </property>
+        <property id="WIFI_CFG_TCP_SOCKET_RECEIVE_BUFFER_SIZE" display="TCP Socket Receive buffer size" default="4096" type="textbox" category="WIFI_TCP_PROTOCOL">
+            <constraint display="This configuration is used when enabled TCP protocol support." actionOnFail="disable">"${WIFI_CFG_TCP_SUPPORT}" == "${WIFI_CFG_TCP_SUPPORT.1}"</constraint>
+            <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_TCP_SOCKET_RECEIVE_BUFFER_SIZE}")</constraint>
+            <constraint display="Value must be in the range 1~8192">("${WIFI_CFG_TCP_SOCKET_RECEIVE_BUFFER_SIZE}" &gt;= 1) &amp;&amp; ("${WIFI_CFG_TCP_SOCKET_RECEIVE_BUFFER_SIZE}" &lt;= 8192)</constraint>
+            <description>Socket Receive buffer size
+Value must be in the range 1-8192</description>
+        </property>
+
+        <property id="WIFI_CFG_MQTT_SUPPORT" display="MQTT protocol support" default="0" type="checkbox" category="WIFI_PROTOCOL">
+            <option id="WIFI_CFG_MQTT_SUPPORT.0" display="Disable" value="0"/>
+            <option id="WIFI_CFG_MQTT_SUPPORT.1" display="Enable" value="1"/>
+            <description>Enable: Use MQTT protocol.
+Disable: Not use MQTT protocol.</description>
+        </property>
+
+        <category parentID="WIFI_CFG_MQTT_SUPPORT" id="WIFI_MQTT_PROTOCOL" display="Wi-Fi MQTT protocol setting">
+            <description>Setting for Wi-Fi MQTT Protocol generation.</description>
+        </category>
+
+        <property id="WIFI_CFG_MQTT_CERTS" display="Use MQTT Certificates" default="0" type="checkbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <option id="WIFI_CFG_MQTT_CERTS.0" display="Disable" value="0"/>
+            <option id="WIFI_CFG_MQTT_CERTS.1" display="Enable" value="1"/>
+            <description>Enable: Use MQTT Certificates.
+Disable: Not use MQTT Certificates. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_CERTS_HEADER" display="Certificates|MQTT Certificates Header File" default="" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Used for MQTT Certificates." actionOnFail="disable">"${WIFI_CFG_MQTT_CERTS}" == "${WIFI_CFG_MQTT_CERTS.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol and double quotes (&quot;)">/^"[a-zA-Z0-9_.-]*"$/.test('${WIFI_CFG_MQTT_CERTS_HEADER}')</constraint>
+            <description>Name of header file that will contain certificates (macros). User must create header file in 'src' folder.
+Example: "cert_storage.h" </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_ROOT_CA" display="Certificates|Root CA" default="" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Used for MQTT Certificates." actionOnFail="disable">"${WIFI_CFG_MQTT_CERTS}" == "${WIFI_CFG_MQTT_CERTS.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_MQTT_ROOT_CA}")</constraint>
+            <description>Links to user-defined macro of the same name for Root CA which user must define in application header. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_CLIENT_CERT" display="Certificates|Client Certificate" default="" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Used for MQTT Certificates." actionOnFail="disable">"${WIFI_CFG_MQTT_CERTS}" == "${WIFI_CFG_MQTT_CERTS.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_MQTT_CLIENT_CERT}")</constraint>
+            <description>Links to user-defined macro of the same name for client certificate which user must define in application header. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_PRIVATE_KEY" display="Certificates|Private Key" default="" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Used for MQTT Certificates." actionOnFail="disable">"${WIFI_CFG_MQTT_CERTS}" == "${WIFI_CFG_MQTT_CERTS.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_MQTT_PRIVATE_KEY}")</constraint>
+            <description>Links to user-defined macro of the same name for private key which user must define in application header. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_CMD_TX_BUF_SIZE" display="Size in bytes of the MQTT buffer used for sending commands and publishing data. Maximum publishing length is 2063 bytes." default="512" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_MQTT_CMD_TX_BUF_SIZE}")</constraint>
+            <constraint display="Value must be in the range 200~2064">("${WIFI_CFG_MQTT_CMD_TX_BUF_SIZE}" &gt;= 200) &amp;&amp; ("${WIFI_CFG_MQTT_CMD_TX_BUF_SIZE}" &lt;= 2064)</constraint>
+            <description>MQTT buffer used for sending commands and publishing data
+Value must be in the range 200~2064 and must be less than or equal to Wi-Fi TX buffer</description>
+        </property>
+        <property id="WIFI_CFG_MQTT_CMD_RX_BUF_SIZE" display="Size in bytes of the MQTT buffer used for receiving subscribed data. Must be an integer greater than 0." default="512" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_MQTT_CMD_RX_BUF_SIZE}")</constraint>
+            <constraint display="Value must be in the range 1~3000">("${WIFI_CFG_MQTT_CMD_RX_BUF_SIZE}" &gt;= 1) &amp;&amp; ("${WIFI_CFG_MQTT_CMD_RX_BUF_SIZE}" &lt;= 3000)</constraint>
+            <description>MQTT buffer used for receiving subscribed data
+Value must be in the range 1-3000 and must be less than or equal to Wi-Fi RX buffer</description>
+        </property>
+        <property id="WIFI_CFG_MQTT_USE_MQTT_V311" display="Use MQTT protocol v3.1.1" default="1" type="checkbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <option id="WIFI_CFG_MQTT_USE_MQTT_V311.0" display="Disable" value="0"/>
+            <option id="WIFI_CFG_MQTT_USE_MQTT_V311.1" display="Enable" value="1"/>
+            <description>Enable: Enable MQTT protocol v3.1.1.
+Disable: Disable MQTT protocol v3.1.1. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_RX_TIMEOUT" display="MQTT Receive Maximum Timeout (ms)" default="1000" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Timeout must be an integer greater than 0 and less than 65535">testInteger("${WIFI_CFG_MQTT_RX_TIMEOUT}") &amp;&amp; ("${WIFI_CFG_MQTT_RX_TIMEOUT}" &gt;= 0) &amp;&amp; ("${WIFI_CFG_MQTT_RX_TIMEOUT}" &lt;= 65535)</constraint>
+            <description>Timeout for the MQTT Receive function to check the buffer for incoming MQTT messages in milliseconds.
+Set between 0~65535. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_TX_TIMEOUT" display="MQTT Transit Maximum Timeout (ms)" default="1000" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Timeout must be an integer greater than 0 and less than 65535">testInteger("${WIFI_CFG_MQTT_TX_TIMEOUT}") &amp;&amp; ("${WIFI_CFG_MQTT_TX_TIMEOUT}" &gt;= 0) &amp;&amp; ("${WIFI_CFG_MQTT_TX_TIMEOUT}" &lt;= 65535)</constraint>
+            <description>Timeout for publishing MQTT messages in milliseconds.
+Set between 0~65535. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_CLEAN_SESSION" display="Use Clean Session" default="1" type="checkbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <option id="WIFI_CFG_MQTT_CLEAN_SESSION.0" display="Disable" value="0"/>
+            <option id="WIFI_CFG_MQTT_CLEAN_SESSION.1" display="Enable" value="1"/>
+            <description>Enable: Enable Clean Session.
+Disable: Disable Clean Session. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_ALPN1" display="ALPN|ALPN 1" default="" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_MQTT_ALPN1}")</constraint>
+            <description>Select Application Layer Protocol Negotiations (ALPNs) </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_ALPN2" display="ALPN|ALPN 2" default="" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_MQTT_ALPN2}")</constraint>
+            <description>Select Application Layer Protocol Negotiations (ALPNs) </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_ALPN3" display="ALPN|ALPN 3" default="" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_MQTT_ALPN3}")</constraint>
+            <description>Select Application Layer Protocol Negotiations (ALPNs) </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_KEEP_ALIVE" display="Keep Alive (s)" default="60" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <description>MQTT ping period to check if connection is still active. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_CLIENT_IDENTIFIER" display="Client Identifier" default="" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_MQTT_CLIENT_IDENTIFIER}")</constraint>
+            <description>Select Client Identifier </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_HOST_NAME" display="Host Name (or IP address)" default="" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_MQTT_HOST_NAME}")</constraint>
+            <description>Select Host Name (or IP address) </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_PORT" display="MQTT Port" default="1883" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Must be an integer greater than 0 and less than 65535">testInteger("${WIFI_CFG_MQTT_PORT}") &amp;&amp; ("${WIFI_CFG_MQTT_PORT}" &gt;= 0) &amp;&amp; ("${WIFI_CFG_MQTT_PORT}" &lt;= 65535)</constraint>
+            <description>MQTT Port for communication.
+Set between 0~65535. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_USER_NAME" display="MQTT User Name" default="" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_MQTT_USER_NAME}")</constraint>
+            <description>Select MQTT User Name </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_PASSWORD" display="MQTT Password" default="" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_MQTT_PASSWORD}")</constraint>
+            <description>Select MQTT Password </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_WILL_TOPIC" display="Last Will Topic" default="" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_MQTT_WILL_TOPIC}")</constraint>
+            <description>Topic for MQTT Last Will message. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_WILL_MESSAGE" display="Last Will Message" default="" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_MQTT_WILL_MESSAGE}")</constraint>
+            <description>Payload for MQTT Last Will message. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_SNI_NAME" display="Server Name Indication (SNI)" default="" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_MQTT_SNI_NAME}")</constraint>
+            <description>Select Server Name Indication (SNI) </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_WILL_QOS" display="Last Will QoS" default="0" type="combobox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <option id="WIFI_CFG_MQTT_WILL_QOS.0" display="0" value="0"/>
+            <option id="WIFI_CFG_MQTT_WILL_QOS.1" display="1" value="1"/>
+            <option id="WIFI_CFG_MQTT_WILL_QOS.2" display="2" value="2"/>
+            <description>Quality-of-Service for MQTT Last Will message. </description>
+        </property>
+        <!-- W/A for bitmapPrefix -->
+        <property id="WIFI_CFG_MQTT_TLS_CIPHER_SUITES" display="TLS Cipher Suites" default="0" type="checkbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <option id="WIFI_CFG_MQTT_TLS_CIPHER_SUITES.0" display="Disable" value="0"/>
+            <option id="WIFI_CFG_MQTT_TLS_CIPHER_SUITES.1" display="Enable" value="1"/>
+            <description>Enable: Use TLS Cipher Suites.
+Disable: Not use TLS Cipher Suites. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA" display="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA" default="0" type="checkbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Used TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA." actionOnFail="disable">"${WIFI_CFG_MQTT_TLS_CIPHER_SUITES}" == "${WIFI_CFG_MQTT_TLS_CIPHER_SUITES.1}"</constraint>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA.0" display="Unused" value="0"/>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA.1" display="Used" value="WIFI_TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA"/>
+            <description>Select TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA Cipher. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA" display="TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA" default="0" type="checkbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Used TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA." actionOnFail="disable">"${WIFI_CFG_MQTT_TLS_CIPHER_SUITES}" == "${WIFI_CFG_MQTT_TLS_CIPHER_SUITES.1}"</constraint>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA.0" display="Unused" value="0"/>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA.1" display="Used" value="WIFI_TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA"/>
+            <description>Select TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA Cipher. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256" display="TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256" default="0" type="checkbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Used TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256." actionOnFail="disable">"${WIFI_CFG_MQTT_TLS_CIPHER_SUITES}" == "${WIFI_CFG_MQTT_TLS_CIPHER_SUITES.1}"</constraint>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256.0" display="Unused" value="0"/>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256.1" display="Used" value="WIFI_TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256"/>
+            <description>Select TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256 Cipher. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384" display="TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384" default="0" type="checkbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Used TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384." actionOnFail="disable">"${WIFI_CFG_MQTT_TLS_CIPHER_SUITES}" == "${WIFI_CFG_MQTT_TLS_CIPHER_SUITES.1}"</constraint>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384.0" display="Unused" value="0"/>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384.1" display="Used" value="WIFI_TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"/>
+            <description>Select TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384 Cipher. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256" display="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256" default="0" type="checkbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Used TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256." actionOnFail="disable">"${WIFI_CFG_MQTT_TLS_CIPHER_SUITES}" == "${WIFI_CFG_MQTT_TLS_CIPHER_SUITES.1}"</constraint>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256.0" display="Unused" value="0"/>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256.1" display="Used" value="WIFI_TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"/>
+            <description>Select TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 Cipher. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384" display="TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384" default="0" type="checkbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Used TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384." actionOnFail="disable">"${WIFI_CFG_MQTT_TLS_CIPHER_SUITES}" == "${WIFI_CFG_MQTT_TLS_CIPHER_SUITES.1}"</constraint>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384.0" display="Unused" value="0"/>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384.1" display="Used" value="WIFI_TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"/>
+            <description>Select TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 Cipher. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA" display="TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA" default="0" type="checkbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Used TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA." actionOnFail="disable">"${WIFI_CFG_MQTT_TLS_CIPHER_SUITES}" == "${WIFI_CFG_MQTT_TLS_CIPHER_SUITES.1}"</constraint>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA.0" display="Unused" value="0"/>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA.1" display="Used" value="WIFI_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA"/>
+            <description>Select TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA Cipher. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA" display="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA" default="0" type="checkbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Used TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA." actionOnFail="disable">"${WIFI_CFG_MQTT_TLS_CIPHER_SUITES}" == "${WIFI_CFG_MQTT_TLS_CIPHER_SUITES.1}"</constraint>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA.0" display="Unused" value="0"/>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA.1" display="Used" value="WIFI_TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA"/>
+            <description>Select TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA Cipher. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256" display="TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256" default="0" type="checkbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Used TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256." actionOnFail="disable">"${WIFI_CFG_MQTT_TLS_CIPHER_SUITES}" == "${WIFI_CFG_MQTT_TLS_CIPHER_SUITES.1}"</constraint>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256.0" display="Unused" value="0"/>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256.1" display="Used" value="WIFI_TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256"/>
+            <description>Select TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256 Cipher. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384" display="TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384" default="0" type="checkbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Used TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA." actionOnFail="disable">"${WIFI_CFG_MQTT_TLS_CIPHER_SUITES}" == "${WIFI_CFG_MQTT_TLS_CIPHER_SUITES.1}"</constraint>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384.0" display="Unused" value="0"/>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384.1" display="Used" value="WIFI_TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384"/>
+            <description>Select TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384 Cipher. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256" display="TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256" default="0" type="checkbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Used TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256." actionOnFail="disable">"${WIFI_CFG_MQTT_TLS_CIPHER_SUITES}" == "${WIFI_CFG_MQTT_TLS_CIPHER_SUITES.1}"</constraint>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256.0" display="Unused" value="0"/>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256.1" display="Used" value="WIFI_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"/>
+            <description>Select TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 Cipher. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384" display="TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384" default="0" type="checkbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Used TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384." actionOnFail="disable">"${WIFI_CFG_MQTT_TLS_CIPHER_SUITES}" == "${WIFI_CFG_MQTT_TLS_CIPHER_SUITES.1}"</constraint>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384.0" display="Unused" value="0"/>
+            <option id="WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384.1" display="Used" value="WIFI_TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"/>
+            <description>Select TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 Cipher. </description>
+        </property>
+        <property id="WIFI_CFG_MQTT_P_CALLBACK" display="Callback function use" default="1" type="combobox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <option id="WIFI_CFG_MQTT_P_CALLBACK.0" display="0" value="0"/>
+            <option id="WIFI_CFG_MQTT_P_CALLBACK.1" display="1" value="1"/>
+            <description>0 = Unused
+1 = Used</description>
+        </property>
+        <property id="WIFI_CFG_MQTT_P_CALLBACK_FUNCTION_NAME" display="MQTT callback function name" default="mqtt_userCallback" type="textbox" category="WIFI_MQTT_PROTOCOL">
+            <constraint display="This configuration is used when enabled MQTT protocol support." actionOnFail="disable">"${WIFI_CFG_MQTT_SUPPORT}" == "${WIFI_CFG_MQTT_SUPPORT.1}"</constraint>
+            <constraint display="Used for callback function." actionOnFail="disable">"${WIFI_CFG_MQTT_P_CALLBACK}" == "${WIFI_CFG_MQTT_P_CALLBACK.1}"</constraint>
+            <constraint display="Illegal input.">/^[a-zA-Z_0-9]*$/.test("${WIFI_CFG_MQTT_P_CALLBACK_FUNCTION_NAME}")</constraint>
+            <description>Please input the MQTT callback function name. </description>
+        </property>
+
+        <property id="WIFI_CFG_TLS_SUPPORT" display="TLS protocol support" default="0" type="checkbox" category="WIFI_PROTOCOL">
+            <option id="WIFI_CFG_TLS_SUPPORT.0" display="Disable" value="0"/>
+            <option id="WIFI_CFG_TLS_SUPPORT.1" display="Enable" value="1"/>
+            <description>Enable: Enable TLS support.
+Disable: Not enable TLS support. </description>
+        </property>
+
+        <category parentID="WIFI_CFG_TLS_SUPPORT" id="WIFI_TLS_PROTOCOL" display="Wi-Fi TLS protocol setting">
+            <description>Setting for Wi-Fi MQTT Protocol generation.</description>
+        </category>
+
+        <property id="WIFI_CFG_TLS_CREATABLE_SOCKETS" display="Creatable TLS Sockets number" default="1" type="textbox" category="WIFI_TLS_PROTOCOL">
+            <constraint display="This configuration is used when enabled TLS protocol support." actionOnFail="disable">"${WIFI_CFG_TLS_SUPPORT}" == "${WIFI_CFG_TLS_SUPPORT.1}"</constraint>
+            <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_TLS_CREATABLE_SOCKETS}")</constraint>
+            <constraint display="Value must be in the range 1~4">("${WIFI_CFG_TLS_CREATABLE_SOCKETS}" &gt;= 1) &amp;&amp; ("${WIFI_CFG_TLS_CREATABLE_SOCKETS}" &lt;= 4)</constraint>
+            <description>Creatable Sockets number.
+Value must be in the range 1-4.</description>
+        </property>
+        <property id="WIFI_CFG_TLS_SOCKET_RECEIVE_BUFFER_SIZE" display="TLS Socket Receive buffer size" default="4096" type="textbox" category="WIFI_TLS_PROTOCOL">
+            <constraint display="This configuration is used when enabled TLS protocol support." actionOnFail="disable">"${WIFI_CFG_TLS_SUPPORT}" == "${WIFI_CFG_TLS_SUPPORT.1}"</constraint>
+            <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_TLS_SOCKET_RECEIVE_BUFFER_SIZE}")</constraint>
+            <constraint display="Value must be in the range 1~8192">("${WIFI_CFG_TLS_SOCKET_RECEIVE_BUFFER_SIZE}" &gt;= 1) &amp;&amp; ("${WIFI_CFG_TLS_SOCKET_RECEIVE_BUFFER_SIZE}" &lt;= 8192)</constraint>
+            <description>Socket Receive buffer size
+Value must be in the range 1-8192</description>
+        </property>
+        <property id="WIFI_CFG_TLS_USE_CA_CERT" display="Use CA Certificates" default="1" type="checkbox" category="WIFI_TLS_PROTOCOL">
+            <constraint display="Used for TLS support." actionOnFail="disable">"${WIFI_CFG_TLS_SUPPORT}" == "${WIFI_CFG_TLS_SUPPORT.1}"</constraint>
+            <option id="WIFI_CFG_TLS_USE_CA_CERT.0" display="Disable" value="0"/>
+            <option id="WIFI_CFG_TLS_USE_CA_CERT.1" display="Enable" value="1"/>
+            <description>Enable: Use CA Certificates.
+Disable: Not use CA Certificates. </description>
+        </property>
+        <property id="WIFI_CFG_TLS_CERT_MAX_NAME" display="Max Certificate Name Length" default="32" type="textbox" category="WIFI_TLS_PROTOCOL">
+            <constraint display="Used for TLS support." actionOnFail="disable">"${WIFI_CFG_TLS_SUPPORT}" == "${WIFI_CFG_TLS_SUPPORT.1}"</constraint>
+            <constraint display="Use CA Certificates." actionOnFail="disable">"${WIFI_CFG_TLS_USE_CA_CERT}" == "${WIFI_CFG_TLS_USE_CA_CERT.1}"</constraint>
+            <constraint display="Value must be an decimal value">testInteger("${WIFI_CFG_TLS_CERT_MAX_NAME}")</constraint>
+            <description>Max Certificate's name length. </description>
+        </property>
+        <property id="WIFI_CFG_TLS_CERT_CA_NAME" display="The CA Certificate Name" default='""' type="textbox" category="WIFI_TLS_PROTOCOL">
+            <constraint display="Used for TLS support." actionOnFail="disable">"${WIFI_CFG_TLS_SUPPORT}" == "${WIFI_CFG_TLS_SUPPORT.1}"</constraint>
+            <constraint display="Use CA Certificates." actionOnFail="disable">"${WIFI_CFG_TLS_USE_CA_CERT}" == "${WIFI_CFG_TLS_USE_CA_CERT.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol and double quotes (&quot;)">/^"[a-zA-Z0-9_.-]*"$/.test('${WIFI_CFG_TLS_CERT_CA_NAME}')</constraint>
+            <description>Please input the CA certificate name. </description>
+         </property>
+        <property id="WIFI_CFG_TLS_CERT_CLIENT_NAME" display="The Client Certificate Name" default='""' type="textbox" category="WIFI_TLS_PROTOCOL">
+            <constraint display="Used for TLS support." actionOnFail="disable">"${WIFI_CFG_TLS_SUPPORT}" == "${WIFI_CFG_TLS_SUPPORT.1}"</constraint>
+            <constraint display="Use CA Certificates." actionOnFail="disable">"${WIFI_CFG_TLS_USE_CA_CERT}" == "${WIFI_CFG_TLS_USE_CA_CERT.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol and double quotes (&quot;)">/^"[a-zA-Z0-9_.-]*"$/.test('${WIFI_CFG_TLS_CERT_CLIENT_NAME}')</constraint>
+            <description>Please input the Client certificate name. </description>
+        </property>
+        <property id="WIFI_CFG_TLS_CERT_PRIVATE_NAME" display="The Private Certificate Name" default='""' type="textbox" category="WIFI_TLS_PROTOCOL">
+            <constraint display="Used for TLS support." actionOnFail="disable">"${WIFI_CFG_TLS_SUPPORT}" == "${WIFI_CFG_TLS_SUPPORT.1}"</constraint>
+            <constraint display="Use CA Certificates." actionOnFail="disable">"${WIFI_CFG_TLS_USE_CA_CERT}" == "${WIFI_CFG_TLS_USE_CA_CERT.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol and double quotes (&quot;)">/^"[a-zA-Z0-9_.-]*"$/.test('${WIFI_CFG_TLS_CERT_PRIVATE_NAME}')</constraint>
+            <description>Please input the Private certificate name. </description>
+        </property>
+
+        <property id="WIFI_CFG_HTTP_SUPPORT" display="HTTP protocol support" default="0" type="checkbox" category="WIFI_PROTOCOL">
+            <option id="WIFI_CFG_HTTP_SUPPORT.0" display="Disable" value="0"/>
+            <option id="WIFI_CFG_HTTP_SUPPORT.1" display="Enable" value="1"/>
+            <description>Enable: Enable HTTP support.
+Disable: Not enable HTTP support. </description>
+        </property>
+
+        <category parentID="WIFI_CFG_HTTP_SUPPORT" id="WIFI_HTTP_PROTOCOL" display="Wi-Fi HTTP protocol setting">
+            <description>Setting for Wi-Fi HTTP Protocol generation.</description>
+        </category>
+
+        <property id="WIFI_CFG_HTTP_SNI_NAME" display="Server Name Indication (SNI)" default="" type="textbox" category="WIFI_HTTP_PROTOCOL">
+            <constraint display="This configuration is used when enabled HTTP protocol support." actionOnFail="disable">"${WIFI_CFG_HTTP_SUPPORT}" == "${WIFI_CFG_HTTP_SUPPORT.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_HTTP_SNI_NAME}")</constraint>
+            <description>Select Server Name Indication (SNI) </description>
+        </property>
+        <property id="WIFI_CFG_HTTP_ALPN1" display="ALPN|ALPN 1" default="" type="textbox" category="WIFI_HTTP_PROTOCOL">
+            <constraint display="This configuration is used when enabled HTTP protocol support." actionOnFail="disable">"${WIFI_CFG_HTTP_SUPPORT}" == "${WIFI_CFG_HTTP_SUPPORT.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_HTTP_ALPN1}")</constraint>
+            <description>Select Application Layer Protocol Negotiations (ALPNs) </description>
+        </property>
+        <property id="WIFI_CFG_HTTP_ALPN2" display="ALPN|ALPN 2" default="" type="textbox" category="WIFI_HTTP_PROTOCOL">
+            <constraint display="This configuration is used when enabled HTTP protocol support." actionOnFail="disable">"${WIFI_CFG_HTTP_SUPPORT}" == "${WIFI_CFG_HTTP_SUPPORT.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_HTTP_ALPN2}")</constraint>
+            <description>Select Application Layer Protocol Negotiations (ALPNs) </description>
+        </property>
+        <property id="WIFI_CFG_HTTP_ALPN3" display="ALPN|ALPN 3" default="" type="textbox" category="WIFI_HTTP_PROTOCOL">
+            <constraint display="This configuration is used when enabled HTTP protocol support." actionOnFail="disable">"${WIFI_CFG_HTTP_SUPPORT}" == "${WIFI_CFG_HTTP_SUPPORT.1}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_HTTP_ALPN3}")</constraint>
+            <description>Select Application Layer Protocol Negotiations (ALPNs) </description>
+        </property>
+        <property id="WIFI_CFG_HTTP_TLS_AUTH" display="Use HTTP TLS Authentication Levels" default="0" type="combobox" category="WIFI_HTTP_PROTOCOL">
+            <constraint display="This configuration is used when enabled HTTP protocol support." actionOnFail="disable">"${WIFI_CFG_HTTP_SUPPORT}" == "${WIFI_CFG_HTTP_SUPPORT.1}"</constraint>
+            <option id="WIFI_CFG_HTTP_TLS_AUTH.0" display="None" value="0"/>
+            <option id="WIFI_CFG_HTTP_TLS_AUTH.1" display="Optional" value="1"/>
+            <option id="WIFI_CFG_HTTP_TLS_AUTH.2" display="Require" value="2"/>
+            <description>None: No authentication required; accept connections without any form of authentication.
+Optional: Allow both authenticated and unauthenticated connections.
+Require. Demand authentication for connections. </description>
+        </property>
+        <property id="WIFI_CFG_HTTP_CERTS_HEADER" display="Certificates|HTTP Certificates Header File" default="" type="textbox" category="WIFI_HTTP_PROTOCOL">
+            <constraint display="This configuration is used when enabled HTTP protocol support." actionOnFail="disable">"${WIFI_CFG_HTTP_SUPPORT}" == "${WIFI_CFG_HTTP_SUPPORT.1}"</constraint>
+            <constraint display="Used for HTTP Certificates." actionOnFail="disable">"${WIFI_CFG_HTTP_TLS_AUTH}" != "${WIFI_CFG_HTTP_TLS_AUTH.0}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol and double quotes (&quot;)">/^"[a-zA-Z0-9_.-]*"$/.test('${WIFI_CFG_HTTP_CERTS_HEADER}')</constraint>
+            <description>Name of header file that will contain certificates (macros). User must create header file in 'src' folder.
+Example: "cert_storage.h" </description>
+        </property>
+        <property id="WIFI_CFG_HTTP_ROOT_CA" display="Certificates|Root CA" default="" type="textbox" category="WIFI_HTTP_PROTOCOL">
+            <constraint display="This configuration is used when enabled HTTP protocol support." actionOnFail="disable">"${WIFI_CFG_HTTP_SUPPORT}" == "${WIFI_CFG_HTTP_SUPPORT.1}"</constraint>
+            <constraint display="Used for HTTP Certificates." actionOnFail="disable">"${WIFI_CFG_HTTP_TLS_AUTH}" != "${WIFI_CFG_HTTP_TLS_AUTH.0}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_HTTP_ROOT_CA}")</constraint>
+            <description>Links to user-defined macro of the same name for Root CA which user must define in application header. </description>
+        </property>
+        <property id="WIFI_CFG_HTTP_CLIENT_CERT" display="Certificates|Client Certificate" default="" type="textbox" category="WIFI_HTTP_PROTOCOL">
+            <constraint display="This configuration is used when enabled HTTP protocol support." actionOnFail="disable">"${WIFI_CFG_HTTP_SUPPORT}" == "${WIFI_CFG_HTTP_SUPPORT.1}"</constraint>
+            <constraint display="Used for HTTP Certificates." actionOnFail="disable">"${WIFI_CFG_HTTP_TLS_AUTH}" != "${WIFI_CFG_HTTP_TLS_AUTH.0}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_HTTP_CLIENT_CERT}")</constraint>
+            <description>Links to user-defined macro of the same name for client certificate which user must define in application header. </description>
+        </property>
+        <property id="WIFI_CFG_HTTP_PRIVATE_KEY" display="Certificates|Private Key" default="" type="textbox" category="WIFI_HTTP_PROTOCOL">
+            <constraint display="This configuration is used when enabled HTTP protocol support." actionOnFail="disable">"${WIFI_CFG_HTTP_SUPPORT}" == "${WIFI_CFG_HTTP_SUPPORT.1}"</constraint>
+            <constraint display="Used for HTTP Certificates." actionOnFail="disable">"${WIFI_CFG_HTTP_TLS_AUTH}" != "${WIFI_CFG_HTTP_TLS_AUTH.0}"</constraint>
+            <constraint display="Illegal input. Must be a valid C symbol">/^[a-zA-Z0-9_.-]*$/.test("${WIFI_CFG_HTTP_PRIVATE_KEY}")</constraint>
+            <description>Links to user-defined macro of the same name for private key which user must define in application header. </description>
+        </property>
+    </configuration>
+</module>
