@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rtc_rx_private.h
@@ -63,6 +63,8 @@
 *           31.12.2021 2.83    Added support for RX660.
 *           29.05.2023 2.90    Added support for RX23E-B.
 *                              Updated according to GSCE Code Checker 6.50.
+*           28.06.2024 3.00    Added support for RX260, RX261.
+*                              Updated according to GSCE Code Checker 6.50.
 ***********************************************************************************************************************/
 
 #ifndef R_RTC_PRIVATE_H
@@ -82,9 +84,9 @@ Macro definitions
 #define RTC_COUNTER_STOP        (0)
 #define RTC_COUNTER_START       (1)
 
-#define RTC_CAPTURE_ENABLE_MASK (0x80)
-#define RTC_CAPTURE_EVENT_MASK  (0x04)
-#define RTC_CAPTURE_EDGE_MASK   (0x03)
+#define RTC_CAPTURE_ENABLE_MASK     (0x80)
+#define RTC_CAPTURE_EVENT_MASK      (0x04)
+#define RTC_CAPTURE_EDGE_MASK       (0x03)
 #define RTC_CAPTURE_TAMPICR1_CH0EN  (0x01)
 #define RTC_CAPTURE_TAMPICR1_CH1EN  (0x02)
 #define RTC_CAPTURE_TAMPICR1_CH2EN  (0x04)
@@ -93,8 +95,11 @@ Macro definitions
                                         /* The carry interrupt (CIE bit) is used to read the current time. */
 #define RTC_DUMMY_READ          (3)     /* Three times of dummy read */
 
+#if (((BSP_MCU_RX261 == 1) || (BSP_MCU_RX260 == 1)) && (BSP_PACKAGE_PINS == 48))
+    #error  "ERROR - Product with 48 Pins not support RTC Module."
+#endif
 
-#if !defined(BSP_MCU_RX140) || !defined(BSP_MCU_RX660)
+#if !defined(BSP_MCU_RX140) || !defined(BSP_MCU_RX660) || !defined(BSP_MCU_RX260) || !defined(BSP_MCU_RX261)
 #if !defined(RTC_CFG_DRIVE_CAPACITY_LO) && \
     !defined(RTC_CFG_DRIVE_CAPACITY_MD) && \
     !defined(RTC_CFG_DRIVE_CAPACITY_HI) && \
@@ -142,7 +147,7 @@ Macro definitions
         #error "ERROR - RTC_CFG_DRIVE_CAPACITY_HI in r_rtc_rx_config.h is invalid selection for MCU."
     #endif
 #endif
-#endif /* !definedBSP_MCU_RX140 || !definedBSP_MCU_RX660 */
+#endif /* !definedBSP_MCU_RX140 || !definedBSP_MCU_RX660 || !definedBSP_MCU_RX260 || !definedBSP_MCU_RX261*/
 
 
 /***********************************************************************************************************************
@@ -180,11 +185,34 @@ Exported global functions (to be accessed by other files)
 ***********************************************************************************************************************/
 
 #if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130) && !defined(BSP_MCU_RX140) && !defined(BSP_MCU_RX23E_B)
-extern volatile rtc_cap_ctrl_t  *g_pcap_ctrl;
-extern volatile rtc_cap_time_t  *g_pcap_time;
-void            rtc_config_capture(rtc_capture_cfg_t *p_capture);
-rtc_err_t       rtc_check_capture(rtc_pin_t pin, tm_t *p_time);
-void            rtc_disable_capture(rtc_pin_t pin);
+extern volatile rtc_cap_ctrl_t  * g_pcap_ctrl;
+extern volatile rtc_cap_time_t  * g_pcap_time;
+
+
+/******************************************************************************
+ * Function Name: rtc_config_capture
+ * Description  : .
+ * Argument     : p_capture
+ * Return Value : .
+ *****************************************************************************/
+void            rtc_config_capture (rtc_capture_cfg_t * p_capture);
+
+/******************************************************************************
+ * Function Name: rtc_check_capture
+ * Description  : .
+ * Arguments    : pin
+ *              : p_time
+ * Return Value : .
+ *****************************************************************************/
+rtc_err_t       rtc_check_capture (rtc_pin_t pin, tm_t * p_time);
+
+/******************************************************************************
+ * Function Name: rtc_disable_capture
+ * Description  : .
+ * Argument     : pin
+ * Return Value : .
+ *****************************************************************************/
+void            rtc_disable_capture (rtc_pin_t pin);
 #endif
 
 /******************************************************************************

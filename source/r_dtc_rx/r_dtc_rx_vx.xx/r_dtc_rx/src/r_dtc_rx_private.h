@@ -58,6 +58,8 @@
 *         : 31.03.2023 4.30    Added support for RX26T.
 *         : 29.05.2023 4.40    Added support for RX23E-B.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 28.06.2024 4.50    Added support for RX260, RX261.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *******************************************************************************/
 #ifndef DTC_RX_PRIVATE_H
 #define DTC_RX_PRIVATE_H
@@ -97,6 +99,16 @@ Includes   <System Includes> , "Project Includes"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
+#elif defined(BSP_MCU_RX260)
+    #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE) && (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE)
+        #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
+    #include "./src/targets/rx260/r_dtc_rx_target.h"
+#elif defined(BSP_MCU_RX261)
+    #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE) && (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE)
+        #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
+    #include "./src/targets/rx261/r_dtc_rx_target.h"
 #elif defined(BSP_MCU_RX26T)
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE) && (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
@@ -286,7 +298,7 @@ typedef union dtc_mra {
         uint8_t SM:2, /* Transfer Source Address Addressing Mode */
         uint8_t rs:1, /* reserved */
         uint8_t WBDIS:1 /* Write-back Disable */
-    ) BIT;
+) BIT;
 
 } dtc_mra_t;
 
@@ -301,7 +313,7 @@ typedef union dtc_mrb {
         uint8_t DM   :2,  /* Transfer Destination Address Addressing Mode */
         uint8_t INDX:1,   /* Index Table Reference */
         uint8_t SQEND:1  /* Sequence Transfer End */
-    ) BIT;
+) BIT;
 
 } dtc_mrb_t;
 
@@ -311,7 +323,7 @@ typedef union dtc_mrc {
     R_BSP_ATTRIB_STRUCT_BIT_ORDER_LEFT_2 (
         uint8_t rs :7,    /* reserved */
         uint8_t DISPE :1
-    ) BIT;
+) BIT;
 
 } dtc_mrc_t;
 #endif /* (DTC_IP_VER_DTCa == DTC_IP) */

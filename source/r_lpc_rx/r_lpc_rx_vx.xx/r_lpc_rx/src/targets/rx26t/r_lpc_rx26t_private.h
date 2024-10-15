@@ -22,7 +22,8 @@
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * History : DD.MM.YYYY Version Description           
- *         : 15.08.2022 1.00    First Release
+ *           15.08.2022 1.00    First Release
+ *           28.06.2024 1.10    Removed duplicate macros (LPC_CLOCK_ACTIVE and LPC_CLOCK_INACTIVE)
  ***********************************************************************************************************************/
 
 #ifndef R_LPC_RX26T_PRIVATE_H
@@ -52,9 +53,6 @@
 
     #define LPC_MEDIUM_SPD (0x02)
     #define LPC_HIGH_SPD   (0x00)
-
-    #define LPC_CLOCK_INACTIVE                  (0x01)
-    #define LPC_CLOCK_ACTIVE                    (0x00)
 
     #define LPC_ACS_CHK_MSTPCRA                 (0xFFFFFFCF)
     #define LPC_ACS_CHK_MSTPCRB                 (0xFFFFFFFF)

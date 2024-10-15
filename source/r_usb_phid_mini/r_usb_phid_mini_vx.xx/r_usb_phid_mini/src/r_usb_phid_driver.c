@@ -44,6 +44,8 @@
 #include "r_usb_reg_access.h"
 #include "r_usb_phid.h"
 
+#ifdef USB_CFG_PHID_USE
+
 /*******************************************************************************
  Macro definitions
  ******************************************************************************/
@@ -75,6 +77,16 @@ void usb_phid_write_complete (usb_putr_t *p_mess, uint16_t data1, uint16_t data2
     ctrl.pipe   = p_mess->keyword;                    /* Pipe number setting */
     ctrl.type   = USB_PHID;                           /* PHID class  */
     ctrl.size   = 0;
+
+    if (USB_CFG_PHID_INT_IN == ctrl.pipe)
+    {
+        ctrl.type = USB_PHID;    /* Device class setting  */
+    }
+    else
+    {
+        ctrl.type = USB_PHID2;   /* Device class setting  */
+    }
+
     if (USB_DATA_NONE == p_mess->status)
     {
         ctrl.status = USB_SUCCESS;
@@ -83,6 +95,7 @@ void usb_phid_write_complete (usb_putr_t *p_mess, uint16_t data1, uint16_t data2
     {
         ctrl.status = USB_ERR_NG;
     }
+
 #if (BSP_CFG_RTOS_USED != 0)                          /* RTOS */
     ctrl.p_data = (void *)p_mess->task_id;
 #endif /* (BSP_CFG_RTOS_USED != 0) */
@@ -108,7 +121,15 @@ void usb_phid_read_complete (usb_putr_t *p_mess, uint16_t data1, uint16_t data2)
     ctrl.size   = p_mess->read_req_len - p_mess->tranlen;
     ctrl.pipe   = p_mess->keyword;                  /* Pipe number setting */
 
-    ctrl.type   = USB_PHID;                         /* Device class setting  */
+    if (USB_CFG_PHID_INT_OUT == ctrl.pipe)
+    {
+        ctrl.type = USB_PHID;    /* Device class setting  */
+    }
+    else
+    {
+        ctrl.type = USB_PHID2;   /* Device class setting  */
+    }
+
     switch (p_mess->status)
     {
         case USB_DATA_OK :
@@ -136,6 +157,7 @@ void usb_phid_read_complete (usb_putr_t *p_mess, uint16_t data1, uint16_t data2)
  End of function usb_phid_read_complete
  ******************************************************************************/
 
+#endif                                 /* USB_CFG_PHID_USE */
 
 /******************************************************************************
  End  Of File

@@ -18,7 +18,7 @@
 * you agree to the additional terms and conditions found by accessing the 
 * following link:
 * http://www.renesas.com/disclaimer
-* Copyright (C) 2020 Renesas Electronics Corporation. All rights reserved.    
+* Copyright (C) 2020(2024) Renesas Electronics Corporation. All rights reserved.    
  *********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_hmanager_rtos.c
@@ -27,6 +27,7 @@
 /**********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *         : 30.06.2020 1.20 First Release
+ *         : 30.04.2024 1.30 Added support for RX261.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -1108,7 +1109,7 @@ static void usb_hstd_mgr_aordetach_process(usb_utr_t *ptr)
                 usb_cstd_set_event(USB_STS_BC, &ctrl);               /* Set Event()  */
             }
 #endif /* USB_CFG_BC == USB_CFG_ENABLE */
-            usb_cpu_delay_xms((uint16_t) 100);
+            usb_cpu_delay_xms((uint16_t) 100);                      /* Don't remove. USB Spec: 7.1.7.3 */
             usb_hstd_mgr_reset(ptr, USB_DEVICEADDR);
         }
     }
@@ -1146,8 +1147,8 @@ usb_er_t usb_hstd_mgr_open (void)
     memset(gs_usb_hstd_device_descriptor, 0, USB_DEVICESIZE);
     memset(g_usb_hstd_config_descriptor, 0, USB_CONFIGSIZE);
     memset((void *)&g_usb_hstd_setup_data, 0, (5*2));
-    memset((void *)&gsp_usb_hstd_mgr_msg, 0, sizeof(usb_utr_t));
 
+    gsp_usb_hstd_mgr_msg = 0;
     gs_usb_hstd_enum_seq = 0;
     gs_usb_hstd_mgr_msginfo = 0;
     gs_usb_hstd_mgr_callback = 0;

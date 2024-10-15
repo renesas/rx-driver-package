@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_rx.h
@@ -52,6 +52,7 @@
 *           24.01.2023 5.00    Added RX26T.
 *           28.02.2023 5.10    Added RX23E-B.
 *           01.10.2023 5.11    Added support for Tool News R20TS0963.
+*           30.07.2024 5.20    Added RX260, and RX261.
 ***********************************************************************************************************************/
 
 #ifndef FLASH_RX_HEADER_FILE
@@ -89,6 +90,10 @@
     #include "./src/targets/rx24t/r_flash_rx24t.h"
 #elif defined(MCU_RX24U)
     #include "./src/targets/rx24u/r_flash_rx24u.h"
+#elif defined(MCU_RX260)
+    #include "./src/targets/rx260/r_flash_rx260.h"
+#elif defined(MCU_RX261)
+    #include "./src/targets/rx261/r_flash_rx261.h"
 #elif defined(MCU_RX26T)
     #include "./src/targets/rx26t/r_flash_rx26t.h"
 #elif defined(MCU_RX64M)

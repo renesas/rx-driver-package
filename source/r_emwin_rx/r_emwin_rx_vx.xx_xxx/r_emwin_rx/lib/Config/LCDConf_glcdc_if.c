@@ -57,6 +57,7 @@
  *                                      - draw_poly_outline_aa
  *                                      - fill_polygon_aa
  *                                     Other fixed.
+ *         : 30.08.2024 6.34.g.1.20    Fixed issue of R_DMACA_Close function in copy_buffer function.
   *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -1403,7 +1404,7 @@ static void copy_buffer(int32_t layer_index, int32_t index_src, int32_t index_ds
     } while (0 == (dmac_status.dtif_stat)); /* WAIT_LOOP */
 
     ret = R_DMACA_Close(EMWIN_DMAC_NUMBER);
-    if ((DMACA_SUCCESS != ret) && (DMACA_SUCCESS_OTHER_CH_BUSY != ret))
+    if ((DMACA_SUCCESS != ret) && (DMACA_SUCCESS_OTHER_CH_BUSY != ret) && (DMACA_SUCCESS_DTC_BUSY != ret))
     {
         /* WAIT_LOOP */
         while (1)

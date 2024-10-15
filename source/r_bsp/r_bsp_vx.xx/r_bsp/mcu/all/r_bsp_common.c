@@ -50,6 +50,7 @@
 *                               - delay_wait
 *         : 26.07.2019 2.01     Modified comment of API function to Doxygen style.
 *         : 21.11.2023 2.02     Added the R_BSP_ClockReset_Bootloader function.
+*         : 31.05.2024 2.03     Fixed coding style.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -87,7 +88,7 @@ Private global variables and functions
  * where the top 2 bytes are the major version number and the bottom 2 bytes are the minor version number. For 
  * example, Version 4.25 would be returned as 0x00040019.
  */
-uint32_t R_BSP_GetVersion (void)
+uint32_t R_BSP_GetVersion(void)
 {
     /* These version macros are defined in platform.h. */
     return ((((uint32_t)R_BSP_VERSION_MAJOR) << 16) | (uint32_t)R_BSP_VERSION_MINOR);
@@ -102,7 +103,7 @@ uint32_t R_BSP_GetVersion (void)
 * Return Value : None
 ***********************************************************************************************************************/
 R_BSP_PRAGMA_STATIC_INLINE_ASM(delay_wait)
-void delay_wait (unsigned long loop_cnt)
+void delay_wait(unsigned long loop_cnt)
 {
     R_BSP_ASM_INTERNAL_USED(loop_cnt)
     R_BSP_ASM_BEGIN
@@ -155,7 +156,7 @@ bool R_BSP_SoftwareDelay(uint32_t delay, bsp_delay_units_t units)
 #ifdef BSP_CFG_PARAM_CHECKING_ENABLE
     if ((BSP_DELAY_MICROSECS != units) && (BSP_DELAY_MILLISECS != units) && (BSP_DELAY_SECS != units))
     {
-        return(false);
+        return (false);
     }
 #endif
 
@@ -169,8 +170,8 @@ bool R_BSP_SoftwareDelay(uint32_t delay, bsp_delay_units_t units)
      * and/or a slow ICLK we use 32 bit integers to reduce the overhead cycles of this function
      * by approximately a third and stand the best chance of achieving the requested delay.
      */
-    if ( (BSP_DELAY_MICROSECS == units) &&
-         (delay <= (0xFFFFFFFFUL / iclk_rate)) )  /* Ensure (iclk_rate * delay) will not exceed 32 bits */
+    if ((BSP_DELAY_MICROSECS == units) &&
+        (delay <= (0xFFFFFFFFUL / iclk_rate)))  /* Ensure (iclk_rate * delay) will not exceed 32 bits */
     {
         delay_cycles = ((iclk_rate * delay) / units);
 
@@ -189,7 +190,7 @@ bool R_BSP_SoftwareDelay(uint32_t delay, bsp_delay_units_t units)
         {
             /* The requested delay is too large/small for the current ICLK. Return false which
              * also results in the minimum possible delay. */
-            return(false);
+            return (false);
         }
     }
     else
@@ -212,7 +213,7 @@ bool R_BSP_SoftwareDelay(uint32_t delay, bsp_delay_units_t units)
         {
             /* The requested delay is too large/small for the current ICLK. Return false which
              * also results in the minimum possible delay. */
-            return(false);
+            return (false);
         }
 
         /* Casting is valid because it matches the type to the right side or argument. */
@@ -221,7 +222,7 @@ bool R_BSP_SoftwareDelay(uint32_t delay, bsp_delay_units_t units)
 
     delay_wait(loop_cnt);
 
-    return(true);
+    return (true);
 } /* End of function R_BSP_SoftwareDelay() */
 
 #if defined(BSP_CFG_BOOTLOADER_PROJECT)

@@ -18,7 +18,7 @@
 * you agree to the additional terms and conditions found by accessing the 
 * following link:
 * http://www.renesas.com/disclaimer
-* Copyright (C) 2020 Renesas Electronics Corporation. All rights reserved.    
+* Copyright (C) 2020(2024) Renesas Electronics Corporation. All rights reserved.    
  *********************************************************************************************************************/
 /**********************************************************************************************************************
 * File Name    : r_rtos_abstract.c
@@ -28,6 +28,7 @@
 /**********************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 30.06.2020 1.20     First Release
+*         : 30.04.2024 1.30 Added support for RX261.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -276,6 +277,29 @@ rtos_err_t  rtos_start_task (rtos_task_id_t *p_id)
 #endif
     return RTOS_SUCCESS;
 }/* End of function rtos_start_task() */
+
+/**********************************************************************************************************************
+ * Function Name: rtos_terminate_task
+ * Description  : Terminate the task
+ * Arguments    : p_id          : Pointer to the area to store the starat task ID.
+ * Return Value : RTOS_SUCCESS / RTOS_ERROR
+ *********************************************************************************************************************/
+rtos_err_t  rtos_terminate_task (rtos_task_id_t *p_id)
+{
+#if     BSP_CFG_RTOS_USED == 1      /* FreeRTOS */
+#elif   BSP_CFG_RTOS_USED == 2      /* SEGGER embOS */
+#elif   BSP_CFG_RTOS_USED == 3      /* Micrium MicroC/OS */
+#elif   BSP_CFG_RTOS_USED == 4      /* Renesas RI600V4 & RI600PX */
+    ER  err;
+    err = ter_tsk (*p_id);
+    if (E_OK != err)
+    {
+        return RTOS_ERROR;
+    }
+#else
+#endif
+    return RTOS_SUCCESS;
+}/* End of function rtos_terminate_task() */
 
 /**********************************************************************************************************************
  * Function Name: rtos_get_task_id

@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate></fileTemplate>
+    <configuration>
+	<category id="category1" display="Configuration Options Setting">
+	<description>Configuration Options Setting</description>
+	</category>
+        <property id="RSIP_CFG_PARAM_CHECKING_ENABLE" display="Parameter Checking" default="1" type="combobox" category="category1">
+            <option id="RSIP_CFG_PARAM_CHECKING_ENABLE.0" display="No checking Parameter" value="0"/>
+            <option id="RSIP_CFG_PARAM_CHECKING_ENABLE.1" display="Checking Parameter" value="1"/>
+            <description>0 = No checking Parameter
+1 = Checking Parameter</description>
+        </property>
+        <property id="RSIP_CFG_AES_128_ENABLE" display="AES128" default="1" type="combobox" category="category1">
+            <option id="RSIP_CFG_AES_128_ENABLE.0" display="No using AES128" value="0"/>
+            <option id="RSIP_CFG_AES_128_ENABLE.1" display="Using AES128" value="1"/>
+            <description>0 = No using AES128
+1 = Using AES128</description>
+        </property>
+        <property id="RSIP_CFG_AES_256_ENABLE" display="AES256" default="1" type="combobox" category="category1">
+            <option id="RSIP_CFG_AES_256_ENABLE.0" display="No using AES256" value="0"/>
+            <option id="RSIP_CFG_AES_256_ENABLE.1" display="Using AES256" value="1"/>
+            <description>0 = No using AES256
+1 = Using AES256</description>
+        </property>
+        <property id="RSIP_CFG_AES_ECB_CBC_CTR_ENABLE" display="AES ECB/CBC/CTR" default="1" type="combobox" category="category1">
+            <option id="RSIP_CFG_AES_ECB_CBC_CTR_ENABLE.0" display="No using AES ECB/CBC/CTR" value="0"/>
+            <option id="RSIP_CFG_AES_ECB_CBC_CTR_ENABLE.1" display="Using AES ECB/CBC/CTR" value="1"/>
+            <description>0 = No using AES ECB/CBC/CTR
+1 = Using AES ECB/CBC/CTR</description>
+        </property>
+        <property id="RSIP_CFG_AES_GCM_ENABLE" display="AES GCM" default="1" type="combobox" category="category1">
+            <option id="RSIP_CFG_AES_GCM_ENABLE.0" display="No using AES GCM" value="0"/>
+            <option id="RSIP_CFG_AES_GCM_ENABLE.1" display="Using AES GCM" value="1"/>
+            <description>0 = No using AES GCM
+1 = Using AES GCM</description>
+        </property>
+        <property id="RSIP_CFG_AES_CCM_ENABLE" display="AES CCM" default="1" type="combobox" category="category1">
+            <option id="RSIP_CFG_AES_CCM_ENABLE.0" display="No using AES CCM" value="0"/>
+            <option id="RSIP_CFG_AES_CCM_ENABLE.1" display="Using AES CCM" value="1"/>
+            <description>0 = No using AES CCM
+1 = Using AES CCM</description>
+        </property>
+        <property id="RSIP_CFG_AES_CMAC_ENABLE" display="AES CMAC" default="1" type="combobox" category="category1">
+            <option id="RSIP_CFG_AES_CMAC_ENABLE.0" display="No using AES CMAC" value="0"/>
+            <option id="RSIP_CFG_AES_CMAC_ENABLE.1" display="Using AES CMAC" value="1"/>
+            <description>0 = No using AES CMAC
+1 = Using AES CMAC</description>
+        </property>
+        <property id="RSIP_CFG_ECC_SECP256R1_ENABLE" display="ECDSA SECP256R1" default="1" type="combobox" category="category1">
+            <option id="RSIP_CFG_ECC_SECP256R1_ENABLE.0" display="No using ECDSA SECP256R1" value="0"/>
+            <option id="RSIP_CFG_ECC_SECP256R1_ENABLE.1" display="Using ECDSA SECP256R1" value="1"/>
+            <description>0 = No using ECDSA SECP256R1
+1 = Using ECDSA SECP256R1</description>
+        </property>
+        <property id="RSIP_CFG_ECC_BRAINPOOLP256R1_ENABLE" display="ECDSA BRAINPOOLP256R1" default="1" type="combobox" category="category1">
+            <option id="RSIP_CFG_ECC_BRAINPOOLP256R1_ENABLE.0" display="No using ECDSA BRAINPOOLP256R1" value="0"/>
+            <option id="RSIP_CFG_ECC_BRAINPOOLP256R1_ENABLE.1" display="Using ECDSA BRAINPOOLP256R1" value="1"/>
+            <description>0 = No using ECDSA BRAINPOOLP256R1
+1 = Using ECDSA BRAINPOOLP256R1</description>
+        </property>
+        <property id="RSIP_CFG_ECC_SECP256K1_ENABLE" display="ECDSA SECP256K1" default="1" type="combobox" category="category1">
+            <option id="RSIP_CFG_ECC_SECP256K1_ENABLE.0" display="No using ECDSA SECP256K1" value="0"/>
+            <option id="RSIP_CFG_ECC_SECP256K1_ENABLE.1" display="Using ECDSA SECP256K1" value="1"/>
+            <description>0 = No using ECDSA SECP256K1
+1 = Using ECDSA SECP256K1</description>
+        </property>
+        <property id="RSIP_CFG_SHA224_ENABLE" display="SHA224" default="1" type="combobox" category="category1">
+            <option id="RSIP_CFG_SHA224_ENABLE.0" display="No using SHA224" value="0"/>
+            <option id="RSIP_CFG_SHA224_ENABLE.1" display="Using SHA224" value="1"/>
+            <description>0 = No using SHA224
+1 = Using SHA224</description>
+        </property>
+        <property id="RSIP_CFG_SHA256_ENABLE" display="SHA256" default="1" type="combobox" category="category1">
+            <option id="RSIP_CFG_SHA256_ENABLE.0" display="No using SHA256" value="0"/>
+            <option id="RSIP_CFG_SHA256_ENABLE.1" display="Using SHA256" value="1"/>
+            <description>0 = No using SHA256
+1 = Using SHA256</description>
+        </property>
+        <property id="RSIP_CFG_HMAC_SHA224_ENABLE" display="SHA224 HMAC" default="1" type="combobox" category="category1">
+            <option id="RSIP_CFG_HMAC_SHA224_ENABLE.0" display="No using SHA224 HMAC" value="0"/>
+            <option id="RSIP_CFG_HMAC_SHA224_ENABLE.1" display="Using SHA224 HMAC" value="1"/>
+            <description>0 = No using SHA224 HMAC
+1 = Using SHA224 HMAC</description>
+        </property>
+        <property id="RSIP_CFG_HMAC_SHA256_ENABLE" display="SHA256 HMAC" default="1" type="combobox" category="category1">
+            <option id="RSIP_CFG_HMAC_SHA256_ENABLE.0" display="No using SHA256 HMAC" value="0"/>
+            <option id="RSIP_CFG_HMAC_SHA256_ENABLE.1" display="Using SHA256 HMAC" value="1"/>
+            <description>0 = No using SHA256 HMAC
+1 = Using SHA256 HMAC</description>
+        </property>
+        <property id="RSIP_CFG_SECURE_BOOT_ENABLE" display="SECURE BOOT" default="1" type="combobox" category="category1">
+            <option id="RSIP_CFG_SECURE_BOOT_ENABLE.0" display="No using Secure Boot" value="0"/>
+            <option id="RSIP_CFG_SECURE_BOOT_ENABLE.1" display="Using Secure Boot" value="1"/>
+            <description>0 = No using Secure Boot
+1 = Using Secure Boot</description>
+        </property>
+        <property id="RSIP_CFG_FIRMWARE_UPDATE_ENABLE" display="FIRMWARE UPDATE" default="1" type="combobox" category="category1">
+            <option id="RSIP_CFG_FIRMWARE_UPDATE_ENABLE.0" display="No using Firmware Update" value="0"/>
+            <option id="RSIP_CFG_FIRMWARE_UPDATE_ENABLE.1" display="Using Firmware Update" value="1"/>
+            <description>0 = No using Firmware Update
+1 = Using Firmware Update</description>
+        </property>
+		<category id="category2" display="Configuration Size Setting">
+		<description>Configuration Size Setting</description>
+		</category>
+        <property id="RSIP_CFG_BYTE_SIZE_SHA_BLOCK_MAX" display="SHA Block Size" default="256U" type="textbox" category="category2">
+            <constraint display="Value must be an integer">testInteger("${RSIP_CFG_BYTE_SIZE_SHA_BLOCK_MAX}")</constraint>
+            <description>Setting the SHA Block Size</description>
+        </property>
+        <property id="RSIP_CFG_WORD_SIZE_SHA_INTERNAL_STATE_MAX" display="SHA Internal State Size" default="20U" type="textbox" category="category2">
+            <constraint display="Value must be an integer">testInteger("${RSIP_CFG_WORD_SIZE_SHA_INTERNAL_STATE_MAX}")</constraint>
+            <description>Setting the SHA Internal State Size</description>
+        </property>
+        <property id="RSIP_CFG_BYTE_SIZE_HMAC_BLOCK_MAX" display="HMAC Block Size" default="128U" type="textbox" category="category2">
+            <constraint display="Value must be an integer">testInteger("${RSIP_CFG_BYTE_SIZE_HMAC_BLOCK_MAX}")</constraint>
+            <description>Setting the HMAC Block Size</description>
+        </property>
+        <property id="RSIP_CFG_WORD_SIZE_HMAC_INTERNAL_STATE_MAX" display="HMAC Internal State Size" default="20U" type="textbox" category="category2">
+            <constraint display="Value must be an integer">testInteger("${RSIP_CFG_WORD_SIZE_HMAC_INTERNAL_STATE_MAX}")</constraint>
+            <description>Setting the HMAC Internal State Size</description>
+        </property>
+        <property id="RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_HMAC_MAX" display="HMAC Wrapped Key Size" default="RSIP_BYTE_SIZE_WRAPPED_KEY_HMAC_SHA256" type="textbox" category="category2">
+            <description>Setting the HMAC Wrapped Key Size</description>
+        </property>
+        <property id="RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_KEY_UPDATE_KEY" display="KUK Wrapped Key Size" default="64U" type="textbox" category="category2">
+            <constraint display="Value must be an integer">testInteger("${RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_KEY_UPDATE_KEY}")</constraint>
+            <description>Setting the KUK Wrapped Key Size</description>
+        </property>
+        <property id="RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_AES_128" display="AES128 Wrapped Key Size" default="36U" type="textbox" category="category2">
+            <constraint display="Value must be an integer">testInteger("${RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_AES_128}")</constraint>
+            <description>Setting the AES128 Wrapped Key Size</description>
+        </property>
+        <property id="RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_AES_256" display="AES256 Wrapped Key Size" default="52U" type="textbox" category="category2">
+            <constraint display="Value must be an integer">testInteger("${RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_AES_256}")</constraint>
+            <description>Setting the AES256 Wrapped Key Size</description>
+        </property>
+        <property id="RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_SECP256R1_PUBLIC" display="ECDSA SECP256R1 Public Wrapped Key Size" default="84U" type="textbox" category="category2">
+            <constraint display="Value must be an integer">testInteger("${RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_SECP256R1_PUBLIC}")</constraint>
+            <description>Setting the ECDSA SECP256R1 Public Wrapped Key Size</description>
+        </property>
+        <property id="RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_SECP256K1_PUBLIC" display="ECDSA SECP256K1 Public Wrapped Key Size" default="84U" type="textbox" category="category2">
+            <constraint display="Value must be an integer">testInteger("${RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_SECP256K1_PUBLIC}")</constraint>
+            <description>Setting the ECDSA SECP256K1 Public Wrapped Key Size</description>
+        </property>
+        <property id="RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_BRAINPOOLP256R1_PUBLIC" display="ECDSA BRAINPOOLP256R1 Public Wrapped Key Size" default="84U" type="textbox" category="category2">
+            <constraint display="Value must be an integer">testInteger("${RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_BRAINPOOLP256R1_PUBLIC}")</constraint>
+            <description>Setting the ECDSA BRAINPOOLP256R1 Public Wrapped Key Size</description>
+        </property>
+        <property id="RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_SECP256R1_PRIVATE" display="ECDSA SECP256R1 Private Wrapped Key Size" default="52U" type="textbox" category="category2">
+            <constraint display="Value must be an integer">testInteger("${RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_SECP256R1_PRIVATE}")</constraint>
+            <description>Setting the ECDSA SECP256R1 Private Wrapped Key Size</description>
+        </property>
+        <property id="RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_SECP256K1_PRIVATE" display="ECDSA SECP256K1 Private Wrapped Key Size" default="52U" type="textbox" category="category2">
+            <constraint display="Value must be an integer">testInteger("${RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_SECP256K1_PRIVATE}")</constraint>
+            <description>Setting the ECDSA SECP256K1 Private Wrapped Key Size</description>
+        </property>
+        <property id="RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_BRAINPOOLP256R1_PRIVATE" display="ECDSA BRAINPOOLP256R1 Private Wrapped Key Size" default="52U" type="textbox" category="category2">
+            <constraint display="Value must be an integer">testInteger("${RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_ECC_BRAINPOOLP256R1_PRIVATE}")</constraint>
+            <description>Setting the ECDSA BRAINPOOLP256R1 Private Wrapped Key Size</description>
+        </property>
+        <property id="RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_HMAC_SHA224" display="SHA224 HMAC Wrapped Key Size" default="52U" type="textbox" category="category2">
+            <constraint display="Value must be an integer">testInteger("${RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_HMAC_SHA224}")</constraint>
+            <description>Setting the SHA224 HMAC Wrapped Key Size</description>
+        </property>
+        <property id="RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_HMAC_SHA256" display="SHA256 HMAC Wrapped Key Size" default="52U" type="textbox" category="category2">
+            <constraint display="Value must be an integer">testInteger("${RSIP_CFG_BYTE_SIZE_WRAPPED_KEY_VALUE_HMAC_SHA256}")</constraint>
+            <description>Setting the SHA256 HMAC Wrapped Key Size</description>
+        </property>
+        <property id="RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_ECC_256_QX" display="ECDSA 256 QX Wrapped Public Key" default="4U" type="textbox" category="category2">
+            <constraint display="Value must be an integer">testInteger("${RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_ECC_256_QX}")</constraint>
+            <description>Setting the ECDSA 256 QX Wrapped Public Key</description>
+        </property>
+        <property id="RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_ECC_256_QY" display="ECDSA 256 QY Wrapped Public Key" default="36U" type="textbox" category="category2">
+            <constraint display="Value must be an integer">testInteger("${RSIP_CFG_BYTE_POS_WRAPPED_PUBLIC_KEY_ECC_256_QY}")</constraint>
+            <description>Setting the ECDSA 256 QY Wrapped Public Key</description>
+        </property>
+		<category id="category3" display="Configuration Support Setting">
+		<description>Configuration Support Setting</description>
+		</category>
+        <property id="AES_CCM_SUPPORTED" display="Support AES CCM" default="1" type="checkbox" category="category3">
+            <option id="AES_CCM_SUPPORTED.0" display="Unsupport AES CCM" value="0"/>
+            <option id="AES_CCM_SUPPORTED.1" display="Support AES CCM" value="1"/>
+            <description>0 = Unsupport AES CCM
+1 = Support AES CCM</description>
+        </property>
+        <property id="BRAINPOOLP256R1_SUPPORTED" display="Support ECDSA BRAINPOOLP256R1" default="1" type="checkbox" category="category3">
+            <option id="BRAINPOOLP256R1_SUPPORTED.0" display="Unsupport ECDSA BRAINPOOLP256R1" value="0"/>
+            <option id="BRAINPOOLP256R1_SUPPORTED.1" display="Support ECDSA BRAINPOOLP256R1" value="1"/>
+            <description>0 = Unsupport ECDSA BRAINPOOLP256R1
+1 = Support ECDSA BRAINPOOLP256R1</description>
+        </property>
+        <property id="SECP256K1_SUPPORTED" display="Support ECDSA SECP256K1" default="1" type="checkbox" category="category3">
+            <option id="SECP256K1_SUPPORTED.0" display="Unsupport ECDSA SECP256K1" value="0"/>
+            <option id="SECP256K1_SUPPORTED.1" display="Support ECDSA SECP256K1" value="1"/>
+            <description>0 = Unsupport ECDSA SECP256K1
+1 = Support ECDSA SECP256K1</description>
+        </property>
+        <property id="SHA224_SUPPORTED" display="Support SHA224" default="1" type="checkbox" category="category3">
+            <option id="SHA224_SUPPORTED.0" display="Unsupport SHA224" value="0"/>
+            <option id="SHA224_SUPPORTED.1" display="Support SHA224" value="1"/>
+            <description>0 = Unsupport SHA224
+1 = Support SHA224</description>
+        </property>
+        <property id="SHA256_SUPPORTED" display="Support SHA256" default="1" type="checkbox" category="category3">
+            <option id="SHA256_SUPPORTED.0" display="Unsupport SHA256" value="0"/>
+            <option id="SHA256_SUPPORTED.1" display="Support SHA256" value="1"/>
+            <description>0 = Unsupport SHA256
+1 = Support SHA256</description>
+        </property>
+        <property id="HMAC_SHA224_SUPPORTED" display="Support SHA224 HMAC" default="1" type="checkbox" category="category3">
+            <option id="HMAC_SHA224_SUPPORTED.0" display="Unsupport SHA224 HMAC" value="0"/>
+            <option id="HMAC_SHA224_SUPPORTED.1" display="Support SHA224 HMAC" value="1"/>
+            <description>0 = Unsupport SHA224 HMAC
+1 = Support SHA224 HMAC</description>
+        </property>
+        <property id="HMAC_SHA256_SUPPORTED" display="Support SHA256 HMAC" default="1" type="checkbox" category="category3">
+            <option id="HMAC_SHA256_SUPPORTED.0" display="Unsupport  SHA256 HMAC" value="0"/>
+            <option id="HMAC_SHA256_SUPPORTED.1" display="Support  SHA256 HMAC" value="1"/>
+            <description>0 = Unsupport  SHA256 HMAC
+1 = Support  SHA256 HMAC</description>
+        </property>
+        <property id="FWUP_SUPPORTED" display="Support FIRMWARE UPDATE" default="1" type="checkbox" category="category3">
+            <option id="FWUP_SUPPORTED.0" display="Unsupport FIRMWARE UPDATE" value="0"/>
+            <option id="FWUP_SUPPORTED.1" display="Support FIRMWARE UPDATE" value="1"/>
+            <description>0 = Unsupport FIRMWARE UPDATE
+1 = Support FIRMWARE UPDATE</description>
+        </property>
+    </configuration>
+</module>

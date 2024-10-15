@@ -18,11 +18,12 @@
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_elc_rx23e-b.c
- * Version      : 1.0
+ * Version      : 1.01
  * Description  : Functions for using Event Link Controller module
  ************************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *           31.05.2023 1.0     Initial Release
+ *           31.07.2023 1.01    elc_set_err_check_um_note modify
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  Includes   <System Includes> , "Project Includes"
@@ -600,24 +601,6 @@ elc_err_t elc_set_err_check_um_note (elc_event_signal_t * const p_elc_event_sign
             break;
         }
     }
-
-    /* ELSR24 ELSR25 ELSR26 ELSR27 */
-    switch (p_elc_module->link_module)
-    {
-        /* These 2 case are intentionally combined */
-        case ELC_PSP0 :
-        case ELC_PSP1 :
-        case ELC_PSP2 :
-        case ELC_PSP3 :
-            if (ELC_DOC_DOPCF == p_elc_event_signal->event_signal)
-            {
-                err = ELC_ERR_INVALID_ARG;
-            }
-        break;
-        default :
-        break;
-    }
-
     return err;
 }
 /***********************************************************************************************************************

@@ -48,6 +48,7 @@
 *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *         : 29.05.2023 3.20     Supported RX23E-B.
 *         : 05.10.2023 3.40     Added include header to fix missing #include platform.h issue.
+*         : 28.06.2024 3.50     Supported RX260, RX261.
 ***********************************************************************************************************************/
 #ifndef R_RSPI_PRIVATE_H
 #define R_RSPI_PRIVATE_H
@@ -75,7 +76,8 @@ Macro definitions
     || defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX24U) \
     || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX23W) \
     || defined(BSP_MCU_RX23E_A) || defined(BSP_MCU_RX140) || defined(BSP_MCU_RX660) \
-    || defined(BSP_MCU_RX26T) || defined(BSP_MCU_RX23E_B)
+    || defined(BSP_MCU_RX26T) || defined(BSP_MCU_RX23E_B) || defined(BSP_MCU_RX260) \
+    || defined(BSP_MCU_RX261)
 
 #define RSPI_MAX_CHANNELS   (1)
 #else

@@ -368,6 +368,9 @@ void usb_cstd_dma_send_continue(uint16_t useport)
 
     channel = usb_cstd_dma_ref_ch_no(useport);
     pipe = g_usb_cstd_dma_pipe[channel];
+#if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
+    g_usb_hstd_current_pipe = pipe;
+#endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 
     if (USB_HOST == g_usb_cstd_usb_mode)
     {

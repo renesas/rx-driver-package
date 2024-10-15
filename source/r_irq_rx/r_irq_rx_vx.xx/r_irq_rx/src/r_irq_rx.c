@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_irq_rx.c
@@ -38,6 +38,7 @@
 *         : 15.04.2021  3.80    Added R_IRQ_IRClear() function to clear IR flag.
 *         : 15.08.2022  4.30    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *         : 29.05.2023  4.40    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 28.06.2024  4.50    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -438,7 +439,8 @@ Function definitions
  * @retval IRQ_ERR_INVALID_ARG: An invalid argument value was passed.
  * @retval IRQ_ERR_LOCK: The lock could not be acquired.
  * @details The Open function is responsible for preparing an IRQ for operation. After completion of the Open function
- * the IRQ shall be enabled and ready to service interrupts. This function must be called once prior to calling any other
+ * the IRQ shall be enabled and ready to service interrupts.
+ * This function must be called once prior to calling any other
  * IRQ API functions. Once successfully completed, the status of the selected IRQ will be set to "open". After that this
  * function should not be called again for the same IRQ without first performing a "close" by calling R_IRQ_Close().
  * @note
@@ -576,13 +578,13 @@ End of function R_IRQ_Open
  * @brief The Control function is responsible for handling special hardware or software operations for the IRQ.
  * @param[in] handle Handle for the IRQ.
  * @param[in] cmd Enumerated command codes:\n
- * IRQ_CMD_SET_PRIO	- Changes the interrupt priority level.\n
+ * IRQ_CMD_SET_PRIO - Changes the interrupt priority level.\n
  * IRQ_CMD_SET_TRIG - Changes the interrupt triggering mode.
- * @param[in] pcmd_data Pointer to the command-data structure parameter of type void that is used to reference the location
- * of any data specific to the command that is needed for its completion.
+ * @param[in] pcmd_data Pointer to the command-data structure parameter of type void that is used to
+ * reference the location of any data specific to the command that is needed for its completion.
  * @retval IRQ_SUCCESS: Command successfully completed.
- * @retval IRQ_ERR_NOT_OPENED:	The IRQ has not been opened.  Perform R_IRQ_Open() first
- * @retval IRQ_ERR_BAD_NUM: 	IRQ number is invalid or unavailable
+ * @retval IRQ_ERR_NOT_OPENED:  The IRQ has not been opened.  Perform R_IRQ_Open() first
+ * @retval IRQ_ERR_BAD_NUM:     IRQ number is invalid or unavailable
  * @retval IRQ_ERR_UNKNOWN_CMD: Control command is not recognized.
  * @retval IRQ_ERR_INVALID_PTR: pcmd_data pointer or handle is NULL
  * @retval IRQ_ERR_INVALID_ARG: An element of the pcmd_data structure contains an invalid value.
@@ -595,9 +597,9 @@ End of function R_IRQ_Open
  * @note
  * None.
  */
-irq_err_t   R_IRQ_Control(irq_handle_t  const handle,
-                          irq_cmd_t     const cmd,
-                          void               *pcmd_data)
+irq_err_t R_IRQ_Control (irq_handle_t const handle,
+                         irq_cmd_t    const cmd,
+                                      void *pcmd_data)
 {
     irq_err_t      ret = IRQ_SUCCESS;
     irq_prio_t    *p_rio_cmd_dat;
@@ -789,9 +791,9 @@ End of function R_IRQ_Close
  * @retval IRQ_ERR_NOT_OPENED: The IRQ has not been opened.  Perform R_IRQ_Open() first.
  * @retval IRQ_ERR_BAD_NUM: IRQ number is invalid or unavailable.
  * @retval IRQ_ERR_INVALID_PTR: plevel data pointer or handle is NULL.
- * @details This function reads the current level of the pin assigned to the specified IRQ. This is a realtime read which
- * may indicate a different value than the level that initially triggered an interrupt. One example use is for cases in
- * which a switch has triggered an interrupt and then needs to be polled for debounce.
+ * @details This function reads the current level of the pin assigned to the specified IRQ.
+ * This is a realtime read which may indicate a different value than the level that initially triggered an interrupt.
+ *  One example use is for cases in which a switch has triggered an interrupt and then needs to be polled for debounce.
  * @note
  * None.
  */
@@ -835,8 +837,8 @@ End of function R_IRQ_ReadInput
  * @retval IRQ_ERR_NOT_OPENED: The IRQ has not been opened.  Perform R_IRQ_Open() first.
  * @retval IRQ_ERR_BAD_NUM: IRQ number is invalid or unavailable.
  * @retval IRQ_ERR_INVALID_PTR: handle is NULL.
- * @details The function enables or disables the ICU interrupt for the IRQ specified by the handle argument. This function
- * is potentially called frequently and is expected to execute quickly.
+ * @details The function enables or disables the ICU interrupt for the IRQ specified by the handle argument.
+ * This function is potentially called frequently and is expected to execute quickly.
  * @note
  * None.
  */

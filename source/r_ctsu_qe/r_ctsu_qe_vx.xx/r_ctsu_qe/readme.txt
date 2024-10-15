@@ -5,11 +5,11 @@ r_ctsu_qe
 
 Document Number 
 ---------------
-r01an4469jj0210
+r01an4469jj0300
 
 Version
 -------
-v2.10
+v3.00
 
 Overview
 --------
@@ -29,7 +29,7 @@ Features
 * MEC function support.
 * Automatic correction support.
 * Automatic judgement support.
- 
+* Judgement Majoriry Mode(JMM) support.
 
 Supported MCUs
 --------------
@@ -38,6 +38,8 @@ Supported MCUs
 * RX140 Group
 * RX230 Group
 * RX231 Group
+* RX260 Group
+* RX261 Group
 * RX23W Group
 * RX671 Group
 
@@ -47,6 +49,8 @@ Boards Tested On
 * RX130 Capacitive Touch Kit
 * RSKRX231
 * RX140 Capacitive Touch Kit
+* RX671 Capacitive Touch Kit
+* RX261 Capacitive Touch Kit
 
 
 Limitations
@@ -56,33 +60,40 @@ Limitations
 
 Peripherals Used Directly
 -------------------------
+RX113, RX130, RX230, RX231, RX23W, RX671
 * CTSU
+RX140 (64KB)
+* CTSU2L
+RX140 (128KB, 256KB)
+* CTSU2SL
+RX260, RX261
+* CTSU2SLa
 
 
 Required Packages
 -----------------
-* r_bsp       v6.20
-* r_touch_qe  v2.10
+* r_bsp       v7.50
+* r_touch_qe  v3.00
 
 
 Toolchain(s) Used
 -----------------
-* Renesas CC-RX 3.03
+* Renesas CC-RX 3.06
 
 
 File Structure
 --------------
-r_ctsu_qe (v2.10)
+r_ctsu_qe
 |   +-- readme.txt
-|   +-- r_ctsu_qe_if.h (v2.10)
+|   +-- r_ctsu_qe_if.h
 
 +---src
-|   +-- r_ctsu_qe.h (v2.10)
-|   +-- r_ctsu_qe_api.h (v2.10)
+|   +-- r_ctsu_qe.h
+|   +-- r_ctsu_qe_api.h
 |
 +---src
-    +-- r_ctsu_qe.c (v2.10)
+    +-- r_ctsu_qe.c
 
 r_config
-    r_ctsu_qe_config.h (v2.10)
+    r_ctsu_qe_config.h
 

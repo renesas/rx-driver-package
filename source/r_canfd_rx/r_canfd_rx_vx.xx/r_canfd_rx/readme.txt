@@ -20,12 +20,14 @@ Supported MCUs
 --------------
 * RX660 Group
 * RX26T Group
+* RX261 Group
 
 
 Boards Tested On
 ----------------
 * RSKRX660
-* RSKRX26T
+* MCK-RX26T
+* EK-RX261
 
 Peripherals Used Directly
 -------------------------
@@ -33,7 +35,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp_rx     v7.20 or greater (See platform.h)
+* r_bsp_rx     v7.51 or greater (See platform.h)
 
 File Structure
 --------------
@@ -43,13 +45,13 @@ r_canfd_rx
 |
 +---doc
 |   +-- en
-|       r01an6130es{VERSION_NUMBER}-rx-canfd.pdf
+|   |   r01an6130es{VERSION_NUMBER}-rx-canfd.pdf
 |   +-- ja
 |       r01an6130js{VERSION_NUMBER}-rx-canfd.pdf
 +---src
-        r_canfd_rx.c
-        r_canfd_data.c
-        r_canfd_rx_private.h
+|       r_canfd_rx.c
+|       r_canfd_data.c
+|       r_canfd_rx_private.h
 +---inc
         r_can_api.c
         r_canfd.h

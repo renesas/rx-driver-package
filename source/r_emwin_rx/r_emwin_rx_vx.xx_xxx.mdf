@@ -115,6 +115,8 @@ Please select from below setting.
                        '${Board.name}' === 'TargetBoardRX660' ||
                        '${Board.name}' === 'RSKRX71M' ||
                        '${Board.name}' === 'RSKRX64M' ||
+                       '${Board.name}' === 'EK-RX261' ||
+                       '${Board.name}' === 'FPB-RX261' ||
                        '${Board.name}' === 'RSKRX231' ||
                        '${Board.name}' === 'RSKRX231B' ||
                        '${Board.name}' === 'RSSKRX23W' ||
@@ -394,7 +396,9 @@ Please select from below setting.
                        '${Board.name}' === 'TargetBoardRX23W' ||
                        '${Board.name}' === 'TargetBoardRX23Wmodule' ||
                        '${Board.name}' === 'TargetBoardRX130') {'TOUCH_IF_SCI_SPI';}
-              else if ('${Board.name}' === 'TargetBoardRX65N') {'TOUCH_IF_RSPI';}"
+              else if ('${Board.name}' === 'TargetBoardRX65N' ||
+                       '${Board.name}' === 'EK-RX261' ||
+                       '${Board.name}' === 'FPB-RX261') {'TOUCH_IF_RSPI';}"
             type="combobox" category="TOUCH_INTERFACE">
             <option id="EMWIN_TOUCH_IF.SCI_IIC" display="TOUCH_IF_SCI_IIC" value="TOUCH_IF_SCI_IIC" dependency="r_sci_iic_rx"/>
             <option id="EMWIN_TOUCH_IF.RSPI" display="TOUCH_IF_RSPI" value="TOUCH_IF_RSPI" dependency="r_rspi_rx"/>

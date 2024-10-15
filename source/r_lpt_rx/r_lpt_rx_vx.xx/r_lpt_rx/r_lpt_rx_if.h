@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer 
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.    
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.    
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_lpt_rx_if.h
@@ -34,6 +34,7 @@
  *           31.03.2021 3.00    Added function R_LPT_InitChan, R_LPT_SetCMT, R_LPT_FinalChan, R_LPT_InitPWM
  *                              Added command LPT_CMD_PWM_START and LPT_CMD_PWM_STOP to R_LPT_Control()
  *           31.05.2023 4.00    Added support for RX23E-B
+ *           31.07.2024 5.00    Added support for RX260, RX261
  *********************************************************************************************************************/
 
 /*******************************************************************************
@@ -48,7 +49,7 @@
 #define LPT_IF_H
 
 /* Version Number of API. */
-#define LPT_VERSION_MAJOR  (4)
+#define LPT_VERSION_MAJOR  (5)
 #define LPT_VERSION_MINOR  (00)
 
 /* Wait time for Call R_LPT_Close after Called R_LPT_Open immediately */

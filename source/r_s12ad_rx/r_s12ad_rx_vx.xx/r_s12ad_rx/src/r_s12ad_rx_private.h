@@ -50,6 +50,7 @@
 *           01.08.2022 5.10    Added RX26T support.
 *           14.10.2022 5.20    Added RX23E-B support.
 *           03.04.2023 5.30    Added RX26T 48k support.
+*           13.02.2024 5.40    Added RX260 and RX261 support.
 *******************************************************************************/
 
 #ifndef S12AD_PRV_PRIVATE_H

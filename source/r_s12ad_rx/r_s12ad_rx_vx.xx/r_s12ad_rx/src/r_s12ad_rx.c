@@ -56,6 +56,7 @@
 *           01.08.2022 5.10    Added RX26T support.
 *           14.10.2022 5.20    Added RX23E-B support.
 *           03.04.2023 5.30    Added RX26T 48k support.
+*           13.02.2024 5.40    Added RX260 and RX261 support.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -98,7 +99,7 @@ extern R_BSP_VOLATILE_EVENACCESS uint16_t * const  gp_dreg2_ptrs[];
 
 extern R_BSP_VOLATILE_EVENACCESS uint16_t * const  gp_dreg_ptrs[];
 
-#else  /* rx110/rx111/rx113/rx130/rx13t/rx230/rx231/rx23w/rx23e-a/rx23t */
+#else  /* rx110/rx111/rx113/rx130/rx13t/rx140/rx230/rx231/rx23w/rx23e-a/rx23e-b/rx23t/rx260/rx261 */
 
 extern R_BSP_VOLATILE_EVENACCESS uint16_t * const  gp_dreg_ptrs[]; // In ROM
 adc_ctrl_t g_dcb = { ADC_MODE_MAX, false, NULL};  // In RAM
@@ -324,7 +325,7 @@ adc_err_t R_ADC_ReadAll(adc_data_t * const  p_all_data)
     || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX23E_A) || defined(BSP_MCU_RX23E_B) \
     || defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T)   || defined(BSP_MCU_RX24U) \
     || defined(BSP_MCU_RX671) || defined(BSP_MCU_RX140)   || defined(BSP_MCU_RX660) \
-    || defined(BSP_MCU_RX26T))
+    || defined(BSP_MCU_RX26T) || defined(BSP_MCU_RX260)   || defined(BSP_MCU_RX261))
     
     return adc_read_all(p_all_data);
 
@@ -365,7 +366,7 @@ adc_err_t R_ADC_ReadAll(adc_data_t * const  p_all_data)
     || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX23E_A) || defined(BSP_MCU_RX23E_B) \
     || defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T)   || defined(BSP_MCU_RX24U) \
     || defined(BSP_MCU_RX671) || defined(BSP_MCU_RX140)   || defined(BSP_MCU_RX660) \
-    || defined(BSP_MCU_RX26T)) */
+    || defined(BSP_MCU_RX26T) || defined(BSP_MCU_RX260)   || defined(BSP_MCU_RX261)) */
     
 } /* End of function R_ADC_ReadAll() */
 
@@ -390,8 +391,8 @@ adc_err_t   R_ADC_Close(uint8_t const unit)
     || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX23E_A)  || defined(BSP_MCU_RX23E_B) \
     || defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T)    || defined(BSP_MCU_RX24U) \
     || defined(BSP_MCU_RX671) || defined(BSP_MCU_RX140)    || defined(BSP_MCU_RX660) \
-    || defined(BSP_MCU_RX26T))
-    
+    || defined(BSP_MCU_RX26T) || defined(BSP_MCU_RX260)    || defined(BSP_MCU_RX261))
+
     return adc_close(unit);
 
 #else /* rx110/rx111/rx113 */
@@ -458,9 +459,9 @@ adc_err_t   R_ADC_Close(uint8_t const unit)
     || defined(BSP_MCU_RX231) || defined(BSP_MCU_RX230)    || defined(BSP_MCU_RX23W) \
     || defined(BSP_MCU_RX130) || defined(BSP_MCU_RX13T)    || defined(BSP_MCU_RX66N) \
     || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX23E_A)  || defined(BSP_MCU_RX23E_B) \
-    || defined(BSP_MCU_RX23T)|| defined(BSP_MCU_RX24T)     || defined(BSP_MCU_RX24U) \
-    || defined(BSP_MCU_RX671)|| defined(BSP_MCU_RX140)     || defined(BSP_MCU_RX660) \
-    || defined(BSP_MCU_RX26T)) */
+    || defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T)    || defined(BSP_MCU_RX24U) \
+    || defined(BSP_MCU_RX671) || defined(BSP_MCU_RX140)    || defined(BSP_MCU_RX660) \
+    || defined(BSP_MCU_RX26T) || defined(BSP_MCU_RX260)    || defined(BSP_MCU_RX261)) */
 } /* End of function R_ADC_Close() */
 
 

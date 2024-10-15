@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2014-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_rx.c
@@ -38,6 +38,9 @@
 *                                   Modified to not use BSP API functions to enable/disable interrupt requests.
 *              : 24.01.2023 5.00    Modified the condition of PFRAM section definition.
 *              : 01.10.2023 5.11    Added support for Tool News R20TS0963.
+*              : 30.07.2024 5.20    Modified functions flash_InterruptRequestDisable(), flash_InterruptRequestEnable().
+*                                   (When using the GCC or IAR compiler in non-blocking mode,
+*                                    ROM access occurs during P/E mode.)
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -51,6 +54,29 @@ Includes   <System Includes> , "Project Includes"
 /***********************************************************************************************************************
 Macro definitions
 ***********************************************************************************************************************/
+/* ---------- Bit Manipulation ---------- */
+#if defined(__CCRX__)
+
+/* void __bclr(unsigned char *data, unsigned long bit) */
+#define R_FLASH_BIT_CLEAR(x, y)      __bclr((unsigned char *)(x), (unsigned long)(y))
+/* void __bset(unsigned char *data, unsigned long bit) */
+#define R_FLASH_BIT_SET(x, y)        __bset((unsigned char *)(x), (unsigned long)(y))
+
+#elif defined(__GNUC__)
+
+/* void R_FLASH_BitClear(uint8_t *data, uint32_t bit) (This macro uses API function of FLASH.) */
+#define R_FLASH_BIT_CLEAR(x, y)      R_FLASH_BitClear((uint8_t *)(x), (uint32_t)(y))
+/* void R_FLASH_BitSet(uint8_t *data, uint32_t bit) (This macro uses API function of FLASH.) */
+#define R_FLASH_BIT_SET(x, y)        R_FLASH_BitSet((uint8_t *)(x), (uint32_t)(y))
+
+#elif defined(__ICCRX__)
+
+/* void R_FLASH_BitClear(uint8_t *data, uint32_t bit) (This macro uses API function of FLASH.) */
+#define R_FLASH_BIT_CLEAR(x, y)      R_FLASH_BitClear((uint8_t *)(x), (uint32_t)(y))
+/* void R_FLASH_BitSet(uint8_t *data, uint32_t bit) (This macro uses API function of FLASH.) */
+#define R_FLASH_BIT_SET(x, y)        R_FLASH_BitSet((uint8_t *)(x), (uint32_t)(y))
+
+#endif
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -69,6 +95,11 @@ FCU_BYTE_PTR g_pfcu_cmd_area = (uint8_t*) FCU_COMMAND_AREA;  // sequencer comman
 
 #if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
 static void R_FlashCodeCopy(void);
+#endif
+
+#if defined(__GNUC__) || defined(__ICCRX__)
+R_BSP_ATTRIB_STATIC_INLINE_ASM void R_FLASH_BitSet(uint8_t *data, uint32_t bit);
+R_BSP_ATTRIB_STATIC_INLINE_ASM void R_FLASH_BitClear(uint8_t *data, uint32_t bit);
 #endif
 
 
@@ -554,7 +585,7 @@ void flash_InterruptRequestEnable (uint32_t vector)
     p_ier_addr = (uint8_t *)&ICU.IER[ier_reg_num].BYTE;
 
     /* Casting is valid because it matches the type to the right side or argument. */
-    R_BSP_BIT_SET(p_ier_addr, ien_bit_num);
+    R_FLASH_BIT_SET(p_ier_addr, ien_bit_num);
 } /* End of function flash_InterruptRequestEnable() */
 
 /***********************************************************************************************************************
@@ -587,8 +618,52 @@ void flash_InterruptRequestDisable (uint32_t vector)
     p_ier_addr = (uint8_t *)&ICU.IER[ier_reg_num].BYTE;
 
     /* Casting is valid because it matches the type to the right side or argument. */
-    R_BSP_BIT_CLEAR(p_ier_addr, ien_bit_num);
+    R_FLASH_BIT_CLEAR(p_ier_addr, ien_bit_num);
 } /* End of function flash_InterruptRequestDisable() */
+
+#if defined(__GNUC__) || defined(__ICCRX__)
+/***********************************************************************************************************************
+* Function Name: R_FLASH_BitSet
+* Description  : Sets the specified one bit in the specified 1-byte area to 1.
+* Arguments    : data - Address of the target 1-byte area
+*                bit  - Position of the bit to be manipulated
+*                NOTE: This function is diverted from R_BSP_BitSet().
+* Return Value : none
+***********************************************************************************************************************/
+FLASH_PE_MODE_SECTION
+R_BSP_PRAGMA_STATIC_INLINE_ASM(R_FLASH_BitSet)
+void R_FLASH_BitSet(uint8_t *data, uint32_t bit)
+{
+    R_BSP_ASM_INTERNAL_USED(data)
+    R_BSP_ASM_INTERNAL_USED(bit)
+
+    R_BSP_ASM_BEGIN
+    R_BSP_ASM(    BSET    R2, [R1]    )
+    R_BSP_ASM_END
+} /* End of function R_FLASH_BitSet() */
+#endif /* defined(__GNUC__) || defined(__ICCRX__) */
+
+#if defined(__GNUC__) || defined(__ICCRX__)
+/***********************************************************************************************************************
+* Function Name: R_FLASH_BitClear
+* Description  : Sets the specified one bit in the specified 1-byte area to 0.
+* Arguments    : data - Address of the target 1-byte area
+*                bit  - Position of the bit to be manipulated
+*                NOTE: This function is diverted from R_BSP_BitClear().
+* Return Value : none
+***********************************************************************************************************************/
+FLASH_PE_MODE_SECTION
+R_BSP_PRAGMA_STATIC_INLINE_ASM(R_FLASH_BitClear)
+void R_FLASH_BitClear(uint8_t *data, uint32_t bit)
+{
+    R_BSP_ASM_INTERNAL_USED(data)
+    R_BSP_ASM_INTERNAL_USED(bit)
+
+    R_BSP_ASM_BEGIN
+    R_BSP_ASM(    BCLR    R2, [R1]    )
+    R_BSP_ASM_END
+} /* End of function R_FLASH_BitClear() */
+#endif /* defined(__GNUC__) || defined(__ICCRX__) */
 
 
 FLASH_SECTION_CHANGE_END /* end FLASH SECTION FRAM */

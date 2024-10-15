@@ -25,6 +25,7 @@
 *                              Supported for RX671.
 *           03.12.2021 2.00    Updated new features in Asynchronous mode
 *                              and added support for Manchester mode.
+*           28.06.2024 2.60    Added the source code to check unsupported channel for the supported device.
 ***********************************************************************************************************************/
 
 #ifndef RSCI_RX671_H
@@ -43,6 +44,10 @@ Includes   <System Includes> , "Project Includes"
 Macro definitions
 ***********************************************************************************************************************/
 
+/* RSCI channel include Check */
+#if ((RSCI_CFG_CH0_INCLUDED != 0) || (RSCI_CFG_CH8_INCLUDED != 0) || (RSCI_CFG_CH9_INCLUDED != 0))
+    #error "ERROR - Unsupported channel chosen in r_rsci_config.h"
+#endif
 
 /* RSCI SCR register masks */
 #define RSCI_SCR0_TIE_MASK    (0x00100000U)     /* transmit interrupt enable */

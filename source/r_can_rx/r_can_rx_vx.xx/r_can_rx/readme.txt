@@ -82,3 +82,7 @@ r_can_rx
 |
 +---src
         r_can_rx.c
+r_config
+    r_can_rx_config.h
+
+r_can_rx.ftl

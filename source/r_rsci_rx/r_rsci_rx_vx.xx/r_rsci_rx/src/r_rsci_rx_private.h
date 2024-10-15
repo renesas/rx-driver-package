@@ -27,6 +27,7 @@
 *                              and added support for Manchester mode.
 *           15.08.2022 2.30    Supported for RX26T.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           28.06.2024 2.60    Supported for RX260, RX261.
 ***********************************************************************************************************************/
 
 #ifndef RSCI_RX_H
@@ -40,6 +41,41 @@ Includes   <System Includes> , "Project Includes"
 /***********************************************************************************************************************
 Macro definitions
 ***********************************************************************************************************************/
+/* Bit number */
+#define RSCI_BIT0    (0)
+#define RSCI_BIT1    (1)
+#define RSCI_BIT2    (2)
+#define RSCI_BIT3    (3)
+#define RSCI_BIT4    (4)
+#define RSCI_BIT5    (5)
+#define RSCI_BIT6    (6)
+#define RSCI_BIT7    (7)
+#define RSCI_BIT8    (8)
+#define RSCI_BIT9    (9)
+#define RSCI_BIT10   (10)
+#define RSCI_BIT11   (11)
+#define RSCI_BIT12   (12)
+#define RSCI_BIT13   (13)
+#define RSCI_BIT14   (14)
+#define RSCI_BIT15   (15)
+#define RSCI_BIT16   (16)
+#define RSCI_BIT17   (17)
+#define RSCI_BIT18   (18)
+#define RSCI_BIT19   (19)
+#define RSCI_BIT20   (20)
+#define RSCI_BIT21   (21)
+#define RSCI_BIT22   (22)
+#define RSCI_BIT23   (23)
+#define RSCI_BIT24   (24)
+#define RSCI_BIT25   (25)
+#define RSCI_BIT26   (26)
+#define RSCI_BIT27   (27)
+#define RSCI_BIT28   (28)
+#define RSCI_BIT29   (29)
+#define RSCI_BIT30   (30)
+#define RSCI_BIT31   (31)
+
+
 /* Bit position masks */
 #define BIT0_MASK   (0x00000001U)
 #define BIT1_MASK   (0x00000002U)
@@ -82,19 +118,22 @@ Macro definitions
     #define RSCI_CFG_FIFO_INCLUDED (1)
 #endif
 
-#if ((RSCI_CFG_CH8_DATA_MATCH_INCLUDED) || (RSCI_CFG_CH9_DATA_MATCH_INCLUDED) || \
-        (RSCI_CFG_CH10_DATA_MATCH_INCLUDED) || (RSCI_CFG_CH11_DATA_MATCH_INCLUDED))
+#if ((RSCI_CFG_CH0_DATA_MATCH_INCLUDED) || (RSCI_CFG_CH8_DATA_MATCH_INCLUDED) || \
+        (RSCI_CFG_CH9_DATA_MATCH_INCLUDED) || (RSCI_CFG_CH10_DATA_MATCH_INCLUDED) || \
+        (RSCI_CFG_CH11_DATA_MATCH_INCLUDED))
     #define RSCI_CFG_DATA_MATCH_INCLUDED (1)
 #endif
 
-#if ((RSCI_CFG_CH8_RX_DATA_SAMPLING_TIMING_INCLUDED)     ||   \
+#if ((RSCI_CFG_CH0_RX_DATA_SAMPLING_TIMING_INCLUDED)     ||   \
+        (RSCI_CFG_CH8_RX_DATA_SAMPLING_TIMING_INCLUDED)  ||   \
         (RSCI_CFG_CH9_RX_DATA_SAMPLING_TIMING_INCLUDED)  ||   \
         (RSCI_CFG_CH10_RX_DATA_SAMPLING_TIMING_INCLUDED) ||   \
         (RSCI_CFG_CH11_RX_DATA_SAMPLING_TIMING_INCLUDED))
     #define RSCI_CFG_RX_DATA_SAMPLING_TIMING_INCLUDED (1)
 #endif
 
-#if ((RSCI_CFG_CH8_TX_SIGNAL_TRANSITION_TIMING_INCLUDED)     ||   \
+#if ((RSCI_CFG_CH0_TX_SIGNAL_TRANSITION_TIMING_INCLUDED)     ||   \
+        (RSCI_CFG_CH8_TX_SIGNAL_TRANSITION_TIMING_INCLUDED)  ||   \
         (RSCI_CFG_CH9_TX_SIGNAL_TRANSITION_TIMING_INCLUDED)  ||   \
         (RSCI_CFG_CH10_TX_SIGNAL_TRANSITION_TIMING_INCLUDED) ||   \
         (RSCI_CFG_CH11_TX_SIGNAL_TRANSITION_TIMING_INCLUDED))

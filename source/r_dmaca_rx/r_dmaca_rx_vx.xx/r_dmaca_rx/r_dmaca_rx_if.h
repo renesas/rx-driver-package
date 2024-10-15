@@ -51,6 +51,7 @@
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *         : 29.05.2023 3.20    Added support for RX23E-B.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 28.06.2024 3.30    Added support for RX260, RX261.
 *******************************************************************************/
 #ifndef DMACA_RX_IF_H
 #define DMACA_RX_IF_H
@@ -74,7 +75,7 @@ Macro definitions
 
 /* Version Number of API */
 #define DMACA_VERSION_MAJOR  (3)
-#define DMACA_VERSION_MINOR  (20)
+#define DMACA_VERSION_MINOR  (30)
 
 /* DMAC activation is disabled. */
 #define DMACA_ACTIVE_DISABLE              (0x00u)

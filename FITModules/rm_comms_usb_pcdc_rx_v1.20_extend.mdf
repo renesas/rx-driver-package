@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+* DISCLAIMER
+* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
+* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
+* applicable laws, including copyright laws. 
+* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
+* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
+* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
+* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
+* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
+* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
+* following link:
+* http://www.renesas.com/disclaimer
+*
+* Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+  <fileVersion>1.00</fileVersion>
+  <formatVersion>2.00</formatVersion>
+  <fileTemplate>
+  </fileTemplate>
+  <configuration>
+    <property id="RM_COMMS_USB_PCDC_CFG_PARAM_CHECKING_ENABLE" display="Parameter Checking" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+      <option id="RM_COMMS_USB_PCDC_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="System Default" value="BSP_CFG_PARAM_CHECKING_ENABLE" />
+      <option id="RM_COMMS_USB_PCDC_CFG_PARAM_CHECKING_ENABLE.0" display="Disabled" value="0" />
+      <option id="RM_COMMS_USB_PCDC_CFG_PARAM_CHECKING_ENABLE.1" display="Enabled" value="1" />
+      <description>Select whether to include parameter checking in the code.
+"Disabled": Compiles out parameter checking.
+"Enabled": Includes parameter checking.
+"System Default": Sets this to "BSP_CFG_PARAM_CHECKING_ENABLE"</description>
+    </property>
+
+    <property id="COMMS_USB_PCDC_CFG_RTOS_TX_MUTEX_SUPPORT_ENABLE" display="[TX] Lock device for writing in using RTOS." default="0" type="combobox">
+      <option id="COMMS_USB_PCDC_CFG_RTOS_TX_MUTEX_SUPPORT_ENABLE.DISABLED" display="Disabled" value="0" />
+      <option id="COMMS_USB_PCDC_CFG_RTOS_TX_MUTEX_SUPPORT_ENABLE.ENABLED" display="Enabled" value="1" />
+      <description>Select whether to support the device lock operation.
+The device lock operation is effective available when using RTOS and enabled a blocking operation.
+"Disabled": Disbled a device lock operation.
+"Enabled": Enabled a device lock operation.</description>
+    </property>
+
+    <property id="COMMS_USB_PCDC_CFG_RTOS_RX_MUTEX_SUPPORT_ENABLE" display="[RX] Lock device for writing in using RTOS." default="0" type="combobox">
+      <option id="COMMS_USB_PCDC_CFG_RTOS_RX_MUTEX_SUPPORT_ENABLE.DISABLED" display="Disabled" value="0" />
+      <option id="COMMS_USB_PCDC_CFG_RTOS_RX_MUTEX_SUPPORT_ENABLE.ENABLED" display="Enabled" value="1" />
+      <description>Select whether to support the device lock operation.
+The device lock operation is effective available when using RTOS and enabled a blocking operation.
+"Disabled": Disbled a device lock operation.
+"Enabled": Enabled a device lock operation.</description>
+    </property>
+
+    <property id="COMMS_USB_PCDC_CFG_MUTEX_TIMEOUT" display="Timeout for recursive mutex operation in using RTOS." default="0xFFFFFFFF" type="textbox">
+      <constraint display="Must be integer value (0x00 - 0xFFFFFFFF)">((0x00 &lt;= ${COMMS_USB_PCDC_CFG_MUTEX_TIMEOUT}) &amp;&amp; (0xFFFFFFFF &gt;= ${COMMS_USB_PCDC_CFG_MUTEX_TIMEOUT}))</constraint>
+      <description>Specify the timeout for the device lock for USB PCDC.</description>
+    </property>
+
+    <property id="COMMS_USB_PCDC_CFG_RTOS_TX_SEMAPHORE_SUPPORT_ENABLE" display="[TX] Block writing in using RTOS." default="0" type="combobox">
+      <option id="COMMS_USB_PCDC_CFG_RTOS_TX_SEMAPHORE_SUPPORT_ENABLE.DISABLED" display="Disabled" value="0" />
+      <option id="COMMS_USB_PCDC_CFG_RTOS_TX_SEMAPHORE_SUPPORT_ENABLE.ENABLED" display="Enabled" value="1" />
+      <description>Select whether to support the blocking operation.
+The blocking operation is effective available when using RTOS.
+"Disabled": Perform with non-blocking operation.
+"Enabled": Perform with blocking operation.</description>
+    </property>
+
+    <property id="COMMS_USB_PCDC_CFG_RTOS_RX_SEMAPHORE_SUPPORT_ENABLE" display="[RX] Block writing in using RTOS." default="0" type="combobox">
+      <option id="COMMS_USB_PCDC_CFG_RTOS_RX_SEMAPHORE_SUPPORT_ENABLE.DISABLED" display="Disabled" value="0" />
+      <option id="COMMS_USB_PCDC_CFG_RTOS_RX_SEMAPHORE_SUPPORT_ENABLE.ENABLED" display="Enabled" value="1" />
+      <description>Select whether to support the blocking operation.
+The blocking operation is effective available when using RTOS.
+"Disabled": Perform with non-blocking operation.
+"Enabled": Perform with blocking operation.</description>
+    </property>
+
+    <property id="COMMS_USB_PCDC_CFG_SEMAPHORE_TIMEOUT" display="Timeout for semaphore operation in using RTOS." default="0xFFFFFFFF" type="textbox">
+      <constraint display="Must be integer value (0x00 - 0xFFFFFFFF)">((0x00 &lt;= ${COMMS_USB_PCDC_CFG_SEMAPHORE_TIMEOUT}) &amp;&amp; (0xFFFFFFFF &gt;= ${COMMS_USB_PCDC_CFG_SEMAPHORE_TIMEOUT}))</constraint>
+      <description>Specify the timeout for the blocking bus of the USB PCDC Communication.</description>
+    </property>
+
+    <property id="COMMS_USB_PCDC_CFG_CALLBACK" display="[USB PCDC Communication] Callback Function" default="rm_comms_usb_pcdc_user_callback" type="textbox">
+      <constraint display="Must not be empty and not be NULL">!("" === "${COMMS_USB_PCDC_CFG_CALLBACK}") &amp;&amp; !("NULL" === "${COMMS_USB_PCDC_CFG_CALLBACK}")</constraint>
+      <description>Specify the callback function name of the USB_PCDC Communication.</description>
+    </property>
+
+    <property id="COMMS_USB_PCDC_DEVICE_USED" display="Specify type of USB PCDC used for middleware" default="USB PCDC BASIC" type="combobox">
+      <option id="COMMS_USB_PCDC_DEVICE_USED.0" display="USB PCDC BASIC" value="USB_PCDC_BASIC" />
+      <option id="COMMS_USB_PCDC_DEVICE_USED.1" display="USB PCDC MINI" value="USB_PCDC_BASIC_MINI" />
+      <description>Select type of USB used for COMMS_USB_PCDC</description>
+    </property>
+<!--
+/***********************************************************************************************************************
+  DEVICE TIMER
+***********************************************************************************************************************/
+-->
+    <property id="COMMS_USB_PCDC_CFG_TIMER_CHANNEL" display="Timer Channel" default="0" type="combobox">
+        <option id="COMMS_USB_PCDC_CFG_TIMER_CHANNEL.0"  display="0" value="0" />
+        <option id="COMMS_USB_PCDC_CFG_TIMER_CHANNEL.1"  display="1" value="1" />
+        <description>Specify the timer channel.</description>
+    </property>
+
+    <property id="COMMS_USB_PCDC_CFG_TIMER_FREQUENCY" display="Timer Frequency Hz" default="100" type="textbox">
+        <constraint display="Must not be empty">"" != "${COMMS_USB_PCDC_CFG_TIMER_FREQUENCY}"</constraint>
+        <constraint display="Value must be an integer">testInteger("${COMMS_USB_PCDC_CFG_TIMER_FREQUENCY}")</constraint>
+        <description>Specify the timer frequency (Hz).</description>
+    </property>
+
+    <property id="COMMS_USB_PCDC_CFG_TIMER_PRIORITY" display="Timer Priority Level" default="CMT_PRIORITY_14" type="combobox">
+        <option id="COMMS_USB_PCDC_CFG_TIMER_PRIORITY.0"  display="0 (Disabled)" value="CMT_PRIORITY_0" />
+        <option id="COMMS_USB_PCDC_CFG_TIMER_PRIORITY.1"  display="1           " value="CMT_PRIORITY_1" />
+        <option id="COMMS_USB_PCDC_CFG_TIMER_PRIORITY.2"  display="2           " value="CMT_PRIORITY_2" />
+        <option id="COMMS_USB_PCDC_CFG_TIMER_PRIORITY.3"  display="3           " value="CMT_PRIORITY_3" />
+        <option id="COMMS_USB_PCDC_CFG_TIMER_PRIORITY.4"  display="4           " value="CMT_PRIORITY_4" />
+        <option id="COMMS_USB_PCDC_CFG_TIMER_PRIORITY.5"  display="5           " value="CMT_PRIORITY_5" />
+        <option id="COMMS_USB_PCDC_CFG_TIMER_PRIORITY.6"  display="6           " value="CMT_PRIORITY_6" />
+        <option id="COMMS_USB_PCDC_CFG_TIMER_PRIORITY.7"  display="7           " value="CMT_PRIORITY_7" />
+        <option id="COMMS_USB_PCDC_CFG_TIMER_PRIORITY.8"  display="8           " value="CMT_PRIORITY_8" />
+        <option id="COMMS_USB_PCDC_CFG_TIMER_PRIORITY.9"  display="9           " value="CMT_PRIORITY_9" />
+        <option id="COMMS_USB_PCDC_CFG_TIMER_PRIORITY.10" display="10          " value="CMT_PRIORITY_10" />
+        <option id="COMMS_USB_PCDC_CFG_TIMER_PRIORITY.11" display="11          " value="CMT_PRIORITY_11" />
+        <option id="COMMS_USB_PCDC_CFG_TIMER_PRIORITY.12" display="12          " value="CMT_PRIORITY_12" />
+        <option id="COMMS_USB_PCDC_CFG_TIMER_PRIORITY.13" display="13          " value="CMT_PRIORITY_13" />
+        <option id="COMMS_USB_PCDC_CFG_TIMER_PRIORITY.14" display="14          " value="CMT_PRIORITY_14" />
+        <option id="COMMS_USB_PCDC_CFG_TIMER_PRIORITY.15" display="15 (Highest)" value="CMT_PRIORITY_MAX" />
+        <description>Set the timer priority level.</description>
+    </property>
+  </configuration>
+</module>

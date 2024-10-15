@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_irq_rx_private.h
@@ -58,19 +58,24 @@
 *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *         : 29.05.2023  4.40    Added support RX23E-B.
 *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 28.06.2024  4.50    Added support RX260,RX261.
+*                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*                               Updated constraint in MDF file to disable configuration of unsupported channels for RX260, RX261.
+*                               Updated .ftl file to set register value using BYTE format.
 ***********************************************************************************************************************/
-#ifndef R_IRQ_PRIVATE_H_
-#define R_IRQ_PRIVATE_H_
 
 #include "platform.h"
 #include "r_irq_rx_config.h"
+
+#ifndef R_IRQ_PRIVATE_H_
+#define R_IRQ_PRIVATE_H_
 
 /******************************************************************************
 Macro definitions
 ******************************************************************************/
 /* Version Number of API. */
 #define IRQ_RX_VERSION_MAJOR           (4)
-#define IRQ_RX_VERSION_MINOR           (40)
+#define IRQ_RX_VERSION_MINOR           (50)
 
 /* Bit position of interrupt enable bits in interrupt enable register. */
 #define IRQ_IEN_MASK_IRQ0   (0x01)
@@ -95,43 +100,6 @@ Macro definitions
 #define IRQ_IEN_MASK_IRQ14   (0x40)
 #define IRQ_IEN_MASK_IRQ15   (0x80)
 #endif
-
-
-/******************************************************************************
-Typedef definitions
-******************************************************************************/
-/**********************************************************************************************************************
- * Function Name: irq_callback
- * Description  : .
- * Argument     : pargs
- * Return Value : .
- *********************************************************************************************************************/
-typedef void (*irq_callback)(void *pargs);
-
-typedef enum
-{
-    IRQ_BIT0 = 0x01,
-    IRQ_BIT1 = 0x02,
-    IRQ_BIT2 = 0x04,
-    IRQ_BIT3 = 0x08,
-    IRQ_BIT4 = 0x10,
-    IRQ_BIT5 = 0x20,
-    IRQ_BIT6 = 0x40,
-    IRQ_BIT7 = 0x80,
-} irq_8bit_mask_t;
-
-/* Definition of  structure */
-typedef struct irq_init_block_s
-{
-    irq_number_t const irq_num;
-    uint8_t const ien_bit_mask;    /* Bit mask for the interrupt enable register bit for this IRQ. */
-    uint8_t const ier_reg_index;   /* An index to the Interrupt enable register location for this interrupt. */
-    uint8_t const filt_clk_div;    /* PCLK divisor setting for the input pin digital filter. */
-    uint8_t const filt_enable;     /* Filter enable setting (on or off) for the input pin digital filter. */
-    irq_callback *const p_irq_callback; /* pointer to callback function pointer. */
-    uint8_t const *p_irq_in_port;    /* Pointer to the I/O port input data register for this IRQ. */
-    irq_8bit_mask_t irq_port_bit;  /* I/O port input data bit mask for this IRQ. */
-} irq_init_block_t;
 
 
 /******************************************************************************
@@ -1175,6 +1143,44 @@ Port and pin definitions for Smart Configurator
 #else
 #define IRQ_CFG_USE_IRQ15   (0)
 #endif  /* defined(IRQ_PORT_IRQ15) && defined(IRQ_PORT_BIT_IRQ15) */
+
+/******************************************************************************
+Typedef definitions
+******************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: irq_callback
+ * Description  : .
+ * Argument     : pargs
+ * Return Value : .
+ *********************************************************************************************************************/
+typedef void (*irq_callback)(void *pargs);
+
+typedef enum
+{
+    IRQ_BIT0 = 0x01,
+    IRQ_BIT1 = 0x02,
+    IRQ_BIT2 = 0x04,
+    IRQ_BIT3 = 0x08,
+    IRQ_BIT4 = 0x10,
+    IRQ_BIT5 = 0x20,
+    IRQ_BIT6 = 0x40,
+    IRQ_BIT7 = 0x80,
+} irq_8bit_mask_t;
+
+
+/* Definition of  structure */
+typedef struct irq_init_block_s
+{
+    irq_number_t const irq_num;
+    uint8_t const ien_bit_mask;    /* Bit mask for the interrupt enable register bit for this IRQ. */
+    uint8_t const ier_reg_index;   /* An index to the Interrupt enable register location for this interrupt. */
+    uint8_t const filt_clk_div;    /* PCLK divisor setting for the input pin digital filter. */
+    uint8_t const filt_enable;     /* Filter enable setting (on or off) for the input pin digital filter. */
+    irq_callback *const p_irq_callback; /* pointer to callback function pointer. */
+    uint8_t const *p_irq_in_port;    /* Pointer to the I/O port input data register for this IRQ. */
+    irq_8bit_mask_t irq_port_bit;  /* I/O port input data bit mask for this IRQ. */
+} irq_init_block_t;
+
 
 
 #endif /* R_IRQ_PRIVATE_H_ */

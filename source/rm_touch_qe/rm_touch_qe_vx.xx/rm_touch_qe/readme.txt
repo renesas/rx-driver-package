@@ -5,11 +5,11 @@ rm_touch_qe
 
 Document Number 
 ---------------
-r01an4470jj0210
+r01an4470jj0300
 
 Version
 -------
-v2.10
+v3.00
 
 Overview
 --------
@@ -28,7 +28,7 @@ Features
 * Wrapper API for Touch API FIT V1.11 support
 * Serial tuning support with standalone QE Tool for Capacitive Touch
 * Touch threshold adjustment function support.
-
+* Judgement Majoriry Mode(JMM) support.
 
 Supported MCUs
 --------------
@@ -37,53 +37,58 @@ Supported MCUs
 * RX140 Group
 * RX230 Group
 * RX231 Group
+* RX260 Group
+* RX261 Group
 * RX23W Group
 * RX671 Group
+
 
 Boards Tested On
 ----------------
 * RX130 Capacitive Touch Kit
 * RSKRX231
 * RX140 Capacitive Touch Kit
+* RX671 Capacitive Touch Kit
+* RX261 Capacitive Touch Kit
+
 
 Limitations
 -----------
 -
 
+
 Peripherals Used Directly
 -------------------------
-* CTSU
+- (Required r_ctsu_qe)
 
 
 Required Packages
 -----------------
-* r_bsp      v6.20
-* r_ctsu_qe  v2.10
+* r_bsp      v7.50
+* r_ctsu_qe  v3.00
 
 
 Toolchain(s) Used
 -----------------
-* Renesas CC-RX 3.03
+* Renesas CC-RX 3.06
 
 
 File Structure
 --------------
-rm_touch_qe (v2.10)
+rm_touch_qe
 |   +-- readme.txt
-|   +-- rm_touch_qe_if.h (v2.10)
+|   +-- rm_touch_qe_if.h
 |
 +---inc
-|   +-- rm_touch_qe.h (v2.10)
-|   +-- rm_touch_qe_api.h (v2.10)
+|   +-- rm_touch_qe.h
+|   +-- rm_touch_qe_api.h
 |
 +---wrapper
 |   +-- r_touch_wrapper_qe.c
 |   +-- r_touch_wrapper_qe_h
 |
 +---src
-    +-- rm_touch_qe.c (v2.10)
+    +-- rm_touch_qe.c
 
 r_config
-    rm_touch_qe_config.h (v2.10)
-
-
+    rm_touch_qe_config.h

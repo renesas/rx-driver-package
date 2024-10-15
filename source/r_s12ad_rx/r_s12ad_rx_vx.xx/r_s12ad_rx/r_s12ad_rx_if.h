@@ -57,6 +57,7 @@
 *           01.08.2022 5.10    Added RX26T support.
 *           14.10.2022 5.20    Added RX23E-B support.
 *           03.04.2023 5.30    Added RX26T 48k support.
+*           13.02.2024 5.40    Added RX260 and RX261 support.
 ***********************************************************************************************************************/
 
 #ifndef S12AD_PRV_IF_H
@@ -119,6 +120,10 @@ Includes   <System Includes> , "Project Includes"
 #include "./src/targets/rx24u/r_s12ad_rx24u_if.h"
 #elif defined(BSP_MCU_RX26T)
 #include "./src/targets/rx26t/r_s12ad_rx26t_if.h"
+#elif defined(BSP_MCU_RX260)
+#include "./src/targets/rx260/r_s12ad_rx260_if.h"
+#elif defined(BSP_MCU_RX261)
+#include "./src/targets/rx261/r_s12ad_rx261_if.h"
 #endif
 
 /******************************************************************************
@@ -126,7 +131,7 @@ Macro definitions
 *******************************************************************************/
 /* Version Number of API. */
 #define ADC_VERSION_MAJOR       (5)
-#define ADC_VERSION_MINOR       (20)
+#define ADC_VERSION_MINOR       (40)
 
 /*****************************************************************************
 Typedef definitions

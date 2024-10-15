@@ -14,7 +14,7 @@
 * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2013(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2013(2024) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_usb_hlibusbip.c
@@ -27,6 +27,7 @@
 *           : 30.11.2018 1.10    Supporting Smart Configurator
 *           : 31.05.2019 1.11    Added support for GNUC and ICCRX.
 *           : 30.06.2020 1.20    Added support for RTOS.
+*           : 30.04.2024 1.30    Added support for RX261.
 ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -489,14 +490,22 @@ void usb_hstd_brdy_pipe_process(uint16_t bitsts)
                     buffer = hw_usb_read_fifoctr(useport);
 
                     set_dma_block_cnt = (uint16_t)((g_usb_hstd_data_cnt[g_usb_cstd_dma_pipe[dma_ch]] -1)
-                                                                             / g_usb_cstd_dma_fifo[dma_ch]) +1;
+                             / g_usb_cstd_dma_fifo[dma_ch]) +1;
 
                     trans_dma_block_cnt = usb_cstd_dma_get_crtb(dma_ch);
+
                     /* Get D0fifo Receive Data Length */
                     g_usb_cstd_dma_size[dma_ch] = buffer & USB_DTLN;
                     if (set_dma_block_cnt > trans_dma_block_cnt)
                     {
-                        g_usb_cstd_dma_size[dma_ch] += ((set_dma_block_cnt - (trans_dma_block_cnt + 1)) * maxps);
+                        if (0 == g_usb_cstd_dma_size[dma_ch])   /* DTLN = 0 (Received 0 length packet) */
+                        {
+                            g_usb_cstd_dma_size[dma_ch] += ((set_dma_block_cnt - trans_dma_block_cnt) * maxps);
+                        }
+                        else
+                        {
+                            g_usb_cstd_dma_size[dma_ch] += ((set_dma_block_cnt - (trans_dma_block_cnt + 1)) * maxps);
+                        }
                     }
 
                     /* Check data count */

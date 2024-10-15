@@ -24,6 +24,8 @@
 *         : 22.11.2021 1.00    Initial Release
 *         : 06.01.2023 1.20    Fixed TXRF flag not cleared in the function canfd_channel_tx_isr()
 *         : 13.12.2023 1.31    Added WAIT_LOOP comments.
+*         : 28.06.2024 1.40    Added support for RX261.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * Includes
@@ -74,19 +76,27 @@ static const uint8_t g_mode_order[] = {0, 2, 1, 0, 0, 3};
  * Private function prototypes
  **********************************************************************************************************************/
 #if CANFD_CFG_PARAM_CHECKING_ENABLE
-static bool r_canfd_bit_timing_parameter_check(can_bit_timing_cfg_t * p_bit_timing);
+static bool r_canfd_bit_timing_parameter_check (can_bit_timing_cfg_t * p_bit_timing);
 
 #endif
 
-static void    r_canfd_mb_read(uint32_t buffer, can_frame_t * const frame);
-static void    r_canfd_call_callback(canfd_instance_ctrl_t * p_ctrl, can_callback_args_t * p_args);
-static void    r_canfd_mode_transition(canfd_instance_ctrl_t * p_ctrl, can_operation_mode_t operation_mode);
-static void    r_canfd_mode_ctr_set(volatile uint32_t * p_ctr_reg, can_operation_mode_t operation_mode);
-static uint8_t r_canfd_bytes_to_dlc(uint8_t bytes);
-static uint32_t trailing_zeros(uint32_t n);
-void           canfd_error_isr(void);
-void           canfd_rx_fifo_isr(void);
-void           canfd_channel_tx_isr(void);
+static void     r_canfd_mb_read (uint32_t buffer, can_frame_t * const frame);
+static void     r_canfd_call_callback (canfd_instance_ctrl_t * p_ctrl, can_callback_args_t * p_args);
+static void     r_canfd_mode_transition (canfd_instance_ctrl_t * p_ctrl, can_operation_mode_t operation_mode);
+static void     r_canfd_mode_ctr_set (volatile uint32_t * p_ctr_reg, can_operation_mode_t operation_mode);
+static uint8_t  r_canfd_bytes_to_dlc (uint8_t bytes);
+static uint32_t trailing_zeros (uint32_t n);
+
+#if defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T)
+/* Interrupt service routine for CANFD global and channel error group interrupt */
+static void      canfd_error_grp_isr(void);
+
+/* Interrupt service routine for CANFD RX FIFO group interrupt */
+static void      canfd_rx_fifo_grp_isr(void);
+
+/* Interrupt service routine for CANFD0 Channel TX group interrupt */
+static void      canfd_channel_tx_grp_isr(void);
+#endif
 
 /***********************************************************************************************************************
  * ISR prototypes
@@ -103,9 +113,10 @@ void           canfd_channel_tx_isr(void);
 static const canfd_ch_st_ptr CANFD_CHANNELS[] =
 {
     #ifdef CANFD0
-         &CANFD0,
+        &CANFD0,
     #endif
 };
+
 /* make sure that MAX_CHANNELS = the number of CANFD channels */
 #define MAX_CHANNELS (sizeof(CANFD_CHANNELS)/sizeof(canfd_ch_st_ptr))
 
@@ -203,8 +214,8 @@ bsp_int_ctrl_t int_ctrl;
 
     /* Check that prescaler is in range */
     FSP_ERROR_RETURN((p_data_timing->baud_rate_prescaler <= CANFD_BAUD_RATE_PRESCALER_MAX) &&
-                     (p_data_timing->baud_rate_prescaler >= CANFD_BAUD_RATE_PRESCALER_MIN),
-                     FSP_ERR_CAN_INIT_FAILED);
+                    (p_data_timing->baud_rate_prescaler >= CANFD_BAUD_RATE_PRESCALER_MIN),
+                    FSP_ERR_CAN_INIT_FAILED);
 
     /* Check that TSEG1 >= TSEG2 >= SJW for data bitrate  */
 
@@ -221,17 +232,17 @@ bsp_int_ctrl_t int_ctrl;
     uint32_t data_rate_clocks = p_data_timing->baud_rate_prescaler *
                                 (p_data_timing->time_segment_1 + p_data_timing->time_segment_2 + 1U);
     uint32_t nominal_rate_clocks = p_bit_timing->baud_rate_prescaler *
-                                   (p_bit_timing->time_segment_1 + p_bit_timing->time_segment_2 + 1U);
+                                    (p_bit_timing->time_segment_1 + p_bit_timing->time_segment_2 + 1U);
 
     /* Check that data_rate_clocks <= nominal_rate_clocks  */
     FSP_ERROR_RETURN(data_rate_clocks <= nominal_rate_clocks, FSP_ERR_CAN_INIT_FAILED);
 
-#else
+#else  /* !CANFD_CFG_PARAM_CHECKING_ENABLE */
     uint32_t channel = p_cfg->channel;
 
     /* Get extended config */
     canfd_extended_cfg_t * p_extend = (canfd_extended_cfg_t *) p_cfg->p_extend;
-#endif
+#endif /* CANFD_CFG_PARAM_CHECKING_ENABLE */
 
     fsp_err_t err = FSP_SUCCESS;
 
@@ -266,7 +277,11 @@ bsp_int_ctrl_t int_ctrl;
     if (0 == p_cfg->channel)
     {
         /* Write MSTPCRD to 0: The module stop state is canceled. */
+#if defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T)
         MSTP(CANFD) = 0;
+#else
+        MSTP(CANFD0) = 0;
+#endif
     }
 #if ((R_BSP_VERSION_MAJOR == 7) && (R_BSP_VERSION_MINOR >= 20)) || (R_BSP_VERSION_MAJOR >= 8)
     R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
@@ -305,6 +320,7 @@ bsp_int_ctrl_t int_ctrl;
             canfd_block_p->RFCR[i].LONG = p_global_cfg->rx_fifo_config[i];
         }
 
+#if defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T)
         /* Configure Configure RX FIFOs interrupt. Must enable group that it belongs to */
         /* in addition to individual source. */
         R_BSP_InterruptRequestEnable(VECT(ICU, GROUPBL2));
@@ -318,26 +334,44 @@ bsp_int_ctrl_t int_ctrl;
 #endif
         /* Configure priority interrupt */
         ICU.IPR[IPR_ICU_GROUPBL2].BIT.IPR = p_global_cfg->rx_fifo_ipl;
-        R_BSP_InterruptWrite( BSP_INT_SRC_BL2_CANFD_RFRI, (bsp_int_cb_t) canfd_rx_fifo_isr);
+        R_BSP_InterruptWrite( BSP_INT_SRC_BL2_CANFD_RFRI, (bsp_int_cb_t) canfd_rx_fifo_grp_isr);
+#endif
 
+#if !(defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T))
+        /* Enable CANFD RX FIFOs interrupt. */
+        R_BSP_InterruptRequestEnable(VECT(CANFD, RFRI));
+
+        /* Configure priority interrupt */
+        IPR(CANFD, RFRI) = p_global_cfg->global_interrupts;
+#endif
         /* Set global error interrupts */
-       canfd_block_p->GCR.LONG = p_global_cfg->global_interrupts;
+        canfd_block_p->GCR.LONG = p_global_cfg->global_interrupts;
     }
 
-        /* Configure global error interrupt. Must enable group that it belongs to */
-        /* in addition to individual source. */
-        R_BSP_InterruptRequestEnable(VECT(ICU, GROUPBL2));
+#if defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T)
+    /* Configure global error interrupt. Must enable group that it belongs to */
+    /* in addition to individual source. */
+    R_BSP_InterruptRequestEnable(VECT(ICU, GROUPBL2));
 #if ((R_BSP_VERSION_MAJOR == 7) && (R_BSP_VERSION_MINOR >= 20)) || (R_BSP_VERSION_MAJOR >= 8)
         R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 #endif
-        /* resolves to:  ICU.GEN[GEN_CANFD_GLEI].BIT.EN3 = 1; */
-        EN(CANFD, GLEI) = 1;
+    /* resolves to:  ICU.GEN[GEN_CANFD_GLEI].BIT.EN3 = 1; */
+    EN(CANFD, GLEI) = 1;
 #if ((R_BSP_VERSION_MAJOR == 7) && (R_BSP_VERSION_MINOR >= 20)) || (R_BSP_VERSION_MAJOR >= 8)
-        R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
+    R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 #endif
-        /* Configure priority interrupt */
-        ICU.IPR[IPR_ICU_GROUPBL2].BIT.IPR = p_global_cfg->global_err_ipl;
-        R_BSP_InterruptWrite( BSP_INT_SRC_BL2_CANFD_GLEI, (bsp_int_cb_t) canfd_error_isr);
+    /* Configure priority interrupt */
+    ICU.IPR[IPR_ICU_GROUPBL2].BIT.IPR = p_global_cfg->global_err_ipl;
+    R_BSP_InterruptWrite( BSP_INT_SRC_BL2_CANFD_GLEI, (bsp_int_cb_t) canfd_error_grp_isr);
+#endif
+
+#if !(defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T))
+    /* Enable CANFD Global Error Interrupt. */
+    R_BSP_InterruptRequestEnable(VECT(CANFD, GLEI));
+
+    /* Configure priority interrupt */
+    IPR(CANFD, GLEI) = p_global_cfg->global_err_ipl;
+#endif
 
     /* Track ctrl struct */
     gp_ctrl[channel] = p_ctrl;
@@ -353,7 +387,7 @@ bsp_int_ctrl_t int_ctrl;
     canfd_afl_t * p_afl = (canfd_afl_t*)p_extend->p_afl;
 
     /* WAIT_LOOP */
-    for ( ; afl_entry < afl_max; afl_entry++)
+    for (; afl_entry < afl_max; afl_entry++)
     {
         /* AFL register access is performed through a page window comprised of 16 entries. See Section 33.5.7 "Entering
          * Entries in the AFL" in the RX660 User's Manual (R01UH0937EJ0050) for more details. */
@@ -375,18 +409,16 @@ bsp_int_ctrl_t int_ctrl;
     /* Cancel Channel Sleep and wait for transition to Channel Reset */
     r_canfd_mode_transition(p_ctrl, CAN_OPERATION_MODE_RESET);
 
-    /* Configure bitrate */
-    canfd_ch_block_p->NBCR.LONG =
-        (uint32_t) (((p_cfg->p_bit_timing->baud_rate_prescaler - 1) & R_CANFD_NBCR_BRP_Msk) <<
-                R_CANFD_NBCR_BRP_Pos) |
+    /* Configure bit rate */
+    canfd_ch_block_p->NBCR.LONG = (uint32_t) (((p_cfg->p_bit_timing->baud_rate_prescaler - 1) & R_CANFD_NBCR_BRP_Msk) <<
+        R_CANFD_NBCR_BRP_Pos) |
         ((p_cfg->p_bit_timing->time_segment_1 - 1U) << R_CANFD_NBCR_TSEG1_Pos) |
         ((p_cfg->p_bit_timing->time_segment_2 - 1U) << R_CANFD_NBCR_TSEG2_Pos) |
         ((p_cfg->p_bit_timing->synchronization_jump_width - 1U) << R_CANFD_NBCR_SJW_Pos);
 
-    /* Configure data bitrate for rate switching on FD frames */
-    canfd_ch_block_p->DBCR.LONG =
-        (uint32_t) (((p_extend->p_data_timing->baud_rate_prescaler - 1) & R_CANFD_DBCR_BRP_Msk) <<
-                R_CANFD_DBCR_BRP_Pos) |
+    /* Configure data bit rate for rate switching on FD frames */
+    canfd_ch_block_p->DBCR.LONG = (uint32_t) (((p_extend->p_data_timing->baud_rate_prescaler - 1) & R_CANFD_DBCR_BRP_Msk) <<
+        R_CANFD_DBCR_BRP_Pos) |
         ((p_extend->p_data_timing->time_segment_1 - 1U) << R_CANFD_DBCR_TSEG1_Pos) |
         ((p_extend->p_data_timing->time_segment_2 - 1U) << R_CANFD_DBCR_TSEG2_Pos) |
         ((p_extend->p_data_timing->synchronization_jump_width - 1U) << R_CANFD_DBCR_SJW_Pos);
@@ -399,9 +431,7 @@ bsp_int_ctrl_t int_ctrl;
     }
 
     /* Configure transceiver delay compensation; allow user to set ESI bit manually */
-    canfd_ch_block_p->FDCFG.LONG =
-        (tdco << R_CANFD_FDCFG_TDCO_Pos) |
-        (uint32_t) (p_extend->delay_compensation << R_CANFD_FDCFG_TDCE_Pos) |
+    canfd_ch_block_p->FDCFG.LONG = (tdco << R_CANFD_FDCFG_TDCO_Pos) | (uint32_t) (p_extend->delay_compensation << R_CANFD_FDCFG_TDCE_Pos) |
         R_CANFD_FDCFG_TESI_Msk | 1U;
 
     /* Write TX message buffer interrupt enable bits */
@@ -412,35 +442,51 @@ bsp_int_ctrl_t int_ctrl;
 
     /* Enable channel interrupts */
 
-        /* Configure channel error interrupts. Must enable group that it belongs to */
-        /* in addition to individual source. */
-        R_BSP_InterruptRequestEnable(VECT(ICU, GROUPBL2));
+#if defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T)
+    /* Configure channel error interrupts. Must enable group that it belongs to */
+    /* in addition to individual source. */
+    R_BSP_InterruptRequestEnable(VECT(ICU, GROUPBL2));
 #if ((R_BSP_VERSION_MAJOR == 7) && (R_BSP_VERSION_MINOR >= 20)) || (R_BSP_VERSION_MAJOR >= 8)
-        R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
+    R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 #endif
-        /* resolves to:  ICU.GEN[GEN_CANFD0_CHEI].BIT.EN1 = 1; */
-        EN(CANFD0, CHEI) = 1;
+    /* resolves to:  ICU.GEN[GEN_CANFD0_CHEI].BIT.EN1 = 1; */
+    EN(CANFD0, CHEI) = 1;
 #if ((R_BSP_VERSION_MAJOR == 7) && (R_BSP_VERSION_MINOR >= 20)) || (R_BSP_VERSION_MAJOR >= 8)
-        R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
+    R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 #endif
-        /* Configure priority interrupt */
-        ICU.IPR[IPR_ICU_GROUPBL2].BIT.IPR = p_cfg->ipl;
-        R_BSP_InterruptWrite( BSP_INT_SRC_BL2_CANFD0_CHEI, (bsp_int_cb_t) canfd_error_isr);
+    /* Configure priority interrupt */
+    ICU.IPR[IPR_ICU_GROUPBL2].BIT.IPR = p_cfg->ipl;
+    R_BSP_InterruptWrite( BSP_INT_SRC_BL2_CANFD0_CHEI, (bsp_int_cb_t) canfd_error_grp_isr);
 
-        /* Configure channel interrupts. Must enable group that it belongs to */
-        /* in addition to individual source. */
-        R_BSP_InterruptRequestEnable(VECT(ICU, GROUPBL2));
+    /* Configure channel interrupts. Must enable group that it belongs to */
+    /* in addition to individual source. */
+    R_BSP_InterruptRequestEnable(VECT(ICU, GROUPBL2));
 #if ((R_BSP_VERSION_MAJOR == 7) && (R_BSP_VERSION_MINOR >= 20)) || (R_BSP_VERSION_MAJOR >= 8)
-        R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
+    R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
 #endif
-        /* resolves to:  ICU.GEN[GEN_CANFD0_CHTI].BIT.EN5 = 1; */
-        EN(CANFD0, CHTI) = 1;
+    /* resolves to:  ICU.GEN[GEN_CANFD0_CHTI].BIT.EN5 = 1; */
+    EN(CANFD0, CHTI) = 1;
 #if ((R_BSP_VERSION_MAJOR == 7) && (R_BSP_VERSION_MINOR >= 20)) || (R_BSP_VERSION_MAJOR >= 8)
-        R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
+    R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
 #endif
-        /* Configure priority interrupt */
-        ICU.IPR[IPR_ICU_GROUPBL2].BIT.IPR = p_cfg->ipl;
-        R_BSP_InterruptWrite( BSP_INT_SRC_BL2_CANFD0_CHTI, (bsp_int_cb_t) canfd_channel_tx_isr);
+    /* Configure priority interrupt */
+    ICU.IPR[IPR_ICU_GROUPBL2].BIT.IPR = p_cfg->ipl;
+    R_BSP_InterruptWrite( BSP_INT_SRC_BL2_CANFD0_CHTI, (bsp_int_cb_t) canfd_channel_tx_grp_isr);
+#endif
+
+#if !(defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T))
+    /* Enable CANFD0 Channel Error Interrupt. */
+    R_BSP_InterruptRequestEnable(VECT(CANFD0, CHEI));
+
+    /* Configure priority interrupt */
+    IPR(CANFD0, CHEI) = p_cfg->ipl;
+
+    /* Enable CANFD Global Error Interrupt. */
+    R_BSP_InterruptRequestEnable(VECT(CANFD0, CHTI));
+
+    /* Configure priority interrupt */
+    IPR(CANFD0, CHTI) = p_cfg->ipl;
+#endif
 
     /* Set global mode to Operation and wait for transition */
     r_canfd_mode_transition(p_ctrl, CAN_OPERATION_MODE_GLOBAL_OPERATION);
@@ -472,6 +518,7 @@ bsp_int_ctrl_t int_ctrl;
  *****************************************************************************************************************/
 fsp_err_t R_CANFD_Close (can_ctrl_t * const p_api_ctrl)
 {
+    /* Assigned CAN Instance Control Block */
     canfd_instance_ctrl_t * p_ctrl = (canfd_instance_ctrl_t *) p_api_ctrl;
 
 #if CANFD_CFG_PARAM_CHECKING_ENABLE
@@ -486,12 +533,25 @@ fsp_err_t R_CANFD_Close (can_ctrl_t * const p_api_ctrl)
     /* Set driver to closed */
     p_ctrl->open = 0U;
 
-    /* Get config struct */
+    /* Get configuration structure */
     can_cfg_t * p_cfg = (can_cfg_t *) p_ctrl->p_cfg;
 
-
+#if defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T)
     /* Disable interrupts. Must disable group that it belongs to */
     R_BSP_InterruptRequestDisable(VECT(ICU, GROUPBL2));
+#else
+    /* Disable CANFD Global Error Interrupt. */
+    R_BSP_InterruptRequestDisable(VECT(CANFD, GLEI));
+
+    /* Disable CANFD RX FIFO Interrupt. */
+    R_BSP_InterruptRequestDisable(VECT(CANFD, RFRI));
+
+    /* Disable CANFD0 Channel Error Interrupt. */
+    R_BSP_InterruptRequestDisable(VECT(CANFD0, CHEI));
+
+    /* Disable CANFD0 Channel TX Interrupt. */
+    R_BSP_InterruptRequestDisable(VECT(CANFD0, CHTI));
+#endif
 
     /* Transition to Global Sleep */
     r_canfd_mode_transition(p_ctrl, CAN_OPERATION_MODE_GLOBAL_RESET);
@@ -513,8 +573,12 @@ R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &in
 #endif
     if (0 == p_cfg->channel)
     {
-        /* Write MSTPCRD to 0: The module stop state is canceled. */
+        /* Write MSTPCRD to 1: The module stop state is canceled. */
+#if defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T)
         MSTP(CANFD) = 1;
+#else
+        MSTP(CANFD0) = 1;
+#endif
     }
 #if ((R_BSP_VERSION_MAJOR == 7) && (R_BSP_VERSION_MINOR >= 20)) || (R_BSP_VERSION_MAJOR >= 8)
 R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
@@ -523,7 +587,7 @@ R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int
     /* Enable writing to PRCR bits while simultaneously disabling PRC1. */
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR);
 
-    /* Reset global control struct pointer */
+    /* Reset global control structure pointer */
     gp_ctrl[p_cfg->channel] = NULL;
 
     return FSP_SUCCESS;
@@ -554,6 +618,7 @@ fsp_err_t R_CANFD_Write (can_ctrl_t * const p_api_ctrl, uint32_t buffer, can_fra
     canfd_block_p = &CANFD;
 
 #if CANFD_CFG_PARAM_CHECKING_ENABLE
+    /* Assigned CAN Instance Control Block */
     canfd_instance_ctrl_t * p_ctrl = (canfd_instance_ctrl_t *) p_api_ctrl;
 
     /* Check p_ctrl */
@@ -587,9 +652,9 @@ fsp_err_t R_CANFD_Write (can_ctrl_t * const p_api_ctrl, uint32_t buffer, can_fra
         /* Do nothing. */
     }
 
-#else
+#else /* !CANFD_CFG_PARAM_CHECKING_ENABLE */
     canfd_instance_ctrl_t * p_ctrl = (canfd_instance_ctrl_t *) p_api_ctrl;
-#endif
+#endif /* CANFD_CFG_PARAM_CHECKING_ENABLE */
 
     /* Calculate global TX message buffer number */
     uint32_t txmb = buffer + (p_ctrl->p_cfg->channel * CANFD_PRV_TXMB_CHANNEL_OFFSET);
@@ -599,11 +664,11 @@ fsp_err_t R_CANFD_Write (can_ctrl_t * const p_api_ctrl, uint32_t buffer, can_fra
 
     /* Set TX message buffer registers: HF0 */
     canfd_block_p->TMB[txmb].HF0.LONG = p_frame->id | ((uint32_t) p_frame->type << R_CANFD_TMB_HF0_RTR_Pos) |
-                              ((uint32_t) p_frame->id_mode << R_CANFD_TMB_HF0_IDE_Pos);
+                                        ((uint32_t) p_frame->id_mode << R_CANFD_TMB_HF0_IDE_Pos);
 
     /* Set TX message buffer registers: HF1 */
     canfd_block_p->TMB[txmb].HF1.LONG = (uint32_t) r_canfd_bytes_to_dlc(p_frame->data_length_code) <<
-                              R_CANFD_TMB_HF1_DLC_Pos;
+                                        R_CANFD_TMB_HF1_DLC_Pos;
 
     /* Set FD bits (ESI, BRS and FDF) */
     canfd_block_p->TMB[txmb].HF2.LONG = p_frame->options & 7U;
@@ -651,6 +716,7 @@ fsp_err_t R_CANFD_Read (can_ctrl_t * const p_api_ctrl, uint32_t buffer, can_fram
     canfd_block_p = &CANFD;
 
 #if CANFD_CFG_PARAM_CHECKING_ENABLE
+    /* Assigned CAN Instance Control Block */
     canfd_instance_ctrl_t * p_ctrl = (canfd_instance_ctrl_t *) p_api_ctrl;
 
     /* Check p_ctrl */
@@ -706,11 +772,14 @@ fsp_err_t R_CANFD_Read (can_ctrl_t * const p_api_ctrl, uint32_t buffer, can_fram
  * @note None.
  *****************************************************************************************************************/
 fsp_err_t R_CANFD_ModeTransition (can_ctrl_t * const   p_api_ctrl,
-                                  can_operation_mode_t operation_mode,
-                                  can_test_mode_t      test_mode)
+                                    can_operation_mode_t operation_mode,
+                                    can_test_mode_t      test_mode)
 {
+    /* Assigned CAN Instance Control Block */
     canfd_instance_ctrl_t * p_ctrl = (canfd_instance_ctrl_t *) p_api_ctrl;
+
     fsp_err_t               err    = FSP_SUCCESS;
+
     volatile struct st_canfd0 R_BSP_EVENACCESS_SFR * canfd_ch_block_p;
 
     /* Assign variable canfd_ch_block_p to &CANFDn with n is channel */
@@ -736,8 +805,8 @@ fsp_err_t R_CANFD_ModeTransition (can_ctrl_t * const   p_api_ctrl,
 
     /* Check to ensure the current mode is Global Reset when transitioning into or out of Global Sleep */
     FSP_ERROR_RETURN(((cfdgsts & R_CANFD_GSR_RSTST_Msk) && (CAN_OPERATION_MODE_RESET & operation_mode)) ||
-                     (!(cfdgsts & R_CANFD_GSR_SLPST_Msk) && (CAN_OPERATION_MODE_GLOBAL_SLEEP != operation_mode)),
-                     FSP_ERR_INVALID_MODE);
+                    (!(cfdgsts & R_CANFD_GSR_SLPST_Msk) && (CAN_OPERATION_MODE_GLOBAL_SLEEP != operation_mode)),
+                    FSP_ERR_INVALID_MODE);
 
     /* Check to ensure the current Global mode supports the requested Channel mode, if applicable. The requested mode
      * and the current global mode are converted into a number 0-3 corresponding to Operation, Halt, Reset and Sleep
@@ -746,9 +815,9 @@ fsp_err_t R_CANFD_ModeTransition (can_ctrl_t * const   p_api_ctrl,
     {
         /* Check operation_mode */
         FSP_ERROR_RETURN(g_mode_order[operation_mode] >= g_mode_order[cfdgsts & CANFD_PRV_CTR_MODE_MASK],
-                         FSP_ERR_INVALID_MODE);
+                        FSP_ERR_INVALID_MODE);
     }
-#endif
+#endif /* CANFD_CFG_PARAM_CHECKING_ENABLE */
 
     if (p_ctrl->test_mode != test_mode)
     {
@@ -760,10 +829,10 @@ fsp_err_t R_CANFD_ModeTransition (can_ctrl_t * const   p_api_ctrl,
             uint32_t cfdcnctr = canfd_ch_block_p->CHCR.LONG;
 
             /* Clear CTME and CTMS */
-            cfdcnctr &= ~(R_CANFD_CHCR_CTME_Msk | R_CANFD_CHCR_CTMS_Msk);
+            cfdcnctr &= (~(R_CANFD_CHCR_CTME_Msk | R_CANFD_CHCR_CTMS_Msk));
 
             /* Write CHCR */
-            canfd_ch_block_p->CHCR.LONG = cfdcnctr | ((uint32_t) test_mode << R_CANFD_CHCR_CTME_Pos);
+            canfd_ch_block_p->CHCR.LONG = cfdcnctr | ((uint32_t)test_mode << R_CANFD_CHCR_CTME_Pos);
         }
 
         p_ctrl->test_mode = test_mode;
@@ -797,6 +866,7 @@ fsp_err_t R_CANFD_InfoGet (can_ctrl_t * const p_api_ctrl, can_info_t * const p_i
 
 
 #if CANFD_CFG_PARAM_CHECKING_ENABLE
+    /* Assigned CAN Instance Control Block */
     canfd_instance_ctrl_t * p_ctrl = (canfd_instance_ctrl_t *) p_api_ctrl;
 
     /* Check pointers for NULL values */
@@ -819,14 +889,18 @@ fsp_err_t R_CANFD_InfoGet (can_ctrl_t * const p_api_ctrl, can_info_t * const p_i
 
     uint32_t cfdcnsts = canfd_ch_block_p->CHSR.LONG;
     p_info->status               = cfdcnsts & UINT16_MAX;
+
+    /* Cast to unit8_t */
     p_info->error_count_receive  = (uint8_t) ((cfdcnsts & R_CANFD_CHSR_REC_Msk) >> R_CANFD_CHSR_REC_Pos);
+
+    /* Cast to unit8_t */
     p_info->error_count_transmit = (uint8_t) ((cfdcnsts & R_CANFD_CHSR_TEC_Msk) >> R_CANFD_CHSR_TEC_Pos);
     p_info->error_code           = canfd_ch_block_p->CHESR.LONG & UINT16_MAX;
     p_info->rx_mb_status         = canfd_block_p->RMNDR.LONG;
     p_info->rx_fifo_status       = (~canfd_block_p->FESR.LONG) & CANFD_PRV_RX_FIFO_STATUS_MASK;
 
     /* Clear error flags */
-    canfd_ch_block_p->CHESR.LONG &= ~((uint32_t) UINT16_MAX);
+    canfd_ch_block_p->CHESR.LONG &= (~((uint32_t)UINT16_MAX));
 
     return FSP_SUCCESS;
 }
@@ -849,10 +923,11 @@ fsp_err_t R_CANFD_InfoGet (can_ctrl_t * const p_api_ctrl, can_info_t * const p_i
  * @note None.
  **********************************************************************************************************************/
 fsp_err_t R_CANFD_CallbackSet (can_ctrl_t * const          p_api_ctrl,
-                               void (                    * p_callback)(can_callback_args_t *),
-                               void const * const          p_context,
-                               can_callback_args_t * const p_callback_memory)
+                                void (                    * p_callback)(can_callback_args_t *),
+                                void const * const          p_context,
+                                can_callback_args_t * const p_callback_memory)
 {
+    /* Assigned CAN Instance Control Block */
     canfd_instance_ctrl_t * p_ctrl = (canfd_instance_ctrl_t *) p_api_ctrl;
 
 #if CANFD_CFG_PARAM_CHECKING_ENABLE
@@ -868,11 +943,16 @@ fsp_err_t R_CANFD_CallbackSet (can_ctrl_t * const          p_api_ctrl,
 
     /* Store callback and context */
     p_ctrl->p_callback = p_callback;
+
     p_ctrl->p_context         = p_context;
     p_ctrl->p_callback_memory = p_callback_memory;
 
     return FSP_SUCCESS;
 }
+/**********************************************************************************************************************
+ End of function R_CANFD_CallbackSet
+ *********************************************************************************************************************/
+
 
 /*******************************************************************************************************************//**
  * @} (end addtogroup CAN)
@@ -882,24 +962,34 @@ fsp_err_t R_CANFD_CallbackSet (can_ctrl_t * const          p_api_ctrl,
  * Private Functions
  **********************************************************************************************************************/
 #if CANFD_CFG_PARAM_CHECKING_ENABLE
+/******************************************************************************
+ * Function Name: r_canfd_bit_timing_parameter_check
+ * Description  : .
+ * Argument     : p_bit_timing
+ * Return Value : .
+ *****************************************************************************/
 static bool r_canfd_bit_timing_parameter_check (can_bit_timing_cfg_t * const p_bit_timing)
 {
     /* Check that prescaler is in range */
     FSP_ERROR_RETURN((p_bit_timing->baud_rate_prescaler <= CANFD_BAUD_RATE_PRESCALER_MAX) &&
-                     (p_bit_timing->baud_rate_prescaler >= CANFD_BAUD_RATE_PRESCALER_MIN),
-                     false);
+                    (p_bit_timing->baud_rate_prescaler >= CANFD_BAUD_RATE_PRESCALER_MIN),
+                    false);
 
     /* Check that TSEG1 > TSEG2 >= SJW for nominal bitrate  */
 
     /* Check Time Segment 1 is greater than Time Segment 2 */
-    FSP_ERROR_RETURN((uint32_t) p_bit_timing->time_segment_1 > (uint32_t) p_bit_timing->time_segment_2, false);
+    FSP_ERROR_RETURN((uint32_t)p_bit_timing->time_segment_1 > (uint32_t)p_bit_timing->time_segment_2, false);
 
     /* Check Time Segment 2 is greater than or equal to the synchronization jump width */
-    FSP_ERROR_RETURN((uint32_t) p_bit_timing->time_segment_2 >= (uint32_t) p_bit_timing->synchronization_jump_width,
-                     false);
+    FSP_ERROR_RETURN((uint32_t)p_bit_timing->time_segment_2 >= (uint32_t)p_bit_timing->synchronization_jump_width,
+                    false);
 
     return true;
 }
+/******************************************************************************
+ End of function r_canfd_bit_timing_parameter_check
+ *****************************************************************************/
+
 
 #endif
 
@@ -911,6 +1001,13 @@ static bool r_canfd_bit_timing_parameter_check (can_bit_timing_cfg_t * const p_b
  * @param[in]     buffer     Index of buffer to read from (MBs 0-31, FIFOs 32+)
  * @param[in]     frame      Pointer to CAN frame to write to
  **********************************************************************************************************************/
+/******************************************************************************
+ * Function Name: r_canfd_mb_read
+ * Description  : Read from a Message Buffer or FIFO.
+ * Arguments    : buffer Index of buffer to read from (MBs 0-31, FIFOs 32+)
+ *              : frame Pointer to CAN frame to write to
+ * Return Value : .
+ *****************************************************************************/
 static void r_canfd_mb_read (uint32_t buffer, can_frame_t * const frame)
 {
     volatile struct st_canfd R_BSP_EVENACCESS_SFR * canfd_block_p;
@@ -919,19 +1016,20 @@ static void r_canfd_mb_read (uint32_t buffer, can_frame_t * const frame)
     canfd_block_p = &CANFD;
 
     bool is_mb = buffer < CANFD_PRV_RXMB_MAX;
+
     /* Get pointer to message buffer (FIFOs use the same buffer structure) */
-    volatile canfd_rmb_t * mb_regs =
-        (is_mb) ? (volatile canfd_rmb_t *)(&CANFD.RMB0 + buffer*76) : /* address of RMBn = &RMB(n-1) + 76 bytes */
+    volatile canfd_rmb_t * p_mb_regs =
+        (is_mb) ? (volatile canfd_rmb_t *)((&CANFD.RMB0) + (buffer*76)) : /* address of RMBn = &RMB(n-1) + 76 bytes */
         (volatile canfd_rmb_t *) (&CANFD.RFB[buffer-CANFD_PRV_RXMB_MAX]);
 
     /* Get frame data. */
-    uint32_t id = mb_regs->HF0.LONG;
+    uint32_t id = p_mb_regs->HF0.LONG;
 
     /* Get the frame type */
     frame->type = (can_frame_type_t) ((id & R_CANFD_RMBn_HF0_RTR_Msk) >> R_CANFD_RMBn_HF0_RTR_Pos);
 
     /* Get FD status bits (ESI, BRS and FDF) */
-    frame->options = mb_regs->HF2.LONG & 7U;
+    frame->options = p_mb_regs->HF2.LONG & 7U;
 
     /* Get the frame ID */
     frame->id = id & R_CANFD_RMBn_HF0_ID_Msk;
@@ -940,12 +1038,15 @@ static void r_canfd_mb_read (uint32_t buffer, can_frame_t * const frame)
     frame->id_mode = (can_id_mode_t) (id >> R_CANFD_RMBn_HF0_IDE_Pos);
 
     /* Get the frame data length code */
-    frame->data_length_code = dlc_to_bytes[mb_regs->HF1.LONG >> R_CANFD_RMBn_HF1_DLC_Pos];
+    frame->data_length_code = dlc_to_bytes[p_mb_regs->HF1.LONG >> R_CANFD_RMBn_HF1_DLC_Pos];
 
     /* Copy data to frame */
     uint32_t  len    = frame->data_length_code;
+
     uint8_t * p_dest = frame->data;
-    uint8_t * p_src  = (uint8_t *) (mb_regs->DATA);
+
+    /* Cast to unit8_t */
+    uint8_t * p_src  = (uint8_t *) (p_mb_regs->DATA);
 
     /* WAIT_LOOP */
     while (len--)
@@ -956,7 +1057,7 @@ static void r_canfd_mb_read (uint32_t buffer, can_frame_t * const frame)
     if (is_mb)
     {
         /* Clear RXMB New Data bit */
-        canfd_block_p->RMNDR.LONG &= ~(1U << buffer);
+        canfd_block_p->RMNDR.LONG &= (~(1U << buffer));
     }
     else
     {
@@ -964,6 +1065,10 @@ static void r_canfd_mb_read (uint32_t buffer, can_frame_t * const frame)
         canfd_block_p->RFPCR[buffer - CANFD_PRV_RXMB_MAX] = UINT8_MAX;
     }
 }
+/******************************************************************************
+ End of function r_canfd_mb_read
+ *****************************************************************************/
+
 
 /*******************************************************************************************************************//**
  * Calls user callback.
@@ -971,6 +1076,13 @@ static void r_canfd_mb_read (uint32_t buffer, can_frame_t * const frame)
  * @param[in]     p_ctrl     Pointer to CAN instance control block
  * @param[in]     p_args     Pointer to arguments on stack
  **********************************************************************************************************************/
+/******************************************************************************
+ * Function Name: r_canfd_call_callback
+ * Description  : Calls user callback.
+ * Arguments    : p_ctrl Pointer to CAN instance control block
+ *              : p_args Pointer to arguments on stack
+ * Return Value : .
+ *****************************************************************************/
 static void r_canfd_call_callback (canfd_instance_ctrl_t * p_ctrl, can_callback_args_t * p_args)
 {
     can_callback_args_t args;
@@ -1001,13 +1113,18 @@ static void r_canfd_call_callback (canfd_instance_ctrl_t * p_ctrl, can_callback_
         *p_ctrl->p_callback_memory = args;
     }
 }
+/******************************************************************************
+ End of function r_canfd_call_callback
+ *****************************************************************************/
 
-/*******************************************************************************************************************//**
- * Error ISR.
- *
- * Saves context if RTOS is used, clears interrupts, calls common error function, and restores context if RTOS is used.
- **********************************************************************************************************************/
-void canfd_error_isr (void)
+/******************************************************************************
+* Function Name:    canfd_error_isr_common
+* Description  :    Common ISR handler for CANFD Global Error and CANFD0 Channel
+*                   Error.
+* Arguments    :    None
+* Return Value :    None
+******************************************************************************/
+static void canfd_error_isr_common (void)
 {
     volatile struct st_canfd0 R_BSP_EVENACCESS_SFR * canfd0_block_p;
     volatile struct st_canfd R_BSP_EVENACCESS_SFR * canfd_block_p;
@@ -1041,7 +1158,8 @@ void canfd_error_isr (void)
         {
             /* Get lowest RX FIFO with Message Lost condition and clear the flag */
             args.buffer = trailing_zeros(canfd_block_p->FMLSR.LONG);
-            canfd_block_p->RFSR[args.buffer].LONG &= ~R_CANFD_RFSR_LOST_Msk;
+
+            canfd_block_p->RFSR[args.buffer].LONG &= (~R_CANFD_RFSR_LOST_Msk);
         }
 
         /* Choose ctrl block for the selected global error handler channel. */
@@ -1049,6 +1167,7 @@ void canfd_error_isr (void)
 
         /* Set channel and context based on selected global error handler channel. */
         args.channel   = p_ctrl->p_cfg->channel;
+
         args.p_context = p_callback_ctrl->p_context;
     }
     else
@@ -1072,17 +1191,83 @@ void canfd_error_isr (void)
     args.p_frame = NULL;
     r_canfd_call_callback(p_callback_ctrl, &args);
 
-    /* Clear IRQ */
-    IR(ICU, GROUPBL2)  = 0;
+    /* Clear Error Flag ISR */
+#if defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T)
+    IR(ICU, GROUPBL2) = 0;
+#else
+    if (CAN_EVENT_ERR_GLOBAL == args.event)
+    {
+        IR(CANFD, GLEI) = 0;
+    }
+    else
+    {
+        IR(CANFD0, CHEI) = 0;
+    }
+#endif
 }
+/******************************************************************************
+ End of function canfd_error_isr_common
+ *****************************************************************************/
 
-/*******************************************************************************************************************//**
- * Receive ISR.
- *
- * Saves context if RTOS is used, clears interrupts, calls common receive function
- * and restores context if RTOS is used.
- **********************************************************************************************************************/
-void canfd_rx_fifo_isr (void)
+
+/******************************************************************************
+* Function Name:    canfd_global_error_isr
+* Description  :    CANFD Global Error ISR calls a common function.
+* Arguments    :    None
+* Return Value :    None
+******************************************************************************/
+#if !(defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T))
+
+    R_BSP_PRAGMA_STATIC_INTERRUPT (canfd_global_error_isr, VECT(CANFD, GLEI))
+    R_BSP_ATTRIB_STATIC_INTERRUPT void canfd_global_error_isr(void)
+    {
+        canfd_error_isr_common();
+    } /* End of function canfd_global_error_isr */
+#endif
+
+/******************************************************************************
+* Function Name:    canfd_channel_error_isr
+* Description  :    CANFD Channel Error ISR calls a common function.
+* Arguments    :    None
+* Return Value :    None
+******************************************************************************/
+#if !(defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T))
+
+    R_BSP_PRAGMA_STATIC_INTERRUPT (canfd_channel_error_isr, VECT(CANFD0, CHEI))
+    R_BSP_ATTRIB_STATIC_INTERRUPT void canfd_channel_error_isr(void)
+    {
+        canfd_error_isr_common();
+    } /* End of function canfd_channel_error_isr */
+#endif
+
+
+#if defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T)
+/******************************************************************************
+* Function Name:    canfd_error_grp_isr
+* Description  :    BSP group interrupt handler for register the error callback function
+* Arguments    :    None
+* Return Value :    None
+******************************************************************************/
+static void canfd_error_grp_isr (void)
+{
+    /* Called from BSP group interrupt handler. */
+    #if defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T)
+        if ((IS(CANFD, GLEI)) || (IS(CANFD0, CHEI)))
+        {
+            canfd_error_isr_common();
+        }
+    #endif
+} /* End of function canfd_error_grp_isr */
+#endif
+
+
+/******************************************************************************
+* Function Name:    canfd_rx_fifo_isr_common
+* Description  :    Common ISR handler for CANFD RX FIFO.
+* Arguments    :    None
+* Return Value :    None
+******************************************************************************/
+static void canfd_rx_fifo_isr_common (void)
 {
     volatile struct st_canfd R_BSP_EVENACCESS_SFR * canfd_block_p;
     canfd_block_p = &CANFD;
@@ -1116,45 +1301,93 @@ void canfd_rx_fifo_isr (void)
         }
 
         /* Clear RX FIFO Interrupt Flag */
-        canfd_block_p->RFSR[fifo].LONG &= ~R_CANFD_RFSR_RFIF_Msk;
+        canfd_block_p->RFSR[fifo].LONG &= (~R_CANFD_RFSR_RFIF_Msk);
     }
 
     if (!canfd_block_p->RFISR.LONG)
     {
         /* Clear interrupt in NVIC if there are no pending RX FIFO IRQs */
+        #if defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T)
         IR(ICU, GROUPBL2)  = 0;
+        #else
+        IR(CANFD, RFRI)  = 0;
+        #endif
     }
-
 }
+/******************************************************************************
+ End of function canfd_rx_fifo_isr_common
+ *****************************************************************************/
 
-/*******************************************************************************************************************//**
- * Transmit ISR.
- *
- * Saves context if RTOS is used, clears interrupts, calls common transmit function
- * and restores context if RTOS is used.
- **********************************************************************************************************************/
-void canfd_channel_tx_isr (void)
+
+/******************************************************************************
+* Function Name:    canfd_rx_fifo_isr
+* Description  :    CANFD RX FIFO ISR.
+*                   CANFD RX FIFO ISR calls a common function.
+* Arguments    :    None
+* Return Value :    None
+******************************************************************************/
+#if !(defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T))
+
+    R_BSP_PRAGMA_STATIC_INTERRUPT (canfd_rx_fifo_isr, VECT(CANFD, RFRI))
+    R_BSP_ATTRIB_STATIC_INTERRUPT void canfd_rx_fifo_isr(void)
+    {
+        canfd_rx_fifo_isr_common();
+    } /* End of function canfd_rx_fifo_isr */
+#endif
+
+
+#if defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T)
+/******************************************************************************
+* Function Name:    canfd_rx_fifo_grp_isr
+* Description  :    BSP group interrupt handler for register the CANFD RX FIFO
+*                   callback function
+* Arguments    :    None
+* Return Value :    None
+******************************************************************************/
+static void canfd_rx_fifo_grp_isr (void)
+{
+    /* Called from BSP group interrupt handler. */
+    #if defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T)
+        if (IS(CANFD, RFRI))
+        {
+            canfd_rx_fifo_isr_common();
+        }
+    #endif
+} /* End of function canfd_rx_fifo_grp_isr */
+#endif
+
+
+/******************************************************************************
+* Function Name:    canfd_channel_tx_isr_common
+* Description  :    Common ISR handler for CANFD0 TX Channel.
+* Arguments    :    None
+* Return Value :    None
+******************************************************************************/
+static void canfd_channel_tx_isr_common (void)
 {
     volatile struct st_canfd R_BSP_EVENACCESS_SFR * canfd_block_p;
     canfd_block_p = &CANFD;
 
     /* Casting gp_ctrl[0] into pointer and struct canfd_instance_ctrl_t */
     canfd_instance_ctrl_t * p_ctrl = (canfd_instance_ctrl_t *) gp_ctrl[0];
+
     uint32_t                channel = 0;
 
     /* Set static arguments */
     can_callback_args_t args;
     args.channel   = channel;
+
     args.p_context = p_ctrl->p_context;
     args.p_frame   = NULL;
 
     /* Check the byte of tisr that corresponds to the interrupting channel */
-    uint32_t tisr = *((uint8_t *)(&canfd_block_p->TISR.LONG) + channel);
+    uint32_t tisr  = *((uint8_t *)(&canfd_block_p->TISR.LONG) + channel);
 
     /* WAIT_LOOP */
     while (tisr)
     {
-        uint32_t  txmb;
+        uint32_t txmb;
+
         volatile uint32_t * p_tmt_sts;
 
         /* Get relevant TX status register bank */
@@ -1168,6 +1401,7 @@ void canfd_channel_tx_isr (void)
         {
             /* Casting the register into the unsigned interger pointer */
             p_tmt_sts  = (volatile uint32_t *) &canfd_block_p->TMTASR0.LONG;
+
             args.event = CAN_EVENT_TX_ABORTED;
         }
 
@@ -1184,9 +1418,51 @@ void canfd_channel_tx_isr (void)
         /* Check for more interrupts on this channel */
         tisr = *((uint8_t *)(&canfd_block_p->TISR.LONG) + channel);
     }
+
     /* Clear interrupt */
+    #if defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T)
     IR(ICU, GROUPBL2)  = 0;
-}
+    #else
+    IR(CANFD0, CHTI)  = 0;
+    #endif
+} /* End of function canfd_channel_tx_isr_common */
+
+/******************************************************************************
+* Function Name:    canfd_channel_tx_isr
+* Description  :    CANFD0 Channel TX ISR calls a common function.
+* Arguments    :    None
+* Return Value :    None
+******************************************************************************/
+#if !(defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T))
+
+    R_BSP_PRAGMA_STATIC_INTERRUPT (canfd_channel_tx_isr, VECT(CANFD0, CHTI))
+    R_BSP_ATTRIB_STATIC_INTERRUPT void canfd_channel_tx_isr(void)
+    {
+        canfd_channel_tx_isr_common();
+    } /* End of function canfd_channel_tx_isr */
+#endif
+
+
+#if defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T)
+/******************************************************************************
+* Function Name:    canfd_channel_tx_grp_isr
+* Description  :    BSP group interrupt handler for register the CANFD0 Channel
+*                   TX callback function
+* Arguments    :    None
+* Return Value :    None
+******************************************************************************/
+static void canfd_channel_tx_grp_isr (void)
+{
+    /* Called from BSP group interrupt handler. */
+    #if defined (BSP_MCU_RX660) || defined (BSP_MCU_RX26T)
+        if (IS(CANFD0, CHTI))
+        {
+            canfd_channel_tx_isr_common();
+        }
+    #endif
+} /* End of function canfd_channel_tx_grp_isr */
+#endif
+
 
 /***************************************************************************************************************//**
  * @brief Switch to a different channel, global or test mode.
@@ -1200,6 +1476,16 @@ void canfd_channel_tx_isr (void)
  * @details Switch to a different channel, global or test mode.c
  * @note None.
  *****************************************************************************************************************/
+/******************************************************************************
+ * Function Name: r_canfd_mode_transition
+ * Description  : Switch to a different channel, global or test mode.
+ * Arguments    : p_ctrl         Pointer to the CAN control block.
+ *              : operation_mode Destination CAN operation state.
+ * Return Value : FSP_ERR_NOT_OPEN        Control block not open.
+ *                FSP_ERR_ASSERTION       Null pointer presented.
+ *                FSP_ERR_INVALID_MODE    Cannot change to the requested mode
+ *                                        from the current global mode.
+ *****************************************************************************/
 static void r_canfd_mode_transition (canfd_instance_ctrl_t * p_ctrl, can_operation_mode_t operation_mode)
 {
     volatile struct st_canfd0 R_BSP_EVENACCESS_SFR * canfd_ch_block_p;
@@ -1219,14 +1505,14 @@ static void r_canfd_mode_transition (canfd_instance_ctrl_t * p_ctrl, can_operati
     {
         uint32_t cfdgctr = canfd_block_p->GCR.LONG;
 
+        /* Cast to volatile uint32_t */
         r_canfd_mode_ctr_set((volatile uint32_t *)&canfd_block_p->GCR.LONG, operation_mode);
 
         /* If CANFD is transitioning out of Reset the FIFOs need to be enabled. */
-        if ((cfdgctr & R_CANFD_GSR_RSTST_Msk) && !(operation_mode & CAN_OPERATION_MODE_RESET))
+        if ((cfdgctr & R_CANFD_GSR_RSTST_Msk) && (!(operation_mode & CAN_OPERATION_MODE_RESET)))
         {
-            /* Get global config */
-            canfd_global_cfg_t * p_global_cfg =
-                ((canfd_extended_cfg_t *) p_ctrl->p_cfg->p_extend)->p_global_cfg;
+            /* Get global configuration */
+            canfd_global_cfg_t * p_global_cfg = ((canfd_extended_cfg_t *) p_ctrl->p_cfg->p_extend)->p_global_cfg;
 
             /* Enable RX FIFOs */
             /* WAIT_LOOP */
@@ -1251,29 +1537,52 @@ static void r_canfd_mode_transition (canfd_instance_ctrl_t * p_ctrl, can_operati
         r_canfd_mode_ctr_set((volatile uint32_t *) &canfd_ch_block_p->CHCR.LONG, operation_mode);
     }
 
+    /* Store operation mode */
     p_ctrl->operation_mode = (can_operation_mode_t) (canfd_ch_block_p->CHCR.LONG & CANFD_PRV_CTR_MODE_MASK);
 }
+/******************************************************************************
+ End of function r_canfd_mode_transition
+ *****************************************************************************/
+
 
 /*******************************************************************************************************************//**
  * Sets the provided CTR register to the requested mode and waits for the associated STS register to reflect the change
  * @param[in]  p_ctr_reg            - pointer to control register
  * @param[in]  operation_mode       - requested mode (not including global bits)
  **********************************************************************************************************************/
+/******************************************************************************
+ * Function Name: r_canfd_mode_ctr_set
+ * Description  : Sets the provided CTR register to the requested mode and waits
+ *                for the associated STS register to reflect the change.
+ * Arguments    : p_ctr_reg      pointer to control register
+ *              : operation_mode requested mode (not including global bits)
+ * Return Value : .
+ *****************************************************************************/
 static void r_canfd_mode_ctr_set (volatile uint32_t * p_ctr_reg, can_operation_mode_t operation_mode)
 {
     volatile uint32_t * p_sts_reg = p_ctr_reg + 1;
 
     /* See definitions for CFDCnCTR, CFDCnSTS, CFDGCTR and CFDGSTS in the RX660 User's Manual (R01UH0937EJ) */
-    *p_ctr_reg = (*p_ctr_reg & ~CANFD_PRV_CTR_MODE_MASK) | operation_mode;
+    *p_ctr_reg = ((*p_ctr_reg) & (~CANFD_PRV_CTR_MODE_MASK)) | operation_mode;
 
     /* WAIT_LOOP */
     FSP_HARDWARE_REGISTER_WAIT((*p_sts_reg & CANFD_PRV_CTR_MODE_MASK), operation_mode);
 }
+/******************************************************************************
+ End of function r_canfd_mode_ctr_set
+ *****************************************************************************/
+
 
 /*******************************************************************************************************************//**
  * Converts bytes into a DLC value
  * @param[in]  bytes       Number of payload bytes
  **********************************************************************************************************************/
+/******************************************************************************
+ * Function Name: r_canfd_bytes_to_dlc
+ * Description  : Converts bytes into a DLC value.
+ * Argument     : bytes Number of payload bytes
+ * Return Value : .
+ *****************************************************************************/
 static uint8_t r_canfd_bytes_to_dlc (uint8_t bytes)
 {
     if (bytes <= 8)
@@ -1283,15 +1592,26 @@ static uint8_t r_canfd_bytes_to_dlc (uint8_t bytes)
 
     if (bytes <= 24)
     {
+        /* Cast to unit8_t */
         return (uint8_t) (8U + ((bytes - 8U) / 4U));
     }
 
+    /* Cast to unit8_t */
     return (uint8_t) (0xDU + ((bytes / 16U) - 2U));
 }
+/******************************************************************************
+ End of function r_canfd_bytes_to_dlc
+ *****************************************************************************/
 
-/* returns the number of trailing zeros in n */
-static uint32_t trailing_zeros(uint32_t n) {
 
+/******************************************************************************
+ * Function Name: trailing_zeros
+ * Description  : returns the number of trailing zeros in n.
+ * Argument     : n
+ * Return Value : .
+ *****************************************************************************/
+static uint32_t trailing_zeros(uint32_t n)
+{
     uint32_t count = 0;
 
 /*
@@ -1302,13 +1622,15 @@ static uint32_t trailing_zeros(uint32_t n) {
      if the rightmost digit of n is 0, ( n & 1 ) outputs 0
 */
     /* WAIT_LOOP */
-    while (n > 0 && (n & 1) == 0) {
-
+    while ((n > 0) && ((n & 1) == 0))
+    {
         count = count + 1;  /* increment count */
-        n = n >> 1;         /* rightshift n by one */
-
+        n = n >> 1;         /* right shift n by one */
     }
 
     return count;
-
 }
+/******************************************************************************
+ End of function trailing_zeros
+ *****************************************************************************/
+

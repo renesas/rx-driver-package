@@ -6,12 +6,12 @@
     <toolchain>
         <brand>Renesas</brand>
         <product>RXC</product>
-        <version>3.05.00</version>
+        <version>3.06.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
-        <version>8.03.00.202311</version>
+        <version>8.03.00.202405</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -40,6 +40,8 @@
         <group omit_board="true">RX23W</group>
         <group omit_board="true">RX24T</group>
         <group omit_board="true">RX24U</group>
+        <group omit_board="true">RX260</group>
+        <group omit_board="true">RX261</group>
         <group omit_board="true">RX26T</group>
         <group omit_board="true">RX64M</group>
         <group omit_board="true">RX651</group>
@@ -63,7 +65,7 @@
         <version>x.xx</version>
         <dependency>
                 <module>r_bsp</module>
-                <version>7.42</version>
+                <version>7.51</version>
         </dependency>
         <zipsource>r_flash_rx_vx.xx.zip</zipsource>
         <application>Non-Volatile Storage</application>

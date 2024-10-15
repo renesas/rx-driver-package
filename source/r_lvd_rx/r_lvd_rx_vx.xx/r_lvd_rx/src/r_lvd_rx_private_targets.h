@@ -56,6 +56,8 @@
 *                                    setting the “voltage detection level” for RX23E-B.
 *              : 30.01.2024 4.70     Changed LVD circuit enable wait value for RX13T/RX23E-A/RX26T/RX66T/RX72T.
 *                                    Changed ICU group from LVD_GROUP_INT_ICUB to LVD_GROUP_INT_ICUC for RX66T/RX72T.
+*              : 28.06.2024 4.80     Added Nested interrupt support.
+*                                    Added support for RX260, RX261.
 ***********************************************************************************************************************/
 #ifndef LVD_PRIVATE_TARGETS_HEADER_FILE
 #define LVD_PRIVATE_TARGETS_HEADER_FILE
@@ -94,6 +96,10 @@ Includes <System Includes> , "Project Includes"
     #include "./targets/rx24t/r_lvd_rx24t.h"
 #elif defined(BSP_MCU_RX24U)
     #include "./targets/rx24u/r_lvd_rx24u.h"
+#elif defined(BSP_MCU_RX260)
+    #include "./targets/rx260/r_lvd_rx260.h"
+#elif defined(BSP_MCU_RX261)
+    #include "./targets/rx261/r_lvd_rx261.h"
 #elif defined(BSP_MCU_RX26T)
     #include "./targets/rx26t/r_lvd_rx26t.h"
 #elif defined(BSP_MCU_RX64M)
@@ -125,7 +131,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
 #define LVD_RX_VERSION_MAJOR                    (4)
-#define LVD_RX_VERSION_MINOR                    (70)
+#define LVD_RX_VERSION_MINOR                    (80)
 
 /***********************************************************************************************************************
 Typedef definitions

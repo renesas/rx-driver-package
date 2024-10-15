@@ -31,8 +31,11 @@
  *         : 05.03.2021 2.02    Added RX671 to Doxygen comment.
  *         : 31.07.2021 2.03    Added support for snooze mode in Low Power Consumption.
  *         : 31.12.2021 2.04    Removes the lower operating power consumption related functions of RX660.
- *         : 15.08.2022 2.20    Fixed to comply with GSCE Coding Standards Rev.6.5.0.   
- *         : 29.05.2023 2.30    Fixed to comply with GSCE Coding Standards Rev.6.5.0.   
+ *         : 15.08.2022 2.20    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *         : 29.05.2023 2.30    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *         : 28.06.2024 2.40    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *                              Modified comment of API R_LPC_OperatingModeSet (), R_LPC_ReturnClockSwitch (),
+ *                              and R_LPC_LowPowerModeActivate () functions.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
   Includes <System Includes> , "Project Includes"
@@ -57,12 +60,13 @@
  *                              programmed or erased (P/E).
  * @details   Depending upon the mode chosen and the MCU, the maximum speed of the internal clocks ICLK, PCLKB, PCLKD 
  *            and FCLK is limited. For example, in Low-Speed operating mode on the RX110, RX111, RX113, RX130, RX140,
- *            RX230, RX231, RX23W, only the sub-clock can be used as the system clock. See Table 11.3 (RX64M, RX65N,
- *            RX66N,RX671,RX71M, RX72M, RX72N) and Table 11.4(RX110, RX111, RX113, RX130, RX140, RX230, RX231, RX23W) in the
- *            Hardware manual for clock limitations. If the argument to this function cannot support the current internal
- *            clock frequencies, then an error is returned. When switching the clock source from a lower frequency to
- *            a higher frequency, make certain that the operating power control mode is configured to support the range.
- *            Failure to do so will result in improper CPU operation.
+ *            RX230, RX231, RX23E-B, RX23W, RX260, RX261, only the sub-clock can be used as the system clock. See 
+ *            Table 11.3 (RX64M, RX65N, RX66N, RX671, RX71M, RX72M, RX72N) and Table 11.4 (RX110, RX111, RX113, RX130,
+ *            RX140, RX230, RX231, RX23E-B, RX23W, RX260, RX261) in the Hardware manual for clock limitations. If the 
+ *            argument to this function cannot support the current internal clock frequencies, then an error is 
+ *            returned. When switching the clock source from a lower frequency to a higher frequency, make certain that
+ *            the operating power control mode is configured to support the range. Failure to do so will result in 
+ *            improper CPU operation.
  * @note      When switching operating power control modes and internal clock frequencies, it is important to first make
  *            sure that the frequencies of internal clocks are set within the range supported by the operating power 
  *            control mode. When moving between operating power control modes/frequencies, use the following sequence: 
@@ -74,7 +78,7 @@
  *            \li Decrease internal clock frequencies
  *            \li Use R_LPC_OperatingModeSet() to move to lower power operating mode.
  */
-lpc_err_t R_LPC_OperatingModeSet (lpc_operating_mode_t e_mode)
+lpc_err_t R_LPC_OperatingModeSet(lpc_operating_mode_t e_mode)
 {
     return (lpc_operating_mode_set(e_mode));
 
@@ -122,9 +126,9 @@ lpc_err_t R_LPC_LowPowerModeConfigure(lpc_low_power_mode_t e_mode)
  * @note      In order for each peripheral function to operate in snooze mode, it is necessary to meet the conditions for
  *            each peripheral function to be used before switching to software standby.
  */
-lpc_err_t R_LPC_SnoozeModeConfigure (lpc_snooze_mode_t * snooze_mode)
+lpc_err_t R_LPC_SnoozeModeConfigure(lpc_snooze_mode_t * snooze_mode)
 {
-    return lpc_snooze_mode_configure(snooze_mode);
+    return (lpc_snooze_mode_configure(snooze_mode));
 }
 /***********************************************************************************************************************
  End of function R_LPC_SnoozeModeConfigure
@@ -140,6 +144,7 @@ lpc_err_t R_LPC_SnoozeModeConfigure (lpc_snooze_mode_t * snooze_mode)
  *            Function to be called before activating low power mode.
  * @retval    LPC_SUCCESS
  * @retval    LPC_ERR_OSC_STOP_ENABLED: Cannot enter software standby if oscillation stop detection is enabled.
+ * @retval    LPC_ERR_CLOCK_EXCEEDED: Clock exceeds the limit of the operating power control mode.
  * @retval    LPC_ERR_ILL_CLOCK_SOURCE: Illegal clock when sleep mode return clock switching is enabled
  * @retval    LPC_ERR_ILL_MAIN_CLK_FREQ: Clock freq. exceeds the limit of the sleep return clock.
  * @retval    LPC_ERR_DEEP_SLEEP_STATUS: The condition error for a deep sleep mode
@@ -196,14 +201,14 @@ lpc_err_t R_LPC_LowPowerModeActivate(lpc_callback_set_t pcallback)
  *               sure the internal clock after returning from sleep mode does not exceed the limits 
  *               of middle speed mode.
  *
- *            -# RX130, RX140, RX230, RX231, RX23W MCUs :\n
+ *            -# RX130, RX140, RX230, RX231, RX23E-B, RX23W, RX260, RX261 MCUs :\n
  *            \- When entering Sleep Mode, the system clock should be the Sub-Clock oscillator. On exiting sleep, the 
  *               operating mode will return to whatever the operating power control mode was before entering sleep.\n
  *            \- If Middle Speed mode is the return mode and the Main OSC is chosen as the Sleep Return clock source, 
  *               make sure the internal clock after returning from sleep mode does not exceed the limits of middle speed
  *               mode.
  *
- *            -# RX64M, RX65N, RX66N, RX671, RX71M, RX72M, RX72N MCUs:\n
+ *            -# RX26T, RX64M, RX65N, RX66N, RX671, RX71M, RX72M, RX72N MCUs:\n
  *            \- When entering sleep mode, select LOCO or the sub-clock as the clock source.
  *
  * @note      None 

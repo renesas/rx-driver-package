@@ -10,7 +10,7 @@ R01AN2166JJ
 
 Version
 -------
-v1.20
+v1.30
 
 Overview
 --------
@@ -29,6 +29,7 @@ Supported MCUs
 * RX113 Group
 * RX231 Group
 * RX23W Group
+* RX261 Group
 
 Boards Tested On
 ----------------
@@ -36,6 +37,7 @@ Boards Tested On
 * RSKRX113
 * RSKRX231
 * RSSKRX23W
+* EK-RX261
  
 Limitations
 -----------
@@ -54,9 +56,9 @@ How to add to your project
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v.3.02.00
-* GCC for Renesas RX 8.3.0.201904
-* IAR C/C++ Compiler for Renesas version 4.14.1
+* Renesas RX v.3.06.00
+* GCC for Renesas RX 8.3.0.202311
+* IAR C/C++ Compiler for Renesas version 4.20.3
 
 File Structure
 --------------
@@ -67,9 +69,9 @@ r_usb_basic_mini
 |
 +---doc
 |     \en
-|     |   r01an2166ej0120_usb.pdf
+|     |   r01an2166ej0130_usb.pdf
 |     \jp
-|         r01an2166jj0120_usb.pdf
+|         r01an2166jj0130_usb.pdf
 |
 +---ref
 |       r_usb_config_mini_reference.h

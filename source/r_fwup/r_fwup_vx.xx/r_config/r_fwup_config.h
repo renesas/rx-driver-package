@@ -27,6 +27,7 @@
 *                              Added arguments to R_FWUP_WriteImageProgram API.
 *         : 28.03.2024 2.02    Update wrapper functions.
 *         : 09.04.2024 2.03    Fixed wrapper function.
+*         : 15.10.2024 2.04    Fixed wrapper function.
 ***********************************************************************************************************************/
 #include "platform.h"
 

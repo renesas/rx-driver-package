@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_group.c
@@ -54,6 +54,7 @@
 *              : 23.04.2021 4.80    Added support for RX140.
 *              : 24.01.2023 5.00    Added Flash Type 5.
 *                                   Modified the condition of PFRAM section definition.
+*              : 30.07.2024 5.20    Modified FISR register settings.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -225,6 +226,15 @@ flash_err_t r_flash_open(void)
     {
         return FLASH_ERR_FREQUENCY;
     }
+#if (FLASH_TYPE == FLASH_TYPE_1)
+    if (FLASH_FISR_ROUNDING_FCLK_FREQ > MCU_CFG_FCLK_HZ)
+    {
+        if (((uint32_t)MCU_CFG_FCLK_HZ % MHZ) != 0)
+        {
+            return FLASH_ERR_FREQUENCY;
+        }
+    }
+#endif
 #if (FLASH_TYPE == FLASH_TYPE_1) && (FLASH_TYPE_VARIETY == FLASH_TYPE_VARIETY_A)
     if (1 == SYSTEM.HOCOCR.BIT.HCSTP)
     {

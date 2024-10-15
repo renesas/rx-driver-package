@@ -13,7 +13,7 @@
 * this software. By using this software, you agree to the additional terms and conditions found by accessing the
 * following link:
 * http://www.renesas.com/disclaimer
-* Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
 ************************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_ctsu_qe_api.h
@@ -151,6 +151,7 @@ typedef enum e_ctsu_ssdiv
 typedef enum e_ctsu_specific_data_type
 {
     CTSU_SPECIFIC_RAW_DATA,
+    CTSU_SPECIFIC_CCO_CORRECTION_DATA,
     CTSU_SPECIFIC_CORRECTION_DATA,
     CTSU_SPECIFIC_SELECTED_FREQ,
 } ctsu_specific_data_type_t;
@@ -207,6 +208,7 @@ typedef struct st_ctsu_cfg
     uint8_t                    mtucfen;                 ///< Mutual capacity operation for automatic judgement
     uint8_t                    ajfen;                   ///< Automatic judgement function enabled for automatic judgement
     uint8_t                    autojudge_monitor_num;   ///< Method number for QE monitor for automatic judgement
+    uint8_t                    majirimd;                ///< JMM or VMM for automatic judgement
     uint8_t                    ctsuchac0;               ///< TS00-TS07 enable mask
     uint8_t                    ctsuchac1;               ///< TS08-TS15 enable mask
     uint8_t                    ctsuchac2;               ///< TS16-TS23 enable mask
@@ -228,6 +230,7 @@ typedef struct st_ctsu_cfg
     uint16_t     tuning_self_target_value;              ///< Target self value for initial offset tuning
     uint16_t     tuning_mutual_target_value;            ///< Target mutual value for initial offset tuning
     ctsu_auto_button_cfg_t const * p_ctsu_auto_buttons; ///< Pointer to array of automatic judgement button configuration.
+    uint8_t      majority_mode;                         ///< Software majority mode selection
 } ctsu_cfg_t;
 
 /** Functions implemented at the HAL layer will follow this API. */

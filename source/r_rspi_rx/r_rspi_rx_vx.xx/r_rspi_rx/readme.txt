@@ -10,7 +10,7 @@ R01AN1827JJ{VERSION_NUMBER}
 
 Version
 -------
-v3.40
+v3.50
 
 Overview
 --------
@@ -89,6 +89,8 @@ Supported/Tested MCUs
 * RX660
 * RX26T
 * RX23E-B
+* RX260
+* RX261
 
 Boards Tested On
 ----------------
@@ -115,8 +117,9 @@ Boards Tested On
 * RSKRX671
 * RSKRX140
 * RSKRX660
-* RSKRX26T
+* MCK-RX26T
 * RSSKRX23E-B
+* EK-RX261
 
 Limitations
 -----------
@@ -128,7 +131,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp     v7.41
+* r_bsp     v7.51
 
 How to add to your project
 --------------------------

@@ -77,19 +77,6 @@ static flash_err_t flash_wait_frdy(void);
  *********************************************************************************************************************/
 void flash_df_access_enable(void)
 {
-#if (FLASH_TYPE_VARIETY == FLASH_TYPE_VARIETY_A)
-    /* E2 DataFlash Wait Cycle Setting */
-    if (MCU_CFG_ICLK_HZ > FLASH_DFLWAITR_ICLK_FREQ)
-    {
-        FLASH.DFLWAITR.WORD = 0xAA01;
-
-        while (0x0001 != FLASH.DFLWAITR.WORD)
-        {
-            R_BSP_NOP();
-        }
-    }
-#endif
-
     /* E2 DataFlash Access enable */
     FLASH.DFLCTL.BIT.DFLEN = 1;
 

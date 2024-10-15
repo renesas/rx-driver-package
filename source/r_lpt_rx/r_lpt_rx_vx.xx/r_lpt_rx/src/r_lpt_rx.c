@@ -33,6 +33,7 @@
  *         : 31.03.2021 3.00    Added function R_LPT_InitChan, R_LPT_SetCMT, R_LPT_FinalChan, R_LPT_InitPWM
  *                              Added command LPT_CMD_PWM_START and LPT_CMD_PWM_STOP to R_LPT_Control()
  *         : 31.01.2022 3.01    Fixed R_LPT_Open function
+ *         : 31.07.2024 5.00    Added support for RX260, RX261
  *********************************************************************************************************************/
 /**********************************************************************************************************************
   Includes <System Includes> , "Project Includes"
@@ -350,7 +351,7 @@ lpt_err_t R_LPT_InitPWM(lpt_ch_t chan, lpt_pwm_cfg_t * const p_config)
     lpt_err_t   err = LPT_SUCCESS;
 
     /* Check arguments */
-#if LPT_CFG_PARAM_CHECKING
+#if LPT_CFG_PARAM_CHECKING_ENABLE
     /* Check argument p_config */
     if (NULL == p_config)
     {

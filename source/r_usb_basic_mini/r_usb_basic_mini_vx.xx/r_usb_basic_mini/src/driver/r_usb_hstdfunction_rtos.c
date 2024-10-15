@@ -1009,22 +1009,19 @@ uint16_t usb_hstd_check_attach (void)
 
     usb_hstd_read_lnst(buf);
 
-    if (USB_UNDECID == (uint16_t) (buf[1] & USB_RHST))
+    if (USB_FS_JSTS == (buf[0] & USB_LNST))
     {
-        if (USB_FS_JSTS == (buf[0] & USB_LNST))
-        {
-            /* High/Full speed device */
-            ret = USB_ATTACHF;
-        }
-        else if (USB_LS_JSTS == (buf[0] & USB_LNST))
-        {
-            /* Low speed device */
-            ret = USB_ATTACHL;
-        }
-        else
-        {
-            ret = USB_DETACH;
-        }
+        /* High/Full speed device */
+        ret = USB_ATTACHF;
+    }
+    else if (USB_LS_JSTS == (buf[0] & USB_LNST))
+    {
+        /* Low speed device */
+        ret = USB_ATTACHL;
+    }
+    else
+    {
+        ret = USB_DETACH;
     }
     return ret;
 }

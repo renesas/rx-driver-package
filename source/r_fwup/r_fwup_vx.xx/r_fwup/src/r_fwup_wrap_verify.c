@@ -28,6 +28,7 @@
  *         : 28.03.2024 2.02    Update wrapper functions.
  *                              Add tinycrypt library.
  *         : 09.04.2024 2.03    Fixed wrapper function.
+ *         : 15.10.2024 2.04    Fixed wrapper function.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -51,6 +52,8 @@
 #define FWUP_HASH_BYTES        (TC_SHA256_DIGEST_SIZE)
 #define FWUP_HASH_BITS         (FWUP_HASH_BYTES * 8)
 #define FWUP_CERT_PEM           g_code_signer_public_key
+#define FWUP_BITSTRING_LENGTH_OFFSET (24U)
+#define FWUP_PUBLIC_KEY_DATA_OFFSET (27U)
 
 /**********************************************************************************************************************
  Local Typedef definitions
@@ -231,10 +234,11 @@ static int32_t wrap_extract_pubkey(uint8_t *p_buf)
 {
     int32_t result = -1;
     uint8_t binary[128] = {0};
-    uint8_t data_length;
     uint8_t FWUP_FAR * p_head;
     uint8_t FWUP_FAR * p_current;
     uint8_t FWUP_FAR * p_tail;
+    uint8_t publicKey_info[27] = {0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x02, 0x01,
+    		0x06, 0x08, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00, 0x04};
 
     /* Base64 decode */
     p_head = (uint8_t FWUP_FAR *)g_code_signer_public_key + STRLEN(s_keyheader);
@@ -272,23 +276,11 @@ static int32_t wrap_extract_pubkey(uint8_t *p_buf)
         B3 C1 56 F7 D4 D8 00 4D 4B EF 8B 6F 23 FB 3D AC
      */
     p_current = binary;
-    data_length = *(++p_current);
-    while (1)
+
+    if((MEMCMP(p_current, publicKey_info, sizeof(publicKey_info))) == 0)
     {
-        /* found BIT STRING (maybe public key) */
-        if ((0x03 == *p_current) && (0x42 == *(p_current + 1)))
-        {
-            /* Extract Public key */
-            p_current++; /* Move pointer to LENGTH */
-            MEMCPY(p_buf, p_current + 3, *p_current -2);
-            result = 0;
-            break;
-        }
-        if ((p_current - binary) > data_length)
-        {
-            break;  /* parsing error */
-        }
-        p_current++;
+    	MEMCPY(p_buf, p_current + FWUP_PUBLIC_KEY_DATA_OFFSET, *(p_current + FWUP_BITSTRING_LENGTH_OFFSET) - 2);
+        result = 0;
     }
     return (result);
 }

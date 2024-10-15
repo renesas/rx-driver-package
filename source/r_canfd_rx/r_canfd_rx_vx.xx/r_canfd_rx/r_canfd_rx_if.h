@@ -28,6 +28,8 @@
 *         : 31.03.2023 1.30    Changed Minor version to 30.
 *                              Supported for RX26T.
 *         : 13.12.2023 1.31    Added WAIT_LOOP comments.
+*         : 28.06.2024 1.40    Added support for RX261.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 #ifndef CAN_INTERFACE_HEADER_FILE
 #define CAN_INTERFACE_HEADER_FILE 
@@ -50,7 +52,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define CANFD_RX_VERSION_MAJOR           (1)
-#define CANFD_RX_VERSION_MINOR           (31)
+#define CANFD_RX_VERSION_MINOR           (40)
 /* The process of getting the version number is done through the macro below. The version number is encoded where the
    top 2 bytes are the major version number and the bottom 2 bytes are the minor version number. For example,
    Version 4.25 would be returned as 0x00040019. */
@@ -79,10 +81,10 @@ extern const can_instance_t g_canfd0;
 
 /** Access the CANFD instance using these structures when calling API functions directly (::p_api is not used). */
 extern canfd_instance_ctrl_t g_canfd0_ctrl;
-extern can_cfg_t g_canfd0_cfg;
-extern canfd_extended_cfg_t g_canfd0_extended_cfg;
-extern can_bit_timing_cfg_t g_canfd0_bit_timing_cfg;
-extern can_bit_timing_cfg_t g_canfd0_data_timing_cfg;
+extern can_cfg_t             g_canfd0_cfg;
+extern canfd_extended_cfg_t  g_canfd0_extended_cfg;
+extern can_bit_timing_cfg_t  g_canfd0_bit_timing_cfg;
+extern can_bit_timing_cfg_t  g_canfd0_data_timing_cfg;
 
 /* Global configuration (referenced by all instances) */
 extern canfd_global_cfg_t g_canfd_global_cfg;

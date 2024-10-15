@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_iwdt_rx.c
@@ -39,6 +39,7 @@
 *                              Fixed to comply with GSCE Coding Standards Rev.6.00.
 *           15.08.2022 4.30    Fixed to comply with GSCE Coding Standards Rev.6.5.0
 *           29.05.2023 4.40    Fixed to comply with GSCE Coding Standards Rev.6.5.0
+*           28.06.2024 4.50    Added support for RX260, RX261.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************

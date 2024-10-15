@@ -246,39 +246,31 @@ uint16_t usb_hstd_chk_attach (usb_utr_t *ptr)
 
     usb_hstd_read_lnst(ptr, buf);
 
-    if (USB_UNDECID == (uint16_t) (buf[1] & USB_RHST))
+    if (USB_FS_JSTS == (buf[0] & USB_LNST))
     {
-        if (USB_FS_JSTS == (buf[0] & USB_LNST))
-        {
-            /* High/Full speed device */
-            USB_PRINTF0(" Detect FS-J\n");
+        /* High/Full speed device */
+        USB_PRINTF0(" Detect FS-J\n");
 #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M)
-            usb_hstd_set_hse(ptr, g_usb_hstd_hs_enable[ptr->ip]);
+        usb_hstd_set_hse(ptr, g_usb_hstd_hs_enable[ptr->ip]);
 #endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
-            return USB_ATTACHF;
-        }
-        else if (USB_LS_JSTS == (buf[0] & USB_LNST))
-        {
-            /* Low speed device */
-            USB_PRINTF0(" Attach LS device\n");
+        return USB_ATTACHF;
+    }
+    else if (USB_LS_JSTS == (buf[0] & USB_LNST))
+    {
+        /* Low speed device */
+        USB_PRINTF0(" Attach LS device\n");
 #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M)
-            usb_hstd_set_hse(ptr, USB_HS_DISABLE);
+        usb_hstd_set_hse(ptr, USB_HS_DISABLE);
 #endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
-            return USB_ATTACHL;
-        }
-        else if (USB_SE0 == (buf[0] & USB_LNST))
-        {
-            USB_PRINTF0(" Detach device\n");
-        }
-        else
-        {
-            USB_PRINTF0(" Attach unknown speed device\n");
-        }
+        return USB_ATTACHL;
+    }
+    else if (USB_SE0 == (buf[0] & USB_LNST))
+    {
+        USB_PRINTF0(" Detach device\n");
     }
     else
     {
-        USB_PRINTF0(" Already device attached\n");
-        return USB_OK;
+        USB_PRINTF0(" Attach unknown speed device\n");
     }
     return USB_DETACH;
 }

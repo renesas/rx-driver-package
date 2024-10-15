@@ -35,6 +35,7 @@
         <version>3.03.00</version>
         <version>3.04.00</version>
         <version>3.05.00</version>
+        <version>3.06.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -47,6 +48,8 @@
         <version>8.03.00.202104</version>
         <version>8.03.00.202202</version>
         <version>8.03.00.202204</version>
+        <version>8.03.00.202311</version>
+        <version>8.03.00.202405</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -58,6 +61,7 @@
         <version>4.14.01</version>
         <version>4.20.01</version>
         <version>4.20.03</version>
+        <version>5.10.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -71,6 +75,8 @@
         <group omit_board="true">RX23E-A</group>
         <group omit_board="true">RX23E-B</group>
         <group omit_board="true">RX23W</group>
+        <group omit_board="true">RX260</group>
+        <group omit_board="true">RX261</group>
         <group omit_board="true">RX26T</group>
         <group omit_board="true">RX64M</group>
         <group omit_board="true">RX65N</group>
@@ -93,7 +99,7 @@
         <zipsource>r_dmaca_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.40</version>
+            <version>7.51</version>
         </dependency>
         <application>dmaca</application>
         <desc>DMAC driver</desc>

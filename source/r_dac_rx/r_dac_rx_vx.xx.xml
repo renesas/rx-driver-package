@@ -37,6 +37,7 @@
         <version>3.03.00</version>
         <version>3.04.00</version>
         <version>3.05.00</version>
+        <version>3.06.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -49,6 +50,8 @@
         <version>8.03.00.202202</version>
         <version>8.03.00.202204</version>
         <version>8.03.00.202305</version>
+        <version>8.03.00.202311</version>
+        <version>8.03.00.202405</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -82,6 +85,8 @@
         <group omit_board="true">RX23W</group>
         <group omit_board="true">RX24T</group>
         <group omit_board="true">RX24U</group>
+        <group omit_board="true">RX260</group>
+        <group omit_board="true">RX261</group>
         <group omit_board="true">RX26T</group>
         <group omit_board="true">RX64M</group>
         <group omit_board="true">RX65N</group>
@@ -103,7 +108,7 @@
         <zipsource>r_dac_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.42</version>
+            <version>7.51</version>
         </dependency>
         <application>D/A Converter</application>
         <desc>DAC Driver</desc>

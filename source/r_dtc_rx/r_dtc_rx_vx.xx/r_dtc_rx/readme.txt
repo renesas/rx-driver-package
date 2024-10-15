@@ -5,7 +5,7 @@ r_dtc_rx
 
 Version
 -------
-v4.40
+v4.50
 
 Overview
 --------
@@ -36,6 +36,8 @@ Supported MCUs
 * RX23T MCU
 * RX24T MCU
 * RX24U MCU
+* RX260 MCU
+* RX261 MCU
 * RX26T MCU
 * RX65N MCU
 * RX651 MCU
@@ -117,6 +119,16 @@ r_dtc_rx
         |       r_dtc_rx_target_if.h
         |
         +---rx24u
+        |       r_dtc_rx_target.c
+        |       r_dtc_rx_target.h
+        |       r_dtc_rx_target_if.h
+        |
+        +---rx260
+        |       r_dtc_rx_target.c
+        |       r_dtc_rx_target.h
+        |       r_dtc_rx_target_if.h
+        |
+        +---rx261
         |       r_dtc_rx_target.c
         |       r_dtc_rx_target.h
         |       r_dtc_rx_target_if.h

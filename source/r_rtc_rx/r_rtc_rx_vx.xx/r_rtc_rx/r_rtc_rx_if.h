@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rtc_rx_if.h
@@ -55,6 +55,8 @@
 *           29.05.2023 2.90    Added support for RX23E-B.
 *                              Updated demo projects.
 *                              Updated according to GSCE Code Checker 6.50.
+*           28.06.2024 3.00    Added support for RX260, RX261.
+*                              Updated according to GSCE Code Checker 6.50.
 ***********************************************************************************************************************/
 
 #ifndef RTC_RX_INTERFACE_HEADER_FILE
@@ -70,8 +72,8 @@ Includes   <System Includes> , "Project Includes"
 Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
-#define RTC_RX_VERSION_MAJOR        (2)
-#define RTC_RX_VERSION_MINOR        (90)
+#define RTC_RX_VERSION_MAJOR        (3)
+#define RTC_RX_VERSION_MINOR        (00)
 
 /***********************************************************************************************************************
 BSP version detection
@@ -115,7 +117,7 @@ typedef enum e_rtc_periodic
  * Arguments    : p_args
  * Return Value : .
  *****************************************************************************/
-typedef void (*rtc_cb_func_t)(void *p_args);
+typedef void (* rtc_cb_func_t)(void * p_args);
 
 typedef struct
 {
@@ -164,10 +166,11 @@ typedef enum
     RTC_CMD_ENABLE_ALARM,
     RTC_CMD_START_COUNTERS,
     RTC_CMD_STOP_COUNTERS,
-    RTC_CMD_PARTIAL_RESET,          // primarily output clock, alarms and capture registers
+    RTC_CMD_PARTIAL_RESET,          /* primarily output clock, alarms and capture registers */
 #if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130) && !defined(BSP_MCU_RX140) && !defined(BSP_MCU_RX23E_B)
-    RTC_CMD_CONFIG_CAPTURE,         // configure capture pin; RX230, RX231, RX64M, RX65N, RX671, RX71M, RX72M, RX660, RX66N, RX72N
-    RTC_CMD_CHECK_PIN0_CAPTURE,     // see if capture event occurred; load time if yes
+    RTC_CMD_CONFIG_CAPTURE,         /* configure capture pin; RX230, RX231, RX260, RX261, RX64M, RX65N, RX671,
+                                       RX71M, RX72M, RX660, RX66N, RX72N */
+    RTC_CMD_CHECK_PIN0_CAPTURE,     /* see if capture event occurred; load time if yes */
     RTC_CMD_CHECK_PIN1_CAPTURE,
     RTC_CMD_CHECK_PIN2_CAPTURE,
     RTC_CMD_DISABLE_CAPTURE,

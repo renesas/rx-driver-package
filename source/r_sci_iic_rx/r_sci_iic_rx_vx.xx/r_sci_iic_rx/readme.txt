@@ -98,6 +98,14 @@ r_sci_iic_rx
         |        r_sci_iic_rx26t.c
         |        r_sci_iic_rx26t_private.h
         |
+        +---rx260
+        |        r_sci_iic_rx260.c
+        |        r_sci_iic_rx260_private.h
+        |
+        +---rx261
+        |        r_sci_iic_rx261.c
+        |        r_sci_iic_rx261_private.h
+        |
         +---rx64m
         |       r_sci_iic_rx64m.c
         |       r_sci_iic_rx64m_private.h

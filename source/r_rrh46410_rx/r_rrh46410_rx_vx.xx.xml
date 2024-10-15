@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<refinfo>
+  
+  <toolchain>
+    <brand>Renesas</brand>
+    <product>RXC</product>
+    <version>3.06.00</version>
+  </toolchain>
+  <toolchain>
+    <brand>GNU</brand>
+    <product>GNURX</product>
+    <version>8.3.0.202311</version>
+  </toolchain>
+  <toolchain>
+    <brand>IAR</brand>
+    <product>ICCRX</product>
+    <version>4.20.01</version>
+  </toolchain>
+  
+  <target>
+    <family omit_series="true">RX</family>
+  </target>
+  
+  
+  <package>
+    <type>fitmodule</type>
+    <name>r_rrh46410_rx</name>
+    <version>x.xx</version>
+    <zipsource>r_rrh46410_rx_vx.xx.zip</zipsource>
+    <dependency>
+      <module>r_bsp</module>
+      <version>7.42</version>
+    </dependency>
+    <dependency>
+      <module>r_comms_i2c_rx</module>
+      <version>1.22</version>
+    </dependency>
+    <dependency>
+      <module>r_irq_rx</module>
+      <version>4.40</version>
+    </dependency>
+    <application>Sensors</application>
+    <application>RRH46410 Gas Sensor</application>
+    <desc>RRH46410 Sensor Middleware</desc>
+    <details>The RRH46410 FIT module controls the Renesas Electronics RRH46410 sensors using RIIC FIT module and/or SCI_IIC FIT module. Cannot be used with ZMOD4XXX FIT module in the same project.</details>
+    <function>RRH46410 Sensors IIC</function>
+    <incdir>r_config</incdir>
+    <incdir>r_rrh46410_rx</incdir>
+    <incdir>r_rrh46410_rx/inc/api</incdir>
+    <incdir>r_rrh46410_rx/inc/instances</incdir>
+  </package>
+  <sampleapplicationnote>
+    <documentno>R01AN7370</documentno>
+  </sampleapplicationnote>
+</refinfo>

@@ -208,6 +208,10 @@ rtos_err_t usb_rtos_configuration(void)
     rtos_create_mailbox(&g_rtos_usb_pcd_sub_mbx_id, &mbx_info);         /* For PCD Sub */
 
    #if defined(USB_CFG_PMSC_USE)
+    /* Mailbox Creation */
+    mbx_info.length         = QUEUE_SIZE;
+    rtos_create_mailbox(&g_rtos_usb_pmsc_mbx_id, &mbx_info);             /* For PMSC */
+
     task_info.task_code     = (TaskFunction_t)usb_pmsc_task;
     task_info.p_name        = "PMSC_TSK";
     task_info.stack_depth   = STACK_SIZE;
@@ -215,9 +219,6 @@ rtos_err_t usb_rtos_configuration(void)
     task_info.priority      = PMSC_TSK_PRI;
     rtos_create_task(&g_rtos_usb_pmsc_task_id, &task_info);
 
-    /* Mailbox Creation */
-    mbx_info.length         = QUEUE_SIZE;
-    rtos_create_mailbox(&g_rtos_usb_pmsc_mbx_id, &mbx_info);             /* For PMSC */
    #endif /* defined(USB_CFG_PMSC_USE) */
 
     /* Task Creation */

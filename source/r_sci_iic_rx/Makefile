@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_sci_iic_rx
-VERSION = 		2.71
+VERSION = 		2.80
 MDF = V1,V2
 
 CONFIG_FOLDER = r_config

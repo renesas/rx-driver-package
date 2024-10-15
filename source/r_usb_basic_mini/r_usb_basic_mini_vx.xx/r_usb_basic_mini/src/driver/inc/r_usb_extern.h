@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015(2024) Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_usb_extern.h
@@ -28,6 +28,7 @@
 *           : 31.05.2019 1.11    Added support for GNUC and ICCRX.
 *           : 30.06.2019 1.12    RX23W is added.
 *           : 30.06.2020 1.20    Added support for RTOS.
+*           : 30.04.2024 1.30    Added support for RX261.
  ***********************************************************************************************************************/
 
 #ifndef R_USB_EXTERN_H
@@ -472,9 +473,9 @@ void      usb_pstd_receive_start (uint16_t pipe);
 void      usb_pstd_fifo_to_buf (uint16_t pipe, uint16_t  useport);
 uint16_t  usb_pstd_read_data (uint16_t pipe, uint16_t pipemode);
 void      usb_pstd_data_end (uint16_t pipe, uint16_t status);
-uint8_t   usb_pstd_set_pipe_table (uint8_t  *p_descriptor);
+uint8_t   usb_pstd_set_pipe_table (uint8_t  *p_descriptor, uint8_t class);
 void      usb_pstd_set_pipe_reg (void);
-uint8_t   usb_pstd_get_pipe_no (uint8_t type, uint8_t dir);
+uint8_t   usb_pstd_get_pipe_no (uint8_t type, uint8_t dir, uint8_t class);
 uint16_t  usb_pstd_epadr_to_pipe (uint16_t dir_ep);
 void      usb_pstd_bemp_pipe_process(uint16_t bitsts);
 void      usb_pstd_brdy_pipe_process(uint16_t bitsts);
@@ -560,7 +561,6 @@ void      usb_pstd_interface(usb_putr_t *p_utr, uint16_t data1, uint16_t data2);
 void      usb_pstd_class_request(usb_setup_t *p_req, uint16_t ctsq);
 void      usb_pstd_class_request_ioss (usb_setup_t *p_req);
 void      usb_pstd_class_request_rwds (usb_setup_t * p_req);
-void      usb_pstd_class_request_wds (usb_setup_t * p_req);
 void      usb_pstd_other_request (usb_setup_t *p_req);
 void      usb_pstd_class_request_wnss (usb_setup_t *p_req);
 void      usb_pstd_class_request_rss (usb_setup_t *p_req);

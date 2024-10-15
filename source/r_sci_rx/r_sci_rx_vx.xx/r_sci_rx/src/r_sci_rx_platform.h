@@ -37,6 +37,7 @@
 *           31.03.2023 4.80    Added support for RX26T.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *           29.05.2023 4.90    Added support for RX23E-B.
+*           28.06.2024 5.30    Added support for RX260, RX261.
 ***********************************************************************************************************************/
 
 #ifndef SCI_RX_PLATFORM_H
@@ -75,6 +76,10 @@ Includes   <System Includes> , "Project Includes"
 #include "./targets/rx24t/r_sci_rx24t_private.h"  /* RX24T */
 #elif defined(BSP_MCU_RX24U)
 #include "./targets/rx24u/r_sci_rx24u_private.h"  /* RX24U */
+#elif defined(BSP_MCU_RX260)
+#include "./targets/rx260/r_sci_rx260_private.h"  /* RX260 */
+#elif defined(BSP_MCU_RX261)
+#include "./targets/rx261/r_sci_rx261_private.h"  /* RX261 */
 #elif defined(BSP_MCU_RX26T)
 #include "./targets/rx26t/r_sci_rx26t_private.h"  /* RX26T */
 #elif defined(BSP_MCU_RX64M)

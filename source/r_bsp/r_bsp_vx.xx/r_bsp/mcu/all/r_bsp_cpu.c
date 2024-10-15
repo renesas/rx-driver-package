@@ -52,6 +52,7 @@
 *                               - BSP_PRV_BUSPRI_BPEB_TOGGLE
 *                               - BSP_PRV_BUSPRI_BPXB_TOGGLE
 *                               Added bsp_bus_priority_initialize function.
+*         : 31.05.2024 3.17     Fixed coding style.
 **********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -146,7 +147,7 @@ static const    uint16_t s_prcr_masks[BSP_REG_PROTECT_TOTAL_ITEMS-1] =
  * @note The 'I' bit of the PSW can only be modified when in Supervisor Mode. If the CPU is in User Mode and this 
  * function is called, this function does nothing.
  */
-void R_BSP_InterruptsDisable (void)
+void R_BSP_InterruptsDisable(void)
 {
     uint32_t    pmode;
 
@@ -171,7 +172,7 @@ void R_BSP_InterruptsDisable (void)
  * @note The 'I' bit of the PSW can only be modified when in Supervisor Mode. If the CPU is in User Mode and this 
  * function is called, this function does nothing.
  */
-void R_BSP_InterruptsEnable (void)
+void R_BSP_InterruptsEnable(void)
 {
     uint32_t    pmode;
 
@@ -195,7 +196,7 @@ void R_BSP_InterruptsEnable (void)
  * @details This function reads the CPU's Interrupt Priority Level. This level is stored in the IPL bits of the 
  * Processor Status Word (PSW) register.
  */
-uint32_t R_BSP_CpuInterruptLevelRead (void)
+uint32_t R_BSP_CpuInterruptLevelRead(void)
 {
     /* Use the compiler intrinsic function to read the CPU IPL. */
     uint32_t psw_value;
@@ -222,9 +223,9 @@ uint32_t R_BSP_CpuInterruptLevelRead (void)
  * @note The CPU's IPL can only be modified by the user when in Supervisor Mode. If the CPU is in User Mode and this
  * function is called, this function does not control IPL and return false.
  */
-bool R_BSP_CpuInterruptLevelWrite (uint32_t level)
+bool R_BSP_CpuInterruptLevelWrite(uint32_t level)
 {
-    bool ret;
+    bool     ret;
     uint32_t pmode;
 
     /* The R_BSP_SET_IPL() function use the MVTIPL instruction.
@@ -291,7 +292,7 @@ bool R_BSP_CpuInterruptLevelWrite (uint32_t level)
                 R_BSP_SET_IPL(7);
                 break;
 
-    #if 7 < BSP_MCU_IPL_MAX
+#if 7 < BSP_MCU_IPL_MAX
             case (8):
 
                 /* IPL = 8 */
@@ -339,7 +340,7 @@ bool R_BSP_CpuInterruptLevelWrite (uint32_t level)
                 /* IPL = 15 */
                 R_BSP_SET_IPL(15);
                 break;
-    #endif /* BSP_MCU_IPL_MAX */
+#endif /* 7 < BSP_MCU_IPL_MAX */
 
             default:
                 ret = false;
@@ -373,7 +374,7 @@ bool R_BSP_CpuInterruptLevelWrite (uint32_t level)
  * this function is valid only in supervisor mode. When this function is executed in user mode, the 
  * R_BSP_InterruptControl function is executed but atomicity is not to secure.
  */
-void R_BSP_RegisterProtectEnable (bsp_reg_protect_t regs_to_protect)
+void R_BSP_RegisterProtectEnable(bsp_reg_protect_t regs_to_protect)
 {
 #ifdef BSP_MCU_REGISTER_WRITE_PROTECTION
     bsp_int_ctrl_t int_ctrl;
@@ -451,7 +452,7 @@ void R_BSP_RegisterProtectEnable (bsp_reg_protect_t regs_to_protect)
  * with this function is valid only in supervisor mode. When this function is executed in user mode, the 
  * R_BSP_InterruptControl function is executed but atomicity is not to secure.
  */
-void R_BSP_RegisterProtectDisable (bsp_reg_protect_t regs_to_unprotect)
+void R_BSP_RegisterProtectDisable(bsp_reg_protect_t regs_to_unprotect)
 {
 #ifdef BSP_MCU_REGISTER_WRITE_PROTECTION
     bsp_int_ctrl_t int_ctrl;
@@ -687,9 +688,9 @@ void R_BSP_SoftwareReset(void)
     SYSTEM.SWRR = 0xA501;
 
     /* WAIT_LOOP */
-    while(1)
+    while (1)
     {
-         R_BSP_NOP();
+        R_BSP_NOP();
     }
 } /* End of function R_BSP_SoftwareReset() */
 
@@ -699,7 +700,7 @@ void R_BSP_SoftwareReset(void)
 * Arguments    : none
 * Return Value : none
 ***********************************************************************************************************************/
-void bsp_register_protect_open (void)
+void bsp_register_protect_open(void)
 {
 #ifdef BSP_MCU_REGISTER_WRITE_PROTECTION
     uint32_t i;
@@ -721,7 +722,7 @@ void bsp_register_protect_open (void)
 * Arguments    : none
 * Return Value : none
 ***********************************************************************************************************************/
-void bsp_ram_initialize (void)
+void bsp_ram_initialize(void)
 {
     uint32_t i;
 
@@ -740,7 +741,7 @@ void bsp_ram_initialize (void)
 * Arguments    : none
 * Return Value : none
 ***********************************************************************************************************************/
-void bsp_bus_priority_initialize (void)
+void bsp_bus_priority_initialize(void)
 {
     uint16_t tmp_priority = 0;
 

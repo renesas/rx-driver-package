@@ -53,6 +53,7 @@
 #include "r_usb_cstd_rtos.h"
 #endif /* (BSP_CFG_RTOS_USED != 0) */
 
+#if defined(USB_CFG_PMSC_USE)
 /******************************************************************************
  Macro definitions
  ******************************************************************************/
@@ -1010,6 +1011,7 @@ void usb_pmsc_init (void)
     memset((void *)&g_usb_pmsc_message, 0, sizeof(usb_pmsc_cbm_t));
 } /* End of function usb_pmsc_init() */
 
+#endif /* defined(USB_CFG_PMSC_USE) */
 
 /******************************************************************************
  End Of File

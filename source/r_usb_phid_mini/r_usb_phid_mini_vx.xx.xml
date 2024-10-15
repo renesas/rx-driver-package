@@ -6,7 +6,18 @@
     <toolchain>
         <brand>Renesas</brand>
         <product>RXC</product>
+        <version>2.01.00</version>
+        <version>2.03.00</version>
+        <version>2.05.00</version>
+        <version>2.06.00</version>
+        <version>2.07.00</version>
+        <version>3.00.00</version>
+        <version>3.01.00</version>
         <version>3.02.00</version>
+        <version>3.03.00</version>
+        <version>3.04.00</version>
+        <version>3.05.00</version>
+        <version>3.06.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -14,6 +25,12 @@
         <version>4.08.04.201803</version>
         <version>4.08.04.201902</version>
         <version>8.03.00.201904</version>
+        <version>8.03.00.202004</version>
+        <version>8.03.00.202102</version>
+        <version>8.03.00.202104</version>
+        <version>8.03.00.202202</version>
+        <version>8.03.00.202204</version>
+        <version>8.03.00.202311</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -22,6 +39,10 @@
         <version>4.10.01</version>
         <version>4.11.01</version>
         <version>4.12.01</version>
+        <version>4.14.01</version>
+        <version>4.20.01</version>
+        <version>4.20.03</version>
+        <version>5.10.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -33,10 +54,12 @@
         <group omit_board="true">RX113</group>
         <group omit_board="true">RX231</group>
         <group omit_board="true">RX23W</group>
+        <group omit_board="true">RX261</group>
         <board>GENERIC_RX111</board>
         <board>GENERIC_RX113</board>
         <board>GENERIC_RX231</board>
         <board>GENERIC_RX23W</board>
+        <board>GENERIC_RX261</board>
     </target>
 
     <!-- only one package entry allowed -->
@@ -48,18 +71,18 @@
         <zipsource>r_usb_phid_mini_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.20</version>
+            <version>7.50</version>
         </dependency>
         <dependency>
             <module>r_usb_basic_mini</module>
-            <version>1.20</version>
+            <version>1.30</version>
         </dependency>
         <application>Connectivity</application>
         <desc>USB Peripheral Human Interface Device Class</desc>
         <details>The r_usb_phid_mini package provides USB peripheral human interface device class driver</details>
         <function>USB_PHID_MINI</function>
         <incdir>r_usb_phid_mini</incdir>
-        <incdir>r_usb_phid_mini\src\inc</incdir>
+        <incdir>r_usb_phid_mini/src/inc</incdir>
     </package>
 
     <sampleapplicationnote >

@@ -43,6 +43,7 @@
         <version>3.03.00</version>
         <version>3.04.00</version>
         <version>3.05.00</version>
+        <version>3.06.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -58,6 +59,8 @@
         <version>8.03.00.202202</version>
         <version>8.03.00.202204</version>
         <version>8.03.00.202305</version>
+        <version>8.03.00.202311</version>
+        <version>8.03.00.202405</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -93,6 +96,8 @@
         <group>RX23W</group>
         <group>RX24T</group>
         <group>RX24U</group>
+        <group>RX260</group>
+        <group>RX261</group>
         <group>RX26T</group>
         <group>RX64M</group>
         <group>RX651</group>
@@ -119,6 +124,8 @@
         <board>GENERIC_RX23W</board>
         <board>GENERIC_RX24T</board>
         <board>GENERIC_RX24U</board>
+        <board>GENERIC_RX260</board>
+        <board>GENERIC_RX261</board>
         <board>GENERIC_RX26T</board>
         <board>GENERIC_RX64M</board>
         <board>GENERIC_RX65N</board>

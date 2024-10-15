@@ -1509,7 +1509,7 @@ static void usb_peri_class_reqeust_usbx_get_data (usb_setup_t * p_req)
     }
 
     g_usb_pstd_std_request = USB_YES;
-    usb_pstd_ctrl_write(p_req->request_length,
+    usb_pstd_ctrl_write(p_req->length,
                         transfer_request->ux_slave_transfer_request_data_pointer
                         );
 }                                      /* End of function usb_peri_class_reqeust_usbx_get_data */

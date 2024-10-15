@@ -42,6 +42,8 @@
 #include "r_usb_pcdc.h"
 #include "r_usb_bitdefine.h"
 
+#ifdef USB_CFG_PCDC_USE
+
 /******************************************************************************
  Macro definitions
  ******************************************************************************/
@@ -160,6 +162,8 @@ void usb_pcdc_write_complete (usb_putr_t *p_mess, uint16_t data1, uint16_t data2
         usb_cstd_set_event(USB_STS_WRITE_COMPLETE, &ctrl);
     }
 } /* End of function usb_pcdc_write_complete() */
+
+#endif                                 /* USB_CFG_PCDC_USE */
 
 /******************************************************************************
  End  Of File

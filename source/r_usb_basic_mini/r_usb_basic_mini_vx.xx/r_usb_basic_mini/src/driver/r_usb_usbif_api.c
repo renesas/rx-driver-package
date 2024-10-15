@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2016(2020) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016(2024) Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_usb_usbif_api.c
@@ -27,6 +27,7 @@
 *         : 30.11.2018 1.10 Supporting Smart Configurator
 *         : 31.05.2019 1.11 Added support for GNUC and ICCRX.
 *         : 30.06.2020 1.20 Added support for RTOS.
+*         : 30.04.2024 1.30 Added support for RX261.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -39,6 +40,9 @@ Includes   <System Includes> , "Project Includes"
 #include "r_usb_reg_access.h"
 #include "r_usb_typedef.h"
 #include "r_usb_extern.h"
+#if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
+#include "r_usb_cstd_rtos.h"
+#endif /* (BSP_CFG_RTOS_USED != 0) */
 
 #if USB_CFG_DTC == USB_CFG_ENABLE
 #include "r_dtc_rx_if.h"
@@ -201,7 +205,7 @@ usb_err_t R_USB_Open (usb_ctrl_t *p_ctrl, usb_cfg_t *p_cfg)
 
 #endif  /* USB_CFG_DMA == USB_CFG_ENABLE */
 
-#if (BSP_CFG_RTOS_USED > 1)
+#if (BSP_CFG_RTOS_USED > 0)
     usb_rtos_configuration();
 #endif /* (BSP_CFG_RTOS_USED > 1) */
 
@@ -217,6 +221,9 @@ usb_err_t R_USB_Open (usb_ctrl_t *p_ctrl, usb_cfg_t *p_cfg)
     {
         case USB_PCDC:
         case USB_PMSC:
+        case USB_PCDC_PHID:
+        case USB_PCDC_PMSC:
+        case USB_PHID_PMSC:
             if (USB_PERI != p_cfg->usb_mode)
             {
                 return USB_ERR_PARA;
@@ -387,14 +394,43 @@ usb_err_t R_USB_Open (usb_ctrl_t *p_ctrl, usb_cfg_t *p_cfg)
 #if (BSP_CFG_RTOS_USED != 0)
         rtos_get_task_id(&g_usb_default_apl_task_id);
 #endif /* BSP_CFG_RTOS_USED != 0 */
-        g_usb_cstd_open_class |= (1 << p_ctrl->type);      /* Set USB Open device class */
-        if (USB_PCDC == p_ctrl->type)
+
+        if (USB_PCDC_PHID == p_ctrl->type)
         {
-            g_usb_cstd_open_class |= (1 << USB_PCDCC);   /* Set USB Open device class */
+            g_usb_cstd_open_class |= (1 << USB_PCDC);      /* Set USB Open device class */
+            g_usb_cstd_open_class |= (1 << USB_PCDCC);     /* Set USB Open device class */
+            g_usb_cstd_open_class |= (1 << USB_PHID);      /* Set USB Open device class */
         }
-        if (USB_HCDC == p_ctrl->type)
+        if (USB_PCDC_PMSC == p_ctrl->type)
         {
-            g_usb_cstd_open_class |= (1 << USB_HCDCC);   /* Set USB Open device class */
+            g_usb_cstd_open_class |= (1 << USB_PCDC);      /* Set USB Open device class */
+            g_usb_cstd_open_class |= (1 << USB_PCDCC);     /* Set USB Open device class */
+            g_usb_cstd_open_class |= (1 << USB_PMSC);      /* Set USB Open device class */
+        }
+        if (USB_PHID_PMSC == p_ctrl->type)
+        {
+            g_usb_cstd_open_class |= (1 << USB_PHID);      /* Set USB Open device class */
+            g_usb_cstd_open_class |= (1 << USB_PMSC);      /* Set USB Open device class */
+        }
+        else
+        {
+            g_usb_cstd_open_class |= (1 << p_ctrl->type);    /* Set USB Open device class */
+            if (USB_PCDC == p_ctrl->type)
+            {
+                g_usb_cstd_open_class |= (1 << USB_PCDCC);     /* Set USB Open device class */
+#if defined(USB_CFG_PCDC_2COM_USE)
+                g_usb_cstd_open_class |= (1 << USB_PCDC2);     /* Set USB Open device class */
+                g_usb_cstd_open_class |= (1 << USB_PCDCC2);    /* Set USB Open device class */
+#endif /* defined(USB_CFG_PCDC_2COM_USE) */
+            }
+            if (USB_HCDC == p_ctrl->type)
+            {
+                g_usb_cstd_open_class |= (1 << USB_HCDCC);     /* Set USB Open device class */
+            }
+            if (USB_PHID == p_ctrl->type)
+            {
+                g_usb_cstd_open_class |= (1 << USB_PHID2);     /* Set USB Open device class */
+            }
         }
     }
 
@@ -418,13 +454,56 @@ usb_err_t R_USB_Open (usb_ctrl_t *p_ctrl, usb_cfg_t *p_cfg)
 usb_err_t R_USB_Close (void)
 {
     usb_err_t   ret_code;
+#if (BSP_CFG_RTOS_USED == 0)   /* nonOS */
+    uint16_t    i;
+
+#endif /* BSP_CFG_RTOS_USED == 0 nonOS */
+
+#if USB_CFG_DTC == USB_CFG_ENABLE
+    dtc_err_t   ret;
+
+#endif  /* USB_CFG_DTC == USB_CFG_ENABLE */
+
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
     uint8_t     devclass = USB_IFCLS_NOT;
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 
-#if (BSP_CFG_RTOS_USED > 1)
+#if (BSP_CFG_RTOS_USED > 0)
     usb_rtos_unconfiguration();
-#endif /* #if (BSP_CFG_RTOS_USED > 1) */
+#endif /* #if (BSP_CFG_RTOS_USED > 0) */
+
+  #if (BSP_CFG_RTOS_USED == 0)   /* nonOS */
+    /* USB Event Dummy Read */
+    for (i =0; i <10; i++)
+    {
+        usb_cstd_usb_task();
+    }
+  #endif /* BSP_CFG_RTOS_USED == 0   nonOS */
+
+#if USB_CFG_DTC == USB_CFG_ENABLE
+    ret = R_DTC_Close();
+    if (DTC_SUCCESS != ret)
+    {
+#if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
+        return USB_ERR_PARA;
+#else /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
+        return USB_ERR_NG;
+#endif/* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
+    }
+
+#endif  /* USB_CFG_DTC == USB_CFG_ENABLE */
+
+#if USB_CFG_DMA == USB_CFG_ENABLE
+
+#if USB_CFG_NOUSE != USB_CFG_USB0_DMA_TX
+    R_DMACA_Close(USB_CFG_USB0_DMA_TX);
+#endif  /* USB_CFG_NOUSE != USB_CFG_USB0_DMA_TX */
+
+#if USB_CFG_NOUSE != USB_CFG_USB0_DMA_RX
+    R_DMACA_Close(USB_CFG_USB0_DMA_RX);
+#endif  /* USB_CFG_NOUSE != USB_CFG_USB0_DMA_RX */
+
+#endif  /* USB_CFG_DMA == USB_CFG_ENABLE */
 
     ret_code = usb_module_stop();
     if (USB_SUCCESS == ret_code)
@@ -478,6 +557,14 @@ usb_err_t R_USB_Close (void)
     }
     /* Clear USB Open device class */
     g_usb_cstd_open_class  = 0;
+
+  #if (BSP_CFG_RTOS_USED == 0)   /* nonOS */
+    /* USB Event Dummy Read */
+    for (i =0; i <10; i++)
+    {
+        usb_cstd_usb_task();
+    }
+  #endif /* BSP_CFG_RTOS_USED == 0    nonOS */
 
     return ret_code;
 }

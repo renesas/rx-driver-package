@@ -29,10 +29,10 @@ r_sdc_spi_rx
 +---doc
 |   |
 |   +---en
-|   |   r01an6908ej0100-rx-sdmemory-spi.pdf
+|   |   r01an6908ej0110-rx-sdmemory-spi.pdf
 |   |
 |   +---ja
-|       r01an6908jj0100-rx-sdmemory-spi.pdf
+|       r01an6908jj0110-rx-sdmemory-spi.pdf
 |
 +---src
         r_sdc_spi_close.c

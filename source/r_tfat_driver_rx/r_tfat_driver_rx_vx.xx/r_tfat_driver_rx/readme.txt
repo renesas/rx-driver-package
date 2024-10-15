@@ -30,9 +30,9 @@ r_tfat_driver_rx
 +---doc
 |   |
 |   +---en
-|   |   r20an0335ej0240-rx-tfat.pdf
+|   |   r20an0335ej0250-rx-tfat.pdf
 |   +---ja
-|       r20an0335jj0240-rx-tfat.pdf
+|       r20an0335jj0250-rx-tfat.pdf
 +---src
     |   r_tfat_drv_if.c
     |   r_tfat_drv_if_dev.h
@@ -41,6 +41,8 @@ r_tfat_driver_rx
         |
         +---sdmem
         |      r_tfat_drv_if_sdmem.c
+        +---spi_sdmem
+        |      r_tfat_drv_if_spi_sdmem.c
         +---usb
         |      r_tfat_drv_if_usb.c
         +---usb_mini

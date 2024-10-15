@@ -18,7 +18,7 @@
 * you agree to the additional terms and conditions found by accessing the 
 * following link:
 * http://www.renesas.com/disclaimer
-* Copyright (C) 2020 Renesas Electronics Corporation. All rights reserved.    
+* Copyright (C) 2020(2024) Renesas Electronics Corporation. All rights reserved.    
  *********************************************************************************************************************/
 /*******************************************************************************
 * File Name    : r_usb_cstd_rtos.c
@@ -28,6 +28,7 @@
 /*****************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 30.06.2020 1.20     First Release
+*         : 30.04.2024 1.30 Added support for RX261.
 ******************************************************************************/
 
 /******************************************************************************
@@ -164,6 +165,10 @@ rtos_err_t usb_rtos_configuration(void)
     rtos_create_mailbox(&g_rtos_usb_pcd_sub_mbx_id, &mbx_info);         /* For PCD Sub */
 
 #if defined(USB_CFG_PMSC_USE)
+    /* Mailbox Creation */
+    mbx_info.length         = QUEUE_SIZE;
+    rtos_create_mailbox(&g_rtos_usb_pmsc_mbx_id, &mbx_info);             /* For PMSC */
+
     task_info.task_code     = (TaskFunction_t)usb_pmsc_task;
     task_info.p_name        = "PMSC_TSK";
     task_info.stack_depth   = STACK_SIZE;
@@ -171,9 +176,6 @@ rtos_err_t usb_rtos_configuration(void)
     task_info.priority      = PMSC_TSK_PRI;
     rtos_create_task(&g_rtos_usb_pmsc_task_id, &task_info);
 
-    /* Mailbox Creation */
-    mbx_info.length         = QUEUE_SIZE;
-    rtos_create_mailbox(&g_rtos_usb_pmsc_mbx_id, &mbx_info);             /* For PMSC */
 #endif /* defined(USB_CFG_PMSC_USE) */
 
     /* Task Creation */
@@ -263,6 +265,10 @@ rtos_err_t usb_rtos_unconfiguration(void)
     rtos_delete_fixed_memory(&g_rtos_usb_mpf_id);
 
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
+    /* Terminate Task */
+    rtos_terminate_task(&g_rtos_usb_hcd_task_id);           /* For HCD */
+    rtos_terminate_task(&g_rtos_usb_mgr_task_id);           /* For MGR */
+
     /* Delete Task */
     rtos_delete_task(&g_rtos_usb_hcd_task_id);              /* For HCD */
     rtos_delete_task(&g_rtos_usb_mgr_task_id);              /* For MGR */
@@ -288,6 +294,10 @@ rtos_err_t usb_rtos_unconfiguration(void)
 #endif /* ( (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST ) */
 
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
+
+    /* Terminate Task */
+    rtos_terminate_task(&g_rtos_usb_pcd_task_id);           /* For PCD */
+
     /* Delete Task */
     rtos_delete_task(&g_rtos_usb_pcd_task_id);              /* For PCD */
 
@@ -296,11 +306,15 @@ rtos_err_t usb_rtos_unconfiguration(void)
     rtos_delete_mailbox(&g_rtos_usb_pcd_sub_mbx_id);        /* For PCD Sub */
 
 #if defined(USB_CFG_PMSC_USE)
+    /* Delete Mailbox */
+    rtos_delete_mailbox(&g_rtos_usb_pmsc_mbx_id);           /* For PMSC */
+
+    /* Terminate Task */
+    rtos_terminate_task(&g_rtos_usb_pmsc_task_id);          /* For PMSC */
+
     /* Delete Task */
     rtos_delete_task(&g_rtos_usb_pmsc_task_id);             /* For PMSC */
 
-    /* Delete Mailbox */
-    rtos_delete_mailbox(&g_rtos_usb_pmsc_mbx_id);           /* For PMSC */
 #endif /* defined(USB_CFG_PMSC_USE) */
 
 #endif /* ( (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI ) */
@@ -311,6 +325,10 @@ rtos_err_t usb_rtos_unconfiguration(void)
     g_rtos_usb_mpf_id               = USB_NULL;
 
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
+    /* Terminate Task */
+    rtos_terminate_task(&g_rtos_usb_hcd_task_id);           /* For HCD */
+    rtos_terminate_task(&g_rtos_usb_mgr_task_id);           /* For MGR */
+
     g_rtos_usb_hcd_mbx_id           = USB_NULL;
     g_rtos_usb_hcd_sub_mbx_id       = USB_NULL;
     g_rtos_usb_mgr_mbx_id           = USB_NULL;

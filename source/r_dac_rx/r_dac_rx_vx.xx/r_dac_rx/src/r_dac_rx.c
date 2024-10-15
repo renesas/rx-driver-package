@@ -56,6 +56,7 @@
 *                              DA0 and DA1 for RX66T, RX72T, RX660, RX26T.
 *                              Added DAC_OUT_SEL_REF0_REF1 to dac_out_ref_t enum for simultaneous Vref output 
 *                              from DA0 and DA1 for RX66T, RX72T, RX660, RX26T.
+*           28.06.2024 5.30    Added support for RX260, RX261.
 ******************************************************************************/
 /*****************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -311,7 +312,8 @@ static dac_err_t dac_set_options(dac_cfg_t *p_cfg)
     /* OPTION: SYNCHRONIZE WITH ADC */
 
 #if defined(BSP_MCU_RX113) || defined(BSP_MCU_RX130) || defined(BSP_MCU_RX231) || defined(BSP_MCU_RX230) \
- || defined(BSP_MCU_RX23W) || defined(BSP_MCU_RX140) || defined(BSP_MCU_RX660)
+ || defined(BSP_MCU_RX23W) || defined(BSP_MCU_RX140) || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX260) \
+ || defined(BSP_MCU_RX261)
     if (p_cfg->sync_with_adc == false)
     {
         DA.DAADSCR.BIT.DAADST = 0;      // do not sync with ADC
@@ -816,7 +818,7 @@ dac_err_t R_DAC_Close(void)
  || defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) \
  || defined(BSP_MCU_RX24U) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) \
  || defined(BSP_MCU_RX23W) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX140)\
- || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T)
+ || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T) || defined(BSP_MCU_RX260) || defined(BSP_MCU_RX261)
     /* Not sync with ADC */
     DA.DAADSCR.BIT.DAADST = 0;
 #endif

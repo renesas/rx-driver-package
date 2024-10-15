@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_gpio_rx_if.h
@@ -91,6 +91,7 @@
 *                              Removed common "gpio_port_t" structure and added "gpio_port_t" structure for RX110 
 *                                 64-Pin, 48-Pin, 40-Pin, and 36-Pin.
 *         : 29.05.2023 5.00    Added support for RX23E-B.
+*         : 28.06.2024 5.10    Added support for RX260, RX261.
 ***********************************************************************************************************************/
 
 #ifndef GPIO_RX_INTERFACE_HEADER_FILE
@@ -131,6 +132,10 @@ Includes   <System Includes> , "Project Includes"
     #include "./src/targets/rx23e-b/r_gpio_rx23e-b.h"
 #elif defined(BSP_MCU_RX24T)
     #include "./src/targets/rx24t/r_gpio_rx24t.h"
+#elif defined(BSP_MCU_RX260)
+    #include "./src/targets/rx260/r_gpio_rx260.h"
+#elif defined(BSP_MCU_RX261)
+    #include "./src/targets/rx261/r_gpio_rx261.h"
 #elif defined(BSP_MCU_RX26T)
     #include "./src/targets/rx26t/r_gpio_rx26t.h"
 #elif defined(BSP_MCU_RX24U)
@@ -169,7 +174,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define GPIO_RX_VERSION_MAJOR           (5)
-#define GPIO_RX_VERSION_MINOR           (00)
+#define GPIO_RX_VERSION_MINOR           (10)
 
 /***********************************************************************************************************************
 Typedef definitions

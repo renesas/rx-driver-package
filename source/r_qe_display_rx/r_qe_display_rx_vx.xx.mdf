@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="QE_DISPLAY_CFG_UART_CH" display="UART channel" default="0" type="combobox">
+            <option id="QE_DISPLAY_CFG_UART_CH.0"  display="UART0"  value="0"/>
+            <option id="QE_DISPLAY_CFG_UART_CH.1"  display="UART1"  value="1"/>
+            <option id="QE_DISPLAY_CFG_UART_CH.2"  display="UART2"  value="2"/>
+            <option id="QE_DISPLAY_CFG_UART_CH.3"  display="UART3"  value="3"/>
+            <option id="QE_DISPLAY_CFG_UART_CH.4"  display="UART4"  value="4"/>
+            <option id="QE_DISPLAY_CFG_UART_CH.5"  display="UART5"  value="5"/>
+            <option id="QE_DISPLAY_CFG_UART_CH.6"  display="UART6"  value="6"/>
+            <option id="QE_DISPLAY_CFG_UART_CH.7"  display="UART7"  value="7"/>
+            <option id="QE_DISPLAY_CFG_UART_CH.8"  display="UART8"  value="8"/>
+            <option id="QE_DISPLAY_CFG_UART_CH.9"  display="UART9"  value="9"/>
+            <option id="QE_DISPLAY_CFG_UART_CH.10" display="UART10" value="10"/>
+            <option id="QE_DISPLAY_CFG_UART_CH.11" display="UART11" value="11"/>
+            <option id="QE_DISPLAY_CFG_UART_CH.12" display="UART12" value="12"/>
+            <description>SCI number for QE adjustment with UART channel.</description>
+        </property>
+
+        <property id="QE_DISPLAY_CFG_UART_BAUDRATE" display="UART baud rate" default="115200" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${QE_DISPLAY_CFG_UART_BAUDRATE}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 2147483647">("${QE_DISPLAY_CFG_UART_BAUDRATE}" &gt;= 1) &amp;&amp; ("${QE_DISPLAY_CFG_UART_BAUDRATE}" &lt;= 2147483647)</constraint>
+            <description>UART baud rate for QE adjustment. Set the baud rate to be the same as the QE for Display settings. The maximum baud rate is device dependent. Refer to the user's manual for device used.</description>
+        </property>
+
+        <property id="QE_DISPLAY_CFG_UART_INTERRUPT_PRIORITY_LEVEL" display="UART Interrupt priority level" default="5" type="combobox">
+            <option id="QE_DISPLAY_CFG_UART_INTERRUPT_PRIORITY_LEVEL.0" display="Level 0 (interrupt disabled)" value="0"/>
+            <option id="QE_DISPLAY_CFG_UART_INTERRUPT_PRIORITY_LEVEL.1" display="Level 1" value="1"/>
+            <option id="QE_DISPLAY_CFG_UART_INTERRUPT_PRIORITY_LEVEL.2" display="Level 2" value="2"/>
+            <option id="QE_DISPLAY_CFG_UART_INTERRUPT_PRIORITY_LEVEL.3" display="Level 3" value="3"/>
+            <option id="QE_DISPLAY_CFG_UART_INTERRUPT_PRIORITY_LEVEL.4" display="Level 4" value="4"/>
+            <option id="QE_DISPLAY_CFG_UART_INTERRUPT_PRIORITY_LEVEL.5" display="Level 5" value="5"/>
+            <option id="QE_DISPLAY_CFG_UART_INTERRUPT_PRIORITY_LEVEL.6" display="Level 6" value="6"/>
+            <option id="QE_DISPLAY_CFG_UART_INTERRUPT_PRIORITY_LEVEL.7" display="Level 7" value="7"/>
+            <option id="QE_DISPLAY_CFG_UART_INTERRUPT_PRIORITY_LEVEL.8" display="Level 8" value="8"/>
+            <option id="QE_DISPLAY_CFG_UART_INTERRUPT_PRIORITY_LEVEL.9" display="Level 9" value="9"/>
+            <option id="QE_DISPLAY_CFG_UART_INTERRUPT_PRIORITY_LEVEL.10" display="Level 10" value="10"/>
+            <option id="QE_DISPLAY_CFG_UART_INTERRUPT_PRIORITY_LEVEL.11" display="Level 11" value="11"/>
+            <option id="QE_DISPLAY_CFG_UART_INTERRUPT_PRIORITY_LEVEL.12" display="Level 12" value="12"/>
+            <option id="QE_DISPLAY_CFG_UART_INTERRUPT_PRIORITY_LEVEL.13" display="Level 13" value="13"/>
+            <option id="QE_DISPLAY_CFG_UART_INTERRUPT_PRIORITY_LEVEL.14" display="Level 14" value="14"/>
+            <option id="QE_DISPLAY_CFG_UART_INTERRUPT_PRIORITY_LEVEL.15" display="Level 15 (highest)" value="15"/>
+            <description>Selects UART interrupt priority level.</description>
+        </property>
+
+        <property id="QE_DISPLAY_CFG_DEBUG_PRINT_ENABLE" display="Enable debug print" default="0" type="checkbox">
+            <option id="QE_DISPLAY_CFG_DEBUG_PRINT_ENABLE.false" display="Disable debug print" value="0"/>
+            <option id="QE_DISPLAY_CFG_DEBUG_PRINT_ENABLE.true" display="Enable debug print" value="1"/>
+            <description>Enable debug message print to debug terminal.</description>
+        </property>
+
+    </configuration>
+</module>

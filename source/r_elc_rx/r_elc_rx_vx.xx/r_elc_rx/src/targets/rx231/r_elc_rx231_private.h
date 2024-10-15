@@ -18,11 +18,12 @@
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_elc_rx231_private.h
- * Version      : 1.0
+ * Version      : 1.01
  * Description  : Functions for using Event Link Controller module
  ************************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *           01.07.2016 1.0     Initial Release
+ *           31.07.2024 1.01    ELC_TIMER_EVENT_COUNTER add
  ***********************************************************************************************************************/
 #ifndef ELC_RX231_PRIVATE_H
     #define ELC_RX231_PRIVATE_H
@@ -181,6 +182,7 @@ typedef enum
     ELC_TIMER_START         = 0,
     ELC_TIMER_RESTART       = 1,
     ELC_TIMER_INPUT_CAPTURE = 2,
+    ELC_TIMER_EVENT_COUNTER = 2,
     ELC_TIMER_DISABLED      = 3
 } elc_timer_operation_select_t;
 

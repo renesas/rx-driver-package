@@ -14,9 +14,9 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
-/**********************************************************************************************************************
+/*********************************************************************************************************************
  * File Name    : r_lpt_rx_platform.h
  * Version      : 4.00
  * Description  : Functions for using Low Power Timer
@@ -27,6 +27,7 @@
  *         : 10.06.2020 2.00    Added support for RX23W
  *         : 25.09.2020 2.01    Added support for RX140
  *         : 31.05.2023 4.00    Added support for RX23E-B
+ *         : 31.07.2024 5.00    Added support for RX261,RX260
  *********************************************************************************************************************/
 
 /*******************************************************************************
@@ -47,6 +48,10 @@ Includes <System Includes> , "Project Includes"
     #include "./targets/rx23w/r_lpt_rx23w_private.h"
 #elif defined(BSP_MCU_RX23E_B)
     #include "./targets/rx23e-b/r_lpt_rx23e-b_private.h"
+#elif defined(BSP_MCU_RX260)
+    #include "./targets/rx260/r_lpt_rx260_private.h"
+#elif defined(BSP_MCU_RX261)
+    #include "./targets/rx261/r_lpt_rx261_private.h"
 #else
     #error "This MCU is not supported by the current r_lpt_rx module."
 #endif

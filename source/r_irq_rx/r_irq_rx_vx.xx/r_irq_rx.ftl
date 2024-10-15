@@ -26,25 +26,24 @@ void ${Function_Name}()
         <#list pins as pin>
             <#assign pinUsed= "${pin.assignedPinName}">
             <#if pinUsed != "UNUSED">
-
     /* Set ${pin.pinName} pin */
                 <#if headerInfo.device?contains("R5F524T")>
                     <#if pin.portNum != "5" && pin.portNum != "6">
-    PORT${pin.portNum}.PMR.BIT.B${pin.pinBitNum} = 0U;
+    PORT${pin.portNum}.PMR.BYTE &= ~(1U<<${pin.pinBitNum});
                     </#if>
                 <#elseif headerInfo.device?contains("R5F524U")>
                     <#if pin.portNum != "5" && pin.portNum != "6">
-    PORT${pin.portNum}.PMR.BIT.B${pin.pinBitNum} = 0U;
+    PORT${pin.portNum}.PMR.BYTE &= ~(1U<<${pin.pinBitNum});
                     </#if>
                 <#else>
-    PORT${pin.portNum}.PMR.BIT.B${pin.pinBitNum} = 0U;
+    PORT${pin.portNum}.PMR.BYTE &= ~(1U<<${pin.pinBitNum});
                 </#if>
                 <#if headerInfo.device?contains("R5F513T")>
-                    <#if pin.portNum != "E" && pin.portNum != "2">
-    PORT${pin.portNum}.PDR.BIT.B${pin.pinBitNum} = 0U;
+                    <#if pin.portNum != "E">
+    PORT${pin.portNum}.PDR.BYTE &= ~(1U<<${pin.pinBitNum});
                     </#if>
-                <#else>
-    PORT${pin.portNum}.PDR.BIT.B${pin.pinBitNum} = 0U;
+                <#else> 
+    PORT${pin.portNum}.PDR.BYTE &= ~(1U<<${pin.pinBitNum});
                 </#if>
     MPC.${pin.assignedPinName}PFS.BYTE = 0x${pin.pinMPC}U;
             </#if>

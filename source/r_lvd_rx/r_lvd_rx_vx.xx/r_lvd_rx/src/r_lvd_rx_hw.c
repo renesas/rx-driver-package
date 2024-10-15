@@ -46,6 +46,8 @@
 *                                    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *              : 29.05.2023 4.50     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *              : 30.01.2024 4.70     Added macro LVD_GROUP_INT_ICUC.
+*              : 28.06.2024 4.80     Added Nested interrupt support.
+*                                    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -253,10 +255,10 @@ lvd_err_t lvd_hw_check_clearstatus(void)
 *              : LVD_ERR_INVALID_FUNC       ; Address in the p_callback parameter is invalid.
 *              : LVD_ERR_INVALID_ARG        ; The argument of the p_cfg parameter is invalid.
 ***********************************************************************************************************************/
-lvd_err_t lvd_hw_check_param_open(lvd_channel_t ch, 
-                                  lvd_config_t const *p_cfg, 
-                                  void (*p_cb)(void *), 
-                                  lvd_cfg_opt_t const *p_cfg_opt)
+lvd_err_t lvd_hw_check_param_open  (lvd_channel_t ch,
+                                    lvd_config_t const *p_cfg,
+                                    void (*p_cb)(void *),
+                                    lvd_cfg_opt_t const *p_cfg_opt)
 {
     lvd_err_t result_code = LVD_SUCCESS;
     
@@ -665,8 +667,8 @@ void lvd_hw_select_reset(lvd_channel_t ch)
 {
     if (LVD_CHANNEL_1 == ch)
     {
-#if ((LVD_ENABLE == LVD_SUPPORT_MI_CH1)||\
-     (LVD_ENABLE == LVD_SUPPORT_NMI_CH1))
+#if ((LVD_ENABLE == LVD_SUPPORT_MI_CH1) \
+    || (LVD_ENABLE == LVD_SUPPORT_NMI_CH1))
         /* Set LVD1RI */
         SYSTEM.LVD1CR0.BYTE = (SYSTEM.LVD1CR0.BYTE & 0xF7U) | 0x40U;
 #endif
@@ -674,8 +676,8 @@ void lvd_hw_select_reset(lvd_channel_t ch)
 #ifndef  BSP_MCU_RX23W
     else
     {
-#if ((LVD_ENABLE == LVD_SUPPORT_MI_CH2)||\
-     (LVD_ENABLE == LVD_SUPPORT_NMI_CH2))
+#if ((LVD_ENABLE == LVD_SUPPORT_MI_CH2) \
+    || (LVD_ENABLE == LVD_SUPPORT_NMI_CH2))
         /* Set LVD2RI */
         SYSTEM.LVD2CR0.BYTE = (SYSTEM.LVD2CR0.BYTE & 0xF7U) | 0x40U;
 #endif
@@ -737,8 +739,8 @@ void lvd_hw_select_int(lvd_channel_t ch)
 {
     if (LVD_CHANNEL_1 == ch)
     {
-#if ((LVD_ENABLE == LVD_SUPPORT_MI_CH1)||\
-     (LVD_ENABLE == LVD_SUPPORT_NMI_CH1))
+#if ((LVD_ENABLE == LVD_SUPPORT_MI_CH1) \
+    || (LVD_ENABLE == LVD_SUPPORT_NMI_CH1))
         /* Set LVD1RI */
         SYSTEM.LVD1CR0.BYTE = SYSTEM.LVD1CR0.BYTE & 0xB7U;
 #endif
@@ -746,8 +748,8 @@ void lvd_hw_select_int(lvd_channel_t ch)
 #ifndef  BSP_MCU_RX23W
     else
     {
-#if ((LVD_ENABLE == LVD_SUPPORT_MI_CH2)||\
-     (LVD_ENABLE == LVD_SUPPORT_NMI_CH2))
+#if ((LVD_ENABLE == LVD_SUPPORT_MI_CH2) \
+    || (LVD_ENABLE == LVD_SUPPORT_NMI_CH2))
         /* Set LVD2RI */
         SYSTEM.LVD2CR0.BYTE = SYSTEM.LVD2CR0.BYTE & 0xB7U;
 #endif
@@ -768,8 +770,8 @@ void lvd_hw_select_mi(lvd_channel_t ch)
 {
     if (LVD_CHANNEL_1 == ch)
     {
-#if ((LVD_ENABLE == LVD_SUPPORT_MI_CH1)&&\
-     (LVD_ENABLE == LVD_SUPPORT_NMI_CH1))
+#if ((LVD_ENABLE == LVD_SUPPORT_MI_CH1) \
+    && (LVD_ENABLE == LVD_SUPPORT_NMI_CH1))
         /* Set LVD1IRQSEL */
         SYSTEM.LVD1CR1.BIT.LVD1IRQSEL = 1;
 #endif
@@ -777,8 +779,8 @@ void lvd_hw_select_mi(lvd_channel_t ch)
 #ifndef  BSP_MCU_RX23W
     else
     {
-#if ((LVD_ENABLE == LVD_SUPPORT_MI_CH2)&&\
-     (LVD_ENABLE == LVD_SUPPORT_NMI_CH2))
+#if ((LVD_ENABLE == LVD_SUPPORT_MI_CH2) \
+    && (LVD_ENABLE == LVD_SUPPORT_NMI_CH2))
         /* Set LVD2IRQSEL */
         SYSTEM.LVD2CR1.BIT.LVD2IRQSEL = 1;
 #endif
@@ -799,8 +801,8 @@ void lvd_hw_select_nmi(lvd_channel_t ch)
 {
     if (LVD_CHANNEL_1 == ch)
     {
-#if ((LVD_ENABLE == LVD_SUPPORT_MI_CH1)&&\
-     (LVD_ENABLE == LVD_SUPPORT_NMI_CH1))
+#if ((LVD_ENABLE == LVD_SUPPORT_MI_CH1) \
+    && (LVD_ENABLE == LVD_SUPPORT_NMI_CH1))
         /* Set LVD1IRQSEL */
         SYSTEM.LVD1CR1.BIT.LVD1IRQSEL = 0;
 #endif
@@ -808,8 +810,8 @@ void lvd_hw_select_nmi(lvd_channel_t ch)
 #ifndef  BSP_MCU_RX23W
     else
     {
-#if ((LVD_ENABLE == LVD_SUPPORT_MI_CH2)&&\
-     (LVD_ENABLE == LVD_SUPPORT_NMI_CH2))
+#if ((LVD_ENABLE == LVD_SUPPORT_MI_CH2) \
+    && (LVD_ENABLE == LVD_SUPPORT_NMI_CH2))
         /* Set LVD2IRQSEL */
         SYSTEM.LVD2CR1.BIT.LVD2IRQSEL = 0;
 #endif
@@ -1525,6 +1527,11 @@ R_BSP_PRAGMA_STATIC_INTERRUPT (lvd_ch1_isr, VECT(LVD, LVD1))
 
 R_BSP_ATTRIB_STATIC_INTERRUPT void lvd_ch1_isr(void)
 {
+#if LVD_CFG_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     lvd_int_cb_args_t event_arg;
     
     /* Check data pointer */
@@ -1535,6 +1542,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void lvd_ch1_isr(void)
         /* Cast type lvd_int_cb_args_t to type void * */
         p_lvd_cb_ch1((void *)&event_arg);
     }
+
+#if LVD_CFG_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_CLRPSW_I();
+#endif
 
     return ;
 } /* End of function lvd_ch1_isr() */
@@ -1565,15 +1577,26 @@ R_BSP_PRAGMA_STATIC_INTERRUPT (lvd_ch2_isr, VECT(LVD, LVD2))
 #endif
 R_BSP_ATTRIB_STATIC_INTERRUPT void lvd_ch2_isr(void)
 {
+#if LVD_CFG_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     lvd_int_cb_args_t event_arg;
     
     /* Check data pointer */
     if ((NULL != p_lvd_cb_ch2) && (FIT_NO_FUNC != p_lvd_cb_ch2))
     {
         event_arg.vector = BSP_INT_SRC_LVD2;
+
         /* Cast type lvd_int_cb_args_t to type void * */
         p_lvd_cb_ch2((void *)&event_arg);
     }
+
+#if LVD_CFG_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_CLRPSW_I();
+#endif
 
     return ;
 } /* End of function lvd_ch2_isr() */

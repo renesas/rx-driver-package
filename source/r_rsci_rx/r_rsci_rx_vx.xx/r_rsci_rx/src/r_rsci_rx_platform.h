@@ -25,6 +25,7 @@
 *                              Supported for RX671.
 *           31.03.2022 2.10    Supported for RX660.
 *           15.08.2022 2.30    Supported for RX26T.
+*           28.06.2024 2.60    Supported for RX260, RX261.
 ************************************************************************************************************************/
 
 #ifndef RSCI_RX_PLATFORM_H
@@ -41,6 +42,10 @@ Includes   <System Includes> , "Project Includes"
 #include "./targets/rx660/r_rsci_rx660_private.h"  /* RX660 */
 #elif defined(BSP_MCU_RX26T)
 #include "./targets/rx26t/r_rsci_rx26t_private.h"  /* RX26T */
+#elif defined(BSP_MCU_RX260)
+#include "./targets/rx260/r_rsci_rx260_private.h"  /* RX260 */
+#elif defined(BSP_MCU_RX261)
+#include "./targets/rx261/r_rsci_rx261_private.h"  /* RX261 */
 #else
 #error "ERROR - r_rsci_rxXXX_private.h not included."
 #endif

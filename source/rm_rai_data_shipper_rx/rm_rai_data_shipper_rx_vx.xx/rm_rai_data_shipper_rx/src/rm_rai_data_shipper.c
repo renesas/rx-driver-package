@@ -44,12 +44,20 @@
  * Private function prototypes
  **********************************************************************************************************************/
 
+#if (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_UART)
 static void rai_data_shipper_notify_application(rai_data_shipper_instance_ctrl_t * p_ctrl, rm_comms_uart_event_t event);
+#elif (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_USB_PCDC)
+static void rai_data_shipper_notify_application(rai_data_shipper_instance_ctrl_t * p_ctrl, rm_comms_usb_pcdc_event_t event);
+#endif
 
 /**********************************************************************************************************************
  * Global function prototypes
  **********************************************************************************************************************/
+#if (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_UART)
 void rai_data_shipper_write_callback(rm_comms_uart_callback_args_t * p_args);
+#elif (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_USB_PCDC)
+void rai_data_shipper_write_callback(rm_comms_usb_pcdc_callback_args_t * p_args);
+#endif
 
 /**********************************************************************************************************************
  * Extern function prototypes
@@ -177,7 +185,11 @@ fsp_err_t RM_RAI_DATA_SHIPPER_Write (rai_data_shipper_ctrl_t * const         p_a
     if (p_ctrl->tx_info.write_requests < p_ctrl->p_cfg->divider)
     {
         p_ctrl->tx_info.write_requests++;
+        #if (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_UART)
         rai_data_shipper_notify_application(p_ctrl, RM_COMMS_UART_EVENT_TX_OPERATION_COMPLETE);
+        #elif (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_USB_PCDC)
+        rai_data_shipper_notify_application(p_ctrl, RM_COMMS_USB_PCDC_EVENT_TX_OPERATION_COMPLETE);
+        #endif
 
         return FSP_SUCCESS;
     }
@@ -276,9 +288,11 @@ fsp_err_t RM_RAI_DATA_SHIPPER_Write (rai_data_shipper_ctrl_t * const         p_a
         p_ctrl->tx_info.channels++;
     }
 
-    p_ctrl->p_cfg->p_comms->p_api->write(p_ctrl->p_cfg->p_comms->p_ctrl,
-                                         (uint8_t *) &p_ctrl->tx_info.header,
-                                         header_buffer_len);
+    fsp_err_t err =
+        p_ctrl->p_cfg->p_comms->p_api->write(p_ctrl->p_cfg->p_comms->p_ctrl,
+                                             (uint8_t *) &p_ctrl->tx_info.header,
+                                             header_buffer_len);
+    FSP_ERROR_RETURN(FSP_SUCCESS == err, err);
 
     return FSP_SUCCESS;
 }
@@ -316,7 +330,11 @@ fsp_err_t RM_RAI_DATA_SHIPPER_Close (rai_data_shipper_ctrl_t * const p_api_ctrl)
     return err;
 }
 
+#if (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_UART)
 static void rai_data_shipper_notify_application (rai_data_shipper_instance_ctrl_t * p_ctrl, rm_comms_uart_event_t event)
+#elif (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_USB_PCDC)
+static void rai_data_shipper_notify_application (rai_data_shipper_instance_ctrl_t * p_ctrl, rm_comms_usb_pcdc_event_t event)
+#endif
 {
     // Callback to application to release buffer etc.
     rai_data_shipper_callback_args_t args =
@@ -328,11 +346,19 @@ static void rai_data_shipper_notify_application (rai_data_shipper_instance_ctrl_
     p_ctrl->p_cfg->p_callback(&args);
 }
 
+#if (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_UART)
 void rai_data_shipper_write_callback (rm_comms_uart_callback_args_t * p_args)
+#elif (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_USB_PCDC)
+void rai_data_shipper_write_callback (rm_comms_usb_pcdc_callback_args_t * p_args)
+#endif
 {
     rai_data_shipper_instance_ctrl_t * p_ctrl = (rai_data_shipper_instance_ctrl_t *) p_args->p_context;
 
+    #if (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_UART)
     if (p_args->event == RM_COMMS_UART_EVENT_ERROR)
+    #elif (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_USB_PCDC)
+    if (p_args->event == RM_COMMS_USB_PCDC_EVENT_ERROR)
+    #endif
     {
         rai_data_shipper_notify_application(p_ctrl, p_args->event);
 
@@ -352,8 +378,11 @@ void rai_data_shipper_write_callback (rm_comms_uart_callback_args_t * p_args)
                                              p_ctrl->tx_info.data[p_ctrl->tx_info.current].len);
     if (FSP_SUCCESS != err)
     {
+        #if (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_UART)
         rai_data_shipper_notify_application(p_ctrl, RM_COMMS_UART_EVENT_ERROR);
-
+        #elif (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_USB_PCDC)
+        rai_data_shipper_notify_application(p_ctrl, RM_COMMS_USB_PCDC_EVENT_ERROR);
+        #endif
         return;
     }
 

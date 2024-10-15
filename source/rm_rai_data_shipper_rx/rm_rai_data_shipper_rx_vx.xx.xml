@@ -35,6 +35,14 @@
 		        <version>1.00</version>
         </dependency>
         <dependency>
+		        <module>rm_comms_usb_pcdc_rx</module>
+		        <version>1.20</version>
+        </dependency>
+        <dependency>
+		        <module>rm_comms_usb_pcdc_rx_mini</module>
+		        <version>1.20</version>
+        </dependency>
+        <dependency>
 		        <module>rm_rai_data_collector_rx</module>
 		        <version>1.00</version>
         </dependency>

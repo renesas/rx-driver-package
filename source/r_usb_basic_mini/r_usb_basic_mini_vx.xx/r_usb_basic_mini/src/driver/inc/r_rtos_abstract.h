@@ -18,7 +18,7 @@
 * you agree to the additional terms and conditions found by accessing the 
 * following link:
 * http://www.renesas.com/disclaimer
-* Copyright (C) 2020 Renesas Electronics Corporation. All rights reserved.    
+* Copyright (C) 2020(2024) Renesas Electronics Corporation. All rights reserved.    
  *********************************************************************************************************************/
 /**********************************************************************************************************************
 * File Name    : r_rtos_abstract.h
@@ -28,6 +28,7 @@
 /**********************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 30.06.2020 1.20     First Release
+*         : 30.04.2024 1.30     Added support for RX261.
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -183,6 +184,7 @@ rtos_err_t      rtos_release_fixed_memory(rtos_mem_id_t *p_id, void *p_memblk);
 /* For task */
 rtos_err_t      rtos_create_task (rtos_task_id_t *p_id, rtos_task_info_t *p_info);
 rtos_err_t      rtos_delete_task (rtos_task_id_t *p_id);
+rtos_err_t      rtos_terminate_task (rtos_task_id_t *p_id);
 rtos_err_t      rtos_get_task_id (rtos_task_id_t *p_id);
 rtos_err_t      rtos_start_task  (rtos_task_id_t *p_id);
 

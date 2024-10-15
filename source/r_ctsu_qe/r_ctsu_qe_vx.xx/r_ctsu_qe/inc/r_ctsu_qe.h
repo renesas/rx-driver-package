@@ -13,7 +13,7 @@
 * this software. By using this software, you agree to the additional terms and conditions found by accessing the
 * following link:
 * http://www.renesas.com/disclaimer
-* Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
 ************************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_ctsu_qe.h
@@ -35,14 +35,13 @@
 #include "r_ctsu_qe_config.h"
 #include "r_ctsu_qe_api.h"
 
-
 /* Common macro for FSP header files. There is also a corresponding FSP_FOOTER macro at the end of this file. */
 FSP_HEADER
 
 /***********************************************************************************************************************
  * Macro definitions
  **********************************************************************************************************************/
-#if defined(BSP_MCU_RX140)
+#if defined(BSP_MCU_RX140) || defined(BSP_MCU_RX261) || defined(BSP_MCU_RX260)
 #define BSP_FEATURE_CTSU_VERSION                  (2)
 #else
 #define BSP_FEATURE_CTSU_VERSION                  (1)
@@ -81,6 +80,33 @@ FSP_HEADER
 
  #define CTSU_DIAG_HIGH_CURRENT_SOURCE    (16) ///< number of high current source table at Diagnosis
  #define CTSU_DIAG_LOW_CURRENT_SOURCE     (10) ///< number of low current source table at Diagnosis
+#endif
+
+#define CTSU_VALUE_MAJORITY_MODE         (0x01)
+#define CTSU_JUDGEMENT_MAJORITY_MODE     (0x02)
+
+#ifndef CTSU_CFG_MAJORITY_MODE
+ #define CTSU_CFG_MAJORITY_MODE           (CTSU_VALUE_MAJORITY_MODE)
+#endif
+#if (BSP_FEATURE_CTSU_VERSION == 2)
+ #if (CTSU_CFG_MAJORITY_MODE & CTSU_JUDGEMENT_MAJORITY_MODE)
+
+  #define CTSU_MAJORITY_MODE_ELEMENTS     (CTSU_CFG_NUM_SUMULTI)
+ #else
+  #define CTSU_MAJORITY_MODE_ELEMENTS     (1)
+ #endif
+#endif
+
+#if (BSP_FEATURE_CTSU_VERSION == 1)
+ #define CTSU_MAJORITY_MODE_ELEMENTS      (1)
+#endif
+
+#ifdef QE_TOUCH_CONFIGURATION
+ #if (CTSU_CFG_AUTO_JUDGE_ENABLE == 1)
+  #if (QE_TOUCH_VERSION < 0x0400)
+   #error "Error! For Autojudge measurement with CTSU FIT v3.00 or later, please use QE V4.0.0 or later."
+  #endif
+ #endif
 #endif
 
 /***********************************************************************************************************************
@@ -183,7 +209,7 @@ typedef struct st_ctsu_self_buf
 } ctsu_self_buf_t;
 #endif
 
-typedef struct ctsu_data
+typedef struct st_ctsu_data
 {
     uint16_t decimal_point_data;
     uint16_t int_data;
@@ -387,6 +413,17 @@ typedef struct st_ctsu_instance_ctrl
     uint8_t             blini_flag;                 ///< Flags for controlling baseline initialization bit for automatic judgement
     uint8_t             ajmmat;                     ///< Copy from config by Open API for automatic judgement
     uint8_t             ajbmat;                     ///< Copy from config by Open  for automatic judgement
+  #if (CTSU_CFG_AUTO_MULTI_CLOCK_CORRECTION_ENABLE == 1)
+    uint32_t            adress_mcact1;              ///< CTSUMCACT1 Variable start address for automatic judgement
+    uint32_t            adress_mcact2;              ///< CTSUMCACT2 Variable start address for automatic judgement
+    uint32_t            count_mcact1;               ///< CTSUMCACT1 transfer count for automatic judgement
+    uint32_t            count_mcact2;               ///< CTSUMCACT2 transfer count for automatic judgement
+  #endif
+ #endif
+ #if (CTSU_CFG_AUTO_MULTI_CLOCK_CORRECTION_ENABLE == 1)
+    uint32_t          * p_mcact1;                   ///< Array of CTSUMCACT1 register write variables. g_ctsu_mcact1[] is set by Open API.
+    uint32_t          * p_mcact2;                   ///< Array of CTSUMCACT2 register write variables. g_ctsu_mcact2[] is set by Open API.
+    uint8_t             mcact_flag;                 ///< Flags for controlling automatic frequency correction setting
  #endif
 #endif
     ctsu_cfg_t const * p_ctsu_cfg;                 ///< Pointer to initial configurations.
@@ -420,6 +457,7 @@ extern const ctsu_api_t g_ctsu_on_ctsu;
 fsp_err_t R_CTSU_Open(ctsu_ctrl_t * const p_ctrl, ctsu_cfg_t const * const p_cfg);
 fsp_err_t R_CTSU_ScanStart(ctsu_ctrl_t * const p_ctrl);
 fsp_err_t R_CTSU_DataGet(ctsu_ctrl_t * const p_ctrl, uint16_t * p_data);
+fsp_err_t R_CTSU_AutoJudgementDataGet(ctsu_ctrl_t * const p_ctrl, uint64_t * p_button_status);
 fsp_err_t R_CTSU_ScanStop(ctsu_ctrl_t * const p_ctrl);
 fsp_err_t R_CTSU_CallbackSet(ctsu_ctrl_t * const          p_api_ctrl,
                              void (                     * p_callback)(ctsu_callback_args_t *),
@@ -431,7 +469,6 @@ fsp_err_t R_CTSU_SpecificDataGet(ctsu_ctrl_t * const       p_ctrl,
                                  uint16_t                * p_specific_data,
                                  ctsu_specific_data_type_t specific_data_type);
 fsp_err_t R_CTSU_DataInsert(ctsu_ctrl_t * const p_ctrl, uint16_t * p_insert_data);
-fsp_err_t R_CTSU_AutoJudgementDataGet(ctsu_ctrl_t * const p_ctrl, uint64_t * p_button_status);
 fsp_err_t R_CTSU_OffsetTuning(ctsu_ctrl_t * const p_ctrl);
 
 /* Common macro for FSP header files. There is also a corresponding FSP_HEADER macro at the top of this file. */

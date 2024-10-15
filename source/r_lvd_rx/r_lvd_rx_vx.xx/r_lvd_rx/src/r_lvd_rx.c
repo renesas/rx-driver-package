@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_lvd_rx.c
@@ -36,6 +36,8 @@
 *              : 25.11.2019 3.30     Modified comment of API function to Doxygen style.
 *              : 31.03.2023 4.40     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *              : 29.05.2023 4.50     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*              : 28.06.2024 4.80     Added Nested interrupt support.
+*                                    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -114,7 +116,7 @@ static void lvd_stop_int (lvd_channel_t ch);
 
 /***********************************************************************************************************************
 * Function Name: R_LVD_Open
-***********************************************************************************************************************//**
+********************************************************************************************************************//**
  * @brief This function initializes the specified channel and starts the LVD.
  * @param[in] channel Enumerated channel number to be initialized and for which the LVD starts.
  * @param[in] p_cfg Address of the configuration structure.
@@ -189,7 +191,7 @@ RETURN_R_LVD_OPEN:
 
 /***********************************************************************************************************************
 * Function Name: R_LVD_Close
-***********************************************************************************************************************//**
+********************************************************************************************************************//**
  * @brief This function stops the specified LVD channel.
  * @param[in] channel Enumerated channel number to be stopped.
  * @retval LVD_SUCCESS Successful: The LVD has been stopped.
@@ -226,7 +228,7 @@ RETURN_R_LVD_CLOSE:
 
 /***********************************************************************************************************************
 * Function Name: R_LVD_GetStatus
-***********************************************************************************************************************//**
+********************************************************************************************************************//**
  * @brief This function obtains the LVD status of the specified channel.
  * @param[in] channel Enumerated channel number to obtain the status.
  * @param[in] p_status_position Address to store the enumerated voltage position status.
@@ -235,18 +237,18 @@ RETURN_R_LVD_CLOSE:
  * @retval LVD_ERR_INVALID_PTR Error: Addresses in the p_status_position and p_status_cross parameters are invalid.
  * @retval LVD_ERR_INVALID_CHAN Error: The channel parameter is invalid.
  * @retval LVD_ERR_NOT_OPENED Error: The specified channel is not opened.
- * @details This function stores the LVD statuses into parameters *p_status_position and *p_status_cross for the specified
- * channel. Refer to Figure 3.1for details on the statuses. The voltage position status stored in the *p_status_position
- * parameter can be obtained without dependence on the voltage detection condition. The voltage crossing status stored in
- * the *p_status_cross parameter is dependent on the voltage detection condition and the status becomes ‘Crossed’ only when
- * the condition is satisfied. Before this function is executed, the R_LVD_Open() function must be executed with the specified
- * channel to make the channel status ‘Opened’.
+ * @details This function stores the LVD statuses into parameters *p_status_position and *p_status_cross for
+ * the specified channel. Refer to Figure 3.1for details on the statuses. The voltage position status stored in
+ * the *p_status_position parameter can be obtained without dependence on the voltage detection condition.
+ * The voltage crossing status stored in *p_status_cross parameter is dependent on the voltage detection condition
+ * and the status becomes ‘Crossed’ only when the condition is satisfied. Before this function is executed,
+ * the R_LVD_Open() function must be executed with the specified channel to make the channel status ‘Opened’.
  * @note
  * None.
  */
-lvd_err_t R_LVD_GetStatus(lvd_channel_t channel,
-                          lvd_status_position_t *p_status_position,
-                          lvd_status_cross_t *p_status_cross)
+lvd_err_t R_LVD_GetStatus  (lvd_channel_t channel,
+                            lvd_status_position_t *p_status_position,
+                            lvd_status_cross_t *p_status_cross)
 {
     lvd_err_t result_code = LVD_SUCCESS;
 
@@ -293,17 +295,17 @@ RETURN_R_LVD_GETSTATUS:
 
 /***********************************************************************************************************************
 * Function Name: R_LVD_ClearStatus
-***********************************************************************************************************************//**
+********************************************************************************************************************//**
  * @brief This function clears the voltage crossing status for the specified channel.
  * @param[in] channel Enumerated channel number to clear the voltage crossing status.
  * @retval LVD_SUCCESS Successful: The voltage crossing status has been cleared.
  * @retval LVD_ERR_INVALID_CHAN Error: The channel parameter is invalid.
  * @retval LVD_ERR_NOT_OPENED   Error: The specified channel is not opened.
- * @details This function clears the voltage crossing status to ‘Not crossed’ for the specified channel. To clear the
- * status, interrupt and reset are temporarily disabled. Before executing this function, the R_LVD_Open() function must
- * be executed with the specified channel to make the channel status ‘Opened’.
- * @note Note that no interrupt or reset will occur if a voltage is detected while interrupt and reset are temporarily disabled
- * by this function.
+ * @details This function clears the voltage crossing status to ‘Not crossed’ for the specified channel.
+ * To clear the status, interrupt and reset are temporarily disabled. Before executing this function,
+ * the R_LVD_Open() function must be executed with the specified channel to make the channel status ‘Opened’.
+ * @note Note that no interrupt or reset will occur if a voltage is detected while interrupt and reset are
+ * temporarily disabled by this function.
  */
 lvd_err_t R_LVD_ClearStatus(lvd_channel_t channel)
 {
@@ -344,7 +346,7 @@ RETURN_R_LVD_CLEARSTATUS:
 
 /***********************************************************************************************************************
 * Function Name: R_LVD_GetVersion
-***********************************************************************************************************************//**
+********************************************************************************************************************//**
  * @brief This function returns the current version of the LVD FIT module.
  * @return Version number
  * @details This function returns the version of the LVD FIT module. The version number is encoded where the top 2 bytes
@@ -505,8 +507,8 @@ static void lvd_start_lvd(lvd_channel_t ch, lvd_trigger_t trigger)
     return ;
 } /* End of function lvd_start_lvd() */
 
-#elif ((LVD_GROUP_SETUP_LVDAa_1 == LVD_GROUP_SETUP)||\
-       (LVD_GROUP_SETUP_LVDAb_1 == LVD_GROUP_SETUP))
+#elif ((LVD_GROUP_SETUP_LVDAa_1 == LVD_GROUP_SETUP) \
+    || (LVD_GROUP_SETUP_LVDAb_1 == LVD_GROUP_SETUP))
 static void lvd_start_lvd(lvd_channel_t ch, lvd_trigger_t trigger)
 {
     if (LVD_ACTION_RESET == lvd_cfg_opt[ch].lvd_action)
@@ -600,8 +602,8 @@ static void lvd_stop_lvd(lvd_channel_t ch)
     return ;
 } /* End of function lvd_stop_lvd() */
 
-#elif ((LVD_GROUP_SETUP_LVDAa_1 == LVD_GROUP_SETUP)||\
-       (LVD_GROUP_SETUP_LVDAb_1 == LVD_GROUP_SETUP))
+#elif ((LVD_GROUP_SETUP_LVDAa_1 == LVD_GROUP_SETUP) \
+    || (LVD_GROUP_SETUP_LVDAb_1 == LVD_GROUP_SETUP))
 static void lvd_stop_lvd(lvd_channel_t ch)
 {
     if (LVD_ACTION_RESET == lvd_cfg_opt[ch].lvd_action)

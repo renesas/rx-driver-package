@@ -18,7 +18,7 @@
  * you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2015(2019) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015(2024) Renesas Electronics Corporation. All rights reserved.
  *****************************************************************************/
 /******************************************************************************
  * File Name    : r_usb_pdriver.c
@@ -30,6 +30,7 @@
  *         : 30.11.2018 1.10    Supporting Smart Configurator
  *         : 31.05.2019 1.11    Added support for GNUC and ICCRX.
  *         : 30.06.2020 1.20    Added support for RTOS.
+ *         : 30.04.2024 1.30 Added support for RX261.
 *******************************************************************************/
 
 /******************************************************************************
@@ -177,6 +178,7 @@ static void usb_pstd_interrupt_process (uint16_t type, uint16_t status)
             {
                 /* Power state  */
                 case USB_DS_POWR :
+                    /* Non process */
                 break;
 
                 /* Default state  */
@@ -186,24 +188,29 @@ static void usb_pstd_interrupt_process (uint16_t type, uint16_t status)
 
                 /* Address state  */
                 case USB_DS_ADDS :
+                    /* Non process */
                 break;
 
                 /* Configured state  */
                 case USB_DS_CNFG :
+                    /* Non process */
                 break;
 
                 /* Power suspend state */
                 case USB_DS_SPD_POWR :
+                    /* Non process */
+                break;
 
-                /* Continue */
                 /* Default suspend state */
                 case USB_DS_SPD_DFLT :
+                    /* Non process */
+                break;
 
-                /* Continue */
                 /* Address suspend state */
                 case USB_DS_SPD_ADDR :
+                    /* Non process */
+                break;
 
-                /* Continue */
                 /* Configured Suspend state */
                 case USB_DS_SPD_CNFG :
                     usb_pstd_suspend_process();
@@ -211,6 +218,7 @@ static void usb_pstd_interrupt_process (uint16_t type, uint16_t status)
 
                 /* Error */
                 default :
+                    /* Non process */
                 break;
             }
         break;
@@ -847,7 +855,7 @@ usb_er_t usb_pstd_transfer_start(usb_putr_t * p_utr)
 
     rtos_get_fixed_memory(&g_rtos_usb_mpf_id, (void **)&p_tran_data, RTOS_ZERO);
 
-    if (NULL == p_utr)
+    if (NULL == p_utr || NULL == p_tran_data)
     {
         return USB_ERROR;
     }
@@ -1137,6 +1145,7 @@ uint16_t usb_pstd_pipe_info (uint8_t *p_table, uint16_t length)
     uint16_t ofdsc;
     uint16_t retval = USB_ERROR;
     uint8_t         pipe_no;
+    uint8_t class;
 
     /* Check Endpoint Descriptor */
     ofdsc = p_table[0];
@@ -1144,11 +1153,18 @@ uint16_t usb_pstd_pipe_info (uint8_t *p_table, uint16_t length)
     /* WAIT_LOOP */
     while (ofdsc < length)
     {
+        /* Interface Descriptor */
+        if ( USB_DT_INTERFACE == p_table[ofdsc + USB_EP_B_DESCRIPTORTYPE])
+        {
+            /* bInterfaceClass set */
+            class = p_table[ofdsc + USB_IF_B_INTERFACECLASS];
+        }
+
         /* Endpoint Descriptor */
         if (USB_DT_ENDPOINT == p_table[ofdsc + USB_EP_B_DESCRIPTORTYPE])
         {
             /* EP Table pipe Information set */
-            pipe_no = usb_pstd_set_pipe_table (&p_table[ofdsc]);
+            pipe_no = usb_pstd_set_pipe_table (&p_table[ofdsc], class);
             if (USB_NULL != pipe_no)
             {
                 retval = USB_OK;

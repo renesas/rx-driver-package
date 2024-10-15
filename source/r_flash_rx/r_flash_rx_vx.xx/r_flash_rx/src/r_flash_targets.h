@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2017-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2017-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_targets.h
@@ -37,6 +37,7 @@
 *           23.12.2021 4.90    Added RX660.
 *           24.01.2023 5.00    Added RX26T.
 *           28.02.2023 5.10    Added RX23E-B.
+*           30.07.2024 5.20    Added RX260, and RX261.
 ***********************************************************************************************************************/
 
 #ifndef FLASH_TARGETS_HEADER_FILE
@@ -98,6 +99,10 @@ Macro definitions
 #elif defined(BSP_MCU_RX24U)
     #define MCU_RX24U
     #define MCU_RX24_ALL
+#elif defined(BSP_MCU_RX260)
+    #define MCU_RX260
+#elif defined(BSP_MCU_RX261)
+    #define MCU_RX261
 #elif defined(BSP_MCU_RX26T)
     #define MCU_RX26T
 #elif defined(BSP_MCU_RX64M)

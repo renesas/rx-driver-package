@@ -36,6 +36,7 @@
  *         : 31.03.2023 6.32.a.1.00    Update emWin library to v6.32a.
  *         : 31.01.2024 6.34.g.1.00    Update emWin library to v6.34g.
  *         : 12.04.2024 6.34.g.1.10    Update FIT module version.
+ *         : 30.08.2024 6.34.g.1.20    Update FIT module version.
  *********************************************************************************************************************/
 #ifndef EMWIN_RX_IF_H
 #define EMWIN_RX_IF_H
@@ -57,7 +58,7 @@
 #define EMWIN_VERSION_EMWIN_MINOR   (34)
 #define EMWIN_VERSION_EMWIN_CHAR    ('g')
 #define EMWIN_VERSION_FIT_MAJOR     (1)
-#define EMWIN_VERSION_FIT_MINOR     (10)
+#define EMWIN_VERSION_FIT_MINOR     (20)
 
 /**********************************************************************************************************************
  Global Typedef definitions

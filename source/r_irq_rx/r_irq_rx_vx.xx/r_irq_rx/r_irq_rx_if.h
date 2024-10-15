@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /******************************************************************************
 * File Name    : r_irq_rx_if.h
@@ -33,11 +33,8 @@
 *         : 15.04.2021 3.80    Added R_IRQ_IRClear() function to clear IR flag.
 *         : 15.08.2022 4.30    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *         : 29.05.2023 4.40    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 28.06.2024 4.50    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ******************************************************************************/
-/* Multiple inclusion protection. */
-#ifndef IRQ_RX_IF_H
-#define IRQ_RX_IF_H
-
 
 /******************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -45,6 +42,9 @@ Includes   <System Includes> , "Project Includes"
 /* BSP includes */
 #include "platform.h"
 
+/* Multiple inclusion protection. */
+#ifndef IRQ_RX_IF_H
+#define IRQ_RX_IF_H
 
 /******************************************************************************
 Macro definitions
@@ -180,7 +180,7 @@ irq_err_t   R_IRQ_Open (irq_number_t     irq_number,
  *********************************************************************************************************************/
 irq_err_t   R_IRQ_Control (irq_handle_t  const handle,
                            irq_cmd_t     const cmd,
-                           void               *pcmd_data);
+                                         void *pcmd_data);
 
 /**********************************************************************************************************************
  * Function Name: R_IRQ_Close
@@ -207,8 +207,7 @@ irq_err_t   R_IRQ_ReadInput (irq_handle_t  const handle,
  *              : enable
  * Return Value : .
  *********************************************************************************************************************/
-irq_err_t   R_IRQ_InterruptEnable (irq_handle_t  const handle,
-                                   bool                enable);
+irq_err_t   R_IRQ_InterruptEnable (irq_handle_t const handle, bool enable);
 
 /**********************************************************************************************************************
  * Function Name: R_IRQ_GetVersion

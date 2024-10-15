@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2024 Renesas Electronics Corporation. All rights reserved.
 **********************************************************************************************************************/
 /**********************************************************************************************************************
 * File Name    : r_flash_type1_if.h
@@ -32,6 +32,7 @@
 *                23.04.2021 4.80    Added RX140.
 *                13.05.2022 4.90    Added support for Tool News R20TS0818.
 *                24.01.2023 5.00    Modified FLASH_FREQ_HI.
+*                30.07.2024 5.20    Added support for RX260 and RX261.
 **********************************************************************************************************************/
 
 #ifndef R_FLASH_TYPE1_IF_H
@@ -62,7 +63,11 @@ Macro definitions
 
 #define FLASH_FREQ_LO           (1000000)
 #if (FLASH_TYPE_VARIETY == FLASH_TYPE_VARIETY_A)
+#if defined(MCU_RX140)
 #define FLASH_FREQ_HI           (48000000)
+#elif defined(MCU_RX260) || defined(MCU_RX261)
+#define FLASH_FREQ_HI           (64000000)
+#endif
 #else
 #define FLASH_FREQ_HI           (32000000)
 #endif

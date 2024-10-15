@@ -24,7 +24,11 @@
 #include "r_smc_entry.h"
 #include "rm_rai_data_collector.h"
 #include "rm_rai_data_shipper.h"
-#include "rm_comms_uart_if.h"
+#if (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_UART)
+ #include "rm_comms_uart_if.h"
+#elif (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_USB_PCDC)
+ #include "rm_comms_usb_pcdc_if.h"
+#endif
 
 /**********************************************************************************************************************
  Macro definitions
@@ -54,8 +58,13 @@
 /***********************************************************************************************************************
  * Global function prototypes
  **********************************************************************************************************************/
+#if (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_UART)
 extern void rai_data_shipper_write_callback(rm_comms_uart_callback_args_t * p_args);
 void rm_rai_data_shipper_callback0(rm_comms_uart_callback_args_t * p_args);
+#elif (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_USB_PCDC)
+extern void rai_data_shipper_write_callback(rm_comms_usb_pcdc_callback_args_t * p_args);
+void rm_rai_data_shipper_callback0(rm_comms_usb_pcdc_callback_args_t * p_args);
+#endif
 void RM_RAI_DATA_SHIPPER_CFG_CALLBACK(rai_data_shipper_callback_args_t * p_args);
 
 /***********************************************************************************************************************
@@ -100,7 +109,11 @@ const rai_data_shipper_instance_t g_rai_data_shipper0 =
 };
 
 /* Callback function */
+#if (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_UART)
 void rm_rai_data_shipper_callback0(rm_comms_uart_callback_args_t * p_args)
+#elif (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_USB_PCDC)
+void rm_rai_data_shipper_callback0(rm_comms_usb_pcdc_callback_args_t * p_args)
+#endif
 {
     p_args->p_context = (void *)&g_rai_data_shipper0_ctrl;
     rai_data_shipper_write_callback(p_args);

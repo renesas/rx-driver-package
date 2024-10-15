@@ -58,6 +58,7 @@
 *                              DA0 and DA1 for RX66T, RX72T, RX660, RX26T.
 *                              Added DAC_OUT_SEL_REF0_REF1 to dac_out_ref_t enum for simultaneous Vref output 
 *                              from DA0 and DA1 for RX66T, RX72T, RX660, RX26T.
+*           28.06.2024 5.30    Added support for RX260, RX261.
 ***********************************************************************************************************************/
 #ifndef DAC_RX_IF_H
 #define DAC_RX_IF_H
@@ -76,9 +77,13 @@ Macro definitions
     #error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
 #endif
 
+#if (((BSP_MCU_RX261 == 1) || (BSP_MCU_RX260 == 1)) && (BSP_PACKAGE_PINS == 48))
+    #error  "ERROR - Product with 48 Pins not support DAC Module."
+#endif
+
 /* Version Number of API. */
 #define DAC_VERSION_MAJOR  (5)
-#define DAC_VERSION_MINOR  (20)
+#define DAC_VERSION_MINOR  (30)
 
 
 #if defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX23E_B)
@@ -173,7 +178,7 @@ typedef struct st_dac_cfg
     bool        sync_with_adc;
 } dac_cfg_t;
 
-#else //defined(BSP_MCU_RX130) || defined(BSP_MCU_RX24U) || defined(BSP_MCU_RX140)
+#else /* defined(BSP_MCU_RX130) || defined(BSP_MCU_RX24U) || defined(BSP_MCU_RX140) || defined(BSP_MCU_RX260) || defined(BSP_MCU_RX261) */
 typedef struct st_dac_cfg
 {
     bool        fmt_flush_right;

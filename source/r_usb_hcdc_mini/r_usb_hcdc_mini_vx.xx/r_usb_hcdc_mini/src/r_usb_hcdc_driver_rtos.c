@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2024) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_hcdc_driver_rtos.c
@@ -27,17 +27,18 @@
  *           : 29.12.2015 1.02    Minor Update.
  *           : 30.11.2018 1.10    Supporting Smart Configurator
  *           : 31.05.2019 1.11    Added support for GNUC and ICCRX.
+ *           : 30.04.2024 1.30    Added support for RX261.
  ***********************************************************************************************************************/
 
 /******************************************************************************
  Includes   <System Includes> , "Project Includes"
  ******************************************************************************/
 #include "r_usb_hcdc.h"
+#include "r_usb_bitdefine.h"
 
 #if (BSP_CFG_RTOS_USED != 0)    /* RTOS */
 
-#include "r_usb_bitdefine.h"
-
+#if defined(USB_CFG_HCDC_USE)
 /******************************************************************************
  Macro definitions
  ******************************************************************************/
@@ -420,6 +421,8 @@ static void usb_hcdc_init (usb_utr_t *ptr, uint16_t data1, uint16_t data2)
  ******************************************************************************/
 
 #endif /*(BSP_CFG_RTOS_USED != 0)*/
+
+#endif /* defined(USB_CFG_HCDC_USE) */
 /******************************************************************************
  End  Of File
  ******************************************************************************/

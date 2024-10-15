@@ -33,6 +33,7 @@
  *         : 15.08.2022 2.20    Added RX26T.
  *         : 29.05.2023 2.30    Added RX23E-B.
  *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *         : 28.06.2024 2.40    Added RX260, RX261.
  ***********************************************************************************************************************/
 #ifndef R_LPC_RX_PLATFORM_H
     #define R_LPC_RX_PLATFORM_H
@@ -59,6 +60,10 @@
         #include "./targets/rx23e-b/r_lpc_rx23e-b_if.h"
     #elif defined(BSP_MCU_RX23W)
         #include "./targets/rx23w/r_lpc_rx23w_if.h"
+    #elif defined(BSP_MCU_RX260)
+        #include "./targets/rx260/r_lpc_rx260_if.h"
+    #elif defined(BSP_MCU_RX261)
+        #include "./targets/rx261/r_lpc_rx261_if.h"
     #elif defined(BSP_MCU_RX26T)
         #include "./targets/rx26t/r_lpc_rx26t_if.h"
     #elif defined(BSP_MCU_RX64M)

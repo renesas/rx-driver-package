@@ -62,9 +62,16 @@ r_lpt_rx
         |      r_lpt_rx23w_private.h
         |
         +---rx23e-b
-               r_lpt_rx23e-b.c
-               r_lpt_rx23e-b_private.h
-
+        |      r_lpt_rx23e-b.c
+        |      r_lpt_rx23e-b_private.h
+        |
+        +---rx260
+        |      r_lpt_rx260.c
+        |      r_lpt_rx260_private.h
+        |
+        +---rx261
+               r_lpt_rx261.c
+               r_lpt_rx261_private.h
 r_config
     r_lpt_rx_config.h
 

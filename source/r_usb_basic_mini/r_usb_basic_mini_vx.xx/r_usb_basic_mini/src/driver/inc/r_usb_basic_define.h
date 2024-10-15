@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2024) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_basic_define.h
@@ -28,6 +28,7 @@
 *         : 31.05.2019 1.11 Added support for GNUC and ICCRX.
 *         : 30.06.2019 1.12 RX23W is added.
 *         : 30.06.2020 1.20 Added support for RTOS.
+*         : 30.04.2024 1.30 Added support for RX261.
  ***********************************************************************************************************************/
 
 
@@ -97,8 +98,11 @@
 
 #ifdef BSP_MCU_RX23W
     #define USB_TATTDB          (BSP_ICLK_HZ / 7000)     /* RX23W(Chapter 7.1.7.3 TATTDB) minimum duration of 100 ms */
-#endif /* BSP_MCU_RX231 */
+#endif /* BSP_MCU_RX23W */
 
+#ifdef BSP_MCU_RX261
+    #define USB_TATTDB          (BSP_ICLK_HZ / 7000)     /* RX261(Chapter 7.1.7.3 TATTDB) minimum duration of 100 ms */
+#endif /* BSP_MCU_RX261 */
 
 
 /**********************************************************************************************************************

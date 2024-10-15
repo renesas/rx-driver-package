@@ -14,11 +14,11 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_lpt_rx_private.h
- * Version      : 3.00
+ * Version      : 5.00
  * Description  : Functions for using Low Power Timer
  **********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
@@ -29,7 +29,8 @@
  *         : 31.03.2021 3.00    Added function R_LPT_InitChan, R_LPT_SetCMT, R_LPT_FinalChan, R_LPT_InitPWM
  *                              Added command LPT_CMD_PWM_START and LPT_CMD_PWM_STOP to R_LPT_Control()
  *         : 31.05.2023 4.00    Change parameter check definition.
- *********************************************************************************************************************/
+ *         : 31.07.2024 5.00    Added support for RX260, RX261
+*********************************************************************************************************************/
 
 /*******************************************************************************
   Includes   <System Includes> , "Project Includes"

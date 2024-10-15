@@ -68,8 +68,15 @@ r_elc_rx
         |   +-- r_elc_rx23e-b_private.h
         |
         +-- rx65n
-            +-- r_elc_rx65n.c
-            +-- r_elc_rx65n_private.h
-   
+        |   +-- r_elc_rx65n.c
+        |   +-- r_elc_rx65n_private.h
+        |
+        +---rx260
+        |   +-- r_elc_rx260.c
+        |   +-- r_elc_rx260_private.h
+        |
+        +---rx261
+            +-- r_elc_rx261.c
+            +-- r_elc_rx261_private.h
 r_config
     r_elc_rx_config.h

@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2020 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2020(2024) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_hreg_abs.c
@@ -23,6 +23,7 @@
 /**********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *         : 30.06.2020 1.20 First Release
+ *         : 30.04.2024 1.30 Added support for RX261.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -422,8 +423,8 @@ void usb_hstd_bus_reset (void)
         }
     }
 
-    /* 30ms wait */
-    usb_cpu_delay_xms((uint16_t) 30);
+    /* 30msec->100msec Support Tera Byte Size Storage Device */
+    usb_cpu_delay_xms((uint16_t) 100);
 }
 /******************************************************************************
  End of function usb_hstd_bus_reset

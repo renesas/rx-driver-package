@@ -153,13 +153,19 @@
 *           23.04.2021 4.80    Added support for RX140.
 *           10.12.2021 4.81    Added support for Tool News R20TS0765, R20TS0772, and some minor updates.
 *           13.05.2022 4.90    Added support for RX660.
-*                              Added support for Tool News R20TS0818, and Technical Update TN-RX*-A0261A. 
+*                              Added support for Tool News R20TS0818, and Technical Update TN-RX*-A0261A.
 *           23.12.2022 4.91    Fixed typos in app note. 
 *           24.01.2023 5.00    Added support for RX26T. Added Flash Type 5.
-*                              Added support for Tool News R20TS0872. 
+*                              Added support for Tool News R20TS0872.
 *           28.02.2023 5.10    Added support for RX23E-B.
 *           01.10.2023 5.11    Added support for Tool News R20TS0963.
 *           17.01.2024 5.12    Modified the dual mode definition of RX671 code flash memory 1 Mbyte.
+*           30.07.2024 5.20    Added support for RX260 and RX261.
+*                              Added countermeasures as described in Technical Update TN-RX*-A0274A.
+*                              Modified FISR register settings.
+*                              Modified functions flash_InterruptRequestDisable(), flash_InterruptRequestEnable().
+*                              (When using the GCC or IAR compiler in non-blocking mode,
+*                               ROM access occurs during P/E mode.)
 ***********************************************************************************************************************/
 
 #ifndef FLASH_INTERFACE_HEADER_FILE
@@ -177,7 +183,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Driver Version Number. */
 #define FLASH_RX_VERSION_MAJOR           (5)
-#define FLASH_RX_VERSION_MINOR           (12)
+#define FLASH_RX_VERSION_MINOR           (20)
 
 
 /***********************************************************************************************************************
@@ -195,7 +201,8 @@ Typedef definitions
      defined(MCU_RX130) || defined(MCU_RX231) || defined(MCU_RX23T) || \
      defined(MCU_RX24T) || defined(MCU_RX24U) || defined(MCU_RX230) || \
      defined(MCU_RX23W) || defined(MCU_RX13T) || defined(MCU_RX23E_A) || \
-     defined(MCU_RX140) || defined(MCU_RX23E_B))
+     defined(MCU_RX140) || defined(MCU_RX23E_B) || defined(MCU_RX260) || \
+     defined(MCU_RX261))
 #define FLASH_TYPE              FLASH_TYPE_1
 
 #elif (defined(MCU_RX64M) || defined(MCU_RX66T) || defined(MCU_RX71M) || \
@@ -212,7 +219,7 @@ Typedef definitions
 
 #define FLASH_TYPE_VARIETY_A    (1)
 
-#if (defined(MCU_RX140))
+#if (defined(MCU_RX140) || defined(MCU_RX260) || defined(MCU_RX261))
 #define FLASH_TYPE_VARIETY      (FLASH_TYPE_VARIETY_A)
 #endif
 

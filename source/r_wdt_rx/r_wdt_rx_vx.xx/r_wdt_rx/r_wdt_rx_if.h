@@ -41,6 +41,7 @@
 *           28.06.2022 2.90    Updated demo projects
 *           15.08.2022 3.00    Added support for RX26T.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           28.06.2024 3.10    Added support for RX260, RX261.
 ***********************************************************************************************************************/
 
 #ifndef WDT_RX_IF_H
@@ -64,7 +65,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define WDT_RX_VERSION_MAJOR   (3)
-#define WDT_RX_VERSION_MINOR   (00)
+#define WDT_RX_VERSION_MINOR   (10)
 
 #define OFS0_WDT_DISABLED              (0x00020000)
 

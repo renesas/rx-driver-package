@@ -41,6 +41,7 @@
 *                               BSP_INT_SRC_BUS_ERROR_TIMEOUT are specified as vector in the R_BSP_InterruptWrite 
 *                               function.
 *                               Modified comment.
+*         : 31.05.2024 1.15     Fixed coding style.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -87,7 +88,7 @@ static bsp_int_err_t bsp_gr_int_enable_disable (bsp_int_src_t vector, bool enabl
  * @note When setting an immediate value for an argument "vector", the argument must be 0 to 255. Don't set the 
  * vector number of the reserved interrupt source to the argument.
  */
-void R_BSP_InterruptRequestEnable (uint32_t vector)
+void R_BSP_InterruptRequestEnable(uint32_t vector)
 {
     uint32_t ier_reg_num;
     uint32_t ien_bit_num;
@@ -117,7 +118,7 @@ void R_BSP_InterruptRequestEnable (uint32_t vector)
  * @note When setting an immediate value for an argument "vector", the argument must be 0 to 255. Don't set the 
  * vector number of the reserved interrupt source to the argument.
  */
-void R_BSP_InterruptRequestDisable (uint32_t vector)
+void R_BSP_InterruptRequestDisable(uint32_t vector)
 {
     uint32_t ier_reg_num;
     uint32_t ien_bit_num;
@@ -142,7 +143,7 @@ void R_BSP_InterruptRequestDisable (uint32_t vector)
 * Arguments    : None
 * Return Value : None
 ***********************************************************************************************************************/
-void bsp_interrupt_open (void)
+void bsp_interrupt_open(void)
 {
     uint32_t i;
 
@@ -184,7 +185,7 @@ void bsp_interrupt_open (void)
  * @note Use of FIT_NO_FUNC is preferred over NULL since access to the address defined by FIT_NO_FUNC will cause a 
  * bus error which is easy for the user to catch. NULL typically resolves to 0 which is a valid address on RX MCUs.
  */
-bsp_int_err_t R_BSP_InterruptWrite (bsp_int_src_t vector,  bsp_int_cb_t callback)
+bsp_int_err_t R_BSP_InterruptWrite(bsp_int_src_t vector,  bsp_int_cb_t callback)
 {
     bsp_int_err_t err;
 
@@ -198,8 +199,8 @@ bsp_int_err_t R_BSP_InterruptWrite (bsp_int_src_t vector,  bsp_int_cb_t callback
     }
     else
     {
-        if((BSP_INT_SRC_BUS_ERROR_ILLEGAL_ACCESS == vector) || (BSP_INT_SRC_BUS_ERROR_TIMEOUT == vector) ||
-           (BSP_INT_SRC_EMPTY <= vector))
+        if ((BSP_INT_SRC_BUS_ERROR_ILLEGAL_ACCESS == vector) || (BSP_INT_SRC_BUS_ERROR_TIMEOUT == vector) ||
+            (BSP_INT_SRC_EMPTY <= vector))
         {
             /* When registering a bus error callback function, specify BSP_INT_SRC_BUS_ERROR in the vector. */
             err = BSP_INT_ERR_INVALID_ARG;
@@ -224,7 +225,7 @@ bsp_int_err_t R_BSP_InterruptWrite (bsp_int_src_t vector,  bsp_int_cb_t callback
  * @details This function returns the callback function address for an interrupt if one has been registered. If a 
  * callback function has not been registered then an error is returned and nothing is stored to the callback address.
  */
-bsp_int_err_t R_BSP_InterruptRead (bsp_int_src_t vector, bsp_int_cb_t * callback)
+bsp_int_err_t R_BSP_InterruptRead(bsp_int_src_t vector, bsp_int_cb_t * callback)
 {
     bsp_int_err_t err;
 
@@ -285,7 +286,7 @@ bsp_int_err_t R_BSP_InterruptRead (bsp_int_src_t vector, bsp_int_cb_t * callback
  * executed in user mode, atomicity is not to secure.\n
  * See Section 5.15 in the application note for more information.
  */
-bsp_int_err_t R_BSP_InterruptControl (bsp_int_src_t vector, bsp_int_cmd_t cmd, void * pdata)
+bsp_int_err_t R_BSP_InterruptControl(bsp_int_src_t vector, bsp_int_cmd_t cmd, void * pdata)
 {
     bsp_int_err_t       err;
     bsp_int_cb_args_t   cb_args;
@@ -336,7 +337,7 @@ bsp_int_err_t R_BSP_InterruptControl (bsp_int_src_t vector, bsp_int_cmd_t cmd, v
             }
             else
             {
-                 err = BSP_INT_ERR_INVALID_ARG;
+                err = BSP_INT_ERR_INVALID_ARG;
             }
             break;
 
@@ -381,7 +382,7 @@ bsp_int_err_t R_BSP_InterruptControl (bsp_int_src_t vector, bsp_int_cmd_t cmd, v
 *                BSP_INT_ERR_UNSUPPORTED -
 *                    This processing is not supported. (Executed in user mode.)
 ***********************************************************************************************************************/
-static bsp_int_err_t bsp_fit_interrupts_control (bool enable, bsp_int_ctrl_t * pdata)
+static bsp_int_err_t bsp_fit_interrupts_control(bool enable, bsp_int_ctrl_t * pdata)
 {
     bsp_int_err_t       err;
     uint32_t            pmode;
@@ -389,7 +390,7 @@ static bsp_int_err_t bsp_fit_interrupts_control (bool enable, bsp_int_ctrl_t * p
     uint32_t            ipl_value;
 
     /* Casting is valid because it matches the type to the right side or argument. */
-    if(((uint32_t)NULL != (uint32_t)pdata) && ((uint32_t)FIT_NO_FUNC != (uint32_t)pdata))
+    if (((uint32_t)NULL != (uint32_t)pdata) && ((uint32_t)FIT_NO_FUNC != (uint32_t)pdata))
     {
         /* Read current processor mode. */
         pmode = (R_BSP_GET_PSW() & 0x00100000);
@@ -405,7 +406,7 @@ static bsp_int_err_t bsp_fit_interrupts_control (bool enable, bsp_int_ctrl_t * p
             }
             else
             {
-                 /* Get the current Processor Interrupt Priority Level (IPL) and save IPL value. */
+                /* Get the current Processor Interrupt Priority Level (IPL) and save IPL value. */
                 pdata->ipl = R_BSP_CpuInterruptLevelRead();
 
                 /* Set IPL to the maximum value to disable all interrupts,
@@ -459,7 +460,7 @@ static bsp_int_err_t bsp_fit_interrupts_control (bool enable, bsp_int_ctrl_t * p
 *                BSP_INT_ERR_GROUP_STILL_ENABLED -
 *                    Not all group interrupts were disabled so group interrupt was not disabled.
 ***********************************************************************************************************************/
-static bsp_int_err_t bsp_gr_int_enable_disable (bsp_int_src_t vector, bool enable, uint32_t ipl)
+static bsp_int_err_t bsp_gr_int_enable_disable(bsp_int_src_t vector, bool enable, uint32_t ipl)
 {
     bsp_int_err_t err = BSP_INT_SUCCESS;
 
@@ -939,7 +940,7 @@ R_BSP_ATTRIB_INTERRUPT void non_maskable_isr(void)
     if ((1 == ICU.NMISR.BIT.RAMST) && (1 == ICU.NMIER.BIT.RAMEN))
     {
         /* Casting is valid because it matches the type to the right side or argument. */
-        if(1 == RAM.RAMSTS.BIT.RAMERR)
+        if (1 == RAM.RAMSTS.BIT.RAMERR)
         {
             /* RAM Error interrupt is requested. */
             R_BSP_InterruptControl(BSP_INT_SRC_RAM, BSP_INT_CMD_CALL_CALLBACK, FIT_NO_PTR);
@@ -1058,13 +1059,13 @@ R_BSP_ATTRIB_INTERRUPT void non_maskable_isr(void)
 #endif /* BSP_MCU_NMI_EXNMI */
 
     /* WAIT_LOOP */
-    while(1)
+    while (1)
     {
         /* Infinite loop. Return from Non-maskable interrupt handlling routine is prohibited.
            Never use the non-maskable interrupt with an attempt to return to the program that was being executed at 
            the time of interrupt generation after the exception handling routine is ended.
          */
-         R_BSP_NOP();
+        R_BSP_NOP();
     }
 } /* End of function non_maskable_isr() */
 #endif /* BSP_MCU_NON_MASKABLE_ISR */
@@ -1095,7 +1096,7 @@ R_BSP_ATTRIB_INTERRUPT void undefined_interrupt_source_isr(void)
 * Arguments    : none
 * Return value : none
 ***********************************************************************************************************************/
-R_BSP_ATTRIB_INTERRUPT void bus_error_isr (void)
+R_BSP_ATTRIB_INTERRUPT void bus_error_isr(void)
 {
     /* Clear the bus error */
     BSC.BERCLR.BIT.STSCLR = 1;

@@ -54,6 +54,10 @@
  *  #define USB_CFG_PHID_USE : Peripheral Human Interface Device Class
  *  #define USB_CFG_PMSC_USE : Peripheral Mass Storage Class
  *  #define USB_CFG_PVND_USE : Peripheral VENDER Class
+ *  #define USB_CFG_PCDC_2COM_USE : Peripheral Composite device(CDC VCOM 2Port)
+ *  #define USB_CFG_PCDC_PHID_USE : Peripheral Composite device(CDC + HID)
+ *  #define USB_CFG_PCDC_PMSC_USE : Peripheral Composite device(CDC + MSC)
+ *  #define USB_CFG_PHID_PMSC_USE : Peripheral Composite device(HID + MSC)
  * */
 #define USB_CFG_HCDC_USE    /* USB_CFG_DEVICE_CLASS */
 
@@ -61,13 +65,13 @@
  * USB_CFG_ENABLE       : Uses DTC
  * USB_CFG_DISABLE      : Does not use DTC
  */
-#define    USB_CFG_DTC              (USB_CFG_DISABLE)
+#define USB_CFG_DTC              (USB_CFG_DISABLE)
 
 /**  [DMA use setting]
  * USB_CFG_ENABLE       : Uses DMA
  * USB_CFG_DISABLE      : Does not use DMA
  */
-#define    USB_CFG_DMA              (USB_CFG_DISABLE)
+#define USB_CFG_DMA              (USB_CFG_DISABLE)
 
 /** [DMA Channel setting(USB0 module Send transfer)]
  * USB_CFG_CH0          : Uses DMAC0
@@ -75,7 +79,7 @@
  * USB_CFG_CH2          : Uses DMAC2
  * USB_CFG_CH3          : Uses DMAC3
  */
-#define     USB_CFG_USB0_DMA_TX     (USB_CFG_CH0)
+#define  USB_CFG_USB0_DMA_TX     (USB_CFG_CH0)
 
 /** [DMA Channel setting(USB0 module Receive transfer)]
  * USB_CFG_CH0          : Uses DMAC0
@@ -83,7 +87,7 @@
  * USB_CFG_CH2          : Uses DMAC2
  * USB_CFG_CH3          : Uses DMAC3
  */
-#define     USB_CFG_USB0_DMA_RX     (USB_CFG_CH1)
+#define  USB_CFG_USB0_DMA_RX     (USB_CFG_CH1)
 
 /** [Setting Battery Charging (BC) function]
  * USB_CFG_ENABLE       : Uses BC function.
@@ -102,7 +106,7 @@
  * USB_CFG_ENABLE       : Uses USB Regulator
  * USB_CFG_DISABLE      : Does not use USB Regulator
  */
-#define     USB_CFG_REGULATOR       (USB_CFG_DISABLE)
+#define  USB_CFG_REGULATOR       (USB_CFG_DISABLE)
 
 
 

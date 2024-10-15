@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer 
  *
- * Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2013-2024 Renesas Electronics Corporation. All rights reserved.
  **********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_riic_rx_config.h
@@ -71,6 +71,10 @@
  *         : 10.10.2023 2.90     Modified source code comments of RIIC_CFG_CHi_RXI_INT_PRIORITY,
  *                                RIIC_CFG_CHi_TXI_INT_PRIORITY, RIIC_CFG_CHi_EEI_INT_PRIORITY,
  *                                RIIC_CFG_CHi_TEI_INT_PRIORITY (i = 0 to 2).
+ *         : 01.08.2024 2.91     Added RX651 group to source code comments of RIIC_CFG_CHi_RXI_INT_PRIORITY,
+ *                                RIIC_CFG_CHi_TXI_INT_PRIORITY, RIIC_CFG_CHi_EEI_INT_PRIORITY,
+ *                                RIIC_CFG_CHi_TEI_INT_PRIORITY (i = 0 to 2).
+ *         : 08.08.2024 3.00     Added RX260, RX261 support.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIIC_CONFIG_H
@@ -99,6 +103,8 @@
 /*  RX23W: ch0,    ,     */
 /*  RX24T: ch0,    ,     */
 /*  RX24U: ch0,    ,     */
+/*  RX260: ch0,    ,     */
+/*  RX261: ch0,    ,     */
 /*  RX26T: ch0,    ,     */
 /*  RX64M: ch0,    , ch2 */
 /*  RX65N: ch0, ch1, ch2 */
@@ -179,8 +185,8 @@
 /* This #define sets the priority level for the riic interrupt */
 /* 1 lowest, 15 highest */
 /* The following devices can not individually specify the interrupt priority level for EEI0, TEI0, EEI2, TEI2. */
-/* EEI and TEI interrupts are grouped as the BL1 interrupt in the RX26T, RX64M, RX65N, RX660, RX66N, RX66T, RX671,
-   RX71M, RX72M, RX72N, and RX72T group. */
+/* EEI and TEI interrupts are grouped as the BL1 interrupt in the RX26T, RX64M, RX65N, RX651, RX660, RX66N, RX66T,
+   RX671, RX71M, RX72M, RX72N, and RX72T groups. */
     #define RIIC_CFG_CH0_RXI_INT_PRIORITY   (1)
     #define RIIC_CFG_CH0_TXI_INT_PRIORITY   (1)
 /* The priority level of the EEI, please do not lower than the priority level of TXI and RXI.

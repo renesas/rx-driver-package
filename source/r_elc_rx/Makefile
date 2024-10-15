@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_elc_rx
-VERSION = 		3.00
+VERSION = 		4.00
 MDF = V2
 
 CONFIG_FOLDER = r_config

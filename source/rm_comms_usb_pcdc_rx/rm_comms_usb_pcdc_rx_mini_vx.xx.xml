@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refinfo>
+  <!-- multiple versions permitted -->
+  <toolchain>
+    <brand>Renesas</brand>
+    <product>RXC</product>
+    <version>3.02.00</version>
+  </toolchain>
+
+  <!-- only one target entry allowed; multiple sub tags permitted -->
+  <target>
+    <family>RX</family>
+    <series>RX100</series>
+    <series>RX200</series>
+    <group omit_board="true">RX111</group>
+    <group omit_board="true">RX113</group>
+    <group omit_board="true">RX231</group>
+    <group omit_board="true">RX23W</group>
+    <board>GENERIC_RX111</board>
+    <board>GENERIC_RX113</board>
+    <board>GENERIC_RX231</board>
+    <board>GENERIC_RX23W</board>
+  </target>
+
+  <!-- only one package entry allowed -->
+  <!-- multiple dependencies, functions, and incdirs permitted -->
+  <package>
+    <type>fitmodule</type>
+    <name>rm_comms_usb_pcdc_rx_mini</name>
+    <version>x.xx</version>
+    <zipsource>rm_comms_usb_pcdc_rx_vx.xx.zip</zipsource>
+    <dependency>
+      <module>r_bsp</module>
+      <version>7.41</version>
+    </dependency>
+    <dependency>
+      <module>r_usb_pcdc_mini</module>
+      <version>1.20</version>
+    </dependency>
+    <dependency>
+      <module>r_cmt_rx</module>
+      <version>5.60</version>
+    </dependency>
+    <application>Middleware</application>
+    <application>USB Peripheral Communications Device Class driver interface middleware</application>
+    <desc>USB Peripheral Communications Device Class Driver Interface Middleware</desc>
+    <details>The USB_PCDC communication module provides USB peripheral communications device class.</details>
+    <function>USB_PCDC</function>
+    <incdir>r_config</incdir>
+    <incdir>rm_comms_usb_pcdc_rx</incdir>
+    <incdir>rm_comms_usb_pcdc_rx/inc/api</incdir>
+    <incdir>rm_comms_usb_pcdc_rx/inc/instances</incdir>
+  </package>
+</refinfo>

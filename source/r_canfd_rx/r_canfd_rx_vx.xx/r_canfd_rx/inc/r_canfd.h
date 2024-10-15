@@ -23,6 +23,7 @@
 * History : DD.MM.YYYY Version Description
 *           22.11.2021 1.00    Initial Release
 *           13.12.2023 1.31    Added WAIT_LOOP comments.
+*           28.06.2024 1.40    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 #ifndef R_CANFD_H
 #define R_CANFD_H
@@ -46,39 +47,39 @@ FSP_HEADER
 /* =========================================================================================================================== */
 
 /* ========================================================  GCFG  ======================================================== */
- #define R_CANFD_GCFG_TPRI_Pos                (0UL)          /*!< TPRI (Bit 0)                                          */
- #define R_CANFD_GCFG_TPRI_Msk                (0x1UL)        /*!< TPRI (Bitfield-Mask: 0x01)                            */
- #define R_CANFD_GCFG_DCE_Pos                 (1UL)          /*!< DCE (Bit 1)                                           */
- #define R_CANFD_GCFG_DCE_Msk                 (0x2UL)        /*!< DCE (Bitfield-Mask: 0x01)                             */
- #define R_CANFD_GCFG_DRE_Pos                 (2UL)          /*!< DRE (Bit 2)                                           */
- #define R_CANFD_GCFG_DRE_Msk                 (0x4UL)        /*!< DRE (Bitfield-Mask: 0x01)                             */
- #define R_CANFD_GCFG_MME_Pos                 (3UL)          /*!< MME (Bit 3)                                           */
- #define R_CANFD_GCFG_MME_Msk                 (0x8UL)        /*!< MME (Bitfield-Mask: 0x01)                             */
- #define R_CANFD_GCFG_DLLCS_Pos               (4UL)          /*!< DLLCS (Bit 4)                                           */
- #define R_CANFD_GCFG_DLLCS_Msk               (0x10UL)       /*!< DLLCS (Bitfield-Mask: 0x01)                             */
- #define R_CANFD_GCFG_OMRC_Pos                (5UL)          /*!< OMRC (Bit 5)                                         */
- #define R_CANFD_GCFG_OMRC_Msk                (0x20UL)       /*!< OMRC (Bitfield-Mask: 0x01)                           */
- #define R_CANFD_GCFG_TSP_Pos                 (8UL)          /*!< TSP (Bit 8)                                           */
- #define R_CANFD_GCFG_TSP_Msk                 (0xf00UL)      /*!< TSP (Bitfield-Mask: 0x0f)                             */
- #define R_CANFD_GCFG_TSCS_Pos                (12UL)         /*!< TSCS (Bit 12)                                         */
- #define R_CANFD_GCFG_TSCS_Msk                (0x1000UL)     /*!< TSCS (Bitfield-Mask: 0x01)                            */
- #define R_CANFD_GCFG_ITP_Pos                 (16UL)         /*!< ITP (Bit 16)                                        */
- #define R_CANFD_GCFG_ITP_Msk                 (0xffff0000UL) /*!< ITP (Bitfield-Mask: 0xffff)                         */
+#define R_CANFD_GCFG_TPRI_Pos                (0UL)          /*!< TPRI (Bit 0)                                          */
+#define R_CANFD_GCFG_TPRI_Msk                (0x1UL)        /*!< TPRI (Bitfield-Mask: 0x01)                            */
+#define R_CANFD_GCFG_DCE_Pos                 (1UL)          /*!< DCE (Bit 1)                                           */
+#define R_CANFD_GCFG_DCE_Msk                 (0x2UL)        /*!< DCE (Bitfield-Mask: 0x01)                             */
+#define R_CANFD_GCFG_DRE_Pos                 (2UL)          /*!< DRE (Bit 2)                                           */
+#define R_CANFD_GCFG_DRE_Msk                 (0x4UL)        /*!< DRE (Bitfield-Mask: 0x01)                             */
+#define R_CANFD_GCFG_MME_Pos                 (3UL)          /*!< MME (Bit 3)                                           */
+#define R_CANFD_GCFG_MME_Msk                 (0x8UL)        /*!< MME (Bitfield-Mask: 0x01)                             */
+#define R_CANFD_GCFG_DLLCS_Pos               (4UL)          /*!< DLLCS (Bit 4)                                           */
+#define R_CANFD_GCFG_DLLCS_Msk               (0x10UL)       /*!< DLLCS (Bitfield-Mask: 0x01)                             */
+#define R_CANFD_GCFG_OMRC_Pos                (5UL)          /*!< OMRC (Bit 5)                                         */
+#define R_CANFD_GCFG_OMRC_Msk                (0x20UL)       /*!< OMRC (Bitfield-Mask: 0x01)                           */
+#define R_CANFD_GCFG_TSP_Pos                 (8UL)          /*!< TSP (Bit 8)                                           */
+#define R_CANFD_GCFG_TSP_Msk                 (0xf00UL)      /*!< TSP (Bitfield-Mask: 0x0f)                             */
+#define R_CANFD_GCFG_TSCS_Pos                (12UL)         /*!< TSCS (Bit 12)                                         */
+#define R_CANFD_GCFG_TSCS_Msk                (0x1000UL)     /*!< TSCS (Bitfield-Mask: 0x01)                            */
+#define R_CANFD_GCFG_ITP_Pos                 (16UL)         /*!< ITP (Bit 16)                                        */
+#define R_CANFD_GCFG_ITP_Msk                 (0xffff0000UL) /*!< ITP (Bitfield-Mask: 0xffff)                         */
 /* ========================================================  GCR  ======================================================== */
- #define R_CANFD_GCR_GMDC_Pos                (0UL)          /*!< GMDC (Bit 0)                                          */
- #define R_CANFD_GCR_GMDC_Msk                (0x3UL)        /*!< GMDC (Bitfield-Mask: 0x03)                            */
- #define R_CANFD_GCR_SLPRQ_Pos               (2UL)          /*!< SLPRQ (Bit 2)                                         */
- #define R_CANFD_GCR_SLPRQ_Msk               (0x4UL)        /*!< SLPRQ (Bitfield-Mask: 0x01)                           */
- #define R_CANFD_GCR_DEIE_Pos                (8UL)          /*!< DEIE (Bit 8)                                          */
- #define R_CANFD_GCR_DEIE_Msk                (0x100UL)      /*!< DEIE (Bitfield-Mask: 0x01)                            */
- #define R_CANFD_GCR_MLIE_Pos                (9UL)          /*!< MLIE (Bit 9)                                          */
- #define R_CANFD_GCR_MLIE_Msk                (0x200UL)      /*!< MLIE (Bitfield-Mask: 0x01)                            */
- #define R_CANFD_GCR_THLIE_Pos               (10UL)         /*!< THLIE (Bit 10)                                       */
- #define R_CANFD_GCR_THLIE_Msk               (0x400UL)      /*!< THLIE (Bitfield-Mask: 0x01)                          */
- #define R_CANFD_GCR_POIE_Pos                (11UL)         /*!< POIE (Bit 11)                                      */
- #define R_CANFD_GCR_POIE_Msk                (0x800UL)      /*!< POIE (Bitfield-Mask: 0x01)                         */
- #define R_CANFD_GCR_TSCR_Pos                (16UL)         /*!< TSCR (Bit 16)                                        */
- #define R_CANFD_GCR_TSCR_Msk                (0x10000UL)    /*!< TSCR (Bitfield-Mask: 0x01)                           */
+#define R_CANFD_GCR_GMDC_Pos                (0UL)          /*!< GMDC (Bit 0)                                          */
+#define R_CANFD_GCR_GMDC_Msk                (0x3UL)        /*!< GMDC (Bitfield-Mask: 0x03)                            */
+#define R_CANFD_GCR_SLPRQ_Pos               (2UL)          /*!< SLPRQ (Bit 2)                                         */
+#define R_CANFD_GCR_SLPRQ_Msk               (0x4UL)        /*!< SLPRQ (Bitfield-Mask: 0x01)                           */
+#define R_CANFD_GCR_DEIE_Pos                (8UL)          /*!< DEIE (Bit 8)                                          */
+#define R_CANFD_GCR_DEIE_Msk                (0x100UL)      /*!< DEIE (Bitfield-Mask: 0x01)                            */
+#define R_CANFD_GCR_MLIE_Pos                (9UL)          /*!< MLIE (Bit 9)                                          */
+#define R_CANFD_GCR_MLIE_Msk                (0x200UL)      /*!< MLIE (Bitfield-Mask: 0x01)                            */
+#define R_CANFD_GCR_THLIE_Pos               (10UL)         /*!< THLIE (Bit 10)                                       */
+#define R_CANFD_GCR_THLIE_Msk               (0x400UL)      /*!< THLIE (Bitfield-Mask: 0x01)                          */
+#define R_CANFD_GCR_POIE_Pos                (11UL)         /*!< POIE (Bit 11)                                      */
+#define R_CANFD_GCR_POIE_Msk                (0x800UL)      /*!< POIE (Bitfield-Mask: 0x01)                         */
+#define R_CANFD_GCR_TSCR_Pos                (16UL)         /*!< TSCR (Bit 16)                                        */
+#define R_CANFD_GCR_TSCR_Msk                (0x10000UL)    /*!< TSCR (Bitfield-Mask: 0x01)                           */
 /* ========================================================  GSR  ======================================================== */
 #define R_CANFD_GSR_RSTST_Pos             (0UL)          /*!< RSTST (Bit 0)                                       */
 #define R_CANFD_GSR_RSTST_Msk             (0x1UL)        /*!< RSTST (Bitfield-Mask: 0x01)                         */
@@ -97,30 +98,30 @@ FSP_HEADER
 #define R_CANFD_AFCFG_RNC0_Pos            (16UL)         /*!< RNC0 (Bit 16)                                         */
 #define R_CANFD_AFCFG_RNC0_Msk            (0x1ff0000UL)  /*!< RNC0 (Bitfield-Mask: 0x1ff)                           */
 /* ========================================================  RMCR  ======================================================== */
- #define R_CANFD_RMCR_NMB_Pos               (0UL)          /*!< NMB (Bit 0)                                         */
- #define R_CANFD_RMCR_NMB_Msk               (0xffUL)       /*!< NMB (Bitfield-Mask: 0xff)                           */
- #define R_CANFD_RMCR_PLS_Pos               (8UL)          /*!< PLS (Bit 8)                                         */
- #define R_CANFD_RMCR_PLS_Msk               (0x700UL)      /*!< PLS (Bitfield-Mask: 0x07)                           */
+#define R_CANFD_RMCR_NMB_Pos               (0UL)          /*!< NMB (Bit 0)                                         */
+#define R_CANFD_RMCR_NMB_Msk               (0xffUL)       /*!< NMB (Bitfield-Mask: 0xff)                           */
+#define R_CANFD_RMCR_PLS_Pos               (8UL)          /*!< PLS (Bit 8)                                         */
+#define R_CANFD_RMCR_PLS_Msk               (0x700UL)      /*!< PLS (Bitfield-Mask: 0x07)                           */
 /* ========================================================  RFCR  ======================================================== */
- #define R_CANFD_RFCR_RFE_Pos                 (0UL)          /*!< RFE (Bit 0)                                           */
- #define R_CANFD_RFCR_RFE_Msk                 (0x1UL)        /*!< RFE (Bitfield-Mask: 0x01)                             */
- #define R_CANFD_RFCR_RFIE_Pos                (1UL)          /*!< RFIE (Bit 1)                                          */
- #define R_CANFD_RFCR_RFIE_Msk                (0x2UL)        /*!< RFIE (Bitfield-Mask: 0x01)                            */
- #define R_CANFD_RFCR_PLS_Pos               (4UL)          /*!< PLS (Bit 4)                                         */
- #define R_CANFD_RFCR_PLS_Msk               (0x70UL)       /*!< PLS (Bitfield-Mask: 0x07)                           */
- #define R_CANFD_RFCR_FDS_Pos                (8UL)          /*!< FDS (Bit 8)                                          */
- #define R_CANFD_RFCR_FDS_Msk                (0x700UL)      /*!< FDS (Bitfield-Mask: 0x07)                            */
- #define R_CANFD_RFCR_RFIM_Pos                (12UL)         /*!< RFIM (Bit 12)                                         */
- #define R_CANFD_RFCR_RFIM_Msk                (0x1000UL)     /*!< RFIM (Bitfield-Mask: 0x01)                            */
- #define R_CANFD_RFCR_RFITH_Pos              (13UL)         /*!< RFITH (Bit 13)                                       */
- #define R_CANFD_RFCR_RFITH_Msk              (0xe000UL)     /*!< RFITH (Bitfield-Mask: 0x07)                          */
+#define R_CANFD_RFCR_RFE_Pos                 (0UL)          /*!< RFE (Bit 0)                                           */
+#define R_CANFD_RFCR_RFE_Msk                 (0x1UL)        /*!< RFE (Bitfield-Mask: 0x01)                             */
+#define R_CANFD_RFCR_RFIE_Pos                (1UL)          /*!< RFIE (Bit 1)                                          */
+#define R_CANFD_RFCR_RFIE_Msk                (0x2UL)        /*!< RFIE (Bitfield-Mask: 0x01)                            */
+#define R_CANFD_RFCR_PLS_Pos                 (4UL)          /*!< PLS (Bit 4)                                         */
+#define R_CANFD_RFCR_PLS_Msk                 (0x70UL)       /*!< PLS (Bitfield-Mask: 0x07)                           */
+#define R_CANFD_RFCR_FDS_Pos                 (8UL)          /*!< FDS (Bit 8)                                          */
+#define R_CANFD_RFCR_FDS_Msk                 (0x700UL)      /*!< FDS (Bitfield-Mask: 0x07)                            */
+#define R_CANFD_RFCR_RFIM_Pos                (12UL)         /*!< RFIM (Bit 12)                                         */
+#define R_CANFD_RFCR_RFIM_Msk                (0x1000UL)     /*!< RFIM (Bitfield-Mask: 0x01)                            */
+#define R_CANFD_RFCR_RFITH_Pos               (13UL)         /*!< RFITH (Bit 13)                                       */
+#define R_CANFD_RFCR_RFITH_Msk               (0xe000UL)     /*!< RFITH (Bitfield-Mask: 0x07)                          */
 /* =======================================================  RFSR  ======================================================== */
 #define R_CANFD_RFSR_EMPTY_Pos              (0UL)          /*!< EMPTY (Bit 0)                                         */
 #define R_CANFD_RFSR_EMPTY_Msk              (0x1UL)        /*!< EMPTY (Bitfield-Mask: 0x01)                           */
-#define R_CANFD_RFSR_FULL_Pos              (1UL)          /*!< FULL (Bit 1)                                         */
-#define R_CANFD_RFSR_FULL_Msk              (0x2UL)        /*!< FULL (Bitfield-Mask: 0x01)                           */
-#define R_CANFD_RFSR_LOST_Pos              (2UL)          /*!< LOST (Bit 2)                                         */
-#define R_CANFD_RFSR_LOST_Msk              (0x4UL)        /*!< LOST (Bitfield-Mask: 0x01)                           */
+#define R_CANFD_RFSR_FULL_Pos               (1UL)          /*!< FULL (Bit 1)                                         */
+#define R_CANFD_RFSR_FULL_Msk               (0x2UL)        /*!< FULL (Bitfield-Mask: 0x01)                           */
+#define R_CANFD_RFSR_LOST_Pos               (2UL)          /*!< LOST (Bit 2)                                         */
+#define R_CANFD_RFSR_LOST_Msk               (0x4UL)        /*!< LOST (Bitfield-Mask: 0x01)                           */
 #define R_CANFD_RFSR_RFIF_Pos               (3UL)          /*!< RFIF (Bit 3)                                          */
 #define R_CANFD_RFSR_RFIF_Msk               (0x8UL)        /*!< RFIF (Bitfield-Mask: 0x01)                            */
 #define R_CANFD_RFSR_FLVL_Pos               (8UL)          /*!< FLVL (Bit 8)                                          */
@@ -141,7 +142,7 @@ FSP_HEADER
 #define R_CANFD_FESR_RFEMP0_Msk             (0x1UL)        /*!< RFEMP0 (Bitfield-Mask: 0x01)                          */
 #define R_CANFD_FESR_RFEMP1_Pos             (1UL)          /*!< RFEMP1 (Bit 1)                                        */
 #define R_CANFD_FESR_RFEMP1_Msk             (0x2UL)        /*!< RFEMP1 (Bitfield-Mask: 0x01)                          */
-#define R_CANFD_FESR_RFEMP_Msk             (0x3UL)        /*!< RFXEMP (Bitfield-Mask: 0x03)                          */
+#define R_CANFD_FESR_RFEMP_Msk              (0x3UL)        /*!< RFXEMP (Bitfield-Mask: 0x03)                          */
 #define R_CANFD_FESR_CFEMP0_Pos             (8UL)          /*!< CFEMP0 (Bit 8)                                        */
 #define R_CANFD_FESR_CFEMP0_Msk             (0x100UL)      /*!< CFEMP0 (Bitfield-Mask: 0x01)                          */
 /* =========================================================  NBCR  ========================================================== */
@@ -168,10 +169,10 @@ FSP_HEADER
 #define R_CANFD_DBCR_SJW_Msk       (0xf000000UL)  /*!< SJW (Bitfield-Mask: 0x0f)                            */
 
 /* =========================================================  FDCFG  ========================================================= */
-#define R_CANFD_FDCFG_ECC_Pos    (0UL)          /*!< ECC (Bit 0)                                        */
-#define R_CANFD_FDCFG_ECC_Msk    (0x7UL)        /*!< ECC (Bitfield-Mask: 0x07)                          */
-#define R_CANFD_FDCFG_SSPC_Pos     (8UL)          /*!< SSPC (Bit 8)                                         */
-#define R_CANFD_FDCFG_SSPC_Msk     (0x100UL)      /*!< SSPC (Bitfield-Mask: 0x01)                           */
+#define R_CANFD_FDCFG_ECC_Pos       (0UL)          /*!< ECC (Bit 0)                                        */
+#define R_CANFD_FDCFG_ECC_Msk       (0x7UL)        /*!< ECC (Bitfield-Mask: 0x07)                          */
+#define R_CANFD_FDCFG_SSPC_Pos      (8UL)          /*!< SSPC (Bit 8)                                         */
+#define R_CANFD_FDCFG_SSPC_Msk      (0x100UL)      /*!< SSPC (Bitfield-Mask: 0x01)                           */
 #define R_CANFD_FDCFG_TDCE_Pos      (9UL)          /*!< TDCE (Bit 9)                                          */
 #define R_CANFD_FDCFG_TDCE_Msk      (0x200UL)      /*!< TDCE (Bitfield-Mask: 0x01)                            */
 #define R_CANFD_FDCFG_TESI_Pos      (10UL)         /*!< TESI (Bit 10)                                         */
@@ -185,48 +186,48 @@ FSP_HEADER
 #define R_CANFD_FDCFG_CLOE_Pos      (30UL)         /*!< CLOE (Bit 30)                                         */
 #define R_CANFD_FDCFG_CLOE_Msk      (0x40000000UL) /*!< CLOE (Bitfield-Mask: 0x01)                            */
 /* ==========================================================  CHCR  ========================================================== */
- #define R_CANFD_CHCR_MDC_Pos        (0UL)          /*!< MDC (Bit 0)                                         */
- #define R_CANFD_CHCR_MDC_Msk        (0x3UL)        /*!< MDC (Bitfield-Mask: 0x03)                           */
- #define R_CANFD_CHCR_SLPRQ_Pos      (2UL)          /*!< SLPRQ (Bit 2)                                         */
- #define R_CANFD_CHCR_SLPRQ_Msk      (0x4UL)        /*!< SLPRQ (Bitfield-Mask: 0x01)                           */
- #define R_CANFD_CHCR_RTBO_Pos       (3UL)          /*!< RTBO (Bit 3)                                          */
- #define R_CANFD_CHCR_RTBO_Msk       (0x8UL)        /*!< RTBO (Bitfield-Mask: 0x01)                            */
- #define R_CANFD_CHCR_BEIE_Pos       (8UL)          /*!< BEIE (Bit 8)                                          */
- #define R_CANFD_CHCR_BEIE_Msk       (0x100UL)      /*!< BEIE (Bitfield-Mask: 0x01)                            */
- #define R_CANFD_CHCR_EWIE_Pos       (9UL)          /*!< EWIE (Bit 9)                                          */
- #define R_CANFD_CHCR_EWIE_Msk       (0x200UL)      /*!< EWIE (Bitfield-Mask: 0x01)                            */
- #define R_CANFD_CHCR_EPIE_Pos       (10UL)         /*!< EPIE (Bit 10)                                         */
- #define R_CANFD_CHCR_EPIE_Msk       (0x400UL)      /*!< EPIE (Bitfield-Mask: 0x01)                            */
- #define R_CANFD_CHCR_BOEIE_Pos      (11UL)         /*!< BOEIE (Bit 11)                                        */
- #define R_CANFD_CHCR_BOEIE_Msk      (0x800UL)      /*!< BOEIE (Bitfield-Mask: 0x01)                           */
- #define R_CANFD_CHCR_BORIE_Pos      (12UL)         /*!< BORIE (Bit 12)                                        */
- #define R_CANFD_CHCR_BORIE_Msk      (0x1000UL)     /*!< BORIE (Bitfield-Mask: 0x01)                           */
- #define R_CANFD_CHCR_OLIE_Pos       (13UL)         /*!< OLIE (Bit 13)                                         */
- #define R_CANFD_CHCR_OLIE_Msk       (0x2000UL)     /*!< OLIE (Bitfield-Mask: 0x01)                            */
- #define R_CANFD_CHCR_BLIE_Pos       (14UL)         /*!< BLIE (Bit 14)                                         */
- #define R_CANFD_CHCR_BLIE_Msk       (0x4000UL)     /*!< BLIE (Bitfield-Mask: 0x01)                            */
- #define R_CANFD_CHCR_ALIE_Pos       (15UL)         /*!< ALIE (Bit 15)                                         */
- #define R_CANFD_CHCR_ALIE_Msk       (0x8000UL)     /*!< ALIE (Bitfield-Mask: 0x01)                            */
- #define R_CANFD_CHCR_TAIE_Pos       (16UL)         /*!< TAIE (Bit 16)                                         */
- #define R_CANFD_CHCR_TAIE_Msk       (0x10000UL)    /*!< TAIE (Bitfield-Mask: 0x01)                            */
- #define R_CANFD_CHCR_ECOVIE_Pos     (17UL)         /*!< ECOVIE (Bit 17)                                       */
- #define R_CANFD_CHCR_ECOVIE_Msk     (0x20000UL)    /*!< ECOVIE (Bitfield-Mask: 0x01)                          */
- #define R_CANFD_CHCR_SCOVIE_Pos     (18UL)         /*!< SCOVIE (Bit 18)                                       */
- #define R_CANFD_CHCR_SCOVIE_Msk     (0x40000UL)    /*!< SCOVIE (Bitfield-Mask: 0x01)                          */
- #define R_CANFD_CHCR_TDCVIE_Pos     (19UL)         /*!< TDCVIE (Bit 19)                                      */
- #define R_CANFD_CHCR_TDCVIE_Msk     (0x80000UL)    /*!< TDCVIE (Bitfield-Mask: 0x01)                         */
- #define R_CANFD_CHCR_BOM_Pos        (21UL)         /*!< BOM (Bit 21)                                          */
- #define R_CANFD_CHCR_BOM_Msk        (0x600000UL)   /*!< BOM (Bitfield-Mask: 0x03)                             */
- #define R_CANFD_CHCR_EDM_Pos        (23UL)         /*!< ERRD (Bit 23)                                         */
- #define R_CANFD_CHCR_EDM_Msk        (0x800000UL)   /*!< ERRD (Bitfield-Mask: 0x01)                            */
- #define R_CANFD_CHCR_CTME_Pos       (24UL)         /*!< CTME (Bit 24)                                         */
- #define R_CANFD_CHCR_CTME_Msk       (0x1000000UL)  /*!< CTME (Bitfield-Mask: 0x01)                            */
- #define R_CANFD_CHCR_CTMS_Pos       (25UL)         /*!< CTMS (Bit 25)                                         */
- #define R_CANFD_CHCR_CTMS_Msk       (0x6000000UL)  /*!< CTMS (Bitfield-Mask: 0x03)                            */
- #define R_CANFD_CHCR_BFT_Pos        (30UL)         /*!< BFT (Bit 30)                                         */
- #define R_CANFD_CHCR_BFT_Msk        (0x40000000UL) /*!< BFT (Bitfield-Mask: 0x01)                            */
- #define R_CANFD_CHCR_ROME_Pos       (31UL)         /*!< ROME (Bit 31)                                          */
- #define R_CANFD_CHCR_ROME_Msk       (0x80000000UL) /*!< ROME (Bitfield-Mask: 0x01)                             */
+#define R_CANFD_CHCR_MDC_Pos        (0UL)          /*!< MDC (Bit 0)                                         */
+#define R_CANFD_CHCR_MDC_Msk        (0x3UL)        /*!< MDC (Bitfield-Mask: 0x03)                           */
+#define R_CANFD_CHCR_SLPRQ_Pos      (2UL)          /*!< SLPRQ (Bit 2)                                         */
+#define R_CANFD_CHCR_SLPRQ_Msk      (0x4UL)        /*!< SLPRQ (Bitfield-Mask: 0x01)                           */
+#define R_CANFD_CHCR_RTBO_Pos       (3UL)          /*!< RTBO (Bit 3)                                          */
+#define R_CANFD_CHCR_RTBO_Msk       (0x8UL)        /*!< RTBO (Bitfield-Mask: 0x01)                            */
+#define R_CANFD_CHCR_BEIE_Pos       (8UL)          /*!< BEIE (Bit 8)                                          */
+#define R_CANFD_CHCR_BEIE_Msk       (0x100UL)      /*!< BEIE (Bitfield-Mask: 0x01)                            */
+#define R_CANFD_CHCR_EWIE_Pos       (9UL)          /*!< EWIE (Bit 9)                                          */
+#define R_CANFD_CHCR_EWIE_Msk       (0x200UL)      /*!< EWIE (Bitfield-Mask: 0x01)                            */
+#define R_CANFD_CHCR_EPIE_Pos       (10UL)         /*!< EPIE (Bit 10)                                         */
+#define R_CANFD_CHCR_EPIE_Msk       (0x400UL)      /*!< EPIE (Bitfield-Mask: 0x01)                            */
+#define R_CANFD_CHCR_BOEIE_Pos      (11UL)         /*!< BOEIE (Bit 11)                                        */
+#define R_CANFD_CHCR_BOEIE_Msk      (0x800UL)      /*!< BOEIE (Bitfield-Mask: 0x01)                           */
+#define R_CANFD_CHCR_BORIE_Pos      (12UL)         /*!< BORIE (Bit 12)                                        */
+#define R_CANFD_CHCR_BORIE_Msk      (0x1000UL)     /*!< BORIE (Bitfield-Mask: 0x01)                           */
+#define R_CANFD_CHCR_OLIE_Pos       (13UL)         /*!< OLIE (Bit 13)                                         */
+#define R_CANFD_CHCR_OLIE_Msk       (0x2000UL)     /*!< OLIE (Bitfield-Mask: 0x01)                            */
+#define R_CANFD_CHCR_BLIE_Pos       (14UL)         /*!< BLIE (Bit 14)                                         */
+#define R_CANFD_CHCR_BLIE_Msk       (0x4000UL)     /*!< BLIE (Bitfield-Mask: 0x01)                            */
+#define R_CANFD_CHCR_ALIE_Pos       (15UL)         /*!< ALIE (Bit 15)                                         */
+#define R_CANFD_CHCR_ALIE_Msk       (0x8000UL)     /*!< ALIE (Bitfield-Mask: 0x01)                            */
+#define R_CANFD_CHCR_TAIE_Pos       (16UL)         /*!< TAIE (Bit 16)                                         */
+#define R_CANFD_CHCR_TAIE_Msk       (0x10000UL)    /*!< TAIE (Bitfield-Mask: 0x01)                            */
+#define R_CANFD_CHCR_ECOVIE_Pos     (17UL)         /*!< ECOVIE (Bit 17)                                       */
+#define R_CANFD_CHCR_ECOVIE_Msk     (0x20000UL)    /*!< ECOVIE (Bitfield-Mask: 0x01)                          */
+#define R_CANFD_CHCR_SCOVIE_Pos     (18UL)         /*!< SCOVIE (Bit 18)                                       */
+#define R_CANFD_CHCR_SCOVIE_Msk     (0x40000UL)    /*!< SCOVIE (Bitfield-Mask: 0x01)                          */
+#define R_CANFD_CHCR_TDCVIE_Pos     (19UL)         /*!< TDCVIE (Bit 19)                                      */
+#define R_CANFD_CHCR_TDCVIE_Msk     (0x80000UL)    /*!< TDCVIE (Bitfield-Mask: 0x01)                         */
+#define R_CANFD_CHCR_BOM_Pos        (21UL)         /*!< BOM (Bit 21)                                          */
+#define R_CANFD_CHCR_BOM_Msk        (0x600000UL)   /*!< BOM (Bitfield-Mask: 0x03)                             */
+#define R_CANFD_CHCR_EDM_Pos        (23UL)         /*!< ERRD (Bit 23)                                         */
+#define R_CANFD_CHCR_EDM_Msk        (0x800000UL)   /*!< ERRD (Bitfield-Mask: 0x01)                            */
+#define R_CANFD_CHCR_CTME_Pos       (24UL)         /*!< CTME (Bit 24)                                         */
+#define R_CANFD_CHCR_CTME_Msk       (0x1000000UL)  /*!< CTME (Bitfield-Mask: 0x01)                            */
+#define R_CANFD_CHCR_CTMS_Pos       (25UL)         /*!< CTMS (Bit 25)                                         */
+#define R_CANFD_CHCR_CTMS_Msk       (0x6000000UL)  /*!< CTMS (Bitfield-Mask: 0x03)                            */
+#define R_CANFD_CHCR_BFT_Pos        (30UL)         /*!< BFT (Bit 30)                                         */
+#define R_CANFD_CHCR_BFT_Msk        (0x40000000UL) /*!< BFT (Bitfield-Mask: 0x01)                            */
+#define R_CANFD_CHCR_ROME_Pos       (31UL)         /*!< ROME (Bit 31)                                          */
+#define R_CANFD_CHCR_ROME_Msk       (0x80000000UL) /*!< ROME (Bitfield-Mask: 0x01)                             */
 
 /* =========================================================================================================================== */
 /* ================                                           TMB                                           ================ */
@@ -244,36 +245,36 @@ FSP_HEADER
 #define R_CANFD_TMB_HF1_DLC_Pos      (28UL)         /*!< DLC (Bit 28)                                        */
 #define R_CANFD_TMB_HF1_DLC_Msk      (0xf0000000UL) /*!< DLC (Bitfield-Mask: 0x0f)                           */
 /* =========================================================  FDCTR  ========================================================= */
- #define R_CANFD_CFDTM_FDCTR_TMESI_Pos    (0UL)          /*!< TMESI (Bit 0)                                         */
- #define R_CANFD_CFDTM_FDCTR_TMESI_Msk    (0x1UL)        /*!< TMESI (Bitfield-Mask: 0x01)                           */
- #define R_CANFD_CFDTM_FDCTR_TMBRS_Pos    (1UL)          /*!< TMBRS (Bit 1)                                         */
- #define R_CANFD_CFDTM_FDCTR_TMBRS_Msk    (0x2UL)        /*!< TMBRS (Bitfield-Mask: 0x01)                           */
- #define R_CANFD_CFDTM_FDCTR_TMFDF_Pos    (2UL)          /*!< TMFDF (Bit 2)                                         */
- #define R_CANFD_CFDTM_FDCTR_TMFDF_Msk    (0x4UL)        /*!< TMFDF (Bitfield-Mask: 0x01)                           */
- #define R_CANFD_CFDTM_FDCTR_TMIFL_Pos    (8UL)          /*!< TMIFL (Bit 8)                                         */
- #define R_CANFD_CFDTM_FDCTR_TMIFL_Msk    (0x300UL)      /*!< TMIFL (Bitfield-Mask: 0x03)                           */
- #define R_CANFD_CFDTM_FDCTR_TMPTR_Pos    (16UL)         /*!< TMPTR (Bit 16)                                        */
- #define R_CANFD_CFDTM_FDCTR_TMPTR_Msk    (0xffff0000UL) /*!< TMPTR (Bitfield-Mask: 0xffff)                         */
+#define R_CANFD_CFDTM_FDCTR_TMESI_Pos    (0UL)          /*!< TMESI (Bit 0)                                         */
+#define R_CANFD_CFDTM_FDCTR_TMESI_Msk    (0x1UL)        /*!< TMESI (Bitfield-Mask: 0x01)                           */
+#define R_CANFD_CFDTM_FDCTR_TMBRS_Pos    (1UL)          /*!< TMBRS (Bit 1)                                         */
+#define R_CANFD_CFDTM_FDCTR_TMBRS_Msk    (0x2UL)        /*!< TMBRS (Bitfield-Mask: 0x01)                           */
+#define R_CANFD_CFDTM_FDCTR_TMFDF_Pos    (2UL)          /*!< TMFDF (Bit 2)                                         */
+#define R_CANFD_CFDTM_FDCTR_TMFDF_Msk    (0x4UL)        /*!< TMFDF (Bitfield-Mask: 0x01)                           */
+#define R_CANFD_CFDTM_FDCTR_TMIFL_Pos    (8UL)          /*!< TMIFL (Bit 8)                                         */
+#define R_CANFD_CFDTM_FDCTR_TMIFL_Msk    (0x300UL)      /*!< TMIFL (Bitfield-Mask: 0x03)                           */
+#define R_CANFD_CFDTM_FDCTR_TMPTR_Pos    (16UL)         /*!< TMPTR (Bit 16)                                        */
+#define R_CANFD_CFDTM_FDCTR_TMPTR_Msk    (0xffff0000UL) /*!< TMPTR (Bitfield-Mask: 0xffff)                         */
 /* ==========================================================  DF  =========================================================== */
- #define R_CANFD_CFDTM_DF_TMDB_Pos        (0UL)          /*!< TMDB (Bit 0)                                          */
- #define R_CANFD_CFDTM_DF_TMDB_Msk        (0xffUL)       /*!< TMDB (Bitfield-Mask: 0xff)                            */
+#define R_CANFD_CFDTM_DF_TMDB_Pos        (0UL)          /*!< TMDB (Bit 0)                                          */
+#define R_CANFD_CFDTM_DF_TMDB_Msk        (0xffUL)       /*!< TMDB (Bitfield-Mask: 0xff)                            */
 /* ==========================================================  CHSR  ========================================================== */
-#define R_CANFD_CHSR_RSTST_Pos    (0UL)          /*!< RSTST (Bit 0)                                       */
-#define R_CANFD_CHSR_RSTST_Msk    (0x1UL)        /*!< RSTST (Bitfield-Mask: 0x01)                         */
-#define R_CANFD_CHSR_HLTST_Pos    (1UL)          /*!< HLTST (Bit 1)                                       */
-#define R_CANFD_CHSR_HLTST_Msk    (0x2UL)        /*!< HLTST (Bitfield-Mask: 0x01)                         */
-#define R_CANFD_CHSR_SLPST_Pos    (2UL)          /*!< SLPST (Bit 2)                                       */
-#define R_CANFD_CHSR_SLPST_Msk    (0x4UL)        /*!< SLPST (Bitfield-Mask: 0x01)                         */
-#define R_CANFD_CHSR_EPST_Pos      (3UL)          /*!< EPST (Bit 3)                                         */
-#define R_CANFD_CHSR_EPST_Msk      (0x8UL)        /*!< EPST (Bitfield-Mask: 0x01)                           */
-#define R_CANFD_CHSR_BOST_Pos      (4UL)          /*!< BOST (Bit 4)                                         */
-#define R_CANFD_CHSR_BOST_Msk      (0x10UL)       /*!< BOST (Bitfield-Mask: 0x01)                           */
-#define R_CANFD_CHSR_TRMST_Pos     (5UL)          /*!< TRMST (Bit 5)                                        */
-#define R_CANFD_CHSR_TRMST_Msk     (0x20UL)       /*!< TRMST (Bitfield-Mask: 0x01)                          */
-#define R_CANFD_CHSR_RECST_Pos     (6UL)          /*!< RECST (Bit 6)                                        */
-#define R_CANFD_CHSR_RECST_Msk     (0x40UL)       /*!< RECST (Bitfield-Mask: 0x01)                          */
-#define R_CANFD_CHSR_CRDY_Pos     (7UL)          /*!< CRDY (Bit 7)                                        */
-#define R_CANFD_CHSR_CRDY_Msk     (0x80UL)       /*!< CRDY (Bitfield-Mask: 0x01)                          */
+#define R_CANFD_CHSR_RSTST_Pos      (0UL)          /*!< RSTST (Bit 0)                                       */
+#define R_CANFD_CHSR_RSTST_Msk      (0x1UL)        /*!< RSTST (Bitfield-Mask: 0x01)                         */
+#define R_CANFD_CHSR_HLTST_Pos      (1UL)          /*!< HLTST (Bit 1)                                       */
+#define R_CANFD_CHSR_HLTST_Msk      (0x2UL)        /*!< HLTST (Bitfield-Mask: 0x01)                         */
+#define R_CANFD_CHSR_SLPST_Pos      (2UL)          /*!< SLPST (Bit 2)                                       */
+#define R_CANFD_CHSR_SLPST_Msk      (0x4UL)        /*!< SLPST (Bitfield-Mask: 0x01)                         */
+#define R_CANFD_CHSR_EPST_Pos       (3UL)          /*!< EPST (Bit 3)                                         */
+#define R_CANFD_CHSR_EPST_Msk       (0x8UL)        /*!< EPST (Bitfield-Mask: 0x01)                           */
+#define R_CANFD_CHSR_BOST_Pos       (4UL)          /*!< BOST (Bit 4)                                         */
+#define R_CANFD_CHSR_BOST_Msk       (0x10UL)       /*!< BOST (Bitfield-Mask: 0x01)                           */
+#define R_CANFD_CHSR_TRMST_Pos      (5UL)          /*!< TRMST (Bit 5)                                        */
+#define R_CANFD_CHSR_TRMST_Msk      (0x20UL)       /*!< TRMST (Bitfield-Mask: 0x01)                          */
+#define R_CANFD_CHSR_RECST_Pos      (6UL)          /*!< RECST (Bit 6)                                        */
+#define R_CANFD_CHSR_RECST_Msk      (0x40UL)       /*!< RECST (Bitfield-Mask: 0x01)                          */
+#define R_CANFD_CHSR_CRDY_Pos       (7UL)          /*!< CRDY (Bit 7)                                        */
+#define R_CANFD_CHSR_CRDY_Msk       (0x80UL)       /*!< CRDY (Bitfield-Mask: 0x01)                          */
 #define R_CANFD_CHSR_RESI_Pos       (8UL)          /*!< RESI (Bit 8)                                          */
 #define R_CANFD_CHSR_RESI_Msk       (0x100UL)      /*!< RESI (Bitfield-Mask: 0x01)                            */
 #define R_CANFD_CHSR_REC_Pos        (16UL)         /*!< REC (Bit 16)                                          */
@@ -286,31 +287,31 @@ FSP_HEADER
 /* =========================================================================================================================== */
 
 /* ==========================================================  HF0  =========================================================== */
- #define R_CANFD_RMBn_HF0_ID_Pos        (0UL)          /*!< RMID (Bit 0)                                          */
- #define R_CANFD_RMBn_HF0_ID_Msk        (0x1fffffffUL) /*!< RMID (Bitfield-Mask: 0x1fffffff)                      */
- #define R_CANFD_RMBn_HF0_RTR_Pos       (30UL)         /*!< RMRTR (Bit 30)                                        */
- #define R_CANFD_RMBn_HF0_RTR_Msk       (0x40000000UL) /*!< RMRTR (Bitfield-Mask: 0x01)                           */
- #define R_CANFD_RMBn_HF0_IDE_Pos       (31UL)         /*!< RMIDE (Bit 31)                                        */
- #define R_CANFD_RMBn_HF0_IDE_Msk       (0x80000000UL) /*!< RMIDE (Bitfield-Mask: 0x01)                           */
+#define R_CANFD_RMBn_HF0_ID_Pos        (0UL)          /*!< RMID (Bit 0)                                          */
+#define R_CANFD_RMBn_HF0_ID_Msk        (0x1fffffffUL) /*!< RMID (Bitfield-Mask: 0x1fffffff)                      */
+#define R_CANFD_RMBn_HF0_RTR_Pos       (30UL)         /*!< RMRTR (Bit 30)                                        */
+#define R_CANFD_RMBn_HF0_RTR_Msk       (0x40000000UL) /*!< RMRTR (Bitfield-Mask: 0x01)                           */
+#define R_CANFD_RMBn_HF0_IDE_Pos       (31UL)         /*!< RMIDE (Bit 31)                                        */
+#define R_CANFD_RMBn_HF0_IDE_Msk       (0x80000000UL) /*!< RMIDE (Bitfield-Mask: 0x01)                           */
 /* ==========================================================  HF1  ========================================================== */
- #define R_CANFD_RMBn_HF1_TS_Pos       (0UL)          /*!< RMTS (Bit 0)                                          */
- #define R_CANFD_RMBn_HF1_TS_Msk       (0xffffUL)     /*!< RMTS (Bitfield-Mask: 0xffff)                          */
- #define R_CANFD_RMBn_HF1_DLC_Pos      (28UL)         /*!< RMDLC (Bit 28)                                        */
- #define R_CANFD_RMBn_HF1_DLC_Msk      (0xf0000000UL) /*!< RMDLC (Bitfield-Mask: 0x0f)                           */
+#define R_CANFD_RMBn_HF1_TS_Pos       (0UL)          /*!< RMTS (Bit 0)                                          */
+#define R_CANFD_RMBn_HF1_TS_Msk       (0xffffUL)     /*!< RMTS (Bitfield-Mask: 0xffff)                          */
+#define R_CANFD_RMBn_HF1_DLC_Pos      (28UL)         /*!< RMDLC (Bit 28)                                        */
+#define R_CANFD_RMBn_HF1_DLC_Msk      (0xf0000000UL) /*!< RMDLC (Bitfield-Mask: 0x0f)                           */
 /* =========================================================  FDSTS  ========================================================= */
- #define R_CANFDL_CFDRMC_RM_FDSTS_RMESI_Pos    (0UL)          /*!< RMESI (Bit 0)                                         */
- #define R_CANFDL_CFDRMC_RM_FDSTS_RMESI_Msk    (0x1UL)        /*!< RMESI (Bitfield-Mask: 0x01)                           */
- #define R_CANFDL_CFDRMC_RM_FDSTS_RMBRS_Pos    (1UL)          /*!< RMBRS (Bit 1)                                         */
- #define R_CANFDL_CFDRMC_RM_FDSTS_RMBRS_Msk    (0x2UL)        /*!< RMBRS (Bitfield-Mask: 0x01)                           */
- #define R_CANFDL_CFDRMC_RM_FDSTS_RMFDF_Pos    (2UL)          /*!< RMFDF (Bit 2)                                         */
- #define R_CANFDL_CFDRMC_RM_FDSTS_RMFDF_Msk    (0x4UL)        /*!< RMFDF (Bitfield-Mask: 0x01)                           */
- #define R_CANFDL_CFDRMC_RM_FDSTS_RMIFL_Pos    (8UL)          /*!< RMIFL (Bit 8)                                         */
- #define R_CANFDL_CFDRMC_RM_FDSTS_RMIFL_Msk    (0x300UL)      /*!< RMIFL (Bitfield-Mask: 0x03)                           */
- #define R_CANFDL_CFDRMC_RM_FDSTS_RMPTR_Pos    (16UL)         /*!< RMPTR (Bit 16)                                        */
- #define R_CANFDL_CFDRMC_RM_FDSTS_RMPTR_Msk    (0xffff0000UL) /*!< RMPTR (Bitfield-Mask: 0xffff)                         */
+#define R_CANFDL_CFDRMC_RM_FDSTS_RMESI_Pos    (0UL)          /*!< RMESI (Bit 0)                                         */
+#define R_CANFDL_CFDRMC_RM_FDSTS_RMESI_Msk    (0x1UL)        /*!< RMESI (Bitfield-Mask: 0x01)                           */
+#define R_CANFDL_CFDRMC_RM_FDSTS_RMBRS_Pos    (1UL)          /*!< RMBRS (Bit 1)                                         */
+#define R_CANFDL_CFDRMC_RM_FDSTS_RMBRS_Msk    (0x2UL)        /*!< RMBRS (Bitfield-Mask: 0x01)                           */
+#define R_CANFDL_CFDRMC_RM_FDSTS_RMFDF_Pos    (2UL)          /*!< RMFDF (Bit 2)                                         */
+#define R_CANFDL_CFDRMC_RM_FDSTS_RMFDF_Msk    (0x4UL)        /*!< RMFDF (Bitfield-Mask: 0x01)                           */
+#define R_CANFDL_CFDRMC_RM_FDSTS_RMIFL_Pos    (8UL)          /*!< RMIFL (Bit 8)                                         */
+#define R_CANFDL_CFDRMC_RM_FDSTS_RMIFL_Msk    (0x300UL)      /*!< RMIFL (Bitfield-Mask: 0x03)                           */
+#define R_CANFDL_CFDRMC_RM_FDSTS_RMPTR_Pos    (16UL)         /*!< RMPTR (Bit 16)                                        */
+#define R_CANFDL_CFDRMC_RM_FDSTS_RMPTR_Msk    (0xffff0000UL) /*!< RMPTR (Bitfield-Mask: 0xffff)                         */
 /* ==========================================================  DF  =========================================================== */
- #define R_CANFDL_CFDRMC_RM_DF_RMDB_Pos        (0UL)          /*!< RMDB (Bit 0)                                          */
- #define R_CANFDL_CFDRMC_RM_DF_RMDB_Msk        (0xffUL)       /*!< RMDB (Bitfield-Mask: 0xff)                            */
+#define R_CANFDL_CFDRMC_RM_DF_RMDB_Pos        (0UL)          /*!< RMDB (Bit 0)                                          */
+#define R_CANFDL_CFDRMC_RM_DF_RMDB_Msk        (0xffUL)       /*!< RMDB (Bitfield-Mask: 0xff)                            */
 /* ========================================================  GSR  ======================================================== */
 #define R_CANFD_GSR_GRSTSTS_Pos             (0UL)          /*!< GRSTSTS (Bit 0)                                       */
 #define R_CANFD_GSR_GRSTSTS_Msk             (0x1UL)        /*!< GRSTSTS (Bitfield-Mask: 0x01)                         */
@@ -325,7 +326,7 @@ FSP_HEADER
 /* Function-like macro used to wait for a condition to be met, most often used to wait for hardware register updates.
  * This macro can be redefined to add a timeout if necessary. */
 #ifndef FSP_HARDWARE_REGISTER_WAIT
- #define FSP_HARDWARE_REGISTER_WAIT(reg, required_value)    while ((reg) != (required_value)) { /* Wait. */} /* WAIT_LOOP */
+    #define FSP_HARDWARE_REGISTER_WAIT(reg, required_value)    while ((reg) != (required_value)) { /* Wait. */} /* WAIT_LOOP */
 #endif
 
 
@@ -522,21 +523,21 @@ typedef struct st_canfd_instance_ctrl
 /** AFL Entry */
 typedef struct st_canfd_afl_entry_t
 {
-	uint32_t id                 : 29; ///< ID to match against
-	uint32_t rs                 : 1;
-	can_frame_type_t frame_type : 1;  ///< Frame type (Data or Remote)
-	can_id_mode_t    id_mode    : 1;  ///< ID mode (Standard or Extended)
+    uint32_t id                 : 29; ///< ID to match against
+    uint32_t rs                 : 1;
+    can_frame_type_t frame_type : 1;  ///< Frame type (Data or Remote)
+    can_id_mode_t    id_mode    : 1;  ///< ID mode (Standard or Extended)
 
-	uint32_t mask_id         	: 29; ///< ID Mask
-	uint32_t rs1                : 1;
-	uint32_t mask_frame_type 	: 1;  ///< Only accept frames with the configured frame type
-	uint32_t mask_id_mode    	: 1;  ///< Only accept frames with the configured ID mode
+    uint32_t mask_id            : 29; ///< ID Mask
+    uint32_t rs1                : 1;
+    uint32_t mask_frame_type    : 1;  ///< Only accept frames with the configured frame type
+    uint32_t mask_id_mode       : 1;  ///< Only accept frames with the configured ID mode
 
-	canfd_minimum_dlc_t minimum_dlc 	: 4; ///< Minimum DLC value to accept (valid when DLC Check is enabled)
-	uint32_t rs2                    	: 4;
-	canfd_rx_mb_t rx_buffer         	: 8; ///< RX Message Buffer to receive messages accepted by this rule
-	uint32_t rs3                  		: 16;
-	canfd_rx_fifo_t fifo_select_flags;   ///< RX FIFO(s) to receive messages accepted by this rule
+    canfd_minimum_dlc_t minimum_dlc     : 4; ///< Minimum DLC value to accept (valid when DLC Check is enabled)
+    uint32_t rs2                        : 4;
+    canfd_rx_mb_t rx_buffer             : 8; ///< RX Message Buffer to receive messages accepted by this rule
+    uint32_t rs3                        : 16;
+    canfd_rx_fifo_t fifo_select_flags;   ///< RX FIFO(s) to receive messages accepted by this rule
 } canfd_afl_entry_t;
 
 /** CANFD Global Configuration */
@@ -574,18 +575,18 @@ extern const can_api_t g_canfd_on_canfd;
 /***********************************************************************************************************************
  * Public APIs
  **********************************************************************************************************************/
-fsp_err_t R_CANFD_Open(can_ctrl_t * const p_api_ctrl, can_cfg_t const * const p_cfg);
-fsp_err_t R_CANFD_Close(can_ctrl_t * const p_api_ctrl);
-fsp_err_t R_CANFD_Write(can_ctrl_t * const p_api_ctrl, uint32_t const buffer, can_frame_t * const p_frame);
-fsp_err_t R_CANFD_Read(can_ctrl_t * const p_api_ctrl, uint32_t const buffer, can_frame_t * const p_frame);
-fsp_err_t R_CANFD_ModeTransition(can_ctrl_t * const   p_api_ctrl,
-                                 can_operation_mode_t operation_mode,
-                                 can_test_mode_t      test_mode);
-fsp_err_t R_CANFD_InfoGet(can_ctrl_t * const p_api_ctrl, can_info_t * const p_info);
-fsp_err_t R_CANFD_CallbackSet(can_ctrl_t * const          p_api_ctrl,
-                              void (                    * p_callback)(can_callback_args_t *),
-                              void const * const          p_context,
-                              can_callback_args_t * const p_callback_memory);
+fsp_err_t R_CANFD_Open (can_ctrl_t * const p_api_ctrl, can_cfg_t const * const p_cfg);
+fsp_err_t R_CANFD_Close (can_ctrl_t * const p_api_ctrl);
+fsp_err_t R_CANFD_Write (can_ctrl_t * const p_api_ctrl, uint32_t const buffer, can_frame_t * const p_frame);
+fsp_err_t R_CANFD_Read (can_ctrl_t * const p_api_ctrl, uint32_t const buffer, can_frame_t * const p_frame);
+fsp_err_t R_CANFD_ModeTransition (can_ctrl_t * const   p_api_ctrl,
+                                    can_operation_mode_t operation_mode,
+                                    can_test_mode_t      test_mode);
+fsp_err_t R_CANFD_InfoGet (can_ctrl_t * const p_api_ctrl, can_info_t * const p_info);
+fsp_err_t R_CANFD_CallbackSet (can_ctrl_t * const          p_api_ctrl,
+                                void (                    * p_callback)(can_callback_args_t *),
+                                void const * const          p_context,
+                                can_callback_args_t * const p_callback_memory);
 
 /*******************************************************************************************************************//**
  * @} (end defgroup CAN)

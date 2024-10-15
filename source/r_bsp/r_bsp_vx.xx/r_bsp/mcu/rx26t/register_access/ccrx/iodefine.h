@@ -29,9 +29,10 @@
 /*            : V1.00A (2023-01-27)  [Hardware Manual Revision : 1.00]          */
 /*            : V1.10  (2023-07-07)  [Hardware Manual Revision : 1.10]          */
 /*            : V1.10A (2023-08-22)  [Hardware Manual Revision : 1.10]          */
+/*            : V1.10B (2024-05-21)  [Hardware Manual Revision : 1.10]          */
 /* Note       : This is a typical example.                                      */
 /*                                                                              */
-/*  Copyright(c) 2023 Renesas Electronics Corporation.                          */
+/*  Copyright(c) 2022 (2023-2024) Renesas Electronics Corporation.              */
 /*                                                                              */
 /********************************************************************************/
 /*                                                                              */
@@ -14296,10 +14297,10 @@ typedef struct st_rspia {
 	union {
 		unsigned long LONG;
 		struct {
-			unsigned short H;
+			unsigned short L;
 		} WORD;
 		struct {
-			unsigned char HH;
+			unsigned char LL;
 		} BYTE;
 	} SPDR;
 	union {

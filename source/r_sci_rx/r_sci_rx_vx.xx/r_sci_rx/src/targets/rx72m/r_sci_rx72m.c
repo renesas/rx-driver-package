@@ -27,6 +27,7 @@
 *                              Updated macro definition enable and disable TXI, RXI, ERI, TEI.
 *           27.12.2022 4.60    Updated macro definition enable and disable nested interrupt for TXI, RXI, ERI, TEI.
 *           16.02.2023 4.70    Fixed a bug that return wrong value in sci_init_bit_rate() function.
+*           28.06.2024 5.30    Corrected the typecasting formula in sci_init_bit_rate().
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -372,7 +373,7 @@ int32_t sci_init_bit_rate(sci_hdl_t const  hdl,
     hdl->rom->regs->BRR = (uint8_t)(tmp-1);
 
     /* Casting uint32_t to float is valid  */
-    float_M = ((float)((baud * divisor) * 256) * tmp) / pclk;
+    float_M = ((((float)baud * divisor) * 256) * tmp) / pclk;
     float_M *= 2;
 
     /* Casting float to uint32_t */

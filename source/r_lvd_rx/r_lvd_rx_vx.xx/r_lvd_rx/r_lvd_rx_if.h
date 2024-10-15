@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_lvd_rx_if.h
@@ -31,6 +31,7 @@
 *              : 01.02.2019 2.50     Added support for RX72T, RX65N-64pin.
 *              : 20.05.2019 3.00     Added support for GNUC and ICCRX.
 *              : 31.03.2023 4.40     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*              : 28.06.2024 4.80     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 #ifndef LVD_INTERFACE_HEADER_FILE
 #define LVD_INTERFACE_HEADER_FILE
@@ -119,9 +120,9 @@ Imported global variables and functions (from other files)
 ***********************************************************************************************************************/
 extern lvd_err_t R_LVD_Open (lvd_channel_t channel, lvd_config_t const *p_cfg, void (*p_callback)(void *));
 extern lvd_err_t R_LVD_Close (lvd_channel_t channel);
-extern lvd_err_t R_LVD_GetStatus (lvd_channel_t channel,
-                                  lvd_status_position_t * p_status_position,
-                                  lvd_status_cross_t * p_status_cross);
+extern lvd_err_t R_LVD_GetStatus   (lvd_channel_t channel,
+                                    lvd_status_position_t * p_status_position,
+                                    lvd_status_cross_t * p_status_cross);
 extern lvd_err_t R_LVD_ClearStatus (lvd_channel_t channel);
 extern uint32_t  R_LVD_GetVersion (void);
 

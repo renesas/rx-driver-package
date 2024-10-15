@@ -47,6 +47,7 @@
 #include "r_usb_media_driver_mini_if.h"
 #include "r_usb_patapi.h"
 
+#if defined(USB_CFG_PMSC_USE)
 /*******************************************************************************
  Macro definitions
  ******************************************************************************/
@@ -214,6 +215,8 @@ usb_media_ret_t R_USB_media_ioctl(usb_ioctl_cmd_t ioctl_cmd, void * ioctl_data)
 
     return result;
 } /* End of function R_USB_media_ioctl() */
+
+#endif /* defined(USB_CFG_PMSC_USE) */
 
 /******************************************************************************
  End Of File

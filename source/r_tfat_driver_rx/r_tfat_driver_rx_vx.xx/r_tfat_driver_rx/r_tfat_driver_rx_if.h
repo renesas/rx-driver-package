@@ -38,6 +38,7 @@
 *              : 10.06.2020 2.10     Added support MMC Firmware and 
 *                                    FLASH Firmware.
 *              : 15.12.2023 2.40     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*              : 08.05.2024 2.50     Added support SPI mode SD card.
 *******************************************************************************/
 #ifndef _R_TFAT_DRIVER_RX_IF_H_
 #define _R_TFAT_DRIVER_RX_IF_H_
@@ -54,12 +55,13 @@ Includes   <System Includes> , "Project Includes"
 Macro definitions
 *******************************************************************************/
 /* used memory define */
-#define TFAT_CTRL_NONE          0
-#define TFAT_CTRL_USB           1
-#define TFAT_CTRL_SDMEM         2
-#define TFAT_CTRL_MMC           3
-#define TFAT_CTRL_USB_MINI      4
-#define TFAT_CTRL_SERIAL_FLASH  5
+#define TFAT_CTRL_NONE          (0)
+#define TFAT_CTRL_USB           (1)
+#define TFAT_CTRL_SDMEM         (2)
+#define TFAT_CTRL_MMC           (3)
+#define TFAT_CTRL_USB_MINI      (4)
+#define TFAT_CTRL_SERIAL_FLASH  (5)
+#define TFAT_CTRL_SPI_SDMEM     (6)
 
 /*******************************************************************************
 Typedef definitions

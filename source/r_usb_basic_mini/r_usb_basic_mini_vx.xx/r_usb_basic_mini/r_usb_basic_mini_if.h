@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2014(2024) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_basic_mini_if.h
@@ -26,6 +26,7 @@
  *         : 08.01.2014 1.00 First Release
  *         : 30.11.2018 1.10 Supporting Smart Configurator
  *         : 30.06.2020 1.20 Added support for RTOS.
+ *         : 30.04.2024 1.30 Added support for RX261.
  ***********************************************************************************************************************/
 #ifndef R_USB_BASIC_MINI_IF_H
 #define R_USB_BASIC_MINI_IF_H
@@ -45,6 +46,25 @@ Includes   <System Includes> , "Project Includes"
 /******************************************************************************
  Macro definitions
  ******************************************************************************/
+#if defined(USB_CFG_PCDC_2COM_USE)
+#define USB_CFG_PCDC_USE /* USB_CFG_DEVICE_CLASS */
+#endif /* defined(USB_CFG_PHID_USE) */
+
+#if defined(USB_CFG_PCDC_PHID_USE)
+#define USB_CFG_PCDC_USE /* USB_CFG_DEVICE_CLASS */
+#define USB_CFG_PHID_USE /* USB_CFG_DEVICE_CLASS */
+#endif /* defined(USB_CFG_PHID_USE) */
+
+#if defined(USB_CFG_PCDC_PMSC_USE)
+#define USB_CFG_PCDC_USE /* USB_CFG_DEVICE_CLASS */
+#define USB_CFG_PMSC_USE /* USB_CFG_DEVICE_CLASS */
+#endif /* defined(USB_CFG_PMSC_USE) */
+
+#if defined(USB_CFG_PHID_PMSC_USE)
+#define USB_CFG_PHID_USE /* USB_CFG_DEVICE_CLASS */
+#define USB_CFG_PMSC_USE /* USB_CFG_DEVICE_CLASS */
+#endif /* defined(USB_CFG_PMSC_USE) */
+
 /* USB Request Type Register */
 #define     USB_BREQUEST                        (0xFF00u)   /* b15-8 */
 
@@ -300,11 +320,9 @@ typedef enum usb_status
 /* USB class type */
 typedef enum usb_class
 {
-    USB_PCDC = 0, USB_PCDCC, USB_PCDC2, USB_PCDCC2, USB_PHID, USB_PVND,
-
-    USB_HCDC, USB_HCDCC, USB_HHID, USB_HVND,
-
-    USB_HMSC, USB_PMSC, USB_REQUEST
+    USB_PCDC = 0, USB_PCDCC, USB_PCDC2, USB_PCDCC2, USB_PHID, USB_PHID2,
+    USB_PVND, USB_PCDC_PHID, USB_PCDC_PMSC, USB_PHID_PMSC, 
+    USB_HCDC, USB_HCDCC, USB_HHID, USB_HVND, USB_HMSC, USB_PMSC, USB_REQUEST
 } usb_class_t;
 
 /* USB battery charging type */

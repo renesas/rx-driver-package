@@ -5,7 +5,7 @@ r_dmaca_rx
 
 Version
 -------
-v3.20
+v3.30
 
 Overview
 --------
@@ -27,6 +27,8 @@ Supported MCUs
 * RX23E-A Group
 * RX23E-B Group
 * RX23W Group
+* RX260 Group
+* RX261 Group
 * RX26T Group
 * RX64M Group
 * RX65N Group
@@ -149,6 +151,14 @@ r_dmaca_rx
         |       r_dmaca_rx_target.h
         |
         +---rx23w
+        |       r_dmaca_rx_target.c
+        |       r_dmaca_rx_target.h
+        |
+        +---rx260
+        |       r_dmaca_rx_target.c
+        |       r_dmaca_rx_target.h
+        |
+        +---rx261
         |       r_dmaca_rx_target.c
         |       r_dmaca_rx_target.h
         |

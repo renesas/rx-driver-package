@@ -33,13 +33,13 @@
 *         : 30.01.2015 2.02    Added RX71M.
 *         : 13.04.2015 2.03    Added RX231.
 *         : 24.12.2015 2.04    Added RX130, RX23T and RX24T.
-*         :                    Modified #define name from "DTC_CFG_SHORT_ADDRRESS_MODE"
-*         :                    to "DTC_CFG_SHORT_ADDRESS_MODE".
+*                              Modified #define name from "DTC_CFG_SHORT_ADDRRESS_MODE"
+*                              to "DTC_CFG_SHORT_ADDRESS_MODE".
 *         : 30.09.2016 2.05    Added RX65N.
-*         :                    Supported to the register added in DTCb.
-*         :                    Moved struct dtc_transfer_data_cfg_t to r_dtc_rx_target_if.h
-*         :                    Added include pass of target mcu interface header file.
-*         :                    Added R_DTC_CreateSeq() function.
+*                              Supported to the register added in DTCb.
+*                              Moved struct dtc_transfer_data_cfg_t to r_dtc_rx_target_if.h
+*                              Added include pass of target mcu interface header file.
+*                              Added R_DTC_CreateSeq() function.
 *         : 31.01.2017 2.06    Modified r_dtc_rx.c.
 *         : 31.03.2017 2.07    Added RX24U and RX24T-512KB.
 *         : 31.07.2017 2.08    Supported RX65N-2MB and RX130-512KB.
@@ -49,7 +49,7 @@
 *         : 18.06.2019 3.01    Modified r_dtc_rx_private.h.
 *         : 28.06.2019 3.10    Added support for RX23W.
 *         : 15.08.2019 3.20    Added support for RX72M.
-          : 12.11.2019 3.21    Removed definitions for MTU5 in DTC activation interrupt source for RX23W.
+*         : 12.11.2019 3.21    Removed definitions for MTU5 in DTC activation interrupt source for RX23W.
 *         : 25.11.2019 3.30    Added support for RX13T.
 *         : 30.12.2019 3.40    Added support for RX66N, RX72N.
 *         : 31.03.2020 3.50    Added support for RX23E-A.
@@ -58,15 +58,17 @@
 *         : 15.04.2021 3.80    Added support for RX140.
 *         : 13.09.2021 3.90    Added the Demo for RX671.
 *         : 14.03.2022 4.00    Added interrupt vector "DTCE_RNG_RNGRDI" for RX140.
-                               Added support for RX66T-48pin.
+*                              Added support for RX66T-48pin.
 *         : 31.03.2022 4.10    Added support for RX660.
 *         : 28.06.2022 4.20    Updated demo projects.
 *         : 27.12.2022 4.21    Updated slash format of included header file paths for Linux compatibility.
 *         : 31.03.2023 4.30    Added support for RX26T.
-                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *         : 29.05.2023 4.40    Added support for RX23E-B.
-                               Fixed warnings in IAR.
-                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*                              Fixed warnings in IAR.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 28.06.2024 4.50    Added support for RX260, RX261.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *******************************************************************************/
 #ifndef DTC_RX_IF_H
 #define DTC_RX_IF_H
@@ -89,7 +91,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define DTC_VERSION_MAJOR  (4)
-#define DTC_VERSION_MINOR  (40)
+#define DTC_VERSION_MINOR  (50)
 
 /*******************************************************************************
 Typedef definitions
@@ -242,6 +244,10 @@ typedef struct st_transfer_data { /* 4 long-words */
     #include "./src/targets/rx24t/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX24U)
     #include "./src/targets/rx24u/r_dtc_rx_target_if.h"
+#elif defined(BSP_MCU_RX260)
+    #include "./src/targets/rx260/r_dtc_rx_target_if.h"
+#elif defined(BSP_MCU_RX261)
+    #include "./src/targets/rx261/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX26T)
     #include "./src/targets/rx26t/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX130)

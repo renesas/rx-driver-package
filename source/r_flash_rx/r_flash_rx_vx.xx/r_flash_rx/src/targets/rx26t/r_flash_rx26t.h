@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2023-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_rx26t.h
@@ -24,6 +24,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 20.02.2023 5.00    First Release
+*         : 30.07.2024 5.20    Added countermeasures as described in Technical Update TN-RX*-A0274A.
 ***********************************************************************************************************************/
 
 #ifndef R_FLASH_RX26T_H
@@ -477,12 +478,12 @@ R_BSP_PRAGMA_PACKOPTION
         ((int32_t)(60 * (50.0/(MCU_CFG_FCLK_HZ/1000000)))*(MCU_CFG_ICLK_HZ/1000000))
 
 /*  According to HW Manual the Max Erasure Time for a 16KB block is
-    around 864ms.  This is with a FCLK of 4 MHz. The calculation below
+    around 520ms.  This is with a FCLK of 4 MHz. The calculation below
     calculates the number of ICLK ticks needed for the timeout delay.
-    The 864ms number is adjusted linearly depending on the FCLK frequency.
+    The 520ms number is adjusted linearly depending on the FCLK frequency.
 */
 #define WAIT_MAX_ERASE_CF_16K \
-        ((int32_t)(864000 * (4.0/(MCU_CFG_FCLK_HZ/1000000)))*(MCU_CFG_ICLK_HZ/1000000))
+        ((int32_t)(520000 * (4.0/(MCU_CFG_FCLK_HZ/1000000)))*(MCU_CFG_ICLK_HZ/1000000))
 #define WAIT_MAX_ERASE_CF_MEDIUM WAIT_MAX_ERASE_CF_16K
 
 /*  According to HW Manual the Max Erasure Time for a 4KB block is

@@ -29,6 +29,9 @@
 *           15.08.2022 2.30    Supported for RX26T.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *           30.06.2023 2.40    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           28.06.2024 2.60    Supported for RX260, RX261.
+*                              Updated support command RSCI_CMD_SET_TXI_PRIORITY and RSCI_CMD_SET_RXI_PRIORITY 
+*                              in R_RSCI_Control() for RX260, RX261.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -131,6 +134,11 @@ static void rsci_receive_data_match(rsci_hdl_t const hdl);
 
 /* queue buffers */
 #if (RSCI_CFG_ASYNC_INCLUDED || RSCI_CFG_MANC_INCLUDED)
+
+#if RSCI_CFG_CH0_INCLUDED
+static uint8_t  ch0_tx_buf[RSCI_CFG_CH0_TX_BUFSIZ];
+static uint8_t  ch0_rx_buf[RSCI_CFG_CH0_RX_BUFSIZ];
+#endif
 
 #if RSCI_CFG_CH8_INCLUDED
 static uint8_t  ch8_tx_buf[RSCI_CFG_CH8_TX_BUFSIZ];
@@ -422,6 +430,14 @@ static rsci_err_t rsci_init_queues(uint8_t const chan)
     /* channel number verified as legal prior to calling this function */
     switch (chan)
     {
+#if RSCI_CFG_CH0_INCLUDED
+        case (RSCI_CH0):
+        {
+            q_err1 = R_BYTEQ_Open(ch0_tx_buf, RSCI_CFG_CH0_TX_BUFSIZ, &g_rsci_handles[RSCI_CH0]->u_tx_data.que);
+            q_err2 = R_BYTEQ_Open(ch0_rx_buf, RSCI_CFG_CH0_RX_BUFSIZ, &g_rsci_handles[RSCI_CH0]->u_rx_data.que);
+            break;
+        }
+#endif
 #if RSCI_CFG_CH8_INCLUDED
         case (RSCI_CH8):
         {
@@ -590,7 +606,7 @@ static rsci_err_t rsci_init_async(rsci_hdl_t const      hdl,
     else
     {
         hdl->rom->regs->SCR1.BIT.PE = 1;
-		hdl->rom->regs->SCR1.BIT.PM = (uint8_t)((p_cfg->parity_type));
+        hdl->rom->regs->SCR1.BIT.PM = (uint8_t)((p_cfg->parity_type));
     }
 
     /* Configure Character Length, Stop Bit Length */
@@ -802,7 +818,7 @@ static rsci_err_t rsci_init_manc(rsci_hdl_t const      hdl,
     else
     {
         hdl->rom->regs->SCR1.BIT.PE = 1;
-		hdl->rom->regs->SCR1.BIT.PM = (uint8_t)((p_cfg->parity_type));
+        hdl->rom->regs->SCR1.BIT.PM = (uint8_t)((p_cfg->parity_type));
     }
 
     /* Configure Character Length, Stop Bit Length, Start bit Length */
@@ -2338,16 +2354,28 @@ rsci_err_t R_RSCI_Control(rsci_hdl_t const     hdl,
 
         case (RSCI_CMD_SET_TXI_PRIORITY):
         {
+#if defined(BSP_MCU_RX671) || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T)
             /* Casting void type to uint8_t type is valid */
             *hdl->rom->ipr_txi = *((uint8_t*)p_args);
             break;
+#else
+            /* Casting void type to uint8_t type is valid */
+            *hdl->rom->ipr = *((uint8_t *)p_args);
+            break;
+#endif
         }
 
         case (RSCI_CMD_SET_RXI_PRIORITY):
         {
+#if defined(BSP_MCU_RX671) || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T)
             /* Casting void type to uint8_t type is valid */
             *hdl->rom->ipr_rxi = *((uint8_t*)p_args);
             break;
+#else
+            /* Casting void type to uint8_t type is valid */
+            *hdl->rom->ipr = *((uint8_t *)p_args);
+            break;
+#endif
         }
 
         default:

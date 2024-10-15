@@ -1202,26 +1202,22 @@ uint8_t usb_hstd_check_attach(void)
 
     usb_hstd_read_lnst((uint16_t*)&buf);
 
-    if (USB_UNDECID == (uint16_t)(buf[1] & USB_RHST))      /* RHST is at non-connection */
+    if (USB_FS_JSTS == (buf[0] & USB_LNST))            /* High/Full speed device */
     {
-        if (USB_FS_JSTS == (buf[0] & USB_LNST))            /* High/Full speed device */
-        {
-            return USB_LNST_ATTACH;
-        }
-        else if (USB_LS_JSTS == (buf[0] & USB_LNST))       /* Low speed device */
-        {
-            return USB_LNST_ATTACH;
-        }
-        else if (USB_SE0 == (buf[0] & USB_LNST))
-        {
-        }
-        else 
-        {
-             /* Do Nothing */
-        }
-        return USB_LNST_DETACH;
+        return USB_LNST_ATTACH;
     }
-    return USB_RHST_ATTACH;
+    else if (USB_LS_JSTS == (buf[0] & USB_LNST))       /* Low speed device */
+    {
+        return USB_LNST_ATTACH;
+    }
+    else if (USB_SE0 == (buf[0] & USB_LNST))
+    {
+    }
+    else 
+    {
+         /* Do Nothing */
+    }
+    return USB_LNST_DETACH;
 }   /* End of function usb_hstd_check_attach() */
 
 

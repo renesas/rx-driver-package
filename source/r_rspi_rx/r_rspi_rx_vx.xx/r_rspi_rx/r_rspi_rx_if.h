@@ -58,6 +58,9 @@
 *                               Modified the order of disabling interrupts between SPTI and SPRI
 *                               when disabling interrupts.
 *                               Added include header to fix missing #include platform.h issue in "r_rspi_rx_private.h".
+*         : 28.06.2024 3.50     Supported RX260, RX261.
+*                               Fixed the default value of RSPI_CFG_DUMMY_TXDATA in MDF file
+*                               to match the value in file r_rspi_rx_config.h.
 ***********************************************************************************************************************/
 #ifndef RSPI_API_HEADER_FILE
 #define RSPI_API_HEADER_FILE
@@ -83,7 +86,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define RSPI_RX_VERSION_MAJOR           (3)
-#define RSPI_RX_VERSION_MINOR           (40)
+#define RSPI_RX_VERSION_MINOR           (50)
 
 /***********************************************************************************************************************
 Typedef definitions

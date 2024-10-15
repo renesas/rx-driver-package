@@ -35,7 +35,6 @@
 
 #if (BSP_CFG_RTOS_USED == 0)    /* Non-OS */
 #include "r_usb_reg_access.h"
-#include "r_usb_cstd_rtos.h"
 
 /*******************************************************************************
  Macro definitions
@@ -457,6 +456,7 @@ Return value    : none
 ******************************************************************************/
 static void usb_hmsc_data_act(usb_tskinfo_t *p_mess)
 {
+    static uint8_t g_usb_hmsc_rs_data[USB_HMSC_REQUEST_SENSE_SIZE]; /* Request Sense Data Buffer */
     uint16_t    hmsc_retval = USB_HMSC_CSW_ERR;
     uint16_t    result;
     uint32_t    size;
@@ -577,7 +577,7 @@ static void usb_hmsc_data_act(usb_tskinfo_t *p_mess)
                     {
                         gs_usb_hmsc_csw_loop = USB_YES;
                         /* Request sense command */
-                        usb_hmsc_request_sense ((uint8_t *)&g_usb_hmsc_data);
+                        usb_hmsc_request_sense ((uint8_t *)&g_usb_hmsc_rs_data);
                     }
                     else
                     {

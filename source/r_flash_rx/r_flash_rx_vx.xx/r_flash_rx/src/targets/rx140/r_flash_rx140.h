@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2021-2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_flash_rx140.h
@@ -24,6 +24,7 @@
 /**********************************************************************************************************************
  * History : DD.MM.YYYY Version  Description
  *         : 23.04.2021 4.80     First Release
+ *         : 30.07.2024 5.20     Modified WAIT_MAX_ERASE_CF_1K and WAIT_MAX_ERASE_DF_1K.
  *********************************************************************************************************************/
 
 #ifndef R_FLASH_RX140_H
@@ -269,7 +270,7 @@ typedef enum _flash_block_address
     The 2331ms number is adjusted linearly depending on the FCLK frequency.
 */
 #define WAIT_MAX_ERASE_CF_1K \
-        ((int32_t)(2331000 *(MCU_CFG_ICLK_HZ/1000000)))
+        ((int32_t)((2331000 * 4) *(MCU_CFG_ICLK_HZ/1000000)))
 
 /*  According to HW Manual the Max Erasure Time for a 4KB Data Flash block is
     around 1273.7 ms.  This is with a FCLK of 1MHz. The calculation below
@@ -277,7 +278,7 @@ typedef enum _flash_block_address
     The 1273.7 ms number is adjusted linearly depending on the FCLK frequency.
 */
 #define WAIT_MAX_ERASE_DF_1K \
-        ((int32_t)(1273700 * (MCU_CFG_ICLK_HZ/1000000)))
+        ((int32_t)((1273700 * 2) * (MCU_CFG_ICLK_HZ/1000000)))
 
 #define WAIT_MAX_ERASE_CF   WAIT_MAX_ERASE_CF_1K
 #define WAIT_MAX_ERASE_DF   WAIT_MAX_ERASE_DF_1K

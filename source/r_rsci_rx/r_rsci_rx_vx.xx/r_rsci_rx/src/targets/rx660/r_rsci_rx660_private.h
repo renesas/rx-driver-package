@@ -22,6 +22,7 @@
 ************************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *           31.03.2022 1.00    Initial Release
+*           28.06.2024 2.60    Added the source code to check unsupported channel for the supported device.
 ***********************************************************************************************************************/
 
 #ifndef RSCI_RX660_H
@@ -40,6 +41,10 @@ Includes   <System Includes> , "Project Includes"
 Macro definitions
 ***********************************************************************************************************************/
 
+/* RSCI channel include Check */
+#if ((RSCI_CFG_CH0_INCLUDED != 0) || (RSCI_CFG_CH8_INCLUDED != 0) || (RSCI_CFG_CH9_INCLUDED != 0) || ((BSP_CFG_MCU_PART_PACKAGE == 0x6) && (RSCI_CFG_CH11_INCLUDED != 0)))
+    #error "ERROR - Unsupported channel chosen in r_rsci_config.h"
+#endif
 
 /* RSCI SCR register masks */
 #define RSCI_SCR0_TIE_MASK    (0x00100000U)     /* transmit interrupt enable */

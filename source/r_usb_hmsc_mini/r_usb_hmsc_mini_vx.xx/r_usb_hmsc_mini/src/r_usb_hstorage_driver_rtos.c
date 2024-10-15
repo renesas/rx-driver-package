@@ -68,7 +68,7 @@ uint8_t g_usb_hmsc_data[512];
 uint16_t usb_hmsc_error_process (uint16_t err_code)
 {
     uint16_t    retval;
-    static uint8_t g_usb_hmsc_rs_data[64]; /* Request Sense Data Buffer */
+    static uint8_t g_usb_hmsc_rs_data[USB_HMSC_REQUEST_SENSE_SIZE]; /* Request Sense Data Buffer */
 
     retval = err_code;
 
@@ -91,32 +91,16 @@ uint16_t usb_hmsc_error_process (uint16_t err_code)
  ******************************************************************************/
 uint16_t usb_hmsc_strg_drive_search (void)
 {
-    usb_er_t err;
     uint16_t hmsc_retval;
     uint16_t count = 0;
 
     /* Get MAX_LUN */
-    err = usb_hmsc_get_max_unit();
-    if (USB_ERROR == err)
-    {
-        return err;
-    }
+    usb_hmsc_get_max_unit();
 
     usb_cpu_delay_xms(100);
 
     /* Inquiry */
     hmsc_retval = usb_hmsc_inquiry((uint8_t*) &g_usb_hmsc_data);
-    if (USB_HMSC_OK != hmsc_retval)
-    {
-        hmsc_retval = usb_hmsc_error_process(hmsc_retval);
-        if (USB_HMSC_OK != hmsc_retval)
-        {
-            return USB_ERROR;
-        }
-    }
-
-    /* Read Format Capacity */
-    hmsc_retval = usb_hmsc_read_format_capacity((uint8_t*) &g_usb_hmsc_data);
     if (USB_HMSC_OK != hmsc_retval)
     {
         hmsc_retval = usb_hmsc_error_process(hmsc_retval);
@@ -175,7 +159,11 @@ uint16_t usb_hmsc_strg_drive_search (void)
         }
         else
         {
-            return USB_ERROR;
+            hmsc_retval = usb_hmsc_error_process(hmsc_retval);
+            if (USB_HMSC_OK != hmsc_retval)
+            {
+                return USB_ERROR;
+            }
         }
     }
 

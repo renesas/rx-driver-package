@@ -50,6 +50,7 @@
         <version>8.03.00.202204</version>
         <version>8.03.00.202305</version>
         <version>8.03.00.202311</version>
+        <version>8.03.00.202405</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -85,6 +86,8 @@
         <group omit_board="true">RX23E-B</group>
         <group omit_board="true">RX24T</group>
         <group omit_board="true">RX24U</group>
+        <group omit_board="true">RX260</group>
+        <group omit_board="true">RX261</group>
         <group omit_board="true">RX26T</group>
         <group omit_board="true">RX64M</group>
         <group omit_board="true">RX65N</group>
@@ -107,7 +110,7 @@
         <zipsource>r_lvd_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.42</version>
+            <version>7.51</version>
         </dependency>
         <application>Low Voltage Detection</application>
         <desc>LVD Driver</desc>

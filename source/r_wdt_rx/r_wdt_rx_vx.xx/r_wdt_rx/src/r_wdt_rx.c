@@ -34,6 +34,8 @@
 *                              Modified comment of API function to Doxygen style.
 *           15.08.2022 3.00    Added support for RX26T.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           28.06.2024 3.10    Added support for RX260, RX261.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -60,9 +62,9 @@ Private global variables and functions
 static bool gs_already_opened = false;
 
 /* Internal functions. */
-static wdt_err_t wdt_init_register_start_mode (wdt_config_t *p_cfg);
+static wdt_err_t wdt_init_register_start_mode (wdt_config_t * p_cfg);
 #if (1 == WDT_CFG_PARAM_CHECKING_ENABLE)
-static bool wdt_parameter_check (wdt_config_t *p_cfg);
+static bool wdt_parameter_check (wdt_config_t * p_cfg);
 
 #endif /* WDT_CFG_PARAM_CHECKING_ENABLE */
 #endif /* BSP_CFG_OFS0_REG_VALUE */
@@ -249,7 +251,7 @@ End of function wdt_parameter_check
 *  the cmd argument.
 * @code
 * WDT_CMD_GET_STATUS,         // Get WDT status
-* WDT_CMD_REFRESH_COUNTING,  // Refresh the counter
+* WDT_CMD_REFRESH_COUNTING,   // Refresh the counter
 * @endcode
 * @retval [WDT_SUCCESS]          - Command completed successfully.
 * @retval [WDT_ERR_INVALID_ARG]  - Error: Argument is not valid.
@@ -300,7 +302,7 @@ wdt_err_t R_WDT_Control(wdt_cmd_t const cmd, uint16_t * p_status)
     switch (cmd)
     {
         case WDT_CMD_REFRESH_COUNTING:
-            {
+        {
             /* Make settings to WDTRR register to refresh the counter
             WDTRR - WDT Refresh Register
             Refresh the down-counter of WDT */
@@ -308,21 +310,21 @@ wdt_err_t R_WDT_Control(wdt_cmd_t const cmd, uint16_t * p_status)
 
             /* Set WDTRR register value to 0xFFu to refresh counting */
             WDT.WDTRR = 0xFFu;
-            }
-        break;
+            break;
+        }
 
         case WDT_CMD_GET_STATUS:
-            {
+        {
             /* Get WDT status from WDTSR register */
             *p_status = WDT.WDTSR.WORD;
-            }
-        break;
+            break;
+        }
 
         default:
-            {
+        {
             R_BSP_NOP();
-            }
-        break;
+            break;
+        }
     }
 
     release_hw_lock();

@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015(2024) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_cdataio.c
@@ -28,6 +28,7 @@
 *           : 30.11.2018 1.10    Supporting Smart Configurator
 *           : 31.05.2019 1.11    Added support for GNUC and ICCRX.
 *           : 30.06.2020 1.20    Added support for RTOS.
+*           : 30.04.2024 1.30    Added support for RX261.
   ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -137,7 +138,9 @@ const uint8_t g_usb_pstd_pipe_no_tbl[] =
 
   #if defined(USB_CFG_PHID_USE)
     USB_CFG_PHID_INT_OUT,   USB_CFG_PHID_INT_IN,    /* USB_PHID */
+    USB_CFG_PHID_INT_OUT2,  USB_CFG_PHID_INT_IN2,    /* USB_PHID2 */
   #else
+    USB_NULL,               USB_NULL,
     USB_NULL,               USB_NULL,
   #endif
 };
@@ -180,32 +183,39 @@ void (*gp_usb_cstd_callback[]) (usb_utr_t *, uint16_t, uint16_t) =
         /* PHID */
   #if defined(USB_CFG_PHID_USE)
         usb_phid_read_complete, usb_phid_write_complete, /* USB_PHID (4) */
+        usb_phid_read_complete, usb_phid_write_complete, /* USB_PHID (5) */
   #else
         USB_NULL, USB_NULL, /* USB_PHID (4) */
+        USB_NULL, USB_NULL, /* USB_PHID (5) */
   #endif
         /* PVNDR */
-        USB_NULL, USB_NULL, /* USB_PVND  (5) */
+        USB_NULL, USB_NULL, /* USB_PVND  (6) */
+
+        USB_NULL, USB_NULL, /* USB_PCDC_PHID(dummy 7) */
+        USB_NULL, USB_NULL, /* USB_PCDC_PMSC(dummy 8) */
+        USB_NULL, USB_NULL, /* USB_PHID_PMSC(dummy 9) */
+
         /* HCDC, HCDCC */
 #if defined(USB_CFG_HCDC_USE) && (BSP_CFG_RTOS_USED != 0)
-        usb_hcdc_read_complete, usb_hcdc_write_complete, /* USB_HCDC  (6) */
-        usb_hcdc_read_complete, USB_NULL, /* USB_HCDCC (7) */
+        usb_hcdc_read_complete, usb_hcdc_write_complete, /* USB_HCDC  (10) */
+        usb_hcdc_read_complete, USB_NULL, /* USB_HCDCC (11) */
 #else
-        USB_NULL, USB_NULL, /* USB_HCDC  (6) */
-        USB_NULL, USB_NULL, /* USB_HCDCC (7) */
+        USB_NULL, USB_NULL, /* USB_HCDC  (10) */
+        USB_NULL, USB_NULL, /* USB_HCDCC (11) */
 #endif
         /* HHID */
 #if defined(USB_CFG_HHID_USE) && (BSP_CFG_RTOS_USED != 0)
-        usb_hhid_read_complete, usb_hhid_write_complete, /* USB_HHID  (8) */
+        usb_hhid_read_complete, usb_hhid_write_complete, /* USB_HHID  (12) */
 #else
-        USB_NULL, USB_NULL, /* USB_HHID  (8) */
+        USB_NULL, USB_NULL, /* USB_HHID  (12) */
 #endif
         /* HVNDR */
-        USB_NULL, USB_NULL, /* USB_HVND  (9) */
+        USB_NULL, USB_NULL, /* USB_HVND  (13) */
 
         /* HMSC */
-        USB_NULL, USB_NULL, /* USB_HMSC  (10) */
+        USB_NULL, USB_NULL, /* USB_HMSC  (14) */
         /* PMSC */
-        USB_NULL, USB_NULL, /* USB_PMSC  (11) */
+        USB_NULL, USB_NULL, /* USB_PMSC  (15) */
 }; /* const void (gp_usb_cstd_callback[])(usb_utr_t *, uint16_t, uint16_t) */
 
 uint16_t     g_usb_cstd_bemp_skip[USB_MAX_PIPE_NO + 1u];

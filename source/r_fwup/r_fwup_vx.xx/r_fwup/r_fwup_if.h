@@ -27,6 +27,7 @@
 *                              Added arguments to R_FWUP_WriteImageProgram API.
 *         : 29.03.2024 2.02    Update wrapper functions.
 *         : 09.04.2024 2.03    Fixed wrapper function.
+*         : 15.10.2024 2.04    Fixed wrapper function.
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -45,7 +46,7 @@ Macro definitions
 **********************************************************************************************************************/
 /* Version Number of API. */
 #define FWUP_VERSION_MAJOR                  (2)
-#define FWUP_VERSION_MINOR                  (03)
+#define FWUP_VERSION_MINOR                  (04)
 
 /* for FWUP_CFG_FUNCTION_MODE */
 #define FWUP_FUNC_BOOTLOADER                (0)

@@ -41,6 +41,7 @@
 *                                    FLASH Firmware.
 *              : 31.08.2023 2.30     Updated FatFs ff15.
 *              : 15.12.2023 2.40     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*              : 08.05.2024 2.50     Added support SPI mode SD card.
 *******************************************************************************/
 
 /******************************************************************************
@@ -210,6 +211,84 @@ static uint32_t TFAT_DRIVE_SDMEM_ALLOC = (SDMEM_NUM_9 | SDMEM_NUM_8 | SDMEM_NUM_
 #endif
 
 #endif /* (TFAT_SDMEM_DRIVE_NUM > 0) */
+
+
+/* for SD SPI memory card */
+#if (TFAT_SPI_SDMEM_DRIVE_NUM > 0)
+#if (TFAT_DRIVE_ALLOC_NUM_0 == TFAT_CTRL_SPI_SDMEM)
+#define SPI_SDMEM_NUM_0   (1)
+#define DRV0_DEV_CH   (0)
+#else
+#define SPI_SDMEM_NUM_0   (0)
+#endif // (TFAT_DRIVE_ALLOC_NUM_0 == TFAT_CTRL_SPI_SDMEM)
+#if (TFAT_DRIVE_ALLOC_NUM_1 == TFAT_CTRL_SPI_SDMEM)
+#define SPI_SDMEM_NUM_1   (1<<1)
+#define DRV1_DEV_CH   (0 + SPI_SDMEM_NUM_0)
+#else
+#define SPI_SDMEM_NUM_1   (0)
+#endif // (TFAT_DRIVE_ALLOC_NUM_1 == TFAT_CTRL_SPI_SDMEM)
+#if (TFAT_DRIVE_ALLOC_NUM_2 == TFAT_CTRL_SPI_SDMEM)
+#define SPI_SDMEM_NUM_2   (1<<2)
+#define DRV2_DEV_CH   (0 + SPI_SDMEM_NUM_0 + (SPI_SDMEM_NUM_1>>1))
+#else
+#define SPI_SDMEM_NUM_2   (0)
+#endif // (TFAT_DRIVE_ALLOC_NUM_2 == TFAT_CTRL_SPI_SDMEM)
+#if (TFAT_DRIVE_ALLOC_NUM_3 == TFAT_CTRL_SPI_SDMEM)
+#define SPI_SDMEM_NUM_3   (1<<3)
+#define DRV3_DEV_CH   (0 + SPI_SDMEM_NUM_0 + (SPI_SDMEM_NUM_1>>1) + (SPI_SDMEM_NUM_2>>2))
+#else
+#define SPI_SDMEM_NUM_3   (0)
+#endif //  (TFAT_DRIVE_ALLOC_NUM_3 == TFAT_CTRL_SPI_SDMEM)
+#if (TFAT_DRIVE_ALLOC_NUM_4 == TFAT_CTRL_SPI_SDMEM)
+#define SPI_SDMEM_NUM_4   (1<<4)
+#define DRV4_DEV_CH   (0 + SPI_SDMEM_NUM_0 + (SPI_SDMEM_NUM_1>>1) + (SPI_SDMEM_NUM_2>>2) + (SPI_SDMEM_NUM_3>>3))
+#else
+#define SPI_SDMEM_NUM_4    (0)
+#endif // (TFAT_DRIVE_ALLOC_NUM_4 == TFAT_CTRL_SPI_SDMEM)
+#if (TFAT_DRIVE_ALLOC_NUM_5 == TFAT_CTRL_SPI_SDMEM)
+#define SPI_SDMEM_NUM_5   (1<<5)
+#define DRV5_DEV_CH   (0 + SPI_SDMEM_NUM_0 + (SPI_SDMEM_NUM_1>>1) + (SPI_SDMEM_NUM_2>>2) + (SPI_SDMEM_NUM_3>>3) + (SPI_SDMEM_NUM_4>>4))
+#else
+#define SPI_SDMEM_NUM_5    (0)
+#endif // (TFAT_DRIVE_ALLOC_NUM_5 == TFAT_CTRL_SPI_SDMEM)
+#if (TFAT_DRIVE_ALLOC_NUM_6 == TFAT_CTRL_SPI_SDMEM)
+#define SPI_SDMEM_NUM_6   (1<<6)
+#define DRV6_DEV_CH   (0 + SPI_SDMEM_NUM_0 + (SPI_SDMEM_NUM_1>>1) + (SPI_SDMEM_NUM_2>>2) + (SPI_SDMEM_NUM_3>>3) + (SPI_SDMEM_NUM_4>>4) \
+                         + (SPI_SDMEM_NUM_5>>5))
+#else
+#define SPI_SDMEM_NUM_6    (0)
+#endif // (TFAT_DRIVE_ALLOC_NUM_6 == TFAT_CTRL_SPI_SDMEM)
+#if (TFAT_DRIVE_ALLOC_NUM_7 == TFAT_CTRL_SPI_SDMEM)
+#define SPI_SDMEM_NUM_7   (1<<7)
+#define DRV7_DEV_CH   (0 + SPI_SDMEM_NUM_0 + (SPI_SDMEM_NUM_1>>1) + (SPI_SDMEM_NUM_2>>2) + (SPI_SDMEM_NUM_3>>3) + (SPI_SDMEM_NUM_4>>4) \
+                         + (SPI_SDMEM_NUM_5>>5) + (SPI_SDMEM_NUM_6>>6))
+#else
+#define SPI_SDMEM_NUM_7    (0)
+#endif // (TFAT_DRIVE_ALLOC_NUM_7 == TFAT_CTRL_SPI_SDMEM)
+#if (TFAT_DRIVE_ALLOC_NUM_8 == TFAT_CTRL_SPI_SDMEM)
+#define SPI_SDMEM_NUM_8   (1<<8)
+#define DRV8_DEV_CH   (0 + SPI_SDMEM_NUM_0 + (SPI_SDMEM_NUM_1>>1) + (SPI_SDMEM_NUM_2>>2) + (SPI_SDMEM_NUM_3>>3) + (SPI_SDMEM_NUM_4>>4) \
+                         + (SPI_SDMEM_NUM_5>>5) + (SPI_SDMEM_NUM_6>>6) + (SPI_SDMEM_NUM_7>>7))
+#else
+#define SPI_SDMEM_NUM_8    (0)
+#endif // (TFAT_DRIVE_ALLOC_NUM_8 == TFAT_CTRL_SPI_SDMEM)
+#if (TFAT_DRIVE_ALLOC_NUM_9 == TFAT_CTRL_SPI_SDMEM)
+#define SPI_SDMEM_NUM_9   (1<<9)
+#define DRV9_DEV_CH   (0 + SPI_SDMEM_NUM_0 + (SPI_SDMEM_NUM_1>>1) + (SPI_SDMEM_NUM_2>>2) + (SPI_SDMEM_NUM_3>>3) + (SPI_SDMEM_NUM_4>>4) \
+                     + (SPI_SDMEM_NUM_5>>5) + (SPI_SDMEM_NUM_6>>6) + (SPI_SDMEM_NUM_7>>7) + (SPI_SDMEM_NUM_8>>8))
+#else
+#define SPI_SDMEM_NUM_9   (0)
+#endif // (TFAT_DRIVE_ALLOC_NUM_9 == TFAT_CTRL_SPI_SDMEM)
+
+static uint32_t TFAT_DRIVE_SPI_SDMEM_ALLOC = (SPI_SDMEM_NUM_9 | SPI_SDMEM_NUM_8 | SPI_SDMEM_NUM_7 | SPI_SDMEM_NUM_6 | SPI_SDMEM_NUM_5 | \
+                                          SPI_SDMEM_NUM_4 | SPI_SDMEM_NUM_3 | SPI_SDMEM_NUM_2 | SPI_SDMEM_NUM_1 | SPI_SDMEM_NUM_0);
+
+#if TFAT_SPI_SDMEM_DRIVE_NUM != ( (SPI_SDMEM_NUM_9>>9)+(SPI_SDMEM_NUM_8>>8)+(SPI_SDMEM_NUM_7>>7)+(SPI_SDMEM_NUM_6>>6)+(SPI_SDMEM_NUM_5>>5)+ \
+                              (SPI_SDMEM_NUM_4>>4)+(SPI_SDMEM_NUM_3>>3)+(SPI_SDMEM_NUM_2>>2)+(SPI_SDMEM_NUM_1>>1)+SPI_SDMEM_NUM_0 )
+#error "Error! Invalid setting for TFAT_SPI_SDMEM_DRIVE_NUM or TFAT_DRIVE_ALLOC_NUM_x in r_tfat_driver_rx_config.h"
+#endif
+
+#endif /* (TFAT_SPI_SDMEM_DRIVE_NUM > 0) */
 
 
 /* for MMC */
@@ -528,6 +607,19 @@ static uint8_t chk_use_sdmem(uint8_t drive)
 #endif /* USE_SDMEM */
 
 /******************************************************************************
+* Function Name : chk_use_spi_sdmem
+* Description   : allocation check
+* Arguments     : uint8_t drive : Physical drive number for TFAT module
+* Return value  : true : 0x01
+******************************************************************************/
+#if (TFAT_SPI_SDMEM_DRIVE_NUM > 0)
+static uint8_t chk_use_spi_sdmem(uint8_t drive)
+{
+    return ( ( (TFAT_DRIVE_SPI_SDMEM_ALLOC & (0x01 << drive) ) != 0) ?  0x01 : 0x00);
+}
+#endif /* USE_SPI_SDMEM */
+
+/******************************************************************************
 * Function Name : chk_use_mmc
 * Description   : allocation check
 * Arguments     : uint8_t drive : Physical drive number for TFAT module
@@ -595,6 +687,14 @@ DSTATUS disk_initialize (
     }
 #endif
 
+#if (TFAT_SPI_SDMEM_DRIVE_NUM > 0)
+    if ( chk_use_spi_sdmem(pdrv) )
+    {
+        /* function for SPI SDMEM */
+        ret = spi_sdmem_disk_initialize( drive_alloc_tbl[pdrv][1] );
+    }
+#endif
+
 #if (TFAT_MMC_DRIVE_NUM > 0)
     if ( chk_use_mmc(pdrv) )
     {
@@ -658,6 +758,14 @@ DRESULT disk_read (
     {
         /* function for SDMEM */
         ret = sdmem_disk_read( drive_alloc_tbl[pdrv][1], buff, sector, count );
+    }
+#endif
+
+#if (TFAT_SPI_SDMEM_DRIVE_NUM > 0)
+    if ( chk_use_spi_sdmem(pdrv) )
+    {
+        /* function for SPI SDMEM */
+        ret = spi_sdmem_disk_read( drive_alloc_tbl[pdrv][1], buff, sector, count );
     }
 #endif
 
@@ -729,6 +837,14 @@ DRESULT disk_write (
     }
 #endif
 
+#if (TFAT_SPI_SDMEM_DRIVE_NUM > 0)
+    if ( chk_use_spi_sdmem(pdrv) )
+    {
+        /* function for SPI SDMEM */
+        ret = spi_sdmem_disk_write( drive_alloc_tbl[pdrv][1], buff, sector, count );
+    }
+#endif
+
 #if (TFAT_MMC_DRIVE_NUM > 0)
     if ( chk_use_mmc(pdrv) )
     {
@@ -795,6 +911,14 @@ DRESULT disk_ioctl (
     }
 #endif
 
+#if (TFAT_SPI_SDMEM_DRIVE_NUM > 0)
+    if ( chk_use_spi_sdmem(pdrv) )
+    {
+        /* function for SPI SDMEM */
+        ret = spi_sdmem_disk_ioctl ( drive_alloc_tbl[pdrv][1], cmd, buff );
+    }
+#endif
+
 #if (TFAT_MMC_DRIVE_NUM > 0)
     if ( chk_use_mmc(pdrv) )
     {
@@ -852,6 +976,14 @@ DSTATUS disk_status (
     {
         /* function for SDMEM */
         ret = sdmem_disk_status ( drive_alloc_tbl[pdrv][1] );
+    }
+#endif
+
+#if (TFAT_SPI_SDMEM_DRIVE_NUM > 0)
+    if ( chk_use_spi_sdmem(pdrv) )
+    {
+        /* function for SPI SDMEM */
+        ret = spi_sdmem_disk_status ( drive_alloc_tbl[pdrv][1] );
     }
 #endif
 
@@ -980,6 +1112,16 @@ DRESULT drv_change_alloc(TFAT_DRV_NUM tfat_drv, uint8_t dev_type,
     else
     {
         TFAT_DRIVE_SDMEM_ALLOC &= ~(0x01 << tfat_drv);
+    }
+#endif
+#if (TFAT_SPI_SDMEM_DRIVE_NUM > 0)
+    if ( TFAT_CTRL_SPI_SDMEM == dev_type )
+    {
+        TFAT_DRIVE_SPI_SDMEM_ALLOC |= (0x01 << tfat_drv);
+    }
+    else
+    {
+        TFAT_DRIVE_SPI_SDMEM_ALLOC &= ~(0x01 << tfat_drv);
     }
 #endif
 #if (TFAT_MMC_DRIVE_NUM > 0)

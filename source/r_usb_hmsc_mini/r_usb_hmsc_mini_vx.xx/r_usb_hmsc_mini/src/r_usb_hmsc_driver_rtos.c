@@ -482,6 +482,7 @@ static uint16_t usb_hmsc_data_act (void)
                 usb_hmsc_csw_err_stall = USB_ON;
                 usb_hmsc_clear_stall(USB_CFG_HMSC_BULK_IN, class_trans_result);
                 hmsc_retval = usb_hmsc_rcv_csw();
+                usb_hmsc_csw_err_stall = USB_OFF;
             }
             else if (USB_MSC_CSW_PHASE_ERR == hmsc_retval)
             {

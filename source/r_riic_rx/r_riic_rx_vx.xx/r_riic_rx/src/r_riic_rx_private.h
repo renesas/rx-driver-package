@@ -74,6 +74,7 @@
  *         : 31.03.2023 2.70     Added RX26T support.
  *         : 29.05.2023 2.80     Added RX23E-B support.
  *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0
+ *         : 08.08.2024 3.00     Added RX260, RX261 support.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIIC_PRIVATE_H
@@ -137,6 +138,10 @@
         #include "./targets/rx26t/r_riic_rx26t_private.h"
     #elif defined(BSP_MCU_RX23E_B)
         #include "./targets/rx23e-b/r_riic_rx23e_b_private.h"
+    #elif defined(BSP_MCU_RX260)
+        #include "./targets/rx260/r_riic_rx260_private.h"
+    #elif defined(BSP_MCU_RX261)
+        #include "./targets/rx261/r_riic_rx261_private.h"
     #else
         #error "This MCU is not supported by the current r_riic_rx module."
     #endif

@@ -22,7 +22,8 @@
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
- *         : 10.06.2020 2.01    Added RX65N, RX66N, RX72M and RX72N.
+ *           10.06.2020 2.01    Added RX65N, RX66N, RX72M and RX72N.
+ *           28.06.2024 2.10    Removed duplicate macros (LPC_CLOCK_ACTIVE and LPC_CLOCK_INACTIVE)
  ***********************************************************************************************************************/
 
 #ifndef R_LPC_RX66N_PRIVATE_H
@@ -84,9 +85,6 @@
 
     #define LPC_MEDIUM_SPD (0x02)
     #define LPC_HIGH_SPD (0x00)
-
-    #define LPC_CLOCK_INACTIVE                  (0x01)
-    #define LPC_CLOCK_ACTIVE                    (0x00)
     
     #define LPC_ACS_CHK_MSTPCRA                 (0xFFFFFFCF)
     #define LPC_ACS_CHK_MSTPCRB                 (0xFFFFFFFF)

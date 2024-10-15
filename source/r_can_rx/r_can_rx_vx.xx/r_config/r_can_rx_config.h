@@ -24,9 +24,9 @@
 * History : DD.MM.YYYY Version Description
 *         : 02.01.2015 1.10    For 64M, 71M, 65N.
 *         : 30.10.2015 2.02    FIT update, new R_CAN_Create interface.
-*         : 3.3.2016   2.10    65N added.
-*         : 1.30.2017  2.11    Tested with 65N 2MB. (Only comments change.)
-*         : 8.14.2017  2.12    Release version for 65N 2MB. Bug fix in r_can_rx.c.
+*         : 03.03.2016 2.10    65N added.
+*         : 30.01.2017 2.11    Tested with 65N 2MB. (Only comments change.)
+*         : 14.08.2017 2.12    Release version for 65N 2MB. Bug fix in r_can_rx.c.
 *         : 27.04.2018 2.13    - Added RX66T
 *         : 26.09.2018 2.13    Revised r_can_rx_config.h for use with Smart Configurator
 *         : 08.01.2019 2.15    - Added RX72T

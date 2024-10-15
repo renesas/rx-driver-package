@@ -28,15 +28,12 @@
 *           31.03.2022 2.10    Added comments for RX660 support
 *           15.08.2022 2.30    Supported for RX26T.
 *           30.06.2023 2.40    Supported for RX26T-256KB.
+*           28.06.2024 2.60    Moved the source code which checks for RX26T devices support to r_rsci_rx26t_private.h.
 ***********************************************************************************************************************/
 #ifndef RSCI_CONFIG_H
 #define RSCI_CONFIG_H
 
 #include "platform.h"
-
-#if ((BSP_MCU_RX26T == 1) && ((BSP_CFG_MCU_PART_MEMORY_SIZE == 0x8) || (BSP_CFG_MCU_PART_MEMORY_SIZE == 0xA)))
-#error  "Error - RX26T Product with 48 Kbytes RAM not support RSCI Module!"
-#endif
 
 /***********************************************************************************************************************
 Configuration Options
@@ -64,26 +61,30 @@ Configuration Options
  * m = this channel is not available in Manchester mode.
  * RX MCU supported channels
  *
- * CH#    671  660  26T
- * ----   ---  ---  ---
- * CH8               Xm
- * CH9               X
- * CH10    X    X     
- * CH11    X    X    X
+ * CH#    671  660  26T  260  261
+ * ----   ---  ---  ---  ---  ---
+ * CH0                    Xm   Xm
+ * CH8               Xm   Xm   Xm
+ * CH9               X    X    X 
+ * CH10    X    X                
+ * CH11    X    X    X           
 
 */
+#define RSCI_CFG_CH0_INCLUDED    (0)
 #define RSCI_CFG_CH8_INCLUDED    (0)
 #define RSCI_CFG_CH9_INCLUDED    (0)
 #define RSCI_CFG_CH10_INCLUDED   (0)
 #define RSCI_CFG_CH11_INCLUDED   (1)
 
 /* SPECIFY ASYNC MODE TX QUEUE BUFFER SIZES (will not allocate if chan not enabled) */
+#define RSCI_CFG_CH0_TX_BUFSIZ   (80)
 #define RSCI_CFG_CH8_TX_BUFSIZ   (80)
 #define RSCI_CFG_CH9_TX_BUFSIZ   (80)
 #define RSCI_CFG_CH10_TX_BUFSIZ  (80)
 #define RSCI_CFG_CH11_TX_BUFSIZ  (80)
 
 /* SPECIFY ASYNC MODE RX QUEUE BUFFER SIZES (will not allocate if chan not enabled) */
+#define RSCI_CFG_CH0_RX_BUFSIZ   (80)
 #define RSCI_CFG_CH8_RX_BUFSIZ   (80)
 #define RSCI_CFG_CH9_RX_BUFSIZ   (80)
 #define RSCI_CFG_CH10_RX_BUFSIZ  (80)
@@ -126,18 +127,21 @@ Configuration Options
 #define RSCI_CFG_CH11_RX_FIFO_THRESH (8)
 
 /* ENABLE Received Data match function; 1=included, 0=not */
+#define RSCI_CFG_CH0_DATA_MATCH_INCLUDED  (0)
 #define RSCI_CFG_CH8_DATA_MATCH_INCLUDED  (0)
 #define RSCI_CFG_CH9_DATA_MATCH_INCLUDED  (0)
 #define RSCI_CFG_CH10_DATA_MATCH_INCLUDED (0)
 #define RSCI_CFG_CH11_DATA_MATCH_INCLUDED (0)
 
 /* Set enable/ disable transmit signal transition timing adjust feature for each channel; 1=enable, 0=disable */
+#define RSCI_CFG_CH0_TX_SIGNAL_TRANSITION_TIMING_INCLUDED   (0)
 #define RSCI_CFG_CH8_TX_SIGNAL_TRANSITION_TIMING_INCLUDED   (0)
 #define RSCI_CFG_CH9_TX_SIGNAL_TRANSITION_TIMING_INCLUDED   (0)
 #define RSCI_CFG_CH10_TX_SIGNAL_TRANSITION_TIMING_INCLUDED  (0)
 #define RSCI_CFG_CH11_TX_SIGNAL_TRANSITION_TIMING_INCLUDED  (0)
 
 /* Set enable/ disable receive data sampling timing adjust feature for each channel; 1=enable, 0=disable */
+#define RSCI_CFG_CH0_RX_DATA_SAMPLING_TIMING_INCLUDED   (0)
 #define RSCI_CFG_CH8_RX_DATA_SAMPLING_TIMING_INCLUDED   (0)
 #define RSCI_CFG_CH9_RX_DATA_SAMPLING_TIMING_INCLUDED   (0)
 #define RSCI_CFG_CH10_RX_DATA_SAMPLING_TIMING_INCLUDED  (0)

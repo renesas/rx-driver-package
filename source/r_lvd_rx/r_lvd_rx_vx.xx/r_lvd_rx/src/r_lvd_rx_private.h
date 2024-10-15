@@ -40,6 +40,7 @@
 *                                    Added define for LVD_GROUP_INT_ICUG.
 *                                    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *              : 30.01.2024 4.70     Added define LVD_GROUP_INT_ICUC.
+*              : 28.06.2024 4.80     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 #ifndef LVD_PRIVATE_HEADER_FILE
 #define LVD_PRIVATE_HEADER_FILE
@@ -139,10 +140,10 @@ extern lvd_err_t lvd_hw_check_already_open (bool b_open_flag);
 extern lvd_err_t lvd_hw_check_not_opened (bool b_open_flag);
 extern lvd_err_t lvd_hw_check_getstatus (void);
 extern lvd_err_t lvd_hw_check_clearstatus (void);
-extern lvd_err_t lvd_hw_check_param_open (lvd_channel_t ch,
-                                          lvd_config_t const * p_cfg,
-                                          void (*p_cb)(void *),
-                                          lvd_cfg_opt_t const * p_cfg_opt);
+extern lvd_err_t lvd_hw_check_param_open   (lvd_channel_t ch,
+                                            lvd_config_t const * p_cfg,
+                                            void (*p_cb)(void *),
+                                            lvd_cfg_opt_t const * p_cfg_opt);
 extern lvd_err_t lvd_hw_check_loco_limitation (lvd_cfg_opt_t const * p_cfg_opt);
 
 /* Setup functions */

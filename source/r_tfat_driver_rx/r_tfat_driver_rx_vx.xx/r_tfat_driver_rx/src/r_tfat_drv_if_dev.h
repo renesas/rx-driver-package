@@ -35,6 +35,7 @@
 *                                    Added support FLASH SPI Firmware
 *                                    Added support MMCIF Firmware
 *              : 15.12.2023 2.40     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*              : 08.05.2024 2.50     Added support SPI mode SD card.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_tfat_driver_rx_if_dev.h
@@ -91,6 +92,16 @@ DRESULT sdmem_disk_write(uint8_t drive, const uint8_t* buffer,
 DRESULT sdmem_disk_ioctl(uint8_t drive, uint8_t command, void* buffer);
 DSTATUS sdmem_disk_status(uint8_t drive);
 #endif /* (TFAT_SDMEM_DRIVE_NUM > 0) */
+
+#if (TFAT_SPI_SDMEM_DRIVE_NUM > 0)
+DSTATUS spi_sdmem_disk_initialize(uint8_t drive);
+DRESULT spi_sdmem_disk_read(uint8_t drive, uint8_t* buffer,
+                        uint32_t sector_number, uint32_t sector_count);
+DRESULT spi_sdmem_disk_write(uint8_t drive, const uint8_t* buffer,
+                        uint32_t sector_number, uint32_t sector_count);
+DRESULT spi_sdmem_disk_ioctl(uint8_t drive, uint8_t command, void* buffer);
+DSTATUS spi_sdmem_disk_status(uint8_t drive);
+#endif /* (TFAT_SPI_SDMEM_DRIVE_NUM > 0) */
 
 #if (TFAT_MMC_DRIVE_NUM > 0)
 DSTATUS mmcif_disk_initialize(uint8_t drive);

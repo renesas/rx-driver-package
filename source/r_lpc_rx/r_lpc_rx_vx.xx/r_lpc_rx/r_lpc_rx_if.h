@@ -34,10 +34,15 @@
  *         : 31.12.2021 2.04    Changed version to 2.04.
  *         : 28.06.2022 2.10    Added new demo projects.
  *         : 15.08.2022 2.20    Changed version to 2.20.
- *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.     
+ *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
  *         : 29.05.2023 2.30    Added support for RX23E-B.
- *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.     
-  ***********************************************************************************************************************/
+ *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *         : 28.06.2024 2.40    Added support for RX260, RX261.
+ *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *                              Removed duplicate macros (LPC_CLOCK_ACTIVE and LPC_CLOCK_INACTIVE) for all devices.
+ *                              Modified comment of API R_LPC_OperatingModeSet (), R_LPC_ReturnClockSwitch (),
+ *                              and R_LPC_LowPowerModeActivate () functions.
+ ***********************************************************************************************************************/
 
 #ifndef R_LPC_RX_IF_H
     #define R_LPC_RX_IF_H
@@ -61,7 +66,7 @@
 
 /* Version Number of API. */
     #define LPC_RX_VERSION_MAJOR           (2)
-    #define LPC_RX_VERSION_MINOR           (30)
+    #define LPC_RX_VERSION_MINOR           (40)
 
 /***********************************************************************************************************************
  Typedef definitions
@@ -135,6 +140,12 @@ lpc_err_t R_LPC_LowPowerModeActivate (void (*pcallback)(void* pdata));
  *********************************************************************************************************************/
 lpc_err_t R_LPC_ReturnClockSwitch (lpc_clock_switch_t e_clock_source, bool enable);
 #ifdef LPC_VALID_SNOOZE_MODE
+/**********************************************************************************************************************
+ * Function Name: R_LPC_SnoozeModeConfigure
+ * Description  : .
+ * Argument     : snooze_mode
+ * Return Value : .
+ *********************************************************************************************************************/
 lpc_err_t R_LPC_SnoozeModeConfigure (lpc_snooze_mode_t * snooze_mode);
 #endif
 

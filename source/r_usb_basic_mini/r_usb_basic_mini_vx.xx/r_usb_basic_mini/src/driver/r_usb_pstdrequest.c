@@ -18,7 +18,7 @@
  * you agree to the additional terms and conditions found by accessing the
  * following link:
  * http://www.renesas.com/disclaimer
- * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015(2024) Renesas Electronics Corporation. All rights reserved.
  *****************************************************************************/
 /******************************************************************************
  * File Name    : r_usb_pstdrequest.c
@@ -31,6 +31,7 @@
  *         : 31.05.2019 1.11 Added support for GNUC and ICCRX.
  *         : 30.06.2019 1.12 RX23W is added.
  *         : 30.06.2020 1.20 Added support for RTOS.
+ *         : 30.04.2024 1.30 Added support for RX261.
 *******************************************************************************/
 
 /******************************************************************************
@@ -1131,7 +1132,6 @@ static void usb_pstd_set_interface3 (void)
 
                 /* Search endpoint setting */
                 usb_pstd_set_eptbl_index(g_usb_pstd_req_index, g_usb_pstd_alt_no[g_usb_pstd_req_index]);
-                usb_pstd_set_pipe_reg();
             }
             else
             {
@@ -1193,11 +1193,7 @@ void usb_pstd_class_request(usb_setup_t *p_req, uint16_t ctsq)
             break;
 
             case USB_CS_WRDS :
-#if defined(USB_CFG_PMSC_USE)
-                usb_pstd_class_request_wds(p_req);   /* class request (control write data stage) */
-#else   /* defined(USB_CFG_PMSC_USE) */
                 usb_pstd_class_request_rwds(p_req);  /* class request (control write data stage) */
-#endif  /* defined(USB_CFG_PMSC_USE) */
             break;
 
             case USB_CS_WRND :
@@ -1248,10 +1244,19 @@ void usb_pstd_class_request_rwds (usb_setup_t * p_req)
 {
 #if defined(USB_CFG_PMSC_USE)
 
+#if defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE)
     usb_ctrl_t ctrl;
+#endif /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
 
     /* Is a request receive target Interface? */
-    if ((0 == p_req->index) && ((p_req->type & USB_BMREQUESTTYPERECIP) == USB_INTERFACE))
+#if defined(USB_CFG_PCDC_2COM_USE) || defined(USB_CFG_PCDC_PHID_USE) || defined(USB_CFG_PCDC_PMSC_USE)\
+ || defined(USB_CFG_PHID_PMSC_USE)  
+    if (USB_INTERFACE == (p_req->type & USB_BMREQUESTTYPERECIP))
+#else /* defined(USB_CFG_PCDC_2COM_USE) || defined(USB_CFG_PCDC_PHID_USE) || defined(USB_CFG_PCDC_PMSC_USE)\
+ || defined(USB_CFG_PHID_PMSC_USE) */
+    if ((0 == p_req->index) && (USB_INTERFACE == (p_req->type & USB_BMREQUESTTYPERECIP)))
+#endif /* defined(USB_CFG_PCDC_2COM_USE) || defined(USB_CFG_PCDC_PHID_USE) || defined(USB_CFG_PCDC_PMSC_USE)\
+ || defined(USB_CFG_PHID_PMSC_USE) */
     {
         if ((p_req->type & USB_BREQUEST) == USB_GET_MAX_LUN)
         {
@@ -1259,7 +1264,7 @@ void usb_pstd_class_request_rwds (usb_setup_t * p_req)
         }
         else
         {
-            /* Get Line Coding Request */
+#if defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE)
             ctrl.setup  = *p_req; /* Save setup data. */
             ctrl.size   = 0;
             ctrl.status = USB_ACK;
@@ -1268,12 +1273,26 @@ void usb_pstd_class_request_rwds (usb_setup_t * p_req)
             ctrl.p_data =  (void *)g_usb_default_apl_task_id;
 #endif /* (BSP_CFG_RTOS_USED != 0) */
             usb_cstd_set_event(USB_STS_REQUEST, &ctrl);
+#else /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
+
+            /* Set Stall */
+            usb_pstd_set_stall_pipe0(); /* Req Error */
+#endif /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
         }
     }
     else
     {
+#if defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE)
+        ctrl.setup  = *p_req; /* Save setup data. */
+        ctrl.size   = 0;
+        ctrl.status = USB_ACK;
+        ctrl.type   = USB_REQUEST;
+        usb_cstd_set_event(USB_STS_REQUEST, &ctrl);
+#else /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
+
         /* Set Stall */
         usb_pstd_set_stall_pipe0(); /* Req Error */
+#endif /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
     }
 
 #else   /* defined(USB_CFG_PMSC_USE) */
@@ -1291,19 +1310,6 @@ void usb_pstd_class_request_rwds (usb_setup_t * p_req)
     usb_cstd_set_event(USB_STS_REQUEST, &ctrl);
 #endif  /* defined(USB_CFG_PMSC_USE) */
 } /* End of function usb_pstd_class_request_rwds */
-
-#if defined(USB_CFG_PMSC_USE)
-/******************************************************************************
- Function Name   : usb_pstd_class_request_wds
- Description     : Class request processing (control write data stage)
- Arguments       : usb_setup_t *p_req : Pointer to usb_setup_t structure
- Return value    : none
- ******************************************************************************/
-void usb_pstd_class_request_wds (usb_setup_t * p_req)
-{
-    usb_pstd_set_stall_pipe0();
-} /* End of function usb_pstd_class_request_wds */
-#endif  /* defined(USB_CFG_PMSC_USE) */
 
 /******************************************************************************
  Function Name   : usb_pstd_other_request
@@ -1336,8 +1342,19 @@ void usb_pstd_class_request_wnss (usb_setup_t *p_req)
 {
 #if defined(USB_CFG_PMSC_USE)
 
+#if defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE)
+    usb_ctrl_t ctrl;
+#endif /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
+
     /* Is a request receive target Interface? */
-    if ((0 == p_req->index) && ((p_req->type & USB_BMREQUESTTYPERECIP) == USB_INTERFACE))
+#if defined(USB_CFG_PCDC_2COM_USE) || defined(USB_CFG_PCDC_PHID_USE) || defined(USB_CFG_PCDC_PMSC_USE)\
+ || defined(USB_CFG_PHID_PMSC_USE)
+    if (USB_INTERFACE == (p_req->type & USB_BMREQUESTTYPERECIP))
+#else /* defined(USB_CFG_PCDC_2COM_USE) || defined(USB_CFG_PCDC_PHID_USE) || defined(USB_CFG_PCDC_PMSC_USE)\
+ || defined(USB_CFG_PHID_PMSC_USE) */
+    if ((0 == p_req->index) && (USB_INTERFACE == (p_req->type & USB_BMREQUESTTYPERECIP)))
+#endif /* defined(USB_CFG_PCDC_2COM_USE) || defined(USB_CFG_PCDC_PHID_USE) || defined(USB_CFG_PCDC_PMSC_USE)\
+ || defined(USB_CFG_PHID_PMSC_USE) */
     {
         if (USB_MASS_STORAGE_RESET == (p_req->type & USB_BREQUEST))
         {
@@ -1345,12 +1362,32 @@ void usb_pstd_class_request_wnss (usb_setup_t *p_req)
         }
         else
         {
+#if defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE)
+            ctrl.setup  = *p_req; /* Save setup data. */
+            ctrl.size   = 0;
+            ctrl.status = USB_ACK;
+            ctrl.type   = USB_REQUEST;
+            usb_cstd_set_event(USB_STS_REQUEST, &ctrl);
+#else /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
+            /* Set Stall */
             usb_pstd_set_stall_pipe0(); /* Req Error */
+
+#endif /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
         }
     }
     else
     {
+#if defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE)
+            ctrl.setup  = *p_req; /* Save setup data. */
+            ctrl.size   = 0;
+            ctrl.status = USB_ACK;
+            ctrl.type   = USB_REQUEST;
+            usb_cstd_set_event(USB_STS_REQUEST, &ctrl);
+#else /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
+
+        /* Set Stall */
         usb_pstd_set_stall_pipe0(); /* Req Error */
+#endif /* defined(USB_CFG_PCDC_USE) || defined(USB_CFG_PHID_USE) || defined(USB_CFG_TESTREQUEST_USE) */
     }
 
     if (USB_MASS_STORAGE_RESET != (p_req->type & USB_BREQUEST))
@@ -1367,9 +1404,11 @@ void usb_pstd_class_request_wnss (usb_setup_t *p_req)
     ctrl.size   = 0;
     ctrl.status = USB_ACK;
     ctrl.type   = USB_REQUEST;
+
 #if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
     ctrl.p_data =  (void *)g_usb_default_apl_task_id;
 #endif /* (BSP_CFG_RTOS_USED != 0) */
+
     usb_cstd_set_event(USB_STS_REQUEST, &ctrl);
 
     usb_pstd_ctrl_end((uint16_t) USB_CTRL_END); /* End control transfer. */

@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2021 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2021-2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_flash_nofcu.h
@@ -23,6 +23,8 @@
 /**********************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *           23.04.2021 4.80    First Release. (Changed the structure of FLASH_TYPE_1 code with the addition of RX140.)
+ *           30.07.2024 5.20    Modified tMS(WAIT_TMS_HIGH) settings for VARIETY_A of FLASH_TYPE_1.
+ *                              Modified FISR register settings.
  *********************************************************************************************************************/
 
 #ifndef R_FLASH_NOFCU_H
@@ -95,22 +97,26 @@
 #endif
 
 #if (FLASH_TYPE_VARIETY == FLASH_TYPE_VARIETY_A)
-/* E2 DataFlash Wait Cycle Setting (Height of ICLK frequency) */
-#define FLASH_DFLWAITR_ICLK_FREQ            (32000000)
-
 /* Boundary frequency of FCLK register (Peripheral Clock Notification bits) */
 #define FLASH_FISR_FCLK_FREQ                (32000000)
 #endif
+
+/* Lower rounding boundaries of FCLK frequency (Peripheral Clock Notification bits) */
+#define FLASH_FISR_ROUNDING_FCLK_FREQ       (4000000)
 
 /*==== Wait Process definition ====*/
 #define WAIT_TDIS                           (3)
 #define WAIT_TMS_MID                        (4)
 #define WAIT_TMS_HIGH                       (6)
+#if (FLASH_TYPE_VARIETY == FLASH_TYPE_VARIETY_A)
+#undef  WAIT_TMS_HIGH
+#define WAIT_TMS_HIGH                       (16)
+#endif
 #define WAIT_TDSTOP                         (6)
 
 #define MHZ                                 (1000000)
 #define KHZ                                 (1000)
-#define FCLK_MHZ                            ((MCU_CFG_FCLK_HZ + 999999) / MHZ)
+#define FCLK_MHZ                            (((uint32_t)MCU_CFG_FCLK_HZ + 999999) / MHZ)
 #define ICLK_KHZ                            (MCU_CFG_ICLK_HZ / KHZ)
 
 /* Definition for function name compatibility */

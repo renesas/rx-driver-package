@@ -33,6 +33,8 @@
 
 #define TOUCH_CFG_UART_TUNING_SUPPORT     (0)
 
+#define TOUCH_CFG_UART_MODULE_TYPE        (0)
+
 #define TOUCH_CFG_UART_NUMBER             (0)
 
 #define TOUCH_CFG_UART_BAUDRATE           (115200)

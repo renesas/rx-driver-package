@@ -5,12 +5,12 @@ r_flash_rx
 
 Document Number 
 ---------------
-r01an2184ej0512
-r01an2184jj0512
+r01an2184ej0520
+r01an2184jj0520
 
 Version
 -------
-v5.12
+v5.20
 
 Overview
 --------
@@ -47,6 +47,7 @@ Supported MCUs
 * RX23W Group
 * RX24T Group
 * RX24U Group
+* RX260, RX261 Group
 * RX26T Group
 * RX64M Group
 * RX651, RX65N Group
@@ -75,6 +76,7 @@ Boards Tested On
 * RSSKRX23W
 * RSKRX24T
 * RSKRX24U
+* RX261 EK Board
 * MCK-RX26T
 * RSKRX64M
 * RSKRX65N
@@ -104,7 +106,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp      V7.42
+* r_bsp      V7.51
 
 How to add to your project
 --------------------------
@@ -135,8 +137,8 @@ How to add to your project
 
 Toolchain(s) Used
 -----------------
-* Renesas RXC 3.05.00
-* GNU GNURX 8.03.00.202311
+* Renesas RXC 3.06.00
+* GNU GNURX 8.03.00.202405
 * IAR ICCRX 5.10.01
 
 
@@ -148,9 +150,9 @@ r_flash_rx
 |
 +---doc
 |   +-- en
-|   |   +-- r01an2184ej0512-rx-flash.pdf
+|   |   +-- r01an2184ej0520-rx-flash.pdf
 |   +-- ja
-|       +-- r01an2184jj0512-rx-flash.pdf
+|       +-- r01an2184jj0520-rx-flash.pdf
 |
 +---ref
 |   +-- r_flash_rx_config_reference.h
@@ -226,6 +228,12 @@ r_flash_rx
         |
         +--rx24u
              +-- r_flash_rx24u.h
+        |
+        +--rx260
+             +-- r_flash_rx260.h
+        |
+        +--rx261
+             +-- r_flash_rx261.h
         |
         +--rx26t
              +-- r_flash_rx26t.h

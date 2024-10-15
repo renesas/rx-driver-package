@@ -48,6 +48,7 @@
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *         : 29.05.2023 3.20    Added support RX23E-B
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 28.06.2024 3.30    Added support RX260, RX261.
 *******************************************************************************/
 #ifndef DMACA_RX_PRIVATE_H
 #define DMACA_RX_PRIVATE_H
@@ -88,6 +89,10 @@ Includes   <System Includes>, "Project Includes"
     #include "./src/targets/rx23e-b/r_dmaca_rx_target.h"
 #elif defined(BSP_MCU_RX23W)
     #include "./src/targets/rx23w/r_dmaca_rx_target.h"
+#elif defined(BSP_MCU_RX260)
+    #include "./src/targets/rx260/r_dmaca_rx_target.h"
+#elif defined(BSP_MCU_RX261)
+    #include "./src/targets/rx261/r_dmaca_rx_target.h"
 #elif defined(BSP_MCU_RX26T)
     #include "./src/targets/rx26t/r_dmaca_rx_target.h"
 #else

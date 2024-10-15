@@ -18,7 +18,7 @@
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_lpc_rx_private.h
- * Version      : 2.04
+ * Version      : 2.40
  * Description  : The LPC module configures the MCU for the different operating and low power modes.
  *                This file is the LPC module's interface header file and should be included by the application that
  *                intends to use the API.
@@ -29,6 +29,7 @@
  *           31.12.2021 2.04    Delete lpc_operating_mode_set() and lpc_return_clock_switch()
  *                              function declaration for rx660.
  *           29.05.2023 2.30    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *           28.06.2024 2.40    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
  ***********************************************************************************************************************/
 #ifndef R_LPC_RX_PRIVATE_H
     #define R_LPC_RX_PRIVATE_H
@@ -82,7 +83,13 @@ lpc_err_t lpc_lowpower_activate (lpc_callback_set_t pcallback);
  *********************************************************************************************************************/
 lpc_err_t lpc_return_clock_switch (lpc_clock_switch_t e_clock_source, bool enable);
 #ifdef LPC_VALID_SNOOZE_MODE
-lpc_err_t lpc_snooze_mode_configure(lpc_snooze_mode_t * snooze_mode);
+/**********************************************************************************************************************
+ * Function Name: lpc_snooze_mode_configure
+ * Description  : .
+ * Arguments    : snooze_mode
+ * Return Value : .
+ *********************************************************************************************************************/
+lpc_err_t lpc_snooze_mode_configure (lpc_snooze_mode_t * snooze_mode);
 #endif
 #endif /* R_LPC_RX_PRIVATE_H */
 /***********************************************************************************************************************

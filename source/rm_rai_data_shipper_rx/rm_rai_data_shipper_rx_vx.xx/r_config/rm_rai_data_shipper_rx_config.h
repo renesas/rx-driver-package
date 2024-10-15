@@ -6,6 +6,11 @@
 extern "C" {
 #endif
 
+/* Specify Used Device*/
+#define RM_COMMS_UART                                                   (0)
+#define RM_COMMS_USB_PCDC                                               (1)
+#define RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED                             RM_COMMS_UART
+
 /* Common */
 #define RM_RAI_DATA_SHIPPER_CFG_PARAM_CHECKING_ENABLE                   (BSP_CFG_PARAM_CHECKING_ENABLE)
 

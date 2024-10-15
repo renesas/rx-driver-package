@@ -24,6 +24,7 @@
 /**********************************************************************************************************************
  * History : DD.MM.YYYY Version  Description
  *         : 28.12.2023 1.00     First Release
+ *         : 20.09.2024 1.10     Fixed r_sdc_spi_get_sd_csdinfov2()
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -623,7 +624,7 @@ sdc_spi_status_t r_sdc_spi_get_sd_csdinfov2(sdc_spi_hndl_t * p_hndl, uint32_t * 
     }
 
     /* Set csd information */
-    p_csdinfo->memsize = SDC_SPI_MEMSIZE_DUMMY; /* Refer to SD card spec. */
+    p_csdinfo->memsize = (((*p_csize) + 1) * 512); /* Refer to SD card spec. */ /* <-ver1.10  ver1.00 -> p_csdinfo->memsize = SDC_SPI_MEMSIZE_DUMMY; */
     p_csdinfo->maxblkno = (((*p_csize) + 1) * 1024) - 1;  /* Refer to SD card spec. */
     taac_unit_tbl_idx = (*(p_csdbuf+1)) & 0x07; /* Refer to SD card spec. */
     taac_value = g_taac_value_tbl[((*(p_csdbuf+1)) & 0x78) >> 3];   /* Refer to SD card spec. */

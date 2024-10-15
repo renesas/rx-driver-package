@@ -45,7 +45,11 @@
 #include "platform.h"
 #include "r_ctsu_qe_api.h"
 #if (TOUCH_CFG_UART_MONITOR_SUPPORT == 1)
-#include "r_sci_rx_if.h"
+ #if (TOUCH_CFG_UART_MODULE_TYPE == 0)
+  #include "r_sci_rx_if.h"
+ #elif (TOUCH_CFG_UART_MODULE_TYPE == 1)
+  #include "r_rsci_rx_if.h"
+ #endif
 #endif
 /* Common macro for FSP header files. There is also a corresponding FSP_FOOTER macro at the end of this file. */
 FSP_HEADER
@@ -240,13 +244,13 @@ typedef struct st_touch_api
      * @par Implemented as
      * - @ref RM_TOUCH_MonitorAddressGet()
      *
-     * @param[in]  p_ctrl       Pointer to control structure.
-     * @param[out]  p_monitor_buf    monitoring buffer address.
-     * @param[out]  p_monitor_id     monitoring ID variable address.
-     * @param[out]  p_monitor_size   monitoring size array address.
+     * @param[in]   p_ctrl       Pointer to control structure.
+     * @param[out]  pp_monitor_buf    monitoring buffer address.
+     * @param[out]  pp_monitor_id     monitoring ID variable address.
+     * @param[out]  pp_monitor_size   monitoring size array address.
      */
-    fsp_err_t (* monitorAddressGet)(touch_ctrl_t * const p_ctrl, uint32_t * p_monitor_buf,
-    		                        uint32_t * p_monitor_id, uint32_t * p_monitor_size);
+    fsp_err_t (* monitorAddressGet)(touch_ctrl_t * const p_ctrl, uint8_t ** pp_monitor_buf,
+    		                        uint8_t ** pp_monitor_id, uint16_t ** pp_monitor_size);
 } touch_api_t;
 
 /** This structure encompasses everything that is needed to use an instance of this interface. */

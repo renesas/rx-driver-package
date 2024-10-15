@@ -23,6 +23,8 @@
 * History : DD.MM.YYYY Version Description
 *           15.08.2022 1.00    Initial Release
 *           30.06.2023 2.40    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           28.06.2024 2.60    Added the source code which checks for RX26T devices support.
+*                              Added the source code to check unsupported channel for the supported device.
 ***********************************************************************************************************************/
 
 #ifndef RSCI_RX26T_H
@@ -41,9 +43,13 @@ Includes   <System Includes> , "Project Includes"
 Macro definitions
 ***********************************************************************************************************************/
 
+#if ((BSP_MCU_RX26T == 1) && ((BSP_CFG_MCU_PART_MEMORY_SIZE == 0x8) || (BSP_CFG_MCU_PART_MEMORY_SIZE == 0xA)))
+    #error  "ERROR - RX26T Product with 48 Kbytes RAM not support RSCI Module!"
+#endif
+
 /* RSCI channel include Check */
-#if (RSCI_CFG_CH10_INCLUDED != 0)
-    #error "ERROR - Unsupported channel chosen in r_sci_config.h"
+#if ((RSCI_CFG_CH0_INCLUDED != 0) || (RSCI_CFG_CH10_INCLUDED != 0))
+    #error "ERROR - Unsupported channel chosen in r_rsci_config.h"
 #endif
 
 /* RSCI SCR register masks */

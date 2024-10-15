@@ -63,7 +63,7 @@
 #define CTSU_CFG_TSCAP_PORT                       (0xFFFF)
 #define CTSU_CFG_VCC_MV                           (5000)
 #define CTSU_CFG_DIAG_SUPPORT_ENABLE              (0)
-#if (BSP_MCU_RX140)
+#if defined(BSP_MCU_RX140) || defined(BSP_MCU_RX261) || defined(BSP_MCU_RX260)
 #define CTSU_CFG_NUM_CFC                          (0)
 #define CTSU_CFG_NUM_CFC_TX                       (0)
 #if(TOUCH_CFG_SERIAL_TUNING_SUPPORT == 1)
@@ -71,9 +71,15 @@
 #else
 #define CTSU_CFG_NUM_SUMULTI                      (3)
 #endif
+#if defined(BSP_MCU_RX260) || defined(BSP_MCU_RX261)
+#define CTSU_CFG_SUMULTI0                         (0x2F)
+#define CTSU_CFG_SUMULTI1                         (0x28)
+#define CTSU_CFG_SUMULTI2                         (0x36)
+#else
 #define CTSU_CFG_SUMULTI0                         (0x3F)
 #define CTSU_CFG_SUMULTI1                         (0x36)
 #define CTSU_CFG_SUMULTI2                         (0x48)
+#endif
 #define CTSU_CFG_TEMP_CORRECTION_SUPPORT          (0)
 #define CTSU_CFG_TEMP_CORRECTION_TS               (0)
 #define CTSU_CFG_TEMP_CORRECTION_TIME             (0)
@@ -146,7 +152,7 @@
 #define CTSU_CFG_DIAG_DAC6_MIN                    (33446)
 #endif
 
-#if defined(BSP_MCU_RX140)
+#if defined(BSP_MCU_RX140) || defined(BSP_MCU_RX261) || defined(BSP_MCU_RX260)
 #define CTSU_DIAG_TSCAP_RANGE_LOW                 (1050)
 #define CTSU_DIAG_TSCAP_RANGE_HIGH                (1419)
 

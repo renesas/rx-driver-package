@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_rtc_rx
-VERSION = 		2.90
+VERSION = 		3.00
 MDF = V1,v2
 
 CONFIG_FOLDER = r_config

@@ -50,6 +50,7 @@
 #include "r_usb_patapi.h"
 #include "r_usb_pmsc.h"
 
+#if defined(USB_CFG_PMSC_USE)
 /******************************************************************************
  Macro definitions
  ******************************************************************************/
@@ -69,7 +70,8 @@ static void             pmsc_atapi_get_read_data(uint32_t *p_size, uint8_t **pp_
 static void             pmsc_atapi_get_mode_sense10_data (uint8_t page_code, uint32_t *p_size, uint8_t **pp_buff);
 
 static uint8_t          gs_usb_atapi_is_data_stage = USB_FALSE;      /* Data SetUp Flag */
-static uint8_t          gs_usb_pmsc_media_buffer[USB_ATAPI_BLOCK_UNIT * USB_CFG_PMSC_TRANS_COUNT];
+static uint32_t         g_usb_pmsc_media_buffer[(USB_ATAPI_BLOCK_UNIT * USB_CFG_PMSC_TRANS_COUNT)/4];
+static uint8_t          *gp_usb_pmsc_media_buffer = (uint8_t *)&g_usb_pmsc_media_buffer[0];
 static usb_pmsc_cdb_t   *gsp_usb_atapi_cbwcb;                        /* CBWCB pointer */
 static uint32_t         gs_usb_atapi_cur_lba;                        /* the current Logical Block Address */
 static uint8_t          g_usb_pmsc_atapi_data[256];
@@ -534,13 +536,13 @@ static void pmsc_atapi_get_read_data(uint32_t *p_size, uint8_t **pp_buff)
                 trans_block = USB_CFG_PMSC_TRANS_COUNT;
             }
 
-            R_USB_media_read(&gs_usb_pmsc_media_buffer[0], gs_usb_atapi_cur_lba, trans_block);
+            R_USB_media_read(gp_usb_pmsc_media_buffer, gs_usb_atapi_cur_lba, trans_block);
 
             gs_usb_atapi_cur_lba += trans_block;
 
             *p_size = (USB_ATAPI_BLOCK_UNIT * trans_block);
             /* Casting uint8_t */
-            *pp_buff = (uint8_t *)(&gs_usb_pmsc_media_buffer[0]);
+            *pp_buff = (uint8_t *)(gp_usb_pmsc_media_buffer);
 
         break;
 
@@ -753,8 +755,7 @@ void pmsc_atapi_command_processing(uint8_t *p_cbw, uint16_t usb_result, usb_putr
                         }
                         else
                         {
-                            if ((g_usb_pmsc_dtl > g_usb_pmsc_message.ul_size) 
-                                && (USB_ATAPI_READ10 != gsp_usb_atapi_cbwcb->s_usb_ptn0.uc_opcode))
+                            if (g_usb_pmsc_dtl > g_usb_pmsc_message.ul_size)
                             {
 #if (USB_ATAPI_SHT_RESPONSE == 0)
                                 status = USB_PMSC_CMD_SHT_COMPLETE;     /* case 5 */
@@ -795,7 +796,7 @@ void pmsc_atapi_command_processing(uint8_t *p_cbw, uint16_t usb_result, usb_putr
 
                     /* Retrieve the location and size of the write buffer. */
                     this_transfer_size = g_usb_pmsc_message.ul_size;
-                    p_atapi_rw_buff = &gs_usb_pmsc_media_buffer[0];
+                    p_atapi_rw_buff = gp_usb_pmsc_media_buffer;
 
                     if (this_transfer_size > (USB_ATAPI_BLOCK_UNIT * USB_CFG_PMSC_TRANS_COUNT))
                     {
@@ -817,7 +818,7 @@ void pmsc_atapi_command_processing(uint8_t *p_cbw, uint16_t usb_result, usb_putr
                 if (USB_DATA_OK == usb_result)  /* Previous Transfer OK */
                 {
                     /* Casting uint8_t* */
-                    p_atapi_rw_buff = (uint8_t *)(&gs_usb_pmsc_media_buffer[0]);
+                    p_atapi_rw_buff = (uint8_t *)(gp_usb_pmsc_media_buffer);
 
                     trans_block = this_transfer_size / USB_ATAPI_BLOCK_UNIT;
                     if (0 != (this_transfer_size % USB_ATAPI_BLOCK_UNIT))
@@ -826,7 +827,7 @@ void pmsc_atapi_command_processing(uint8_t *p_cbw, uint16_t usb_result, usb_putr
                     }
 
                     /* Write will be limited to max one block at a time */
-                    R_USB_media_write(&gs_usb_pmsc_media_buffer[0], gs_usb_atapi_cur_lba, trans_block);
+                    R_USB_media_write(gp_usb_pmsc_media_buffer, gs_usb_atapi_cur_lba, trans_block);
                     gs_usb_atapi_cur_lba += trans_block;
 
                     /* Update the count of data transferred so far. */
@@ -983,12 +984,12 @@ static void pmsc_atapi_get_mode_sense10_data(uint8_t page_code, uint32_t *p_size
 void pmsc_atapi_init (void)
 {
     /* Casting void* */
-    memset((void *)&gs_usb_pmsc_media_buffer, 0, (USB_ATAPI_BLOCK_UNIT * USB_CFG_PMSC_TRANS_COUNT));
+    memset((void *)gp_usb_pmsc_media_buffer, 0, (USB_ATAPI_BLOCK_UNIT * USB_CFG_PMSC_TRANS_COUNT));
     gsp_usb_atapi_cbwcb = USB_NULL;
     gs_usb_atapi_cur_lba = 0;
 } /* End of function pmsc_atapi_init() */
 
-
+#endif /* defined(USB_CFG_PMSC_USE) */
 
 /******************************************************************************
  End Of File

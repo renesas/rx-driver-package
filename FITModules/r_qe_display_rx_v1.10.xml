@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>3.06.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>8.03.00.202405</version>
+    </toolchain>
+    <toolchain>
+        <brand>IAR</brand>
+        <product>ICCRX</product>
+        <version>5.10.01</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX600</series>
+        <series>RX700</series>
+        <group omit_board="true">RX65N</group>
+        <group omit_board="true">RX66N</group>
+        <group omit_board="true">RX72M</group>
+        <group omit_board="true">RX72N</group>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_qe_display_rx</name>
+        <version>1.10</version>
+        <zipsource>r_qe_display_rx_v1.10.zip</zipsource>
+        <dependency>
+            <module>r_glcdc_rx</module>
+            <version>1.60</version>
+        </dependency>
+        <dependency>
+            <module>r_sci_rx</module>
+            <version>5.30</version>
+        </dependency>
+        <dependency>
+            <module>r_cmt_rx</module>
+            <version>5.70</version>
+        </dependency>
+        <dependency>
+            <module>r_gpio_rx</module>
+            <version>5.10</version>
+        </dependency>
+        <application>Graphic</application>
+        <desc>QE for Display middleware module</desc>
+        <details>The QE for Display FIT module provides device communication functions and LCD panel adjustment functions with Standalone QE for Display. </details>
+        <function>-</function>
+        <incdir>r_config</incdir>
+        <incdir>r_qe_display_rx</incdir>
+        <incdir>r_qe_display_rx/src</incdir>
+    </package>
+
+</refinfo>

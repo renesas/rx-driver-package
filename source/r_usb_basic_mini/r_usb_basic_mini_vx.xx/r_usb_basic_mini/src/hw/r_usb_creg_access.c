@@ -1409,6 +1409,8 @@ void hw_usb_clear_idpsinke (void)
 #endif  /* USB_CFG_BC == USB_CFG_ENABLE */
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 
+#if USB_CFG_BC == USB_CFG_ENABLE
+
 /******************************************************************************
  Function Name   : hw_usb_set_vdcen
  Description     : Set VDCEN bit.
@@ -1452,6 +1454,7 @@ void hw_usb_clear_batchge(void)
 {
     USB0.USBBCCTRL0.WORD &= (~USB_BATCHGE);
 } /* End of function hw_usb_clear_batchge */
+#endif  /* USB_CFG_BC == USB_CFG_ENABLE */
 
 /******************************************************************************
  End of file

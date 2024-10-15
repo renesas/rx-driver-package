@@ -153,18 +153,12 @@ static void usb_hmsc_strg_drive_search_act(usb_tskinfo_t *p_mess)
         break;
 
         case USB_SEQ_2:
-            /* Read Format Capacity */
-            usb_hmsc_read_format_capacity ((uint8_t*)&g_usb_hmsc_data);
-            gs_usb_hmsc_drive_search_seq++;
-        break;
-
-        case USB_SEQ_3:
             /* Read Capacity */
             usb_hmsc_read_capacity ((uint8_t*)&g_usb_hmsc_data);
             gs_usb_hmsc_drive_search_seq++;
         break;
 
-        case USB_SEQ_4:
+        case USB_SEQ_3:
             if (USB_HMSC_OK != p_mess->keyword)
             {
                 /* TestUnitReady */
@@ -174,12 +168,12 @@ static void usb_hmsc_strg_drive_search_act(usb_tskinfo_t *p_mess)
             else
             {
                 /* Pass TestUnitReady  */
-                gs_usb_hmsc_drive_search_seq = USB_SEQ_6;
+                gs_usb_hmsc_drive_search_seq = USB_SEQ_5;
                 usb_hmsc_strg_specified_path (p_mess);
             };
         break;
 
-        case USB_SEQ_5:
+        case USB_SEQ_4:
             if (USB_HMSC_OK != p_mess->keyword)
             {
                 /* TestUnitReady */
@@ -194,13 +188,13 @@ static void usb_hmsc_strg_drive_search_act(usb_tskinfo_t *p_mess)
             };
         break;
 
-        case USB_SEQ_6:
+        case USB_SEQ_5:
             /* Read10 */
             usb_hmsc_read10 ((uint8_t*)&g_usb_hmsc_data, USB_STRG_SECTTOP, USB_STRG_SECTCNT1, USB_STRG_SECTSIZE);
             gs_usb_hmsc_drive_search_seq++;
         break;
 
-        case USB_SEQ_7:
+        case USB_SEQ_6:
             if (USB_HMSC_OK == p_mess->keyword)
             {
                 gs_usb_hmsc_drive_search_seq = USB_SEQ_0;
@@ -208,7 +202,7 @@ static void usb_hmsc_strg_drive_search_act(usb_tskinfo_t *p_mess)
             }
             else
             {
-                gs_usb_hmsc_drive_search_seq = USB_SEQ_6;
+                gs_usb_hmsc_drive_search_seq = USB_SEQ_5;
                 gs_usb_hmsc_read_mbr_retry++;   /* Update Retry count */
                 if (USB_STRG_MBR_READ_RETRY_MAX == gs_usb_hmsc_read_mbr_retry)
                 {

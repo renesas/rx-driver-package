@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015(2024) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_hreg_abs.c
@@ -27,6 +27,7 @@
  *         : 31.05.2019 1.11 Added support for GNUC and ICCRX.
  *         : 30.06.2019 1.12 RX23W is added.
  *         : 30.06.2020 1.20 Added support for RTOS.
+ *         : 30.04.2024 1.30 Added support for RX261.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -363,7 +364,7 @@ void usb_hstd_bus_reset(void)
     usb_hstd_set_uact();
     /* Wait 10ms or more (USB reset recovery) */
     hw_usb_write_dcpmxps((uint16_t) (USB_DEFPACKET + USB_DEVICE_0));
-    usb_cpu_delay_xms((uint16_t)20);
+    usb_cpu_delay_xms((uint16_t)100);   /* 20msec->100msec Support Tera Byte Size Storage Device */
 }
 /******************************************************************************
  End of function usb_hstd_bus_reset

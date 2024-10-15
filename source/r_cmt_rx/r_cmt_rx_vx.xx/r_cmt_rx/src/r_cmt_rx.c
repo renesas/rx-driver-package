@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_cmt_rx.c
@@ -63,6 +63,8 @@
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *         : 29.05.2023 5.60    Added support for RX23E-B.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 28.06.2024 5.70    Added support for RX260, RX261.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -79,7 +81,7 @@ Macro definitions
 #if defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX113) || defined(BSP_MCU_RX71_ALL)    || \
     defined(BSP_MCU_RX231)    || defined(BSP_MCU_RX230) || defined(BSP_MCU_RX23W) || defined(BSP_MCU_RX23T)    || \
     defined(BSP_MCU_RX24_ALL) || defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66_ALL) || defined(BSP_MCU_RX72_ALL)|| \
-    defined(BSP_MCU_RX671) || defined(BSP_MCU_RX26T)
+    defined(BSP_MCU_RX671) || defined(BSP_MCU_RX26T) || defined(BSP_MCU_RX260) || defined(BSP_MCU_RX261)
 
     #define CMT_RX_NUM_CHANNELS        (4)
 #elif defined(BSP_MCU_RX111)  || defined(BSP_MCU_RX110)    || defined(BSP_MCU_RX130)  || defined(BSP_MCU_RX13T) || \
@@ -102,7 +104,7 @@ Macro definitions
 #if defined(BSP_MCU_RX11_ALL) || defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71_ALL) || defined(BSP_MCU_RX113) || \
     defined(BSP_MCU_RX23_ALL) || defined(BSP_MCU_RX13_ALL) || defined(BSP_MCU_RX24_ALL) || \
     defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66_ALL) || defined(BSP_MCU_RX72_ALL) ||defined(BSP_MCU_RX671) || \
-    defined(BSP_MCU_RX140) || defined(BSP_MCU_RX26T)
+    defined(BSP_MCU_RX140) || defined(BSP_MCU_RX26T) || defined(BSP_MCU_RX260) || defined(BSP_MCU_RX261)
     #define CMT_PCLK_HZ                 (BSP_PCLKB_HZ)
 #else
     #define CMT_PCLK_HZ                 (BSP_PCLK_HZ)
@@ -112,7 +114,7 @@ Macro definitions
 #if defined(BSP_MCU_RX11_ALL) || defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71_ALL) || \
     defined(BSP_MCU_RX23_ALL) || defined(BSP_MCU_RX13_ALL) || defined(BSP_MCU_RX24_ALL) || \
     defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66_ALL) || defined(BSP_MCU_RX72_ALL) || \
-    defined(BSP_MCU_RX671) || defined(BSP_MCU_RX140) || defined(BSP_MCU_RX26T)
+    defined(BSP_MCU_RX671) || defined(BSP_MCU_RX140) || defined(BSP_MCU_RX26T) || defined(BSP_MCU_RX260) || defined(BSP_MCU_RX261)
     #define CMT_REG_PROTECT             (1)
 #else
     #define CMT_REG_PROTECT             (0)
@@ -548,7 +550,7 @@ bool R_CMT_Control(uint32_t channel, cmt_commands_t command, void * pdata)
         /* Do nothing. */
     }
 #else /* Non-OS & others */
-#endif/* BSP_CFG_RTOS_USED */
+#endif/* BSP_CFG_RTOS_USED == 0 */
 
     /* Process command that was input. */
     switch (command)
@@ -1700,7 +1702,7 @@ void cmt_isr_common (uint32_t channel)
             }
         }
         /* End of function cmt_isr_common */
-    #endif /* End of  CMT_RX_NUM_CHANNELS */
+    #endif /* End of  CMT_RX_NUM_CHANNELS == 2 */
 #else /* Non-OS & others */
     R_BSP_PRAGMA_STATIC_INLINE(cmt_isr_common)
     void cmt_isr_common (uint32_t channel)
@@ -1718,7 +1720,7 @@ void cmt_isr_common (uint32_t channel)
             g_cmt_callbacks[channel]((void *)&channel);
         }
     }
-#endif /* BSP_CFG_RTOS_USED */
+#endif /* BSP_CFG_RTOS_USED == 0 */
 /* End of function cmt_isr_common */
 
 /***********************************************************************************************************************
@@ -1772,7 +1774,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmt0_isr (void)
 #endif
     cmt_isr_common(0);
 }
-#endif /* BSP_CFG_RTOS_USED */
+#endif /* BSP_CFG_RTOS_USED == 0 */
 /* End of function cmt0_isr */
 
 /***********************************************************************************************************************
@@ -1826,7 +1828,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmt1_isr (void)
 #endif
     cmt_isr_common(1);
 }
-#endif /* BSP_CFG_RTOS_USED */
+#endif /* BSP_CFG_RTOS_USED == 0 */
 /* End of function cmt1_isr */
 
 #if   CMT_RX_NUM_CHANNELS == 4
@@ -1882,7 +1884,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmt2_isr (void)
 #endif
     cmt_isr_common(2);
 }
-#endif /* BSP_CFG_RTOS_USED */
+#endif /* BSP_CFG_RTOS_USED == 0 */
 /* End of function cmt2_isr */
 
 /***********************************************************************************************************************
@@ -1936,6 +1938,6 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmt3_isr (void)
 #endif
     cmt_isr_common(3);
 }
-#endif/* BSP_CFG_RTOS_USED */
+#endif/* BSP_CFG_RTOS_USED == 0 */
 /* End of function cmt3_isr */
 #endif /* End of #if CMT_RX_NUM_CHANNELS == 4 */

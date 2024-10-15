@@ -82,6 +82,7 @@
 /* Class Request Buffer Size */
 #define USB_HMSC_CLSDATASIZE                (512u)
 #define USB_HMSC_STRG_SECTSIZE              (512u) /* 512 bytes per sector */
+#define USB_HMSC_REQUEST_SENSE_SIZE         (64)
 
 /*****************************************************************************
  Typedef definitions

@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2019 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_lvd_rx_config.h
@@ -29,6 +29,7 @@
 *              : 28.09.2018 2.40     Added support for RX66T.
 *                                    Corrected file name.
 *              : 01.02.2019 2.50     Added support for RX72T, RX65N-64pin.
+*              : 28.06.2024 4.80     Added Nested interrupt support.
 ***********************************************************************************************************************/
 #ifndef LVD_CONFIG_HEADER_FILE
 #define LVD_CONFIG_HEADER_FILE
@@ -122,6 +123,12 @@ Macro definitions
 /* reset. Refer to the User's Manual: Hardware for details.                         */
 #define LVD_CFG_STABILIZATION_CHANNEL_1     (0)
 #define LVD_CFG_STABILIZATION_CHANNEL_2     (0)
+
+/* Enable Nested Interrupt                                                          */
+/* 0 : Disable nested interrupt.                                                    */
+/* 1 : Enable nested interrupt.                                                     */
+/* (default value = 0)                                                              */
+#define LVD_CFG_EN_NESTED_INT               (0)
 
 /***********************************************************************************************************************
 Typedef definitions

@@ -41,6 +41,7 @@
         <version>8.03.00.202202</version>
         <version>8.03.00.202204</version>
         <version>8.03.00.202311</version>
+        <version>8.03.00.202405</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -56,6 +57,8 @@
         <series>RX200</series>
         <series>RX600</series>
         <group omit_board="true">RX26T</group>
+        <group omit_board="true">RX260</group>
+        <group omit_board="true">RX261</group>
         <group omit_board="true">RX660</group>
         <group omit_board="true">RX671</group>
     </target>
@@ -69,7 +72,7 @@
         <zipsource>r_rsci_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.42</version>
+            <version>7.51</version>
         </dependency>
         <dependency>
             <module>r_byteq</module>

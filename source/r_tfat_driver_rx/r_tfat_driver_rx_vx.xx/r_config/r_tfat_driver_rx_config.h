@@ -40,6 +40,7 @@
 *              : 15.12.2023 2.40     Added support FLASH SPI sector
 *                                    size selectable.
 *                                    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*              : 08.05.2024 2.50     Added support SPI mode SD card
 *******************************************************************************/
 #ifndef _R_TFAT_DRIVER_RX_CONFIG_H_
 #define _R_TFAT_DRIVER_RX_CONFIG_H_
@@ -56,6 +57,7 @@ Configuration Options
 */
 #define TFAT_USB_DRIVE_NUM          (0)
 #define TFAT_SDMEM_DRIVE_NUM        (0)
+#define TFAT_SPI_SDMEM_DRIVE_NUM    (0)
 #define TFAT_USB_MINI_DRIVE_NUM     (0)
 #define TFAT_MMC_DRIVE_NUM          (0)
 #define TFAT_SERIAL_FLASH_DRIVE_NUM (0)
@@ -68,6 +70,7 @@ Configuration Options
   <valid define>
   TFAT_CTRL_USB             : for USB
   TFAT_CTRL_SDMEM           : for SD memory card
+  TFAT_CTRL_SPI_SDMEM       : for SPI mode SD memory card
   TFAT_CTRL_USB_MINI        : for USB Mini
   TFAT_CTRL_MMC             : for MMC memory card or eMMC
   TFAT_CTRL_SERIAL_FLASH    : for Serial FLASH memory

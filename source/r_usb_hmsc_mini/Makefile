@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_usb_hmsc_mini
-VERSION = 		1.20
+VERSION = 		1.30
 MDF = V2
 
 CONFIG_FOLDER = r_config

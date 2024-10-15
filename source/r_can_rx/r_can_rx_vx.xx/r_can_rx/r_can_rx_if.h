@@ -21,17 +21,17 @@
 * Description  : The RX CAN FIT API.
 ************************************************************************************************************************
 * History : DD.MM.YYYY Version Description
-*         : 02.20.2015 2.01    For 64M, 71M. Originates from RX63N.
+*         : 20.02.2015 2.01    For 64M, 71M. Originates from RX63N.
 *         : 30.10.2015 2.02    FIT update, new R_CAN_Create interface.
-*         : 3.3.2016   2.10    65N added. No significant changes.
-*         : 1.30.2017  2.11    - const was added to CAN_port_map_t so that there is no need to add const
+*         : 03.03.2016 2.10    65N added. No significant changes.
+*         : 30.01.2017 2.11    - const was added to CAN_port_map_t so that there is no need to add const
 *                                to instantiations.
 *                              - Replaced 0 with NULL for unused pointers to
 *                                port config. registers. (p_CAN0_RX_PIN_MPC etc.)
 *                              - Test ran with 65N 2MB.
 *                              - Some GSCE coding guidelines implemented. Mulitple lines changed. (Plugin was used.)
-*         : 8.14.2017  2.12    - RX65N 2MB MP release.
-*         : 27.04.2018 2.13WS  - Added RX66T. Fixed faulty CANn RX port configuration #if statements
+*         : 14.08.2017 2.12    - RX65N 2MB MP release.
+*         : 27.04.2018 2.13    - Added RX66T. Fixed faulty CANn RX port configuration #if statements
 *         : 26.10.2018 2.13    - Added support for additional RX/TX ports on RX66T
 *         : 08.01.2019 2.15    - Added RX72T
 *         : 05.04.2019 3.00    - Added support for GCC and IAR compilers
@@ -57,6 +57,8 @@
 *                              - Updated demo projects to support FIFO callback.
 *                              - Added demo for RX72N.
 *                              - Added WAIT_LOOP comments.
+*         : 21.12.2023 5.60    - Added support to receive both data frames and remote frames in FIFO mailbox mode.
+*                              - Fixed issue cannot receive remote frames with extended ID in FIFO mailbox mode.
 ***********************************************************************************************************************/
 #ifndef CAN_INTERFACE_HEADER_FILE
 #define CAN_INTERFACE_HEADER_FILE 
@@ -77,7 +79,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define RCAN_RX_VERSION_MAJOR           (5)
-#define RCAN_RX_VERSION_MINOR           (50)
+#define RCAN_RX_VERSION_MINOR           (60)
 /* The process of getting the version number is done through the macro below. The version number is encoded where the
    top 2 bytes are the major version number and the bottom 2 bytes are the minor version number. For example,
    Version 4.25 would be returned as 0x00040019. */
@@ -443,7 +445,8 @@ void        R_CAN_RxSetMask (const uint32_t ch_nr, const uint32_t mbox_nr, const
  *              : mbox_nr
  *              : fidcr0_value
  *              : fidcr1_value
- *              : frame_type
+ *              : fidcr0_frame_type
+ *              : fidcr1_frame_type
  *              : mkr6_value
  *              : mkr7_value
  * Return Value : .
@@ -453,7 +456,8 @@ uint32_t    R_CAN_RxSetFIFO (const uint32_t  ch_nr,
                             const uint32_t  mbox_nr,
                             const uint32_t  fidcr0_value,
                             const uint32_t  fidcr1_value,
-                            const uint32_t  frame_type,
+                            const uint32_t  fidcr0_frame_type,
+                            const uint32_t  fidcr1_frame_type,
                             const uint32_t  mkr6_value,
                             const uint32_t  mkr7_value);
 
@@ -465,7 +469,8 @@ uint32_t    R_CAN_RxSetFIFO (const uint32_t  ch_nr,
  *              : mbox_nr
  *              : xfidcr0_value
  *              : xfidcr1_value
- *              : frame_type
+ *              : fidcr0_frame_type
+ *              : fidcr1_frame_type
  *              : mkr6_value
  *              : mkr7_value
  * Return Value : .
@@ -475,7 +480,8 @@ uint32_t    R_CAN_RxSetFIFOXid (const uint32_t  ch_nr,
                                 const uint32_t  mbox_nr,
                                 const uint32_t  xfidcr0_value,
                                 const uint32_t  xfidcr1_value,
-                                const uint32_t  frame_type,
+                                const uint32_t  fidcr0_frame_type,
+                                const uint32_t  fidcr1_frame_type,
                                 const uint32_t  mkr6_value,
                                 const uint32_t  mkr7_value);
 

@@ -78,6 +78,8 @@
  *                               Modified source code comments of RIIC_CFG_CHi_RXI_INT_PRIORITY,
  *                                RIIC_CFG_CHi_TXI_INT_PRIORITY, RIIC_CFG_CHi_EEI_INT_PRIORITY,
  *                                RIIC_CFG_CHi_TEI_INT_PRIORITY (i = 0 to 2) in r_riic_rx_config.h.
+ *         : 01.08.2024 2.91     Fixed issues related to EEI and TEI interrupt priority levels for RX651 in MDF file.
+ *         : 08.08.2024 3.00     Added RX260, RX261 support.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIIC_IF_H
@@ -99,8 +101,8 @@ R_BSP_PRAGMA_UNPACK
 #endif
 
 /* Version Number of API. */
-    #define RIIC_VERSION_MAJOR      (2)
-    #define RIIC_VERSION_MINOR      (90)
+    #define RIIC_VERSION_MAJOR      (3)
+    #define RIIC_VERSION_MINOR      (00)
 
 /*----------------------------------------------------------------------------*/
 /*   Defines the argument of the R_RIIC_Control function.                     */

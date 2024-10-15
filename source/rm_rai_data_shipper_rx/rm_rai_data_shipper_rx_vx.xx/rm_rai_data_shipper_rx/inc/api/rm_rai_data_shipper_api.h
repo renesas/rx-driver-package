@@ -42,6 +42,7 @@
 #if   defined(__CCRX__) || defined(__ICCRX__)   || defined(__RX__)
  #include "platform.h"
  #include "rm_rai_data_shipper_r_crc_api_complement.h"
+ #include "rm_rai_data_shipper_rx_config.h"
 #elif defined(__CCRL__) || defined(__ICCRL78__) || defined(__RL78__)
  #include <stddef.h>
  #include <stdbool.h>
@@ -54,7 +55,11 @@
 #endif
 
 #include "rm_rai_data_collector_api.h"
-#include "rm_comms_uart_api.h"
+#if (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_UART)
+ #include "rm_comms_uart_api.h"
+#elif (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_USB_PCDC)
+ #include "rm_comms_usb_pcdc_api.h"
+#endif
 
 #if   defined(__CCRX__) || defined(__ICCRX__)   || defined(__RX__)
 #elif defined(__CCRL__) || defined(__ICCRL78__) || defined(__RL78__)
@@ -75,7 +80,11 @@ FSP_HEADER
 /** Callback function parameter structure */
 typedef struct st_rai_data_shipper_callback_args
 {
-    rm_comms_uart_event_t result;           ///< Whether data is sent successfully or not
+#if (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_UART)
+    rm_comms_uart_event_t result;      ///< Whether data is sent successfully or not
+#elif (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_USB_PCDC)
+    rm_comms_usb_pcdc_event_t result;  ///< Whether data is sent successfully or not
+#endif
     void const     * p_context;        ///< Pointer to the user-provided context
 } rai_data_shipper_callback_args_t;
 
@@ -94,7 +103,11 @@ typedef struct st_rai_data_shipper_cfg
     uint8_t divider;                                                ///< Send data on every (divider + 1) requests in case the interface bandwidth is not sufficient
 
     crc_instance_t const      * p_crc;                              ///< Pointer to CRC instance
+#if (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_UART)
     rm_comms_uart_instance_t const * p_comms;                       ///< Pointer to COMMS_UART API instance
+#elif (RM_RAI_DATA_SHIPPER_CFG_DEVICE_USED == RM_COMMS_USB_PCDC)
+    rm_comms_usb_pcdc_instance_t const * p_comms;                   ///< Pointer to COMMS_USB_PCDC API instance
+#endif
 
     void const * p_context;                                         ///< Pointer to the user-provided context
     void (* p_callback)(rai_data_shipper_callback_args_t * p_args); ///< Pointer to the callback function on data sent or error

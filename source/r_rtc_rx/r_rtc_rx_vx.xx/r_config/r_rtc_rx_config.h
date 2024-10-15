@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2013-2021 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rtc_rx_config.h
@@ -43,6 +43,7 @@
 *           30.06.2021 2.81    Added support for RX671.
 *           31.07.2021 2.82    Added support for RX140.
 *           31.12.2021 2.83    Added support for RX660.
+*           28.06.2024 3.00    Added support for RX260, RX261.
 ***********************************************************************************************************************/
 
 #ifndef R_RTC_RX_CONFIG_H
@@ -65,7 +66,7 @@ Configuration Options
 
 /* SPECIFY SUB-CLOCK OSCILLATOR DRIVE CAPACITY ON RX11x, RX130, RX23x, RX64M or RX71M, RX65N, RX671, RX72M, RX66N, RX72N 
  * uncomment appropriate level: standard, low, middle, or high
- * Devices with invalid settings: RX140, RX660
+ * Devices with invalid settings: RX140, RX660, RX260, RX261
  */
 
 /* Supported by the RX11x, RX130, RX23x, RX64M or RX71M, RX65N, RX671, RX72M, RX66N, RX72N */

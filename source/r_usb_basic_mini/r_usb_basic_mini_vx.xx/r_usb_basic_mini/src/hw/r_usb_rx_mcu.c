@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2015(2024) Renesas Electronics Corporation. All rights reserved.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_usb_rx_mcu.c
@@ -24,6 +24,7 @@
 * History   : DD.MM.YYYY Version Description
 *           : 08.01.2014 1.00 First Release
 *           : 30.06.2020 1.20 Added support for RTOS.
+*           : 30.04.2024 1.30 Added support for RX261.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -105,7 +106,7 @@
 R_BSP_PRAGMA_STATIC_INTERRUPT(usb_cpu_usb_interrupt, VECT(USB0, USBI0))
 
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
-R_BSP_PRAGMA_STATIC_INTERRUPT(usb_cpu_usb_resume_interrupt, VECT(USB0, USBR0))
+R_BSP_PRAGMA_INTERRUPT(usb_cpu_usb_resume_interrupt, VECT(USB0, USBR0))
 #endif /* ( (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI ) */
 
 #if USB_CFG_DTC == USB_CFG_ENABLE
@@ -195,14 +196,20 @@ usb_err_t usb_module_stop (void)
     USB0.BEMPENB.WORD = 0;
     USB0.INTENB0.WORD = 0;
     USB0.INTENB1.WORD = 0;
+    USB0.BRDYSTS.WORD = 0;
+    USB0.NRDYSTS.WORD = 0;
+    USB0.BEMPSTS.WORD = 0;
+    USB0.DEVADD0.WORD = 0;
+    USB0.DEVADD1.WORD = 0;
+    USB0.DEVADD2.WORD = 0;
+    USB0.DEVADD3.WORD = 0;
+    USB0.DEVADD4.WORD = 0;
+    USB0.DEVADD5.WORD = 0;
     USB0.SYSCFG.WORD &= (~USB_DPRPU);
     USB0.SYSCFG.WORD &= (~USB_DMRPU);
     USB0.SYSCFG.WORD &= (~USB_DRPD);
     USB0.SYSCFG.WORD &= (~USB_USBE);
     USB0.SYSCFG.WORD &= (~USB_DCFM);
-    USB0.BRDYSTS.WORD = 0;
-    USB0.NRDYSTS.WORD = 0;
-    USB0.BEMPSTS.WORD = 0;
 
     /* Enable writing to MSTP registers */
     R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);
@@ -419,7 +426,7 @@ R_BSP_ATTRIB_INTERRUPT void usb_cpu_usb_interrupt (void)
  Arguments       : none
  Return value    : none
  ******************************************************************************/
-R_BSP_ATTRIB_STATIC_INTERRUPT void usb_cpu_usb_resume_interrupt (void)
+R_BSP_ATTRIB_INTERRUPT void usb_cpu_usb_resume_interrupt (void)
 {
     hw_usb_pclear_sts_resm();
     IPR(USB0,USBR0) = 0x00; /* Priority Resume1=0 */
