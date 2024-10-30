@@ -414,7 +414,8 @@ sci_err_t R_SCI_Open (uint8_t const      chan,
     {
 #if (TX_DTC_DMACA_ENABLE & 0x01 || TX_DTC_DMACA_ENABLE & 0x02)
         /* DTC/DMAC don't use the queue */
-        if ((SCI_DTC_ENABLE != g_handles[chan]->rom->dtc_dmaca_tx_enable) && (SCI_DMACA_ENABLE != g_handles[chan]->rom->dtc_dmaca_tx_enable))
+        if (((SCI_DTC_ENABLE != g_handles[chan]->rom->dtc_dmaca_tx_enable) && (SCI_DMACA_ENABLE != g_handles[chan]->rom->dtc_dmaca_tx_enable))
+        	|| ((SCI_DTC_ENABLE != g_handles[chan]->rom->dtc_dmaca_rx_enable) && (SCI_DMACA_ENABLE != g_handles[chan]->rom->dtc_dmaca_rx_enable)))
         {
             err = sci_init_queues(chan);
         }
