@@ -1,48 +1,44 @@
-/*******************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
-*
-* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
-*******************************************************************************/
-/*******************************************************************************
+/***********************************************************************************************************************
+ * DISCLAIMER
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
+ * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+ * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
+ * following link:
+ * http://www.renesas.com/disclaimer
+ *
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
+ **********************************************************************************************************************/
+/***********************************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 01.12.2014 1.00     First Release
 *              : 27.01.2015 1.01     Chage symbol name of Arguments 
 *                                    None change proceedures.
-*******************************************************************************/
-/*******************************************************************************
+*              : 15.11.2024 1.02     Added WAIT_LOOP comment.
+ **********************************************************************************************************************/
+/***********************************************************************************************************************
 * System Name  : interface file for IrDA fit module.
 * File Name    : r_irda_sci_rx.c
-* Version      : 1.01
+* Version      : 1.02
 * Device       : RX
 * Abstract     : 
-* Tool-Chain   : Renesas RXC Toolchain v2.02.00
+* Tool-Chain   : Renesas RXC Toolchain v3.06.00
 * OS           : not use
 * H/W Platform : RSKRX113
 * Description  : Functions for using IrDA on RX devices. 
 * Limitation   : none
-*******************************************************************************/
+ **********************************************************************************************************************/
 
-/*******************************************************************************
+/***********************************************************************************************************************
   Includes <System Includes> , "Project Includes"
-*******************************************************************************/
+ **********************************************************************************************************************/
 /* Access to peripherals and board defines. */
 #include "platform.h"
 
@@ -55,17 +51,17 @@
 
 #include "r_byteq_if.h"
 
-/*******************************************************************************
+/***********************************************************************************************************************
   Typedef definitions
-*******************************************************************************/
+ **********************************************************************************************************************/
 
-/*******************************************************************************
+/***********************************************************************************************************************
   Macro definitions
-*******************************************************************************/
+ **********************************************************************************************************************/
 
-/*******************************************************************************
+/***********************************************************************************************************************
   Private global variables and functions
-*******************************************************************************/
+ **********************************************************************************************************************/
 irda_sci_err_t R_IRDA_SCI_Open      (uint8_t const            chan,
                                     irda_sci_t * const       p_cfg,
                                      void                    (* const p_callback)(void *p_args),
@@ -93,7 +89,7 @@ void           irda_tei_handler      (irda_sci_hdl_t const hdl);
 void           irda_rxi_handler      (irda_sci_hdl_t const hdl);
 void           irda_eri_handler      (irda_sci_hdl_t const hdl);
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_IRDA_SCI_Open
 * Description  : Initializes an SCI channel for the IrDA mode.
 *
@@ -122,7 +118,7 @@ void           irda_eri_handler      (irda_sci_hdl_t const hdl);
 *                    element of casted mode config structure (p_cfg) is invalid
 *                IRDA_SCI_ERR_QUEUE_UNAVAILABLE -
 *                    cannot open transmit or receive queue or both
-******************************************************************************/
+**********************************************************************************************************************/
 irda_sci_err_t R_IRDA_SCI_Open(uint8_t const      chan,
                                irda_sci_t * const  p_cfg,
                                void               (* const p_callback)(void *p_args),
@@ -187,7 +183,7 @@ irda_sci_err_t R_IRDA_SCI_Open(uint8_t const      chan,
     return (err);
 }
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_IRDA_SCI_Send
 * Description  : Sets the transmit data with the channel specified by the
 *                handle. If transmit operation is not being performed,
@@ -210,7 +206,7 @@ irda_sci_err_t R_IRDA_SCI_Open(uint8_t const      chan,
 *                    not enough space in tx queue to store data (Async)
 *                SCI_ERR_XCVR_BUSY -
 *                    channel currently busy (SSPI/Sync)
-******************************************************************************/
+**********************************************************************************************************************/
 irda_sci_err_t R_IRDA_SCI_Send(irda_sci_hdl_t const  hdl,
                                uint8_t            *p_src,
                                uint16_t const     length)
@@ -239,6 +235,7 @@ irda_sci_err_t R_IRDA_SCI_Send(irda_sci_hdl_t const  hdl,
     else
     {
         /* Else load bytes into tx queue for transmission */
+    	/* WAIT_LOOP */
         for (cnt=0; cnt < length; cnt++)
         {
             if (hdl->tx_idle == true)
@@ -265,7 +262,7 @@ irda_sci_err_t R_IRDA_SCI_Send(irda_sci_hdl_t const  hdl,
     return err;
 }
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_IRDA_SCI_Receive
 * Description  : The data received with the channel specified by the handle
 *                is stored in the queue within the interrupt handling.
@@ -281,7 +278,7 @@ irda_sci_err_t R_IRDA_SCI_Send(irda_sci_hdl_t const  hdl,
 *                    channel mode not currently supported
 *                SCI_ERR_INSUFFICIENT_DATA -
 *                    rx queue does not contain requested amount of data
-******************************************************************************/
+ **********************************************************************************************************************/
 irda_sci_err_t R_IRDA_SCI_Receive(irda_sci_hdl_t const hdl,
                                   uint8_t         *p_dst,
                                   uint16_t const  length)
@@ -310,6 +307,7 @@ irda_sci_err_t R_IRDA_SCI_Receive(irda_sci_hdl_t const hdl,
     else
     {
         /* Get specified bytes data from queue */
+    	/* WAIT_LOOP */
         for (cnt=0; cnt < length; cnt++)
         {
             *hdl->rom->icu_rxi &= (uint8_t)~hdl->rom->rxi_en_mask;
@@ -321,13 +319,13 @@ irda_sci_err_t R_IRDA_SCI_Receive(irda_sci_hdl_t const hdl,
     return err;
 }
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: irda_txi_handler
 * Description  : TXI interrupt handler for SCI
 * Arguments    : hdl - 
 *                    handle for channel (ptr to chan control block)
 * Return Value : none
-******************************************************************************/
+ **********************************************************************************************************************/
 void irda_txi_handler(irda_sci_hdl_t const hdl)
 {
     byteq_err_t     ret;
@@ -352,13 +350,13 @@ void irda_txi_handler(irda_sci_hdl_t const hdl)
 
 }
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: irda_tei_handler
 * Description  : TEI interrupt handler for SCI
 * Arguments    : hdl - 
 *                    handle for channel (ptr to chan control block)
 * Return Value : none
-******************************************************************************/
+ **********************************************************************************************************************/
 void irda_tei_handler(irda_sci_hdl_t const hdl)
 {
     irda_sci_cb_args_t   args;
@@ -380,13 +378,13 @@ void irda_tei_handler(irda_sci_hdl_t const hdl)
     }
 }
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: irda_rxi_handler
 * Description  : RXI interrupt handler for SCI
 * Arguments    : hdl - 
 *                    handle for channel (ptr to chan control block)
 * Return Value : none
-******************************************************************************/
+ **********************************************************************************************************************/
 void irda_rxi_handler(irda_sci_hdl_t const hdl)
 {
     irda_sci_cb_args_t   args;
@@ -420,13 +418,13 @@ void irda_rxi_handler(irda_sci_hdl_t const hdl)
     }
 }
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: irda_eri_handler
 * Description  : ERI interrupt handler for SCI
 * Arguments    : hdl -
 *                    handle for channel (ptr to chan control block)
 * Return Value : none
-******************************************************************************/
+ **********************************************************************************************************************/
 void irda_eri_handler(irda_sci_hdl_t const hdl)
 {
     irda_sci_cb_args_t   args;
@@ -459,6 +457,7 @@ void irda_eri_handler(irda_sci_hdl_t const hdl)
     hdl->rom->regs->SSR.BYTE &= ~IRDA_SCI_RCVR_ERR_MASK;
 
     /* In overrun error release, Keep reading the RDR during overrun error clear. */
+    /* WAIT_LOOP */
     while ((hdl->rom->regs->SSR.BYTE & IRDA_SCI_RCVR_ERR_MASK) != 0)
     {
         byte = hdl->rom->regs->RDR;
@@ -467,7 +466,7 @@ void irda_eri_handler(irda_sci_hdl_t const hdl)
 
 }
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_IRDA_SCI_Control
 * Description  : This function performs the control of the transmission and 
 *                Receive queue.
@@ -485,7 +484,7 @@ void irda_eri_handler(irda_sci_hdl_t const hdl)
 *                IRDA_SCI_ERR_INVALID_ARG -
 *                    The cmd value or p_args contains an invalid value.
 *                    May be due to mode channel is operating in.
-******************************************************************************/
+ **********************************************************************************************************************/
 irda_sci_err_t R_IRDA_SCI_Control(irda_sci_hdl_t const     hdl,
                                   irda_sci_cmd_t const     cmd,
                                   void                    *p_args)
@@ -542,7 +541,7 @@ irda_sci_err_t R_IRDA_SCI_Control(irda_sci_hdl_t const     hdl,
     return err;
 }
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_IRDA_SCI_Close
 * Description  : Initialize the channel used in the IrDA to make it back to
 *                default.
@@ -554,7 +553,7 @@ irda_sci_err_t R_IRDA_SCI_Control(irda_sci_hdl_t const     hdl,
 *                    hdl was NULL
 *                IRDA_SCI_ERR_LOCK_FUNC -
 *                    Tried to close the channel, but detected a hardware error.
-******************************************************************************/
+ **********************************************************************************************************************/
 irda_sci_err_t R_IRDA_SCI_Close(irda_sci_hdl_t const hdl)
 {
     bool            chk1,chk2;
@@ -591,14 +590,14 @@ irda_sci_err_t R_IRDA_SCI_Close(irda_sci_hdl_t const hdl)
 }
 
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_IRDA_SCI_GetVersion
 * Description  : Returns the version of this module. The version number is 
 *                encoded such that the top two bytes are the major version
 *                number and the bottom two bytes are the minor version number.
 * Arguments    : none
 * Return Value : version number
-******************************************************************************/
+ **********************************************************************************************************************/
 #pragma inline(R_IRDA_SCI_GetVersion)
 uint32_t  R_IRDA_SCI_GetVersion(void)
 {

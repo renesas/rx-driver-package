@@ -23,7 +23,7 @@
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_eeprom_spi_config.h
-* Version      : 3.00
+* Version      : 3.10
 * Description  : EEPROM driver configuration header file
 *************************************************************************************************/
 /************************************************************************************************
@@ -31,7 +31,7 @@
 * History      : 28.11.2014 2.30     Revised functions of same as Ver.2.30 of other middleware.
 *              : 30.01.2015 2.31     Added RX71M.
 *              : 21.12.2018 3.00     Change eeprom drive interface to Memory Access Driver Interface
-*              : 30.06.2022 3.10     Added #defines specify the ports used for SS#.
+*              : 30.06.2022 3.10     Added macros to specify the ports used for SS#.
 *************************************************************************************************/
 #ifndef __EEPROM_SPI_CONFIG_H__
 #define __EEPROM_SPI_CONFIG_H__
@@ -115,10 +115,13 @@ SELECT THE SERIAL EEPROM DEVICE
 /************************************************************************************************
 PIN ASSIGNMENT
 *************************************************************************************************/
-/* The #defines specify the ports used for SS#. */
-#define EEPROM_SPI_CS_DEV0_CFG_PORTNO   ('C')     /* Device 0 Port Number : EEPROM SS#    */
+/* The macros to specify the ports used for SS#. 
+   Default value 'X' is for reference only, If this default value is kept, then the code
+   support for device port will be temporarily disabled until user assigns a value of port
+   used for SS# according to a device. */
+#define EEPROM_SPI_CS_DEV0_CFG_PORTNO   ('X')     /* Device 0 Port Number : EEPROM SS#    */
 #define EEPROM_SPI_CS_DEV0_CFG_BITNO    ('0')     /* Device 0 Bit Number  : EEPROM SS#    */
-#define EEPROM_SPI_CS_DEV1_CFG_PORTNO   ('C')     /* Device 1 Port Number : EEPROM SS#    */
+#define EEPROM_SPI_CS_DEV1_CFG_PORTNO   ('X')     /* Device 1 Port Number : EEPROM SS#    */
 #define EEPROM_SPI_CS_DEV1_CFG_BITNO    ('0')     /* Device 1 Bit Number  : EEPROM SS#    */
 
 /************************************************************************************************

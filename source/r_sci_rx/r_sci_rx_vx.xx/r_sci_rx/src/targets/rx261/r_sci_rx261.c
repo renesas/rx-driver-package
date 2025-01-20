@@ -22,6 +22,8 @@
 ***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *           28.06.2024 1.00    Initial Release.
+*           01.11.2024 5.40    Fixed the issue that data cannot be sent when using the SCI_CMD_TX_Q_FLUSH command
+*                              with the R_SCI_Control() function before executing the R_SCI_Send() function.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -524,6 +526,12 @@ sci_err_t sci_async_cmds(sci_hdl_t const hdl,
             DISABLE_TXI_INT;
             R_BYTEQ_Flush(hdl->u_tx_data.que);
             ENABLE_TXI_INT;
+
+            /* Re-enable interrupts */
+            hdl->rom->regs->SCR.BYTE &= (~SCI_EN_XCVR_MASK);
+            SCI_SCR_DUMMY_READ;
+            SCI_IR_TXI_CLEAR;
+            hdl->rom->regs->SCR.BYTE |= SCI_EN_XCVR_MASK;
             #endif /*End of SCI_CFG_USE_CIRCULAR_BUFFER == 1 */
             break;
         }

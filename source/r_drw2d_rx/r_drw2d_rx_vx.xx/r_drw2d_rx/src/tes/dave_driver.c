@@ -28,6 +28,7 @@
  *  2011-03-11 MRe  improved/removed context backup for blit
  *  2012-09-25 BSp  MISRA cleanup
  *  2013-06-25 MRe  changed check of dlistblocks in d2_lowlocalmemmode to >= 1
+ *  2024-11-15      Added WAIT_LOOP comment
  *-------------------------------------------------------------------------- */
  
 /*--------------------------------------------------------------------------
@@ -299,6 +300,7 @@ d2_device * d2_opendevice( d2_u32 flags )
 
       /* clear register cache */
 #ifdef D2_USEREGCACHE
+      /* WAIT_LOOP */
       for(i=0; i<D2_QUANTITY; i++)
       {
          handle->cache.data[i]  = 0;
@@ -349,6 +351,7 @@ d2_s32 d2_closedevice( d2_device *handle )
 
    /* find in chain */
    prev = &g_devicechain;
+   /* WAIT_LOOP */
    while( (NULL != prev) && (*prev != handle))
    {
       prev = (d2_devicedata **) *prev;
@@ -365,6 +368,7 @@ d2_s32 d2_closedevice( d2_device *handle )
    /* free render contexts */
    D2_DEV(handle)->ctxdef = NULL; /* necessary in order to free default context */
 
+   /* WAIT_LOOP */
    while(NULL != D2_DEV(handle)->ctxchain)
    {
       (void)d2_freecontext(D2_DEV(handle), D2_DEV(handle)->ctxchain);
@@ -477,6 +481,7 @@ d2_s32 d2_inithw( d2_device *handle, d2_u32 flags )
 
    /* invalidate register cache */
 #ifdef D2_USEREGCACHE
+   /* WAIT_LOOP */
    for(i=0; i<D2_QUANTITY; i++)
    {
       d2_dev->cache.valid[i] = 0;
@@ -671,6 +676,7 @@ static void d2_strcpy(d2_char *dst, const d2_char *src, d2_u32 dst_size)
    }
 
    --dst_size;
+   /* WAIT_LOOP */
    while( (0 != *src) && (0 != dst_size) )
    {
       *dst = *src;
@@ -697,6 +703,7 @@ static void d2_strcat(d2_char *dst, const d2_char *src, d2_u32 dst_size)
    }
 
    --dst_size;
+   /* WAIT_LOOP */
    while( (0 != *dst) && (0 != dst_size) )
    {
       dst++;
@@ -727,9 +734,10 @@ static void d2_inttostr(d2_char *a_dst, d2_u32 a_number, d2_u32 a_size)
       num /= 10;
       divisor *= 10;
       digits++;
-   } while (num > 0);
+   } while (num > 0);/* WAIT_LOOP */
 
    /* convert to string */
+   /* WAIT_LOOP */
    while( (a_size > 0) && (digits > 0) )
    {    
       d2_u32 digit;
@@ -768,9 +776,10 @@ static void d2_hextostr(d2_char *a_dst, d2_u32 a_number, d2_u32 a_size)
       num /= 16;
       divisor *= 16;
       digits++;
-   } while (num > 0);
+   } while (num > 0);/* WAIT_LOOP */
 
    /* convert to string */
+   /* WAIT_LOOP */
    while( (a_size > 0) && (digits > 0) )
    {    
       d2_u32 digit;
@@ -869,6 +878,7 @@ const d2_char * d2_getrevisionstringhw( const d2_device *handle)
    d2_strcat(g_revisionstring, strnb, sizeof(g_revisionstring) );
    d2_strcat(g_revisionstring, ", Features: ", sizeof(g_revisionstring) );
 
+   /* WAIT_LOOP */
    for(i=0; i < (sizeof(bits) / sizeof(d2_s32)); ++i)
    {
       if( (hwrev & bits[i]) != 0 )
@@ -1255,6 +1265,7 @@ d2_u32 d2_getdlistblockcount(d2_device *handle)
    }
    else
    {
+      /* WAIT_LOOP */
       while(cblock != dlist->currentblock)
       {
          cblock = cblock->next;

@@ -22,6 +22,7 @@
  *  2012-01-26 MRe  fixed flushing of renderbuffer when a new one is selected
  *  2012-07-18 MRe  improved render buffer management
  *  2012-09-25 BSp  MISRA cleanup
+ *  2024-11-15      Added WAIT_LOOP comment
  */
 
 /*--------------------------------------------------------------------------
@@ -390,6 +391,7 @@ d2_s32 d2_selectrenderbuffer( d2_device *handle, d2_renderbuffer *buffer )
 #ifdef D2_USEREGCACHE
    if(0 == (D2_DEV(handle)->flags & d2_df_no_registercaching))
    {
+      /* WAIT_LOOP */
       for(i=0; i<D2_QUANTITY; i++)
       {
          D2_DEV(handle)->cache.valid[i] = 0;
@@ -676,6 +678,7 @@ extern d2_s32 d2_relocateframe( d2_device *handle, const void *ptr )
       D2_RETOK(handle);
    }
 
+   /* WAIT_LOOP */
    while(NULL != blk)
    {
       d2_u32 argument = 0;
@@ -683,6 +686,7 @@ extern d2_s32 d2_relocateframe( d2_device *handle, const void *ptr )
 
       lastEntry = (d2_dlist_entry*)((d2_s32*)entry + (blk->quantity*(sizeof(d2_dlist_entry)/sizeof(d2_s32))));  /* step through all entries in the block */
 
+      /* WAIT_LOOP */
       while(entry < lastEntry)  
       {
          adrmask = entry->address.mask;
@@ -898,6 +902,7 @@ d2_s32 d2_dumprenderbuffer( d2_device *handle, d2_renderbuffer *buffer, void **r
    used = dlist->currentblock->quantity - dlist->blocksize;
    blk = dlist->firstblock;
 
+   /* WAIT_LOOP */
    while(blk != dlist->currentblock)
    {
       used += blk->quantity;
@@ -922,6 +927,7 @@ d2_s32 d2_dumprenderbuffer( d2_device *handle, d2_renderbuffer *buffer, void **r
    blk      = D2_DEV(handle)->selectedbuffer->baselist.firstblock;
    lastBlk  = D2_DEV(handle)->selectedbuffer->baselist.currentblock;
 
+   /* WAIT_LOOP */
    while(NULL != blk)
    {
       d2_u32 argument = 0;
@@ -936,6 +942,7 @@ d2_s32 d2_dumprenderbuffer( d2_device *handle, d2_renderbuffer *buffer, void **r
          lastEntry = entry + blk->quantity;      /* full block: use end position */
       }
 
+      /* WAIT_LOOP */
       while(entry < lastEntry)  
       {
          adrmask = entry->address.mask;
@@ -1127,6 +1134,7 @@ d2_u32 d2_getrenderbuffersize(d2_device *handle, d2_renderbuffer *rb)
       used = dlist->currentblock->quantity - dlist->blocksize;
       cblock = dlist->firstblock;
 
+      /* WAIT_LOOP */
       while(cblock != dlist->currentblock)
       {
          used += cblock->quantity;

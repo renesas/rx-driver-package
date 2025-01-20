@@ -17,7 +17,7 @@
 * Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /**********************************************************************************************************************
-* File Name    : r_sci_rx.c
+* File Name    : r_sci_rx23w.c
 * Description  : Functions for using SCI on the RX23W device.
 ***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
@@ -29,6 +29,10 @@
 *           27.12.2022 4.60    Updated macro definition enable and disable nested interrupt for TXI, RXI, ERI, TEI.
 *           31.01.2024 5.10    Added WAIT_LOOP comments.
 *           28.06.2024 5.30    Corrected the typecasting formula in sci_init_bit_rate().
+*           01.11.2024 5.40    Fixed the issue that data cannot be sent when using the SCI_CMD_TX_Q_FLUSH command
+*                              with the R_SCI_Control() function before executing the R_SCI_Send() function.
+*                              Fixed the issue that the DMAC channel will not be closed or keep busy
+*                              if a communication error after executing the R_SCI_Send() or R_SCI_Receive() function.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -443,7 +447,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_txi1_isr(void)
     
     txi_handler(&ch1_ctrl);
 } /* End of function sci1_txi1_isr() */
-#endif /* End of SCI_CFG_CH1_INCLUDED  */
+#endif /* End of SCI_CFG_CH1_INCLUDEDÂ  */
 
 #if SCI_CFG_CH5_INCLUDED
 /*******************************************************************************
@@ -459,7 +463,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_txi5_isr(void)
 
     txi_handler(&ch5_ctrl);
 } /* End of function sci5_txi5_isr() */
-#endif /* End of SCI_CFG_CH5_INCLUDED  */
+#endif /* End of SCI_CFG_CH5_INCLUDEDÂ  */
 
 #if SCI_CFG_CH8_INCLUDED
 /*******************************************************************************
@@ -475,7 +479,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci8_txi8_isr(void)
 
     txi_handler(&ch8_ctrl);
 } /* End of function sci8_txi8_isr() */
-#endif /* End of SCI_CFG_CH8_INCLUDED  */
+#endif /* End of SCI_CFG_CH8_INCLUDEDÂ  */
 
 #if SCI_CFG_CH12_INCLUDED
 /*******************************************************************************
@@ -491,7 +495,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_txi12_isr(void)
     
     txi_handler(&ch12_ctrl);
 } /* End of function sci12_txi12_isr() */
-#endif /* End of SCI_CFG_CH12_INCLUDED  */
+#endif /* End of SCI_CFG_CH12_INCLUDEDÂ  */
 
 #endif /* End of ((SCI_CFG_ASYNC_INCLUDED) || (TX_DTC_DMACA_ENABLE | RX_DTC_DMACA_ENABLE) || (SCI_CFG_IRDA_INCLUDED)) */
 
@@ -516,7 +520,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_tei1_isr(void)
     
     tei_handler(&ch1_ctrl);
 } /* End of function sci1_tei1_isr() */
-#endif /* End of SCI_CFG_CH1_INCLUDED  */
+#endif /* End of SCI_CFG_CH1_INCLUDEDÂ  */
 
 #if SCI_CFG_CH5_INCLUDED
 /*******************************************************************************
@@ -532,7 +536,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_tei5_isr(void)
 
     tei_handler(&ch5_ctrl);
 } /* End of function sci5_tei5_isr() */
-#endif /* End of SCI_CFG_CH5_INCLUDED  */
+#endif /* End of SCI_CFG_CH5_INCLUDEDÂ  */
 
 #if SCI_CFG_CH8_INCLUDED
 /*******************************************************************************
@@ -548,7 +552,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci8_tei8_isr(void)
 
     tei_handler(&ch8_ctrl);
 } /* End of function sci8_tei8_isr() */
-#endif /* End of SCI_CFG_CH8_INCLUDED  */
+#endif /* End of SCI_CFG_CH8_INCLUDEDÂ  */
 
 #if SCI_CFG_CH12_INCLUDED
 /*******************************************************************************
@@ -564,7 +568,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_tei12_isr(void)
     
     tei_handler(&ch12_ctrl);
 } /* End of function sci12_tei12_isr() */
-#endif /* End of SCI_CFG_CH12_INCLUDED  */
+#endif /* End of SCI_CFG_CH12_INCLUDEDÂ  */
 
 #endif /* SCI_CFG_TEI_INCLUDED */
 
@@ -588,7 +592,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_rxi1_isr(void)
     
     rxi_handler(&ch1_ctrl);
 } /* End of function sci1_rxi1_isr() */
-#endif /* End of SCI_CFG_CH1_INCLUDED  */
+#endif /* End of SCI_CFG_CH1_INCLUDEDÂ  */
 
 #if SCI_CFG_CH5_INCLUDED
 /*******************************************************************************
@@ -604,7 +608,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_rxi5_isr(void)
 
     rxi_handler(&ch5_ctrl);
 } /* End of function sci5_rxi5_isr() */
-#endif /* End of SCI_CFG_CH5_INCLUDED  */
+#endif /* End of SCI_CFG_CH5_INCLUDEDÂ  */
 
 #if SCI_CFG_CH8_INCLUDED
 /*******************************************************************************
@@ -620,7 +624,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci8_rxi8_isr(void)
 
     rxi_handler(&ch8_ctrl);
 } /* End of function sci8_rxi8_isr() */
-#endif /* End of SCI_CFG_CH8_INCLUDED  */
+#endif /* End of SCI_CFG_CH8_INCLUDEDÂ  */
 
 #if SCI_CFG_CH12_INCLUDED
 /*******************************************************************************
@@ -636,7 +640,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_rxi12_isr(void)
     
     rxi_handler(&ch12_ctrl);
 } /* End of function sci12_rxi12_isr() */
-#endif /* End of SCI_CFG_CH12_INCLUDED  */
+#endif /* End of SCI_CFG_CH12_INCLUDEDÂ  */
 
 /*****************************************************************************
 * sciN_eriN_isr 
@@ -658,7 +662,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_eri1_isr(void)
     
     eri_handler(&ch1_ctrl);
 } /* End of function sci1_eri1_isr() */
-#endif /* End of SCI_CFG_CH1_INCLUDED  */
+#endif /* End of SCI_CFG_CH1_INCLUDEDÂ  */
 
 #if SCI_CFG_CH5_INCLUDED
 /*****************************************************************************
@@ -674,7 +678,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_eri5_isr(void)
 
     eri_handler(&ch5_ctrl);
 } /* End of function sci5_eri5_isr() */
-#endif /* End of SCI_CFG_CH5_INCLUDED  */
+#endif /* End of SCI_CFG_CH5_INCLUDEDÂ  */
 
 #if SCI_CFG_CH8_INCLUDED
 /*****************************************************************************
@@ -690,7 +694,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci8_eri8_isr(void)
 
     eri_handler(&ch8_ctrl);
 } /* End of function sci8_eri8_isr() */
-#endif /* End of SCI_CFG_CH8_INCLUDED  */
+#endif /* End of SCI_CFG_CH8_INCLUDEDÂ  */
 
 #if SCI_CFG_CH12_INCLUDED
 /*****************************************************************************
@@ -706,7 +710,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_eri12_isr(void)
     
     eri_handler(&ch12_ctrl);
 } /* End of function sci12_eri12_isr() */
-#endif /* End of SCI_CFG_CH12_INCLUDED  */
+#endif /* End of SCI_CFG_CH12_INCLUDEDÂ  */
 
 #if (SCI_CFG_ASYNC_INCLUDED)
 /*****************************************************************************
@@ -818,6 +822,12 @@ sci_err_t sci_async_cmds(sci_hdl_t const hdl,
             DISABLE_TXI_INT;
             R_BYTEQ_Flush(hdl->u_tx_data.que);
             ENABLE_TXI_INT;
+
+            /* Re-enable interrupts */
+            hdl->rom->regs->SCR.BYTE &= (~SCI_EN_XCVR_MASK);
+            SCI_SCR_DUMMY_READ;
+            SCI_IR_TXI_CLEAR;
+            hdl->rom->regs->SCR.BYTE |= SCI_EN_XCVR_MASK;
 #endif
         break;
         }
@@ -1169,6 +1179,12 @@ sci_err_t sci_irda_cmds(sci_hdl_t const hdl,
             DISABLE_TXI_INT;
             R_BYTEQ_Flush(hdl->u_tx_data.que);
             ENABLE_TXI_INT;
+
+            /* Re-enable interrupts */
+            hdl->rom->regs->SCR.BYTE &= (~SCI_EN_XCVR_MASK);
+            SCI_SCR_DUMMY_READ;
+            SCI_IR_TXI_CLEAR;
+            hdl->rom->regs->SCR.BYTE |= SCI_EN_XCVR_MASK;
         break;
 
         /* flush the Receive queue */
@@ -1248,6 +1264,14 @@ sci_err_t sci_irda_open(uint8_t const      chan,
     /* Initialize transmit status flag */
     hdl->tx_idle = true;
 
+#if (RX_DTC_DMACA_ENABLE & 0x01 || RX_DTC_DMACA_ENABLE & 0x02)
+    /* Initialize receive flag when using DTC/DMAC */
+    if ((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
+    {
+        hdl->rx_idle = true;
+    }
+#endif
+
     /* Set data polarity and Serial I/O pins are used for IrDA data communication. */
     hdl->rom->regs_irda->IRCR.BYTE = (uint8_t)(0x80 | (SCI_CFG_CH5_IRDA_IRTXD_INACTIVE_LEVEL << 3) |
                           (SCI_CFG_CH5_IRDA_IRRXD_INACTIVE_LEVEL <<2 ));
@@ -1262,8 +1286,17 @@ sci_err_t sci_irda_open(uint8_t const      chan,
         return err;
     }
 
+#if (TX_DTC_DMACA_ENABLE & 0x01 || TX_DTC_DMACA_ENABLE & 0x02)
+    /* DTC/DMAC don't use the queue */
+    if ((SCI_DTC_ENABLE != g_handles[chan]->rom->dtc_dmaca_tx_enable) && (SCI_DMACA_ENABLE != g_handles[chan]->rom->dtc_dmaca_tx_enable))
+    {
+        /* Configuration and initialization of the queue of the sending and receiving */
+        err = sci_irda_init_queues(chan);
+    }
+#else
     /* Configuration and initialization of the queue of the sending and receiving */
     err = sci_irda_init_queues(chan);
+#endif
     if (SCI_SUCCESS != err)
     {
         return err;

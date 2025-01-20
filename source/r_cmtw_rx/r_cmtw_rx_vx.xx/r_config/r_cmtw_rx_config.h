@@ -25,6 +25,7 @@
 *         : 29.08.2014 1.00    First GSCE Release.
 *         : 01.02.2019 1.40    Supported RX65N-64pin.
 *                              Corrected interrupt priority level macro names.
+*         : 28.06.2024 2.90    Added support Nested Interrupt.  
 ***********************************************************************************************************************/
 #ifndef CMTW_RX_CONFIG_H
 #define CMTW_RX_CONFIG_H
@@ -54,6 +55,11 @@ Configuration Options
 #define CMTW_CFG_IPR_IC0_CH1                (3)
 #define CMTW_CFG_IPR_IC1_CH1                (3)
 
-#endif /* CMTW_RX_CONFIG_H */
+/* Enable CMTW Nested Interrupt */
+/* 0 : Disable nested interrupt.*/
+/* 1 : Enable nested interrupt.*/
+/* (default value = 0)*/
+#define CMTW_CFG_EN_NESTED_INT              (0)
 
+#endif /* CMTW_RX_CONFIG_H */
 

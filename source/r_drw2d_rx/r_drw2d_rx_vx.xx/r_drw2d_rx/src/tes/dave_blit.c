@@ -19,6 +19,7 @@
  *  2011-06-16 MRe  added Alpha4, Alpha2, Alpha1 texture formats
  *  2012-09-05 MRe  added check for Alpha4, Alpha2, Alpha1 texture formats
  *  2012-09-25 BSp  MISRA cleanup
+ *  2024-11-15      Added WAIT_LOOP comment
  */
 
 /*--------------------------------------------------------------------------
@@ -346,6 +347,7 @@ d2_s32 d2_blitcopy( d2_device *handle, d2_s32 srcwidth, d2_s32 srcheight, d2_bli
    blitcontext->gradients = ctx->gradients;
    if(0 != blitcontext->gradients)
    {
+      /* WAIT_LOOP */
       for(i=0; i<4; i++)
       {
          blitcontext->gradient[i] = ctx->gradient[i];
@@ -541,13 +543,13 @@ d2_s32 d2_blitcopy( d2_device *handle, d2_s32 srcwidth, d2_s32 srcheight, d2_bli
    /* handle possible mirroring */
    if(0 != (flags & d2_bf_mirroru))
    {
-	   dxu = -dxu;
-	   u0 = D2_FIX16(srcwidth)-u0;     /* PRQA S 4131 */ /* $Misra: #PERF_ARITHMETIC_SHIFT_LEFT $*/
+       dxu = -dxu;
+       u0 = D2_FIX16(srcwidth)-u0;     /* PRQA S 4131 */ /* $Misra: #PERF_ARITHMETIC_SHIFT_LEFT $*/
    }
    if(0 != (flags & d2_bf_mirrorv))
    {
-	   dyv = -dyv;
-	   v0 = D2_FIX16(srcheight)-v0;    /* PRQA S 4131 */ /* $Misra: #PERF_ARITHMETIC_SHIFT_LEFT $*/
+       dyv = -dyv;
+       v0 = D2_FIX16(srcheight)-v0;    /* PRQA S 4131 */ /* $Misra: #PERF_ARITHMETIC_SHIFT_LEFT $*/
    }
 
    /* filtering: offset by -1/2 texel compared to nearest neighbour, to position the 2x2 kernel correctly */

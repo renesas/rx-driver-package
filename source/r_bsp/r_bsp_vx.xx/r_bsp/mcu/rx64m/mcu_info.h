@@ -44,6 +44,7 @@
 *                               - BSP_MCU_GROUP_INTERRUPT_BE0
 *         : 30.11.2021 2.01     Deleted the compile switch for BSP_CFG_MCU_PART_SERIES and BSP_CFG_MCU_PART_GROUP.
 *         : 22.04.2022 2.02     Added version check of smart configurator.
+*         : 27.11.2024 2.03     Added version check of smart configurator.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -68,6 +69,16 @@ Macro definitions
        - BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE, BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE, BSP_CFG_HOCO_OSCILLATE_ENABLE, 
          BSP_CFG_LOCO_OSCILLATE_ENABLE, BSP_CFG_IWDT_CLOCK_OSCILLATE_ENABLE, BSP_CFG_CPLUSPLUS
        Please update Smart configurator to Smart Configurator for RX V2.12.0 (equivalent to e2 studio 2022-01) or 
+       later version.
+     */
+    #error "To use this version of BSP, you need to upgrade Smart configurator. Please upgrade Smart configurator. If you don't use Smart Configurator, please change value of BSP_CFG_CONFIGURATOR_VERSION in r_bsp_config.h."
+#endif
+
+#if BSP_CFG_CONFIGURATOR_VERSION < 2240
+    /* If you are using a version earlier than Smart Configurator for RX V2.23.0 (equivalent to e2 studio 2024-10), 
+       the program may enter an infinite loop in the initial settings depending on the conditions used. For details, 
+       see the related Tool News (R20TS1052).
+       Please update Smart configurator to Smart Configurator for RX V2.24.0 (equivalent to e2 studio 2024-01) or 
        later version.
      */
     #error "To use this version of BSP, you need to upgrade Smart configurator. Please upgrade Smart configurator. If you don't use Smart Configurator, please change value of BSP_CFG_CONFIGURATOR_VERSION in r_bsp_config.h."

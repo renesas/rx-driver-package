@@ -34,6 +34,7 @@
 *                               Added version check of smart configurator.
 *         : 28.02.2023 1.06     Added the following macro definition.
 *                               - BSP_MCU_TFU_VERSION
+*         : 27.11.2024 1.07     Added version check of smart configurator.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -75,6 +76,16 @@ Macro definitions
      */
     #error "To use this version of BSP, you need to upgrade Smart configurator. Please upgrade Smart configurator. If you don't use Smart Configurator, please change value of BSP_CFG_CONFIGURATOR_VERSION in r_bsp_config.h."
 #endif
+#endif
+
+#if BSP_CFG_CONFIGURATOR_VERSION < 2240
+    /* If you are using a version earlier than Smart Configurator for RX V2.23.0 (equivalent to e2 studio 2024-10), 
+       the program may enter an infinite loop in the initial settings depending on the conditions used. For details, 
+       see the related Tool News (R20TS1052).
+       Please update Smart configurator to Smart Configurator for RX V2.24.0 (equivalent to e2 studio 2024-01) or 
+       later version.
+     */
+    #error "To use this version of BSP, you need to upgrade Smart configurator. Please upgrade Smart configurator. If you don't use Smart Configurator, please change value of BSP_CFG_CONFIGURATOR_VERSION in r_bsp_config.h."
 #endif
 
 /* MCU CPU Version */

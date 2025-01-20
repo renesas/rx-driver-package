@@ -5,13 +5,13 @@ r_vbatt_rx
 
 Document Number
 ---------------
-R01AN2796JJ0220
-R01AN2796EJ0220
+R01AN2796JJ0230
+R01AN2796EJ0230
 
 
 Version
 -------
-v2.20
+v2.30
 
 
 Overview
@@ -20,9 +20,7 @@ This module detects drop for the battery backup power and voltage of VBATT pin.
 So, the user can detect whether RTC count value is valid or not by this module.
 
 The driver can be reducedin size by removing code used for parameter checking or for unused channels. 
-These configuration options can be found in "r_config\r_vbatt_rx_config.h". 
-An original copy of the configuration file is stored in 
-"r_vbatt_rx\ref\r_vbatt_rx_config_reference.h".
+These configuration options can be found in "r_config\r_vbatt_rx_config.h".
 
 
 Features
@@ -71,7 +69,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp     v7.20
+* r_bsp     v7.42
 
 
 How to add to your project
@@ -119,9 +117,9 @@ For example, to run the demo on a RSKRX231 board, the user would uncomment the #
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.04.00
-* GCC for Renesas RX 8.03.00.202202
-* IAR C/C++ Compiler for Renesas RX version 4.20.03
+* Renesas RX v3.06.00
+* GCC for Renesas RX 8.03.00.202311
+* IAR C/C++ Compiler for Renesas RX version 5.10.01
 
 
 File Structure
@@ -132,10 +130,10 @@ r_vbatt_rx
 |
 +---doc
 |   +---en
-|   |   r01an2796ej0220-rx-vbatt.pdf
+|   |   r01an2796ej0230-rx-vbatt.pdf
 |   |
 |   +---ja
-|       r01an2796jj0220-rx-vbatt.pdf
+|       r01an2796jj0230-rx-vbatt.pdf
 |
 +---src
     |

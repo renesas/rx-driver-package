@@ -22,11 +22,11 @@ r_lpc_rx
 |    |
 |    +---en
 |    |    |
-|    |    +---r01an2769ej0240-rx-lpc.pdf
+|    |    +---r01an2769ej0250-rx-lpc.pdf
 |    |
 |    +---ja
 |         |
-|         +---r01an2769jj0240-rx-lpc.pdf
+|         +---r01an2769jj0250-rx-lpc.pdf
 |
 +---src
      |    r_lpc_rx.c

@@ -10,6 +10,7 @@
         <version>3.03.00</version>
         <version>3.04.00</version>
         <version>3.05.00</version>
+        <version>3.06.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -17,12 +18,14 @@
         <version>8.03.00 202004</version>
         <version>8.03.00 202202</version>
         <version>8.03.00 202204</version>
+        <version>8.03.00 202405</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
         <product>ICCRX</product>
         <version>4.20.01</version>
         <version>4.20.03</version>
+        <version>5.10.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->

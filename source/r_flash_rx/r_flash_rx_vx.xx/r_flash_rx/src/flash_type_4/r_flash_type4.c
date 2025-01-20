@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2024 Renesas Electronics Corporation. All rights reserved.
 ********************************************************************************************************************/
 /*******************************************************************************************************************
 * File Name : r_flash_type4.c
@@ -39,6 +39,7 @@
 *         : 26.06.2020 4.60    Modified R_CF_SetAccessWindow() and R_CF_GetAccessWindow() of access window functions.
 *                              Modified the check order in get_cmdlk_err() and get_cmdlk_err_event().
 *         : 24.01.2023 5.00    Modified the condition of PFRAM section definition.
+*         : 15.11.2024 5.21    Added WAIT_LOOP comment.
 ********************************************************************************************************************/
 
 /********************************************************************************************************************
@@ -262,6 +263,7 @@ void R_CF_SetCurrentSwapState(uint8_t value)
     FLASH.FSUACR.WORD = reg_value;
 
 
+    /* WAIT_LOOP */
     while(sas_flag != FLASH.FSUACR.BIT.SAS)
     {
         /* Confirm that the written value can be read correctly. */
@@ -434,6 +436,7 @@ static flash_err_t flash_write_faw_reg (fawreg_t faw)
      * arises of writing to the same area that you are executing from.
      */
     g_current_parameters.wait_cnt = FLASH_FRDY_CMD_TIMEOUT;
+    /* WAIT_LOOP */
     while (1 != FLASH.FSTATR.BIT.FRDY)
     {
         /* Wait until FRDY is 1 unless timeout occurs. */
@@ -443,6 +446,7 @@ static flash_err_t flash_write_faw_reg (fawreg_t faw)
             *g_pfcu_cmd_area = (uint8_t) FLASH_FACI_CMD_FORCED_STOP;
 
             /* Wait for current operation to complete.*/
+            /* WAIT_LOOP */
             while (1 != FLASH.FSTATR.BIT.FRDY)
             {
                 ;
@@ -520,6 +524,7 @@ flash_err_t flash_toggle_banksel_reg()
      * are executing from.
      */
     g_current_parameters.wait_cnt = FLASH_FRDY_CMD_TIMEOUT;
+    /* WAIT_LOOP */
     while (1 != FLASH.FSTATR.BIT.FRDY)
     {
         /* Wait until FRDY is 1 unless timeout occurs. */
@@ -529,6 +534,7 @@ flash_err_t flash_toggle_banksel_reg()
             *g_pfcu_cmd_area = (uint8_t) FLASH_FACI_CMD_FORCED_STOP;
 
             /* Wait for current operation to complete.*/
+            /* WAIT_LOOP */
             while (1 != FLASH.FSTATR.BIT.FRDY)
             {
                 ;

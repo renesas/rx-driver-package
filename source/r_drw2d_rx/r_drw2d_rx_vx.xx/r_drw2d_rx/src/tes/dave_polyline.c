@@ -12,6 +12,7 @@
  *  2008-01-14 ASc  changed comments from C++ to C, removed tabs
  *  2011-01-20 SSt  made lines and polylines thread safe (eliminated globals)
  *  2012-09-25 BSp  MISRA cleanup
+ *  2024-11-15      Added WAIT_LOOP comment
  *-------------------------------------------------------------------------- */
 
 #include "dave_driver.h"
@@ -161,6 +162,7 @@ d2_s32 d2_renderpolyline_intern( d2_devicedata *handle, d2_contextdata *ctx, con
    dyp1 = 0;
 
    /* iterate over polyline */
+   /* WAIT_LOOP */
    for(i=0; i<count; i++)
    {
       d2_u32 sflag;
@@ -360,6 +362,7 @@ static d2_s32 d2_renderpolyline2_intern( d2_devicedata *handle, d2_contextdata *
    w1  = (d2_width)(w1 + olwidth);
 
    /* iterate over polyline */
+   /* WAIT_LOOP */
    for (i=0; i<count; i++)
    {
       d2_s32 bSkip;

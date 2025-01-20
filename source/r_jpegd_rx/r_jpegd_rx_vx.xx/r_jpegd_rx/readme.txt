@@ -10,7 +10,7 @@ R20AN0104EJ
 
 Version
 -------
-v2.06
+v2.07
 
 Overview
 --------
@@ -84,7 +84,7 @@ How to add to your project
 
 Toolchain(s) Used
 -----------------
-Renesas RX Compiler V.1.02.01
+Renesas RX Compiler V.1.02.01 or later
 
 File Structure
 --------------
@@ -93,11 +93,11 @@ r_jpegd_rx
 |
 +---doc
 |   +---en
-|   |       r20an0104ej0206_rx_jpegd.pdf
+|   |       r20an0104ej0207_rx_jpegd.pdf
 |   |       r20uw0075ej0103_jpegd.pdf
 |   |
 |   \---ja
-|           r20an0104jj0206_rx_jpegd.pdf
+|           r20an0104jj0207_rx_jpegd.pdf
 |           r20uw0075jj0103_jpegd.pdf
 |
 +---lib
@@ -115,7 +115,7 @@ r_jpegd_rx
 |       r_stdint.h
 |
 +---make_lib
-|       make_lib.zip
-|
-\---ref
-        r_jpegd_rx_config_reference.h
+        make_lib.zip
+
+r_config
+    r_jpegd_rx_config.h

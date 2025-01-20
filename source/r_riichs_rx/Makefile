@@ -1,18 +1,15 @@
 MODULE_NAME = 	r_riichs_rx
-VERSION = 		1.10
+VERSION = 		1.20
 MDF = V1,v2
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules
+FILE_PATH = $(MODULE_NAME)_vx.xx/$(MODULE_NAME)/ref
 
 $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).zip: $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).xml $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).mdf $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION)_extend.mdf
 	cd ./$(MODULE_NAME)_vx.xx; \
-	mkdir $(CONFIG_FOLDER); \
-	cp $(MODULE_NAME)/ref/$(MODULE_NAME)_config_reference.h $(CONFIG_FOLDER)/$(MODULE_NAME)_config.h; \
-	cp $(MODULE_NAME)/ref/$(MODULE_NAME)_pin_config_reference.h $(CONFIG_FOLDER)/$(MODULE_NAME)_pin_config.h; \
 	zip ../$(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).zip -r ./$(MODULE_NAME) -r ./$(CONFIG_FOLDER); \
-	rm -rf $(CONFIG_FOLDER); \
-	cd ../;	\
+	cd ../;
 
 $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).xml:
 	cp ./$(MODULE_NAME)_vx.xx.xml tmp.xml

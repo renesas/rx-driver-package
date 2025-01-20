@@ -63,7 +63,7 @@
         </dependency>
         <dependency>
             <module>r_tfat_rx</module>
-            <version>4.12</version>
+            <version>4.13</version>
         </dependency>
         <application>Storage &#38; Memory</application>
         <desc>Memory Driver Interface for Open Source FAT File System.</desc>

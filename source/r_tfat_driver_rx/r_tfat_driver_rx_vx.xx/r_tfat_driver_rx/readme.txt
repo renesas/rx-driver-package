@@ -30,9 +30,9 @@ r_tfat_driver_rx
 +---doc
 |   |
 |   +---en
-|   |   r20an0335ej0250-rx-tfat.pdf
+|   |   r20an0335ej0260-rx-tfat.pdf
 |   +---ja
-|       r20an0335jj0250-rx-tfat.pdf
+|       r20an0335jj0260-rx-tfat.pdf
 +---src
     |   r_tfat_drv_if.c
     |   r_tfat_drv_if_dev.h

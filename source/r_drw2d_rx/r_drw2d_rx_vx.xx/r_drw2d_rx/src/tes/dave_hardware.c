@@ -23,6 +23,7 @@
  *                    multithreading
  *  2011-02-07 SSt  - moved instance management for multithreading to d1 driver
  *  2012-09-25 BSp  - MISRA cleanup
+ *  2024-11-15      - Added WAIT_LOOP comment
  *-------------------------------------------------------------------------- */
 
 #include "dave_driver.h"
@@ -93,6 +94,7 @@ d2_s32 d2hw_get(d1_device * hwid, d2_u32 index)
 void d2hw_wait(d1_device * hwid)
 {
    /* wait for enum ready state */
+   /* WAIT_LOOP */
    while(0 != ((d2_u32)d1_getregister( hwid, D1_DAVE2D, D2_STATUS ) & D2C_BUSY_ENUM) )
    {}
 }
@@ -108,12 +110,14 @@ void d2hw_finish(const d2_device *handle)
    if(0 != (D2_DEV(handle)->flags & d2_df_no_dlist))
    {
       /* wait for ready state */
+      /* WAIT_LOOP */
       while(0 != ((d2_u32)d1_getregister( hwId, D1_DAVE2D, D2_STATUS ) & ( D2C_BUSY_ENUM | D2C_BUSY_WRITE )))
       {}
    }
    else
    {
       /* wait for dlist finish signal */
+      /* WAIT_LOOP */
       while(0 != ((d2_u32)d1_getregister( hwId, D1_DAVE2D, D2_STATUS ) & D2C_DLISTACTIVE))
       {
          if(0 == (D2_DEV(handle)->flags & d2_df_no_irq))
@@ -149,6 +153,7 @@ void d2hw_start( d2_device *handle, const d2_dlist *dlist, d2_s32 startnoblk )
       }
       else
       {
+         /* WAIT_LOOP */
          while(NULL != blk)
          {
             d2_dlist_entry *pos = blk->block;

@@ -41,6 +41,7 @@
 *         : 28.06.2022 2.70    Updated demo projects.
 *         : 15.08.2022 2.80    Added support for RX26T.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 28.06.2024 2.90    Added support Nested Interrupt.
 ***********************************************************************************************************************/
 #ifndef CMTW_RX_IF_H
 #define CMTW_RX_IF_H
@@ -62,7 +63,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define CMTW_RX_VERSION_MAJOR       (02)
-#define CMTW_RX_VERSION_MINOR       (80)
+#define CMTW_RX_VERSION_MINOR       (90)
 
 /***********************************************************************************************************************
 Typedef definitions

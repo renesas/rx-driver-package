@@ -77,6 +77,8 @@
 *           12.06.2023 5.00    Fixed a bug in sci_send_sync_data(), sci_receive_sync_data() and 
 *                              sci_receive_async_data() function in using DTC/DMAC.
 *           31.01.2024 5.10    Added WAIT_LOOP comments.
+*           01.11.2024 5.40    Fixed the issue that the DMAC channel will not be closed or keep busy
+*                              if a communication error after executing the R_SCI_Send() or R_SCI_Receive() function.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -2703,8 +2705,8 @@ void rxi_handler(sci_hdl_t const hdl)
                     hdl->tx_idle = true;
                 }
 #endif
-#if (SCI_CFG_ASYNC_INCLUDED)
-                if (SCI_MODE_ASYNC == hdl->mode)
+#if (SCI_CFG_ASYNC_INCLUDED || SCI_CFG_IRDA_INCLUDED)
+                if ((SCI_MODE_ASYNC == hdl->mode) || (SCI_MODE_IRDA == hdl->mode))
                 {
                     hdl->rx_idle = true;
                 }
@@ -2808,15 +2810,32 @@ static void sci_error(sci_hdl_t const hdl)
             }
         }
 
-#if ((RX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x02) && SCI_CFG_ASYNC_INCLUDED)
-    /* Clear rx_idle flag when using Async mode with DTC/DMAC */
-    if ((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
-    {
-        if (SCI_MODE_ASYNC == hdl->mode)
+#if (RX_DTC_DMACA_ENABLE & 0x02)
+        /* Disable interrupt and Close RX DMAC channel when using DMAC */
+        if (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable)
         {
-            hdl->rx_idle = true;
+            R_DMACA_Int_Disable(hdl->rom->dmaca_rx_channel);
+            R_DMACA_Close(hdl->rom->dmaca_rx_channel);
         }
-    }
+#endif
+
+#if (SCI_CFG_SSPI_INCLUDED || SCI_CFG_SYNC_INCLUDED)
+        /* Clear tx_idle flag when using Sync/Sspi mode */
+        if ((SCI_MODE_SYNC == hdl->mode) || (SCI_MODE_SSPI == hdl->mode))
+        {
+            hdl->tx_idle = true;
+        }
+#endif
+
+#if (((RX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x02)) && (SCI_CFG_ASYNC_INCLUDED || SCI_CFG_IRDA_INCLUDED))
+        /* Clear rx_idle flag when using Async/Irda mode with DTC/DMAC */
+        if ((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
+        {
+            if ((SCI_MODE_ASYNC == hdl->mode) || (SCI_MODE_IRDA == hdl->mode))
+            {
+                hdl->rx_idle = true;
+            }
+        }
 #endif
 
         /* Do callback for error */
@@ -2869,15 +2888,36 @@ static void sci_fifo_error(sci_hdl_t const hdl)
             /* Do Nothing */
         }
 
-#if ((RX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x02) && SCI_CFG_ASYNC_INCLUDED)
-    /* Clear rx_idle flag when using Async mode with DTC/DMAC */
-    if ((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
-    {
-        if (SCI_MODE_ASYNC == hdl->mode)
+#if (RX_DTC_DMACA_ENABLE & 0x02)
+        /* Disable interrupt and Close RX DMAC channel when using DMAC */
+        if (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable)
         {
-            hdl->rx_idle = true;
+            /* Check remain data will be received by CPU after transfer by block in FIFO */
+            if (0 == &hdl->queue[hdl->qindex_app_rx].rx_fraction)
+            {
+                R_DMACA_Int_Disable(hdl->rom->dmaca_rx_channel);
+                R_DMACA_Close(hdl->rom->dmaca_rx_channel);
+            }
         }
-    }
+#endif
+
+#if (SCI_CFG_SSPI_INCLUDED || SCI_CFG_SYNC_INCLUDED)
+        /* Clear tx_idle flag when using Sync/Sspi mode */
+        if ((SCI_MODE_SYNC == hdl->mode) || (SCI_MODE_SSPI == hdl->mode))
+        {
+            hdl->tx_idle = true;
+        }
+#endif
+
+#if (((RX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x02)) && SCI_CFG_ASYNC_INCLUDED)
+        /* Clear rx_idle flag when using Async mode with DTC/DMAC */
+        if ((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
+        {
+            if (SCI_MODE_ASYNC == hdl->mode)
+            {
+                hdl->rx_idle = true;
+            }
+        }
 #endif
 
         /* Do callback for error */

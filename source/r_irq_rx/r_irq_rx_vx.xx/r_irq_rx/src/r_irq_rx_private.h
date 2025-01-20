@@ -62,6 +62,7 @@
 *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *                               Updated constraint in MDF file to disable configuration of unsupported channels for RX260, RX261.
 *                               Updated .ftl file to set register value using BYTE format.
+*         : 01.11.2024  4.60    Updated constraint in MDF file to disable configuration of unsupported channels for all devices.
 ***********************************************************************************************************************/
 
 #include "platform.h"
@@ -75,7 +76,7 @@ Macro definitions
 ******************************************************************************/
 /* Version Number of API. */
 #define IRQ_RX_VERSION_MAJOR           (4)
-#define IRQ_RX_VERSION_MINOR           (50)
+#define IRQ_RX_VERSION_MINOR           (60)
 
 /* Bit position of interrupt enable bits in interrupt enable register. */
 #define IRQ_IEN_MASK_IRQ0   (0x01)

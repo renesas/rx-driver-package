@@ -14,6 +14,7 @@
  *  2011-06-16 MRe  added Alpha4, Alpha2, Alpha1 texture formats
  *  2012-09-05 MRe  added check for Alpha4, Alpha2, Alpha1 texture formats
  *  2012-09-25 BSp  MISRA cleanup
+ *  2024-11-15      Added WAIT_LOOP comment
  */
 
 /*--------------------------------------------------------------------------
@@ -671,6 +672,7 @@ d2_s32 d2_settexclut( d2_device *handle, d2_color* clut )
 
       if(NULL != D2_DEV(handle)->ctxselected->texclut_cached)
       {
+         /* WAIT_LOOP */
          for (i=0; i<clut_entries; i++)
          {
             D2_DEV(handle)->ctxselected->texclut_cached[i] = D2_DEV(handle)->ctxselected->texclut[i];
@@ -753,6 +755,7 @@ d2_s32 d2_settexclut_part( d2_device *handle, const d2_color* clut_part, d2_u32 
       /* initialize the CLUT cache */
       if(NULL != D2_DEV(handle)->ctxselected->texclut)
       {
+         /* WAIT_LOOP */
          for(i=0; i<max_index; i++)
          {
             (*pclut_cached)[i] = D2_DEV(handle)->ctxselected->texclut[i];
@@ -761,6 +764,7 @@ d2_s32 d2_settexclut_part( d2_device *handle, const d2_color* clut_part, d2_u32 
 
       else
       {
+         /* WAIT_LOOP */
          for(i=0; i<max_index; i++)
          {
             (*pclut_cached)[i] = 0;
@@ -769,6 +773,7 @@ d2_s32 d2_settexclut_part( d2_device *handle, const d2_color* clut_part, d2_u32 
    }
 
    /* copy the part to the CLUT cache */
+   /* WAIT_LOOP */
    for(i=0; i<length; i++)
    {
       (*pclut_cached)[i+start_index] = clut_part[i];
@@ -840,6 +845,7 @@ d2_s32 d2_writetexclut_direct( d2_device *handle, const d2_color* clut_part, d2_
 
    D2_DLISTWRITEU( D2_TEXCLUT_ADDR, start_index );
 
+   /* WAIT_LOOP */
    for(i=0; i<length; i++)
    {
       D2_DLISTWRITEU( D2_TEXCLUT_DATA, clut_part[i] );

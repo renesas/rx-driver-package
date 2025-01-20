@@ -13,6 +13,7 @@
  *  2009-10-29 CSe  Allow cliprect of width or height 1.
  *  2011-09-05 MRe  removed check of fb format change; check now done at render start
  *  2012-09-25 BSp  MISRA cleanup
+ *  2024-11-15      Added WAIT_LOOP comment
  *-------------------------------------------------------------------------- */
 
 
@@ -251,6 +252,7 @@ d2_s32 d2_framebuffer( d2_device *handle, void *ptr, d2_s32 pitch, d2_u32 width,
    /* update context modeflags */
    ctx = D2_DEV(handle)->ctxchain;
 
+   /* WAIT_LOOP */
    while(NULL != ctx)
    {
       ctx->cr2mask = 

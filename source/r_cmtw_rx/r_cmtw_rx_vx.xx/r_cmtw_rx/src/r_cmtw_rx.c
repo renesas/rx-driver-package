@@ -35,6 +35,7 @@
 *                              Added support for atomic control.
 *                              Removed support for Generation 1 devices.
 *         : 15.08.2022 2.80    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 28.06.2024 2.90    Added support Nested Interrupt.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -976,6 +977,11 @@ static uint32_t calculate_count(cmtw_time_unit_t time_unit, cmtw_clock_divisor_t
 R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_cm_ch0_isr, VECT(CMTW0, CMWI0))
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_cm_ch0_isr(void)
 {
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     uint32_t                  count;
     cmtw_prv_ch_ctrl_info_t * hdl;
 
@@ -996,6 +1002,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_cm_ch0_isr(void)
         hdl->rom->regs->CMWCR.BIT.CMWIE = 0;
         hdl->rom->regs->CMWIOR.BIT.CMWE = 0;
     }
+    
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_cm_ch0_isr() */
 
 /***********************************************************************************************************************
@@ -1007,6 +1018,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_cm_ch0_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_oc0_ch0_isr, VECT_CMTW0_OC0I0)
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc0_ch0_isr(void)
 {
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     uint32_t                  count;
     cmtw_prv_ch_ctrl_info_t * hdl;
 
@@ -1028,6 +1044,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc0_ch0_isr(void)
         hdl->rom->regs->CMWCR.BIT.OC0IE = 0;
         hdl->rom->regs->CMWIOR.BIT.OC0E = 0;
     }
+    
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_oc0_ch0_isr() */
 
 /***********************************************************************************************************************
@@ -1039,6 +1060,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc0_ch0_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_oc1_ch0_isr, VECT_CMTW0_OC1I0)
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc1_ch0_isr(void)
 {
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     uint32_t                  count;
     cmtw_prv_ch_ctrl_info_t * hdl;
 
@@ -1060,6 +1086,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc1_ch0_isr(void)
         hdl->rom->regs->CMWCR.BIT.OC1IE = 0;
         hdl->rom->regs->CMWIOR.BIT.OC1E = 0;
     }
+    
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_oc1_ch0_isr() */
 
 /***********************************************************************************************************************
@@ -1071,6 +1102,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc1_ch0_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_ic0_ch0_isr, VECT_CMTW0_IC0I0)
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic0_ch0_isr(void)
 {
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     uint32_t                  count;
     cmtw_prv_ch_ctrl_info_t * hdl;
 
@@ -1091,6 +1127,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic0_ch0_isr(void)
         hdl->rom->regs->CMWCR.BIT.IC0IE = 0;
         hdl->rom->regs->CMWIOR.BIT.IC0E = 0;
     }
+    
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_ic0_ch0_isr() */
 
 /***********************************************************************************************************************
@@ -1102,6 +1143,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic0_ch0_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_ic1_ch0_isr, VECT_CMTW0_IC1I0)
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic1_ch0_isr(void)
 {
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     uint32_t                  count;
     cmtw_prv_ch_ctrl_info_t * hdl;
 
@@ -1122,6 +1168,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic1_ch0_isr(void)
         hdl->rom->regs->CMWCR.BIT.IC1IE = 0;
         hdl->rom->regs->CMWIOR.BIT.IC1E = 0;
     }
+    
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_ic1_ch0_isr() */
 #endif /* End of #if CMTW_CFG_USE_CH0 == 1 */
 
@@ -1135,6 +1186,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic1_ch0_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_cm_ch1_isr, VECT(CMTW1, CMWI1))
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_cm_ch1_isr(void)
 {
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     uint32_t                  count;
     cmtw_prv_ch_ctrl_info_t * hdl;
 
@@ -1155,6 +1211,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_cm_ch1_isr(void)
         hdl->rom->regs->CMWCR.BIT.CMWIE = 0;
         hdl->rom->regs->CMWIOR.BIT.CMWE = 0;
     }
+
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_cm_ch1_isr() */
 
 /***********************************************************************************************************************
@@ -1166,6 +1227,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_cm_ch1_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_oc0_ch1_isr, VECT_CMTW1_OC0I1)
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc0_ch1_isr(void)
 {
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     uint32_t                  count;
     cmtw_prv_ch_ctrl_info_t * hdl;
 
@@ -1187,6 +1253,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc0_ch1_isr(void)
         hdl->rom->regs->CMWCR.BIT.OC0IE = 0;
         hdl->rom->regs->CMWIOR.BIT.OC0E = 0;
     }
+
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_oc0_ch1_isr() */
 
 /***********************************************************************************************************************
@@ -1198,6 +1269,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc0_ch1_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_oc1_ch1_isr, VECT_CMTW1_OC1I1)
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc1_ch1_isr(void)
 {
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     uint32_t                  count;
     cmtw_prv_ch_ctrl_info_t * hdl;
 
@@ -1219,6 +1295,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc1_ch1_isr(void)
         hdl->rom->regs->CMWCR.BIT.OC1IE = 0;
         hdl->rom->regs->CMWIOR.BIT.OC1E = 0;
     }
+
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_oc1_ch1_isr() */
 
 
@@ -1231,6 +1312,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc1_ch1_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_ic0_ch1_isr, VECT_CMTW1_IC0I1)
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic0_ch1_isr(void)
 {
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     uint32_t                  count;
     cmtw_prv_ch_ctrl_info_t * hdl;
 
@@ -1251,6 +1337,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic0_ch1_isr(void)
         hdl->rom->regs->CMWCR.BIT.IC0IE = 0;
         hdl->rom->regs->CMWIOR.BIT.IC0E = 0;
     }
+
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_ic0_ch1_isr() */
 
 /***********************************************************************************************************************
@@ -1262,6 +1353,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic0_ch1_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_ic1_ch1_isr, VECT_CMTW1_IC1I1)
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic1_ch1_isr(void)
 {
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     uint32_t                  count;
     cmtw_prv_ch_ctrl_info_t * hdl;
 
@@ -1282,6 +1378,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic1_ch1_isr(void)
         hdl->rom->regs->CMWCR.BIT.IC1IE = 0;
         hdl->rom->regs->CMWIOR.BIT.IC1E = 0;
     }
+
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_ic1_ch1_isr() */
 #endif /* End of #if CMTW_CFG_USE_CH1 == 1 */
 

@@ -1,22 +1,8 @@
-/***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics America Inc. and may only be used with products
- * of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.  Renesas products are
- * sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for the selection and use
- * of Renesas products and Renesas assumes no liability.  No license, express or implied, to any intellectual property
- * right is granted by Renesas. This software is protected under all applicable laws, including copyright laws. Renesas
- * reserves the right to change or discontinue this software and/or this documentation. THE SOFTWARE AND DOCUMENTATION
- * IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND TO THE FULLEST EXTENT
- * PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY, INCLUDING WARRANTIES
- * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE SOFTWARE OR
- * DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.  TO THE MAXIMUM
- * EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR DOCUMENTATION
- * (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER, INCLUDING,
- * WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY LOST PROFITS,
- * OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE POSSIBILITY
- * OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /*******************************************************************************************************************//**
  * @addtogroup BLE_ABS BLE_ABS
@@ -36,18 +22,6 @@ FSP_HEADER
 /***********************************************************************************************************************
  * Macro definitions
  **********************************************************************************************************************/
-
-/* Configure ABS Number Bonding */
-#define BLE_ABS_CFG_NUMBER_BONDING                  (BLE_CFG_ABS_NUMBER_BONDING)
-
-/* Configure ABS  Timer number of slot */
-#define BLE_ABS_CFG_TIMER_NUMBER_OF_SLOT            (BLE_CFG_ABS_TIMER_NUMBER_OF_SLOT)
-
-/* Configure ABS GATT MTU size */
-#define BLE_ABS_CFG_GATT_MTU_SIZE                   (BLE_CFG_ABS_GATT_MTU_SIZE)
-
-/* Configure ABS RF connection maximum  */
-#define BLE_ABS_CFG_RF_CONNECTION_MAXIMUM           (BLE_CFG_ABS_RF_CONNECTION_MAXIMUM)
 
 /* BLE_ABS_EVENT_NOTIFY_XXX_POS is DEPRECATED. Use BLE_EVENT_NOTIFY_XXX_POS macro defined in r_ble_api.h */
 #define BLE_ABS_EVENT_NOTIFY_CONNECTION_START_POS     (0)
@@ -122,10 +96,10 @@ typedef struct st_ble_abs_timer
 typedef struct st_ble_abs_identity_address_info
 {
     /* identity address */
-    ble_device_address_t identity_address[BLE_CFG_ABS_NUMBER_BONDING + 1];
+    ble_device_address_t identity_address[BLE_ABS_CFG_NUMBER_BONDING + 1];
 
     /* local & remote IRK set */
-    st_ble_gap_rslv_list_key_set_t key_set[BLE_CFG_ABS_NUMBER_BONDING + 1];
+    st_ble_gap_rslv_list_key_set_t key_set[BLE_ABS_CFG_NUMBER_BONDING + 1];
 
     /* the number of identity info stored in Data Flash */
     uint8_t bond_count;
@@ -148,7 +122,7 @@ typedef struct st_ble_abs_instance_ctrl
     st_ble_dev_addr_t           loc_bd_addr;                                        ///< Local device address.
     uint8_t                         privacy_mode;                                   ///< Privacy mode.
     uint32_t                        set_privacy_status;                             ///< Local privacy status.
-    ble_abs_timer_t                 timer[BLE_CFG_ABS_TIMER_NUMBER_OF_SLOT];
+    ble_abs_timer_t                 timer[BLE_ABS_CFG_TIMER_NUMBER_OF_SLOT];
     uint8_t                         local_irk[BLE_GAP_IRK_SIZE];
     ble_abs_identity_address_info_t identity_address_info;
 

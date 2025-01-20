@@ -10,7 +10,7 @@ R20AN0263EJ
 
 Version
 -------
-v1.01
+v1.02
 
 Overview
 --------
@@ -86,7 +86,7 @@ How to add to your project
 
 Toolchain(s) Used
 -----------------
-* Renesas RXC V.1.02.01
+* Renesas RXC V.1.02.01 or later
 
 File Structure
 --------------
@@ -95,11 +95,11 @@ r_jpege_rx
 |
 +---doc
 |   +---en
-|   |       r20an0263ej0101_rx_jpege.pdf
+|   |       r20an0263ej0102_rx_jpege.pdf
 |   |       r20uw0122ej0100_jpege.pdf
 |   |
 |   \---ja
-|           r20an0263jj0101_rx_jpege.pdf
+|           r20an0263jj0102_rx_jpege.pdf
 |           r20uw0122jj0100_jpege.pdf
 |
 +---lib
@@ -117,7 +117,7 @@ r_jpege_rx
 |       r_stdint.h
 |
 +---make_lib
-|       make_lib.zip
-|
-\---ref
-        r_jpege_rx_config_reference.h
+        make_lib.zip
+
+r_config
+    r_jpege_rx_config.h

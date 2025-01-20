@@ -18,7 +18,8 @@
  *  2010-09-09 MRe  added renderquad functions
  *  2011-09-05 MRe  fix pipeline wait if cr2 change 
  *  2012-09-25 BSp  MISRA cleanup
- *  2017-07-27 HFu  clearly commented and renamed d2_insertwait...dlist_intern functions 
+ *  2017-07-27 HFu  clearly commented and renamed d2_insertwait...dlist_intern functions
+ *  2024-11-15      Added WAIT_LOOP comment
  */
 
 /*--------------------------------------------------------------------------
@@ -78,6 +79,7 @@ void d2_rendertrifan_intern( d2_device *handle, d2_fp_triangle rtri, const d2_po
 
    vert += 4;
 
+   /* WAIT_LOOP */
    for(i=0; i<count; i++)
    {
       /* final vertex */
@@ -250,6 +252,7 @@ void d2_setupmaterial_intern( d2_devicedata *handle, d2_contextdata *ctx )
             {
                D2_DLISTWRITEU( D2_TEXCLUT_ADDR, 0 );
 
+               /* WAIT_LOOP */
                for(i = 0; i < clut_entries; i++)
                {
                   D2_DLISTWRITEU( D2_TEXCLUT_DATA, ctx->texclut_cached[i] );
@@ -262,6 +265,7 @@ void d2_setupmaterial_intern( d2_devicedata *handle, d2_contextdata *ctx )
             {
                D2_DLISTWRITEU( D2_TEXCLUT_ADDR, 0 );
 
+               /* WAIT_LOOP */
                for(i = 0; i < clut_entries; i++)
                {
                   D2_DLISTWRITEU( D2_TEXCLUT_DATA, ctx->texclut[i] );
@@ -962,6 +966,7 @@ d2_s32 d2_rendertrilist( d2_device *handle, const d2_point *data, const d2_u32 *
    /* simple loop */
    share = 0;
 
+   /* WAIT_LOOP */
    for(i=0; i<count; i++)
    {
       d2_point px1, py1, px2, py2, px3, py3;
@@ -1039,6 +1044,7 @@ d2_s32 d2_rendertristrip( d2_device *handle, const d2_point *data, const d2_u32 
 
    flip = 0;
 
+   /* WAIT_LOOP */
    for(i=0; i<count; i++)
    {
       /* third point */

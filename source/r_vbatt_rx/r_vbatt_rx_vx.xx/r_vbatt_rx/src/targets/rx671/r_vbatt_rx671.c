@@ -23,7 +23,8 @@
 *******************************************************************************/
 /*******************************************************************************
 * History      : DD.MM.YYYY Version  Description
-*              : 31.03.2021 1.00     First Release
+*              : 31.03.2021 1.00     First Release.
+*              : 28.06.2024 2.30     Added support Nested Interrupt.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_vbatt_rx671.c
@@ -94,7 +95,7 @@ vbatt_return_t r_vbatt_check_parameter(void * p_arg, vbatt_api_mode_t called_api
 
             /* ---- checks information struct ---- */
             if ((0 != ((vbatt_ctrl_info_t*)p_arg)->tamper_channel) &&
-            	(1 != ((vbatt_ctrl_info_t*)p_arg)->tamper_channel) &&
+                (1 != ((vbatt_ctrl_info_t*)p_arg)->tamper_channel) &&
                 (2 != ((vbatt_ctrl_info_t*)p_arg)->tamper_channel))
             {
                 return VBATT_ERR_INVALID_ARG;
@@ -102,7 +103,7 @@ vbatt_return_t r_vbatt_check_parameter(void * p_arg, vbatt_api_mode_t called_api
 
             /* Check valid tamper detection interrupt */
             if ((0 != ((vbatt_ctrl_info_t*)p_arg)->tamper_detection_interrupt) &&
-            	(1 != ((vbatt_ctrl_info_t*)p_arg)->tamper_detection_interrupt))
+                (1 != ((vbatt_ctrl_info_t*)p_arg)->tamper_detection_interrupt))
             {
                 return VBATT_ERR_INVALID_ARG;
             }
@@ -154,7 +155,7 @@ vbatt_return_t r_vbatt_check_parameter(void * p_arg, vbatt_api_mode_t called_api
         case VBATT_TAMPER_MODE_GETSTATUS:
 
             if ((0 != ((vbatt_status_t*)p_arg)->tamper_channel) &&
-            	(1 != ((vbatt_status_t*)p_arg)->tamper_channel) &&
+                (1 != ((vbatt_status_t*)p_arg)->tamper_channel) &&
                 (2 != ((vbatt_status_t*)p_arg)->tamper_channel))
             {
                 return VBATT_ERR_INVALID_ARG;
@@ -194,7 +195,7 @@ vbatt_return_t r_vbatt_open_set_target_mcu(void)
     /* Set configuration Tamper 0 */
     if(VBATT_TAMPER_ENABLE == VBATT_CFG_TAMPER_CH0)
     {
-    	/* Set Tamper Channel 0 */
+        /* Set Tamper Channel 0 */
         vbatt_set.tamper_channel = VBATT_TAMPER_CH0;
 
         /* Set Tamper Detection Interrupt */
@@ -580,8 +581,18 @@ End of function r_vbatt_getstatus_target_mcus
 R_BSP_PRAGMA_STATIC_INTERRUPT(r_vbatt_isr,VECT_VBATT_TAMPDI)
 R_BSP_ATTRIB_STATIC_INTERRUPT void r_vbatt_isr(void)
 {
+#if VBATT_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     /* Calls battery backup function maskable interrupt processing function */
     r_vbatt_isr_processing();
+
+#if VBATT_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 }
 /******************************************************************************
 End of function r_vbatt_isr

@@ -12,7 +12,6 @@ The RIICHS is in compliance with single master mode of the XP I2C-bus (Inter-IC-
 The driver supports one channels available on the mcu.
 The driver can be reducedin size by removing code used for parameter checking orfor unused channels.
 These configuration options can be found in "r_config\r_riichs_rx_config.h".
-An original copy of the configuration file is stored in "r_riichs_rx\ref\r_riichs_rx_config_reference.h".
 
 Features
 --------
@@ -35,10 +34,6 @@ r_riichs_rx
 |   |
 |   +---ja
 |       r01an5552jj{VERSION_NUMBER}-rx-riichs.pdf
-|
-+---ref
-|       r_riichs_rx_config_reference.h
-|       r_riichs_rx_pin_config_reference.h
 |
 +---src
     |   r_riichs_rx.c

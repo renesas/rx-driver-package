@@ -13,6 +13,7 @@
  *  2006-11-07 CSe  allocate memory through new d0_ functions
  *  2008-01-14 ASc  changed comments from C++ to C, removed tabs
  *  2012-09-25 BSp  MISRA cleanup
+ *  2024-11-15      Added WAIT_LOOP comment
  *-------------------------------------------------------------------------- */
 
 #include "dave_driver.h"
@@ -79,6 +80,7 @@ void *d2_reallocmem_p( d2_u32 newsize, void *oldadr, d2_s32 keep )
       d2_s32 *src = (d2_s32*) oldadr;
       d2_s32 *dst = (d2_s32*) newadr;
 
+      /* WAIT_LOOP */
       for (i=0; i<(oldsize / sizeof(d2_s32)); i++)
       {
          *dst = *src;
@@ -91,6 +93,7 @@ void *d2_reallocmem_p( d2_u32 newsize, void *oldadr, d2_s32 keep )
          /* copy not 'int aligned' part */
          d2_s8 *srcc = (d2_s8*) src;
          d2_s8 *dstc = (d2_s8*) dst;
+         /* WAIT_LOOP */
          for (i=0; i<(oldsize & (sizeof(d2_s32)-1)); i++)
          {
             *dstc = *srcc;

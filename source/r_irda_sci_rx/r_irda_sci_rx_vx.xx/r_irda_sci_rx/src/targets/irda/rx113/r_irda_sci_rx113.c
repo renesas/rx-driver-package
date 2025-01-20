@@ -1,48 +1,44 @@
-/*******************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
-*
-* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
-*******************************************************************************/
-/*******************************************************************************
+/***********************************************************************************************************************
+ * DISCLAIMER
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
+ * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+ * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
+ * following link:
+ * http://www.renesas.com/disclaimer
+ *
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
+ **********************************************************************************************************************/
+/***********************************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 01.12.2014 1.00     First Release
 *              : 27.01.2015 1.01     Chage symbol name of Arguments 
 *                                    None change proceedures.
-*******************************************************************************/
-/*******************************************************************************
+*              : 15.11.2024 1.02     Added WAIT_LOOP comment.
+ **********************************************************************************************************************/
+/***********************************************************************************************************************
 * System Name  : interface file for IrDA fit module.
 * File Name    : r_irda_sci_rx113.c
-* Version      : 1.01
+* Version      : 1.02
 * Device       : RX
 * Abstract     : 
-* Tool-Chain   : Renesas RXC Toolchain v2.01.00
+* Tool-Chain   : Renesas RXC Toolchain v3.06.00
 * OS           : not use
 * H/W Platform : RSKRX113
 * Description  : Functions for using IrDA on RX devices. 
 * Limitation   : none
-*******************************************************************************/
+ **********************************************************************************************************************/
 
-/*******************************************************************************
+/***********************************************************************************************************************
 Includes <System Includes> , "Project Includes"
-*******************************************************************************/
+ **********************************************************************************************************************/
 /* Access to peripherals and board defines. */
 #include "platform.h"
 
@@ -56,13 +52,13 @@ Includes <System Includes> , "Project Includes"
 
 #include "r_byteq_if.h"
 
-/*****************************************************************************
+/***********************************************************************************************************************
 Macro definitions
-******************************************************************************/
+ **********************************************************************************************************************/
 
-/*****************************************************************************
+/***********************************************************************************************************************
   Private variables and functions
-******************************************************************************/
+ **********************************************************************************************************************/
 /*------- Data and information for each channel -------*/
 #if IRDA_SCI_CFG_CH5_INCLUDED
 
@@ -198,7 +194,7 @@ static irda_sci_err_t irda_sci_init_bit_rate        (irda_sci_hdl_t const    hdl
                                                      uint32_t const     pclk,
                                                      irda_sci_t * const  p_cfg);
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: irda_power_setting
 * Description  : Starts or stops operation of the specified module.
 * Arguments    : hdl -
@@ -207,7 +203,7 @@ static irda_sci_err_t irda_sci_init_bit_rate        (irda_sci_hdl_t const    hdl
 *                    Information of the selected operation for 
 *                    the module (start/stop)
 * Return Value : none
-******************************************************************************/
+ **********************************************************************************************************************/
 void irda_power_setting(irda_sci_hdl_t const hdl, bool init_or_setting)
 {
     volatile  __evenaccess uint32_t *mstp_reg = hdl->rom->mstp;
@@ -231,7 +227,7 @@ void irda_power_setting(irda_sci_hdl_t const hdl, bool init_or_setting)
     return;
 }
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: irda_sci_open
 * Description  : Initialization for using the IRDA
 *
@@ -242,7 +238,7 @@ void irda_power_setting(irda_sci_hdl_t const hdl, bool init_or_setting)
 *                    handle for channel (pointer to channel control block)
 * Return Value : IRDA_SCI_SUCCESS -
 *                    channel opened successfully
-******************************************************************************/
+ **********************************************************************************************************************/
 irda_sci_err_t irda_sci_open(uint8_t const      chan,
                              irda_sci_t * const  p_cfg,
                              void               (* const p_callback)(void *p_args),
@@ -316,14 +312,14 @@ irda_sci_err_t irda_sci_open(uint8_t const      chan,
     return (err);
 }
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: irda_sci_close
 * Description  : Stops the IRDA function. This processing includes the 
 *                initialization for SCI chX used.
 * Arguments    : hdl - 
 *                    handle for channel (ptr to chan control block)
 * Return Value : None
-******************************************************************************/
+ **********************************************************************************************************************/
 void irda_sci_close(irda_sci_hdl_t const hdl)
 {
 
@@ -376,7 +372,7 @@ void irda_sci_close(irda_sci_hdl_t const hdl)
 
 }
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: sci_enable_ints
 * Description  : Clears the specified interrupt request flag and enables or 
 *                disables the interrupt request.
@@ -386,7 +382,7 @@ void irda_sci_close(irda_sci_hdl_t const hdl)
 *                priority -
 *                    priority for interrupts
 * Return Value : none
-******************************************************************************/
+ **********************************************************************************************************************/
 static void select_ints(uint32_t* ints_sel, bool init_or_setting)
 {
     volatile  __evenaccess uint32_t  * select_ir;
@@ -412,13 +408,13 @@ static void select_ints(uint32_t* ints_sel, bool init_or_setting)
     }
 }
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Outline      : Sets the state when the specified pin is not active state.
 * Function Name: irda_sci_mpc_setting
 * Description  : Set IRDA_SCI function pin controller.
 * Arguments    : uint8_t* port_sel ; Port select infomation
 * Return Value : None
-******************************************************************************/
+ **********************************************************************************************************************/
 static void irda_sci_io_setting(uint8_t* port_sel)
 {
     volatile uint8_t __evenaccess * const p_pdr  = ((&PORT0.PDR.BYTE) + *(port_sel));
@@ -429,14 +425,14 @@ static void irda_sci_io_setting(uint8_t* port_sel)
 
 }
 
-/************************************************************************************
+/***********************************************************************************************************************
 * Outline      : Switches the specified pin mode.
 * Function Name: irda_sci_io_mode_setting
 * Description  : Set IRDA_SCI function pin controller.
 * Arguments    : uint8_t* port_sel ; Port select infomation
 *              : init_or_setting   : Specifies the mode for the pin to be selected.
 * Return Value : None
-************************************************************************************/
+ **********************************************************************************************************************/
 static void irda_sci_io_mode_setting(uint8_t* port_sel, bool init_or_setting)
 {
     volatile uint8_t __evenaccess * const p_pmr  = ((&PORT0.PDR.BYTE) + 0x60 + *(port_sel));
@@ -470,13 +466,13 @@ static void irda_sci_io_mode_setting(uint8_t* port_sel, bool init_or_setting)
 
 }
 
-/************************************************************************************
+/***********************************************************************************************************************
 * Outline      : Reset SCI I/O register
 * Function Name: irda_sci_clear_io_register
 * Description  : Reset SCI I/O register.
 * Arguments    : irda_sci_ch_ctrl_t const hdl     ;   IrDA handler
 * Return Value : None
-************************************************************************************/
+ **********************************************************************************************************************/
 static void irda_sci_clear_io_register_sci(irda_sci_hdl_t const hdl)
 {
     volatile  __evenaccess struct st_sci12 * p_prom = hdl->rom->regs;
@@ -495,7 +491,7 @@ static void irda_sci_clear_io_register_sci(irda_sci_hdl_t const hdl)
     p_prom->SPMR.BYTE    = IRDA_SCI_SPMR_INIT;
 }
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: sci_init_queues
 * Description  : Configuration and initialization of the queue of the sending
 *                and receiving
@@ -505,7 +501,7 @@ static void irda_sci_clear_io_register_sci(irda_sci_hdl_t const hdl)
 *                    channel initialized successfully
 *                SCI_ERR_QUEUE_UNAVAILABLE -
 *                    no queue control blocks available
-******************************************************************************/
+ **********************************************************************************************************************/
 static irda_sci_err_t irda_sci_init_queues(uint8_t const  chan)
 {
     byteq_err_t      ret1 = BYTEQ_ERR_INVALID_ARG;
@@ -531,7 +527,7 @@ static irda_sci_err_t irda_sci_init_queues(uint8_t const  chan)
     return err;
 }
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: irda_sci_init_bit_rate
 * Description  :Configures settings based on the specified peripheral clock
 *               and communication rate. Verifies if the high pulse width
@@ -546,7 +542,7 @@ static irda_sci_err_t irda_sci_init_queues(uint8_t const  chan)
 *                    Baud-Rate was correctly set
 *                IRDA_SCI_ERR_INVALID_ARG -
 *                    Paramater is Invalid value or The baud rate is not set correctly
-******************************************************************************/
+ **********************************************************************************************************************/
 static irda_sci_err_t irda_sci_init_bit_rate(irda_sci_hdl_t const  hdl,
                                              uint32_t const pclk,
                                              irda_sci_t * const  p_cfg)
@@ -576,6 +572,7 @@ static irda_sci_err_t irda_sci_init_bit_rate(irda_sci_hdl_t const  hdl,
     /* BRR = (ratio / divisor) - 1                            */
 
     ratio = pclk/baud;
+    /* WAIT_LOOP */
     for(i=0; i < num_divisors; i++)
     {
         if (ratio < (uint32_t)(p_baud_info[i].divisor * 256))
@@ -622,12 +619,12 @@ static irda_sci_err_t irda_sci_init_bit_rate(irda_sci_hdl_t const  hdl,
     return (err);
 }
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: sci5_txi5_isr
 * Description  : TXI interrupt routine
 * Arguments    : none
 * Return Value : none
-******************************************************************************/
+ **********************************************************************************************************************/
 #if IRDA_SCI_CFG_CH5_INCLUDED
 #pragma interrupt sci5_txi5_isr(vect=VECT(SCI5,TXI5))
 static void sci5_txi5_isr(void)
@@ -636,12 +633,12 @@ static void sci5_txi5_isr(void)
 }
 #endif
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: IRDA_SCI_CFG_CH5_INCLUDED
 * Description  : TEI interrupt routine
 * Arguments    : none
 * Return Value : none
-******************************************************************************/
+ **********************************************************************************************************************/
 #if IRDA_SCI_CFG_CH5_INCLUDED
 #pragma interrupt sci5_tei5_isr(vect=VECT(SCI5,TEI5))
 static void sci5_tei5_isr(void)
@@ -651,12 +648,12 @@ static void sci5_tei5_isr(void)
 #endif
 
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: sci5_rxi5_isr
 * Description  : RXI interrupt routine
 * Arguments    : none
 * Return Value : none
-******************************************************************************/
+ **********************************************************************************************************************/
 #if IRDA_SCI_CFG_CH5_INCLUDED
 #pragma interrupt sci5_rxi5_isr(vect=VECT(SCI5,RXI5))
 static void sci5_rxi5_isr(void)
@@ -665,12 +662,12 @@ static void sci5_rxi5_isr(void)
 }
 #endif
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: sci5_eri5_isr
 * Description  : ERI interrupt routine
 * Arguments    : none
 * Return Value : none
-******************************************************************************/
+ **********************************************************************************************************************/
 #if IRDA_SCI_CFG_CH5_INCLUDED
 #pragma interrupt sci5_eri5_isr(vect=VECT(SCI5,ERI5))
 static void sci5_eri5_isr(void)

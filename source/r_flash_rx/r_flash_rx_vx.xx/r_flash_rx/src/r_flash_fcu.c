@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer 
 *
-* Copyright (C) 2016-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2016-2024 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_flash_fcu.c
@@ -42,6 +42,7 @@
 *                                   Modified the condition of PFRAM section definition.
 *                                   Modified to check that the value of FENTRYR is set even if it is not Flash Type 4.
 *              : 01.10.2023 5.11    Added support for Tool News R20TS0963.
+*              : 15.11.2024 5.21    Added WAIT_LOOP comment.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -139,6 +140,7 @@ flash_err_t flash_fcuram_codecopy(void)
 
         /* Read FENTRYR to ensure it has been set to 0. Note that the top byte
            of the FENTRYR register is not retained and is read as 0x00. */
+        /* WAIT_LOOP */
         while (0x0000 != FLASH.FENTRYR.WORD)
         {
             /* Wait until FENTRYR is 0 unless timeout occurs. */
@@ -238,6 +240,7 @@ flash_err_t flash_reset(void)
 
     /*Transition to Read mode*/
     FLASH.FENTRYR.WORD = 0xAA00;
+    /* WAIT_LOOP */
     while (FLASH.FENTRYR.WORD != 0x0000)
         ;
 
@@ -266,6 +269,7 @@ flash_err_t flash_stop(void)
     *g_pfcu_cmd_area = (uint8_t) FLASH_FACI_CMD_FORCED_STOP;
 
     /* Wait for current operation to complete.*/
+    /* WAIT_LOOP */
     while (1 != FLASH.FSTATR.BIT.FRDY)
     {
         ;
@@ -301,6 +305,7 @@ flash_err_t flash_pe_mode_enter(flash_type_t flash_type)
     if (flash_type == FLASH_TYPE_DATA_FLASH)
     {
         FLASH.FENTRYR.WORD = 0xAA80;        //Transition to DF P/E mode
+        /* WAIT_LOOP */
         while (FLASH.FENTRYR.WORD != 0x0080)
             ;
 
@@ -318,6 +323,7 @@ flash_err_t flash_pe_mode_enter(flash_type_t flash_type)
     else if (flash_type == FLASH_TYPE_CODE_FLASH)
     {
         FLASH.FENTRYR.WORD = 0xAA01;            //Transition to CF P/E mode
+        /* WAIT_LOOP */
         while (FLASH.FENTRYR.WORD != 0x0001)
             ;
 
@@ -370,6 +376,7 @@ flash_err_t flash_pe_mode_exit(void)
 
     /* Transition to Read mode */
     FLASH.FENTRYR.WORD = 0xAA00;
+    /* WAIT_LOOP */
     while (FLASH.FENTRYR.WORD != 0x0000)
         ;
 
@@ -395,7 +402,7 @@ flash_err_t flash_wait_frdy(void)
 {
     flash_err_t err = FLASH_SUCCESS;
     
-    
+    /* WAIT_LOOP */
     while (1 != FLASH.FSTATR.BIT.FRDY)
     {
         if (g_current_parameters.wait_cnt-- <= 0)
@@ -476,6 +483,7 @@ flash_err_t flash_erase(uint32_t block_address, uint32_t num_blocks)
     FLASH.FCPSR.WORD = 0x0001;
 
     /* LOOP THROUGH EACH BLOCK */
+    /* WAIT_LOOP */
     for (g_current_parameters.current_count = 0;
       g_current_parameters.current_count < g_current_parameters.total_count;
       g_current_parameters.current_count++)
@@ -656,6 +664,7 @@ flash_err_t flash_write(uint32_t src_start_address,
 
 
     /* TOTAL NUMBER OF BYTES TO WRITE LOOP */
+    /* WAIT_LOOP */
     while (g_current_parameters.total_count > 0)
     {
 #if (FLASH_TYPE == FLASH_TYPE_4)
@@ -673,11 +682,13 @@ flash_err_t flash_write(uint32_t src_start_address,
         *g_pfcu_cmd_area = (uint8_t) g_current_parameters.fcu_min_write_cnt;
 
         /* MINIMUM FLASH WRITE SIZE LOOP (2 BYTES AT A TIME DUE TO FCU BUFFER SIZE) */
+        /* WAIT_LOOP */
         while (g_current_parameters.current_count++ < g_current_parameters.fcu_min_write_cnt)
         {
             /* Copy data from source address to destination area */
             *(FCU_WORD_PTR) g_pfcu_cmd_area = *(uint16_t *) g_current_parameters.src_addr;
 
+            /* WAIT_LOOP */
             while (FLASH.FSTATR.BIT.DBFULL == 1)    // wait for fcu buffer to empty
                 ;
 
@@ -750,11 +761,13 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void Excep_FCU_FRDYI(void)
             *g_pfcu_cmd_area = (uint8_t) g_current_parameters.fcu_min_write_cnt;
 
             /* MINIMUM FLASH WRITE SIZE LOOP (2 BYTES AT A TIME DUE TO FCU BUFFER SIZE) */
+            /* WAIT_LOOP */
             while (g_current_parameters.current_count++ < g_current_parameters.fcu_min_write_cnt)
             {
                 /* Copy data from source address to destination area */
                 *(FCU_WORD_PTR) g_pfcu_cmd_area =   *(uint16_t *) g_current_parameters.src_addr;
 
+                /* WAIT_LOOP */
                 while (FLASH.FSTATR.BIT.DBFULL == 1)    // wait for fcu buffer to empty
                     ;
 
@@ -863,6 +876,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void Excep_FCU_FRDYI(void)
     {
         if (0 == FLASH.FASTAT.BIT.CMDLK)    // last block lock successful
         {
+        	/* WAIT_LOOP */
             while (++g_current_parameters.current_count < g_current_parameters.total_count)
             {
                 /* Decrement to start address of next CF block */

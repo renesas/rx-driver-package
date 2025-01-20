@@ -25,6 +25,7 @@
 * History      : DD.MM.YYYY Version  Description
 *              : 30.06.2015 1.00     First Release
 *              : 31.03.2021 2.00     Added support for RX671
+*              : 28.06.2024 2.30     Added support Nested Interrupt.
 *******************************************************************************/
 /*******************************************************************************
 * File Name     : r_vbatt_rx_config.h
@@ -250,5 +251,11 @@ Configuration Options
 */
 #define VBATT_CFG_INT_PRIORITY          (5)
 
+/*
+ * Enable Nested Interrupt
+ *  0 : Disable nested interrupt.
+ *  1 : Enable nested interrupt.
+*/
+#define VBATT_CFG_EN_NESTED_INT   (0)
 
 #endif /* R_VBATT_RX_CONFIG_H */

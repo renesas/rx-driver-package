@@ -42,6 +42,9 @@
  *                              Removed duplicate macros (LPC_CLOCK_ACTIVE and LPC_CLOCK_INACTIVE) for all devices.
  *                              Modified comment of API R_LPC_OperatingModeSet (), R_LPC_ReturnClockSwitch (),
  *                              and R_LPC_LowPowerModeActivate () functions.
+ *         : 01.11.2024 2.50    Moved the restrictions of PLL, PLL2 and main clock oscillator in middle-speed operation 
+ *                              mode and middle-speed operation mode 2 to lpc_freq_range_check() and 
+ *                              lpc_lowpower_activate_check() functions for RX260, RX261.
  ***********************************************************************************************************************/
 
 #ifndef R_LPC_RX_IF_H
@@ -66,7 +69,7 @@
 
 /* Version Number of API. */
     #define LPC_RX_VERSION_MAJOR           (2)
-    #define LPC_RX_VERSION_MINOR           (40)
+    #define LPC_RX_VERSION_MINOR           (50)
 
 /***********************************************************************************************************************
  Typedef definitions

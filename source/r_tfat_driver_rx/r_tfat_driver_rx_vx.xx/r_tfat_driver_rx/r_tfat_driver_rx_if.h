@@ -37,8 +37,11 @@
 *                                    Added support for GNUC and ICCRX.
 *              : 10.06.2020 2.10     Added support MMC Firmware and 
 *                                    FLASH Firmware.
-*              : 15.12.2023 2.40     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*              : 15.12.2023 2.40     Fixed to comply with GSCE Coding
+*                                    Standards Rev.6.5.0.
 *              : 08.05.2024 2.50     Added support SPI mode SD card.
+*              : 30.09.2024 2.60     Changed the comment of API functions to
+*                                    the Doxygen style.
 *******************************************************************************/
 #ifndef _R_TFAT_DRIVER_RX_IF_H_
 #define _R_TFAT_DRIVER_RX_IF_H_

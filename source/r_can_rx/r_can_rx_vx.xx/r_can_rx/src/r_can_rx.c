@@ -67,6 +67,7 @@
 *                              - Added WAIT_LOOP comments.
 *         : 21.12.2023 5.60    - Added support to receive both data frames and remote frames in FIFO mailbox mode.
 *                              - Fixed issue cannot receive remote frames with extended ID in FIFO mailbox mode.
+*         : 29.03.2024 5.70    - Added Nested Interrupt support.
 ***********************************************************************************************************************/
 /******************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -219,7 +220,7 @@ static void     can_module_stop_state_cancel (const uint32_t ch_nr);
 * in r_can_rx_config.h.\n
 * Before returning, it clears all mailboxes, sets the peripheral into Operation mode, and clears any errors.
 * @note Users need to declare the baud rate prescaler division and bit timing values to set the bitrate of the CAN
-* channel through the p_cfg argument before call R_CAN_Create function.
+* channel through the p_cfg argument before call R_CAN_Create() function.
 */
 uint32_t R_CAN_Create(const uint32_t ch_nr,
                     const uint32_t mb_mode,
@@ -2358,7 +2359,15 @@ Description:    CAN0 Transmit interrupt (channel 0).
 R_BSP_PRAGMA_INTERRUPT (CAN0_TXM0_ISR, VECT_CAN0_TXM0)    /* See mcu_mapped_interrupts.h. */
 R_BSP_ATTRIB_INTERRUPT void CAN0_TXM0_ISR(void)
 {
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
     can_tx_callback[0]();
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
 }
 /******************************************************************************
  End of function CAN0_TXM0_ISR
@@ -2373,7 +2382,15 @@ Description:    CAN0 fifo Transmit interrupt (channel 0).
 R_BSP_PRAGMA_INTERRUPT (CAN0_TXF0_ISR, VECT_CAN0_TXF0)    /* See mcu_mapped_interrupts.h. */
 R_BSP_ATTRIB_INTERRUPT void CAN0_TXF0_ISR(void)
 {
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
     can_txf_callback[0]();
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
 }
 /******************************************************************************
  End of function CAN0_TXF0_ISR
@@ -2388,7 +2405,15 @@ Description:    CAN0 Receive interrupt (channel 1).
 R_BSP_PRAGMA_INTERRUPT (CAN0_RXM0_ISR, VECT_CAN0_RXM0)
 R_BSP_ATTRIB_INTERRUPT void CAN0_RXM0_ISR(void)
 {
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
     can_rx_callback[0]();
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
 }
 /******************************************************************************
  End of function CAN0_RXM0_ISR
@@ -2403,7 +2428,15 @@ Description:    CAN0 fifo Receive interrupt (channel 1).
 R_BSP_PRAGMA_INTERRUPT (CAN0_RXF0_ISR, VECT_CAN0_RXF0)
 R_BSP_ATTRIB_INTERRUPT void CAN0_RXF0_ISR(void)
 {
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
     can_rxf_callback[0]();
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
 }
 /******************************************************************************
  End of function CAN0_RXF0_ISR
@@ -2420,7 +2453,15 @@ Description:    CAN1 Transmit interrupt (channel 1).
 R_BSP_PRAGMA_INTERRUPT(CAN1_TXM1_ISR, VECT_CAN1_TXM1)
 R_BSP_ATTRIB_INTERRUPT void CAN1_TXM1_ISR(void)
 {
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
     can_tx_callback[1]();
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
 }
 /******************************************************************************
  End of function CAN1_TXM1_ISR
@@ -2435,7 +2476,15 @@ Description:    CAN0 fifo Transmit interrupt (channel 1).
 R_BSP_PRAGMA_INTERRUPT(CAN1_TXF1_ISR, VECT_CAN1_TXF1)    /* See mcu_mapped_interrupts.h. */
 R_BSP_ATTRIB_INTERRUPT void CAN1_TXF1_ISR(void)
 {
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
     can_txf_callback[1]();
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
 }
 /******************************************************************************
  End of function CAN1_TXF1_ISR
@@ -2450,7 +2499,15 @@ Description:    CAN1 Receive interrupt (channel 1).
 R_BSP_PRAGMA_INTERRUPT(CAN1_RXM1_ISR, VECT_CAN1_RXM1)
 R_BSP_ATTRIB_INTERRUPT void CAN1_RXM1_ISR(void)
 {
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
     can_rx_callback[1]();
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
 }
 /******************************************************************************
  End of function CAN1_RXM1_ISR
@@ -2465,7 +2522,15 @@ Description:    CAN1 fifo Receive interrupt (channel 1).
 R_BSP_PRAGMA_INTERRUPT(CAN1_RXF1_ISR, VECT_CAN1_RXF1)
 R_BSP_ATTRIB_INTERRUPT void CAN1_RXF1_ISR(void)
 {
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
     can_rxf_callback[1]();
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
 }
 /******************************************************************************
  End of function CAN1_RXF1_ISR
@@ -2483,7 +2548,15 @@ Description:    CAN2 Transmit interrupt (channel 2).
 R_BSP_PRAGMA_INTERRUPT(CAN2_TXM2_ISR, VECT_CAN2_TXM2)    /* See mcu_mapped_interrupts.h. */
 R_BSP_ATTRIB_INTERRUPT void CAN2_TXM2_ISR(void)
 {
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
     can_tx_callback[2]();
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
 }
 /******************************************************************************
  End of function CAN2_TXM2_ISR
@@ -2497,7 +2570,15 @@ Description:    CAN2 fifo Transmit interrupt (channel 2).
 R_BSP_PRAGMA_INTERRUPT(CAN2_TXF2_ISR, VECT_CAN2_TXF2)    /* See mcu_mapped_interrupts.h. */
 R_BSP_ATTRIB_INTERRUPT void CAN2_TXF2_ISR(void)
 {
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
     can_txf_callback[2]();
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
 }
 /******************************************************************************
  End of function CAN2_TXF2_ISR
@@ -2512,7 +2593,15 @@ Description:    CAN2 Receive interrupt (channel 2).
 R_BSP_PRAGMA_INTERRUPT(CAN2_RXM2_ISR, VECT_CAN2_RXM2)    /* See mcu_mapped_interrupts.h. */
 R_BSP_ATTRIB_INTERRUPT void CAN2_RXM2_ISR(void)
 {
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
     can_rx_callback[2]();
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
 }
 /******************************************************************************
  End of function CAN2_RXM2_ISR
@@ -2527,7 +2616,15 @@ Description:    CAN2 fifo Receive interrupt (channel 2).
 R_BSP_PRAGMA_INTERRUPT(CAN2_RXF2_ISR, VECT_CAN2_RXF2)    /* See mcu_mapped_interrupts.h. */
 R_BSP_ATTRIB_INTERRUPT void CAN2_RXF2_ISR(void)
 {
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
     can_rxf_callback[2]();
+#if CAN_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif /* CAN_CFG_EN_NESTED_INT == 1 */
 }
 /******************************************************************************
  End of function CAN2_RXR2_ISR

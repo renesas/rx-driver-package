@@ -37,6 +37,7 @@
 *              : 31.03.2021 2.00     Added support for RX671
 *              : 13.09.2021 2.10     Added the demo for RX671
 *              : 29.07.2022 2.20     Updated demo projects
+*              : 28.06.2024 2.30     Added support Nested Interrupt.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_vbatt_rx_if.h
@@ -58,7 +59,7 @@ Macro definitions
 *******************************************************************************/
 /* Version Number of API. */
 #define VBATT_VERSION_MAJOR           (2)
-#define VBATT_VERSION_MINOR           (20)
+#define VBATT_VERSION_MINOR           (30)
 
 
 /* VBATT function grouping */

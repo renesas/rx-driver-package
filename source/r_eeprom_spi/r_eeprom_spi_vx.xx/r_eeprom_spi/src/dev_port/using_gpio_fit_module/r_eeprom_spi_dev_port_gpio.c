@@ -19,12 +19,12 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014(2022) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * System Name  : EEPROM driver software
 * File Name    : r_eeprom_spi_dev_port_gpio.c
-* Version      : 3.02
+* Version      : 3.10
 * Device       : -
 * Abstract     : Device port file
 * Tool-Chain   : -
@@ -43,6 +43,7 @@
 *              : 10.12.2020 3.02     Fixed a bug that build warning and link error occur
 *                                    when GPIO module Firmware Integration Technology and
 *                                    MPC module Firmware Integration Technology are used together.
+*              : 30.06.2022 3.10     Set PORTX as the default port assigned to SS#
 *************************************************************************************************/
 
 
@@ -56,6 +57,8 @@ Includes <System Includes> , "Project Includes"
 /* Check MCU Group. */
 #if (defined(EEPROM_SPI_CFG_USE_FIT) && defined(EEPROM_SPI_CFG_USE_GPIO_MPC_FIT))
 
+/* Check the value of the port is usable or not */
+#if !defined(EEPROM_SPI_TEMPORARY_DISABLE_DEV_PORT)
 
 /************************************************************************************************
 Macro definitions
@@ -284,7 +287,32 @@ eeprom_status_t r_eeprom_spi_wait_lp(uint8_t unit)
     }
     return EEPROM_SPI_SUCCESS;
 }
+#else
+    #warning "Please select a port number assigned to SS# to enable code support for device port. Check in file r_eeprom_spi_config.h"
+void r_eeprom_spi_cs_init(uint8_t devno)
+{
+    /* This is dummy function. */
+    R_BSP_NOP();
+} /* End of function r_eeprom_spi_cs_init() */
 
+void r_eeprom_spi_set_cs(uint8_t devno, uint8_t lv)
+{
+    /* This is dummy function. */
+    R_BSP_NOP();
+} /* End of function r_eeprom_spi_set_cs() */
+
+void r_eeprom_spi_cs_reset(uint8_t devno)
+{
+    /* This is dummy function. */
+    R_BSP_NOP();
+}  /* End of function r_eeprom_spi_cs_reset() */
+
+eeprom_status_t r_eeprom_spi_wait_lp(uint8_t unit)
+{
+    /* This is dummy function. */
+    return EEPROM_SPI_SUCCESS;
+}  /* End of function r_eeprom_spi_wait_lp() */
+#endif /* #if !defined(EEPROM_SPI_TEMPORARY_DISABLE_DEV_PORT) */
 
 #endif  /*#if (defined(EEPROM_SPI_CFG_USE_FIT) && defined(EEPROM_SPI_CFG_USE_GPIO_MPC_FIT)) */
 

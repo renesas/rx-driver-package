@@ -23,6 +23,9 @@
 /*********************************************************************************************************************
  * History : DD.MM.YYYY Version Description           
  *         : 28.06.2024 1.00    First Release
+ *         : 01.11.2024 2.50    Moved the restrictions of PLL, PLL2 and main clock oscillator in middle-speed operation 
+ *                              mode and middle-speed operation mode 2 to lpc_freq_range_check() and 
+ *                              lpc_lowpower_activate_check() functions for RX260, RX261.
  **********************************************************************************************************************/
 
 /*********************************************************************************************************************
@@ -136,15 +139,6 @@ lpc_err_t lpc_operating_mode_set(lpc_operating_mode_t e_mode)
     
         case LPC_OP_MIDDLE_SPEED:
 
-#if (BSP_CFG_MCU_VCC_MV <= 1799)
-            /* Check if PLL/PLL2 is running */
-            if ((LPC_CLOCK_ACTIVE == SYSTEM.PLLCR2.BYTE) || \
-                (LPC_CLOCK_ACTIVE == SYSTEM.PLL2CR2.BYTE))
-            {
-                return LPC_ERR_CLOCK_EXCEEDED;
-            }
-#endif
-
             /* WAIT_LOOP */
             while (LPC_TRANSITION_ONGOING == SYSTEM.SOPCCR.BIT.SOPCMTSF)
             {
@@ -177,21 +171,6 @@ lpc_err_t lpc_operating_mode_set(lpc_operating_mode_t e_mode)
             break;
 
         case LPC_OP_MIDDLE_SPEED_2:
-
-#if (BSP_CFG_MCU_VCC_MV <= 1799)
-            /* Check if PLL/PLL2 is running */
-            if ((LPC_CLOCK_ACTIVE == SYSTEM.PLLCR2.BYTE) || \
-                (LPC_CLOCK_ACTIVE == SYSTEM.PLL2CR2.BYTE))
-            {
-                return LPC_ERR_CLOCK_EXCEEDED;
-            }
-#endif
-
-            /* Check if main clock oscillator as the clock source */
-            if (LPC_CKSEL_MAIN_OSC == SYSTEM.SCKCR3.BIT.CKSEL)
-            {
-                return LPC_ERR_CLOCK_EXCEEDED;
-            }
 
             /* WAIT_LOOP */
             while (LPC_TRANSITION_ONGOING == SYSTEM.SOPCCR.BIT.SOPCMTSF)
@@ -352,19 +331,6 @@ lpc_err_t lpc_lowpower_activate(lpc_callback_set_t pcallback)
     if (LPC_SUCCESS != err)
     {
         return err;
-    }
-#endif
-
-#if (BSP_CFG_MCU_VCC_MV <= 1799)
-    if ((LPC_MEDIUM_SPD == SYSTEM.OPCCR.BIT.OPCM) || \
-        (LPC_MEDIUM_SPD_2 == SYSTEM.OPCCR.BIT.OPCM))
-    {
-        /* Check if PLL/PLL2 is running */
-        if ((LPC_CLOCK_ACTIVE == SYSTEM.PLLCR2.BYTE) || \
-            (LPC_CLOCK_ACTIVE == SYSTEM.PLL2CR2.BYTE))
-        {
-            return LPC_ERR_CLOCK_EXCEEDED;
-        }
     }
 #endif
 
@@ -554,6 +520,16 @@ static lpc_err_t lpc_freq_range_check(lpc_operating_mode_t e_mode)
             break;
     
         case LPC_OP_MIDDLE_SPEED:
+
+#if (BSP_CFG_MCU_VCC_MV <= 1799)
+            /* Check if PLL/PLL2 is running */
+            if ((LPC_CLOCK_ACTIVE == SYSTEM.PLLCR2.BYTE) || \
+                (LPC_CLOCK_ACTIVE == SYSTEM.PLL2CR2.BYTE))
+            {
+                return LPC_ERR_CLOCK_EXCEEDED;
+            }
+#endif
+
 #if ((BSP_CFG_MCU_VCC_MV > 2399) || (BSP_CFG_MCU_VCC_MV <= 1799))
             /* Check if clock speeds are within limits */
             if (((((iclk_freq > LPC_MAX_ICLK_MID_SPEED_FREQ_HZ)
@@ -594,6 +570,21 @@ static lpc_err_t lpc_freq_range_check(lpc_operating_mode_t e_mode)
             break;
 
         case LPC_OP_MIDDLE_SPEED_2:
+
+#if (BSP_CFG_MCU_VCC_MV <= 1799)
+            /* Check if PLL/PLL2 is running */
+            if ((LPC_CLOCK_ACTIVE == SYSTEM.PLLCR2.BYTE) || \
+                (LPC_CLOCK_ACTIVE == SYSTEM.PLL2CR2.BYTE))
+            {
+                return LPC_ERR_CLOCK_EXCEEDED;
+            }
+#endif
+
+            /* Check if main clock oscillator as the clock source */
+            if (LPC_CKSEL_MAIN_OSC == SYSTEM.SCKCR3.BIT.CKSEL)
+            {
+                return LPC_ERR_CLOCK_EXCEEDED;
+            }
 
             /* Check if clock speeds are within limits */
             if (((((iclk_freq > LPC_MAX_ICLK_MID_SPEED2_FREQ_HZ)
@@ -734,6 +725,19 @@ static uint32_t lpc_clockhzget(lpc_system_clocks_t clock)
 static lpc_err_t lpc_lowpower_activate_check(void)
 {
     uint8_t rstckcr_rstcksel;
+
+#if (BSP_CFG_MCU_VCC_MV <= 1799)
+    if ((LPC_MEDIUM_SPD == SYSTEM.OPCCR.BIT.OPCM) || \
+        (LPC_MEDIUM_SPD_2 == SYSTEM.OPCCR.BIT.OPCM))
+    {
+        /* Check if PLL/PLL2 is running */
+        if ((LPC_CLOCK_ACTIVE == SYSTEM.PLLCR2.BYTE) || \
+            (LPC_CLOCK_ACTIVE == SYSTEM.PLL2CR2.BYTE))
+        {
+            return LPC_ERR_CLOCK_EXCEEDED;
+        }
+    }
+#endif
 
     if (0x1 == SYSTEM.SBYCR.BIT.SSBY) /* check if entering software standby */
     {

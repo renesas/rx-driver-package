@@ -29,7 +29,9 @@
 *           31.03.2023 4.80    Added support for RX26T.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *           13.03.2024 5.20    Fixed the issue that repeat_block_side had an unexpected value
-*                               in the sci_tx_dmaca_create() and sci_rx_dmaca_create() functions.
+*                              in the sci_tx_dmaca_create() and sci_rx_dmaca_create() functions.
+*           01.11.2024 5.40    Fixed the issue that the DMAC channel will not be closed or keep busy
+*                              if a communication error after executing the R_SCI_Send() or R_SCI_Receive() function.
 ***********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -996,8 +998,8 @@ static void sci_dmac_rx_handler(sci_hdl_t const hdl)
             hdl->tx_idle = true;
         }
 #endif
-#if (SCI_CFG_ASYNC_INCLUDED)
-        if (SCI_MODE_ASYNC == hdl->mode)
+#if (SCI_CFG_ASYNC_INCLUDED || SCI_CFG_IRDA_INCLUDED)
+        if ((SCI_MODE_ASYNC == hdl->mode) || (SCI_MODE_IRDA == hdl->mode))
         {
             hdl->rx_idle = true;
         }

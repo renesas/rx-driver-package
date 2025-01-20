@@ -1,4 +1,8 @@
-/* ${REA_DISCLAIMER_PLACEHOLDER} */
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 #ifndef R_BLE_GTL_H
 #define R_BLE_GTL_H
@@ -116,5 +120,7 @@ ble_status_t R_BLE_GTL_VS_Init(ble_vs_app_cb_t vs_cb);
 ble_status_t R_BLE_GTL_VS_GetBdAddr(uint8_t addr_type);
 ble_status_t R_BLE_GTL_VS_SetBdAddr(st_ble_dev_addr_t * p_addr);
 ble_status_t R_BLE_GTL_VS_GetRand(uint8_t rand_size);
+ble_status_t R_BLE_GTL_VS_GetTxPower(uint16_t conn_hdl);
+ble_status_t R_BLE_GTL_VS_SetTxPower (uint16_t conn_hdl, uint8_t tx_power);
 
 #endif                                 /* R_BLE_GTL_H */

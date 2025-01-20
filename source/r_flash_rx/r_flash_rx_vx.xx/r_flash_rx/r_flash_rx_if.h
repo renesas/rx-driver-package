@@ -166,6 +166,7 @@
 *                              Modified functions flash_InterruptRequestDisable(), flash_InterruptRequestEnable().
 *                              (When using the GCC or IAR compiler in non-blocking mode,
 *                               ROM access occurs during P/E mode.)
+*           15.11.2024 5.21    Added WAIT_LOOP comment.
 ***********************************************************************************************************************/
 
 #ifndef FLASH_INTERFACE_HEADER_FILE
@@ -183,7 +184,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Driver Version Number. */
 #define FLASH_RX_VERSION_MAJOR           (5)
-#define FLASH_RX_VERSION_MINOR           (20)
+#define FLASH_RX_VERSION_MINOR           (21)
 
 
 /***********************************************************************************************************************

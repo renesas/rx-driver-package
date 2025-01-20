@@ -17,6 +17,7 @@
  *  2010-03-18 MRe  added d2_setalphablendmodeex, d2_getalphablendmodeflags
  *  2011-09-22 MRe  fixed default for ctx->texmodemask
  *  2012-09-25 BSp  MISRA cleanup
+ *  2024-11-15      Added WAIT_LOOP comment
  */
 
 /*--------------------------------------------------------------------------
@@ -209,6 +210,7 @@ d2_s32 d2_freecontext( d2_device *handle, d2_context *ctx )
 
    /* find in chain */
    prev = & D2_DEV(handle)->ctxchain;
+   /* WAIT_LOOP */
    while ((prev) && (*prev != ctx))
    {
       prev = (d2_contextdata **) *prev;
@@ -1209,6 +1211,7 @@ d2_s32 d2_setpattern( d2_device *handle, d2_pattern pattern )
     * pattern &= ((2 << (patlen-1))-1);  (warning: would break 'eye' demo) */
 
    /* extend it to fill entire hardware word */
+   /* WAIT_LOOP */
    for (i=0; i<(maxPatLen / patLen); i++) 
    {
       pattern |= (pattern << patLen);

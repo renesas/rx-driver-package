@@ -15,6 +15,7 @@
 //  2018-01-24      added support for RX
 //  2020-02-28      added ICU_GROUPAL1 Enable/Disable Switch
 //  2021-05-27      supported GNU-RX and IAR compiler.
+//  2024-11-15      Added WAIT_LOOP comment
 //--------------------------------------------------------------------------
 
 #include <stdlib.h>
@@ -228,6 +229,7 @@ int d1_queryirq(d1_device *handle, int irqmask, int timeout)
         }
 
         /* wait for irq */
+        /* WAIT_LOOP */
         while(1)
         {
             if ((irqmask & d1_irq_dlist) && g_irq_triggered[d1_irqslot_dlist])
@@ -472,6 +474,6 @@ static unsigned long d1_grpal1_get()
     /* The address of the base register is cast to match the size of the register. */
     p_grpal1_addr = ((unsigned long *)GRPAL1_0_BASE);
 
-	return (*p_grpal1_addr);
+    return (*p_grpal1_addr);
 } /* End of function d1_grpal1_get() */
 #endif

@@ -30,7 +30,8 @@
 *                                    - GCC for Renesas RX
 *                                    - IAR C/C++ Compiler for Renesas RX
 *                                    Deleted the inline expansion.
-*              : 31.03.2021 2.00     Removed the sub-folder vbatt 
+*              : 31.03.2021 2.00     Removed the sub-folder vbatt.
+*              : 28.06.2024 2.30     Added support Nested Interrupt.
 *******************************************************************************/
 /*******************************************************************************
 * File Name    : r_vbatt_rx230.c
@@ -366,8 +367,18 @@ End of function r_vbatt_getstatus_target_mcu
 R_BSP_PRAGMA_STATIC_INTERRUPT(r_vbatt_isr,VECT_VBATT_VBTLVDI)
 R_BSP_ATTRIB_STATIC_INTERRUPT void r_vbatt_isr(void)
 {
+#if VBATT_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     /* Calls battery backup function maskable interrupt processing function */
     r_vbatt_isr_processing();
+
+#if VBATT_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 }
 /******************************************************************************
 End of function r_vbatt_isr

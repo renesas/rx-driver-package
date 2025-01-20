@@ -166,7 +166,7 @@
             <description>Select only one serial flash memory capacity to be controlled for device 1.
  (1: control target, 0: not control target)</description>
         </property>
-        <property id="EEPROM_SPI_CS_DEV0_CFG_PORTNO" display="Device 0 Port Number" default="'C'" type="combobox">
+        <property id="EEPROM_SPI_CS_DEV0_CFG_PORTNO" display="Device 0 Port Number" default="'X'" type="combobox">
             <option id="EEPROM_SPI_CS_DEV0_CFG_PORTNO.'0'" display="PORT0" value="'0'"/>
             <option id="EEPROM_SPI_CS_DEV0_CFG_PORTNO.'1'" display="PORT1" value="'1'"/>
             <option id="EEPROM_SPI_CS_DEV0_CFG_PORTNO.'2'" display="PORT2" value="'2'"/>
@@ -201,12 +201,11 @@
             <option id="EEPROM_SPI_CS_DEV0_CFG_PORTNO.'V'" display="PORTV" value="'V'"/>
             <option id="EEPROM_SPI_CS_DEV0_CFG_PORTNO.'W'" display="PORTW" value="'W'"/>
             <option id="EEPROM_SPI_CS_DEV0_CFG_PORTNO.'X'" display="PORTX" value="'X'"/>
-            <option id="EEPROM_SPI_CS_DEV0_CFG_PORTNO.'Y'" display="PORTY" value="'Y'"/>
-            <option id="EEPROM_SPI_CS_DEV0_CFG_PORTNO.'Z'" display="PORTZ" value="'Z'"/>
             <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV0_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV0_INCLUDED.#define EEPROM_SPI_CFG_DEV0_INCLUDED}"</constraint>
             <description>Configure Device 0 Port Number
 Depending on the MCU used
-0 - 9, A-?</description>
+0 - 9, A - X
+Default value 'X' is for reference only, user needs to assign a value of port used for SS# according to the MCU used.</description>
         </property>
         <property id="EEPROM_SPI_CS_DEV0_CFG_BITNO" display="Device 0 Bit Number" default="'0'" type="combobox">
             <option id="EEPROM_SPI_CS_DEV0_CFG_BITNO.'0'" display="PIN0" value="'0'"/>
@@ -222,7 +221,7 @@ Depending on the MCU used
 Depending on the MCU used
 0 - 7</description>
         </property>
-        <property id="EEPROM_SPI_CS_DEV1_CFG_PORTNO" display="Device 1 Port Number" default="'C'" type="combobox">
+        <property id="EEPROM_SPI_CS_DEV1_CFG_PORTNO" display="Device 1 Port Number" default="'X'" type="combobox">
             <option id="EEPROM_SPI_CS_DEV1_CFG_PORTNO.'0'" display="PORT0" value="'0'"/>
             <option id="EEPROM_SPI_CS_DEV1_CFG_PORTNO.'1'" display="PORT1" value="'1'"/>
             <option id="EEPROM_SPI_CS_DEV1_CFG_PORTNO.'2'" display="PORT2" value="'2'"/>
@@ -257,12 +256,11 @@ Depending on the MCU used
             <option id="EEPROM_SPI_CS_DEV1_CFG_PORTNO.'V'" display="PORTV" value="'V'"/>
             <option id="EEPROM_SPI_CS_DEV1_CFG_PORTNO.'W'" display="PORTW" value="'W'"/>
             <option id="EEPROM_SPI_CS_DEV1_CFG_PORTNO.'X'" display="PORTX" value="'X'"/>
-            <option id="EEPROM_SPI_CS_DEV1_CFG_PORTNO.'Y'" display="PORTY" value="'Y'"/>
-            <option id="EEPROM_SPI_CS_DEV1_CFG_PORTNO.'Z'" display="PORTZ" value="'Z'"/>
             <constraint display="Device only valid for Supported" actionOnFail="disable">"${SC_EEPROM_SPI_CFG_DEV1_INCLUDED}" == "${SC_EEPROM_SPI_CFG_DEV1_INCLUDED.#define EEPROM_SPI_CFG_DEV1_INCLUDED}"</constraint>
             <description>Configure Device 1 Port Number
 Depending on the MCU used
-0 - 9, A-?</description>
+0 - 9, A - X
+Default value 'X' is for reference only, user needs to assign a value of port used for SS# according to the MCU used.</description>
         </property>
         <property id="EEPROM_SPI_CS_DEV1_CFG_BITNO" display="Device 1 Bit Number" default="'0'" type="combobox">
             <option id="EEPROM_SPI_CS_DEV1_CFG_BITNO.'0'" display="PIN0" value="'0'"/>

@@ -57,8 +57,9 @@ Application.
  * the chosen compiler does not support long long. Per default this module is
  * linked. 
  * This module is excluded only when the compiler supports long long
- * 
  *
+ * Changes:
+ *  2024-11-15      Added WAIT_LOOP comment
  *-------------------------------------------------------------------------- */
 
 
@@ -379,6 +380,7 @@ void d2_div6432(const d2_int64 *dividend, d2_s32 divisor, d2_int64 *res)
       d2_u32 tmp32;
       d2_u32 remMask  = 0x80000000u;
       shift = 0;
+      /* WAIT_LOOP */
       for(;;)
       {
          if(0 != (remainder & remMask))

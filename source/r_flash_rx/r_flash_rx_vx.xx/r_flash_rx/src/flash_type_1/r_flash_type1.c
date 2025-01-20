@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2024 Renesas Electronics Corporation. All rights reserved.
 ********************************************************************************************************************/
 /*******************************************************************************************************************
 * File Name : r_flash_type1.c
@@ -42,6 +42,7 @@
 *           23.04.2021 4.80    Added RX140.
 *           24.01.2023 5.00    Modified the condition of PFRAM section definition.
 *                              Removed code to set registers FWB2 and FWB3 to FFFFh in flash_cf_set_access_window().
+*           15.11.2024 5.21    Added WAIT_LOOP comment.
 ********************************************************************************************************************/
 
 /********************************************************************************************************************
@@ -131,7 +132,8 @@ void flash_set_current_swap_state(uint8_t value)
     flash_pe_mode_enter(FLASH_TYPE_CODE_FLASH);
 
     FLASH.FISR.BIT.SAS = sas_flag;
-
+	
+    /* WAIT_LOOP */
     while(sas_flag != FLASH.FISR.BIT.SAS)
     {
         /* Confirm that the written value can be read correctly. */
@@ -388,6 +390,7 @@ FLASH_PE_MODE_SECTION
 flash_err_t flash_wait_exrdy(void)
 {
     /* Check EXFREADY Flag bit*/
+	/* WAIT_LOOP */
     while (1 != FLASH.FSTATR1.BIT.EXRDY)
     {
         /* Check that execute command is completed. */
@@ -404,6 +407,7 @@ flash_err_t flash_wait_exrdy(void)
     /* Clear FEXCR register */
     FLASH.FEXCR.BYTE = FEXCR_CLEAR;
 
+    /* WAIT_LOOP */
     while (0 != FLASH.FSTATR1.BIT.EXRDY)
     {
         /* Check that execute command is completed. */

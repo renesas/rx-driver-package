@@ -9,29 +9,38 @@ R01AN7174EU (English version)
 
 Version
 -------
-v1.20
+v1.30
 
 Overview
 --------------------------------------------------------------------------------
 The r_ble_da14531_rx module provides BLE GAP functionality for DA14531 BLE module
 which are compliant with Bluetooth version 5.0.
 This driver is tested and works with the following toolchain:
-  Renesas RX Toolchain v3.05.00
+  Renesas RX Toolchain v3.06.00
 All API calls and their supporting interface definitions are located in r_ble_da14531_if.h.
 
 Features
 --------
-* Peripheral support only.
+* Peripheral support only
 * Legacy Advertising, connection (No Security)
 * UART support
-* Dynamic loading of custom profile.
+* Dynamic loading of custom profile
 * Integration with QE BLE plugin
 * GAP, GATT Server
 * FreeRTOS Support
 * AzureRTOS Support
 * Bare metal support
 * L2CAP, GATT Client support
-* Support SDK download from host MCU.
+* Support SDK download from host MCU
+* Sleep mode support
+* Common functionality for DA1453x
+  - Boot from host or DA14531/DA14535 flash
+  - Use 1-wire (default) or 2-wire UART for booting
+  - Open/Close the BLE protocol stack
+* GATT Server functionality: 
+  - Notification of characteristics modification
+  - Read/Write of GATT Profile from host
+  - Loading of Profile definition
 
 Supported MCUs
 --------------
@@ -60,12 +69,12 @@ Required Packages
 How to add to your project
 --------------------------
 Please refer to the Adding Firmware Integration Technology Modules to Projects.
-"r01an1723eu0121_rx.pdf/r01an1826ej0110_rx.pdf/r20an0451es0100-e2studio-sc.pdf"(Only English version)
-"r01an1723ju0121_rx.pdf/r01an1826jj0110_rx.pdf/r20an0451js0100-e2studio-sc.pdf"(Only Japanese version)
+"r01an1723eu0130_rx.pdf/r01an1826ej0110_rx.pdf/r20an0451es0100-e2studio-sc.pdf"(Only English version)
+"r01an1723ju0130_rx.pdf/r01an1826jj0110_rx.pdf/r20an0451js0100-e2studio-sc.pdf"(Only Japanese version)
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.05.00
+* Renesas RX v3.06.00
 
 File Structure
 --------------
@@ -95,6 +104,5 @@ r_ble_da14531_rx
             r_ble_gtl.h
             r_ble_gtl_image.c
             r_ble_gtl_image.h
-   
 r_config
     r_ble_da14531_config.h

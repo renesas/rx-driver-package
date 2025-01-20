@@ -12,6 +12,7 @@
  *  2012-09-25 BSp  MISRA cleanup
  *  2016-06-29 MHo  bugfix in fbblitcopy: handle SRC below DST in case of overlapping rects correctly in presence of an asymmetric clip rect
  *  2017-07-27 HFu  bugfix in fbblitcopy: corrected wait-insert to full wait instead of pipeline only
+ *  2024-11-15      Added WAIT_LOOP comment
  */
 
 /*--------------------------------------------------------------------------
@@ -269,6 +270,7 @@ d2_s32 d2_utility_perspectivewarp( d2_device *handle, d2_u16 srcwidth, d2_u16 sr
    d2_u32 axu = wt;
    d2_u32 ayu = (d2_u32) ( (32767 - (wt >> 1)) / dstheight );
 
+   /* WAIT_LOOP */
    for(y=0; y<(d2_u32)dstheight; y++ )
    {
       d2_s32 result;
@@ -401,7 +403,7 @@ d2_s32 d2_utility_fbblitcopy( d2_device *handle, d2_u16 width, d2_u16 height, d2
          {
             return result;
          }
-      } while (strx > srcx);
+      } while (strx > srcx);/* WAIT_LOOP */
       return result;
    }
 

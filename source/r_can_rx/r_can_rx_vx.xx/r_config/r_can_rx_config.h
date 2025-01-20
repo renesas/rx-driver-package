@@ -38,6 +38,7 @@
 *         :                    - Removed wrong parentheses at value of macros for STB/EN Port/pin.
 *         : 01.04.2021 5.00    - Added support for setting different bitrate for different channels.
 *         : 08.09.2023 5.50    - Added descriptions for each value of FRAME_ID_MODE.
+*         : 29.03.2024 5.70    - Added Nested Interrupt support.
 ***********************************************************************************************************************/
 #ifndef CAN_CONFIG_HEADER_FILE
 #define CAN_CONFIG_HEADER_FILE
@@ -66,6 +67,13 @@ mailboxes for messages sent and received. */
 #define CAN0_INT_LVL        (2)
 #define CAN1_INT_LVL        (2)
 #define CAN2_INT_LVL        (2)
+
+/*
+ * Enable Nested Interrupt
+ *  0 : Disable nested interrupt.
+ *  1 : Enable nested interrupt.
+ */
+#define CAN_CFG_EN_NESTED_INT   (0)
 
 /**********************************************************************************************************************
  * Select CAN ID-type for the driver, that is, usage of 11-bit or 29-bit IDs. The FRAME_ID_MODE can be set to

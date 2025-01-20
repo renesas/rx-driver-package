@@ -14,7 +14,7 @@
  * following link:
  * http://www.renesas.com/disclaimer
  *
- * Copyright (C) 2021-2023 Renesas Electronics Corporation. All rights reserved.
+ * Copyright (C) 2021-2024 Renesas Electronics Corporation. All rights reserved.
  *********************************************************************************************************************/
 /**********************************************************************************************************************
  * File Name    : r_flash_nofcu.c
@@ -27,6 +27,7 @@
  *           10.12.2021 4.81    Added support for Tool News R20TS0772, and removed unnecessary code in flash_write().
  *           24.01.2023 5.00    Modified the condition of PFRAM section definition.
  *           01.10.2023 5.11    Added support for Tool News R20TS0963.
+ *           15.11.2024 5.21    Added WAIT_LOOP comment.
 *********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -136,6 +137,7 @@ static void flash_df_read_mode_enter(void)
 
     FLASH.FENTRYR.WORD = FENTRYR_READ_MODE;
 
+    /* WAIT_LOOP */
     while (0x0000 != FLASH.FENTRYR.WORD)
     {
         /* Confirm that the written value can be read correctly. */
@@ -334,10 +336,12 @@ void flash_stop(void)
     if ((FLASH.FENTRYR.WORD == 0x0080) || (FLASH.FENTRYR.WORD == 0x0001))
     {
         FLASH.FCR.BIT.STOP = 1;
+        /* WAIT_LOOP */
         while (FLASH.FSTATR1.BIT.FRDY == 0)     // wait for FRDY
             ;
 
         FLASH.FCR.BYTE = 0;
+        /* WAIT_LOOP */
         while (FLASH.FSTATR1.BIT.FRDY == 1)     // wait for FRDY
             ;
     }
@@ -637,6 +641,7 @@ flash_err_t flash_write(const uint32_t src_address, const uint32_t dest_address,
         return FLASH_ERR_FAILURE;
     }
 
+    /* WAIT_LOOP */
     while(g_current_parameters.total_count > 0)
     {
         g_current_parameters.total_count--;
@@ -762,6 +767,7 @@ static void flash_cf_read_mode_enter(void)
 
     FLASH.FENTRYR.WORD = FENTRYR_READ_MODE;
 
+    /* WAIT_LOOP */
     while (0x0000 != FLASH.FENTRYR.WORD)
     {
         /* Confirm that the written value can be read correctly. */
@@ -929,6 +935,7 @@ FLASH_PE_MODE_SECTION
 static flash_err_t flash_wait_frdy(void)
 {
     /* Check FREADY Flag bit*/
+	/* WAIT_LOOP */
     while (1 != FLASH.FSTATR1.BIT.FRDY)
     {
         /* Check that execute command is completed. */
@@ -945,6 +952,7 @@ static flash_err_t flash_wait_frdy(void)
     /* Clear FCR register */
     FLASH.FCR.BYTE = FCR_CLEAR;
 
+    /* WAIT_LOOP */
     while (0 != FLASH.FSTATR1.BIT.FRDY)
     {
         /* Check that execute command is completed. */

@@ -33,6 +33,7 @@
  * 2012-09-25 BSp  - MISRA cleanup
  * 2012-10-16 MRe  - fixed freemem for d2_df_no_dlist
  * 2017-07-27 HFu  - clearly commented and renamed d2_insertwait...dlist_intern functions
+ * 2024-11-15      - Added WAIT_LOOP comment
  *-------------------------------------------------------------------------- */
 
 /*--------------------------------------------------------------------------
@@ -126,6 +127,7 @@ void d2_free_dlistblock_intern( const d2_device *handle, d2_dlist_block *data )
    d1_device      *id = D2_DEV(handle)->hwid;
 
    /* free chain */
+   /* WAIT_LOOP */
    while(NULL != data)
    {
       n = data->next;
@@ -215,6 +217,7 @@ d2_s32 d2_initdlist_intern( d2_device *handle, d2_dlist *dlist, d2_u32 initialsi
          vmem_blocks->block_size = llm_mode->vidmemblocksizefactor * D2_DEV(handle)->dlistblocksize;
          vmem_blocks->num_slices = llm_mode->vidmemblocksizefactor;
 
+         /* WAIT_LOOP */
          for (i=0; i<vmem_blocks->num_blocks; ++i)
          {
             vmem_blocks->blocks[i] = NULL;
@@ -287,6 +290,7 @@ void d2_deinitdlist_intern(const d2_dlist *dlist)
    {
       d2_u32 i;
       d1_device *id = D2_DEV(dlist->device)->hwid;
+      /* WAIT_LOOP */
       for (i=0; i<dlist->vidmem_blocks->num_blocks; ++i)
       {
          if(NULL != dlist->vidmem_blocks->blocks[i])
@@ -350,6 +354,7 @@ void d2_nextdlistblock_intern( d2_dlist *dlist )
             *(blk->jump) = (d2_s32)nextaddress;
             blk->jump = 0;
          }
+         /* WAIT_LOOP */
          while (pos < end)
          {
             *pos= (d2_s32)0x80808080u;
@@ -474,6 +479,7 @@ void d2_resetdlist_intern( d2_dlist *dlist )
    d2_s32 regIdx;
    if(0 == (((d2_devicedata *) dlist->device)->flags & d2_df_no_registercaching))
    {
+      /* WAIT_LOOP */
       for (regIdx = 0; regIdx < D2_QUANTITY; regIdx++)
       {
          cachedData->valid[regIdx] = 0;
@@ -530,6 +536,7 @@ void* d2_preparedlist_read_intern( const d2_device *handle, d2_dlist *dlist, d2_
       {
          /* go to penultimate element in list */
          d2_dlist_block *blk = dlist->currentblock;
+         /* WAIT_LOOP */
          while(NULL != blk->next->next)
          {
             blk = blk->next;
@@ -616,6 +623,7 @@ d2_u32 d2_executedlist_intern( const d2_device *handle, d2_dlist_entry *block )
    d1_device *id = D2_DEV(handle)->hwid;
    d2_u32 a1,a2,a3,a4;
 
+   /* WAIT_LOOP */
    for (;;)
    {
       d2_s32 bEOL = 0;
@@ -871,6 +879,7 @@ void d2_scratch2dlist_intern( d2_device *handle )
       tagIndex = dlist->tagindex;
       pos = dlist->position;
 
+      /* WAIT_LOOP */
       for(i=0; (i < cnt) && (0 ==  D2_DEV(dlist->device)->delayed_errorcode) ; i++)
       {
          d2_s32 bSkip = 0;
@@ -955,6 +964,7 @@ void d2_scratch2dlist_intern( d2_device *handle )
          {
             pos = dlist->position;
 
+            /* WAIT_LOOP */
             while( (cnt > 0) && (0 != tagIndex) )
             {
                /* read entry */
@@ -995,6 +1005,7 @@ void d2_scratch2dlist_intern( d2_device *handle )
          {
             /* walk rest of scratchbuffer in multiples of 4
              * tagindex must be 0 at this point (only exception is that cnt is already 0) */
+            /* WAIT_LOOP */
             for(i=0; (i < (cnt / 4)) && (0 == D2_DEV(dlist->device)->delayed_errorcode); i++)
             {
                pos = dlist->position;
@@ -1029,6 +1040,7 @@ void d2_scratch2dlist_intern( d2_device *handle )
 
             /* copy remaining entries */
             cnt &= 3;
+            /* WAIT_LOOP */
             for(i=0; (i < cnt) && (0 == D2_DEV( dlist->device)->delayed_errorcode); i++)
             {
                d2_u32 regIdx = scratchEntry->reg;
@@ -1075,6 +1087,7 @@ static d2_s32 d2_dlist2dlist_intern( d2_device *handle, d2_dlist *dlist, void *a
    if(0 != tagIndex)
    {
       /* fill dlist entry with 0x80 indices */
+      /* WAIT_LOOP */
       while(0 != tagIndex)
       {
          /* store in displaylist */
@@ -1099,6 +1112,7 @@ static d2_s32 d2_dlist2dlist_intern( d2_device *handle, d2_dlist *dlist, void *a
    }
 
    /* copy dlist with size of dlist entries */
+   /* WAIT_LOOP */
    while(cnt >= 5)
    {
       d2_u32 *dl = &dlist->position->address.mask;
@@ -1136,10 +1150,11 @@ static d2_s32 d2_dlist2dlist_intern( d2_device *handle, d2_dlist *dlist, void *a
             dlist_word++;
             cnt--;
          }
-         while(0 != cnt);
+         while(0 != cnt);/* WAIT_LOOP */
       }
 
       /* pad with 0x80808080 */
+      /* WAIT_LOOP */
       for(cnt_rem = (5 - cnt_rem); cnt_rem > 0; cnt_rem--)
       {
          *dl = 0x80808080u;
@@ -1149,6 +1164,7 @@ static d2_s32 d2_dlist2dlist_intern( d2_device *handle, d2_dlist *dlist, void *a
 
    /* clear register cache */
 #ifdef D2_USEREGCACHE
+   /* WAIT_LOOP */
    for(i=0; i<D2_QUANTITY; i++)
    {
       D2_DEV(handle)->cache.data[i]  = 0;
@@ -1173,6 +1189,7 @@ void d2_copydlist_vidmem_intern( const d2_dlist *dlist )
    }
 
    /* copy all but the last block */
+   /* WAIT_LOOP */
    while(blk != last)
    {
       /* replace jump address with new address inside vidmem */
@@ -1208,6 +1225,7 @@ void d2_cacheflushdlist_intern( const d2_dlist *dlist )
    }
 
    /* flush all but the first block */
+   /* WAIT_LOOP */
    while(blk != last)
    {
       /* replace jump address with new address inside vidmem */
@@ -1234,6 +1252,7 @@ void d2_mapdlist_vidmem_intern( const d2_dlist *dlist )
    }
 
    /* flush all but the first block */
+   /* WAIT_LOOP */
    while(blk != last)
    {
       if( (NULL != blk->next) && (NULL != blk->jump) )
@@ -1259,6 +1278,7 @@ void d2_clear_dlistlist_intern( const d2_device *handle, d2_dlist *dlist )
    d2_s32 *dlist_list = (d2_s32 *)dlist->dlist_addresses;
    (void)handle; /* PRQA S 3112 */ /*$Misra: #COMPILER_WARNING $*/
 
+   /* WAIT_LOOP */
    for (i=0; i<dlist->dlist_addresses_max; i++)
    {
       dlist_list[i] = 0;
@@ -1283,6 +1303,7 @@ d2_s32* d2_add_dlistlist_intern( const d2_device *handle, d2_dlist *dlist, const
       dlist_list = (d2_s32 *)dlist->dlist_addresses;
 
       /* clear new part */
+      /* WAIT_LOOP */
       for(i=pos; i<dlist->dlist_addresses_max; i++)
       {
          dlist_list[i] = 0;

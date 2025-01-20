@@ -24,6 +24,8 @@
  * History      : DD.MM.YYYY Version  Description
  *              : 30.06.2021 1.00     First Release
  *              : 21.12.2022 1.10     Fixed processing error of riichs_bps_calc
+ *              : 30.09.2024 1.20     Changed the comment of API functions to the Doxygen style.
+ *                                    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
  **********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -53,11 +55,12 @@ volatile riichs_callback g_riichs_callbackfunc_s[RIICHS_MAX_CH_NUM];
 /*----------------------------------------------------------------------------*/
 /*   riichs information                                                       */
 /*----------------------------------------------------------------------------*/
+/* IIC driver information */
 static riichs_info_t * priichs_info_m[RIICHS_MAX_CH_NUM]; /* IIC driver information */
 static riichs_info_t * priichs_info_s[RIICHS_MAX_CH_NUM]; /* IIC driver information */
 
 static riichs_api_event_t riichs_api_event[RIICHS_MAX_CH_NUM]; /* Event flag */
-static riichs_api_info_t riichs_api_info[RIICHS_MAX_CH_NUM]; /* Internal status management */
+static riichs_api_info_t riichs_api_info[RIICHS_MAX_CH_NUM];   /* Internal status management */
 
 static uint32_t g_riichs_bps[RIICHS_MAX_CH_NUM];
 static uint32_t g_riichs_icfer_init[RIICHS_MAX_CH_NUM];
@@ -74,72 +77,176 @@ uint8_t g_riichs_timeout_enable[RIICHS_MAX_CH_NUM];
 /*----------------------------------------------------------------------------*/
 /*   Main processing of RIICHS Driver API functions                           */
 /*----------------------------------------------------------------------------*/
+/* Get initial setting */
 static void riichs_get_initial_setting (riichs_info_t * p_riichs_info);
+
+/* Initializes the I/O register for RIICHS control. */
 static riichs_return_t riichs_open (riichs_info_t *);
+
+/* Generates the start condition. Starts the master transmission. */
 static riichs_return_t riichs_master_send (riichs_info_t *);
+
+/* Generates the start condition. Starts the master reception. */
 static riichs_return_t riichs_master_receive (riichs_info_t *);
+
+/* Generates the start condition. Starts the master reception. */
 static riichs_return_t riichs_master_send_receive (riichs_info_t *);
+
+/* Generates the start condition. Starts the slave reception and the slave transmission. */
 static riichs_return_t riichs_slave_transfer (riichs_info_t *);
+
+/* Returns the state of this module. */
 static void riichs_getstatus (riichs_info_t *, riichs_mcu_status_t *);
+
+/* Outputs control signals of the simple I2C mode. */
 static riichs_return_t riichs_control (riichs_info_t *, uint8_t ctrl_ptn);
+
+/* Resets the RIICHS driver. */
 static void riichs_close (riichs_info_t *);
+
+/* Advances the IIC communication. */
 static riichs_return_t r_riichs_advance (riichs_info_t *);
+
+/* Advances the IIC communication. */
 static riichs_return_t riichs_advance (riichs_info_t *);
 
 /*----------------------------------------------------------------------------*/
 /*   Called from function table                                               */
 /*----------------------------------------------------------------------------*/
+/* IIC Protocol Execution Processing. */
 static riichs_return_t riichs_func_table (riichs_api_event_t, riichs_info_t *);
+
+/* Initialize IIC Driver Processing. */
 static riichs_return_t riichs_init_driver (riichs_info_t *);
+
+/* Generate Start Condition Processing. */
 static riichs_return_t riichs_generate_start_cond (riichs_info_t *);
+
+/* Send master code Processing. */
 static riichs_return_t riichs_send_master_code_cond (riichs_info_t *);
+
+/* After Start Condition Generation Processing. */
 static riichs_return_t riichs_after_gen_start_cond (riichs_info_t *);
+
+/* After Slave Address Transmission Processing. */
 static riichs_return_t riichs_after_send_slvadr (riichs_info_t *);
+
+/* After Slave Address Receive Processing */
 static riichs_return_t riichs_after_receive_slvadr (riichs_info_t *);
+
+/* After Transmitting Data Processing. */
 static riichs_return_t riichs_write_data_sending (riichs_info_t *);
+
+/* After Receiving Data Processing. */
 static riichs_return_t riichs_read_data_receiving (riichs_info_t *);
+
+/* After Generating Stop Condition Processing. */
 static riichs_return_t riichs_after_dtct_stop_cond (riichs_info_t *);
+
+/* Arbitration Lost Error Processing. */
 static riichs_return_t riichs_arbitration_lost (riichs_info_t *);
+
+/* NACK Error Processing. */
 static riichs_return_t riichs_nack (riichs_info_t *);
+
+/* Enable IIC Slave Transfer Processing. */
 static riichs_return_t riichs_enable_slave_transfer (riichs_info_t *);
+
+/* Time Out Error Processing. */
 static riichs_return_t riichs_time_out (riichs_info_t *);
 
 /*----------------------------------------------------------------------------*/
 /*   Other function                                                           */
 /*----------------------------------------------------------------------------*/
+/* Initializes RAM. */
 static void riichs_api_mode_event_init (riichs_info_t *, riichs_api_mode_t);
+
+/* Update Internal Status Processing. */
 static void riichs_api_mode_set (riichs_info_t *, riichs_api_mode_t);
+
+/* Update Internal Status Processing. */
 static void riichs_api_status_set (riichs_info_t *, riichs_api_status_t);
+
+/* Updates the channel status. */
 static void riichs_set_ch_status (riichs_info_t *, riichs_ch_dev_status_t);
+
+/* Check Channel Status Processing (at Start Function). */
 static riichs_return_t riichs_check_chstatus_start (riichs_info_t *);
+
+/* Check Channel Status Processing (at Advance Function). */
 static riichs_return_t riichs_check_chstatus_advance (riichs_info_t *);
+
+/* Enables IIC bus interrupt enable register. */
 static void riichs_enable (riichs_info_t *);
+
+/* Disables IIC. */
 static void riichs_disable (riichs_info_t *);
+
+/* Initialize IIC Driver Processing */
 static void riichs_init_io_register (riichs_info_t *);
+
+/* Enable Slave Address Match Interrupt Processing. */
 static void riichs_slv_addr_match_int_enable (riichs_info_t *);
+
+/* Enable Slave Address Match Interrupt Processing. */
 static void riichs_int_enable (riichs_info_t *);
+
+/* Disable Interrupt Processing. */
 static void riichs_int_disable (riichs_info_t *);
+
+/* Set ICSIER and ICCSIER Register Processing. */
 static void riichs_int_icsier_iccsier_setting (riichs_info_t *, uint32_t New_icsier, uint32_t New_iccsier);
+
+/* Set IIC Frequency Processing. */
 static void riichs_set_frequency (riichs_info_t *);
+
+/* Check Bus Busy Processing. */
 static bool riichs_check_bus_busy (riichs_info_t *);
+
+/* Generate Start Condition Processing. */
 static void riichs_start_cond_generate (riichs_info_t *);
+
+/* Generate Restart Condition Processing. */
 static void riichs_re_start_cond_generate (riichs_info_t * p_riichs_info);
+
+/* Generate Stop Condition Processing. */
 static void riichs_stop_cond_generate (riichs_info_t *);
+
+/* Transmit Data Processing. */
 static void riichs_set_sending_data (riichs_info_t *, uint8_t *p_data);
+
+/* Receive Data Processing. */
 static uint32_t riichs_get_receiving_data (riichs_info_t *);
+
+/* Receive "last byte - 2bytes" Setting Proccesing. */
 static void riichs_receive_wait_setting (riichs_info_t *);
+
+/* Receive "last byte - 1byte" Setting Proccesing. */
 static void riichs_receive_pre_end_setting (riichs_info_t *);
+
+/* Receive End Setting Processing. */
 static void riichs_receive_end_setting (riichs_info_t *);
+
+/* Enable IIC Function Processing. */
 static void riichs_reset_clear (riichs_info_t *);
+
+/* Set ICCR.ICE. */
 static void riichs_set_iccrice (riichs_info_t *);
+
+/* Bus Free Time Setting. */
 static void riichs_set_icbftr (riichs_info_t *);
+
+/* Disable IIC Function Processing. */
 static void riichs_reset_set (riichs_info_t *);
+
+/* All reset IIC Function Processing. */
 static void riichs_all_reset (riichs_info_t *);
+
+/* Clears Interrupt Request Flag Processing. */
 static void riichs_clear_ir_flag (riichs_info_t *);
 
+/* "bps" calculation Processing */
 static riichs_return_t riichs_bps_calc(riichs_info_t *, uint16_t kbps, bool first_bps_set_flag);
-
-/* static double riichs_check_freq(void); */
 
 /*----------------------------------------------------------------------------*/
 /*   function table                                                           */
@@ -149,161 +256,167 @@ static const riichs_mtx_t gc_riichs_mtx_tbl[RIICHS_STS_MAX][RIICHS_EV_MAX] =
     /* Uninitialized state */
     {
         { RIICHS_EV_INIT, riichs_init_driver }, /* IIC Driver Initialization */
-        { RIICHS_EV_EN_SLV_TRANSFER, NULL }, /* Enable Slave Transfer */
-        { RIICHS_EV_GEN_START_COND, NULL }, /* Start Condition Generation */
-        { RIICHS_EV_INT_START, NULL }, /* Start Condition Generation Interrupt */
-        { RIICHS_EV_INT_ADD, NULL }, /* Address Sending Interrupt */
-        { RIICHS_EV_INT_SEND, NULL }, /* Data Sending Interrupt */
-        { RIICHS_EV_INT_RECEIVE, NULL }, /* Data Receiving Interrupt */
-        { RIICHS_EV_INT_STOP, NULL }, /* Stop Condition Generation Interrupt */
-        { RIICHS_EV_INT_AL, NULL }, /* Arbitration-Lost Interrupt */
-        { RIICHS_EV_INT_NACK, NULL }, /* No Acknowledge Interrupt */
-        { RIICHS_EV_INT_TMO, NULL }, /* Time out Interrupt */
+        { RIICHS_EV_EN_SLV_TRANSFER, NULL },    /* Enable Slave Transfer */
+        { RIICHS_EV_GEN_START_COND, NULL },     /* Start Condition Generation */
+        { RIICHS_EV_INT_START, NULL },          /* Start Condition Generation Interrupt */
+        { RIICHS_EV_INT_ADD, NULL },            /* Address Sending Interrupt */
+        { RIICHS_EV_INT_SEND, NULL },           /* Data Sending Interrupt */
+        { RIICHS_EV_INT_RECEIVE, NULL },        /* Data Receiving Interrupt */
+        { RIICHS_EV_INT_STOP, NULL },           /* Stop Condition Generation Interrupt */
+        { RIICHS_EV_INT_AL, NULL },             /* Arbitration-Lost Interrupt */
+        { RIICHS_EV_INT_NACK, NULL },           /* No Acknowledge Interrupt */
+        { RIICHS_EV_INT_TMO, NULL },            /* Time out Interrupt */
     },
 
     /* Idle state */
     {
-        { RIICHS_EV_INIT, NULL }, /* IIC Driver Initialization */
+        { RIICHS_EV_INIT, NULL },                                    /* IIC Driver Initialization */
         { RIICHS_EV_EN_SLV_TRANSFER, riichs_enable_slave_transfer }, /* Enable Slave Transfer */
-        { RIICHS_EV_GEN_START_COND, riichs_generate_start_cond }, /* Start Condition Generation */
-        { RIICHS_EV_INT_START, NULL }, /* Start Condition Generation Interrupt */
-        { RIICHS_EV_INT_ADD, NULL }, /* Address Sending Interrupt */
-        { RIICHS_EV_INT_SEND, NULL }, /* Data Sending Interrupt */
-        { RIICHS_EV_INT_RECEIVE, NULL }, /* Data Receiving Interrupt */
-        { RIICHS_EV_INT_STOP, NULL }, /* Stop Condition Generation Interrupt */
-        { RIICHS_EV_INT_AL, NULL }, /* Arbitration-Lost Interrupt */
-        { RIICHS_EV_INT_NACK, NULL }, /* No Acknowledge Interrupt */
-        { RIICHS_EV_INT_TMO, NULL }, /* Time out Interrupt */
+        { RIICHS_EV_GEN_START_COND, riichs_generate_start_cond },    /* Start Condition Generation */
+        { RIICHS_EV_INT_START, NULL },                               /* Start Condition Generation Interrupt */
+        { RIICHS_EV_INT_ADD, NULL },                                 /* Address Sending Interrupt */
+        { RIICHS_EV_INT_SEND, NULL },                                /* Data Sending Interrupt */
+        { RIICHS_EV_INT_RECEIVE, NULL },                             /* Data Receiving Interrupt */
+        { RIICHS_EV_INT_STOP, NULL },                                /* Stop Condition Generation Interrupt */
+        { RIICHS_EV_INT_AL, NULL },                                  /* Arbitration-Lost Interrupt */
+        { RIICHS_EV_INT_NACK, NULL },                                /* No Acknowledge Interrupt */
+        { RIICHS_EV_INT_TMO, NULL },                                 /* Time out Interrupt */
     },
+
     /* Idle state on enable slave transfer */
     {
-        { RIICHS_EV_INIT, NULL }, /* IIC Driver Initialization */
-        { RIICHS_EV_EN_SLV_TRANSFER, NULL }, /* Enable Slave Transfer */
+        { RIICHS_EV_INIT, NULL },                                 /* IIC Driver Initialization */
+        { RIICHS_EV_EN_SLV_TRANSFER, NULL },                      /* Enable Slave Transfer */
         { RIICHS_EV_GEN_START_COND, riichs_generate_start_cond }, /* Start Condition Generation */
-        { RIICHS_EV_INT_START, NULL }, /* Start Condition Generation Interrupt */
-        { RIICHS_EV_INT_ADD, riichs_after_receive_slvadr }, /* Address Sending Interrupt */
-        { RIICHS_EV_INT_SEND, NULL }, /* Data Sending Interrupt */
-        { RIICHS_EV_INT_RECEIVE, riichs_after_receive_slvadr }, /* Data Receiving Interrupt */
-        { RIICHS_EV_INT_STOP, NULL }, /* Stop Condition Generation Interrupt */
-        { RIICHS_EV_INT_AL, NULL }, /* Arbitration-Lost Interrupt */
-        { RIICHS_EV_INT_NACK, NULL }, /* No Acknowledge Interrupt */
-        { RIICHS_EV_INT_TMO, NULL }, /* Time out Interrupt */
+        { RIICHS_EV_INT_START, NULL },                            /* Start Condition Generation Interrupt */
+        { RIICHS_EV_INT_ADD, riichs_after_receive_slvadr },       /* Address Sending Interrupt */
+        { RIICHS_EV_INT_SEND, NULL },                             /* Data Sending Interrupt */
+        { RIICHS_EV_INT_RECEIVE, riichs_after_receive_slvadr },   /* Data Receiving Interrupt */
+        { RIICHS_EV_INT_STOP, NULL },                             /* Stop Condition Generation Interrupt */
+        { RIICHS_EV_INT_AL, NULL },                               /* Arbitration-Lost Interrupt */
+        { RIICHS_EV_INT_NACK, NULL },                             /* No Acknowledge Interrupt */
+        { RIICHS_EV_INT_TMO, NULL },                              /* Time out Interrupt */
     },
 
     /* Start condition generation completion wait state */
     {
-        { RIICHS_EV_INIT, NULL }, /* IIC Driver Initialization */
-        { RIICHS_EV_EN_SLV_TRANSFER, NULL }, /* Enable Slave Transfer */
-        { RIICHS_EV_GEN_START_COND, NULL }, /* Start Condition Generation */
+        { RIICHS_EV_INIT, NULL },                             /* IIC Driver Initialization */
+        { RIICHS_EV_EN_SLV_TRANSFER, NULL },                  /* Enable Slave Transfer */
+        { RIICHS_EV_GEN_START_COND, NULL },                   /* Start Condition Generation */
         { RIICHS_EV_INT_START, riichs_after_gen_start_cond }, /* Start Condition Generation Interrupt */
-        { RIICHS_EV_INT_ADD, NULL }, /* Address Sending Interrupt */
-        { RIICHS_EV_INT_SEND, NULL }, /* Data Sending Interrupt */
-        { RIICHS_EV_INT_RECEIVE, NULL }, /* Data Receiving Interrupt */
-        { RIICHS_EV_INT_STOP, NULL }, /* Stop Condition Generation Interrupt */
-        { RIICHS_EV_INT_AL, riichs_arbitration_lost }, /* Arbitration-Lost Interrupt */
-        { RIICHS_EV_INT_NACK, riichs_nack }, /* No Acknowledge Interrupt */
-        { RIICHS_EV_INT_TMO, riichs_time_out }, /* Time out Interrupt */
+        { RIICHS_EV_INT_ADD, NULL },                          /* Address Sending Interrupt */
+        { RIICHS_EV_INT_SEND, NULL },                         /* Data Sending Interrupt */
+        { RIICHS_EV_INT_RECEIVE, NULL },                      /* Data Receiving Interrupt */
+        { RIICHS_EV_INT_STOP, NULL },                         /* Stop Condition Generation Interrupt */
+        { RIICHS_EV_INT_AL, riichs_arbitration_lost },        /* Arbitration-Lost Interrupt */
+        { RIICHS_EV_INT_NACK, riichs_nack },                  /* No Acknowledge Interrupt */
+        { RIICHS_EV_INT_TMO, riichs_time_out },               /* Time out Interrupt */
     },
 
     /* Send master code completion wait state */
     {
-        { RIICHS_EV_INIT, NULL }, /* IIC Driver Initialization */
-        { RIICHS_EV_EN_SLV_TRANSFER, NULL }, /* Enable Slave Transfer */
-        { RIICHS_EV_GEN_START_COND, NULL }, /* Start Condition Generation */
+        { RIICHS_EV_INIT, NULL },                              /* IIC Driver Initialization */
+        { RIICHS_EV_EN_SLV_TRANSFER, NULL },                   /* Enable Slave Transfer */
+        { RIICHS_EV_GEN_START_COND, NULL },                    /* Start Condition Generation */
         { RIICHS_EV_INT_START, riichs_send_master_code_cond }, /* Start Condition Generation Interrupt */
-        { RIICHS_EV_INT_ADD, NULL }, /* Address Sending Interrupt */
-        { RIICHS_EV_INT_SEND, NULL }, /* Data Sending Interrupt */
-        { RIICHS_EV_INT_RECEIVE, NULL }, /* Data Receiving Interrupt */
-        { RIICHS_EV_INT_STOP, NULL }, /* Stop Condition Generation Interrupt */
-        { RIICHS_EV_INT_AL, riichs_arbitration_lost }, /* Arbitration-Lost Interrupt */
-        { RIICHS_EV_INT_NACK, NULL }, /* No Acknowledge Interrupt */
-        { RIICHS_EV_INT_TMO, riichs_time_out }, /* Time out Interrupt */
+        { RIICHS_EV_INT_ADD, NULL },                           /* Address Sending Interrupt */
+        { RIICHS_EV_INT_SEND, NULL },                          /* Data Sending Interrupt */
+        { RIICHS_EV_INT_RECEIVE, NULL },                       /* Data Receiving Interrupt */
+        { RIICHS_EV_INT_STOP, NULL },                          /* Stop Condition Generation Interrupt */
+        { RIICHS_EV_INT_AL, riichs_arbitration_lost },         /* Arbitration-Lost Interrupt */
+        { RIICHS_EV_INT_NACK, NULL },                          /* No Acknowledge Interrupt */
+        { RIICHS_EV_INT_TMO, riichs_time_out },                /* Time out Interrupt */
     },
 
     /* Slave address [Write] transmission completion wait state */
     {
-        { RIICHS_EV_INIT, NULL }, /* IIC Driver Initialization */
-        { RIICHS_EV_EN_SLV_TRANSFER, NULL }, /* Enable Slave Transfer */
-        { RIICHS_EV_GEN_START_COND, NULL }, /* Start Condition Generation */
-        { RIICHS_EV_INT_START, NULL }, /* Start Condition Generation Interrupt */
+        { RIICHS_EV_INIT, NULL },                        /* IIC Driver Initialization */
+        { RIICHS_EV_EN_SLV_TRANSFER, NULL },             /* Enable Slave Transfer */
+        { RIICHS_EV_GEN_START_COND, NULL },              /* Start Condition Generation */
+        { RIICHS_EV_INT_START, NULL },                   /* Start Condition Generation Interrupt */
         { RIICHS_EV_INT_ADD, riichs_after_send_slvadr }, /* Address Sending Interrupt */
-        { RIICHS_EV_INT_SEND, NULL }, /* Data Sending Interrupt */
-        { RIICHS_EV_INT_RECEIVE, NULL }, /* Data Receiving Interrupt */
-        { RIICHS_EV_INT_STOP, NULL }, /* Stop Condition Generation Interrupt */
-        { RIICHS_EV_INT_AL, riichs_arbitration_lost }, /* Arbitration-Lost Interrupt */
-        { RIICHS_EV_INT_NACK, riichs_nack }, /* No Acknowledge Interrupt */
-        { RIICHS_EV_INT_TMO, riichs_time_out }, /* Time out Interrupt */
+        { RIICHS_EV_INT_SEND, NULL },                    /* Data Sending Interrupt */
+        { RIICHS_EV_INT_RECEIVE, NULL },                 /* Data Receiving Interrupt */
+        { RIICHS_EV_INT_STOP, NULL },                    /* Stop Condition Generation Interrupt */
+        { RIICHS_EV_INT_AL, riichs_arbitration_lost },   /* Arbitration-Lost Interrupt */
+        { RIICHS_EV_INT_NACK, riichs_nack },             /* No Acknowledge Interrupt */
+        { RIICHS_EV_INT_TMO, riichs_time_out },          /* Time out Interrupt */
     },
 
     /* Slave address [Read] transmission completion wait state */
     {
-        { RIICHS_EV_INIT, NULL }, /* IIC Driver Initialization */
-        { RIICHS_EV_EN_SLV_TRANSFER, NULL }, /* Enable Slave Transfer */
-        { RIICHS_EV_GEN_START_COND, NULL }, /* Start Condition Generation */
-        { RIICHS_EV_INT_START, NULL }, /* Start Condition Generation Interrupt */
-        { RIICHS_EV_INT_ADD, NULL }, /* Address Sending Interrupt */
-        { RIICHS_EV_INT_SEND, NULL }, /* Data Sending Interrupt */
+        { RIICHS_EV_INIT, NULL },                            /* IIC Driver Initialization */
+        { RIICHS_EV_EN_SLV_TRANSFER, NULL },                 /* Enable Slave Transfer */
+        { RIICHS_EV_GEN_START_COND, NULL },                  /* Start Condition Generation */
+        { RIICHS_EV_INT_START, NULL },                       /* Start Condition Generation Interrupt */
+        { RIICHS_EV_INT_ADD, NULL },                         /* Address Sending Interrupt */
+        { RIICHS_EV_INT_SEND, NULL },                        /* Data Sending Interrupt */
         { RIICHS_EV_INT_RECEIVE, riichs_after_send_slvadr }, /* Data Receiving Interrupt */
-        { RIICHS_EV_INT_STOP, NULL }, /* Stop Condition Generation Interrupt  */
-        { RIICHS_EV_INT_AL, riichs_arbitration_lost }, /* Arbitration-Lost Interrupt */
-        { RIICHS_EV_INT_NACK, riichs_nack }, /* No Acknowledge Interrupt */
-        { RIICHS_EV_INT_TMO, riichs_time_out }, /* Time out Interrupt */
+        { RIICHS_EV_INT_STOP, NULL },                        /* Stop Condition Generation Interrupt  */
+        { RIICHS_EV_INT_AL, riichs_arbitration_lost },       /* Arbitration-Lost Interrupt */
+        { RIICHS_EV_INT_NACK, riichs_nack },                 /* No Acknowledge Interrupt */
+        { RIICHS_EV_INT_TMO, riichs_time_out },              /* Time out Interrupt */
     },
 
     /* Data transmission completion wait state */
     {
-        { RIICHS_EV_INIT, NULL }, /* IIC Driver Initialization */
-        { RIICHS_EV_EN_SLV_TRANSFER, NULL }, /* Enable Slave Transfer */
-        { RIICHS_EV_GEN_START_COND, NULL }, /* Start Condition Generation */
-        { RIICHS_EV_INT_START, NULL }, /* Start Condition Generation Interrupt */
-        { RIICHS_EV_INT_ADD, NULL }, /* Address Sending Interrupt */
+        { RIICHS_EV_INIT, NULL },                          /* IIC Driver Initialization */
+        { RIICHS_EV_EN_SLV_TRANSFER, NULL },               /* Enable Slave Transfer */
+        { RIICHS_EV_GEN_START_COND, NULL },                /* Start Condition Generation */
+        { RIICHS_EV_INT_START, NULL },                     /* Start Condition Generation Interrupt */
+        { RIICHS_EV_INT_ADD, NULL },                       /* Address Sending Interrupt */
         { RIICHS_EV_INT_SEND, riichs_write_data_sending }, /* Data Sending Interrupt */
-        { RIICHS_EV_INT_RECEIVE, NULL }, /* Data Receiving Interrupt */
-        { RIICHS_EV_INT_STOP, NULL }, /* Stop Condition Generation Interrupt */
-        { RIICHS_EV_INT_AL, riichs_arbitration_lost }, /* Arbitration-Lost Interrupt */
-        { RIICHS_EV_INT_NACK, riichs_nack }, /* No Acknowledge Interrupt */
-        { RIICHS_EV_INT_TMO, riichs_time_out }, /* Time out Interrupt */
+        { RIICHS_EV_INT_RECEIVE, NULL },                   /* Data Receiving Interrupt */
+        { RIICHS_EV_INT_STOP, NULL },                      /* Stop Condition Generation Interrupt */
+        { RIICHS_EV_INT_AL, riichs_arbitration_lost },     /* Arbitration-Lost Interrupt */
+        { RIICHS_EV_INT_NACK, riichs_nack },               /* No Acknowledge Interrupt */
+        { RIICHS_EV_INT_TMO, riichs_time_out },            /* Time out Interrupt */
     },
 
     /* Data reception completion wait state */
     {
-        { RIICHS_EV_INIT, NULL }, /* IIC Driver Initialization */
-        { RIICHS_EV_EN_SLV_TRANSFER, NULL }, /* Enable Slave Transfer */
-        { RIICHS_EV_GEN_START_COND, NULL }, /* Start Condition Generation */
-        { RIICHS_EV_INT_START, NULL }, /* Start Condition Generation Interrupt */
-        { RIICHS_EV_INT_ADD, NULL }, /* Address Sending Interrupt */
-        { RIICHS_EV_INT_SEND, NULL }, /* Data Sending Interrupt */
+        { RIICHS_EV_INIT, NULL },                              /* IIC Driver Initialization */
+        { RIICHS_EV_EN_SLV_TRANSFER, NULL },                   /* Enable Slave Transfer */
+        { RIICHS_EV_GEN_START_COND, NULL },                    /* Start Condition Generation */
+        { RIICHS_EV_INT_START, NULL },                         /* Start Condition Generation Interrupt */
+        { RIICHS_EV_INT_ADD, NULL },                           /* Address Sending Interrupt */
+        { RIICHS_EV_INT_SEND, NULL },                          /* Data Sending Interrupt */
         { RIICHS_EV_INT_RECEIVE, riichs_read_data_receiving }, /* Data Receiving Interrupt */
-        { RIICHS_EV_INT_STOP, NULL }, /* Stop Condition Generation Interrupt */
-        { RIICHS_EV_INT_AL, riichs_arbitration_lost }, /* Arbitration-Lost Interrupt */
-        { RIICHS_EV_INT_NACK, riichs_nack }, /* No Acknowledge Interrupt */
-        { RIICHS_EV_INT_TMO, riichs_time_out }, /* Time out Interrupt */
+        { RIICHS_EV_INT_STOP, NULL },                          /* Stop Condition Generation Interrupt */
+        { RIICHS_EV_INT_AL, riichs_arbitration_lost },         /* Arbitration-Lost Interrupt */
+        { RIICHS_EV_INT_NACK, riichs_nack },                   /* No Acknowledge Interrupt */
+        { RIICHS_EV_INT_TMO, riichs_time_out },                /* Time out Interrupt */
     },
 
     /* Stop condition generation completion wait state */
     {
-        { RIICHS_EV_INIT, NULL }, /* IIC Driver Initialization */
-        { RIICHS_EV_EN_SLV_TRANSFER, NULL }, /* Enable Slave Transfer */
-        { RIICHS_EV_GEN_START_COND, NULL }, /* Start Condition Generation */
-        { RIICHS_EV_INT_START, NULL }, /* Start Condition Generation Interrupt */
-        { RIICHS_EV_INT_ADD, NULL }, /* Address Sending Interrupt */
-        { RIICHS_EV_INT_SEND, NULL }, /* Data Sending Interrupt */
-        { RIICHS_EV_INT_RECEIVE, NULL }, /* Data Receiving Interrupt */
+        { RIICHS_EV_INIT, NULL },                            /* IIC Driver Initialization */
+        { RIICHS_EV_EN_SLV_TRANSFER, NULL },                 /* Enable Slave Transfer */
+        { RIICHS_EV_GEN_START_COND, NULL },                  /* Start Condition Generation */
+        { RIICHS_EV_INT_START, NULL },                       /* Start Condition Generation Interrupt */
+        { RIICHS_EV_INT_ADD, NULL },                         /* Address Sending Interrupt */
+        { RIICHS_EV_INT_SEND, NULL },                        /* Data Sending Interrupt */
+        { RIICHS_EV_INT_RECEIVE, NULL },                     /* Data Receiving Interrupt */
         { RIICHS_EV_INT_STOP, riichs_after_dtct_stop_cond }, /* Stop Condition Generation Interrupt */
-        { RIICHS_EV_INT_AL, NULL }, /* Arbitration-Lost Interrupt */
-        { RIICHS_EV_INT_NACK, riichs_nack }, /* No Acknowledge Interrupt */
-        { RIICHS_EV_INT_TMO, riichs_time_out }, /* Time out Interrupt */
+        { RIICHS_EV_INT_AL, NULL },                          /* Arbitration-Lost Interrupt */
+        { RIICHS_EV_INT_NACK, riichs_nack },                 /* No Acknowledge Interrupt */
+        { RIICHS_EV_INT_TMO, riichs_time_out },              /* Time out Interrupt */
     },
 
 };
 
 /**********************************************************************************************************************
  * Function Name: R_RIICHS_Open
- *****************************************************************************************************************/ /**
+ ******************************************************************************************************************//**
  * @brief This function initializes the RIICHS FIT module. This function must be called before calling any other API 
  *        functions.
  * @param[in,out] *p_riichs_info
- *             This is the pointer to the I2C communication information structure.
+ *             This is the pointer to the I2C communication information structure.\n
+ *             See section R_RIICHS_Open() in the application note for details.\n
+ *             The contents of the structure are referred and updated during communication. Do not rewrite 
+ *             the structure during communication (RIICHS_COMMUNICATION) and when an error has occurred 
+ *             (RIICHS_TMO and RIICHS_ERROR).\n
+ *             See section R_RIICHS_Open() in the application note for details.
  * @retval    RIICHS_SUCCESS             Processing completed successfully
  * @retval    RIICHS_ERR_LOCK_FUNC       The API is locked by the other task
  * @retval    RIICHS_ERR_INVALID_CHAN    Nonexistent channel
@@ -319,18 +432,22 @@ static const riichs_mtx_t gc_riichs_mtx_tbl[RIICHS_STS_MAX][RIICHS_EV_MAX] =
  *            \li Initializing variables used by the API.
  *            \li Initializing the RIICHS registers used for the RIICHS communication.
  *            \li Disabling the RIICHS interrupts.
- * @note      None
+ * @note      See section R_RIICHS_Open() in the application note for details.
  */
-riichs_return_t R_RIICHS_Open (riichs_info_t * p_riichs_info)
+riichs_return_t R_RIICHS_Open(riichs_info_t * p_riichs_info)
 {
     bool chk = RIICHS_FALSE;
+
     riichs_return_t ret;
+
     riichs_addr_format_t temp_addr_fortmat0 = p_riichs_info->slave_addr0_format;
     riichs_addr_format_t temp_addr_fortmat1 = p_riichs_info->slave_addr1_format;
     riichs_addr_format_t temp_addr_fortmat2 = p_riichs_info->slave_addr2_format;
+
     uint16_t temp_addr0 = p_riichs_info->slave_addr0;
     uint16_t temp_addr1 = p_riichs_info->slave_addr1;
     uint16_t temp_addr2 = p_riichs_info->slave_addr2;
+
     riichs_priority_t temp_rxi_priority = p_riichs_info->rxi_priority;
     riichs_priority_t temp_txi_priority = p_riichs_info->txi_priority;
     riichs_priority_t temp_eei_priority = p_riichs_info->eei_priority;
@@ -371,7 +488,7 @@ riichs_return_t R_RIICHS_Open (riichs_info_t * p_riichs_info)
     }
 
     /* ---- CHECK interrupt priority level ---- */
-    if ((1U > temp_txi_priority) || (15U < temp_txi_priority)
+    if ((1U > temp_txi_priority)    || (15U < temp_txi_priority)
         || (1U > temp_rxi_priority) || (15U < temp_rxi_priority)
         || (1U > temp_tei_priority) || (15U < temp_tei_priority)
         || (1U > temp_eei_priority) || (15U < temp_eei_priority)
@@ -406,7 +523,7 @@ riichs_return_t R_RIICHS_Open (riichs_info_t * p_riichs_info)
     {
         return RIICHS_ERR_INVALID_ARG;
     }
-#endif
+#endif /* 1U == RIICHS_CFG_PARAM_CHECKING_ENABLE */
 
     /*  ---- RIICHS HARDWARE LOCK ---- */
     chk = riichs_mcu_hardware_lock(p_riichs_info->ch_no);
@@ -421,7 +538,7 @@ riichs_return_t R_RIICHS_Open (riichs_info_t * p_riichs_info)
 
     /* ---- INITIALIZE RIICHS INTERNAL STATUS INFORMATION ---- */
     g_riichs_ChStatus[p_riichs_info->ch_no] = RIICHS_NO_INIT;
-    p_riichs_info->dev_sts = RIICHS_NO_INIT;
+    p_riichs_info->dev_sts                  = RIICHS_NO_INIT;
 
     /* ---- INITIALIZE CHANNEL ---- */
     /* Calls the API function. */
@@ -436,13 +553,15 @@ riichs_return_t R_RIICHS_Open (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : none
  **********************************************************************************************************************/
-static void riichs_get_initial_setting (riichs_info_t * p_riichs_info)
+static void riichs_get_initial_setting(riichs_info_t * p_riichs_info)
 {
     riichs_priority_t temp_rxi_priority = p_riichs_info->rxi_priority;
     riichs_priority_t temp_txi_priority = p_riichs_info->txi_priority;
     riichs_priority_t temp_eei_priority = p_riichs_info->eei_priority;
     riichs_priority_t temp_tei_priority = p_riichs_info->tei_priority;
+
     riichs_timeout_t temp_timeout_enable = p_riichs_info->timeout_enable;
+
     uint32_t temp_speed_kbps = p_riichs_info->speed_kbps;
 
     /* external global variable */
@@ -450,6 +569,7 @@ static void riichs_get_initial_setting (riichs_info_t * p_riichs_info)
     g_riichs_txi_int_priority[p_riichs_info->ch_no] = temp_txi_priority;
     g_riichs_eei_int_priority[p_riichs_info->ch_no] = temp_eei_priority;
     g_riichs_tei_int_priority[p_riichs_info->ch_no] = temp_tei_priority;
+
     g_riichs_timeout_enable[p_riichs_info->ch_no] = temp_timeout_enable;
 
     /* internal global variable */
@@ -489,19 +609,25 @@ static void riichs_get_initial_setting (riichs_info_t * p_riichs_info)
             case RIICHS_DIGITAL_FILTER_0:
                 g_riichs_icicr_init[p_riichs_info->ch_no] &= RIICHS_ICICR_NF_CLR;
             break;
+
             case RIICHS_DIGITAL_FILTER_1:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000D0;
             break;
+
             case RIICHS_DIGITAL_FILTER_2:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000D4;
             break;
+
             case RIICHS_DIGITAL_FILTER_3:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000D8;
             break;
+
             case RIICHS_DIGITAL_FILTER_4:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000DC;
             break;
+
             default:
+                R_BSP_NOP();
             break;
         }
     }
@@ -513,55 +639,73 @@ static void riichs_get_initial_setting (riichs_info_t * p_riichs_info)
             case RIICHS_DIGITAL_FILTER_0:
                 g_riichs_icicr_init[p_riichs_info->ch_no] &= RIICHS_ICICR_NF_CLR;
             break;
+
             case RIICHS_DIGITAL_FILTER_1:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000D0;
             break;
+
             case RIICHS_DIGITAL_FILTER_2:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000D1;
             break;
+
             case RIICHS_DIGITAL_FILTER_3:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000D2;
             break;
+
             case RIICHS_DIGITAL_FILTER_4:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000D3;
             break;
+
             case RIICHS_DIGITAL_FILTER_5:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000D4;
             break;
+
             case RIICHS_DIGITAL_FILTER_6:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000D5;
             break;
+
             case RIICHS_DIGITAL_FILTER_7:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000D6;
             break;
+
             case RIICHS_DIGITAL_FILTER_8:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000D7;
             break;
+
             case RIICHS_DIGITAL_FILTER_9:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000D8;
             break;
+
             case RIICHS_DIGITAL_FILTER_10:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000D9;
             break;
+
             case RIICHS_DIGITAL_FILTER_11:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000DA;
             break;
+
             case RIICHS_DIGITAL_FILTER_12:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000DB;
             break;
+
             case RIICHS_DIGITAL_FILTER_13:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000DC;
             break;
+
             case RIICHS_DIGITAL_FILTER_14:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000DD;
             break;
+
             case RIICHS_DIGITAL_FILTER_15:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000DE;
             break;
+
             case RIICHS_DIGITAL_FILTER_16:
                 g_riichs_icicr_init[p_riichs_info->ch_no] = 0x000000DF;
             break;
+
             default:
+                R_BSP_NOP();
             break;
         }
     }
@@ -614,7 +758,8 @@ static void riichs_get_initial_setting (riichs_info_t * p_riichs_info)
     }
     else
     {
-
+        /* Do nothing */
+        R_BSP_NOP();
     }
 
     if (RIICHS_L_COUNT_DISABLE == p_riichs_info->l_count)
@@ -658,7 +803,7 @@ static void riichs_get_initial_setting (riichs_info_t * p_riichs_info)
  * Return Value : RIICHS_SUCCESS                   ; Successful operation
  *              : RIICHS_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riichs_return_t riichs_open (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_open(riichs_info_t * p_riichs_info)
 {
     riichs_return_t ret;
 
@@ -708,12 +853,18 @@ static riichs_return_t riichs_open (riichs_info_t * p_riichs_info)
 
 /**********************************************************************************************************************
  * Function Name: R_RIICHS_MasterSend
- *****************************************************************************************************************/ /**
+ ******************************************************************************************************************//**
  * @brief Starts master transmission. Changes the transmit pattern according to the parameters. Operates batched 
  *        processing until stop condition generation.
  * @param[in] *p_riichs_info
  *             This is the pointer to the I2C communication information structure. The transmit patterns can be 
- *             selected from four patterns by the parameter setting.
+ *             selected from four patterns by the parameter setting.\n
+ *             See section R_RIICHS_MasterSend() in the application note for details.\n
+ *             The contents of the structure are referred and updated during communication.
+ *             Do not rewrite the structure during communication (RIICHS_COMMUNICATION) and when an error
+ *             has occurred (RIICHS_TMO and RIICHS_ERROR). \n
+ *             When setting the slave address, store it without shifting 1 bit to left.\n
+ *             See section R_RIICHS_MasterSend() in the application note for details.
  * @retval    RIICHS_SUCCESS             Processing completed successfully
  * @retval    RIICHS_ERR_INVALID_CHAN    The channel is nonexistent
  * @retval    RIICHS_ERR_INVALID_ARG     The parameter is invalid
@@ -734,23 +885,21 @@ static riichs_return_t riichs_open (riichs_info_t * p_riichs_info)
  *            generation ends normally. This function returns RIICHS_ERR_BUS_BUSY as a return value when the following 
  *            conditions are met to the start condition generation ends normally. (Note.1) \n
  *            \li The internal status bit is in busy state.
- *            \li Either SCL or SDA line is in low state. 
+ *            \li Either SCL or SDA line is in low state.
  * 
- *            The transmission processing is performed sequentially in subsequent interrupt processing after this 
- *            function return RIICHS_SUCCESS. Section "2.4 Usage of Interrupt Vector" in the application note should be 
- *            referred for the interrupt to be used. For master transmission, the interrupt generation timing should be 
- *            referred from "6.2.1 Master transmission" in the application note. \n
+ *            The transmission processing is performed sequentially in subsequent interrupt processing after this
+ *            function return RIICHS_SUCCESS. See section R_RIICHS_MasterSend() in the application note for details.\n
  *            After issuing a stop condition at the end of transmission, the callback function specified by the 
- *            argument is called. \n
+ *            argument is called.\n
  *            The transmission completion is performed normally or not, can be confirmed by checking the device status 
  *            flag specified by the argument or the channel status flag g_riichs_ChStatus [], that is to be
  *            "RIICHS_FINISH" for normal completion.\n
  *            Notes:\n
  *            1. When SCL and SDA pin is not external pull-up, this function may return RIICHS_ERR_BUS_BUSY by
  *               detecting either SCL or SDA line is as in low state.
- * @note      Available settings for each pattern see Section 3.2 in the application note for details.
+ * @note      Available settings for each pattern see R_RIICHS_MasterSend() in the application note for details.
  */
-riichs_return_t R_RIICHS_MasterSend (riichs_info_t * p_riichs_info)
+riichs_return_t R_RIICHS_MasterSend(riichs_info_t * p_riichs_info)
 {
     riichs_return_t ret;
 
@@ -789,9 +938,10 @@ riichs_return_t R_RIICHS_MasterSend (riichs_info_t * p_riichs_info)
  *              : RIICHS_ERR_TMO                   ; Time out error
  *              : RIICHS_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riichs_return_t riichs_master_send (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_master_send(riichs_info_t * p_riichs_info)
 {
     riichs_return_t ret;
+
     riichs_callback callbackfunc = NULL;
 
     if (NULL == p_riichs_info->p_slv_adr)
@@ -817,7 +967,7 @@ static riichs_return_t riichs_master_send (riichs_info_t * p_riichs_info)
     priichs_info_m[p_riichs_info->ch_no] = p_riichs_info;
 
     /* Sets the callback function. */
-    callbackfunc = p_riichs_info->callbackfunc;
+    callbackfunc                                  = p_riichs_info->callbackfunc;
     g_riichs_callbackfunc_m[p_riichs_info->ch_no] = callbackfunc;
 
     /* Generates the start condition.  */
@@ -843,12 +993,18 @@ static riichs_return_t riichs_master_send (riichs_info_t * p_riichs_info)
 
 /**********************************************************************************************************************
  * Function Name: R_RIICHS_MasterReceive
- *****************************************************************************************************************/ /**
+ ******************************************************************************************************************//**
  * @brief Starts master reception. Changes the receive pattern according to the parameters. Operates batched processing 
  *        until stop condition generation.
  * @param[in] *p_riichs_info
  *             This is the pointer to the I2C communication information structure. The receive pattern can be selected 
- *             from master reception and master transmit/receive by the parameter setting. 
+ *             from master reception and master transmit/receive by the parameter setting.\n
+ *             See section R_RIICHS_MasterReceive() in the application note for details.\n
+ *             The contents of the structure are referred and updated during communication. Do not rewrite the
+ *             structure during communication (RIICHS_COMMUNICATION) and when an error has occurred (RIICHS_TMO and
+ *             RIICHS_ERROR).\n
+ *             When setting the slave address, store it without shifting 1 bit to left.\n
+ *             See section R_RIICHS_MasterReceive() in the application note for details.
  * @retval    RIICHS_SUCCESS             Processing completed successfully
  * @retval    RIICHS_ERR_INVALID_CHAN    The channel is nonexistent
  * @retval    RIICHS_ERR_INVALID_ARG     The parameter is invalid
@@ -872,20 +1028,18 @@ static riichs_return_t riichs_master_send (riichs_info_t * p_riichs_info)
  *            \li Either SCL or SDA line is in low state.
  * 
  *            The reception processing is performed sequentially in subsequent interrupt processing after this 
- *            function return RIICHS_SUCCESS. Section "2.4 Usage of Interrupt Vector" in the application note should be 
- *            referred for the interrupt to be used. For master transmission, the interrupt generation timing should be 
- *            referred from "6.2.2 Master Reception" in the application note . \n
+ *            function return RIICHS_SUCCESS. See R_RIICHS_MasterReceive() in the application note for details\n
  *            After issuing a stop condition at the end of reception, the callback function specified by the argument 
- *            is called. \n
+ *            is called.\n
  *            The reception completion is performed normally or not, can be confirmed by checking the device status 
  *            flag specified by the argument or the channel status flag g_riichs_ChStatus [], that is to be
  *            "RIICHS_FINISH" for normal completion.\n
  *            Notes:\n
  *            1. When SCL and SDA pin is not external pull-up, this function may return RIICHS_ERR_BUS_BUSY by
  *               detecting either SCL or SDA line is as in low state.
- * @note      Available settings for each receive pattern see Section 3.3 in the application note for details.
+ * @note      Available settings for each receive pattern see R_RIICHS_MasterReceive() in the application note for details.
  */
-riichs_return_t R_RIICHS_MasterReceive (riichs_info_t * p_riichs_info)
+riichs_return_t R_RIICHS_MasterReceive(riichs_info_t * p_riichs_info)
 {
     riichs_return_t ret;
 
@@ -893,6 +1047,7 @@ riichs_return_t R_RIICHS_MasterReceive (riichs_info_t * p_riichs_info)
     {
         return RIICHS_ERR_INVALID_ARG;
     }
+
     /* ---- CHECK ARGUMENTS ---- */
 #if (1U == RIICHS_CFG_PARAM_CHECKING_ENABLE)
     /* Parameter check */
@@ -926,7 +1081,6 @@ riichs_return_t R_RIICHS_MasterReceive (riichs_info_t * p_riichs_info)
 } /* End of function R_RIICHS_MasterReceive() */
 
 /***********************************************************************************************************************
- * Outline      : 
  * Function Name: riichs_master_receive
  * Description  : sub function of R_RIICHS_MasterReceive(). 
  *              : Generates the start condition. Starts the master reception.
@@ -938,7 +1092,7 @@ riichs_return_t R_RIICHS_MasterReceive (riichs_info_t * p_riichs_info)
  *              : RIICHS_ERR_TMO                   ; Time out error
  *              : RIICHS_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riichs_return_t riichs_master_receive (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_master_receive(riichs_info_t * p_riichs_info)
 {
     riichs_return_t ret;
     riichs_callback callbackfunc = NULL;
@@ -961,7 +1115,7 @@ static riichs_return_t riichs_master_receive (riichs_info_t * p_riichs_info)
     priichs_info_m[p_riichs_info->ch_no] = p_riichs_info;
 
     /* Sets the callback function. */
-    callbackfunc = p_riichs_info->callbackfunc;
+    callbackfunc                                  = p_riichs_info->callbackfunc;
     g_riichs_callbackfunc_m[p_riichs_info->ch_no] = callbackfunc;
 
     /* Generates the start condition. */
@@ -986,7 +1140,6 @@ static riichs_return_t riichs_master_receive (riichs_info_t * p_riichs_info)
 } /* End of function riichs_master_receive() */
 
 /***********************************************************************************************************************
- * Outline      : 
  * Function Name: riichs_master_send_receive
  * Description  : sub function of R_RIICHS_MasterReceive().
  *              : Generates the start condition. Starts the master reception.
@@ -998,9 +1151,10 @@ static riichs_return_t riichs_master_receive (riichs_info_t * p_riichs_info)
  *              : RIICHS_ERR_TMO                   ; Time out error
  *              : RIICHS_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riichs_return_t riichs_master_send_receive (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_master_send_receive(riichs_info_t * p_riichs_info)
 {
     riichs_return_t ret;
+
     riichs_callback callbackfunc = NULL;
 
     /* Checks the channel status. */
@@ -1021,7 +1175,7 @@ static riichs_return_t riichs_master_send_receive (riichs_info_t * p_riichs_info
     priichs_info_m[p_riichs_info->ch_no] = p_riichs_info;
 
     /* Sets the callback function. */
-    callbackfunc = p_riichs_info->callbackfunc;
+    callbackfunc                                  = p_riichs_info->callbackfunc;
     g_riichs_callbackfunc_m[p_riichs_info->ch_no] = callbackfunc;
 
     /* Generates the start condition. */
@@ -1047,12 +1201,17 @@ static riichs_return_t riichs_master_send_receive (riichs_info_t * p_riichs_info
 
 /**********************************************************************************************************************
  * Function Name: R_RIICHS_SlaveTransfer
- *****************************************************************************************************************/ /**
+ ******************************************************************************************************************//**
  * @brief This function performs slave transmission and reception. Changes the transmit and receive pattern according 
  *        to the parameters.
  * @param[in] *p_riichs_info
  *             This is the pointer to the I2C communication information structure. The operation can be selected from 
  *             preparation for slave reception, slave transmission, or both of them by the parameter setting.
+ *             See section R_RIICHS_SlaveTransfer() in the application note for details.\n
+ *             The contents of the structure are referred and updated during communication. Do not rewrite
+ *             the structure during communication (RIICHS_COMMUNICATION) and when an error has occurred 
+ *             (RIICHS_TMO and RIICHS_ERROR).\n
+ *             See section R_RIICHS_SlaveTransfer() in the application note for details.
  * @retval    RIICHS_SUCCESS             Processing completed successfully
  * @retval    RIICHS_ERR_INVALID_CHAN    The channel is nonexistent
  * @retval    RIICHS_ERR_INVALID_ARG     The parameter is invalid
@@ -1074,11 +1233,7 @@ static riichs_return_t riichs_master_send_receive (riichs_info_t * p_riichs_info
  *            slave address match interrupt are completed normally. \n
  *            The processing of slave transmission or slave reception is performed sequentially in the subsequent 
  *            interrupt processing. \n
- *            Section "2.4 Usage of Interrupt Vector" in the application note should be referred for the interrupt to 
- *            be used. \n
- *            The interrupt generation timing of slave transmission should be referred from "6.2.4 Slave Transmission" 
- *            in the application note. The interrupt generation timing for slave reception should be referred from 
- *            "6.2.5 Slave reception" in the application note. \n
+ *            See section R_RIICHS_SlaveTransfer() in the application note for details.\n
  *            After detecting the stop condition of slave transmission or slave reception termination, the callback 
  *            function specified by the argument is called. \n
  *            The successful completion of slave reception can be checked by confirming the device status flag or 
@@ -1087,9 +1242,9 @@ static riichs_return_t riichs_master_send_receive (riichs_info_t * p_riichs_info
  *            channel status flag specified in the argument g_riichs_ChStatus [], that is to be "RIICHS_FINISH" or
  *            "RIICHS_NACK". "RIICHS_NACK" is set when master device transmitted NACK for notify to the slave that last 
  *            data receive completed.
- * @note      Available settings for each receive pattern see Section 3.4 in the application note for details.
+ * @note      Available settings for each receive pattern see R_RIICHS_SlaveTransfer() in the application note for details.
  */
-riichs_return_t R_RIICHS_SlaveTransfer (riichs_info_t * p_riichs_info)
+riichs_return_t R_RIICHS_SlaveTransfer(riichs_info_t * p_riichs_info)
 {
     riichs_return_t ret;
 
@@ -1118,7 +1273,6 @@ riichs_return_t R_RIICHS_SlaveTransfer (riichs_info_t * p_riichs_info)
 } /* End of function R_RIICHS_SlaveTransfer() */
 
 /***********************************************************************************************************************
- * Outline      : 
  * Function Name: riichs_slave_transfer
  * Description  : sub function of R_RIICHS_SlaveTransfer.
  *              : Generates the start condition. Starts the slave reception and the slave transmission.
@@ -1130,14 +1284,17 @@ riichs_return_t R_RIICHS_SlaveTransfer (riichs_info_t * p_riichs_info)
  *              : RIICHS_ERR_TMO                   ; Time out error
  *              : RIICHS_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riichs_return_t riichs_slave_transfer (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_slave_transfer(riichs_info_t * p_riichs_info)
 {
     riichs_return_t ret;
+
     riichs_callback callbackfunc = NULL;
-    volatile uint32_t uctmp = 0x00000000;
-    volatile uint32_t temp_picscr_reg = 0x00000000;
+
+    volatile uint32_t uctmp            = 0x00000000;
+    volatile uint32_t temp_picscr_reg  = 0x00000000;
+
     volatile uint32_t * const picscr_reg = RIICHS_ICSCR_ADR;
-    temp_picscr_reg = *picscr_reg;
+    temp_picscr_reg                      = *picscr_reg;
 
     /* Checks the channel status. */
     ret = riichs_check_chstatus_start(p_riichs_info);
@@ -1163,36 +1320,39 @@ static riichs_return_t riichs_slave_transfer (riichs_info_t * p_riichs_info)
     priichs_info_s[p_riichs_info->ch_no] = p_riichs_info;
 
     /* Sets the callback function. */
-    callbackfunc = p_riichs_info->callbackfunc;
+    callbackfunc                                  = p_riichs_info->callbackfunc;
     g_riichs_callbackfunc_s[p_riichs_info->ch_no] = callbackfunc;
 
     if (1000 < g_riichs_bps[p_riichs_info->ch_no])
     {
         temp_picscr_reg |= RIICHS_ICSCR_HSMCE_SET;
-        (*picscr_reg) = temp_picscr_reg;
+        (*picscr_reg)    = temp_picscr_reg;
+
         uctmp = *picscr_reg; /* Reads ICSCR. */
 
         RIICHS0.ICCSCR.BIT.WAITAE = 0U; /* Refer to the technical update. */
         RIICHS0.ICCSCR.BIT.WAITRE = 1U; /* Refer to the technical update. */
+
         /* WAIT_LOOP */
         while ((0U != RIICHS0.ICCSCR.BIT.WAITAE) || (1U != RIICHS0.ICCSCR.BIT.WAITRE))
         {
             /* Do Nothing */
+            R_BSP_NOP();
         }
     }
 
     /* ---- Enables IIC bus interrupt enable register. ---- */
-    if (((uint8_t *) FIT_NO_PTR != p_riichs_info->p_data1st) && ((uint8_t *) FIT_NO_PTR != p_riichs_info->p_data2nd))
+    if (((uint8_t *)FIT_NO_PTR != p_riichs_info->p_data1st) && ((uint8_t *)FIT_NO_PTR != p_riichs_info->p_data2nd))
     {
         /* Enables slave send and slave receive */
         riichs_int_icsier_iccsier_setting(p_riichs_info, RIICHS_ICSIER_INIT, RIICHS_ICCSIER_TX_RX);
     }
-    else if (((uint8_t *) FIT_NO_PTR != p_riichs_info->p_data1st) && ((uint8_t *) FIT_NO_PTR == p_riichs_info->p_data2nd))
+    else if (((uint8_t *)FIT_NO_PTR != p_riichs_info->p_data1st) && ((uint8_t *)FIT_NO_PTR == p_riichs_info->p_data2nd))
     {
         /* Enable slave send */
         riichs_int_icsier_iccsier_setting(p_riichs_info, RIICHS_ICSIER_INIT, RIICHS_ICCSIER_TX);
     }
-    else if (((uint8_t *) FIT_NO_PTR == p_riichs_info->p_data1st) && ((uint8_t *) FIT_NO_PTR != p_riichs_info->p_data2nd))
+    else if (((uint8_t *)FIT_NO_PTR == p_riichs_info->p_data1st) && ((uint8_t *)FIT_NO_PTR != p_riichs_info->p_data2nd))
     {
         /* Enable slave receive */
         riichs_int_icsier_iccsier_setting(p_riichs_info, RIICHS_ICSIER_INIT, RIICHS_ICCSIER_RX);
@@ -1200,6 +1360,7 @@ static riichs_return_t riichs_slave_transfer (riichs_info_t * p_riichs_info)
     else
     {
         /* Do Nothing */
+        R_BSP_NOP();
     }
 
     return ret;
@@ -1207,12 +1368,14 @@ static riichs_return_t riichs_slave_transfer (riichs_info_t * p_riichs_info)
 
 /**********************************************************************************************************************
  * Function Name: R_RIICHS_GetStatus
- *****************************************************************************************************************/ /**
+ ******************************************************************************************************************//**
  * @brief Returns the state of this module.
  * @param[in] *p_riichs_info
- *             This is the pointer to the I2C communication information structure.
+ *             This is the pointer to the I2C communication information structure.\n
+ *             See R_RIICHS_GetStatus() in the application note for details.
  * @param[in] *p_riichs_status
- *             This contains the variable to store the RIICHS state.
+ *             This contains the variable to store the RIICHS state. 
+ *             See R_RIICHS_GetStatus() in the application note for details.
  * @retval    RIICHS_SUCCESS             Processing completed successfully
  * @retval    RIICHS_ERR_INVALID_CHAN    The channel is nonexistent
  * @retval    RIICHS_ERR_INVALID_ARG     The parameter is invalid
@@ -1221,9 +1384,9 @@ static riichs_return_t riichs_slave_transfer (riichs_info_t * p_riichs_info)
  *            specified by the parameter, and returns the obtained state as 32-bit structure. \n
  *            When this function is called, the RIICHS arbitration-lost flag and NACK flag are cleared to 0. If the 
  *            device state is "RIICHS_ AL", the value is updated to "RIICHS_FINISH". \n
- * @note      The state flag allocation see Section 3.5 in the application note for details.
+ * @note      The state flag allocation see R_RIICHS_GetStatus() in the application note for details.
  */
-riichs_return_t R_RIICHS_GetStatus (riichs_info_t *p_riichs_info, riichs_mcu_status_t *p_riichs_status)
+riichs_return_t R_RIICHS_GetStatus(riichs_info_t *p_riichs_info, riichs_mcu_status_t *p_riichs_status)
 {
     /* ---- CHECK ARGUMENTS ---- */
 #if (1U == RIICHS_CFG_PARAM_CHECKING_ENABLE)
@@ -1238,7 +1401,6 @@ riichs_return_t R_RIICHS_GetStatus (riichs_info_t *p_riichs_info, riichs_mcu_sta
     {
         return RIICHS_ERR_INVALID_CHAN;
     }
-
 #endif
 
     /* Calls the API function. */
@@ -1257,10 +1419,11 @@ riichs_return_t R_RIICHS_GetStatus (riichs_info_t *p_riichs_info, riichs_mcu_sta
  *                riichs_mcu_status_t * p_riichs_status ; The address to store the I2C state flag.
  * Return Value : none
  **********************************************************************************************************************/
-static void riichs_getstatus (riichs_info_t *p_riichs_info, riichs_mcu_status_t *p_riichs_status)
+static void riichs_getstatus(riichs_info_t *p_riichs_info, riichs_mcu_status_t *p_riichs_status)
 {
-    volatile uint32_t uctmp = 0x00000000;
     volatile riichs_mcu_status_t sts_flag;
+
+    volatile uint32_t uctmp           = 0x00000000;
     volatile uint32_t temp_picsr2_reg = 0x00000000;
 
     volatile uint32_t * const picimr_reg = RIICHS_ICIMR_ADR;
@@ -1269,6 +1432,7 @@ static void riichs_getstatus (riichs_info_t *p_riichs_info, riichs_mcu_status_t 
     volatile uint32_t * const picssr_reg = RIICHS_ICSSR_ADR;
     volatile uint32_t * const picsr2_reg = RIICHS_ICSR2_ADR;
     volatile uint32_t * const piccsr_reg = RIICHS_ICCSR_ADR;
+
     temp_picsr2_reg = *picsr2_reg;
 
     sts_flag.LONG = 0x00000000;
@@ -1286,12 +1450,12 @@ static void riichs_getstatus (riichs_info_t *p_riichs_info, riichs_mcu_status_t 
     /* ---- Check Mode ---- */
     if (RIICHS_ICMMR_TRS_SET == ((*picmmr_reg) & RIICHS_ICMMR_TRS))
     {
-        /* Send */
+        /* Send mode */
         sts_flag.BIT.TRS = 1U;
     }
     else
     {
-        /* Receive */
+        /* Receive mode */
         sts_flag.BIT.TRS = 0U;
     }
 
@@ -1303,7 +1467,7 @@ static void riichs_getstatus (riichs_info_t *p_riichs_info, riichs_mcu_status_t 
     }
     else
     {
-        /* Not detected */
+        /* NACK translation not detected */
         sts_flag.BIT.NACK = 0U;
     }
 
@@ -1528,9 +1692,11 @@ static void riichs_getstatus (riichs_info_t *p_riichs_info, riichs_mcu_status_t 
 
     /* ---- clear flag ---- */
     temp_picsr2_reg &= RIICHS_ICSR2_AL_CLR;
-    (*picsr2_reg) = temp_picsr2_reg;
+    (*picsr2_reg)    = temp_picsr2_reg;
+
     temp_picsr2_reg &= RIICHS_ICSR2_NACKF_CLR;
-    (*picsr2_reg) = temp_picsr2_reg;
+    (*picsr2_reg)    = temp_picsr2_reg;
+
     uctmp = *picsr2_reg;
 
     if (RIICHS_AL == g_riichs_ChStatus[p_riichs_info->ch_no])
@@ -1542,21 +1708,39 @@ static void riichs_getstatus (riichs_info_t *p_riichs_info, riichs_mcu_status_t 
 
 /**********************************************************************************************************************
  * Function Name: R_RIICHS_Control
- *****************************************************************************************************************/ /**
+ ******************************************************************************************************************//**
  * @brief This function outputs conditions, Hi-Z from the SDA, and one-shot of the SCL clock. Also it resets the 
  *        settings of this module. This function is mainly used when a communication error occurs.
  * @param[in] *p_riichs_info
- *             This is the pointer to the I2C communication information structure.
+ *             This is the pointer to the I2C communication information structure.\n
+ *             See R_RIICHS_Control() in the application note for details. \n
+ *             The contents of the structure are referred and updated during communication.
+ *             Do not rewrite the structure during communication (RIICHS_COMMUNICATION) and when an error
+ *             has occurred (RIICHS_TMO and RIICHS_ERROR).\n
+ *             See section R_RIICHS_Control() in the application note for details.
  * @param[in] ctrl_ptn
- *             Specifies the output pattern. See Section 3.6 in the application note for details.
+ *             Specifies the output pattern. \n
+ *             The output pattern listed below can be specified simultaneously. 
+ *             When specifying multiple patterns simultaneously, specify them with '|'(OR). \n
+ *             The following output patterns can be specified simultaneously with a combination of two or 
+ *             three of them. \n
+ *             \li RIICHS_GEN_START_CON
+ *             \li RIICHS_GEN_RESTART_CON
+ *             \li RIICHS_GEN_STOP_CON
+ *
+ *             The following two can specified simultaneously.\n
+ *             \li RIICHS_GEN_SDA_HI_Z
+ *             \li RIICHS_GEN_SCL_ONESHOT
+ *
+ *             See R_RIICHS_Control() in the application note for details.
  * @retval    RIICHS_SUCCESS             Processing completed successfully
  * @retval    RIICHS_ERR_INVALID_CHAN    Nonexistent channel
  * @retval    RIICHS_ERR_INVALID_ARG     Invalid parameter
  * @retval    RIICHS_ERR_BUS_BUSY        Bus is busy
  * @retval    RIICHS_ERR_AL              Arbitration-lost error occurred
  * @retval    RIICHS_ERR_OTHER           The event occurred is invalid in the current state
- * @details   Outputs control signals of the RIICHS. Outputs conditions specified by the argument, Hi-Z from the SDA pin, 
- *            and one-shot of the SCL clock. Also resets the RIICHS module settings.
+ * @details   Outputs control signals of the RIICHS. Outputs conditions specified by the argument,
+ *            Hi-Z from the SDA pin, and one-shot of the SCL clock. Also resets the RIICHS module settings.
  * @note      One-shot output of the SCL clock. \n
  *            In master mode, if the clock signals from the master and slave devices go out of synchronization due to 
  *            noise or other factors, the slave device may hold the SDA line low (bus hang up). Then the SDA line can 
@@ -1564,7 +1748,7 @@ static void riichs_getstatus (riichs_info_t *p_riichs_info, riichs_mcu_status_t 
  *            In this module, one clock of the SCL can be output by setting the output pattern "RIICHS_GEN_SCL_ONESHOT" 
  *            (one-shot output of the SCL clock) and calling R_RIICHS_Control().
  */
-riichs_return_t R_RIICHS_Control (riichs_info_t * p_riichs_info, uint8_t ctrl_ptn)
+riichs_return_t R_RIICHS_Control(riichs_info_t * p_riichs_info, uint8_t ctrl_ptn)
 {
     riichs_return_t ret;
 
@@ -1598,7 +1782,7 @@ riichs_return_t R_RIICHS_Control (riichs_info_t * p_riichs_info, uint8_t ctrl_pt
  *                Outputs conditions specified by the argument, NACK,
  *                and one-shot of the SSCL clock. Also resets the simple I2C mode settings.
  * Arguments    : r_iic_info_t * p_riichs_info     ; IIC Information
- *                uint8_t cntl_ptn               ; Output Pattern
+ *                uint8_t        cntl_ptn          ; Output Pattern
  *                 [Options]
  *                  RIICHS_GEN_START_CON
  *                  RIICHS_GEN_STOP_CON
@@ -1612,11 +1796,13 @@ riichs_return_t R_RIICHS_Control (riichs_info_t * p_riichs_info, uint8_t ctrl_pt
  *              : RIICHS_ERR_AL                    ; Arbitration lost error
  *              : RIICHS_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riichs_return_t riichs_control (riichs_info_t * p_riichs_info, uint8_t ctrl_ptn)
+static riichs_return_t riichs_control(riichs_info_t * p_riichs_info, uint8_t ctrl_ptn)
 {
     volatile riichs_return_t ret = RIICHS_SUCCESS;
+
     volatile uint32_t uctmp = 0x00000000;
-    volatile uint32_t cnt = 0x00000000;
+    volatile uint32_t cnt   = 0x00000000;
+
     volatile uint32_t temp_picocr_reg = 0x00000000;
     volatile uint32_t temp_picsr2_reg = 0x00000000;
 
@@ -1624,7 +1810,8 @@ static riichs_return_t riichs_control (riichs_info_t * p_riichs_info, uint8_t ct
     volatile uint32_t * const picsr2_reg = RIICHS_ICSR2_ADR;
     volatile uint32_t * const picocr_reg = RIICHS_ICOCR_ADR;
     volatile uint32_t * const picbsr_reg = RIICHS_ICBSR_ADR;
-    volatile uint32_t * const piccr_reg = RIICHS_ICCR_ADR;
+    volatile uint32_t * const piccr_reg  = RIICHS_ICCR_ADR;
+
     temp_picocr_reg = *picocr_reg;
     temp_picsr2_reg = *picsr2_reg;
 
@@ -1640,8 +1827,8 @@ static riichs_return_t riichs_control (riichs_info_t * p_riichs_info, uint8_t ct
         (*piccr_reg) = RIICHS_ICCR_ICE_SET;
     }
 
-    if ((0 != (uint8_t) (((RIICHS_GEN_START_CON | RIICHS_GEN_RESTART_CON) | RIICHS_GEN_STOP_CON) & ctrl_ptn))
-            && (0 == (uint8_t) (((RIICHS_GEN_SDA_HI_Z | RIICHS_GEN_SCL_ONESHOT) | RIICHS_GEN_RESET) & ctrl_ptn)))
+    if ((0 != (uint8_t)(((RIICHS_GEN_START_CON | RIICHS_GEN_RESTART_CON) | RIICHS_GEN_STOP_CON) & ctrl_ptn))
+    &&  (0 == (uint8_t)(((RIICHS_GEN_SDA_HI_Z  | RIICHS_GEN_SCL_ONESHOT) | RIICHS_GEN_RESET) & ctrl_ptn)))
     {
         /* ==== Check request output pattern ==== */
         /* ---- Generate the start condition ---- */
@@ -1660,6 +1847,7 @@ static riichs_return_t riichs_control (riichs_info_t * p_riichs_info, uint8_t ct
 
             /* Wait the request generation has been completed */
             cnt = p_riichs_info->bus_check_counter;
+
             /* WAIT_LOOP */
             while (RIICHS_ICSR2_START_SET != ((*picsr2_reg) & RIICHS_ICSR2_START))
             {
@@ -1686,7 +1874,7 @@ static riichs_return_t riichs_control (riichs_info_t * p_riichs_info, uint8_t ct
 
             /* Clear START detect bit */
             temp_picsr2_reg &= RIICHS_ICSR2_START_CLR;
-            (*picsr2_reg) = temp_picsr2_reg;
+            (*picsr2_reg)    = temp_picsr2_reg;
         }
 
         /* ---- Generate the restart condition ---- */
@@ -1705,6 +1893,7 @@ static riichs_return_t riichs_control (riichs_info_t * p_riichs_info, uint8_t ct
 
             /* Wait the request generation has been completed*/
             cnt = p_riichs_info->bus_check_counter;
+
             /* WAIT_LOOP */
             while (RIICHS_ICSR2_START_SET != ((*picsr2_reg) & RIICHS_ICSR2_START))
             {
@@ -1731,7 +1920,7 @@ static riichs_return_t riichs_control (riichs_info_t * p_riichs_info, uint8_t ct
 
             /* Clear START detect bit */
             temp_picsr2_reg &= RIICHS_ICSR2_START_CLR;
-            (*picsr2_reg) = temp_picsr2_reg;
+            (*picsr2_reg)    = temp_picsr2_reg;
         }
 
         /* ---- Generate the stop condition ---- */
@@ -1750,6 +1939,7 @@ static riichs_return_t riichs_control (riichs_info_t * p_riichs_info, uint8_t ct
 
             /* Wait the request generation has been completed*/
             cnt = p_riichs_info->bus_check_counter;
+
             /* WAIT_LOOP */
             while (RIICHS_ICSR2_STOP_SET != ((*picsr2_reg) & RIICHS_ICSR2_STOP))
             {
@@ -1776,12 +1966,12 @@ static riichs_return_t riichs_control (riichs_info_t * p_riichs_info, uint8_t ct
 
             /* Clear STOP detect bit */
             temp_picsr2_reg &= RIICHS_ICSR2_STOP_CLR;
-            (*picsr2_reg) = temp_picsr2_reg;
+            (*picsr2_reg)    = temp_picsr2_reg;
         }
     }
-    else if ((0x00 != (uint8_t) ((RIICHS_GEN_SDA_HI_Z | RIICHS_GEN_SCL_ONESHOT) & ctrl_ptn))
-            && (0x00 == (uint8_t) ((((RIICHS_GEN_START_CON | RIICHS_GEN_RESTART_CON) | RIICHS_GEN_STOP_CON) |
-            RIICHS_GEN_RESET) & ctrl_ptn)))
+    else if ((0x00 != (uint8_t)((RIICHS_GEN_SDA_HI_Z | RIICHS_GEN_SCL_ONESHOT) & ctrl_ptn))
+        &&   (0x00 == (uint8_t)((((RIICHS_GEN_START_CON | RIICHS_GEN_RESTART_CON) | RIICHS_GEN_STOP_CON) |
+                RIICHS_GEN_RESET) & ctrl_ptn)))
     {
         /* ---- Select SDA pin in a high-impedance state ---- */
         if (RIICHS_GEN_SDA_HI_Z == (ctrl_ptn & RIICHS_GEN_SDA_HI_Z))
@@ -1789,18 +1979,21 @@ static riichs_return_t riichs_control (riichs_info_t * p_riichs_info, uint8_t ct
             /* Changes the SDA pin in a high-impedance state. */
             /* Sets for ICOCR.SDAO bit. */
             *picocr_reg = (uint32_t) ((*picocr_reg) | RIICHS_ICOCR_SDAO_SET | RIICHS_ICOCR_SOWP_SET);
-            *picocr_reg = (uint32_t) ((*picocr_reg) & RIICHS_ICOCR_SOWP_CLR);
+
+            /* Clears for ICOR.SOWP bit */
+            *picocr_reg = (uint32_t)((*picocr_reg) & RIICHS_ICOCR_SOWP_CLR);
         }
 
         /* ---- Generate OneShot of SSCL clock ---- */
         if (RIICHS_GEN_SCL_ONESHOT == (ctrl_ptn & RIICHS_GEN_SCL_ONESHOT))
         {
-            /* Output SCL oneshot */
+            /* Output SCL one-shot */
             temp_picocr_reg |= RIICHS_ICOCR_CLO_SET;
-            (*picocr_reg) = temp_picocr_reg;
+            (*picocr_reg)    = temp_picocr_reg;
 
-            /* Wait output scl oneshot has been completed */
+            /* Wait output SCL one-shot has been completed */
             cnt = p_riichs_info->bus_check_counter;
+
             /* WAIT_LOOP */
             while (RIICHS_ICOCR_CLO_SET == ((*picocr_reg) & RIICHS_ICOCR_CLO_SET))
             {
@@ -1811,9 +2004,11 @@ static riichs_return_t riichs_control (riichs_info_t * p_riichs_info, uint8_t ct
                 }
                 else
                 {
-                    /* Set SCLO bit is "1"(Hi-z). */
+                    /* Set SCLO bit is "1" (Hi-z). */
                     *picocr_reg = (uint32_t) ((*picocr_reg) | RIICHS_ICOCR_SCLO_SET | RIICHS_ICOCR_SOWP_SET);
-                    *picocr_reg = (uint32_t) ((*picocr_reg) & RIICHS_ICOCR_SOWP_CLR);
+
+                    /* Set SOWP bit is "0" (Disable SCLO/SDAO Write Protect). */
+                    *picocr_reg = (uint32_t)((*picocr_reg) & RIICHS_ICOCR_SOWP_CLR);
 
                     /* When Non Reply */
                     ret = RIICHS_ERR_BUS_BUSY;
@@ -1822,8 +2017,8 @@ static riichs_return_t riichs_control (riichs_info_t * p_riichs_info, uint8_t ct
             }
         }
     }
-    else if ((0x00 != (uint8_t) ((RIICHS_GEN_RESET) & ctrl_ptn))
-            && (0x00 == (uint8_t) (((((RIICHS_GEN_START_CON | RIICHS_GEN_RESTART_CON) | RIICHS_GEN_STOP_CON) |
+    else if ((0x00 != (uint8_t)((RIICHS_GEN_RESET) & ctrl_ptn))
+            && (0x00 == (uint8_t)(((((RIICHS_GEN_START_CON | RIICHS_GEN_RESTART_CON) | RIICHS_GEN_STOP_CON) |
             RIICHS_GEN_SDA_HI_Z) | RIICHS_GEN_SCL_ONESHOT) & ctrl_ptn)))
     {
         /* ---- Generate Reset ---- */
@@ -1853,10 +2048,15 @@ static riichs_return_t riichs_control (riichs_info_t * p_riichs_info, uint8_t ct
 
 /**********************************************************************************************************************
  * Function Name: R_RIICHS_Close
- *****************************************************************************************************************/ /**
+ ******************************************************************************************************************//**
  * @brief This function completes the RIICHS communication and releases the RIICHS used.
  * @param[in] *p_riichs_info
- *             This is the pointer to the I2C communication information structure.
+ *             This is the pointer to the I2C communication information structure.\n
+ *             See section R_RIICHS_Close() in the application note for details.\n
+ *             The contents of the structure are referred and updated during communication. 
+ *             Do not rewrite the structure during communication (RIICHS_COMMUNICATION) and when an error has occurred 
+ *             (RIICHS_TMO and RIICHS_ERROR). \n
+ *             See section R_RIICHS_Close() in the application note for details.
  * @retval    RIICHS_SUCCESS           Processing completed successfully
  * @retval    RIICHS_ERR_INVALID_CHAN  The channel is nonexistent
  * @retval    RIICHS_ERR_INVALID_ARG   Invalid parameter
@@ -1865,12 +2065,12 @@ static riichs_return_t riichs_control (riichs_info_t * p_riichs_info, uint8_t ct
  *            \li Entering the RIICHS module-stop state.
  *            \li Releasing I2C output ports.
  *            \li Disabling the RIICHS interrupt.
- * 
+ *
  *            To restart the communication, call the R_RIICHS_Open() function (initialization function). If the 
  *            communication is forcibly terminated, that communication is not guaranteed. \n
  * @note      None
  */
-riichs_return_t R_RIICHS_Close (riichs_info_t * p_riichs_info)
+riichs_return_t R_RIICHS_Close(riichs_info_t * p_riichs_info)
 {
     /* ---- CHECK ARGUMENTS ---- */
 #if (1U == RIICHS_CFG_PARAM_CHECKING_ENABLE)
@@ -1907,7 +2107,7 @@ riichs_return_t R_RIICHS_Close (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info      ;   IIC Information
  * Return Value : none
  **********************************************************************************************************************/
-static void riichs_close (riichs_info_t * p_riichs_info)
+static void riichs_close(riichs_info_t * p_riichs_info)
 {
     /* Updates the channel status. */
     riichs_set_ch_status(p_riichs_info, RIICHS_NO_INIT);
@@ -1926,7 +2126,7 @@ static void riichs_close (riichs_info_t * p_riichs_info)
 
 /**********************************************************************************************************************
  * Function Name: R_RIICHS_GetVersion
- *****************************************************************************************************************/ /**
+ ******************************************************************************************************************//**
  * @brief Returns the current version of this module.
  * @return    Version number
  * @details   This function will return the version of the currently installed RIICHS FIT module. The version number is 
@@ -1934,7 +2134,7 @@ static void riichs_close (riichs_info_t * p_riichs_info)
  *            number. For example, Version 4.25 would be returned as 0x00040019.
  * @note      None
  */
-uint32_t R_RIICHS_GetVersion (void)
+uint32_t R_RIICHS_GetVersion(void)
 {
     uint32_t const version = (RIICHS_VERSION_MAJOR << 16) | RIICHS_VERSION_MINOR;
 
@@ -1953,7 +2153,7 @@ uint32_t R_RIICHS_GetVersion (void)
  *              : RIICHS_ERR_TMO                   ; Time out error
  *              : RIICHS_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riichs_return_t r_riichs_advance (riichs_info_t * p_riichs_info)
+static riichs_return_t r_riichs_advance(riichs_info_t * p_riichs_info)
 {
     riichs_return_t ret;
 
@@ -1984,11 +2184,12 @@ static riichs_return_t r_riichs_advance (riichs_info_t * p_riichs_info)
  *              : RIICHS_ERR_TMO                   ; Time out error
  *              : RIICHS_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riichs_return_t riichs_advance (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_advance(riichs_info_t * p_riichs_info)
 {
-    volatile uint32_t * const picsr2_reg = RIICHS_ICSR2_ADR;
-    volatile uint32_t * const picsier_reg = RIICHS_ICSIER_ADR;
+    volatile uint32_t * const picsr2_reg   = RIICHS_ICSR2_ADR;
+    volatile uint32_t * const picsier_reg  = RIICHS_ICSIER_ADR;
     volatile uint32_t * const piccsier_reg = RIICHS_ICCSIER_ADR;
+
     riichs_return_t ret;
 
     /* Checks the channel status. */
@@ -1998,13 +2199,13 @@ static riichs_return_t riichs_advance (riichs_info_t * p_riichs_info)
         return ret;
     }
 
-    /* Event happened? */
+    /* Event check */
     if (RIICHS_EV_INIT != riichs_api_event[p_riichs_info->ch_no])
     {
         /* IIC communication processing */
         ret = riichs_func_table(riichs_api_event[p_riichs_info->ch_no], p_riichs_info);
 
-        /* return value? */
+        /* return value check */
         switch (ret)
         {
             case RIICHS_SUCCESS :
@@ -2041,6 +2242,7 @@ static riichs_return_t riichs_advance (riichs_info_t * p_riichs_info)
                 {
                     /* Advances communication. (Not finished) */
                     /* Do Nothing */
+                    R_BSP_NOP();
                 }
                 else
                 {
@@ -2048,8 +2250,8 @@ static riichs_return_t riichs_advance (riichs_info_t * p_riichs_info)
                     /* Updates the channel status. */
                     if (RIICHS_ICSR2_AL == ((*picsr2_reg) & RIICHS_ICSR2_AL))
                     {
-                        if (((RIICHS_MODE_S_READY == riichs_api_info[p_riichs_info->ch_no].N_Mode)
-                                || (RIICHS_MODE_S_SEND == riichs_api_info[p_riichs_info->ch_no].N_Mode))
+                        if (((RIICHS_MODE_S_READY   == riichs_api_info[p_riichs_info->ch_no].N_Mode)
+                                || (RIICHS_MODE_S_SEND    == riichs_api_info[p_riichs_info->ch_no].N_Mode))
                                 || (RIICHS_MODE_S_RECEIVE == riichs_api_info[p_riichs_info->ch_no].N_Mode))
                         {
                             riichs_set_ch_status(priichs_info_s[p_riichs_info->ch_no], RIICHS_FINISH);
@@ -2067,12 +2269,12 @@ static riichs_return_t riichs_advance (riichs_info_t * p_riichs_info)
                     }
 
                     /* Checks the callback function. */
-                    if ((((((RIICHS_MODE_M_SEND == riichs_api_info[p_riichs_info->ch_no].N_Mode)
-                            || (RIICHS_MODE_M_SEND == riichs_api_info[p_riichs_info->ch_no].B_Mode))
-                            || (RIICHS_MODE_M_RECEIVE == riichs_api_info[p_riichs_info->ch_no].N_Mode))
-                            || (RIICHS_MODE_M_RECEIVE == riichs_api_info[p_riichs_info->ch_no].B_Mode))
-                            || (RIICHS_MODE_M_SEND_RECEIVE == riichs_api_info[p_riichs_info->ch_no].N_Mode))
-                            || (RIICHS_MODE_M_SEND_RECEIVE == riichs_api_info[p_riichs_info->ch_no].B_Mode))
+                    if ((((((RIICHS_MODE_M_SEND         == riichs_api_info[p_riichs_info->ch_no].N_Mode)
+                        ||  (RIICHS_MODE_M_SEND         == riichs_api_info[p_riichs_info->ch_no].B_Mode))
+                        ||  (RIICHS_MODE_M_RECEIVE      == riichs_api_info[p_riichs_info->ch_no].N_Mode))
+                        ||  (RIICHS_MODE_M_RECEIVE      == riichs_api_info[p_riichs_info->ch_no].B_Mode))
+                        ||  (RIICHS_MODE_M_SEND_RECEIVE == riichs_api_info[p_riichs_info->ch_no].N_Mode))
+                        ||  (RIICHS_MODE_M_SEND_RECEIVE == riichs_api_info[p_riichs_info->ch_no].B_Mode))
                     {
                         if (NULL != g_riichs_callbackfunc_m[p_riichs_info->ch_no])
                         {
@@ -2091,7 +2293,7 @@ static riichs_return_t riichs_advance (riichs_info_t * p_riichs_info)
 
                     /* Return to the last mode */
                     if ((RIICHS_MODE_S_READY == riichs_api_info[p_riichs_info->ch_no].N_Mode)
-                            || (RIICHS_MODE_S_READY == riichs_api_info[p_riichs_info->ch_no].B_Mode))
+                    ||  (RIICHS_MODE_S_READY == riichs_api_info[p_riichs_info->ch_no].B_Mode))
                     {
                         /* Initialize API status on RAM */
                         riichs_api_mode_set(p_riichs_info, RIICHS_MODE_NONE);
@@ -2099,20 +2301,20 @@ static riichs_return_t riichs_advance (riichs_info_t * p_riichs_info)
                         riichs_api_status_set(p_riichs_info, RIICHS_STS_IDLE_EN_SLV);
 
                         /* ---- Enables IIC bus interrupt enable register. ---- */
-                        if (((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
-                                && ((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
+                        if (((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
+                                && ((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
                         {
                             /* Enables slave send and slave receive */
                             riichs_int_icsier_iccsier_setting(priichs_info_s[p_riichs_info->ch_no], RIICHS_ICSIER_INIT, RIICHS_ICCSIER_TX_RX);
                         }
-                        else if (((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
-                                && ((uint8_t *) FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
+                        else if (((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
+                                && ((uint8_t *)FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
                         {
                             /* Enable slave send */
                             riichs_int_icsier_iccsier_setting(priichs_info_s[p_riichs_info->ch_no], RIICHS_ICSIER_INIT, RIICHS_ICCSIER_TX);
                         }
-                        else if (((uint8_t *) FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data1st)
-                                && ((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
+                        else if (((uint8_t *)FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data1st)
+                                && ((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
                         {
                             /* Enable slave receive */
                             riichs_int_icsier_iccsier_setting(priichs_info_s[p_riichs_info->ch_no], RIICHS_ICSIER_INIT, RIICHS_ICCSIER_RX);
@@ -2120,6 +2322,7 @@ static riichs_return_t riichs_advance (riichs_info_t * p_riichs_info)
                         else
                         {
                             /* Do Nothing */
+                            R_BSP_NOP();
                         }
                     }
                     else
@@ -2130,22 +2333,26 @@ static riichs_return_t riichs_advance (riichs_info_t * p_riichs_info)
 
                         /* Initializes ICSIER register. */
                         *picsier_reg = RIICHS_ICSIER_INIT;
+
                         /* WAIT_LOOP */
                         while (RIICHS_ICSIER_INIT != (*picsier_reg))
                         {
                             /* Do Nothing */
+                            R_BSP_NOP();
                         }
 
                         /* Initializes ICCSIER register. */
                         *piccsier_reg = RIICHS_ICCSIER_INIT;
+
                         /* WAIT_LOOP */
                         while (RIICHS_ICCSIER_INIT != (*piccsier_reg))
                         {
                             /* Do Nothing */
+                            R_BSP_NOP();
                         }
                     }
                 }
-            break;
+                break;
 
             default :
 
@@ -2168,14 +2375,14 @@ static riichs_return_t riichs_advance (riichs_info_t * p_riichs_info)
  * Function Name: riichs_func_table
  * Description  : IIC Protocol Execution Processing.
  *                Executes the function which set in "pfunc".
- * Arguments    : riichs_api_event_t event    ; Event
- *              : riichs_info_t * p_riichs_info      ; IIC Information
+ * Arguments    : riichs_api_event_t   event           ; Event
+ *              : riichs_info_t      * p_riichs_info   ; IIC Information
  * Return Value : Refer to the each calling function.
  **********************************************************************************************************************/
-static riichs_return_t riichs_func_table (riichs_api_event_t event, riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_func_table(riichs_api_event_t event, riichs_info_t * p_riichs_info)
 {
     riichs_return_t ret;
-    riichs_return_t (*pFunc) (riichs_info_t *);
+    riichs_return_t (*pFunc)(riichs_info_t *);
     riichs_api_status_t n_status;
 
     /* Acquires a now state. */
@@ -2219,7 +2426,7 @@ static riichs_return_t riichs_func_table (riichs_api_event_t event, riichs_info_
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : RIICHS_SUCCESS                   ; Successful operation, idle state
  **********************************************************************************************************************/
-static riichs_return_t riichs_init_driver (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_init_driver(riichs_info_t * p_riichs_info)
 {
     /* Initializes the IIC registers. */
     /* Sets the internal status. */
@@ -2236,7 +2443,7 @@ static riichs_return_t riichs_init_driver (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : RIICHS_SUCCESS                   ; Successful operation, communication state
  **********************************************************************************************************************/
-static riichs_return_t riichs_send_master_code_cond (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_send_master_code_cond(riichs_info_t * p_riichs_info)
 {
     uint8_t buf_send_data = 0x08;
 
@@ -2251,23 +2458,26 @@ static riichs_return_t riichs_send_master_code_cond (riichs_info_t * p_riichs_in
 /***********************************************************************************************************************
  * Function Name: riichs_generate_start_cond
  * Description  : Generate Start Condition Processing.
- *                Checks bus busy. Sets the internal status. Generates the start condition.
+ *              : Checks bus busy. Sets the internal status. Generates the start condition.
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : RIICHS_SUCCESS                   ; Successful operation, communication state
  *              : RIICHS_ERR_BUS_BUSY              ; Bus busy error
  **********************************************************************************************************************/
-static riichs_return_t riichs_generate_start_cond (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_generate_start_cond(riichs_info_t * p_riichs_info)
 {
     riichs_return_t ret;
+
     bool boolret;
+
     volatile uint32_t uctmp;
     volatile uint32_t temp_picsr2_reg;
     volatile uint32_t temp_picsier_reg;
 
     /* Creates the register pointer for the specified RIICHS channel. */
     volatile uint32_t * const picsier_reg = RIICHS_ICSIER_ADR;
-    volatile uint32_t * const picsr2_reg = RIICHS_ICSR2_ADR;
-    temp_picsr2_reg = *picsr2_reg;
+    volatile uint32_t * const picsr2_reg  = RIICHS_ICSR2_ADR;
+
+    temp_picsr2_reg  = *picsr2_reg;
     temp_picsier_reg = *picsier_reg;
 
     /* Checks bus busy. */
@@ -2280,38 +2490,41 @@ static riichs_return_t riichs_generate_start_cond (riichs_info_t * p_riichs_info
     {
         /* Clears each status flag. */
         temp_picsr2_reg &= RIICHS_ICSR2_STOP_CLR;
-        (*picsr2_reg) = temp_picsr2_reg;
+        (*picsr2_reg)    = temp_picsr2_reg;
+
         /* WAIT_LOOP */
         while (0x00000000 != (((*picsr2_reg) & RIICHS_ICSR2_START) || ((*picsr2_reg) & RIICHS_ICSR2_STOP)))
         {
             /* Do Nothing */
+            R_BSP_NOP();
         }
+
         /* Sets the internal status. */
         riichs_api_status_set(p_riichs_info, RIICHS_STS_ST_COND_WAIT);
 
-
         /* Clears ALIE bit. */
         temp_picsier_reg &= (~RIICHS_ICSIER_AL);
-        (*picsier_reg) = temp_picsier_reg;
+        (*picsier_reg)    = temp_picsier_reg;
+
         uctmp = *picsier_reg; /* Reads ICSIER. */
 
         /* Enables IIC bus interrupt enable register. */
         if (RIICHS_MODE_S_READY == riichs_api_info[p_riichs_info->ch_no].B_Mode)
         {
-            if (((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
+            if (((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
+                    && ((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
             {
                 /* Enables slave send and slave receive */
                 riichs_int_icsier_iccsier_setting(priichs_info_s[p_riichs_info->ch_no], RIICHS_ICSIER_ST_NAK_AL, RIICHS_ICCSIER_TX_RX);
             }
-            else if (((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
+            else if (((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
+                    && ((uint8_t *)FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
             {
                 /* Enable slave send */
                 riichs_int_icsier_iccsier_setting(priichs_info_s[p_riichs_info->ch_no], RIICHS_ICSIER_ST_NAK_AL, RIICHS_ICCSIER_TX);
             }
-            else if (((uint8_t *) FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
+            else if (((uint8_t *)FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data1st)
+                    && ((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
             {
                 /* Enable slave receive */
                 riichs_int_icsier_iccsier_setting(priichs_info_s[p_riichs_info->ch_no], RIICHS_ICSIER_ST_NAK_AL, RIICHS_ICCSIER_RX);
@@ -2319,6 +2532,7 @@ static riichs_return_t riichs_generate_start_cond (riichs_info_t * p_riichs_info
             else
             {
                 /* Do Nothing */
+                R_BSP_NOP();
             }
         }
         else
@@ -2346,10 +2560,12 @@ static riichs_return_t riichs_generate_start_cond (riichs_info_t * p_riichs_info
  * Return Value : RIICHS_SUCCESS                   ; Successful operation, communication state
  *              : RIICHS_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riichs_return_t riichs_after_gen_start_cond (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_after_gen_start_cond(riichs_info_t * p_riichs_info)
 {
     riichs_return_t ret = RIICHS_SUCCESS;
+
     uint8_t buf_send_data;
+
     volatile uint32_t cnt;
 
     /* IIC mode? */
@@ -2365,11 +2581,12 @@ static riichs_return_t riichs_after_gen_start_cond (riichs_info_t * p_riichs_inf
                 case RIICHS_STS_IDLE :
                 case RIICHS_STS_IDLE_EN_SLV :
                 case RIICHS_STS_MASTER_CODE_WAIT :
+
                     /* Is the slave address pointer set? */
-                    if ((uint8_t *) FIT_NO_PTR != p_riichs_info->p_slv_adr) /* Pattern 4 of Master Write */
+                    if ((uint8_t *)FIT_NO_PTR != p_riichs_info->p_slv_adr) /* Pattern 4 of Master Write */
                     {
                         /* Sets a write code. */
-                        buf_send_data = (uint8_t) ((*(p_riichs_info->p_slv_adr)) << 1U);
+                        buf_send_data  = (uint8_t) ((*(p_riichs_info->p_slv_adr)) << 1U);
                         buf_send_data &= W_CODE;
 
                         /* Sets the internal status. */
@@ -2379,20 +2596,20 @@ static riichs_return_t riichs_after_gen_start_cond (riichs_info_t * p_riichs_inf
                         /* Transmit data empty interrupt request is enabled. */
                         if (RIICHS_MODE_S_READY == riichs_api_info[p_riichs_info->ch_no].B_Mode)
                         {
-                            if (((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
-                                    && ((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
+                            if (((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
+                                && ((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
                             {
                                 /* Enables slave send and slave receive */
                                 riichs_int_icsier_iccsier_setting(priichs_info_s[p_riichs_info->ch_no], RIICHS_ICSIER_TEND_NAK_AL, RIICHS_ICCSIER_TX_RX);
                             }
-                            else if (((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
-                                    && ((uint8_t *) FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
+                            else if (((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
+                                && ((uint8_t *)FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
                             {
                                 /* Enable slave send */
                                 riichs_int_icsier_iccsier_setting(priichs_info_s[p_riichs_info->ch_no], RIICHS_ICSIER_TEND_NAK_AL, RIICHS_ICCSIER_TX);
                             }
-                            else if (((uint8_t *) FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data1st)
-                                    && ((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
+                            else if (((uint8_t *)FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data1st)
+                                && ((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
                             {
                                 /* Enable slave receive */
                                 riichs_int_icsier_iccsier_setting(priichs_info_s[p_riichs_info->ch_no], RIICHS_ICSIER_TEND_NAK_AL, RIICHS_ICCSIER_RX);
@@ -2400,6 +2617,7 @@ static riichs_return_t riichs_after_gen_start_cond (riichs_info_t * p_riichs_inf
                             else
                             {
                                 /* Do Nothing */
+                                R_BSP_NOP();
                             }
                         }
                         else
@@ -2413,6 +2631,7 @@ static riichs_return_t riichs_after_gen_start_cond (riichs_info_t * p_riichs_inf
                     else
                     {
                         /* Do Nothing */
+                        R_BSP_NOP();
                     }
                 break;
 
@@ -2420,7 +2639,7 @@ static riichs_return_t riichs_after_gen_start_cond (riichs_info_t * p_riichs_inf
                 case RIICHS_STS_SEND_DATA_WAIT :
 
                     /* Sets a read code. */
-                    buf_send_data = (uint8_t) ((*(p_riichs_info->p_slv_adr)) << 1U);
+                    buf_send_data  = (uint8_t) ((*(p_riichs_info->p_slv_adr)) << 1U);
                     buf_send_data |= R_CODE;
 
                     /* Sets the internal status. */
@@ -2428,6 +2647,7 @@ static riichs_return_t riichs_after_gen_start_cond (riichs_info_t * p_riichs_inf
 
                     /* Enables the IIC bus interrupt. */
                     riichs_int_icsier_iccsier_setting(p_riichs_info, RIICHS_ICSIER_NAK_AL, RIICHS_ICCSIER_RX);
+
                     /* Transmits the slave address. */
                     riichs_set_sending_data(p_riichs_info, &buf_send_data);
 
@@ -2453,20 +2673,20 @@ static riichs_return_t riichs_after_gen_start_cond (riichs_info_t * p_riichs_inf
             /* Enables the IIC bus interrupt. */
             if (RIICHS_MODE_S_READY == riichs_api_info[p_riichs_info->ch_no].B_Mode)
             {
-                if (((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
-                        && ((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
+                if (((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
+                && ((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
                 {
                     /* Enables slave send and slave receive */
                     riichs_int_icsier_iccsier_setting(priichs_info_s[p_riichs_info->ch_no], RIICHS_ICSIER_NAK_AL, RIICHS_ICCSIER_TX_RX);
                 }
-                else if (((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
-                        && ((uint8_t *) FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
+                else if (((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
+                && ((uint8_t *)FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
                 {
                     /* Enable slave send */
                     riichs_int_icsier_iccsier_setting(priichs_info_s[p_riichs_info->ch_no], RIICHS_ICSIER_NAK_AL, RIICHS_ICCSIER_TX_RX);
                 }
-                else if (((uint8_t *) FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data1st)
-                        && ((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
+                else if (((uint8_t *)FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data1st)
+                && ((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
                 {
                     /* Enable slave receive */
                     riichs_int_icsier_iccsier_setting(priichs_info_s[p_riichs_info->ch_no], RIICHS_ICSIER_NAK_AL, RIICHS_ICCSIER_RX);
@@ -2474,6 +2694,7 @@ static riichs_return_t riichs_after_gen_start_cond (riichs_info_t * p_riichs_inf
                 else
                 {
                     /* Do Nothing */
+                    R_BSP_NOP();
                 }
             }
             else
@@ -2483,7 +2704,6 @@ static riichs_return_t riichs_after_gen_start_cond (riichs_info_t * p_riichs_inf
 
             /* Transmits the slave address. */
             riichs_set_sending_data(p_riichs_info, &buf_send_data);
-
         break;
 
         default :
@@ -2502,9 +2722,10 @@ static riichs_return_t riichs_after_gen_start_cond (riichs_info_t * p_riichs_inf
  * Return Value : RIICHS_SUCCESS                   ; Successful operation, communication state
  *              : RIICHS_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riichs_return_t riichs_after_send_slvadr (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_after_send_slvadr(riichs_info_t * p_riichs_info)
 {
     riichs_return_t ret = RIICHS_SUCCESS;
+
     volatile uint32_t uctmp = 0x00000000;
 
     /* IIC mode? */
@@ -2513,8 +2734,8 @@ static riichs_return_t riichs_after_send_slvadr (riichs_info_t * p_riichs_info)
         case RIICHS_MODE_M_SEND :
 
             /* --- Pattern 1 of Master Write --- */
-            if (((uint8_t *) FIT_NO_PTR != (uint8_t *) p_riichs_info->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR != (uint8_t *) p_riichs_info->p_data2nd))
+            if (((uint8_t *)FIT_NO_PTR != (uint8_t *)p_riichs_info->p_data1st)
+            && ((uint8_t *)FIT_NO_PTR != (uint8_t *)p_riichs_info->p_data2nd))
             {
                 /* Sets the internal status. */
                 riichs_api_status_set(p_riichs_info, RIICHS_STS_SEND_DATA_WAIT);
@@ -2541,8 +2762,8 @@ static riichs_return_t riichs_after_send_slvadr (riichs_info_t * p_riichs_info)
             }
 
             /* --- Pattern 2 of Master Write --- */
-            else if (((uint8_t *) FIT_NO_PTR == p_riichs_info->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR != p_riichs_info->p_data2nd))
+            else if (((uint8_t *)FIT_NO_PTR == p_riichs_info->p_data1st)
+            && ((uint8_t *)FIT_NO_PTR != p_riichs_info->p_data2nd))
             {
                 /* Sets the internal status. */
                 riichs_api_status_set(p_riichs_info, RIICHS_STS_SEND_DATA_WAIT);
@@ -2569,8 +2790,8 @@ static riichs_return_t riichs_after_send_slvadr (riichs_info_t * p_riichs_info)
             }
 
             /* --- Pattern 3 of Master Write --- */
-            else if (((uint8_t *) FIT_NO_PTR == p_riichs_info->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR == p_riichs_info->p_data2nd))
+            else if (((uint8_t *)FIT_NO_PTR == p_riichs_info->p_data1st)
+                    && ((uint8_t *)FIT_NO_PTR == p_riichs_info->p_data2nd))
             {
                 /* Sets the internal status. */
                 riichs_api_status_set(p_riichs_info, RIICHS_STS_SP_COND_WAIT);
@@ -2671,14 +2892,12 @@ static riichs_return_t riichs_after_send_slvadr (riichs_info_t * p_riichs_info)
         default :
             ret = RIICHS_ERR_OTHER;
         break;
-
     }
 
     return ret;
 } /* End of function riichs_after_send_slvadr() */
 
 /***********************************************************************************************************************
- * Outline      : 
  * Function Name: riichs_after_receive_slvadr
  * Description  : After Slave Address Receive Processing
  *                Performs one of the following processing according to the state.
@@ -2687,51 +2906,57 @@ static riichs_return_t riichs_after_send_slvadr (riichs_info_t * p_riichs_info)
  * Return Value : RIICHS_SUCCESS                   ; Successful operation, communication state
  *              : RIICHS_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riichs_return_t riichs_after_receive_slvadr (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_after_receive_slvadr(riichs_info_t * p_riichs_info)
 {
     volatile uint32_t * const picsr2_reg = RIICHS_ICSR2_ADR;
     volatile uint32_t * const picmmr_reg = RIICHS_ICMMR_ADR;
-    volatile uint32_t uctmp = 0x00000000;
+
+    volatile uint32_t uctmp           = 0x00000000;
     volatile uint32_t temp_picsr2_reg = 0x00000000;
+
     temp_picsr2_reg = *picsr2_reg;
-    uint8_t blank_data[1] =
-    { BLANK };
+
+    uint8_t blank_data[1] = { BLANK };
 
     /* Clears each status flag. */
     temp_picsr2_reg &= RIICHS_ICSR2_STOP_CLR;
-    (*picsr2_reg) = temp_picsr2_reg;
+    (*picsr2_reg)    = temp_picsr2_reg;
+
     /* WAIT_LOOP */
     while (0x00000000 != ((*picsr2_reg) & RIICHS_ICSR2_STOP))
     {
         /* Do Nothing */
+        R_BSP_NOP();
     }
 
     /* ---- Enables IIC bus interrupt enable register. ---- */
-    if (((uint8_t *) FIT_NO_PTR != p_riichs_info->p_data1st) && ((uint8_t *) FIT_NO_PTR != p_riichs_info->p_data2nd))
+    /* Enables slave send and slave receive */
+    if (((uint8_t *)FIT_NO_PTR != p_riichs_info->p_data1st) && ((uint8_t *)FIT_NO_PTR != p_riichs_info->p_data2nd))
     {
-        /* Enables slave send and slave receive */
         riichs_int_icsier_iccsier_setting(p_riichs_info, RIICHS_ICSIER_SP_NAK, RIICHS_ICCSIER_TX_RX);
     }
-    else if (((uint8_t *) FIT_NO_PTR != p_riichs_info->p_data1st) && ((uint8_t *) FIT_NO_PTR == p_riichs_info->p_data2nd))
+
+    /* Enable slave send */
+    else if (((uint8_t *)FIT_NO_PTR != p_riichs_info->p_data1st) && ((uint8_t *)FIT_NO_PTR == p_riichs_info->p_data2nd))
     {
-        /* Enable slave send */
         riichs_int_icsier_iccsier_setting(p_riichs_info, RIICHS_ICSIER_SP_NAK, RIICHS_ICCSIER_TX);
     }
-    else if (((uint8_t *) FIT_NO_PTR == p_riichs_info->p_data1st) && ((uint8_t *) FIT_NO_PTR != p_riichs_info->p_data2nd))
+
+    /* Enable slave receive */
+    else if (((uint8_t *)FIT_NO_PTR == p_riichs_info->p_data1st) && ((uint8_t *)FIT_NO_PTR != p_riichs_info->p_data2nd))
     {
-        /* Enable slave receive */
         riichs_int_icsier_iccsier_setting(p_riichs_info, RIICHS_ICSIER_SP, RIICHS_ICCSIER_RX);
     }
     else
     {
         /* Do Nothing */
+        R_BSP_NOP();
     }
 
-    /* Slave receive mode? */
+    /* Slave receive mode */
     if (0x00 == ((*picmmr_reg) & RIICHS_ICMMR_TRS))
     {
-        /* Sets the internal status. */
-        riichs_api_status_set(p_riichs_info, RIICHS_STS_RECEIVE_DATA_WAIT);
+        riichs_api_status_set(p_riichs_info, RIICHS_STS_RECEIVE_DATA_WAIT); /* Sets the internal status. */
 
         if (0x00000002 >= p_riichs_info->cnt2nd)
         {
@@ -2745,44 +2970,37 @@ static riichs_return_t riichs_after_receive_slvadr (riichs_info_t * p_riichs_inf
             riichs_receive_pre_end_setting(p_riichs_info);
         }
 
-        /* Performs dummy read. */
-        uctmp = riichs_get_receiving_data(p_riichs_info);
+        uctmp = riichs_get_receiving_data(p_riichs_info); /* Performs dummy read. */
     }
 
     /* Slave send mode */
     else
     {
-        /* Sets the internal status. */
-        riichs_api_status_set(p_riichs_info, RIICHS_STS_SEND_DATA_WAIT);
+        riichs_api_status_set(p_riichs_info, RIICHS_STS_SEND_DATA_WAIT); /* Sets the internal status. */
 
-        /* 1st data counter = 0?  */
+        /* 1st data counter = 0 */
         if (0x00000000 != p_riichs_info->cnt1st)
         {
-            if ((uint8_t *) FIT_NO_PTR == p_riichs_info->p_data1st)
+            /* 1st data buffer has 8-bit length */
+            if ((uint8_t *)FIT_NO_PTR == p_riichs_info->p_data1st)
             {
-                /* Internal error */
-                return RIICHS_ERR_OTHER;
+                return RIICHS_ERR_OTHER; /* Internal error */
             }
 
-            /* Transmits a 1st data. */
-            riichs_set_sending_data(p_riichs_info, p_riichs_info->p_data1st);
+            riichs_set_sending_data(p_riichs_info, p_riichs_info->p_data1st); /* Transmits a 1st data. */
 
-            /* Decreases the 1st data counter. */
-            p_riichs_info->cnt1st--;
+            p_riichs_info->cnt1st--; /* Decreases the 1st data counter. */
 
-            /* Increases the 1st data buffer pointer. */
-            p_riichs_info->p_data1st++;
+            p_riichs_info->p_data1st++; /* Increases the 1st data buffer pointer. */
         }
         else
         {
-            /* Transmits a "FFh" data. */
-            riichs_set_sending_data(p_riichs_info, blank_data);
+            riichs_set_sending_data(p_riichs_info, blank_data); /* Transmits a "FFh" data. */
         }
 
     }
 
     return RIICHS_SUCCESS;
-
 } /* End of function riichs_after_receive_slvadr() */
 
 /***********************************************************************************************************************
@@ -2794,9 +3012,10 @@ static riichs_return_t riichs_after_receive_slvadr (riichs_info_t * p_riichs_inf
  * Return Value : RIICHS_SUCCESS                   ; Successful operation, communication state
  *              : RIICHS_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riichs_return_t riichs_write_data_sending (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_write_data_sending(riichs_info_t * p_riichs_info)
 {
     riichs_return_t ret = RIICHS_SUCCESS;
+
     uint8_t blank_data[1] =
     { BLANK };
 
@@ -2806,7 +3025,7 @@ static riichs_return_t riichs_write_data_sending (riichs_info_t * p_riichs_info)
         case RIICHS_MODE_M_SEND :
 
             /* Is 1st data pointer set? */
-            if ((uint8_t *) FIT_NO_PTR != p_riichs_info->p_data1st)
+            if ((uint8_t *)FIT_NO_PTR != p_riichs_info->p_data1st)
             {
                 /* 1st data counter = 0?  */
                 if (0x00000000 != p_riichs_info->cnt1st) /* Pattern 1 of Master Write */
@@ -2824,8 +3043,9 @@ static riichs_return_t riichs_write_data_sending (riichs_info_t * p_riichs_info)
                 }
             }
 
+
             /* Is 2nd data pointer set? */
-            if ((uint8_t *) FIT_NO_PTR != p_riichs_info->p_data2nd)
+            if ((uint8_t *)FIT_NO_PTR != p_riichs_info->p_data2nd)
             {
                 /* 2nd data counter = 0? */
                 if (0x00000000 != p_riichs_info->cnt2nd) /* Pattern 2 of Master Write */
@@ -2885,7 +3105,7 @@ static riichs_return_t riichs_write_data_sending (riichs_info_t * p_riichs_info)
         case RIICHS_MODE_S_SEND :
 
             /* Is 1st data pointer set? */
-            if ((uint8_t *) FIT_NO_PTR != p_riichs_info->p_data1st)
+            if ((uint8_t *)FIT_NO_PTR != p_riichs_info->p_data1st)
             {
                 /* 1st data counter = 0?  */
                 if (0x00000000 != p_riichs_info->cnt1st)
@@ -2910,7 +3130,6 @@ static riichs_return_t riichs_write_data_sending (riichs_info_t * p_riichs_info)
                 /* Transmits a "FFh" data. */
                 riichs_set_sending_data(p_riichs_info, blank_data);
             }
-
         break;
 
         default :
@@ -2929,7 +3148,7 @@ static riichs_return_t riichs_write_data_sending (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : RIICHS_SUCCESS                   ; Successful operation, communication state
  **********************************************************************************************************************/
-static riichs_return_t riichs_read_data_receiving (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_read_data_receiving(riichs_info_t * p_riichs_info)
 {
     volatile uint32_t uctmp = 0x00000000;
 
@@ -2979,7 +3198,7 @@ static riichs_return_t riichs_read_data_receiving (riichs_info_t * p_riichs_info
     {
         /* Stores the received data. */
         *p_riichs_info->p_data2nd = riichs_get_receiving_data(p_riichs_info);
-        p_riichs_info->cnt2nd--; /* Decreases the receiving data counter. */
+        p_riichs_info->cnt2nd--;    /* Decreases the receiving data counter. */
         p_riichs_info->p_data2nd++; /* Increases the receiving data buffer pointer. */
     }
 
@@ -2994,18 +3213,23 @@ static riichs_return_t riichs_read_data_receiving (riichs_info_t * p_riichs_info
  * Return Value : RIICHS_SUCCESS                   ; Successful operation, finished communication and idle state
  *              : RIICHS_ERR_BUS_BUSY              ; Bus busy error
  *              : RIICHS_ERR_AL                    ; Arbitration lost error
- *              : RIICHS_ERR_TMO                  ; Time out error
+ *              : RIICHS_ERR_TMO                   ; Time out error
  **********************************************************************************************************************/
-static riichs_return_t riichs_after_dtct_stop_cond (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_after_dtct_stop_cond(riichs_info_t * p_riichs_info)
 {
     riichs_return_t ret = RIICHS_SUCCESS;
-    bool boolret = RIICHS_FALSE;
+
+    bool boolret        = RIICHS_FALSE;
+
     volatile uint32_t * const picscr_reg = RIICHS_ICSCR_ADR;
-    volatile uint32_t temp_picscr_reg = 0x00000000;
+
+    volatile uint32_t temp_picscr_reg    = 0x00000000;
+
     temp_picscr_reg = *picscr_reg;
 
     /* Waits from "bus busy" to "bus ready". */
     boolret = riichs_check_bus_busy(p_riichs_info);
+
     if (RIICHS_FALSE == boolret)
     {
         ret = RIICHS_ERR_BUS_BUSY;
@@ -3028,7 +3252,7 @@ static riichs_return_t riichs_after_dtct_stop_cond (riichs_info_t * p_riichs_inf
     {
         /* Disable slave address1 */
         temp_picscr_reg &= RIICHS_ICSCR_SAR_DISABLE;
-        (*picscr_reg) = temp_picscr_reg;
+        (*picscr_reg)    = temp_picscr_reg;
     }
 
     return ret;
@@ -3037,11 +3261,11 @@ static riichs_return_t riichs_after_dtct_stop_cond (riichs_info_t * p_riichs_inf
 /***********************************************************************************************************************
  * Function Name: riichs_arbitration_lost
  * Description  : Arbitration Lost Error Processing. 
- *                Returns RIICHS_ERR_AL.
+ *              : Returns RIICHS_ERR_AL.
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : RIICHS_SUCCESS                    ; Arbitration lost error
  **********************************************************************************************************************/
-static riichs_return_t riichs_arbitration_lost (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_arbitration_lost(riichs_info_t * p_riichs_info)
 {
     /* Checks the internal mode. */
     /* slave transfer not enable in now */
@@ -3071,20 +3295,20 @@ static riichs_return_t riichs_arbitration_lost (riichs_info_t * p_riichs_info)
             riichs_api_status_set(priichs_info_s[p_riichs_info->ch_no], RIICHS_STS_AL);
 
             /* ---- Enables IIC bus interrupt enable register. ---- */
-            if (((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
+            if (((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
+            &&  ((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
             {
                 /* Enables slave send and slave receive */
                 riichs_int_icsier_iccsier_setting(priichs_info_s[p_riichs_info->ch_no], RIICHS_ICSIER_SP_NAK, RIICHS_ICCSIER_TX_RX);
             }
-            else if (((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
+            else if (((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data1st)
+            &&       ((uint8_t *)FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
             {
                 /* Enable slave send */
                 riichs_int_icsier_iccsier_setting(priichs_info_s[p_riichs_info->ch_no], RIICHS_ICSIER_SP_NAK, RIICHS_ICCSIER_TX);
             }
-            else if (((uint8_t *) FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
+            else if (((uint8_t *)FIT_NO_PTR == priichs_info_s[p_riichs_info->ch_no]->p_data1st)
+            &&       ((uint8_t *)FIT_NO_PTR != priichs_info_s[p_riichs_info->ch_no]->p_data2nd))
             {
                 /* Enable slave receive */
                 riichs_int_icsier_iccsier_setting(priichs_info_s[p_riichs_info->ch_no], RIICHS_ICSIER_SP, RIICHS_ICCSIER_RX);
@@ -3092,11 +3316,13 @@ static riichs_return_t riichs_arbitration_lost (riichs_info_t * p_riichs_info)
             else
             {
                 /* Do Nothing */
+                R_BSP_NOP();
             }
         }
         else
         {
             /* Do Nothing */
+            R_BSP_NOP();
         }
     }
 
@@ -3105,10 +3331,12 @@ static riichs_return_t riichs_arbitration_lost (riichs_info_t * p_riichs_info)
             || (RIICHS_MODE_S_RECEIVE == riichs_api_info[p_riichs_info->ch_no].N_Mode))
     {
         /* Do Nothing */
+        R_BSP_NOP();
     }
     else
     {
         /* Do Nothing */
+        R_BSP_NOP();
     }
 
     return RIICHS_SUCCESS;
@@ -3121,7 +3349,7 @@ static riichs_return_t riichs_arbitration_lost (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : RIICHS_SUCCESS                   ; Arbitration lost error
  **********************************************************************************************************************/
-static riichs_return_t riichs_time_out (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_time_out(riichs_info_t * p_riichs_info)
 {
     /* Sets the internal status. */
     riichs_api_status_set(p_riichs_info, RIICHS_STS_TMO);
@@ -3131,14 +3359,15 @@ static riichs_return_t riichs_time_out (riichs_info_t * p_riichs_info)
 
 /***********************************************************************************************************************
  * Function Name: riichs_nack
- * Description  : Nack Error Processing.
+ * Description  : NACK Error Processing.
  *                Generates the stop condition and returns RIICHS_NACK.
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : RIICHS_SUCCESS                   ; Successful operation
  **********************************************************************************************************************/
-static riichs_return_t riichs_nack (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_nack(riichs_info_t * p_riichs_info)
 {
     volatile uint32_t * const picmmr_reg = RIICHS_ICMMR_ADR;
+
     volatile uint32_t uctmp = 0x00000000;
 
     /* Sets the internal status. */
@@ -3179,7 +3408,7 @@ static riichs_return_t riichs_nack (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : RIICHS_SUCCESS                   ; Successful operation, idle state on enable slave transfer
  **********************************************************************************************************************/
-static riichs_return_t riichs_enable_slave_transfer (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_enable_slave_transfer(riichs_info_t * p_riichs_info)
 {
     /* Setting the IIC registers. */
     /* Includes I/O register read operation at the end of the following function. */
@@ -3194,11 +3423,11 @@ static riichs_return_t riichs_enable_slave_transfer (riichs_info_t * p_riichs_in
 /***********************************************************************************************************************
  * Function Name: riichs_api_mode_event_init
  * Description  : Initializes RAM.
- * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
- *              : riichs_api_mode_t new_mode  ; New mode
+ * Arguments    : riichs_info_t   * p_riichs_info    ; IIC Information
+ *              : riichs_api_mode_t new_mode         ; New mode
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_api_mode_event_init (riichs_info_t * p_riichs_info, riichs_api_mode_t new_mode)
+static void riichs_api_mode_event_init(riichs_info_t * p_riichs_info, riichs_api_mode_t new_mode)
 {
     uint8_t ch_no = p_riichs_info->ch_no;
 
@@ -3217,10 +3446,10 @@ static void riichs_api_mode_event_init (riichs_info_t * p_riichs_info, riichs_ap
  * Description  : Update Internal Status Processing.
  *                Updates the now status and the previous status.
  * Arguments    : riichs_info_t * p_riichs_info          ; IIC Information
- *              : riichs_api_mode_t new_status    ; New status
+ *              : riichs_api_mode_t new_status           ; New status
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_api_mode_set (riichs_info_t * p_riichs_info, riichs_api_mode_t new_mode)
+static void riichs_api_mode_set(riichs_info_t * p_riichs_info, riichs_api_mode_t new_mode)
 {
     uint8_t ch_no = p_riichs_info->ch_no;
     
@@ -3236,10 +3465,10 @@ static void riichs_api_mode_set (riichs_info_t * p_riichs_info, riichs_api_mode_
  * Description  : Update Internal Status Processing.
  *                Updates the now status and the previous status.
  * Arguments    : riichs_info_t * p_riichs_info          ; IIC Information
- *              : riichs_api_status_t new_status  ; New status
+ *              : riichs_api_status_t new_status         ; New status
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_api_status_set (riichs_info_t * p_riichs_info, riichs_api_status_t new_status)
+static void riichs_api_status_set(riichs_info_t * p_riichs_info, riichs_api_status_t new_status)
 {
     uint8_t ch_no = p_riichs_info->ch_no;
     
@@ -3254,10 +3483,10 @@ static void riichs_api_status_set (riichs_info_t * p_riichs_info, riichs_api_sta
  * Function Name: riichs_set_ch_status
  * Description  : Updates the channel status.
  * Arguments    : riichs_info_t * p_riichs_info          ; IIC Information
- *              : riichs_ch_dev_status_t status               ; channel status, device status
+ *              : riichs_ch_dev_status_t status          ; channel status, device status
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_set_ch_status (riichs_info_t * p_riichs_info, riichs_ch_dev_status_t status)
+static void riichs_set_ch_status(riichs_info_t * p_riichs_info, riichs_ch_dev_status_t status)
 {
     /* Sets the channel status. */
     g_riichs_ChStatus[p_riichs_info->ch_no] = status;
@@ -3278,9 +3507,10 @@ static void riichs_set_ch_status (riichs_info_t * p_riichs_info, riichs_ch_dev_s
  *              : RIICHS_ERR_TMO                   ; Time out error
  *              : RIICHS_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riichs_return_t riichs_check_chstatus_start (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_check_chstatus_start(riichs_info_t * p_riichs_info)
 {
     volatile uint32_t * const picbsr_reg = RIICHS_ICBSR_ADR;
+
     riichs_return_t ret;
 
     /* Checks the channel status. */
@@ -3375,7 +3605,7 @@ static riichs_return_t riichs_check_chstatus_start (riichs_info_t * p_riichs_inf
  *              : RIICHS_ERR_TMO                   ; Time out error
  *              : RIICHS_ERR_OTHER                 ; Other error
  **********************************************************************************************************************/
-static riichs_return_t riichs_check_chstatus_advance (riichs_info_t * p_riichs_info)
+static riichs_return_t riichs_check_chstatus_advance(riichs_info_t * p_riichs_info)
 {
     riichs_return_t ret;
 
@@ -3433,15 +3663,13 @@ static riichs_return_t riichs_check_chstatus_advance (riichs_info_t * p_riichs_i
         case RIICHS_TMO :
 
             /* The channel is in time out error state. */
-            /* Sets the return value to time out error state. */
-            ret = RIICHS_ERR_TMO;
+            ret = RIICHS_ERR_TMO; /* Sets the return value to time out error state. */
         break;
 
         case RIICHS_AL :
 
             /* The channel is in error state. */
-            /* Sets the return value to error state. */
-            ret = RIICHS_ERR_AL;
+            ret = RIICHS_ERR_AL; /* Sets the return value to error state. */
         break;
 
         default :
@@ -3461,7 +3689,7 @@ static riichs_return_t riichs_check_chstatus_advance (riichs_info_t * p_riichs_i
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_enable (riichs_info_t * p_riichs_info)
+static void riichs_enable(riichs_info_t * p_riichs_info)
 {
     /* Initializes the IIC registers. */
     /* Includes I/O register read operation at the end of the following function. */
@@ -3489,7 +3717,7 @@ static void riichs_enable (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_disable (riichs_info_t * p_riichs_info)
+static void riichs_disable(riichs_info_t * p_riichs_info)
 {
     /* Disables IIC. */
     /* Sets SCLn and SDAn to non-driven state. */
@@ -3510,39 +3738,38 @@ static void riichs_disable (riichs_info_t * p_riichs_info)
 } /* End of function riichs_disable() */
 
 /***********************************************************************************************************************
- * Outline      : Initialize IIC Driver Processing
  * Function Name: riichs_init_io_register
- * Description  : Initializes RIICHS register.
+ * Description  : Initialize IIC Driver Processing
+ *              : Initializes RIICHS register.
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_init_io_register (riichs_info_t * p_riichs_info)
+static void riichs_init_io_register(riichs_info_t * p_riichs_info)
 {
     volatile uint32_t uctmp = 0x00000000;
 
     /* Creates the register pointer for the specified RIICHS channel. */
-
-    volatile uint32_t * const psar0_reg = RIICHS_SAR0_ADR;
-    volatile uint32_t * const psar1_reg = RIICHS_SAR1_ADR;
-    volatile uint32_t * const psar2_reg = RIICHS_SAR2_ADR;
-    volatile uint32_t * const picscr_reg = RIICHS_ICSCR_ADR;
-    volatile uint32_t * const pictor_reg = RIICHS_ICTOR_ADR;
-    volatile uint32_t * const picicr_reg = RIICHS_ICICR_ADR;
-    volatile uint32_t * const picfer_reg = RIICHS_ICFER_ADR;
-    volatile uint32_t * const picser_reg = RIICHS_ICSER_ADR;
+    volatile uint32_t * const psar0_reg   = RIICHS_SAR0_ADR;
+    volatile uint32_t * const psar1_reg   = RIICHS_SAR1_ADR;
+    volatile uint32_t * const psar2_reg   = RIICHS_SAR2_ADR;
+    volatile uint32_t * const picscr_reg  = RIICHS_ICSCR_ADR;
+    volatile uint32_t * const pictor_reg  = RIICHS_ICTOR_ADR;
+    volatile uint32_t * const picicr_reg  = RIICHS_ICICR_ADR;
+    volatile uint32_t * const picfer_reg  = RIICHS_ICFER_ADR;
+    volatile uint32_t * const picser_reg  = RIICHS_ICSER_ADR;
     volatile uint32_t * const piccser_reg = RIICHS_ICCSER_ADR;
     volatile uint32_t * const picackr_reg = RIICHS_ICACKR_ADR;
     volatile uint32_t * const piccscr_reg = RIICHS_ICCSCR_ADR;
-    volatile uint32_t * const picocr_reg = RIICHS_ICOCR_ADR;
+    volatile uint32_t * const picocr_reg  = RIICHS_ICOCR_ADR;
 
     /* Sets SCLn and SDAn to non-driven state. */
     /* Resets all RIICHS registers and the internal status. (RIICHS reset) */
     riichs_all_reset(p_riichs_info);
 
     /* Sets slave address format and slave address. */
-    *psar0_reg = RIICHS_SAR0_INIT; /* Sets SARy.(y=0,1,2) */
-    *psar1_reg = RIICHS_SAR1_INIT; /* Sets SARy.(y=0,1,2) */
-    *psar2_reg = RIICHS_SAR2_INIT; /* Sets SARy.(y=0,1,2) */
+    *psar0_reg  = RIICHS_SAR0_INIT;  /* Sets SARy.(y=0,1,2) */
+    *psar1_reg  = RIICHS_SAR1_INIT;  /* Sets SARy.(y=0,1,2) */
+    *psar2_reg  = RIICHS_SAR2_INIT;  /* Sets SARy.(y=0,1,2) */
     *picscr_reg = RIICHS_ICSCR_INIT; /* Sets ICSCR register. */
 
     /* Set SARy.FS bit */
@@ -3576,10 +3803,12 @@ static void riichs_init_io_register (riichs_info_t * p_riichs_info)
 
     /* Initializes ICSER register. */
     *picser_reg = g_riichs_icser_init[p_riichs_info->ch_no];
+
     uctmp = *picser_reg; /* Reads ICSER. */
 
     /* Initializes ICCSER register. */
     *piccser_reg = RIICHS_ICCSER_TDE_SET | RIICHS_ICCSER_RDE_SET;
+
     uctmp = *piccser_reg; /* Reads ICCSER. */
 } /* End of function riichs_init_io_register() */
 
@@ -3590,97 +3819,99 @@ static void riichs_init_io_register (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_slv_addr_match_int_enable (riichs_info_t * p_riichs_info)
+static void riichs_slv_addr_match_int_enable(riichs_info_t * p_riichs_info)
 {
-    volatile uint32_t uctmp = 0x00000000;
+    volatile uint32_t uctmp           = 0x00000000;
     volatile uint32_t temp_picscr_reg = 0x00000000;
 
     /* Creates the register pointer for the specified RIICHS channel. */
-    volatile uint32_t * const psar0_reg = RIICHS_SAR0_ADR;
-    volatile uint32_t * const psar1_reg = RIICHS_SAR1_ADR;
-    volatile uint32_t * const psar2_reg = RIICHS_SAR2_ADR;
+    volatile uint32_t * const psar0_reg  = RIICHS_SAR0_ADR;
+    volatile uint32_t * const psar1_reg  = RIICHS_SAR1_ADR;
+    volatile uint32_t * const psar2_reg  = RIICHS_SAR2_ADR;
     volatile uint32_t * const picscr_reg = RIICHS_ICSCR_ADR;
+
     temp_picscr_reg = *picscr_reg;
 
-    /* internal reset */
-    riichs_reset_set(p_riichs_info);
+    riichs_reset_set(p_riichs_info); /* internal reset */
 
-    /* Enables slave address match interrupt. */
-    if (1U == p_riichs_info->slave_addr0_format)
+    if (1U == p_riichs_info->slave_addr0_format) /* Enables slave address match interrupt. */
     {
         /* 7bit address format setting */
         *psar0_reg = (uint32_t)p_riichs_info->slave_addr0;
+
         temp_picscr_reg |= RIICHS_ICSCR_SAR0E_SET;
-        (*picscr_reg) = temp_picscr_reg;
+        (*picscr_reg)    = temp_picscr_reg;
     }
     else if (2U == p_riichs_info->slave_addr0_format)
     {
         /* 10bit address format setting */
         *psar0_reg = (uint32_t)p_riichs_info->slave_addr0;
+
         temp_picscr_reg |= RIICHS_ICSCR_SAR0E_SET;
-        (*picscr_reg) = temp_picscr_reg;
+        (*picscr_reg)    = temp_picscr_reg;
     }
-    else
+    else /* Disable slave address0 */
     {
-        /* Disable slave address0 */
+
         temp_picscr_reg &= RIICHS_ICSCR_SAR0E_CLR;
-        (*picscr_reg) = temp_picscr_reg;
+        (*picscr_reg)    = temp_picscr_reg;
     }
 
     if (1U == p_riichs_info->slave_addr1_format)
     {
         /* 7bit address format setting */
         *psar1_reg = (uint32_t)p_riichs_info->slave_addr1;
+
         temp_picscr_reg |= RIICHS_ICSCR_SAR1E_SET;
-        (*picscr_reg) = temp_picscr_reg;
+        (*picscr_reg)    = temp_picscr_reg;
     }
     else if (2U == p_riichs_info->slave_addr1_format)
     {
         /* 10bit address format setting */
         *psar1_reg = (uint32_t)p_riichs_info->slave_addr1;
+
         temp_picscr_reg |= RIICHS_ICSCR_SAR1E_SET;
-        (*picscr_reg) = temp_picscr_reg;
+        (*picscr_reg)    = temp_picscr_reg;
     }
-    else
+    else /* Disable slave address1 */
     {
-        /* Disable slave address1 */
         temp_picscr_reg &= RIICHS_ICSCR_SAR1E_CLR;
-        (*picscr_reg) = temp_picscr_reg;
+        (*picscr_reg)    = temp_picscr_reg;
     }
 
     if (1U == p_riichs_info->slave_addr2_format)
     {
         /* 7bit address format setting */
         *psar2_reg = (uint32_t)p_riichs_info->slave_addr2;
+
         temp_picscr_reg |= RIICHS_ICSCR_SAR2E_SET;
-        (*picscr_reg) = temp_picscr_reg;
+        (*picscr_reg)    = temp_picscr_reg;
     }
     else if (2 == p_riichs_info->slave_addr2_format)
     {
         /* 10bit address format setting */
         *psar2_reg = (uint32_t)p_riichs_info->slave_addr2;
+
         temp_picscr_reg |= RIICHS_ICSCR_SAR2E_SET;
-        (*picscr_reg) = temp_picscr_reg;
+        (*picscr_reg)    = temp_picscr_reg;
     }
-    else
+    else /* Disable slave address2 */
     {
-        /* Disable slave address2 */
         temp_picscr_reg &= RIICHS_ICSCR_SAR2E_CLR;
-        (*picscr_reg) = temp_picscr_reg;
+        (*picscr_reg)    = temp_picscr_reg;
     }
 
-    if (1U == p_riichs_info->gca_enable)
+    if (1U == p_riichs_info->gca_enable) /* General call address setting */
     {
-        /* General call address setting */
         temp_picscr_reg |= RIICHS_ICSCR_GCAE_SET;
-        (*picscr_reg) = temp_picscr_reg;
+        (*picscr_reg)    = temp_picscr_reg;
     }
-    else
+    else /* Disable General call address */
     {
-        /* Disable General call address */
         temp_picscr_reg &= RIICHS_ICSCR_GCAE_CLR;
-        (*picscr_reg) = temp_picscr_reg;
+        (*picscr_reg)    = temp_picscr_reg;
     }
+
     uctmp = *picscr_reg; /* Reads ICSCR. */
 
     /* Clears internal reset. */
@@ -3694,7 +3925,7 @@ static void riichs_slv_addr_match_int_enable (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_int_enable (riichs_info_t * p_riichs_info)
+static void riichs_int_enable(riichs_info_t * p_riichs_info)
 {
     /* Clears the interrupt request register. */
     riichs_clear_ir_flag(p_riichs_info);
@@ -3706,11 +3937,11 @@ static void riichs_int_enable (riichs_info_t * p_riichs_info)
 /***********************************************************************************************************************
  * Function Name: riichs_int_disable
  * Description  : Disable Interrupt Processing.
- *                Disables interrupt. Sets interrupt source priority. Clears interrupt request register.
+ *              : Disables interrupt. Sets interrupt source priority. Clears interrupt request register.
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_int_disable (riichs_info_t * p_riichs_info)
+static void riichs_int_disable(riichs_info_t * p_riichs_info)
 {
     /* Disable interrupts each target MCU.  */
     riichs_mcu_int_disable(p_riichs_info->ch_no);
@@ -3723,13 +3954,13 @@ static void riichs_int_disable (riichs_info_t * p_riichs_info)
 /***********************************************************************************************************************
  * Function Name: riichs_int_icsier_iccsier_setting
  * Description  : Set ICSIER and ICCSIER Register Processing.
- *                Sets an interrupt condition of RIICHS.
- * Arguments    : riichs_info_t *  p_riichs_info     ; IIC Information
- : uint32_t        New_icsier        ; New ICSIER value
- : uint32_t        New_iccsier       ; New ICCSIER value
+ *              : Sets an interrupt condition of RIICHS.
+ * Arguments    : riichs_info_t * p_riichs_info     ; IIC Information
+ *              : uint32_t        New_icsier        ; New ICSIER value
+ *              : uint32_t        New_iccsier       ; New ICCSIER value
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_int_icsier_iccsier_setting (riichs_info_t * p_riichs_info, uint32_t New_icsier,uint32_t New_iccsier)
+static void riichs_int_icsier_iccsier_setting(riichs_info_t * p_riichs_info, uint32_t New_icsier, uint32_t New_iccsier)
 {
     /* Setting TMOIE bit of interrupt enable register. */
     riichs_mcu_int_icsier_iccsier_setting (p_riichs_info->ch_no, New_icsier, New_iccsier);
@@ -3738,17 +3969,19 @@ static void riichs_int_icsier_iccsier_setting (riichs_info_t * p_riichs_info, ui
 
 /***********************************************************************************************************************
  * Function Name: riichs_set_frequency
- * Description  : Set IIC Frequency Processing. Sets ICRCCR, ICFBR and ICHBR registers.
+ * Description  : Set IIC Frequency Processing.
+ *                Sets ICRCCR, ICFBR and ICHBR registers.
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_set_frequency (riichs_info_t * p_riichs_info)
+static void riichs_set_frequency(riichs_info_t * p_riichs_info)
 {
     riichs_bps_calc(p_riichs_info, g_riichs_bps[p_riichs_info->ch_no], true); /* Set BPS */
 
     if (1000 < g_riichs_bps[p_riichs_info->ch_no])
     {
-        riichs_bps_calc(p_riichs_info, p_riichs_info->fs_speed_kbps, false); /* set bit rate before Hs-mode communication */
+        /* Set bit rate before Hs-mode communication */
+        riichs_bps_calc(p_riichs_info, p_riichs_info->fs_speed_kbps, false);
     }
 
 } /* End of function riichs_set_frequency() */
@@ -3757,14 +3990,14 @@ static void riichs_set_frequency (riichs_info_t * p_riichs_info)
  * Function Name: riichs_check_bus_busy
  * Description  : Check Bus Busy Processing.
  *                When the bits of the RIICHS registers are the following set values, the bus is released.
- *              :   ICBSR.BFREE = 1 ; The I2C bus is released (bus free state).
- *              :   ICIMR.SCLI = 1 ; SCLn pin input is at a high level.
- *              :   ICIMR.SDAI = 1 ; SDAn pin input is at a high level.
+ *              :   ICBSR.BFREE = 1  ; The I2C bus is released (bus free state).
+ *              :   ICIMR.SCLI  = 1  ; SCLn pin input is at a high level.
+ *              :   ICIMR.SDAI  = 1  ; SDAn pin input is at a high level.
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : RIICHS_TRUE                      ; Bus ready
  *              : RIICHS_FALSE                     ; Bus busy
  **********************************************************************************************************************/
-static bool riichs_check_bus_busy (riichs_info_t * p_riichs_info)
+static bool riichs_check_bus_busy(riichs_info_t * p_riichs_info)
 {
     volatile uint32_t cnt = 0x00000000;
 
@@ -3777,12 +4010,13 @@ static bool riichs_check_bus_busy (riichs_info_t * p_riichs_info)
     for (cnt = p_riichs_info->bus_check_counter; cnt > 0x00000000; cnt--)
     {
         /* Bus busy? */
-        if ((RIICHS_MSK_BFREE == ((*picbsr_reg) & RIICHS_MSK_BFREE)) && /* ICBSR.BFREE = 1 */
-        (RIICHS_MSK_SCLSDA == ((*picimr_reg) & RIICHS_MSK_SCLSDA))) /* ICIMR.SCLI = 1, ICIMR.SDAI = 1 */
+        if ((RIICHS_MSK_BFREE  == ((*picbsr_reg) & RIICHS_MSK_BFREE)) && /* ICBSR.BFREE = 1 */
+            (RIICHS_MSK_SCLSDA == ((*picimr_reg) & RIICHS_MSK_SCLSDA)))  /* ICIMR.SCLI = 1, ICIMR.SDAI = 1 */
         {
             return RIICHS_TRUE; /* Bus ready */
         }
     }
+
     return RIICHS_FALSE; /* Bus busy */
 } /* End of function riichs_check_bus_busy() */
 
@@ -3793,25 +4027,27 @@ static bool riichs_check_bus_busy (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_start_cond_generate (riichs_info_t * p_riichs_info)
+static void riichs_start_cond_generate(riichs_info_t * p_riichs_info)
 {
-    volatile uint32_t uctmp = 0x00000000;
+    volatile uint32_t uctmp           = 0x00000000;
     volatile uint32_t temp_picsr2_reg = 0x00000000;
 
     /* Creates the register pointer for the specified RIICHS channel. */
     volatile uint32_t * const picsr2_reg = RIICHS_ICSR2_ADR;
     volatile uint32_t * const piccgr_reg = RIICHS_ICCGR_ADR;
+
     temp_picsr2_reg = *picsr2_reg;
 
     /* Clears start condition detection flag. */
     if (0x00000000 != (((*picsr2_reg) & RIICHS_ICSR2_START_SET)))
     {
         temp_picsr2_reg &= RIICHS_ICSR2_START_CLR;
-        (*picsr2_reg) = temp_picsr2_reg;
+        (*picsr2_reg)    = temp_picsr2_reg;
     }
 
     /* Generates a start condition. */
     (*piccgr_reg) = RIICHS_ICCGR_ST; /* Sets ICCGR.ST bit. */
+
     uctmp = *piccgr_reg; /* Reads ICCGR. */
 } /* End of function riichs_start_cond_generate() */
 
@@ -3822,40 +4058,42 @@ static void riichs_start_cond_generate (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void  riichs_re_start_cond_generate (riichs_info_t * p_riichs_info)
+static void  riichs_re_start_cond_generate(riichs_info_t * p_riichs_info)
 {
     volatile uint32_t uctmp = 0x00000000;
+
     volatile uint32_t temp_picsr2_reg = 0x00000000;
 
     /* Creates the register pointer for the specified RIICHS channel. */
     volatile uint32_t * const picsr2_reg = RIICHS_ICSR2_ADR;
     volatile uint32_t * const piccgr_reg = RIICHS_ICCGR_ADR;
+
     temp_picsr2_reg = *picsr2_reg;
 
     /* Clears start condition detection flag. */
     if (0x00000000 != (((*picsr2_reg) & RIICHS_ICSR2_START_SET)))
     {
         temp_picsr2_reg &= RIICHS_ICSR2_START_CLR;
-        (*picsr2_reg) = temp_picsr2_reg;
+        (*picsr2_reg)    = temp_picsr2_reg;
     }
 
     /* Generates a restart condition. */
     (*piccgr_reg) = RIICHS_ICCGR_RS; /* Sets ICCGR.RS bit. */
+
     uctmp = *piccgr_reg; /* Reads ICCGR. */
-
-
 } /* End of function riichs_re_start_cond_generate() */
 
 /***********************************************************************************************************************
  * Function Name: riichs_stop_cond_generate
  * Description  : Generate Stop Condition Processing.
- *                Clears ICSR2.STOP bit and sets ICCGR.SP bit.
+ *              : Clears ICSR2.STOP bit and sets ICCGR.SP bit.
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_stop_cond_generate (riichs_info_t * p_riichs_info)
+static void riichs_stop_cond_generate(riichs_info_t * p_riichs_info)
 {
     volatile uint32_t uctmp = 0x00000000;
+
     volatile uint32_t temp_picsr2_reg = 0x00000000;
 
     /* Creates the register pointer for the specified RIICHS channel. */
@@ -3867,23 +4105,24 @@ static void riichs_stop_cond_generate (riichs_info_t * p_riichs_info)
     if (0x00000000 != (((*picsr2_reg) & RIICHS_ICSR2_STOP_SET)))
     {
         temp_picsr2_reg &= RIICHS_ICSR2_STOP_CLR;
-        (*picsr2_reg) = temp_picsr2_reg;
+        (*picsr2_reg)    = temp_picsr2_reg;
     }
 
     /* Generates a stop condition. */
     (*piccgr_reg) = RIICHS_ICCGR_SP; /* Sets ICCGR.SP bit. */
+
     uctmp = *piccgr_reg; /* Reads ICCGR. */
 } /* End of function riichs_stop_cond_generate() */
 
 /***********************************************************************************************************************
  * Function Name: riichs_set_sending_data
  * Description  : Transmit Data Processing.
- *                Sets transmission data to ICDRT register.
+ *              : Sets transmission data to ICDRT register.
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
- *              : uint8_t *p_data                ; Transmitted data buffer pointer
+ *              : uint8_t *p_data                    ; Transmitted data buffer pointer
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_set_sending_data (riichs_info_t * p_riichs_info, uint8_t *p_data)
+static void riichs_set_sending_data(riichs_info_t * p_riichs_info, uint8_t *p_data)
 {
     volatile uint32_t uctmp = 0x00000000;
 
@@ -3904,6 +4143,7 @@ static void riichs_set_sending_data (riichs_info_t * p_riichs_info, uint8_t *p_d
 
     /* Sets the transmitting data. */
     *picdr_reg = *p_data; /* Writes data to RIICHS in order to transmit. */
+
     uctmp = *picdr_reg; /* Reads ICDR. */
 } /* End of function riichs_set_sending_data() */
 
@@ -3914,7 +4154,7 @@ static void riichs_set_sending_data (riichs_info_t * p_riichs_info, uint8_t *p_d
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : Returns received data.
  **********************************************************************************************************************/
-static uint32_t riichs_get_receiving_data (riichs_info_t * p_riichs_info)
+static uint32_t riichs_get_receiving_data(riichs_info_t * p_riichs_info)
 {
     /* Creates the register pointer for the specified RIICHS channel. */
     volatile uint32_t * const picdr_reg = RIICHS_ICDR_ADR;
@@ -3930,9 +4170,9 @@ static uint32_t riichs_get_receiving_data (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_receive_wait_setting (riichs_info_t * p_riichs_info)
+static void riichs_receive_wait_setting(riichs_info_t * p_riichs_info)
 {
-    volatile uint32_t uctmp = 0x00000000;
+    volatile uint32_t uctmp            = 0x00000000;
     volatile uint32_t temp_piccscr_reg = 0x00000000;
 
     /* Creates the register pointer for the specified RIICHS channel. */
@@ -3941,7 +4181,8 @@ static void riichs_receive_wait_setting (riichs_info_t * p_riichs_info)
 
     /* Sets ICCSCR.WAIT bit. */
     temp_piccscr_reg |= RIICHS_ICCSCR_WAITRE_SET;
-    (*piccscr_reg) = temp_piccscr_reg;
+    (*piccscr_reg)    = temp_piccscr_reg;
+
     uctmp = *piccscr_reg; /* Reads ICCSCR. */
 } /* End of function riichs_receive_wait_setting() */
 
@@ -3952,27 +4193,34 @@ static void riichs_receive_wait_setting (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_receive_pre_end_setting (riichs_info_t * p_riichs_info)
+static void riichs_receive_pre_end_setting(riichs_info_t * p_riichs_info)
 {
     volatile uint32_t uctmp = 0x00000000;
+
     volatile uint32_t temp_picackr_reg = 0x00000000;
     volatile uint32_t temp_piccscr_reg = 0x00000000;
 
     /* Creates the register pointer for the specified RIICHS channel. */
     volatile uint32_t * const piccscr_reg = RIICHS_ICCSCR_ADR;
     volatile uint32_t * const picackr_reg = RIICHS_ICACKR_ADR;
+
     temp_picackr_reg = *picackr_reg;
     temp_piccscr_reg = *piccscr_reg;
 
     /* Sets ICCSCR.WAITAE bit.*/
     temp_piccscr_reg |= RIICHS_ICCSCR_WAITAE_SET;
-    (*piccscr_reg) = temp_piccscr_reg;
+    (*piccscr_reg)    = temp_piccscr_reg;
 
     /* Sets ICACKR.ACKBT bit. */
     temp_picackr_reg |= (RIICHS_ICACKR_ACKWP_SET | RIICHS_ICACKR_ACKBT_SET);
-    (*picackr_reg) = temp_picackr_reg; /* Modification of the ACKBT bit is enabled.A 1 is sent as the acknowledge bit (NACK transmission). */
-    temp_picackr_reg &= RIICHS_ICACKR_ACKWP_CLR; /* Modification of the ACKBT bit is disabled. */
+
+    /* Modification of the ACKBT bit is enabled.A 1 is sent as the acknowledge bit (NACK transmission). */
     (*picackr_reg) = temp_picackr_reg;
+
+    /* Modification of the ACKBT bit is disabled. */
+    temp_picackr_reg &= RIICHS_ICACKR_ACKWP_CLR;
+    (*picackr_reg)    = temp_picackr_reg;
+
     uctmp = *piccscr_reg; /* Reads ICCSCR. */
     uctmp = *picackr_reg; /* Reads ICACKR. */
 } /* End of function riichs_receive_pre_end_setting() */
@@ -3984,26 +4232,32 @@ static void riichs_receive_pre_end_setting (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_receive_end_setting (riichs_info_t * p_riichs_info)
+static void riichs_receive_end_setting(riichs_info_t * p_riichs_info)
 {
     volatile uint32_t uctmp = 0x00000000;
+
     volatile uint32_t temp_picackr_reg = 0x00000000;
     volatile uint32_t temp_piccscr_reg = 0x00000000;
 
     /* Creates the register pointer for the specified RIICHS channel. */
     volatile uint32_t * const piccscr_reg = RIICHS_ICCSCR_ADR;
     volatile uint32_t * const picackr_reg = RIICHS_ICACKR_ADR;
+
     temp_picackr_reg = *picackr_reg;
 
     /* Sets ICACKR.ACKBT bit. */
-    temp_picackr_reg |= (RIICHS_ICACKR_ACKWP_SET | RIICHS_ICACKR_ACKBT_SET); /* Modification of the ACKBT bit is enabled. */
-    (*picackr_reg) = temp_picackr_reg;
-    temp_picackr_reg &= RIICHS_ICACKR_ACKWP_CLR; /* Modification of the ACKBT bit is disabled. */
-    (*picackr_reg) = temp_picackr_reg;
+    /* Modification of the ACKBT bit is enabled. */
+    temp_picackr_reg |= (RIICHS_ICACKR_ACKWP_SET | RIICHS_ICACKR_ACKBT_SET);
+    (*picackr_reg)    = temp_picackr_reg;
+
+    /* Modification of the ACKBT bit is disabled. */
+    temp_picackr_reg &= RIICHS_ICACKR_ACKWP_CLR;
+    (*picackr_reg)    = temp_picackr_reg;
 
     /* Clears ICCSCR.WAIT bit. */
     temp_piccscr_reg &= RIICHS_ICCSCR_WAITRE_CLR;
-    (*piccscr_reg) = temp_piccscr_reg;
+    (*piccscr_reg)    = temp_piccscr_reg;
+
     uctmp = *piccscr_reg; /* Reads ICCSCR. */
     uctmp = *picackr_reg; /* Reads ICACKR. */
 } /* End of function riichs_receive_end_setting() */
@@ -4015,9 +4269,10 @@ static void riichs_receive_end_setting (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info     ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_reset_clear (riichs_info_t * p_riichs_info)
+static void riichs_reset_clear(riichs_info_t * p_riichs_info)
 {
     volatile uint32_t uctmp = 0x00000000;
+
     volatile uint32_t temp_picrcr_reg = 0x00000000;
 
     /* Creates the register pointer for the specified RIICHS channel. */
@@ -4026,9 +4281,11 @@ static void riichs_reset_clear (riichs_info_t * p_riichs_info)
 
     /* Enables RIICHS. */
     temp_picrcr_reg &= RIICHS_ICRCR_ISRST_CLR; /* Clears ICRCR.ISRST bit. */
-    (*picrcr_reg) = temp_picrcr_reg;
+    (*picrcr_reg)    = temp_picrcr_reg;
+
     temp_picrcr_reg &= RIICHS_ICRCR_ENABLE; /* Clears ICRCR.MRST bit. */
-    (*picrcr_reg) = temp_picrcr_reg;
+    (*picrcr_reg)    = temp_picrcr_reg;
+
     uctmp = *picrcr_reg; /* Reads ICRCR. */
 } /* End of function riichs_reset_clear() */
 
@@ -4038,7 +4295,7 @@ static void riichs_reset_clear (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info     ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_set_iccrice (riichs_info_t * p_riichs_info)
+static void riichs_set_iccrice(riichs_info_t * p_riichs_info)
 {
     volatile uint32_t uctmp = 0x00000000;
 
@@ -4046,7 +4303,8 @@ static void riichs_set_iccrice (riichs_info_t * p_riichs_info)
     volatile uint32_t * const piccr_reg = RIICHS_ICCR_ADR;
 
     (*piccr_reg) = RIICHS_ICCR_ICE_SET; /* Set the ICCR.ICE bit to 1. */
-    uctmp = *piccr_reg; /* Reads ICCR. */
+
+    uctmp = *piccr_reg;         /* Reads ICCR. */
 } /* End of function riichs_set_iccrice() */
 
 /***********************************************************************************************************************
@@ -4055,9 +4313,10 @@ static void riichs_set_iccrice (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info     ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_set_icbftr (riichs_info_t * p_riichs_info)
+static void riichs_set_icbftr(riichs_info_t * p_riichs_info)
 {
     volatile uint32_t uctmp = 0x00000000;
+
     uint32_t temp_bus_free_time = p_riichs_info->bus_free_time;
 
     /* Creates the register pointer for the specified RIICHS channel. */
@@ -4065,7 +4324,8 @@ static void riichs_set_icbftr (riichs_info_t * p_riichs_info)
 
     /* Set BUS free time. */
     (*picbftr_reg) = temp_bus_free_time; /* Set ICBFTR. */
-    uctmp = *picbftr_reg; /* Reads ICBFTR. */
+
+    uctmp = *picbftr_reg;      /* Reads ICBFTR. */
 } /* End of function riichs_set_icbftr() */
 
 /***********************************************************************************************************************
@@ -4075,7 +4335,7 @@ static void riichs_set_icbftr (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_reset_set (riichs_info_t * p_riichs_info)
+static void riichs_reset_set(riichs_info_t * p_riichs_info)
 {
     volatile uint32_t uctmp = 0x00000000;
 
@@ -4084,6 +4344,7 @@ static void riichs_reset_set (riichs_info_t * p_riichs_info)
 
     /* Resets RIICHS registers. */
     (*picrcr_reg) = RIICHS_ICRCR_ISRST_SET; /* Sets ICRCR.ISRST bit. */
+
     uctmp = *picrcr_reg; /* Reads ICRCR. */
 } /* End of function riichs_reset_set() */
 
@@ -4094,28 +4355,30 @@ static void riichs_reset_set (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_all_reset (riichs_info_t * p_riichs_info)
+static void riichs_all_reset(riichs_info_t * p_riichs_info)
 {
-    volatile uint32_t uctmp = 0x00000000;
-    volatile uint32_t temp_piccr_reg = 0x00000000;
+    volatile uint32_t uctmp           = 0x00000000;
+    volatile uint32_t temp_piccr_reg  = 0x00000000;
     volatile uint32_t temp_picrcr_reg = 0x00000000;
 
     /* Creates the register pointer for the specified RIICHS channel. */
-    volatile uint32_t * const piccr_reg = RIICHS_ICCR_ADR;
+    volatile uint32_t * const piccr_reg  = RIICHS_ICCR_ADR;
     volatile uint32_t * const picrcr_reg = RIICHS_ICRCR_ADR;
-    temp_piccr_reg = *piccr_reg;
+
+    temp_piccr_reg  = *piccr_reg;
     temp_picrcr_reg = *picrcr_reg;
 
     /* Resets RIICHS registers. */
-    temp_piccr_reg &= RIICHS_ICCR_ICE_CLR; /* Clear ICCR.ICE bit. */
-    (*piccr_reg) = temp_piccr_reg;
+    temp_piccr_reg  &= RIICHS_ICCR_ICE_CLR; /* Clear ICCR.ICE bit. */
+    (*piccr_reg)     = temp_piccr_reg;
     temp_picrcr_reg |= RIICHS_ICRCR_RIICHS_RESET; /* Sets ICRCR.MRST bit to 1. */
-    (*picrcr_reg) = temp_picrcr_reg;
+    (*picrcr_reg)    = temp_picrcr_reg;
 
     /* Waiting for reset completion ICRCR.MRST bit = 0? */
     while (RIICHS_ICRCR_INIT != ((*picrcr_reg) & RIICHS_ICRCR_RIICHS_RESET))
     {
         /* Do Nothing */
+        R_BSP_NOP();
     }
 
     uctmp = *picrcr_reg; /* Reads ICRCR. */
@@ -4128,52 +4391,61 @@ static void riichs_all_reset (riichs_info_t * p_riichs_info)
  * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
  * Return Value : None
  **********************************************************************************************************************/
-static void riichs_clear_ir_flag (riichs_info_t * p_riichs_info)
+static void riichs_clear_ir_flag(riichs_info_t * p_riichs_info)
 {
-    uint8_t internal_flag = 0x00; /* Determines whether reinitialization is necessary. */
+    uint8_t internal_flag = 0x00; /* Determines whether re-initialization is necessary. */
+
     volatile uint32_t uctmp = 0x00000000;
 
     /* Creates the register pointer for the specified RIICHS channel. */
 
-    volatile uint32_t * const picrcr_reg = RIICHS_ICRCR_ADR;
-    volatile uint32_t * const picsier_reg = RIICHS_ICSIER_ADR;
+    volatile uint32_t * const picrcr_reg   = RIICHS_ICRCR_ADR;
+    volatile uint32_t * const picsier_reg  = RIICHS_ICSIER_ADR;
     volatile uint32_t * const piccsier_reg = RIICHS_ICCSIER_ADR;
+
     /* Checks IR flag. */
     /* If IR flag is set, clears IR flag. */
     if ((RIICHS_IR_SET == riichs_mcu_check_ir_txi(p_riichs_info->ch_no))
-            || (RIICHS_IR_SET == riichs_mcu_check_ir_rxi(p_riichs_info->ch_no)))
+    ||  (RIICHS_IR_SET == riichs_mcu_check_ir_rxi(p_riichs_info->ch_no)))
     {
         /* Sets return value. */
         internal_flag = 0x01;
+
         /* sets ICRCR.MRST bit. */
         (*picrcr_reg) = RIICHS_ICRCR_RIICHS_RESET;
+
         /* WAIT_LOOP */
         while (RIICHS_ICRCR_RIICHS_RESET != ((*picrcr_reg) & RIICHS_ICRCR_RIICHS_RESET))
         {
             /* Do Nothing */
+            R_BSP_NOP();
         }
     }
 
     /* Initializes ICSIER register. */
     *picsier_reg = RIICHS_ICSIER_INIT;
+
     /* WAIT_LOOP */
     while (RIICHS_ICSIER_INIT != (*picsier_reg))
     {
         /* Do Nothing */
+        R_BSP_NOP();
     }
 
     /* Initializes ICCSIER register. */
     *piccsier_reg = RIICHS_ICCSIER_INIT;
+
     /* WAIT_LOOP */
     while (RIICHS_ICCSIER_INIT != (*piccsier_reg))
     {
         /* Do Nothing */
+        R_BSP_NOP();
     }
 
     riichs_mcu_clear_ir_rxi(p_riichs_info->ch_no); /* Clears RXI interrupt request register. */
     riichs_mcu_clear_ir_txi(p_riichs_info->ch_no); /* Clears TXI interrupt request register. */
 
-    /* Checks the need of the reinitialization. */
+    /* Checks the need of the re-initialization. */
     if (0x01 == internal_flag)
     {
         internal_flag = 0x00;
@@ -4183,36 +4455,38 @@ static void riichs_clear_ir_flag (riichs_info_t * p_riichs_info)
         riichs_init_io_register(p_riichs_info);
         riichs_set_iccrice (p_riichs_info);
     }
-}
- /* End of function riichs_clear_ir_flag() */
+} /* End of function riichs_clear_ir_flag() */
 
 /***********************************************************************************************************************
  * Function Name: riichs_bps_calc
  * Description  : Calculation for ICBRH and ICBRL registers value
  *              :  and CKS bits value from setting bps of the argument.
  *              :
- * Arguments    : riichs_info_t * p_riichs_info      ; IIC Information
- *              : uint16_t kbps                  ; bit rate(kHz)
- *              : bool first_bps_set_flag         ; first bps set flag
- * Return Value : RIICHS_SUCCESS                   ; Successful operation, communication state
- *              : RIICHS_ERR_OTHER                 ; Other error
+ * Arguments    : riichs_info_t * p_riichs_info         ; IIC Information
+ *              : uint16_t        kbps                  ; bit rate(kHz)
+ *              : bool            first_bps_set_flag    ; first bps set flag
+ * Return Value : RIICHS_SUCCESS      ; Successful operation, communication state
+ *              : RIICHS_ERR_OTHER    ; Other error
  **********************************************************************************************************************/
-static riichs_return_t riichs_bps_calc (riichs_info_t * p_riichs_info, uint16_t kbps, bool first_bps_set_flag)
+static riichs_return_t riichs_bps_calc(riichs_info_t * p_riichs_info, uint16_t kbps, bool first_bps_set_flag)
 {
-    volatile uint32_t uctmp = 0x00000000;
-    volatile uint32_t temp = 0x00000000;
-    uint32_t temp_replace = 0x00000000;
-    volatile uint32_t nf = 0x00000000;
-    uint32_t nf_replace = 0x00000000;
     volatile uint32_t * const picrccr_reg = RIICHS_ICRCCR_ADR;
-    volatile uint32_t * const picfbr_reg = RIICHS_ICFBR_ADR;
-    volatile uint32_t * const pichbr_reg = RIICHS_ICHBR_ADR;
-    volatile uint32_t * const picicr_reg = RIICHS_ICICR_ADR;
+    volatile uint32_t * const picfbr_reg  = RIICHS_ICFBR_ADR;
+    volatile uint32_t * const pichbr_reg  = RIICHS_ICHBR_ADR;
+    volatile uint32_t * const picicr_reg  = RIICHS_ICICR_ADR;
+
+    volatile uint32_t uctmp = 0x00000000;
+    volatile uint32_t temp  = 0x00000000;
+    volatile uint32_t nf    = 0x00000000;
+
+    uint32_t temp_replace = 0x00000000;
+    uint32_t nf_replace   = 0x00000000;
 
     const uint8_t d_cks[RIICHS_MAX_DIV] =
     { 1, 2, 4, 8, 16, 32, 64, 128 }; /* divider array of RIICHS clock  */
     double pclk_val;
 
+    /* Convert kbps to bps */
     volatile double bps = (double) (kbps * 1000);
     volatile double L_time; /* H Width period */
     volatile double H_time; /* L Width period */
@@ -4226,12 +4500,13 @@ static riichs_return_t riichs_bps_calc (riichs_info_t * p_riichs_info, uint16_t 
 
     double scl_up_time;
     double scl_down_time;
+
     volatile uint8_t cnt;
 
-    /* before Hs-mode communication BPS check */
-    if ( (false == first_bps_set_flag) && (kbps > RIICHS_FASTPLUS_SPPED_MAX) )
-    { /* Cannot set bps */
-        return RIICHS_ERR_OTHER;
+    /* Before Hs-mode communication BPS check */
+    if ((false == first_bps_set_flag) && (kbps > RIICHS_FASTPLUS_SPPED_MAX))
+    {
+        return RIICHS_ERR_OTHER; /* Cannot set bps */
     }
 
     pclk_val = riichs_mcu_check_freq(); /* Store pclk frequency */
@@ -4239,13 +4514,13 @@ static riichs_return_t riichs_bps_calc (riichs_info_t * p_riichs_info, uint16_t 
     if (first_bps_set_flag)
     {
         /* Set Rise up time and down time */
-        scl_up_time = p_riichs_info->scl_up_time;
+        scl_up_time   = p_riichs_info->scl_up_time;
         scl_down_time = p_riichs_info->scl_down_time;
     }
     else
     {
         /* set Rise up time and down time before Hs-mode communication */
-        scl_up_time = p_riichs_info->fs_scl_up_time;
+        scl_up_time   = p_riichs_info->fs_scl_up_time;
         scl_down_time = p_riichs_info->fs_scl_down_time;
     }
 
@@ -4255,20 +4530,20 @@ static riichs_return_t riichs_bps_calc (riichs_info_t * p_riichs_info, uint16_t 
     L_time = (1 / (2 * bps)); /* Half period of frequency */
     H_time = L_time;
 
-    if (kbps > RIICHS_FASTPLUS_SPPED_MAX)
     /* Check I2C mode of Speed */
+    if (kbps > RIICHS_FASTPLUS_SPPED_MAX)
     {
-        L_time = (2 / (3 * bps)); /* period of frequency high:low = 1:2 */
-        H_time = (1 / (3 * bps));
+        L_time = (2 / (3*bps)); /* period of frequency high:low = 1:2 */
+        H_time = (1 / (3*bps));
+
         /* 1000kbps over */
-        /* Check L width */
-        if (L_time <= (160E-9 + scl_down_time))
+        if (L_time <= (160E-9 + scl_down_time)) /* Check L width */
         {
             /* Wnen L width less than 0.5us */
             /* Subtract Rise up and down time for SCL from H/L width */
-            L_time = 160E-9;
+            L_time  = 160E-9;
             bps_tmp = bps;
-            H_time = (((1 / bps_tmp) - L_time) - scl_up_time) - scl_down_time;
+            H_time  = (((1 / bps_tmp) - L_time) - scl_up_time) - scl_down_time;
         }
         else
         {
@@ -4289,9 +4564,9 @@ static riichs_return_t riichs_bps_calc (riichs_info_t * p_riichs_info, uint16_t 
         {
             /* Wnen L width less than 0.5us */
             /* Subtract Rise up and down time for SCL from H/L width */
-            L_time = 0.5E-6;
+            L_time  = 0.5E-6;
             bps_tmp = bps;
-            H_time = (((1 / bps_tmp) - L_time) - scl_up_time) - scl_down_time;
+            H_time  = (((1 / bps_tmp) - L_time) - scl_up_time) - scl_down_time;
         }
         else
         {
@@ -4312,9 +4587,9 @@ static riichs_return_t riichs_bps_calc (riichs_info_t * p_riichs_info, uint16_t 
         {
             /* Wnen L width less than 1.3us */
             /* Subtract Rise up and down time for SCL from H/L width */
-            L_time = 1.3E-6;
+            L_time  = 1.3E-6;
             bps_tmp = bps;
-            H_time = (((1 / bps_tmp) - L_time) - scl_up_time) - scl_down_time;
+            H_time  = (((1 / bps_tmp) - L_time) - scl_up_time) - scl_down_time;
         }
         else
         {
@@ -4342,7 +4617,7 @@ static riichs_return_t riichs_bps_calc (riichs_info_t * p_riichs_info, uint16_t 
     {
         /* Calculating until calc_val is less than 256 */
         /* WAIT_LOOP */
-        for (calc_val = 0xFFFF, cnt = 0; RIICHS_ICBR_MAX < (calc_val * (temp_L_time/temp_H_time)); cnt++)
+        for (calc_val = 0xFFFF, cnt = 0; RIICHS_ICBR_MAX < (calc_val * (temp_L_time / temp_H_time)); cnt++)
         {
             calc_val = H_time; /* Set H width time */
 
@@ -4354,8 +4629,8 @@ static riichs_return_t riichs_bps_calc (riichs_info_t * p_riichs_info, uint16_t 
             }
 
             calc_val_tmp = calc_val;
-            calc_val = (calc_val_tmp / (d_cks[cnt] / pclk_val));
-            calc_val = calc_val + 0.5; /* round off */
+            calc_val     = (calc_val_tmp / (d_cks[cnt] / pclk_val));
+            calc_val     = calc_val + 0.5; /* round off */
         }
 
         /* store ICRCCR value to avoid CKS bit. */
@@ -4364,15 +4639,15 @@ static riichs_return_t riichs_bps_calc (riichs_info_t * p_riichs_info, uint16_t 
     else
     {
         /* Set H width to calc_val */
-        cnt = ((*picrccr_reg) & 0x00000007) + 1;
-        calc_val = H_time; /* Set H width time */
+        cnt          = ((*picrccr_reg) & 0x00000007) + 1;
+        calc_val     = H_time; /* Set H width time */
         calc_val_tmp = calc_val;
-        calc_val = (calc_val_tmp / (d_cks[cnt - 1] / pclk_val));
+        calc_val     = (calc_val_tmp / (d_cks[cnt - 1] / pclk_val));
 
-        if (RIICHS_ICBR_MAX < (calc_val * (temp_L_time/temp_H_time)))
+        if (RIICHS_ICBR_MAX < (calc_val * (temp_L_time / temp_H_time)))
         {
             temp_replace |= 0x80000000; /* set ICFBR.DSBRPO */
-            calc_val = calc_val / 2;
+            calc_val      = calc_val / 2;
         }
 
         calc_val = calc_val + 0.5; /* round off */
@@ -4388,16 +4663,16 @@ static riichs_return_t riichs_bps_calc (riichs_info_t * p_riichs_info, uint16_t 
         /* Apply noise filter stage  */
         if (kbps > RIICHS_FASTPLUS_SPPED_MAX)
         {
-            nf_replace = (*picicr_reg & (0x0000000f))/4 + 1;
+            nf_replace = (((*picicr_reg) & (0x0000000f)) / 4) + 1;
         }
         else
         {
-            nf_replace = (*picicr_reg & (0x0000000f)) + 1;
+            nf_replace = ((*picicr_reg) & (0x0000000f)) + 1;
         }
     }
     else
     {
-        nf_replace = (*picicr_reg & (0x0000000f))/4 + 1;
+        nf_replace = (((*picicr_reg) & (0x0000000f)) / 4) + 1;
     }
 
     /* Set value to ICHBR register OR ICFBR register HIGH[7:0] */
@@ -4405,22 +4680,25 @@ static riichs_return_t riichs_bps_calc (riichs_info_t * p_riichs_info, uint16_t 
     {
         calc_val = 3;
     }
-    if ((0 < nf_replace) && (((nf_replace + 1) * 2) > calc_val) )
+    if ((0 < nf_replace) && (((nf_replace + 1) * 2) > calc_val))
     {
         calc_val = (nf_replace + 1) * 2;
     }
-    temp_replace |= ((uint32_t)(((uint32_t)(calc_val - 1 - nf_replace)) & 0x000000ff) << 8);
+
+    /* bps value */
+    temp_replace |= ((uint32_t)(((uint32_t)((calc_val - 1) - nf_replace)) & (0x000000ff)) << 8);
 
     /* Set L width to calc_val */
-    calc_val = L_time; /* Set L width */
+    calc_val     = L_time; /* Set L width */
     calc_val_tmp = calc_val;
-    calc_val = (calc_val_tmp / (d_cks[cnt - 1] / pclk_val));
+    calc_val     = (calc_val_tmp / (d_cks[cnt - 1] / pclk_val));
 
     if (0 < (temp_replace & 0x80000000))
     {
         calc_val = calc_val / 2;
     }
 
+    /* Convert calc_val to bps unit */
     calc_val = (uint16_t) (calc_val + 0.5); /* round off */
 
     if (RIICHS_ICBR_MAX < calc_val)
@@ -4439,7 +4717,9 @@ static riichs_return_t riichs_bps_calc (riichs_info_t * p_riichs_info, uint16_t 
     {
         calc_val = (nf_replace + 1) * 2;
     }
-    temp_replace |= ((uint32_t) (((uint32_t) (calc_val - 1 - nf_replace)) & 0x000000ff));
+
+    /* bps value */
+    temp_replace |= ((uint32_t)(((uint32_t)((calc_val - 1) - nf_replace)) & (0x000000ff)));
 
     if (kbps > RIICHS_FASTPLUS_SPPED_MAX)
     {
@@ -4451,6 +4731,7 @@ static riichs_return_t riichs_bps_calc (riichs_info_t * p_riichs_info, uint16_t 
         /* set F/S-Mode Bit rate Register */
         *picfbr_reg = temp_replace;
     }
+
     uctmp = *pichbr_reg; /* dummy read */
     uctmp = *picfbr_reg; /* dummy read */
 
@@ -4468,7 +4749,7 @@ static riichs_return_t riichs_bps_calc (riichs_info_t * p_riichs_info, uint16_t 
  * Arguments    : None
  * Return Value : None
  **********************************************************************************************************************/
-void riichs0_eei_sub (void)
+void riichs0_eei_sub(void)
 {
     riichs_info_t * p_riichs_info;
 
@@ -4477,10 +4758,12 @@ void riichs0_eei_sub (void)
     {
         /* all interrupt disable */
         RIICHS0.ICSIER.BIT.TMOIE = 0U;
+
         /* WAIT_LOOP */
         while (0U != RIICHS0.ICSIER.BIT.TMOIE)
         {
             /* Do Nothing */
+            R_BSP_NOP();
         }
         riichs_api_event[0] = RIICHS_EV_INT_TMO;
     }
@@ -4489,10 +4772,12 @@ void riichs0_eei_sub (void)
     if ((0U != RIICHS0.ICSR2.BIT.AL) && (0U != RIICHS0.ICSIER.BIT.ALIE))
     {
         RIICHS0.ICSIER.BIT.ALIE = 0U;
+
         /* WAIT_LOOP */
         while (0U != RIICHS0.ICSIER.BIT.ALIE)
         {
             /* Do Nothing */
+            R_BSP_NOP();
         }
         riichs_api_event[0] = RIICHS_EV_INT_AL;
         if (RIICHS_MODE_S_READY == riichs_api_info[0].B_Mode)
@@ -4515,20 +4800,24 @@ void riichs0_eei_sub (void)
         RIICHS0.ICSIER.BIT.SPIE = 0U;
 
         RIICHS0.ICCSCR.BIT.WAITAE = 0U; /* Refer to the technical update. */
-        RIICHS0.ICACKR.LONG = (( RIICHS0.ICACKR.LONG & RIICHS_ICACKR_ACKBT_CLR) | RIICHS_ICACKR_ACKWP_SET);
-        RIICHS0.ICACKR.BIT.ACKWP = 0U; /* Refer to the technical update. */
+        RIICHS0.ICACKR.LONG       = ((RIICHS0.ICACKR.LONG & RIICHS_ICACKR_ACKBT_CLR) | RIICHS_ICACKR_ACKWP_SET);
+        RIICHS0.ICACKR.BIT.ACKWP  = 0U; /* Refer to the technical update. */
+
         /* WAIT_LOOP */
         while ((0U != RIICHS0.ICCSCR.BIT.WAITAE) || (0U != RIICHS0.ICACKR.BIT.ACKBT))
         {
             /* Do Nothing */
+            R_BSP_NOP();
         }
 
         /* Clears each status flag. */
         RIICHS0.ICSR2.BIT.STOP = 0U;
+
         /* WAIT_LOOP */
         while (0U != RIICHS0.ICSR2.BIT.STOP)
         {
             /* Do Nothing */
+            R_BSP_NOP();
         }
 
         /* Sets event flag. */
@@ -4546,10 +4835,12 @@ void riichs0_eei_sub (void)
         RIICHS0.ICSIER.BIT.TEIE = 0U;
         RIICHS0.ICCSIER.BIT.TIE = 0U;
         RIICHS0.ICCSIER.BIT.RIE = 0U;
+
         /* WAIT_LOOP */
         while (((0U != RIICHS0.ICSIER.BIT.TEIE) || (0U != RIICHS0.ICCSIER.BIT.TIE)) || (0U != RIICHS0.ICCSIER.BIT.RIE))
         {
             /* Do Nothing */
+            R_BSP_NOP();
         }
 
         if (0U == RIICHS0.ICMMR.BIT.TRS)
@@ -4573,9 +4864,10 @@ void riichs0_eei_sub (void)
         while ((0U != RIICHS0.ICSR2.BIT.START) || (0U != RIICHS0.ICSIER.BIT.STIE))
         {
             /* Do Nothing */
+            R_BSP_NOP();
         }
 
-        if (( RIICHS_STS_IDLE == riichs_api_info[0].B_status) && (1000 < g_riichs_bps[0]) )
+        if ((RIICHS_STS_IDLE == riichs_api_info[0].B_status) && (1000 < g_riichs_bps[0]))
         {
             /* Sets the internal status. */
             riichs_api_status_set(priichs_info_m[0], RIICHS_STS_MASTER_CODE_WAIT);
@@ -4587,25 +4879,22 @@ void riichs0_eei_sub (void)
 
     switch (riichs_api_info[0].N_Mode)
     {
+        /* Master mode data */
         case RIICHS_MODE_M_SEND :
         case RIICHS_MODE_M_RECEIVE :
         case RIICHS_MODE_M_SEND_RECEIVE :
-
-            /* Master mode data */
             p_riichs_info = priichs_info_m[0];
         break;
 
+        /* Slave mode data */
         case RIICHS_MODE_S_READY :
         case RIICHS_MODE_S_SEND :
         case RIICHS_MODE_S_RECEIVE :
-
-            /* Slave mode data */
             p_riichs_info = priichs_info_s[0];
         break;
 
+        /* Internal error */
         default :
-
-            /* Internal error */
             return;
         break;
     }
@@ -4620,7 +4909,7 @@ void riichs0_eei_sub (void)
  * Arguments    : None
  * Return Value : None
  **********************************************************************************************************************/
-void riichs0_txi_sub (void)
+void riichs0_txi_sub(void)
 {
     uint32_t tmp;
 
@@ -4630,6 +4919,7 @@ void riichs0_txi_sub (void)
     /*  - The RX device is in slave mode.                                                          */
     /*  - The RX device is in transmission mode (the R/W bit received is 'R' (slave transmission)) */
     tmp = RIICHS0.ICMMR.LONG;
+
     if ((RIICHS_ICMMR_MST_SET != (tmp & RIICHS_ICMMR_MST)) && (RIICHS_ICMMR_TRS_SET == (tmp & RIICHS_ICMMR_TRS)))
     {
         /* Processing when the addresses match (slave send specified) */
@@ -4664,25 +4954,20 @@ void riichs0_txi_sub (void)
 
                 /* Sets interrupted address sending. */
                 riichs_api_event[0] = RIICHS_EV_INT_ADD;
-
             break;
 
             case RIICHS_STS_SEND_DATA_WAIT :
 
                 /* Sets interrupted data sending. */
                 riichs_api_event[0] = RIICHS_EV_INT_SEND;
-
             break;
 
             default :
-
-                /* Does nothing. */
+                R_BSP_NOP(); /* Does nothing. */
             break;
-
         }
 
         r_riichs_advance(priichs_info_s[0]); /* Calls advance function */
-
     }
 } /* End of function riichs0_txi_sub() */
 
@@ -4693,7 +4978,7 @@ void riichs0_txi_sub (void)
  * Arguments    : None
  * Return Value : None
  **********************************************************************************************************************/
-void riichs0_rxi_sub (void)
+void riichs0_rxi_sub(void)
 {
     riichs_info_t * p_riichs_info;
 
@@ -4717,16 +5002,14 @@ void riichs0_rxi_sub (void)
 
     switch (riichs_api_info[0].N_Mode)
     {
+        /* Master mode data */
         case RIICHS_MODE_M_RECEIVE :
         case RIICHS_MODE_M_SEND_RECEIVE :
-
-            /* Master mode data */
             p_riichs_info = priichs_info_m[0];
         break;
 
+        /* Slave mode data */
         case RIICHS_MODE_S_RECEIVE :
-
-            /* Slave mode data */
             p_riichs_info = priichs_info_s[0];
         break;
 
@@ -4750,14 +5033,16 @@ void riichs0_rxi_sub (void)
  * Arguments    : None
  * Return Value : None
  **********************************************************************************************************************/
-void riichs0_tei_sub (void)
+void riichs0_tei_sub(void)
 {
     /* Clears ICSR2.TEND. */
     RIICHS0.ICSR2.BIT.TEND = 0U;
+
     /* WAIT_LOOP */
     while (0U != RIICHS0.ICSR2.BIT.TEND)
     {
         /* Do Nothing */
+        R_BSP_NOP();
     }
 
     /* Sets event. */
@@ -4765,6 +5050,7 @@ void riichs0_tei_sub (void)
     {
 
         case RIICHS_STS_MASTER_CODE_WAIT :
+
             /* Sets interrupted data sending. */
             riichs_api_status_set(priichs_info_m[0], RIICHS_STS_ST_COND_WAIT);
             riichs_re_start_cond_generate(priichs_info_m[0]);
@@ -4795,4 +5081,4 @@ void riichs0_tei_sub (void)
 
     r_riichs_advance(priichs_info_m[0]); /* Calls advance function */
 } /* End of function riichs0_tei_sub() */
-#endif
+#endif /* RIICHS_CFG_CH0_INCLUDED == 1U */

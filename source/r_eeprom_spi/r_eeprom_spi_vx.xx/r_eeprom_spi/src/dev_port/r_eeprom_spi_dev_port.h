@@ -19,21 +19,22 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014(2022) Renesas Electronics Corporation. All rights reserved.
 *************************************************************************************************/
 /************************************************************************************************
 * File Name    : r_eeprom_spi_dev_port.h
-* Version      : 3.02
+* Version      : 3.10
 * Description  : EEPROM driver dev port header file
 *************************************************************************************************/
 /************************************************************************************************
 * History      : DD.MM.YYYY Version Description
 *              : 28.11.2014 2.30    Revised functions of same as Ver.2.30 of other middleware.
 *              : 30.01.2015 2.31    Added RX71M.
-*              : 29.05.2015 2.32     Added RX231 and RX230.
-*              : 04.04.2019 3.01     Added support for GNUC and ICCRX.
-*                                    Fixed coding style.
-*              : 10.12.2020 3.02     Remodeling the target device to the entire RX family.
+*              : 29.05.2015 2.32    Added RX231 and RX230.
+*              : 04.04.2019 3.01    Added support for GNUC and ICCRX.
+*                                   Fixed coding style.
+*              : 10.12.2020 3.02    Remodeling the target device to the entire RX family.
+*              : 30.06.2022 3.10    Set PORTX as the default port assigned to SS#
 *************************************************************************************************/
 #ifndef __EEPROM_SPI_DEV_PORT_H__
 #define __EEPROM_SPI_DEV_PORT_H__
@@ -157,10 +158,6 @@ Macro definitions
         #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     W
     #elif (('X' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('x' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
         #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     X
-    #elif (('Y' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('y' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
-        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     Y
-    #elif (('Z' == EEPROM_SPI_CS_DEV0_CFG_PORTNO) || ('z' == EEPROM_SPI_CS_DEV0_CFG_PORTNO))
-        #define EEPROM_SPI_CS_DEV0_CFG_PORTNO_SFR     Z
     #endif
 
     #if   ('0' == EEPROM_SPI_CS_DEV0_CFG_BITNO)
@@ -277,10 +274,6 @@ Macro definitions
         #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     W
     #elif (('X' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('x' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
         #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     X
-    #elif (('Y' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('y' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
-        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     Y
-    #elif (('Z' == EEPROM_SPI_CS_DEV1_CFG_PORTNO) || ('z' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
-        #define EEPROM_SPI_CS_DEV1_CFG_PORTNO_SFR     Z
     #endif
 
     #if   ('0' == EEPROM_SPI_CS_DEV1_CFG_BITNO)
@@ -361,6 +354,12 @@ Macro definitions
  #define EEPROM_SPI_PWPR_PFSWE     MPC.PWPR.BIT.PFSWE          /* PFS Register Write Enable (PWPR) */
 #endif  /* #if !defined(EEPROM_SPI_CFG_USE_GPIO_MPC_FIT) */
 
+/* ---- Temporary disable support for code without target device port ---- */
+#if (defined(EEPROM_SPI_CFG_DEV0_INCLUDED) && ('X' == EEPROM_SPI_CS_DEV0_CFG_PORTNO)) \
+    || (defined(EEPROM_SPI_CFG_DEV1_INCLUDED) && ('X' == EEPROM_SPI_CS_DEV1_CFG_PORTNO))
+#define EEPROM_SPI_TEMPORARY_DISABLE_DEV_PORT
+#endif /* #if (defined(EEPROM_SPI_CFG_DEV0_INCLUDED) && ('X' == EEPROM_SPI_CS_DEV0_CFG_PORTNO)) \
+          || (defined(EEPROM_SPI_CFG_DEV1_INCLUDED) && ('X' == EEPROM_SPI_CS_DEV1_CFG_PORTNO)) */
 
 /************************************************************************************************
 Typedef definitions

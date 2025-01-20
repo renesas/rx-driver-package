@@ -28,11 +28,15 @@
 /*******************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 10.06.2020 1.00     First Release
-*              : 10.09.2020 2.20     Revised the processing of the flash_spi_disk_ioctl function. The value of
+*              : 10.09.2020 2.20     Revised the processing of the flash_spi_disk_ioctl
+*                                    function. The value of
 *                                    GET_BLOCK_SIZE is fixed to 16.
 *              : 15.12.2023 2.40     Added support FLASH SPI sector
 *                                    size selectable.
-*                                    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*                                    Fixed to comply with GSCE Coding Standards
+*                                    Rev.6.5.0.
+*              : 30.09.2024 2.60     Changed the comment of API functions to
+*                                    the Doxygen style.
 *******************************************************************************/
 
 /******************************************************************************
@@ -98,13 +102,22 @@ static int8_t flash_spi_start_timer (uint32_t channel, uint32_t msec);
 static int8_t flash_spi_check_timer (uint32_t channel);
 static int8_t flash_spi_end_timer (uint32_t channel);
 
-/******************************************************************************
-* Function Name : flash_spi_disk_initialize
-* Description   : This function initializes the memory medium
-*               :    for file operations
-* Arguments     :  uint8_t  drive        : Physical drive number
-* Return value  : Status of the memory medium
-******************************************************************************/
+
+/**********************************************************************************************************************
+* Function Name: flash_spi_disk_initialize
+*******************************************************************************************************************//**
+* @brief This function initializes the disk drive.
+*
+* @param[in] drive  Specifies the initialize drive number.
+*
+* @retval TFAT_RES_OK  Normal termination.
+*
+* @retval Others       DSTATUS status of the disk after function execution.
+*
+* @details This function does not execute the Serial Flash memory driver initialize. Please implement Serial
+* Flash memory initialize code in user code.
+* @note None
+*/
 DSTATUS flash_spi_disk_initialize(uint8_t drive)
 {
     uint8_t                 flash_status;       // Flash status
@@ -126,16 +139,26 @@ DSTATUS flash_spi_disk_initialize(uint8_t drive)
     return RES_OK;
 } /* End of function flash_spi_disk_initialize() */
 
-/******************************************************************************
-* Function Name : flash_spi_disk_read
-* Description   : This function reads data from the specified location
-*               :    of the memory medium
-* Arguments     : uint8_t drive          : Physical drive number
-*               : uint8_t* buffer        : Pointer to the read data buffer
-*               : uint32_t sector_number : uint32_t SectorNumber
-*               : uint32_t sector_count  : Number of sectors to read
-* Return value  : Result of function execution
-******************************************************************************/
+
+/**********************************************************************************************************************
+* Function Name: flash_spi_disk_read
+*******************************************************************************************************************//**
+* @brief This function reads the data from disk.
+*
+* @param[in]  drive  Specifies the physical drive number.
+*
+* @param[out] buffer Pointer to the read buffer to store the read data. A buffer of the size equal to the
+* number of bytes to be read is required.
+*
+* @param[in]  sector_number  Specifies the start sector number in logical block address (LBA).
+*
+* @param[in]  sector_count   Specifies number of sectors to read. The value can be 1 to 255.
+*
+* @retval DRESULT  Result of the function execution.
+*
+* @details Read data from Serial Flash memory by block.
+* @note None
+*/
 DRESULT flash_spi_disk_read (
     uint8_t drive,               /* Physical drive number            */
     uint8_t* buffer,             /* Pointer to the read data buffer  */
@@ -365,7 +388,7 @@ void get_sector_written_map(
     else
     {
         p_map->head_sector_info.erase_fat_sector_start = 
-                      (fat_sector_number / FAT_SECTOR_CNT_BY_ERASE_SECTOR) * FAT_SECTOR_CNT_BY_ERASE_SECTOR;
+                    (fat_sector_number / FAT_SECTOR_CNT_BY_ERASE_SECTOR) * FAT_SECTOR_CNT_BY_ERASE_SECTOR;
         p_map->head_sector_info.erase_fat_sector_cnt = FAT_SECTOR_CNT_BY_ERASE_SECTOR;
         p_map->head_sector_info.program_fat_sector_start = fat_sector_number;
         next_erase_sector = p_map->head_sector_info.erase_fat_sector_start +
@@ -418,16 +441,25 @@ void get_sector_written_map(
     return;
 }
 
-/******************************************************************************
-* Function Name : flash_spi_disk_write
-* Description   : This function writes data to a specified location
-*               :    of the memory medium
-* Arguments     : uint8_t drive          : Physical drive number
-*               : const uint8_t* buffer  : Pointer to the write data
-*               : uint32_t sector_number : Sector number to write
-*               : uint32_t sector_count  : Number of sectors to write
-* Return value  : Result of function execution
-******************************************************************************/
+
+/**********************************************************************************************************************
+* Function Name: flash_spi_disk_write
+*******************************************************************************************************************//**
+* @brief This function writes the data to the disk.
+*
+* @param[in] drive  Specifies the physical drive number.
+*
+* @param[in] buffer Pointer to the data to be written.
+*
+* @param[in] sector_number  Specifies the start sector number in logical block address (LBA).
+*
+* @param[in] sector_count   Specifies number of sectors to write. The value can be 1 to 255.
+*
+* @retval DRESULT  Result of the function execution.
+*
+* @details Write the data to the Serial Flash memory by block.
+* @note None
+*/
 DRESULT flash_spi_disk_write (
     uint8_t drive,                /* Physical drive number           */
     const uint8_t* buffer,        /* Pointer to the write data       */
@@ -489,15 +521,30 @@ DRESULT flash_spi_disk_write (
     return RES_OK;
 } /* End of function flash_spi_disk_write() */
 
-/******************************************************************************
-* Function Name : flash_spi_disk_ioctl
-* Description   : This function is used to execute memory operations
-*               :    other than read\write
-* Arguments     : uint8_t drive   : Drive number
-*               : uint8_t command : Control command code
-*               : void*   buffer  : Data transfer buffer
-* Return value  : Result of function execution
-******************************************************************************/
+
+/**********************************************************************************************************************
+* Function Name: flash_spi_disk_ioctl
+*******************************************************************************************************************//**
+* @brief This function controls the drive.
+*
+* @param[in] drive   Specifies the physical drive number.
+*
+* @param[in] command Specifies the command code. The command code will always be 0.
+*
+* @param[in] buffer  Pointer should always be a NULL pointer.
+*
+* @retval DRESULT  Result of the function execution.
+*
+* @details The flash_spi_disk_ioctl function is used only by the f_sync or f_mkfs function amongst all the TFAT
+* FIT functions. Users who do not plan to use f_sync function in their applications can skip the implementation
+* for this particular driver interface function.\n
+* For users who wish to use f_sync function in their applications, the command CTRL_SYNC has to be implemented.\n
+* The command CTRL_SYNC should consist of the code to finish off any pending write process. If the disk i/o module
+* has a write back cache, the dirty sector must be flushed immediately. The f_sync function will perform a save
+* operation to the unsaved data related to the file object passed as argument.\n
+* For other commands, see Section 4.6.4 in the application note for details.
+* @note None
+*/
 DRESULT flash_spi_disk_ioctl (
     uint8_t drive,                /* Drive number             */
     uint8_t command,              /* Control command code     */
@@ -580,13 +627,23 @@ DRESULT flash_spi_disk_ioctl (
     return RES_OK;
 } /* End of function flash_spi_disk_ioctl() */
 
-/******************************************************************************
-* Function Name : flash_spi_disk_status
-* Description   : This function is used to retrieve the current status
-*               :    of the disk
-* Arguments     : uint8_t drive : Physical drive number
-* Return value  : Status of the disk
-******************************************************************************/
+
+/**********************************************************************************************************************
+* Function Name: flash_spi_disk_status
+*******************************************************************************************************************//**
+* @brief This function gets the disk drive status.
+*
+* @param[in] drive  Specifies the physical drive number.
+*
+* @retval TFAT_RES_OK  Normal termination.
+*
+* @retval Others       DSTATUS status of the disk after function execution.
+*
+* @details This function should consist of the code that checks the disk and returns the current disk status.
+* The disk status can have any of the three values, see Section 2.10 in the application note for details.
+* The disk status can be returned by updating the return value with the macros related to disk status.
+* @note None
+*/
 DSTATUS flash_spi_disk_status (
     uint8_t drive                  /* Physical drive number    */
 )
@@ -612,13 +669,16 @@ DSTATUS flash_spi_disk_status (
     return RES_OK;
 } /* End of function flash_spi_disk_status() */
 
-/******************************************************************************
-* Function Name : flash_spi_1ms_interval
-* Description   : This function is used to initialize the 1ms timer
-*               :    of the disk
-* Arguments     : None
-* Return value  : None
-******************************************************************************/
+
+/**********************************************************************************************************************
+* Function Name: flash_spi_1ms_interval
+*******************************************************************************************************************//**
+* @brief This function updates the internal timer per 1 ms.
+*
+* @details This function updates the internal timer of the TFAT driver FIT per 1 ms. This timer is used to check
+* the busy status of the serial flash memory.
+* @note None
+*/
 void flash_spi_1ms_interval (void)
 {
     uint32_t channel = 0;

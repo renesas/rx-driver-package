@@ -14,7 +14,7 @@
 * following link:
 * http://www.renesas.com/disclaimer
 *
-* Copyright (C) 2014-2023 Renesas Electronics Corporation. All rights reserved.
+* Copyright (C) 2014-2024 Renesas Electronics Corporation. All rights reserved.
 ********************************************************************************************************************/
 /*******************************************************************************************************************
 * File Name : r_flash_type3.c
@@ -41,6 +41,7 @@
 *           24.06.2020 4.60    Modified to set the timeout value on global variable in flash_lockbit_write().
 *           10.12.2021 4.81    Modified the if statement for error judgment of flash type 3 in do_cmdlk_recovery().
 *           24.01.2023 5.00    Modified the condition of PFRAM section definition.
+*           15.11.2024 5.21    Added WAIT_LOOP comment.
 ********************************************************************************************************************/
 
 /********************************************************************************************************************
@@ -400,6 +401,7 @@ static flash_err_t flash_lockbit_write(flash_block_address_t block_address, uint
     g_current_parameters.total_count = num_blocks;
 
     /* Loop through each block address and set lockbit */
+    /* WAIT_LOOP */
     for (g_current_parameters.current_count = 0;
          g_current_parameters.current_count < g_current_parameters.total_count;
          g_current_parameters.current_count++)

@@ -81,6 +81,7 @@
 *                               - BSP_CFG_CLKOUT_SOURCE
 *                               - BSP_CFG_CLKOUT_DIV
 *                               - BSP_CFG_HOCO_FREQUENCY
+*         : 27.11.2024 2.04    Changed comment of BSP_CFG_RTC_ENABLE.
 ***********************************************************************************************************************/
 
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
@@ -306,10 +307,11 @@ Configuration Options
  */
 #define BSP_CFG_CLKOUT_SOURCE           (1)
 
-/* The sub-clock oscillation control for using the RTC.
-   When '1' is selected, the registers related to RTC are initialized and the sub-clock oscillator is operated.
+/* Defines whether to use the RTC or not.
+   This setting will initialize the RTC related registers.
    0 = The RTC is not to be used.
    1 = The RTC is to be used.
+   When using RTC FIT or RTC CG, the Smart Configurator sets this to "1". Set it to "1" when using RTC.
 */
 #define BSP_CFG_RTC_ENABLE              (0)
 

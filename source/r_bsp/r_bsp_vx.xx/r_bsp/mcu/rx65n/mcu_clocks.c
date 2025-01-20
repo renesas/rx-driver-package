@@ -59,6 +59,18 @@
 *                               Added the bsp_mcu_clock_reset_bootloader function.
 *                               Renamed local variable for subclock in the clock_source_select function.
 *                               Changed MOFCR setting timing.
+*         : 27.11.2024 3.03     The following changes have been made to apply the Technical Update Information
+*                               (TN-RX*-A0280A):
+*                               - The RCR4.RCKSEL bit setting process has been modified to only occur when the RTC is 
+*                                 not in use.
+*                               - Added processing to clear the RTC interrupt status flag.
+*                               The following changes have been made to apply the main clock as the RTC count source:
+*                               - Added the process of setting the RCR4.RCKSEL bit to the main clock oscillator.
+*                               - Changed the compile switch for the sub clock initial settings.
+*                               - Added 6-count wait processing for the main clock.
+*                               Deleted the wait process for one sub-clock count.
+*                               Added process to switch system clock to main clock when initializing RTC with the main 
+*                               clock.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -488,9 +500,9 @@ static void clock_source_select (void)
     volatile uint8_t dummy;
 #if BSP_CFG_BOOTLOADER_PROJECT == 0
     /* Disable the following valiable in the bootloader project. */
-#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) || (BSP_CFG_RTC_ENABLE == 1)
+    #if BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1
     uint8_t tmp_rtcdv;
-#endif /* (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) || (BSP_CFG_RTC_ENABLE == 1) */
+    #endif
 #endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
 
 #if BSP_CFG_HOCO_OSCILLATE_ENABLE == 1
@@ -544,7 +556,6 @@ static void clock_source_select (void)
 #else /* (BSP_CFG_HOCO_OSCILLATE_ENABLE == 0) */
   #if BSP_CFG_BOOTLOADER_PROJECT == 0
     /* Disable the following functions in the bootloader project. */
-
     /* If HOCO is already operating, it doesn't stop. */
     if (1 == SYSTEM.HOCOCR.BIT.HCSTP)
     {
@@ -635,25 +646,6 @@ static void clock_source_select (void)
     /* Cold start setting */
     if (0 == SYSTEM.RSTSR1.BIT.CWSF)
     {
-        /* Stop the sub-clock oscillator */
-        /* RCR4 - RTC Control Register 4
-        b7:b1    Reserved - The write value should be 0.
-        b0       RCKSEL   - Count Source Select - Sub-clock oscillator is selected. */
-        RTC.RCR4.BIT.RCKSEL = 0;
-
-        /* WAIT_LOOP */
-        for (i = 0; i < 4; i++)
-        {
-            /* dummy read four times */
-            dummy = RTC.RCR4.BYTE;
-        }
-
-        /* Confirm that the written */
-        if (0 != RTC.RCR4.BIT.RCKSEL)
-        {
-            R_BSP_NOP();
-        }
-
         /* RCR3 - RTC Control Register 3
         b7:b4    Reserved - The write value should be 0.
         b3:b1    RTCDV    - Sub-clock oscillator Drive Ability Control.
@@ -696,7 +688,7 @@ static void clock_source_select (void)
             R_BSP_NOP();
         }
 
-#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) || (BSP_CFG_RTC_ENABLE == 1)
+#if BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1
         /* Set the drive capacity of the sub-clock oscillator */
         #if   (BSP_CFG_SOSC_DRV_CAP == 0) /* Standard CL */
             tmp_rtcdv = 0x06;
@@ -747,9 +739,9 @@ static void clock_source_select (void)
                If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
             R_BSP_NOP();
         }
-#endif /* (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) || (BSP_CFG_RTC_ENABLE == 1) */
+#endif /* BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1 */
 
-#if BSP_CFG_RTC_ENABLE == 1
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) && (BSP_CFG_RTC_ENABLE == 1)
         /* ---- Set wait time until the sub-clock oscillator stabilizes ---- */
         SYSTEM.SOSCWTCR.BYTE = 0x00;
 
@@ -768,17 +760,69 @@ static void clock_source_select (void)
         {
             R_BSP_NOP();
         }
-#endif /* BSP_CFG_RTC_ENABLE == 1 */
+#endif /* (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) && (BSP_CFG_RTC_ENABLE == 1) */
 
-#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) || (BSP_CFG_RTC_ENABLE == 1)
+#if BSP_CFG_RTC_ENABLE == 0 /* TN-RX*-A0280A */
+    #if BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE == 1
+        /* Satisfy the frequency of the peripheral module clock (PCLKB) ≥ the frequency of the count source. 
+           Therefore, the system clock is temporarily switched to the main clock.
+         */
+        SYSTEM.SCKCR3.BIT.CKSEL = 2;
+
+        /* Dummy read and compare. cf."5. I/O Registers", "(2) Notes on writing to I/O registers" in User's manual.
+           This is done to ensure that the register has been written before the next register access. The RX has a 
+           pipeline architecture so the next instruction could be executed before the previous write had finished.
+        */
+        if(2 == SYSTEM.SCKCR3.BIT.CKSEL)
+        {
+            R_BSP_NOP();
+        }
+    #endif
+
+        /* Stop the sub-clock oscillator */
+        /* RCR4 - RTC Control Register 4
+        b7:b1    Reserved - The write value should be 0.
+        b0       RCKSEL   - Count Source Select - Main-clock oscillator or sub-clock oscillator is selected. */
+    #if BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE == 1
+        RTC.RCR4.BIT.RCKSEL = 1;
+    #else
+        RTC.RCR4.BIT.RCKSEL = 0;
+    #endif
+
+        /* WAIT_LOOP */
+        for (i = 0; i < 4; i++)
+        {
+            /* dummy read four times */
+            dummy = RTC.RCR4.BYTE;
+        }
+
+        /* Confirm that the written */
+    #if BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE == 1
+        if (1 != RTC.RCR4.BIT.RCKSEL)
+    #else
+        if (0 != RTC.RCR4.BIT.RCKSEL)
+    #endif
+        {
+            R_BSP_NOP();
+        }
+
+    #if BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE == 1
+        /* Wait for six the main-clock cycles */
+        /* 6 count of main-clock : (1000000/BSP_CFG_XTAL_HZ)*6
+           In the case of main-clock frequency is 24MHz : (1000000/24000000)*6 = 0.041666667us
+           In the case of main-clock frequency is 8MHz : (1000000/8000000)*6 = 0.125us
+           This time is shorter than 1 cycle of LOCO.
+           (1)*(1000000/240000)=4.166666667us */
+        R_BSP_SoftwareDelay((uint32_t)5, BSP_DELAY_MICROSECS);
+    #elif BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1
         /* Wait for six the sub-clock cycles */
         /* 6 count of sub-clock : (1000000/32768)*6=183.10546875us
            In the case of LOCO frequency is 264kHz : 183.10546875/(1000000/264000)=48.33984375cycle
            (48.33984375+2)*(1000000/240000)=209.7493489583333us ("+2" is overhead cycle) */
         R_BSP_SoftwareDelay((uint32_t)210, BSP_DELAY_MICROSECS);
-#endif
+    #endif /* BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1 */
 
-#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) && (BSP_CFG_RTC_ENABLE == 0)
+    #if (BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE == 1) || (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1)
         /* Stop prescaler and counter */
         /* RCR2 - RTC Control Register 2
         b7  CNTMD - Count Mode Select - The calendar count mode.
@@ -826,18 +870,19 @@ static void clock_source_select (void)
         b0     AIE   - Alarm Interrupt Enable - An alarm interrupt request is disabled. */
         RTC.RCR1.BYTE &= 0xF8;
 
-        /* Wait for one the sub-clock cycles */
-        /* 1 count of sub-clock : (1000000/32768)=30.517578125us
-           In the case of LOCO frequency is 264kHz : 30.517578125/(1000000/264000)=8.056640625cycle
-           (8.056640625+2)*(1000000/240000)=41.902669270833us ("+2" is overhead cycle) */
-        R_BSP_SoftwareDelay((uint32_t)42, BSP_DELAY_MICROSECS);
-
         /* Confirm that the written value can be read correctly. */
         if (0x00 != (RTC.RCR1.BYTE & 0x07))
         {
             R_BSP_NOP();
         }
-#endif /* (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) && (BSP_CFG_RTC_ENABLE == 0) */
+    #endif /* (BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE == 1) || (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) */
+#endif /* BSP_CFG_RTC_ENABLE == 0 */
+
+#if BSP_CFG_RTC_ENABLE == 0 /* TN-RX*-A0280A */
+        IR(RTC,PRD) = 0;
+        IR(RTC,ALM) = 0;
+        IR(RTC,CUP) = 0;
+#endif /* BSP_CFG_RTC_ENABLE == 0 */
     }
     /* Warm start setting */
     else
@@ -883,9 +928,7 @@ static void clock_source_select (void)
         {
             R_BSP_NOP();
         }
-#endif /* BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1 */
 
-#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) || (BSP_CFG_RTC_ENABLE == 1)
         /* WAIT_LOOP */
         while (1 != SYSTEM.OSCOVFSR.BIT.SOOVF)
         {
@@ -893,9 +936,9 @@ static void clock_source_select (void)
                If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
             R_BSP_NOP();
         }
-#endif
+#endif /* BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1 */
 
-#if BSP_CFG_RTC_ENABLE == 1
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 1) && (BSP_CFG_RTC_ENABLE == 1)
         /* ---- Set wait time until the sub-clock oscillator stabilizes ---- */
         SYSTEM.SOSCWTCR.BYTE = 0x00;
 #endif

@@ -1,34 +1,20 @@
-/***********************************************************************************************************************
- * Copyright [2020-2023] Renesas Electronics Corporation and/or its affiliates.  All Rights Reserved.
- *
- * This software and documentation are supplied by Renesas Electronics America Inc. and may only be used with products
- * of Renesas Electronics Corp. and its affiliates ("Renesas").  No other uses are authorized.  Renesas products are
- * sold pursuant to Renesas terms and conditions of sale.  Purchasers are solely responsible for the selection and use
- * of Renesas products and Renesas assumes no liability.  No license, express or implied, to any intellectual property
- * right is granted by Renesas. This software is protected under all applicable laws, including copyright laws. Renesas
- * reserves the right to change or discontinue this software and/or this documentation. THE SOFTWARE AND DOCUMENTATION
- * IS DELIVERED TO YOU "AS IS," AND RENESAS MAKES NO REPRESENTATIONS OR WARRANTIES, AND TO THE FULLEST EXTENT
- * PERMISSIBLE UNDER APPLICABLE LAW, DISCLAIMS ALL WARRANTIES, WHETHER EXPLICITLY OR IMPLICITLY, INCLUDING WARRANTIES
- * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT, WITH RESPECT TO THE SOFTWARE OR
- * DOCUMENTATION.  RENESAS SHALL HAVE NO LIABILITY ARISING OUT OF ANY SECURITY VULNERABILITY OR BREACH.  TO THE MAXIMUM
- * EXTENT PERMITTED BY LAW, IN NO EVENT WILL RENESAS BE LIABLE TO YOU IN CONNECTION WITH THE SOFTWARE OR DOCUMENTATION
- * (OR ANY PERSON OR ENTITY CLAIMING RIGHTS DERIVED FROM YOU) FOR ANY LOSS, DAMAGES, OR CLAIMS WHATSOEVER, INCLUDING,
- * WITHOUT LIMITATION, ANY DIRECT, CONSEQUENTIAL, SPECIAL, INDIRECT, PUNITIVE, OR INCIDENTAL DAMAGES; ANY LOST PROFITS,
- * OTHER ECONOMIC DAMAGE, PROPERTY DAMAGE, OR PERSONAL INJURY; AND EVEN IF RENESAS HAS BEEN ADVISED OF THE POSSIBILITY
- * OF SUCH LOSS, DAMAGES, CLAIMS OR COSTS.
- **********************************************************************************************************************/
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 #ifndef RM_BLE_ABS_API_H
 #define RM_BLE_ABS_API_H
 
 /*******************************************************************************************************************//**
- * @ingroup RENESAS_INTERFACES
+ * @ingroup RENESAS_NETWORKING_INTERFACES
  * @defgroup BLE_ABS_API BLE ABS Interface
- * @brief Interface for Bluetooth Low Energy Abstraction functions.
+ * @brief Interface for BLE Abstraction functions.
  *
  * @section BLE_ABS_API_Summary Summary
- * The BLE ABS interface for the Bluetooth Low Energy Abstraction (BLE ABS) peripheral provides 
- * Bluetooth Low Energy Abstraction functionality.
+ * The BLE Abstraction (BLE ABS) interface provides an abstraction layer for various Renesas BLE hardware.
+ *
  *
  * @{
  **********************************************************************************************************************/
@@ -50,9 +36,41 @@ FSP_HEADER
  * Macro definitions
  **********************************************************************************************************************/
 
+/* Configure ABS */
+#define BLE_ABS_CFG_NUMBER_BONDING                  (1)
+#define BLE_ABS_CFG_TIMER_NUMBER_OF_SLOT            (10)
+#define BLE_ABS_CFG_GATT_MTU_SIZE                   (247)
+#define BLE_ABS_CFG_RF_CONNECTION_MAXIMUM           (1)
+#define BLE_ABS_CFG_TRANSMIT_POWER_INDEX            (34)
+
 #define BLE_ABS_ADVERTISING_PHY_LEGACY    (0x00) ///< Non-Connectable Legacy Advertising phy setting.
 #define BLE_BD_ADDR_LEN                   (0x06)
 
+/* SPECIFY WHETHER TO USE UART TRANSPORT LAYER INTERFACE */
+/* Setting an equate to 1 includes code specific to that transport layer interface. */
+#define BLE_CFG_TRANSPORT_INTERFACE_UART     1
+
+/* Configure RF connection maximum */
+#define BLE_CFG_RF_CONN_MAX                         (1)
+
+/* Configure select device */
+#define DA14531_DEVICE      (1)
+#define DA14535_DEVICE      (2)
+
+/* Configure 2 wire UART */
+#if (2 == BLE_CFG_HOST_BOOT_MODE) && (DA14531_DEVICE == BLE_CFG_DA1453x_DEVICE)
+
+#define DA1453x_GTL_UART_RX_PIN     1
+#define DA1453x_GTL_UART_TX_PIN     0
+#define DA1453x_GTL_POR_PIN         9
+
+#else
+
+#define DA1453x_GTL_UART_RX_PIN     5
+#define DA1453x_GTL_UART_TX_PIN     6
+#define DA1453x_GTL_POR_PIN         0
+
+#endif
 /**********************************************************************************************************************
  * Typedef definitions
  **********************************************************************************************************************/
@@ -874,7 +892,7 @@ typedef struct st_ble_abs_api
      * @param[in]  p_ctrl       Pointer to control structure.
      * @param[in]  p_cfg        Pointer to pin configuration structure.
      */
-    fsp_err_t (* open)(ble_abs_ctrl_t * const p_ctrl, ble_abs_cfg_t * p_cfg);
+    fsp_err_t (* open)(ble_abs_ctrl_t * const p_ctrl, ble_abs_cfg_t const * const p_cfg);
 
     /** Close the BLE ABS.
      *

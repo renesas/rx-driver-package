@@ -30,13 +30,15 @@
 *              : 01.12.2014 1.00     First Release
 *              : 22.06.2015 1.02     Added support MCU RX231.
 *              : 01.04.2016 1.03     Updated the xml file.
-*              : 30.09.2016 x.xx      Added support MCU RX65N.
 *              : 14.12.2018 1.05     Supporting USB driver for RTOS
 *              : 08.08.2019 2.00     Added support for FreeRTOS and 
 *                                    Renesas uITRON (RI600V4).
 *                                    Added support for GNUC and ICCRX.
 *              : 10.09.2020 2.20     Added support for the format function.
-*              : 15.12.2023 2.40     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*              : 15.12.2023 2.40     Fixed to comply with GSCE Coding Standards
+*                                    Rev.6.5.0.
+*              : 30.09.2024 2.60     Changed the comment of API functions to
+*                                    the Doxygen style.
 *******************************************************************************/
 
 /******************************************************************************
@@ -153,28 +155,48 @@ static uint16_t g_usb_hmsc_tfatSecSize = 512;
 usb_utr_t tfat_ptr;
 #endif
 
-/******************************************************************************
-* Function Name : usb_disk_initialize
-* Description   : This function initializes the memory medium
-*               :    for file operations
-* Arguments     : uint8_t pdrv        : Physical drive number
-* Return value  : Status of the memory medium
-******************************************************************************/
+
+/**********************************************************************************************************************
+* Function Name: usb_disk_initialize
+*******************************************************************************************************************//**
+* @brief This function initializes the disk drive.
+*
+* @param[in] pdrv  Specifies the initialize drive number.
+*
+* @retval TFAT_RES_OK  Normal termination.
+*
+* @retval Others       DSTATUS status of the disk after function execution.
+*
+* @details This API does not call USB driver initialize function because of USB driver limitation
+* (1 time call is only accepted). Please call USB driver initialize function in user program.
+* @note None
+*/
 DSTATUS usb_disk_initialize (uint8_t pdrv)
 {
     return RES_OK;
 }
 
-/******************************************************************************
-* Function Name : usb_disk_read
-* Description   : This function reads data from the specified location
-*               :    of the memory medium
-* Arguments     : uint8_t pdrv    : Physical drive number
-*               : uint8_t* buff   : Pointer to the read data buffer
-*               : uint32_t sector : uint32_t SectorNumber
-*               : uint32_t count  : Number of sectors to read
-* Return value  : Result of function execution
-******************************************************************************/
+
+/**********************************************************************************************************************
+* Function Name: usb_disk_read
+*******************************************************************************************************************//**
+* @brief This function reads the data from disk.
+*
+* @param[in]  pdrv    Specifies the physical drive number.
+*
+* @param[out] buff    Pointer to the read buffer to store the read data. A buffer of the size equal to the
+* number of bytes to be read is required.
+*
+* @param[in]  sector  Specifies the start sector number in logical block address (LBA).
+*
+* @param[in]  count   Specifies number of sectors to read. The value can be 1 to 255.
+*
+* @retval DRESULT  Result of the function execution.
+*
+* @details This function reads the data from disk drive. The position of read data is specified using
+* this function argument.
+* @note None
+*/
 DRESULT usb_disk_read (
     uint8_t pdrv,               /* Physical drive number            */
     uint8_t* buff,              /* Pointer to the read data buffer  */
@@ -258,16 +280,26 @@ DRESULT usb_disk_read (
     return RES_OK;
 }
 
-/******************************************************************************
-* Function Name : usb_disk_write
-* Description   : This function writes data to a specified location
-*               :    of the memory medium
-* Arguments     : uint8_t pdrv        : Physical drive number
-*               : const uint8_t* buff : Pointer to the write data
-*               : uint32_t sector     : Sector number to write
-*               : uint32_t count      : Number of sectors to write
-* Return value  : Result of function execution
-******************************************************************************/
+
+/**********************************************************************************************************************
+* Function Name: usb_disk_write
+*******************************************************************************************************************//**
+* @brief This function writes the data to the disk.
+*
+* @param[in] pdrv    Specifies the physical drive number.
+*
+* @param[in] buff    Pointer to the data to be written.
+*
+* @param[in] sector  Specifies the start sector number in logical block address (LBA).
+*
+* @param[in] count   Specifies number of sectors to read. The value can be 1 to 255.
+*
+* @retval DRESULT  Result of the function execution.
+*
+* @details This function writes the data to the disk drive. The position of write data is specified using
+* this function argument.
+* @note None
+*/
 DRESULT usb_disk_write (
     uint8_t pdrv,           /* Physical drive number           */
     const uint8_t* buff,    /* Pointer to the write data       */
@@ -352,15 +384,30 @@ DRESULT usb_disk_write (
     return RES_OK;
 }
 
-/******************************************************************************
-* Function Name : usb_disk_ioctl
-* Description   : This function is used to execute memory operations
-*               :    other than read\write
-* Arguments     : uint8_t pdrv : Drive number
-*               : uint8_t cmd  : Control command code
-*               : void* buff   : Data transfer buffer
-* Return value  : Result of function execution
-******************************************************************************/
+
+/**********************************************************************************************************************
+* Function Name: usb_disk_ioctl
+*******************************************************************************************************************//**
+* @brief This function controls the drive.
+*
+* @param[in] pdrv  Specifies the physical drive number.
+*
+* @param[in] cmd   Specifies the command code. The command code will always be 0.
+*
+* @param[in] buff  Pointer should always be a NULL pointer.
+*
+* @retval DRESULT  Result of the function execution.
+*
+* @details The usb_disk_ioctl function is used only by the f_sync function amongst all the TFAT FIT functions.
+* Users who do not plan to use f_sync function in their applications can skip the implementation for this
+* particular driver interface function.\n
+* For users who wish to use f_sync function in their applications, the command CTRL_SYNC has to be implemented.\n
+* For users who wish to use f_sync function in their applications, this particular driver interface function
+* will have to be implemented. This driver function should consist of the code to finish off any pending write
+* process. If the disk i/o module has a write back cache, the dirty sector must be flushed immediately.The f_sync
+* function will perform a save operation to the unsaved data related to the file object passed as argument.
+* @note None
+*/
 DRESULT usb_disk_ioctl (
     uint8_t pdrv,          /* Drive number             */
     uint8_t cmd,           /* Control command code     */
@@ -494,13 +541,23 @@ DRESULT usb_disk_ioctl (
     return RES_OK;
 }
 
-/******************************************************************************
-* Function Name : usb_disk_status
-* Description   : This function is used to retrieve the current status
-*               :    of the disk
-* Arguments     : uint8_t pdrv : Physical drive number
-* Return value  : Status of the disk
-******************************************************************************/
+
+/**********************************************************************************************************************
+* Function Name: usb_disk_status
+*******************************************************************************************************************//**
+* @brief This function gets the information about disk drive.
+*
+* @param[in] pdrv  Specifies the physical drive number.
+*
+* @retval TFAT_RES_OK  Normal termination.
+*
+* @retval Others       DSTATUS status of the disk after function execution.
+*
+* @details This function should consist of the code that checks the disk and returns the current disk status.
+* The disk status can have any of the three values, see Section 2.10 in the application note for details.
+* The disk status can be returned by updating the return value with the macros related to disk status.
+* @note None
+*/
 DSTATUS usb_disk_status (uint8_t pdrv /* Physical drive number    */
                         )
 {
@@ -511,12 +568,15 @@ DSTATUS usb_disk_status (uint8_t pdrv /* Physical drive number    */
 }
 
 #if (BSP_CFG_RTOS_USED == 0)
-/******************************************************************************
-Function Name   : R_usb_hmsc_WaitLoop
-Description     : Hmsc wait loop function
-Arguments       : none
-Return value    : none
-******************************************************************************/
+/**********************************************************************************************************************
+* Function Name: R_usb_hmsc_WaitLoop
+*******************************************************************************************************************//**
+* @brief This function waits for the data read/write.
+*
+* @details Please refer to the USB driver document for details.
+*
+* @note None
+*/
 void R_usb_hmsc_WaitLoop (void)
 {
     if (usb_cstd_check_schedule() == USB_FLGSET)

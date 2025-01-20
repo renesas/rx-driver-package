@@ -1,4 +1,8 @@
-/* ${REA_DISCLAIMER_PLACEHOLDER} */
+/*
+* Copyright (c) 2020 - 2024 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /**********************************************************************************************************************
  * Includes
@@ -27,6 +31,9 @@
 #elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
  #define R_BLE_GTL_BYTE_POOL_LEN                0x800
 #endif
+
+/* The reset pulse duration in milliseconds */
+#define R_BLE_GTL_RESET_PULSE_MS                200
 
 /* Internal event bit definitions*/
 #define R_BLE_GTL_ADV_TIMER_EXPIRED_EVENT       0x00000001UL
@@ -60,6 +67,7 @@
 #define R_BLE_GTL_TASK_ID_GAPM                  0x000D
 #define R_BLE_GTL_TASK_ID_GAPC                  0x000E
 #define R_BLE_GTL_TASK_ID_GTL                   0x0010
+#define R_BLE_GTL_TASK_ID_AUX                   0x00A0
 
 /* GTL GATTM Command ID's */
 #define R_BLE_GTL_GATTM_ADD_SVC_REQ             0x0B00
@@ -126,6 +134,12 @@
 #define R_BLE_GTL_GAPC_SET_LE_PKT_SIZE_CMD      0x0E2B
 #define R_BLE_GTL_GAPC_LE_PKT_SIZE_IND          0x0E2C
 
+/* GTL Auxiliary Command ID's */
+#define R_BLE_GTL_AUX_SET_TX_POWER_CMD          0xA005
+#define R_BLE_GTL_AUX_SET_TX_POWER_CMP_EVT      0xA006
+#define R_BLE_GTL_AUX_GET_TX_POWER_CMD          0xA007
+#define R_BLE_GTL_AUX_GET_TX_POWER_RSP          0xA008
+
 #define R_BLE_GTL_PERIPHERAL_ROLE               0x0A
 #define R_BLE_GTL_ADV_FLAG_FIELD_LEN            3
 #define R_BLE_GTL_ADV_DATA_LEN_MAX              31
@@ -187,6 +201,17 @@
 #define R_BLE_GTL_BOOT_SOH                      0x01
 #define R_BLE_GTL_BOOT_ACK                      0x06
 #define R_BLE_GTL_BOOT_NACK                     0x15
+
+/* Defines for host DB */
+#define DB_INVALID_INDEX                        0xFFFF
+#define DB_VALID_INDEX                          0x0000
+#define BLE_SERV_CCC_UUID                       0x2902
+
+/* Directive macro invalid */
+#if (2 == BLE_CFG_HOST_BOOT_MODE) && (DA14531_DEVICE == BLE_CFG_DA1453x_DEVICE)
+    #error "Error! Invalid value for BLE_CFG_HOST_BOOT_MODE & BLE_CFG_DA1453x_DEVICE. \
+                                                                    Please verify this macro in r_ble_da14531_config.h"
+#endif
 
 /***********************************************************************************************************************
  * Enumerations
@@ -298,6 +323,12 @@ typedef enum e_r_ble_gtl_gattc_operation
     R_BLE_GTL_GATTC_OP_NOTIFY,
     R_BLE_GTL_GATTC_OP_INDICATE,
 } r_ble_gtl_gattc_operation_t;
+
+typedef enum e_r_ble_gtl_aux_operation
+{
+    R_BLE_GTL_AUX_OP_NONE = 0x00,
+    R_BLE_GTL_AUX_SET_TX_POWER = 0x06,
+} r_ble_gtl_aux_operation_t;
 
 typedef enum e_r_ble_gtl_host_error_code
 {
@@ -890,6 +921,26 @@ typedef struct r_ble_gtl_gattm_add_svc_rsp
     uint8_t                         padding;
 } r_ble_gtl_gattm_add_svc_rsp_t;
 
+/* GTL message Auxiliary Commands */
+typedef struct r_ble_gtl_aux_get_pwr_cmd
+{
+    r_ble_gtl_msg_hdr_t             hdr;
+    /* No parameters with this command */
+} r_ble_gtl_aux_get_pwr_cmd_t;
+
+typedef struct r_ble_gtl_aux_set_pwr_cmd
+{
+    r_ble_gtl_msg_hdr_t             hdr;
+    uint8_t                         operation;
+} r_ble_gtl_aux_set_pwr_cmd_t;
+
+/* GTL message Auxiliary Responses */
+typedef struct r_ble_gtl_aux_set_pwr_rsp
+{
+    uint8_t                         operation;
+    uint8_t                         status;
+} r_ble_gtl_aux_set_pwr_rsp_t;
+
 #pragma unpack
 
 /* Device data */
@@ -966,7 +1017,7 @@ typedef struct r_ble_gtl_fifo
 } r_ble_gtl_fifo_t;
 #endif
 
-#if (BLE_CFG_HOST_BOOT_MODE == 1)
+#if (BLE_CFG_HOST_BOOT_MODE > 0)
 #pragma pack
 typedef struct r_ble_gtl_boot_header
 {
@@ -975,6 +1026,13 @@ typedef struct r_ble_gtl_boot_header
 } r_ble_gtl_boot_header_t;
 #pragma unpack
 #endif
+
+/* Local (Host) database to support RI items */
+typedef struct ri_value_array_struct
+{
+    uint16_t index;
+    uint16_t value; 
+} ri_value_array_struct_t;
 
 /***********************************************************************************************************************
  * Extern variables
@@ -989,6 +1047,7 @@ extern st_sci_conf_t * s_port_cfg;
 /***********************************************************************************************************************
  * Static Private Variables
  **********************************************************************************************************************/
+static uint16_t                         max_ri_values = 0;
 static uint8_t                        * p_rx_buf = NULL;
 static uint16_t                         rx_msg_ix = 0;
 static r_ble_gtl_rx_msg_parser_state_t  rx_gtl_msg_parser_state;
@@ -999,12 +1058,13 @@ static ble_vs_app_cb_t                  g_vs_cb    = NULL;
 static ble_gatts_app_cb_t               g_gatts_cb = NULL;
 static ble_gattc_app_cb_t               g_gattc_cb = NULL;
 static ble_l2cap_cf_app_cb_t            g_l2cap_cb = NULL;
+static ri_value_array_struct_t          *ri_value_array = NULL;
 /* Buffers must be aligned to 32-bit boundary as messages contain 16 and 32-bit data types which can be 
    dereferenced via pointers */
 #pragma pack
 static uint8_t                          g_gtl_msg_buf_pool[R_BLE_GTL_MSG_QUEUE_LEN][R_BLE_GTL_MSG_LEN_MAX];
 #pragma unpack
-#if (BLE_CFG_HOST_BOOT_MODE == 1)
+#if (BLE_CFG_HOST_BOOT_MODE > 0)
 /* Set this flag when booting DA1453x from host. It informs UART receive interrupt handler that incoming bytes are not
    GTL messages and should instead be handled by boot loader function. */
 static volatile bool                    g_booting = false;
@@ -1053,6 +1113,42 @@ static r_ble_gtl_fifo_t                 g_pend_gtl_msg_queue;
 static volatile bool                    g_uart_tei_sem;
 #endif
 
+/* Mapping of power level returned by DA1453x to actual power in dBm */
+#if  (DA14531_DEVICE == BLE_CFG_DA1453x_DEVICE)
+static const int8_t tx_pwr_lut[] =
+{
+   -127, /* 0  - Invalid */
+    -19, /* 1  - RF_TX_PWR_LVL_MINUS_19d5 */
+    -13, /* 2  - RF_TX_PWR_LVL_MINUS_13d5 */
+    -10, /* 3  - RF_TX_PWR_LVL_MINUS_10d0 */
+    -7,  /* 4  - RF_TX_PWR_LVL_MINUS_7d0 */
+    -5,  /* 5  - RF_TX_PWR_LVL_MINUS_5d0 */
+    -3,  /* 6  - RF_TX_PWR_LVL_MINUS_3d5 */
+    -2,  /* 7  - RF_TX_PWR_LVL_MINUS_2d0 */
+    -1,  /* 8  - RF_TX_PWR_LVL_MINUS_1d0 */
+     0,  /* 9  - RF_TX_PWR_LVL_0d0 */
+     1,  /* 10 - RF_TX_PWR_LVL_PLUS_1d0 */
+     2,  /* 11 - RF_TX_PWR_LVL_PLUS_1d5 */
+     3   /* 12 - RF_TX_PWR_LVL_PLUS_2d5 */
+};
+#elif  (DA14535_DEVICE == BLE_CFG_DA1453x_DEVICE)
+static const int8_t tx_pwr_lut[] =
+{
+   -127, /* 0  - Invalid */
+    -18, /* 1  - RF_TX_PWR_LVL_MINUS_18d0 */
+    -12, /* 2  - RF_TX_PWR_LVL_MINUS_12d0 */
+    -9,  /* 3  - RF_TX_PWR_LVL_MINUS_9d0 */
+    -6,  /* 4  - RF_TX_PWR_LVL_MINUS_6d0 */
+    -4,  /* 5  - RF_TX_PWR_LVL_MINUS_4d0 */
+    -2,  /* 6  - RF_TX_PWR_LVL_MINUS_2d5 */
+    -1,  /* 7  - RF_TX_PWR_LVL_MINUS_1d0 */
+     0,  /* 8  - RF_TX_PWR_LVL_0d0 */
+     1,  /* 9  - RF_TX_PWR_LVL_PLUS_1d5 */
+     2,  /* 10 - RF_TX_PWR_LVL_PLUS_2d5 */
+     3,  /* 11 - RF_TX_PWR_LVL_PLUS_3d0 */
+     4   /* 12 - RF_TX_PWR_LVL_PLUS_4d0 */
+};
+#endif
 /***********************************************************************************************************************
  * Local function prototypes
  **********************************************************************************************************************/
@@ -1138,6 +1234,8 @@ static ble_status_t         r_ble_gtl_gapc_disconnect(uint16_t conn_hdl, uint8_t
 static ble_status_t         r_ble_gtl_gapc_param_update(uint16_t conn_hdl, 
                                                         st_ble_gap_conn_param_t * p_conn_update_param,
                                                         r_ble_gtl_gapc_param_update_ind_t * p_param_update_ind);
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_write_ri_req_ind_handler(uint16_t conn_hdl, 
+                                                                  r_ble_gtl_gattc_write_req_ind_t * p_param );
 static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_handler(uint8_t * p_gtl_msg);
 static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_write_req_ind_handler(uint16_t conn_hdl, 
                                                                   r_ble_gtl_gattc_write_req_ind_t * p_param);
@@ -1194,6 +1292,10 @@ static ble_status_t         r_ble_gtl_gap_get_char_value_by_uuid(uint16_t uuid, 
 static ble_status_t         r_ble_gtl_gap_get_char_value_by_handle(uint16_t handle, uint8_t ** p_value, 
                                                                    uint16_t * p_len);
 static ble_status_t         r_ble_gtl_gap_stop_adv(uint8_t adv_hdl, uint8_t reason);
+static ble_status_t         r_ble_gtl_aux_get_tx_power(int8_t * p_tx_pwr);
+static ble_status_t         r_ble_gtl_aux_set_tx_power(uint8_t tx_pwr);
+static ble_status_t         r_ble_gtl_aux_send_get_tx_power_cmd(void);
+static ble_status_t         r_ble_gtl_aux_send_set_tx_power_cmd(uint8_t operation);
 static void                 r_ble_gtl_cleanup_open(void);
 static bool                 r_ble_gtl_cb_evt_queue_init(void);
 static bool                 r_ble_gtl_cb_evt_queue_empty(void);
@@ -1216,7 +1318,7 @@ static ble_status_t         r_ble_gtl_adv_timer_stop(void);
 static bool                 r_ble_gtl_adv_timer_expired(void);
 static bool                 r_ble_gtl_event_init(void);
 #endif
-#if (BLE_CFG_HOST_BOOT_MODE == 1)
+#if (BLE_CFG_HOST_BOOT_MODE > 0)
 static ble_status_t         r_ble_gtl_transmit_image(uint8_t * p_data, uint32_t len);
 static ble_status_t         r_ble_gtl_boot_load_image(void);
 #endif
@@ -1234,6 +1336,9 @@ static void                 r_ble_gtl_adv_timer_cb(TimerHandle_t xTimer);
 #elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
 static void                 r_ble_gtl_adv_timer_cb(ULONG context);
 #endif
+static uint16_t             r_ble_gtl_is_ri_index(uint16_t db_index);
+static uint16_t             r_ble_gtl_get_ri_value_with_db_index(uint16_t db_index, uint16_t ** p_value);
+static void                 r_ble_gtl_init_ri_database(void);
 
 /***********************************************************************************************************************
  * Public Functions Implementation
@@ -1306,7 +1411,7 @@ ble_status_t R_BLE_GTL_Open (r_ble_gtl_transport_api_t * p_api)
     g_dev_params.mtu_size      = BLE_GATT_DEFAULT_MTU;
     g_dev_params.state         = R_BLE_GTL_DEV_STATE_IDLE;
 
-#if (BLE_CFG_HOST_BOOT_MODE == 1)
+#if (BLE_CFG_HOST_BOOT_MODE > 0)
     /* Load an image directly into the DA1453x device, once loaded the DA1453x will automatically start
        executing the image. NOTE: This does not re-program any flash connected to the DA1453x, it simply
        loads the image into the DA1453x internal RAM. If successful device will send the ready indication */
@@ -2034,6 +2139,9 @@ ble_status_t R_BLE_GTL_GATTS_SetDbInst(st_ble_gatts_db_cfg_t * p_db_inst)
     r_ble_gtl_uuid_t             uuid;
     r_ble_gtl_gattm_att_desc_t * p_att_desc   = NULL;
 
+    /* Initialize RI type database */
+    r_ble_gtl_init_ri_database();
+
     /* Store GAP service characteristic values so we can respond with them if requested 
        via R_BLE_GTL_GAPC_GET_DEV_INFO_REQ_IND command */
     r_ble_gtl_gap_get_char_value_by_uuid(R_BLE_GTL_CHAR_DEVICE_NAME,
@@ -2309,11 +2417,20 @@ ble_status_t R_BLE_GTL_GATTS_GetAttr(uint16_t conn_hdl, uint16_t attr_hdl, st_bl
 
     if (0 <= ((int32_t)attr_hdl + g_dev_params.att_hndl_offset))
     {
-        status = r_ble_gtl_gattm_get_att_value(conn_hdl, 
-                                               (uint16_t)((int32_t)attr_hdl + g_dev_params.att_hndl_offset), 
-                                               p_value);
+        if(r_ble_gtl_is_ri_index( attr_hdl ) == DB_VALID_INDEX)
+        {
+            uint16_t *p_ccc_val = 0;
+            r_ble_gtl_get_ri_value_with_db_index(attr_hdl, &p_ccc_val);
+            p_value->p_value = (uint8_t *)p_ccc_val;
+            p_value->value_len = 2;
+            status = BLE_SUCCESS;
+        }
+        else
+        {
+            status = r_ble_gtl_gattm_get_att_value(conn_hdl, 
+                                    (uint16_t)((int32_t)attr_hdl + g_dev_params.att_hndl_offset), p_value);
+        }
     }
-
     return status;
 }
 
@@ -2487,8 +2604,8 @@ ble_status_t R_BLE_GTL_GATTC_DiscAllChar(uint16_t conn_hdl, st_ble_gatt_hdl_rang
     disc_serv_events.evt_128  = BLE_GATTC_EVENT_CHAR_128_DISC_IND;
     disc_serv_events.evt_comp = BLE_GATTC_EVENT_ALL_CHAR_DISC_COMP;
 
-    status = r_ble_gtl_gattc_discover(conn_hdl, R_BLE_GTL_GATTC_OP_DISC_ALL_CHAR, 0x0001, 
-                                                    UINT16_MAX, NULL, &disc_serv_events);
+    status = r_ble_gtl_gattc_discover(conn_hdl, R_BLE_GTL_GATTC_OP_DISC_ALL_CHAR,
+                                      p_range->start_hdl, p_range->end_hdl, NULL, &disc_serv_events);
 
     return status;
 }
@@ -2530,8 +2647,8 @@ ble_status_t R_BLE_GTL_GATTC_DiscCharByUuid(uint16_t                  conn_hdl,
         disc_serv_events.evt_128  = BLE_GATTC_EVENT_CHAR_128_DISC_IND;
         disc_serv_events.evt_comp = BLE_GATTC_EVENT_CHAR_DISC_COMP;
 
-        status = r_ble_gtl_gattc_discover(conn_hdl, R_BLE_GTL_GATTC_OP_DISC_BY_UUID_CHAR, 0x0001, 
-                                                        UINT16_MAX, &uuid, &disc_serv_events);
+        status = r_ble_gtl_gattc_discover(conn_hdl, R_BLE_GTL_GATTC_OP_DISC_BY_UUID_CHAR,
+                                          p_range->start_hdl, p_range->end_hdl, &uuid, &disc_serv_events);
     }
 
     return status;
@@ -3290,6 +3407,93 @@ ble_status_t R_BLE_GTL_VS_GetRand(uint8_t rand_size)
     return status;
 }
 
+ble_status_t R_BLE_GTL_VS_GetTxPower(uint16_t conn_hdl)
+{
+#if BLE_CFG_PARAM_CHECKING_ENABLE
+    FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
+    FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
+#endif
+
+    /* Same power level used for all connections */
+    FSP_PARAMETER_NOT_USED(conn_hdl);
+
+    ble_status_t                       status;
+    r_ble_gtl_cb_evt_t               * p_cb_evt = NULL;
+    st_ble_vs_get_tx_pwr_comp_evt_t  * p_tx_power_evt;
+    int8_t                             tx_power;
+
+    status = r_ble_gtl_aux_get_tx_power(&tx_power);
+    if (BLE_SUCCESS == status)
+    {
+        p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_VS_EVENT_GET_TX_POWER, BLE_SUCCESS,
+                                             sizeof(st_ble_vs_get_tx_pwr_comp_evt_t));
+        if (NULL != p_cb_evt)
+        {
+            p_tx_power_evt = p_cb_evt->data.vs.p_param;
+
+            p_tx_power_evt->conn_hdl    = 0;
+            p_tx_power_evt->max_tx_pwr  = tx_pwr_lut[sizeof(tx_pwr_lut) - 1];
+            p_tx_power_evt->curr_tx_pwr = tx_power;
+
+            status = r_ble_gtl_cb_evt_queue_add(p_cb_evt);
+        }
+        else
+        {
+            status = BLE_ERR_MEM_ALLOC_FAILED;
+        }
+    }
+
+    return status;
+}
+
+ble_status_t R_BLE_GTL_VS_SetTxPower (uint16_t conn_hdl, uint8_t tx_power)
+{
+#if BLE_CFG_PARAM_CHECKING_ENABLE
+    FSP_ERROR_RETURN(NULL != gp_instance_ctrl, BLE_ERR_INVALID_STATE);
+    FSP_ERROR_RETURN(R_BLE_GTL_OPEN != gp_instance_ctrl->open, BLE_ERR_INVALID_STATE);
+#endif
+
+    /* Same power level used for all connections */
+    FSP_PARAMETER_NOT_USED(conn_hdl);
+
+    ble_status_t                      status = BLE_ERR_INVALID_ARG;;
+    r_ble_gtl_cb_evt_t              * p_cb_evt = NULL;
+    st_ble_vs_set_tx_pwr_comp_evt_t * p_tx_power_evt;
+    int8_t                            tx_power_dbm;
+
+    if ((BLE_VS_TX_POWER_HIGH == tx_power) ||
+        (BLE_VS_TX_POWER_MID == tx_power) ||
+        (BLE_VS_TX_POWER_LOW == tx_power))
+    {
+        status = r_ble_gtl_aux_set_tx_power(tx_power);
+        if (BLE_SUCCESS == status)
+        {
+            /* Read back power in dBm so we can pass back to user */
+            status = r_ble_gtl_aux_get_tx_power(&tx_power_dbm);
+            if (BLE_SUCCESS == status)
+            {
+                p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_VS_EVENT_SET_TX_POWER, BLE_SUCCESS,
+                                                     sizeof(st_ble_vs_set_tx_pwr_comp_evt_t));
+                if (NULL != p_cb_evt)
+                {
+                    p_tx_power_evt = p_cb_evt->data.vs.p_param;
+
+                    p_tx_power_evt->conn_hdl    = 0;
+                    p_tx_power_evt->curr_tx_pwr = tx_power_dbm;
+
+                    status = r_ble_gtl_cb_evt_queue_add(p_cb_evt);
+                }
+                else
+                {
+                    status = BLE_ERR_MEM_ALLOC_FAILED;
+                }
+            }
+        }
+    }
+
+    return status;
+}
+
 /*******************************************************************************************************************//**
  *  Handle interrupt from UART. Name of function name is displayed in e2 Studio configurator but is locked and can't
  *  be changed.
@@ -3309,7 +3513,7 @@ void R_BLE_GTL_UartCallback (void * pArgs)
         case SCI_EVT_RX_CHAR:
         {
             g_transport_api.read(g_transport_api.p_context, &data_byte, 1);
-#if (BLE_CFG_HOST_BOOT_MODE == 1)
+#if (BLE_CFG_HOST_BOOT_MODE > 0)
             if (false == g_booting)
             {
 #endif
@@ -3323,7 +3527,7 @@ void R_BLE_GTL_UartCallback (void * pArgs)
                         r_ble_gtl_msg_buffer_free_from_isr(p_rx_msg);
                     }
                 }
-#if (BLE_CFG_HOST_BOOT_MODE == 1)
+#if (BLE_CFG_HOST_BOOT_MODE > 0)
             }
             else
             {
@@ -3355,6 +3559,122 @@ void R_BLE_GTL_UartCallback (void * pArgs)
 /***********************************************************************************************************************
  * Local Functions definitions
  **********************************************************************************************************************/
+ 
+/*******************************************************************************************************************//**
+ *  Initialize the local RI attribute database. DA1453x does not support storing RI values (notifications & indications)
+ *
+ **********************************************************************************************************************/
+static void r_ble_gtl_init_ri_database(void)
+{
+    max_ri_values = 0;
+
+    /* First find out how many RI values exists so the appropriate table size is allocated */
+    for(uint16_t i = 0; i < QE_ATTRIBUTE_HANDLE_PROFILE_END; i++)
+    {
+        if( *(uint16_t *)qe_ble_profile[i].uuid == BLE_SERV_CCC_UUID )
+        {
+            max_ri_values++;
+        }
+    }
+
+    if(max_ri_values == 0)
+    {
+        return;
+    }
+
+    ri_value_array = r_ble_gtl_malloc(max_ri_values * sizeof(ri_value_array_struct_t));
+    memset((void *)ri_value_array, 0, max_ri_values * sizeof(ri_value_array_struct_t));
+    int ri_values_index = 0;
+
+    for(uint16_t i = 0; i < QE_ATTRIBUTE_HANDLE_PROFILE_END; i++)
+    {
+        if( *(uint16_t *)qe_ble_profile[i].uuid == BLE_SERV_CCC_UUID )
+        {
+            ri_value_array[ri_values_index].index = i;
+            ri_value_array[ri_values_index].value = 0;
+            ri_values_index = ri_values_index + 1;
+        }
+    }
+}
+
+/*******************************************************************************************************************//**
+ *  Get the value of an RI type attribute from a local database
+ *
+ * @param[in]  db_index         Index in the database
+ * @param[out] p_value          Pointer to the value of the attribue.
+ *
+ * @retval DB_VALID_INDEX       The indexed attribute had been found in the database. *value holds its value.
+ * @retval DB_INVALID_INDEX     The indexed attribute had not been found in the database. *value remains unchanged.
+ **********************************************************************************************************************/
+static uint16_t r_ble_gtl_get_ri_value_with_db_index(uint16_t db_index, uint16_t ** p_value)
+{
+
+    uint16_t status = DB_INVALID_INDEX;
+    for (uint16_t ri_values_index = 0; ri_values_index < max_ri_values; ri_values_index++)
+    {
+        if(ri_value_array[ri_values_index].index == db_index)
+        {
+            *p_value = &ri_value_array[ri_values_index].value;
+            status = DB_VALID_INDEX;
+            break;
+        }
+    }
+
+    return status;
+}
+
+/*******************************************************************************************************************//**
+ *  Checks if the database index holds an RI type attribute (notification or indication).
+ *
+ * @param[in]  db_index         Index in the database
+ *
+ * @retval DB_VALID_INDEX       The indexed attribute had been found in the database. 
+ * @retval DB_INVALID_INDEX     The indexed attribute had not been found in the database. 
+ **********************************************************************************************************************/
+static uint16_t r_ble_gtl_is_ri_index(uint16_t db_index)
+{
+    uint16_t status = DB_INVALID_INDEX;
+
+    /* Search in local DB for the value of a specific CCC by index. If it does not exist it is not RI */
+    for (uint16_t ri_values_index = 0; ri_values_index < max_ri_values; ri_values_index++)
+    {
+        if(ri_value_array[ri_values_index].index == db_index)
+        {
+            status = DB_VALID_INDEX;
+            break;
+        }
+      
+    }
+  
+    return status;
+}
+
+
+/*******************************************************************************************************************//**
+ * Sets the value of an RI type attribute in the local database.
+ *
+ * @param[in]  db_index         Index in the database
+ * @param[out] value            The value of the attribue.
+ *
+ * @retval DB_VALID_INDEX       The indexed attribute had been found in the database. Successful write.
+ * @retval DB_INVALID_INDEX     The indexed attribute had not been found in the database. Unsuccessful write.
+ **********************************************************************************************************************/
+static uint16_t r_ble_gtl_set_ri_value_with_db_index(uint16_t db_index, uint16_t value )
+{
+    uint16_t status = DB_INVALID_INDEX;
+
+    for (uint16_t ri_values_index = 0; ri_values_index < max_ri_values; ri_values_index++)
+    {
+        if(ri_value_array[ri_values_index].index == db_index)
+        {
+            ri_value_array[ri_values_index].value = value;
+            status = DB_VALID_INDEX;
+            break;
+        }
+    }
+
+    return status;
+}
 
 /*******************************************************************************************************************//**
  *  Process incoming GTL messages received via transport layer. Messages might generated a callback event.
@@ -3473,6 +3793,57 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_gapc_handler(uint8_t * p_gtl_msg)
 
     return p_cb_evt;
 }
+/*******************************************************************************************************************//**
+ *  Handle GATT client write request indication message for RI attributes.
+
+ *
+ * @param[in]  conn_hdl         Handle of connection on which message was received
+ * @param[in]  p_param          Pointer to buffer containing received GATT client write request indication message
+ *
+ * @retval NULL                 No callback event generated by message processing
+ **********************************************************************************************************************/
+static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_write_ri_req_ind_handler(uint16_t conn_hdl,
+                                                                     r_ble_gtl_gattc_write_req_ind_t * p_param )
+{
+     ble_status_t                   status;
+    r_ble_gtl_cb_evt_t           * p_cb_evt = NULL;
+    st_ble_gatts_write_rsp_evt_t * p_write_rsp_evt;
+    st_ble_gatts_db_access_evt_t * p_db_access_evt;
+
+    status = r_ble_gtl_gattc_send_write_cfm(conn_hdl, R_BLE_GTL_GAP_ERR_NO_ERROR, p_param->handle);
+
+    p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTS_EVENT_WRITE_RSP_COMP, status, sizeof(st_ble_gatts_write_rsp_evt_t));
+    if (NULL != p_cb_evt)
+    {
+        p_cb_evt->data.gatts.conn_hdl  = conn_hdl;
+
+        p_write_rsp_evt = p_cb_evt->data.gatts.p_param;
+        p_write_rsp_evt->attr_hdl = (uint16_t)(p_param->handle - g_dev_params.att_hndl_offset);
+
+        r_ble_gtl_cb_evt_queue_add(p_cb_evt);
+    }
+
+    /* Update the attribute database with the value written */
+    r_ble_gtl_set_ri_value_with_db_index((uint16_t)(p_param->handle - g_dev_params.att_hndl_offset) ,  
+                                                                         * (uint16_t *)p_param->value);
+
+    /* Send the application callback */
+    p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTS_EVENT_DB_ACCESS_IND, status, p_param->length);
+    if (NULL != p_cb_evt)
+    {
+         p_cb_evt->data.gatts.conn_hdl  = conn_hdl;
+
+         p_db_access_evt = p_cb_evt->data.gatts.p_param;
+         p_db_access_evt->p_handle->conn_hdl        = conn_hdl;
+         p_db_access_evt->p_params->attr_hdl        = (uint16_t)(p_param->handle - g_dev_params.att_hndl_offset);
+         p_db_access_evt->p_params->db_op           = BLE_GATTS_OP_CHAR_PEER_WRITE_REQ;
+         p_db_access_evt->p_params->value.value_len = p_param->length;
+         memcpy(p_db_access_evt->p_params->value.p_value, p_param->value, p_param->length);
+    }
+
+     return p_cb_evt;
+}
+
 
 /*******************************************************************************************************************//**
  *  Handle received GATT client messages. Messages might generated a callback event.
@@ -3496,9 +3867,20 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_handler(uint8_t * p_gtl_msg)
     {
         case R_BLE_GTL_GATTC_WRITE_REQ_IND:
         {
+
             r_ble_gtl_gattc_write_req_ind_t * p_param = 
-                                    (r_ble_gtl_gattc_write_req_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
-            p_cb_evt = r_ble_gtl_gattc_write_req_ind_handler(conn_hdl, p_param);
+                                        (r_ble_gtl_gattc_write_req_ind_t *)&p_gtl_msg[sizeof(r_ble_gtl_msg_hdr_t)];
+
+        /* If the atttibute is RI type, then it should not be accessed via DA1453x database but through host database */
+            if(r_ble_gtl_is_ri_index((uint16_t)(p_param->handle - g_dev_params.att_hndl_offset)) == DB_VALID_INDEX)
+            {
+                p_cb_evt = r_ble_gtl_gattc_write_ri_req_ind_handler(conn_hdl, p_param);
+            }
+            else
+            {
+                p_cb_evt = r_ble_gtl_gattc_write_req_ind_handler(conn_hdl, p_param);
+            }
+
             break;
         }
 
@@ -3811,6 +4193,7 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_write_req_ind_handler(uint16_t conn_
     p_cb_evt = r_ble_gtl_cb_evt_allocate(BLE_GATTS_EVENT_WRITE_RSP_COMP, status, sizeof(st_ble_gatts_write_rsp_evt_t));
     if (NULL != p_cb_evt)
     {
+        p_cb_evt->data.gatts.conn_hdl  = conn_hdl;
         p_write_rsp_evt = p_cb_evt->data.gatts.p_param;
         p_write_rsp_evt->attr_hdl = (uint16_t)(p_param->handle - g_dev_params.att_hndl_offset);
 
@@ -3853,12 +4236,18 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_gattc_read_req_ind_handler(uint16_t conn_h
     uint8_t   status    = R_BLE_GTL_ATT_ERR_REQUEST_NOT_SUPPORTED;
     uint8_t * p_value   = NULL;
     uint16_t  value_len = 0;
+    uint16_t  att_index = (uint16_t)((int32_t)p_param->handle - g_dev_params.att_hndl_offset);
 
-    /* All characteristic values are stored in the DA1453x, except for client configuration characteristics */
-    if (BLE_SUCCESS == r_ble_gtl_gap_get_char_value_by_handle((uint16_t)((int32_t)p_param->handle 
-                                                                                - g_dev_params.att_hndl_offset),
-                                                              &p_value, &value_len))
+    /* All characteristic values are stored in the DA1453x, except for client configuration 
+                                                                    characteristics that are RI type*/
+    if (BLE_SUCCESS == r_ble_gtl_gap_get_char_value_by_handle(att_index, &p_value, &value_len))
     {
+        uint16_t *p_ccc_val = 0;
+        uint16_t state = r_ble_gtl_get_ri_value_with_db_index(att_index, &p_ccc_val);
+        if (DB_VALID_INDEX == state)
+        {
+            p_value = (uint8_t *)p_ccc_val;
+        }
         status = R_BLE_GTL_GAP_ERR_NO_ERROR;
     }
 
@@ -4248,7 +4637,7 @@ static ble_status_t r_ble_gtl_gapm_send_dev_config_cmd(void)
         p_cmd->gap_start_hdl  = 0x0000; /* Let DA14531 selects its own handles */
         p_cmd->gatt_start_hdl = 0x0000;
         p_cmd->att_cfg_       = 0x0000; /* Not used, must be set to zero */
-        p_cmd->max_mtu        = BLE_CFG_ABS_GATT_MTU_SIZE;
+        p_cmd->max_mtu        = BLE_ABS_CFG_GATT_MTU_SIZE;
         p_cmd->max_mps        = 0;
         p_cmd->role           = R_BLE_GTL_PERIPHERAL_ROLE;
         p_cmd->att_cfg        = 0x00; /* Don't allow writes to device name or appearance */
@@ -6045,6 +6434,134 @@ static ble_status_t r_ble_gtl_gap_get_char_value_by_uuid(uint16_t uuid, uint8_t 
 }
 
 /*******************************************************************************************************************//**
+ *  Read transmit power level and convert into units of dBm.
+ *
+ * @param[in]  p_tx_pwr         Pointer into which power level value should be written
+ *
+ * @retval BLE_SUCCESS          Power level read successfully
+ * @retval BLE_ERR_INVALID_DATA Invalid power level returned
+ **********************************************************************************************************************/
+static ble_status_t r_ble_gtl_aux_get_tx_power(int8_t * p_tx_pwr)
+{
+    uint8_t      tx_power_level;
+    ble_status_t status = BLE_ERR_ALREADY_IN_PROGRESS;
+
+    if (true == r_ble_gtl_mutex_take(R_BLE_GTL_MUTEX_RX))
+    {
+        status = r_ble_gtl_aux_send_get_tx_power_cmd();
+        if (BLE_SUCCESS == status)
+        {
+            status = r_ble_gtl_msg_wait_for_response(R_BLE_GTL_AUX_GET_TX_POWER_RSP,
+                                                     &tx_power_level,
+                                                     sizeof(tx_power_level),
+                                                     R_BLE_GTL_MSG_RSP_TIMEOUT_MS);
+            if (BLE_SUCCESS == status)
+            {
+                /* Convert response into dBm */
+                if ((sizeof(tx_pwr_lut) > tx_power_level) && (0 < tx_power_level))
+                {
+                    *p_tx_pwr = tx_pwr_lut[tx_power_level];
+                }
+                else
+                {
+                    status =  BLE_ERR_INVALID_DATA;
+                }
+            }
+
+        }
+        r_ble_gtl_mutex_give(R_BLE_GTL_MUTEX_RX);
+    }
+
+    return status;
+}
+
+/*******************************************************************************************************************//**
+ *  Set transmit power level.
+ *
+ * @param[in] tx_pwr                   Power level value
+ *
+ * @retval BLE_SUCCESS                 Power level set successfully
+ * @retval BLE_ERR_ALREADY_IN_PROGRESS Busy with another command
+ **********************************************************************************************************************/
+static ble_status_t r_ble_gtl_aux_set_tx_power(uint8_t tx_pwr)
+{
+    ble_status_t status = BLE_ERR_ALREADY_IN_PROGRESS;
+
+    if (true == r_ble_gtl_mutex_take(R_BLE_GTL_MUTEX_RX))
+    {
+        status = r_ble_gtl_aux_send_set_tx_power_cmd(tx_pwr);
+        if (BLE_SUCCESS == status)
+        {
+            status = r_ble_gtl_msg_wait_for_cmd_complete(R_BLE_GTL_AUX_SET_TX_POWER_CMP_EVT,
+                                                         R_BLE_GTL_AUX_SET_TX_POWER,
+                                                         R_BLE_GTL_GAP_ERR_NO_ERROR,
+                                                         R_BLE_GTL_MSG_CMD_CMP_TIMEOUT_MS);
+        }
+        r_ble_gtl_mutex_give(R_BLE_GTL_MUTEX_RX);
+    }
+
+    return status;
+}
+
+/*******************************************************************************************************************//**
+ *  Send get transmit power command to the DA14xxx
+ *
+ * @retval BLE_SUCCESS                  Command transmitted successfully
+ * @retval BLE_ERR_MEM_ALLOC_FAILED     Insufficient memory to create command message
+ **********************************************************************************************************************/
+static ble_status_t r_ble_gtl_aux_send_get_tx_power_cmd(void)
+{
+    ble_status_t   status;
+    uint8_t      * p_cmd;
+
+    p_cmd = r_ble_gtl_msg_allocate(R_BLE_GTL_AUX_GET_TX_POWER_CMD,
+                                   R_BLE_GTL_TASK_ID_AUX,
+                                   R_BLE_GTL_TASK_ID_GTL,
+                                   sizeof(r_ble_gtl_aux_get_pwr_cmd_t));
+    if (NULL != p_cmd)
+    {
+        status = r_ble_gtl_msg_transmit(p_cmd);
+    }
+    else
+    {
+        status = BLE_ERR_MEM_ALLOC_FAILED;
+    }
+
+    return status;
+}
+
+/*******************************************************************************************************************//**
+ *  Send set transmit power command to the DA14xxx
+ *
+ * @param[in] operation                 Power level value
+ *
+ * @retval BLE_SUCCESS                  Command transmitted successfully
+ * @retval BLE_ERR_MEM_ALLOC_FAILED     Insufficient memory to create command message
+ **********************************************************************************************************************/
+static ble_status_t r_ble_gtl_aux_send_set_tx_power_cmd(uint8_t operation)
+{
+    ble_status_t                  status;
+    r_ble_gtl_aux_set_pwr_cmd_t * p_cmd;
+
+    p_cmd = (r_ble_gtl_aux_set_pwr_cmd_t *)r_ble_gtl_msg_allocate(R_BLE_GTL_AUX_SET_TX_POWER_CMD,
+                                                                  R_BLE_GTL_TASK_ID_AUX,
+                                                                  R_BLE_GTL_TASK_ID_GTL,
+                                                                  sizeof(r_ble_gtl_aux_set_pwr_cmd_t));
+    if (NULL != p_cmd)
+    {
+        p_cmd->operation = operation;
+
+        status = r_ble_gtl_msg_transmit((uint8_t *)p_cmd);
+    }
+    else
+    {
+        status = BLE_ERR_MEM_ALLOC_FAILED;
+    }
+
+    return status;
+}
+
+/*******************************************************************************************************************//**
  *  Parse received GTL message byte. Once complete message is received it is queued for processing by the R_BLE_Execute
  *  function (which is called periodically by the users application).
  *
@@ -6535,35 +7052,7 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_cb_evt_allocate(uint16_t type, ble_status_
 
             case R_BLE_GTL_CB_EVT_TYPE_VS:
             {
-                if (BLE_VS_EVENT_GET_ADDR_COMP == type)
-                {
-                    if (0 != param_len)
-                    {
-                        p_evt_cb->data.vs.p_param = r_ble_gtl_malloc(param_len);
-                        if (NULL != p_evt_cb->data.vs.p_param)
-                        {
-                            allocated = true;
-                        }
-                    }
-                    else
-                    {
-                        p_evt_cb->data.vs.p_param = NULL;
-                        allocated = true;
-                    }
-
-                    if (true == allocated)
-                    {
-                        p_evt_cb->type              = type;
-                        p_evt_cb->result            = result;
-                        p_evt_cb->data.vs.param_len = param_len;
-                    }
-                    else
-                    {
-                        r_ble_gtl_free(p_evt_cb);
-                        p_evt_cb = NULL;
-                    }
-                }
-                else if (BLE_VS_EVENT_GET_RAND == type)
+                if (BLE_VS_EVENT_GET_RAND == type)
                 {
                     st_ble_vs_get_rand_comp_evt_t * p_rand_comp;
 
@@ -6597,7 +7086,31 @@ static r_ble_gtl_cb_evt_t * r_ble_gtl_cb_evt_allocate(uint16_t type, ble_status_
                 }
                 else
                 {
-                    ; /* Unsupported event */
+                    if (0 != param_len)
+                    {
+                        p_evt_cb->data.vs.p_param = r_ble_gtl_malloc(param_len);
+                        if (NULL != p_evt_cb->data.vs.p_param)
+                        {
+                            allocated = true;
+                        }
+                    }
+                    else
+                    {
+                        p_evt_cb->data.vs.p_param = NULL;
+                        allocated = true;
+                    }
+
+                    if (true == allocated)
+                    {
+                        p_evt_cb->type              = type;
+                        p_evt_cb->result            = result;
+                        p_evt_cb->data.vs.param_len = param_len;
+                    }
+                    else
+                    {
+                        r_ble_gtl_free(p_evt_cb);
+                        p_evt_cb = NULL;
+                    }
                 }
                 break;
             }
@@ -7690,19 +8203,31 @@ static bool r_ble_gtl_mutex_give(uint32_t mutex)
 static void r_ble_gtl_hw_reset(void)
 {
 #if (0 == BLE_CFG_RESET_POLARITY)
+    /* Generate an active low reset */
     BLE_SCK_DDR(BLE_CFG_SCK_PORT, BLE_CFG_SCK_PIN) = 1;
     BLE_SCK_DR(BLE_CFG_SCK_PORT, BLE_CFG_SCK_PIN) = 0;
     BLE_RESET_DDR(BLE_CFG_RESET_PORT, BLE_CFG_RESET_PIN) = 1;
     BLE_RESET_DR(BLE_CFG_RESET_PORT, BLE_CFG_RESET_PIN) = 0;
-    r_ble_gtl_delay(1);
+    r_ble_gtl_delay(R_BLE_GTL_RESET_PULSE_MS);
     BLE_RESET_DR(BLE_CFG_RESET_PORT, BLE_CFG_RESET_PIN) = 1;
 #else
+	/* Generate an active high reset */
     BLE_SCK_DDR(BLE_CFG_SCK_PORT, BLE_CFG_SCK_PIN) = 1;
     BLE_SCK_DR(BLE_CFG_SCK_PORT, BLE_CFG_SCK_PIN) = 0;
     BLE_RESET_DDR(BLE_CFG_RESET_PORT, BLE_CFG_RESET_PIN) = 0;
     BLE_RESET_DR(BLE_CFG_RESET_PORT, BLE_CFG_RESET_PIN) = 1;
-    r_ble_gtl_delay(1);
+    r_ble_gtl_delay(R_BLE_GTL_RESET_PULSE_MS);
     BLE_RESET_DR(BLE_CFG_RESET_PORT, BLE_CFG_RESET_PIN) = 0;
+#endif
+#if (2 == BLE_CFG_HOST_BOOT_MODE) && (DA14531_DEVICE == BLE_CFG_DA1453x_DEVICE)
+/* Restore Reset-Rx pin initial status back to Input */
+/* Configure pins. */
+    BLE_RESET_DDR(BLE_CFG_RESET_PORT, BLE_CFG_RESET_PIN) = 1;
+#if (0 == BLE_CFG_RESET_POLARITY)
+    BLE_RESET_DR(BLE_CFG_RESET_PORT, BLE_CFG_RESET_PIN) = 1;
+#else
+    BLE_RESET_DR(BLE_CFG_RESET_PORT, BLE_CFG_RESET_PIN) = 0;
+#endif
 #endif
 }
 
@@ -7907,35 +8432,8 @@ static bool r_ble_gtl_adv_timer_expired(void)
 
     return expired;
 }
-
-/*******************************************************************************************************************//**
- *  Initialize event signalling mechanism
- *
- * @retval true             Initialization successful.
- * @retval false            Initialization failed.
- **********************************************************************************************************************/
-static bool r_ble_gtl_event_init(void)
-{
-    bool init = false;
-
-#if BSP_CFG_RTOS_USED == 1 /* FreeRTOS */
-    g_events = xEventGroupCreate();
-    if (NULL != g_events)
-    {
-        init = true;
-    }
-#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
-    if (TX_SUCCESS == tx_event_flags_create(&g_events, "EVENTS"))
-    {
-        init = true;
-    }
 #endif
-
-    return init;
-}
-#endif
-
-#if (BLE_CFG_HOST_BOOT_MODE == 1)
+#if (BLE_CFG_HOST_BOOT_MODE > 0)
 /*******************************************************************************************************************//**
  *  Transmit image to DA1453x.
  *
@@ -7981,7 +8479,7 @@ static ble_status_t r_ble_gtl_boot_load_image(void)
 {
     ble_status_t      status  = BLE_ERR_UNSPECIFIED;
     uint8_t           rx_crc  = 0;
-    volatile uint32_t timeout = 20;
+    volatile uint32_t timeout = 1000;
 
     /* Inform UART ISR how to handle received data */
     g_booting = true;
@@ -8038,6 +8536,31 @@ static ble_status_t r_ble_gtl_boot_load_image(void)
 }
 #endif
 
+/*******************************************************************************************************************//**
+ *  Initialize event signalling mechanism
+ *
+ * @retval true             Initialization successful.
+ * @retval false            Initialization failed.
+ **********************************************************************************************************************/
+static bool r_ble_gtl_event_init(void)
+{
+    bool init = false;
+
+#if BSP_CFG_RTOS_USED == 1 /* FreeRTOS */
+    g_events = xEventGroupCreate();
+    if (NULL != g_events)
+    {
+        init = true;
+    }
+#elif BSP_CFG_RTOS_USED == 5 /* ThreadX */
+    if (TX_SUCCESS == tx_event_flags_create(&g_events, "EVENTS"))
+    {
+        init = true;
+    }
+#endif
+
+    return init;
+}
 #if BSP_CFG_RTOS_USED == 0 /* Baremetal */
 /*******************************************************************************************************************//**
  *  Initialize FIFO

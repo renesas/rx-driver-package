@@ -55,6 +55,7 @@
 *              : 24.01.2023 5.00    Added Flash Type 5.
 *                                   Modified the condition of PFRAM section definition.
 *              : 30.07.2024 5.20    Modified FISR register settings.
+*              : 15.11.2024 5.21    Added WAIT_LOOP comment.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -1481,6 +1482,7 @@ flash_err_t r_flash_control(flash_cmd_t cmd, void *pcfg)
             flash_stop();   // can abort an outstanding erase or blankcheck command
         }
 
+        /* WAIT_LOOP */
         while (FLASH_READY != g_flash_state)
             ;
 #endif
@@ -1525,6 +1527,7 @@ flash_err_t r_flash_control(flash_cmd_t cmd, void *pcfg)
     else if (FLASH_CMD_ROM_CACHE_ENABLE == cmd)
     {
         FLASH.ROMCIV.BIT.ROMCIV = 1;                // start invalidation
+        /* WAIT_LOOP */
         while (0 != FLASH.ROMCIV.BIT.ROMCIV)        // wait for invalidation to complete
         {
             R_BSP_NOP();

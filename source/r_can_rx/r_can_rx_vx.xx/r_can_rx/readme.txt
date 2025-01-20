@@ -15,7 +15,7 @@ Features
         - Multiple CAN channels.
         - Loopback modes for easy testing.
         - Remote frames.
-        - Bus error checking. 
+        - Bus error checking.
 
 Supported MCUs
 --------------
@@ -64,9 +64,9 @@ How to add the driver to your project
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.05
-* GNURX 8.3.0.202305
-* ICCRX 4.20.3
+* Renesas RX v3.06
+* GNURX 8.3.0.202311
+* ICCRX 5.10.01
 
 File Structure
 --------------

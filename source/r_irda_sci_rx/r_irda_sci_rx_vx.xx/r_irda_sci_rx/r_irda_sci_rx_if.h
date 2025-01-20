@@ -1,33 +1,29 @@
-/*******************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
-*
-* Copyright (C) 2015 Renesas Electronics Corporation. All rights reserved.
-*******************************************************************************/
-/*******************************************************************************
+/***********************************************************************************************************************
+ * DISCLAIMER
+ * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
+ * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
+ * applicable laws, including copyright laws.
+ * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
+ * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
+ * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
+ * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
+ * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+ * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
+ * this software. By using this software, you agree to the additional terms and conditions found by accessing the
+ * following link:
+ * http://www.renesas.com/disclaimer
+ *
+ * Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
+ **********************************************************************************************************************/
+/***********************************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 01.12.2014 1.00     First Release
 *              : 27.01.2015 1.01     Chage symbol name of Arguments 
 *                                    None change proceedures.
-*******************************************************************************/
-/*******************************************************************************
+*              : 15.11.2024 1.02     Changed Minor version to 1.02.
+ **********************************************************************************************************************/
+/***********************************************************************************************************************
 * System Name  : interface file for irda fit module.
 * File Name    : r_irda_sci_rx_if.h
 * Version      : 1.01
@@ -38,13 +34,13 @@
 * H/W Platform : RSKRX113
 * Description  : Functions for using IRDA on RX devices. 
 * Limitation   : none
-*******************************************************************************/
+ **********************************************************************************************************************/
 #ifndef IRDA_SCI_IF_H
 #define IRDA_SCI_IF_H
 
-/*******************************************************************************
+/***********************************************************************************************************************
   Includes   <System Includes> , "Project Includes"
-*******************************************************************************/
+ **********************************************************************************************************************/
 /* Fixed width integer support. */
 #include <stdint.h>
 /* bool support */
@@ -53,16 +49,16 @@
 /* Used for configuring the IrDA code */
 #include "r_irda_sci_rx_config.h"
 
-/*******************************************************************************
+/***********************************************************************************************************************
   Macro definitions
-*******************************************************************************/
+ **********************************************************************************************************************/
 /* Version Number of API. */
 #define IRDA_SCI_VERSION_MAJOR  (1)
-#define IRDA_SCI_VERSION_MINOR  (01)
+#define IRDA_SCI_VERSION_MINOR  (02)
 
-/*******************************************************************************
+/***********************************************************************************************************************
   Typedef definitions
-*******************************************************************************/
+ **********************************************************************************************************************/
 /* SCI channel numbers */
 typedef enum e_irda_sci_ch
 {
@@ -156,9 +152,9 @@ typedef struct st_irda_sci_cb_args
     uint8_t              byte;      /* byte read when error occurred (unused for TEI, XFER_DONE) */
 } irda_sci_cb_args_t;
 
-/*******************************************************************************
+/***********************************************************************************************************************
   Public Functions
-*******************************************************************************/
+ **********************************************************************************************************************/
 extern irda_sci_err_t R_IRDA_SCI_Open       (uint8_t const          chan,
                                             irda_sci_t * const      p_cfg,
                                             void                    (* const p_callback)(void *p_args),

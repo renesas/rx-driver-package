@@ -80,6 +80,7 @@
 *                               Added definition of R_BSP_ClockReset_Bootloader function.
 *         : 31.05.2024 1.55     Changed Minor version to 7.50.
 *         : 05.07.2024 1.56     Changed Minor version to 7.51.
+*         : 27.11.2024 1.57     Changed Minor version to 7.52.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -125,7 +126,7 @@ Macro definitions
 
 /* Version Number of r_bsp. */
 #define R_BSP_VERSION_MAJOR           (7)
-#define R_BSP_VERSION_MINOR           (51)
+#define R_BSP_VERSION_MINOR           (52)
 
 /* This macro is used to suppress compiler messages about not only a parameter but also a auto variable not being used
  * in a function. The nice thing about using this implementation is that it does not take any extra RAM or ROM.

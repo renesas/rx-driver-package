@@ -41,6 +41,7 @@
 *              : 30.07.2024 5.20    Modified functions flash_InterruptRequestDisable(), flash_InterruptRequestEnable().
 *                                   (When using the GCC or IAR compiler in non-blocking mode,
 *                                    ROM access occurs during P/E mode.)
+*              : 15.11.2024 5.21    Added WAIT_LOOP comment.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -173,6 +174,7 @@ static void R_FlashCodeCopy(void)
     p_rom_section = (uint8_t *)R_BSP_SECTOP(PFRAM);
 
     /* Copy code from ROM to RAM. */
+    /* WAIT_LOOP */
     for (bytes_copied = 0; bytes_copied < R_BSP_SECSIZE(PFRAM); bytes_copied++)
     {
         p_ram_section[bytes_copied] = p_rom_section[bytes_copied];
@@ -185,6 +187,7 @@ static void R_FlashCodeCopy(void)
     p_rom_section = (uint8_t *)R_BSP_SECTOP(PFRAM2);
 
     /* Copy code from ROM to RAM. */
+    /* WAIT_LOOP */
     for (bytes_copied = 0; bytes_copied < R_BSP_SECSIZE(PFRAM2); bytes_copied++)
     {
         p_ram_section[bytes_copied] = p_rom_section[bytes_copied];
@@ -209,11 +212,13 @@ static void R_FlashCodeCopy(void)
 
     /* Copy code from ROM to RAM. */
 #if defined(__LIT)
+    /* WAIT_LOOP */
     for (bytes_copied = 0; bytes_copied < R_BSP_SECSIZE(PFRAM_init); bytes_copied++)
     {
         p_ram_section[bytes_copied] = p_rom_section[bytes_copied];
     }
 #elif defined(__BIG)
+    /* WAIT_LOOP */
     for (bytes_copied = 0; bytes_copied < R_BSP_SECSIZE(PFRAM_init); bytes_copied+=4)
     {
         /* Copy over data 4 byte at a time. */
@@ -232,11 +237,13 @@ static void R_FlashCodeCopy(void)
 
     /* Copy code from ROM to RAM. */
 #if defined(__LIT)
+    /* WAIT_LOOP */
     for (bytes_copied = 0; bytes_copied < R_BSP_SECSIZE(PFRAM2_init); bytes_copied++)
     {
         p_ram_section[bytes_copied] = p_rom_section[bytes_copied];
     }
 #elif defined(__BIG)
+    /* WAIT_LOOP */
     for (bytes_copied = 0; bytes_copied < R_BSP_SECSIZE(PFRAM2_init); bytes_copied+=4)
     {
         /* Copy over data 4 byte at a time. */

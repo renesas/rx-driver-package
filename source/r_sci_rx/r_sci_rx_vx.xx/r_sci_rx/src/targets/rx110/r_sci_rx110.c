@@ -17,7 +17,7 @@
 * Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
 ***********************************************************************************************************************/
 /**********************************************************************************************************************
-* File Name    : r_sci_rx.c
+* File Name    : r_sci_rx110.c
 * Description  : Functions for using SCI on the RX110 device.
 ***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
@@ -29,6 +29,8 @@
 *           31.03.2021 3.80    Added support circular buffer in mode asynchronous.
 *           27.12.2022 4.60    Updated macro definition enable and disable nested interrupt for TXI, RXI, ERI, TEI.
 *           31.01.2024 5.10    Added WAIT_LOOP comments.
+*           01.11.2024 5.40    Fixed the issue that data cannot be sent when using the SCI_CMD_TX_Q_FLUSH command
+*                              with the R_SCI_Control() function before executing the R_SCI_Send() function.
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -638,6 +640,12 @@ sci_err_t sci_async_cmds(sci_hdl_t const hdl,
         DISABLE_TXI_INT;
         R_BYTEQ_Flush(hdl->u_tx_data.que);
         ENABLE_TXI_INT;
+
+        /* Re-enable interrupts */
+        hdl->rom->regs->SCR.BYTE &= (~SCI_EN_XCVR_MASK);
+        SCI_SCR_DUMMY_READ;
+        SCI_IR_TXI_CLEAR;
+        hdl->rom->regs->SCR.BYTE |= SCI_EN_XCVR_MASK;
 #endif
     break;
     }

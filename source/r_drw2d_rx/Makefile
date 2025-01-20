@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_drw2d_rx
-VERSION = 		1.12
+VERSION = 		1.13
 MDF = V1
 
 CONFIG_FOLDER = r_config
