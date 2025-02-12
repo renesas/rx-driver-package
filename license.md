@@ -12,7 +12,7 @@
 | Bluetooth Mesh(crackle) | Mindtree(Mike Ryan) | BSD 2-Clause License                                                                                         |
 | [emWin](https://www.segger.com/products/user-interface/emwin/add-ons/emwin-support-renesas-rx-mcu/) | SEGGER-Renesas | Renesas Sub-license Agreement                   |
 | [TinyCrypt](https://github.com/intel/tinycrypt/)      | Intel Corporation     | BSD-3-Clause and BSD-2-Clause. See [LICENSE](https://github.com/intel/tinycrypt/blob/master/LICENSE)|
-| Bluetooth Mesh(crackle) | Mindtree(Mike Ryan) | BSD 2-Clause License                                                                                         |
+| crackle | Mindtree | BSD 2-Clause License                                                                                         |
 | TES Dave2D                                            | TES Electronics Solutions GmBH     | [Renesas Open License v1.0](#renesas-open-license-v10)                                      |
 
 ## BSD 3-Clause License
