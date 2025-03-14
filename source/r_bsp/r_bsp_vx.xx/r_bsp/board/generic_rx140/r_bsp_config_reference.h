@@ -41,6 +41,16 @@
 *                               Modified comment.
 *         : 22.04.2022 1.03     Modified comment.
 *         : 28.02.2023 1.04     Modified comment.
+*         : 21.11.2023 1.05     Added the following macro definitions.
+*                                - BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE
+*                                - BSP_CFG_MEMORY_BUS1_PRIORITY
+*                                - BSP_CFG_MEMORY_BUS2_PRIORITY
+*                                - BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY
+*                                - BSP_CFG_INTERNAL_PERIPHERAL_BUS2_3_PRIORITY
+*                                - BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY
+*                                - BSP_CFG_BOOTLOADER_PROJECT
+*                               Deleted the BSP_CFG_ROM_CODE_PROTECT_VALUE.
+*                               Modified comment.
 ***********************************************************************************************************************/
 
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
@@ -410,7 +420,7 @@ Configuration Options
 /* Configure whether voltage detection 1 circuit and HOCO are enabled after reset.
    OFS1 - Option Function Select Register 1
        b31:b14 Reserved (set to 1)
-       b13:b12 HOCOFQ - HOCO Flequency Select
+       b13:b12 HOCOFQ - HOCO Frequency Select
              0 0: 48 MHz
              0 1: 48 MHz
              1 0: 24 MHz
@@ -428,14 +438,6 @@ Configuration Options
    Default value is 0xFFFFDFFF.
 */
 #define BSP_CFG_OFS1_REG_VALUE  (0xFFFFDFFF)
-
-/* ROM Code Protection is a feature that can prohibit PROM programmers from reading or writing flash memory.
-   There are 3 different options that can be chosen:
-   0    = ROM code protection 1 = Both reading and writing to the user area and user boot area are prohibited.
-   1    = ROM code protection 2 = Reading from the user area and user boot area are prohibited.
-   Else = Protection disabled   = Reading and writing are allowed.
-*/
-#define BSP_CFG_ROM_CODE_PROTECT_VALUE  (0xFFFFFFFF)
 
 /* This macro lets other modules no if a RTOS is being used.
    0 = RTOS is not used.
@@ -604,6 +606,49 @@ Configuration Options
    1 = This project is a C++ project.
 */
 #define BSP_CFG_CPLUSPLUS             (0)
+
+/* Select whether to enable bus priority initialization.
+   0 = Bus priority initialization is disabled.
+   1 = Bus priority initialization is enabled.
+*/
+#define BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE      (0)
+
+/* Select the priority order for memory bus 1 (RAM).
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_MEMORY_BUS1_PRIORITY                (0)
+
+/* Select the priority order for memory bus 2 (ROM).
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_MEMORY_BUS2_PRIORITY                (0)
+
+/* Select the priority order for internal peripheral bus 1.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY   (0)
+
+/* Select the priority order for internal peripheral buses 2 and 3.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS2_3_PRIORITY (0)
+
+/* Select the priority order for internal peripheral bus 6.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY   (0)
+
+/* Select whether it is bootloader project.
+   0 = This project isn't a bootloader project.
+   1 = This project is a bootloader project.
+   NOTE: Not normally used. Set this to "1" only in the bootloader project.
+*/
+#define BSP_CFG_BOOTLOADER_PROJECT    (0)
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

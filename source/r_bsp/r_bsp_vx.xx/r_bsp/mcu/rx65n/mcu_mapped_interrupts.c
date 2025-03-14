@@ -61,6 +61,7 @@
 *                                - TSIP_INTEGRATE_WRRDY
 *                                - TSIP_INTEGRATE_RDRDY
 *         : 28.02.2019 2.01      Fixed coding style.
+*         : 21.11.2023 2.02      Added processing to clear the IR flag.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -710,6 +711,13 @@ void bsp_mapped_interrupt_open (void)
     /* Casting is valid because it matches the type to the right side or argument. */
     BSP_PRV_INT_SELECT(BSP_PRV_A, BSP_MAPPED_INT_CFG_A_VECT_AES_AESEND) = BSP_PRV_INT_A_NUM_AES_AESEND;
 #endif
+
+    /* Write 0 to the IRn.IR flag. */
+    /* WAIT_LOOP */
+    for(uint16_t i = IR_PERIB_INTB128;i <= IR_PERIA_INTA255; i++)
+    {
+        ICU.IR[i].BIT.IR = 0;
+    }
 
 } /* End of function bsp_mapped_interrupt_open() */
 

@@ -28,6 +28,7 @@
 *         : 28.02.2019 3.00     Added bsp_ram_initialize function.
 *                               Fixed coding style.
 *         : 26.07.2019 3.01     Added R_BSP_SoftwareReset function.
+*         : 21.11.2023 3.02     Added bsp_bus_priority_initialize function.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -85,6 +86,9 @@ void     R_BSP_SoftwareReset(void);
 
 void     bsp_register_protect_open(void); //r_bsp internal function. DO NOT CALL.
 void     bsp_ram_initialize(void);
+#if BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE == 1
+void     bsp_bus_priority_initialize(void);
+#endif
 
 #endif /* CPU_H */
 

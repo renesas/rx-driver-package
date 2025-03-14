@@ -48,6 +48,7 @@
 *                               Added comments for when use simulator.
 *                               Added version check of smart configurator.
 *         : 22.04.2022 3.01     Deleted version check of smart configurator.
+*         : 21.11.2023 3.02     Deleted the usb_lpc_clock_source_select function.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -90,7 +91,6 @@ Private global variables and functions
 #if BSP_CFG_STARTUP_DISABLE == 0
 static void operating_frequency_set(void);
 static void clock_source_select(void);
-static void usb_lpc_clock_source_select(void);
 #endif /* BSP_CFG_STARTUP_DISABLE == 0 */
 
 /***********************************************************************************************************************
@@ -158,7 +158,6 @@ void mcu_clock_setup(void)
 {
     /* Switch to high-speed operation */
     operating_frequency_set();
-    usb_lpc_clock_source_select();
 } /* End of function mcu_clock_setup() */
 
 /***********************************************************************************************************************
@@ -456,25 +455,6 @@ static void clock_source_select (void)
     /* LOCO is not chosen but it cannot be turned off yet since it is still being used. */
 #endif
 } /* End of function clock_source_select() */
-
-/***********************************************************************************************************************
-* Function name: usb_lpc_clock_source_select
-* Description  : Enables clock sources for the usb and lpc (if not already done) as chosen by the user.
-*                This function also implements the software delays needed for the clocks to stabilize.
-* Arguments    : none
-* Return value : none
-***********************************************************************************************************************/
-static void usb_lpc_clock_source_select (void)
-{
-    /* Protect off. DO NOT USE R_BSP_RegisterProtectDisable()! (not initialized yet) */
-    SYSTEM.PRCR.WORD = 0xA50F;
-
-    /* INITIALIZE AND SELECT LPC CLOCK SOURCE */
-
-    /* Enable protect bit */
-    SYSTEM.PRCR.WORD = 0xA500;
-    return;
-} /* End of function usb_lpc_clock_source_select() */
 
 #endif /* BSP_CFG_STARTUP_DISABLE == 0 */
 

@@ -26,6 +26,7 @@
 *                               Added support for GNUC and ICCRX.
 *                               Fixed coding style.
 *         : 29.01.2021 3.01     Added tha __write function and __read function for ICCRX.
+*         : 31.05.2024 3.02     Fixed coding style.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -201,7 +202,7 @@ void close_all(void)
     long i;
 
     /* WAIT_LOOP */
-    for( i=0; i < _nfiles; i++ )
+    for( i = 0; i < _nfiles; i++ )
     {
         /* Checks if the file is opened or not */
         if( _Files[i]->_Mode & (BSP_PRV_MOPENR | BSP_PRV_MOPENW | BSP_PRV_MOPENA ) )

@@ -42,6 +42,17 @@
 *         : 22.04.2022 3.14     Modified the following functions.
 *                               - R_BSP_VoltageLevelSetting
 *         : 28.02.2023 3.15     Modified comment.
+*         : 21.11.2023 3.16     Added the following macro definitions.
+*                               - BSP_PRV_BUSPRI_BPRA_TOGGLE
+*                               - BSP_PRV_BUSPRI_BPRO_TOGGLE
+*                               - BSP_PRV_BUSPRI_BPIB_TOGGLE
+*                               - BSP_PRV_BUSPRI_BPGB_TOGGLE
+*                               - BSP_PRV_BUSPRI_BPHB_TOGGLE
+*                               - BSP_PRV_BUSPRI_BPFB_TOGGLE
+*                               - BSP_PRV_BUSPRI_BPEB_TOGGLE
+*                               - BSP_PRV_BUSPRI_BPXB_TOGGLE
+*                               Added bsp_bus_priority_initialize function.
+*         : 31.05.2024 3.17     Fixed coding style.
 **********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -82,6 +93,17 @@ Macro definitions
 #define BSP_PRV_VOLSR_RICVLS_BIT_NUM  (7)
 #endif /* BSP_MCU_VOLTAGE_LEVEL_SETTING_RIIC */
 #endif /* BSP_MCU_VOLTAGE_LEVEL_SETTING */
+
+#if BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE == 1
+#define BSP_PRV_BUSPRI_BPRA_TOGGLE    (0x0001)
+#define BSP_PRV_BUSPRI_BPRO_TOGGLE    (0x0004)
+#define BSP_PRV_BUSPRI_BPIB_TOGGLE    (0x0010)
+#define BSP_PRV_BUSPRI_BPGB_TOGGLE    (0x0040)
+#define BSP_PRV_BUSPRI_BPHB_TOGGLE    (0x0100)
+#define BSP_PRV_BUSPRI_BPFB_TOGGLE    (0x0400)
+#define BSP_PRV_BUSPRI_BPEB_TOGGLE    (0x1000)
+#define BSP_PRV_BUSPRI_BPXB_TOGGLE    (0x4000)
+#endif /* BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE == 1 */
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -125,7 +147,7 @@ static const    uint16_t s_prcr_masks[BSP_REG_PROTECT_TOTAL_ITEMS-1] =
  * @note The 'I' bit of the PSW can only be modified when in Supervisor Mode. If the CPU is in User Mode and this 
  * function is called, this function does nothing.
  */
-void R_BSP_InterruptsDisable (void)
+void R_BSP_InterruptsDisable(void)
 {
     uint32_t    pmode;
 
@@ -150,7 +172,7 @@ void R_BSP_InterruptsDisable (void)
  * @note The 'I' bit of the PSW can only be modified when in Supervisor Mode. If the CPU is in User Mode and this 
  * function is called, this function does nothing.
  */
-void R_BSP_InterruptsEnable (void)
+void R_BSP_InterruptsEnable(void)
 {
     uint32_t    pmode;
 
@@ -174,7 +196,7 @@ void R_BSP_InterruptsEnable (void)
  * @details This function reads the CPU's Interrupt Priority Level. This level is stored in the IPL bits of the 
  * Processor Status Word (PSW) register.
  */
-uint32_t R_BSP_CpuInterruptLevelRead (void)
+uint32_t R_BSP_CpuInterruptLevelRead(void)
 {
     /* Use the compiler intrinsic function to read the CPU IPL. */
     uint32_t psw_value;
@@ -201,9 +223,9 @@ uint32_t R_BSP_CpuInterruptLevelRead (void)
  * @note The CPU's IPL can only be modified by the user when in Supervisor Mode. If the CPU is in User Mode and this
  * function is called, this function does not control IPL and return false.
  */
-bool R_BSP_CpuInterruptLevelWrite (uint32_t level)
+bool R_BSP_CpuInterruptLevelWrite(uint32_t level)
 {
-    bool ret;
+    bool     ret;
     uint32_t pmode;
 
     /* The R_BSP_SET_IPL() function use the MVTIPL instruction.
@@ -270,7 +292,7 @@ bool R_BSP_CpuInterruptLevelWrite (uint32_t level)
                 R_BSP_SET_IPL(7);
                 break;
 
-    #if 7 < BSP_MCU_IPL_MAX
+#if 7 < BSP_MCU_IPL_MAX
             case (8):
 
                 /* IPL = 8 */
@@ -318,7 +340,7 @@ bool R_BSP_CpuInterruptLevelWrite (uint32_t level)
                 /* IPL = 15 */
                 R_BSP_SET_IPL(15);
                 break;
-    #endif /* BSP_MCU_IPL_MAX */
+#endif /* 7 < BSP_MCU_IPL_MAX */
 
             default:
                 ret = false;
@@ -352,7 +374,7 @@ bool R_BSP_CpuInterruptLevelWrite (uint32_t level)
  * this function is valid only in supervisor mode. When this function is executed in user mode, the 
  * R_BSP_InterruptControl function is executed but atomicity is not to secure.
  */
-void R_BSP_RegisterProtectEnable (bsp_reg_protect_t regs_to_protect)
+void R_BSP_RegisterProtectEnable(bsp_reg_protect_t regs_to_protect)
 {
 #ifdef BSP_MCU_REGISTER_WRITE_PROTECTION
     bsp_int_ctrl_t int_ctrl;
@@ -430,7 +452,7 @@ void R_BSP_RegisterProtectEnable (bsp_reg_protect_t regs_to_protect)
  * with this function is valid only in supervisor mode. When this function is executed in user mode, the 
  * R_BSP_InterruptControl function is executed but atomicity is not to secure.
  */
-void R_BSP_RegisterProtectDisable (bsp_reg_protect_t regs_to_unprotect)
+void R_BSP_RegisterProtectDisable(bsp_reg_protect_t regs_to_unprotect)
 {
 #ifdef BSP_MCU_REGISTER_WRITE_PROTECTION
     bsp_int_ctrl_t int_ctrl;
@@ -666,9 +688,9 @@ void R_BSP_SoftwareReset(void)
     SYSTEM.SWRR = 0xA501;
 
     /* WAIT_LOOP */
-    while(1)
+    while (1)
     {
-         R_BSP_NOP();
+        R_BSP_NOP();
     }
 } /* End of function R_BSP_SoftwareReset() */
 
@@ -678,7 +700,7 @@ void R_BSP_SoftwareReset(void)
 * Arguments    : none
 * Return Value : none
 ***********************************************************************************************************************/
-void bsp_register_protect_open (void)
+void bsp_register_protect_open(void)
 {
 #ifdef BSP_MCU_REGISTER_WRITE_PROTECTION
     uint32_t i;
@@ -700,7 +722,7 @@ void bsp_register_protect_open (void)
 * Arguments    : none
 * Return Value : none
 ***********************************************************************************************************************/
-void bsp_ram_initialize (void)
+void bsp_ram_initialize(void)
 {
     uint32_t i;
 
@@ -711,4 +733,63 @@ void bsp_ram_initialize (void)
         g_bsp_Locks[i].lock = 0;
     }
 } /* End of function bsp_ram_initialize() */
+
+#if BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE == 1
+/***********************************************************************************************************************
+* Function Name: bsp_bus_priority_initialize
+* Description  : Initialize bus priority.
+* Arguments    : none
+* Return Value : none
+***********************************************************************************************************************/
+void bsp_bus_priority_initialize(void)
+{
+    uint16_t tmp_priority = 0;
+
+#if (defined(BSP_CFG_MEMORY_BUS1_PRIORITY) && (BSP_CFG_MEMORY_BUS1_PRIORITY == 1)) || \
+    (defined(BSP_CFG_MEMORY_BUS1_3_PRIORITY) && (BSP_CFG_MEMORY_BUS1_3_PRIORITY == 1))
+    /* Specify the value to be set to the BPRA bit. */
+    tmp_priority |= BSP_PRV_BUSPRI_BPRA_TOGGLE;
+#endif
+
+#if (defined(BSP_CFG_MEMORY_BUS2_PRIORITY) && (BSP_CFG_MEMORY_BUS2_PRIORITY == 1))
+    /* Specify the value to be set to the BPRO bit. */
+    tmp_priority |= BSP_PRV_BUSPRI_BPRO_TOGGLE;
+#endif
+
+#if (defined(BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY) && (BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY == 1))
+    /* Specify the value to be set to the BPIB bit. */
+    tmp_priority |= BSP_PRV_BUSPRI_BPIB_TOGGLE;
+#endif
+
+#if (defined(BSP_CFG_INTERNAL_PERIPHERAL_BUS2_PRIORITY) && (BSP_CFG_INTERNAL_PERIPHERAL_BUS2_PRIORITY == 1)) || \
+    (defined(BSP_CFG_INTERNAL_PERIPHERAL_BUS2_3_PRIORITY) && (BSP_CFG_INTERNAL_PERIPHERAL_BUS2_3_PRIORITY == 1))
+    /* Specify the value to be set to the BPGB bit. */
+    tmp_priority |= BSP_PRV_BUSPRI_BPGB_TOGGLE;
+#endif
+
+#if (defined(BSP_CFG_INTERNAL_PERIPHERAL_BUS4_PRIORITY) && (BSP_CFG_INTERNAL_PERIPHERAL_BUS4_PRIORITY == 1)) || \
+    (defined(BSP_CFG_INTERNAL_PERIPHERAL_BUS4_5_PRIORITY) && (BSP_CFG_INTERNAL_PERIPHERAL_BUS4_5_PRIORITY == 1))
+    /* Specify the value to be set to the BPHB bit. */
+    tmp_priority |= BSP_PRV_BUSPRI_BPHB_TOGGLE;
+#endif
+
+#if (defined(BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY) && (BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY == 1))
+    /* Specify the value to be set to the BPFB bit. */
+    tmp_priority |= BSP_PRV_BUSPRI_BPFB_TOGGLE;
+#endif
+
+#if (defined(BSP_CFG_EXTERNAL_BUS_PRIORITY) && (BSP_CFG_EXTERNAL_BUS_PRIORITY == 1))
+    /* Specify the value to be set to the BPEB bit. */
+    tmp_priority |= BSP_PRV_BUSPRI_BPEB_TOGGLE;
+#endif
+
+#if (defined(BSP_CFG_INTERNAL_EXPANSION_BUS_PRIORITY) && (BSP_CFG_INTERNAL_EXPANSION_BUS_PRIORITY == 1))
+    /* Specify the value to be set to the BPEB bit. */
+    tmp_priority |= BSP_PRV_BUSPRI_BPXB_TOGGLE;
+#endif
+
+    /* Set the bus priority. */
+    BSC.BUSPRI.WORD = tmp_priority;
+} /* End of function bsp_bus_priority_initialize() */
+#endif /* BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE == 1 */
 

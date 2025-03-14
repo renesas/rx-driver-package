@@ -25,6 +25,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version   Description
 *         : 18.05.2021 1.00      First Release
+*         : 21.11.2023 1.01      Added compile switch of BSP_CFG_BOOTLOADER_PROJECT.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -53,17 +54,24 @@ static void rom_cache_noncacheable_area1_set(void);
 #endif /* BSP_CFG_ROM_CACHE_ENABLE == 1 */
 #endif /* BSP_CFG_STARTUP_DISABLE == 0 */
 
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+/* Disable the following functions in the bootloader project. */
 /* MCU I/O port configuration function declaration */
 static void output_ports_configure(void);
 
 /* Interrupt configuration function declaration */
 static void interrupts_configure(void);
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
 
 /* MCU peripheral module configuration function declaration */
 static void peripheral_modules_enable(void);
 
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+/* Disable the following functions in the bootloader project. */
+
 /* ADC initial configuration function declaration */
 static void bsp_adc_initial_configure(void);
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
 
 /***********************************************************************************************************************
 * Function name: hardware_setup
@@ -81,11 +89,17 @@ void hardware_setup(void)
 #endif /* BSP_CFG_ROM_CACHE_ENABLE == 1 */
 #endif /* BSP_CFG_STARTUP_DISABLE == 0 */
 
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+    /* Disable the following functions in the bootloader project. */
     output_ports_configure();
     interrupts_configure();
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
     peripheral_modules_enable();
     bsp_non_existent_port_init();
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+    /* Disable the following functions in the bootloader project. */
     bsp_adc_initial_configure();
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
 } /* End of function hardware_setup() */
 
 /* When using the user startup program, disable the following code. */
@@ -280,6 +294,8 @@ static void rom_cache_noncacheable_area1_set (void)
 #endif /* BSP_CFG_ROM_CACHE_ENABLE == 1 */
 #endif /* BSP_CFG_STARTUP_DISABLE == 0 */
 
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+/* Disable the following functions in the bootloader project. */
 /***********************************************************************************************************************
 * Function name: output_ports_configure
 * Description  : Configures the port and pin direction settings, and sets the pin outputs to a safe level.
@@ -303,6 +319,7 @@ static void interrupts_configure(void)
     /* Add code here to setup additional interrupts */
     R_BSP_NOP();
 } /* End of function interrupts_configure() */
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
 
 /***********************************************************************************************************************
 * Function name: peripheral_modules_enable
@@ -319,6 +336,8 @@ static void peripheral_modules_enable(void)
 #endif
 } /* End of function peripheral_modules_enable() */
 
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+/* Disable the following functions in the bootloader project. */
 /***********************************************************************************************************************
 * Function name: bsp_adc_initial_configure
 * Description  : Configures the ADC initial settings
@@ -355,4 +374,5 @@ static void bsp_adc_initial_configure(void)
     /* Protect on. */
     SYSTEM.PRCR.WORD = 0xA500;
 } /* End of function bsp_adc_initial_configure() */
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
 

@@ -29,11 +29,11 @@
 /*            : V0.50B (2022-08-25)  [Hardware Manual Revision : 0.50]          */
 /*            : V1.00  (2022-12-13)  [Hardware Manual Revision : 0.60]          */
 /*            : V1.00A (2023-01-27)  [Hardware Manual Revision : 1.00]          */
-/*                                                                              */
+/*            : V1.10  (2023-07-07)  [Hardware Manual Revision : 1.10]          */
+/*            : V1.10A (2023-08-22)  [Hardware Manual Revision : 1.10]          */
 /* Note       : This is a typical example.                                      */
 /*                                                                              */
-/*  Copyright(c) 2023 Renesas Electronics Corp.                                 */
-/*                  And Renesas Solutions Corp. ,All Rights Reserved.           */
+/*  Copyright(c) 2023 Renesas Electronics Corporation.                          */
 /*                                                                              */
 /********************************************************************************/
 /*                                                                              */
@@ -5118,7 +5118,7 @@ typedef struct st_flash {
 			unsigned char FLWE:2;
 		} BIT;
 	} FWEPROR;
-	char           wk0[7794395];
+	char           wk0[7794397];
 	unsigned long  UIDR0;
 	char           wk1[108];
 	unsigned long  UIDR1;
@@ -5593,8 +5593,7 @@ typedef struct st_gptw0 {
 			unsigned long :3;
 			unsigned long MD:4;
 			unsigned long SSCEN:1;
-			unsigned long :2;
-			unsigned long CPSCD:1;
+			unsigned long :3;
 			unsigned long SSCGRP:2;
 			unsigned long SCGTIOC:1;
 			unsigned long ICDS:1;
@@ -11860,8 +11859,7 @@ typedef struct st_portb {
 			unsigned char B5:1;
 			unsigned char B4:1;
 			unsigned char B3:1;
-			unsigned char B2:1;
-			unsigned char B1:1;
+			unsigned char :2;
 			unsigned char B0:1;
 		} BIT;
 	} DSCR;
@@ -12139,7 +12137,9 @@ typedef struct st_portn {
 	union {
 		unsigned char BYTE;
 		struct {
-			unsigned char :3;
+			unsigned char :1;
+			unsigned char B6:1;
+			unsigned char :1;
 			unsigned char B4:1;
 			unsigned char :4;
 		} BIT;
@@ -12157,7 +12157,7 @@ typedef struct st_portn {
 	union {
 		unsigned char BYTE;
 		struct {
-			unsigned char :1;
+			unsigned char B7:1;
 			unsigned char B6:1;
 			unsigned char :6;
 		} BIT;

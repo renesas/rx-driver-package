@@ -23,6 +23,7 @@
 /**********************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 28.02.2023 1.00     First Release
+*         : 21.11.2023 1.01     Modified comment.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -37,11 +38,10 @@ Macro definitions
 /* RX MCUs come in different packages and different pin counts.
  * Each bit of PORTm.PDR corresponds to each pin of port m; I/O direction can be specified in 1-bit units.
  * Each bit of PDR corresponding to port m that does not exist is reserved.
- * Also, each bit of PDR corresponding to P40 to P42, P44 to P46, PH0, PH4, and PE2 pins is reserved, because such pins
- * are input only.
- * Make settings of the reserved bit according to the description in section 20.4, Initialization of the Port Direction
- * Register (PDR). These values are then ORed into the direction registers to set non-existent pins as outputs or 
- * inputs, which can help save power.
+ * Also, each bit of PDR corresponding to PE2 pins is reserved, because such pins are input only.
+ * Make settings of the reserved bit according to the description in section 20.5.1, Initialization of the Port 
+ * Direction Register (PDR). These values are then ORed into the direction registers to set non-existent pins as 
+ * outputs or inputs, which can help save power.
  */
 #if BSP_PACKAGE_PINS == 100
     /* Refer User's Manual: Hardware Table 20.4. */

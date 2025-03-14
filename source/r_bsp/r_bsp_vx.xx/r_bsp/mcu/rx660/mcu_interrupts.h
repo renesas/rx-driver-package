@@ -23,6 +23,10 @@
 /**********************************************************************************************************************
 * History : DD.MM.YYYY Version   Description
 *         : 22.04.2022 1.00      First Release
+*         : 21.11.2023 1.01      Added the following enumeration constant.
+*                                - BSP_INT_SRC_BUS_ERROR_ILLEGAL_ACCESS
+*                                - BSP_INT_SRC_BUS_ERROR_TIMEOUT
+*                                - BSP_INT_SRC_EXC_ADDRESS
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -62,6 +66,8 @@ typedef enum
     BSP_INT_SRC_LVD2,                     /* Voltage monitoring 2 interrupt */
     BSP_INT_SRC_UNDEFINED_INTERRUPT,      /* Interrupt has triggered for a vector that user did not write a handler. */
     BSP_INT_SRC_BUS_ERROR,                /* Bus error: illegal address access or timeout */
+    BSP_INT_SRC_BUS_ERROR_ILLEGAL_ACCESS, /* Bus error: illegal address access. Use this when you want to set only Illegal address access detection. */
+    BSP_INT_SRC_BUS_ERROR_TIMEOUT,        /* Bus error: timeout. Use this when you want to set only Bus timeout detection. */
     BSP_INT_SRC_RAM,                      /* RAM error interrupt */
 
     BSP_INT_SRC_GR_INT_TOP,

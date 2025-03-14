@@ -25,6 +25,7 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version   Description
 *         : 22.04.2022 1.00      First Release
+*         : 21.11.2023 1.01      Added compile switch of BSP_CFG_BOOTLOADER_PROJECT.
 ***********************************************************************************************************************/
 
 
@@ -40,18 +41,23 @@ Includes   <System Includes> , "Project Includes"
 /***********************************************************************************************************************
 Private global variables and functions
 ***********************************************************************************************************************/
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+/* Disable the following functions in the bootloader project. */
 /* MCU I/O port configuration function declaration */
 static void output_ports_configure(void);
 
 /* Interrupt configuration function declaration */
 static void interrupts_configure(void);
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
 
 /* MCU peripheral module configuration function declaration */
 static void peripheral_modules_enable(void);
 
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+/* Disable the following functions in the bootloader project. */
 /* VOLSR register initial configuration function declaration */
 static void bsp_volsr_initial_configure(void);
-
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
 
 /***********************************************************************************************************************
 * Function name: hardware_setup
@@ -61,13 +67,18 @@ static void bsp_volsr_initial_configure(void);
 ***********************************************************************************************************************/
 void hardware_setup(void)
 {
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+    /* Disable the following functions in the bootloader project. */
     output_ports_configure();
     interrupts_configure();
     bsp_volsr_initial_configure();
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
     peripheral_modules_enable();
     bsp_non_existent_port_init();
 } /* End of function hardware_setup() */
 
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+/* Disable the following functions in the bootloader project. */
 /***********************************************************************************************************************
 * Function name: output_ports_configure
 * Description  : Configures the port and pin direction settings, and sets the pin outputs to a safe level.
@@ -91,6 +102,7 @@ static void interrupts_configure(void)
     /* Add code here to setup additional interrupts */
     R_BSP_NOP();
 } /* End of function interrupts_configure() */
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
 
 /***********************************************************************************************************************
 * Function name: peripheral_modules_enable
@@ -107,6 +119,8 @@ static void peripheral_modules_enable(void)
 #endif
 } /* End of function peripheral_modules_enable() */
 
+#if BSP_CFG_BOOTLOADER_PROJECT == 0
+/* Disable the following functions in the bootloader project. */
 /***********************************************************************************************************************
 * Function name: bsp_volsr_initial_configure
 * Description  : Initializes the VOLSR register.
@@ -130,4 +144,5 @@ static void bsp_volsr_initial_configure(void)
 
     R_BSP_VoltageLevelSetting(tmp_arg);
 } /* End of function bsp_volsr_initial_configure() */
+#endif /* BSP_CFG_BOOTLOADER_PROJECT == 0 */
 

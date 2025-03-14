@@ -24,42 +24,51 @@
 *                is just a reference file that the user can use to make their own r_bsp_config.h file.
 ************************************************************************************************************************
 * History : DD.MM.YYYY Version Description
-*         : 31.07.2019 1.00     First Release
-*         : 08.10.2019 1.01     Added the following macro definition.
-*                                - BSP_CFG_SWINT_UNIT1_ENABLE
-*                                - BSP_CFG_SWINT_TASK_BUFFER_NUMBER
-*                                - BSP_CFG_SWINT_IPR_INITIAL_VALUE
-*                               Modified comment for added support of Renesas RTOS (RI600V4 or RI600PX).
-*                               Added the following macro definition.
-*                                - BSP_CFG_RENESAS_RTOS_USED
-*         : 10.12.2019 1.02     Changed default value of the following macro definitions.
-*                                - BSP_CFG_USTACK_BYTES
-*                                - BSP_CFG_ISTACK_BYTES
-*         : 04.08.2020 1.03     Modified comment for added support of Delta-Sigma A/D Converter(DSAD) 1 Unit version.
-*         : 29.01.2021 1.04     Added the following macro definition.
-*                                - BSP_CFG_SCI_UART_TERMINAL_ENABLE
-*                                - BSP_CFG_SCI_UART_TERMINAL_CHANNEL
-*                                - BSP_CFG_SCI_UART_TERMINAL_BITRATE
-*                                - BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY
-*         : 26.02.2021 1.05     Added a comment for Azure RTOS to BSP_CFG_RTOS_USED.
-*         : 30.11.2021 2.00     Added the following macro definitions.
-*                                - BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE
-*                                - BSP_CFG_HOCO_OSCILLATE_ENABLE
-*                                - BSP_CFG_LOCO_OSCILLATE_ENABLE
-*                                - BSP_CFG_IWDT_CLOCK_OSCILLATE_ENABLE
-*                                - BSP_CFG_CLKOUT_SOURCE
-*                                - BSP_CFG_CLKOUT_DIV
-*                                - BSP_CFG_CLKOUT_OUTPUT
-*                                - BSP_CFG_HOCO_TRIMMING_ENABLE
-*                                - BSP_CFG_HOCO_TRIMMING_REG_VALUE
-*                                - BSP_CFG_CONFIGURATOR_VERSION
-*                                - BSP_CFG_CPLUSPLUS
-*                               Changed initial value of the following macro definitions.
-*                                - BSP_CFG_MCU_PART_GROUP
-*                                - BSP_CFG_MCU_PART_SERIES
-*         : 11.02.2022 2.01     Changed initial value of the following macro definitions.
-*                                - BSP_CFG_SWINT_UNIT1_ENABLE
-*         : 28.02.2023 2.02     Modified comment.
+*         : 31.07.2019 1.00    First Release
+*         : 08.10.2019 1.01    Added the following macro definition.
+*                               - BSP_CFG_SWINT_UNIT1_ENABLE
+*                               - BSP_CFG_SWINT_TASK_BUFFER_NUMBER
+*                               - BSP_CFG_SWINT_IPR_INITIAL_VALUE
+*                              Modified comment for added support of Renesas RTOS (RI600V4 or RI600PX).
+*                              Added the following macro definition.
+*                               - BSP_CFG_RENESAS_RTOS_USED
+*         : 10.12.2019 1.02    Changed default value of the following macro definitions.
+*                               - BSP_CFG_USTACK_BYTES
+*                               - BSP_CFG_ISTACK_BYTES
+*         : 04.08.2020 1.03    Modified comment for added support of Delta-Sigma A/D Converter(DSAD) 1 Unit version.
+*         : 29.01.2021 1.04    Added the following macro definition.
+*                               - BSP_CFG_SCI_UART_TERMINAL_ENABLE
+*                               - BSP_CFG_SCI_UART_TERMINAL_CHANNEL
+*                               - BSP_CFG_SCI_UART_TERMINAL_BITRATE
+*                               - BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY
+*         : 26.02.2021 1.05    Added a comment for Azure RTOS to BSP_CFG_RTOS_USED.
+*         : 30.11.2021 2.00    Added the following macro definitions.
+*                               - BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE
+*                               - BSP_CFG_HOCO_OSCILLATE_ENABLE
+*                               - BSP_CFG_LOCO_OSCILLATE_ENABLE
+*                               - BSP_CFG_IWDT_CLOCK_OSCILLATE_ENABLE
+*                               - BSP_CFG_CLKOUT_SOURCE
+*                               - BSP_CFG_CLKOUT_DIV
+*                               - BSP_CFG_CLKOUT_OUTPUT
+*                               - BSP_CFG_HOCO_TRIMMING_ENABLE
+*                               - BSP_CFG_HOCO_TRIMMING_REG_VALUE
+*                               - BSP_CFG_CONFIGURATOR_VERSION
+*                               - BSP_CFG_CPLUSPLUS
+*                              Changed initial value of the following macro definitions.
+*                               - BSP_CFG_MCU_PART_GROUP
+*                               - BSP_CFG_MCU_PART_SERIES
+*         : 11.02.2022 2.01    Changed initial value of the following macro definitions.
+*                               - BSP_CFG_SWINT_UNIT1_ENABLE
+*         : 28.02.2023 2.02    Modified comment.
+*         : 21.11.2023 2.03    Added the following macro definitions.
+*                               - BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE
+*                               - BSP_CFG_MEMORY_BUS1_PRIORITY
+*                               - BSP_CFG_MEMORY_BUS2_PRIORITY
+*                               - BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY
+*                               - BSP_CFG_INTERNAL_PERIPHERAL_BUS2_3_PRIORITY
+*                               - BSP_CFG_INTERNAL_PERIPHERAL_BUS4_PRIORITY
+*                               - BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY
+*                               - BSP_CFG_BOOTLOADER_PROJECT
 ***********************************************************************************************************************/
 
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
@@ -567,6 +576,55 @@ Configuration Options
    1 = This project is a C++ project.
 */
 #define BSP_CFG_CPLUSPLUS             (0)
+
+/* Select whether to enable bus priority initialization.
+   0 = Bus priority initialization is disabled.
+   1 = Bus priority initialization is enabled.
+*/
+#define BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE      (0)
+
+/* Select the priority order for memory bus 1 (RAM).
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_MEMORY_BUS1_PRIORITY                (0)
+
+/* Select the priority order for memory bus 2 (ROM).
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_MEMORY_BUS2_PRIORITY                (0)
+
+/* Select the priority order for internal peripheral bus 1.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY   (0)
+
+/* Select the priority order for internal peripheral buses 2 and 3.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS2_3_PRIORITY (0)
+
+/* Select the priority order for internal peripheral bus 4.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS4_PRIORITY   (0)
+
+/* Select the priority order for internal peripheral bus 6.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY   (0)
+
+/* Select whether it is bootloader project.
+   0 = This project isn't a bootloader project.
+   1 = This project is a bootloader project.
+   NOTE: Not normally used. Set this to "1" only in the bootloader project.
+*/
+#define BSP_CFG_BOOTLOADER_PROJECT    (0)
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

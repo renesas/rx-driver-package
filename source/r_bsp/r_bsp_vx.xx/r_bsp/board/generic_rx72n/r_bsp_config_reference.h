@@ -51,6 +51,16 @@
 *                               Added the following macro definition.
 *                                - BSP_CFG_EXPANSION_RAM_ENABLE
 *         : 28.02.2023 2.03     Modified comment.
+*         : 21.11.2023 2.04     Added the following macro definitions.
+*                                - BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE
+*                                - BSP_CFG_MEMORY_BUS1_3_PRIORITY
+*                                - BSP_CFG_MEMORY_BUS2_PRIORITY
+*                                - BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY
+*                                - BSP_CFG_INTERNAL_PERIPHERAL_BUS2_3_PRIORITY
+*                                - BSP_CFG_INTERNAL_PERIPHERAL_BUS4_5_PRIORITY
+*                                - BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY
+*                                - BSP_CFG_EXTERNAL_BUS_PRIORITY
+*                                - BSP_CFG_BOOTLOADER_PROJECT
 ***********************************************************************************************************************/
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
 #define R_BSP_CONFIG_REF_HEADER_FILE
@@ -148,7 +158,7 @@ NOTE: The RAM areas are not contiguous.It is separated by 512 KB each.
 
 /* If only 1 stack is chosen using BSP_CFG_USER_STACK_ENABLE then no RAM will be allocated for the user stack. */
 #if BSP_CFG_USER_STACK_ENABLE == 1
-/* User Stack size in bytes. 
+/* User Stack size in bytes.
  * NOTE: This setting is available only when using CCRX and GNUC.
  *       This is invalid when using Renesas RTOS with CCRX. */
 #define BSP_CFG_USTACK_BYTES            (0x1000)
@@ -857,6 +867,61 @@ NOTE: The RAM areas are not contiguous.It is separated by 512 KB each.
    1 = Sections of the expansion RAM area is enabled.
 */
 #define BSP_CFG_EXPANSION_RAM_ENABLE  (0)
+
+/* Select whether to enable bus priority initialization.
+   0 = Bus priority initialization is disabled.
+   1 = Bus priority initialization is enabled.
+*/
+#define BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE      (0)
+
+/* Select the priority order for memory bus 1 (RAM) and memory bus 3 (expansion RAM/ECCRAM).
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_MEMORY_BUS1_3_PRIORITY              (0)
+
+/* Select the priority order for memory bus 2 (code flash memory).
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_MEMORY_BUS2_PRIORITY                (0)
+
+/* Select the priority order for internal peripheral bus 1.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY   (0)
+
+/* Select the priority order for internal peripheral buses 2 and 3.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS2_3_PRIORITY (0)
+
+/* Select the priority order for internal peripheral buses 4 and 5.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS4_5_PRIORITY (0)
+
+/* Select the priority order for internal peripheral bus 6.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY   (0)
+
+/* Select the priority order for the external bus.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_EXTERNAL_BUS_PRIORITY               (0)
+
+/* Select whether it is bootloader project.
+   0 = This project isn't a bootloader project.
+   1 = This project is a bootloader project.
+   NOTE: Not normally used. Set this to "1" only in the bootloader project.
+*/
+#define BSP_CFG_BOOTLOADER_PROJECT    (0)
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

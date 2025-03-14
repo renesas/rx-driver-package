@@ -25,6 +25,7 @@
 *         : 28.02.2019 3.00     Merged processing of all devices.
 *                               Fixed coding style.
 *         : 25.11.2022 3.01     Modiffied comment.
+*         : 31.05.2024 3.02     Fixed coding style.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -77,7 +78,7 @@ Private global variables and functions
 * Arguments    : character to output
 * Return Value : none
 ***********************************************************************************************************************/
-void charput (char output_char)
+void charput(char output_char)
 {
     /* If user has provided their own charput() function, then call it. */
 #if BSP_CFG_USER_CHARPUT_ENABLED == 1
@@ -103,7 +104,7 @@ void charput (char output_char)
 * Arguments    : none
 * Return Value : received character
 ***********************************************************************************************************************/
-char charget (void)
+char charget(void)
 {
     /* If user has provided their own charget() function, then call it. */
 #if BSP_CFG_USER_CHARGET_ENABLED == 1

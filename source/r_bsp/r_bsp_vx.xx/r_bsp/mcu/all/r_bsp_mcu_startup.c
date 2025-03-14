@@ -26,6 +26,7 @@
 *                               Fixed coding style.
 *         : 26.07.2019 2.01     Modified comment of API function to Doxygen style.
 *                               Added Initialization the trigonometric function unit in R_BSP_StartupOpen function.
+*         : 31.05.2024 2.02     Fixed coding style.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -68,7 +69,7 @@ Private global variables and functions
  * @note The R_BSP_StartupOpen function performs a part of processing in the startup function.
  * See Section 5.18 in the application note for more information.
  */
-void R_BSP_StartupOpen (void)
+void R_BSP_StartupOpen(void)
 {
     /* Initializes the trigonometric function unit. */
 #ifdef BSP_MCU_TRIGONOMETRIC
