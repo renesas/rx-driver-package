@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>3.07.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>8.3.0.202411</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family>RX</family>
+        <series>RX600</series>
+        <series>RX700</series>
+        <group>RX65N</group>
+        <group>RX72N</group>
+        <group>RX72M</group>
+        <group>RX64M</group>
+        <group>RX71M</group>
+        <group>RX66N</group>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_lwip_rx</name>
+        <version>1.00</version>
+        <zipsource>r_lwip_rx_v1.00.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>7.53</version>
+        </dependency>
+        <dependency>
+            <module>r_lwip_driver_rx</module>
+            <version>1.00</version>
+        </dependency>
+        <application>lwIP</application>
+        <desc>lwIP tcpip</desc>
+        <details>lwIP for Renesas MCUs.</details>
+        <function>connectivity</function>
+        <incdir>r_config</incdir>
+        <incdir>r_lwip_rx/src/include</incdir>
+    </package>
+
+</refinfo>
+

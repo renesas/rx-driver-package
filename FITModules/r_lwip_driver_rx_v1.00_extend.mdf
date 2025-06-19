@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="LWIP_DRIVER_CFG_ETH_MAC_ADDR0" display="ETH_MAC_ADDR0" default="0x74" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${LWIP_DRIVER_CFG_ETH_MAC_ADDR0}")</constraint>
+            <constraint display="Value must be in the range 0x00 ~ 0xFF" actionOnFail="error">("${LWIP_DRIVER_CFG_ETH_MAC_ADDR0}" &gt;= 0x00) &amp;&amp; ("${LWIP_DRIVER_CFG_ETH_MAC_ADDR0}" &lt;= 0xFF)</constraint>
+            <description>These options set the MAC address.
+Use the LWIP_DRIVER_CFG_ETH_MAC_ADDR0 to LWIP_DRIVER_CFG_ETH_MAC_ADDR5 options to set the address. The LWIP_DRIVER_CFG_ETH_MAC_ADDR0 option is the first octet.
+Values in the range from 0x00 to 0xFF can be set for each option.</description>
+        </property>
+        <property id="LWIP_DRIVER_CFG_ETH_MAC_ADDR1" display="ETH_MAC_ADDR1" default="0x90" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${LWIP_DRIVER_CFG_ETH_MAC_ADDR1}")</constraint>
+            <constraint display="Value must be in the range 0x00 ~ 0xFF" actionOnFail="error">("${LWIP_DRIVER_CFG_ETH_MAC_ADDR1}" &gt;= 0x00) &amp;&amp; ("${LWIP_DRIVER_CFG_ETH_MAC_ADDR1}" &lt;= 0xFF)</constraint>
+            <description>These options set the MAC address.
+Use the LWIP_DRIVER_CFG_ETH_MAC_ADDR0 to LWIP_DRIVER_CFG_ETH_MAC_ADDR5 options to set the address. The LWIP_DRIVER_CFG_ETH_MAC_ADDR0 option is the first octet.
+Values in the range from 0x00 to 0xFF can be set for each option.</description>
+        </property>
+        <property id="LWIP_DRIVER_CFG_ETH_MAC_ADDR2" display="ETH_MAC_ADDR2" default="0x50" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${LWIP_DRIVER_CFG_ETH_MAC_ADDR2}")</constraint>
+            <constraint display="Value must be in the range 0x00 ~ 0xFF" actionOnFail="error">("${LWIP_DRIVER_CFG_ETH_MAC_ADDR2}" &gt;= 0x00) &amp;&amp; ("${LWIP_DRIVER_CFG_ETH_MAC_ADDR2}" &lt;= 0xFF)</constraint>
+            <description>These options set the MAC address.
+Use the LWIP_DRIVER_CFG_ETH_MAC_ADDR0 to LWIP_DRIVER_CFG_ETH_MAC_ADDR5 options to set the address. The LWIP_DRIVER_CFG_ETH_MAC_ADDR0 option is the first octet.
+Values in the range from 0x00 to 0xFF can be set for each option.</description>
+        </property>
+        <property id="LWIP_DRIVER_CFG_ETH_MAC_ADDR3" display="ETH_MAC_ADDR3" default="0x10" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${LWIP_DRIVER_CFG_ETH_MAC_ADDR3}")</constraint>
+            <constraint display="Value must be in the range 0x00 ~ 0xFF" actionOnFail="error">("${LWIP_DRIVER_CFG_ETH_MAC_ADDR3}" &gt;= 0x00) &amp;&amp; ("${LWIP_DRIVER_CFG_ETH_MAC_ADDR3}" &lt;= 0xFF)</constraint>
+            <description>These options set the MAC address.
+Use the LWIP_DRIVER_CFG_ETH_MAC_ADDR0 to LWIP_DRIVER_CFG_ETH_MAC_ADDR5 options to set the address. The LWIP_DRIVER_CFG_ETH_MAC_ADDR0 option is the first octet.
+Values in the range from 0x00 to 0xFF can be set for each option.</description>
+        </property>
+        <property id="LWIP_DRIVER_CFG_ETH_MAC_ADDR4" display="ETH_MAC_ADDR4" default="0xFE" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${LWIP_DRIVER_CFG_ETH_MAC_ADDR4}")</constraint>
+            <constraint display="Value must be in the range 0x00 ~ 0xFF" actionOnFail="error">("${LWIP_DRIVER_CFG_ETH_MAC_ADDR4}" &gt;= 0x00) &amp;&amp; ("${LWIP_DRIVER_CFG_ETH_MAC_ADDR4}" &lt;= 0xFF)</constraint>
+            <description>These options set the MAC address.
+Use the LWIP_DRIVER_CFG_ETH_MAC_ADDR0 to LWIP_DRIVER_CFG_ETH_MAC_ADDR5 options to set the address. The LWIP_DRIVER_CFG_ETH_MAC_ADDR0 option is the first octet.
+Values in the range from 0x00 to 0xFF can be set for each option.</description>
+        </property>
+        <property id="LWIP_DRIVER_CFG_ETH_MAC_ADDR5" display="ETH_MAC_ADDR5" default="0x79" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${LWIP_DRIVER_CFG_ETH_MAC_ADDR5}")</constraint>
+            <constraint display="Value must be in the range 0x00 ~ 0xFF" actionOnFail="error">("${LWIP_DRIVER_CFG_ETH_MAC_ADDR5}" &gt;= 0x00) &amp;&amp; ("${LWIP_DRIVER_CFG_ETH_MAC_ADDR5}" &lt;= 0xFF)</constraint>
+            <description>These options set the MAC address.
+Use the LWIP_DRIVER_CFG_ETH_MAC_ADDR0 to LWIP_DRIVER_CFG_ETH_MAC_ADDR5 options to set the address. The LWIP_DRIVER_CFG_ETH_MAC_ADDR0 option is the first octet.
+Values in the range from 0x00 to 0xFF can be set for each option.</description>
+        </property>
+        <property id="LWIP_DRIVER_CFG_ETH_DRV_CH" display="ETH_DRV_CH" default="0" type="combobox">
+            <option id="LWIP_DRIVER_CFG_ETH_DRV_CH.0" display="0" value="0"/>
+            <option id="LWIP_DRIVER_CFG_ETH_DRV_CH.1" display="1" value="1"/>
+            <description>Sets the channel number of the ETHERC to be used by the lwIP.
+The default setting is for channel 0 of the ETHERC. Set the value corresponding to the channel of the ETHERC that is to be controlled.
+Specifically, set 0 or 1 for devices with two ETHERC channels or 0 for other devices.</description>
+        </property>
+        <property id="LWIP_DRIVER_CFG_MTU" display="MTU" default="1500" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${LWIP_DRIVER_CFG_MTU}")</constraint>
+            <constraint display="Value must be in the range 576 ~ 1500" actionOnFail="error">("${LWIP_DRIVER_CFG_MTU}" &gt;= 576) &amp;&amp; ("${LWIP_DRIVER_CFG_MTU}" &lt;= 1500)</constraint>
+            <description>Sets the maximum unit for transfer.
+Values in the range from 576 to 1500 can be set.</description>
+        </property>
+        <property id="LWIP_DRIVER_CFG_SEND_MAX_LOOP" display="SEND_MAX_LOOP" default="20" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${LWIP_DRIVER_CFG_SEND_MAX_LOOP}")</constraint>
+            <constraint display="Value must be greater than or equal to 1" actionOnFail="error">("${LWIP_DRIVER_CFG_SEND_MAX_LOOP}" &gt;= 1)</constraint>
+            <description>Sets the number of times to retry processing until the transmission buffer has empty space when this FIT module is unable to acquire it because it is full.</description>
+        </property>
+        <property id="LWIP_DRIVER_CFG_SEND_DELAY_US" display="SEND_DELAY_US" default="50" type="textbox">
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${LWIP_DRIVER_CFG_SEND_DELAY_US}")</constraint>
+            <constraint display="Value must be greater than or equal to 1" actionOnFail="error">("${LWIP_DRIVER_CFG_SEND_DELAY_US}" &gt;= 1)</constraint>
+            <description>Sets the interval in microseconds for retrying processing until the transmission buffer has empty space when this FIT module is unable to acquire it because it is full.</description>
+        </property>
+    </configuration>
+</module>

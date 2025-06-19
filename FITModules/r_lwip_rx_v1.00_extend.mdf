@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="NO_SYS" display="NO_SYS" default="1" type="combobox">
+            <option id="NO_SYS.1" display="OS not used" value="1"/>
+            <constraint display="The NO_SYS is fixed" actionOnFail="disable">${NO_SYS} &lt; 0</constraint>
+            <description>Selects whether or not an OS is to be used.
+Be sure to set 1. The setting 0 (OS used) is not supported.
+0: OS used; 1: OS not used</description>
+        </property>
+        <property id="SYS_LIGHTWEIGHT_PROT" display="SYS_LIGHTWEIGHT_PROT" default="0" type="combobox">
+            <option id="SYS_LIGHTWEIGHT_PROT.1" display="Enabled" value="1"/>
+            <option id="SYS_LIGHTWEIGHT_PROT.0" display="Disabled" value="0"/>
+            <description>Selects whether to enable or disable protection between tasks (and protection against interrupts of tasks) for the specific critical areas during the allocation and release of buffers and the allocation of memory.
+If the setting of this macro is 1 (enabled) and that of the NO_SYS macro is 1, the I flag of the CPU in the critical section in lwIP is set to 0 (prohibiting interrupts).
+0: Disabled; 1: Enabled</description>
+        </property>
+        <property id="MEM_ALIGNMENT" display="MEM_ALIGNMENT" default="4" type="textbox">
+            <constraint display="The MEM_ALIGNMENT is fixed" actionOnFail="disable">${MEM_ALIGNMENT} &lt; 0</constraint>
+            <description>Sets memory alignment for the CPU.
+A change to the setting is not required.
+An attempted change to the setting may lead to incorrect operation of this FIT module due to incorrectly aligned access to data in memory.</description>
+        </property>
+        <property id="MEM_SIZE" display="MEM_SIZE" default="20*1024" type="textbox">
+            <description>Sets the size of heap memory.</description>
+        </property>
+        <property id="MEMP_NUM_PBUF" display="MEMP_NUM_PBUF" default="50" type="textbox">
+            <description>Set the number of pbufs for the memp structure.</description>
+        </property>
+        <property id="MEMP_NUM_UDP_PCB" display="MEMP_NUM_UDP_PCB" default="6" type="textbox">
+            <description>Sets the number of UDP control blocks.</description>
+        </property>
+        <property id="MEMP_NUM_TCP_PCB" display="MEMP_NUM_TCP_PCB" default="10" type="textbox">
+            <description>Sets the number of TCP connections.</description>
+        </property>
+        <property id="MEMP_NUM_TCP_PCB_LISTEN" display="MEMP_NUM_TCP_PCB_LISTEN" default="5" type="textbox">
+            <description>Sets the number of TCP connections in the listening state.</description>
+        </property>
+        <property id="MEMP_NUM_TCP_SEG" display="MEMP_NUM_TCP_SEG" default="16" type="textbox">
+            <description>Sets the number of TCP segments the queue can hold.</description>
+        </property>
+        <property id="MEMP_NUM_SYS_TIMEOUT" display="MEMP_NUM_SYS_TIMEOUT" default="LWIP_NUM_SYS_TIMEOUT_INTERNAL" type="textbox">
+            <description>Sets the number of timeouts to be used by this FIT module.</description>
+        </property>
+        <property id="PBUF_POOL_SIZE" display="PBUF_POOL_SIZE" default="16" type="textbox">
+            <description>Sets the number of buffers in the pbuf pool.</description>
+        </property>
+        <property id="LWIP_ARP" display="LWIP_ARP" default="1" type="combobox">
+            <option id="LWIP_ARP.1" display="Enabled" value="1"/>
+            <option id="LWIP_ARP.0" display="Disabled" value="0"/>
+            <description>Selects whether to enable or disable the ARP function.
+0: Disabled; 1: Enabled</description>
+        </property>
+        <property id="LWIP_IPV4" display="LWIP_IPV4" default="1" type="combobox">
+            <option id="LWIP_IPV4.1" display="Enabled" value="1"/>
+            <option id="LWIP_IPV4.0" display="Disabled" value="0"/>
+            <description>Selects whether to enable or disable IPv4.
+0: Disabled; 1: Enabled</description>
+        </property>
+        <property id="LWIP_ICMP" display="LWIP_ICMP" default="1" type="combobox">
+            <option id="LWIP_ICMP.1" display="Enabled" value="1"/>
+            <option id="LWIP_ICMP.0" display="Disabled" value="0"/>
+            <description>Selects whether to enable or disable the ICMP module.
+0: Disabled; 1: Enabled</description>
+        </property>
+        <property id="LWIP_DHCP" display="LWIP_DHCP" default="0" type="combobox">
+            <option id="LWIP_DHCP.1" display="Enabled" value="1"/>
+            <option id="LWIP_DHCP.0" display="Disabled" value="0"/>
+            <description>Selects whether to enable or disable the DHCP module.
+0: Disabled; 1: Enabled</description>
+        </property>
+        <property id="LWIP_IGMP" display="LWIP_IGMP" default="1" type="combobox">
+            <option id="LWIP_IGMP.1" display="Enabled" value="1"/>
+            <option id="LWIP_IGMP.0" display="Disabled" value="0"/>
+            <description>Selects whether to enable or disable the IGMP module.
+0: Disabled; 1: Enabled</description>
+        </property>
+        <property id="LWIP_UDP" display="LWIP_UDP" default="1" type="combobox">
+            <option id="LWIP_UDP.1" display="Enabled" value="1"/>
+            <option id="LWIP_UDP.0" display="Disabled" value="0"/>
+            <description>Selects whether to enable or disable the UDP.
+0: Disabled; 1: Enabled</description>
+        </property>
+        <property id="UDP_TTL" display="UDP_TTL" default="IP_DEFAULT_TTL" type="textbox">
+            <description>Sets the default value for time-to-live.</description>
+        </property>
+        <property id="LWIP_TCP" display="LWIP_TCP" default="1" type="combobox">
+            <option id="LWIP_TCP.1" display="Enabled" value="1"/>
+            <option id="LWIP_TCP.0" display="Disabled" value="0"/>
+            <description>Selects whether to enable or disable the TCP.
+0: Disabled; 1: Enabled</description>
+        </property>
+        <property id="TCP_TTL" display="TCP_TTL" default="IP_DEFAULT_TTL" type="textbox">
+            <description>Sets the default value for time-to-live.</description>
+        </property>
+        <property id="TCP_WND" display="TCP_WND" default="4 * TCP_MSS" type="textbox">
+            <description>Sets the size of the TCP window.</description>
+        </property>
+        <property id="TCP_QUEUE_OOSEQ" display="TCP_QUEUE_OOSEQ" default="0" type="combobox">
+            <option id="TCP_QUEUE_OOSEQ.1" display="Enabled" value="1"/>
+            <option id="TCP_QUEUE_OOSEQ.0" display="Disabled" value="0"/>
+            <description>Selects whether to enable or disable queuing of TCP segments that arrive out of order when such segments are received.
+0: Disabled; 1: Enabled</description>
+        </property>
+        <property id="TCP_MSS" display="TCP_MSS" default="1500 - 40" type="textbox">
+            <description>Sets the maximum size of a TCP segment.</description>
+        </property>
+        <property id="TCP_SND_BUF" display="TCP_SND_BUF" default="4 * TCP_MSS" type="textbox">
+            <description>Sets the TCP transmission buffer space in bytes.</description>
+        </property>
+        <property id="TCP_SND_QUEUELEN" display="TCP_SND_QUEUELEN" default="2 * TCP_SND_BUF/TCP_MSS" type="textbox">
+            <description>Sets the TCP transmission buffer space with the pbuf size as the unit. </description>
+        </property>
+        <property id="PBUF_POOL_BUFSIZE" display="PBUF_POOL_BUFSIZE" default="LWIP_MEM_ALIGN_SIZE(TCP_MSS+PBUF_IP_HLEN+PBUF_TRANSPORT_HLEN+PBUF_LINK_ENCAPSULATION_HLEN+PBUF_LINK_HLEN)" type="textbox">
+            <description>Sets the size of each pbuf in the pbuf pool.</description>
+        </property>
+        <property id="LWIP_NETIF_LINK_CALLBACK" display="LWIP_NETIF_LINK_CALLBACK" default="0" type="combobox">
+            <option id="LWIP_NETIF_LINK_CALLBACK.1" display="Enabled" value="1"/>
+            <option id="LWIP_NETIF_LINK_CALLBACK.0" display="Disabled" value="0"/>
+            <description>Selects whether to enable or disable a callback function for notification of a change to the link state.
+0: Disabled; 1: Enabled</description>
+        </property>
+        <property id="LWIP_NETCONN" display="LWIP_NETCONN" default="0" type="combobox">
+            <option id="LWIP_NETCONN.1" display="Enabled" value="1"/>
+            <option id="LWIP_NETCONN.0" display="Disabled" value="0"/>
+            <description>Selects whether to enable or disable Netconn API functions.
+0: Disabled; 1: Enabled</description>
+        </property>
+        <property id="LWIP_SOCKET" display="LWIP_SOCKET" default="0" type="combobox">
+            <option id="LWIP_SOCKET.1" display="Enabled" value="1"/>
+            <option id="LWIP_SOCKET.0" display="Disabled" value="0"/>
+            <description>Selects whether to enable or disable socket API functions.
+0: Disabled; 1: Enabled</description>
+        </property>
+        <property id="LWIP_STATS" display="LWIP_STATS" default="0" type="combobox">
+            <option id="LWIP_STATS.1" display="Enabled" value="1"/>
+            <option id="LWIP_STATS.0" display="Disabled" value="0"/>
+            <description>Selects whether to enable or disable statistics collection in lwip_stats.
+0: Disabled; 1: Enabled</description>
+        </property>
+    </configuration>
+</module>
