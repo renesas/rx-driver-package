@@ -29,7 +29,50 @@
 /**********************************************************************************************************************
  Macro definitions
  *********************************************************************************************************************/
+#if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
 #define UART_BAUD_MAX_CNT    (4)
+#elif defined(__CCRL__) || defined(__ICCRL78__) || defined(__RL)
+#define UART_BAUD_MAX_CNT    (3)
+#endif
+
+#if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
+#if WIFI_CFG_LOGGING_OPTION == 2
+/* FreeRTOS CLI Command Console */
+#if WIFI_CFG_LOG_TERM_CHANNEL == (0)
+#define U_SCI_UART_CLI_PINSET()  R_SCI_PinSet_SCI0()
+#elif WIFI_CFG_LOG_TERM_CHANNEL == (1)
+#define U_SCI_UART_CLI_PINSET()  R_SCI_PinSet_SCI1()
+#elif WIFI_CFG_LOG_TERM_CHANNEL == (2)
+#define U_SCI_UART_CLI_PINSET()  R_SCI_PinSet_SCI2()
+#elif WIFI_CFG_LOG_TERM_CHANNEL == (3)
+#define U_SCI_UART_CLI_PINSET()  R_SCI_PinSet_SCI3()
+#elif WIFI_CFG_LOG_TERM_CHANNEL == (4)
+#define U_SCI_UART_CLI_PINSET()  R_SCI_PinSet_SCI4()
+#elif WIFI_CFG_LOG_TERM_CHANNEL == (5)
+#define U_SCI_UART_CLI_PINSET()  R_SCI_PinSet_SCI5()
+#elif WIFI_CFG_LOG_TERM_CHANNEL == (6)
+#define U_SCI_UART_CLI_PINSET()  R_SCI_PinSet_SCI6()
+#elif WIFI_CFG_LOG_TERM_CHANNEL == (7)
+#define U_SCI_UART_CLI_PINSET()  R_SCI_PinSet_SCI7()
+#elif WIFI_CFG_LOG_TERM_CHANNEL == (8)
+#define U_SCI_UART_CLI_PINSET()  R_SCI_PinSet_SCI8()
+#elif WIFI_CFG_LOG_TERM_CHANNEL == (9)
+#define U_SCI_UART_CLI_PINSET()  R_SCI_PinSet_SCI9()
+#elif WIFI_CFG_LOG_TERM_CHANNEL == (10)
+#define U_SCI_UART_CLI_PINSET()  R_SCI_PinSet_SCI10()
+#elif WIFI_CFG_LOG_TERM_CHANNEL == (11)
+#define U_SCI_UART_CLI_PINSET()  R_SCI_PinSet_SCI11()
+#elif WIFI_CFG_LOG_TERM_CHANNEL == (12)
+#define U_SCI_UART_CLI_PINSET()  R_SCI_PinSet_SCI12()
+#else
+#error "Error! Invalid setting for WIFI_CFG_LOG_TERM_CHANNEL in r_wifi_da16xxx_config.h"
+#endif
+#endif
+#endif
+
+/**********************************************************************************************************************
+ Global Typedef definitions
+ *********************************************************************************************************************/
 
 /**********************************************************************************************************************
  Local Typedef definitions
@@ -38,8 +81,16 @@
 /**********************************************************************************************************************
  Exported global variables
  *********************************************************************************************************************/
-static uint8_t g_rx_buff[TEMP_BUF_MAX];
+/* IP address */
+static wifi_ip_configuration_t s_cur = {0};  /* Current IP configuration of the module */
+static uint8_t g_rx_buff;
+
+/* WIFI system state */
+static volatile e_wifi_module_status_t s_wifi_system_state = MODULE_DISCONNECTED;
 static volatile uint8_t g_rx_idx = 0;
+#if WIFI_CFG_LOGGING_OPTION == 2
+static sci_hdl_t g_sci_handle;
+#endif
 
 /**********************************************************************************************************************
  Private (static) variables and functions
@@ -59,15 +110,15 @@ static wifi_err_t da16xxx_sntp_service_init(void);
 #endif
 
 /* Log functions */
-static int s_vsnprintf_safe (char * s, size_t n, const char * format, va_list arg);
-static int s_snprintf_safe (char * s, size_t n, const char * format, ...);
-static void s_log_printf_common (uint8_t usLoggingLevel, const char * pcFormat, va_list args);
-
-/* WIFI system state */
-static volatile e_wifi_module_status_t s_wifi_system_state = MODULE_DISCONNECTED;
-
-/* IP address */
-static wifi_ip_configuration_t s_cur = {0};  /* Current IP configuration of the module */
+#if WIFI_CFG_LOGGING_OPTION != 0
+static int16_t s_vsnprintf_safe (char * s, size_t n, const char * format, va_list arg);
+static int16_t s_snprintf_safe (char * s, size_t n, const char * format, ...);
+static void s_log_printf_common (uint8_t usLoggingLevel, const char WIFI_FAR * pcFormat, va_list args);
+#endif
+#if WIFI_CFG_LOGGING_OPTION == 2
+static void s_uart_config (void);
+static void s_uart_string_printf(char WIFI_FAR * pcString);
+#endif
 
 /**********************************************************************************************************************
  * Function Name: R_WIFI_DA16XXX_Open
@@ -84,7 +135,16 @@ wifi_err_t R_WIFI_DA16XXX_Open(void)
 {
     wifi_err_t api_ret = WIFI_SUCCESS;
     uint8_t index = 0;
+#if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
     uint32_t uart_baud_rates[UART_BAUD_MAX_CNT] = {115200, 230400, 460800, 921600};
+#elif defined(__CCRL__) || defined(__ICCRL78__) || defined(__RL)
+    uint32_t uart_baud_rates[UART_BAUD_MAX_CNT] = {115200, 230400, 460800};
+#endif
+
+#if WIFI_CFG_LOGGING_OPTION == 2
+    /* Logging */
+    s_uart_config();
+#endif
 
     /* Disconnected WiFi module? */
     if (MODULE_DISCONNECTED != wifi_system_state_get())
@@ -116,7 +176,7 @@ wifi_err_t R_WIFI_DA16XXX_Open(void)
         uart_port_set_baudrate(uart_baud_rates[index]);
 
         /* Test basic communications with an AT command. */
-        WIFI_LOG_INFO(("R_WIFI_DA16XXX_Open: Test with baud rate %d!", uart_baud_rates[index]));
+        WIFI_LOG_INFO(("R_WIFI_DA16XXX_Open: Test with baud rate %lu!", uart_baud_rates[index]));
         if (AT_OK != at_exec("ATZ\r"))
         {
 #if (WIFI_CFG_DA16600_SUPPORT)
@@ -147,11 +207,11 @@ wifi_err_t R_WIFI_DA16XXX_Open(void)
     }
 
     /* Update the module baud rate in case if it doesn't match with user configured baud rate */
-    WIFI_LOG_INFO(("R_WIFI_DA16XXX_Open: baud rate:%d", WIFI_CFG_SCI_BAUDRATE));
+    WIFI_LOG_INFO(("R_WIFI_DA16XXX_Open: baud rate:%lu", WIFI_CFG_SCI_BAUDRATE));
     if (uart_baud_rates[index] != WIFI_CFG_SCI_BAUDRATE)
     {
         /* Configure UART parameters for UART port. */
-        if (AT_OK != at_exec("ATB=%lu,8,n,1,%d\r", WIFI_CFG_SCI_BAUDRATE, WIFI_CFG_CTS_SW_CTRL))
+        if (AT_OK != at_exec("ATB=%lu\r", WIFI_CFG_SCI_BAUDRATE))
         {
             WIFI_LOG_ERROR(("R_WIFI_DA16XXX_Open: Cannot update Wi-fi module baud rate!"));
             api_ret = WIFI_ERR_MODULE_COM;
@@ -165,9 +225,11 @@ wifi_err_t R_WIFI_DA16XXX_Open(void)
     /* Show version info */
     at_exec("AT+VER\r");
 
-#if WIFI_CFG_DEBUG_LOG == 4
+#if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
+#if WIFI_CFG_DEBUG_LOG == LOG_DEBUG
     /* Enable echo back */
     at_exec("ATE\r");
+#endif
 #endif
 
     /* Set AP mode */
@@ -189,8 +251,10 @@ wifi_err_t R_WIFI_DA16XXX_Open(void)
     }
 #endif
 
+#if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
     /* Set flow control for serial port */
     flow_ctrl_init();
+#endif
 
 END_INITIALIZE:
     if (WIFI_SUCCESS != api_ret)
@@ -242,6 +306,11 @@ wifi_err_t R_WIFI_DA16XXX_Close(void)
 
     disconnect_ap_sub();
 
+#if WIFI_CFG_LOGGING_OPTION == 2
+    /* Logging */
+    R_SCI_Close(g_sci_handle);
+#endif
+
     /* Close module */
     da16xxx_close();
 
@@ -262,11 +331,11 @@ wifi_err_t R_WIFI_DA16XXX_Close(void)
  *                WIFI_ERR_NOT_CONNECT
  *                WIFI_ERR_TAKE_MUTEX
  *********************************************************************************************************************/
-wifi_err_t R_WIFI_DA16XXX_Ping(uint8_t *ip_address, uint16_t count)
+wifi_err_t R_WIFI_DA16XXX_Ping(uint32_t *ip_address, uint16_t count)
 {
     wifi_err_t api_ret = WIFI_SUCCESS;
-    int32_t    sent_count = 0;
-    int32_t    recv_count = 0;
+    uint16_t sent_count = 0;
+    uint16_t recv_count = 0;
 
     /* Connected access point? */
     if (0 != R_WIFI_DA16XXX_IsConnected())
@@ -292,7 +361,7 @@ wifi_err_t R_WIFI_DA16XXX_Ping(uint8_t *ip_address, uint16_t count)
     if (AT_OK == at_exec_wo_mutex("AT+NWPING=0,%d.%d.%d.%d,%d\r",
                                   ip_address[0], ip_address[1], ip_address[2], ip_address[3], count))
     {
-        at_read("+NWPING:%d,%d", &sent_count, &recv_count);
+        at_read("+NWPING:%hu,%hu", &sent_count, &recv_count);
         if (sent_count != recv_count)
         {
             WIFI_LOG_ERROR(("R_WIFI_DA16XXX_Ping: Cannot reach to IP address (sent: %d, recv: %d)!",
@@ -326,15 +395,12 @@ wifi_err_t R_WIFI_DA16XXX_Ping(uint8_t *ip_address, uint16_t count)
  *                WIFI_ERR_MODULE_COM
  *                WIFI_ERR_TAKE_MUTEX
  *********************************************************************************************************************/
-wifi_err_t R_WIFI_DA16XXX_Scan(wifi_scan_result_t * ap_results, uint32_t max_networks)
+wifi_err_t R_WIFI_DA16XXX_Scan(wifi_scan_result_t * ap_results, uint8_t max_networks)
 {
     wifi_err_t     api_ret = WIFI_SUCCESS;
     e_rslt_code_t  at_rslt;
-    uint32_t       data_ret = DATA_NOT_FOUND;
-    uint32_t       i;
-    uint8_t        ssid_tmp[WIFI_CFG_MAX_SSID_LEN] = "\0";
-    int32_t        bssid_tmp[WIFI_CFG_MAX_BSSID_LEN] = {0};
-    int32_t        rssi_tmp = 0;
+    uint8_t        data_ret = DATA_NOT_FOUND;
+    uint8_t        i;
     uint8_t        flag[50] = "\0";
 
     /* Disconnected WiFi module? */
@@ -369,7 +435,6 @@ wifi_err_t R_WIFI_DA16XXX_Scan(wifi_scan_result_t * ap_results, uint32_t max_net
     at_set_timeout(ATCMD_RESP_TIMEOUT);
 
     /* clear tmp variables */
-    memset(ssid_tmp, 0, WIFI_CFG_MAX_SSID_LEN);
     memset(flag, 0, 50);
     i = 0;
     while (i != max_networks)
@@ -381,30 +446,20 @@ wifi_err_t R_WIFI_DA16XXX_Scan(wifi_scan_result_t * ap_results, uint32_t max_net
         if (i == 0)
         {
             data_ret = at_read("+WFSCAN:%x:%x:%x:%x:%x:%x\t%*d\t%d\t%s%*[\t]%[^\n]\n",
-                               &bssid_tmp[0], &bssid_tmp[1], &bssid_tmp[2],
-                               &bssid_tmp[3], &bssid_tmp[4], &bssid_tmp[5],
-                               &rssi_tmp, flag, ssid_tmp);
+                               &ap_results[i].bssid[0], &ap_results[i].bssid[1], &ap_results[i].bssid[2],
+                               &ap_results[i].bssid[3], &ap_results[i].bssid[4], &ap_results[i].bssid[5],
+                               &ap_results[i].rssi, flag, ap_results[i].ssid);
         }
         else
         {
             data_ret = at_read_wo_prefix("%x:%x:%x:%x:%x:%x\t%*d\t%d\t%s%*[\t]%[^\n]\n",
-                                         &bssid_tmp[0], &bssid_tmp[1], &bssid_tmp[2],
-                                         &bssid_tmp[3], &bssid_tmp[4], &bssid_tmp[5],
-                                         &rssi_tmp, flag, ssid_tmp);
+                                         &ap_results[i].bssid[0], &ap_results[i].bssid[1], &ap_results[i].bssid[2],
+                                         &ap_results[i].bssid[3], &ap_results[i].bssid[4], &ap_results[i].bssid[5],
+                                         &ap_results[i].rssi, flag, ap_results[i].ssid);
             at_move_to_next_line();
         }
         if (DATA_FOUND == data_ret)
         {
-            /* bssi */
-            ap_results[i].bssid[0] = (uint8_t) bssid_tmp[0];
-            ap_results[i].bssid[1] = (uint8_t) bssid_tmp[1];
-            ap_results[i].bssid[2] = (uint8_t) bssid_tmp[2];
-            ap_results[i].bssid[3] = (uint8_t) bssid_tmp[3];
-            ap_results[i].bssid[4] = (uint8_t) bssid_tmp[4];
-            ap_results[i].bssid[5] = (uint8_t) bssid_tmp[5];
-
-            /* signal strength */
-            ap_results[i].rssi = (int8_t)(rssi_tmp);
 
             /* security */
             if (NULL != strstr((const char *)flag, "[WPA2-PSK"))
@@ -444,27 +499,25 @@ wifi_err_t R_WIFI_DA16XXX_Scan(wifi_scan_result_t * ap_results, uint32_t max_net
 
             /* ssid */
             WIFI_LOG_INFO(("R_WIFI_DA16XXX_Scan: AP result:"));
-            if (ssid_tmp[0] == '\0')
+            if (ap_results[i].ssid[0] == '\0')
             {
                 ap_results[i].hidden = 1;
             }
             else
             {
                 ap_results[i].hidden = 0;
-                memcpy(ap_results[i].ssid, ssid_tmp, sizeof(ssid_tmp));
                 WIFI_LOG_INFO(("SSID: %s", ap_results[i].ssid));
             }
-            WIFI_LOG_INFO(("BSSID: %X.%X.%X.%X.%X.%X", bssid_tmp[0],
-                                                       bssid_tmp[1],
-                                                       bssid_tmp[2],
-                                                       bssid_tmp[3],
-                                                       bssid_tmp[4],
-                                                       bssid_tmp[5]));
+            WIFI_LOG_INFO(("BSSID: %X.%X.%X.%X.%X.%X", ap_results[i].bssid[0],
+                                                       ap_results[i].bssid[1],
+                                                       ap_results[i].bssid[2],
+                                                       ap_results[i].bssid[3],
+                                                       ap_results[i].bssid[4],
+                                                       ap_results[i].bssid[5]));
             WIFI_LOG_INFO(("Security: %d", ap_results[i].security));
             WIFI_LOG_INFO(("Encryption: %d", ap_results[i].encryption));
 
             /* clear tmp variables */
-            memset(ssid_tmp, 0, WIFI_CFG_MAX_SSID_LEN);
             memset(flag, 0, 50);
             i++;
         }
@@ -675,10 +728,9 @@ int32_t R_WIFI_DA16XXX_IsConnected(void)
  *                WIFI_ERR_MODULE_COM
  *                WIFI_ERR_TAKE_MUTEX
  *********************************************************************************************************************/
-wifi_err_t R_WIFI_DA16XXX_DnsQuery(uint8_t * domain_name, uint8_t * ip_address)
+wifi_err_t R_WIFI_DA16XXX_DnsQuery(uint8_t WIFI_FAR * domain_name, uint32_t * ip_address)
 {
     wifi_err_t api_ret = WIFI_ERR_MODULE_COM;
-    int32_t    ip_tmp[4];
 
     /* Connected access point? */
     if (0 != R_WIFI_DA16XXX_IsConnected())
@@ -703,12 +755,9 @@ wifi_err_t R_WIFI_DA16XXX_DnsQuery(uint8_t * domain_name, uint8_t * ip_address)
     if (AT_OK == at_exec_wo_mutex("AT+NWHOST=%s\r", domain_name))
     {
         if (DATA_FOUND == at_read("+NWHOST:%d.%d.%d.%d",
-                                  &ip_tmp[0], &ip_tmp[1], &ip_tmp[2], &ip_tmp[3]))
+                                  &ip_address[0], &ip_address[1],
+                                  &ip_address[2],  &ip_address[3]))
         {
-            ip_address[0] = (uint8_t) ip_tmp[0];
-            ip_address[1] = (uint8_t) ip_tmp[1];
-            ip_address[2] = (uint8_t) ip_tmp[2];
-            ip_address[3] = (uint8_t) ip_tmp[3];
             api_ret = WIFI_SUCCESS;
         }
     }
@@ -732,7 +781,7 @@ wifi_err_t R_WIFI_DA16XXX_DnsQuery(uint8_t * domain_name, uint8_t * ip_address)
  *                WIFI_ERR_NOT_OPEN
  *                WIFI_ERR_MODULE_COM
  *********************************************************************************************************************/
-wifi_err_t R_WIFI_DA16XXX_SntpServerIpAddressSet (uint8_t * ip_address)
+wifi_err_t R_WIFI_DA16XXX_SntpServerIpAddressSet (uint32_t * ip_address)
 {
     wifi_err_t api_ret = WIFI_SUCCESS;
 
@@ -806,7 +855,7 @@ wifi_err_t R_WIFI_DA16XXX_SntpEnableSet (wifi_sntp_enable_t enable)
  *                WIFI_ERR_NOT_OPEN
  *                WIFI_ERR_MODULE_COM
  *********************************************************************************************************************/
-wifi_err_t R_WIFI_DA16XXX_SntpTimeZoneSet (int32_t utc_offset_in_hours)
+wifi_err_t R_WIFI_DA16XXX_SntpTimeZoneSet (int8_t utc_offset_in_hours)
 {
     wifi_err_t api_ret = WIFI_SUCCESS;
 
@@ -845,9 +894,9 @@ wifi_err_t R_WIFI_DA16XXX_SntpTimeZoneSet (int32_t utc_offset_in_hours)
  *                WIFI_ERR_MODULE_COM
  *                WIFI_ERR_TAKE_MUTEX
  *********************************************************************************************************************/
-wifi_err_t R_WIFI_DA16XXX_LocalTimeGet (uint8_t * local_time, uint32_t size_string)
+wifi_err_t R_WIFI_DA16XXX_LocalTimeGet (uint8_t * local_time, uint8_t size_string)
 {
-    wifi_err_t api_ret = WIFI_SUCCESS;
+    wifi_err_t api_ret = WIFI_ERR_MODULE_COM;
 
     /* Disconnected WiFi module? */
     if (MODULE_DISCONNECTED == wifi_system_state_get())
@@ -870,14 +919,10 @@ wifi_err_t R_WIFI_DA16XXX_LocalTimeGet (uint8_t * local_time, uint32_t size_stri
 
     if (AT_OK == at_exec_wo_mutex("AT+TIME=?\r"))
     {
-        if (DATA_NOT_FOUND == at_read("+TIME:%s", local_time))
+        if (DATA_FOUND == at_read("+TIME:%s", local_time))
         {
-            api_ret = WIFI_ERR_MODULE_COM;
+            api_ret = WIFI_SUCCESS;
         }
-    }
-    else
-    {
-        api_ret = WIFI_ERR_MODULE_COM;
     }
 
     /* Give mutex */
@@ -937,10 +982,9 @@ wifi_err_t R_WIFI_DA16XXX_SetDnsServerAddress (uint8_t * dns_address)
  *                WIFI_ERR_MODULE_COM
  *                WIFI_ERR_TAKE_MUTEX
  *********************************************************************************************************************/
-wifi_err_t R_WIFI_DA16XXX_GetMacAddress (uint8_t * mac_address)
+wifi_err_t R_WIFI_DA16XXX_GetMacAddress (uint32_t * mac_address)
 {
     wifi_err_t api_ret = WIFI_ERR_MODULE_COM;
-    int32_t    mac_tmp[6];
 
     /* Connected access point? */
     if (0 != R_WIFI_DA16XXX_IsConnected())
@@ -964,15 +1008,9 @@ wifi_err_t R_WIFI_DA16XXX_GetMacAddress (uint8_t * mac_address)
     if (AT_OK == at_exec_wo_mutex("AT+WFMAC=?\r"))
     {
         if (DATA_FOUND == at_read("+WFMAC:%X:%X:%X:%X:%X:%X",
-                                  &mac_tmp[0], &mac_tmp[1], &mac_tmp[2],
-                                  &mac_tmp[3], &mac_tmp[4], &mac_tmp[5]))
+                                  &mac_address[0], &mac_address[1], &mac_address[2],
+                                  &mac_address[3], &mac_address[4], &mac_address[5]))
         {
-            mac_address[0] = (uint8_t) mac_tmp[0];
-            mac_address[1] = (uint8_t) mac_tmp[1];
-            mac_address[2] = (uint8_t) mac_tmp[2];
-            mac_address[3] = (uint8_t) mac_tmp[3];
-            mac_address[4] = (uint8_t) mac_tmp[4];
-            mac_address[5] = (uint8_t) mac_tmp[5];
             api_ret = WIFI_SUCCESS;
         }
     }
@@ -999,9 +1037,6 @@ wifi_err_t R_WIFI_DA16XXX_GetMacAddress (uint8_t * mac_address)
 wifi_err_t R_WIFI_DA16XXX_GetIpAddress (wifi_ip_configuration_t * ip_config)
 {
     wifi_err_t api_ret = WIFI_ERR_MODULE_COM;
-    int32_t    ip_tmp[4];
-    int32_t    sub_tmp[4];
-    int32_t    gw_tmp[4];
 
     /* Connected access point? */
     if (0 != R_WIFI_DA16XXX_IsConnected())
@@ -1024,23 +1059,17 @@ wifi_err_t R_WIFI_DA16XXX_GetIpAddress (wifi_ip_configuration_t * ip_config)
 
     if (AT_OK == at_exec_wo_mutex("AT+NWIP=?\r"))
     {
-        if (DATA_FOUND == at_read("+NWIP:0,%d.%d.%d.%d,%d.%d.%d.%d,%d.%d.%d.%d",
-                                  &ip_tmp[0], &ip_tmp[1], &ip_tmp[2], &ip_tmp[3],
-                                  &sub_tmp[0], &sub_tmp[1], &sub_tmp[2], &sub_tmp[3],
-                                  &gw_tmp[0], &gw_tmp[1], &gw_tmp[2], &gw_tmp[3]))
+        if (DATA_FOUND == at_read(
+                "+NWIP:0,%d.%d.%d.%d,%d.%d.%d.%d,%d.%d.%d.%d",
+                &ip_config->ipaddress[0], &ip_config->ipaddress[1],
+                &ip_config->ipaddress[2], &ip_config->ipaddress[3],
+                &ip_config->subnetmask[0], &ip_config->subnetmask[1],
+                &ip_config->subnetmask[2], &ip_config->subnetmask[3],
+                &ip_config->gateway[0], &ip_config->gateway[1],
+                &ip_config->gateway[2], &ip_config->gateway[3]
+            )
+        )
         {
-            ip_config->ipaddress[0] = (uint8_t) ip_tmp[0];
-            ip_config->ipaddress[1] = (uint8_t) ip_tmp[1];
-            ip_config->ipaddress[2] = (uint8_t) ip_tmp[2];
-            ip_config->ipaddress[3] = (uint8_t) ip_tmp[3];
-            ip_config->subnetmask[0] = (uint8_t) sub_tmp[0];
-            ip_config->subnetmask[1] = (uint8_t) sub_tmp[1];
-            ip_config->subnetmask[2] = (uint8_t) sub_tmp[2];
-            ip_config->subnetmask[3] = (uint8_t) sub_tmp[3];
-            ip_config->gateway[0] = (uint8_t) gw_tmp[0];
-            ip_config->gateway[1] = (uint8_t) gw_tmp[1];
-            ip_config->gateway[2] = (uint8_t) gw_tmp[2];
-            ip_config->gateway[3] = (uint8_t) gw_tmp[3];
             api_ret = WIFI_SUCCESS;
         }
     }
@@ -1102,13 +1131,15 @@ wifi_err_t R_WIFI_DA16XXX_HardwareReset (void)
         return WIFI_ERR_SERIAL_OPEN;
     }
 
+#if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
     /* Set flow control for serial port */
     flow_ctrl_init();
+#endif
 
     /* Give mutex */
     os_wrap_mutex_give(MUTEX_TX);
 
-#if WIFI_CFG_DEBUG_LOG == 4
+#if WIFI_CFG_DEBUG_LOG == LOG_DEBUG
     /* Enable echo back */
     at_exec("ATE\r");
 #endif
@@ -1165,14 +1196,14 @@ wifi_err_t R_WIFI_DA16XXX_HardwareReset (void)
 
 /******************************************************************************************************************//**
  * Function Name: R_WIFI_DA16XXX_GetVersion
- * Description  : Get the Wi-Fi FIT module version.
+ * Description  : Get the Wi-Fi module version.
  * Arguments    : none
  * Return Value : The version of Wi-Fi module. The version number is encoded such that the top 2 bytes are the major
  *                version number and the bottom 2 bytes are the minor version number.
  **********************************************************************************************************************/
 uint32_t R_WIFI_DA16XXX_GetVersion(void)
 {
-    uint32_t version = (WIFI_VERSION_MAJOR << 16) | WIFI_VERSION_MINOR;
+    uint32_t version = (((uint32_t) WIFI_VERSION_MAJOR) << 16) | (uint32_t) WIFI_VERSION_MINOR;
 
     return version;
 }
@@ -1253,15 +1284,17 @@ static wifi_err_t disconnect_ap_sub(void)
 static void da16xxx_hw_reset(void)
 {
     /* WIFI Module hardware reset   */
+#if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
     WIFI_RESET_DDR(WIFI_CFG_RESET_PORT, WIFI_CFG_RESET_PIN) = 1;  /* output */
+#endif
     WIFI_RESET_DR(WIFI_CFG_RESET_PORT, WIFI_CFG_RESET_PIN)  = 0;  /* low    */
 #if (WIFI_CFG_DA16600_SUPPORT)
-    R_BSP_SoftwareDelay(500, BSP_DELAY_MILLISECS);
+    os_wrap_swdelay(500, UNIT_MSEC);
 #else
-    R_BSP_SoftwareDelay(30, BSP_DELAY_MILLISECS);
+    os_wrap_swdelay(30, UNIT_MSEC);
 #endif
     WIFI_RESET_DR(WIFI_CFG_RESET_PORT, WIFI_CFG_RESET_PIN)  = 1;  /* high   */
-    R_BSP_SoftwareDelay(250, BSP_DELAY_MILLISECS);
+    os_wrap_swdelay(250, UNIT_MSEC);
 }
 /**********************************************************************************************************************
  * End of function da16xxx_hw_reset
@@ -1296,7 +1329,7 @@ static void da16xxx_close(void)
 static wifi_err_t da16xxx_sntp_service_init(void)
 {
     wifi_err_t api_ret = WIFI_SUCCESS;
-    int32_t    ip_address_sntp_server[4];
+    uint32_t    ip_address_sntp_server[4];
 
     /* Set the SNTP server IP address */
     if (4 != sscanf(WIFI_CFG_SNTP_SERVER_IP, "%d.%d.%d.%d",
@@ -1308,7 +1341,7 @@ static wifi_err_t da16xxx_sntp_service_init(void)
     }
 
     /* Configure the SNTP Server Address */
-    api_ret = R_WIFI_DA16XXX_SntpServerIpAddressSet((uint8_t *) ip_address_sntp_server);
+    api_ret = R_WIFI_DA16XXX_SntpServerIpAddressSet(ip_address_sntp_server);
     if (api_ret != WIFI_SUCCESS)
     {
         return api_ret;
@@ -1333,7 +1366,7 @@ static wifi_err_t da16xxx_sntp_service_init(void)
 /**********************************************************************************************************************
  * End of function da16xxx_sntp_service_init
  *********************************************************************************************************************/
- #endif
+#endif
 
 /*
  * Callback functions
@@ -1366,11 +1399,12 @@ void da16xxx_handle_incoming_common_data(wifi_resp_type_t *type, wifi_recv_state
         {
             if (g_rx_idx == 0)
             {
-                g_rx_buff[g_rx_idx++] = data;
+                g_rx_buff = data;
+                g_rx_idx++;
             }
             else if (',' == data)
             {
-                if ('1' == g_rx_buff[0])
+                if ('1' == g_rx_buff)
                 {
                     s_wifi_system_state = MODULE_ACCESSPOINT;
                 }
@@ -1400,29 +1434,30 @@ void da16xxx_handle_incoming_common_data(wifi_resp_type_t *type, wifi_recv_state
  *********************************************************************************************************************/
 
 /*
- * Log functions
+ * Logging functions
  */
+#if WIFI_CFG_LOGGING_OPTION >= 2
 /**********************************************************************************************************************
  * Function Name: s_vsnprintf_safe
  * Description  : vsnprintf.
  * Arguments    : s - string buffer
- * 		          n - length
+ *                n - length
  *                format - format message
  *                varg
  * Return Value : None
  *********************************************************************************************************************/
-static int s_vsnprintf_safe(char * s,
-                            size_t n,
-                            const char * format,
-                            va_list arg)
+static int16_t s_vsnprintf_safe(char * s,
+                                size_t n,
+                                const char * format,
+                                va_list arg)
 {
-    int ret;
+    int16_t ret;
 
     ret = vsnprintf(s, n, format, arg);
 
     /* Check if the string was truncated and if so, update the return value
      * to reflect the number of characters actually written. */
-    if( ret >= n )
+    if( ret >= (int16_t) n )
     {
         /* Do not include the terminating NULL character to keep the behaviour
          * same as the standard. */
@@ -1449,17 +1484,17 @@ static int s_vsnprintf_safe(char * s,
  * Function Name: s_snprintf_safe
  * Description  : snprintf.
  * Arguments    : s - string buffer
- * 		          n - length
+ *                n - length
  *                format - format message
  * Return Value : None
  *********************************************************************************************************************/
-static int s_snprintf_safe(char * s,
-                          size_t n,
-                          const char * format,
-                          ... )
+static int16_t s_snprintf_safe(char * s,
+                               size_t n,
+                               const char * format,
+                               ... )
 {
-    int ret;
-    va_list args;
+    int16_t ret;
+    va_list args = {0};
 
     va_start( args, format );
     ret = s_vsnprintf_safe( s, n, format, args );
@@ -1475,38 +1510,38 @@ static int s_snprintf_safe(char * s,
  * Function Name: s_log_printf_common
  * Description  : Print common log without freeRTOS logging module.
  * Arguments    : usLoggingLevel - log level
- *                format - format message
+ *                pcFormat - format message
  *                varg
  * Return Value : None
  *********************************************************************************************************************/
 static void s_log_printf_common(uint8_t usLoggingLevel,
-                                const char * pcFormat,
+                                const char WIFI_FAR * pcFormat,
                                 va_list args)
 {
     size_t xLength = 0;
-    char pcPrintString[256];
+    char pcPrintString[WIFI_LOGGING_MAX_MESSAGE_LENGTH];
 
     if (NULL != pcPrintString)
     {
-        const int8_t * pcLevelString = NULL;
+        const char * pcLevelString = NULL;
         size_t ulFormatLen = 0UL;
 
-        /* Choose the string for the log level metadata for the log message. */
+        /* Choose the string for the log level meta data for the log message. */
         switch (usLoggingLevel)
         {
-            case 1:
+            case LOG_ERROR:
                 pcLevelString = "ERROR";
                 break;
 
-            case 2:
+            case LOG_WARN:
                 pcLevelString = "WARN";
                 break;
 
-            case 3:
+            case LOG_INFO:
                 pcLevelString = "INFO";
                 break;
 
-            case 4:
+            case LOG_DEBUG:
                 pcLevelString = "DEBUG";
                 break;
 
@@ -1516,24 +1551,27 @@ static void s_log_printf_common(uint8_t usLoggingLevel,
         }
 
         /* Add the chosen log level information as prefix for the message. */
-        if( ( pcLevelString != NULL ) && ( xLength < 256 ) )
+        if( ( pcLevelString != NULL ) && ( xLength < WIFI_LOGGING_MAX_MESSAGE_LENGTH ) )
         {
-            xLength += s_snprintf_safe( pcPrintString + xLength, 256 - xLength, "[%s] ", pcLevelString );
+            xLength += s_snprintf_safe( pcPrintString + xLength,
+                                        WIFI_LOGGING_MAX_MESSAGE_LENGTH - xLength, "[%s] ", pcLevelString );
         }
 
-        if( xLength < 256 )
+        if( xLength < WIFI_LOGGING_MAX_MESSAGE_LENGTH )
         {
-            xLength += s_vsnprintf_safe( pcPrintString + xLength, 256 - xLength, pcFormat, args );
+            xLength += s_vsnprintf_safe( pcPrintString + xLength,
+                                         WIFI_LOGGING_MAX_MESSAGE_LENGTH - xLength, pcFormat, args );
         }
 
         /* Add newline characters if the message does not end with them.*/
-        ulFormatLen = strlen( (char *)pcFormat );
+        ulFormatLen = strlen( (char WIFI_FAR *)pcFormat );
 
         if( ( ulFormatLen >= 2 ) &&
-            ( strncmp( (char *)(pcFormat + ulFormatLen), "\r\n", 2 ) != 0 ) &&
-            ( xLength < 256 ) )
+            ( strncmp( (char WIFI_FAR *)(pcFormat + ulFormatLen), "\r\n", 2 ) != 0 ) &&
+            ( xLength < WIFI_LOGGING_MAX_MESSAGE_LENGTH ) )
         {
-            xLength += s_snprintf_safe(pcPrintString + xLength, 256 - xLength, "%s", "\r\n" );
+            xLength += s_snprintf_safe(pcPrintString + xLength,
+                                       WIFI_LOGGING_MAX_MESSAGE_LENGTH - xLength, "%s", "\r\n" );
         }
 
         pcPrintString[xLength] = '\0';
@@ -1542,7 +1580,11 @@ static void s_log_printf_common(uint8_t usLoggingLevel,
          * not empty. */
         if (xLength > 0)
         {
+#if WIFI_CFG_LOGGING_OPTION == 3
             printf ("%s", pcPrintString);
+#elif WIFI_CFG_LOGGING_OPTION == 2
+            s_uart_string_printf(pcPrintString);
+#endif
         }
     }
 }
@@ -1556,12 +1598,12 @@ static void s_log_printf_common(uint8_t usLoggingLevel,
  * Arguments    : format - format message
  * Return Value : None
  *********************************************************************************************************************/
-void printf_log_error (const char * format, ...)
+void printf_log_error (const char WIFI_FAR * format, ...)
 {
-    va_list args;
+    va_list args = {0};
 
     va_start(args, format);
-    s_log_printf_common(1, format, args);
+    s_log_printf_common(LOG_ERROR, format, args);
 
     va_end(args);
 }
@@ -1575,12 +1617,12 @@ void printf_log_error (const char * format, ...)
  * Arguments    : format - format message
  * Return Value : None
  *********************************************************************************************************************/
-void printf_log_warn (const char * format, ...)
+void printf_log_warn (const char WIFI_FAR * format, ...)
 {
-    va_list args;
+    va_list args = {0};
 
     va_start(args, format);
-    s_log_printf_common(2, format, args);
+    s_log_printf_common(LOG_WARN, format, args);
 
     va_end(args);
 }
@@ -1594,12 +1636,12 @@ void printf_log_warn (const char * format, ...)
  * Arguments    : format - format message
  * Return Value : None
  *********************************************************************************************************************/
-void printf_log_info (const char * format, ...)
+void printf_log_info (const char WIFI_FAR * format, ...)
 {
-    va_list args;
+    va_list args = {0};
 
     va_start(args, format);
-    s_log_printf_common(3, format, args);
+    s_log_printf_common(LOG_INFO, format, args);
 
     va_end(args);
 }
@@ -1613,15 +1655,94 @@ void printf_log_info (const char * format, ...)
  * Arguments    : format - format message
  * Return Value : None
  *********************************************************************************************************************/
-void printf_log_debug (const char * format, ...)
+void printf_log_debug (const char WIFI_FAR * format, ...)
 {
-    va_list args;
+    va_list args = {0};
 
     va_start(args, format);
-    s_log_printf_common(4, format, args);
+    s_log_printf_common(LOG_DEBUG, format, args);
 
     va_end(args);
 }
 /**********************************************************************************************************************
  * End of function printf_log_debug
  *********************************************************************************************************************/
+#endif
+
+#if WIFI_CFG_LOGGING_OPTION == 2
+/**********************************************************************************************************************
+ * Function Name: s_uart_config
+ * Description  : Peripheral UART operation for log output.
+ * Arguments    : none
+ * Return Value : none
+ *********************************************************************************************************************/
+static void s_uart_config(void)
+{
+    sci_cfg_t sci_config;
+#if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
+    U_SCI_UART_CLI_PINSET();
+#endif
+    sci_config.async.baud_rate    = WIFI_CFG_SCI_UART_TERMINAL_BAUDRATE;
+    sci_config.async.clk_src      = SCI_CLK_INT;
+    sci_config.async.data_size    = SCI_DATA_8BIT;
+    sci_config.async.parity_en    = SCI_PARITY_OFF;
+    sci_config.async.parity_type  = SCI_EVEN_PARITY;
+    sci_config.async.stop_bits    = SCI_STOPBITS_1;
+    sci_config.async.int_priority = WIFI_CFG_SCI_UART_INTERRUPT_PRIORITY;
+
+    if (SCI_SUCCESS != R_SCI_Open(WIFI_CFG_LOG_TERM_CHANNEL, SCI_MODE_ASYNC, &sci_config, NULL, &g_sci_handle))
+    {
+        R_BSP_NOP();
+    }
+}
+/**********************************************************************************************************************
+ * End of function s_uart_config
+ *********************************************************************************************************************/
+
+/**********************************************************************************************************************
+ * Function Name: s_uart_string_printf
+ * Description  : Sends the specified character string on the set UART channel.
+ * Arguments    : pString-
+ *                  Pointer type log output character string.
+ * Return Value : none
+ *********************************************************************************************************************/
+static void s_uart_string_printf(char WIFI_FAR * pcString)
+{
+    sci_err_t sci_error = SCI_SUCCESS;
+    uint16_t retry = 0xffff;
+    uint16_t str_length = (uint16_t) strlen(pcString);
+    uint16_t transmit_length;
+
+    while ((retry > 0) && (str_length > 0))
+    {
+
+        R_SCI_Control(g_sci_handle, SCI_CMD_TX_Q_BYTES_FREE, &transmit_length);
+
+        if (transmit_length > str_length)
+        {
+            transmit_length = str_length;
+        }
+
+        sci_error = R_SCI_Send(g_sci_handle, (uint8_t WIFI_FAR *) pcString, transmit_length);
+
+        if ((SCI_ERR_XCVR_BUSY == sci_error) || (SCI_ERR_INSUFFICIENT_SPACE == sci_error))
+        {
+            /* retry if previous transmission still in progress or tx buffer is insufficient. */
+            retry--;
+        }
+        else
+        {
+            str_length -= transmit_length;
+            pcString += transmit_length;
+        }
+    }
+
+    if (SCI_SUCCESS != sci_error)
+    {
+        R_BSP_NOP();
+    }
+}
+/**********************************************************************************************************************
+ * End of function s_uart_string_printf
+ *********************************************************************************************************************/
+#endif

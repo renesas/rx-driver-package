@@ -33,17 +33,17 @@
         <product>GNURX</product>
         <version>4.08.04.201902</version>
     </toolchain>
-    <toolchain>
-        <brand>IAR</brand>
-        <product>ICCRX</product>
-        <version>4.12.01</version>
-    </toolchain>
-
     <!-- only one target entry allowed; multiple sub tags permitted -->
     <target>
         <family>RX</family>
         <series>RX600</series>
+        <series>RX100</series>
+        <series>RX200</series>
         <group omit_board="true">RX65N</group>
+        <group omit_board="true">RX66N</group>
+        <group omit_board="true">RX671</group>
+        <group omit_board="true">RX140</group>
+        <group omit_board="true">RX261</group>
     </target>
 
     <!-- only one package entry allowed -->
@@ -72,4 +72,7 @@
         <incdir>r_wifi_da16xxx</incdir>
         <incdir>r_wifi_da16xxx/src</incdir>
     </package>
+    <sampleapplicationnote>
+    <documentno>R01AN7173</documentno>
+    </sampleapplicationnote>
 </refinfo>

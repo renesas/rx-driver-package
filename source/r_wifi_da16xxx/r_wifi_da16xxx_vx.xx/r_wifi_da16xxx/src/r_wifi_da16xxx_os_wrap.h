@@ -30,8 +30,10 @@
 
 #if BSP_CFG_RTOS_USED == 1        /* FreeRTOS is used.   */
 #include "FreeRTOS.h"
+#include "semphr.h"
+#include "timers.h"
 
-#if WIFI_CFG_USE_FREERTOS_LOGGING == 1
+#if WIFI_CFG_LOGGING_OPTION == 1
 #include "logging_levels.h"
 
 /* Logging configuration */
@@ -51,8 +53,7 @@
 #include "tx_mutex.h"
 #include "tx_thread.h"
 #include "tx_semaphore.h"
-#else
-#error  "Error - BSP_CFG_RTOS_USED is not 1(FreeRTOS) or 5(AzureRTOS) !"
+
 #endif /* BSP_CFG_RTOS_USED */
 
 /**********************************************************************************************************************
@@ -66,6 +67,8 @@
 #elif BSP_CFG_RTOS_USED == 5      /* Azure RTOS is used. */
 #define TICK_VALUE                 (1000 / TX_TIMER_TICKS_PER_SECOND)
 #define OS_WRAP_MS_TO_TICKS(ms)    (ms < TICK_VALUE ? 1 : ms / TICK_VALUE) /* ms -> tick count */
+#else                             /* Bare metal is used. */
+#define OS_WRAP_MS_TO_TICKS(ms)    (ms*1000) /* ms -> tick count */
 #endif /* BSP_CFG_RTOS_USED */
 
 #if BSP_CFG_RTOS_USED == 1        /* FreeRTOS is used.   */
@@ -76,6 +79,10 @@ typedef TickType_t         OS_TICK;             /* ticks */
 typedef TX_MUTEX           OS_MUTEX;            /* mutex              */
 typedef TX_TIMER           OS_TIMER_HANDLE;     /* handle for timer   */
 typedef ULONG              OS_TICK;             /* ticks */
+#else                             /* Bare metal is used. */
+typedef uint32_t*        OS_MUTEX;            /* mutex              */
+typedef uint32_t         OS_TIMER_HANDLE;     /* handle for timer   */
+typedef uint32_t         OS_TICK;             /* ticks */
 #endif /* BSP_CFG_RTOS_USED */
 
 #define MUTEX_TX             (0x01)     // WIFI API(TX)
@@ -110,6 +117,9 @@ typedef enum
 /**********************************************************************************************************************
  External global variables
  *********************************************************************************************************************/
+#if BSP_CFG_RTOS_USED == 0        /* Bare metal is used.   */
+extern OS_TICK g_tick_count;
+#endif /* BSP_CFG_RTOS_USED */
 
 /**********************************************************************************************************************
  Exported global functions
@@ -199,6 +209,15 @@ void tick_count_stop (void);
  * Return Value : TICK_NOT_EXPIERD
  *                TICK_EXPIERD
  *********************************************************************************************************************/
-uint32_t tick_count_check (void);
+uint8_t tick_count_check (void);
+
+/**********************************************************************************************************************
+ * Function Name: os_wrap_swdelay
+ * Description  : This function handles R_BSP_SoftwareDelay.
+ * Arguments    : delay  - timer value
+ *                unit   - tick or milliseconds
+ * Return Value : None
+ *********************************************************************************************************************/
+void os_wrap_swdelay (uint32_t delay, e_timer_unit_t unit);
 
 #endif /* R_WIFI_DA16XXX_OS_WRAP_H */

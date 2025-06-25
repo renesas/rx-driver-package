@@ -39,15 +39,15 @@
 /* Socket table information */
 typedef struct st_sock_tbl
 {
-    uint8_t                 ipaddr[4];
-    uint32_t                port;
+    uint32_t                ipaddr[4];
+    uint16_t                port;
     wifi_socket_status_t    status;
     uint8_t                 ipver;
     wifi_socket_type_t      type;
     byteq_hdl_t             byteq_hdl;
-    uint32_t                put_err_cnt;
+    uint16_t                put_err_cnt;
     uint8_t                 recv_buf[TCP_BUF_MAX];
-    int32_t                 recv_len;
+    int16_t                 recv_len;
     st_wifi_timer           timer_tx;
     st_wifi_timer           timer_rx;
 } st_sock_tbl_t;
@@ -56,7 +56,6 @@ typedef struct st_sock_tbl
  Exported global variables
  *********************************************************************************************************************/
 static st_sock_tbl_t g_sock_tbl[TCP_TBL_MAX];
-static uint8_t g_rx_buff[TEMP_BUF_MAX];
 static uint8_t g_sock_list[TCP_TBL_MAX + 2]; //number of sockets + 2 others socket type
 static volatile uint8_t g_cur_sock_idx = UINT8_MAX;
 static volatile uint8_t g_rx_idx = 0;
@@ -74,9 +73,9 @@ static volatile uint8_t g_rx_idx = 0;
  *                WIFI_ERR_NOT_CONNECT
  *                WIFI_ERR_SOCKET_NUM
  *********************************************************************************************************************/
-wifi_err_t R_WIFI_DA16XXX_GetAvailableSocket (uint32_t * socket_id)
+wifi_err_t R_WIFI_DA16XXX_GetAvailableSocket (uint8_t * socket_id)
 {
-    uint32_t i = 0;
+    uint8_t i = 0;
 
     /* Connected access point? */
     if (0 != R_WIFI_DA16XXX_IsConnected())
@@ -117,7 +116,7 @@ wifi_err_t R_WIFI_DA16XXX_GetAvailableSocket (uint32_t * socket_id)
  *                WIFI_ERR_NOT_OPEN
  *                WIFI_ERR_SOCKET_NUM
  *********************************************************************************************************************/
-wifi_err_t R_WIFI_DA16XXX_GetSocketStatus (uint32_t socket_number, wifi_socket_status_t *socket_status)
+wifi_err_t R_WIFI_DA16XXX_GetSocketStatus (uint8_t socket_number, wifi_socket_status_t *socket_status)
 {
     /* Disconnected WiFi module? */
     if (0 != R_WIFI_DA16XXX_IsOpened())
@@ -156,7 +155,7 @@ wifi_err_t R_WIFI_DA16XXX_GetSocketStatus (uint32_t socket_number, wifi_socket_s
  *                WIFI_ERR_NOT_CONNECT
  *                WIFI_ERR_SOCKET_CREATE
  *********************************************************************************************************************/
-wifi_err_t R_WIFI_DA16XXX_CreateSocket (uint32_t socket_number, wifi_socket_type_t type, uint8_t ip_version)
+wifi_err_t R_WIFI_DA16XXX_CreateSocket (uint8_t socket_number, wifi_socket_type_t type, uint8_t ip_version)
 {
     static bool socket_init = false;
     wifi_err_t ret = WIFI_ERR_SOCKET_CREATE;
@@ -192,18 +191,18 @@ wifi_err_t R_WIFI_DA16XXX_CreateSocket (uint32_t socket_number, wifi_socket_type
                                           TCP_BUF_MAX,
                                           &g_sock_tbl[socket_number].byteq_hdl))
         {
-            WIFI_LOG_INFO(("R_WIFI_DA16XXX_CreateSocket: Creating socket %lu!", socket_number));
+            WIFI_LOG_INFO(("R_WIFI_DA16XXX_CreateSocket: Creating socket %d!", socket_number));
             ret = WIFI_SUCCESS;
         }
         else
         {
-            WIFI_LOG_ERROR(("R_WIFI_DA16XXX_CreateSocket: Cannot open BYTEQ for socket %lu!", socket_number));
+            WIFI_LOG_ERROR(("R_WIFI_DA16XXX_CreateSocket: Cannot open BYTEQ for socket %d!", socket_number));
             ret = WIFI_ERR_BYTEQ_OPEN;
         }
     }
     else
     {
-        WIFI_LOG_WARN(("R_WIFI_DA16XXX_CreateSocket: socket %lu has already created!", socket_number));
+        WIFI_LOG_WARN(("R_WIFI_DA16XXX_CreateSocket: socket %d has already created!", socket_number));
     }
 
     return ret;
@@ -225,10 +224,10 @@ wifi_err_t R_WIFI_DA16XXX_CreateSocket (uint32_t socket_number, wifi_socket_type
  *                WIFI_ERR_SOCKET_NUM
  *                WIFI_ERR_TAKE_MUTEX
  *********************************************************************************************************************/
-wifi_err_t R_WIFI_DA16XXX_TcpConnect (uint32_t socket_number, uint8_t * ip_address, uint16_t port)
+wifi_err_t R_WIFI_DA16XXX_TcpConnect (uint8_t socket_number, uint32_t * ip_address, uint16_t port)
 {
     wifi_err_t  api_ret = WIFI_ERR_MODULE_COM;
-    uint8_t     cid = 0;
+    uint32_t    cid = 0;
 
     /* Connected access point? */
     if (0 != R_WIFI_DA16XXX_IsConnected())
@@ -246,7 +245,7 @@ wifi_err_t R_WIFI_DA16XXX_TcpConnect (uint32_t socket_number, uint8_t * ip_addre
     /* socket created? */
     if (WIFI_SOCKET_STATUS_SOCKET != g_sock_tbl[socket_number].status)
     {
-        WIFI_LOG_ERROR(("R_WIFI_DA16XXX_TcpConnect: socket %lu is not created!", socket_number));
+        WIFI_LOG_ERROR(("R_WIFI_DA16XXX_TcpConnect: socket %d is not created!", socket_number));
         return WIFI_ERR_SOCKET_NUM;
     }
 
@@ -257,20 +256,17 @@ wifi_err_t R_WIFI_DA16XXX_TcpConnect (uint32_t socket_number, uint8_t * ip_addre
     }
 
     at_set_timeout(10000);
-    if (AT_OK == at_exec_wo_mutex("AT+TRTC=%d.%d.%d.%d,%lu,0\r",
+    if (AT_OK == at_exec_wo_mutex("AT+TRTC=%d.%d.%d.%d,%d,0\r",
                                   ip_address[0], ip_address[1], ip_address[2], ip_address[3], port))
     {
         if (DATA_FOUND == at_read("+TRTC:%d", &cid))
         {
-            g_sock_tbl[socket_number].ipaddr[0] = ip_address[0];
-            g_sock_tbl[socket_number].ipaddr[1] = ip_address[1];
-            g_sock_tbl[socket_number].ipaddr[2] = ip_address[2];
-            g_sock_tbl[socket_number].ipaddr[3] = ip_address[3];
+            memcpy(g_sock_tbl[socket_number].ipaddr, ip_address, sizeof(g_sock_tbl[socket_number].ipaddr));
             g_sock_tbl[socket_number].port = port;
             g_sock_tbl[socket_number].status = WIFI_SOCKET_STATUS_CONNECTED;
             g_sock_list[cid] = socket_number;
             api_ret = WIFI_SUCCESS;
-            WIFI_LOG_INFO(("R_WIFI_DA16XXX_TcpConnect: connected socket %lu to TCP server.", socket_number));
+            WIFI_LOG_INFO(("R_WIFI_DA16XXX_TcpConnect: connected socket %d to TCP server.", socket_number));
         }
     }
 
@@ -300,18 +296,20 @@ wifi_err_t R_WIFI_DA16XXX_TcpConnect (uint32_t socket_number, uint8_t * ip_addre
  *                WIFI_ERR_SOCKET_NUM
  *                WIFI_ERR_TAKE_MUTEX
  *********************************************************************************************************************/
-int32_t R_WIFI_DA16XXX_SendSocket (uint32_t socket_number, uint8_t * data,
-                                   uint32_t length, uint32_t timeout_ms)
+int16_t R_WIFI_DA16XXX_SendSocket (uint8_t socket_number, uint8_t WIFI_FAR * data,
+                                   uint16_t length, uint32_t timeout_ms)
 {
-    uint32_t    send_idx = 0;
+    uint16_t    send_idx = 0;
+#if WIFI_CFG_SCI_BAUDRATE == 115200
     uint8_t     send_data[DA16XXX_AT_CMD_BUF_MAX] = {0};
-    int32_t     send_length;
+    int16_t     send_length;
+#endif
     uint8_t     cid = 0;
-    int32_t     api_ret = 0;
+    int16_t     api_ret = 0;
     e_atcmd_err_t at_ret = ATCMD_OK;
     e_rslt_code_t rslt_ret = AT_OK;
     OS_TICK     tick_tmp;
-    uint32_t    tx_length;
+    uint16_t    tx_length;
 
     /* Connect access point? */
     if (0 != R_WIFI_DA16XXX_IsConnected())
@@ -329,7 +327,7 @@ int32_t R_WIFI_DA16XXX_SendSocket (uint32_t socket_number, uint8_t * data,
     /* Not connect? */
     if (WIFI_SOCKET_STATUS_CONNECTED != g_sock_tbl[socket_number].status)
     {
-        WIFI_LOG_ERROR(("R_WIFI_DA16XXX_SendSocket: socket #%lu is not connected!", socket_number));
+        WIFI_LOG_ERROR(("R_WIFI_DA16XXX_SendSocket: socket #%d is not connected!", socket_number));
         return WIFI_ERR_SOCKET_NUM;
     }
 
@@ -368,16 +366,16 @@ int32_t R_WIFI_DA16XXX_SendSocket (uint32_t socket_number, uint8_t * data,
         }
         /* get prefix length */
 #if WIFI_CFG_SCI_BAUDRATE == 115200
-        send_length = snprintf((char *) send_data, DA16XXX_AT_CMD_BUF_MAX, "\x1BS%d%ld,%d.%d.%d.%d,%lu,%s,",
+        send_length = snprintf((char WIFI_FAR *) send_data, DA16XXX_AT_CMD_BUF_MAX, "\x1BS%d%d,%d.%d.%d.%d,%d,r,",
                                cid, (int) tx_length,
                                g_sock_tbl[socket_number].ipaddr[0],
                                g_sock_tbl[socket_number].ipaddr[1],
                                g_sock_tbl[socket_number].ipaddr[2],
                                g_sock_tbl[socket_number].ipaddr[3],
-                               g_sock_tbl[socket_number].port, "r");
+                               g_sock_tbl[socket_number].port);
 
         WIFI_LOG_DEBUG(("SendSocket: %s", send_data));
-        at_ret = at_send_raw((uint8_t *) send_data, (uint32_t) send_length);
+        at_ret = at_send_raw((uint8_t WIFI_FAR *) send_data, (uint32_t) send_length);
         if (ATCMD_ERR_TIMEOUT == at_ret)
         {
             WIFI_LOG_ERROR(("SendSocket: at_send_raw() timed out (ret=%ld)!", at_ret));
@@ -391,7 +389,7 @@ int32_t R_WIFI_DA16XXX_SendSocket (uint32_t socket_number, uint8_t * data,
             break;
         }
 #else
-        rslt_ret = at_exec_wo_mutex("\x1BH%d,%ld,%d.%d.%d.%d,%lu\r",
+        rslt_ret = at_exec_wo_mutex("\x1BH%d,%d,%d.%d.%d.%d,%d\r",
                                     cid, (int) tx_length,
                                     g_sock_tbl[socket_number].ipaddr[0],
                                     g_sock_tbl[socket_number].ipaddr[1],
@@ -412,7 +410,7 @@ int32_t R_WIFI_DA16XXX_SendSocket (uint32_t socket_number, uint8_t * data,
         }
 #endif
 
-        at_ret = at_send_raw((uint8_t *) data + send_idx, tx_length);
+        at_ret = at_send_raw((uint8_t WIFI_FAR *) data + send_idx, tx_length);
         if (ATCMD_ERR_TIMEOUT == at_ret)
         {
             WIFI_LOG_ERROR(("SendSocket: at_send_raw() timed out (ret=%ld)!", at_ret));
@@ -450,7 +448,7 @@ int32_t R_WIFI_DA16XXX_SendSocket (uint32_t socket_number, uint8_t * data,
     at_set_timeout(ATCMD_RESP_TIMEOUT);
     os_wrap_mutex_give(MUTEX_TX);
     tick_tmp = os_wrap_tickcount_get() - tick_tmp;
-    WIFI_LOG_INFO(("R_WIFI_DA16XXX_SendSocket: socket %lu ret=%ld (%lu).", socket_number, api_ret, tick_tmp));
+    WIFI_LOG_INFO(("R_WIFI_DA16XXX_SendSocket: socket %d ret=%ld (%lu).", socket_number, api_ret, tick_tmp));
     return api_ret;
 }
 /**********************************************************************************************************************
@@ -469,11 +467,11 @@ int32_t R_WIFI_DA16XXX_SendSocket (uint32_t socket_number, uint8_t * data,
  *                WIFI_ERR_NOT_CONNECT
  *                WIFI_ERR_SOCKET_NUM
  *********************************************************************************************************************/
-int32_t R_WIFI_DA16XXX_ReceiveSocket (uint32_t socket_number, uint8_t * data,
-                                      uint32_t length, uint32_t timeout_ms)
+int16_t R_WIFI_DA16XXX_ReceiveSocket (uint8_t socket_number, uint8_t WIFI_FAR * data,
+                                      uint16_t length, uint32_t timeout_ms)
 {
-    int32_t     api_ret = WIFI_SUCCESS;
-    uint32_t    recv_cnt = 0;
+    int16_t     api_ret = WIFI_SUCCESS;
+    uint16_t    recv_cnt = 0;
     byteq_err_t byteq_ret;
     OS_TICK     tick_tmp = 0;
 
@@ -527,11 +525,11 @@ int32_t R_WIFI_DA16XXX_ReceiveSocket (uint32_t socket_number, uint8_t * data,
     /* Not connect? */
     if ((recv_cnt == 0) && (WIFI_SOCKET_STATUS_CONNECTED != g_sock_tbl[socket_number].status))
     {
-        WIFI_LOG_ERROR(("R_WIFI_DA16XXX_ReceiveSocket: socket %lu is not connected!", socket_number));
+        WIFI_LOG_ERROR(("R_WIFI_DA16XXX_ReceiveSocket: socket %d is not connected!", socket_number));
         return WIFI_ERR_SOCKET_NUM;
     }
 
-    WIFI_LOG_INFO(("R_WIFI_DA16XXX_ReceiveSocket: socket %lu recv_cnt=%ld (%lu).", socket_number, recv_cnt, tick_tmp));
+    WIFI_LOG_INFO(("R_WIFI_DA16XXX_ReceiveSocket: socket %d recv_cnt=%ld (%lu).", socket_number, recv_cnt, tick_tmp));
     api_ret = recv_cnt;
     return api_ret;
 }
@@ -549,7 +547,7 @@ int32_t R_WIFI_DA16XXX_ReceiveSocket (uint32_t socket_number, uint8_t * data,
  *                WIFI_ERR_MODULE_TIMEOUT
  *                WIFI_ERR_SOCKET_NUM
  *********************************************************************************************************************/
-wifi_err_t R_WIFI_DA16XXX_CloseSocket (uint32_t socket_number)
+wifi_err_t R_WIFI_DA16XXX_CloseSocket (uint8_t socket_number)
 {
     wifi_err_t api_ret = WIFI_SUCCESS;
     e_rslt_code_t at_rep = AT_OK;
@@ -605,7 +603,7 @@ CLOSE_SOCKET:
     g_sock_tbl[socket_number].put_err_cnt = 0;
     g_sock_tbl[socket_number].status = WIFI_SOCKET_STATUS_CLOSED;
     g_sock_list[cid] = UINT8_MAX;
-    WIFI_LOG_INFO(("R_WIFI_DA16XXX_CloseSocket: socket %lu is closed!", socket_number));
+    WIFI_LOG_INFO(("R_WIFI_DA16XXX_CloseSocket: socket %d is closed!", socket_number));
 
 RETURN_ERROR:
     at_set_timeout(ATCMD_RESP_TIMEOUT);
@@ -626,7 +624,7 @@ RETURN_ERROR:
  *                WIFI_ERR_SOCKET_NUM
  *                WIFI_ERR_TAKE_MUTEX
  *********************************************************************************************************************/
-wifi_err_t R_WIFI_DA16XXX_TcpReconnect (uint32_t socket_number)
+wifi_err_t R_WIFI_DA16XXX_TcpReconnect (uint8_t socket_number)
 {
     uint8_t cid;
     uint8_t sock_num;
@@ -664,7 +662,7 @@ wifi_err_t R_WIFI_DA16XXX_TcpReconnect (uint32_t socket_number)
  *********************************************************************************************************************/
 void da16xxx_handle_incoming_socket_data(wifi_resp_type_t *type, wifi_recv_state_t *state, uint8_t data)
 {
-    uint8_t cid = UINT8_MAX;
+    static uint8_t cid = 0;
 
     switch (*state)
     {
@@ -672,12 +670,9 @@ void da16xxx_handle_incoming_socket_data(wifi_resp_type_t *type, wifi_recv_state
         {
             if (',' == data)
             {
-                g_rx_buff[g_rx_idx] = 0;
-                cid = strtol((char *) g_rx_buff, NULL, 10);
                 if (*type == WIFI_RESP_TRXTC)
                 {
                     /* Socket disconnect event received */
-                    g_rx_idx = 0;
                     g_cur_sock_idx = g_sock_list[cid];
                     g_sock_tbl[g_cur_sock_idx].put_err_cnt = 0;
                     g_sock_tbl[g_cur_sock_idx].status = WIFI_SOCKET_STATUS_SOCKET;
@@ -689,11 +684,17 @@ void da16xxx_handle_incoming_socket_data(wifi_resp_type_t *type, wifi_recv_state
                     g_cur_sock_idx = g_sock_list[cid];
                     *state = WIFI_RECV_PARAM_IP;
                 }
+                cid = 0;
+            }
+            else if (data >= '0' && data <= '9')
+            {
+                cid = cid * 10 + (data - '0');
             }
             else
             {
-                g_rx_buff[g_rx_idx++] = data;
-                g_rx_idx = g_rx_idx % TEMP_BUF_MAX;
+                cid = 0;
+                *type = WIFI_RESP_NONE;
+                *state = WIFI_RECV_PREFIX;
             }
             break;
         }
@@ -718,14 +719,16 @@ void da16xxx_handle_incoming_socket_data(wifi_resp_type_t *type, wifi_recv_state
         {
             if (',' == data)
             {
-                g_rx_buff[g_rx_idx] = 0;
                 *state = WIFI_RECV_DATA;
-                g_sock_tbl[g_cur_sock_idx].recv_len = strtol((char *) g_rx_buff, NULL, 10);
+            }
+            else if (data >= '0' && data <= '9')
+            {
+                g_sock_tbl[g_cur_sock_idx].recv_len = g_sock_tbl[g_cur_sock_idx].recv_len * 10 + (data - '0');
             }
             else
             {
-                g_rx_buff[g_rx_idx++] = data;
-                g_rx_idx = g_rx_idx % TEMP_BUF_MAX;
+                *type = WIFI_RESP_NONE;
+                *state = WIFI_RECV_PREFIX;
             }
             break;
         }

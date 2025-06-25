@@ -31,13 +31,11 @@
  *********************************************************************************************************************/
 #if WIFI_CFG_MQTT_SUPPORT == 1
 
-#if defined(__CCRX__) || defined(__ICCRX__) || defined (__RX__)
 #if WIFI_CFG_MQTT_CERTS == 1
 #include WIFI_CFG_MQTT_CERTS_HEADER
 
 #define CERT_INCLUDE
 #endif /* WIFI_CFG_MQTT_CERTS */
-#endif
 
 /**********************************************************************************************************************
  Local Typedef definitions
@@ -69,7 +67,7 @@ typedef struct st_da16xxx_mqtt
     /* MQTT Client identifier. Must be unique per client. */
     const char   * p_client_identifier;
     /* Length of the client identifier. */
-    uint16_t       client_identifier_length;
+    uint8_t        client_identifier_length;
     /* MQTT endpoint host name. */
     const char   * p_host_name;
     /* MQTT Port number. */
@@ -77,23 +75,23 @@ typedef struct st_da16xxx_mqtt
     /* MQTT user name. Set to NULL if not used. */
     const char   * p_mqtt_user_name;
     /* Length of MQTT user name. Set to 0 if not used. */
-    uint16_t       user_name_length;
+    uint8_t        user_name_length;
     /* MQTT password. Set to NULL if not used. */
     const char   * p_mqtt_password;
     /* Length of MQTT password. Set to 0 if not used. */
-    uint16_t       password_length;
+    uint8_t        password_length;
     /* String representing a trusted server root certificate. */
     const char   * p_root_ca;
     /* Size associated with root CA Certificate. */
-    uint32_t       root_ca_size;
+    uint16_t       root_ca_size;
     /* String representing a Client certificate. */
     const char   * p_client_cert;
     /* Size associated with Client certificate. */
-    uint32_t       client_cert_size;
+    uint16_t       client_cert_size;
     /* String representing Client Private Key. */
     const char   * p_client_private_key;
     /* Size associated with Client Private Key. */
-    uint32_t       private_key_size;
+    uint16_t       private_key_size;
     /* String representing Will Topic. */
     const char   * p_will_topic;
     /* String representing Will Message. */
@@ -131,7 +129,7 @@ void WIFI_CFG_MQTT_P_CALLBACK_FUNCTION_NAME(wifi_mqtt_callback_args_t * p_args);
  Private (static) variables and functions
  *********************************************************************************************************************/
 /* sub functions */
-static uint8_t get_alpn_number(void);
+static uint8_t get_mqtt_alpn_number(void);
 static uint8_t get_cipher_suites_number(void);
 
 /* WIFI MQTT on chip configuration */
@@ -139,7 +137,7 @@ static wifi_err_t r_wifi_da16xxx_mqtt_optional_init(void);
 static void r_wifi_da16xxx_mqtt_instance_init(void);
 
 /* receive data MQTT buffer */
-static uint32_t r_wifi_da16xxx_mqtt_buffer_recv(uint8_t * data, uint32_t length, uint32_t timeout);
+static uint16_t r_wifi_da16xxx_mqtt_buffer_recv(uint8_t * data, uint16_t length, uint32_t timeout);
 
 /* BYTEQ functions */
 static wifi_err_t mqtt_byteq_open(void);
@@ -236,15 +234,14 @@ wifi_err_t R_WIFI_DA16XXX_MqttOpen(void)
     }
     else
     {
-#if defined(__CCRX__) || defined(__ICCRX__) || defined (__RX__)
         /* Store the TLS certificate/private key */
         if ((NULL != g_mqtt_tbl.p_root_ca) && (NULL != g_mqtt_tbl.p_client_cert) &&
             (NULL != g_mqtt_tbl.p_client_private_key))
         {
             /* Check the certificates/keys provided to ensure the TX buffer is large enough (-3 for command string e.g. "C1,") */
-            if ((g_mqtt_tbl.root_ca_size > (WIFI_CFG_MQTT_CMD_TX_BUF_SIZE - 3)) ||
-                (g_mqtt_tbl.client_cert_size > (WIFI_CFG_MQTT_CMD_TX_BUF_SIZE - 3)) ||
-                (g_mqtt_tbl.private_key_size > (WIFI_CFG_MQTT_CMD_TX_BUF_SIZE - 3)))
+            if ((g_mqtt_tbl.root_ca_size > (DA16XXX_MAX_CERT_SIZE - 3)) ||
+                (g_mqtt_tbl.client_cert_size > (DA16XXX_MAX_CERT_SIZE - 3)) ||
+                (g_mqtt_tbl.private_key_size > (DA16XXX_MAX_CERT_SIZE - 3)))
             {
                 return WIFI_ERR_MQTT_OUT_OF_MEMORY;
             }
@@ -266,7 +263,7 @@ wifi_err_t R_WIFI_DA16XXX_MqttOpen(void)
             at_send("%sC0,", DA16XXX_CERT_START);
 
             /* Send certificate/key ascii text */
-            at_send_raw((uint8_t *) g_mqtt_tbl.p_root_ca, g_mqtt_tbl.root_ca_size);
+            at_send_raw((uint8_t WIFI_FAR *) g_mqtt_tbl.p_root_ca, g_mqtt_tbl.root_ca_size);
 
             /* Send Indication of the end of content  */
             at_send("%s", DA16XXX_CERT_END);
@@ -282,7 +279,7 @@ wifi_err_t R_WIFI_DA16XXX_MqttOpen(void)
             at_send("%sC1,", DA16XXX_CERT_START);
 
             /* Send certificate/key ascii text */
-            at_send_raw((uint8_t *) g_mqtt_tbl.p_client_cert, g_mqtt_tbl.client_cert_size);
+            at_send_raw((uint8_t WIFI_FAR *) g_mqtt_tbl.p_client_cert, g_mqtt_tbl.client_cert_size);
 
             /* Send Indication of the end of content  */
             at_send("%s", DA16XXX_CERT_END);
@@ -298,7 +295,7 @@ wifi_err_t R_WIFI_DA16XXX_MqttOpen(void)
             at_send("%sC2,", DA16XXX_CERT_START);
 
             /* Send certificate/key ascii text */
-            at_send_raw((uint8_t *) g_mqtt_tbl.p_client_private_key, g_mqtt_tbl.private_key_size);
+            at_send_raw((uint8_t WIFI_FAR *) g_mqtt_tbl.p_client_private_key, g_mqtt_tbl.private_key_size);
 
             /* Send Indication of the end of content  */
             at_send("%s", DA16XXX_CERT_END);
@@ -311,13 +308,6 @@ wifi_err_t R_WIFI_DA16XXX_MqttOpen(void)
             /* give mutex */
             os_wrap_mutex_give(MUTEX_TX | MUTEX_RX);
         }
-#elif defined(__CCRL__) || defined(__ICCRL78__) || defined(__RL)
-        /* Enable TLS with AT+NWMQTLS */
-        if (AT_OK != at_exec("AT+NWMQTLS=1\r"))
-        {
-            return WIFI_ERR_MODULE_COM;
-        }
-#endif
     }
 
     if (0 == g_mqtt_tbl.keep_alive_seconds)
@@ -491,9 +481,7 @@ wifi_err_t R_WIFI_DA16XXX_MqttPublish(wifi_mqtt_pub_info_t * const p_pub_info)
             return WIFI_ERR_MODULE_COM;
         }
 
-#define TOPIC_AT_PREFIX_LENGTH 11
-        if ((TOPIC_AT_PREFIX_LENGTH + strlen(p_pub_info->p_payload) +
-                strlen(p_pub_info->p_topic_name)) >= WIFI_CFG_MQTT_CMD_TX_BUF_SIZE)
+        if ((strlen(p_pub_info->p_payload) + strlen(p_pub_info->p_topic_name)) >= WIFI_CFG_MQTT_CMD_TX_BUF_SIZE)
         {
             return WIFI_ERR_MQTT_INVALID_DATA;
         }
@@ -670,12 +658,12 @@ wifi_err_t R_WIFI_DA16XXX_MqttReceive (void)
                                               WIFI_CFG_MQTT_CMD_RX_BUF_SIZE - 1,
                                               g_mqtt_tbl.rx_timer.threshold);
 
-        if (*ptr != NULL && recv_cnt != 0)
+        if (ptr != NULL && recv_cnt != 0)
         {
             char *p_data;
             char *p_topic;
             char p_length[4];
-            char * p_data_len = strrchr(ptr, ',');
+            char WIFI_FAR * p_data_len = strrchr(ptr, ',');
             if (p_data_len != NULL)
             {
                 // Get MQTT message length
@@ -703,12 +691,12 @@ wifi_err_t R_WIFI_DA16XXX_MqttReceive (void)
                 mqtt_data.p_topic     = p_topic;
                 mqtt_data.data_length = (uint32_t) length;
 
+                /* Call the user callback with successful data */
+                g_mqtt_tbl.p_mqtt_callback(&mqtt_data);
+
                 // Free allocated memory
                 free(p_data);
                 free(p_topic);
-
-                /* Call the user callback with successful data */
-                g_mqtt_tbl.p_mqtt_callback(&mqtt_data);
             }
             else
             {
@@ -888,8 +876,8 @@ static void r_wifi_da16xxx_mqtt_instance_init(void)
 
     /* User configurations */
     g_mqtt_tbl.use_mqtt_v311 = WIFI_CFG_MQTT_USE_MQTT_V311;
-    g_mqtt_tbl.rx_timer.threshold = WIFI_CFG_MQTT_RX_TIMEOUT;
-    g_mqtt_tbl.tx_timer.threshold = WIFI_CFG_MQTT_TX_TIMEOUT;
+    g_mqtt_tbl.rx_timer.threshold = OS_WRAP_MS_TO_TICKS(WIFI_CFG_MQTT_RX_TIMEOUT);
+    g_mqtt_tbl.tx_timer.threshold = OS_WRAP_MS_TO_TICKS(WIFI_CFG_MQTT_TX_TIMEOUT);
 
 #if WIFI_CFG_MQTT_P_CALLBACK == 1
     g_mqtt_tbl.p_mqtt_callback = WIFI_CFG_MQTT_P_CALLBACK_FUNCTION_NAME;
@@ -900,7 +888,7 @@ static void r_wifi_da16xxx_mqtt_instance_init(void)
     g_mqtt_tbl.clean_session = WIFI_CFG_MQTT_CLEAN_SESSION;
 
     /* Assign ALPN */
-    g_mqtt_tbl.alpn_count = get_alpn_number();
+    g_mqtt_tbl.alpn_count = get_mqtt_alpn_number();
     g_mqtt_tbl.p_alpns[0] = WIFI_STRING_CONVERT(WIFI_CFG_MQTT_ALPN1);
     g_mqtt_tbl.p_alpns[1] = WIFI_STRING_CONVERT(WIFI_CFG_MQTT_ALPN2);
     g_mqtt_tbl.p_alpns[2] = WIFI_STRING_CONVERT(WIFI_CFG_MQTT_ALPN3);
@@ -983,18 +971,7 @@ static void r_wifi_da16xxx_mqtt_instance_init(void)
     g_mqtt_tbl.p_tls_cipher_suites[10] = (wifi_tls_cipher_suites_t) WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256;
     g_mqtt_tbl.p_tls_cipher_suites[11] = (wifi_tls_cipher_suites_t) WIFI_CFG_MQTT_TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384;
 #else
-    g_mqtt_tbl.p_tls_cipher_suites[0] = (wifi_tls_cipher_suites_t) 0;
-    g_mqtt_tbl.p_tls_cipher_suites[1] = (wifi_tls_cipher_suites_t) 0;
-    g_mqtt_tbl.p_tls_cipher_suites[2] = (wifi_tls_cipher_suites_t) 0;
-    g_mqtt_tbl.p_tls_cipher_suites[3] = (wifi_tls_cipher_suites_t) 0;
-    g_mqtt_tbl.p_tls_cipher_suites[4] = (wifi_tls_cipher_suites_t) 0;
-    g_mqtt_tbl.p_tls_cipher_suites[5] = (wifi_tls_cipher_suites_t) 0;
-    g_mqtt_tbl.p_tls_cipher_suites[6] = (wifi_tls_cipher_suites_t) 0;
-    g_mqtt_tbl.p_tls_cipher_suites[7] = (wifi_tls_cipher_suites_t) 0;
-    g_mqtt_tbl.p_tls_cipher_suites[8] = (wifi_tls_cipher_suites_t) 0;
-    g_mqtt_tbl.p_tls_cipher_suites[9] = (wifi_tls_cipher_suites_t) 0;
-    g_mqtt_tbl.p_tls_cipher_suites[10] = (wifi_tls_cipher_suites_t) 0;
-    g_mqtt_tbl.p_tls_cipher_suites[11] = (wifi_tls_cipher_suites_t) 0;
+    memset(g_mqtt_tbl.p_tls_cipher_suites, 0, sizeof(g_mqtt_tbl.p_tls_cipher_suites));
 #endif
     /* Assign number of cipher suites */
     g_mqtt_tbl.tls_cipher_count = get_cipher_suites_number();
@@ -1011,13 +988,12 @@ static void r_wifi_da16xxx_mqtt_instance_init(void)
  *                timeout
  * Return Value : Number of received data.
  *********************************************************************************************************************/
-static uint32_t r_wifi_da16xxx_mqtt_buffer_recv(uint8_t * data, uint32_t length, uint32_t timeout)
+static uint16_t r_wifi_da16xxx_mqtt_buffer_recv(uint8_t * data, uint16_t length, uint32_t timeout)
 {
-    uint32_t recv_cnt = 0;
+    uint16_t recv_cnt = 0;
     byteq_err_t byteq_ret;
     OS_TICK tick_tmp;
 
-    g_mqtt_tbl.rx_timer.threshold = OS_WRAP_MS_TO_TICKS(timeout);
     if (0 < timeout)
     {
         g_mqtt_tbl.rx_timer.tick_sta = os_wrap_tickcount_get();
@@ -1064,12 +1040,12 @@ static uint32_t r_wifi_da16xxx_mqtt_buffer_recv(uint8_t * data, uint32_t length,
 
 
 /**********************************************************************************************************************
- * Function Name: get_alpn_number
+ * Function Name: get_mqtt_alpn_number
  * Description  : Get the number of ALPN.
  * Arguments    : none
  * Return Value : number of ALPN
  *********************************************************************************************************************/
-static uint8_t get_alpn_number(void)
+static uint8_t get_mqtt_alpn_number(void)
 {
     /* Count alpn */
     uint8_t count = 0;
@@ -1091,7 +1067,7 @@ static uint8_t get_alpn_number(void)
     return count;
 }
 /**********************************************************************************************************************
- * End of function get_alpn_number
+ * End of function get_mqtt_alpn_number
  *********************************************************************************************************************/
 
 /**********************************************************************************************************************

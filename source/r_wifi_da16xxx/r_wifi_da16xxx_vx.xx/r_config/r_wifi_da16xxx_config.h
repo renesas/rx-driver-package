@@ -85,28 +85,34 @@
 /* Board dependent settings; please use the value for each setting listed below depending on the board you use.
 
 Preprocessors that define board dependent settings and the corresponding values to be set are as follows:
-Confirmed board number          1      2      3      4      5      6      7      8      9      10
-WIFI_CFG_SCI_CHANNEL            0      2      6      1      6      0      6      2      5      5
-WIFI_CFG_SCI_PCLK_HZ (*note1)   60000000
-WIFI_CFG_CTS_PORT               2      J      J      3      J      2      J      J      C      C
-WIFI_CFG_CTS_PIN                3      5      3      1      3      3      3      5      0      0
-WIFI_CFG_RTS_PORT               2      J      J      3      J      2      J      J      C      C
-WIFI_CFG_RTS_PIN                3      5      3      1      3      3      3      5      0      0
-WIFI_CFG_PFS_SET_VALUE (*note2) 0x0BU  0x0BU  0x0AU  0x0BU  0x0AU  0x0BU  0x0AU  0x0BU  0x0BU  0x0BU
-WIFI_CFG_RESET_PORT             D      5      F      2      5      A      5      A      B      B
-WIFI_CFG_RESET_PIN              0      5      5      0      5      1      5      1      1      1
+Confirmed board number          1       2      3      4      5      6      7      8      9      10     11     12     13     14     15     16
+WIFI_CFG_SCI_CHANNEL            0       2      6      1      6      0      6      2      5      5      5      5      10     11     5      1
+WIFI_CFG_SCI_PCLK_HZ (*note1)
+WIFI_CFG_CTS_PORT               2       J      J      3      J      2      J      J      C      C      C      C      8      7      A      1
+WIFI_CFG_CTS_PIN                3       5      3      1      3      3      3      5      0      0      0      0      3      4      6      4
+WIFI_CFG_RTS_PORT               2       J      J      3      J      2      J      J      C      C      C      C      8      7      A      3
+WIFI_CFG_RTS_PIN                3       5      3      1      3      3      3      5      0      0      0      0      0      5      1      1
+WIFI_CFG_PFS_SET_VALUE (*note2) 0x0BU   0x0BU  0x0AU  0x0BU  0x0AU  0x0BU  0x0AU  0x0BU  0x0BU  0x0BU  0x0BU  0x0BU  0X2DU  0X2DU  0x0BU  0x0BU
+WIFI_CFG_RESET_PORT             D       5      F      2      5      A      5      A      B      B      D      D      4      C      B      B
+WIFI_CFG_RESET_PIN              0       5      5      0      5      1      5      1      1      1      7      7      7      0      3      2
 
 where the confirmed board numbers listed in the first row above are as follows (*note3):
-1: RX65N Cloud Kit (PMOD(CN5)),
-2: RX65N Envision Kit (PMOD(CN14)),
+1: RX65N Cloud Kit (PMOD),
+2: RX65N Envision Kit (PMOD),
 3: RX65N RSK (2MB) (PMOD1),
 4: RX65N RSK (2MB) (PMOD2),
 5: Cloud Kit for RX65N v1, CK-RX65N v1 (PMOD1),
 6: Cloud Kit for RX65N v1, CK-RX65N v1 (PMOD2),
 7: Cloud Kit for RX65N v2, CK-RX65N v2 (PMOD1),
 8: Cloud Kit for RX65N v2, CK-RX65N v2 (PMOD2),
-9: RX671 Target Board (PMOD(CN1)) (not tested), *note4.
-10: RX66N Target Board (PMOD(CN1)) (not tested), *note5.
+9: RX671 Target Board (PMOD),         *note4.
+10: RX66N Target Board (PMOD)         *note5.
+11: FPB-RX261 (PMOD1),                *note6
+12: EK-RX261  (PMOD1),                *note7
+13: EK-RX671  (PMOD1),                *note8
+14: EK-RX671  (PMOD2),   			  *note8
+15: FPB-RX140 (PMOD1),                *note9
+16: FPB-RX140 (PMOD2), 				  *note9
 In the above preprocessor list, please use one of the values listed on the right side.
 On the right side, each column corresponds to each confirmed board number.
 
@@ -120,7 +126,8 @@ Note2: Check Pin Function Select (PSEL) of Pin Function Control Register (PxyPFS
     1: RX65N group: https://www.renesas.com/us/en/document/mah/rx65n-group-rx651-group-users-manualhardware-rev230
     2: RX671 group: https://www.renesas.com/tw/en/document/mah/rx671-group-users-manual-hardware-rev100
     3: RX66N group: https://www.renesas.com/us/en/document/mah/rx66n-group-users-manual-hardware-rev111
-
+    4: RX261 group: https://www.renesas.com/en/document/mah/rx260-group-rx261-group-users-manual-hardware?r=25565706
+    5: RX140 group: https://www.renesas.com/en/document/mah/rx140-group-users-manual-hardware-rev120?r=1531576
 Note3: List of board user's manual:
     1: RX65N Cloud Kit:    https://www.renesas.com/us/en/document/mat/uses-manual-cloud-option-board
     2: RX65N Envision Kit: https://www.renesas.com/us/en/document/mat/rx65n-envision-kit-users-manual-rev100
@@ -131,11 +138,23 @@ Note3: List of board user's manual:
 
 Note4:
 When you use RX671 Target Board, you need pattern cut and so on to use SCI channel 5(TXD5/RXD5/CTS5) and GPIO(PC1).
-Please refer to User's Manual: https://www.renesas.com/products/microcontrollers-microprocessors/rx-32-bit-performance-efficiency-mcus/rtk5rx6710c00000bj-target-board-rx671
+Please refer to User's Manual: https://www.renesas.com/en/document/mat/target-board-rx671-users-manual-rev100
 
 Note5:
 When you use RX66N Target Board, you need remodeling of the board to use SCI channel 5(TXD5/RXD5/CTS5) and GPIO(PC1).
-Please refer to User's Manual: https://www.renesas.com/products/microcontrollers-microprocessors/rx-32-bit-performance-efficiency-mcus/rtk5rx66n0c00000bj-target-board-rx66n
+Please refer to User's Manual:https://www.renesas.com/en/document/mah/target-board-rx66n-users-manual-rev100
+
+Note6:
+When you use FPB-RX261,please refer to User's Manual:https://www.renesas.com/en/document/mat/fpb-rx261-v1-users-manual?r=25565483
+
+Note7:
+When you use EK-RX261,please refer to User's Manual:https://www.renesas.com/en/document/mat/ek-rx261-v1-users-manual
+
+Note8:
+When you use EK-RX671,please refer to User's Manual:https://www.renesas.com/en/document/mat/ek-rx671-v1-users-manual
+
+Note9:
+When you use RX140FPB,please refer to User's Manual:https://www.renesas.com/en/document/mat/fpb-rx140-v1-users-manual
 
 */
 
@@ -201,12 +220,31 @@ Please refer to User's Manual: https://www.renesas.com/products/microcontrollers
  */
 #define WIFI_CFG_COUNTRY_CODE                   ""
 
-/* Use FreeRTOS logging functionality
-   0 = Not use FreeRTOS logging functionality.
-   1 = Use FreeRTOS logging functionality.
+/* Logging option to output errors, warnings, status, and other information of Wi-Fi DA16XXX module.
+   1 = Using FreeRTOS logging stack for logging output.
+   2 = Using serial port for logging output.
+   3 = Using Renesas Debug Virtual Console for logging output.
  */
-#define WIFI_CFG_USE_FREERTOS_LOGGING           0
+#define WIFI_CFG_LOGGING_OPTION                 0
 
+#if WIFI_CFG_LOGGING_OPTION == 2
+
+/* SCI Channel for logging output if using serial port logging
+ */
+#define WIFI_CFG_LOG_TERM_CHANNEL               (5)
+
+/* Communication baud rate for serial terminal.
+*/
+#define WIFI_CFG_SCI_UART_TERMINAL_BAUDRATE      (115200)
+
+/* Interrupt priority for serial terminal.
+   0(low) - 15(high)
+*/
+#define WIFI_CFG_SCI_UART_INTERRUPT_PRIORITY    (1)
+
+#endif
+
+#if WIFI_CFG_LOGGING_OPTION != 0
 /* Debug log output level
    0: OFF
    1: ERROR
@@ -215,6 +253,8 @@ Please refer to User's Manual: https://www.renesas.com/products/microcontrollers
    4: +DEBUG(AT command data)
  */
 #define WIFI_CFG_DEBUG_LOG                      0
+
+#endif
 
 /* TCP protocol support
    0 = Not use TCP protocol.
@@ -485,7 +525,7 @@ Please refer to User's Manual: https://www.renesas.com/products/microcontrollers
  */
 #define WIFI_CFG_TLS_USE_CA_CERT                1
 
-/* Configures length for certificate’s name.
+/* Configures length for certificate's name.
  */
 #define WIFI_CFG_TLS_CERT_MAX_NAME              32
 

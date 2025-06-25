@@ -46,12 +46,12 @@ typedef struct st_da16xxx_http
     uint8_t                 alpn_count;                     ///< ALPN Protocols count. Max value is 3.
     wifi_http_tls_auth_t    tls_level;                      ///< HTTP TLS Authentication level.
     const char            * p_root_ca;                      ///< String representing a trusted server root certificate.
-    uint32_t                root_ca_size;                   ///< Size associated with root CA Certificate.
+    uint16_t                root_ca_size;                   ///< Size associated with root CA Certificate.
     const char            * p_client_cert;                  ///< String representing a Client certificate.
-    uint32_t                client_cert_size;               ///< Size associated with Client certificate.
+    uint16_t                client_cert_size;               ///< Size associated with Client certificate.
     const char            * p_client_private_key;           ///< String representing Client Private Key.
-    uint32_t                private_key_size;               ///< Size associated with Client Private Key.
-    uint32_t                open;                           ///< Flag to track HTTP status.
+    uint16_t                private_key_size;               ///< Size associated with Client Private Key.
+    uint8_t                 open;                           ///< Flag to track HTTP status.
     volatile uint8_t        request_status;                 ///< Flag to track HTTP request status.
 } st_da16xxx_http_t;
 
@@ -59,15 +59,15 @@ typedef struct st_da16xxx_http
  Exported global variables
  *********************************************************************************************************************/
 st_da16xxx_http_t g_http_tbl;
-static uint8_t g_rx_buf[TEMP_BUF_MAX];
 static volatile uint8_t g_rx_idx = 0;
 static volatile bool g_http_stt_code = false;
+static char* g_http_init_rsp_buf = NULL;
 
 /**********************************************************************************************************************
  Private (static) variables and functions
  *********************************************************************************************************************/
 /* sub functions */
-static uint8_t get_alpn_number(void);
+static uint8_t get_http_alpn_number(void);
 
 /**********************************************************************************************************************
  * Function Name: R_WIFI_DA16XXX_HttpOpen
@@ -118,7 +118,7 @@ wifi_err_t R_WIFI_DA16XXX_HttpOpen(void)
     }
 
     /* Get ALPN number */
-    g_http_tbl.alpn_count = get_alpn_number();
+    g_http_tbl.alpn_count = get_http_alpn_number();
 
     /* Set ALPN settings */
     if (g_http_tbl.alpn_count != 0)
@@ -218,7 +218,7 @@ wifi_err_t R_WIFI_DA16XXX_HttpOpen(void)
         at_send("%sC3,", DA16XXX_CERT_START);
 
         /* Send certificate/key ascii text */
-        at_send_raw((uint8_t *) g_http_tbl.p_root_ca, g_http_tbl.root_ca_size);
+        at_send_raw((uint8_t WIFI_FAR *) g_http_tbl.p_root_ca, g_http_tbl.root_ca_size);
 
         /* Send Indication of the end of content  */
         at_send("%s", DA16XXX_CERT_END);
@@ -235,7 +235,7 @@ wifi_err_t R_WIFI_DA16XXX_HttpOpen(void)
         at_send("%sC4,", DA16XXX_CERT_START);
 
         /* Send certificate/key ascii text */
-        at_send_raw((uint8_t *) g_http_tbl.p_client_cert, g_http_tbl.client_cert_size);
+        at_send_raw((uint8_t WIFI_FAR *) g_http_tbl.p_client_cert, g_http_tbl.client_cert_size);
 
         /* Send Indication of the end of content  */
         at_send("%s", DA16XXX_CERT_END);
@@ -252,7 +252,7 @@ wifi_err_t R_WIFI_DA16XXX_HttpOpen(void)
         at_send("%sC5,", DA16XXX_CERT_START);
 
         /* Send certificate/key ascii text */
-        at_send_raw((uint8_t *) g_http_tbl.p_client_private_key, g_http_tbl.private_key_size);
+        at_send_raw((uint8_t WIFI_FAR *) g_http_tbl.p_client_private_key, g_http_tbl.private_key_size);
 
         /* Send Indication of the end of content  */
         at_send("%s", DA16XXX_CERT_END);
@@ -367,8 +367,14 @@ wifi_err_t R_WIFI_DA16XXX_HttpSend (wifi_http_request_t request, wifi_http_buffe
     /* Point to use's response buffer */
     g_http_tbl.buffer = buffer;
 
+    /* Save the initial response_buffer's address */
+    g_http_init_rsp_buf = g_http_tbl.buffer->response_buffer;
+
+    /* Reset HTTP buffer length*/
+    g_http_tbl.buffer->resp_length = 0;
+
     /* Reset HTTP request status */
-    g_http_tbl.request_status = 0xFF;
+    g_http_tbl.request_status = 0x00;
 
     /* take mutex */
     if (OS_WRAP_SUCCESS != os_wrap_mutex_take(MUTEX_TX | MUTEX_RX))
@@ -386,17 +392,18 @@ wifi_err_t R_WIFI_DA16XXX_HttpSend (wifi_http_request_t request, wifi_http_buffe
 
     if (NULL != request.request_body)
     {
-        at_send_raw((uint8_t *) ",'", 1);
-        if (AT_OK != at_send_raw((uint8_t *) request.request_body, request.length))
+        at_send_raw((uint8_t WIFI_FAR *) ",'", 2);
+        if (AT_OK != at_send_raw((uint8_t WIFI_FAR *) request.request_body, request.length))
         {
             WIFI_LOG_ERROR(("R_WIFI_DA16XXX_HttpSend: Cannot send request body!"));
             os_wrap_mutex_give(MUTEX_TX | MUTEX_RX);
             return WIFI_ERR_MODULE_COM;
         }
+        at_send_raw((uint8_t WIFI_FAR *) "'", 1);
     }
 
     /* Send and get AT CMD response */
-    ret = at_exec_wo_mutex("'\r");
+    ret = at_exec_wo_mutex("\r");
     if (AT_OK != ret)
     {
         WIFI_LOG_ERROR(("R_WIFI_DA16XXX_HttpSend: Cannot send out the HTTP request (%d)!", ret));
@@ -421,13 +428,20 @@ wifi_err_t R_WIFI_DA16XXX_HttpSend (wifi_http_request_t request, wifi_http_buffe
         }
     }
 
-    if (retry_count == retry_max || g_http_tbl.request_status != 0x00)
+    if (retry_count == retry_max)
+    {
+        WIFI_LOG_ERROR(("R_WIFI_DA16XXX_HttpSend: HTTP request timed out!"));
+        return WIFI_ERR_MODULE_COM;
+    }
+    else if (g_http_tbl.request_status != 0x00)
     {
         WIFI_LOG_ERROR(("R_WIFI_DA16XXX_HttpSend: HTTP request status error (%#04X))!", g_http_tbl.request_status));
         return WIFI_ERR_MODULE_COM;
     }
-
-    return WIFI_SUCCESS;
+    else
+    {
+        return WIFI_SUCCESS;
+    }
 }
 /**********************************************************************************************************************
  * End of function R_WIFI_DA16XXX_HttpSend
@@ -435,12 +449,12 @@ wifi_err_t R_WIFI_DA16XXX_HttpSend (wifi_http_request_t request, wifi_http_buffe
 
 
 /**********************************************************************************************************************
- * Function Name: get_alpn_number
+ * Function Name: get_http_alpn_number
  * Description  : Get the number of ALPN.
  * Arguments    : none
  * Return Value : number of ALPN
  *********************************************************************************************************************/
-static uint8_t get_alpn_number(void)
+static uint8_t get_http_alpn_number(void)
 {
     /* Count alpn */
     uint8_t count = 0;
@@ -462,7 +476,7 @@ static uint8_t get_alpn_number(void)
     return count;
 }
 /**********************************************************************************************************************
- * End of function get_alpn_number
+ * End of function get_http_alpn_number
  *********************************************************************************************************************/
 
 
@@ -480,36 +494,48 @@ void da16xxx_handle_incoming_http_data(wifi_resp_type_t *type, wifi_recv_state_t
     {
         case WIFI_RECV_PARAM_CID:
         {
-            if (data == '\r')
+            if (g_rx_idx > 3)
             {
-                g_rx_buf[g_rx_idx] = data;
-                g_http_tbl.request_status = strtol((char *)g_rx_buf, NULL, 10);
                 g_rx_idx = 0;
-                g_http_stt_code = true;
                 *type = WIFI_RESP_NONE;
                 *state = WIFI_RECV_PREFIX;
             }
-            else if (g_rx_idx == 4)
+            else if (data == '\r')
             {
                 g_rx_idx = 0;
+                g_http_stt_code = true;
+                g_http_tbl.buffer->response_buffer = g_http_init_rsp_buf;
                 *type = WIFI_RESP_NONE;
                 *state = WIFI_RECV_PREFIX;
+            }
+            else if (data >= '0' && data <= '9')
+            {
+                g_http_tbl.request_status = g_http_tbl.request_status * 10 + (data - '0');
+                g_rx_idx++;
             }
             else
             {
-                g_rx_buf[g_rx_idx++] = data;
+                g_rx_idx = 0;
+                *type = WIFI_RESP_NONE;
+                *state = WIFI_RECV_PREFIX;
             }
             break;
         }
 
         case WIFI_RECV_PARAM_LEN:
         {
-            g_rx_buf[g_rx_idx++] = data;
             if (data == ',')
             {
-                g_rx_idx = 0;
-                g_http_tbl.buffer->resp_length = strtol((char *)g_rx_buf, NULL, 10);
                 *state = WIFI_RECV_DATA;
+            }
+            else if (data >= '0' && data <= '9')
+            {
+                g_http_tbl.buffer->resp_length = g_http_tbl.buffer->resp_length * 10 + (data - '0');
+            }
+            else
+            {
+                *type = WIFI_RESP_NONE;
+                *state = WIFI_RECV_PREFIX;
             }
             break;
         }
@@ -518,8 +544,8 @@ void da16xxx_handle_incoming_http_data(wifi_resp_type_t *type, wifi_recv_state_t
         {
             if (g_http_tbl.buffer->resp_length > 0)
             {
-                g_http_tbl.buffer->response_buffer[strlen(g_http_tbl.buffer->response_buffer)] = data;
-                g_http_tbl.buffer->response_buffer[strlen(g_http_tbl.buffer->response_buffer) + 1] = '\0';
+                *(g_http_tbl.buffer->response_buffer++) = data;
+                *(g_http_tbl.buffer->response_buffer) = '\0';
                 g_http_tbl.buffer->resp_length--;
             }
 
@@ -530,7 +556,7 @@ void da16xxx_handle_incoming_http_data(wifi_resp_type_t *type, wifi_recv_state_t
             }
             break;
         }
-        
+
         default:
         {
             g_rx_idx = 0;

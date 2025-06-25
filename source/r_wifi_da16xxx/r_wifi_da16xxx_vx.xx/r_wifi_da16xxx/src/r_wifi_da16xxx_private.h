@@ -28,12 +28,17 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdarg.h>
+#include <stdlib.h>
 
 #include "r_wifi_da16xxx_if.h"
 #include "r_wifi_da16xxx_os_wrap.h"
+#if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
 #include "r_sci_rx_if.h"
-#include "r_byteq_if.h"
 #include "r_sci_rx_pinset.h"
+#elif defined(__CCRL__) || defined(__ICCRL78__) || defined(__RL)
+#include "r_sci_rl_if.h"
+#endif
+#include "r_byteq_if.h"
 
 /**********************************************************************************************************************
  Macro definitions
@@ -49,10 +54,17 @@
 #error "Error! Need to set SCI_CFG_TEI_INCLUDED is '1' in r_sci_rx_config.h"
 #endif
 
+#if WIFI_CFG_DA16600_SUPPORT == 1 &&  WIFI_CFG_CTS_SW_CTRL == 0
+#error "Error! DA16600 Pmod currently only supports running with RTS (Hardware), CTS (Software): \
+Need to set WIFI_CFG_CTS_SW_CTRL to 1 in r_wifi_da16xxx_config.h. \
+Ensure the port and pin configurations of CTS, RTS pins match the board specifications."
+#endif
+
 /* Configuration */
 #define TEMP_BUF_MAX                   (256)                                   // RX temp buffer
 #define ATCMD_RESP_TIMEOUT             (1000)   // Timeout threshold for AT command response (msec)
 #define DA16XXX_AT_SOCK_TX_MAX         (4096)   // DA16XXX socket transmit max length
+#define DA16XXX_AT_TLS_CON_TIMEOUT     (60000)  // DA16XXX tls connection timeout
 #define DA16XXX_AT_CMD_BUF_MAX         (WIFI_CFG_AT_CMD_TX_BUFFER_SIZE)
 #define DA16XXX_AT_RESP_BUF_MAX        (WIFI_CFG_AT_CMD_RX_BUFFER_SIZE)
 
@@ -61,66 +73,52 @@
 #define DA16XXX_HOURS_IN_SECONDS                (3600)
 
 #if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
-/* Reset port pin macros.  */
-#define WIFI_RESET_DDR(x, y)            (WIFI_RESET_DDR_PREPROC(x, y))
-#define WIFI_RESET_DDR_PREPROC(x, y)    ((PORT ## x .PDR.BIT.B ## y))
-#define WIFI_RESET_DR(x, y)             (WIFI_RESET_DR_PREPROC(x, y))
 #define WIFI_RESET_DR_PREPROC(x, y)     ((PORT ## x .PODR.BIT.B ## y))
+#define WIFI_RESET_DDR_PREPROC(x, y)    ((PORT ## x .PDR.BIT.B ## y))
+
+#define WIFI_RTS_PDR_PREPROC(x, y)      ((PORT ## x .PDR.BIT.B ## y))
+#define WIFI_RTS_PODR_PREPROC(x, y)     ((PORT ## x .PODR.BIT.B ## y))
+#define WIFI_CTS_PIDR_PREPROC(x, y)     ((PORT ## x .PIDR.BIT.B ## y))
+#define WIFI_SET_PMR_PREPROC(x, y)      ((PORT ## x .PMR.BIT.B ## y))
+#define WIFI_SET_PFS_PREPROC(x, y)      ((MPC.P ## x ## y ##PFS.BYTE))
+
+#elif defined(__CCRL__) || defined(__ICCRL78__) || defined(__RL)
+#define WIFI_RESET_DR_PREPROC(x, y)     ( P ## x ## _bit.no ## y )
+#define WIFI_RESET_DDR_PREPROC(x, y)
+
+#define WIFI_RTS_PDR_PREPROC(x, y)
+#define WIFI_RTS_PODR_PREPROC(x, y)
+#define WIFI_CTS_PIDR_PREPROC(x, y)
+#define WIFI_SET_PMR_PREPROC(x, y)
+#define WIFI_SET_PFS_PREPROC(x, y)
+#endif
+
+/* Reset port pin macros.  */
+#define WIFI_RESET_DR(x, y)             (WIFI_RESET_DR_PREPROC(x, y))
+#define WIFI_RESET_DDR(x, y)            (WIFI_RESET_DDR_PREPROC(x, y))
 
 /* RTS port pin macros.  */
 #define WIFI_RTS_PDR(x, y)              (WIFI_RTS_PDR_PREPROC(x, y))
-#define WIFI_RTS_PDR_PREPROC(x, y)      ((PORT ## x .PDR.BIT.B ## y))
 #define WIFI_RTS_PODR(x, y)             (WIFI_RTS_PODR_PREPROC(x, y))
-#define WIFI_RTS_PODR_PREPROC(x, y)     ((PORT ## x .PODR.BIT.B ## y))
 
 /* CTS port pin macros. */
 #define WIFI_CTS_PIDR(x, y)             (WIFI_CTS_PIDR_PREPROC(x, y))
-#define WIFI_CTS_PIDR_PREPROC(x, y)     ((PORT ## x .PIDR.BIT.B ## y))
 
 /* PMR port macros. */
 #define WIFI_SET_PMR(x, y)              (WIFI_SET_PMR_PREPROC(x, y))
-#define WIFI_SET_PMR_PREPROC(x, y)      ((PORT ## x .PMR.BIT.B ## y))
 
 /* PFS port macros. */
 #define WIFI_SET_PFS(x, y)              (WIFI_SET_PFS_PREPROC(x, y))
-#define WIFI_SET_PFS_PREPROC(x, y)      ((MPC.P ## x ## y ##PFS.BYTE))
-#endif
 
 /* Debug mode */
-#if WIFI_CFG_USE_FREERTOS_LOGGING == 0
+#if WIFI_CFG_LOGGING_OPTION == 0
 
-#if WIFI_CFG_DEBUG_LOG == 4
-/* All log level messages will logged */
-#define WIFI_LOG_ERROR(message) printf_log_error message
-#define WIFI_LOG_WARN(message)  printf_log_warn message
-#define WIFI_LOG_INFO(message)  printf_log_info message
-#define WIFI_LOG_DEBUG(message) printf_log_debug message
-#elif WIFI_CFG_DEBUG_LOG == 3
-/* Only INFO, WARNING and ERROR messages will be logged */
-#define WIFI_LOG_ERROR(message) printf_log_error message
-#define WIFI_LOG_WARN(message)  printf_log_warn message
-#define WIFI_LOG_INFO(message)  printf_log_info message
-#define WIFI_LOG_DEBUG(message)
-#elif WIFI_CFG_DEBUG_LOG == 2
-/* Only WARNING and ERROR messages will be logged */
-#define WIFI_LOG_ERROR(message) printf_log_error message
-#define WIFI_LOG_WARN(message)  printf_log_warn message
-#define WIFI_LOG_INFO(message)
-#define WIFI_LOG_DEBUG(message)
-#elif WIFI_CFG_DEBUG_LOG == 1
-/* Only ERROR messages will be logged */
-#define WIFI_LOG_ERROR(message) printf_log_error message
-#define WIFI_LOG_WARN(message)
-#define WIFI_LOG_INFO(message)
-#define WIFI_LOG_DEBUG(message)
-#elif WIFI_CFG_DEBUG_LOG == 0
 #define WIFI_LOG_ERROR(message)
 #define WIFI_LOG_WARN(message)
 #define WIFI_LOG_INFO(message)
 #define WIFI_LOG_DEBUG(message)
-#endif /* WIFI_CFG_DEBUG_LOG */
 
-#else
+#elif WIFI_CFG_LOGGING_OPTION == 1
 
 #if BSP_CFG_RTOS_USED != 1
 #error "Error - BSP_CFG_RTOS_USED is not 1(FreeRTOS)!"
@@ -130,7 +128,59 @@
 #define WIFI_LOG_WARN(message)  LogWarn(message)
 #define WIFI_LOG_INFO(message)  LogInfo(message)
 #define WIFI_LOG_DEBUG(message) LogDebug(message)
-#endif /* WIFI_CFG_USE_FREERTOS_LOGGING */
+
+#elif WIFI_CFG_LOGGING_OPTION == 2 || WIFI_CFG_LOGGING_OPTION == 3
+
+/*
+ * When WIFI_CFG_DEBUG_LOG is #LOG_NONE, logging is disabled and no
+ * logging messages are printed.
+ */
+#define LOG_NONE            0
+#define LOG_ERROR           1
+#define LOG_WARN            2
+#define LOG_INFO            3
+#define LOG_DEBUG           4
+
+#if WIFI_CFG_DEBUG_LOG == LOG_DEBUG
+/* All log level messages will logged. */
+#define WIFI_LOG_ERROR( message )          printf_log_error message
+#define WIFI_LOG_WARN( message )           printf_log_warn message
+#define WIFI_LOG_INFO( message )           printf_log_info message
+#define WIFI_LOG_DEBUG( message )          printf_log_debug message
+
+#elif WIFI_CFG_DEBUG_LOG == LOG_INFO
+/* Only INFO, WARNING and ERROR messages will be logged. */
+#define WIFI_LOG_ERROR( message )          printf_log_error message
+#define WIFI_LOG_WARN( message )           printf_log_warn message
+#define WIFI_LOG_INFO( message )           printf_log_info message
+#define WIFI_LOG_DEBUG( message )
+
+#elif WIFI_CFG_DEBUG_LOG == LOG_WARN
+/* Only WARNING and ERROR messages will be logged.*/
+#define WIFI_LOG_ERROR( message )          printf_log_error message
+#define WIFI_LOG_WARN( message )           printf_log_warn message
+#define WIFI_LOG_INFO( message )
+#define WIFI_LOG_DEBUG( message )
+
+#elif WIFI_CFG_DEBUG_LOG == LOG_ERROR
+/* Only ERROR messages will be logged. */
+#define WIFI_LOG_ERROR( message )          printf_log_error message
+#define WIFI_LOG_WARN( message )
+#define WIFI_LOG_INFO( message )
+#define WIFI_LOG_DEBUG( message )
+
+#elif WIFI_CFG_DEBUG_LOG == LOG_NONE
+#define WIFI_LOG_ERROR( message )
+#define WIFI_LOG_WARN( message )
+#define WIFI_LOG_INFO( message )
+#define WIFI_LOG_DEBUG( message )
+#endif /* WIFI_CFG_DEBUG_LOG */
+
+#define WIFI_LOGGING_MAX_MESSAGE_LENGTH 256
+
+#else
+#error "Error! Invalid value for WIFI_CFG_LOGGING_OPTION. Please verify this macro in r_wifi_da16xxx_config.h"
+#endif /* WIFI_CFG_LOGGING_OPTION */
 
 /* Convert a macro value to a string */
 #define WIFI_STRING_MACRO(str)          #str
@@ -146,7 +196,7 @@
 #define DA16XXX_MQTT_TLS_CIPHER_SUITE_MAX   (17)   // Maximum number of TLS cipher suites supported by DA16XXX.
 #define DA16XXX_MQTT_MAX_TOPIC_LEN          (64)   // Maximum total length for topics supported by DA16XXX.
 #define DA16XXX_MQTT_MAX_PUBMSG_LEN         (2048) // Maximum total length for message supported by DA16XXX.
-#define DA16XXX_MQTT_MAX_PUBTOPICMSG_LEN    (2063) // Maximum total length for message + topic supported by DA16XXX.
+#define DA16XXX_MQTT_MAX_PUBTOPICMSG_LEN    (2113) // Maximum total length for message + topic supported by DA16XXX.
 #define DA16XXX_MQTT_SUBTOPIC_MAX_CNT       (4)    // Maximum number of subscription topics allowed.
 
 /**********************************************************************************************************************
@@ -241,7 +291,7 @@ typedef enum
  *                ATCMD_ERR_MODULE_COM
  *                ATCMD_ERR_TIMEOUT
  *********************************************************************************************************************/
-e_atcmd_err_t at_send_raw (uint8_t *data, uint16_t const length);
+e_atcmd_err_t at_send_raw (uint8_t WIFI_FAR *data, uint16_t const length);
 
 /**********************************************************************************************************************
  * Function Name: at_send
@@ -352,6 +402,7 @@ void at_set_timeout (uint32_t timeout_ms);
  *********************************************************************************************************************/
 void post_err_event (wifi_err_event_enum_t err_event, uint32_t sock_idx);
 
+#if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
 /**********************************************************************************************************************
  * Function Name: flow_ctrl_init
  * Description  : Initialise hardware flow.
@@ -367,6 +418,7 @@ void flow_ctrl_init (void);
  * Return Value : None
  *********************************************************************************************************************/
 void flow_ctrl_set (e_flow_ctrl_t flow);
+#endif
 
 /**********************************************************************************************************************
  * Function Name: uart_port_open
@@ -385,13 +437,14 @@ e_atcmd_err_t uart_port_open(void);
  *********************************************************************************************************************/
 void uart_port_close(void);
 
+#if WIFI_CFG_LOGGING_OPTION >= 2
 /**********************************************************************************************************************
  * Function Name: printf_log_error
  * Description  : Print error log without freeRTOS logging module.
  * Arguments    : format - format message
  * Return Value : None
  *********************************************************************************************************************/
-void printf_log_error (const char * format, ...);
+void printf_log_error (const char WIFI_FAR * format, ...);
 
 /**********************************************************************************************************************
  * Function Name: printf_log_warn
@@ -399,7 +452,7 @@ void printf_log_error (const char * format, ...);
  * Arguments    : format - format message
  * Return Value : None
  *********************************************************************************************************************/
-void printf_log_warn (const char * format, ...);
+void printf_log_warn (const char WIFI_FAR * format, ...);
 
 /**********************************************************************************************************************
  * Function Name: printf_log_info
@@ -407,7 +460,7 @@ void printf_log_warn (const char * format, ...);
  * Arguments    : format - format message
  * Return Value : None
  *********************************************************************************************************************/
-void printf_log_info (const char * format, ...);
+void printf_log_info (const char WIFI_FAR * format, ...);
 
 /**********************************************************************************************************************
  * Function Name: printf_log_debug
@@ -415,7 +468,8 @@ void printf_log_info (const char * format, ...);
  * Arguments    : format - format message
  * Return Value : None
  *********************************************************************************************************************/
-void printf_log_debug (const char * format, ...);
+void printf_log_debug (const char WIFI_FAR * format, ...);
+#endif /* WIFI_CFG_LOGGING_ENABLE */
 
 /**********************************************************************************************************************
  * Function Name: da16xxx_handle_incoming_common_data

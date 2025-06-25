@@ -64,7 +64,6 @@ typedef struct
  Exported global variables
  *********************************************************************************************************************/
 static st_uart_tbl_t g_uart_tbl;
-static uint8_t g_rx_buff[TEMP_BUF_MAX];
 static volatile uint8_t g_rx_idx = 0;
 
 /* User callback */
@@ -79,7 +78,7 @@ void (* const p_wifi_callback)(void *p_args) = NULL;
  Private (static) variables and functions
  *********************************************************************************************************************/
 /* Port configurations */
-static st_sci_conf_t * get_port_config (void);
+static st_sci_conf_t WIFI_FAR * get_port_config (void);
 
 /* SCI callback functions for UART */
 static void cb_sci_uart (void * pArgs);
@@ -88,7 +87,7 @@ static void da16xxx_handle_incoming_uart_data(uint8_t data);
 
 /* SCI configurations */
 #if WIFI_CFG_CTS_SW_CTRL == 0
-static st_sci_conf_t *s_port_cfg = NULL;
+static st_sci_conf_t WIFI_FAR * s_port_cfg = NULL;
 #endif
 static const st_sci_conf_t s_sci_cfg[] =
 {
@@ -104,6 +103,9 @@ static const st_sci_conf_t s_sci_cfg[] =
 #if SCI_CFG_CH3_INCLUDED == 1
     {SCI_CH3 , R_SCI_PinSet_SCI3  ,SCI_CFG_CH3_TX_BUFSIZ  ,SCI_CFG_CH3_RX_BUFSIZ  },
 #endif
+#if defined(__CCRL__) || defined(__ICCRL78__) || defined(__RL)
+    {SCI_NUM_CH, NULL ,0 ,0 }
+#else
 #if SCI_CFG_CH4_INCLUDED == 1
     {SCI_CH4 , R_SCI_PinSet_SCI4  ,SCI_CFG_CH4_TX_BUFSIZ  ,SCI_CFG_CH4_RX_BUFSIZ  },
 #endif
@@ -132,17 +134,20 @@ static const st_sci_conf_t s_sci_cfg[] =
     {SCI_CH12, R_SCI_PinSet_SCI12 ,SCI_CFG_CH12_TX_BUFSIZ ,SCI_CFG_CH12_RX_BUFSIZ },
 #endif
     {SCI_NUM_CH, NULL ,0 ,0 }
+#endif
 };
 
 /* Buffer control */
 static uint8_t  s_cmd_buf[CMD_BUF_MAX];
 static uint8_t  s_resp_buf[RESP_BUF_MAX];
 static char     s_resp_prefix[PREFIX_LEN_MAX];
-static uint32_t s_rcv_cnt = 0;
-static uint32_t s_read_cnt = 0;
-static uint32_t s_start_pos = 0;
+static uint16_t s_rcv_cnt = 0;
+static uint16_t s_read_cnt = 0;
+static uint16_t s_start_pos = 0;
 static uint32_t s_atcmd_resp_timeout = ATCMD_RESP_TIMEOUT;
+static bool     s_atcmd_timeout_flag = false;
 
+#if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
 /**********************************************************************************************************************
  * Function Name: flow_ctrl_init
  * Description  : Initialise hardware flow.
@@ -196,6 +201,7 @@ void flow_ctrl_set (e_flow_ctrl_t flow)
 /**********************************************************************************************************************
  * End of function flow_ctrl_set
  *********************************************************************************************************************/
+#endif
 
 /**********************************************************************************************************************
  * Function Name: get_port_config
@@ -204,10 +210,10 @@ void flow_ctrl_set (e_flow_ctrl_t flow)
  * Return Value : SUCCESS : SCI configuration table(st_sci_conf_t) pointer by port.
  *                FAIL    : NULL
  *********************************************************************************************************************/
-static st_sci_conf_t * get_port_config(void)
+static st_sci_conf_t WIFI_FAR * get_port_config(void)
 {
-    uint16_t i = 0;
-    st_sci_conf_t * p_tbl = NULL;
+    uint8_t i = 0;
+    st_sci_conf_t WIFI_FAR * p_tbl = NULL;
 
     /* Set table pointer */
     for (i = 0;; i++ )
@@ -218,7 +224,7 @@ static st_sci_conf_t * get_port_config(void)
         }
         if (WIFI_CFG_SCI_CHANNEL == s_sci_cfg[i].ch)
         {
-            p_tbl = (st_sci_conf_t *)&s_sci_cfg[i];
+            p_tbl = (st_sci_conf_t WIFI_FAR *)&s_sci_cfg[i];
             break;
         }
     }
@@ -238,7 +244,7 @@ static st_sci_conf_t * get_port_config(void)
 e_atcmd_err_t uart_port_open(void)
 {
     st_uart_tbl_t * p_uart = &g_uart_tbl;
-    st_sci_conf_t * p_cfg = get_port_config();
+    st_sci_conf_t WIFI_FAR * p_cfg = get_port_config();
 
     memset(&g_uart_tbl, 0, sizeof(g_uart_tbl));
 
@@ -311,7 +317,7 @@ void uart_port_close(void)
  *                ATCMD_ERR_MODULE_COM
  *                ATCMD_ERR_TIMEOUT
  *********************************************************************************************************************/
-e_atcmd_err_t at_send_raw(uint8_t *data, uint16_t const length)
+e_atcmd_err_t at_send_raw(uint8_t WIFI_FAR *data, uint16_t const length)
 {
     e_atcmd_err_t ret = ATCMD_OK;
     uint32_t index = 0;
@@ -319,9 +325,12 @@ e_atcmd_err_t at_send_raw(uint8_t *data, uint16_t const length)
     uint32_t send_length = 0;
 #endif
 
+#if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
     // HW flow enable
     flow_ctrl_set(RTS_OFF);
+#endif
 
+    s_atcmd_timeout_flag = true;
 #if WIFI_CFG_CTS_SW_CTRL == 0
     while ((index < length) && (ret == ATCMD_OK))
     {
@@ -367,12 +376,12 @@ e_atcmd_err_t at_send_raw(uint8_t *data, uint16_t const length)
             ret = ATCMD_ERR_TIMEOUT;
             break;
         }
-
+#if (WIFI_CFG_DA16600_SUPPORT == 0)
         if (1 == WIFI_CTS_PIDR(WIFI_CFG_CTS_PORT, WIFI_CFG_CTS_PIN))
         {
             continue;
         }
-
+#endif
         /* Send AT command */
         g_uart_tbl.tx_end_flag = 0;
         if (SCI_SUCCESS != R_SCI_Send(g_uart_tbl.sci_hdl, &data[index++], 1))
@@ -400,8 +409,15 @@ e_atcmd_err_t at_send_raw(uint8_t *data, uint16_t const length)
 
     tick_count_stop();
 
+#if defined(__CCRX__) || defined(__ICCRX__) || defined(__RX__)
     // HW flow disable
     flow_ctrl_set(RTS_ON);
+#endif
+
+    if (ATCMD_OK != ret)
+    {
+        s_atcmd_timeout_flag = false;
+    }
 
     return ret;
 }
@@ -464,7 +480,7 @@ e_rslt_code_t at_recv(void)
 {
     byteq_err_t byteq_ret;
     uint8_t data;
-    uint32_t start_pos = 0;
+    uint16_t start_pos = 0;
     e_rslt_code_t  ret = AT_INTERNAL_ERROR;
 
     /* Initialize */
@@ -519,11 +535,13 @@ e_rslt_code_t at_recv(void)
                 if (NULL != strstr((const char *) &s_resp_buf[start_pos], AT_RETURN_TEXT_OK))
                 {
                     tick_count_stop();
+                    s_atcmd_timeout_flag = false;
                     return AT_OK;
                 }
                 else if (1 == sscanf((const char *) &s_resp_buf[start_pos], AT_RETURN_TEXT_ERR, (int *) &ret))
                 {
                     tick_count_stop();
+                    s_atcmd_timeout_flag = false;
                     return ret;
                 }
                 /* set pointer to next line */
@@ -531,6 +549,7 @@ e_rslt_code_t at_recv(void)
             }
         }
     }
+    s_atcmd_timeout_flag = false;
     return ret;
 }
 /**********************************************************************************************************************
@@ -631,11 +650,11 @@ e_rslt_code_t at_exec_wo_mutex (const char *cmd, ...)
  * Return Value : 0     : data not found
  *                other : data found
  *********************************************************************************************************************/
-e_atcmd_read_t at_read(const char *response_fmt, ...)
+e_atcmd_read_t at_read(const char WIFI_FAR *response_fmt, ...)
 {
     va_list   args = {0};
     e_atcmd_read_t  rtn = DATA_NOT_FOUND;
-    char    * sp;
+    char WIFI_FAR * sp;
 
     /* No received data? */
     if (0 == s_rcv_cnt)
@@ -648,7 +667,7 @@ e_atcmd_read_t at_read(const char *response_fmt, ...)
     /* Make prefix */
     memset(s_resp_prefix, 0, sizeof(s_resp_prefix));
     strcpy(s_resp_prefix, response_fmt);
-    sp = strstr((const char *)response_fmt, (const char *) "%");
+    sp = strstr(response_fmt, (const char WIFI_FAR *) "%");
     if (0 != sp)
     {
         s_resp_prefix[(uint32_t)sp - (uint32_t)response_fmt] = 0;
@@ -666,9 +685,9 @@ e_atcmd_read_t at_read(const char *response_fmt, ...)
         if ('\n' == s_resp_buf[s_read_cnt++])
         {
             /* Check for match */
-            if (0 == strncmp((const char *)&s_resp_buf[s_start_pos], s_resp_prefix, strlen(s_resp_prefix)))
+            if (0 == strncmp((const char WIFI_FAR *)&s_resp_buf[s_start_pos], s_resp_prefix, strlen(s_resp_prefix)))
             {
-                if (EOF == vsscanf((const char *)&s_resp_buf[s_start_pos], response_fmt, args))
+                if (EOF == vsscanf((const char WIFI_FAR *)&s_resp_buf[s_start_pos], response_fmt, args))
                 {
                     WIFI_LOG_ERROR(("at_read: Input data failure (%s)", response_fmt));
                     rtn = DATA_NOT_FOUND;
@@ -706,7 +725,7 @@ e_atcmd_read_t at_read_wo_prefix(const char *response_fmt, ...)
     va_list args = {0};
 
     va_start(args, response_fmt);
-    if (EOF == vsscanf((const char *)&s_resp_buf[s_start_pos], response_fmt, args))
+    if (EOF == vsscanf((const char WIFI_FAR *)&s_resp_buf[s_start_pos], response_fmt, args))
     {
         WIFI_LOG_ERROR(("at_read_wo_prefix: Input data failure (%s)", response_fmt));
         ret = DATA_NOT_FOUND;
@@ -853,25 +872,21 @@ static void cb_sci_err(sci_cb_evt_t event)
     if (SCI_EVT_RXBUF_OVFL == event)
     {
         /* From RXI interrupt; rx queue is full */
-        // WIFI_LOG_ERROR(("cb_sci_err: SCI_EVT_RXBUF_OVFL"));
         post_err_event(WIFI_EVENT_SERIAL_RXQ_OVF_ERR, 0);
     }
     else if (SCI_EVT_OVFL_ERR == event)
     {
         /* From receiver overflow error interrupt */
-        // WIFI_LOG_ERROR(("cb_sci_err: SCI_EVT_OVFL_ERR"));
         post_err_event(WIFI_EVENT_SERIAL_OVF_ERR, 0);
     }
     else if (SCI_EVT_FRAMING_ERR == event)
     {
         /* From receiver framing error interrupt */
-        // WIFI_LOG_ERROR(("cb_sci_err: SCI_EVT_FRAMING_ERR"));
         post_err_event(WIFI_EVENT_SERIAL_FLM_ERR, 0);
     }
     else
     {
         /* Do nothing */
-        // WIFI_LOG_INFO(("cb_sci_err: event %d.", event));
     }
 }
 /**********************************************************************************************************************
@@ -886,8 +901,9 @@ static void cb_sci_err(sci_cb_evt_t event)
  *********************************************************************************************************************/
 void da16xxx_handle_incoming_uart_data(uint8_t data)
 {
+    static uint32_t hash[2] = {0};
 
-    if (g_uart_tbl.socket_recv_state != WIFI_RECV_DATA)
+    if (s_atcmd_timeout_flag && (g_uart_tbl.socket_recv_state != WIFI_RECV_DATA))
     {
         if (BYTEQ_SUCCESS != R_BYTEQ_Put(g_uart_tbl.byteq_hdl, data))
         {
@@ -930,6 +946,7 @@ void da16xxx_handle_incoming_uart_data(uint8_t data)
         }
 
         case WIFI_RESP_TRSSLDTC:
+        case WIFI_RESP_TRSSLXTC:
         {
 #if WIFI_CFG_TLS_SUPPORT == 1
             da16xxx_handle_incoming_secure_socket_data(&g_uart_tbl.at_resp_type, &g_uart_tbl.socket_recv_state, data);
@@ -966,6 +983,8 @@ void da16xxx_handle_incoming_uart_data(uint8_t data)
             {
                 g_uart_tbl.socket_recv_state = WIFI_RECV_CMD;
                 g_rx_idx = 0;
+                hash[0] = 0;
+                hash[1] = 0;
             }
             break;
         }
@@ -975,68 +994,124 @@ void da16xxx_handle_incoming_uart_data(uint8_t data)
             {
                 // reset index
                 g_rx_idx = 0;
+                hash[0] = 0;
+                hash[1] = 0;
             }
             else if (':' == data)
             {
-                /* Check for incoming data through socket */
-                if (0 == strncmp("TRDTC", (char *) g_rx_buff, g_rx_idx))
+                if (5 == g_rx_idx)
                 {
-                    g_uart_tbl.at_resp_type = WIFI_RESP_TRDTC;
-                    g_uart_tbl.socket_recv_state = WIFI_RECV_PARAM_CID;
+                    /* Check for incoming data through socket */
+                    if (0x528E3CB5 == hash[0]) // TRDTC
+                    {
+                        g_uart_tbl.at_resp_type = WIFI_RESP_TRDTC;
+                        g_uart_tbl.socket_recv_state = WIFI_RECV_PARAM_CID;
+                    }
+                    /* Check for TCP socket disconnect notification */
+                    else if (0x5C6772C9 == hash[0]) // TRXTC
+                    {
+                        g_uart_tbl.at_resp_type = WIFI_RESP_TRXTC;
+                        g_uart_tbl.socket_recv_state = WIFI_RECV_PARAM_CID;
+                    }
+                    /* Check AP connect status */
+                    else if (0xF2E2E92A == hash[0]) // WFJAP
+                    {
+                        g_uart_tbl.at_resp_type = WIFI_RESP_WFJAP;
+                        g_uart_tbl.socket_recv_state = WIFI_RECV_PARAM_CID;
+                    }
+                    /* Check AP disconnect status */
+                    else if (0xEFEE8C24 == hash[0]) // WFDAP
+                    {
+                        g_uart_tbl.at_resp_type = WIFI_RESP_WFDAP;
+                        g_uart_tbl.socket_recv_state = WIFI_RECV_PARAM_CID;
+                    }
+                    else
+                    {
+                        g_uart_tbl.socket_recv_state = WIFI_RECV_PREFIX;
+                    }
                 }
-                /* Check for TCP socket disconnect notification */
-                else if (0 == strncmp("TRXTC", (char *) g_rx_buff, g_rx_idx))
+                else if (6 == g_rx_idx)
                 {
-                    g_uart_tbl.at_resp_type = WIFI_RESP_TRXTC;
-                    g_uart_tbl.socket_recv_state = WIFI_RECV_PARAM_CID;
+                    /* Check MQTT connect status */
+                    if (0xFD8CAC96 == hash[0]) // NWMQCL
+                    {
+                        g_uart_tbl.at_resp_type = WIFI_RESP_NWMQCL;
+                        g_uart_tbl.socket_recv_state = WIFI_RECV_PARAM_CID;
+                    }
+                    else
+                    {
+                        g_uart_tbl.socket_recv_state = WIFI_RECV_PREFIX;
+                    }
                 }
-                /* Check AP connect status */
-                else if (0 == strncmp("WFJAP", (char *) g_rx_buff, g_rx_idx))
+                else if (7 == g_rx_idx)
                 {
-                    g_uart_tbl.at_resp_type = WIFI_RESP_WFJAP;
-                    g_uart_tbl.socket_recv_state = WIFI_RECV_PARAM_CID;
+                    /* Check MQTT message */
+                    if (0xFD96AF13 == hash[0] && 0x00000047 == hash[1]) // NWMQMSG
+                    {
+                        g_uart_tbl.at_resp_type = WIFI_RESP_NWMQMSG;
+                        g_uart_tbl.socket_recv_state = WIFI_RECV_DATA;
+                    }
+                    else
+                    {
+                        g_uart_tbl.socket_recv_state = WIFI_RECV_PREFIX;
+                    }
                 }
-                /* Check AP disconnect status */
-                else if (0 == strncmp("WFDAP", (char *) g_rx_buff, g_rx_idx))
+                else if (8 == g_rx_idx)
                 {
-                    g_uart_tbl.at_resp_type = WIFI_RESP_WFDAP;
-                    g_uart_tbl.socket_recv_state = WIFI_RECV_PARAM_CID;
+                    /* Check for incoming data through secure socket */
+                    if (0x47271EB6 == hash[0] && 0x005414EF == hash[1]) // TRSSLDTC
+                    {
+                        g_uart_tbl.at_resp_type = WIFI_RESP_TRSSLDTC;
+                        g_uart_tbl.socket_recv_state = WIFI_RECV_PARAM_CID;
+                    }
+                    else if (0x47271ECA == hash[0] && 0x005414EF == hash[1]) // TRSSLXTC
+                    {
+                        g_uart_tbl.at_resp_type = WIFI_RESP_TRSSLXTC;
+                        g_uart_tbl.socket_recv_state = WIFI_RECV_PARAM_CID;
+                    }
+                    else
+                    {
+                        g_uart_tbl.socket_recv_state = WIFI_RECV_PREFIX;
+                    }
                 }
-                /* Check MQTT connect status */
-                else if (0 == strncmp("NWMQCL", (char *) g_rx_buff, g_rx_idx))
+                else if (9 == g_rx_idx)
                 {
-                    g_uart_tbl.at_resp_type = WIFI_RESP_NWMQCL;
-                    g_uart_tbl.socket_recv_state = WIFI_RECV_PARAM_CID;
+                    /* Check HTTP response data */
+                    if (0x1664C756 == hash[0] && 0x205604AE == hash[1]) // NWHTCDATA
+                    {
+                        g_uart_tbl.at_resp_type = WIFI_RESP_NWHTCDATA;
+                        g_uart_tbl.socket_recv_state = WIFI_RECV_PARAM_LEN;
+                    }
+                    else
+                    {
+                        g_uart_tbl.socket_recv_state = WIFI_RECV_PREFIX;
+                    }
                 }
-                /* Check MQTT message */
-                else if (0 == strncmp("NWMQMSG", (char *) g_rx_buff, g_rx_idx))
+                else if (10 == g_rx_idx)
                 {
-                    g_uart_tbl.at_resp_type = WIFI_RESP_NWMQMSG;
-                    g_uart_tbl.socket_recv_state = WIFI_RECV_DATA;
+                    /* Check MQTT send message status */
+                    if (0xFD96AF13 == hash[0] && 0x1090FF42 == hash[1]) // NWMQMSGSND
+                    {
+                        g_uart_tbl.at_resp_type = WIFI_RESP_NWMQMSGSND;
+                        g_uart_tbl.socket_recv_state = WIFI_RECV_PARAM_CID;
+                    }
+                    else
+                    {
+                        g_uart_tbl.socket_recv_state = WIFI_RECV_PREFIX;
+                    }
                 }
-                /* Check MQTT send message status */
-                else if (0 == strncmp("NWMQMSGSND", (char *) g_rx_buff, g_rx_idx))
+                else if (11 == g_rx_idx)
                 {
-                    g_uart_tbl.at_resp_type = WIFI_RESP_NWMQMSGSND;
-                    g_uart_tbl.socket_recv_state = WIFI_RECV_PARAM_CID;
-                }
-                /* Check for incoming data through secure socket */
-                else if (0 == strncmp("TRSSLDTC", (char *) g_rx_buff, g_rx_idx))
-                {
-                    g_uart_tbl.at_resp_type = WIFI_RESP_TRSSLDTC;
-                    g_uart_tbl.socket_recv_state = WIFI_RECV_PARAM_CID;
-                }
-                /* Check HTTP request status */
-                else if (0 == strncmp("NWHTCSTATUS", (char *) g_rx_buff, g_rx_idx))
-                {
-                    g_uart_tbl.at_resp_type = WIFI_RESP_NWHTCSTATUS;
-                    g_uart_tbl.socket_recv_state = WIFI_RECV_PARAM_CID;
-                }
-                /* Check HTTP response data */
-                else if (0 == strncmp("NWHTCDATA", (char *) g_rx_buff, g_rx_idx))
-                {
-                    g_uart_tbl.at_resp_type = WIFI_RESP_NWHTCDATA;
-                    g_uart_tbl.socket_recv_state = WIFI_RECV_PARAM_LEN;
+                    /* Check HTTP request status */
+                    if (0x1664C765 == hash[0] && 0x437C5865 == hash[1]) // NWHTCSTATUS
+                    {
+                        g_uart_tbl.at_resp_type = WIFI_RESP_NWHTCSTATUS;
+                        g_uart_tbl.socket_recv_state = WIFI_RECV_PARAM_CID;
+                    }
+                    else
+                    {
+                        g_uart_tbl.socket_recv_state = WIFI_RECV_PREFIX;
+                    }
                 }
             }
             else if (g_rx_idx == 11)
@@ -1045,8 +1120,17 @@ void da16xxx_handle_incoming_uart_data(uint8_t data)
             }
             else
             {
-                g_rx_buff[g_rx_idx++] = data;
-                g_rx_idx = g_rx_idx % TEMP_BUF_MAX;
+                /* Convert string to integer using SDBM hash algorithm
+                   Separating string into maximum length 6 characters to prevent hash collision */
+                if (6 > g_rx_idx)
+                {
+                    hash[0] = data + (hash[0] << 6) + (hash[0] << 16) - hash[0];
+                }
+                else
+                {
+                    hash[1] = data + (hash[1] << 6) + (hash[1] << 16) - hash[1];
+                }
+                g_rx_idx++;
             }
             break;
         }
