@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
 * File Name    : lowsrc.c
 * Description  : Functions to support stream I/O
@@ -27,6 +14,13 @@
 *                               Fixed coding style.
 *         : 29.01.2021 3.01     Added tha __write function and __read function for ICCRX.
 *         : 31.05.2024 3.02     Fixed coding style.
+*         : 26.02.2025 3.03     Changed the disclaimer.
+*         : 28.05.2025 3.04     Added compile switch for the following macro definitions.
+*                               - BSP_CFG_LOW_LEVEL_INTERFACE_STDIO_ENABLE
+*                               - BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE
+*                               Added exclusive control processing for wait_sem and signal_sem.
+*                               Deleted _write and _read functions for OPTLIB.
+*                               Fixed coding style.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -121,7 +115,7 @@ Typedef definitions
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
-Exported global variables (to be accessed by other files)
+Exported global variables and functions (to be accessed by other files)
 ***********************************************************************************************************************/
 extern const long _nfiles;     /* The number of files for input/output files */
 char flmod[BSP_PRV_IOSTREAM];          /* The location for the mode of opened file. */
@@ -138,14 +132,22 @@ char *env_list[] = {            /* Array for environment variables(**environ) */
 
 char **environ = env_list;
 
+#if BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 1
+/* If the user is requesting exclusive control with wait_sem and signal_sem, this would be the prototype. */
+void BSP_CFG_USER_ENTER_CRITICAL_FUNCTION(void);
+void BSP_CFG_USER_EXIT_CRITICAL_FUNCTION(void);
+#endif /* BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 1 */
+
 /***********************************************************************************************************************
 Private global variables and functions
 ***********************************************************************************************************************/
+#if BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE == 1
 #ifdef _REENTRANT
 static long sem_errno;
 static int force_fail_signal_sem = BSP_PRV_FALSE;
 static int semaphore[BSP_PRV_SEMSIZE];
 #endif /* _REENTRANT */
+#endif /* BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE == 1 */
 
 /***********************************************************************************************************************
 * Function Name: init_iolib
@@ -212,6 +214,7 @@ void close_all(void)
     }
 } /* End of function close_all() */
 
+#if BSP_CFG_LOW_LEVEL_INTERFACE_STDIO_ENABLE == 1
 /***********************************************************************************************************************
 * Function Name: open
 * Description  : file open
@@ -373,7 +376,9 @@ long lseek(long fileno, long offset, long base)
 
     return -1L;
 } /* End of function lseek() */
+#endif /* BSP_CFG_LOW_LEVEL_INTERFACE_STDIO_ENABLE == 1 */
 
+#if BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE == 1
 #ifdef _REENTRANT
 /***********************************************************************************************************************
 * Function Name: errno_addr
@@ -393,15 +398,57 @@ long *errno_addr(void)
 * Arguments    : semnum - Semaphore ID
 * Return Value : BSP_PRV_OK(=1) (Normal)
 *                BSP_PRV_NG(=0) (Error)
+* Note         : If BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE is 0, exclusive control is enabled only when the processor 
+*                mode is supervisor mode and interrupt enabled. If the processor mode is User mode, exclusive control 
+*                is disabled, so if necessary, make your own exclusive control process by using 
+*                BSP_CFG_USER_ENTER_CRITICAL_FUNCTION.
 ***********************************************************************************************************************/
 long wait_sem(long semnum) /* Semaphore ID */
 {
-    if((0 < semnum) && (semnum < BSP_PRV_SEMSIZE)) {
-        if(semaphore[semnum] == BSP_PRV_FALSE) {
+#if BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 0
+    uint32_t    psw = get_psw();
+    uint32_t    pmode = (psw & 0x00100000);
+    uint32_t    iflag = (psw & 0x00010000);
+    uint32_t    reset_iflag = 0;
+
+    /* Check current processor mode and interrupt enable. */
+    if ((0 == pmode) && (0 != iflag))
+    {
+        /* Disable interrupt. */
+        clrpsw_i();
+        reset_iflag = 1;
+    }
+#elif BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 1
+    BSP_CFG_USER_ENTER_CRITICAL_FUNCTION();
+#endif  /* BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 0 */
+
+    if((0 < semnum) && (semnum < BSP_PRV_SEMSIZE))
+    {
+        if(semaphore[semnum] == BSP_PRV_FALSE)
+        {
             semaphore[semnum] = BSP_PRV_TRUE;
+#if BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 0
+            if(1 == reset_iflag)
+            {
+                /* Enable interrupt. */
+                setpsw_i();
+            }
+#elif BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 1
+            BSP_CFG_USER_EXIT_CRITICAL_FUNCTION();
+#endif  /* BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 0 */
             return(BSP_PRV_OK);
         }
     }
+
+#if BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 0
+    if(1 == reset_iflag)
+    {
+        /* Enable interrupt. */
+        setpsw_i();
+    }
+#elif BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 1
+    BSP_CFG_USER_EXIT_CRITICAL_FUNCTION();
+#endif  /* BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 0 */
     return(BSP_PRV_NG);
 }
 
@@ -411,26 +458,70 @@ long wait_sem(long semnum) /* Semaphore ID */
 * Arguments    : semnum - Semaphore ID
 * Return Value : BSP_PRV_OK(=1) (Normal)
 *                BSP_PRV_NG(=0) (Error)
+* Note         : If BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE is 0, exclusive control is enabled only when the processor 
+*                mode is supervisor mode and interrupt enabled. If the processor mode is User mode, exclusive control 
+*                is disabled, so if necessary, make your own exclusive control process by using 
+*                BSP_CFG_USER_ENTER_CRITICAL_FUNCTION.
 ***********************************************************************************************************************/
 long signal_sem(long semnum) /* Semaphore ID */
 {
-    if(!force_fail_signal_sem) {
-        if((0 <= semnum) && (semnum < BSP_PRV_SEMSIZE)) {
-            if( semaphore[semnum] == BSP_PRV_TRUE ) {
+#if BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 0
+    uint32_t    psw = get_psw();
+    uint32_t    pmode = (psw & 0x00100000);
+    uint32_t    iflag = (psw & 0x00010000);
+    uint32_t    reset_iflag = 0;
+
+    /* Check current processor mode and interrupt enable. */
+    if ((0 == pmode) && (0 != iflag))
+    {
+        /* Disable interrupt. */
+        clrpsw_i();
+        reset_iflag = 1;
+    }
+#elif BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 1
+    BSP_CFG_USER_ENTER_CRITICAL_FUNCTION();
+#endif  /* BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 0 */
+
+    if(!force_fail_signal_sem)
+    {
+        if((0 <= semnum) && (semnum < BSP_PRV_SEMSIZE))
+        {
+            if( semaphore[semnum] == BSP_PRV_TRUE )
+            {
                 semaphore[semnum] = BSP_PRV_FALSE;
+#if BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 0
+                if(1 == reset_iflag)
+                {
+                    /* Enable interrupt. */
+                    setpsw_i();
+                }
+#elif BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 1
+                BSP_CFG_USER_EXIT_CRITICAL_FUNCTION();
+#endif  /* BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 0 */
                 return(BSP_PRV_OK);
             }
         }
     }
+
+#if BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 0
+    if(1 == reset_iflag)
+    {
+        /* Enable interrupt. */
+        setpsw_i();
+    }
+#elif BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 1
+    BSP_CFG_USER_EXIT_CRITICAL_FUNCTION();
+#endif  /* BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE == 0 */
     return(BSP_PRV_NG);
 }
 #endif /* _REENTRANT */
-
+#endif /* BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE == 1 */
 #endif /* defined(__CCRX__) */
 
 #endif /* BSP_CFG_IO_LIB_ENABLE */
 
 #if defined(__GNUC__)
+#if BSP_CFG_LOW_LEVEL_INTERFACE_STDIO_ENABLE == 1
 /***********************************************************************************************************************
 * Function Name: write
 * Description  : Data write (for GNURX+NEWLIB)
@@ -476,56 +567,25 @@ int read(int fileno, char *buf, int count)
 }
 
 /***********************************************************************************************************************
-* Function Name: _write
-* Description  : Data write (for GNURX+OPTLIB)
-* Arguments    : fileno - File number
-*                buf - The address of destination buffer
-*                count - The number of chacter to write
-* Return Value : Number of write characters (Pass)
-***********************************************************************************************************************/
-int _write(int fileno, char *buf, int count)
-{
-    int i;
-    char c;
-
-    /* This code is only used to remove compiler info messages about these parameters not being used. */
-    INTERNAL_NOT_USED(fileno);
-
-    /* WAIT_LOOP */
-    for(i = count; i > 0; --i)
-    {
-       c = *buf++;
-       charput(c);
-    }
-
-    return count;
-}
-
-/***********************************************************************************************************************
-* Function Name: read
-* Description  : Data read (for GNURX+OPTLIB)
-* Arguments    : fileno - File number
-*                buf - The address of destination buffer
-*                count - The number of chacter to read
-* Return Value : 1 (Pass)
-***********************************************************************************************************************/
-int _read(int fileno, char *buf, int count)
-{
-    /* This code is only used to remove compiler info messages about these parameters not being used. */
-    INTERNAL_NOT_USED(fileno);
-    INTERNAL_NOT_USED(count);
-
-    *buf = charget();
-    return 1;
-}
-
-/***********************************************************************************************************************
 * Function Name: close
 * Description  : dummy
 * Arguments    : none
 * Return Value : none
 ***********************************************************************************************************************/
 void close (void)
+{
+    /* This is dummy function.
+       This function is used to suppress the warning messages of GNU compiler.
+       Plese edit the function as required. */
+}
+
+/***********************************************************************************************************************
+* Function Name: lseek
+* Description  : dummy
+* Arguments    : none
+* Return Value : none
+***********************************************************************************************************************/
+void lseek (void)
 {
     /* This is dummy function.
        This function is used to suppress the warning messages of GNU compiler.
@@ -557,20 +617,7 @@ void isatty (void)
        This function is used to suppress the warning messages of GNU compiler.
        Plese edit the function as required. */
 }
-
-/***********************************************************************************************************************
-* Function Name: lseek
-* Description  : dummy
-* Arguments    : none
-* Return Value : none
-***********************************************************************************************************************/
-void lseek (void)
-{
-    /* This is dummy function.
-       This function is used to suppress the warning messages of GNU compiler.
-       Plese edit the function as required. */
-}
-
+#endif /* BSP_CFG_LOW_LEVEL_INTERFACE_STDIO_ENABLE == 1 */
 #endif /* defined(__GNUC__) */
 
 #if defined(__ICCRX__)

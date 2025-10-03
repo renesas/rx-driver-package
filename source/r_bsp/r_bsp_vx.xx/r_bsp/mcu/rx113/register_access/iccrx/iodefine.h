@@ -1,23 +1,10 @@
 /* IAR file generator: v1.0 */
 
-/**********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO
- * THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2020 Renesas Electronics Corporation. All rights reserved.
- *********************************************************************************************************************/
+/*
+* Copyright (c) 2013(2014-2025) Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /*********************************************************************************
 *
 * Device     : RX/RX100/RX113
@@ -26,18 +13,17 @@
 *
 * Abstract   : Definition of I/O Register.
 *
-* History    : 0.4  (2013-11-18)  [Hardware Manual Revision : 0.40]
-*            : 0.5  (2014-01-05)  [Hardware Manual Revision : 0.50]
-*            : 1.0  (2014-07-22)  [Hardware Manual Revision : 1.00]
-*            : 1.0A (2015-04-20)  [Hardware Manual Revision : 1.02 + TU]
-*            : 1.0B (2016-08-24)  [Hardware Manual Revision : 1.02 + TU]
-*            : 1.0C (2016-11-10)  [Hardware Manual Revision : 1.02 + TU]
-*            : 1.1  (2018-03-31)  [Hardware Manual Revision : 1.10]
-*            : 1.1A (2023-03-03)  [Hardware Manual Revision : 1.10]
+* History    : 0.4   (2013-11-18)  [Hardware Manual Revision : 0.40]
+*            : 0.5   (2014-01-05)  [Hardware Manual Revision : 0.50]
+*            : 1.0   (2014-07-22)  [Hardware Manual Revision : 1.00]
+*            : 1.0A  (2015-04-20)  [Hardware Manual Revision : 1.02 + TU]
+*            : 1.0B  (2016-08-24)  [Hardware Manual Revision : 1.02 + TU]
+*            : 1.0C  (2016-11-10)  [Hardware Manual Revision : 1.02 + TU]
+*            : 1.1   (2018-03-31)  [Hardware Manual Revision : 1.10]
+*            : 1.1A  (2023-03-03)  [Hardware Manual Revision : 1.10]
+*            : 1.10B (2025-02-14)  [Hardware Manual Revision : 1.10]
 *
 * NOTE       : THIS IS A TYPICAL EXAMPLE.
-*
-* Copyright (C) 2023 (2013 - 2018) Renesas Electronics Corporation.
 *
 *********************************************************************************/
 /********************************************************************************/

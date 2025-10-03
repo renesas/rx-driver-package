@@ -1,17 +1,8 @@
-                                                                          
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                          
+/*
+* Copyright (c) 2015(2016-2025) Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /*********************************************************************************
 *
 * Device     : RX/RX200/RX24U
@@ -20,20 +11,19 @@
 *
 * Abstract   : Definition of I/O Register.
 *
-* History    : 0.5  (2015-06-15)  [Hardware Manual Revision : 0.50]
-*            : 1.0  (2015-10-26)  [Hardware Manual Revision : 1.00]
-*            : 1.0A (2016-02-26)  [Hardware Manual Revision : 1.00]
-*            : 1.0B (2016-08-03)  [Hardware Manual Revision : 1.00]
-*            : 1.0C (2016-11-24)  [Hardware Manual Revision : 1.10]
-*            : 1.0D (2016-12-06)  [Hardware Manual Revision : 1.10]
-*            : 1.0E (2017-01-06)  [Hardware Manual Revision : 1.10]
-*            : 1.0F (2017-01-25)  [Hardware Manual Revision : 1.10]
-*            : 1.0G (2017-01-26)  [Hardware Manual Revision : 1.10]
-*            : 1.0H (2017-01-26)  [Hardware Manual Revision : 1.10]
+* History    : 0.5   (2015-06-15)  [Hardware Manual Revision : 0.50]
+*            : 1.0   (2015-10-26)  [Hardware Manual Revision : 1.00]
+*            : 1.0A  (2016-02-26)  [Hardware Manual Revision : 1.00]
+*            : 1.0B  (2016-08-03)  [Hardware Manual Revision : 1.00]
+*            : 1.0C  (2016-11-24)  [Hardware Manual Revision : 1.10]
+*            : 1.0D  (2016-12-06)  [Hardware Manual Revision : 1.10]
+*            : 1.0E  (2017-01-06)  [Hardware Manual Revision : 1.10]
+*            : 1.0F  (2017-01-25)  [Hardware Manual Revision : 1.10]
+*            : 1.0G  (2017-01-26)  [Hardware Manual Revision : 1.10]
+*            : 1.0H  (2017-01-26)  [Hardware Manual Revision : 1.10]
+*            : 1.00I (2025-02-14)  [Hardware Manual Revision : 1.10]
 *
 * NOTE       : THIS IS A TYPICAL EXAMPLE.
-*
-* Copyright (C) 2016 (2015) Renesas Electronics Corporation.
 *
 *********************************************************************************/
 /********************************************************************************/
@@ -8322,6 +8312,19 @@ typedef struct st_gpt {
 			unsigned char L;
 		} BYTE;
 		struct {
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char ETIPEN:1;
+			unsigned char ETINEN:1;
+			unsigned char :6;
+			unsigned char :5;
+#ifdef IODEFINE_H_HISTORY
+			unsigned char :3;
+			unsigned char :8;
+#endif
+			unsigned char GTENFCS:2;
+			unsigned char GTETRGEN:1;
+#else
 			unsigned char GTETRGEN:1;
 			unsigned char GTENFCS:2;
 #ifdef IODEFINE_H_HISTORY
@@ -8332,6 +8335,7 @@ typedef struct st_gpt {
 			unsigned char :6;
 			unsigned char ETINEN:1;
 			unsigned char ETIPEN:1;
+#endif
 		} BIT;
 	} GTETINT;
 	char           wk0[2];

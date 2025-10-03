@@ -1,14 +1,24 @@
-/********************************************************************************/
-/*                                                                              */
-/* Device     : RX/RX700/RX71M                                                  */
-/* File Name  : iodefine.h                                                      */
-/* Abstract   : Definition of I/O Register.                                     */
-/* History    : V1.0 (2014-12-08)  [Hardware Manual Revision : 1.00]            */
-/* History    : V1.0A(2017-04-24)  [Hardware Manual Revision : 1.00]            */
-/* Note       : This is a typical example.                                      */
-/*                                                                              */
-/*  Copyright(C) 2014 Renesas Electronics Corporation.                          */
-/*                                                                              */
+/*
+* Copyright (c) 2014(2017,2025) Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
+/********************************************************************************
+*
+* Device     : RX/RX700/RX71M
+*
+* File Name  : iodefine.h
+*
+* Abstract   : Definition of I/O Register
+*
+* History    : 0.10  (2014-03-22)  [Hardware Manual Revision : 0.10]
+*            : 1.00  (2014-12-08)  [Hardware Manual Revision : 1.00]
+*            : 1.0A  (2017-04-24)  [Hardware Manual Revision : 1.00]
+*            : 1.00B (2025-02-14)  [Hardware Manual Revision : 1.00]
+*
+* Note       : THIS IS A TYPICAL EXAMPLE.
+*
+*********************************************************************************/
 /********************************************************************************/
 /*                                                                              */
 /*  DESCRIPTION : Definition of ICU Register                                    */

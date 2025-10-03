@@ -1,15 +1,28 @@
-/********************************************************************************/
-/*                                                                              */
-/* Device     : RX/RX100/RX111                                                  */
-/* File Name  : iodefine.h                                                      */
-/* Abstract   : Definition of I/O Register.                                     */
-/* History    : V1.1  (2014-05-14)  [Hardware Manual Revision : 1.10]           */
-/* History    : V1.1A (2016-08-24)  [Hardware Manual Revision : 1.10]           */
-/* Note       : This is a typical example.                                      */
-/*                                                                              */
-/*  Copyright(c) 2014 Renesas Electronics Corp.                                 */
-/*                  And Renesas Solutions Corp. ,All Rights Reserved.           */
-/*                                                                              */
+/*
+* Copyright (c) 2012(2013-2025) Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
+/*********************************************************************************
+*
+* Device     : RX/RX100/RX111
+*
+* File Name  : iodefine.h
+*
+* Abstract   : Definition of I/O Register.
+*
+* History    : 0.4A  (2012-09-02)  [Hardware Manual Revision : 0.40]
+*            : 0.5A  (2013-02-12)  [Hardware Manual Revision : 0.50 + Adds]
+*            : 0.5B  (2013-03-12)  [Hardware Manual Revision : 0.50 + Adds]
+*            : 0.9A  (2013-05-14)  [Hardware Manual Revision : 0.90]
+*            : 1.0   (2013-06-28)  [Hardware Manual Revision : 1.00]
+*            : 1.1   (2014-05-14)  [Hardware Manual Revision : 1.10]
+*            : 1.1A  (2016-08-24)  [Hardware Manual Revision : 1.10]
+*            : 1.10B (2025-02-14)  [Hardware Manual Revision : 1.10]
+*
+* NOTE       : THIS IS A TYPICAL EXAMPLE.
+*
+*********************************************************************************/
 /********************************************************************************/
 /*                                                                              */
 /*  DESCRIPTION : Definition of ICU Register                                    */

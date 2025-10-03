@@ -1,35 +1,8 @@
-                                                                          
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                          
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2015(2016-2025) Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /*******************************************************************************
 *
 * Device     : RX/RX600/RX65N
@@ -53,10 +26,9 @@
 *            : V2.0A  (2017-10-23)  [Hardware Manual Revision : 2.00]
 *            : V2.2   (2018-10-26)  [Hardware Manual Revision : 2.10]
 *            : V2.30  (2019-07-26)  [Hardware Manual Revision : 2.30]
+*            : V2.30A (2025-02-14)  [Hardware Manual Revision : 2.30]
 *
 * NOTE       : THIS IS A TYPICAL EXAMPLE.
-*
-*  Copyright(c) 2019 Renesas Electronics Corporation.
 *
 *********************************************************************************/
 /********************************************************************************/
@@ -5531,11 +5503,19 @@ typedef struct st_elc {
 		unsigned char BYTE;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned char WI:1;
-			unsigned char WE:1;
-			unsigned char :5;
-			unsigned char SEG:1;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned char SEG : 1;
+			unsigned char  : 5;
+			unsigned char WE : 1;
+			unsigned char WI : 1;
+#else
+			unsigned char WI : 1;
+			unsigned char WE : 1;
+			unsigned char  : 5;
+			unsigned char SEG : 1;
+#endif
+	} BIT;
 #endif
 	} ELSEGR;
 	char           wk6[3];
@@ -11474,30 +11454,56 @@ typedef struct st_mmcif {
 	union {
 		unsigned long LONG;
 #ifdef IODEFINE_H_HISTORY
-		struct {
-			unsigned long :1;
-			unsigned long BOOT:1;
-			unsigned long CMD:6;
-			unsigned long RTYP:2;
-			unsigned long RBSY:1;
-			unsigned long :1;
-			unsigned long WDAT:1;
-			unsigned long DWEN:1;
-			unsigned long CMLTE:1;
-			unsigned long CMD12EN:1;
-			unsigned long RIDXC:2;
-			unsigned long RCRC7C:2;
-			unsigned long :1;
-			unsigned long CRC16C:1;
-			unsigned long BOOTACK:1;
-			unsigned long CRCSTE:1;
-			unsigned long TBIT:1;
-			unsigned long OPDM:1;
-			unsigned long :2;
-			unsigned long SBIT:1;
-			unsigned long :1;
-			unsigned long DATW:2;
-		} BIT;
+		struct {			
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned long DATW : 2;
+			unsigned long  : 1;
+			unsigned long SBIT : 1;
+			unsigned long  : 2;
+			unsigned long OPDM : 1;
+			unsigned long TBIT : 1;
+			unsigned long CRCSTE : 1;
+			unsigned long BOOTACK : 1;
+			unsigned long CRC16C : 1;
+			unsigned long  : 1;
+			unsigned long RCRC7C : 2;
+			unsigned long RIDXC : 2;
+			unsigned long CMD12EN : 1;
+			unsigned long CMLTE : 1;
+			unsigned long DWEN : 1;
+			unsigned long WDAT : 1;
+			unsigned long  : 1;
+			unsigned long RBSY : 1;
+			unsigned long RTYP : 2;
+			unsigned long CMD : 6;
+			unsigned long BOOT : 1;
+			unsigned long  : 1;
+#else
+			unsigned long  : 1;
+			unsigned long BOOT : 1;
+			unsigned long CMD : 6;
+			unsigned long RTYP : 2;
+			unsigned long RBSY : 1;
+			unsigned long  : 1;
+			unsigned long WDAT : 1;
+			unsigned long DWEN : 1;
+			unsigned long CMLTE : 1;
+			unsigned long CMD12EN : 1;
+			unsigned long RIDXC : 2;
+			unsigned long RCRC7C : 2;
+			unsigned long  : 1;
+			unsigned long CRC16C : 1;
+			unsigned long BOOTACK : 1;
+			unsigned long CRCSTE : 1;
+			unsigned long TBIT : 1;
+			unsigned long OPDM : 1;
+			unsigned long  : 2;
+			unsigned long SBIT : 1;
+			unsigned long  : 1;
+			unsigned long DATW : 2;
+#endif
+	} BIT;
 #endif
 	} CECMDSET;
 	char           wk0[4];
@@ -26285,15 +26291,27 @@ typedef struct st_sdhi {
 		unsigned long LONG;
 #ifdef IODEFINE_H_HISTORY
 		struct {
-			unsigned long :16;
-			unsigned long CMD12AT:2;
-			unsigned long TRSTP:1;
-			unsigned long CMDRW:1;
-			unsigned long CMDTP:1;
-			unsigned long RSPTP:3;
-			unsigned long ACMD:2;
-			unsigned long CMDIDX:6;
-		} BIT;
+			
+#ifdef __RX_LITTLE_ENDIAN__
+			unsigned long CMDIDX : 6;
+			unsigned long ACMD : 2;
+			unsigned long RSPTP : 3;
+			unsigned long CMDTP : 1;
+			unsigned long CMDRW : 1;
+			unsigned long TRSTP : 1;
+			unsigned long CMD12AT : 2;
+			unsigned long  : 16;
+#else
+			unsigned long  : 16;
+			unsigned long CMD12AT : 2;
+			unsigned long TRSTP : 1;
+			unsigned long CMDRW : 1;
+			unsigned long CMDTP : 1;
+			unsigned long RSPTP : 3;
+			unsigned long ACMD : 2;
+			unsigned long CMDIDX : 6;
+#endif
+	} BIT;
 #endif
 	} SDCMD;
 	char           wk0[4];

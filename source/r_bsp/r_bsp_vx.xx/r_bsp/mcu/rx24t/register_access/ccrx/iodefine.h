@@ -1,49 +1,35 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2015(2016-2025) Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /*********************************************************************************
 *
-* Device     : RX/RX200/RX24T,RX24U
+* Device     : RX/RX200/RX24T
 *
 * File Name  : iodefine.h
 *
 * Abstract   : Definition of I/O Register.
 *
-* History    : 0.5  (2015-06-15)  [Hardware Manual Revision : 0.50 RX24T]
-*            : 1.0  (2015-10-26)  [Hardware Manual Revision : 1.00 RX24T]
-*            : 1.0A (2016-02-26)  [Hardware Manual Revision : 1.00 RX24T]
-*            : 1.0B (2016-08-03)  [Hardware Manual Revision : 1.00 RX24T, Hardware Manual Revision : 0.50 RX24U]
-*            : 1.0C (2016-11-24)  [Hardware Manual Revision : 1.10 RX24T, Hardware Manual Revision : 0.50 RX24U]
-*            : 1.0D (2016-12-06)  [Hardware Manual Revision : 1.10 RX24T, Hardware Manual Revision : 0.50 RX24U]
-*            : 1.0E (2017-01-06)  [Hardware Manual Revision : 1.10 RX24T, Hardware Manual Revision : 0.50 RX24U]
-*            : 1.0F (2017-01-25)  [Hardware Manual Revision : 1.10 RX24T, Hardware Manual Revision : 0.50 RX24U]
-*            : 1.0G (2017-01-26)  [Hardware Manual Revision : 1.10 RX24T, Hardware Manual Revision : 0.50 RX24U]
-*            : 1.0H (2017-01-26)  [Hardware Manual Revision : 1.10 RX24T, Hardware Manual Revision : 0.50 RX24U]
+* History    : 0.5   (2015-06-15)  [Hardware Manual Revision : 0.50]
+*            : 1.0   (2015-10-26)  [Hardware Manual Revision : 1.00]
+*            : 1.0A  (2016-02-26)  [Hardware Manual Revision : 1.00]
+*            : 1.0B  (2016-08-03)  [Hardware Manual Revision : 1.00]
+*            : 1.0C  (2016-11-24)  [Hardware Manual Revision : 1.10]
+*            : 1.0D  (2016-12-06)  [Hardware Manual Revision : 1.10]
+*            : 1.0E  (2017-01-06)  [Hardware Manual Revision : 1.10]
+*            : 1.0F  (2017-01-25)  [Hardware Manual Revision : 1.10]
+*            : 1.0G  (2017-01-26)  [Hardware Manual Revision : 1.10]
+*            : 1.0H  (2017-01-26)  [Hardware Manual Revision : 1.10]
+*            : 1.00I (2025-02-14)  [Hardware Manual Revision : 1.10]
 *
 * NOTE       : THIS IS A TYPICAL EXAMPLE.
-*
-* Copyright (C) 2016 (2015) Renesas Electronics Corporation.
 *
 *********************************************************************************/
 /********************************************************************************/
 /*                                                                              */
 /*  DESCRIPTION : Definition of ICU Register                                    */
-/*  CPU TYPE    : RX24T,RX24U                                                   */
+/*  CPU TYPE    : RX24T                                                         */
 /*                                                                              */
 /*  Usage : IR,DTCER,IER,IPR of ICU Register                                    */
 /*     The following IR, DTCE, IEN, IPR macro functions simplify usage.         */

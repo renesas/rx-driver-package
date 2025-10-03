@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
 * File Name    : sbrk.c
 * Description  : Configures the MCU heap memory.  The size of the heap is defined by the macro HEAPSIZE below.
@@ -26,6 +13,9 @@
 *                               Added support for GNUC and ICCRX.
 *                               Fixed coding style.
 *         : 26.07.2019 3.01     Fixed coding style.
+*         : 26.02.2025 3.02     Changed the disclaimer.
+*         : 28.05.2025 3.03     Added compile switch of BSP_CFG_LOW_LEVEL_INTERFACE_SBRK_ENABLE.
+*                               Deleted the heap definition and _top_of_heap function for OPTLIB.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -40,7 +30,7 @@ Includes   <System Includes> , "Project Includes"
 #if BSP_CFG_STARTUP_DISABLE == 0
 
 #if defined(__CCRX__) || defined(__GNUC__)
-
+#if BSP_CFG_LOW_LEVEL_INTERFACE_SBRK_ENABLE == 1
 /***********************************************************************************************************************
 Macro definitions
 ***********************************************************************************************************************/
@@ -61,13 +51,6 @@ static u_heap_type_t s_heap_area;
 
 /* End address allocated by sbrk (CC-RX and GNURX+NEWLIB) */
 static int8_t *sp_brk=(int8_t *)&s_heap_area;
-
-#if defined(__GNUC__)
-/* Start address of allocated heap area (GNURX+OPTLIB only) */
-int8_t *_heap_of_memory=(int8_t *)&s_heap_area;
-/* End address of allocated heap area (GNURX+OPTLIB only) */
-int8_t *_last_heap_object=(int8_t *)&s_heap_area;
-#endif /* defined(__GNUC__) */
 
 /***********************************************************************************************************************
 * Function name: sbrk
@@ -99,19 +82,7 @@ int8_t  *sbrk(size_t size)
     return p_area;
 } /* End of function sbrk() */
 
-#if defined(__GNUC__)
-/***********************************************************************************************************************
-* Function name: _top_of_heap
-* Description  : This function returns end address of reserved heap area. (GNURX+OPTLIB only)
-* Arguments    : none
-* Return value : End address of reserved heap area
-***********************************************************************************************************************/
-int8_t *_top_of_heap(void)
-{
-    return (int8_t *)(s_heap_area.heap + BSP_CFG_HEAP_BYTES);
-} /* End of function End of function sbrk()() */
-#endif /* defined(__GNUC__) */
-
+#endif /* BSP_CFG_LOW_LEVEL_INTERFACE_SBRK_ENABLE == 1 */
 #endif /* defined(__CCRX__), defined(__GNUC__) */
 
 #endif /* BSP_CFG_STARTUP_DISABLE == 0 */

@@ -1,5 +1,10 @@
 /* IAR file generator: v1.0 */
 
+/*
+* Copyright (c) 2013(2014-2025) Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /********************************************************************************
 *
 * Device     : RX/RX600/RX64M
@@ -17,10 +22,9 @@
 *            : 0.90a (2014-06-05)  [Hardware Manual Revision : 0.90]
 *            : 1.0   (2014-10-20)  [Hardware Manual Revision : 1.00]
 *            : 1.0A  (2017-04-24)  [Hardware Manual Revision : 1.00]
+*            : 1.00B (2025-02-14)  [Hardware Manual Revision : 1.00]
 *
 * Note       : This is a typical example.
-*
-* Copyright (C) 2017 (2013 - 2014) Renesas Electronics Corporation.
 *
 *********************************************************************************/
 /********************************************************************************/

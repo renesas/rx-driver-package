@@ -1,38 +1,23 @@
 /* IAR file generator: v1.0 */
 
-/**********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO
- * THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2020 Renesas Electronics Corporation. All rights reserved.
- *********************************************************************************************************************/
+/*
+* Copyright (c) 2018(2023,2025) Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /********************************************************************************/
 /*                                                                              */
 /* Device     : RX/RX700/RX72T                                                  */
 /* File Name  : iodefine.h                                                      */
 /* Abstract   : Definition of I/O Register.                                     */
-/* History    : V0.4  (2018-03-19)  [Hardware Manual Revision : 0.40]           */
-/* History    : V0.40a(2018-04-23)  [Hardware Manual Revision : 0.40]           */
-/* History    : V0.50 (2018-09-20)  [Hardware Manual Revision : 0.50]           */
-/* History    : V1.00 (2018-10-15)  [Hardware Manual Revision : 1.00]           */
+/* History    : V0.4   (2018-03-19) [Hardware Manual Revision : 0.40]           */
+/* History    : V0.40a (2018-04-23) [Hardware Manual Revision : 0.40]           */
+/* History    : V0.50  (2018-09-20) [Hardware Manual Revision : 0.50]           */
+/* History    : V1.00  (2018-10-15) [Hardware Manual Revision : 1.00]           */
 /* History    : V1.00A (2023-02-20) [Hardware Manual Revision : 1.00]           */
 /* History    : V1.00B (2023-03-08) [Hardware Manual Revision : 1.00]           */
+/* History    : V1.00C (2025-02-14) [Hardware Manual Revision : 1.00]           */
 /* Note       : This is a typical example.                                      */
-/*                                                                              */
-/*  Copyright(c) 2023 Renesas Electronics Corp.                                 */
-/*                  And Renesas Solutions Corp. ,All Rights Reserved.           */
 /*                                                                              */
 /********************************************************************************/
 /*                                                                              */

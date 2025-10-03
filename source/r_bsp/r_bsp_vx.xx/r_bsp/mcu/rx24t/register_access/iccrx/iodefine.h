@@ -1,5 +1,10 @@
 /* IAR file generator: v1.0 */
 
+/*
+* Copyright (c) 2015(2016-2025) Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /*********************************************************************************
 *
 * Device     : RX/RX200/RX24T
@@ -8,20 +13,19 @@
 *
 * Abstract   : Definition of I/O Register.
 *
-* History    : 0.5  (2015-06-15)  [Hardware Manual Revision : 0.50]
-*            : 1.0  (2015-10-26)  [Hardware Manual Revision : 1.00]
-*            : 1.0A (2016-02-26)  [Hardware Manual Revision : 1.00]
-*            : 1.0B (2016-08-03)  [Hardware Manual Revision : 1.00]
-*            : 1.0C (2016-11-24)  [Hardware Manual Revision : 1.10]
-*            : 1.0D (2016-12-06)  [Hardware Manual Revision : 1.10]
-*            : 1.0E (2017-01-06)  [Hardware Manual Revision : 1.10]
-*            : 1.0F (2017-01-25)  [Hardware Manual Revision : 1.10]
-*            : 1.0G (2017-01-26)  [Hardware Manual Revision : 1.10]
-*            : 1.0H (2017-01-26)  [Hardware Manual Revision : 1.10]
+* History    : 0.5   (2015-06-15)  [Hardware Manual Revision : 0.50]
+*            : 1.0   (2015-10-26)  [Hardware Manual Revision : 1.00]
+*            : 1.0A  (2016-02-26)  [Hardware Manual Revision : 1.00]
+*            : 1.0B  (2016-08-03)  [Hardware Manual Revision : 1.00]
+*            : 1.0C  (2016-11-24)  [Hardware Manual Revision : 1.10]
+*            : 1.0D  (2016-12-06)  [Hardware Manual Revision : 1.10]
+*            : 1.0E  (2017-01-06)  [Hardware Manual Revision : 1.10]
+*            : 1.0F  (2017-01-25)  [Hardware Manual Revision : 1.10]
+*            : 1.0G  (2017-01-26)  [Hardware Manual Revision : 1.10]
+*            : 1.0H  (2017-01-26)  [Hardware Manual Revision : 1.10]
+*            : 1.00I (2025-02-14)  [Hardware Manual Revision : 1.10]
 *
 * NOTE       : THIS IS A TYPICAL EXAMPLE.
-*
-* Copyright (C) 2016 (2015) Renesas Electronics Corporation.
 *
 *********************************************************************************/
 /********************************************************************************/

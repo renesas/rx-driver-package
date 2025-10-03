@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2024 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
 * File Name    : mcu_clocks.c
 * Description  : Contains clock specific routines
@@ -23,6 +10,8 @@
 /**********************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 31.05.2024 1.00     First Release
+*         : 05.07.2024 1.01     Added lpt_clock_source_select function.
+*         : 26.02.2025 1.02     Changed the disclaimer.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -84,6 +73,7 @@ static void operating_frequency_set (void);
 static void clock_source_select (void);
 #if BSP_CFG_BOOTLOADER_PROJECT == 0
 /* Disable the following functions in the bootloader project. */
+static void lpt_clock_source_select (void);
 #if BSP_CFG_CLKOUT_OUTPUT != 0
 /* CLKOUT initial configuration function declaration */
 static void bsp_clkout_initial_configure (void);
@@ -163,6 +153,8 @@ void mcu_clock_setup(void)
 
 #if BSP_CFG_BOOTLOADER_PROJECT == 0
 /* Disable the following functions in the bootloader project. */
+    lpt_clock_source_select();
+
 #if BSP_CFG_CLKOUT_OUTPUT != 0
     bsp_clkout_initial_configure();
 #endif /* BSP_CFG_CLKOUT_OUTPUT != 0 */
@@ -651,6 +643,41 @@ static void clock_source_select(void)
 
 #if BSP_CFG_BOOTLOADER_PROJECT == 0
     /* Disable the following functions in the bootloader project. */
+/***********************************************************************************************************************
+* Function name: lpt_clock_source_select
+* Description  : Enables clock sources for the lpt (if not already done) as chosen by the user.
+* Arguments    : none
+* Return value : none
+***********************************************************************************************************************/
+static void lpt_clock_source_select(void)
+{
+    /* Protect off. */
+    SYSTEM.PRCR.WORD = 0xA50F;
+
+    /* INITIALIZE AND SELECT LPT CLOCK SOURCE */
+
+#if (BSP_CFG_LPT_CLOCK_SOURCE == 0) || (BSP_CFG_LPT_CLOCK_SOURCE == 2)
+    /* Sub-clock or None is chosen. */
+    /* sub-clock oscillator already initialized in clock_source_select() */
+
+#elif (BSP_CFG_LPT_CLOCK_SOURCE == 1)
+    /* IWDT clock is chosen. */
+    /* IWDT clock oscillator already initialized in operating_frequency_set() */
+
+    /* Controls whether to stop the IWDT counter in a low power consumption state.
+    IWDTCSTPR - IWDT Count Stop Control Register
+    b7     SLCSTP   - Sleep Mode Count Stop Control - Count stop is disabled.
+    b6:b1  Reserved - These bits are read as 0. Writing to these bits has no effect. */
+    IWDT.IWDTCSTPR.BIT.SLCSTP = 0;
+#elif (BSP_CFG_LPT_CLOCK_SOURCE == 3)
+    /* LOCO is chosen. */
+    /* LOCO already initialized in clock_source_select() */
+#endif
+
+    /* Enable protect bit */
+    SYSTEM.PRCR.WORD = 0xA500;
+} /* End of function lpt_clock_source_select() */
+
 #if BSP_CFG_CLKOUT_OUTPUT != 0
 /***********************************************************************************************************************
 * Function name: bsp_clkout_initial_configure

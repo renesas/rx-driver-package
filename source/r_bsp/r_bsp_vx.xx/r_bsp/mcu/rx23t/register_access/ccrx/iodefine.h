@@ -1,3 +1,8 @@
+/*
+* Copyright (c) 2014(2015-2025) Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /*********************************************************************************
 *
 * Device     : RX/RX200/RX23T
@@ -6,15 +11,14 @@
 *
 * Abstract   : Definition of I/O Register.
 *
-* History    : 0.5  (2014-11-07)  [Hardware Manual Revision : 0.50]
-*            : 0.5A (2014-11-13)  [Hardware Manual Revision : 0.50]
-*            : 1.0  (2015-04-23)  [Hardware Manual Revision : 1.00]
-*            : 1.1  (2015-07-13)  [Hardware Manual Revision : 1.10]
-*            : 1.1A (2016-08-24)  [Hardware Manual Revision : 1.10]
+* History    : 0.5   (2014-11-07)  [Hardware Manual Revision : 0.50]
+*            : 0.5A  (2014-11-13)  [Hardware Manual Revision : 0.50]
+*            : 1.0   (2015-04-23)  [Hardware Manual Revision : 1.00]
+*            : 1.1   (2015-07-13)  [Hardware Manual Revision : 1.10]
+*            : 1.1A  (2016-08-24)  [Hardware Manual Revision : 1.10]
+*            : 1.10B (2025-02-14)  [Hardware Manual Revision : 1.10]
 *
 * NOTE       : THIS IS A TYPICAL EXAMPLE.
-*
-* Copyright (C) 2015 (2014) Renesas Electronics Corporation.
 *
 *********************************************************************************/
 /********************************************************************************/

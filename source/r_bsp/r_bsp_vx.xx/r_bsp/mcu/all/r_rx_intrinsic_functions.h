@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
 * File Name    : r_rx_intrinsic_functions.h
 * Description  : This is a file for integrating the definitions of built-in functions that differ for each compilers.
@@ -46,6 +33,71 @@
 *                               - R_BSP_ATAN2HYPOTFX
 *                               - R_BSP_ATAN2FX
 *                               - R_BSP_HYPOTFX
+*                               - R_BSP_CalcSine_Cosine_Fpn
+*                               - R_BSP_CalcSine_Fpn
+*                               - R_BSP_CalcCosine_Fpn
+*                               - R_BSP_CalcAtan_SquareRoot_Fpn
+*                               - R_BSP_CalcAtan_Fpn
+*                               - R_BSP_CalcSquareRoot_Fpn
+*         : 26.02.2025 1.15     Changed the disclaimer.
+*         : 28.05.2025 1.16     Added compile switches to enable the following functions in GNUC and ICCRX only.
+*                               - R_BSP_ChangeToUserMode
+*                               - R_BSP_BitSet
+*                               - R_BSP_BitClear
+*                               - R_BSP_BitReverse
+*                               Added compile switches to enable the following functions in ICCRX only.
+*                               - R_BSP_MoveToAccHiLong
+*                               - R_BSP_MoveToAccLoLong
+*                               - R_BSP_MoveFromAccHiLong
+*                               - R_BSP_MoveFromAccMiLong
+*                               - R_BSP_SetBPSW
+*                               - R_BSP_GetBPSW
+*                               - R_BSP_SetBPC
+*                               - R_BSP_GetBPC
+*                               - R_BSP_SetEXTB
+*                               - R_BSP_GetEXTB
+*                               Changed the followind definition of Double-Precision Floating-Point for ICCRX
+*                               to compiler intrinsic functions.
+*                               - R_BSP_SET_DPSW
+*                               - R_BSP_GET_DPSW
+*                               - R_BSP_SET_DECNT
+*                               - R_BSP_GET_DECNT
+*                               - R_BSP_GET_DEPC
+*                               Changed the followind definition of the trigonometric function unit for ICCRX
+*                               to compiler intrinsic functions.
+*                               - R_BSP_SINCOSFX
+*                               - R_BSP_SINFX
+*                               - R_BSP_COSFX
+*                               - R_BSP_ATAN2HYPOTFX
+*                               - R_BSP_ATAN2FX
+*                               - R_BSP_HYPOTFX
+*                               Changed the followind definition of Double-Precision Floating-Point for GNUC
+*                               to compiler intrinsic functions.
+*                               - R_BSP_SET_DPSW
+*                               - R_BSP_GET_DPSW
+*                               - R_BSP_SET_DECNT
+*                               - R_BSP_GET_DECNT
+*                               - R_BSP_GET_DEPC
+*                               Changed the followind definition of the trigonometric function unit for GNUC
+*                               to compiler intrinsic functions.
+*                               - R_BSP_INIT_TFU
+*                               - R_BSP_SINCOSF
+*                               - R_BSP_ATAN2HYPOTF
+*                               - R_BSP_SINCOSFX
+*                               - R_BSP_SINFX
+*                               - R_BSP_COSFX
+*                               - R_BSP_ATAN2HYPOTFX
+*                               - R_BSP_ATAN2FX
+*                               - R_BSP_HYPOTFX
+*                               Deleted the following intrinsic functions.
+*                               - R_BSP_SetDPSW
+*                               - R_BSP_GetDPSW
+*                               - R_BSP_SetDECNT
+*                               - R_BSP_GetDECNT
+*                               - R_BSP_GetDEPC
+*                               - R_BSP_InitTFU
+*                               - R_BSP_CalcSine_Cosine
+*                               - R_BSP_CalcAtan_SquareRoot
 *                               - R_BSP_CalcSine_Cosine_Fpn
 *                               - R_BSP_CalcSine_Fpn
 *                               - R_BSP_CalcCosine_Fpn
@@ -378,7 +430,7 @@ Macro definitions
 
 /* void __set_interrupt_table(unsigned long address) */
 #define R_BSP_SET_INTB(x)    __set_interrupt_table((unsigned long)(x))
-/* unsigned long __get_interrupt_table(void); */
+/* unsigned long __get_interrupt_table(void) */
 #define R_BSP_GET_INTB()     (void *)__get_interrupt_table()
 
 #endif
@@ -650,17 +702,17 @@ Macro definitions
 
 #elif defined(__GNUC__)
 
-/* void R_BSP_SetDPSW(uint32_t data) (This macro uses API function of BSP.) */
-#define R_BSP_SET_DPSW(x)    R_BSP_SetDPSW((uint32_t)(x))
-/* uint32_t R_BSP_GetDPSW(void) (This macro uses API function of BSP.) */
-#define R_BSP_GET_DPSW()     R_BSP_GetDPSW()
+/* void __builtin_rx_mvtdc(int, int) */
+#define R_BSP_SET_DPSW(x)    __builtin_rx_mvtdc(0x0, (int)(x))
+/* int __builtin_rx_mvfdc(int) */
+#define R_BSP_GET_DPSW()     (unsigned long)__builtin_rx_mvfdc(0x0)
 
 #elif defined(__ICCRX__)
 
-/* void R_BSP_SetDPSW(uint32_t data) (This macro uses API function of BSP.) */
-#define R_BSP_SET_DPSW(x)    R_BSP_SetDPSW((uint32_t)(x))
-/* uint32_t R_BSP_GetDPSW(void) (This macro uses API function of BSP.) */
-#define R_BSP_GET_DPSW()     R_BSP_GetDPSW()
+/* void __set_DPSW_register(unsigned long) */
+#define R_BSP_SET_DPSW(x)    __set_DPSW_register((unsigned long)(x))
+/* unsigned long __get_DPSW_register(void) */
+#define R_BSP_GET_DPSW()     __get_DPSW_register()
 
 #endif
 
@@ -674,17 +726,17 @@ Macro definitions
 
 #elif defined(__GNUC__)
 
-/* void R_BSP_SetDECNT(uint32_t data) (This macro uses API function of BSP.) */
-#define R_BSP_SET_DECNT(x)    R_BSP_SetDECNT((uint32_t)(x))
-/* uint32_t R_BSP_GetDECNT(void) (This macro uses API function of BSP.) */
-#define R_BSP_GET_DECNT()     R_BSP_GetDECNT()
+/* void __builtin_rx_mvtdc(int, int) */
+#define R_BSP_SET_DECNT(x)    __builtin_rx_mvtdc(0x2, (int)(x))
+/* int __builtin_rx_mvfdc(int) */
+#define R_BSP_GET_DECNT()     (unsigned long)__builtin_rx_mvfdc(0x2)
 
 #elif defined(__ICCRX__)
 
-/* void R_BSP_SetDECNT(uint32_t data) (This macro uses API function of BSP.) */
-#define R_BSP_SET_DECNT(x)    R_BSP_SetDECNT((uint32_t)(x))
-/* uint32_t R_BSP_GetDECNT(void) (This macro uses API function of BSP.) */
-#define R_BSP_GET_DECNT()     R_BSP_GetDECNT()
+/* void __set_DECNT_register(unsigned long) */
+#define R_BSP_SET_DECNT(x)    __set_DECNT_register((unsigned long)(x))
+/* unsigned long __get_DECNT_register(void) */
+#define R_BSP_GET_DECNT()     __get_DECNT_register()
 
 #endif
 
@@ -696,13 +748,13 @@ Macro definitions
 
 #elif defined(__GNUC__)
 
-/* void *R_BSP_GetDEPC(void) (This macro uses API function of BSP.) */
-#define R_BSP_GET_DEPC()     R_BSP_GetDEPC()
+/* int __builtin_rx_mvfdc(int) */
+#define R_BSP_GET_DEPC()     (void *)__builtin_rx_mvfdc(0x3)
 
 #elif defined(__ICCRX__)
 
-/* void *R_BSP_GetDEPC(void) (This macro uses API function of BSP.) */
-#define R_BSP_GET_DEPC()     R_BSP_GetDEPC()
+/* unsigned long __get_DEPC_register(void) */
+#define R_BSP_GET_DEPC()     (void *)__get_DEPC_register()
 
 #endif
 #endif /* __DPFPU */
@@ -710,6 +762,7 @@ Macro definitions
 
 /* ---------- Initializes the trigonometric function unit. ---------- */
 #ifdef BSP_MCU_TRIGONOMETRIC
+#ifdef __TFU
 #if BSP_MCU_TFU_VERSION == 1
 #if defined(__CCRX__)
 
@@ -718,8 +771,8 @@ Macro definitions
 
 #elif defined(__GNUC__)
 
-/* void R_BSP_InitTFU(void) (This macro uses API function of BSP.) */
-#define R_BSP_INIT_TFU()      R_BSP_InitTFU()
+/* void __init_tfu(void) */
+#define R_BSP_INIT_TFU()      __init_tfu()
 
 #elif defined(__ICCRX__)
 
@@ -738,8 +791,8 @@ Macro definitions
 
 #elif defined(__GNUC__)
 
-/* void R_BSP_CalcSine_Cosine(float f, float *sin, float *cos) (This macro uses API function of BSP.) */
-#define R_BSP_SINCOSF(x, y, z)    R_BSP_CalcSine_Cosine((float)(x), (float *)(y), (float *)(z))
+/* void __builtin_rx_sincosf(float value, float *sin, float *cos) */
+#define R_BSP_SINCOSF(x, y, z)    __builtin_rx_sincosf((float)(x), (float *)(y), (float *)(z))
 
 #elif defined(__ICCRX__)
 
@@ -757,9 +810,8 @@ Macro definitions
 
 #elif defined(__GNUC__)
 
-/* void R_BSP_CalcAtan_SquareRoot(float y, float x, float *atan2, float *hypot)
-   (This macro uses API function of BSP.) */
-#define R_BSP_ATAN2HYPOTF(w, x, y, z)    R_BSP_CalcAtan_SquareRoot((float)(w), (float)(x), (float *)(y), (float *)(z))
+/* void __builtin_rx_atan2hypotf(float y, float x, float *atan2, float *hypot) */
+#define R_BSP_ATAN2HYPOTF(w, x, y, z)    __builtin_rx_atan2hypotf((float)(w), (float)(x), (float *)(y), (float *)(z))
 
 #elif defined(__ICCRX__)
 
@@ -782,13 +834,13 @@ Macro definitions
 
 #elif defined(__GNUC__)
 
-/* void R_BSP_CalcSine_Cosine_Fpn(int32_t fx, int32_t *sin, int32_t *cos) (This macro uses API function of BSP.) */
-#define R_BSP_SINCOSFX(x, y, z)    R_BSP_CalcSine_Cosine_Fpn((int32_t)(x), (int32_t *)(y), (int32_t *)(z))
+/* void __builtin_rx_sincosfx(signed int value, signed int *sin, signed int *cos) */
+#define R_BSP_SINCOSFX(x, y, z)    __builtin_rx_sincosfx((signed int)(x), (signed int *)(y), (signed int *)(z))
 
 #elif defined(__ICCRX__)
 
-/* void R_BSP_CalcSine_Cosine_Fpn(int32_t fx, int32_t *sin, int32_t *cos) (This macro uses API function of BSP.) */
-#define R_BSP_SINCOSFX(x, y, z)    R_BSP_CalcSine_Cosine_Fpn((int32_t)(x), (int32_t *)(y), (int32_t *)(z))
+/* void __sincosfx(signed long fx, signed long *sin, signed long *cos) */
+#define R_BSP_SINCOSFX(x, y, z)    __sincosfx((signed long)(x), (signed long *)(y), (signed long *)(z))
 
 #endif
 
@@ -805,13 +857,13 @@ Macro definitions
 
 #elif defined(__GNUC__)
 
-/* int32_t R_BSP_CalcSine_Fpn(int32_t fx) (This macro uses API function of BSP.) */
-#define R_BSP_SINFX(x)    R_BSP_CalcSine_Fpn((int32_t)(x))
+/* signed int __builtin_rx_sinfx(signed int value) */
+#define R_BSP_SINFX(x)    (signed long)__builtin_rx_sinfx((signed int)(x))
 
 #elif defined(__ICCRX__)
 
-/* int32_t R_BSP_CalcSine_Fpn(int32_t fx) (This macro uses API function of BSP.) */
-#define R_BSP_SINFX(x)    R_BSP_CalcSine_Fpn((int32_t)(x))
+/* signed long __sinfx(signed long fx) */
+#define R_BSP_SINFX(x)    __sinfx((signed long)(x))
 
 #endif
 
@@ -828,13 +880,13 @@ Macro definitions
 
 #elif defined(__GNUC__)
 
-/* int32_t R_BSP_CalcCosine_Fpn(int32_t fx) (This macro uses API function of BSP.) */
-#define R_BSP_COSFX(x)    R_BSP_CalcCosine_Fpn((int32_t)(x))
+/* signed int __builtin_rx_cosfx(signed int value) */
+#define R_BSP_COSFX(x)    (signed long)__builtin_rx_cosfx((signed int)(x))
 
 #elif defined(__ICCRX__)
 
-/* int32_t R_BSP_CalcCosine_Fpn(int32_t fx) (This macro uses API function of BSP.) */
-#define R_BSP_COSFX(x)    R_BSP_CalcCosine_Fpn((int32_t)(x))
+/* signed long __cosfx(signed long fx) */
+#define R_BSP_COSFX(x)    __cosfx((signed long)(x))
 
 #endif
 
@@ -851,15 +903,13 @@ Macro definitions
 
 #elif defined(__GNUC__)
 
-/* void R_BSP_CalcAtan_SquareRoot_Fpn(int32_t y, int32_t x, int32_t *atan2, int32_t *hypot)
-   (This macro uses API function of BSP.) */
-#define R_BSP_ATAN2HYPOTFX(w, x, y, z)    R_BSP_CalcAtan_SquareRoot_Fpn((int32_t)(w), (int32_t)(x), (int32_t *)(y), (int32_t *)(z))
+/* void __builtin_rx_atan2hypotfx(signed int y, signed int x, signed int *atan2, signed int *hypot) */
+#define R_BSP_ATAN2HYPOTFX(w, x, y, z)    __builtin_rx_atan2hypotfx((signed int)(w), (signed int)(x), (signed int *)(y), (signed int *)(z))
 
 #elif defined(__ICCRX__)
 
-/* void R_BSP_CalcAtan_SquareRoot_Fpn(int32_t y, int32_t x, int32_t *atan2, int32_t *hypot)
-   (This macro uses API function of BSP.) */
-#define R_BSP_ATAN2HYPOTFX(w, x, y, z)    R_BSP_CalcAtan_SquareRoot_Fpn((int32_t)(w), (int32_t)(x), (int32_t *)(y), (int32_t *)(z))
+/* void __atan2hypotfx(signed long y, signed long x, signed long *atan2, signed long *hypo */
+#define R_BSP_ATAN2HYPOTFX(w, x, y, z)    __atan2hypotfx((signed long)(w), (signed long)(x), (signed long *)(y), (signed long *)(z))
 
 #endif
 
@@ -876,13 +926,13 @@ Macro definitions
 
 #elif defined(__GNUC__)
 
-/* int32_t R_BSP_CalcAtan_Fpn(int32_t y, int32_t x) (This macro uses API function of BSP.) */
-#define R_BSP_ATAN2FX(x, y)    R_BSP_CalcAtan_Fpn((int32_t)(x), (int32_t)(y))
+/* signed int __builtin_rx_atan2fx(signed int y, signed int x) */
+#define R_BSP_ATAN2FX(x, y)    (signed long)__builtin_rx_atan2fx((signed int)(x), (signed int)(y))
 
 #elif defined(__ICCRX__)
 
-/* int32_t R_BSP_CalcAtan_Fpn(int32_t y, int32_t x) (This macro uses API function of BSP.) */
-#define R_BSP_ATAN2FX(x, y)    R_BSP_CalcAtan_Fpn((int32_t)(x), (int32_t)(y))
+/* signed long __atan2fx(signed long y, signed long x) */
+#define R_BSP_ATAN2FX(x, y)    __atan2fx((signed long)(x), (signed long)(y))
 
 #endif
 
@@ -899,17 +949,18 @@ Macro definitions
 
 #elif defined(__GNUC__)
 
-/* int32_t R_BSP_CalcSquareRoot_Fpn(int32_t x, int32_t y) (This macro uses API function of BSP.) */
-#define R_BSP_HYPOTFX(x, y)    R_BSP_CalcSquareRoot_Fpn((int32_t)(x), (int32_t)(y))
+/* signed int __builtin_rx_hypotfx(signed int x, signed int y) */
+#define R_BSP_HYPOTFX(x, y)    (signed long)__builtin_rx_hypotfx((signed int)(x), (signed int)(y))
 
 #elif defined(__ICCRX__)
 
-/* int32_t R_BSP_CalcSquareRoot_Fpn(int32_t x, int32_t y) (This macro uses API function of BSP.) */
-#define R_BSP_HYPOTFX(x, y)    R_BSP_CalcSquareRoot_Fpn((int32_t)(x), (int32_t)(y))
+/* signed long __hypotfx(signed long x, signed long y) */
+#define R_BSP_HYPOTFX(x, y)    __hypotfx((signed long)(x), (signed long)(y))
 
 #endif
 
 #endif /* BSP_MCU_TFU_VERSION == 2 */
+#endif /* __TFU */
 #endif /* BSP_MCU_TRIGONOMETRIC */
 
 /***********************************************************************************************************************
@@ -939,9 +990,17 @@ signed long long R_BSP_SignedMultiplication(signed long data1, signed long data2
 unsigned long long R_BSP_UnsignedMultiplication(unsigned long data1, unsigned long data2);
 void R_BSP_SetACC(signed long long data);
 signed long long R_BSP_GetACC(void);
+R_BSP_ATTRIB_INLINE_ASM void R_BSP_ChangeToUserMode(void);
+R_BSP_ATTRIB_INLINE_ASM void R_BSP_BitSet(uint8_t *data, uint32_t bit);
+R_BSP_ATTRIB_INLINE_ASM void R_BSP_BitClear(uint8_t *data, uint32_t bit);
+R_BSP_ATTRIB_INLINE_ASM void R_BSP_BitReverse(uint8_t *data, uint32_t bit);
 #endif /* defined(__GNUC__) || defined(__ICCRX__)  */
 
-R_BSP_ATTRIB_INLINE_ASM void R_BSP_ChangeToUserMode(void);
+#if defined(__ICCRX__)
+R_BSP_ATTRIB_INLINE_ASM void R_BSP_MoveToAccHiLong(int32_t data);
+R_BSP_ATTRIB_INLINE_ASM void R_BSP_MoveToAccLoLong(int32_t data);
+int32_t R_BSP_MoveFromAccHiLong(void);
+int32_t R_BSP_MoveFromAccMiLong(void);
 R_BSP_ATTRIB_INLINE_ASM void R_BSP_SetBPSW(uint32_t data);
 uint32_t R_BSP_GetBPSW(void);
 R_BSP_ATTRIB_INLINE_ASM void R_BSP_SetBPC(void * data);
@@ -950,41 +1009,7 @@ void *R_BSP_GetBPC(void);
 R_BSP_ATTRIB_INLINE_ASM void R_BSP_SetEXTB(void * data);
 void *R_BSP_GetEXTB(void);
 #endif /* BSP_MCU_EXCEPTION_TABLE */
-R_BSP_ATTRIB_INLINE_ASM void R_BSP_BitSet(uint8_t *data, uint32_t bit);
-R_BSP_ATTRIB_INLINE_ASM void R_BSP_BitClear(uint8_t *data, uint32_t bit);
-R_BSP_ATTRIB_INLINE_ASM void R_BSP_BitReverse(uint8_t *data, uint32_t bit);
-R_BSP_ATTRIB_INLINE_ASM void R_BSP_MoveToAccHiLong(int32_t data);
-R_BSP_ATTRIB_INLINE_ASM void R_BSP_MoveToAccLoLong(int32_t data);
-int32_t R_BSP_MoveFromAccHiLong(void);
-int32_t R_BSP_MoveFromAccMiLong(void);
-#ifdef BSP_MCU_DOUBLE_PRECISION_FLOATING_POINT
-#ifdef __DPFPU
-R_BSP_ATTRIB_INLINE_ASM void R_BSP_SetDPSW(uint32_t data);
-uint32_t R_BSP_GetDPSW(void);
-R_BSP_ATTRIB_INLINE_ASM void R_BSP_SetDECNT(uint32_t data);
-uint32_t R_BSP_GetDECNT(void);
-void *R_BSP_GetDEPC(void);
-#endif
-#endif
-#ifdef BSP_MCU_TRIGONOMETRIC
-#ifdef __TFU
-#if BSP_MCU_TFU_VERSION == 1
-R_BSP_ATTRIB_INLINE_ASM void R_BSP_InitTFU(void);
-#endif /* BSP_MCU_TFU_VERSION == 1 */
-#ifdef __FPU
-R_BSP_ATTRIB_INLINE_ASM void R_BSP_CalcSine_Cosine(float f, float *sin, float *cos);
-R_BSP_ATTRIB_INLINE_ASM void R_BSP_CalcAtan_SquareRoot(float y, float x, float *atan2, float *hypot);
-#endif /* __FPU */
-#if BSP_MCU_TFU_VERSION == 2
-R_BSP_ATTRIB_INLINE_ASM void R_BSP_CalcSine_Cosine_Fpn(int32_t f, int32_t *sin, int32_t *cos);
-int32_t R_BSP_CalcSine_Fpn(int32_t fx);
-int32_t R_BSP_CalcCosine_Fpn(int32_t fx);
-R_BSP_ATTRIB_INLINE_ASM void R_BSP_CalcAtan_SquareRoot_Fpn(int32_t y, int32_t x, int32_t *atan2, int32_t *hypot);
-int32_t R_BSP_CalcAtan_Fpn(int32_t y, int32_t x);
-int32_t R_BSP_CalcSquareRoot_Fpn(int32_t y, int32_t x);
-#endif /* BSP_MCU_TFU_VERSION == 2 */
-#endif /* __TFU */
-#endif
+#endif /* defined(__ICCRX__) */
 
 /* End of multiple inclusion prevention macro */
 #endif  /* R_RX_INTRINSIC_FUNCTIONS_H */

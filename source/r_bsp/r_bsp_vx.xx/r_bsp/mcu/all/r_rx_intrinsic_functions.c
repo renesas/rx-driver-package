@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
 * File Name    : r_rx_intrinsic_functions.c
 * Description  : Defines built-in functions that are in CCRX but not in the GCC and IAR compiler.
@@ -50,6 +37,50 @@
 *                               - bsp_calc_cosine_fsp
 *                               - bsp_calc_atan_fsp
 *                               - bsp_calc_squareroot_fsp
+*         : 26.02.2025 1.06     Changed the disclaimer.
+*         : 28.05.2025 1.07     Added compile switches to enable the following functions in GNUC and ICCRX only.
+*                               - R_BSP_ChangeToUserMode
+*                               - R_BSP_BitSet
+*                               - R_BSP_BitClear
+*                               - R_BSP_BitReverse
+*                               Added compile switches to enable the following functions in ICCRX only.
+*                               - R_BSP_MoveToAccHiLong
+*                               - R_BSP_MoveToAccLoLong
+*                               - R_BSP_MoveFromAccHiLong
+*                               - R_BSP_MoveFromAccMiLong
+*                               - bsp_move_from_acc_hi_long
+*                               - bsp_move_from_acc_mi_long
+*                               - R_BSP_SetBPSW
+*                               - R_BSP_GetBPSW
+*                               - R_BSP_SetBPC
+*                               - R_BSP_GetBPC
+*                               - R_BSP_SetEXTB
+*                               - R_BSP_GetEXTB
+*                               - bsp_get_bpsw
+*                               - bsp_get_bpc
+*                               - bsp_get_extb
+*                               Deleted the following intrinsic functions.
+*                               - R_BSP_SetDPSW
+*                               - R_BSP_GetDPSW
+*                               - R_BSP_SetDECNT
+*                               - R_BSP_GetDECNT
+*                               - R_BSP_GetDEPC
+*                               - bsp_get_dpsw
+*                               - bsp_get_decnt
+*                               - bsp_get_depc
+*                               - R_BSP_InitTFU
+*                               - R_BSP_CalcSine_Cosine
+*                               - R_BSP_CalcAtan_SquareRoot
+*                               - R_BSP_CalcSine_Cosine_Fpn
+*                               - R_BSP_CalcSine_Fpn
+*                               - R_BSP_CalcCosine_Fpn
+*                               - R_BSP_CalcAtan_SquareRoot_Fpn
+*                               - R_BSP_CalcAtan_Fpn
+*                               - R_BSP_CalcSquareRoot_Fpn
+*                               - bsp_calc_sine_fsp
+*                               - bsp_calc_cosine_fsp
+*                               - bsp_calc_atan_fsp
+*                               - bsp_calc_squareroot_fsp
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -73,30 +104,18 @@ Exported global variables (to be accessed by other files)
 /***********************************************************************************************************************
 Private global variables and functions
 ***********************************************************************************************************************/
+#if defined(__ICCRX__)
 R_BSP_ATTRIB_STATIC_INLINE_ASM void bsp_get_bpsw(uint32_t *data);
 R_BSP_ATTRIB_STATIC_INLINE_ASM void bsp_get_bpc(uint32_t *data);
 #ifdef BSP_MCU_EXCEPTION_TABLE
 R_BSP_ATTRIB_STATIC_INLINE_ASM void bsp_get_extb(uint32_t *data);
 #endif /* BSP_MCU_EXCEPTION_TABLE */
+#endif /* defined(__ICCRX__) */
+
+#if defined(__GNUC__) || defined(__ICCRX__)
 R_BSP_ATTRIB_STATIC_INLINE_ASM void bsp_move_from_acc_hi_long(uint32_t *data);
 R_BSP_ATTRIB_STATIC_INLINE_ASM void bsp_move_from_acc_mi_long(uint32_t *data);
-#ifdef BSP_MCU_DOUBLE_PRECISION_FLOATING_POINT
-#ifdef __DPFPU
-R_BSP_ATTRIB_STATIC_INLINE_ASM void bsp_get_dpsw(uint32_t *data);
-R_BSP_ATTRIB_STATIC_INLINE_ASM void bsp_get_decnt(uint32_t *data);
-R_BSP_ATTRIB_STATIC_INLINE_ASM void bsp_get_depc(uint32_t *ret);
-#endif /* __DPFPU */
-#endif /* BSP_MCU_DOUBLE_PRECISION_FLOATING_POINT */
-#ifdef BSP_MCU_TRIGONOMETRIC
-#ifdef __TFU
-#if BSP_MCU_TFU_VERSION == 2
-R_BSP_ATTRIB_STATIC_INLINE_ASM void bsp_calc_sine_fsp(int32_t *ret, int32_t fx);
-R_BSP_ATTRIB_STATIC_INLINE_ASM void bsp_calc_cosine_fsp(int32_t *ret, int32_t fx);
-R_BSP_ATTRIB_STATIC_INLINE_ASM void bsp_calc_atan_fsp(int32_t *ret, int32_t y, int32_t x);
-R_BSP_ATTRIB_STATIC_INLINE_ASM void bsp_calc_squareroot_fsp(int32_t *ret, int32_t y, int32_t x);
-#endif /* BSP_MCU_TFU_VERSION == 2 */
-#endif /* __TFU */
-#endif /* BSP_MCU_TRIGONOMETRIC */
+#endif /* defined(__GNUC__) || defined(__ICCRX__)  */
 
 /***********************************************************************************************************************
 * Function Name: R_BSP_Max
@@ -300,6 +319,7 @@ unsigned long long R_BSP_UnsignedMultiplication(unsigned long data1, unsigned lo
 * Arguments    : none
 * Return value : none
 ***********************************************************************************************************************/
+#if defined(__GNUC__) || defined(__ICCRX__)
 R_BSP_PRAGMA_INLINE_ASM(R_BSP_ChangeToUserMode)
 void R_BSP_ChangeToUserMode(void)
 {
@@ -324,6 +344,7 @@ void R_BSP_ChangeToUserMode(void)
     R_BSP_ASM(    ;RTS                                                                                             )
     R_BSP_ASM_END
 } /* End of function R_BSP_ChangeToUserMode() */
+#endif /* defined(__GNUC__) || defined(__ICCRX__)  */
 
 /***********************************************************************************************************************
 * Function Name: R_BSP_SetACC
@@ -477,6 +498,7 @@ short R_BSP_MulAndAccOperation_FixedPoint2(short* data1, short* data2, unsigned 
 }
 #endif /* defined(__GNUC__) */
 
+#if defined(__ICCRX__)
 /***********************************************************************************************************************
 * Function Name: R_BSP_SetBPSW
 * Description  : Sets a value to BPSW.
@@ -638,7 +660,9 @@ void *R_BSP_GetEXTB(void)
     return (void *)ret;
 } /* End of function R_BSP_GetEXTB() */
 #endif /* BSP_MCU_EXCEPTION_TABLE */
+#endif /* defined(__ICCRX__) */
 
+#if defined(__ICCRX__)
 /***********************************************************************************************************************
 * Function Name: R_BSP_MoveToAccHiLong
 * Description  : This function moves the contents of src to the higher-order 32 bits of the accumulator.
@@ -742,7 +766,9 @@ int32_t R_BSP_MoveFromAccMiLong(void)
     bsp_move_from_acc_mi_long((uint32_t *)&ret);
     return ret;
 } /* End of function R_BSP_MoveFromAccMiLong() */
+#endif /* defined(__ICCRX__)  */
 
+#if defined(__GNUC__) || defined(__ICCRX__)
 /***********************************************************************************************************************
 * Function Name: R_BSP_BitSet
 * Description  : Sets the specified one bit in the specified 1-byte area to 1.
@@ -797,458 +823,5 @@ void R_BSP_BitReverse(uint8_t *data, uint32_t bit)
     R_BSP_ASM_END
 } /* End of function R_BSP_BitReverse() */
 
-#ifdef BSP_MCU_DOUBLE_PRECISION_FLOATING_POINT
-#ifdef __DPFPU
-/***********************************************************************************************************************
-* Function Name: R_BSP_SetDPSW
-* Description  : Sets a value to DPSW.
-* Arguments    : data - Value to be set.
-* Return Value : none
-***********************************************************************************************************************/
-R_BSP_PRAGMA_INLINE_ASM(R_BSP_SetDPSW)
-void R_BSP_SetDPSW(uint32_t data)
-{
-    R_BSP_ASM_INTERNAL_USED(data)
-
-    R_BSP_ASM_BEGIN
-    R_BSP_ASM(    MVTDC   R1, DPSW    )
-    R_BSP_ASM_END
-} /* End of function R_BSP_SetDPSW() */
-
-/***********************************************************************************************************************
-* Function Name: bsp_get_dpsw
-* Description  : Refers to the DPSW value.
-* Arguments    : ret - Return value address.
-* Return Value : none
-***********************************************************************************************************************/
-R_BSP_PRAGMA_STATIC_INLINE_ASM(bsp_get_dpsw)
-void bsp_get_dpsw(uint32_t *ret)
-{
-    R_BSP_ASM_INTERNAL_USED(ret)
-
-    R_BSP_ASM_BEGIN
-    R_BSP_ASM(    PUSH.L     R2           )
-    R_BSP_ASM(    MVFDC      DPSW, R2     )
-    R_BSP_ASM(    MOV.L      R2, [R1]     )
-    R_BSP_ASM(    POP        R2           )
-    R_BSP_ASM_END
-} /* End of function bsp_get_dpsw() */
-
-/***********************************************************************************************************************
-* Function Name: R_BSP_GetDPSW
-* Description  : Refers to the DPSW value.
-* Arguments    : none
-* Return Value : DPSW value.
-* Note         : This function exists to avoid code analysis errors. Because, when inline assembler function has
-*                a return value, the error of "No return, in function returning non-void" occurs.
-***********************************************************************************************************************/
-uint32_t R_BSP_GetDPSW(void)
-{
-    uint32_t ret;
-
-    /* Casting is valid because it matches the type to the right side or argument. */
-    bsp_get_dpsw((uint32_t *)&ret);
-    return ret;
-} /* End of function R_BSP_GetDPSW() */
-
-/***********************************************************************************************************************
-* Function Name: R_BSP_SetDECNT
-* Description  : Sets a value to DECNT.
-* Arguments    : data - Value to be set.
-* Return Value : none
-***********************************************************************************************************************/
-R_BSP_PRAGMA_INLINE_ASM(R_BSP_SetDECNT)
-void R_BSP_SetDECNT(uint32_t data)
-{
-    R_BSP_ASM_INTERNAL_USED(data)
-
-    R_BSP_ASM_BEGIN
-    R_BSP_ASM(    MVTDC   R1, DECNT    )
-    R_BSP_ASM_END
-} /* End of function R_BSP_SetDECNT() */
-
-/***********************************************************************************************************************
-* Function Name: bsp_get_decnt
-* Description  : Refers to the DECNT value.
-* Arguments    : ret - Return value address.
-* Return Value : none
-***********************************************************************************************************************/
-R_BSP_PRAGMA_STATIC_INLINE_ASM(bsp_get_decnt)
-void bsp_get_decnt(uint32_t *ret)
-{
-    R_BSP_ASM_INTERNAL_USED(ret)
-
-    R_BSP_ASM_BEGIN
-    R_BSP_ASM(    PUSH.L     R2           )
-    R_BSP_ASM(    MVFDC      DECNT, R2    )
-    R_BSP_ASM(    MOV.L      R2, [R1]     )
-    R_BSP_ASM(    POP        R2           )
-    R_BSP_ASM_END
-} /* End of function bsp_get_decnt() */
-
-/***********************************************************************************************************************
-* Function Name: R_BSP_GetDECNT
-* Description  : Refers to the DECNT value.
-* Arguments    : none
-* Return Value : DECNT value.
-* Note         : This function exists to avoid code analysis errors. Because, when inline assembler function has
-*                a return value, the error of "No return, in function returning non-void" occurs.
-***********************************************************************************************************************/
-uint32_t R_BSP_GetDECNT(void)
-{
-    uint32_t ret;
-
-    /* Casting is valid because it matches the type to the right side or argument. */
-    bsp_get_decnt((uint32_t *)&ret);
-    return ret;
-} /* End of function R_BSP_GetDECNT() */
-
-/***********************************************************************************************************************
-* Function Name: bsp_get_depc
-* Description  : Refers to the DEPC value.
-* Arguments    : ret - Return value address.
-* Return Value : none
-***********************************************************************************************************************/
-R_BSP_PRAGMA_STATIC_INLINE_ASM(bsp_get_depc)
-void bsp_get_depc(uint32_t *ret)
-{
-    R_BSP_ASM_INTERNAL_USED(ret)
-
-    R_BSP_ASM_BEGIN
-    R_BSP_ASM(    PUSH.L     R2           )
-    R_BSP_ASM(    MVFDC      DEPC, R2     )
-    R_BSP_ASM(    MOV.L      R2, [R1]     )
-    R_BSP_ASM(    POP        R2           )
-    R_BSP_ASM_END
-} /* End of function bsp_get_decnt() */
-
-/***********************************************************************************************************************
-* Function Name: R_BSP_GetDEPC
-* Description  : Refers to the DEPC value.
-* Arguments    : none
-* Return Value : DEPC value.
-* Note         : This function exists to avoid code analysis errors. Because, when inline assembler function has
-*                a return value, the error of "No return, in function returning non-void" occurs.
-***********************************************************************************************************************/
-void *R_BSP_GetDEPC(void)
-{
-    uint32_t ret;
-
-    /* Casting is valid because it matches the type to the right side or argument. */
-    bsp_get_depc((uint32_t *)&ret);
-    return (void *)ret;
-} /* End of function R_BSP_GetDECNT() */
-#endif /* __DPFPU */
-#endif /* BSP_MCU_DOUBLE_PRECISION_FLOATING_POINT */
-
-#ifdef BSP_MCU_TRIGONOMETRIC
-#ifdef __TFU
-#if BSP_MCU_TFU_VERSION == 1
-/***********************************************************************************************************************
-* Function Name: R_BSP_InitTFU
-* Description  : Initialize arithmetic unit for trigonometric functions.
-* Arguments    : none
-* Return Value : none
-***********************************************************************************************************************/
-R_BSP_PRAGMA_INLINE_ASM(R_BSP_InitTFU)
-void R_BSP_InitTFU(void)
-{
-    R_BSP_ASM_BEGIN
-    R_BSP_ASM(    PUSH.L    R1             )
-    R_BSP_ASM(    MOV.L     #81400H, R1    )
-    R_BSP_ASM(    MOV.B     #7, [R1]       )
-    R_BSP_ASM(    MOV.B     #7, 1[R1]      )
-    R_BSP_ASM(    POP       R1             )
-    R_BSP_ASM_END
-} /* End of function R_BSP_InitTFU() */
-#endif
-#ifdef __FPU
-/***********************************************************************************************************************
-* Function Name: R_BSP_CalcSine_Cosine
-* Description  : Uses the trigonometric function unit to calculate the sine and cosine of an angle at the same time
-*                (single precision).
-* Arguments    : f - Value in radians from which to calculate the sine and cosine
-*              : sin - Address for storing the result of the sine operation
-*              : cos - Address for storing the result of the cosine operation
-* Return Value : none
-***********************************************************************************************************************/
-R_BSP_PRAGMA_INLINE_ASM(R_BSP_CalcSine_Cosine)
-void R_BSP_CalcSine_Cosine(float f, float *sin, float *cos)
-{
-    R_BSP_ASM_BEGIN
-    R_BSP_ASM(    PUSH.L    R4             )
-    R_BSP_ASM(    MOV.L     #81410H, R4    )
-    R_BSP_ASM(    MOV.L     R1, 4[R4]      )
-    R_BSP_ASM(    MOV.L     4[R4], [R2]    )
-    R_BSP_ASM(    MOV.L     [R4], [R3]     )
-    R_BSP_ASM(    POP       R4             )
-    R_BSP_ASM_END
-} /* End of function R_BSP_CalcSine_Cosine() */
-
-/***********************************************************************************************************************
-* Function Name: R_BSP_CalcAtan_SquareRoot
-* Description  : Uses the trigonometric function unit to calculate the arc tangent of x and y and the square root of 
-*                the sum of squares of these values at the same time (single precision).
-* Arguments    : y - Coordinate y (the numerator of the tangent)
-*                x - Coordinate x (the denominator of the tangent)
-*                atan2 - Address for storing the result of the arc tangent operation for y/x
-*                hypot - Address for storing the result of the square root of the sum of squares of x and y
-* Return Value : none
-***********************************************************************************************************************/
-R_BSP_PRAGMA_INLINE_ASM(R_BSP_CalcAtan_SquareRoot)
-void R_BSP_CalcAtan_SquareRoot(float y, float x, float *atan2, float *hypot)
-{
-    R_BSP_ASM_INTERNAL_USED(y)
-    R_BSP_ASM_INTERNAL_USED(x)
-    R_BSP_ASM_INTERNAL_USED(atan2)
-    R_BSP_ASM_INTERNAL_USED(hypot)
-
-    R_BSP_ASM_BEGIN
-    R_BSP_ASM(    PUSHM     R5-R6              )
-    R_BSP_ASM(    MOV.L     #81418H, R5        )
-    R_BSP_ASM(    MOV.L     R2, [R5]           )
-    R_BSP_ASM(    MOV.L     R1, 4[R5]          )
-    R_BSP_ASM(    MOV.L     4[R5], [R3]        )
-    R_BSP_ASM(    MOV.L     [R5], R6           )
-    R_BSP_ASM(    FMUL      #3F1B74EEH, R6     )
-    R_BSP_ASM(    MOV.L     R6, [R4]           )
-    R_BSP_ASM(    POPM      R5-R6              )
-    R_BSP_ASM_END
-} /* End of function R_BSP_CalcAtan_SquareRoot() */
-#endif /* __FPU */
-
-#if BSP_MCU_TFU_VERSION == 2
-
-/***********************************************************************************************************************
-* Function Name: R_BSP_CalcSine_Cosine_Fpn
-* Description  : Uses the trigonometric function unit to calculate the sine and cosine of an angle.
-*                (fixed-point numbers)
-* Arguments    : f - Value in radians from which to calculate the sine and cosine
-*              : sin - Address for storing the result of the sine operation
-*              : cos - Address for storing the result of the cosine operation
-* Return Value : none
-***********************************************************************************************************************/
-R_BSP_PRAGMA_INLINE_ASM(R_BSP_CalcSine_Cosine_Fpn)
-void R_BSP_CalcSine_Cosine_Fpn(int32_t f, int32_t *sin, int32_t *cos)
-{
-    R_BSP_ASM_INTERNAL_USED(f)
-    R_BSP_ASM_INTERNAL_USED(sin)
-    R_BSP_ASM_INTERNAL_USED(cos)
-
-    R_BSP_ASM_BEGIN
-    R_BSP_ASM(    PUSH.L    R4              )
-    R_BSP_ASM(    PUSH.L    R14             )
-    R_BSP_ASM(    MOV.L     #81420H, R4     )
-    R_BSP_ASM(    MOV.L     R1, 4[R4]       )
-    R_BSP_ASM(    MOV.L     4[R4], R1       )
-    R_BSP_ASM(    MOV.L     [R4], R14       )
-    R_BSP_ASM(    MOV.L     R1, [R2]        )
-    R_BSP_ASM(    MOV.L     R14, [R3]       )
-    R_BSP_ASM(    POP       R4              )
-    R_BSP_ASM(    POP       R14             )
-    R_BSP_ASM_END
-} /* End of function R_BSP_CalcSine_Cosine_Fpn() */
-
-/***********************************************************************************************************************
-* Function Name: bsp_calc_sine_fsp
-* Description  : Uses the trigonometric function unit to calculate the sine of an angle.
-*                (fixed-point numbers)
-* Arguments    : ret - Return value address.
-*                fx - Value in radians from which to calculate the sine
-* Return Value : none
-***********************************************************************************************************************/
-R_BSP_PRAGMA_STATIC_INLINE_ASM(bsp_calc_sine_fsp)
-void bsp_calc_sine_fsp(int32_t *ret, int32_t fx)
-{
-    R_BSP_ASM_INTERNAL_USED(ret)
-    R_BSP_ASM_INTERNAL_USED(fx)
-
-    R_BSP_ASM_BEGIN
-    R_BSP_ASM(    PUSH.L    R14             )
-    R_BSP_ASM(    MOV.L     #81424H, R14    )
-    R_BSP_ASM(    MOV.L     R2, [R14]       )
-    R_BSP_ASM(    MOV.L     [R14], [R1]     )
-    R_BSP_ASM(    POP       R14             )
-    R_BSP_ASM_END
-} /* End of function bsp_calc_sine_fsp() */
-
-/***********************************************************************************************************************
-* Function Name: R_BSP_CalcSine_Fpn
-* Description  : Uses the trigonometric function unit to calculate the sine of an angle.
-*                (fixed-point numbers)
-* Arguments    : fx - Value in radians from which to calculate the sine
-* Return Value : Sine calculation result
-***********************************************************************************************************************/
-int32_t R_BSP_CalcSine_Fpn(int32_t fx)
-{
-    int32_t ret;
-
-    bsp_calc_sine_fsp((int32_t *)&ret, fx);
-
-    return ret;
-} /* End of function R_BSP_CalcSine_Fpn() */
-
-/***********************************************************************************************************************
-* Function Name: bsp_calc_cosine_fsp
-* Description  : Uses the trigonometric function unit to calculate the cosine of an angle.
-*                (fixed-point numbers)
-* Arguments    : ret - Return value address.
-*                fx - Value in radians from which to calculate the cosine
-* Return Value : none
-***********************************************************************************************************************/
-R_BSP_PRAGMA_STATIC_INLINE_ASM(bsp_calc_cosine_fsp)
-void bsp_calc_cosine_fsp(int32_t *ret, int32_t fx)
-{
-    R_BSP_ASM_INTERNAL_USED(ret)
-    R_BSP_ASM_INTERNAL_USED(fx)
-
-    R_BSP_ASM_BEGIN
-    R_BSP_ASM(    PUSH.L    R3              )
-    R_BSP_ASM(    MOV.L     #81420H, R3     )
-    R_BSP_ASM(    MOV.L     R2, 4[R3]       )
-    R_BSP_ASM(    MOV.L     [R3], [R1]      )
-    R_BSP_ASM(    POP       R3              )
-    R_BSP_ASM_END
-} /* End of function bsp_calc_cosine_fsp() */
-
-/***********************************************************************************************************************
-* Function Name: R_BSP_CalcCosine_Fpn
-* Description  : Uses the trigonometric function unit to calculate the cosine of an angle.
-*                (fixed-point numbers)
-* Arguments    : fx - Value in radians from which to calculate the cosine
-* Return Value : Cosine calculation result
-***********************************************************************************************************************/
-int32_t R_BSP_CalcCosine_Fpn(int32_t fx)
-{
-    int32_t ret;
-
-    bsp_calc_cosine_fsp((int32_t *)&ret, fx);
-
-    return ret;
-} /* End of function R_BSP_CalcCosine_Fpn() */
-
-/***********************************************************************************************************************
-* Function Name: R_BSP_CalcAtan_SquareRoot_Fpn
-* Description  : Uses the trigonometric function unit to calculate the arc tangent of x and y and the square root of 
-*                the sum of squares of these values. (fixed-point numbers)
-* Arguments    : y - Coordinate y (the numerator of the tangent)
-*                x - Coordinate x (the denominator of the tangent)
-*                atan2 - Address for storing the result of the arc tangent operation for y/x
-*                hypot - Address for storing the result of the square root of the sum of squares of x and y
-* Return Value : none
-***********************************************************************************************************************/
-R_BSP_PRAGMA_INLINE_ASM(R_BSP_CalcAtan_SquareRoot_Fpn)
-void R_BSP_CalcAtan_SquareRoot_Fpn(int32_t y, int32_t x, int32_t *atan2, int32_t *hypot)
-{
-    R_BSP_ASM_INTERNAL_USED(y)
-    R_BSP_ASM_INTERNAL_USED(x)
-    R_BSP_ASM_INTERNAL_USED(atan2)
-    R_BSP_ASM_INTERNAL_USED(hypot)
-
-    R_BSP_ASM_BEGIN
-    R_BSP_ASM(    PUSH.L     R5                 )
-    R_BSP_ASM(    PUSH.L     R14                )
-    R_BSP_ASM(    PUSH.L     R15                )
-    R_BSP_ASM(    MOV.L      R4, R14            )
-    R_BSP_ASM(    MOV.L      #81428H, R15       )
-    R_BSP_ASM(    MOV.L      R2, [R15]          )
-    R_BSP_ASM(    MOV.L      #9B74EDA8H, R4     )
-    R_BSP_ASM(    MOV.L      R1, 4[R15]         )
-    R_BSP_ASM(    EMULU      [R15].L, R4        )
-    R_BSP_ASM(    MOV.L      4[R15], [R3]       )
-    R_BSP_ASM(    MOV.L      R5, [R14]          )
-    R_BSP_ASM(    POP        R15                )
-    R_BSP_ASM(    POP        R14                )
-    R_BSP_ASM(    POP        R5                 )
-    R_BSP_ASM_END
-} /* End of function R_BSP_CalcAtan_SquareRoot_Fpn() */
-
-/***********************************************************************************************************************
-* Function Name: bsp_calc_atan_fsp
-* Description  : Uses the trigonometric function unit to calculate the arc tangent of x and y. (fixed-point numbers)
-* Arguments    : ret - Return value address.
-*                y - Coordinate y (the numerator of the tangent)
-*                x - Coordinate x (the denominator of the tangent)
-* Return Value : none
-***********************************************************************************************************************/
-R_BSP_PRAGMA_STATIC_INLINE_ASM(bsp_calc_atan_fsp)
-void bsp_calc_atan_fsp(int32_t *ret, int32_t y, int32_t x)
-{
-    R_BSP_ASM_INTERNAL_USED(ret)
-    R_BSP_ASM_INTERNAL_USED(y)
-    R_BSP_ASM_INTERNAL_USED(x)
-
-    R_BSP_ASM_BEGIN
-    R_BSP_ASM(    PUSH.L    R14             )
-    R_BSP_ASM(    MOV.L     #81428H, R14    )
-    R_BSP_ASM(    MOV.L     R3, [R14+]      )
-    R_BSP_ASM(    MOV.L     R2, [R14]       )
-    R_BSP_ASM(    MOV.L     [R14], [R1]     )
-    R_BSP_ASM(    POP       R14             )
-    R_BSP_ASM_END
-} /* End of function bsp_calc_atan_fsp() */
-
-/***********************************************************************************************************************
-* Function Name: R_BSP_CalcAtan_Fpn
-* Description  : Uses the trigonometric function unit to calculate the arc tangent of x and y. (fixed-point numbers)
-* Arguments    : y - Coordinate y (the numerator of the tangent)
-*                x - Coordinate x (the denominator of the tangent)
-* Return Value : Arc tangent calculation result
-***********************************************************************************************************************/
-int32_t R_BSP_CalcAtan_Fpn(int32_t y, int32_t x)
-{
-    int32_t ret;
-
-    bsp_calc_atan_fsp((int32_t *)&ret, y, x);
-
-    return ret;
-} /* End of function R_BSP_CalcAtan_Fpn() */
-
-/***********************************************************************************************************************
-* Function Name: R_BSP_CalcSquareRoot_fpn
-* Description  : Uses the trigonometric function unit to calculate the square root of the 
-*                sum of squares of x and y. (fixed-point numbers)
-* Arguments    : ret - Return value address.
-*                y - Coordinate y (the numerator of the tangent)
-*                x - Coordinate x (the denominator of the tangent)
-* Return Value : Result of calculation of the square root of the sum of squares of x and y.
-***********************************************************************************************************************/
-R_BSP_PRAGMA_STATIC_INLINE_ASM(bsp_calc_squareroot_fsp)
-void bsp_calc_squareroot_fsp(int32_t *ret, int32_t y, int32_t x)
-{
-    R_BSP_ASM_INTERNAL_USED(ret)
-    R_BSP_ASM_INTERNAL_USED(y)
-    R_BSP_ASM_INTERNAL_USED(x)
-
-    R_BSP_ASM_BEGIN
-    R_BSP_ASM(    PUSHM     R4-R5              )
-    R_BSP_ASM(    MOV.L     #81428H, R5        )
-    R_BSP_ASM(    MOV.L     R2, [R5]           )
-    R_BSP_ASM(    MOV.L     #9B74EDA8H, R4     )
-    R_BSP_ASM(    MOV.L     R3, 4[R5]          )
-    R_BSP_ASM(    EMULU     [R5].L, R4         )
-    R_BSP_ASM(    MOV.L     R5, [R1]           )
-    R_BSP_ASM(    POPM      R4-R5              )
-    R_BSP_ASM_END
-} /* End of function bsp_calc_squareroot_fsp() */
-
-/***********************************************************************************************************************
-* Function Name: R_BSP_CalcSquareRoot_fpn
-* Description  : Uses the trigonometric function unit to calculate the square root of the 
-*                sum of squares of x and y. (fixed-point numbers)
-* Arguments    : y - Coordinate y (the numerator of the tangent)
-*                x - Coordinate x (the denominator of the tangent)
-* Return Value : Result of calculation of the square root of the sum of squares of x and y.
-***********************************************************************************************************************/
-int32_t R_BSP_CalcSquareRoot_Fpn(int32_t y, int32_t x)
-{
-    int32_t ret;
-
-    bsp_calc_squareroot_fsp((int32_t *)&ret, y, x);
-
-    return ret;
-} /* End of function R_BSP_CalcSquareRoot_Fpn() */
-#endif /* BSP_MCU_TFU_VERSION == 2 */
-#endif /* __TFU */
-#endif /* BSP_MCU_TRIGONOMETRIC */
+#endif /* defined(__GNUC__) || defined(__ICCRX__)  */
 

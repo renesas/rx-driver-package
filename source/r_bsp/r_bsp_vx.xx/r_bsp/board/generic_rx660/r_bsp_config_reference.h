@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2022 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
 * File Name    : r_bsp_config_reference.h
 * Device(s)    : RX660
@@ -37,6 +24,15 @@
 *                               - BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY
 *                               - BSP_CFG_EXTERNAL_BUS_PRIORITY
 *                               - BSP_CFG_BOOTLOADER_PROJECT
+*         : 27.11.2024 1.04     Changed comment of BSP_CFG_RTC_ENABLE.
+*         : 26.02.2025 1.05     Changed the disclaimer.
+*         : 28.05.2025 1.06     Added the following macro definitions.
+*                               - BSP_CFG_LOW_LEVEL_INTERFACE_STDIO_ENABLE
+*                               - BSP_CFG_LOW_LEVEL_INTERFACE_SBRK_ENABLE
+*                               - BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE
+*                               - BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE
+*                               - BSP_CFG_USER_ENTER_CRITICAL_FUNCTION
+*                               - BSP_CFG_USER_EXIT_CRITICAL_FUNCTION
 ***********************************************************************************************************************/
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
 #define R_BSP_CONFIG_REF_HEADER_FILE
@@ -299,10 +295,11 @@ Configuration Options
 */
 #define BSP_CFG_MAIN_CLOCK_SOURCE       (0)
 
-/* The sub-clock oscillation control for using the RTC.
-   When '1' is selected, the registers related to RTC are initialized and the sub-clock oscillator is operated.
+/* Defines whether to use the RTC or not.
+   This setting will initialize the RTC related registers.
    0 = The RTC is not to be used.
    1 = The RTC is to be used.
+   When using RTC FIT or RTC CG, the Smart Configurator sets this to "1". Set it to "1" when using RTC.
 */
 #define BSP_CFG_RTC_ENABLE              (0)
 
@@ -717,6 +714,59 @@ Configuration Options
    NOTE: Not normally used. Set this to "1" only in the bootloader project.
 */
 #define BSP_CFG_BOOTLOADER_PROJECT    (0)
+
+/* Defines whether to enable the following low-level interface functions for standard Input/Output in the BSP.
+   CCRX: open, close, write, read, lseek
+   GCC: write, read, close, lseek, fstat, isatty
+   0: Disables low-level interface functions for standard Input/Output in the BSP.
+   1: Enables low-level interface functions for standard Input/Output in the BSP.
+   NOTE: If you disable this setting and use the low-level interface functions, 
+         please implement these low-level interface functions yourself.
+   NOTE: This setting is available only when using CCRX and GCC.
+*/
+#define BSP_CFG_LOW_LEVEL_INTERFACE_STDIO_ENABLE   (1)
+
+/* Defines whether to enable the low-level interface functions (sbrk) for memory management in the BSP.
+   0: Disables the low-level interface function (sbrk) for memory management in the BSP.
+   1: Enables the low-level interface function (sbrk) for memory management in the BSP.
+   NOTE: If you disable this setting and use the low-level interface functions(sbrk),
+         please implement these low-level interface functions yourself.
+   NOTE: This setting is available only when using CCRX and GCC.
+*/
+#define BSP_CFG_LOW_LEVEL_INTERFACE_SBRK_ENABLE   (1)
+
+/* Defines whether to enable the low-level interface functions (errno_addr, wait_sem, signal_sem) 
+   for the reentrant library in the BSP.
+   0: Disables the low-level interface functions (errno_addr, wait_sem, signal_sem) for the reentrant library 
+      in the BSP.
+   1: Enables the low-level interface functions (errno_addr, wait_sem, signal_sem) for the reentrant library 
+      in the BSP.
+   NOTE: If you disable this setting and use the low-level interface functions
+         (errno_addr, wait_sem, signal_sem), please implement these low-level interface functions yourself.
+   NOTE: This setting is available only when using CCRX.
+*/
+#define BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE   (1)
+
+/* Defines whether to use user functions for exclusive control of wait_sem and signal_sem.
+   0 = Use default exclusive control with wait_sem and signal_sem.
+   1 = Use user function for exclusive control with wait_sem and signal_sem.
+   NOTE: This setting is available when BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE is 1 and CCRX is used.
+   NOTE: If you enable this setting, you must implement the functions used by 
+         BSP_CFG_USER_ENTER_CRITICAL_FUNCTION and BSP_CFG_USER_EXIT_CRITICAL_FUNCTION.
+   NOTE: This setting is available only when using CCRX.
+*/
+#define BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE       (0)
+
+/* BSP_CFG_USER_ENTER_CRITICAL_FUNCTION defines the name of the function you want to call to 
+   disable interrupts when using the exclusion controls with wait_sem and signal_sem.
+   BSP_CFG_USER_EXIT_CRITICAL_FUNCTION defines the name of the function you want to call to 
+   enable interrupts after processing when using the exclusion controls with wait_sem and signal_sem.
+   If desired, users can redirect the mutual exclusion functions to their own functions, replacing 
+   the my_... function names with the names of their own functions.
+   NOTE: This setting is available when BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE is 1.
+*/
+#define BSP_CFG_USER_ENTER_CRITICAL_FUNCTION     my_enter_critical_function
+#define BSP_CFG_USER_EXIT_CRITICAL_FUNCTION      my_exit_critical_function
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

@@ -1,15 +1,25 @@
-/********************************************************************************/
-/*                                                                              */
-/* Device     : RX/RX100/RX110                                                  */
-/* File Name  : iodefine.h                                                      */
-/* Abstract   : Definition of I/O Register.                                     */
-/* History    : V1.0A (2014-02-26)  [Hardware Manual Revision : 1.00]           */
-/* History    : V1.0B (2016-08-24)  [Hardware Manual Revision : 1.00]           */
-/* Note       : This is a typical example.                                      */
-/*                                                                              */
-/*  Copyright(c) 2014 Renesas Electronics Corp.                                 */
-/*                  And Renesas Solutions Corp. ,All Rights Reserved.           */
-/*                                                                              */
+/*
+* Copyright (c) 2013(2014-2025) Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
+/*********************************************************************************
+*
+* Device     : RX/RX100/RX110
+*
+* File Name  : iodefine.h
+*
+* Abstract   : Definition of I/O Register.
+*
+* History    : 0.50  (2013-07-15)  [Hardware Manual Revision : 0.50]
+*            : 1.00  (2014-02-21)  [Hardware Manual Revision : 1.00]
+*            : 1.0A  (2014-02-26)  [Hardware Manual Revision : 1.00]
+*            : 1.0B  (2016-08-24)  [Hardware Manual Revision : 1.00]
+*            : 1.00C (2025-02-14)  [Hardware Manual Revision : 1.00]
+*
+* NOTE       : THIS IS A TYPICAL EXAMPLE.
+*
+*********************************************************************************/
 /********************************************************************************/
 /*                                                                              */
 /*  DESCRIPTION : Definition of ICU Register                                    */

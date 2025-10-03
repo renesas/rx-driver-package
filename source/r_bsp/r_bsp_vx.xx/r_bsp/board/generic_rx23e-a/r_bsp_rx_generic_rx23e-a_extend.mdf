@@ -1,23 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
-* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
-* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
-* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
-* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
-* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
-* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
   Purpose: Module Description File (MDF) Example (Schema Version 2.0)
            This is a description of a sample FIT module configuration file
@@ -338,5 +325,52 @@ NOTE: This setting is common to all units. It can not be set individually. Pleas
 1 = This project is a bootloader project.
 NOTE: Not normally used. Set it only in the bootloader project.</description>
         </property>
-     </configuration>
+        <property id="BSP_CFG_LOW_LEVEL_INTERFACE_STDIO_ENABLE" display="Select the low-level interface functions for standard Input/Output." default="1" type="combobox">
+            <option id="BSP_CFG_LOW_LEVEL_INTERFACE_STDIO_ENABLE.0" display="Disabled" value="0"/>
+            <option id="BSP_CFG_LOW_LEVEL_INTERFACE_STDIO_ENABLE.1" display="Enabled" value="1"/>
+            <description>0: Disables the following low-level interface functions for standard Input/Output in the BSP.
+1: Enables the following low-level interface functions for standard Input/Output in the BSP.
+CCRX: open, close, write, read, lseek
+GCC: write, read, close, lseek, fstat, isatty
+NOTE: If you disable this setting and use the low-level interface functions, please implement these low-level interface functions yourself.
+NOTE: This setting is available only when using CCRX and GCC.</description>
+        </property>
+        <property id="BSP_CFG_LOW_LEVEL_INTERFACE_SBRK_ENABLE" display="Select the low-level interface functions for memory management." default="1" type="combobox">
+            <option id="BSP_CFG_LOW_LEVEL_INTERFACE_SBRK_ENABLE.0" display="Disabled" value="0"/>
+            <option id="BSP_CFG_LOW_LEVEL_INTERFACE_SBRK_ENABLE.1" display="Enabled" value="1"/>
+            <description>0: Disables the low-level interface function (sbrk) for memory management in the BSP.
+1: Enables the low-level interface function (sbrk) for memory management in the BSP.
+NOTE: If you disable this setting and use the low-level interface functions(sbrk), please implement these low-level interface functions yourself.
+NOTE: This setting is available only when using CCRX and GCC.</description>
+        </property>
+        <property id="BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE" display="Select the low-level interface functions for the reentrant library." default="1" type="combobox">
+            <option id="BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE.0" display="Disabled" value="0"/>
+            <option id="BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE.1" display="Enabled" value="1"/>
+            <description>0: Disables the low-level interface functions (errno_addr, wait_sem, signal_sem) for the reentrant library in the BSP.
+1: Enables the low-level interface functions (errno_addr, wait_sem, signal_sem) for the reentrant library in the BSP.
+NOTE: If you disable this setting and use the low-level interface functions (errno_addr, wait_sem, signal_sem), please implement these low-level interface functions yourself.
+NOTE: This setting is available only when using CCRX.</description>
+        </property>
+        <property id="BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE" display="Select whether to use user function for the exclusive control of wait_sem and signal_sem." default="0" type="combobox">
+            <option id="BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE.0" display="Use default exclusive control" value="0"/>
+            <option id="BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE.1" display="Use user function" value="1"/>
+            <constraint display="when low-level interface functions for the reentrant library is enabled only" actionOnFail="disable">${BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE} == ${BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE.1}</constraint>
+            <description>0 = Use default exclusive control with wait_sem and signal_sem.
+1 = Use user function for exclusive control with wait_sem and signal_sem.
+NOTE: This setting is available when BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE is 1.
+NOTE: This setting is available only when using CCRX.</description>
+        </property>
+        <property id="BSP_CFG_USER_ENTER_CRITICAL_FUNCTION" display="Name of the function that disables interrupts for wait_sem and signal_sem" default="my_enter_critical_function" type="textbox">
+            <constraint display="when user function for the exclusive control of wait_sem and signal_sem is enabled only" actionOnFail="disable">${BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE} == ${BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${BSP_CFG_USER_ENTER_CRITICAL_FUNCTION}")</constraint>
+            <description>Defines the name of the function you want to call to disable interrupts when using the exclusion controls with wait_sem and signal_sem.
+NOTE: This setting is available when BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE is 1.</description>
+        </property>
+        <property id="BSP_CFG_USER_EXIT_CRITICAL_FUNCTION" display="Name of the function that enables interrupts for wait_sem and signal_sem" default="my_exit_critical_function" type="textbox">
+            <constraint display="when user function for the exclusive control of wait_sem and signal_sem is enabled only" actionOnFail="disable">${BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE} == ${BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${BSP_CFG_USER_EXIT_CRITICAL_FUNCTION}")</constraint>
+            <description>Defines the name of the function you want to call to enable interrupts after processing when using the exclusion controls with wait_sem and signal_sem.
+NOTE: This setting is available when BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE is 1.</description>
+        </property>
+    </configuration>
 </module>

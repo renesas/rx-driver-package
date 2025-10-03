@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
 * File Name    : lowsrc.h
 * Description  : Functions to support stream I/O
@@ -28,6 +15,11 @@
 *         : 31.07.2020 2.01     Fixed an issue that caused build errors when the _REENTRANT option was specified in 
 *                               the CCRX compiler.
 *         : 29.01.2021 3.01     Added tha __write function and __read function for ICCRX.
+*         : 26.02.2025 3.02     Changed the disclaimer.
+*         : 28.05.2025 3.03     Deleted _write and _read functions for OPTLIB.
+*                               Added compile switch for the following macro definitions.
+*                               - BSP_CFG_LOW_LEVEL_INTERFACE_STDIO_ENABLE
+*                               - BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -55,27 +47,31 @@ Exported global functions (to be accessed by other files)
 #if defined(__CCRX__)
 void init_iolib(void);
 void close_all(void);
+#if BSP_CFG_LOW_LEVEL_INTERFACE_STDIO_ENABLE == 1
 long open(const char *name, long  mode, long  flg);
 long close(long fileno);
 long write(long  fileno, const unsigned char *buf, long  count);
 long read(long fileno, unsigned char *buf, long count);
 long lseek(long fileno, long offset, long base);
+#endif /* BSP_CFG_LOW_LEVEL_INTERFACE_STDIO_ENABLE == 1 */
+#if BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE == 1
 #ifdef _REENTRANT
 long *errno_addr(void);
 long wait_sem(long semnum);
 long signal_sem(long semnum);
 #endif
+#endif /* BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE == 1 */
 #endif /* defined(__CCRX__) */
 
 #if defined(__GNUC__)
+#if BSP_CFG_LOW_LEVEL_INTERFACE_STDIO_ENABLE == 1
 int write(int fileno, char *buf, int count);
 int read(int fileno, char *buf, int count);
-int _write(int fileno, char *buf, int count);
-int _read(int fileno, char *buf, int count);
 void close(void);
+void lseek(void);
 void fstat(void);
 void isatty(void);
-void lseek(void);
+#endif /* BSP_CFG_LOW_LEVEL_INTERFACE_STDIO_ENABLE == 1 */
 #endif /* defined(__GNUC__) */
 
 #if defined(__ICCRX__)
