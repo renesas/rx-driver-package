@@ -32,23 +32,32 @@
     <!-- multiple dependencies, applications, functions, and incdirs permitted -->
     <package>
         <type>fitmodule</type>
-        <name>r_lwip_rx</name>
-        <version>x.xx</version>
-        <zipsource>r_lwip_rx_vx.xx.zip</zipsource>
+        <name>r_lwip_driver_rx</name>
+        <version>1.10</version>
+        <zipsource>r_lwip_driver_rx_v1.10.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>7.54</version>
         </dependency>
         <dependency>
-            <module>r_lwip_driver_rx</module>
+            <module>r_lwip_rx</module>
             <version>1.10</version>
         </dependency>
+        <dependency>
+            <module>r_ether_rx</module>
+            <version>1.24</version>
+        </dependency>
+        <dependency>
+            <module>r_cmt_rx</module>
+            <version>5.71</version>
+        </dependency>
         <application>lwIP</application>
-        <desc>lwIP tcpip</desc>
-        <details>lwIP for Renesas MCUs.</details>
+        <desc>lwIP driver</desc>
+        <details>Software used as a porting layer for lwip.</details>
         <function>connectivity</function>
         <incdir>r_config</incdir>
-        <incdir>r_lwip_rx/src/include</incdir>
+        <incdir>r_lwip_driver_rx</incdir>
+        <incdir>r_lwip_driver_rx/src</incdir>
     </package>
 
 </refinfo>

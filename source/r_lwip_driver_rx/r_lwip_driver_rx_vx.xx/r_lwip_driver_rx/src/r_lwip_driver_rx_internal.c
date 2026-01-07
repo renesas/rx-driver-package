@@ -12,14 +12,11 @@
  * Includes   <System Includes> , "Project Includes"
  *********************************************************************************************************************/
 #include <string.h>
-#include "r_cmt_rx_if.h"
 #include "r_bsp/platform.h"
-#include "src/r_ether_rx_private.h"
-#include "r_ether_rx_if.h"
-#include "r_ether_rx_pinset.h"
 
 #include "lwip/init.h"
 #include "lwip/netif.h"
+#include "lwip/sys.h"
 
 #include "lwip/opt.h"
 #include "lwip/memp.h"
@@ -30,11 +27,14 @@
 #include "lwip/snmp.h"
 #include "lwip/etharp.h"
 #include "netif/ethernet.h"
-#include "r_lwip_driver_rx_config.h"
-#include "r_lwip_driver_rx_if.h"
-#include "r_lwip_driver_rx_private.h"
 #include "arch/sys_arch.h"
 
+#if NO_SYS
+#include "r_cmt_rx_if.h"
+#endif
+#include "r_ether_rx_if.h"
+#include "r_ether_rx_pinset.h"
+#include "r_lwip_driver_rx_private.h"
 
 /**********************************************************************************************************************
  * Macro definitions
@@ -50,8 +50,15 @@
 uint8_t g_link_change[ETHER_CHANNEL_MAX] = {0};
 uint8_t g_link_status[ETHER_CHANNEL_MAX] = {0};
 
+#if NO_SYS
 extern uint32_t g_timer_count;
 extern uint16_t g_timer_set_ms;
+#endif
+
+#if !NO_SYS
+extern sys_mbox_t g_lwip_driver_read_complete_mbox[ETHER_CHANNEL_MAX];
+static bool s_lwip_driver_read_complete_message = true;
+#endif
 
 /**********************************************************************************************************************
  * Private (static) variables and functions
@@ -62,11 +69,15 @@ void r_lwip_driver_rx_ether_int_cb (void *p_arg);
 /**********************************************************************************************************************
  * Function Name  @fn   r_lwip_driver_timer_callback
  *********************************************************************************************************************/
+#if NO_SYS
 void r_lwip_driver_timer_callback(void * pdata)
 {
+    LWIP_UNUSED_ARG(pdata);
+
     /* call this function per ms */
     g_timer_count += g_timer_set_ms;
 }
+#endif
 /**********************************************************************************************************************
  * End of function r_lwip_driver_timer_callback
  *********************************************************************************************************************/
@@ -157,7 +168,19 @@ err_t r_lwip_driver_low_level_init(struct netif *netif)
 
     /* device capabilities */
     /* don't set NETIF_FLAG_ETHARP if this device is not an ethernet one */
-    netif->flags |= NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP;
+    netif->flags |= (NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP);
+#if LWIP_IGMP
+    netif->flags |= NETIF_FLAG_IGMP;
+#endif /* LWIP_IGMP */
+#if LWIP_IPV6
+    netif->flags |= NETIF_FLAG_MLD6;
+#endif /* LWIP_IPV6 */
+
+#if !NO_SYS
+    /* Start input thread. */
+    sys_thread_new("lwip_ether_input_thread", r_lwip_driver_input_thread, netif,
+                    DEFAULT_THREAD_STACKSIZE, DEFAULT_THREAD_PRIO);
+#endif
 
     eth_param.ether_callback.pcb_func = r_lwip_driver_rx_ether_cb;
 
@@ -256,12 +279,8 @@ struct pbuf* r_lwip_driver_low_level_input(struct netif *netif)
         return p;
     }
 
-#if ETH_PAD_SIZE
-    len += ETH_PAD_SIZE; /* allow room for Ethernet padding */
-#endif
-
     /* We allocate a pbuf chain of pbufs from the pool. */
-    p = pbuf_alloc(PBUF_RAW, len, PBUF_POOL);
+    p = pbuf_alloc(PBUF_RAW, len + ETH_PAD_SIZE, PBUF_POOL);
 
     if (NULL != p)
     {
@@ -270,7 +289,6 @@ struct pbuf* r_lwip_driver_low_level_input(struct netif *netif)
 #endif
 
         MEMCPY(p->payload, p_buf, len);
-        p->len = len;
 
 #if ETH_PAD_SIZE
         pbuf_add_header(p, ETH_PAD_SIZE); /* reclaim the padding word */
@@ -333,11 +351,18 @@ void r_lwip_driver_rx_ether_int_cb(void *p_arg)
 
     LWIP_ASSERT("The channel number is wrong. ", eth_ch < ETHER_CHANNEL_MAX);
 
-    if((p_cb_arg->status_ecsr & (1u << 2)) != 0u)
+    if((p_cb_arg->status_ecsr & (1ul << 2)) != 0u)
     {
         /* Link change detected, signal Ethernet processing thread. */
         g_link_change[eth_ch] = LWIP_DRIVER_LINK_CHANGE_FLAG_ON;
     }
+#if !NO_SYS
+    if((p_cb_arg->status_eesr & (1ul << 18)) != 0u)
+    {
+        /* Send a message to input thread. */
+        sys_mbox_trypost_fromisr(&g_lwip_driver_read_complete_mbox[eth_ch], &s_lwip_driver_read_complete_message);
+    }
+#endif
 }
 /**********************************************************************************************************************
  * End of function r_lwip_driver_rx_ether_int_cb
@@ -346,7 +371,7 @@ void r_lwip_driver_rx_ether_int_cb(void *p_arg)
 /**********************************************************************************************************************
  * Function Name  @fn   r_lwip_driver_Xorshift
  *********************************************************************************************************************/
-#if BSP_CFG_MCU_PART_ENCRYPTION_INCLUDED != true &&  BSP_CFG_MCU_PART_FUNCTION != (0x11)
+#if !R_LWIP_DRIVER_USE_TSIP
 uint32_t r_lwip_driver_Xorshift(uint32_t seed)
 {
     uint32_t y = seed;
@@ -356,7 +381,7 @@ uint32_t r_lwip_driver_Xorshift(uint32_t seed)
 
     return y;
 }
-#endif /* BSP_CFG_MCU_PART_ENCRYPTION_INCLUDED != true &&  BSP_CFG_MCU_PART_FUNCTION != (0x11) */
+#endif /* !R_LWIP_DRIVER_USE_TSIP */
 /**********************************************************************************************************************
  * End of function r_lwip_driver_Xorshift
  *********************************************************************************************************************/

@@ -12,6 +12,7 @@
         <brand>GNU</brand>
         <product>GNURX</product>
         <version>8.3.0.202411</version>
+        <version>14.2.0.202505</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -36,11 +37,11 @@
         <zipsource>r_lwip_driver_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.53</version>
+            <version>7.54</version>
         </dependency>
         <dependency>
             <module>r_lwip_rx</module>
-            <version>1.00</version>
+            <version>1.10</version>
         </dependency>
         <dependency>
             <module>r_ether_rx</module>

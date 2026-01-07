@@ -33,8 +33,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_lwip_rx</name>
-        <version>x.xx</version>
-        <zipsource>r_lwip_rx_vx.xx.zip</zipsource>
+        <version>1.10</version>
+        <zipsource>r_lwip_rx_v1.10.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>7.54</version>

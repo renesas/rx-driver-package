@@ -14,8 +14,7 @@
 /**********************************************************************************************************************
  * Includes   <System Includes> , "Project Includes"
  *********************************************************************************************************************/
-#include "lwip/err.h"
-#include "lwip/netif.h"
+#include "r_lwip_driver_rx_if.h"
 
 /**********************************************************************************************************************
  * Macro definitions
@@ -32,7 +31,9 @@
 /**********************************************************************************************************************
  Exported global functions (to be accessed by other files)
  *********************************************************************************************************************/
+#if NO_SYS
 void r_lwip_driver_timer_callback (void * pdata);
+#endif
 
 uint32_t r_lwip_driver_get_linkstatus(uint32_t eth_ch);
 
@@ -42,8 +43,8 @@ err_t r_lwip_driver_low_level_init(struct netif *netif);
 
 struct pbuf* r_lwip_driver_low_level_input(struct netif *netif);
 
-#if BSP_CFG_MCU_PART_ENCRYPTION_INCLUDED != true &&  BSP_CFG_MCU_PART_FUNCTION != (0x11)
+#if !R_LWIP_DRIVER_USE_TSIP
 uint32_t r_lwip_driver_Xorshift(uint32_t z);
-#endif /* BSP_CFG_MCU_PART_ENCRYPTION_INCLUDED != true &&  BSP_CFG_MCU_PART_FUNCTION != (0x11) */
+#endif /* !R_LWIP_DRIVER_USE_TSIP */
 
 #endif /* R_LWIP_DRIVER_RX_PRIVATE_H */
