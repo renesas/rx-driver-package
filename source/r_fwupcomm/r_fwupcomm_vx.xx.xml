@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refinfo>
+  <!-- multiple versions permitted -->
+  <toolchain>
+    <brand>Renesas</brand>
+    <product>RXC</product>
+    <version>3.07.00</version>
+  </toolchain>
+  <toolchain>
+    <brand>GNU</brand>
+    <product>GNURX</product>
+    <version>8.03.00.202411</version>
+  </toolchain>
+  <!-- only one target entry allowed; multiple sub tags permitted -->
+  <target>
+    <family>RX</family>
+    <series>RX100</series>
+    <series>RX200</series>
+    <series>RX600</series>
+    <series>RX700</series>
+    <group omit_board="true">RX140</group>
+    <group omit_board="true">RX23E-B</group>
+    <group omit_board="true">RX261</group>
+    <group omit_board="true">RX65N</group>
+    <group omit_board="true">RX66T</group>
+    <group omit_board="true">RX660</group>
+  </target>
+  <!-- only one package entry allowed -->
+  <!-- multiple dependencies, functions, and incdirs permitted -->
+  <package>
+    <type>fitmodule</type>
+    <name>r_fwupcomm</name>
+    <version>x.xx</version>
+    <zipsource>r_fwupcomm_vx.xx.zip</zipsource>
+    <dependency>
+      <module>r_bsp</module>
+      <version>7.53</version>
+      <version>7.52</version>
+      <version>7.51</version>
+      <version>7.50</version>
+    </dependency>
+    <dependency>
+      <module>r_sci_rx</module>
+      <version>5.41</version>
+      <version>5.30</version>
+      <version>5.00</version>
+      <version>4.90</version>
+    </dependency>
+    <dependency>
+      <module>r_rspi_rx</module>
+      <version>3.51</version>
+    </dependency>
+    <application>Communications</application>
+    <desc>FWUP Communication Middleware</desc>
+    <details>This module provides command control of serial communication when updating the firmware of the secondary MCU.</details>
+    <function>FWUP Communication</function>
+    <incdir>r_config</incdir>
+    <incdir>r_fwupcomm</incdir>
+    <incdir>r_fwupcomm/src</incdir>
+    <incdir>r_fwupcomm/src/commands</incdir>
+    <incdir>r_fwupcomm/src/connectivity</incdir>
+  </package>
+  <sampleapplicationnote>
+    <documentno>R01AN7757</documentno>
+  </sampleapplicationnote>
+</refinfo>

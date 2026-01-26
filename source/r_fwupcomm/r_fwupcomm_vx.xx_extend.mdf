@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/*
+* Copyright (c) 2020 - 2025 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+  <fileVersion>1.00</fileVersion>
+  <formatVersion>2.00</formatVersion>
+  <fileTemplate>
+  </fileTemplate>
+  <configuration>
+    <property id="FWUPCOMM_CFG_PARAM_CHECKING_ENABLE" display="Parameter Check" default="0" type="combobox">
+      <option id="FWUPCOMM_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="System Default" value="BSP_CFG_PARAM_CHECKING_ENABLE" />
+      <option id="FWUPCOMM_CFG_PARAM_CHECKING_ENABLE.0" display="Disabled" value="0" />
+      <option id="FWUPCOMM_CFG_PARAM_CHECKING_ENABLE.1" display="Enabled" value="1" />
+      <description>Select whether to include parameter checking in the code.
+"System Default": Sets this to "BSP_CFG_PARAM_CHECKING_ENABLE"
+"Disabled": Compiles out parameter checking.
+"Enabled": Includes parameter checking.
+      </description>
+    </property>
+    <property id="FWUPCOMM_CFG_DEVICE_PRIMARY" display="Primary MCU or Secondary MCU" default="1" type="combobox">
+      <option id="FWUPCOMM_CFG_DEVICE_PRIMARY.1" display="Primary MCU" value="1" />
+      <option id="FWUPCOMM_CFG_DEVICE_PRIMARY.0" display="Secondary MCU" value="0" />
+      <description>Select whether to use the Primary MCU or Secondary MCU.
+0: Secondary MCU
+1: Primary MCU
+      </description>
+    </property>
+    <property id="FWUPCOMM_CFG_CH_INTERFACE" display="Communication Interface" default="1" type="combobox">
+      <option id="FWUPCOMM_CFG_COMM_INTERFACE.1" display="SCI UART" value="1" />
+      <option id="FWUPCOMM_CFG_COMM_INTERFACE.10" display="SCI SPI (Primary MCU Only)" value="10" />
+      <option id="FWUPCOMM_CFG_COMM_INTERFACE.11" display="RSPI SPI" value="11" />
+      <description>Select the communication interface to be used.
+0: SCI UART
+10: SCI SPI (Primary MCU Only)
+11: RSPI SPI
+      </description>
+    </property>
+    <!-- UART Interface -->
+    <property id="FWUPCOMM_CFG_SCI_UART_CHANNEL" display="UART Channel Number" default="1" type="textbox">
+      <constraint display="This setting is for UART only." actionOnFail="disable">${FWUPCOMM_CFG_CH_INTERFACE} == ${FWUPCOMM_CFG_COMM_INTERFACE.1}</constraint>
+      <constraint display="Value must be an integer.">testInteger("${FWUPCOMM_CFG_SCI_UART_CHANNEL}")</constraint>
+      <constraint display="Value must be in the range 0 ~ 12">("${FWUPCOMM_CFG_SCI_UART_CHANNEL}".replace(/[LUlu]+$/, '')  &gt;= 0) &amp;&amp; ("${FWUPCOMM_CFG_SCI_UART_CHANNEL}".replace(/[LUlu]+$/, '')  &lt;= 12)</constraint>
+      <description>Specify the SCI channel number to be used for UART communications.</description>
+    </property>
+    <property id="FWUPCOMM_CFG_SCI_UART_BITRATE" display="UART Bitrate [bps]" default="1000000" type="textbox">
+      <constraint display="This setting is for UART only." actionOnFail="disable">${FWUPCOMM_CFG_CH_INTERFACE} == ${FWUPCOMM_CFG_COMM_INTERFACE.1}</constraint>
+      <constraint display="Value must be an integer.">testInteger("${FWUPCOMM_CFG_SCI_UART_BITRATE}")</constraint>
+      <constraint display="Value must be greater than 0.">("${FWUPCOMM_CFG_SCI_UART_BITRATE}".replace(/[LUlu]+$/, '')  &gt;= 1)</constraint>
+      <description>Specify the bitrate for UART communications.</description>
+      <!-- Note: bit rate -> bitrate -->
+    </property>
+    <property id="FWUPCOMM_CFG_SCI_UART_INT_PRIORITY" display="UART Interrupt Priority" default="15" type="textbox">
+      <constraint display="This setting is for UART only." actionOnFail="disable">${FWUPCOMM_CFG_CH_INTERFACE} == ${FWUPCOMM_CFG_COMM_INTERFACE.1}</constraint>
+      <constraint display="Value must be an integer.">testInteger("${FWUPCOMM_CFG_SCI_UART_INT_PRIORITY}")</constraint>
+      <constraint display="Value must be in the range 0 ~ 15">("${FWUPCOMM_CFG_SCI_UART_INT_PRIORITY}".replace(/[LUlu]+$/, '')  &gt;= 0) &amp;&amp; ("${FWUPCOMM_CFG_SCI_UART_INT_PRIORITY}".replace(/[LUlu]+$/, '')  &lt;= 15)</constraint>
+      <description>Specify the priority of interrupts from the SCI channel to be used for UART communications.</description>
+    </property>
+    <!-- SPI Interface -->
+    <property id="FWUPCOMM_CFG_SPI_CHANNEL" display="SPI Channel Number" default="0" type="textbox">
+      <constraint display="This setting is for SPI only." actionOnFail="disable">(${FWUPCOMM_CFG_CH_INTERFACE} == ${FWUPCOMM_CFG_COMM_INTERFACE.10}||${FWUPCOMM_CFG_CH_INTERFACE} == ${FWUPCOMM_CFG_COMM_INTERFACE.11})</constraint>
+      <constraint display="Value must be an integer.">testInteger("${FWUPCOMM_CFG_SPI_CHANNEL}")</constraint>
+      <constraint display="Value must be in the range 0 ~ 12">("${FWUPCOMM_CFG_SPI_CHANNEL}".replace(/[LUlu]+$/, '')  &gt;= 0) &amp;&amp; ("${FWUPCOMM_CFG_SPI_CHANNEL}".replace(/[LUlu]+$/, '')  &lt;= 12)</constraint>
+      <description>Specify the SPI channel number to be used for SPI communications.</description>
+    </property>
+    <property id="FWUPCOMM_CFG_SPI_BITRATE" display="SPI Bitrate [bps]" default="1000000" type="textbox">
+      <constraint display="This setting is for SPI only." actionOnFail="disable">(${FWUPCOMM_CFG_CH_INTERFACE} == ${FWUPCOMM_CFG_COMM_INTERFACE.10}||${FWUPCOMM_CFG_CH_INTERFACE} == ${FWUPCOMM_CFG_COMM_INTERFACE.11})</constraint>
+      <constraint display="Value must be an integer.">testInteger("${FWUPCOMM_CFG_SPI_BITRATE}")</constraint>
+      <constraint display="Value must be greater than 0.">("${FWUPCOMM_CFG_SPI_BITRATE}".replace(/[LUlu]+$/, '')  &gt;= 1)</constraint>
+      <description>Specify the bitrate for SPI communications.</description>
+    </property>
+    <property id="FWUPCOMM_CFG_SPI_MISO_PORTNO" display="SPI MISO Port Number" default="'A'" type="combobox">
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.0" display="PORT0" value="'0'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.1" display="PORT1" value="'1'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.2" display="PORT2" value="'2'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.3" display="PORT3" value="'3'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.4" display="PORT4" value="'4'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.5" display="PORT5" value="'5'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.6" display="PORT6" value="'6'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.7" display="PORT7" value="'7'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.8" display="PORT8" value="'8'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.9" display="PORT9" value="'9'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.A" display="PORTA" value="'A'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.B" display="PORTB" value="'B'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.C" display="PORTC" value="'C'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.D" display="PORTD" value="'D'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.E" display="PORTE" value="'E'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.F" display="PORTF" value="'F'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.G" display="PORTG" value="'G'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.H" display="PORTH" value="'H'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.I" display="PORTI" value="'I'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_PORTNO.J" display="PORTJ" value="'J'"/>
+      <constraint display="This setting is for SPI only." actionOnFail="disable">(${FWUPCOMM_CFG_CH_INTERFACE} == ${FWUPCOMM_CFG_COMM_INTERFACE.10}||${FWUPCOMM_CFG_CH_INTERFACE} == ${FWUPCOMM_CFG_COMM_INTERFACE.11})</constraint>
+      <description>Specify the port of the SPI MISO pin.</description>
+    </property>
+    <property id="FWUPCOMM_CFG_SPI_MISO_BITNO" display="SPI MISO Pin Number" default="'0'" type="combobox">
+      <option id="FWUPCOMM_CFG_SPI_MISO_BITNO.0" display="B0" value="'0'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_BITNO.1" display="B1" value="'1'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_BITNO.2" display="B2" value="'2'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_BITNO.3" display="B3" value="'3'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_BITNO.4" display="B4" value="'4'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_BITNO.5" display="B5" value="'5'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_BITNO.6" display="B6" value="'6'"/>
+      <option id="FWUPCOMM_CFG_SPI_MISO_BITNO.7" display="B7" value="'7'"/>
+      <constraint display="This setting is for SPI only." actionOnFail="disable">(${FWUPCOMM_CFG_CH_INTERFACE} == ${FWUPCOMM_CFG_COMM_INTERFACE.10}||${FWUPCOMM_CFG_CH_INTERFACE} == ${FWUPCOMM_CFG_COMM_INTERFACE.11})</constraint>
+      <description>Specify the bit of the SPI MISO pin.</description>
+    </property>
+    <property id="FWUPCOMM_CFG_SPI_INT_PRIORITY" display="SCI SPI Interrupt Priority" default="15" type="textbox">
+      <constraint display="This setting is for SPI only." actionOnFail="disable">${FWUPCOMM_CFG_CH_INTERFACE} == ${FWUPCOMM_CFG_COMM_INTERFACE.10}</constraint>
+      <constraint display="Value must be an integer.">testInteger("${FWUPCOMM_CFG_SPI_INT_PRIORITY}")</constraint>
+      <constraint display="Value must be in the range 0 ~ 15">("${FWUPCOMM_CFG_SPI_INT_PRIORITY}".replace(/[LUlu]+$/, '')  &gt;= 0) &amp;&amp; ("${FWUPCOMM_CFG_SPI_INT_PRIORITY}".replace(/[LUlu]+$/, '')  &lt;= 15)</constraint>
+      <description>Specify the priority of interrupts from the SPI channel to be used for SPI communications.</description>
+    </property>
+    <!-- COMMON -->
+    <property id="FWUPCOMM_CFG_SEND_PACKET_BUFFER_SIZE" display="Send Packet Buffer Size" default="1048U" type="textbox">
+      <constraint display="Value must be an integer.">testInteger("${FWUPCOMM_CFG_SEND_PACKET_BUFFER_SIZE}")</constraint>
+      <constraint display="Value must be greater than or equal to 8.">("${FWUPCOMM_CFG_SEND_PACKET_BUFFER_SIZE}".replace(/[LUlu]+$/, '')  &gt;= 8)</constraint>
+      <description>Specify the size of the transmission buffer for commands.
+The size must be greater than or equal to 8 and multiples of 4.
+            </description>
+    </property>
+    <property id="FWUPCOMM_CFG_RECV_PACKET_BUFFER_SIZE" display="Receive Packet Buffer Size" default="1048U" type="textbox">
+      <constraint display="Value must be an integer.">testInteger("${FWUPCOMM_CFG_RECV_PACKET_BUFFER_SIZE}")</constraint>
+      <constraint display="Value must be greater than or equal to 8.">("${FWUPCOMM_CFG_RECV_PACKET_BUFFER_SIZE}".replace(/[LUlu]+$/, '')  &gt;= 8)</constraint>
+      <description>Specify the size of the reception buffer for commands.
+The size must be greater than or equal to 8 and multiples of 4.
+            </description>
+    </property>
+    <property id="FWUPCOMM_CFG_DEVICE_ADDRESS" display="Device Address" default="0xA0" type="textbox">
+      <constraint display="Value must be an integer.">testInteger("${FWUPCOMM_CFG_DEVICE_ADDRESS}")</constraint>
+      <constraint display="Value must be in the range 0x00 ~ 0xFF">("${FWUPCOMM_CFG_DEVICE_ADDRESS}".replace(/[LUlu]+$/, '')  &gt;= 0) &amp;&amp; ("${FWUPCOMM_CFG_DEVICE_ADDRESS}".replace(/[LUlu]+$/, '')  &lt;= 0xFF)</constraint>
+      <description>Specify a specific address for the device.</description>
+    </property>
+    <property id="FWUPCOMM_CFG_CMD_SEND_TIMEOUT" display="Command Send Timeout" default="500U" type="textbox">
+      <constraint display="Value must be an integer.">testInteger("${FWUPCOMM_CFG_CMD_SEND_TIMEOUT}")</constraint>
+      <constraint display="Value must be greater than or equal to 0.">("${FWUPCOMM_CFG_CMD_SEND_TIMEOUT}".replace(/[LUlu]+$/, '')  &gt;= 0)</constraint>
+      <description>Specify the timeout time for sending in communications.</description>
+    </property>
+    <property id="FWUPCOMM_CFG_CMD_RECV_TIMEOUT" display="Command Receive Timeout" default="500U" type="textbox">
+      <constraint display="Value must be an integer.">testInteger("${FWUPCOMM_CFG_CMD_RECV_TIMEOUT}")</constraint>
+      <constraint display="Value must be greater than or equal to 0.">("${FWUPCOMM_CFG_CMD_RECV_TIMEOUT}".replace(/[LUlu]+$/, '')  &gt;= 0)</constraint>
+      <description>Specify the timeout time for receiving in communications.</description>
+    </property>
+    <property id="FWUPCOMM_CFG_CMD_COMMON_ENABLE" display="Enable Common command" default="1" type="combobox">
+      <option id="FWUPCOMM_CFG_CMD_COMMON_ENABLE.0" display="Disabled" value="0" />
+      <option id="FWUPCOMM_CFG_CMD_COMMON_ENABLE.1" display="Enabled" value="1" />
+      <description>Select whether or not to enable Common command.
+0: Disabled
+1: Enabled
+      </description>
+    </property>
+    <property id="FWUPCOMM_CFG_CMD_HANDLER_COMMON" display="Common Command Handler" default="R_FWUPCOMM_CmdHandler_Common" type="textbox">
+      <constraint display="Display only when COMMON command is enabled." actionOnFail="disable">${FWUPCOMM_CFG_CMD_COMMON_ENABLE} == ${FWUPCOMM_CFG_CMD_COMMON_ENABLE.1}</constraint>
+      <constraint display="Please enter a valid function name." actionOnFail="error">testSymbol("${FWUPCOMM_CFG_CMD_HANDLER_COMMON}")</constraint>
+      <description>Specify the name of the handler function to be called when a Common command is received.</description>
+    </property>
+    <property id="FWUPCOMM_CFG_CMD_FWUP_ENABLE" display="Enable FWUP command" default="1" type="combobox">
+      <option id="FWUPCOMM_CFG_CMD_FWUP_ENABLE.0" display="Disabled" value="0" />
+      <option id="FWUPCOMM_CFG_CMD_FWUP_ENABLE.1" display="Enabled" value="1" />
+      <description>Select whether or not to enable FWUP command.
+0: Disabled
+1: Enabled
+      </description>
+    </property>
+    <property id="FWUPCOMM_CFG_CMD_HANDLER_FWUP" display="FWUP Command Handler" default="R_FWUPCOMM_CmdHandler_FWUP" type="textbox">
+      <constraint display="Display only when FWUP command is enabled." actionOnFail="disable">${FWUPCOMM_CFG_CMD_FWUP_ENABLE} == ${FWUPCOMM_CFG_CMD_FWUP_ENABLE.1}</constraint>
+      <constraint display="Please enter a valid function name." actionOnFail="error">testSymbol("${FWUPCOMM_CFG_CMD_HANDLER_FWUP}")</constraint>
+      <description>Specify the name of the handler function to be called when an FWUP command is received.</description>
+    </property>
+    <property id="FWUPCOMM_CFG_CMD_VER" display="Command Version" default="0x01" type="textbox">
+      <constraint display="Value must be an integer.">testInteger("${FWUPCOMM_CFG_CMD_VER}")</constraint>
+      <constraint display="Value must be in the range 0x00 ~ 0xFF">("${FWUPCOMM_CFG_CMD_VER}".replace(/[LUlu]+$/, '')  &gt;= 0) &amp;&amp; ("${FWUPCOMM_CFG_CMD_VER}".replace(/[LUlu]+$/, '')  &lt;= 0xFF)</constraint>
+      <description>Specify the version number of commands.</description>
+    </property>
+    <property id="FWUPCOMM_CFG_CMD_FWUP_START_DATA_SIZE" display="FWUP Start Data Size" default="0U" type="textbox">
+      <constraint display="Display only when FWUP command is enabled." actionOnFail="disable">${FWUPCOMM_CFG_CMD_FWUP_ENABLE} == ${FWUPCOMM_CFG_CMD_FWUP_ENABLE.1}</constraint>
+      <constraint display="Value must be an integer.">testInteger("${FWUPCOMM_CFG_CMD_FWUP_START_DATA_SIZE}")</constraint>
+      <constraint display="Value must be greater than or equal to 0.">("${FWUPCOMM_CFG_CMD_FWUP_START_DATA_SIZE}".replace(/[LUlu]+$/, '')  &gt;= 0)</constraint>
+      <description>Specify the size of command data to be included with the FWUP START command.
+The size must be multiples of 4.
+      </description>
+    </property>
+    <property id="FWUPCOMM_CFG_CMD_FWUP_WRITE_FW_BLOCK_SIZE" display="FWUP Write FW Block Size" default="1024U" type="textbox">
+      <constraint display="Display only when FWUP command is enabled." actionOnFail="disable">${FWUPCOMM_CFG_CMD_FWUP_ENABLE} == ${FWUPCOMM_CFG_CMD_FWUP_ENABLE.1}</constraint>
+      <constraint display="Value must be an integer.">testInteger("${FWUPCOMM_CFG_CMD_FWUP_WRITE_FW_BLOCK_SIZE}")</constraint>
+      <constraint display="Value must be greater than 0.">("${FWUPCOMM_CFG_CMD_FWUP_WRITE_FW_BLOCK_SIZE}".replace(/[LUlu]+$/, '')  &gt;= 1)</constraint>
+      <description>Specify the size of the block of firmware to be included with the FWUP WRITE command.
+The size must be multiples of 4.
+      </description>
+    </property>
+    <property id="FWUPCOMM_CFG_CMD_COMMON_MAX_DATA_SIZE" display="Common command Max Data Size" default="12U" type="textbox">
+      <constraint display="Display only when COMMON command is enabled." actionOnFail="disable">${FWUPCOMM_CFG_CMD_COMMON_ENABLE} == ${FWUPCOMM_CFG_CMD_COMMON_ENABLE.1}</constraint>
+      <constraint display="Value must be an integer.">testInteger("${FWUPCOMM_CFG_CMD_COMMON_MAX_DATA_SIZE}")</constraint>
+      <constraint display="Value must be greater than or equal to 0.">("${FWUPCOMM_CFG_CMD_COMMON_MAX_DATA_SIZE}".replace(/[LUlu]+$/, '')  &gt;= 0)</constraint>
+      <description>Specify the maximum size of data to be included with a Common command.
+The size must be multiples of 4.
+      </description>
+    </property>
+  </configuration>
+</module>
