@@ -1,8 +1,7 @@
 | Component                                             | Copyright                          | License                                                                                     |
 |-------------------------------------------------------|------------------------------------|---------------------------------------------------------------------------------------------|
 |<tr> <td colspan="3"><strong>Renesas drivers and middleware<strong></td></tr>                                                                                                             |
-| RX MCU BSP                                            | Renesas Electronics Corporation    | [BSD-3-Clause](#bsd-3-clause-license)                                                       |
-| RX Board BSP                                          | Renesas Electronics Corporation    | [BSD-3-Clause](#bsd-3-clause-license)                                                       |
+| RX BSP                                                | Renesas Electronics Corporation    | [BSD-3-Clause](#bsd-3-clause-license)                                                       |
 | RX MCU Peripheral Functions Drivers                   | Renesas Electronics Corporation    | [BSD-3-Clause](#bsd-3-clause-license)                                                       |
 | Renesas Middleware                                    | Renesas Electronics Corporation    | [BSD-3-Clause](#bsd-3-clause-license)                                                       |
 |<tr> <td colspan="3"><strong>Third-Party components included in the packs<strong></td></tr>                                                                                               |
