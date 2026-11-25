@@ -523,6 +523,17 @@ static UINT usb_peri_usbx_to_basic (UX_SLAVE_DCD * dcd, UINT function, VOID * pa
                 tran_data.complete     = usb_peri_usbx_transfer_complete_cb;                       /* Callback function */
                 err = usb_pstd_transfer_start(&tran_data);
 
+                /* USBX requests a ZLP when an IN transfer ends on a packet boundary before the length
+                   expected by the host. The basic driver does not terminate such a transfer by itself.  */
+                if ((USB_OK == err) && (UX_TRUE == transfer_request->ux_slave_transfer_request_force_zlp) &&
+                    (USB_NO == g_usb_peri_usbx_is_detach[pipe]))
+                {
+                    tran_data.read_req_len = 0;
+                    tran_data.tranlen      = 0;
+                    err = usb_pstd_transfer_start(&tran_data);
+                    transfer_request->ux_slave_transfer_request_actual_length = size;
+                }
+
                 if (USB_OK == err)
                 {
                     if (USB_YES == g_usb_peri_usbx_is_detach[pipe])
