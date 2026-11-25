@@ -1367,6 +1367,12 @@ static void usb_pstd_set_interface3 (void)
                 /* Search endpoint setting */
                 usb_pstd_set_eptbl_index(g_usb_pstd_req_index,
                         g_usb_pstd_alt_num[g_usb_pstd_req_index]);
+
+#if (BSP_CFG_RTOS_USED == 5)
+                /* Let USBX mount the endpoints of the alternate setting and notify the class.  */
+                _ux_device_stack_alternate_setting_set((ULONG) g_usb_pstd_req_index,
+                                                       (ULONG) g_usb_pstd_alt_num[g_usb_pstd_req_index]);
+#endif /* (BSP_CFG_RTOS_USED == 5) */
             }
             else
             {
